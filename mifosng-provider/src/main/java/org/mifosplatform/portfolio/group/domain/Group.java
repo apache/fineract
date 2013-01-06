@@ -23,7 +23,7 @@ import org.mifosplatform.useradministration.domain.AppUser;
 public class Group extends AbstractAuditableCustom<AppUser, Long> {
 
     @SuppressWarnings("unused")
-	@ManyToOne
+    @ManyToOne
     @JoinColumn(name = "office_id", nullable = false)
     private Office office;
 
@@ -33,13 +33,11 @@ public class Group extends AbstractAuditableCustom<AppUser, Long> {
     @Column(name = "external_id", length = 100, unique = true)
     private String externalId;
 
-    @Column(name = "is_deleted", nullable=false)
+    @Column(name = "is_deleted", nullable = false)
     private boolean deleted = false;
-    
+
     @ManyToMany
-    @JoinTable(name = "m_group_client",
-               joinColumns = @JoinColumn(name = "group_id"),
-               inverseJoinColumns = @JoinColumn(name = "client_id"))
+    @JoinTable(name = "m_group_client", joinColumns = @JoinColumn(name = "group_id"), inverseJoinColumns = @JoinColumn(name = "client_id"))
     private Set<Client> clientMembers;
 
     public Group() {
@@ -48,10 +46,10 @@ public class Group extends AbstractAuditableCustom<AppUser, Long> {
         this.clientMembers = new HashSet<Client>();
     }
 
-    public static Group newGroup(Office office, String name, String externalId, Set<Client> clientMembers){
+    public static Group newGroup(Office office, String name, String externalId, Set<Client> clientMembers) {
         return new Group(office, name, externalId, clientMembers);
     }
-    
+
     public Group(Office office, String name, String externalId, Set<Client> clientMembers) {
         this.office = office;
         if (StringUtils.isNotBlank(name)) {
@@ -64,11 +62,11 @@ public class Group extends AbstractAuditableCustom<AppUser, Long> {
         } else {
             this.externalId = null;
         }
-        if (clientMembers != null){
+        if (clientMembers != null) {
             this.clientMembers = clientMembers;
         }
     }
-    
+
     public void update(final GroupCommand command, final Office groupOffice, final Set<Client> clientMembers) {
         if (command.isExternalIdChanged()) {
             this.externalId = command.getExternalId();
@@ -81,22 +79,23 @@ public class Group extends AbstractAuditableCustom<AppUser, Long> {
         if (command.isNameChanged()) {
             this.name = command.getName();
         }
-        
-        if (clientMembers != null && command.isClientMembersChanged()){
+
+        if (clientMembers != null && command.isClientMembersChanged()) {
             this.clientMembers = clientMembers;
         }
     }
-    
-    public void addClientMember(final Client member){
+
+    public void addClientMember(final Client member) {
         this.clientMembers.add(member);
     }
 
-    public boolean hasClientAsMember(final Client client){
+    public boolean hasClientAsMember(final Client client) {
         return this.clientMembers.contains(client);
     }
-    
+
     /**
-     * Delete is a <i>soft delete</i>. Updates flag on group so it wont appear in query/report results.
+     * Delete is a <i>soft delete</i>. Updates flag on group so it wont appear
+     * in query/report results.
      * 
      * Any fields with unique constraints and prepended with id of record.
      */

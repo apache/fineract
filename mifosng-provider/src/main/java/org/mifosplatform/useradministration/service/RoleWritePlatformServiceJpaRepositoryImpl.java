@@ -5,7 +5,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
-import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
+import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
+import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.useradministration.command.PermissionsCommand;
 import org.mifosplatform.useradministration.command.RoleCommand;
@@ -43,7 +44,7 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
 
     @Transactional
     @Override
-    public EntityIdentifier createRole(final JsonCommand command) {
+    public CommandProcessingResult createRole(final JsonCommand command) {
 
         context.authenticatedUser();
 
@@ -53,12 +54,12 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
         final Role entity = Role.fromJson(command);
         this.roleRepository.save(entity);
 
-        return EntityIdentifier.resourceResult(entity.getId(), null);
+        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(entity.getId()).build();
     }
 
     @Transactional
     @Override
-    public EntityIdentifier updateRole(final Long roleId, final JsonCommand command) {
+    public CommandProcessingResult updateRole(final Long roleId, final JsonCommand command) {
 
         context.authenticatedUser();
 
@@ -73,12 +74,12 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
             this.roleRepository.save(role);
         }
 
-        return EntityIdentifier.withChanges(role.getId(), changes);
+        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(roleId).with(changes).build();
     }
 
     @Transactional
     @Override
-    public EntityIdentifier updateRolePermissions(final Long roleId, final JsonCommand command) {
+    public CommandProcessingResult updateRolePermissions(final Long roleId, final JsonCommand command) {
         context.authenticatedUser();
 
         final Role role = this.roleRepository.findOne(roleId);
@@ -106,7 +107,7 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
             this.roleRepository.save(role);
         }
 
-        return EntityIdentifier.withChanges(role.getId(), changes);
+        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(roleId).with(changes).build();
     }
 
     private Permission findPermissionByCode(Collection<Permission> allPermissions, String permissionCode) {

@@ -2,7 +2,7 @@ package org.mifosplatform.organisation.office.handler;
 
 import org.mifosplatform.commands.handler.NewCommandSourceHandler;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
-import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
+import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.organisation.office.service.OfficeWritePlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,7 +20,7 @@ public class CreateOfficeTransactionCommandHandler implements NewCommandSourceHa
 
     @Transactional
     @Override
-    public EntityIdentifier processCommand(final JsonCommand command) {
+    public CommandProcessingResult processCommand(final JsonCommand command) {
 
         return this.writePlatformService.externalBranchMoneyTransfer(command);
     }

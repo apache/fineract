@@ -17,11 +17,13 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
+import org.mifosplatform.commands.domain.CommandWrapper;
+import org.mifosplatform.commands.service.CommandWrapperBuilder;
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.mifosplatform.infrastructure.codes.data.CodeValueData;
 import org.mifosplatform.infrastructure.codes.service.CodeValueReadPlatformService;
 import org.mifosplatform.infrastructure.core.api.ApiRequestParameterHelper;
-import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
+import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
@@ -98,8 +100,10 @@ public class ClientIdentifiersApiResource {
     public String createClientIdentifier(@PathParam("clientId") final Long clientId, final String apiRequestBodyAsJson) {
 
         try {
-            final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("CREATE", "CLIENTIDENTIFIER", "CREATE",
-                    "clients", clientId, "identifiers", null, apiRequestBodyAsJson);
+            final CommandWrapper commandRequest = new CommandWrapperBuilder().createClientIdentifier().withClientId(clientId)
+                    .withUrl("/clients/" + clientId + "/identifiers").withJson(apiRequestBodyAsJson).build();
+
+            final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
             return this.toApiJsonSerializer.serialize(result);
         } catch (DuplicateClientIdentifierException e) {
@@ -143,8 +147,11 @@ public class ClientIdentifiersApiResource {
             @PathParam("identifierId") final Long clientIdentifierId, final String apiRequestBodyAsJson) {
 
         try {
-            final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("UPDATE", "CLIENTIDENTIFIER", "UPDATE",
-                    "clients", clientId, "identifiers", clientIdentifierId, apiRequestBodyAsJson);
+            final CommandWrapper commandRequest = new CommandWrapperBuilder().updateClientIdentifier()
+                    .withUrl("/clients/" + clientId + "/identifiers").withClientId(clientId).withEntityId(clientIdentifierId)
+                    .withJson(apiRequestBodyAsJson).build();
+
+            final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
             return this.toApiJsonSerializer.serialize(result);
         } catch (DuplicateClientIdentifierException e) {
@@ -166,8 +173,11 @@ public class ClientIdentifiersApiResource {
     public String deleteClientIdentifier(@PathParam("clientId") final Long clientId,
             @PathParam("identifierId") final Long clientIdentifierId) {
 
-        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("DELETE", "CLIENTIDENTIFIER", "DELETE",
-                "clients", clientId, "identifiers", clientIdentifierId, "{}");
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteClientIdentifier()
+                .withUrl("/clients/" + clientId + "/identifiers").withClientId(clientId).withEntityId(clientIdentifierId).withJson("{}")
+                .build();
+
+        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
         return this.toApiJsonSerializer.serialize(result);
     }

@@ -134,4 +134,8 @@ public class Staff extends AbstractAuditableCustom<AppUser, Long> {
     public boolean identifiedBy(final Staff staff) {
         return getId().equals(staff.getId());
     }
+
+    public Long officeId() {
+        return this.office.getId();
+    }
 }

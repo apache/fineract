@@ -1,13 +1,13 @@
 package org.mifosplatform.portfolio.charge.service;
 
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
-import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
+import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 
 public interface ChargeWritePlatformService {
 
-    EntityIdentifier createCharge(JsonCommand command);
+    CommandProcessingResult createCharge(JsonCommand command);
 
-    EntityIdentifier updateCharge(Long chargeId, JsonCommand command);
+    CommandProcessingResult updateCharge(Long chargeId, JsonCommand command);
 
-    EntityIdentifier deleteCharge(Long chargeId);
+    CommandProcessingResult deleteCharge(Long chargeId);
 }

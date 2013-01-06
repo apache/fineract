@@ -2,7 +2,7 @@ package org.mifosplatform.useradministration.handler;
 
 import org.mifosplatform.commands.handler.NewCommandSourceHandler;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
-import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
+import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.useradministration.domain.AppUser;
 import org.mifosplatform.useradministration.service.AppUserWritePlatformService;
@@ -24,12 +24,12 @@ public class UpdateUserCommandHandler implements NewCommandSourceHandler {
 
     @Transactional
     @Override
-    public EntityIdentifier processCommand(final JsonCommand command) {
+    public CommandProcessingResult processCommand(final JsonCommand command) {
 
         final AppUser loggedInUser = context.authenticatedUser();
 
-        final Long userId = command.resourceId();
-        EntityIdentifier result = null;
+        final Long userId = command.entityId();
+        CommandProcessingResult result = null;
         if (loggedInUser.hasIdOf(userId)) {
             result = this.writePlatformService.updateUsersOwnAccountDetails(userId, command);
         } else {

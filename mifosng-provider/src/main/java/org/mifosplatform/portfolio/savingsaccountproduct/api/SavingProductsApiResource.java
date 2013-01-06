@@ -22,7 +22,7 @@ import javax.ws.rs.core.UriInfo;
 import org.mifosplatform.infrastructure.core.api.ApiParameterHelper;
 import org.mifosplatform.infrastructure.core.api.PortfolioApiDataConversionService;
 import org.mifosplatform.infrastructure.core.api.PortfolioApiJsonSerializerService;
-import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
+import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
@@ -73,7 +73,7 @@ public class SavingProductsApiResource {
 
         final SavingProductCommand command = this.apiDataConversionService.convertJsonToSavingProductCommand(null, jsonRequestBody);
 
-        EntityIdentifier entityIdentifier = this.savingProductWritePlatformService.createSavingProduct(command);
+        CommandProcessingResult entityIdentifier = this.savingProductWritePlatformService.createSavingProduct(command);
 
         return Response.ok().entity(entityIdentifier).build();
     }
@@ -85,7 +85,7 @@ public class SavingProductsApiResource {
     public Response updateSavingProduct(@PathParam("productId") final Long productId, final String jsonRequestBody) {
 
         SavingProductCommand command = this.apiDataConversionService.convertJsonToSavingProductCommand(productId, jsonRequestBody);
-        EntityIdentifier entityIdentifier = this.savingProductWritePlatformService.updateSavingProduct(command);
+        CommandProcessingResult entityIdentifier = this.savingProductWritePlatformService.updateSavingProduct(command);
         return Response.ok().entity(entityIdentifier).build();
     }
 
@@ -209,6 +209,6 @@ public class SavingProductsApiResource {
 
         this.savingProductWritePlatformService.deleteSavingProduct(productId);
 
-        return Response.ok(new EntityIdentifier(productId)).build();
+        return Response.ok(new CommandProcessingResult(productId)).build();
     }
 }

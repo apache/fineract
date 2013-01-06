@@ -3,7 +3,8 @@ package org.mifosplatform.portfolio.fund.service;
 import java.util.Map;
 
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
-import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
+import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
+import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.portfolio.fund.command.FundCommand;
@@ -38,7 +39,7 @@ public class FundWritePlatformServiceJpaRepositoryImpl implements FundWritePlatf
 
     @Transactional
     @Override
-    public EntityIdentifier createFund(final JsonCommand command) {
+    public CommandProcessingResult createFund(final JsonCommand command) {
 
         try {
             context.authenticatedUser();
@@ -50,16 +51,16 @@ public class FundWritePlatformServiceJpaRepositoryImpl implements FundWritePlatf
 
             this.fundRepository.save(fund);
 
-            return EntityIdentifier.resourceResult(fund.getId(), null);
+            return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(fund.getId()).build();
         } catch (DataIntegrityViolationException dve) {
             handleFundDataIntegrityIssues(command, dve);
-            return EntityIdentifier.empty();
+            return CommandProcessingResult.empty();
         }
     }
 
     @Transactional
     @Override
-    public EntityIdentifier updateFund(final Long fundId, final JsonCommand command) {
+    public CommandProcessingResult updateFund(final Long fundId, final JsonCommand command) {
 
         try {
             context.authenticatedUser();
@@ -75,10 +76,10 @@ public class FundWritePlatformServiceJpaRepositoryImpl implements FundWritePlatf
                 this.fundRepository.saveAndFlush(fund);
             }
 
-            return EntityIdentifier.withChanges(fund.getId(), changes);
+            return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(fund.getId()).with(changes).build();
         } catch (DataIntegrityViolationException dve) {
             handleFundDataIntegrityIssues(command, dve);
-            return EntityIdentifier.empty();
+            return CommandProcessingResult.empty();
         }
     }
 

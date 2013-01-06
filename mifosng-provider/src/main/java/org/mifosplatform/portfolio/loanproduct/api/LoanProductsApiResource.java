@@ -17,9 +17,11 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
+import org.mifosplatform.commands.domain.CommandWrapper;
+import org.mifosplatform.commands.service.CommandWrapperBuilder;
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.mifosplatform.infrastructure.core.api.ApiRequestParameterHelper;
-import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
+import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
@@ -86,9 +88,11 @@ public class LoanProductsApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String createLoanProduct(final String apiRequestBodyAsJson) {
 
-        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("CREATE", "LOANPRODUCT", "CREATE",
-                "loanproducts", null, apiRequestBodyAsJson);
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().createLoanProduct().withUrl("/loanproducts")
+                .withJson(apiRequestBodyAsJson).build();
 
+        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        
         return this.toApiJsonSerializer.serialize(result);
     }
 
@@ -143,9 +147,11 @@ public class LoanProductsApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String updateLoanProduct(@PathParam("productId") final Long productId, final String apiRequestBodyAsJson) {
+        
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().updateLoanProduct().withUrl("/loanproducts").withEntityId(productId)
+                .withJson(apiRequestBodyAsJson).build();
 
-        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("UPDATE", "LOANPRODUCT", "UPDATE",
-                "loanproducts", productId, apiRequestBodyAsJson);
+        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
         return this.toApiJsonSerializer.serialize(result);
     }

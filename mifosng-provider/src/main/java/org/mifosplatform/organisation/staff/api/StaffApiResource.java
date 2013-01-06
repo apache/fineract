@@ -18,9 +18,11 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.commons.lang.StringUtils;
+import org.mifosplatform.commands.domain.CommandWrapper;
+import org.mifosplatform.commands.service.CommandWrapperBuilder;
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.mifosplatform.infrastructure.core.api.ApiRequestParameterHelper;
-import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
+import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
@@ -85,9 +87,11 @@ public class StaffApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String createStaff(final String apiRequestBodyAsJson) {
+        
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().createStaff().withUrl("/staff").withJson(apiRequestBodyAsJson)
+                .build();
 
-        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("CREATE", "STAFF", "CREATE", "staff",
-                null, apiRequestBodyAsJson);
+        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
         return this.toApiJsonSerializer.serialize(result);
     }
@@ -117,9 +121,11 @@ public class StaffApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String updateStaff(@PathParam("staffId") final Long staffId, final String apiRequestBodyAsJson) {
 
-        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("UPDATE", "STAFF", "UPDATE", "staff",
-                staffId, apiRequestBodyAsJson);
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().updateStaff().withUrl("/staff").withEntityId(staffId).withJson(apiRequestBodyAsJson)
+                .build();
 
+        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        
         return this.toApiJsonSerializer.serialize(result);
     }
 

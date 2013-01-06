@@ -19,9 +19,11 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.commons.lang.StringUtils;
+import org.mifosplatform.commands.domain.CommandWrapper;
+import org.mifosplatform.commands.service.CommandWrapperBuilder;
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.mifosplatform.infrastructure.core.api.ApiRequestParameterHelper;
-import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
+import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.exception.UnrecognizedQueryParamException;
 import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
@@ -102,8 +104,10 @@ public class LoanChargesApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String addLoanCharge(@PathParam("loanId") final Long loanId, final String apiRequestBodyAsJson) {
 
-        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("CREATE", "LOANCHARGE", "N/A", "loans",
-                loanId, "charges", null, apiRequestBodyAsJson);
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().createLoanCharge().withUrl("/loans/" + loanId + "/charges")
+                .withLoanId(loanId).withJson(apiRequestBodyAsJson).build();
+
+        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
         return this.toApiJsonSerializer.serialize(result);
     }
@@ -115,8 +119,10 @@ public class LoanChargesApiResource {
     public String updateLoanCharge(@PathParam("loanId") final Long loanId, @PathParam("loanChargeId") final Long loanChargeId,
             final String apiRequestBodyAsJson) {
 
-        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("UPDATE", "LOANCHARGE", "N/A", "loans",
-                loanId, "charges", loanChargeId, apiRequestBodyAsJson);
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().updateLoanCharge().withUrl("/loans/" + loanId + "/charges")
+                .withLoanId(loanId).withEntityId(loanChargeId).withJson(apiRequestBodyAsJson).build();
+
+        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
         return this.toApiJsonSerializer.serialize(result);
     }
@@ -130,8 +136,10 @@ public class LoanChargesApiResource {
 
         String json = "";
         if (is(commandParam, "waive")) {
-            final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("WAIVE", "LOANCHARGE", "N/A", "loans",
-                    loanId, "charges", loanChargeId, "{}");
+            final CommandWrapper commandRequest = new CommandWrapperBuilder().waiveLoanCharge().withUrl("/loans/" + loanId + "/charges")
+                    .withLoanId(loanId).withEntityId(loanChargeId).withJson("{}").build();
+
+            final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
             json = this.toApiJsonSerializer.serialize(result);
         } else {
@@ -147,8 +155,10 @@ public class LoanChargesApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String deleteLoanCharge(@PathParam("loanId") final Long loanId, @PathParam("chargeId") final Long loanChargeId) {
 
-        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("DELETE", "LOANCHARGE", "N/A", "loans",
-                loanId, "charges", loanChargeId, "{}");
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteLoanCharge().withUrl("/loans/" + loanId + "/charges")
+                .withLoanId(loanId).withEntityId(loanChargeId).withJson("{}").build();
+
+        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
         return this.toApiJsonSerializer.serialize(result);
     }

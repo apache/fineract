@@ -2,7 +2,7 @@ package org.mifosplatform.portfolio.loanaccount.handler;
 
 import org.mifosplatform.commands.handler.NewCommandSourceHandler;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
-import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
+import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.portfolio.loanaccount.service.LoanWritePlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,8 +20,8 @@ public class CloseLoanAsRescheduledCommandHandler implements NewCommandSourceHan
 
     @Transactional
     @Override
-    public EntityIdentifier processCommand(final JsonCommand command) {
+    public CommandProcessingResult processCommand(final JsonCommand command) {
 
-        return this.writePlatformService.closeAsRescheduled(command.resourceId(), command);
+        return this.writePlatformService.closeAsRescheduled(command.getLoanId(), command);
     }
 }

@@ -7,7 +7,7 @@ import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
-import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
+import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.monetary.domain.Money;
@@ -81,7 +81,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 
     @Transactional
     @Override
-    public EntityIdentifier createDepositAccount(final DepositAccountCommand command) {
+    public CommandProcessingResult createDepositAccount(final DepositAccountCommand command) {
 
         try {
             this.context.authenticatedUser();
@@ -92,16 +92,16 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
             final DepositAccount account = this.depositAccountAssembler.assembleFrom(command);
             this.depositAccountRepository.save(account);
 
-            return new EntityIdentifier(account.getId());
+            return new CommandProcessingResult(account.getId());
         } catch (DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(command, dve);
-            return new EntityIdentifier(Long.valueOf(-1));
+            return new CommandProcessingResult(Long.valueOf(-1));
         }
     }
 
     @Transactional
     @Override
-    public EntityIdentifier deleteDepositAccount(final Long accountId) {
+    public CommandProcessingResult deleteDepositAccount(final Long accountId) {
 
         this.context.authenticatedUser();
 
@@ -111,12 +111,12 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
         account.delete();
         this.depositAccountRepository.save(account);
 
-        return new EntityIdentifier(accountId);
+        return new CommandProcessingResult(accountId);
     }
 
     @Transactional
     @Override
-    public EntityIdentifier approveDepositApplication(final DepositStateTransitionApprovalCommand command) {
+    public CommandProcessingResult approveDepositApplication(final DepositStateTransitionApprovalCommand command) {
 
         // AppUser currentUser = context.authenticatedUser();
 
@@ -147,7 +147,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
             this.noteRepository.save(note);
         }
 
-        return new EntityIdentifier(account.getId());
+        return new CommandProcessingResult(account.getId());
 
     }
 
@@ -161,7 +161,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 
     @Transactional
     @Override
-    public EntityIdentifier rejectDepositApplication(DepositStateTransitionCommand command) {
+    public CommandProcessingResult rejectDepositApplication(DepositStateTransitionCommand command) {
 
         // AppUser currentUser = context.authenticatedUser();
 
@@ -189,12 +189,12 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
             this.noteRepository.save(note);
         }
 
-        return new EntityIdentifier(account.getId());
+        return new CommandProcessingResult(account.getId());
     }
 
     @Transactional
     @Override
-    public EntityIdentifier withdrawDepositApplication(DepositStateTransitionCommand command) {
+    public CommandProcessingResult withdrawDepositApplication(DepositStateTransitionCommand command) {
 
         // AppUser currentUser = context.authenticatedUser();
 
@@ -222,12 +222,12 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
             this.noteRepository.save(note);
         }
 
-        return new EntityIdentifier(account.getId());
+        return new CommandProcessingResult(account.getId());
     }
 
     @Transactional
     @Override
-    public EntityIdentifier undoDepositApproval(UndoStateTransitionCommand command) {
+    public CommandProcessingResult undoDepositApproval(UndoStateTransitionCommand command) {
 
         context.authenticatedUser();
 
@@ -242,7 +242,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
             Note note = Note.depositNote(account, noteText);
             this.noteRepository.save(note);
         }
-        return new EntityIdentifier(account.getId());
+        return new CommandProcessingResult(account.getId());
     }
 
     /*
@@ -285,7 +285,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 
     @Transactional
     @Override
-    public EntityIdentifier withdrawDepositAccountMoney(final DepositAccountWithdrawalCommand command) {
+    public CommandProcessingResult withdrawDepositAccountMoney(final DepositAccountWithdrawalCommand command) {
 
         context.authenticatedUser();
 
@@ -316,12 +316,12 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
             this.noteRepository.save(note);
         }
 
-        return new EntityIdentifier(account.getId());
+        return new CommandProcessingResult(account.getId());
     }
 
     @Transactional
     @Override
-    public EntityIdentifier withdrawDepositAccountInterestMoney(DepositAccountWithdrawInterestCommand command) {
+    public CommandProcessingResult withdrawDepositAccountInterestMoney(DepositAccountWithdrawInterestCommand command) {
 
         context.authenticatedUser();
 
@@ -353,7 +353,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
             throw new DepositAccountTransactionsException("deposit.transaction.interest.withdrawal.cannot.withdraw",
                     "You can not withdraw interst for this account");
         }
-        return new EntityIdentifier(account.getId());
+        return new CommandProcessingResult(account.getId());
     }
 
 /*    private BigDecimal getTotalWithdrawableInterestAvailable(DepositAccount account) {
@@ -366,7 +366,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 
     @Transactional
     @Override
-    public EntityIdentifier renewDepositAccount(DepositAccountCommand command) {
+    public CommandProcessingResult renewDepositAccount(DepositAccountCommand command) {
 
         this.context.authenticatedUser();
 
@@ -386,7 +386,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
                 this.depositAccountRepository.save(renewedAccount);
                 account.closeDepositAccount(defaultDepositLifecycleStateMachine());
                 this.depositAccountRepository.save(account);
-                return new EntityIdentifier(renewedAccount.getId());
+                return new CommandProcessingResult(renewedAccount.getId());
             }
 
             throw new DepositAccountReopenException(account.getMaturityDate());
@@ -396,7 +396,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
     }
 
     @Override
-    public EntityIdentifier updateDepositAccount(DepositAccountCommand command) {
+    public CommandProcessingResult updateDepositAccount(DepositAccountCommand command) {
 
         try {
             this.context.authenticatedUser();
@@ -415,16 +415,16 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 
             this.depositAccountRepository.save(account);
 
-            return new EntityIdentifier(account.getId());
+            return new CommandProcessingResult(account.getId());
         } catch (DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(command, dve);
-            return new EntityIdentifier(Long.valueOf(-1));
+            return new CommandProcessingResult(Long.valueOf(-1));
         }
     }
 
     @Transactional
     @Override
-    public EntityIdentifier postInterestToDepositAccount(Collection<DepositAccountsForLookup> accounts) {
+    public CommandProcessingResult postInterestToDepositAccount(Collection<DepositAccountsForLookup> accounts) {
 
         try {
 
@@ -434,9 +434,9 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
                 this.depositAccountAssembler.postInterest(account);
                 this.depositAccountRepository.save(account);
             }
-            return new EntityIdentifier(new Long(accounts.size()));
+            return new CommandProcessingResult(new Long(accounts.size()));
         } catch (Exception e) {
-            return new EntityIdentifier(Long.valueOf(-1));
+            return new CommandProcessingResult(Long.valueOf(-1));
         }
 
     }

@@ -5,7 +5,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
-import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
+import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
+import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.portfolio.charge.domain.Charge;
 import org.mifosplatform.portfolio.charge.domain.ChargeRepository;
@@ -57,7 +58,7 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
 
     @Transactional
     @Override
-    public EntityIdentifier createLoanProduct(final JsonCommand command) {
+    public CommandProcessingResult createLoanProduct(final JsonCommand command) {
 
         this.context.authenticatedUser();
 
@@ -75,7 +76,7 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
 
         this.loanProductRepository.save(loanproduct);
 
-        return EntityIdentifier.resourceResult(loanproduct.getId(), null);
+        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(loanproduct.getId()).build();
     }
 
     private LoanTransactionProcessingStrategy findStrategyByIdIfProvided(final Long transactionProcessingStrategyId) {
@@ -98,7 +99,7 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
 
     @Transactional
     @Override
-    public EntityIdentifier updateLoanProduct(final Long loanProductId, final JsonCommand command) {
+    public CommandProcessingResult updateLoanProduct(final Long loanProductId, final JsonCommand command) {
 
         this.context.authenticatedUser();
         
@@ -132,7 +133,7 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
             this.loanProductRepository.save(product);
         }
         
-        return EntityIdentifier.withChanges(product.getId(), changes);
+        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(loanProductId).with(changes).build();
     }
 
     private Set<Charge> assembleSetOfCharges(final JsonCommand command, final String currencyCode) {

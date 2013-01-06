@@ -9,7 +9,8 @@ import org.mifosplatform.infrastructure.codes.exception.CodeNotFoundException;
 import org.mifosplatform.infrastructure.codes.exception.SystemDefinedCodeCannotBeChangedException;
 import org.mifosplatform.infrastructure.codes.serialization.CodeCommandFromApiJsonDeserializer;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
-import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
+import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
+import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.slf4j.Logger;
@@ -38,7 +39,7 @@ public class CodeWritePlatformServiceJpaRepositoryImpl implements CodeWritePlatf
 
     @Transactional
     @Override
-    public EntityIdentifier createCode(final JsonCommand command) {
+    public CommandProcessingResult createCode(final JsonCommand command) {
 
         try {
             context.authenticatedUser();
@@ -49,15 +50,15 @@ public class CodeWritePlatformServiceJpaRepositoryImpl implements CodeWritePlatf
             final Code code = Code.fromJson(command);
             this.codeRepository.save(code);
 
-            return EntityIdentifier.resourceResult(code.getId(), null);
+            return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(code.getId()).build();
         } catch (DataIntegrityViolationException dve) {
-            return EntityIdentifier.empty();
+            return CommandProcessingResult.empty();
         }
     }
 
     @Transactional
     @Override
-    public EntityIdentifier updateCode(final Long codeId, final JsonCommand command) {
+    public CommandProcessingResult updateCode(final Long codeId, final JsonCommand command) {
 
         try {
             context.authenticatedUser();
@@ -71,7 +72,7 @@ public class CodeWritePlatformServiceJpaRepositoryImpl implements CodeWritePlatf
                 this.codeRepository.save(code);
             }
 
-            return EntityIdentifier.withChanges(codeId, changes);
+            return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(codeId).with(changes).build();
         } catch (DataIntegrityViolationException dve) {
             handleCodeDataIntegrityIssues(command, dve);
             return null;
@@ -80,7 +81,7 @@ public class CodeWritePlatformServiceJpaRepositoryImpl implements CodeWritePlatf
 
     @Transactional
     @Override
-    public EntityIdentifier deleteCode(final Long codeId) {
+    public CommandProcessingResult deleteCode(final Long codeId) {
 
         context.authenticatedUser();
 
@@ -89,7 +90,7 @@ public class CodeWritePlatformServiceJpaRepositoryImpl implements CodeWritePlatf
 
         this.codeRepository.delete(code);
 
-        return new EntityIdentifier(code.getId());
+        return new CommandProcessingResultBuilder().withEntityId(codeId).build();
     }
 
     private Code retrieveCodeBy(final Long codeId) {

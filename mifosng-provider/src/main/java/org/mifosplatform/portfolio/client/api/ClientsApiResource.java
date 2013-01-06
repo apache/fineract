@@ -22,12 +22,14 @@ import javax.ws.rs.core.UriInfo;
 
 import org.apache.commons.lang.StringUtils;
 import org.mifosplatform.commands.data.CommandSourceData;
+import org.mifosplatform.commands.domain.CommandWrapper;
+import org.mifosplatform.commands.service.CommandWrapperBuilder;
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.mifosplatform.commands.service.PortfolioCommandsReadPlatformService;
 import org.mifosplatform.infrastructure.core.api.ApiParameterHelper;
 import org.mifosplatform.infrastructure.core.api.ApiRequestParameterHelper;
 import org.mifosplatform.infrastructure.core.api.PortfolioApiDataConversionService;
-import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
+import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.mifosplatform.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
@@ -89,7 +91,8 @@ public class ClientsApiResource {
         // FIXME - kw - rather than exposing SQL through the api can we not just
         // pass parameter we want to search by and build up sql like is done for
         // other parameters?
-        final String extraCriteria = buildSqlStringFromClientCriteria(sqlSearch, officeId, externalId, displayName, firstName, lastName, hierarchy);
+        final String extraCriteria = buildSqlStringFromClientCriteria(sqlSearch, officeId, externalId, displayName, firstName, lastName,
+                hierarchy);
 
         final Collection<ClientData> clients = this.clientReadPlatformService.retrieveAllIndividualClients(extraCriteria);
 
@@ -150,7 +153,8 @@ public class ClientsApiResource {
 
         ClientData clientData = this.clientReadPlatformService.retrieveIndividualClient(clientId);
         if (settings.isTemplate()) {
-            // FIXME - KW - no need for special OfficeLookup object, just use OfficeData and only populate with id, name, nameDecorated
+            // FIXME - KW - no need for special OfficeLookup object, just use
+            // OfficeData and only populate with id, name, nameDecorated
             final List<OfficeLookup> allowedOffices = new ArrayList<OfficeLookup>(officeReadPlatformService.retrieveAllOfficesForLookup());
             clientData = ClientData.templateOnTop(clientData, allowedOffices);
         }
@@ -216,8 +220,10 @@ public class ClientsApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String createClient(final String apiRequestBodyAsJson) {
 
-        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("CREATE", "CLIENT", "CREATE", "clients",
-                null, apiRequestBodyAsJson);
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().createClient().withUrl("/clients").withJson(apiRequestBodyAsJson)
+                .build();
+
+        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
         return this.toApiJsonSerializer.serialize(result);
     }
@@ -228,8 +234,10 @@ public class ClientsApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String updateClient(@PathParam("clientId") final Long clientId, final String apiRequestBodyAsJson) {
 
-        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("UPDATE", "CLIENT", "UPDATE", "clients",
-                clientId, apiRequestBodyAsJson);
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().updateClient().withUrl("/clients").withEntityId(clientId)
+                .withJson(apiRequestBodyAsJson).build();
+
+        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
         return this.toApiJsonSerializer.serialize(result);
     }
@@ -240,8 +248,10 @@ public class ClientsApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String deleteClient(@PathParam("clientId") final Long clientId) {
 
-        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("DELETE", "CLIENT", "DELETE", "clients",
-                clientId, "{}");
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteClient().withUrl("/clients").withEntityId(clientId)
+                .withJson("{}").build();
+
+        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
         return this.toApiJsonSerializer.serialize(result);
     }

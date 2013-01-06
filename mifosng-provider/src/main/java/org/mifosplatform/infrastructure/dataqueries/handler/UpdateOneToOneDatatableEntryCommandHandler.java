@@ -4,7 +4,8 @@ import java.util.Map;
 
 import org.mifosplatform.commands.handler.NewCommandSourceHandler;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
-import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
+import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
+import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.mifosplatform.infrastructure.dataqueries.service.ReadWriteNonCoreDataService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,10 +23,12 @@ public class UpdateOneToOneDatatableEntryCommandHandler implements NewCommandSou
 
     @Transactional
     @Override
-    public EntityIdentifier processCommand(final JsonCommand command) {
+    public CommandProcessingResult processCommand(final JsonCommand command) {
 
-        Map<String, Object> changes = this.writePlatformService.updateDatatableEntryOneToOne(command.entityName(), command.resourceId(), command);
+        final Map<String, Object> changes = this.writePlatformService.updateDatatableEntryOneToOne(command.entityName(), command.getApptableId(),
+                command);
 
-        return EntityIdentifier.resourceResult(command.resourceId(), command.commandId(), changes);
+        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(command.getApptableId()).with(changes)
+                .build();
     }
 }

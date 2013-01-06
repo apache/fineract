@@ -9,7 +9,8 @@ import java.util.Map;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
-import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
+import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
+import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.mifosplatform.infrastructure.security.exception.NoAuthorizationException;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.monetary.domain.ApplicationCurrency;
@@ -93,7 +94,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
     @Transactional
     @Override
-    public EntityIdentifier disburseLoan(final Long loanId, final JsonCommand command) {
+    public CommandProcessingResult disburseLoan(final Long loanId, final JsonCommand command) {
 
         final AppUser currentUser = context.authenticatedUser();
 
@@ -118,12 +119,20 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             this.noteRepository.save(note);
         }
 
-        return EntityIdentifier.resourceResult(loanId, command.commandId(), changes);
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(command.commandId()) //
+                .withEntityId(loan.getId()) //
+                .withOfficeId(loan.getOfficeId()) //
+                .withClientId(loan.getClientId()) //
+                .withGroupId(loan.getGroupId()) //
+                .withLoanId(loanId) //
+                .with(changes) //
+                .build();
     }
 
     @Transactional
     @Override
-    public EntityIdentifier undoLoanDisbursal(final Long loanId, final JsonCommand command) {
+    public CommandProcessingResult undoLoanDisbursal(final Long loanId, final JsonCommand command) {
 
         context.authenticatedUser();
 
@@ -138,12 +147,20 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             this.noteRepository.save(note);
         }
 
-        return EntityIdentifier.resourceResult(loanId, command.commandId(), changes);
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(command.commandId()) //
+                .withEntityId(loan.getId()) //
+                .withOfficeId(loan.getOfficeId()) //
+                .withClientId(loan.getClientId()) //
+                .withGroupId(loan.getGroupId()) //
+                .withLoanId(loanId) //
+                .with(changes) //
+                .build();
     }
 
     @Transactional
     @Override
-    public EntityIdentifier makeLoanRepayment(final Long loanId, final JsonCommand command) {
+    public CommandProcessingResult makeLoanRepayment(final Long loanId, final JsonCommand command) {
 
         final AppUser currentUser = context.authenticatedUser();
 
@@ -177,12 +194,20 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         changes.put("locale", command.locale());
         changes.put("dateFormat", command.dateFormat());
 
-        return EntityIdentifier.subResourceResult(loanId, loanRepayment.getId(), command.commandId(), changes);
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(command.commandId()) //
+                .withEntityId(loanRepayment.getId()) //
+                .withOfficeId(loan.getOfficeId()) //
+                .withClientId(loan.getClientId()) //
+                .withGroupId(loan.getGroupId()) //
+                .withLoanId(loanId) //
+                .with(changes) //
+                .build();
     }
 
     @Transactional
     @Override
-    public EntityIdentifier adjustLoanTransaction(final Long loanId, final Long transactionId, final JsonCommand command) {
+    public CommandProcessingResult adjustLoanTransaction(final Long loanId, final Long transactionId, final JsonCommand command) {
 
         context.authenticatedUser();
 
@@ -220,12 +245,20 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         changes.put("locale", command.locale());
         changes.put("dateFormat", command.dateFormat());
 
-        return EntityIdentifier.subResourceResult(loanId, transactionId, command.commandId(), changes);
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(command.commandId()) //
+                .withEntityId(transactionId) //
+                .withOfficeId(loan.getOfficeId()) //
+                .withClientId(loan.getClientId()) //
+                .withGroupId(loan.getGroupId()) //
+                .withLoanId(loanId) //
+                .with(changes) //
+                .build();
     }
 
     @Transactional
     @Override
-    public EntityIdentifier waiveInterestOnLoan(final Long loanId, final JsonCommand command) {
+    public CommandProcessingResult waiveInterestOnLoan(final Long loanId, final JsonCommand command) {
 
         context.authenticatedUser();
 
@@ -254,12 +287,20 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         changes.put("locale", command.locale());
         changes.put("dateFormat", command.dateFormat());
 
-        return EntityIdentifier.subResourceResult(loanId, waiveTransaction.getId(), command.commandId(), changes);
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(command.commandId()) //
+                .withEntityId(waiveTransaction.getId()) //
+                .withOfficeId(loan.getOfficeId()) //
+                .withClientId(loan.getClientId()) //
+                .withGroupId(loan.getGroupId()) //
+                .withLoanId(loanId) //
+                .with(changes) //
+                .build();
     }
 
     @Transactional
     @Override
-    public EntityIdentifier writeOff(final Long loanId, final JsonCommand command) {
+    public CommandProcessingResult writeOff(final Long loanId, final JsonCommand command) {
         context.authenticatedUser();
 
         final LoanTransactionCommand loanTransactionCommand = this.loanTransactionCommandFromApiJsonDeserializer.commandFromApiJson(command
@@ -286,12 +327,20 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         changes.put("locale", command.locale());
         changes.put("dateFormat", command.dateFormat());
 
-        return EntityIdentifier.subResourceResult(loanId, writeoff.getId(), command.commandId(), changes);
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(command.commandId()) //
+                .withEntityId(writeoff.getId()) //
+                .withOfficeId(loan.getOfficeId()) //
+                .withClientId(loan.getClientId()) //
+                .withGroupId(loan.getGroupId()) //
+                .withLoanId(loanId) //
+                .with(changes) //
+                .build();
     }
 
     @Transactional
     @Override
-    public EntityIdentifier closeLoan(final Long loanId, final JsonCommand command) {
+    public CommandProcessingResult closeLoan(final Long loanId, final JsonCommand command) {
 
         context.authenticatedUser();
 
@@ -320,11 +369,28 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         changes.put("locale", command.locale());
         changes.put("dateFormat", command.dateFormat());
 
-        EntityIdentifier result = null;
+        CommandProcessingResult result = null;
         if (possibleClosingTransaction != null) {
-            result = EntityIdentifier.subResourceResult(loanId, possibleClosingTransaction.getId(), command.commandId(), changes);
+
+            result = new CommandProcessingResultBuilder() //
+                    .withCommandId(command.commandId()) //
+                    .withEntityId(possibleClosingTransaction.getId()) //
+                    .withOfficeId(loan.getOfficeId()) //
+                    .withClientId(loan.getClientId()) //
+                    .withGroupId(loan.getGroupId()) //
+                    .withLoanId(loanId) //
+                    .with(changes) //
+                    .build();
         } else {
-            result = EntityIdentifier.resourceResult(loanId, command.commandId(), changes);
+            result = new CommandProcessingResultBuilder() //
+                    .withCommandId(command.commandId()) //
+                    .withEntityId(loanId) //
+                    .withOfficeId(loan.getOfficeId()) //
+                    .withClientId(loan.getClientId()) //
+                    .withGroupId(loan.getGroupId()) //
+                    .withLoanId(loanId) //
+                    .with(changes) //
+                    .build();
         }
 
         return result;
@@ -332,7 +398,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
     @Transactional
     @Override
-    public EntityIdentifier closeAsRescheduled(final Long loanId, final JsonCommand command) {
+    public CommandProcessingResult closeAsRescheduled(final Long loanId, final JsonCommand command) {
         context.authenticatedUser();
 
         final LoanTransactionCommand loanTransactionCommand = this.loanTransactionCommandFromApiJsonDeserializer.commandFromApiJson(command
@@ -358,12 +424,20 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         changes.put("locale", command.locale());
         changes.put("dateFormat", command.dateFormat());
 
-        return EntityIdentifier.resourceResult(loanId, command.commandId(), changes);
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(command.commandId()) //
+                .withEntityId(loanId) //
+                .withOfficeId(loan.getOfficeId()) //
+                .withClientId(loan.getClientId()) //
+                .withGroupId(loan.getGroupId()) //
+                .withLoanId(loanId) //
+                .with(changes) //
+                .build();
     }
 
     @Transactional
     @Override
-    public EntityIdentifier addLoanCharge(final Long loanId, final JsonCommand command) {
+    public CommandProcessingResult addLoanCharge(final Long loanId, final JsonCommand command) {
         this.context.authenticatedUser();
 
         final LoanChargeCommand loanChargeCommand = this.loanChargeCommandFromApiJsonDeserializer.commandFromApiJson(command.json());
@@ -388,12 +462,19 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         loan.addLoanCharge(loanCharge);
         this.loanRepository.save(loan);
 
-        return EntityIdentifier.subResourceResult(loanId, loanCharge.getId(), command.commandId());
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(command.commandId()) //
+                .withEntityId(loanCharge.getId()) //
+                .withOfficeId(loan.getOfficeId()) //
+                .withClientId(loan.getClientId()) //
+                .withGroupId(loan.getGroupId()) //
+                .withLoanId(loanId) //
+                .build();
     }
 
     @Transactional
     @Override
-    public EntityIdentifier updateLoanCharge(final Long loanId, final Long loanChargeId, final JsonCommand command) {
+    public CommandProcessingResult updateLoanCharge(final Long loanId, final Long loanChargeId, final JsonCommand command) {
 
         this.context.authenticatedUser();
 
@@ -407,12 +488,20 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         this.loanRepository.save(loan);
 
-        return EntityIdentifier.subResourceResult(loanId, loanChargeId, command.commandId(), changes);
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(command.commandId()) //
+                .withEntityId(loanChargeId) //
+                .withOfficeId(loan.getOfficeId()) //
+                .withClientId(loan.getClientId()) //
+                .withGroupId(loan.getGroupId()) //
+                .withLoanId(loanId) //
+                .with(changes) //
+                .build();
     }
 
     @Transactional
     @Override
-    public EntityIdentifier waiveLoanCharge(final Long loanId, final Long loanChargeId, final JsonCommand command) {
+    public CommandProcessingResult waiveLoanCharge(final Long loanId, final Long loanChargeId, final JsonCommand command) {
 
         this.context.authenticatedUser();
 
@@ -435,12 +524,20 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             this.noteRepository.save(note);
         }
 
-        return EntityIdentifier.subResourceResult(loanId, loanChargeId, command.commandId(), changes);
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(command.commandId()) //
+                .withEntityId(loanChargeId) //
+                .withOfficeId(loan.getOfficeId()) //
+                .withClientId(loan.getClientId()) //
+                .withGroupId(loan.getGroupId()) //
+                .withLoanId(loanId) //
+                .with(changes) //
+                .build();
     }
 
     @Transactional
     @Override
-    public EntityIdentifier deleteLoanCharge(final Long loanId, final Long loanChargeId, final JsonCommand command) {
+    public CommandProcessingResult deleteLoanCharge(final Long loanId, final Long loanChargeId, final JsonCommand command) {
 
         this.context.authenticatedUser();
 
@@ -450,7 +547,14 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         loan.removeLoanCharge(loanCharge);
         this.loanRepository.save(loan);
 
-        return EntityIdentifier.subResourceResult(loanId, loanChargeId, command.commandId());
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(command.commandId()) //
+                .withEntityId(loanChargeId) //
+                .withOfficeId(loan.getOfficeId()) //
+                .withClientId(loan.getClientId()) //
+                .withGroupId(loan.getGroupId()) //
+                .withLoanId(loanId) //
+                .build();
     }
 
     private Loan retrieveLoanBy(final Long loanId) {
@@ -469,7 +573,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
     @Transactional
     @Override
-    public EntityIdentifier loanReassignment(final Long loanId, final JsonCommand command) {
+    public CommandProcessingResult loanReassignment(final Long loanId, final JsonCommand command) {
 
         this.context.authenticatedUser();
 
@@ -488,12 +592,19 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         this.loanRepository.saveAndFlush(loan);
 
-        return EntityIdentifier.resourceResult(loanId, command.commandId());
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(command.commandId()) //
+                .withEntityId(loanId) //
+                .withOfficeId(loan.getOfficeId()) //
+                .withClientId(loan.getClientId()) //
+                .withGroupId(loan.getGroupId()) //
+                .withLoanId(loanId) //
+                .build();
     }
 
     @Transactional
     @Override
-    public EntityIdentifier bulkLoanReassignment(final JsonCommand command) {
+    public CommandProcessingResult bulkLoanReassignment(final JsonCommand command) {
 
         this.context.authenticatedUser();
 
@@ -518,6 +629,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         this.loanRepository.flush();
 
-        return EntityIdentifier.resourceResult(null, command.commandId());
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(command.commandId()) //
+                .build();
     }
 }

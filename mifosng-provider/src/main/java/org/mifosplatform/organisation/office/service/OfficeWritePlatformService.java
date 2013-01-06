@@ -1,13 +1,13 @@
 package org.mifosplatform.organisation.office.service;
 
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
-import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
+import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 
 public interface OfficeWritePlatformService {
 
-    EntityIdentifier createOffice(JsonCommand command);
+    CommandProcessingResult createOffice(JsonCommand command);
 
-    EntityIdentifier updateOffice(Long officeId, JsonCommand command);
+    CommandProcessingResult updateOffice(Long officeId, JsonCommand command);
 
-    EntityIdentifier externalBranchMoneyTransfer(JsonCommand command);
+    CommandProcessingResult externalBranchMoneyTransfer(JsonCommand command);
 }

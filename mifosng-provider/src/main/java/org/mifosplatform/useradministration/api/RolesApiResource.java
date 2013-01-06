@@ -17,11 +17,13 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
 import org.mifosplatform.commands.data.CommandSourceData;
+import org.mifosplatform.commands.domain.CommandWrapper;
+import org.mifosplatform.commands.service.CommandWrapperBuilder;
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.mifosplatform.commands.service.PortfolioCommandsReadPlatformService;
 import org.mifosplatform.infrastructure.codes.data.CodeData;
 import org.mifosplatform.infrastructure.core.api.ApiRequestParameterHelper;
-import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
+import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
@@ -103,8 +105,10 @@ public class RolesApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String createRole(final String apiRequestBodyAsJson) {
 
-        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("CREATE", "ROLE", "CREATE", "roles", null,
-                apiRequestBodyAsJson);
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().createRole().withUrl("/roles").withJson(apiRequestBodyAsJson)
+                .build();
+
+        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
         return this.toApiJsonSerializer.serialize(result);
     }
@@ -145,8 +149,10 @@ public class RolesApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String updateRole(@PathParam("roleId") final Long roleId, final String apiRequestBodyAsJson) {
 
-        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("UPDATE", "ROLE", "UPDATE", "roles",
-                roleId, apiRequestBodyAsJson);
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().updateRole().withUrl("/roles").withJson(apiRequestBodyAsJson)
+                .withEntityId(roleId).build();
+
+        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
         return this.toApiJsonSerializer.serialize(result);
     }
@@ -175,9 +181,11 @@ public class RolesApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String updateRolePermissions(@PathParam("roleId") final Long roleId, final String apiRequestBodyAsJson) {
 
-        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("PERMISSIONS", "ROLE",
-                "UPDATEPERMISSIONS", "roles", roleId, apiRequestBodyAsJson);
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().updateRolePermissions().withUrl("/roles/" + roleId + "/permissions").withJson(apiRequestBodyAsJson)
+                .withEntityId(roleId).build();
 
+        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        
         return this.toApiJsonSerializer.serialize(result);
     }
 }

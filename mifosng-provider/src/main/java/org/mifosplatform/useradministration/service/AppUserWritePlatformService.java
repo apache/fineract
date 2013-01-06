@@ -1,17 +1,17 @@
 package org.mifosplatform.useradministration.service;
 
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
-import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
+import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 
 public interface AppUserWritePlatformService {
 
-    EntityIdentifier createUser(JsonCommand command);
+    CommandProcessingResult createUser(JsonCommand command);
 
-    EntityIdentifier updateUser(Long userId, JsonCommand command);
+    CommandProcessingResult updateUser(Long userId, JsonCommand command);
 
-    EntityIdentifier deleteUser(Long userId);
+    CommandProcessingResult deleteUser(Long userId);
 
     // we dont put any permissions on this e.g. a user with no admin rights can
     // change their own details (email, username, password etc).
-    EntityIdentifier updateUsersOwnAccountDetails(Long userId, JsonCommand command);
+    CommandProcessingResult updateUsersOwnAccountDetails(Long userId, JsonCommand command);
 }

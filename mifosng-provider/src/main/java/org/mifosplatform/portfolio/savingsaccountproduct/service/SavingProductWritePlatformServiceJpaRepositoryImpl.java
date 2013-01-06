@@ -1,6 +1,6 @@
 package org.mifosplatform.portfolio.savingsaccountproduct.service;
 
-import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
+import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.portfolio.loanproduct.domain.PeriodFrequencyType;
@@ -33,7 +33,7 @@ public class SavingProductWritePlatformServiceJpaRepositoryImpl implements Savin
 
     @Transactional
     @Override
-    public EntityIdentifier createSavingProduct(final SavingProductCommand command) {
+    public CommandProcessingResult createSavingProduct(final SavingProductCommand command) {
 
         this.context.authenticatedUser();
         SavingProductCommandValidator validator = new SavingProductCommandValidator(command);
@@ -55,12 +55,12 @@ public class SavingProductWritePlatformServiceJpaRepositoryImpl implements Savin
                 command.getLockinPeriod(), lockinPeriodType);
 
         this.savingProductRepository.save(product);
-        return new EntityIdentifier(product.getId());
+        return new CommandProcessingResult(product.getId());
     }
 
     @Transactional
     @Override
-    public EntityIdentifier updateSavingProduct(final SavingProductCommand command) {
+    public CommandProcessingResult updateSavingProduct(final SavingProductCommand command) {
 
         this.context.authenticatedUser();
         SavingProductCommandValidator validator = new SavingProductCommandValidator(command);
@@ -70,19 +70,19 @@ public class SavingProductWritePlatformServiceJpaRepositoryImpl implements Savin
         if (product == null) { throw new SavingProductNotFoundException(command.getId()); }
         product.update(command);
         this.savingProductRepository.save(product);
-        return new EntityIdentifier(Long.valueOf(product.getId()));
+        return new CommandProcessingResult(Long.valueOf(product.getId()));
     }
 
     @Transactional
     @Override
-    public EntityIdentifier deleteSavingProduct(Long productId) {
+    public CommandProcessingResult deleteSavingProduct(Long productId) {
 
         this.context.authenticatedUser();
         SavingProduct product = this.savingProductRepository.findOne(productId);
         if (product == null || product.isDeleted()) { throw new SavingsProductNotFoundException(productId); }
         product.delete();
         this.savingProductRepository.save(product);
-        return new EntityIdentifier(Long.valueOf(product.getId()));
+        return new CommandProcessingResult(Long.valueOf(product.getId()));
     }
 
 }

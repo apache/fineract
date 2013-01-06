@@ -24,7 +24,7 @@ import javax.ws.rs.core.UriInfo;
 
 import org.mifosplatform.infrastructure.core.api.ApiConstants;
 import org.mifosplatform.infrastructure.core.api.ApiRequestParameterHelper;
-import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
+import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.mifosplatform.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.mifosplatform.infrastructure.core.service.FileUtils;
@@ -106,7 +106,7 @@ public class DocumentManagementApiResource {
 
         Long documentId = this.documentWritePlatformService.createDocument(documentCommand, inputStream);
 
-        return this.toApiJsonSerializer.serialize(EntityIdentifier.resourceResult(documentId, null));
+        return this.toApiJsonSerializer.serialize(CommandProcessingResult.resourceResult(documentId, null));
     }
 
     @PUT
@@ -141,7 +141,7 @@ public class DocumentManagementApiResource {
             documentCommand = new DocumentCommand(modifiedParams, documentId, entityType, entityId, name, null, null, null, description,
                     null);
         }
-        EntityIdentifier identifier = this.documentWritePlatformService.updateDocument(documentCommand, inputStream);
+        CommandProcessingResult identifier = this.documentWritePlatformService.updateDocument(documentCommand, inputStream);
 
         return this.toApiJsonSerializer.serialize(identifier);
     }
@@ -189,7 +189,7 @@ public class DocumentManagementApiResource {
         final DocumentCommand documentCommand = new DocumentCommand(null, documentId, entityType, entityId, null, null, null, null, null,
                 null);
 
-        final EntityIdentifier documentIdentifier = this.documentWritePlatformService.deleteDocument(documentCommand);
+        final CommandProcessingResult documentIdentifier = this.documentWritePlatformService.deleteDocument(documentCommand);
 
         return this.toApiJsonSerializer.serialize(documentIdentifier);
     }

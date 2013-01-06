@@ -1,13 +1,13 @@
 package org.mifosplatform.useradministration.service;
 
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
-import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
+import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 
 public interface RoleWritePlatformService {
 
-    EntityIdentifier createRole(JsonCommand command);
+    CommandProcessingResult createRole(JsonCommand command);
 
-    EntityIdentifier updateRole(Long roleId, JsonCommand command);
+    CommandProcessingResult updateRole(Long roleId, JsonCommand command);
 
-    EntityIdentifier updateRolePermissions(Long roleId, JsonCommand command);
+    CommandProcessingResult updateRolePermissions(Long roleId, JsonCommand command);
 }

@@ -26,7 +26,7 @@ import org.apache.commons.lang.StringUtils;
 import org.mifosplatform.infrastructure.core.api.ApiParameterHelper;
 import org.mifosplatform.infrastructure.core.api.PortfolioApiDataConversionService;
 import org.mifosplatform.infrastructure.core.api.PortfolioApiJsonSerializerService;
-import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
+import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.exception.UnrecognizedQueryParamException;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
@@ -89,7 +89,7 @@ public class DepositAccountsApiResource {
 
         final DepositAccountCommand command = this.apiDataConversionService.convertJsonToDepositAccountCommand(null, jsonRequestBody);
 
-        EntityIdentifier entityIdentifier = this.depositAccountWritePlatformService.createDepositAccount(command);
+        CommandProcessingResult entityIdentifier = this.depositAccountWritePlatformService.createDepositAccount(command);
 
         return Response.ok().entity(entityIdentifier).build();
     }
@@ -102,7 +102,7 @@ public class DepositAccountsApiResource {
 
         final DepositAccountCommand command = this.apiDataConversionService.convertJsonToDepositAccountCommand(accountId, jsonRequestBody);
 
-        EntityIdentifier entityIdentifier = this.depositAccountWritePlatformService.updateDepositAccount(command);
+        CommandProcessingResult entityIdentifier = this.depositAccountWritePlatformService.updateDepositAccount(command);
 
         return Response.ok().entity(entityIdentifier).build();
     }
@@ -193,7 +193,7 @@ public class DepositAccountsApiResource {
 
         this.depositAccountWritePlatformService.deleteDepositAccount(accountId);
 
-        return Response.ok(new EntityIdentifier(accountId)).build();
+        return Response.ok(new CommandProcessingResult(accountId)).build();
     }
 
     private DepositAccountData handleTemplateRelatedData(final Set<String> responseParameters, final DepositAccountData account) {
@@ -220,37 +220,37 @@ public class DepositAccountsApiResource {
         if (is(commandParam, "approve")) {
             DepositStateTransitionApprovalCommand command = apiDataConversionService.convertJsonToDepositStateTransitionApprovalCommand(
                     accountId, jsonRequestBody);
-            EntityIdentifier identifier = this.depositAccountWritePlatformService.approveDepositApplication(command);
+            CommandProcessingResult identifier = this.depositAccountWritePlatformService.approveDepositApplication(command);
             response = Response.ok().entity(identifier).build();
         } else if (is(commandParam, "withdrawal")) {
             DepositAccountWithdrawalCommand command = apiDataConversionService.convertJsonToDepositWithdrawalCommand(accountId,
                     jsonRequestBody);
-            EntityIdentifier identifier = this.depositAccountWritePlatformService.withdrawDepositAccountMoney(command);
+            CommandProcessingResult identifier = this.depositAccountWritePlatformService.withdrawDepositAccountMoney(command);
             response = Response.ok().entity(identifier).build();
         } else if (is(commandParam, "interestwithdraw")) {
             DepositAccountWithdrawInterestCommand command = apiDataConversionService.convertJsonToDepositAccountWithdrawInterestCommand(
                     accountId, jsonRequestBody);
-            EntityIdentifier identifier = this.depositAccountWritePlatformService.withdrawDepositAccountInterestMoney(command);
+            CommandProcessingResult identifier = this.depositAccountWritePlatformService.withdrawDepositAccountInterestMoney(command);
             response = Response.ok().entity(identifier).build();
         } else if (is(commandParam, "renew")) {
             DepositAccountCommand command = apiDataConversionService.convertJsonToDepositAccountCommand(accountId, jsonRequestBody);
-            EntityIdentifier entityIdentifier = this.depositAccountWritePlatformService.renewDepositAccount(command);
+            CommandProcessingResult entityIdentifier = this.depositAccountWritePlatformService.renewDepositAccount(command);
             return Response.ok().entity(entityIdentifier).build();
         } else {
             DepositStateTransitionCommand command = apiDataConversionService.convertJsonToDepositStateTransitionCommand(accountId,
                     jsonRequestBody);
             if (is(commandParam, "reject")) {
-                EntityIdentifier identifier = this.depositAccountWritePlatformService.rejectDepositApplication(command);
+                CommandProcessingResult identifier = this.depositAccountWritePlatformService.rejectDepositApplication(command);
                 response = Response.ok().entity(identifier).build();
             } else if (is(commandParam, "withdrewbyclient")) {
-                EntityIdentifier identifier = this.depositAccountWritePlatformService.withdrawDepositApplication(command);
+                CommandProcessingResult identifier = this.depositAccountWritePlatformService.withdrawDepositApplication(command);
                 response = Response.ok().entity(identifier).build();
             }
 
             UndoStateTransitionCommand undoCommand = new UndoStateTransitionCommand(accountId, command.getNote());
 
             if (is(commandParam, "undoapproval")) {
-                EntityIdentifier identifier = this.depositAccountWritePlatformService.undoDepositApproval(undoCommand);
+                CommandProcessingResult identifier = this.depositAccountWritePlatformService.undoDepositApproval(undoCommand);
                 response = Response.ok().entity(identifier).build();
             }
         }
@@ -270,7 +270,7 @@ public class DepositAccountsApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public Response postInterest() {
         Collection<DepositAccountsForLookup> accounts = this.depositAccountReadPlatformService.retrieveDepositAccountForLookup();
-        EntityIdentifier entityIdentifier = this.depositAccountWritePlatformService.postInterestToDepositAccount(accounts);
+        CommandProcessingResult entityIdentifier = this.depositAccountWritePlatformService.postInterestToDepositAccount(accounts);
         return Response.ok().entity(entityIdentifier).build();
 
     }

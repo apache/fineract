@@ -9,7 +9,8 @@ import org.mifosplatform.commands.domain.CommandWrapper;
 import org.mifosplatform.commands.exception.UnsupportedCommandException;
 import org.mifosplatform.commands.handler.NewCommandSourceHandler;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
-import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
+import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
+import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.mifosplatform.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.monetary.service.ConfigurationDomainService;
@@ -44,13 +45,13 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
 
     @Transactional
     @Override
-    public EntityIdentifier processAndLogCommand(final CommandWrapper wrapper, final JsonCommand command, final boolean isApprovedByChecker) {
+    public CommandProcessingResult processAndLogCommand(final CommandWrapper wrapper, final JsonCommand command, final boolean isApprovedByChecker) {
 
         final NewCommandSourceHandler handler = findCommandHandler(wrapper);
-        final EntityIdentifier result = handler.processCommand(command);
+        final CommandProcessingResult result = handler.processCommand(command);
 
         final AppUser maker = context.authenticatedUser();
-        
+
         CommandSource commandSourceResult = null;
         if (command.commandId() != null) {
             commandSourceResult = this.commandSourceRepository.findOne(command.commandId());
@@ -59,8 +60,8 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
             commandSourceResult = CommandSource.fullEntryFrom(wrapper, command, maker);
         }
         commandSourceResult.updateResourceId(result.resourceId());
-        commandSourceResult.updateSubResourceId(result.subResourceId());
-        
+        commandSourceResult.updateForAudit(result.getOfficeId(), result.getGroupId(), result.getClientId(), result.getLoanId());
+
         String changesOnlyJson = null;
         if (result.hasChanges()) {
             changesOnlyJson = this.toApiJsonSerializer.serializeResult(result.getChanges());
@@ -75,14 +76,15 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
             commandSourceRepository.save(commandSourceResult);
         }
 
-        if (this.configurationDomainService.isMakerCheckerEnabledForTask(wrapper.taskPermissionName()) && !isApprovedByChecker) { throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(changesOnlyJson); }
+        if (this.configurationDomainService.isMakerCheckerEnabledForTask(wrapper.taskPermissionName()) && !isApprovedByChecker) { throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(
+                changesOnlyJson); }
 
         return result;
     }
 
     @Transactional
     @Override
-    public EntityIdentifier logCommand(final CommandWrapper wrapper, final JsonCommand command) {
+    public CommandProcessingResult logCommand(final CommandWrapper wrapper, final JsonCommand command) {
 
         final AppUser maker = context.authenticatedUser();
 
@@ -92,28 +94,27 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
             commandSourceRepository.save(commandSourceResult);
         }
 
-        return EntityIdentifier.resourceResult(commandSourceResult.resourceId(), commandSourceResult.getId());
+        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(commandSourceResult.resourceId()).build();
     }
 
     private NewCommandSourceHandler findCommandHandler(final CommandWrapper wrapper) {
         NewCommandSourceHandler handler = null;
 
         if (wrapper.isDatatableResource()) {
-        	if (wrapper.isCreate()) {
-        		handler = applicationContext.getBean("createDatatableEntryCommandHandler", NewCommandSourceHandler.class);
-        	} else if (wrapper.isUpdateMultiple()) {
+            if (wrapper.isCreate()) {
+                handler = applicationContext.getBean("createDatatableEntryCommandHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isUpdateMultiple()) {
                 handler = applicationContext.getBean("updateOneToManyDatatableEntryCommandHandler", NewCommandSourceHandler.class);
-        	 } else if (wrapper.isUpdate()) {
-                 handler = applicationContext.getBean("updateOneToOneDatatableEntryCommandHandler", NewCommandSourceHandler.class);
-        	 } else if (wrapper.isDeleteMultiple()) {
-                 handler = applicationContext.getBean("deleteOneToManyDatatableEntryCommandHandler", NewCommandSourceHandler.class);
-             } else if (wrapper.isDelete()) {
-                 handler = applicationContext.getBean("deleteOneToOneDatatableEntryCommandHandler", NewCommandSourceHandler.class);
-        	} else {
+            } else if (wrapper.isUpdateOneToOne()) {
+                handler = applicationContext.getBean("updateOneToOneDatatableEntryCommandHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isDeleteMultiple()) {
+                handler = applicationContext.getBean("deleteOneToManyDatatableEntryCommandHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isDeleteOneToOne()) {
+                handler = applicationContext.getBean("deleteOneToOneDatatableEntryCommandHandler", NewCommandSourceHandler.class);
+            } else {
                 throw new UnsupportedCommandException(wrapper.commandName());
             }
-        }
-        else if (wrapper.isClientNoteResource()) {
+        } else if (wrapper.isClientNoteResource()) {
             if (wrapper.isCreate()) {
                 handler = applicationContext.getBean("createClientNoteCommandHandler", NewCommandSourceHandler.class);
             } else if (wrapper.isUpdate()) {
@@ -132,7 +133,7 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
             } else {
                 throw new UnsupportedCommandException(wrapper.commandName());
             }
-        } else if (wrapper.isClientResource() && !wrapper.isNotesSubResource() && !wrapper.isIdentifiersSubResource()) {
+        } else if (wrapper.isClientResource() && !wrapper.isClientNoteResource() && !wrapper.isClientIdentifierResource()) {
             if (wrapper.isCreate()) {
                 handler = applicationContext.getBean("createClientCommandHandler", NewCommandSourceHandler.class);
             } else if (wrapper.isUpdate()) {
@@ -226,7 +227,6 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
                 throw new UnsupportedCommandException(wrapper.commandName());
             }
         } else if (wrapper.isLoanResource()) {
-            
             if (wrapper.isApproveLoanApplication()) {
                 handler = applicationContext.getBean("loanApplicationApprovalCommandHandler", NewCommandSourceHandler.class);
             } else if (wrapper.isUndoApprovalOfLoanApplication()) {
@@ -251,14 +251,6 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
                 handler = applicationContext.getBean("closeLoanCommandHandler", NewCommandSourceHandler.class);
             } else if (wrapper.isCloseLoanAsRescheduled()) {
                 handler = applicationContext.getBean("closeLoanAsRescheduledCommandHandler", NewCommandSourceHandler.class);
-            } else if (wrapper.isAddLoanCharge()) {
-                handler = applicationContext.getBean("addLoanChargeCommandHandler", NewCommandSourceHandler.class);
-            } else if (wrapper.isDeleteLoanCharge()) {
-                handler = applicationContext.getBean("deleteLoanChargeCommandHandler", NewCommandSourceHandler.class);
-            } else if (wrapper.isUpdateLoanCharge()) {
-                handler = applicationContext.getBean("updateLoanChargeCommandHandler", NewCommandSourceHandler.class);
-            } else if (wrapper.isWaiveLoanCharge()) {
-                handler = applicationContext.getBean("waiveLoanChargeCommandHandler", NewCommandSourceHandler.class);
             } else if (wrapper.isUpdateLoanOfficer()) {
                 handler = applicationContext.getBean("updateLoanOfficerCommandHandler", NewCommandSourceHandler.class);
             } else if (wrapper.isBulkUpdateLoanOfficer()) {
@@ -271,6 +263,16 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
                 handler = applicationContext.getBean("loanApplicationDeletionCommandHandler", NewCommandSourceHandler.class);
             } else {
                 throw new UnsupportedCommandException(wrapper.commandName());
+            }
+        } else if (wrapper.isLoanChargeResource()) {
+            if (wrapper.isAddLoanCharge()) {
+                handler = applicationContext.getBean("addLoanChargeCommandHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isDeleteLoanCharge()) {
+                handler = applicationContext.getBean("deleteLoanChargeCommandHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isUpdateLoanCharge()) {
+                handler = applicationContext.getBean("updateLoanChargeCommandHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isWaiveLoanCharge()) {
+                handler = applicationContext.getBean("waiveLoanChargeCommandHandler", NewCommandSourceHandler.class);
             }
         } else {
             throw new UnsupportedCommandException(wrapper.commandName());

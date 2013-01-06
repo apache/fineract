@@ -3,7 +3,8 @@ package org.mifosplatform.organisation.office.service;
 import java.util.Map;
 
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
-import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
+import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
+import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.mifosplatform.infrastructure.security.exception.NoAuthorizationException;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
@@ -57,7 +58,7 @@ public class OfficeWritePlatformServiceJpaRepositoryImpl implements OfficeWriteP
 
     @Transactional
     @Override
-    public EntityIdentifier createOffice(final JsonCommand command) {
+    public CommandProcessingResult createOffice(final JsonCommand command) {
 
         try {
             final AppUser currentUser = context.authenticatedUser();
@@ -76,16 +77,17 @@ public class OfficeWritePlatformServiceJpaRepositoryImpl implements OfficeWriteP
 
             this.officeRepository.save(office);
 
-            return EntityIdentifier.resourceResult(office.getId(), null);
+            return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(office.getId())
+                    .withOfficeId(office.getId()).build();
         } catch (DataIntegrityViolationException dve) {
             handleOfficeDataIntegrityIssues(command, dve);
-            return EntityIdentifier.empty();
+            return CommandProcessingResult.empty();
         }
     }
 
     @Transactional
     @Override
-    public EntityIdentifier updateOffice(final Long officeId, final JsonCommand command) {
+    public CommandProcessingResult updateOffice(final Long officeId, final JsonCommand command) {
 
         try {
             final AppUser currentUser = context.authenticatedUser();
@@ -106,16 +108,17 @@ public class OfficeWritePlatformServiceJpaRepositoryImpl implements OfficeWriteP
                 this.officeRepository.saveAndFlush(office);
             }
 
-            return EntityIdentifier.withChanges(office.getId(), changes);
+            return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(office.getId())
+                    .withOfficeId(office.getId()).with(changes).build();
         } catch (DataIntegrityViolationException dve) {
             handleOfficeDataIntegrityIssues(command, dve);
-            return EntityIdentifier.empty();
+            return CommandProcessingResult.empty();
         }
     }
 
     @Transactional
     @Override
-    public EntityIdentifier externalBranchMoneyTransfer(final JsonCommand command) {
+    public CommandProcessingResult externalBranchMoneyTransfer(final JsonCommand command) {
 
         context.authenticatedUser();
 
@@ -123,13 +126,16 @@ public class OfficeWritePlatformServiceJpaRepositoryImpl implements OfficeWriteP
                 .json());
         moneyTransferCommand.validateBranchTransfer();
 
+        Long officeId = null;
         Office fromOffice = null;
         if (moneyTransferCommand.getFromOfficeId() != null) {
             fromOffice = this.officeRepository.findOne(moneyTransferCommand.getFromOfficeId());
+            officeId = fromOffice.getId();
         }
         Office toOffice = null;
         if (moneyTransferCommand.getToOfficeId() != null) {
             toOffice = this.officeRepository.findOne(moneyTransferCommand.getToOfficeId());
+            officeId = toOffice.getId();
         }
 
         if (fromOffice == null && toOffice == null) { throw new OfficeNotFoundException(moneyTransferCommand.getToOfficeId()); }
@@ -145,7 +151,8 @@ public class OfficeWritePlatformServiceJpaRepositoryImpl implements OfficeWriteP
 
         this.officeMonetaryTransferRepository.save(entity);
 
-        return EntityIdentifier.resourceResult(entity.getId(), null);
+        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(entity.getId()).withOfficeId(officeId)
+                .build();
     }
 
     /*

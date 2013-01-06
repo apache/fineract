@@ -23,6 +23,7 @@ import org.springframework.data.jpa.domain.AbstractPersistable;
 @Table(name = "m_client")
 public class Client extends AbstractPersistable<Long> {
 
+    @SuppressWarnings("unused")
     @Column(name = "account_no", length=40, unique=true, nullable=false)
     private String accountNumber;
     
@@ -81,7 +82,7 @@ public class Client extends AbstractPersistable<Long> {
     }
 
     private Client(final Office office, final String firstName, final String lastName, final LocalDate openingDate, final String externalId) {
-        this.accountNumber = new RandomPasswordGenerator(25).generate();
+        this.accountNumber = new RandomPasswordGenerator(19).generate();
         this.office = office;
         if (StringUtils.isNotBlank(externalId)) {
             this.externalId = externalId.trim();

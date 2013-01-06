@@ -24,7 +24,7 @@ import org.mifosplatform.accounting.api.infrastructure.AccountingApiJsonSerializ
 import org.mifosplatform.accounting.service.GLAccountReadPlatformService;
 import org.mifosplatform.accounting.service.GLAccountWritePlatformService;
 import org.mifosplatform.infrastructure.core.api.ApiParameterHelper;
-import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
+import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -109,7 +109,7 @@ public class GLAccountsApiResource {
 
         final Long coaId = glAccountWritePlatformService.createGLAccount(command);
 
-        return this.apiJsonSerializerService.serializeEntityIdentifier(new EntityIdentifier(coaId));
+        return this.apiJsonSerializerService.serializeEntityIdentifier(new CommandProcessingResult(coaId));
     }
 
     @PUT
@@ -122,7 +122,7 @@ public class GLAccountsApiResource {
 
         final Long coaId = glAccountWritePlatformService.updateGLAccount(glAccountId, command);
 
-        return this.apiJsonSerializerService.serializeEntityIdentifier(new EntityIdentifier(coaId));
+        return this.apiJsonSerializerService.serializeEntityIdentifier(new CommandProcessingResult(coaId));
     }
 
     @DELETE
@@ -133,6 +133,6 @@ public class GLAccountsApiResource {
 
         this.glAccountWritePlatformService.deleteGLAccount(glAccountId);
 
-        return Response.ok(new EntityIdentifier(glAccountId)).build();
+        return Response.ok(new CommandProcessingResult(glAccountId)).build();
     }
 }

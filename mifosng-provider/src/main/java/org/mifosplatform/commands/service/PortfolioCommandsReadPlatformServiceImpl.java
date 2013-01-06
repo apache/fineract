@@ -29,7 +29,7 @@ public class PortfolioCommandsReadPlatformServiceImpl implements PortfolioComman
     private static final class CommandSourceMapper implements RowMapper<CommandSourceData> {
 
         public String schema() {
-            return " mc.id as id, mc.api_operation as taskOperation, mc.api_resource as taskEntity, mc.resource_id as entityId,"
+            return " mc.id as id, mc.action_name as taskOperation, mc.entity_name as taskEntity, mc.resource_id as entityId,"
                     + "mc.command_as_json as taskJson, mc.made_on_date as madeOnDate from m_portfolio_command_source mc ";
         }
 
@@ -54,7 +54,7 @@ public class PortfolioCommandsReadPlatformServiceImpl implements PortfolioComman
 
         final CommandSourceMapper rm = new CommandSourceMapper();
         final String sql = "select " + rm.schema()
-                + " where mc.checker_id is null and mc.processing_result_enum = 2 order by mc.made_on_date DESC, mc.api_resource ASC, mc.api_operation ASC";
+                + " where mc.checker_id is null and mc.processing_result_enum = 2 order by mc.made_on_date DESC, mc.api_resource ASC, mc.action_name ASC";
 
         return this.jdbcTemplate.query(sql, rm, new Object[] {});
     }
@@ -74,7 +74,7 @@ public class PortfolioCommandsReadPlatformServiceImpl implements PortfolioComman
         final CommandSourceMapper rm = new CommandSourceMapper();
         final String sql = "select "
                 + rm.schema()
-                + " where mc.api_resource like ? and mc.resource_id = ? and mc.checker_id is null and mc.processing_result_enum = 2 order by mc.made_on_date DESC, mc.api_operation ASC";
+                + " where mc.entity_name like ? and mc.resource_id = ? and mc.checker_id is null and mc.processing_result_enum = 2 order by mc.made_on_date DESC, mc.action_name ASC";
 
         return this.jdbcTemplate.query(sql, rm, new Object[] { apiResource, resourceId });
     }

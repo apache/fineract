@@ -16,9 +16,11 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.commons.lang.StringUtils;
+import org.mifosplatform.commands.domain.CommandWrapper;
+import org.mifosplatform.commands.service.CommandWrapperBuilder;
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.mifosplatform.infrastructure.core.api.ApiRequestParameterHelper;
-import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
+import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.exception.UnrecognizedQueryParamException;
 import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
@@ -115,22 +117,25 @@ public class LoanTransactionsApiResource {
     public String executeLoanTransaction(@PathParam("loanId") final Long loanId, @QueryParam("command") final String commandParam,
             final String apiRequestBodyAsJson) {
 
-        EntityIdentifier result = null;
+        CommandWrapperBuilder builder = new CommandWrapperBuilder().withUrl("/loans/" + loanId + "/transactions").withLoanId(loanId)
+                .withJson(apiRequestBodyAsJson);
+
+        CommandProcessingResult result = null;
         if (is(commandParam, "repayment")) {
-            result = this.commandsSourceWritePlatformService.logCommandSource("REPAYMENT", "LOAN", "N/A", "loans", loanId, "transactions",
-                    null, apiRequestBodyAsJson);
+            final CommandWrapper commandRequest = builder.loanRepaymentTransaction().build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, "waiveinterest")) {
-            result = this.commandsSourceWritePlatformService.logCommandSource("WAIVEINTERESTPORTION", "LOAN", "N/A", "loans", loanId,
-                    "transactions", null, apiRequestBodyAsJson);
+            final CommandWrapper commandRequest = builder.waiveInterestPortionTransaction().build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, "writeoff")) {
-            result = this.commandsSourceWritePlatformService.logCommandSource("WRITEOFF", "LOAN", "N/A", "loans", loanId, "transactions",
-                    null, apiRequestBodyAsJson);
+            final CommandWrapper commandRequest = builder.writeOffLoanTransaction().build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, "close-rescheduled")) {
-            result = this.commandsSourceWritePlatformService.logCommandSource("CLOSEASRESCHEDULED", "LOAN", "N/A", "loans", loanId,
-                    "transactions", null, apiRequestBodyAsJson);
+            final CommandWrapper commandRequest = builder.closeLoanAsRescheduledTransaction().build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, "close")) {
-            result = this.commandsSourceWritePlatformService
-                    .logCommandSource("CLOSE", "LOAN", "N/A", "loans", loanId, apiRequestBodyAsJson);
+            final CommandWrapper commandRequest = builder.closeLoanTransaction().build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         }
 
         if (result == null) { throw new UnrecognizedQueryParamException("command", commandParam); }
@@ -145,9 +150,13 @@ public class LoanTransactionsApiResource {
     public String adjustLoanTransaction(@PathParam("loanId") final Long loanId, @PathParam("transactionId") final Long transactionId,
             final String apiRequestBodyAsJson) {
 
-        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("ADJUST", "LOAN", "N/A", "loans", loanId,
-                "transactions", transactionId, apiRequestBodyAsJson);
-
+        CommandWrapperBuilder builder = new CommandWrapperBuilder().withUrl("/loans/" + loanId + "/transactions").withLoanId(loanId).withEntityId(transactionId)
+                .withJson(apiRequestBodyAsJson);
+        final CommandWrapper commandRequest = builder.adjustTransaction().build();
+        
+        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        
         return this.toApiJsonSerializer.serialize(result);
     }
+    
 }

@@ -25,21 +25,29 @@ public class CommandSource extends AbstractPersistable<Long> {
     
     @Column(name = "entity_name", nullable = true, length = 100)
     private String entityName;
+    
+    @SuppressWarnings("unused")
+    @Column(name = "office_id")
+    private Long officeId;
 
-    @Column(name = "api_operation", length = 30)
-    private String apiOperation;
-
-    @Column(name = "api_resource", length = 100)
-    private String resource;
+    @SuppressWarnings("unused")
+    @Column(name = "group_id")
+    private Long groupId;
+    
+    @SuppressWarnings("unused")
+    @Column(name = "client_id")
+    private Long clientId;
+    
+    @SuppressWarnings("unused")
+    @Column(name = "loan_id")
+    private Long loanId;
+    
+    @SuppressWarnings("unused")
+    @Column(name = "api_get_url", length = 100)
+    private String resourceGetUrl;
 
     @Column(name = "resource_id")
     private Long resourceId;
-
-    @Column(name = "api_subresource", length = 100)
-    private String subResource;
-
-    @Column(name = "subresource_id")
-    private Long subResourceId;
 
     @Column(name = "command_as_json", length = 1000)
     private String commandAsJson;
@@ -69,24 +77,22 @@ public class CommandSource extends AbstractPersistable<Long> {
     private Integer processingResult;
 
     public static CommandSource fullEntryFrom(final CommandWrapper wrapper, final JsonCommand command, final AppUser maker) {
-        return new CommandSource(wrapper.actionName(), wrapper.entityName(), wrapper.operation(), wrapper.resourceName(), command.resourceId(),
-                wrapper.subResourceName(), command.subResourceId(), command.json(), maker, DateTime.now());
+        return new CommandSource(wrapper.actionName(), wrapper.entityName(), wrapper.getHref(), command.entityId(), command.json(), maker, DateTime.now());
     }
 
     protected CommandSource() {
         //
     }
 
-    private CommandSource(final String actionName, final String entityName, final String apiOperation, final String resource, final Long resourceId,
-            final String subResource, final Long subResourceId, final String commandSerializedAsJson, final AppUser maker,
+    private CommandSource(
+            final String actionName, final String entityName, final String href,
+            final Long resourceId,
+            final String commandSerializedAsJson, final AppUser maker,
             final DateTime madeOnDateTime) {
         this.actionName = actionName;
         this.entityName = entityName;
-        this.apiOperation = StringUtils.defaultIfEmpty(apiOperation, null);
-        this.resource = StringUtils.defaultIfEmpty(resource, null);
+        this.resourceGetUrl = href;
         this.resourceId = resourceId;
-        this.subResource = StringUtils.defaultIfEmpty(subResource, null);
-        this.subResourceId = subResourceId;
         this.commandAsJson = commandSerializedAsJson;
         this.maker = maker;
         this.madeOnDate = madeOnDateTime.toDate();
@@ -101,10 +107,6 @@ public class CommandSource extends AbstractPersistable<Long> {
 
     public void updateResourceId(final Long resourceId) {
         this.resourceId = resourceId;
-    }
-
-    public void updateSubResourceId(final Long subResourceId) {
-        this.subResourceId = subResourceId;
     }
 
     public void updateJsonTo(final String json) {
@@ -123,18 +125,6 @@ public class CommandSource extends AbstractPersistable<Long> {
         return this.commandAsJson;
     }
 
-    public String commandName() {
-        return this.apiOperation + '-' + this.resource;
-    }
-
-    public String resourceName() {
-        return this.resource;
-    }
-
-    public String operation() {
-        return this.apiOperation;
-    }
-    
     public String getActionName() {
         return this.actionName;
     }
@@ -147,23 +137,18 @@ public class CommandSource extends AbstractPersistable<Long> {
         return this.actionName + "_" + this.entityName;
     }
 
-    public String getResource() {
-        return this.resource;
-    }
-
     public Long getResourceId() {
         return this.resourceId;
     }
 
-    public String getSubResource() {
-        return this.subResource;
-    }
-
-    public Long getSubResourceId() {
-        return this.subResourceId;
-    }
-
     public void markAsAwaitingApproval() {
         this.processingResult = CommandProcessingResultType.AWAITING_APPROVAL.getValue();
+    }
+
+    public void updateForAudit(final Long officeId, final Long groupId, final Long clientId, final Long loanId) {
+        this.officeId = officeId;
+        this.groupId = groupId;
+        this.clientId = clientId;
+        this.loanId = loanId;
     }
 }

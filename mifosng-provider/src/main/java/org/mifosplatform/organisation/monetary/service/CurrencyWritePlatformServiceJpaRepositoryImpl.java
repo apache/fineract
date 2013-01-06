@@ -8,7 +8,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
-import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
+import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
+import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.monetary.command.CurrencyCommand;
 import org.mifosplatform.organisation.monetary.domain.ApplicationCurrency;
@@ -42,7 +43,7 @@ public class CurrencyWritePlatformServiceJpaRepositoryImpl implements CurrencyWr
 
     @Transactional
     @Override
-    public EntityIdentifier updateAllowedCurrencies(final JsonCommand command) {
+    public CommandProcessingResult updateAllowedCurrencies(final JsonCommand command) {
 
         context.authenticatedUser();
 
@@ -69,6 +70,6 @@ public class CurrencyWritePlatformServiceJpaRepositoryImpl implements CurrencyWr
         this.organisationCurrencyRepository.deleteAll();
         this.organisationCurrencyRepository.save(allowedCurrencies);
 
-        return EntityIdentifier.withChanges(null, changes);
+        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).with(changes).build();
     }
 }

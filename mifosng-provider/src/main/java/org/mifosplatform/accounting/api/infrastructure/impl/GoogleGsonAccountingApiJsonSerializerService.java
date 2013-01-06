@@ -11,7 +11,7 @@ import org.mifosplatform.accounting.api.data.GLJournalEntryData;
 import org.mifosplatform.accounting.api.data.JournalEntryIdentifier;
 import org.mifosplatform.accounting.api.infrastructure.AccountingApiJsonSerializerService;
 import org.mifosplatform.infrastructure.core.api.PortfolioApiJsonSerializerService;
-import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
+import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.serialization.GoogleGsonSerializerHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -46,7 +46,7 @@ public class GoogleGsonAccountingApiJsonSerializerService implements AccountingA
     }
 
     @Override
-    public String serializeEntityIdentifier(final EntityIdentifier identifier) {
+    public String serializeEntityIdentifier(final CommandProcessingResult identifier) {
         final Gson gsonDeserializer = helper.createGsonBuilderWithParameterExclusionSerializationStrategy(DATA_PARAMETERS, false,
                 DATA_PARAMETERS);
         return helper.serializedJsonFrom(gsonDeserializer, identifier);

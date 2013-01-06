@@ -22,7 +22,7 @@ import javax.ws.rs.core.UriInfo;
 import org.mifosplatform.infrastructure.core.api.ApiParameterHelper;
 import org.mifosplatform.infrastructure.core.api.PortfolioApiDataConversionService;
 import org.mifosplatform.infrastructure.core.api.PortfolioApiJsonSerializerService;
-import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
+import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
@@ -69,7 +69,7 @@ public class DepositProductsApiResource {
 
         final DepositProductCommand command = this.apiDataConversionService.convertJsonToDepositProductCommand(null, jsonRequestBody);
 
-        EntityIdentifier entityIdentifier = this.depositProductWritePlatformService.createDepositProduct(command);
+        CommandProcessingResult entityIdentifier = this.depositProductWritePlatformService.createDepositProduct(command);
 
         return Response.ok().entity(entityIdentifier).build();
     }
@@ -81,7 +81,7 @@ public class DepositProductsApiResource {
     public Response updateDepositProduct(@PathParam("productId") final Long productId, final String jsonRequestBody) {
 
         final DepositProductCommand command = this.apiDataConversionService.convertJsonToDepositProductCommand(productId, jsonRequestBody);
-        EntityIdentifier entityIdentifier = this.depositProductWritePlatformService.updateDepositProduct(command);
+        CommandProcessingResult entityIdentifier = this.depositProductWritePlatformService.updateDepositProduct(command);
         return Response.ok().entity(entityIdentifier).build();
     }
 
@@ -93,7 +93,7 @@ public class DepositProductsApiResource {
 
         this.depositProductWritePlatformService.deleteDepositProduct(productId);
 
-        return Response.ok(new EntityIdentifier(productId)).build();
+        return Response.ok(new CommandProcessingResult(productId)).build();
     }
 
     @GET

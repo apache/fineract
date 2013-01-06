@@ -1,6 +1,6 @@
 package org.mifosplatform.portfolio.savingsdepositproduct.service;
 
-import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
+import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
@@ -52,7 +52,7 @@ public class DepositProductWritePlatformServiceJpaRepositoryImpl implements Depo
 
     @Transactional
     @Override
-    public EntityIdentifier createDepositProduct(final DepositProductCommand command) {
+    public CommandProcessingResult createDepositProduct(final DepositProductCommand command) {
 
         try {
             this.context.authenticatedUser();
@@ -70,16 +70,16 @@ public class DepositProductWritePlatformServiceJpaRepositoryImpl implements Depo
                     command.isLockinPeriodAllowed(), command.getLockinPeriod(), lockinPeriodType);
             this.depositProductRepository.save(product);
 
-            return new EntityIdentifier(product.getId());
+            return new CommandProcessingResult(product.getId());
         } catch (DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(command, dve);
-            return new EntityIdentifier(Long.valueOf(-1));
+            return new CommandProcessingResult(Long.valueOf(-1));
         }
     }
 
     @Transactional
     @Override
-    public EntityIdentifier updateDepositProduct(final DepositProductCommand command) {
+    public CommandProcessingResult updateDepositProduct(final DepositProductCommand command) {
 
         try {
             this.context.authenticatedUser();
@@ -101,22 +101,22 @@ public class DepositProductWritePlatformServiceJpaRepositoryImpl implements Depo
 
             product.update(command, interestCompoundingFrequency, lockinPeriodType);
             this.depositProductRepository.save(product);
-            return new EntityIdentifier(Long.valueOf(product.getId()));
+            return new CommandProcessingResult(Long.valueOf(product.getId()));
         } catch (DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(command, dve);
-            return new EntityIdentifier(Long.valueOf(-1));
+            return new CommandProcessingResult(Long.valueOf(-1));
         }
     }
 
     @Transactional
     @Override
-    public EntityIdentifier deleteDepositProduct(final Long productId) {
+    public CommandProcessingResult deleteDepositProduct(final Long productId) {
 
         this.context.authenticatedUser();
         DepositProduct product = this.depositProductRepository.findOne(productId);
         if (product == null) { throw new DepositProductNotFoundException(productId); }
         product.delete();
         this.depositProductRepository.save(product);
-        return new EntityIdentifier(Long.valueOf(product.getId()));
+        return new CommandProcessingResult(Long.valueOf(product.getId()));
     }
 }

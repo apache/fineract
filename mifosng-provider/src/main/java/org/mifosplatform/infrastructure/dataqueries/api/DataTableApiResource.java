@@ -15,9 +15,11 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
+import org.mifosplatform.commands.domain.CommandWrapper;
+import org.mifosplatform.commands.service.CommandWrapperBuilder;
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.mifosplatform.infrastructure.core.api.ApiParameterHelper;
-import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
+import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.mifosplatform.infrastructure.dataqueries.data.DatatableData;
 import org.mifosplatform.infrastructure.dataqueries.data.GenericResultsetData;
@@ -70,7 +72,7 @@ public class DataTableApiResource {
 
         this.readWriteNonCoreDataService.registerDatatable(datatable, apptable);
 
-        return this.toApiJsonSerializer.serialize(EntityIdentifier.empty());
+        return this.toApiJsonSerializer.serialize(CommandProcessingResult.empty());
     }
 
     @POST
@@ -81,7 +83,7 @@ public class DataTableApiResource {
 
         this.readWriteNonCoreDataService.deregisterDatatable(datatable);
 
-        return this.toApiJsonSerializer.serialize(EntityIdentifier.empty());
+        return this.toApiJsonSerializer.serialize(CommandProcessingResult.empty());
     }
 
     @GET
@@ -139,10 +141,12 @@ public class DataTableApiResource {
     public String newDatatableEntry(@PathParam("datatable") final String datatable, @PathParam("apptableId") final Long apptableId,
             final String apiRequestBodyAsJson) {
 
-        final EntityIdentifier entityIdentifier = this.commandsSourceWritePlatformService.logCommandSource("CREATE", datatable, "CREATE",
-                "datatables/" + datatable, apptableId, apiRequestBodyAsJson);
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().createDatatable(datatable, apptableId, null)
+                .withUrl("/datatables/" + datatable).withJson(apiRequestBodyAsJson).build();
 
-        return this.toApiJsonSerializer.serialize(entityIdentifier);
+        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+
+        return this.toApiJsonSerializer.serialize(result);
     }
 
     @PUT
@@ -152,10 +156,12 @@ public class DataTableApiResource {
     public String updateDatatableEntryOnetoOne(@PathParam("datatable") final String datatable,
             @PathParam("apptableId") final Long apptableId, final String apiRequestBodyAsJson) {
 
-        final EntityIdentifier entityIdentifier = this.commandsSourceWritePlatformService.logCommandSource("UPDATE", datatable, "UPDATE",
-                "datatables/" + datatable, apptableId, apiRequestBodyAsJson);
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().updateDatatable(datatable, apptableId, null)
+                .withUrl("/datatables/" + datatable).withJson(apiRequestBodyAsJson).build();
 
-        return this.toApiJsonSerializer.serialize(entityIdentifier);
+        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+
+        return this.toApiJsonSerializer.serialize(result);
     }
 
     @PUT
@@ -166,10 +172,12 @@ public class DataTableApiResource {
             @PathParam("apptableId") final Long apptableId, @PathParam("datatableId") final Long datatableId,
             final String apiRequestBodyAsJson) {
 
-        final EntityIdentifier entityIdentifier = this.commandsSourceWritePlatformService.logCommandSource("UPDATE", datatable,
-                "UPDATE_MULTIPLE", "datatables/" + datatable, apptableId, "datatables/" + datatable, datatableId, apiRequestBodyAsJson);
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().updateDatatable(datatable, apptableId, datatableId)
+                .withUrl("/datatables/" + datatable + "/" + apptableId).withJson(apiRequestBodyAsJson).build();
 
-        return this.toApiJsonSerializer.serialize(entityIdentifier);
+        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+
+        return this.toApiJsonSerializer.serialize(result);
     }
 
     @DELETE
@@ -178,10 +186,12 @@ public class DataTableApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String deleteDatatableEntries(@PathParam("datatable") final String datatable, @PathParam("apptableId") final Long apptableId) {
 
-        final EntityIdentifier entityIdentifier = this.commandsSourceWritePlatformService.logCommandSource("DELETE", datatable, "DELETE",
-                "datatables/" + datatable, apptableId, "{}");
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteDatatable(datatable, apptableId, null)
+                .withUrl("/datatables/" + datatable).withJson("{}").build();
 
-        return this.toApiJsonSerializer.serialize(entityIdentifier);
+        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+
+        return this.toApiJsonSerializer.serialize(result);
     }
 
     @DELETE
@@ -191,9 +201,11 @@ public class DataTableApiResource {
     public String deleteDatatableEntries(@PathParam("datatable") final String datatable, @PathParam("apptableId") final Long apptableId,
             @PathParam("datatableId") final Long datatableId) {
 
-        final EntityIdentifier entityIdentifier = this.commandsSourceWritePlatformService.logCommandSource("DELETE", datatable,
-                "DELETE_MULTIPLE", "datatables/" + datatable, apptableId, "datatables/" + datatable, datatableId, "{}");
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteDatatable(datatable, apptableId, datatableId)
+                .withUrl("/datatables/" + datatable + "/" + apptableId).withJson("{}").build();
 
-        return this.toApiJsonSerializer.serialize(entityIdentifier);
+        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+
+        return this.toApiJsonSerializer.serialize(result);
     }
 }

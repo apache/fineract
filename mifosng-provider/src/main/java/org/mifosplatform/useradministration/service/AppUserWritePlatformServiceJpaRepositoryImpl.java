@@ -8,7 +8,8 @@ import java.util.Set;
 
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.ApiParameterError;
-import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
+import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
+import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.mifosplatform.infrastructure.core.service.PlatformEmailSendException;
@@ -62,7 +63,7 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
 
     @Transactional
     @Override
-    public EntityIdentifier createUser(final JsonCommand command) {
+    public CommandProcessingResult createUser(final JsonCommand command) {
 
         try {
             context.authenticatedUser();
@@ -82,10 +83,11 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
             final AppUser appUser = AppUser.fromJson(userOffice, allRoles, command);
             this.userDomainService.create(appUser);
 
-            return EntityIdentifier.resourceResult(appUser.getId(), null);
+            return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(appUser.getId())
+                    .withOfficeId(userOffice.getId()).build();
         } catch (DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(command, dve);
-            return EntityIdentifier.empty();
+            return CommandProcessingResult.empty();
         } catch (PlatformEmailSendException e) {
             final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
 
@@ -101,7 +103,7 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
 
     @Transactional
     @Override
-    public EntityIdentifier updateUser(final Long userId, final JsonCommand command) {
+    public CommandProcessingResult updateUser(final Long userId, final JsonCommand command) {
 
         try {
             context.authenticatedUser();
@@ -133,10 +135,11 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
                 this.appUserRepository.save(userToUpdate);
             }
 
-            return EntityIdentifier.withChanges(userId, changes);
+            return new CommandProcessingResultBuilder().withEntityId(userId).withOfficeId(userToUpdate.getOffice().getId()).with(changes)
+                    .build();
         } catch (DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(command, dve);
-            return EntityIdentifier.empty();
+            return CommandProcessingResult.empty();
         }
     }
 
@@ -147,7 +150,7 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
      */
     @Transactional
     @Override
-    public EntityIdentifier updateUsersOwnAccountDetails(final Long userId, final JsonCommand command) {
+    public CommandProcessingResult updateUsersOwnAccountDetails(final Long userId, final JsonCommand command) {
 
         try {
             context.authenticatedUser();
@@ -179,10 +182,10 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
                 this.appUserRepository.saveAndFlush(userToUpdate);
             }
 
-            return EntityIdentifier.withChanges(userId, changes);
+            return CommandProcessingResult.withChanges(userId, changes);
         } catch (DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(command, dve);
-            return EntityIdentifier.empty();
+            return CommandProcessingResult.empty();
         }
     }
 
@@ -204,7 +207,7 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
 
     @Transactional
     @Override
-    public EntityIdentifier deleteUser(final Long userId) {
+    public CommandProcessingResult deleteUser(final Long userId) {
 
         final AppUser user = this.appUserRepository.findOne(userId);
         if (user == null || user.isDeleted()) { throw new UserNotFoundException(userId); }
@@ -212,7 +215,7 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
         user.delete();
         this.appUserRepository.save(user);
 
-        return EntityIdentifier.resourceResult(userId, null);
+        return new CommandProcessingResultBuilder().withEntityId(userId).withOfficeId(user.getOffice().getId()).build();
     }
 
     /*

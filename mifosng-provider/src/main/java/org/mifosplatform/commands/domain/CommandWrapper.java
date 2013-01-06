@@ -3,43 +3,61 @@ package org.mifosplatform.commands.domain;
 public class CommandWrapper {
 
     private final Long commandId;
+    @SuppressWarnings("unused")
+    private final Long officeId;
+    private final Long groupId;
+    private final Long clientId;
+    private final Long loanId;
     private final String actionName;
     private final String entityName;
-    private final String apiOperation;
-    private final String resource;
-    private final Long resourceId;
-    private final String subResource;
-    private final Long subResourceId;
+    private final String taskPermissionName;
+    private final Long entityId;
+    private final String href;
+    private final String json;
+    private final Long apptableId;
+    private final Long datatableId;
 
-    public static CommandWrapper wrap(final String actionName, final String enityName, final String apiOperation, final String resource,
-            final Long resourceId) {
-        return new CommandWrapper(null, actionName, enityName, apiOperation, resource, resourceId, null, null);
-    }
-
-    public static CommandWrapper wrap(final String actionName, final String enityName, final String apiOperation, final String resource,
-            final Long resourceId, final String subResource, final Long subRescourceId) {
-        return new CommandWrapper(null, actionName, enityName, apiOperation, resource, resourceId, subResource, subRescourceId);
+    public static CommandWrapper wrap(final String actionName, final String enityName, final Long resourceId) {
+        return new CommandWrapper(null, actionName, enityName, resourceId);
     }
 
     public static CommandWrapper fromExistingCommand(final Long commandId, final String actionName, final String enityName,
-            final String apiOperation, final String resource, final Long resourceId, final String subResource, final Long subRescourceId) {
-        return new CommandWrapper(commandId, actionName, enityName, apiOperation, resource, resourceId, subResource, subRescourceId);
+            final Long resourceId) {
+        return new CommandWrapper(commandId, actionName, enityName, resourceId);
     }
 
-    private CommandWrapper(final Long commandId, final String actionName, final String enityName, final String apiOperation,
-            final String resource, final Long resourceId, final String subResource, final Long subResourceId) {
+    private CommandWrapper(final Long commandId, final String actionName, final String enityName, final Long resourceId) {
         this.commandId = commandId;
+        this.officeId = null;
+        this.groupId = null;
+        this.clientId = null;
+        this.loanId = null;
         this.actionName = actionName;
         this.entityName = enityName;
-        this.apiOperation = apiOperation;
-        this.resource = resource;
-        this.resourceId = resourceId;
-        this.subResource = subResource;
-        this.subResourceId = subResourceId;
+        this.taskPermissionName = actionName + "_" + entityName;
+        this.entityId = resourceId;
+        this.apptableId = null;
+        this.datatableId = null;
+        this.href = null;
+        this.json = null;
     }
 
-    public String commandName() {
-        return this.apiOperation + '-' + this.resource;
+    public CommandWrapper(final Long officeId, final Long groupId, final Long clientId, final Long loanId, final String actionName,
+            final String entityName, final Long entityId, final Long apptableId, final Long datatableId, final String href,
+            final String json) {
+        this.commandId = null;
+        this.officeId = officeId;
+        this.groupId = groupId;
+        this.clientId = clientId;
+        this.loanId = loanId;
+        this.actionName = actionName;
+        this.entityName = entityName;
+        this.taskPermissionName = actionName + "_" + entityName;
+        this.entityId = entityId;
+        this.apptableId = apptableId;
+        this.datatableId = datatableId;
+        this.href = href;
+        this.json = json;
     }
 
     public Long commandId() {
@@ -55,117 +73,141 @@ public class CommandWrapper {
     }
 
     public Long resourceId() {
-        return this.resourceId;
-    }
-
-    public String resourceName() {
-        return this.resource;
-    }
-
-    public Long subResourceId() {
-        return this.subResourceId;
-    }
-
-    public String subResourceName() {
-        return this.subResource;
+        return this.entityId;
     }
 
     public String taskPermissionName() {
         return this.actionName + "_" + this.entityName;
     }
 
-    public String operation() {
-        return this.apiOperation;
+    public boolean isCreate() {
+        return this.actionName.equalsIgnoreCase("CREATE");
     }
 
-    public boolean isCreate() {
-        return this.apiOperation.equalsIgnoreCase("CREATE");
+    public String getTaskPermissionName() {
+        return this.taskPermissionName;
+    }
+
+    public String getHref() {
+        return this.href;
+    }
+
+    public String getJson() {
+        return this.json;
+    }
+
+    public String getEntityName() {
+        return this.entityName;
+    }
+
+    public Long getEntityId() {
+        return this.entityId;
+    }
+
+    public Long getGroupId() {
+        return this.groupId;
+    }
+
+    public Long getClientId() {
+        return this.clientId;
+    }
+
+    public Long getLoanId() {
+        return this.loanId;
+    }
+
+    public Long getApptableId() {
+        return this.apptableId;
+    }
+
+    public Long getDatatableId() {
+        return this.datatableId;
     }
 
     public boolean isUpdate() {
         // permissions resource has special update which involves no resource.
         return (isPermissionResource() && isUpdateOperation()) || (isCurrencyResource() && isUpdateOperation())
-                || (isUpdateOperation() && this.resourceId != null);
+                || (isUpdateOperation() && this.entityId != null);
     }
 
     private boolean isUpdateOperation() {
-        return this.apiOperation.equalsIgnoreCase("UPDATE");
+        return this.actionName.equalsIgnoreCase("UPDATE");
     }
 
     public boolean isDelete() {
-        return this.apiOperation.equalsIgnoreCase("DELETE") && this.resourceId != null;
+        return isDeleteOperation() && this.entityId != null;
+    }
+
+    private boolean isDeleteOperation() {
+        return this.actionName.equalsIgnoreCase("DELETE");
     }
 
     public boolean isUpdateRolePermissions() {
-        return this.apiOperation.equalsIgnoreCase("UPDATEPERMISSIONS") && this.resourceId != null;
+        return this.actionName.equalsIgnoreCase("PERMISSIONS") && this.entityId != null;
     }
 
     public boolean isPermissionResource() {
-        return this.resource.equalsIgnoreCase("PERMISSIONS");
+        return this.entityName.equalsIgnoreCase("PERMISSION");
     }
 
     public boolean isRoleResource() {
-        return this.resource.equalsIgnoreCase("ROLES");
+        return this.entityName.equalsIgnoreCase("ROLE");
     }
 
     public boolean isUserResource() {
-        return this.resource.equalsIgnoreCase("USERS");
+        return this.entityName.equalsIgnoreCase("USER");
     }
 
     public boolean isCurrencyResource() {
-        return this.resource.equalsIgnoreCase("CURRENCIES");
+        return this.entityName.equalsIgnoreCase("CURRENCY");
     }
 
     public boolean isCodeResource() {
-        return this.resource.equalsIgnoreCase("CODES");
+        return this.entityName.equalsIgnoreCase("CODE");
     }
 
     public boolean isStaffResource() {
-        return this.resource.equalsIgnoreCase("STAFF");
+        return this.entityName.equalsIgnoreCase("STAFF");
     }
 
     public boolean isFundResource() {
-        return this.resource.equalsIgnoreCase("FUNDS");
+        return this.entityName.equalsIgnoreCase("FUND");
     }
 
     public boolean isOfficeResource() {
-        return this.resource.equalsIgnoreCase("OFFICES");
+        return this.entityName.equalsIgnoreCase("OFFICE");
     }
 
     public boolean isOfficeTransactionResource() {
-        return this.resource.equalsIgnoreCase("OFFICETRANSACTIONS");
+        return this.entityName.equalsIgnoreCase("OFFICETRANSACTION");
     }
 
     public boolean isChargeDefinitionResource() {
-        return this.resource.equalsIgnoreCase("CHARGES");
+        return this.entityName.equalsIgnoreCase("CHARGE");
     }
 
     public boolean isLoanProductResource() {
-        return this.resource.equalsIgnoreCase("LOANPRODUCTS");
+        return this.entityName.equalsIgnoreCase("LOANPRODUCT");
     }
 
     public boolean isClientResource() {
-        return this.resource.equalsIgnoreCase("CLIENTS");
+        return this.entityName.equalsIgnoreCase("CLIENT");
     }
 
     public boolean isClientIdentifierResource() {
-        return isClientResource() && isIdentifiersSubResource();
+        return this.entityName.equals("CLIENTIDENTIFIER");
     }
 
     public boolean isClientNoteResource() {
-        return isClientResource() && isNotesSubResource();
-    }
-
-    public boolean isNotesSubResource() {
-        return "NOTES".equalsIgnoreCase(this.subResource);
-    }
-
-    public boolean isIdentifiersSubResource() {
-        return "IDENTIFIERS".equalsIgnoreCase(this.subResource);
+        return this.entityName.equals("CLIENTNOTE");
     }
 
     public boolean isLoanResource() {
-        return this.resource.equalsIgnoreCase("LOANS");
+        return this.entityName.equalsIgnoreCase("LOAN");
+    }
+    
+    public boolean isLoanChargeResource() {
+        return this.entityName.equalsIgnoreCase("LOANCHARGE");
     }
 
     public boolean isApproveLoanApplication() {
@@ -221,9 +263,9 @@ public class CommandWrapper {
     }
 
     public boolean isDeleteLoanCharge() {
-        return this.actionName.equalsIgnoreCase("DELETE") && this.entityName.equalsIgnoreCase("LOANCHARGE");
+        return isDeleteOperation() && this.entityName.equalsIgnoreCase("LOANCHARGE");
     }
-    
+
     public boolean isUpdateLoanCharge() {
         return this.actionName.equalsIgnoreCase("UPDATE") && this.entityName.equalsIgnoreCase("LOANCHARGE");
     }
@@ -240,15 +282,27 @@ public class CommandWrapper {
         return this.actionName.equalsIgnoreCase("BULKREASSIGN") && this.entityName.equalsIgnoreCase("LOAN");
     }
 
-	public boolean isDatatableResource() {
-		return this.resource.toUpperCase().startsWith("DATATABLES");
-	}
+    public boolean isDatatableResource() {
+        return this.apptableId != null;
+    }
 
-	public boolean isDeleteMultiple() {
-		return isDatatableResource() && this.apiOperation.equalsIgnoreCase("DELETE_MULTIPLE");
-	}
+    public boolean isDeleteOneToOne() {
+        return isDatatableResource() && isDeleteOperation() && this.apptableId != null;
+    }
+    
+    public boolean isDeleteMultiple() {
+        return isDatatableResource() && isDeleteOperation() && this.apptableId != null && this.datatableId != null;
+    }
 
-	public boolean isUpdateMultiple() {
-		return isDatatableResource() && this.apiOperation.equalsIgnoreCase("UPDATE_MULTIPLE");
-	}
+    public boolean isUpdateOneToOne() {
+        return isDatatableResource() && isUpdateOperation() && this.apptableId != null;
+    }
+    
+    public boolean isUpdateMultiple() {
+        return isDatatableResource() && isUpdateOperation() && this.apptableId != null && this.datatableId != null;
+    }
+
+    public String commandName() {
+        return this.actionName + "_" + this.entityName;
+    }
 }

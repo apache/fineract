@@ -3,7 +3,7 @@ package org.mifosplatform.infrastructure.codes.handler;
 import org.mifosplatform.commands.handler.NewCommandSourceHandler;
 import org.mifosplatform.infrastructure.codes.service.CodeWritePlatformService;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
-import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
+import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,8 +20,8 @@ public class UpdateCodeCommandHandler implements NewCommandSourceHandler {
 
     @Transactional
     @Override
-    public EntityIdentifier processCommand(final JsonCommand command) {
+    public CommandProcessingResult processCommand(final JsonCommand command) {
 
-        return this.writePlatformService.updateCode(command.resourceId(), command);
+        return this.writePlatformService.updateCode(command.entityId(), command);
     }
 }

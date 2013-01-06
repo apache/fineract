@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
+import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.mifosplatform.infrastructure.core.service.FileUtils;
 import org.mifosplatform.infrastructure.documentmanagement.command.DocumentCommand;
@@ -77,7 +77,7 @@ public class DocumentWritePlatformServiceJpaRepositoryImpl implements DocumentWr
 
     @Transactional
     @Override
-    public EntityIdentifier updateDocument(final DocumentCommand documentCommand, final InputStream inputStream) {
+    public CommandProcessingResult updateDocument(final DocumentCommand documentCommand, final InputStream inputStream) {
         try {
             context.authenticatedUser();
 
@@ -114,7 +114,7 @@ public class DocumentWritePlatformServiceJpaRepositoryImpl implements DocumentWr
 
             this.documentRepository.saveAndFlush(documentForUpdate);
 
-            return new EntityIdentifier(documentForUpdate.getId());
+            return new CommandProcessingResult(documentForUpdate.getId());
         } catch (DataIntegrityViolationException dve) {
             logger.error(dve.getMessage(), dve);
             throw new PlatformDataIntegrityException("error.msg.document.unknown.data.integrity.issue",
@@ -127,7 +127,7 @@ public class DocumentWritePlatformServiceJpaRepositoryImpl implements DocumentWr
 
     @Transactional
     @Override
-    public EntityIdentifier deleteDocument(final DocumentCommand documentCommand) {
+    public CommandProcessingResult deleteDocument(final DocumentCommand documentCommand) {
         context.authenticatedUser();
 
         validateParentEntityType(documentCommand);
@@ -138,7 +138,7 @@ public class DocumentWritePlatformServiceJpaRepositoryImpl implements DocumentWr
 
         this.documentRepository.delete(document);
         deleteFile(document.getName(), document.getLocation());
-        return new EntityIdentifier(document.getId());
+        return new CommandProcessingResult(document.getId());
     }
 
     private void deleteFile(String documentName, String location) {

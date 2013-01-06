@@ -17,11 +17,13 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
+import org.mifosplatform.commands.domain.CommandWrapper;
+import org.mifosplatform.commands.service.CommandWrapperBuilder;
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.mifosplatform.infrastructure.codes.data.CodeData;
 import org.mifosplatform.infrastructure.codes.service.CodeReadPlatformService;
 import org.mifosplatform.infrastructure.core.api.ApiRequestParameterHelper;
-import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
+import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
@@ -75,9 +77,11 @@ public class CodesApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String createCode(final String apiRequestBodyAsJson) {
 
-        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("CREATE", "CODE", "CREATE", "codes", null,
-                apiRequestBodyAsJson);
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().createCode().withUrl("/codes").withJson(apiRequestBodyAsJson)
+                .build();
 
+        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        
         return this.toApiJsonSerializer.serialize(result);
     }
 
@@ -99,9 +103,11 @@ public class CodesApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String updateCode(@PathParam("codeId") final Long codeId, final String apiRequestBodyAsJson) {
 
-        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("UPDATE", "CODE", "UPDATE", "codes",
-                codeId, apiRequestBodyAsJson);
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().updateCode().withUrl("/codes").withEntityId(codeId).withJson(apiRequestBodyAsJson)
+                .build();
 
+        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        
         return this.toApiJsonSerializer.serialize(result);
     }
 
@@ -111,9 +117,11 @@ public class CodesApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String deleteCode(@PathParam("codeId") final Long codeId) {
 
-        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("DELETE", "CODE", "DELETE", "codes",
-                codeId, "{}");
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteCode().withUrl("/codes").withEntityId(codeId).withJson("{}")
+                .build();
 
+        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        
         return this.toApiJsonSerializer.serialize(result);
     }
 }

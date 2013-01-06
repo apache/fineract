@@ -1,6 +1,6 @@
 package org.mifosplatform.portfolio.savingsaccount.service;
 
-import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
+import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.portfolio.client.domain.NoteRepository;
@@ -39,7 +39,7 @@ public class SavingAccountWritePlatformServiceJpaRepositoryImpl implements Savin
 
     @Transactional
     @Override
-    public EntityIdentifier createSavingAccount(final SavingAccountCommand command) {
+    public CommandProcessingResult createSavingAccount(final SavingAccountCommand command) {
         try {
             this.context.authenticatedUser();
             SavingAccountCommandValidator validator = new SavingAccountCommandValidator(command);
@@ -48,16 +48,16 @@ public class SavingAccountWritePlatformServiceJpaRepositoryImpl implements Savin
             SavingAccount account = this.savingAccountAssembler.assembleFrom(command);
             this.savingAccountRepository.save(account);
 
-            return new EntityIdentifier(account.getId());
+            return new CommandProcessingResult(account.getId());
         } catch (DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(command, dve);
-            return new EntityIdentifier(Long.valueOf(-1));
+            return new CommandProcessingResult(Long.valueOf(-1));
         }
 
     }
 
     @Override
-    public EntityIdentifier updateSavingAccount(final SavingAccountCommand command) {
+    public CommandProcessingResult updateSavingAccount(final SavingAccountCommand command) {
         try {
             this.context.authenticatedUser();
             SavingAccountCommandValidator validator = new SavingAccountCommandValidator(command);
@@ -69,10 +69,10 @@ public class SavingAccountWritePlatformServiceJpaRepositoryImpl implements Savin
                 this.savingAccountAssembler.assembleFrom(command, account);
                 this.savingAccountRepository.save(account);
             }
-            return new EntityIdentifier(account.getId());
+            return new CommandProcessingResult(account.getId());
         } catch (DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(command, dve);
-            return new EntityIdentifier(Long.valueOf(-1));
+            return new CommandProcessingResult(Long.valueOf(-1));
         }
     }
 

@@ -20,7 +20,7 @@ import javax.ws.rs.core.UriInfo;
 import org.mifosplatform.infrastructure.core.api.ApiParameterHelper;
 import org.mifosplatform.infrastructure.core.api.PortfolioApiDataConversionService;
 import org.mifosplatform.infrastructure.core.api.PortfolioApiJsonSerializerService;
-import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
+import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.portfolio.loanaccount.gaurantor.command.GuarantorCommand;
 import org.mifosplatform.portfolio.loanaccount.gaurantor.data.GuarantorData;
@@ -82,7 +82,7 @@ public class GuarantorsApiResource {
         this.guarantorWritePlatformService.createGuarantor(loanId, command);
 
         // returns the loan Identifier for which the guarantor was associated
-        return Response.ok().entity(new EntityIdentifier(loanId)).build();
+        return Response.ok().entity(new CommandProcessingResult(loanId)).build();
     }
 
     @PUT
@@ -93,7 +93,7 @@ public class GuarantorsApiResource {
 
         this.guarantorWritePlatformService.updateGuarantor(loanId, command);
 
-        return Response.ok().entity(new EntityIdentifier(loanId)).build();
+        return Response.ok().entity(new CommandProcessingResult(loanId)).build();
     }
 
     @DELETE
@@ -101,6 +101,6 @@ public class GuarantorsApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public Response deleteGuarantor(@PathParam("loanId") final Long loanId) {
         this.guarantorWritePlatformService.removeGuarantor(loanId);
-        return Response.ok(new EntityIdentifier(loanId)).build();
+        return Response.ok(new CommandProcessingResult(loanId)).build();
     }
 }

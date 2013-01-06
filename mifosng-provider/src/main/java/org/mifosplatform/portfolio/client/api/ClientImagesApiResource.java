@@ -14,7 +14,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
 import org.mifosplatform.infrastructure.core.api.ApiConstants;
-import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
+import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.domain.Base64EncodedImage;
 import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.mifosplatform.infrastructure.core.service.FileUtils;
@@ -69,7 +69,7 @@ public class ClientImagesApiResource {
         FileUtils.validateImageMimeType(bodyPart.getMediaType().toString());
         FileUtils.validateFileSizeWithinPermissibleRange(fileSize, fileDetails.getFileName(), ApiConstants.MAX_FILE_UPLOAD_SIZE_IN_MB);
 
-        final EntityIdentifier result = this.clientWritePlatformService.saveOrUpdateClientImage(clientId, fileDetails.getFileName(),
+        final CommandProcessingResult result = this.clientWritePlatformService.saveOrUpdateClientImage(clientId, fileDetails.getFileName(),
                 inputStream);
 
         return this.toApiJsonSerializer.serialize(result);
@@ -85,7 +85,7 @@ public class ClientImagesApiResource {
 
         final Base64EncodedImage base64EncodedImage = FileUtils.extractImageFromDataURL(jsonRequestBody);
 
-        final EntityIdentifier result = this.clientWritePlatformService.saveOrUpdateClientImage(clientId, base64EncodedImage);
+        final CommandProcessingResult result = this.clientWritePlatformService.saveOrUpdateClientImage(clientId, base64EncodedImage);
 
         return this.toApiJsonSerializer.serialize(result);
     }
@@ -127,7 +127,7 @@ public class ClientImagesApiResource {
     public String deleteClientImage(@PathParam("clientId") final Long clientId) {
         this.clientWritePlatformService.deleteClientImage(clientId);
 
-        return this.toApiJsonSerializer.serialize(new EntityIdentifier(clientId));
+        return this.toApiJsonSerializer.serialize(new CommandProcessingResult(clientId));
     }
 
     /**

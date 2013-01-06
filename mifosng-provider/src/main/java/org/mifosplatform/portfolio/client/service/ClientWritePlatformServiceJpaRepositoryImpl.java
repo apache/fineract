@@ -10,7 +10,8 @@ import org.mifosplatform.infrastructure.codes.domain.CodeValue;
 import org.mifosplatform.infrastructure.codes.domain.CodeValueRepository;
 import org.mifosplatform.infrastructure.codes.exception.CodeValueNotFoundException;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
-import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
+import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
+import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.mifosplatform.infrastructure.core.domain.Base64EncodedImage;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.mifosplatform.infrastructure.core.service.FileUtils;
@@ -79,15 +80,17 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 
     @Transactional
     @Override
-    public EntityIdentifier deleteClient(final Long clientId) {
+    public CommandProcessingResult deleteClient(final Long clientId) {
 
         final Client client = this.clientRepository.findOne(clientId);
         if (client == null || client.isDeleted()) { throw new ClientNotFoundException(clientId); }
 
+        final Long officeId = client.getOffice().getId();
+
         client.delete();
         this.clientRepository.save(client);
 
-        return EntityIdentifier.resourceResult(clientId, null);
+        return new CommandProcessingResultBuilder().withOfficeId(officeId).withClientId(clientId).withEntityId(clientId).build();
     }
 
     /*
@@ -111,7 +114,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 
     @Transactional
     @Override
-    public EntityIdentifier createClient(final JsonCommand command) {
+    public CommandProcessingResult createClient(final JsonCommand command) {
 
         try {
             context.authenticatedUser();
@@ -127,22 +130,24 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 
             final Client newClient = Client.fromJson(clientOffice, command);
             this.clientRepository.save(newClient);
-            
-            // now use client account identifier generator to generate proper account number
+
+            // now use client account identifier generator to generate proper
+            // account number
             AccountIdentifierGenerator generator = new ClientAccountIdentifierGenerator(newClient.getId(), 9);
             newClient.updateAccountIdentifier(generator.generate());
             this.clientRepository.save(newClient);
-            
-            return EntityIdentifier.resourceResult(newClient.getId(), null);
+
+            return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withOfficeId(clientOffice.getId())
+                    .withClientId(newClient.getId()).withEntityId(newClient.getId()).build();
         } catch (DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(command, dve);
-            return EntityIdentifier.empty();
+            return CommandProcessingResult.empty();
         }
     }
 
     @Transactional
     @Override
-    public EntityIdentifier updateClient(final Long clientId, final JsonCommand command) {
+    public CommandProcessingResult updateClient(final Long clientId, final JsonCommand command) {
 
         try {
             context.authenticatedUser();
@@ -167,22 +172,23 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                 this.clientRepository.save(clientForUpdate);
             }
 
-            return EntityIdentifier.withChanges(clientId, changes);
+            return new CommandProcessingResultBuilder().withCommandId(command.commandId())
+                    .withOfficeId(clientForUpdate.getOffice().getId()).withClientId(clientId).withEntityId(clientId).with(changes).build();
         } catch (DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(command, dve);
-            return new EntityIdentifier(Long.valueOf(-1));
+            return new CommandProcessingResult(Long.valueOf(-1));
         }
     }
 
     @Transactional
     @Override
-    public EntityIdentifier addClientNote(final Long clientId, final JsonCommand command) {
+    public CommandProcessingResult addClientNote(final Long clientId, final JsonCommand command) {
 
         context.authenticatedUser();
 
         final ClientNoteCommand clientNoteCommand = this.clientNoteFromApiJsonDeserializer.commandFromApiJson(command.json());
         clientNoteCommand.validate();
-        
+
         final Client clientForUpdate = this.clientRepository.findOne(clientId);
         if (clientForUpdate == null) { throw new ClientNotFoundException(clientId); }
 
@@ -190,12 +196,13 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 
         this.noteRepository.save(note);
 
-        return EntityIdentifier.subResourceResult(clientId, note.getId(), command.commandId());
+        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withOfficeId(clientForUpdate.getOffice().getId())
+                .withClientId(clientId).withEntityId(note.getId()).build();
     }
 
     @Transactional
     @Override
-    public EntityIdentifier updateClientNote(final Long clientId, final Long noteId, final JsonCommand command) {
+    public CommandProcessingResult updateClientNote(final Long clientId, final Long noteId, final JsonCommand command) {
 
         context.authenticatedUser();
 
@@ -206,18 +213,21 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
         if (noteForUpdate == null || noteForUpdate.isNotAgainstClientWithIdOf(clientId)) { throw new NoteNotFoundException(noteId,
                 clientId, "client"); }
 
+        final Client client = this.clientRepository.findOne(clientId);
+
         final Map<String, Object> changes = noteForUpdate.update(command);
 
         if (!changes.isEmpty()) {
             this.noteRepository.save(noteForUpdate);
         }
 
-        return EntityIdentifier.subResourceResult(clientId, noteId, command.commandId(), changes);
+        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withOfficeId(client.getOffice().getId())
+                .withClientId(clientId).withEntityId(noteId).with(changes).build();
     }
 
     @Transactional
     @Override
-    public EntityIdentifier addClientIdentifier(final Long clientId, final JsonCommand command) {
+    public CommandProcessingResult addClientIdentifier(final Long clientId, final JsonCommand command) {
 
         context.authenticatedUser();
         final ClientIdentifierCommand clientIdentifierCommand = this.clientIdentifierCommandFromApiJsonDeserializer
@@ -241,16 +251,17 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 
             this.clientIdentifierRepository.save(clientIdentifier);
 
-            return EntityIdentifier.subResourceResult(clientId, clientIdentifier.getId(), command.commandId());
+            return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withOfficeId(client.getOffice().getId())
+                    .withClientId(clientId).withEntityId(clientIdentifier.getId()).build();
         } catch (DataIntegrityViolationException dve) {
             handleClientIdentifierDataIntegrityViolation(documentTypeLabel, documentTypeId, documentKey, dve);
-            return EntityIdentifier.empty();
+            return CommandProcessingResult.empty();
         }
     }
 
     @Transactional
     @Override
-    public EntityIdentifier updateClientIdentifier(final Long clientId, final Long identifierId, final JsonCommand command) {
+    public CommandProcessingResult updateClientIdentifier(final Long clientId, final Long identifierId, final JsonCommand command) {
 
         context.authenticatedUser();
         final ClientIdentifierCommand clientIdentifierCommand = this.clientIdentifierCommandFromApiJsonDeserializer
@@ -291,10 +302,13 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             if (!changes.isEmpty()) {
                 this.clientIdentifierRepository.saveAndFlush(clientIdentifierForUpdate);
             }
-            return EntityIdentifier.subResourceResult(clientId, identifierId, command.commandId(), changes);
+
+            final Client client = this.clientRepository.findOne(clientId);
+            return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withOfficeId(client.getOffice().getId())
+                    .withClientId(clientId).withEntityId(identifierId).with(changes).build();
         } catch (DataIntegrityViolationException dve) {
             handleClientIdentifierDataIntegrityViolation(documentTypeLabel, documentTypeId, documentKey, dve);
-            return new EntityIdentifier(Long.valueOf(-1));
+            return new CommandProcessingResult(Long.valueOf(-1));
         }
     }
 
@@ -317,17 +331,19 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 
     @Transactional
     @Override
-    public EntityIdentifier deleteClientIdentifier(final Long clientId, final Long identifierId, final Long commandId) {
+    public CommandProcessingResult deleteClientIdentifier(final Long clientId, final Long identifierId, final Long commandId) {
         final ClientIdentifier clientIdentifier = this.clientIdentifierRepository.findOne(identifierId);
         if (clientIdentifier == null) { throw new ClientIdentifierNotFoundException(identifierId); }
         this.clientIdentifierRepository.delete(clientIdentifier);
 
-        return EntityIdentifier.subResourceResult(clientId, identifierId, commandId);
+        final Client client = this.clientRepository.findOne(clientId);
+        return new CommandProcessingResultBuilder().withCommandId(commandId).withOfficeId(client.getOffice().getId())
+                .withClientId(clientId).withEntityId(identifierId).build();
     }
 
     @Transactional
     @Override
-    public EntityIdentifier saveOrUpdateClientImage(Long clientId, String imageName, InputStream inputStream) {
+    public CommandProcessingResult saveOrUpdateClientImage(Long clientId, String imageName, InputStream inputStream) {
         try {
             final Client client = this.clientRepository.findOne(clientId);
             String imageUploadLocation = setupForClientImageUpdate(clientId, client);
@@ -343,7 +359,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 
     @Transactional
     @Override
-    public EntityIdentifier deleteClientImage(final Long clientId) {
+    public CommandProcessingResult deleteClientImage(final Long clientId) {
 
         final Client client = this.clientRepository.findOne(clientId);
         if (client == null || client.isDeleted()) { throw new ClientNotFoundException(clientId); }
@@ -356,7 +372,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
     }
 
     @Override
-    public EntityIdentifier saveOrUpdateClientImage(final Long clientId, final Base64EncodedImage encodedImage) {
+    public CommandProcessingResult saveOrUpdateClientImage(final Long clientId, final Base64EncodedImage encodedImage) {
         try {
             final Client client = this.clientRepository.findOne(clientId);
             final String imageUploadLocation = setupForClientImageUpdate(clientId, client);
@@ -386,10 +402,10 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
         return imageUploadLocation;
     }
 
-    private EntityIdentifier updateClientImage(final Long clientId, final Client client, final String imageLocation) {
+    private CommandProcessingResult updateClientImage(final Long clientId, final Client client, final String imageLocation) {
         client.setImageKey(imageLocation);
         this.clientRepository.save(client);
 
-        return new EntityIdentifier(clientId);
+        return new CommandProcessingResult(clientId);
     }
 }

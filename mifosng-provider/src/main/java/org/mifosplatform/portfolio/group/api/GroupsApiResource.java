@@ -22,7 +22,7 @@ import org.apache.commons.lang.StringUtils;
 import org.mifosplatform.infrastructure.core.api.ApiParameterHelper;
 import org.mifosplatform.infrastructure.core.api.ApiRequestParameterHelper;
 import org.mifosplatform.infrastructure.core.api.PortfolioApiDataConversionService;
-import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
+import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.mifosplatform.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
@@ -156,7 +156,7 @@ public class GroupsApiResource {
 
         final GroupCommand command = this.apiDataConversionService.convertJsonToGroupCommand(null, jsonRequestBody);
 
-        EntityIdentifier entityIdentifier = this.groupWritePlatformService.createGroup(command);
+        CommandProcessingResult entityIdentifier = this.groupWritePlatformService.createGroup(command);
 
         return this.toApiJsonSerializer.serialize(entityIdentifier);
     }
@@ -169,7 +169,7 @@ public class GroupsApiResource {
 
         final GroupCommand command = this.apiDataConversionService.convertJsonToGroupCommand(groupId, jsonRequestBody);
 
-        EntityIdentifier entityIdentifier = this.groupWritePlatformService.updateGroup(command);
+        CommandProcessingResult entityIdentifier = this.groupWritePlatformService.updateGroup(command);
 
         return this.toApiJsonSerializer.serialize(entityIdentifier);
     }
@@ -180,7 +180,7 @@ public class GroupsApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String deleteGroup(@PathParam("groupId") final Long groupId) {
 
-        EntityIdentifier entityIdentifier = this.groupWritePlatformService.deleteGroup(groupId);
+        CommandProcessingResult entityIdentifier = this.groupWritePlatformService.deleteGroup(groupId);
 
         return this.toApiJsonSerializer.serialize(entityIdentifier);
     }

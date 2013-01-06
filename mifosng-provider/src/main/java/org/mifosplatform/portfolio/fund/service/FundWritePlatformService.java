@@ -1,11 +1,11 @@
 package org.mifosplatform.portfolio.fund.service;
 
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
-import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
+import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 
 public interface FundWritePlatformService {
 
-    EntityIdentifier createFund(JsonCommand command);
+    CommandProcessingResult createFund(JsonCommand command);
 
-    EntityIdentifier updateFund(Long fundId, JsonCommand command);
+    CommandProcessingResult updateFund(Long fundId, JsonCommand command);
 }

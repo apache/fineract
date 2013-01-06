@@ -3,7 +3,7 @@ package org.mifosplatform.portfolio.group.service;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
+import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.office.domain.Office;
@@ -50,7 +50,7 @@ public class GroupWritePlatformServiceJpaRepositoryImpl implements GroupWritePla
 
     @Transactional
     @Override
-    public EntityIdentifier createGroup(GroupCommand command) {
+    public CommandProcessingResult createGroup(GroupCommand command) {
         try {
             this.context.authenticatedUser();
 
@@ -68,16 +68,16 @@ public class GroupWritePlatformServiceJpaRepositoryImpl implements GroupWritePla
 
             this.groupRepository.saveAndFlush(newGroup);
 
-            return new EntityIdentifier(newGroup.getId());
+            return new CommandProcessingResult(newGroup.getId());
         } catch (DataIntegrityViolationException dve) {
             handleGroupDataIntegrityIssues(command, dve);
-            return new EntityIdentifier(Long.valueOf(-1));
+            return new CommandProcessingResult(Long.valueOf(-1));
         }
     }
 
     @Transactional
     @Override
-    public EntityIdentifier updateGroup(GroupCommand command) {
+    public CommandProcessingResult updateGroup(GroupCommand command) {
 
         try {
             context.authenticatedUser();
@@ -105,16 +105,16 @@ public class GroupWritePlatformServiceJpaRepositoryImpl implements GroupWritePla
 
             groupRepository.saveAndFlush(groupForUpdate);
 
-            return new EntityIdentifier(groupForUpdate.getId());
+            return new CommandProcessingResult(groupForUpdate.getId());
         } catch (DataIntegrityViolationException dve) {
             handleGroupDataIntegrityIssues(command, dve);
-            return new EntityIdentifier(Long.valueOf(-1));
+            return new CommandProcessingResult(Long.valueOf(-1));
         }
     }
 
     @Transactional
     @Override
-    public EntityIdentifier deleteGroup(Long groupId) {
+    public CommandProcessingResult deleteGroup(Long groupId) {
 
         context.authenticatedUser();
 
@@ -125,7 +125,7 @@ public class GroupWritePlatformServiceJpaRepositoryImpl implements GroupWritePla
         groupForDelete.delete();
         this.groupRepository.save(groupForDelete);
 
-        return new EntityIdentifier(groupId);
+        return new CommandProcessingResult(groupId);
     }
 
     private Set<Client> assembleSetOfClients(final GroupCommand command) {

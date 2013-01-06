@@ -75,7 +75,6 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
     @JoinColumn(name = "guarantor_id")
     private Client guarantor;
 
-    @SuppressWarnings("unused")
     @ManyToOne(optional = true)
     @JoinColumn(name = "group_id")
     private Group group;
@@ -212,7 +211,8 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
             final Set<LoanCharge> loanCharges) {
         final LoanStatus status = null;
         LoanProductRelatedDetail loanRepaymentScheduleDetail = loanSchedule.loanProductRelatedDetail();
-        return new Loan(client, null, fund, officer, transactionProcessingStrategy, loanProduct, loanRepaymentScheduleDetail, status, loanCharges);
+        return new Loan(client, null, fund, officer, transactionProcessingStrategy, loanProduct, loanRepaymentScheduleDetail, status,
+                loanCharges);
     }
 
     public static Loan newGroupLoanApplication(final Group group, final LoanProduct loanProduct, final Fund fund, final Staff officer,
@@ -220,12 +220,13 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
             final Set<LoanCharge> loanCharges) {
         final LoanStatus status = null;
         LoanProductRelatedDetail loanRepaymentScheduleDetail = loanSchedule.loanProductRelatedDetail();
-        return new Loan(null, group, fund, officer, transactionProcessingStrategy, loanProduct, loanRepaymentScheduleDetail, status, loanCharges);
+        return new Loan(null, group, fund, officer, transactionProcessingStrategy, loanProduct, loanRepaymentScheduleDetail, status,
+                loanCharges);
     }
 
-    public static Loan newIndividualLoanApplicationFromGroup(final Client client, final Group group, final LoanProduct loanProduct, final Fund fund,
-            final Staff officer, final LoanTransactionProcessingStrategy transactionProcessingStrategy, final LoanSchedule loanSchedule,
-            final Set<LoanCharge> loanCharges) {
+    public static Loan newIndividualLoanApplicationFromGroup(final Client client, final Group group, final LoanProduct loanProduct,
+            final Fund fund, final Staff officer, final LoanTransactionProcessingStrategy transactionProcessingStrategy,
+            final LoanSchedule loanSchedule, final Set<LoanCharge> loanCharges) {
         final LoanStatus status = null;
         LoanProductRelatedDetail loanRepaymentScheduleDetail = loanSchedule.loanProductRelatedDetail();
         return new Loan(client, group, fund, officer, transactionProcessingStrategy, loanProduct, loanRepaymentScheduleDetail, status,
@@ -236,9 +237,9 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
         //
     }
 
-    private Loan(final Client client, final Group group, Fund fund, Staff loanOfficer, final LoanTransactionProcessingStrategy transactionProcessingStrategy,
-            final LoanProduct loanProduct, final LoanProductRelatedDetail loanRepaymentScheduleDetail, final LoanStatus loanStatus,
-            final Set<LoanCharge> loanCharges) {
+    private Loan(final Client client, final Group group, Fund fund, Staff loanOfficer,
+            final LoanTransactionProcessingStrategy transactionProcessingStrategy, final LoanProduct loanProduct,
+            final LoanProductRelatedDetail loanRepaymentScheduleDetail, final LoanStatus loanStatus, final Set<LoanCharge> loanCharges) {
         this.client = client;
         this.group = group;
         this.fund = fund;
@@ -436,12 +437,13 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
         return actualChanges;
     }
 
-    public LoanTransaction waiveLoanCharge(final LoanCharge loanCharge, final LoanLifecycleStateMachine loanLifecycleStateMachine, final Map<String, Object> changes) {
+    public LoanTransaction waiveLoanCharge(final LoanCharge loanCharge, final LoanLifecycleStateMachine loanLifecycleStateMachine,
+            final Map<String, Object> changes) {
 
         validateLoanIsNotClosed(loanCharge);
 
         final Money amountWaived = loanCharge.waive(loanCurrency());
-        
+
         changes.put("amount", amountWaived.getAmount());
 
         Money feeChargesWaived = Money.of(loanCurrency(), loanCharge.amount());
@@ -665,7 +667,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
         Arrays.sort(newLoanChargeData);
         return !Arrays.equals(existingLoanChargeData, newLoanChargeData);
     }
-    
+
     private Set<LoanCharge> getNullPointerSafeLoanCharges() {
         Set<LoanCharge> loanCharges = this.charges;
         if (this.charges == null) {
@@ -968,8 +970,8 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
         final LoanSchedule loanSchedule = new LoanSchedule(loanScheduleGenerator, applicationCurrency, principal, interestRatePerPeriod,
                 interestRatePeriodFrequencyType, defaultAnnualNominalInterestRate, interestMethod, interestCalculationPeriodMethod,
                 repaymentEvery, repaymentPeriodFrequencyType, numberOfRepayments, amortizationMethod, loanTermFrequency,
-                loanTermPeriodFrequencyType, getNullPointerSafeLoanCharges(), this.getDisbursementDate(), this.getExpectedFirstRepaymentOnDate(),
-                this.getInterestChargedFromDate(), inArrearsTolerance);
+                loanTermPeriodFrequencyType, getNullPointerSafeLoanCharges(), this.getDisbursementDate(),
+                this.getExpectedFirstRepaymentOnDate(), this.getInterestChargedFromDate(), inArrearsTolerance);
 
         final LoanScheduleData generatedData = loanSchedule.generate();
 
@@ -1921,5 +1923,31 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 
     public Client getClient() {
         return client;
+    }
+
+    public Long getClientId() {
+        Long clientId = null;
+        if (this.client != null) {
+            clientId = this.client.getId();
+        }
+        return clientId;
+    }
+
+    public Long getGroupId() {
+        Long groupId = null;
+        if (this.group != null) {
+            groupId = this.group.getId();
+        }
+        return groupId;
+    }
+
+    public Long getOfficeId() {
+        Long officeId = null;
+        if (this.client != null) {
+            officeId = this.client.getOffice().getId();
+        } else {
+//            officeId = this.group.getOffice().getId();
+        }
+        return officeId;
     }
 }

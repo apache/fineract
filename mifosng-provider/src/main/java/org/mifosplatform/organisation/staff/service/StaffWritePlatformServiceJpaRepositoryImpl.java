@@ -4,7 +4,8 @@ import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
-import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
+import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
+import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.office.domain.Office;
@@ -44,7 +45,7 @@ public class StaffWritePlatformServiceJpaRepositoryImpl implements StaffWritePla
 
     @Transactional
     @Override
-    public EntityIdentifier createStaff(final JsonCommand command) {
+    public CommandProcessingResult createStaff(final JsonCommand command) {
 
         try {
             context.authenticatedUser();
@@ -61,16 +62,17 @@ public class StaffWritePlatformServiceJpaRepositoryImpl implements StaffWritePla
 
             this.staffRepository.save(staff);
 
-            return EntityIdentifier.resourceResult(staff.getId(), null);
+            return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(staff.getId())
+                    .withOfficeId(officeId).build();
         } catch (DataIntegrityViolationException dve) {
             handleStaffDataIntegrityIssues(command, dve);
-            return EntityIdentifier.empty();
+            return CommandProcessingResult.empty();
         }
     }
 
     @Transactional
     @Override
-    public EntityIdentifier updateStaff(final Long staffId, final JsonCommand command) {
+    public CommandProcessingResult updateStaff(final Long staffId, final JsonCommand command) {
 
         try {
             context.authenticatedUser();
@@ -78,7 +80,7 @@ public class StaffWritePlatformServiceJpaRepositoryImpl implements StaffWritePla
             final StaffCommand staffCommand = this.fromApiJsonDeserializer.commandFromApiJson(command.json());
             staffCommand.validateForUpdate();
 
-            Staff staffForUpdate = this.staffRepository.findOne(staffId);
+            final Staff staffForUpdate = this.staffRepository.findOne(staffId);
             if (staffForUpdate == null) { throw new StaffNotFoundException(staffId); }
 
             final Map<String, Object> changesOnly = staffForUpdate.update(command);
@@ -95,10 +97,11 @@ public class StaffWritePlatformServiceJpaRepositoryImpl implements StaffWritePla
                 this.staffRepository.save(staffForUpdate);
             }
 
-            return EntityIdentifier.withChanges(staffForUpdate.getId(), changesOnly);
+            return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(staffId)
+                    .withOfficeId(staffForUpdate.officeId()).with(changesOnly).build();
         } catch (DataIntegrityViolationException dve) {
             handleStaffDataIntegrityIssues(command, dve);
-            return EntityIdentifier.empty();
+            return CommandProcessingResult.empty();
         }
     }
 

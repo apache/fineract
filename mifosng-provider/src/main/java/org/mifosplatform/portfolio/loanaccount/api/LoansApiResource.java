@@ -20,11 +20,13 @@ import javax.ws.rs.core.UriInfo;
 
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
+import org.mifosplatform.commands.domain.CommandWrapper;
+import org.mifosplatform.commands.service.CommandWrapperBuilder;
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.mifosplatform.infrastructure.core.api.ApiParameterHelper;
 import org.mifosplatform.infrastructure.core.api.ApiRequestParameterHelper;
 import org.mifosplatform.infrastructure.core.api.JsonQuery;
-import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
+import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.exception.UnrecognizedQueryParamException;
 import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
@@ -331,8 +333,10 @@ public class LoansApiResource {
             return this.loanScheduleToApiJsonSerializer.serialize(settings, loanSchedule, new HashSet<String>());
         }
 
-        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("CREATE", "LOAN", "CREATE", "loans", null,
-                apiRequestBodyAsJson);
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().createLoanApplication().withUrl("/loans")
+                .withJson(apiRequestBodyAsJson).build();
+
+        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
         return this.toApiJsonSerializer.serialize(result);
     }
@@ -343,8 +347,10 @@ public class LoansApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String modifyLoanApplication(@PathParam("loanId") final Long loanId, final String apiRequestBodyAsJson) {
 
-        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("UPDATE", "LOAN", "UPDATE", "loans",
-                loanId, apiRequestBodyAsJson);
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().updateLoanApplication().withUrl("/loans").withLoanId(loanId)
+                .withEntityId(loanId).withJson(apiRequestBodyAsJson).build();
+
+        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
         return this.toApiJsonSerializer.serialize(result);
     }
@@ -355,8 +361,10 @@ public class LoansApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String deleteLoanApplication(@PathParam("loanId") final Long loanId) {
 
-        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("DELETE", "LOAN", "DELETE", "loans",
-                loanId, "{}");
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteLoanApplication().withUrl("/loans").withLoanId(loanId)
+                .withEntityId(loanId).withJson("{}").build();
+
+        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
         return this.toApiJsonSerializer.serialize(result);
     }
@@ -368,28 +376,31 @@ public class LoansApiResource {
     public String stateTransitions(@PathParam("loanId") final Long loanId, @QueryParam("command") final String commandParam,
             final String apiRequestBodyAsJson) {
 
-        EntityIdentifier result = null;
+        final CommandWrapperBuilder builder = new CommandWrapperBuilder().withUrl("/loans").withLoanId(loanId).withEntityId(loanId)
+                .withJson(apiRequestBodyAsJson);
+
+        CommandProcessingResult result = null;
 
         if (is(commandParam, "reject")) {
-            result = this.commandsSourceWritePlatformService.logCommandSource("REJECT", "LOAN", "N/A", "loans", loanId,
-                    apiRequestBodyAsJson);
+            final CommandWrapper commandRequest = builder.rejectLoanApplication().build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, "withdrewbyclient")) {
-            result = this.commandsSourceWritePlatformService.logCommandSource("WITHDRAW", "LOAN", "N/A", "loans", loanId,
-                    apiRequestBodyAsJson);
+            final CommandWrapper commandRequest = builder.withdrawLoanApplication().build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, "approve")) {
-            result = this.commandsSourceWritePlatformService.logCommandSource("APPROVE", "LOAN", "N/A", "loans", loanId,
-                    apiRequestBodyAsJson);
+            final CommandWrapper commandRequest = builder.approveLoanApplication().build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, "disburse")) {
-            result = this.commandsSourceWritePlatformService.logCommandSource("DISBURSE", "LOAN", "N/A", "loans", loanId,
-                    apiRequestBodyAsJson);
+            final CommandWrapper commandRequest = builder.disburseLoanApplication().build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         }
 
         if (is(commandParam, "undoapproval")) {
-            result = this.commandsSourceWritePlatformService.logCommandSource("APPROVALUNDO", "LOAN", "N/A", "loans", loanId,
-                    apiRequestBodyAsJson);
+            final CommandWrapper commandRequest = builder.undoLoanApplicationApproval().build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, "undodisbursal")) {
-            result = this.commandsSourceWritePlatformService.logCommandSource("DISBURSALUNDO", "LOAN", "N/A", "loans", loanId,
-                    apiRequestBodyAsJson);
+            final CommandWrapper commandRequest = builder.undoLoanApplicationDisbursal().build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         }
 
         if (result == null) { throw new UnrecognizedQueryParamException("command", commandParam); }
@@ -429,8 +440,10 @@ public class LoansApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String assignLoanOfficer(@PathParam("loanId") final Long loanId, final String apiRequestBodyAsJson) {
 
-        final EntityIdentifier result = this.commandsSourceWritePlatformService.logCommandSource("UPDATELOANOFFICER", "LOAN", "N/A",
-                "loans", loanId, apiRequestBodyAsJson);
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().assignLoanOfficer().withUrl("/loans").withLoanId(loanId)
+                .withEntityId(loanId).withJson(apiRequestBodyAsJson).build();
+
+        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
         return this.toApiJsonSerializer.serialize(result);
     }

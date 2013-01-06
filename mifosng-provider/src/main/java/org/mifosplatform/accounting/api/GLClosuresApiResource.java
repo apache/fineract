@@ -25,7 +25,7 @@ import org.mifosplatform.accounting.api.infrastructure.AccountingApiJsonSerializ
 import org.mifosplatform.accounting.service.GLClosureReadPlatformService;
 import org.mifosplatform.accounting.service.GLClosureWritePlatformService;
 import org.mifosplatform.infrastructure.core.api.ApiParameterHelper;
-import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
+import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.office.data.OfficeLookup;
 import org.mifosplatform.organisation.office.service.OfficeReadPlatformService;
@@ -105,7 +105,7 @@ public class GLClosuresApiResource {
 
         final Long coaId = glClosureWritePlatformService.createGLClosure(command);
 
-        return this.apiJsonSerializerService.serializeEntityIdentifier(new EntityIdentifier(coaId));
+        return this.apiJsonSerializerService.serializeEntityIdentifier(new CommandProcessingResult(coaId));
     }
 
     @PUT
@@ -118,7 +118,7 @@ public class GLClosuresApiResource {
 
         final Long coaId = glClosureWritePlatformService.updateGLClosure(glClosureId, command);
 
-        return this.apiJsonSerializerService.serializeEntityIdentifier(new EntityIdentifier(coaId));
+        return this.apiJsonSerializerService.serializeEntityIdentifier(new CommandProcessingResult(coaId));
     }
 
     @DELETE
@@ -129,6 +129,6 @@ public class GLClosuresApiResource {
 
         this.glClosureWritePlatformService.deleteGLClosure(glClosureId);
 
-        return Response.ok(new EntityIdentifier(glClosureId)).build();
+        return Response.ok(new CommandProcessingResult(glClosureId)).build();
     }
 }

@@ -23,7 +23,7 @@ import org.apache.commons.lang.StringUtils;
 import org.mifosplatform.infrastructure.core.api.ApiParameterHelper;
 import org.mifosplatform.infrastructure.core.api.PortfolioApiDataConversionService;
 import org.mifosplatform.infrastructure.core.api.PortfolioApiJsonSerializerService;
-import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
+import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
@@ -104,7 +104,7 @@ public class SavingsAccountApiResource {
             return calculateSavingSchedule(uriInfo, calculateSavingScheduleCommand);
         }
 
-        EntityIdentifier entityIdentifier = this.savingAccountWritePlatformService.createSavingAccount(command);
+        CommandProcessingResult entityIdentifier = this.savingAccountWritePlatformService.createSavingAccount(command);
 
         return this.toApiJsonSerializer.serialize(entityIdentifier);
     }
@@ -126,7 +126,7 @@ public class SavingsAccountApiResource {
 
         final SavingAccountCommand command = this.apiDataConversionService.convertJsonToSavingAccountCommand(accountId, jsonRequestBody);
 
-        EntityIdentifier entityIdentifier = this.savingAccountWritePlatformService.updateSavingAccount(command);
+        CommandProcessingResult entityIdentifier = this.savingAccountWritePlatformService.updateSavingAccount(command);
 
         return Response.ok().entity(entityIdentifier).build();
     }

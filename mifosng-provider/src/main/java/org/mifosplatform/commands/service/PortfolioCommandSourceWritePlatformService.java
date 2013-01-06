@@ -1,15 +1,13 @@
 package org.mifosplatform.commands.service;
 
-import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
+import org.mifosplatform.commands.domain.CommandWrapper;
+import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 
 public interface PortfolioCommandSourceWritePlatformService {
 
-    EntityIdentifier logCommandSource(String actionName, String entityName, String apiOperation, String resource, Long resourceId, String subResource,
-            Long subRescourceId, String json);
+    CommandProcessingResult logCommandSource(CommandWrapper commandRequest);
 
-    EntityIdentifier logCommandSource(String actionName, String entityName, String apiOperation, String resource, Long resourceId, String json);
-
-    EntityIdentifier approveEntry(Long id);
+    CommandProcessingResult approveEntry(Long id);
 
     Long deleteEntry(Long makerCheckerId);
 }

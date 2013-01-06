@@ -22,7 +22,7 @@ import org.mifosplatform.commands.data.CommandSourceData;
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.mifosplatform.commands.service.PortfolioCommandsReadPlatformService;
 import org.mifosplatform.infrastructure.core.api.ApiRequestParameterHelper;
-import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
+import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.exception.UnrecognizedQueryParamException;
 import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
@@ -76,7 +76,7 @@ public class CommandsApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String approveMakerCheckerEntry(@PathParam("commandId") final Long commandId, @QueryParam("command") final String commandParam) {
 
-        EntityIdentifier result = null;
+        CommandProcessingResult result = null;
         if (is(commandParam, "approve")) {
             result = this.writePlatformService.approveEntry(commandId);
         } else {
@@ -98,6 +98,6 @@ public class CommandsApiResource {
 
         final Long id = this.writePlatformService.deleteEntry(commandId);
 
-        return this.toApiJsonSerializer.serialize(EntityIdentifier.commandOnlyResult(id));
+        return this.toApiJsonSerializer.serialize(CommandProcessingResult.commandOnlyResult(id));
     }
 }

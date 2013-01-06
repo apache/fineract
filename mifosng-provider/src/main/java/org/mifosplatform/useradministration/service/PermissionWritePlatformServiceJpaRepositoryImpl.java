@@ -5,7 +5,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
-import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
+import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
+import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.useradministration.command.PermissionsCommand;
 import org.mifosplatform.useradministration.domain.Permission;
@@ -34,7 +35,7 @@ public class PermissionWritePlatformServiceJpaRepositoryImpl implements Permissi
 
     @Transactional
     @Override
-    public EntityIdentifier updateMakerCheckerPermissions(final JsonCommand command) {
+    public CommandProcessingResult updateMakerCheckerPermissions(final JsonCommand command) {
         context.authenticatedUser();
 
         final Collection<Permission> allPermissions = this.permissionRepository.findAll();
@@ -63,7 +64,7 @@ public class PermissionWritePlatformServiceJpaRepositoryImpl implements Permissi
             changes.put("permissions", changedPermissions);
         }
 
-        return EntityIdentifier.withChanges(null, changes);
+        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).with(changes).build();
     }
 
     private Permission findPermissionInCollectionByCode(final Collection<Permission> allPermissions, final String permissionCode) {

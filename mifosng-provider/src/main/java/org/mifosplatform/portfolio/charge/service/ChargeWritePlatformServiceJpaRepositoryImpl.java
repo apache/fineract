@@ -3,7 +3,8 @@ package org.mifosplatform.portfolio.charge.service;
 import java.util.Map;
 
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
-import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
+import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
+import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.portfolio.charge.command.ChargeDefinitionCommand;
@@ -28,9 +29,8 @@ public class ChargeWritePlatformServiceJpaRepositoryImpl implements ChargeWriteP
     private final ChargeRepository chargeRepository;
 
     @Autowired
-    public ChargeWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, 
-            final ChargeDefinitionCommandFromApiJsonDeserializer fromApiJsonDeserializer,
-            final ChargeRepository chargeRepository) {
+    public ChargeWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
+            final ChargeDefinitionCommandFromApiJsonDeserializer fromApiJsonDeserializer, final ChargeRepository chargeRepository) {
         this.context = context;
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
         this.chargeRepository = chargeRepository;
@@ -38,63 +38,63 @@ public class ChargeWritePlatformServiceJpaRepositoryImpl implements ChargeWriteP
 
     @Transactional
     @Override
-    public EntityIdentifier createCharge(final JsonCommand command) {
+    public CommandProcessingResult createCharge(final JsonCommand command) {
         try {
             this.context.authenticatedUser();
-            
+
             final ChargeDefinitionCommand chargeDefinitionCommand = this.fromApiJsonDeserializer.commandFromApiJson(command.json());
             chargeDefinitionCommand.validateForCreate();
 
             final Charge charge = Charge.fromJson(command);
             this.chargeRepository.save(charge);
 
-            return EntityIdentifier.resourceResult(charge.getId(), null);
+            return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(charge.getId()).build();
         } catch (DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(command, dve);
-            return EntityIdentifier.empty();
+            return CommandProcessingResult.empty();
         }
     }
 
     @Transactional
     @Override
-    public EntityIdentifier updateCharge(final Long chargeId, final JsonCommand command) {
+    public CommandProcessingResult updateCharge(final Long chargeId, final JsonCommand command) {
 
         try {
             this.context.authenticatedUser();
-            
+
             final ChargeDefinitionCommand chargeDefinitionCommand = this.fromApiJsonDeserializer.commandFromApiJson(command.json());
             chargeDefinitionCommand.validateForUpdate();
 
             final Charge chargeForUpdate = this.chargeRepository.findOne(chargeId);
             if (chargeForUpdate == null) { throw new ChargeNotFoundException(chargeId); }
-            
+
             final Map<String, Object> changes = chargeForUpdate.update(command);
 
             if (!changes.isEmpty()) {
                 this.chargeRepository.save(chargeForUpdate);
             }
 
-            return EntityIdentifier.withChanges(chargeForUpdate.getId(), changes);
+            return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(chargeId).with(changes).build();
         } catch (DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(command, dve);
-            return EntityIdentifier.empty();
+            return CommandProcessingResult.empty();
         }
     }
 
     @Transactional
     @Override
-    public EntityIdentifier deleteCharge(final Long chargeId) {
+    public CommandProcessingResult deleteCharge(final Long chargeId) {
 
         this.context.authenticatedUser();
 
         final Charge chargeForDelete = this.chargeRepository.findOne(chargeId);
         if (chargeForDelete == null || chargeForDelete.isDeleted()) { throw new ChargeNotFoundException(chargeId); }
-        
+
         chargeForDelete.delete();
 
         chargeRepository.save(chargeForDelete);
 
-        return EntityIdentifier.resourceResult(chargeForDelete.getId(), null);
+        return new CommandProcessingResultBuilder().withEntityId(chargeForDelete.getId()).build();
     }
 
     /*
@@ -104,10 +104,11 @@ public class ChargeWritePlatformServiceJpaRepositoryImpl implements ChargeWriteP
     private void handleDataIntegrityIssues(final JsonCommand command, final DataIntegrityViolationException dve) {
 
         Throwable realCause = dve.getMostSpecificCause();
-        if (realCause.getMessage().contains("name")) { 
+        if (realCause.getMessage().contains("name")) {
             final String name = command.stringValueOfParameterNamed("name");
-            throw new PlatformDataIntegrityException("error.msg.charge.duplicate.name",
-                "Charge with name `" + name +"` already exists", "name", name); }
+            throw new PlatformDataIntegrityException("error.msg.charge.duplicate.name", "Charge with name `" + name + "` already exists",
+                    "name", name);
+        }
 
         logger.error(dve.getMessage(), dve);
         throw new PlatformDataIntegrityException("error.msg.charge.unknown.data.integrity.issue",

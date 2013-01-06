@@ -7,12 +7,12 @@ import org.mifosplatform.accounting.api.data.GLAccountData;
 import org.mifosplatform.accounting.api.data.GLClosureData;
 import org.mifosplatform.accounting.api.data.GLJournalEntryData;
 import org.mifosplatform.accounting.api.data.JournalEntryIdentifier;
-import org.mifosplatform.infrastructure.core.data.EntityIdentifier;
+import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 
 
 public interface AccountingApiJsonSerializerService {
 
-    String serializeEntityIdentifier(final EntityIdentifier identifier);
+    String serializeEntityIdentifier(final CommandProcessingResult identifier);
 
     String serializeJournalEntryIdentifier(final JournalEntryIdentifier identifier);
 
