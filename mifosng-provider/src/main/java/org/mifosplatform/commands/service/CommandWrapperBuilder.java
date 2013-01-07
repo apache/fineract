@@ -55,18 +55,23 @@ public class CommandWrapperBuilder {
     public CommandWrapperBuilder createRole() {
         this.actionName = "CREATE";
         this.entityName = "ROLE";
+        this.href = "/roles/template";
         return this;
     }
 
-    public CommandWrapperBuilder updateRole() {
+    public CommandWrapperBuilder updateRole(final Long roleId) {
         this.actionName = "UPDATE";
         this.entityName = "ROLE";
+        this.entityId = roleId;
+        this.href = "/roles/" + roleId;
         return this;
     }
 
-    public CommandWrapperBuilder updateRolePermissions() {
+    public CommandWrapperBuilder updateRolePermissions(final Long roleId) {
         this.actionName = "PERMISSIONS";
         this.entityName = "ROLE";
+        this.entityId = roleId;
+        this.href = "/roles/" + roleId + "/permissions";
         return this;
     }
 

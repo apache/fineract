@@ -5,20 +5,20 @@ package org.mifosplatform.useradministration.data;
  */
 public class AppUserLookup {
 
-	private final Long id;
-	private final String username;
+    private final Long id;
+    private final String username;
 
-	public AppUserLookup(final Long id, final String username) {
-		this.id = id;
-		this.username = username;
-	}
+    public AppUserLookup(final Long id, final String username) {
+        this.id = id;
+        this.username = username;
+    }
 
-	public Long getId() {
-		return this.id;
-	}
+    public Long getId() {
+        return this.id;
+    }
 
-	public String getUsername() {
-		return this.username;
-	}
+    public String getUsername() {
+        return this.username;
+    }
 
 }
