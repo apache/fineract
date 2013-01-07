@@ -23,6 +23,10 @@ CREATE TABLE `m_portfolio_command_source` (
   KEY `made_on_date` (`made_on_date`),
   KEY `checked_on_date` (`checked_on_date`),
   KEY `processing_result_enum` (`processing_result_enum`),
+  KEY `office_id` (`office_id`),
+  KEY `group_id` (`office_id`),
+  KEY `client_id` (`office_id`),
+  KEY `loan_id` (`office_id`),
   CONSTRAINT `FK_m_checker_m_appuser` FOREIGN KEY (`checker_id`) REFERENCES `m_appuser` (`id`),
   CONSTRAINT `FK_m_maker_m_appuser` FOREIGN KEY (`maker_id`) REFERENCES `m_appuser` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
