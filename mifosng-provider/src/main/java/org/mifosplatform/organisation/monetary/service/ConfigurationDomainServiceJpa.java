@@ -15,7 +15,7 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
     /*
      * hard code to false to disable maker checker across the board.
      */
-    private final boolean makerCheckerGloablConfigurationEnabled = false;
+    private final boolean makerCheckerGloablConfigurationEnabled = true;
 
     @Autowired
     public ConfigurationDomainServiceJpa(final PermissionRepository permissionRepository) {
