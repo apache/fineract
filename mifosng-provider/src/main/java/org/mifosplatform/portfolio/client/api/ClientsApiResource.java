@@ -182,8 +182,8 @@ public class ClientsApiResource {
     private Collection<ClientData> retrieveAllUnprocessedDataChanges(final Long clientId) {
         Collection<ClientData> dataChanges = new ArrayList<ClientData>();
 
-        Collection<CommandSourceData> unprocessedChanges = this.commandSourceReadPlatformService.retrieveUnprocessChangesByResourceId(
-                "clients", clientId);
+        Collection<CommandSourceData> unprocessedChanges = this.commandSourceReadPlatformService.retrieveUnprocessChangesByEntityNameAndId(
+                "CLIENT", clientId);
         for (CommandSourceData commandSourceData : unprocessedChanges) {
             ClientData change = this.apiDataConversionService.convertInternalJsonFormatToClientDataChange(clientId,
                     commandSourceData.json());
@@ -220,8 +220,10 @@ public class ClientsApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String createClient(final String apiRequestBodyAsJson) {
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().createClient().withUrl("/clients").withJson(apiRequestBodyAsJson)
-                .build();
+        final CommandWrapper commandRequest = new CommandWrapperBuilder() //
+                .createClient() //
+                .withJson(apiRequestBodyAsJson) //
+                .build(); //
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
@@ -234,8 +236,10 @@ public class ClientsApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String updateClient(@PathParam("clientId") final Long clientId, final String apiRequestBodyAsJson) {
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().updateClient().withUrl("/clients").withEntityId(clientId)
-                .withJson(apiRequestBodyAsJson).build();
+        final CommandWrapper commandRequest = new CommandWrapperBuilder() //
+                .updateClient(clientId) //
+                .withJson(apiRequestBodyAsJson) //
+                .build(); //
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
@@ -248,8 +252,9 @@ public class ClientsApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String deleteClient(@PathParam("clientId") final Long clientId) {
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteClient().withUrl("/clients").withEntityId(clientId)
-                .withJson("{}").build();
+        final CommandWrapper commandRequest = new CommandWrapperBuilder() //
+                .deleteClient(clientId) //
+                .build(); //
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 

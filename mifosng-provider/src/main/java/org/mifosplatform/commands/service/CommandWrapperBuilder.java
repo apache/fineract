@@ -12,7 +12,7 @@ public class CommandWrapperBuilder {
     private String entityName;
     private Long entityId;
     private String href;
-    private String json;
+    private String json = "{}";
     private Long apptableId;
     private Long datatableId;
 
@@ -217,18 +217,24 @@ public class CommandWrapperBuilder {
     public CommandWrapperBuilder createClient() {
         this.actionName = "CREATE";
         this.entityName = "CLIENT";
+        this.href = "/clients/template";
         return this;
     }
 
-    public CommandWrapperBuilder updateClient() {
+    public CommandWrapperBuilder updateClient(final Long clientId) {
         this.actionName = "UPDATE";
         this.entityName = "CLIENT";
+        this.entityId = clientId;
+        this.href = "/clients/" + clientId;
         return this;
     }
 
-    public CommandWrapperBuilder deleteClient() {
+    public CommandWrapperBuilder deleteClient(final Long clientId) {
         this.actionName = "DELETE";
         this.entityName = "CLIENT";
+        this.entityId = clientId;
+        this.href = "/clients/" + clientId;
+        this.json = "{}";
         return this;
     }
 

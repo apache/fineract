@@ -48,8 +48,7 @@ public class CommandsApiResource {
     @Autowired
     public CommandsApiResource(final PlatformSecurityContext context, final PortfolioCommandsReadPlatformService readPlatformService,
             final DefaultToApiJsonSerializer<CommandSourceData> toApiJsonSerializer,
-            final ApiRequestParameterHelper apiRequestParameterHelper, 
-            final PortfolioCommandSourceWritePlatformService writePlatformService) {
+            final ApiRequestParameterHelper apiRequestParameterHelper, final PortfolioCommandSourceWritePlatformService writePlatformService) {
         this.context = context;
         this.readPlatformService = readPlatformService;
         this.toApiJsonSerializer = toApiJsonSerializer;
