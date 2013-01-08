@@ -1,7 +1,9 @@
-package org.mifosplatform.organisation.monetary.api;
+package org.mifosplatform.infrastructure.configuration.api;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import javax.ws.rs.Consumes;
@@ -16,35 +18,37 @@ import javax.ws.rs.core.UriInfo;
 import org.mifosplatform.commands.domain.CommandWrapper;
 import org.mifosplatform.commands.service.CommandWrapperBuilder;
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
+import org.mifosplatform.infrastructure.configuration.data.GlobalConfigurationData;
+import org.mifosplatform.infrastructure.configuration.service.ConfigurationReadPlatformService;
+import org.mifosplatform.infrastructure.core.api.ApiParameterHelper;
 import org.mifosplatform.infrastructure.core.api.ApiRequestParameterHelper;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
-import org.mifosplatform.organisation.monetary.data.ApplicationCurrencyConfigurationData;
-import org.mifosplatform.organisation.monetary.service.OrganisationCurrencyReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-@Path("/currencies")
+@Path("/configurations")
 @Component
 @Scope("singleton")
-public class CurrenciesApiResource {
+public class GlobalConfigurationApiResource {
 
-    private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("selectedCurrencyOptions", "currencyOptions"));
+    private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("globalConfiguration"));
 
     private final String resourceNameForPermissions = "CURRENCY";
 
     private final PlatformSecurityContext context;
-    private final OrganisationCurrencyReadPlatformService readPlatformService;
-    private final DefaultToApiJsonSerializer<ApplicationCurrencyConfigurationData> toApiJsonSerializer;
+    private final ConfigurationReadPlatformService readPlatformService;
+    private final DefaultToApiJsonSerializer<GlobalConfigurationData> toApiJsonSerializer;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 
     @Autowired
-    public CurrenciesApiResource(final PlatformSecurityContext context, final OrganisationCurrencyReadPlatformService readPlatformService,
-            final DefaultToApiJsonSerializer<ApplicationCurrencyConfigurationData> toApiJsonSerializer,
+    public GlobalConfigurationApiResource(final PlatformSecurityContext context,
+            final ConfigurationReadPlatformService readPlatformService,
+            final DefaultToApiJsonSerializer<GlobalConfigurationData> toApiJsonSerializer,
             final ApiRequestParameterHelper apiRequestParameterHelper,
             final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
         this.context = context;
@@ -57,11 +61,11 @@ public class CurrenciesApiResource {
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveCurrencies(@Context final UriInfo uriInfo) {
+    public String retrieveConfiguration(@Context final UriInfo uriInfo) {
 
         context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
 
-        final ApplicationCurrencyConfigurationData configurationData = this.readPlatformService.retrieveCurrencyConfiguration();
+        final GlobalConfigurationData configurationData = this.readPlatformService.retrieveGlobalConfiguration();
 
         final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serialize(settings, configurationData, RESPONSE_DATA_PARAMETERS);
@@ -70,13 +74,22 @@ public class CurrenciesApiResource {
     @PUT
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String updateCurrencies(final String apiRequestBodyAsJson) {
+    public String updateConfiguration(@Context final UriInfo uriInfo) {
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().updateCurrencies().withUrl("/currencies").withJson(apiRequestBodyAsJson)
+        Map<String, String> configurationParameters = ApiParameterHelper.asMap(uriInfo.getQueryParameters());
+
+        Map<String, Object> globalConfiguration = new HashMap<String, Object>();
+        globalConfiguration.put("globalConfiguration", configurationParameters);
+
+        final String apiRequestJson = this.toApiJsonSerializer.serialize(globalConfiguration);
+
+        final CommandWrapper commandRequest = new CommandWrapperBuilder() //
+                .updateGlobalConfiguration() //
+                .withJson(apiRequestJson) //
                 .build();
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        
+
         return this.toApiJsonSerializer.serialize(result);
     }
 }

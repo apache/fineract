@@ -393,4 +393,12 @@ public class CommandWrapperBuilder {
         this.entityName = "LOAN";
         return this;
     }
+
+    public CommandWrapperBuilder updateGlobalConfiguration() {
+        this.actionName = "UPDATE";
+        this.entityName = "CONFIGURATION";
+        this.entityId = null;
+        this.href = "/configurations";
+        return this;
+    }
 }

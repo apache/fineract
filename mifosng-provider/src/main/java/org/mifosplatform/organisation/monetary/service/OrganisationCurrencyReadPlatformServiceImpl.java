@@ -2,7 +2,7 @@ package org.mifosplatform.organisation.monetary.service;
 
 import java.util.List;
 
-import org.mifosplatform.organisation.monetary.data.ConfigurationData;
+import org.mifosplatform.organisation.monetary.data.ApplicationCurrencyConfigurationData;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,7 +18,7 @@ public class OrganisationCurrencyReadPlatformServiceImpl implements Organisation
     }
 
     @Override
-    public ConfigurationData retrieveCurrencyConfiguration() {
+    public ApplicationCurrencyConfigurationData retrieveCurrencyConfiguration() {
 
         final List<CurrencyData> selectedCurrencyOptions = this.currencyReadPlatformService.retrieveAllowedCurrencies();
         final List<CurrencyData> currencyOptions = this.currencyReadPlatformService.retrieveAllPlatformCurrencies();
@@ -26,6 +26,6 @@ public class OrganisationCurrencyReadPlatformServiceImpl implements Organisation
         // remove selected currency options
         currencyOptions.removeAll(selectedCurrencyOptions);
 
-        return new ConfigurationData(currencyOptions, selectedCurrencyOptions);
+        return new ApplicationCurrencyConfigurationData(currencyOptions, selectedCurrencyOptions);
     }
 }

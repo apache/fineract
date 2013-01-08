@@ -1,9 +1,9 @@
 package org.mifosplatform.organisation.monetary.service;
 
-import org.mifosplatform.organisation.monetary.data.ConfigurationData;
+import org.mifosplatform.organisation.monetary.data.ApplicationCurrencyConfigurationData;
 
 public interface OrganisationCurrencyReadPlatformService {
 
-    ConfigurationData retrieveCurrencyConfiguration();
+    ApplicationCurrencyConfigurationData retrieveCurrencyConfiguration();
 
 }

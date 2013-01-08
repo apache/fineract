@@ -1,6 +1,7 @@
-package org.mifosplatform.organisation.monetary.service;
+package org.mifosplatform.infrastructure.configuration.domain;
 
 import org.apache.commons.lang.StringUtils;
+import org.mifosplatform.infrastructure.configuration.exception.GlobalConfigurationPropertyNotFoundException;
 import org.mifosplatform.useradministration.domain.Permission;
 import org.mifosplatform.useradministration.domain.PermissionRepository;
 import org.mifosplatform.useradministration.exception.PermissionNotFoundException;
@@ -11,15 +12,13 @@ import org.springframework.stereotype.Service;
 public class ConfigurationDomainServiceJpa implements ConfigurationDomainService {
 
     private final PermissionRepository permissionRepository;
-
-    /*
-     * hard code to false to disable maker checker across the board.
-     */
-    private final boolean makerCheckerGloablConfigurationEnabled = false;
+    private final GlobalConfigurationRepository globalConfigurationRepository;
 
     @Autowired
-    public ConfigurationDomainServiceJpa(final PermissionRepository permissionRepository) {
+    public ConfigurationDomainServiceJpa(final PermissionRepository permissionRepository,
+            final GlobalConfigurationRepository globalConfigurationRepository) {
         this.permissionRepository = permissionRepository;
+        this.globalConfigurationRepository = globalConfigurationRepository;
     }
 
     @Override
@@ -29,6 +28,10 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
         final Permission thisTask = this.permissionRepository.findOneByCode(taskPermissionCode);
         if (thisTask == null) { throw new PermissionNotFoundException(taskPermissionCode); }
 
-        return thisTask.hasMakerCheckerEnabled() && this.makerCheckerGloablConfigurationEnabled;
+        final String makerCheckerConfigurationProperty = "maker-checker";
+        final GlobalConfigurationProperty property = this.globalConfigurationRepository.findOneByName(makerCheckerConfigurationProperty);
+        if (property == null) { throw new GlobalConfigurationPropertyNotFoundException(makerCheckerConfigurationProperty); }
+
+        return thisTask.hasMakerCheckerEnabled() && property.isEnabled();
     }
 }

@@ -1,4 +1,4 @@
-package org.mifosplatform.organisation.monetary.service;
+package org.mifosplatform.infrastructure.configuration.domain;
 
 public interface ConfigurationDomainService {
 

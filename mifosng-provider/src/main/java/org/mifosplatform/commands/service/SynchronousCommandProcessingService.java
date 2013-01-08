@@ -8,12 +8,12 @@ import org.mifosplatform.commands.domain.CommandSourceRepository;
 import org.mifosplatform.commands.domain.CommandWrapper;
 import org.mifosplatform.commands.exception.UnsupportedCommandException;
 import org.mifosplatform.commands.handler.NewCommandSourceHandler;
+import org.mifosplatform.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.mifosplatform.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
-import org.mifosplatform.organisation.monetary.service.ConfigurationDomainService;
 import org.mifosplatform.portfolio.client.service.RollbackTransactionAsCommandIsNotApprovedByCheckerException;
 import org.mifosplatform.useradministration.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,6 +47,8 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
     @Override
     public CommandProcessingResult processAndLogCommand(final CommandWrapper wrapper, final JsonCommand command, final boolean isApprovedByChecker) {
 
+        final boolean rollbackTransaction = this.configurationDomainService.isMakerCheckerEnabledForTask(wrapper.taskPermissionName()) && !isApprovedByChecker;
+        
         final NewCommandSourceHandler handler = findCommandHandler(wrapper);
         final CommandProcessingResult result = handler.processCommand(command);
 
@@ -76,8 +78,7 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
             commandSourceRepository.save(commandSourceResult);
         }
 
-        if (this.configurationDomainService.isMakerCheckerEnabledForTask(wrapper.taskPermissionName()) && !isApprovedByChecker) { throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(
-                changesOnlyJson); }
+        if (rollbackTransaction) { throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(changesOnlyJson); }
 
         return result;
     }
@@ -100,7 +101,10 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
     private NewCommandSourceHandler findCommandHandler(final CommandWrapper wrapper) {
         NewCommandSourceHandler handler = null;
 
-        if (wrapper.isDatatableResource()) {
+        if (wrapper.isConfigurationResource()) {
+            handler = applicationContext.getBean("updateGlobalConfigurationCommandHandler", NewCommandSourceHandler.class);
+        }
+        else if (wrapper.isDatatableResource()) {
             if (wrapper.isCreate()) {
                 handler = applicationContext.getBean("createDatatableEntryCommandHandler", NewCommandSourceHandler.class);
             } else if (wrapper.isUpdateMultiple()) {

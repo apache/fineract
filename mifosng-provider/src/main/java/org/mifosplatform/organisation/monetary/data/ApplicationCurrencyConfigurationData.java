@@ -3,16 +3,16 @@ package org.mifosplatform.organisation.monetary.data;
 import java.util.Collection;
 
 /**
- * Immutable data object for configuration.
+ * Immutable data object for application currency.
  */
-public class ConfigurationData {
+public class ApplicationCurrencyConfigurationData {
 
     @SuppressWarnings("unused")
     private final Collection<CurrencyData> selectedCurrencyOptions;
     @SuppressWarnings("unused")
     private final Collection<CurrencyData> currencyOptions;
 
-    public ConfigurationData(final Collection<CurrencyData> currencyOptions, final Collection<CurrencyData> selectedCurrencyOptions) {
+    public ApplicationCurrencyConfigurationData(final Collection<CurrencyData> currencyOptions, final Collection<CurrencyData> selectedCurrencyOptions) {
         this.currencyOptions = currencyOptions;
         this.selectedCurrencyOptions = selectedCurrencyOptions;
     }
