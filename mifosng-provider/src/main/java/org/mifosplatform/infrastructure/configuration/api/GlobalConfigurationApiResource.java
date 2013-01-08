@@ -37,7 +37,7 @@ public class GlobalConfigurationApiResource {
 
     private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("globalConfiguration"));
 
-    private final String resourceNameForPermissions = "CURRENCY";
+    private final String resourceNameForPermissions = "CONFIGURATION";
 
     private final PlatformSecurityContext context;
     private final ConfigurationReadPlatformService readPlatformService;
