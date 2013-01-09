@@ -12,14 +12,14 @@ VALUES
 ('maker-checker', 0);
 
 INSERT INTO `m_permission`
-(`id`,
+(
 `grouping`,
 `code`,
 `entity_name`,
 `action_name`,
 `can_maker_checker`)
 VALUES
-(419,'configuration','UPDATE_CONFIGURATION',
+('configuration','UPDATE_CONFIGURATION',
 'CONFIGURATION','UPDATE',1),
-(420,'configuration','READ_CONFIGURATION',
+('configuration','READ_CONFIGURATION',
 'CONFIGURATION','READ',1);
