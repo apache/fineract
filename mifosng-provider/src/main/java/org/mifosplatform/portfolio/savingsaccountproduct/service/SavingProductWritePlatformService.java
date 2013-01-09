@@ -6,12 +6,12 @@ import org.springframework.security.access.prepost.PreAuthorize;
 
 public interface SavingProductWritePlatformService {
 
-    @PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'ORGANISATION_ADMINISTRATION_SUPER_USER', 'CREATE_SAVINGSPRODUCT')")
+    @PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'CREATE_SAVINGSPRODUCT')")
     CommandProcessingResult createSavingProduct(SavingProductCommand command);
 
-    @PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'ORGANISATION_ADMINISTRATION_SUPER_USER', 'UPDATE_SAVINGSPRODUCT')")
+    @PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'UPDATE_SAVINGSPRODUCT')")
     CommandProcessingResult updateSavingProduct(SavingProductCommand command);
 
-    @PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'ORGANISATION_ADMINISTRATION_SUPER_USER', 'DELETE_SAVINGSPRODUCT')")
+    @PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'DELETE_SAVINGSPRODUCT')")
     CommandProcessingResult deleteSavingProduct(Long productId);
 }

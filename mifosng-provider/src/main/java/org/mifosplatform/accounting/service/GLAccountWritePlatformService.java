@@ -5,13 +5,13 @@ import org.springframework.security.access.prepost.PreAuthorize;
 
 public interface GLAccountWritePlatformService {
 
-    @PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'ORGANISATION_ADMINISTRATION_SUPER_USER', 'CREATE_GL_ACCOUNT')")
+    @PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'CREATE_GL_ACCOUNT')")
     Long createGLAccount(GLAccountCommand command);
 
-    @PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'ORGANISATION_ADMINISTRATION_SUPER_USER', 'UPDATE_GL_ACCOUNT')")
+    @PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'UPDATE_GL_ACCOUNT')")
     Long updateGLAccount(Long glAccountId, GLAccountCommand command);
 
-    @PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'ORGANISATION_ADMINISTRATION_SUPER_USER', 'DELETE_GL_ACCOUNT')")
+    @PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'DELETE_GL_ACCOUNT')")
     Long deleteGLAccount(Long glAccountId);
 
 }

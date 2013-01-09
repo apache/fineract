@@ -6,12 +6,12 @@ import org.springframework.security.access.prepost.PreAuthorize;
 
 public interface DepositProductWritePlatformService {
 
-    @PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'ORGANISATION_ADMINISTRATION_SUPER_USER', 'CREATE_DEPOSITPRODUCT')")
+    @PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'CREATE_DEPOSITPRODUCT')")
     CommandProcessingResult createDepositProduct(DepositProductCommand command);
 
-    @PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'ORGANISATION_ADMINISTRATION_SUPER_USER', 'UPDATE_DEPOSITPRODUCT')")
+    @PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'UPDATE_DEPOSITPRODUCT')")
     CommandProcessingResult updateDepositProduct(DepositProductCommand command);
 
-    @PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'ORGANISATION_ADMINISTRATION_SUPER_USER', 'DELETE_DEPOSITPRODUCT')")
+    @PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'DELETE_DEPOSITPRODUCT')")
     CommandProcessingResult deleteDepositProduct(Long productId);
 }

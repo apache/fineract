@@ -15,13 +15,13 @@ public interface ClientWritePlatformService {
 
     CommandProcessingResult deleteClient(Long clientId);
 
-    @PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'PORTFOLIO_MANAGEMENT_SUPER_USER', 'CREATE_CLIENTIMAGE')")
+    @PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'CREATE_CLIENTIMAGE')")
     CommandProcessingResult saveOrUpdateClientImage(Long clientId, String imageName, InputStream inputStream);
 
-    @PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'PORTFOLIO_MANAGEMENT_SUPER_USER', 'CREATE_CLIENTIMAGE')")
+    @PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'CREATE_CLIENTIMAGE')")
     CommandProcessingResult saveOrUpdateClientImage(Long clientId, Base64EncodedImage encodedImage);
 
-    @PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'PORTFOLIO_MANAGEMENT_SUPER_USER', 'DELETE_CLIENTIMAGE')")
+    @PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'DELETE_CLIENTIMAGE')")
     CommandProcessingResult deleteClientImage(Long clientId);
 
     CommandProcessingResult addClientNote(Long clientId, JsonCommand command);

@@ -305,23 +305,23 @@ public class AppUser extends AbstractAuditableCustom<AppUser, Long> implements P
     }
 
     public boolean canNotApproveLoanInPast() {
-        return hasNotPermissionForAnyOf("ALL_FUNCTIONS", "APPROVEINPAST_LOAN", "PORTFOLIO_MANAGEMENT_SUPER_USER");
+        return hasNotPermissionForAnyOf("ALL_FUNCTIONS", "APPROVEINPAST_LOAN");
     }
 
     public boolean canNotRejectLoanInPast() {
-        return hasNotPermissionForAnyOf("ALL_FUNCTIONS", "REJECTINPAST_LOAN", "PORTFOLIO_MANAGEMENT_SUPER_USER");
+        return hasNotPermissionForAnyOf("ALL_FUNCTIONS", "REJECTINPAST_LOAN");
     }
 
     public boolean canNotWithdrawByClientLoanInPast() {
-        return hasNotPermissionForAnyOf("ALL_FUNCTIONS", "WITHDRAWINPAST_LOAN", "PORTFOLIO_MANAGEMENT_SUPER_USER");
+        return hasNotPermissionForAnyOf("ALL_FUNCTIONS", "WITHDRAWINPAST_LOAN");
     }
 
     public boolean canNotDisburseLoanInPast() {
-        return hasNotPermissionForAnyOf("ALL_FUNCTIONS", "DISBURSEINPAST_LOAN", "PORTFOLIO_MANAGEMENT_SUPER_USER");
+        return hasNotPermissionForAnyOf("ALL_FUNCTIONS", "DISBURSEINPAST_LOAN");
     }
 
     public boolean canNotMakeRepaymentOnLoanInPast() {
-        return hasNotPermissionForAnyOf("ALL_FUNCTIONS", "REPAYMENTINPAST_LOAN", "PORTFOLIO_MANAGEMENT_SUPER_USER");
+        return hasNotPermissionForAnyOf("ALL_FUNCTIONS", "REPAYMENTINPAST_LOAN");
     }
 
     public boolean hasNotPermissionForReport(final String reportName) {
@@ -365,57 +365,8 @@ public class AppUser extends AbstractAuditableCustom<AppUser, Long> implements P
         String matchPermission = "READ_" + entityType.toUpperCase();
 
         if (!(hasNotPermissionForAnyOf("ALL_FUNCTIONS", "ALL_FUNCTIONS_READ", matchPermission))) return;
-
-        String higherPermission = "";
-        if (entityType.equalsIgnoreCase("CHARGE")) {
-            higherPermission = "ORGANISATION_ADMINISTRATION_SUPER_USER";
-        } else if (entityType.equalsIgnoreCase("CLIENT")) {
-            higherPermission = "PORTFOLIO_MANAGEMENT_SUPER_USER";
-        } else if (entityType.equalsIgnoreCase("CLIENTNOTE")) {
-            higherPermission = "PORTFOLIO_MANAGEMENT_SUPER_USER";
-        } else if (entityType.equalsIgnoreCase("CLIENTIDENTIFIER")) {
-            higherPermission = "PORTFOLIO_MANAGEMENT_SUPER_USER";
-        } else if (entityType.equalsIgnoreCase("CLIENTIMAGE")) {
-            higherPermission = "PORTFOLIO_MANAGEMENT_SUPER_USER";
-        } else if (entityType.equalsIgnoreCase("CODE")) {
-            higherPermission = "ORGANISATION_ADMINISTRATION_SUPER_USER";
-        } else if (entityType.equalsIgnoreCase("CURRENCY")) {
-            higherPermission = "ORGANISATION_ADMINISTRATION_SUPER_USER";
-        } else if (entityType.equalsIgnoreCase("DOCUMENTMAN")) {
-            higherPermission = "PORTFOLIO_MANAGEMENT_SUPER_USER";
-        } else if (entityType.equalsIgnoreCase("FUND")) {
-            higherPermission = "ORGANISATION_ADMINISTRATION_SUPER_USER";
-        } else if (entityType.equalsIgnoreCase("GROUP")) {
-            higherPermission = "PORTFOLIO_MANAGEMENT_SUPER_USER";
-        } else if (entityType.equalsIgnoreCase("LOANPRODUCT")) {
-            higherPermission = "ORGANISATION_ADMINISTRATION_SUPER_USER";
-        } else if (entityType.equalsIgnoreCase("LOAN")) {
-            higherPermission = "PORTFOLIO_MANAGEMENT_SUPER_USER";
-        } else if (entityType.equalsIgnoreCase("OFFICE")) {
-            higherPermission = "ORGANISATION_ADMINISTRATION_SUPER_USER";
-        } else if (entityType.equalsIgnoreCase("OFFICETRANSACTION")) {
-            higherPermission = "ORGANISATION_ADMINISTRATION_SUPER_USER";
-        } else if (entityType.equalsIgnoreCase("PERMISSION")) {
-            higherPermission = "USER_ADMINISTRATION_SUPER_USER";
-        } else if (entityType.equalsIgnoreCase("ROLE")) {
-            higherPermission = "USER_ADMINISTRATION_SUPER_USER";
-        } else if (entityType.equalsIgnoreCase("USER")) {
-            higherPermission = "USER_ADMINISTRATION_SUPER_USER";
-        } else if (entityType.equalsIgnoreCase("STAFF")) {
-            higherPermission = "ORGANISATION_ADMINISTRATION_SUPER_USER";
-        } else if (entityType.equalsIgnoreCase("SAVINGSPRODUCT")) {
-            higherPermission = "ORGANISATION_ADMINISTRATION_SUPER_USER";
-        } else if (entityType.equalsIgnoreCase("DEPOSITPRODUCT")) {
-            higherPermission = "ORGANISATION_ADMINISTRATION_SUPER_USER";
-        } else if (entityType.equalsIgnoreCase("DEPOSITACCOUNT")) {
-            higherPermission = "PORTFOLIO_MANAGEMENT_SUPER_USER";
-        } else if (entityType.equalsIgnoreCase("SAVINGSACCOUNT")) {
-            higherPermission = "PORTFOLIO_MANAGEMENT_SUPER_USER";
-        }
-
-        if (!(higherPermission.equals(""))) {
-            if (hasNotPermissionForAnyOf(higherPermission)) throw new NoAuthorizationException(authorizationMessage);
-        }
+        
+        throw new NoAuthorizationException(authorizationMessage);
     }
 
     private boolean hasNotPermissionTo(final String permissionCode) {
