@@ -316,6 +316,11 @@ public class CommandWrapperBuilder {
         this.datatableId = datatableId;
         this.actionName = "UPDATE";
         this.entityName = datatable;
+        if (datatableId == null) {
+            this.href = "/datatables/" + datatable + "/" + apptableId;
+        } else {
+            this.href = "/datatables/" + datatable + "/" + apptableId + "/" + datatableId;
+        }
         return this;
     }
 
@@ -324,6 +329,11 @@ public class CommandWrapperBuilder {
         this.datatableId = datatableId;
         this.actionName = "DELETE";
         this.entityName = datatable;
+        if (datatableId == null) {
+            this.href = "/datatables/" + datatable + "/" + apptableId;
+        } else {
+            this.href = "/datatables/" + datatable + "/" + apptableId + "/" + datatableId;
+        }
         return this;
     }
 
