@@ -101,7 +101,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
 					+ "lp.annual_nominal_interest_rate as annualInterestRate, lp.interest_method_enum as interestMethod, lp.interest_calculated_in_period_enum as interestCalculationInPeriodMethod,"
 					+ "lp.repay_every as repaidEvery, lp.repayment_period_frequency_enum as repaymentPeriodFrequency, lp.number_of_repayments as numberOfRepayments, "
 					+ "lp.amortization_method_enum as amortizationMethod, lp.arrearstolerance_amount as tolerance, "
-					+ "lp.created_date as createdon, lp.lastmodified_date as modifiedon, "
+					+ "lp.created_date as createdon, lp.lastmodified_date as modifiedon, lp.accounting_type as accountingType, "
 					+ "curr.name as currencyName, curr.internationalized_name_code as currencyNameCode, curr.display_symbol as currencyDisplaySymbol "
 					+ " from m_product_loan lp "
 					+ " left join m_fund f on f.id = lp.fund_id"
@@ -136,6 +136,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
 
 			final Integer numberOfRepayments = JdbcSupport.getInteger(rs,"numberOfRepayments");
 			final Integer repaymentEvery = JdbcSupport.getInteger(rs, "repaidEvery");
+			final Integer accountingType = JdbcSupport.getInteger(rs, "accountingType");
 			final Integer loanTermFrequency = repaymentEvery * numberOfRepayments;
 			final BigDecimal interestRatePerPeriod = rs.getBigDecimal("interestRatePerPeriod");
 			final BigDecimal annualInterestRate = rs.getBigDecimal("annualInterestRate");
@@ -165,7 +166,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
 					numberOfRepayments, loanTermFrequency, repaymentEvery, interestRatePerPeriod,
 					annualInterestRate, loanTermFrequencyType, repaymentFrequencyType,
 					interestRateFrequencyType, amortizationType, interestType,
-					interestCalculationPeriodType, fundId, fundName, transactionStrategyId, transactionStrategyName, this.charges);
+					interestCalculationPeriodType, fundId, fundName, transactionStrategyId, transactionStrategyName, this.charges, accountingType);
 		}
 
 	}

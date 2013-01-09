@@ -17,8 +17,16 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
+
 import org.mifosplatform.commands.domain.CommandWrapper;
 import org.mifosplatform.commands.service.CommandWrapperBuilder;
+
+import org.mifosplatform.accounting.AccountingConstants.GL_ACCOUNT_CLASSIFICATION;
+import org.mifosplatform.accounting.AccountingConstants.LOAN_PRODUCT_ACCOUNTING_PARAMS;
+import org.mifosplatform.accounting.api.data.GLAccountData;
+import org.mifosplatform.accounting.service.GLAccountReadPlatformService;
+import org.mifosplatform.accounting.service.ProductToGLAccountMappingReadPlatformService;
+
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.mifosplatform.infrastructure.core.api.ApiRequestParameterHelper;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
@@ -51,7 +59,10 @@ public class LoanProductsApiResource {
             "interestRateFrequencyType", "amortizationType", "interestType", "interestCalculationPeriodType", "charges", "createdOn",
             "lastModifedOn", "currencyOptions", "amortizationTypeOptions", "interestTypeOptions", "interestCalculationPeriodTypeOptions",
             "repaymentFrequencyTypeOptions", "interestRateFrequencyTypeOptions", "fundOptions", "transactionProcessingStrategyOptions",
-            "chargeOptions"));
+            "chargeOptions", "assetAccountOptions", "incomeAccountOptions", "expenseAccountOptions", "accountingType" , LOAN_PRODUCT_ACCOUNTING_PARAMS.FEES_RECEIVABLE.getValue(),
+            LOAN_PRODUCT_ACCOUNTING_PARAMS.FUND_SOURCE.getValue(),LOAN_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_FEES.getValue(),LOAN_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_PENALTIES.getValue(),
+            LOAN_PRODUCT_ACCOUNTING_PARAMS.INTEREST_ON_LOANS.getValue(),LOAN_PRODUCT_ACCOUNTING_PARAMS.INTEREST_RECEIVABLE.getValue(),LOAN_PRODUCT_ACCOUNTING_PARAMS.LOAN_PORTFOLIO.getValue(),
+            LOAN_PRODUCT_ACCOUNTING_PARAMS.LOSSES_WRITTEN_OFF.getValue(),LOAN_PRODUCT_ACCOUNTING_PARAMS.PENALTIES_RECEIVABLE.getValue()));
 
     private final String resourceNameForPermissions = "LOANPRODUCT";
 
@@ -64,6 +75,8 @@ public class LoanProductsApiResource {
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final LoanDropdownReadPlatformService dropdownReadPlatformService;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
+    private final GLAccountReadPlatformService accountReadPlatformService;
+    private final ProductToGLAccountMappingReadPlatformService accountMappingReadPlatformService;
 
     @Autowired
     public LoanProductsApiResource(final PlatformSecurityContext context, final LoanProductReadPlatformService readPlatformService,
@@ -71,7 +84,9 @@ public class LoanProductsApiResource {
             final FundReadPlatformService fundReadPlatformService, final LoanDropdownReadPlatformService dropdownReadPlatformService,
             final DefaultToApiJsonSerializer<LoanProductData> toApiJsonSerializer,
             final ApiRequestParameterHelper apiRequestParameterHelper,
-            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
+            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
+            final GLAccountReadPlatformService accountReadPlatformService,
+            final ProductToGLAccountMappingReadPlatformService accountMappingReadPlatformService) {
         this.context = context;
         this.loanProductReadPlatformService = readPlatformService;
         this.chargeReadPlatformService = chargeReadPlatformService;
@@ -81,6 +96,8 @@ public class LoanProductsApiResource {
         this.toApiJsonSerializer = toApiJsonSerializer;
         this.apiRequestParameterHelper = apiRequestParameterHelper;
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
+        this.accountReadPlatformService = accountReadPlatformService;
+        this.accountMappingReadPlatformService = accountMappingReadPlatformService;
     }
 
     @POST
@@ -137,8 +154,10 @@ public class LoanProductsApiResource {
         if (settings.isTemplate()) {
             loanProduct = handleTemplate(loanProduct);
         }
+        
+        LoanProductData loanProductDataUpdatedWithAccountingMapping=accountMappingReadPlatformService.fetchAccountMappingDetailsForLoanProduct(loanProduct);
 
-        return this.toApiJsonSerializer.serialize(settings, loanProduct, LOAN_PRODUCT_DATA_PARAMETERS);
+        return this.toApiJsonSerializer.serialize(settings, loanProductDataUpdatedWithAccountingMapping, LOAN_PRODUCT_DATA_PARAMETERS);
     }
 
     @PUT
@@ -174,9 +193,14 @@ public class LoanProductsApiResource {
         final Collection<FundData> fundOptions = this.fundReadPlatformService.retrieveAllFunds();
         final Collection<TransactionProcessingStrategyData> transactionProcessingStrategyOptions = this.dropdownReadPlatformService
                 .retreiveTransactionProcessingStrategies();
+        
+        final List<GLAccountData> assetAccountOptions = accountReadPlatformService.retrieveAllEnabledDetailGLAccounts(GL_ACCOUNT_CLASSIFICATION.ASSET);
+        final List<GLAccountData> incomeAccountOptions = accountReadPlatformService.retrieveAllEnabledDetailGLAccounts(GL_ACCOUNT_CLASSIFICATION.INCOME);;
+        final List<GLAccountData> expenseAccountOptions = accountReadPlatformService.retrieveAllEnabledDetailGLAccounts(GL_ACCOUNT_CLASSIFICATION.EXPENSE);;
 
         return new LoanProductData(productData, chargeOptions, currencyOptions, amortizationTypeOptions, interestTypeOptions,
                 interestCalculationPeriodTypeOptions, loanTermFrequencyTypeOptions, repaymentFrequencyTypeOptions,
-                interestRateFrequencyTypeOptions, fundOptions, transactionProcessingStrategyOptions);
+                interestRateFrequencyTypeOptions, fundOptions, transactionProcessingStrategyOptions,
+                assetAccountOptions, incomeAccountOptions, expenseAccountOptions);
     }
 }

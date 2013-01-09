@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.joda.time.DateTime;
+import org.mifosplatform.accounting.api.data.GLAccountData;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.mifosplatform.portfolio.charge.data.ChargeData;
@@ -40,6 +41,7 @@ public class LoanProductData {
     private final Integer repaymentEvery;
     private final BigDecimal interestRatePerPeriod;
     private final BigDecimal annualInterestRate;
+    private final Integer accountingType;
 
     private final EnumOptionData loanTermFrequencyType;
     private final EnumOptionData repaymentFrequencyType;
@@ -63,6 +65,23 @@ public class LoanProductData {
     private final List<EnumOptionData> interestRateFrequencyTypeOptions;
     private final List<EnumOptionData> loanTermFrequencyTypeOptions;
     private final Collection<ChargeData> chargeOptions;
+
+    // accounting related template fields
+    private final List<GLAccountData> assetAccountOptions;
+    private final List<GLAccountData> incomeAccountOptions;
+    private final List<GLAccountData> expenseAccountOptions;
+    
+    //accounting related mapping feilds
+    private Long loanPortfolioAccountId;
+    private Long fundSourceAccountId;
+    private Long interestOnLoanAccountId;
+    private Long incomeFromFeeAccountId;
+    private Long incomeFromPenaltyAccountId;
+    private Long writeOffAccountId;
+    // accounting heads used only for accrual based accounting
+    private Long receivableInterestAccountId;
+    private Long receivableFeeAccountId;
+    private Long receivablePenaltyAccountId;
 
     /**
      * Used when returning lookup information about loan product for dropdowns.
@@ -90,11 +109,12 @@ public class LoanProductData {
         final Long transactionProcessingStrategyId = null;
         final String transactionProcessingStrategyName = null;
         final Collection<ChargeData> charges = null;
+        final Integer accountingType = null;
 
         return new LoanProductData(createdOn, lastModifedOn, id, name, description, currency, principal, tolerance, numberOfRepayments,
                 loanTermFrequency, repaymentEvery, interestRatePerPeriod, annualInterestRate, loanTermFrequencyType,
                 repaymentFrequencyType, interestRateFrequencyType, amortizationType, interestType, interestCalculationPeriodType, fundId,
-                fundName, transactionProcessingStrategyId, transactionProcessingStrategyName, charges);
+                fundName, transactionProcessingStrategyId, transactionProcessingStrategyName, charges, accountingType);
     }
 
     public static LoanProductData sensibleDefaultsForNewLoanProductCreation() {
@@ -124,11 +144,12 @@ public class LoanProductData {
         final Long transactionProcessingStrategyId = null;
         final String transactionProcessingStrategyName = null;
         final Collection<ChargeData> charges = null;
+        final Integer accountingType = 1;
 
         return new LoanProductData(createdOn, lastModifedOn, id, name, description, currency, principal, tolerance, numberOfRepayments,
                 loanTermFrequency, repaymentEvery, interestRatePerPeriod, annualInterestRate, loanTermFrequencyType,
                 repaymentFrequencyType, interestRateFrequencyType, amortizationType, interestType, interestCalculationPeriodType, fundId,
-                fundName, transactionProcessingStrategyId, transactionProcessingStrategyName, charges);
+                fundName, transactionProcessingStrategyId, transactionProcessingStrategyName, charges, accountingType);
     }
 
     public LoanProductData(final DateTime createdOn, final DateTime lastModifedOn, final Long id, final String name,
@@ -138,7 +159,7 @@ public class LoanProductData {
             final EnumOptionData repaymentFrequencyType, final EnumOptionData interestRateFrequencyType,
             final EnumOptionData amortizationType, final EnumOptionData interestType, final EnumOptionData interestCalculationPeriodType,
             final Long fundId, final String fundName, final Long transactionProcessingStrategyId,
-            final String transactionProcessingStrategyName, final Collection<ChargeData> charges) {
+            final String transactionProcessingStrategyName, final Collection<ChargeData> charges, final Integer accountingType) {
         this.createdOn = createdOn;
         this.lastModifedOn = lastModifedOn;
         this.id = id;
@@ -163,6 +184,7 @@ public class LoanProductData {
         this.transactionProcessingStrategyId = transactionProcessingStrategyId;
         this.transactionProcessingStrategyName = transactionProcessingStrategyName;
         this.charges = charges;
+        this.accountingType = accountingType;
 
         this.chargeOptions = null;
         this.currencyOptions = null;
@@ -174,6 +196,10 @@ public class LoanProductData {
         this.loanTermFrequencyTypeOptions = null;
         this.repaymentFrequencyTypeOptions = null;
         this.interestRateFrequencyTypeOptions = null;
+        
+        this.assetAccountOptions = null;
+        this.incomeAccountOptions = null;
+        this.expenseAccountOptions = null;
     }
 
     public LoanProductData(final LoanProductData productData, final Collection<ChargeData> chargeOptions,
@@ -181,7 +207,9 @@ public class LoanProductData {
             final List<EnumOptionData> interestTypeOptions, final List<EnumOptionData> interestCalculationPeriodTypeOptions,
             final List<EnumOptionData> loanTermFrequencyTypeOptions, final List<EnumOptionData> repaymentFrequencyTypeOptions,
             final List<EnumOptionData> interestRateFrequencyTypeOptions, final Collection<FundData> fundOptions,
-            final Collection<TransactionProcessingStrategyData> transactionProcessingStrategyOptions) {
+            final Collection<TransactionProcessingStrategyData> transactionProcessingStrategyOptions,
+            final List<GLAccountData> assetAccountOptions, final List<GLAccountData> incomeAccountOptions,
+            final List<GLAccountData> expenseAccountOptions) {
         this.createdOn = productData.createdOn;
         this.lastModifedOn = productData.lastModifedOn;
         this.id = productData.id;
@@ -205,6 +233,7 @@ public class LoanProductData {
         this.transactionProcessingStrategyId = productData.transactionProcessingStrategyId;
         this.transactionProcessingStrategyName = productData.transactionProcessingStrategyName;
         this.charges = productData.charges();
+        this.accountingType = productData.accountingType;
 
         this.chargeOptions = chargeOptions;
         this.currencyOptions = currencyOptions;
@@ -221,6 +250,10 @@ public class LoanProductData {
         this.loanTermFrequencyTypeOptions = loanTermFrequencyTypeOptions;
         this.repaymentFrequencyTypeOptions = repaymentFrequencyTypeOptions;
         this.interestRateFrequencyTypeOptions = interestRateFrequencyTypeOptions;
+        
+        this.assetAccountOptions = assetAccountOptions;
+        this.incomeAccountOptions = incomeAccountOptions;
+        this.expenseAccountOptions = expenseAccountOptions;
     }
 
     public Collection<ChargeData> charges() {
@@ -362,4 +395,111 @@ public class LoanProductData {
     public Collection<ChargeData> getChargeOptions() {
         return chargeOptions;
     }
+
+    public List<GLAccountData> getAssetAccountOptions() {
+        return this.assetAccountOptions;
+    }
+
+    public List<GLAccountData> getIncomeAccountOptions() {
+        return this.incomeAccountOptions;
+    }
+
+    public List<GLAccountData> getExpenseAccountOptions() {
+        return this.expenseAccountOptions;
+    }
+
+    
+    public Long getLoanPortfolioAccountId() {
+        return this.loanPortfolioAccountId;
+    }
+
+    
+    public void setLoanPortfolioAccountId(Long loanPortfolioAccountId) {
+        this.loanPortfolioAccountId = loanPortfolioAccountId;
+    }
+
+    
+    public Long getFundSourceAccountId() {
+        return this.fundSourceAccountId;
+    }
+
+    
+    public void setFundSourceAccountId(Long fundSourceAccountId) {
+        this.fundSourceAccountId = fundSourceAccountId;
+    }
+
+    public Long getInterestOnLoanAccountId() {
+        return this.interestOnLoanAccountId;
+    }
+
+    
+    public void setInterestOnLoanAccountId(Long interestOnLoanAccountId) {
+        this.interestOnLoanAccountId = interestOnLoanAccountId;
+    }
+
+    
+    public Long getIncomeFromFeeAccountId() {
+        return this.incomeFromFeeAccountId;
+    }
+
+    
+    public void setIncomeFromFeeAccountId(Long incomeFromFeeAccountId) {
+        this.incomeFromFeeAccountId = incomeFromFeeAccountId;
+    }
+
+    
+    public Long getIncomeFromPenaltyAccountId() {
+        return this.incomeFromPenaltyAccountId;
+    }
+
+    
+    public void setIncomeFromPenaltyAccountId(Long incomeFromPenaltyAccountId) {
+        this.incomeFromPenaltyAccountId = incomeFromPenaltyAccountId;
+    }
+
+    public Long getWriteOffAccountId() {
+        return this.writeOffAccountId;
+    }
+
+    
+    public void setWriteOffAccountId(Long writeOffAccountId) {
+        this.writeOffAccountId = writeOffAccountId;
+    }
+
+    
+    public Long getReceivableInterestAccountId() {
+        return this.receivableInterestAccountId;
+    }
+
+    
+    public void setReceivableInterestAccountId(Long receivableInterestAccountId) {
+        this.receivableInterestAccountId = receivableInterestAccountId;
+    }
+
+    
+    public Long getReceivableFeeAccountId() {
+        return this.receivableFeeAccountId;
+    }
+
+    
+    public void setReceivableFeeAccountId(Long receivableFeeAccountId) {
+        this.receivableFeeAccountId = receivableFeeAccountId;
+    }
+
+    
+    public Long getReceivablePenaltyAccountId() {
+        return this.receivablePenaltyAccountId;
+    }
+
+    
+    public void setReceivablePenaltyAccountId(Long receivablePenaltyAccountId) {
+        this.receivablePenaltyAccountId = receivablePenaltyAccountId;
+    }
+
+    
+    public Integer getAccountingType() {
+        return this.accountingType;
+    }
+    
+
 }

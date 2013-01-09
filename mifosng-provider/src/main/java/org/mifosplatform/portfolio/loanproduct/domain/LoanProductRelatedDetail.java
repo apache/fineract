@@ -73,7 +73,23 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
 
     @Column(name = "arrearstolerance_amount", scale = 6, precision = 19, nullable = true)
     private BigDecimal inArrearsTolerance;
+    
+    @Column(name = "accounting_type", nullable = false)
+    private Integer accountingType;
 
+    public static LoanProductRelatedDetail createFrom(final MonetaryCurrency currency, final BigDecimal principal,
+            final BigDecimal nominalInterestRatePerPeriod, final PeriodFrequencyType interestRatePeriodFrequencyType,
+            final BigDecimal nominalAnnualInterestRate, final InterestMethod interestMethod,
+            final InterestCalculationPeriodMethod interestCalculationPeriodMethod, final Integer repaymentEvery,
+            final PeriodFrequencyType repaymentPeriodFrequencyType, final Integer numberOfRepayments,
+            final AmortizationMethod amortizationMethod, final BigDecimal inArrearsTolerance,
+            final AccountingRuleType accountingRuleType) {
+
+        return new LoanProductRelatedDetail(currency, principal, nominalInterestRatePerPeriod, interestRatePeriodFrequencyType,
+                nominalAnnualInterestRate, interestMethod, interestCalculationPeriodMethod, repaymentEvery, repaymentPeriodFrequencyType,
+                numberOfRepayments, amortizationMethod, inArrearsTolerance, accountingRuleType);
+    }
+    
     public static LoanProductRelatedDetail createFrom(final MonetaryCurrency currency, final BigDecimal principal,
             final BigDecimal nominalInterestRatePerPeriod, final PeriodFrequencyType interestRatePeriodFrequencyType,
             final BigDecimal nominalAnnualInterestRate, final InterestMethod interestMethod,
@@ -83,7 +99,7 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
 
         return new LoanProductRelatedDetail(currency, principal, nominalInterestRatePerPeriod, interestRatePeriodFrequencyType,
                 nominalAnnualInterestRate, interestMethod, interestCalculationPeriodMethod, repaymentEvery, repaymentPeriodFrequencyType,
-                numberOfRepayments, amortizationMethod, inArrearsTolerance);
+                numberOfRepayments, amortizationMethod, inArrearsTolerance, null);
     }
 
     protected LoanProductRelatedDetail() {
@@ -95,7 +111,8 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
             final BigDecimal defaultAnnualNominalInterestRate, final InterestMethod interestMethod,
             final InterestCalculationPeriodMethod interestCalculationPeriodMethod, final Integer repayEvery,
             final PeriodFrequencyType repaymentFrequencyType, final Integer defaultNumberOfRepayments,
-            final AmortizationMethod amortizationMethod, final BigDecimal inArrearsTolerance) {
+            final AmortizationMethod amortizationMethod, final BigDecimal inArrearsTolerance,
+            final AccountingRuleType accountingRuleType) {
         this.currency = currency;
         this.principal = defaultPrincipal;
         this.nominalInterestRatePerPeriod = defaultNominalInterestRatePerPeriod;
@@ -111,6 +128,9 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
             this.inArrearsTolerance = null;
         } else {
             this.inArrearsTolerance = inArrearsTolerance;
+        }
+        if(accountingRuleType !=null){
+            this.accountingType = accountingRuleType.getValue();
         }
     }
 
@@ -163,6 +183,11 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
 
     public AmortizationMethod getAmortizationMethod() {
         return amortizationMethod;
+    }
+    
+    
+    public Integer getAccountingType() {
+        return this.accountingType;
     }
 
     public Map<String, Object> update(final JsonCommand command, final AprCalculator aprCalculator) {
@@ -284,6 +309,13 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
             actualChanges.put(interestCalculationPeriodTypeParamName, newValue);
             actualChanges.put("locale", localeAsInput);
             this.interestCalculationPeriodMethod = InterestCalculationPeriodMethod.fromInt(newValue);
+        }
+        
+        final String accountingTypeParamName = "accountingType";
+        if (command.isChangeInIntegerParameterNamed(accountingTypeParamName, this.accountingType)) {
+            final Integer newValue = command.integerValueOfParameterNamed(accountingTypeParamName);
+            actualChanges.put(accountingTypeParamName, newValue);
+            this.accountingType = newValue;
         }
 
         return actualChanges;

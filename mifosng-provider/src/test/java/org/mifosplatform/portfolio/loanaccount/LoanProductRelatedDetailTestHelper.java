@@ -140,6 +140,6 @@ public class LoanProductRelatedDetailTestHelper {
 		
 		return new LoanProductRelatedDetail(currency, defaultPrincipal, defaultNominalInterestRatePerPeriod, 
 				interestPeriodFrequencyType, defaultAnnualNominalInterestRate, interestMethod, 
-				interestCalculationPeriodMethod, repayEvery, repaymentFrequencyType, defaultNumberOfRepayments, amortizationMethod, inArrearsTolerance);
+				interestCalculationPeriodMethod, repayEvery, repaymentFrequencyType, defaultNumberOfRepayments, amortizationMethod, inArrearsTolerance, null);
 	}
 }

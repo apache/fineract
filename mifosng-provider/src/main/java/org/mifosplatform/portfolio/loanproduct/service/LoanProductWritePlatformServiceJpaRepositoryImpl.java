@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.mifosplatform.accounting.service.ProductToGLAccountMappingWritePlatformService;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
@@ -40,13 +41,14 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
     private final FundRepository fundRepository;
     private final LoanTransactionProcessingStrategyRepository loanTransactionProcessingStrategyRepository;
     private final ChargeRepository chargeRepository;
+    private final ProductToGLAccountMappingWritePlatformService accountMappingWritePlatformService;
 
     @Autowired
     public LoanProductWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
             final LoanProductCommandFromApiJsonDeserializer fromApiJsonDeserializer, final LoanProductRepository loanProductRepository,
             final AprCalculator aprCalculator, final FundRepository fundRepository,
             final LoanTransactionProcessingStrategyRepository loanTransactionProcessingStrategyRepository,
-            final ChargeRepository chargeRepository) {
+            final ChargeRepository chargeRepository, final ProductToGLAccountMappingWritePlatformService accountMappingWritePlatformService) {
         this.context = context;
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
         this.loanProductRepository = loanProductRepository;
@@ -54,6 +56,7 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
         this.fundRepository = fundRepository;
         this.loanTransactionProcessingStrategyRepository = loanTransactionProcessingStrategyRepository;
         this.chargeRepository = chargeRepository;
+        this.accountMappingWritePlatformService = accountMappingWritePlatformService;
     }
 
     @Transactional
@@ -75,6 +78,9 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
                 this.aprCalculator);
 
         this.loanProductRepository.save(loanproduct);
+        
+        //save accounting mappings
+        accountMappingWritePlatformService.createLoanProductToGLAccountMapping(loanproduct.getId(), loanProductCommand);
 
         return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(loanproduct.getId()).build();
     }
@@ -128,6 +134,12 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
             final Set<Charge> charges = this.assembleSetOfCharges(command, product.getCurrency().getCode());
             product.update(charges);
         }
+        
+        // accounting related changes
+        if (loanProductCommand.getAccountingType() != null) {
+            boolean accountingTypeChanged = changes.containsKey("accountingType");
+            accountMappingWritePlatformService.updateLoanProductToGLAccountMapping(product.getId(), loanProductCommand, accountingTypeChanged);
+        }
 
         if (!changes.isEmpty()) {
             this.loanProductRepository.save(product);
@@ -164,4 +176,5 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
 
         return charges;
     }
+    
 }

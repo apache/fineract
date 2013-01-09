@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
+import org.mifosplatform.accounting.AccountingConstants;
 import org.mifosplatform.accounting.AccountingConstants.GL_ACCOUNT_CLASSIFICATION;
 import org.mifosplatform.accounting.AccountingConstants.GL_ACCOUNT_USAGE;
 import org.mifosplatform.accounting.api.data.GLAccountData;
@@ -149,6 +150,11 @@ public class GLAccountReadPlatformServiceImpl implements GLAccountReadPlatformSe
         } catch (EmptyResultDataAccessException e) {
             throw new GLAccountNotFoundException(glAccountId);
         }
+    }
+
+    @Override
+    public List<GLAccountData> retrieveAllEnabledDetailGLAccounts(GL_ACCOUNT_CLASSIFICATION classification) {
+        return retrieveAllGLAccounts(classification.toString(), null, AccountingConstants.GL_ACCOUNT_USAGE.DETAIL.toString(), null, false);
     }
 
     private static boolean checkValidGLAccountClassification(final String entityType) {

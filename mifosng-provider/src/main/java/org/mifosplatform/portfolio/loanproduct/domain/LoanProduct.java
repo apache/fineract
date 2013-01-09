@@ -83,10 +83,12 @@ public class LoanProduct extends AbstractAuditableCustom<AppUser, Long> {
         final Integer repaymentEvery = command.integerValueOfParameterNamed("repaymentEvery");
         final Integer numberOfRepayments = command.integerValueOfParameterNamed("numberOfRepayments");
         final BigDecimal inArrearsTolerance = command.bigDecimalValueOfParameterNamed("inArrearsTolerance");
+        final AccountingRuleType accountingRuleType = AccountingRuleType.fromInt(command
+                .integerValueOfParameterNamed("accountingType"));
 
         return new LoanProduct(fund, loanTransactionProcessingStrategy, name, description, currency, principal, interestRatePerPeriod,
                 interestFrequencyType, annualInterestRate, interestMethod, interestCalculationPeriodMethod, repaymentEvery,
-                repaymentFrequencyType, numberOfRepayments, amortizationMethod, inArrearsTolerance, productCharges);
+                repaymentFrequencyType, numberOfRepayments, amortizationMethod, inArrearsTolerance, productCharges, accountingRuleType);
     }
 
     protected LoanProduct() {
@@ -99,7 +101,8 @@ public class LoanProduct extends AbstractAuditableCustom<AppUser, Long> {
             final BigDecimal defaultAnnualNominalInterestRate, final InterestMethod interestMethod,
             final InterestCalculationPeriodMethod interestCalculationPeriodMethod, final Integer repayEvery,
             final PeriodFrequencyType repaymentFrequencyType, final Integer defaultNumberOfInstallments,
-            final AmortizationMethod amortizationMethod, final BigDecimal inArrearsTolerance, final Set<Charge> charges) {
+            final AmortizationMethod amortizationMethod, final BigDecimal inArrearsTolerance, final Set<Charge> charges,
+            final AccountingRuleType accountingRuleType) {
         this.fund = fund;
         this.transactionProcessingStrategy = transactionProcessingStrategy;
         this.name = name.trim();
@@ -115,7 +118,7 @@ public class LoanProduct extends AbstractAuditableCustom<AppUser, Long> {
 
         this.loanProductRelatedDetail = new LoanProductRelatedDetail(currency, defaultPrincipal, defaultNominalInterestRatePerPeriod,
                 interestPeriodFrequencyType, defaultAnnualNominalInterestRate, interestMethod, interestCalculationPeriodMethod, repayEvery,
-                repaymentFrequencyType, defaultNumberOfInstallments, amortizationMethod, inArrearsTolerance);
+                repaymentFrequencyType, defaultNumberOfInstallments, amortizationMethod, inArrearsTolerance, accountingRuleType);
     }
 
     public MonetaryCurrency getCurrency() {

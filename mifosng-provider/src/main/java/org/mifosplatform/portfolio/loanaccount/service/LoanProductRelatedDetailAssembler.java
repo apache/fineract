@@ -57,6 +57,6 @@ public class LoanProductRelatedDetailAssembler {
 
         return new LoanProductRelatedDetail(currency, principalAmount, defaultNominalInterestRatePerPeriod, interestPeriodFrequencyType,
                 defaultAnnualNominalInterestRate, interestMethod, interestCalculationPeriodMethod, repayEvery, repaymentFrequencyType,
-                defaultNumberOfInstallments, amortizationMethod, inArrearsTolerance);
+                defaultNumberOfInstallments, amortizationMethod, inArrearsTolerance, null);
     }
 }
