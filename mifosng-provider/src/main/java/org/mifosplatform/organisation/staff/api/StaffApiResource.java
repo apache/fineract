@@ -87,9 +87,8 @@ public class StaffApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String createStaff(final String apiRequestBodyAsJson) {
-        
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().createStaff().withUrl("/staff").withJson(apiRequestBodyAsJson)
-                .build();
+
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().createStaff().withJson(apiRequestBodyAsJson).build();
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
@@ -121,11 +120,10 @@ public class StaffApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String updateStaff(@PathParam("staffId") final Long staffId, final String apiRequestBodyAsJson) {
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().updateStaff().withUrl("/staff").withEntityId(staffId).withJson(apiRequestBodyAsJson)
-                .build();
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().updateStaff(staffId).withJson(apiRequestBodyAsJson).build();
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        
+
         return this.toApiJsonSerializer.serialize(result);
     }
 

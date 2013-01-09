@@ -120,7 +120,9 @@ public class UsersApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String createUser(final String apiRequestBodyAsJson) {
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().createUser().withUrl("/users").withJson(apiRequestBodyAsJson)
+        final CommandWrapper commandRequest = new CommandWrapperBuilder() //
+                .createUser() //
+                .withJson(apiRequestBodyAsJson) //
                 .build();
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
@@ -134,8 +136,10 @@ public class UsersApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String updateUser(@PathParam("userId") final Long userId, final String apiRequestBodyAsJson) {
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().updateUser().withUrl("/users").withJson(apiRequestBodyAsJson)
-                .withEntityId(userId).build();
+        final CommandWrapper commandRequest = new CommandWrapperBuilder() //
+                .updateUser(userId) //
+                .withJson(apiRequestBodyAsJson) //
+                .build();
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
@@ -148,8 +152,9 @@ public class UsersApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String deleteUser(@PathParam("userId") final Long userId) {
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteUser().withUrl("/users").withJson("{}")
-                .withEntityId(userId).build();
+        final CommandWrapper commandRequest = new CommandWrapperBuilder() //
+                .updateUser(userId) //
+                .build();
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 

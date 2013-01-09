@@ -77,11 +77,10 @@ public class CodesApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String createCode(final String apiRequestBodyAsJson) {
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().createCode().withUrl("/codes").withJson(apiRequestBodyAsJson)
-                .build();
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().createCode().withJson(apiRequestBodyAsJson).build();
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        
+
         return this.toApiJsonSerializer.serialize(result);
     }
 
@@ -103,11 +102,10 @@ public class CodesApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String updateCode(@PathParam("codeId") final Long codeId, final String apiRequestBodyAsJson) {
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().updateCode().withUrl("/codes").withEntityId(codeId).withJson(apiRequestBodyAsJson)
-                .build();
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().updateCode(codeId).withJson(apiRequestBodyAsJson).build();
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        
+
         return this.toApiJsonSerializer.serialize(result);
     }
 
@@ -117,11 +115,10 @@ public class CodesApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String deleteCode(@PathParam("codeId") final Long codeId) {
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteCode().withUrl("/codes").withEntityId(codeId).withJson("{}")
-                .build();
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteCode(codeId).build();
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        
+
         return this.toApiJsonSerializer.serialize(result);
     }
 }

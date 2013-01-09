@@ -232,6 +232,9 @@ public class LoansApiResource {
             }
 
             if (associationParameters.contains("permissions")) {
+
+                if (repaymentSchedule == null) { throw new IllegalStateException(); }
+
                 // FIXME - KW - Waive feature was changed to waive interest at
                 // anytime so this permission checking is probably not needed -
                 // look into.
@@ -245,8 +248,8 @@ public class LoansApiResource {
                         && (tolerance.isGreaterThan(totalOutstandingMoney) || tolerance.isEqualTo(totalOutstandingMoney));
 
                 loanRepaymentsCount = retrieveNonDisbursementTransactions(loanRepayments);
-                permissions = this.loanReadPlatformService.retrieveLoanPermissions(loanBasicDetails, isWaiveAllowed,
-                        loanRepaymentsCount, existsGuarantor);
+                permissions = this.loanReadPlatformService.retrieveLoanPermissions(loanBasicDetails, isWaiveAllowed, loanRepaymentsCount,
+                        existsGuarantor);
 
                 // clear parent data which wasn't requested
                 if (!associationParameters.contains("repaymentSchedule")) {
@@ -333,8 +336,7 @@ public class LoansApiResource {
             return this.loanScheduleToApiJsonSerializer.serialize(settings, loanSchedule, new HashSet<String>());
         }
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().createLoanApplication().withUrl("/loans")
-                .withJson(apiRequestBodyAsJson).build();
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().createLoanApplication().withJson(apiRequestBodyAsJson).build();
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
@@ -347,8 +349,8 @@ public class LoansApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String modifyLoanApplication(@PathParam("loanId") final Long loanId, final String apiRequestBodyAsJson) {
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().updateLoanApplication().withUrl("/loans").withLoanId(loanId)
-                .withEntityId(loanId).withJson(apiRequestBodyAsJson).build();
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().updateLoanApplication(loanId).withJson(apiRequestBodyAsJson)
+                .build();
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
@@ -361,8 +363,7 @@ public class LoansApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String deleteLoanApplication(@PathParam("loanId") final Long loanId) {
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteLoanApplication().withUrl("/loans").withLoanId(loanId)
-                .withEntityId(loanId).withJson("{}").build();
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteLoanApplication(loanId).build();
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
@@ -376,30 +377,29 @@ public class LoansApiResource {
     public String stateTransitions(@PathParam("loanId") final Long loanId, @QueryParam("command") final String commandParam,
             final String apiRequestBodyAsJson) {
 
-        final CommandWrapperBuilder builder = new CommandWrapperBuilder().withUrl("/loans").withLoanId(loanId).withEntityId(loanId)
-                .withJson(apiRequestBodyAsJson);
+        final CommandWrapperBuilder builder = new CommandWrapperBuilder().withJson(apiRequestBodyAsJson);
 
         CommandProcessingResult result = null;
 
         if (is(commandParam, "reject")) {
-            final CommandWrapper commandRequest = builder.rejectLoanApplication().build();
+            final CommandWrapper commandRequest = builder.rejectLoanApplication(loanId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, "withdrewbyclient")) {
-            final CommandWrapper commandRequest = builder.withdrawLoanApplication().build();
+            final CommandWrapper commandRequest = builder.withdrawLoanApplication(loanId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, "approve")) {
-            final CommandWrapper commandRequest = builder.approveLoanApplication().build();
+            final CommandWrapper commandRequest = builder.approveLoanApplication(loanId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, "disburse")) {
-            final CommandWrapper commandRequest = builder.disburseLoanApplication().build();
+            final CommandWrapper commandRequest = builder.disburseLoanApplication(loanId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         }
 
         if (is(commandParam, "undoapproval")) {
-            final CommandWrapper commandRequest = builder.undoLoanApplicationApproval().build();
+            final CommandWrapper commandRequest = builder.undoLoanApplicationApproval(loanId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, "undodisbursal")) {
-            final CommandWrapper commandRequest = builder.undoLoanApplicationDisbursal().build();
+            final CommandWrapper commandRequest = builder.undoLoanApplicationDisbursal(loanId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         }
 
@@ -440,8 +440,7 @@ public class LoansApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String assignLoanOfficer(@PathParam("loanId") final Long loanId, final String apiRequestBodyAsJson) {
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().assignLoanOfficer().withUrl("/loans").withLoanId(loanId)
-                .withEntityId(loanId).withJson(apiRequestBodyAsJson).build();
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().assignLoanOfficer(loanId).withJson(apiRequestBodyAsJson).build();
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 

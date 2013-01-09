@@ -100,8 +100,8 @@ public class ClientIdentifiersApiResource {
     public String createClientIdentifier(@PathParam("clientId") final Long clientId, final String apiRequestBodyAsJson) {
 
         try {
-            final CommandWrapper commandRequest = new CommandWrapperBuilder().createClientIdentifier().withClientId(clientId)
-                    .withUrl("/clients/" + clientId + "/identifiers").withJson(apiRequestBodyAsJson).build();
+            final CommandWrapper commandRequest = new CommandWrapperBuilder().createClientIdentifier(clientId)
+                    .withJson(apiRequestBodyAsJson).build();
 
             final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
@@ -147,8 +147,7 @@ public class ClientIdentifiersApiResource {
             @PathParam("identifierId") final Long clientIdentifierId, final String apiRequestBodyAsJson) {
 
         try {
-            final CommandWrapper commandRequest = new CommandWrapperBuilder().updateClientIdentifier()
-                    .withUrl("/clients/" + clientId + "/identifiers").withClientId(clientId).withEntityId(clientIdentifierId)
+            final CommandWrapper commandRequest = new CommandWrapperBuilder().updateClientIdentifier(clientId, clientIdentifierId)
                     .withJson(apiRequestBodyAsJson).build();
 
             final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
@@ -173,9 +172,7 @@ public class ClientIdentifiersApiResource {
     public String deleteClientIdentifier(@PathParam("clientId") final Long clientId,
             @PathParam("identifierId") final Long clientIdentifierId) {
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteClientIdentifier()
-                .withUrl("/clients/" + clientId + "/identifiers").withClientId(clientId).withEntityId(clientIdentifierId).withJson("{}")
-                .build();
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteClientIdentifier(clientId, clientIdentifierId).build();
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 

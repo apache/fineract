@@ -88,11 +88,10 @@ public class LoanProductsApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String createLoanProduct(final String apiRequestBodyAsJson) {
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().createLoanProduct().withUrl("/loanproducts")
-                .withJson(apiRequestBodyAsJson).build();
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().createLoanProduct().withJson(apiRequestBodyAsJson).build();
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        
+
         return this.toApiJsonSerializer.serialize(result);
     }
 
@@ -147,9 +146,9 @@ public class LoanProductsApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String updateLoanProduct(@PathParam("productId") final Long productId, final String apiRequestBodyAsJson) {
-        
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().updateLoanProduct().withUrl("/loanproducts").withEntityId(productId)
-                .withJson(apiRequestBodyAsJson).build();
+
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().updateLoanProduct(productId).withJson(apiRequestBodyAsJson)
+                .build();
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 

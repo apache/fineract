@@ -99,7 +99,7 @@ public class OfficesApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String createOffice(final String apiRequestBodyAsJson) {
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().createOffice().withUrl("/offices").withJson(apiRequestBodyAsJson)
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().createOffice().withJson(apiRequestBodyAsJson)
                 .build();
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
@@ -132,8 +132,7 @@ public class OfficesApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String updateOffice(@PathParam("officeId") final Long officeId, final String apiRequestBodyAsJson) {
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().updateOffice().withUrl("/offices").withEntityId(officeId)
-                .withJson(apiRequestBodyAsJson).build();
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().updateOffice(officeId).withJson(apiRequestBodyAsJson).build();
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 

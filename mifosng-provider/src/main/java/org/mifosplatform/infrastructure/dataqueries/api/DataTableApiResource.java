@@ -142,7 +142,7 @@ public class DataTableApiResource {
             final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().createDatatable(datatable, apptableId, null)
-                .withUrl("/datatables/" + datatable).withJson(apiRequestBodyAsJson).build();
+                .withJson(apiRequestBodyAsJson).build();
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
@@ -157,7 +157,7 @@ public class DataTableApiResource {
             @PathParam("apptableId") final Long apptableId, final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().updateDatatable(datatable, apptableId, null)
-                .withUrl("/datatables/" + datatable).withJson(apiRequestBodyAsJson).build();
+                .withJson(apiRequestBodyAsJson).build();
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
@@ -173,7 +173,7 @@ public class DataTableApiResource {
             final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().updateDatatable(datatable, apptableId, datatableId)
-                .withUrl("/datatables/" + datatable + "/" + apptableId).withJson(apiRequestBodyAsJson).build();
+                .withJson(apiRequestBodyAsJson).build();
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
@@ -186,8 +186,7 @@ public class DataTableApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String deleteDatatableEntries(@PathParam("datatable") final String datatable, @PathParam("apptableId") final Long apptableId) {
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteDatatable(datatable, apptableId, null)
-                .withUrl("/datatables/" + datatable).withJson("{}").build();
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteDatatable(datatable, apptableId, null).build();
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
@@ -201,8 +200,7 @@ public class DataTableApiResource {
     public String deleteDatatableEntries(@PathParam("datatable") final String datatable, @PathParam("apptableId") final Long apptableId,
             @PathParam("datatableId") final Long datatableId) {
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteDatatable(datatable, apptableId, datatableId)
-                .withUrl("/datatables/" + datatable + "/" + apptableId).withJson("{}").build();
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteDatatable(datatable, apptableId, datatableId).build();
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 

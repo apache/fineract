@@ -104,8 +104,7 @@ public class LoanChargesApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String addLoanCharge(@PathParam("loanId") final Long loanId, final String apiRequestBodyAsJson) {
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().createLoanCharge().withUrl("/loans/" + loanId + "/charges")
-                .withLoanId(loanId).withJson(apiRequestBodyAsJson).build();
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().createLoanCharge(loanId).withJson(apiRequestBodyAsJson).build();
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
@@ -119,8 +118,8 @@ public class LoanChargesApiResource {
     public String updateLoanCharge(@PathParam("loanId") final Long loanId, @PathParam("loanChargeId") final Long loanChargeId,
             final String apiRequestBodyAsJson) {
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().updateLoanCharge().withUrl("/loans/" + loanId + "/charges")
-                .withLoanId(loanId).withEntityId(loanChargeId).withJson(apiRequestBodyAsJson).build();
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().updateLoanCharge(loanId, loanChargeId)
+                .withJson(apiRequestBodyAsJson).build();
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
@@ -136,8 +135,7 @@ public class LoanChargesApiResource {
 
         String json = "";
         if (is(commandParam, "waive")) {
-            final CommandWrapper commandRequest = new CommandWrapperBuilder().waiveLoanCharge().withUrl("/loans/" + loanId + "/charges")
-                    .withLoanId(loanId).withEntityId(loanChargeId).withJson("{}").build();
+            final CommandWrapper commandRequest = new CommandWrapperBuilder().waiveLoanCharge(loanId, loanChargeId).build();
 
             final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
@@ -155,8 +153,7 @@ public class LoanChargesApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String deleteLoanCharge(@PathParam("loanId") final Long loanId, @PathParam("chargeId") final Long loanChargeId) {
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteLoanCharge().withUrl("/loans/" + loanId + "/charges")
-                .withLoanId(loanId).withEntityId(loanChargeId).withJson("{}").build();
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteLoanCharge(loanId, loanChargeId).build();
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 

@@ -99,8 +99,7 @@ public class BulkLoansApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String loanReassignment(final String apiRequestBodyAsJson) {
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().assignLoanOfficersInBulk().withUrl("/loans/loanreassignment")
-                .withJson(apiRequestBodyAsJson).build();
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().assignLoanOfficersInBulk().withJson(apiRequestBodyAsJson).build();
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 

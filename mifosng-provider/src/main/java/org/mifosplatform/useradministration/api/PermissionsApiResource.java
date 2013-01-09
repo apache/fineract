@@ -79,8 +79,10 @@ public class PermissionsApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String updatePermissionsDetails(final String apiRequestBodyAsJson) {
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().updatePermissions().withUrl("/permissions")
-                .withJson(apiRequestBodyAsJson).build();
+        final CommandWrapper commandRequest = new CommandWrapperBuilder() //
+                .updatePermissions() //
+                .withJson(apiRequestBodyAsJson) //
+                .build();
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 

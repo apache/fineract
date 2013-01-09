@@ -73,8 +73,7 @@ public class ClientNotesApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String addNewClientNote(@PathParam("clientId") final Long clientId, final String apiRequestBodyAsJson) {
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().createClientNote().withUrl("/clients/" + clientId + "/notes")
-                .withClientId(clientId).withJson(apiRequestBodyAsJson).build();
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().createClientNote(clientId).withJson(apiRequestBodyAsJson).build();
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
@@ -103,8 +102,8 @@ public class ClientNotesApiResource {
     public String updateClientNote(@PathParam("clientId") final Long clientId, @PathParam("noteId") final Long noteId,
             final String apiRequestBodyAsJson) {
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().updateClientNote().withUrl("/clients/" + clientId + "/notes")
-                .withClientId(clientId).withEntityId(noteId).withJson(apiRequestBodyAsJson).build();
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().updateClientNote(clientId, noteId).withJson(apiRequestBodyAsJson)
+                .build();
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 

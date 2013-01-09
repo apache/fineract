@@ -88,8 +88,8 @@ public class OfficeTransactionsApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String transferMoneyFrom(final String apiRequestBodyAsJson) {
-        
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().createOfficeTransaction().withUrl("/officetransactions").withJson(apiRequestBodyAsJson).build();
+
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().createOfficeTransaction().withJson(apiRequestBodyAsJson).build();
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 

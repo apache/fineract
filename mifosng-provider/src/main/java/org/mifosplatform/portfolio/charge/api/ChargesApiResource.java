@@ -110,8 +110,7 @@ public class ChargesApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String createCharge(final String apiRequestBodyAsJson) {
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().createCharge().withUrl("/charges").withJson(apiRequestBodyAsJson)
-                .build();
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().createCharge().withJson(apiRequestBodyAsJson).build();
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
@@ -124,8 +123,7 @@ public class ChargesApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String updateCharge(@PathParam("chargeId") final Long chargeId, final String apiRequestBodyAsJson) {
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().updateCharge().withUrl("/charges").withEntityId(chargeId)
-                .withJson(apiRequestBodyAsJson).build();
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().updateCharge(chargeId).withJson(apiRequestBodyAsJson).build();
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
@@ -138,8 +136,7 @@ public class ChargesApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String deleteCharge(@PathParam("chargeId") final Long chargeId) {
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteCharge().withUrl("/charges").withEntityId(chargeId)
-                .withJson("{}").build();
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteCharge(chargeId).build();
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 

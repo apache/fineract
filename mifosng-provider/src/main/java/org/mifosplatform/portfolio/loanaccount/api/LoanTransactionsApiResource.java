@@ -117,24 +117,23 @@ public class LoanTransactionsApiResource {
     public String executeLoanTransaction(@PathParam("loanId") final Long loanId, @QueryParam("command") final String commandParam,
             final String apiRequestBodyAsJson) {
 
-        CommandWrapperBuilder builder = new CommandWrapperBuilder().withUrl("/loans/" + loanId + "/transactions").withLoanId(loanId)
-                .withJson(apiRequestBodyAsJson);
+        CommandWrapperBuilder builder = new CommandWrapperBuilder().withJson(apiRequestBodyAsJson);
 
         CommandProcessingResult result = null;
         if (is(commandParam, "repayment")) {
-            final CommandWrapper commandRequest = builder.loanRepaymentTransaction().build();
+            final CommandWrapper commandRequest = builder.loanRepaymentTransaction(loanId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, "waiveinterest")) {
-            final CommandWrapper commandRequest = builder.waiveInterestPortionTransaction().build();
+            final CommandWrapper commandRequest = builder.waiveInterestPortionTransaction(loanId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, "writeoff")) {
-            final CommandWrapper commandRequest = builder.writeOffLoanTransaction().build();
+            final CommandWrapper commandRequest = builder.writeOffLoanTransaction(loanId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, "close-rescheduled")) {
-            final CommandWrapper commandRequest = builder.closeLoanAsRescheduledTransaction().build();
+            final CommandWrapper commandRequest = builder.closeLoanAsRescheduledTransaction(loanId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, "close")) {
-            final CommandWrapper commandRequest = builder.closeLoanTransaction().build();
+            final CommandWrapper commandRequest = builder.closeLoanTransaction(loanId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         }
 
@@ -150,9 +149,8 @@ public class LoanTransactionsApiResource {
     public String adjustLoanTransaction(@PathParam("loanId") final Long loanId, @PathParam("transactionId") final Long transactionId,
             final String apiRequestBodyAsJson) {
 
-        CommandWrapperBuilder builder = new CommandWrapperBuilder().withUrl("/loans/" + loanId + "/transactions").withLoanId(loanId).withEntityId(transactionId)
-                .withJson(apiRequestBodyAsJson);
-        final CommandWrapper commandRequest = builder.adjustTransaction().build();
+        CommandWrapperBuilder builder = new CommandWrapperBuilder().withJson(apiRequestBodyAsJson);
+        final CommandWrapper commandRequest = builder.adjustTransaction(loanId, transactionId).build();
         
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         
