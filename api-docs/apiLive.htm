@@ -488,6 +488,16 @@ var jqxhr = $.ajax({
                 <p>Clients are people and businesses that have applied (or may apply) to an MFI for loans.</p>
                 <table class=matrixHeading>
                     <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Field Descriptions</div></td></tr>
+                    <tr class=alt><td>accountNo</td></tr>
+                    <tr><td class=fielddesc>If provided during client creation, its value is set as account no. for client account, otherwise an auto generated account no. is put in place based on the configured strategy.</td></tr>
+                    <tr class=alt><td>firstname</td></tr>
+                    <tr><td class=fielddesc>Facility to break up name into parts suitable for humans.</td></tr>
+                    <tr class=alt><td>middlename</td></tr>
+                    <tr><td class=fielddesc>Facility to break up name into parts suitable for humans.</td></tr>
+                    <tr class=alt><td>lastname</td></tr>
+                    <tr><td class=fielddesc>Facility to break up name into parts suitable for humans.</td></tr>
+                    <tr class=alt><td>fullname</td></tr>
+                    <tr><td class=fielddesc>Facility to set name of a client or business that doesnt suit the firstname,middlename,lastname structure.</td></tr>
                     <tr class=alt><td>externalId</td></tr>
                     <tr><td class=fielddesc>A place to put an external reference for this client e.g. The ID another system uses.<br>
                     If provided, it must be unique.</td></tr>
@@ -507,21 +517,23 @@ var jqxhr = $.ajax({
             <div class="method-example">
                 <code class="method-declaration">GET https://Domain Name/api/v1/clients</code>
 <code class="method-response">[ {
+  "id" : 14,
+  "accountNo": "14",
+  "firstname" : "Patrick",
+  "middlename" : "J"
+  "lastname" : "Asare-Frimpong",
+  "displayName" : "Patrick J Asare-Frimpong",
   "officeId" : 2,
   "officeName" : "sub branch 1",
-  "id" : 14,
-  "firstname" : "Patrick",
-  "lastname" : "Asare-Frimpong",
-  "displayName" : "Patrick Asare-Frimpong",
   "externalId" : "123AB",
   "joinedDate" : [ 2012, 4, 18 ]
 }, {
+  "id" : 13,
+  "accountNo": "0000000AB5",
+  "fullname" : "My micro business Ltd."
+  "displayName" : "My micro business Ltd.",
   "officeId" : 5,
   "officeName" : "Majmoua",
-  "id" : 13,
-  "firstname" : "firstMajmoua",
-  "lastname" : "client",
-  "displayName" : "firstMajmoua client",
   "joinedDate" : [ 2011, 12, 1 ]
 }... ]
 </code>
@@ -582,12 +594,12 @@ var jqxhr = $.ajax({
             <div class="method-example">
                 <code class="method-declaration">GET https://Domain Name/api/v1/clients/{clientId}</code>
 <code class="method-response">{
-  "officeId" : 1,
-  "officeName" : "Demo MFI Head Office",
   "id" : 1,
   "firstname" : "Patrick",
   "lastname" : "O'Meara",
   "displayName" : "Patrick O'Meara",
+  "officeId" : 1,
+  "officeName" : "Demo MFI Head Office",
   "joinedDate" : [ 2009, 1, 4 ]
 }
 </code>
@@ -599,12 +611,12 @@ var jqxhr = $.ajax({
     <div class="method-description">
         <h4>Create a Client</h4>
         <p> <b>Note:</b> You can enter either:<br>
-        firstname/lastname - for a person OR<br>
-        clientOrBusinessName - for a business or organisation (or person known by one name).<br>
+        firstname/middlename/lastname - for a person (middlename is optional) OR<br>
+        fullname - for a business or organisation (or person known by one name).<br>
         </p>
         <table class=matrixHeading>
             <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Mandatory Fields</div></td></tr>
-            <tr class=alt><td>firstname and lastname OR clientOrBusinessName<br>, joinedDate, officeId</td></tr>
+            <tr class=alt><td>firstname and lastname OR fullname<br>, joinedDate, officeId</td></tr>
         </table>
     </div>
     <div class="method-example">
@@ -634,7 +646,7 @@ Content-Type: application/json
 Request Body:
 {
  "officeId": 1,
- "clientOrBusinessName": "New Business to Create",
+ "fullname": "New Business to Create",
  "externalId": "one/78",
  "dateFormat": "dd MMMM yyyy", 
  "locale": "en",
