@@ -130,7 +130,9 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
     private static final class ClientMapper implements RowMapper<ClientData> {
 
         public String clientSchema() {
-            return "c.account_no as accountNo, c.office_id as officeId, o.name as officeName, c.id as id, c.firstname as firstname, c.lastname as lastname, c.display_name as displayName, "
+            return "c.account_no as accountNo, c.office_id as officeId, o.name as officeName, c.id as id, "
+                    + "c.firstname as firstname, c.middlename as middlename, c.lastname as lastname, "
+                    + "c.fullname as fullname, c.display_name as displayName, "
                     + "c.external_id as externalId, c.joined_date as joinedDate, c.image_key as imagekey from m_client c join m_office o on o.id = c.office_id "
                     + " where o.hierarchy like ? and c.is_deleted=0 ";
         }
@@ -141,19 +143,18 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             final String accountNo = rs.getString("accountNo");
             final Long officeId = JdbcSupport.getLong(rs, "officeId");
             final Long id = JdbcSupport.getLong(rs, "id");
-            String firstname = rs.getString("firstname");
-            if (StringUtils.isBlank(firstname)) {
-                firstname = "";
-            }
+            final String firstname = rs.getString("firstname");
+            final String middlename = rs.getString("middlename");
             final String lastname = rs.getString("lastname");
+            final String fullname = rs.getString("fullname");
             final String displayName = rs.getString("displayName");
             final String externalId = rs.getString("externalId");
             final LocalDate joinedDate = JdbcSupport.getLocalDate(rs, "joinedDate");
             final String imageKey = rs.getString("imageKey");
             final String officeName = rs.getString("officeName");
 
-            return new ClientData(accountNo, officeId, officeName, id, firstname, lastname, displayName, externalId, joinedDate, imageKey, null, null,
-                    null);
+            return new ClientData(accountNo, officeId, officeName, id, firstname, middlename, lastname, fullname, displayName, externalId,
+                    joinedDate, imageKey, null, null, null);
         }
 
     }
@@ -250,36 +251,37 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
                     }
                 }
             }
-            
+
             List<ClientAccountSummaryData> pendingApprovalSavingAccounts = new ArrayList<ClientAccountSummaryData>();
             List<ClientAccountSummaryData> approvedSavingAccounts = new ArrayList<ClientAccountSummaryData>();
             List<ClientAccountSummaryData> withdrawnByClientSavingAccounts = new ArrayList<ClientAccountSummaryData>();
             List<ClientAccountSummaryData> rejectedSavingAccounts = new ArrayList<ClientAccountSummaryData>();
             List<ClientAccountSummaryData> closedSavingAccounts = new ArrayList<ClientAccountSummaryData>();
-            
+
             ClientSavingAccountSummaryDataMapper clientSavingAccountSummaryDataMapper = new ClientSavingAccountSummaryDataMapper();
-            String savingAccountsSql = "select " + clientSavingAccountSummaryDataMapper.schema() + " where sa.client_id=? and sa.is_deleted=0";
-            List<ClientAccountSummaryData> savingAccountsResults = this.jdbcTemplate.query(savingAccountsSql, clientSavingAccountSummaryDataMapper, new Object[] {clientId});
-            
+            String savingAccountsSql = "select " + clientSavingAccountSummaryDataMapper.schema()
+                    + " where sa.client_id=? and sa.is_deleted=0";
+            List<ClientAccountSummaryData> savingAccountsResults = this.jdbcTemplate.query(savingAccountsSql,
+                    clientSavingAccountSummaryDataMapper, new Object[] { clientId });
+
             if (savingAccountsResults != null) {
-				for (ClientAccountSummaryData account : savingAccountsResults){
-					if (account.accountStatusId() == 100)
-						pendingApprovalSavingAccounts.add(account);
-					else if (account.accountStatusId() ==300)
-						approvedSavingAccounts.add(account);
-					else if (account.accountStatusId() == 400)
-						withdrawnByClientSavingAccounts.add(account);
-					else if (account.accountStatusId() == 500)
-						rejectedSavingAccounts.add(account);
-					else if (account.accountStatusId() == 600)
-						closedSavingAccounts.add(account);
-				}
-			}
+                for (ClientAccountSummaryData account : savingAccountsResults) {
+                    if (account.accountStatusId() == 100)
+                        pendingApprovalSavingAccounts.add(account);
+                    else if (account.accountStatusId() == 300)
+                        approvedSavingAccounts.add(account);
+                    else if (account.accountStatusId() == 400)
+                        withdrawnByClientSavingAccounts.add(account);
+                    else if (account.accountStatusId() == 500)
+                        rejectedSavingAccounts.add(account);
+                    else if (account.accountStatusId() == 600) closedSavingAccounts.add(account);
+                }
+            }
 
             return new ClientAccountSummaryCollectionData(pendingApprovalLoans, awaitingDisbursalLoans, openLoans, closedLoans,
                     pendingApprovalDepositAccounts, approvedDepositAccounts, withdrawnByClientDespositAccounts, rejectedDepositAccounts,
-                    closedDepositAccounts, preclosedDepositAccounts, maturedDepositAccounts,
-                    pendingApprovalSavingAccounts,approvedSavingAccounts,withdrawnByClientSavingAccounts,rejectedSavingAccounts,closedSavingAccounts);
+                    closedDepositAccounts, preclosedDepositAccounts, maturedDepositAccounts, pendingApprovalSavingAccounts,
+                    approvedSavingAccounts, withdrawnByClientSavingAccounts, rejectedSavingAccounts, closedSavingAccounts);
         } catch (EmptyResultDataAccessException e) {
             throw new ClientNotFoundException(clientId);
         }
@@ -524,8 +526,9 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
     private static final class ClientIdentifierMapper implements RowMapper<ClientData> {
 
         public String clientLookupByIdentifierSchema() {
-            return "c.id as id, c.account_no as accountNo, c.firstname as firstname, c.lastname as lastname, " + "c.office_id as officeId, o.name as officeName "
-                    + "from m_client c, m_office o, m_client_identifier ci " + "where o.id = c.office_id and c.id=ci.client_id "
+            return "c.id as id, c.account_no as accountNo, c.firstname as firstname, c.middlename as middlename, c.lastname as lastname, "
+                    + "c.fullname as fullname, c.display_name as displayName," + "c.office_id as officeId, o.name as officeName "
+                    + " from m_client c, m_office o, m_client_identifier ci " + "where o.id = c.office_id and c.id=ci.client_id "
                     + "and ci.document_type_id= ? and ci.document_key like ?";
         }
 
@@ -534,21 +537,20 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
             final Long id = rs.getLong("id");
             final String accountNo = rs.getString("accountNo");
-            String firstname = rs.getString("firstname");
-            if (StringUtils.isBlank(firstname)) {
-                firstname = "";
-            }
+            final String firstname = rs.getString("firstname");
+            final String middlename = rs.getString("middlename");
             final String lastname = rs.getString("lastname");
+            final String fullname = rs.getString("fullname");
+            final String displayName = rs.getString("displayName");
 
             final Long officeId = rs.getLong("officeId");
             final String officeName = rs.getString("officeName");
 
-            return ClientData.clientIdentifier(id, accountNo, firstname, lastname, officeId, officeName);
+            return ClientData.clientIdentifier(id, accountNo, firstname, middlename, lastname, fullname, displayName, officeId, officeName);
         }
     }
-    
-    
-     private static final class ClientSavingAccountSummaryDataMapper implements RowMapper<ClientAccountSummaryData> {
+
+    private static final class ClientSavingAccountSummaryDataMapper implements RowMapper<ClientAccountSummaryData> {
 
         public String schema() {
 
@@ -571,5 +573,5 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             return new ClientAccountSummaryData(id, externalId, productId, productName, accountStatusId);
         }
     }
-    
+
 }

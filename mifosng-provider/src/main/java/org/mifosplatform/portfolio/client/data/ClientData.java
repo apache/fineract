@@ -14,13 +14,14 @@ final public class ClientData {
 
     private final Long id;
     private final String accountNo;
+    private final String externalId;
     private final String firstname;
+    private final String middlename;
     private final String lastname;
-    private final String clientOrBusinessName;
+    private final String fullname;
     private final String displayName;
     private final Long officeId;
     private final String officeName;
-    private final String externalId;
     private final LocalDate joinedDate;
     private final String imageKey;
     @SuppressWarnings("unused")
@@ -31,91 +32,52 @@ final public class ClientData {
     private final ClientData currentChange;
     private final Collection<ClientData> allChanges;
 
-    private static String buildDisplayNameFrom(final String firstname, final String lastname) {
-        String displayName = null;
-        StringBuilder displayNameBuilder = new StringBuilder();
-        if (StringUtils.isNotBlank(firstname)) {
-            displayNameBuilder.append(firstname).append(' ');
-        }
-
-        if (StringUtils.isNotBlank(lastname)) {
-            displayNameBuilder.append(lastname);
-            displayName = displayNameBuilder.toString();
-        }
-        return displayName;
-    }
-
     public static ClientData dataChangeInstance(final Long id, final Long officeId, final String externalId, final String firstname,
-            final String lastname, final String clientOrBusinessName, final LocalDate joiningDate) {
+            final String middlename, final String lastname, final String fullname, final LocalDate joiningDate) {
 
-        String firstnameValue = firstname;
-        String lastnameValue = lastname;
-        if (StringUtils.isNotBlank(clientOrBusinessName)) {
-            firstnameValue = null;
-            lastnameValue = clientOrBusinessName;
-        }
-        final String displayName = buildDisplayNameFrom(firstnameValue, lastnameValue);
-
-        return new ClientData(null, officeId, null, id, firstnameValue, lastnameValue, displayName, externalId, joiningDate, null, null, null,
-                null);
+        String localDisplayName = null;
+        return new ClientData(null, officeId, null, id, firstname, middlename, lastname, fullname, localDisplayName, externalId,
+                joiningDate, null, null, null, null);
     }
 
     public static ClientData integrateChanges(final ClientData clientData, ClientData currentChange, final Collection<ClientData> allChanges) {
-        String firstname = clientData.firstname;
-        String lastname = clientData.lastname;
-        if (StringUtils.isNotBlank(clientData.clientOrBusinessName)) {
-            firstname = null;
-            lastname = clientData.clientOrBusinessName;
-        }
-        final String displayName = buildDisplayNameFrom(firstname, lastname);
-        return new ClientData(clientData.accountNo, clientData.officeId, clientData.officeName, clientData.id, firstname, lastname, displayName,
-                clientData.externalId, clientData.joinedDate, clientData.imageKey, clientData.allowedOffices, currentChange, allChanges);
+        return new ClientData(clientData.accountNo, clientData.officeId, clientData.officeName, clientData.id, clientData.firstname,
+                clientData.middlename, clientData.lastname, clientData.fullname, clientData.displayName, clientData.externalId,
+                clientData.joinedDate, clientData.imageKey, clientData.allowedOffices, currentChange, allChanges);
     }
 
     public static ClientData template(final Long officeId, final LocalDate joinedDate, final List<OfficeLookup> allowedOffices) {
-        return new ClientData(null, officeId, null, null, null, null, null, null, joinedDate, null, allowedOffices, null, null);
+        return new ClientData(null, officeId, null, null, null, null, null, null, null, null, joinedDate, null, allowedOffices, null, null);
     }
 
     public static ClientData templateOnTop(final ClientData clientData, final List<OfficeLookup> allowedOffices) {
 
-        String firstname = clientData.firstname;
-        String lastname = clientData.lastname;
-        if (StringUtils.isNotBlank(clientData.clientOrBusinessName)) {
-            firstname = null;
-            lastname = clientData.clientOrBusinessName;
-        }
-        final String displayName = buildDisplayNameFrom(firstname, lastname);
-        return new ClientData(clientData.accountNo, clientData.officeId, clientData.officeName, clientData.id, firstname, lastname, displayName,
-                clientData.externalId, clientData.joinedDate, clientData.imageKey, allowedOffices, clientData.currentChange,
-                clientData.allChanges);
+        return new ClientData(clientData.accountNo, clientData.officeId, clientData.officeName, clientData.id, clientData.firstname,
+                clientData.middlename, clientData.lastname, clientData.fullname, clientData.displayName, clientData.externalId,
+                clientData.joinedDate, clientData.imageKey, allowedOffices, clientData.currentChange, clientData.allChanges);
     }
 
-    public static ClientData clientIdentifier(final Long id, final String accountIdentifier, final String firstname, final String lastname, final Long officeId,
+    public static ClientData clientIdentifier(final Long id, final String accountIdentifier, final String firstname,
+            final String middlename, final String lastname, final String fullname, final String displayName, final Long officeId,
             final String officeName) {
 
-        final String displayName = buildDisplayNameFrom(firstname, lastname);
-
-        return new ClientData(accountIdentifier, officeId, officeName, id, firstname, lastname, displayName, null, null, null, null, null, null);
+        return new ClientData(accountIdentifier, officeId, officeName, id, firstname, middlename, lastname, fullname, displayName, null,
+                null, null, null, null, null);
     }
 
-    public ClientData(final String accountNo, final Long officeId, final String officeName, final Long id, final String firstname, final String lastname,
-            final String displayName, final String externalId, final LocalDate joinedDate, final String imageKey,
-            final List<OfficeLookup> allowedOffices, final ClientData currentChange, final Collection<ClientData> allChanges) {
+    public ClientData(final String accountNo, final Long officeId, final String officeName, final Long id, final String firstname,
+            final String middlename, final String lastname, final String fullname, final String displayName, final String externalId,
+            final LocalDate joinedDate, final String imageKey, final List<OfficeLookup> allowedOffices, final ClientData currentChange,
+            final Collection<ClientData> allChanges) {
         this.accountNo = accountNo;
         this.officeId = officeId;
         this.officeName = officeName;
         this.id = id;
         this.firstname = StringUtils.defaultIfEmpty(firstname, null);
-
-        /*** unset last name for business name **/
-        if (StringUtils.isBlank(firstname)) {
-            this.lastname = null;
-            this.clientOrBusinessName = lastname;
-        } else {
-            this.lastname = lastname;
-            this.clientOrBusinessName = null;
-        }
-        this.displayName = displayName;
+        this.middlename = StringUtils.defaultIfEmpty(middlename, null);
+        this.lastname = StringUtils.defaultIfEmpty(lastname, null);
+        this.fullname = StringUtils.defaultIfEmpty(fullname, null);
+        this.displayName = StringUtils.defaultIfEmpty(displayName, null);
         this.externalId = StringUtils.defaultIfEmpty(externalId, null);
         this.joinedDate = joinedDate;
         this.imageKey = imageKey;

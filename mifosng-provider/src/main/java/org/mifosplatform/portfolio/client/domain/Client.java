@@ -1,7 +1,9 @@
 package org.mifosplatform.portfolio.client.domain;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.persistence.Column;
@@ -11,10 +13,14 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
+import org.mifosplatform.infrastructure.core.data.ApiParameterError;
+import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
+import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.mifosplatform.infrastructure.security.service.RandomPasswordGenerator;
 import org.mifosplatform.organisation.office.domain.Office;
 import org.springframework.data.jpa.domain.AbstractPersistable;
@@ -23,21 +29,27 @@ import org.springframework.data.jpa.domain.AbstractPersistable;
 @Table(name = "m_client")
 public class Client extends AbstractPersistable<Long> {
 
-    @SuppressWarnings("unused")
-    @Column(name = "account_no", length=40, unique=true, nullable=false)
+    @Column(name = "account_no", length = 40, unique = true, nullable = false)
     private String accountNumber;
-    
+
     @ManyToOne
     @JoinColumn(name = "office_id", nullable = false)
     private Office office;
 
     @Column(name = "firstname", length = 50)
-    private String firstName;
+    private String firstname;
+
+    @Column(name = "middlename", length = 50)
+    private String middlename;
 
     @Column(name = "lastname", length = 50)
-    private String lastName;
+    private String lastname;
 
-    @Column(name = "display_name", length = 50)
+    @Column(name = "fullname", length = 100)
+    private String fullname;
+
+    @SuppressWarnings("unused")
+    @Column(name = "display_name", length = 100)
     private String displayName;
 
     @Column(name = "joined_date")
@@ -53,36 +65,34 @@ public class Client extends AbstractPersistable<Long> {
     @Column(name = "image_key", length = 500)
     private String imageKey;
 
+    @Transient
+    private boolean accountNumberRequiresAutoGeneration = false;
+
     public static Client fromJson(final Office clientOffice, final JsonCommand command) {
-        
-        final String joiningDateParamName = "joinedDate";
-        final LocalDate joiningDate = command.localDateValueOfParameterNamed(joiningDateParamName);
-        
-        final String firstnameParamName = "firstname";
-        String firstname = command.stringValueOfParameterNamed(firstnameParamName);
-        
-        final String lastnameParamName = "lastname";
-        String lastname = command.stringValueOfParameterNamed(lastnameParamName);
-        
-        final String clientOrBusinessNameParamName = "clientOrBusinessName";
-        final String clientOrBusinessName = command.stringValueOfParameterNamed(clientOrBusinessNameParamName);
-        if (StringUtils.isNotBlank(clientOrBusinessName)) {
-            lastname = clientOrBusinessName;
-            firstname = null;
-        }
-        
-        final String externalIdParamName = "externalId";
-        final String externalId = command.stringValueOfParameterNamed(externalIdParamName);
-        
-        return new Client(clientOffice, firstname, lastname, joiningDate, externalId);
+
+        final String accountNo = command.stringValueOfParameterNamed("accountNo");
+        final String firstname = command.stringValueOfParameterNamed("firstname");
+        final String middlename = command.stringValueOfParameterNamed("middlename");
+        final String lastname = command.stringValueOfParameterNamed("lastname");
+        final String fullname = command.stringValueOfParameterNamed("fullname");
+        final LocalDate joiningDate = command.localDateValueOfParameterNamed("joinedDate");
+        final String externalId = command.stringValueOfParameterNamed("externalId");
+
+        return new Client(clientOffice, accountNo, firstname, middlename, lastname, fullname, joiningDate, externalId);
     }
-    
+
     protected Client() {
         //
     }
 
-    private Client(final Office office, final String firstName, final String lastName, final LocalDate openingDate, final String externalId) {
-        this.accountNumber = new RandomPasswordGenerator(19).generate();
+    private Client(final Office office, final String accountNo, final String firstname, final String middlename, final String lastname, final String fullname,
+            final LocalDate openingDate, final String externalId) {
+        if (StringUtils.isBlank(accountNo)) {
+            this.accountNumber = new RandomPasswordGenerator(19).generate();
+            this.accountNumberRequiresAutoGeneration = true;
+        } else {
+            this.accountNumber = accountNo;
+        }
         this.office = office;
         if (StringUtils.isNotBlank(externalId)) {
             this.externalId = externalId.trim();
@@ -90,18 +100,40 @@ public class Client extends AbstractPersistable<Long> {
             this.externalId = null;
         }
         this.joinedDate = openingDate.toDateMidnight().toDate();
-        if (StringUtils.isNotBlank(firstName)) {
-            this.firstName = firstName.trim();
+        if (StringUtils.isNotBlank(firstname)) {
+            this.firstname = firstname.trim();
         } else {
-            this.firstName = null;
+            this.firstname = null;
         }
-        this.lastName = lastName.trim();
-        // populate display name
-        if (this.firstName != null) {
-            this.displayName = this.firstName + " " + this.lastName;
+
+        if (StringUtils.isNotBlank(middlename)) {
+            this.middlename = middlename.trim();
         } else {
-            this.displayName = this.lastName;
+            this.middlename = null;
         }
+
+        if (StringUtils.isNotBlank(lastname)) {
+            this.lastname = lastname.trim();
+        } else {
+            this.lastname = null;
+        }
+
+        if (StringUtils.isNotBlank(fullname)) {
+            this.fullname = fullname.trim();
+        } else {
+            this.fullname = null;
+        }
+        
+        deriveDisplayName();
+        validateNameParts();
+    }
+    
+    public boolean isAccountNumberRequiresAutoGeneration() {
+        return this.accountNumberRequiresAutoGeneration;
+    }
+    
+    public void setAccountNumberRequiresAutoGeneration(boolean accountNumberRequiresAutoGeneration) {
+        this.accountNumberRequiresAutoGeneration = accountNumberRequiresAutoGeneration;
     }
 
     public boolean identifiedBy(final String identifier) {
@@ -111,110 +143,143 @@ public class Client extends AbstractPersistable<Long> {
     public boolean identifiedBy(Long clientId) {
         return getId().equals(clientId);
     }
-    
+
     public void changeOffice(final Office newOffice) {
         this.office = newOffice;
     }
-    
+
     public void updateAccountIdentifier(final String accountIdentifier) {
         this.accountNumber = accountIdentifier;
     }
 
     public Map<String, Object> update(final JsonCommand command) {
-        
-        final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(7);
-        
-        final String dateFormatAsInput = command.dateFormat();
-        final String localeAsInput = command.locale();
-        
-        final String officeIdParamName = "officeId";
-        if (command.isChangeInLongParameterNamed(officeIdParamName, this.office.getId())) {
-            final Long newValue = command.longValueOfParameterNamed(officeIdParamName);
-            actualChanges.put(officeIdParamName, newValue);
-        }
-        
-        final String joiningDateParamName = "joinedDate";
-        if (command.isChangeInLocalDateParameterNamed(joiningDateParamName, getJoiningLocalDate())) {
-            final String valueAsInput = command.stringValueOfParameterNamed(joiningDateParamName);
-            actualChanges.put(joiningDateParamName, valueAsInput);
-            actualChanges.put("dateFormat", dateFormatAsInput);
-            actualChanges.put("locale", localeAsInput);
-            
-            final LocalDate newValue = command.localDateValueOfParameterNamed(joiningDateParamName);
-            this.joinedDate = newValue.toDate();
+
+        final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(9);
+
+        final String accountNoParamName = "accountNo";
+        if (command.isChangeInStringParameterNamed(accountNoParamName, this.accountNumber)) {
+            final String newValue = command.stringValueOfParameterNamed(accountNoParamName);
+            actualChanges.put(accountNoParamName, newValue);
+            this.accountNumber = StringUtils.defaultIfEmpty(newValue, null);
         }
 
-        final String clientOrBusinessNameParamName = "clientOrBusinessName";
-        final String lastnameParamName = "lastname";
-        if (command.isChangeInStringParameterNamed(lastnameParamName, getLastnameIfNotClientOrBusinessName())) {
-            final String newValue = command.stringValueOfParameterNamed(lastnameParamName);
-            actualChanges.put(lastnameParamName, newValue);
-            if (StringUtils.isNotBlank(getClientOrBusinessName())) {
-                actualChanges.put(clientOrBusinessNameParamName, "");
-            }
-            this.lastName = newValue;
-        }
-        
-        final String firstnameParamName = "firstname";
-        if (command.isChangeInStringParameterNamed(firstnameParamName, this.firstName)) {
-            final String newValue = command.stringValueOfParameterNamed(firstnameParamName);
-            actualChanges.put(firstnameParamName, newValue);
-            this.firstName = newValue;
-        }
-        
-        
-        if (command.isChangeInStringParameterNamed(clientOrBusinessNameParamName, getClientOrBusinessName())) {
-            final String newValue = command.stringValueOfParameterNamed(clientOrBusinessNameParamName);
-            actualChanges.put(clientOrBusinessNameParamName, newValue);
-            if (StringUtils.isNotBlank(newValue)) {
-                this.lastName = newValue;
-                this.firstName = null;
-                this.displayName = this.lastName;
-            } else {
-                deriveDisplayName();
-            }
-        }
-        
         final String externalIdParamName = "externalId";
         if (command.isChangeInStringParameterNamed(externalIdParamName, this.externalId)) {
             final String newValue = command.stringValueOfParameterNamed(externalIdParamName);
             actualChanges.put(externalIdParamName, newValue);
             this.externalId = StringUtils.defaultIfEmpty(newValue, null);
         }
-        
+
+        final String officeIdParamName = "officeId";
+        if (command.isChangeInLongParameterNamed(officeIdParamName, this.office.getId())) {
+            final Long newValue = command.longValueOfParameterNamed(officeIdParamName);
+            actualChanges.put(officeIdParamName, newValue);
+        }
+
+        final String firstnameParamName = "firstname";
+        if (command.isChangeInStringParameterNamed(firstnameParamName, this.firstname)) {
+            final String newValue = command.stringValueOfParameterNamed(firstnameParamName);
+            actualChanges.put(firstnameParamName, newValue);
+            this.firstname = StringUtils.defaultIfEmpty(newValue, null);
+        }
+
+        final String middlenameParamName = "middlename";
+        if (command.isChangeInStringParameterNamed(middlenameParamName, this.middlename)) {
+            final String newValue = command.stringValueOfParameterNamed(middlenameParamName);
+            actualChanges.put(middlenameParamName, newValue);
+            this.middlename = StringUtils.defaultIfEmpty(newValue, null);
+        }
+
+        final String lastnameParamName = "lastname";
+        if (command.isChangeInStringParameterNamed(lastnameParamName, this.lastname)) {
+            final String newValue = command.stringValueOfParameterNamed(lastnameParamName);
+            actualChanges.put(lastnameParamName, newValue);
+            this.lastname = StringUtils.defaultIfEmpty(newValue, null);
+        }
+
+        final String fullnameParamName = "fullname";
+        if (command.isChangeInStringParameterNamed(fullnameParamName, this.fullname)) {
+            final String newValue = command.stringValueOfParameterNamed(fullnameParamName);
+            actualChanges.put(fullnameParamName, newValue);
+            this.fullname = newValue;
+        }
+
+        validateNameParts();
+
+        final String dateFormatAsInput = command.dateFormat();
+        final String localeAsInput = command.locale();
+
+        final String joiningDateParamName = "joinedDate";
+        if (command.isChangeInLocalDateParameterNamed(joiningDateParamName, getJoiningLocalDate())) {
+            final String valueAsInput = command.stringValueOfParameterNamed(joiningDateParamName);
+            actualChanges.put(joiningDateParamName, valueAsInput);
+            actualChanges.put("dateFormat", dateFormatAsInput);
+            actualChanges.put("locale", localeAsInput);
+
+            final LocalDate newValue = command.localDateValueOfParameterNamed(joiningDateParamName);
+            this.joinedDate = newValue.toDate();
+        }
+
+        deriveDisplayName();
+
         return actualChanges;
     }
 
-    private void deriveDisplayName() {
-        this.displayName = this.firstName + " " + this.lastName;
+    private void validateNameParts() {
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("client");
+
+        if (StringUtils.isNotBlank(this.fullname)) {
+
+            baseDataValidator.reset().parameter("firstname").value(this.firstname)
+                    .mustBeBlankWhenParameterProvided("fullname", this.fullname);
+
+            baseDataValidator.reset().parameter("middlename").value(this.middlename)
+                    .mustBeBlankWhenParameterProvided("fullname", this.fullname);
+
+            baseDataValidator.reset().parameter("lastname").value(this.lastname)
+                    .mustBeBlankWhenParameterProvided("fullname", this.fullname);
+        }
+
+        if (StringUtils.isBlank(this.fullname)) {
+            baseDataValidator.reset().parameter("firstname").value(this.firstname).notBlank().notExceedingLengthOf(50);
+            baseDataValidator.reset().parameter("middlename").value(this.middlename).ignoreIfNull().notExceedingLengthOf(50);
+            baseDataValidator.reset().parameter("lastname").value(this.lastname).notBlank().notExceedingLengthOf(50);
+        }
+
+        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
+                "Validation errors exist.", dataValidationErrors); }
     }
-    
+
+    private void deriveDisplayName() {
+
+        StringBuilder nameBuilder = new StringBuilder();
+        if (StringUtils.isNotBlank(this.firstname)) {
+            nameBuilder.append(this.firstname).append(' ');
+        }
+
+        if (StringUtils.isNotBlank(this.middlename)) {
+            nameBuilder.append(this.middlename).append(' ');
+        }
+
+        if (StringUtils.isNotBlank(this.lastname)) {
+            nameBuilder.append(this.lastname);
+        }
+
+        if (StringUtils.isNotBlank(this.fullname)) {
+            nameBuilder = new StringBuilder(this.fullname);
+        }
+
+        this.displayName = nameBuilder.toString();
+    }
+
     private LocalDate getJoiningLocalDate() {
         LocalDate joiningLocalDate = null;
         if (this.joinedDate != null) {
             joiningLocalDate = LocalDate.fromDateFields(this.joinedDate);
         }
         return joiningLocalDate;
-    }
-
-    /*
-     * 
-     */
-    private String getLastnameIfNotClientOrBusinessName() {
-        String lastname = null;
-        if (StringUtils.isNotBlank(this.firstName) && StringUtils.isNotBlank(this.lastName)) {
-            lastname = this.lastName;
-        }
-        return lastname;
-    }
-
-    
-    private String getClientOrBusinessName() {
-        String clientOrBusinessName = null;
-        if (StringUtils.isBlank(this.firstName) && StringUtils.isNotBlank(this.lastName)) {
-            clientOrBusinessName = this.lastName;
-        }
-        return clientOrBusinessName;
     }
 
     /**
@@ -240,52 +305,20 @@ public class Client extends AbstractPersistable<Long> {
         return office;
     }
 
-    public void setOffice(Office office) {
-        this.office = office;
-    }
-
     public String getFirstName() {
-        return firstName;
-    }
-
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
+        return firstname;
     }
 
     public String getLastName() {
-        return lastName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
-
-    public String getDisplayName() {
-        return displayName;
-    }
-
-    public void setDisplayName(String displayName) {
-        this.displayName = displayName;
+        return lastname;
     }
 
     public Date getJoiningDate() {
         return joinedDate;
     }
 
-    public void setJoiningDate(Date joiningDate) {
-        this.joinedDate = joiningDate;
-    }
-
     public String getExternalId() {
         return externalId;
-    }
-
-    public void setExternalId(String externalId) {
-        this.externalId = externalId;
-    }
-
-    public void setDeleted(boolean deleted) {
-        this.deleted = deleted;
     }
 
     public String getImageKey() {

@@ -67,7 +67,7 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
         final ClientCommand command = this.clientCommandFromApiJsonDeserializer.commandFromApiJson(json);
 
         return ClientData.dataChangeInstance(resourceIdentifier, command.getOfficeId(), command.getExternalId(), command.getFirstname(),
-                command.getLastname(), command.getClientOrBusinessName(), command.getJoiningDate());
+                command.getMiddlename(), command.getLastname(), command.getFullname(), command.getJoiningDate());
     }
 
     @Override
