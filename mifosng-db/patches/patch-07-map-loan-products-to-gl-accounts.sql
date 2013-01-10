@@ -13,7 +13,6 @@ CREATE TABLE `acc_product_mapping` (
 	`financial_account_type` SMALLINT(5) NULL DEFAULT NULL,
 	PRIMARY KEY (`id`)
 )
-COLLATE='utf8_general_ci'
 ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
