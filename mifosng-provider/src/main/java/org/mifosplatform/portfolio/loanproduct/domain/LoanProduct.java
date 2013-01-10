@@ -58,6 +58,9 @@ public class LoanProduct extends AbstractAuditableCustom<AppUser, Long> {
     @Embedded
     private final LoanProductRelatedDetail loanProductRelatedDetail;
 
+    @Column(name = "accounting_type", nullable = false)
+    private Integer accountingType;
+
     public static LoanProduct assembleFromJson(final Fund fund, final LoanTransactionProcessingStrategy loanTransactionProcessingStrategy,
             final Set<Charge> productCharges, final JsonCommand command, final AprCalculator aprCalculator) {
 
@@ -83,8 +86,7 @@ public class LoanProduct extends AbstractAuditableCustom<AppUser, Long> {
         final Integer repaymentEvery = command.integerValueOfParameterNamed("repaymentEvery");
         final Integer numberOfRepayments = command.integerValueOfParameterNamed("numberOfRepayments");
         final BigDecimal inArrearsTolerance = command.bigDecimalValueOfParameterNamed("inArrearsTolerance");
-        final AccountingRuleType accountingRuleType = AccountingRuleType.fromInt(command
-                .integerValueOfParameterNamed("accountingType"));
+        final AccountingRuleType accountingRuleType = AccountingRuleType.fromInt(command.integerValueOfParameterNamed("accountingType"));
 
         return new LoanProduct(fund, loanTransactionProcessingStrategy, name, description, currency, principal, interestRatePerPeriod,
                 interestFrequencyType, annualInterestRate, interestMethod, interestCalculationPeriodMethod, repaymentEvery,
@@ -118,7 +120,11 @@ public class LoanProduct extends AbstractAuditableCustom<AppUser, Long> {
 
         this.loanProductRelatedDetail = new LoanProductRelatedDetail(currency, defaultPrincipal, defaultNominalInterestRatePerPeriod,
                 interestPeriodFrequencyType, defaultAnnualNominalInterestRate, interestMethod, interestCalculationPeriodMethod, repayEvery,
-                repaymentFrequencyType, defaultNumberOfInstallments, amortizationMethod, inArrearsTolerance, accountingRuleType);
+                repaymentFrequencyType, defaultNumberOfInstallments, amortizationMethod, inArrearsTolerance);
+
+        if (accountingRuleType != null) {
+            this.accountingType = accountingRuleType.getValue();
+        }
     }
 
     public MonetaryCurrency getCurrency() {
@@ -128,7 +134,7 @@ public class LoanProduct extends AbstractAuditableCustom<AppUser, Long> {
     public Set<Charge> getCharges() {
         return charges;
     }
-    
+
     public void update(final Fund fund) {
         this.fund = fund;
     }
@@ -145,6 +151,13 @@ public class LoanProduct extends AbstractAuditableCustom<AppUser, Long> {
 
         final Map<String, Object> actualChanges = this.loanProductRelatedDetail.update(command, aprCalculator);
 
+        final String accountingTypeParamName = "accountingType";
+        if (command.isChangeInIntegerParameterNamed(accountingTypeParamName, this.accountingType)) {
+            final Integer newValue = command.integerValueOfParameterNamed(accountingTypeParamName);
+            actualChanges.put(accountingTypeParamName, newValue);
+            this.accountingType = newValue;
+        }
+        
         final String nameParamName = "name";
         if (command.isChangeInStringParameterNamed(nameParamName, this.name)) {
             final String newValue = command.stringValueOfParameterNamed(nameParamName);
