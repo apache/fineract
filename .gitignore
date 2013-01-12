@@ -15,3 +15,4 @@ repos
 *.iml
 *.ipr
 *.iws
+rebel.xml

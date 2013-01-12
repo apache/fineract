@@ -1,3 +1,18 @@
+apply plugin: 'rebel'
+
+buildscript {
+  repositories {
+     mavenLocal()
+     mavenCentral()
+     mavenRepo(name: 'zt-public-snapshots',
+               url: 'http://repos.zeroturnaround.com/nexus/content/groups/zt-public/')
+  }
+
+  dependencies {
+     classpath group: 'org.zeroturnaround', name: 'gradle-jrebel-plugin', version: '1.0.2-SNAPSHOT'
+  }
+}
+
 buildscript {
     repositories {
         add(new org.apache.ivy.plugins.resolver.URLResolver()) {
