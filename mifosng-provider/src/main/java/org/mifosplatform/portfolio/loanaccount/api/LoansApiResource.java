@@ -69,14 +69,14 @@ import com.google.gson.JsonElement;
 @Scope("singleton")
 public class LoansApiResource {
 
-    private final Set<String> LOAN_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "externalId", "clientId", "groupId",
-            "clientName", "groupName", "fundId", "fundName", "loanProductId", "loanProductName", "loanProductDescription", "currency",
-            "principal", "inArrearsTolerance", "numberOfRepayments", "repaymentEvery", "interestRatePerPeriod", "annualInterestRate",
-            "repaymentFrequencyType", "interestRateFrequencyType", "amortizationType", "interestType", "interestCalculationPeriodType",
-            "submittedOnDate", "approvedOnDate", "expectedDisbursementDate", "actualDisbursementDate", "expectedFirstRepaymentOnDate",
-            "interestChargedFromDate", "closedOnDate", "expectedMaturityDate", "status", "lifeCycleStatusDate", "repaymentSchedule",
-            "transactions", "permissions", "convenienceData", "charges", "productOptions", "amortizationTypeOptions",
-            "interestTypeOptions", "interestCalculationPeriodTypeOptions", "repaymentFrequencyTypeOptions",
+    private final Set<String> LOAN_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "accountNo", "externalId", "clientId",
+            "groupId", "clientName", "groupName", "fundId", "fundName", "loanProductId", "loanProductName", "loanProductDescription",
+            "currency", "principal", "inArrearsTolerance", "numberOfRepayments", "repaymentEvery", "interestRatePerPeriod",
+            "annualInterestRate", "repaymentFrequencyType", "interestRateFrequencyType", "amortizationType", "interestType",
+            "interestCalculationPeriodType", "submittedOnDate", "approvedOnDate", "expectedDisbursementDate", "actualDisbursementDate",
+            "expectedFirstRepaymentOnDate", "interestChargedFromDate", "closedOnDate", "expectedMaturityDate", "status",
+            "lifeCycleStatusDate", "repaymentSchedule", "transactions", "permissions", "convenienceData", "charges", "productOptions",
+            "amortizationTypeOptions", "interestTypeOptions", "interestCalculationPeriodTypeOptions", "repaymentFrequencyTypeOptions",
             "interestRateFrequencyTypeOptions", "fundOptions", "repaymentStrategyOptions", "chargeOptions", "loanOfficerId",
             "loanOfficerName", "loanOfficerOptions", "chargeTemplate"));
 

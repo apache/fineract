@@ -308,7 +308,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
         public String loanAccountSummarySchema() {
 
-            StringBuilder accountsSummary = new StringBuilder("l.id as id, l.external_id as externalId,");
+            StringBuilder accountsSummary = new StringBuilder("l.id as id, l.account_no as accountNo, l.external_id as externalId,");
             accountsSummary.append("l.product_id as productId, lp.name as productName,").append("l.loan_status_id as statusId ")
                     .append("from m_loan l ").append("LEFT JOIN m_product_loan AS lp ON lp.id = l.product_id ");
 
@@ -319,13 +319,14 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         public ClientAccountSummaryData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
 
             final Long id = JdbcSupport.getLong(rs, "id");
+            final String accountNo = rs.getString("accountNo");
             final String externalId = rs.getString("externalId");
             final Long productId = JdbcSupport.getLong(rs, "productId");
             final String loanProductName = rs.getString("productName");
             final Integer loanStatusId = JdbcSupport.getInteger(rs, "statusId");
             final EnumOptionData loanStatus = LoanEnumerations.status(loanStatusId);
 
-            return new ClientAccountSummaryData(id, externalId, productId, loanProductName, loanStatus);
+            return new ClientAccountSummaryData(id, accountNo, externalId, productId, loanProductName, loanStatus);
         }
     }
 

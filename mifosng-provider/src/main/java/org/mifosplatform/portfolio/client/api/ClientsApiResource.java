@@ -265,7 +265,7 @@ public class ClientsApiResource {
     @Path("{clientId}/loans")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveClientAccount(@PathParam("clientId") final Long clientId, @Context final UriInfo uriInfo) {
+    public String retrieveClientAccounts(@PathParam("clientId") final Long clientId, @Context final UriInfo uriInfo) {
 
         context.authenticatedUser().validateHasReadPermission("CLIENT");
 
@@ -278,7 +278,6 @@ public class ClientsApiResource {
                 "withdrawnByClientDepositAccountsCount", "withdrawnByClientDepositAccounts", "closedDepositAccountsCount",
                 "closedDepositAccounts", "maturedDepositAccountsCount", "maturedDepositAccounts", "rejectedDepositAccountsCount",
                 "rejectedDepositAccounts", "preclosedDepositAccountsCount", "preclosedDepositAccounts",
-
                 "pendingApprovalSavingAccountsCount", "pendingApprovalSavingAccounts", "approvedSavingAccountsCount",
                 "approvedSavingAccounts", "withdrawnByClientSavingAccountsCount", "withdrawnByClientSavingAccounts",
                 "rejectedSavingAccountsCount", "rejectedSavingAccounts", "closedSavingAccountsCount", "closedSavingAccounts"));

@@ -81,6 +81,7 @@ public class LoanAssembler {
 
     private Loan assembleApplication(final JsonElement element, final Long clientId, final Long groupId) {
 
+        final String accountNo = fromApiJsonHelper.extractStringNamed("accountNo", element);
         final Long productId = fromApiJsonHelper.extractLongNamed("productId", element);
         final Long fundId = fromApiJsonHelper.extractLongNamed("fundId", element);
         final Long loanOfficerId = fromApiJsonHelper.extractLongNamed("loanOfficerId", element);
@@ -96,7 +97,7 @@ public class LoanAssembler {
         final Set<LoanCharge> loanCharges = this.loanChargeAssembler.fromParsedJson(element);
 
         final BigDecimal inArrearsTolerance = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("inArrearsTolerance", element);
-        LoanSchedule loanSchedule = this.loanScheduleAssembler.fromJson(element, inArrearsTolerance);
+        final LoanSchedule loanSchedule = this.loanScheduleAssembler.fromJson(element, inArrearsTolerance);
 
         Loan loanApplication = null;
         Client client = null;
@@ -105,7 +106,7 @@ public class LoanAssembler {
             client = this.clientRepository.findOne(clientId);
             if (client == null || client.isDeleted()) { throw new ClientNotFoundException(clientId); }
 
-            loanApplication = Loan.newIndividualLoanApplication(client, loanProduct, fund, loanOfficer, loanTransactionProcessingStrategy,
+            loanApplication = Loan.newIndividualLoanApplication(accountNo, client, loanProduct, fund, loanOfficer, loanTransactionProcessingStrategy,
                     loanSchedule, loanCharges);
         }
 
@@ -113,7 +114,7 @@ public class LoanAssembler {
             group = this.groupRepository.findOne(groupId);
             if (group == null || group.isDeleted()) { throw new GroupNotFoundException(groupId); }
 
-            loanApplication = Loan.newGroupLoanApplication(group, loanProduct, fund, loanOfficer, loanTransactionProcessingStrategy,
+            loanApplication = Loan.newGroupLoanApplication(accountNo, group, loanProduct, fund, loanOfficer, loanTransactionProcessingStrategy,
                     loanSchedule, loanCharges);
         }
 
@@ -121,7 +122,7 @@ public class LoanAssembler {
             
             if (!group.hasClientAsMember(client)) { throw new ClientNotInGroupException(clientId, groupId); }
             
-            loanApplication = Loan.newIndividualLoanApplicationFromGroup(client, group, loanProduct, fund, loanOfficer, loanTransactionProcessingStrategy,
+            loanApplication = Loan.newIndividualLoanApplicationFromGroup(accountNo, client, group, loanProduct, fund, loanOfficer, loanTransactionProcessingStrategy,
                     loanSchedule, loanCharges);
         }
 

@@ -368,7 +368,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
     private static final class LoanMapper implements RowMapper<LoanBasicDetailsData> {
 
         public String loanSchema() {
-            return "l.id as id, l.external_id as externalId, l.fund_id as fundId, f.name as fundName, "
+            return "l.id as id, l.account_no as accountNo, l.external_id as externalId, l.fund_id as fundId, f.name as fundName, "
                     + " lp.id as loanProductId, lp.name as loanProductName, lp.description as loanProductDescription, c.id as clientId, c.display_name as clientName, "
                     + " c.office_id as clientOfficeId, g.id as groupId, g.name as groupName, g.office_id as groupOfficeId,"
                     + " l.submittedon_date as submittedOnDate,"
@@ -391,75 +391,75 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         @Override
         public LoanBasicDetailsData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
 
-            String currencyCode = rs.getString("currencyCode");
-            String currencyName = rs.getString("currencyName");
-            String currencyNameCode = rs.getString("currencyNameCode");
-            String currencyDisplaySymbol = rs.getString("currencyDisplaySymbol");
-            Integer currencyDigits = JdbcSupport.getInteger(rs, "currencyDigits");
-            CurrencyData currencyData = new CurrencyData(currencyCode, currencyName, currencyDigits, currencyDisplaySymbol,
+            final String currencyCode = rs.getString("currencyCode");
+            final String currencyName = rs.getString("currencyName");
+            final String currencyNameCode = rs.getString("currencyNameCode");
+            final String currencyDisplaySymbol = rs.getString("currencyDisplaySymbol");
+            final Integer currencyDigits = JdbcSupport.getInteger(rs, "currencyDigits");
+            final CurrencyData currencyData = new CurrencyData(currencyCode, currencyName, currencyDigits, currencyDisplaySymbol,
                     currencyNameCode);
 
-            Long id = rs.getLong("id");
-            String externalId = rs.getString("externalId");
+            final Long id = rs.getLong("id");
+            final String accountNo = rs.getString("accountNo");
+            final String externalId = rs.getString("externalId");
 
-            Long clientId = JdbcSupport.getLong(rs, "clientId");
-            Long clientOfficeId = JdbcSupport.getLong(rs, "clientOfficeId");
-            ;
-            String clientName = rs.getString("clientName");
+            final Long clientId = JdbcSupport.getLong(rs, "clientId");
+            final Long clientOfficeId = JdbcSupport.getLong(rs, "clientOfficeId");
+            final String clientName = rs.getString("clientName");
 
-            Long groupId = JdbcSupport.getLong(rs, "groupId");
-            Long groupOfficeId = JdbcSupport.getLong(rs, "groupOfficeId");
-            ;
-            String groupName = rs.getString("groupName");
+            final Long groupId = JdbcSupport.getLong(rs, "groupId");
+            final Long groupOfficeId = JdbcSupport.getLong(rs, "groupOfficeId");
+            final String groupName = rs.getString("groupName");
 
-            Long fundId = JdbcSupport.getLong(rs, "fundId");
-            String fundName = rs.getString("fundName");
-            Long loanOfficerId = JdbcSupport.getLong(rs, "loanOfficerId");
-            String loanOfficerName = rs.getString("loanOfficerName");
-            Long loanProductId = JdbcSupport.getLong(rs, "loanProductId");
-            String loanProductName = rs.getString("loanProductName");
-            String loanProductDescription = rs.getString("loanProductDescription");
+            final Long fundId = JdbcSupport.getLong(rs, "fundId");
+            final String fundName = rs.getString("fundName");
+            final Long loanOfficerId = JdbcSupport.getLong(rs, "loanOfficerId");
+            final String loanOfficerName = rs.getString("loanOfficerName");
+            final Long loanProductId = JdbcSupport.getLong(rs, "loanProductId");
+            final String loanProductName = rs.getString("loanProductName");
+            final String loanProductDescription = rs.getString("loanProductDescription");
 
-            LocalDate submittedOnDate = JdbcSupport.getLocalDate(rs, "submittedOnDate");
-            LocalDate approvedOnDate = JdbcSupport.getLocalDate(rs, "approvedOnDate");
-            LocalDate expectedDisbursementDate = JdbcSupport.getLocalDate(rs, "expectedDisbursementDate");
-            LocalDate actualDisbursementDate = JdbcSupport.getLocalDate(rs, "actualDisbursementDate");
-            LocalDate expectedFirstRepaymentOnDate = JdbcSupport.getLocalDate(rs, "expectedFirstRepaymentOnDate");
-            LocalDate interestChargedFromDate = JdbcSupport.getLocalDate(rs, "interestChargedFromDate");
-            LocalDate closedOnDate = JdbcSupport.getLocalDate(rs, "closedOnDate");
-            LocalDate expectedMaturityDate = JdbcSupport.getLocalDate(rs, "expectedMaturityDate");
+            final LocalDate submittedOnDate = JdbcSupport.getLocalDate(rs, "submittedOnDate");
+            final LocalDate approvedOnDate = JdbcSupport.getLocalDate(rs, "approvedOnDate");
+            final LocalDate expectedDisbursementDate = JdbcSupport.getLocalDate(rs, "expectedDisbursementDate");
+            final LocalDate actualDisbursementDate = JdbcSupport.getLocalDate(rs, "actualDisbursementDate");
+            final LocalDate expectedFirstRepaymentOnDate = JdbcSupport.getLocalDate(rs, "expectedFirstRepaymentOnDate");
+            final LocalDate interestChargedFromDate = JdbcSupport.getLocalDate(rs, "interestChargedFromDate");
+            final LocalDate closedOnDate = JdbcSupport.getLocalDate(rs, "closedOnDate");
+            final LocalDate expectedMaturityDate = JdbcSupport.getLocalDate(rs, "expectedMaturityDate");
 
-            BigDecimal principal = rs.getBigDecimal("principal");
-            BigDecimal inArrearsTolerance = rs.getBigDecimal("inArrearsTolerance");
-            BigDecimal totalDisbursementCharges = rs.getBigDecimal("totalDisbursementCharges");
+            final BigDecimal principal = rs.getBigDecimal("principal");
+            final BigDecimal inArrearsTolerance = rs.getBigDecimal("inArrearsTolerance");
+            final BigDecimal totalDisbursementCharges = rs.getBigDecimal("totalDisbursementCharges");
 
-            Integer numberOfRepayments = JdbcSupport.getInteger(rs, "numberOfRepayments");
-            Integer repaymentEvery = JdbcSupport.getInteger(rs, "repaymentEvery");
-            BigDecimal interestRatePerPeriod = rs.getBigDecimal("interestRatePerPeriod");
-            BigDecimal annualInterestRate = rs.getBigDecimal("annualInterestRate");
+            final Integer numberOfRepayments = JdbcSupport.getInteger(rs, "numberOfRepayments");
+            final Integer repaymentEvery = JdbcSupport.getInteger(rs, "repaymentEvery");
+            final BigDecimal interestRatePerPeriod = rs.getBigDecimal("interestRatePerPeriod");
+            final BigDecimal annualInterestRate = rs.getBigDecimal("annualInterestRate");
 
-            Integer termFrequency = JdbcSupport.getInteger(rs, "termFrequency");
-            Integer termPeriodFrequencyTypeInt = JdbcSupport.getInteger(rs, "termPeriodFrequencyType");
-            EnumOptionData termPeriodFrequencyType = LoanEnumerations.termFrequencyType(termPeriodFrequencyTypeInt);
+            final Integer termFrequency = JdbcSupport.getInteger(rs, "termFrequency");
+            final Integer termPeriodFrequencyTypeInt = JdbcSupport.getInteger(rs, "termPeriodFrequencyType");
+            final EnumOptionData termPeriodFrequencyType = LoanEnumerations.termFrequencyType(termPeriodFrequencyTypeInt);
 
-            int repaymentFrequencyTypeInt = JdbcSupport.getInteger(rs, "repaymentFrequencyType");
-            EnumOptionData repaymentFrequencyType = LoanEnumerations.repaymentFrequencyType(repaymentFrequencyTypeInt);
+            final int repaymentFrequencyTypeInt = JdbcSupport.getInteger(rs, "repaymentFrequencyType");
+            final EnumOptionData repaymentFrequencyType = LoanEnumerations.repaymentFrequencyType(repaymentFrequencyTypeInt);
 
-            int interestRateFrequencyTypeInt = JdbcSupport.getInteger(rs, "interestRateFrequencyType");
-            EnumOptionData interestRateFrequencyType = LoanEnumerations.interestRateFrequencyType(interestRateFrequencyTypeInt);
+            final int interestRateFrequencyTypeInt = JdbcSupport.getInteger(rs, "interestRateFrequencyType");
+            final EnumOptionData interestRateFrequencyType = LoanEnumerations.interestRateFrequencyType(interestRateFrequencyTypeInt);
 
-            Integer transactionStrategyId = JdbcSupport.getInteger(rs, "transactionStrategyId");
+            final Integer transactionStrategyId = JdbcSupport.getInteger(rs, "transactionStrategyId");
 
-            int amortizationTypeInt = JdbcSupport.getInteger(rs, "amortizationType");
-            int interestTypeInt = JdbcSupport.getInteger(rs, "interestType");
-            int interestCalculationPeriodTypeInt = JdbcSupport.getInteger(rs, "interestCalculationPeriodType");
+            final int amortizationTypeInt = JdbcSupport.getInteger(rs, "amortizationType");
+            final int interestTypeInt = JdbcSupport.getInteger(rs, "interestType");
+            final int interestCalculationPeriodTypeInt = JdbcSupport.getInteger(rs, "interestCalculationPeriodType");
 
-            EnumOptionData amortizationType = LoanEnumerations.amortizationType(amortizationTypeInt);
-            EnumOptionData interestType = LoanEnumerations.interestType(interestTypeInt);
-            EnumOptionData interestCalculationPeriodType = LoanEnumerations.interestCalculationPeriodType(interestCalculationPeriodTypeInt);
+            final EnumOptionData amortizationType = LoanEnumerations.amortizationType(amortizationTypeInt);
+            final EnumOptionData interestType = LoanEnumerations.interestType(interestTypeInt);
+            final EnumOptionData interestCalculationPeriodType = LoanEnumerations
+                    .interestCalculationPeriodType(interestCalculationPeriodTypeInt);
 
-            Integer lifeCycleStatusId = JdbcSupport.getInteger(rs, "lifeCycleStatusId");
-            EnumOptionData status = LoanEnumerations.status(lifeCycleStatusId);
+            final Integer lifeCycleStatusId = JdbcSupport.getInteger(rs, "lifeCycleStatusId");
+            final EnumOptionData status = LoanEnumerations.status(lifeCycleStatusId);
 
             LocalDate lifeCycleStatusDate = submittedOnDate;
             if (approvedOnDate != null) {
@@ -473,8 +473,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             }
 
             Collection<LoanChargeData> charges = null;
-            return new LoanBasicDetailsData(id, externalId, clientId, clientName, clientOfficeId, groupId, groupName, groupOfficeId,
-                    loanProductId, loanProductName, loanProductDescription, fundId, fundName, closedOnDate, submittedOnDate,
+            return new LoanBasicDetailsData(id, accountNo, externalId, clientId, clientName, clientOfficeId, groupId, groupName,
+                    groupOfficeId, loanProductId, loanProductName, loanProductDescription, fundId, fundName, closedOnDate, submittedOnDate,
                     approvedOnDate, expectedDisbursementDate, actualDisbursementDate, expectedMaturityDate, expectedFirstRepaymentOnDate,
                     interestChargedFromDate, currencyData, principal, inArrearsTolerance, numberOfRepayments, repaymentEvery,
                     interestRatePerPeriod, annualInterestRate, repaymentFrequencyType, interestRateFrequencyType, amortizationType,

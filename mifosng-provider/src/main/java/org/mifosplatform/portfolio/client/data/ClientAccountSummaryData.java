@@ -10,6 +10,8 @@ public class ClientAccountSummaryData {
     @SuppressWarnings("unused")
     private final Long id;
     @SuppressWarnings("unused")
+    private final String accountNo;
+    @SuppressWarnings("unused")
     private final String externalId;
     @SuppressWarnings("unused")
     private final Long productId;
@@ -22,6 +24,7 @@ public class ClientAccountSummaryData {
     public ClientAccountSummaryData(final Long id, final String externalId, final Long productId, final String loanProductName,
             final Integer loanStatusId) {
         this.id = id;
+        this.accountNo = null;
         this.externalId = externalId;
         this.productId = productId;
         this.productName = loanProductName;
@@ -29,13 +32,10 @@ public class ClientAccountSummaryData {
         this.status = null;
     }
 
-    /**
-     * Rather than use id, just be consistent and use EnumOptionData for the
-     * status of an account.
-     */
-    public ClientAccountSummaryData(final Long id, final String externalId, final Long productId, final String loanProductName,
+    public ClientAccountSummaryData(final Long id, final String accountNo, final String externalId, final Long productId, final String loanProductName,
             final EnumOptionData loanStatus) {
         this.id = id;
+        this.accountNo = accountNo;
         this.externalId = externalId;
         this.productId = productId;
         this.productName = loanProductName;

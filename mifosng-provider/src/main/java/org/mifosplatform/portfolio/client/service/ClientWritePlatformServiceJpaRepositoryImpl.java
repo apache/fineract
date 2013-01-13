@@ -22,7 +22,7 @@ import org.mifosplatform.organisation.office.domain.OfficeRepository;
 import org.mifosplatform.organisation.office.exception.OfficeNotFoundException;
 import org.mifosplatform.portfolio.client.command.ClientIdentifierCommand;
 import org.mifosplatform.portfolio.client.command.ClientNoteCommand;
-import org.mifosplatform.portfolio.client.domain.AccountIdentifierGeneratorFactory;
+import org.mifosplatform.portfolio.client.domain.AccountNumberGeneratorFactory;
 import org.mifosplatform.portfolio.client.domain.AccountNumberGenerator;
 import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.client.domain.ClientIdentifier;
@@ -58,7 +58,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
     private final ClientCommandFromApiJsonDeserializer fromApiJsonDeserializer;
     private final ClientNoteCommandFromApiJsonDeserializer clientNoteFromApiJsonDeserializer;
     private final ClientIdentifierCommandFromApiJsonDeserializer clientIdentifierCommandFromApiJsonDeserializer;
-    private final AccountIdentifierGeneratorFactory accountIdentifierGeneratorFactory;
+    private final AccountNumberGeneratorFactory accountIdentifierGeneratorFactory;
 
     @Autowired
     public ClientWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final ClientRepository clientRepository,
@@ -67,7 +67,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             final ClientCommandFromApiJsonDeserializer fromApiJsonDeserializer,
             final ClientNoteCommandFromApiJsonDeserializer clientNoteFromApiJsonDeserializer,
             final ClientIdentifierCommandFromApiJsonDeserializer clientIdentifierCommandFromApiJsonDeserializer,
-            final AccountIdentifierGeneratorFactory accountIdentifierGeneratorFactory) {
+            final AccountNumberGeneratorFactory accountIdentifierGeneratorFactory) {
         this.context = context;
         this.clientRepository = clientRepository;
         this.clientIdentifierRepository = clientIdentifierRepository;
@@ -123,8 +123,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 
             this.fromApiJsonDeserializer.validateForCreate(command.json());
 
-            final String officeIdParamName = "officeId";
-            final Long officeId = command.longValueOfParameterNamed(officeIdParamName);
+            final Long officeId = command.longValueOfParameterNamed("officeId");
 
             final Office clientOffice = this.officeRepository.findOne(officeId);
             if (clientOffice == null) { throw new OfficeNotFoundException(officeId); }
@@ -135,7 +134,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             if (newClient.isAccountNumberRequiresAutoGeneration()) {
                 final AccountNumberGenerator accountNoGenerator = this.accountIdentifierGeneratorFactory
                         .determineClientAccountNoGenerator(newClient.getId());
-                newClient.updateAccountIdentifier(accountNoGenerator.generate());
+                newClient.updateAccountNo(accountNoGenerator.generate());
                 this.clientRepository.save(newClient);
             }
 

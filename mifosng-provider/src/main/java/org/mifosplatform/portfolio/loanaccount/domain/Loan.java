@@ -35,6 +35,7 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.domain.AbstractAuditableCustom;
+import org.mifosplatform.infrastructure.security.service.RandomPasswordGenerator;
 import org.mifosplatform.organisation.monetary.domain.ApplicationCurrency;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.organisation.monetary.domain.Money;
@@ -64,9 +65,17 @@ import org.mifosplatform.portfolio.loanproduct.service.LoanEnumerations;
 import org.mifosplatform.useradministration.domain.AppUser;
 
 @Entity
-@Table(name = "m_loan", uniqueConstraints = @UniqueConstraint(columnNames = { "external_id" }))
+@Table(name = "m_loan", uniqueConstraints = { 
+        @UniqueConstraint(columnNames = { "account_no" }, name = "loan_account_no_UNIQUE"),
+        @UniqueConstraint(columnNames = { "external_id" }, name = "loan_externalid_UNIQUE") })
 public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 
+    @Column(name = "account_no", length = 20, unique = true, nullable = false)
+    private String accountNumber;
+
+    @Column(name = "external_id")
+    private String externalId;
+    
     @ManyToOne(optional = true)
     @JoinColumn(name = "client_id")
     private Client client;
@@ -94,9 +103,6 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
     @ManyToOne
     @JoinColumn(name = "loan_transaction_strategy_id", nullable = true)
     private LoanTransactionProcessingStrategy transactionProcessingStrategy;
-
-    @Column(name = "external_id")
-    private String externalId;
 
     @Embedded
     private LoanProductRelatedDetail loanRepaymentScheduleDetail;
@@ -188,58 +194,53 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
     private BigDecimal totalChargesDueAtDisbursement;
 
     @Transient
+    private boolean accountNumberRequiresAutoGeneration = false;
+
+    @Transient
     private final LoanRepaymentScheduleTransactionProcessorFactory transactionProcessor = new LoanRepaymentScheduleTransactionProcessorFactory();
 
-    @Deprecated
-    public static Loan createNew(final Fund fund, final Staff loanOfficer,
-            final LoanTransactionProcessingStrategy transactionProcessingStrategy, final LoanProduct loanProduct, final Client client,
-            final LoanProductRelatedDetail loanRepaymentScheduleDetail, final Set<LoanCharge> loanCharges) {
-        return new Loan(client, null, fund, loanOfficer, transactionProcessingStrategy, loanProduct, loanRepaymentScheduleDetail, null,
-                loanCharges);
-    }
-
-    @Deprecated
-    public static Loan createNew(final Fund fund, final Staff loanOfficer,
-            final LoanTransactionProcessingStrategy transactionProcessingStrategy, final LoanProduct loanProduct, final Group group,
-            final LoanProductRelatedDetail loanRepaymentScheduleDetail, final Set<LoanCharge> loanCharges) {
-        return new Loan(null, group, fund, loanOfficer, transactionProcessingStrategy, loanProduct, loanRepaymentScheduleDetail, null,
-                loanCharges);
-    }
-
-    public static Loan newIndividualLoanApplication(final Client client, final LoanProduct loanProduct, final Fund fund,
-            final Staff officer, final LoanTransactionProcessingStrategy transactionProcessingStrategy, final LoanSchedule loanSchedule,
-            final Set<LoanCharge> loanCharges) {
-        final LoanStatus status = null;
-        LoanProductRelatedDetail loanRepaymentScheduleDetail = loanSchedule.loanProductRelatedDetail();
-        return new Loan(client, null, fund, officer, transactionProcessingStrategy, loanProduct, loanRepaymentScheduleDetail, status,
-                loanCharges);
-    }
-
-    public static Loan newGroupLoanApplication(final Group group, final LoanProduct loanProduct, final Fund fund, final Staff officer,
-            final LoanTransactionProcessingStrategy transactionProcessingStrategy, final LoanSchedule loanSchedule,
-            final Set<LoanCharge> loanCharges) {
-        final LoanStatus status = null;
-        LoanProductRelatedDetail loanRepaymentScheduleDetail = loanSchedule.loanProductRelatedDetail();
-        return new Loan(null, group, fund, officer, transactionProcessingStrategy, loanProduct, loanRepaymentScheduleDetail, status,
-                loanCharges);
-    }
-
-    public static Loan newIndividualLoanApplicationFromGroup(final Client client, final Group group, final LoanProduct loanProduct,
+    public static Loan newIndividualLoanApplication(final String accountNo, final Client client, final LoanProduct loanProduct,
             final Fund fund, final Staff officer, final LoanTransactionProcessingStrategy transactionProcessingStrategy,
             final LoanSchedule loanSchedule, final Set<LoanCharge> loanCharges) {
         final LoanStatus status = null;
         LoanProductRelatedDetail loanRepaymentScheduleDetail = loanSchedule.loanProductRelatedDetail();
-        return new Loan(client, group, fund, officer, transactionProcessingStrategy, loanProduct, loanRepaymentScheduleDetail, status,
-                loanCharges);
+        return new Loan(accountNo, client, null, fund, officer, transactionProcessingStrategy, loanProduct, loanRepaymentScheduleDetail,
+                status, loanCharges);
+    }
+
+    public static Loan newGroupLoanApplication(final String accountNo, final Group group, final LoanProduct loanProduct, final Fund fund,
+            final Staff officer, final LoanTransactionProcessingStrategy transactionProcessingStrategy, final LoanSchedule loanSchedule,
+            final Set<LoanCharge> loanCharges) {
+        final LoanStatus status = null;
+        LoanProductRelatedDetail loanRepaymentScheduleDetail = loanSchedule.loanProductRelatedDetail();
+        return new Loan(accountNo, null, group, fund, officer, transactionProcessingStrategy, loanProduct, loanRepaymentScheduleDetail,
+                status, loanCharges);
+    }
+
+    public static Loan newIndividualLoanApplicationFromGroup(final String accountNo, final Client client, final Group group,
+            final LoanProduct loanProduct, final Fund fund, final Staff officer,
+            final LoanTransactionProcessingStrategy transactionProcessingStrategy, final LoanSchedule loanSchedule,
+            final Set<LoanCharge> loanCharges) {
+        final LoanStatus status = null;
+        LoanProductRelatedDetail loanRepaymentScheduleDetail = loanSchedule.loanProductRelatedDetail();
+        return new Loan(accountNo, client, group, fund, officer, transactionProcessingStrategy, loanProduct, loanRepaymentScheduleDetail,
+                status, loanCharges);
     }
 
     protected Loan() {
         //
     }
 
-    private Loan(final Client client, final Group group, Fund fund, Staff loanOfficer,
+    private Loan(final String accountNo, final Client client, final Group group, Fund fund, Staff loanOfficer,
             final LoanTransactionProcessingStrategy transactionProcessingStrategy, final LoanProduct loanProduct,
             final LoanProductRelatedDetail loanRepaymentScheduleDetail, final LoanStatus loanStatus, final Set<LoanCharge> loanCharges) {
+
+        if (StringUtils.isBlank(accountNo)) {
+            this.accountNumber = new RandomPasswordGenerator(19).generate();
+            this.accountNumberRequiresAutoGeneration = true;
+        } else {
+            this.accountNumber = accountNo;
+        }
         this.client = client;
         this.group = group;
         this.fund = fund;
@@ -283,6 +284,14 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 
     private void updateTotalChargesDueAtDisbursement() {
         this.totalChargesDueAtDisbursement = deriveSumTotalOfChargesDueAtDisbursement();
+    }
+    
+    public boolean isAccountNumberRequiresAutoGeneration() {
+        return this.accountNumberRequiresAutoGeneration;
+    }
+    
+    public void setAccountNumberRequiresAutoGeneration(boolean accountNumberRequiresAutoGeneration) {
+        this.accountNumberRequiresAutoGeneration = accountNumberRequiresAutoGeneration;
     }
 
     public void addLoanCharge(final LoanCharge loanCharge) {
@@ -545,7 +554,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
         this.expectedMaturityDate = determineExpectedMaturityDate().toDate();
     }
 
-    public Map<String, Object> modifyLoanApplication(final JsonCommand command, final LoanChargeCommand[] loanChargeCommands,
+    public Map<String, Object> loanApplicationModification(final JsonCommand command, final LoanChargeCommand[] loanChargeCommands,
             final AprCalculator aprCalculator) {
 
         final Map<String, Object> actualChanges = this.loanRepaymentScheduleDetail.updateLoanApplicationAttributes(command, aprCalculator);
@@ -557,6 +566,13 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
         final String dateFormatAsInput = command.dateFormat();
         final String localeAsInput = command.locale();
 
+        final String accountNoParamName = "accountNo";
+        if (command.isChangeInStringParameterNamed(accountNoParamName, this.accountNumber)) {
+            final String newValue = command.stringValueOfParameterNamed(accountNoParamName);
+            actualChanges.put(accountNoParamName, newValue);
+            this.accountNumber = StringUtils.defaultIfEmpty(newValue, null);
+        }
+        
         final String externalIdParamName = "externalId";
         if (command.isChangeInStringParameterNamed(externalIdParamName, this.externalId)) {
             final String newValue = command.stringValueOfParameterNamed(externalIdParamName);
@@ -658,6 +674,35 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
                 this.interestChargedFromDate = null;
             }
         }
+        
+        if (getSubmittedOnDate().isAfter(new LocalDate())) {
+            final String errorMessage = "The date on which a loan is submitted cannot be in the future.";
+            throw new InvalidLoanStateTransitionException("submittal", "cannot.be.a.future.date", errorMessage, getSubmittedOnDate());
+        }
+
+        if (getSubmittedOnDate().isAfter(getExpectedDisbursedOnLocalDate())) {
+            final String errorMessage = "The date on which a loan is submitted cannot be after its expected disbursement date: "
+                    + getExpectedDisbursedOnLocalDate().toString();
+            throw new InvalidLoanStateTransitionException("submittal", "cannot.be.after.expected.disbursement.date", errorMessage,
+                    getSubmittedOnDate(), getExpectedDisbursedOnLocalDate());
+        }
+        
+        // FIXME - this constraint doesnt really need to be here. should be
+        // possible to express loan term as say 12 months whilst also saying
+        // - that the repayment structure is 6 repayments every bi-monthly.
+//        validateSelectedPeriodFrequencyTypeIsTheSame(dataValidationErrors, loanTermFrequency, loanTermFrequencyType, numberOfRepayments,
+//                repaymentEvery, repaymentEveryType);
+//        
+//        validateRepaymentsStartingFromDateIsAfterDisbursementDate(dataValidationErrors, expectedDisbursementDate,
+//                repaymentsStartingFromDate);
+//
+//        validateRepaymentsStartingFromDateAndInterestChargedFromDate(dataValidationErrors, expectedDisbursementDate,
+//                repaymentsStartingFromDate, interestChargedFromDate);
+
+        // charges are optional
+        for (LoanCharge loanCharge : getNullPointerSafeLoanCharges()) {
+            validateChargeHasValidSpecifiedDateIfApplicable(loanCharge, getDisbursementDate(), getLastRepaymentPeriodDueDate());
+        }
 
         return actualChanges;
     }
@@ -715,6 +760,8 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
         LoanStatus statusEnum = lifecycleStateMachine.transition(LoanEvent.LOAN_CREATED, from);
         this.loanStatus = statusEnum.getValue();
 
+        this.externalId = externalId;
+        
         this.termFrequency = loanSchedule.getLoanTermFrequency();
         this.termPeriodFrequencyType = loanSchedule.getLoanTermPeriodFrequencyType().getValue();
 
@@ -749,8 +796,6 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
         for (LoanCharge loanCharge : getNullPointerSafeLoanCharges()) {
             validateChargeHasValidSpecifiedDateIfApplicable(loanCharge, getDisbursementDate(), getLastRepaymentPeriodDueDate());
         }
-
-        this.externalId = externalId;
     }
 
     private LocalDate determineExpectedMaturityDate() {
@@ -1946,8 +1991,13 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
         if (this.client != null) {
             officeId = this.client.getOffice().getId();
         } else {
-//            officeId = this.group.getOffice().getId();
+            // officeId = this.group.getOffice().getId();
         }
         return officeId;
+    }
+
+    public void updateAccountNo(final String newAccountNo) {
+        this.accountNumber = newAccountNo;
+        this.accountNumberRequiresAutoGeneration=false;
     }
 }

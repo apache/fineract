@@ -20,6 +20,7 @@ import org.mifosplatform.portfolio.loanproduct.data.LoanProductData;
 public class LoanBasicDetailsData {
 
     private final Long id;
+    private final String accountNo;
     private final String externalId;
     private final Long clientId;
     private final Long clientOfficeId;
@@ -105,6 +106,7 @@ public class LoanBasicDetailsData {
             final EnumOptionData interestCalculationPeriodType, final LocalDate expectedDisbursementDate,
             final Collection<LoanChargeData> charges) {
         this.id = null;
+        this.accountNo = null;
         this.externalId = null;
         this.clientId = clientId;
         this.clientName = clientName;
@@ -163,6 +165,7 @@ public class LoanBasicDetailsData {
     private LoanBasicDetailsData(final Long clientId, final String clientName, final Long clientOfficeId, final Long groupId,
             final String groupName, final Long groupOfficeId, final LocalDate expectedDisbursementDate) {
         this.id = null;
+        this.accountNo = null;
         this.externalId = null;
         this.clientId = clientId;
         this.clientName = clientName;
@@ -210,10 +213,10 @@ public class LoanBasicDetailsData {
         this.totalDisbursementCharges = BigDecimal.ZERO;
     }
 
-    public LoanBasicDetailsData(final Long id, final String externalId, final Long clientId, final String clientName,
-            final Long clientOfficeId, final Long groupId, final String groupName, final Long groupOfficeId, final Long loanProductId,
-            final String loanProductName, final String loanProductDescription, final Long fundId, String fundName,
-            final LocalDate closedOnDate, final LocalDate submittedOnDate, final LocalDate approvedOnDate,
+    public LoanBasicDetailsData(final Long id, final String accountNo, final String externalId, final Long clientId,
+            final String clientName, final Long clientOfficeId, final Long groupId, final String groupName, final Long groupOfficeId,
+            final Long loanProductId, final String loanProductName, final String loanProductDescription, final Long fundId,
+            String fundName, final LocalDate closedOnDate, final LocalDate submittedOnDate, final LocalDate approvedOnDate,
             final LocalDate expectedDisbursementDate, final LocalDate actualDisbursementDate, final LocalDate expectedMaturityDate,
             final LocalDate repaymentsStartingFromDate, final LocalDate interestChargedFromDate, final CurrencyData currency,
             final BigDecimal principal, final BigDecimal inArrearsTolerance, final Integer numberOfRepayments,
@@ -224,6 +227,7 @@ public class LoanBasicDetailsData {
             final EnumOptionData termPeriodFrequencyType, final Integer transactionStrategyId, final Collection<LoanChargeData> charges,
             final Long loanOfficerId, String loanOfficerName, final BigDecimal totalDisbursementCharges) {
         this.id = id;
+        this.accountNo = accountNo;
         this.externalId = externalId;
         this.clientId = clientId;
         this.clientName = clientName;
@@ -347,6 +351,10 @@ public class LoanBasicDetailsData {
 
     public Long getId() {
         return id;
+    }
+
+    public String getAccountNo() {
+        return this.accountNo;
     }
 
     public String getExternalId() {

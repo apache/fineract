@@ -29,7 +29,7 @@ import org.springframework.data.jpa.domain.AbstractPersistable;
 @Table(name = "m_client")
 public class Client extends AbstractPersistable<Long> {
 
-    @Column(name = "account_no", length = 40, unique = true, nullable = false)
+    @Column(name = "account_no", length = 20, unique = true, nullable = false)
     private String accountNumber;
 
     @ManyToOne
@@ -148,8 +148,9 @@ public class Client extends AbstractPersistable<Long> {
         this.office = newOffice;
     }
 
-    public void updateAccountIdentifier(final String accountIdentifier) {
+    public void updateAccountNo(final String accountIdentifier) {
         this.accountNumber = accountIdentifier;
+        this.accountNumberRequiresAutoGeneration = false;
     }
 
     public Map<String, Object> update(final JsonCommand command) {

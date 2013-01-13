@@ -22,6 +22,7 @@ public class LoanAccountData {
 
     // basic loan details
     private final Long id;
+    private final String accountNo;
     private final String externalId;
     private final Long clientId;
     private final String clientName;
@@ -129,6 +130,7 @@ public class LoanAccountData {
         }
 
         this.id = basicDetails.getId();
+        this.accountNo = basicDetails.getAccountNo();
         this.externalId = basicDetails.getExternalId();
         this.clientId = basicDetails.getClientId();
         this.clientName = basicDetails.getClientName();
