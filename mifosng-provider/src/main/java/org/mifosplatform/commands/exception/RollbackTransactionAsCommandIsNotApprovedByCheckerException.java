@@ -1,4 +1,4 @@
-package org.mifosplatform.portfolio.client.service;
+package org.mifosplatform.commands.exception;
 
 public class RollbackTransactionAsCommandIsNotApprovedByCheckerException extends RuntimeException {
 

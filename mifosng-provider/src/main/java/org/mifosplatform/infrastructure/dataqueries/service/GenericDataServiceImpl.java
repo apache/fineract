@@ -66,7 +66,7 @@ public class GenericDataServiceImpl implements GenericDataService {
 
     @Override
     public void updateSQL(final String sql, final String sqlErrorMsg) {
-        
+
         // long startTime = System.currentTimeMillis();
         Connection db_connection = null;
         Statement db_statement = null;

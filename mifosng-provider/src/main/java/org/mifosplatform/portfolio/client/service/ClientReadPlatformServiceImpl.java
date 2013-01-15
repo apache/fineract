@@ -65,7 +65,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
         if (StringUtils.isNotBlank(extraCriteria)) sql += " and (" + extraCriteria + ")";
 
-        sql += " order by c.lastname ASC, c.firstname ASC";
+        sql += " order by c.display_name ASC, c.account_no ASC";
 
         return this.jdbcTemplate.query(sql, rm, new Object[] { hierarchySearchString });
     }
