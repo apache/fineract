@@ -91,6 +91,26 @@ public final class ClientCommandFromApiJsonDeserializer extends AbstractFromApiJ
             final String externalId = fromApiJsonHelper.extractStringNamed(externalIdParameterName, element);
             baseDataValidator.reset().parameter(externalIdParameterName).value(externalId).ignoreIfNull().notExceedingLengthOf(100);
         }
+        
+        final String fullnameParameterName = "fullname";
+        if (fromApiJsonHelper.parameterExists(fullnameParameterName, element)) {
+            atLeastOneParameterPassedForUpdate = true;
+        }
+        
+        final String lastNameParameterName = "lastname";
+        if (fromApiJsonHelper.parameterExists(lastNameParameterName, element)) {
+            atLeastOneParameterPassedForUpdate = true;
+        }
+        
+        final String middleNameParameterName = "middlename";
+        if (fromApiJsonHelper.parameterExists(middleNameParameterName, element)) {
+            atLeastOneParameterPassedForUpdate = true;
+        }
+        
+        final String firstNameParameterName = "firstname";
+        if (fromApiJsonHelper.parameterExists(firstNameParameterName, element)) {
+            atLeastOneParameterPassedForUpdate = true;
+        }
 
         final String officeIdParameterName = "officeId";
         if (fromApiJsonHelper.parameterExists(officeIdParameterName, element)) {

@@ -34,9 +34,8 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
     private final OfficeReadPlatformService officeReadPlatformService;
 
     @Autowired
-    public GroupReadPlatformServiceImpl(final PlatformSecurityContext context,
-            final TenantAwareRoutingDataSource dataSource, ClientReadPlatformService clientReadPlatformService,
-            final OfficeReadPlatformService officeReadPlatformService) {
+    public GroupReadPlatformServiceImpl(final PlatformSecurityContext context, final TenantAwareRoutingDataSource dataSource,
+            ClientReadPlatformService clientReadPlatformService, final OfficeReadPlatformService officeReadPlatformService) {
         this.context = context;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.clientReadPlatformService = clientReadPlatformService;
@@ -52,7 +51,7 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
 
         String sql = "select " + rm.groupSchema() + " where g.is_deleted=0";
 
-        if (StringUtils.isNotBlank(extraCriteria)){
+        if (StringUtils.isNotBlank(extraCriteria)) {
             sql += " and (" + extraCriteria + ")";
         }
 
@@ -61,16 +60,16 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
 
     @Override
     public GroupData retrieveGroup(final Long groupId) {
-        
-        try{
+
+        try {
             this.context.authenticatedUser();
-            
+
             GroupMapper rm = new GroupMapper();
-            
+
             String sql = "select " + rm.groupSchema() + " where g.id = ? and g.is_deleted=0";
-            
-            return this.jdbcTemplate.queryForObject(sql, rm, new Object[] {groupId});
-        } catch (EmptyResultDataAccessException e){
+
+            return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { groupId });
+        } catch (EmptyResultDataAccessException e) {
             throw new GroupNotFoundException(groupId);
         }
     }
@@ -89,8 +88,8 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
     private static final class GroupMapper implements RowMapper<GroupData> {
 
         public String groupSchema() {
-            return "g.office_id as officeId, o.name as officeName, g.id as id, g.external_id as externalId, " +
-                   "g.name as name from m_group g join m_office o on o.id = g.office_id";
+            return "g.office_id as officeId, o.name as officeName, g.id as id, g.external_id as externalId, "
+                    + "g.name as name from m_group g join m_office o on o.id = g.office_id";
         }
 
         @Override
@@ -109,32 +108,29 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
     }
 
     @Override
-    public Collection<ClientLookup> retrieveClientMembers(Long groupId){
-        
+    public Collection<ClientLookup> retrieveClientMembers(Long groupId) {
+
         this.context.authenticatedUser();
-        
+
         ClientMemberSummaryDataMapper rm = new ClientMemberSummaryDataMapper();
-        
+
         String sql = "select " + rm.clientMemberSummarySchema() + " where cm.is_deleted = 0 and pgc.group_id = ?";
-        
-        return this.jdbcTemplate.query(sql, rm, new Object[] {groupId});
+
+        return this.jdbcTemplate.query(sql, rm, new Object[] { groupId });
     }
-    
+
     private static final class ClientMemberSummaryDataMapper implements RowMapper<ClientLookup> {
 
         public String clientMemberSummarySchema() {
-            return "cm.id, cm.firstname, cm.lastname from m_client cm INNER JOIN m_group_client pgc ON pgc.client_id = cm.id";
+            return "cm.id, cm.display_name as displayName from m_client cm INNER JOIN m_group_client pgc ON pgc.client_id = cm.id";
         }
 
         @Override
         public ClientLookup mapRow(ResultSet rs, @SuppressWarnings("unused") int rowNum) throws SQLException {
             Long id = rs.getLong("id");
-            String firstname = rs.getString("firstname");
-            String lastname = rs.getString("lastname");
-            if (StringUtils.isBlank(firstname)) {
-                firstname = "";
-            }
-            return new ClientLookup(id, firstname, lastname);
+            String displayName = rs.getString("displayName");
+
+            return ClientLookup.create(id, displayName);
         }
 
     }
@@ -156,7 +152,7 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
 
             String sql = "select " + rm.loanAccountSummarySchema() + " where l.group_id = ? and l.client_id is null";
 
-            List<GroupAccountSummaryData> results = this.jdbcTemplate.query(sql, rm, new Object[] {groupId});
+            List<GroupAccountSummaryData> results = this.jdbcTemplate.query(sql, rm, new Object[] { groupId });
             if (results != null) {
                 for (GroupAccountSummaryData row : results) {
 
@@ -181,7 +177,7 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
 
             sql = "select " + rm.loanAccountSummarySchema() + " where l.group_id = ? and l.client_id is not null";
 
-            results = this.jdbcTemplate.query(sql, rm, new Object[] {groupId});
+            results = this.jdbcTemplate.query(sql, rm, new Object[] { groupId });
             if (results != null) {
                 for (GroupAccountSummaryData row : results) {
 
@@ -218,29 +214,24 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
 
         String sql = "select " + rm.loanAccountSummarySchema() + " where l.group_id = ? and l.client_id is null and l.loan_officer_id = ?";
 
-        List<GroupAccountSummaryData> loanAccounts = this.jdbcTemplate.query(sql, rm, new Object[] {groupId, loanOfficerId});
+        List<GroupAccountSummaryData> loanAccounts = this.jdbcTemplate.query(sql, rm, new Object[] { groupId, loanOfficerId });
 
         return loanAccounts;
     }
 
-    private static final class GroupLoanAccountSummaryDataMapper implements
-            RowMapper<GroupAccountSummaryData> {
+    private static final class GroupLoanAccountSummaryDataMapper implements RowMapper<GroupAccountSummaryData> {
 
         public String loanAccountSummarySchema() {
 
             StringBuilder accountsSummary = new StringBuilder("l.id as id, l.external_id as externalId,");
-            accountsSummary
-                    .append("l.product_id as productId, lp.name as productName,")
-                    .append("l.loan_status_id as statusId ")
-                    .append("from m_loan l ")
-                    .append("LEFT JOIN m_product_loan AS lp ON lp.id = l.product_id ");
+            accountsSummary.append("l.product_id as productId, lp.name as productName,").append("l.loan_status_id as statusId ")
+                    .append("from m_loan l ").append("LEFT JOIN m_product_loan AS lp ON lp.id = l.product_id ");
 
             return accountsSummary.toString();
         }
 
         @Override
-        public GroupAccountSummaryData mapRow(final ResultSet rs,
-                                               @SuppressWarnings("unused") final int rowNum) throws SQLException {
+        public GroupAccountSummaryData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
 
             Long id = JdbcSupport.getLong(rs, "id");
             String externalId = rs.getString("externalId");
