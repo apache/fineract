@@ -1,13 +1,17 @@
 package org.mifosplatform.portfolio.loanaccount.service;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
+import org.mifosplatform.accounting.service.GLJournalEntryWritePlatformService;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
@@ -41,6 +45,7 @@ import org.mifosplatform.portfolio.loanaccount.exception.LoanTransactionNotFound
 import org.mifosplatform.portfolio.loanaccount.serialization.LoanChargeCommandFromApiJsonDeserializer;
 import org.mifosplatform.portfolio.loanaccount.serialization.LoanStateTransitionCommandFromApiJsonDeserializer;
 import org.mifosplatform.portfolio.loanaccount.serialization.LoanTransactionCommandFromApiJsonDeserializer;
+import org.mifosplatform.portfolio.loanproduct.domain.AccountingRuleType;
 import org.mifosplatform.portfolio.loanproduct.exception.InvalidCurrencyException;
 import org.mifosplatform.useradministration.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,6 +66,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     private final ChargeRepository chargeRepository;
     private final LoanChargeRepository loanChargeRepository;
     private final ApplicationCurrencyRepository applicationCurrencyRepository;
+    private final GLJournalEntryWritePlatformService journalEntryWritePlatformService;
 
     @Autowired
     public LoanWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
@@ -69,7 +75,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             final LoanChargeCommandFromApiJsonDeserializer loanChargeCommandFromApiJsonDeserializer, final LoanAssembler loanAssembler,
             final LoanRepository loanRepository, final LoanTransactionRepository loanTransactionRepository,
             final NoteRepository noteRepository, final ChargeRepository chargeRepository, final LoanChargeRepository loanChargeRepository,
-            final ApplicationCurrencyRepository applicationCurrencyRepository) {
+            final ApplicationCurrencyRepository applicationCurrencyRepository,
+            final GLJournalEntryWritePlatformService journalEntryWritePlatformService) {
         this.context = context;
         this.loanStateTransitionCommandFromApiJsonDeserializer = loanStateTransitionCommandFromApiJsonDeserializer;
         this.loanTransactionCommandFromApiJsonDeserializer = loanTransactionCommandFromApiJsonDeserializer;
@@ -81,6 +88,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         this.chargeRepository = chargeRepository;
         this.loanChargeRepository = loanChargeRepository;
         this.applicationCurrencyRepository = applicationCurrencyRepository;
+        this.journalEntryWritePlatformService = journalEntryWritePlatformService;
     }
 
     private boolean isBeforeToday(final LocalDate date) {
@@ -111,12 +119,35 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         final ApplicationCurrency currency = this.applicationCurrencyRepository.findOneByCode(loan.getPrincpal().getCurrencyCode());
 
+      
         final Map<String, Object> changes = loan.disburse(command, defaultLoanLifecycleStateMachine(), currency);
+        //variable stores Id's of all existing loan transactions (newly created loan transactions would not have an Id before save)
+        Set<Long> existingLoanTransactionIds = new HashSet<Long>();
+        for(LoanTransaction loanTransaction:loan.getLoanTransactions()){
+            if(loanTransaction.getId()==null){
+                existingLoanTransactionIds.add(loanTransaction.getId());
+            }
+        }
         this.loanRepository.save(loan);
 
         if (StringUtils.isNotBlank(noteText)) {
             Note note = Note.loanNote(loan, noteText);
             this.noteRepository.save(note);
+        }
+        
+        // make a call to accounting
+        if (loan.loanProduct().getAccountingType() != AccountingRuleType.NONE.getValue()) {
+            /***
+             * Variable holds list of all newly created loan transactions during this
+             * disbursal
+             **/
+            List<LoanTransaction> newLoanTransactions = new ArrayList<LoanTransaction>();
+            for(LoanTransaction loanTransaction:loan.getLoanTransactions()){
+                if(!existingLoanTransactionIds.contains(loanTransaction.getId())){
+                    newLoanTransactions.add(loanTransaction);
+                }
+            }
+            journalEntryWritePlatformService.createJournalEntriesForLoan(loan, newLoanTransactions);
         }
 
         return new CommandProcessingResultBuilder() //
@@ -193,6 +224,11 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         changes.put("locale", command.locale());
         changes.put("dateFormat", command.dateFormat());
+        
+        // make a call to accounting
+        if (loan.loanProduct().getAccountingType() != AccountingRuleType.NONE.getValue()) {
+            journalEntryWritePlatformService.createJournalEntriesForLoan(loan, loanRepayment);
+        }
 
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //

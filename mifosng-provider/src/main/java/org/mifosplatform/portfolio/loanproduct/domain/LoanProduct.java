@@ -146,6 +146,10 @@ public class LoanProduct extends AbstractAuditableCustom<AppUser, Long> {
     public void update(final Set<Charge> charges) {
         this.charges = charges;
     }
+    
+    public Integer getAccountingType() {
+        return this.accountingType;
+    }
 
     public Map<String, Object> update(final JsonCommand command, final AprCalculator aprCalculator) {
 

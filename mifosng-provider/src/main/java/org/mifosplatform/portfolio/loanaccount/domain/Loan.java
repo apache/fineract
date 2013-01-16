@@ -946,7 +946,6 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
     private void disburse(final LocalDate expectedDisbursedOnLocalDate) {
         this.disbursedOnDate = expectedDisbursedOnLocalDate.toDate();
         this.expectedMaturityDate = determineExpectedMaturityDate().toDate();
-
         handleDisbursementTransaction(expectedDisbursedOnLocalDate);
     }
 
@@ -1916,7 +1915,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
         return this.loanRepaymentScheduleDetail.getPrincipal().getCurrencyCode();
     }
 
-    private MonetaryCurrency getCurrency() {
+    public MonetaryCurrency getCurrency() {
         return this.loanRepaymentScheduleDetail.getCurrency();
     }
 
@@ -2000,4 +1999,9 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
         this.accountNumber = newAccountNo;
         this.accountNumberRequiresAutoGeneration=false;
     }
+    
+    public List<LoanTransaction> getLoanTransactions() {
+        return this.loanTransactions;
+    }
+    
 }

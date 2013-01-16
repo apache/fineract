@@ -1,13 +1,16 @@
 package org.mifosplatform.accounting.service.impl;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
+import org.mifosplatform.accounting.AccountingConstants.CASH_ACCOUNTS_FOR_LOAN;
 import org.mifosplatform.accounting.AccountingConstants.JOURNAL_ENTRY_TYPE;
+import org.mifosplatform.accounting.AccountingConstants.PORTFOLIO_PRODUCT_TYPE;
 import org.mifosplatform.accounting.api.commands.GLJournalEntryCommand;
 import org.mifosplatform.accounting.api.commands.SingleDebitOrCreditEntryCommand;
 import org.mifosplatform.accounting.domain.GLAccount;
@@ -16,6 +19,8 @@ import org.mifosplatform.accounting.domain.GLClosure;
 import org.mifosplatform.accounting.domain.GLClosureRepository;
 import org.mifosplatform.accounting.domain.GLJournalEntry;
 import org.mifosplatform.accounting.domain.GLJournalEntryRepository;
+import org.mifosplatform.accounting.domain.ProductToGLAccountMapping;
+import org.mifosplatform.accounting.domain.ProductToGLAccountMappingRepository;
 import org.mifosplatform.accounting.exceptions.GLAccountNotFoundException;
 import org.mifosplatform.accounting.exceptions.GLJournalEntriesNotFoundException;
 import org.mifosplatform.accounting.exceptions.GLJournalEntryInvalidException;
@@ -26,6 +31,8 @@ import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityExce
 import org.mifosplatform.organisation.office.domain.Office;
 import org.mifosplatform.organisation.office.domain.OfficeRepository;
 import org.mifosplatform.organisation.office.exception.OfficeNotFoundException;
+import org.mifosplatform.portfolio.loanaccount.domain.Loan;
+import org.mifosplatform.portfolio.loanaccount.domain.LoanTransaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,15 +49,17 @@ public class GLJournalEntryWritePlatformServiceJpaRepositoryImpl implements GLJo
     private final GLAccountRepository glAccountRepository;
     private final GLJournalEntryRepository glJournalEntryRepository;
     private final OfficeRepository officeRepository;
+    private final ProductToGLAccountMappingRepository accountMappingRepository;
 
     @Autowired
     public GLJournalEntryWritePlatformServiceJpaRepositoryImpl(final GLClosureRepository glClosureRepository,
             final GLAccountRepository glAccountRepository, final GLJournalEntryRepository glJournalEntryRepository,
-            final OfficeRepository officeRepository) {
+            final OfficeRepository officeRepository, final ProductToGLAccountMappingRepository accountMappingRepository) {
         this.glClosureRepository = glClosureRepository;
         this.officeRepository = officeRepository;
         this.glAccountRepository = glAccountRepository;
         this.glJournalEntryRepository = glJournalEntryRepository;
+        this.accountMappingRepository = accountMappingRepository;
     }
 
     @Transactional
@@ -113,6 +122,113 @@ public class GLJournalEntryWritePlatformServiceJpaRepositoryImpl implements GLJo
             this.glJournalEntryRepository.saveAndFlush(journalEntry);
         }
         return reversalTransactionId;
+    }
+
+    @Transactional
+    @Override
+    public void createJournalEntriesForLoan(Loan loan, List<LoanTransaction> loanTransactions) {
+        // shouldn't be before an accounting closure
+        GLClosure latestGLClosure = glClosureRepository.getLatestGLClosureByBranch(loan.getOfficeId());
+        Office office = loan.getClient().getOffice();
+        Long loanProductId = loan.loanProduct().getId();
+        // TODO: Check for accounting type
+        for (LoanTransaction loanTransaction : loanTransactions) {
+            Date entryDate = loanTransaction.getDateOf();
+            String transactionId = loanTransaction.getId().toString();
+            Long loanId = loan.getId();
+            /**
+             * check if an accounting closure has happened for this branch after
+             * the transaction Date
+             **/
+            if (latestGLClosure != null) {
+                if (latestGLClosure.getClosingDate().after(loanTransaction.getDateOf())) { throw new GLJournalEntryInvalidException(
+                        GL_JOURNAL_ENTRY_INVALID_REASON.ACCOUNTING_CLOSED, latestGLClosure.getClosingDate(), null, null); }
+            }
+            /*** Debit loan Portfolio and credit Fund source for Disbursal **/
+            if (loanTransaction.isDisbursement()) {
+
+                GLAccount loanPortfolioAccount = getLinkedFinAccountForLoanProduct(loanProductId, CASH_ACCOUNTS_FOR_LOAN.LOAN_PORTFOLIO);
+                GLAccount fundSourceAccount = getLinkedFinAccountForLoanProduct(loanProductId, CASH_ACCOUNTS_FOR_LOAN.FUND_SOURCE);
+
+                BigDecimal disbursalAmount = loanTransaction.getAmount();
+                createDebitJournalEntryForLoanProduct(office, loanPortfolioAccount, loanId, transactionId, entryDate, disbursalAmount);
+                createCreditJournalEntryForLoanProduct(office, fundSourceAccount, loanId, transactionId, entryDate, disbursalAmount);
+            }/***
+             * Create a single Debit to fund source and multiple credits if
+             * applicable (loan portfolio for principal repayment, Interest on
+             * loans for interest repayments, Income from fees for fees payment
+             * and Income from penalties for penalty payment)
+             **/
+            else if (loanTransaction.isRepayment() || loanTransaction.isRepaymentAtDisbursement()) {
+                BigDecimal principalAmount = loanTransaction.getPrincipalPortion(loan.getCurrency()).getAmount();
+                BigDecimal interestAmount = loanTransaction.getInterestPortion(loan.getCurrency()).getAmount();
+                BigDecimal feesAmount = loanTransaction.getFeeChargesPortion(loan.getCurrency()).getAmount();
+                BigDecimal penaltiesAmount = loanTransaction.getPenaltyChargesPortion(loan.getCurrency()).getAmount();
+
+                BigDecimal totalDebitAmount = new BigDecimal(0);
+
+                if (!(principalAmount.compareTo(BigDecimal.ZERO) == 0)) {
+                    totalDebitAmount = totalDebitAmount.add(principalAmount);
+
+                    GLAccount loanPortfolioAccount = getLinkedFinAccountForLoanProduct(loanProductId, CASH_ACCOUNTS_FOR_LOAN.LOAN_PORTFOLIO);
+                    createCreditJournalEntryForLoanProduct(office, loanPortfolioAccount, loanId, transactionId, entryDate, principalAmount);
+                }
+                if (!(interestAmount.compareTo(BigDecimal.ZERO) == 0)) {
+                    totalDebitAmount = totalDebitAmount.add(interestAmount);
+
+                    GLAccount interestAccount = getLinkedFinAccountForLoanProduct(loanProductId, CASH_ACCOUNTS_FOR_LOAN.INTEREST_ON_LOANS);
+                    createCreditJournalEntryForLoanProduct(office, interestAccount, loanId, transactionId, entryDate, interestAmount);
+                }
+                if (!(feesAmount.compareTo(BigDecimal.ZERO) == 0)) {
+                    totalDebitAmount = totalDebitAmount.add(feesAmount);
+
+                    GLAccount incomeFromFeesAccount = getLinkedFinAccountForLoanProduct(loanProductId,
+                            CASH_ACCOUNTS_FOR_LOAN.INCOME_FROM_FEES);
+                    createCreditJournalEntryForLoanProduct(office, incomeFromFeesAccount, loanId, transactionId, entryDate, feesAmount);
+                }
+                if (!(penaltiesAmount.compareTo(BigDecimal.ZERO) == 0)) {
+                    totalDebitAmount = totalDebitAmount.add(penaltiesAmount);
+
+                    GLAccount incomeFromPenaltiesAccount = getLinkedFinAccountForLoanProduct(loanProductId,
+                            CASH_ACCOUNTS_FOR_LOAN.INCOME_FROM_PENALTIES);
+                    createCreditJournalEntryForLoanProduct(office, incomeFromPenaltiesAccount, loanId, transactionId, entryDate,
+                            penaltiesAmount);
+                }
+                GLAccount fundSourceAccount = getLinkedFinAccountForLoanProduct(loanProductId, CASH_ACCOUNTS_FOR_LOAN.FUND_SOURCE);
+                createDebitJournalEntryForLoanProduct(office, fundSourceAccount, loanId, transactionId, entryDate, totalDebitAmount);
+            } // TODO Vishwas: Add conditions for write off, contra waive
+              // interest
+              // and waive charges
+        }
+
+    }
+
+    @Transactional
+    @Override
+    public void createJournalEntriesForLoan(Loan loan, LoanTransaction loanTransaction) {
+        List<LoanTransaction> loanTransactions = new ArrayList<LoanTransaction>();
+        loanTransactions.add(loanTransaction);
+        createJournalEntriesForLoan(loan, loanTransactions);
+    }
+
+    private GLAccount getLinkedFinAccountForLoanProduct(Long loanProductId, CASH_ACCOUNTS_FOR_LOAN finAccountType) {
+        ProductToGLAccountMapping accountMapping = accountMappingRepository.findByProductIdAndProductTypeAndFinancialAccountType(
+                loanProductId, PORTFOLIO_PRODUCT_TYPE.LOAN.getValue(), finAccountType.getValue());
+        return accountMapping.getGlAccount();
+    }
+
+    private void createCreditJournalEntryForLoanProduct(Office office, GLAccount account, Long loanId, String transactionId,
+            Date entryDate, BigDecimal amount) {
+        GLJournalEntry journalEntry = GLJournalEntry.createNew(office, account, transactionId, true, entryDate,
+                JOURNAL_ENTRY_TYPE.CREDIT.toString(), amount, null, PORTFOLIO_PRODUCT_TYPE.LOAN.toString(), loanId);
+        glJournalEntryRepository.saveAndFlush(journalEntry);
+    }
+
+    private void createDebitJournalEntryForLoanProduct(Office office, GLAccount account, Long loanId, String transactionId, Date entryDate,
+            BigDecimal amount) {
+        GLJournalEntry journalEntry = GLJournalEntry.createNew(office, account, transactionId, true, entryDate,
+                JOURNAL_ENTRY_TYPE.DEBIT.toString(), amount, null, PORTFOLIO_PRODUCT_TYPE.LOAN.toString(), loanId);
+        glJournalEntryRepository.saveAndFlush(journalEntry);
     }
 
     /**
@@ -212,4 +328,5 @@ public class GLJournalEntryWritePlatformServiceJpaRepositoryImpl implements GLJo
     private String generateTransactionId() {
         return RandomStringUtils.random(15, "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890");
     }
+
 }
