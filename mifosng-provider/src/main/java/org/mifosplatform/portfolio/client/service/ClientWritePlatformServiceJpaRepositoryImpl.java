@@ -107,6 +107,10 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             final String externalId = command.stringValueOfParameterNamed("externalId");
             throw new PlatformDataIntegrityException("error.msg.client.duplicate.externalId", "Client with externalId `" + externalId
                     + "` already exists", "externalId", externalId);
+        } else if (realCause.getMessage().contains("account_no_UNIQUE")) {
+            final String accountNo = command.stringValueOfParameterNamed("accountNo");
+            throw new PlatformDataIntegrityException("error.msg.client.duplicate.accountNo", "Client with accountNo `" + accountNo
+                    + "` already exists", "accountNo", accountNo);
         }
 
         logAsErrorUnexpectedDataIntegrityException(dve);
@@ -173,11 +177,16 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             }
 
             if (!changes.isEmpty()) {
-                this.clientRepository.save(clientForUpdate);
+                this.clientRepository.saveAndFlush(clientForUpdate);
             }
 
-            return new CommandProcessingResultBuilder().withCommandId(command.commandId())
-                    .withOfficeId(clientForUpdate.getOffice().getId()).withClientId(clientId).withEntityId(clientId).with(changes).build();
+            return new CommandProcessingResultBuilder() //
+                    .withCommandId(command.commandId()) //
+                    .withOfficeId(clientForUpdate.getOffice().getId()) //
+                    .withClientId(clientId) //
+                    .withEntityId(clientId) //
+                    .with(changes) //
+                    .build();
         } catch (DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(command, dve);
             return new CommandProcessingResult(Long.valueOf(-1));

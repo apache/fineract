@@ -14,6 +14,7 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
+import javax.persistence.UniqueConstraint;
 
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
@@ -26,7 +27,7 @@ import org.mifosplatform.organisation.office.domain.Office;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
-@Table(name = "m_client")
+@Table(name = "m_client", uniqueConstraints = { @UniqueConstraint(columnNames = { "account_no" }, name = "account_no_UNIQUE")})
 public class Client extends AbstractPersistable<Long> {
 
     @Column(name = "account_no", length = 20, unique = true, nullable = false)
@@ -85,8 +86,8 @@ public class Client extends AbstractPersistable<Long> {
         //
     }
 
-    private Client(final Office office, final String accountNo, final String firstname, final String middlename, final String lastname, final String fullname,
-            final LocalDate openingDate, final String externalId) {
+    private Client(final Office office, final String accountNo, final String firstname, final String middlename, final String lastname,
+            final String fullname, final LocalDate openingDate, final String externalId) {
         if (StringUtils.isBlank(accountNo)) {
             this.accountNumber = new RandomPasswordGenerator(19).generate();
             this.accountNumberRequiresAutoGeneration = true;
@@ -123,15 +124,15 @@ public class Client extends AbstractPersistable<Long> {
         } else {
             this.fullname = null;
         }
-        
+
         deriveDisplayName();
         validateNameParts();
     }
-    
+
     public boolean isAccountNumberRequiresAutoGeneration() {
         return this.accountNumberRequiresAutoGeneration;
     }
-    
+
     public void setAccountNumberRequiresAutoGeneration(boolean accountNumberRequiresAutoGeneration) {
         this.accountNumberRequiresAutoGeneration = accountNumberRequiresAutoGeneration;
     }
