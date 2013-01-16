@@ -45,7 +45,6 @@ import org.mifosplatform.portfolio.loanaccount.exception.LoanTransactionNotFound
 import org.mifosplatform.portfolio.loanaccount.serialization.LoanChargeCommandFromApiJsonDeserializer;
 import org.mifosplatform.portfolio.loanaccount.serialization.LoanStateTransitionCommandFromApiJsonDeserializer;
 import org.mifosplatform.portfolio.loanaccount.serialization.LoanTransactionCommandFromApiJsonDeserializer;
-import org.mifosplatform.portfolio.loanproduct.domain.AccountingRuleType;
 import org.mifosplatform.portfolio.loanproduct.exception.InvalidCurrencyException;
 import org.mifosplatform.useradministration.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -119,12 +118,12 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         final ApplicationCurrency currency = this.applicationCurrencyRepository.findOneByCode(loan.getPrincpal().getCurrencyCode());
 
-      
         final Map<String, Object> changes = loan.disburse(command, defaultLoanLifecycleStateMachine(), currency);
-        //variable stores Id's of all existing loan transactions (newly created loan transactions would not have an Id before save)
+        // variable stores Id's of all existing loan transactions (newly created
+        // loan transactions would not have an Id before save)
         Set<Long> existingLoanTransactionIds = new HashSet<Long>();
-        for(LoanTransaction loanTransaction:loan.getLoanTransactions()){
-            if(loanTransaction.getId()==null){
+        for (LoanTransaction loanTransaction : loan.getLoanTransactions()) {
+            if (loanTransaction.getId() == null) {
                 existingLoanTransactionIds.add(loanTransaction.getId());
             }
         }
@@ -134,16 +133,16 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             Note note = Note.loanNote(loan, noteText);
             this.noteRepository.save(note);
         }
-        
+
         // make a call to accounting
-        if (loan.loanProduct().getAccountingType() != AccountingRuleType.NONE.getValue()) {
+        if (loan.isAccountingEnabledOnLoanProduct()) {
             /***
-             * Variable holds list of all newly created loan transactions during this
-             * disbursal
+             * Variable holds list of all newly created loan transactions during
+             * this disbursal
              **/
             List<LoanTransaction> newLoanTransactions = new ArrayList<LoanTransaction>();
-            for(LoanTransaction loanTransaction:loan.getLoanTransactions()){
-                if(!existingLoanTransactionIds.contains(loanTransaction.getId())){
+            for (LoanTransaction loanTransaction : loan.getLoanTransactions()) {
+                if (!existingLoanTransactionIds.contains(loanTransaction.getId())) {
                     newLoanTransactions.add(loanTransaction);
                 }
             }
@@ -224,9 +223,9 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         changes.put("locale", command.locale());
         changes.put("dateFormat", command.dateFormat());
-        
+
         // make a call to accounting
-        if (loan.loanProduct().getAccountingType() != AccountingRuleType.NONE.getValue()) {
+        if (loan.isAccountingEnabledOnLoanProduct()) {
             journalEntryWritePlatformService.createJournalEntriesForLoan(loan, loanRepayment);
         }
 

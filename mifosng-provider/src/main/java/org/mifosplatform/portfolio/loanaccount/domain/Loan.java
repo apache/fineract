@@ -495,10 +495,6 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
         return this.client;
     }
 
-    public LoanProduct loanProduct() {
-        return this.loanProduct;
-    }
-
     public LoanProductRelatedDetail repaymentScheduleDetail() {
         return this.loanRepaymentScheduleDetail;
     }
@@ -2003,5 +1999,12 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
     public List<LoanTransaction> getLoanTransactions() {
         return this.loanTransactions;
     }
-    
+
+    public boolean isAccountingEnabledOnLoanProduct() {
+        return this.loanProduct.isAccountingEnabled();
+    }
+
+    public Long productId() {
+        return this.loanProduct.getId();
+    }
 }

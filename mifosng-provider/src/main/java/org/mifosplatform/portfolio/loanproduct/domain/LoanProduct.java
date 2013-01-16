@@ -146,7 +146,7 @@ public class LoanProduct extends AbstractAuditableCustom<AppUser, Long> {
     public void update(final Set<Charge> charges) {
         this.charges = charges;
     }
-    
+
     public Integer getAccountingType() {
         return this.accountingType;
     }
@@ -161,7 +161,7 @@ public class LoanProduct extends AbstractAuditableCustom<AppUser, Long> {
             actualChanges.put(accountingTypeParamName, newValue);
             this.accountingType = newValue;
         }
-        
+
         final String nameParamName = "name";
         if (command.isChangeInStringParameterNamed(nameParamName, this.name)) {
             final String newValue = command.stringValueOfParameterNamed(nameParamName);
@@ -215,5 +215,9 @@ public class LoanProduct extends AbstractAuditableCustom<AppUser, Long> {
         }
 
         return chargeIds.toArray(new String[chargeIds.size()]);
+    }
+
+    public boolean isAccountingEnabled() {
+        return AccountingRuleType.NONE.getValue().equals(this.accountingType);
     }
 }

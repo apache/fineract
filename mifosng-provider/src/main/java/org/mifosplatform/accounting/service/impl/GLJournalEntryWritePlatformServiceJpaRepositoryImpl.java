@@ -130,7 +130,7 @@ public class GLJournalEntryWritePlatformServiceJpaRepositoryImpl implements GLJo
         // shouldn't be before an accounting closure
         GLClosure latestGLClosure = glClosureRepository.getLatestGLClosureByBranch(loan.getOfficeId());
         Office office = loan.getClient().getOffice();
-        Long loanProductId = loan.loanProduct().getId();
+        Long loanProductId = loan.productId();
         // TODO: Check for accounting type
         for (LoanTransaction loanTransaction : loanTransactions) {
             Date entryDate = loanTransaction.getDateOf();
