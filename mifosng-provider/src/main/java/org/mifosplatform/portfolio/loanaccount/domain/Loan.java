@@ -2003,6 +2003,14 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
     public boolean isAccountingEnabledOnLoanProduct() {
         return this.loanProduct.isAccountingEnabled();
     }
+    
+    public boolean isCashBasedAccountingEnabledOnLoanProduct(){
+        return this.loanProduct.isCashBasedAccountingEnabled();
+    }
+    
+    public boolean isAccrualBasedAccountingEnabledOnLoanProduct(){
+        return this.loanProduct.isAccrualBasedAccountingEnabled();
+    }
 
     public Long productId() {
         return this.loanProduct.getId();

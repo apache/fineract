@@ -218,6 +218,14 @@ public class LoanProduct extends AbstractAuditableCustom<AppUser, Long> {
     }
 
     public boolean isAccountingEnabled() {
-        return AccountingRuleType.NONE.getValue().equals(this.accountingType);
+        return !AccountingRuleType.NONE.getValue().equals(this.accountingType);
+    }
+    
+    public boolean isCashBasedAccountingEnabled(){
+        return AccountingRuleType.CASH_BASED.getValue().equals(this.accountingType);
+    }
+    
+    public boolean isAccrualBasedAccountingEnabled(){
+        return AccountingRuleType.ACCRUAL_BASED.getValue().equals(this.accountingType);
     }
 }

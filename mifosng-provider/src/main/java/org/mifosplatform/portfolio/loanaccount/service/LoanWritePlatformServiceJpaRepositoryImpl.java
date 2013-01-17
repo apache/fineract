@@ -122,8 +122,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         // variable stores Id's of all existing loan transactions (newly created
         // loan transactions would not have an Id before save)
         Set<Long> existingLoanTransactionIds = new HashSet<Long>();
-        for (LoanTransaction loanTransaction : loan.getLoanTransactions()) {
-            if (loanTransaction.getId() == null) {
+        for(LoanTransaction loanTransaction:loan.getLoanTransactions()){
+            if(!(loanTransaction.getId()==null)){
                 existingLoanTransactionIds.add(loanTransaction.getId());
             }
         }
@@ -261,13 +261,15 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final Map<String, Object> changes = new LinkedHashMap<String, Object>();
         changes.put("transactionDate", command.stringValueOfParameterNamed("transactionDate"));
         changes.put("transactionAmount", command.stringValueOfParameterNamed("transactionAmount"));
+        
+        boolean transactionIsRepayment= transactionToAdjust.isRepayment();
 
         final LoanTransaction newTransactionDetail = loan.adjustExistingTransaction(transactionDate, transactionAmount,
                 defaultLoanLifecycleStateMachine(), transactionToAdjust);
         if (newTransactionDetail.isGreaterThanZero(loan.getPrincpal().getCurrency())) {
             this.loanTransactionRepository.save(newTransactionDetail);
         }
-
+        
         this.loanRepository.save(loan);
 
         final String noteText = command.stringValueOfParameterNamed("note");
@@ -279,7 +281,17 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         changes.put("locale", command.locale());
         changes.put("dateFormat", command.dateFormat());
-
+        
+        // make a call to accounting only if transaction being adjusted is a repayment (not waiver)
+        if (loan.isAccountingEnabledOnLoanProduct() && transactionIsRepayment) {
+            List<LoanTransaction> newLoanTransactions = new ArrayList<LoanTransaction>();
+            if (newTransactionDetail.getId() != null) {
+                newLoanTransactions.add(newTransactionDetail);
+            }
+            newLoanTransactions.add(transactionToAdjust);
+            journalEntryWritePlatformService.createJournalEntriesForLoan(loan, newLoanTransactions);
+        }
+        
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
                 .withEntityId(transactionId) //
@@ -361,6 +373,11 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         changes.put("locale", command.locale());
         changes.put("dateFormat", command.dateFormat());
+        
+        // make a call to accounting
+        if (loan.isAccountingEnabledOnLoanProduct()) {
+            journalEntryWritePlatformService.createJournalEntriesForLoan(loan, writeoff);
+        }
 
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //

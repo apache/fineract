@@ -146,6 +146,10 @@ public class LoanTransaction extends AbstractAuditableCustom<AppUser, Long> {
     public boolean isNotContra() {
         return this.contra == null;
     }
+    
+    public boolean isContra() {
+        return this.contra != null;
+    }
 
     public boolean isDisbursement() {
         return LoanTransactionType.DISBURSEMENT.equals(getTypeOf());
