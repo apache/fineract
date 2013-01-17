@@ -239,17 +239,33 @@ public class LoanTransaction extends AbstractAuditableCustom<AppUser, Long> {
     public Money getPrincipalPortion(final MonetaryCurrency currency) {
         return Money.of(currency, this.principalPortion);
     }
+    
+    public BigDecimal getPrincipalPortion() {
+        return this.principalPortion;
+    }
 
     public Money getInterestPortion(final MonetaryCurrency currency) {
         return Money.of(currency, this.interestPortion);
+    }
+    
+    public BigDecimal getInterestPortion() {
+        return this.interestPortion;
     }
 
     public Money getFeeChargesPortion(final MonetaryCurrency currency) {
         return Money.of(currency, this.feeChargesPortion);
     }
-
+    
+    public BigDecimal getFeePortion() {
+        return this.feeChargesPortion;
+    }
+    
     public Money getPenaltyChargesPortion(final MonetaryCurrency currency) {
         return Money.of(currency, this.penaltyChargesPortion);
+    }
+
+    public BigDecimal getPenaltyChargesPortion() {
+        return this.penaltyChargesPortion;
     }
 
     public void resetDerivedComponents() {

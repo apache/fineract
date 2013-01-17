@@ -11,6 +11,8 @@ import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
+import org.mifosplatform.accounting.api.data.LoanDTO;
+import org.mifosplatform.accounting.api.data.LoanTransactionDTO;
 import org.mifosplatform.accounting.service.GLJournalEntryWritePlatformService;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
@@ -146,7 +148,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                     newLoanTransactions.add(loanTransaction);
                 }
             }
-            journalEntryWritePlatformService.createJournalEntriesForLoan(loan, newLoanTransactions);
+            LoanDTO loanDTO = populateLoanDTO(loan, newLoanTransactions);
+            journalEntryWritePlatformService.createJournalEntriesForLoan(loanDTO);
         }
 
         return new CommandProcessingResultBuilder() //
@@ -226,7 +229,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         // make a call to accounting
         if (loan.isAccountingEnabledOnLoanProduct()) {
-            journalEntryWritePlatformService.createJournalEntriesForLoan(loan, loanRepayment);
+            LoanDTO loanDTO = populateLoanData(loan, loanRepayment);
+            journalEntryWritePlatformService.createJournalEntriesForLoan(loanDTO);
         }
 
         return new CommandProcessingResultBuilder() //
@@ -289,7 +293,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 newLoanTransactions.add(newTransactionDetail);
             }
             newLoanTransactions.add(transactionToAdjust);
-            journalEntryWritePlatformService.createJournalEntriesForLoan(loan, newLoanTransactions);
+            LoanDTO loanDTO = populateLoanDTO(loan, newLoanTransactions);
+            journalEntryWritePlatformService.createJournalEntriesForLoan(loanDTO);
         }
         
         return new CommandProcessingResultBuilder() //
@@ -376,7 +381,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         
         // make a call to accounting
         if (loan.isAccountingEnabledOnLoanProduct()) {
-            journalEntryWritePlatformService.createJournalEntriesForLoan(loan, writeoff);
+            LoanDTO loanDTO = populateLoanData(loan, writeoff);
+            journalEntryWritePlatformService.createJournalEntriesForLoan(loanDTO);
         }
 
         return new CommandProcessingResultBuilder() //
@@ -684,5 +690,25 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
                 .build();
+    }
+    
+    private LoanDTO populateLoanDTO(Loan loan, List<LoanTransaction> loanTransactions) {
+        List<LoanTransactionDTO> loanTransactionDTOs = new ArrayList<LoanTransactionDTO>();
+        for (LoanTransaction loanTransaction : loanTransactions) {
+            LoanTransactionDTO loanTransactionDTO = new LoanTransactionDTO(loanTransaction.getId().toString(),
+                    loanTransaction.getDateOf(), loanTransaction.getAmount(), loanTransaction.getPrincipalPortion(),
+                    loanTransaction.getInterestPortion(), loanTransaction.getFeePortion(), loanTransaction.getPenaltyChargesPortion(),
+                    loanTransaction.isDisbursement(), loanTransaction.isRepayment(), loanTransaction.isRepaymentAtDisbursement(),
+                    loanTransaction.isContra(), loanTransaction.isWriteOff());
+            loanTransactionDTOs.add(loanTransactionDTO);
+        }
+        return new LoanDTO(loan.getId(), loan.productId(), loan.getOfficeId(), loan.isCashBasedAccountingEnabledOnLoanProduct(),
+                loan.isAccrualBasedAccountingEnabledOnLoanProduct(), loanTransactionDTOs);
+    }
+
+    private LoanDTO populateLoanData(Loan loan, LoanTransaction loanTransaction) {
+        List<LoanTransaction> loanTransactions = new ArrayList<LoanTransaction>();
+        loanTransactions.add(loanTransaction);
+        return populateLoanDTO(loan, loanTransactions);
     }
 }
