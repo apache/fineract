@@ -5,68 +5,6 @@ import java.util.Map;
 
 public class AccountingConstants {
 
-    /*** Categories for Accounting **/
-    public static enum GL_ACCOUNT_CLASSIFICATION {
-        ASSET, LIABILITY, INCOME, EXPENSE, EQUITY;
-
-        @Override
-        public String toString() {
-            return name().toString();
-        }
-    }
-
-    /** Types of Journal Entries **/
-    public static enum JOURNAL_ENTRY_TYPE {
-        DEBIT, CREDIT;
-
-        @Override
-        public String toString() {
-            return name().toString();
-        }
-    }
-
-    /** USAGES of Accounts **/
-    public static enum GL_ACCOUNT_USAGE {
-        HEADER, DETAIL;
-
-        @Override
-        public String toString() {
-            return name().toString();
-        }
-    }
-
-    /*** Types of portfolio products ***/
-    public static enum PORTFOLIO_PRODUCT_TYPE {
-        LOAN(1), SAVING(2);
-
-        private final Integer value;
-
-        private PORTFOLIO_PRODUCT_TYPE(final Integer value) {
-            this.value = value;
-        }
-
-        @Override
-        public String toString() {
-            return name().toString().replaceAll("_", " ");
-        }
-
-        public Integer getValue() {
-            return this.value;
-        }
-
-        private static final Map<Integer, PORTFOLIO_PRODUCT_TYPE> intToEnumMap = new HashMap<Integer, PORTFOLIO_PRODUCT_TYPE>();
-        static {
-            for (PORTFOLIO_PRODUCT_TYPE type : PORTFOLIO_PRODUCT_TYPE.values()) {
-                intToEnumMap.put(type.value, type);
-            }
-        }
-
-        public static PORTFOLIO_PRODUCT_TYPE fromInt(int i) {
-            PORTFOLIO_PRODUCT_TYPE type = intToEnumMap.get(Integer.valueOf(i));
-            return type;
-        }
-    }
-
     /*** Accounting placeholders for cash based accounting for loan products ***/
     public static enum CASH_ACCOUNTS_FOR_LOAN {
         FUND_SOURCE(1), LOAN_PORTFOLIO(2), INTEREST_ON_LOANS(3), INCOME_FROM_FEES(4), INCOME_FROM_PENALTIES(5), LOSSES_WRITTEN_OFF(6);

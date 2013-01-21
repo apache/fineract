@@ -50,8 +50,8 @@ public class GLJournalEntry extends AbstractAuditableCustom<AppUser, Long> {
     @Temporal(TemporalType.DATE)
     private Date entryDate;
 
-    @Column(name = "type", nullable = false, length = 50)
-    private String type;
+    @Column(name = "type_enum", nullable = false, length = 50)
+    private Integer type;
 
     @Column(name = "amount", scale = 6, precision = 19, nullable = false)
     private BigDecimal amount;
@@ -69,9 +69,9 @@ public class GLJournalEntry extends AbstractAuditableCustom<AppUser, Long> {
     private Long entityId;
 
     public static GLJournalEntry createNew(Office office, GLAccount glAccount, String transactionId, boolean portfolioGenerated,
-            Date entryDate, String type, BigDecimal amount, String description, String entityType, Long entityId) {
-        return new GLJournalEntry(office, glAccount, transactionId, portfolioGenerated, entryDate, type, amount, description, entityType,
-                entityId);
+            Date entryDate, JournalEntryType journalEntryType, BigDecimal amount, String description, String entityType, Long entityId) {
+        return new GLJournalEntry(office, glAccount, transactionId, portfolioGenerated, entryDate, journalEntryType.getValue(), amount,
+                description, entityType, entityId);
     }
 
     protected GLJournalEntry() {
@@ -79,7 +79,7 @@ public class GLJournalEntry extends AbstractAuditableCustom<AppUser, Long> {
     }
 
     public GLJournalEntry(Office office, GLAccount glAccount, String transactionId, boolean portfolioGenerated, Date entryDate,
-            String type, BigDecimal amount, String description, String entityType, Long entityId) {
+            Integer type, BigDecimal amount, String description, String entityType, Long entityId) {
         this.office = office;
         this.glAccount = glAccount;
         this.reversalJournalEntry = null;
@@ -94,7 +94,11 @@ public class GLJournalEntry extends AbstractAuditableCustom<AppUser, Long> {
         this.entityId = entityId;
     }
 
-    public String getType() {
+    public boolean isDebitEntry() {
+        return JournalEntryType.DEBIT.getValue().equals(type);
+    }
+
+    public Integer getType() {
         return this.type;
     }
 

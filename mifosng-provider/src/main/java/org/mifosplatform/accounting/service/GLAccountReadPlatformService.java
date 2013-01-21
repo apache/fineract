@@ -2,16 +2,18 @@ package org.mifosplatform.accounting.service;
 
 import java.util.List;
 
-import org.mifosplatform.accounting.AccountingConstants;
 import org.mifosplatform.accounting.api.data.GLAccountData;
+import org.mifosplatform.accounting.domain.GLAccountType;
 
 public interface GLAccountReadPlatformService {
 
-    List<GLAccountData> retrieveAllGLAccounts(String accountClassification, String searchParam, String usage,
+    List<GLAccountData> retrieveAllGLAccounts(Integer accountClassification, String searchParam, Integer usage,
             Boolean manualTransactionsAllowed, Boolean disabled);
 
     GLAccountData retrieveGLAccountById(long glAccountId);
 
-    List<GLAccountData> retrieveAllEnabledDetailGLAccounts(AccountingConstants.GL_ACCOUNT_CLASSIFICATION classification);
+    List<GLAccountData> retrieveAllEnabledDetailGLAccounts(GLAccountType accountType);
+
+    GLAccountData retrieveNewGLAccountDetails();
 
 }

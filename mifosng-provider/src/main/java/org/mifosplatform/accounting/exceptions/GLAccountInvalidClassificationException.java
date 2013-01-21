@@ -4,11 +4,11 @@ import org.mifosplatform.infrastructure.core.exception.AbstractPlatformDomainRul
 
 /**
  * A {@link RuntimeException} thrown when trying to fetch accounts belonging to
- * an Invalid Type
+ * an Invalid Usage Type
  */
 public class GLAccountInvalidClassificationException extends AbstractPlatformDomainRuleException {
 
-    public GLAccountInvalidClassificationException(final String classification) {
-        super("error.msg.glaccount.classification.invalid", "The following COA classification is invalid: " + classification);
+    public GLAccountInvalidClassificationException(final Integer usage) {
+        super("error.msg.glaccount.usage.invalid", "The following COA usage is invalid: " + usage);
     }
 }

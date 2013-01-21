@@ -4,13 +4,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.mifosplatform.accounting.AccountingConstants;
 import org.mifosplatform.accounting.AccountingConstants.ACCRUAL_ACCOUNTS_FOR_LOAN;
 import org.mifosplatform.accounting.AccountingConstants.CASH_ACCOUNTS_FOR_LOAN;
 import org.mifosplatform.accounting.AccountingConstants.LOAN_PRODUCT_ACCOUNTING_PARAMS;
-import org.mifosplatform.accounting.AccountingConstants.PORTFOLIO_PRODUCT_TYPE;
 import org.mifosplatform.accounting.domain.GLAccount;
 import org.mifosplatform.accounting.domain.GLAccountRepository;
+import org.mifosplatform.accounting.domain.PortfolioProductType;
 import org.mifosplatform.accounting.domain.ProductToGLAccountMapping;
 import org.mifosplatform.accounting.domain.ProductToGLAccountMappingRepository;
 import org.mifosplatform.accounting.exceptions.GLAccountNotFoundException;
@@ -181,7 +180,7 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
         GLAccount glAccount = accountRepository.findOne(glAccountId);
         if (glAccount == null) { throw new GLAccountNotFoundException(glAccountId); }
         ProductToGLAccountMapping accountMapping = new ProductToGLAccountMapping(glAccount, productId,
-                AccountingConstants.PORTFOLIO_PRODUCT_TYPE.LOAN.getValue(), accountTypeId);
+                PortfolioProductType.LOAN.getValue(), accountTypeId);
         accountMappingRepository.save(accountMapping);
     }
 
@@ -189,8 +188,8 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
             String accountParamValue, Map<String, Object> changes) {
         // get the existing product
         ProductToGLAccountMapping accountMapping = accountMappingRepository.findByProductIdAndProductTypeAndFinancialAccountType(productId,
-                PORTFOLIO_PRODUCT_TYPE.LOAN.getValue(), accountTypeId);
-        if (accountMapping == null) { throw new ProductToGLAccountMappingNotFoundException(PORTFOLIO_PRODUCT_TYPE.LOAN, productId,
+                PortfolioProductType.LOAN.getValue(), accountTypeId);
+        if (accountMapping == null) { throw new ProductToGLAccountMappingNotFoundException(PortfolioProductType.LOAN, productId,
                 accountTypeName); }
         if (accountMapping.getGlAccount().getId() != glAccountId) {
             GLAccount glAccount = accountRepository.findOne(glAccountId);
@@ -204,7 +203,7 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
     @Override
     public void deleteLoanProductToGLAccountMapping(Long loanProductId) {
         List<ProductToGLAccountMapping> productToGLAccountMappings = accountMappingRepository.findByProductIdAndProductType(loanProductId,
-                PORTFOLIO_PRODUCT_TYPE.LOAN.getValue());
+                PortfolioProductType.LOAN.getValue());
         if (productToGLAccountMappings != null && productToGLAccountMappings.size() > 0) {
             accountMappingRepository.deleteInBatch(productToGLAccountMappings);
         }

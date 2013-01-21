@@ -3,6 +3,7 @@ package org.mifosplatform.accounting.api.data;
 import java.math.BigDecimal;
 
 import org.joda.time.LocalDate;
+import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 
 /**
  * Immutable object representing a General Ledger Account
@@ -23,11 +24,11 @@ public class GLJournalEntryData {
     @SuppressWarnings("unused")
     private final Long glAccountId;
     @SuppressWarnings("unused")
-    private final String glAccountClassification;
+    private final EnumOptionData glAccountClassification;
     @SuppressWarnings("unused")
     private final LocalDate entryDate;
     @SuppressWarnings("unused")
-    private final String entryType;
+    private final EnumOptionData entryType;
     @SuppressWarnings("unused")
     private final BigDecimal amount;
     @SuppressWarnings("unused")
@@ -50,7 +51,7 @@ public class GLJournalEntryData {
     private final Boolean reversed;
 
     public GLJournalEntryData(Long id, Long officeId, String officeName, String glAccountName, Long glAccountId,
-            String glAccountClassification, LocalDate entryDate, String entryType, BigDecimal amount, String transactionId,
+            EnumOptionData glAccountClassification, LocalDate entryDate, EnumOptionData entryType, BigDecimal amount, String transactionId,
             Boolean portfolioGenerated, String entityType, Long entityId, Long createdByUserId, LocalDate createdDate,
             String createdByUserName, String comments, Boolean reversed) {
         this.id = id;

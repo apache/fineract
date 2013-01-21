@@ -6,13 +6,15 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
-import org.mifosplatform.accounting.AccountingConstants;
-import org.mifosplatform.accounting.AccountingConstants.GL_ACCOUNT_CLASSIFICATION;
-import org.mifosplatform.accounting.AccountingConstants.GL_ACCOUNT_USAGE;
 import org.mifosplatform.accounting.api.data.GLAccountData;
+import org.mifosplatform.accounting.domain.GLAccountType;
+import org.mifosplatform.accounting.domain.GLAccountUsage;
 import org.mifosplatform.accounting.exceptions.GLAccountInvalidClassificationException;
 import org.mifosplatform.accounting.exceptions.GLAccountNotFoundException;
+import org.mifosplatform.accounting.service.AccountingEnumerations;
 import org.mifosplatform.accounting.service.GLAccountReadPlatformService;
+import org.mifosplatform.infrastructure.core.data.EnumOptionData;
+import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
 import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -34,7 +36,7 @@ public class GLAccountReadPlatformServiceImpl implements GLAccountReadPlatformSe
 
         public String schema() {
             return " id as id, name as name, parent_id as parentId, gl_code as glCode, disabled as disabled, manual_journal_entries_allowed as manualEntriesAllowed, "
-                    + "classification as classification, header_account as headerAccount, description as description "
+                    + "classification_enum as classification, account_usage as accountUsage, description as description "
                     + "from acc_gl_account";
         }
 
@@ -47,20 +49,25 @@ public class GLAccountReadPlatformServiceImpl implements GLAccountReadPlatformSe
             String glCode = rs.getString("glCode");
             boolean disabled = rs.getBoolean("disabled");
             boolean manualEntriesAllowed = rs.getBoolean("manualEntriesAllowed");
-            String classification = rs.getString("classification");
-            boolean headerAccount = rs.getBoolean("headerAccount");
+            final int accountTypeId = JdbcSupport.getInteger(rs, "classification");
+            final EnumOptionData accountType = AccountingEnumerations.gLAccountType(accountTypeId);
+            final int usageId = JdbcSupport.getInteger(rs, "accountUsage");
+            final EnumOptionData usage = AccountingEnumerations.gLAccountUsage(usageId);
             String description = rs.getString("description");
 
-            return new GLAccountData(id, name, parentId, glCode, disabled, manualEntriesAllowed, classification, headerAccount, description);
+            return new GLAccountData(id, name, parentId, glCode, disabled, manualEntriesAllowed, accountType, usage, description);
         }
     }
 
     @Override
-    public List<GLAccountData> retrieveAllGLAccounts(String accountClassification, String searchParam, String usage,
+    public List<GLAccountData> retrieveAllGLAccounts(Integer accountClassification, String searchParam, Integer usage,
             Boolean manualTransactionsAllowed, Boolean disabled) {
-        if (StringUtils.isNotBlank(accountClassification)) {
-            if (!checkValidGLAccountClassification(accountClassification)) { throw new GLAccountInvalidClassificationException(
-                    accountClassification); }
+        if (accountClassification != null) {
+            if (!checkValidGLAccountType(accountClassification)) { throw new GLAccountInvalidClassificationException(accountClassification); }
+        }
+
+        if (usage != null) {
+            if (!checkValidGLAccountUsage(usage)) { throw new GLAccountInvalidClassificationException(accountClassification); }
         }
 
         GLAccountMapper rm = new GLAccountMapper();
@@ -68,7 +75,7 @@ public class GLAccountReadPlatformServiceImpl implements GLAccountReadPlatformSe
         Object[] paramaterArray = new Object[3];
         int arrayPos = 0;
         boolean filtersPresent = false;
-        if (StringUtils.isNotBlank(accountClassification) || StringUtils.isNotBlank(searchParam) || StringUtils.isNotBlank(usage)
+        if ((accountClassification != null) || StringUtils.isNotBlank(searchParam) || (usage != null)
                 || (manualTransactionsAllowed != null) || (disabled != null)) {
             filtersPresent = true;
             sql += " where";
@@ -76,8 +83,8 @@ public class GLAccountReadPlatformServiceImpl implements GLAccountReadPlatformSe
 
         if (filtersPresent) {
             boolean firstWhereConditionAdded = false;
-            if (StringUtils.isNotBlank(accountClassification)) {
-                sql += " classification like ?";
+            if (accountClassification != null) {
+                sql += " classification_enum like ?";
                 paramaterArray[arrayPos] = accountClassification;
                 arrayPos = arrayPos + 1;
                 firstWhereConditionAdded = true;
@@ -93,16 +100,14 @@ public class GLAccountReadPlatformServiceImpl implements GLAccountReadPlatformSe
                 arrayPos = arrayPos + 1;
                 firstWhereConditionAdded = true;
             }
-            if (StringUtils.isNotBlank(usage)) {
+            if (usage != null) {
                 if (firstWhereConditionAdded) {
                     sql += " and ";
                 }
-                if (usage.equalsIgnoreCase(GL_ACCOUNT_USAGE.HEADER.toString())) {
-                    sql += " header_account = 1 ";
-                } else if (usage.equalsIgnoreCase(GL_ACCOUNT_USAGE.DETAIL.toString())) {
-                    sql += " header_account = 0 ";
-                } else {
-
+                if (GLAccountUsage.HEADER.getValue().equals(usage)) {
+                    sql += " account_usage = 2 ";
+                } else if (GLAccountUsage.DETAIL.getValue().equals(usage)) {
+                    sql += " account_usage = 1 ";
                 }
                 firstWhereConditionAdded = true;
             }
@@ -153,15 +158,27 @@ public class GLAccountReadPlatformServiceImpl implements GLAccountReadPlatformSe
     }
 
     @Override
-    public List<GLAccountData> retrieveAllEnabledDetailGLAccounts(GL_ACCOUNT_CLASSIFICATION classification) {
-        return retrieveAllGLAccounts(classification.toString(), null, AccountingConstants.GL_ACCOUNT_USAGE.DETAIL.toString(), null, false);
+    public List<GLAccountData> retrieveAllEnabledDetailGLAccounts(GLAccountType accountType) {
+        return retrieveAllGLAccounts(accountType.getValue(), null, GLAccountUsage.DETAIL.getValue(), null, false);
     }
 
-    private static boolean checkValidGLAccountClassification(final String entityType) {
-        for (GL_ACCOUNT_CLASSIFICATION classification : GL_ACCOUNT_CLASSIFICATION.values()) {
-            if (classification.name().toString().equalsIgnoreCase(entityType)) { return true; }
+    private static boolean checkValidGLAccountType(final int type) {
+        for (GLAccountType accountType : GLAccountType.values()) {
+            if (accountType.getValue().equals(type)) { return true; }
         }
         return false;
+    }
+
+    private static boolean checkValidGLAccountUsage(final int type) {
+        for (GLAccountUsage accountUsage : GLAccountUsage.values()) {
+            if (accountUsage.getValue().equals(type)) { return true; }
+        }
+        return false;
+    }
+
+    @Override
+    public GLAccountData retrieveNewGLAccountDetails() {
+        return GLAccountData.sensibleDefaultsForNewGLAccountCreation();
     }
 
 }

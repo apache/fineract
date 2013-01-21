@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.mifosplatform.accounting.api.commands.GLAccountCommand;
+import org.mifosplatform.accounting.domain.GLAccountType;
+import org.mifosplatform.accounting.domain.GLAccountUsage;
 import org.mifosplatform.infrastructure.core.data.ApiParameterError;
 import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
 import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
@@ -28,7 +30,11 @@ public class GLAccountCommandValidator {
 
         baseDataValidator.reset().parameter("parentId").value(command.getParentId()).ignoreIfNull().integerGreaterThanZero();
 
-        baseDataValidator.reset().parameter("classification").value(command.getClassification()).notBlank().notExceedingLengthOf(45);
+        baseDataValidator.reset().parameter("classification").value(command.getClassification())
+                .inMinMaxRange(GLAccountType.getMinValue(), GLAccountType.getMaxValue());
+
+        baseDataValidator.reset().parameter("usage").value(command.getUsage())
+                .inMinMaxRange(GLAccountUsage.getMinValue(), GLAccountUsage.getMaxValue());
 
         baseDataValidator.reset().parameter("description").value(command.getDescription()).ignoreIfNull().notExceedingLengthOf(500);
 
@@ -49,8 +55,10 @@ public class GLAccountCommandValidator {
 
         baseDataValidator.reset().parameter("parentId").value(command.getParentId()).ignoreIfNull().integerGreaterThanZero();
 
-        baseDataValidator.reset().parameter("classification").value(command.getClassification()).ignoreIfNull().notBlank()
-                .notExceedingLengthOf(45);
+        baseDataValidator.reset().parameter("classification").value(command.getClassification()).ignoreIfNull()
+                .inMinMaxRange(GLAccountType.getMinValue(), GLAccountType.getMaxValue());
+        baseDataValidator.reset().parameter("usage").value(command.getUsage()).ignoreIfNull()
+                .inMinMaxRange(GLAccountUsage.getMinValue(), GLAccountUsage.getMaxValue());
 
         baseDataValidator.reset().parameter("description").value(command.getDescription()).ignoreIfNull().notBlank()
                 .notExceedingLengthOf(500);

@@ -132,6 +132,33 @@ public class JsonParserHelper {
         }
         return value;
     }
+    
+    /** Method used to extract integers from unformatted strings.
+     * Ex: "1" , "100002" etc
+     * 
+     * Please note that this method does not support extracting Integers from locale
+     * specific formatted strings Ex "1,000" etc
+     * 
+     * @param parameterName
+     * @param element
+     * @param parametersPassedInRequest
+     * @return
+     */
+    public Integer extractIntegerFromUnFormattedStringNamed(final String parameterName, final JsonElement element, final Set<String> parametersPassedInRequest) {
+        Integer intValue = null;
+        if (element.isJsonObject()) {
+            JsonObject object = element.getAsJsonObject();
+            if (object.has(parameterName) && object.get(parameterName).isJsonPrimitive()) {
+                parametersPassedInRequest.add(parameterName);
+                JsonPrimitive primitive = object.get(parameterName).getAsJsonPrimitive();
+                final String stringValue = primitive.getAsString();
+                if (StringUtils.isNotBlank(stringValue)) {
+                    intValue = Integer.valueOf(stringValue);
+                }
+            }
+        }
+        return intValue;
+    }
 
     public String extractDateFormatParameter(final JsonObject element) {
         String value = null;

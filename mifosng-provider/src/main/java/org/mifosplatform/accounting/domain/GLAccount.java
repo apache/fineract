@@ -43,19 +43,19 @@ public class GLAccount extends AbstractPersistable<Long> {
     private boolean manualEntriesAllowed = true;
 
     @SuppressWarnings("unused")
-    @Column(name = "classification", nullable = false, length = 45)
-    private String classification;
+    @Column(name = "classification_enum", nullable = false)
+    private Integer classification;
 
-    @Column(name = "header_account", nullable = false)
-    private boolean headerAccount;
+    @Column(name = "account_usage", nullable = false)
+    private Integer usage;
 
     @SuppressWarnings("unused")
     @Column(name = "description", nullable = true, length = 500)
     private String description;
 
     public static GLAccount createNew(final GLAccount parent, final String name, final String glCode, final boolean disabled,
-            final boolean manualEntriesAllowed, final String classification, final boolean headerAccount, final String description) {
-        return new GLAccount(parent, name, glCode, disabled, manualEntriesAllowed, classification, headerAccount, description);
+            final boolean manualEntriesAllowed, final Integer classification, final Integer usage, final String description) {
+        return new GLAccount(parent, name, glCode, disabled, manualEntriesAllowed, classification, usage, description);
     }
 
     protected GLAccount() {
@@ -63,13 +63,13 @@ public class GLAccount extends AbstractPersistable<Long> {
     }
 
     private GLAccount(final GLAccount parent, final String name, final String glCode, final boolean disabled,
-            final boolean manualEntriesAllowed, final String classification, final boolean headerAccount, final String description) {
+            final boolean manualEntriesAllowed, final Integer classification, final Integer usage, final String description) {
         this.parent = parent;
         this.name = StringUtils.defaultIfEmpty(name, null);
         this.glCode = StringUtils.defaultIfEmpty(glCode, null);
         this.disabled = BooleanUtils.toBooleanDefaultIfNull(disabled, false);
         this.manualEntriesAllowed = BooleanUtils.toBooleanDefaultIfNull(manualEntriesAllowed, true);
-        this.headerAccount = BooleanUtils.toBooleanDefaultIfNull(headerAccount, false);
+        this.usage = usage;
         this.classification = classification;
         this.description = StringUtils.defaultIfEmpty(description, null);
     }
@@ -87,8 +87,8 @@ public class GLAccount extends AbstractPersistable<Long> {
         if (command.isGLCodeChanged()) {
             this.glCode = command.getGlCode();
         }
-        if (command.isHeaderAccountFlagChanged()) {
-            this.headerAccount = command.getHeaderAccount();
+        if (command.isUsageChanged()) {
+            this.usage = command.getUsage();
         }
         if (command.isManualEntriesAllowedFlagChanged()) {
             this.manualEntriesAllowed = command.getManualEntriesAllowed();
@@ -102,7 +102,11 @@ public class GLAccount extends AbstractPersistable<Long> {
     }
 
     public boolean isHeaderAccount() {
-        return headerAccount;
+        return GLAccountUsage.HEADER.getValue().equals(this.usage);
+    }
+
+    public Integer getUsage() {
+        return this.usage;
     }
 
     public List<GLAccount> getChildren() {

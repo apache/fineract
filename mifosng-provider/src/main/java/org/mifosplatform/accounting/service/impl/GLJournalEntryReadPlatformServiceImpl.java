@@ -12,7 +12,9 @@ import java.util.List;
 import org.joda.time.LocalDate;
 import org.mifosplatform.accounting.api.data.GLJournalEntryData;
 import org.mifosplatform.accounting.exceptions.GLJournalEntriesNotFoundException;
+import org.mifosplatform.accounting.service.AccountingEnumerations;
 import org.mifosplatform.accounting.service.GLJournalEntryReadPlatformService;
+import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
 import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,11 +36,11 @@ public class GLJournalEntryReadPlatformServiceImpl implements GLJournalEntryRead
     private static final class GLJournalEntryMapper implements RowMapper<GLJournalEntryData> {
 
         public String schema() {
-            return " journalEntry.id as journalEntryId, glAccount.classification as classification ,"
+            return " journalEntry.id as journalEntryId, glAccount.classification_enum as classification ,"
                     + " glAccount.name as glAccountName, journalEntry.account_id as glAccountId,"
                     + " journalEntry.office_id as officeId, office.name as officeName, "
                     + " journalEntry.portfolio_generated as portfolioGenerated,journalEntry.entry_date as entryDate, "
-                    + " journalEntry.type as entryType,journalEntry.amount as amount, journalEntry.transaction_id as transactionId,"
+                    + " journalEntry.type_enum as entryType,journalEntry.amount as amount, journalEntry.transaction_id as transactionId,"
                     + " journalEntry.entity_type as entityType, journalEntry.entity_id as entityId, creatingUser.id as createdByUserId, "
                     + " creatingUser.username as createdByUserName, journalEntry.description as comments, "
                     + " journalEntry.created_date as createdDate, journalEntry.reversed as reversed "
@@ -55,22 +57,24 @@ public class GLJournalEntryReadPlatformServiceImpl implements GLJournalEntryRead
             String officeName = rs.getString("officeName");
             String glAccountName = rs.getString("glAccountName");
             Long glAccountId = rs.getLong("glAccountId");
-            String glAccountClassification = rs.getString("classification");
+            final int accountTypeId = JdbcSupport.getInteger(rs, "classification");
+            final EnumOptionData accountType = AccountingEnumerations.gLAccountType(accountTypeId);
             LocalDate entryDate = JdbcSupport.getLocalDate(rs, "entryDate");
             Boolean portfolioGenerated = rs.getBoolean("portfolioGenerated");
             BigDecimal amount = rs.getBigDecimal("amount");
-            String entryType = rs.getString("entryType");
+            int entryTypeId = JdbcSupport.getInteger(rs, "entryType");
+            final EnumOptionData entryType = AccountingEnumerations.journalEntryType(entryTypeId);
             String transactionId = rs.getString("transactionId");
             String entityType = rs.getString("entityType");
-            Long entityId = rs.getLong("entityId");
+            Long entityId = JdbcSupport.getLong(rs, "entityId");
             Long createdByUserId = rs.getLong("createdByUserId");
             LocalDate createdDate = JdbcSupport.getLocalDate(rs, "createdDate");
             String createdByUserName = rs.getString("createdByUserName");
             String comments = rs.getString("comments");
             Boolean reversed = rs.getBoolean("reversed");
 
-            return new GLJournalEntryData(journalEntryId, officeId, officeName, glAccountName, glAccountId, glAccountClassification,
-                    entryDate, entryType, amount, transactionId, portfolioGenerated, entityType, entityId, createdByUserId, createdDate,
+            return new GLJournalEntryData(journalEntryId, officeId, officeName, glAccountName, glAccountId, accountType, entryDate,
+                    entryType, amount, transactionId, portfolioGenerated, entityType, entityId, createdByUserId, createdDate,
                     createdByUserName, comments, reversed);
         }
     }

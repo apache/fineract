@@ -8,8 +8,6 @@ import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
 import org.mifosplatform.accounting.AccountingConstants.CASH_ACCOUNTS_FOR_LOAN;
-import org.mifosplatform.accounting.AccountingConstants.JOURNAL_ENTRY_TYPE;
-import org.mifosplatform.accounting.AccountingConstants.PORTFOLIO_PRODUCT_TYPE;
 import org.mifosplatform.accounting.api.commands.GLJournalEntryCommand;
 import org.mifosplatform.accounting.api.commands.SingleDebitOrCreditEntryCommand;
 import org.mifosplatform.accounting.api.data.LoanDTO;
@@ -20,6 +18,8 @@ import org.mifosplatform.accounting.domain.GLClosure;
 import org.mifosplatform.accounting.domain.GLClosureRepository;
 import org.mifosplatform.accounting.domain.GLJournalEntry;
 import org.mifosplatform.accounting.domain.GLJournalEntryRepository;
+import org.mifosplatform.accounting.domain.JournalEntryType;
+import org.mifosplatform.accounting.domain.PortfolioProductType;
 import org.mifosplatform.accounting.domain.ProductToGLAccountMapping;
 import org.mifosplatform.accounting.domain.ProductToGLAccountMappingRepository;
 import org.mifosplatform.accounting.exceptions.GLAccountNotFoundException;
@@ -78,9 +78,9 @@ public class GLJournalEntryWritePlatformServiceJpaRepositoryImpl implements GLJo
             Date entryDate = command.getEntryDate().toDateMidnight().toDate();
             String transactionId = generateTransactionId();
 
-            saveAllDebitOrCreditEntries(command, office, entryDate, command.getDebits(), transactionId, JOURNAL_ENTRY_TYPE.DEBIT);
+            saveAllDebitOrCreditEntries(command, office, entryDate, command.getDebits(), transactionId, JournalEntryType.DEBIT);
 
-            saveAllDebitOrCreditEntries(command, office, entryDate, command.getCredits(), transactionId, JOURNAL_ENTRY_TYPE.CREDIT);
+            saveAllDebitOrCreditEntries(command, office, entryDate, command.getCredits(), transactionId, JournalEntryType.CREDIT);
 
             return transactionId;
         } catch (DataIntegrityViolationException dve) {
@@ -104,14 +104,14 @@ public class GLJournalEntryWritePlatformServiceJpaRepositoryImpl implements GLJo
             GLJournalEntry reversalJournalEntry;
             String reversalComment = "Reversal entry for Journal Entry with Entry Id  :" + journalEntry.getId() + " and transaction Id "
                     + transactionId;
-            if (journalEntry.getType().equalsIgnoreCase(JOURNAL_ENTRY_TYPE.DEBIT.toString())) {
+            if (journalEntry.isDebitEntry()) {
                 reversalJournalEntry = GLJournalEntry.createNew(journalEntry.getOffice(), journalEntry.getGlAccount(),
-                        reversalTransactionId, false, journalEntry.getEntryDate(), JOURNAL_ENTRY_TYPE.CREDIT.toString(),
-                        journalEntry.getAmount(), reversalComment, null, null);
+                        reversalTransactionId, false, journalEntry.getEntryDate(), JournalEntryType.CREDIT, journalEntry.getAmount(),
+                        reversalComment, null, null);
             } else {
                 reversalJournalEntry = GLJournalEntry.createNew(journalEntry.getOffice(), journalEntry.getGlAccount(),
-                        reversalTransactionId, false, journalEntry.getEntryDate(), JOURNAL_ENTRY_TYPE.DEBIT.toString(),
-                        journalEntry.getAmount(), reversalComment, null, null);
+                        reversalTransactionId, false, journalEntry.getEntryDate(), JournalEntryType.DEBIT, journalEntry.getAmount(),
+                        reversalComment, null, null);
             }
             // save the reversal entry
             this.glJournalEntryRepository.saveAndFlush(reversalJournalEntry);
@@ -267,21 +267,21 @@ public class GLJournalEntryWritePlatformServiceJpaRepositoryImpl implements GLJo
 
     private GLAccount getLinkedFinAccountForLoanProduct(Long loanProductId, CASH_ACCOUNTS_FOR_LOAN finAccountType) {
         ProductToGLAccountMapping accountMapping = accountMappingRepository.findByProductIdAndProductTypeAndFinancialAccountType(
-                loanProductId, PORTFOLIO_PRODUCT_TYPE.LOAN.getValue(), finAccountType.getValue());
+                loanProductId, PortfolioProductType.LOAN.getValue(), finAccountType.getValue());
         return accountMapping.getGlAccount();
     }
 
     private void createCreditJournalEntryForLoanProduct(Office office, GLAccount account, Long loanId, String transactionId,
             Date entryDate, BigDecimal amount) {
-        GLJournalEntry journalEntry = GLJournalEntry.createNew(office, account, transactionId, true, entryDate,
-                JOURNAL_ENTRY_TYPE.CREDIT.toString(), amount, null, PORTFOLIO_PRODUCT_TYPE.LOAN.toString(), loanId);
+        GLJournalEntry journalEntry = GLJournalEntry.createNew(office, account, transactionId, true, entryDate, JournalEntryType.CREDIT,
+                amount, null, PortfolioProductType.LOAN.toString(), loanId);
         glJournalEntryRepository.saveAndFlush(journalEntry);
     }
 
     private void createDebitJournalEntryForLoanProduct(Office office, GLAccount account, Long loanId, String transactionId, Date entryDate,
             BigDecimal amount) {
-        GLJournalEntry journalEntry = GLJournalEntry.createNew(office, account, transactionId, true, entryDate,
-                JOURNAL_ENTRY_TYPE.DEBIT.toString(), amount, null, PORTFOLIO_PRODUCT_TYPE.LOAN.toString(), loanId);
+        GLJournalEntry journalEntry = GLJournalEntry.createNew(office, account, transactionId, true, entryDate, JournalEntryType.DEBIT,
+                amount, null, PortfolioProductType.LOAN.toString(), loanId);
         glJournalEntryRepository.saveAndFlush(journalEntry);
     }
 
@@ -336,7 +336,7 @@ public class GLJournalEntryWritePlatformServiceJpaRepositoryImpl implements GLJo
      * @param transactionId
      */
     private void saveAllDebitOrCreditEntries(GLJournalEntryCommand command, final Office office, Date entryDate,
-            SingleDebitOrCreditEntryCommand[] singleDebitOrCreditEntryCommands, String transactionId, JOURNAL_ENTRY_TYPE type) {
+            SingleDebitOrCreditEntryCommand[] singleDebitOrCreditEntryCommands, String transactionId, JournalEntryType type) {
         for (SingleDebitOrCreditEntryCommand singleDebitOrCreditEntryCommand : singleDebitOrCreditEntryCommands) {
             GLAccount glAccount = glAccountRepository.findOne(singleDebitOrCreditEntryCommand.getGlAccountId());
             if (glAccount == null) { throw new GLAccountNotFoundException(singleDebitOrCreditEntryCommand.getGlAccountId()); }
@@ -356,7 +356,7 @@ public class GLJournalEntryWritePlatformServiceJpaRepositoryImpl implements GLJo
             if (!StringUtils.isBlank(singleDebitOrCreditEntryCommand.getComments())) {
                 comments = singleDebitOrCreditEntryCommand.getComments();
             }
-            GLJournalEntry glJournalEntry = GLJournalEntry.createNew(office, glAccount, transactionId, false, entryDate, type.toString(),
+            GLJournalEntry glJournalEntry = GLJournalEntry.createNew(office, glAccount, transactionId, false, entryDate, type,
                     singleDebitOrCreditEntryCommand.getAmount(), comments, null, null);
             glJournalEntryRepository.saveAndFlush(glJournalEntry);
         }

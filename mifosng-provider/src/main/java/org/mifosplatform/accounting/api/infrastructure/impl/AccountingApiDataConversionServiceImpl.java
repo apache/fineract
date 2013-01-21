@@ -61,7 +61,7 @@ public class AccountingApiDataConversionServiceImpl implements AccountingApiData
         final Map<String, Object> requestMap = gsonConverter.fromJson(json, typeOfMap);
 
         final Set<String> supportedParams = new HashSet<String>(Arrays.asList("name", "parentId", "glCode", "disabled",
-                "manualEntriesAllowed", "classification", "headerAccount", "description", "locale", "dateFormat"));
+                "manualEntriesAllowed", "classification", "usage", "description", "locale", "dateFormat"));
 
         checkForUnsupportedParameters(requestMap, supportedParams);
 
@@ -75,16 +75,18 @@ public class AccountingApiDataConversionServiceImpl implements AccountingApiData
         final String glCode = helper.extractStringNamed("glCode", element, requestParamatersDetected);
         final Boolean disabled = helper.extractBooleanNamed("disabled", element, requestParamatersDetected);
         final Boolean manualEntriesAllowed = helper.extractBooleanNamed("manualEntriesAllowed", element, requestParamatersDetected);
-        final String category = helper.extractStringNamed("classification", element, requestParamatersDetected);
-        final Boolean headerAccount = helper.extractBooleanNamed("headerAccount", element, requestParamatersDetected);
+        final Integer category = helper.extractIntegerFromUnFormattedStringNamed("classification", element, requestParamatersDetected);
+        final Integer usage = helper.extractIntegerFromUnFormattedStringNamed("usage", element, requestParamatersDetected);
         final String description = helper.extractStringNamed("description", element, requestParamatersDetected);
 
         return new GLAccountCommand(requestParamatersDetected, resourceIdentifier, name, parentId, glCode, disabled, manualEntriesAllowed,
-                category, headerAccount, description);
+                category, usage, description);
     }
 
     @Override
     public GLClosureCommand convertJsonToGLClosureCommand(Long resourceIdentifier, String json) {
+        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         final Map<String, Object> requestMap = gsonConverter.fromJson(json, typeOfMap);
 
@@ -107,6 +109,8 @@ public class AccountingApiDataConversionServiceImpl implements AccountingApiData
 
     @Override
     public GLJournalEntryCommand convertJsonToGLJournalEntryCommand(String json) {
+        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         final Map<String, Object> requestMap = gsonConverter.fromJson(json, typeOfMap);
 

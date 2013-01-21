@@ -2,6 +2,8 @@ package org.mifosplatform.accounting.api.commands;
 
 import java.util.Set;
 
+import org.mifosplatform.accounting.domain.GLAccountUsage;
+
 /**
  * Immutable command for adding a general Ledger Account
  */
@@ -13,15 +15,15 @@ public class GLAccountCommand {
     private final String glCode;
     private final Boolean disabled;
     private final Boolean manualEntriesAllowed;
-    private final Boolean headerAccount;
-    private final String classification;
+    private final Integer usage;
+    private final Integer classification;
     private final String description;
 
     private final Set<String> parametersPassedInRequest;
 
     public GLAccountCommand(final Set<String> modifiedParameters, final Long id, final String name, final Long parentId,
-            final String glCode, final Boolean disabled, final Boolean manualEntriesAllowed, final String classification,
-            final Boolean headerAccount, final String description) {
+            final String glCode, final Boolean disabled, final Boolean manualEntriesAllowed, final Integer classification,
+            final Integer usage, final String description) {
         this.parametersPassedInRequest = modifiedParameters;
         this.id = id;
         this.name = name;
@@ -30,8 +32,12 @@ public class GLAccountCommand {
         this.disabled = disabled;
         this.manualEntriesAllowed = manualEntriesAllowed;
         this.classification = classification;
-        this.headerAccount = headerAccount;
+        this.usage = usage;
         this.description = description;
+    }
+
+    public boolean isHeaderAccount() {
+        return GLAccountUsage.HEADER.getValue().equals(this.usage);
     }
 
     public boolean isNameChanged() {
@@ -58,8 +64,8 @@ public class GLAccountCommand {
         return this.parametersPassedInRequest.contains("classification");
     }
 
-    public boolean isHeaderAccountFlagChanged() {
-        return this.parametersPassedInRequest.contains("headerAccount");
+    public boolean isUsageChanged() {
+        return this.parametersPassedInRequest.contains("usage");
     }
 
     public boolean isDescriptionChanged() {
@@ -90,15 +96,15 @@ public class GLAccountCommand {
         return manualEntriesAllowed;
     }
 
-    public Boolean getHeaderAccount() {
-        return headerAccount;
+    public Integer getUsage() {
+        return this.usage;
     }
 
     public String getDescription() {
         return description;
     }
 
-    public String getClassification() {
+    public Integer getClassification() {
         return classification;
     }
 }

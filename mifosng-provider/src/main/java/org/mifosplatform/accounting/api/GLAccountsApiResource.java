@@ -21,10 +21,12 @@ import org.mifosplatform.accounting.api.commands.GLAccountCommand;
 import org.mifosplatform.accounting.api.data.GLAccountData;
 import org.mifosplatform.accounting.api.infrastructure.AccountingApiDataConversionService;
 import org.mifosplatform.accounting.api.infrastructure.AccountingApiJsonSerializerService;
+import org.mifosplatform.accounting.service.AccountingDropdownReadPlatformService;
 import org.mifosplatform.accounting.service.GLAccountReadPlatformService;
 import org.mifosplatform.accounting.service.GLAccountWritePlatformService;
 import org.mifosplatform.infrastructure.core.api.ApiParameterHelper;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
+import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -47,6 +49,9 @@ public class GLAccountsApiResource {
     @Autowired
     private AccountingApiJsonSerializerService apiJsonSerializerService;
 
+    @Autowired
+    private AccountingDropdownReadPlatformService dropdownReadPlatformService;
+
     private final String entityType = "GL_ACCOUNT";
 
     @Autowired
@@ -65,8 +70,8 @@ public class GLAccountsApiResource {
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveAllAccounts(@Context final UriInfo uriInfo, @QueryParam("classification") final String classification,
-            @QueryParam("searchParam") final String searchParam, @QueryParam("usage") final String usage,
+    public String retrieveAllAccounts(@Context final UriInfo uriInfo, @QueryParam("classification") final Integer classification,
+            @QueryParam("searchParam") final String searchParam, @QueryParam("usage") final Integer usage,
             @QueryParam("manualAdjustmentsAllowed") final Boolean manualTransactionsAllowed, @QueryParam("disabled") final Boolean disabled) {
 
         context.authenticatedUser().validateHasReadPermission(entityType);
@@ -78,6 +83,22 @@ public class GLAccountsApiResource {
                 usage, manualTransactionsAllowed, disabled);
 
         return this.apiJsonSerializerService.serializeGLAccountDataToJson(prettyPrint, responseParameters, glAccountDatas);
+    }
+    
+    @GET
+    @Path("template")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String retrieveNewLoanProductDetails(@Context final UriInfo uriInfo) {
+
+        context.authenticatedUser().validateHasReadPermission(entityType);
+
+        GLAccountData glAccountData = this.glAccountReadPlatformService.retrieveNewGLAccountDetails();
+        glAccountData = handleTemplate(glAccountData);
+
+        final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
+        final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
+        return this.apiJsonSerializerService.serializeGLAccountDataToJson(prettyPrint, responseParameters, glAccountData);
     }
 
     @GET
@@ -92,9 +113,9 @@ public class GLAccountsApiResource {
         final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
         boolean template = ApiParameterHelper.template(uriInfo.getQueryParameters());
 
-        final GLAccountData glAccountData = this.glAccountReadPlatformService.retrieveGLAccountById(glAccountId);
+        GLAccountData glAccountData = this.glAccountReadPlatformService.retrieveGLAccountById(glAccountId);
         if (template) {
-            // TODO: define templates
+            glAccountData = handleTemplate(glAccountData);
         }
 
         return this.apiJsonSerializerService.serializeGLAccountDataToJson(prettyPrint, responseParameters, glAccountData);
@@ -134,5 +155,11 @@ public class GLAccountsApiResource {
         this.glAccountWritePlatformService.deleteGLAccount(glAccountId);
 
         return Response.ok(new CommandProcessingResult(glAccountId)).build();
+    }
+
+    private GLAccountData handleTemplate(GLAccountData glAccountData) {
+        List<EnumOptionData> accountTypeOptions = dropdownReadPlatformService.retrieveGLAccountTypeOptions();
+        List<EnumOptionData> usageOptions = dropdownReadPlatformService.retrieveGLAccountUsageOptions();
+        return new GLAccountData(glAccountData, accountTypeOptions, usageOptions);
     }
 }

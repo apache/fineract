@@ -2,20 +2,17 @@ package org.mifosplatform.accounting.service.impl;
 
 import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
-import org.mifosplatform.accounting.AccountingConstants.GL_ACCOUNT_CLASSIFICATION;
 import org.mifosplatform.accounting.api.commands.GLAccountCommand;
 import org.mifosplatform.accounting.domain.GLAccount;
 import org.mifosplatform.accounting.domain.GLAccountRepository;
 import org.mifosplatform.accounting.domain.GLJournalEntry;
 import org.mifosplatform.accounting.domain.GLJournalEntryRepository;
 import org.mifosplatform.accounting.exceptions.GLAccountDuplicateException;
-import org.mifosplatform.accounting.exceptions.GLAccountInvalidClassificationException;
 import org.mifosplatform.accounting.exceptions.GLAccountInvalidDeleteException;
 import org.mifosplatform.accounting.exceptions.GLAccountInvalidDeleteException.GL_ACCOUNT_INVALID_DELETE_REASON;
-import org.mifosplatform.accounting.exceptions.GLAccountInvalidUpdateException.GL_ACCOUNT_INVALID_UPDATE_REASON;
 import org.mifosplatform.accounting.exceptions.GLAccountInvalidParentException;
 import org.mifosplatform.accounting.exceptions.GLAccountInvalidUpdateException;
+import org.mifosplatform.accounting.exceptions.GLAccountInvalidUpdateException.GL_ACCOUNT_INVALID_UPDATE_REASON;
 import org.mifosplatform.accounting.exceptions.GLAccountNotFoundException;
 import org.mifosplatform.accounting.service.GLAccountCommandValidator;
 import org.mifosplatform.accounting.service.GLAccountWritePlatformService;
@@ -49,18 +46,13 @@ public class GLAccountWritePlatformServiceJpaRepositoryImpl implements GLAccount
             GLAccountCommandValidator validator = new GLAccountCommandValidator(command);
             validator.validateForCreate();
 
-            if (StringUtils.isNotBlank(command.getClassification())) {
-                if (!checkValidGLAccountClassification(command.getClassification())) { throw new GLAccountInvalidClassificationException(
-                        command.getClassification()); }
-            }
-
             // check parent is valid
             GLAccount parentGLAccount = null;
             if (command.getParentId() != null) {
                 parentGLAccount = validateParentGLAccount(command);
             }
             GLAccount glAccount = GLAccount.createNew(parentGLAccount, command.getName(), command.getGlCode(), false,
-                    command.getManualEntriesAllowed(), command.getClassification(), command.getHeaderAccount(), command.getDescription());
+                    command.getManualEntriesAllowed(), command.getClassification(), command.getUsage(), command.getDescription());
 
             this.glAccountRepository.saveAndFlush(glAccount);
 
@@ -87,18 +79,12 @@ public class GLAccountWritePlatformServiceJpaRepositoryImpl implements GLAccount
             parentGLAccount = validateParentGLAccount(command);
         }
 
-        // validate new classification
-        if (command.isClassificationChanged()) {
-            if (!checkValidGLAccountClassification(command.getClassification())) { throw new GLAccountInvalidClassificationException(
-                    command.getClassification()); }
-        }
-
         /**
          * a detail account cannot be changed to a header account if
          * transactions are already logged against it
          **/
-        if (command.isHeaderAccountFlagChanged()) {
-            if (command.getHeaderAccount() == true) {
+        if (command.isUsageChanged()) {
+            if (command.isHeaderAccount()) {
                 List<GLJournalEntry> journalEntriesForAccount = glJournalEntryRepository.findFirstJournalEntryForAccount(glAccountId);
                 if (journalEntriesForAccount.size() > 0) { throw new GLAccountInvalidUpdateException(
                         GL_ACCOUNT_INVALID_UPDATE_REASON.TRANSANCTIONS_LOGGED, glAccountId); }
@@ -161,10 +147,4 @@ public class GLAccountWritePlatformServiceJpaRepositoryImpl implements GLAccount
                 "Unknown data integrity issue with resource GL Account: " + realCause.getMessage());
     }
 
-    private static boolean checkValidGLAccountClassification(final String entityType) {
-        for (GL_ACCOUNT_CLASSIFICATION classification : GL_ACCOUNT_CLASSIFICATION.values()) {
-            if (classification.name().toString().equalsIgnoreCase(entityType)) { return true; }
-        }
-        return false;
-    }
 }
