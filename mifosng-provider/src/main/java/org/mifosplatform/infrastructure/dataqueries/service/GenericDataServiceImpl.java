@@ -166,6 +166,8 @@ public class GenericDataServiceImpl implements GenericDataService {
         List<ResultsetDataRow> data = grs.getData();
         List<String> row;
         Integer rSize;
+        String doubleQuote = "\"";
+        String slashDoubleQuote = "\\\"";
         String currColType;
         String currVal;
         // logger.info("NO. of Rows: " + data.size());
@@ -176,7 +178,7 @@ public class GenericDataServiceImpl implements GenericDataService {
             rSize = row.size();
             for (int j = 0; j < rSize; j++) {
 
-                writer.append('\"' + columnHeaders.get(j).getColumnName() + '\"' + ": ");
+                writer.append(doubleQuote + columnHeaders.get(j).getColumnName() + doubleQuote + ": ");
                 currColType = columnHeaders.get(j).getColumnDisplayType();
                 currVal = row.get(j);
                 if (currVal != null) {
@@ -188,7 +190,7 @@ public class GenericDataServiceImpl implements GenericDataService {
                             writer.append("[" + localDate.getYear() + ", " + localDate.getMonthOfYear() + ", " + localDate.getDayOfMonth()
                                     + "]");
                         } else
-                            writer.append('\"' + currVal + '\"');
+                            writer.append(doubleQuote + replace(currVal, doubleQuote,slashDoubleQuote) + doubleQuote);
                     }
                 } else
                     writer.append("null");
