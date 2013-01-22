@@ -38,4 +38,12 @@ public enum TenureTypeEnum {
         }
         return tenureTypeEnum;
     }
+
+	public boolean isFixedPeriod() {
+		return this.value.equals(TenureTypeEnum.FIXED_PERIOD.value);
+	}
+
+	public boolean isPerpetual() {
+		return this.value.equals(TenureTypeEnum.PERPETUAL.value);
+	}
 }

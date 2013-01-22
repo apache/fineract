@@ -10,17 +10,19 @@ public class SavingSchedulePeriodData {
     private final LocalDate dueDate;
     private final BigDecimal depositDue;
     private final BigDecimal depositPaid;
+    private final BigDecimal interestAccured;
 
-    public SavingSchedulePeriodData(final Integer period, final LocalDate dueDate, final BigDecimal depositDue, final BigDecimal depositPaid) {
+    public SavingSchedulePeriodData(final Integer period, final LocalDate dueDate, final BigDecimal depositDue, final BigDecimal depositPaid, final BigDecimal interestAccured) {
         this.period = period;
         this.dueDate = dueDate;
         this.depositDue = depositDue;
         this.depositPaid = depositPaid;
+        this.interestAccured = interestAccured;
     }
 
     public static SavingSchedulePeriodData addScheduleInformation(int periodNumber, LocalDate scheduleDate,
-            BigDecimal depositAmountPerPeriod) {
-        return new SavingSchedulePeriodData(periodNumber, scheduleDate, depositAmountPerPeriod, BigDecimal.ZERO);
+            BigDecimal depositAmountPerPeriod, BigDecimal interestAccured) {
+        return new SavingSchedulePeriodData(periodNumber, scheduleDate, depositAmountPerPeriod, BigDecimal.ZERO, interestAccured);
     }
 
     public Integer getPeriod() {
@@ -39,5 +41,7 @@ public class SavingSchedulePeriodData {
         return this.depositPaid;
     }
 
-
+	public BigDecimal getInterestAccured() {
+		return this.interestAccured;
+	}
 }

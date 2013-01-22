@@ -4,14 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.joda.time.LocalDate;
-import org.mifosplatform.portfolio.loanproduct.domain.PeriodFrequencyType;
 import org.mifosplatform.portfolio.savingsaccount.domain.DepositScheduleDateGenerator;
+import org.mifosplatform.portfolio.savingsaccountproduct.domain.SavingFrequencyType;
 
 public class DefaultDepositScheduleDateGenerator implements DepositScheduleDateGenerator {
 
     @Override
     public List<LocalDate> generate(LocalDate scheuleStartDate, Integer paymentPeriods, Integer depositFrequency,
-            PeriodFrequencyType depositFrequencyType) {
+    		SavingFrequencyType savingFrequencyType) {
 
         List<LocalDate> duePaymentPeriodDates = new ArrayList<LocalDate>(depositFrequency);
         LocalDate startDate = scheuleStartDate;
@@ -22,21 +22,24 @@ public class DefaultDepositScheduleDateGenerator implements DepositScheduleDateG
             if (period == 1) {
                 duePaymentPeriodDate = startDate;
             } else {
-                switch (depositFrequencyType) {
-                    case DAYS:
+                switch (savingFrequencyType) {
+                    case DAILY:
                         duePaymentPeriodDate = startDate.plusDays(depositFrequency);
                     break;
-                    case WEEKS:
-                        duePaymentPeriodDate = startDate.plusWeeks(depositFrequency);
-                    break;
-                    case MONTHS:
+                    case MONTHLY:
                         duePaymentPeriodDate = startDate.plusMonths(depositFrequency);
                     break;
-                    case YEARS:
-                        duePaymentPeriodDate = startDate.plusYears(depositFrequency);
+                    case QUATERLY:
+                        duePaymentPeriodDate = startDate.plusMonths(3*depositFrequency);
                     break;
-                    case INVALID:
+                    case HALFYEARLY:
+                        duePaymentPeriodDate = startDate.plusMonths(6*depositFrequency);
                     break;
+                    case YEARLY:
+                    	duePaymentPeriodDate = startDate.plusYears(depositFrequency);
+                    break;
+                    default:
+					break;	
                 }
             }
             duePaymentPeriodDates.add(duePaymentPeriodDate);

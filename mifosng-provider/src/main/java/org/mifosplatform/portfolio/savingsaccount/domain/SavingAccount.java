@@ -204,12 +204,13 @@ public class SavingAccount extends AbstractAuditableCustom<AppUser, Long> {
             Integer depositEvery, Integer interestPostEvery, Integer interestPostFrequency) {
 
         Money futureValueOnMaturity = null;
-        if (savingProductType.isReccuring()) {
+        if (savingProductType.isReccuring() && tenureTypeEnum.isFixedPeriod()) {
             futureValueOnMaturity = reccuringDepositInterestCalculator.calculateInterestOnMaturityFor(savingsDeposit, tenure,
                     reccuringInterestRate, commencementDate, tenureTypeEnum, savingFrequencyType, savingInterestCalculationMethod,depositEvery);
-        } else if (savingProductType.isRegular()) {
-            futureValueOnMaturity = reccuringDepositInterestCalculator.calculateInterestOnMaturityFor(savingsDeposit, tenure,
-                    savingInterestRate, commencementDate, tenureTypeEnum, savingFrequencyType, savingInterestCalculationMethod,depositEvery);
+        } else if (savingProductType.isReccuring() && tenureTypeEnum.isPerpetual()) {
+            futureValueOnMaturity = savingsDeposit;
+        } else {
+        	futureValueOnMaturity = savingsDeposit;
         }
 
         return new SavingAccount(client, externalId, product, savingsDeposit, reccuringInterestRate, savingInterestRate, tenure,
@@ -255,8 +256,8 @@ public class SavingAccount extends AbstractAuditableCustom<AppUser, Long> {
         this.lockinPeriod = lockinPeriod;
         this.lockinPeriodType = lockinPeriodType.getValue();
         this.projectedTotalOnMaturity = futureValueOnMaturity.getAmount();
-        this.projectedInterestAccruedOnMaturity = futureValueOnMaturity.getAmount().subtract(
-                BigDecimal.valueOf(savingsDeposit.getAmount().doubleValue() * tenure.doubleValue() / payEvery)); //presently only for months
+        BigDecimal projectedInterestForReccuring = futureValueOnMaturity.getAmount().subtract(BigDecimal.valueOf(savingsDeposit.getAmount().doubleValue() * tenure.doubleValue() / payEvery)); //presently only for months
+        this.projectedInterestAccruedOnMaturity = savingProductType.isReccuring() && tenureTypeEnum.isFixedPeriod() ? projectedInterestForReccuring : BigDecimal.ZERO;
         this.payEvery = payEvery;
         this.outstandingAmount = BigDecimal.ZERO;
         this.interestPostEvery = interestPostEvery;
@@ -267,15 +268,17 @@ public class SavingAccount extends AbstractAuditableCustom<AppUser, Long> {
             BigDecimal savingInterestRate, Integer tenure, LocalDate commencementDate, TenureTypeEnum tenureTypeEnum,
             SavingProductType savingProductType, SavingFrequencyType savingFrequencyType,
             SavingInterestCalculationMethod savingInterestCalculationMethod, boolean isLockinPeriodAllowed, Integer lockinPeriod,
-            PeriodFrequencyType lockinPeriodType, ReccuringDepositInterestCalculator reccuringDepositInterestCalculator,Integer payEvery) {
+            PeriodFrequencyType lockinPeriodType, ReccuringDepositInterestCalculator reccuringDepositInterestCalculator,Integer payEvery,
+            SavingsInterestType interestType, Integer interestPostEvery, Integer interestPostFrequency) {
 
-        Money futureValueOnMaturity = null;
-        if (savingProductType.isReccuring()) {
+    	Money futureValueOnMaturity = null;
+        if (savingProductType.isReccuring() && tenureTypeEnum.isFixedPeriod()) {
             futureValueOnMaturity = reccuringDepositInterestCalculator.calculateInterestOnMaturityFor(savingsDeposit, tenure,
                     reccuringInterestRate, commencementDate, tenureTypeEnum, savingFrequencyType, savingInterestCalculationMethod,payEvery);
-        } else if (savingProductType.isRegular()) {
-            futureValueOnMaturity = reccuringDepositInterestCalculator.calculateInterestOnMaturityFor(savingsDeposit, tenure,
-                    savingInterestRate, commencementDate, tenureTypeEnum, savingFrequencyType, savingInterestCalculationMethod,payEvery);
+        } else if (savingProductType.isReccuring() && tenureTypeEnum.isPerpetual()) {
+            futureValueOnMaturity = savingsDeposit;
+        } else {
+        	futureValueOnMaturity = savingsDeposit;
         }
 
         this.product = product;
@@ -288,17 +291,20 @@ public class SavingAccount extends AbstractAuditableCustom<AppUser, Long> {
         this.tenureType = tenureTypeEnum.getValue();
         this.savingProductType = savingProductType.getValue();
         this.frequency = savingFrequencyType.getValue();
+        this.interestType = interestType.getValue();
         this.interestCalculationMethod = savingInterestCalculationMethod.getValue();
         this.isLockinPeriodAllowed = isLockinPeriodAllowed;
         this.lockinPeriod = lockinPeriod;
         this.lockinPeriodType = lockinPeriodType.getValue();
         this.payEvery = payEvery;
         this.outstandingAmount = BigDecimal.ZERO;
+        this.interestPostEvery = interestPostEvery;
+        this.interestPostFrequency=interestPostFrequency;
+        this.savingScheduleInstallments.clear();
 
-        // FIXME - MADHUKAR - futureValueOnMaturity is possibly null
         this.projectedTotalOnMaturity = futureValueOnMaturity.getAmount();
-        this.projectedInterestAccruedOnMaturity = futureValueOnMaturity.getAmount().subtract(
-                BigDecimal.valueOf(savingsDeposit.getAmount().doubleValue() * tenure.doubleValue()));
+        BigDecimal projectedInterestForReccuring = futureValueOnMaturity.getAmount().subtract(BigDecimal.valueOf(savingsDeposit.getAmount().doubleValue() * tenure.doubleValue() / payEvery)); //presently only for months
+        this.projectedInterestAccruedOnMaturity = savingProductType.isReccuring() && tenureTypeEnum.isFixedPeriod() ? projectedInterestForReccuring : BigDecimal.ZERO;
     }
 
     public boolean isDeleted() {
@@ -456,6 +462,7 @@ public class SavingAccount extends AbstractAuditableCustom<AppUser, Long> {
         this.maturesOnDate = null;
         this.withdrawnOnDate = withdrawnOn.toDateTimeAtCurrentTime().toDate();
         this.closedOnDate = withdrawnOn.toDateTimeAtCurrentTime().toDate();
+        this.savingScheduleInstallments.clear();
 
         if (withdrawnOn.isBefore(projectedCommencementDate())) {
 
@@ -480,7 +487,6 @@ public class SavingAccount extends AbstractAuditableCustom<AppUser, Long> {
         this.closedOnDate = new Date();
 	}
 
-	@SuppressWarnings("null")
 	public void approveSavingAccount(LocalDate approvalDate, BigDecimal savingsDepositAmountPerPeriod, BigDecimal recurringInterestRate,
 			BigDecimal savingInterestRate, Integer interestType, Integer tenure, Integer tenureType, Integer frequency, Integer payEvery, 
 			DepositLifecycleStateMachine depositLifecycleStateMachine, ReccuringDepositInterestCalculator reccuringDepositInterestCalculator,
@@ -496,12 +502,13 @@ public class SavingAccount extends AbstractAuditableCustom<AppUser, Long> {
         SavingInterestCalculationMethod interestCalculationMethod = SavingInterestCalculationMethod.fromInt(this.interestCalculationMethod); 
         
         Money futureValueOnMaturity = null;
-        if (SavingProductType.fromInt(product.getSavingProductRelatedDetail().getSavingProductType()).isReccuring()) {
+        if (SavingProductType.fromInt(this.savingProductType).isReccuring() && tenureTypeEnum.isFixedPeriod()) {
             futureValueOnMaturity = reccuringDepositInterestCalculator.calculateInterestOnMaturityFor(savingsAmountPerPeriod, tenure,
             		recurringInterestRate, approvalDate, tenureTypeEnum, savingFrequencyType, interestCalculationMethod,payEvery);
-        } else if (SavingProductType.fromInt(product.getSavingProductRelatedDetail().getSavingProductType()).isRegular()) {
-            futureValueOnMaturity = reccuringDepositInterestCalculator.calculateInterestOnMaturityFor(savingsAmountPerPeriod, tenure,
-                    savingInterestRate, approvalDate, tenureTypeEnum, savingFrequencyType, interestCalculationMethod,payEvery);
+        }  else if (SavingProductType.fromInt(this.savingProductType).isReccuring() && tenureTypeEnum.isPerpetual()) {
+            futureValueOnMaturity = savingsAmountPerPeriod;
+        } else {
+        	futureValueOnMaturity = savingsAmountPerPeriod;
         }
 		
 		this.actualCommencementDate = approvalDate.toDate();
@@ -515,7 +522,8 @@ public class SavingAccount extends AbstractAuditableCustom<AppUser, Long> {
 		this.payEvery = payEvery;
 		this.savingScheduleInstallments.clear();
 		this.total=futureValueOnMaturity.getAmount();
-		this.interestAccrued = futureValueOnMaturity.getAmount().subtract(BigDecimal.valueOf(savingsDepositAmountPerPeriod.doubleValue() * tenure/payEvery.doubleValue()));
+		BigDecimal interestForReccuring = futureValueOnMaturity.getAmount().subtract(BigDecimal.valueOf(savingsDepositAmountPerPeriod.doubleValue() * tenure.doubleValue()/payEvery.doubleValue())); //presently only for months
+		this.interestAccrued = SavingProductType.fromInt(this.savingProductType).isReccuring() && tenureTypeEnum.isFixedPeriod() ? interestForReccuring : BigDecimal.ZERO;
 		this.interestPostEvery = interestPostEvery;
 		this.interestPostFrequency = interestPostFrequency;
 		
@@ -537,24 +545,31 @@ public class SavingAccount extends AbstractAuditableCustom<AppUser, Long> {
 		this.outstandingAmount = this.outstandingAmount.add(command.getSavingsDepostiAmountPerPeriod()); 
 		this.totalSavingsAmount = this.totalSavingsAmount.add(command.getSavingsDepostiAmountPerPeriod());
 		
-		for(SavingScheduleInstallments savingScheduleInstallment : this.savingScheduleInstallments){
-			if(!savingScheduleInstallment.isCompleted()){
-				depositAmount = savingScheduleInstallment.getDeposit();
-				remainAmountToBePaid = depositAmount.subtract(savingScheduleInstallment.getDepositPaid());
-				if (remainAmountToBePaid.doubleValue() > 0) {
-					if (commandRemainDepositAmount.doubleValue() > 0) {
-						if (commandRemainDepositAmount.doubleValue() >= remainAmountToBePaid.doubleValue()) {
-							savingScheduleInstallment.setDepositPaid(remainAmountToBePaid.add(savingScheduleInstallment.getDepositPaid()));
-							savingScheduleInstallment.setPaymentDate(command.getDepositDate().toDate());
-							savingScheduleInstallment.setCompleted(true);
-							commandRemainDepositAmount = commandRemainDepositAmount.subtract(remainAmountToBePaid);
-						} else if(commandRemainDepositAmount.doubleValue() < remainAmountToBePaid.doubleValue()){
-							savingScheduleInstallment.setDepositPaid(commandRemainDepositAmount.add(savingScheduleInstallment.getDepositPaid()));
-							savingScheduleInstallment.setPaymentDate(command.getDepositDate().toDate());
-							commandRemainDepositAmount = BigDecimal.ZERO;
+		if(SavingProductType.fromInt(this.savingProductType).isReccuring() && TenureTypeEnum.fromInt(tenureType).isFixedPeriod()) {
+			for(SavingScheduleInstallments savingScheduleInstallment : this.savingScheduleInstallments){
+				if(!savingScheduleInstallment.isCompleted()){
+					depositAmount = savingScheduleInstallment.getDeposit();
+					remainAmountToBePaid = depositAmount.subtract(savingScheduleInstallment.getDepositPaid());
+					if (remainAmountToBePaid.doubleValue() > 0) {
+						if (commandRemainDepositAmount.doubleValue() > 0) {
+							if (commandRemainDepositAmount.doubleValue() >= remainAmountToBePaid.doubleValue()) {
+								savingScheduleInstallment.setDepositPaid(remainAmountToBePaid.add(savingScheduleInstallment.getDepositPaid()));
+								savingScheduleInstallment.setPaymentDate(command.getDepositDate().toDate());
+								savingScheduleInstallment.setCompleted(true);
+								commandRemainDepositAmount = commandRemainDepositAmount.subtract(remainAmountToBePaid);
+							} else if(commandRemainDepositAmount.doubleValue() < remainAmountToBePaid.doubleValue()){
+								savingScheduleInstallment.setDepositPaid(commandRemainDepositAmount.add(savingScheduleInstallment.getDepositPaid()));
+								savingScheduleInstallment.setPaymentDate(command.getDepositDate().toDate());
+								commandRemainDepositAmount = BigDecimal.ZERO;
+							}
 						}
 					}
 				}
+			}
+		} else {
+			for(SavingScheduleInstallments savingScheduleInstallment : this.savingScheduleInstallments){
+			savingScheduleInstallment.setDepositPaid(remainAmountToBePaid.add(savingScheduleInstallment.getDepositPaid()));
+			savingScheduleInstallment.setPaymentDate(command.getDepositDate().toDate());
 			}
 		}
 	}
@@ -582,7 +597,7 @@ public class SavingAccount extends AbstractAuditableCustom<AppUser, Long> {
         this.externalId = this.getId() + "_" + this.externalId;
 	}
 
-	public void postInterest(ReccuringDepositInterestCalculator reccuringDepositInterestCalculator) {
+	public void postInterest() {
 		
 		LocalDate lastInterestPostedDate = getLastInterestPostedDate();
         @SuppressWarnings("unused")
@@ -643,8 +658,9 @@ public class SavingAccount extends AbstractAuditableCustom<AppUser, Long> {
 				termTotalAmount = termTotalAmount.add(totalOutstandingAmount);
 				transactionStartDate = transactionEndDate;
 				isOutstandingAmountCalculated = true;
+				
 			}
-		//	FIXME-MADHUKAR calculate interest on calculation method 
+		//	TODO- calculate interest on calculation method 
 			
 		//	if (savingInterestCalculationMethod.isAverageBalance()) {
 				averageBalanceForTerm =BigDecimal.valueOf(termTotalAmount.doubleValue()/this.interestPostEvery);

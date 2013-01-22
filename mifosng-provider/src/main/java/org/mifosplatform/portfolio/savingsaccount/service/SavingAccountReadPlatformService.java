@@ -6,6 +6,7 @@ import java.util.Collection;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.mifosplatform.portfolio.savingsaccount.data.SavingAccountData;
 import org.mifosplatform.portfolio.savingsaccount.data.SavingAccountForLookup;
+import org.mifosplatform.portfolio.savingsaccount.data.SavingAccountTransactionsData;
 import org.mifosplatform.portfolio.savingsaccount.data.SavingPermissionData;
 import org.mifosplatform.portfolio.savingsaccount.data.SavingScheduleData;
 
@@ -24,4 +25,6 @@ public interface SavingAccountReadPlatformService {
 	SavingScheduleData retrieveSavingsAccountSchedule(Long accountId, CurrencyData currencyData);
 
 	Collection<SavingAccountForLookup> retrieveSavingAccountsForLookUp();
+
+	Collection<SavingAccountTransactionsData> retrieveSavingsAccountTransactions(Long accountId);
 }

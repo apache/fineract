@@ -32,7 +32,6 @@ public class SavingAccountCommandValidator {
         baseDataValidator.reset().parameter("savingInterestRate").value(command.getSavingInterestRate()).notNull().zeroOrPositiveAmount();
         baseDataValidator.reset().parameter("savingInterestRate")
                 .comapareMinAndMaxOfTwoBigDecmimalNos(command.getSavingInterestRate(), command.getRecurringInterestRate());
-        baseDataValidator.reset().parameter("savingProductType").value(command.getSavingProductType()).notNull();
         baseDataValidator.reset().parameter("tenureType").value(command.getTenureType()).notNull();
         baseDataValidator.reset().parameter("tenure").value(command.getTenure()).notNull();
         baseDataValidator.reset().parameter("frequency").value(command.getFrequency()).notNull();
@@ -72,7 +71,6 @@ public class SavingAccountCommandValidator {
                 .zeroOrPositiveAmount();
         baseDataValidator.reset().parameter("savingInterestRate")
                 .comapareMinAndMaxOfTwoBigDecmimalNos(command.getSavingInterestRate(), command.getRecurringInterestRate());
-        baseDataValidator.reset().parameter("savingProductType").value(command.getSavingProductType()).ignoreIfNull();
         baseDataValidator.reset().parameter("tenureType").value(command.getTenureType()).ignoreIfNull();
         baseDataValidator.reset().parameter("tenure").value(command.getTenure()).ignoreIfNull();
         baseDataValidator.reset().parameter("frequency").value(command.getFrequency()).ignoreIfNull();

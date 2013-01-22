@@ -817,7 +817,7 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
         Set<String> supportedParams = new HashSet<String>(Arrays.asList("clientId", "productId", "externalId", "currencyCode",
                 "digitsAfterDecimal", "savingsDepositAmountPerPeriod", "recurringInterestRate", "savingInterestRate", "tenure",
                 "commencementDate", "locale", "dateFormat", "isLockinPeriodAllowed", "lockinPeriod", "lockinPeriodType",
-                "savingProductType", "tenureType", "depositfrequency", "interestType", "interestCalculationMethod", "minimumBalanceForWithdrawal",
+                "tenureType", "depositfrequency", "interestType", "interestCalculationMethod", "minimumBalanceForWithdrawal",
                 "isPartialDepositAllowed", "depositEvery","interestPostEvery","interestPostFrequency"));
         checkForUnsupportedParameters(requestMap, supportedParams);
         Set<String> modifiedParameters = new HashSet<String>();
@@ -837,7 +837,6 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
         Integer lockinPeriodType = extractIntegerParameter("lockinPeriodType", requestMap, modifiedParameters);
 
         LocalDate commencementDate = extractLocalDateParameter("commencementDate", requestMap, modifiedParameters);
-        Integer savingProductType = extractIntegerParameter("savingProductType", requestMap, modifiedParameters);
         Integer tenureType = extractIntegerParameter("tenureType", requestMap, modifiedParameters);
         Integer depositfrequency = extractIntegerParameter("depositfrequency", requestMap, modifiedParameters);
         Integer interestType = extractIntegerParameter("interestType", requestMap, modifiedParameters);
@@ -851,7 +850,7 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
 
         return new SavingAccountCommand(modifiedParameters, resourceIdentifier, clientId, productId, externalId, currencyCode,
                 digitsAfterDecimalValue, savingsDepositAmount, recurringInterestRate, savingInterestRate, tenure, commencementDate,
-                savingProductType, tenureType, depositfrequency, interestType, minimumBalanceForWithdrawal, interestCalculationMethod,
+                tenureType, depositfrequency, interestType, minimumBalanceForWithdrawal, interestCalculationMethod,
                 isLockinPeriodAllowed, isPartialDepositAllowed, lockinPeriod, lockinPeriodType, depositEvery, interestPostEvery, interestPostFrequency);
     }
 

@@ -13,12 +13,14 @@ public class CalculateSavingScheduleCommand {
     private final BigDecimal interestRate;
     private final LocalDate paymentsStartingFromDate;
     private final Integer tenure;
+    private final Integer tenureType;
     private final Integer interestPostEvery; 
     private final Integer interestPostFrequency;
+    private final Integer interestCalculationMethod;
 
     public CalculateSavingScheduleCommand(final Long productId, final BigDecimal deposit, final Integer depositEvery,
             final Integer paymentFrequencyType, final BigDecimal interestRate, final LocalDate paymentsStartingFromDate,
-            final Integer tenure,final Integer interestPostEvery, final Integer interestPostFrequency) {
+            final Integer tenure, final Integer tenureType, final Integer interestPostEvery, final Integer interestPostFrequency, final Integer interestCalculationMethod) {
 
         this.productId = productId;
         this.deposit = deposit;
@@ -27,8 +29,10 @@ public class CalculateSavingScheduleCommand {
         this.interestRate = interestRate;
         this.paymentsStartingFromDate = paymentsStartingFromDate;
         this.tenure = tenure;
+        this.tenureType = tenureType;
         this.interestPostEvery = interestPostEvery;
         this.interestPostFrequency = interestPostFrequency;
+        this.interestCalculationMethod = interestCalculationMethod;
 
     }
 
@@ -66,6 +70,14 @@ public class CalculateSavingScheduleCommand {
 
 	public Integer getInterestPostFrequency() {
 		return this.interestPostFrequency;
+	}
+
+	public Integer getTenureType() {
+		return this.tenureType;
+	}
+
+	public Integer getInterestCalculationMethod() {
+		return this.interestCalculationMethod;
 	}
 
 }

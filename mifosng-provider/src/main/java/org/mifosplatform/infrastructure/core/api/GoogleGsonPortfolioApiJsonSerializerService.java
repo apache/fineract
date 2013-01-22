@@ -55,7 +55,7 @@ public class GoogleGsonPortfolioApiJsonSerializerService implements PortfolioApi
             "preClosureAllowed", "preClosureInterestRate", "withdrawnonDate", "rejectedonDate", "closedonDate", "isLockinPeriodAllowed",
             "lockinPeriod", "lockinPeriodType", "productOptions", "currencyOptions", "savingsProductTypeOptions", "tenureTypeOptions",
             "savingFrequencyOptions", "savingsInterestTypeOptions", "lockinPeriodTypeOptions", "interestCalculationOptions","permissions","savingScheduleDatas",
-            "dueAmount", "savingScheduleData"));
+            "dueAmount", "savingScheduleData", "transactions","interestPostEvery","interestPostFrequency"));
 
     // guarantors
     private static final Set<String> GUARANTOR_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("externalGuarantor", "existingClientId",

@@ -80,9 +80,6 @@ public class SavingAccountAssembler {
         }
 
         SavingProductType savingProductType = SavingProductType.fromInt(product.getSavingProductRelatedDetail().getSavingProductType());
-        if (command.getSavingProductType() != null) {
-            savingProductType = SavingProductType.fromInt(command.getSavingProductType());
-        }
 
         SavingFrequencyType savingFrequencyType = SavingFrequencyType.fromInt(product.getSavingProductRelatedDetail().getFrequency());
         if (command.getFrequency() != null) {
@@ -135,7 +132,7 @@ public class SavingAccountAssembler {
         for (SavingSchedulePeriodData savingSchedulePeriodData : savingScheduleData.getPeriods()) {
 
             final SavingScheduleInstallments installment = new SavingScheduleInstallments(account, savingSchedulePeriodData.getDueDate()
-                    .toDate(), savingSchedulePeriodData.getPeriod(), savingSchedulePeriodData.getDepositDue());
+                    .toDate(), savingSchedulePeriodData.getPeriod(), savingSchedulePeriodData.getDepositDue(), savingSchedulePeriodData.getInterestAccured());
             account.addSavingScheduleInstallment(installment);
         }
 
@@ -177,9 +174,6 @@ public class SavingAccountAssembler {
         }
 
         SavingProductType savingProductType = SavingProductType.fromInt(account.getSavingProductType());
-        if (command.isSavingProductTypeChanged()) {
-            savingProductType = SavingProductType.fromInt(command.getSavingProductType());
-        }
 
         SavingFrequencyType savingFrequencyType = SavingFrequencyType.fromInt(account.getFrequency());
         if (command.isSavingFrequencyTypeChanged()) {
@@ -220,9 +214,28 @@ public class SavingAccountAssembler {
         if(command.isDepositEveryChanged()){
         	payEvery = command.getDepositEvery();
         }
+        
+        SavingsInterestType interestType = SavingsInterestType.fromInt(product.getSavingProductRelatedDetail().getInterestType());
+        if (command.getInterestType() != null) {
+            interestType = SavingsInterestType.fromInt(command.getInterestType());
+        }
+        
+        Integer interestPostEvery = command.getInterestPostEvery();
+
+        Integer interestPostFrequency =command.getInterestPostFrequency();
+        
         account.modifyAccount(product, externalId, savingsDeposit, reccuringInterestRate, savingInterestRate, tenure, commencementDate,
                 tenureTypeEnum, savingProductType, savingFrequencyType, savingInterestCalculationMethod, isLockinPeriodAllowed,
-                lockinPeriod, lockinPeriodType, this.reccuringDepositInterestCalculator,payEvery);
+                lockinPeriod, lockinPeriodType, this.reccuringDepositInterestCalculator,payEvery, interestType, interestPostEvery, interestPostFrequency);
+        
+        SavingScheduleData savingScheduleData = this.calculateSavingSchedule.calculateSavingSchedule(command
+                .toCalculateSavingScheduleCommand());
+        for (SavingSchedulePeriodData savingSchedulePeriodData : savingScheduleData.getPeriods()) {
+
+            final SavingScheduleInstallments installment = new SavingScheduleInstallments(account, savingSchedulePeriodData.getDueDate()
+                    .toDate(), savingSchedulePeriodData.getPeriod(), savingSchedulePeriodData.getDepositDue(), savingSchedulePeriodData.getInterestAccured());
+            account.addSavingScheduleInstallment(installment);
+        }
 
     }
 
@@ -292,13 +305,13 @@ public class SavingAccountAssembler {
 		
 		
 		CalculateSavingScheduleCommand calculateSavingScheduleCommand = new CalculateSavingScheduleCommand(account.getProduct().getId(), savingsDepositAmountPerPeriod, payEvery,
-				frequency, recurringInterestRate, approvalDate, tenure,interestPostEvery,interestPostFrequency);
+				frequency, recurringInterestRate, approvalDate, tenure,tenureType,interestPostEvery,interestPostFrequency,account.getInterestCalculationMethod());
 		
 		SavingScheduleData savingScheduleData = this.calculateSavingSchedule.calculateSavingSchedule(calculateSavingScheduleCommand);
         for (SavingSchedulePeriodData savingSchedulePeriodData : savingScheduleData.getPeriods()) {
 
             final SavingScheduleInstallments installment = new SavingScheduleInstallments(account, savingSchedulePeriodData.getDueDate()
-                    .toDate(), savingSchedulePeriodData.getPeriod(), savingSchedulePeriodData.getDepositDue());
+                    .toDate(), savingSchedulePeriodData.getPeriod(), savingSchedulePeriodData.getDepositDue(),savingSchedulePeriodData.getInterestAccured());
             account.addSavingScheduleInstallment(installment);
         }
 	}
@@ -315,7 +328,7 @@ public class SavingAccountAssembler {
 	}
 
 	public void postInterest(SavingAccount account) {
-		account.postInterest(this.reccuringDepositInterestCalculator);
+		account.postInterest();
 	}
 
 }

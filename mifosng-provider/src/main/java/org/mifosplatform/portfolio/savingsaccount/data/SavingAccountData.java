@@ -72,6 +72,10 @@ public class SavingAccountData {
 	private final BigDecimal outstandingAmount;
 	private final BigDecimal dueAmount;
 	private final SavingScheduleData savingScheduleData;
+	private final Collection<SavingAccountTransactionsData> transactions;
+	
+	private final Integer interestPostEvery;
+	private final EnumOptionData interestPostFrequency;
     
     public static SavingAccountData createFrom(final Long clientId, final String clientDisplayName) {
         return new SavingAccountData(clientId, clientDisplayName);
@@ -85,7 +89,7 @@ public class SavingAccountData {
             BigDecimal projectedInterestAccuredOnMaturity, BigDecimal actualInterestAccured, BigDecimal projectedMaturityAmount,
             BigDecimal actualMaturityAmount, boolean preClosureAllowed, BigDecimal preClosureInterestRate, LocalDate withdrawnonDate,
             LocalDate rejectedonDate, LocalDate closedonDate, boolean isLockinPeriodAllowed, Integer lockinPeriod,
-            EnumOptionData lockinPeriodType, Integer depositEvery, BigDecimal outstandingAmount) {
+            EnumOptionData lockinPeriodType, Integer depositEvery, BigDecimal outstandingAmount, Integer interestPostEvery, EnumOptionData interestPostFrequency) {
         this.id = id;
         this.status = status;
         this.externalId = externalId;
@@ -133,6 +137,9 @@ public class SavingAccountData {
         this.outstandingAmount = outstandingAmount;
         this.dueAmount = BigDecimal.ZERO;
         this.savingScheduleData = null;
+        this.transactions = null;
+        this.interestPostEvery = interestPostEvery;
+        this.interestPostFrequency = interestPostFrequency;
     }
 
     public SavingAccountData(Long clientId, String clientName) {
@@ -183,6 +190,9 @@ public class SavingAccountData {
         this.outstandingAmount = BigDecimal.ZERO;
         this.dueAmount =BigDecimal.ZERO;
         this.savingScheduleData = null;
+        this.transactions = null;
+        this.interestPostEvery =null;
+        this.interestPostFrequency = null;
     }
 
     public SavingAccountData(SavingAccountData account, Collection<SavingProductLookup> productOptions, List<CurrencyData> currencyOptions,
@@ -238,6 +248,9 @@ public class SavingAccountData {
         this.permissions = account.permissions;
         this.outstandingAmount = account.outstandingAmount;
         this.savingScheduleData = account.savingScheduleData;
+        this.transactions = account.transactions;
+        this.interestPostEvery = account.interestPostEvery;
+        this.interestPostFrequency = account.interestPostFrequency;
     }
 
     // FIXME - Madhukar - unused variables been passed into construction - why?
@@ -277,7 +290,7 @@ public class SavingAccountData {
         this.withdrawnonDate = null;
         this.rejectedonDate = null;
         this.closedonDate = null;
-        this.isLockinPeriodAllowed = false;
+        this.isLockinPeriodAllowed = lockinPeriodAllowed;
         this.lockinPeriod = lockinPeriod;
         this.lockinPeriodType = lockinPeriodType;
         this.depositEvery = depositEvery;
@@ -294,6 +307,9 @@ public class SavingAccountData {
         this.outstandingAmount = BigDecimal.ZERO;
         this.dueAmount = BigDecimal.ZERO;
         this.savingScheduleData = null;
+        this.transactions = null;
+        this.interestPostEvery =3;
+        this.interestPostFrequency = savingsFrequencyType;
     }
 
 	public SavingAccountData(SavingAccountData account,	SavingPermissionData permissions) {
@@ -345,6 +361,9 @@ public class SavingAccountData {
         this.outstandingAmount = account.outstandingAmount;
         this.dueAmount = account.dueAmount;
         this.savingScheduleData = account.savingScheduleData;
+        this.transactions = account.transactions;
+        this.interestPostEvery = account.interestPostEvery;
+        this.interestPostFrequency = account.interestPostFrequency;
 	}
 
 	public SavingAccountData(SavingAccountData account, SavingScheduleData savingScheduleData) {
@@ -396,6 +415,63 @@ public class SavingAccountData {
         this.outstandingAmount = account.outstandingAmount;
         this.dueAmount = account.dueAmount;
         this.savingScheduleData = savingScheduleData;
+        this.transactions = account.transactions;
+        this.interestPostEvery = account.interestPostEvery;
+        this.interestPostFrequency = account.interestPostFrequency;
+	}
+
+	public SavingAccountData(SavingAccountData account, Collection<SavingAccountTransactionsData> transactions) {
+		this.id = account.id;
+        this.status = account.status;
+        this.externalId = account.externalId;
+        this.clientId = account.clientId;
+        this.clientName = account.clientName;
+        this.productId = account.productId;
+        this.productName = account.productName;
+        this.productType = account.productType;
+        this.currencyData = account.currencyData;
+        this.savingsDepositAmountPerPeriod = account.savingsDepositAmountPerPeriod;
+        this.savingsFrequencyType = account.savingsFrequencyType;
+        this.totalDepositAmount = account.totalDepositAmount;
+        this.recurringInterestRate = account.recurringInterestRate;
+        this.savingInterestRate = account.savingInterestRate;
+        this.interestType = account.interestType;
+        this.interestCalculationMethod = account.interestCalculationMethod;
+        this.tenure = account.tenure;
+        this.tenureType = account.tenureType;
+        this.projectedCommencementDate = account.projectedCommencementDate;
+        this.actualCommencementDate = account.actualCommencementDate;
+        this.maturesOnDate = account.maturesOnDate;
+        this.projectedInterestAccuredOnMaturity = account.projectedInterestAccuredOnMaturity;
+        this.actualInterestAccured = account.actualInterestAccured;
+        this.projectedMaturityAmount = account.projectedMaturityAmount;
+        this.actualMaturityAmount = account.actualMaturityAmount;
+        this.preClosureAllowed = account.preClosureAllowed;
+        this.preClosureInterestRate = account.preClosureInterestRate;
+        this.withdrawnonDate = account.withdrawnonDate;
+        this.rejectedonDate = account.rejectedonDate;
+        this.closedonDate = account.closedonDate;
+        this.isLockinPeriodAllowed = account.isLockinPeriodAllowed;
+        this.lockinPeriod = account.lockinPeriod;
+        this.lockinPeriodType = account.lockinPeriodType;
+        this.depositEvery = account.depositEvery;
+        
+        this.productOptions = account.productOptions;
+        this.currencyOptions = account.currencyOptions;
+        this.savingsProductTypeOptions = account.savingsProductTypeOptions;
+        this.tenureTypeOptions = account.tenureTypeOptions;
+        this.savingFrequencyOptions = account.savingFrequencyOptions;
+        this.savingsInterestTypeOptions = account.savingsInterestTypeOptions;
+        this.lockinPeriodTypeOptions = account.lockinPeriodTypeOptions;
+        this.interestCalculationOptions = account.interestCalculationOptions;
+        this.savingScheduleDatas = account.savingScheduleDatas;
+        this.permissions = account.permissions;
+        this.outstandingAmount = account.outstandingAmount;
+        this.dueAmount = account.dueAmount;
+        this.savingScheduleData = account.savingScheduleData;
+        this.transactions = transactions;
+        this.interestPostEvery = account.interestPostEvery;
+        this.interestPostFrequency = account.interestPostFrequency;
 	}
 
 	public Long getId() {
@@ -568,6 +644,14 @@ public class SavingAccountData {
 
 	public BigDecimal getOutstandingAmount() {
 		return this.outstandingAmount;
+	}
+
+	public Integer getInterestPostEvery() {
+		return this.interestPostEvery;
+	}
+
+	public EnumOptionData getInterestPostFrequency() {
+		return this.interestPostFrequency;
 	}
 	
 }

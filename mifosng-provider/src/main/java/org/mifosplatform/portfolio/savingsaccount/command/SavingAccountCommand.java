@@ -24,7 +24,6 @@ public class SavingAccountCommand {
     private final Integer lockinPeriodType;
 
     private final LocalDate commencementDate;
-    private final Integer savingProductType;
     private final Integer tenureType;
     private final Integer frequency;
     private final Integer interestType;
@@ -42,7 +41,7 @@ public class SavingAccountCommand {
     public SavingAccountCommand(final Set<String> modifiedParameters, final Long id, final Long clientId, final Long productId,
             final String externalId, final String currencyCode, final Integer digitsAfterDecimal, final BigDecimal savingsDepositAmount,
             final BigDecimal recurringInterestRate, final BigDecimal savingInterestRate, final Integer tenure,
-            final LocalDate commencementDate, final Integer savingProductType, final Integer tenureType, final Integer frequency,
+            final LocalDate commencementDate, final Integer tenureType, final Integer frequency,
             final Integer interestType, final BigDecimal minimumBalanceForWithdrawal, final Integer interestCalculationMethod,
             final boolean isLockinPeriodAllowed, final boolean isPartialDepositAllowed, final Integer lockInPeriod,
             final Integer lockinPeriodType, final Integer depositEvery,final Integer interestPostEvery,final Integer interestPostFrequency) {
@@ -61,7 +60,6 @@ public class SavingAccountCommand {
         this.modifiedParameters = modifiedParameters;
         this.commencementDate = commencementDate;
 
-        this.savingProductType = savingProductType;
         this.tenureType = tenureType;
         this.frequency = frequency;
         this.interestType = interestType;
@@ -132,10 +130,6 @@ public class SavingAccountCommand {
 
     public LocalDate getCommencementDate() {
         return commencementDate;
-    }
-
-    public Integer getSavingProductType() {
-        return savingProductType;
     }
 
     public Integer getTenureType() {
@@ -261,7 +255,7 @@ public class SavingAccountCommand {
 
     public CalculateSavingScheduleCommand toCalculateSavingScheduleCommand() {
         return new CalculateSavingScheduleCommand(productId, savingsDepositAmount, depositEvery, frequency, recurringInterestRate,
-                commencementDate, tenure, interestPostEvery, interestPostFrequency);
+                commencementDate, tenure, tenureType, interestPostEvery, interestPostFrequency,interestCalculationMethod);
     }
 
 }

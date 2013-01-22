@@ -42,6 +42,7 @@ import org.mifosplatform.portfolio.savingsaccount.command.SavingAccountWithdrawa
 import org.mifosplatform.portfolio.savingsaccount.command.SavingStateTransitionsCommand;
 import org.mifosplatform.portfolio.savingsaccount.data.SavingAccountData;
 import org.mifosplatform.portfolio.savingsaccount.data.SavingAccountForLookup;
+import org.mifosplatform.portfolio.savingsaccount.data.SavingAccountTransactionsData;
 import org.mifosplatform.portfolio.savingsaccount.data.SavingPermissionData;
 import org.mifosplatform.portfolio.savingsaccount.data.SavingScheduleData;
 import org.mifosplatform.portfolio.savingsaccount.service.CalculateSavingSchedule;
@@ -103,7 +104,7 @@ public class SavingsAccountApiResource {
             "interestCalculationMethod", "tenure", "tenureType", "projectedCommencementDate", "actualCommencementDate", "maturesOnDate",
             "projectedInterestAccuredOnMaturity", "actualInterestAccured", "projectedMaturityAmount", "actualMaturityAmount",
             "preClosureAllowed", "preClosureInterestRate", "withdrawnonDate", "rejectedonDate", "closedonDate", "isLockinPeriodAllowed",
-            "lockinPeriod", "lockinPeriodType","outstandingAmount","savingScheduleData"));
+            "lockinPeriod", "lockinPeriodType","outstandingAmount","savingScheduleData","transactions","interestPostEvery","interestPostFrequency"));
 
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
@@ -173,6 +174,7 @@ public class SavingsAccountApiResource {
         
         SavingPermissionData permissions = null;
         SavingScheduleData savingScheduleData = null;
+        Collection<SavingAccountTransactionsData> transactions = null;
 
         Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
         if (responseParameters.isEmpty()) {
@@ -191,8 +193,8 @@ public class SavingsAccountApiResource {
 		Set<String> associationParameters = ApiParameterHelper.extractAssociationsForResponseIfProvided(uriInfo.getQueryParameters());
         if (!associationParameters.isEmpty()) {
             if (associationParameters.contains("all")) {
-            	associationParameters.add("savingScheduleData");
-                responseParameters.addAll(Arrays.asList("permissions","savingScheduleData"));
+            	associationParameters.addAll(Arrays.asList("savingScheduleData","transactions"));
+                responseParameters.addAll(Arrays.asList("permissions","savingScheduleData","transactions"));
             } else {
                 responseParameters.addAll(associationParameters);
             }
@@ -201,6 +203,10 @@ public class SavingsAccountApiResource {
             	CurrencyData currencyData = account.getCurrencyData();
 				savingScheduleData = this.savingAccountReadPlatformService.retrieveSavingsAccountSchedule(accountId,currencyData);
 				account = new SavingAccountData(account,savingScheduleData);
+			}
+            if (associationParameters.contains("transactions")) {
+            	transactions = this.savingAccountReadPlatformService.retrieveSavingsAccountTransactions(accountId);
+				account = new SavingAccountData(account,transactions);
 			}
             permissions = this.savingAccountReadPlatformService.retrieveSavingAccountPermissions(account);
             account = new SavingAccountData(account, permissions);
@@ -258,10 +264,10 @@ public class SavingsAccountApiResource {
          List<EnumOptionData> lockinPeriodTypeOptions = Arrays.asList(months);
 
          EnumOptionData averagebal = SavingProductEnumerations.savingInterestCalculationMethod(SavingInterestCalculationMethod.AVERAGEBAL);
-         EnumOptionData minbal = SavingProductEnumerations.savingInterestCalculationMethod(SavingInterestCalculationMethod.MINBAL);
+      // EnumOptionData minbal = SavingProductEnumerations.savingInterestCalculationMethod(SavingInterestCalculationMethod.MINBAL);
          EnumOptionData monthlyCollection = SavingProductEnumerations
                  .savingInterestCalculationMethod(SavingInterestCalculationMethod.MONTHLYCOLLECTION);
-         List<EnumOptionData> interestCalculationOptions = Arrays.asList(averagebal, minbal, monthlyCollection);
+         List<EnumOptionData> interestCalculationOptions = Arrays.asList(averagebal, monthlyCollection);
          BigDecimal dueAmount = this.savingAccountReadPlatformService.deriveSavingDueAmount(account);
 		return new SavingAccountData(account, productOptions, currencyOptions, savingsProductTypeOptions,tenureTypeOptions,savingFrequencyOptions,
 				savingsInterestTypeOptions,lockinPeriodTypeOptions,interestCalculationOptions, dueAmount);

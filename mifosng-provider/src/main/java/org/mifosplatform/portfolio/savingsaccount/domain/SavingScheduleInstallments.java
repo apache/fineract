@@ -46,6 +46,10 @@ public class SavingScheduleInstallments extends AbstractAuditableCustom<AppUser,
     private BigDecimal depositPaid;
 
     @SuppressWarnings("unused")
+    @Column(name = "interest_accured", scale = 6, precision = 19, nullable = true)
+    private BigDecimal interstAccured;
+    
+    @SuppressWarnings("unused")
     @Column(name = "completed_derived", nullable = false)
     private boolean completed;
     
@@ -55,7 +59,7 @@ public class SavingScheduleInstallments extends AbstractAuditableCustom<AppUser,
 		this.paymentDate = null;
 	}
 
-    public SavingScheduleInstallments(SavingAccount account, Date dueDate, Integer installmentNumber, BigDecimal deposit) {
+    public SavingScheduleInstallments(SavingAccount account, Date dueDate, Integer installmentNumber, BigDecimal deposit, BigDecimal interstAccured) {
         this.savingAccount = account;
         this.dueDate = dueDate;
         this.installmentNumber = installmentNumber;
@@ -63,6 +67,7 @@ public class SavingScheduleInstallments extends AbstractAuditableCustom<AppUser,
         this.paymentDate = null;
         this.depositPaid = BigDecimal.ZERO;
         this.completed = false;
+        this.interstAccured = interstAccured;
     }
 
     public void updateAccount(SavingAccount account) {

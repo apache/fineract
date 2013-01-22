@@ -34,27 +34,29 @@ public class ReccuringDepositInterestCalculator {
         
     	if(savingInterestCalculationMethod.isAverageBalance()){
     		
-    		BigDecimal totalAmount = BigDecimal.ZERO;
     		BigDecimal termAmount = BigDecimal.ZERO;
     		BigDecimal totalInterest = BigDecimal.ZERO;
+    		BigDecimal closingBalance = BigDecimal.ZERO;
     		BigDecimal amountPerPeriod = savingsDepositPerPeriod.getAmount();
     		Integer depositEveryOriginalValue = depositEvery;
-    		BigDecimal amountPermonth = amountPerPeriod.divide(BigDecimal.valueOf(depositEvery.doubleValue()));
+    		BigDecimal amountPermonth = BigDecimal.valueOf(amountPerPeriod.doubleValue()/depositEvery.doubleValue());
+    		
     		while (noOfTimestobeCalculated > 0) {
 				while (depositEvery > 0) {
-					termAmount = termAmount.add(amountPermonth);
-					totalAmount = totalAmount.add(termAmount);
+					closingBalance = closingBalance.add(amountPermonth);
+					termAmount = termAmount.add(closingBalance);
 					depositEvery--;
 				}
-				BigDecimal averageAmount = BigDecimal.valueOf(totalAmount.doubleValue()/depositEveryOriginalValue.doubleValue());
+				
+				BigDecimal averageAmount = BigDecimal.valueOf(termAmount.doubleValue()/depositEveryOriginalValue.doubleValue());
 				BigDecimal interestRatePerTerm = BigDecimal.valueOf(interestRateAsFraction.doubleValue()/monthsInYear.doubleValue()*depositEveryOriginalValue.doubleValue());
 				BigDecimal interestperTerm = averageAmount.multiply(interestRatePerTerm);
 				totalInterest = totalInterest.add(interestperTerm);
 				depositEvery = depositEveryOriginalValue;
-				totalAmount = BigDecimal.ZERO; 
+				termAmount = BigDecimal.ZERO;
 				noOfTimestobeCalculated--;
 			}
-    		finalAmount = termAmount.add(totalInterest);
+    		finalAmount = closingBalance.add(totalInterest);
     			
     	} else if(savingInterestCalculationMethod.isMonthlyCollection()){
 	        /*
@@ -73,14 +75,15 @@ public class ReccuringDepositInterestCalculator {
 	        BigDecimal monthsExpressedInYears;
 	        BigDecimal timeforOneCalculationPeriod;
 	        BigDecimal amountPerPeriod;
-	        
+	        Integer tempTenure = tenure;
 	        while (noOfTimestobeCalculated > 0) {
-	            monthsExpressedInYears = BigDecimal.valueOf(tenure.doubleValue() / monthsInYear.doubleValue());
+	            monthsExpressedInYears = BigDecimal.valueOf(tempTenure.doubleValue() / monthsInYear.doubleValue());
 	            timeforOneCalculationPeriod = BigDecimal.valueOf(noofTimesInterestCompoundPerYear * monthsExpressedInYears.doubleValue());
 	            amountPerPeriod = savingsDepositPerPeriod.getAmount().multiply(
 	                    BigDecimal.valueOf(Math.pow(onePlusInterestRatePerPeriod.doubleValue(), timeforOneCalculationPeriod.doubleValue())));
 	            finalAmount = finalAmount.add(amountPerPeriod);
 	            noOfTimestobeCalculated--;
+	            tempTenure = tempTenure-depositEvery;
 	        }
     	} 
      return Money.of(savingsDepositPerPeriod.getCurrency(), finalAmount);

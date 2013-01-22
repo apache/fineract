@@ -17,6 +17,7 @@ import org.mifosplatform.portfolio.client.data.ClientData;
 import org.mifosplatform.portfolio.client.service.ClientReadPlatformService;
 import org.mifosplatform.portfolio.savingsaccount.data.SavingAccountData;
 import org.mifosplatform.portfolio.savingsaccount.data.SavingAccountForLookup;
+import org.mifosplatform.portfolio.savingsaccount.data.SavingAccountTransactionsData;
 import org.mifosplatform.portfolio.savingsaccount.data.SavingPermissionData;
 import org.mifosplatform.portfolio.savingsaccount.data.SavingScheduleData;
 import org.mifosplatform.portfolio.savingsaccount.data.SavingSchedulePeriodData;
@@ -25,6 +26,7 @@ import org.mifosplatform.portfolio.savingsaccountproduct.data.SavingProductLooku
 import org.mifosplatform.portfolio.savingsaccountproduct.service.SavingProductEnumerations;
 import org.mifosplatform.portfolio.savingsaccountproduct.service.SavingProductReadPlatformService;
 import org.mifosplatform.portfolio.savingsdepositaccount.service.DepositAccountEnumerations;
+import org.mifosplatform.portfolio.savingsdepositaccount.service.DepositAccountTransactionEnumerations;
 import org.mifosplatform.portfolio.savingsdepositproduct.domain.TenureTypeEnum;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -85,6 +87,7 @@ public class SavingAccountReadPlatformServiceImpl implements SavingAccountReadPl
                     + " sa.pre_closure_interest_rate AS preClosureInterestRate, sa.is_lock_in_period_allowed AS isLockinPeriodAllowed,"
                     + " sa.lock_in_period AS lockinPeriod, sa.lock_in_period_type AS lockinPeriodType, sa.withdrawnon_date AS withdrawnonDate,"
                     + " sa.rejectedon_date AS rejectedonDate, sa.closedon_date AS closedonDate, ps.name AS productName, sa.deposit_every as depositEvery, "
+                    + " sa.interest_posting_every AS interestPostEvery, sa.interest_posting_frequency AS interestPostFrequency, "
                     + " c.firstname AS firstname, c.lastname AS lastname, curr.name AS currencyName, "
                     + " curr.internationalized_name_code AS currencyNameCode, curr.display_symbol AS currencyDisplaySymbol "
                     + " FROM m_saving_account sa " + " JOIN m_client c ON c.id = sa.client_id"
@@ -150,13 +153,17 @@ public class SavingAccountReadPlatformServiceImpl implements SavingAccountReadPl
             Integer lockinPeriodTypeValue = JdbcSupport.getInteger(rs, "lockinPeriodType");
             EnumOptionData lockinPeriodType = SavingProductEnumerations.savingsLockinPeriod(lockinPeriodTypeValue);
             Integer depositEvery = JdbcSupport.getInteger(rs, "depositEvery");
+            
+            Integer interestPostEvery = JdbcSupport.getInteger(rs, "interestPostEvery");
+            EnumOptionData interestPostFrequency = SavingProductEnumerations.interestFrequencyType(JdbcSupport.getInteger(rs, "interestPostFrequency"));
+            
 
             return new SavingAccountData(id, status, externalId, clientId, clientName, productId, productName, productType, currencyData,
                     savingsDepostiAmountPerPeriod, savingsFrequencyType, totalDepositAmount, reccuringInterestRate, savingInterestRate,
                     interestType, interestCalculationMethod, tenure, tenureType, projectedCommencementDate, actualCommencementDate,
                     maturesOnDate, projectedInterestAccuredOnMaturity, actualInterestAccured, projectedMaturityAmount,
                     actualMaturityAmount, preClosureAllowed, preClosureInterestRate, withdrawnonDate, rejectedonDate, closedonDate,
-                    isLockinPeriodAllowed, lockinPeriod, lockinPeriodType,depositEvery,outstandingAmount);
+                    isLockinPeriodAllowed, lockinPeriod, lockinPeriodType,depositEvery,outstandingAmount, interestPostEvery, interestPostFrequency);
         }
     }
 
@@ -229,10 +236,10 @@ public class SavingAccountReadPlatformServiceImpl implements SavingAccountReadPl
 			Integer noOfMonths = Months.monthsBetween(date, new LocalDate()).getMonths();
 			Integer noOfPeriodsExistedTillDate = noOfMonths/depositEvery;
 			BigDecimal totalAmountToBePaidTillDate = BigDecimal.valueOf(noOfPeriodsExistedTillDate.doubleValue()*amountPerPeriod.doubleValue());
-			dueAmount = dueAmount.add(BigDecimal.valueOf(totalAmountToBePaidTillDate.doubleValue() - account.getTotalDepositAmount().doubleValue()));
+			dueAmount = dueAmount.add(BigDecimal.valueOf(totalAmountToBePaidTillDate.doubleValue() - account.getOutstandingAmount().doubleValue()));
 			
 		}
-		
+		dueAmount = dueAmount.doubleValue() < 0 ? BigDecimal.ZERO : dueAmount;
 		return dueAmount;
 	}
 	
@@ -243,10 +250,14 @@ public class SavingAccountReadPlatformServiceImpl implements SavingAccountReadPl
 		String sql = "Select " + mapper.savingScheduleSchema() +" where ss.saving_account_id =? order by ss.installment";
 		List<SavingSchedulePeriodData> periods = this.jdbcTemplate.query(sql, mapper, new Object[]{accountId}); 
 		BigDecimal cumulativeDepositDue = BigDecimal.ZERO;
+		BigDecimal cumulativeDepositPaid = BigDecimal.ZERO;
+		BigDecimal cummulativeInterestAccured = BigDecimal.ZERO;
 		for(SavingSchedulePeriodData data : periods){
-			cumulativeDepositDue = cumulativeDepositDue.add(data.getDepositDue()).subtract(data.getDepositPaid());
+			cumulativeDepositDue = cumulativeDepositDue.add(data.getDepositDue())/*.subtract(data.getDepositPaid())*/;
+			cumulativeDepositPaid = cumulativeDepositPaid.add(data.getDepositPaid());
+			cummulativeInterestAccured = cummulativeInterestAccured.add(data.getInterestAccured());
 		}
-		SavingScheduleData scheduleData = new SavingScheduleData(currency, cumulativeDepositDue, periods);
+		SavingScheduleData scheduleData = new SavingScheduleData(currency, cumulativeDepositDue, cumulativeDepositPaid, cummulativeInterestAccured, periods);
 		return scheduleData;
 	}
 	
@@ -255,7 +266,7 @@ public class SavingAccountReadPlatformServiceImpl implements SavingAccountReadPl
 		public String savingScheduleSchema(){
 			return "ss.id as id, ss.saving_account_id as savingAccountId, ss.duedate as dueDate, ss.installment as installment, "
 				 + " ss.deposit as deposit, ss.payment_date as paymentDate, ss.deposit_paid as depositPaid, "
-				 + " ss.completed_derived as completedDerived FROM m_saving_schedule ss";
+				 + " ss.completed_derived as completedDerived, ss.interest_accured AS interestAccured FROM m_saving_schedule ss";
 		}
 
 		@Override
@@ -265,8 +276,9 @@ public class SavingAccountReadPlatformServiceImpl implements SavingAccountReadPl
 			Integer installment = JdbcSupport.getInteger(rs, "installment");
 			BigDecimal depositDue = rs.getBigDecimal("deposit");
 			BigDecimal depositPaid = rs.getBigDecimal("depositPaid");
+			BigDecimal interestAccured = rs.getBigDecimal("interestAccured");
 			
-			return new SavingSchedulePeriodData(installment, dueDate, depositDue, depositPaid);
+			return new SavingSchedulePeriodData(installment, dueDate, depositDue, depositPaid, interestAccured);
 		}
 		
 	}
@@ -288,6 +300,32 @@ public class SavingAccountReadPlatformServiceImpl implements SavingAccountReadPl
 		public SavingAccountForLookup mapRow(ResultSet rs, @SuppressWarnings("unused") int rowNum) throws SQLException {
 			Long id = rs.getLong("id");
 			return new SavingAccountForLookup(id);
+		}
+		
+	}
+
+	@Override
+	public Collection<SavingAccountTransactionsData> retrieveSavingsAccountTransactions(Long accountId) {
+		this.context.authenticatedUser();
+		SavingAccountTransactionMapper savingAccountTransactionMapper = new SavingAccountTransactionMapper();
+		String sql = "select "+ savingAccountTransactionMapper.schema() + " where stxn.saving_account_id = ? ";
+		return jdbcTemplate.query(sql, savingAccountTransactionMapper, new Object[] {accountId});
+	}
+	
+	private static final class SavingAccountTransactionMapper implements RowMapper<SavingAccountTransactionsData> {
+		
+		public String schema() {
+			return "stxn.id as id, stxn.transaction_type_enum as type, stxn.transaction_date as transactionDate, stxn.amount as amount FROM m_saving_account_transaction stxn";
+		}
+
+		@Override
+		public SavingAccountTransactionsData mapRow(ResultSet rs, @SuppressWarnings("unused") int rowNum) throws SQLException {
+			Long id = rs.getLong("id");
+			LocalDate transactionDate = JdbcSupport.getLocalDate(rs, "transactionDate");
+			Integer transactionTypeValue = JdbcSupport.getInteger(rs, "type");
+			EnumOptionData transactionType = DepositAccountTransactionEnumerations.depositType(transactionTypeValue);
+			BigDecimal amount = rs.getBigDecimal("amount");
+			return new SavingAccountTransactionsData(id, transactionDate, transactionType, amount);
 		}
 		
 	}
