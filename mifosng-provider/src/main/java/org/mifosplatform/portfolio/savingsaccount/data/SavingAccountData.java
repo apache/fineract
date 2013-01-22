@@ -11,7 +11,7 @@ import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.mifosplatform.portfolio.savingsaccountproduct.data.SavingProductLookup;
 
 /**
- * Immutable data object reprsenting a savings account.
+ * Immutable data object representing a savings account.
  */
 public class SavingAccountData {
 
@@ -50,33 +50,25 @@ public class SavingAccountData {
     private final EnumOptionData lockinPeriodType;
     private final Integer depositEvery;
 
-    @SuppressWarnings("unused")
     private final List<SavingProductLookup> productOptions;
-    @SuppressWarnings("unused")
     private final List<CurrencyData> currencyOptions;
-    @SuppressWarnings("unused")
     private final List<EnumOptionData> savingsProductTypeOptions;
-    @SuppressWarnings("unused")
     private final List<EnumOptionData> tenureTypeOptions;
-    @SuppressWarnings("unused")
     private final List<EnumOptionData> savingFrequencyOptions;
-    @SuppressWarnings("unused")
     private final List<EnumOptionData> savingsInterestTypeOptions;
-    @SuppressWarnings("unused")
     private final List<EnumOptionData> lockinPeriodTypeOptions;
-    @SuppressWarnings("unused")
     private final List<EnumOptionData> interestCalculationOptions;
-    
+
     private final Collection<SavingScheduleData> savingScheduleDatas;
     private final SavingPermissionData permissions;
-	private final BigDecimal outstandingAmount;
-	private final BigDecimal dueAmount;
-	private final SavingScheduleData savingScheduleData;
-	private final Collection<SavingAccountTransactionsData> transactions;
-	
-	private final Integer interestPostEvery;
-	private final EnumOptionData interestPostFrequency;
-    
+    private final BigDecimal outstandingAmount;
+    private final BigDecimal dueAmount;
+    private final SavingScheduleData savingScheduleData;
+    private final Collection<SavingAccountTransactionsData> transactions;
+
+    private final Integer interestPostEvery;
+    private final EnumOptionData interestPostFrequency;
+
     public static SavingAccountData createFrom(final Long clientId, final String clientDisplayName) {
         return new SavingAccountData(clientId, clientDisplayName);
     }
@@ -89,7 +81,8 @@ public class SavingAccountData {
             BigDecimal projectedInterestAccuredOnMaturity, BigDecimal actualInterestAccured, BigDecimal projectedMaturityAmount,
             BigDecimal actualMaturityAmount, boolean preClosureAllowed, BigDecimal preClosureInterestRate, LocalDate withdrawnonDate,
             LocalDate rejectedonDate, LocalDate closedonDate, boolean isLockinPeriodAllowed, Integer lockinPeriod,
-            EnumOptionData lockinPeriodType, Integer depositEvery, BigDecimal outstandingAmount, Integer interestPostEvery, EnumOptionData interestPostFrequency) {
+            EnumOptionData lockinPeriodType, Integer depositEvery, BigDecimal outstandingAmount, Integer interestPostEvery,
+            EnumOptionData interestPostFrequency) {
         this.id = id;
         this.status = status;
         this.externalId = externalId;
@@ -188,17 +181,17 @@ public class SavingAccountData {
         this.savingScheduleDatas = null;
         this.permissions = null;
         this.outstandingAmount = BigDecimal.ZERO;
-        this.dueAmount =BigDecimal.ZERO;
+        this.dueAmount = BigDecimal.ZERO;
         this.savingScheduleData = null;
         this.transactions = null;
-        this.interestPostEvery =null;
+        this.interestPostEvery = null;
         this.interestPostFrequency = null;
     }
 
     public SavingAccountData(SavingAccountData account, Collection<SavingProductLookup> productOptions, List<CurrencyData> currencyOptions,
             List<EnumOptionData> savingsProductTypeOptions, List<EnumOptionData> tenureTypeOptions,
             List<EnumOptionData> savingFrequencyOptions, List<EnumOptionData> savingsInterestTypeOptions,
-            List<EnumOptionData> lockinPeriodTypeOptions, List<EnumOptionData> interestCalculationOptions,BigDecimal dueAmount) {
+            List<EnumOptionData> lockinPeriodTypeOptions, List<EnumOptionData> interestCalculationOptions, BigDecimal dueAmount) {
         this.id = account.id;
         this.status = account.status;
         this.externalId = account.externalId;
@@ -243,7 +236,7 @@ public class SavingAccountData {
         this.lockinPeriodTypeOptions = lockinPeriodTypeOptions;
         this.interestCalculationOptions = interestCalculationOptions;
         this.dueAmount = dueAmount;
-        
+
         this.savingScheduleDatas = account.savingScheduleDatas;
         this.permissions = account.permissions;
         this.outstandingAmount = account.outstandingAmount;
@@ -259,7 +252,6 @@ public class SavingAccountData {
             Integer tenure, EnumOptionData savingsFrequencyType, EnumOptionData interestType, EnumOptionData interestCalculationMethod,
             BigDecimal minimumBalanceForWithdrawal, boolean partialDepositAllowed, boolean lockinPeriodAllowed, Integer lockinPeriod,
             EnumOptionData lockinPeriodType, Integer depositEvery) {
-
         this.id = null;
         this.status = null;
         this.externalId = null;
@@ -308,12 +300,12 @@ public class SavingAccountData {
         this.dueAmount = BigDecimal.ZERO;
         this.savingScheduleData = null;
         this.transactions = null;
-        this.interestPostEvery =3;
+        this.interestPostEvery = 3;
         this.interestPostFrequency = savingsFrequencyType;
     }
 
-	public SavingAccountData(SavingAccountData account,	SavingPermissionData permissions) {
-		this.id = account.id;
+    public SavingAccountData(SavingAccountData account, SavingPermissionData permissions) {
+        this.id = account.id;
         this.status = account.status;
         this.externalId = account.externalId;
         this.clientId = account.clientId;
@@ -347,7 +339,7 @@ public class SavingAccountData {
         this.lockinPeriod = account.lockinPeriod;
         this.lockinPeriodType = account.lockinPeriodType;
         this.depositEvery = account.depositEvery;
-        
+
         this.productOptions = account.productOptions;
         this.currencyOptions = account.currencyOptions;
         this.savingsProductTypeOptions = account.savingsProductTypeOptions;
@@ -364,10 +356,10 @@ public class SavingAccountData {
         this.transactions = account.transactions;
         this.interestPostEvery = account.interestPostEvery;
         this.interestPostFrequency = account.interestPostFrequency;
-	}
+    }
 
-	public SavingAccountData(SavingAccountData account, SavingScheduleData savingScheduleData) {
-		this.id = account.id;
+    public SavingAccountData(SavingAccountData account, SavingScheduleData savingScheduleData) {
+        this.id = account.id;
         this.status = account.status;
         this.externalId = account.externalId;
         this.clientId = account.clientId;
@@ -401,7 +393,7 @@ public class SavingAccountData {
         this.lockinPeriod = account.lockinPeriod;
         this.lockinPeriodType = account.lockinPeriodType;
         this.depositEvery = account.depositEvery;
-        
+
         this.productOptions = account.productOptions;
         this.currencyOptions = account.currencyOptions;
         this.savingsProductTypeOptions = account.savingsProductTypeOptions;
@@ -418,10 +410,10 @@ public class SavingAccountData {
         this.transactions = account.transactions;
         this.interestPostEvery = account.interestPostEvery;
         this.interestPostFrequency = account.interestPostFrequency;
-	}
+    }
 
-	public SavingAccountData(SavingAccountData account, Collection<SavingAccountTransactionsData> transactions) {
-		this.id = account.id;
+    public SavingAccountData(SavingAccountData account, Collection<SavingAccountTransactionsData> transactions) {
+        this.id = account.id;
         this.status = account.status;
         this.externalId = account.externalId;
         this.clientId = account.clientId;
@@ -455,7 +447,7 @@ public class SavingAccountData {
         this.lockinPeriod = account.lockinPeriod;
         this.lockinPeriodType = account.lockinPeriodType;
         this.depositEvery = account.depositEvery;
-        
+
         this.productOptions = account.productOptions;
         this.currencyOptions = account.currencyOptions;
         this.savingsProductTypeOptions = account.savingsProductTypeOptions;
@@ -472,186 +464,41 @@ public class SavingAccountData {
         this.transactions = transactions;
         this.interestPostEvery = account.interestPostEvery;
         this.interestPostFrequency = account.interestPostFrequency;
-	}
+    }
 
-	public Long getId() {
-		return this.id;
-	}
+    public EnumOptionData getStatus() {
+        return this.status;
+    }
 
-	public EnumOptionData getStatus() {
-		return this.status;
-	}
+    public CurrencyData getCurrencyData() {
+        return this.currencyData;
+    }
 
-	public String getExternalId() {
-		return this.externalId;
-	}
+    public BigDecimal getSavingsDepostiAmountPerPeriod() {
+        return this.savingsDepositAmountPerPeriod;
+    }
 
-	public Long getClientId() {
-		return this.clientId;
-	}
+    public Integer getTenure() {
+        return this.tenure;
+    }
 
-	public String getClientName() {
-		return this.clientName;
-	}
+    public EnumOptionData getTenureType() {
+        return this.tenureType;
+    }
 
-	public Long getProductId() {
-		return this.productId;
-	}
+    public LocalDate getActualCommencementDate() {
+        return this.actualCommencementDate;
+    }
 
-	public String getProductName() {
-		return this.productName;
-	}
+    public LocalDate getMaturesOnDate() {
+        return this.maturesOnDate;
+    }
 
-	public EnumOptionData getProductType() {
-		return this.productType;
-	}
+    public Integer getDepositEvery() {
+        return this.depositEvery;
+    }
 
-	public CurrencyData getCurrencyData() {
-		return this.currencyData;
-	}
-
-	public BigDecimal getSavingsDepostiAmountPerPeriod() {
-		return this.savingsDepositAmountPerPeriod;
-	}
-
-	public EnumOptionData getSavingsFrequencyType() {
-		return this.savingsFrequencyType;
-	}
-
-	public BigDecimal getTotalDepositAmount() {
-		return this.totalDepositAmount;
-	}
-
-	public BigDecimal getReccuringInterestRate() {
-		return this.recurringInterestRate;
-	}
-
-	public BigDecimal getSavingInterestRate() {
-		return this.savingInterestRate;
-	}
-
-	public EnumOptionData getInterestType() {
-		return this.interestType;
-	}
-
-	public EnumOptionData getInterestCalculationMethod() {
-		return this.interestCalculationMethod;
-	}
-
-	public Integer getTenure() {
-		return this.tenure;
-	}
-
-	public EnumOptionData getTenureType() {
-		return this.tenureType;
-	}
-
-	public LocalDate getProjectedCommencementDate() {
-		return this.projectedCommencementDate;
-	}
-
-	public LocalDate getActualCommencementDate() {
-		return this.actualCommencementDate;
-	}
-
-	public LocalDate getMaturesOnDate() {
-		return this.maturesOnDate;
-	}
-
-	public BigDecimal getProjectedInterestAccuredOnMaturity() {
-		return this.projectedInterestAccuredOnMaturity;
-	}
-
-	public BigDecimal getActualInterestAccured() {
-		return this.actualInterestAccured;
-	}
-
-	public BigDecimal getProjectedMaturityAmount() {
-		return this.projectedMaturityAmount;
-	}
-
-	public BigDecimal getActualMaturityAmount() {
-		return this.actualMaturityAmount;
-	}
-
-	public boolean isPreClosureAllowed() {
-		return this.preClosureAllowed;
-	}
-
-	public BigDecimal getPreClosureInterestRate() {
-		return this.preClosureInterestRate;
-	}
-
-	public LocalDate getWithdrawnonDate() {
-		return this.withdrawnonDate;
-	}
-
-	public LocalDate getRejectedonDate() {
-		return this.rejectedonDate;
-	}
-
-	public LocalDate getClosedonDate() {
-		return this.closedonDate;
-	}
-
-	public boolean isLockinPeriodAllowed() {
-		return this.isLockinPeriodAllowed;
-	}
-
-	public Integer getLockinPeriod() {
-		return this.lockinPeriod;
-	}
-
-	public EnumOptionData getLockinPeriodType() {
-		return this.lockinPeriodType;
-	}
-
-	public Integer getDepositEvery() {
-		return this.depositEvery;
-	}
-
-	public List<SavingProductLookup> getProductOptions() {
-		return this.productOptions;
-	}
-
-	public List<CurrencyData> getCurrencyOptions() {
-		return this.currencyOptions;
-	}
-
-	public List<EnumOptionData> getSavingsProductTypeOptions() {
-		return this.savingsProductTypeOptions;
-	}
-
-	public List<EnumOptionData> getTenureTypeOptions() {
-		return this.tenureTypeOptions;
-	}
-
-	public List<EnumOptionData> getSavingFrequencyOptions() {
-		return this.savingFrequencyOptions;
-	}
-
-	public List<EnumOptionData> getSavingsInterestTypeOptions() {
-		return this.savingsInterestTypeOptions;
-	}
-
-	public List<EnumOptionData> getLockinPeriodTypeOptions() {
-		return this.lockinPeriodTypeOptions;
-	}
-
-	public List<EnumOptionData> getInterestCalculationOptions() {
-		return this.interestCalculationOptions;
-	}
-
-	public BigDecimal getOutstandingAmount() {
-		return this.outstandingAmount;
-	}
-
-	public Integer getInterestPostEvery() {
-		return this.interestPostEvery;
-	}
-
-	public EnumOptionData getInterestPostFrequency() {
-		return this.interestPostFrequency;
-	}
-	
+    public BigDecimal getOutstandingAmount() {
+        return this.outstandingAmount;
+    }
 }

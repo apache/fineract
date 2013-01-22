@@ -28,7 +28,6 @@ import org.mifosplatform.infrastructure.core.api.PortfolioApiJsonSerializerServi
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.exception.UnrecognizedQueryParamException;
-import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
@@ -77,10 +76,10 @@ public class SavingsAccountApiResource {
 
     @Autowired
     private PortfolioApiJsonSerializerService apiJsonSerializerService;
-    
-    @Autowired 
+
+    @Autowired
     private SavingProductReadPlatformService savingProductReadPlatformService;
-    
+
     @Autowired
     private CurrencyReadPlatformService currencyReadPlatformService;
 
@@ -94,9 +93,6 @@ public class SavingsAccountApiResource {
 
     @Autowired
     private ToApiJsonSerializer<SavingAccountData> toApiJsonSerializer;
-    
-    @Autowired
-    private FromJsonHelper fromJsonHelper;
 
     private static final Set<String> typicalResponseParameters = new HashSet<String>(Arrays.asList("id", "status", "externalId",
             "clientId", "clientName", "productId", "productName", "productType", "currencyData", "savingsDepostiAmountPerPeriod",
@@ -104,7 +100,8 @@ public class SavingsAccountApiResource {
             "interestCalculationMethod", "tenure", "tenureType", "projectedCommencementDate", "actualCommencementDate", "maturesOnDate",
             "projectedInterestAccuredOnMaturity", "actualInterestAccured", "projectedMaturityAmount", "actualMaturityAmount",
             "preClosureAllowed", "preClosureInterestRate", "withdrawnonDate", "rejectedonDate", "closedonDate", "isLockinPeriodAllowed",
-            "lockinPeriod", "lockinPeriodType","outstandingAmount","savingScheduleData","transactions","interestPostEvery","interestPostFrequency"));
+            "lockinPeriod", "lockinPeriodType", "outstandingAmount", "savingScheduleData", "transactions", "interestPostEvery",
+            "interestPostFrequency"));
 
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
@@ -171,7 +168,7 @@ public class SavingsAccountApiResource {
     public String retrieveDepositAccount(@PathParam("accountId") final Long accountId, @Context final UriInfo uriInfo) {
 
         context.authenticatedUser().validateHasReadPermission(entityType);
-        
+
         SavingPermissionData permissions = null;
         SavingScheduleData savingScheduleData = null;
         Collection<SavingAccountTransactionsData> transactions = null;
@@ -180,141 +177,146 @@ public class SavingsAccountApiResource {
         if (responseParameters.isEmpty()) {
             responseParameters.addAll(typicalResponseParameters);
         }
-		
-		boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
-		
-		SavingAccountData account = this.savingAccountReadPlatformService.retrieveSavingsAccount(accountId);
-		
-		 boolean template = ApiParameterHelper.template(uriInfo.getQueryParameters());
-	        if (template) {
-	            account = handleTemplateRelatedData(responseParameters, account);
-	        }
-		
-		Set<String> associationParameters = ApiParameterHelper.extractAssociationsForResponseIfProvided(uriInfo.getQueryParameters());
+
+        boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
+
+        SavingAccountData account = this.savingAccountReadPlatformService.retrieveSavingsAccount(accountId);
+
+        boolean template = ApiParameterHelper.template(uriInfo.getQueryParameters());
+        if (template) {
+            account = handleTemplateRelatedData(responseParameters, account);
+        }
+
+        Set<String> associationParameters = ApiParameterHelper.extractAssociationsForResponseIfProvided(uriInfo.getQueryParameters());
         if (!associationParameters.isEmpty()) {
             if (associationParameters.contains("all")) {
-            	associationParameters.addAll(Arrays.asList("savingScheduleData","transactions"));
-                responseParameters.addAll(Arrays.asList("permissions","savingScheduleData","transactions"));
+                associationParameters.addAll(Arrays.asList("savingScheduleData", "transactions"));
+                responseParameters.addAll(Arrays.asList("permissions", "savingScheduleData", "transactions"));
             } else {
                 responseParameters.addAll(associationParameters);
             }
-            
+
             if (associationParameters.contains("savingScheduleData")) {
-            	CurrencyData currencyData = account.getCurrencyData();
-				savingScheduleData = this.savingAccountReadPlatformService.retrieveSavingsAccountSchedule(accountId,currencyData);
-				account = new SavingAccountData(account,savingScheduleData);
-			}
+                CurrencyData currencyData = account.getCurrencyData();
+                savingScheduleData = this.savingAccountReadPlatformService.retrieveSavingsAccountSchedule(accountId, currencyData);
+                account = new SavingAccountData(account, savingScheduleData);
+            }
             if (associationParameters.contains("transactions")) {
-            	transactions = this.savingAccountReadPlatformService.retrieveSavingsAccountTransactions(accountId);
-				account = new SavingAccountData(account,transactions);
-			}
+                transactions = this.savingAccountReadPlatformService.retrieveSavingsAccountTransactions(accountId);
+                account = new SavingAccountData(account, transactions);
+            }
             permissions = this.savingAccountReadPlatformService.retrieveSavingAccountPermissions(account);
             account = new SavingAccountData(account, permissions);
         }
-		
-		return this.apiJsonSerializerService.serializeSavingAccountsDataToJson(prettyPrint, responseParameters, account);
-	}
 
-	@GET
-	@Path("template")
-	@Consumes({MediaType.APPLICATION_JSON})
-	@Produces({MediaType.APPLICATION_JSON})
-	public String retrieveNewDepositAccountDetails(
-			@QueryParam("clientId") final Long clientId,
-			@QueryParam("productId") final Long productId,
-			@Context final UriInfo uriInfo) {
+        return this.apiJsonSerializerService.serializeSavingAccountsDataToJson(prettyPrint, responseParameters, account);
+    }
 
-    	context.authenticatedUser().validateHasReadPermission(entityType);
-    	
-		Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
-		if (responseParameters.isEmpty()) {
-			responseParameters.addAll(typicalResponseParameters);
-		}
-		boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
-		
-		SavingAccountData account = this.savingAccountReadPlatformService.retrieveNewSavingsAccountDetails(clientId, productId);
-		account = handleTemplateRelatedData(responseParameters,account);
-		
-		return this.apiJsonSerializerService.serializeSavingAccountsDataToJson(prettyPrint, responseParameters, account);
-	}
-	
+    @GET
+    @Path("template")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String retrieveNewDepositAccountDetails(@QueryParam("clientId") final Long clientId,
+            @QueryParam("productId") final Long productId, @Context final UriInfo uriInfo) {
+
+        context.authenticatedUser().validateHasReadPermission(entityType);
+
+        Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
+        if (responseParameters.isEmpty()) {
+            responseParameters.addAll(typicalResponseParameters);
+        }
+        boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
+
+        SavingAccountData account = this.savingAccountReadPlatformService.retrieveNewSavingsAccountDetails(clientId, productId);
+        account = handleTemplateRelatedData(responseParameters, account);
+
+        return this.apiJsonSerializerService.serializeSavingAccountsDataToJson(prettyPrint, responseParameters, account);
+    }
+
     private SavingAccountData handleTemplateRelatedData(Set<String> responseParameters, SavingAccountData account) {
-    	responseParameters.addAll(Arrays.asList("productOptions", "currencyOptions", "savingsProductTypeOptions", "tenureTypeOptions",
-                "savingFrequencyOptions", "savingsInterestTypeOptions", "lockinPeriodTypeOptions", "interestCalculationOptions", "dueAmount"));
-    	
-    	 Collection<SavingProductLookup> productOptions = savingProductReadPlatformService.retrieveAllSavingProductsForLookup();
-    	 List<CurrencyData> currencyOptions = this.currencyReadPlatformService.retrieveAllowedCurrencies();
+        responseParameters.addAll(Arrays.asList("productOptions", "currencyOptions", "savingsProductTypeOptions", "tenureTypeOptions",
+                "savingFrequencyOptions", "savingsInterestTypeOptions", "lockinPeriodTypeOptions", "interestCalculationOptions",
+                "dueAmount"));
 
-         EnumOptionData recurring = SavingProductEnumerations.savingProductType(SavingProductType.RECURRING);
-         EnumOptionData regular = SavingProductEnumerations.savingProductType(SavingProductType.REGULAR);
-         List<EnumOptionData> savingsProductTypeOptions = Arrays.asList(recurring, regular);
+        Collection<SavingProductLookup> productOptions = savingProductReadPlatformService.retrieveAllSavingProductsForLookup();
+        List<CurrencyData> currencyOptions = this.currencyReadPlatformService.retrieveAllowedCurrencies();
 
-         EnumOptionData fixed = SavingProductEnumerations.tenureTypeEnum(TenureTypeEnum.FIXED_PERIOD);
-         EnumOptionData perpetual = SavingProductEnumerations.tenureTypeEnum(TenureTypeEnum.PERPETUAL);
-         List<EnumOptionData> tenureTypeOptions = Arrays.asList(fixed, perpetual);
+        EnumOptionData recurring = SavingProductEnumerations.savingProductType(SavingProductType.RECURRING);
+        EnumOptionData regular = SavingProductEnumerations.savingProductType(SavingProductType.REGULAR);
+        List<EnumOptionData> savingsProductTypeOptions = Arrays.asList(recurring, regular);
 
-         EnumOptionData monthly = SavingProductEnumerations.interestFrequencyType(SavingFrequencyType.MONTHLY);
-         List<EnumOptionData> savingFrequencyOptions = Arrays.asList(monthly);
+        EnumOptionData fixed = SavingProductEnumerations.tenureTypeEnum(TenureTypeEnum.FIXED_PERIOD);
+        EnumOptionData perpetual = SavingProductEnumerations.tenureTypeEnum(TenureTypeEnum.PERPETUAL);
+        List<EnumOptionData> tenureTypeOptions = Arrays.asList(fixed, perpetual);
 
-         EnumOptionData simple = SavingProductEnumerations.savingInterestType(SavingsInterestType.SIMPLE);
-         EnumOptionData compounding = SavingProductEnumerations.savingInterestType(SavingsInterestType.COMPOUNDING);
-         List<EnumOptionData> savingsInterestTypeOptions = Arrays.asList(simple, compounding);
+        EnumOptionData monthly = SavingProductEnumerations.interestFrequencyType(SavingFrequencyType.MONTHLY);
+        List<EnumOptionData> savingFrequencyOptions = Arrays.asList(monthly);
 
-         EnumOptionData months = SavingProductEnumerations.savingsLockinPeriod(SavingsLockinPeriodEnum.MONTHS);
-         List<EnumOptionData> lockinPeriodTypeOptions = Arrays.asList(months);
+        EnumOptionData simple = SavingProductEnumerations.savingInterestType(SavingsInterestType.SIMPLE);
+        EnumOptionData compounding = SavingProductEnumerations.savingInterestType(SavingsInterestType.COMPOUNDING);
+        List<EnumOptionData> savingsInterestTypeOptions = Arrays.asList(simple, compounding);
 
-         EnumOptionData averagebal = SavingProductEnumerations.savingInterestCalculationMethod(SavingInterestCalculationMethod.AVERAGEBAL);
-      // EnumOptionData minbal = SavingProductEnumerations.savingInterestCalculationMethod(SavingInterestCalculationMethod.MINBAL);
-         EnumOptionData monthlyCollection = SavingProductEnumerations
-                 .savingInterestCalculationMethod(SavingInterestCalculationMethod.MONTHLYCOLLECTION);
-         List<EnumOptionData> interestCalculationOptions = Arrays.asList(averagebal, monthlyCollection);
-         BigDecimal dueAmount = this.savingAccountReadPlatformService.deriveSavingDueAmount(account);
-		return new SavingAccountData(account, productOptions, currencyOptions, savingsProductTypeOptions,tenureTypeOptions,savingFrequencyOptions,
-				savingsInterestTypeOptions,lockinPeriodTypeOptions,interestCalculationOptions, dueAmount);
-	}
+        EnumOptionData months = SavingProductEnumerations.savingsLockinPeriod(SavingsLockinPeriodEnum.MONTHS);
+        List<EnumOptionData> lockinPeriodTypeOptions = Arrays.asList(months);
 
-	private boolean is(final String commandParam, final String commandValue) {
+        EnumOptionData averagebal = SavingProductEnumerations.savingInterestCalculationMethod(SavingInterestCalculationMethod.AVERAGEBAL);
+        // EnumOptionData minbal =
+        // SavingProductEnumerations.savingInterestCalculationMethod(SavingInterestCalculationMethod.MINBAL);
+        EnumOptionData monthlyCollection = SavingProductEnumerations
+                .savingInterestCalculationMethod(SavingInterestCalculationMethod.MONTHLYCOLLECTION);
+        List<EnumOptionData> interestCalculationOptions = Arrays.asList(averagebal, monthlyCollection);
+        BigDecimal dueAmount = this.savingAccountReadPlatformService.deriveSavingDueAmount(account);
+        return new SavingAccountData(account, productOptions, currencyOptions, savingsProductTypeOptions, tenureTypeOptions,
+                savingFrequencyOptions, savingsInterestTypeOptions, lockinPeriodTypeOptions, interestCalculationOptions, dueAmount);
+    }
+
+    private boolean is(final String commandParam, final String commandValue) {
         return StringUtils.isNotBlank(commandParam) && commandParam.trim().equalsIgnoreCase(commandValue);
     }
-	
-	@POST
-	@Path("{accountId}")
-	@Consumes({ MediaType.APPLICATION_JSON })
+
+    @POST
+    @Path("{accountId}")
+    @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-	 public Response savingStateTransitions(@PathParam("accountId") final Long accountId, @QueryParam("command") final String commandParam, final String jsonRequestBody) {
-		Response response = null;
-		if (is(commandParam, "approve")) {
-			SavingAccountApprovalCommand command = this.apiDataConversionService.convertJsonToSavingApprovalCommand(accountId, jsonRequestBody);
-			CommandProcessingResult identifier = this.savingAccountWritePlatformService.approveSavingAccount(command);
-			response = Response.ok().entity(identifier).build();
-		} else if (is(commandParam, "depositmoney")) {
-			SavingAccountDepositCommand command = this.apiDataConversionService.convertJsonToSavingAccountDepositCommand(accountId, jsonRequestBody);
-			CommandProcessingResult identifier = this.savingAccountWritePlatformService.depositMoney(command);
-	         response = Response.ok().entity(identifier).build();
-		} else if (is(commandParam, "withdraw")) {
-			SavingAccountWithdrawalCommand command = this.apiDataConversionService.convertJsonToSavingAccountWithdrawalCommand(accountId, jsonRequestBody);
-			CommandProcessingResult identifier = this.savingAccountWritePlatformService.withdrawSavingAmount(command);
-			response = Response.ok().entity(identifier).build();
-		} else {
-			SavingStateTransitionsCommand command = this.apiDataConversionService.convertJsonToSavingStateTransitionCommand(accountId, jsonRequestBody);
-			if (is(commandParam, "reject")) {
-				CommandProcessingResult identifier = this.savingAccountWritePlatformService.rejectSavingApplication(command);
-				response = Response.ok().entity(identifier).build();
-			} else if (is(commandParam, "withdrewbyclient")) {
-				CommandProcessingResult identifier = this.savingAccountWritePlatformService.withdrawSavingApplication(command);
-				response = Response.ok().entity(identifier).build();
-			}
-			UndoStateTransitionCommand undoCommand = new UndoStateTransitionCommand(accountId, command.getNote());
-			if (is(commandParam, "undoapproval")) {
-				CommandProcessingResult identifier = this.savingAccountWritePlatformService.undoSavingAccountApproval(undoCommand);
-				response = Response.ok().entity(identifier).build();
-			}
-		}
-		if (response == null) { throw new UnrecognizedQueryParamException("command", commandParam); }
-		return response; 
-	}
-	
-	@DELETE
+    public Response savingStateTransitions(@PathParam("accountId") final Long accountId, @QueryParam("command") final String commandParam,
+            final String jsonRequestBody) {
+        Response response = null;
+        if (is(commandParam, "approve")) {
+            SavingAccountApprovalCommand command = this.apiDataConversionService.convertJsonToSavingApprovalCommand(accountId,
+                    jsonRequestBody);
+            CommandProcessingResult identifier = this.savingAccountWritePlatformService.approveSavingAccount(command);
+            response = Response.ok().entity(identifier).build();
+        } else if (is(commandParam, "depositmoney")) {
+            SavingAccountDepositCommand command = this.apiDataConversionService.convertJsonToSavingAccountDepositCommand(accountId,
+                    jsonRequestBody);
+            CommandProcessingResult identifier = this.savingAccountWritePlatformService.depositMoney(command);
+            response = Response.ok().entity(identifier).build();
+        } else if (is(commandParam, "withdraw")) {
+            SavingAccountWithdrawalCommand command = this.apiDataConversionService.convertJsonToSavingAccountWithdrawalCommand(accountId,
+                    jsonRequestBody);
+            CommandProcessingResult identifier = this.savingAccountWritePlatformService.withdrawSavingAmount(command);
+            response = Response.ok().entity(identifier).build();
+        } else {
+            SavingStateTransitionsCommand command = this.apiDataConversionService.convertJsonToSavingStateTransitionCommand(accountId,
+                    jsonRequestBody);
+            if (is(commandParam, "reject")) {
+                CommandProcessingResult identifier = this.savingAccountWritePlatformService.rejectSavingApplication(command);
+                response = Response.ok().entity(identifier).build();
+            } else if (is(commandParam, "withdrewbyclient")) {
+                CommandProcessingResult identifier = this.savingAccountWritePlatformService.withdrawSavingApplication(command);
+                response = Response.ok().entity(identifier).build();
+            }
+            UndoStateTransitionCommand undoCommand = new UndoStateTransitionCommand(accountId, command.getNote());
+            if (is(commandParam, "undoapproval")) {
+                CommandProcessingResult identifier = this.savingAccountWritePlatformService.undoSavingAccountApproval(undoCommand);
+                response = Response.ok().entity(identifier).build();
+            }
+        }
+        if (response == null) { throw new UnrecognizedQueryParamException("command", commandParam); }
+        return response;
+    }
+
+    @DELETE
     @Path("{accountId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
@@ -324,17 +326,16 @@ public class SavingsAccountApiResource {
 
         return Response.ok(new CommandProcessingResult(accountId)).build();
     }
-	
-	@POST
+
+    @POST
     @Path("postinterest")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public Response postInterest() {
-		
-		Collection<SavingAccountForLookup> savingAccounts = this.savingAccountReadPlatformService.retrieveSavingAccountsForLookUp();
-		CommandProcessingResult entityIdentifier = this.savingAccountWritePlatformService.postInterest(savingAccounts);
-    	return Response.ok().entity(entityIdentifier).build();
+
+        Collection<SavingAccountForLookup> savingAccounts = this.savingAccountReadPlatformService.retrieveSavingAccountsForLookUp();
+        CommandProcessingResult entityIdentifier = this.savingAccountWritePlatformService.postInterest(savingAccounts);
+        return Response.ok().entity(entityIdentifier).build();
     }
-	 
 
 }

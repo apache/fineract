@@ -23,7 +23,6 @@ public class SavingScheduleInstallments extends AbstractAuditableCustom<AppUser,
     @JoinColumn(name = "saving_account_id", nullable = false)
     private SavingAccount savingAccount;
 
-    @SuppressWarnings("unused")
     @Temporal(TemporalType.DATE)
     @Column(name = "duedate", nullable = false)
     private final Date dueDate;
@@ -32,34 +31,31 @@ public class SavingScheduleInstallments extends AbstractAuditableCustom<AppUser,
     @Column(name = "installment", nullable = false)
     private final Integer installmentNumber;
 
-    @SuppressWarnings("unused")
     @Column(name = "deposit", scale = 6, precision = 19, nullable = false)
     private BigDecimal deposit;
 
-    @SuppressWarnings("unused")
     @Temporal(TemporalType.DATE)
     @Column(name = "payment_date", nullable = true)
     private Date paymentDate;
 
-    @SuppressWarnings("unused")
     @Column(name = "deposit_paid", scale = 6, precision = 19, nullable = true)
     private BigDecimal depositPaid;
 
     @SuppressWarnings("unused")
     @Column(name = "interest_accured", scale = 6, precision = 19, nullable = true)
     private BigDecimal interstAccured;
-    
-    @SuppressWarnings("unused")
+
     @Column(name = "completed_derived", nullable = false)
     private boolean completed;
-    
-    public SavingScheduleInstallments() {
-		this.dueDate = null;
-		this.installmentNumber = null;
-		this.paymentDate = null;
-	}
 
-    public SavingScheduleInstallments(SavingAccount account, Date dueDate, Integer installmentNumber, BigDecimal deposit, BigDecimal interstAccured) {
+    public SavingScheduleInstallments() {
+        this.dueDate = null;
+        this.installmentNumber = null;
+        this.paymentDate = null;
+    }
+
+    public SavingScheduleInstallments(SavingAccount account, Date dueDate, Integer installmentNumber, BigDecimal deposit,
+            BigDecimal interstAccured) {
         this.savingAccount = account;
         this.dueDate = dueDate;
         this.installmentNumber = installmentNumber;
@@ -74,37 +70,35 @@ public class SavingScheduleInstallments extends AbstractAuditableCustom<AppUser,
         this.savingAccount = account;
     }
 
-	public Date getPaymentDate() {
-		return this.paymentDate;
-	}
+    public Date getPaymentDate() {
+        return this.paymentDate;
+    }
 
-	public void setPaymentDate(Date paymentDate) {
-		this.paymentDate = paymentDate;
-	}
+    public void setPaymentDate(Date paymentDate) {
+        this.paymentDate = paymentDate;
+    }
 
-	public BigDecimal getDepositPaid() {
-		return this.depositPaid;
-	}
+    public BigDecimal getDepositPaid() {
+        return this.depositPaid;
+    }
 
-	public void setDepositPaid(BigDecimal depositPaid) {
-		this.depositPaid = depositPaid;
-	}
+    public void setDepositPaid(BigDecimal depositPaid) {
+        this.depositPaid = depositPaid;
+    }
 
-	public Date getDueDate() {
-		return this.dueDate;
-	}
+    public Date getDueDate() {
+        return this.dueDate;
+    }
 
-	public BigDecimal getDeposit() {
-		return this.deposit;
-	}
+    public BigDecimal getDeposit() {
+        return this.deposit;
+    }
 
-	public boolean isCompleted() {
-		return this.completed;
-	}
+    public boolean isCompleted() {
+        return this.completed;
+    }
 
-	public void setCompleted(boolean completed) {
-		this.completed = completed;
-	}
-
+    public void setCompleted(boolean completed) {
+        this.completed = completed;
+    }
 }
-
