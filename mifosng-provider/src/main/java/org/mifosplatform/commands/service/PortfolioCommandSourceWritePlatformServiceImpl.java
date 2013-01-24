@@ -35,8 +35,17 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
 
     @Override
     public CommandProcessingResult logCommandSource(final CommandWrapper wrapper) {
-
-        context.authenticatedUser().validateHasPermissionTo(wrapper.getTaskPermissionName());
+        
+        boolean isApprovedByChecker = false;
+        // check if is update of own account details
+        if (wrapper.isUpdateOfOwnUserDetails(context.authenticatedUser().getId())) {
+            // then allow this operation to proceed.
+            // maker checker doesnt mean anything here.
+            isApprovedByChecker = true; // set to true in case permissions have been maker-checker enabled by accident.
+        } else {
+            // if not user changing their own details - check user has permission to perform specific task.
+            context.authenticatedUser().validateHasPermissionTo(wrapper.getTaskPermissionName());
+        }
 
         final String json = wrapper.getJson();
         CommandProcessingResult result = null;
@@ -46,7 +55,6 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
                     wrapper.getEntityId(), wrapper.getGroupId(), wrapper.getClientId(), wrapper.getLoanId(), wrapper.getApptableId(),
                     wrapper.getDatatableId());
 
-            final boolean isApprovedByChecker = false;
             result = this.processAndLogCommandService.processAndLogCommand(wrapper, command, isApprovedByChecker);
         } catch (RollbackTransactionAsCommandIsNotApprovedByCheckerException e) {
 

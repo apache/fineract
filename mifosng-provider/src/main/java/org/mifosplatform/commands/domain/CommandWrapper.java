@@ -309,4 +309,8 @@ public class CommandWrapper {
     public String commandName() {
         return this.actionName + "_" + this.entityName;
     }
+
+    public boolean isUpdateOfOwnUserDetails(final Long loggedInUserId) {
+        return this.isUserResource() && isUpdate() && loggedInUserId.equals(this.entityId);
+    }
 }
