@@ -169,7 +169,7 @@ public final class LoanApplicationCommandFromApiJsonHelper {
         if (fromApiJsonHelper.parameterExists(inArrearsToleranceParameterName, element)) {
             final BigDecimal inArrearsTolerance = fromApiJsonHelper.extractBigDecimalWithLocaleNamed(inArrearsToleranceParameterName,
                     element);
-            baseDataValidator.reset().parameter(inArrearsToleranceParameterName).value(inArrearsTolerance).ignoreIfNull().positiveAmount();
+            baseDataValidator.reset().parameter(inArrearsToleranceParameterName).value(inArrearsTolerance).ignoreIfNull().zeroOrPositiveAmount();
         }
 
         final String submittedOnDateParameterName = "submittedOnDate";
