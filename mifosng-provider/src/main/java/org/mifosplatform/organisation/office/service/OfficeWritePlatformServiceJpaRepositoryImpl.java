@@ -14,7 +14,6 @@ import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.organisation.monetary.domain.Money;
 import org.mifosplatform.organisation.monetary.exception.CurrencyNotFoundException;
 import org.mifosplatform.organisation.office.command.BranchMoneyTransferCommand;
-import org.mifosplatform.organisation.office.command.OfficeCommand;
 import org.mifosplatform.organisation.office.domain.Office;
 import org.mifosplatform.organisation.office.domain.OfficeRepository;
 import org.mifosplatform.organisation.office.domain.OfficeTransaction;
@@ -63,11 +62,14 @@ public class OfficeWritePlatformServiceJpaRepositoryImpl implements OfficeWriteP
         try {
             final AppUser currentUser = context.authenticatedUser();
 
-            final OfficeCommand officeCommand = this.fromApiJsonDeserializer.commandFromApiJson(command.json());
-            officeCommand.validateForCreate();
+            this.fromApiJsonDeserializer.validateForCreate(command.json());
 
-            final Office parent = validateUserPriviledgeOnOfficeAndRetrieve(currentUser, officeCommand.getParentId());
+            Long parentId = null;
+            if (command.parameterExists("parentId")) {
+                parentId = command.longValueOfParameterNamed("parentId");
+            }
 
+            final Office parent = validateUserPriviledgeOnOfficeAndRetrieve(currentUser, parentId);
             final Office office = Office.fromJson(parent, command);
 
             // pre save to generate id for use in office hierarchy
@@ -92,15 +94,19 @@ public class OfficeWritePlatformServiceJpaRepositoryImpl implements OfficeWriteP
         try {
             final AppUser currentUser = context.authenticatedUser();
 
-            final OfficeCommand officeCommand = this.fromApiJsonDeserializer.commandFromApiJson(command.json());
-            officeCommand.validateForUpdate();
+            this.fromApiJsonDeserializer.validateForUpdate(command.json());
+
+            Long parentId = null;
+            if (command.parameterExists("parentId")) {
+                parentId = command.longValueOfParameterNamed("parentId");
+            }
 
             final Office office = validateUserPriviledgeOnOfficeAndRetrieve(currentUser, officeId);
 
             final Map<String, Object> changes = office.update(command);
 
             if (changes.containsKey("parentId")) {
-                final Office parent = validateUserPriviledgeOnOfficeAndRetrieve(currentUser, officeCommand.getParentId());
+                final Office parent = validateUserPriviledgeOnOfficeAndRetrieve(currentUser, parentId);
                 office.update(parent);
             }
 

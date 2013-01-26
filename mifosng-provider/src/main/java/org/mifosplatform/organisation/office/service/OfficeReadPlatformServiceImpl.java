@@ -52,17 +52,16 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
         @Override
         public OfficeData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
 
-            Long id = rs.getLong("id");
-            String name = rs.getString("name");
-            String nameDecorated = rs.getString("nameDecorated");
-            String externalId = rs.getString("externalId");
-            LocalDate openingDate = JdbcSupport.getLocalDate(rs, "openingDate");
-            String hierarchy = rs.getString("hierarchy");
-            Long parentId = JdbcSupport.getLong(rs, "parentId");
-            String parentName = rs.getString("parentName");
+            final Long id = rs.getLong("id");
+            final String name = rs.getString("name");
+            final String nameDecorated = rs.getString("nameDecorated");
+            final String externalId = rs.getString("externalId");
+            final LocalDate openingDate = JdbcSupport.getLocalDate(rs, "openingDate");
+            final String hierarchy = rs.getString("hierarchy");
+            final Long parentId = JdbcSupport.getLong(rs, "parentId");
+            final String parentName = rs.getString("parentName");
 
-            List<OfficeLookup> allowedParents = new ArrayList<OfficeLookup>();
-            return new OfficeData(id, name, nameDecorated, externalId, openingDate, hierarchy, parentId, parentName, allowedParents);
+            return new OfficeData(id, name, nameDecorated, externalId, openingDate, hierarchy, parentId, parentName, null);
         }
     }
 
@@ -202,22 +201,19 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
 
         context.authenticatedUser();
 
-        List<OfficeLookup> parentLookups = new ArrayList<OfficeLookup>();
-
-        return OfficeData.template(parentLookups, new LocalDate());
+        return OfficeData.template(null, new LocalDate());
     }
 
     @Override
-    public List<OfficeLookup> retrieveAllowedParents(final Long officeId) {
+    public Collection<OfficeData> retrieveAllowedParents(final Long officeId) {
 
         context.authenticatedUser();
-        List<OfficeLookup> filterParentLookups = new ArrayList<OfficeLookup>();
+        Collection<OfficeData> filterParentLookups = new ArrayList<OfficeData>();
 
         if (isNotHeadOffice(officeId)) {
-            List<OfficeLookup> parentLookups = new ArrayList<OfficeLookup>(retrieveAllOfficesForLookup());
+            Collection<OfficeData> parentLookups = retrieveAllOfficesForDropdown();
 
-            for (OfficeLookup office : parentLookups) {
-
+            for (OfficeData office : parentLookups) {
                 if (!office.hasIdentifyOf(officeId)) {
                     filterParentLookups.add(office);
                 }
@@ -225,7 +221,6 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
         }
 
         return filterParentLookups;
-
     }
 
     private boolean isNotHeadOffice(final Long officeId) {

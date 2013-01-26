@@ -1,4 +1,4 @@
-﻿-- currency symbols may not apply through command line on windows so use a different client like mysql workbench
+-- currency symbols may not apply through command line on windows so use a different client like mysql workbench
 
 INSERT INTO `ref_loan_transaction_processing_strategy`
 (`id`,`code`,`name`)
@@ -66,7 +66,7 @@ VALUES
 
 (42,'EEK',2,NULL,'Estonian Kroon','currency.EEK'),(43,'EGP',2,NULL,'Egyptian Pound','currency.EGP'),(44,'ERN',2,NULL,'Eritrea Nafka','currency.ERN'),
 
-(45,'ETB',2,NULL,'Ethiopian Birr','currency.ETB'),(46,'EUR',2,'€','Euro','currency.EUR'),
+(45,'ETB',2,NULL,'Ethiopian Birr','currency.ETB'),(46,'EUR',2,'�','Euro','currency.EUR'),
 (47,'FJD',2,NULL,'Fiji Dollar','currency.FJD'),(48,'FKP',2,NULL,'Falkland 
 
 Islands Pound','currency.FKP'),(49,'GBP',2,NULL,'Pound Sterling','currency.GBP'),(50,'GEL',2,NULL,'Georgian Lari','currency.GEL'),
@@ -79,7 +79,7 @@ Islands Pound','currency.FKP'),(49,'GBP',2,NULL,'Pound Sterling','currency.GBP')
 
 (61,'HUF',2,NULL,'Hungarian Forint','currency.HUF'),(62,'IDR',2,NULL,'Indonesian Rupiah','currency.IDR'),(63,'ILS',2,NULL,'New Israeli Shekel','currency.ILS'),
 
-(64,'INR',2,'₹','Indian Rupee','currency.INR'),
+(64,'INR',2,'?','Indian Rupee','currency.INR'),
 (65,'IQD',3,NULL,'Iraqi Dinar','currency.IQD'),(66,'IRR',2,NULL,'Iranian Rial','currency.IRR'),
 
 (67,'ISK',0,NULL,'Iceland Krona','currency.ISK'),(68,'JMD',2,NULL,'Jamaican Dollar','currency.JMD'),(69,'JOD',3,NULL,'Jordanian Dinar','currency.JOD'),
@@ -92,7 +92,7 @@ Islands Pound','currency.FKP'),(49,'GBP',2,NULL,'Pound Sterling','currency.GBP')
 
 (78,'KYD',2,NULL,'Cayman Islands Dollar','currency.KYD'),(79,'KZT',2,NULL,'Kazakhstan Tenge','currency.KZT'),
 (80,'LAK',2,NULL,'Lao Kip','currency.LAK'),
-(81,'LBP',2,'L£','Lebanese Pound','currency.LBP'),
+(81,'LBP',2,'L�','Lebanese Pound','currency.LBP'),
 (82,'LKR',2,NULL,'Sri Lanka Rupee','currency.LKR'),(83,'LRD',2,NULL,'Liberian Dollar','currency.LRD'),(84,'LSL',2,NULL,'Lesotho Loti','currency.LSL'),
 (85,'LTL',2,NULL,'Lithuanian Litas','currency.LTL'),(86,'LVL',2,NULL,'Latvian Lats','currency.LVL'),(87,'LYD',3,NULL,'Libyan Dinar','currency.LYD'),
 
@@ -163,9 +163,9 @@ INSERT INTO `m_code_value`
 (`id`,`code_id`,`code_value`,`order_position`)
 VALUES (1,1,'Passport number',0);
 
-INSERT INTO `m_office` (`id`, `parent_id`, `hierarchy`, `external_id`, `name`, `opening_date`, `createdby_id`, `created_date`, `lastmodified_date`, `lastmodifiedby_id`) 
+INSERT INTO `m_office` (`id`, `parent_id`, `hierarchy`, `external_id`, `name`, `opening_date`) 
 VALUES 
-(1,NULL,'.','1','Head Office','2009-01-01',NULL,NULL,'2012-07-13 17:04:20',1);
+(1,NULL,'.','1','Head Office','2009-01-01');
 
 -- ========= roles and permissions =========
 
@@ -191,7 +191,105 @@ INSERT INTO `m_permission` VALUES
 (9,'transaction_loan','REJECT_LOAN','LOAN','REJECT',1),
 (10,'transaction_loan','REJECTINPAST_LOAN','LOAN','REJECTINPAST',1),
 (11,'transaction_loan','WITHDRAW_LOAN','LOAN','WITHDRAW',1),
-(12,'transaction_loan','WITHDRAWINPAST_LOAN','LOAN','WITHDRAWINPAST',1),(13,'portfolio','DELETE_LOAN','LOAN','DELETE',1),(14,'transaction_loan','APPROVALUNDO_LOAN','LOAN','APPROVALUNDO',1),(15,'transaction_loan','DISBURSE_LOAN','LOAN','DISBURSE',1),(16,'transaction_loan','DISBURSEINPAST_LOAN','LOAN','DISBURSEINPAST',1),(17,'transaction_loan','DISBURSALUNDO_LOAN','LOAN','DISBURSALUNDO',1),(18,'transaction_loan','REPAYMENT_LOAN','LOAN','REPAYMENT',1),(19,'transaction_loan','REPAYMENTINPAST_LOAN','LOAN','REPAYMENTINPAST',1),(20,'portfolio','CREATE_CLIENT','CLIENT','CREATE',1),(42,'special','ALL_FUNCTIONS',NULL,NULL,0),(43,'special','ALL_FUNCTIONS_READ',NULL,NULL,0),(112,'organisation','CREATE_CHARGE','CHARGE','CREATE',1),(113,'organisation','READ_CHARGE','CHARGE','READ',0),(114,'organisation','UPDATE_CHARGE','CHARGE','UPDATE',1),(115,'organisation','DELETE_CHARGE','CHARGE','DELETE',1),(120,'portfolio','READ_CLIENT','CLIENT','READ',0),(121,'portfolio','UPDATE_CLIENT','CLIENT','UPDATE',1),(122,'portfolio','DELETE_CLIENT','CLIENT','DELETE',1),(123,'portfolio','CREATE_CLIENTIMAGE','CLIENTIMAGE','CREATE',1),(124,'portfolio','READ_CLIENTIMAGE','CLIENTIMAGE','READ',0),(126,'portfolio','DELETE_CLIENTIMAGE','CLIENTIMAGE','DELETE',1),(127,'portfolio','CREATE_CLIENTNOTE','CLIENTNOTE','CREATE',1),(128,'portfolio','READ_CLIENTNOTE','CLIENTNOTE','READ',0),(129,'portfolio','UPDATE_CLIENTNOTE','CLIENTNOTE','UPDATE',1),(130,'portfolio','DELETE_CLIENTNOTE','CLIENTNOTE','DELETE',1),(131,'portfolio','CREATE_CLIENTIDENTIFIER','CLIENTIDENTIFIER','CREATE',1),(132,'portfolio','READ_CLIENTIDENTIFIER','CLIENTIDENTIFIER','READ',0),(133,'portfolio','UPDATE_CLIENTIDENTIFIER','CLIENTIDENTIFIER','UPDATE',1),(134,'portfolio','DELETE_CLIENTIDENTIFIER','CLIENTIDENTIFIER','DELETE',1),(135,'configuration','CREATE_CODE','CODE','CREATE',1),(136,'configuration','READ_CODE','CODE','READ',0),(137,'configuration','UPDATE_CODE','CODE','UPDATE',1),(138,'configuration','DELETE_CODE','CODE','DELETE',1),(139,'configuration','READ_CURRENCY','CURRENCY','READ',0),(140,'configuration','UPDATE_CURRENCY','CURRENCY','UPDATE',1),(141,'portfolio','CREATE_DOCUMENT','DOCUMENT','CREATE',1),(142,'portfolio','READ_DOCUMENT','DOCUMENT','READ',0),(143,'portfolio','UPDATE_DOCUMENT','DOCUMENT','UPDATE',1),(144,'portfolio','DELETE_DOCUMENT','DOCUMENT','DELETE',1),(145,'organisation','CREATE_FUND','FUND','CREATE',1),(146,'organisation','READ_FUND','FUND','READ',0),(147,'organisation','UPDATE_FUND','FUND','UPDATE',1),(148,'organisation','DELETE_FUND','FUND','DELETE',1),(149,'portfolio','CREATE_GROUP','GROUP','CREATE',1),(150,'portfolio','READ_GROUP','GROUP','READ',0),(151,'portfolio','UPDATE_GROUP','GROUP','UPDATE',1),(152,'portfolio','DELETE_GROUP','GROUP','DELETE',1),(153,'organisation','CREATE_LOANPRODUCT','LOANPRODUCT','CREATE',1),(154,'organisation','READ_LOANPRODUCT','LOANPRODUCT','READ',0),(155,'organisation','UPDATE_LOANPRODUCT','LOANPRODUCT','UPDATE',1),(156,'organisation','DELETE_LOANPRODUCT','LOANPRODUCT','DELETE',1),(157,'portfolio','READ_LOAN','LOAN','READ',0),(158,'portfolio','UPDATE_LOAN','LOAN','UPDATE',1),(159,'portfolio','UPDATEHISTORIC_LOAN','LOAN','UPDATEHISTORIC',1),(160,'portfolio','CREATE_LOANCHARGE','LOANCHARGE','CREATE',1),(161,'portfolio','UPDATE_LOANCHARGE','LOANCHARGE','UPDATE',1),(162,'portfolio','DELETE_LOANCHARGE','LOANCHARGE','DELETE',1),(163,'portfolio','WAIVE_LOANCHARGE','LOANCHARGE','WAIVE',1),(164,'transaction_loan','BULKREASSIGN_LOAN','LOAN','BULKREASSIGN',1),(165,'transaction_loan','ADJUST_LOAN','LOAN','ADJUST',1),(166,'transaction_loan','WAIVEINTERESTPORTION_LOAN','LOAN','WAIVEINTERESTPORTION',1),(167,'transaction_loan','WRITEOFF_LOAN','LOAN','WRITEOFF',1),(168,'transaction_loan','CLOSE_LOAN','LOAN','CLOSE',1),(169,'transaction_loan','CLOSEASRESCHEDULED_LOAN','LOAN','CLOSEASRESCHEDULED',1),(170,'organisation','READ_MAKERCHECKER','MAKERCHECKER','READ',0),(171,'organisation','CREATE_OFFICE','OFFICE','CREATE',1),(172,'organisation','READ_OFFICE','OFFICE','READ',0),(173,'organisation','UPDATE_OFFICE','OFFICE','UPDATE',1),(174,'organisation','DELETE_OFFICE','OFFICE','DELETE',1),(175,'organisation','READ_OFFICETRANSACTION','OFFICETRANSACTION','READ',0),(176,'organisation','CREATE_OFFICETRANSACTION','OFFICETRANSACTION','CREATE',1),(177,'authorisation','READ_PERMISSION','PERMISSION','READ',0),(178,'authorisation','CREATE_ROLE','ROLE','CREATE',1),(179,'authorisation','READ_ROLE','ROLE','READ',0),(180,'authorisation','UPDATE_ROLE','ROLE','UPDATE',1),(181,'authorisation','DELETE_ROLE','ROLE','DELETE',1),(182,'authorisation','CREATE_USER','USER','CREATE',1),(183,'authorisation','READ_USER','USER','READ',0),(184,'authorisation','UPDATE_USER','USER','UPDATE',1),(185,'authorisation','DELETE_USER','USER','DELETE',1),(186,'organisation','CREATE_STAFF','STAFF','CREATE',1),(187,'organisation','READ_STAFF','STAFF','READ',0),(188,'organisation','UPDATE_STAFF','STAFF','UPDATE',1),(189,'organisation','DELETE_STAFF','STAFF','DELETE',1),(190,'organisation','CREATE_SAVINGSPRODUCT','SAVINGSPRODUCT','CREATE',1),(191,'organisation','READ_SAVINGSPRODUCT','SAVINGSPRODUCT','READ',0),(192,'organisation','UPDATE_SAVINGSPRODUCT','SAVINGSPRODUCT','UPDATE',1),(193,'organisation','DELETE_SAVINGSPRODUCT','SAVINGSPRODUCT','DELETE',1),(194,'organisation','CREATE_DEPOSITPRODUCT','DEPOSITPRODUCT','CREATE',1),(195,'organisation','READ_DEPOSITPRODUCT','DEPOSITPRODUCT','READ',0),(196,'organisation','UPDATE_DEPOSITPRODUCT','DEPOSITPRODUCT','UPDATE',1),(197,'organisation','DELETE_DEPOSITPRODUCT','DEPOSITPRODUCT','DELETE',1),(198,'portfolio','CREATE_DEPOSITACCOUNT','DEPOSITACCOUNT','CREATE',1),(199,'portfolio','READ_DEPOSITACCOUNT','DEPOSITACCOUNT','READ',0),(200,'portfolio','UPDATE_DEPOSITACCOUNT','DEPOSITACCOUNT','UPDATE',1),(201,'portfolio','DELETE_DEPOSITACCOUNT','DEPOSITACCOUNT','DELETE',1),(202,'transaction_deposit','APPROVE_DEPOSITACCOUNT','DEPOSITACCOUNT','APPROVE',1),(203,'transaction_deposit','REJECT_DEPOSITACCOUNT','DEPOSITACCOUNT','REJECT',1),(204,'transaction_deposit','WITHDRAW_DEPOSITACCOUNT','DEPOSITACCOUNT','WITHDRAW',1),(205,'transaction_deposit','APPROVALUNDO_DEPOSITACCOUNT','DEPOSITACCOUNT','APPROVALUNDO',1),(206,'transaction_deposit','WITHDRAWAL_DEPOSITACCOUNT','DEPOSITACCOUNT','WITHDRAWAL',1),(207,'transaction_deposit','INTEREST_DEPOSITACCOUNT','DEPOSITACCOUNT','INTEREST',1),(208,'transaction_deposit','RENEW_DEPOSITACCOUNT','DEPOSITACCOUNT','RENEW',1),(209,'portfolio','CREATE_SAVINGSACCOUNT','SAVINGSACCOUNT','CREATE',1),(210,'portfolio','READ_SAVINGSACCOUNT','SAVINGSACCOUNT','READ',0),(211,'portfolio','UPDATE_SAVINGSACCOUNT','SAVINGSACCOUNT','UPDATE',1),(212,'portfolio','DELETE_SAVINGSACCOUNT','SAVINGSACCOUNT','DELETE',1),
+(12,'transaction_loan','WITHDRAWINPAST_LOAN','LOAN','WITHDRAWINPAST',1),(13,'portfolio','DELETE_LOAN','LOAN','DELETE',1),
+
+(14,'transaction_loan','APPROVALUNDO_LOAN','LOAN','APPROVALUNDO',1),(15,'transaction_loan','DISBURSE_LOAN','LOAN','DISBURSE',1),
+
+(16,'transaction_loan','DISBURSEINPAST_LOAN','LOAN','DISBURSEINPAST',1),(17,'transaction_loan','DISBURSALUNDO_LOAN','LOAN','DISBURSALUNDO',1),
+
+(18,'transaction_loan','REPAYMENT_LOAN','LOAN','REPAYMENT',1),(19,'transaction_loan','REPAYMENTINPAST_LOAN','LOAN','REPAYMENTINPAST',1),
+
+(20,'portfolio','CREATE_CLIENT','CLIENT','CREATE',1),(42,'special','ALL_FUNCTIONS',NULL,NULL,0),(43,'special','ALL_FUNCTIONS_READ',NULL,NULL,0),
+
+(112,'organisation','CREATE_CHARGE','CHARGE','CREATE',1),(113,'organisation','READ_CHARGE','CHARGE','READ',0),
+
+(114,'organisation','UPDATE_CHARGE','CHARGE','UPDATE',1),(115,'organisation','DELETE_CHARGE','CHARGE','DELETE',1),(120,'portfolio','READ_CLIENT','CLIENT','READ',0),
+
+(121,'portfolio','UPDATE_CLIENT','CLIENT','UPDATE',1),(122,'portfolio','DELETE_CLIENT','CLIENT','DELETE',1),
+
+(123,'portfolio','CREATE_CLIENTIMAGE','CLIENTIMAGE','CREATE',1),(124,'portfolio','READ_CLIENTIMAGE','CLIENTIMAGE','READ',0),
+
+(126,'portfolio','DELETE_CLIENTIMAGE','CLIENTIMAGE','DELETE',1),(127,'portfolio','CREATE_CLIENTNOTE','CLIENTNOTE','CREATE',1),
+
+(128,'portfolio','READ_CLIENTNOTE','CLIENTNOTE','READ',0),(129,'portfolio','UPDATE_CLIENTNOTE','CLIENTNOTE','UPDATE',1),
+
+(130,'portfolio','DELETE_CLIENTNOTE','CLIENTNOTE','DELETE',1),(131,'portfolio','CREATE_CLIENTIDENTIFIER','CLIENTIDENTIFIER','CREATE',1),
+
+(132,'portfolio','READ_CLIENTIDENTIFIER','CLIENTIDENTIFIER','READ',0),(133,'portfolio','UPDATE_CLIENTIDENTIFIER','CLIENTIDENTIFIER','UPDATE',1),
+
+(134,'portfolio','DELETE_CLIENTIDENTIFIER','CLIENTIDENTIFIER','DELETE',1),(135,'configuration','CREATE_CODE','CODE','CREATE',1),
+
+(136,'configuration','READ_CODE','CODE','READ',0),(137,'configuration','UPDATE_CODE','CODE','UPDATE',1),(138,'configuration','DELETE_CODE','CODE','DELETE',1),
+
+(139,'configuration','READ_CURRENCY','CURRENCY','READ',0),(140,'configuration','UPDATE_CURRENCY','CURRENCY','UPDATE',1),
+
+(141,'portfolio','CREATE_DOCUMENT','DOCUMENT','CREATE',1),(142,'portfolio','READ_DOCUMENT','DOCUMENT','READ',0),
+
+(143,'portfolio','UPDATE_DOCUMENT','DOCUMENT','UPDATE',1),(144,'portfolio','DELETE_DOCUMENT','DOCUMENT','DELETE',1),
+
+(145,'organisation','CREATE_FUND','FUND','CREATE',1),(146,'organisation','READ_FUND','FUND','READ',0),(147,'organisation','UPDATE_FUND','FUND','UPDATE',1),
+
+(148,'organisation','DELETE_FUND','FUND','DELETE',1),(149,'portfolio','CREATE_GROUP','GROUP','CREATE',1),(150,'portfolio','READ_GROUP','GROUP','READ',0),
+
+(151,'portfolio','UPDATE_GROUP','GROUP','UPDATE',1),(152,'portfolio','DELETE_GROUP','GROUP','DELETE',1),
+
+(153,'organisation','CREATE_LOANPRODUCT','LOANPRODUCT','CREATE',1),(154,'organisation','READ_LOANPRODUCT','LOANPRODUCT','READ',0),
+
+(155,'organisation','UPDATE_LOANPRODUCT','LOANPRODUCT','UPDATE',1),(156,'organisation','DELETE_LOANPRODUCT','LOANPRODUCT','DELETE',1),
+
+(157,'portfolio','READ_LOAN','LOAN','READ',0),(158,'portfolio','UPDATE_LOAN','LOAN','UPDATE',1),(159,'portfolio','UPDATEHISTORIC_LOAN','LOAN','UPDATEHISTORIC',1),
+
+(160,'portfolio','CREATE_LOANCHARGE','LOANCHARGE','CREATE',1),(161,'portfolio','UPDATE_LOANCHARGE','LOANCHARGE','UPDATE',1),
+
+(162,'portfolio','DELETE_LOANCHARGE','LOANCHARGE','DELETE',1),(163,'portfolio','WAIVE_LOANCHARGE','LOANCHARGE','WAIVE',1),
+
+(164,'transaction_loan','BULKREASSIGN_LOAN','LOAN','BULKREASSIGN',1),(165,'transaction_loan','ADJUST_LOAN','LOAN','ADJUST',1),
+
+(166,'transaction_loan','WAIVEINTERESTPORTION_LOAN','LOAN','WAIVEINTERESTPORTION',1),(167,'transaction_loan','WRITEOFF_LOAN','LOAN','WRITEOFF',1),
+
+(168,'transaction_loan','CLOSE_LOAN','LOAN','CLOSE',1),(169,'transaction_loan','CLOSEASRESCHEDULED_LOAN','LOAN','CLOSEASRESCHEDULED',1),
+
+(170,'organisation','READ_MAKERCHECKER','MAKERCHECKER','READ',0),(171,'organisation','CREATE_OFFICE','OFFICE','CREATE',1),
+
+(172,'organisation','READ_OFFICE','OFFICE','READ',0),(173,'organisation','UPDATE_OFFICE','OFFICE','UPDATE',1),
+
+(174,'organisation','DELETE_OFFICE','OFFICE','DELETE',1),(175,'organisation','READ_OFFICETRANSACTION','OFFICETRANSACTION','READ',0),
+
+(176,'organisation','CREATE_OFFICETRANSACTION','OFFICETRANSACTION','CREATE',1),(177,'authorisation','READ_PERMISSION','PERMISSION','READ',0),
+
+(178,'authorisation','CREATE_ROLE','ROLE','CREATE',1),(179,'authorisation','READ_ROLE','ROLE','READ',0),(180,'authorisation','UPDATE_ROLE','ROLE','UPDATE',1),
+
+(181,'authorisation','DELETE_ROLE','ROLE','DELETE',1),(182,'authorisation','CREATE_USER','USER','CREATE',1),(183,'authorisation','READ_USER','USER','READ',0),
+
+(184,'authorisation','UPDATE_USER','USER','UPDATE',1),(185,'authorisation','DELETE_USER','USER','DELETE',1),(186,'organisation','CREATE_STAFF','STAFF','CREATE',1),
+
+(187,'organisation','READ_STAFF','STAFF','READ',0),(188,'organisation','UPDATE_STAFF','STAFF','UPDATE',1),(189,'organisation','DELETE_STAFF','STAFF','DELETE',1),
+
+(190,'organisation','CREATE_SAVINGSPRODUCT','SAVINGSPRODUCT','CREATE',1),(191,'organisation','READ_SAVINGSPRODUCT','SAVINGSPRODUCT','READ',0),
+
+(192,'organisation','UPDATE_SAVINGSPRODUCT','SAVINGSPRODUCT','UPDATE',1),(193,'organisation','DELETE_SAVINGSPRODUCT','SAVINGSPRODUCT','DELETE',1),
+
+(194,'organisation','CREATE_DEPOSITPRODUCT','DEPOSITPRODUCT','CREATE',1),(195,'organisation','READ_DEPOSITPRODUCT','DEPOSITPRODUCT','READ',0),
+
+(196,'organisation','UPDATE_DEPOSITPRODUCT','DEPOSITPRODUCT','UPDATE',1),(197,'organisation','DELETE_DEPOSITPRODUCT','DEPOSITPRODUCT','DELETE',1),
+
+(198,'portfolio','CREATE_DEPOSITACCOUNT','DEPOSITACCOUNT','CREATE',1),(199,'portfolio','READ_DEPOSITACCOUNT','DEPOSITACCOUNT','READ',0),
+
+(200,'portfolio','UPDATE_DEPOSITACCOUNT','DEPOSITACCOUNT','UPDATE',1),(201,'portfolio','DELETE_DEPOSITACCOUNT','DEPOSITACCOUNT','DELETE',1),
+
+(202,'transaction_deposit','APPROVE_DEPOSITACCOUNT','DEPOSITACCOUNT','APPROVE',1),(203,'transaction_deposit','REJECT_DEPOSITACCOUNT','DEPOSITACCOUNT','REJECT',1),
+
+(204,'transaction_deposit','WITHDRAW_DEPOSITACCOUNT','DEPOSITACCOUNT','WITHDRAW',1),
+
+(205,'transaction_deposit','APPROVALUNDO_DEPOSITACCOUNT','DEPOSITACCOUNT','APPROVALUNDO',1),
+
+(206,'transaction_deposit','WITHDRAWAL_DEPOSITACCOUNT','DEPOSITACCOUNT','WITHDRAWAL',1),
+
+(207,'transaction_deposit','INTEREST_DEPOSITACCOUNT','DEPOSITACCOUNT','INTEREST',1),(208,'transaction_deposit','RENEW_DEPOSITACCOUNT','DEPOSITACCOUNT','RENEW',1),
+
+(209,'portfolio','CREATE_SAVINGSACCOUNT','SAVINGSACCOUNT','CREATE',1),(210,'portfolio','READ_SAVINGSACCOUNT','SAVINGSACCOUNT','READ',0),
+
+(211,'portfolio','UPDATE_SAVINGSACCOUNT','SAVINGSACCOUNT','UPDATE',1),(212,'portfolio','DELETE_SAVINGSACCOUNT','SAVINGSACCOUNT','DELETE',1),
 (213,'authorisation','PERMISSIONS_ROLE','ROLE','PERMISSIONS',1);
 
 INSERT INTO `m_permission`
@@ -207,9 +305,9 @@ VALUES
 ('configuration','READ_CONFIGURATION',
 'CONFIGURATION','READ',1);
 
-INSERT INTO `m_role` (`id`, `name`, `description`, `createdby_id`, `created_date`, `lastmodified_date`, `lastmodifiedby_id`) 
+INSERT INTO `m_role` (`id`, `name`, `description`) 
 VALUES 
-(1,'Super user','This role provides all application permissions.',NULL,NULL,NULL,NULL);
+(1,'Super user','This role provides all application permissions.');
 
 /* role 1 is super user, give it ALL_FUNCTIONS */
 INSERT INTO m_role_permission(role_id, permission_id)
@@ -223,17 +321,52 @@ where grouping not in ('special', 'report')
 and action_name != 'READ';
 
 INSERT INTO `m_appuser` (`id`, `office_id`, `username`, `firstname`, `lastname`, `password`, `email`, 
-`firsttime_login_remaining`, `nonexpired`, `nonlocked`, `nonexpired_credentials`, `enabled`, 
-`createdby_id`, `created_date`, `lastmodified_date`, `lastmodifiedby_id`) 
+`firsttime_login_remaining`, `nonexpired`, `nonlocked`, `nonexpired_credentials`, `enabled`) 
 VALUES 
-(1,1,'mifos','App','Administrator','5787039480429368bf94732aacc771cd0a3ea02bcf504ffe1185ab94213bc63a','demomfi@mifos.org','\0','','','','',NULL,NULL,NULL,NULL);
+(1,1,'mifos','App','Administrator','5787039480429368bf94732aacc771cd0a3ea02bcf504ffe1185ab94213bc63a','demomfi@mifos.org','\0','','','','');
 
 
 INSERT INTO `m_appuser_role` (`appuser_id`, `role_id`) VALUES (1,1);
 
 INSERT INTO `stretchy_parameter` VALUES 
-(3,'FullReportList',NULL,'n/a','n/a','n/a','n/a','Y',NULL,NULL,'select  r.report_id, r.report_name, r.report_type, r.report_subtype, r.report_category,\r  rp.parameter_id, rp.report_parameter_name, p.parameter_name\r  from stretchy_report r\r  left join stretchy_report_parameter rp on rp.report_id = r.report_id\r  left join stretchy_parameter p on p.parameter_id = rp.parameter_id\r  where r.use_report is true\r  and exists\r  (\r select \'f\'\r  from m_appuser_role ur \r  join m_role r on r.id = ur.role_id\r  join m_role_permission rp on rp.role_id = r.id\r  join m_permission p on p.id = rp.permission_id\r  where ur.appuser_id = ${currentUserId}\r  and (p.code in (\'ALL_FUNCTIONS_READ\', \'ALL_FUNCTIONS\') or p.code = concat(\"READ_\", r.report_name))\r )\r  order by r.report_name, rp.parameter_id'),(4,'FullParameterList',NULL,'n/a','n/a','n/a','n/a','Y',NULL,NULL,'select parameter_name, parameter_variable, parameter_label, parameter_displayType, parameter_FormatType, parameter_default, selectOne,  selectAll\r\nfrom stretchy_parameter p\r\nwhere special is null\r\norder by parameter_id'),(5,'selectOfficeId','officeId','Office','select','number','0',NULL,'Y',NULL,'select id, \r\nconcat(substring(\"........................................\", 1, \r\n   ((LENGTH(`hierarchy`) - LENGTH(REPLACE(`hierarchy`, \'.\', \'\')) - 1) * 4)), \r\n   `name`) as tc\r\nfrom m_office\r\nwhere hierarchy like concat(\'${currentUserHierarchy}\', \'%\')\r\norder by hierarchy'),(6,'currencyIdSelectAll','currencyId','Currency','select','number','0',NULL,'Y','Y','select `code`, `name`\r\nfrom m_organisation_currency\r\norder by `code`'),(7,'currencyIdSelectOne','currencyId','Currency','select','number','0',NULL,'Y',NULL,'select `code`, `name`\r\nfrom m_organisation_currency\r\norder by `code`'),(10,'fundIdSelectAll','fundId','Fund','select','number','0',NULL,'Y','Y','(select id, `name`\r\nfrom m_fund\r\norder by `name`)\r\nunion all\r\n(select -10, \'-\')'),(80,'selectStartDate','startDate','startDate','date','date','today',NULL,NULL,NULL,NULL),(81,'selectEndDate','endDate','endDate','date','date','today',NULL,NULL,NULL,NULL),
-(82,'reportCategoryList',NULL,'n/a','n/a','n/a','n/a','Y',NULL,NULL,'select  r.report_id, r.report_name, r.report_type, r.report_subtype, r.report_category,\r  rp.parameter_id, rp.report_parameter_name, p.parameter_name\r  from stretchy_report r\r  left join stretchy_report_parameter rp on rp.report_id = r.report_id\r  left join stretchy_parameter p on p.parameter_id = rp.parameter_id\r  where r.report_category = \'${reportCategory}\'\r  and r.use_report is true\r  and exists\r  (\r select \'f\'\r  from m_appuser_role ur \r  join m_role r on r.id = ur.role_id\r  join m_role_permission rp on rp.role_id = r.id\r  join m_permission p on p.id = rp.permission_id\r  where ur.appuser_id = ${currentUserId}\r  and (p.code in (\'ALL_FUNCTIONS_READ\', \'ALL_FUNCTIONS\') or p.code = concat(\"READ_\", r.report_name))\r )\r  order by r.report_name, rp.parameter_id');
+(3,'FullReportList',NULL,'n/a','n/a','n/a','n/a','Y',NULL,NULL,'select  r.report_id, r.report_name, r.report_type, r.report_subtype, r.report_category,\r  
+
+rp.parameter_id, rp.report_parameter_name, p.parameter_name\r  from stretchy_report r\r  left join stretchy_report_parameter rp on rp.report_id = r.report_id\r  left 
+
+join stretchy_parameter p on p.parameter_id = rp.parameter_id\r  where r.use_report is true\r  and exists\r  (\r select \'f\'\r  from m_appuser_role ur \r  join m_role 
+
+r on r.id = ur.role_id\r  join m_role_permission rp on rp.role_id = r.id\r  join m_permission p on p.id = rp.permission_id\r  where ur.appuser_id = ${currentUserId}\r  
+
+and (p.code in (\'ALL_FUNCTIONS_READ\', \'ALL_FUNCTIONS\') or p.code = concat(\"READ_\", r.report_name))\r )\r  order by r.report_name, rp.parameter_id'),
+
+(4,'FullParameterList',NULL,'n/a','n/a','n/a','n/a','Y',NULL,NULL,'select parameter_name, parameter_variable, parameter_label, parameter_displayType, 
+
+parameter_FormatType, parameter_default, selectOne,  selectAll\r\nfrom stretchy_parameter p\r\nwhere special is null\r\norder by parameter_id'),
+
+(5,'selectOfficeId','officeId','Office','select','number','0',NULL,'Y',NULL,'select id, \r\nconcat(substring(\"........................................\", 1, \r\n   
+
+((LENGTH(`hierarchy`) - LENGTH(REPLACE(`hierarchy`, \'.\', \'\')) - 1) * 4)), \r\n   `name`) as tc\r\nfrom m_office\r\nwhere hierarchy like concat
+
+(\'${currentUserHierarchy}\', \'%\')\r\norder by hierarchy'),(6,'currencyIdSelectAll','currencyId','Currency','select','number','0',NULL,'Y','Y','select `code`, 
+
+`name`\r\nfrom m_organisation_currency\r\norder by `code`'),(7,'currencyIdSelectOne','currencyId','Currency','select','number','0',NULL,'Y',NULL,'select `code`, 
+
+`name`\r\nfrom m_organisation_currency\r\norder by `code`'),(10,'fundIdSelectAll','fundId','Fund','select','number','0',NULL,'Y','Y','(select id, `name`\r\nfrom 
+
+m_fund\r\norder by `name`)\r\nunion all\r\n(select -10, \'-\')'),(80,'selectStartDate','startDate','startDate','date','date','today',NULL,NULL,NULL,NULL),
+
+(81,'selectEndDate','endDate','endDate','date','date','today',NULL,NULL,NULL,NULL),
+(82,'reportCategoryList',NULL,'n/a','n/a','n/a','n/a','Y',NULL,NULL,'select  r.report_id, r.report_name, r.report_type, r.report_subtype, r.report_category,\r  
+
+rp.parameter_id, rp.report_parameter_name, p.parameter_name\r  from stretchy_report r\r  left join stretchy_report_parameter rp on rp.report_id = r.report_id\r  left 
+
+join stretchy_parameter p on p.parameter_id = rp.parameter_id\r  where r.report_category = \'${reportCategory}\'\r  and r.use_report is true\r  and exists\r  (\r 
+
+select \'f\'\r  from m_appuser_role ur \r  join m_role r on r.id = ur.role_id\r  join m_role_permission rp on rp.role_id = r.id\r  join m_permission p on p.id = 
+
+rp.permission_id\r  where ur.appuser_id = ${currentUserId}\r  and (p.code in (\'ALL_FUNCTIONS_READ\', \'ALL_FUNCTIONS\') or p.code = concat(\"READ_\", 
+
+r.report_name))\r )\r  order by r.report_name, rp.parameter_id');
 
 -- Add datatables for guarantor stuff in here for now rather than DDL as we expect it may change
 DROP TABLE IF EXISTS `m_guarantor_external`;

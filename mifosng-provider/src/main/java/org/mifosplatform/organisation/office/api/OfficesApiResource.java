@@ -1,10 +1,8 @@
 package org.mifosplatform.organisation.office.api;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import javax.ws.rs.Consumes;
@@ -21,14 +19,12 @@ import javax.ws.rs.core.UriInfo;
 import org.mifosplatform.commands.domain.CommandWrapper;
 import org.mifosplatform.commands.service.CommandWrapperBuilder;
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
-import org.mifosplatform.infrastructure.codes.data.CodeData;
 import org.mifosplatform.infrastructure.core.api.ApiRequestParameterHelper;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.office.data.OfficeData;
-import org.mifosplatform.organisation.office.data.OfficeLookup;
 import org.mifosplatform.organisation.office.service.OfficeReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -40,7 +36,8 @@ import org.springframework.stereotype.Component;
 public class OfficesApiResource {
 
     /**
-     * The set of parameters that are supported in response for {@link CodeData}
+     * The set of parameters that are supported in response for
+     * {@link OfficeData}.
      */
     private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "name", "nameDecorated", "externalId",
             "openingDate", "hierarchy", "parentId", "parentName", "allowedParents"));
@@ -87,7 +84,7 @@ public class OfficesApiResource {
 
         OfficeData office = this.readPlatformService.retrieveNewOfficeTemplate();
 
-        final List<OfficeLookup> allowedParents = new ArrayList<OfficeLookup>(this.readPlatformService.retrieveAllOfficesForLookup());
+        final Collection<OfficeData> allowedParents = this.readPlatformService.retrieveAllOfficesForDropdown();
         office = OfficeData.appendedTemplate(office, allowedParents);
 
         final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
@@ -99,7 +96,9 @@ public class OfficesApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String createOffice(final String apiRequestBodyAsJson) {
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().createOffice().withJson(apiRequestBodyAsJson)
+        final CommandWrapper commandRequest = new CommandWrapperBuilder() //
+                .createOffice() //
+                .withJson(apiRequestBodyAsJson) //
                 .build();
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
@@ -119,7 +118,7 @@ public class OfficesApiResource {
 
         OfficeData office = this.readPlatformService.retrieveOffice(officeId);
         if (settings.isTemplate()) {
-            List<OfficeLookup> allowedParents = this.readPlatformService.retrieveAllowedParents(officeId);
+            Collection<OfficeData> allowedParents = this.readPlatformService.retrieveAllowedParents(officeId);
             office = OfficeData.appendedTemplate(office, allowedParents);
         }
 
@@ -132,7 +131,10 @@ public class OfficesApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String updateOffice(@PathParam("officeId") final Long officeId, final String apiRequestBodyAsJson) {
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().updateOffice(officeId).withJson(apiRequestBodyAsJson).build();
+        final CommandWrapper commandRequest = new CommandWrapperBuilder() //
+                .updateOffice(officeId) //
+                .withJson(apiRequestBodyAsJson) //
+                .build();
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 

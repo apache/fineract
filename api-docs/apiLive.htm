@@ -1613,13 +1613,15 @@ Request Body:
 {
  "name": "Example New Branch",
  "dateFormat": "dd MMMM yyyy",
+ "locale": "en",
  "openingDate": "01 July 2007",
  "parentId": 2,
  "externalId": "SYS54-88"
 }
 </code>
 <code class="method-response">{
-  "resourceId": 9
+  "officeId": 3,
+  "resourceId": 3
 }
 </code>
             </div>
@@ -1640,7 +1642,10 @@ Request Body:
 }
 </code>
 <code class="method-response">{
-  "resourceId": 1
+  "officeId": 3,
+  "resourceId": 3,
+  "changes": {
+    "name": "Name is updated"
 }
 </code>
             </div>
