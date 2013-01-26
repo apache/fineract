@@ -214,10 +214,6 @@ CREATE TABLE `m_role` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `name` varchar(100) NOT NULL,
   `description` varchar(500) NOT NULL,
-  `createdby_id` bigint(20) DEFAULT NULL,
-  `created_date` datetime DEFAULT NULL,
-  `lastmodified_date` datetime DEFAULT NULL,
-  `lastmodifiedby_id` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -245,10 +241,6 @@ CREATE TABLE `m_appuser` (
   `nonlocked` bit(1) NOT NULL,
   `nonexpired_credentials` bit(1) NOT NULL,
   `enabled` bit(1) NOT NULL,
-  `createdby_id` bigint(20) DEFAULT NULL,
-  `created_date` datetime DEFAULT NULL,
-  `lastmodified_date` datetime DEFAULT NULL,
-  `lastmodifiedby_id` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `username_org` (`username`),
   KEY `FKB3D587CE0DD567A` (`office_id`),
