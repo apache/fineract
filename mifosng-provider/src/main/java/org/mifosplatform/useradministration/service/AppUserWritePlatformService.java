@@ -10,8 +10,4 @@ public interface AppUserWritePlatformService {
     CommandProcessingResult updateUser(Long userId, JsonCommand command);
 
     CommandProcessingResult deleteUser(Long userId);
-
-    // we dont put any permissions on this e.g. a user with no admin rights can
-    // change their own details (email, username, password etc).
-    CommandProcessingResult updateUsersOwnAccountDetails(Long userId, JsonCommand command);
 }

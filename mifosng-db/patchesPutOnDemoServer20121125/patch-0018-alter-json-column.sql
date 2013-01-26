@@ -1,1 +1,0 @@
-ALTER TABLE `m_portfolio_command_source` CHANGE COLUMN `command_as_json` `command_as_json` VARCHAR(5000) NOT NULL;

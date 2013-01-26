@@ -11,6 +11,8 @@ public interface OfficeReadPlatformService {
 
     Collection<OfficeData> retrieveAllOffices();
 
+    Collection<OfficeData> retrieveAllOfficesForDropdown();
+    
     Collection<OfficeLookup> retrieveAllOfficesForLookup();
 
     OfficeData retrieveOffice(Long officeId);

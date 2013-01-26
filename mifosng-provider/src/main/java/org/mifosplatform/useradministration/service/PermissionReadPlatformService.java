@@ -2,13 +2,13 @@ package org.mifosplatform.useradministration.service;
 
 import java.util.Collection;
 
-import org.mifosplatform.useradministration.data.PermissionUsageData;
+import org.mifosplatform.useradministration.data.PermissionData;
 
 public interface PermissionReadPlatformService {
 
-    Collection<PermissionUsageData> retrieveAllPermissions();
+    Collection<PermissionData> retrieveAllPermissions();
     
-    Collection<PermissionUsageData> retrieveAllMakerCheckerablePermissions();
+    Collection<PermissionData> retrieveAllMakerCheckerablePermissions();
 
-    Collection<PermissionUsageData> retrieveAllRolePermissions(Long roleId);
+    Collection<PermissionData> retrieveAllRolePermissions(Long roleId);
 }

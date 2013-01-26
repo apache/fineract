@@ -1,1 +1,0 @@
-ALTER TABLE `m_loan` CHANGE COLUMN `arrearstolerance_amount` `arrearstolerance_amount` DECIMAL(19,6) NULL;

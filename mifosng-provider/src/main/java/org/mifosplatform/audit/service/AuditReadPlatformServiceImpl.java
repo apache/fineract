@@ -13,7 +13,7 @@ import org.mifosplatform.audit.data.AuditSearchData;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
 import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
-import org.mifosplatform.useradministration.data.AppUserLookup;
+import org.mifosplatform.useradministration.data.AppUserData;
 import org.mifosplatform.useradministration.service.AppUserReadPlatformService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -104,7 +104,7 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
 
     @Override
     public AuditSearchData retrieveSearchTemplate() {
-        Collection<AppUserLookup> appUsers = appUserReadPlatformService.retrieveSearchTemplate();
+        final Collection<AppUserData> appUsers = appUserReadPlatformService.retrieveSearchTemplate();
 
         ActionNamesMapper mapper = new ActionNamesMapper();
         List<String> actionNames = this.jdbcTemplate.query(mapper.schema(), mapper, new Object[] {});

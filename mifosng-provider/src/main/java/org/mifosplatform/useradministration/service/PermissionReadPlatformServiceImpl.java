@@ -6,7 +6,7 @@ import java.util.Collection;
 
 import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
-import org.mifosplatform.useradministration.data.PermissionUsageData;
+import org.mifosplatform.useradministration.data.PermissionData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +29,7 @@ public class PermissionReadPlatformServiceImpl implements PermissionReadPlatform
     }
 
     @Override
-    public Collection<PermissionUsageData> retrieveAllPermissions() {
+    public Collection<PermissionData> retrieveAllPermissions() {
 
         context.authenticatedUser();
 
@@ -40,7 +40,7 @@ public class PermissionReadPlatformServiceImpl implements PermissionReadPlatform
     }
 
     @Override
-    public Collection<PermissionUsageData> retrieveAllMakerCheckerablePermissions() {
+    public Collection<PermissionData> retrieveAllMakerCheckerablePermissions() {
 
         context.authenticatedUser();
 
@@ -52,7 +52,7 @@ public class PermissionReadPlatformServiceImpl implements PermissionReadPlatform
     }
 
     @Override
-    public Collection<PermissionUsageData> retrieveAllRolePermissions(final Long roleId) {
+    public Collection<PermissionData> retrieveAllRolePermissions(final Long roleId) {
 
         final PermissionUsageDataMapper mapper = new PermissionUsageDataMapper();
         final String sql = mapper.rolePermissionSchema();
@@ -61,10 +61,10 @@ public class PermissionReadPlatformServiceImpl implements PermissionReadPlatform
         return this.jdbcTemplate.query(sql, mapper, new Object[] { roleId });
     }
 
-    private static final class PermissionUsageDataMapper implements RowMapper<PermissionUsageData> {
+    private static final class PermissionUsageDataMapper implements RowMapper<PermissionData> {
 
         @Override
-        public PermissionUsageData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+        public PermissionData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
 
             final String grouping = rs.getString("grouping");
             final String code = rs.getString("code");
@@ -72,7 +72,7 @@ public class PermissionReadPlatformServiceImpl implements PermissionReadPlatform
             final String actionName = rs.getString("actionName");
             final Boolean selected = rs.getBoolean("selected");
 
-            return new PermissionUsageData(grouping, code, entityName, actionName, selected);
+            return PermissionData.instance(grouping, code, entityName, actionName, selected);
         }
 
         public String permissionSchema() {

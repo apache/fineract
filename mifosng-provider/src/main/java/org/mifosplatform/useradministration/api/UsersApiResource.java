@@ -1,10 +1,8 @@
 package org.mifosplatform.useradministration.api;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import javax.ws.rs.Consumes;
@@ -27,7 +25,7 @@ import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
-import org.mifosplatform.organisation.office.data.OfficeLookup;
+import org.mifosplatform.organisation.office.data.OfficeData;
 import org.mifosplatform.organisation.office.service.OfficeReadPlatformService;
 import org.mifosplatform.useradministration.data.AppUserData;
 import org.mifosplatform.useradministration.service.AppUserReadPlatformService;
@@ -94,8 +92,8 @@ public class UsersApiResource {
 
         AppUserData user = this.readPlatformService.retrieveUser(userId);
         if (settings.isTemplate()) {
-            List<OfficeLookup> offices = new ArrayList<OfficeLookup>(this.officeReadPlatformService.retrieveAllOfficesForLookup());
-            user = new AppUserData(user, offices);
+            final Collection<OfficeData> offices = this.officeReadPlatformService.retrieveAllOfficesForDropdown();
+            user = AppUserData.template(user, offices);
         }
 
         return this.toApiJsonSerializer.serialize(settings, user, RESPONSE_DATA_PARAMETERS);
@@ -153,7 +151,7 @@ public class UsersApiResource {
     public String deleteUser(@PathParam("userId") final Long userId) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
-                .updateUser(userId) //
+                .deleteUser(userId) //
                 .build();
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);

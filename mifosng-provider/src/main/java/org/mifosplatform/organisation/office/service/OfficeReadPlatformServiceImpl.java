@@ -66,6 +66,23 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
         }
     }
 
+    private static final class OfficeDropdownMapper implements RowMapper<OfficeData> {
+
+        public String schema() {
+            return " o.id as id, " + nameDecoratedBaseOnHierarchy + " as nameDecorated, o.name as name from m_office o ";
+        }
+
+        @Override
+        public OfficeData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+
+            final Long id = rs.getLong("id");
+            final String name = rs.getString("name");
+            final String nameDecorated = rs.getString("nameDecorated");
+
+            return OfficeData.dropdown(id, name, nameDecorated);
+        }
+    }
+
     private static final class OfficeLookupMapper implements RowMapper<OfficeLookup> {
 
         public String officeLookupSchema() {
@@ -133,6 +150,19 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
 
         OfficeMapper rm = new OfficeMapper();
         String sql = "select " + rm.officeSchema() + "where o.hierarchy like ? order by o.hierarchy";
+
+        return this.jdbcTemplate.query(sql, rm, new Object[] { hierarchySearchString });
+    }
+
+    @Override
+    public Collection<OfficeData> retrieveAllOfficesForDropdown() {
+        final AppUser currentUser = context.authenticatedUser();
+
+        final String hierarchy = currentUser.getOffice().getHierarchy();
+        final String hierarchySearchString = hierarchy + "%";
+
+        final OfficeDropdownMapper rm = new OfficeDropdownMapper();
+        final String sql = "select " + rm.schema() + "where o.hierarchy like ? order by o.hierarchy";
 
         return this.jdbcTemplate.query(sql, rm, new Object[] { hierarchySearchString });
     }
@@ -226,5 +256,4 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
 
         return new OfficeTransactionData(new LocalDate(), parentLookups, currencyOptions);
     }
-
 }

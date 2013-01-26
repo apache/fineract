@@ -7,7 +7,7 @@ import org.mifosplatform.infrastructure.core.exception.AbstractPlatformResourceN
  */
 public class UserNotFoundException extends AbstractPlatformResourceNotFoundException {
 
-	public UserNotFoundException(Long id) {
-		super("error.msg.user.id.invalid", "User with identifier " + id + " does not exist", id);
-	}
+    public UserNotFoundException(Long id) {
+        super("error.msg.user.id.invalid", "User with identifier " + id + " does not exist", id);
+    }
 }

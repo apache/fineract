@@ -1,1 +1,0 @@
-ALTER TABLE `m_portfolio_command_source` CHANGE COLUMN `api_resource` `api_resource` VARCHAR(100) NOT NULL;

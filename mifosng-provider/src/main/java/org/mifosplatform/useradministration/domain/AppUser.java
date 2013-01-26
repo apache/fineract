@@ -20,20 +20,20 @@ import javax.persistence.UniqueConstraint;
 
 import org.apache.commons.lang.StringUtils;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
-import org.mifosplatform.infrastructure.core.domain.AbstractAuditableCustom;
 import org.mifosplatform.infrastructure.security.domain.PlatformUser;
 import org.mifosplatform.infrastructure.security.exception.NoAuthorizationException;
 import org.mifosplatform.infrastructure.security.service.PlatformPasswordEncoder;
 import org.mifosplatform.organisation.office.domain.Office;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.jpa.domain.AbstractPersistable;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 
 @Entity
 @Table(name = "m_appuser", uniqueConstraints = @UniqueConstraint(columnNames = { "username" }, name = "username_org"))
-public class AppUser extends AbstractAuditableCustom<AppUser, Long> implements PlatformUser {
+public class AppUser extends AbstractPersistable<Long> implements PlatformUser {
 
     private final static Logger logger = LoggerFactory.getLogger(AppUser.class);
 
@@ -365,7 +365,7 @@ public class AppUser extends AbstractAuditableCustom<AppUser, Long> implements P
         String matchPermission = "READ_" + entityType.toUpperCase();
 
         if (!(hasNotPermissionForAnyOf("ALL_FUNCTIONS", "ALL_FUNCTIONS_READ", matchPermission))) return;
-        
+
         throw new NoAuthorizationException(authorizationMessage);
     }
 
@@ -385,7 +385,7 @@ public class AppUser extends AbstractAuditableCustom<AppUser, Long> implements P
         }
         return hasPermission;
     }
-    
+
     private boolean hasAllFunctionsPermission() {
         boolean match = false;
         for (Role role : this.roles) {
@@ -443,8 +443,7 @@ public class AppUser extends AbstractAuditableCustom<AppUser, Long> implements P
     }
 
     public void validateHasDatatableReadPermission(final String datatable) {
-        if (hasNotPermissionForDatatable(datatable, "READ")) { 
-            throw new NoAuthorizationException("Not authorised to read datatable: " + datatable); 
-        }
+        if (hasNotPermissionForDatatable(datatable, "READ")) { throw new NoAuthorizationException("Not authorised to read datatable: "
+                + datatable); }
     }
 }

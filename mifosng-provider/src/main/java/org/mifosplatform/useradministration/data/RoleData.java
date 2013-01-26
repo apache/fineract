@@ -12,11 +12,16 @@ public class RoleData {
     private final String description;
     @SuppressWarnings("unused")
     private final RoleData currentChanges;
-    
+
+    public RolePermissionsData toRolePermissionData(final Collection<PermissionData> permissionUsageData,
+            final Collection<PermissionData> currentChanges) {
+        return new RolePermissionsData(id, name, description, permissionUsageData, currentChanges);
+    }
+
     public static RoleData changes(final String name, final String description) {
         return new RoleData(null, name, description, null);
     }
-    
+
     public static RoleData integrateChanges(final RoleData role, final RoleData currentChanges) {
         return new RoleData(role.id, role.name, role.description, currentChanges);
     }
@@ -37,9 +42,5 @@ public class RoleData {
     @Override
     public int hashCode() {
         return this.id.hashCode();
-    }
-
-    public RolePermissionsData toRolePermissionData(final Collection<PermissionUsageData> permissionUsageData, final Collection<PermissionUsageData> currentChanges) {
-        return new RolePermissionsData(id, name, description, permissionUsageData, currentChanges);
     }
 }

@@ -9,7 +9,6 @@ import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.useradministration.command.PermissionsCommand;
-import org.mifosplatform.useradministration.command.RoleCommand;
 import org.mifosplatform.useradministration.domain.Permission;
 import org.mifosplatform.useradministration.domain.PermissionRepository;
 import org.mifosplatform.useradministration.domain.Role;
@@ -48,8 +47,7 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
 
         context.authenticatedUser();
 
-        final RoleCommand roleCommand = this.roleCommandFromApiJsonDeserializer.commandFromApiJson(command.json());
-        roleCommand.validateForCreate();
+        this.roleCommandFromApiJsonDeserializer.validateForCreate(command.json());
 
         final Role entity = Role.fromJson(command);
         this.roleRepository.save(entity);
@@ -63,8 +61,7 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
 
         context.authenticatedUser();
 
-        final RoleCommand roleCommand = this.roleCommandFromApiJsonDeserializer.commandFromApiJson(command.json());
-        roleCommand.validateForUpdate();
+        this.roleCommandFromApiJsonDeserializer.validateForUpdate(command.json());
 
         final Role role = this.roleRepository.findOne(roleId);
         if (role == null) { throw new RoleNotFoundException(roleId); }
@@ -74,7 +71,10 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
             this.roleRepository.save(role);
         }
 
-        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(roleId).with(changes).build();
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(command.commandId()) //
+                .withEntityId(roleId).with(changes) //
+                .build();
     }
 
     @Transactional
@@ -107,7 +107,11 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
             this.roleRepository.save(role);
         }
 
-        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(roleId).with(changes).build();
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(command.commandId()) //
+                .withEntityId(roleId) //
+                .with(changes) //
+                .build();
     }
 
     private Permission findPermissionByCode(Collection<Permission> allPermissions, String permissionCode) {

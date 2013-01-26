@@ -2821,7 +2821,7 @@ No Request Body
 	<div class="method-section">
 		<div class="method-description">
 		    <h3>Users</h3>
-		    <p>An API capability to support user administration.</p>
+		    <p>An API capability to support administration of application users.</p>
 		</div>
 	</div>
    
@@ -2906,8 +2906,7 @@ No Request Body
       "name": "Data Entry (Portfolio only)",
       "description": "This role allows a user full permissions around client and loan functionality but nothing else."
     },...
-  ],
-  "selectedRoles": []
+  ]
 }
 </code>
 	    </div>
@@ -2934,7 +2933,6 @@ No Request Body
   "firstname": "App(test)",
   "lastname": "Administrator",
   "email": "demomfi@mifos.org",
-  "allowedOffices": [],
   "availableRoles": [
     {
       "id": 2,
@@ -2965,8 +2963,7 @@ No Request Body
 	    <div class="method-description">
 	        <h4>Create a User</h4>
 	        <p>Adds new application user.</p>
-                <p><b>Note:</b> Password information is not required (or processed).  Password details are auto-generated and then sent to the email account given
-                (which is why it can take a few seconds to complete). 
+                <p><b>Note:</b> Password information is not required (or processed). Password details at present are auto-generated and then sent to the email account given (which is why it can take a few seconds to complete). 
                 </p>
                 <table class=matrixHeading>
                     <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Mandatory Fields</div></td></tr>
@@ -2989,6 +2986,7 @@ Request body:
 </code>
 <code class="method-response">
 {
+  "officeId": 1,
   "resourceId": 11
 }
 </code>
@@ -3007,8 +3005,7 @@ Request body:
 Content-Type: application/json
 Request body:
 {
- "firstname": "Test", 
- "roles": [2], 
+ "firstname": "Test",  
  "password": "window75", 
  "repeatPassword": "window75"
 }
@@ -3016,7 +3013,12 @@ Request body:
 </code>
 <code class="method-response">
 {
-  "resourceId": 3
+ "officeId": 1,
+  "resourceId": 3,
+  "changes": {
+    "firstname": "Test",
+    "passwordEncoded": "abc3326b1bb376351c7baeb4175f5e0504e33aadf6a158474a6d71de1befae51"
+  }
 }
 </code>
 	    </div>
@@ -3035,7 +3037,9 @@ Content-Type: application/json
 No Request Body
 </code>
 <code class="method-response">{
- "resourceId": 20
+  "officeId": 1,
+  "resourceId": 20,
+  "changes": {}
 }
 </code>
 	    </div>
@@ -3247,24 +3251,21 @@ ALL_FUNCTIONS_READ: "true"
     "code": "READ_PERMISSION",
     "entityName": "PERMISSION",
     "actionName": "READ",
-    "selected": true,
-    "isMakerChecker": false
+    "selected": true
   },
   {
     "grouping": "authorisation",
     "code": "CREATE_ROLE",
     "entityName": "ROLE",
     "actionName": "CREATE",
-    "selected": true,
-    "isMakerChecker": true
+    "selected": true
   },
   {
     "grouping": "authorisation",
     "code": "DELETE_ROLE",
     "entityName": "ROLE",
     "actionName": "DELETE",
-    "selected": true,
-    "isMakerChecker": true
+    "selected": true
   }, ... ]
 </code>
 	    </div>

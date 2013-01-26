@@ -22,7 +22,6 @@ import org.mifosplatform.commands.domain.CommandWrapper;
 import org.mifosplatform.commands.service.CommandWrapperBuilder;
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.mifosplatform.commands.service.PortfolioCommandsReadPlatformService;
-import org.mifosplatform.infrastructure.codes.data.CodeData;
 import org.mifosplatform.infrastructure.core.api.ApiRequestParameterHelper;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
@@ -30,7 +29,7 @@ import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSeria
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.useradministration.command.PermissionsCommand;
 import org.mifosplatform.useradministration.command.RoleCommand;
-import org.mifosplatform.useradministration.data.PermissionUsageData;
+import org.mifosplatform.useradministration.data.PermissionData;
 import org.mifosplatform.useradministration.data.RoleData;
 import org.mifosplatform.useradministration.data.RolePermissionsData;
 import org.mifosplatform.useradministration.serialization.PermissionsCommandFromApiJsonDeserializer;
@@ -47,13 +46,13 @@ import org.springframework.stereotype.Component;
 public class RolesApiResource {
 
     /**
-     * The set of parameters that are supported in response for {@link CodeData}
+     * The set of parameters that are supported in response for {@link RoleData}
      */
     private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "name", "description",
             "availablePermissions", "selectedPermissions"));
 
     /**
-     * The set of parameters that are supported in response for {@link CodeData}
+     * The set of parameters that are supported in response for {@link RoleData}
      */
     private final Set<String> PERMISSIONS_RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "name", "description",
             "permissionUsageData"));
@@ -169,15 +168,15 @@ public class RolesApiResource {
         final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 
         final RoleData role = this.roleReadPlatformService.retrieveRole(roleId);
-        final Collection<PermissionUsageData> permissionUsageData = this.permissionReadPlatformService.retrieveAllRolePermissions(roleId);
-        Collection<PermissionUsageData> currentChanges = null;
+        final Collection<PermissionData> permissionUsageData = this.permissionReadPlatformService.retrieveAllRolePermissions(roleId);
+        Collection<PermissionData> currentChanges = null;
 
         if (settings.isCommandIdPassed()) {
             final CommandSourceData entry = this.commandSourceReadPlatformService.retrieveById(settings.getCommandId());
             PermissionsCommand command = permissionsFromApiJsonDeserializer.commandFromApiJson(entry.json());
-            currentChanges = new ArrayList<PermissionUsageData>();
+            currentChanges = new ArrayList<PermissionData>();
             for (String key : command.getPermissions().keySet()) {
-                currentChanges.add(PermissionUsageData.from(key, command.getPermissions().get(key)));
+                currentChanges.add(PermissionData.from(key, command.getPermissions().get(key)));
             }
         }
 

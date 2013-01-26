@@ -3,7 +3,7 @@ package org.mifosplatform.useradministration.data;
 /**
  * Immutable representation of permissions
  */
-public class PermissionUsageData {
+public class PermissionData {
 
     @SuppressWarnings("unused")
     private final String grouping;
@@ -16,11 +16,16 @@ public class PermissionUsageData {
     @SuppressWarnings("unused")
     private final Boolean selected;
 
-    public static PermissionUsageData from(final String permissionCode, final boolean isSelected) {
-        return new PermissionUsageData(null, permissionCode, null, null, isSelected);
+    public static PermissionData from(final String permissionCode, final boolean isSelected) {
+        return new PermissionData(null, permissionCode, null, null, isSelected);
     }
 
-    public PermissionUsageData(final String grouping, final String code, final String entityName, final String actionName,
+    public static PermissionData instance(final String grouping, final String code, final String entityName, final String actionName,
+            final Boolean selected) {
+        return new PermissionData(grouping, code, entityName, actionName, selected);
+    }
+
+    private PermissionData(final String grouping, final String code, final String entityName, final String actionName,
             final Boolean selected) {
         this.grouping = grouping;
         this.code = code;

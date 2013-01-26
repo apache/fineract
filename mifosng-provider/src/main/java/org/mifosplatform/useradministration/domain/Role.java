@@ -15,12 +15,12 @@ import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
-import org.mifosplatform.infrastructure.core.domain.AbstractAuditableCustom;
 import org.mifosplatform.useradministration.data.RoleData;
+import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
 @Table(name = "m_role")
-public class Role extends AbstractAuditableCustom<AppUser, Long> {
+public class Role extends AbstractPersistable<Long> {
 
     @Column(name = "name", nullable = false, length = 100)
     private String name;
