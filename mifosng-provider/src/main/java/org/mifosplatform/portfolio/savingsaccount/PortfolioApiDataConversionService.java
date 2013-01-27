@@ -1,4 +1,4 @@
-package org.mifosplatform.infrastructure.core.api;
+package org.mifosplatform.portfolio.savingsaccount;
 
 import org.mifosplatform.portfolio.client.data.ClientData;
 import org.mifosplatform.portfolio.group.command.GroupCommand;
@@ -39,12 +39,12 @@ public interface PortfolioApiDataConversionService {
     SavingAccountCommand convertJsonToSavingAccountCommand(Long resourceIdentifier, String json);
 
     GuarantorCommand convertJsonToGuarantorCommand(Long resourceIdentifier, Long loanId, String json);
-    
+
     SavingStateTransitionsCommand convertJsonToSavingStateTransitionCommand(Long accountId, String json);
-    
+
     SavingAccountApprovalCommand convertJsonToSavingApprovalCommand(Long accountId, String json);
 
-	SavingAccountDepositCommand convertJsonToSavingAccountDepositCommand(Long accountId, String json);
+    SavingAccountDepositCommand convertJsonToSavingAccountDepositCommand(Long accountId, String json);
 
-	SavingAccountWithdrawalCommand convertJsonToSavingAccountWithdrawalCommand(Long accountId, String jsonRequestBody);
+    SavingAccountWithdrawalCommand convertJsonToSavingAccountWithdrawalCommand(Long accountId, String jsonRequestBody);
 }

@@ -20,14 +20,14 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
 import org.mifosplatform.infrastructure.core.api.ApiParameterHelper;
-import org.mifosplatform.infrastructure.core.api.PortfolioApiDataConversionService;
-import org.mifosplatform.infrastructure.core.api.PortfolioApiJsonSerializerService;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.mifosplatform.organisation.monetary.service.CurrencyReadPlatformService;
 import org.mifosplatform.portfolio.loanproduct.domain.PeriodFrequencyType;
+import org.mifosplatform.portfolio.savingsaccount.PortfolioApiDataConversionService;
+import org.mifosplatform.portfolio.savingsaccount.PortfolioApiJsonSerializerService;
 import org.mifosplatform.portfolio.savingsaccountproduct.service.SavingsDepositEnumerations;
 import org.mifosplatform.portfolio.savingsdepositproduct.command.DepositProductCommand;
 import org.mifosplatform.portfolio.savingsdepositproduct.data.DepositProductData;

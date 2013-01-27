@@ -1,4 +1,4 @@
-package org.mifosplatform.infrastructure.core.api;
+package org.mifosplatform.portfolio.savingsaccount;
 
 import java.util.Arrays;
 import java.util.Collection;

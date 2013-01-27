@@ -1327,10 +1327,6 @@ CREATE TABLE `m_organisation_currency` (
   `name` varchar(50) NOT NULL,
   `display_symbol` varchar(10) DEFAULT NULL,
   `internationalized_name_code` varchar(50) NOT NULL,
-  `createdby_id` bigint(20) DEFAULT NULL,
-  `created_date` datetime DEFAULT NULL,
-  `lastmodified_date` datetime DEFAULT NULL,
-  `lastmodifiedby_id` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=88 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -1341,7 +1337,7 @@ CREATE TABLE `m_organisation_currency` (
 
 LOCK TABLES `m_organisation_currency` WRITE;
 /*!40000 ALTER TABLE `m_organisation_currency` DISABLE KEYS */;
-INSERT INTO `m_organisation_currency` VALUES (87,'ZAR',2,'South African Rand','R','currency.ZAR',1,'2013-01-24 09:28:57','2013-01-24 09:28:57',1);
+INSERT INTO `m_organisation_currency` VALUES (87,'ZAR',2,'South African Rand','R','currency.ZAR');
 /*!40000 ALTER TABLE `m_organisation_currency` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -2103,4 +2099,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2013-01-26 20:25:56
+-- Dump completed on 2013-01-27  0:29:30

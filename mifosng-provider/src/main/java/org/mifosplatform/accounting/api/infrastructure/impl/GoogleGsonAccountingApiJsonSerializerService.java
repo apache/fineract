@@ -10,9 +10,9 @@ import org.mifosplatform.accounting.api.data.GLClosureData;
 import org.mifosplatform.accounting.api.data.GLJournalEntryData;
 import org.mifosplatform.accounting.api.data.JournalEntryIdentifier;
 import org.mifosplatform.accounting.api.infrastructure.AccountingApiJsonSerializerService;
-import org.mifosplatform.infrastructure.core.api.PortfolioApiJsonSerializerService;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.serialization.GoogleGsonSerializerHelper;
+import org.mifosplatform.portfolio.savingsaccount.PortfolioApiJsonSerializerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
