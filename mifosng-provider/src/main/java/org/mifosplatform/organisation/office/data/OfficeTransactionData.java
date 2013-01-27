@@ -1,7 +1,7 @@
 package org.mifosplatform.organisation.office.data;
 
 import java.math.BigDecimal;
-import java.util.List;
+import java.util.Collection;
 
 import org.joda.time.LocalDate;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
@@ -30,12 +30,12 @@ public class OfficeTransactionData {
     @SuppressWarnings("unused")
     private final String description;
     @SuppressWarnings("unused")
-    private final List<CurrencyData> currencyOptions;
+    private final Collection<CurrencyData> currencyOptions;
     @SuppressWarnings("unused")
-    private final List<OfficeLookup> allowedOffices;
+    private final Collection<OfficeData> allowedOffices;
 
-    public OfficeTransactionData(final LocalDate transactionDate, final List<OfficeLookup> allowedOffices,
-            final List<CurrencyData> currencyOptions) {
+    public OfficeTransactionData(final LocalDate transactionDate, final Collection<OfficeData> allowedOffices,
+            final Collection<CurrencyData> currencyOptions) {
         this.transactionDate = transactionDate;
         this.allowedOffices = allowedOffices;
         this.currencyOptions = currencyOptions;
@@ -63,6 +63,5 @@ public class OfficeTransactionData {
         this.transactionDate = transactionDate;
         this.currencyOptions = null;
         this.allowedOffices = null;
-
     }
 }

@@ -1,12 +1,12 @@
 package org.mifosplatform.organisation.monetary.service;
 
-import java.util.List;
+import java.util.Collection;
 
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
 
 public interface CurrencyReadPlatformService {
 
-    List<CurrencyData> retrieveAllowedCurrencies();
+    Collection<CurrencyData> retrieveAllowedCurrencies();
 
-    List<CurrencyData> retrieveAllPlatformCurrencies();
+    Collection<CurrencyData> retrieveAllPlatformCurrencies();
 }

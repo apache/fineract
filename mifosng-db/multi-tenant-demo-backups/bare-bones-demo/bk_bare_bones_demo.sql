@@ -160,6 +160,68 @@ LOCK TABLES `acc_product_mapping` WRITE;
 UNLOCK TABLES;
 
 --
+-- Table structure for table `additional client fields data`
+--
+
+DROP TABLE IF EXISTS `additional client fields data`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `additional client fields data` (
+  `client_id` bigint(20) NOT NULL,
+  `Business Description` varchar(100) DEFAULT NULL,
+  `Years in Business` int(11) DEFAULT NULL,
+  `Gender_cd` int(11) DEFAULT NULL,
+  `Education_cv` varchar(60) DEFAULT NULL,
+  `Next Visit` date DEFAULT NULL,
+  `Highest Rate Paid` decimal(19,6) DEFAULT NULL,
+  `Comment` text,
+  PRIMARY KEY (`client_id`),
+  CONSTRAINT `FK_Additional Client Fields Data_1` FOREIGN KEY (`client_id`) REFERENCES `m_client` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `additional client fields data`
+--
+
+LOCK TABLES `additional client fields data` WRITE;
+/*!40000 ALTER TABLE `additional client fields data` DISABLE KEYS */;
+INSERT INTO `additional client fields data` VALUES (15,'first business',45,21,'Trade','2012-10-10','4.400000','some comments\ni \nmade up'),(16,NULL,88,21,'Trade','2012-10-03',NULL,'lk\nk\nk'),(17,'farmer',10,21,'Primary','2012-11-17','12.000000','efewd'),(36,NULL,NULL,21,'Primary','2012-11-15',NULL,NULL);
+/*!40000 ALTER TABLE `additional client fields data` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `additional loan fields data`
+--
+
+DROP TABLE IF EXISTS `additional loan fields data`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `additional loan fields data` (
+  `loan_id` bigint(20) NOT NULL,
+  `Business Description` varchar(100) DEFAULT NULL,
+  `Years in Business` int(11) DEFAULT NULL,
+  `Gender_cd` int(11) DEFAULT NULL,
+  `Education_cv` varchar(60) DEFAULT NULL,
+  `Next Visit` date DEFAULT NULL,
+  `Highest Rate Paid` decimal(19,6) DEFAULT NULL,
+  `Comment` text,
+  PRIMARY KEY (`loan_id`),
+  CONSTRAINT `FK_Additional Loan Fields Data_1` FOREIGN KEY (`loan_id`) REFERENCES `m_loan` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `additional loan fields data`
+--
+
+LOCK TABLES `additional loan fields data` WRITE;
+/*!40000 ALTER TABLE `additional loan fields data` DISABLE KEYS */;
+INSERT INTO `additional loan fields data` VALUES (44,NULL,NULL,21,'Tertiary',NULL,NULL,'some comment'),(52,'IT Consultant',2004,21,'Primary','2012-12-12',NULL,'no further comment');
+/*!40000 ALTER TABLE `additional loan fields data` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `c_configuration`
 --
 
@@ -182,6 +244,72 @@ LOCK TABLES `c_configuration` WRITE;
 /*!40000 ALTER TABLE `c_configuration` DISABLE KEYS */;
 INSERT INTO `c_configuration` VALUES (1,'maker-checker',0);
 /*!40000 ALTER TABLE `c_configuration` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `extra family details data`
+--
+
+DROP TABLE IF EXISTS `extra family details data`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `extra family details data` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `client_id` bigint(20) NOT NULL,
+  `Name` varchar(40) DEFAULT NULL,
+  `Date of Birth` date DEFAULT NULL,
+  `Points Score` int(11) DEFAULT NULL,
+  `Education_cdHighest` int(11) DEFAULT NULL,
+  `Other Notes` text,
+  PRIMARY KEY (`id`),
+  KEY `FK_Extra Family Details Data_1` (`client_id`),
+  CONSTRAINT `FK_Extra Family Details Data_1` FOREIGN KEY (`client_id`) REFERENCES `m_client` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `extra family details data`
+--
+
+LOCK TABLES `extra family details data` WRITE;
+/*!40000 ALTER TABLE `extra family details data` DISABLE KEYS */;
+INSERT INTO `extra family details data` VALUES (1,16,'fasdf','2012-10-02',NULL,5,NULL),(2,35,'Jo','2004-02-04',NULL,4,NULL),(3,17,'father','1961-11-09',1,4,'kkn'),(4,15,'sfdgd',NULL,NULL,NULL,NULL),(5,15,'tretw',NULL,NULL,NULL,NULL),(6,17,'asdfasd','2013-01-22',12,4,'asdfa');
+/*!40000 ALTER TABLE `extra family details data` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `extra_client_details`
+--
+
+DROP TABLE IF EXISTS `extra_client_details`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `extra_client_details` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `client_id` bigint(20) NOT NULL,
+  `client_dob` date DEFAULT NULL,
+  `client_address` varchar(60) DEFAULT NULL,
+  `father_name` varchar(40) DEFAULT NULL,
+  `nominee` varchar(40) DEFAULT NULL,
+  `nominee_relationship` varchar(40) DEFAULT NULL,
+  `nominee_address` varchar(60) DEFAULT NULL,
+  `crime_no` varchar(40) DEFAULT NULL,
+  `police_station` varchar(40) DEFAULT NULL,
+  `other_notes` text,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `client_id` (`client_id`),
+  KEY `FK_extra_client_details_1` (`client_id`),
+  CONSTRAINT `FK_extra_client_details` FOREIGN KEY (`client_id`) REFERENCES `m_client` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `extra_client_details`
+--
+
+LOCK TABLES `extra_client_details` WRITE;
+/*!40000 ALTER TABLE `extra_client_details` DISABLE KEYS */;
+/*!40000 ALTER TABLE `extra_client_details` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -365,6 +493,73 @@ CREATE TABLE `m_client_identifier` (
 LOCK TABLES `m_client_identifier` WRITE;
 /*!40000 ALTER TABLE `m_client_identifier` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_client_identifier` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `m_client_xadditional information`
+--
+
+DROP TABLE IF EXISTS `m_client_xadditional information`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `m_client_xadditional information` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `Ethnic Group` varchar(50) DEFAULT NULL,
+  `Ethnic Group Other` varchar(50) DEFAULT NULL,
+  `Household Location` varchar(50) DEFAULT NULL,
+  `Household Location Other` varchar(50) DEFAULT NULL,
+  `Religion` varchar(50) DEFAULT NULL,
+  `Religion Other` varchar(50) DEFAULT NULL,
+  `Knowledge of Person` varchar(50) DEFAULT NULL,
+  `Gender` varchar(10) DEFAULT NULL,
+  `Whois` mediumtext,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `portfolio_client_extra_Additional Information_fk1` FOREIGN KEY (`id`) REFERENCES `m_client` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
+) ENGINE=InnoDB AUTO_INCREMENT=35 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `m_client_xadditional information`
+--
+
+LOCK TABLES `m_client_xadditional information` WRITE;
+/*!40000 ALTER TABLE `m_client_xadditional information` DISABLE KEYS */;
+INSERT INTO `m_client_xadditional information` VALUES (1,'Italian',NULL,'North Sikkim',NULL,'Unknown',NULL,'Friend of staff member','Male','More info about this and other things\n\nuntil the end'),(4,'Bedouin',NULL,'North Sikkim',NULL,'Atheist',NULL,'Staff member',NULL,NULL),(13,'Other','Chin','Other','Zatual','Protestant',NULL,'Other','Male',NULL),(15,'Berber',NULL,'South Sikkim',NULL,'Animist',NULL,NULL,'Male',NULL),(16,'Italian',NULL,'North Sikkim',NULL,NULL,NULL,'Friend of staff member',NULL,NULL),(17,'Berber',NULL,'North Sikkim',NULL,'Muslim',NULL,'Spouse of staff member','Male',NULL),(24,'Unknown',NULL,'East Sikkim',NULL,'Animist',NULL,'Staff member','Male',NULL),(25,'Other','Kryptonian','Other','Metropolis','Other','Humanist','Other','Male','Farm boy turned reporter.'),(27,'Other','Asian','Other','Xian','Other',NULL,'Other','Female','uh?'),(34,'Italian',NULL,'East Sikkim',NULL,'Muslim',NULL,'Not known by any staff member','Male',NULL);
+/*!40000 ALTER TABLE `m_client_xadditional information` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `m_client_xhighly improbable info`
+--
+
+DROP TABLE IF EXISTS `m_client_xhighly improbable info`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `m_client_xhighly improbable info` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `Fathers Favourite Team` varchar(50) DEFAULT NULL,
+  `Mothers Favourite Team` varchar(50) DEFAULT NULL,
+  `Fathers DOB` date DEFAULT NULL,
+  `Mothers DOB` date DEFAULT NULL,
+  `Fathers Education` varchar(50) DEFAULT NULL,
+  `Mothers Education` varchar(50) DEFAULT NULL,
+  `Number of Children` int(11) DEFAULT NULL,
+  `Favourite Town` varchar(30) DEFAULT NULL,
+  `Closing Comments` mediumtext,
+  `Annual Family Income` decimal(19,6) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `portfolio_client_extra_Highly Improbable Info_fk1` FOREIGN KEY (`id`) REFERENCES `m_client` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
+) ENGINE=InnoDB AUTO_INCREMENT=26 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `m_client_xhighly improbable info`
+--
+
+LOCK TABLES `m_client_xhighly improbable info` WRITE;
+/*!40000 ALTER TABLE `m_client_xhighly improbable info` DISABLE KEYS */;
+INSERT INTO `m_client_xhighly improbable info` VALUES (1,'AC Milan','Manchester Utd',NULL,NULL,'Secondary','Secondary',NULL,NULL,NULL,NULL),(2,'Sao Paulo',NULL,'2012-07-12',NULL,NULL,NULL,NULL,NULL,'bally\r\n\r\ncl',NULL),(3,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(16,'Sao Paulo',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(17,'Juventus',NULL,'2012-08-15',NULL,NULL,NULL,NULL,NULL,NULL,NULL),(25,'None, hates soccer','Sao Paulo','1984-04-19','1978-11-16','Trade','Tertiary',3,'Copenhagen','We find him not guilty.','30000.432000');
+/*!40000 ALTER TABLE `m_client_xhighly improbable info` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -959,6 +1154,35 @@ LOCK TABLES `m_loan_transaction` WRITE;
 UNLOCK TABLES;
 
 --
+-- Table structure for table `m_loan_xadditional information`
+--
+
+DROP TABLE IF EXISTS `m_loan_xadditional information`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `m_loan_xadditional information` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `Business Location` varchar(50) DEFAULT NULL,
+  `Business Location Other` varchar(50) DEFAULT NULL,
+  `Business` varchar(10) DEFAULT NULL,
+  `Business Description` mediumtext,
+  `Business Title` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `portfolio_loan_extra_Additional Information_fk1` FOREIGN KEY (`id`) REFERENCES `m_loan` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
+) ENGINE=InnoDB AUTO_INCREMENT=32 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `m_loan_xadditional information`
+--
+
+LOCK TABLES `m_loan_xadditional information` WRITE;
+/*!40000 ALTER TABLE `m_loan_xadditional information` DISABLE KEYS */;
+INSERT INTO `m_loan_xadditional information` VALUES (1,'East Sikkim',NULL,'New',NULL,NULL),(30,'Other','Metropolis','Existing','Reporting on those wacky superheroes.','Daily Planet'),(31,'Other','EVERYWHERE','New',NULL,'Batman Justice Inc.');
+/*!40000 ALTER TABLE `m_loan_xadditional information` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `m_note`
 --
 
@@ -1084,10 +1308,6 @@ CREATE TABLE `m_organisation_currency` (
   `name` varchar(50) NOT NULL,
   `display_symbol` varchar(10) DEFAULT NULL,
   `internationalized_name_code` varchar(50) NOT NULL,
-  `createdby_id` bigint(20) DEFAULT NULL,
-  `created_date` datetime DEFAULT NULL,
-  `lastmodified_date` datetime DEFAULT NULL,
-  `lastmodifiedby_id` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -1098,7 +1318,7 @@ CREATE TABLE `m_organisation_currency` (
 
 LOCK TABLES `m_organisation_currency` WRITE;
 /*!40000 ALTER TABLE `m_organisation_currency` DISABLE KEYS */;
-INSERT INTO `m_organisation_currency` VALUES (21,'USD',2,'US Dollar','$','currency.USD',1,'2012-05-01 22:43:02','2012-05-01 22:43:02',1);
+INSERT INTO `m_organisation_currency` VALUES (21,'USD',2,'US Dollar','$','currency.USD');
 /*!40000 ALTER TABLE `m_organisation_currency` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1649,6 +1869,63 @@ INSERT INTO `ref_loan_transaction_processing_strategy` VALUES (1,'mifos-standard
 UNLOCK TABLES;
 
 --
+-- Table structure for table `risk_analysis`
+--
+
+DROP TABLE IF EXISTS `risk_analysis`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `risk_analysis` (
+  `client_id` bigint(20) NOT NULL,
+  `proposed_loan_amount` decimal(19,6) DEFAULT NULL,
+  `assets_cash` decimal(19,6) DEFAULT NULL,
+  `assets_bank_accounts` decimal(19,6) DEFAULT NULL,
+  `assets_accounts_receivable` decimal(19,6) DEFAULT NULL,
+  `assets_inventory` decimal(19,6) DEFAULT NULL,
+  `assets_total_fixed_business` decimal(19,6) DEFAULT NULL,
+  `assets_total_business` decimal(19,6) DEFAULT NULL,
+  `assets_total_household` decimal(19,6) DEFAULT NULL,
+  `liabilities_accounts_payable` decimal(19,6) DEFAULT NULL,
+  `liabilities_business_debts` decimal(19,6) DEFAULT NULL,
+  `liabilities_total_business` decimal(19,6) DEFAULT NULL,
+  `liabilities_equity_working_capital` decimal(19,6) DEFAULT NULL,
+  `liabilities_total_household` decimal(19,6) DEFAULT NULL,
+  `liabilities_household_equity` decimal(19,6) DEFAULT NULL,
+  `cashflow_cash_sales` decimal(19,6) DEFAULT NULL,
+  `cashflow_cash_sales2` decimal(19,6) DEFAULT NULL,
+  `cashflow_cost_goods_sold` decimal(19,6) DEFAULT NULL,
+  `cashflow_cost_goods_sold2` decimal(19,6) DEFAULT NULL,
+  `cashflow_gross_profit` decimal(19,6) DEFAULT NULL,
+  `cashflow_other_income1` decimal(19,6) DEFAULT NULL,
+  `cashflow_total_income2` decimal(19,6) DEFAULT NULL,
+  `cashflow_household_expense` decimal(19,6) DEFAULT NULL,
+  `cashflow_payments_to_savings` decimal(19,6) DEFAULT NULL,
+  `cashflow_operational_expenses` decimal(19,6) DEFAULT NULL,
+  `cashflow_disposable_income` decimal(19,6) DEFAULT NULL,
+  `cashflow_amount_loan_installment` decimal(19,6) DEFAULT NULL,
+  `cashflow_available_surplus` decimal(19,6) DEFAULT NULL,
+  `fi_inventory_turnover` decimal(19,6) DEFAULT NULL,
+  `fi_gross_margin` decimal(19,6) DEFAULT NULL,
+  `fi_indebtedness` decimal(19,6) DEFAULT NULL,
+  `fi_loan_recommendation` decimal(19,6) DEFAULT NULL,
+  `fi_roe` decimal(19,6) DEFAULT NULL,
+  `fi_repayment_capacity` decimal(19,6) DEFAULT NULL,
+  PRIMARY KEY (`client_id`),
+  CONSTRAINT `FK_risk_analysis_1` FOREIGN KEY (`client_id`) REFERENCES `m_client` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `risk_analysis`
+--
+
+LOCK TABLES `risk_analysis` WRITE;
+/*!40000 ALTER TABLE `risk_analysis` DISABLE KEYS */;
+INSERT INTO `risk_analysis` VALUES (3,'33.000000','1.000000',NULL,'3.000000',NULL,NULL,'4.000000',NULL,NULL,NULL,'55.000000','-51.000000',NULL,'0.000000',NULL,NULL,NULL,NULL,'0.000000',NULL,NULL,NULL,NULL,NULL,'0.000000',NULL,'0.000000',NULL,NULL,'-1.080000','-1.730000','0.000000',NULL),(15,'0.000000','0.000000','0.000000','0.000000','0.000000','0.000000','0.000000','0.000000','0.000000','0.000000','0.000000','0.000000','0.000000','0.000000','0.000000','0.000000','0.000000','0.000000','0.000000','0.000000','0.000000','0.000000','0.000000','0.000000','0.000000','0.000000','0.000000','0.000000','0.000000','0.000000','0.000000','0.000000','0.000000'),(16,'444.000000','51.000000',NULL,'33.330000',NULL,NULL,'84.330000',NULL,NULL,NULL,NULL,'84.330000',NULL,'0.000000','444.000000','3.000000','343.000000','42.000000','62.000000',NULL,NULL,NULL,NULL,NULL,'62.000000',NULL,'62.000000',NULL,'0.230000','0.000000','5.270000','0.740000','0.000000'),(22,NULL,'50000.000000',NULL,NULL,NULL,NULL,'50000.000000',NULL,NULL,NULL,NULL,'50000.000000',NULL,'0.000000','20000.000000',NULL,NULL,NULL,'20000.000000',NULL,NULL,'8300.000000',NULL,'2000.000000','9700.000000',NULL,'9700.000000',NULL,'1.000000','0.000000','0.000000','0.400000','0.000000'),(25,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),(58,NULL,'500000.000000',NULL,NULL,NULL,NULL,'500000.000000',NULL,NULL,NULL,NULL,'500000.000000',NULL,'0.000000',NULL,NULL,NULL,NULL,'0.000000','30000.000000',NULL,'0.000000',NULL,'3000.000000','27000.000000',NULL,'27000.000000',NULL,NULL,'0.000000','0.000000','0.000000','0.000000');
+/*!40000 ALTER TABLE `risk_analysis` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `rpt_sequence`
 --
 
@@ -1793,4 +2070,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2013-01-26 20:21:03
+-- Dump completed on 2013-01-27  0:02:57

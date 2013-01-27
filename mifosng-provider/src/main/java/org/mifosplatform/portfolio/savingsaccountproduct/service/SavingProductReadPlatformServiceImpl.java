@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
-import java.util.List;
 
 import org.joda.time.DateTime;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
@@ -60,7 +59,7 @@ public class SavingProductReadPlatformServiceImpl implements SavingProductReadPl
 
         SavingProductLookupMapper savingProductLookupMapper = new SavingProductLookupMapper();
 
-        String sql = "select " + savingProductLookupMapper.savingProductLookupSchema() +  " where sp.is_deleted=0";
+        String sql = "select " + savingProductLookupMapper.savingProductLookupSchema() + " where sp.is_deleted=0";
 
         return this.jdbcTemplate.query(sql, savingProductLookupMapper, new Object[] {});
     }
@@ -146,7 +145,7 @@ public class SavingProductReadPlatformServiceImpl implements SavingProductReadPl
             return new SavingProductData(createdOn, lastModifedOn, id, name, description, interestRate, minInterestRate, maxInterestRate,
                     currencyData, currencyDigits, savingsDepositAmount, savingProductTypeEnum, tenureTypeEnum, tenure, savingFrequencyType,
                     savingInterestType, interestCalculationMethodEnum, minimumBalanceForWithdrawal, isPartialDepositAllowed,
-                    isLockinPeriodAllowed, lockinPeriod, lockinPeriodType,depositEvery);
+                    isLockinPeriodAllowed, lockinPeriod, lockinPeriodType, depositEvery);
         }
     }
 
@@ -169,7 +168,7 @@ public class SavingProductReadPlatformServiceImpl implements SavingProductReadPl
 
     private void populateProductDataWithDropdownOptions(final SavingProductData productData) {
 
-        List<CurrencyData> currencyOptions = currencyReadPlatformService.retrieveAllowedCurrencies();
+        Collection<CurrencyData> currencyOptions = currencyReadPlatformService.retrieveAllowedCurrencies();
         productData.setCurrencyOptions(currencyOptions);
     }
 

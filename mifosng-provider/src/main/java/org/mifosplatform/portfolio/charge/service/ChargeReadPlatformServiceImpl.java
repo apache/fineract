@@ -72,7 +72,7 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
 
         this.context.authenticatedUser();
 
-        final List<CurrencyData> currencyOptions = currencyReadPlatformService.retrieveAllowedCurrencies();
+        final Collection<CurrencyData> currencyOptions = currencyReadPlatformService.retrieveAllowedCurrencies();
         final List<EnumOptionData> allowedChargeCalculationTypeOptions = this.chargeDropdownReadPlatformService.retrieveCalculationTypes();
         final List<EnumOptionData> allowedChargeAppliesToOptions = this.chargeDropdownReadPlatformService.retrieveApplicableToTypes();
         final List<EnumOptionData> allowedChargeTimeOptions = this.chargeDropdownReadPlatformService.retrieveCollectionTimeTypes();

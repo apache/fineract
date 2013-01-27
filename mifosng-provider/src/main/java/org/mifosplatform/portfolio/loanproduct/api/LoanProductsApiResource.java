@@ -177,7 +177,7 @@ public class LoanProductsApiResource {
         Collection<ChargeData> chargeOptions = this.chargeReadPlatformService.retrieveLoanApplicableCharges(feeChargesOnly);
         chargeOptions.removeAll(productData.charges());
 
-        final List<CurrencyData> currencyOptions = currencyReadPlatformService.retrieveAllowedCurrencies();
+        final Collection<CurrencyData> currencyOptions = currencyReadPlatformService.retrieveAllowedCurrencies();
         final List<EnumOptionData> amortizationTypeOptions = dropdownReadPlatformService.retrieveLoanAmortizationTypeOptions();
         final List<EnumOptionData> interestTypeOptions = dropdownReadPlatformService.retrieveLoanInterestTypeOptions();
         final List<EnumOptionData> interestCalculationPeriodTypeOptions = dropdownReadPlatformService

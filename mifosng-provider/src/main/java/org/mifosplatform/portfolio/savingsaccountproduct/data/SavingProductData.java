@@ -3,6 +3,7 @@ package org.mifosplatform.portfolio.savingsaccountproduct.data;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.joda.time.DateTime;
@@ -44,16 +45,17 @@ public class SavingProductData implements Serializable {
     private DateTime lastModifedOn;
     private final Integer depositEvery;
 
-    private List<CurrencyData> currencyOptions = new ArrayList<CurrencyData>();
-    List<EnumOptionData> savingsProductTypeOptions = new ArrayList<EnumOptionData>();
-    List<EnumOptionData> tenureTypeOptions = new ArrayList<EnumOptionData>();
-    List<EnumOptionData> savingFrequencyOptions = new ArrayList<EnumOptionData>();
-    List<EnumOptionData> savingsInterestTypeOptions = new ArrayList<EnumOptionData>();
-    List<EnumOptionData> lockinPeriodTypeOptions = new ArrayList<EnumOptionData>();
-    List<EnumOptionData> interestCalculationOptions = new ArrayList<EnumOptionData>();
+    @SuppressWarnings("unused")
+    private Collection<CurrencyData> currencyOptions = new ArrayList<CurrencyData>();
+    private List<EnumOptionData> savingsProductTypeOptions = new ArrayList<EnumOptionData>();
+    private List<EnumOptionData> tenureTypeOptions = new ArrayList<EnumOptionData>();
+    private List<EnumOptionData> savingFrequencyOptions = new ArrayList<EnumOptionData>();
+    private List<EnumOptionData> savingsInterestTypeOptions = new ArrayList<EnumOptionData>();
+    private List<EnumOptionData> lockinPeriodTypeOptions = new ArrayList<EnumOptionData>();
+    private List<EnumOptionData> interestCalculationOptions = new ArrayList<EnumOptionData>();
 
     public SavingProductData() {
-    	this.createdOn = new DateTime();
+        this.createdOn = new DateTime();
         this.lastModifedOn = new DateTime();
         this.id = null;
         this.name = null;
@@ -69,13 +71,14 @@ public class SavingProductData implements Serializable {
         this.tenure = Integer.valueOf(12);
         this.savingFrequencyType = SavingProductEnumerations.interestFrequencyType(SavingFrequencyType.MONTHLY);
         this.interestType = SavingProductEnumerations.savingInterestType(SavingsInterestType.COMPOUNDING);
-        this.interestCalculationMethod = SavingProductEnumerations.savingInterestCalculationMethod(SavingInterestCalculationMethod.AVERAGEBAL);
+        this.interestCalculationMethod = SavingProductEnumerations
+                .savingInterestCalculationMethod(SavingInterestCalculationMethod.AVERAGEBAL);
         this.minimumBalanceForWithdrawal = BigDecimal.valueOf(100);
         this.isPartialDepositAllowed = false;
         this.isLockinPeriodAllowed = false;
         this.lockinPeriod = Integer.valueOf(0);
         this.lockinPeriodType = SavingProductEnumerations.savingsLockinPeriod(SavingsLockinPeriodEnum.MONTHS);
-        this.depositEvery=Integer.valueOf(3);
+        this.depositEvery = Integer.valueOf(3);
     }
 
     public SavingProductData(DateTime createdOn, DateTime lastModifedOn, Long id, String name, String description, BigDecimal interestRate,
@@ -109,10 +112,10 @@ public class SavingProductData implements Serializable {
         this.depositEvery = depositEvery;
     }
 
-    public SavingProductData(SavingProductData product, List<CurrencyData> currencyOptions, List<EnumOptionData> savingsProductTypeOptions,
-            List<EnumOptionData> tenureTypeOptions, List<EnumOptionData> savingFrequencyOptions,
-            List<EnumOptionData> savingsInterestTypeOptions, List<EnumOptionData> lockinPeriodTypeOptions,
-            List<EnumOptionData> interestCalculationOptions) {
+    public SavingProductData(SavingProductData product, Collection<CurrencyData> currencyOptions,
+            List<EnumOptionData> savingsProductTypeOptions, List<EnumOptionData> tenureTypeOptions,
+            List<EnumOptionData> savingFrequencyOptions, List<EnumOptionData> savingsInterestTypeOptions,
+            List<EnumOptionData> lockinPeriodTypeOptions, List<EnumOptionData> interestCalculationOptions) {
 
         this.createdOn = product.getCreatedOn();
         this.lastModifedOn = product.getLastModifedOn();
@@ -232,11 +235,7 @@ public class SavingProductData implements Serializable {
         return lastModifedOn;
     }
 
-    public List<CurrencyData> getCurrencyOptions() {
-        return currencyOptions;
-    }
-
-    public void setCurrencyOptions(List<CurrencyData> currencyOptions) {
+    public void setCurrencyOptions(Collection<CurrencyData> currencyOptions) {
         this.currencyOptions = currencyOptions;
     }
 
@@ -268,8 +267,8 @@ public class SavingProductData implements Serializable {
         return interestCalculationOptions;
     }
 
-	public Integer getDepositEvery() {
-		return this.depositEvery;
-	}
+    public Integer getDepositEvery() {
+        return this.depositEvery;
+    }
 
 }

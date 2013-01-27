@@ -180,7 +180,7 @@ public class DepositProductsApiResource {
     private DepositProductData handleTemplateRelatedData(final Set<String> responseParameters, final DepositProductData productData) {
 
         responseParameters.addAll(Arrays.asList("currencyOptions", "interestCompoundedEveryPeriodTypeOptions"));
-        List<CurrencyData> allowedCurrencies = this.currencyReadPlatformService.retrieveAllowedCurrencies();
+        Collection<CurrencyData> allowedCurrencies = this.currencyReadPlatformService.retrieveAllowedCurrencies();
 
         EnumOptionData monthly = SavingsDepositEnumerations.interestCompoundingPeriodType(PeriodFrequencyType.MONTHS);
         List<EnumOptionData> interestCompoundedEveryPeriodTypeOptions = Arrays.asList(monthly);

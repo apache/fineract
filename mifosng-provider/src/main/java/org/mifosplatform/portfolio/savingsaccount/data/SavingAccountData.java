@@ -51,7 +51,7 @@ public class SavingAccountData {
     private final Integer depositEvery;
 
     private final List<SavingProductLookup> productOptions;
-    private final List<CurrencyData> currencyOptions;
+    private final Collection<CurrencyData> currencyOptions;
     private final List<EnumOptionData> savingsProductTypeOptions;
     private final List<EnumOptionData> tenureTypeOptions;
     private final List<EnumOptionData> savingFrequencyOptions;
@@ -188,10 +188,11 @@ public class SavingAccountData {
         this.interestPostFrequency = null;
     }
 
-    public SavingAccountData(SavingAccountData account, Collection<SavingProductLookup> productOptions, List<CurrencyData> currencyOptions,
-            List<EnumOptionData> savingsProductTypeOptions, List<EnumOptionData> tenureTypeOptions,
-            List<EnumOptionData> savingFrequencyOptions, List<EnumOptionData> savingsInterestTypeOptions,
-            List<EnumOptionData> lockinPeriodTypeOptions, List<EnumOptionData> interestCalculationOptions, BigDecimal dueAmount) {
+    public SavingAccountData(SavingAccountData account, Collection<SavingProductLookup> productOptions,
+            Collection<CurrencyData> currencyOptions, List<EnumOptionData> savingsProductTypeOptions,
+            List<EnumOptionData> tenureTypeOptions, List<EnumOptionData> savingFrequencyOptions,
+            List<EnumOptionData> savingsInterestTypeOptions, List<EnumOptionData> lockinPeriodTypeOptions,
+            List<EnumOptionData> interestCalculationOptions, BigDecimal dueAmount) {
         this.id = account.id;
         this.status = account.status;
         this.externalId = account.externalId;

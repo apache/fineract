@@ -239,7 +239,7 @@ public class SavingsAccountApiResource {
                 "dueAmount"));
 
         Collection<SavingProductLookup> productOptions = savingProductReadPlatformService.retrieveAllSavingProductsForLookup();
-        List<CurrencyData> currencyOptions = this.currencyReadPlatformService.retrieveAllowedCurrencies();
+        Collection<CurrencyData> currencyOptions = this.currencyReadPlatformService.retrieveAllowedCurrencies();
 
         EnumOptionData recurring = SavingProductEnumerations.savingProductType(SavingProductType.RECURRING);
         EnumOptionData regular = SavingProductEnumerations.savingProductType(SavingProductType.REGULAR);

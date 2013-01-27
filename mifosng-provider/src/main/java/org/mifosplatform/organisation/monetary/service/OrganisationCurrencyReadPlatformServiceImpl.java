@@ -1,6 +1,6 @@
 package org.mifosplatform.organisation.monetary.service;
 
-import java.util.List;
+import java.util.Collection;
 
 import org.mifosplatform.organisation.monetary.data.ApplicationCurrencyConfigurationData;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
@@ -20,8 +20,8 @@ public class OrganisationCurrencyReadPlatformServiceImpl implements Organisation
     @Override
     public ApplicationCurrencyConfigurationData retrieveCurrencyConfiguration() {
 
-        final List<CurrencyData> selectedCurrencyOptions = this.currencyReadPlatformService.retrieveAllowedCurrencies();
-        final List<CurrencyData> currencyOptions = this.currencyReadPlatformService.retrieveAllPlatformCurrencies();
+        final Collection<CurrencyData> selectedCurrencyOptions = this.currencyReadPlatformService.retrieveAllowedCurrencies();
+        final Collection<CurrencyData> currencyOptions = this.currencyReadPlatformService.retrieveAllPlatformCurrencies();
 
         // remove selected currency options
         currencyOptions.removeAll(selectedCurrencyOptions);

@@ -2,7 +2,7 @@ package org.mifosplatform.organisation.monetary.service;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.List;
+import java.util.Collection;
 
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
 import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
@@ -18,33 +18,31 @@ public class CurrencyReadPlatformServiceImpl implements CurrencyReadPlatformServ
 
     private final JdbcTemplate jdbcTemplate;
     private final PlatformSecurityContext context;
+    private final CurrencyMapper currencyRowMapper;
 
     @Autowired
     public CurrencyReadPlatformServiceImpl(final PlatformSecurityContext context, final TenantAwareRoutingDataSource dataSource) {
         this.context = context;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.currencyRowMapper = new CurrencyMapper();
     }
 
     @Override
-    public List<CurrencyData> retrieveAllowedCurrencies() {
+    public Collection<CurrencyData> retrieveAllowedCurrencies() {
 
         context.authenticatedUser();
 
-        String sql = "select c.code as code, c.name as name, c.decimal_places as decimalPlaces, c.display_symbol as displaySymbol, c.internationalized_name_code as nameCode from m_organisation_currency c order by c.name";
+        final String sql = "select " + currencyRowMapper.schema() + " from m_organisation_currency c order by c.name";
 
-        RowMapper<CurrencyData> rm = new CurrencyMapper();
-
-        return this.jdbcTemplate.query(sql, rm, new Object[] {});
+        return this.jdbcTemplate.query(sql, currencyRowMapper, new Object[] {});
     }
 
     @Override
-    public List<CurrencyData> retrieveAllPlatformCurrencies() {
+    public Collection<CurrencyData> retrieveAllPlatformCurrencies() {
 
-        String sql = "select c.code as code, c.name as name, c.decimal_places as decimalPlaces, c.display_symbol as displaySymbol, c.internationalized_name_code as nameCode from m_currency c order by c.name";
+        final String sql = "select " + currencyRowMapper.schema() + " from m_currency c order by c.name";
 
-        RowMapper<CurrencyData> rm = new CurrencyMapper();
-
-        return this.jdbcTemplate.query(sql, rm, new Object[] {});
+        return this.jdbcTemplate.query(sql, currencyRowMapper, new Object[] {});
     }
 
     private static final class CurrencyMapper implements RowMapper<CurrencyData> {
@@ -52,13 +50,17 @@ public class CurrencyReadPlatformServiceImpl implements CurrencyReadPlatformServ
         @Override
         public CurrencyData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
 
-            String code = rs.getString("code");
-            String name = rs.getString("name");
-            int decimalPlaces = JdbcSupport.getInteger(rs, "decimalPlaces");
-            String displaySymbol = rs.getString("displaySymbol");
-            String nameCode = rs.getString("nameCode");
+            final String code = rs.getString("code");
+            final String name = rs.getString("name");
+            final int decimalPlaces = JdbcSupport.getInteger(rs, "decimalPlaces");
+            final String displaySymbol = rs.getString("displaySymbol");
+            final String nameCode = rs.getString("nameCode");
 
             return new CurrencyData(code, name, decimalPlaces, displaySymbol, nameCode);
+        }
+
+        public String schema() {
+            return " c.code as code, c.name as name, c.decimal_places as decimalPlaces, c.display_symbol as displaySymbol, c.internationalized_name_code as nameCode ";
         }
     }
 }

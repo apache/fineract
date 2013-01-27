@@ -1,6 +1,7 @@
 package org.mifosplatform.portfolio.charge.data;
 
 import java.math.BigDecimal;
+import java.util.Collection;
 import java.util.List;
 
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
@@ -21,12 +22,12 @@ public class ChargeData {
     private final EnumOptionData chargeAppliesTo;
     private final EnumOptionData chargeCalculationType;
 
-    private final List<CurrencyData> currencyOptions;
+    private final Collection<CurrencyData> currencyOptions;
     private final List<EnumOptionData> chargeCalculationTypeOptions;
     private final List<EnumOptionData> chargeAppliesToOptions;
     private final List<EnumOptionData> chargeTimeTypeOptions;
 
-    public static ChargeData template(final List<CurrencyData> currencyOptions, final List<EnumOptionData> chargeCalculationTypeOptions,
+    public static ChargeData template(final Collection<CurrencyData> currencyOptions, final List<EnumOptionData> chargeCalculationTypeOptions,
             final List<EnumOptionData> chargeAppliesToOptions, final List<EnumOptionData> chargeTimeTypeOptions) {
 
         return new ChargeData(null, null, null, null, null, null, null, false, false, currencyOptions, chargeCalculationTypeOptions,
@@ -59,7 +60,7 @@ public class ChargeData {
 
     public ChargeData(final Long id, final String name, final BigDecimal amount, final CurrencyData currency,
             final EnumOptionData chargeTimeType, final EnumOptionData chargeAppliesTo, final EnumOptionData chargeCalculationType,
-            final boolean penalty, final boolean active, final List<CurrencyData> currencyOptions,
+            final boolean penalty, final boolean active, final Collection<CurrencyData> currencyOptions,
             final List<EnumOptionData> chargeCalculationTypeOptions, final List<EnumOptionData> chargeAppliesToOptions,
             final List<EnumOptionData> chargeTimeTypeOptions) {
         this.id = id;

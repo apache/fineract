@@ -1,4 +1,4 @@
--- currency symbols may not apply through command line on windows so use a different client like mysql workbench
+﻿-- currency symbols may not apply through command line on windows so use a different client like mysql workbench
 
 INSERT INTO `ref_loan_transaction_processing_strategy`
 (`id`,`code`,`name`)
@@ -66,7 +66,7 @@ VALUES
 
 (42,'EEK',2,NULL,'Estonian Kroon','currency.EEK'),(43,'EGP',2,NULL,'Egyptian Pound','currency.EGP'),(44,'ERN',2,NULL,'Eritrea Nafka','currency.ERN'),
 
-(45,'ETB',2,NULL,'Ethiopian Birr','currency.ETB'),(46,'EUR',2,'�','Euro','currency.EUR'),
+(45,'ETB',2,NULL,'Ethiopian Birr','currency.ETB'),(46,'EUR',2,'€','Euro','currency.EUR'),
 (47,'FJD',2,NULL,'Fiji Dollar','currency.FJD'),(48,'FKP',2,NULL,'Falkland 
 
 Islands Pound','currency.FKP'),(49,'GBP',2,NULL,'Pound Sterling','currency.GBP'),(50,'GEL',2,NULL,'Georgian Lari','currency.GEL'),
@@ -79,7 +79,7 @@ Islands Pound','currency.FKP'),(49,'GBP',2,NULL,'Pound Sterling','currency.GBP')
 
 (61,'HUF',2,NULL,'Hungarian Forint','currency.HUF'),(62,'IDR',2,NULL,'Indonesian Rupiah','currency.IDR'),(63,'ILS',2,NULL,'New Israeli Shekel','currency.ILS'),
 
-(64,'INR',2,'?','Indian Rupee','currency.INR'),
+(64,'INR',2,'₹','Indian Rupee','currency.INR'),
 (65,'IQD',3,NULL,'Iraqi Dinar','currency.IQD'),(66,'IRR',2,NULL,'Iranian Rial','currency.IRR'),
 
 (67,'ISK',0,NULL,'Iceland Krona','currency.ISK'),(68,'JMD',2,NULL,'Jamaican Dollar','currency.JMD'),(69,'JOD',3,NULL,'Jordanian Dinar','currency.JOD'),
@@ -92,7 +92,7 @@ Islands Pound','currency.FKP'),(49,'GBP',2,NULL,'Pound Sterling','currency.GBP')
 
 (78,'KYD',2,NULL,'Cayman Islands Dollar','currency.KYD'),(79,'KZT',2,NULL,'Kazakhstan Tenge','currency.KZT'),
 (80,'LAK',2,NULL,'Lao Kip','currency.LAK'),
-(81,'LBP',2,'L�','Lebanese Pound','currency.LBP'),
+(81,'LBP',2,'L£','Lebanese Pound','currency.LBP'),
 (82,'LKR',2,NULL,'Sri Lanka Rupee','currency.LKR'),(83,'LRD',2,NULL,'Liberian Dollar','currency.LRD'),(84,'LSL',2,NULL,'Lesotho Loti','currency.LSL'),
 (85,'LTL',2,NULL,'Lithuanian Litas','currency.LTL'),(86,'LVL',2,NULL,'Latvian Lats','currency.LVL'),(87,'LYD',3,NULL,'Libyan Dinar','currency.LYD'),
 
@@ -151,9 +151,8 @@ Pound','currency.SYP'),(136,'SZL',2,NULL,'Swaziland Lilangeni','currency.SZL'),(
 (162,'ZMK',2,NULL,'Zambian Kwacha','currency.ZMK'),
 (163,'ZWD',2,NULL,'Zimbabwe Dollar','currency.ZWD');
 
-INSERT INTO `m_organisation_currency` (`id`, `code`, `decimal_places`, `name`, `display_symbol`, `internationalized_name_code`, `createdby_id`, `created_date`, 
-`lastmodified_date`, `lastmodifiedby_id`) 
-VALUES (21,'USD',2,'US Dollar','$','currency.USD',1,'2012-05-01 22:43:02','2012-05-01 22:43:02',1);
+INSERT INTO `m_organisation_currency` (`id`, `code`, `decimal_places`, `name`, `display_symbol`, `internationalized_name_code`) 
+VALUES (21,'USD',2,'US Dollar','$','currency.USD');
 
 -- create single code and code value for client identifiers
 INSERT INTO `m_code`

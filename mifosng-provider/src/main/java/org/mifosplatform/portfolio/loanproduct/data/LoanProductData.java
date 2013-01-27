@@ -55,7 +55,7 @@ public class LoanProductData {
     private final DateTime createdOn;
     private final DateTime lastModifedOn;
 
-    private final List<CurrencyData> currencyOptions;
+    private final Collection<CurrencyData> currencyOptions;
     private final Collection<FundData> fundOptions;
     private final Collection<TransactionProcessingStrategyData> transactionProcessingStrategyOptions;
     private final List<EnumOptionData> amortizationTypeOptions;
@@ -70,8 +70,8 @@ public class LoanProductData {
     private final List<GLAccountData> assetAccountOptions;
     private final List<GLAccountData> incomeAccountOptions;
     private final List<GLAccountData> expenseAccountOptions;
-    
-    //accounting related mapping feilds
+
+    // accounting related mapping feilds
     private Long loanPortfolioAccountId;
     private Long fundSourceAccountId;
     private Long interestOnLoanAccountId;
@@ -196,14 +196,14 @@ public class LoanProductData {
         this.loanTermFrequencyTypeOptions = null;
         this.repaymentFrequencyTypeOptions = null;
         this.interestRateFrequencyTypeOptions = null;
-        
+
         this.assetAccountOptions = null;
         this.incomeAccountOptions = null;
         this.expenseAccountOptions = null;
     }
 
     public LoanProductData(final LoanProductData productData, final Collection<ChargeData> chargeOptions,
-            final List<CurrencyData> currencyOptions, final List<EnumOptionData> amortizationTypeOptions,
+            final Collection<CurrencyData> currencyOptions, final List<EnumOptionData> amortizationTypeOptions,
             final List<EnumOptionData> interestTypeOptions, final List<EnumOptionData> interestCalculationPeriodTypeOptions,
             final List<EnumOptionData> loanTermFrequencyTypeOptions, final List<EnumOptionData> repaymentFrequencyTypeOptions,
             final List<EnumOptionData> interestRateFrequencyTypeOptions, final Collection<FundData> fundOptions,
@@ -238,7 +238,7 @@ public class LoanProductData {
         this.chargeOptions = chargeOptions;
         this.currencyOptions = currencyOptions;
         if (this.currencyOptions.size() == 1) {
-            this.currency = this.currencyOptions.get(0);
+            this.currency = new ArrayList<CurrencyData>(this.currencyOptions).get(0);
         } else {
             this.currency = productData.currency;
         }
@@ -250,7 +250,7 @@ public class LoanProductData {
         this.loanTermFrequencyTypeOptions = loanTermFrequencyTypeOptions;
         this.repaymentFrequencyTypeOptions = repaymentFrequencyTypeOptions;
         this.interestRateFrequencyTypeOptions = interestRateFrequencyTypeOptions;
-        
+
         this.assetAccountOptions = assetAccountOptions;
         this.incomeAccountOptions = incomeAccountOptions;
         this.expenseAccountOptions = expenseAccountOptions;
@@ -356,10 +356,6 @@ public class LoanProductData {
         return lastModifedOn;
     }
 
-    public List<CurrencyData> getCurrencyOptions() {
-        return currencyOptions;
-    }
-
     public Collection<FundData> getFundOptions() {
         return fundOptions;
     }
@@ -408,22 +404,18 @@ public class LoanProductData {
         return this.expenseAccountOptions;
     }
 
-    
     public Long getLoanPortfolioAccountId() {
         return this.loanPortfolioAccountId;
     }
 
-    
     public void setLoanPortfolioAccountId(Long loanPortfolioAccountId) {
         this.loanPortfolioAccountId = loanPortfolioAccountId;
     }
 
-    
     public Long getFundSourceAccountId() {
         return this.fundSourceAccountId;
     }
 
-    
     public void setFundSourceAccountId(Long fundSourceAccountId) {
         this.fundSourceAccountId = fundSourceAccountId;
     }
@@ -432,27 +424,22 @@ public class LoanProductData {
         return this.interestOnLoanAccountId;
     }
 
-    
     public void setInterestOnLoanAccountId(Long interestOnLoanAccountId) {
         this.interestOnLoanAccountId = interestOnLoanAccountId;
     }
 
-    
     public Long getIncomeFromFeeAccountId() {
         return this.incomeFromFeeAccountId;
     }
 
-    
     public void setIncomeFromFeeAccountId(Long incomeFromFeeAccountId) {
         this.incomeFromFeeAccountId = incomeFromFeeAccountId;
     }
 
-    
     public Long getIncomeFromPenaltyAccountId() {
         return this.incomeFromPenaltyAccountId;
     }
 
-    
     public void setIncomeFromPenaltyAccountId(Long incomeFromPenaltyAccountId) {
         this.incomeFromPenaltyAccountId = incomeFromPenaltyAccountId;
     }
@@ -461,45 +448,36 @@ public class LoanProductData {
         return this.writeOffAccountId;
     }
 
-    
     public void setWriteOffAccountId(Long writeOffAccountId) {
         this.writeOffAccountId = writeOffAccountId;
     }
 
-    
     public Long getReceivableInterestAccountId() {
         return this.receivableInterestAccountId;
     }
 
-    
     public void setReceivableInterestAccountId(Long receivableInterestAccountId) {
         this.receivableInterestAccountId = receivableInterestAccountId;
     }
 
-    
     public Long getReceivableFeeAccountId() {
         return this.receivableFeeAccountId;
     }
 
-    
     public void setReceivableFeeAccountId(Long receivableFeeAccountId) {
         this.receivableFeeAccountId = receivableFeeAccountId;
     }
 
-    
     public Long getReceivablePenaltyAccountId() {
         return this.receivablePenaltyAccountId;
     }
 
-    
     public void setReceivablePenaltyAccountId(Long receivablePenaltyAccountId) {
         this.receivablePenaltyAccountId = receivablePenaltyAccountId;
     }
 
-    
     public Integer getAccountingType() {
         return this.accountingType;
     }
-    
 
 }

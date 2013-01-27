@@ -5,7 +5,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
@@ -246,8 +245,8 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
     public OfficeTransactionData retrieveNewOfficeTransactionDetails() {
         context.authenticatedUser();
 
-        List<OfficeLookup> parentLookups = new ArrayList<OfficeLookup>(retrieveAllOfficesForLookup());
-        List<CurrencyData> currencyOptions = currencyReadPlatformService.retrieveAllowedCurrencies();
+        final Collection<OfficeData> parentLookups = retrieveAllOfficesForDropdown();
+        final Collection<CurrencyData> currencyOptions = currencyReadPlatformService.retrieveAllowedCurrencies();
 
         return new OfficeTransactionData(new LocalDate(), parentLookups, currencyOptions);
     }

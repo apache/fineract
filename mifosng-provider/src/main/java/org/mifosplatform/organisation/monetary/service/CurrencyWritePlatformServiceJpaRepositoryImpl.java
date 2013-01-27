@@ -70,6 +70,9 @@ public class CurrencyWritePlatformServiceJpaRepositoryImpl implements CurrencyWr
         this.organisationCurrencyRepository.deleteAll();
         this.organisationCurrencyRepository.save(allowedCurrencies);
 
-        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).with(changes).build();
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(command.commandId()) //
+                .with(changes) //
+                .build();
     }
 }

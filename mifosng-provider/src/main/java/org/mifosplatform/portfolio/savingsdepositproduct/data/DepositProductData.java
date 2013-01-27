@@ -2,6 +2,7 @@ package org.mifosplatform.portfolio.savingsdepositproduct.data;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.joda.time.DateTime;
@@ -40,7 +41,7 @@ public class DepositProductData {
     private final DateTime createdOn;
     private final DateTime lastModifedOn;
 
-    private final List<CurrencyData> currencyOptions;
+    private final Collection<CurrencyData> currencyOptions;
     private final List<EnumOptionData> interestCompoundedEveryPeriodTypeOptions;
 
     public DepositProductData(final DateTime createdOn, final DateTime lastModifedOn, final Long id, final String externalId,
@@ -82,7 +83,8 @@ public class DepositProductData {
         this.interestCompoundedEveryPeriodTypeOptions = new ArrayList<EnumOptionData>();
     }
 
-    public DepositProductData(final List<CurrencyData> currencyOptions, final EnumOptionData defaultInterestCompoundedEveryPeriodType,
+    public DepositProductData(final Collection<CurrencyData> currencyOptions,
+            final EnumOptionData defaultInterestCompoundedEveryPeriodType,
             final List<EnumOptionData> interestCompoundedEveryPeriodTypeOptions) {
         this.createdOn = null;
         this.lastModifedOn = null;
@@ -115,7 +117,7 @@ public class DepositProductData {
         this.interestCompoundedEveryPeriodTypeOptions = interestCompoundedEveryPeriodTypeOptions;
     }
 
-    public DepositProductData(final DepositProductData product, final List<CurrencyData> currencyOptions,
+    public DepositProductData(final DepositProductData product, final Collection<CurrencyData> currencyOptions,
             final List<EnumOptionData> interestCompoundedEveryPeriodTypeOptions) {
         this.createdOn = product.getCreatedOn();
         this.lastModifedOn = product.getLastModifedOn();
@@ -224,7 +226,7 @@ public class DepositProductData {
         return lastModifedOn;
     }
 
-    public List<CurrencyData> getCurrencyOptions() {
+    public Collection<CurrencyData> getCurrencyOptions() {
         return currencyOptions;
     }
 

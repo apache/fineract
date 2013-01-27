@@ -135,8 +135,87 @@ function getBaseURL(docURL)
             <div id="toc-menu1" class="flybar-menu">
                 <div class="tocMatrix">
                     <table class=matrixHeading>
-                        <tr class="matrixHeadingBG"><td colspan=2 valign="top"><div class="matrixHeadingVerbs"><table><tr><td>RESOURCES</td></tr></table></div></td><td><table><tr><td><div class="matrixHeadingVerbs">POST</div></td></tr><tr><td><div class=matrixHeadingCommands>create/complex update</div></td></tr></table></td><td><table><tr><td><div class="matrixHeadingVerbs">GET</div></td></tr><tr><td><div class=matrixHeadingCommands>read</div></td></tr></table></td><td><table><tr><td><div class="matrixHeadingVerbs">PUT</div></td></tr><tr><td><div class=matrixHeadingCommands>update</div></td></tr></table></td><td><table><tr><td><div class="matrixHeadingVerbs">DELETE</div></td></tr><tr><td><div class=matrixHeadingCommands>delete</div></td></tr></table></td></tr>
-                        <tr class="alt"><td><a href="#configs">CONFIGURATION</a></td><td>configurations/currency</td><td></td><td><a href="#configs_currencyretrieve">Retrieve Currency Configuration</a></td><td><a href="#configs_currencyupdate">Update Currency Configuration</a></td><td></td></tr>
+                        <tr class="matrixHeadingBG">
+                            <td colspan=2 valign="top">
+                                <div class="matrixHeadingVerbs">
+                                    <table>
+                                        <tr>
+                                            <td>RESOURCES</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </td>
+                            <td>
+                                <table>
+                                    <tr>
+                                        <td>
+                                            <div class="matrixHeadingVerbs">POST</div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div class=matrixHeadingCommands>create/complex update</div>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
+                            <td>
+                                <table>
+                                    <tr>
+                                        <td>
+                                            <div class="matrixHeadingVerbs">GET</div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div class=matrixHeadingCommands>read</div>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
+                            <td>
+                                <table>
+                                    <tr>
+                                        <td>
+                                            <div class="matrixHeadingVerbs">PUT</div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div class=matrixHeadingCommands>update</div>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
+                            <td>
+                                <table>
+                                    <tr>
+                                        <td>
+                                            <div class="matrixHeadingVerbs">DELETE</div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div class=matrixHeadingCommands>delete</div>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                        <tr class="alt">
+                            <td><a href="#configs">CURRENCY</a></td><td>currencies</td>
+                            <td></td>
+                            <td><a href="#configs_currencyretrieve">Retrieve Currency Configuration</a></td>
+                            <td><a href="#configs_currencyupdate">Update Currency Configuration</a></td>
+                            <td></td>
+                        </tr>
+                        <tr class="alt">
+                            <td><a href="#configs_global">GLOBAL CONFIGURATION</a></td><td>configurations</td>
+                            <td></td>
+                            <td><a href="#configs_globalconfig_retrieve">Retrieve Global Configuration</a></td>
+                            <td><a href="#configs_globalconfig_currencyupdate">Update Global Configuration</a></td>
+                            <td></td>
+                        </tr>
                     </table>
                 </div>                
             </div>
@@ -2144,8 +2223,8 @@ Request Body:
 	<a id="configs" name="configs" class="old-syle-anchor">&nbsp;</a>
 	<div class="method-section">
 		<div class="method-description">
-		    <h3>Configuration</h3>
-		    <p>Application related configuration.  For example, selecting the currencies permitted for use within the MFI.</p>
+		    <h3>Currency</h3>
+		    <p>Application related configuration around viewing/updating the currencies permitted for use within the MFI.</p>
 		</div>
 	</div>
 	
@@ -2155,61 +2234,42 @@ Request Body:
 	        <h4>Retrieve Currency Configuration</h4>
 	        <p>Returns the list of currencies permitted for use AND the list of currencies not selected (but available for selection).</p>
 	        <p>Example Requests: </p>
-	        <div class=apiClick>configurations/currency</div>
+	        <div class=apiClick>currencies</div>
                 <br><br>
-	        <div class=apiClick>configurations/currency?fields=selectedCurrencyOptions</div>
+	        <div class=apiClick>currencies?fields=selectedCurrencyOptions</div>
 	    </div>
 	    <div class="method-example">
-	        <code class="method-declaration">GET https://Domain Name/api/v1/configurations/currency</code>
-<code class="method-response">{
-  "selectedCurrencyOptions" : [ {
-    "code" : "XOF",
-    "name" : "CFA Franc BCEAO",
-    "decimalPlaces" : 0,
-    "displaySymbol" : "CFA",
-    "nameCode" : "currency.XOF",
-    "displayLabel" : "CFA Franc BCEAO (CFA)"
-  }, {
-    "code" : "ETB",
-    "name" : "Ethiopian Birr",
-    "decimalPlaces" : 2,
-    "nameCode" : "currency.ETB",
-    "displayLabel" : "Ethiopian Birr [ETB]"
-  } ],
-  "currencyOptions" : [ {
-    "code" : "AED",
-    "name" : "UAE Dirham",
-    "decimalPlaces" : 2,
-    "nameCode" : "currency.AED",
-    "displayLabel" : "UAE Dirham [AED]"
-  }, {
-    "code" : "AFN",
-    "name" : "Afghanistan Afghani",
-    "decimalPlaces" : 2,
-    "nameCode" : "currency.AFN",
-    "displayLabel" : "Afghanistan Afghani [AFN]"
-  }, ...
- ]
+	        <code class="method-declaration">GET https://Domain Name/api/v1/currencies</code>
+            <code class="method-response">{
+    "selectedCurrencyOptions" : [ {
+    "code": "USD",
+    "name": "US Dollar",
+    "decimalPlaces": 2,
+    "displaySymbol": "$",
+    "nameCode": "currency.USD",
+    "displayLabel": "US Dollar ($)"
+    }]
 }
-</code>
+            </code>
 	    </div>
 	</div>
         
-        <a id="configs_currencyupdate" name="configs_currencyupdate" class="old-syle-anchor">&nbsp;</a>
-	<div class="method-section">
-	    <div class="method-description">
-	        <h4>Update Currency Configuration</h4>
-	        <p>Updates the list of currencies permitted for use.</p>
-	    </div>
-            <div class="method-example">
-                <code class="method-declaration">PUT https://Domain Name/api/v1/configurations/currency</code>
-                <code class="method-request">PUT configurations/currency
+    <a id="configs_currencyupdate" name="configs_currencyupdate" class="old-syle-anchor">&nbsp;</a>
+    <div class="method-section">
+       <div class="method-description">
+           <h4>Update Currency Configuration</h4>
+           <p>Updates the list of currencies permitted for use.</p>
+       </div>
+       <div class="method-example">
+        <code class="method-declaration">PUT https://Domain Name/api/v1/currencies</code>
+        <code class="method-request">PUT currencies
 Content-Type: application/json
-Request Body:{
+Request Body:
+{
 "currencies": ["KES", "BND",  "LBP", "GHC", "USD", "XOF", "AED", "AMD"]
 }
-                </code>
-                <code class="method-response">{
+        </code>
+        <code class="method-response">{
     "currencies": [
     "KES",
     "BND",
@@ -2221,10 +2281,61 @@ Request Body:{
     "AMD"
     ]
 }
-                </code>
-	    </div>
+        </code>
         </div>
-    
+    </div>
+
+    <a id="configs_global" name="configs_global" class="old-syle-anchor">&nbsp;</a>
+    <div class="method-section">
+        <div class="method-description">
+            <h3>Global Configuration</h3>
+            <p>Global configuration related to set of supported enable/disable configurations e.g. maker-checker.</p>
+        </div>
+    </div>
+
+    <a id="configs_globalconfig_retrieve" name="configs_globalconfig_retrieve" class="old-syle-anchor">&nbsp;</a>
+    <div class="method-section">
+        <div class="method-description">
+            <h4>Retrieve Global Configuration</h4>
+            <p>Returns the list global enable/disable configurations.</p>
+            <p>Example Requests: </p>
+            <div class=apiClick>configurations</div>
+        </div>
+        <div class="method-example">
+            <code class="method-declaration">GET https://Domain Name/api/v1/configurations</code>
+            <code class="method-response">{
+  "globalConfiguration": [
+    {
+      "name": "maker-checker",
+      "enabled": false
+    }
+  ]
+}
+            </code>
+        </div>
+    </div>
+
+     <a id="configs_globalconfig_currencyupdate" name="configs_globalconfig_currencyupdate" class="old-syle-anchor">&nbsp;</a>
+    <div class="method-section">
+       <div class="method-description">
+           <h4>Update Global Configuration</h4>
+           <p>Updates an enable/disable global configuration item.</p>
+       </div>
+       <div class="method-example">
+        <code class="method-declaration">PUT https://Domain Name/api/v1/configurations?maker-checker=false</code>
+        <code class="method-request">PUT configurations
+Content-Type: application/json
+Request Body:
+{
+}
+        </code>
+        <code class="method-response">{
+  "changes": {}
+}
+        </code>
+        </div>
+    </div>
+
     <!-- start of datatables api docs -->
         <a id="datatables" name="datatables" class="old-syle-anchor">&nbsp;</a>
         <div class="method-section">
@@ -3154,11 +3265,14 @@ Request body:
 Content-Type: application/json
 Request body:
 { 
- "name": "Updated Role Name"
+ "description": "some description(changed)"
 }
 </code>
 <code class="method-response">{
-  "resourceId": 8
+  "resourceId": 8,
+  "changes": {
+    "description": "some description(changed)"
+  }
 }
 </code>
 	    </div>
@@ -3183,8 +3297,7 @@ Request body:
       "code": "READ_PERMISSION",
       "entityName": "PERMISSION",
       "actionName": "READ",
-      "selected": false,
-      "isMakerChecker": false
+      "selected": false
     },
     {
       "grouping": "authorisation",
@@ -3192,15 +3305,13 @@ Request body:
       "entityName": "ROLE",
       "actionName": "CREATE",
       "selected": false,
-      "isMakerChecker": false
     },
     {
       "grouping": "authorisation",
       "code": "DELETE_ROLE",
       "entityName": "ROLE",
       "actionName": "DELETE",
-      "selected": false,
-      "isMakerChecker": false
+      "selected": false
     },...]
 }
 </code>
@@ -3218,13 +3329,16 @@ Request body:
 Content-Type: application/json
 Request body:
 {
-ADJUST_LOAN: "true",
-ALL_FUNCTIONS: "true",
-ALL_FUNCTIONS_READ: "true"
+"permissions": {"ALL_FUNCTIONS_READ": "true"}
 }
 </code>
 <code class="method-response">{
-  "resourceId": 8
+  "resourceId": 8,
+  "changes": {
+    "permissions": {
+      "ALL_FUNCTIONS_READ": true
+    }
+  }
 }
 </code>
 	    </div>
@@ -3298,7 +3412,21 @@ ALL_FUNCTIONS_READ: "true"
             <tr><td></td><td>offices/{officeId}</td><td></td><td><a href="#offices_retrieve">Retrieve an Office</a></td><td><a href="#offices_update">Update an Office</a></td><td></td></tr>
             <tr class="alt"><td><a href="#loanproducts">LOAN PRODUCT</a></td><td>loanproducts</td><td><a href="#loanproducts_create">Create a Loan Product</a></td><td><a href="#loanproducts_list">List Loan Products</a></td><td></td><td></td></tr>
             <tr><td></td><td>loanproducts/{productId}</td><td></td><td><a href="#loanproducts_retrieve">Retrieve a Loan Product</a></td><td><a href="#loanproducts_update">Update a Loan Product</a></td><td></td></tr>
-            <tr class="alt"><td><a href="#configs">CONFIGURATION</a></td><td>configurations/currency</td><td></td><td><a href="#configs_currencyretrieve">Retrieve Currency Configuration</a></td><td><a href="#configs_currencyupdate">Update Currency Configuration</a></td><td></td></tr>
+            <tr class="alt">
+                <td><a href="#configs">CURRENCY</a></td>
+                <td>currencies</td>
+                <td></td>
+                <td><a href="#configs_currencyretrieve">Retrieve Currency Configuration</a></td>
+                <td><a href="#configs_currencyupdate">Update Currency Configuration</a></td>
+                <td></td>
+            </tr>
+            <tr class="alt">
+                <td><a href="#configs_global">GLOBAL CONFIGURATION</a></td><td>configurations</td>
+                <td></td>
+                <td><a href="#configs_globalconfig_retrieve">Retrieve Global Configuration</a></td>
+                <td><a href="#configs_globalconfig_currencyupdate">Update Global Configuration</a></td>
+                <td></td>
+            </tr>
             <tr><td><a href="#datatables">DATA TABLE</a></td><td>datatables</td><td></td><td><a href="#datatables_list">List Data Tables</a></td><td></td><td></td></tr>
             <tr class="alt"><td></td><td>datatables/register/{datatable}/{apptable}</td><td><a href="#datatables_register">Register Data Table</a></td><td></td><td></td><td></td></tr>
             <tr><td></td><td>datatables/deregister/{datatable}</td><td><a href="#datatables_deregister">Deregister Data Table</a></td><td></td><td></td><td></td></tr>
