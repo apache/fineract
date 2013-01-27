@@ -126,10 +126,6 @@ CREATE TABLE `m_document` (
   `type` varchar(50) DEFAULT NULL,
   `description` varchar(1000) DEFAULT NULL,
   `location` varchar(500) NOT NULL DEFAULT '0',
-  `createdby_id` int(20) NOT NULL,
-  `lastmodifiedby_id` int(20) NOT NULL,
-  `created_date` datetime NOT NULL,
-  `lastmodified_date` datetime NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -291,10 +287,6 @@ CREATE TABLE `m_charge` (
   `is_penalty` tinyint(1) NOT NULL DEFAULT '0',
   `is_active` tinyint(1) NOT NULL,
   `is_deleted` tinyint(1) NOT NULL DEFAULT '0',
-  `createdby_id` bigint(20) DEFAULT NULL,
-  `created_date` datetime DEFAULT NULL,
-  `lastmodifiedby_id` bigint(20) DEFAULT NULL,
-  `lastmodified_date` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -303,10 +295,6 @@ CREATE TABLE `m_fund` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `name` varchar(255) DEFAULT NULL,
   `external_id` varchar(100) DEFAULT NULL,
-  `createdby_id` bigint(20) DEFAULT NULL,
-  `created_date` datetime DEFAULT NULL,
-  `lastmodifiedby_id` bigint(20) DEFAULT NULL,
-  `lastmodified_date` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `fund_name_org` (`name`),
   UNIQUE KEY `fund_externalid_org` (`external_id`)
@@ -319,10 +307,6 @@ CREATE TABLE `m_staff` (
   `firstname` varchar(50) DEFAULT NULL,
   `lastname` varchar(50) DEFAULT NULL,
   `display_name` varchar(100) NOT NULL,
-  `createdby_id` bigint(20) DEFAULT NULL,
-  `created_date` datetime DEFAULT NULL,
-  `lastmodifiedby_id` bigint(20) DEFAULT NULL,
-  `lastmodified_date` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `display_name` (`display_name`),
   KEY `FK_m_staff_m_office` (`office_id`),

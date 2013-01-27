@@ -399,10 +399,6 @@ CREATE TABLE `m_charge` (
   `is_penalty` tinyint(1) NOT NULL DEFAULT '0',
   `is_active` tinyint(1) NOT NULL,
   `is_deleted` tinyint(1) NOT NULL DEFAULT '0',
-  `createdby_id` bigint(20) DEFAULT NULL,
-  `created_date` datetime DEFAULT NULL,
-  `lastmodifiedby_id` bigint(20) DEFAULT NULL,
-  `lastmodified_date` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`)
 ) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8;
@@ -414,7 +410,7 @@ CREATE TABLE `m_charge` (
 
 LOCK TABLES `m_charge` WRITE;
 /*!40000 ALTER TABLE `m_charge` DISABLE KEYS */;
-INSERT INTO `m_charge` VALUES (1,'Fee','USD',1,1,1,'10.000000',0,1,0,1,'2012-10-25 15:12:08',1,'2012-10-25 15:12:08'),(2,'Check Bounce penalty','XOF',1,2,1,'50.000000',0,1,0,1,'2012-10-29 10:27:32',1,'2012-10-29 10:44:28'),(3,'fee2','XOF',1,1,1,'12.000000',0,1,0,1,'2012-12-06 16:54:43',1,'2012-12-06 16:54:43'),(4,'PlusOne Service Charge %','HKD',1,1,2,'1.000000',0,1,0,1,'2012-12-12 07:20:24',1,'2012-12-12 07:34:55'),(5,'Administration Fee','HKD',1,1,1,'500.000000',0,1,0,1,'2012-12-12 07:32:11',1,'2012-12-12 08:02:37'),(6,'OD Charge','HKD',1,2,2,'12.000000',1,1,0,1,'2012-12-19 02:49:05',1,'2012-12-19 02:55:36');
+INSERT INTO `m_charge` VALUES (1,'Fee','USD',1,1,1,'10.000000',0,1,0),(2,'Check Bounce penalty','XOF',1,2,1,'50.000000',0,1,0),(3,'fee2','XOF',1,1,1,'12.000000',0,1,0),(4,'PlusOne Service Charge %','HKD',1,1,2,'1.000000',0,1,0),(5,'Administration Fee','HKD',1,1,1,'500.000000',0,1,0),(6,'OD Charge','HKD',1,2,2,'12.000000',1,1,0);
 /*!40000 ALTER TABLE `m_charge` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -773,10 +769,6 @@ CREATE TABLE `m_document` (
   `type` varchar(50) DEFAULT NULL,
   `description` varchar(1000) DEFAULT NULL,
   `location` varchar(500) NOT NULL DEFAULT '0',
-  `createdby_id` int(20) NOT NULL,
-  `lastmodifiedby_id` int(20) NOT NULL,
-  `created_date` datetime NOT NULL,
-  `lastmodified_date` datetime NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -787,7 +779,7 @@ CREATE TABLE `m_document` (
 
 LOCK TABLES `m_document` WRITE;
 /*!40000 ALTER TABLE `m_document` DISABLE KEYS */;
-INSERT INTO `m_document` VALUES (4,'loans',22,'test docs','jscam.swf',35091,'application/x-shockwave-flash',NULL,'/root/.mifosx/DefaultDemoTenant/documents/loans/22/n8uivwkh/jscam.swf',1,1,'2012-10-29 09:16:55','2012-10-29 09:16:55'),(7,'clients',37,'Passport','australianprofile.pdf',494511,'application/pdf',NULL,'/root/.mifosx/DefaultDemoTenant/documents/clients/37/539uhy4c/australianprofile.pdf',1,1,'2012-11-15 05:20:40','2012-11-15 05:20:40'),(8,'clients',17,'testdoc','doc00003186.doc',110994,'application/msword','wddwoidwi','/root/.mifosx/DefaultDemoTenant/documents/clients/17/6ppzw73tdebnson/doc00003186.doc',1,1,'2012-11-15 07:49:32','2012-11-15 07:49:32'),(9,'client_identifiers',4,'hfghfgh','passport-shaun.gif',64646,'image/gif',NULL,'/root/.mifosx/DefaultDemoTenant/documents/client_identifiers/4/qfx4h9pn4o1/passport-shaun.gif',1,1,'2012-12-01 10:42:50','2012-12-01 10:42:50'),(10,'clients',16,'TestSave','restclient.jpg',55485,'image/jpeg',NULL,'/root/.mifosx/DefaultDemoTenant/documents/clients/16/o4ielexzj6n/restclient.jpg',1,1,'2012-12-15 18:08:38','2012-12-15 18:08:38');
+INSERT INTO `m_document` VALUES (4,'loans',22,'test docs','jscam.swf',35091,'application/x-shockwave-flash',NULL,'/root/.mifosx/DefaultDemoTenant/documents/loans/22/n8uivwkh/jscam.swf'),(7,'clients',37,'Passport','australianprofile.pdf',494511,'application/pdf',NULL,'/root/.mifosx/DefaultDemoTenant/documents/clients/37/539uhy4c/australianprofile.pdf'),(8,'clients',17,'testdoc','doc00003186.doc',110994,'application/msword','wddwoidwi','/root/.mifosx/DefaultDemoTenant/documents/clients/17/6ppzw73tdebnson/doc00003186.doc'),(9,'client_identifiers',4,'hfghfgh','passport-shaun.gif',64646,'image/gif',NULL,'/root/.mifosx/DefaultDemoTenant/documents/client_identifiers/4/qfx4h9pn4o1/passport-shaun.gif'),(10,'clients',16,'TestSave','restclient.jpg',55485,'image/jpeg',NULL,'/root/.mifosx/DefaultDemoTenant/documents/clients/16/o4ielexzj6n/restclient.jpg');
 /*!40000 ALTER TABLE `m_document` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -802,10 +794,6 @@ CREATE TABLE `m_fund` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `name` varchar(255) DEFAULT NULL,
   `external_id` varchar(100) DEFAULT NULL,
-  `createdby_id` bigint(20) DEFAULT NULL,
-  `created_date` datetime DEFAULT NULL,
-  `lastmodifiedby_id` bigint(20) DEFAULT NULL,
-  `lastmodified_date` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `fund_name_org` (`name`),
   UNIQUE KEY `fund_externalid_org` (`external_id`)
@@ -818,7 +806,7 @@ CREATE TABLE `m_fund` (
 
 LOCK TABLES `m_fund` WRITE;
 /*!40000 ALTER TABLE `m_fund` DISABLE KEYS */;
-INSERT INTO `m_fund` VALUES (1,'Z3','Z3',1,'2012-07-17 00:33:46',1,'2012-12-12 07:30:49'),(2,'Z4','Z4',1,'2012-07-17 03:19:10',1,'2012-12-12 07:30:56'),(3,'Z5','Z5',1,'2012-07-19 15:30:54',1,'2012-12-12 07:31:01'),(4,'PlusOne Fund','PlusOne',1,'2012-07-19 15:31:21',1,'2012-12-12 07:04:48'),(5,'Z1','Z1',1,'2012-11-13 09:34:15',1,'2012-12-12 07:30:42'),(6,'Z6','Z6',1,'2012-11-13 10:10:56',1,'2012-12-12 07:31:06'),(7,'Z2','Z2',1,'2012-12-06 16:44:31',1,'2012-12-12 07:30:38');
+INSERT INTO `m_fund` VALUES (1,'Z3','Z3'),(2,'Z4','Z4'),(3,'Z5','Z5'),(4,'PlusOne Fund','PlusOne'),(5,'Z1','Z1'),(6,'Z6','Z6'),(7,'Z2','Z2');
 /*!40000 ALTER TABLE `m_fund` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1815,10 +1803,6 @@ CREATE TABLE `m_staff` (
   `firstname` varchar(50) DEFAULT NULL,
   `lastname` varchar(50) DEFAULT NULL,
   `display_name` varchar(100) NOT NULL,
-  `createdby_id` bigint(20) DEFAULT NULL,
-  `created_date` datetime DEFAULT NULL,
-  `lastmodifiedby_id` bigint(20) DEFAULT NULL,
-  `lastmodified_date` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `display_name` (`display_name`),
   KEY `FK_m_staff_m_office` (`office_id`),
@@ -1832,7 +1816,7 @@ CREATE TABLE `m_staff` (
 
 LOCK TABLES `m_staff` WRITE;
 /*!40000 ALTER TABLE `m_staff` DISABLE KEYS */;
-INSERT INTO `m_staff` VALUES (1,1,20,'Nayan','Ambali','Ambali, Nayan',1,'2012-11-15 04:30:24',1,'2012-11-15 04:30:24'),(2,1,21,'Uganda','loanofficer','loanofficer, Uganda',1,'2012-12-07 11:04:47',1,'2013-01-22 12:16:52'),(3,1,22,'Loan 01','Officer','Officer, Loan 01',1,'2012-12-12 07:18:57',1,'2012-12-12 08:02:01'),(4,1,22,'Loan 02','Officer','Officer, Loan 02',1,'2012-12-12 07:19:17',1,'2012-12-12 08:02:07');
+INSERT INTO `m_staff` VALUES (1,1,20,'Nayan','Ambali','Ambali, Nayan'),(2,1,21,'Uganda','loanofficer','loanofficer, Uganda'),(3,1,22,'Loan 01','Officer','Officer, Loan 01'),(4,1,22,'Loan 02','Officer','Officer, Loan 02');
 /*!40000 ALTER TABLE `m_staff` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -2099,4 +2083,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2013-01-27  0:29:30
+-- Dump completed on 2013-01-27 22:12:43

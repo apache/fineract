@@ -39,7 +39,7 @@ public class CodeReadPlatformServiceImpl implements CodeReadPlatformService {
             final String code_name = rs.getString("code_name");
             final boolean systemDefined = rs.getBoolean("systemDefined");
 
-            return new CodeData(id, code_name, systemDefined);
+            return CodeData.instance(id, code_name, systemDefined);
         }
     }
 

@@ -10,13 +10,12 @@ import javax.persistence.UniqueConstraint;
 
 import org.apache.commons.lang.StringUtils;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
-import org.mifosplatform.infrastructure.core.domain.AbstractAuditableCustom;
-import org.mifosplatform.useradministration.domain.AppUser;
+import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
 @Table(name = "m_fund", uniqueConstraints = { @UniqueConstraint(columnNames = { "name" }, name = "fund_name_org"),
         @UniqueConstraint(columnNames = { "external_id" }, name = "fund_externalid_org") })
-public class Fund extends AbstractAuditableCustom<AppUser, Long> {
+public class Fund extends AbstractPersistable<Long> {
 
     @Column(name = "name")
     private String name;

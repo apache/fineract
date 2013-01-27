@@ -185,7 +185,7 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
             final boolean penalty = rs.getBoolean("penalty");
             final boolean active = rs.getBoolean("active");
 
-            return new ChargeData(id, name, amount, currency, chargeTimeType, chargeAppliesToType, chargeCalculationType, penalty, active);
+            return ChargeData.instance(id, name, amount, currency, chargeTimeType, chargeAppliesToType, chargeCalculationType, penalty, active);
         }
     }
 

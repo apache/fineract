@@ -14,7 +14,11 @@ public class CodeValueData {
     @SuppressWarnings("unused")
     private final Integer position;
 
-    public CodeValueData(final Long id, final String name, final Integer position) {
+    public static CodeValueData instance(final Long id, final String name, final Integer position) {
+        return new CodeValueData(id, name, position);
+    }
+
+    private CodeValueData(final Long id, final String name, final Integer position) {
         this.id = id;
         this.name = name;
         this.position = position;

@@ -12,7 +12,11 @@ public class CodeData {
     @SuppressWarnings("unused")
     private final boolean systemDefined;
 
-    public CodeData(final Long id, final String name, final boolean systemDefined) {
+    public static CodeData instance(final Long id, final String name, final boolean systemDefined) {
+        return new CodeData(id, name, systemDefined);
+    }
+
+    private CodeData(final Long id, final String name, final boolean systemDefined) {
         this.id = id;
         this.name = name;
         this.systemDefined = systemDefined;

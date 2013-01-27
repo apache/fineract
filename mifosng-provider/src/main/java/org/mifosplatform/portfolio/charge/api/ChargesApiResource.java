@@ -85,7 +85,7 @@ public class ChargesApiResource {
         ChargeData charge = this.readPlatformService.retrieveCharge(chargeId);
         if (settings.isTemplate()) {
             ChargeData templateData = this.readPlatformService.retrieveNewChargeDetails();
-            charge = new ChargeData(charge, templateData);
+            charge = ChargeData.withTemplate(charge, templateData);
         }
 
         return this.toApiJsonSerializer.serialize(settings, charge, CHARGES_DATA_PARAMETERS);

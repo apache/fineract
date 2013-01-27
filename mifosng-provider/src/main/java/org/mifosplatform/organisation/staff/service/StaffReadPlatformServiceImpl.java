@@ -58,7 +58,7 @@ public class StaffReadPlatformServiceImpl implements StaffReadPlatformService {
             final boolean isLoanOfficer = rs.getBoolean("isLoanOfficer");
             final String officeName = rs.getString("officeName");
 
-            return new StaffData(id, firstname, lastname, displayName, officeId, officeName, isLoanOfficer, null);
+            return StaffData.instance(id, firstname, lastname, displayName, officeId, officeName, isLoanOfficer);
         }
     }
 
@@ -107,8 +107,8 @@ public class StaffReadPlatformServiceImpl implements StaffReadPlatformService {
         final StaffGroupMapper staffGroupMapper = new StaffGroupMapper();
         final String groupSql = "select distinct " + staffGroupMapper.schema();
 
-        final List<StaffAccountSummaryCollectionData.ClientSummary> clientSummaryList = this.jdbcTemplate.query(clientSql, staffClientMapper,
-                new Object[] { loanOfficerId });
+        final List<StaffAccountSummaryCollectionData.ClientSummary> clientSummaryList = this.jdbcTemplate.query(clientSql,
+                staffClientMapper, new Object[] { loanOfficerId });
 
         for (StaffAccountSummaryCollectionData.ClientSummary clientSummary : clientSummaryList) {
 
@@ -123,8 +123,8 @@ public class StaffReadPlatformServiceImpl implements StaffReadPlatformService {
 
         for (StaffAccountSummaryCollectionData.GroupSummary groupSummary : groupSummaryList) {
 
-            final Collection<GroupAccountSummaryData> groupLoanAccounts = this.groupReadPlatformService.retrieveGroupLoanAccountsByLoanOfficerId(
-                    groupSummary.getId(), loanOfficerId);
+            final Collection<GroupAccountSummaryData> groupLoanAccounts = this.groupReadPlatformService
+                    .retrieveGroupLoanAccountsByLoanOfficerId(groupSummary.getId(), loanOfficerId);
 
             groupSummary.setLoans(groupLoanAccounts);
         }

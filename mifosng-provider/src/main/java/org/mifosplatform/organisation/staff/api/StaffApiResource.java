@@ -26,7 +26,7 @@ import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
-import org.mifosplatform.organisation.office.data.OfficeLookup;
+import org.mifosplatform.organisation.office.data.OfficeData;
 import org.mifosplatform.organisation.office.service.OfficeReadPlatformService;
 import org.mifosplatform.organisation.staff.data.StaffData;
 import org.mifosplatform.organisation.staff.service.StaffReadPlatformService;
@@ -107,7 +107,7 @@ public class StaffApiResource {
 
         StaffData staff = this.readPlatformService.retrieveStaff(staffId);
         if (settings.isTemplate()) {
-            final Collection<OfficeLookup> allowedOffices = officeReadPlatformService.retrieveAllOfficesForLookup();
+            final Collection<OfficeData> allowedOffices = officeReadPlatformService.retrieveAllOfficesForDropdown();
             staff = StaffData.templateData(staff, allowedOffices);
         }
 

@@ -27,38 +27,27 @@ public class ChargeData {
     private final List<EnumOptionData> chargeAppliesToOptions;
     private final List<EnumOptionData> chargeTimeTypeOptions;
 
-    public static ChargeData template(final Collection<CurrencyData> currencyOptions, final List<EnumOptionData> chargeCalculationTypeOptions,
-            final List<EnumOptionData> chargeAppliesToOptions, final List<EnumOptionData> chargeTimeTypeOptions) {
-
+    public static ChargeData template(final Collection<CurrencyData> currencyOptions,
+            final List<EnumOptionData> chargeCalculationTypeOptions, final List<EnumOptionData> chargeAppliesToOptions,
+            final List<EnumOptionData> chargeTimeTypeOptions) {
         return new ChargeData(null, null, null, null, null, null, null, false, false, currencyOptions, chargeCalculationTypeOptions,
                 chargeAppliesToOptions, chargeTimeTypeOptions);
     }
 
-    public ChargeData(final ChargeData charge, final ChargeData template) {
-        this(charge.id, charge.name, charge.amount, charge.currency, charge.chargeTimeType, charge.chargeAppliesTo,
+    public static ChargeData withTemplate(final ChargeData charge, final ChargeData template) {
+        return new ChargeData(charge.id, charge.name, charge.amount, charge.currency, charge.chargeTimeType, charge.chargeAppliesTo,
                 charge.chargeCalculationType, charge.penalty, charge.active, template.currencyOptions,
                 template.chargeCalculationTypeOptions, template.chargeAppliesToOptions, template.chargeTimeTypeOptions);
     }
 
-    public ChargeData(final Long id, final String name, final BigDecimal amount, final CurrencyData currency,
+    public static ChargeData instance(final Long id, final String name, final BigDecimal amount, final CurrencyData currency,
             final EnumOptionData chargeTimeType, final EnumOptionData chargeAppliesTo, final EnumOptionData chargeCalculationType,
             final boolean penalty, final boolean active) {
-        this.id = id;
-        this.name = name;
-        this.amount = amount;
-        this.currency = currency;
-        this.chargeTimeType = chargeTimeType;
-        this.chargeAppliesTo = chargeAppliesTo;
-        this.chargeCalculationType = chargeCalculationType;
-        this.penalty = penalty;
-        this.active = active;
-        this.currencyOptions = null;
-        this.chargeCalculationTypeOptions = null;
-        this.chargeAppliesToOptions = null;
-        this.chargeTimeTypeOptions = null;
+        return new ChargeData(id, name, amount, currency, chargeTimeType, chargeAppliesTo, chargeCalculationType, penalty, active, null,
+                null, null, null);
     }
 
-    public ChargeData(final Long id, final String name, final BigDecimal amount, final CurrencyData currency,
+    private ChargeData(final Long id, final String name, final BigDecimal amount, final CurrencyData currency,
             final EnumOptionData chargeTimeType, final EnumOptionData chargeAppliesTo, final EnumOptionData chargeCalculationType,
             final boolean penalty, final boolean active, final Collection<CurrencyData> currencyOptions,
             final List<EnumOptionData> chargeCalculationTypeOptions, final List<EnumOptionData> chargeAppliesToOptions,

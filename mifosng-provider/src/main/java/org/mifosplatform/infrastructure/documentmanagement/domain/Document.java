@@ -5,13 +5,12 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 
 import org.apache.commons.lang.StringUtils;
-import org.mifosplatform.infrastructure.core.domain.AbstractAuditableCustom;
 import org.mifosplatform.infrastructure.documentmanagement.command.DocumentCommand;
-import org.mifosplatform.useradministration.domain.AppUser;
+import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
 @Table(name = "m_document")
-public class Document extends AbstractAuditableCustom<AppUser, Long> {
+public class Document extends AbstractPersistable<Long> {
 
     @Column(name = "parent_entity_type", length = 50)
     private String parentEntityType;

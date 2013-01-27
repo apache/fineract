@@ -87,8 +87,8 @@ public class ClientIdentifiersApiResource {
 
         context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
 
-        Collection<CodeValueData> codeValues = codeValueReadPlatformService.retrieveCustomIdentifierCodeValues();
-        ClientIdentifierData clientIdentifierData = ClientIdentifierData.template(codeValues);
+        final Collection<CodeValueData> codeValues = codeValueReadPlatformService.retrieveCustomIdentifierCodeValues();
+        final ClientIdentifierData clientIdentifierData = ClientIdentifierData.template(codeValues);
 
         final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serialize(settings, clientIdentifierData, CLIENT_IDENTIFIER_DATA_PARAMETERS);
@@ -123,8 +123,8 @@ public class ClientIdentifiersApiResource {
     @Path("{identifierId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String getClientIdentifier(@PathParam("clientId") final Long clientId, @PathParam("identifierId") final Long clientIdentifierId,
-            @Context final UriInfo uriInfo) {
+    public String retrieveClientIdentifiers(@PathParam("clientId") final Long clientId,
+            @PathParam("identifierId") final Long clientIdentifierId, @Context final UriInfo uriInfo) {
 
         context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
 
