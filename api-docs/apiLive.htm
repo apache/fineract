@@ -246,6 +246,21 @@ function getBaseURL(docURL)
                             <td><a href="#fund_update">Update a Fund</a></td>
                             <td></td>
                         </tr>
+                        <tr class="alt">
+                            <td><a href="#staff">STAFF</a></td><td>staff</td>
+                            <td><a href="#staff_create">Create a Staff</a></td>
+                            <td><a href="#staff_list">List Staff</a></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr class="alt">
+                            <td></td>
+                            <td>staff/{staffId}</td>
+                            <td></td>
+                            <td><a href="#staff_retrieve">Retrieve a Staff Member</a></td>
+                            <td><a href="#staff_update">Update a Staff Member</a></td>
+                            <td></td>
+                        </tr>
                     </table>
                 </div>                
             </div>
@@ -2579,6 +2594,115 @@ Request Body:
         </div>
     </div>
 
+
+    <a id="staff" name="staff" class="old-syle-anchor">&nbsp;</a>
+    <div class="method-section">
+        <div class="method-description">
+            <h3>Staff</h3>
+            <p>Allows you to model staff members. At present the key role of signifigance is whether this staff member is a loan officer or not.</p>
+        </div>
+    </div>
+
+    <a id="staff_create" name="staff_create" class="old-syle-anchor">&nbsp;</a>
+    <div class="method-section">
+        <div class="method-description">
+        <h4>Create a staff member</h4>
+        <p>Creates a staff member.</p>
+        </div>
+        <div class="method-example">
+            <code class="method-declaration">POST https://Domain Name/api/v1/staff</code>
+            <code class="method-request">POST staff
+Content-Type: application/json
+Request Body:
+{
+    "officeId": 1,
+    "firstname": "John",
+    "lastname": "Doe",
+    "isLoanOfficer": "true"
+}
+</code>
+            <code class="method-response">{
+  "officeId": 1,
+  "resourceId": 1
+}
+            </code>
+        </div>
+    </div>
+
+    <a id="staff_list" name="staff_list" class="old-syle-anchor">&nbsp;</a>
+    <div class="method-section">
+        <div class="method-description">
+            <h4>Retrieve Staff</h4>
+            <p>Returns the list of staff members.</p>
+            <p>Example Requests: </p>
+            <div class=apiClick>staff</div>
+        </div>
+        <div class="method-example">
+            <code class="method-declaration">GET https://Domain Name/api/v1/staff</code>
+            <code class="method-response">[
+  {
+    "id": 1,
+    "firstname": "John",
+    "lastname": "Doe",
+    "displayName": "Doe, John",
+    "officeId": 1,
+    "officeName": "Head Office",
+    "isLoanOfficer": true
+  }
+]
+            </code>
+        </div>
+    </div>
+
+    <a id="staff_retrieve" name="staff_retrieve" class="old-syle-anchor">&nbsp;</a>
+    <div class="method-section">
+        <div class="method-description">
+            <h4>Retrieve a Staff Member</h4>
+            <p>Returns the details of a Staff Member.</p>
+            <p>Example Requests: </p>
+            <div class=apiClick>staff/1</div>
+        </div>
+        <div class="method-example">
+            <code class="method-declaration">GET https://Domain Name/api/v1/staff/1</code>
+            <code class="method-response">{
+  "id": 1,
+  "firstname": "John",
+  "lastname": "Doe",
+  "displayName": "Doe, John",
+  "officeId": 1,
+  "officeName": "Head Office",
+  "isLoanOfficer": true
+}
+            </code>
+        </div>
+    </div>
+
+    <a id="staff_update" name="staff_update" class="old-syle-anchor">&nbsp;</a>
+    <div class="method-section">
+        <div class="method-description">
+        <h4>Update a Staff Member</h4>
+        <p>Updates the details of a staff member.</p>
+        </div>
+        <div class="method-example">
+            <code class="method-declaration">PUT https://Domain Name/api/v1/staff/1</code>
+            <code class="method-request">PUT staff/1
+Content-Type: application/json
+Request Body:
+{
+    "isLoanOfficer": "false"
+}
+</code>
+            <code class="method-response">{
+  "officeId": 1,
+  "resourceId": 1,
+  "changes": {
+    "isLoanOfficer": false
+  }
+}
+</code>
+        </div>
+    </div>
+
     <!-- start of datatables api docs -->
         <a id="datatables" name="datatables" class="old-syle-anchor">&nbsp;</a>
         <div class="method-section">
@@ -3698,6 +3822,21 @@ Request body:
                 <td></td>
                 <td><a href="#fund_retrieve">Retrieve a Fund</a></td>
                 <td><a href="#fund_update">Update a Fund</a></td>
+                <td></td>
+            </tr>
+            <tr class="alt">
+                <td><a href="#staff">STAFF</a></td><td>staff</td>
+                <td><a href="#staff_create">Create a Staff</a></td>
+                <td><a href="#staff_list">List Staff</a></td>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr class="alt">
+                <td></td>
+                <td>staff/{staffId}</td>
+                <td></td>
+                <td><a href="#staff_retrieve">Retrieve a Staff Member</a></td>
+                <td><a href="#staff_update">Update a Staff Member</a></td>
                 <td></td>
             </tr>
             <tr><td><a href="#datatables">DATA TABLE</a></td><td>datatables</td><td></td><td><a href="#datatables_list">List Data Tables</a></td><td></td><td></td></tr>

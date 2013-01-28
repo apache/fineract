@@ -42,15 +42,15 @@ public final class FundCommandFromApiJsonDeserializer {
         fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, supportedParameters);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("code");
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("fund");
 
         final JsonElement element = fromApiJsonHelper.parse(json);
 
         final String name = fromApiJsonHelper.extractStringNamed("name", element);
-        baseDataValidator.reset().parameter("name").value(name).notBlank().notExceedingLengthOf(255);
+        baseDataValidator.reset().parameter("name").value(name).notBlank().notExceedingLengthOf(100);
 
         final String externalId = fromApiJsonHelper.extractStringNamed("externalId", element);
-        baseDataValidator.reset().parameter("externalId").value(externalId).notExceedingLengthOf(255);
+        baseDataValidator.reset().parameter("externalId").value(externalId).notExceedingLengthOf(100);
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
@@ -62,12 +62,12 @@ public final class FundCommandFromApiJsonDeserializer {
         fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, supportedParameters);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("code");
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("fund");
 
         final JsonElement element = fromApiJsonHelper.parse(json);
         if (fromApiJsonHelper.parameterExists("name", element)) {
             final String name = fromApiJsonHelper.extractStringNamed("name", element);
-            baseDataValidator.reset().parameter("name").value(name).notBlank().notExceedingLengthOf(255);
+            baseDataValidator.reset().parameter("name").value(name).notBlank().notExceedingLengthOf(100);
         }
 
         if (fromApiJsonHelper.parameterExists("externalId", element)) {

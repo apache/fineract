@@ -1,28 +1,27 @@
 package org.mifosplatform.organisation.staff.serialization;
 
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
+import org.mifosplatform.infrastructure.core.data.ApiParameterError;
+import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
 import org.mifosplatform.infrastructure.core.exception.InvalidJsonException;
-import org.mifosplatform.infrastructure.core.serialization.AbstractFromApiJsonDeserializer;
-import org.mifosplatform.infrastructure.core.serialization.FromApiJsonDeserializer;
+import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
-import org.mifosplatform.organisation.staff.command.StaffCommand;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
 
-/**
- * Implementation of {@link FromApiJsonDeserializer} for {@link StaffCommand}'s.
- */
 @Component
-public final class StaffCommandFromApiJsonDeserializer extends AbstractFromApiJsonDeserializer<StaffCommand> {
+public final class StaffCommandFromApiJsonDeserializer {
 
     /**
      * The parameters supported for this command.
@@ -36,20 +35,69 @@ public final class StaffCommandFromApiJsonDeserializer extends AbstractFromApiJs
         this.fromApiJsonHelper = fromApiJsonHelper;
     }
 
-    @Override
-    public StaffCommand commandFromApiJson(final String json) {
+    public void validateForCreate(final String json) {
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, supportedParameters);
 
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("staff");
+
         final JsonElement element = fromApiJsonHelper.parse(json);
 
         final String firstname = fromApiJsonHelper.extractStringNamed("firstname", element);
-        final String lastname = fromApiJsonHelper.extractStringNamed("lastname", element);
-        final Boolean isLoanOfficer = fromApiJsonHelper.extractBooleanNamed("isLoanOfficer", element);
-        final Long officeId = fromApiJsonHelper.extractLongNamed("officeId", element);
+        baseDataValidator.reset().parameter("firstname").value(firstname).notBlank().notExceedingLengthOf(50);
 
-        return new StaffCommand(officeId, firstname, lastname, isLoanOfficer);
+        final String lastname = fromApiJsonHelper.extractStringNamed("lastname", element);
+        baseDataValidator.reset().parameter("lastname").value(lastname).notBlank().notExceedingLengthOf(50);
+
+        final Long officeId = fromApiJsonHelper.extractLongNamed("officeId", element);
+        baseDataValidator.reset().parameter("officeId").value(officeId).notNull().integerGreaterThanZero();
+
+        if (fromApiJsonHelper.parameterExists("isLoanOfficer", element)) {
+            final Boolean loanOfficerFlag = fromApiJsonHelper.extractBooleanNamed("isLoanOfficer", element);
+            baseDataValidator.reset().parameter("isLoanOfficer").value(loanOfficerFlag).notNull();
+        }
+
+        throwExceptionIfValidationWarningsExist(dataValidationErrors);
+    }
+
+    public void validateForUpdate(final String json) {
+        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, supportedParameters);
+
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("staff");
+
+        final JsonElement element = fromApiJsonHelper.parse(json);
+        if (fromApiJsonHelper.parameterExists("firstname", element)) {
+            final String firstname = fromApiJsonHelper.extractStringNamed("firstname", element);
+            baseDataValidator.reset().parameter("firstname").value(firstname).notBlank().notExceedingLengthOf(50);
+        }
+
+        if (fromApiJsonHelper.parameterExists("lastname", element)) {
+            final String lastname = fromApiJsonHelper.extractStringNamed("lastname", element);
+            baseDataValidator.reset().parameter("lastname").value(lastname).notBlank().notExceedingLengthOf(50);
+        }
+
+        if (fromApiJsonHelper.parameterExists("officeId", element)) {
+            final Long officeId = fromApiJsonHelper.extractLongNamed("officeId", element);
+            baseDataValidator.reset().parameter("officeId").value(officeId).notNull().integerGreaterThanZero();
+        }
+
+        if (fromApiJsonHelper.parameterExists("isLoanOfficer", element)) {
+            final Boolean loanOfficerFlag = fromApiJsonHelper.extractBooleanNamed("isLoanOfficer", element);
+            baseDataValidator.reset().parameter("isLoanOfficer").value(loanOfficerFlag).notNull();
+        }
+
+        throwExceptionIfValidationWarningsExist(dataValidationErrors);
+    }
+
+    private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
+        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
+                "Validation errors exist.", dataValidationErrors); }
     }
 }
