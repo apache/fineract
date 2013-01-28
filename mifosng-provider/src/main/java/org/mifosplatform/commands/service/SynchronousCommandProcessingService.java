@@ -45,10 +45,12 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
 
     @Transactional
     @Override
-    public CommandProcessingResult processAndLogCommand(final CommandWrapper wrapper, final JsonCommand command, final boolean isApprovedByChecker) {
+    public CommandProcessingResult processAndLogCommand(final CommandWrapper wrapper, final JsonCommand command,
+            final boolean isApprovedByChecker) {
 
-        final boolean rollbackTransaction = this.configurationDomainService.isMakerCheckerEnabledForTask(wrapper.taskPermissionName()) && !isApprovedByChecker;
-        
+        final boolean rollbackTransaction = this.configurationDomainService.isMakerCheckerEnabledForTask(wrapper.taskPermissionName())
+                && !isApprovedByChecker;
+
         final NewCommandSourceHandler handler = findCommandHandler(wrapper);
         final CommandProcessingResult result = handler.processCommand(command);
 
@@ -95,7 +97,8 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
             commandSourceRepository.save(commandSourceResult);
         }
 
-        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(commandSourceResult.resourceId()).build();
+        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(commandSourceResult.resourceId())
+                .build();
     }
 
     private NewCommandSourceHandler findCommandHandler(final CommandWrapper wrapper) {
@@ -103,8 +106,7 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
 
         if (wrapper.isConfigurationResource()) {
             handler = applicationContext.getBean("updateGlobalConfigurationCommandHandler", NewCommandSourceHandler.class);
-        }
-        else if (wrapper.isDatatableResource()) {
+        } else if (wrapper.isDatatableResource()) {
             if (wrapper.isCreate()) {
                 handler = applicationContext.getBean("createDatatableEntryCommandHandler", NewCommandSourceHandler.class);
             } else if (wrapper.isUpdateMultiple()) {
@@ -209,6 +211,8 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
         } else if (wrapper.isOfficeTransactionResource()) {
             if (wrapper.isCreate()) {
                 handler = applicationContext.getBean("createOfficeTransactionCommandHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isDelete()) {
+                handler = applicationContext.getBean("deleteOfficeTransactionCommandHandler", NewCommandSourceHandler.class);
             } else {
                 throw new UnsupportedCommandException(wrapper.commandName());
             }

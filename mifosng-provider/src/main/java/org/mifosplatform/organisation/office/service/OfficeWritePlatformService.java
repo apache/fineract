@@ -10,4 +10,6 @@ public interface OfficeWritePlatformService {
     CommandProcessingResult updateOffice(Long officeId, JsonCommand command);
 
     CommandProcessingResult externalBranchMoneyTransfer(JsonCommand command);
+
+    CommandProcessingResult deleteOfficeTransaction(Long id, JsonCommand command);
 }

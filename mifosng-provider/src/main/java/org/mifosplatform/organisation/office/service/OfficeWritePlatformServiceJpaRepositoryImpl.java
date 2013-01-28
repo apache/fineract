@@ -38,7 +38,7 @@ public class OfficeWritePlatformServiceJpaRepositoryImpl implements OfficeWriteP
     private final OfficeCommandFromApiJsonDeserializer fromApiJsonDeserializer;
     private final BranchMoneyTransferCommandFromApiJsonDeserializer moneyTransferCommandFromApiJsonDeserializer;
     private final OfficeRepository officeRepository;
-    private final OfficeTransactionRepository officeMonetaryTransferRepository;
+    private final OfficeTransactionRepository officeTransactionRepository;
     private final ApplicationCurrencyRepository applicationCurrencyRepository;
 
     @Autowired
@@ -51,7 +51,7 @@ public class OfficeWritePlatformServiceJpaRepositoryImpl implements OfficeWriteP
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
         this.moneyTransferCommandFromApiJsonDeserializer = moneyTransferCommandFromApiJsonDeserializer;
         this.officeRepository = officeRepository;
-        this.officeMonetaryTransferRepository = officeMonetaryTransferRepository;
+        this.officeTransactionRepository = officeMonetaryTransferRepository;
         this.applicationCurrencyRepository = applicationCurrencyRepository;
     }
 
@@ -155,9 +155,23 @@ public class OfficeWritePlatformServiceJpaRepositoryImpl implements OfficeWriteP
 
         final OfficeTransaction entity = OfficeTransaction.fromJson(fromOffice, toOffice, amount, command);
 
-        this.officeMonetaryTransferRepository.save(entity);
+        this.officeTransactionRepository.save(entity);
 
         return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(entity.getId()).withOfficeId(officeId)
+                .build();
+    }
+
+    @Transactional
+    @Override
+    public CommandProcessingResult deleteOfficeTransaction(final Long transactionId, JsonCommand command) {
+
+        context.authenticatedUser();
+        
+        this.officeTransactionRepository.delete(transactionId);
+
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(command.commandId()) //
+                .withEntityId(transactionId) //
                 .build();
     }
 

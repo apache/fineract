@@ -126,6 +126,14 @@ public class CommandWrapperBuilder {
         this.href = "/officetransactions/template";
         return this;
     }
+    
+    public CommandWrapperBuilder deleteOfficeTransaction(final Long transactionId) {
+        this.actionName = "DELETE";
+        this.entityName = "OFFICETRANSACTION";
+        this.entityId = transactionId;
+        this.href = "/officetransactions/" + transactionId;
+        return this;
+    }
 
     public CommandWrapperBuilder createStaff() {
         this.actionName = "CREATE";
