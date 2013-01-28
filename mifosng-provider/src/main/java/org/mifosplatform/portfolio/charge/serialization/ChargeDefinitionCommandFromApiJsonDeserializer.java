@@ -10,19 +10,14 @@ import java.util.Set;
 import org.apache.commons.lang.StringUtils;
 import org.mifosplatform.infrastructure.core.exception.InvalidJsonException;
 import org.mifosplatform.infrastructure.core.serialization.AbstractFromApiJsonDeserializer;
-import org.mifosplatform.infrastructure.core.serialization.FromApiJsonDeserializer;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.portfolio.charge.command.ChargeDefinitionCommand;
-import org.mifosplatform.portfolio.fund.command.FundCommand;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
 
-/**
- * Implementation of {@link FromApiJsonDeserializer} for {@link FundCommand}'s.
- */
 @Component
 public final class ChargeDefinitionCommandFromApiJsonDeserializer extends AbstractFromApiJsonDeserializer<ChargeDefinitionCommand> {
 

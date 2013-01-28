@@ -231,6 +231,21 @@ function getBaseURL(docURL)
                             <td><a href="#configs_code_update">Update a Code</a></td>
                             <td><a href="#configs_code_delete">Delete a Code</a></td>
                         </tr>
+                        <tr class="alt">
+                            <td><a href="#funds">FUNDS</a></td><td>funds</td>
+                            <td><a href="#funds_create">Create a Fund</a></td>
+                            <td><a href="#funds_retrieve">List Funds</a></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr class="alt">
+                            <td></td>
+                            <td>funds/{fundId}</td>
+                            <td></td>
+                            <td><a href="#fund_retrieve">Retrieve a Fund</a></td>
+                            <td><a href="#fund_update">Update a Fund</a></td>
+                            <td></td>
+                        </tr>
                     </table>
                 </div>                
             </div>
@@ -2470,6 +2485,100 @@ Content-Type: application/json
         </div>
     </div>
 
+    <a id="funds" name="funds" class="old-syle-anchor">&nbsp;</a>
+    <div class="method-section">
+        <div class="method-description">
+            <h3>Funds</h3>
+            <p>Simple implementation of funds. At present funds can optionally be associated with a Loan.</p>
+            <p>This information can then be used to produce reports on loans/loan amounts drawn from a fund.</p>
+        </div>
+    </div>
+
+    <a id="funds_create" name="funds_create" class="old-syle-anchor">&nbsp;</a>
+    <div class="method-section">
+        <div class="method-description">
+        <h4>Create a Fund</h4>
+        <p>Creates a fund.</p>
+        </div>
+        <div class="method-example">
+            <code class="method-declaration">POST https://Domain Name/api/v1/funds</code>
+            <code class="method-request">POST funds
+Content-Type: application/json
+Request Body:
+{
+    "name": "EU Agri Fund"
+}
+</code>
+            <code class="method-response">{
+  "resourceId": 1
+}
+            </code>
+        </div>
+    </div>
+
+    <a id="funds_retrieve" name="funds_retrieve" class="old-syle-anchor">&nbsp;</a>
+    <div class="method-section">
+        <div class="method-description">
+            <h4>Retrieve Funds</h4>
+            <p>Returns the list of funds.</p>
+            <p>Example Requests: </p>
+            <div class=apiClick>funds</div>
+        </div>
+        <div class="method-example">
+            <code class="method-declaration">GET https://Domain Name/api/v1/funds</code>
+            <code class="method-response">[
+  {
+    "id": 1,
+    "name": "EU Agri Fund"
+  }
+]
+            </code>
+        </div>
+    </div>
+
+    <a id="fund_retrieve" name="fund_retrieve" class="old-syle-anchor">&nbsp;</a>
+    <div class="method-section">
+        <div class="method-description">
+            <h4>Retrieve a Fund</h4>
+            <p>Returns the details of a Fund.</p>
+            <p>Example Requests: </p>
+            <div class=apiClick>funds/1</div>
+        </div>
+        <div class="method-example">
+            <code class="method-declaration">GET https://Domain Name/api/v1/funds/1</code>
+            <code class="method-response">{
+    "id": 1,
+    "name": "EU Agri Fund"
+}
+            </code>
+        </div>
+    </div>
+
+    <a id="fund_update" name="fund_update" class="old-syle-anchor">&nbsp;</a>
+    <div class="method-section">
+        <div class="method-description">
+        <h4>Update a Fund</h4>
+        <p>Updates the details of a fund.</p>
+        </div>
+        <div class="method-example">
+            <code class="method-declaration">PUT https://Domain Name/api/v1/funds/1</code>
+            <code class="method-request">PUT funds/1
+Content-Type: application/json
+Request Body:
+{
+    "name": "EU Agri Fund (2010-2020)"
+}
+</code>
+            <code class="method-response">{
+  "resourceId": 1,
+  "changes": {
+    "name": "EU Agri Fund (2010-2020)"
+  }
+}
+</code>
+        </div>
+    </div>
+
     <!-- start of datatables api docs -->
         <a id="datatables" name="datatables" class="old-syle-anchor">&nbsp;</a>
         <div class="method-section">
@@ -3575,6 +3684,21 @@ Request body:
                 <td><a href="#configs_code_retrieve">Retrieve a Code</a></td>
                 <td><a href="#configs_code_update">Update a Code</a></td>
                 <td><a href="#configs_code_delete">Delete a Code</a></td>
+            </tr>
+            <tr class="alt">
+                <td><a href="#funds">FUNDS</a></td><td>funds</td>
+                <td><a href="#funds_create">Create a Fund</a></td>
+                <td><a href="#funds_retrieve">List Funds</a></td>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr class="alt">
+                <td></td>
+                <td>funds/{fundId}</td>
+                <td></td>
+                <td><a href="#fund_retrieve">Retrieve a Fund</a></td>
+                <td><a href="#fund_update">Update a Fund</a></td>
+                <td></td>
             </tr>
             <tr><td><a href="#datatables">DATA TABLE</a></td><td>datatables</td><td></td><td><a href="#datatables_list">List Data Tables</a></td><td></td><td></td></tr>
             <tr class="alt"><td></td><td>datatables/register/{datatable}/{apptable}</td><td><a href="#datatables_register">Register Data Table</a></td><td></td><td></td><td></td></tr>

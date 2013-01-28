@@ -1,28 +1,27 @@
 package org.mifosplatform.portfolio.fund.serialization;
 
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
+import org.mifosplatform.infrastructure.core.data.ApiParameterError;
+import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
 import org.mifosplatform.infrastructure.core.exception.InvalidJsonException;
-import org.mifosplatform.infrastructure.core.serialization.AbstractFromApiJsonDeserializer;
-import org.mifosplatform.infrastructure.core.serialization.FromApiJsonDeserializer;
+import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
-import org.mifosplatform.portfolio.fund.command.FundCommand;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
 
-/**
- * Implementation of {@link FromApiJsonDeserializer} for {@link FundCommand}'s.
- */
 @Component
-public final class FundCommandFromApiJsonDeserializer extends AbstractFromApiJsonDeserializer<FundCommand> {
+public final class FundCommandFromApiJsonDeserializer {
 
     /**
      * The parameters supported for this command.
@@ -36,18 +35,51 @@ public final class FundCommandFromApiJsonDeserializer extends AbstractFromApiJso
         this.fromApiJsonHelper = fromApiJsonHelper;
     }
 
-    @Override
-    public FundCommand commandFromApiJson(final String json) {
-
+    public void validateForCreate(final String json) {
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, supportedParameters);
 
-        final JsonElement element = fromApiJsonHelper.parse(json);
-        final String name = fromApiJsonHelper.extractStringNamed("name", element);
-        final String externalId = fromApiJsonHelper.extractStringNamed("externalId", element);
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("code");
 
-        return new FundCommand(name, externalId);
+        final JsonElement element = fromApiJsonHelper.parse(json);
+
+        final String name = fromApiJsonHelper.extractStringNamed("name", element);
+        baseDataValidator.reset().parameter("name").value(name).notBlank().notExceedingLengthOf(255);
+
+        final String externalId = fromApiJsonHelper.extractStringNamed("externalId", element);
+        baseDataValidator.reset().parameter("externalId").value(externalId).notExceedingLengthOf(255);
+
+        throwExceptionIfValidationWarningsExist(dataValidationErrors);
+    }
+
+    public void validateForUpdate(final String json) {
+        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, supportedParameters);
+
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("code");
+
+        final JsonElement element = fromApiJsonHelper.parse(json);
+        if (fromApiJsonHelper.parameterExists("name", element)) {
+            final String name = fromApiJsonHelper.extractStringNamed("name", element);
+            baseDataValidator.reset().parameter("name").value(name).notBlank().notExceedingLengthOf(255);
+        }
+
+        if (fromApiJsonHelper.parameterExists("externalId", element)) {
+            final String externalId = fromApiJsonHelper.extractStringNamed("externalId", element);
+            baseDataValidator.reset().parameter("externalId").value(externalId).notExceedingLengthOf(100);
+        }
+
+        throwExceptionIfValidationWarningsExist(dataValidationErrors);
+    }
+
+    private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
+        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
+                "Validation errors exist.", dataValidationErrors); }
     }
 }
