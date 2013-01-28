@@ -10,6 +10,7 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
+import org.mifosplatform.portfolio.charge.exception.ChargeDueAtDisbursementCannotBePenaltyException;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
@@ -74,6 +75,7 @@ public class Charge extends AbstractPersistable<Long> {
         this.chargeCalculation = chargeCalculationType.getValue();
         this.penalty = penalty;
         this.active = active;
+        if (penalty && chargeTime.isTimeOfDisbursement()) { throw new ChargeDueAtDisbursementCannotBePenaltyException(name); }
     }
 
     public String getName() {
@@ -173,6 +175,8 @@ public class Charge extends AbstractPersistable<Long> {
             actualChanges.put(activeParamName, newValue);
             this.active = newValue;
         }
+        
+        if (this.penalty && ChargeTimeType.fromInt(this.chargeTime).isTimeOfDisbursement()) { throw new ChargeDueAtDisbursementCannotBePenaltyException(name); }
 
         return actualChanges;
     }

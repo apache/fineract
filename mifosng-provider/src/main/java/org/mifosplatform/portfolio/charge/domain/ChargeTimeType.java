@@ -1,9 +1,9 @@
 package org.mifosplatform.portfolio.charge.domain;
 
 public enum ChargeTimeType {
-	
-    INVALID(0, "chargeTimeType.invalid"),
-    DISBURSEMENT(1, "chargeTimeType.disbursement"),
+
+    INVALID(0, "chargeTimeType.invalid"), //
+    DISBURSEMENT(1, "chargeTimeType.disbursement"), //
     SPECIFIED_DUE_DATE(2, "chargeTimeType.specifiedDueDate");
 
     private final Integer value;
@@ -24,17 +24,21 @@ public enum ChargeTimeType {
 
     public static ChargeTimeType fromInt(final Integer chargeTime) {
         ChargeTimeType chargeTimeType = ChargeTimeType.INVALID;
-        switch(chargeTime){
+        switch (chargeTime) {
             case 1:
                 chargeTimeType = DISBURSEMENT;
-                break;
+            break;
             case 2:
                 chargeTimeType = SPECIFIED_DUE_DATE;
-                break;
+            break;
             default:
                 chargeTimeType = INVALID;
-                break;
+            break;
         }
         return chargeTimeType;
+    }
+
+    public boolean isTimeOfDisbursement() {
+        return ChargeTimeType.DISBURSEMENT.getValue().equals(this.value);
     }
 }

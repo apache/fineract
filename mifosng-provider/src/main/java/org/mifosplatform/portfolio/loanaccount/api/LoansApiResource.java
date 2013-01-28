@@ -52,6 +52,7 @@ import org.mifosplatform.portfolio.loanaccount.gaurantor.data.GuarantorData;
 import org.mifosplatform.portfolio.loanaccount.gaurantor.service.GuarantorReadPlatformService;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.data.LoanScheduleData;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.service.LoanScheduleCalculationPlatformService;
+import org.mifosplatform.portfolio.loanaccount.service.LoanChargeReadPlatformService;
 import org.mifosplatform.portfolio.loanaccount.service.LoanReadPlatformService;
 import org.mifosplatform.portfolio.loanproduct.data.LoanProductData;
 import org.mifosplatform.portfolio.loanproduct.data.TransactionProcessingStrategyData;
@@ -88,6 +89,7 @@ public class LoansApiResource {
     private final LoanDropdownReadPlatformService dropdownReadPlatformService;
     private final FundReadPlatformService fundReadPlatformService;
     private final ChargeReadPlatformService chargeReadPlatformService;
+    private final LoanChargeReadPlatformService loanChargeReadPlatformService;
     private final LoanScheduleCalculationPlatformService calculationPlatformService;
     private final StaffReadPlatformService staffReadPlatformService;
     private final GuarantorReadPlatformService guarantorReadPlatformService;
@@ -102,7 +104,7 @@ public class LoansApiResource {
     public LoansApiResource(final PlatformSecurityContext context, final LoanReadPlatformService loanReadPlatformService,
             final LoanProductReadPlatformService loanProductReadPlatformService,
             final LoanDropdownReadPlatformService dropdownReadPlatformService, final FundReadPlatformService fundReadPlatformService,
-            final ChargeReadPlatformService chargeReadPlatformService,
+            final ChargeReadPlatformService chargeReadPlatformService, final LoanChargeReadPlatformService loanChargeReadPlatformService,
             final LoanScheduleCalculationPlatformService calculationPlatformService,
             final StaffReadPlatformService staffReadPlatformService, final GuarantorReadPlatformService guarantorReadPlatformService,
             final DefaultToApiJsonSerializer<LoanAccountData> toApiJsonSerializer,
@@ -116,6 +118,7 @@ public class LoansApiResource {
         this.dropdownReadPlatformService = dropdownReadPlatformService;
         this.fundReadPlatformService = fundReadPlatformService;
         this.chargeReadPlatformService = chargeReadPlatformService;
+        this.loanChargeReadPlatformService = loanChargeReadPlatformService;
         this.calculationPlatformService = calculationPlatformService;
         this.staffReadPlatformService = staffReadPlatformService;
         this.guarantorReadPlatformService = guarantorReadPlatformService;
@@ -154,7 +157,7 @@ public class LoansApiResource {
 
         final boolean feeChargesOnly = false;
         Collection<ChargeData> chargeOptions = this.chargeReadPlatformService.retrieveLoanApplicableCharges(feeChargesOnly);
-        ChargeData chargeTemplate = this.chargeReadPlatformService.retrieveLoanChargeTemplate();
+        ChargeData chargeTemplate = this.loanChargeReadPlatformService.retrieveLoanChargeTemplate();
 
         LoanBasicDetailsData loanBasicDetails;
         Long officeId;
@@ -258,7 +261,7 @@ public class LoansApiResource {
             }
 
             if (associationParameters.contains("charges")) {
-                charges = this.chargeReadPlatformService.retrieveLoanCharges(loanId);
+                charges = this.loanChargeReadPlatformService.retrieveLoanCharges(loanId);
                 if (CollectionUtils.isEmpty(charges)) {
                     charges = null; // set back to null so doesnt appear in JSON
                                     // is no charges exist.
@@ -293,7 +296,7 @@ public class LoansApiResource {
             repaymentStrategyOptions = this.dropdownReadPlatformService.retreiveTransactionProcessingStrategies();
             final boolean feeChargesOnly = false;
             chargeOptions = this.chargeReadPlatformService.retrieveLoanApplicableCharges(feeChargesOnly);
-            chargeTemplate = this.chargeReadPlatformService.retrieveLoanChargeTemplate();
+            chargeTemplate = this.loanChargeReadPlatformService.retrieveLoanChargeTemplate();
         }
 
         final LoanAccountData loanAccount = new LoanAccountData(loanBasicDetails, convenienceDataRequired, repaymentSchedule,

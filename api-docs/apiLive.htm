@@ -261,6 +261,21 @@ function getBaseURL(docURL)
                             <td><a href="#staff_update">Update a Staff Member</a></td>
                             <td></td>
                         </tr>
+                        <tr class="alt">
+                            <td><a href="#charges">CHARGES</a></td><td>charges</td>
+                            <td><a href="#charges_create">Create a Charge</a></td>
+                            <td><a href="#charges_list">List Charges</a></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr class="alt">
+                            <td></td>
+                            <td>charges/{chargeId}</td>
+                            <td></td>
+                            <td><a href="#charges_retrieve">Retrieve a Charge</a></td>
+                            <td><a href="#charges_update">Update a Charge</a></td>
+                            <td><a href="#charges_delete">Delete a Charge</a></td>
+                        </tr>
                     </table>
                 </div>                
             </div>
@@ -2703,6 +2718,207 @@ Request Body:
         </div>
     </div>
 
+
+    <a id="charges" name="charges" class="old-syle-anchor">&nbsp;</a>
+    <div class="method-section">
+        <div class="method-description">
+            <h3>Charges</h3>
+            <p>Its typical for MFIs to add extra costs to their financial products. There are typically <b>Fees</b> or <b>Penalites</b>.</p>
+            <p>Charges is what we use to model both fees and penalities. For now charges can only be associated with loan products / loans.</p>
+        </div>
+    </div>
+
+    <a id="charges_create" name="staff_create" class="old-syle-anchor">&nbsp;</a>
+    <div class="method-section">
+        <div class="method-description">
+        <h4>Create/Define a Charge</h4>
+        <p>Define a new charge that can later be associated with loan products or loans.</p>
+        </div>
+        <div class="method-example">
+            <code class="method-declaration">POST https://Domain Name/api/v1/charges</code>
+            <code class="method-request">POST charges
+Content-Type: application/json
+Request Body:
+{
+    "name": "Loan service fee",
+    "chargeAppliesTo": 1,
+    "currencyCode": "USD",
+    "locale": "en",
+    "amount": "230.56",
+    "chargeTimeType": "1",
+    "chargeCalculationType": "1"
+}
+</code>
+            <code class="method-response">{
+  "resourceId": 2
+}
+            </code>
+        </div>
+    </div>
+
+    <a id="charges_list" name="charges_list" class="old-syle-anchor">&nbsp;</a>
+    <div class="method-section">
+        <div class="method-description">
+            <h4>Retrieve Charges</h4>
+            <p>Returns the list of defined charges.</p>
+            <p>Example Requests: </p>
+            <div class=apiClick>charges</div>
+        </div>
+        <div class="method-example">
+            <code class="method-declaration">GET https://Domain Name/api/v1/charges</code>
+            <code class="method-response">[
+  {
+    "id": 2,
+    "name": "Loan service fee",
+    "active": false,
+    "penalty": false,
+    "currency": {
+      "code": "USD",
+      "name": "US Dollar",
+      "decimalPlaces": 2,
+      "displaySymbol": "$",
+      "nameCode": "currency.USD",
+      "displayLabel": "US Dollar ($)"
+    },
+    "amount": 230.56,
+    "chargeTimeType": {
+      "id": 1,
+      "code": "chargeTimeType.disbursement",
+      "value": "Disbursement"
+    },
+    "chargeAppliesTo": {
+      "id": 1,
+      "code": "chargeAppliesTo.loan",
+      "value": "Loan"
+    },
+    "chargeCalculationType": {
+      "id": 1,
+      "code": "chargeCalculationType.flat",
+      "value": "Flat"
+    }
+  },
+  {
+    "id": 1,
+    "name": "newcharge",
+    "active": true,
+    "penalty": false,
+    "currency": {
+      "code": "USD",
+      "name": "US Dollar",
+      "decimalPlaces": 2,
+      "displaySymbol": "$",
+      "nameCode": "currency.USD",
+      "displayLabel": "US Dollar ($)"
+    },
+    "amount": 456,
+    "chargeTimeType": {
+      "id": 1,
+      "code": "chargeTimeType.disbursement",
+      "value": "Disbursement"
+    },
+    "chargeAppliesTo": {
+      "id": 1,
+      "code": "chargeAppliesTo.loan",
+      "value": "Loan"
+    },
+    "chargeCalculationType": {
+      "id": 1,
+      "code": "chargeCalculationType.flat",
+      "value": "Flat"
+    }
+  }
+]
+            </code>
+        </div>
+    </div>
+
+    <a id="charges_retrieve" name="charges_retrieve" class="old-syle-anchor">&nbsp;</a>
+    <div class="method-section">
+        <div class="method-description">
+            <h4>Retrieve a Charge</h4>
+            <p>Returns the details of a defined Charge.</p>
+            <p>Example Requests: </p>
+            <div class=apiClick>charges/2</div>
+        </div>
+        <div class="method-example">
+            <code class="method-declaration">GET https://Domain Name/api/v1/charges/2</code>
+            <code class="method-response">{
+  "id": 2,
+  "name": "Loan service fee",
+  "active": false,
+  "penalty": false,
+  "currency": {
+    "code": "USD",
+    "name": "US Dollar",
+    "decimalPlaces": 2,
+    "displaySymbol": "$",
+    "nameCode": "currency.USD",
+    "displayLabel": "US Dollar ($)"
+  },
+  "amount": 230.56,
+  "chargeTimeType": {
+    "id": 1,
+    "code": "chargeTimeType.disbursement",
+    "value": "Disbursement"
+  },
+  "chargeAppliesTo": {
+    "id": 1,
+    "code": "chargeAppliesTo.loan",
+    "value": "Loan"
+  },
+  "chargeCalculationType": {
+    "id": 1,
+    "code": "chargeCalculationType.flat",
+    "value": "Flat"
+  }
+}
+            </code>
+        </div>
+    </div>
+
+    <a id="charges_update" name="charges_update" class="old-syle-anchor">&nbsp;</a>
+    <div class="method-section">
+        <div class="method-description">
+        <h4>Update a Charge</h4>
+        <p>Updates the details of a Charge.</p>
+        </div>
+        <div class="method-example">
+            <code class="method-declaration">PUT https://Domain Name/api/v1/charges/1</code>
+            <code class="method-request">PUT charges/1
+Content-Type: application/json
+Request Body:
+{
+    "name": "Loan service fee(changed)"
+}
+</code>
+            <code class="method-response">{
+  "resourceId": 2,
+  "changes": {
+    "name": "Loan service fee(changed)"
+  }
+}
+</code>
+        </div>
+    </div>
+
+    <a id="charges_delete" name="charges_delete" class="old-syle-anchor">&nbsp;</a>
+    <div class="method-section">
+        <div class="method-description">
+        <h4>Delete a Charge</h4>
+        <p>Deletes a Charge.</p>
+        </div>
+        <div class="method-example">
+            <code class="method-declaration">DELETE https://Domain Name/api/v1/charges/2</code>
+            <code class="method-request">DELETE charges/2
+Content-Type: application/json
+</code>
+            <code class="method-response">{
+  "resourceId": 2
+}
+</code>
+        </div>
+    </div>
+
     <!-- start of datatables api docs -->
         <a id="datatables" name="datatables" class="old-syle-anchor">&nbsp;</a>
         <div class="method-section">
@@ -3838,6 +4054,21 @@ Request body:
                 <td><a href="#staff_retrieve">Retrieve a Staff Member</a></td>
                 <td><a href="#staff_update">Update a Staff Member</a></td>
                 <td></td>
+            </tr>
+            <tr class="alt">
+                <td><a href="#charges">CHARGES</a></td><td>charges</td>
+                <td><a href="#charges_create">Create a Charge</a></td>
+                <td><a href="#charges_list">List Charges</a></td>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr class="alt">
+                <td></td>
+                <td>charges/{chargeId}</td>
+                <td></td>
+                <td><a href="#charges_retrieve">Retrieve a Charge</a></td>
+                <td><a href="#charges_update">Update a Charge</a></td>
+                <td><a href="#charges_delete">Delete a Charge</a></td>            
             </tr>
             <tr><td><a href="#datatables">DATA TABLE</a></td><td>datatables</td><td></td><td><a href="#datatables_list">List Data Tables</a></td><td></td><td></td></tr>
             <tr class="alt"><td></td><td>datatables/register/{datatable}/{apptable}</td><td><a href="#datatables_register">Register Data Table</a></td><td></td><td></td><td></td></tr>
