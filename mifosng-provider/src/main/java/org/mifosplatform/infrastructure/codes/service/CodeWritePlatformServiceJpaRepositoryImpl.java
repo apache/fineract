@@ -2,7 +2,6 @@ package org.mifosplatform.infrastructure.codes.service;
 
 import java.util.Map;
 
-import org.mifosplatform.infrastructure.codes.command.CodeCommand;
 import org.mifosplatform.infrastructure.codes.domain.Code;
 import org.mifosplatform.infrastructure.codes.domain.CodeRepository;
 import org.mifosplatform.infrastructure.codes.exception.CodeNotFoundException;
@@ -44,9 +43,8 @@ public class CodeWritePlatformServiceJpaRepositoryImpl implements CodeWritePlatf
         try {
             context.authenticatedUser();
 
-            final CodeCommand codeCommand = this.fromApiJsonDeserializer.commandFromApiJson(command.json());
-            codeCommand.validateForCreate();
-
+            this.fromApiJsonDeserializer.validateForCreate(command.json());
+            
             final Code code = Code.fromJson(command);
             this.codeRepository.save(code);
 
@@ -62,17 +60,21 @@ public class CodeWritePlatformServiceJpaRepositoryImpl implements CodeWritePlatf
 
         try {
             context.authenticatedUser();
-            final CodeCommand codeCommand = this.fromApiJsonDeserializer.commandFromApiJson(command.json());
-            codeCommand.validateForUpdate();
-
+            
+            this.fromApiJsonDeserializer.validateForUpdate(command.json());
+            
             final Code code = retrieveCodeBy(codeId);
-            Map<String, Object> changes = code.update(command);
+            final Map<String, Object> changes = code.update(command);
 
             if (!changes.isEmpty()) {
                 this.codeRepository.save(code);
             }
 
-            return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(codeId).with(changes).build();
+            return new CommandProcessingResultBuilder() //
+                    .withCommandId(command.commandId()) //
+                    .withEntityId(codeId) //
+                    .with(changes) //
+                    .build();
         } catch (DataIntegrityViolationException dve) {
             handleCodeDataIntegrityIssues(command, dve);
             return null;

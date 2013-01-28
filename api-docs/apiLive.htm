@@ -213,8 +213,23 @@ function getBaseURL(docURL)
                             <td><a href="#configs_global">GLOBAL CONFIGURATION</a></td><td>configurations</td>
                             <td></td>
                             <td><a href="#configs_globalconfig_retrieve">Retrieve Global Configuration</a></td>
-                            <td><a href="#configs_globalconfig_currencyupdate">Update Global Configuration</a></td>
+                            <td><a href="#configs_globalconfig_update">Update Global Configuration</a></td>
                             <td></td>
+                        </tr>
+                        <tr class="alt">
+                            <td><a href="#configs_codes">CODES</a></td><td>codes</td>
+                            <td><a href="#configs_codes_create">Create a Code</a></td>
+                            <td><a href="#configs_codes_retrieve">List Codes</a></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr class="alt">
+                            <td></td>
+                            <td>codes/{codeId}</td>
+                            <td></td>
+                            <td><a href="#configs_code_retrieve">Retrieve a Code</a></td>
+                            <td><a href="#configs_code_update">Update a Code</a></td>
+                            <td><a href="#configs_code_delete">Delete a Code</a></td>
                         </tr>
                     </table>
                 </div>                
@@ -2315,7 +2330,7 @@ Request Body:
         </div>
     </div>
 
-     <a id="configs_globalconfig_currencyupdate" name="configs_globalconfig_currencyupdate" class="old-syle-anchor">&nbsp;</a>
+     <a id="configs_globalconfig_update" name="configs_globalconfig_update" class="old-syle-anchor">&nbsp;</a>
     <div class="method-section">
        <div class="method-description">
            <h4>Update Global Configuration</h4>
@@ -2333,6 +2348,125 @@ Request Body:
   "changes": {}
 }
         </code>
+        </div>
+    </div>
+
+    <a id="configs_codes" name="configs_codes" class="old-syle-anchor">&nbsp;</a>
+    <div class="method-section">
+        <div class="method-description">
+            <h3>Codes</h3>
+            <p>Code and code values: Codes represent a specific category of data, their code values are a specific instance of that category.</p>
+            <p>Codes are mostly <b>system defined</b> which means the code itself comes out of the box and cannot be modifed however its code values can be. e.g. 'Customer Identifier', it defaults to a code value of 'Passport' but could be 'Drivers License, National Id' etc<p/>
+        </div>
+    </div>
+
+    <a id="configs_codes_create" name="configs_codes_create" class="old-syle-anchor">&nbsp;</a>
+    <div class="method-section">
+        <div class="method-description">
+        <h4>Create a Code</h4>
+        <p>Creates a code. Codes created through api are always 'user defined' and so system defined is marked as false.</p>
+        </div>
+        <div class="method-example">
+            <code class="method-declaration">POST https://Domain Name/api/v1/codes</code>
+            <code class="method-request">POST codes
+Content-Type: application/json
+Request Body:
+{
+    "name": "MyNewCode"
+}
+</code>
+            <code class="method-response">{
+  "resourceId": 2
+}
+            </code>
+        </div>
+    </div>
+
+    <a id="configs_codes_retrieve" name="configs_codes_retrieve" class="old-syle-anchor">&nbsp;</a>
+    <div class="method-section">
+        <div class="method-description">
+            <h4>Retrieve Codes</h4>
+            <p>Returns the list of codes.</p>
+            <p>Example Requests: </p>
+            <div class=apiClick>codes</div>
+        </div>
+        <div class="method-example">
+            <code class="method-declaration">GET https://Domain Name/api/v1/codes</code>
+            <code class="method-response">[
+  {
+    "id": 1,
+    "name": "Customer Identifier",
+    "systemDefined": true
+  },
+  {
+    "id": 2,
+    "name": "MyNewCode",
+    "systemDefined": false
+  }
+]
+            </code>
+        </div>
+    </div>
+
+    <a id="configs_code_retrieve" name="configs_code_retrieve" class="old-syle-anchor">&nbsp;</a>
+    <div class="method-section">
+        <div class="method-description">
+            <h4>Retrieve a Code</h4>
+            <p>Returns the details of a Code.</p>
+            <p>Example Requests: </p>
+            <div class=apiClick>codes/1</div>
+        </div>
+        <div class="method-example">
+            <code class="method-declaration">GET https://Domain Name/api/v1/codes/1</code>
+            <code class="method-response">{
+    "id": 1,
+    "name": "Customer Identifier",
+    "systemDefined": true
+}
+            </code>
+        </div>
+    </div>
+
+    <a id="configs_code_update" name="configs_codes_update" class="old-syle-anchor">&nbsp;</a>
+    <div class="method-section">
+        <div class="method-description">
+        <h4>Update a Code</h4>
+        <p>Updates the details of a code if it is not system defined.</p>
+        </div>
+        <div class="method-example">
+            <code class="method-declaration">PUT https://Domain Name/api/v1/codes/2</code>
+            <code class="method-request">PUT codes/2
+Content-Type: application/json
+Request Body:
+{
+    "name": "MyNewCode(changed)"
+}
+</code>
+            <code class="method-response">{
+  "resourceId": 2,
+  "changes": {
+    "name": "MyNewCode(changed)"
+  }
+}
+</code>
+        </div>
+    </div>
+
+    <a id="configs_code_delete" name="configs_code_delete" class="old-syle-anchor">&nbsp;</a>
+    <div class="method-section">
+        <div class="method-description">
+        <h4>Delete a Code</h4>
+        <p>Deletes a code if it is not system defined.</p>
+        </div>
+        <div class="method-example">
+            <code class="method-declaration">DELETE https://Domain Name/api/v1/codes/2</code>
+            <code class="method-request">DELETE codes/2
+Content-Type: application/json
+</code>
+            <code class="method-response">{
+  "resourceId": 2
+}
+            </code>
         </div>
     </div>
 
@@ -3424,8 +3558,23 @@ Request body:
                 <td><a href="#configs_global">GLOBAL CONFIGURATION</a></td><td>configurations</td>
                 <td></td>
                 <td><a href="#configs_globalconfig_retrieve">Retrieve Global Configuration</a></td>
-                <td><a href="#configs_globalconfig_currencyupdate">Update Global Configuration</a></td>
+                <td><a href="#configs_globalconfig_update">Update Global Configuration</a></td>
                 <td></td>
+            </tr>
+            <tr class="alt">
+                <td><a href="#configs_codes">CODES</a></td><td>codes</td>
+                <td><a href="#configs_codes_create">Create a Code</a></td>
+                <td><a href="#configs_codes_retrieve">List Codes</a></td>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr class="alt">
+                <td></td>
+                <td>codes/{codeId}</td>
+                <td></td>
+                <td><a href="#configs_code_retrieve">Retrieve a Code</a></td>
+                <td><a href="#configs_code_update">Update a Code</a></td>
+                <td><a href="#configs_code_delete">Delete a Code</a></td>
             </tr>
             <tr><td><a href="#datatables">DATA TABLE</a></td><td>datatables</td><td></td><td><a href="#datatables_list">List Data Tables</a></td><td></td><td></td></tr>
             <tr class="alt"><td></td><td>datatables/register/{datatable}/{apptable}</td><td><a href="#datatables_register">Register Data Table</a></td><td></td><td></td><td></td></tr>
