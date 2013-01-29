@@ -21,9 +21,6 @@ import org.mifosplatform.infrastructure.core.data.ApiParameterError;
 import org.mifosplatform.infrastructure.core.exception.InvalidJsonException;
 import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.mifosplatform.infrastructure.core.exception.UnsupportedParameterException;
-import org.mifosplatform.portfolio.client.command.ClientCommand;
-import org.mifosplatform.portfolio.client.data.ClientData;
-import org.mifosplatform.portfolio.client.serialization.ClientCommandFromApiJsonDeserializer;
 import org.mifosplatform.portfolio.group.command.GroupCommand;
 import org.mifosplatform.portfolio.savingsaccount.command.SavingAccountApprovalCommand;
 import org.mifosplatform.portfolio.savingsaccount.command.SavingAccountCommand;
@@ -37,7 +34,6 @@ import org.mifosplatform.portfolio.savingsdepositaccount.command.DepositAccountW
 import org.mifosplatform.portfolio.savingsdepositaccount.command.DepositStateTransitionApprovalCommand;
 import org.mifosplatform.portfolio.savingsdepositaccount.command.DepositStateTransitionCommand;
 import org.mifosplatform.portfolio.savingsdepositproduct.command.DepositProductCommand;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.number.NumberFormatter;
 import org.springframework.stereotype.Service;
 
@@ -56,21 +52,8 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
      */
     private final Gson gsonConverter;
 
-    private final ClientCommandFromApiJsonDeserializer clientCommandFromApiJsonDeserializer;
-
-    @Autowired
-    public PortfolioApiDataConversionServiceImpl(final ClientCommandFromApiJsonDeserializer clientCommandFromApiJsonDeserializer) {
-        this.clientCommandFromApiJsonDeserializer = clientCommandFromApiJsonDeserializer;
+    public PortfolioApiDataConversionServiceImpl() {
         this.gsonConverter = new Gson();
-    }
-
-    @Override
-    public ClientData convertInternalJsonFormatToClientDataChange(final Long resourceIdentifier, final String json) {
-
-        final ClientCommand command = this.clientCommandFromApiJsonDeserializer.commandFromApiJson(json);
-
-        return ClientData.dataChangeInstance(resourceIdentifier, command.getOfficeId(), command.getExternalId(), command.getFirstname(),
-                command.getMiddlename(), command.getLastname(), command.getFullname(), command.getJoiningDate());
     }
 
     @Override
@@ -815,9 +798,9 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
         // currencyCode, currencyDigits
         Set<String> supportedParams = new HashSet<String>(Arrays.asList("clientId", "productId", "externalId", "currencyCode",
                 "digitsAfterDecimal", "savingsDepositAmountPerPeriod", "recurringInterestRate", "savingInterestRate", "tenure",
-                "commencementDate", "locale", "dateFormat", "isLockinPeriodAllowed", "lockinPeriod", "lockinPeriodType",
-                "tenureType", "depositfrequency", "interestType", "interestCalculationMethod", "minimumBalanceForWithdrawal",
-                "isPartialDepositAllowed", "depositEvery","interestPostEvery","interestPostFrequency"));
+                "commencementDate", "locale", "dateFormat", "isLockinPeriodAllowed", "lockinPeriod", "lockinPeriodType", "tenureType",
+                "depositfrequency", "interestType", "interestCalculationMethod", "minimumBalanceForWithdrawal", "isPartialDepositAllowed",
+                "depositEvery", "interestPostEvery", "interestPostFrequency"));
         checkForUnsupportedParameters(requestMap, supportedParams);
         Set<String> modifiedParameters = new HashSet<String>();
 
@@ -843,21 +826,20 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
         BigDecimal minimumBalanceForWithdrawal = extractBigDecimalParameter("minimumBalanceForWithdrawal", requestMap, modifiedParameters);
         boolean isPartialDepositAllowed = extractBooleanParameter("isPartialDepositAllowed", requestMap, modifiedParameters);
         Integer depositEvery = extractIntegerParameter("depositEvery", requestMap, modifiedParameters);
-        
+
         Integer interestPostEvery = extractIntegerParameter("interestPostEvery", requestMap, modifiedParameters);
         Integer interestPostFrequency = extractIntegerParameter("interestPostFrequency", requestMap, modifiedParameters);
 
         return new SavingAccountCommand(modifiedParameters, resourceIdentifier, clientId, productId, externalId, currencyCode,
                 digitsAfterDecimalValue, savingsDepositAmount, recurringInterestRate, savingInterestRate, tenure, commencementDate,
-                tenureType, depositfrequency, interestType, minimumBalanceForWithdrawal, interestCalculationMethod,
-                isLockinPeriodAllowed, isPartialDepositAllowed, lockinPeriod, lockinPeriodType, depositEvery, interestPostEvery, interestPostFrequency);
+                tenureType, depositfrequency, interestType, minimumBalanceForWithdrawal, interestCalculationMethod, isLockinPeriodAllowed,
+                isPartialDepositAllowed, lockinPeriod, lockinPeriodType, depositEvery, interestPostEvery, interestPostFrequency);
     }
 
+    @Override
+    public SavingStateTransitionsCommand convertJsonToSavingStateTransitionCommand(Long accountId, String json) {
 
-        @Override
-        public SavingStateTransitionsCommand convertJsonToSavingStateTransitionCommand( Long accountId, String json) {
-                
-       if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         Map<String, Object> requestMap = gsonConverter.fromJson(json, typeOfMap);
@@ -872,26 +854,27 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
         String note = extractStringParameter("note", requestMap, modifiedParameters);
 
         return new SavingStateTransitionsCommand(accountId, eventDate, note);
-                
-        }
 
-        @Override
-        public SavingAccountApprovalCommand convertJsonToSavingApprovalCommand( Long accountId, String json) {
-                
-                if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
-                
-                Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+    }
+
+    @Override
+    public SavingAccountApprovalCommand convertJsonToSavingApprovalCommand(Long accountId, String json) {
+
+        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+
+        Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         Map<String, Object> requestMap = gsonConverter.fromJson(json, typeOfMap);
-        
-        Set<String> supportedParams = new HashSet<String>(Arrays.asList("locale", "dateFormat", "commencementDate", "savingsDepositAmountPerPeriod",
-                        "minimumBalanceForWithdrawal", "recurringInterestRate", "savingInterestRate", "interestType", "tenure", "tenureType", "frequency", "payEvery", "note",
-                        "interestPostEvery", "interestPostFrequency"));
-        
+
+        Set<String> supportedParams = new HashSet<String>(Arrays.asList("locale", "dateFormat", "commencementDate",
+                "savingsDepositAmountPerPeriod", "minimumBalanceForWithdrawal", "recurringInterestRate", "savingInterestRate",
+                "interestType", "tenure", "tenureType", "frequency", "payEvery", "note", "interestPostEvery", "interestPostFrequency"));
+
         checkForUnsupportedParameters(requestMap, supportedParams);
         Set<String> modifiedParameters = new HashSet<String>();
-        
+
         LocalDate commencementDate = extractLocalDateParameter("commencementDate", requestMap, modifiedParameters);
-        BigDecimal savingsDepositAmountPerPeriod = extractBigDecimalParameter("savingsDepositAmountPerPeriod", requestMap, modifiedParameters);
+        BigDecimal savingsDepositAmountPerPeriod = extractBigDecimalParameter("savingsDepositAmountPerPeriod", requestMap,
+                modifiedParameters);
         BigDecimal minimumBalanceForWithdrawal = extractBigDecimalParameter("minimumBalanceForWithdrawal", requestMap, modifiedParameters);
         BigDecimal recurringInterestRate = extractBigDecimalParameter("recurringInterestRate", requestMap, modifiedParameters);
         BigDecimal savingInterestRate = extractBigDecimalParameter("savingInterestRate", requestMap, modifiedParameters);
@@ -903,43 +886,46 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
         String note = extractStringParameter("note", requestMap, modifiedParameters);
         Integer interestPostEvery = extractIntegerParameter("interestPostEvery", requestMap, modifiedParameters);
         Integer interestPostFrequency = extractIntegerParameter("interestPostFrequency", requestMap, modifiedParameters);
-                return new SavingAccountApprovalCommand(accountId, commencementDate, savingsDepositAmountPerPeriod, minimumBalanceForWithdrawal, recurringInterestRate,
-                                savingInterestRate, interestType, tenure, tenureType, frequency, payEvery, note, interestPostEvery, interestPostFrequency);
-        }
+        return new SavingAccountApprovalCommand(accountId, commencementDate, savingsDepositAmountPerPeriod, minimumBalanceForWithdrawal,
+                recurringInterestRate, savingInterestRate, interestType, tenure, tenureType, frequency, payEvery, note, interestPostEvery,
+                interestPostFrequency);
+    }
 
-        @Override
-        public SavingAccountDepositCommand convertJsonToSavingAccountDepositCommand(Long accountId, String json) {
-                if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
-                
-                Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+    @Override
+    public SavingAccountDepositCommand convertJsonToSavingAccountDepositCommand(Long accountId, String json) {
+        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+
+        Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         Map<String, Object> requestMap = gsonConverter.fromJson(json, typeOfMap);
-        
-        Set<String> supportedParams = new HashSet<String>(Arrays.asList("locale", "dateFormat", "depositDate", "savingsDepositAmountPerPeriod", "note"));
-        
+
+        Set<String> supportedParams = new HashSet<String>(Arrays.asList("locale", "dateFormat", "depositDate",
+                "savingsDepositAmountPerPeriod", "note"));
+
         checkForUnsupportedParameters(requestMap, supportedParams);
         Set<String> modifiedParameters = new HashSet<String>();
-        
+
         LocalDate depositDate = extractLocalDateParameter("depositDate", requestMap, modifiedParameters);
-        BigDecimal savingsDepositAmountPerPeriod = extractBigDecimalParameter("savingsDepositAmountPerPeriod", requestMap, modifiedParameters);
+        BigDecimal savingsDepositAmountPerPeriod = extractBigDecimalParameter("savingsDepositAmountPerPeriod", requestMap,
+                modifiedParameters);
         String note = extractStringParameter("note", requestMap, modifiedParameters);
-                return new SavingAccountDepositCommand(accountId, savingsDepositAmountPerPeriod, depositDate, note);
-        }
+        return new SavingAccountDepositCommand(accountId, savingsDepositAmountPerPeriod, depositDate, note);
+    }
 
-        @Override
-        public SavingAccountWithdrawalCommand convertJsonToSavingAccountWithdrawalCommand(Long accountId, String json) {
-                if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
-                
-                Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+    @Override
+    public SavingAccountWithdrawalCommand convertJsonToSavingAccountWithdrawalCommand(Long accountId, String json) {
+        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+
+        Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         Map<String, Object> requestMap = gsonConverter.fromJson(json, typeOfMap);
-        
+
         Set<String> supportedParams = new HashSet<String>(Arrays.asList("locale", "dateFormat", "transactionDate", "amount", "note"));
-        
+
         checkForUnsupportedParameters(requestMap, supportedParams);
         Set<String> modifiedParameters = new HashSet<String>();
-        
+
         LocalDate transactionDate = extractLocalDateParameter("transactionDate", requestMap, modifiedParameters);
         BigDecimal amount = extractBigDecimalParameter("amount", requestMap, modifiedParameters);
         String note = extractStringParameter("note", requestMap, modifiedParameters);
-                return new SavingAccountWithdrawalCommand(accountId, transactionDate, amount, note);
-        }
+        return new SavingAccountWithdrawalCommand(accountId, transactionDate, amount, note);
+    }
 }

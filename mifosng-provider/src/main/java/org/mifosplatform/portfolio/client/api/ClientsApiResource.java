@@ -34,10 +34,11 @@ import org.mifosplatform.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.office.data.OfficeLookup;
 import org.mifosplatform.organisation.office.service.OfficeReadPlatformService;
+import org.mifosplatform.portfolio.client.command.ClientCommand;
 import org.mifosplatform.portfolio.client.data.ClientAccountSummaryCollectionData;
 import org.mifosplatform.portfolio.client.data.ClientData;
+import org.mifosplatform.portfolio.client.serialization.ClientCommandFromApiJsonDeserializer;
 import org.mifosplatform.portfolio.client.service.ClientReadPlatformService;
-import org.mifosplatform.portfolio.savingsaccount.PortfolioApiDataConversionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -47,8 +48,9 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class ClientsApiResource {
 
-    private final Set<String> CLIENT_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "accountNo", "officeId", "officeName", "externalId",
-            "firstname", "middlename", "lastname", "fullname", "joinedDate", "displayName", "clientOrBusinessName", "allowedOffices", "imagePresent"));
+    private final Set<String> CLIENT_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "accountNo", "officeId", "officeName",
+            "externalId", "firstname", "middlename", "lastname", "fullname", "joinedDate", "displayName", "clientOrBusinessName",
+            "allowedOffices", "imagePresent"));
 
     private final PlatformSecurityContext context;
     private final ClientReadPlatformService clientReadPlatformService;
@@ -56,24 +58,25 @@ public class ClientsApiResource {
     private final ToApiJsonSerializer<ClientData> toApiJsonSerializer;
     private final ToApiJsonSerializer<ClientAccountSummaryCollectionData> clientAccountSummaryToApiJsonSerializer;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
-    private final PortfolioApiDataConversionService apiDataConversionService;
     private final PortfolioCommandsReadPlatformService commandSourceReadPlatformService;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
+    private final ClientCommandFromApiJsonDeserializer clientCommandFromApiJsonDeserializer;
 
     @Autowired
     public ClientsApiResource(final PlatformSecurityContext context, final ClientReadPlatformService readPlatformService,
             final OfficeReadPlatformService officeReadPlatformService, final ToApiJsonSerializer<ClientData> toApiJsonSerializer,
+            final ClientCommandFromApiJsonDeserializer clientCommandFromApiJsonDeserializer,
             final ToApiJsonSerializer<ClientAccountSummaryCollectionData> clientAccountSummaryToApiJsonSerializer,
-            final ApiRequestParameterHelper apiRequestParameterHelper, final PortfolioApiDataConversionService apiDataConversionService,
+            final ApiRequestParameterHelper apiRequestParameterHelper,
             final PortfolioCommandsReadPlatformService commandsReadPlatformService,
             final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
         this.context = context;
         this.clientReadPlatformService = readPlatformService;
         this.officeReadPlatformService = officeReadPlatformService;
         this.toApiJsonSerializer = toApiJsonSerializer;
+        this.clientCommandFromApiJsonDeserializer = clientCommandFromApiJsonDeserializer;
         this.clientAccountSummaryToApiJsonSerializer = clientAccountSummaryToApiJsonSerializer;
         this.apiRequestParameterHelper = apiRequestParameterHelper;
-        this.apiDataConversionService = apiDataConversionService;
         this.commandSourceReadPlatformService = commandsReadPlatformService;
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
     }
@@ -173,7 +176,10 @@ public class ClientsApiResource {
     private ClientData handleRequestToIntegrateProposedChangesFromCommand(final Long clientId, final Long commandId,
             final ClientData clientData) {
         final CommandSourceData entry = this.commandSourceReadPlatformService.retrieveById(commandId);
-        final ClientData currentChange = this.apiDataConversionService.convertInternalJsonFormatToClientDataChange(clientId, entry.json());
+
+        final ClientCommand command = this.clientCommandFromApiJsonDeserializer.commandFromApiJson(entry.json());
+        final ClientData currentChange = ClientData.dataChangeInstance(clientId, command.getOfficeId(), command.getExternalId(),
+                command.getFirstname(), command.getMiddlename(), command.getLastname(), command.getFullname(), command.getJoiningDate());
 
         final Collection<ClientData> dataChanges = null; // retrieveAllUnprocessedDataChanges(clientId);
         return ClientData.integrateChanges(clientData, currentChange, dataChanges);
@@ -185,8 +191,10 @@ public class ClientsApiResource {
         Collection<CommandSourceData> unprocessedChanges = this.commandSourceReadPlatformService.retrieveUnprocessChangesByEntityNameAndId(
                 "CLIENT", clientId);
         for (CommandSourceData commandSourceData : unprocessedChanges) {
-            ClientData change = this.apiDataConversionService.convertInternalJsonFormatToClientDataChange(clientId,
-                    commandSourceData.json());
+            final ClientCommand command = this.clientCommandFromApiJsonDeserializer.commandFromApiJson(commandSourceData.json());
+            final ClientData change = ClientData
+                    .dataChangeInstance(clientId, command.getOfficeId(), command.getExternalId(), command.getFirstname(),
+                            command.getMiddlename(), command.getLastname(), command.getFullname(), command.getJoiningDate());
             dataChanges.add(change);
         }
 

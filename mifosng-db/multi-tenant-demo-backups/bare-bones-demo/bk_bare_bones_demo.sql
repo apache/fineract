@@ -429,19 +429,11 @@ CREATE TABLE `m_client` (
   `display_name` varchar(100) NOT NULL,
   `image_key` varchar(500) DEFAULT NULL,
   `joined_date` date DEFAULT NULL,
-  `createdby_id` bigint(20) DEFAULT NULL,
-  `created_date` datetime DEFAULT NULL,
-  `lastmodified_date` datetime DEFAULT NULL,
-  `lastmodifiedby_id` bigint(20) DEFAULT NULL,
   `is_deleted` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `account_no_UNIQUE` (`account_no`),
   UNIQUE KEY `external_id` (`external_id`),
   KEY `FKCE00CAB3E0DD567A` (`office_id`),
-  KEY `FKAUD0000000000001` (`createdby_id`),
-  KEY `FKAUD0000000000002` (`lastmodifiedby_id`),
-  CONSTRAINT `FKAUD0000000000001` FOREIGN KEY (`createdby_id`) REFERENCES `m_appuser` (`id`),
-  CONSTRAINT `FKAUD0000000000002` FOREIGN KEY (`lastmodifiedby_id`) REFERENCES `m_appuser` (`id`),
   CONSTRAINT `FKCE00CAB3E0DD567A` FOREIGN KEY (`office_id`) REFERENCES `m_office` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=347 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -813,18 +805,10 @@ CREATE TABLE `m_group` (
   `name` varchar(100) DEFAULT NULL,
   `external_id` varchar(100) DEFAULT NULL,
   `is_deleted` tinyint(1) NOT NULL DEFAULT '0',
-  `createdby_id` bigint(20) DEFAULT NULL,
-  `created_date` datetime DEFAULT NULL,
-  `lastmodified_date` datetime DEFAULT NULL,
-  `lastmodifiedby_id` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`),
   UNIQUE KEY `external_id` (`external_id`),
-  KEY `FKJPWG000000000003` (`createdby_id`),
-  KEY `FKJPWG000000000004` (`lastmodifiedby_id`),
   KEY `office_id` (`office_id`),
-  CONSTRAINT `FKJPWG000000000003` FOREIGN KEY (`createdby_id`) REFERENCES `m_appuser` (`id`),
-  CONSTRAINT `FKJPWG000000000004` FOREIGN KEY (`lastmodifiedby_id`) REFERENCES `m_appuser` (`id`),
   CONSTRAINT `m_group_ibfk_1` FOREIGN KEY (`office_id`) REFERENCES `m_office` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -1471,19 +1455,11 @@ CREATE TABLE `m_product_loan` (
   `number_of_repayments` smallint(5) NOT NULL,
   `amortization_method_enum` smallint(5) NOT NULL,
   `accounting_type` smallint(5) NOT NULL,
-  `createdby_id` bigint(20) DEFAULT NULL,
-  `created_date` datetime DEFAULT NULL,
-  `lastmodified_date` datetime DEFAULT NULL,
-  `lastmodifiedby_id` bigint(20) DEFAULT NULL,
   `loan_transaction_strategy_id` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`id`),
-  KEY `FKAUD0000000000003` (`createdby_id`),
-  KEY `FKAUD0000000000004` (`lastmodifiedby_id`),
   KEY `FKA6A8A7D77240145` (`fund_id`),
   KEY `FK_ltp_strategy` (`loan_transaction_strategy_id`),
   CONSTRAINT `FKA6A8A7D77240145` FOREIGN KEY (`fund_id`) REFERENCES `m_fund` (`id`),
-  CONSTRAINT `FKAUD0000000000003` FOREIGN KEY (`createdby_id`) REFERENCES `m_appuser` (`id`),
-  CONSTRAINT `FKAUD0000000000004` FOREIGN KEY (`lastmodifiedby_id`) REFERENCES `m_appuser` (`id`),
   CONSTRAINT `FK_ltp_strategy` FOREIGN KEY (`loan_transaction_strategy_id`) REFERENCES `ref_loan_transaction_processing_strategy` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -2058,4 +2034,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2013-01-29 12:54:03
+-- Dump completed on 2013-01-29 20:18:19

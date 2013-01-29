@@ -1,0 +1,11 @@
+ALTER TABLE `m_product_loan` 
+DROP FOREIGN KEY `FKAUD0000000000004` , 
+DROP FOREIGN KEY `FKAUD0000000000003` ; 
+
+ALTER TABLE `m_product_loan` 
+DROP COLUMN `lastmodifiedby_id` , 
+DROP COLUMN `lastmodified_date` , 
+DROP COLUMN `created_date` , 
+DROP COLUMN `createdby_id`  , 
+DROP INDEX `FKAUD0000000000004`, 
+DROP INDEX `FKAUD0000000000003`;

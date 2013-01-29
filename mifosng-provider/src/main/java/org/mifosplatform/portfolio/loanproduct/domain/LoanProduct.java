@@ -17,12 +17,11 @@ import javax.persistence.Table;
 
 import org.apache.commons.lang.StringUtils;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
-import org.mifosplatform.infrastructure.core.domain.AbstractAuditableCustom;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.portfolio.charge.domain.Charge;
 import org.mifosplatform.portfolio.fund.domain.Fund;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.AprCalculator;
-import org.mifosplatform.useradministration.domain.AppUser;
+import org.springframework.data.jpa.domain.AbstractPersistable;
 
 /**
  * Loan products allow for categorisation of an organisations loans into
@@ -35,7 +34,7 @@ import org.mifosplatform.useradministration.domain.AppUser;
  */
 @Entity
 @Table(name = "m_product_loan")
-public class LoanProduct extends AbstractAuditableCustom<AppUser, Long> {
+public class LoanProduct extends AbstractPersistable<Long> {
 
     @ManyToOne
     @JoinColumn(name = "fund_id", nullable = true)
@@ -220,12 +219,12 @@ public class LoanProduct extends AbstractAuditableCustom<AppUser, Long> {
     public boolean isAccountingEnabled() {
         return !AccountingRuleType.NONE.getValue().equals(this.accountingType);
     }
-    
-    public boolean isCashBasedAccountingEnabled(){
+
+    public boolean isCashBasedAccountingEnabled() {
         return AccountingRuleType.CASH_BASED.getValue().equals(this.accountingType);
     }
-    
-    public boolean isAccrualBasedAccountingEnabled(){
+
+    public boolean isAccrualBasedAccountingEnabled() {
         return AccountingRuleType.ACCRUAL_BASED.getValue().equals(this.accountingType);
     }
 }

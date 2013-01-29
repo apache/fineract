@@ -1475,19 +1475,11 @@ CREATE TABLE `m_product_loan` (
   `number_of_repayments` smallint(5) NOT NULL,
   `amortization_method_enum` smallint(5) NOT NULL,
   `accounting_type` smallint(5) NOT NULL,
-  `createdby_id` bigint(20) DEFAULT NULL,
-  `created_date` datetime DEFAULT NULL,
-  `lastmodified_date` datetime DEFAULT NULL,
-  `lastmodifiedby_id` bigint(20) DEFAULT NULL,
   `loan_transaction_strategy_id` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`id`),
-  KEY `FKAUD0000000000003` (`createdby_id`),
-  KEY `FKAUD0000000000004` (`lastmodifiedby_id`),
   KEY `FKA6A8A7D77240145` (`fund_id`),
   KEY `FK_ltp_strategy` (`loan_transaction_strategy_id`),
   CONSTRAINT `FKA6A8A7D77240145` FOREIGN KEY (`fund_id`) REFERENCES `m_fund` (`id`),
-  CONSTRAINT `FKAUD0000000000003` FOREIGN KEY (`createdby_id`) REFERENCES `m_appuser` (`id`),
-  CONSTRAINT `FKAUD0000000000004` FOREIGN KEY (`lastmodifiedby_id`) REFERENCES `m_appuser` (`id`),
   CONSTRAINT `FK_ltp_strategy` FOREIGN KEY (`loan_transaction_strategy_id`) REFERENCES `ref_loan_transaction_processing_strategy` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -1498,7 +1490,7 @@ CREATE TABLE `m_product_loan` (
 
 LOCK TABLES `m_product_loan` WRITE;
 /*!40000 ALTER TABLE `m_product_loan` DISABLE KEYS */;
-INSERT INTO `m_product_loan` VALUES (1,'HKD',2,'700000.000000',NULL,'PORetailLoan',NULL,4,'5.000000',2,'21.000000',0,1,1,2,120,1,1,1,'2012-04-12 22:14:34','2012-12-12 08:10:01',24,1),(2,'LBP',2,'35000.000000','10.000000','Different Loan Type',NULL,NULL,'1.000000',2,'12.000000',0,1,2,1,10,1,1,1,'2012-07-17 03:20:34','2012-07-17 03:20:34',1,1),(3,'BND',2,'5000.000000','10.000000','Further Loan Product',NULL,2,'1.500000',2,'18.000000',0,1,1,2,6,0,1,1,'2012-07-17 03:21:38','2012-07-17 03:21:38',1,1),(4,'MMK',0,'50000.000000','0.000000','General','General micro-loan',3,'1.250000',2,'36.000000',1,1,1,2,12,1,1,1,'2012-07-19 15:34:27','2012-07-19 17:13:59',1,1),(5,'MMK',0,'50000.000000','0.000000','Agricultural','Agricultural micro-loan',4,'1.250000',2,'36.000000',1,1,12,2,2,1,1,1,'2012-07-19 15:36:16','2012-07-19 17:14:15',1,1),(6,'MMK',2,'100.000000','10.000000','testloan','testloan from client app',4,'10.000000',2,'120.000000',0,1,1,2,10,0,1,1,'2012-08-01 07:35:46','2012-08-01 07:35:46',1,1),(7,'XOF',0,'500.000000','2000.000000','new-lp-test-1','test creating new lp',3,'2.000000',2,'24.000000',0,1,1,2,12,1,1,1,'2012-09-02 10:47:10','2012-09-02 10:47:20',1,NULL),(8,'GHC',2,'30000.000000','0.000000','another-test-lp','another test updated.',1,'2.000000',2,'24.000000',0,1,1,2,12,1,1,1,'2012-09-02 11:04:41','2012-09-02 11:08:24',1,NULL),(9,'XOF',0,'120000.000000','0.000000','loan product1','loan product1',1,'8.000000',2,'96.000000',0,1,3,2,1233,0,1,1,'2012-09-25 09:31:22','2012-09-25 09:31:22',1,NULL),(10,'BND',2,'120000.000000','0.000000','loan product1','loan product1',2,'8.000000',2,'96.000000',0,1,3,2,1233,0,1,1,'2012-09-25 09:31:22','2012-09-25 09:35:17',1,NULL),(11,'XOF',2,'3333333.000000','0.000000','Collection100','aaa',4,'30.000000',2,'360.000000',0,1,1,2,2,1,1,11,'2012-09-25 09:44:52','2012-09-25 09:44:52',11,NULL),(12,'INR',2,'10000.000000',NULL,'A Flat Loan',NULL,3,'10.000000',3,'10.000000',1,1,1,2,10,1,1,1,'2012-11-02 22:37:14','2012-11-02 22:37:14',1,1),(13,'INR',2,'10000.000000',NULL,'A Flat Loan',NULL,3,'10.000000',3,'10.000000',1,1,1,2,10,1,1,1,'2012-11-02 22:37:14','2012-11-02 22:37:14',1,1),(14,'INR',2,'10000.000000',NULL,'A Flat Loan',NULL,3,'10.000000',3,'10.000000',1,1,1,2,10,1,1,1,'2012-11-02 22:37:14','2012-11-02 22:37:14',1,1),(15,'INR',2,'10000.000000',NULL,'A Flat Loan',NULL,3,'10.000000',3,'10.000000',1,1,1,2,10,1,1,1,'2012-11-02 22:37:14','2012-11-02 22:37:14',1,1),(16,'HKD',2,'10000.000000','10.000000','PlusOne Education Loan','Education loan for higher studies',4,'8.000000',3,'18.000000',0,1,1,2,24,1,1,1,'2012-11-15 05:15:40','2012-12-12 07:32:41',1,NULL),(17,'KES',2,'100000.000000',NULL,'Intrasoft Business Loan','Individual Business Loan',4,'10.000000',2,'24.000000',1,1,1,2,1,1,1,1,'2012-12-07 11:03:57','2013-01-14 10:46:42',25,1),(18,'HKD',2,'1000000.000000',NULL,'POInstalmentLoan','Instalment Loan',4,'5.000000',3,'60.000000',0,1,1,2,120,1,1,1,'2012-12-12 07:30:32','2012-12-12 07:36:04',1,1);
+INSERT INTO `m_product_loan` VALUES (1,'HKD',2,'700000.000000',NULL,'PORetailLoan',NULL,4,'5.000000',2,'21.000000',0,1,1,2,120,1,1,1),(2,'LBP',2,'35000.000000','10.000000','Different Loan Type',NULL,NULL,'1.000000',2,'12.000000',0,1,2,1,10,1,1,1),(3,'BND',2,'5000.000000','10.000000','Further Loan Product',NULL,2,'1.500000',2,'18.000000',0,1,1,2,6,0,1,1),(4,'MMK',0,'50000.000000','0.000000','General','General micro-loan',3,'1.250000',2,'36.000000',1,1,1,2,12,1,1,1),(5,'MMK',0,'50000.000000','0.000000','Agricultural','Agricultural micro-loan',4,'1.250000',2,'36.000000',1,1,12,2,2,1,1,1),(6,'MMK',2,'100.000000','10.000000','testloan','testloan from client app',4,'10.000000',2,'120.000000',0,1,1,2,10,0,1,1),(7,'XOF',0,'500.000000','2000.000000','new-lp-test-1','test creating new lp',3,'2.000000',2,'24.000000',0,1,1,2,12,1,1,NULL),(8,'GHC',2,'30000.000000','0.000000','another-test-lp','another test updated.',1,'2.000000',2,'24.000000',0,1,1,2,12,1,1,NULL),(9,'XOF',0,'120000.000000','0.000000','loan product1','loan product1',1,'8.000000',2,'96.000000',0,1,3,2,1233,0,1,NULL),(10,'BND',2,'120000.000000','0.000000','loan product1','loan product1',2,'8.000000',2,'96.000000',0,1,3,2,1233,0,1,NULL),(11,'XOF',2,'3333333.000000','0.000000','Collection100','aaa',4,'30.000000',2,'360.000000',0,1,1,2,2,1,1,NULL),(12,'INR',2,'10000.000000',NULL,'A Flat Loan',NULL,3,'10.000000',3,'10.000000',1,1,1,2,10,1,1,1),(13,'INR',2,'10000.000000',NULL,'A Flat Loan',NULL,3,'10.000000',3,'10.000000',1,1,1,2,10,1,1,1),(14,'INR',2,'10000.000000',NULL,'A Flat Loan',NULL,3,'10.000000',3,'10.000000',1,1,1,2,10,1,1,1),(15,'INR',2,'10000.000000',NULL,'A Flat Loan',NULL,3,'10.000000',3,'10.000000',1,1,1,2,10,1,1,1),(16,'HKD',2,'10000.000000','10.000000','PlusOne Education Loan','Education loan for higher studies',4,'8.000000',3,'18.000000',0,1,1,2,24,1,1,NULL),(17,'KES',2,'100000.000000',NULL,'Intrasoft Business Loan','Individual Business Loan',4,'10.000000',2,'24.000000',1,1,1,2,1,1,1,1),(18,'HKD',2,'1000000.000000',NULL,'POInstalmentLoan','Instalment Loan',4,'5.000000',3,'60.000000',0,1,1,2,120,1,1,1);
 /*!40000 ALTER TABLE `m_product_loan` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -2071,4 +2063,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2013-01-29 12:55:44
+-- Dump completed on 2013-01-29 20:20:02

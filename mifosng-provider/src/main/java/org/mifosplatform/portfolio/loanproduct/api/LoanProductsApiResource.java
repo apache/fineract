@@ -176,6 +176,9 @@ public class LoanProductsApiResource {
         final boolean feeChargesOnly = true;
         Collection<ChargeData> chargeOptions = this.chargeReadPlatformService.retrieveLoanApplicableCharges(feeChargesOnly);
         chargeOptions.removeAll(productData.charges());
+        if (chargeOptions.isEmpty()) {
+            chargeOptions = null;
+        }
 
         final Collection<CurrencyData> currencyOptions = currencyReadPlatformService.retrieveAllowedCurrencies();
         final List<EnumOptionData> amortizationTypeOptions = dropdownReadPlatformService.retrieveLoanAmortizationTypeOptions();
@@ -187,14 +190,26 @@ public class LoanProductsApiResource {
         final List<EnumOptionData> interestRateFrequencyTypeOptions = dropdownReadPlatformService
                 .retrieveInterestRateFrequencyTypeOptions();
 
-        final Collection<FundData> fundOptions = this.fundReadPlatformService.retrieveAllFunds();
+        Collection<FundData> fundOptions = this.fundReadPlatformService.retrieveAllFunds();
+        if (fundOptions.isEmpty()) {
+            fundOptions = null;
+        }
         final Collection<TransactionProcessingStrategyData> transactionProcessingStrategyOptions = this.dropdownReadPlatformService
                 .retreiveTransactionProcessingStrategies();
         
-        final List<GLAccountData> assetAccountOptions = accountReadPlatformService.retrieveAllEnabledDetailGLAccounts(GLAccountType.ASSET);
-        final List<GLAccountData> incomeAccountOptions = accountReadPlatformService.retrieveAllEnabledDetailGLAccounts(GLAccountType.INCOME);;
-        final List<GLAccountData> expenseAccountOptions = accountReadPlatformService.retrieveAllEnabledDetailGLAccounts(GLAccountType.EXPENSE);;
-
+        List<GLAccountData> assetAccountOptions = accountReadPlatformService.retrieveAllEnabledDetailGLAccounts(GLAccountType.ASSET);
+        if (assetAccountOptions.isEmpty()) {
+            assetAccountOptions = null;
+        }
+        List<GLAccountData> incomeAccountOptions = accountReadPlatformService.retrieveAllEnabledDetailGLAccounts(GLAccountType.INCOME);
+        if (incomeAccountOptions.isEmpty()) {
+            incomeAccountOptions = null;
+        }
+        List<GLAccountData> expenseAccountOptions = accountReadPlatformService.retrieveAllEnabledDetailGLAccounts(GLAccountType.EXPENSE);
+        if (expenseAccountOptions.isEmpty()) {
+            expenseAccountOptions = null;
+        }
+        
         return new LoanProductData(productData, chargeOptions, currencyOptions, amortizationTypeOptions, interestTypeOptions,
                 interestCalculationPeriodTypeOptions, loanTermFrequencyTypeOptions, repaymentFrequencyTypeOptions,
                 interestRateFrequencyTypeOptions, fundOptions, transactionProcessingStrategyOptions,

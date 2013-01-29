@@ -1921,6 +1921,10 @@ Request Body:
                     <tr><td class=fielddesc>
                         <span>Example Values:</span> Same as repayment period, Daily</td></tr></td></tr>
                     </tr>
+                    <tr class=alt><td>accountingType</td></tr>
+                    <tr><td class=fielddesc>
+                        <span>Example Values:</span>NONE(1), CASH_BASED(2), ACCRUAL_BASED(3)</td></tr></td></tr>
+                    </tr>
                 </table>
             </div>
         </div>
@@ -1936,120 +1940,57 @@ Request Body:
             </div>
             <div class="method-example">
                 <code class="method-declaration">GET https://Domain Name/api/v1/loanproducts</code>
-                <code class="method-response">[ {
-  "id" : 1,
-  "name" : "Agricultural Loan",
-  "description" : "An agricultural loan given to farmers to help buy crop, stock and machinery. With an arrears tolerance setting of 1,000 CFA, loans are not marked as 'in arrears' or 'in bad standing' if the amount outstanding is less than this. Interest rate is described using monthly percentage rate (MPR) even though the loan typically lasts a year and requires one repayment (typically at time when farmer sells crop)",
-  "principal" : {
-    "currencyCode" : "XOF",
-    "digitsAfterDecimal" : 0,
-    "amount" : 100000,
-    "defaultName" : "CFA Franc BCEAO",
-    "nameCode" : "currency.XOF",
-    "displaySymbol" : "CFA",
-    "zero" : false,
-    "greaterThanZero" : true,
-    "displaySymbolValue" : "100000 CFA"
-  },
-  "inArrearsTolerance" : {
-    "currencyCode" : "XOF",
-    "digitsAfterDecimal" : 0,
-    "amount" : 1000,
-    "defaultName" : "CFA Franc BCEAO",
-    "nameCode" : "currency.XOF",
-    "displaySymbol" : "CFA",
-    "zero" : false,
-    "greaterThanZero" : true,
-    "displaySymbolValue" : "1000 CFA"
-  },
-  "numberOfRepayments" : 1,
-  "repaymentEvery" : 12,
-  "interestRatePerPeriod" : 1.750000,
-  "annualInterestRate" : 21.000000,
-  "repaymentFrequencyType" : {
-    "id" : 2,
-    "code" : "repaymentFrequency.periodFrequencyType.months",
-    "value" : "Months"
-  },
-  "interestRateFrequencyType" : {
-    "id" : 2,
-    "code" : "interestRateFrequency.periodFrequencyType.months",
-    "value" : "Per month"
-  },
-  "amortizationType" : {
-    "id" : 1,
-    "code" : "amortizationType.equal.installments",
-    "value" : "Equal installments"
-  },
-  "interestType" : {
-    "id" : 0,
-    "code" : "interestType.declining.balance",
-    "value" : "Declining Balance"
-  },
-  "interestCalculationPeriodType" : {
-    "id" : 1,
-    "code" : "interestCalculationPeriodType.same.as.repayment.period",
-    "value" : "Same as repayment period"
-  },
-  "createdOn" : 1334232874000,
-  "lastModifedOn" : 1334232874000
-}, {
-  "id" : 2,
-  "name" : "Brunei Loan",
-  "principal" : {
-    "currencyCode" : "BND",
-    "digitsAfterDecimal" : 2,
-    "amount" : 76000.00,
-    "defaultName" : "Brunei Dollar",
-    "nameCode" : "currency.BND",
-    "displaySymbol" : "BND",
-    "zero" : false,
-    "greaterThanZero" : true,
-    "displaySymbolValue" : "76000.00 BND"
-  },
-  "inArrearsTolerance" : {
-    "currencyCode" : "BND",
-    "digitsAfterDecimal" : 2,
-    "amount" : 50.00,
-    "defaultName" : "Brunei Dollar",
-    "nameCode" : "currency.BND",
-    "displaySymbol" : "BND",
-    "zero" : false,
-    "greaterThanZero" : true,
-    "displaySymbolValue" : "50.00 BND"
-  },
-  "numberOfRepayments" : 10,
-  "repaymentEvery" : 1,
-  "interestRatePerPeriod" : 6.000000,
-  "annualInterestRate" : 72.000000,
-  "repaymentFrequencyType" : {
-    "id" : 1,
-    "code" : "repaymentFrequency.periodFrequencyType.weeks",
-    "value" : "Weeks"
-  },
-  "interestRateFrequencyType" : {
-    "id" : 2,
-    "code" : "interestRateFrequency.periodFrequencyType.months",
-    "value" : "Per month"
-  },
-  "amortizationType" : {
-    "id" : 1,
-    "code" : "amortizationType.equal.installments",
-    "value" : "Equal installments"
-  },
-  "interestType" : {
-    "id" : 0,
-    "code" : "interestType.declining.balance",
-    "value" : "Declining Balance"
-  },
-  "interestCalculationPeriodType" : {
-    "id" : 1,
-    "code" : "interestCalculationPeriodType.same.as.repayment.period",
-    "value" : "Same as repayment period"
-  },
-  "createdOn" : 1334513601000,
-  "lastModifedOn" : 1334513601000
-}...]
+                <code class="method-response">[
+  {
+    "id": 1,
+    "name": "A new loan product for me",
+    "currency": {
+      "code": "USD",
+      "name": "US Dollar",
+      "decimalPlaces": 2,
+      "displaySymbol": "$",
+      "nameCode": "currency.USD",
+      "displayLabel": "US Dollar ($)"
+    },
+    "principal": 100000,
+    "numberOfRepayments": 12,
+    "loanTermFrequency": 12,
+    "repaymentEvery": 1,
+    "interestRatePerPeriod": 1.75,
+    "annualInterestRate": 21,
+    "accountingType": 1,
+    "loanTermFrequencyType": {
+      "id": 2,
+      "code": "loanTermFrequency.periodFrequencyType.months",
+      "value": "Months"
+    },
+    "repaymentFrequencyType": {
+      "id": 2,
+      "code": "repaymentFrequency.periodFrequencyType.months",
+      "value": "Months"
+    },
+    "interestRateFrequencyType": {
+      "id": 2,
+      "code": "interestRateFrequency.periodFrequencyType.months",
+      "value": "Per month"
+    },
+    "amortizationType": {
+      "id": 0,
+      "code": "amortizationType.equal.principal",
+      "value": "Equal principle payments"
+    },
+    "interestType": {
+      "id": 0,
+      "code": "interestType.declining.balance",
+      "value": "Declining Balance"
+    },
+    "interestCalculationPeriodType": {
+      "id": 1,
+      "code": "interestCalculationPeriodType.same.as.repayment.period",
+      "value": "Same as repayment period"
+    }
+  }
+]
     </code>
             </div>
         </div>
@@ -2070,147 +2011,164 @@ Request Body:
             <div class="method-example">
                 <code class="method-declaration">GET https://Domain Name/api/v1/loanproducts/template</code>
 <code class="method-response">{
-  "principal" : {
-    "currencyCode" : "KES",
-    "digitsAfterDecimal" : 2,
-    "amount" : 0.00,
-    "defaultName" : "Kenyan Shilling",
-    "nameCode" : "currency.KES",
-    "displaySymbol" : "KSh",
-    "zero" : true,
-    "greaterThanZero" : false,
-    "displaySymbolValue" : "0.00 KSh"
+  "currency": {
+    "code": "USD",
+    "name": "US Dollar",
+    "decimalPlaces": 2,
+    "displaySymbol": "$",
+    "nameCode": "currency.USD",
+    "displayLabel": "US Dollar ($)"
   },
-  "inArrearsTolerance" : {
-    "currencyCode" : "KES",
-    "digitsAfterDecimal" : 2,
-    "amount" : 0.00,
-    "defaultName" : "Kenyan Shilling",
-    "nameCode" : "currency.KES",
-    "displaySymbol" : "KSh",
-    "zero" : true,
-    "greaterThanZero" : false,
-    "displaySymbolValue" : "0.00 KSh"
+  "accountingType": 1,
+  "loanTermFrequencyType": {
+    "id": 2,
+    "code": "loanTermFrequency.periodFrequencyType.months",
+    "value": "Months"
   },
-  "interestRatePerPeriod" : 0,
-  "annualInterestRate" : 0,
-  "repaymentFrequencyType" : {
-    "id" : 2,
-    "code" : "repaymentFrequency.periodFrequencyType.months",
-    "value" : "Months"
+  "repaymentFrequencyType": {
+    "id": 2,
+    "code": "repaymentFrequency.periodFrequencyType.months",
+    "value": "Months"
   },
-  "interestRateFrequencyType" : {
-    "id" : 2,
-    "code" : "interestRateFrequency.periodFrequencyType.months",
-    "value" : "Per month"
+  "interestRateFrequencyType": {
+    "id": 2,
+    "code": "interestRateFrequency.periodFrequencyType.months",
+    "value": "Per month"
   },
-  "amortizationType" : {
-    "id" : 1,
-    "code" : "amortizationType.equal.installments",
-    "value" : "Equal installments"
+  "amortizationType": {
+    "id": 1,
+    "code": "amortizationType.equal.installments",
+    "value": "Equal installments"
   },
-  "interestType" : {
-    "id" : 0,
-    "code" : "interestType.declining.balance",
-    "value" : "Declining Balance"
+  "interestType": {
+    "id": 0,
+    "code": "interestType.declining.balance",
+    "value": "Declining Balance"
   },
-  "interestCalculationPeriodType" : {
-    "id" : 1,
-    "code" : "interestCalculationPeriodType.same.as.repayment.period",
-    "value" : "Same as repayment period"
+  "interestCalculationPeriodType": {
+    "id": 1,
+    "code": "interestCalculationPeriodType.same.as.repayment.period",
+    "value": "Same as repayment period"
   },
-  "currencyOptions" : [ {
-    "code" : "KES",
-    "name" : "Kenyan Shilling",
-    "decimalPlaces" : 2,
-    "displaySymbol" : "KSh",
-    "nameCode" : "currency.KES",
-    "displayLabel" : "Kenyan Shilling (KSh)"
-  }, {
-    "code" : "BND",
-    "name" : "Brunei Dollar",
-    "decimalPlaces" : 2,
-    "displaySymbol" : "BND",
-    "nameCode" : "currency.BND",
-    "displayLabel" : "Brunei Dollar (BND)"
-  }, {
-    "code" : "LBP",
-    "name" : "Lebanese Pound",
-    "decimalPlaces" : 2,
-    "displaySymbol" : "LÂ£",
-    "nameCode" : "currency.LBP",
-    "displayLabel" : "Lebanese Pound (LÂ£)"
-  }, {
-    "code" : "GHC",
-    "name" : "Ghana Cedi",
-    "decimalPlaces" : 2,
-    "displaySymbol" : "GHC",
-    "nameCode" : "currency.GHC",
-    "displayLabel" : "Ghana Cedi (GHC)"
-  }, {
-    "code" : "USD",
-    "name" : "US Dollar",
-    "decimalPlaces" : 2,
-    "displaySymbol" : "$",
-    "nameCode" : "currency.USD",
-    "displayLabel" : "US Dollar ($)"
-  }, {
-    "code" : "XOF",
-    "name" : "CFA Franc BCEAO",
-    "decimalPlaces" : 0,
-    "displaySymbol" : "CFA",
-    "nameCode" : "currency.XOF",
-    "displayLabel" : "CFA Franc BCEAO (CFA)"
-  } ],
-  "amortizationTypeOptions" : [ {
-    "id" : 1,
-    "code" : "amortizationType.equal.installments",
-    "value" : "Equal installments"
-  }, {
-    "id" : 0,
-    "code" : "amortizationType.equal.principal",
-    "value" : "Equal principle payments"
-  } ],
-  "interestTypeOptions" : [ {
-    "id" : 1,
-    "code" : "interestType.flat",
-    "value" : "Flat"
-  }, {
-    "id" : 0,
-    "code" : "interestType.declining.balance",
-    "value" : "Declining Balance"
-  } ],
-  "interestCalculationPeriodTypeOptions" : [ {
-    "id" : 0,
-    "code" : "interestCalculationPeriodType.daily",
-    "value" : "Daily"
-  }, {
-    "id" : 1,
-    "code" : "interestCalculationPeriodType.same.as.repayment.period",
-    "value" : "Same as repayment period"
-  } ],
-  "repaymentFrequencyTypeOptions" : [ {
-    "id" : 0,
-    "code" : "repaymentFrequency.periodFrequencyType.days",
-    "value" : "Days"
-  }, {
-    "id" : 1,
-    "code" : "repaymentFrequency.periodFrequencyType.weeks",
-    "value" : "Weeks"
-  }, {
-    "id" : 2,
-    "code" : "repaymentFrequency.periodFrequencyType.months",
-    "value" : "Months"
-  } ],
-  "interestRateFrequencyTypeOptions" : [ {
-    "id" : 2,
-    "code" : "interestRateFrequency.periodFrequencyType.months",
-    "value" : "Per month"
-  }, {
-    "id" : 3,
-    "code" : "interestRateFrequency.periodFrequencyType.years",
-    "value" : "Per year"
-  } ]
+  "currencyOptions": [
+    {
+      "code": "USD",
+      "name": "US Dollar",
+      "decimalPlaces": 2,
+      "displaySymbol": "$",
+      "nameCode": "currency.USD",
+      "displayLabel": "US Dollar ($)"
+    }
+  ],
+  "transactionProcessingStrategyOptions": [
+    {
+      "id": 1,
+      "code": "mifos-standard-strategy",
+      "name": "Mifos style"
+    },
+    {
+      "id": 2,
+      "code": "heavensfamily-strategy",
+      "name": "Heavensfamily"
+    },
+    {
+      "id": 3,
+      "code": "creocore-strategy",
+      "name": "Creocore"
+    },
+    {
+      "id": 4,
+      "code": "rbi-india-strategy",
+      "name": "RBI (India)"
+    }
+  ],
+  "amortizationTypeOptions": [
+    {
+      "id": 1,
+      "code": "amortizationType.equal.installments",
+      "value": "Equal installments"
+    },
+    {
+      "id": 0,
+      "code": "amortizationType.equal.principal",
+      "value": "Equal principle payments"
+    }
+  ],
+  "interestTypeOptions": [
+    {
+      "id": 1,
+      "code": "interestType.flat",
+      "value": "Flat"
+    },
+    {
+      "id": 0,
+      "code": "interestType.declining.balance",
+      "value": "Declining Balance"
+    }
+  ],
+  "interestCalculationPeriodTypeOptions": [
+    {
+      "id": 0,
+      "code": "interestCalculationPeriodType.daily",
+      "value": "Daily"
+    },
+    {
+      "id": 1,
+      "code": "interestCalculationPeriodType.same.as.repayment.period",
+      "value": "Same as repayment period"
+    }
+  ],
+  "repaymentFrequencyTypeOptions": [
+    {
+      "id": 0,
+      "code": "repaymentFrequency.periodFrequencyType.days",
+      "value": "Days"
+    },
+    {
+      "id": 1,
+      "code": "repaymentFrequency.periodFrequencyType.weeks",
+      "value": "Weeks"
+    },
+    {
+      "id": 2,
+      "code": "repaymentFrequency.periodFrequencyType.months",
+      "value": "Months"
+    }
+  ],
+  "interestRateFrequencyTypeOptions": [
+    {
+      "id": 2,
+      "code": "interestRateFrequency.periodFrequencyType.months",
+      "value": "Per month"
+    },
+    {
+      "id": 3,
+      "code": "interestRateFrequency.periodFrequencyType.years",
+      "value": "Per year"
+    }
+  ],
+  "loanTermFrequencyTypeOptions": [
+    {
+      "id": 0,
+      "code": "loanTermFrequency.periodFrequencyType.days",
+      "value": "Days"
+    },
+    {
+      "id": 1,
+      "code": "loanTermFrequency.periodFrequencyType.weeks",
+      "value": "Weeks"
+    },
+    {
+      "id": 2,
+      "code": "loanTermFrequency.periodFrequencyType.months",
+      "value": "Months"
+    },
+    {
+      "id": 3,
+      "code": "loanTermFrequency.periodFrequencyType.years",
+      "value": "Years"
+    }
+  ]
 }
 </code>
             </div>
@@ -2230,62 +2188,54 @@ Request Body:
             <div class="method-example">
                 <code class="method-declaration">GET https://Domain Name/api/v1/loanproducts/{productId}</code>
 <code class="method-response">{
-  "id" : 1,
-  "name" : "Agricultural Loan",
-  "description" : "An agricultural loan given to farmers to help buy crop, stock and machinery. With an arrears tolerance setting of 1,000 CFA, loans are not marked as 'in arrears' or 'in bad standing' if the amount outstanding is less than this. Interest rate is described using monthly percentage rate (MPR) even though the loan typically lasts a year and requires one repayment (typically at time when farmer sells crop)",
-  "principal" : {
-    "currencyCode" : "XOF",
-    "digitsAfterDecimal" : 0,
-    "amount" : 100000,
-    "defaultName" : "CFA Franc BCEAO",
-    "nameCode" : "currency.XOF",
-    "displaySymbol" : "CFA",
-    "zero" : false,
-    "greaterThanZero" : true,
-    "displaySymbolValue" : "100000 CFA"
+  "id": 1,
+  "name": "A new loan product for me",
+  "currency": {
+    "code": "USD",
+    "name": "US Dollar",
+    "decimalPlaces": 2,
+    "displaySymbol": "$",
+    "nameCode": "currency.USD",
+    "displayLabel": "US Dollar ($)"
   },
-  "inArrearsTolerance" : {
-    "currencyCode" : "XOF",
-    "digitsAfterDecimal" : 0,
-    "amount" : 1000,
-    "defaultName" : "CFA Franc BCEAO",
-    "nameCode" : "currency.XOF",
-    "displaySymbol" : "CFA",
-    "zero" : false,
-    "greaterThanZero" : true,
-    "displaySymbolValue" : "1000 CFA"
+  "principal": 100000,
+  "numberOfRepayments": 12,
+  "loanTermFrequency": 12,
+  "repaymentEvery": 1,
+  "interestRatePerPeriod": 1.75,
+  "annualInterestRate": 21,
+  "accountingType": 1,
+  "loanTermFrequencyType": {
+    "id": 2,
+    "code": "loanTermFrequency.periodFrequencyType.months",
+    "value": "Months"
   },
-  "numberOfRepayments" : 1,
-  "repaymentEvery" : 12,
-  "interestRatePerPeriod" : 1.750000,
-  "annualInterestRate" : 21.000000,
-  "repaymentFrequencyType" : {
-    "id" : 2,
-    "code" : "repaymentFrequency.periodFrequencyType.months",
-    "value" : "Months"
+  "repaymentFrequencyType": {
+    "id": 2,
+    "code": "repaymentFrequency.periodFrequencyType.months",
+    "value": "Months"
   },
-  "interestRateFrequencyType" : {
-    "id" : 2,
-    "code" : "interestRateFrequency.periodFrequencyType.months",
-    "value" : "Per month"
+  "interestRateFrequencyType": {
+    "id": 2,
+    "code": "interestRateFrequency.periodFrequencyType.months",
+    "value": "Per month"
   },
-  "amortizationType" : {
-    "id" : 1,
-    "code" : "amortizationType.equal.installments",
-    "value" : "Equal installments"
+  "amortizationType": {
+    "id": 0,
+    "code": "amortizationType.equal.principal",
+    "value": "Equal principle payments"
   },
-  "interestType" : {
-    "id" : 0,
-    "code" : "interestType.declining.balance",
-    "value" : "Declining Balance"
+  "interestType": {
+    "id": 0,
+    "code": "interestType.declining.balance",
+    "value": "Declining Balance"
   },
-  "interestCalculationPeriodType" : {
-    "id" : 1,
-    "code" : "interestCalculationPeriodType.same.as.repayment.period",
-    "value" : "Same as repayment period"
+  "interestCalculationPeriodType": {
+    "id": 1,
+    "code": "interestCalculationPeriodType.same.as.repayment.period",
+    "value": "Same as repayment period"
   },
-  "createdOn" : 1334232874000,
-  "lastModifedOn" : 1334232874000
+  "charges": []
 }
 </code>
             </div>
@@ -2299,7 +2249,7 @@ Request Body:
                     <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Mandatory Fields</div></td></tr>
                     <tr class=alt><td>name, currencyCode, digitsAfterDecimal, principal, inArrearsTolerance, repaymentFrequencyType, repaymentEvery,
                     numberOfRepayments, interestRatePerPeriod, interestRateFrequencyType, amortizationType,
-                    interestType, interestCalculationPeriodType</td></tr>
+                    interestType, interestCalculationPeriodType, accountingType</td></tr>
                 </table>
             </div>
             <div class="method-example">
@@ -2308,25 +2258,24 @@ Request Body:
 Content-Type: application/json
 Request Body:
 {
- "name": "A new loan product for me",
- "description": "A description not exceeding 500 characters.",
- "currencyCode": "USD",
- "digitsAfterDecimal": "2",
- "locale": "en_GB",
- "principal": "100,000.00",
- "inArrearsTolerance": "1,000.00",
- "repaymentFrequencyType": 2,
- "repaymentEvery": "1",
- "numberOfRepayments": "12",
- "interestRatePerPeriod": "1.75",
- "interestRateFrequencyType": 2,
- "amortizationType": 1,
- "interestType": 0,
- "interestCalculationPeriodType": 1
+    "name": "A new loan product for me",
+    "currencyCode": "USD",
+    "locale": "en_GB",
+    "digitsAfterDecimal": "2",
+    "principal": "100,000.00",
+    "repaymentFrequencyType": 2,
+    "repaymentEvery": "1",
+    "numberOfRepayments": "12",
+    "interestRatePerPeriod": "1.75",
+    "interestRateFrequencyType": 2,
+    "amortizationType": 1,
+    "interestType": 0,
+    "interestCalculationPeriodType": 1,
+    "accountingType": 1
 }
 </code>
 <code class="method-response">{
-  "resourceId": 9
+  "resourceId": 1
 }
 </code>
             </div>
@@ -2338,18 +2287,21 @@ Request Body:
                 <h4>Update a Loan Product</h4>
             </div>
             <div class="method-example">
-                <code class="method-declaration">POST https://Domain Name/api/v1/loanproducts/{loanId}</code>
-<code class="method-request">POST loanproducts/1
+                <code class="method-declaration">PUT https://Domain Name/api/v1/loanproducts/{loanId}</code>
+<code class="method-request">PUT loanproducts/1
 Content-Type: application/json
 Request Body:
 {
  "locale": "en_GB",
- "principal": "100,000.00",
- "inArrearsTolerance": "5,000.00"
+ "principal": "70,000.00"
 }
 </code>
 <code class="method-response">{
-  "resourceId": 1
+  "resourceId": 1,
+  "changes": {
+    "principal": 70000,
+    "locale": "en_GB"
+  }
 }
 </code>
             </div>

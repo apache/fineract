@@ -1,6 +1,5 @@
 package org.mifosplatform.portfolio.savingsaccount;
 
-import org.mifosplatform.portfolio.client.data.ClientData;
 import org.mifosplatform.portfolio.group.command.GroupCommand;
 import org.mifosplatform.portfolio.savingsaccount.command.SavingAccountApprovalCommand;
 import org.mifosplatform.portfolio.savingsaccount.command.SavingAccountCommand;
@@ -20,8 +19,6 @@ public interface PortfolioApiDataConversionService {
     SavingProductCommand convertJsonToSavingProductCommand(Long resourceIdentifier, String json);
 
     DepositProductCommand convertJsonToDepositProductCommand(Long resourceIdentifier, String json);
-
-    ClientData convertInternalJsonFormatToClientDataChange(Long clientId, String json);
 
     GroupCommand convertJsonToGroupCommand(Long resourceIdentifier, String json);
 

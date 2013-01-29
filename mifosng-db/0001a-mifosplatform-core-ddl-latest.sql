@@ -470,19 +470,11 @@ CREATE TABLE `m_product_loan` (
   `number_of_repayments` smallint(5) NOT NULL,
   `amortization_method_enum` smallint(5) NOT NULL,
   `accounting_type` smallint(5) NOT NULL,
-  `createdby_id` bigint(20) DEFAULT NULL,
-  `created_date` datetime DEFAULT NULL,
-  `lastmodified_date` datetime DEFAULT NULL,
-  `lastmodifiedby_id` bigint(20) DEFAULT NULL,
   `loan_transaction_strategy_id` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`id`),
-  KEY `FKAUD0000000000003` (`createdby_id`),
-  KEY `FKAUD0000000000004` (`lastmodifiedby_id`),
   KEY `FKA6A8A7D77240145` (`fund_id`),
   KEY `FK_ltp_strategy` (`loan_transaction_strategy_id`),
   CONSTRAINT `FKA6A8A7D77240145` FOREIGN KEY (`fund_id`) REFERENCES `m_fund` (`id`),
-  CONSTRAINT `FKAUD0000000000003` FOREIGN KEY (`createdby_id`) REFERENCES `m_appuser` (`id`),
-  CONSTRAINT `FKAUD0000000000004` FOREIGN KEY (`lastmodifiedby_id`) REFERENCES `m_appuser` (`id`),
   CONSTRAINT `FK_ltp_strategy` FOREIGN KEY (`loan_transaction_strategy_id`) REFERENCES `ref_loan_transaction_processing_strategy` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
