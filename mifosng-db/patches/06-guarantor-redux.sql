@@ -26,7 +26,6 @@ CREATE TABLE `m_guarantor` (
 	INDEX `FK_m_guarantor_m_loan` (`loan_id`),
 	CONSTRAINT `FK_m_guarantor_m_loan` FOREIGN KEY (`loan_id`) REFERENCES `m_loan` (`id`)
 )
-COLLATE='utf8_general_ci'
 ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- Update loan table

@@ -11,7 +11,7 @@ public class GuarantorConstants {
     public static enum GUARANTOR_JSON_INPUT_PARAMS {
         LOAN_ID("loanId"), GUARANTOR_TYPE_ID("guarantorTypeId"), ENTITY_ID("entityId"), FIRSTNAME("firstname"), LASTNAME("lastname"), ADDRESS_LINE_1(
                 "addressLine1"), ADDRESS_LINE_2("addressLine2"), CITY("city"), STATE("state"), ZIP("zip"), COUNTRY("country"), MOBILE_NUMBER(
-                "mobileNumber"), PHONE_NUMBER("housePhoneNumber"), COMMENT("comment"), DATE_OF_BIRTH("dob"), ;
+                "mobileNumber"), PHONE_NUMBER("housePhoneNumber"), COMMENT("comment"), DATE_OF_BIRTH("dob");
 
         private final String value;
 

@@ -291,6 +291,11 @@ INSERT INTO `m_permission` VALUES
 (211,'portfolio','UPDATE_SAVINGSACCOUNT','SAVINGSACCOUNT','UPDATE',1),(212,'portfolio','DELETE_SAVINGSACCOUNT','SAVINGSACCOUNT','DELETE',1),
 (213,'authorisation','PERMISSIONS_ROLE','ROLE','PERMISSIONS',1);
 
+INSERT INTO `m_permission` (`grouping`, `code`, `entity_name`, `action_name`, `can_maker_checker`) VALUES ('portfolio', 'CREATE_GUARANTOR', 'GUARANTOR', 'CREATE', 1);
+INSERT INTO `m_permission` (`grouping`, `code`, `entity_name`, `action_name`, `can_maker_checker`) VALUES ('portfolio', 'DELETE_GUARANTOR', 'GUARANTOR', 'DELETE', 1);
+INSERT INTO `m_permission` (`grouping`, `code`, `entity_name`, `action_name`, `can_maker_checker`) VALUES ('portfolio', 'READ_GUARANTOR', 'GUARANTOR', 'READ', 0);
+INSERT INTO `m_permission` (`grouping`, `code`, `entity_name`, `action_name`, `can_maker_checker`) VALUES ('portfolio', 'UPDATE_GUARANTOR', 'GUARANTOR', 'UPDATE', 1);
+
 INSERT INTO `m_permission`
 (
 `grouping`,
@@ -366,26 +371,6 @@ select \'f\'\r  from m_appuser_role ur \r  join m_role r on r.id = ur.role_id\r 
 rp.permission_id\r  where ur.appuser_id = ${currentUserId}\r  and (p.code in (\'ALL_FUNCTIONS_READ\', \'ALL_FUNCTIONS\') or p.code = concat(\"READ_\", 
 
 r.report_name))\r )\r  order by r.report_name, rp.parameter_id');
-
--- Add datatables for guarantor stuff in here for now rather than DDL as we expect it may change
-DROP TABLE IF EXISTS `m_guarantor_external`;
-CREATE TABLE `m_guarantor_external` (
-  `loan_id` bigint(20) NOT NULL,
-  `firstname` varchar(50) NOT NULL,
-  `lastname` varchar(50) NOT NULL,
-  `dob` date DEFAULT NULL,
-  `address_line_1` varchar(500) DEFAULT NULL,
-  `address_line_2` varchar(500) DEFAULT NULL,
-  `city` varchar(50) DEFAULT NULL,
-  `state` varchar(50) DEFAULT NULL,
-  `country` varchar(50) DEFAULT NULL,
-  `zip` varchar(20) DEFAULT NULL,
-  `house_phone_number` varchar(20) DEFAULT NULL,
-  `mobile_number` varchar(20) DEFAULT NULL,
-  `comment` varchar(20) DEFAULT NULL,
-  PRIMARY KEY (`loan_id`),
-  CONSTRAINT `FK_m_guarantor_m_loan` FOREIGN KEY (`loan_id`) REFERENCES `m_loan` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 INSERT INTO `x_registered_table` (`registered_table_name`, `application_table_name`)
 VALUES ('m_guarantor_external','m_loan');

@@ -23,6 +23,7 @@ DROP TABLE IF EXISTS `m_document`;
 DROP TABLE IF EXISTS `m_fund`;
 DROP TABLE IF EXISTS `m_group`;
 DROP TABLE IF EXISTS `m_group_client`;
+DROP TABLE IF EXISTS `m_guarantor`;
 DROP TABLE IF EXISTS `m_loan`;
 DROP TABLE IF EXISTS `m_loan_charge`;
 DROP TABLE IF EXISTS `m_loan_officer_assignment_history`;
@@ -566,15 +567,39 @@ CREATE TABLE `m_loan` (
   KEY `FK_loan_ltp_strategy` (`loan_transaction_strategy_id`),
   KEY `FK_m_loan_m_staff` (`loan_officer_id`),
   KEY `group_id` (`group_id`),
-  KEY `FK_m_loan_guarantor` (`guarantor_id`),
   CONSTRAINT `FK7C885877240145` FOREIGN KEY (`fund_id`) REFERENCES `m_fund` (`id`),
   CONSTRAINT `FKB6F935D87179A0CB` FOREIGN KEY (`client_id`) REFERENCES `m_client` (`id`),
   CONSTRAINT `FKB6F935D8C8D4B434` FOREIGN KEY (`product_id`) REFERENCES `m_product_loan` (`id`),
   CONSTRAINT `FK_loan_ltp_strategy` FOREIGN KEY (`loan_transaction_strategy_id`) REFERENCES `ref_loan_transaction_processing_strategy` (`id`),
-  CONSTRAINT `FK_m_loan_guarantor` FOREIGN KEY (`guarantor_id`) REFERENCES `m_client` (`id`),
   CONSTRAINT `FK_m_loan_m_staff` FOREIGN KEY (`loan_officer_id`) REFERENCES `m_staff` (`id`),
   CONSTRAINT `m_loan_ibfk_1` FOREIGN KEY (`group_id`) REFERENCES `m_group` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE `m_guarantor` (
+	`id` BIGINT(20) NOT NULL AUTO_INCREMENT,
+	`loan_id` BIGINT(20) NOT NULL,
+	`type_enum` SMALLINT(5) NOT NULL,
+	`entity_id` BIGINT(20) NULL DEFAULT NULL,
+	`firstname` VARCHAR(50) NULL DEFAULT NULL,
+	`lastname` VARCHAR(50) NULL DEFAULT NULL,
+	`dob` DATE NULL DEFAULT NULL,
+	`address_line_1` VARCHAR(500) NULL DEFAULT NULL,
+	`address_line_2` VARCHAR(500) NULL DEFAULT NULL,
+	`city` VARCHAR(50) NULL DEFAULT NULL,
+	`state` VARCHAR(50) NULL DEFAULT NULL,
+	`country` VARCHAR(50) NULL DEFAULT NULL,
+	`zip` VARCHAR(20) NULL DEFAULT NULL,
+	`house_phone_number` VARCHAR(20) NULL DEFAULT NULL,
+	`mobile_number` VARCHAR(20) NULL DEFAULT NULL,
+	`comment` VARCHAR(500) NULL DEFAULT NULL,
+	PRIMARY KEY (`id`),
+	INDEX `FK_m_guarantor_m_loan` (`loan_id`),
+	CONSTRAINT `FK_m_guarantor_m_loan` FOREIGN KEY (`loan_id`) REFERENCES `m_loan` (`id`)
+)
+ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+ALTER TABLE `m_loan`
+	ADD CONSTRAINT `FK_m_loan_guarantor` FOREIGN KEY (`guarantor_id`) REFERENCES `m_guarantor` (`id`);
 
 CREATE TABLE `m_loan_charge` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
