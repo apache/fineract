@@ -12,15 +12,14 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import org.apache.commons.lang.StringUtils;
-import org.mifosplatform.infrastructure.core.domain.AbstractAuditableCustom;
 import org.mifosplatform.organisation.office.domain.Office;
 import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.group.command.GroupCommand;
-import org.mifosplatform.useradministration.domain.AppUser;
+import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
 @Table(name = "m_group")
-public class Group extends AbstractAuditableCustom<AppUser, Long> {
+public class Group extends AbstractPersistable<Long> {
 
     @SuppressWarnings("unused")
     @ManyToOne
