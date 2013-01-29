@@ -2,6 +2,7 @@ package org.mifosplatform.portfolio.loanaccount.gaurantor.api;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.ws.rs.Consumes;
@@ -14,93 +15,117 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
-import org.mifosplatform.infrastructure.core.api.ApiParameterHelper;
+import org.mifosplatform.commands.domain.CommandWrapper;
+import org.mifosplatform.commands.service.CommandWrapperBuilder;
+import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
+import org.mifosplatform.infrastructure.core.api.ApiRequestParameterHelper;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
+import org.mifosplatform.infrastructure.core.data.EnumOptionData;
+import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
+import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
-import org.mifosplatform.portfolio.loanaccount.gaurantor.command.GuarantorCommand;
 import org.mifosplatform.portfolio.loanaccount.gaurantor.data.GuarantorData;
+import org.mifosplatform.portfolio.loanaccount.gaurantor.domain.GuarantorType;
+import org.mifosplatform.portfolio.loanaccount.gaurantor.service.GuarantorEnumerations;
 import org.mifosplatform.portfolio.loanaccount.gaurantor.service.GuarantorReadPlatformService;
-import org.mifosplatform.portfolio.loanaccount.gaurantor.service.GuarantorWritePlatformService;
-import org.mifosplatform.portfolio.savingsaccount.PortfolioApiDataConversionService;
-import org.mifosplatform.portfolio.savingsaccount.PortfolioApiJsonSerializerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-@Path("/loans/{loanId}/guarantor")
+@Path("/guarantors")
 @Component
 @Scope("singleton")
 public class GuarantorsApiResource {
 
-    @Autowired
-    private GuarantorWritePlatformService guarantorWritePlatformService;
-
-    @Autowired
-    private GuarantorReadPlatformService guarantorReadPlatformService;
-
-    @Autowired
-    private PortfolioApiDataConversionService apiDataConversionService;
-
-    @Autowired
-    private PortfolioApiJsonSerializerService apiJsonSerializerService;
-
-    private static final Set<String> typicalResponseParameters = new HashSet<String>(Arrays.asList("externalGuarantor", "existingClientId",
+    private static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("externalGuarantor", "existingClientId",
             "firstname", "lastname", "addressLine1", "addressLine2", "city", "state", "zip", "country", "mobileNumber", "housePhoneNumber",
             "comment", "dob"));
 
-    private final String SystemEntityType = "m_guarantor_external";
+    private final String resourceNameForPermission = "GUARANTOR";
+
+    private final GuarantorReadPlatformService guarantorReadPlatformService;
+    private final DefaultToApiJsonSerializer<GuarantorData> apiJsonSerializerService;
+    private final ApiRequestParameterHelper apiRequestParameterHelper;
+    private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
+    private final PlatformSecurityContext context;
 
     @Autowired
-    private PlatformSecurityContext context;
+    public GuarantorsApiResource(final PlatformSecurityContext context, final GuarantorReadPlatformService guarantorReadPlatformService,
+            final DefaultToApiJsonSerializer<GuarantorData> toApiJsonSerializer, final ApiRequestParameterHelper apiRequestParameterHelper,
+            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
+        this.context = context;
+        this.apiRequestParameterHelper = apiRequestParameterHelper;
+        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
+        this.apiJsonSerializerService = toApiJsonSerializer;
+        this.guarantorReadPlatformService = guarantorReadPlatformService;
+    }
 
     @GET
+    @Path("template")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveGuarantorDetails(@Context final UriInfo uriInfo, @PathParam("loanId") final Long loanId) {
-        context.authenticatedUser().validateHasReadPermission(SystemEntityType);
-        Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
-        if (responseParameters.isEmpty()) {
-            responseParameters.addAll(typicalResponseParameters);
+    public String newGuarantorTemplate(@Context final UriInfo uriInfo) {
+        context.authenticatedUser().validateHasReadPermission(resourceNameForPermission);
+
+        GuarantorData guarantorData = guarantorReadPlatformService.retrieveNewGuarantorDetails();
+
+        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        return this.apiJsonSerializerService.serialize(settings, guarantorData, RESPONSE_DATA_PARAMETERS);
+    }
+
+    @GET
+    @Path("{guarantorId}")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String retrieveGuarantorDetails(@Context final UriInfo uriInfo, @PathParam("guarantorId") final Long guarantorId) {
+        context.authenticatedUser().validateHasReadPermission(resourceNameForPermission);
+
+        GuarantorData guarantorData = guarantorReadPlatformService.retrieveGuarantor(guarantorId);
+
+        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        if (settings.isTemplate()) {
+            final List<EnumOptionData> guarantorTypeOptions = GuarantorEnumerations.guarantorType(GuarantorType.values());
+            guarantorData = GuarantorData.templateOnTop(guarantorData, guarantorTypeOptions);
         }
-        boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
 
-        GuarantorData guarantorData = guarantorReadPlatformService.retrieveGuarantor(loanId);
-
-        return this.apiJsonSerializerService.serializeGuarantorDataToJson(prettyPrint, responseParameters, guarantorData);
+        return this.apiJsonSerializerService.serialize(settings, guarantorData, RESPONSE_DATA_PARAMETERS);
     }
 
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public Response createGuarantor(@PathParam("loanId") final Long loanId, final String jsonRequestBody) {
+    public String createGuarantor(final String apiRequestBodyAsJson) {
 
-        final GuarantorCommand command = this.apiDataConversionService.convertJsonToGuarantorCommand(null, loanId, jsonRequestBody);
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().createGuarantor().withJson(apiRequestBodyAsJson).build();
 
-        this.guarantorWritePlatformService.createGuarantor(loanId, command);
+        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
-        // returns the loan Identifier for which the guarantor was associated
-        return Response.ok().entity(new CommandProcessingResult(loanId)).build();
+        return this.apiJsonSerializerService.serialize(result);
     }
 
     @PUT
+    @Path("{guarantorId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public Response updateGuarantor(@PathParam("loanId") final Long loanId, final String jsonRequestBody) {
-        final GuarantorCommand command = this.apiDataConversionService.convertJsonToGuarantorCommand(null, loanId, jsonRequestBody);
+    public String updateGuarantor(@PathParam("guarantorId") final Long guarantorId, final String jsonRequestBody) {
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().updateGuarantor(guarantorId).withJson(jsonRequestBody).build();
 
-        this.guarantorWritePlatformService.updateGuarantor(loanId, command);
+        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
-        return Response.ok().entity(new CommandProcessingResult(loanId)).build();
+        return this.apiJsonSerializerService.serialize(result);
     }
 
     @DELETE
+    @Path("{guarantorId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public Response deleteGuarantor(@PathParam("loanId") final Long loanId) {
-        this.guarantorWritePlatformService.removeGuarantor(loanId);
-        return Response.ok(new CommandProcessingResult(loanId)).build();
+    public String deleteGuarantor(@PathParam("guarantorId") final Long guarantorId) {
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteGuarantor(guarantorId).build();
+
+        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+
+        return this.apiJsonSerializerService.serialize(result);
     }
 }

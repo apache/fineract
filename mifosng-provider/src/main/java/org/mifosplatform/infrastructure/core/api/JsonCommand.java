@@ -2,6 +2,7 @@ package org.mifosplatform.infrastructure.core.api;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
+import java.util.Date;
 
 import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
@@ -195,6 +196,14 @@ public final class JsonCommand {
     public Long longValueOfParameterNamed(final String parameterName) {
         return this.fromApiJsonHelper.extractLongNamed(parameterName, parsedCommand);
     }
+    
+    public boolean isChangeInDateParameterNamed(final String parameterName, final Date existingValue) {
+        LocalDate localDate = null;
+        if (existingValue != null) {
+            localDate = LocalDate.fromDateFields(existingValue);
+        }
+        return isChangeInLocalDateParameterNamed( parameterName, localDate);
+    }
 
     public boolean isChangeInLocalDateParameterNamed(final String parameterName, final LocalDate existingValue) {
         boolean isChanged = false;
@@ -207,6 +216,12 @@ public final class JsonCommand {
 
     public LocalDate localDateValueOfParameterNamed(final String parameterName) {
         return this.fromApiJsonHelper.extractLocalDateNamed(parameterName, parsedCommand);
+    }
+    
+    public Date DateValueOfParameterNamed(final String parameterName) {
+        LocalDate localDate = this.fromApiJsonHelper.extractLocalDateNamed(parameterName, parsedCommand);
+        if (localDate == null) { return null; }
+        return localDate.toDateMidnight().toDate();
     }
 
     public boolean isChangeInStringParameterNamed(final String parameterName, final String existingValue) {
@@ -248,6 +263,12 @@ public final class JsonCommand {
     public Integer integerValueOfParameterNamed(final String parameterName) {
         return this.fromApiJsonHelper.extractIntegerWithLocaleNamed(parameterName, parsedCommand);
     }
+    
+    public Integer integerValueSansLocaleOfParameterNamed(final String parameterName) {
+        return this.fromApiJsonHelper.extractIntegerSansLocaleNamed(parameterName, parsedCommand);
+    }
+    
+    
 
     public boolean isChangeInBooleanParameterNamed(final String parameterName, final Boolean existingValue) {
         boolean isChanged = false;

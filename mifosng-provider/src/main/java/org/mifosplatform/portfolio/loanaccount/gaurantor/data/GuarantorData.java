@@ -1,196 +1,111 @@
 package org.mifosplatform.portfolio.loanaccount.gaurantor.data;
 
+import java.util.List;
+
 import org.joda.time.LocalDate;
+import org.mifosplatform.infrastructure.core.data.EnumOptionData;
+import org.mifosplatform.organisation.staff.data.StaffData;
+import org.mifosplatform.portfolio.client.data.ClientData;
+import org.mifosplatform.portfolio.loanaccount.gaurantor.domain.GuarantorType;
+import org.mifosplatform.portfolio.loanaccount.gaurantor.service.GuarantorEnumerations;
 
 public class GuarantorData {
-	private String firstname;
-	private String lastname;
-	private boolean externalGuarantor;
 
-	/*** Fields for current customers serving as guarantors **/
-	private Long existingClientId;
-	private String externalId;
-	private String officeName;
-	private LocalDate joinedDate;
+    private final Long id;
+    private final Long loanId;
+    private final EnumOptionData guarantorType;
 
-	/*** Fields for external persons serving as guarantors ***/
-	private String addressLine1;
-	private String addressLine2;
-	private String city;
-	private String state;
-	private String zip;
-	private String country;
-	private String mobileNumber;
-	private String housePhoneNumber;
-	private String comment;
-	private LocalDate dob;
+    private final String firstname;
+    private final String lastname;
 
-	public GuarantorData(final Long existingClientId, final String firstname,
-			final String lastname, final String externalId,
-			final String officeName, final LocalDate joinedDate) {
-		this.existingClientId = existingClientId;
-		this.firstname = firstname;
-		this.lastname = lastname;
-		this.externalId = externalId;
-		this.officeName = officeName;
-		this.joinedDate = joinedDate;
-		this.externalGuarantor = false;
-	}
+    /*** Fields for current customers/staff serving as guarantors **/
+    private final Long entityId;
+    private final String externalId;
+    private final String officeName;
+    private final LocalDate joinedDate;
 
-	public GuarantorData(final String firstname, final String lastname,
-			final LocalDate dob, final String addressLine1,
-			final String addressLine2, final String city, final String state,
-			final String zip, final String country, final String mobileNumber,
-			final String housePhoneNumber, final String comment) {
-		this.firstname = firstname;
-		this.lastname = lastname;
-		this.dob = dob;
-		this.addressLine1 = addressLine1;
-		this.addressLine2 = addressLine2;
-		this.city = city;
-		this.state = state;
-		this.zip = zip;
-		this.country = country;
-		this.mobileNumber = mobileNumber;
-		this.housePhoneNumber = housePhoneNumber;
-		this.comment = comment;
-		this.externalGuarantor = true;
-	}
+    /*** Fields for external persons serving as guarantors ***/
 
-	public String getFirstname() {
-		return firstname;
-	}
+    private final String addressLine1;
+    private final String addressLine2;
+    private final String city;
+    private final String state;
+    private final String zip;
+    private final String country;
+    private final String mobileNumber;
+    private final String housePhoneNumber;
+    private final String comment;
+    private final LocalDate dob;
 
-	public void setFirstname(String firstname) {
-		this.firstname = firstname;
-	}
+    // template
+    @SuppressWarnings("unused")
+    private final List<EnumOptionData> guarantorTypeOptions;
 
-	public String getLastname() {
-		return lastname;
-	}
+    public static GuarantorData template(final List<EnumOptionData> guarantorTypeOptions) {
+        return new GuarantorData(null, null, null, GuarantorEnumerations.guarantorType(GuarantorType.CUSTOMER), null, null, null, null,
+                null, null, null, null, null, null, null, null, null, null, null, guarantorTypeOptions);
+    }
 
-	public void setLastname(String lastname) {
-		this.lastname = lastname;
-	}
+    public static GuarantorData templateOnTop(final GuarantorData guarantorData, final List<EnumOptionData> guarantorTypeOptions) {
+        return new GuarantorData(guarantorData.id, guarantorData.loanId, guarantorData.entityId, guarantorData.guarantorType,
+                guarantorData.firstname, guarantorData.lastname, guarantorData.dob, guarantorData.addressLine1, guarantorData.addressLine2,
+                guarantorData.city, guarantorData.state, guarantorData.zip, guarantorData.country, guarantorData.mobileNumber,
+                guarantorData.housePhoneNumber, guarantorData.comment, guarantorData.officeName, guarantorData.joinedDate,
+                guarantorData.externalId, guarantorTypeOptions);
+    }
 
-	public Long getExistingClientId() {
-		return existingClientId;
-	}
+    public static GuarantorData mergeClientData(ClientData clientData, GuarantorData guarantorData) {
+        return new GuarantorData(guarantorData.id, guarantorData.loanId, guarantorData.entityId, guarantorData.guarantorType,
+                clientData.getFirstname(), clientData.getLastname(), null, null, null, null, null, null, null, null, null, null,
+                clientData.getOfficeName(), clientData.getJoinedDate(), clientData.getExternalId(), null);
+    }
 
-	public void setExistingClientId(Long existingClientId) {
-		this.existingClientId = existingClientId;
-	}
+    public static GuarantorData mergeStaffData(StaffData staffData, GuarantorData guarantorData) {
+        return new GuarantorData(guarantorData.id, guarantorData.loanId, guarantorData.entityId, guarantorData.guarantorType,
+                staffData.getFirstname(), staffData.getLastname(), null, null, null, null, null, null, null, null, null, null,
+                staffData.getOfficeName(), null, null, null);
+    }
 
-	public String getExternalId() {
-		return externalId;
-	}
+    public GuarantorData(Long id, Long loanId, Long entityId, EnumOptionData guarantorType, String firstname, String lastname,
+            LocalDate dob, String addressLine1, String addressLine2, String city, String state, String zip, String country,
+            String mobileNumber, String housePhoneNumber, String comment, String officeName, LocalDate joinedDate, String externalId,
+            List<EnumOptionData> guarantorTypeOptions) {
+        this.id = id;
+        this.loanId = loanId;
+        this.guarantorType = guarantorType;
+        this.entityId = entityId;
+        this.firstname = firstname;
+        this.lastname = lastname;
+        this.dob = dob;
+        this.addressLine1 = addressLine1;
+        this.addressLine2 = addressLine2;
+        this.city = city;
+        this.state = state;
+        this.zip = zip;
+        this.country = country;
+        this.mobileNumber = mobileNumber;
+        this.housePhoneNumber = housePhoneNumber;
+        this.comment = comment;
+        this.officeName = officeName;
+        this.joinedDate = joinedDate;
+        this.externalId = externalId;
+        this.guarantorTypeOptions = guarantorTypeOptions;
+    }
 
-	public void setExternalId(String externalId) {
-		this.externalId = externalId;
-	}
+    public boolean isExternalGuarantor() {
+        return GuarantorType.EXTERNAL.getValue().equals(guarantorType.getId());
+    }
 
-	public String getOfficeName() {
-		return officeName;
-	}
+    public boolean isExistingClient() {
+        return GuarantorType.CUSTOMER.getValue().equals(guarantorType.getId());
+    }
 
-	public void setOfficeName(String officeName) {
-		this.officeName = officeName;
-	}
+    public boolean isStaffMember() {
+        return GuarantorType.STAFF.getValue().equals(guarantorType.getId());
+    }
 
-	public LocalDate getJoinedDate() {
-		return joinedDate;
-	}
-
-	public void setJoinedDate(LocalDate joinedDate) {
-		this.joinedDate = joinedDate;
-	}
-
-	public String getAddressLine1() {
-		return addressLine1;
-	}
-
-	public void setAddressLine1(String addressLine1) {
-		this.addressLine1 = addressLine1;
-	}
-
-	public String getAddressLine2() {
-		return addressLine2;
-	}
-
-	public void setAddressLine2(String addressLine2) {
-		this.addressLine2 = addressLine2;
-	}
-
-	public String getCity() {
-		return city;
-	}
-
-	public void setCity(String city) {
-		this.city = city;
-	}
-
-	public String getState() {
-		return state;
-	}
-
-	public void setState(String state) {
-		this.state = state;
-	}
-
-	public String getZip() {
-		return zip;
-	}
-
-	public void setZip(String zip) {
-		this.zip = zip;
-	}
-
-	public String getCountry() {
-		return country;
-	}
-
-	public void setCountry(String country) {
-		this.country = country;
-	}
-
-	public String getMobileNumber() {
-		return mobileNumber;
-	}
-
-	public void setMobileNumber(String mobileNumber) {
-		this.mobileNumber = mobileNumber;
-	}
-
-	public String getHousePhoneNumber() {
-		return housePhoneNumber;
-	}
-
-	public void setHousePhoneNumber(String housePhoneNumber) {
-		this.housePhoneNumber = housePhoneNumber;
-	}
-
-	public String getComment() {
-		return comment;
-	}
-
-	public void setComment(String comment) {
-		this.comment = comment;
-	}
-
-	public boolean getExternalGuarantor() {
-		return externalGuarantor;
-	}
-
-	public void setExternalGuarantor(boolean externalGuarantor) {
-		this.externalGuarantor = externalGuarantor;
-	}
-
-	public LocalDate getDob() {
-		return dob;
-	}
-
-	public void setDob(LocalDate dob) {
-		this.dob = dob;
-	}
+    public Long getEntityId() {
+        return this.entityId;
+    }
 
 }

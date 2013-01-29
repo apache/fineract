@@ -75,8 +75,8 @@ public class AccountingApiDataConversionServiceImpl implements AccountingApiData
         final String glCode = helper.extractStringNamed("glCode", element, requestParamatersDetected);
         final Boolean disabled = helper.extractBooleanNamed("disabled", element, requestParamatersDetected);
         final Boolean manualEntriesAllowed = helper.extractBooleanNamed("manualEntriesAllowed", element, requestParamatersDetected);
-        final Integer category = helper.extractIntegerFromUnFormattedStringNamed("classification", element, requestParamatersDetected);
-        final Integer usage = helper.extractIntegerFromUnFormattedStringNamed("usage", element, requestParamatersDetected);
+        final Integer category = helper.extractIntegerSansLocaleNamed("classification", element, requestParamatersDetected);
+        final Integer usage = helper.extractIntegerSansLocaleNamed("usage", element, requestParamatersDetected);
         final String description = helper.extractStringNamed("description", element, requestParamatersDetected);
 
         return new GLAccountCommand(requestParamatersDetected, resourceIdentifier, name, parentId, glCode, disabled, manualEntriesAllowed,

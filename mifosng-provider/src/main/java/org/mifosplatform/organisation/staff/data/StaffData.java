@@ -41,4 +41,41 @@ public class StaffData {
         this.officeId = officeId;
         this.allowedOffices = allowedOffices;
     }
+
+    
+    public Long getId() {
+        return this.id;
+    }
+
+    
+    public String getFirstname() {
+        return this.firstname;
+    }
+
+    
+    public String getLastname() {
+        return this.lastname;
+    }
+
+    
+    public String getDisplayName() {
+        return this.displayName;
+    }
+
+    
+    public Long getOfficeId() {
+        return this.officeId;
+    }
+
+    
+    public String getOfficeName() {
+        return this.officeName;
+    }
+
+    
+    public boolean isLoanOfficer() {
+        return this.isLoanOfficer;
+    }
+    
+    
 }

@@ -180,6 +180,14 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
             } else {
                 throw new UnsupportedCommandException(wrapper.commandName());
             }
+        } else if (wrapper.isGuarantorResource()) {
+            if (wrapper.isCreate()) {
+                handler = applicationContext.getBean("createGuarantorCommandHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isUpdate()) {
+                handler = applicationContext.getBean("updateGuarantorCommandHandler", NewCommandSourceHandler.class);
+            } else {
+                throw new UnsupportedCommandException(wrapper.commandName());
+            }
         } else if (wrapper.isCodeResource()) {
             if (wrapper.isCreate()) {
                 handler = applicationContext.getBean("createCodeCommandHandler", NewCommandSourceHandler.class);

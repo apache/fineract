@@ -199,7 +199,7 @@ public class LoansApiResource {
         LoanScheduleData repaymentSchedule = null;
         LoanPermissionData permissions = null;
         Collection<LoanChargeData> charges = null;
-        GuarantorData guarantorData = null;
+        Collection<GuarantorData> guarantors = null;
 
         boolean convenienceDataRequired = false;
         final Set<String> associationParameters = ApiParameterHelper.extractAssociationsForResponseIfProvided(uriInfo.getQueryParameters());
@@ -210,11 +210,10 @@ public class LoansApiResource {
                         "charges", "guarantor"));
             }
 
-            boolean existsGuarantor = false;
             if (associationParameters.contains("guarantor")) {
-                if (guarantorReadPlatformService.existsGuarantor(loanId)) {
-                    guarantorData = this.guarantorReadPlatformService.retrieveGuarantor(loanId);
-                    existsGuarantor = true;
+                guarantors = this.guarantorReadPlatformService.retrieveGuarantorsForLoan(loanId);
+                if (CollectionUtils.isEmpty(guarantors)) {
+                    guarantors = null; // set back to null so doesn't appear in JSON
                 }
             }
 
@@ -251,8 +250,7 @@ public class LoansApiResource {
                         && (tolerance.isGreaterThan(totalOutstandingMoney) || tolerance.isEqualTo(totalOutstandingMoney));
 
                 loanRepaymentsCount = retrieveNonDisbursementTransactions(loanRepayments);
-                permissions = this.loanReadPlatformService.retrieveLoanPermissions(loanBasicDetails, isWaiveAllowed, loanRepaymentsCount,
-                        existsGuarantor);
+                permissions = this.loanReadPlatformService.retrieveLoanPermissions(loanBasicDetails, isWaiveAllowed, loanRepaymentsCount);
 
                 // clear parent data which wasn't requested
                 if (!associationParameters.contains("repaymentSchedule")) {
@@ -302,7 +300,7 @@ public class LoansApiResource {
         final LoanAccountData loanAccount = new LoanAccountData(loanBasicDetails, convenienceDataRequired, repaymentSchedule,
                 loanRepayments, permissions, charges, productOptions, loanTermFrequencyTypeOptions, repaymentFrequencyTypeOptions,
                 repaymentStrategyOptions, interestRateFrequencyTypeOptions, amortizationTypeOptions, interestTypeOptions,
-                interestCalculationPeriodTypeOptions, fundOptions, chargeOptions, chargeTemplate, null, guarantorData);
+                interestCalculationPeriodTypeOptions, fundOptions, chargeOptions, chargeTemplate, null, guarantors);
 
         final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serialize(settings, loanAccount, LOAN_DATA_PARAMETERS);

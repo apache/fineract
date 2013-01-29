@@ -2,7 +2,6 @@ package org.mifosplatform.portfolio.savingsaccount;
 
 import org.mifosplatform.portfolio.client.data.ClientData;
 import org.mifosplatform.portfolio.group.command.GroupCommand;
-import org.mifosplatform.portfolio.loanaccount.gaurantor.command.GuarantorCommand;
 import org.mifosplatform.portfolio.savingsaccount.command.SavingAccountApprovalCommand;
 import org.mifosplatform.portfolio.savingsaccount.command.SavingAccountCommand;
 import org.mifosplatform.portfolio.savingsaccount.command.SavingAccountDepositCommand;
@@ -38,8 +37,6 @@ public interface PortfolioApiDataConversionService {
 
     SavingAccountCommand convertJsonToSavingAccountCommand(Long resourceIdentifier, String json);
 
-    GuarantorCommand convertJsonToGuarantorCommand(Long resourceIdentifier, Long loanId, String json);
-
     SavingStateTransitionsCommand convertJsonToSavingStateTransitionCommand(Long accountId, String json);
 
     SavingAccountApprovalCommand convertJsonToSavingApprovalCommand(Long accountId, String json);
@@ -47,4 +44,5 @@ public interface PortfolioApiDataConversionService {
     SavingAccountDepositCommand convertJsonToSavingAccountDepositCommand(Long accountId, String json);
 
     SavingAccountWithdrawalCommand convertJsonToSavingAccountWithdrawalCommand(Long accountId, String jsonRequestBody);
+
 }

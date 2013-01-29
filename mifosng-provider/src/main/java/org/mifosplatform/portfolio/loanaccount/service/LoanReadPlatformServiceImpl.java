@@ -197,7 +197,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
     @Override
     public LoanPermissionData retrieveLoanPermissions(final LoanBasicDetailsData loanBasicDetails, final boolean isWaiverAllowed,
-            final int repaymentAndWaiveCount, final boolean existsGuarantor) {
+            final int repaymentAndWaiveCount) {
 
         final boolean pendingApproval = (loanBasicDetails.getStatus().getId().equals(100L));
         final boolean waitingForDisbursal = (loanBasicDetails.getStatus().getId().equals(200L));
@@ -215,12 +215,6 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         if (closed || isOverpaid) {
             addLoanChargeAllowed = false;
             setGuarantorAllowed = false;
-            editGuarantorAllowed = false;
-        }
-
-        if (existsGuarantor) {
-            setGuarantorAllowed = false;
-        } else {
             editGuarantorAllowed = false;
         }
 

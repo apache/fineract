@@ -141,6 +141,10 @@ public class FromJsonHelper {
         return helperDelegator.extractIntegerWithLocaleNamed(parameterName, element.getAsJsonObject(), new HashSet<String>());
     }
     
+    public Integer extractIntegerSansLocaleNamed(final String parameterName, final JsonElement element){
+        return helperDelegator.extractIntegerSansLocaleNamed(parameterName, element.getAsJsonObject(), new HashSet<String>()); 
+    }
+    
     public Integer extractIntegerWithLocaleNamed(final String parameterName, final JsonElement element,
             final Set<String> parametersPassedInRequest) {
         return helperDelegator.extractIntegerWithLocaleNamed(parameterName, element.getAsJsonObject(), parametersPassedInRequest);

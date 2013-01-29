@@ -150,6 +150,30 @@ public class CommandWrapperBuilder {
         this.href = "/staff/" + staffId;
         return this;
     }
+    
+    public CommandWrapperBuilder createGuarantor() {
+        this.actionName = "CREATE";
+        this.entityName = "GUARANTOR";
+        this.entityId = null;
+        this.href = "/guarantors/template";
+        return this;
+    }
+
+    public CommandWrapperBuilder updateGuarantor(final Long guarantorId) {
+        this.actionName = "UPDATE";
+        this.entityName = "GUARANTOR";
+        this.entityId = guarantorId;
+        this.href = "/guarantors/" + guarantorId;
+        return this;
+    }
+    
+    public CommandWrapperBuilder deleteGuarantor(final Long guarantorId) {
+        this.actionName = "DELETE";
+        this.entityName = "GUARANTOR";
+        this.entityId = guarantorId;
+        this.href = "/guarantors/" + guarantorId;
+        return this;
+    }
 
     public CommandWrapperBuilder createFund() {
         this.actionName = "CREATE";

@@ -25,7 +25,6 @@ import org.mifosplatform.portfolio.client.command.ClientCommand;
 import org.mifosplatform.portfolio.client.data.ClientData;
 import org.mifosplatform.portfolio.client.serialization.ClientCommandFromApiJsonDeserializer;
 import org.mifosplatform.portfolio.group.command.GroupCommand;
-import org.mifosplatform.portfolio.loanaccount.gaurantor.command.GuarantorCommand;
 import org.mifosplatform.portfolio.savingsaccount.command.SavingAccountApprovalCommand;
 import org.mifosplatform.portfolio.savingsaccount.command.SavingAccountCommand;
 import org.mifosplatform.portfolio.savingsaccount.command.SavingAccountDepositCommand;
@@ -854,51 +853,10 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
                 isLockinPeriodAllowed, isPartialDepositAllowed, lockinPeriod, lockinPeriodType, depositEvery, interestPostEvery, interestPostFrequency);
     }
 
-    @Override
-    public GuarantorCommand convertJsonToGuarantorCommand(Long resourceIdentifier, Long loanId, String json) {
-        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
-        Type typeOfMap = new TypeToken<Map<String, String>>() {}.getType();
-        Map<String, String> requestMap = gsonConverter.fromJson(json, typeOfMap);
-
-        Set<String> supportedParams = new HashSet<String>(Arrays.asList("externalGuarantor", "existingClientId", "firstname", "lastname",
-                "addressLine1", "addressLine2", "city", "state", "zip", "country", "mobileNumber", "housePhoneNumber", "comment", "dob",
-                "locale", "dateFormat"));
-
-        checkForUnsupportedParameters(requestMap, supportedParams);
-
-        Set<String> modifiedParameters = new HashSet<String>();
-
-        boolean externalGuarantor = extractBooleanParameter("externalGuarantor", requestMap, modifiedParameters);
-
-        Long existingClientId = extractLongParameter("existingClientId", requestMap, modifiedParameters);
-        String firstname = extractStringParameter("firstname", requestMap, modifiedParameters);
-        String lastname = extractStringParameter("lastname", requestMap, modifiedParameters);
-        String addressLine1 = extractStringParameter("addressLine1", requestMap, modifiedParameters);
-        String addressLine2 = extractStringParameter("addressLine2", requestMap, modifiedParameters);
-        String city = extractStringParameter("city", requestMap, modifiedParameters);
-        String state = extractStringParameter("state", requestMap, modifiedParameters);
-        String zip = extractStringParameter("zip", requestMap, modifiedParameters);
-        String country = extractStringParameter("country", requestMap, modifiedParameters);
-        String mobileNumber = extractStringParameter("mobileNumber", requestMap, modifiedParameters);
-        String housePhoneNumber = extractStringParameter("housePhoneNumber", requestMap, modifiedParameters);
-        String comment = extractStringParameter("comment", requestMap, modifiedParameters);
-        String dob = extractStringParameter("dob", requestMap, modifiedParameters);
-
-        // workaround for passing locale info to data table api
-        final String dateFormat = requestMap.get("dateFormat");
-        final String locale = requestMap.get("locale");
-
-        GuarantorCommand command = new GuarantorCommand(modifiedParameters, existingClientId, firstname, lastname, externalGuarantor,
-                addressLine1, addressLine2, city, state, zip, country, mobileNumber, housePhoneNumber, comment, dob);
-        command.setDateFormat(dateFormat);
-        command.setLocale(locale);
-        return command;
-    }
-
-	@Override
-	public SavingStateTransitionsCommand convertJsonToSavingStateTransitionCommand( Long accountId, String json) {
-		
+        @Override
+        public SavingStateTransitionsCommand convertJsonToSavingStateTransitionCommand( Long accountId, String json) {
+                
        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
@@ -914,20 +872,20 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
         String note = extractStringParameter("note", requestMap, modifiedParameters);
 
         return new SavingStateTransitionsCommand(accountId, eventDate, note);
-		
-	}
+                
+        }
 
-	@Override
-	public SavingAccountApprovalCommand convertJsonToSavingApprovalCommand( Long accountId, String json) {
-		
-		if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
-		
-		Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        @Override
+        public SavingAccountApprovalCommand convertJsonToSavingApprovalCommand( Long accountId, String json) {
+                
+                if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+                
+                Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         Map<String, Object> requestMap = gsonConverter.fromJson(json, typeOfMap);
         
         Set<String> supportedParams = new HashSet<String>(Arrays.asList("locale", "dateFormat", "commencementDate", "savingsDepositAmountPerPeriod",
-        		"minimumBalanceForWithdrawal", "recurringInterestRate", "savingInterestRate", "interestType", "tenure", "tenureType", "frequency", "payEvery", "note",
-        		"interestPostEvery", "interestPostFrequency"));
+                        "minimumBalanceForWithdrawal", "recurringInterestRate", "savingInterestRate", "interestType", "tenure", "tenureType", "frequency", "payEvery", "note",
+                        "interestPostEvery", "interestPostFrequency"));
         
         checkForUnsupportedParameters(requestMap, supportedParams);
         Set<String> modifiedParameters = new HashSet<String>();
@@ -945,15 +903,15 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
         String note = extractStringParameter("note", requestMap, modifiedParameters);
         Integer interestPostEvery = extractIntegerParameter("interestPostEvery", requestMap, modifiedParameters);
         Integer interestPostFrequency = extractIntegerParameter("interestPostFrequency", requestMap, modifiedParameters);
-		return new SavingAccountApprovalCommand(accountId, commencementDate, savingsDepositAmountPerPeriod, minimumBalanceForWithdrawal, recurringInterestRate,
-				savingInterestRate, interestType, tenure, tenureType, frequency, payEvery, note, interestPostEvery, interestPostFrequency);
-	}
+                return new SavingAccountApprovalCommand(accountId, commencementDate, savingsDepositAmountPerPeriod, minimumBalanceForWithdrawal, recurringInterestRate,
+                                savingInterestRate, interestType, tenure, tenureType, frequency, payEvery, note, interestPostEvery, interestPostFrequency);
+        }
 
-	@Override
-	public SavingAccountDepositCommand convertJsonToSavingAccountDepositCommand(Long accountId, String json) {
-		if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
-		
-		Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        @Override
+        public SavingAccountDepositCommand convertJsonToSavingAccountDepositCommand(Long accountId, String json) {
+                if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+                
+                Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         Map<String, Object> requestMap = gsonConverter.fromJson(json, typeOfMap);
         
         Set<String> supportedParams = new HashSet<String>(Arrays.asList("locale", "dateFormat", "depositDate", "savingsDepositAmountPerPeriod", "note"));
@@ -964,14 +922,14 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
         LocalDate depositDate = extractLocalDateParameter("depositDate", requestMap, modifiedParameters);
         BigDecimal savingsDepositAmountPerPeriod = extractBigDecimalParameter("savingsDepositAmountPerPeriod", requestMap, modifiedParameters);
         String note = extractStringParameter("note", requestMap, modifiedParameters);
-		return new SavingAccountDepositCommand(accountId, savingsDepositAmountPerPeriod, depositDate, note);
-	}
+                return new SavingAccountDepositCommand(accountId, savingsDepositAmountPerPeriod, depositDate, note);
+        }
 
-	@Override
-	public SavingAccountWithdrawalCommand convertJsonToSavingAccountWithdrawalCommand(Long accountId, String json) {
-		if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
-		
-		Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        @Override
+        public SavingAccountWithdrawalCommand convertJsonToSavingAccountWithdrawalCommand(Long accountId, String json) {
+                if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+                
+                Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         Map<String, Object> requestMap = gsonConverter.fromJson(json, typeOfMap);
         
         Set<String> supportedParams = new HashSet<String>(Arrays.asList("locale", "dateFormat", "transactionDate", "amount", "note"));
@@ -982,6 +940,6 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
         LocalDate transactionDate = extractLocalDateParameter("transactionDate", requestMap, modifiedParameters);
         BigDecimal amount = extractBigDecimalParameter("amount", requestMap, modifiedParameters);
         String note = extractStringParameter("note", requestMap, modifiedParameters);
-		return new SavingAccountWithdrawalCommand(accountId, transactionDate, amount, note);
-	}
+                return new SavingAccountWithdrawalCommand(accountId, transactionDate, amount, note);
+        }
 }

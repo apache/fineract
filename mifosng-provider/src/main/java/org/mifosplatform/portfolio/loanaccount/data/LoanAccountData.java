@@ -69,7 +69,7 @@ public class LoanAccountData {
     private final Collection<LoanChargeData> charges;
     private final LoanPermissionData permissions;
     private final LoanConvenienceData convenienceData;
-    private final GuarantorData guarantorData;
+    private final Collection<GuarantorData> guarantors;
 
     // template
     private final Collection<StaffData> loanOfficerOptions;
@@ -94,7 +94,7 @@ public class LoanAccountData {
             final Collection<EnumOptionData> interestRateFrequencyTypeOptions, final Collection<EnumOptionData> amortizationTypeOptions,
             final Collection<EnumOptionData> interestTypeOptions, final Collection<EnumOptionData> interestCalculationPeriodTypeOptions,
             final Collection<FundData> fundOptions, final Collection<ChargeData> chargeOptions, final ChargeData chargeTemplate,
-            final Collection<StaffData> loanOfficerOptions, final GuarantorData guarantorData) {
+            final Collection<StaffData> loanOfficerOptions, final Collection<GuarantorData> guarantors) {
         this.repaymentSchedule = repaymentSchedule;
         this.transactions = transactions;
         this.permissions = permissions;
@@ -111,7 +111,7 @@ public class LoanAccountData {
         this.chargeOptions = chargeOptions;
         this.chargeTemplate = chargeTemplate;
         this.loanOfficerOptions = loanOfficerOptions;
-        this.guarantorData = guarantorData;
+        this.guarantors = guarantors;
 
         if (convenienceDataRequired) {
             int maxSubmittedOnOffsetFromToday = basicDetails.getMaxSubmittedOnOffsetFromToday();

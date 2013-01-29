@@ -1,101 +1,116 @@
 package org.mifosplatform.portfolio.loanaccount.gaurantor.service;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
-import org.mifosplatform.infrastructure.dataqueries.data.GenericResultsetData;
-import org.mifosplatform.infrastructure.dataqueries.service.ReadWriteNonCoreDataService;
-import org.mifosplatform.portfolio.client.domain.Client;
-import org.mifosplatform.portfolio.loanaccount.domain.Loan;
-import org.mifosplatform.portfolio.loanaccount.domain.LoanRepository;
-import org.mifosplatform.portfolio.loanaccount.exception.LoanNotFoundException;
+import org.mifosplatform.infrastructure.core.data.EnumOptionData;
+import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
+import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
+import org.mifosplatform.organisation.staff.data.StaffData;
+import org.mifosplatform.organisation.staff.service.StaffReadPlatformService;
+import org.mifosplatform.portfolio.client.data.ClientData;
+import org.mifosplatform.portfolio.client.service.ClientReadPlatformService;
 import org.mifosplatform.portfolio.loanaccount.gaurantor.data.GuarantorData;
-import org.mifosplatform.portfolio.loanaccount.gaurantor.exception.GuarantorNotFoundException;
+import org.mifosplatform.portfolio.loanaccount.gaurantor.domain.GuarantorType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
 @Service
 public class GuarantorReadPlatformServiceImpl implements GuarantorReadPlatformService {
 
-    // Table for storing external Guarantor Details
-    public static final String EXTERNAL_GUARANTOR_TABLE_NAME = "m_guarantor_external";
-
-    private final LoanRepository loanRepository;
-    private final ReadWriteNonCoreDataService readWriteNonCoreDataService;
+    private final JdbcTemplate jdbcTemplate;
+    private final ClientReadPlatformService clientReadPlatformService;
+    private final StaffReadPlatformService staffReadPlatformService;
 
     @Autowired
-    public GuarantorReadPlatformServiceImpl(final LoanRepository loanRepository,
-            final ReadWriteNonCoreDataService readWriteNonCoreDataService) {
-        this.loanRepository = loanRepository;
-        this.readWriteNonCoreDataService = readWriteNonCoreDataService;
+    public GuarantorReadPlatformServiceImpl(final TenantAwareRoutingDataSource dataSource,
+            final ClientReadPlatformService clientReadPlatformService, final StaffReadPlatformService staffReadPlatformService) {
+        this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.clientReadPlatformService = clientReadPlatformService;
+        this.staffReadPlatformService = staffReadPlatformService;
     }
 
-    @Override
-    public boolean existsGuarantor(Long loanId) {
-        Loan loan = retrieveLoanById(loanId);
-        // return if internal guarantor exists
-        if (loan.getGuarantor() != null) { return true; }
-        // return if an external guarantor exists
-        if (null != getExternalGuarantor(loanId)) { return true; }
-        // else no guarantor exists
-        return false;
-    }
+    private static final class GuarantorMapper implements RowMapper<GuarantorData> {
 
-    @Override
-    public GuarantorData retrieveGuarantor(Long loanId) {
-        GuarantorData guarantorData = null;
-        Loan loan = retrieveLoanById(loanId);
-        // does an internal guarantor exist
-        if (loan.getGuarantor() != null) {
-            Client guarantor = loan.getGuarantor();
-            LocalDate localDate = new LocalDate(guarantor.getJoiningDate());
-            guarantorData = new GuarantorData(guarantor.getId(), guarantor.getFirstName(), guarantor.getLastName(),
-                    guarantor.getExternalId(), guarantor.getOffice().getName(), localDate);
-        } else {
-            guarantorData = getExternalGuarantor(loanId);
+        public String schema() {
+            return "  g.id as id, g.loan_id as loanId, g.entity_id as entityId, g.type_enum guarantorType ,g.firstname as firstname,"
+                    + " g.lastname as lastname, g.dob as dateOfBirth, g.address_line_1 as addressLine1, g.address_line_2 as addressLine2,"
+                    + " g.city as city, g.state as state, g.country as country, g.zip as zip, g.house_phone_number as housePhoneNumber, "
+                    + " g.mobile_number as mobilePhoneNumber, g.comment as comment from m_guarantor g";
         }
-        // throw error if guarantor does not exist
-        if (guarantorData == null) { throw new GuarantorNotFoundException(loanId); }
+
+        @Override
+        public GuarantorData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+            Long id = rs.getLong("id");
+            Long loanId = rs.getLong("loanId");
+            Integer guarantorTypeId = rs.getInt("guarantorType");
+            final EnumOptionData guarantorType = GuarantorEnumerations.guarantorType(guarantorTypeId);
+            Long entityId = rs.getLong("entityId");
+            String firstname = rs.getString("firstname");
+            String lastname = rs.getString("lastname");
+            LocalDate dob = JdbcSupport.getLocalDate(rs, "dateOfBirth");
+            String addressLine1 = rs.getString("addressLine1");
+            String addressLine2 = rs.getString("addressLine2");
+            String city = rs.getString("city");
+            String state = rs.getString("state");
+            String zip = rs.getString("zip");
+            String country = rs.getString("country");
+            String mobileNumber = rs.getString("mobilePhoneNumber");
+            String housePhoneNumber = rs.getString("housePhoneNumber");
+            String comment = rs.getString("comment");
+            return new GuarantorData(id, loanId, entityId, guarantorType, firstname, lastname, dob, addressLine1, addressLine2, city,
+                    state, zip, country, mobileNumber, housePhoneNumber, comment, null, null, null, null);
+        }
+    }
+
+    @Override
+    public List<GuarantorData> retrieveGuarantorsForLoan(Long loanId) {
+        final GuarantorMapper rm = new GuarantorMapper();
+        String sql = "select " + rm.schema();
+        sql += " where loan_id = ?";
+        List<GuarantorData> guarantorDatas = this.jdbcTemplate.query(sql, rm, new Object[] { loanId });
+
+        List<GuarantorData> mergedGuarantorDatas = new ArrayList<GuarantorData>();
+
+        for (GuarantorData guarantorData : guarantorDatas) {
+            mergedGuarantorDatas.add(mergeDetailsForClientOrStaffGuarantor(guarantorData));
+        }
+        return mergedGuarantorDatas;
+    }
+
+    @Override
+    public GuarantorData retrieveGuarantor(Long guarantorId) {
+        final GuarantorMapper rm = new GuarantorMapper();
+        String sql = "select " + rm.schema();
+        sql += " where loan_id = ?";
+        GuarantorData guarantorData = this.jdbcTemplate.queryForObject(sql, rm, new Object[] { guarantorId });
+
+        return mergeDetailsForClientOrStaffGuarantor(guarantorData);
+    }
+
+    @Override
+    public GuarantorData retrieveNewGuarantorDetails() {
+        final List<EnumOptionData> guarantorTypeOptions = GuarantorEnumerations.guarantorType(GuarantorType.values());
+        return GuarantorData.template(guarantorTypeOptions);
+    }
+
+    /**
+     * @param guarantorData
+     */
+    private GuarantorData mergeDetailsForClientOrStaffGuarantor(GuarantorData guarantorData) {
+        if (guarantorData.isExistingClient()) {
+            ClientData clientData = clientReadPlatformService.retrieveIndividualClient(guarantorData.getEntityId());
+            return GuarantorData.mergeClientData(clientData, guarantorData);
+        } else if (guarantorData.isStaffMember()) {
+            StaffData staffData = staffReadPlatformService.retrieveStaff(guarantorData.getEntityId());
+            return GuarantorData.mergeStaffData(staffData, guarantorData);
+        }
         return guarantorData;
     }
 
-    private Loan retrieveLoanById(final Long loanId) {
-
-        // FIXME - KW - On the read side of services - we would prefer not to
-        // use the repository/ORM pattern
-        Loan loan = loanRepository.findOne(loanId);
-        if (loan == null) { throw new LoanNotFoundException(loanId); }
-        return loan;
-    }
-
-    @Override
-    public GuarantorData getExternalGuarantor(final Long loanId) {
-
-        GenericResultsetData genericResultDataSet = readWriteNonCoreDataService.retrieveDataTableGenericResultSet(
-                EXTERNAL_GUARANTOR_TABLE_NAME, loanId, null, null);
-        if (genericResultDataSet.getData().size() == 1) {
-            List<String> guarantorRow = genericResultDataSet.getData().get(0).getRow();
-            String firstname = guarantorRow.get(1);
-            String lastname = guarantorRow.get(2);
-
-            LocalDate dateOfBirth = null;
-            if (!StringUtils.isBlank(guarantorRow.get(3))) {
-                dateOfBirth = new LocalDate(guarantorRow.get(3));
-            }
-            String addressLine1 = guarantorRow.get(4);
-            String addressLine2 = guarantorRow.get(5);
-            String city = guarantorRow.get(6);
-            String state = guarantorRow.get(7);
-            String country = guarantorRow.get(8);
-            String zip = guarantorRow.get(9);
-            String housePhoneNumber = guarantorRow.get(10);
-            String mobileNumber = guarantorRow.get(11);
-            String comment = guarantorRow.get(12);
-            GuarantorData guarantorData = new GuarantorData(firstname, lastname, dateOfBirth, addressLine1, addressLine2, city, state, zip,
-                    country, mobileNumber, housePhoneNumber, comment);
-            return guarantorData;
-        }
-        return null;
-    }
 }

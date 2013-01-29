@@ -1,19 +1,27 @@
 package org.mifosplatform.portfolio.loanaccount.gaurantor.command;
 
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import org.joda.time.LocalDate;
+import org.mifosplatform.infrastructure.core.data.ApiParameterError;
+import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
+import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
+import org.mifosplatform.portfolio.loanaccount.gaurantor.GuarantorConstants.GUARANTOR_JSON_INPUT_PARAMS;
+import org.mifosplatform.portfolio.loanaccount.gaurantor.domain.GuarantorType;
 
 /**
  * Immutable command for creating or updating details of a Guarantor.
  */
 public class GuarantorCommand {
 
-    private final boolean externalGuarantor;
-
     /*** Fields for current customers serving as guarantors **/
-    private final Long existingClientId;
+    private final Long loanId;
+    private final Integer guarantorTypeId;
+    private final Long entityId;
 
     /*** Fields for external persons serving as guarantors ***/
-    // FIXME - kw - what if the details for collecting guarantors change? we are using datatable approach but embedding a structure here?
     private final String firstname;
     private final String lastname;
     private final String addressLine1;
@@ -25,24 +33,16 @@ public class GuarantorCommand {
     private final String mobileNumber;
     private final String housePhoneNumber;
     private final String comment;
-    private final String dob;
+    private final LocalDate dob;
 
-    /** Feilds for passing Locale info to generic data service api **/
-    private String dateFormat;
-    private String locale;
-
-    private final Set<String> modifiedParameters;
-
-    public GuarantorCommand(final Set<String> modifiedParameters, final Long existingClientId, final String firstname,
-            final String lastname, final Boolean externalGuarantor, final String addressLine1, final String addressLine2,
-            final String city, final String state, final String zip, final String country, final String mobileNumber,
-            final String housePhoneNumber, final String comment, final String dob) {
-        this.modifiedParameters = modifiedParameters;
-
-        this.externalGuarantor = externalGuarantor;
-
-        /*** Fields for current customers serving as guarantors **/
-        this.existingClientId = existingClientId;
+    public GuarantorCommand(final Long loanId, final Integer guarantorTypeId, final Long entityId, final String firstname,
+            final String lastname, final String addressLine1, final String addressLine2, final String city, final String state,
+            final String zip, final String country, final String mobileNumber, final String housePhoneNumber, final String comment,
+            final LocalDate dob) {
+        this.loanId = loanId;
+        /*** Fields for current entities serving as guarantors **/
+        this.guarantorTypeId = guarantorTypeId;
+        this.entityId = entityId;
 
         /*** Fields for external persons serving as guarantors ***/
         this.firstname = firstname;
@@ -59,80 +59,105 @@ public class GuarantorCommand {
         this.dob = dob;
     }
 
-    public String getFirstname() {
-        return firstname;
+    public boolean isExternalGuarantor() {
+        return GuarantorType.EXTERNAL.getValue().equals(guarantorTypeId);
     }
 
-    public String getLastname() {
-        return lastname;
+    public Date getDobAsDate() {
+        return this.dob.toDateMidnight().toDate();
     }
 
-    public Boolean isExternalGuarantor() {
-        return externalGuarantor;
+    public void validateForCreate() {
+
+        List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+
+        DataValidatorBuilder baseDataValidator = getDataValidator(dataValidationErrors);
+
+        baseDataValidator.reset().parameter(GUARANTOR_JSON_INPUT_PARAMS.LOAN_ID.getValue()).value(this.loanId).notNull()
+                .integerGreaterThanZero();
+        baseDataValidator.reset().parameter(GUARANTOR_JSON_INPUT_PARAMS.GUARANTOR_TYPE_ID.getValue()).value(this.guarantorTypeId).notNull()
+                .inMinMaxRange(GuarantorType.getMinValue(), GuarantorType.getMaxValue());
+
+        // validate for existing Client or Staff serving as gurantor
+        if (!this.isExternalGuarantor()) {
+            baseDataValidator.reset().parameter(GUARANTOR_JSON_INPUT_PARAMS.ENTITY_ID.getValue()).value(this.entityId).notNull()
+                    .integerGreaterThanZero();
+        } else {
+            // validate for an external guarantor
+            baseDataValidator.reset().parameter(GUARANTOR_JSON_INPUT_PARAMS.FIRSTNAME.getValue()).value(this.firstname).notBlank()
+                    .notExceedingLengthOf(50);
+            baseDataValidator.reset().parameter(GUARANTOR_JSON_INPUT_PARAMS.LASTNAME.getValue()).value(this.lastname).notBlank()
+                    .notExceedingLengthOf(50);
+            validateNonMandatoryFieldsForMaxLength(baseDataValidator);
+        }
+
+        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
+                "Validation errors exist.", dataValidationErrors); }
     }
 
-    public Long getExistingClientId() {
-        return existingClientId;
+    public void validateForUpdate() {
+        List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+
+        DataValidatorBuilder baseDataValidator = getDataValidator(dataValidationErrors);
+
+        baseDataValidator.reset().parameter(GUARANTOR_JSON_INPUT_PARAMS.GUARANTOR_TYPE_ID.getValue()).value(this.guarantorTypeId)
+                .ignoreIfNull().inMinMaxRange(GuarantorType.getMinValue(), GuarantorType.getMaxValue());
+
+        // validate for existing Client or Staff serving as gurantor
+        if (!this.isExternalGuarantor()) {
+            baseDataValidator.reset().parameter(GUARANTOR_JSON_INPUT_PARAMS.ENTITY_ID.getValue()).value(this.entityId).ignoreIfNull()
+                    .integerGreaterThanZero();
+        } else {
+            // TODO: Vishwas this validation is buggy (it is compulsory to
+            // update
+            // firstname and last name when a guarantor type is changed), to be
+            // corrected while
+            // refactoring for maker checker
+            baseDataValidator.reset().parameter(GUARANTOR_JSON_INPUT_PARAMS.FIRSTNAME.getValue()).value(this.firstname).ignoreIfNull()
+                    .notExceedingLengthOf(50);
+            baseDataValidator.reset().parameter(GUARANTOR_JSON_INPUT_PARAMS.LASTNAME.getValue()).value(this.lastname).ignoreIfNull()
+                    .notExceedingLengthOf(50);
+
+            validateNonMandatoryFieldsForMaxLength(baseDataValidator);
+        }
+        baseDataValidator.reset().anyOfNotNull(this.entityId, this.addressLine1, this.addressLine2, this.city, this.comment, this.country,
+                this.firstname, this.housePhoneNumber, this.lastname, this.mobileNumber, this.state, this.zip);
+
+        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
+                "Validation errors exist.", dataValidationErrors); }
     }
 
-    public String getAddressLine1() {
-        return addressLine1;
+    /**
+     * @param baseDataValidator
+     */
+    private void validateNonMandatoryFieldsForMaxLength(DataValidatorBuilder baseDataValidator) {
+        // validate non mandatory fields for length
+        baseDataValidator.reset().parameter(GUARANTOR_JSON_INPUT_PARAMS.ADDRESS_LINE_1.getValue()).value(this.addressLine1).ignoreIfNull()
+                .notExceedingLengthOf(50);
+        baseDataValidator.reset().parameter(GUARANTOR_JSON_INPUT_PARAMS.ADDRESS_LINE_2.getValue()).value(this.addressLine2).ignoreIfNull()
+                .notExceedingLengthOf(50);
+        baseDataValidator.reset().parameter(GUARANTOR_JSON_INPUT_PARAMS.CITY.getValue()).value(this.city).ignoreIfNull()
+                .notExceedingLengthOf(50);
+        baseDataValidator.reset().parameter(GUARANTOR_JSON_INPUT_PARAMS.STATE.getValue()).value(this.state).ignoreIfNull()
+                .notExceedingLengthOf(50);
+        baseDataValidator.reset().parameter(GUARANTOR_JSON_INPUT_PARAMS.ZIP.getValue()).value(this.zip).ignoreIfNull()
+                .notExceedingLengthOf(50);
+        baseDataValidator.reset().parameter(GUARANTOR_JSON_INPUT_PARAMS.COUNTRY.getValue()).value(this.country).ignoreIfNull()
+                .notExceedingLengthOf(50);
+        baseDataValidator.reset().parameter(GUARANTOR_JSON_INPUT_PARAMS.MOBILE_NUMBER.getValue()).value(this.mobileNumber).ignoreIfNull()
+                .notExceedingLengthOf(20);
+        baseDataValidator.reset().parameter(GUARANTOR_JSON_INPUT_PARAMS.PHONE_NUMBER.getValue()).value(this.housePhoneNumber)
+                .ignoreIfNull().notExceedingLengthOf(20);
+        baseDataValidator.reset().parameter(GUARANTOR_JSON_INPUT_PARAMS.COMMENT.getValue()).value(this.comment).ignoreIfNull()
+                .notExceedingLengthOf(500);
     }
 
-    public String getAddressLine2() {
-        return addressLine2;
+    /**
+     * @param dataValidationErrors
+     * @return
+     */
+    private DataValidatorBuilder getDataValidator(List<ApiParameterError> dataValidationErrors) {
+        DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("Guarantor");
+        return baseDataValidator;
     }
-
-    public String getCity() {
-        return city;
-    }
-
-    public String getState() {
-        return state;
-    }
-
-    public String getZip() {
-        return zip;
-    }
-
-    public String getCountry() {
-        return country;
-    }
-
-    public String getMobileNumber() {
-        return mobileNumber;
-    }
-
-    public String getHousePhoneNumber() {
-        return housePhoneNumber;
-    }
-
-    public String getComment() {
-        return comment;
-    }
-
-    public Set<String> getModifiedParameters() {
-        return modifiedParameters;
-    }
-
-    public String getDob() {
-        return dob;
-    }
-
-    public String getDateFormat() {
-        return dateFormat;
-    }
-
-    public void setDateFormat(String dateFormat) {
-        this.dateFormat = dateFormat;
-    }
-
-    public String getLocale() {
-        return locale;
-    }
-
-    public void setLocale(String locale) {
-        this.locale = locale;
-    }
-
 }

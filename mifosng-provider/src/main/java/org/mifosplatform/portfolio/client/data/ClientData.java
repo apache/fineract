@@ -122,4 +122,29 @@ final public class ClientData {
     public ClientData currentChange() {
         return this.currentChange;
     }
+
+    public String getExternalId() {
+        return this.externalId;
+    }
+
+    public String getFirstname() {
+        return this.firstname;
+    }
+
+    public String getLastname() {
+        return this.lastname;
+    }
+
+    public Long getOfficeId() {
+        return this.officeId;
+    }
+
+    public String getOfficeName() {
+        return this.officeName;
+    }
+
+    public LocalDate getJoinedDate() {
+        return this.joinedDate;
+    }
+
 }

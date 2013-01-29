@@ -173,6 +173,10 @@ public class CommandWrapper {
     public boolean isStaffResource() {
         return this.entityName.equalsIgnoreCase("STAFF");
     }
+    
+    public boolean isGuarantorResource() {
+        return this.entityName.equalsIgnoreCase("GUARANTOR");
+    }
 
     public boolean isFundResource() {
         return this.entityName.equalsIgnoreCase("FUND");

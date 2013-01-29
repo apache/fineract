@@ -144,7 +144,7 @@ public class JsonParserHelper {
      * @param parametersPassedInRequest
      * @return
      */
-    public Integer extractIntegerFromUnFormattedStringNamed(final String parameterName, final JsonElement element, final Set<String> parametersPassedInRequest) {
+    public Integer extractIntegerSansLocaleNamed(final String parameterName, final JsonElement element, final Set<String> parametersPassedInRequest) {
         Integer intValue = null;
         if (element.isJsonObject()) {
             JsonObject object = element.getAsJsonObject();

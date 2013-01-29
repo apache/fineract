@@ -1,13 +1,15 @@
 package org.mifosplatform.portfolio.loanaccount.gaurantor.service;
 
+import java.util.List;
+
 import org.mifosplatform.portfolio.loanaccount.gaurantor.data.GuarantorData;
 
 public interface GuarantorReadPlatformService {
 
-    GuarantorData retrieveGuarantor(Long loanId);
+    List<GuarantorData> retrieveGuarantorsForLoan(Long loanId);
 
-    boolean existsGuarantor(Long loanId);
+    GuarantorData retrieveGuarantor(Long guarantorId);
 
-    GuarantorData getExternalGuarantor(Long loanId);
+    GuarantorData retrieveNewGuarantorDetails();
 
 }
