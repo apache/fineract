@@ -1,4 +1,4 @@
-package org.mifosplatform.portfolio.loanaccount.gaurantor.command;
+package org.mifosplatform.portfolio.loanaccount.guarantor.command;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -8,8 +8,8 @@ import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.data.ApiParameterError;
 import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
 import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
-import org.mifosplatform.portfolio.loanaccount.gaurantor.GuarantorConstants.GUARANTOR_JSON_INPUT_PARAMS;
-import org.mifosplatform.portfolio.loanaccount.gaurantor.domain.GuarantorType;
+import org.mifosplatform.portfolio.loanaccount.guarantor.GuarantorConstants.GUARANTOR_JSON_INPUT_PARAMS;
+import org.mifosplatform.portfolio.loanaccount.guarantor.domain.GuarantorType;
 
 /**
  * Immutable command for creating or updating details of a Guarantor.

@@ -1,7 +1,8 @@
-package org.mifosplatform.portfolio.loanaccount.gaurantor.serialization;
+package org.mifosplatform.portfolio.loanaccount.guarantor.serialization;
 
 import java.lang.reflect.Type;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
@@ -9,8 +10,8 @@ import org.mifosplatform.infrastructure.core.exception.InvalidJsonException;
 import org.mifosplatform.infrastructure.core.serialization.AbstractFromApiJsonDeserializer;
 import org.mifosplatform.infrastructure.core.serialization.FromApiJsonDeserializer;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
-import org.mifosplatform.portfolio.loanaccount.gaurantor.GuarantorConstants.GUARANTOR_JSON_INPUT_PARAMS;
-import org.mifosplatform.portfolio.loanaccount.gaurantor.command.GuarantorCommand;
+import org.mifosplatform.portfolio.loanaccount.guarantor.GuarantorConstants.GUARANTOR_JSON_INPUT_PARAMS;
+import org.mifosplatform.portfolio.loanaccount.guarantor.command.GuarantorCommand;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -36,13 +37,16 @@ public final class GuarantorCommandFromApiJsonDeserializer extends AbstractFromA
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, GUARANTOR_JSON_INPUT_PARAMS.getAllValues());
+        Set<String> supportedParameters = GUARANTOR_JSON_INPUT_PARAMS.getAllValues();
+        supportedParameters.add("locale");
+        supportedParameters.add("dateFormat");
+        fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, supportedParameters);
 
         final JsonElement element = fromApiJsonHelper.parse(json);
 
         Long loanId = fromApiJsonHelper.extractLongNamed(GUARANTOR_JSON_INPUT_PARAMS.LOAN_ID.getValue(), element);
-        Integer guarantorTypeId = fromApiJsonHelper.extractIntegerSansLocaleNamed(
-                GUARANTOR_JSON_INPUT_PARAMS.GUARANTOR_TYPE_ID.getValue(), element);
+        Integer guarantorTypeId = fromApiJsonHelper.extractIntegerSansLocaleNamed(GUARANTOR_JSON_INPUT_PARAMS.GUARANTOR_TYPE_ID.getValue(),
+                element);
         Long entityId = fromApiJsonHelper.extractLongNamed(GUARANTOR_JSON_INPUT_PARAMS.ENTITY_ID.getValue(), element);
         String firstname = fromApiJsonHelper.extractStringNamed(GUARANTOR_JSON_INPUT_PARAMS.FIRSTNAME.getValue(), element);
         String lastname = fromApiJsonHelper.extractStringNamed(GUARANTOR_JSON_INPUT_PARAMS.LASTNAME.getValue(), element);

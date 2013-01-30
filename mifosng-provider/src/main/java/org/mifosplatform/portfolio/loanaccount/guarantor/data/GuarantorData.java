@@ -1,4 +1,4 @@
-package org.mifosplatform.portfolio.loanaccount.gaurantor.data;
+package org.mifosplatform.portfolio.loanaccount.guarantor.data;
 
 import java.util.List;
 
@@ -6,8 +6,8 @@ import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.organisation.staff.data.StaffData;
 import org.mifosplatform.portfolio.client.data.ClientData;
-import org.mifosplatform.portfolio.loanaccount.gaurantor.domain.GuarantorType;
-import org.mifosplatform.portfolio.loanaccount.gaurantor.service.GuarantorEnumerations;
+import org.mifosplatform.portfolio.loanaccount.guarantor.domain.GuarantorType;
+import org.mifosplatform.portfolio.loanaccount.guarantor.service.GuarantorEnumerations;
 
 public class GuarantorData {
 
@@ -93,15 +93,15 @@ public class GuarantorData {
     }
 
     public boolean isExternalGuarantor() {
-        return GuarantorType.EXTERNAL.getValue().equals(guarantorType.getId());
+        return GuarantorType.EXTERNAL.getValue().equals(guarantorType.getId().intValue());
     }
 
     public boolean isExistingClient() {
-        return GuarantorType.CUSTOMER.getValue().equals(guarantorType.getId());
+        return GuarantorType.CUSTOMER.getValue().equals(guarantorType.getId().intValue());
     }
 
     public boolean isStaffMember() {
-        return GuarantorType.STAFF.getValue().equals(guarantorType.getId());
+        return GuarantorType.STAFF.getValue().equals(guarantorType.getId().intValue());
     }
 
     public Long getEntityId() {

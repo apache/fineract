@@ -1,4 +1,4 @@
-package org.mifosplatform.portfolio.loanaccount.gaurantor.domain;
+package org.mifosplatform.portfolio.loanaccount.guarantor.domain;
 
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -15,7 +15,7 @@ import javax.persistence.TemporalType;
 import org.apache.commons.lang.StringUtils;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.portfolio.loanaccount.domain.Loan;
-import org.mifosplatform.portfolio.loanaccount.gaurantor.GuarantorConstants.GUARANTOR_JSON_INPUT_PARAMS;
+import org.mifosplatform.portfolio.loanaccount.guarantor.GuarantorConstants.GUARANTOR_JSON_INPUT_PARAMS;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity

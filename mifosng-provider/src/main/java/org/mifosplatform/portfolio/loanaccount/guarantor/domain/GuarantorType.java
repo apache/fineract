@@ -1,4 +1,4 @@
-package org.mifosplatform.portfolio.loanaccount.gaurantor.domain;
+package org.mifosplatform.portfolio.loanaccount.guarantor.domain;
 
 import java.util.HashMap;
 import java.util.Map;

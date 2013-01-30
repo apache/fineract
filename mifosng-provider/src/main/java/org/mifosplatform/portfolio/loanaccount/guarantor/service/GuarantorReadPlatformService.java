@@ -1,8 +1,8 @@
-package org.mifosplatform.portfolio.loanaccount.gaurantor.service;
+package org.mifosplatform.portfolio.loanaccount.guarantor.service;
 
 import java.util.List;
 
-import org.mifosplatform.portfolio.loanaccount.gaurantor.data.GuarantorData;
+import org.mifosplatform.portfolio.loanaccount.guarantor.data.GuarantorData;
 
 public interface GuarantorReadPlatformService {
 

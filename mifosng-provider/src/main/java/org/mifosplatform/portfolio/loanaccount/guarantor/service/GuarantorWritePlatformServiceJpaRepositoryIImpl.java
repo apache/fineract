@@ -1,4 +1,4 @@
-package org.mifosplatform.portfolio.loanaccount.gaurantor.service;
+package org.mifosplatform.portfolio.loanaccount.guarantor.service;
 
 import java.util.Map;
 
@@ -15,13 +15,13 @@ import org.mifosplatform.portfolio.client.exception.ClientNotFoundException;
 import org.mifosplatform.portfolio.loanaccount.domain.Loan;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanRepository;
 import org.mifosplatform.portfolio.loanaccount.exception.LoanNotFoundException;
-import org.mifosplatform.portfolio.loanaccount.gaurantor.GuarantorConstants.GUARANTOR_JSON_INPUT_PARAMS;
-import org.mifosplatform.portfolio.loanaccount.gaurantor.command.GuarantorCommand;
-import org.mifosplatform.portfolio.loanaccount.gaurantor.domain.Guarantor;
-import org.mifosplatform.portfolio.loanaccount.gaurantor.domain.GuarantorRepository;
-import org.mifosplatform.portfolio.loanaccount.gaurantor.exception.GuarantorNotFoundException;
-import org.mifosplatform.portfolio.loanaccount.gaurantor.exception.InvalidGuarantorException;
-import org.mifosplatform.portfolio.loanaccount.gaurantor.serialization.GuarantorCommandFromApiJsonDeserializer;
+import org.mifosplatform.portfolio.loanaccount.guarantor.GuarantorConstants.GUARANTOR_JSON_INPUT_PARAMS;
+import org.mifosplatform.portfolio.loanaccount.guarantor.command.GuarantorCommand;
+import org.mifosplatform.portfolio.loanaccount.guarantor.domain.Guarantor;
+import org.mifosplatform.portfolio.loanaccount.guarantor.domain.GuarantorRepository;
+import org.mifosplatform.portfolio.loanaccount.guarantor.exception.GuarantorNotFoundException;
+import org.mifosplatform.portfolio.loanaccount.guarantor.exception.InvalidGuarantorException;
+import org.mifosplatform.portfolio.loanaccount.guarantor.serialization.GuarantorCommandFromApiJsonDeserializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

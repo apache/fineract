@@ -1,10 +1,10 @@
-package org.mifosplatform.portfolio.loanaccount.gaurantor.service;
+package org.mifosplatform.portfolio.loanaccount.guarantor.service;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
-import org.mifosplatform.portfolio.loanaccount.gaurantor.domain.GuarantorType;
+import org.mifosplatform.portfolio.loanaccount.guarantor.domain.GuarantorType;
 
 public class GuarantorEnumerations {
 

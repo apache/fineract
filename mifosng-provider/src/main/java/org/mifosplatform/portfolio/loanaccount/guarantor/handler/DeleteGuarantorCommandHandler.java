@@ -1,9 +1,9 @@
-package org.mifosplatform.portfolio.loanaccount.gaurantor.handler;
+package org.mifosplatform.portfolio.loanaccount.guarantor.handler;
 
 import org.mifosplatform.commands.handler.NewCommandSourceHandler;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
-import org.mifosplatform.portfolio.loanaccount.gaurantor.service.GuarantorWritePlatformService;
+import org.mifosplatform.portfolio.loanaccount.guarantor.service.GuarantorWritePlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

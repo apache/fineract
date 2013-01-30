@@ -1,4 +1,4 @@
-package org.mifosplatform.portfolio.loanaccount.gaurantor;
+package org.mifosplatform.portfolio.loanaccount.guarantor;
 
 import java.util.HashSet;
 import java.util.Set;

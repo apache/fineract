@@ -1,4 +1,4 @@
-package org.mifosplatform.portfolio.loanaccount.gaurantor.service;
+package org.mifosplatform.portfolio.loanaccount.guarantor.service;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -13,8 +13,8 @@ import org.mifosplatform.organisation.staff.data.StaffData;
 import org.mifosplatform.organisation.staff.service.StaffReadPlatformService;
 import org.mifosplatform.portfolio.client.data.ClientData;
 import org.mifosplatform.portfolio.client.service.ClientReadPlatformService;
-import org.mifosplatform.portfolio.loanaccount.gaurantor.data.GuarantorData;
-import org.mifosplatform.portfolio.loanaccount.gaurantor.domain.GuarantorType;
+import org.mifosplatform.portfolio.loanaccount.guarantor.data.GuarantorData;
+import org.mifosplatform.portfolio.loanaccount.guarantor.domain.GuarantorType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;

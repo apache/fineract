@@ -1,4 +1,4 @@
-package org.mifosplatform.portfolio.loanaccount.gaurantor.api;
+package org.mifosplatform.portfolio.loanaccount.guarantor.api;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -26,10 +26,10 @@ import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
-import org.mifosplatform.portfolio.loanaccount.gaurantor.data.GuarantorData;
-import org.mifosplatform.portfolio.loanaccount.gaurantor.domain.GuarantorType;
-import org.mifosplatform.portfolio.loanaccount.gaurantor.service.GuarantorEnumerations;
-import org.mifosplatform.portfolio.loanaccount.gaurantor.service.GuarantorReadPlatformService;
+import org.mifosplatform.portfolio.loanaccount.guarantor.data.GuarantorData;
+import org.mifosplatform.portfolio.loanaccount.guarantor.domain.GuarantorType;
+import org.mifosplatform.portfolio.loanaccount.guarantor.service.GuarantorEnumerations;
+import org.mifosplatform.portfolio.loanaccount.guarantor.service.GuarantorReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
