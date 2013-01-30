@@ -1,4 +1,4 @@
--- currency symbols may not apply through command line on windows so use a different client like mysql workbench
+﻿-- currency symbols may not apply through command line on windows so use a different client like mysql workbench
 
 INSERT INTO `ref_loan_transaction_processing_strategy`
 (`id`,`code`,`name`)
@@ -36,47 +36,66 @@ VALUES
 (2,'AFN',2,NULL,'Afghanistan Afghani','currency.AFN'),
 (3,'ALL',2,NULL,'Albanian Lek','currency.ALL'),
 (4,'AMD',2,NULL,'Armenian Dram','currency.AMD'),
-(5,'ANG',2,NULL,'Netherlands Antillian Guilder','currency.ANG'),(6,'AOA',2,NULL,'Angolan Kwanza','currency.AOA'),
+(5,'ANG',2,NULL,'Netherlands Antillian Guilder','currency.ANG'),
+(6,'AOA',2,NULL,'Angolan Kwanza','currency.AOA'),
 (7,'ARS',2,NULL,'Argentine Peso','currency.ARS'),
-(8,'AUD',2,'A$','Australian Dollar','currency.AUD'),(9,'AWG',2,NULL,'Aruban Guilder','currency.AWG'),
+(8,'AUD',2,'A$','Australian Dollar','currency.AUD'),
+(9,'AWG',2,NULL,'Aruban Guilder','currency.AWG'),
 (10,'AZM',2,NULL,'Azerbaijanian Manat','currency.AZM'),
 (11,'BAM',2,NULL,'Bosnia and Herzegovina Convertible Marks','currency.BAM'),
 (12,'BBD',2,NULL,'Barbados Dollar','currency.BBD'),
 (13,'BDT',2,NULL,'Bangladesh Taka','currency.BDT'),
-(14,'BGN',2,NULL,'Bulgarian Lev','currency.BGN'),(15,'BHD',3,NULL,'Bahraini Dinar','currency.BHD'),
+(14,'BGN',2,NULL,'Bulgarian Lev','currency.BGN'),
+(15,'BHD',3,NULL,'Bahraini Dinar','currency.BHD'),
 (16,'BIF',0,NULL,'Burundi Franc','currency.BIF'),
 (17,'BMD',2,NULL,'Bermudian Dollar','currency.BMD'),
 (18,'BND',2,'B$','Brunei Dollar','currency.BND'),
-(19,'BOB',2,NULL,'Bolivian Boliviano','currency.BOB'),(20,'BRL',2,NULL,'Brazilian Real','currency.BRL'),(21,'BSD',2,NULL,'Bahamian Dollar','currency.BSD'),
-
-(22,'BTN',2,NULL,'Bhutan Ngultrum','currency.BTN'),(23,'BWP',2,NULL,'Botswana Pula','currency.BWP'),(24,'BYR',0,NULL,'Belarussian Ruble','currency.BYR'),
-
-(25,'BZD',2,NULL,'Belize Dollar','currency.BZD'),(26,'CAD',2,NULL,'Canadian Dollar','currency.CAD'),
-(27,'CDF',2,NULL,'Franc Congolais','currency.CDF'),(28,'CHF',2,NULL,'Swiss Franc','currency.CHF'),(29,'CLP',0,NULL,'Chilean Peso','currency.CLP'),
-
-(30,'CNY',2,NULL,'Chinese Yuan Renminbi','currency.CNY'),(31,'COP',2,NULL,'Colombian Peso','currency.COP'),(32,'CRC',2,NULL,'Costa Rican Colon','currency.CRC'),
-
-(33,'CSD',2,NULL,'Serbian Dinar','currency.CSD'),(34,'CUP',2,NULL,'Cuban Peso','currency.CUP'),(35,'CVE',2,NULL,'Cape Verde Escudo','currency.CVE'),
-(36,'CYP',2,NULL,'Cyprus Pound','currency.CYP'),(37,'CZK',2,NULL,'Czech Koruna','currency.CZK'),(38,'DJF',0,NULL,'Djibouti Franc','currency.DJF'),
-
-(39,'DKK',2,NULL,'Danish Krone','currency.DKK'),(40,'DOP',2,NULL,'Dominican Peso','currency.DOP'),(41,'DZD',2,NULL,'Algerian Dinar','currency.DZD'),
-
-(42,'EEK',2,NULL,'Estonian Kroon','currency.EEK'),(43,'EGP',2,NULL,'Egyptian Pound','currency.EGP'),(44,'ERN',2,NULL,'Eritrea Nafka','currency.ERN'),
-
-(45,'ETB',2,NULL,'Ethiopian Birr','currency.ETB'),(46,'EUR',2,'�','Euro','currency.EUR'),
-(47,'FJD',2,NULL,'Fiji Dollar','currency.FJD'),(48,'FKP',2,NULL,'Falkland 
-
-Islands Pound','currency.FKP'),(49,'GBP',2,NULL,'Pound Sterling','currency.GBP'),(50,'GEL',2,NULL,'Georgian Lari','currency.GEL'),
+(19,'BOB',2,NULL,'Bolivian Boliviano','currency.BOB'),
+(20,'BRL',2,NULL,'Brazilian Real','currency.BRL'),
+(21,'BSD',2,NULL,'Bahamian Dollar','currency.BSD'),
+(22,'BTN',2,NULL,'Bhutan Ngultrum','currency.BTN'),
+(23,'BWP',2,NULL,'Botswana Pula','currency.BWP'),
+(24,'BYR',0,NULL,'Belarussian Ruble','currency.BYR'),
+(25,'BZD',2,NULL,'Belize Dollar','currency.BZD'),
+(26,'CAD',2,NULL,'Canadian Dollar','currency.CAD'),
+(27,'CDF',2,NULL,'Franc Congolais','currency.CDF'),
+(28,'CHF',2,NULL,'Swiss Franc','currency.CHF'),
+(29,'CLP',0,NULL,'Chilean Peso','currency.CLP'),
+(30,'CNY',2,NULL,'Chinese Yuan Renminbi','currency.CNY'),
+(31,'COP',2,NULL,'Colombian Peso','currency.COP'),
+(32,'CRC',2,NULL,'Costa Rican Colon','currency.CRC'),
+(33,'CSD',2,NULL,'Serbian Dinar','currency.CSD'),
+(34,'CUP',2,NULL,'Cuban Peso','currency.CUP'),
+(35,'CVE',2,NULL,'Cape Verde Escudo','currency.CVE'),
+(36,'CYP',2,NULL,'Cyprus Pound','currency.CYP'),
+(37,'CZK',2,NULL,'Czech Koruna','currency.CZK'),
+(38,'DJF',0,NULL,'Djibouti Franc','currency.DJF'),
+(39,'DKK',2,NULL,'Danish Krone','currency.DKK'),
+(40,'DOP',2,NULL,'Dominican Peso','currency.DOP'),
+(41,'DZD',2,NULL,'Algerian Dinar','currency.DZD'),
+(42,'EEK',2,NULL,'Estonian Kroon','currency.EEK'),
+(43,'EGP',2,NULL,'Egyptian Pound','currency.EGP'),
+(44,'ERN',2,NULL,'Eritrea Nafka','currency.ERN'),
+(45,'ETB',2,NULL,'Ethiopian Birr','currency.ETB'),
+(46,'EUR',2,'€','Euro','currency.EUR'),
+(47,'FJD',2,NULL,'Fiji Dollar','currency.FJD'),
+(48,'FKP',2,NULL,'Falkland Islands Pound','currency.FKP'),
+(49,'GBP',2,NULL,'Pound Sterling','currency.GBP'),
+(50,'GEL',2,NULL,'Georgian Lari','currency.GEL'),
 (51,'GHC',2,'GHc','Ghana Cedi','currency.GHC'),
-(52,'GIP',2,NULL,'Gibraltar Pound','currency.GIP'),(53,'GMD',2,NULL,'Gambian Dalasi','currency.GMD'),(54,'GNF',0,NULL,'Guinea Franc','currency.GNF'),
-
-(55,'GTQ',2,NULL,'Guatemala Quetzal','currency.GTQ'),(56,'GYD',2,NULL,'Guyana Dollar','currency.GYD'),(57,'HKD',2,NULL,'Hong Kong Dollar','currency.HKD'),
-
-(58,'HNL',2,NULL,'Honduras Lempira','currency.HNL'),(59,'HRK',2,NULL,'Croatian Kuna','currency.HRK'),(60,'HTG',2,NULL,'Haiti Gourde','currency.HTG'),
-
-(61,'HUF',2,NULL,'Hungarian Forint','currency.HUF'),(62,'IDR',2,NULL,'Indonesian Rupiah','currency.IDR'),(63,'ILS',2,NULL,'New Israeli Shekel','currency.ILS'),
-
-(64,'INR',2,'?','Indian Rupee','currency.INR'),
+(52,'GIP',2,NULL,'Gibraltar Pound','currency.GIP'),
+(53,'GMD',2,NULL,'Gambian Dalasi','currency.GMD'),
+(54,'GNF',0,NULL,'Guinea Franc','currency.GNF'),
+(55,'GTQ',2,NULL,'Guatemala Quetzal','currency.GTQ'),
+(56,'GYD',2,NULL,'Guyana Dollar','currency.GYD'),
+(57,'HKD',2,NULL,'Hong Kong Dollar','currency.HKD'),
+(58,'HNL',2,NULL,'Honduras Lempira','currency.HNL'),
+(59,'HRK',2,NULL,'Croatian Kuna','currency.HRK'),
+(60,'HTG',2,NULL,'Haiti Gourde','currency.HTG'),
+(61,'HUF',2,NULL,'Hungarian Forint','currency.HUF'),
+(62,'IDR',2,NULL,'Indonesian Rupiah','currency.IDR'),
+(63,'ILS',2,NULL,'New Israeli Shekel','currency.ILS'),
+(64,'INR',2,'₹','Indian Rupee','currency.INR'),
 (65,'IQD',3,NULL,'Iraqi Dinar','currency.IQD'),(66,'IRR',2,NULL,'Iranian Rial','currency.IRR'),
 
 (67,'ISK',0,NULL,'Iceland Krona','currency.ISK'),(68,'JMD',2,NULL,'Jamaican Dollar','currency.JMD'),(69,'JOD',3,NULL,'Jordanian Dinar','currency.JOD'),
@@ -89,7 +108,7 @@ Islands Pound','currency.FKP'),(49,'GBP',2,NULL,'Pound Sterling','currency.GBP')
 
 (78,'KYD',2,NULL,'Cayman Islands Dollar','currency.KYD'),(79,'KZT',2,NULL,'Kazakhstan Tenge','currency.KZT'),
 (80,'LAK',2,NULL,'Lao Kip','currency.LAK'),
-(81,'LBP',2,'L�','Lebanese Pound','currency.LBP'),
+(81,'LBP',2,'L£','Lebanese Pound','currency.LBP'),
 (82,'LKR',2,NULL,'Sri Lanka Rupee','currency.LKR'),(83,'LRD',2,NULL,'Liberian Dollar','currency.LRD'),(84,'LSL',2,NULL,'Lesotho Loti','currency.LSL'),
 (85,'LTL',2,NULL,'Lithuanian Litas','currency.LTL'),(86,'LVL',2,NULL,'Latvian Lats','currency.LVL'),(87,'LYD',3,NULL,'Libyan Dinar','currency.LYD'),
 
@@ -122,21 +141,30 @@ Islands Pound','currency.FKP'),(49,'GBP',2,NULL,'Pound Sterling','currency.GBP')
 
 (127,'SHP',2,NULL,'St Helena Pound','currency.SHP'),(128,'SIT',2,NULL,'Slovenian Tolar','currency.SIT'),(129,'SKK',2,NULL,'Slovak Koruna','currency.SKK'),
 
-(130,'SLL',2,NULL,'Sierra Leone Leone','currency.SLL'),(131,'SOS',2,NULL,'Somali Shilling','currency.SOS'),(132,'SRD',2,NULL,'Surinam Dollar','currency.SRD'),
-(133,'STD',2,NULL,'Sao Tome and Principe Dobra','currency.STD'),(134,'SVC',2,NULL,'El Salvador Colon','currency.SVC'),(135,'SYP',2,NULL,'Syrian 
-
-Pound','currency.SYP'),(136,'SZL',2,NULL,'Swaziland Lilangeni','currency.SZL'),(137,'THB',2,NULL,'Thai Baht','currency.THB'),
-(138,'TJS',2,NULL,'Tajik Somoni','currency.TJS'),(139,'TMM',2,NULL,'Turkmenistan Manat','currency.TMM'),
+(130,'SLL',2,NULL,'Sierra Leone Leone','currency.SLL'),
+(131,'SOS',2,NULL,'Somali Shilling','currency.SOS'),
+(132,'SRD',2,NULL,'Surinam Dollar','currency.SRD'),
+(133,'STD',2,NULL,'Sao Tome and Principe Dobra','currency.STD'),
+(134,'SVC',2,NULL,'El Salvador Colon','currency.SVC'),
+(135,'SYP',2,NULL,'Syrian Pound','currency.SYP'),
+(136,'SZL',2,NULL,'Swaziland Lilangeni','currency.SZL'),
+(137,'THB',2,NULL,'Thai Baht','currency.THB'),
+(138,'TJS',2,NULL,'Tajik Somoni','currency.TJS'),
+(139,'TMM',2,NULL,'Turkmenistan Manat','currency.TMM'),
 (140,'TND',3,'DT','Tunisian Dinar','currency.TND'),
-(141,'TOP',2,NULL,'Tonga Pa\'anga','currency.TOP'),(142,'TRY',2,NULL,'Turkish Lira','currency.TRY'),(143,'TTD',2,NULL,'Trinidad and Tobago Dollar','currency.TTD'),
-
-(144,'TWD',2,NULL,'New Taiwan Dollar','currency.TWD'),(145,'TZS',2,NULL,'Tanzanian Shilling','currency.TZS'),(146,'UAH',2,NULL,'Ukraine Hryvnia','currency.UAH'),
-
+(141,'TOP',2,NULL,'Tonga Pa\'anga','currency.TOP'),
+(142,'TRY',2,NULL,'Turkish Lira','currency.TRY'),
+(143,'TTD',2,NULL,'Trinidad and Tobago Dollar','currency.TTD'),
+(144,'TWD',2,NULL,'New Taiwan Dollar','currency.TWD'),
+(145,'TZS',2,NULL,'Tanzanian Shilling','currency.TZS'),
+(146,'UAH',2,NULL,'Ukraine Hryvnia','currency.UAH'),
 (147,'UGX',2,'USh','Uganda Shilling','currency.UGX'),
 (148,'USD',2,'$','US Dollar','currency.USD'),
-(149,'UYU',2,NULL,'Peso Uruguayo','currency.UYU'),(150,'UZS',2,NULL,'Uzbekistan Sum','currency.UZS'),(151,'VEB',2,NULL,'Venezuelan Bolivar','currency.VEB'),
-
-(152,'VND',2,NULL,'Vietnamese Dong','currency.VND'),(153,'VUV',0,NULL,'Vanuatu Vatu','currency.VUV'),
+(149,'UYU',2,NULL,'Peso Uruguayo','currency.UYU'),
+(150,'UZS',2,NULL,'Uzbekistan Sum','currency.UZS'),
+(151,'VEB',2,NULL,'Venezuelan Bolivar','currency.VEB'),
+(152,'VND',2,NULL,'Vietnamese Dong','currency.VND'),
+(153,'VUV',0,NULL,'Vanuatu Vatu','currency.VUV'),
 (154,'WST',2,NULL,'Samoa Tala','currency.WST'),
 (155,'XAF',0,NULL,'CFA Franc BEAC','currency.XAF'),
 (156,'XCD',2,NULL,'East Caribbean Dollar','currency.XCD'),
@@ -147,6 +175,7 @@ Pound','currency.SYP'),(136,'SZL',2,NULL,'Swaziland Lilangeni','currency.SZL'),(
 (161,'ZAR',2, 'R','South African Rand','currency.ZAR'),
 (162,'ZMK',2,NULL,'Zambian Kwacha','currency.ZMK'),
 (163,'ZWD',2,NULL,'Zimbabwe Dollar','currency.ZWD');
+-- ======== end of currencies ==
 
 INSERT INTO `m_organisation_currency` (`id`, `code`, `decimal_places`, `name`, `display_symbol`, `internationalized_name_code`) 
 VALUES (21,'USD',2,'US Dollar','$','currency.USD');
@@ -164,8 +193,6 @@ VALUES
 (1,NULL,'.','1','Head Office','2009-01-01');
 
 -- ========= roles and permissions =========
-
--- === System Supplied Permissons ==
 /*
 this scripts removes all current m_role_permission and m_permission entries
 and then inserts new m_permission entries and just one m_role_permission entry
@@ -173,142 +200,236 @@ which gives the role (id 1 - super user) an ALL_FUNCTIONS permission
 
 If you had other roles set up with specific permissions you will have to set up their permissions again.
 */
+truncate `m_role_permission`;
+truncate `m_permission`;
 
-delete from m_role_permission;
-delete from m_permission;
-
-/* System Supplied Permissons */
-INSERT INTO `m_permission` VALUES 
-(4,'special','REPORTING_SUPER_USER',NULL,NULL,0),
-(5,'portfolio','CREATE_LOAN','LOAN','CREATE',1),
-(6,'portfolio','CREATEHISTORIC_LOAN','LOAN','CREATEHISTORIC',1),
-(7,'transaction_loan','APPROVE_LOAN','LOAN','APPROVE',1),
-(8,'transaction_loan','APPROVEINPAST_LOAN','LOAN','APPROVEINPAST',1),
-(9,'transaction_loan','REJECT_LOAN','LOAN','REJECT',1),
-(10,'transaction_loan','REJECTINPAST_LOAN','LOAN','REJECTINPAST',1),
-(11,'transaction_loan','WITHDRAW_LOAN','LOAN','WITHDRAW',1),
-(12,'transaction_loan','WITHDRAWINPAST_LOAN','LOAN','WITHDRAWINPAST',1),(13,'portfolio','DELETE_LOAN','LOAN','DELETE',1),
-
-(14,'transaction_loan','APPROVALUNDO_LOAN','LOAN','APPROVALUNDO',1),(15,'transaction_loan','DISBURSE_LOAN','LOAN','DISBURSE',1),
-
-(16,'transaction_loan','DISBURSEINPAST_LOAN','LOAN','DISBURSEINPAST',1),(17,'transaction_loan','DISBURSALUNDO_LOAN','LOAN','DISBURSALUNDO',1),
-
-(18,'transaction_loan','REPAYMENT_LOAN','LOAN','REPAYMENT',1),(19,'transaction_loan','REPAYMENTINPAST_LOAN','LOAN','REPAYMENTINPAST',1),
-
-(20,'portfolio','CREATE_CLIENT','CLIENT','CREATE',1),(42,'special','ALL_FUNCTIONS',NULL,NULL,0),(43,'special','ALL_FUNCTIONS_READ',NULL,NULL,0),
-
-(112,'organisation','CREATE_CHARGE','CHARGE','CREATE',1),(113,'organisation','READ_CHARGE','CHARGE','READ',0),
-
-(114,'organisation','UPDATE_CHARGE','CHARGE','UPDATE',1),(115,'organisation','DELETE_CHARGE','CHARGE','DELETE',1),(120,'portfolio','READ_CLIENT','CLIENT','READ',0),
-
-(121,'portfolio','UPDATE_CLIENT','CLIENT','UPDATE',1),(122,'portfolio','DELETE_CLIENT','CLIENT','DELETE',1),
-
-(123,'portfolio','CREATE_CLIENTIMAGE','CLIENTIMAGE','CREATE',1),(124,'portfolio','READ_CLIENTIMAGE','CLIENTIMAGE','READ',0),
-
-(126,'portfolio','DELETE_CLIENTIMAGE','CLIENTIMAGE','DELETE',1),(127,'portfolio','CREATE_CLIENTNOTE','CLIENTNOTE','CREATE',1),
-
-(128,'portfolio','READ_CLIENTNOTE','CLIENTNOTE','READ',0),(129,'portfolio','UPDATE_CLIENTNOTE','CLIENTNOTE','UPDATE',1),
-
-(130,'portfolio','DELETE_CLIENTNOTE','CLIENTNOTE','DELETE',1),(131,'portfolio','CREATE_CLIENTIDENTIFIER','CLIENTIDENTIFIER','CREATE',1),
-
-(132,'portfolio','READ_CLIENTIDENTIFIER','CLIENTIDENTIFIER','READ',0),(133,'portfolio','UPDATE_CLIENTIDENTIFIER','CLIENTIDENTIFIER','UPDATE',1),
-
-(134,'portfolio','DELETE_CLIENTIDENTIFIER','CLIENTIDENTIFIER','DELETE',1),(135,'configuration','CREATE_CODE','CODE','CREATE',1),
-
-(136,'configuration','READ_CODE','CODE','READ',0),(137,'configuration','UPDATE_CODE','CODE','UPDATE',1),(138,'configuration','DELETE_CODE','CODE','DELETE',1),
-
-(139,'configuration','READ_CURRENCY','CURRENCY','READ',0),(140,'configuration','UPDATE_CURRENCY','CURRENCY','UPDATE',1),
-
-(141,'portfolio','CREATE_DOCUMENT','DOCUMENT','CREATE',1),(142,'portfolio','READ_DOCUMENT','DOCUMENT','READ',0),
-
-(143,'portfolio','UPDATE_DOCUMENT','DOCUMENT','UPDATE',1),(144,'portfolio','DELETE_DOCUMENT','DOCUMENT','DELETE',1),
-
-(145,'organisation','CREATE_FUND','FUND','CREATE',1),(146,'organisation','READ_FUND','FUND','READ',0),(147,'organisation','UPDATE_FUND','FUND','UPDATE',1),
-
-(148,'organisation','DELETE_FUND','FUND','DELETE',1),(149,'portfolio','CREATE_GROUP','GROUP','CREATE',1),(150,'portfolio','READ_GROUP','GROUP','READ',0),
-
-(151,'portfolio','UPDATE_GROUP','GROUP','UPDATE',1),(152,'portfolio','DELETE_GROUP','GROUP','DELETE',1),
-
-(153,'organisation','CREATE_LOANPRODUCT','LOANPRODUCT','CREATE',1),(154,'organisation','READ_LOANPRODUCT','LOANPRODUCT','READ',0),
-
-(155,'organisation','UPDATE_LOANPRODUCT','LOANPRODUCT','UPDATE',1),(156,'organisation','DELETE_LOANPRODUCT','LOANPRODUCT','DELETE',1),
-
-(157,'portfolio','READ_LOAN','LOAN','READ',0),(158,'portfolio','UPDATE_LOAN','LOAN','UPDATE',1),(159,'portfolio','UPDATEHISTORIC_LOAN','LOAN','UPDATEHISTORIC',1),
-
-(160,'portfolio','CREATE_LOANCHARGE','LOANCHARGE','CREATE',1),(161,'portfolio','UPDATE_LOANCHARGE','LOANCHARGE','UPDATE',1),
-
-(162,'portfolio','DELETE_LOANCHARGE','LOANCHARGE','DELETE',1),(163,'portfolio','WAIVE_LOANCHARGE','LOANCHARGE','WAIVE',1),
-
-(164,'transaction_loan','BULKREASSIGN_LOAN','LOAN','BULKREASSIGN',1),(165,'transaction_loan','ADJUST_LOAN','LOAN','ADJUST',1),
-
-(166,'transaction_loan','WAIVEINTERESTPORTION_LOAN','LOAN','WAIVEINTERESTPORTION',1),(167,'transaction_loan','WRITEOFF_LOAN','LOAN','WRITEOFF',1),
-
-(168,'transaction_loan','CLOSE_LOAN','LOAN','CLOSE',1),(169,'transaction_loan','CLOSEASRESCHEDULED_LOAN','LOAN','CLOSEASRESCHEDULED',1),
-
-(170,'organisation','READ_MAKERCHECKER','MAKERCHECKER','READ',0),(171,'organisation','CREATE_OFFICE','OFFICE','CREATE',1),
-
-(172,'organisation','READ_OFFICE','OFFICE','READ',0),(173,'organisation','UPDATE_OFFICE','OFFICE','UPDATE',1),
-
-(174,'organisation','DELETE_OFFICE','OFFICE','DELETE',1),(175,'organisation','READ_OFFICETRANSACTION','OFFICETRANSACTION','READ',0),
-
-(176,'organisation','CREATE_OFFICETRANSACTION','OFFICETRANSACTION','CREATE',1),(177,'authorisation','READ_PERMISSION','PERMISSION','READ',0),
-
-(178,'authorisation','CREATE_ROLE','ROLE','CREATE',1),(179,'authorisation','READ_ROLE','ROLE','READ',0),(180,'authorisation','UPDATE_ROLE','ROLE','UPDATE',1),
-
-(181,'authorisation','DELETE_ROLE','ROLE','DELETE',1),(182,'authorisation','CREATE_USER','USER','CREATE',1),(183,'authorisation','READ_USER','USER','READ',0),
-
-(184,'authorisation','UPDATE_USER','USER','UPDATE',1),(185,'authorisation','DELETE_USER','USER','DELETE',1),(186,'organisation','CREATE_STAFF','STAFF','CREATE',1),
-
-(187,'organisation','READ_STAFF','STAFF','READ',0),(188,'organisation','UPDATE_STAFF','STAFF','UPDATE',1),(189,'organisation','DELETE_STAFF','STAFF','DELETE',1),
-
-(190,'organisation','CREATE_SAVINGSPRODUCT','SAVINGSPRODUCT','CREATE',1),(191,'organisation','READ_SAVINGSPRODUCT','SAVINGSPRODUCT','READ',0),
-
-(192,'organisation','UPDATE_SAVINGSPRODUCT','SAVINGSPRODUCT','UPDATE',1),(193,'organisation','DELETE_SAVINGSPRODUCT','SAVINGSPRODUCT','DELETE',1),
-
-(194,'organisation','CREATE_DEPOSITPRODUCT','DEPOSITPRODUCT','CREATE',1),(195,'organisation','READ_DEPOSITPRODUCT','DEPOSITPRODUCT','READ',0),
-
-(196,'organisation','UPDATE_DEPOSITPRODUCT','DEPOSITPRODUCT','UPDATE',1),(197,'organisation','DELETE_DEPOSITPRODUCT','DEPOSITPRODUCT','DELETE',1),
-
-(198,'portfolio','CREATE_DEPOSITACCOUNT','DEPOSITACCOUNT','CREATE',1),(199,'portfolio','READ_DEPOSITACCOUNT','DEPOSITACCOUNT','READ',0),
-
-(200,'portfolio','UPDATE_DEPOSITACCOUNT','DEPOSITACCOUNT','UPDATE',1),(201,'portfolio','DELETE_DEPOSITACCOUNT','DEPOSITACCOUNT','DELETE',1),
-
-(202,'transaction_deposit','APPROVE_DEPOSITACCOUNT','DEPOSITACCOUNT','APPROVE',1),(203,'transaction_deposit','REJECT_DEPOSITACCOUNT','DEPOSITACCOUNT','REJECT',1),
-
-(204,'transaction_deposit','WITHDRAW_DEPOSITACCOUNT','DEPOSITACCOUNT','WITHDRAW',1),
-
-(205,'transaction_deposit','APPROVALUNDO_DEPOSITACCOUNT','DEPOSITACCOUNT','APPROVALUNDO',1),
-
-(206,'transaction_deposit','WITHDRAWAL_DEPOSITACCOUNT','DEPOSITACCOUNT','WITHDRAWAL',1),
-
-(207,'transaction_deposit','INTEREST_DEPOSITACCOUNT','DEPOSITACCOUNT','INTEREST',1),(208,'transaction_deposit','RENEW_DEPOSITACCOUNT','DEPOSITACCOUNT','RENEW',1),
-
-(209,'portfolio','CREATE_SAVINGSACCOUNT','SAVINGSACCOUNT','CREATE',1),(210,'portfolio','READ_SAVINGSACCOUNT','SAVINGSACCOUNT','READ',0),
-
-(211,'portfolio','UPDATE_SAVINGSACCOUNT','SAVINGSACCOUNT','UPDATE',1),(212,'portfolio','DELETE_SAVINGSACCOUNT','SAVINGSACCOUNT','DELETE',1),
-(213,'authorisation','PERMISSIONS_ROLE','ROLE','PERMISSIONS',1);
-
-INSERT INTO `m_permission` (`grouping`, `code`, `entity_name`, `action_name`, `can_maker_checker`) VALUES ('portfolio', 'CREATE_GUARANTOR', 'GUARANTOR', 'CREATE', 1);
-INSERT INTO `m_permission` (`grouping`, `code`, `entity_name`, `action_name`, `can_maker_checker`) VALUES ('portfolio', 'DELETE_GUARANTOR', 'GUARANTOR', 'DELETE', 1);
-INSERT INTO `m_permission` (`grouping`, `code`, `entity_name`, `action_name`, `can_maker_checker`) VALUES ('portfolio', 'READ_GUARANTOR', 'GUARANTOR', 'READ', 0);
-INSERT INTO `m_permission` (`grouping`, `code`, `entity_name`, `action_name`, `can_maker_checker`) VALUES ('portfolio', 'UPDATE_GUARANTOR', 'GUARANTOR', 'UPDATE', 1);
-
-INSERT INTO `m_permission` (`grouping`, `code`, `entity_name`, `action_name`, `can_maker_checker`) VALUES ('organisation', 'DELETE_OFFICETRANSACTION', 'OFFICETRANSACTION', 'DELETE', 1);
-
-INSERT INTO `m_permission` (`grouping`, `code`, `entity_name`, `action_name`, `can_maker_checker`) VALUES ('organisation', 'DELETE_OFFICETRANSACTION_CHECKER', 'OFFICETRANSACTION', 'DELETE', 0);
-
-INSERT INTO `m_permission`
-(
-`grouping`,
-`code`,
-`entity_name`,
-`action_name`,
-`can_maker_checker`)
-VALUES
-('configuration','UPDATE_CONFIGURATION',
-'CONFIGURATION','UPDATE',1),
-('configuration','READ_CONFIGURATION',
-'CONFIGURATION','READ',1);
+INSERT INTO `mifostenant-default`.`m_permission`
+(`grouping`,`code`,`entity_name`,`action_name`,`can_maker_checker`) VALUES 
+('special','ALL_FUNCTIONS',NULL,NULL,0),
+('special','ALL_FUNCTIONS_READ',NULL,NULL,0),
+('special', 'CHECKER_SUPER_USER', NULL, NULL, '0'),
+('special','REPORTING_SUPER_USER',NULL,NULL,0),
+('authorisation','READ_PERMISSION','PERMISSION','READ',0),
+('authorisation','PERMISSIONS_ROLE','ROLE','PERMISSIONS',1),
+('authorisation','CREATE_ROLE','ROLE','CREATE',1),
+('authorisation','CREATE_ROLE_CHECKER','ROLE','CREATE',0),
+('authorisation','READ_ROLE','ROLE','READ',0),
+('authorisation','UPDATE_ROLE','ROLE','UPDATE',1),
+('authorisation','UPDATE_ROLE_CHECKER','ROLE','UPDATE',0),
+('authorisation','DELETE_ROLE','ROLE','DELETE',1),
+('authorisation','DELETE_ROLE_CHECKER','ROLE','DELETE',0),
+('authorisation','CREATE_USER','USER','CREATE',1),
+('authorisation','CREATE_USER_CHECKER','USER','CREATE',0),
+('authorisation','READ_USER','USER','READ',0),
+('authorisation','UPDATE_USER','USER','UPDATE',1),
+('authorisation','UPDATE_USER_CHECKER','USER','UPDATE',0),
+('authorisation','DELETE_USER','USER','DELETE',1),
+('authorisation','DELETE_USER_CHECKER','USER','DELETE',0),
+('configuration','READ_CONFIGURATION','CONFIGURATION','READ',1),
+('configuration','UPDATE_CONFIGURATION','CONFIGURATION','UPDATE',1),
+('configuration','UPDATE_CONFIGURATION_CHECKER','CONFIGURATION','UPDATE',0),
+('configuration','READ_CODE','CODE','READ',0),
+('configuration','CREATE_CODE','CODE','CREATE',1),
+('configuration','CREATE_CODE_CHECKER','CODE','CREATE',0),
+('configuration','UPDATE_CODE','CODE','UPDATE',1),
+('configuration','UPDATE_CODE_CHECKER','CODE','UPDATE',0),
+('configuration','DELETE_CODE','CODE','DELETE',1),
+('configuration','DELETE_CODE_CHECKER','CODE','DELETE',0),
+('configuration','READ_CURRENCY','CURRENCY','READ',0),
+('configuration','UPDATE_CURRENCY','CURRENCY','UPDATE',1),
+('configuration','UPDATE_CURRENCY_CHECKER','CURRENCY','UPDATE',0),
+('configuration', 'UPDATE_PERMISSION', 'PERMISSION', 'UPDATE', '1'),
+('configuration', 'UPDATE_PERMISSION_CHECKER', 'PERMISSION', 'UPDATE', '0'),
+('configuration', 'READ_DATATABLE', 'DATATABLE', 'READ', '0'),
+('configuration', 'REGISTER_DATATABLE', 'DATATABLE', 'REGISTER', '1'),
+('configuration', 'REGISTER_DATATABLE_CHECKER', 'DATATABLE', 'REGISTER', '0'),
+('configuration', 'DEREGISTER_DATATABLE', 'DATATABLE', 'DEREGISTER', '1'),
+('configuration', 'DEREGISTER_DATATABLE_CHECKER', 'DATATABLE', 'DEREGISTER', '0'),
+('configuration', 'READ_AUDIT', 'AUDIT', 'READ', '0'),
+('organisation', 'READ_MAKERCHECKER', 'MAKERCHECKER', 'READ', '0'),
+('organisation', 'READ_CHARGE', 'CHARGE', 'READ', '0'),
+('organisation', 'CREATE_CHARGE', 'CHARGE', 'CREATE', '1'),
+('organisation', 'CREATE_CHARGE_CHECKER', 'CHARGE', 'CREATE', '0'),
+('organisation', 'UPDATE_CHARGE', 'CHARGE', 'UPDATE', '1'),
+('organisation', 'UPDATE_CHARGE_CHECKER', 'CHARGE', 'UPDATE', '0'),
+('organisation', 'DELETE_CHARGE', 'CHARGE', 'DELETE', '1'),
+('organisation', 'DELETE_CHARGE_CHECKER', 'CHARGE', 'DELETE', '0'),
+('organisation', 'READ_FUND', 'FUND', 'READ', '0'),
+('organisation', 'CREATE_FUND', 'FUND', 'CREATE', '1'),
+('organisation', 'CREATE_FUND_CHECKER', 'FUND', 'CREATE', '0'),
+('organisation', 'UPDATE_FUND', 'FUND', 'UPDATE', '1'),
+('organisation', 'UPDATE_FUND_CHECKER', 'FUND', 'UPDATE', '0'),
+('organisation', 'DELETE_FUND', 'FUND', 'DELETE', '1'),
+('organisation', 'DELETE_FUND_CHECKER', 'FUND', 'DELETE', '0'),
+('organisation', 'READ_LOANPRODUCT', 'LOANPRODUCT', 'READ', '0'),
+('organisation', 'CREATE_LOANPRODUCT', 'LOANPRODUCT', 'CREATE', '1'),
+('organisation', 'CREATE_LOANPRODUCT_CHECKER', 'LOANPRODUCT', 'CREATE', '0'),
+('organisation', 'UPDATE_LOANPRODUCT', 'LOANPRODUCT', 'UPDATE', '1'),
+('organisation', 'UPDATE_LOANPRODUCT_CHECKER', 'LOANPRODUCT', 'UPDATE', '0'),
+('organisation', 'DELETE_LOANPRODUCT', 'LOANPRODUCT', 'DELETE', '1'),
+('organisation', 'DELETE_LOANPRODUCT_CHECKER', 'LOANPRODUCT', 'DELETE', '0'),
+('organisation', 'READ_OFFICE', 'OFFICE', 'READ', '0'),
+('organisation', 'CREATE_OFFICE', 'OFFICE', 'CREATE', '1'),
+('organisation', 'CREATE_OFFICE_CHECKER', 'OFFICE', 'CREATE', '0'),
+('organisation', 'UPDATE_OFFICE', 'OFFICE', 'UPDATE', '1'),
+('organisation', 'UPDATE_OFFICE_CHECKER', 'OFFICE', 'UPDATE', '0'),
+('organisation', 'READ_OFFICETRANSACTION', 'OFFICETRANSACTION', 'READ', '0'),
+('organisation', 'DELETE_OFFICE_CHECKER', 'OFFICE', 'DELETE', '0'),
+('organisation', 'CREATE_OFFICETRANSACTION', 'OFFICETRANSACTION', 'CREATE', '1'),
+('organisation', 'CREATE_OFFICETRANSACTION_CHECKER', 'OFFICETRANSACTION', 'CREATE', '0'),
+('organisation', 'DELETE_OFFICETRANSACTION', 'OFFICETRANSACTION', 'DELETE', 1),
+('organisation', 'DELETE_OFFICETRANSACTION_CHECKER', 'OFFICETRANSACTION', 'DELETE', 0),
+('organisation', 'READ_STAFF', 'STAFF', 'READ', '0'),
+('organisation', 'CREATE_STAFF', 'STAFF', 'CREATE', '1'),
+('organisation', 'CREATE_STAFF_CHECKER', 'STAFF', 'CREATE', '0'),
+('organisation', 'UPDATE_STAFF', 'STAFF', 'UPDATE', '1'),
+('organisation', 'UPDATE_STAFF_CHECKER', 'STAFF', 'UPDATE', '0'),
+('organisation', 'DELETE_STAFF', 'STAFF', 'DELETE', '1'),
+('organisation', 'DELETE_STAFF_CHECKER', 'STAFF', 'DELETE', '0'),
+('organisation', 'READ_SAVINGSPRODUCT', 'SAVINGSPRODUCT', 'READ', '0'),
+('organisation', 'CREATE_SAVINGSPRODUCT', 'SAVINGSPRODUCT', 'CREATE', '1'),
+('organisation', 'CREATE_SAVINGSPRODUCT_CHECKER', 'SAVINGSPRODUCT', 'CREATE', '0'),
+('organisation', 'UPDATE_SAVINGSPRODUCT', 'SAVINGSPRODUCT', 'UPDATE', '1'),
+('organisation', 'UPDATE_SAVINGSPRODUCT_CHECKER', 'SAVINGSPRODUCT', 'UPDATE', '0'),
+('organisation', 'DELETE_SAVINGSPRODUCT', 'SAVINGSPRODUCT', 'DELETE', '1'),
+('organisation', 'DELETE_SAVINGSPRODUCT_CHECKER', 'SAVINGSPRODUCT', 'DELETE', '0'),
+('organisation', 'READ_DEPOSITPRODUCT', 'DEPOSITPRODUCT', 'READ', '0'),
+('organisation', 'CREATE_DEPOSITPRODUCT', 'DEPOSITPRODUCT', 'CREATE', '1'),
+('organisation', 'CREATE_DEPOSITPRODUCT_CHECKER', 'DEPOSITPRODUCT', 'CREATE', '0'),
+('organisation', 'UPDATE_DEPOSITPRODUCT', 'DEPOSITPRODUCT', 'UPDATE', '1'),
+('organisation', 'UPDATE_DEPOSITPRODUCT_CHECKER', 'DEPOSITPRODUCT', 'UPDATE', '0'),
+('organisation', 'DELETE_DEPOSITPRODUCT', 'DEPOSITPRODUCT', 'DELETE', '1'),
+('organisation', 'DELETE_DEPOSITPRODUCT_CHECKER', 'DEPOSITPRODUCT', 'DELETE', '0'),
+('portfolio', 'READ_LOAN', 'LOAN', 'READ', '0'),
+('portfolio', 'CREATE_LOAN', 'LOAN', 'CREATE', '1'),
+('portfolio', 'CREATE_LOAN_CHECKER', 'LOAN', 'CREATE', '0'),
+('portfolio', 'UPDATE_LOAN', 'LOAN', 'UPDATE', '1'),
+('portfolio', 'UPDATE_LOAN_CHECKER', 'LOAN', 'UPDATE', '0'),
+('portfolio', 'DELETE_LOAN', 'LOAN', 'DELETE', '1'),
+('portfolio', 'DELETE_LOAN_CHECKER', 'LOAN', 'DELETE', '0'),
+-- ('portfolio', 'CREATEHISTORIC_LOAN', 'LOAN', 'CREATEHISTORIC', '1'),
+-- ('portfolio', 'CREATEHISTORIC_LOAN_CHECKER', 'LOAN', 'CREATEHISTORIC', '0'),
+-- ('portfolio', 'UPDATEHISTORIC_LOAN', 'LOAN', 'UPDATEHISTORIC', '1'),
+-- ('portfolio', 'UPDATEHISTORIC_LOAN_CHECKER', 'LOAN', 'UPDATEHISTORIC', '0'),
+('portfolio', 'READ_CLIENT', 'CLIENT', 'READ', '0'),
+('portfolio', 'CREATE_CLIENT', 'CLIENT', 'CREATE', '1'),
+('portfolio', 'CREATE_CLIENT_CHECKER', 'CLIENT', 'CREATE', '0'),
+('portfolio', 'UPDATE_CLIENT', 'CLIENT', 'UPDATE', '1'),
+('portfolio', 'UPDATE_CLIENT_CHECKER', 'CLIENT', 'UPDATE', '0'),
+('portfolio', 'DELETE_CLIENT', 'CLIENT', 'DELETE', '1'),
+('portfolio', 'DELETE_CLIENT_CHECKER', 'CLIENT', 'DELETE', '0'),
+('portfolio', 'READ_CLIENTIMAGE', 'CLIENTIMAGE', 'READ', '0'),
+('portfolio', 'CREATE_CLIENTIMAGE', 'CLIENTIMAGE', 'CREATE', '1'),
+('portfolio', 'CREATE_CLIENTIMAGE_CHECKER', 'CLIENTIMAGE', 'CREATE', '0'),
+('portfolio', 'DELETE_CLIENTIMAGE', 'CLIENTIMAGE', 'DELETE', '1'),
+('portfolio', 'DELETE_CLIENTIMAGE_CHECKER', 'CLIENTIMAGE', 'DELETE', '0'),
+('portfolio', 'READ_CLIENTNOTE', 'CLIENTNOTE', 'READ', '0'),
+('portfolio', 'CREATE_CLIENTNOTE', 'CLIENTNOTE', 'CREATE', '1'),
+('portfolio', 'CREATE_CLIENTNOTE_CHECKER', 'CLIENTNOTE', 'CREATE', '0'),
+('portfolio', 'UPDATE_CLIENTNOTE', 'CLIENTNOTE', 'UPDATE', '1'),
+('portfolio', 'UPDATE_CLIENTNOTE_CHECKER', 'CLIENTNOTE', 'UPDATE', '0'),
+('portfolio', 'DELETE_CLIENTNOTE', 'CLIENTNOTE', 'DELETE', '1'),
+('portfolio', 'DELETE_CLIENTNOTE_CHECKER', 'CLIENTNOTE', 'DELETE', '0'),
+('portfolio', 'READ_CLIENTIDENTIFIER', 'CLIENTIDENTIFIER', 'READ', '0'),
+('portfolio', 'CREATE_CLIENTIDENTIFIER', 'CLIENTIDENTIFIER', 'CREATE', '1'),
+('portfolio', 'CREATE_CLIENTIDENTIFIER_CHECKER', 'CLIENTIDENTIFIER', 'CREATE', '0'),
+('portfolio', 'UPDATE_CLIENTIDENTIFIER', 'CLIENTIDENTIFIER', 'UPDATE', '1'),
+('portfolio', 'UPDATE_CLIENTIDENTIFIER_CHECKER', 'CLIENTIDENTIFIER', 'UPDATE', '0'),
+('portfolio', 'DELETE_CLIENTIDENTIFIER', 'CLIENTIDENTIFIER', 'DELETE', '1'),
+('portfolio', 'DELETE_CLIENTIDENTIFIER_CHECKER', 'CLIENTIDENTIFIER', 'DELETE', '0'),
+('portfolio', 'READ_DOCUMENT', 'DOCUMENT', 'READ', '0'),
+('portfolio', 'CREATE_DOCUMENT', 'DOCUMENT', 'CREATE', '1'),
+('portfolio', 'CREATE_DOCUMENT_CHECKER', 'DOCUMENT', 'CREATE', '0'),
+('portfolio', 'UPDATE_DOCUMENT', 'DOCUMENT', 'UPDATE', '1'),
+('portfolio', 'UPDATE_DOCUMENT_CHECKER', 'DOCUMENT', 'UPDATE', '0'),
+('portfolio', 'DELETE_DOCUMENT', 'DOCUMENT', 'DELETE', '1'),
+('portfolio', 'DELETE_DOCUMENT_CHECKER', 'DOCUMENT', 'DELETE', '0'),
+('portfolio', 'READ_GROUP', 'GROUP', 'READ', '0'),
+('portfolio', 'CREATE_GROUP', 'GROUP', 'CREATE', '1'),
+('portfolio', 'CREATE_GROUP_CHECKER', 'GROUP', 'CREATE', '0'),
+('portfolio', 'UPDATE_GROUP', 'GROUP', 'UPDATE', '1'),
+('portfolio', 'UPDATE_GROUP_CHECKER', 'GROUP', 'UPDATE', '0'),
+('portfolio', 'DELETE_GROUP', 'GROUP', 'DELETE', '1'),
+('portfolio', 'DELETE_GROUP_CHECKER', 'GROUP', 'DELETE', '0'),
+('portfolio', 'CREATE_LOANCHARGE', 'LOANCHARGE', 'CREATE', '1'),
+('portfolio', 'CREATE_LOANCHARGE_CHECKER', 'LOANCHARGE', 'CREATE', '0'),
+('portfolio', 'UPDATE_LOANCHARGE', 'LOANCHARGE', 'UPDATE', '1'),
+('portfolio', 'UPDATE_LOANCHARGE_CHECKER', 'LOANCHARGE', 'UPDATE', '0'),
+('portfolio', 'DELETE_LOANCHARGE', 'LOANCHARGE', 'DELETE', '1'),
+('portfolio', 'DELETE_LOANCHARGE_CHECKER', 'LOANCHARGE', 'DELETE', '0'),
+('portfolio', 'WAIVE_LOANCHARGE', 'LOANCHARGE', 'WAIVE', '1'),
+('portfolio', 'WAIVE_LOANCHARGE_CHECKER', 'LOANCHARGE', 'WAIVE', '0'),
+('portfolio', 'READ_DEPOSITACCOUNT', 'DEPOSITACCOUNT', 'READ', '0'),
+('portfolio', 'CREATE_DEPOSITACCOUNT', 'DEPOSITACCOUNT', 'CREATE', '1'),
+('portfolio', 'CREATE_DEPOSITACCOUNT_CHECKER', 'DEPOSITACCOUNT', 'CREATE', '0'),
+('portfolio', 'UPDATE_DEPOSITACCOUNT', 'DEPOSITACCOUNT', 'UPDATE', '1'),
+('portfolio', 'UPDATE_DEPOSITACCOUNT_CHECKER', 'DEPOSITACCOUNT', 'UPDATE', '0'),
+('portfolio', 'DELETE_DEPOSITACCOUNT', 'DEPOSITACCOUNT', 'DELETE', '1'),
+('portfolio', 'DELETE_DEPOSITACCOUNT_CHECKER', 'DEPOSITACCOUNT', 'DELETE', '0'),
+('portfolio', 'READ_SAVINGSACCOUNT', 'SAVINGSACCOUNT', 'READ', '0'),
+('portfolio', 'CREATE_SAVINGSACCOUNT', 'SAVINGSACCOUNT', 'CREATE', '1'),
+('portfolio', 'CREATE_SAVINGSACCOUNT_CHECKER', 'SAVINGSACCOUNT', 'CREATE', '0'),
+('portfolio', 'UPDATE_SAVINGSACCOUNT', 'SAVINGSACCOUNT', 'UPDATE', '1'),
+('portfolio', 'UPDATE_SAVINGSACCOUNT_CHECKER', 'SAVINGSACCOUNT', 'UPDATE', '0'),
+('portfolio', 'DELETE_SAVINGSACCOUNT', 'SAVINGSACCOUNT', 'DELETE', '1'),
+('portfolio', 'DELETE_SAVINGSACCOUNT_CHECKER', 'SAVINGSACCOUNT', 'DELETE', '0'),
+('portfolio', 'READ_GUARANTOR', 'GUARANTOR', 'READ', 0),
+('portfolio', 'CREATE_GUARANTOR', 'GUARANTOR', 'CREATE', 1),
+('portfolio', 'CREATE_GUARANTOR_CHECKER', 'GUARANTOR', 'CREATE', 0),
+('portfolio', 'UPDATE_GUARANTOR', 'GUARANTOR', 'UPDATE', 1),
+('portfolio', 'UPDATE_GUARANTOR_CHECKER', 'GUARANTOR', 'UPDATE', 0),
+('portfolio', 'DELETE_GUARANTOR', 'GUARANTOR', 'DELETE', 1),
+('portfolio', 'DELETE_GUARANTOR_CHECKER', 'GUARANTOR', 'DELETE', 0),
+('transaction_loan', 'APPROVE_LOAN', 'LOAN', 'APPROVE', '1'),
+('transaction_loan', 'APPROVEINPAST_LOAN', 'LOAN', 'APPROVEINPAST', '1'),
+('transaction_loan', 'REJECT_LOAN', 'LOAN', 'REJECT', '1'),
+('transaction_loan', 'REJECTINPAST_LOAN', 'LOAN', 'REJECTINPAST', '1'),
+('transaction_loan', 'WITHDRAW_LOAN', 'LOAN', 'WITHDRAW', '1'),
+('transaction_loan', 'WITHDRAWINPAST_LOAN', 'LOAN', 'WITHDRAWINPAST', '1'),
+('transaction_loan', 'APPROVALUNDO_LOAN', 'LOAN', 'APPROVALUNDO', '1'),
+('transaction_loan', 'DISBURSE_LOAN', 'LOAN', 'DISBURSE', '1'),
+('transaction_loan', 'DISBURSEINPAST_LOAN', 'LOAN', 'DISBURSEINPAST', '1'),
+('transaction_loan', 'DISBURSALUNDO_LOAN', 'LOAN', 'DISBURSALUNDO', '1'),
+('transaction_loan', 'REPAYMENT_LOAN', 'LOAN', 'REPAYMENT', '1'),
+('transaction_loan', 'REPAYMENTINPAST_LOAN', 'LOAN', 'REPAYMENTINPAST', '1'),
+('transaction_loan', 'BULKREASSIGN_LOAN', 'LOAN', 'BULKREASSIGN', '1'),
+('transaction_loan', 'ADJUST_LOAN', 'LOAN', 'ADJUST', '1'),
+('transaction_loan', 'WAIVEINTERESTPORTION_LOAN', 'LOAN', 'WAIVEINTERESTPORTION', '1'),
+('transaction_loan', 'WRITEOFF_LOAN', 'LOAN', 'WRITEOFF', '1'),
+('transaction_loan', 'CLOSE_LOAN', 'LOAN', 'CLOSE', '1'),
+('transaction_loan', 'CLOSEASRESCHEDULED_LOAN', 'LOAN', 'CLOSEASRESCHEDULED', '1'),
+('transaction_loan', 'APPROVE_LOAN_CHECKER', 'LOAN', 'APPROVE', '0'),
+('transaction_loan', 'APPROVEINPAST_LOAN_CHECKER', 'LOAN', 'APPROVEINPAST', '0'),
+('transaction_loan', 'REJECT_LOAN_CHECKER', 'LOAN', 'REJECT', '0'),
+('transaction_loan', 'REJECTINPAST_LOAN_CHECKER', 'LOAN', 'REJECTINPAST', '0'),
+('transaction_loan', 'WITHDRAW_LOAN_CHECKER', 'LOAN', 'WITHDRAW', '0'),
+('transaction_loan', 'WITHDRAWINPAST_LOAN_CHECKER', 'LOAN', 'WITHDRAWINPAST', '0'),
+('transaction_loan', 'APPROVALUNDO_LOAN_CHECKER', 'LOAN', 'APPROVALUNDO', '0'),
+('transaction_loan', 'DISBURSE_LOAN_CHECKER', 'LOAN', 'DISBURSE', '0'),
+('transaction_loan', 'DISBURSEINPAST_LOAN_CHECKER', 'LOAN', 'DISBURSEINPAST', '0'),
+('transaction_loan', 'DISBURSALUNDO_LOAN_CHECKER', 'LOAN', 'DISBURSALUNDO', '0'),
+('transaction_loan', 'REPAYMENT_LOAN_CHECKER', 'LOAN', 'REPAYMENT', '0'),
+('transaction_loan', 'REPAYMENTINPAST_LOAN_CHECKER', 'LOAN', 'REPAYMENTINPAST', '0'),
+('transaction_loan', 'BULKREASSIGN_LOAN_CHECKER', 'LOAN', 'BULKREASSIGN', '0'),
+('transaction_loan', 'ADJUST_LOAN_CHECKER', 'LOAN', 'ADJUST', '0'),
+('transaction_loan', 'WAIVEINTERESTPORTION_LOAN_CHECKER', 'LOAN', 'WAIVEINTERESTPORTION', '0'),
+('transaction_loan', 'WRITEOFF_LOAN_CHECKER', 'LOAN', 'WRITEOFF', '0'),
+('transaction_loan', 'CLOSE_LOAN_CHECKER', 'LOAN', 'CLOSE', '0'),
+('transaction_loan', 'CLOSEASRESCHEDULED_LOAN_CHECKER', 'LOAN', 'CLOSEASRESCHEDULED', '0'),
+('transaction_deposit', 'APPROVE_DEPOSITACCOUNT', 'DEPOSITACCOUNT', 'APPROVE', '1'),
+('transaction_deposit', 'REJECT_DEPOSITACCOUNT', 'DEPOSITACCOUNT', 'REJECT', '1'),
+('transaction_deposit', 'WITHDRAW_DEPOSITACCOUNT', 'DEPOSITACCOUNT', 'WITHDRAW', '1'),
+('transaction_deposit', 'APPROVALUNDO_DEPOSITACCOUNT', 'DEPOSITACCOUNT', 'APPROVALUNDO', '1'),
+('transaction_deposit', 'WITHDRAWAL_DEPOSITACCOUNT', 'DEPOSITACCOUNT', 'WITHDRAWAL', '1'),
+('transaction_deposit', 'INTEREST_DEPOSITACCOUNT', 'DEPOSITACCOUNT', 'INTEREST', '1'),
+('transaction_deposit', 'RENEW_DEPOSITACCOUNT', 'DEPOSITACCOUNT', 'RENEW', '1'),
+('transaction_deposit', 'APPROVE_DEPOSITACCOUNT_CHECKER', 'DEPOSITACCOUNT', 'APPROVE', '0'),
+('transaction_deposit', 'REJECT_DEPOSITACCOUNT_CHECKER', 'DEPOSITACCOUNT', 'REJECT', '0'),
+('transaction_deposit', 'WITHDRAW_DEPOSITACCOUNT_CHECKER', 'DEPOSITACCOUNT', 'WITHDRAW', '0'),
+('transaction_deposit', 'APPROVALUNDO_DEPOSITACCOUNT_CHECKER', 'DEPOSITACCOUNT', 'APPROVALUNDO', '0'),
+('transaction_deposit', 'WITHDRAWAL_DEPOSITACCOUNT_CHECKER', 'DEPOSITACCOUNT', 'WITHDRAWAL', '0'),
+('transaction_deposit', 'INTEREST_DEPOSITACCOUNT_CHECKER', 'DEPOSITACCOUNT', 'INTEREST', '0'),
+('transaction_deposit', 'RENEW_DEPOSITACCOUNT_CHECKER', 'DEPOSITACCOUNT', 'RENEW', '0');
 
 INSERT INTO `m_role` (`id`, `name`, `description`) 
 VALUES 
@@ -333,6 +454,7 @@ VALUES
 
 INSERT INTO `m_appuser_role` (`appuser_id`, `role_id`) VALUES (1,1);
 
+-- ========= reports =========
 INSERT INTO `stretchy_parameter` VALUES 
 (3,'FullReportList',NULL,'n/a','n/a','n/a','n/a','Y',NULL,NULL,'select  r.report_id, r.report_name, r.report_type, r.report_subtype, r.report_category,\r  
 
@@ -372,9 +494,6 @@ select \'f\'\r  from m_appuser_role ur \r  join m_role r on r.id = ur.role_id\r 
 rp.permission_id\r  where ur.appuser_id = ${currentUserId}\r  and (p.code in (\'ALL_FUNCTIONS_READ\', \'ALL_FUNCTIONS\') or p.code = concat(\"READ_\", 
 
 r.report_name))\r )\r  order by r.report_name, rp.parameter_id');
-
-INSERT INTO `x_registered_table` (`registered_table_name`, `application_table_name`)
-VALUES ('m_guarantor_external','m_loan');
 
 -- Add in permissions for any special datatables or reports added in base reference data
 -- This needs to always happen at end of the script
