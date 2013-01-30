@@ -1956,9 +1956,6 @@ Request Body:
     "numberOfRepayments": 12,
     "loanTermFrequency": 12,
     "repaymentEvery": 1,
-    "interestRatePerPeriod": 1.75,
-    "annualInterestRate": 21,
-    "accountingType": 1,
     "loanTermFrequencyType": {
       "id": 2,
       "code": "loanTermFrequency.periodFrequencyType.months",
@@ -1969,11 +1966,15 @@ Request Body:
       "code": "repaymentFrequency.periodFrequencyType.months",
       "value": "Months"
     },
+    "transactionProcessingStrategyId": 1,
+    "transactionProcessingStrategyName": "Mifos style",
+    "interestRatePerPeriod": 1.75,
     "interestRateFrequencyType": {
       "id": 2,
       "code": "interestRateFrequency.periodFrequencyType.months",
       "value": "Per month"
     },
+    "annualInterestRate": 21,
     "amortizationType": {
       "id": 0,
       "code": "amortizationType.equal.principal",
@@ -1988,7 +1989,8 @@ Request Body:
       "id": 1,
       "code": "interestCalculationPeriodType.same.as.repayment.period",
       "value": "Same as repayment period"
-    }
+    },
+    "accountingType": 1
   }
 ]
     </code>
@@ -2019,7 +2021,6 @@ Request Body:
     "nameCode": "currency.USD",
     "displayLabel": "US Dollar ($)"
   },
-  "accountingType": 1,
   "loanTermFrequencyType": {
     "id": 2,
     "code": "loanTermFrequency.periodFrequencyType.months",
@@ -2050,6 +2051,7 @@ Request Body:
     "code": "interestCalculationPeriodType.same.as.repayment.period",
     "value": "Same as repayment period"
   },
+  "accountingType": 1,
   "currencyOptions": [
     {
       "code": "USD",
@@ -2168,7 +2170,8 @@ Request Body:
       "code": "loanTermFrequency.periodFrequencyType.years",
       "value": "Years"
     }
-  ]
+  ],
+  "accountingMappings": {}
 }
 </code>
             </div>
@@ -2202,9 +2205,6 @@ Request Body:
   "numberOfRepayments": 12,
   "loanTermFrequency": 12,
   "repaymentEvery": 1,
-  "interestRatePerPeriod": 1.75,
-  "annualInterestRate": 21,
-  "accountingType": 1,
   "loanTermFrequencyType": {
     "id": 2,
     "code": "loanTermFrequency.periodFrequencyType.months",
@@ -2215,11 +2215,15 @@ Request Body:
     "code": "repaymentFrequency.periodFrequencyType.months",
     "value": "Months"
   },
+  "transactionProcessingStrategyId": 1,
+  "transactionProcessingStrategyName": "Mifos style",
+  "interestRatePerPeriod": 1.75,
   "interestRateFrequencyType": {
     "id": 2,
     "code": "interestRateFrequency.periodFrequencyType.months",
     "value": "Per month"
   },
+  "annualInterestRate": 21,
   "amortizationType": {
     "id": 0,
     "code": "amortizationType.equal.principal",
@@ -2235,6 +2239,7 @@ Request Body:
     "code": "interestCalculationPeriodType.same.as.repayment.period",
     "value": "Same as repayment period"
   },
+  "accountingType": 1,
   "charges": []
 }
 </code>
@@ -2263,9 +2268,10 @@ Request Body:
     "locale": "en_GB",
     "digitsAfterDecimal": "2",
     "principal": "100,000.00",
-    "repaymentFrequencyType": 2,
-    "repaymentEvery": "1",
     "numberOfRepayments": "12",
+    "repaymentEvery": "1",
+    "repaymentFrequencyType": 2,
+    "transactionProcessingStrategyId": 1,
     "interestRatePerPeriod": "1.75",
     "interestRateFrequencyType": 2,
     "amortizationType": 1,

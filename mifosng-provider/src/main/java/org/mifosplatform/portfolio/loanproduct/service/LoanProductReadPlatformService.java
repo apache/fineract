@@ -6,11 +6,11 @@ import org.mifosplatform.portfolio.loanproduct.data.LoanProductData;
 
 public interface LoanProductReadPlatformService {
 
-	Collection<LoanProductData> retrieveAllLoanProducts();
+    Collection<LoanProductData> retrieveAllLoanProducts();
 
-	Collection<LoanProductData> retrieveAllLoanProductsForLookup();
+    Collection<LoanProductData> retrieveAllLoanProductsForLookup();
 
-	LoanProductData retrieveLoanProduct(Long productId);
+    LoanProductData retrieveLoanProduct(Long productId);
 
-	LoanProductData retrieveNewLoanProductDetails();
+    LoanProductData retrieveNewLoanProductDetails();
 }

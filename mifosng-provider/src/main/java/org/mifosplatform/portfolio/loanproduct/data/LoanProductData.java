@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import org.mifosplatform.accounting.api.data.GLAccountData;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
@@ -24,33 +25,31 @@ public class LoanProductData {
     private final Long id;
     private final String name;
     private final String description;
-
     private final Long fundId;
     private final String fundName;
-
-    private final Long transactionProcessingStrategyId;
-    private final String transactionProcessingStrategyName;
-
     private final CurrencyData currency;
     private final BigDecimal principal;
-    private final BigDecimal inArrearsTolerance;
-
     private final Integer numberOfRepayments;
     private final Integer loanTermFrequency;
     private final Integer repaymentEvery;
-    private final BigDecimal interestRatePerPeriod;
-    private final BigDecimal annualInterestRate;
-    private final Integer accountingType;
-
     private final EnumOptionData loanTermFrequencyType;
     private final EnumOptionData repaymentFrequencyType;
+    private final Long transactionProcessingStrategyId;
+    private final String transactionProcessingStrategyName;
+    private final BigDecimal interestRatePerPeriod;
     private final EnumOptionData interestRateFrequencyType;
+    private final BigDecimal annualInterestRate;
     private final EnumOptionData amortizationType;
     private final EnumOptionData interestType;
     private final EnumOptionData interestCalculationPeriodType;
+    private final BigDecimal inArrearsTolerance;
+    
+    // FIXME - KW - This should be returned for serialization as an EnumOptionData like the other Enumerated values
+    private final Integer accountingType;
 
     private final Collection<ChargeData> charges;
 
+    // template related
     private final Collection<CurrencyData> currencyOptions;
     private final Collection<FundData> fundOptions;
     private final Collection<TransactionProcessingStrategyData> transactionProcessingStrategyOptions;
@@ -67,17 +66,9 @@ public class LoanProductData {
     private final List<GLAccountData> incomeAccountOptions;
     private final List<GLAccountData> expenseAccountOptions;
 
-    // accounting related mapping feilds
-    private Long loanPortfolioAccountId;
-    private Long fundSourceAccountId;
-    private Long interestOnLoanAccountId;
-    private Long incomeFromFeeAccountId;
-    private Long incomeFromPenaltyAccountId;
-    private Long writeOffAccountId;
-    // accounting heads used only for accrual based accounting
-    private Long receivableInterestAccountId;
-    private Long receivableFeeAccountId;
-    private Long receivablePenaltyAccountId;
+    // accounting related mapping fields
+    @SuppressWarnings("unused")
+    private final Map<String, Object> accountingMappings;
 
     /**
      * Used when returning lookup information about loan product for dropdowns.
@@ -143,6 +134,15 @@ public class LoanProductData {
                 transactionProcessingStrategyId, transactionProcessingStrategyName, charges, accountingType);
     }
 
+    public static LoanProductData withAccountingMappings(final LoanProductData productData, final Map<String, Object> accountingMappings) {
+
+        return new LoanProductData(productData, productData.chargeOptions, productData.currencyOptions,
+                productData.amortizationTypeOptions, productData.interestTypeOptions, productData.interestCalculationPeriodTypeOptions,
+                productData.loanTermFrequencyTypeOptions, productData.repaymentFrequencyTypeOptions,
+                productData.interestRateFrequencyTypeOptions, productData.fundOptions, productData.transactionProcessingStrategyOptions,
+                productData.assetAccountOptions, productData.incomeAccountOptions, productData.expenseAccountOptions, accountingMappings);
+    }
+
     public LoanProductData(final Long id, final String name, final String description, final CurrencyData currency,
             final BigDecimal principal, final BigDecimal tolerance, final Integer numberOfRepayments, final Integer loanTermFrequency,
             final Integer repaymentEvery, final BigDecimal interestRatePerPeriod, final BigDecimal annualInterestRate,
@@ -189,6 +189,7 @@ public class LoanProductData {
         this.assetAccountOptions = null;
         this.incomeAccountOptions = null;
         this.expenseAccountOptions = null;
+        this.accountingMappings = null;
     }
 
     public LoanProductData(final LoanProductData productData, final Collection<ChargeData> chargeOptions,
@@ -198,7 +199,7 @@ public class LoanProductData {
             final List<EnumOptionData> interestRateFrequencyTypeOptions, final Collection<FundData> fundOptions,
             final Collection<TransactionProcessingStrategyData> transactionProcessingStrategyOptions,
             final List<GLAccountData> assetAccountOptions, final List<GLAccountData> incomeAccountOptions,
-            final List<GLAccountData> expenseAccountOptions) {
+            final List<GLAccountData> expenseAccountOptions, final Map<String, Object> accountingMappings) {
         this.id = productData.id;
         this.name = productData.name;
         this.description = productData.description;
@@ -224,7 +225,7 @@ public class LoanProductData {
 
         this.chargeOptions = chargeOptions;
         this.currencyOptions = currencyOptions;
-        if (this.currencyOptions.size() == 1) {
+        if (this.currencyOptions != null && this.currencyOptions.size() == 1) {
             this.currency = new ArrayList<CurrencyData>(this.currencyOptions).get(0);
         } else {
             this.currency = productData.currency;
@@ -241,6 +242,7 @@ public class LoanProductData {
         this.assetAccountOptions = assetAccountOptions;
         this.incomeAccountOptions = incomeAccountOptions;
         this.expenseAccountOptions = expenseAccountOptions;
+        this.accountingMappings = accountingMappings;
     }
 
     private Collection<ChargeData> nullIfEmpty(final Collection<ChargeData> charges) {
@@ -257,6 +259,14 @@ public class LoanProductData {
             chargesLocal = this.charges;
         }
         return chargesLocal;
+    }
+
+    public Integer accountingRuleType() {
+        return this.accountingType;
+    }
+
+    public boolean hasAccountingEnabled() {
+        return this.accountingType > 1;
     }
 
     public Long getId() {
@@ -377,93 +387,5 @@ public class LoanProductData {
 
     public Collection<ChargeData> getChargeOptions() {
         return chargeOptions;
-    }
-
-    public List<GLAccountData> getAssetAccountOptions() {
-        return this.assetAccountOptions;
-    }
-
-    public List<GLAccountData> getIncomeAccountOptions() {
-        return this.incomeAccountOptions;
-    }
-
-    public List<GLAccountData> getExpenseAccountOptions() {
-        return this.expenseAccountOptions;
-    }
-
-    public Long getLoanPortfolioAccountId() {
-        return this.loanPortfolioAccountId;
-    }
-
-    public void setLoanPortfolioAccountId(Long loanPortfolioAccountId) {
-        this.loanPortfolioAccountId = loanPortfolioAccountId;
-    }
-
-    public Long getFundSourceAccountId() {
-        return this.fundSourceAccountId;
-    }
-
-    public void setFundSourceAccountId(Long fundSourceAccountId) {
-        this.fundSourceAccountId = fundSourceAccountId;
-    }
-
-    public Long getInterestOnLoanAccountId() {
-        return this.interestOnLoanAccountId;
-    }
-
-    public void setInterestOnLoanAccountId(Long interestOnLoanAccountId) {
-        this.interestOnLoanAccountId = interestOnLoanAccountId;
-    }
-
-    public Long getIncomeFromFeeAccountId() {
-        return this.incomeFromFeeAccountId;
-    }
-
-    public void setIncomeFromFeeAccountId(Long incomeFromFeeAccountId) {
-        this.incomeFromFeeAccountId = incomeFromFeeAccountId;
-    }
-
-    public Long getIncomeFromPenaltyAccountId() {
-        return this.incomeFromPenaltyAccountId;
-    }
-
-    public void setIncomeFromPenaltyAccountId(Long incomeFromPenaltyAccountId) {
-        this.incomeFromPenaltyAccountId = incomeFromPenaltyAccountId;
-    }
-
-    public Long getWriteOffAccountId() {
-        return this.writeOffAccountId;
-    }
-
-    public void setWriteOffAccountId(Long writeOffAccountId) {
-        this.writeOffAccountId = writeOffAccountId;
-    }
-
-    public Long getReceivableInterestAccountId() {
-        return this.receivableInterestAccountId;
-    }
-
-    public void setReceivableInterestAccountId(Long receivableInterestAccountId) {
-        this.receivableInterestAccountId = receivableInterestAccountId;
-    }
-
-    public Long getReceivableFeeAccountId() {
-        return this.receivableFeeAccountId;
-    }
-
-    public void setReceivableFeeAccountId(Long receivableFeeAccountId) {
-        this.receivableFeeAccountId = receivableFeeAccountId;
-    }
-
-    public Long getReceivablePenaltyAccountId() {
-        return this.receivablePenaltyAccountId;
-    }
-
-    public void setReceivablePenaltyAccountId(Long receivablePenaltyAccountId) {
-        this.receivablePenaltyAccountId = receivablePenaltyAccountId;
-    }
-
-    public Integer getAccountingType() {
-        return this.accountingType;
     }
 }

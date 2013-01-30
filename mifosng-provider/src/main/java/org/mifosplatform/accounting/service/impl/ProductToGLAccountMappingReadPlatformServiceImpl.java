@@ -2,14 +2,15 @@ package org.mifosplatform.accounting.service.impl;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.mifosplatform.accounting.AccountingConstants.ACCRUAL_ACCOUNTS_FOR_LOAN;
 import org.mifosplatform.accounting.AccountingConstants.CASH_ACCOUNTS_FOR_LOAN;
-import org.mifosplatform.accounting.api.data.ProductToGLAccountMappingData;
+import org.mifosplatform.accounting.AccountingConstants.LOAN_PRODUCT_ACCOUNTING_PARAMS;
 import org.mifosplatform.accounting.service.ProductToGLAccountMappingReadPlatformService;
 import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
-import org.mifosplatform.portfolio.loanproduct.data.LoanProductData;
 import org.mifosplatform.portfolio.loanproduct.domain.AccountingRuleType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -26,7 +27,7 @@ public class ProductToGLAccountMappingReadPlatformServiceImpl implements Product
         this.jdbcTemplate = new JdbcTemplate(dataSource);
     }
 
-    private static final class LoanProductToGLAccountMappingMapper implements RowMapper<ProductToGLAccountMappingData> {
+    private static final class LoanProductToGLAccountMappingMapper implements RowMapper<Map<String, Object>> {
 
         public String schema() {
             return " id as id, gl_account_id as glAccountId,product_id as productId,product_type as productType,financial_account_type as financialAccountType"
@@ -34,71 +35,89 @@ public class ProductToGLAccountMappingReadPlatformServiceImpl implements Product
         }
 
         @Override
-        public ProductToGLAccountMappingData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+        public Map<String, Object> mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
 
-            Long id = rs.getLong("id");
-            Long glAccountId = rs.getLong("glAccountId");
-            Long productId = rs.getLong("productId");
-            Integer productType = rs.getInt("productType");
-            Integer financialAccountType = rs.getInt("financialAccountType");
+            final Long id = rs.getLong("id");
+            final Long glAccountId = rs.getLong("glAccountId");
+            final Long productId = rs.getLong("productId");
+            final Integer productType = rs.getInt("productType");
+            final Integer financialAccountType = rs.getInt("financialAccountType");
 
-            return new ProductToGLAccountMappingData(id, glAccountId, productId, productType, financialAccountType);
+            final Map<String, Object> loanProductToGLAccountMap = new LinkedHashMap<String, Object>(5);
+            loanProductToGLAccountMap.put("id", id);
+            loanProductToGLAccountMap.put("glAccountId", glAccountId);
+            loanProductToGLAccountMap.put("productId", productId);
+            loanProductToGLAccountMap.put("productType", productType);
+            loanProductToGLAccountMap.put("financialAccountType", financialAccountType);
+
+            return loanProductToGLAccountMap;
         }
     }
 
     @Override
-    public LoanProductData fetchAccountMappingDetailsForLoanProduct(LoanProductData loanProductData) {
-        LoanProductToGLAccountMappingMapper rm = new LoanProductToGLAccountMappingMapper();
-        String sql = "select " + rm.schema() + " and product_id = ?";
-        List<ProductToGLAccountMappingData> productToGLAccountMappingDatas = this.jdbcTemplate.query(sql, rm,
-                new Object[] { loanProductData.getId() });
+    public Map<String, Object> fetchAccountMappingDetailsForLoanProduct(final Long loanProductId, final Integer accountingType) {
 
-        if (loanProductData.getAccountingType() == AccountingRuleType.CASH_BASED.getValue()) {
-            for (ProductToGLAccountMappingData productToGLAccountMappingData : productToGLAccountMappingDatas) {
-                CASH_ACCOUNTS_FOR_LOAN glAccountForLoan = CASH_ACCOUNTS_FOR_LOAN.fromInt(productToGLAccountMappingData
-                        .getFinancialAccountType());
+        final Map<String, Object> accountMappingDetails = new LinkedHashMap<String, Object>(8);
+
+        final LoanProductToGLAccountMappingMapper rm = new LoanProductToGLAccountMappingMapper();
+        final String sql = "select " + rm.schema() + " and product_id = ?";
+
+        final List<Map<String, Object>> listOfProductToGLAccountMaps = this.jdbcTemplate.query(sql, rm, new Object[] { loanProductId });
+
+        if (AccountingRuleType.CASH_BASED.getValue().equals(accountingType)) {
+
+            for (Map<String, Object> productToGLAccountMap : listOfProductToGLAccountMaps) {
+
+                final Integer financialAccountType = (Integer) productToGLAccountMap.get("financialAccountType");
+                CASH_ACCOUNTS_FOR_LOAN glAccountForLoan = CASH_ACCOUNTS_FOR_LOAN.fromInt(financialAccountType);
+
+                final Long glAccountId = (Long) productToGLAccountMap.get("glAccountId");
+
                 if (glAccountForLoan.equals(CASH_ACCOUNTS_FOR_LOAN.FUND_SOURCE)) {
-                    loanProductData.setFundSourceAccountId(productToGLAccountMappingData.getGlAccountId());
+                    accountMappingDetails.put(LOAN_PRODUCT_ACCOUNTING_PARAMS.FUND_SOURCE.getValue(), glAccountId);
                 } else if (glAccountForLoan.equals(CASH_ACCOUNTS_FOR_LOAN.INCOME_FROM_FEES)) {
-                    loanProductData.setIncomeFromFeeAccountId(productToGLAccountMappingData.getGlAccountId());
+                    accountMappingDetails.put(LOAN_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_FEES.getValue(), glAccountId);
                 } else if (glAccountForLoan.equals(CASH_ACCOUNTS_FOR_LOAN.INCOME_FROM_PENALTIES)) {
-                    loanProductData.setIncomeFromPenaltyAccountId(productToGLAccountMappingData.getGlAccountId());
+                    accountMappingDetails.put(LOAN_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_PENALTIES.getValue(), glAccountId);
                 } else if (glAccountForLoan.equals(CASH_ACCOUNTS_FOR_LOAN.INTEREST_ON_LOANS)) {
-                    loanProductData.setInterestOnLoanAccountId(productToGLAccountMappingData.getGlAccountId());
+                    accountMappingDetails.put(LOAN_PRODUCT_ACCOUNTING_PARAMS.INTEREST_ON_LOANS.getValue(), glAccountId);
                 } else if (glAccountForLoan.equals(CASH_ACCOUNTS_FOR_LOAN.LOAN_PORTFOLIO)) {
-                    loanProductData.setLoanPortfolioAccountId(productToGLAccountMappingData.getGlAccountId());
+                    accountMappingDetails.put(LOAN_PRODUCT_ACCOUNTING_PARAMS.LOAN_PORTFOLIO.getValue(), glAccountId);
                 } else if (glAccountForLoan.equals(CASH_ACCOUNTS_FOR_LOAN.LOSSES_WRITTEN_OFF)) {
-                    loanProductData.setWriteOffAccountId(productToGLAccountMappingData.getGlAccountId());
+                    accountMappingDetails.put(LOAN_PRODUCT_ACCOUNTING_PARAMS.LOSSES_WRITTEN_OFF.getValue(), glAccountId);
                 }
             }
-        } else if (loanProductData.getAccountingType() == AccountingRuleType.ACCRUAL_BASED.getValue()) {
-            for (ProductToGLAccountMappingData productToGLAccountMappingData : productToGLAccountMappingDatas) {
-                ACCRUAL_ACCOUNTS_FOR_LOAN glAccountForLoan = ACCRUAL_ACCOUNTS_FOR_LOAN.fromInt(productToGLAccountMappingData
-                        .getFinancialAccountType());
+        } else if (AccountingRuleType.ACCRUAL_BASED.getValue().equals(accountingType)) {
+
+            for (Map<String, Object> productToGLAccountMap : listOfProductToGLAccountMaps) {
+                final Integer financialAccountType = (Integer) productToGLAccountMap.get("financialAccountType");
+                ACCRUAL_ACCOUNTS_FOR_LOAN glAccountForLoan = ACCRUAL_ACCOUNTS_FOR_LOAN.fromInt(financialAccountType);
+
+                final Long glAccountId = (Long) productToGLAccountMap.get("glAccountId");
+
                 if (glAccountForLoan.equals(ACCRUAL_ACCOUNTS_FOR_LOAN.FUND_SOURCE)) {
-                    loanProductData.setFundSourceAccountId(productToGLAccountMappingData.getGlAccountId());
+                    accountMappingDetails.put(LOAN_PRODUCT_ACCOUNTING_PARAMS.FUND_SOURCE.getValue(), glAccountId);
                 } else if (glAccountForLoan.equals(ACCRUAL_ACCOUNTS_FOR_LOAN.INCOME_FROM_FEES)) {
-                    loanProductData.setIncomeFromFeeAccountId(productToGLAccountMappingData.getGlAccountId());
+                    accountMappingDetails.put(LOAN_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_FEES.getValue(), glAccountId);
                 } else if (glAccountForLoan.equals(ACCRUAL_ACCOUNTS_FOR_LOAN.INCOME_FROM_PENALTIES)) {
-                    loanProductData.setIncomeFromPenaltyAccountId(productToGLAccountMappingData.getGlAccountId());
+                    accountMappingDetails.put(LOAN_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_PENALTIES.getValue(), glAccountId);
                 } else if (glAccountForLoan.equals(ACCRUAL_ACCOUNTS_FOR_LOAN.INTEREST_ON_LOANS)) {
-                    loanProductData.setInterestOnLoanAccountId(productToGLAccountMappingData.getGlAccountId());
+                    accountMappingDetails.put(LOAN_PRODUCT_ACCOUNTING_PARAMS.INTEREST_ON_LOANS.getValue(), glAccountId);
                 } else if (glAccountForLoan.equals(ACCRUAL_ACCOUNTS_FOR_LOAN.LOAN_PORTFOLIO)) {
-                    loanProductData.setLoanPortfolioAccountId(productToGLAccountMappingData.getGlAccountId());
+                    accountMappingDetails.put(LOAN_PRODUCT_ACCOUNTING_PARAMS.LOAN_PORTFOLIO.getValue(), glAccountId);
                 } else if (glAccountForLoan.equals(ACCRUAL_ACCOUNTS_FOR_LOAN.LOSSES_WRITTEN_OFF)) {
-                    loanProductData.setWriteOffAccountId(productToGLAccountMappingData.getGlAccountId());
+                    accountMappingDetails.put(LOAN_PRODUCT_ACCOUNTING_PARAMS.LOSSES_WRITTEN_OFF.getValue(), glAccountId);
                 } else if (glAccountForLoan.equals(ACCRUAL_ACCOUNTS_FOR_LOAN.INTEREST_RECEIVABLE)) {
-                    loanProductData.setReceivableInterestAccountId(productToGLAccountMappingData.getGlAccountId());
+                    accountMappingDetails.put(LOAN_PRODUCT_ACCOUNTING_PARAMS.INTEREST_RECEIVABLE.getValue(), glAccountId);
                 } else if (glAccountForLoan.equals(ACCRUAL_ACCOUNTS_FOR_LOAN.FEES_RECEIVABLE)) {
-                    loanProductData.setReceivableFeeAccountId(productToGLAccountMappingData.getGlAccountId());
+                    accountMappingDetails.put(LOAN_PRODUCT_ACCOUNTING_PARAMS.FEES_RECEIVABLE.getValue(), glAccountId);
                 } else if (glAccountForLoan.equals(ACCRUAL_ACCOUNTS_FOR_LOAN.PENALTIES_RECEIVABLE)) {
-                    loanProductData.setReceivablePenaltyAccountId(productToGLAccountMappingData.getGlAccountId());
+                    accountMappingDetails.put(LOAN_PRODUCT_ACCOUNTING_PARAMS.PENALTIES_RECEIVABLE.getValue(), glAccountId);
                 }
             }
 
         }
 
-        return loanProductData;
+        return accountMappingDetails;
     }
-
 }

@@ -1,9 +1,8 @@
 package org.mifosplatform.accounting.service;
 
-import org.mifosplatform.portfolio.loanproduct.data.LoanProductData;
+import java.util.Map;
 
 public interface ProductToGLAccountMappingReadPlatformService {
 
-    LoanProductData fetchAccountMappingDetailsForLoanProduct(LoanProductData loanProductData);
-
+    Map<String, Object> fetchAccountMappingDetailsForLoanProduct(final Long loanProductId, final Integer accountingType);
 }

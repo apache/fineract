@@ -19,7 +19,6 @@ import org.mifosplatform.portfolio.fund.exception.FundNotFoundException;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanTransactionProcessingStrategyRepository;
 import org.mifosplatform.portfolio.loanaccount.exception.LoanTransactionProcessingStrategyNotFoundException;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.AprCalculator;
-import org.mifosplatform.portfolio.loanproduct.command.LoanProductCommand;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanProduct;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanProductRepository;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanTransactionProcessingStrategy;
@@ -65,24 +64,29 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
 
         this.context.authenticatedUser();
 
-        final LoanProductCommand loanProductCommand = this.fromApiJsonDeserializer.commandFromApiJson(command.json());
-        loanProductCommand.validateForCreate();
+        this.fromApiJsonDeserializer.validateForCreate(command.json());
 
         // associating fund with loan product at creation is optional for now.
         final Fund fund = findFundByIdIfProvided(command.longValueOfParameterNamed("fundId"));
-        final LoanTransactionProcessingStrategy loanTransactionProcessingStrategy = findStrategyByIdIfProvided(command
-                .longValueOfParameterNamed("transactionProcessingStrategyId"));
-        final Set<Charge> charges = this.assembleSetOfCharges(command, null);
+
+        final Long transactionProcessingStrategyId = command.longValueOfParameterNamed("transactionProcessingStrategyId");
+        final LoanTransactionProcessingStrategy loanTransactionProcessingStrategy = findStrategyByIdIfProvided(transactionProcessingStrategyId);
+
+        final String currencyCode = command.stringValueOfParameterNamed("currencyCode");
+        final Set<Charge> charges = this.assembleSetOfCharges(command, currencyCode);
 
         final LoanProduct loanproduct = LoanProduct.assembleFromJson(fund, loanTransactionProcessingStrategy, charges, command,
                 this.aprCalculator);
 
         this.loanProductRepository.save(loanproduct);
-        
-        //save accounting mappings
-        accountMappingWritePlatformService.createLoanProductToGLAccountMapping(loanproduct.getId(), loanProductCommand);
 
-        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(loanproduct.getId()).build();
+        // save accounting mappings
+        accountMappingWritePlatformService.createLoanProductToGLAccountMapping(loanproduct.getId(), command);
+
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(command.commandId()) //
+                .withEntityId(loanproduct.getId()) //
+                .build();
     }
 
     private LoanTransactionProcessingStrategy findStrategyByIdIfProvided(final Long transactionProcessingStrategyId) {
@@ -108,13 +112,12 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
     public CommandProcessingResult updateLoanProduct(final Long loanProductId, final JsonCommand command) {
 
         this.context.authenticatedUser();
-        
-        final LoanProductCommand loanProductCommand = this.fromApiJsonDeserializer.commandFromApiJson(command.json());
-        loanProductCommand.validateForUpdate();
+
+        this.fromApiJsonDeserializer.validateForUpdate(command.json());
 
         final LoanProduct product = this.loanProductRepository.findOne(loanProductId);
         if (product == null) { throw new LoanProductNotFoundException(loanProductId); }
-        
+
         final Map<String, Object> changes = product.update(command, this.aprCalculator);
 
         // associating fund with loan product at creation is optional for now.
@@ -129,23 +132,27 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
             final LoanTransactionProcessingStrategy loanTransactionProcessingStrategy = findStrategyByIdIfProvided(transactionProcessingStrategyId);
             product.update(loanTransactionProcessingStrategy);
         }
-        
+
         if (changes.containsKey("charges")) {
             final Set<Charge> charges = this.assembleSetOfCharges(command, product.getCurrency().getCode());
             product.update(charges);
         }
-        
+
         // accounting related changes
-        if (loanProductCommand.getAccountingType() != null) {
-            boolean accountingTypeChanged = changes.containsKey("accountingType");
-            accountMappingWritePlatformService.updateLoanProductToGLAccountMapping(product.getId(), loanProductCommand, accountingTypeChanged);
+        boolean accountingTypeChanged = changes.containsKey("accountingType");
+        if (accountingTypeChanged) {
+            accountMappingWritePlatformService.updateLoanProductToGLAccountMapping(product.getId(), command, accountingTypeChanged);
         }
 
         if (!changes.isEmpty()) {
             this.loanProductRepository.save(product);
         }
-        
-        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(loanProductId).with(changes).build();
+
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(command.commandId()) //
+                .withEntityId(loanProductId) //
+                .with(changes) //
+                .build();
     }
 
     private Set<Charge> assembleSetOfCharges(final JsonCommand command, final String currencyCode) {
@@ -176,5 +183,5 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
 
         return charges;
     }
-    
+
 }

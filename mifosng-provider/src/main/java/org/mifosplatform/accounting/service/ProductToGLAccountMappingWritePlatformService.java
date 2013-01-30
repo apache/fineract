@@ -2,14 +2,13 @@ package org.mifosplatform.accounting.service;
 
 import java.util.Map;
 
-import org.mifosplatform.portfolio.loanproduct.command.LoanProductCommand;
+import org.mifosplatform.infrastructure.core.api.JsonCommand;
 
 public interface ProductToGLAccountMappingWritePlatformService {
 
-    void createLoanProductToGLAccountMapping(Long loanProductId, LoanProductCommand command);
+    void createLoanProductToGLAccountMapping(Long loanProductId, JsonCommand command);
 
-    Map<String, Object> updateLoanProductToGLAccountMapping(Long loanProductId, LoanProductCommand command, boolean accountingRuleChanged);
+    Map<String, Object> updateLoanProductToGLAccountMapping(Long loanProductId, JsonCommand command, boolean accountingRuleChanged);
 
     void deleteLoanProductToGLAccountMapping(Long loanProductId);
-
 }

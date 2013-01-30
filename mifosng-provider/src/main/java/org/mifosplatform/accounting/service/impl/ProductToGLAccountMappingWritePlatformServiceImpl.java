@@ -2,6 +2,7 @@ package org.mifosplatform.accounting.service.impl;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import org.mifosplatform.accounting.AccountingConstants.ACCRUAL_ACCOUNTS_FOR_LOAN;
@@ -15,168 +16,224 @@ import org.mifosplatform.accounting.domain.ProductToGLAccountMappingRepository;
 import org.mifosplatform.accounting.exceptions.GLAccountNotFoundException;
 import org.mifosplatform.accounting.exceptions.ProductToGLAccountMappingNotFoundException;
 import org.mifosplatform.accounting.service.ProductToGLAccountMappingWritePlatformService;
-import org.mifosplatform.portfolio.loanproduct.command.LoanProductCommand;
+import org.mifosplatform.infrastructure.core.api.JsonCommand;
+import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.portfolio.loanproduct.domain.AccountingRuleType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.google.gson.JsonElement;
 
 @Service
 public class ProductToGLAccountMappingWritePlatformServiceImpl implements ProductToGLAccountMappingWritePlatformService {
 
     private final GLAccountRepository accountRepository;
     private final ProductToGLAccountMappingRepository accountMappingRepository;
+    private final FromJsonHelper fromApiJsonHelper;
 
     @Autowired
     public ProductToGLAccountMappingWritePlatformServiceImpl(final GLAccountRepository glAccountRepository,
-            final ProductToGLAccountMappingRepository glAccountMappingRepository) {
+            final ProductToGLAccountMappingRepository glAccountMappingRepository, final FromJsonHelper fromApiJsonHelper) {
         this.accountRepository = glAccountRepository;
         this.accountMappingRepository = glAccountMappingRepository;
+        this.fromApiJsonHelper = fromApiJsonHelper;
     }
 
     @Override
     @Transactional
-    public void createLoanProductToGLAccountMapping(Long loanProductId, LoanProductCommand command) {
-        AccountingRuleType accountingRuleType = AccountingRuleType.fromInt(command.getAccountingType());
+    public void createLoanProductToGLAccountMapping(final Long loanProductId, final JsonCommand command) {
+        final JsonElement element = fromApiJsonHelper.parse(command.json());
+        final Integer accountingRuleTypeId = fromApiJsonHelper.extractIntegerNamed("accountingType", element, Locale.getDefault());
+        final AccountingRuleType accountingRuleType = AccountingRuleType.fromInt(accountingRuleTypeId);
 
-        if (accountingRuleType.equals(AccountingRuleType.NONE)) {
-            return;
-        } else if (accountingRuleType.equals(AccountingRuleType.CASH_BASED)) {
-            // asset
-            saveLoanToAccountMapping(command.getFundAccountId(), loanProductId, CASH_ACCOUNTS_FOR_LOAN.FUND_SOURCE.getValue());
-            saveLoanToAccountMapping(command.getLoanPortfolioAccountId(), loanProductId, CASH_ACCOUNTS_FOR_LOAN.LOAN_PORTFOLIO.getValue());
-            saveLoanToAccountMapping(command.getInterestOnLoanId(), loanProductId, CASH_ACCOUNTS_FOR_LOAN.INTEREST_ON_LOANS.getValue());
+        final Long loanPortfolioAccountId = fromApiJsonHelper.extractLongNamed(LOAN_PRODUCT_ACCOUNTING_PARAMS.LOAN_PORTFOLIO.getValue(),
+                element);
+        final Long fundAccountId = fromApiJsonHelper.extractLongNamed(LOAN_PRODUCT_ACCOUNTING_PARAMS.FUND_SOURCE.getValue(), element);
+        final Long incomeFromInterestId = fromApiJsonHelper.extractLongNamed(LOAN_PRODUCT_ACCOUNTING_PARAMS.INTEREST_ON_LOANS.getValue(),
+                element);
+        final Long incomeFromFeeId = fromApiJsonHelper
+                .extractLongNamed(LOAN_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_FEES.getValue(), element);
+        final Long incomeFromPenaltyId = fromApiJsonHelper.extractLongNamed(
+                LOAN_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_PENALTIES.getValue(), element);
+        final Long writeOffAccountId = fromApiJsonHelper.extractLongNamed(LOAN_PRODUCT_ACCOUNTING_PARAMS.LOSSES_WRITTEN_OFF.getValue(),
+                element);
 
-            // income
-            saveLoanToAccountMapping(command.getIncomeFromFeeId(), loanProductId, CASH_ACCOUNTS_FOR_LOAN.INCOME_FROM_FEES.getValue());
-            saveLoanToAccountMapping(command.getIncomeFromPenaltyId(), loanProductId,
-                    CASH_ACCOUNTS_FOR_LOAN.INCOME_FROM_PENALTIES.getValue());
+        switch (accountingRuleType) {
+            case NONE:
+            break;
+            case CASH_BASED:
+                // asset
+                saveLoanToAccountMapping(fundAccountId, loanProductId, CASH_ACCOUNTS_FOR_LOAN.FUND_SOURCE.getValue());
+                saveLoanToAccountMapping(loanPortfolioAccountId, loanProductId, CASH_ACCOUNTS_FOR_LOAN.LOAN_PORTFOLIO.getValue());
+                saveLoanToAccountMapping(incomeFromInterestId, loanProductId, CASH_ACCOUNTS_FOR_LOAN.INTEREST_ON_LOANS.getValue());
 
-            // expenses
-            saveLoanToAccountMapping(command.getWriteOffAccountId(), loanProductId,
-                    CASH_ACCOUNTS_FOR_LOAN.LOSSES_WRITTEN_OFF.getValue());
-        } else if (accountingRuleType.equals(AccountingRuleType.ACCRUAL_BASED)) {
-            // assets (including receivables)
-            saveLoanToAccountMapping(command.getFundAccountId(), loanProductId, ACCRUAL_ACCOUNTS_FOR_LOAN.FUND_SOURCE.getValue());
-            saveLoanToAccountMapping(command.getLoanPortfolioAccountId(), loanProductId,
-                    ACCRUAL_ACCOUNTS_FOR_LOAN.LOAN_PORTFOLIO.getValue());
-            saveLoanToAccountMapping(command.getInterestOnLoanId(), loanProductId, ACCRUAL_ACCOUNTS_FOR_LOAN.INTEREST_ON_LOANS.getValue());
+                // income
+                saveLoanToAccountMapping(incomeFromFeeId, loanProductId, CASH_ACCOUNTS_FOR_LOAN.INCOME_FROM_FEES.getValue());
+                saveLoanToAccountMapping(incomeFromPenaltyId, loanProductId, CASH_ACCOUNTS_FOR_LOAN.INCOME_FROM_PENALTIES.getValue());
 
-            saveLoanToAccountMapping(command.getReceivableInterestAccountId(), loanProductId,
-                    ACCRUAL_ACCOUNTS_FOR_LOAN.INTEREST_RECEIVABLE.getValue());
-            saveLoanToAccountMapping(command.getReceivableFeeAccountId(), loanProductId,
-                    ACCRUAL_ACCOUNTS_FOR_LOAN.FEES_RECEIVABLE.getValue());
-            saveLoanToAccountMapping(command.getReceivablePenaltyAccountId(), loanProductId,
-                    ACCRUAL_ACCOUNTS_FOR_LOAN.PENALTIES_RECEIVABLE.getValue());
+                // expenses
+                saveLoanToAccountMapping(writeOffAccountId, loanProductId, CASH_ACCOUNTS_FOR_LOAN.LOSSES_WRITTEN_OFF.getValue());
+            break;
+            case ACCRUAL_BASED:
+                final Long receivableInterestAccountId = fromApiJsonHelper.extractLongNamed(
+                        LOAN_PRODUCT_ACCOUNTING_PARAMS.INTEREST_RECEIVABLE.getValue(), element);
+                final Long receivableFeeAccountId = fromApiJsonHelper.extractLongNamed(
+                        LOAN_PRODUCT_ACCOUNTING_PARAMS.FEES_RECEIVABLE.getValue(), element);
+                final Long receivablePenaltyAccountId = fromApiJsonHelper.extractLongNamed(
+                        LOAN_PRODUCT_ACCOUNTING_PARAMS.PENALTIES_RECEIVABLE.getValue(), element);
 
-            // income
-            saveLoanToAccountMapping(command.getIncomeFromFeeId(), loanProductId, ACCRUAL_ACCOUNTS_FOR_LOAN.INCOME_FROM_FEES.getValue());
-            saveLoanToAccountMapping(command.getIncomeFromPenaltyId(), loanProductId,
-                    ACCRUAL_ACCOUNTS_FOR_LOAN.INCOME_FROM_PENALTIES.getValue());
+                // assets (including receivables)
+                saveLoanToAccountMapping(fundAccountId, loanProductId, ACCRUAL_ACCOUNTS_FOR_LOAN.FUND_SOURCE.getValue());
+                saveLoanToAccountMapping(loanPortfolioAccountId, loanProductId, ACCRUAL_ACCOUNTS_FOR_LOAN.LOAN_PORTFOLIO.getValue());
+                saveLoanToAccountMapping(incomeFromInterestId, loanProductId, ACCRUAL_ACCOUNTS_FOR_LOAN.INTEREST_ON_LOANS.getValue());
 
-            // expenses
-            saveLoanToAccountMapping(command.getWriteOffAccountId(), loanProductId,
-                    ACCRUAL_ACCOUNTS_FOR_LOAN.LOSSES_WRITTEN_OFF.getValue());
+                saveLoanToAccountMapping(receivableInterestAccountId, loanProductId,
+                        ACCRUAL_ACCOUNTS_FOR_LOAN.INTEREST_RECEIVABLE.getValue());
+                saveLoanToAccountMapping(receivableFeeAccountId, loanProductId, ACCRUAL_ACCOUNTS_FOR_LOAN.FEES_RECEIVABLE.getValue());
+                saveLoanToAccountMapping(receivablePenaltyAccountId, loanProductId,
+                        ACCRUAL_ACCOUNTS_FOR_LOAN.PENALTIES_RECEIVABLE.getValue());
+
+                // income
+                saveLoanToAccountMapping(incomeFromFeeId, loanProductId, ACCRUAL_ACCOUNTS_FOR_LOAN.INCOME_FROM_FEES.getValue());
+                saveLoanToAccountMapping(incomeFromPenaltyId, loanProductId, ACCRUAL_ACCOUNTS_FOR_LOAN.INCOME_FROM_PENALTIES.getValue());
+
+                // expenses
+                saveLoanToAccountMapping(writeOffAccountId, loanProductId, ACCRUAL_ACCOUNTS_FOR_LOAN.LOSSES_WRITTEN_OFF.getValue());
+            break;
         }
-
     }
 
     @Override
     @Transactional
-    public Map<String, Object> updateLoanProductToGLAccountMapping(Long loanProductId, LoanProductCommand command,
+    public Map<String, Object> updateLoanProductToGLAccountMapping(final Long loanProductId, final JsonCommand command,
             boolean accountingRuleChanged) {
-        Map<String, Object> changes = new HashMap<String, Object>();
-        AccountingRuleType accountingRuleType = AccountingRuleType.fromInt(command.getAccountingType());
+        final Map<String, Object> changes = new HashMap<String, Object>();
+
+        final JsonElement element = fromApiJsonHelper.parse(command.json());
+        final Integer accountingRuleTypeId = fromApiJsonHelper.extractIntegerNamed("accountingType", element, Locale.getDefault());
+        final AccountingRuleType accountingRuleType = AccountingRuleType.fromInt(accountingRuleTypeId);
+
+        final Long fundAccountId = fromApiJsonHelper.extractLongNamed(LOAN_PRODUCT_ACCOUNTING_PARAMS.FUND_SOURCE.getValue(), element);
+        final Long loanPortfolioAccountId = fromApiJsonHelper.extractLongNamed(LOAN_PRODUCT_ACCOUNTING_PARAMS.LOAN_PORTFOLIO.getValue(),
+                element);
+        final Long incomeFromInterestId = fromApiJsonHelper.extractLongNamed(LOAN_PRODUCT_ACCOUNTING_PARAMS.INTEREST_ON_LOANS.getValue(),
+                element);
+        final Long incomeFromFeeId = fromApiJsonHelper
+                .extractLongNamed(LOAN_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_FEES.getValue(), element);
+        final Long incomeFromPenaltyId = fromApiJsonHelper.extractLongNamed(
+                LOAN_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_PENALTIES.getValue(), element);
+        final Long writeOffAccountId = fromApiJsonHelper.extractLongNamed(LOAN_PRODUCT_ACCOUNTING_PARAMS.LOSSES_WRITTEN_OFF.getValue(),
+                element);
+
+        final Long receivableInterestAccountId = fromApiJsonHelper.extractLongNamed(
+                LOAN_PRODUCT_ACCOUNTING_PARAMS.INTEREST_RECEIVABLE.getValue(), element);
+        final Long receivableFeeAccountId = fromApiJsonHelper.extractLongNamed(LOAN_PRODUCT_ACCOUNTING_PARAMS.FEES_RECEIVABLE.getValue(),
+                element);
+        final Long receivablePenaltyAccountId = fromApiJsonHelper.extractLongNamed(
+                LOAN_PRODUCT_ACCOUNTING_PARAMS.PENALTIES_RECEIVABLE.getValue(), element);
+
         if (accountingRuleChanged) {
             deleteLoanProductToGLAccountMapping(loanProductId);
             createLoanProductToGLAccountMapping(loanProductId, command);
-            if (accountingRuleType.equals(AccountingRuleType.CASH_BASED)) {
-                changes.put(LOAN_PRODUCT_ACCOUNTING_PARAMS.FUND_SOURCE.getValue(), command.getFundAccountId());
-                changes.put(LOAN_PRODUCT_ACCOUNTING_PARAMS.LOAN_PORTFOLIO.getValue(), command.getLoanPortfolioAccountId());
-                changes.put(LOAN_PRODUCT_ACCOUNTING_PARAMS.INTEREST_ON_LOANS.getValue(), command.getInterestOnLoanId());
-                changes.put(LOAN_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_FEES.getValue(), command.getIncomeFromFeeId());
-                changes.put(LOAN_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_PENALTIES.getValue(), command.getIncomeFromPenaltyId());
-                changes.put(LOAN_PRODUCT_ACCOUNTING_PARAMS.LOSSES_WRITTEN_OFF.getValue(), command.getWriteOffAccountId());
-            } else if (accountingRuleType.equals(AccountingRuleType.ACCRUAL_BASED)) {
-                changes.put(LOAN_PRODUCT_ACCOUNTING_PARAMS.FUND_SOURCE.getValue(), command.getFundAccountId());
-                changes.put(LOAN_PRODUCT_ACCOUNTING_PARAMS.LOAN_PORTFOLIO.getValue(), command.getLoanPortfolioAccountId());
-                changes.put(LOAN_PRODUCT_ACCOUNTING_PARAMS.INTEREST_ON_LOANS.getValue(), command.getInterestOnLoanId());
-                changes.put(LOAN_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_FEES.getValue(), command.getIncomeFromFeeId());
-                changes.put(LOAN_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_PENALTIES.getValue(), command.getIncomeFromPenaltyId());
-                changes.put(LOAN_PRODUCT_ACCOUNTING_PARAMS.LOSSES_WRITTEN_OFF.getValue(), command.getWriteOffAccountId());
-                changes.put(LOAN_PRODUCT_ACCOUNTING_PARAMS.INTEREST_RECEIVABLE.getValue(), command.getReceivableInterestAccountId());
-                changes.put(LOAN_PRODUCT_ACCOUNTING_PARAMS.FEES_RECEIVABLE.getValue(), command.getReceivableFeeAccountId());
-                changes.put(LOAN_PRODUCT_ACCOUNTING_PARAMS.PENALTIES_RECEIVABLE.getValue(), command.getReceivablePenaltyAccountId());
+
+            switch (accountingRuleType) {
+                case NONE:
+                break;
+                case CASH_BASED:
+                    changes.put(LOAN_PRODUCT_ACCOUNTING_PARAMS.FUND_SOURCE.getValue(), fundAccountId);
+                    changes.put(LOAN_PRODUCT_ACCOUNTING_PARAMS.LOAN_PORTFOLIO.getValue(), loanPortfolioAccountId);
+                    changes.put(LOAN_PRODUCT_ACCOUNTING_PARAMS.INTEREST_ON_LOANS.getValue(), incomeFromInterestId);
+                    changes.put(LOAN_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_FEES.getValue(), incomeFromFeeId);
+                    changes.put(LOAN_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_PENALTIES.getValue(), incomeFromPenaltyId);
+                    changes.put(LOAN_PRODUCT_ACCOUNTING_PARAMS.LOSSES_WRITTEN_OFF.getValue(), writeOffAccountId);
+                break;
+                case ACCRUAL_BASED:
+                    changes.put(LOAN_PRODUCT_ACCOUNTING_PARAMS.FUND_SOURCE.getValue(), fundAccountId);
+                    changes.put(LOAN_PRODUCT_ACCOUNTING_PARAMS.LOAN_PORTFOLIO.getValue(), loanPortfolioAccountId);
+                    changes.put(LOAN_PRODUCT_ACCOUNTING_PARAMS.INTEREST_ON_LOANS.getValue(), incomeFromInterestId);
+                    changes.put(LOAN_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_FEES.getValue(), incomeFromFeeId);
+                    changes.put(LOAN_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_PENALTIES.getValue(), incomeFromPenaltyId);
+                    changes.put(LOAN_PRODUCT_ACCOUNTING_PARAMS.LOSSES_WRITTEN_OFF.getValue(), writeOffAccountId);
+                    changes.put(LOAN_PRODUCT_ACCOUNTING_PARAMS.INTEREST_RECEIVABLE.getValue(), receivableInterestAccountId);
+                    changes.put(LOAN_PRODUCT_ACCOUNTING_PARAMS.FEES_RECEIVABLE.getValue(), receivableFeeAccountId);
+                    changes.put(LOAN_PRODUCT_ACCOUNTING_PARAMS.PENALTIES_RECEIVABLE.getValue(), receivablePenaltyAccountId);
+                break;
             }
-
         } else {
+            switch (accountingRuleType) {
+                case NONE:
+                break;
+                case CASH_BASED:
+                    // asset
+                    updateLoanToAccountMapping(fundAccountId, loanProductId, CASH_ACCOUNTS_FOR_LOAN.FUND_SOURCE.getValue(),
+                            CASH_ACCOUNTS_FOR_LOAN.FUND_SOURCE.toString(), LOAN_PRODUCT_ACCOUNTING_PARAMS.FUND_SOURCE.getValue(), changes);
+                    updateLoanToAccountMapping(loanPortfolioAccountId, loanProductId, CASH_ACCOUNTS_FOR_LOAN.LOAN_PORTFOLIO.getValue(),
+                            CASH_ACCOUNTS_FOR_LOAN.LOAN_PORTFOLIO.toString(), LOAN_PRODUCT_ACCOUNTING_PARAMS.LOAN_PORTFOLIO.getValue(),
+                            changes);
+                    updateLoanToAccountMapping(incomeFromInterestId, loanProductId, CASH_ACCOUNTS_FOR_LOAN.INTEREST_ON_LOANS.getValue(),
+                            CASH_ACCOUNTS_FOR_LOAN.INTEREST_ON_LOANS.toString(),
+                            LOAN_PRODUCT_ACCOUNTING_PARAMS.INTEREST_ON_LOANS.getValue(), changes);
 
-            if (accountingRuleType.equals(AccountingRuleType.NONE)) {
-                // do nothing
-            } else if (accountingRuleType.equals(AccountingRuleType.CASH_BASED)) {
-                // asset
-                updateLoanToAccountMapping(command.getFundAccountId(), loanProductId, CASH_ACCOUNTS_FOR_LOAN.FUND_SOURCE.getValue(),
-                        CASH_ACCOUNTS_FOR_LOAN.FUND_SOURCE.toString(), LOAN_PRODUCT_ACCOUNTING_PARAMS.FUND_SOURCE.getValue(), changes);
-                updateLoanToAccountMapping(command.getLoanPortfolioAccountId(), loanProductId,
-                        CASH_ACCOUNTS_FOR_LOAN.LOAN_PORTFOLIO.getValue(), CASH_ACCOUNTS_FOR_LOAN.LOAN_PORTFOLIO.toString(),
-                        LOAN_PRODUCT_ACCOUNTING_PARAMS.LOAN_PORTFOLIO.getValue(), changes);
-                updateLoanToAccountMapping(command.getInterestOnLoanId(), loanProductId,
-                        CASH_ACCOUNTS_FOR_LOAN.INTEREST_ON_LOANS.getValue(), CASH_ACCOUNTS_FOR_LOAN.INTEREST_ON_LOANS.toString(),
-                        LOAN_PRODUCT_ACCOUNTING_PARAMS.INTEREST_ON_LOANS.getValue(), changes);
+                    // income
+                    updateLoanToAccountMapping(incomeFromFeeId, loanProductId, CASH_ACCOUNTS_FOR_LOAN.INCOME_FROM_FEES.getValue(),
+                            CASH_ACCOUNTS_FOR_LOAN.INCOME_FROM_FEES.toString(), LOAN_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_FEES.getValue(),
+                            changes);
+                    updateLoanToAccountMapping(incomeFromPenaltyId, loanProductId, CASH_ACCOUNTS_FOR_LOAN.INCOME_FROM_PENALTIES.getValue(),
+                            CASH_ACCOUNTS_FOR_LOAN.INCOME_FROM_PENALTIES.toString(),
+                            LOAN_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_PENALTIES.getValue(), changes);
 
-                // income
-                updateLoanToAccountMapping(command.getIncomeFromFeeId(), loanProductId, CASH_ACCOUNTS_FOR_LOAN.INCOME_FROM_FEES.getValue(),
-                        CASH_ACCOUNTS_FOR_LOAN.INCOME_FROM_FEES.toString(), LOAN_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_FEES.getValue(),
-                        changes);
-                updateLoanToAccountMapping(command.getIncomeFromPenaltyId(), loanProductId,
-                        CASH_ACCOUNTS_FOR_LOAN.INCOME_FROM_PENALTIES.getValue(), CASH_ACCOUNTS_FOR_LOAN.INCOME_FROM_PENALTIES.toString(),
-                        LOAN_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_PENALTIES.getValue(), changes);
+                    // expenses
+                    updateLoanToAccountMapping(writeOffAccountId, loanProductId, CASH_ACCOUNTS_FOR_LOAN.LOSSES_WRITTEN_OFF.getValue(),
+                            CASH_ACCOUNTS_FOR_LOAN.LOSSES_WRITTEN_OFF.toString(),
+                            LOAN_PRODUCT_ACCOUNTING_PARAMS.LOSSES_WRITTEN_OFF.getValue(), changes);
+                break;
+                case ACCRUAL_BASED:
+                    // assets (including receivables)
+                    updateLoanToAccountMapping(fundAccountId, loanProductId, ACCRUAL_ACCOUNTS_FOR_LOAN.FUND_SOURCE.getValue(),
+                            ACCRUAL_ACCOUNTS_FOR_LOAN.FUND_SOURCE.toString(), LOAN_PRODUCT_ACCOUNTING_PARAMS.FUND_SOURCE.getValue(),
+                            changes);
+                    updateLoanToAccountMapping(loanPortfolioAccountId, loanProductId, ACCRUAL_ACCOUNTS_FOR_LOAN.LOAN_PORTFOLIO.getValue(),
+                            ACCRUAL_ACCOUNTS_FOR_LOAN.LOAN_PORTFOLIO.toString(), LOAN_PRODUCT_ACCOUNTING_PARAMS.LOAN_PORTFOLIO.getValue(),
+                            changes);
+                    updateLoanToAccountMapping(incomeFromInterestId, loanProductId, ACCRUAL_ACCOUNTS_FOR_LOAN.INTEREST_ON_LOANS.getValue(),
+                            ACCRUAL_ACCOUNTS_FOR_LOAN.INTEREST_ON_LOANS.toString(),
+                            LOAN_PRODUCT_ACCOUNTING_PARAMS.INTEREST_ON_LOANS.getValue(), changes);
 
-                // expenses
-                updateLoanToAccountMapping(command.getWriteOffAccountId(), loanProductId,
-                        CASH_ACCOUNTS_FOR_LOAN.LOSSES_WRITTEN_OFF.getValue(), CASH_ACCOUNTS_FOR_LOAN.LOSSES_WRITTEN_OFF.toString(),
-                        LOAN_PRODUCT_ACCOUNTING_PARAMS.LOSSES_WRITTEN_OFF.getValue(), changes);
-            } else if (accountingRuleType.equals(AccountingRuleType.ACCRUAL_BASED)) {
-                // assets (including receivables)
-                updateLoanToAccountMapping(command.getFundAccountId(), loanProductId, ACCRUAL_ACCOUNTS_FOR_LOAN.FUND_SOURCE.getValue(),
-                        ACCRUAL_ACCOUNTS_FOR_LOAN.FUND_SOURCE.toString(), LOAN_PRODUCT_ACCOUNTING_PARAMS.FUND_SOURCE.getValue(), changes);
-                updateLoanToAccountMapping(command.getLoanPortfolioAccountId(), loanProductId,
-                        ACCRUAL_ACCOUNTS_FOR_LOAN.LOAN_PORTFOLIO.getValue(), ACCRUAL_ACCOUNTS_FOR_LOAN.LOAN_PORTFOLIO.toString(),
-                        LOAN_PRODUCT_ACCOUNTING_PARAMS.LOAN_PORTFOLIO.getValue(), changes);
-                updateLoanToAccountMapping(command.getInterestOnLoanId(), loanProductId,
-                        ACCRUAL_ACCOUNTS_FOR_LOAN.INTEREST_ON_LOANS.getValue(), ACCRUAL_ACCOUNTS_FOR_LOAN.INTEREST_ON_LOANS.toString(),
-                        LOAN_PRODUCT_ACCOUNTING_PARAMS.INTEREST_ON_LOANS.getValue(), changes);
+                    updateLoanToAccountMapping(receivableInterestAccountId, loanProductId,
+                            ACCRUAL_ACCOUNTS_FOR_LOAN.INTEREST_RECEIVABLE.getValue(),
+                            ACCRUAL_ACCOUNTS_FOR_LOAN.INTEREST_RECEIVABLE.toString(),
+                            LOAN_PRODUCT_ACCOUNTING_PARAMS.INTEREST_RECEIVABLE.getValue(), changes);
 
-                updateLoanToAccountMapping(command.getReceivableInterestAccountId(), loanProductId,
-                        ACCRUAL_ACCOUNTS_FOR_LOAN.INTEREST_RECEIVABLE.getValue(), ACCRUAL_ACCOUNTS_FOR_LOAN.INTEREST_RECEIVABLE.toString(),
-                        LOAN_PRODUCT_ACCOUNTING_PARAMS.INTEREST_RECEIVABLE.getValue(), changes);
-                updateLoanToAccountMapping(command.getReceivableFeeAccountId(), loanProductId,
-                        ACCRUAL_ACCOUNTS_FOR_LOAN.FEES_RECEIVABLE.getValue(), ACCRUAL_ACCOUNTS_FOR_LOAN.FEES_RECEIVABLE.toString(),
-                        LOAN_PRODUCT_ACCOUNTING_PARAMS.FEES_RECEIVABLE.getValue(), changes);
-                updateLoanToAccountMapping(command.getReceivablePenaltyAccountId(), loanProductId,
-                        ACCRUAL_ACCOUNTS_FOR_LOAN.PENALTIES_RECEIVABLE.getValue(),
-                        ACCRUAL_ACCOUNTS_FOR_LOAN.PENALTIES_RECEIVABLE.toString(),
-                        LOAN_PRODUCT_ACCOUNTING_PARAMS.PENALTIES_RECEIVABLE.getValue(), changes);
+                    updateLoanToAccountMapping(receivableFeeAccountId, loanProductId, ACCRUAL_ACCOUNTS_FOR_LOAN.FEES_RECEIVABLE.getValue(),
+                            ACCRUAL_ACCOUNTS_FOR_LOAN.FEES_RECEIVABLE.toString(),
+                            LOAN_PRODUCT_ACCOUNTING_PARAMS.FEES_RECEIVABLE.getValue(), changes);
 
-                // income
-                updateLoanToAccountMapping(command.getIncomeFromFeeId(), loanProductId,
-                        ACCRUAL_ACCOUNTS_FOR_LOAN.INCOME_FROM_FEES.getValue(), ACCRUAL_ACCOUNTS_FOR_LOAN.INCOME_FROM_FEES.toString(),
-                        LOAN_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_FEES.getValue(), changes);
-                updateLoanToAccountMapping(command.getIncomeFromPenaltyId(), loanProductId,
-                        ACCRUAL_ACCOUNTS_FOR_LOAN.INCOME_FROM_PENALTIES.getValue(),
-                        ACCRUAL_ACCOUNTS_FOR_LOAN.INCOME_FROM_PENALTIES.toString(),
-                        LOAN_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_PENALTIES.getValue(), changes);
+                    updateLoanToAccountMapping(receivablePenaltyAccountId, loanProductId,
+                            ACCRUAL_ACCOUNTS_FOR_LOAN.PENALTIES_RECEIVABLE.getValue(),
+                            ACCRUAL_ACCOUNTS_FOR_LOAN.PENALTIES_RECEIVABLE.toString(),
+                            LOAN_PRODUCT_ACCOUNTING_PARAMS.PENALTIES_RECEIVABLE.getValue(), changes);
 
-                // expenses
-                updateLoanToAccountMapping(command.getWriteOffAccountId(), loanProductId,
-                        ACCRUAL_ACCOUNTS_FOR_LOAN.LOSSES_WRITTEN_OFF.getValue(), ACCRUAL_ACCOUNTS_FOR_LOAN.LOSSES_WRITTEN_OFF.toString(),
-                        LOAN_PRODUCT_ACCOUNTING_PARAMS.LOSSES_WRITTEN_OFF.getValue(), changes);
+                    // income
+                    updateLoanToAccountMapping(incomeFromFeeId, loanProductId, ACCRUAL_ACCOUNTS_FOR_LOAN.INCOME_FROM_FEES.getValue(),
+                            ACCRUAL_ACCOUNTS_FOR_LOAN.INCOME_FROM_FEES.toString(),
+                            LOAN_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_FEES.getValue(), changes);
+                    updateLoanToAccountMapping(incomeFromPenaltyId, loanProductId,
+                            ACCRUAL_ACCOUNTS_FOR_LOAN.INCOME_FROM_PENALTIES.getValue(),
+                            ACCRUAL_ACCOUNTS_FOR_LOAN.INCOME_FROM_PENALTIES.toString(),
+                            LOAN_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_PENALTIES.getValue(), changes);
+
+                    // expenses
+                    updateLoanToAccountMapping(writeOffAccountId, loanProductId, ACCRUAL_ACCOUNTS_FOR_LOAN.LOSSES_WRITTEN_OFF.getValue(),
+                            ACCRUAL_ACCOUNTS_FOR_LOAN.LOSSES_WRITTEN_OFF.toString(),
+                            LOAN_PRODUCT_ACCOUNTING_PARAMS.LOSSES_WRITTEN_OFF.getValue(), changes);
+                break;
             }
         }
         return changes;
     }
 
-    private void saveLoanToAccountMapping(Long glAccountId, Long productId, int accountTypeId) {
+    private void saveLoanToAccountMapping(final Long glAccountId, final Long productId, final int accountTypeId) {
         GLAccount glAccount = accountRepository.findOne(glAccountId);
         if (glAccount == null) { throw new GLAccountNotFoundException(glAccountId); }
         ProductToGLAccountMapping accountMapping = new ProductToGLAccountMapping(glAccount, productId,
@@ -184,8 +241,8 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
         accountMappingRepository.save(accountMapping);
     }
 
-    private void updateLoanToAccountMapping(Long glAccountId, Long productId, int accountTypeId, String accountTypeName,
-            String accountParamValue, Map<String, Object> changes) {
+    private void updateLoanToAccountMapping(final Long glAccountId, final Long productId, final int accountTypeId,
+            final String accountTypeName, final String accountParamValue, final Map<String, Object> changes) {
         // get the existing product
         ProductToGLAccountMapping accountMapping = accountMappingRepository.findByProductIdAndProductTypeAndFinancialAccountType(productId,
                 PortfolioProductType.LOAN.getValue(), accountTypeId);
@@ -201,7 +258,7 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
     }
 
     @Override
-    public void deleteLoanProductToGLAccountMapping(Long loanProductId) {
+    public void deleteLoanProductToGLAccountMapping(final Long loanProductId) {
         List<ProductToGLAccountMapping> productToGLAccountMappings = accountMappingRepository.findByProductIdAndProductType(loanProductId,
                 PortfolioProductType.LOAN.getValue());
         if (productToGLAccountMappings != null && productToGLAccountMappings.size() > 0) {
