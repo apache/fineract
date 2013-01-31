@@ -11,7 +11,6 @@ import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
-import org.mifosplatform.organisation.monetary.command.CurrencyCommand;
 import org.mifosplatform.organisation.monetary.domain.ApplicationCurrency;
 import org.mifosplatform.organisation.monetary.domain.ApplicationCurrencyRepository;
 import org.mifosplatform.organisation.monetary.exception.CurrencyNotFoundException;
@@ -47,13 +46,14 @@ public class CurrencyWritePlatformServiceJpaRepositoryImpl implements CurrencyWr
 
         context.authenticatedUser();
 
-        final CurrencyCommand currencyCommand = this.fromApiJsonDeserializer.commandFromApiJson(command.json());
-        currencyCommand.validateForUpdate();
+        this.fromApiJsonDeserializer.validateForUpdate(command.json());
+
+        final String[] currencies = command.arrayValueOfParameterNamed("currencies");
 
         final Map<String, Object> changes = new LinkedHashMap<String, Object>();
         final List<String> allowedCurrencyCodes = new ArrayList<String>();
         final Set<OrganisationCurrency> allowedCurrencies = new HashSet<OrganisationCurrency>();
-        for (final String currencyCode : currencyCommand.getCurrencies()) {
+        for (final String currencyCode : currencies) {
 
             final ApplicationCurrency currency = this.applicationCurrencyRepository.findOneByCode(currencyCode);
             if (currency == null) { throw new CurrencyNotFoundException(currencyCode); }
