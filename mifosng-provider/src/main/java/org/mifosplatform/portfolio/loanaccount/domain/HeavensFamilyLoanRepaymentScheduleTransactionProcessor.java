@@ -49,7 +49,7 @@ public class HeavensFamilyLoanRepaymentScheduleTransactionProcessor extends Abst
         LoanRepaymentScheduleInstallment previousInstallment = installments.get(previousInstallmentIndex);
         lastInstallmentDueDate = previousInstallment.getDueDate();
 
-        isInAdvance = !transactionDate.isAfter(lastInstallmentDueDate);
+        isInAdvance = !(transactionDate.isAfter(lastInstallmentDueDate) || (transactionDate.isEqual(lastInstallmentDueDate)));
         
         return isInAdvance;
     }
