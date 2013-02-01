@@ -45,7 +45,7 @@ public final class OfficeTransactionCommandFromApiJsonDeserializer {
         fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, supportedParameters);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("code");
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("officeTransaction");
 
         final JsonElement element = fromApiJsonHelper.parse(json);
         final Long fromOfficeId = fromApiJsonHelper.extractLongNamed("fromOfficeId", element);
