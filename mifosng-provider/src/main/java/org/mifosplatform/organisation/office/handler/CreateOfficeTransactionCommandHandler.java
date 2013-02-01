@@ -22,6 +22,6 @@ public class CreateOfficeTransactionCommandHandler implements NewCommandSourceHa
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
 
-        return this.writePlatformService.externalBranchMoneyTransfer(command);
+        return this.writePlatformService.officeTransaction(command);
     }
 }

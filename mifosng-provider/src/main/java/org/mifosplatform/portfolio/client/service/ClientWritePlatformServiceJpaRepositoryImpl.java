@@ -264,8 +264,12 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 
             this.clientIdentifierRepository.save(clientIdentifier);
 
-            return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withOfficeId(client.getOffice().getId())
-                    .withClientId(clientId).withEntityId(clientIdentifier.getId()).build();
+            return new CommandProcessingResultBuilder() //
+                    .withCommandId(command.commandId()) //
+                    .withOfficeId(client.getOffice().getId()) //
+                    .withClientId(clientId) //
+                    .withEntityId(clientIdentifier.getId()) //
+                    .build();
         } catch (DataIntegrityViolationException dve) {
             handleClientIdentifierDataIntegrityViolation(documentTypeLabel, documentTypeId, documentKey, dve);
             return CommandProcessingResult.empty();
@@ -317,8 +321,13 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             }
 
             final Client client = this.clientRepository.findOne(clientId);
-            return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withOfficeId(client.getOffice().getId())
-                    .withClientId(clientId).withEntityId(identifierId).with(changes).build();
+            return new CommandProcessingResultBuilder() //
+                    .withCommandId(command.commandId()) //
+                    .withOfficeId(client.getOffice().getId()) //
+                    .withClientId(clientId) //
+                    .withEntityId(identifierId) //
+                    .with(changes) //
+                    .build();
         } catch (DataIntegrityViolationException dve) {
             handleClientIdentifierDataIntegrityViolation(documentTypeLabel, documentTypeId, documentKey, dve);
             return new CommandProcessingResult(Long.valueOf(-1));

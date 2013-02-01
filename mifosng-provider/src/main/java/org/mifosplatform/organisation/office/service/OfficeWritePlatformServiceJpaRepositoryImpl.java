@@ -13,14 +13,13 @@ import org.mifosplatform.organisation.monetary.domain.ApplicationCurrencyReposit
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.organisation.monetary.domain.Money;
 import org.mifosplatform.organisation.monetary.exception.CurrencyNotFoundException;
-import org.mifosplatform.organisation.office.command.BranchMoneyTransferCommand;
 import org.mifosplatform.organisation.office.domain.Office;
 import org.mifosplatform.organisation.office.domain.OfficeRepository;
 import org.mifosplatform.organisation.office.domain.OfficeTransaction;
 import org.mifosplatform.organisation.office.domain.OfficeTransactionRepository;
 import org.mifosplatform.organisation.office.exception.OfficeNotFoundException;
-import org.mifosplatform.organisation.office.serialization.BranchMoneyTransferCommandFromApiJsonDeserializer;
 import org.mifosplatform.organisation.office.serialization.OfficeCommandFromApiJsonDeserializer;
+import org.mifosplatform.organisation.office.serialization.OfficeTransactionCommandFromApiJsonDeserializer;
 import org.mifosplatform.useradministration.domain.AppUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,7 +35,7 @@ public class OfficeWritePlatformServiceJpaRepositoryImpl implements OfficeWriteP
 
     private final PlatformSecurityContext context;
     private final OfficeCommandFromApiJsonDeserializer fromApiJsonDeserializer;
-    private final BranchMoneyTransferCommandFromApiJsonDeserializer moneyTransferCommandFromApiJsonDeserializer;
+    private final OfficeTransactionCommandFromApiJsonDeserializer moneyTransferCommandFromApiJsonDeserializer;
     private final OfficeRepository officeRepository;
     private final OfficeTransactionRepository officeTransactionRepository;
     private final ApplicationCurrencyRepository applicationCurrencyRepository;
@@ -44,7 +43,7 @@ public class OfficeWritePlatformServiceJpaRepositoryImpl implements OfficeWriteP
     @Autowired
     public OfficeWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
             final OfficeCommandFromApiJsonDeserializer fromApiJsonDeserializer,
-            final BranchMoneyTransferCommandFromApiJsonDeserializer moneyTransferCommandFromApiJsonDeserializer,
+            final OfficeTransactionCommandFromApiJsonDeserializer moneyTransferCommandFromApiJsonDeserializer,
             final OfficeRepository officeRepository, final OfficeTransactionRepository officeMonetaryTransferRepository,
             final ApplicationCurrencyRepository applicationCurrencyRepository) {
         this.context = context;
@@ -79,8 +78,11 @@ public class OfficeWritePlatformServiceJpaRepositoryImpl implements OfficeWriteP
 
             this.officeRepository.save(office);
 
-            return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(office.getId())
-                    .withOfficeId(office.getId()).build();
+            return new CommandProcessingResultBuilder() //
+                    .withCommandId(command.commandId()) //
+                    .withEntityId(office.getId()) //
+                    .withOfficeId(office.getId()) //
+                    .build();
         } catch (DataIntegrityViolationException dve) {
             handleOfficeDataIntegrityIssues(command, dve);
             return CommandProcessingResult.empty();
@@ -114,8 +116,12 @@ public class OfficeWritePlatformServiceJpaRepositoryImpl implements OfficeWriteP
                 this.officeRepository.saveAndFlush(office);
             }
 
-            return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(office.getId())
-                    .withOfficeId(office.getId()).with(changes).build();
+            return new CommandProcessingResultBuilder() //
+                    .withCommandId(command.commandId()) //
+                    .withEntityId(office.getId()) //
+                    .withOfficeId(office.getId()) //
+                    .with(changes) //
+                    .build();
         } catch (DataIntegrityViolationException dve) {
             handleOfficeDataIntegrityIssues(command, dve);
             return CommandProcessingResult.empty();
@@ -124,40 +130,43 @@ public class OfficeWritePlatformServiceJpaRepositoryImpl implements OfficeWriteP
 
     @Transactional
     @Override
-    public CommandProcessingResult externalBranchMoneyTransfer(final JsonCommand command) {
+    public CommandProcessingResult officeTransaction(final JsonCommand command) {
 
         context.authenticatedUser();
 
-        final BranchMoneyTransferCommand moneyTransferCommand = this.moneyTransferCommandFromApiJsonDeserializer.commandFromApiJson(command
-                .json());
-        moneyTransferCommand.validateBranchTransfer();
+        this.moneyTransferCommandFromApiJsonDeserializer.validateOfficeTransfer(command.json());
 
         Long officeId = null;
         Office fromOffice = null;
-        if (moneyTransferCommand.getFromOfficeId() != null) {
-            fromOffice = this.officeRepository.findOne(moneyTransferCommand.getFromOfficeId());
+        final Long fromOfficeId = command.longValueOfParameterNamed("fromOfficeId");
+        if (fromOfficeId != null) {
+            fromOffice = this.officeRepository.findOne(fromOfficeId);
             officeId = fromOffice.getId();
         }
         Office toOffice = null;
-        if (moneyTransferCommand.getToOfficeId() != null) {
-            toOffice = this.officeRepository.findOne(moneyTransferCommand.getToOfficeId());
+        final Long toOfficeId = command.longValueOfParameterNamed("toOfficeId");
+        if (toOfficeId != null) {
+            toOffice = this.officeRepository.findOne(toOfficeId);
             officeId = toOffice.getId();
         }
 
-        if (fromOffice == null && toOffice == null) { throw new OfficeNotFoundException(moneyTransferCommand.getToOfficeId()); }
+        if (fromOffice == null && toOffice == null) { throw new OfficeNotFoundException(toOfficeId); }
 
-        final String currencyCode = moneyTransferCommand.getCurrencyCode();
+        final String currencyCode = command.stringValueOfParameterNamed("currencyCode");
         final ApplicationCurrency appCurrency = this.applicationCurrencyRepository.findOneByCode(currencyCode);
         if (appCurrency == null) { throw new CurrencyNotFoundException(currencyCode); }
 
         final MonetaryCurrency currency = new MonetaryCurrency(appCurrency.getCode(), appCurrency.getDecimalPlaces());
-        final Money amount = Money.of(currency, moneyTransferCommand.getTransactionAmount());
+        final Money amount = Money.of(currency, command.bigDecimalValueOfParameterNamed("transactionAmount"));
 
         final OfficeTransaction entity = OfficeTransaction.fromJson(fromOffice, toOffice, amount, command);
 
         this.officeTransactionRepository.save(entity);
 
-        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(entity.getId()).withOfficeId(officeId)
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(command.commandId()) //
+                .withEntityId(entity.getId()) //
+                .withOfficeId(officeId) //
                 .build();
     }
 
@@ -166,7 +175,7 @@ public class OfficeWritePlatformServiceJpaRepositoryImpl implements OfficeWriteP
     public CommandProcessingResult deleteOfficeTransaction(final Long transactionId, JsonCommand command) {
 
         context.authenticatedUser();
-        
+
         this.officeTransactionRepository.delete(transactionId);
 
         return new CommandProcessingResultBuilder() //
