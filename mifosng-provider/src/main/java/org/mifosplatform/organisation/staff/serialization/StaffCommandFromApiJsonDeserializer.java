@@ -46,14 +46,14 @@ public final class StaffCommandFromApiJsonDeserializer {
 
         final JsonElement element = fromApiJsonHelper.parse(json);
 
+        final Long officeId = fromApiJsonHelper.extractLongNamed("officeId", element);
+        baseDataValidator.reset().parameter("officeId").value(officeId).notNull().integerGreaterThanZero();
+        
         final String firstname = fromApiJsonHelper.extractStringNamed("firstname", element);
         baseDataValidator.reset().parameter("firstname").value(firstname).notBlank().notExceedingLengthOf(50);
 
         final String lastname = fromApiJsonHelper.extractStringNamed("lastname", element);
         baseDataValidator.reset().parameter("lastname").value(lastname).notBlank().notExceedingLengthOf(50);
-
-        final Long officeId = fromApiJsonHelper.extractLongNamed("officeId", element);
-        baseDataValidator.reset().parameter("officeId").value(officeId).notNull().integerGreaterThanZero();
 
         if (fromApiJsonHelper.parameterExists("isLoanOfficer", element)) {
             final Boolean loanOfficerFlag = fromApiJsonHelper.extractBooleanNamed("isLoanOfficer", element);
@@ -71,8 +71,13 @@ public final class StaffCommandFromApiJsonDeserializer {
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("staff");
-
+        
         final JsonElement element = fromApiJsonHelper.parse(json);
+        if (fromApiJsonHelper.parameterExists("officeId", element)) {
+            final Long officeId = fromApiJsonHelper.extractLongNamed("officeId", element);
+            baseDataValidator.reset().parameter("officeId").value(officeId).notNull().integerGreaterThanZero();
+        }
+        
         if (fromApiJsonHelper.parameterExists("firstname", element)) {
             final String firstname = fromApiJsonHelper.extractStringNamed("firstname", element);
             baseDataValidator.reset().parameter("firstname").value(firstname).notBlank().notExceedingLengthOf(50);
@@ -81,11 +86,6 @@ public final class StaffCommandFromApiJsonDeserializer {
         if (fromApiJsonHelper.parameterExists("lastname", element)) {
             final String lastname = fromApiJsonHelper.extractStringNamed("lastname", element);
             baseDataValidator.reset().parameter("lastname").value(lastname).notBlank().notExceedingLengthOf(50);
-        }
-
-        if (fromApiJsonHelper.parameterExists("officeId", element)) {
-            final Long officeId = fromApiJsonHelper.extractLongNamed("officeId", element);
-            baseDataValidator.reset().parameter("officeId").value(officeId).notNull().integerGreaterThanZero();
         }
 
         if (fromApiJsonHelper.parameterExists("isLoanOfficer", element)) {
