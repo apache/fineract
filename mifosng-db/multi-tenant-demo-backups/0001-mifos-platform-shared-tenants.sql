@@ -18,6 +18,9 @@ CREATE TABLE `mifosplatform-tenants`.`tenants` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 INSERT INTO `mifosplatform-tenants`.`tenants`
-(`id`,`name`, `identifier`,`schema_name`)
+(`name`, `identifier`,`schema_name`)
 VALUES
-(1, 'Default Demo Tenant', 'default' ,'mifostenant-default');
+('Default Demo Tenant', 'default' ,'mifostenant-default'),
+('GK Maarg', 'gk-maarg' ,'mifostenant-gk-maarg'),
+('Latam Demo', 'latam' ,'mifostenant-latam'),
+('Bare bones Demo', 'barebones' ,'mifostenant-barebones');
