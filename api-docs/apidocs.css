@@ -5,6 +5,13 @@
 	color: blue;
 }
 
+.apiClickNotPretty {
+    text-decoration: underline;
+    cursor: hand; 
+    cursor: pointer;
+    color: blue;
+}
+
 #jpw {
 	text-decoration: underline;
 	cursor: hand; 

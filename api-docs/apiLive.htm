@@ -47,6 +47,20 @@ function clickAPILink(apiLink)
     else window.open(currentLink);
 }
 
+function clickAPILinkNotPretty(apiLink)
+{    
+    var fixedQueryParams = "tenantIdentifier=default";
+    var currentLink = baseURL + apiLink;
+    if (apiLink.indexOf("?") < 0) currentLink += "?" + fixedQueryParams;
+    else currentLink += "&" + fixedQueryParams;
+    
+    
+    if ((/MSIE (\d+\.\d+);/.test(navigator.userAgent)) || (apiLink.indexOf("exportCSV") > -1) || (apiLink.indexOf("type=CSV") > -1) || (apiLink.indexOf("type=XLS") > -1) )
+    { // test for MSIE (not a great browser for the api docs anyhow)  or a file download
+        location.href = currentLink;
+    }
+    else window.open(currentLink);
+}
 
 function getBaseURL(docURL)
 {
@@ -350,11 +364,10 @@ function getBaseURL(docURL)
                 <h3>Mifos X API Documentation</h3>
                 <p>Mifos X is a secure, multi-tenanted microfinance platform.</p>
                 <p>The goal of the Mifos X API is to empower developers to build apps on top of the Mifos X Platform.
-                The <a href="https://ec2-46-137-62-163.eu-west-1.compute.amazonaws.com:8443/IndividualLendingGeneralJavaScript/IndivLendHome.html?tenantIdentifier=default">
-                reference Individual Lending app</a> (user: mifos password: password) works on the same demo 'tenant' as the interactive links in this documentation.</p>
+                The <a href="https://demo.openmf.org" target="_blank">reference app</a> (username: mifos, password: password) works on the same demo 'tenant' as the interactive links in this documentation.</p>
                 <p>
                 The API is organized around
-                <a href="http://en.wikipedia.org/wiki/Representational_State_Transfer">REST</a>.
+                <a href="http://en.wikipedia.org/wiki/Representational_State_Transfer" target="_blank">REST</a>.
                 </p>
                 <p>
                 The API is designed to have: <br>
@@ -364,16 +377,15 @@ function getBaseURL(docURL)
                 HTTP verbs, which can be understood by off-the-shelf HTTP
                 clients.
                 </p>
-                <p><a href="http://www.json.org/">JSON</a> is returned in all responses from the API, including errors.
+                <p><a href="http://www.json.org/" target="_blank">JSON</a> is returned in all responses from the API, including errors.
                 </p>
                 <p>
-                Much of the API presentation and design ideas are owed to the excellent <a href="http://info.apigee.com/Portals/62317/docs/web%20api.pdf">Apigee "Web API Design" eBook/PDF</a> and the very good <a href="https://stripe.com/docs/api">Stripe API reference</a>. 
+                Much of the API presentation and design ideas are owed to the excellent <a href="http://info.apigee.com/Portals/62317/docs/web%20api.pdf" target="_blank">Apigee "Web API Design" eBook/PDF</a> and the very good <a href="https://stripe.com/docs/api" target="_blank">Stripe API reference</a>. 
                 </p>
             </div>
-    
         </div>
     
-            <a id="interact" name="interact" class="old-syle-anchor">&nbsp;</a>
+        <a id="interact" name="interact" class="old-syle-anchor">&nbsp;</a>
         <div class="method-section">
             <div class="method-description">
                 <h3>Try The API From Your Browser</h3>
@@ -382,7 +394,7 @@ function getBaseURL(docURL)
                 Internet Explorer will probably treat the output as if you wanted to download a file.
                 In that case just elect to open the output in a text editor.</p>
                 <p>If you want to check out the POST, PUT and DELETE (update) examples a good approach is to take a moment to
-                install a REST plugin for your browser e.g. <a href="https://addons.mozilla.org/en-US/firefox/addon/restclient/">RESTClient</a> for FireFox</p>
+                install a REST plugin for your browser e.g. <a href="https://addons.mozilla.org/en-US/firefox/addon/restclient/" target="_blank">RESTClient</a> for FireFox</p>
                 The REST plugins will allow you to
                 <ul>
                     <li class=normalli>Select the "Verb" (e.g. POST)</li>
@@ -393,9 +405,7 @@ function getBaseURL(docURL)
                     <li class=normalli>Send the Request (and receive a Response)</li>
                 </ul>
              </div>
-    
         </div>
-
     
         <a id="genopts" name="genopts" class="old-syle-anchor">&nbsp;</a>
         <div class="method-section">
@@ -413,13 +423,19 @@ function getBaseURL(docURL)
                 
                 <h4>Restrict Returned Fields</h4>
                 <p>Parameter "fields={fieldlist}" can be used on GET requests to restrict the fields returned.</p>
-                <p>Example Request: </p>
-                <div class=apiClick>offices/1?fields=id,name,parentName</div>
+                <p>Normal Request:</p>
+                <div class=apiClickNotPretty>offices/1</div>
+                <p></p>
+                <p>Request (restricting fields returned): </p>
+                <div class=apiClick>offices/1?fields=id,name</div>
                 <p></p>
                 <h4>Pretty JSON Formatting</h4>
                 <p>Parameter "pretty=true" can be used to display JSON from GET requests in an easy-to-read format.
                 This parameter is used in this documentation.</p>
                 <p>Easy-to-read JSON output for POSTs, PUTs and DELETEs will available in the REST plugin you use e.g. RESTClient for FireFox</p>
+                <p>Normal Request (with pretty printing/formatting): </p>
+                <div class=apiClick>offices/1?pretty=true</div>
+                <p></p>
             </div>
     
         </div>
@@ -446,18 +462,20 @@ function getBaseURL(docURL)
             <div class="method-description">
                 <h3>Updating Dates and Numbers</h3>
                 <h4>Dates</h4>
-                <p>Dates are returned in GET requests as an array e.g. [ 2007, 4, 11].  However, they are sent as strings in POST and PUT requests.
-                If there are any dates in your POST or PUT requests, you need to provide the "dateFormat".
+                <p>Dates are returned in GET requests as an array e.g. [ 2007, 4, 11].  However, the API accepts them as strings in POST and PUT requests.
+                If there are any dates in your POST or PUT requests, you need to provide the "locale" and "dateFormat".
                 This can be any date pattern supported by <a href="http://joda-time.sourceforge.net/api-release/org/joda/time/format/DateTimeFormat.html">Joda-Time</a>.
                 This capability can help you when saving data in your client application as you shouldn't need to do any date format conversion prior to issuing your POST or PUT request.
                 </p>
                 <code>
 JSON examples:
 {
+ "locale": "en_US",
  "dateFormat": "dd MMMM yyyy",
  "openingDate": "01 July 2007"
 }
 {
+ "locale": "en_US",
  "dateFormat": "yyyy-MM-dd",
  "openingDate": "2007-03-21"
 }
@@ -3530,24 +3548,37 @@ Request Body:
 	    </div>
 	    <div class="method-example">
 	        <code class="method-declaration">POST https://Domain Name/api/v1/authentication?username={username}&password={password}</code>
-<code class="method-request">POST authentication?username=super1&password=demo
+<code class="method-request">POST authentication?username=mifos&password=password
 Content-Type: application/json
 No Request Body
 </code>
 <code class="method-response">{
-    "username": "super1",
-    "userId": 2,
-    "base64EncodedAuthenticationKey": "c3VwZXIxOmRlbW8=",
-    "authenticated": true,
-    "permissions": [
-    "USER_ADMINISTRATION_SUPER_USER_ROLE",
-    "REPORTING_SUPER_USER_ROLE",
-    "PORTFOLIO_MANAGEMENT_SUPER_USER_ROLE",
-    "ORGANISATION_ADMINISTRATION_SUPER_USER_ROLE"
-    ]
+  "username": "mifos",
+  "userId": 1,
+  "base64EncodedAuthenticationKey": "bWlmb3M6cGFzc3dvcmQ=",
+  "authenticated": true,
+  "permissions": [
+    "ALL_FUNCTIONS"
+  ]
 }
 </code>
 	    </div>
+        <div class="method-example">
+            <code class="method-declaration">POST https://Domain Name/api/v1/authentication?username={username}&password={password}</code>
+<code class="method-request">POST authentication?username=mifos&password=fail
+Content-Type: application/json
+No Request Body
+</code>
+<code class="method-response">{
+  "developerMessage": "Invalid authentication details were passed in api request.",
+  "developerDocLink": "https://github.com/keithwoodlock/mifosx/wiki/HTTP-API-Error-codes",
+  "httpStatusCode": "401",
+  "defaultUserMessage": "Unauthenticated. Please login.",
+  "userMessageGlobalisationCode": "error.msg.not.authenticated",
+  "errors": []
+}
+</code>
+        </div>
 	</div>    
     
     <!-- start of users api docs -->
@@ -4138,6 +4169,10 @@ $(document).ready(function() {
 
     $('.apiClick').bind('click', function() {
         clickAPILink($(this).text());
+    });
+
+    $('.apiClickNotPretty').bind('click', function() {
+        clickAPILinkNotPretty($(this).text());
     });
 
     baseURL = getBaseURL(window.location.href);
