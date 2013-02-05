@@ -3336,11 +3336,17 @@ GET https://DomainName/api/v1/datatables
 POST https://DomainName/api/v1/datatables/register/{datatable}/{apptable}
 					</code>
 					<code class="method-request">
-POST datatables/register/NewTable/m_client 
-Content-Type: application/json Request Body: { } 
+POST datatables/register/userDefinedTableName/m_client 
+
+Content-Type: application/json 
+Request Body: 
+{} 
 					</code>
 					<code class="method-response">
-{ "resourceId": null } </code>
+{ 
+	"resourceId": null 
+} 
+				</code>
 				</div>
 			</div>
 
@@ -3357,9 +3363,18 @@ Content-Type: application/json Request Body: { }
 					<code class="method-declaration">
 POST https://DomainName/api/v1/datatables/deregister/{datatable}
 					</code>
-					<code class="method-request">POST datatables/register/New
-						Table Content-Type: application/json Request Body: { } </code>
-					<code class="method-response">{ "resourceId": null } </code>
+					<code class="method-request">
+POST datatables/deregister/userDefinedTableName 
+
+Content-Type: application/json 
+Request Body: 
+{} 
+					</code>
+					<code class="method-response">
+{
+	"resourceId": null
+} 
+					</code>
 				</div>
 			</div>
 
@@ -3380,13 +3395,28 @@ POST https://DomainName/api/v1/datatables/deregister/{datatable}
 					<code class="method-declaration">
 POST https://DomainName/api/v1/datatables/{datatable}/{apptableId}
 					</code>
-					<code class="method-request">POST datatables/Additional
-						Client Fields Data/1 Content-Type: application/json Request Body:
-						{ "Business Description": "Livestock sales", Comment: "First
-						comment\nmade", Education_cv: "Trade", Gender_cd: "21", "Highest
-						Rate Paid": "8.5", "Next Visit": "01 October 2012", "Years in
-						Business": "5", dateFormat: "dd MMMM yyyy", locale: "en" } </code>
-					<code class="method-response">{ "resourceId": 1 } </code>
+					<code class="method-request">
+POST datatables/Additional Client Fields Data/1 
+
+Content-Type: application/json 
+Request Body:
+{
+	"Business Description": "Livestock sales", 
+	Comment: "First	comment\nmade", 
+	Education_cv: "Trade", 
+	Gender_cd: "21", 
+	"Highest Rate Paid": "8.5", 
+	"Next Visit": "01 October 2012", 
+	"Years in Business": "5", 
+	dateFormat: "dd MMMM yyyy", 
+	locale: "en" 
+}
+					</code>
+					<code class="method-response">
+{
+	"resourceId": 1
+} 
+					</code>
 				</div>
 			</div>
 
@@ -3435,11 +3465,20 @@ POST https://DomainName/api/v1/datatables/{datatable}/{apptableId}
 					<code class="method-declaration">
 GET https://DomainName/api/v1/datatables/{datatable}/{apptableId}
 					</code>
-					<code class="method-response">[ {"client_id": 1, "Business
-						Description": "Livestock sales", "Years in Business": 5,
-						"Gender_cd": "21", "Education_cv": "Trade", "Next Visit": [2012,
-						10, 1], "Highest Rate Paid": 8.500000, "Comment": "First comment
-						made"} ] </code>
+					<code class="method-response">
+[
+{
+	"client_id": 1, 
+	"Business Description": "Livestock sales", 
+	"Years in Business": 5,
+	"Gender_cd": "21", 
+	"Education_cv": "Trade", 
+	"Next Visit": [2012, 10, 1], 
+	"Highest Rate Paid": 8.500000, 
+	"Comment": "First comment made"
+} 
+] 
+					</code>
 				</div>
 			</div>
 
@@ -3455,13 +3494,23 @@ GET https://DomainName/api/v1/datatables/{datatable}/{apptableId}
 					<code class="method-declaration">
 PUT https://DomainName/api/v1/datatables/{datatable}/{apptableId}
 					</code>
-					<code class="method-request">PUT datatables/Additional
-						Client Fields Data/1 Content-Type: application/json Request Body:
-						{ "Business Description": "Livestock sales updated", Comment:
-						"First comment\nmade", Education_cv: "Trade", Gender_cd: "21",
-						"Highest Rate Paid": "8.5", "Next Visit": "01 October 2012",
-						"Years in Business": "5", dateFormat: "dd MMMM yyyy", locale: "en"
-						} </code>
+					<code class="method-request">
+PUT datatables/Additional Client Fields Data/1 
+
+Content-Type: application/json 
+Request Body:
+{ 
+	"Business Description": "Livestock sales updated", 
+	Comment: "First comment\nmade", 
+	Education_cv: "Trade", 
+	Gender_cd: "21",
+	"Highest Rate Paid": "8.5", 
+	"Next Visit": "01 October 2012",
+	"Years in Business": "5", 
+	dateFormat: "dd MMMM yyyy", 
+	locale: "en"
+} 
+					</code>
 					<code class="method-response">{ "resourceId": 1 } </code>
 				</div>
 			</div>
@@ -3477,11 +3526,21 @@ PUT https://DomainName/api/v1/datatables/{datatable}/{apptableId}
 					<code class="method-declaration">
 PUT https://DomainName/api/v1/datatables/{datatable}/{apptableId}/{datatableId}
 					</code>
-					<code class="method-request">PUT datatables/Extra Family
-						Details Data/1/2 Content-Type: application/json Request Body: {
-						"Date of Birth": "01 June 1982", Education_cdHighest: "5", Name:
-						"June", "Other Notes": "More\nnotes", "Points Score": "20",
-						dateFormat: "dd MMMM yyyy", locale: "en" } </code>
+					<code class="method-request">
+PUT datatables/Extra Family Details Data/1/2 
+
+Content-Type: application/json 
+Request Body: 
+{
+	"Date of Birth": "01 June 1982", 
+	Education_cdHighest: "5", 
+	Name: "June", 
+	"Other Notes": "More\nnotes", 
+	"Points Score": "20",
+	dateFormat: "dd MMMM yyyy", 
+	locale: "en" 
+} 
+					</code>
 					<code class="method-response">{ "resourceId": 1 } </code>
 				</div>
 			</div>
@@ -3502,9 +3561,14 @@ PUT https://DomainName/api/v1/datatables/{datatable}/{apptableId}/{datatableId}
 					<code class="method-declaration">
 DELETE https://DomainName/api/v1/datatables/{datatable}/{apptableId}
 					</code>
-					<code class="method-request">DELETE datatables/Additional
-						Client Fields Data/1 Content-Type: application/json Request Body:
-						{ } </code>
+					<code class="method-request">
+DELETE datatables/Additional Client Fields Data/1 
+
+Content-Type: application/json 
+
+Request Body:
+{}
+					 </code>
 					<code class="method-response">{ "resourceId": 1 } </code>
 				</div>
 			</div>
@@ -3521,8 +3585,12 @@ DELETE https://DomainName/api/v1/datatables/{datatable}/{apptableId}
 					<code class="method-declaration">
 DELETE https://DomainName/api/v1/datatables/{datatable}/{apptableId}/{datatableId}
 					</code>
-					<code class="method-request">DELETE datatables/Extra Family
-						Details Data/1/2 Content-Type: application/json Request Body: { }
+					<code class="method-request">
+DELETE datatables/Extra Family Details Data/1/2 
+
+Content-Type: application/json 
+Request Body: 
+{}
 					</code>
 					<code class="method-response">{ "resourceId": 1 } </code>
 				</div>
