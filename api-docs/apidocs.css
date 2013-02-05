@@ -144,7 +144,7 @@ body {
     height: 40px;
     min-width: 745px;
     left: 0; right: 0; top: 0;
-    padding-left: 200px;
+    padding-left: 150px;
     background: #eee;
     background: -webkit-gradient(linear, left top, left bottom, from(#6eb4db), to(#dadada));
     background: -moz-linear-gradient(top, #6eb4db, #dadada);
@@ -184,7 +184,7 @@ body {
 .flybar-nav {
     display: block;
     float: left;
-    width: 150px;
+    width: 80px;
     position: relative;
 }
 
@@ -237,47 +237,53 @@ body {
     box-shadow: 0 3px 5px rgba(0,0,0,0.1);
 }
 
-.flybar-menu-convenience {
-    display: none;
-    position: absolute;
-    top: 41px;
 
-    width: 575px;
-    background-color: rgba(249, 249, 249, 0.99);
-    border: 1px solid rgb(187, 187, 187);
-    border-top: 0;
-    padding: 1em;
-    border-bottom-left-radius: 8px;
-    border-bottom-right-radius: 8px;
-    -webkit-box-shadow: 0 3px 5px rgba(0,0,0,0.1);
-    -moz-box-shadow: 0 3px 5px rgba(0,0,0,0.1);
-    box-shadow: 0 3px 5px rgba(0,0,0,0.1);
-}
 
-#toc-menu1 {
+#toc-menu-client {
 	position:absolute;
-	left:-150px;
+	left:-50px;
 }
-
-#toc-menu2 {
+#toc-menu-loan {
 	position:absolute;
-	left:-300px;
+	left:-130px;
 }
-
-#toc-menu3 {
+#toc-menu-org {
+	position:absolute;
+	left:-210px;
+}
+#toc-menu-system {
+	position:absolute;
+	left:-290px;
+}
+#toc-menu-noncore {
+	position:absolute;
+	left:-370px;
+}
+#toc-menu-report {
 	position:absolute;
 	left:-450px;
 }
-
-#toc-menu4 {
+#toc-menu-user {
 	position:absolute;
-	left:-600px;
+	left:-530px;
+}
+#toc-menu-template {
+	position:absolute;
+	left:-610px;
+}
+#toc-menu-account {
+	position:absolute;
+	left:-610px;
+}
+#toc-menu-group {
+	position:absolute;
+	left:-690px;
+}
+#toc-menu-savings {
+	position:absolute;
+	left:-690px;
 }
 
-#toc-menu5 {
-	position:absolute;
-	left:-450px;
-}
 
 #language-menu {
     left: -25px;
