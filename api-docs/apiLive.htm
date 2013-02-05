@@ -1404,8 +1404,9 @@
 					<div class=apiClick>clients?fields=displayName,officeName,joinedDate</div>
 				</div>
 				<div class="method-example">
-					<code class="method-declaration">GET https://Domain
-						Name/api/v1/clients</code>
+					<code class="method-declaration">
+GET https://DomainName/api/v1/clients
+					</code>
 					<code class="method-response">[ { "id": 2, "accountNo":
 						"000000002", "externalId": "one/78", "fullname": "New Business to
 						Create", "displayName": "New Business to Create", "officeId": 1,
@@ -1435,8 +1436,9 @@
 					<div class=apiClick>clients/template</div>
 				</div>
 				<div class="method-example">
-					<code class="method-declaration">GET https://Domain
-						Name/api/v1/clients/template</code>
+					<code class="method-declaration">
+GET https://DomainName/api/v1/clients/template
+					</code>
 					<code class="method-response">{ "officeId": 1, "joinedDate":
 						[ 2013, 2, 5], "allowedOffices": [ { "id": 1, "name": "Head
 						Office", "nameDecorated": "Head Office" } ] } </code>
@@ -1459,8 +1461,9 @@
 					<div class=apiClick>clients/1?fields=id,displayName,officeName</div>
 				</div>
 				<div class="method-example">
-					<code class="method-declaration">GET https://Domain
-						Name/api/v1/clients/{clientId}</code>
+					<code class="method-declaration">
+GET https://DomainName/api/v1/clients/{clientId}
+					</code>
 					<code class="method-response">{ "id": 1, "accountNo":
 						"000000001", "externalId": "786YYH7", "firstname": "Petra",
 						"lastname": "Yton", "displayName": "Petra Yton", "officeId": 1,
@@ -1490,8 +1493,9 @@
 					</table>
 				</div>
 				<div class="method-example">
-					<code class="method-declaration">POST https://Domain
-						Name/api/v1/clients</code>
+					<code class="method-declaration">
+POST https://DomainName/api/v1/clients
+					</code>
 					<code class="method-request">POST clients Content-Type:
 						application/json Request Body: { "officeId": 1, "firstname":
 						"Petra", "lastname": "Yton", "externalId": "786YYH7",
@@ -1516,8 +1520,9 @@
 					<h4>Update a Client</h4>
 				</div>
 				<div class="method-example">
-					<code class="method-declaration">PUT https://Domain
-						Name/api/v1/clients/{clientId}</code>
+					<code class="method-declaration">
+PUT https://DomainName/api/v1/clients/{clientId}
+						</code>
 					<code class="method-request">PUT clients/1 Content-Type:
 						application/json Request Body: { "externalId": "786444UUUYYH7",
 						"dateFormat": "dd MMMM yyyy", "locale": "en", "joinedDate": "09
@@ -1548,8 +1553,9 @@
 					<div class=apiClick>clients/1/loans?fields=openLoans,closedLoans,activeLoanCount</div>
 				</div>
 				<div class="method-example">
-					<code class="method-declaration">GET https://Domain
-						Name/api/v1/clients/{clientId}/loans</code>
+					<code class="method-declaration">
+GET https://DomainName/api/v1/clients/{clientId}/loans
+					</code>
 					<code class="method-response">{ "anyLoanCount": 9,
 						"pendingApprovalLoanCount": 4, "pendingApprovalLoans": [ { "id":
 						48, "accountNo": "48", "productId": 1, "productName":
@@ -1600,8 +1606,9 @@
 					<div class=apiClick>clients/2/notes?fields=note,createdOn,createdByUsername</div>
 				</div>
 				<div class="method-example">
-					<code class="method-declaration">GET https://Domain
-						Name/api/v1/clients/{clientId}/notes</code>
+					<code class="method-declaration">
+GET https://DomainName/api/v1/clients/{clientId}/notes
+					</code>
 					<code class="method-response">[ { "id": 2, "clientId": 1,
 						"noteType": { "id": 100, "code": "noteType.client", "value":
 						"Client note" }, "note": "First note\r\n\r\nedited",
@@ -1618,8 +1625,9 @@
 					<h4>Add a Client Note</h4>
 				</div>
 				<div class="method-example">
-					<code class="method-declaration">POST https://Domain
-						Name/api/v1/clients/{clientId}/notes</code>
+					<code class="method-declaration">
+POST https://DomainName/api/v1/clients/{clientId}/notes
+					</code>
 					<code class="method-request">POST clients/1/notes
 						Content-Type: application/json Request Body: { "note": "a note
 						about the client" } </code>
@@ -1640,8 +1648,9 @@
 					<div class=apiClick>clients/1/notes/76?fields=note,createdOn,createdByUsername</div>
 				</div>
 				<div class="method-example">
-					<code class="method-declaration">GET https://Domain
-						Name/api/v1/clients/{clientId}/notes/{noteId}</code>
+					<code class="method-declaration">
+GET https://DomainName/api/v1/clients/{clientId}/notes/{noteId}
+					</code>
 					<code class="method-response">{ "id": 76, "clientId": 1,
 						"noteType": { "id": 100, "code": "noteType.client", "value":
 						"Client note" }, "note": "a note about the client", "createdById":
@@ -1658,8 +1667,9 @@
 					<h4>Update a Client Note</h4>
 				</div>
 				<div class="method-example">
-					<code class="method-declaration">PUT https://Domain
-						Name/api/v1/clients/{clientId}/notes/{noteId}</code>
+					<code class="method-declaration">
+PUT https://DomainName/api/v1/clients/{clientId}/notes/{noteId}
+					</code>
 					<code class="method-request">PUT clients/1/notes/76
 						Content-Type: application/json Request Body: { "note": "and here
 						the note is updated nicely." } </code>
@@ -1829,8 +1839,9 @@
 					<div class=apiClick>loans/template?clientId=1</div>
 				</div>
 				<div class="method-example">
-					<code class="method-declaration">GET https://Domain
-						Name/api/v1/loans/template</code>
+					<code class="method-declaration">
+GET https://DomainName/api/v1/loans/template
+					</code>
 					<code class="method-response">{ "clientId" : 1, "clientName"
 						: "Patrick O'Meara", "productId" : 1, "productName" :
 						"Agricultural Loan", "selectedProduct" : { "id" : 1, "name" :
@@ -1966,8 +1977,9 @@
 					<div class=apiClick>loans/1?fields=id,principal,annualInterestRate&associations=repaymentSchedule,transactions</div>
 				</div>
 				<div class="method-example">
-					<code class="method-declaration">GET https://Domain
-						Name/api/v1/loans/{loanId}</code>
+					<code class="method-declaration">
+GET https://DomainName/api/v1/loans/{loanId}
+					</code>
 					<code class="method-response">{ "id": 1, "accountNo":
 						"000000001", "clientId": 1, "clientName": "Petra Yton",
 						"loanProductId": 1, "loanProductName": "A new loan product for
@@ -2033,8 +2045,9 @@
 					</table>
 				</div>
 				<div class="method-example">
-					<code class="method-declaration">POST https://Domain
-						Name/api/v1/loans</code>
+					<code class="method-declaration">
+POST https://DomainName/api/v1/loans
+					</code>
 					<code class="method-request">POST loans Content-Type:
 						application/json Request Body: { "dateFormat": "dd MMMM yyyy",
 						"locale": "en_GB", "clientId": 1, "productId": 1, "principal":
@@ -2081,8 +2094,9 @@
 					</table>
 				</div>
 				<div class="method-example">
-					<code class="method-declaration">POST https://Domain
-						Name/api/v1/loans/{loanId}</code>
+					<code class="method-declaration">
+POST https://DomainName/api/v1/loans/{loanId}
+					</code>
 					<code class="method-request">POST loans/1?command=approve
 						Content-Type: application/json Request Body: { "locale": "en",
 						"dateFormat": "dd MMMM yyyy", "eventDate": "20 September 2011",
@@ -2104,8 +2118,9 @@
 					</p>
 				</div>
 				<div class="method-example">
-					<code class="method-declaration">DELETE https://Domain
-						Name/api/v1/loans/{loanId}</code>
+					<code class="method-declaration">
+DELETE https://DomainName/api/v1/loans/{loanId}
+					</code>
 					<code class="method-request">DELETE loans/1 Content-Type:
 						application/json No Request Body: </code>
 					<code class="method-response">{ "officeId": 1, "clientId":
@@ -2149,8 +2164,9 @@
 					<div class=apiClick>loans/10/transactions/template?command=repayment</div>
 				</div>
 				<div class="method-example">
-					<code class="method-declaration">GET https://Domain
-						Name/api/v1/loans/{loanId}/transactions/template"</code>
+					<code class="method-declaration">
+GET https://DomainName/api/v1/loans/{loanId}/transactions/template"
+					</code>
 					<code class="method-response">{ "transactionType" : { "id" :
 						2, "code" : "loanTransactionType.repayment", "value" : "Repayment"
 						}, "date" : [ 2009, 8, 1 ], "total" : { "currencyCode" : "XOF",
@@ -2175,8 +2191,9 @@
 					</dl>
 				</div>
 				<div class="method-example">
-					<code class="method-declaration">POST https://Domain
-						Name/api/v1/loans/{loanId}/transactions</code>
+					<code class="method-declaration">
+POST https://DomainName/api/v1/loans/{loanId}/transactions
+					</code>
 					<code class="method-request">POST
 						loans/37/transactions?command=repayment Content-Type:
 						application/json Request Body: { "locale": "en_GB", "dateFormat":
@@ -2195,8 +2212,9 @@
 					<div class=apiClick>loans/10/transactions/20</div>
 				</div>
 				<div class="method-example">
-					<code class="method-declaration">GET https://Domain
-						Name/api/v1/loans/{loanId}/transactions/{transactionId}</code>
+					<code class="method-declaration">
+GET https://DomainName/api/v1/loans/{loanId}/transactions/{transactionId}
+					</code>
 					<code class="method-response">{ "id" : 10, "date" : [ 2009,
 						1, 29 ], "total" : { "currencyCode" : "XOF", "digitsAfterDecimal"
 						: 0, "amount" : 300000, "defaultName" : "CFA Franc BCEAO",
@@ -2224,8 +2242,9 @@
 					</table>
 				</div>
 				<div class="method-example">
-					<code class="method-declaration">POST https://Domain
-						Name/api/v1/loans/{loanId}/transactions/{transactionId}</code>
+					<code class="method-declaration">
+POST https://DomainName/api/v1/loans/{loanId}/transactions/{transactionId}
+					</code>
 					<code class="method-request">POST loans/16/transactions/32
 						Content-Type: application/json Request Body: { "locale": "en_GB",
 						"dateFormat": "dd MMMM yyyy", "transactionDate": "25 May 2012",
@@ -2290,8 +2309,9 @@
 					<div class=apiClick>offices?fields=id,name,openingDate</div>
 				</div>
 				<div class="method-example">
-					<code class="method-declaration">GET https://Domain
-						Name/api/v1/offices</code>
+					<code class="method-declaration">
+GET https://DomainName/api/v1/offices
+					</code>
 					<code class="method-response">[ { "id": 1, "name": "Head
 						Office", "nameDecorated": "Head Office", "externalId": "1",
 						"openingDate": [ 2009, 1, 1 ], "hierarchy": "." } ] </code>
@@ -2316,8 +2336,9 @@
 					<div class=apiClick>offices/template</div>
 				</div>
 				<div class="method-example">
-					<code class="method-declaration">GET https://Domain
-						Name/api/v1/offices/template</code>
+					<code class="method-declaration">
+GET https://DomainName/api/v1/offices/template
+					</code>
 					<code class="method-response">{ "openingDate": [2013,2,4],
 						"allowedParents": [ { "id": 1, "name": "Head Office",
 						"nameDecorated": "Head Office" } ] } </code>
@@ -2339,8 +2360,9 @@
 					<div class=apiClick>offices/1?fields=id,name,parentName</div>
 				</div>
 				<div class="method-example">
-					<code class="method-declaration">GET https://Domain
-						Name/api/v1/offices/1</code>
+					<code class="method-declaration">
+GET https://DomainName/api/v1/offices/1
+					</code>
 					<code class="method-response">{ "id": 1, "name": "Head
 						Office", "nameDecorated": "Head Office", "externalId": "1",
 						"openingDate": [2009,1,1], "hierarchy": "." } </code>
@@ -2361,8 +2383,9 @@
 					</table>
 				</div>
 				<div class="method-example">
-					<code class="method-declaration">POST https://Domain
-						Name/api/v1/offices</code>
+					<code class="method-declaration">
+POST https://DomainName/api/v1/offices
+					</code>
 					<code class="method-request">POST offices Content-Type:
 						application/json Request Body: { "name": "Example New Branch",
 						"dateFormat": "dd MMMM yyyy", "locale": "en", "openingDate": "01
@@ -2378,8 +2401,9 @@
 					<h4>Update Office</h4>
 				</div>
 				<div class="method-example">
-					<code class="method-declaration">PUT https://Domain
-						Name/api/v1/offices/{officeId}</code>
+					<code class="method-declaration">
+PUT https://DomainName/api/v1/offices/{officeId}
+					</code>
 					<code class="method-request">PUT offices/1 Content-Type:
 						application/json Request Body: { "name": "Name is updated" } </code>
 					<code class="method-response">{ "officeId": 1, "resourceId":
@@ -2538,8 +2562,9 @@
 					<div class=apiClick>loanproducts?fields=name,description,interestRateFrequencyType,amortizationType</div>
 				</div>
 				<div class="method-example">
-					<code class="method-declaration">GET https://Domain
-						Name/api/v1/loanproducts</code>
+					<code class="method-declaration">
+GET https://DomainName/api/v1/loanproducts
+					</code>
 					<code class="method-response">[ { "id": 1, "name": "A new
 						loan product for me", "currency": { "code": "USD", "name": "US
 						Dollar", "decimalPlaces": 2, "displaySymbol": "$", "nameCode":
@@ -2582,8 +2607,9 @@
 					<div class=apiClick>loanproducts/template</div>
 				</div>
 				<div class="method-example">
-					<code class="method-declaration">GET https://Domain
-						Name/api/v1/loanproducts/template</code>
+					<code class="method-declaration">
+GET https://DomainName/api/v1/loanproducts/template
+					</code>
 					<code class="method-response">{ "currency": { "code": "USD",
 						"name": "US Dollar", "decimalPlaces": 2, "displaySymbol": "$",
 						"nameCode": "currency.USD", "displayLabel": "US Dollar ($)" },
@@ -2655,8 +2681,9 @@
 					<div class=apiClick>loanproducts/1?fields=name,description,numberOfRepayments</div>
 				</div>
 				<div class="method-example">
-					<code class="method-declaration">GET https://Domain
-						Name/api/v1/loanproducts/{productId}</code>
+					<code class="method-declaration">
+GET https://DomainName/api/v1/loanproducts/{productId}
+					</code>
 					<code class="method-response">{ "id": 1, "name": "A new loan
 						product for me", "currency": { "code": "USD", "name": "US Dollar",
 						"decimalPlaces": 2, "displaySymbol": "$", "nameCode":
@@ -2701,8 +2728,9 @@
 					</table>
 				</div>
 				<div class="method-example">
-					<code class="method-declaration">POST https://Domain
-						Name/api/v1/loanproducts</code>
+					<code class="method-declaration">
+POST https://DomainName/api/v1/loanproducts
+					</code>
 					<code class="method-request">POST loanproducts Content-Type:
 						application/json Request Body: { "name": "A new loan product for
 						me", "currencyCode": "USD", "locale": "en_GB",
@@ -2723,8 +2751,9 @@
 					<h4>Update a Loan Product</h4>
 				</div>
 				<div class="method-example">
-					<code class="method-declaration">PUT https://Domain
-						Name/api/v1/loanproducts/{loanId}</code>
+					<code class="method-declaration">
+PUT https://DomainName/api/v1/loanproducts/{loanId}
+					</code>
 					<code class="method-request">PUT loanproducts/1
 						Content-Type: application/json Request Body: { "locale": "en_GB",
 						"principal": "70,000.00" } </code>
@@ -2758,8 +2787,9 @@
 					<div class=apiClick>currencies?fields=selectedCurrencyOptions</div>
 				</div>
 				<div class="method-example">
-					<code class="method-declaration">GET https://Domain
-						Name/api/v1/currencies</code>
+					<code class="method-declaration">
+GET https://DomainName/api/v1/currencies
+					</code>
 					<code class="method-response">{ "selectedCurrencyOptions": [
 						{ "code": "USD", "name": "US Dollar", "decimalPlaces": 2,
 						"displaySymbol": "$", "nameCode": "currency.USD", "displayLabel":
@@ -2782,8 +2812,9 @@
 					<p>Updates the list of currencies permitted for use.</p>
 				</div>
 				<div class="method-example">
-					<code class="method-declaration">PUT https://Domain
-						Name/api/v1/currencies</code>
+					<code class="method-declaration">
+PUT https://DomainName/api/v1/currencies
+					</code>
 					<code class="method-request">PUT currencies Content-Type:
 						application/json Request Body: { "currencies": ["KES", "BND",
 						"LBP", "GHC", "USD", "XOF", "AED", "AMD"] } </code>
@@ -2811,8 +2842,9 @@
 					<div class=apiClick>configurations</div>
 				</div>
 				<div class="method-example">
-					<code class="method-declaration">GET https://Domain
-						Name/api/v1/configurations</code>
+					<code class="method-declaration">
+GET https://DomainName/api/v1/configurations
+					</code>
 					<code class="method-response">{ "globalConfiguration": [ {
 						"name": "maker-checker", "enabled": false } ] } </code>
 				</div>
@@ -2826,8 +2858,9 @@
 					<p>Updates an enable/disable global configuration item.</p>
 				</div>
 				<div class="method-example">
-					<code class="method-declaration">PUT https://Domain
-						Name/api/v1/configurations?maker-checker=false</code>
+					<code class="method-declaration">
+PUT https://DomainName/api/v1/configurations?maker-checker=false
+					</code>
 					<code class="method-request">PUT configurations
 						Content-Type: application/json Request Body: { } </code>
 					<code class="method-response">{ "changes": {} } </code>
@@ -2858,8 +2891,9 @@
 						defined' and so system defined is marked as false.</p>
 				</div>
 				<div class="method-example">
-					<code class="method-declaration">POST https://Domain
-						Name/api/v1/codes</code>
+					<code class="method-declaration">
+POST https://DomainName/api/v1/codes
+					</code>
 					<code class="method-request">POST codes Content-Type:
 						application/json Request Body: { "name": "MyNewCode" } </code>
 					<code class="method-response">{ "resourceId": 4 } </code>
@@ -2876,8 +2910,9 @@
 					<div class=apiClick>codes</div>
 				</div>
 				<div class="method-example">
-					<code class="method-declaration">GET https://Domain
-						Name/api/v1/codes</code>
+					<code class="method-declaration">
+GET https://DomainName/api/v1/codes
+					</code>
 					<code class="method-response">[ { "id": 1, "name": "Customer
 						Identifier", "systemDefined": true }, { "id": 2, "name": "Gender",
 						"systemDefined": true },{ "id": 3, "name": "Education",
@@ -2895,8 +2930,9 @@
 					<div class=apiClick>codes/1</div>
 				</div>
 				<div class="method-example">
-					<code class="method-declaration">GET https://Domain
-						Name/api/v1/codes/1</code>
+					<code class="method-declaration">
+GET https://DomainName/api/v1/codes/{codeId}
+					</code>
 					<code class="method-response">{ "id": 1, "name": "Customer
 						Identifier", "systemDefined": true } </code>
 				</div>
@@ -2910,8 +2946,9 @@
 					<p>Updates the details of a code if it is not system defined.</p>
 				</div>
 				<div class="method-example">
-					<code class="method-declaration">PUT https://Domain
-						Name/api/v1/codes/4</code>
+					<code class="method-declaration">
+PUT https://DomainName/api/v1/codes/{codeId}
+					</code>
 					<code class="method-request">PUT codes/4 Content-Type:
 						application/json Request Body: { "name": "MyNewCode(changed)" } </code>
 					<code class="method-response">{ "resourceId": 4, "changes":
@@ -2927,8 +2964,9 @@
 					<p>Deletes a code if it is not system defined.</p>
 				</div>
 				<div class="method-example">
-					<code class="method-declaration">DELETE https://Domain
-						Name/api/v1/codes/4</code>
+					<code class="method-declaration">
+DELETE https://DomainName/api/v1/codes/{codeId}
+					</code>
 					<code class="method-request">DELETE codes/4 Content-Type:
 						application/json </code>
 					<code class="method-response">{ "resourceId": 4 } </code>
@@ -2953,8 +2991,9 @@
 					<p>Creates a fund.</p>
 				</div>
 				<div class="method-example">
-					<code class="method-declaration">POST https://Domain
-						Name/api/v1/funds</code>
+					<code class="method-declaration">
+POST https://DomainName/api/v1/funds
+					</code>
 					<code class="method-request">POST funds Content-Type:
 						application/json Request Body: { "name": "EU Agri Fund" } </code>
 					<code class="method-response">{ "resourceId": 1 } </code>
@@ -2970,8 +3009,9 @@
 					<div class=apiClick>funds</div>
 				</div>
 				<div class="method-example">
-					<code class="method-declaration">GET https://Domain
-						Name/api/v1/funds</code>
+					<code class="method-declaration">
+GET https://DomainName/api/v1/funds
+					</code>
 					<code class="method-response">[ { "id": 1, "name": "EU Agri
 						Fund" } ] </code>
 				</div>
@@ -2986,8 +3026,9 @@
 					<div class=apiClick>funds/1</div>
 				</div>
 				<div class="method-example">
-					<code class="method-declaration">GET https://Domain
-						Name/api/v1/funds/1</code>
+					<code class="method-declaration">
+GET https://DomainName/api/v1/funds/{fundId}
+					</code>
 					<code class="method-response">{ "id": 1, "name": "EU Agri
 						Fund" } </code>
 				</div>
@@ -3000,8 +3041,9 @@
 					<p>Updates the details of a fund.</p>
 				</div>
 				<div class="method-example">
-					<code class="method-declaration">PUT https://Domain
-						Name/api/v1/funds/1</code>
+					<code class="method-declaration">
+PUT https://DomainName/api/v1/funds/{fundId}
+					</code>
 					<code class="method-request">PUT funds/1 Content-Type:
 						application/json Request Body: { "name": "EU Agri Fund
 						(2010-2020)" } </code>
@@ -3028,8 +3070,9 @@
 					<p>Creates a staff member.</p>
 				</div>
 				<div class="method-example">
-					<code class="method-declaration">POST https://Domain
-						Name/api/v1/staff</code>
+					<code class="method-declaration">
+POST https://DomainName/api/v1/staff
+					</code>
 					<code class="method-request">POST staff Content-Type:
 						application/json Request Body: { "officeId": 1, "firstname":
 						"John", "lastname": "Doe", "isLoanOfficer": "true" } </code>
@@ -3047,8 +3090,9 @@
 					<div class=apiClick>staff</div>
 				</div>
 				<div class="method-example">
-					<code class="method-declaration">GET https://Domain
-						Name/api/v1/staff</code>
+					<code class="method-declaration">
+GET https://DomainName/api/v1/staff
+					</code>
 					<code class="method-response">[ { "id": 1, "firstname":
 						"John", "lastname": "Doe", "displayName": "Doe, John", "officeId":
 						1, "officeName": "Head Office", "isLoanOfficer": true } ] </code>
@@ -3065,7 +3109,8 @@
 				</div>
 				<div class="method-example">
 					<code class="method-declaration">GET https://Domain
-						Name/api/v1/staff/1</code>
+						Name/api/v1/staff/{staffId}
+					</code>
 					<code class="method-response">{ "id": 1, "firstname":
 						"John", "lastname": "Doe", "displayName": "Doe, John", "officeId":
 						1, "officeName": "Head Office", "isLoanOfficer": true } </code>
@@ -3079,8 +3124,9 @@
 					<p>Updates the details of a staff member.</p>
 				</div>
 				<div class="method-example">
-					<code class="method-declaration">PUT https://Domain
-						Name/api/v1/staff/1</code>
+					<code class="method-declaration">
+PUT https://DomainName/api/v1/staff/{staffId}
+					</code>
 					<code class="method-request">PUT staff/1 Content-Type:
 						application/json Request Body: { "isLoanOfficer": "false" } </code>
 					<code class="method-response">{ "officeId": 1, "resourceId":
@@ -3110,8 +3156,9 @@
 						products or loans.</p>
 				</div>
 				<div class="method-example">
-					<code class="method-declaration">POST https://Domain
-						Name/api/v1/charges</code>
+					<code class="method-declaration">
+POST https://DomainName/api/v1/charges
+					</code>
 					<code class="method-request">POST charges Content-Type:
 						application/json Request Body: { "name": "Loan service fee",
 						"chargeAppliesTo": 1, "currencyCode": "USD", "locale": "en",
@@ -3130,8 +3177,9 @@
 					<div class=apiClick>charges</div>
 				</div>
 				<div class="method-example">
-					<code class="method-declaration">GET https://Domain
-						Name/api/v1/charges</code>
+					<code class="method-declaration">
+GET https://DomainName/api/v1/charges
+					</code>
 					<code class="method-response">[ { "id": 1, "name": "Loan
 						service fee", "active": true, "penalty": false, "currency": {
 						"code": "USD", "name": "US Dollar", "decimalPlaces": 2,
@@ -3154,8 +3202,9 @@
 					<div class=apiClick>charges/1</div>
 				</div>
 				<div class="method-example">
-					<code class="method-declaration">GET https://Domain
-						Name/api/v1/charges/1</code>
+					<code class="method-declaration">
+GET https://DomainName/api/v1/charges/{chargeId}
+					</code>
 					<code class="method-response">{ "id": 1, "name": "Loan
 						service fee", "active": true, "penalty": false, "currency": {
 						"code": "USD", "name": "US Dollar", "decimalPlaces": 2,
@@ -3175,8 +3224,9 @@
 					<p>Updates the details of a Charge.</p>
 				</div>
 				<div class="method-example">
-					<code class="method-declaration">PUT https://Domain
-						Name/api/v1/charges/1</code>
+					<code class="method-declaration">
+PUT https://DomainName/api/v1/charges/{chargeId}
+					</code>
 					<code class="method-request">PUT charges/1 Content-Type:
 						application/json Request Body: { "name": "Loan service
 						fee(changed)" } </code>
@@ -3192,8 +3242,9 @@
 					<p>Deletes a Charge.</p>
 				</div>
 				<div class="method-example">
-					<code class="method-declaration">DELETE https://Domain
-						Name/api/v1/charges/1</code>
+					<code class="method-declaration">
+DELETE https://DomainName/api/v1/charges/{chargeId}
+					</code>
 					<code class="method-request">DELETE charges/1 Content-Type:
 						application/json </code>
 					<code class="method-response">{ "resourceId": 1 } </code>
@@ -3249,13 +3300,25 @@
 					<div class=apiClick>datatables</div>
 				</div>
 				<div class="method-example">
-					<code class="method-declaration">GET https://Domain
-						Name/api/v1/datatables</code>
-					<code class="method-response">[ { "applicationTableName":
-						"m_client", "registeredTableName": "Additional Client Fields Data"
-						}, { "applicationTableName": "m_client", "registeredTableName":
-						"Extra Family Details Data" }, { "applicationTableName": "m_loan",
-						"registeredTableName": "Additional Loan Fields Data" } ] </code>
+					<code class="method-declaration">
+GET https://DomainName/api/v1/datatables
+					</code>
+					<code class="method-response">
+[
+ 	{ 
+ 		"applicationTableName": "m_client", 
+ 		"registeredTableName": "Additional Client Fields Data"
+ 	}, 
+	{
+		"applicationTableName": "m_client", 
+		"registeredTableName": "Extra Family Details Data"
+	}, 
+	{
+		"applicationTableName": "m_loan",
+		"registeredTableName": "Additional Loan Fields Data"
+	}
+] 
+					</code>
 				</div>
 			</div>
 
@@ -3269,11 +3332,15 @@
 						API.</p>
 				</div>
 				<div class="method-example">
-					<code class="method-declaration">POST https://Domain
-						Name/api/v1/datatables/register/{datatable}/{apptable}</code>
-					<code class="method-request">POST datatables/register/New
-						Table/m_client Content-Type: application/json Request Body: { } </code>
-					<code class="method-response">{ "resourceId": null } </code>
+					<code class="method-declaration">
+POST https://DomainName/api/v1/datatables/register/{datatable}/{apptable}
+					</code>
+					<code class="method-request">
+POST datatables/register/NewTable/m_client 
+Content-Type: application/json Request Body: { } 
+					</code>
+					<code class="method-response">
+{ "resourceId": null } </code>
 				</div>
 			</div>
 
@@ -3287,8 +3354,9 @@
 						through the API.</p>
 				</div>
 				<div class="method-example">
-					<code class="method-declaration">POST https://Domain
-						Name/api/v1/datatables/deregister/{datatable}</code>
+					<code class="method-declaration">
+POST https://DomainName/api/v1/datatables/deregister/{datatable}
+					</code>
 					<code class="method-request">POST datatables/register/New
 						Table Content-Type: application/json Request Body: { } </code>
 					<code class="method-response">{ "resourceId": null } </code>
@@ -3309,8 +3377,9 @@
 						have both "versions" in any data table.</p>
 				</div>
 				<div class="method-example">
-					<code class="method-declaration">POST https://Domain
-						Name/api/v1/datatables/{datatable}/{apptableId}</code>
+					<code class="method-declaration">
+POST https://DomainName/api/v1/datatables/{datatable}/{apptableId}
+					</code>
 					<code class="method-request">POST datatables/Additional
 						Client Fields Data/1 Content-Type: application/json Request Body:
 						{ "Business Description": "Livestock sales", Comment: "First
@@ -3363,8 +3432,9 @@
 						Data/1?genericResultSet=true</div>
 				</div>
 				<div class="method-example">
-					<code class="method-declaration">GET https://Domain
-						Name/api/v1/datatables/{datatable}/{apptableId}</code>
+					<code class="method-declaration">
+GET https://DomainName/api/v1/datatables/{datatable}/{apptableId}
+					</code>
 					<code class="method-response">[ {"client_id": 1, "Business
 						Description": "Livestock sales", "Years in Business": 5,
 						"Gender_cd": "21", "Education_cv": "Trade", "Next Visit": [2012,
@@ -3382,8 +3452,9 @@
 					<p>Updates the row (if it exists) of the data table.</p>
 				</div>
 				<div class="method-example">
-					<code class="method-declaration">PUT https://Domain
-						Name/api/v1/datatables/{datatable}/{apptableId}</code>
+					<code class="method-declaration">
+PUT https://DomainName/api/v1/datatables/{datatable}/{apptableId}
+					</code>
 					<code class="method-request">PUT datatables/Additional
 						Client Fields Data/1 Content-Type: application/json Request Body:
 						{ "Business Description": "Livestock sales updated", Comment:
@@ -3403,8 +3474,9 @@
 					<p>Updates the row (if it exists) of the data table.</p>
 				</div>
 				<div class="method-example">
-					<code class="method-declaration">PUT https://Domain
-						Name/api/v1/datatables/{datatable}/{apptableId}/{datatableId}</code>
+					<code class="method-declaration">
+PUT https://DomainName/api/v1/datatables/{datatable}/{apptableId}/{datatableId}
+					</code>
 					<code class="method-request">PUT datatables/Extra Family
 						Details Data/1/2 Content-Type: application/json Request Body: {
 						"Date of Birth": "01 June 1982", Education_cdHighest: "5", Name:
