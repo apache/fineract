@@ -1,5 +1,6 @@
 ﻿-- currency symbols may not apply through command line on windows so use a different client like mysql workbench
 
+
 INSERT INTO `ref_loan_transaction_processing_strategy`
 (`id`,`code`,`name`)
 VALUES
@@ -223,7 +224,7 @@ If you had other roles set up with specific permissions you will have to set up 
 truncate `m_role_permission`;
 truncate `m_permission`;
 
-INSERT INTO `mifostenant-default`.`m_permission`
+INSERT INTO `m_permission`
 (`grouping`,`code`,`entity_name`,`action_name`,`can_maker_checker`) VALUES 
 ('special','ALL_FUNCTIONS',NULL,NULL,0),
 ('special','ALL_FUNCTIONS_READ',NULL,NULL,0),
