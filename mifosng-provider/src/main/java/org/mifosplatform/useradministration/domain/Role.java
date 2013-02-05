@@ -13,16 +13,17 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.useradministration.data.RoleData;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
-@Table(name = "m_role")
+@Table(name = "m_role",  uniqueConstraints = { @UniqueConstraint(columnNames = { "name" }, name = "unq_name")})
 public class Role extends AbstractPersistable<Long> {
 
-    @Column(name = "name", nullable = false, length = 100)
+    @Column(name = "name", unique = true, nullable = false, length = 100)
     private String name;
 
     @Column(name = "description", nullable = false, length = 500)

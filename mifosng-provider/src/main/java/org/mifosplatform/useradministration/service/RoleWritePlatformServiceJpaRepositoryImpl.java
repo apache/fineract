@@ -7,6 +7,7 @@ import java.util.Map;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
+import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.useradministration.command.PermissionsCommand;
 import org.mifosplatform.useradministration.domain.Permission;
@@ -17,13 +18,17 @@ import org.mifosplatform.useradministration.exception.PermissionNotFoundExceptio
 import org.mifosplatform.useradministration.exception.RoleNotFoundException;
 import org.mifosplatform.useradministration.serialization.PermissionsCommandFromApiJsonDeserializer;
 import org.mifosplatform.useradministration.serialization.RoleCommandFromApiJsonDeserializer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatformService {
 
+	private final static Logger logger = LoggerFactory.getLogger(RoleWritePlatformServiceJpaRepositoryImpl.class);
     private final PlatformSecurityContext context;
     private final RoleRepository roleRepository;
     private final PermissionRepository permissionRepository;
@@ -45,36 +50,75 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
     @Override
     public CommandProcessingResult createRole(final JsonCommand command) {
 
-        context.authenticatedUser();
+		try {
+			context.authenticatedUser();
 
-        this.roleCommandFromApiJsonDeserializer.validateForCreate(command.json());
+			this.roleCommandFromApiJsonDeserializer.validateForCreate(command
+					.json());
 
-        final Role entity = Role.fromJson(command);
-        this.roleRepository.save(entity);
+			final Role entity = Role.fromJson(command);
 
-        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(entity.getId()).build();
+			this.roleRepository.save(entity);
+
+			return new CommandProcessingResultBuilder()
+					.withCommandId(command.commandId())
+					.withEntityId(entity.getId()).build();
+		} catch (DataIntegrityViolationException dve) {
+			handleDataIntegrityIssues(command, dve);
+			return CommandProcessingResult.empty();
+		}
     }
 
+    /*
+     * Guaranteed to throw an exception no matter what the data integrity issue
+     * is.
+     */
+    private void handleDataIntegrityIssues(final JsonCommand command, final DataIntegrityViolationException dve) {
+
+        Throwable realCause = dve.getMostSpecificCause();
+        if (realCause.getMessage().contains("unq_name")) {
+
+            final String name = command.stringValueOfParameterNamed("name");
+            throw new PlatformDataIntegrityException("error.msg.role.duplicate.name", "Role with name `" + name
+                    + "` already exists", "name", name);
+        }
+        
+        logAsErrorUnexpectedDataIntegrityException(dve);
+        throw new PlatformDataIntegrityException("error.msg.role.unknown.data.integrity.issue",
+                "Unknown data integrity issue with resource.");
+    }
+    
+    private void logAsErrorUnexpectedDataIntegrityException(final DataIntegrityViolationException dve) {
+        logger.error(dve.getMessage(), dve);
+    }
+    
     @Transactional
     @Override
     public CommandProcessingResult updateRole(final Long roleId, final JsonCommand command) {
+		try {
+			context.authenticatedUser();
 
-        context.authenticatedUser();
+			this.roleCommandFromApiJsonDeserializer.validateForUpdate(command
+					.json());
 
-        this.roleCommandFromApiJsonDeserializer.validateForUpdate(command.json());
+			final Role role = this.roleRepository.findOne(roleId);
+			if (role == null) {
+				throw new RoleNotFoundException(roleId);
+			}
 
-        final Role role = this.roleRepository.findOne(roleId);
-        if (role == null) { throw new RoleNotFoundException(roleId); }
+			final Map<String, Object> changes = role.update(command);
+			if (!changes.isEmpty()) {
+				this.roleRepository.saveAndFlush(role);
+			}
 
-        final Map<String, Object> changes = role.update(command);
-        if (!changes.isEmpty()) {
-            this.roleRepository.save(role);
-        }
-
-        return new CommandProcessingResultBuilder() //
-                .withCommandId(command.commandId()) //
-                .withEntityId(roleId).with(changes) //
-                .build();
+			return new CommandProcessingResultBuilder() //
+					.withCommandId(command.commandId()) //
+					.withEntityId(roleId).with(changes) //
+					.build();
+		} catch (DataIntegrityViolationException dve) {
+			handleDataIntegrityIssues(command, dve);
+			return new CommandProcessingResult(Long.valueOf(-1));
+		}
     }
 
     @Transactional
