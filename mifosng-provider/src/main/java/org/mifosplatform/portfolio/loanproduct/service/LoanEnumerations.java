@@ -3,6 +3,7 @@ package org.mifosplatform.portfolio.loanproduct.service;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanStatus;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanTransactionType;
+import org.mifosplatform.portfolio.loanproduct.domain.AccountingRuleType;
 import org.mifosplatform.portfolio.loanproduct.domain.AmortizationMethod;
 import org.mifosplatform.portfolio.loanproduct.domain.InterestCalculationPeriodMethod;
 import org.mifosplatform.portfolio.loanproduct.domain.InterestMethod;
@@ -248,4 +249,13 @@ public class LoanEnumerations {
 		
 		return optionData;
 	}
+	
+    public static EnumOptionData accountingRuleType(final int id) {
+        return accountingRuleType(AccountingRuleType.fromInt(id));
+    }
+
+    public static EnumOptionData accountingRuleType(final AccountingRuleType type) {
+        EnumOptionData optionData = new EnumOptionData(type.getValue().longValue(), type.getCode(), type.toString());
+        return optionData;
+    }
 }

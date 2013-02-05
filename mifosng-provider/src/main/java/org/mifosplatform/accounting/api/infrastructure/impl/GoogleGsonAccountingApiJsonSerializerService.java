@@ -35,8 +35,9 @@ public class GoogleGsonAccountingApiJsonSerializerService implements AccountingA
             "lastUpdatedByUsername", "comments", "allowedOffices"));
 
     private static final Set<String> GL_JOURNAL_ENTRY_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "officeId", "officeName",
-            "glAccountName", "glAccountId", "glAccountClassification", "entryDate", "entryType", "amount", "transactionId",
-            "portfolioGenerated", "entityType", "entityId", "createdByUserId", "createdDate", "createdByUserName", "comments", "reversed"));
+            "glAccountName", "glAccountId", "glAccountCode", "glAccountClassification", "entryDate", "entryType", "amount",
+            "transactionId", "portfolioGenerated", "entityType", "entityId", "createdByUserId", "createdDate", "createdByUserName",
+            "comments", "reversed"));
 
     private final GoogleGsonSerializerHelper helper;
 

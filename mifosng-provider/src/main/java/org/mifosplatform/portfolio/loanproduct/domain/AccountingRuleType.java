@@ -5,12 +5,14 @@ import java.util.Map;
 
 public enum AccountingRuleType {
 
-    NONE(1), CASH_BASED(2), ACCRUAL_BASED(3);
+    NONE(1, "accountingRuleType.none"), CASH_BASED(2, "accountingRuleType.cash"), ACCRUAL_BASED(3, "accountingRuleType.accrual");
 
     private final Integer value;
+    private final String code;
 
-    private AccountingRuleType(final Integer value) {
+    private AccountingRuleType(final Integer value, String code) {
         this.value = value;
+        this.code = code;
     }
 
     @Override
@@ -20,6 +22,10 @@ public enum AccountingRuleType {
 
     public Integer getValue() {
         return this.value;
+    }
+
+    public String getCode() {
+        return this.code;
     }
 
     private static final Map<Integer, AccountingRuleType> intToEnumMap = new HashMap<Integer, AccountingRuleType>();

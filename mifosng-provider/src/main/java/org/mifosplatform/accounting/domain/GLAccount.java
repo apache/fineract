@@ -42,7 +42,6 @@ public class GLAccount extends AbstractPersistable<Long> {
     @Column(name = "manual_journal_entries_allowed", nullable = false)
     private boolean manualEntriesAllowed = true;
 
-    @SuppressWarnings("unused")
     @Column(name = "classification_enum", nullable = false)
     private Integer classification;
 
@@ -131,6 +130,14 @@ public class GLAccount extends AbstractPersistable<Long> {
 
     public String getName() {
         return this.name;
+    }
+
+    public Integer getClassification() {
+        return this.classification;
+    }
+
+    public void setClassification(Integer classification) {
+        this.classification = classification;
     }
 
 }

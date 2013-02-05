@@ -11,6 +11,7 @@ import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.mifosplatform.portfolio.charge.data.ChargeData;
 import org.mifosplatform.portfolio.fund.data.FundData;
+import org.mifosplatform.portfolio.loanproduct.domain.AccountingRuleType;
 import org.mifosplatform.portfolio.loanproduct.domain.AmortizationMethod;
 import org.mifosplatform.portfolio.loanproduct.domain.InterestCalculationPeriodMethod;
 import org.mifosplatform.portfolio.loanproduct.domain.InterestMethod;
@@ -44,8 +45,7 @@ public class LoanProductData {
     private final EnumOptionData interestCalculationPeriodType;
     private final BigDecimal inArrearsTolerance;
     
-    // FIXME - KW - This should be returned for serialization as an EnumOptionData like the other Enumerated values
-    private final Integer accountingType;
+    private final EnumOptionData accountingType;
 
     private final Collection<ChargeData> charges;
 
@@ -94,7 +94,7 @@ public class LoanProductData {
         final Long transactionProcessingStrategyId = null;
         final String transactionProcessingStrategyName = null;
         final Collection<ChargeData> charges = null;
-        final Integer accountingType = null;
+        final EnumOptionData accountingType = null;
 
         return new LoanProductData(id, name, description, currency, principal, tolerance, numberOfRepayments, loanTermFrequency,
                 repaymentEvery, interestRatePerPeriod, annualInterestRate, loanTermFrequencyType, repaymentFrequencyType,
@@ -126,7 +126,7 @@ public class LoanProductData {
         final Long transactionProcessingStrategyId = null;
         final String transactionProcessingStrategyName = null;
         final Collection<ChargeData> charges = null;
-        final Integer accountingType = 1;
+        final EnumOptionData accountingType = LoanEnumerations.accountingRuleType(AccountingRuleType.NONE);
 
         return new LoanProductData(id, name, description, currency, principal, tolerance, numberOfRepayments, loanTermFrequency,
                 repaymentEvery, interestRatePerPeriod, annualInterestRate, loanTermFrequencyType, repaymentFrequencyType,
@@ -150,7 +150,7 @@ public class LoanProductData {
             final EnumOptionData interestRateFrequencyType, final EnumOptionData amortizationType, final EnumOptionData interestType,
             final EnumOptionData interestCalculationPeriodType, final Long fundId, final String fundName,
             final Long transactionProcessingStrategyId, final String transactionProcessingStrategyName,
-            final Collection<ChargeData> charges, final Integer accountingType) {
+            final Collection<ChargeData> charges, final EnumOptionData accountingType) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -261,12 +261,12 @@ public class LoanProductData {
         return chargesLocal;
     }
 
-    public Integer accountingRuleType() {
+    public EnumOptionData accountingRuleType() {
         return this.accountingType;
     }
 
     public boolean hasAccountingEnabled() {
-        return this.accountingType > 1;
+        return this.accountingType.getId() > 1;
     }
 
     public Long getId() {

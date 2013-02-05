@@ -24,6 +24,8 @@ public class GLJournalEntryData {
     @SuppressWarnings("unused")
     private final Long glAccountId;
     @SuppressWarnings("unused")
+    private final String glAccountCode;
+    @SuppressWarnings("unused")
     private final EnumOptionData glAccountClassification;
     @SuppressWarnings("unused")
     private final LocalDate entryDate;
@@ -50,7 +52,7 @@ public class GLJournalEntryData {
     @SuppressWarnings("unused")
     private final Boolean reversed;
 
-    public GLJournalEntryData(Long id, Long officeId, String officeName, String glAccountName, Long glAccountId,
+    public GLJournalEntryData(Long id, Long officeId, String officeName, String glAccountName, Long glAccountId, String glAccountCode,
             EnumOptionData glAccountClassification, LocalDate entryDate, EnumOptionData entryType, BigDecimal amount, String transactionId,
             Boolean portfolioGenerated, String entityType, Long entityId, Long createdByUserId, LocalDate createdDate,
             String createdByUserName, String comments, Boolean reversed) {
@@ -59,6 +61,7 @@ public class GLJournalEntryData {
         this.officeName = officeName;
         this.glAccountName = glAccountName;
         this.glAccountId = glAccountId;
+        this.glAccountCode = glAccountCode;
         this.glAccountClassification = glAccountClassification;
         this.entryDate = entryDate;
         this.entryType = entryType;

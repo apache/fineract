@@ -129,7 +129,10 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
 
             final Integer numberOfRepayments = JdbcSupport.getInteger(rs, "numberOfRepayments");
             final Integer repaymentEvery = JdbcSupport.getInteger(rs, "repaidEvery");
-            final Integer accountingType = JdbcSupport.getInteger(rs, "accountingType");
+            
+            final Integer accountingTypeId = JdbcSupport.getInteger(rs, "accountingType");
+            final EnumOptionData accountingRuleType = LoanEnumerations.accountingRuleType(accountingTypeId);
+            
             final Integer loanTermFrequency = repaymentEvery * numberOfRepayments;
             final BigDecimal interestRatePerPeriod = rs.getBigDecimal("interestRatePerPeriod");
             final BigDecimal annualInterestRate = rs.getBigDecimal("annualInterestRate");
@@ -155,7 +158,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
             return new LoanProductData(id, name, description, currency, principal, tolerance, numberOfRepayments, loanTermFrequency,
                     repaymentEvery, interestRatePerPeriod, annualInterestRate, loanTermFrequencyType, repaymentFrequencyType,
                     interestRateFrequencyType, amortizationType, interestType, interestCalculationPeriodType, fundId, fundName,
-                    transactionStrategyId, transactionStrategyName, this.charges, accountingType);
+                    transactionStrategyId, transactionStrategyName, this.charges, accountingRuleType);
         }
 
     }

@@ -154,12 +154,12 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
                 final Set<Charge> charges = this.assembleSetOfCharges(command, product.getCurrency().getCode());
                 product.update(charges);
             }
-
+            
             // accounting related changes
             boolean accountingTypeChanged = changes.containsKey("accountingType");
-            if (accountingTypeChanged) {
-                accountMappingWritePlatformService.updateLoanProductToGLAccountMapping(product.getId(), command, accountingTypeChanged);
-            }
+            final Map<String, Object> accountingMappingChanges = accountMappingWritePlatformService.updateLoanProductToGLAccountMapping(
+                    product.getId(), command, accountingTypeChanged, product.getAccountingType());
+            changes.putAll(accountingMappingChanges);
 
             if (!changes.isEmpty()) {
                 this.loanProductRepository.saveAndFlush(product);

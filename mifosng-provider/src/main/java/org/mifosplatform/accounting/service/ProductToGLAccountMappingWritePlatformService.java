@@ -8,7 +8,8 @@ public interface ProductToGLAccountMappingWritePlatformService {
 
     void createLoanProductToGLAccountMapping(Long loanProductId, JsonCommand command);
 
-    Map<String, Object> updateLoanProductToGLAccountMapping(Long loanProductId, JsonCommand command, boolean accountingRuleChanged);
+    Map<String, Object> updateLoanProductToGLAccountMapping(Long loanProductId, JsonCommand command, boolean accountingRuleChanged,
+            int accountingRuleTypeId);
 
     void deleteLoanProductToGLAccountMapping(Long loanProductId);
 }

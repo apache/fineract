@@ -155,7 +155,7 @@ public class LoanProductsApiResource {
 
         Map<String, Object> accountingMappings = null;
         if (loanProduct.hasAccountingEnabled()) {
-            accountingMappings = accountMappingReadPlatformService.fetchAccountMappingDetailsForLoanProduct(productId, loanProduct.accountingRuleType());
+            accountingMappings = accountMappingReadPlatformService.fetchAccountMappingDetailsForLoanProduct(productId, loanProduct.accountingRuleType().getId().intValue());
             loanProduct = LoanProductData.withAccountingMappings(loanProduct, accountingMappings);
         }
 

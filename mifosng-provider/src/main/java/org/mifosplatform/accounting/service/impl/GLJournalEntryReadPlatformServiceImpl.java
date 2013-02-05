@@ -37,7 +37,7 @@ public class GLJournalEntryReadPlatformServiceImpl implements GLJournalEntryRead
 
         public String schema() {
             return " journalEntry.id as journalEntryId, glAccount.classification_enum as classification ,"
-                    + " glAccount.name as glAccountName, journalEntry.account_id as glAccountId,"
+                    + " glAccount.name as glAccountName, glAccount.gl_code as glCode, journalEntry.account_id as glAccountId,"
                     + " journalEntry.office_id as officeId, office.name as officeName, "
                     + " journalEntry.portfolio_generated as portfolioGenerated,journalEntry.entry_date as entryDate, "
                     + " journalEntry.type_enum as entryType,journalEntry.amount as amount, journalEntry.transaction_id as transactionId,"
@@ -55,6 +55,7 @@ public class GLJournalEntryReadPlatformServiceImpl implements GLJournalEntryRead
             Long journalEntryId = rs.getLong("journalEntryId");
             Long officeId = rs.getLong("officeId");
             String officeName = rs.getString("officeName");
+            String glCode = rs.getString("glCode");
             String glAccountName = rs.getString("glAccountName");
             Long glAccountId = rs.getLong("glAccountId");
             final int accountTypeId = JdbcSupport.getInteger(rs, "classification");
@@ -73,7 +74,7 @@ public class GLJournalEntryReadPlatformServiceImpl implements GLJournalEntryRead
             String comments = rs.getString("comments");
             Boolean reversed = rs.getBoolean("reversed");
 
-            return new GLJournalEntryData(journalEntryId, officeId, officeName, glAccountName, glAccountId, accountType, entryDate,
+            return new GLJournalEntryData(journalEntryId, officeId, officeName, glAccountName, glAccountId, glCode, accountType, entryDate,
                     entryType, amount, transactionId, portfolioGenerated, entityType, entityId, createdByUserId, createdDate,
                     createdByUserName, comments, reversed);
         }
@@ -133,7 +134,7 @@ public class GLJournalEntryReadPlatformServiceImpl implements GLJournalEntryRead
             }
         }
 
-        sql += " order by journalEntry.entry_date";
+        sql += " order by journalEntry.entry_date,journalEntry.transaction_id";
 
         Object[] finalObjectArray = Arrays.copyOf(objectArray, arrayPos);
         return this.jdbcTemplate.query(sql, rm, finalObjectArray);
