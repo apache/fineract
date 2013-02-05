@@ -8,6 +8,7 @@ import org.mifosplatform.accounting.service.ProductToGLAccountMappingWritePlatfo
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
+import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.portfolio.charge.domain.Charge;
 import org.mifosplatform.portfolio.charge.domain.ChargeRepository;
@@ -26,14 +27,18 @@ import org.mifosplatform.portfolio.loanproduct.exception.InvalidCurrencyExceptio
 import org.mifosplatform.portfolio.loanproduct.exception.LoanProductNotFoundException;
 import org.mifosplatform.portfolio.loanproduct.serialization.LoanProductCommandFromApiJsonDeserializer;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Service
 public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanProductWritePlatformService {
 
-    private final PlatformSecurityContext context;
+    private final static Logger logger = LoggerFactory.getLogger(LoanProductWritePlatformServiceJpaRepositoryImpl.class);
+	private final PlatformSecurityContext context;
     private final LoanProductCommandFromApiJsonDeserializer fromApiJsonDeserializer;
     private final LoanProductRepository loanProductRepository;
     private final AprCalculator aprCalculator;
@@ -62,32 +67,48 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
     @Override
     public CommandProcessingResult createLoanProduct(final JsonCommand command) {
 
-        this.context.authenticatedUser();
+		try {
 
-        this.fromApiJsonDeserializer.validateForCreate(command.json());
+			this.context.authenticatedUser();
 
-        // associating fund with loan product at creation is optional for now.
-        final Fund fund = findFundByIdIfProvided(command.longValueOfParameterNamed("fundId"));
+			this.fromApiJsonDeserializer.validateForCreate(command.json());
 
-        final Long transactionProcessingStrategyId = command.longValueOfParameterNamed("transactionProcessingStrategyId");
-        final LoanTransactionProcessingStrategy loanTransactionProcessingStrategy = findStrategyByIdIfProvided(transactionProcessingStrategyId);
+			// associating fund with loan product at creation is optional for
+			// now.
+			final Fund fund = findFundByIdIfProvided(command
+					.longValueOfParameterNamed("fundId"));
 
-        final String currencyCode = command.stringValueOfParameterNamed("currencyCode");
-        final Set<Charge> charges = this.assembleSetOfCharges(command, currencyCode);
+			final Long transactionProcessingStrategyId = command
+					.longValueOfParameterNamed("transactionProcessingStrategyId");
+			final LoanTransactionProcessingStrategy loanTransactionProcessingStrategy = findStrategyByIdIfProvided(transactionProcessingStrategyId);
 
-        final LoanProduct loanproduct = LoanProduct.assembleFromJson(fund, loanTransactionProcessingStrategy, charges, command,
-                this.aprCalculator);
+			final String currencyCode = command
+					.stringValueOfParameterNamed("currencyCode");
+			final Set<Charge> charges = this.assembleSetOfCharges(command,
+					currencyCode);
 
-        this.loanProductRepository.save(loanproduct);
+			final LoanProduct loanproduct = LoanProduct.assembleFromJson(fund,
+					loanTransactionProcessingStrategy, charges, command,
+					this.aprCalculator);
 
-        // save accounting mappings
-        accountMappingWritePlatformService.createLoanProductToGLAccountMapping(loanproduct.getId(), command);
+			this.loanProductRepository.save(loanproduct);
 
-        return new CommandProcessingResultBuilder() //
-                .withCommandId(command.commandId()) //
-                .withEntityId(loanproduct.getId()) //
-                .build();
-    }
+			// save accounting mappings
+			accountMappingWritePlatformService
+					.createLoanProductToGLAccountMapping(loanproduct.getId(),
+							command);
+
+			return new CommandProcessingResultBuilder() //
+					.withCommandId(command.commandId()) //
+					.withEntityId(loanproduct.getId()) //
+					.build();
+
+		} catch (DataIntegrityViolationException dve) {
+			handleDataIntegrityIssues(command, dve);
+			return new CommandProcessingResult(Long.valueOf(-1));
+		}
+
+	}
 
     private LoanTransactionProcessingStrategy findStrategyByIdIfProvided(final Long transactionProcessingStrategyId) {
         LoanTransactionProcessingStrategy strategy = null;
@@ -111,49 +132,67 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
     @Override
     public CommandProcessingResult updateLoanProduct(final Long loanProductId, final JsonCommand command) {
 
-        this.context.authenticatedUser();
+		try {
 
-        this.fromApiJsonDeserializer.validateForUpdate(command.json());
+			this.context.authenticatedUser();
 
-        final LoanProduct product = this.loanProductRepository.findOne(loanProductId);
-        if (product == null) { throw new LoanProductNotFoundException(loanProductId); }
+			this.fromApiJsonDeserializer.validateForUpdate(command.json());
 
-        final Map<String, Object> changes = product.update(command, this.aprCalculator);
+			final LoanProduct product = this.loanProductRepository
+					.findOne(loanProductId);
+			if (product == null) {
+				throw new LoanProductNotFoundException(loanProductId);
+			}
 
-        // associating fund with loan product at creation is optional for now.
-        if (changes.containsKey("fundId")) {
-            final Long fundId = (Long) changes.get("fundId");
-            final Fund fund = findFundByIdIfProvided(fundId);
-            product.update(fund);
-        }
+			final Map<String, Object> changes = product.update(command,
+					this.aprCalculator);
 
-        if (changes.containsKey("transactionProcessingStrategyId")) {
-            final Long transactionProcessingStrategyId = (Long) changes.get("transactionProcessingStrategyId");
-            final LoanTransactionProcessingStrategy loanTransactionProcessingStrategy = findStrategyByIdIfProvided(transactionProcessingStrategyId);
-            product.update(loanTransactionProcessingStrategy);
-        }
+			// associating fund with loan product at creation is optional for
+			// now.
+			if (changes.containsKey("fundId")) {
+				final Long fundId = (Long) changes.get("fundId");
+				final Fund fund = findFundByIdIfProvided(fundId);
+				product.update(fund);
+			}
 
-        if (changes.containsKey("charges")) {
-            final Set<Charge> charges = this.assembleSetOfCharges(command, product.getCurrency().getCode());
-            product.update(charges);
-        }
+			if (changes.containsKey("transactionProcessingStrategyId")) {
+				final Long transactionProcessingStrategyId = (Long) changes
+						.get("transactionProcessingStrategyId");
+				final LoanTransactionProcessingStrategy loanTransactionProcessingStrategy = findStrategyByIdIfProvided(transactionProcessingStrategyId);
+				product.update(loanTransactionProcessingStrategy);
+			}
 
-        // accounting related changes
-        boolean accountingTypeChanged = changes.containsKey("accountingType");
-        if (accountingTypeChanged) {
-            accountMappingWritePlatformService.updateLoanProductToGLAccountMapping(product.getId(), command, accountingTypeChanged);
-        }
+			if (changes.containsKey("charges")) {
+				final Set<Charge> charges = this.assembleSetOfCharges(command,
+						product.getCurrency().getCode());
+				product.update(charges);
+			}
 
-        if (!changes.isEmpty()) {
-            this.loanProductRepository.save(product);
-        }
+			// accounting related changes
+			boolean accountingTypeChanged = changes
+					.containsKey("accountingType");
+			if (accountingTypeChanged) {
+				accountMappingWritePlatformService
+						.updateLoanProductToGLAccountMapping(product.getId(),
+								command, accountingTypeChanged);
+			}
 
-        return new CommandProcessingResultBuilder() //
-                .withCommandId(command.commandId()) //
-                .withEntityId(loanProductId) //
-                .with(changes) //
-                .build();
-    }
+			if (!changes.isEmpty()) {
+				this.loanProductRepository.save(product);
+			}
+
+			return new CommandProcessingResultBuilder() //
+					.withCommandId(command.commandId()) //
+					.withEntityId(loanProductId) //
+					.with(changes) //
+					.build();
+
+		} catch (DataIntegrityViolationException dve) {
+			handleDataIntegrityIssues(command, dve);
+			return new CommandProcessingResult(Long.valueOf(-1));
+		}
+
+	}
 
     private Set<Charge> assembleSetOfCharges(final JsonCommand command, final String currencyCode) {
 
@@ -182,6 +221,28 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
         }
 
         return charges;
+    }
+    /*
+     * Guaranteed to throw an exception no matter what the data integrity issue
+     * is.
+     */
+    private void handleDataIntegrityIssues(final JsonCommand command, final DataIntegrityViolationException dve) {
+
+        Throwable realCause = dve.getMostSpecificCause();
+        if (realCause.getMessage().contains("unq_name")) {
+
+            final String name = command.stringValueOfParameterNamed("name");
+            throw new PlatformDataIntegrityException("error.msg.product.loan.duplicate.name", "Loan product with name `" + name
+                    + "` already exists", "name", name);
+        }
+
+        logAsErrorUnexpectedDataIntegrityException(dve);
+        throw new PlatformDataIntegrityException("error.msg.product.loan.unknown.data.integrity.issue",
+                "Unknown data integrity issue with resource.");
+    }
+
+    private void logAsErrorUnexpectedDataIntegrityException(final DataIntegrityViolationException dve) {
+        logger.error(dve.getMessage(), dve);
     }
 
 }

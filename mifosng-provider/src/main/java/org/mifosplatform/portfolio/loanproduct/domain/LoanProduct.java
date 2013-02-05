@@ -14,6 +14,7 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 import org.apache.commons.lang.StringUtils;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
@@ -33,7 +34,7 @@ import org.springframework.data.jpa.domain.AbstractPersistable;
  * They allow for constraints to be added at product level.
  */
 @Entity
-@Table(name = "m_product_loan")
+@Table(name = "m_product_loan" , uniqueConstraints = { @UniqueConstraint(columnNames = { "name" }, name = "unq_name")})
 public class LoanProduct extends AbstractPersistable<Long> {
 
     @ManyToOne
@@ -44,7 +45,7 @@ public class LoanProduct extends AbstractPersistable<Long> {
     @JoinColumn(name = "loan_transaction_strategy_id", nullable = true)
     private LoanTransactionProcessingStrategy transactionProcessingStrategy;
 
-    @Column(name = "name", nullable = false)
+    @Column(name = "name", nullable = false , unique = true)
     private String name;
 
     @Column(name = "description")
