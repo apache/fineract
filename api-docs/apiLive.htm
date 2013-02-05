@@ -3499,8 +3499,9 @@ PUT https://DomainName/api/v1/datatables/{datatable}/{apptableId}/{datatableId}
 					</p>
 				</div>
 				<div class="method-example">
-					<code class="method-declaration">DELETE https://Domain
-						Name/api/v1/datatables/{datatable}/{apptableId}</code>
+					<code class="method-declaration">
+DELETE https://DomainName/api/v1/datatables/{datatable}/{apptableId}
+					</code>
 					<code class="method-request">DELETE datatables/Additional
 						Client Fields Data/1 Content-Type: application/json Request Body:
 						{ } </code>
@@ -3517,8 +3518,9 @@ PUT https://DomainName/api/v1/datatables/{datatable}/{apptableId}/{datatableId}
 						one to many with the application table.</p>
 				</div>
 				<div class="method-example">
-					<code class="method-declaration">DELETE https://Domain
-						Name/api/v1/datatables/{datatable}/{apptableId}/{datatableId}</code>
+					<code class="method-declaration">
+DELETE https://DomainName/api/v1/datatables/{datatable}/{apptableId}/{datatableId}
+					</code>
 					<code class="method-request">DELETE datatables/Extra Family
 						Details Data/1/2 Content-Type: application/json Request Body: { }
 					</code>
@@ -3574,8 +3576,9 @@ PUT https://DomainName/api/v1/datatables/{datatable}/{apptableId}/{datatableId}
 					<div class=apiClick>reports?exportCSV=true</div>
 				</div>
 				<div class="method-example">
-					<code class="method-declaration">GET https://Domain
-						Name/api/v1/reports</code>
+					<code class="method-declaration">
+GET https://DomainName/api/v1/reports
+					</code>
 					<code class="method-response">{ "columnHeaders" : [ {
 						"columnName" : "report_id", "columnType" : "INT", "columnLength" :
 						null, "columnDisplayType" : null, "columnValues" : [ ] }, {
@@ -3696,8 +3699,9 @@ PUT https://DomainName/api/v1/datatables/{datatable}/{apptableId}/{datatableId}
 						(Pentaho)?output-type=PDF&R_officeId=1</div>
 				</div>
 				<div class="method-example">
-					<code class="method-declaration">GET https://Domain
-						Name/api/v1/reports/{reportName}</code>
+					<code class="method-declaration">
+GET https://DomainName/api/v1/reports/{reportName}
+					</code>
 					<code class="method-response">{ "columnHeaders" : [ {
 						"columnName" : "Office/Branch", "columnType" : "VARCHAR",
 						"columnLength" : null, "columnDisplayType" : null, "columnValues"
@@ -3770,8 +3774,9 @@ PUT https://DomainName/api/v1/datatables/{datatable}/{apptableId}/{datatableId}
 						of permissions allowed.</p>
 				</div>
 				<div class="method-example">
-					<code class="method-declaration">POST https://Domain
-						Name/api/v1/authentication?username={username}&password={password}</code>
+					<code class="method-declaration">
+POST https://DomainName/api/v1/authentication?username={username}&password={password}
+					</code>
 					<code class="method-request">POST
 						authentication?username=mifos&password=password Content-Type:
 						application/json No Request Body </code>
@@ -3814,8 +3819,9 @@ PUT https://DomainName/api/v1/datatables/{datatable}/{apptableId}/{datatableId}
 					<div class=apiClick>users?fields=id,username,email,officeName</div>
 				</div>
 				<div class="method-example">
-					<code class="method-declaration">GET https://Domain
-						Name/api/v1/users</code>
+					<code class="method-declaration">
+GET https://DomainName/api/v1/users
+					</code>
 					<code class="method-response">[ { "id" : 6, "officeId" : 1,
 						"officeName" : "change super user", "username" : "committee1",
 						"firstname" : "Committee", "lastname" : "Member", "email" :
@@ -3843,8 +3849,9 @@ PUT https://DomainName/api/v1/datatables/{datatable}/{apptableId}/{datatableId}
 					<div class=apiClick>users/template</div>
 				</div>
 				<div class="method-example">
-					<code class="method-declaration">GET https://Domain
-						Name/api/v1/users/template</code>
+					<code class="method-declaration">
+GET https://DomainName/api/v1/users/template
+					</code>
 					<code class="method-response">{ "allowedOffices": [ { "id":
 						1, "name": "Head Office", "nameDecorated": "Head Office" }, {
 						"id": 10, "name": "Myanmar Regional Office", "nameDecorated":
@@ -3874,8 +3881,9 @@ PUT https://DomainName/api/v1/datatables/{datatable}/{apptableId}/{datatableId}
 					<div class=apiClick>users/1?fields=username,officeName</div>
 				</div>
 				<div class="method-example">
-					<code class="method-declaration">GET https://Domain
-						Name/api/v1/users/1</code>
+					<code class="method-declaration">
+GET https://DomainName/api/v1/users/{userId}
+					</code>
 					<code class="method-response">{ "id": 1, "username":
 						"mifos", "officeId": 1, "officeName": "Head Office", "firstname":
 						"App(test)", "lastname": "Administrator", "email":
@@ -3912,8 +3920,9 @@ PUT https://DomainName/api/v1/datatables/{datatable}/{apptableId}/{datatableId}
 					</table>
 				</div>
 				<div class="method-example">
-					<code class="method-declaration">POST https://Domain
-						Name/api/v1/users</code>
+					<code class="method-declaration">
+POST https://DomainName/api/v1/users
+					</code>
 					<code class="method-request">POST users Content-Type:
 						application/json Request body: { "username": "Another New User
 						zll", "firstname": "Test", "lastname": "User", "email":
@@ -3933,8 +3942,9 @@ PUT https://DomainName/api/v1/datatables/{datatable}/{apptableId}/{datatableId}
 					</p>
 				</div>
 				<div class="method-example">
-					<code class="method-declaration">PUT https://Domain
-						Name/api/v1/users/{userId)</code>
+					<code class="method-declaration">
+PUT https://DomainName/api/v1/users/{userId)
+					</code>
 					<code class="method-request">PUT users/3 Content-Type:
 						application/json Request body: { "firstname": "Test", "password":
 						"window75", "repeatPassword": "window75" } </code>
@@ -3953,8 +3963,9 @@ PUT https://DomainName/api/v1/datatables/{datatable}/{apptableId}/{datatableId}
 					<p>Removes the user and the associated roles and permissions.</p>
 				</div>
 				<div class="method-example">
-					<code class="method-declaration">DELETE https://Domain
-						Name/api/v1/users/{userId}</code>
+					<code class="method-declaration">
+DELETE https://DomainName/api/v1/users/{userId}
+					</code>
 					<code class="method-request">DELETE users/20 Content-Type:
 						application/json No Request Body </code>
 					<code class="method-response">{ "officeId": 1, "resourceId":
@@ -3985,8 +3996,9 @@ PUT https://DomainName/api/v1/datatables/{datatable}/{apptableId}/{datatableId}
 					<div class=apiClick>roles?fields=name</div>
 				</div>
 				<div class="method-example">
-					<code class="method-declaration">GET https://Domain
-						Name/api/v1/roles</code>
+					<code class="method-declaration">
+GET https://DomainName/api/v1/roles
+					</code>
 					<code class="method-response">[ { "id" : 1, "name" : "Super
 						user", "description" : "This role provides all application
 						permissions." }, { "id" : 2, "name" : "Field officer",
@@ -4014,8 +4026,9 @@ PUT https://DomainName/api/v1/datatables/{datatable}/{apptableId}/{datatableId}
 					<div class=apiClick>roles/1?fields=name</div>
 				</div>
 				<div class="method-example">
-					<code class="method-declaration">GET https://Domain
-						Name/api/v1/roles/{roleId}</code>
+					<code class="method-declaration">
+GET https://DomainName/api/v1/roles/{roleId}
+					</code>
 					<code class="method-response">{ "id" : 1, "name" : "Super
 						user", "description" : "This role provides all application
 						permissions." } </code>
@@ -4036,8 +4049,9 @@ PUT https://DomainName/api/v1/datatables/{datatable}/{apptableId}/{datatableId}
 					</table>
 				</div>
 				<div class="method-example">
-					<code class="method-declaration">POST https://Domain
-						Name/api/v1/roles</code>
+					<code class="method-declaration">
+POST https://DomainName/api/v1/roles
+					</code>
 					<code class="method-request">POST roles Content-Type:
 						application/json Request body: { "name": "Another Role Name",
 						"description": "A description outlining the purpose of this role
@@ -4052,8 +4066,9 @@ PUT https://DomainName/api/v1/datatables/{datatable}/{apptableId}/{datatableId}
 					<h4>Update a Role</h4>
 				</div>
 				<div class="method-example">
-					<code class="method-declaration">PUT https://Domain
-						Name/api/v1/roles/{roleId}</code>
+					<code class="method-declaration">
+PUT https://DomainName/api/v1/roles/{roleId}
+					</code>
 					<code class="method-request">PUT roles/8 Content-Type:
 						application/json Request body: { "description": "some
 						description(changed)" } </code>
@@ -4071,8 +4086,9 @@ PUT https://DomainName/api/v1/datatables/{datatable}/{apptableId}/{datatableId}
 					<div class=apiClick>roles/1/permissions</div>
 				</div>
 				<div class="method-example">
-					<code class="method-declaration">GET https://Domain
-						Name/api/v1/roles/{roleId}/permissions</code>
+					<code class="method-declaration">
+GET https://DomainName/api/v1/roles/{roleId}/permissions
+					</code>
 					<code class="method-response">{ "id": 1, "name": "Super
 						user", "description": "This role provides all application
 						permissions.", "permissionUsageData": [ { "grouping":
@@ -4092,8 +4108,9 @@ PUT https://DomainName/api/v1/datatables/{datatable}/{apptableId}/{datatableId}
 					<h4>Update a Role's Permissions</h4>
 				</div>
 				<div class="method-example">
-					<code class="method-declaration">PUT https://Domain
-						Name/api/v1/roles/{roleId}/permissions</code>
+					<code class="method-declaration">
+PUT https://DomainName/api/v1/roles/{roleId}/permissions
+					</code>
 					<code class="method-request">PUT roles/8 Content-Type:
 						application/json Request body: { "permissions":
 						{"ALL_FUNCTIONS_READ": "true"} } </code>
@@ -4124,8 +4141,9 @@ PUT https://DomainName/api/v1/datatables/{datatable}/{apptableId}/{datatableId}
 					<div class=apiClick>permissions?fields=grouping,code</div>
 				</div>
 				<div class="method-example">
-					<code class="method-declaration">GET https://Domain
-						Name/api/v1/permissions</code>
+					<code class="method-declaration">
+GET https://DomainName/api/v1/permissions
+					</code>
 					<code class="method-response">[ { "grouping":
 						"authorisation", "code": "READ_PERMISSION", "entityName":
 						"PERMISSION", "actionName": "READ", "selected": true }, {
