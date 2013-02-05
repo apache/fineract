@@ -799,7 +799,7 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
         Set<String> supportedParams = new HashSet<String>(Arrays.asList("clientId", "productId", "externalId", "currencyCode",
                 "digitsAfterDecimal", "savingsDepositAmountPerPeriod", "recurringInterestRate", "savingInterestRate", "tenure",
                 "commencementDate", "locale", "dateFormat", "isLockinPeriodAllowed", "lockinPeriod", "lockinPeriodType", "tenureType",
-                "depositfrequency", "interestType", "interestCalculationMethod", "minimumBalanceForWithdrawal", "isPartialDepositAllowed",
+                "frequency", "interestType", "interestCalculationMethod", "minimumBalanceForWithdrawal", "isPartialDepositAllowed",
                 "depositEvery", "interestPostEvery", "interestPostFrequency"));
         checkForUnsupportedParameters(requestMap, supportedParams);
         Set<String> modifiedParameters = new HashSet<String>();
@@ -820,7 +820,7 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
 
         LocalDate commencementDate = extractLocalDateParameter("commencementDate", requestMap, modifiedParameters);
         Integer tenureType = extractIntegerParameter("tenureType", requestMap, modifiedParameters);
-        Integer depositfrequency = extractIntegerParameter("depositfrequency", requestMap, modifiedParameters);
+        Integer depositfrequency = extractIntegerParameter("frequency", requestMap, modifiedParameters);
         Integer interestType = extractIntegerParameter("interestType", requestMap, modifiedParameters);
         Integer interestCalculationMethod = extractIntegerParameter("interestCalculationMethod", requestMap, modifiedParameters);
         BigDecimal minimumBalanceForWithdrawal = extractBigDecimalParameter("minimumBalanceForWithdrawal", requestMap, modifiedParameters);
