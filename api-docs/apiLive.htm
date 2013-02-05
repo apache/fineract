@@ -86,9 +86,6 @@
 		return baseUrl;
 	}
 </script>
-
-
-
 </head>
 
 <body>
@@ -1211,16 +1208,34 @@
 						application as you shouldn't need to do any date format conversion
 						prior to issuing your POST or PUT request.
 					</p>
-					<code> JSON examples: { "locale": "en_US", "dateFormat": "dd
-						MMMM yyyy", "openingDate": "01 July 2007" } { "locale": "en_US",
-						"dateFormat": "yyyy-MM-dd", "openingDate": "2007-03-21" } </code>
+<code>JSON examples: 
+{
+	"locale": "en_US", 
+	"dateFormat": "dd MMMM yyyy", 
+	"openingDate": "01 July 2007" 
+} 
+
+{
+	"locale": "en_US",
+	"dateFormat": "yyyy-MM-dd", 
+	"openingDate": "2007-03-21"
+}
+</code>
 					<h4>Numbers</h4>
 					<p>You must provide a "locale" when updating numbers. Numbers
 						are not "Ids" or "Types" but are typically money amounts or
 						percentages that relate to loans. In any case, the API will send
 						back an error message if you forget.</p>
-					<code> JSON examples: { "locale": "en_US", "principal":
-						"240,400.88" } { "locale": "fr_CH", "principal": "240 400.88" } </code>
+<code>JSON examples:
+{
+	"locale": "en_US", 
+	"principal": "240,400.88"
+} 
+{ 
+	"locale": "fr_CH", 
+	"principal": "240 400.88"
+}
+</code>
 				</div>
 
 			</div>
@@ -1258,28 +1273,50 @@
 					</p>
 				</div>
 				<div class="method-example">
-					<code> // A Javascript/Jquery example of how to login to
-						Mifos X and use its api. // Typically, the javascript application
-						would // 1) Display a login page to retrieve the username and
-						password. // 2) Send the username and password to a function //
-						such as setBasicAuthKey below which sets the HTTP Basic Auth key.
-						// 3) The HTTP Basic Auth key is used in all subsequent requests
-						// (see the function executeAjaxRequest below). function
-						setBasicAuthKey(username, password) { var jqxhr = $.ajax({ url :
-						"authentication?username=" + username + "&password=" + password,
-						type : 'POST', contentType : "application/json; charset=utf-8",
-						dataType : 'json', data : "{}", cache : false, success :
-						function(data, textStatus, jqXHR) { basicAuthKey =
-						data.base64EncodedAuthenticationKey; }, error : function(jqXHR,
-						textStatus, errorThrown) { //error processing } }); } function
-						executeAjaxRequest(url, verbType, jsonData, basicAuthKey,
-						successFunction, errorFunction) { var jqxhr = $.ajax({ url : url,
-						type : verbType, //POST, GET, PUT or DELETE contentType :
-						"application/json; charset=utf-8", dataType : 'json', data :
-						jsonData, cache : false, beforeSend : function(xhr) {
-						xhr.setRequestHeader("Authorization", "Basic " + basicAuthKey); },
-						success : successFunction, error : errorFunction }); } </code>
-				</div>
+<code> 
+// A Javascript/Jquery example of how to login to Mifos X and use its api. 
+// Typically, the javascript application would 
+// 1) Display a login page to retrieve the username and password. 
+// 2) Send the username and password to a function 
+//    such as setBasicAuthKey below which sets the HTTP Basic Auth key.
+// 3) The HTTP Basic Auth key is used in all subsequent requests
+// (see the function executeAjaxRequest below). 
+
+function setBasicAuthKey(username, password) { 
+
+	var jqxhr = $.ajax({ 
+		url : "authentication?username=" + username + "&password=" + password,
+		type : 'POST', 
+		contentType : "application/json; charset=utf-8",
+		dataType : 'json', 
+		data : "{}", 
+		cache : false, 
+		success : function(data, textStatus, jqXHR) { 
+			basicAuthKey = data.base64EncodedAuthenticationKey; 
+		}, 
+		error : function(jqXHR, textStatus, errorThrown) { 
+			//error processing 
+		} 
+	}); 
+} 
+
+function executeAjaxRequest(url, verbType, jsonData, basicAuthKey, successFunction, errorFunction) { 
+	var jqxhr = $.ajax({ 
+		url : url,
+		type : verbType, //POST, GET, PUT or DELETE 
+		contentType : "application/json; charset=utf-8", 
+		dataType : 'json', 
+		data : jsonData, 
+		cache : false, 
+		beforeSend : function(xhr) {
+			xhr.setRequestHeader("Authorization", "Basic " + basicAuthKey); 
+		},
+		success : successFunction, 
+		error : errorFunction 
+	}); 
+} 
+</code>
+					</div>
 			</div>
 
 			<a id="errors" name="errors" class="old-syle-anchor">&nbsp;</a>
@@ -1303,31 +1340,39 @@
 					</ul>
 				</div>
 				<div class="method-example">
-					<code class="method-response">
-						<b>Error Message returned when attempting to create an Office
-							without passing any parameters</b> { "developerMessage": "The request
-						was invalid. This typically will happen due to validation errors
-						which are provided.", "developerDocLink":
-						"https://github.com/keithwoodlock/mifosx/wiki/HTTP-API-Error-codes",
-						"httpStatusCode": "400", "defaultUserMessage": "Validation errors
-						exist.", "userMessageGlobalisationCode":
-						"validation.msg.validation.errors.exist", "errors": [ {
-						"developerMessage": "The parameter name cannot be blank.",
-						"defaultUserMessage": "The parameter name cannot be blank.",
-						"userMessageGlobalisationCode":
-						"validation.msg.office.name.cannot.be.blank", "parameterName":
-						"name", "value": null, "args": [] }, { "developerMessage": "The
-						parameter openingDate cannot be blank.", "defaultUserMessage":
-						"The parameter openingDate cannot be blank.",
-						"userMessageGlobalisationCode":
-						"validation.msg.office.openingDate.cannot.be.blank",
-						"parameterName": "openingDate", "value": null, "args": [] }, {
-						"developerMessage": "The parameter parentId cannot be blank.",
-						"defaultUserMessage": "The parameter parentId cannot be blank.",
-						"userMessageGlobalisationCode":
-						"validation.msg.office.parentId.cannot.be.blank", "parameterName":
-						"parentId", "value": null, "args": [] } ] }
-					</code>
+<code class="method-response">
+<b>Error Message returned when attempting to create an Office without passing any parameters</b>
+{ 
+"developerMessage": "The request was invalid. This typically will happen due to validation errors which are provided.", 
+"developerDocLink": "https://github.com/keithwoodlock/mifosx/wiki/HTTP-API-Error-codes",
+"httpStatusCode": "400", 
+"defaultUserMessage": "Validation errors exist.", 
+"userMessageGlobalisationCode": "validation.msg.validation.errors.exist", 
+"errors": [ 
+	{
+	"developerMessage": "The parameter name cannot be blank.",
+	"defaultUserMessage": "The parameter name cannot be blank.",
+	"userMessageGlobalisationCode": "validation.msg.office.name.cannot.be.blank", 
+	"parameterName": "name", 
+	"value": null, 
+	"args": [] 
+	}, 
+	{ 
+	"developerMessage": "The parameter openingDate cannot be blank.", 
+	"defaultUserMessage": "The parameter openingDate cannot be blank.",
+	"userMessageGlobalisationCode": "validation.msg.office.openingDate.cannot.be.blank",
+	"parameterName": "openingDate", "value": null, "args": [] 
+	}, 
+	{
+	"developerMessage": "The parameter parentId cannot be blank.",
+	"defaultUserMessage": "The parameter parentId cannot be blank.",
+	"userMessageGlobalisationCode":
+	"validation.msg.office.parentId.cannot.be.blank", "parameterName":
+	"parentId", "value": null, "args": []
+	} 
+] 
+}
+</code>
 				</div>
 			</div>
 
@@ -1407,14 +1452,31 @@
 					<code class="method-declaration">
 GET https://DomainName/api/v1/clients
 					</code>
-					<code class="method-response">[ { "id": 2, "accountNo":
-						"000000002", "externalId": "one/78", "fullname": "New Business to
-						Create", "displayName": "New Business to Create", "officeId": 1,
-						"officeName": "Head Office", "joinedDate": [ 2006, 6, 13 ] }, {
-						"id": 1, "accountNo": "000000001", "externalId": "786YYH7",
-						"firstname": "Petra", "lastname": "Yton", "displayName": "Petra
-						Yton", "officeId": 1, "officeName": "Head Office", "joinedDate": [
-						2009, 3, 4 ] } ] </code>
+					<code class="method-response">
+[
+    {
+        "id": 2,
+        "accountNo": "000000002",
+        "externalId": "one/78",
+        "fullname": "New Business to Create",
+        "displayName": "New Business to Create",
+        "officeId": 1,
+        "officeName": "Head Office",
+        "joinedDate": [2006,6,13]
+    },
+    {
+        "id": 1,
+        "accountNo": "000000001",
+        "externalId": "786YYH7",
+        "firstname": "Petra",
+        "lastname": "Yton",
+        "displayName": "Petra Yton",
+        "officeId": 1,
+        "officeName": "Head Office",
+        "joinedDate": [2009,3,4]
+    }
+]
+					</code>
 				</div>
 			</div>
 
@@ -1439,9 +1501,23 @@ GET https://DomainName/api/v1/clients
 					<code class="method-declaration">
 GET https://DomainName/api/v1/clients/template
 					</code>
-					<code class="method-response">{ "officeId": 1, "joinedDate":
-						[ 2013, 2, 5], "allowedOffices": [ { "id": 1, "name": "Head
-						Office", "nameDecorated": "Head Office" } ] } </code>
+					<code class="method-response">
+{
+    "officeId": 1,
+    "joinedDate": [
+        2013,
+        2,
+        5
+    ],
+    "allowedOffices": [
+        {
+            "id": 1,
+            "name": "Head Office",
+            "nameDecorated": "Head Office"
+        }
+    ]
+}
+					</code>
 				</div>
 			</div>
 
@@ -1464,10 +1540,23 @@ GET https://DomainName/api/v1/clients/template
 					<code class="method-declaration">
 GET https://DomainName/api/v1/clients/{clientId}
 					</code>
-					<code class="method-response">{ "id": 1, "accountNo":
-						"000000001", "externalId": "786YYH7", "firstname": "Petra",
-						"lastname": "Yton", "displayName": "Petra Yton", "officeId": 1,
-						"officeName": "Head Office", "joinedDate": [ 2009, 3, 4 ] } </code>
+					<code class="method-response">
+{
+    "id": 1,
+    "accountNo": "000000001",
+    "externalId": "786YYH7",
+    "firstname": "Petra",
+    "lastname": "Yton",
+    "displayName": "Petra Yton",
+    "officeId": 1,
+    "officeName": "Head Office",
+    "joinedDate": [
+        2009,
+        3,
+        4
+    ]
+}
+					</code>
 				</div>
 			</div>
 
@@ -1496,21 +1585,48 @@ GET https://DomainName/api/v1/clients/{clientId}
 					<code class="method-declaration">
 POST https://DomainName/api/v1/clients
 					</code>
-					<code class="method-request">POST clients Content-Type:
-						application/json Request Body: { "officeId": 1, "firstname":
-						"Petra", "lastname": "Yton", "externalId": "786YYH7",
-						"dateFormat": "dd MMMM yyyy", "locale": "en", "joinedDate": "04
-						March 2009" } </code>
-					<code class="method-response">{ "officeId": 1, "clientId":
-						1, "resourceId": 1 } </code>
+					<code class="method-request">
+POST clients
+Content-Type: application/json Request Body:
+{
+    "officeId": 1,
+    "firstname": "Petra",
+    "lastname": "Yton",
+    "externalId": "786YYH7",
+    "dateFormat": "dd MMMM yyyy",
+    "locale": "en",
+    "joinedDate": "04 March 2009"
+} 
+					</code>
+					<code class="method-response">
+{
+    "officeId": 1,
+    "clientId": 1,
+    "resourceId": 1
+}
+					</code>
 				</div>
 				<div class="method-example">
-					<code class="method-request">POST clients Content-Type:
-						application/json Request Body: { "officeId": 1, "fullname": "New
-						Business to Create", "externalId": "one/78", "dateFormat": "dd
-						MMMM yyyy", "locale": "en", "joinedDate": "13 June 2006" } </code>
-					<code class="method-response">{ "officeId": 1, "clientId":
-						2, "resourceId": 2 } </code>
+					<code class="method-request">
+POST clients
+Content-Type: application/json 
+Request Body: 
+{
+    "officeId": 1,
+    "fullname": "New Business to Create",
+    "externalId": "one/78",
+    "dateFormat": "dd MMMM yyyy",
+    "locale": "en",
+    "joinedDate": "13 June 2006"
+}
+					</code>
+					<code class="method-response">
+{
+    "officeId": 1,
+    "clientId": 2,
+    "resourceId": 2
+}
+					</code>
 				</div>
 			</div>
 
@@ -1523,14 +1639,30 @@ POST https://DomainName/api/v1/clients
 					<code class="method-declaration">
 PUT https://DomainName/api/v1/clients/{clientId}
 						</code>
-					<code class="method-request">PUT clients/1 Content-Type:
-						application/json Request Body: { "externalId": "786444UUUYYH7",
-						"dateFormat": "dd MMMM yyyy", "locale": "en", "joinedDate": "09
-						June 2006" } </code>
-					<code class="method-response">{ "officeId": 1, "clientId":
-						1, "resourceId": 1, "changes": { "externalId": "786444UUUYYH7",
-						"joinedDate": "09 June 2006", "dateFormat": "dd MMMM yyyy",
-						"locale": "en" } } </code>
+					<code class="method-request">
+PUT clients/1 
+Content-Type: application/json 
+Request Body:
+{
+    "externalId": "786444UUUYYH7",
+    "dateFormat": "dd MMMM yyyy",
+    "locale": "en",
+    "joinedDate": "09 June 2006"
+}
+					</code>
+					<code class="method-response">
+{
+    "officeId": 1,
+    "clientId": 1,
+    "resourceId": 1,
+    "changes": {
+        "externalId": "786444UUUYYH7",
+        "joinedDate": "09 June 2006",
+        "dateFormat": "dd MMMM yyyy",
+        "locale": "en"
+    }
+}
+					</code>
 				</div>
 			</div>
 
@@ -1556,39 +1688,119 @@ PUT https://DomainName/api/v1/clients/{clientId}
 					<code class="method-declaration">
 GET https://DomainName/api/v1/clients/{clientId}/loans
 					</code>
-					<code class="method-response">{ "anyLoanCount": 9,
-						"pendingApprovalLoanCount": 4, "pendingApprovalLoans": [ { "id":
-						48, "accountNo": "48", "productId": 1, "productName":
-						"PORetailLoan", "status": { "id": 100, "code":
-						"loanStatusType.submitted.and.pending.approval", "value":
-						"Submitted and pending approval" } }, { "id": 50, "accountNo":
-						"50", "productId": 1, "productName": "PORetailLoan", "status": {
-						"id": 100, "code":
-						"loanStatusType.submitted.and.pending.approval", "value":
-						"Submitted and pending approval" } }, { "id": 51, "accountNo":
-						"51", "productId": 1, "productName": "PORetailLoan", "status": {
-						"id": 100, "code":
-						"loanStatusType.submitted.and.pending.approval", "value":
-						"Submitted and pending approval" } }, { "id": 62, "accountNo":
-						"62", "productId": 3, "productName": "Further Loan Product",
-						"status": { "id": 100, "code":
-						"loanStatusType.submitted.and.pending.approval", "value":
-						"Submitted and pending approval" } } ], "activeLoanCount": 2,
-						"openLoans": [ { "id": 46, "accountNo": "46", "productId": 1,
-						"productName": "PORetailLoan", "status": { "id": 300, "code":
-						"loanStatusType.active", "value": "Active" } }, { "id": 60,
-						"accountNo": "60", "productId": 1, "productName": "PORetailLoan",
-						"status": { "id": 300, "code": "loanStatusType.active", "value":
-						"Active" } } ], "closedLoanCount": 3, "closedLoans": [ { "id": 22,
-						"accountNo": "22", "productId": 1, "productName": "PORetailLoan",
-						"status": { "id": 700, "code": "loanStatusType.overpaid", "value":
-						"Overpaid" } }, { "id": 33, "accountNo": "33", "productId": 1,
-						"productName": "PORetailLoan", "status": { "id": 601, "code":
-						"loanStatusType.closed.written.off", "value": "Closed (written
-						off)" } }, { "id": 44, "accountNo": "44", "productId": 1,
-						"productName": "PORetailLoan", "status": { "id": 600, "code":
-						"loanStatusType.closed.obligations.met", "value": "Closed
-						(obligations met)" } } ] } </code>
+					<code class="method-response">
+{
+    "anyLoanCount": 9,
+    "pendingApprovalLoanCount": 4,
+    "pendingApprovalLoans": [
+        {
+            "id": 48,
+            "accountNo": "48",
+            "productId": 1,
+            "productName": "PORetailLoan",
+            "status": {
+                "id": 100,
+                "code": "loanStatusType.submitted.and.pending.approval",
+                "value": "Submitted and pending approval"
+            }
+        },
+        {
+            "id": 50,
+            "accountNo": "50",
+            "productId": 1,
+            "productName": "PORetailLoan",
+            "status": {
+                "id": 100,
+                "code": "loanStatusType.submitted.and.pending.approval",
+                "value": "Submitted and pending approval"
+            }
+        },
+        {
+            "id": 51,
+            "accountNo": "51",
+            "productId": 1,
+            "productName": "PORetailLoan",
+            "status": {
+                "id": 100,
+                "code": "loanStatusType.submitted.and.pending.approval",
+                "value": "Submitted and pending approval"
+            }
+        },
+        {
+            "id": 62,
+            "accountNo": "62",
+            "productId": 3,
+            "productName": "Further Loan Product",
+            "status": {
+                "id": 100,
+                "code": "loanStatusType.submitted.and.pending.approval",
+                "value": "Submitted and pending approval"
+            }
+        }
+    ],
+    "activeLoanCount": 2,
+    "openLoans": [
+        {
+            "id": 46,
+            "accountNo": "46",
+            "productId": 1,
+            "productName": "PORetailLoan",
+            "status": {
+                "id": 300,
+                "code": "loanStatusType.active",
+                "value": "Active"
+            }
+        },
+        {
+            "id": 60,
+            "accountNo": "60",
+            "productId": 1,
+            "productName": "PORetailLoan",
+            "status": {
+                "id": 300,
+                "code": "loanStatusType.active",
+                "value": "Active"
+            }
+        }
+    ],
+    "closedLoanCount": 3,
+    "closedLoans": [
+        {
+            "id": 22,
+            "accountNo": "22",
+            "productId": 1,
+            "productName": "PORetailLoan",
+            "status": {
+                "id": 700,
+                "code": "loanStatusType.overpaid",
+                "value": "Overpaid"
+            }
+        },
+        {
+            "id": 33,
+            "accountNo": "33",
+            "productId": 1,
+            "productName": "PORetailLoan",
+            "status": {
+                "id": 601,
+                "code": "loanStatusType.closed.written.off",
+                "value": "Closed (written off)"
+            }
+        },
+        {
+            "id": 44,
+            "accountNo": "44",
+            "productId": 1,
+            "productName": "PORetailLoan",
+            "status": {
+                "id": 600,
+                "code": "loanStatusType.closed.obligations.met",
+                "value": "Closed (obligations met)"
+            }
+        }
+    ]
+}
+					</code>
 				</div>
 			</div>
 
@@ -1609,12 +1821,26 @@ GET https://DomainName/api/v1/clients/{clientId}/loans
 					<code class="method-declaration">
 GET https://DomainName/api/v1/clients/{clientId}/notes
 					</code>
-					<code class="method-response">[ { "id": 2, "clientId": 1,
-						"noteType": { "id": 100, "code": "noteType.client", "value":
-						"Client note" }, "note": "First note\r\n\r\nedited",
-						"createdById": 1, "createdByUsername": "mifos", "createdOn":
-						1342498505000, "updatedById": 1, "updatedByUsername": "mifos",
-						"updatedOn": 1342498517000 } ] </code>
+					<code class="method-response">
+[
+    {
+        "id": 2,
+        "clientId": 1,
+        "noteType": {
+            "id": 100,
+            "code": "noteType.client",
+            "value": "Client note"
+        },
+        "note": "First note edited",
+        "createdById": 1,
+        "createdByUsername": "mifos",
+        "createdOn": 1342498505000,
+        "updatedById": 1,
+        "updatedByUsername": "mifos",
+        "updatedOn": 1342498517000
+    }
+]
+					</code>
 				</div>
 			</div>
 
@@ -1628,11 +1854,21 @@ GET https://DomainName/api/v1/clients/{clientId}/notes
 					<code class="method-declaration">
 POST https://DomainName/api/v1/clients/{clientId}/notes
 					</code>
-					<code class="method-request">POST clients/1/notes
-						Content-Type: application/json Request Body: { "note": "a note
-						about the client" } </code>
-					<code class="method-response">{ "officeId": 1, "clientId":
-						1, "resourceId": 76 } </code>
+					<code class="method-request">
+POST clients/1/notes
+Content-Type: application/json 
+Request Body: 
+{ 
+	"note": "a note about the client"
+} 
+					</code>
+					<code class="method-response">
+{
+    "officeId": 1,
+    "clientId": 1,
+    "resourceId": 76
+}
+					</code>
 				</div>
 			</div>
 
@@ -1651,12 +1887,24 @@ POST https://DomainName/api/v1/clients/{clientId}/notes
 					<code class="method-declaration">
 GET https://DomainName/api/v1/clients/{clientId}/notes/{noteId}
 					</code>
-					<code class="method-response">{ "id": 76, "clientId": 1,
-						"noteType": { "id": 100, "code": "noteType.client", "value":
-						"Client note" }, "note": "a note about the client", "createdById":
-						1, "createdByUsername": "mifos", "createdOn": 1359463135000,
-						"updatedById": 1, "updatedByUsername": "mifos", "updatedOn":
-						1359463135000 } </code>
+					<code class="method-response">
+{
+    "id": 76,
+    "clientId": 1,
+    "noteType": {
+        "id": 100,
+        "code": "noteType.client",
+        "value": "Client note"
+    },
+    "note": "a note about the client",
+    "createdById": 1,
+    "createdByUsername": "mifos",
+    "createdOn": 1359463135000,
+    "updatedById": 1,
+    "updatedByUsername": "mifos",
+    "updatedOn": 1359463135000
+}
+					</code>
 				</div>
 			</div>
 
@@ -1670,12 +1918,23 @@ GET https://DomainName/api/v1/clients/{clientId}/notes/{noteId}
 					<code class="method-declaration">
 PUT https://DomainName/api/v1/clients/{clientId}/notes/{noteId}
 					</code>
-					<code class="method-request">PUT clients/1/notes/76
-						Content-Type: application/json Request Body: { "note": "and here
-						the note is updated nicely." } </code>
-					<code class="method-response">{ "officeId": 1, "clientId":
-						1, "resourceId": 76, "changes": { "note": "and here the note is
-						updated nicely." } } </code>
+					<code class="method-request">
+PUT clients/1/notes/76
+Content-Type: application/json 
+Request Body: 
+{ 
+	"note": "and here the note is updated nicely." }
+					</code>
+					<code class="method-response">
+{
+    "officeId": 1,
+    "clientId": 1,
+    "resourceId": 76,
+    "changes": {
+        "note": "and here the note is updated nicely."
+    }
+}
+					</code>
 				</div>
 			</div>
 
@@ -1840,85 +2099,211 @@ PUT https://DomainName/api/v1/clients/{clientId}/notes/{noteId}
 				</div>
 				<div class="method-example">
 					<code class="method-declaration">
-GET https://DomainName/api/v1/loans/template
+GET https://DomainName/api/v1/loans/template?clientId=1
 					</code>
-					<code class="method-response">{ "clientId" : 1, "clientName"
-						: "Patrick O'Meara", "productId" : 1, "productName" :
-						"Agricultural Loan", "selectedProduct" : { "id" : 1, "name" :
-						"Agricultural Loan", "description" : "An agricultural loan given
-						to farmers to help buy crop, stock and machinery. With an arrears
-						tolerance setting of 1,000 CFA, loans are not marked as 'in
-						arrears' or 'in bad standing' if the amount outstanding is less
-						than this. Interest rate is described using monthly percentage
-						rate (MPR) even though the loan typically lasts a year and
-						requires one repayment (typically at time when farmer sells
-						crop)", "principal" : { "currencyCode" : "XOF",
-						"digitsAfterDecimal" : 0, "amount" : 100000, "defaultName" : "CFA
-						Franc BCEAO", "nameCode" : "currency.XOF", "displaySymbol" :
-						"CFA", "zero" : false, "greaterThanZero" : true,
-						"displaySymbolValue" : "100000 CFA" }, "inArrearsTolerance" : {
-						"currencyCode" : "XOF", "digitsAfterDecimal" : 0, "amount" : 1000,
-						"defaultName" : "CFA Franc BCEAO", "nameCode" : "currency.XOF",
-						"displaySymbol" : "CFA", "zero" : false, "greaterThanZero" : true,
-						"displaySymbolValue" : "1000 CFA" }, "numberOfRepayments" : 1,
-						"repaymentEvery" : 12, "interestRatePerPeriod" : 1.750000,
-						"annualInterestRate" : 21.000000, "repaymentFrequencyType" : {
-						"id" : 2, "code" :
-						"repaymentFrequency.periodFrequencyType.months", "value" :
-						"Months" }, "interestRateFrequencyType" : { "id" : 2, "code" :
-						"interestRateFrequency.periodFrequencyType.months", "value" : "Per
-						month" }, "amortizationType" : { "id" : 1, "code" :
-						"amortizationType.equal.installments", "value" : "Equal
-						installments" }, "interestType" : { "id" : 0, "code" :
-						"interestType.declining.balance", "value" : "Declining Balance" },
-						"interestCalculationPeriodType" : { "id" : 1, "code" :
-						"interestCalculationPeriodType.same.as.repayment.period", "value"
-						: "Same as repayment period" }, "createdOn" : 1334232874000,
-						"lastModifedOn" : 1334232874000, "currencyOptions" : [ { "code" :
-						"KES", "name" : "Kenyan Shilling", "decimalPlaces" : 2,
-						"displaySymbol" : "KSh", "nameCode" : "currency.KES",
-						"displayLabel" : "Kenyan Shilling (KSh)" }, { "code" : "BND",
-						"name" : "Brunei Dollar", "decimalPlaces" : 2, "displaySymbol" :
-						"BND", "nameCode" : "currency.BND", "displayLabel" : "Brunei
-						Dollar (BND)" }, { "code" : "LBP", "name" : "Lebanese Pound",
-						"decimalPlaces" : 2, "displaySymbol" : "LÂ£", "nameCode" :
-						"currency.LBP", "displayLabel" : "Lebanese Pound (LÂ£)" }, {
-						"code" : "GHC", "name" : "Ghana Cedi", "decimalPlaces" : 2,
-						"displaySymbol" : "GHC", "nameCode" : "currency.GHC",
-						"displayLabel" : "Ghana Cedi (GHC)" }, { "code" : "USD", "name" :
-						"US Dollar", "decimalPlaces" : 2, "displaySymbol" : "$",
-						"nameCode" : "currency.USD", "displayLabel" : "US Dollar ($)" }, {
-						"code" : "XOF", "name" : "CFA Franc BCEAO", "decimalPlaces" : 0,
-						"displaySymbol" : "CFA", "nameCode" : "currency.XOF",
-						"displayLabel" : "CFA Franc BCEAO (CFA)" } ],
-						"amortizationTypeOptions" : [ { "id" : 1, "code" :
-						"amortizationType.equal.installments", "value" : "Equal
-						installments" }, { "id" : 0, "code" :
-						"amortizationType.equal.principal", "value" : "Equal principle
-						payments" } ], "interestTypeOptions" : [ { "id" : 1, "code" :
-						"interestType.flat", "value" : "Flat" }, { "id" : 0, "code" :
-						"interestType.declining.balance", "value" : "Declining Balance" }
-						], "interestCalculationPeriodTypeOptions" : [ { "id" : 0, "code" :
-						"interestCalculationPeriodType.daily", "value" : "Daily" }, { "id"
-						: 1, "code" :
-						"interestCalculationPeriodType.same.as.repayment.period", "value"
-						: "Same as repayment period" } ], "repaymentFrequencyTypeOptions"
-						: [ { "id" : 0, "code" :
-						"repaymentFrequency.periodFrequencyType.days", "value" : "Days" },
-						{ "id" : 1, "code" :
-						"repaymentFrequency.periodFrequencyType.weeks", "value" : "Weeks"
-						}, { "id" : 2, "code" :
-						"repaymentFrequency.periodFrequencyType.months", "value" :
-						"Months" } ], "interestRateFrequencyTypeOptions" : [ { "id" : 2,
-						"code" : "interestRateFrequency.periodFrequencyType.months",
-						"value" : "Per month" }, { "id" : 3, "code" :
-						"interestRateFrequency.periodFrequencyType.years", "value" : "Per
-						year" } ] }, "expectedDisbursementDate" : [ 2012, 6, 7 ],
-						"allowedProducts" : [ { "id" : 1, "name" : "Agricultural Loan" },
-						{ "id" : 2, "name" : "Brunei Loan" }, { "id" : 3, "name" : "IL
-						Loan" }, { "id" : 4, "name" : "IBL Mabeshte" }, { "id" : 5, "name"
-						: "Salary Loan" }, { "id" : 6, "name" : "daily-declining-balance"
-						}, { "id" : 7, "name" : "A new loan product for me" } ] } </code>
+					<code class="method-response">
+{
+    "clientId": 1,
+    "clientName": "Petra Yton",
+    "expectedDisbursementDate": [
+        2013,
+        2,
+        5
+    ],
+    "loanOfficerOptions": [
+        {
+            "id": 1,
+            "firstname": "John",
+            "lastname": "Doe",
+            "displayName": "Doe, John",
+            "officeId": 1,
+            "officeName": "Head Office",
+            "isLoanOfficer": true
+        }
+    ],
+    "productOptions": [
+        {
+            "id": 1,
+            "name": "A new loan product for me"
+        }
+    ],
+    "termFrequencyTypeOptions": [
+        {
+            "id": 0,
+            "code": "loanTermFrequency.periodFrequencyType.days",
+            "value": "Days"
+        },
+        {
+            "id": 1,
+            "code": "loanTermFrequency.periodFrequencyType.weeks",
+            "value": "Weeks"
+        },
+        {
+            "id": 2,
+            "code": "loanTermFrequency.periodFrequencyType.months",
+            "value": "Months"
+        },
+        {
+            "id": 3,
+            "code": "loanTermFrequency.periodFrequencyType.years",
+            "value": "Years"
+        }
+    ],
+    "repaymentFrequencyTypeOptions": [
+        {
+            "id": 0,
+            "code": "repaymentFrequency.periodFrequencyType.days",
+            "value": "Days"
+        },
+        {
+            "id": 1,
+            "code": "repaymentFrequency.periodFrequencyType.weeks",
+            "value": "Weeks"
+        },
+        {
+            "id": 2,
+            "code": "repaymentFrequency.periodFrequencyType.months",
+            "value": "Months"
+        }
+    ],
+    "repaymentStrategyOptions": [
+        {
+            "id": 1,
+            "code": "mifos-standard-strategy",
+            "name": "Mifos style"
+        },
+        {
+            "id": 2,
+            "code": "heavensfamily-strategy",
+            "name": "Heavensfamily"
+        },
+        {
+            "id": 3,
+            "code": "creocore-strategy",
+            "name": "Creocore"
+        },
+        {
+            "id": 4,
+            "code": "rbi-india-strategy",
+            "name": "RBI (India)"
+        }
+    ],
+    "interestRateFrequencyTypeOptions": [
+        {
+            "id": 2,
+            "code": "interestRateFrequency.periodFrequencyType.months",
+            "value": "Per month"
+        },
+        {
+            "id": 3,
+            "code": "interestRateFrequency.periodFrequencyType.years",
+            "value": "Per year"
+        }
+    ],
+    "amortizationTypeOptions": [
+        {
+            "id": 1,
+            "code": "amortizationType.equal.installments",
+            "value": "Equal installments"
+        },
+        {
+            "id": 0,
+            "code": "amortizationType.equal.principal",
+            "value": "Equal principle payments"
+        }
+    ],
+    "interestTypeOptions": [
+        {
+            "id": 1,
+            "code": "interestType.flat",
+            "value": "Flat"
+        },
+        {
+            "id": 0,
+            "code": "interestType.declining.balance",
+            "value": "Declining Balance"
+        }
+    ],
+    "interestCalculationPeriodTypeOptions": [
+        {
+            "id": 0,
+            "code": "interestCalculationPeriodType.daily",
+            "value": "Daily"
+        },
+        {
+            "id": 1,
+            "code": "interestCalculationPeriodType.same.as.repayment.period",
+            "value": "Same as repayment period"
+        }
+    ],
+    "fundOptions": [
+        {
+            "id": 1,
+            "name": "EU Agri Fund"
+        }
+    ],
+    "chargeOptions": [
+        {
+            "id": 1,
+            "name": "Loan service fee",
+            "active": true,
+            "penalty": false,
+            "currency": {
+                "code": "USD",
+                "name": "US Dollar",
+                "decimalPlaces": 2,
+                "displaySymbol": "$",
+                "nameCode": "currency.USD",
+                "displayLabel": "US Dollar ($)"
+            },
+            "amount": 230.56,
+            "chargeTimeType": {
+                "id": 1,
+                "code": "chargeTimeType.disbursement",
+                "value": "Disbursement"
+            },
+            "chargeAppliesTo": {
+                "id": 1,
+                "code": "chargeAppliesTo.loan",
+                "value": "Loan"
+            },
+            "chargeCalculationType": {
+                "id": 1,
+                "code": "chargeCalculationType.flat",
+                "value": "Flat"
+            }
+        }
+    ],
+    "chargeTemplate": {
+        "active": false,
+        "penalty": false,
+        "chargeCalculationTypeOptions": [
+            {
+                "id": 1,
+                "code": "chargeCalculationType.flat",
+                "value": "Flat"
+            },
+            {
+                "id": 2,
+                "code": "chargeCalculationType.percent.of.amount",
+                "value": "% Amount"
+            }
+        ],
+        "chargeTimeTypeOptions": [
+            {
+                "id": 1,
+                "code": "chargeTimeType.disbursement",
+                "value": "Disbursement"
+            },
+            {
+                "id": 2,
+                "code": "chargeTimeType.specifiedDueDate",
+                "value": "Specified due date"
+            }
+        ]
+    }
+}
+					</code>
 				</div>
 			</div>
 
@@ -1980,32 +2365,70 @@ GET https://DomainName/api/v1/loans/template
 					<code class="method-declaration">
 GET https://DomainName/api/v1/loans/{loanId}
 					</code>
-					<code class="method-response">{ "id": 1, "accountNo":
-						"000000001", "clientId": 1, "clientName": "Petra Yton",
-						"loanProductId": 1, "loanProductName": "A new loan product for
-						me", "status": { "id": 100, "code":
-						"loanStatusType.submitted.and.pending.approval", "value":
-						"Submitted and pending approval" }, "currency": { "code": "USD",
-						"name": "US Dollar", "decimalPlaces": 2, "displaySymbol": "$",
-						"nameCode": "currency.USD", "displayLabel": "US Dollar ($)" },
-						"principal": 100000, "termFrequency": 12,
-						"termPeriodFrequencyType": { "id": 2, "code":
-						"termFrequency.periodFrequencyType.months", "value": "Months" },
-						"numberOfRepayments": 12, "repaymentEvery": 1,
-						"repaymentFrequencyType": { "id": 2, "code":
-						"repaymentFrequency.periodFrequencyType.months", "value": "Months"
-						}, "transactionProcessingStrategyId": 1, "amortizationType": {
-						"id": 1, "code": "amortizationType.equal.installments", "value":
-						"Equal installments" }, "interestRatePerPeriod": 2,
-						"interestRateFrequencyType": { "id": 2, "code":
-						"interestRateFrequency.periodFrequencyType.months", "value": "Per
-						month" }, "annualInterestRate": 24, "interestType": { "id": 0,
-						"code": "interestType.declining.balance", "value": "Declining
-						Balance" }, "interestCalculationPeriodType": { "id": 1, "code":
-						"interestCalculationPeriodType.same.as.repayment.period", "value":
-						"Same as repayment period" }, "submittedOnDate": [2011,9,20],
-						"expectedDisbursementDate": [2011,9,20], "expectedMaturityDate":
-						[2012,9,20], "lifeCycleStatusDate": [2011,9,20] } </code>
+					<code class="method-response">
+{
+    "id": 1,
+    "accountNo": "000000001",
+    "clientId": 1,
+    "clientName": "Petra Yton",
+    "loanProductId": 1,
+    "loanProductName": "A new loan product for me",
+    "status": {
+        "id": 100,
+        "code": "loanStatusType.submitted.and.pending.approval",
+        "value": "Submitted and pending approval"
+    },
+    "currency": {
+        "code": "USD",
+        "name": "US Dollar",
+        "decimalPlaces": 2,
+        "displaySymbol": "$",
+        "nameCode": "currency.USD",
+        "displayLabel": "US Dollar ($)"
+    },
+    "principal": 100000,
+    "termFrequency": 12,
+    "termPeriodFrequencyType": {
+        "id": 2,
+        "code": "termFrequency.periodFrequencyType.months",
+        "value": "Months"
+    },
+    "numberOfRepayments": 12,
+    "repaymentEvery": 1,
+    "repaymentFrequencyType": {
+        "id": 2,
+        "code": "repaymentFrequency.periodFrequencyType.months",
+        "value": "Months"
+    },
+    "transactionProcessingStrategyId": 1,
+    "amortizationType": {
+        "id": 1,
+        "code": "amortizationType.equal.installments",
+        "value": "Equal installments"
+    },
+    "interestRatePerPeriod": 2,
+    "interestRateFrequencyType": {
+        "id": 2,
+        "code": "interestRateFrequency.periodFrequencyType.months",
+        "value": "Per month"
+    },
+    "annualInterestRate": 24,
+    "interestType": {
+        "id": 0,
+        "code": "interestType.declining.balance",
+        "value": "Declining Balance"
+    },
+    "interestCalculationPeriodType": {
+        "id": 1,
+        "code": "interestCalculationPeriodType.same.as.repayment.period",
+        "value": "Same as repayment period"
+    },
+    "submittedOnDate": [2011,9,20],
+    "expectedDisbursementDate": [2011,9,20],
+    "expectedMaturityDate": [2011,9,20],
+    "lifeCycleStatusDate": [2011,9,20]
+}
+					</code>
 				</div>
 			</div>
 
