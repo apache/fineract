@@ -105,7 +105,7 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
 
 		} catch (DataIntegrityViolationException dve) {
 			handleDataIntegrityIssues(command, dve);
-			return new CommandProcessingResult(Long.valueOf(-1));
+			return CommandProcessingResult.empty();
 		}
 
 	}
@@ -178,7 +178,7 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
 			}
 
 			if (!changes.isEmpty()) {
-				this.loanProductRepository.save(product);
+				this.loanProductRepository.saveAndFlush(product);
 			}
 
 			return new CommandProcessingResultBuilder() //
