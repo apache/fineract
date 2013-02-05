@@ -28,7 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatformService {
 
-	private final static Logger logger = LoggerFactory.getLogger(RoleWritePlatformServiceJpaRepositoryImpl.class);
+    private final static Logger logger = LoggerFactory.getLogger(RoleWritePlatformServiceJpaRepositoryImpl.class);
     private final PlatformSecurityContext context;
     private final RoleRepository roleRepository;
     private final PermissionRepository permissionRepository;
@@ -50,23 +50,22 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
     @Override
     public CommandProcessingResult createRole(final JsonCommand command) {
 
-		try {
-			context.authenticatedUser();
+        try {
+            context.authenticatedUser();
 
-			this.roleCommandFromApiJsonDeserializer.validateForCreate(command
-					.json());
+            this.roleCommandFromApiJsonDeserializer.validateForCreate(command.json());
 
-			final Role entity = Role.fromJson(command);
+            final Role entity = Role.fromJson(command);
 
-			this.roleRepository.save(entity);
+            this.roleRepository.save(entity);
 
-			return new CommandProcessingResultBuilder()
-					.withCommandId(command.commandId())
-					.withEntityId(entity.getId()).build();
-		} catch (DataIntegrityViolationException dve) {
-			handleDataIntegrityIssues(command, dve);
-			return CommandProcessingResult.empty();
-		}
+            return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(entity.getId()).build();
+        } catch (DataIntegrityViolationException dve) {
+            handleDataIntegrityIssues(command, dve);
+            return new CommandProcessingResultBuilder() //
+                    .withCommandId(command.commandId()) //
+                    .build();
+        }
     }
 
     /*
@@ -79,46 +78,46 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
         if (realCause.getMessage().contains("unq_name")) {
 
             final String name = command.stringValueOfParameterNamed("name");
-            throw new PlatformDataIntegrityException("error.msg.role.duplicate.name", "Role with name `" + name
-                    + "` already exists", "name", name);
+            throw new PlatformDataIntegrityException("error.msg.role.duplicate.name", "Role with name `" + name + "` already exists",
+                    "name", name);
         }
-        
+
         logAsErrorUnexpectedDataIntegrityException(dve);
         throw new PlatformDataIntegrityException("error.msg.role.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource.");
     }
-    
+
     private void logAsErrorUnexpectedDataIntegrityException(final DataIntegrityViolationException dve) {
         logger.error(dve.getMessage(), dve);
     }
-    
+
     @Transactional
     @Override
     public CommandProcessingResult updateRole(final Long roleId, final JsonCommand command) {
-		try {
-			context.authenticatedUser();
+        try {
+            context.authenticatedUser();
 
-			this.roleCommandFromApiJsonDeserializer.validateForUpdate(command
-					.json());
+            this.roleCommandFromApiJsonDeserializer.validateForUpdate(command.json());
 
-			final Role role = this.roleRepository.findOne(roleId);
-			if (role == null) {
-				throw new RoleNotFoundException(roleId);
-			}
+            final Role role = this.roleRepository.findOne(roleId);
+            if (role == null) { throw new RoleNotFoundException(roleId); }
 
-			final Map<String, Object> changes = role.update(command);
-			if (!changes.isEmpty()) {
-				this.roleRepository.saveAndFlush(role);
-			}
+            final Map<String, Object> changes = role.update(command);
+            if (!changes.isEmpty()) {
+                this.roleRepository.saveAndFlush(role);
+            }
 
-			return new CommandProcessingResultBuilder() //
-					.withCommandId(command.commandId()) //
-					.withEntityId(roleId).with(changes) //
-					.build();
-		} catch (DataIntegrityViolationException dve) {
-			handleDataIntegrityIssues(command, dve);
-			return new CommandProcessingResult(Long.valueOf(-1));
-		}
+            return new CommandProcessingResultBuilder() //
+                    .withCommandId(command.commandId()) //
+                    .withEntityId(roleId) //
+                    .with(changes) //
+                    .build();
+        } catch (DataIntegrityViolationException dve) {
+            handleDataIntegrityIssues(command, dve);
+            return new CommandProcessingResultBuilder() //
+                    .withCommandId(command.commandId()) //
+                    .build();
+        }
     }
 
     @Transactional
