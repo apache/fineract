@@ -38,7 +38,7 @@ import org.slf4j.LoggerFactory;
 public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanProductWritePlatformService {
 
     private final static Logger logger = LoggerFactory.getLogger(LoanProductWritePlatformServiceJpaRepositoryImpl.class);
-	private final PlatformSecurityContext context;
+    private final PlatformSecurityContext context;
     private final LoanProductCommandFromApiJsonDeserializer fromApiJsonDeserializer;
     private final LoanProductRepository loanProductRepository;
     private final AprCalculator aprCalculator;
@@ -67,48 +67,41 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
     @Override
     public CommandProcessingResult createLoanProduct(final JsonCommand command) {
 
-		try {
+        try {
 
-			this.context.authenticatedUser();
+            this.context.authenticatedUser();
 
-			this.fromApiJsonDeserializer.validateForCreate(command.json());
+            this.fromApiJsonDeserializer.validateForCreate(command.json());
 
-			// associating fund with loan product at creation is optional for
-			// now.
-			final Fund fund = findFundByIdIfProvided(command
-					.longValueOfParameterNamed("fundId"));
+            // associating fund with loan product at creation is optional for
+            // now.
+            final Fund fund = findFundByIdIfProvided(command.longValueOfParameterNamed("fundId"));
 
-			final Long transactionProcessingStrategyId = command
-					.longValueOfParameterNamed("transactionProcessingStrategyId");
-			final LoanTransactionProcessingStrategy loanTransactionProcessingStrategy = findStrategyByIdIfProvided(transactionProcessingStrategyId);
+            final Long transactionProcessingStrategyId = command.longValueOfParameterNamed("transactionProcessingStrategyId");
+            final LoanTransactionProcessingStrategy loanTransactionProcessingStrategy = findStrategyByIdIfProvided(transactionProcessingStrategyId);
 
-			final String currencyCode = command
-					.stringValueOfParameterNamed("currencyCode");
-			final Set<Charge> charges = this.assembleSetOfCharges(command,
-					currencyCode);
+            final String currencyCode = command.stringValueOfParameterNamed("currencyCode");
+            final Set<Charge> charges = this.assembleSetOfCharges(command, currencyCode);
 
-			final LoanProduct loanproduct = LoanProduct.assembleFromJson(fund,
-					loanTransactionProcessingStrategy, charges, command,
-					this.aprCalculator);
+            final LoanProduct loanproduct = LoanProduct.assembleFromJson(fund, loanTransactionProcessingStrategy, charges, command,
+                    this.aprCalculator);
 
-			this.loanProductRepository.save(loanproduct);
+            this.loanProductRepository.save(loanproduct);
 
-			// save accounting mappings
-			accountMappingWritePlatformService
-					.createLoanProductToGLAccountMapping(loanproduct.getId(),
-							command);
+            // save accounting mappings
+            accountMappingWritePlatformService.createLoanProductToGLAccountMapping(loanproduct.getId(), command);
 
-			return new CommandProcessingResultBuilder() //
-					.withCommandId(command.commandId()) //
-					.withEntityId(loanproduct.getId()) //
-					.build();
+            return new CommandProcessingResultBuilder() //
+                    .withCommandId(command.commandId()) //
+                    .withEntityId(loanproduct.getId()) //
+                    .build();
 
-		} catch (DataIntegrityViolationException dve) {
-			handleDataIntegrityIssues(command, dve);
-			return CommandProcessingResult.empty();
-		}
+        } catch (DataIntegrityViolationException dve) {
+            handleDataIntegrityIssues(command, dve);
+            return CommandProcessingResult.empty();
+        }
 
-	}
+    }
 
     private LoanTransactionProcessingStrategy findStrategyByIdIfProvided(final Long transactionProcessingStrategyId) {
         LoanTransactionProcessingStrategy strategy = null;
@@ -132,67 +125,58 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
     @Override
     public CommandProcessingResult updateLoanProduct(final Long loanProductId, final JsonCommand command) {
 
-		try {
+        try {
 
-			this.context.authenticatedUser();
+            this.context.authenticatedUser();
 
-			this.fromApiJsonDeserializer.validateForUpdate(command.json());
+            this.fromApiJsonDeserializer.validateForUpdate(command.json());
 
-			final LoanProduct product = this.loanProductRepository
-					.findOne(loanProductId);
-			if (product == null) {
-				throw new LoanProductNotFoundException(loanProductId);
-			}
+            final LoanProduct product = this.loanProductRepository.findOne(loanProductId);
+            if (product == null) { throw new LoanProductNotFoundException(loanProductId); }
 
-			final Map<String, Object> changes = product.update(command,
-					this.aprCalculator);
+            final Map<String, Object> changes = product.update(command, this.aprCalculator);
 
-			// associating fund with loan product at creation is optional for
-			// now.
-			if (changes.containsKey("fundId")) {
-				final Long fundId = (Long) changes.get("fundId");
-				final Fund fund = findFundByIdIfProvided(fundId);
-				product.update(fund);
-			}
+            // associating fund with loan product at creation is optional for
+            // now.
+            if (changes.containsKey("fundId")) {
+                final Long fundId = (Long) changes.get("fundId");
+                final Fund fund = findFundByIdIfProvided(fundId);
+                product.update(fund);
+            }
 
-			if (changes.containsKey("transactionProcessingStrategyId")) {
-				final Long transactionProcessingStrategyId = (Long) changes
-						.get("transactionProcessingStrategyId");
-				final LoanTransactionProcessingStrategy loanTransactionProcessingStrategy = findStrategyByIdIfProvided(transactionProcessingStrategyId);
-				product.update(loanTransactionProcessingStrategy);
-			}
+            if (changes.containsKey("transactionProcessingStrategyId")) {
+                final Long transactionProcessingStrategyId = (Long) changes.get("transactionProcessingStrategyId");
+                final LoanTransactionProcessingStrategy loanTransactionProcessingStrategy = findStrategyByIdIfProvided(transactionProcessingStrategyId);
+                product.update(loanTransactionProcessingStrategy);
+            }
 
-			if (changes.containsKey("charges")) {
-				final Set<Charge> charges = this.assembleSetOfCharges(command,
-						product.getCurrency().getCode());
-				product.update(charges);
-			}
+            if (changes.containsKey("charges")) {
+                final Set<Charge> charges = this.assembleSetOfCharges(command, product.getCurrency().getCode());
+                product.update(charges);
+            }
 
-			// accounting related changes
-			boolean accountingTypeChanged = changes
-					.containsKey("accountingType");
-			if (accountingTypeChanged) {
-				accountMappingWritePlatformService
-						.updateLoanProductToGLAccountMapping(product.getId(),
-								command, accountingTypeChanged);
-			}
+            // accounting related changes
+            boolean accountingTypeChanged = changes.containsKey("accountingType");
+            if (accountingTypeChanged) {
+                accountMappingWritePlatformService.updateLoanProductToGLAccountMapping(product.getId(), command, accountingTypeChanged);
+            }
 
-			if (!changes.isEmpty()) {
-				this.loanProductRepository.saveAndFlush(product);
-			}
+            if (!changes.isEmpty()) {
+                this.loanProductRepository.saveAndFlush(product);
+            }
 
-			return new CommandProcessingResultBuilder() //
-					.withCommandId(command.commandId()) //
-					.withEntityId(loanProductId) //
-					.with(changes) //
-					.build();
+            return new CommandProcessingResultBuilder() //
+                    .withCommandId(command.commandId()) //
+                    .withEntityId(loanProductId) //
+                    .with(changes) //
+                    .build();
 
-		} catch (DataIntegrityViolationException dve) {
-			handleDataIntegrityIssues(command, dve);
-			return new CommandProcessingResult(Long.valueOf(-1));
-		}
+        } catch (DataIntegrityViolationException dve) {
+            handleDataIntegrityIssues(command, dve);
+            return new CommandProcessingResult(Long.valueOf(-1));
+        }
 
-	}
+    }
 
     private Set<Charge> assembleSetOfCharges(final JsonCommand command, final String currencyCode) {
 
@@ -222,6 +206,7 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
 
         return charges;
     }
+
     /*
      * Guaranteed to throw an exception no matter what the data integrity issue
      * is.
