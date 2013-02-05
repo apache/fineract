@@ -1628,23 +1628,25 @@ No Request Body:
             <div class="method-example">
                 <code class="method-declaration">GET https://Domain Name/api/v1/loans/{loanId}/transactions/template"</code>
                 <code class="method-response">{
-  "transactionType" : {
-    "id" : 2,
-    "code" : "loanTransactionType.repayment",
-    "value" : "Repayment"
+  "type": {
+    "id": 2,
+    "code": "loanTransactionType.repayment",
+    "value": "Repayment"
   },
-  "date" : [ 2009, 8, 1 ],
-  "total" : {
-    "currencyCode" : "XOF",
-    "digitsAfterDecimal" : 0,
-    "amount" : 471,
-    "defaultName" : "CFA Franc BCEAO",
-    "nameCode" : "currency.XOF",
-    "displaySymbol" : "CFA",
-    "zero" : false,
-    "greaterThanZero" : true,
-    "displaySymbolValue" : "471 CFA"
-  }
+  "date": [
+    2011,
+    10,
+    20
+  ],
+  "currency": {
+    "code": "USD",
+    "name": "US Dollar",
+    "decimalPlaces": 2,
+    "displaySymbol": "$",
+    "nameCode": "currency.USD",
+    "displayLabel": "US Dollar ($)"
+  },
+  "amount": 9455.96
 }
             </code>
             </div>
@@ -1662,19 +1664,27 @@ No Request Body:
             </div>
             <div class="method-example">
                 <code class="method-declaration">POST https://Domain Name/api/v1/loans/{loanId}/transactions</code>
-                <code class="method-request">POST loans/37/transactions?command=repayment
+                <code class="method-request">POST loans/1/transactions?command=repayment
 Content-Type: application/json
 Request Body:
 {
  "locale": "en_GB",
  "dateFormat": "dd MMMM yyyy",
- "transactionDate": "14 May 2012",
- "transactionAmount": "559.88",
- "note": "Repayment at branch"
+ "transactionDate": "20 October 2011",
+ "transactionAmount": "9,455.96"
 }
                 </code>
                 <code class="method-response">{
-"resourceId": 37
+  "officeId": 1,
+  "clientId": 1,
+  "loanId": 1,
+  "resourceId": 2,
+  "changes": {
+    "transactionDate": "20 October 2011",
+    "transactionAmount": "9,455.96",
+    "locale": "en_GB",
+    "dateFormat": "dd MMMM yyyy"
+  }
 }
                 </code>
             </div>
@@ -1685,25 +1695,35 @@ Request Body:
             <div class="method-description">
                 <h4>Retrieve a Repayment or Waiver Details</h4>
                 <p>Example Request: </p>
-                <div class=apiClick>loans/10/transactions/20</div>
+                <div class=apiClick>loans/1/transactions/1</div>
             </div>
             <div class="method-example">
                 <code class="method-declaration">GET https://Domain Name/api/v1/loans/{loanId}/transactions/{transactionId}</code>
                 <code class="method-response">{
-  "id" : 10,
-  "date" : [ 2009, 1, 29 ],
-  "total" : {
-    "currencyCode" : "XOF",
-    "digitsAfterDecimal" : 0,
-    "amount" : 300000,
-    "defaultName" : "CFA Franc BCEAO",
-    "nameCode" : "currency.XOF",
-    "displaySymbol" : "CFA",
-    "zero" : false,
-    "greaterThanZero" : true,
-    "displaySymbolValue" : "300000 CFA"
+  "id": 1,
+  "type": {
+    "id": 1,
+    "code": "loanTransactionType.disbursement",
+    "value": "Dibursement"
   },
-  "transactionOffsetFromToday" : -1218
+  "date": [
+    2011,
+    9,
+    20
+  ],
+  "currency": {
+    "code": "USD",
+    "name": "US Dollar",
+    "decimalPlaces": 2,
+    "displaySymbol": "$",
+    "nameCode": "currency.USD",
+    "displayLabel": "US Dollar ($)"
+  },
+  "amount": 100000,
+  "principalPortion": 0,
+  "interestPortion": 0,
+  "feeChargesPortion": 0,
+  "penaltyChargesPortion": 0
 }
                 </code>
             </div>
@@ -1720,19 +1740,27 @@ Request Body:
             </div>
             <div class="method-example">
                 <code class="method-declaration">POST https://Domain Name/api/v1/loans/{loanId}/transactions/{transactionId}</code>
-                <code class="method-request">POST loans/16/transactions/32
+                <code class="method-request">POST loans/1/transactions/1
 Content-Type: application/json
 Request Body:
 {
  "locale": "en_GB",
  "dateFormat": "dd MMMM yyyy",
- "transactionDate": "25 May 2012",
- "transactionAmount": "50,000.00",
- "note": "adj note"
+ "transactionDate": "20 October 2011",
+ "transactionAmount": "9,455.00"
 }
                 </code>
                 <code class="method-response">{
-    "resourceId": 16
+  "officeId": 1,
+  "clientId": 1,
+  "loanId": 1,
+  "resourceId": 2,
+  "changes": {
+    "transactionDate": "20 October 2011",
+    "transactionAmount": "9,455.00",
+    "locale": "en_GB",
+    "dateFormat": "dd MMMM yyyy"
+  }
 }
                 </code>
             </div>
@@ -3032,15 +3060,11 @@ Content-Type: application/json
                 <code class="method-response">[
   {
     "applicationTableName": "m_client",
-    "registeredTableName": "Additional Client Fields Data"
+    "registeredTableName": "extra_client_details"
   },
   {
     "applicationTableName": "m_client",
-    "registeredTableName": "Extra Family Details Data"
-  },
-  {
-    "applicationTableName": "m_loan",
-    "registeredTableName": "Additional Loan Fields Data"
+    "registeredTableName": "extra_family_details"
   }
 ]
                 </code>
@@ -3057,14 +3081,16 @@ Content-Type: application/json
             </div>
             <div class="method-example">
                 <code class="method-declaration">POST https://Domain Name/api/v1/datatables/register/{datatable}/{apptable}</code>
-                <code class="method-request">POST datatables/register/New Table/m_client
+                <code class="method-request">POST datatables/register/extra_client_details/m_client
 Content-Type: application/json
 Request Body:
 {
 }
 </code>
                 <code class="method-response">{
-  "resourceId": null
+  "commandId": -1,
+  "officeId": -1,
+  "resourceId": -1
 }
                 </code>
             </div>
@@ -3081,14 +3107,16 @@ Request Body:
             </div>
             <div class="method-example">
                 <code class="method-declaration">POST https://Domain Name/api/v1/datatables/deregister/{datatable}</code>
-                <code class="method-request">POST datatables/register/New Table
+                <code class="method-request">POST datatables/deregister/extra_client_details
 Content-Type: application/json
 Request Body:
 {
 }
 </code>
                 <code class="method-response">{
-  "resourceId": null
+  "commandId": -1,
+  "officeId": -1,
+  "resourceId": -1
 }
                 </code>
             </div>
@@ -3110,19 +3138,19 @@ Request Body:
             </div>
             <div class="method-example">
                 <code class="method-declaration">POST https://Domain Name/api/v1/datatables/{datatable}/{apptableId}</code>
-                <code class="method-request">POST datatables/Additional Client Fields Data/1
+                <code class="method-request">POST datatables/extra_client_details/1
 Content-Type: application/json
 Request Body:
-{
-    "Business Description": "Livestock sales",
-    Comment: "First comment\nmade",
-    Education_cv: "Trade",
-    Gender_cd: "21",
-    "Highest Rate Paid": "8.5",
-    "Next Visit": "01 October 2012",
-    "Years in Business": "5",
-    dateFormat: "dd MMMM yyyy",
-    locale: "en"
+{ 
+    "Business Description": "Livestock sales", 
+    "Comment": "First comment made", 
+    "Education_cv": "Primary", 
+    "Gender_cd": "2", 
+    "Highest Rate Paid": "8.5", 
+    "Next Visit": "01 October 2012", 
+    "Years in Business": "5", 
+    "dateFormat": "dd MMMM yyyy", 
+    locale: "en" 
 }
 </code>
                 <code class="method-response">{
@@ -3154,24 +3182,25 @@ Request Body:
                 </dl>
                 
                 <p>Example Requests: </p>
-                <div class=apiClick>datatables/Additional Client Fields Data/1</div>
+                <div class=apiClick>datatables/extra_client_details/1</div>
                 <br><br>
-                <div class=apiClick>datatables/Extra Family Details Data/1?order=`Date of Birth` desc</div>
+                <div class=apiClick>datatables/extra_family_details/1?order=`Date of Birth` desc</div>
                 <br><br>
-                <div class=apiClick>datatables/Additional Client Fields Data/1?genericResultSet=true</div>
+                <div class=apiClick>datatables/extra_client_details/1?genericResultSet=true</div>
             </div>
             <div class="method-example">
                 <code class="method-declaration">GET https://Domain Name/api/v1/datatables/{datatable}/{apptableId}</code>
                 <code class="method-response">[
-{"client_id": 1,
-"Business Description": "Livestock sales",
-"Years in Business": 5,
-"Gender_cd": "21",
-"Education_cv": "Trade",
-"Next Visit": [2012, 10, 1],
-"Highest Rate Paid": 8.500000,
-"Comment": "First comment
-made"}
+{
+    "client_id": 1,
+    "Business Description": "Livestock sales",
+    "Years in Business": 5,
+    "Gender_cd": "2",
+    "Education_cv": "Primary",
+    "Next Visit": [2012, 10, 1],
+    "Highest Rate Paid": 8.500000,
+    "Comment": "First comment made"
+}
 ]
                 </code>
             </div>
@@ -3188,23 +3217,18 @@ made"}
             </div>
             <div class="method-example">
                 <code class="method-declaration">PUT https://Domain Name/api/v1/datatables/{datatable}/{apptableId}</code>
-                <code class="method-request">PUT datatables/Additional Client Fields Data/1
+                <code class="method-request">PUT datatables/extra_client_details/1
 Content-Type: application/json
 Request Body:
-{
-    "Business Description": "Livestock sales updated",
-    Comment: "First comment\nmade",
-    Education_cv: "Trade",
-    Gender_cd: "21",
-    "Highest Rate Paid": "8.5",
-    "Next Visit": "01 October 2012",
-    "Years in Business": "5",
-    dateFormat: "dd MMMM yyyy",
-    locale: "en"
+{ 
+    "Business Description": "Livestock sales (updated)"
 }
 </code>
                 <code class="method-response">{
-  "resourceId": 1
+  "resourceId": 1,
+  "changes": {
+    "Business Description": "Livestock sales (updated)"
+  }
 }
                 </code>
             </div>
@@ -3220,17 +3244,17 @@ Request Body:
             </div>
             <div class="method-example">
                 <code class="method-declaration">PUT https://Domain Name/api/v1/datatables/{datatable}/{apptableId}/{datatableId}</code>
-                <code class="method-request">PUT datatables/Extra Family Details Data/1/2
+                <code class="method-request">PUT datatables/extra_family_details/1/1
 Content-Type: application/json
 Request Body:
 {
     "Date of Birth": "01 June 1982",
-    Education_cdHighest: "5",
-    Name: "June",
-    "Other Notes": "More\nnotes",
+    "Education_cd_Highest": "5",
+    "Name": "June",
+    "Other Notes": "More notes",
     "Points Score": "20",
-    dateFormat: "dd MMMM yyyy",
-    locale: "en"	
+    "dateFormat": "dd MMMM yyyy",
+    "locale": "en"	
 }
 </code>
                 <code class="method-response">{
@@ -3251,7 +3275,7 @@ Request Body:
             </div>
             <div class="method-example">
                 <code class="method-declaration">DELETE https://Domain Name/api/v1/datatables/{datatable}/{apptableId}</code>
-                <code class="method-request">DELETE datatables/Additional Client Fields Data/1
+                <code class="method-request">DELETE datatables/extra_client_details/1
 Content-Type: application/json
 Request Body:
 {
@@ -3274,7 +3298,7 @@ Request Body:
             </div>
             <div class="method-example">
                 <code class="method-declaration">DELETE https://Domain Name/api/v1/datatables/{datatable}/{apptableId}/{datatableId}</code>
-                <code class="method-request">DELETE datatables/Extra Family Details Data/1/2
+                <code class="method-request">DELETE datatables/extra_family_details/1/2
 Content-Type: application/json
 Request Body:
 {

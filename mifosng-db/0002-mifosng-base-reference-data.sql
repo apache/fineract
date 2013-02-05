@@ -15,7 +15,9 @@ VALUES
 ('maker-checker', 0);
 
 INSERT INTO `r_enum_value` 
-VALUES ('amortization_method_enum',0,'Equal installments','Equal installments'),('amortization_method_enum',1,'Equal principle payments','Equal principle payments'),
+VALUES 
+('amortization_method_enum',0,'Equal principle payments','Equal principle payments'),
+('amortization_method_enum',1,'Equal installments','Equal installments'),
 ('interest_calculated_in_period_enum',0,'Daily','Daily'),('interest_calculated_in_period_enum',1,'Same as repayment period','Same as repayment period'),
 ('interest_method_enum',0,'Declining Balance','Declining Balance'),('interest_method_enum',1,'Flat','Flat'),
 ('interest_period_frequency_enum',2,'Per month','Per month'),('interest_period_frequency_enum',3,'Per year','Per year'),
