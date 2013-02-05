@@ -74,7 +74,7 @@ public class LoanProduct extends AbstractPersistable<Long> {
         final InterestMethod interestMethod = InterestMethod.fromInt(command.integerValueOfParameterNamed("interestType"));
         final InterestCalculationPeriodMethod interestCalculationPeriodMethod = InterestCalculationPeriodMethod.fromInt(command
                 .integerValueOfParameterNamed("interestCalculationPeriodType"));
-        final AmortizationMethod amortizationMethod = AmortizationMethod.fromInt(command.integerValueOfParameterNamed("interestType"));
+        final AmortizationMethod amortizationMethod = AmortizationMethod.fromInt(command.integerValueOfParameterNamed("amortizationType"));
         final PeriodFrequencyType repaymentFrequencyType = PeriodFrequencyType.fromInt(command
                 .integerValueOfParameterNamed("repaymentFrequencyType"));
         final PeriodFrequencyType interestFrequencyType = PeriodFrequencyType.fromInt(command

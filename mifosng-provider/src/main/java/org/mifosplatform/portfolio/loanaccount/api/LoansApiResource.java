@@ -76,10 +76,11 @@ public class LoansApiResource {
             "annualInterestRate", "repaymentFrequencyType", "interestRateFrequencyType", "amortizationType", "interestType",
             "interestCalculationPeriodType", "submittedOnDate", "approvedOnDate", "expectedDisbursementDate", "actualDisbursementDate",
             "expectedFirstRepaymentOnDate", "interestChargedFromDate", "closedOnDate", "expectedMaturityDate", "status",
-            "lifeCycleStatusDate", "repaymentSchedule", "transactions", "permissions", "convenienceData", "charges", "productOptions",
+            "lifeCycleStatusDate", "repaymentSchedule", "transactions", "permissions", "convenienceData", "charges", "guarantor", "productOptions",
             "amortizationTypeOptions", "interestTypeOptions", "interestCalculationPeriodTypeOptions", "repaymentFrequencyTypeOptions",
             "interestRateFrequencyTypeOptions", "fundOptions", "repaymentStrategyOptions", "chargeOptions", "loanOfficerId",
-            "loanOfficerName", "loanOfficerOptions", "chargeTemplate"));
+            "loanOfficerName", "loanOfficerOptions", "chargeTemplate", "transactionProcessingStrategyId", 
+            "termFrequency", "termPeriodFrequencyType"));
 
     private final String resourceNameForPermissions = "LOAN";
 
@@ -201,6 +202,7 @@ public class LoansApiResource {
         Collection<LoanChargeData> charges = null;
         Collection<GuarantorData> guarantors = null;
 
+        final Set<String> mandatoryResponseParameters = new HashSet<String>();
         boolean convenienceDataRequired = false;
         final Set<String> associationParameters = ApiParameterHelper.extractAssociationsForResponseIfProvided(uriInfo.getQueryParameters());
         if (!associationParameters.isEmpty()) {
@@ -211,6 +213,7 @@ public class LoansApiResource {
             }
 
             if (associationParameters.contains("guarantor")) {
+                mandatoryResponseParameters.add("guarantor");
                 guarantors = this.guarantorReadPlatformService.retrieveGuarantorsForLoan(loanId);
                 if (CollectionUtils.isEmpty(guarantors)) {
                     guarantors = null; // set back to null so doesn't appear in JSON
@@ -218,6 +221,7 @@ public class LoansApiResource {
             }
 
             if (associationParameters.contains("transactions")) {
+                mandatoryResponseParameters.add("transactions");
                 final Collection<LoanTransactionData> currentLoanRepayments = this.loanReadPlatformService.retrieveLoanTransactions(loanId);
                 if (!CollectionUtils.isEmpty(currentLoanRepayments)) {
                     loanRepayments = currentLoanRepayments;
@@ -226,6 +230,10 @@ public class LoansApiResource {
 
             if (associationParameters.contains("repaymentSchedule") || associationParameters.contains("permissions")) {
 
+                if (associationParameters.contains("repaymentSchedule")) {
+                    mandatoryResponseParameters.add("repaymentSchedule");
+                }
+                
                 DisbursementData singleDisbursement = loanBasicDetails.toDisburementData();
                 repaymentSchedule = this.loanReadPlatformService.retrieveRepaymentSchedule(loanId, loanBasicDetails.getCurrency(),
                         singleDisbursement, loanBasicDetails.getTotalDisbursementCharges(), loanBasicDetails.getInArrearsTolerance());
@@ -236,7 +244,8 @@ public class LoansApiResource {
             if (associationParameters.contains("permissions")) {
 
                 if (repaymentSchedule == null) { throw new IllegalStateException(); }
-
+                mandatoryResponseParameters.add("permissions");
+                
                 // FIXME - KW - Waive feature was changed to waive interest at
                 // anytime so this permission checking is probably not needed -
                 // look into.
@@ -259,6 +268,7 @@ public class LoansApiResource {
             }
 
             if (associationParameters.contains("charges")) {
+                mandatoryResponseParameters.add("charges");
                 charges = this.loanChargeReadPlatformService.retrieveLoanCharges(loanId);
                 if (CollectionUtils.isEmpty(charges)) {
                     charges = null; // set back to null so doesnt appear in JSON
@@ -302,7 +312,7 @@ public class LoansApiResource {
                 repaymentStrategyOptions, interestRateFrequencyTypeOptions, amortizationTypeOptions, interestTypeOptions,
                 interestCalculationPeriodTypeOptions, fundOptions, chargeOptions, chargeTemplate, null, guarantors);
 
-        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters(), mandatoryResponseParameters);
         return this.toApiJsonSerializer.serialize(settings, loanAccount, LOAN_DATA_PARAMETERS);
     }
 

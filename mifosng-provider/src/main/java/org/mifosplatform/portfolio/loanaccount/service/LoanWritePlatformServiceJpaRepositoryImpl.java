@@ -121,35 +121,37 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final ApplicationCurrency currency = this.applicationCurrencyRepository.findOneByCode(loan.getPrincpal().getCurrencyCode());
 
         final Map<String, Object> changes = loan.disburse(command, defaultLoanLifecycleStateMachine(), currency);
-        // variable stores Id's of all existing loan transactions (newly created
-        // loan transactions would not have an Id before save)
-        Set<Long> existingLoanTransactionIds = new HashSet<Long>();
-        for(LoanTransaction loanTransaction:loan.getLoanTransactions()){
-            if(!(loanTransaction.getId()==null)){
-                existingLoanTransactionIds.add(loanTransaction.getId());
-            }
-        }
-        this.loanRepository.save(loan);
-
-        if (StringUtils.isNotBlank(noteText)) {
-            Note note = Note.loanNote(loan, noteText);
-            this.noteRepository.save(note);
-        }
-
-        // make a call to accounting
-        if (loan.isAccountingEnabledOnLoanProduct()) {
-            /***
-             * Variable holds list of all newly created loan transactions during
-             * this disbursal
-             **/
-            List<LoanTransaction> newLoanTransactions = new ArrayList<LoanTransaction>();
-            for (LoanTransaction loanTransaction : loan.getLoanTransactions()) {
-                if (!existingLoanTransactionIds.contains(loanTransaction.getId())) {
-                    newLoanTransactions.add(loanTransaction);
+        if (!changes.isEmpty()) {
+            // variable stores Id's of all existing loan transactions (newly created
+            // loan transactions would not have an Id before save)
+            final Set<Long> existingLoanTransactionIds = new HashSet<Long>();
+            for(LoanTransaction loanTransaction:loan.getLoanTransactions()){
+                if(!(loanTransaction.getId()==null)){
+                    existingLoanTransactionIds.add(loanTransaction.getId());
                 }
             }
-            LoanDTO loanDTO = populateLoanDTO(loan, newLoanTransactions);
-            journalEntryWritePlatformService.createJournalEntriesForLoan(loanDTO);
+            this.loanRepository.save(loan);
+    
+            if (StringUtils.isNotBlank(noteText)) {
+                Note note = Note.loanNote(loan, noteText);
+                this.noteRepository.save(note);
+            }
+    
+            // make a call to accounting
+            if (loan.isAccountingEnabledOnLoanProduct()) {
+                /***
+                 * Variable holds list of all newly created loan transactions during
+                 * this disbursal
+                 **/
+                List<LoanTransaction> newLoanTransactions = new ArrayList<LoanTransaction>();
+                for (LoanTransaction loanTransaction : loan.getLoanTransactions()) {
+                    if (!existingLoanTransactionIds.contains(loanTransaction.getId())) {
+                        newLoanTransactions.add(loanTransaction);
+                    }
+                }
+                LoanDTO loanDTO = populateLoanDTO(loan, newLoanTransactions);
+                journalEntryWritePlatformService.createJournalEntriesForLoan(loanDTO);
+            }
         }
 
         return new CommandProcessingResultBuilder() //
@@ -172,12 +174,14 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final Loan loan = retrieveLoanBy(loanId);
 
         final Map<String, Object> changes = loan.undoDisbursal(defaultLoanLifecycleStateMachine());
-        this.loanRepository.save(loan);
-
-        final String noteText = command.stringValueOfParameterNamed("note");
-        if (StringUtils.isNotBlank(noteText)) {
-            Note note = Note.loanNote(loan, noteText);
-            this.noteRepository.save(note);
+        if (!changes.isEmpty()) {
+            this.loanRepository.save(loan);
+    
+            final String noteText = command.stringValueOfParameterNamed("note");
+            if (StringUtils.isNotBlank(noteText)) {
+                Note note = Note.loanNote(loan, noteText);
+                this.noteRepository.save(note);
+            }
         }
 
         return new CommandProcessingResultBuilder() //

@@ -327,7 +327,7 @@ function getBaseURL(docURL)
                 <div class="tocMatrix">
                     <table class=matrixHeading>
                         <tr class="matrixHeadingBG"><td colspan=2 valign="top"><div class="matrixHeadingVerbs"><table><tr><td>RESOURCES</td></tr></table></div></td><td><table><tr><td><div class="matrixHeadingVerbs">POST</div></td></tr><tr><td><div class=matrixHeadingCommands>create/complex update</div></td></tr></table></td><td><table><tr><td><div class="matrixHeadingVerbs">GET</div></td></tr><tr><td><div class=matrixHeadingCommands>read</div></td></tr></table></td><td><table><tr><td><div class="matrixHeadingVerbs">PUT</div></td></tr><tr><td><div class=matrixHeadingCommands>update</div></td></tr></table></td><td><table><tr><td><div class="matrixHeadingVerbs">DELETE</div></td></tr><tr><td><div class=matrixHeadingCommands>delete</div></td></tr></table></td></tr>
-                        <tr><td><a href="#authentication">AUTHENTICATION</a></td><td>authentication</td><td><a href="#authentication_permissions">Verify Authentication</a></td><td></td><td></td><td></td></tr>
+                        <tr><td><a href="#authentication">AUTHENTICATION</a></td><td>authentication</td><td><a href="#authenticate_request">Verify Authentication</a></td><td></td><td></td><td></td></tr>
                         <tr class="alt"><td><a href="#users">USER</a></td><td>users</td><td><a href="#users_create">Create a User</a></td><td><a href="#users_list">List Users</a></td><td></td><td></td></tr>
                         <tr><td></td><td>users/{userId}</td><td></td><td><a href="#users_retrieve">Retrieve a User</a></td><td><a href="#users_update">Update a User</a></td><td><a href="#users_delete">Delete a User</a></td></tr>
                         <tr class="alt"><td><a href="#roles">ROLE</a></td><td>roles</td><td><a href="#roles_create">Create a New Role</a></td><td><a href="#roles_list">List Roles</a></td><td></td><td></td></tr>
@@ -634,9 +634,6 @@ var jqxhr = $.ajax({
             </div>
         </div>
     
-    
-    
-    
 <!-- start of clients api docs -->
         <a id="clients" name="clients" class="old-syle-anchor">&nbsp;</a>
         <div class="method-section">
@@ -673,26 +670,37 @@ var jqxhr = $.ajax({
             </div>
             <div class="method-example">
                 <code class="method-declaration">GET https://Domain Name/api/v1/clients</code>
-<code class="method-response">[ {
-  "id" : 14,
-  "accountNo": "14",
-  "firstname" : "Patrick",
-  "middlename" : "J"
-  "lastname" : "Asare-Frimpong",
-  "displayName" : "Patrick J Asare-Frimpong",
-  "officeId" : 2,
-  "officeName" : "sub branch 1",
-  "externalId" : "123AB",
-  "joinedDate" : [ 2012, 4, 18 ]
-}, {
-  "id" : 13,
-  "accountNo": "0000000AB5",
-  "fullname" : "My micro business Ltd."
-  "displayName" : "My micro business Ltd.",
-  "officeId" : 5,
-  "officeName" : "Majmoua",
-  "joinedDate" : [ 2011, 12, 1 ]
-}... ]
+<code class="method-response">[
+  {
+    "id": 2,
+    "accountNo": "000000002",
+    "externalId": "one/78",
+    "fullname": "New Business to Create",
+    "displayName": "New Business to Create",
+    "officeId": 1,
+    "officeName": "Head Office",
+    "joinedDate": [
+      2006,
+      6,
+      13
+    ]
+  },
+  {
+    "id": 1,
+    "accountNo": "000000001",
+    "externalId": "786YYH7",
+    "firstname": "Petra",
+    "lastname": "Yton",
+    "displayName": "Petra Yton",
+    "officeId": 1,
+    "officeName": "Head Office",
+    "joinedDate": [
+      2009,
+      3,
+      4
+    ]
+  }
+]
 </code>
             </div>
         </div>
@@ -713,23 +721,15 @@ var jqxhr = $.ajax({
             <div class="method-example">
                 <code class="method-declaration">GET https://Domain Name/api/v1/clients/template</code>
 <code class="method-response">{
-  "joinedDate" : [ 2012, 5, 29 ],
-  "allowedOffices" : [ {
-    "id" : 1,
-    "name" : "Demo MFI Head Office"
-  }, {
-    "id" : 2,
-    "name" : "sub branch 1"
-  }, {
-    "id" : 8,
-    "name" : "moi aussi"
-  }, {
-    "id" : 3,
-    "name" : "sub branch 2"
-  }, {
-    "id" : 4,
-    "name" : "sub branch 3"
-  } ]
+  "officeId": 1,
+  "joinedDate": [ 2013, 2, 5],
+  "allowedOffices": [
+    {
+      "id": 1,
+      "name": "Head Office",
+      "nameDecorated": "Head Office"
+    }
+  ]
 }
 </code>
             </div>
@@ -750,13 +750,19 @@ var jqxhr = $.ajax({
             <div class="method-example">
                 <code class="method-declaration">GET https://Domain Name/api/v1/clients/{clientId}</code>
 <code class="method-response">{
-  "id" : 1,
-  "firstname" : "Patrick",
-  "lastname" : "O'Meara",
-  "displayName" : "Patrick O'Meara",
-  "officeId" : 1,
-  "officeName" : "Demo MFI Head Office",
-  "joinedDate" : [ 2009, 1, 4 ]
+  "id": 1,
+  "accountNo": "000000001",
+  "externalId": "786YYH7",
+  "firstname": "Petra",
+  "lastname": "Yton",
+  "displayName": "Petra Yton",
+  "officeId": 1,
+  "officeName": "Head Office",
+  "joinedDate": [
+    2009,
+    3,
+    4
+  ]
 }
 </code>
             </div>
@@ -792,8 +798,8 @@ Request Body:
 </code>
 <code class="method-response">{
   "officeId": 1,
-  "clientId": 83,
-  "resourceId": 83
+  "clientId": 1,
+  "resourceId": 1
 }
 </code>
     </div>
@@ -812,8 +818,8 @@ Request Body:
 </code>
 <code class="method-response">{
   "officeId": 1,
-  "clientId": 84,
-  "resourceId": 84
+  "clientId": 2,
+  "resourceId": 2
 }
 </code>
     </div>
@@ -826,7 +832,7 @@ Request Body:
     </div>
     <div class="method-example">
         <code class="method-declaration">PUT https://Domain Name/api/v1/clients/{clientId}</code>
-<code class="method-request">PUT clients/83
+<code class="method-request">PUT clients/1
 Content-Type: application/json
 Request Body:
 { 
@@ -838,8 +844,8 @@ Request Body:
 </code>
 <code class="method-response">{
   "officeId": 1,
-  "clientId": 83,
-  "resourceId": 83,
+  "clientId": 1,
+  "resourceId": 1,
   "changes": {
     "externalId": "786444UUUYYH7",
     "joinedDate": "09 June 2006",
@@ -1389,30 +1395,29 @@ Request Body:
         <br><br>
         <div class=apiClick>loans/1?associations=all</div>
         <br><br>
-        <div class=apiClick>loans/1?fields=id,principal,annualInterestRate&associations=summary,repaymentSchedule</div>
+        <div class=apiClick>loans/1?fields=id,principal,annualInterestRate&associations=repaymentSchedule,transactions</div>
     </div>
     <div class="method-example">
         <code class="method-declaration">GET https://Domain Name/api/v1/loans/{loanId}</code>
         <code class="method-response">{
-{
   "id": 1,
+  "accountNo": "000000001",
   "clientId": 1,
-  "clientName": "Willie O'Meara",
+  "clientName": "Petra Yton",
   "loanProductId": 1,
-  "loanProductName": "Agricultural Loan",
-  "loanProductDescription": "An agricultural loan given to farmers to help buy crop, stock and machinery. With an arrears tolerance setting of 1,000 CFA, loans are not marked as 'in arrears' or 'in bad standing' if the amount outstanding is less than this. Interest rate is described using monthly percentage rate (MPR) even though the loan typically lasts a year and requires one repayment (typically at time when farmer sells crop)",
+  "loanProductName": "A new loan product for me",
   "status": {
     "id": 100,
     "code": "loanStatusType.submitted.and.pending.approval",
     "value": "Submitted and pending approval"
   },
   "currency": {
-    "code": "XOF",
-    "name": "CFA Franc BCEAO",
-    "decimalPlaces": 0,
-    "displaySymbol": "CFA",
-    "nameCode": "currency.XOF",
-    "displayLabel": "CFA Franc BCEAO (CFA)"
+    "code": "USD",
+    "name": "US Dollar",
+    "decimalPlaces": 2,
+    "displaySymbol": "$",
+    "nameCode": "currency.USD",
+    "displayLabel": "US Dollar ($)"
   },
   "principal": 100000,
   "termFrequency": 12,
@@ -1509,7 +1514,10 @@ Request Body:
 
         </code>
         <code class="method-response">{
- "resourceId": 42
+  "officeId": 1,
+  "clientId": 1,
+  "loanId": 1,
+  "resourceId": 1
 }
         </code>
     </div>
@@ -1542,13 +1550,28 @@ Request Body:
 Content-Type: application/json
 Request Body:
 {
- "dateFormat": "dd MMMM yyyy",
- "eventDate": "07 May 2012",
- "note": "and event note is added"
-}                </code>
-                <code class="method-response">
-{
-"resourceId": 37
+    "locale": "en", 
+    "dateFormat": "dd MMMM yyyy", 
+    "eventDate": "20 September 2011", 
+    "note": "and event note is added" 
+}
+</code>
+                <code class="method-response">{
+  "officeId": 1,
+  "clientId": 1,
+  "loanId": 2,
+  "resourceId": 2,
+  "changes": {
+    "status": {
+      "id": 200,
+      "code": "loanStatusType.approved",
+      "value": "Approved"
+    },
+    "locale": "en",
+    "dateFormat": "dd MMMM yyyy",
+    "approvedOnDate": "20 September 2011",
+    "note": "and event note is added"
+  }
 }
                 </code>
             </div>
@@ -1568,7 +1591,10 @@ Content-Type: application/json
 No Request Body:
                 </code>
                 <code class="method-response">{
-"resourceId": 1
+  "officeId": 1,
+  "clientId": 1,
+  "loanId": 1,
+  "resourceId": 1
 }
                 </code>
             </div>
@@ -1749,27 +1775,20 @@ Request Body:
             </div>
             <div class="method-example">
                 <code class="method-declaration">GET https://Domain Name/api/v1/offices</code>
-<code class="method-response">[ {
-  "id" : 1,
-  "name" : "Demo MFI Head Office",
-  "externalId" : "1",
-  "openingDate" : [ 2009, 1, 1 ],
-  "hierarchy" : "."
-}, {
-  "id" : 2,
-  "name" : "B1",
-  "openingDate" : [ 2012, 4, 1 ],
-  "hierarchy" : ".2.",
-  "parentName" : "Demo MFI Head Office",
-  "parentId" : 1
-}, {
-  "id" : 3,
-  "name" : "B2",
-  "openingDate" : [ 2012, 4, 4 ],
-  "hierarchy" : ".3.",
-  "parentName" : "Demo MFI Head Office",
-  "parentId" : 1
-} ]
+<code class="method-response">[
+  {
+    "id": 1,
+    "name": "Head Office",
+    "nameDecorated": "Head Office",
+    "externalId": "1",
+    "openingDate": [
+      2009,
+      1,
+      1
+    ],
+    "hierarchy": "."
+  }
+]
 </code>
             </div>
         </div>
@@ -1790,17 +1809,14 @@ Request Body:
             <div class="method-example">
                 <code class="method-declaration">GET https://Domain Name/api/v1/offices/template</code>
 <code class="method-response">{
-  "openingDate" : [ 2012, 5, 28 ],
-  "allowedParents" : [ {
-    "id" : 1,
-    "name" : "Demo MFI Head Office"
-  }, {
-    "id" : 2,
-    "name" : "B1"
-  }, {
-    "id" : 3,
-    "name" : "B2"
-  } ]
+  "openingDate": [2013,2,4],
+  "allowedParents": [
+    {
+      "id": 1,
+      "name": "Head Office",
+      "nameDecorated": "Head Office"
+    }
+  ]
 }
 </code>
             </div>
@@ -1820,11 +1836,12 @@ Request Body:
             <div class="method-example">
                 <code class="method-declaration">GET https://Domain Name/api/v1/offices/1</code>
 <code class="method-response">{
-  "id" : 1,
-  "name" : "Demo MFI Head Office",
-  "externalId" : "1",
-  "openingDate" : [ 2009, 1, 1 ],
-  "hierarchy" : "."
+  "id": 1,
+  "name": "Head Office",
+  "nameDecorated": "Head Office",
+  "externalId": "1",
+  "openingDate": [2009,1,1],
+  "hierarchy": "."
 }
 </code>
             </div>
@@ -1876,8 +1893,8 @@ Request Body:
 }
 </code>
 <code class="method-response">{
-  "officeId": 3,
-  "resourceId": 3,
+  "officeId": 1,
+  "resourceId": 1,
   "changes": {
     "name": "Name is updated"
 }
@@ -1994,9 +2011,9 @@ Request Body:
     },
     "annualInterestRate": 21,
     "amortizationType": {
-      "id": 0,
-      "code": "amortizationType.equal.principal",
-      "value": "Equal principle payments"
+      "id": 1,
+      "code": "amortizationType.equal.installments",
+      "value": "Equal installments"
     },
     "interestType": {
       "id": 0,
@@ -2243,9 +2260,9 @@ Request Body:
   },
   "annualInterestRate": 21,
   "amortizationType": {
-    "id": 0,
-    "code": "amortizationType.equal.principal",
-    "value": "Equal principle payments"
+    "id": 1,
+    "code": "amortizationType.equal.installments",
+    "value": "Equal installments"
   },
   "interestType": {
     "id": 0,
@@ -2354,14 +2371,39 @@ Request Body:
 	    <div class="method-example">
 	        <code class="method-declaration">GET https://Domain Name/api/v1/currencies</code>
             <code class="method-response">{
-    "selectedCurrencyOptions" : [ {
-    "code": "USD",
-    "name": "US Dollar",
-    "decimalPlaces": 2,
-    "displaySymbol": "$",
-    "nameCode": "currency.USD",
-    "displayLabel": "US Dollar ($)"
-    }]
+  "selectedCurrencyOptions": [
+    {
+      "code": "USD",
+      "name": "US Dollar",
+      "decimalPlaces": 2,
+      "displaySymbol": "$",
+      "nameCode": "currency.USD",
+      "displayLabel": "US Dollar ($)"
+    }
+  ],
+  "currencyOptions": [
+    {
+      "code": "AFN",
+      "name": "Afghanistan Afghani",
+      "decimalPlaces": 2,
+      "nameCode": "currency.AFN",
+      "displayLabel": "Afghanistan Afghani [AFN]"
+    },
+    {
+      "code": "ALL",
+      "name": "Albanian Lek",
+      "decimalPlaces": 2,
+      "nameCode": "currency.ALL",
+      "displayLabel": "Albanian Lek [ALL]"
+    },
+    {
+      "code": "ZWD",
+      "name": "Zimbabwe Dollar",
+      "decimalPlaces": 2,
+      "nameCode": "currency.ZWD",
+      "displayLabel": "Zimbabwe Dollar [ZWD]"
+    }
+  ]
 }
             </code>
 	    </div>
@@ -2474,7 +2516,7 @@ Request Body:
 }
 </code>
             <code class="method-response">{
-  "resourceId": 2
+  "resourceId": 4
 }
             </code>
         </div>
@@ -2498,8 +2540,12 @@ Request Body:
   },
   {
     "id": 2,
-    "name": "MyNewCode",
-    "systemDefined": false
+    "name": "Gender",
+    "systemDefined": true
+  },{
+    "id": 3,
+    "name": "Education",
+    "systemDefined": true
   }
 ]
             </code>
@@ -2532,8 +2578,8 @@ Request Body:
         <p>Updates the details of a code if it is not system defined.</p>
         </div>
         <div class="method-example">
-            <code class="method-declaration">PUT https://Domain Name/api/v1/codes/2</code>
-            <code class="method-request">PUT codes/2
+            <code class="method-declaration">PUT https://Domain Name/api/v1/codes/4</code>
+            <code class="method-request">PUT codes/4
 Content-Type: application/json
 Request Body:
 {
@@ -2541,7 +2587,7 @@ Request Body:
 }
 </code>
             <code class="method-response">{
-  "resourceId": 2,
+  "resourceId": 4,
   "changes": {
     "name": "MyNewCode(changed)"
   }
@@ -2557,12 +2603,12 @@ Request Body:
         <p>Deletes a code if it is not system defined.</p>
         </div>
         <div class="method-example">
-            <code class="method-declaration">DELETE https://Domain Name/api/v1/codes/2</code>
-            <code class="method-request">DELETE codes/2
+            <code class="method-declaration">DELETE https://Domain Name/api/v1/codes/4</code>
+            <code class="method-request">DELETE codes/4
 Content-Type: application/json
 </code>
             <code class="method-response">{
-  "resourceId": 2
+  "resourceId": 4
 }
             </code>
         </div>
@@ -2803,7 +2849,7 @@ Request Body:
 }
 </code>
             <code class="method-response">{
-  "resourceId": 2
+  "resourceId": 1
 }
             </code>
         </div>
@@ -2821,38 +2867,8 @@ Request Body:
             <code class="method-declaration">GET https://Domain Name/api/v1/charges</code>
             <code class="method-response">[
   {
-    "id": 2,
-    "name": "Loan service fee",
-    "active": false,
-    "penalty": false,
-    "currency": {
-      "code": "USD",
-      "name": "US Dollar",
-      "decimalPlaces": 2,
-      "displaySymbol": "$",
-      "nameCode": "currency.USD",
-      "displayLabel": "US Dollar ($)"
-    },
-    "amount": 230.56,
-    "chargeTimeType": {
-      "id": 1,
-      "code": "chargeTimeType.disbursement",
-      "value": "Disbursement"
-    },
-    "chargeAppliesTo": {
-      "id": 1,
-      "code": "chargeAppliesTo.loan",
-      "value": "Loan"
-    },
-    "chargeCalculationType": {
-      "id": 1,
-      "code": "chargeCalculationType.flat",
-      "value": "Flat"
-    }
-  },
-  {
     "id": 1,
-    "name": "newcharge",
+    "name": "Loan service fee",
     "active": true,
     "penalty": false,
     "currency": {
@@ -2863,7 +2879,7 @@ Request Body:
       "nameCode": "currency.USD",
       "displayLabel": "US Dollar ($)"
     },
-    "amount": 456,
+    "amount": 230.560000,
     "chargeTimeType": {
       "id": 1,
       "code": "chargeTimeType.disbursement",
@@ -2891,14 +2907,14 @@ Request Body:
             <h4>Retrieve a Charge</h4>
             <p>Returns the details of a defined Charge.</p>
             <p>Example Requests: </p>
-            <div class=apiClick>charges/2</div>
+            <div class=apiClick>charges/1</div>
         </div>
         <div class="method-example">
-            <code class="method-declaration">GET https://Domain Name/api/v1/charges/2</code>
+            <code class="method-declaration">GET https://Domain Name/api/v1/charges/1</code>
             <code class="method-response">{
-  "id": 2,
+  "id": 1,
   "name": "Loan service fee",
-  "active": false,
+  "active": true,
   "penalty": false,
   "currency": {
     "code": "USD",
@@ -2908,7 +2924,7 @@ Request Body:
     "nameCode": "currency.USD",
     "displayLabel": "US Dollar ($)"
   },
-  "amount": 230.56,
+  "amount": 230.560000,
   "chargeTimeType": {
     "id": 1,
     "code": "chargeTimeType.disbursement",
@@ -2945,7 +2961,7 @@ Request Body:
 }
 </code>
             <code class="method-response">{
-  "resourceId": 2,
+  "resourceId": 1,
   "changes": {
     "name": "Loan service fee(changed)"
   }
@@ -2961,12 +2977,12 @@ Request Body:
         <p>Deletes a Charge.</p>
         </div>
         <div class="method-example">
-            <code class="method-declaration">DELETE https://Domain Name/api/v1/charges/2</code>
-            <code class="method-request">DELETE charges/2
+            <code class="method-declaration">DELETE https://Domain Name/api/v1/charges/1</code>
+            <code class="method-request">DELETE charges/1
 Content-Type: application/json
 </code>
             <code class="method-response">{
-  "resourceId": 2
+  "resourceId": 1
 }
 </code>
         </div>
@@ -3540,7 +3556,7 @@ Request Body:
 		</div>
 	</div>
     
-    <a id="authentication_permissions" name="authentication_permissions" class="old-syle-anchor">&nbsp;</a>
+    <a id="authenticate_request" name="authenticate_request" class="old-syle-anchor">&nbsp;</a>
 	<div class="method-section">
 	    <div class="method-description">
 	        <h4>Verify authentication</h4>
@@ -3562,9 +3578,7 @@ No Request Body
   ]
 }
 </code>
-	    </div>
-        <div class="method-example">
-            <code class="method-declaration">POST https://Domain Name/api/v1/authentication?username={username}&password={password}</code>
+
 <code class="method-request">POST authentication?username=mifos&password=fail
 Content-Type: application/json
 No Request Body
@@ -3578,7 +3592,7 @@ No Request Body
   "errors": []
 }
 </code>
-        </div>
+	    </div>        
 	</div>    
     
     <!-- start of users api docs -->
@@ -4143,7 +4157,7 @@ Request body:
             <tr><td></td><td>datatables/{datatable}/{apptableId}/{datatableId}</td><td></td><td><a href="#datatables_update_1M">Update Entry in Data Table (One to Many)</a></td><td></td><td><a href="#datatables_delete_1M">Delete Entry in Data Table (One to Many)</a></td></tr>
             <tr class="alt"><td><a href="#reports">REPORT</a></td><td>reports</td><td></td><td><a href="#reports_list">List Reports</a></td><td></td><td></td></tr>
             <tr><td></td><td>reports/{reportName}</td><td></td><td><a href="#report_run">Run a Report</a></td><td></td><td></td></tr>
-            <tr class="alt"><td><a href="#authentication">AUTHENTICATION</a></td><td>authentication</td><td><a href="#authentication_permissions">Verify Authentication</a></td><td></td><td></td><td></td></tr>
+            <tr class="alt"><td><a href="#authentication">AUTHENTICATION</a></td><td>authentication</td><td><a href="#authenticate_request">Verify Authentication</a></td><td></td><td></td><td></td></tr>
             <tr><td><a href="#users">USER</a></td><td>users</td><td><a href="#users_create">Create a User</a></td><td><a href="#users_list">List Users</a></td><td></td><td></td></tr>
             <tr class="alt"><td></td><td>users/{userId}</td><td></td><td><a href="#users_retrieve">Retrieve a User</a></td><td><a href="#users_update">Update a User</a></td><td><a href="#users_delete">Delete a User</a></td></tr>
             <tr><td><a href="#roles">ROLE</a></td><td>roles</td><td><a href="#roles_create">Create a New Role</a></td><td><a href="#roles_list">List Roles</a></td><td></td><td></td></tr>

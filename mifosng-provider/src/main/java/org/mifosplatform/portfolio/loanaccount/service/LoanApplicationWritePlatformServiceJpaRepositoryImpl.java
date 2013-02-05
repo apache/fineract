@@ -294,13 +294,15 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 "User has no authority to approve loan with a date in the past."); }
 
         final Map<String, Object> changes = loan.loanApplicationApproval(command, defaultLoanLifecycleStateMachine());
-        this.loanRepository.save(loan);
-
-        final String noteText = command.stringValueOfParameterNamed("note");
-        if (StringUtils.isNotBlank(noteText)) {
-            Note note = Note.loanNote(loan, noteText);
-            changes.put("note", noteText);
-            this.noteRepository.save(note);
+        if (!changes.isEmpty()) {
+            this.loanRepository.save(loan);
+    
+            final String noteText = command.stringValueOfParameterNamed("note");
+            if (StringUtils.isNotBlank(noteText)) {
+                Note note = Note.loanNote(loan, noteText);
+                changes.put("note", noteText);
+                this.noteRepository.save(note);
+            }
         }
 
         return new CommandProcessingResultBuilder() //
@@ -323,12 +325,14 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         final Loan loan = retrieveLoanBy(loanId);
 
         final Map<String, Object> changes = loan.undoApproval(defaultLoanLifecycleStateMachine());
-        this.loanRepository.save(loan);
-
-        String noteText = command.stringValueOfParameterNamed("note");
-        if (StringUtils.isNotBlank(noteText)) {
-            Note note = Note.loanNote(loan, noteText);
-            this.noteRepository.save(note);
+        if (!changes.isEmpty()) {
+            this.loanRepository.save(loan);
+    
+            String noteText = command.stringValueOfParameterNamed("note");
+            if (StringUtils.isNotBlank(noteText)) {
+                Note note = Note.loanNote(loan, noteText);
+                this.noteRepository.save(note);
+            }
         }
 
         return new CommandProcessingResultBuilder() //
@@ -359,12 +363,14 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 "User has no authority to reject loan with a date in the past."); }
 
         final Map<String, Object> changes = loan.loanApplicationRejection(command, defaultLoanLifecycleStateMachine());
-        this.loanRepository.save(loan);
-
-        String noteText = command.stringValueOfParameterNamed("note");
-        if (StringUtils.isNotBlank(noteText)) {
-            Note note = Note.loanNote(loan, noteText);
-            this.noteRepository.save(note);
+        if (!changes.isEmpty()) {
+            this.loanRepository.save(loan);
+    
+            String noteText = command.stringValueOfParameterNamed("note");
+            if (StringUtils.isNotBlank(noteText)) {
+                Note note = Note.loanNote(loan, noteText);
+                this.noteRepository.save(note);
+            }
         }
 
         return new CommandProcessingResultBuilder() //
@@ -395,12 +401,14 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 "User has no authority to mark loan as withdrawn by applicant with a date in the past."); }
 
         final Map<String, Object> changes = loan.loanApplicationWithdrawnByApplicant(command, defaultLoanLifecycleStateMachine());
-        this.loanRepository.save(loan);
-
-        String noteText = command.stringValueOfParameterNamed("note");
-        if (StringUtils.isNotBlank(noteText)) {
-            Note note = Note.loanNote(loan, noteText);
-            this.noteRepository.save(note);
+        if (!changes.isEmpty()) {
+            this.loanRepository.save(loan);
+    
+            String noteText = command.stringValueOfParameterNamed("note");
+            if (StringUtils.isNotBlank(noteText)) {
+                Note note = Note.loanNote(loan, noteText);
+                this.noteRepository.save(note);
+            }
         }
 
         return new CommandProcessingResultBuilder() //

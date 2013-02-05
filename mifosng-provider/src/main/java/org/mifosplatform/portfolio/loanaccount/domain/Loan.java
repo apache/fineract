@@ -803,32 +803,32 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
         if (!statusEnum.hasStateOf(LoanStatus.fromInt(this.loanStatus))) {
             this.loanStatus = statusEnum.getValue();
             actualChanges.put("status", LoanEnumerations.status(this.loanStatus));
-        }
+            
+            LocalDate rejectedOn = command.localDateValueOfParameterNamed("rejectedOnDate");
+            if (rejectedOn == null) {
+                rejectedOn = command.localDateValueOfParameterNamed("eventDate");
+            }
 
-        LocalDate rejectedOn = command.localDateValueOfParameterNamed("rejectedOnDate");
-        if (rejectedOn == null) {
-            rejectedOn = command.localDateValueOfParameterNamed("eventDate");
-        }
+            final Locale locale = new Locale(command.locale());
+            final DateTimeFormatter fmt = DateTimeFormat.forPattern(command.dateFormat()).withLocale(locale);
 
-        final Locale locale = new Locale(command.locale());
-        final DateTimeFormatter fmt = DateTimeFormat.forPattern(command.dateFormat()).withLocale(locale);
+            this.rejectedOnDate = rejectedOn.toDate();
+            this.closedOnDate = rejectedOn.toDate();
+            actualChanges.put("locale", command.locale());
+            actualChanges.put("dateFormat", command.dateFormat());
+            actualChanges.put("rejectedOnDate", rejectedOn.toString(fmt));
+            actualChanges.put("closedOnDate", rejectedOn.toString(fmt));
 
-        this.rejectedOnDate = rejectedOn.toDate();
-        this.closedOnDate = rejectedOn.toDate();
-        actualChanges.put("locale", command.locale());
-        actualChanges.put("dateFormat", command.dateFormat());
-        actualChanges.put("rejectedOnDate", rejectedOn.toString(fmt));
-        actualChanges.put("closedOnDate", rejectedOn.toString(fmt));
-
-        if (rejectedOn.isBefore(getSubmittedOnDate())) {
-            final String errorMessage = "The date on which a loan is rejected cannot be before its submittal date: "
-                    + getSubmittedOnDate().toString();
-            throw new InvalidLoanStateTransitionException("reject", "cannot.be.before.submittal.date", errorMessage, rejectedOn,
-                    getSubmittedOnDate());
-        }
-        if (rejectedOn.isAfter(new LocalDate())) {
-            final String errorMessage = "The date on which a loan is rejected cannot be in the future.";
-            throw new InvalidLoanStateTransitionException("reject", "cannot.be.a.future.date", errorMessage, rejectedOn);
+            if (rejectedOn.isBefore(getSubmittedOnDate())) {
+                final String errorMessage = "The date on which a loan is rejected cannot be before its submittal date: "
+                        + getSubmittedOnDate().toString();
+                throw new InvalidLoanStateTransitionException("reject", "cannot.be.before.submittal.date", errorMessage, rejectedOn,
+                        getSubmittedOnDate());
+            }
+            if (rejectedOn.isAfter(new LocalDate())) {
+                final String errorMessage = "The date on which a loan is rejected cannot be in the future.";
+                throw new InvalidLoanStateTransitionException("reject", "cannot.be.a.future.date", errorMessage, rejectedOn);
+            }
         }
 
         return actualChanges;
@@ -843,33 +843,33 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
         if (!statusEnum.hasStateOf(LoanStatus.fromInt(this.loanStatus))) {
             this.loanStatus = statusEnum.getValue();
             actualChanges.put("status", LoanEnumerations.status(this.loanStatus));
-        }
+            
+            LocalDate withdrawnOn = command.localDateValueOfParameterNamed("withdrawnOnDate");
+            if (withdrawnOn == null) {
+                withdrawnOn = command.localDateValueOfParameterNamed("eventDate");
+            }
 
-        LocalDate withdrawnOn = command.localDateValueOfParameterNamed("withdrawnOnDate");
-        if (withdrawnOn == null) {
-            withdrawnOn = command.localDateValueOfParameterNamed("eventDate");
-        }
+            final Locale locale = new Locale(command.locale());
+            final DateTimeFormatter fmt = DateTimeFormat.forPattern(command.dateFormat()).withLocale(locale);
 
-        final Locale locale = new Locale(command.locale());
-        final DateTimeFormatter fmt = DateTimeFormat.forPattern(command.dateFormat()).withLocale(locale);
+            this.withdrawnOnDate = withdrawnOn.toDate();
+            this.closedOnDate = withdrawnOn.toDate();
+            actualChanges.put("locale", command.locale());
+            actualChanges.put("dateFormat", command.dateFormat());
+            actualChanges.put("withdrawnOnDate", withdrawnOn.toString(fmt));
+            actualChanges.put("closedOnDate", withdrawnOn.toString(fmt));
 
-        this.withdrawnOnDate = withdrawnOn.toDate();
-        this.closedOnDate = withdrawnOn.toDate();
-        actualChanges.put("locale", command.locale());
-        actualChanges.put("dateFormat", command.dateFormat());
-        actualChanges.put("withdrawnOnDate", withdrawnOn.toString(fmt));
-        actualChanges.put("closedOnDate", withdrawnOn.toString(fmt));
+            if (withdrawnOn.isBefore(getSubmittedOnDate())) {
+                final String errorMessage = "The date on which a loan is withdrawn cannot be before its submittal date: "
+                        + getSubmittedOnDate().toString();
+                throw new InvalidLoanStateTransitionException("reject", "cannot.be.before.submittal.date", errorMessage, command,
+                        getSubmittedOnDate());
+            }
 
-        if (withdrawnOn.isBefore(getSubmittedOnDate())) {
-            final String errorMessage = "The date on which a loan is withdrawn cannot be before its submittal date: "
-                    + getSubmittedOnDate().toString();
-            throw new InvalidLoanStateTransitionException("reject", "cannot.be.before.submittal.date", errorMessage, command,
-                    getSubmittedOnDate());
-        }
-
-        if (withdrawnOn.isAfter(new LocalDate())) {
-            final String errorMessage = "The date on which a loan is withdrawn cannot be in the future.";
-            throw new InvalidLoanStateTransitionException("reject", "cannot.be.a.future.date", errorMessage, command);
+            if (withdrawnOn.isAfter(new LocalDate())) {
+                final String errorMessage = "The date on which a loan is withdrawn cannot be in the future.";
+                throw new InvalidLoanStateTransitionException("reject", "cannot.be.a.future.date", errorMessage, command);
+            }
         }
 
         return actualChanges;
@@ -883,34 +883,37 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
         if (!statusEnum.hasStateOf(LoanStatus.fromInt(this.loanStatus))) {
             this.loanStatus = statusEnum.getValue();
             actualChanges.put("status", LoanEnumerations.status(this.loanStatus));
-        }
+            
+            // only do below if status has changed in the 'approval' case
+            LocalDate approvedOn = command.localDateValueOfParameterNamed("approvedOnDate");
+            String approvedOnDateChange = command.stringValueOfParameterNamed("approvedOnDate");
+            if (approvedOn == null) {
+                approvedOn = command.localDateValueOfParameterNamed("eventDate");
+                approvedOnDateChange = command.stringValueOfParameterNamed("eventDate");
+            }
 
-        LocalDate approvedOn = command.localDateValueOfParameterNamed("approvedOnDate");
-        if (approvedOn == null) {
-            approvedOn = command.localDateValueOfParameterNamed("eventDate");
-        }
+            this.approvedOnDate = approvedOn.toDate();
+            actualChanges.put("locale", command.locale());
+            actualChanges.put("dateFormat", command.dateFormat());
+            actualChanges.put("approvedOnDate", approvedOnDateChange);
 
-        this.approvedOnDate = approvedOn.toDate();
-        actualChanges.put("locale", command.locale());
-        actualChanges.put("dateFormat", command.dateFormat());
-        actualChanges.put("approvedOnDate", command.stringValueOfParameterNamed("approvedOnDate"));
+            final LocalDate submittalDate = new LocalDate(this.submittedOnDate);
+            if (approvedOn.isBefore(submittalDate)) {
+                final String errorMessage = "The date on which a loan is approved cannot be before its submittal date: "
+                        + submittalDate.toString();
+                throw new InvalidLoanStateTransitionException("approval", "cannot.be.before.submittal.date", errorMessage, getApprovedOnDate(),
+                        submittalDate);
+            }
+            if (approvedOn.isAfter(new LocalDate())) {
+                final String errorMessage = "The date on which a loan is approved cannot be in the future.";
+                throw new InvalidLoanStateTransitionException("approval", "cannot.be.a.future.date", errorMessage, getApprovedOnDate());
+            }
 
-        final LocalDate submittalDate = new LocalDate(this.submittedOnDate);
-        if (approvedOn.isBefore(submittalDate)) {
-            final String errorMessage = "The date on which a loan is approved cannot be before its submittal date: "
-                    + submittalDate.toString();
-            throw new InvalidLoanStateTransitionException("approval", "cannot.be.before.submittal.date", errorMessage, getApprovedOnDate(),
-                    submittalDate);
-        }
-        if (approvedOn.isAfter(new LocalDate())) {
-            final String errorMessage = "The date on which a loan is approved cannot be in the future.";
-            throw new InvalidLoanStateTransitionException("approval", "cannot.be.a.future.date", errorMessage, getApprovedOnDate());
-        }
-
-        if (this.loanofficer != null) {
-            final LoanOfficerAssignmentHistory loanOfficerAssignmentHistory = LoanOfficerAssignmentHistory.createNew(this,
-                    this.loanofficer, approvedOn);
-            this.loanOfficerHistory.add(loanOfficerAssignmentHistory);
+            if (this.loanofficer != null) {
+                final LoanOfficerAssignmentHistory loanOfficerAssignmentHistory = LoanOfficerAssignmentHistory.createNew(this,
+                        this.loanofficer, approvedOn);
+                this.loanOfficerHistory.add(loanOfficerAssignmentHistory);
+            }
         }
 
         return actualChanges;
@@ -925,12 +928,12 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
         if (!statusEnum.hasStateOf(currentStatus)) {
             this.loanStatus = statusEnum.getValue();
             actualChanges.put("status", LoanEnumerations.status(this.loanStatus));
+            
+            this.approvedOnDate = null;
+            actualChanges.put("approvedOnDate", "");
+
+            this.loanOfficerHistory.clear();
         }
-
-        this.approvedOnDate = null;
-        actualChanges.put("approvedOnDate", "");
-
-        this.loanOfficerHistory.clear();
 
         return actualChanges;
     }
@@ -952,28 +955,28 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
         if (!statusEnum.hasStateOf(LoanStatus.fromInt(this.loanStatus))) {
             this.loanStatus = statusEnum.getValue();
             actualChanges.put("status", LoanEnumerations.status(this.loanStatus));
-        }
+            
+            LocalDate disbursedOn = command.localDateValueOfParameterNamed("disbursedOnDate");
+            if (disbursedOn == null) {
+                disbursedOn = command.localDateValueOfParameterNamed("eventDate");
+            }
 
-        LocalDate disbursedOn = command.localDateValueOfParameterNamed("disbursedOnDate");
-        if (disbursedOn == null) {
-            disbursedOn = command.localDateValueOfParameterNamed("eventDate");
-        }
+            final Locale locale = new Locale(command.locale());
+            final DateTimeFormatter fmt = DateTimeFormat.forPattern(command.dateFormat()).withLocale(locale);
 
-        final Locale locale = new Locale(command.locale());
-        final DateTimeFormatter fmt = DateTimeFormat.forPattern(command.dateFormat()).withLocale(locale);
+            this.disbursedOnDate = disbursedOn.toDate();
+            this.expectedMaturityDate = determineExpectedMaturityDate().toDate();
 
-        this.disbursedOnDate = disbursedOn.toDate();
-        this.expectedMaturityDate = determineExpectedMaturityDate().toDate();
+            actualChanges.put("locale", command.locale());
+            actualChanges.put("dateFormat", command.dateFormat());
+            actualChanges.put("disbursedOnDate", disbursedOn.toString(fmt));
+            actualChanges.put("expectedMaturityDate", LocalDate.fromDateFields(this.expectedDisbursedOnDate).toString(fmt));
 
-        actualChanges.put("locale", command.locale());
-        actualChanges.put("dateFormat", command.dateFormat());
-        actualChanges.put("disbursedOnDate", disbursedOn.toString(fmt));
-        actualChanges.put("expectedMaturityDate", LocalDate.fromDateFields(this.expectedDisbursedOnDate).toString(fmt));
+            handleDisbursementTransaction(disbursedOn);
 
-        handleDisbursementTransaction(disbursedOn);
-
-        if (isRepaymentScheduleRegenerationRequiredForDisbursement(disbursedOn)) {
-            regenerateRepaymentSchedule(currency);
+            if (isRepaymentScheduleRegenerationRequiredForDisbursement(disbursedOn)) {
+                regenerateRepaymentSchedule(currency);
+            }
         }
 
         return actualChanges;
@@ -1067,19 +1070,17 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
         if (!statusEnum.hasStateOf(currentStatus)) {
             this.loanStatus = statusEnum.getValue();
             actualChanges.put("status", LoanEnumerations.status(this.loanStatus));
+            
+            this.approvedOnDate = null;
+            actualChanges.put("disbursedOnDate", "");
+
+            updateLoanToPreDisbursalState();
         }
-
-        this.approvedOnDate = null;
-        actualChanges.put("disbursedOnDate", "");
-
-        updateLoanToPreDisbursalState();
 
         return actualChanges;
     }
 
     private void updateLoanToPreDisbursalState() {
-        this.loanStatus = LoanStatus.APPROVED.getValue();
-
         this.loanTransactions.clear();
         this.disbursedOnDate = null;
 

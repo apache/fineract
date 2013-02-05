@@ -21,6 +21,7 @@ INSERT INTO `mifosplatform-tenants`.`tenants`
 (`name`, `identifier`,`schema_name`)
 VALUES
 ('Default Demo Tenant', 'default' ,'mifostenant-default'),
+('API Docs Demo', 'apidocs' ,'mifostenant-apidocs'),
 ('GK Maarg', 'gk-maarg' ,'mifostenant-gk-maarg'),
 ('Latam Demo', 'latam' ,'mifostenant-latam'),
 ('Bare bones Demo', 'barebones' ,'mifostenant-barebones');

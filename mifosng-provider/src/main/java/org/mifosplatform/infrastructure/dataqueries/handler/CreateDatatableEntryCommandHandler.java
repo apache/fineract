@@ -25,8 +25,9 @@ public class CreateDatatableEntryCommandHandler implements NewCommandSourceHandl
 
         this.writePlatformService.newDatatableEntry(command.entityName(), command.getApptableId(), command);
 
-        // FIXME - kw - need to find office and either group/client/loan that
-        // this datatable is against.
-        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(command.getApptableId()).build();
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(command.commandId()) //
+                .withEntityId(command.getApptableId()) //
+                .build();
     }
 }
