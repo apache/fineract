@@ -36,7 +36,7 @@ CREATE TABLE `acc_gl_account` (
   UNIQUE KEY `acc_gl_code` (`gl_code`),
   KEY `FK_ACC_0000000001` (`parent_id`),
   CONSTRAINT `FK_ACC_0000000001` FOREIGN KEY (`parent_id`) REFERENCES `acc_gl_account` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=98 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -45,6 +45,7 @@ CREATE TABLE `acc_gl_account` (
 
 LOCK TABLES `acc_gl_account` WRITE;
 /*!40000 ALTER TABLE `acc_gl_account` DISABLE KEYS */;
+INSERT INTO `acc_gl_account` VALUES (1,'Petty Cash Balances',NULL,'11100',0,1,2,1,NULL),(2,'Cash in Valut 1',NULL,'11101',0,1,1,1,NULL),(3,'Bank Balances',NULL,'11200',0,1,2,1,NULL),(4,'Centenary Opening Account',NULL,'11201',0,1,1,1,NULL),(5,'Centenary Expense Account',NULL,'11202',0,1,1,1,NULL),(6,'Centenary USD Account',NULL,'11203',0,1,1,1,NULL),(7,'Loans and Advances',NULL,'13100',0,1,2,1,NULL),(8,'Loans to Clients',NULL,'13101',0,1,1,1,NULL),(9,'Outstanding Interest',NULL,'13102',0,1,1,1,NULL),(10,'Outstanding Late Payment Interest',NULL,'13103',0,1,1,1,NULL),(11,'Outstanding Bank Fees to be collected',NULL,'13104',0,1,1,1,NULL),(12,'WriteOff Accounts',NULL,'13200',0,1,2,1,NULL),(13,'Write-offs (use for funds coming in)',NULL,'13201',0,1,1,1,NULL),(14,'Write-offs outstanding principal',NULL,'13202',0,1,1,1,NULL),(15,'Write-offs outstanding interest',NULL,'13203',0,1,1,1,NULL),(16,'Write-offs collected bank fees',NULL,'13204',0,1,1,1,NULL),(17,'Write-offs hardware/furniture',NULL,'13205',0,1,1,1,NULL),(18,'Fixed Assets',NULL,'14100',0,1,2,1,NULL),(19,'Office Equipment',NULL,'14101',0,1,1,1,NULL),(20,'Suspense Items (unidentified deposits)',NULL,'15000',0,1,2,1,NULL),(21,'Assets',NULL,'10000',0,1,2,1,NULL),(22,'Liabilities',NULL,'20000',0,1,2,2,NULL),(23,'Shares Account',NULL,'26100',0,1,2,2,NULL),(24,'Shares Captial',NULL,'26101',0,1,1,2,NULL),(25,'Donated Equity',NULL,'26300',0,1,2,2,NULL),(26,'Donated Equity Ameropa Foundation',NULL,'26301',0,1,1,2,NULL),(27,'Donated Equity e.h',NULL,'26302',0,1,1,2,NULL),(28,'Overpaid Amounts',NULL,'27000',0,1,2,2,NULL),(29,'Loss Provision',NULL,'28000',0,1,2,2,NULL),(30,'Provision Outstanding Principal',NULL,'28001',0,1,1,2,NULL),(31,'Provision Oustanding Interest',NULL,'28002',0,1,1,2,NULL),(32,'Income',NULL,'30000',0,1,2,4,NULL),(33,'Interest Income from Loans',NULL,'31100',0,1,2,4,NULL),(34,'Interest on Loans',NULL,'31101',0,1,1,4,NULL),(35,'Late Payment Interest',NULL,'31102',0,1,1,4,NULL),(36,'Income from Micro credit & Lending Activities',NULL,'31300',0,1,2,4,NULL),(37,'Collected Bank Fees Receivable',NULL,'6201',0,1,1,4,NULL),(38,'Deposits from Loans Write Off',NULL,'31400',0,1,2,4,NULL),(39,'Expenditure',NULL,'40000',0,1,2,5,NULL),(40,'Office Expenditure Account',NULL,'42100',0,1,2,5,NULL),(41,'Water Charges',NULL,'42102',0,1,1,5,NULL),(42,'Electricity Charges',NULL,'42103',0,1,1,5,NULL),(43,'Printing and Stationary',NULL,'42105',0,1,1,5,NULL),(44,'Office Rent',NULL,'42107',0,1,1,5,NULL),(45,'Marketing Expense',NULL,'42109',0,1,1,5,NULL),(46,'Office utilities',NULL,'42112',0,1,1,5,'(supplies, toiletries, kitchen)'),(47,'Furniture',NULL,'42113',0,1,1,5,NULL),(48,'CEDA Meeting Expense',NULL,'42114',0,1,1,5,NULL),(49,'Employee Personal Expsense Account',NULL,'42200',0,1,2,5,NULL),(50,'Salary Alice',NULL,'42201',0,1,1,5,NULL),(51,'Salary Irene',NULL,'42202',0,1,1,5,NULL),(52,'Salary Richard',NULL,'42203',0,1,1,5,NULL),(53,'Salary Loan Officer TBA',NULL,'42204',0,1,1,5,NULL),(54,'Medical Insurance Alice & Family',NULL,'42205',0,1,1,5,NULL),(55,'Medical Insurance Irene',NULL,'42206',0,1,1,5,NULL),(56,'Medical Insurance Richard',NULL,'42207',0,1,1,5,NULL),(57,'Medical Insurance Loan Officer TBA',NULL,'42208',0,1,1,5,NULL),(58,'PAYE all employees',NULL,'42209',0,1,1,5,NULL),(59,'NSSF all employees',NULL,'42210',0,1,1,5,NULL),(60,'Lunch Allowances all employees',NULL,'42211',0,1,1,5,NULL),(61,'IT software and maintenance',NULL,'42300',0,1,2,5,NULL),(62,'Mifos maintenance contract 12 months',NULL,'42301',0,1,1,5,NULL),(63,'VPS Contract 12 months',NULL,'42302',0,1,1,5,NULL),(64,'Bulk SMS Service',NULL,'42303',0,1,1,5,NULL),(65,'Support Accounting Software',NULL,'42304',0,1,1,5,NULL),(66,'Mifos Instance Setup',NULL,'42305',0,1,1,5,NULL),(67,'Misc support expense',NULL,'42306',0,1,1,5,NULL),(68,'Warid Mobile Line',NULL,'42307',0,1,1,5,NULL),(69,'Landline',NULL,'42308',0,1,1,5,NULL),(70,'Modem Alice',NULL,'42309',0,1,1,5,NULL),(71,'Modem Irene',NULL,'42310',0,1,1,5,NULL),(72,'Modem Richard',NULL,'42311',0,1,1,5,NULL),(73,'Repairs',NULL,'42312',0,1,1,5,NULL),(74,'Airtime Expenses',NULL,'42400',0,1,2,5,NULL),(75,'Airtime Alice',NULL,'42401',0,1,1,5,NULL),(76,'Airtime Richard',NULL,'42402',0,1,1,5,NULL),(77,'Airtime Loan Office TBA',NULL,'42403',0,1,1,5,NULL),(78,'Special Airtime Alice',NULL,'42404',0,1,1,5,NULL),(79,'Transportation',NULL,'42500',0,1,2,5,NULL),(80,'Flat monthly transportation cost',NULL,'42501',0,1,1,5,NULL),(81,'Faciliation cost for Richard',NULL,'42502',0,1,1,5,NULL),(82,'Faciliation cost for Loan Officer TBA',NULL,'42503',0,1,1,5,NULL),(83,'Consultancy Expenses',NULL,'42600',0,1,2,5,NULL),(84,'Audit Fees',NULL,'42601',0,1,1,5,NULL),(85,'Legal Fees',NULL,'42602',0,1,1,5,NULL),(86,'Miscellaneous Expenses Account',NULL,'42700',0,1,2,5,NULL),(87,'MFI License',NULL,'42703',0,1,1,5,NULL),(88,'Sundy Expenses',NULL,'42704',0,1,1,5,NULL),(89,'Bank Fees',NULL,'42800',0,1,2,5,NULL),(90,'Bank Charges Operating Account',NULL,'42801',0,1,1,5,NULL),(91,'Bank Charges Expense Account',NULL,'42802',0,1,1,5,NULL),(92,'E.H Account',NULL,'42900',0,1,2,5,NULL),(93,'Airtime',NULL,'42901',0,1,1,5,NULL),(94,'Modem',NULL,'42902',0,1,1,5,NULL),(95,'Meals',NULL,'42903',0,1,1,5,NULL),(96,'Transportation',NULL,'42904',0,1,1,5,NULL),(97,'Miscellaneous',NULL,'42905',0,1,1,5,NULL);
 /*!40000 ALTER TABLE `acc_gl_account` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -121,7 +122,7 @@ CREATE TABLE `acc_gl_journal_entry` (
   CONSTRAINT `FK_acc_gl_journal_entry_m_appuser` FOREIGN KEY (`createdby_id`) REFERENCES `m_appuser` (`id`),
   CONSTRAINT `FK_acc_gl_journal_entry_m_appuser_2` FOREIGN KEY (`lastmodifiedby_id`) REFERENCES `m_appuser` (`id`),
   CONSTRAINT `FK_acc_gl_journal_entry_m_office` FOREIGN KEY (`office_id`) REFERENCES `m_office` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -130,6 +131,7 @@ CREATE TABLE `acc_gl_journal_entry` (
 
 LOCK TABLES `acc_gl_journal_entry` WRITE;
 /*!40000 ALTER TABLE `acc_gl_journal_entry` DISABLE KEYS */;
+INSERT INTO `acc_gl_journal_entry` VALUES (1,8,2,NULL,'1',0,1,'2009-01-09',2,'1000000.000000',NULL,'LOAN',1,1,1,'2013-02-06 16:21:20','2013-02-06 16:21:20'),(2,4,2,NULL,'1',0,1,'2009-01-09',1,'1000000.000000',NULL,'LOAN',1,1,1,'2013-02-06 16:21:20','2013-02-06 16:21:20');
 /*!40000 ALTER TABLE `acc_gl_journal_entry` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -147,7 +149,7 @@ CREATE TABLE `acc_product_mapping` (
   `product_type` smallint(5) DEFAULT NULL,
   `financial_account_type` smallint(5) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -156,6 +158,7 @@ CREATE TABLE `acc_product_mapping` (
 
 LOCK TABLES `acc_product_mapping` WRITE;
 /*!40000 ALTER TABLE `acc_product_mapping` DISABLE KEYS */;
+INSERT INTO `acc_product_mapping` VALUES (1,4,1,1,1),(2,8,1,1,2),(3,34,1,1,3),(4,37,1,1,4),(5,35,1,1,5),(6,97,1,1,6);
 /*!40000 ALTER TABLE `acc_product_mapping` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -400,7 +403,7 @@ CREATE TABLE `m_charge` (
 
 LOCK TABLES `m_charge` WRITE;
 /*!40000 ALTER TABLE `m_charge` DISABLE KEYS */;
-INSERT INTO `m_charge` VALUES (1,'Bank Fee (Per Loan Repayment)','UGX',1,2,1,'1500.000000',0,1,0);
+INSERT INTO `m_charge` VALUES (1,'Bank Fee (per installment)','UGX',1,2,1,'1500.000000',0,1,0);
 /*!40000 ALTER TABLE `m_charge` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -438,7 +441,7 @@ CREATE TABLE `m_client` (
 
 LOCK TABLES `m_client` WRITE;
 /*!40000 ALTER TABLE `m_client` DISABLE KEYS */;
-INSERT INTO `m_client` VALUES (1,'000000001',2,NULL,'First','Kampala','Client',NULL,'First Kampala Client',NULL,'2009-01-02',0);
+INSERT INTO `m_client` VALUES (1,'000000001',2,NULL,'Jesus','Mary','Kampala',NULL,'Jesus Mary Kampala',NULL,'2009-01-02',0);
 /*!40000 ALTER TABLE `m_client` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -893,7 +896,7 @@ CREATE TABLE `m_loan` (
 
 LOCK TABLES `m_loan` WRITE;
 /*!40000 ALTER TABLE `m_loan` DISABLE KEYS */;
-INSERT INTO `m_loan` VALUES (1,'000000001',NULL,1,NULL,1,NULL,2,NULL,100,'UGX',2,'1000000.000000',NULL,'24.000000',3,'24.000000',1,1,12,2,1,2,12,1,NULL,'2009-01-02 00:00:00',NULL,'2009-01-09',NULL,NULL,NULL,'2010-01-09',NULL,NULL,NULL,NULL,NULL,NULL,1,'2013-02-06 13:33:16','2013-02-06 13:33:16',1,2);
+INSERT INTO `m_loan` VALUES (1,'000000001',NULL,1,NULL,1,NULL,2,NULL,300,'UGX',2,'1000000.000000',NULL,'24.000000',3,'24.000000',1,1,12,2,1,2,12,1,NULL,'2009-01-02 00:00:00','2009-01-06 00:00:00','2009-01-09',NULL,NULL,'2009-01-09','2010-01-09',NULL,NULL,NULL,NULL,NULL,NULL,1,'2013-02-06 16:21:01','2013-02-06 16:21:20',1,2);
 /*!40000 ALTER TABLE `m_loan` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -959,7 +962,7 @@ CREATE TABLE `m_loan_officer_assignment_history` (
   KEY `fk_m_loan_officer_assignment_history_0002` (`loan_officer_id`),
   CONSTRAINT `fk_m_loan_officer_assignment_history_0001` FOREIGN KEY (`loan_id`) REFERENCES `m_loan` (`id`),
   CONSTRAINT `fk_m_loan_officer_assignment_history_0002` FOREIGN KEY (`loan_officer_id`) REFERENCES `m_staff` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -968,6 +971,7 @@ CREATE TABLE `m_loan_officer_assignment_history` (
 
 LOCK TABLES `m_loan_officer_assignment_history` WRITE;
 /*!40000 ALTER TABLE `m_loan_officer_assignment_history` DISABLE KEYS */;
+INSERT INTO `m_loan_officer_assignment_history` VALUES (1,1,2,'2009-01-06',NULL,1,'2013-02-06 16:21:12','2013-02-06 16:21:12',1);
 /*!40000 ALTER TABLE `m_loan_officer_assignment_history` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1016,7 +1020,7 @@ CREATE TABLE `m_loan_repayment_schedule` (
 
 LOCK TABLES `m_loan_repayment_schedule` WRITE;
 /*!40000 ALTER TABLE `m_loan_repayment_schedule` DISABLE KEYS */;
-INSERT INTO `m_loan_repayment_schedule` VALUES (1,1,'2009-01-09','2009-02-09',1,'83333.330000',NULL,NULL,'20000.000000',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'\0',1,'2013-02-06 13:33:16','2013-02-06 13:33:16',1,NULL),(2,1,'2009-02-09','2009-03-09',2,'83333.330000',NULL,NULL,'20000.000000',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'\0',1,'2013-02-06 13:33:16','2013-02-06 13:33:16',1,NULL),(3,1,'2009-03-09','2009-04-09',3,'83333.330000',NULL,NULL,'20000.000000',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'\0',1,'2013-02-06 13:33:16','2013-02-06 13:33:16',1,NULL),(4,1,'2009-04-09','2009-05-09',4,'83333.330000',NULL,NULL,'20000.000000',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'\0',1,'2013-02-06 13:33:16','2013-02-06 13:33:16',1,NULL),(5,1,'2009-05-09','2009-06-09',5,'83333.330000',NULL,NULL,'20000.000000',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'\0',1,'2013-02-06 13:33:16','2013-02-06 13:33:16',1,NULL),(6,1,'2009-06-09','2009-07-09',6,'83333.330000',NULL,NULL,'20000.000000',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'\0',1,'2013-02-06 13:33:16','2013-02-06 13:33:16',1,NULL),(7,1,'2009-07-09','2009-08-09',7,'83333.330000',NULL,NULL,'20000.000000',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'\0',1,'2013-02-06 13:33:16','2013-02-06 13:33:16',1,NULL),(8,1,'2009-08-09','2009-09-09',8,'83333.330000',NULL,NULL,'20000.000000',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'\0',1,'2013-02-06 13:33:16','2013-02-06 13:33:16',1,NULL),(9,1,'2009-09-09','2009-10-09',9,'83333.330000',NULL,NULL,'20000.000000',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'\0',1,'2013-02-06 13:33:16','2013-02-06 13:33:16',1,NULL),(10,1,'2009-10-09','2009-11-09',10,'83333.330000',NULL,NULL,'20000.000000',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'\0',1,'2013-02-06 13:33:16','2013-02-06 13:33:16',1,NULL),(11,1,'2009-11-09','2009-12-09',11,'83333.330000',NULL,NULL,'20000.000000',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'\0',1,'2013-02-06 13:33:16','2013-02-06 13:33:16',1,NULL),(12,1,'2009-12-09','2010-01-09',12,'83333.370000',NULL,NULL,'20000.000000',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'\0',1,'2013-02-06 13:33:16','2013-02-06 13:33:16',1,NULL);
+INSERT INTO `m_loan_repayment_schedule` VALUES (1,1,'2009-01-09','2009-02-09',1,'83333.330000',NULL,NULL,'20000.000000',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'\0',1,'2013-02-06 16:21:01','2013-02-06 16:21:01',1,NULL),(2,1,'2009-02-09','2009-03-09',2,'83333.330000',NULL,NULL,'20000.000000',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'\0',1,'2013-02-06 16:21:01','2013-02-06 16:21:01',1,NULL),(3,1,'2009-03-09','2009-04-09',3,'83333.330000',NULL,NULL,'20000.000000',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'\0',1,'2013-02-06 16:21:01','2013-02-06 16:21:01',1,NULL),(4,1,'2009-04-09','2009-05-09',4,'83333.330000',NULL,NULL,'20000.000000',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'\0',1,'2013-02-06 16:21:01','2013-02-06 16:21:01',1,NULL),(5,1,'2009-05-09','2009-06-09',5,'83333.330000',NULL,NULL,'20000.000000',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'\0',1,'2013-02-06 16:21:01','2013-02-06 16:21:01',1,NULL),(6,1,'2009-06-09','2009-07-09',6,'83333.330000',NULL,NULL,'20000.000000',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'\0',1,'2013-02-06 16:21:01','2013-02-06 16:21:01',1,NULL),(7,1,'2009-07-09','2009-08-09',7,'83333.330000',NULL,NULL,'20000.000000',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'\0',1,'2013-02-06 16:21:01','2013-02-06 16:21:01',1,NULL),(8,1,'2009-08-09','2009-09-09',8,'83333.330000',NULL,NULL,'20000.000000',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'\0',1,'2013-02-06 16:21:01','2013-02-06 16:21:01',1,NULL),(9,1,'2009-09-09','2009-10-09',9,'83333.330000',NULL,NULL,'20000.000000',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'\0',1,'2013-02-06 16:21:01','2013-02-06 16:21:01',1,NULL),(10,1,'2009-10-09','2009-11-09',10,'83333.330000',NULL,NULL,'20000.000000',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'\0',1,'2013-02-06 16:21:01','2013-02-06 16:21:01',1,NULL),(11,1,'2009-11-09','2009-12-09',11,'83333.330000',NULL,NULL,'20000.000000',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'\0',1,'2013-02-06 16:21:01','2013-02-06 16:21:01',1,NULL),(12,1,'2009-12-09','2010-01-09',12,'83333.370000',NULL,NULL,'20000.000000',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'\0',1,'2013-02-06 16:21:01','2013-02-06 16:21:01',1,NULL);
 /*!40000 ALTER TABLE `m_loan_repayment_schedule` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1047,7 +1051,7 @@ CREATE TABLE `m_loan_transaction` (
   KEY `FKCFCEA426FC69F3F1` (`contra_id`),
   CONSTRAINT `FKCFCEA42640BE0710` FOREIGN KEY (`loan_id`) REFERENCES `m_loan` (`id`),
   CONSTRAINT `FKCFCEA426FC69F3F1` FOREIGN KEY (`contra_id`) REFERENCES `m_loan_transaction` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1056,6 +1060,7 @@ CREATE TABLE `m_loan_transaction` (
 
 LOCK TABLES `m_loan_transaction` WRITE;
 /*!40000 ALTER TABLE `m_loan_transaction` DISABLE KEYS */;
+INSERT INTO `m_loan_transaction` VALUES (1,1,1,NULL,'2009-01-09','1000000.000000',1,'2013-02-06 16:21:20','2013-02-06 16:21:20',1,'0.000000','0.000000','0.000000','0.000000');
 /*!40000 ALTER TABLE `m_loan_transaction` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1134,7 +1139,7 @@ CREATE TABLE `m_office` (
 
 LOCK TABLES `m_office` WRITE;
 /*!40000 ALTER TABLE `m_office` DISABLE KEYS */;
-INSERT INTO `m_office` VALUES (1,NULL,'.','1','Ceda Microfinance Ltd','2009-01-01'),(2,1,'.2.','2','Uganda (Kampala)','2009-01-01');
+INSERT INTO `m_office` VALUES (1,NULL,'.','1','CEDA Microfinance Ltd.','2009-01-01'),(2,1,'.2.','2','Uganda (Kampala)','2009-01-01');
 /*!40000 ALTER TABLE `m_office` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1265,7 +1270,7 @@ CREATE TABLE `m_portfolio_command_source` (
   KEY `loan_id` (`office_id`),
   CONSTRAINT `FK_m_checker_m_appuser` FOREIGN KEY (`checker_id`) REFERENCES `m_appuser` (`id`),
   CONSTRAINT `FK_m_maker_m_appuser` FOREIGN KEY (`maker_id`) REFERENCES `m_appuser` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1274,7 +1279,7 @@ CREATE TABLE `m_portfolio_command_source` (
 
 LOCK TABLES `m_portfolio_command_source` WRITE;
 /*!40000 ALTER TABLE `m_portfolio_command_source` DISABLE KEYS */;
-INSERT INTO `m_portfolio_command_source` VALUES (1,'UPDATE','USER',1,NULL,NULL,NULL,'/users/1',1,'{\"username\":\"admin\"}',1,'2013-02-06 13:15:05',NULL,NULL,1),(2,'CREATE','USER',1,NULL,NULL,NULL,'/users/template',2,'{\"username\":\"keithwoodlock\",\"firstname\":\"Keith\",\"lastname\":\"Woodlock\",\"email\":\"keithwoodlock@gmail.com\",\"officeId\":\"1\",\"roles\":[\"1\"]}',1,'2013-02-06 13:15:32',NULL,NULL,1),(3,'UPDATE','USER',1,NULL,NULL,NULL,'/users/2',2,'{\"passwordEncoded\":\"4f607e9b6cffbe7d3db92d4bfa3391c7aa751727b4ea29d08fddf9dd72e6e7e3\"}',1,'2013-02-06 13:15:43',NULL,NULL,1),(4,'UPDATE','CURRENCY',NULL,NULL,NULL,NULL,'/currencies',NULL,'{\"currencies\":[\"UGX\"]}',1,'2013-02-06 13:15:58',NULL,NULL,1),(5,'UPDATE','OFFICE',1,NULL,NULL,NULL,'/offices/1',1,'{\"name\":\"Ceda Microfinance Ltd\"}',1,'2013-02-06 13:16:14',NULL,NULL,1),(6,'CREATE','OFFICE',2,NULL,NULL,NULL,'/offices/template',2,'{\"name\":\"Uganda (Kampala)\",\"parentId\":\"1\",\"dateFormat\":\"yyyy-MM-dd\",\"locale\":\"en\",\"openingDate\":\"2009-01-01\",\"externalId\":\"2\"}',1,'2013-02-06 13:18:49',NULL,NULL,1),(7,'CREATE','STAFF',1,NULL,NULL,NULL,'/staff/template',1,'{\"officeId\":\"1\",\"firstname\":\"CedaHO\",\"lastname\":\"LoanOfficer\",\"isLoanOfficer\":\"true\"}',1,'2013-02-06 13:19:21',NULL,NULL,1),(8,'CREATE','STAFF',2,NULL,NULL,NULL,'/staff/template',2,'{\"officeId\":\"2\",\"firstname\":\"Kampala\",\"lastname\":\"LoanOfficer\",\"isLoanOfficer\":\"true\"}',1,'2013-02-06 13:19:35',NULL,NULL,1),(9,'CREATE','CHARGE',NULL,NULL,NULL,NULL,'/charges/template',1,'{\"locale\":\"en\",\"name\":\"Bank Fee (Per Loan Repayment)\",\"amount\":\"1500\",\"currencyCode\":\"UGX\",\"chargeAppliesTo\":\"1\",\"chargeTimeType\":\"2\",\"chargeCalculationType\":\"1\",\"active\":\"true\",\"penalty\":\"false\"}',1,'2013-02-06 13:20:08',NULL,NULL,1),(10,'CREATE','LOANPRODUCT',NULL,NULL,NULL,NULL,'/loanproducts/template',1,'{\"locale\":\"en\",\"name\":\"Kampala LP (no accounting)\",\"description\":\"Typical loan product for Kampala office (with accounting disabled on this one)\",\"currencyCode\":\"UGX\",\"digitsAfterDecimal\":\"2\",\"principal\":\"1,000,000\",\"numberOfRepayments\":\"12\",\"repaymentEvery\":\"1\",\"repaymentFrequencyType\":\"2\",\"transactionProcessingStrategyId\":\"2\",\"interestRatePerPeriod\":\"24\",\"interestRateFrequencyType\":\"3\",\"amortizationType\":\"1\",\"interestType\":\"1\",\"interestCalculationPeriodType\":\"1\",\"inArrearsTolerance\":\"\",\"accountingType\":\"1\",\"fundSourceAccountId\":\"\",\"loanPortfolioAccountId\":\"\",\"receivableInterestAccountId\":\"\",\"receivableFeeAccountId\":\"\",\"receivablePenaltyAccountId\":\"\",\"interestOnLoanAccountId\":\"\",\"incomeFromFeeAccountId\":\"\",\"incomeFromPenaltyAccountId\":\"\",\"writeOffAccountId\":\"\"}',1,'2013-02-06 13:22:32',NULL,NULL,1),(11,'CREATE','CLIENT',2,NULL,1,NULL,'/clients/template',1,'{\"officeId\":\"2\",\"firstname\":\"First\",\"middlename\":\"Kampala\",\"lastname\":\"Client\",\"fullname\":\"\",\"externalId\":\"\",\"dateFormat\":\"yyyy-MM-dd\",\"locale\":\"en\",\"joinedDate\":\"2009-01-02\"}',1,'2013-02-06 13:27:38',NULL,NULL,1),(12,'CREATE','LOAN',2,NULL,1,1,'/loans',1,'{\"clientId\":\"1\",\"groupId\":\"\",\"dateFormat\":\"yyyy-MM-dd\",\"locale\":\"en\",\"productId\":\"1\",\"loanOfficerId\":\"2\",\"submittedOnDate\":\"2009-01-02\",\"submittedOnNote\":\"\",\"principal\":\"1,000,000.00\",\"loanTermFrequency\":\"12\",\"loanTermFrequencyType\":\"2\",\"numberOfRepayments\":\"12\",\"repaymentEvery\":\"1\",\"repaymentFrequencyType\":\"2\",\"transactionProcessingStrategyId\":\"2\",\"expectedDisbursementDate\":\"2009-01-09\",\"repaymentsStartingFromDate\":\"\",\"interestRatePerPeriod\":\"24\",\"interestRateFrequencyType\":\"3\",\"amortizationType\":\"1\",\"interestType\":\"1\",\"interestCalculationPeriodType\":\"1\",\"interestChargedFromDate\":\"\",\"inArrearsTolerance\":\"\"}',1,'2013-02-06 13:33:16',NULL,NULL,1);
+INSERT INTO `m_portfolio_command_source` VALUES (1,'CREATE','USER',1,NULL,NULL,NULL,'/users/template',2,'{\"username\":\"keithwoodlock\",\"firstname\":\"Keith\",\"lastname\":\"Woodlock\",\"email\":\"keithwoodlock@gmail.com\",\"officeId\":\"1\",\"roles\":[\"1\"]}',1,'2013-02-06 15:51:15',NULL,NULL,1),(2,'UPDATE','USER',1,NULL,NULL,NULL,'/users/2',2,'{\"passwordEncoded\":\"4f607e9b6cffbe7d3db92d4bfa3391c7aa751727b4ea29d08fddf9dd72e6e7e3\"}',1,'2013-02-06 15:51:27',NULL,NULL,1),(3,'UPDATE','OFFICE',1,NULL,NULL,NULL,'/offices/1',1,'{\"name\":\"CEDA Microfinance Ltd\"}',1,'2013-02-06 15:53:54',NULL,NULL,1),(4,'CREATE','OFFICE',2,NULL,NULL,NULL,'/offices/template',2,'{\"name\":\"Uganda (Kampala)\",\"parentId\":\"1\",\"dateFormat\":\"yyyy-MM-dd\",\"locale\":\"en\",\"openingDate\":\"2009-01-01\",\"externalId\":\"2\"}',1,'2013-02-06 15:55:56',NULL,NULL,1),(5,'CREATE','STAFF',1,NULL,NULL,NULL,'/staff/template',1,'{\"officeId\":\"1\",\"firstname\":\"CEDA HO\",\"lastname\":\"LoanOfficer\",\"isLoanOfficer\":\"true\"}',1,'2013-02-06 16:03:32',NULL,NULL,1),(6,'CREATE','STAFF',2,NULL,NULL,NULL,'/staff/template',2,'{\"officeId\":\"2\",\"firstname\":\"Kampala\",\"lastname\":\"LoanOfficer\",\"isLoanOfficer\":\"true\"}',1,'2013-02-06 16:03:48',NULL,NULL,1),(7,'UPDATE','CURRENCY',NULL,NULL,NULL,NULL,'/currencies',NULL,'{\"currencies\":[\"UGX\"]}',1,'2013-02-06 16:06:36',NULL,NULL,1),(8,'CREATE','CHARGE',NULL,NULL,NULL,NULL,'/charges/template',1,'{\"locale\":\"en\",\"name\":\"Bank Fee (per installment)\",\"amount\":\"1500\",\"currencyCode\":\"UGX\",\"chargeAppliesTo\":\"1\",\"chargeTimeType\":\"2\",\"chargeCalculationType\":\"1\",\"active\":\"true\",\"penalty\":\"false\"}',1,'2013-02-06 16:06:56',NULL,NULL,1),(9,'CREATE','LOANPRODUCT',NULL,NULL,NULL,NULL,'/loanproducts/template',1,'{\"locale\":\"en\",\"name\":\"Kampala Product (with cash accounting)\",\"description\":\"Typical Kampala loan product with cash accounting enabled for testing.\",\"currencyCode\":\"UGX\",\"digitsAfterDecimal\":\"2\",\"principal\":\"1,000,000\",\"numberOfRepayments\":\"12\",\"repaymentEvery\":\"1\",\"repaymentFrequencyType\":\"2\",\"transactionProcessingStrategyId\":\"2\",\"interestRatePerPeriod\":\"24\",\"interestRateFrequencyType\":\"3\",\"amortizationType\":\"1\",\"interestType\":\"1\",\"interestCalculationPeriodType\":\"1\",\"inArrearsTolerance\":\"\",\"accountingType\":\"2\",\"fundSourceAccountId\":\"4\",\"loanPortfolioAccountId\":\"8\",\"receivableInterestAccountId\":\"\",\"receivableFeeAccountId\":\"\",\"receivablePenaltyAccountId\":\"\",\"interestOnLoanAccountId\":\"34\",\"incomeFromFeeAccountId\":\"37\",\"incomeFromPenaltyAccountId\":\"35\",\"writeOffAccountId\":\"97\"}',1,'2013-02-06 16:13:55',NULL,NULL,1),(10,'CREATE','CLIENT',1,NULL,1,NULL,'/clients/template',1,'{\"officeId\":\"1\",\"firstname\":\"Jesus\",\"middlename\":\"Mary\",\"lastname\":\"Kampala\",\"fullname\":\"\",\"externalId\":\"\",\"dateFormat\":\"yyyy-MM-dd\",\"locale\":\"en\",\"joinedDate\":\"2009-01-02\"}',1,'2013-02-06 16:15:06',NULL,NULL,1),(11,'UPDATE','CLIENT',2,NULL,1,NULL,'/clients/1',1,'{\"officeId\":2}',1,'2013-02-06 16:20:11',NULL,NULL,1),(12,'CREATE','LOAN',2,NULL,1,1,'/loans',1,'{\"clientId\":\"1\",\"groupId\":\"\",\"dateFormat\":\"yyyy-MM-dd\",\"locale\":\"en\",\"productId\":\"1\",\"loanOfficerId\":\"2\",\"submittedOnDate\":\"2009-01-02\",\"submittedOnNote\":\"\",\"principal\":\"1,000,000.00\",\"loanTermFrequency\":\"12\",\"loanTermFrequencyType\":\"2\",\"numberOfRepayments\":\"12\",\"repaymentEvery\":\"1\",\"repaymentFrequencyType\":\"2\",\"transactionProcessingStrategyId\":\"2\",\"expectedDisbursementDate\":\"2009-01-09\",\"repaymentsStartingFromDate\":\"\",\"interestRatePerPeriod\":\"24\",\"interestRateFrequencyType\":\"3\",\"amortizationType\":\"1\",\"interestType\":\"1\",\"interestCalculationPeriodType\":\"1\",\"interestChargedFromDate\":\"\",\"inArrearsTolerance\":\"\"}',1,'2013-02-06 16:21:01',NULL,NULL,1),(13,'APPROVE','LOAN',2,NULL,1,1,'/loans/1',1,'{\"status\":{\"id\":200,\"code\":\"loanStatusType.approved\",\"value\":\"Approved\"},\"locale\":\"en\",\"dateFormat\":\"yyyy-MM-dd\",\"approvedOnDate\":\"2009-01-06\"}',1,'2013-02-06 16:21:12',NULL,NULL,1),(14,'DISBURSE','LOAN',2,NULL,1,1,'/loans/1',1,'{\"status\":{\"id\":300,\"code\":\"loanStatusType.active\",\"value\":\"Active\"},\"locale\":\"en\",\"dateFormat\":\"yyyy-MM-dd\",\"disbursedOnDate\":\"2009-01-09\",\"expectedMaturityDate\":\"2009-01-09\"}',1,'2013-02-06 16:21:20',NULL,NULL,1);
 /*!40000 ALTER TABLE `m_portfolio_command_source` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1373,7 +1378,7 @@ CREATE TABLE `m_product_loan` (
 
 LOCK TABLES `m_product_loan` WRITE;
 /*!40000 ALTER TABLE `m_product_loan` DISABLE KEYS */;
-INSERT INTO `m_product_loan` VALUES (1,'UGX',2,'1000000.000000',NULL,'Kampala LP (no accounting)','Typical loan product for Kampala office (with accounting disabled on this one)',NULL,'24.000000',3,'24.000000',1,1,1,2,12,1,1,2);
+INSERT INTO `m_product_loan` VALUES (1,'UGX',2,'1000000.000000',NULL,'Kampala Product (with cash accounting)','Typical Kampala loan product with cash accounting enabled for testing.',NULL,'24.000000',3,'24.000000',1,1,1,2,12,1,2,2);
 /*!40000 ALTER TABLE `m_product_loan` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1676,7 +1681,7 @@ CREATE TABLE `m_staff` (
 
 LOCK TABLES `m_staff` WRITE;
 /*!40000 ALTER TABLE `m_staff` DISABLE KEYS */;
-INSERT INTO `m_staff` VALUES (1,1,1,'CedaHO','LoanOfficer','LoanOfficer, CedaHO'),(2,1,2,'Kampala','LoanOfficer','LoanOfficer, Kampala');
+INSERT INTO `m_staff` VALUES (1,1,1,'CEDA HO','LoanOfficer','LoanOfficer, CEDA HO'),(2,1,2,'Kampala','LoanOfficer','LoanOfficer, Kampala');
 /*!40000 ALTER TABLE `m_staff` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1885,4 +1890,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2013-02-06 13:45:29
+-- Dump completed on 2013-02-06 16:25:31

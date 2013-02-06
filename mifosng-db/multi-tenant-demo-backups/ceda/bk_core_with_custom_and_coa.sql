@@ -1,6 +1,6 @@
 -- MySQL dump 10.13  Distrib 5.1.60, for Win32 (ia32)
 --
--- Host: localhost    Database: mifostenant-default
+-- Host: localhost    Database: mifostenant-ceda
 -- ------------------------------------------------------
 -- Server version	5.1.60-community
 
@@ -148,7 +148,7 @@ CREATE TABLE `acc_product_mapping` (
   `product_type` smallint(5) DEFAULT NULL,
   `financial_account_type` smallint(5) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -157,6 +157,7 @@ CREATE TABLE `acc_product_mapping` (
 
 LOCK TABLES `acc_product_mapping` WRITE;
 /*!40000 ALTER TABLE `acc_product_mapping` DISABLE KEYS */;
+INSERT INTO `acc_product_mapping` VALUES (1,4,1,1,1),(2,8,1,1,2),(3,34,1,1,3),(4,37,1,1,4),(5,35,1,1,5),(6,97,1,1,6);
 /*!40000 ALTER TABLE `acc_product_mapping` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -186,93 +187,124 @@ INSERT INTO `c_configuration` VALUES (1,'maker-checker',0);
 UNLOCK TABLES;
 
 --
--- Table structure for table `extra_client_details`
+-- Table structure for table `client additional data`
 --
 
-DROP TABLE IF EXISTS `extra_client_details`;
+DROP TABLE IF EXISTS `client additional data`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `extra_client_details` (
+CREATE TABLE `client additional data` (
   `client_id` bigint(20) NOT NULL,
-  `Business Description` varchar(100) DEFAULT NULL,
-  `Years in Business` int(11) DEFAULT NULL,
-  `Gender_cd` int(11) DEFAULT NULL,
-  `Education_cv` varchar(60) DEFAULT NULL,
-  `Next Visit` date DEFAULT NULL,
-  `Highest Rate Paid` decimal(19,6) DEFAULT NULL,
-  `Comment` text,
+  `Gender_cd` int(11) NOT NULL,
+  `Date of Birth` date NOT NULL,
+  `Home address` text NOT NULL,
+  `Telephone number` varchar(20) NOT NULL,
+  `Telephone number (2nd)` varchar(20) NOT NULL,
+  `Email address` varchar(50) NOT NULL,
+  `EducationLevel_cd` int(11) NOT NULL,
+  `MaritalStatus_cd` int(11) NOT NULL,
+  `Number of children` int(11) NOT NULL,
+  `Citizenship` varchar(50) NOT NULL,
+  `PovertyStatus_cd` int(11) NOT NULL,
+  `YesNo_cd_Employed` int(11) NOT NULL,
+  `FieldOfEmployment_cd_Field of employment` int(11) DEFAULT NULL,
+  `Employer name` varchar(50) DEFAULT NULL,
+  `Number of years` int(11) DEFAULT NULL,
+  `Monthly salary` decimal(19,6) DEFAULT NULL,
+  `YesNo_cd_Self employed` int(11) NOT NULL,
+  `FieldOfEmployment_cd_Field of self-employment` int(11) DEFAULT NULL,
+  `Business address` text,
+  `Number of employees` int(11) DEFAULT NULL,
+  `Monthly salaries paid` decimal(19,6) DEFAULT NULL,
+  `Monthly net income of business activity` decimal(19,6) DEFAULT NULL,
+  `Monthly rent` decimal(19,6) DEFAULT NULL,
+  `Other income generating activities` varchar(100) DEFAULT NULL,
+  `YesNo_cd_Bookkeeping` int(11) DEFAULT NULL,
+  `YesNo_cd_Loans with other institutions` int(11) NOT NULL,
+  `From whom` varchar(100) DEFAULT NULL,
+  `Amount` decimal(19,6) DEFAULT NULL,
+  `Interest rate pa` decimal(19,6) DEFAULT NULL,
+  `Number of people depending on overal income` int(11) NOT NULL,
+  `YesNo_cd_Bank account` int(11) NOT NULL,
+  `YesNo_cd_Business plan provided` int(11) NOT NULL,
+  `YesNo_cd_Access to internet` int(11) DEFAULT NULL,
+  `Introduced by` varchar(100) DEFAULT NULL,
+  `Known to introducer since` date NOT NULL,
+  `Last visited by` varchar(100) DEFAULT NULL,
+  `Last visited on` date NOT NULL,
   PRIMARY KEY (`client_id`),
-  CONSTRAINT `FK_extra_client_details` FOREIGN KEY (`client_id`) REFERENCES `m_client` (`id`)
+  CONSTRAINT `FK_client_additional_data` FOREIGN KEY (`client_id`) REFERENCES `m_client` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `extra_client_details`
+-- Dumping data for table `client additional data`
 --
 
-LOCK TABLES `extra_client_details` WRITE;
-/*!40000 ALTER TABLE `extra_client_details` DISABLE KEYS */;
-/*!40000 ALTER TABLE `extra_client_details` ENABLE KEYS */;
+LOCK TABLES `client additional data` WRITE;
+/*!40000 ALTER TABLE `client additional data` DISABLE KEYS */;
+/*!40000 ALTER TABLE `client additional data` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
--- Table structure for table `extra_family_details`
+-- Table structure for table `impact measurement`
 --
 
-DROP TABLE IF EXISTS `extra_family_details`;
+DROP TABLE IF EXISTS `impact measurement`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `extra_family_details` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `client_id` bigint(20) NOT NULL,
-  `Name` varchar(40) DEFAULT NULL,
-  `Date of Birth` date DEFAULT NULL,
-  `Points Score` int(11) DEFAULT NULL,
-  `Education_cd_Highest` int(11) DEFAULT NULL,
-  `Other Notes` text,
-  PRIMARY KEY (`id`),
-  KEY `FK_Extra Family Details Data_1` (`client_id`),
-  CONSTRAINT `FK_family_details` FOREIGN KEY (`client_id`) REFERENCES `m_client` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `extra_family_details`
---
-
-LOCK TABLES `extra_family_details` WRITE;
-/*!40000 ALTER TABLE `extra_family_details` DISABLE KEYS */;
-/*!40000 ALTER TABLE `extra_family_details` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `extra_loan_details`
---
-
-DROP TABLE IF EXISTS `extra_loan_details`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `extra_loan_details` (
+CREATE TABLE `impact measurement` (
   `loan_id` bigint(20) NOT NULL,
-  `Business Description` varchar(100) DEFAULT NULL,
-  `Years in Business` int(11) DEFAULT NULL,
-  `Gender_cd` int(11) DEFAULT NULL,
-  `Education_cv` varchar(60) DEFAULT NULL,
-  `Next Visit` date DEFAULT NULL,
-  `Highest Rate Paid` decimal(19,6) DEFAULT NULL,
-  `Comment` text,
+  `YesNo_cd_RepaidOnSchedule` int(11) NOT NULL,
+  `ReasonNotRepaidOnSchedule` varchar(200) DEFAULT NULL,
+  `How was Loan Amount Invested` varchar(200) NOT NULL,
+  `Additional Income Generated` decimal(19,6) NOT NULL,
+  `Additional Income Used For` text NOT NULL,
+  `YesNo_cd_NewJobsCreated` int(11) NOT NULL,
+  `Number of Jobs Created` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`loan_id`),
-  CONSTRAINT `FK_extra_loan_details` FOREIGN KEY (`loan_id`) REFERENCES `m_loan` (`id`)
+  CONSTRAINT `FK_impact measurement` FOREIGN KEY (`loan_id`) REFERENCES `m_loan` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `extra_loan_details`
+-- Dumping data for table `impact measurement`
 --
 
-LOCK TABLES `extra_loan_details` WRITE;
-/*!40000 ALTER TABLE `extra_loan_details` DISABLE KEYS */;
-/*!40000 ALTER TABLE `extra_loan_details` ENABLE KEYS */;
+LOCK TABLES `impact measurement` WRITE;
+/*!40000 ALTER TABLE `impact measurement` DISABLE KEYS */;
+/*!40000 ALTER TABLE `impact measurement` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `loan additional data`
+--
+
+DROP TABLE IF EXISTS `loan additional data`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `loan additional data` (
+  `loan_id` bigint(20) NOT NULL,
+  `PurposeOfLoan_cd` int(11) NOT NULL,
+  `CollateralType_cd` int(11) NOT NULL,
+  `Collateral notes` text NOT NULL,
+  `YesNo_cd_Guarantor` int(11) NOT NULL,
+  `Guarantor name` varchar(100) DEFAULT NULL,
+  `Guarantor relation` varchar(100) DEFAULT NULL,
+  `Guarantor address` varchar(100) DEFAULT NULL,
+  `Guarantor telephone number` varchar(20) DEFAULT NULL,
+  PRIMARY KEY (`loan_id`),
+  CONSTRAINT `FK_loan_additional_data` FOREIGN KEY (`loan_id`) REFERENCES `m_loan` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `loan additional data`
+--
+
+LOCK TABLES `loan additional data` WRITE;
+/*!40000 ALTER TABLE `loan additional data` DISABLE KEYS */;
+/*!40000 ALTER TABLE `loan additional data` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -300,7 +332,7 @@ CREATE TABLE `m_appuser` (
   UNIQUE KEY `username_org` (`username`),
   KEY `FKB3D587CE0DD567A` (`office_id`),
   CONSTRAINT `FKB3D587CE0DD567A` FOREIGN KEY (`office_id`) REFERENCES `m_office` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -309,7 +341,7 @@ CREATE TABLE `m_appuser` (
 
 LOCK TABLES `m_appuser` WRITE;
 /*!40000 ALTER TABLE `m_appuser` DISABLE KEYS */;
-INSERT INTO `m_appuser` VALUES (1,0,1,'mifos','App','Administrator','5787039480429368bf94732aacc771cd0a3ea02bcf504ffe1185ab94213bc63a','demomfi@mifos.org','\0','','','','');
+INSERT INTO `m_appuser` VALUES (1,0,1,'admin','App','Administrator','5787039480429368bf94732aacc771cd0a3ea02bcf504ffe1185ab94213bc63a','demomfi@mifos.org','\0','','','',''),(2,0,1,'keithwoodlock','Keith','Woodlock','4f607e9b6cffbe7d3db92d4bfa3391c7aa751727b4ea29d08fddf9dd72e6e7e3','keithwoodlock@gmail.com','\0','','','','');
 /*!40000 ALTER TABLE `m_appuser` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -337,7 +369,7 @@ CREATE TABLE `m_appuser_role` (
 
 LOCK TABLES `m_appuser_role` WRITE;
 /*!40000 ALTER TABLE `m_appuser_role` DISABLE KEYS */;
-INSERT INTO `m_appuser_role` VALUES (1,1);
+INSERT INTO `m_appuser_role` VALUES (1,1),(2,1);
 /*!40000 ALTER TABLE `m_appuser_role` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -361,7 +393,7 @@ CREATE TABLE `m_charge` (
   `is_deleted` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -370,6 +402,7 @@ CREATE TABLE `m_charge` (
 
 LOCK TABLES `m_charge` WRITE;
 /*!40000 ALTER TABLE `m_charge` DISABLE KEYS */;
+INSERT INTO `m_charge` VALUES (1,'Bank Fee (per installment)','UGX',1,2,1,'1500.000000',0,1,0);
 /*!40000 ALTER TABLE `m_charge` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -459,7 +492,7 @@ CREATE TABLE `m_code` (
   `is_system_defined` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `code_name` (`code_name`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -468,7 +501,7 @@ CREATE TABLE `m_code` (
 
 LOCK TABLES `m_code` WRITE;
 /*!40000 ALTER TABLE `m_code` DISABLE KEYS */;
-INSERT INTO `m_code` VALUES (1,'Customer Identifier',1),(2,'Gender',1),(3,'Education',1);
+INSERT INTO `m_code` VALUES (1,'Customer Identifier',1),(2,'Gender',0),(3,'YesNo',0),(4,'FieldOfEmployment',0),(5,'EducationLevel',0),(6,'MaritalStatus',0),(7,'PovertyStatus',0),(8,'PurposeOfLoan',0),(9,'CollateralType',0);
 /*!40000 ALTER TABLE `m_code` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -488,7 +521,7 @@ CREATE TABLE `m_code_value` (
   UNIQUE KEY `code_value` (`code_id`,`code_value`),
   KEY `FKCFCEA42640BE071Z` (`code_id`),
   CONSTRAINT `FKCFCEA42640BE071Z` FOREIGN KEY (`code_id`) REFERENCES `m_code` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=28 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -497,7 +530,7 @@ CREATE TABLE `m_code_value` (
 
 LOCK TABLES `m_code_value` WRITE;
 /*!40000 ALTER TABLE `m_code_value` DISABLE KEYS */;
-INSERT INTO `m_code_value` VALUES (1,1,'Passport number',0),(2,2,'Male',1),(3,2,'Female',2),(4,3,'Primary',1),(5,3,'Secondary',2),(6,3,'University',3);
+INSERT INTO `m_code_value` VALUES (2,1,'Passport',1),(3,1,'Id',2),(4,1,'Drivers License',3),(5,1,'Any Other Id Type',4),(6,2,'gender.Male',1),(7,2,'gender.Female',2),(8,3,'option.Yes',1),(9,3,'option.No',2),(10,4,'option.Banker',1),(11,4,'option.SoftwareDeveloper',2),(12,5,'option.University',1),(13,5,'option.Secondary',2),(14,5,'option.Primary',3),(15,6,'option.Married',1),(16,6,'option.Single',2),(17,6,'option.Divorced',3),(18,6,'option.Widow',4),(19,7,'option.PovertyStatus.Band1',1),(20,7,'option.PovertyStatus.Band2',2),(21,7,'option.PovertyStatus.Band3',3),(22,8,'option.Agriculture',1),(23,8,'option.Manufacturing',2),(24,8,'option.HousingImprovement',3),(25,9,'option.House',1),(26,9,'option.Television',2),(27,9,'option.Gold',3);
 /*!40000 ALTER TABLE `m_code_value` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1091,7 +1124,7 @@ CREATE TABLE `m_office` (
   UNIQUE KEY `externalid_org` (`external_id`),
   KEY `FK2291C477E2551DCC` (`parent_id`),
   CONSTRAINT `FK2291C477E2551DCC` FOREIGN KEY (`parent_id`) REFERENCES `m_office` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1100,7 +1133,7 @@ CREATE TABLE `m_office` (
 
 LOCK TABLES `m_office` WRITE;
 /*!40000 ALTER TABLE `m_office` DISABLE KEYS */;
-INSERT INTO `m_office` VALUES (1,NULL,'.','1','Head Office','2009-01-01');
+INSERT INTO `m_office` VALUES (1,NULL,'.','1','CEDA Microfinance Ltd.','2009-01-01'),(2,1,'.2.','2','Uganda (Kampala)','2009-01-01');
 /*!40000 ALTER TABLE `m_office` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1152,7 +1185,7 @@ CREATE TABLE `m_organisation_currency` (
   `display_symbol` varchar(10) DEFAULT NULL,
   `internationalized_name_code` varchar(50) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=23 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1161,7 +1194,7 @@ CREATE TABLE `m_organisation_currency` (
 
 LOCK TABLES `m_organisation_currency` WRITE;
 /*!40000 ALTER TABLE `m_organisation_currency` DISABLE KEYS */;
-INSERT INTO `m_organisation_currency` VALUES (21,'USD',2,'US Dollar','$','currency.USD');
+INSERT INTO `m_organisation_currency` VALUES (22,'UGX',2,'Uganda Shilling','USh','currency.UGX');
 /*!40000 ALTER TABLE `m_organisation_currency` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1231,7 +1264,7 @@ CREATE TABLE `m_portfolio_command_source` (
   KEY `loan_id` (`office_id`),
   CONSTRAINT `FK_m_checker_m_appuser` FOREIGN KEY (`checker_id`) REFERENCES `m_appuser` (`id`),
   CONSTRAINT `FK_m_maker_m_appuser` FOREIGN KEY (`maker_id`) REFERENCES `m_appuser` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1240,6 +1273,7 @@ CREATE TABLE `m_portfolio_command_source` (
 
 LOCK TABLES `m_portfolio_command_source` WRITE;
 /*!40000 ALTER TABLE `m_portfolio_command_source` DISABLE KEYS */;
+INSERT INTO `m_portfolio_command_source` VALUES (1,'CREATE','USER',1,NULL,NULL,NULL,'/users/template',2,'{\"username\":\"keithwoodlock\",\"firstname\":\"Keith\",\"lastname\":\"Woodlock\",\"email\":\"keithwoodlock@gmail.com\",\"officeId\":\"1\",\"roles\":[\"1\"]}',1,'2013-02-06 15:51:15',NULL,NULL,1),(2,'UPDATE','USER',1,NULL,NULL,NULL,'/users/2',2,'{\"passwordEncoded\":\"4f607e9b6cffbe7d3db92d4bfa3391c7aa751727b4ea29d08fddf9dd72e6e7e3\"}',1,'2013-02-06 15:51:27',NULL,NULL,1),(3,'UPDATE','OFFICE',1,NULL,NULL,NULL,'/offices/1',1,'{\"name\":\"CEDA Microfinance Ltd\"}',1,'2013-02-06 15:53:54',NULL,NULL,1),(4,'CREATE','OFFICE',2,NULL,NULL,NULL,'/offices/template',2,'{\"name\":\"Uganda (Kampala)\",\"parentId\":\"1\",\"dateFormat\":\"yyyy-MM-dd\",\"locale\":\"en\",\"openingDate\":\"2009-01-01\",\"externalId\":\"2\"}',1,'2013-02-06 15:55:56',NULL,NULL,1),(5,'CREATE','STAFF',1,NULL,NULL,NULL,'/staff/template',1,'{\"officeId\":\"1\",\"firstname\":\"CEDA HO\",\"lastname\":\"LoanOfficer\",\"isLoanOfficer\":\"true\"}',1,'2013-02-06 16:03:32',NULL,NULL,1),(6,'CREATE','STAFF',2,NULL,NULL,NULL,'/staff/template',2,'{\"officeId\":\"2\",\"firstname\":\"Kampala\",\"lastname\":\"LoanOfficer\",\"isLoanOfficer\":\"true\"}',1,'2013-02-06 16:03:48',NULL,NULL,1),(7,'UPDATE','CURRENCY',NULL,NULL,NULL,NULL,'/currencies',NULL,'{\"currencies\":[\"UGX\"]}',1,'2013-02-06 16:06:36',NULL,NULL,1),(8,'CREATE','CHARGE',NULL,NULL,NULL,NULL,'/charges/template',1,'{\"locale\":\"en\",\"name\":\"Bank Fee (per installment)\",\"amount\":\"1500\",\"currencyCode\":\"UGX\",\"chargeAppliesTo\":\"1\",\"chargeTimeType\":\"2\",\"chargeCalculationType\":\"1\",\"active\":\"true\",\"penalty\":\"false\"}',1,'2013-02-06 16:06:56',NULL,NULL,1),(9,'CREATE','LOANPRODUCT',NULL,NULL,NULL,NULL,'/loanproducts/template',1,'{\"locale\":\"en\",\"name\":\"Kampala Product (with cash accounting)\",\"description\":\"Typical Kampala loan product with cash accounting enabled for testing.\",\"currencyCode\":\"UGX\",\"digitsAfterDecimal\":\"2\",\"principal\":\"1,000,000\",\"numberOfRepayments\":\"12\",\"repaymentEvery\":\"1\",\"repaymentFrequencyType\":\"2\",\"transactionProcessingStrategyId\":\"2\",\"interestRatePerPeriod\":\"24\",\"interestRateFrequencyType\":\"3\",\"amortizationType\":\"1\",\"interestType\":\"1\",\"interestCalculationPeriodType\":\"1\",\"inArrearsTolerance\":\"\",\"accountingType\":\"2\",\"fundSourceAccountId\":\"4\",\"loanPortfolioAccountId\":\"8\",\"receivableInterestAccountId\":\"\",\"receivableFeeAccountId\":\"\",\"receivablePenaltyAccountId\":\"\",\"interestOnLoanAccountId\":\"34\",\"incomeFromFeeAccountId\":\"37\",\"incomeFromPenaltyAccountId\":\"35\",\"writeOffAccountId\":\"97\"}',1,'2013-02-06 16:13:55',NULL,NULL,1);
 /*!40000 ALTER TABLE `m_portfolio_command_source` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1329,7 +1363,7 @@ CREATE TABLE `m_product_loan` (
   KEY `FK_ltp_strategy` (`loan_transaction_strategy_id`),
   CONSTRAINT `FKA6A8A7D77240145` FOREIGN KEY (`fund_id`) REFERENCES `m_fund` (`id`),
   CONSTRAINT `FK_ltp_strategy` FOREIGN KEY (`loan_transaction_strategy_id`) REFERENCES `ref_loan_transaction_processing_strategy` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1338,6 +1372,7 @@ CREATE TABLE `m_product_loan` (
 
 LOCK TABLES `m_product_loan` WRITE;
 /*!40000 ALTER TABLE `m_product_loan` DISABLE KEYS */;
+INSERT INTO `m_product_loan` VALUES (1,'UGX',2,'1000000.000000',NULL,'Kampala Product (with cash accounting)','Typical Kampala loan product with cash accounting enabled for testing.',NULL,'24.000000',3,'24.000000',1,1,1,2,12,1,2,2);
 /*!40000 ALTER TABLE `m_product_loan` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1631,7 +1666,7 @@ CREATE TABLE `m_staff` (
   UNIQUE KEY `display_name` (`display_name`),
   KEY `FK_m_staff_m_office` (`office_id`),
   CONSTRAINT `FK_m_staff_m_office` FOREIGN KEY (`office_id`) REFERENCES `m_office` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1640,6 +1675,7 @@ CREATE TABLE `m_staff` (
 
 LOCK TABLES `m_staff` WRITE;
 /*!40000 ALTER TABLE `m_staff` DISABLE KEYS */;
+INSERT INTO `m_staff` VALUES (1,1,1,'CEDA HO','LoanOfficer','LoanOfficer, CEDA HO'),(2,1,2,'Kampala','LoanOfficer','LoanOfficer, Kampala');
 /*!40000 ALTER TABLE `m_staff` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1697,7 +1733,7 @@ CREATE TABLE `ref_loan_transaction_processing_strategy` (
 
 LOCK TABLES `ref_loan_transaction_processing_strategy` WRITE;
 /*!40000 ALTER TABLE `ref_loan_transaction_processing_strategy` DISABLE KEYS */;
-INSERT INTO `ref_loan_transaction_processing_strategy` VALUES (1,'mifos-standard-strategy','Mifos style',NULL,NULL,NULL,NULL),(2,'heavensfamily-strategy','Heavensfamily',NULL,NULL,NULL,NULL),(3,'creocore-strategy','Creocore',NULL,NULL,NULL,NULL),(4,'rbi-india-strategy','RBI (India)',NULL,NULL,NULL,NULL);
+INSERT INTO `ref_loan_transaction_processing_strategy` VALUES (2,'heavensfamily-strategy','Heavensfamily',NULL,NULL,NULL,NULL);
 /*!40000 ALTER TABLE `ref_loan_transaction_processing_strategy` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1847,4 +1883,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2013-02-06 15:40:54
+-- Dump completed on 2013-02-06 16:14:39
