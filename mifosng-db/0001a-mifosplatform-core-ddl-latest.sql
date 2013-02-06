@@ -473,7 +473,7 @@ CREATE TABLE `m_product_loan` (
   `accounting_type` smallint(5) NOT NULL,
   `loan_transaction_strategy_id` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `unq_name` (`name`)
+  UNIQUE KEY `unq_name` (`name`),
   KEY `FKA6A8A7D77240145` (`fund_id`),
   KEY `FK_ltp_strategy` (`loan_transaction_strategy_id`),
   CONSTRAINT `FKA6A8A7D77240145` FOREIGN KEY (`fund_id`) REFERENCES `m_fund` (`id`),

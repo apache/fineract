@@ -80,7 +80,7 @@ CREATE TABLE `mifostenant-ceda`.`client additional data` (
   `YesNo_cd_Business plan provided` int(11) NOT NULL,
   `YesNo_cd_Access to internet` int(11) DEFAULT NULL,
   `Introduced by` varchar(100) DEFAULT NULL,
-  `Known to introducer since` date NOT NULL,
+  `Known to introducer since` varchar(100) NOT NULL,
   `Last visited by` varchar(100) DEFAULT NULL,
   `Last visited on` date NOT NULL,
   PRIMARY KEY (`client_id`),
@@ -91,8 +91,8 @@ DROP TABLE IF EXISTS `mifostenant-ceda`.`impact measurement`;
 CREATE TABLE `mifostenant-ceda`.`impact measurement` (
   `loan_id` bigint(20) NOT NULL,
   `YesNo_cd_RepaidOnSchedule` int(11) NOT NULL,
-  `ReasonNotRepaidOnSchedule` varchar(200) DEFAULT NULL,
-  `How was Loan Amount Invested` varchar(200) NOT NULL,
+  `ReasonNotRepaidOnSchedule` text DEFAULT NULL,
+  `How was Loan Amount Invested` text NOT NULL,
   `Additional Income Generated` decimal(19,6) NOT NULL,
   `Additional Income Used For` text NOT NULL,
   `YesNo_cd_NewJobsCreated` int(11) NOT NULL,
@@ -116,7 +116,35 @@ CREATE TABLE `mifostenant-ceda`.`loan additional data` (
   CONSTRAINT `FK_loan_additional_data` FOREIGN KEY (`loan_id`) REFERENCES `m_loan` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+-- datatables mapping
+INSERT INTO `mifostenant-ceda`.`x_registered_table`
+(`registered_table_name`,
+`application_table_name`)
+VALUES
+('client additional data', 'm_client'),
+('impact measurement', 'm_loan'),
+('loan additional data', 'm_loan');
 
+-- make sure permissions created for registered datatables
+/* add a create, read, update and delete permission for each registered datatable */
+insert into m_permission(grouping, `code`, entity_name, action_name)
+select 'datatable', concat('CREATE_', r.registered_table_name), r.registered_table_name, 'CREATE'
+from x_registered_table r;
+
+insert into m_permission(grouping, `code`, entity_name, action_name)
+select 'datatable', concat('READ_', r.registered_table_name), r.registered_table_name, 'READ'
+from x_registered_table r;
+
+insert into m_permission(grouping, `code`, entity_name, action_name)
+select 'datatable', concat('UPDATE_', r.registered_table_name), r.registered_table_name, 'UPDATE'
+from x_registered_table r;
+
+insert into m_permission(grouping, `code`, entity_name, action_name)
+select 'datatable', concat('DELETE_', r.registered_table_name), r.registered_table_name, 'DELETE'
+from x_registered_table r;
+
+
+-- ==== Chart of Accounts =====
 DELETE FROM `mifostenant-ceda`.`acc_gl_account` WHERE id>0;
 
 INSERT INTO `mifostenant-ceda`.`acc_gl_account` VALUES 
