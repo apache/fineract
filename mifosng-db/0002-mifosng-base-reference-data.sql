@@ -1,6 +1,5 @@
 ﻿-- currency symbols may not apply through command line on windows so use a different client like mysql workbench
 
-
 INSERT INTO `ref_loan_transaction_processing_strategy`
 (`id`,`code`,`name`)
 VALUES

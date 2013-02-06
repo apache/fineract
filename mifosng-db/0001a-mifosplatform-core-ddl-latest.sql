@@ -1,4 +1,4 @@
--- drop tables in base-schema
+﻿-- drop tables in base-schema
 SET foreign_key_checks = 0;
 
 -- drop accounting subsystem
@@ -199,7 +199,8 @@ CREATE TABLE `m_role` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `name` varchar(100) NOT NULL,
   `description` varchar(500) NOT NULL,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `unq_name` (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `m_role_permission` (
@@ -472,6 +473,7 @@ CREATE TABLE `m_product_loan` (
   `accounting_type` smallint(5) NOT NULL,
   `loan_transaction_strategy_id` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`id`),
+  UNIQUE KEY `unq_name` (`name`)
   KEY `FKA6A8A7D77240145` (`fund_id`),
   KEY `FK_ltp_strategy` (`loan_transaction_strategy_id`),
   CONSTRAINT `FKA6A8A7D77240145` FOREIGN KEY (`fund_id`) REFERENCES `m_fund` (`id`),
