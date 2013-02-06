@@ -2471,19 +2471,39 @@ GET https://DomainName/api/v1/loans/{loanId}
 					<code class="method-declaration">
 POST https://DomainName/api/v1/loans
 					</code>
-					<code class="method-request">POST loans Content-Type:
-						application/json Request Body: { "dateFormat": "dd MMMM yyyy",
-						"locale": "en_GB", "clientId": 1, "productId": 1, "principal":
-						"100,000.00", "loanTermFrequency": 12, "loanTermFrequencyType": 2,
-						"numberOfRepayments": 12, "repaymentEvery": 1,
-						"repaymentFrequencyType": 2, "interestRatePerPeriod": 2,
-						"interestRateFrequencyType": 2, "amortizationType": 1,
-						"interestType": 0, "interestCalculationPeriodType": 1,
-						"expectedDisbursementDate": "20 September 2011",
-						"submittedOnDate": "20 September 2011",
-						"transactionProcessingStrategyId": 1 } </code>
-					<code class="method-response">{ "officeId": 1, "clientId":
-						1, "loanId": 1, "resourceId": 1 } </code>
+					<code class="method-request">
+POST loans
+Content-Type: application/json 
+Request Body:
+{
+    "dateFormat": "dd MMMM yyyy",
+    "locale": "en_GB",
+    "clientId": 1,
+    "productId": 1,
+    "principal": "100,000.00",
+    "loanTermFrequency": 12,
+    "loanTermFrequencyType": 2,
+    "numberOfRepayments": 12,
+    "repaymentEvery": 1,
+    "repaymentFrequencyType": 2,
+    "interestRatePerPeriod": 2,
+    "interestRateFrequencyType": 2,
+    "amortizationType": 1,
+    "interestType": 0,
+    "interestCalculationPeriodType": 1,
+    "expectedDisbursementDate": "20 September 2011",
+    "submittedOnDate": "20 September 2011",
+    "transactionProcessingStrategyId": 1
+}
+					</code>
+					<code class="method-response">
+{
+    "officeId": 1,
+    "clientId": 1,
+    "loanId": 1,
+    "resourceId": 1
+}
+					</code>
 				</div>
 			</div>
 
@@ -2520,15 +2540,36 @@ POST https://DomainName/api/v1/loans
 					<code class="method-declaration">
 POST https://DomainName/api/v1/loans/{loanId}
 					</code>
-					<code class="method-request">POST loans/1?command=approve
-						Content-Type: application/json Request Body: { "locale": "en",
-						"dateFormat": "dd MMMM yyyy", "eventDate": "20 September 2011",
-						"note": "and event note is added" } </code>
-					<code class="method-response">{ "officeId": 1, "clientId":
-						1, "loanId": 2, "resourceId": 2, "changes": { "status": { "id":
-						200, "code": "loanStatusType.approved", "value": "Approved" },
-						"locale": "en", "dateFormat": "dd MMMM yyyy", "approvedOnDate":
-						"20 September 2011", "note": "and event note is added" } } </code>
+					<code class="method-request">
+POST loans/1?command=approve
+Content-Type: application/json 
+Request Body:
+{
+    "locale": "en",
+    "dateFormat": "dd MMMM yyyy",
+    "eventDate": "20 September 2011",
+    "note": "and event note is added"
+}
+</code>
+					<code class="method-response">
+{
+    "officeId": 1,
+    "clientId": 1,
+    "loanId": 2,
+    "resourceId": 2,
+    "changes": {
+        "status": {
+            "id": 200,
+            "code": "loanStatusType.approved",
+            "value": "Approved"
+        },
+        "locale": "en",
+        "dateFormat": "dd MMMM yyyy",
+        "approvedOnDate": "20 September 2011",
+        "note": "and event note is added"
+    }
+}
+					</code>
 				</div>
 			</div>
 			<a id="loans_delete" name="loans_delete" class="old-syle-anchor">&nbsp;</a>
@@ -2544,10 +2585,19 @@ POST https://DomainName/api/v1/loans/{loanId}
 					<code class="method-declaration">
 DELETE https://DomainName/api/v1/loans/{loanId}
 					</code>
-					<code class="method-request">DELETE loans/1 Content-Type:
-						application/json No Request Body: </code>
-					<code class="method-response">{ "officeId": 1, "clientId":
-						1, "loanId": 1, "resourceId": 1 } </code>
+					<code class="method-request">
+DELETE loans/1
+Content-Type: application/json 
+No Request Body:
+					</code>
+					<code class="method-response">
+{
+    "officeId": 1,
+    "clientId": 1,
+    "loanId": 1,
+    "resourceId": 1
+}
+					</code>
 				</div>
 			</div>
 
@@ -2584,19 +2634,37 @@ DELETE https://DomainName/api/v1/loans/{loanId}
 						</dd>
 					</dl>
 					<p>Example Request:</p>
-					<div class=apiClick>loans/10/transactions/template?command=repayment</div>
+					<div class=apiClick>loans/1/transactions/template?command=repayment</div>
 				</div>
 				<div class="method-example">
 					<code class="method-declaration">
 GET https://DomainName/api/v1/loans/{loanId}/transactions/template"
 					</code>
-					<code class="method-response">{ "transactionType" : { "id" :
-						2, "code" : "loanTransactionType.repayment", "value" : "Repayment"
-						}, "date" : [ 2009, 8, 1 ], "total" : { "currencyCode" : "XOF",
-						"digitsAfterDecimal" : 0, "amount" : 471, "defaultName" : "CFA
-						Franc BCEAO", "nameCode" : "currency.XOF", "displaySymbol" :
-						"CFA", "zero" : false, "greaterThanZero" : true,
-						"displaySymbolValue" : "471 CFA" } } </code>
+					<code class="method-response">
+{
+    "transactionType": {
+        "id": 2,
+        "code": "loanTransactionType.repayment",
+        "value": "Repayment"
+    },
+    "date": [
+        2009,
+        8,
+        1
+    ],
+    "total": {
+        "currencyCode": "XOF",
+        "digitsAfterDecimal": 0,
+        "amount": 471,
+        "defaultName": "CFA Franc BCEAO",
+        "nameCode": "currency.XOF",
+        "displaySymbol": "CFA",
+        "zero": false,
+        "greaterThanZero": true,
+        "displaySymbolValue": "471 CFA"
+    }
+}
+					</code>
 				</div>
 			</div>
 			<a id="loans_repayment_etc" name="loans_repayment_etc"
@@ -2617,11 +2685,18 @@ GET https://DomainName/api/v1/loans/{loanId}/transactions/template"
 					<code class="method-declaration">
 POST https://DomainName/api/v1/loans/{loanId}/transactions
 					</code>
-					<code class="method-request">POST
-						loans/37/transactions?command=repayment Content-Type:
-						application/json Request Body: { "locale": "en_GB", "dateFormat":
-						"dd MMMM yyyy", "transactionDate": "14 May 2012",
-						"transactionAmount": "559.88", "note": "Repayment at branch" } </code>
+					<code class="method-request">
+POST loans/1/transactions?command=repayment 
+Content-Type: application/json 
+Request Body:
+{
+    "locale": "en_GB",
+    "dateFormat": "dd MMMM yyyy",
+    "transactionDate": "14 May 2012",
+    "transactionAmount": "559.88",
+    "note": "Repayment at branch"
+}
+					</code>
 					<code class="method-response">{ "resourceId": 37 } </code>
 				</div>
 			</div>
@@ -2632,18 +2707,34 @@ POST https://DomainName/api/v1/loans/{loanId}/transactions
 				<div class="method-description">
 					<h4>Retrieve a Repayment or Waiver Details</h4>
 					<p>Example Request:</p>
-					<div class=apiClick>loans/10/transactions/20</div>
+					<div class=apiClick>loans/1/transactions/2</div>
 				</div>
 				<div class="method-example">
 					<code class="method-declaration">
 GET https://DomainName/api/v1/loans/{loanId}/transactions/{transactionId}
 					</code>
-					<code class="method-response">{ "id" : 10, "date" : [ 2009,
-						1, 29 ], "total" : { "currencyCode" : "XOF", "digitsAfterDecimal"
-						: 0, "amount" : 300000, "defaultName" : "CFA Franc BCEAO",
-						"nameCode" : "currency.XOF", "displaySymbol" : "CFA", "zero" :
-						false, "greaterThanZero" : true, "displaySymbolValue" : "300000
-						CFA" }, "transactionOffsetFromToday" : -1218 } </code>
+					<code class="method-response">
+{
+    "id": 10,
+    "date": [
+        2009,
+        1,
+        29
+    ],
+    "total": {
+        "currencyCode": "XOF",
+        "digitsAfterDecimal": 0,
+        "amount": 300000,
+        "defaultName": "CFA Franc BCEAO",
+        "nameCode": "currency.XOF",
+        "displaySymbol": "CFA",
+        "zero": false,
+        "greaterThanZero": true,
+        "displaySymbolValue": "300000 CFA"
+    },
+    "transactionOffsetFromToday": -1218
+}
+					</code>
 				</div>
 			</div>
 			<a id="loans_repaymentadjust_etc" name="loans_repaymentadjust_etc"
@@ -2668,11 +2759,21 @@ GET https://DomainName/api/v1/loans/{loanId}/transactions/{transactionId}
 					<code class="method-declaration">
 POST https://DomainName/api/v1/loans/{loanId}/transactions/{transactionId}
 					</code>
-					<code class="method-request">POST loans/16/transactions/32
-						Content-Type: application/json Request Body: { "locale": "en_GB",
-						"dateFormat": "dd MMMM yyyy", "transactionDate": "25 May 2012",
-						"transactionAmount": "50,000.00", "note": "adj note" } </code>
-					<code class="method-response">{ "resourceId": 16 } </code>
+					<code class="method-request">
+POST loans/1/transactions/2
+Content-Type: application/json 
+Request Body:
+{
+    "locale": "en_GB",
+    "dateFormat": "dd MMMM yyyy",
+    "transactionDate": "25 May 2012",
+    "transactionAmount": "50,000.00",
+    "note": "adj note"
+}
+					</code>
+					<code class="method-response">
+					{ "resourceId": 16 }
+					</code>
 				</div>
 			</div>
 
@@ -2735,9 +2836,22 @@ POST https://DomainName/api/v1/loans/{loanId}/transactions/{transactionId}
 					<code class="method-declaration">
 GET https://DomainName/api/v1/offices
 					</code>
-					<code class="method-response">[ { "id": 1, "name": "Head
-						Office", "nameDecorated": "Head Office", "externalId": "1",
-						"openingDate": [ 2009, 1, 1 ], "hierarchy": "." } ] </code>
+					<code class="method-response">
+[
+    {
+        "id": 1,
+        "name": "Head Office",
+        "nameDecorated": "Head Office",
+        "externalId": "1",
+        "openingDate": [
+            2009,
+            1,
+            1
+        ],
+        "hierarchy": "."
+    }
+]
+					</code>
 				</div>
 			</div>
 
@@ -2762,9 +2876,22 @@ GET https://DomainName/api/v1/offices
 					<code class="method-declaration">
 GET https://DomainName/api/v1/offices/template
 					</code>
-					<code class="method-response">{ "openingDate": [2013,2,4],
-						"allowedParents": [ { "id": 1, "name": "Head Office",
-						"nameDecorated": "Head Office" } ] } </code>
+					<code class="method-response">
+{
+    "openingDate": [
+        2013,
+        2,
+        4
+    ],
+    "allowedParents": [
+        {
+            "id": 1,
+            "name": "Head Office",
+            "nameDecorated": "Head Office"
+        }
+    ]
+}
+					</code>
 				</div>
 			</div>
 
@@ -2786,9 +2913,20 @@ GET https://DomainName/api/v1/offices/template
 					<code class="method-declaration">
 GET https://DomainName/api/v1/offices/1
 					</code>
-					<code class="method-response">{ "id": 1, "name": "Head
-						Office", "nameDecorated": "Head Office", "externalId": "1",
-						"openingDate": [2009,1,1], "hierarchy": "." } </code>
+					<code class="method-response">
+{
+    "id": 1,
+    "name": "Head Office",
+    "nameDecorated": "Head Office",
+    "externalId": "1",
+    "openingDate": [
+        2009,
+        1,
+        1
+    ],
+    "hierarchy": "."
+}
+					</code>
 				</div>
 			</div>
 
@@ -2809,12 +2947,25 @@ GET https://DomainName/api/v1/offices/1
 					<code class="method-declaration">
 POST https://DomainName/api/v1/offices
 					</code>
-					<code class="method-request">POST offices Content-Type:
-						application/json Request Body: { "name": "Example New Branch",
-						"dateFormat": "dd MMMM yyyy", "locale": "en", "openingDate": "01
-						July 2007", "parentId": 2, "externalId": "SYS54-88" } </code>
-					<code class="method-response">{ "officeId": 3, "resourceId":
-						3 } </code>
+					<code class="method-request">
+POST offices
+Content-Type: application/json 
+Request Body: 
+{
+    "name": "Example New Branch",
+    "dateFormat": "dd MMMM yyyy",
+    "locale": "en",
+    "openingDate": "01 July 2007",
+    "parentId": 2,
+    "externalId": "SYS54-88"
+}
+					</code>
+					<code class="method-response">
+{
+    "officeId": 3,
+    "resourceId": 3
+}
+					</code>
 				</div>
 			</div>
 
@@ -2827,17 +2978,28 @@ POST https://DomainName/api/v1/offices
 					<code class="method-declaration">
 PUT https://DomainName/api/v1/offices/{officeId}
 					</code>
-					<code class="method-request">PUT offices/1 Content-Type:
-						application/json Request Body: { "name": "Name is updated" } </code>
-					<code class="method-response">{ "officeId": 1, "resourceId":
-						1, "changes": { "name": "Name is updated" } </code>
+					<code class="method-request">
+PUT offices/1
+Content-Type: application/json 
+Request Body: 
+{ 
+	"name": "Name is updated" 
+}
+					</code>
+					<code class="method-response">
+{
+    "officeId": 1,
+    "resourceId": 1,
+    "changes": {
+        "name": "Name is updated"
+    }
+}
+					</code>
 				</div>
 			</div>
 			<!-- end of office api docs -->
 
-
 			<!-- start of loan products api docs -->
-
 			<a id="loanproducts" name="loanproducts" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
@@ -2988,27 +3150,61 @@ PUT https://DomainName/api/v1/offices/{officeId}
 					<code class="method-declaration">
 GET https://DomainName/api/v1/loanproducts
 					</code>
-					<code class="method-response">[ { "id": 1, "name": "A new
-						loan product for me", "currency": { "code": "USD", "name": "US
-						Dollar", "decimalPlaces": 2, "displaySymbol": "$", "nameCode":
-						"currency.USD", "displayLabel": "US Dollar ($)" }, "principal":
-						100000, "numberOfRepayments": 12, "loanTermFrequency": 12,
-						"repaymentEvery": 1, "loanTermFrequencyType": { "id": 2, "code":
-						"loanTermFrequency.periodFrequencyType.months", "value": "Months"
-						}, "repaymentFrequencyType": { "id": 2, "code":
-						"repaymentFrequency.periodFrequencyType.months", "value": "Months"
-						}, "transactionProcessingStrategyId": 1,
-						"transactionProcessingStrategyName": "Mifos style",
-						"interestRatePerPeriod": 1.75, "interestRateFrequencyType": {
-						"id": 2, "code":
-						"interestRateFrequency.periodFrequencyType.months", "value": "Per
-						month" }, "annualInterestRate": 21, "amortizationType": { "id": 1,
-						"code": "amortizationType.equal.installments", "value": "Equal
-						installments" }, "interestType": { "id": 0, "code":
-						"interestType.declining.balance", "value": "Declining Balance" },
-						"interestCalculationPeriodType": { "id": 1, "code":
-						"interestCalculationPeriodType.same.as.repayment.period", "value":
-						"Same as repayment period" }, "accountingType": 1 } ] </code>
+					<code class="method-response">
+[
+    {
+        "id": 1,
+        "name": "A new loan product for me",
+        "currency": {
+            "code": "USD",
+            "name": "US Dollar",
+            "decimalPlaces": 2,
+            "displaySymbol": "$",
+            "nameCode": "currency.USD",
+            "displayLabel": "US Dollar ($)"
+        },
+        "principal": 100000,
+        "numberOfRepayments": 12,
+        "loanTermFrequency": 12,
+        "repaymentEvery": 1,
+        "loanTermFrequencyType": {
+            "id": 2,
+            "code": "loanTermFrequency.periodFrequencyType.months",
+            "value": "Months"
+        },
+        "repaymentFrequencyType": {
+            "id": 2,
+            "code": "repaymentFrequency.periodFrequencyType.months",
+            "value": "Months"
+        },
+        "transactionProcessingStrategyId": 1,
+        "transactionProcessingStrategyName": "Mifos style",
+        "interestRatePerPeriod": 1.75,
+        "interestRateFrequencyType": {
+            "id": 2,
+            "code": "interestRateFrequency.periodFrequencyType.months",
+            "value": "Per month"
+        },
+        "annualInterestRate": 21,
+        "amortizationType": {
+            "id": 1,
+            "code": "amortizationType.equal.installments",
+            "value": "Equal installments"
+        },
+        "interestType": {
+            "id": 0,
+            "code": "interestType.declining.balance",
+            "value": "Declining Balance"
+        },
+        "interestCalculationPeriodType": {
+            "id": 1,
+            "code": "interestCalculationPeriodType.same.as.repayment.period",
+            "value": "Same as repayment period"
+        },
+        "accountingType": 1
+    }
+]
+					</code>
 				</div>
 			</div>
 
@@ -3033,59 +3229,207 @@ GET https://DomainName/api/v1/loanproducts
 					<code class="method-declaration">
 GET https://DomainName/api/v1/loanproducts/template
 					</code>
-					<code class="method-response">{ "currency": { "code": "USD",
-						"name": "US Dollar", "decimalPlaces": 2, "displaySymbol": "$",
-						"nameCode": "currency.USD", "displayLabel": "US Dollar ($)" },
-						"loanTermFrequencyType": { "id": 2, "code":
-						"loanTermFrequency.periodFrequencyType.months", "value": "Months"
-						}, "repaymentFrequencyType": { "id": 2, "code":
-						"repaymentFrequency.periodFrequencyType.months", "value": "Months"
-						}, "interestRateFrequencyType": { "id": 2, "code":
-						"interestRateFrequency.periodFrequencyType.months", "value": "Per
-						month" }, "amortizationType": { "id": 1, "code":
-						"amortizationType.equal.installments", "value": "Equal
-						installments" }, "interestType": { "id": 0, "code":
-						"interestType.declining.balance", "value": "Declining Balance" },
-						"interestCalculationPeriodType": { "id": 1, "code":
-						"interestCalculationPeriodType.same.as.repayment.period", "value":
-						"Same as repayment period" }, "accountingType": 1,
-						"currencyOptions": [ { "code": "USD", "name": "US Dollar",
-						"decimalPlaces": 2, "displaySymbol": "$", "nameCode":
-						"currency.USD", "displayLabel": "US Dollar ($)" } ],
-						"transactionProcessingStrategyOptions": [ { "id": 1, "code":
-						"mifos-standard-strategy", "name": "Mifos style" }, { "id": 2,
-						"code": "heavensfamily-strategy", "name": "Heavensfamily" }, {
-						"id": 3, "code": "creocore-strategy", "name": "Creocore" }, {
-						"id": 4, "code": "rbi-india-strategy", "name": "RBI (India)" } ],
-						"amortizationTypeOptions": [ { "id": 1, "code":
-						"amortizationType.equal.installments", "value": "Equal
-						installments" }, { "id": 0, "code":
-						"amortizationType.equal.principal", "value": "Equal principle
-						payments" } ], "interestTypeOptions": [ { "id": 1, "code":
-						"interestType.flat", "value": "Flat" }, { "id": 0, "code":
-						"interestType.declining.balance", "value": "Declining Balance" }
-						], "interestCalculationPeriodTypeOptions": [ { "id": 0, "code":
-						"interestCalculationPeriodType.daily", "value": "Daily" }, { "id":
-						1, "code":
-						"interestCalculationPeriodType.same.as.repayment.period", "value":
-						"Same as repayment period" } ], "repaymentFrequencyTypeOptions": [
-						{ "id": 0, "code": "repaymentFrequency.periodFrequencyType.days",
-						"value": "Days" }, { "id": 1, "code":
-						"repaymentFrequency.periodFrequencyType.weeks", "value": "Weeks"
-						}, { "id": 2, "code":
-						"repaymentFrequency.periodFrequencyType.months", "value": "Months"
-						} ], "interestRateFrequencyTypeOptions": [ { "id": 2, "code":
-						"interestRateFrequency.periodFrequencyType.months", "value": "Per
-						month" }, { "id": 3, "code":
-						"interestRateFrequency.periodFrequencyType.years", "value": "Per
-						year" } ], "loanTermFrequencyTypeOptions": [ { "id": 0, "code":
-						"loanTermFrequency.periodFrequencyType.days", "value": "Days" }, {
-						"id": 1, "code": "loanTermFrequency.periodFrequencyType.weeks",
-						"value": "Weeks" }, { "id": 2, "code":
-						"loanTermFrequency.periodFrequencyType.months", "value": "Months"
-						}, { "id": 3, "code":
-						"loanTermFrequency.periodFrequencyType.years", "value": "Years" }
-						], "accountingMappings": {} } </code>
+					<code class="method-response">
+{
+  "currency": {
+    "code": "USD",
+    "name": "US Dollar",
+    "decimalPlaces": 2,
+    "displaySymbol": "$",
+    "nameCode": "currency.USD",
+    "displayLabel": "US Dollar ($)"
+  },
+  "loanTermFrequencyType": {
+    "id": 2,
+    "code": "loanTermFrequency.periodFrequencyType.months",
+    "value": "Months"
+  },
+  "repaymentFrequencyType": {
+    "id": 2,
+    "code": "repaymentFrequency.periodFrequencyType.months",
+    "value": "Months"
+  },
+  "interestRateFrequencyType": {
+    "id": 2,
+    "code": "interestRateFrequency.periodFrequencyType.months",
+    "value": "Per month"
+  },
+  "amortizationType": {
+    "id": 1,
+    "code": "amortizationType.equal.installments",
+    "value": "Equal installments"
+  },
+  "interestType": {
+    "id": 0,
+    "code": "interestType.declining.balance",
+    "value": "Declining Balance"
+  },
+  "interestCalculationPeriodType": {
+    "id": 1,
+    "code": "interestCalculationPeriodType.same.as.repayment.period",
+    "value": "Same as repayment period"
+  },
+  "accountingType": 1,
+  "currencyOptions": [
+    {
+      "code": "USD",
+      "name": "US Dollar",
+      "decimalPlaces": 2,
+      "displaySymbol": "$",
+      "nameCode": "currency.USD",
+      "displayLabel": "US Dollar ($)"
+    }
+  ],
+  "fundOptions": [
+    {
+      "id": 1,
+      "name": "EU Agri Fund"
+    }
+  ],
+  "transactionProcessingStrategyOptions": [
+    {
+      "id": 1,
+      "code": "mifos-standard-strategy",
+      "name": "Mifos style"
+    },
+    {
+      "id": 2,
+      "code": "heavensfamily-strategy",
+      "name": "Heavensfamily"
+    },
+    {
+      "id": 3,
+      "code": "creocore-strategy",
+      "name": "Creocore"
+    },
+    {
+      "id": 4,
+      "code": "rbi-india-strategy",
+      "name": "RBI (India)"
+    }
+  ],
+  "amortizationTypeOptions": [
+    {
+      "id": 1,
+      "code": "amortizationType.equal.installments",
+      "value": "Equal installments"
+    },
+    {
+      "id": 0,
+      "code": "amortizationType.equal.principal",
+      "value": "Equal principle payments"
+    }
+  ],
+  "interestTypeOptions": [
+    {
+      "id": 1,
+      "code": "interestType.flat",
+      "value": "Flat"
+    },
+    {
+      "id": 0,
+      "code": "interestType.declining.balance",
+      "value": "Declining Balance"
+    }
+  ],
+  "interestCalculationPeriodTypeOptions": [
+    {
+      "id": 0,
+      "code": "interestCalculationPeriodType.daily",
+      "value": "Daily"
+    },
+    {
+      "id": 1,
+      "code": "interestCalculationPeriodType.same.as.repayment.period",
+      "value": "Same as repayment period"
+    }
+  ],
+  "repaymentFrequencyTypeOptions": [
+    {
+      "id": 0,
+      "code": "repaymentFrequency.periodFrequencyType.days",
+      "value": "Days"
+    },
+    {
+      "id": 1,
+      "code": "repaymentFrequency.periodFrequencyType.weeks",
+      "value": "Weeks"
+    },
+    {
+      "id": 2,
+      "code": "repaymentFrequency.periodFrequencyType.months",
+      "value": "Months"
+    }
+  ],
+  "interestRateFrequencyTypeOptions": [
+    {
+      "id": 2,
+      "code": "interestRateFrequency.periodFrequencyType.months",
+      "value": "Per month"
+    },
+    {
+      "id": 3,
+      "code": "interestRateFrequency.periodFrequencyType.years",
+      "value": "Per year"
+    }
+  ],
+  "loanTermFrequencyTypeOptions": [
+    {
+      "id": 0,
+      "code": "loanTermFrequency.periodFrequencyType.days",
+      "value": "Days"
+    },
+    {
+      "id": 1,
+      "code": "loanTermFrequency.periodFrequencyType.weeks",
+      "value": "Weeks"
+    },
+    {
+      "id": 2,
+      "code": "loanTermFrequency.periodFrequencyType.months",
+      "value": "Months"
+    },
+    {
+      "id": 3,
+      "code": "loanTermFrequency.periodFrequencyType.years",
+      "value": "Years"
+    }
+  ],
+  "chargeOptions": [
+    {
+      "id": 1,
+      "name": "Loan service fee",
+      "active": true,
+      "penalty": false,
+      "currency": {
+        "code": "USD",
+        "name": "US Dollar",
+        "decimalPlaces": 2,
+        "displaySymbol": "$",
+        "nameCode": "currency.USD",
+        "displayLabel": "US Dollar ($)"
+      },
+      "amount": 230.56,
+      "chargeTimeType": {
+        "id": 1,
+        "code": "chargeTimeType.disbursement",
+        "value": "Disbursement"
+      },
+      "chargeAppliesTo": {
+        "id": 1,
+        "code": "chargeAppliesTo.loan",
+        "value": "Loan"
+      },
+      "chargeCalculationType": {
+        "id": 1,
+        "code": "chargeCalculationType.flat",
+        "value": "Flat"
+      }
+    }
+  ],
+  "accountingMappings": {}
+}
+					</code>
 				</div>
 			</div>
 
@@ -3107,27 +3451,59 @@ GET https://DomainName/api/v1/loanproducts/template
 					<code class="method-declaration">
 GET https://DomainName/api/v1/loanproducts/{productId}
 					</code>
-					<code class="method-response">{ "id": 1, "name": "A new loan
-						product for me", "currency": { "code": "USD", "name": "US Dollar",
-						"decimalPlaces": 2, "displaySymbol": "$", "nameCode":
-						"currency.USD", "displayLabel": "US Dollar ($)" }, "principal":
-						100000, "numberOfRepayments": 12, "loanTermFrequency": 12,
-						"repaymentEvery": 1, "loanTermFrequencyType": { "id": 2, "code":
-						"loanTermFrequency.periodFrequencyType.months", "value": "Months"
-						}, "repaymentFrequencyType": { "id": 2, "code":
-						"repaymentFrequency.periodFrequencyType.months", "value": "Months"
-						}, "transactionProcessingStrategyId": 1,
-						"transactionProcessingStrategyName": "Mifos style",
-						"interestRatePerPeriod": 1.75, "interestRateFrequencyType": {
-						"id": 2, "code":
-						"interestRateFrequency.periodFrequencyType.months", "value": "Per
-						month" }, "annualInterestRate": 21, "amortizationType": { "id": 1,
-						"code": "amortizationType.equal.installments", "value": "Equal
-						installments" }, "interestType": { "id": 0, "code":
-						"interestType.declining.balance", "value": "Declining Balance" },
-						"interestCalculationPeriodType": { "id": 1, "code":
-						"interestCalculationPeriodType.same.as.repayment.period", "value":
-						"Same as repayment period" }, "accountingType": 1, "charges": [] }
+					<code class="method-response">
+{
+    "id": 1,
+    "name": "A new loan product for me",
+    "currency": {
+        "code": "USD",
+        "name": "US Dollar",
+        "decimalPlaces": 2,
+        "displaySymbol": "$",
+        "nameCode": "currency.USD",
+        "displayLabel": "US Dollar ($)"
+    },
+    "principal": 100000,
+    "numberOfRepayments": 12,
+    "loanTermFrequency": 12,
+    "repaymentEvery": 1,
+    "loanTermFrequencyType": {
+        "id": 2,
+        "code": "loanTermFrequency.periodFrequencyType.months",
+        "value": "Months"
+    },
+    "repaymentFrequencyType": {
+        "id": 2,
+        "code": "repaymentFrequency.periodFrequencyType.months",
+        "value": "Months"
+    },
+    "transactionProcessingStrategyId": 1,
+    "transactionProcessingStrategyName": "Mifos style",
+    "interestRatePerPeriod": 1.75,
+    "interestRateFrequencyType": {
+        "id": 2,
+        "code": "interestRateFrequency.periodFrequencyType.months",
+        "value": "Per month"
+    },
+    "annualInterestRate": 21,
+    "amortizationType": {
+        "id": 1,
+        "code": "amortizationType.equal.installments",
+        "value": "Equal installments"
+    },
+    "interestType": {
+        "id": 0,
+        "code": "interestType.declining.balance",
+        "value": "Declining Balance"
+    },
+    "interestCalculationPeriodType": {
+        "id": 1,
+        "code": "interestCalculationPeriodType.same.as.repayment.period",
+        "value": "Same as repayment period"
+    },
+    "accountingType": 1,
+    "charges": []
+}
 					</code>
 				</div>
 			</div>
@@ -3154,16 +3530,33 @@ GET https://DomainName/api/v1/loanproducts/{productId}
 					<code class="method-declaration">
 POST https://DomainName/api/v1/loanproducts
 					</code>
-					<code class="method-request">POST loanproducts Content-Type:
-						application/json Request Body: { "name": "A new loan product for
-						me", "currencyCode": "USD", "locale": "en_GB",
-						"digitsAfterDecimal": "2", "principal": "100,000.00",
-						"numberOfRepayments": "12", "repaymentEvery": "1",
-						"repaymentFrequencyType": 2, "transactionProcessingStrategyId": 1,
-						"interestRatePerPeriod": "1.75", "interestRateFrequencyType": 2,
-						"amortizationType": 1, "interestType": 0,
-						"interestCalculationPeriodType": 1, "accountingType": 1 } </code>
-					<code class="method-response">{ "resourceId": 1 } </code>
+					<code class="method-request">
+POST loanproducts
+Content-Type: application/json 
+Request Body:
+{
+    "name": "A new loan product for me",
+    "currencyCode": "USD",
+    "locale": "en_GB",
+    "digitsAfterDecimal": "2",
+    "principal": "100,000.00",
+    "numberOfRepayments": "12",
+    "repaymentEvery": "1",
+    "repaymentFrequencyType": 2,
+    "transactionProcessingStrategyId": 1,
+    "interestRatePerPeriod": "1.75",
+    "interestRateFrequencyType": 2,
+    "amortizationType": 1,
+    "interestType": 0,
+    "interestCalculationPeriodType": 1,
+    "accountingType": 1
+}
+					</code>
+					<code class="method-response">
+{ 
+	"resourceId": 1 
+}
+					</code>
 				</div>
 			</div>
 
@@ -3177,11 +3570,24 @@ POST https://DomainName/api/v1/loanproducts
 					<code class="method-declaration">
 PUT https://DomainName/api/v1/loanproducts/{loanId}
 					</code>
-					<code class="method-request">PUT loanproducts/1
-						Content-Type: application/json Request Body: { "locale": "en_GB",
-						"principal": "70,000.00" } </code>
-					<code class="method-response">{ "resourceId": 1, "changes":
-						{ "principal": 70000, "locale": "en_GB" } } </code>
+					<code class="method-request">
+PUT loanproducts/1
+Content-Type: application/json 
+Request Body: 
+{
+    "locale": "en_GB",
+    "principal": "70,000.00"
+}
+					</code>
+					<code class="method-response">
+{
+    "resourceId": 1,
+    "changes": {
+        "principal": 70000,
+        "locale": "en_GB"
+    }
+}
+					</code>
 				</div>
 			</div>
 			<!-- end of loan products api docs -->
@@ -3213,17 +3619,43 @@ PUT https://DomainName/api/v1/loanproducts/{loanId}
 					<code class="method-declaration">
 GET https://DomainName/api/v1/currencies
 					</code>
-					<code class="method-response">{ "selectedCurrencyOptions": [
-						{ "code": "USD", "name": "US Dollar", "decimalPlaces": 2,
-						"displaySymbol": "$", "nameCode": "currency.USD", "displayLabel":
-						"US Dollar ($)" } ], "currencyOptions": [ { "code": "AFN", "name":
-						"Afghanistan Afghani", "decimalPlaces": 2, "nameCode":
-						"currency.AFN", "displayLabel": "Afghanistan Afghani [AFN]" }, {
-						"code": "ALL", "name": "Albanian Lek", "decimalPlaces": 2,
-						"nameCode": "currency.ALL", "displayLabel": "Albanian Lek [ALL]"
-						}, { "code": "ZWD", "name": "Zimbabwe Dollar", "decimalPlaces": 2,
-						"nameCode": "currency.ZWD", "displayLabel": "Zimbabwe Dollar
-						[ZWD]" } ] } </code>
+					<code class="method-response">
+{
+    "selectedCurrencyOptions": [
+        {
+            "code": "USD",
+            "name": "US Dollar",
+            "decimalPlaces": 2,
+            "displaySymbol": "$",
+            "nameCode": "currency.USD",
+            "displayLabel": "US Dollar ($)"
+        }
+    ],
+    "currencyOptions": [
+        {
+            "code": "AFN",
+            "name": "Afghanistan Afghani",
+            "decimalPlaces": 2,
+            "nameCode": "currency.AFN",
+            "displayLabel": "Afghanistan Afghani [AFN]"
+        },
+        {
+            "code": "ALL",
+            "name": "Albanian Lek",
+            "decimalPlaces": 2,
+            "nameCode": "currency.ALL",
+            "displayLabel": "Albanian Lek [ALL]"
+        },
+        {
+            "code": "ZWD",
+            "name": "Zimbabwe Dollar",
+            "decimalPlaces": 2,
+            "nameCode": "currency.ZWD",
+            "displayLabel": "Zimbabwe Dollar [ZWD]"
+        }
+    ]
+}
+					</code>
 				</div>
 			</div>
 
@@ -3238,11 +3670,37 @@ GET https://DomainName/api/v1/currencies
 					<code class="method-declaration">
 PUT https://DomainName/api/v1/currencies
 					</code>
-					<code class="method-request">PUT currencies Content-Type:
-						application/json Request Body: { "currencies": ["KES", "BND",
-						"LBP", "GHC", "USD", "XOF", "AED", "AMD"] } </code>
-					<code class="method-response">{ "currencies": [ "KES",
-						"BND", "LBP", "GHC", "USD", "XOF", "AED", "AMD" ] } </code>
+					<code class="method-request">
+PUT currencies
+Content-Type: application/json 
+Request Body: 
+{
+    "currencies": [
+        "KES",
+        "BND",
+        "LBP",
+        "GHC",
+        "USD",
+        "XOF",
+        "AED",
+        "AMD"
+    ]
+}
+					</code>
+					<code class="method-response">
+{
+    "currencies": [
+        "KES",
+        "BND",
+        "LBP",
+        "GHC",
+        "USD",
+        "XOF",
+        "AED",
+        "AMD"
+    ]
+}
+					</code>
 				</div>
 			</div>
 
@@ -3268,13 +3726,20 @@ PUT https://DomainName/api/v1/currencies
 					<code class="method-declaration">
 GET https://DomainName/api/v1/configurations
 					</code>
-					<code class="method-response">{ "globalConfiguration": [ {
-						"name": "maker-checker", "enabled": false } ] } </code>
+					<code class="method-response">
+{
+    "globalConfiguration": [
+        {
+            "name": "maker-checker",
+            "enabled": false
+        }
+    ]
+}
+					</code>
 				</div>
 			</div>
 
-			<a id="configs_globalconfig_update"
-				name="configs_globalconfig_update" class="old-syle-anchor">&nbsp;</a>
+			<a id="configs_globalconfig_update" name="configs_globalconfig_update" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
 					<h4>Update Global Configuration</h4>
@@ -3284,8 +3749,11 @@ GET https://DomainName/api/v1/configurations
 					<code class="method-declaration">
 PUT https://DomainName/api/v1/configurations?maker-checker=false
 					</code>
-					<code class="method-request">PUT configurations
-						Content-Type: application/json Request Body: { } </code>
+					<code class="method-request">
+PUT configurations
+Content-Type: application/json 
+Request Body: { }
+					</code>
 					<code class="method-response">{ "changes": {} } </code>
 				</div>
 			</div>
@@ -3317,9 +3785,19 @@ PUT https://DomainName/api/v1/configurations?maker-checker=false
 					<code class="method-declaration">
 POST https://DomainName/api/v1/codes
 					</code>
-					<code class="method-request">POST codes Content-Type:
-						application/json Request Body: { "name": "MyNewCode" } </code>
-					<code class="method-response">{ "resourceId": 4 } </code>
+					<code class="method-request">
+POST codes 
+Content-Type: application/json 
+Request Body: 
+{
+	"name": "MyNewCode"
+}
+					</code>
+					<code class="method-response">
+{ 
+	"resourceId": 4 
+}
+					</code>
 				</div>
 			</div>
 
@@ -3336,10 +3814,25 @@ POST https://DomainName/api/v1/codes
 					<code class="method-declaration">
 GET https://DomainName/api/v1/codes
 					</code>
-					<code class="method-response">[ { "id": 1, "name": "Customer
-						Identifier", "systemDefined": true }, { "id": 2, "name": "Gender",
-						"systemDefined": true },{ "id": 3, "name": "Education",
-						"systemDefined": true } ] </code>
+					<code class="method-response">
+[
+    {
+        "id": 1,
+        "name": "Customer Identifier",
+        "systemDefined": true
+    },
+    {
+        "id": 2,
+        "name": "Gender",
+        "systemDefined": true
+    },
+    {
+        "id": 3,
+        "name": "Education",
+        "systemDefined": true
+    }
+]
+					</code>
 				</div>
 			</div>
 
@@ -3356,8 +3849,13 @@ GET https://DomainName/api/v1/codes
 					<code class="method-declaration">
 GET https://DomainName/api/v1/codes/{codeId}
 					</code>
-					<code class="method-response">{ "id": 1, "name": "Customer
-						Identifier", "systemDefined": true } </code>
+					<code class="method-response">
+{
+    "id": 1,
+    "name": "Customer Identifier",
+    "systemDefined": true
+}
+					</code>
 				</div>
 			</div>
 
@@ -3372,10 +3870,22 @@ GET https://DomainName/api/v1/codes/{codeId}
 					<code class="method-declaration">
 PUT https://DomainName/api/v1/codes/{codeId}
 					</code>
-					<code class="method-request">PUT codes/4 Content-Type:
-						application/json Request Body: { "name": "MyNewCode(changed)" } </code>
-					<code class="method-response">{ "resourceId": 4, "changes":
-						{ "name": "MyNewCode(changed)" } } </code>
+					<code class="method-request">
+PUT codes/4
+Content-Type: application/json 
+Request Body: 
+{ 
+	"name": "MyNewCode(changed)"
+}
+					</code>
+					<code class="method-response">
+{
+    "resourceId": 4,
+    "changes": {
+        "name": "MyNewCode(changed)"
+    }
+}
+					</code>
 				</div>
 			</div>
 
@@ -3390,9 +3900,15 @@ PUT https://DomainName/api/v1/codes/{codeId}
 					<code class="method-declaration">
 DELETE https://DomainName/api/v1/codes/{codeId}
 					</code>
-					<code class="method-request">DELETE codes/4 Content-Type:
-						application/json </code>
-					<code class="method-response">{ "resourceId": 4 } </code>
+					<code class="method-request">
+DELETE codes/4 
+Content-Type: application/json
+					</code>
+					<code class="method-response">
+{ 
+	"resourceId": 4 
+}
+					</code>
 				</div>
 			</div>
 
@@ -3417,9 +3933,19 @@ DELETE https://DomainName/api/v1/codes/{codeId}
 					<code class="method-declaration">
 POST https://DomainName/api/v1/funds
 					</code>
-					<code class="method-request">POST funds Content-Type:
-						application/json Request Body: { "name": "EU Agri Fund" } </code>
-					<code class="method-response">{ "resourceId": 1 } </code>
+					<code class="method-request">
+POST funds
+Content-Type: application/json 
+Request Body: 
+{ 
+	"name": "EU Agri Fund"
+}
+					</code>
+					<code class="method-response">
+{ 
+	"resourceId": 1 
+} 
+					</code>
 				</div>
 			</div>
 
@@ -3435,8 +3961,14 @@ POST https://DomainName/api/v1/funds
 					<code class="method-declaration">
 GET https://DomainName/api/v1/funds
 					</code>
-					<code class="method-response">[ { "id": 1, "name": "EU Agri
-						Fund" } ] </code>
+					<code class="method-response">
+[
+    {
+        "id": 1,
+        "name": "EU Agri Fund"
+    }
+]
+					</code>
 				</div>
 			</div>
 
@@ -3452,8 +3984,12 @@ GET https://DomainName/api/v1/funds
 					<code class="method-declaration">
 GET https://DomainName/api/v1/funds/{fundId}
 					</code>
-					<code class="method-response">{ "id": 1, "name": "EU Agri
-						Fund" } </code>
+					<code class="method-response">
+{ 
+	"id": 1, 
+	"name": "EU Agri Fund" 
+}
+					</code>
 				</div>
 			</div>
 
@@ -3467,11 +4003,22 @@ GET https://DomainName/api/v1/funds/{fundId}
 					<code class="method-declaration">
 PUT https://DomainName/api/v1/funds/{fundId}
 					</code>
-					<code class="method-request">PUT funds/1 Content-Type:
-						application/json Request Body: { "name": "EU Agri Fund
-						(2010-2020)" } </code>
-					<code class="method-response">{ "resourceId": 1, "changes":
-						{ "name": "EU Agri Fund (2010-2020)" } } </code>
+					<code class="method-request">
+PUT funds/1
+Content-Type: application/json 
+Request Body: 
+{ 
+	"name": "EU Agri Fund (2010-2020)" 
+}
+					</code>
+					<code class="method-response">
+{
+    "resourceId": 1,
+    "changes": {
+        "name": "EU Agri Fund (2010-2020)"
+    }
+}
+					</code>
 				</div>
 			</div>
 
@@ -3496,11 +4043,23 @@ PUT https://DomainName/api/v1/funds/{fundId}
 					<code class="method-declaration">
 POST https://DomainName/api/v1/staff
 					</code>
-					<code class="method-request">POST staff Content-Type:
-						application/json Request Body: { "officeId": 1, "firstname":
-						"John", "lastname": "Doe", "isLoanOfficer": "true" } </code>
-					<code class="method-response">{ "officeId": 1, "resourceId":
-						1 } </code>
+					<code class="method-request">
+POST staff 
+Content-Type: application/json 
+Request Body: 
+{
+    "officeId": 1,
+    "firstname": "John",
+    "lastname": "Doe",
+    "isLoanOfficer": "true"
+}
+					</code>
+					<code class="method-response">
+{
+    "officeId": 1,
+    "resourceId": 1
+}
+					</code>
 				</div>
 			</div>
 
@@ -3516,9 +4075,19 @@ POST https://DomainName/api/v1/staff
 					<code class="method-declaration">
 GET https://DomainName/api/v1/staff
 					</code>
-					<code class="method-response">[ { "id": 1, "firstname":
-						"John", "lastname": "Doe", "displayName": "Doe, John", "officeId":
-						1, "officeName": "Head Office", "isLoanOfficer": true } ] </code>
+					<code class="method-response">
+[
+    {
+        "id": 1,
+        "firstname": "John",
+        "lastname": "Doe",
+        "displayName": "Doe, John",
+        "officeId": 1,
+        "officeName": "Head Office",
+        "isLoanOfficer": true
+    }
+]
+					</code>
 				</div>
 			</div>
 
@@ -3531,12 +4100,18 @@ GET https://DomainName/api/v1/staff
 					<div class=apiClick>staff/1</div>
 				</div>
 				<div class="method-example">
-					<code class="method-declaration">GET https://Domain
-						Name/api/v1/staff/{staffId}
+					<code class="method-declaration">GET https://DomainName/api/v1/staff/{staffId}</code>
+					<code class="method-response">
+{
+    "id": 1,
+    "firstname": "John",
+    "lastname": "Doe",
+    "displayName": "Doe, John",
+    "officeId": 1,
+    "officeName": "Head Office",
+    "isLoanOfficer": true
+}
 					</code>
-					<code class="method-response">{ "id": 1, "firstname":
-						"John", "lastname": "Doe", "displayName": "Doe, John", "officeId":
-						1, "officeName": "Head Office", "isLoanOfficer": true } </code>
 				</div>
 			</div>
 
@@ -3550,10 +4125,23 @@ GET https://DomainName/api/v1/staff
 					<code class="method-declaration">
 PUT https://DomainName/api/v1/staff/{staffId}
 					</code>
-					<code class="method-request">PUT staff/1 Content-Type:
-						application/json Request Body: { "isLoanOfficer": "false" } </code>
-					<code class="method-response">{ "officeId": 1, "resourceId":
-						1, "changes": { "isLoanOfficer": false } } </code>
+					<code class="method-request">
+PUT staff/1
+Content-Type: application/json 
+Request Body: 
+{ 
+	"isLoanOfficer": "false" 
+}
+					</code>
+					<code class="method-response">
+{
+    "officeId": 1,
+    "resourceId": 1,
+    "changes": {
+        "isLoanOfficer": false
+    }
+}
+					</code>
 				</div>
 			</div>
 
@@ -3582,12 +4170,21 @@ PUT https://DomainName/api/v1/staff/{staffId}
 					<code class="method-declaration">
 POST https://DomainName/api/v1/charges
 					</code>
-					<code class="method-request">POST charges Content-Type:
-						application/json Request Body: { "name": "Loan service fee",
-						"chargeAppliesTo": 1, "currencyCode": "USD", "locale": "en",
-						"amount": "230.56", "chargeTimeType": "1",
-						"chargeCalculationType": "1" } </code>
-					<code class="method-response">{ "resourceId": 1 } </code>
+					<code class="method-request">
+POST charges
+Content-Type: application/json 
+Request Body:
+{
+    "name": "Loan service fee",
+    "chargeAppliesTo": 1,
+    "currencyCode": "USD",
+    "locale": "en",
+    "amount": "230.56",
+    "chargeTimeType": "1",
+    "chargeCalculationType": "1"
+}
+					</code>
+					<code class="method-response">{ "resourceId": 1 }</code>
 				</div>
 			</div>
 
@@ -3603,15 +4200,40 @@ POST https://DomainName/api/v1/charges
 					<code class="method-declaration">
 GET https://DomainName/api/v1/charges
 					</code>
-					<code class="method-response">[ { "id": 1, "name": "Loan
-						service fee", "active": true, "penalty": false, "currency": {
-						"code": "USD", "name": "US Dollar", "decimalPlaces": 2,
-						"displaySymbol": "$", "nameCode": "currency.USD", "displayLabel":
-						"US Dollar ($)" }, "amount": 230.560000, "chargeTimeType": { "id":
-						1, "code": "chargeTimeType.disbursement", "value": "Disbursement"
-						}, "chargeAppliesTo": { "id": 1, "code": "chargeAppliesTo.loan",
-						"value": "Loan" }, "chargeCalculationType": { "id": 1, "code":
-						"chargeCalculationType.flat", "value": "Flat" } } ] </code>
+					<code class="method-response">
+[
+    {
+        "id": 1,
+        "name": "Loan service fee",
+        "active": true,
+        "penalty": false,
+        "currency": {
+            "code": "USD",
+            "name": "US Dollar",
+            "decimalPlaces": 2,
+            "displaySymbol": "$",
+            "nameCode": "currency.USD",
+            "displayLabel": "US Dollar ($)"
+        },
+        "amount": 230.56,
+        "chargeTimeType": {
+            "id": 1,
+            "code": "chargeTimeType.disbursement",
+            "value": "Disbursement"
+        },
+        "chargeAppliesTo": {
+            "id": 1,
+            "code": "chargeAppliesTo.loan",
+            "value": "Loan"
+        },
+        "chargeCalculationType": {
+            "id": 1,
+            "code": "chargeCalculationType.flat",
+            "value": "Flat"
+        }
+    }
+]
+					</code>
 				</div>
 			</div>
 
@@ -3628,15 +4250,38 @@ GET https://DomainName/api/v1/charges
 					<code class="method-declaration">
 GET https://DomainName/api/v1/charges/{chargeId}
 					</code>
-					<code class="method-response">{ "id": 1, "name": "Loan
-						service fee", "active": true, "penalty": false, "currency": {
-						"code": "USD", "name": "US Dollar", "decimalPlaces": 2,
-						"displaySymbol": "$", "nameCode": "currency.USD", "displayLabel":
-						"US Dollar ($)" }, "amount": 230.560000, "chargeTimeType": { "id":
-						1, "code": "chargeTimeType.disbursement", "value": "Disbursement"
-						}, "chargeAppliesTo": { "id": 1, "code": "chargeAppliesTo.loan",
-						"value": "Loan" }, "chargeCalculationType": { "id": 1, "code":
-						"chargeCalculationType.flat", "value": "Flat" } } </code>
+					<code class="method-response">
+{
+    "id": 1,
+    "name": "Loan service fee",
+    "active": true,
+    "penalty": false,
+    "currency": {
+        "code": "USD",
+        "name": "US Dollar",
+        "decimalPlaces": 2,
+        "displaySymbol": "$",
+        "nameCode": "currency.USD",
+        "displayLabel": "US Dollar ($)"
+    },
+    "amount": 230.56,
+    "chargeTimeType": {
+        "id": 1,
+        "code": "chargeTimeType.disbursement",
+        "value": "Disbursement"
+    },
+    "chargeAppliesTo": {
+        "id": 1,
+        "code": "chargeAppliesTo.loan",
+        "value": "Loan"
+    },
+    "chargeCalculationType": {
+        "id": 1,
+        "code": "chargeCalculationType.flat",
+        "value": "Flat"
+    }
+}
+					</code>
 				</div>
 			</div>
 
@@ -3650,11 +4295,22 @@ GET https://DomainName/api/v1/charges/{chargeId}
 					<code class="method-declaration">
 PUT https://DomainName/api/v1/charges/{chargeId}
 					</code>
-					<code class="method-request">PUT charges/1 Content-Type:
-						application/json Request Body: { "name": "Loan service
-						fee(changed)" } </code>
-					<code class="method-response">{ "resourceId": 1, "changes":
-						{ "name": "Loan service fee(changed)" } } </code>
+					<code class="method-request">
+PUT charges/1 
+Content-Type: application/json 
+Request Body: 
+{ 
+	"name": "Loan service fee(changed)" 
+}
+					</code>
+					<code class="method-response">
+{
+    "resourceId": 1,
+    "changes": {
+        "name": "Loan service fee(changed)"
+    }
+}
+					</code>
 				</div>
 			</div>
 
@@ -3668,8 +4324,10 @@ PUT https://DomainName/api/v1/charges/{chargeId}
 					<code class="method-declaration">
 DELETE https://DomainName/api/v1/charges/{chargeId}
 					</code>
-					<code class="method-request">DELETE charges/1 Content-Type:
-						application/json </code>
+					<code class="method-request">
+DELETE charges/1
+Content-Type: application/json
+					</code>
 					<code class="method-response">{ "resourceId": 1 } </code>
 				</div>
 			</div>
@@ -4070,56 +4728,730 @@ Request Body:
 					<code class="method-declaration">
 GET https://DomainName/api/v1/reports
 					</code>
-					<code class="method-response">{ "columnHeaders" : [ {
-						"columnName" : "report_id", "columnType" : "INT", "columnLength" :
-						null, "columnDisplayType" : null, "columnValues" : [ ] }, {
-						"columnName" : "report_name", "columnType" : "VARCHAR",
-						"columnLength" : null, "columnDisplayType" : null, "columnValues"
-						: [ ] }, { "columnName" : "report_type", "columnType" : "VARCHAR",
-						"columnLength" : null, "columnDisplayType" : null, "columnValues"
-						: [ ] }, { "columnName" : "report_subtype", "columnType" :
-						"VARCHAR", "columnLength" : null, "columnDisplayType" : null,
-						"columnValues" : [ ] }, { "columnName" : "report_category",
-						"columnType" : "VARCHAR", "columnLength" : null,
-						"columnDisplayType" : null, "columnValues" : [ ] }, { "columnName"
-						: "parameter_id", "columnType" : "INT", "columnLength" : null,
-						"columnDisplayType" : null, "columnValues" : [ ] }, { "columnName"
-						: "report_parameter_name", "columnType" : "VARCHAR",
-						"columnLength" : null, "columnDisplayType" : null, "columnValues"
-						: [ ] }, { "columnName" : "parameter_name", "columnType" :
-						"VARCHAR", "columnLength" : null, "columnDisplayType" : null,
-						"columnValues" : [ ] } ], "data" : [ { "row" : [ "29", "Client
-						Listing", "Table", null, null, "5", null, "selectOfficeId" ] }, {
-						"row" : [ "42", "Client Listing - Additional and Unlikely",
-						"Table", null, null, "5", null, "selectOfficeId" ] }, { "row" : [
-						"30", "Client Loans Listing", "Table", null, null, "5", null,
-						"selectOfficeId" ] }, { "row" : [ "43", "Client Loans Listing -
-						Additional", "Table", null, null, "5", null, "selectOfficeId" ] },
-						{ "row" : [ "41", "Clients by Surname (a bit silly)", "Chart",
-						"Pie", null, "5", null, "selectOfficeId" ] }, { "row" : [ "39",
-						"Loan Disbursals in Previous Year", "Chart", "Bar", null, "5",
-						null, "selectOfficeId" ] }, { "row" : [ "39", "Loan Disbursals in
-						Previous Year", "Chart", "Bar", null, "7", null,
-						"currencyIdSelectOne" ] }, { "row" : [ "40", "Loan Repayments in
-						Previous Year", "Chart", "Bar", null, "5", null, "selectOfficeId"
-						] }, { "row" : [ "40", "Loan Repayments in Previous Year",
-						"Chart", "Bar", null, "7", null, "currencyIdSelectOne" ] }, {
-						"row" : [ "34", "Loans - Active Loans Portfolio Status", "Table",
-						null, null, "5", null, "selectOfficeId" ] }, { "row" : [ "34",
-						"Loans - Active Loans Portfolio Status", "Table", null, null, "6",
-						null, "currencyIdSelectAll" ] }, { "row" : [ "31", "Loans Awaiting
-						Disbursal", "Table", null, null, "5", null, "selectOfficeId" ] },
-						{ "row" : [ "35", "Portfolio at Risk", "Table", null, null, "5",
-						null, "selectOfficeId" ] }, { "row" : [ "35", "Portfolio at Risk",
-						"Table", null, null, "6", null, "currencyIdSelectAll" ] }, { "row"
-						: [ "32", "Upcoming Repayments", "Table", null, null, "5", null,
-						"selectOfficeId" ] }, { "row" : [ "32", "Upcoming Repayments",
-						"Table", null, null, "6", null, "currencyIdSelectAll" ] }, { "row"
-						: [ "38", "Upcoming Repayments Summary By Month, Currency and Loan
-						Risk", "Table", null, null, "5", null, "selectOfficeId" ] }, {
-						"row" : [ "38", "Upcoming Repayments Summary By Month, Currency
-						and Loan Risk", "Table", null, null, "6", null,
-						"currencyIdSelectAll" ] } ] } </code>
+					<code class="method-response">
+{
+    "columnHeaders": [
+        {
+            "columnName": "report_id",
+            "columnType": "INT",
+            "isColumnNullable": false,
+            "isColumnPrimaryKey": false,
+            "columnValues": []
+        },
+        {
+            "columnName": "report_name",
+            "columnType": "VARCHAR",
+            "isColumnNullable": false,
+            "isColumnPrimaryKey": false,
+            "columnValues": []
+        },
+        {
+            "columnName": "report_type",
+            "columnType": "VARCHAR",
+            "isColumnNullable": false,
+            "isColumnPrimaryKey": false,
+            "columnValues": []
+        },
+        {
+            "columnName": "report_subtype",
+            "columnType": "VARCHAR",
+            "isColumnNullable": false,
+            "isColumnPrimaryKey": false,
+            "columnValues": []
+        },
+        {
+            "columnName": "report_category",
+            "columnType": "VARCHAR",
+            "isColumnNullable": false,
+            "isColumnPrimaryKey": false,
+            "columnValues": []
+        },
+        {
+            "columnName": "parameter_id",
+            "columnType": "INT",
+            "isColumnNullable": false,
+            "isColumnPrimaryKey": false,
+            "columnValues": []
+        },
+        {
+            "columnName": "report_parameter_name",
+            "columnType": "VARCHAR",
+            "isColumnNullable": false,
+            "isColumnPrimaryKey": false,
+            "columnValues": []
+        },
+        {
+            "columnName": "parameter_name",
+            "columnType": "VARCHAR",
+            "isColumnNullable": false,
+            "isColumnPrimaryKey": false,
+            "columnValues": []
+        }
+    ],
+    "data": [
+        {
+            "row": [
+                "10",
+                "Active Loans Portfolio Status",
+                "Table",
+                null,
+                "Loan",
+                "5",
+                null,
+                "OfficeIdSelectOne"
+            ]
+        },
+        {
+            "row": [
+                "10",
+                "Active Loans Portfolio Status",
+                "Table",
+                null,
+                "Loan",
+                "6",
+                null,
+                "loanOfficerIdSelectAll"
+            ]
+        },
+        {
+            "row": [
+                "10",
+                "Active Loans Portfolio Status",
+                "Table",
+                null,
+                "Loan",
+                "10",
+                null,
+                "currencyIdSelectAll"
+            ]
+        },
+        {
+            "row": [
+                "10",
+                "Active Loans Portfolio Status",
+                "Table",
+                null,
+                "Loan",
+                "20",
+                null,
+                "fundIdSelectAll"
+            ]
+        },
+        {
+            "row": [
+                "10",
+                "Active Loans Portfolio Status",
+                "Table",
+                null,
+                "Loan",
+                "25",
+                null,
+                "loanProductIdSelectAll"
+            ]
+        },
+        {
+            "row": [
+                "11",
+                "Active Loans Summary per Branch",
+                "Table",
+                null,
+                "Loan Portfolio",
+                "5",
+                null,
+                "OfficeIdSelectOne"
+            ]
+        },
+        {
+            "row": [
+                "11",
+                "Active Loans Summary per Branch",
+                "Table",
+                null,
+                "Loan Portfolio",
+                "10",
+                null,
+                "currencyIdSelectAll"
+            ]
+        },
+        {
+            "row": [
+                "48",
+                "Balance Sheet",
+                "Pentaho",
+                null,
+                "Accounting",
+                "5",
+                "branch",
+                "OfficeIdSelectOne"
+            ]
+        },
+        {
+            "row": [
+                "48",
+                "Balance Sheet",
+                "Pentaho",
+                null,
+                "Accounting",
+                "41",
+                "date",
+                "endDateSelect"
+            ]
+        },
+        {
+            "row": [
+                "1",
+                "Client Listing",
+                "Table",
+                null,
+                "Client",
+                "5",
+                null,
+                "OfficeIdSelectOne"
+            ]
+        },
+        {
+            "row": [
+                "2",
+                "Client Loans Listing",
+                "Table",
+                null,
+                "Client",
+                "5",
+                null,
+                "OfficeIdSelectOne"
+            ]
+        },
+        {
+            "row": [
+                "2",
+                "Client Loans Listing",
+                "Table",
+                null,
+                "Client",
+                "6",
+                null,
+                "loanOfficerIdSelectAll"
+            ]
+        },
+        {
+            "row": [
+                "2",
+                "Client Loans Listing",
+                "Table",
+                null,
+                "Client",
+                "10",
+                null,
+                "currencyIdSelectAll"
+            ]
+        },
+        {
+            "row": [
+                "2",
+                "Client Loans Listing",
+                "Table",
+                null,
+                "Client",
+                "20",
+                null,
+                "fundIdSelectAll"
+            ]
+        },
+        {
+            "row": [
+                "2",
+                "Client Loans Listing",
+                "Table",
+                null,
+                "Client",
+                "25",
+                null,
+                "loanProductIdSelectAll"
+            ]
+        },
+        {
+            "row": [
+                "20",
+                "Funds Disbursed Between Dates Summary",
+                "Table",
+                null,
+                "Fund",
+                "10",
+                null,
+                "currencyIdSelectAll"
+            ]
+        },
+        {
+            "row": [
+                "20",
+                "Funds Disbursed Between Dates Summary",
+                "Table",
+                null,
+                "Fund",
+                "20",
+                null,
+                "fundIdSelectAll"
+            ]
+        },
+        {
+            "row": [
+                "20",
+                "Funds Disbursed Between Dates Summary",
+                "Table",
+                null,
+                "Fund",
+                "40",
+                null,
+                "startDateSelect"
+            ]
+        },
+        {
+            "row": [
+                "20",
+                "Funds Disbursed Between Dates Summary",
+                "Table",
+                null,
+                "Fund",
+                "41",
+                null,
+                "endDateSelect"
+            ]
+        },
+        {
+            "row": [
+                "21",
+                "Funds Disbursed Between Dates Summary by Office",
+                "Table",
+                null,
+                "Fund",
+                "5",
+                null,
+                "OfficeIdSelectOne"
+            ]
+        },
+        {
+            "row": [
+                "21",
+                "Funds Disbursed Between Dates Summary by Office",
+                "Table",
+                null,
+                "Fund",
+                "10",
+                null,
+                "currencyIdSelectAll"
+            ]
+        },
+        {
+            "row": [
+                "21",
+                "Funds Disbursed Between Dates Summary by Office",
+                "Table",
+                null,
+                "Fund",
+                "20",
+                null,
+                "fundIdSelectAll"
+            ]
+        },
+        {
+            "row": [
+                "21",
+                "Funds Disbursed Between Dates Summary by Office",
+                "Table",
+                null,
+                "Fund",
+                "40",
+                null,
+                "startDateSelect"
+            ]
+        },
+        {
+            "row": [
+                "21",
+                "Funds Disbursed Between Dates Summary by Office",
+                "Table",
+                null,
+                "Fund",
+                "41",
+                null,
+                "endDateSelect"
+            ]
+        },
+        {
+            "row": [
+                "49",
+                "Income Statement",
+                "Pentaho",
+                null,
+                "Accounting",
+                "5",
+                "branch",
+                "OfficeIdSelectOne"
+            ]
+        },
+        {
+            "row": [
+                "49",
+                "Income Statement",
+                "Pentaho",
+                null,
+                "Accounting",
+                "40",
+                "fromDate",
+                "startDateSelect"
+            ]
+        },
+        {
+            "row": [
+                "49",
+                "Income Statement",
+                "Pentaho",
+                null,
+                "Accounting",
+                "41",
+                "toDate",
+                "endDateSelect"
+            ]
+        },
+        {
+            "row": [
+                "5",
+                "Loans Awaiting Disbursal",
+                "Table",
+                null,
+                "Loan Portfolio",
+                "5",
+                null,
+                "OfficeIdSelectOne"
+            ]
+        },
+        {
+            "row": [
+                "5",
+                "Loans Awaiting Disbursal",
+                "Table",
+                null,
+                "Loan Portfolio",
+                "6",
+                null,
+                "loanOfficerIdSelectAll"
+            ]
+        },
+        {
+            "row": [
+                "5",
+                "Loans Awaiting Disbursal",
+                "Table",
+                null,
+                "Loan Portfolio",
+                "10",
+                null,
+                "currencyIdSelectAll"
+            ]
+        },
+        {
+            "row": [
+                "5",
+                "Loans Awaiting Disbursal",
+                "Table",
+                null,
+                "Loan Portfolio",
+                "20",
+                null,
+                "fundIdSelectAll"
+            ]
+        },
+        {
+            "row": [
+                "5",
+                "Loans Awaiting Disbursal",
+                "Table",
+                null,
+                "Loan Portfolio",
+                "25",
+                null,
+                "loanProductIdSelectAll"
+            ]
+        },
+        {
+            "row": [
+                "6",
+                "Loans Awaiting Disbursal Summary",
+                "Table",
+                null,
+                "Loan Portfolio",
+                "5",
+                null,
+                "OfficeIdSelectOne"
+            ]
+        },
+        {
+            "row": [
+                "6",
+                "Loans Awaiting Disbursal Summary",
+                "Table",
+                null,
+                "Loan Portfolio",
+                "6",
+                null,
+                "loanOfficerIdSelectAll"
+            ]
+        },
+        {
+            "row": [
+                "6",
+                "Loans Awaiting Disbursal Summary",
+                "Table",
+                null,
+                "Loan Portfolio",
+                "10",
+                null,
+                "currencyIdSelectAll"
+            ]
+        },
+        {
+            "row": [
+                "6",
+                "Loans Awaiting Disbursal Summary",
+                "Table",
+                null,
+                "Loan Portfolio",
+                "20",
+                null,
+                "fundIdSelectAll"
+            ]
+        },
+        {
+            "row": [
+                "6",
+                "Loans Awaiting Disbursal Summary",
+                "Table",
+                null,
+                "Loan Portfolio",
+                "25",
+                null,
+                "loanProductIdSelectAll"
+            ]
+        },
+        {
+            "row": [
+                "7",
+                "Loans Awaiting Disbursal Summary by Month",
+                "Table",
+                null,
+                "Loan Portfolio",
+                "5",
+                null,
+                "OfficeIdSelectOne"
+            ]
+        },
+        {
+            "row": [
+                "7",
+                "Loans Awaiting Disbursal Summary by Month",
+                "Table",
+                null,
+                "Loan Portfolio",
+                "6",
+                null,
+                "loanOfficerIdSelectAll"
+            ]
+        },
+        {
+            "row": [
+                "7",
+                "Loans Awaiting Disbursal Summary by Month",
+                "Table",
+                null,
+                "Loan Portfolio",
+                "10",
+                null,
+                "currencyIdSelectAll"
+            ]
+        },
+        {
+            "row": [
+                "7",
+                "Loans Awaiting Disbursal Summary by Month",
+                "Table",
+                null,
+                "Loan Portfolio",
+                "20",
+                null,
+                "fundIdSelectAll"
+            ]
+        },
+        {
+            "row": [
+                "7",
+                "Loans Awaiting Disbursal Summary by Month",
+                "Table",
+                null,
+                "Loan Portfolio",
+                "25",
+                null,
+                "loanProductIdSelectAll"
+            ]
+        },
+        {
+            "row": [
+                "15",
+                "Portfolio at Risk",
+                "Table",
+                null,
+                "Loan Portfolio",
+                "5",
+                null,
+                "OfficeIdSelectOne"
+            ]
+        },
+        {
+            "row": [
+                "15",
+                "Portfolio at Risk",
+                "Table",
+                null,
+                "Loan Portfolio",
+                "6",
+                null,
+                "loanOfficerIdSelectAll"
+            ]
+        },
+        {
+            "row": [
+                "15",
+                "Portfolio at Risk",
+                "Table",
+                null,
+                "Loan Portfolio",
+                "10",
+                null,
+                "currencyIdSelectAll"
+            ]
+        },
+        {
+            "row": [
+                "15",
+                "Portfolio at Risk",
+                "Table",
+                null,
+                "Loan Portfolio",
+                "20",
+                null,
+                "fundIdSelectAll"
+            ]
+        },
+        {
+            "row": [
+                "15",
+                "Portfolio at Risk",
+                "Table",
+                null,
+                "Loan Portfolio",
+                "25",
+                null,
+                "loanProductIdSelectAll"
+            ]
+        },
+        {
+            "row": [
+                "16",
+                "Portfolio at Risk by Branch",
+                "Table",
+                null,
+                "Loan Portfolio",
+                "5",
+                null,
+                "OfficeIdSelectOne"
+            ]
+        },
+        {
+            "row": [
+                "16",
+                "Portfolio at Risk by Branch",
+                "Table",
+                null,
+                "Loan Portfolio",
+                "6",
+                null,
+                "loanOfficerIdSelectAll"
+            ]
+        },
+        {
+            "row": [
+                "16",
+                "Portfolio at Risk by Branch",
+                "Table",
+                null,
+                "Loan Portfolio",
+                "10",
+                null,
+                "currencyIdSelectAll"
+            ]
+        },
+        {
+            "row": [
+                "16",
+                "Portfolio at Risk by Branch",
+                "Table",
+                null,
+                "Loan Portfolio",
+                "20",
+                null,
+                "fundIdSelectAll"
+            ]
+        },
+        {
+            "row": [
+                "16",
+                "Portfolio at Risk by Branch",
+                "Table",
+                null,
+                "Loan Portfolio",
+                "25",
+                null,
+                "loanProductIdSelectAll"
+            ]
+        },
+        {
+            "row": [
+                "50",
+                "Trial Balance",
+                "Pentaho",
+                null,
+                "Accounting",
+                "5",
+                "branch",
+                "OfficeIdSelectOne"
+            ]
+        },
+        {
+            "row": [
+                "50",
+                "Trial Balance",
+                "Pentaho",
+                null,
+                "Accounting",
+                "40",
+                "fromDate",
+                "startDateSelect"
+            ]
+        },
+        {
+            "row": [
+                "50",
+                "Trial Balance",
+                "Pentaho",
+                null,
+                "Accounting",
+                "41",
+                "toDate",
+                "endDateSelect"
+            ]
+        }
+    ]
+}
+					</code>
 				</div>
 			</div>
 
@@ -4193,41 +5525,76 @@ GET https://DomainName/api/v1/reports
 					<code class="method-declaration">
 GET https://DomainName/api/v1/reports/{reportName}
 					</code>
-					<code class="method-response">{ "columnHeaders" : [ {
-						"columnName" : "Office/Branch", "columnType" : "VARCHAR",
-						"columnLength" : null, "columnDisplayType" : null, "columnValues"
-						: [ ] }, { "columnName" : "Name", "columnType" : "VARCHAR",
-						"columnLength" : null, "columnDisplayType" : null, "columnValues"
-						: [ ] }, { "columnName" : "Joining Date", "columnType" : "DATE",
-						"columnLength" : null, "columnDisplayType" : null, "columnValues"
-						: [ ] } ], "data" : [ { "row" : [ "Demo MFI Head Office",
-						"O'Meara, Patrick", "2009-01-04" ] }, { "row" : [ "Demo MFI Head
-						Office", "O'Meara, Dennis", "2009-01-04" ] }, { "row" : [ "Demo
-						MFI Head Office", "Smith, John", "2009-01-11" ] }, { "row" : [
-						"Demo MFI Head Office", "O'Meara, Jimmy", "2009-01-11" ] }, {
-						"row" : [ "Demo MFI Head Office", "Sunnyville vegetable growers
-						Ltd", "2009-01-24" ] }, { "row" : [ "Demo MFI Head Office",
-						"TraorÃ©, Kalilou", "2009-02-04" ] }, { "row" : [ "Demo MFI Head
-						Office", "KonÃ©, Sidi", "2009-02-11" ] }, { "row" : [ "Demo MFI
-						Head Office", "YattabarÃ©, Moustapha", "2009-02-18" ] }, { "row" :
-						[ "Demo MFI Head Office", "Mali fruit sales ltd.", "2009-02-18" ]
-						}, { "row" : [ "Demo MFI Head Office", "Djenne co-op group",
-						"2009-02-25" ] }, { "row" : [ "Demo MFI Head Office", "test,
-						test", "2012-04-19" ] }, { "row" : [ "Demo MFI Head Office",
-						"Ziffle, Fred", "2012-04-21" ] }, { "row" : [ "Demo MFI Head
-						Office", "omara, safik", "2012-04-24" ] }, { "row" : [ "Demo MFI
-						Head Office", "HF Test", "2012-04-24" ] }, { "row" : [ "Demo MFI
-						Head Office", "HF Test 2", "2012-04-24" ] }, { "row" : [ "Demo MFI
-						Head Office", "Kumar, Shiva", "2011-10-01" ] }, { "row" : [ "Demo
-						MFI Head Office", "Yton, Petra", "2006-06-09" ] }, { "row" : [
-						"Demo MFI Head Office", "Yton, Petra", "2006-06-09" ] }, { "row" :
-						[ "sub branch 1", "Lee, Jacques", "2012-04-03" ] }, { "row" : [
-						"sub branch 1", "Asare-Frimpong, Patrick", "2012-04-18" ] }, {
-						"row" : [ "sub branch 2", "t, test", "2012-04-18" ] }, { "row" : [
-						"Majmoua", "client, firstMajmoua", "2011-12-01" ] }, { "row" : [
-						"Intrasoft Technologies", "Said, Zayyad", "2012-04-02" ] }, {
-						"row" : [ "Hugo technologies", "typical individual lending
-						client", "2010-06-02" ] } ] } </code>
+					<code class="method-response">
+{
+    "columnHeaders": [
+        {
+            "columnName": "Office/Branch",
+            "columnType": "VARCHAR",
+            "isColumnNullable": false,
+            "isColumnPrimaryKey": false,
+            "columnValues": []
+        },
+        {
+            "columnName": "Client Account No.",
+            "columnType": "VARCHAR",
+            "isColumnNullable": false,
+            "isColumnPrimaryKey": false,
+            "columnValues": []
+        },
+        {
+            "columnName": "Name",
+            "columnType": "VARCHAR",
+            "isColumnNullable": false,
+            "isColumnPrimaryKey": false,
+            "columnValues": []
+        },
+        {
+            "columnName": "Joined",
+            "columnType": "DATE",
+            "isColumnNullable": false,
+            "isColumnPrimaryKey": false,
+            "columnValues": []
+        },
+        {
+            "columnName": "External Id",
+            "columnType": "VARCHAR",
+            "isColumnNullable": false,
+            "isColumnPrimaryKey": false,
+            "columnValues": []
+        }
+    ],
+    "data": [
+        {
+            "row": [
+                "Head Office",
+                "000000001",
+                "Petra Yton",
+                "2009-03-04",
+                "786YYH7"
+            ]
+        },
+        {
+            "row": [
+                "Head Office",
+                "000000002",
+                "Keith(changed) Yton",
+                "2009-03-04",
+                null
+            ]
+        },
+        {
+            "row": [
+                "Head Office",
+                "000000003",
+                "Jorge lastname",
+                "2013-02-05",
+                null
+            ]
+        }
+    ]
+}
+					</code>
 				</div>
 			</div>
 
@@ -4268,24 +5635,37 @@ GET https://DomainName/api/v1/reports/{reportName}
 					<code class="method-declaration">
 POST https://DomainName/api/v1/authentication?username={username}&password={password}
 					</code>
-					<code class="method-request">POST
-						authentication?username=mifos&password=password Content-Type:
-						application/json No Request Body </code>
-					<code class="method-response">{ "username": "mifos",
-						"userId": 1, "base64EncodedAuthenticationKey":
-						"bWlmb3M6cGFzc3dvcmQ=", "authenticated": true, "permissions": [
-						"ALL_FUNCTIONS" ] } </code>
-
-					<code class="method-request">POST
-						authentication?username=mifos&password=fail Content-Type:
-						application/json No Request Body </code>
-					<code class="method-response">{ "developerMessage": "Invalid
-						authentication details were passed in api request.",
-						"developerDocLink":
-						"https://github.com/keithwoodlock/mifosx/wiki/HTTP-API-Error-codes",
-						"httpStatusCode": "401", "defaultUserMessage": "Unauthenticated.
-						Please login.", "userMessageGlobalisationCode":
-						"error.msg.not.authenticated", "errors": [] } </code>
+					<code class="method-request">
+POST authentication?username=mifos&password=password
+Content-Type: application/json 
+No Request Body
+					</code>
+					<code class="method-response">
+{
+    "username": "mifos",
+    "userId": 1,
+    "base64EncodedAuthenticationKey": "bWlmb3M6cGFzc3dvcmQ=",
+    "authenticated": true,
+    "permissions": [
+        "ALL_FUNCTIONS"
+    ]
+}
+					</code>
+					<code class="method-request">
+POST authentication?username=mifos&password=fail 
+Content-Type: application/json 
+No Request Body
+					</code>
+					<code class="method-response">
+{
+    "developerMessage": "Invalid authentication details were passed in api request.",
+    "developerDocLink": "https://github.com/keithwoodlock/mifosx/wiki/HTTP-API-Error-codes",
+    "httpStatusCode": "401",
+    "defaultUserMessage": "Unauthenticated. Please login.",
+    "userMessageGlobalisationCode": "error.msg.not.authenticated",
+    "errors": []
+}
+					</code>
 				</div>
 			</div>
 
@@ -4294,8 +5674,7 @@ POST https://DomainName/api/v1/authentication?username={username}&password={pass
 			<div class="method-section">
 				<div class="method-description">
 					<h3>Users</h3>
-					<p>An API capability to support administration of application
-						users.</p>
+					<p>An API capability to support administration of application users.</p>
 				</div>
 			</div>
 
@@ -4313,13 +5692,19 @@ POST https://DomainName/api/v1/authentication?username={username}&password={pass
 					<code class="method-declaration">
 GET https://DomainName/api/v1/users
 					</code>
-					<code class="method-response">[ { "id" : 6, "officeId" : 1,
-						"officeName" : "change super user", "username" : "committee1",
-						"firstname" : "Committee", "lastname" : "Member", "email" :
-						"fake@email.com" }, { "id" : 5, "officeId" : 1, "officeName" :
-						"change super user", "username" : "dataentry1", "firstname" :
-						"Data Entry", "lastname" : "User", "email" : "fake@email.com"
-						}...] </code>
+					<code class="method-response">
+[
+    {
+        "id": 1,
+        "username": "mifos",
+        "officeId": 1,
+        "officeName": "Head Office",
+        "firstname": "App",
+        "lastname": "Administrator",
+        "email": "demomfi@mifos.org"
+    }
+]
+					</code>
 				</div>
 			</div>
 
@@ -4343,18 +5728,24 @@ GET https://DomainName/api/v1/users
 					<code class="method-declaration">
 GET https://DomainName/api/v1/users/template
 					</code>
-					<code class="method-response">{ "allowedOffices": [ { "id":
-						1, "name": "Head Office", "nameDecorated": "Head Office" }, {
-						"id": 10, "name": "Myanmar Regional Office", "nameDecorated":
-						"....Myanmar Regional Office" }, { "id": 7, "name": "Myanmar 1",
-						"nameDecorated": "........Myanmar 1" },... ], "availableRoles": [
-						{ "id": 1, "name": "Super user", "description": "This role
-						provides all application permissions." }, { "id": 2, "name":
-						"Field officer", "description": "A field officer role allows the
-						user to add client and loans and view reports but nothing else."
-						}, { "id": 3, "name": "Data Entry (Portfolio only)",
-						"description": "This role allows a user full permissions around
-						client and loan functionality but nothing else." },... ] } </code>
+					<code class="method-response">
+{
+    "allowedOffices": [
+        {
+            "id": 1,
+            "name": "Head Office",
+            "nameDecorated": "Head Office"
+        }
+    ],
+    "availableRoles": [
+        {
+            "id": 1,
+            "name": "Super user",
+            "description": "This role provides all application permissions."
+        }
+    ]
+}
+					</code>
 				</div>
 			</div>
 
@@ -4375,20 +5766,27 @@ GET https://DomainName/api/v1/users/template
 					<code class="method-declaration">
 GET https://DomainName/api/v1/users/{userId}
 					</code>
-					<code class="method-response">{ "id": 1, "username":
-						"mifos", "officeId": 1, "officeName": "Head Office", "firstname":
-						"App(test)", "lastname": "Administrator", "email":
-						"demomfi@mifos.org", "availableRoles": [ { "id": 2, "name": "Field
-						officer", "description": "A field officer role allows the user to
-						add client and loans and view reports but nothing else." }, {
-						"id": 3, "name": "Data Entry (Portfolio only)", "description":
-						"This role allows a user full permissions around client and loan
-						functionality but nothing else." },... ], "selectedRoles": [ {
-						"id": 1, "name": "Super user", "description": "This role provides
-						all application permissions." } ] } </code>
+					<code class="method-response">
+{
+    "id": 1,
+    "username": "mifos",
+    "officeId": 1,
+    "officeName": "Head Office",
+    "firstname": "App",
+    "lastname": "Administrator",
+    "email": "demomfi@mifos.org",
+    "availableRoles": [],
+    "selectedRoles": [
+        {
+            "id": 1,
+            "name": "Super user",
+            "description": "This role provides all application permissions."
+        }
+    ]
+}
+					</code>
 				</div>
 			</div>
-
 
 			<a id="users_create" name="users_create" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
@@ -4414,12 +5812,25 @@ GET https://DomainName/api/v1/users/{userId}
 					<code class="method-declaration">
 POST https://DomainName/api/v1/users
 					</code>
-					<code class="method-request">POST users Content-Type:
-						application/json Request body: { "username": "Another New User
-						zll", "firstname": "Test", "lastname": "User", "email":
-						"whatever@mifos.org", "officeId": 1, "roles": [2,3] } </code>
-					<code class="method-response"> { "officeId": 1,
-						"resourceId": 11 } </code>
+					<code class="method-request">
+POST users
+Content-Type: application/json 
+Request body:
+{
+    "username": "newuser",
+    "firstname": "Test",
+    "lastname": "User",
+    "email": "whatever@mifos.org",
+    "officeId": 1,
+    "roles": [2,3]
+}
+					</code>
+					<code class="method-response">
+{
+    "officeId": 1,
+    "resourceId": 11
+}
+					</code>
 				</div>
 			</div>
 
@@ -4436,14 +5847,26 @@ POST https://DomainName/api/v1/users
 					<code class="method-declaration">
 PUT https://DomainName/api/v1/users/{userId)
 					</code>
-					<code class="method-request">PUT users/3 Content-Type:
-						application/json Request body: { "firstname": "Test", "password":
-						"window75", "repeatPassword": "window75" } </code>
-					<code class="method-response"> { "officeId": 1,
-						"resourceId": 3, "changes": { "firstname": "Test",
-						"passwordEncoded":
-						"abc3326b1bb376351c7baeb4175f5e0504e33aadf6a158474a6d71de1befae51"
-						} } </code>
+					<code class="method-request">
+PUT users/3 
+Content-Type: application/json 
+Request body:
+{
+    "firstname": "Test",
+    "password": "window75",
+    "repeatPassword": "window75"
+}
+					</code>
+					<code class="method-response"> 
+{
+    "officeId": 1,
+    "resourceId": 3,
+    "changes": {
+        "firstname": "Test",
+        "passwordEncoded": "abc3326b1bb376351c7baeb4175f5e0504e33aadf6a158474a6d71de1befae51"
+    }
+}
+					</code>
 				</div>
 			</div>
 
@@ -4457,22 +5880,28 @@ PUT https://DomainName/api/v1/users/{userId)
 					<code class="method-declaration">
 DELETE https://DomainName/api/v1/users/{userId}
 					</code>
-					<code class="method-request">DELETE users/20 Content-Type:
-						application/json No Request Body </code>
-					<code class="method-response">{ "officeId": 1, "resourceId":
-						20, "changes": {} } </code>
+					<code class="method-request">
+DELETE users/20
+Content-Type: application/json 
+No Request Body
+					</code>
+					<code class="method-response">
+{
+    "officeId": 1,
+    "resourceId": 20,
+    "changes": {}
+}
+					</code>
 				</div>
 			</div>
 			<!--  end of users api docs -->
-
 
 			<!-- start of roles api docs -->
 			<a id="roles" name="users" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
 					<h3>Roles</h3>
-					<p>An API capability to support management of application roles
-						for user administration.</p>
+					<p>An API capability to support management of application roles for user administration.</p>
 				</div>
 			</div>
 
@@ -4490,19 +5919,15 @@ DELETE https://DomainName/api/v1/users/{userId}
 					<code class="method-declaration">
 GET https://DomainName/api/v1/roles
 					</code>
-					<code class="method-response">[ { "id" : 1, "name" : "Super
-						user", "description" : "This role provides all application
-						permissions." }, { "id" : 2, "name" : "Field officer",
-						"description" : "A field officer role allows the user to add
-						client and loans and view reports but nothing else." }, { "id" :
-						3, "name" : "Data Entry (Portfolio only)", "description" : "This
-						role allows a user full permissions around client and loan
-						functionality but nothing else." }, { "id" : 4, "name" : "Credit
-						Committe Member", "description" : "This role allows a user to
-						approve reject or withdraw loans (with reporting)." }, { "id" : 5,
-						"name" : "Manager", "description" : "This role allows a manager to
-						do anything related to portfolio management and also view all
-						reports." } ] </code>
+					<code class="method-response">
+[
+  {
+    "id": 1,
+    "name": "Super user",
+    "description": "This role provides all application permissions."
+  }
+]
+					</code>
 				</div>
 			</div>
 
@@ -4520,9 +5945,13 @@ GET https://DomainName/api/v1/roles
 					<code class="method-declaration">
 GET https://DomainName/api/v1/roles/{roleId}
 					</code>
-					<code class="method-response">{ "id" : 1, "name" : "Super
-						user", "description" : "This role provides all application
-						permissions." } </code>
+					<code class="method-response">
+{
+  "id": 1,
+  "name": "Super user",
+  "description": "This role provides all application permissions."
+}
+					</code>
 				</div>
 			</div>
 
@@ -4543,11 +5972,16 @@ GET https://DomainName/api/v1/roles/{roleId}
 					<code class="method-declaration">
 POST https://DomainName/api/v1/roles
 					</code>
-					<code class="method-request">POST roles Content-Type:
-						application/json Request body: { "name": "Another Role Name",
-						"description": "A description outlining the purpose of this role
-						in relation to the application." } </code>
-					<code class="method-response">{ "resourceId": 8 } </code>
+					<code class="method-request">
+POST roles 
+Content-Type: application/json 
+Request body:
+{
+    "name": "Another Role Name",
+    "description": "A description outlining the purpose of this role in relation to the application."
+}
+					</code>
+					<code class="method-response">{ "resourceId": 2} </code>
 				</div>
 			</div>
 
@@ -4560,11 +5994,22 @@ POST https://DomainName/api/v1/roles
 					<code class="method-declaration">
 PUT https://DomainName/api/v1/roles/{roleId}
 					</code>
-					<code class="method-request">PUT roles/8 Content-Type:
-						application/json Request body: { "description": "some
-						description(changed)" } </code>
-					<code class="method-response">{ "resourceId": 8, "changes":
-						{ "description": "some description(changed)" } } </code>
+					<code class="method-request">
+PUT roles/1
+Content-Type: application/json 
+Request body: 
+{ 
+	"description": "some description(changed)" 
+}
+					</code>
+					<code class="method-response">
+{ 
+	"resourceId": 1, 
+	"changes": { 
+		"description": "some description(changed)" 
+	} 
+} 
+					</code>
 				</div>
 			</div>
 
@@ -4580,15 +6025,30 @@ PUT https://DomainName/api/v1/roles/{roleId}
 					<code class="method-declaration">
 GET https://DomainName/api/v1/roles/{roleId}/permissions
 					</code>
-					<code class="method-response">{ "id": 1, "name": "Super
-						user", "description": "This role provides all application
-						permissions.", "permissionUsageData": [ { "grouping":
-						"authorisation", "code": "READ_PERMISSION", "entityName":
-						"PERMISSION", "actionName": "READ", "selected": false }, {
-						"grouping": "authorisation", "code": "CREATE_ROLE", "entityName":
-						"ROLE", "actionName": "CREATE", "selected": false, }, {
-						"grouping": "authorisation", "code": "DELETE_ROLE", "entityName":
-						"ROLE", "actionName": "DELETE", "selected": false },...] } </code>
+					<code class="method-response">
+{
+    "id": 1,
+    "name": "Super user",
+    "description": "This role provides all application permissions.",
+    "permissionUsageData": [
+        {
+            "grouping": "authorisation",
+            "code": "READ_PERMISSION",
+            "entityName": "PERMISSION",
+            "actionName": "READ",
+            "selected": false
+        },
+        ...
+        {
+            "grouping": "transaction_loan",
+            "code": "WRITEOFF_LOAN_CHECKER",
+            "entityName": "LOAN",
+            "actionName": "WRITEOFF",
+            "selected": false
+        }
+    ]
+}
+					</code>
 				</div>
 			</div>
 
@@ -4602,11 +6062,26 @@ GET https://DomainName/api/v1/roles/{roleId}/permissions
 					<code class="method-declaration">
 PUT https://DomainName/api/v1/roles/{roleId}/permissions
 					</code>
-					<code class="method-request">PUT roles/8 Content-Type:
-						application/json Request body: { "permissions":
-						{"ALL_FUNCTIONS_READ": "true"} } </code>
-					<code class="method-response">{ "resourceId": 8, "changes":
-						{ "permissions": { "ALL_FUNCTIONS_READ": true } } } </code>
+					<code class="method-request">
+PUT roles/8 
+Content-Type: application/json 
+Request body:
+{
+    "permissions": {
+        "ALL_FUNCTIONS_READ": "true"
+    }
+}
+					</code>
+					<code class="method-response">
+{
+    "resourceId": 8,
+    "changes": {
+        "permissions": {
+            "ALL_FUNCTIONS_READ": true
+        }
+    }
+}
+					</code>
 				</div>
 			</div>
 
@@ -4615,8 +6090,7 @@ PUT https://DomainName/api/v1/roles/{roleId}/permissions
 			<div class="method-section">
 				<div class="method-description">
 					<h3>Permissions</h3>
-					<p>An API capability to support management of application
-						permissions for user administration.</p>
+					<p>An API capability to support management of application permissions for user administration.</p>
 				</div>
 			</div>
 
@@ -4635,13 +6109,25 @@ PUT https://DomainName/api/v1/roles/{roleId}/permissions
 					<code class="method-declaration">
 GET https://DomainName/api/v1/permissions
 					</code>
-					<code class="method-response">[ { "grouping":
-						"authorisation", "code": "READ_PERMISSION", "entityName":
-						"PERMISSION", "actionName": "READ", "selected": true }, {
-						"grouping": "authorisation", "code": "CREATE_ROLE", "entityName":
-						"ROLE", "actionName": "CREATE", "selected": true }, { "grouping":
-						"authorisation", "code": "DELETE_ROLE", "entityName": "ROLE",
-						"actionName": "DELETE", "selected": true }, ... ] </code>
+					<code class="method-response">
+[
+  {
+    "grouping": "authorisation",
+    "code": "READ_PERMISSION",
+    "entityName": "PERMISSION",
+    "actionName": "READ",
+    "selected": true
+  },
+  ....
+  {
+    "grouping": "transaction_loan",
+    "code": "WRITEOFF_LOAN",
+    "entityName": "LOAN",
+    "actionName": "WRITEOFF",
+    "selected": true
+  }
+]
+					</code>
 				</div>
 			</div>
 
