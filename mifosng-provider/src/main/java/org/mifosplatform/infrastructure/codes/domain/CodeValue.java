@@ -8,6 +8,8 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import org.apache.commons.lang.StringUtils;
+import org.mifosplatform.infrastructure.codes.CodeConstants.CODEVALUE_JSON_INPUT_PARAMS;
+import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
@@ -45,5 +47,12 @@ public class CodeValue extends AbstractPersistable<Long> {
 
     public int position() {
         return position;
+    }
+    
+    public static CodeValue fromJson(Code code, final JsonCommand command) {
+
+        final String label = command.stringValueOfParameterNamed(CODEVALUE_JSON_INPUT_PARAMS.NAME.getValue());
+        final Integer position = command.integerValueSansLocaleOfParameterNamed(CODEVALUE_JSON_INPUT_PARAMS.POSITION.getValue());
+        return new CodeValue(code, label, position.intValue());
     }
 }

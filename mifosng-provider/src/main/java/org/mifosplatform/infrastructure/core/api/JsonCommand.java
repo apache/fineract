@@ -33,22 +33,23 @@ public final class JsonCommand {
     private final String entityName;
     private final Long apptableId;
     private final Long datatableId;
+    private final Long codeId;
 
     public static JsonCommand from(final String jsonCommand, final JsonElement parsedCommand, final FromJsonHelper fromApiJsonHelper,
             final String entityName, final Long resourceId, final Long groupId, final Long clientId, final Long loanId,
-            final Long apptableId, final Long datatableId) {
+            final Long apptableId, final Long datatableId, final Long codeId) {
         return new JsonCommand(null, jsonCommand, parsedCommand, fromApiJsonHelper, entityName, resourceId, groupId, clientId, loanId,
-                apptableId, datatableId);
+                apptableId, datatableId, codeId);
     }
 
     public static JsonCommand fromExistingCommand(final Long commandId, final String jsonCommand, final JsonElement parsedCommand,
             final FromJsonHelper fromApiJsonHelper, final Long resourceId) {
-        return new JsonCommand(commandId, jsonCommand, parsedCommand, fromApiJsonHelper, null, resourceId, null, null, null, null, null);
+        return new JsonCommand(commandId, jsonCommand, parsedCommand, fromApiJsonHelper, null, resourceId, null, null, null, null, null, null);
     }
 
     public JsonCommand(final Long commandId, final String jsonCommand, final JsonElement parsedCommand,
             final FromJsonHelper fromApiJsonHelper, final String entityName, final Long resourceId, final Long groupId,
-            final Long clientId, final Long loanId, final Long apptableId, final Long datatableId) {
+            final Long clientId, final Long loanId, final Long apptableId, final Long datatableId, final Long codeId) {
         this.commandId = commandId;
         this.jsonCommand = jsonCommand;
         this.parsedCommand = parsedCommand;
@@ -60,6 +61,7 @@ public final class JsonCommand {
         this.loanId = loanId;
         this.apptableId = apptableId;
         this.datatableId = datatableId;
+        this.codeId = codeId;
     }
 
     public String json() {
@@ -102,6 +104,10 @@ public final class JsonCommand {
         return this.datatableId;
     }
 
+    public Long getCodeId(){
+        return this.codeId;
+    }
+    
     private boolean differenceExists(final LocalDate baseValue, final LocalDate workingCopyValue) {
         boolean differenceExists = false;
 
