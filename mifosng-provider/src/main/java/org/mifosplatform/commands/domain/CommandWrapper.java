@@ -16,6 +16,7 @@ public class CommandWrapper {
     private final String json;
     private final Long apptableId;
     private final Long datatableId;
+    private final Long codeId;
 
     public static CommandWrapper wrap(final String actionName, final String enityName, final Long resourceId) {
         return new CommandWrapper(null, actionName, enityName, resourceId);
@@ -38,12 +39,13 @@ public class CommandWrapper {
         this.entityId = resourceId;
         this.apptableId = null;
         this.datatableId = null;
+        this.codeId = null;
         this.href = null;
         this.json = null;
     }
 
     public CommandWrapper(final Long officeId, final Long groupId, final Long clientId, final Long loanId, final String actionName,
-            final String entityName, final Long entityId, final Long apptableId, final Long datatableId, final String href,
+            final String entityName, final Long entityId, final Long apptableId, final Long datatableId, final Long codeId, final String href,
             final String json) {
         this.commandId = null;
         this.officeId = officeId;
@@ -56,6 +58,7 @@ public class CommandWrapper {
         this.entityId = entityId;
         this.apptableId = apptableId;
         this.datatableId = datatableId;
+        this.codeId = codeId;
         this.href = href;
         this.json = json;
     }
@@ -87,7 +90,11 @@ public class CommandWrapper {
     public String getTaskPermissionName() {
         return this.taskPermissionName;
     }
-
+    
+    public Long getCodeId(){
+        return this.codeId;
+    }
+    
     public String getHref() {
         return this.href;
     }
@@ -170,6 +177,10 @@ public class CommandWrapper {
         return this.entityName.equalsIgnoreCase("CODE");
     }
 
+    public boolean isCodeValueResource() {
+        return this.entityName.equalsIgnoreCase("CODEVALUE");
+    }
+    
     public boolean isStaffResource() {
         return this.entityName.equalsIgnoreCase("STAFF");
     }

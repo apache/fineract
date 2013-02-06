@@ -21,4 +21,6 @@ public interface CodeValueReadPlatformService {
 
 	// system defined code value data
 	Collection<CodeValueData> retrieveCustomIdentifierCodeValues();
+	
+	Collection<CodeValueData> retrieveAllCodeValues(final Long codeId);
 }

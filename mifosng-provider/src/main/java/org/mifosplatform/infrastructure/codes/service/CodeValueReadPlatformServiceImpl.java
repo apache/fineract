@@ -52,4 +52,17 @@ public class CodeValueReadPlatformServiceImpl implements CodeValueReadPlatformSe
 
         return this.jdbcTemplate.query(sql, rm, new Object[] { "Customer Identifier" });
     }
+
+	@Override
+	public Collection<CodeValueData> retrieveAllCodeValues(Long codeId) {
+		
+		context.authenticatedUser();
+
+        final CodeValueDataMapper rm = new CodeValueDataMapper();
+        final String sql = "select " + rm.schema() + "where cv.code_id = ? order by position";
+
+        return this.jdbcTemplate.query(sql, rm, new Object[] { codeId });
+	}
+    
+    
 }

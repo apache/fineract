@@ -53,7 +53,7 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
             final JsonElement parsedCommand = this.fromApiJsonHelper.parse(json);
             final JsonCommand command = JsonCommand.from(json, parsedCommand, this.fromApiJsonHelper, wrapper.getEntityName(),
                     wrapper.getEntityId(), wrapper.getGroupId(), wrapper.getClientId(), wrapper.getLoanId(), wrapper.getApptableId(),
-                    wrapper.getDatatableId());
+                    wrapper.getDatatableId(), wrapper.getCodeId());
 
             result = this.processAndLogCommandService.processAndLogCommand(wrapper, command, isApprovedByChecker);
         } catch (RollbackTransactionAsCommandIsNotApprovedByCheckerException e) {
@@ -63,7 +63,7 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
             final JsonElement parsedCommand = this.fromApiJsonHelper.parse(jsonToUse);
             final JsonCommand command = JsonCommand.from(jsonToUse, parsedCommand, this.fromApiJsonHelper, wrapper.getEntityName(),
                     wrapper.getEntityId(), wrapper.getGroupId(), wrapper.getClientId(), wrapper.getLoanId(), wrapper.getApptableId(),
-                    wrapper.getDatatableId());
+                    wrapper.getDatatableId(), wrapper.getCodeId());
 
             result = this.processAndLogCommandService.logCommand(wrapper, command);
         }

@@ -15,10 +15,11 @@ public class CommandWrapperBuilder {
     private String json = "{}";
     private Long apptableId;
     private Long datatableId;
+    private Long codeId;
 
     public CommandWrapper build() {
         return new CommandWrapper(this.officeId, this.groupId, this.clientId, this.loanId, this.actionName, this.entityName, this.entityId,
-                this.apptableId, this.datatableId, this.href, this.json);
+                this.apptableId, this.datatableId, this.codeId, this.href, this.json);
     }
 
     // public CommandWrapperBuilder withEntityId(final Long withId) {
@@ -555,4 +556,13 @@ public class CommandWrapperBuilder {
         this.href = "/loans/loanreassignment";
         return this;
     }
+    
+    public CommandWrapperBuilder createCodeValue(final Long codeId) {
+        this.actionName = "CREATE";
+        this.entityName = "CODEVALUE";
+        this.codeId = codeId;
+        this.href = "/codes/" + codeId + "/codevalues/template";
+        return this;
+    }
+    
 }
