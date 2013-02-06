@@ -2802,43 +2802,43 @@ Request Body:
 <a id="fixeddeposits" name="fixeddeposits" class="old-syle-anchor">&nbsp;</a>
         <div class="method-section">
             <div class="method-description">
-                <h2>Fixed Deposits :</h2>
+                <h2>Fixed Deposit Account:</h2>
                 <table class=matrixHeading>
                     <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Field Descriptions</div></td></tr>
                     <tr class=alt><td>deposit :</td></tr>
-                    <tr><td class=fielddesc>The amount to be deposit in the fixeddeposit.</td></tr>
+                    <tr><td class=fielddesc>The amount to be deposited in the deposit account.</td></tr>
                     <tr class=alt><td>externalId :</td></tr>
-                    <tr><td class=fielddesc>A place to put an external reference for this fixeddeposit. e.g. The ID another system uses.<br>
+                    <tr><td class=fielddesc>A place to put an external reference for this deposit account. e.g. The ID another system uses.<br>
                     If provided, it must be unique.</td></tr>
 					
-                    <tr class=alt><td>tenureInMonths :</td></tr>
-                    <tr><td class=fielddesc>denotes the tenure period of depsoit account. </td></tr>
+                    <tr class=alt><td>tenureInMonths:</td></tr>
+                    <tr><td class=fielddesc>denotes the tenure period of deposit account. </td></tr>
 					
-                    <tr class=alt><td>renewalAllowed :</td></tr>
+                    <tr class=alt><td>renewalAllowed:</td></tr>
                     <tr><td class=fielddesc>Whether the deposit account is eligible for renew after maturity. <br>
 					If 'true' : renewalAllowed otherwise renewal not allowed.</td></tr>
 					
-                    <tr class=alt><td>isInterestWithdrawable :</td></tr>
-                    <tr><td class=fielddesc>denotes whether for this deposit account interest is withdrawable or not <br>
-					If true interest is withdrawable and 'interestCompoundingAllowed' is must be false. </td></tr>
+                    <tr class=alt><td>isInterestWithdrawable:</td></tr>
+                    <tr><td class=fielddesc>denotes whether for this deposit account, interest is withdrawable or not <br>
+					If true interest is withdrawable and 'interestCompoundingAllowed' must be false. </td></tr>
 					
-					<tr class=alt><td>interestCompoundingAllowed :</td></tr>
+					<tr class=alt><td>interestCompoundingAllowed:</td></tr>
                     <tr><td class=fielddesc>denotes interestCompounding is allowed or not for a deposit account <br>
 					If 'false' on simple interest basis the interest is calculated</td></tr>
 					
-                    <tr class=alt><td>maturityInterestRate :</td></tr>
+                    <tr class=alt><td>maturityInterestRate:</td></tr>
                     <tr><td class=fielddesc>Interest rate applicable on deposit amount upto maturity date, <br>
 					after maturrity if the account is not closed 'preClosureInterestRate' is applicable on deposit amount </td></tr>
 					
-					<tr class=alt><td>preClosureInterestRate :</td></tr>
+					<tr class=alt><td>preClosureInterestRate:</td></tr>
                     <tr><td class=fielddesc>Interest rate applicable on deposit amount if the account is closed before maturity date, <br>
 					and after maturity of account if it is not closed or renewed this interest rate is applicable.</td></tr>
 					
-                    <tr class=alt><td>interestCompoundedEvery :</td></tr>
+                    <tr class=alt><td>interestCompoundedEvery:</td></tr>
                     <tr><td class=fielddesc>Interest is calculated on deposit account for every interestCompoundedEvery period</td></tr>
 					
-					<tr class=alt><td>lockinPeriod :</td></tr>
-					<tr><td class=fielddesc>With in a lockinperiod, the deposit account cannot be preclosed</td></tr>
+					<tr class=alt><td>lockinPeriod:</td></tr>
+					<tr><td class=fielddesc>Within a lockinperiod, the deposit account cannot be preclosed</td></tr>
 										
                     </tr>
                 </table>
@@ -2849,7 +2849,7 @@ Request Body:
 <a id="fixeddeposits_template" name="fixeddeposits_template" class="old-syle-anchor">&nbsp;</a>
 <div class="method-section">
     <div class="method-description">
-        <h2>Retrieve Fixeddeposit Details Template :</h2>
+        <h2>Retrieve Deposit Account Details Template:</h2>
                 <p>This is a convenience resource.  It can be useful when building maintenance user interface screens for client applications. The template data returned consists of any or all of:
                     <ul>
                     <li class=normalli>Field Defaults</li>   
@@ -2870,68 +2870,103 @@ Request Body:
         <div class=apiClick>depositaccounts/template?clientId=17</div>
     </div>
     <div class="method-example">
-        <code class="method-declaration">GET https://Domain Name/api/v1/depositaccounts/template</code>
+    	<code class="method-declaration">GET https://Domain Name/api/v1/depositaccounts/template?clientId={clientId}&productId={productId}</code>
+    	<code class="method-response">
+{
+  "clientId": 1,
+  "clientName": "First Client",
+  "productId": 1,
+  "productName": "MyFirstDepositProduct",
+  "currency": {
+    "code": "USD",
+    "name": "",
+    "decimalPlaces": 2,
+    "displaySymbol": "",
+    "nameCode": "",
+    "displayLabel": " [USD]"
+  },
+  "deposit": 100,
+  "maturityInterestRate": 6,
+  "tenureInMonths": 12,
+  "projectedCommencementDate": [
+    2013,
+    2,
+    6
+  ],
+  "interestCompoundedEvery": 1,
+  "interestCompoundedEveryPeriodType": {
+    "id": 2,
+    "code": "deposit.interest.compounding.period.periodFrequencyType.months",
+    "value": "Months"
+  },
+  "renewalAllowed": true,
+  "preClosureAllowed": true,
+  "preClosureInterestRate": 3,
+  "isInterestWithdrawable": false,
+  "interestCompoundingAllowed": true,
+  "interestCompoundedEveryPeriodTypeOptions": [
+    {
+      "id": 2,
+      "code": "deposit.interest.compounding.period.periodFrequencyType.months",
+      "value": "Months"
+    }
+  ],
+  "productOptions": [
+    {
+      "id": 1,
+      "name": "MyFirstDepositProduct"
+    }
+  ],
+  "availableInterestForWithdrawal": 0,
+  "availableWithdrawalAmount": 0,
+  "todaysDate": [
+    2013,
+    2,
+    6
+  ],
+  "isLockinPeriodAllowed": true,
+  "lockinPeriod": 0,
+  "lockinPeriodType": {
+    "id": 2,
+    "code": "deposit.interest.compounding.period.periodFrequencyType.months",
+    "value": "Months"
+  },
+  "availableInterest": 0,
+  "interestPostedAmount": 0
+}
+		</code>
+
+        <code class="method-declaration">GET https://Domain Name/api/v1/depositaccounts/template?clientId={clientId}</code>
 <code class="method-response">{
-	"clientId": 17,
-	"clientName": "Agri",
-	"productId": 1,
-	"productName": "Micro Savings",
-	"currency": {
-		"code": "INR",
-		"name": "",
-		"decimalPlaces": 2,
-		"displaySymbol": "",
-		"nameCode": "",
-		"displayLabel": " [INR]"
-	},
-	"deposit": 200.000000,
-	"maturityInterestRate": 12.000000,
-	"tenureInMonths": 0,
-	"projectedCommencementDate": [2013,
-	1,
-	30],
-	"interestCompoundedEvery": 6,
-	"interestCompoundedEveryPeriodType": {
-		"id": 2,
-		"code": "deposit.interest.compounding.period.periodFrequencyType.months",
-		"value": "Months"
-	},
-	"renewalAllowed": true,
-	"preClosureAllowed": true,
-	"preClosureInterestRate": 5.000000,
-	"isInterestWithdrawable": false,
-	"interestCompoundingAllowed": false,
-	"interestCompoundedEveryPeriodTypeOptions": [{
-		"id": 2,
-		"code": "deposit.interest.compounding.period.periodFrequencyType.months",
-		"value": "Months"
-	}],
-	"productOptions": [{
-		"id": 5,
-		"name": "fgretgr"
-	},
-	{
-		"id": 1,
-		"name": "Micro Savings"
-	},
-	{
-		"id": 4,
-		"name": "PlusOne Deposit"
-	}],
-	"availableInterestForWithdrawal": 0,
-	"availableWithdrawalAmount": 0,
-	"todaysDate": [2013,
-	1,
-	30],
-	"isLockinPeriodAllowed": true,
-	"lockinPeriod": 0,
-	"lockinPeriodType": {
-		"id": 2,
-		"code": "deposit.interest.compounding.period.periodFrequencyType.months",
-		"value": "Months"
-	},
-	"availableInterest": 0,
-	"interestPostedAmount": 0
+  "clientId": 1,
+  "clientName": "First Client",
+  "renewalAllowed": false,
+  "preClosureAllowed": false,
+  "isInterestWithdrawable": false,
+  "interestCompoundingAllowed": true,
+  "interestCompoundedEveryPeriodTypeOptions": [
+    {
+      "id": 2,
+      "code": "deposit.interest.compounding.period.periodFrequencyType.months",
+      "value": "Months"
+    }
+  ],
+  "productOptions": [
+    {
+      "id": 1,
+      "name": "MyFirstDepositProduct"
+    }
+  ],
+  "availableInterestForWithdrawal": 0,
+  "availableWithdrawalAmount": 0,
+  "todaysDate": [
+    2013,
+    2,
+    6
+  ],
+  "isLockinPeriodAllowed": true,
+  "availableInterest": 0,
+  "interestPostedAmount": 0
 }
 </code>
     </div>
