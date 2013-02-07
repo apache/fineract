@@ -270,6 +270,15 @@ public final class JsonCommand {
         return this.fromApiJsonHelper.extractIntegerWithLocaleNamed(parameterName, parsedCommand);
     }
     
+    public boolean isChangeInIntegerSansLocaleParameterNamed(final String parameterName, final Integer existingValue) {
+        boolean isChanged = false;
+        if (parameterExists(parameterName)) {
+            final Integer workingValue = integerValueSansLocaleOfParameterNamed(parameterName);
+            isChanged = differenceExists(existingValue, workingValue);
+        }
+        return isChanged;
+    }
+    
     public Integer integerValueSansLocaleOfParameterNamed(final String parameterName) {
         return this.fromApiJsonHelper.extractIntegerSansLocaleNamed(parameterName, parsedCommand);
     }
