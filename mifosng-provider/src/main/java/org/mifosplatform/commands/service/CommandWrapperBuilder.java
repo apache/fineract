@@ -549,6 +549,15 @@ public class CommandWrapperBuilder {
         this.href = "/loans/" + loanId;
         return this;
     }
+    
+    public CommandWrapperBuilder unassignLoanOfficer(final Long loanId) {
+        this.actionName = "REMOVELOANOFFICER";
+        this.entityName = "LOAN";
+        this.entityId = null;
+        this.loanId = loanId;
+        this.href = "/loans/" + loanId;
+        return this;
+    }
 
     public CommandWrapperBuilder assignLoanOfficersInBulk() {
         this.actionName = "BULKREASSIGN";

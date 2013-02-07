@@ -457,4 +457,18 @@ public class LoansApiResource {
 
         return this.toApiJsonSerializer.serialize(result);
     }
+    
+    @POST
+    @Path("{loanId}/unassign")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String unassignLoanOfficer(@PathParam("loanId") final Long loanId, final String apiRequestBodyAsJson) {
+
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().unassignLoanOfficer(loanId).withJson(apiRequestBodyAsJson)
+                .build();
+
+        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+
+        return this.toApiJsonSerializer.serialize(result);
+    }
 }

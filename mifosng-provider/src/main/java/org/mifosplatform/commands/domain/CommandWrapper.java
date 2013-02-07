@@ -297,6 +297,10 @@ public class CommandWrapper {
         return this.actionName.equalsIgnoreCase("UPDATELOANOFFICER") && this.entityName.equalsIgnoreCase("LOAN");
     }
 
+    public boolean isRemoveLoanOfficer() {
+        return this.actionName.equalsIgnoreCase("REMOVELOANOFFICER") && this.entityName.equalsIgnoreCase("LOAN");
+    }
+    
     public boolean isBulkUpdateLoanOfficer() {
         return this.actionName.equalsIgnoreCase("BULKREASSIGN") && this.entityName.equalsIgnoreCase("LOAN");
     }

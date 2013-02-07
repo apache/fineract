@@ -1941,6 +1941,18 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
         }
     }
 
+    
+    public void removeLoanOfficer(final LocalDate updatedDate) {
+
+        final LoanOfficerAssignmentHistory latestHistoryRecord = findLatestIncompleteHistoryRecord();
+
+        if (latestHistoryRecord != null) {
+            latestHistoryRecord.updateEndDate(updatedDate);
+        }
+            
+        this.loanofficer = null;
+    }
+    
     private LoanOfficerAssignmentHistory findLatestIncompleteHistoryRecord() {
 
         LoanOfficerAssignmentHistory latestRecordWithNoEndDate = null;
@@ -2006,4 +2018,9 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
     public Long productId() {
         return this.loanProduct.getId();
     }
+    
+    public Staff getLoanOfficer() {
+        return this.loanofficer;
+    }
+
 }

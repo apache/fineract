@@ -32,6 +32,7 @@ import org.mifosplatform.portfolio.client.domain.NoteRepository;
 import org.mifosplatform.portfolio.loanaccount.command.LoanChargeCommand;
 import org.mifosplatform.portfolio.loanaccount.command.LoanStateTransitionCommand;
 import org.mifosplatform.portfolio.loanaccount.command.LoanTransactionCommand;
+import org.mifosplatform.portfolio.loanaccount.command.LoanUpdateCommand;
 import org.mifosplatform.portfolio.loanaccount.domain.DefaultLoanLifecycleStateMachine;
 import org.mifosplatform.portfolio.loanaccount.domain.Loan;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanCharge;
@@ -44,9 +45,11 @@ import org.mifosplatform.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.mifosplatform.portfolio.loanaccount.exception.LoanNotFoundException;
 import org.mifosplatform.portfolio.loanaccount.exception.LoanOfficerAssignmentException;
 import org.mifosplatform.portfolio.loanaccount.exception.LoanTransactionNotFoundException;
+import org.mifosplatform.portfolio.loanaccount.exception.UnassignLoanOfficerException;
 import org.mifosplatform.portfolio.loanaccount.serialization.LoanChargeCommandFromApiJsonDeserializer;
 import org.mifosplatform.portfolio.loanaccount.serialization.LoanStateTransitionCommandFromApiJsonDeserializer;
 import org.mifosplatform.portfolio.loanaccount.serialization.LoanTransactionCommandFromApiJsonDeserializer;
+import org.mifosplatform.portfolio.loanaccount.serialization.LoanUpdateCommandFromApiJsonDeserializer;
 import org.mifosplatform.portfolio.loanproduct.exception.InvalidCurrencyException;
 import org.mifosplatform.useradministration.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,6 +63,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     private final LoanStateTransitionCommandFromApiJsonDeserializer loanStateTransitionCommandFromApiJsonDeserializer;
     private final LoanTransactionCommandFromApiJsonDeserializer loanTransactionCommandFromApiJsonDeserializer;
     private final LoanChargeCommandFromApiJsonDeserializer loanChargeCommandFromApiJsonDeserializer;
+    private final LoanUpdateCommandFromApiJsonDeserializer loanUpdateCommandFromApiJsonDeserializer;
     private final LoanRepository loanRepository;
     private final NoteRepository noteRepository;
     private final LoanTransactionRepository loanTransactionRepository;
@@ -73,7 +77,9 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     public LoanWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
             final LoanStateTransitionCommandFromApiJsonDeserializer loanStateTransitionCommandFromApiJsonDeserializer,
             final LoanTransactionCommandFromApiJsonDeserializer loanTransactionCommandFromApiJsonDeserializer,
-            final LoanChargeCommandFromApiJsonDeserializer loanChargeCommandFromApiJsonDeserializer, final LoanAssembler loanAssembler,
+            final LoanChargeCommandFromApiJsonDeserializer loanChargeCommandFromApiJsonDeserializer,
+            final LoanUpdateCommandFromApiJsonDeserializer loanUpdateCommandFromApiJsonDeserializer,
+            final LoanAssembler loanAssembler,
             final LoanRepository loanRepository, final LoanTransactionRepository loanTransactionRepository,
             final NoteRepository noteRepository, final ChargeRepository chargeRepository, final LoanChargeRepository loanChargeRepository,
             final ApplicationCurrencyRepository applicationCurrencyRepository,
@@ -90,6 +96,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         this.loanChargeRepository = loanChargeRepository;
         this.applicationCurrencyRepository = applicationCurrencyRepository;
         this.journalEntryWritePlatformService = journalEntryWritePlatformService;
+        this.loanUpdateCommandFromApiJsonDeserializer = loanUpdateCommandFromApiJsonDeserializer; 
     }
 
     private boolean isBeforeToday(final LocalDate date) {
@@ -695,7 +702,39 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 .withCommandId(command.commandId()) //
                 .build();
     }
-    
+
+    @Transactional
+    @Override
+    public CommandProcessingResult removeLoanOfficer(final Long loanId, final JsonCommand command) {
+
+        this.context.authenticatedUser();
+
+        final LoanUpdateCommand loanUpdateCommand = this.loanUpdateCommandFromApiJsonDeserializer.commandFromApiJson(command
+                .json());
+        
+        loanUpdateCommand.validate();
+
+        
+        final LocalDate dateOfLoanOfficerunAssigned = command.localDateValueOfParameterNamed("unassignedDate");
+
+        final Loan loan = retrieveLoanBy(loanId);
+
+        if (loan.getLoanOfficer() == null) { throw new UnassignLoanOfficerException(loanId); }
+
+        loan.removeLoanOfficer(dateOfLoanOfficerunAssigned);
+
+        this.loanRepository.saveAndFlush(loan);
+
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(command.commandId()) //
+                .withEntityId(loanId) //
+                .withOfficeId(loan.getOfficeId()) //
+                .withClientId(loan.getClientId()) //
+                .withGroupId(loan.getGroupId()) //
+                .withLoanId(loanId) //
+                .build();
+    }
+
     private LoanDTO populateLoanDTO(Loan loan, List<LoanTransaction> loanTransactions) {
         List<LoanTransactionDTO> loanTransactionDTOs = new ArrayList<LoanTransactionDTO>();
         for (LoanTransaction loanTransaction : loanTransactions) {

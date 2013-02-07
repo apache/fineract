@@ -32,4 +32,6 @@ public interface LoanWritePlatformService {
     CommandProcessingResult loanReassignment(Long loanId, JsonCommand command);
 
     CommandProcessingResult bulkLoanReassignment(JsonCommand command);
+
+    CommandProcessingResult removeLoanOfficer(Long loanId, JsonCommand command);
 }

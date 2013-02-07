@@ -9,7 +9,8 @@ import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
 import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
 
 /**
- * Immutable data object for updating relationship between loan officer and a loan.
+ * Immutable data object for updating relationship between loan officer and a
+ * loan.
  */
 public class UpdateLoanOfficerCommand {
 
@@ -26,17 +27,18 @@ public class UpdateLoanOfficerCommand {
         this.loans = null;
     }
 
-    public UpdateLoanOfficerCommand(final Long fromLoanOfficerId, final Long toLoanOfficerId, final LocalDate assignmentDate, final String[] loans) {
+    public UpdateLoanOfficerCommand(final Long fromLoanOfficerId, final Long toLoanOfficerId, final LocalDate assignmentDate,
+            final String[] loans) {
         this.fromLoanOfficerId = fromLoanOfficerId;
         this.toLoanOfficerId = toLoanOfficerId;
         this.assignmentDate = assignmentDate;
         this.loans = loans;
     }
-    
-    public void validateForBulkLoanReassignment() {
-        List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
 
-        DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loans.reassignment");
+    public void validateForBulkLoanReassignment() {
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loans.reassignment");
 
         baseDataValidator.reset().parameter("fromLoanOfficerId").value(this.fromLoanOfficerId).notNull().integerGreaterThanZero();
         baseDataValidator.reset().parameter("toLoanOfficerId").value(this.toLoanOfficerId).notNull().integerGreaterThanZero()
@@ -51,9 +53,9 @@ public class UpdateLoanOfficerCommand {
     }
 
     public void validateForLoanReassignment() {
-        List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
 
-        DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loans.reassignment");
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loans.reassignment");
 
         baseDataValidator.reset().parameter("toLoanOfficerId").value(this.toLoanOfficerId).notNull().integerGreaterThanZero()
                 .notSameAsParameter("fromLoanOfficerId", this.fromLoanOfficerId);
