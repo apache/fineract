@@ -118,7 +118,8 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
         for (LoanCharge loanCharge : charges) {
             if (!loanCharge.isDueAtDisbursement()) {
                 if (loanCharge.isFeeCharge() && loanCharge.isNotFullyPaid() && amountRemaining.isGreaterThanZero()) {
-                    amountRemaining = loanCharge.updatePaidAmountBy(amountRemaining);
+                    final LoanCharge unpaidCharge = findEarliestUnpaidChargeFromUnOrderedSet(charges);
+                    amountRemaining = unpaidCharge.updatePaidAmountBy(amountRemaining);
                 }
             }
         }

@@ -742,6 +742,12 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
             final LocalDate submittedOn, final String externalId) {
 
         final LoanScheduleData loanScheduleData = loanSchedule.generate();
+        
+        // Have to set expectedDisbursementDate to avoid nullPointer so should be passed down to updateLoanSchedule method
+        if (loanSchedule.getDisbursementDate() != null) {
+            this.expectedDisbursedOnDate = loanSchedule.getDisbursementDate().toDate();
+        }        
+        
         updateLoanSchedule(loanScheduleData);
 
         LoanStatus from = null;
@@ -759,10 +765,6 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 
         this.submittedOnDate = submittedOn.toDate();
         this.expectedMaturityDate = determineExpectedMaturityDate().toDate();
-
-        if (loanSchedule.getDisbursementDate() != null) {
-            this.expectedDisbursedOnDate = loanSchedule.getDisbursementDate().toDate();
-        }
 
         if (loanSchedule.getRepaymentStartFromDate() != null) {
             this.expectedFirstRepaymentOnDate = loanSchedule.getRepaymentStartFromDate().toDate();

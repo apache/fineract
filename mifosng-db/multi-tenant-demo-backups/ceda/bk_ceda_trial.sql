@@ -122,7 +122,7 @@ CREATE TABLE `acc_gl_journal_entry` (
   CONSTRAINT `FK_acc_gl_journal_entry_m_appuser` FOREIGN KEY (`createdby_id`) REFERENCES `m_appuser` (`id`),
   CONSTRAINT `FK_acc_gl_journal_entry_m_appuser_2` FOREIGN KEY (`lastmodifiedby_id`) REFERENCES `m_appuser` (`id`),
   CONSTRAINT `FK_acc_gl_journal_entry_m_office` FOREIGN KEY (`office_id`) REFERENCES `m_office` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -131,7 +131,7 @@ CREATE TABLE `acc_gl_journal_entry` (
 
 LOCK TABLES `acc_gl_journal_entry` WRITE;
 /*!40000 ALTER TABLE `acc_gl_journal_entry` DISABLE KEYS */;
-INSERT INTO `acc_gl_journal_entry` VALUES (1,8,1,NULL,'1',0,1,'2009-01-09',2,'1000000.000000',NULL,'LOAN',1,1,1,'2013-02-06 20:40:22','2013-02-06 20:40:22'),(2,4,1,NULL,'1',0,1,'2009-01-09',1,'1000000.000000',NULL,'LOAN',1,1,1,'2013-02-06 20:40:22','2013-02-06 20:40:22');
+INSERT INTO `acc_gl_journal_entry` VALUES (1,8,1,NULL,'1',0,1,'2009-01-15',2,'1000000.000000',NULL,'LOAN',1,1,1,'2013-02-07 00:59:00','2013-02-07 00:59:00'),(2,4,1,NULL,'1',0,1,'2009-01-15',1,'1000000.000000',NULL,'LOAN',1,1,1,'2013-02-07 00:59:00','2013-02-07 00:59:00'),(3,8,1,NULL,'2',0,1,'2009-02-15',1,'83333.330000',NULL,'LOAN',1,1,1,'2013-02-07 00:59:05','2013-02-07 00:59:05'),(4,34,1,NULL,'2',0,1,'2009-02-15',1,'20000.000000',NULL,'LOAN',1,1,1,'2013-02-07 00:59:05','2013-02-07 00:59:05'),(5,37,1,NULL,'2',0,1,'2009-02-15',1,'1500.000000',NULL,'LOAN',1,1,1,'2013-02-07 00:59:05','2013-02-07 00:59:05'),(6,4,1,NULL,'2',0,1,'2009-02-15',2,'104833.330000',NULL,'LOAN',1,1,1,'2013-02-07 00:59:05','2013-02-07 00:59:05'),(7,8,1,NULL,'3',0,1,'2009-03-15',1,'83333.330000',NULL,'LOAN',1,1,1,'2013-02-07 00:59:08','2013-02-07 00:59:08'),(8,34,1,NULL,'3',0,1,'2009-03-15',1,'20000.000000',NULL,'LOAN',1,1,1,'2013-02-07 00:59:08','2013-02-07 00:59:08'),(9,37,1,NULL,'3',0,1,'2009-03-15',1,'1500.000000',NULL,'LOAN',1,1,1,'2013-02-07 00:59:08','2013-02-07 00:59:08'),(10,4,1,NULL,'3',0,1,'2009-03-15',2,'104833.330000',NULL,'LOAN',1,1,1,'2013-02-07 00:59:08','2013-02-07 00:59:08'),(11,8,1,NULL,'4',0,1,'2009-04-15',1,'83333.330000',NULL,'LOAN',1,1,1,'2013-02-07 00:59:10','2013-02-07 00:59:10'),(12,34,1,NULL,'4',0,1,'2009-04-15',1,'20000.000000',NULL,'LOAN',1,1,1,'2013-02-07 00:59:10','2013-02-07 00:59:10'),(13,37,1,NULL,'4',0,1,'2009-04-15',1,'1500.000000',NULL,'LOAN',1,1,1,'2013-02-07 00:59:10','2013-02-07 00:59:10'),(14,4,1,NULL,'4',0,1,'2009-04-15',2,'104833.330000',NULL,'LOAN',1,1,1,'2013-02-07 00:59:10','2013-02-07 00:59:10'),(15,8,1,NULL,'5',0,1,'2009-05-15',1,'83333.000000',NULL,'LOAN',1,1,1,'2013-02-07 00:59:16','2013-02-07 00:59:16'),(16,4,1,NULL,'5',0,1,'2009-05-15',2,'83333.000000',NULL,'LOAN',1,1,1,'2013-02-07 00:59:16','2013-02-07 00:59:16');
 /*!40000 ALTER TABLE `acc_gl_journal_entry` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -244,7 +244,6 @@ CREATE TABLE `client additional data` (
 
 LOCK TABLES `client additional data` WRITE;
 /*!40000 ALTER TABLE `client additional data` DISABLE KEYS */;
-INSERT INTO `client additional data` VALUES (1,6,'1939-02-23','Somewhere','4541','qreeqrq','keithwoodlock@',14,17,3,'Ugandian',19,9,NULL,NULL,NULL,NULL,8,10,'Somwhere different from home',1,'1000.000000','3000.000000','300.000000','None',9,9,NULL,NULL,NULL,3,8,8,9,'Me','A while ago','Irene','2009-02-19');
 /*!40000 ALTER TABLE `client additional data` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -442,7 +441,7 @@ CREATE TABLE `m_client` (
 
 LOCK TABLES `m_client` WRITE;
 /*!40000 ALTER TABLE `m_client` DISABLE KEYS */;
-INSERT INTO `m_client` VALUES (1,'000000001',1,NULL,'Kampala','a','Client',NULL,'Kampala a Client',NULL,'2009-01-02',0);
+INSERT INTO `m_client` VALUES (1,'000000001',1,NULL,'Kampala','First','Client',NULL,'Kampala First Client',NULL,'2009-01-08',0);
 /*!40000 ALTER TABLE `m_client` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -897,7 +896,7 @@ CREATE TABLE `m_loan` (
 
 LOCK TABLES `m_loan` WRITE;
 /*!40000 ALTER TABLE `m_loan` DISABLE KEYS */;
-INSERT INTO `m_loan` VALUES (1,'000000001',NULL,1,NULL,1,NULL,1,NULL,300,'UGX',2,'1000000.000000',NULL,'24.000000',3,'24.000000',1,1,12,2,1,2,12,1,NULL,'2009-01-02 00:00:00','2009-01-07 00:00:00','2009-01-09',NULL,NULL,'2009-01-09','2010-01-09',NULL,NULL,NULL,NULL,NULL,NULL,1,'2013-02-06 20:36:26','2013-02-06 20:40:22',1,2);
+INSERT INTO `m_loan` VALUES (1,'000000001',NULL,1,NULL,1,NULL,1,NULL,300,'UGX',2,'1000000.000000',NULL,'24.000000',3,'24.000000',1,1,12,2,1,2,12,1,'0.000000','2009-01-08 00:00:00','2009-01-13 00:00:00','2009-01-15',NULL,NULL,'2009-01-15','2010-01-15',NULL,NULL,NULL,NULL,NULL,NULL,1,'2013-02-07 00:58:40','2013-02-07 00:59:00',1,2);
 /*!40000 ALTER TABLE `m_loan` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -929,7 +928,7 @@ CREATE TABLE `m_loan_charge` (
   KEY `m_loan_charge_ibfk_2` (`loan_id`),
   CONSTRAINT `m_loan_charge_ibfk_1` FOREIGN KEY (`charge_id`) REFERENCES `m_charge` (`id`),
   CONSTRAINT `m_loan_charge_ibfk_2` FOREIGN KEY (`loan_id`) REFERENCES `m_loan` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -938,6 +937,7 @@ CREATE TABLE `m_loan_charge` (
 
 LOCK TABLES `m_loan_charge` WRITE;
 /*!40000 ALTER TABLE `m_loan_charge` DISABLE KEYS */;
+INSERT INTO `m_loan_charge` VALUES (1,1,1,0,2,'2010-01-15',1,NULL,NULL,'1500.000000','0.000000','0.000000','0.000000','1500.000000',0),(2,1,1,0,2,'2009-12-15',1,NULL,NULL,'1500.000000','0.000000','0.000000','0.000000','1500.000000',0),(3,1,1,0,2,'2009-11-15',1,NULL,NULL,'1500.000000','0.000000','0.000000','0.000000','1500.000000',0),(4,1,1,0,2,'2009-10-15',1,NULL,NULL,'1500.000000','0.000000','0.000000','0.000000','1500.000000',0),(5,1,1,0,2,'2009-09-15',1,NULL,NULL,'1500.000000','0.000000','0.000000','0.000000','1500.000000',0),(6,1,1,0,2,'2009-08-15',1,NULL,NULL,'1500.000000','0.000000','0.000000','0.000000','1500.000000',0),(7,1,1,0,2,'2009-07-15',1,NULL,NULL,'1500.000000','0.000000','0.000000','0.000000','1500.000000',0),(8,1,1,0,2,'2009-06-15',1,NULL,NULL,'1500.000000','0.000000','0.000000','0.000000','1500.000000',0),(9,1,1,0,2,'2009-05-15',1,NULL,NULL,'1500.000000','0.000000','0.000000','0.000000','1500.000000',0),(10,1,1,0,2,'2009-04-15',1,NULL,NULL,'1500.000000','1500.000000','0.000000','0.000000','0.000000',1),(11,1,1,0,2,'2009-03-15',1,NULL,NULL,'1500.000000','1500.000000','0.000000','0.000000','0.000000',1),(12,1,1,0,2,'2009-02-15',1,NULL,NULL,'1500.000000','1500.000000','0.000000','0.000000','0.000000',1);
 /*!40000 ALTER TABLE `m_loan_charge` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -972,7 +972,7 @@ CREATE TABLE `m_loan_officer_assignment_history` (
 
 LOCK TABLES `m_loan_officer_assignment_history` WRITE;
 /*!40000 ALTER TABLE `m_loan_officer_assignment_history` DISABLE KEYS */;
-INSERT INTO `m_loan_officer_assignment_history` VALUES (1,1,1,'2009-01-07',NULL,1,'2013-02-06 20:40:16','2013-02-06 20:40:16',1);
+INSERT INTO `m_loan_officer_assignment_history` VALUES (1,1,1,'2009-01-13',NULL,1,'2013-02-07 00:58:56','2013-02-07 00:58:56',1);
 /*!40000 ALTER TABLE `m_loan_officer_assignment_history` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1021,7 +1021,7 @@ CREATE TABLE `m_loan_repayment_schedule` (
 
 LOCK TABLES `m_loan_repayment_schedule` WRITE;
 /*!40000 ALTER TABLE `m_loan_repayment_schedule` DISABLE KEYS */;
-INSERT INTO `m_loan_repayment_schedule` VALUES (1,1,'2009-01-09','2009-02-09',1,'83333.330000',NULL,NULL,'20000.000000',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'\0',1,'2013-02-06 20:36:26','2013-02-06 20:36:26',1,NULL),(2,1,'2009-02-09','2009-03-09',2,'83333.330000',NULL,NULL,'20000.000000',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'\0',1,'2013-02-06 20:36:26','2013-02-06 20:36:26',1,NULL),(3,1,'2009-03-09','2009-04-09',3,'83333.330000',NULL,NULL,'20000.000000',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'\0',1,'2013-02-06 20:36:26','2013-02-06 20:36:26',1,NULL),(4,1,'2009-04-09','2009-05-09',4,'83333.330000',NULL,NULL,'20000.000000',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'\0',1,'2013-02-06 20:36:26','2013-02-06 20:36:26',1,NULL),(5,1,'2009-05-09','2009-06-09',5,'83333.330000',NULL,NULL,'20000.000000',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'\0',1,'2013-02-06 20:36:26','2013-02-06 20:36:26',1,NULL),(6,1,'2009-06-09','2009-07-09',6,'83333.330000',NULL,NULL,'20000.000000',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'\0',1,'2013-02-06 20:36:26','2013-02-06 20:36:26',1,NULL),(7,1,'2009-07-09','2009-08-09',7,'83333.330000',NULL,NULL,'20000.000000',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'\0',1,'2013-02-06 20:36:26','2013-02-06 20:36:26',1,NULL),(8,1,'2009-08-09','2009-09-09',8,'83333.330000',NULL,NULL,'20000.000000',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'\0',1,'2013-02-06 20:36:26','2013-02-06 20:36:26',1,NULL),(9,1,'2009-09-09','2009-10-09',9,'83333.330000',NULL,NULL,'20000.000000',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'\0',1,'2013-02-06 20:36:26','2013-02-06 20:36:26',1,NULL),(10,1,'2009-10-09','2009-11-09',10,'83333.330000',NULL,NULL,'20000.000000',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'\0',1,'2013-02-06 20:36:26','2013-02-06 20:36:26',1,NULL),(11,1,'2009-11-09','2009-12-09',11,'83333.330000',NULL,NULL,'20000.000000',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'\0',1,'2013-02-06 20:36:26','2013-02-06 20:36:26',1,NULL),(12,1,'2009-12-09','2010-01-09',12,'83333.370000',NULL,NULL,'20000.000000',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'\0',1,'2013-02-06 20:36:26','2013-02-06 20:36:26',1,NULL);
+INSERT INTO `m_loan_repayment_schedule` VALUES (1,1,'2009-01-15','2009-02-15',1,'83333.330000','83333.330000',NULL,'20000.000000','20000.000000',NULL,'1500.000000','1500.000000',NULL,NULL,NULL,NULL,NULL,NULL,'',1,'2013-02-07 00:58:40','2013-02-07 00:59:05',1,NULL),(2,1,'2009-02-15','2009-03-15',2,'83333.330000','83333.330000',NULL,'20000.000000','20000.000000',NULL,'1500.000000','1500.000000',NULL,NULL,NULL,NULL,NULL,NULL,'',1,'2013-02-07 00:58:40','2013-02-07 00:59:08',1,NULL),(3,1,'2009-03-15','2009-04-15',3,'83333.330000','83333.330000',NULL,'20000.000000','20000.000000',NULL,'1500.000000','1500.000000',NULL,NULL,NULL,NULL,NULL,NULL,'',1,'2013-02-07 00:58:40','2013-02-07 00:59:10',1,NULL),(4,1,'2009-04-15','2009-05-15',4,'83333.330000','83333.000000',NULL,'20000.000000',NULL,NULL,'1500.000000',NULL,NULL,NULL,NULL,NULL,NULL,NULL,'\0',1,'2013-02-07 00:58:40','2013-02-07 00:59:16',1,NULL),(5,1,'2009-05-15','2009-06-15',5,'83333.330000',NULL,NULL,'20000.000000',NULL,NULL,'1500.000000',NULL,NULL,NULL,NULL,NULL,NULL,NULL,'\0',1,'2013-02-07 00:58:40','2013-02-07 00:58:40',1,NULL),(6,1,'2009-06-15','2009-07-15',6,'83333.330000',NULL,NULL,'20000.000000',NULL,NULL,'1500.000000',NULL,NULL,NULL,NULL,NULL,NULL,NULL,'\0',1,'2013-02-07 00:58:40','2013-02-07 00:58:40',1,NULL),(7,1,'2009-07-15','2009-08-15',7,'83333.330000',NULL,NULL,'20000.000000',NULL,NULL,'1500.000000',NULL,NULL,NULL,NULL,NULL,NULL,NULL,'\0',1,'2013-02-07 00:58:40','2013-02-07 00:58:40',1,NULL),(8,1,'2009-08-15','2009-09-15',8,'83333.330000',NULL,NULL,'20000.000000',NULL,NULL,'1500.000000',NULL,NULL,NULL,NULL,NULL,NULL,NULL,'\0',1,'2013-02-07 00:58:40','2013-02-07 00:58:40',1,NULL),(9,1,'2009-09-15','2009-10-15',9,'83333.330000',NULL,NULL,'20000.000000',NULL,NULL,'1500.000000',NULL,NULL,NULL,NULL,NULL,NULL,NULL,'\0',1,'2013-02-07 00:58:40','2013-02-07 00:58:40',1,NULL),(10,1,'2009-10-15','2009-11-15',10,'83333.330000',NULL,NULL,'20000.000000',NULL,NULL,'1500.000000',NULL,NULL,NULL,NULL,NULL,NULL,NULL,'\0',1,'2013-02-07 00:58:40','2013-02-07 00:58:40',1,NULL),(11,1,'2009-11-15','2009-12-15',11,'83333.330000',NULL,NULL,'20000.000000',NULL,NULL,'1500.000000',NULL,NULL,NULL,NULL,NULL,NULL,NULL,'\0',1,'2013-02-07 00:58:40','2013-02-07 00:58:40',1,NULL),(12,1,'2009-12-15','2010-01-15',12,'83333.370000',NULL,NULL,'20000.000000',NULL,NULL,'1500.000000',NULL,NULL,NULL,NULL,NULL,NULL,NULL,'\0',1,'2013-02-07 00:58:40','2013-02-07 00:58:40',1,NULL);
 /*!40000 ALTER TABLE `m_loan_repayment_schedule` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1052,7 +1052,7 @@ CREATE TABLE `m_loan_transaction` (
   KEY `FKCFCEA426FC69F3F1` (`contra_id`),
   CONSTRAINT `FKCFCEA42640BE0710` FOREIGN KEY (`loan_id`) REFERENCES `m_loan` (`id`),
   CONSTRAINT `FKCFCEA426FC69F3F1` FOREIGN KEY (`contra_id`) REFERENCES `m_loan_transaction` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1061,7 +1061,7 @@ CREATE TABLE `m_loan_transaction` (
 
 LOCK TABLES `m_loan_transaction` WRITE;
 /*!40000 ALTER TABLE `m_loan_transaction` DISABLE KEYS */;
-INSERT INTO `m_loan_transaction` VALUES (1,1,1,NULL,'2009-01-09','1000000.000000',1,'2013-02-06 20:40:22','2013-02-06 20:40:22',1,'0.000000','0.000000','0.000000','0.000000');
+INSERT INTO `m_loan_transaction` VALUES (1,1,1,NULL,'2009-01-15','1000000.000000',1,'2013-02-07 00:59:00','2013-02-07 00:59:00',1,'0.000000','0.000000','0.000000','0.000000'),(2,1,2,NULL,'2009-02-15','104833.330000',1,'2013-02-07 00:59:05','2013-02-07 00:59:05',1,'83333.330000','20000.000000','1500.000000',NULL),(3,1,2,NULL,'2009-03-15','104833.330000',1,'2013-02-07 00:59:08','2013-02-07 00:59:08',1,'83333.330000','20000.000000','1500.000000',NULL),(4,1,2,NULL,'2009-04-15','104833.330000',1,'2013-02-07 00:59:10','2013-02-07 00:59:10',1,'83333.330000','20000.000000','1500.000000',NULL),(5,1,2,NULL,'2009-05-15','83333.000000',1,'2013-02-07 00:59:16','2013-02-07 00:59:16',1,'83333.000000',NULL,NULL,NULL);
 /*!40000 ALTER TABLE `m_loan_transaction` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1271,7 +1271,7 @@ CREATE TABLE `m_portfolio_command_source` (
   KEY `loan_id` (`office_id`),
   CONSTRAINT `FK_m_checker_m_appuser` FOREIGN KEY (`checker_id`) REFERENCES `m_appuser` (`id`),
   CONSTRAINT `FK_m_maker_m_appuser` FOREIGN KEY (`maker_id`) REFERENCES `m_appuser` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1280,7 +1280,7 @@ CREATE TABLE `m_portfolio_command_source` (
 
 LOCK TABLES `m_portfolio_command_source` WRITE;
 /*!40000 ALTER TABLE `m_portfolio_command_source` DISABLE KEYS */;
-INSERT INTO `m_portfolio_command_source` VALUES (1,'CREATE','CLIENT',1,NULL,1,NULL,'/clients/template',1,'{\"officeId\":\"1\",\"firstname\":\"Kampala\",\"middlename\":\"a\",\"lastname\":\"Client\",\"fullname\":\"\",\"externalId\":\"\",\"dateFormat\":\"yyyy-MM-dd\",\"locale\":\"en\",\"joinedDate\":\"2009-01-02\"}',1,'2013-02-06 20:28:23',NULL,NULL,1),(2,'CREATE','client additional data',NULL,NULL,NULL,NULL,'/datatables/client additional data/1',1,'{\"dateFormat\":\"yyyy-MM-dd\",\"locale\":\"en\",\"Gender_cd\":\"6\",\"Date_of_Birth\":\"1939-02-23\",\"EducationLevel_cd\":\"14\",\"MaritalStatus_cd\":\"17\",\"Number_of_children\":\"3\",\"Citizenship\":\"Ugandian\",\"PovertyStatus_cd\":\"19\",\"Home_address\":\"Somewhere\",\"Telephone_number\":\"4541\",\"Telephone_number_(2nd)\":\"qreeqrq\",\"Email_address\":\"keithwoodlock@\",\"YesNo_cd_Employed\":\"9\",\"YesNo_cd_Self_employed\":\"8\",\"FieldOfEmployment_cd_Field_of_self-employment\":\"10\",\"Business_address\":\"Somwhere different from home\",\"Number_of_employees\":\"1\",\"Monthly_salaries_paid\":\"1000\",\"Monthly_net_income_of_business_activity\":\"3000\",\"Monthly_rent\":\"300\",\"Other_income_generating_activities\":\"None\",\"YesNo_cd_Bookkeeping\":\"9\",\"YesNo_cd_Loans_with_other_institutions\":\"9\",\"Number_of_people_depending_on_overal_income\":\"3\",\"YesNo_cd_Bank_account\":\"8\",\"YesNo_cd_Business_plan_provided\":\"8\",\"YesNo_cd_Access_to_internet\":\"9\",\"Introduced_by\":\"Me\",\"Known_to_introducer_since\":\"A while ago\",\"Last_visited_by\":\"Irene\",\"Last_visited_on\":\"2009-02-19\"}',1,'2013-02-06 20:31:18',NULL,NULL,1),(3,'CREATE','LOAN',1,NULL,1,1,'/loans',1,'{\"clientId\":\"1\",\"groupId\":\"\",\"dateFormat\":\"yyyy-MM-dd\",\"locale\":\"en\",\"productId\":\"1\",\"loanOfficerId\":\"1\",\"submittedOnDate\":\"2009-01-02\",\"submittedOnNote\":\"\",\"principal\":\"1,000,000.00\",\"loanTermFrequency\":\"12\",\"loanTermFrequencyType\":\"2\",\"numberOfRepayments\":\"12\",\"repaymentEvery\":\"1\",\"repaymentFrequencyType\":\"2\",\"transactionProcessingStrategyId\":\"2\",\"expectedDisbursementDate\":\"2009-01-09\",\"repaymentsStartingFromDate\":\"\",\"interestRatePerPeriod\":\"24\",\"interestRateFrequencyType\":\"3\",\"amortizationType\":\"1\",\"interestType\":\"1\",\"interestCalculationPeriodType\":\"1\",\"interestChargedFromDate\":\"\",\"inArrearsTolerance\":\"\"}',1,'2013-02-06 20:36:26',NULL,NULL,1),(4,'APPROVE','LOAN',1,NULL,1,1,'/loans/1',1,'{\"status\":{\"id\":200,\"code\":\"loanStatusType.approved\",\"value\":\"Approved\"},\"locale\":\"en\",\"dateFormat\":\"yyyy-MM-dd\",\"approvedOnDate\":\"2009-01-07\"}',1,'2013-02-06 20:40:16',NULL,NULL,1),(5,'DISBURSE','LOAN',1,NULL,1,1,'/loans/1',1,'{\"status\":{\"id\":300,\"code\":\"loanStatusType.active\",\"value\":\"Active\"},\"locale\":\"en\",\"dateFormat\":\"yyyy-MM-dd\",\"disbursedOnDate\":\"2009-01-09\",\"expectedMaturityDate\":\"2009-01-09\"}',1,'2013-02-06 20:40:22',NULL,NULL,1);
+INSERT INTO `m_portfolio_command_source` VALUES (1,'UPDATE','LOANPRODUCT',NULL,NULL,NULL,NULL,'/loanproducts/1',1,'{\"name\":\"KamLP\"}',1,'2013-02-07 00:55:03',NULL,NULL,1),(2,'CREATE','CLIENT',1,NULL,1,NULL,'/clients/template',1,'{\"officeId\":\"1\",\"firstname\":\"Kampala\",\"middlename\":\"First\",\"lastname\":\"Client\",\"fullname\":\"\",\"externalId\":\"\",\"dateFormat\":\"yyyy-MM-dd\",\"locale\":\"en\",\"joinedDate\":\"2009-01-08\"}',1,'2013-02-07 00:55:27',NULL,NULL,1),(3,'CREATE','LOAN',1,NULL,1,1,'/loans',1,'{\"clientId\":\"1\",\"groupId\":\"\",\"dateFormat\":\"yyyy-MM-dd\",\"locale\":\"en\",\"productId\":\"1\",\"loanOfficerId\":\"1\",\"submittedOnDate\":\"2009-01-08\",\"submittedOnNote\":\"\",\"principal\":\"1,000,000.00\",\"loanTermFrequency\":\"12\",\"loanTermFrequencyType\":\"2\",\"numberOfRepayments\":\"12\",\"repaymentEvery\":\"1\",\"repaymentFrequencyType\":\"2\",\"transactionProcessingStrategyId\":\"2\",\"expectedDisbursementDate\":\"2009-01-15\",\"repaymentsStartingFromDate\":\"\",\"interestRatePerPeriod\":\"24\",\"interestRateFrequencyType\":\"3\",\"amortizationType\":\"1\",\"interestType\":\"1\",\"interestCalculationPeriodType\":\"1\",\"interestChargedFromDate\":\"\",\"inArrearsTolerance\":\"\",\"charges\":[{\"chargeId\":\"1\",\"amount\":\"1,500\",\"specifiedDueDate\":\"2009-02-15\"},{\"chargeId\":\"1\",\"amount\":\"1,500\",\"specifiedDueDate\":\"2009-03-15\"},{\"chargeId\":\"1\",\"amount\":\"1,500\",\"specifiedDueDate\":\"2009-04-15\"},{\"chargeId\":\"1\",\"amount\":\"1,500\",\"specifiedDueDate\":\"2009-05-15\"},{\"chargeId\":\"1\",\"amount\":\"1,500\",\"specifiedDueDate\":\"2009-06-15\"},{\"chargeId\":\"1\",\"amount\":\"1,500\",\"specifiedDueDate\":\"2009-07-15\"},{\"chargeId\":\"1\",\"amount\":\"1,500\",\"specifiedDueDate\":\"2009-08-15\"},{\"chargeId\":\"1\",\"amount\":\"1,500\",\"specifiedDueDate\":\"2009-09-15\"},{\"chargeId\":\"1\",\"amount\":\"1,500\",\"specifiedDueDate\":\"2009-10-15\"},{\"chargeId\":\"1\",\"amount\":\"1,500\",\"specifiedDueDate\":\"2009-11-15\"},{\"chargeId\":\"1\",\"amount\":\"1,500\",\"specifiedDueDate\":\"2009-12-15\"},{\"chargeId\":\"1\",\"amount\":\"1,500\",\"specifiedDueDate\":\"2010-01-15\"}]}',1,'2013-02-07 00:58:40',NULL,NULL,1),(4,'APPROVE','LOAN',1,NULL,1,1,'/loans/1',1,'{\"status\":{\"id\":200,\"code\":\"loanStatusType.approved\",\"value\":\"Approved\"},\"locale\":\"en\",\"dateFormat\":\"yyyy-MM-dd\",\"approvedOnDate\":\"2009-01-13\"}',1,'2013-02-07 00:58:56',NULL,NULL,1),(5,'DISBURSE','LOAN',1,NULL,1,1,'/loans/1',1,'{\"status\":{\"id\":300,\"code\":\"loanStatusType.active\",\"value\":\"Active\"},\"locale\":\"en\",\"dateFormat\":\"yyyy-MM-dd\",\"disbursedOnDate\":\"2009-01-15\",\"expectedMaturityDate\":\"2009-01-15\"}',1,'2013-02-07 00:59:00',NULL,NULL,1),(6,'REPAYMENT','LOAN',1,NULL,1,1,'/loans/1/transactions/template?command=repayment',2,'{\"transactionDate\":\"2009-02-15\",\"transactionAmount\":\"104,833.33\",\"locale\":\"en\",\"dateFormat\":\"yyyy-MM-dd\"}',1,'2013-02-07 00:59:05',NULL,NULL,1),(7,'REPAYMENT','LOAN',1,NULL,1,1,'/loans/1/transactions/template?command=repayment',3,'{\"transactionDate\":\"2009-03-15\",\"transactionAmount\":\"104,833.33\",\"locale\":\"en\",\"dateFormat\":\"yyyy-MM-dd\"}',1,'2013-02-07 00:59:08',NULL,NULL,1),(8,'REPAYMENT','LOAN',1,NULL,1,1,'/loans/1/transactions/template?command=repayment',4,'{\"transactionDate\":\"2009-04-15\",\"transactionAmount\":\"104,833.33\",\"locale\":\"en\",\"dateFormat\":\"yyyy-MM-dd\"}',1,'2013-02-07 00:59:10',NULL,NULL,1),(9,'REPAYMENT','LOAN',1,NULL,1,1,'/loans/1/transactions/template?command=repayment',5,'{\"transactionDate\":\"2009-05-15\",\"transactionAmount\":\"833,33\",\"locale\":\"en\",\"dateFormat\":\"yyyy-MM-dd\"}',1,'2013-02-07 00:59:16',NULL,NULL,1);
 /*!40000 ALTER TABLE `m_portfolio_command_source` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1379,7 +1379,7 @@ CREATE TABLE `m_product_loan` (
 
 LOCK TABLES `m_product_loan` WRITE;
 /*!40000 ALTER TABLE `m_product_loan` DISABLE KEYS */;
-INSERT INTO `m_product_loan` VALUES (1,'UGX',2,'1000000.000000',NULL,'Kampala Product (with cash accounting)','Typical Kampala loan product with cash accounting enabled for testing.',NULL,'24.000000',3,'24.000000',1,1,1,2,12,1,2,2);
+INSERT INTO `m_product_loan` VALUES (1,'UGX',2,'1000000.000000',NULL,'KamLP','Typical Kampala loan product with cash accounting enabled for testing.',NULL,'24.000000',3,'24.000000',1,1,1,2,12,1,2,2);
 /*!40000 ALTER TABLE `m_product_loan` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1891,4 +1891,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2013-02-06 20:40:48
+-- Dump completed on 2013-02-07  1:01:06

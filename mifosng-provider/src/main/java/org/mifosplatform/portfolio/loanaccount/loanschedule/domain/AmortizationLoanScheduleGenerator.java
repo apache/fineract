@@ -12,13 +12,7 @@ import org.mifosplatform.portfolio.loanproduct.domain.LoanProductRelatedDetail;
 
 public interface AmortizationLoanScheduleGenerator {
 
-	LoanScheduleData generate(
-			ApplicationCurrency applicationCurrency, 
-			LoanProductRelatedDetail loanScheduleInfo,
-			LocalDate disbursementDate, 
-			LocalDate interestCalculatedFrom,
-			BigDecimal periodInterestRateForRepaymentPeriod,
-			LocalDate idealDisbursementDateBasedOnFirstRepaymentDate,
-			List<LocalDate> scheduledDates, 
-			Set<LoanCharge> loanCharges);
+    LoanScheduleData generate(ApplicationCurrency applicationCurrency, LoanProductRelatedDetail loanScheduleInfo,
+            LocalDate disbursementDate, LocalDate interestCalculatedFrom, BigDecimal periodInterestRateForRepaymentPeriod,
+            LocalDate idealDisbursementDateBasedOnFirstRepaymentDate, List<LocalDate> scheduledDates, Set<LoanCharge> loanCharges);
 }
