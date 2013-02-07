@@ -1,9 +1,12 @@
 package org.mifosplatform.infrastructure.codes.service;
 
+import java.util.Map;
+
 import org.mifosplatform.infrastructure.codes.domain.Code;
 import org.mifosplatform.infrastructure.codes.domain.CodeRepository;
 import org.mifosplatform.infrastructure.codes.domain.CodeValue;
 import org.mifosplatform.infrastructure.codes.domain.CodeValueRepository;
+import org.mifosplatform.infrastructure.codes.exception.CodeValueNotFoundException;
 import org.mifosplatform.infrastructure.codes.serialization.CodeValueCommandFromApiJsonDeserializer;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
@@ -28,8 +31,8 @@ public class CodeValueWritePlatformServiceJpaRepositoryImpl implements CodeValue
     private final CodeValueCommandFromApiJsonDeserializer fromApiJsonDeserializer;
 
     @Autowired
-    public CodeValueWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final CodeRepository codeRepository, final CodeValueRepository codeValueRepository,
-            final CodeValueCommandFromApiJsonDeserializer fromApiJsonDeserializer) {
+    public CodeValueWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final CodeRepository codeRepository,
+            final CodeValueRepository codeValueRepository, final CodeValueCommandFromApiJsonDeserializer fromApiJsonDeserializer) {
         this.context = context;
         this.codeRepository = codeRepository;
         this.codeValueRepository = codeValueRepository;
@@ -41,10 +44,10 @@ public class CodeValueWritePlatformServiceJpaRepositoryImpl implements CodeValue
     public CommandProcessingResult createCodeValue(final JsonCommand command) {
 
         try {
-            context.authenticatedUser();
+            this.context.authenticatedUser();
 
             this.fromApiJsonDeserializer.validateForCreate(command.json());
-            
+
             final Long codeId = command.getCodeId();
             final Code code = this.codeRepository.findOne(codeId);
             final CodeValue codeValue = CodeValue.fromJson(code, command);
@@ -64,14 +67,70 @@ public class CodeValueWritePlatformServiceJpaRepositoryImpl implements CodeValue
      * is.
      */
     private void handleCodeValueDataIntegrityIssues(final JsonCommand command, final DataIntegrityViolationException dve) {
-        Throwable realCause = dve.getMostSpecificCause();
+        final Throwable realCause = dve.getMostSpecificCause();
         if (realCause.getMessage().contains("code_value_duplicate")) {
             final String name = command.stringValueOfParameterNamed("name");
-            throw new PlatformDataIntegrityException("error.msg.code.value.duplicate.label", "A code value with lable '" + name + "' already exists");
+            throw new PlatformDataIntegrityException("error.msg.code.value.duplicate.label", "A code value with lable '" + name
+                    + "' already exists");
         }
 
         logger.error(dve.getMessage(), dve);
         throw new PlatformDataIntegrityException("error.msg.cund.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource: " + realCause.getMessage());
+    }
+
+    @Transactional
+    @Override
+    public CommandProcessingResult updateCodeValue(final Long codeValueId, final JsonCommand command) {
+
+        try {
+            this.context.authenticatedUser();
+
+            this.fromApiJsonDeserializer.validateForUpdate(command.json());
+
+            final CodeValue codeValue = retrieveCodeValueBy(codeValueId);
+            final Map<String, Object> changes = codeValue.update(command);
+
+            if (!changes.isEmpty()) {
+                this.codeValueRepository.saveAndFlush(codeValue);
+            }
+
+            return new CommandProcessingResultBuilder() //
+                    .withCommandId(command.commandId()) //
+                    .withEntityId(codeValueId) //
+                    .with(changes) //
+                    .build();
+        } catch (DataIntegrityViolationException dve) {
+            handleCodeValueDataIntegrityIssues(command, dve);
+            return new CommandProcessingResultBuilder() //
+                    .withCommandId(command.commandId()) //
+                    .build();
+        }
+
+    }
+
+    @Transactional
+    @Override
+    public CommandProcessingResult deleteCodeValue(final Long codeValueId) {
+
+        try {
+            this.context.authenticatedUser();
+
+            CodeValue codeValue = retrieveCodeValueBy(codeValueId);
+
+            this.codeValueRepository.delete(codeValue);
+
+            return new CommandProcessingResultBuilder().withEntityId(codeValueId).build();
+        } catch (DataIntegrityViolationException dve) {
+            logger.error(dve.getMessage(), dve);
+            throw new PlatformDataIntegrityException("error.msg.cund.unknown.data.integrity.issue",
+                    "Unknown data integrity issue with resource: " + dve.getMostSpecificCause().getMessage());
+        }
+    }
+
+    private CodeValue retrieveCodeValueBy(final Long codeValueId) {
+        final CodeValue codeValue = this.codeValueRepository.findOne(codeValueId);
+        if (codeValue == null) { throw new CodeValueNotFoundException(codeValueId); }
+        return codeValue;
     }
 }

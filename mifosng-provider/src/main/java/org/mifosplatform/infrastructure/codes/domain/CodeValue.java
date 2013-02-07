@@ -1,5 +1,8 @@
 package org.mifosplatform.infrastructure.codes.domain;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
@@ -55,4 +58,26 @@ public class CodeValue extends AbstractPersistable<Long> {
         final Integer position = command.integerValueSansLocaleOfParameterNamed(CODEVALUE_JSON_INPUT_PARAMS.POSITION.getValue());
         return new CodeValue(code, label, position.intValue());
     }
+    
+    public Map<String, Object> update(final JsonCommand command) {
+
+        final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(2);
+
+        final String labelParamName = CODEVALUE_JSON_INPUT_PARAMS.NAME.getValue();
+        if (command.isChangeInStringParameterNamed(labelParamName, this.label)) {
+            final String newValue = command.stringValueOfParameterNamed(labelParamName);
+            actualChanges.put(labelParamName, newValue);
+            this.label = StringUtils.defaultIfEmpty(newValue, null);
+        }
+        
+        final String positionParamName = CODEVALUE_JSON_INPUT_PARAMS.POSITION.getValue();
+        if (command.isChangeInIntegerSansLocaleParameterNamed(positionParamName, this.position)) {
+            final Integer newValue = command.integerValueSansLocaleOfParameterNamed(positionParamName);
+            actualChanges.put(positionParamName, newValue);
+            this.position = newValue.intValue();
+        }
+        
+        return actualChanges;
+    }
+
 }

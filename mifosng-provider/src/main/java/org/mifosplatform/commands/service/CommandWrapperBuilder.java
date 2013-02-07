@@ -564,5 +564,21 @@ public class CommandWrapperBuilder {
         this.href = "/codes/" + codeId + "/codevalues/template";
         return this;
     }
+ 
+    public CommandWrapperBuilder updateCodeValue(Long codeId, final Long codeValueId) {
+        this.actionName = "UPDATE";
+        this.entityName = "CODEVALUE";
+        this.entityId = codeValueId;
+        this.codeId = codeId;
+        this.href = "/codes/" + codeId + "/codevalues/" + codeValueId;
+        return this;
+    }
     
+    public CommandWrapperBuilder deleteCodeValue(Long codeId, final Long codeValueId) {
+        this.actionName = "DELETE";
+        this.entityName = "CODEVALUE";
+        this.entityId = codeValueId;
+        this.href = "/codes/" + codeId + "/codevalues/" + codeValueId;
+        return this;
+    }
 }
