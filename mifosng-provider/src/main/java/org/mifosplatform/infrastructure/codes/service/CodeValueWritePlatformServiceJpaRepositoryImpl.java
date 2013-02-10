@@ -68,14 +68,14 @@ public class CodeValueWritePlatformServiceJpaRepositoryImpl implements CodeValue
      */
     private void handleCodeValueDataIntegrityIssues(final JsonCommand command, final DataIntegrityViolationException dve) {
         final Throwable realCause = dve.getMostSpecificCause();
-        if (realCause.getMessage().contains("code_value_duplicate")) {
+        if (realCause.getMessage().contains("code_value")) {
             final String name = command.stringValueOfParameterNamed("name");
             throw new PlatformDataIntegrityException("error.msg.code.value.duplicate.label", "A code value with lable '" + name
-                    + "' already exists");
+                    + "' already exists", "name", name);
         }
 
         logger.error(dve.getMessage(), dve);
-        throw new PlatformDataIntegrityException("error.msg.cund.unknown.data.integrity.issue",
+        throw new PlatformDataIntegrityException("error.msg.code.value.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource: " + realCause.getMessage());
     }
 
@@ -123,7 +123,7 @@ public class CodeValueWritePlatformServiceJpaRepositoryImpl implements CodeValue
             return new CommandProcessingResultBuilder().withEntityId(codeValueId).build();
         } catch (DataIntegrityViolationException dve) {
             logger.error(dve.getMessage(), dve);
-            throw new PlatformDataIntegrityException("error.msg.cund.unknown.data.integrity.issue",
+            throw new PlatformDataIntegrityException("error.msg.code.value.unknown.data.integrity.issue",
                     "Unknown data integrity issue with resource: " + dve.getMostSpecificCause().getMessage());
         }
     }

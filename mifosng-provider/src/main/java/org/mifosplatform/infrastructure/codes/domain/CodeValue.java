@@ -55,7 +55,8 @@ public class CodeValue extends AbstractPersistable<Long> {
     public static CodeValue fromJson(Code code, final JsonCommand command) {
 
         final String label = command.stringValueOfParameterNamed(CODEVALUE_JSON_INPUT_PARAMS.NAME.getValue());
-        final Integer position = command.integerValueSansLocaleOfParameterNamed(CODEVALUE_JSON_INPUT_PARAMS.POSITION.getValue());
+        Integer position = command.integerValueSansLocaleOfParameterNamed(CODEVALUE_JSON_INPUT_PARAMS.POSITION.getValue());
+        if(position == null) position = new Integer(0);
         return new CodeValue(code, label, position.intValue());
     }
     

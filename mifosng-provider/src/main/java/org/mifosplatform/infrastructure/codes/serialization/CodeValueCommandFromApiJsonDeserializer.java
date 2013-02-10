@@ -50,10 +50,10 @@ public final class CodeValueCommandFromApiJsonDeserializer {
         final String name = this.fromApiJsonHelper.extractStringNamed(CODEVALUE_JSON_INPUT_PARAMS.NAME.getValue(), element);
         baseDataValidator.reset().parameter(CODEVALUE_JSON_INPUT_PARAMS.NAME.getValue()).value(name).notBlank().notExceedingLengthOf(100);
 
-        final Integer position = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(CODEVALUE_JSON_INPUT_PARAMS.POSITION.getValue(),
+        /*final Integer position = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(CODEVALUE_JSON_INPUT_PARAMS.POSITION.getValue(),
                 element);
         baseDataValidator.reset().parameter(CODEVALUE_JSON_INPUT_PARAMS.POSITION.getValue()).value(position).notBlank()
-                .integerGreaterThanZero();
+                .integerGreaterThanZero();*/
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
@@ -73,13 +73,6 @@ public final class CodeValueCommandFromApiJsonDeserializer {
             final String name = this.fromApiJsonHelper.extractStringNamed(CODEVALUE_JSON_INPUT_PARAMS.NAME.getValue(), element);
             baseDataValidator.reset().parameter(CODEVALUE_JSON_INPUT_PARAMS.NAME.getValue()).value(name).notBlank()
                     .notExceedingLengthOf(100);
-        }
-
-        if (this.fromApiJsonHelper.parameterExists(CODEVALUE_JSON_INPUT_PARAMS.POSITION.getValue(), element)) {
-            final Integer position = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(CODEVALUE_JSON_INPUT_PARAMS.POSITION.getValue(),
-                    element);
-            baseDataValidator.reset().parameter(CODEVALUE_JSON_INPUT_PARAMS.POSITION.getValue()).value(position).notBlank()
-                    .integerGreaterThanZero();
         }
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
