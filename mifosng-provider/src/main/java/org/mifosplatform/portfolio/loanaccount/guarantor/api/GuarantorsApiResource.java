@@ -34,12 +34,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-@Path("/guarantors")
+@Path("/loans/{loanId}/guarantors")
 @Component
 @Scope("singleton")
 public class GuarantorsApiResource {
 
-    private static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("externalGuarantor", "existingClientId",
+    private static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("guarantorTypeId", "entityId",
             "firstname", "lastname", "addressLine1", "addressLine2", "city", "state", "zip", "country", "mobileNumber", "housePhoneNumber",
             "comment", "dob"));
 
@@ -76,13 +76,27 @@ public class GuarantorsApiResource {
     }
 
     @GET
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String retrieveGuarantorDetails(@Context final UriInfo uriInfo, @PathParam("loanId") final Long loanId) {
+        context.authenticatedUser().validateHasReadPermission(resourceNameForPermission);
+
+        List<GuarantorData> guarantorDatas = guarantorReadPlatformService.retrieveGuarantorsForValidLoan(loanId);
+
+        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+
+        return this.apiJsonSerializerService.serialize(settings, guarantorDatas, RESPONSE_DATA_PARAMETERS);
+    }
+
+    @GET
     @Path("{guarantorId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveGuarantorDetails(@Context final UriInfo uriInfo, @PathParam("guarantorId") final Long guarantorId) {
+    public String retrieveGuarantorDetails(@Context final UriInfo uriInfo, @PathParam("loanId") final Long loanId,
+            @PathParam("guarantorId") final Long guarantorId) {
         context.authenticatedUser().validateHasReadPermission(resourceNameForPermission);
 
-        GuarantorData guarantorData = guarantorReadPlatformService.retrieveGuarantor(guarantorId);
+        GuarantorData guarantorData = guarantorReadPlatformService.retrieveGuarantor(loanId, guarantorId);
 
         final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         if (settings.isTemplate()) {
@@ -96,9 +110,9 @@ public class GuarantorsApiResource {
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String createGuarantor(final String apiRequestBodyAsJson) {
+    public String createGuarantor(@PathParam("loanId") final Long loanId, final String apiRequestBodyAsJson) {
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().createGuarantor().withJson(apiRequestBodyAsJson).build();
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().createGuarantor(loanId).withJson(apiRequestBodyAsJson).build();
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
@@ -109,8 +123,10 @@ public class GuarantorsApiResource {
     @Path("{guarantorId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String updateGuarantor(@PathParam("guarantorId") final Long guarantorId, final String jsonRequestBody) {
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().updateGuarantor(guarantorId).withJson(jsonRequestBody).build();
+    public String updateGuarantor(@PathParam("loanId") final Long loanId, @PathParam("guarantorId") final Long guarantorId,
+            final String jsonRequestBody) {
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().updateGuarantor(loanId, guarantorId).withJson(jsonRequestBody)
+                .build();
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
@@ -121,8 +137,8 @@ public class GuarantorsApiResource {
     @Path("{guarantorId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String deleteGuarantor(@PathParam("guarantorId") final Long guarantorId) {
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteGuarantor(guarantorId).build();
+    public String deleteGuarantor(@PathParam("loanId") final Long loanId, @PathParam("guarantorId") final Long guarantorId) {
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteGuarantor(loanId, guarantorId).build();
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 

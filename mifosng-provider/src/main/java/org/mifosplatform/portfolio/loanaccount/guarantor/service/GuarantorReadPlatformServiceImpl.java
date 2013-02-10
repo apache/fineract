@@ -13,6 +13,9 @@ import org.mifosplatform.organisation.staff.data.StaffData;
 import org.mifosplatform.organisation.staff.service.StaffReadPlatformService;
 import org.mifosplatform.portfolio.client.data.ClientData;
 import org.mifosplatform.portfolio.client.service.ClientReadPlatformService;
+import org.mifosplatform.portfolio.loanaccount.domain.Loan;
+import org.mifosplatform.portfolio.loanaccount.domain.LoanRepository;
+import org.mifosplatform.portfolio.loanaccount.exception.LoanNotFoundException;
 import org.mifosplatform.portfolio.loanaccount.guarantor.data.GuarantorData;
 import org.mifosplatform.portfolio.loanaccount.guarantor.domain.GuarantorType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,13 +29,16 @@ public class GuarantorReadPlatformServiceImpl implements GuarantorReadPlatformSe
     private final JdbcTemplate jdbcTemplate;
     private final ClientReadPlatformService clientReadPlatformService;
     private final StaffReadPlatformService staffReadPlatformService;
+    private final LoanRepository loanRepository;
 
     @Autowired
     public GuarantorReadPlatformServiceImpl(final TenantAwareRoutingDataSource dataSource,
-            final ClientReadPlatformService clientReadPlatformService, final StaffReadPlatformService staffReadPlatformService) {
+            final ClientReadPlatformService clientReadPlatformService, final StaffReadPlatformService staffReadPlatformService,
+            final LoanRepository loanRepository) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.clientReadPlatformService = clientReadPlatformService;
         this.staffReadPlatformService = staffReadPlatformService;
+        this.loanRepository = loanRepository;
     }
 
     private static final class GuarantorMapper implements RowMapper<GuarantorData> {
@@ -69,6 +75,13 @@ public class GuarantorReadPlatformServiceImpl implements GuarantorReadPlatformSe
     }
 
     @Override
+    public List<GuarantorData> retrieveGuarantorsForValidLoan(Long loanId) {
+        Loan loan = this.loanRepository.findOne(loanId);
+        if (loan == null) { throw new LoanNotFoundException(loanId); }
+        return retrieveGuarantorsForLoan(loanId);
+    }
+
+    @Override
     public List<GuarantorData> retrieveGuarantorsForLoan(Long loanId) {
         final GuarantorMapper rm = new GuarantorMapper();
         String sql = "select " + rm.schema();
@@ -84,11 +97,11 @@ public class GuarantorReadPlatformServiceImpl implements GuarantorReadPlatformSe
     }
 
     @Override
-    public GuarantorData retrieveGuarantor(Long guarantorId) {
+    public GuarantorData retrieveGuarantor(Long loanId, Long guarantorId) {
         final GuarantorMapper rm = new GuarantorMapper();
         String sql = "select " + rm.schema();
-        sql += " where loan_id = ?";
-        GuarantorData guarantorData = this.jdbcTemplate.queryForObject(sql, rm, new Object[] { guarantorId });
+        sql += " where g.loan_id = ? and g.id = ?";
+        GuarantorData guarantorData = this.jdbcTemplate.queryForObject(sql, rm, new Object[] { loanId, guarantorId });
 
         return mergeDetailsForClientOrStaffGuarantor(guarantorData);
     }

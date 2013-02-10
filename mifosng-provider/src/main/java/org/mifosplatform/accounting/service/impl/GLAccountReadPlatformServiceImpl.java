@@ -45,7 +45,7 @@ public class GLAccountReadPlatformServiceImpl implements GLAccountReadPlatformSe
 
             Long id = rs.getLong("id");
             String name = rs.getString("name");
-            Long parentId = rs.getLong("parentId");
+            Long parentId = JdbcSupport.getLong(rs,"parentId"); 
             String glCode = rs.getString("glCode");
             boolean disabled = rs.getBoolean("disabled");
             boolean manualEntriesAllowed = rs.getBoolean("manualEntriesAllowed");

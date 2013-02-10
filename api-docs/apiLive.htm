@@ -293,6 +293,27 @@
 								<td></td>
 								<td></td>
 							</tr>
+							<tr>
+								<td></td>
+								<td>loans/{loanId}/guarantors</td>
+								<td><a href="#loans_guarantors_create">Create a Guarantor
+								</a></td>
+								<td><a href="#loans_guarantors_list">List Guarantors
+								</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>loans/{loanId}/guarantors/{guarantorId}</td>
+								<td></td>
+								<td><a href="#loans_guarantors_retrieve">Retrieve a Guarantor
+								</a></td>
+								<td><a href="#loans_guarantors_update">Update a Guarantor
+								</a></td>
+								<td><a href="#loans_guarantors_delete">Delete a Guarantor
+								</a></td>
+							</tr>
 						</table>
 					</div>
 				</div>
@@ -1071,6 +1092,113 @@
 								<td></td>
 								<td><a href="#savingaccounts_delete">Delete a Saving
 										Application</a></td>
+							</tr>
+						</table>
+					</div>
+				</div>
+			</div>
+			<div class="flybar-nav">
+				<h2 class="flybar-button">Accounting</h2>
+				<div id="toc-menu-group" class="flybar-menu">
+					<div class="tocMatrix">
+						<table class=matrixHeading>
+							<tr class="matrixHeadingBG">
+								<td colspan=2 valign="top"><div class="matrixHeadingVerbs">
+										<table>
+											<tr>
+												<td>RESOURCES</td>
+											</tr>
+										</table>
+									</div></td>
+								<td><table>
+										<tr>
+											<td><div class="matrixHeadingVerbs">POST</div></td>
+										</tr>
+										<tr>
+											<td><div class=matrixHeadingCommands>create/complex
+													update</div></td>
+										</tr>
+									</table></td>
+								<td><table>
+										<tr>
+											<td><div class="matrixHeadingVerbs">GET</div></td>
+										</tr>
+										<tr>
+											<td><div class=matrixHeadingCommands>read</div></td>
+										</tr>
+									</table></td>
+								<td><table>
+										<tr>
+											<td><div class="matrixHeadingVerbs">PUT</div></td>
+										</tr>
+										<tr>
+											<td><div class=matrixHeadingCommands>update</div></td>
+										</tr>
+									</table></td>
+								<td><table>
+										<tr>
+											<td><div class="matrixHeadingVerbs">DELETE</div></td>
+										</tr>
+										<tr>
+											<td><div class=matrixHeadingCommands>delete</div></td>
+										</tr>
+									</table></td>
+							</tr>
+							<tr class="alt">
+								<td><a href="#glaccounts">General Ledger Account</a></td>
+								<td>glaccounts</td>
+								<td><a href="#glaccounts_create">Create a New Ledger Account</a></td>
+								<td><a href="#glaccounts_list">List Ledger Accounts</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>glaccounts/{glaccountId}</td>
+								<td></td>
+								<td><a href="#glaccounts_retrieve">Retrieve a Ledger Account</a></td>
+								<td><a href="#glaccounts_update">Update a Ledger Account</a></td>
+								<td><a href="#glaccounts_delete">Delete a Ledger Account</a></td>
+							</tr>
+							<tr class="alt">
+								<td><a href="#glclosures">Accounting Closure</a></td>
+								<td>glclosures</td>
+								<td><a href="#glclosures_create">Create an Accounting Closure</a></td>
+								<td><a href="#glclosures_list">List Accounting Closures</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>glclosures/{glclosureId}</td>
+								<td></td>
+								<td><a href="#glclosures_retrieve">Retrieve an Accounting Closure</a></td>
+								<td><a href="#glclosures_update">Update an Accounting Closure</a></td>
+								<td><a href="#glclosures_delete">Delete an Accounting Closure</a></td>
+							</tr>
+							<tr class="alt">
+								<td><a href="#glclosures">Journal Entries</a></td>
+								<td>journalentries</td>
+								<td><a href="#journalentries_create">Create Journal Entries</a></td>
+								<td><a href="#journalentries_list">List Journal Entries</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>journalentries/{entryId}</td>
+								<td></td>
+								<td><a href="#journalentries_retrieve">Retrieve a Journal Entry</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>journalentries/{transactionId}/reversal</td>
+								<td><a href="#journalentries_reverse">Reverse Journal Entries</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
 							</tr>
 						</table>
 					</div>
@@ -3976,7 +4104,7 @@ Request Body:
 						</tr>
 						</tr>
 						<tr class=alt>
-							<td>accountingType</td>
+							<td>accountingRule</td>
 						</tr>
 						<tr>
 							<td class=fielddesc><span>Example Values:</span>NONE(1),
@@ -4055,7 +4183,11 @@ GET https://DomainName/api/v1/loanproducts
             "code": "interestCalculationPeriodType.same.as.repayment.period",
             "value": "Same as repayment period"
         },
-        "accountingType": 1
+        "accountingRule": {
+            "id": 1,
+            "code": "accountingRuleType.none",
+            "value": "NONE"
+        }
     }
 ]
 					</code>
@@ -4123,7 +4255,7 @@ GET https://DomainName/api/v1/loanproducts/template
     "code": "interestCalculationPeriodType.same.as.repayment.period",
     "value": "Same as repayment period"
   },
-  "accountingType": 1,
+  "accountingRule": 1,
   "currencyOptions": [
     {
       "code": "USD",
@@ -4281,6 +4413,158 @@ GET https://DomainName/api/v1/loanproducts/template
       }
     }
   ],
+  "accountingOptions": {
+        "assetAccountOptions": [
+            {
+                "id": 1,
+                "name": "Fund Source For Loans",
+                "glCode": "100001",
+                "disabled": false,
+                "manualEntriesAllowed": true,
+                "type": {
+                    "id": 1,
+                    "code": "accountType.asset",
+                    "value": "ASSET"
+                },
+                "usage": {
+                    "id": 1,
+                    "code": "accountUsage.detail",
+                    "value": "DETAIL"
+                },
+                "description": "Desc"
+            },
+            {
+                "id": 2,
+                "name": "Interest Receivable",
+                "glCode": "100002",
+                "disabled": false,
+                "manualEntriesAllowed": true,
+                "type": {
+                    "id": 1,
+                    "code": "accountType.asset",
+                    "value": "ASSET"
+                },
+                "usage": {
+                    "id": 1,
+                    "code": "accountUsage.detail",
+                    "value": "DETAIL"
+                },
+                "description": "Desc"
+            },
+            {
+                "id": 3,
+                "name": "Fees Receivable",
+                "glCode": "100003",
+                "disabled": false,
+                "manualEntriesAllowed": true,
+                "type": {
+                    "id": 1,
+                    "code": "accountType.asset",
+                    "value": "ASSET"
+                },
+                "usage": {
+                    "id": 1,
+                    "code": "accountUsage.detail",
+                    "value": "DETAIL"
+                },
+                "description": "Desc"
+            },
+            {
+                "id": 4,
+                "name": "Penalties Receivable",
+                "glCode": "100004",
+                "disabled": false,
+                "manualEntriesAllowed": true,
+                "type": {
+                    "id": 1,
+                    "code": "accountType.asset",
+                    "value": "ASSET"
+                },
+                "usage": {
+                    "id": 1,
+                    "code": "accountUsage.detail",
+                    "value": "DETAIL"
+                },
+                "description": "better duddette"
+            }
+        ],
+        "expenseAccountOptions": [
+            {
+                "id": 5,
+                "name": "Written Off Losses",
+                "glCode": "500005",
+                "disabled": false,
+                "manualEntriesAllowed": true,
+                "type": {
+                    "id": 5,
+                    "code": "accountType.expense",
+                    "value": "EXPENSE"
+                },
+                "usage": {
+                    "id": 1,
+                    "code": "accountUsage.detail",
+                    "value": "DETAIL"
+                },
+                "description": "Desc"
+            }
+        ],
+        "incomeAccountOptions": [
+            {
+                "id": 6,
+                "name": "Income from Interest",
+                "glCode": "400001",
+                "disabled": false,
+                "manualEntriesAllowed": true,
+                "type": {
+                    "id": 4,
+                    "code": "accountType.income",
+                    "value": "INCOME"
+                },
+                "usage": {
+                    "id": 1,
+                    "code": "accountUsage.detail",
+                    "value": "DETAIL"
+                },
+                "description": "Desc"
+            },
+            {
+                "id": 7,
+                "name": "Income from Fees",
+                "glCode": "400002",
+                "disabled": false,
+                "manualEntriesAllowed": true,
+                "type": {
+                    "id": 4,
+                    "code": "accountType.income",
+                    "value": "INCOME"
+                },
+                "usage": {
+                    "id": 1,
+                    "code": "accountUsage.detail",
+                    "value": "DETAIL"
+                },
+                "description": "Desc"
+            },
+            {
+                "id": 8,
+                "name": "Income from Penalties",
+                "glCode": "400003",
+                "disabled": false,
+                "manualEntriesAllowed": true,
+                "type": {
+                    "id": 4,
+                    "code": "accountType.income",
+                    "value": "INCOME"
+                },
+                "usage": {
+                    "id": 1,
+                    "code": "accountUsage.detail",
+                    "value": "DETAIL"
+                },
+                "description": "Desc"
+            }
+        ]
+  },
   "accountingMappings": {}
 }
 					</code>
@@ -4355,7 +4639,7 @@ GET https://DomainName/api/v1/loanproducts/{productId}
         "code": "interestCalculationPeriodType.same.as.repayment.period",
         "value": "Same as repayment period"
     },
-    "accountingType": 1,
+    "accountingRule": 1,
     "charges": []
 }
 					</code>
@@ -4367,7 +4651,17 @@ GET https://DomainName/api/v1/loanproducts/{productId}
 			<div class="method-section">
 				<div class="method-description">
 					<h4>Create a Loan Product</h4>
-					<table class=matrixHeading>
+					<p>Depending of the Accounting Rule (accountingRule) selected, 
+				     additional fields with details with the appropriate Ledger Account 
+					 identifiers would need to be passed in.
+					</p>
+
+					</p>Refer <a href="https://mifosforge.jira.com/wiki/display/MIFOSX/A+Possible+accounting+Spec">
+					 MifosX Accounting Specs Draft</a> for more details regarding the 
+					 significance of the selected accounting Rule
+					</p>
+
+                    <table class=matrixHeading>
 						<tr class="matrixHeadingBG">
 							<td><div class="mifosXHeading2">Mandatory Fields</div></td>
 						</tr>
@@ -4376,7 +4670,24 @@ GET https://DomainName/api/v1/loanproducts/{productId}
 								inArrearsTolerance, repaymentFrequencyType, repaymentEvery,
 								numberOfRepayments, interestRatePerPeriod,
 								interestRateFrequencyType, amortizationType, interestType,
-								interestCalculationPeriodType, accountingType</td>
+								interestCalculationPeriodType, accountingRule</td>
+						</tr>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Additional Mandatory Fields for Cash(2) based accounting</div></td>
+						</tr>
+						<tr class=alt>
+							<td>fundSourceAccountId, loanPortfolioAccountId, interestOnLoanAccountId, 
+								incomeFromFeeAccountId, incomeFromPenaltyAccountId, 
+								writeOffAccountId</td>
+						</tr>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Additional Mandatory Fields for Accrual(3) based accounting</div></td>
+						</tr>
+						<tr class=alt>
+							<td>fundSourceAccountId, loanPortfolioAccountId, interestOnLoanAccountId, 
+								incomeFromFeeAccountId, incomeFromPenaltyAccountId, 
+								writeOffAccountId, receivableInterestAccountId, receivableFeeAccountId,
+								receivablePenaltyAccountId</td>
 						</tr>
 					</table>
 				</div>
@@ -4403,7 +4714,7 @@ Request Body:
     "amortizationType": 1,
     "interestType": 0,
     "interestCalculationPeriodType": 1,
-    "accountingType": 1
+    "accountingRule": 1
 }
 					</code>
 					<code class="method-response">
@@ -4411,6 +4722,76 @@ Request Body:
 	"resourceId": 1 
 }
 					</code>
+					<code class="method-request">
+POST loanproducts
+Content-Type: application/json 
+Request Body:
+{
+    "name": "A new loan product for me",
+    "currencyCode": "USD",
+    "locale": "en_GB",
+    "digitsAfterDecimal": "2",
+    "principal": "100,000.00",
+    "numberOfRepayments": "12",
+    "repaymentEvery": "1",
+    "repaymentFrequencyType": 2,
+    "transactionProcessingStrategyId": 1,
+    "interestRatePerPeriod": "1.75",
+    "interestRateFrequencyType": 2,
+    "amortizationType": 1,
+    "interestType": 0,
+    "interestCalculationPeriodType": 1,
+    "accountingRule":"3",
+    "fundSourceAccountId":"15",
+    "loanPortfolioAccountId":"16",
+    "interestOnLoanAccountId":"14",
+    "incomeFromFeeAccountId":"13",
+    "incomeFromPenaltyAccountId":"12",
+    "writeOffAccountId":"11"
+}
+					</code>
+					<code class="method-response">
+{ 
+	"resourceId": 2 
+}
+					</code>
+					<code class="method-request">
+POST loanproducts
+Content-Type: application/json 
+Request Body:
+{
+    "name": "A new loan product for me",
+    "currencyCode": "USD",
+    "locale": "en_GB",
+    "digitsAfterDecimal": "2",
+    "principal": "100,000.00",
+    "numberOfRepayments": "12",
+    "repaymentEvery": "1",
+    "repaymentFrequencyType": 2,
+    "transactionProcessingStrategyId": 1,
+    "interestRatePerPeriod": "1.75",
+    "interestRateFrequencyType": 2,
+    "amortizationType": 1,
+    "interestType": 0,
+    "interestCalculationPeriodType": 1,
+    "accountingRule":"3",
+    "fundSourceAccountId":"15",
+    "loanPortfolioAccountId":"16",
+    "receivableInterestAccountId":"10",
+    "receivableFeeAccountId":"9",
+    "receivablePenaltyAccountId":"8",
+    "interestOnLoanAccountId":"14",
+    "incomeFromFeeAccountId":"13",
+    "incomeFromPenaltyAccountId":"12",
+    "writeOffAccountId":"11"
+}
+					</code>
+					<code class="method-response">
+{ 
+	"resourceId": 3 
+}
+					</code>
+			
 				</div>
 			</div>
 
@@ -6984,6 +7365,390 @@ GET https://DomainName/api/v1/permissions
 					</code>
 				</div>
 			</div>
+
+			<!-- start of accounting api docs -->
+            <a id="glaccounts" name="glaccounts" class="old-syle-anchor">&nbsp;</a>
+            <div class="method-section">
+                <div class="method-description">
+                    <h3>General Ledger Account</h3>
+                    <p>Ledger accounts represent an Individual account within an Organizations Chart 
+                       Of Accounts(COA) and are assigned a name and unique number by which they can 
+                       be identified. <br/>
+                       All transactions relating to a company's assets, liabilities, owners' equity, 
+                       revenue and expenses are recorded against these accounts
+                    </p>
+                    <table class=matrixHeading>
+                        <tr class="matrixHeadingBG">
+                            <td><div class="mifosXHeading2">Field Descriptions</div></td>
+                        </tr>
+                        <tr class=alt>
+                            <td>name</td>
+                        </tr>
+                        <tr>
+                            <td class=fielddesc>The name of the account</td>
+                        </tr>
+                        <tr class=alt>
+                            <td>glCode</td>
+                        </tr>
+                        <tr>
+                            <td class=fielddesc>The Ledger code associated with the 
+                                Account<br>These codes are mandatory and should be unique within
+                                an organization</td>
+                        </tr>
+                        <tr class=alt>
+                            <td>disabled</td>
+                        </tr>
+                        <tr>
+                            <td class=fielddesc>A boolean flag that indicates whether an account
+                            	is currently in use</td>
+                        </tr>
+                        <tr class=alt>
+                            <td>type</td>
+                        </tr>
+                        <tr>
+                            <td class=fielddesc>Classifies the account into one of the following Types
+                            	<br/><b>Asset accounts:</b> represent the different types of economic resources
+                            	owned or controlled by business, common examples of Asset accounts are cash, 
+                            	cash in bank, building, inventory, prepaid rent, goodwill, accounts receivable<br/>
+								<b>Liability accounts:</b> represent the different types of economic obligations
+								by a business, such as accounts payable, bank loan, bonds payable<br/>
+								<b>Income accounts:</b> represent the company's gross earnings and common examples 
+								include Interest Income, Sales and Service revenue<br/>
+								<b>Expense accounts:</b> represent the company's expenditures to enable itself to 
+								operate. Common examples are electricity and water, rentals, depreciation, 
+								doubtful accounts, insurance.<br/>
+								<b>Equity accounts:</b> represent the residual equity of a business (after 
+								deducting from Assets all the liabilities) including Retained Earnings 
+								and Appropriations <br/><br/>
+								The options are fully listed in <a href="#glaccounts_template">Retrieve
+								General Ledger Accounts Template</a>.
+                            </td>
+                        </tr>
+                        <tr class=alt>
+                            <td>usage</td>
+                        </tr>
+                        <tr>
+                            <td class=fielddesc>Determines how the account shall be used<br> 
+                            "Header" accounts specify the title of a group of accounts. Header accounts are used
+                            only to group detail accounts that have a similar purpose; that is, detail accounts
+                            are assigned to specific header accounts
+                            <br/>
+                            "Detail" accounts may have transactions logged against them<br/><br/>
+                            The options are fully listed in <a href="#glaccounts_template">Retrieve
+							General Ledger Accounts Template</a>.
+                            </td>
+                        </tr>
+                        <tr class=alt>
+                            <td>manualEntriesAllowed</td>
+                        </tr>
+                        <tr>
+                            <td class=fielddesc>Specifies if manual adjustments can be made
+                            against this account using the <a href="#journalentries_create">
+                            Create Journal Entries API</a> </td>
+                        </tr>
+                        <tr class=alt>
+                            <td>description</td>
+                        </tr>
+                        <tr>
+                            <td class=fielddesc>Human understandable description for the Ledger Account
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <a id="glaccounts_list" name="glaccounts_list" class="old-syle-anchor">&nbsp;</a>
+            <div class="method-section">
+                <div class="method-description">
+                    <h4>List General Ledger Accounts</h4>
+                    <h5>Arguments</h5>
+                    <dl class="argument-list">
+                        <dt>type</dt>
+                        <dd>
+                            Integer <span>optional</span>
+                        </dd>
+                        <dt>manualAdjustmentsAllowed</dt>
+                        <dd>
+                            boolean <span>optional</span>
+                        </dd>
+                        <dt>usage</dt>
+                        <dd>
+                            Integer <span>optional</span>
+                        </dd>
+                        <dt>disabled</dt>
+                        <dd>
+                            boolean <span>optional</span>
+                        </dd>
+                    </dl>
+                    <p>Example Requests:</p>
+                    <div class=apiClick>glaccounts</div>
+                    <br>
+                    <br>
+                    <div class=apiClick>glaccounts?type=1&manualAdjustmentsAllowed=true&usage=1&disabled=false</div>
+                </div>
+                <div class="method-example">
+                    <code class="method-declaration">
+GET https://DomainName/api/v1/glaccounts
+                    </code>
+                    <code class="method-response">
+[
+    {
+        "id": 16,
+        "name": "Cash",
+        "glCode": "100001",
+        "disabled": false,
+        "manualEntriesAllowed": true,
+        "type": {
+            "id": 1,
+            "code": "accountType.asset",
+            "value": "ASSET"
+        },
+        "usage": {
+            "id": 1,
+            "code": "accountUsage.detail",
+            "value": "DETAIL"
+        },
+        "description": "Desc"
+    },
+    {
+        "id": 15,
+        "name": "Fund Source For Loan",
+        "glCode": "100002",
+        "disabled": false,
+        "manualEntriesAllowed": true,
+        "type": {
+            "id": 1,
+            "code": "accountType.asset",
+            "value": "ASSET"
+        },
+        "usage": {
+            "id": 1,
+            "code": "accountUsage.detail",
+            "value": "DETAIL"
+        },
+        "description": "Desc"
+    }
+]
+                    </code>
+                </div>
+            </div>
+
+            <a id="glaccounts_template" name="glaccounts_template"
+                class="old-syle-anchor">&nbsp;</a>
+            <div class="method-section">
+                <div class="method-description">
+                    <h4>Retrieve GL Accounts Template</h4>
+                    <p>This is a convenience resource. It can be useful when
+                        building maintenance user interface screens for client
+                        applications. The template data returned consists of any or all
+                        of:
+                    <ul>
+                        <li class=normalli>Field Defaults</li>
+                        <li class=normalli>Allowed Value Lists</li>
+                    </ul>
+                    </p>
+                    <p>Example Request:</p>
+                    <div class=apiClick>glaccounts/template</div>
+                </div>
+                <div class="method-example">
+                    <code class="method-declaration">
+GET https://DomainName/api/v1/glaccounts/template
+                    </code>
+                    <code class="method-response">
+{
+    "disabled": false,
+    "manualEntriesAllowed": true,
+    "type": {
+        "id": 1,
+        "code": "accountType.asset",
+        "value": "ASSET"
+    },
+    "usage": {
+        "id": 1,
+        "code": "accountUsage.detail",
+        "value": "DETAIL"
+    },
+    "accountTypeOptions": [
+        {
+            "id": 1,
+            "code": "accountType.asset",
+            "value": "ASSET"
+        },
+        {
+            "id": 2,
+            "code": "accountType.liability",
+            "value": "LIABILITY"
+        },
+        {
+            "id": 3,
+            "code": "accountType.equity",
+            "value": "EQUITY"
+        },
+        {
+            "id": 4,
+            "code": "accountType.income",
+            "value": "INCOME"
+        },
+        {
+            "id": 5,
+            "code": "accountType.expense",
+            "value": "EXPENSE"
+        }
+    ],
+    "usageOptions": [
+        {
+            "id": 1,
+            "code": "accountUsage.detail",
+            "value": "DETAIL"
+        },
+        {
+            "id": 2,
+            "code": "accountUsage.header",
+            "value": "HEADER"
+        }
+    ]
+}
+                    </code>
+                </div>
+            </div>
+
+
+            <a id="glaccounts_retrieve" name="glaccounts_retrieve"
+                class="old-syle-anchor">&nbsp;</a>
+            <div class="method-section">
+                <div class="method-description">
+                    <h4>Retrieve a General Ledger Account</h4>
+                    <p>Example Requests:</p>
+                    <div class=apiClick>glaccounts/1</div>
+                    <br>
+                    <br>
+                    <div class=apiClick>glaccounts/1?template=true</div>
+                    <br>
+                    <br>
+                    <div class=apiClick>glaccounts/1?fields=name,glCode</div>
+                </div>
+                <div class="method-example">
+                    <code class="method-declaration">
+GET https://DomainName/api/v1/glaccounts/{glaccountsId}
+                    </code>
+                    <code class="method-response">
+{
+    "id": 1,
+    "name": "Cash",
+    "glCode": "100001",
+    "disabled": false,
+    "manualEntriesAllowed": true,
+    "type": {
+        "id": 1,
+        "code": "accountType.asset1",
+        "value": "ASSET"
+    },
+    "usage": {
+        "id": 1,
+        "code": "accountUsage.detail",
+        "value": "DETAIL"
+    },
+    "description": "Desc"
+}
+                    </code>
+                </div>
+            </div>
+
+            <a id="glaccounts_create" name="glaccounts_create" class="old-syle-anchor">&nbsp;</a>
+            <div class="method-section">
+                <div class="method-description">
+                    <h4>Create a General Ledger Account</h4>
+                    <p>
+                        <b>Note:</b> You can optionally<br>
+                        create a Hierarchical Chart of Account by using the "parentId"
+                        property of an Account<br>
+                    </p>
+                    <table class=matrixHeading>
+                        <tr class="matrixHeadingBG">
+                            <td><div class="mifosXHeading2">Mandatory Fields</div></td>
+                        </tr>
+                        <tr class=alt>
+                            <td>name, glCode, classification, usage and manualEntriesAllowed
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="method-example">
+                    <code class="method-declaration">
+POST https://DomainName/api/v1/glaccounts_update
+                    </code>
+                    <code class="method-request">
+POST glaccounts
+Content-Type: application/json 
+Request Body:
+{
+    "name": "Cash at Bangalore",
+    "glCode": "100017",
+    "manualEntriesAllowed": true,
+    "classification": 1,
+    "usage": 1,
+    "description": "Cash at Bangalore Branch"
+}
+                    </code>
+                    <code class="method-response">
+{
+    "resourceId": 22
+}
+                    </code>
+                </div>
+            </div>
+
+            <a id="glaccounts_update" name="glaccounts_update" class="old-syle-anchor">&nbsp;</a>
+            <div class="method-section">
+                <div class="method-description">
+                    <h4>Update a General Ledger Account</h4>
+                </div>
+                <div class="method-example">
+                    <code class="method-declaration">
+PUT https://DomainName/api/v1/glaccounts/{glaccountId}
+                        </code>
+                    <code class="method-request">
+PUT glaccounts/1 
+Content-Type: application/json 
+Request Body:
+{
+    "name": "Cash at Tumkur"
+}
+                    </code>
+                    <code class="method-response">
+{
+    "resourceId": 1,
+}
+                    </code>
+                </div>
+            </div>
+
+            <a id="glaccounts_delete" name="glaccounts_delete" class="old-syle-anchor">&nbsp;</a>
+            <div class="method-section">
+                <div class="method-description">
+                    <h4>Delete a General Ledger Account</h4>
+                    <p>
+                        <b>Note:</b> Only Ledger Accounts against which no transactions have been logged
+                        (either manually or by the loan or Savings portfolio) can be deleted.
+                    </p>
+                </div>
+                <div class="method-example">
+                    <code class="method-declaration">
+DELETE https://DomainName/api/v1/glaccounts/{glaccountId}
+                    </code>
+                    <code class="method-request">
+DELETE glaccounts/1
+Content-Type: application/json 
+No Request Body:
+                    </code>
+                    <code class="method-response">
+{
+    "resourceId": 1
+}
+                    </code>
+                </div>
+            </div>
+
 
 		</div>
 		<!-- main-content-wrapper -->

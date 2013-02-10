@@ -70,7 +70,7 @@ public class GLAccountsApiResource {
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveAllAccounts(@Context final UriInfo uriInfo, @QueryParam("classification") final Integer classification,
+    public String retrieveAllAccounts(@Context final UriInfo uriInfo, @QueryParam("type") final Integer classification,
             @QueryParam("searchParam") final String searchParam, @QueryParam("usage") final Integer usage,
             @QueryParam("manualAdjustmentsAllowed") final Boolean manualTransactionsAllowed, @QueryParam("disabled") final Boolean disabled) {
 

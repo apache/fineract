@@ -73,7 +73,7 @@ public class GLClosureReadPlatformServiceImpl implements GLClosureReadPlatformSe
             arrayPos = arrayPos + 1;
         }
 
-        sql = sql + " order by glClosure.closing_date";
+        sql = sql + " order by glClosure.closing_date desc";
 
         Object[] finalObjectArray = Arrays.copyOf(objectArray, arrayPos);
         return this.jdbcTemplate.query(sql, rm, finalObjectArray);

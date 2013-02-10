@@ -33,7 +33,7 @@ public final class LoanProductCommandFromApiJsonDeserializer {
     private final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("name", "description", "fundId",
             "transactionProcessingStrategyId", "currencyCode", "digitsAfterDecimal", "principal", "inArrearsTolerance",
             "interestRatePerPeriod", "repaymentEvery", "numberOfRepayments", "repaymentFrequencyType", "interestRateFrequencyType",
-            "amortizationType", "interestType", "interestCalculationPeriodType", "charges", "locale", "accountingType",
+            "amortizationType", "interestType", "interestCalculationPeriodType", "charges", "locale", "accountingRule",
             LOAN_PRODUCT_ACCOUNTING_PARAMS.FEES_RECEIVABLE.getValue(), LOAN_PRODUCT_ACCOUNTING_PARAMS.FUND_SOURCE.getValue(),
             LOAN_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_FEES.getValue(), LOAN_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_PENALTIES.getValue(),
             LOAN_PRODUCT_ACCOUNTING_PARAMS.INTEREST_ON_LOANS.getValue(), LOAN_PRODUCT_ACCOUNTING_PARAMS.INTEREST_RECEIVABLE.getValue(),
@@ -114,8 +114,8 @@ public final class LoanProductCommandFromApiJsonDeserializer {
                 .inMinMaxRange(0, 1);
 
         // accounting related data validation
-        final Integer accountingRuleType = fromApiJsonHelper.extractIntegerNamed("accountingType", element, Locale.getDefault());
-        baseDataValidator.reset().parameter("accountingType").value(accountingRuleType).notNull().inMinMaxRange(1, 3);
+        final Integer accountingRuleType = fromApiJsonHelper.extractIntegerNamed("accountingRule", element, Locale.getDefault());
+        baseDataValidator.reset().parameter("accountingRule").value(accountingRuleType).notNull().inMinMaxRange(1, 3);
 
         if (isCashBasedAccounting(accountingRuleType) || isAccrualBasedAccounting(accountingRuleType)) {
 
@@ -266,8 +266,8 @@ public final class LoanProductCommandFromApiJsonDeserializer {
                     .inMinMaxRange(0, 1);
         }
 
-        final Integer accountingRuleType = fromApiJsonHelper.extractIntegerNamed("accountingType", element, Locale.getDefault());
-        baseDataValidator.reset().parameter("accountingType").value(accountingRuleType).ignoreIfNull().inMinMaxRange(1, 3);
+        final Integer accountingRuleType = fromApiJsonHelper.extractIntegerNamed("accountingRule", element, Locale.getDefault());
+        baseDataValidator.reset().parameter("accountingRule").value(accountingRuleType).ignoreIfNull().inMinMaxRange(1, 3);
 
         final Long fundAccountId = fromApiJsonHelper.extractLongNamed(LOAN_PRODUCT_ACCOUNTING_PARAMS.FUND_SOURCE.getValue(), element);
         baseDataValidator.reset().parameter(LOAN_PRODUCT_ACCOUNTING_PARAMS.FUND_SOURCE.getValue()).value(fundAccountId).ignoreIfNull()

@@ -30,7 +30,7 @@ public class GLAccountCommandValidator {
 
         baseDataValidator.reset().parameter("parentId").value(command.getParentId()).ignoreIfNull().integerGreaterThanZero();
 
-        baseDataValidator.reset().parameter("classification").value(command.getClassification())
+        baseDataValidator.reset().parameter("classification").value(command.getClassification()).notNull()
                 .inMinMaxRange(GLAccountType.getMinValue(), GLAccountType.getMaxValue());
 
         baseDataValidator.reset().parameter("usage").value(command.getUsage())

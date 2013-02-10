@@ -21,4 +21,6 @@ public interface LoanDropdownReadPlatformService {
 	List<EnumOptionData> retrieveInterestRateFrequencyTypeOptions();
 
 	Collection<TransactionProcessingStrategyData> retreiveTransactionProcessingStrategies();
+	
+	List<EnumOptionData> retrieveAccountingRuleTypeOptions();
 }

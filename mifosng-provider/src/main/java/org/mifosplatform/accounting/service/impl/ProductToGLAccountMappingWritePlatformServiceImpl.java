@@ -50,7 +50,7 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
     @Transactional
     public void createLoanProductToGLAccountMapping(final Long loanProductId, final JsonCommand command) {
         final JsonElement element = this.fromApiJsonHelper.parse(command.json());
-        final Integer accountingRuleTypeId = this.fromApiJsonHelper.extractIntegerNamed("accountingType", element, Locale.getDefault());
+        final Integer accountingRuleTypeId = this.fromApiJsonHelper.extractIntegerNamed("accountingRule", element, Locale.getDefault());
         final AccountingRuleType accountingRuleType = AccountingRuleType.fromInt(accountingRuleTypeId);
 
         switch (accountingRuleType) {
