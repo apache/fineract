@@ -34,7 +34,7 @@ public class JdbcTenantDetailsService implements TenantDetailsService {
         try {
             TenantMapper rm = new TenantMapper();
             String sql = "select id, name, schema_name as schemaName, schema_server as schemaServer, schema_server_port as schemaServerPort, "
-                    + " schema_username as schemaUsername, schema_password as schemaPassword "
+                    + " schema_username as schemaUsername, schema_password as schemaPassword , timezone_id as timezoneId "
                     + " from tenants t where t.identifier like ?";
 
             return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { tenantIdentifier });
@@ -55,8 +55,9 @@ public class JdbcTenantDetailsService implements TenantDetailsService {
             String schemaServerPort = rs.getString("schemaServerPort");
             String schemaUsername = rs.getString("schemaUsername");
             String schemaPassword = rs.getString("schemaPassword");
-
-            return new MifosPlatformTenant(id, name, schemaName, schemaServer, schemaServerPort, schemaUsername, schemaPassword);
+            String timezoneId =rs.getString("timezoneId");
+            
+            return new MifosPlatformTenant(id, name, schemaName, schemaServer, schemaServerPort, schemaUsername, schemaPassword ,timezoneId);
         }
     }
 }

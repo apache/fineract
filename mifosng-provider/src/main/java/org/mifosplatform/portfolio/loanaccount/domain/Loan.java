@@ -35,6 +35,7 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.domain.AbstractAuditableCustom;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.security.service.RandomPasswordGenerator;
 import org.mifosplatform.organisation.monetary.domain.ApplicationCurrency;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
@@ -48,6 +49,7 @@ import org.mifosplatform.portfolio.loanaccount.command.LoanChargeCommand;
 import org.mifosplatform.portfolio.loanaccount.exception.InvalidLoanStateTransitionException;
 import org.mifosplatform.portfolio.loanaccount.exception.InvalidLoanTransactionTypeException;
 import org.mifosplatform.portfolio.loanaccount.exception.LoanOfficerAssignmentException;
+import org.mifosplatform.portfolio.loanaccount.exception.LoanOfficerUnassignmentDateException;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.data.LoanScheduleData;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.data.LoanSchedulePeriodData;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.AprCalculator;
@@ -1942,17 +1944,29 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
     }
 
     
-    public void removeLoanOfficer(final LocalDate updatedDate) {
+    public void removeLoanOfficer(final LocalDate unassignDate) {
 
         final LoanOfficerAssignmentHistory latestHistoryRecord = findLatestIncompleteHistoryRecord();
 
         if (latestHistoryRecord != null) {
-            latestHistoryRecord.updateEndDate(updatedDate);
+            validateUnassignDate(latestHistoryRecord, unassignDate);
+            latestHistoryRecord.updateEndDate(unassignDate);
         }
-            
+
         this.loanofficer = null;
     }
-    
+
+    private void validateUnassignDate(final LoanOfficerAssignmentHistory latestHistoryRecord, final LocalDate unassignDate) {
+
+        final LocalDate today = DateUtils.getLocalDateOfTenant();
+
+        if (latestHistoryRecord.getStartDate().isAfter(unassignDate)) {
+            throw new LoanOfficerUnassignmentDateException(this.getId(), this.getLoanOfficer().getId(), latestHistoryRecord.getStartDate(),
+                    unassignDate);
+        } else if (unassignDate.isAfter(today)) { throw new LoanOfficerUnassignmentDateException(
+                this.getId()); }
+    }
+
     private LoanOfficerAssignmentHistory findLatestIncompleteHistoryRecord() {
 
         LoanOfficerAssignmentHistory latestRecordWithNoEndDate = null;

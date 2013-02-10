@@ -67,7 +67,7 @@ public class LoanOfficerAssignmentHistory extends AbstractAuditableCustom<AppUse
 		return getStartDate().isEqual(matchingDate);
 	}
 	
-	private LocalDate getStartDate() {
+	public LocalDate getStartDate() {
 		return new LocalDate(startDate);
 	}
 
