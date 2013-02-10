@@ -413,6 +413,14 @@ public class LoansApiResource {
             final CommandWrapper commandRequest = builder.undoLoanApplicationDisbursal(loanId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         }
+        
+        if (is(commandParam, "assignloanofficer")) {
+            final CommandWrapper commandRequest = builder.assignLoanOfficer(loanId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        } else if (is(commandParam, "unassignloanofficer")) {
+            final CommandWrapper commandRequest = builder.unassignLoanOfficer(loanId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        }
 
         if (result == null) { throw new UnrecognizedQueryParamException("command", commandParam); }
 
@@ -445,30 +453,4 @@ public class LoansApiResource {
         return this.loanOfficeTransferToApiJsonSerializer.serialize(settings, loanReassignmentData, RESPONSE_DATA_PARAMETERS);
     }
 
-    @POST
-    @Path("{loanId}/assign")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    public String assignLoanOfficer(@PathParam("loanId") final Long loanId, final String apiRequestBodyAsJson) {
-
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().assignLoanOfficer(loanId).withJson(apiRequestBodyAsJson).build();
-
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-
-        return this.toApiJsonSerializer.serialize(result);
-    }
-    
-    @POST
-    @Path("{loanId}/unassign")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    public String unassignLoanOfficer(@PathParam("loanId") final Long loanId, final String apiRequestBodyAsJson) {
-
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().unassignLoanOfficer(loanId).withJson(apiRequestBodyAsJson)
-                .build();
-
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-
-        return this.toApiJsonSerializer.serialize(result);
-    }
 }

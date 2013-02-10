@@ -45,7 +45,7 @@ import org.mifosplatform.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.mifosplatform.portfolio.loanaccount.exception.LoanNotFoundException;
 import org.mifosplatform.portfolio.loanaccount.exception.LoanOfficerAssignmentException;
 import org.mifosplatform.portfolio.loanaccount.exception.LoanTransactionNotFoundException;
-import org.mifosplatform.portfolio.loanaccount.exception.UnassignLoanOfficerException;
+import org.mifosplatform.portfolio.loanaccount.exception.LoanOfficerUnassignmentException;
 import org.mifosplatform.portfolio.loanaccount.serialization.LoanChargeCommandFromApiJsonDeserializer;
 import org.mifosplatform.portfolio.loanaccount.serialization.LoanStateTransitionCommandFromApiJsonDeserializer;
 import org.mifosplatform.portfolio.loanaccount.serialization.LoanTransactionCommandFromApiJsonDeserializer;
@@ -719,7 +719,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         final Loan loan = retrieveLoanBy(loanId);
 
-        if (loan.getLoanOfficer() == null) { throw new UnassignLoanOfficerException(loanId); }
+        if (loan.getLoanOfficer() == null) { throw new LoanOfficerUnassignmentException(loanId); }
 
         loan.removeLoanOfficer(dateOfLoanOfficerunAssigned);
 

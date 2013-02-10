@@ -1,0 +1,2 @@
+ALTER TABLE tenants MODIFY timezone_id  VARCHAR(100) not null;  -- timezone are refferd witn names rather than numerics
+UPDATE `tenants` SET `timezone_id`='Asia/Kolkata' WHERE  `id`=1 LIMIT 1; -- setting Indian time zone
