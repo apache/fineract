@@ -58,7 +58,7 @@ public class GuarantorWritePlatformServiceJpaRepositoryIImpl implements Guaranto
             final GuarantorCommand guarantorCommand = this.fromApiJsonDeserializer.commandFromApiJson(command.json());
             guarantorCommand.validateForCreate();
 
-            final Long loanId = command.longValueOfParameterNamed(GUARANTOR_JSON_INPUT_PARAMS.LOAN_ID.getValue());
+            final Long loanId = command.getLoanId();
             Loan loan = retrieveLoanById(loanId);
             Guarantor guarantor = null;
             guarantor = Guarantor.fromJson(loan, command);
@@ -83,6 +83,7 @@ public class GuarantorWritePlatformServiceJpaRepositoryIImpl implements Guaranto
             final GuarantorCommand guarantorCommand = this.fromApiJsonDeserializer.commandFromApiJson(command.json());
             guarantorCommand.validateForUpdate();
 
+            // TODO: Vishwas need to fetch by both loan and Guarantor Id
             final Guarantor guarantorForUpdate = this.guarantorRepository.findOne(guarantorId);
             if (guarantorForUpdate == null) { throw new GuarantorNotFoundException(guarantorId); }
 
@@ -108,6 +109,7 @@ public class GuarantorWritePlatformServiceJpaRepositoryIImpl implements Guaranto
     @Override
     @Transactional
     public CommandProcessingResult removeGuarantor(final Long guarantorId) {
+        // TODO: Vishwas need to fetch by both loan and Guarantor Id
         final Guarantor guarantorForDelete = this.guarantorRepository.findOne(guarantorId);
         if (guarantorForDelete == null) { throw new GuarantorNotFoundException(guarantorId); }
 

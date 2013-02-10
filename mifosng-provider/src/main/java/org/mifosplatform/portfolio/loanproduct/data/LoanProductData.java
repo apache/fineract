@@ -44,8 +44,8 @@ public class LoanProductData {
     private final EnumOptionData interestType;
     private final EnumOptionData interestCalculationPeriodType;
     private final BigDecimal inArrearsTolerance;
-    
-    private final EnumOptionData accountingType;
+
+    private final EnumOptionData accountingRule;
 
     private final Collection<ChargeData> charges;
 
@@ -62,9 +62,8 @@ public class LoanProductData {
     private final Collection<ChargeData> chargeOptions;
 
     // accounting related template fields
-    private final List<GLAccountData> assetAccountOptions;
-    private final List<GLAccountData> incomeAccountOptions;
-    private final List<GLAccountData> expenseAccountOptions;
+    private final List<EnumOptionData> accountingRuleOptions;
+    private final Map<String, List<GLAccountData>> accountingMappingOptions;
 
     // accounting related mapping fields
     @SuppressWarnings("unused")
@@ -140,7 +139,7 @@ public class LoanProductData {
                 productData.amortizationTypeOptions, productData.interestTypeOptions, productData.interestCalculationPeriodTypeOptions,
                 productData.loanTermFrequencyTypeOptions, productData.repaymentFrequencyTypeOptions,
                 productData.interestRateFrequencyTypeOptions, productData.fundOptions, productData.transactionProcessingStrategyOptions,
-                productData.assetAccountOptions, productData.incomeAccountOptions, productData.expenseAccountOptions, accountingMappings);
+                productData.accountingMappingOptions, productData.accountingRuleOptions, accountingMappings);
     }
 
     public LoanProductData(final Long id, final String name, final String description, final CurrencyData currency,
@@ -173,7 +172,7 @@ public class LoanProductData {
         this.transactionProcessingStrategyId = transactionProcessingStrategyId;
         this.transactionProcessingStrategyName = transactionProcessingStrategyName;
         this.charges = charges;
-        this.accountingType = accountingType;
+        this.accountingRule = accountingType;
 
         this.chargeOptions = null;
         this.currencyOptions = null;
@@ -186,9 +185,8 @@ public class LoanProductData {
         this.repaymentFrequencyTypeOptions = null;
         this.interestRateFrequencyTypeOptions = null;
 
-        this.assetAccountOptions = null;
-        this.incomeAccountOptions = null;
-        this.expenseAccountOptions = null;
+        this.accountingMappingOptions = null;
+        this.accountingRuleOptions = null;
         this.accountingMappings = null;
     }
 
@@ -198,8 +196,8 @@ public class LoanProductData {
             final List<EnumOptionData> loanTermFrequencyTypeOptions, final List<EnumOptionData> repaymentFrequencyTypeOptions,
             final List<EnumOptionData> interestRateFrequencyTypeOptions, final Collection<FundData> fundOptions,
             final Collection<TransactionProcessingStrategyData> transactionProcessingStrategyOptions,
-            final List<GLAccountData> assetAccountOptions, final List<GLAccountData> incomeAccountOptions,
-            final List<GLAccountData> expenseAccountOptions, final Map<String, Object> accountingMappings) {
+            final Map<String, List<GLAccountData>> accountingMappingOptions, final List<EnumOptionData> accountingRuleOptions,
+            final Map<String, Object> accountingMappings) {
         this.id = productData.id;
         this.name = productData.name;
         this.description = productData.description;
@@ -221,7 +219,7 @@ public class LoanProductData {
         this.transactionProcessingStrategyId = productData.transactionProcessingStrategyId;
         this.transactionProcessingStrategyName = productData.transactionProcessingStrategyName;
         this.charges = nullIfEmpty(productData.charges());
-        this.accountingType = productData.accountingType;
+        this.accountingRule = productData.accountingRule;
 
         this.chargeOptions = chargeOptions;
         this.currencyOptions = currencyOptions;
@@ -239,9 +237,8 @@ public class LoanProductData {
         this.repaymentFrequencyTypeOptions = repaymentFrequencyTypeOptions;
         this.interestRateFrequencyTypeOptions = interestRateFrequencyTypeOptions;
 
-        this.assetAccountOptions = assetAccountOptions;
-        this.incomeAccountOptions = incomeAccountOptions;
-        this.expenseAccountOptions = expenseAccountOptions;
+        this.accountingMappingOptions = accountingMappingOptions;
+        this.accountingRuleOptions = accountingRuleOptions;
         this.accountingMappings = accountingMappings;
     }
 
@@ -262,11 +259,11 @@ public class LoanProductData {
     }
 
     public EnumOptionData accountingRuleType() {
-        return this.accountingType;
+        return this.accountingRule;
     }
 
     public boolean hasAccountingEnabled() {
-        return this.accountingType.getId() > 1;
+        return this.accountingRule.getId() > 1;
     }
 
     public Long getId() {

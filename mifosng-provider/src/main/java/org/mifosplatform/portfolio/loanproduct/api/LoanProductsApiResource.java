@@ -19,7 +19,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
-import org.mifosplatform.accounting.AccountingConstants.LOAN_PRODUCT_ACCOUNTING_PARAMS;
 import org.mifosplatform.accounting.api.data.GLAccountData;
 import org.mifosplatform.accounting.domain.GLAccountType;
 import org.mifosplatform.accounting.service.GLAccountReadPlatformService;
@@ -58,12 +57,7 @@ public class LoanProductsApiResource {
             "interestRateFrequencyType", "amortizationType", "interestType", "interestCalculationPeriodType", "charges", "createdOn",
             "lastModifedOn", "currencyOptions", "amortizationTypeOptions", "interestTypeOptions", "interestCalculationPeriodTypeOptions",
             "repaymentFrequencyTypeOptions", "interestRateFrequencyTypeOptions", "fundOptions", "transactionProcessingStrategyOptions",
-            "chargeOptions", "assetAccountOptions", "incomeAccountOptions", "expenseAccountOptions", "accountingType",
-            LOAN_PRODUCT_ACCOUNTING_PARAMS.FEES_RECEIVABLE.getValue(), LOAN_PRODUCT_ACCOUNTING_PARAMS.FUND_SOURCE.getValue(),
-            LOAN_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_FEES.getValue(), LOAN_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_PENALTIES.getValue(),
-            LOAN_PRODUCT_ACCOUNTING_PARAMS.INTEREST_ON_LOANS.getValue(), LOAN_PRODUCT_ACCOUNTING_PARAMS.INTEREST_RECEIVABLE.getValue(),
-            LOAN_PRODUCT_ACCOUNTING_PARAMS.LOAN_PORTFOLIO.getValue(), LOAN_PRODUCT_ACCOUNTING_PARAMS.LOSSES_WRITTEN_OFF.getValue(),
-            LOAN_PRODUCT_ACCOUNTING_PARAMS.PENALTIES_RECEIVABLE.getValue()));
+            "chargeOptions", "accountingOptions", "accountingRule","accountingRuleOptions","accountingMappings","accountingMappingOptions"));
 
     private final String resourceNameForPermissions = "LOANPRODUCT";
 
@@ -205,22 +199,29 @@ public class LoanProductsApiResource {
         final Collection<TransactionProcessingStrategyData> transactionProcessingStrategyOptions = this.dropdownReadPlatformService
                 .retreiveTransactionProcessingStrategies();
 
+        Map<String, List<GLAccountData>> accountOptions= new HashMap<String, List<GLAccountData>>();
         List<GLAccountData> assetAccountOptions = accountReadPlatformService.retrieveAllEnabledDetailGLAccounts(GLAccountType.ASSET);
         if (assetAccountOptions.isEmpty()) {
             assetAccountOptions = null;
         }
+        accountOptions.put("assetAccountOptions", assetAccountOptions);
+        
         List<GLAccountData> incomeAccountOptions = accountReadPlatformService.retrieveAllEnabledDetailGLAccounts(GLAccountType.INCOME);
         if (incomeAccountOptions.isEmpty()) {
             incomeAccountOptions = null;
         }
+        accountOptions.put("incomeAccountOptions", incomeAccountOptions);
+        
         List<GLAccountData> expenseAccountOptions = accountReadPlatformService.retrieveAllEnabledDetailGLAccounts(GLAccountType.EXPENSE);
         if (expenseAccountOptions.isEmpty()) {
             expenseAccountOptions = null;
         }
+        accountOptions.put("expenseAccountOptions", expenseAccountOptions);
+        
+        List<EnumOptionData> accountingRuleTypeOptions = dropdownReadPlatformService.retrieveAccountingRuleTypeOptions();
 
         return new LoanProductData(productData, chargeOptions, currencyOptions, amortizationTypeOptions, interestTypeOptions,
                 interestCalculationPeriodTypeOptions, loanTermFrequencyTypeOptions, repaymentFrequencyTypeOptions,
-                interestRateFrequencyTypeOptions, fundOptions, transactionProcessingStrategyOptions, assetAccountOptions,
-                incomeAccountOptions, expenseAccountOptions, accountingMappings);
+                interestRateFrequencyTypeOptions, fundOptions, transactionProcessingStrategyOptions, accountOptions, accountingRuleTypeOptions,accountingMappings);
     }
 }

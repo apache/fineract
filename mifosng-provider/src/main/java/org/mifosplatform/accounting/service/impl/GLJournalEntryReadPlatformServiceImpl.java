@@ -134,7 +134,7 @@ public class GLJournalEntryReadPlatformServiceImpl implements GLJournalEntryRead
             }
         }
 
-        sql += " order by journalEntry.entry_date,journalEntry.transaction_id";
+        sql += " order by journalEntry.entry_date desc,journalEntry.transaction_id";
 
         Object[] finalObjectArray = Arrays.copyOf(objectArray, arrayPos);
         return this.jdbcTemplate.query(sql, rm, finalObjectArray);
@@ -147,11 +147,26 @@ public class GLJournalEntryReadPlatformServiceImpl implements GLJournalEntryRead
             GLJournalEntryMapper rm = new GLJournalEntryMapper();
             String sql = "select " + rm.schema() + " and journalEntry.id = ?";
 
-            GLJournalEntryData glAccountData = this.jdbcTemplate.queryForObject(sql, rm, new Object[] { glJournalEntryId });
+            GLJournalEntryData glJournalEntryData = this.jdbcTemplate.queryForObject(sql, rm, new Object[] { glJournalEntryId });
 
-            return glAccountData;
+            return glJournalEntryData;
         } catch (EmptyResultDataAccessException e) {
             throw new GLJournalEntriesNotFoundException(glJournalEntryId);
+        }
+    }
+
+    @Override
+    public List<GLJournalEntryData> retrieveRelatedJournalEntries(String transactionId) {
+        try {
+
+            GLJournalEntryMapper rm = new GLJournalEntryMapper();
+            String sql = "select " + rm.schema() + " and journalEntry.transaction_id = ?";
+
+            List<GLJournalEntryData> journalEntryDatas = this.jdbcTemplate.query(sql, rm, new Object[] { transactionId });
+
+            return journalEntryDatas;
+        } catch (EmptyResultDataAccessException e) {
+            throw new GLJournalEntriesNotFoundException(transactionId);
         }
     }
 

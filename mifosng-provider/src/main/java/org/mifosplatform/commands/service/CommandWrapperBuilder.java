@@ -41,7 +41,7 @@ public class CommandWrapperBuilder {
         this.json = withJson;
         return this;
     }
-    
+
     public CommandWrapperBuilder updateGlobalConfiguration() {
         this.actionName = "UPDATE";
         this.entityName = "CONFIGURATION";
@@ -127,7 +127,7 @@ public class CommandWrapperBuilder {
         this.href = "/officetransactions/template";
         return this;
     }
-    
+
     public CommandWrapperBuilder deleteOfficeTransaction(final Long transactionId) {
         this.actionName = "DELETE";
         this.entityName = "OFFICETRANSACTION";
@@ -151,28 +151,31 @@ public class CommandWrapperBuilder {
         this.href = "/staff/" + staffId;
         return this;
     }
-    
-    public CommandWrapperBuilder createGuarantor() {
+
+    public CommandWrapperBuilder createGuarantor(final Long loanId) {
         this.actionName = "CREATE";
         this.entityName = "GUARANTOR";
         this.entityId = null;
-        this.href = "/guarantors/template";
+        this.loanId = loanId;
+        this.href = "/loans/" + loanId + "/guarantors/template";
         return this;
     }
 
-    public CommandWrapperBuilder updateGuarantor(final Long guarantorId) {
+    public CommandWrapperBuilder updateGuarantor(final Long loanId, final Long guarantorId) {
         this.actionName = "UPDATE";
         this.entityName = "GUARANTOR";
         this.entityId = guarantorId;
-        this.href = "/guarantors/" + guarantorId;
+        this.loanId = loanId;
+        this.href = "/loans/" + loanId + "/guarantors/" + guarantorId;
         return this;
     }
-    
-    public CommandWrapperBuilder deleteGuarantor(final Long guarantorId) {
+
+    public CommandWrapperBuilder deleteGuarantor(final Long loanId, final Long guarantorId) {
         this.actionName = "DELETE";
         this.entityName = "GUARANTOR";
         this.entityId = guarantorId;
-        this.href = "/guarantors/" + guarantorId;
+        this.loanId = loanId;
+        this.href = "/loans/" + loanId + "/guarantors/" + guarantorId;
         return this;
     }
 
@@ -549,7 +552,7 @@ public class CommandWrapperBuilder {
         this.href = "/loans/" + loanId;
         return this;
     }
-    
+
     public CommandWrapperBuilder unassignLoanOfficer(final Long loanId) {
         this.actionName = "REMOVELOANOFFICER";
         this.entityName = "LOAN";
@@ -565,7 +568,7 @@ public class CommandWrapperBuilder {
         this.href = "/loans/loanreassignment";
         return this;
     }
-    
+
     public CommandWrapperBuilder createCodeValue(final Long codeId) {
         this.actionName = "CREATE";
         this.entityName = "CODEVALUE";
@@ -573,7 +576,7 @@ public class CommandWrapperBuilder {
         this.href = "/codes/" + codeId + "/codevalues/template";
         return this;
     }
- 
+
     public CommandWrapperBuilder updateCodeValue(Long codeId, final Long codeValueId) {
         this.actionName = "UPDATE";
         this.entityName = "CODEVALUE";
@@ -582,7 +585,7 @@ public class CommandWrapperBuilder {
         this.href = "/codes/" + codeId + "/codevalues/" + codeValueId;
         return this;
     }
-    
+
     public CommandWrapperBuilder deleteCodeValue(Long codeId, final Long codeValueId) {
         this.actionName = "DELETE";
         this.entityName = "CODEVALUE";
