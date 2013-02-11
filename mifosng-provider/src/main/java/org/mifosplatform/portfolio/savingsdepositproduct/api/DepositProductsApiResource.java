@@ -16,12 +16,13 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
 import org.mifosplatform.infrastructure.core.api.ApiParameterHelper;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
+import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
+import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.mifosplatform.organisation.monetary.service.CurrencyReadPlatformService;
@@ -44,56 +45,66 @@ public class DepositProductsApiResource {
 
     private final String entityType = "DEPOSITPRODUCT";
 
-    @Autowired
-    private DepositProductReadPlatformService depositProductReadPlatformService;
+    private final PlatformSecurityContext context;
+    private final DepositProductReadPlatformService depositProductReadPlatformService;
+    private final CurrencyReadPlatformService currencyReadPlatformService;
+    private final DepositProductWritePlatformService depositProductWritePlatformService;
+    private final PortfolioApiDataConversionService apiDataConversionService;
+    private final PortfolioApiJsonSerializerService apiJsonSerializerService;
+    private final DefaultToApiJsonSerializer<DepositProductData> toApiJsonSerializer;
 
     @Autowired
-    private CurrencyReadPlatformService currencyReadPlatformService;
-
-    @Autowired
-    private DepositProductWritePlatformService depositProductWritePlatformService;
-
-    @Autowired
-    private PortfolioApiDataConversionService apiDataConversionService;
-
-    @Autowired
-    private PortfolioApiJsonSerializerService apiJsonSerializerService;
-
-    @Autowired
-    private PlatformSecurityContext context;
+    public DepositProductsApiResource(final PlatformSecurityContext context,
+            final DepositProductReadPlatformService depositProductReadPlatformService,
+            final CurrencyReadPlatformService currencyReadPlatformService,
+            final DepositProductWritePlatformService depositProductWritePlatformService,
+            final PortfolioApiDataConversionService apiDataConversionService,
+            final PortfolioApiJsonSerializerService apiJsonSerializerService,
+            final DefaultToApiJsonSerializer<DepositProductData> toApiJsonSerializer) {
+        this.context = context;
+        this.depositProductReadPlatformService = depositProductReadPlatformService;
+        this.currencyReadPlatformService = currencyReadPlatformService;
+        this.depositProductWritePlatformService = depositProductWritePlatformService;
+        this.apiDataConversionService = apiDataConversionService;
+        this.apiJsonSerializerService = apiJsonSerializerService;
+        this.toApiJsonSerializer = toApiJsonSerializer;
+    }
 
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public Response createDepositProduct(final String jsonRequestBody) {
+    public String createDepositProduct(final String jsonRequestBody) {
 
         final DepositProductCommand command = this.apiDataConversionService.convertJsonToDepositProductCommand(null, jsonRequestBody);
 
-        CommandProcessingResult entityIdentifier = this.depositProductWritePlatformService.createDepositProduct(command);
+        final CommandProcessingResult result = this.depositProductWritePlatformService.createDepositProduct(command);
 
-        return Response.ok().entity(entityIdentifier).build();
+        return this.toApiJsonSerializer.serialize(result);
     }
 
     @PUT
     @Path("{productId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public Response updateDepositProduct(@PathParam("productId") final Long productId, final String jsonRequestBody) {
+    public String updateDepositProduct(@PathParam("productId") final Long productId, final String jsonRequestBody) {
 
         final DepositProductCommand command = this.apiDataConversionService.convertJsonToDepositProductCommand(productId, jsonRequestBody);
-        CommandProcessingResult entityIdentifier = this.depositProductWritePlatformService.updateDepositProduct(command);
-        return Response.ok().entity(entityIdentifier).build();
+        final CommandProcessingResult result = this.depositProductWritePlatformService.updateDepositProduct(command);
+
+        return this.toApiJsonSerializer.serialize(result);
     }
 
     @DELETE
     @Path("{productId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public Response deleteDepositProduct(@PathParam("productId") final Long productId) {
+    public String deleteDepositProduct(@PathParam("productId") final Long productId) {
 
         this.depositProductWritePlatformService.deleteDepositProduct(productId);
 
-        return Response.ok(new CommandProcessingResult(productId)).build();
+        final CommandProcessingResult result = new CommandProcessingResultBuilder().withEntityId(productId).build();
+
+        return this.toApiJsonSerializer.serialize(result);
     }
 
     @GET

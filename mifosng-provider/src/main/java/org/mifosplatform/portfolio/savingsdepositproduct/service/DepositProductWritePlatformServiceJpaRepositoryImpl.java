@@ -1,6 +1,7 @@
 package org.mifosplatform.portfolio.savingsdepositproduct.service;
 
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
+import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
@@ -70,7 +71,9 @@ public class DepositProductWritePlatformServiceJpaRepositoryImpl implements Depo
                     command.isLockinPeriodAllowed(), command.getLockinPeriod(), lockinPeriodType);
             this.depositProductRepository.save(product);
 
-            return new CommandProcessingResult(product.getId());
+            return new CommandProcessingResultBuilder() //
+                    .withEntityId(product.getId()) //
+                    .build();
         } catch (DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(command, dve);
             return new CommandProcessingResult(Long.valueOf(-1));
@@ -101,7 +104,10 @@ public class DepositProductWritePlatformServiceJpaRepositoryImpl implements Depo
 
             product.update(command, interestCompoundingFrequency, lockinPeriodType);
             this.depositProductRepository.save(product);
-            return new CommandProcessingResult(Long.valueOf(product.getId()));
+
+            return new CommandProcessingResultBuilder() //
+                    .withEntityId(product.getId()) //
+                    .build();
         } catch (DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(command, dve);
             return new CommandProcessingResult(Long.valueOf(-1));
@@ -116,7 +122,11 @@ public class DepositProductWritePlatformServiceJpaRepositoryImpl implements Depo
         DepositProduct product = this.depositProductRepository.findOne(productId);
         if (product == null) { throw new DepositProductNotFoundException(productId); }
         product.delete();
+
         this.depositProductRepository.save(product);
-        return new CommandProcessingResult(Long.valueOf(product.getId()));
+
+        return new CommandProcessingResultBuilder() //
+                .withEntityId(product.getId()) //
+                .build();
     }
 }
