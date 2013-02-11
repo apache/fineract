@@ -153,7 +153,7 @@ public class JsonParserHelper {
                 JsonPrimitive primitive = object.get(parameterName).getAsJsonPrimitive();
                 final String stringValue = primitive.getAsString();
                 if (StringUtils.isNotBlank(stringValue)) {
-                    intValue = Integer.valueOf(stringValue);
+                    intValue = convertToIntegerSanLocale(stringValue, parameterName);
                 }
             }
         }
@@ -372,6 +372,29 @@ public class JsonParserHelper {
                     dataValidationErrors);
         }
     }
+
+    public Integer convertToIntegerSanLocale(final String numericalValueFormatted, final String parameterName) {
+
+        try {
+            Integer number = null;
+
+            if (StringUtils.isNotBlank(numericalValueFormatted)) {
+                number = Integer.valueOf(numericalValueFormatted);
+            }
+
+            return number;
+        } catch (NumberFormatException e) {
+
+            List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+            ApiParameterError error = ApiParameterError.parameterError("validation.msg.invalid.integer", "The parameter "
+                    + parameterName + " has value: " + numericalValueFormatted + " which is invalid integer.", parameterName, numericalValueFormatted);
+            dataValidationErrors.add(error);
+
+            throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
+                    dataValidationErrors);
+        }
+    }
+
 
     public BigDecimal convertFrom(final String numericalValueFormatted, final String parameterName, final Locale clientApplicationLocale) {
 
