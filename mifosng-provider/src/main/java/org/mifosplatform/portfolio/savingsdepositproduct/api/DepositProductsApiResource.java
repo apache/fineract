@@ -107,7 +107,7 @@ public class DepositProductsApiResource {
                 "lastModifedOn", "currencyCode", "digitsAfterDecimal", "minimumBalance", "maximumBalance", "tenureInMonths",
                 "maturityDefaultInterestRate", "maturityMinInterestRate", "maturityMaxInterestRate", "interestCompoundedEvery",
                 "interestCompoundedEveryPeriodType", "renewalAllowed", "preClosureAllowed", "preClosureInterestRate",
-                "interestCompoundingAllowed", "isLockinPeriodAllowed", "lockinPeriod", "lockinPeriodType"));
+                "interestCompoundingAllowed", "isLockinPeriodAllowed", "lockinPeriod", "lockinPeriodType", "currency"));
 
         Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
         if (responseParameters.isEmpty()) {
@@ -131,7 +131,7 @@ public class DepositProductsApiResource {
                 "lastModifedOn", "currencyCode", "digitsAfterDecimal", "minimumBalance", "maximumBalance", "tenureInMonths",
                 "maturityDefaultInterestRate", "maturityMinInterestRate", "maturityMaxInterestRate", "interestCompoundedEvery",
                 "interestCompoundedEveryPeriodType", "renewalAllowed", "preClosureAllowed", "preClosureInterestRate",
-                "interestCompoundingAllowed", "isLockinPeriodAllowed", "lockinPeriod", "lockinPeriodType"));
+                "interestCompoundingAllowed", "isLockinPeriodAllowed", "lockinPeriod", "lockinPeriodType", "currency"));
 
         Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
         if (responseParameters.isEmpty()) {
@@ -162,7 +162,7 @@ public class DepositProductsApiResource {
                 "currencyCode", "digitsAfterDecimal", "minimumBalance", "maximumBalance", "tenureInMonths", "maturityDefaultInterestRate",
                 "maturityMinInterestRate", "maturityMaxInterestRate", "interestCompoundedEvery", "interestCompoundedEveryPeriodType",
                 "renewalAllowed", "preClosureAllowed", "preClosureInterestRate", "isLockinPeriodAllowed", "lockinPeriod",
-                "lockinPeriodType"));
+                "lockinPeriodType", "currency"));
 
         Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
         if (responseParameters.isEmpty()) {

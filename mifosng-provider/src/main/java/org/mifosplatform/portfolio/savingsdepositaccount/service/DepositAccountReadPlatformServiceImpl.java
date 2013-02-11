@@ -110,7 +110,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
                     selectedProduct.getMaturityDefaultInterestRate(), selectedProduct.getTenureInMonths(),
                     selectedProduct.getInterestCompoundedEvery(), selectedProduct.getInterestCompoundedEveryPeriodType(),
                     selectedProduct.isRenewalAllowed(), selectedProduct.isPreClosureAllowed(), selectedProduct.getPreClosureInterestRate(),
-                    selectedProduct.isInterestCompoundingAllowed());
+                    selectedProduct.isInterestCompoundingAllowed(),selectedProduct.getLockinPeriod(),selectedProduct.getLockinPeriodType(),selectedProduct.isLockinPeriodAllowed());
         } else {
             accountData = DepositAccountData.createFrom(clientAccount.id(), clientAccount.displayName());
         }

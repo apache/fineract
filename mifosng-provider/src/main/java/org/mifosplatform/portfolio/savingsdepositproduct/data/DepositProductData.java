@@ -28,6 +28,7 @@ public class DepositProductData {
     private final BigDecimal maturityMaxInterestRate;
     private final Integer interestCompoundedEvery;
     private final EnumOptionData interestCompoundedEveryPeriodType;
+    private final CurrencyData currency;
 
     private final boolean renewalAllowed;
     private final boolean preClosureAllowed;
@@ -51,7 +52,7 @@ public class DepositProductData {
             final BigDecimal maturityMaxInterestRate, final Integer interestCompoundedEvery,
             final EnumOptionData interestCompoundedEveryPeriodType, final boolean renewalAllowed, final boolean preClosureAllowed,
             final BigDecimal preClosureInterestRate, final boolean interestCompoundingAllowed, final boolean isLockinPeriodAllowed,
-            final Integer lockinPeriod, final EnumOptionData lockinPeriodType) {
+            final Integer lockinPeriod, final EnumOptionData lockinPeriodType,final CurrencyData currencyData) {
 
         this.createdOn = createdOn;
         this.lastModifedOn = lastModifedOn;
@@ -78,7 +79,7 @@ public class DepositProductData {
         this.lockinPeriod = lockinPeriod;
         this.lockinPeriodType = lockinPeriodType;
         this.isLockinPeriodAllowed = isLockinPeriodAllowed;
-
+        this.currency = currencyData;
         this.currencyOptions = new ArrayList<CurrencyData>();
         this.interestCompoundedEveryPeriodTypeOptions = new ArrayList<EnumOptionData>();
     }
@@ -93,25 +94,27 @@ public class DepositProductData {
         this.name = null;
         this.description = null;
         this.currencyCode = null;
-        this.digitsAfterDecimal = Integer.valueOf(0);
-        this.minimumBalance = BigDecimal.ZERO;
-        this.maximumBalance = BigDecimal.ZERO;
+        this.digitsAfterDecimal = null;
+        this.minimumBalance = null;
+        this.maximumBalance = null;
 
-        this.tenureInMonths = Integer.valueOf(0);
-        this.maturityDefaultInterestRate = BigDecimal.ZERO;
-        this.maturityMinInterestRate = BigDecimal.ZERO;
-        this.maturityMaxInterestRate = BigDecimal.ZERO;
-        this.interestCompoundedEvery = Integer.valueOf(1);
+        this.tenureInMonths = null;
+        this.maturityDefaultInterestRate = null;
+        this.maturityMinInterestRate = null;
+        this.maturityMaxInterestRate = null;
+        this.interestCompoundedEvery = null;
         this.interestCompoundedEveryPeriodType = defaultInterestCompoundedEveryPeriodType;
 
-        this.renewalAllowed = true;
-        this.preClosureAllowed = true;
-        this.preClosureInterestRate = BigDecimal.ZERO;
-        this.interestCompoundingAllowed = true;
+        this.renewalAllowed = false;
+        this.preClosureAllowed = false;
+        this.preClosureInterestRate = null;
+        this.interestCompoundingAllowed = false;
 
-        this.isLockinPeriodAllowed = true;
-        this.lockinPeriod = Integer.valueOf(0);
+        this.isLockinPeriodAllowed = false;
+        this.lockinPeriod = null;
         this.lockinPeriodType = defaultInterestCompoundedEveryPeriodType;
+        
+        this.currency = null;
 
         this.currencyOptions = currencyOptions;
         this.interestCompoundedEveryPeriodTypeOptions = interestCompoundedEveryPeriodTypeOptions;
@@ -145,9 +148,15 @@ public class DepositProductData {
         this.lockinPeriod = product.getLockinPeriod();
         this.lockinPeriodType = product.getLockinPeriodType();
         this.isLockinPeriodAllowed = product.isLockinPeriodAllowed();
-
+        
         this.currencyOptions = currencyOptions;
         this.interestCompoundedEveryPeriodTypeOptions = interestCompoundedEveryPeriodTypeOptions;
+        
+        if (this.currencyOptions != null && this.currencyOptions.size() == 1) {
+            this.currency = new ArrayList<CurrencyData>(this.currencyOptions).get(0);
+        } else {
+            this.currency = product.currency;
+        }
     }
 
     public Long getId() {

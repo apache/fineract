@@ -45,10 +45,8 @@ public class SavingProductCommandValidator {
         baseDataValidator.reset().parameter("interestCalculationMethod").value(command.getInterestCalculationMethod()).ignoreIfNull();
         baseDataValidator.reset().parameter("minimumBalanceForWithdrawal").value(command.getMinimumBalanceForWithdrawal()).ignoreIfNull()
                 .zeroOrPositiveAmount();
-        baseDataValidator.reset().parameter("isPartialDepositAllowed").value(command.isPartialDepositAllowed())
-                .trueOrFalseRequired(command.isPartialDepositAllowedChanged()).ignoreIfNull();
-        baseDataValidator.reset().parameter("isLockinPeriodAllowed").value(command.isLockinPeriodAllowed())
-                .trueOrFalseRequired(command.isLockinPeriodAllowedChanged()).ignoreIfNull();
+        baseDataValidator.reset().parameter("isPartialDepositAllowed").value(command.isPartialDepositAllowed()).ignoreIfNull();
+        baseDataValidator.reset().parameter("isLockinPeriodAllowed").value(command.isLockinPeriodAllowed()).ignoreIfNull();
         baseDataValidator.reset().parameter("lockinPeriod").value(command.getLockinPeriod()).ignoreIfNull();
         baseDataValidator.reset().parameter("lockinPeriodType").value(command.getLockinPeriodType()).ignoreIfNull();
 

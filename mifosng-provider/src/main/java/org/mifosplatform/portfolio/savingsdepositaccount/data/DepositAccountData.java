@@ -110,7 +110,7 @@ public class DepositAccountData {
         this.preClosureInterestRate = null;
 
         this.interestCompoundedEveryPeriodTypeOptions = new ArrayList<EnumOptionData>();
-        this.productOptions = new ArrayList<DepositProductLookup>();
+        this.productOptions = null;
 
         this.withdrawnonDate = null;
         this.closedonDate = null;
@@ -121,17 +121,17 @@ public class DepositAccountData {
 
         this.interestPaid = null;
         this.isInterestWithdrawable = false;
-        this.interestCompoundingAllowed = true;
-        this.availableInterestForWithdrawal = new BigDecimal(0);
-        this.availableWithdrawalAmount = new BigDecimal(0);
-        this.todaysDate = new LocalDate();
+        this.interestCompoundingAllowed = false;
+        this.availableInterestForWithdrawal = null;
+        this.availableWithdrawalAmount = null;
+        this.todaysDate = null;
 
-        this.isLockinPeriodAllowed = true;
+        this.isLockinPeriodAllowed = false;
         this.lockinPeriod = null;
         this.lockinPeriodType = null;
 
-        this.availableInterest = BigDecimal.ZERO;
-        this.interestPostedAmount = BigDecimal.ZERO;
+        this.availableInterest = null;
+        this.interestPostedAmount = null;
         this.lastInterestPostedDate = null;
         this.nextInterestPostedDate = null;
         
@@ -169,7 +169,7 @@ public class DepositAccountData {
         this.preClosureInterestRate = account.getPreClosureInterestRate();
 
         this.interestCompoundedEveryPeriodTypeOptions = interestCompoundedEveryPeriodTypeOptions;
-        this.productOptions = new ArrayList<DepositProductLookup>(productOptions);
+        this.productOptions = defaultIfEmpty(productOptions);
 
         this.withdrawnonDate = account.getWithdrawnonDate();
         this.rejectedonDate = account.getRejectedonDate();
@@ -326,7 +326,8 @@ public class DepositAccountData {
     public DepositAccountData(final Long clientId, final String clientName, final Long productId, final String productName,
             final CurrencyData currency, final BigDecimal deposit, final BigDecimal interestRate, final Integer tenureInMonths,
             final Integer interestCompoundedEvery, final EnumOptionData interestCompoundedEveryPeriodType, final boolean renewalAllowed,
-            final boolean preClosureAllowed, final BigDecimal preClosureInterestRate, final boolean interestCompoundingAllowed) {
+            final boolean preClosureAllowed, final BigDecimal preClosureInterestRate, final boolean interestCompoundingAllowed, Integer lockinPeriod,
+			EnumOptionData lockinPeriodType, boolean lockinPeriodAllowed) {
         this.id = null;
         this.externalId = null;
         this.status = null;
@@ -365,12 +366,11 @@ public class DepositAccountData {
         this.interestCompoundingAllowed = interestCompoundingAllowed;
         this.availableInterestForWithdrawal = BigDecimal.ZERO;
         this.availableWithdrawalAmount = BigDecimal.ZERO;
-        this.todaysDate = new LocalDate();
+        this.todaysDate = null;
 
-        // need to update in constructor's call method and update it
-        this.lockinPeriod = Integer.valueOf(0);
-        this.isLockinPeriodAllowed = true;
-        this.lockinPeriodType = interestCompoundedEveryPeriodType;
+        this.lockinPeriod = lockinPeriod;
+        this.isLockinPeriodAllowed = lockinPeriodAllowed;
+        this.lockinPeriodType = lockinPeriodType;
 
         this.availableInterest = BigDecimal.ZERO;
         this.interestPostedAmount = BigDecimal.ZERO;
@@ -593,14 +593,14 @@ public class DepositAccountData {
                 return BigDecimal.ZERO;
             }
         } else
-            return BigDecimal.ZERO;
+            return null;
 
         return availableInterestForWithdrawal;
     }
 
     private BigDecimal determineAvalableWithdrawalAmount(final DepositAccountData account) {
 
-        BigDecimal avalablePreclosureWithdrawalAmount = BigDecimal.ZERO;
+        BigDecimal avalablePreclosureWithdrawalAmount = null;
         if (this.status != null) {
             if (account.getStatus().getId() == 300) {
                 // if(new LocalDate().isBefore(account.getMaturedOn()) || new
@@ -632,6 +632,14 @@ public class DepositAccountData {
         BigDecimal interestRateForOneDay = interestRateAsFraction.divide(BigDecimal.valueOf(daysInYear.doubleValue()), mc);
         return BigDecimal.valueOf(depsoitAmount.doubleValue() * days.doubleValue() * interestRateForOneDay.doubleValue());
 
+    }
+    
+    private List<DepositProductLookup> defaultIfEmpty(final Collection<DepositProductLookup> collection) {
+        List<DepositProductLookup> returnCollection = null;
+        if (collection != null && !collection.isEmpty()) {
+            returnCollection = new ArrayList<DepositProductLookup>(collection);
+        }
+        return returnCollection;
     }
 
 }

@@ -321,7 +321,7 @@ public class DepositProduct extends AbstractAuditableCustom<AppUser, Long> {
 		if (!inRange) {
 			final String actualValue = depositAmount.toPlainString();
 			final String minValue = (this.minimumBalance == null) ? "" : this.minimumBalance.toPlainString();
-			final String maxValue = (this.minimumBalance == null) ? "" : this.minimumBalance.toPlainString();
+			final String maxValue = (this.maximumBalance == null) ? "" : this.maximumBalance.toPlainString();
 			throw new DepositProductValueOutsideRangeException(actualValue, minValue, maxValue, "deposit.account.deposit.amount");
 		}
 	}

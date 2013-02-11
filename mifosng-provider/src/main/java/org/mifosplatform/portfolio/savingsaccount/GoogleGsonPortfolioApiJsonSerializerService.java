@@ -35,7 +35,7 @@ public class GoogleGsonPortfolioApiJsonSerializerService implements PortfolioApi
             "currencyCode", "digitsAfterDecimal", "minimumBalance", "maximumBalance", "tenureInMonths", "maturityDefaultInterestRate",
             "maturityMinInterestRate", "maturityMaxInterestRate", "interestCompoundedEvery", "interestCompoundedEveryPeriodType",
             "renewalAllowed", "preClosureAllowed", "preClosureInterestRate", "interestCompoundingAllowed", "isLockinPeriodAllowed",
-            "lockinPeriod", "lockinPeriodType"));
+            "lockinPeriod", "lockinPeriodType", "currency"));
 
     private static final Set<String> SAVINGS_DEPOSIT_ACCOUNT_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("productOptions",
             "interestCompoundedEveryPeriodTypeOptions", "id", "externalId", "clientId", "clientName", "productId", "productName", "status",

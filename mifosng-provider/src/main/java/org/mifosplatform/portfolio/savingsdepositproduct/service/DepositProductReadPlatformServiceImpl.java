@@ -90,6 +90,10 @@ public class DepositProductReadPlatformServiceImpl implements DepositProductRead
 
             String currencyCode = rs.getString("currencyCode");
             Integer currencyDigits = JdbcSupport.getInteger(rs, "currencyDigits");
+            String currencyName = rs.getString("currencyName");
+            String currencyNameCode = rs.getString("currencyNameCode");
+            String currencyDisplaySymbol = rs.getString("currencyDisplaySymbol");
+            CurrencyData currencyData = new CurrencyData(currencyCode, currencyName, currencyDigits, currencyDisplaySymbol, currencyNameCode);
 
             DateTime createdOn = JdbcSupport.getDateTime(rs, "createdon");
             DateTime lastModifedOn = JdbcSupport.getDateTime(rs, "modifiedon");
@@ -121,7 +125,7 @@ public class DepositProductReadPlatformServiceImpl implements DepositProductRead
             return new DepositProductData(createdOn, lastModifedOn, id, exernalId, name, description, currencyCode, currencyDigits,
                     minimumBalance, maximumBalance, tenureMonths, maturityDefaultInterestRate, maturityMinInterestRate,
                     maturityMaxInterestRate, interestCompoundedEvery, interestCompoundedEveryPeriodType, canRenew, canPreClose,
-                    preClosureInterestRate, interestCompoundingAllowed, isLockinPeriodAllowed, lockinPeriod, lockinPeriodType);
+                    preClosureInterestRate, interestCompoundingAllowed, isLockinPeriodAllowed, lockinPeriod, lockinPeriodType, currencyData);
         }
 
     }
