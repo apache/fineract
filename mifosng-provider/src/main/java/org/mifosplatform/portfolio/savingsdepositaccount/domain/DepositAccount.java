@@ -8,7 +8,9 @@ package org.mifosplatform.portfolio.savingsdepositaccount.domain;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -30,12 +32,12 @@ import org.hibernate.annotations.LazyCollectionOption;
 import org.joda.time.Days;
 import org.joda.time.LocalDate;
 import org.joda.time.Months;
+import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.domain.AbstractAuditableCustom;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.organisation.monetary.domain.Money;
 import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.loanproduct.domain.PeriodFrequencyType;
-import org.mifosplatform.portfolio.savingsdepositaccount.command.DepositStateTransitionApprovalCommand;
 import org.mifosplatform.portfolio.savingsdepositaccount.exception.InvalidDepositStateTransitionException;
 import org.mifosplatform.portfolio.savingsdepositproduct.domain.DepositProduct;
 import org.mifosplatform.useradministration.domain.AppUser;
@@ -276,31 +278,56 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long> {
         this.externalId = this.getId() + "_" + this.externalId;
     }
 
-    public void approve(final LocalDate actualCommencementDate, final DepositLifecycleStateMachine depositLifecycleStateMachine,
-            final DepositStateTransitionApprovalCommand command, final FixedTermDepositInterestCalculator calculator) {
+    public Map<String, Object> approve(final LocalDate actualCommencementDate, final DepositLifecycleStateMachine depositLifecycleStateMachine,
+            final JsonCommand command, final FixedTermDepositInterestCalculator calculator) {
+    	
+    	final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(20);
+    	final String localeAsInput = command.locale();
 
         DepositAccountStatus statusEnum = depositLifecycleStateMachine.transition(DepositAccountEvent.DEPOSIT_APPROVED,
                 DepositAccountStatus.fromInt(this.depositStatus));
         this.depositStatus = statusEnum.getValue();
 
-        if (command.getTenureInMonths() != null) {
-            this.tenureInMonths = command.getTenureInMonths();
+        final String tenureInMonthsParamName = "tenureInMonths";
+        if (command.isChangeInIntegerParameterNamed(tenureInMonthsParamName, this.tenureInMonths)) {
+            final Integer newValue = command.integerValueOfParameterNamed(tenureInMonthsParamName);
+            actualChanges.put(tenureInMonthsParamName, newValue);
+            actualChanges.put("locale", localeAsInput);
+            this.tenureInMonths = newValue;
         }
-
-        if (command.getMaturityInterestRate() != null) {
-            this.interestRate = command.getMaturityInterestRate();
+        
+        final String maturityInterestRateParamName = "maturityInterestRate";
+        if (command.isChangeInBigDecimalParameterNamed(maturityInterestRateParamName, this.interestRate)) {
+            final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(maturityInterestRateParamName);
+            actualChanges.put(maturityInterestRateParamName, newValue);
+            actualChanges.put("locale", localeAsInput);
+            this.interestRate = newValue;
         }
         this.product.validateInterestRateInRange(this.interestRate);
 
-        if (command.getDepositAmount() != null) {
-            this.depositAmount = command.getDepositAmount();
+        final String depositParamName = "deposit";
+        if (command.isChangeInBigDecimalParameterNamed(depositParamName, this.depositAmount)) {
+            final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(depositParamName);
+            actualChanges.put(depositParamName, newValue);
+            actualChanges.put("locale", localeAsInput);
+            this.depositAmount = newValue;
         }
         this.product.validateDepositInRange(this.depositAmount);
+        
+        final String interestCompoundedEveryParamName = "interestCompoundedEvery";
+        if (command.isChangeInIntegerParameterNamed(interestCompoundedEveryParamName, this.interestCompoundedEvery)) {
+            final Integer newValue = command.integerValueOfParameterNamed(interestCompoundedEveryParamName);
+            actualChanges.put(interestCompoundedEveryParamName, newValue);
+            actualChanges.put("locale", localeAsInput);
+            this.interestCompoundedEvery = newValue;
+        }
 
-        this.interestCompoundedEvery = command.getInterestCompoundedEvery();
-
-        if (command.getInterestCompoundedEveryPeriodType() != null) {
-            this.interestCompoundedFrequencyType = PeriodFrequencyType.fromInt(command.getInterestCompoundedEveryPeriodType()).getValue();
+        final String interestCompoundedEveryPeriodTypeParamName = "interestCompoundedEveryPeriodType";
+        if (command.isChangeInIntegerParameterNamed(interestCompoundedEveryPeriodTypeParamName, this.interestCompoundedFrequencyType)) {
+            final Integer newValue = command.integerValueOfParameterNamed(interestCompoundedEveryPeriodTypeParamName);
+            actualChanges.put(interestCompoundedEveryPeriodTypeParamName, newValue);
+            actualChanges.put("locale", localeAsInput);
+            this.interestCompoundedFrequencyType = PeriodFrequencyType.fromInt(newValue).getValue();
         }
 
         this.actualCommencementDate = actualCommencementDate.toDate();
@@ -341,6 +368,7 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long> {
             throw new InvalidDepositStateTransitionException("approval", "cannot.be.a.future.date", errorMessage,
                     getActualCommencementDate());
         }
+        return actualChanges; 
     }
 
     public LocalDate getActualCommencementDate() {

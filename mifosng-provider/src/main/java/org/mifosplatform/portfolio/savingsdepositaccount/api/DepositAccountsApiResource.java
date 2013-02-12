@@ -28,21 +28,19 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.commons.lang.StringUtils;
+import org.mifosplatform.commands.domain.CommandWrapper;
+import org.mifosplatform.commands.service.CommandWrapperBuilder;
+import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.mifosplatform.infrastructure.core.api.ApiParameterHelper;
+import org.mifosplatform.infrastructure.core.api.ApiRequestParameterHelper;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.exception.UnrecognizedQueryParamException;
+import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
+import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
-import org.mifosplatform.portfolio.loanaccount.command.UndoStateTransitionCommand;
 import org.mifosplatform.portfolio.loanproduct.domain.PeriodFrequencyType;
-import org.mifosplatform.portfolio.savingsaccount.PortfolioApiDataConversionService;
-import org.mifosplatform.portfolio.savingsaccount.PortfolioApiJsonSerializerService;
 import org.mifosplatform.portfolio.savingsaccountproduct.service.SavingsDepositEnumerations;
-import org.mifosplatform.portfolio.savingsdepositaccount.command.DepositAccountCommand;
-import org.mifosplatform.portfolio.savingsdepositaccount.command.DepositAccountWithdrawInterestCommand;
-import org.mifosplatform.portfolio.savingsdepositaccount.command.DepositAccountWithdrawalCommand;
-import org.mifosplatform.portfolio.savingsdepositaccount.command.DepositStateTransitionApprovalCommand;
-import org.mifosplatform.portfolio.savingsdepositaccount.command.DepositStateTransitionCommand;
 import org.mifosplatform.portfolio.savingsdepositaccount.data.DepositAccountData;
 import org.mifosplatform.portfolio.savingsdepositaccount.data.DepositAccountsForLookup;
 import org.mifosplatform.portfolio.savingsdepositaccount.data.DepositPermissionData;
@@ -59,57 +57,72 @@ import org.springframework.stereotype.Component;
 @Component
 @Scope("singleton")
 public class DepositAccountsApiResource {
-
-    @Autowired
-    private DepositAccountReadPlatformService depositAccountReadPlatformService;
-
-    @Autowired
-    private DepositProductReadPlatformService depositProductReadPlatformService;
-
-    @Autowired
-    private DepositAccountWritePlatformService depositAccountWritePlatformService;
-
-    @Autowired
-    private PortfolioApiDataConversionService apiDataConversionService;
-
-    @Autowired
-    private PortfolioApiJsonSerializerService apiJsonSerializerService;
-
-    private final String entityType = "DEPOSITACCOUNT";
-    @Autowired
-    private PlatformSecurityContext context;
-
-    private static final Set<String> typicalResponseParameters = new HashSet<String>(Arrays.asList("id", "externalId", "clientId",
-            "clientName", "productId", "productName", "status", "currency", "deposit", "maturityInterestRate", "tenureInMonths",
-            "interestCompoundedEvery", "interestCompoundingAllowed", "interestCompoundedEveryPeriodType", "renewalAllowed",
-            "preClosureAllowed", "preClosureInterestRate", "withdrawnonDate", "rejectedonDate", "closedonDate", "transactions",
-            "interestPaid", "isInterestWithdrawable", "availableInterestForWithdrawal", "availableWithdrawalAmount", "todaysDate",
+	
+	private static final Set<String> SAVINGS_DEPOSIT_ACCOUNT_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("productOptions",
+            "interestCompoundedEveryPeriodTypeOptions", "id", "externalId", "clientId", "clientName", "productId", "productName", "status",
+            "currency", "deposit", "maturityInterestRate", "tenureInMonths", "interestCompoundedEvery",
+            "interestCompoundedEveryPeriodType", "renewalAllowed", "preClosureAllowed", "preClosureInterestRate", "withdrawnonDate",
+            "rejectedonDate", "closedonDate", "transactions", "permissions", "isInterestWithdrawable", "interestPaid",
+            "interestCompoundingAllowed", "availableInterestForWithdrawal", "availableWithdrawalAmount", "todaysDate",
             "isLockinPeriodAllowed", "lockinPeriod", "lockinPeriodType", "printFDdetailsLocation", "availableInterest",
             "interestPostedAmount", "lastInterestPostedDate", "nextInterestPostedDate", "fatherName", "address", "imageKey"));
+
+    private final DepositAccountReadPlatformService depositAccountReadPlatformService;
+
+    private final DepositProductReadPlatformService depositProductReadPlatformService;
+
+    private final DepositAccountWritePlatformService depositAccountWritePlatformService;
+
+    private final String entityType = "DEPOSITACCOUNT";
+    
+    private final PlatformSecurityContext context;
+    
+    private final DefaultToApiJsonSerializer<DepositAccountData> toApiJsonSerializer;
+    
+    private final ApiRequestParameterHelper apiRequestParameterHelper;
+    
+    private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
+
+    @Autowired
+    public DepositAccountsApiResource(final DepositAccountReadPlatformService depositAccountReadPlatformService,
+    		final DepositProductReadPlatformService depositProductReadPlatformService,
+    		final DepositAccountWritePlatformService depositAccountWritePlatformService,
+    		final PlatformSecurityContext context, 
+    		final DefaultToApiJsonSerializer<DepositAccountData> toApiJsonSerializer,
+    		final ApiRequestParameterHelper apiRequestParameterHelper,
+    		final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService ) {
+    	this.depositAccountReadPlatformService = depositAccountReadPlatformService;
+    	this.depositProductReadPlatformService = depositProductReadPlatformService;
+    	this.depositAccountWritePlatformService = depositAccountWritePlatformService;
+    	this.context = context;
+    	this.toApiJsonSerializer = toApiJsonSerializer;
+    	this.apiRequestParameterHelper = apiRequestParameterHelper;
+    	this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
+	}
 
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public Response createDepositAccount(final String jsonRequestBody) {
+    public String createDepositAccount(final String apiRequestBodyAsJson) {
 
-        final DepositAccountCommand command = this.apiDataConversionService.convertJsonToDepositAccountCommand(null, jsonRequestBody);
+    	final CommandWrapper commandRequest = new CommandWrapperBuilder().createDepositAccount().withJson(apiRequestBodyAsJson).build();
+    	
+    	final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
-        CommandProcessingResult entityIdentifier = this.depositAccountWritePlatformService.createDepositAccount(command);
-
-        return Response.ok().entity(entityIdentifier).build();
+        return this.toApiJsonSerializer.serialize(result);
     }
 
     @PUT
     @Path("{accountId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public Response updateDepositAccount(@PathParam("accountId") final Long accountId, final String jsonRequestBody) {
+    public String updateDepositAccount(@PathParam("accountId") final Long accountId, final String apiRequestBodyAsJson) {
 
-        final DepositAccountCommand command = this.apiDataConversionService.convertJsonToDepositAccountCommand(accountId, jsonRequestBody);
+    	final CommandWrapper commandRequest = new CommandWrapperBuilder().updateDepositAccount(accountId).withJson(apiRequestBodyAsJson).build();
+    	
+    	final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
-        CommandProcessingResult entityIdentifier = this.depositAccountWritePlatformService.updateDepositAccount(command);
-
-        return Response.ok().entity(entityIdentifier).build();
+        return this.toApiJsonSerializer.serialize(result);
     }
 
     @GET
@@ -119,15 +132,11 @@ public class DepositAccountsApiResource {
 
         context.authenticatedUser().validateHasReadPermission(entityType);
 
-        Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
-        if (responseParameters.isEmpty()) {
-            responseParameters.addAll(typicalResponseParameters);
-        }
-        boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
-
         Collection<DepositAccountData> accounts = this.depositAccountReadPlatformService.retrieveAllDepositAccounts();
 
-        return this.apiJsonSerializerService.serializeDepositAccountDataToJson(prettyPrint, responseParameters, accounts);
+        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        
+        return this.toApiJsonSerializer.serialize(settings, accounts, SAVINGS_DEPOSIT_ACCOUNT_DATA_PARAMETERS);
     }
 
     @GET
@@ -137,35 +146,26 @@ public class DepositAccountsApiResource {
     public String retrieveDepositAccount(@PathParam("accountId") final Long accountId, @Context final UriInfo uriInfo) {
 
         context.authenticatedUser().validateHasReadPermission(entityType);
-
-        Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
-
+        
         DepositPermissionData permissions = null;
 
-        if (responseParameters.isEmpty()) {
-            responseParameters.addAll(typicalResponseParameters);
-        }
-        boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
-
         DepositAccountData account = this.depositAccountReadPlatformService.retrieveDepositAccount(accountId);
+        
+        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 
-        boolean template = ApiParameterHelper.template(uriInfo.getQueryParameters());
-        if (template) {
-            account = handleTemplateRelatedData(responseParameters, account);
+        if (settings.isTemplate()) {
+            account = handleTemplateRelatedData(account);
         }
 
         Set<String> associationParameters = ApiParameterHelper.extractAssociationsForResponseIfProvided(uriInfo.getQueryParameters());
         if (!associationParameters.isEmpty()) {
             if (associationParameters.contains("all")) {
-                responseParameters.addAll(Arrays.asList("permissions"));
-            } else {
-                responseParameters.addAll(associationParameters);
+            	 permissions = this.depositAccountReadPlatformService.retrieveDepositAccountsPermissions(account);
+                 account = new DepositAccountData(account, permissions, account.getTransactions());
             }
-            permissions = this.depositAccountReadPlatformService.retrieveDepositAccountsPermissions(account);
-            account = new DepositAccountData(account, permissions, account.getTransactions());
         }
 
-        return this.apiJsonSerializerService.serializeDepositAccountDataToJson(prettyPrint, responseParameters, account);
+        return this.toApiJsonSerializer.serialize(settings, account, SAVINGS_DEPOSIT_ACCOUNT_DATA_PARAMETERS);
     }
 
     @GET
@@ -177,33 +177,29 @@ public class DepositAccountsApiResource {
 
         context.authenticatedUser().validateHasReadPermission(entityType);
 
-        Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
-        if (responseParameters.isEmpty()) {
-            responseParameters.addAll(typicalResponseParameters);
-        }
-        boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
-
         DepositAccountData account = this.depositAccountReadPlatformService.retrieveNewDepositAccountDetails(clientId, productId);
 
-        account = handleTemplateRelatedData(responseParameters, account);
+        account = handleTemplateRelatedData(account);
 
-        return this.apiJsonSerializerService.serializeDepositAccountDataToJson(prettyPrint, responseParameters, account);
+        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        
+        return this.toApiJsonSerializer.serialize(settings, account, SAVINGS_DEPOSIT_ACCOUNT_DATA_PARAMETERS);
     }
 
     @DELETE
     @Path("{accountId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public Response deleteProduct(@PathParam("accountId") final Long accountId) {
+    public String deleteProduct(@PathParam("accountId") final Long accountId) {
 
-        this.depositAccountWritePlatformService.deleteDepositAccount(accountId);
+    	final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteDepositAccount(accountId).build();
+    	
+    	final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
-        return Response.ok(new CommandProcessingResult(accountId)).build();
+        return this.toApiJsonSerializer.serialize(result);
     }
 
-    private DepositAccountData handleTemplateRelatedData(final Set<String> responseParameters, final DepositAccountData account) {
-
-        responseParameters.addAll(Arrays.asList("interestCompoundedEveryPeriodTypeOptions", "productOptions"));
+    private DepositAccountData handleTemplateRelatedData(final DepositAccountData account) {
 
         Collection<DepositProductLookup> productOptions = depositProductReadPlatformService.retrieveAllDepositProductsForLookup();
 
@@ -217,52 +213,36 @@ public class DepositAccountsApiResource {
     @Path("{accountId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public Response SubmitDepositApplication(@PathParam("accountId") final Long accountId,
-            @QueryParam("command") final String commandParam, final String jsonRequestBody) {
-
-        Response response = null;
+    public String SubmitDepositApplication(@PathParam("accountId") final Long accountId,
+            @QueryParam("command") final String commandParam, final String apiRequestBodyAsJson) {
+    	
+    	CommandWrapperBuilder builder = new CommandWrapperBuilder().withJson(apiRequestBodyAsJson);
+    	CommandProcessingResult result = null;
 
         if (is(commandParam, "approve")) {
-            DepositStateTransitionApprovalCommand command = apiDataConversionService.convertJsonToDepositStateTransitionApprovalCommand(
-                    accountId, jsonRequestBody);
-            CommandProcessingResult identifier = this.depositAccountWritePlatformService.approveDepositApplication(command);
-            response = Response.ok().entity(identifier).build();
+        	final CommandWrapper commandRequest = builder.approveDepositApplication(accountId).build();
+        	result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, "withdrawal")) {
-            DepositAccountWithdrawalCommand command = apiDataConversionService.convertJsonToDepositWithdrawalCommand(accountId,
-                    jsonRequestBody);
-            CommandProcessingResult identifier = this.depositAccountWritePlatformService.withdrawDepositAccountMoney(command);
-            response = Response.ok().entity(identifier).build();
+        	final CommandWrapper commandRequest = builder.withdrawDepositAmount(accountId).build();
+        	result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, "interestwithdraw")) {
-            DepositAccountWithdrawInterestCommand command = apiDataConversionService.convertJsonToDepositAccountWithdrawInterestCommand(
-                    accountId, jsonRequestBody);
-            CommandProcessingResult identifier = this.depositAccountWritePlatformService.withdrawDepositAccountInterestMoney(command);
-            response = Response.ok().entity(identifier).build();
+        	final CommandWrapper commandRequest = builder.withdrawInterestDepositAmount(accountId).build();
+        	result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, "renew")) {
-            DepositAccountCommand command = apiDataConversionService.convertJsonToDepositAccountCommand(accountId, jsonRequestBody);
-            CommandProcessingResult entityIdentifier = this.depositAccountWritePlatformService.renewDepositAccount(command);
-            return Response.ok().entity(entityIdentifier).build();
-        } else {
-            DepositStateTransitionCommand command = apiDataConversionService.convertJsonToDepositStateTransitionCommand(accountId,
-                    jsonRequestBody);
-            if (is(commandParam, "reject")) {
-                CommandProcessingResult identifier = this.depositAccountWritePlatformService.rejectDepositApplication(command);
-                response = Response.ok().entity(identifier).build();
-            } else if (is(commandParam, "withdrewbyclient")) {
-                CommandProcessingResult identifier = this.depositAccountWritePlatformService.withdrawDepositApplication(command);
-                response = Response.ok().entity(identifier).build();
-            }
+        	final CommandWrapper commandRequest = builder.renewDepositAccount(accountId).build();
+        	result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        } else if (is(commandParam, "reject")) {
+        	final CommandWrapper commandRequest = builder.rejectDepositAccount(accountId).build();
+        	result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        } else if (is(commandParam, "withdrewbyclient")) {
+        	final CommandWrapper commandRequest = builder.withdrawDepositApplication(accountId).build();
+        	result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        } else if (is(commandParam, "undoapproval")) {
+        	final CommandWrapper commandRequest = builder.undoDepositApplicationApproval(accountId).build();
+        	result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        } else { throw new UnrecognizedQueryParamException("command", commandParam); }
 
-            UndoStateTransitionCommand undoCommand = new UndoStateTransitionCommand(accountId, command.getNote());
-
-            if (is(commandParam, "undoapproval")) {
-                CommandProcessingResult identifier = this.depositAccountWritePlatformService.undoDepositApproval(undoCommand);
-                response = Response.ok().entity(identifier).build();
-            }
-        }
-
-        if (response == null) { throw new UnrecognizedQueryParamException("command", commandParam); }
-
-        return response;
+        return this.toApiJsonSerializer.serialize(result);
     }
 
     private boolean is(final String commandParam, final String commandValue) {
@@ -273,14 +253,15 @@ public class DepositAccountsApiResource {
     @Path("postinterest")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public Response postInterest() {
+    public String postInterest() {
         Collection<DepositAccountsForLookup> accounts = this.depositAccountReadPlatformService.retrieveDepositAccountForLookup();
         CommandProcessingResult entityIdentifier = this.depositAccountWritePlatformService.postInterestToDepositAccount(accounts);
-        return Response.ok().entity(entityIdentifier).build();
+        return this.toApiJsonSerializer.serialize(entityIdentifier);
 
     }
 
-    @GET
+    @SuppressWarnings("null")
+	@GET
     @Path("{accountId}/print")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })

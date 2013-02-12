@@ -8,27 +8,22 @@ package org.mifosplatform.portfolio.savingsdepositaccount.service;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
+import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
+import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
+import org.mifosplatform.infrastructure.security.exception.NoAuthorizationException;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.monetary.domain.Money;
 import org.mifosplatform.portfolio.client.domain.Note;
 import org.mifosplatform.portfolio.client.domain.NoteRepository;
-import org.mifosplatform.portfolio.loanaccount.command.UndoStateTransitionCommand;
 import org.mifosplatform.portfolio.savingsaccountproduct.exception.SavingsProductNotFoundException;
-import org.mifosplatform.portfolio.savingsdepositaccount.command.DepositAccountCommand;
-import org.mifosplatform.portfolio.savingsdepositaccount.command.DepositAccountCommandValidator;
-import org.mifosplatform.portfolio.savingsdepositaccount.command.DepositAccountWithdrawInterestCommand;
-import org.mifosplatform.portfolio.savingsdepositaccount.command.DepositAccountWithdrawalCommand;
-import org.mifosplatform.portfolio.savingsdepositaccount.command.DepositAccountWithdrawalCommandValidator;
-import org.mifosplatform.portfolio.savingsdepositaccount.command.DepositStateTransitionApprovalCommand;
-import org.mifosplatform.portfolio.savingsdepositaccount.command.DepositStateTransitionApprovalCommandValidator;
-import org.mifosplatform.portfolio.savingsdepositaccount.command.DepositStateTransitionCommand;
-import org.mifosplatform.portfolio.savingsdepositaccount.command.WithDrawDepositAccountInterestCommandValidator;
 import org.mifosplatform.portfolio.savingsdepositaccount.data.DepositAccountsForLookup;
 import org.mifosplatform.portfolio.savingsdepositaccount.domain.DepositAccount;
 import org.mifosplatform.portfolio.savingsdepositaccount.domain.DepositAccountRepository;
@@ -39,6 +34,8 @@ import org.mifosplatform.portfolio.savingsdepositaccount.domain.FixedTermDeposit
 import org.mifosplatform.portfolio.savingsdepositaccount.exception.DepositAccountNotFoundException;
 import org.mifosplatform.portfolio.savingsdepositaccount.exception.DepositAccountReopenException;
 import org.mifosplatform.portfolio.savingsdepositaccount.exception.DepositAccountTransactionsException;
+import org.mifosplatform.portfolio.savingsdepositaccount.serialization.DepositAccountCommandFromApiJsonDeserializer;
+import org.mifosplatform.portfolio.savingsdepositaccount.serialization.DepositAccountStateTransitionCommandFromApiJsonDeserializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,28 +53,36 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
     private final DepositAccountAssembler depositAccountAssembler;
     private final FixedTermDepositInterestCalculator fixedTermDepositInterestCalculator;
     private final NoteRepository noteRepository;
+    private final DepositAccountCommandFromApiJsonDeserializer fromApiJsonDeserializer;
+    private final DepositAccountStateTransitionCommandFromApiJsonDeserializer depositAccountStateTransitionCommandFromApiJsonDeserializer;
 
     @Autowired
     public DepositAccountWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
             final DepositAccountRepository depositAccountRepository, final DepositAccountAssembler depositAccountAssembler,
-            final FixedTermDepositInterestCalculator fixedTermDepositInterestCalculator, final NoteRepository noteRepository) {
+            final FixedTermDepositInterestCalculator fixedTermDepositInterestCalculator, final NoteRepository noteRepository,
+            final DepositAccountCommandFromApiJsonDeserializer fromApiJsonDeserializer,
+            final DepositAccountStateTransitionCommandFromApiJsonDeserializer depositAccountStateTransitionCommandFromApiJsonDeserializer) {
         this.context = context;
         this.depositAccountRepository = depositAccountRepository;
         this.depositAccountAssembler = depositAccountAssembler;
         this.fixedTermDepositInterestCalculator = fixedTermDepositInterestCalculator;
         this.noteRepository = noteRepository;
+        this.fromApiJsonDeserializer = fromApiJsonDeserializer;
+        this.depositAccountStateTransitionCommandFromApiJsonDeserializer = depositAccountStateTransitionCommandFromApiJsonDeserializer;
     }
 
     /*
      * Guaranteed to throw an exception no matter what the data integrity issue
      * is.
      */
-    private void handleDataIntegrityIssues(final DepositAccountCommand command, final DataIntegrityViolationException dve) {
+    private void handleDataIntegrityIssues(final JsonCommand command, final DataIntegrityViolationException dve) {
 
         Throwable realCause = dve.getMostSpecificCause();
-        if (realCause.getMessage().contains("deposit_acc_external_id")) { throw new PlatformDataIntegrityException(
-                "error.msg.desposit.account.duplicate.externalId", "Deposit account with externalId " + command.getExternalId()
-                        + " already exists", "externalId", command.getExternalId()); }
+        if (realCause.getMessage().contains("deposit_acc_external_id")) { 
+        	final String externalId = command.stringValueOfParameterNamed("externalId");
+        	throw new PlatformDataIntegrityException(
+                "error.msg.desposit.account.duplicate.externalId", "Deposit account with externalId " + externalId
+                        + " already exists", "externalId", externalId); }
 
         logger.error(dve.getMessage(), dve);
         throw new PlatformDataIntegrityException("error.msg.deposit.account.unknown.data.integrity.issue",
@@ -86,18 +91,18 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 
     @Transactional
     @Override
-    public CommandProcessingResult createDepositAccount(final DepositAccountCommand command) {
+    public CommandProcessingResult createDepositAccount(final JsonCommand command) {
 
         try {
             this.context.authenticatedUser();
-
-            DepositAccountCommandValidator validator = new DepositAccountCommandValidator(command);
-            validator.validateForCreate();
+            this.fromApiJsonDeserializer.validateForCreate(command.json());
 
             final DepositAccount account = this.depositAccountAssembler.assembleFrom(command);
             this.depositAccountRepository.save(account);
 
-            return new CommandProcessingResult(account.getId());
+            return new CommandProcessingResultBuilder() //
+            .withEntityId(account.getId()) //
+            .build();
         } catch (DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(command, dve);
             return new CommandProcessingResult(Long.valueOf(-1));
@@ -116,49 +121,43 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
         account.delete();
         this.depositAccountRepository.save(account);
 
-        return new CommandProcessingResult(accountId);
+        return new CommandProcessingResultBuilder() //
+        .withEntityId(accountId) //
+        .build();
     }
 
     @Transactional
     @Override
-    public CommandProcessingResult approveDepositApplication(final DepositStateTransitionApprovalCommand command) {
+    public CommandProcessingResult approveDepositApplication(final JsonCommand command) {
 
-        // AppUser currentUser = context.authenticatedUser();
+        this.context.authenticatedUser();
+        this.fromApiJsonDeserializer.validateForApprove(command.json());
 
-        DepositStateTransitionApprovalCommandValidator validator = new DepositStateTransitionApprovalCommandValidator(command);
-        validator.validate();
+        DepositAccount account = this.depositAccountRepository.findOne(command.entityId());
+        if (account == null || account.isDeleted()) { throw new DepositAccountNotFoundException(command.entityId()); }
 
-        DepositAccount account = this.depositAccountRepository.findOne(command.getAccountId());
-        if (account == null || account.isDeleted()) { throw new DepositAccountNotFoundException(command.getAccountId()); }
+        final LocalDate commencementDate = command.localDateValueOfParameterNamed("commencementDate");
 
-        // FIXME - madhukar - you are checking for loan permission here instead
-        // of some specific deposit account permission.
-        // removing check for now until rules dealing with creating and
-        // maintaining deposit accounts in the past is clarified
-        LocalDate eventDate = command.getEventDate();
-        // if (this.isBeforeToday(eventDate) &&
-        // currentUser.canNotApproveLoanInPast()) {
-        // throw new
-        // NoAuthorizationException("User has no authority to approve deposit with a date in the past.");
-        // }
-
-        account.approve(eventDate, defaultDepositLifecycleStateMachine(), command, this.fixedTermDepositInterestCalculator);
+        Map<String, Object> actualChanges = account.approve(commencementDate, defaultDepositLifecycleStateMachine(), command, this.fixedTermDepositInterestCalculator);
 
         this.depositAccountRepository.save(account);
-
-        String noteText = command.getNote();
+        
+        String noteText = command.stringValueOfParameterNamed("note");
         if (StringUtils.isNotBlank(noteText)) {
             Note note = Note.depositNote(account, noteText);
             this.noteRepository.save(note);
         }
 
-        return new CommandProcessingResult(account.getId());
+        return new CommandProcessingResultBuilder() //
+        .withEntityId(account.getId()) //
+        .with(actualChanges)
+        .build();
 
     }
 
-    // private boolean isBeforeToday(final LocalDate date) {
-    // return date.isBefore(new LocalDate());
-    // }
+    private boolean isBeforeToday(final LocalDate date) {
+    	return date.isBefore(new LocalDate());
+    }
     private DepositLifecycleStateMachine defaultDepositLifecycleStateMachine() {
         List<DepositAccountStatus> allowedDepositStatuses = Arrays.asList(DepositAccountStatus.values());
         return new DepositLifecycleStateMachineImpl(allowedDepositStatuses);
@@ -166,141 +165,95 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 
     @Transactional
     @Override
-    public CommandProcessingResult rejectDepositApplication(DepositStateTransitionCommand command) {
+    public CommandProcessingResult rejectDepositApplication(JsonCommand command) {
 
-        // AppUser currentUser = context.authenticatedUser();
+        this.context.authenticatedUser();
+        this.depositAccountStateTransitionCommandFromApiJsonDeserializer.validateForReject(command.json());
 
-        DepositStateTransitionCommandValidator validator = new DepositStateTransitionCommandValidator(command);
-        validator.validate();
+        DepositAccount account = this.depositAccountRepository.findOne(command.entityId());
+        if (account == null || account.isDeleted()) { throw new DepositAccountNotFoundException(command.entityId()); }
 
-        DepositAccount account = this.depositAccountRepository.findOne(command.getAccountId());
-        if (account == null || account.isDeleted()) { throw new DepositAccountNotFoundException(command.getAccountId()); }
-
-        // removing check for now until rules dealing with creating and
-        // maintaining deposit accounts in the past is clarified
-        LocalDate eventDate = command.getEventDate();
-        // if (this.isBeforeToday(eventDate) &&
-        // currentUser.canNotApproveLoanInPast()) {
-        // throw new
-        // NoAuthorizationException("User has no authority to approve deposit with a date in the past.");
-        // }
+        LocalDate eventDate = command.localDateValueOfParameterNamed("eventDate");
+        if (this.isBeforeToday(eventDate)) {
+        	throw new NoAuthorizationException("User has no authority to reject deposit with a date in the past.");
+        }
 
         account.reject(eventDate, defaultDepositLifecycleStateMachine());
         this.depositAccountRepository.save(account);
 
-        String noteText = command.getNote();
+        String noteText = command.stringValueOfParameterNamed("note");
         if (StringUtils.isNotBlank(noteText)) {
             Note note = Note.depositNote(account, noteText);
             this.noteRepository.save(note);
         }
 
-        return new CommandProcessingResult(account.getId());
+        return new CommandProcessingResultBuilder() //
+        .withEntityId(account.getId()) //
+        .build();
     }
 
     @Transactional
     @Override
-    public CommandProcessingResult withdrawDepositApplication(DepositStateTransitionCommand command) {
+    public CommandProcessingResult withdrawDepositApplication(JsonCommand command) {
 
-        // AppUser currentUser = context.authenticatedUser();
+        this.context.authenticatedUser();
+        this.depositAccountStateTransitionCommandFromApiJsonDeserializer.validateForWithdrawDepositApplication(command.json());
 
-        DepositStateTransitionCommandValidator validator = new DepositStateTransitionCommandValidator(command);
-        validator.validate();
+        DepositAccount account = this.depositAccountRepository.findOne(command.entityId());
+        if (account == null || account.isDeleted()) { throw new DepositAccountNotFoundException(command.entityId()); }
 
-        DepositAccount account = this.depositAccountRepository.findOne(command.getAccountId());
-        if (account == null || account.isDeleted()) { throw new DepositAccountNotFoundException(command.getAccountId()); }
-
-        // removing check for now until rules dealing with creating and
-        // maintaining deposit accounts in the past is clarified
-        LocalDate eventDate = command.getEventDate();
-        // if (this.isBeforeToday(eventDate) &&
-        // currentUser.canNotApproveLoanInPast()) {
-        // throw new
-        // NoAuthorizationException("User has no authority to approve deposit with a date in the past.");
-        // }
+        LocalDate eventDate = command.localDateValueOfParameterNamed("eventDate");
+        if (this.isBeforeToday(eventDate)) {
+        	throw new NoAuthorizationException("User has no authority to reject deposit with a date in the past.");
+        }
 
         account.withdrawnByApplicant(eventDate, defaultDepositLifecycleStateMachine());
         this.depositAccountRepository.save(account);
 
-        String noteText = command.getNote();
+        String noteText = command.stringValueOfParameterNamed("note");
         if (StringUtils.isNotBlank(noteText)) {
             Note note = Note.depositNote(account, noteText);
             this.noteRepository.save(note);
         }
 
-        return new CommandProcessingResult(account.getId());
+        return new CommandProcessingResultBuilder() //
+        .withEntityId(account.getId()) //
+        .build();
     }
 
     @Transactional
     @Override
-    public CommandProcessingResult undoDepositApproval(UndoStateTransitionCommand command) {
+    public CommandProcessingResult undoDepositApproval(JsonCommand command) {
 
         context.authenticatedUser();
 
-        DepositAccount account = this.depositAccountRepository.findOne(command.getLoanId());
-        if (account == null || account.isDeleted()) { throw new DepositAccountNotFoundException(command.getLoanId()); }
+        DepositAccount account = this.depositAccountRepository.findOne(command.entityId());
+        if (account == null || account.isDeleted()) { throw new DepositAccountNotFoundException(command.entityId()); }
 
         account.undoDepositApproval(defaultDepositLifecycleStateMachine());
         this.depositAccountRepository.save(account);
 
-        String noteText = command.getNote();
+        String noteText = command.stringValueOfParameterNamed("note");
         if (StringUtils.isNotBlank(noteText)) {
             Note note = Note.depositNote(account, noteText);
             this.noteRepository.save(note);
         }
-        return new CommandProcessingResult(account.getId());
+        return new CommandProcessingResultBuilder() //
+        .withEntityId(account.getId()) //
+        .build();
     }
-
-    /*
-     * @Transactional
-     * 
-     * @Override public EntityIdentifier
-     * matureDepositApplication(DepositStateTransitionCommand command) {
-     * 
-     * AppUser currentUser = context.authenticatedUser();
-     * 
-     * DepositStateTransitionCommandValidator validator = new
-     * DepositStateTransitionCommandValidator(command); validator.validate();
-     * 
-     * DepositAccount account =
-     * this.depositAccountRepository.findOne(command.getAccountId()); if
-     * (account == null || account.isDeleted()) { throw new
-     * DepositAccountNotFoundException(command.getAccountId()); }
-     * 
-     * LocalDate eventDate = command.getEventDate(); if
-     * (this.isBeforeToday(eventDate) && currentUser.canNotApproveLoanInPast())
-     * { throw new NoAuthorizationException(
-     * "User has no authority to mature deposit with a date in the past."); }
-     * 
-     * account.matureDepositApplication(eventDate,
-     * defaultDepositLifecycleStateMachine());
-     * this.depositAccountRepository.save(account);
-     * 
-     * if(account.isRenewalAllowed()){ final DepositAccount renewedAccount =
-     * this.depositAccountAssembler.assembleFrom(account);
-     * this.depositAccountRepository.save(renewedAccount); return new
-     * EntityIdentifier(renewedAccount.getId()); //returns the new deposit
-     * application id }
-     * 
-     * String noteText = command.getNote(); if
-     * (StringUtils.isNotBlank(noteText)) { Note note =
-     * Note.depositNote(account, noteText); this.noteRepository.save(note); }
-     * 
-     * return new EntityIdentifier(account.getId()); }
-     */
 
     @Transactional
     @Override
-    public CommandProcessingResult withdrawDepositAccountMoney(final DepositAccountWithdrawalCommand command) {
+    public CommandProcessingResult withdrawDepositAccountMoney(final JsonCommand command) {
 
-        context.authenticatedUser();
+        this.context.authenticatedUser();
+        this.depositAccountStateTransitionCommandFromApiJsonDeserializer.validateForWithdrawDepositAmount(command.json());
 
-        DepositAccountWithdrawalCommandValidator validator = new DepositAccountWithdrawalCommandValidator(command);
-        validator.validate();
+        DepositAccount account = this.depositAccountRepository.findOne(command.entityId());
+        if (account == null || account.isDeleted()) { throw new DepositAccountNotFoundException(command.entityId()); }
 
-        DepositAccount account = this.depositAccountRepository.findOne(command.getAccountId());
-        if (account == null || account.isDeleted()) { throw new DepositAccountNotFoundException(command.getAccountId()); }
-
-        LocalDate eventDate = command.getMaturesOnDate();
+        LocalDate eventDate = command.localDateValueOfParameterNamed("maturesOnDate");
 
         Integer lockinPeriod = account.getLockinPeriod();
         LocalDate lockinPeriodExpDate = account.getActualCommencementDate().plusMonths(Integer.valueOf(lockinPeriod));
@@ -315,26 +268,27 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
         // }
         account.withdrawDepositAccountMoney(defaultDepositLifecycleStateMachine(), fixedTermDepositInterestCalculator, eventDate);
         this.depositAccountRepository.save(account);
-        String noteText = command.getNote();
+        String noteText = command.stringValueOfParameterNamed("note");
         if (StringUtils.isNotBlank(noteText)) {
             Note note = Note.depositNote(account, noteText);
             this.noteRepository.save(note);
         }
 
-        return new CommandProcessingResult(account.getId());
+        return new CommandProcessingResultBuilder() //
+        .withEntityId(account.getId()) //
+        .build();
     }
 
     @Transactional
     @Override
-    public CommandProcessingResult withdrawDepositAccountInterestMoney(DepositAccountWithdrawInterestCommand command) {
+    public CommandProcessingResult withdrawDepositAccountInterestMoney(JsonCommand command) {
 
         context.authenticatedUser();
+        this.depositAccountStateTransitionCommandFromApiJsonDeserializer.validateForWithdrawInterestAmount(command.json());
 
-        WithDrawDepositAccountInterestCommandValidator validator = new WithDrawDepositAccountInterestCommandValidator(command);
-        validator.validate();
-
-        DepositAccount account = this.depositAccountRepository.findOne(command.getAccountId());
-        if (account == null || account.isDeleted()) { throw new DepositAccountNotFoundException(command.getAccountId()); }
+        BigDecimal interestAmount = command.bigDecimalValueOfParameterNamed("amount");
+        DepositAccount account = this.depositAccountRepository.findOne(command.entityId());
+        if (account == null || account.isDeleted()) { throw new DepositAccountNotFoundException(command.entityId()); }
         if (account.isInterestWithdrawable() && !account.isInterestCompoundingAllowed()) {
 
            // BigDecimal totalAvailableInterestForWithdrawal = getTotalWithdrawableInterestAvailable(account);
@@ -342,9 +296,9 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
             BigDecimal remainInterestForWithdrawal = account.getAvailableInterest(); //totalAvailableInterestForWithdrawal.subtract(interestPaid);
 
             if (remainInterestForWithdrawal.doubleValue() > 0) {
-                if (remainInterestForWithdrawal.doubleValue() >= command.getWithdrawInterest().doubleValue()
-                        && command.getWithdrawInterest().doubleValue() > 0) {
-                    account.withdrawInterest(Money.of(account.getDeposit().getCurrency(), command.getWithdrawInterest()));
+                if (remainInterestForWithdrawal.doubleValue() >= interestAmount.doubleValue()
+                        && interestAmount.doubleValue() > 0) {
+                    account.withdrawInterest(Money.of(account.getDeposit().getCurrency(), interestAmount));
                     this.depositAccountRepository.save(account);
                 } else {
                     throw new DepositAccountTransactionsException("deposit.transaction.interest.withdrawal.exceed", "You can Withdraw "
@@ -358,28 +312,20 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
             throw new DepositAccountTransactionsException("deposit.transaction.interest.withdrawal.cannot.withdraw",
                     "You can not withdraw interst for this account");
         }
-        return new CommandProcessingResult(account.getId());
+        return new CommandProcessingResultBuilder() //
+        .withEntityId(account.getId()) //
+        .build();
     }
-
-/*    private BigDecimal getTotalWithdrawableInterestAvailable(DepositAccount account) {
-        BigDecimal interstGettingForPeriod = BigDecimal.valueOf(account.getAccuredInterest().getAmount().doubleValue()
-                / new Double(account.getTenureInMonths()));
-        Integer noOfMonthsforInterestCal = Months.monthsBetween(account.getActualCommencementDate(), new LocalDate()).getMonths();
-        Integer noOfPeriods = noOfMonthsforInterestCal / account.getInterestCompoundedEvery();
-        return interstGettingForPeriod.multiply(new BigDecimal(noOfPeriods));
-    }*/
 
     @Transactional
     @Override
-    public CommandProcessingResult renewDepositAccount(DepositAccountCommand command) {
+    public CommandProcessingResult renewDepositAccount(JsonCommand command) {
 
         this.context.authenticatedUser();
-
-        RenewDepositAccountCommandValidator validator = new RenewDepositAccountCommandValidator(command);
-        validator.validateForCreate();
-
-        DepositAccount account = this.depositAccountRepository.findOne(command.getId());
-        if (account == null || account.isDeleted()) { throw new DepositAccountNotFoundException(command.getId()); }
+        this.fromApiJsonDeserializer.validateForRenew(command.json());
+        
+        DepositAccount account = this.depositAccountRepository.findOne(command.entityId());
+        if (account == null || account.isDeleted()) { throw new DepositAccountNotFoundException(command.entityId()); }
 
         // FIXME - KW - extract whats in this if into a method that naturally
         // describes what you are checking.
@@ -391,7 +337,9 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
                 this.depositAccountRepository.save(renewedAccount);
                 account.closeDepositAccount(defaultDepositLifecycleStateMachine());
                 this.depositAccountRepository.save(account);
-                return new CommandProcessingResult(renewedAccount.getId());
+                return new CommandProcessingResultBuilder() //
+                .withEntityId(account.getId()) //
+                .build();
             }
 
             throw new DepositAccountReopenException(account.getMaturityDate());
@@ -400,27 +348,33 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
         throw new DepositAccountReopenException(account.getMaturityDate());
     }
 
+    @Transactional
     @Override
-    public CommandProcessingResult updateDepositAccount(DepositAccountCommand command) {
+    public CommandProcessingResult updateDepositAccount(Long accountId, JsonCommand command) {
 
         try {
-            this.context.authenticatedUser();
-
-            DepositAccountCommandValidator validator = new DepositAccountCommandValidator(command);
-            validator.validateForUpdate();
-
-            final DepositAccount account = this.depositAccountRepository.findOne(command.getId());
-            if (account == null || account.isDeleted()) { throw new DepositAccountNotFoundException(command.getId()); }
-
-            if (account.isSubmittedAndPendingApproval()) {
-                this.depositAccountAssembler.assembleUpdatedDepositAccount(account, command);
-            } else if (account.isActive()) {
-                this.depositAccountAssembler.updateApprovedDepositAccount(account, command);
-            }
-
-            this.depositAccountRepository.save(account);
-
-            return new CommandProcessingResult(account.getId());
+	        	
+	            this.context.authenticatedUser();
+	            this.fromApiJsonDeserializer.validateForUpdate(command.json());
+	            
+	            Map<String, Object> changes =  new LinkedHashMap<String, Object>(20);;
+	            
+	            final DepositAccount account = this.depositAccountRepository.findOne(accountId);
+	            if (account == null || account.isDeleted()) { throw new DepositAccountNotFoundException(accountId); }
+	
+	            if (account.isSubmittedAndPendingApproval()) {
+	            	changes = this.depositAccountAssembler.assembleUpdatedDepositAccount(account, command);
+	            } else if (account.isActive()) {
+	            	changes = this.depositAccountAssembler.updateApprovedDepositAccount(account, command);
+	            }
+	
+	            this.depositAccountRepository.save(account);
+	
+	            return new CommandProcessingResultBuilder() //
+	            .withEntityId(account.getId()) //
+	            .with(changes)
+	            .build();
+	            
         } catch (DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(command, dve);
             return new CommandProcessingResult(Long.valueOf(-1));
@@ -439,7 +393,9 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
                 this.depositAccountAssembler.postInterest(account);
                 this.depositAccountRepository.save(account);
             }
-            return new CommandProcessingResult(new Long(accounts.size()));
+            return new CommandProcessingResultBuilder() //
+            .withEntityId(Long.valueOf(accounts.size())) //
+            .build();
         } catch (Exception e) {
             return new CommandProcessingResult(Long.valueOf(-1));
         }

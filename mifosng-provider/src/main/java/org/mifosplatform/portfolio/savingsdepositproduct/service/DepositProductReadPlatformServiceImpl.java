@@ -26,6 +26,9 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
+
+
+
 @Service
 public class DepositProductReadPlatformServiceImpl implements DepositProductReadPlatformService {
 
@@ -50,7 +53,7 @@ public class DepositProductReadPlatformServiceImpl implements DepositProductRead
     public Collection<DepositProductLookup> retrieveAllDepositProductsForLookup() {
         this.context.authenticatedUser();
         DepositProductLookupMapper depositProductLookupMapper = new DepositProductLookupMapper();
-        String sql = "select " + depositProductLookupMapper.depositProductLookupSchema();
+        String sql = "select " + depositProductLookupMapper.depositProductLookupSchema() + " where dp.is_deleted=0";
         return this.jdbcTemplate.query(sql, depositProductLookupMapper, new Object[] {});
     }
 
