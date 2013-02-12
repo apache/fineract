@@ -294,11 +294,11 @@
 								<td></td>
 							</tr>
 							<tr>
-								<td></td>
+								<td><a href="#guarantors">Guarantors</a></td>
 								<td>loans/{loanId}/guarantors</td>
-								<td><a href="#loans_guarantors_create">Create a Guarantor
+								<td><a href="#guarantors_create">Create a Guarantor
 								</a></td>
-								<td><a href="#loans_guarantors_list">List Guarantors
+								<td><a href="#guarantors_list">List Guarantors
 								</a></td>
 								<td></td>
 								<td></td>
@@ -307,11 +307,11 @@
 								<td></td>
 								<td>loans/{loanId}/guarantors/{guarantorId}</td>
 								<td></td>
-								<td><a href="#loans_guarantors_retrieve">Retrieve a Guarantor
+								<td><a href="#guarantors_retrieve">Retrieve a Guarantor
 								</a></td>
-								<td><a href="#loans_guarantors_update">Update a Guarantor
+								<td><a href="#guarantors_update">Update a Guarantor
 								</a></td>
-								<td><a href="#loans_guarantors_delete">Delete a Guarantor
+								<td><a href="#guarantors_delete">Delete a Guarantor
 								</a></td>
 							</tr>
 						</table>
@@ -1101,7 +1101,7 @@
 								<td><a href="#glclosures_delete">Delete an Accounting Closure</a></td>
 							</tr>
 							<tr class="alt">
-								<td><a href="#glclosures">Journal Entries</a></td>
+								<td><a href="#journalentries">Journal Entries</a></td>
 								<td>journalentries</td>
 								<td><a href="#journalentries_create">Create Journal Entries</a></td>
 								<td><a href="#journalentries_list">List Journal Entries</a></td>
@@ -1112,7 +1112,7 @@
 								<td></td>
 								<td>journalentries/{entryId}</td>
 								<td></td>
-								<td><a href="#journalentries_retrieve">Retrieve a Journal Entry</a></td>
+								<td><a href="#journalentries_retrieve">Retrieve a single Entry</a></td>
 								<td></td>
 								<td></td>
 							</tr>
@@ -2851,6 +2851,323 @@ Request Body:
 					</code>
 				</div>
 			</div>
+
+			<a id="guarantors" name="guarantors" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h3>Guarantors</h3>
+					<p>A person who guarantees to pay for someone else's debt
+					if he or she should default on a loan obligation. A guarantor acts as a co-signor of sorts.                   
+					</p>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Field Descriptions</div></td>
+						</tr>
+						<tr class=alt>
+							<td>guarantorType</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Identifies if the guarantor is
+							an existing Client, Staff member or an external
+							individual <br/>
+							Refer <a href="#guarantors_template">Retrieve
+							Guarantor Details Template</a> for complete
+							details
+						</td>
+						</tr>
+						<tr class=alt>
+							<td>entityId</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>The identifier for guarantors
+							who are an existing Client of Staff member.
+							</td>
+						</tr>
+						<tr class=alt>
+							<td>firstname</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Guarantors first name
+							</td>
+						</tr>
+						<tr class=alt>
+							<td>lastname</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Guarantors last name
+							</td>
+						</tr>
+						<tr class=alt>
+							<td>officeName</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Name of the office with which the internal guarantors are associated
+							</td>
+						</tr>
+						<tr class=alt>
+							<td>addressLine1, addressLine2, city, state, zip,
+							country, mobileNumber, housePhoneNumber, comment,
+							dob</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Address, contact and date of
+							birth details of an external guarantor
+							</td>
+						</tr>
+					</table>
+				</div>
+			</div>
+
+			<a id="guarantors_list" name="guarantors_list"
+				class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>List Guarantors</h4>
+					<p>Example Requests:</p>
+					<div class=apiClick>loans/1/guarantors</div>
+					<br>
+					<br>
+					<div class=apiClick>loans/1/guarantors?fields=firstname,lastname</div>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+GET https://DomainName/api/v1/loans/{loanId}/guarantors
+					</code>
+					<code class="method-response">
+[
+    {
+        "id": 1,
+        "loanId": 1,
+        "guarantorType": {
+            "id": 1,
+            "code": "guarantor.existing.customer",
+            "value": "CUSTOMER"
+        },
+        "firstname": "Declan",
+        "lastname": "Browne",
+        "officeName": "Head Office",
+        "joinedDate": [
+            2009,
+            1,
+            4
+        ]
+    }
+]
+					</code>
+				</div>
+			</div>
+
+			<a id="guarantors_template" name="guarantors_template"
+				class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Retrieve Guarantors Details Template</h4>
+					<p>This is a convenience resource. It can be useful when
+						building maintenance user interface screens for client
+						applications. The template data returned consists of any or all
+						of:
+					<ul>
+						<li class=normalli>Field Defaults</li>
+						<li class=normalli>Allowed Value Lists</li>
+					</ul>
+					</p>
+					<p>Example Request:</p>
+					<div class=apiClick>loans/1/guarantors/template</div>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+GET https://DomainName/api/v1/loans/{loanId}/guarantors/template
+					</code>
+					<code class="method-response">
+{
+    "guarantorType": {
+        "id": 1,
+        "code": "guarantor.existing.customer",
+        "value": "CUSTOMER"
+    },
+    "guarantorTypeOptions": [
+        {
+            "id": 1,
+            "code": "guarantor.existing.customer",
+            "value": "CUSTOMER"
+        },
+        {
+            "id": 2,
+            "code": "guarantor.staff",
+            "value": "STAFF"
+        },
+        {
+            "id": 3,
+            "code": "guarantor.external",
+            "value": "EXTERNAL"
+        }
+    ]
+}
+					</code>
+				</div>
+			</div>
+
+			<a id="guarantors_retrieve" name="guarantors_retrieve"
+				class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Retrieve a Guarantor</h4>
+					<p>Example Requests:</p>
+					<div class=apiClick>/loans/1/guarantors/1</div>
+					<br>
+					<br>
+					<div class=apiClick>/loans/1/guarantors/1</div>
+					<br>
+					<br>
+					<div class=apiClick>/loans/1/guarantors/1?fields=firstname</div>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+GET https://DomainName/api/v1/loans/{loanId}/guarantors/{guarantorId}
+					</code>
+					<code class="method-response">
+{
+    "id": 1,
+    "loanId": 1,
+    "guarantorType": {
+        "id": 1,
+        "code": "guarantor.existing.customer",
+        "value": "CUSTOMER"
+    },
+    "firstname": "Declan",
+    "officeName": "Head Office",
+    "joinedDate": [
+        2009,
+        1,
+        4
+    ]
+}
+					</code>
+				</div>
+			</div>
+
+			<a id="guarantors_create" name="guarantors_create" class="old-syle-anchor">&nbsp;</a>
+            <div class="method-section">
+                <div class="method-description">
+                    <h4>Create a Guarantor</h4>
+                    <p>
+                        <b>Note:</b> You may associate any number of Guarantors
+                        to a Loan. The mandatory fields would vary based
+                        on the "guarantorType"<br>
+                    </p>
+                    <table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Mandatory Fields
+								for "internal" guarantors</div></td>
+						</tr>
+						<tr class=alt>
+							<td>guarantorTypeId, entityId</td>
+						</tr>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Mandatory Fields for "external" guarantors</div></td>
+						</tr>
+						<tr class=alt>
+							<td>guarantorTypeId, firstname, lastname</td>
+						</tr>
+                    </table>
+                </div>
+                <div class="method-example">
+                    <code class="method-declaration">
+POST https://DomainName/api/v1//loans/{loanId}}/guarantors
+                    </code>
+                    <code class="method-request">
+POST /loans/1/guarantors
+Content-Type: application/json 
+Request Body:
+{
+  guarantorTypeId:3,
+  firstname:Lyndon,
+  lastname:Johnson
+}
+                    </code>
+                    <code class="method-response">
+{
+    "officeId": 2,
+    "loanId": 1,
+    "resourceId": 9
+}
+                    </code>
+                    <code class="method-request">
+POST /loans/1/guarantors
+Content-Type: application/json 
+Request Body:
+{
+  guarantorTypeId:1,
+  entityId:2
+}
+                    </code>
+                    <code class="method-response">
+{
+    "officeId": 2,
+    "loanId": 1,
+    "resourceId": 10
+}
+                    </code>
+                </div>
+            </div>
+
+            <a id="guarantors_update" name="guarantors_update"
+				class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Update a Guarantor</h4>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+PUT https://DomainName/api/v1/loans/{loanId}/guarantors/{guarantorId}
+					</code>
+					<code class="method-request">
+PUT loans/1/guarantors/1
+Content-Type: application/json 
+Request Body: 
+{
+  entityId:1
+}
+					</code>
+					<code class="method-response">
+{
+    "officeId": 1,
+    "resourceId": 1,
+    "changes": {
+        "entityId": 1
+    }
+}
+					</code>
+				</div>
+			</div>
+
+			<a id="guarantors_delete" name="guarantors_delete" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Remove a Guarantor</h4>
+					<p>
+						<b>Note:</b> A guarantor can be removed only from loans that are not yet approved.
+					</p>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+DELETE https://DomainName/api/v1/loans/{loanId}/guarantors/{guarantorId}
+					</code>
+					<code class="method-request">
+DELETE loans/1/guarantors/1
+Content-Type: application/json 
+No Request Body:
+					</code>
+					<code class="method-response">
+{
+    "officeId": 2,
+    "loanId": 1,
+    "resourceId": 1
+}
+					</code>
+				</div>
+			</div>
+
 			<!-- start of fixed deposits   -->
 			
 <a id="fixeddeposits" name="fixeddeposits" class="old-syle-anchor">&nbsp;</a>
@@ -8571,7 +8888,7 @@ GET https://DomainName/api/v1/glaccounts/{glaccountsId}
                 </div>
                 <div class="method-example">
                     <code class="method-declaration">
-POST https://DomainName/api/v1/glaccounts_update
+POST https://DomainName/api/v1/glaccounts
                     </code>
                     <code class="method-request">
 POST glaccounts
@@ -8613,7 +8930,22 @@ Request Body:
                     </code>
                     <code class="method-response">
 {
-    "resourceId": 1,
+    "resourceId": 1
+}
+                    </code>
+                </div>
+                <div class="method-example">
+                    <code class="method-request">
+PUT glaccounts/1 
+Content-Type: application/json 
+Request Body:
+{
+    "disabled": true
+}
+                    </code>
+                    <code class="method-response">
+{
+    "resourceId": 1
 }
                     </code>
                 </div>
@@ -8645,10 +8977,691 @@ No Request Body:
                 </div>
             </div>
 
+            <a id="glclosures" name="glclosures" class="old-syle-anchor">&nbsp;</a>
+            <div class="method-section">
+                <div class="method-description">
+                    <h3>Accounting Closure</h3>
+                    <p>An accounting closure indicates that no more journal
+                    	entries may be logged or reversed in the system 
+                    	(either manually or via the portfolio) prior to the closure date
+                    </p>
+                    <table class=matrixHeading>
+                        <tr class="matrixHeadingBG">
+                            <td><div class="mifosXHeading2">Field Descriptions</div></td>
+                        </tr>
+                        <tr class=alt>
+                            <td>closingDate</td>
+                        </tr>
+                        <tr>
+                            <td class=fielddesc>The date for which the
+                            accounting closure is defined</td>
+                        </tr>
+                        <tr class=alt>
+                            <td>officeId</td>
+                        </tr>
+                        <tr>
+                            <td class=fielddesc>The identifer of the branch for
+                            	which accounting has been closed</td>
+                        </tr>
+                         <tr class=alt>
+                            <td>comments</td>
+                        </tr>
+                        <tr>
+                            <td class=fielddesc>Description associated with an
+                            	Accounting closure</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
 
-		</div>
+            <a id="glclosures_list" name="glclosures_list" class="old-syle-anchor">&nbsp;</a>
+            <div class="method-section">
+                <div class="method-description">
+                    <h4>List Accounting closures</h4>
+                    <p>Example Requests:</p>
+                    <div class=apiClick>glclosures</div>
+                    <br>
+                    <br>
+                </div>
+                <div class="method-example">
+                    <code class="method-declaration">
+GET https://DomainName/api/v1/glclosures
+                    </code>
+                    <code class="method-response">
+[
+    {
+        "id": 7,
+        "officeId": 1,
+        "officeName": "Head Office",
+        "closingDate": [
+            2013,
+            1,
+            2
+        ],
+        "deleted": false,
+        "createdDate": [
+            2013,
+            1,
+            3
+        ],
+        "lastUpdatedDate": [
+            2013,
+            1,
+            3
+        ],
+        "createdByUserId": 1,
+        "createdByUsername": "mifos",
+        "lastUpdatedByUserId": 1,
+        "lastUpdatedByUsername": "mifos",
+        "comments": "closed",
+        "allowedOffices": []
+    },
+    {
+        "id": 6,
+        "officeId": 1,
+        "officeName": "Head Office",
+        "closingDate": [
+            2012,
+            12,
+            13
+        ],
+        "deleted": false,
+        "createdDate": [
+            2012,
+            12,
+            14
+        ],
+        "lastUpdatedDate": [
+            2012,
+            12,
+            14
+        ],
+        "createdByUserId": 1,
+        "createdByUsername": "mifos",
+        "lastUpdatedByUserId": 1,
+        "lastUpdatedByUsername": "mifos",
+        "comments": "hello",
+        "allowedOffices": []
+    }
+]
+                    </code>
+                </div>
+            </div>
+
+            <a id="glclosures_retrieve" name="glclosures_retrieve"
+                class="old-syle-anchor">&nbsp;</a>
+            <div class="method-section">
+                <div class="method-description">
+                    <h4>Retrieve an Accounting Closure</h4>
+                    <p>Example Requests:</p>
+                    <div class=apiClick>glclosures/1</div>
+                    <br>
+                    <br>
+                    <div class=apiClick>/glclosures/1?fields=officeName,closingDate</div>
+                </div>
+                <div class="method-example">
+                    <code class="method-declaration">
+GET https://DomainName/api/v1/glclosures/{glclosureId}
+                    </code>
+                    <code class="method-response">
+{
+    "id": 7,
+    "officeId": 1,
+    "officeName": "Head Office",
+    "closingDate": [
+        2013,
+        1,
+        2
+    ],
+    "deleted": false,
+    "createdDate": [
+        2013,
+        1,
+        3
+    ],
+    "lastUpdatedDate": [
+        2013,
+        1,
+        3
+    ],
+    "createdByUserId": 1,
+    "createdByUsername": "mifos",
+    "lastUpdatedByUserId": 1,
+    "lastUpdatedByUsername": "mifos",
+    "comments": "closed",
+    "allowedOffices": []
+}
+                    </code>
+                </div>
+            </div>
+
+            <a id="glclosures_create" name="glclosures_create" class="old-syle-anchor">&nbsp;</a>
+            <div class="method-section">
+                <div class="method-description">
+                    <h4>Create an Accounting Closure</h4>
+                    <table class=matrixHeading>
+                        <tr class="matrixHeadingBG">
+                            <td><div class="mifosXHeading2">Mandatory Fields</div></td>
+                        </tr>
+                        <tr class=alt>
+                            <td>officeId,closingDate
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="method-example">
+                    <code class="method-declaration">
+POST https://DomainName/api/v1/glclosures
+                    </code>
+                    <code class="method-request">
+POST glclosures
+Content-Type: application/json 
+Request Body:
+{
+    "officeId": 1,
+    "closingDate": "06 December 2012",
+    "comments": "The accountants are heading for a carribean vacation"
+ 	"locale": "en" ,
+  	"dateFormat": "dd MMMM yyyy"
+}
+                    </code>
+                    <code class="method-response">
+{
+    "resourceId": 1
+}
+                    </code>
+                </div>
+            </div>
+
+            <a id="glclosures_update" name="glclosures_update" class="old-syle-anchor">&nbsp;</a>
+            <div class="method-section">
+                <div class="method-description">
+                    <h4>Update an Accounting closure</h4>
+                    <p>Once an accounting closure is created, only the comment associated with it can be edited
+                    </p>
+                </div>
+                <div class="method-example">
+                    <code class="method-declaration">
+PUT https://DomainName/api/v1/glclosures/{glclosureId}
+                        </code>
+                    <code class="method-request">
+PUT glclosures/1 
+Content-Type: application/json 
+Request Body:
+{
+    "comments": "All transactions verified by Johnny Cash"
+}
+                    </code>
+                    <code class="method-response">
+{
+    "resourceId": 1
+}
+                    </code>
+                </div>
+                <div class="method-example">
+                    <code class="method-request">
+PUT glclosures/1 
+Content-Type: application/json 
+Request Body:
+{
+    "disabled": true
+}
+                    </code>
+                    <code class="method-response">
+{
+    "resourceId": 1
+}
+                    </code>
+                </div>
+            </div>
+
+            <a id="glclosures_delete" name="glclosures_delete" class="old-syle-anchor">&nbsp;</a>
+            <div class="method-section">
+                <div class="method-description">
+                    <h4>Delete An accounting closure</h4>
+                    <p>
+                        <b>Note:</b> Only the latest accounting closure
+                        associated with a branch may be closed.
+                    </p>
+                </div>
+                <div class="method-example">
+                    <code class="method-declaration">
+DELETE https://DomainName/api/v1/glclosures/{glclosureId}
+                    </code>
+                    <code class="method-request">
+DELETE glclosures/1
+Content-Type: application/json 
+No Request Body:
+                    </code>
+                    <code class="method-response">
+{
+    "resourceId": 1
+}
+                    </code>
+                </div>
+            </div>
+
+            <a id="journalentries" name="journalentries" class="old-syle-anchor">&nbsp;</a>
+            <div class="method-section">
+                <div class="method-description">
+                    <h3>Journal Entries</h3>
+                    <p>A journal entry refers to the logging of 
+                    transactions against general ledger accounts. A journal
+                    entry can consist of several line items, each of which is either a "debit" or a "credit". The total amount of the
+                    debits must equal the total amount of the credits or the
+                    journal entry is said to be "unbalanced" <br/><br/>
+                    A journal entry directly changes the account balances on
+                    the general ledger
+                    </p>
+                    <table class=matrixHeading>
+                        <tr class="matrixHeadingBG">
+                            <td><div class="mifosXHeading2">Field Descriptions</div></td>
+                        </tr>
+                        <tr class=alt>
+                            <td>officeId</td>
+                        </tr>
+                        <tr>
+                            <td class=fielddesc>The identifier of the office (
+                            	cost center) at which the financial activity
+                            	occured</td>
+                        </tr>
+                        <tr class=alt>
+                            <td>glAccountId</td>
+                        </tr>
+                        <tr>
+                            <td class=fielddesc>The identifier of the account (
+                            	Ledger Account) against which this journal entry
+                            	was made
+                            </td>
+                        </tr>
+                        <tr class=alt>
+                            <td>entryDate</td>
+                        </tr>
+                        <tr>
+                            <td class=fielddesc>The target date for which this
+                             entry was recorded</td>
+                        </tr>
+                        <tr class=alt>
+                            <td>amount</td>
+                        </tr>
+                        <tr>
+                            <td class=fielddesc>The Monetary amount associated 
+                            with this entry
+                            </td>
+                        </tr>
+                        <tr class=alt>
+                            <td>comments</td>
+                        </tr>
+                        <tr>
+                            <td class=fielddesc>A description associated with
+                            this entry</td>
+                        </tr>
+                        <tr class=alt>
+                            <td>entryType</td>
+                        </tr>
+                        <tr>
+                            <td class=fielddesc>Either a Credit(1) or a Debit(2)</td>
+                        </tr>
+                        <tr class=alt>
+                            <td>transactionId</td>
+                        </tr>
+                        <tr>
+                            <td class=fielddesc>A unique Identifier for a set 
+                            	of related Credit and Debit entries that make up a "balanced" jounral Entry.
+                            	For a manual entry, this feild is a unique string.<br/>
+                            	For a system generated entry, the combination
+                            	of transactionId and entityId is unique
+                            </td>
+                        </tr>
+                        <tr class=alt>
+                            <td>entryType</td>
+                        </tr>
+                        <tr>
+                            <td class=fielddesc>Either a Credit(1) or a Debit(2)</td>
+                        </tr>
+                        <tr class=alt>
+                            <td>portfolioGenerated</td>
+                        </tr>
+                        <tr>
+                            <td class=fielddesc>Flag determines if an entry is 
+                            generated by the portfolio (posted automatically by 
+                            the system  during lifecycle of loan and saving
+                            products) or manually created by using the <a href="
+                            journalentries_create">Create (Balanced) Journal 
+                            Entries</a> API
+                        	</td>
+                        </tr>
+                        <tr class=alt>
+                            <td>reversed</td>
+                        </tr>
+                        <tr>
+                            <td class=fielddesc>Flag determines if this manual
+                            journal entry has been reversed using the <a href="
+                            journalentries_reverse">Reverse a Journal Entry</a> API. <br/>
+                            Note: A journal entry is reversed by logging debits
+                            for all credits that make up the Journal entry and
+                            vice-versa
+                        	</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <a id="journalentries_list" name="journalentries_list" class="old-syle-anchor">&nbsp;</a>
+            <div class="method-section">
+                <div class="method-description">
+                    <h4>List Journal Entries</h4>
+                    <h5>Arguments</h5>
+                    <dl class="argument-list">
+                        <dt>officeId</dt>
+                        <dd>
+                            Integer <span>optional</span>
+                        </dd>
+                        <dt>glAccountId</dt>
+                        <dd>
+                            Integer <span>optional</span>
+                        </dd>
+                        <dt>portfolioGenerated</dt>
+                        <dd>
+                            Boolean <span>optional</span>
+                        </dd>
+                        <dd>Flag determines if portfolio generated Journal
+                        	Entries (posted automatically by the system 
+                        	during lifecycle of loan and saving products) 
+                        	shall also be returned <br/>
+                        	Set to "True" by default if not passed in explicity
+                        </dd>
+                        <dt>fromDate</dt>
+                        <dd>
+                            Date (yyyy-MM-dd)<span>optional</span>
+                        </dd>
+                        <dd>Filters for Journal entries whose entry Date 
+                        	is greater than or equal to the passed in Date
+                        </dd>
+                        <dt>toDate</dt>
+                        <dd>
+                            Date (yyyy-MM-dd)<span>optional</span>
+                        </dd>
+                        <dd>Filters for Journal entries whose entry Date 
+                        	is lesser than or equal to the passed in Date
+                        </dd>
+                        <dt>transactionId</dt>
+                        <dd>
+                            String <span>optional</span>
+                        </dd>
+                    </dl>
+                    <p>Example Requests:</p>
+                    <div class=apiClick>journalentries?transactionId=PB37X8Y21EQUY4S</div>
+                    <br>
+                    <br>
+                    <div class=apiClick>journalentries?officeId=1&glAccountId=17&portfolioGenerated=false&fromDate=2012-01-01&toDate=2013-01-01</div>
+                </div>
+                <div class="method-example">
+                    <code class="method-declaration">
+GET https://DomainName/api/v1/journalentries?transactionId=PB37X8Y21EQUY4S
+                    </code>
+                    <code class="method-response">
+[
+    {
+        "id": 81,
+        "officeId": 1,
+        "officeName": "Head Office",
+        "glAccountName": "Something totally else",
+        "glAccountId": 17,
+        "glAccountCode": "340098",
+        "glAccountClassification": {
+            "id": 3,
+            "code": "accountType.equity",
+            "value": "EQUITY"
+        },
+        "entryDate": [
+            2012,
+            12,
+            12
+        ],
+        "entryType": {
+            "id": 2,
+            "code": "journalEntrytType.debit",
+            "value": "DEBIT"
+        },
+        "amount": 120,
+        "transactionId": "PB37X8Y21EQUY4S",
+        "portfolioGenerated": false,
+        "createdByUserId": 1,
+        "createdDate": [
+            2012,
+            12,
+            13
+        ],
+        "createdByUserName": "mifos",
+        "reversed": true
+    },
+    {
+        "id": 82,
+        "officeId": 1,
+        "officeName": "Head Office",
+        "glAccountName": "Something else",
+        "glAccountId": 19,
+        "glAccountCode": "560050",
+        "glAccountClassification": {
+            "id": 3,
+            "code": "accountType.equity",
+            "value": "EQUITY"
+        },
+        "entryDate": [
+            2012,
+            12,
+            12
+        ],
+        "entryType": {
+            "id": 1,
+            "code": "journalEntryType.credit",
+            "value": "CREDIT"
+        },
+        "amount": 120,
+        "transactionId": "PB37X8Y21EQUY4S",
+        "portfolioGenerated": false,
+        "createdByUserId": 1,
+        "createdDate": [
+            2012,
+            12,
+            13
+        ],
+        "createdByUserName": "mifos",
+        "reversed": true
+    }
+]
+                    </code>
+                </div>
+            </div>
+
+            <a id="journalentries_create" name="journalentries_create" class="old-syle-anchor">&nbsp;</a>
+            <div class="method-section">
+                <div class="method-description">
+                    <h4>Create "Balanced" Journal Entries</h4>
+                    <p>
+                        <b>Note:</b> A Balanced (simple) Journal entry would
+                        have atleast one "Debit" and one "Credit" entry whose
+                        amounts are equal <br/>
+                        Compound Journal entries may have "n" debits and "m"
+                        credits where both "m" and "n" are greater than 0
+                        and the sum or all debits and all credits are equal
+                        <br>
+                    </p>
+                    <table class=matrixHeading>
+                        <tr class="matrixHeadingBG">
+                            <td><div class="mifosXHeading2">Mandatory Fields</div></td>
+                        </tr>
+                        <tr class=alt>
+                            <td>officeId, entryDate 
+                            </td>
+                        </tr>
+                        <tr>
+                        	 <td class=fielddesc></td>
+                        </tr>
+                         <tr class=alt>
+                            <td>credits</td>
+                        </tr>
+                        <tr>
+                            <td class=fielddesc>Details of the credits contained
+                            	in the journal entry. Each credit entry contains
+                            	the following items <br/>
+                            	glAccountId: Identifier of the general ledger
+                            	account against which credit entry shall be 
+                            	made <br/>
+                            	amount: Amount of money involved in the credit
+                            	<br/>
+                            	comments: Optional description associated with
+                            	a credit entry
+                            </a>.
+                            </td>
+                        </tr>
+                        <tr class=alt>
+                            <td>debits</td>
+                        </tr>
+                        <tr>
+                            <td class=fielddesc>Details of the debits contained
+                            	in the journal entry. Each debit entry contains the following items <br/>
+                            	glAccountId: Identifier of the general ledger account against which the debit entry shall be
+                            	made <br/>
+                            	amount: Amount of money involved in the debit
+                            	<br/>
+                            	comments: Optional description associated with
+                            	a debit entry
+                            </a>.
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="method-example">
+                    <code class="method-declaration">
+POST https://DomainName/api/v1/journalentries
+                    </code>
+                    <code class="method-request">
+POST journalentries
+Content-Type: application/json 
+Request Body:
+{
+"officeId": 1,
+"entryDate": "06 December 2012",
+"comments": "Gifts for staff",
+"locale": "en" ,
+"dateFormat": "dd MMMM yyyy",
+"credits":[{"glAccountId":1,
+			"amount":5000},
+		   {"glAccountId":2,
+			"amount":5000}
+		  ],
+"debits":[{"glAccountId":3,
+			"amount":5000},
+		   {"glAccountId":4,
+			"amount":5000}
+		 ]
+}
+                    </code>
+                    <code class="method-response">
+{
+    "resourceId": C1MAE935K0IAEYA
+}
+                    </code>
+                </div>
+            </div>
+
+            <a id="journalentries_retrieve" name="journalentries_retrieve"
+                class="old-syle-anchor">&nbsp;</a>
+            <div class="method-section">
+                <div class="method-description">
+                    <h4>Retrieve a single Entry</h4>
+                    <p>Example Requests:</p>
+                    <div class=apiClick>journalentries/1</div>
+                    <br>
+                    <br>
+                    <br>
+                    <div class=apiClick>journalentries/1?fields=officeName,glAccountId,entryType,amount</div>
+                </div>
+                <div class="method-example">
+                    <code class="method-declaration">
+GET https://DomainName/api/v1/journalentries/{entryId}
+                    </code>
+                    <code class="method-response">
+{
+    "id": 22,
+    "officeId": 2,
+    "officeName": "sub branch 1",
+    "glAccountName": "Income from interest",
+    "glAccountId": 14,
+    "glAccountCode": "400001",
+    "glAccountClassification": {
+        "id": 4,
+        "code": "accountType.income",
+        "value": "INCOME"
+    },
+    "entryDate": [
+        2012,
+        11,
+        2
+    ],
+    "entryType": {
+        "id": 1,
+        "code": "journalEntryType.credit",
+        "value": "CREDIT"
+    },
+    "amount": 900,
+    "transactionId": "13",
+    "portfolioGenerated": true,
+    "createdByUserId": 1,
+    "createdDate": [
+        2012,
+        11,
+        2
+    ],
+    "createdByUserName": "mifos",
+    "reversed": false
+}
+                    </code>
+                </div>
+            </div>
+
+            <a id="journalentries_reverse" name="journalentries_reverse"
+                class="old-syle-anchor">&nbsp;</a>
+            <div class="method-section">
+                <div class="method-description">
+                    <h4>Reverse a Journal Entry</h4>
+                    <p>
+                        <b>Note:</b> A journal entry is reversed by logging debits
+                        for all credits that constitute the Journal entry and
+                        vice-versa 
+                    </p>
+                    <h5>Arguments</h5>
+					<dl class="argument-list">
+						<dt>command</dt>
+						<dd>
+							String<span> Mandatory, case-insensitive</span>
+						</dd>
+						<dd>'reverse' : Reverse the Journal Entry</dd>
+					</dl>
+                </div>
+                <div class="method-example">
+                    <code class="method-declaration">
+GET https://DomainName/api/v1/journalentries/{transactionId}
+                    </code>
+                    <code class="method-request">
+POST journalentries/C1MAE935K0IAEYA?command=reverse
+Content-Type: application/json 
+</code>
+                    <code class="method-response">
+{
+    "resourceId": C1MAE935K0IAEYA
+}
+                    </code>
+                </div>
+            </div>
+
+
+			
+
+        </div>
 		<!-- main-content-wrapper -->
-
 
 		<a id="fullapi_matrix" name="fullapi_matrix" class="old-syle-anchor">&nbsp;</a>
 		<br>

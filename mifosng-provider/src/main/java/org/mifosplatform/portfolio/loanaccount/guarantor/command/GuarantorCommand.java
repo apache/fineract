@@ -17,7 +17,6 @@ import org.mifosplatform.portfolio.loanaccount.guarantor.domain.GuarantorType;
 public class GuarantorCommand {
 
     /*** Fields for current customers serving as guarantors **/
-    private final Long loanId;
     private final Integer guarantorTypeId;
     private final Long entityId;
 
@@ -35,11 +34,10 @@ public class GuarantorCommand {
     private final String comment;
     private final LocalDate dob;
 
-    public GuarantorCommand(final Long loanId, final Integer guarantorTypeId, final Long entityId, final String firstname,
+    public GuarantorCommand(final Integer guarantorTypeId, final Long entityId, final String firstname,
             final String lastname, final String addressLine1, final String addressLine2, final String city, final String state,
             final String zip, final String country, final String mobileNumber, final String housePhoneNumber, final String comment,
             final LocalDate dob) {
-        this.loanId = loanId;
         /*** Fields for current entities serving as guarantors **/
         this.guarantorTypeId = guarantorTypeId;
         this.entityId = entityId;
@@ -73,8 +71,6 @@ public class GuarantorCommand {
 
         DataValidatorBuilder baseDataValidator = getDataValidator(dataValidationErrors);
 
-        baseDataValidator.reset().parameter(GUARANTOR_JSON_INPUT_PARAMS.LOAN_ID.getValue()).value(this.loanId).notNull()
-                .integerGreaterThanZero();
         baseDataValidator.reset().parameter(GUARANTOR_JSON_INPUT_PARAMS.GUARANTOR_TYPE_ID.getValue()).value(this.guarantorTypeId).notNull()
                 .inMinMaxRange(GuarantorType.getMinValue(), GuarantorType.getMaxValue());
 

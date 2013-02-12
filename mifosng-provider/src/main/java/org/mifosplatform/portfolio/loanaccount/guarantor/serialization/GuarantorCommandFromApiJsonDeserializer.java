@@ -44,7 +44,6 @@ public final class GuarantorCommandFromApiJsonDeserializer extends AbstractFromA
 
         final JsonElement element = fromApiJsonHelper.parse(json);
 
-        Long loanId = fromApiJsonHelper.extractLongNamed(GUARANTOR_JSON_INPUT_PARAMS.LOAN_ID.getValue(), element);
         Integer guarantorTypeId = fromApiJsonHelper.extractIntegerSansLocaleNamed(GUARANTOR_JSON_INPUT_PARAMS.GUARANTOR_TYPE_ID.getValue(),
                 element);
         Long entityId = fromApiJsonHelper.extractLongNamed(GUARANTOR_JSON_INPUT_PARAMS.ENTITY_ID.getValue(), element);
@@ -61,7 +60,7 @@ public final class GuarantorCommandFromApiJsonDeserializer extends AbstractFromA
         String comment = fromApiJsonHelper.extractStringNamed(GUARANTOR_JSON_INPUT_PARAMS.COMMENT.getValue(), element);
         LocalDate dob = fromApiJsonHelper.extractLocalDateNamed(GUARANTOR_JSON_INPUT_PARAMS.DATE_OF_BIRTH.getValue(), element);
 
-        return new GuarantorCommand(loanId, guarantorTypeId, entityId, firstname, lastname, addressLine1, addressLine2, city, state, zip,
+        return new GuarantorCommand(guarantorTypeId, entityId, firstname, lastname, addressLine1, addressLine2, city, state, zip,
                 country, mobileNumber, housePhoneNumber, comment, dob);
     }
 }
