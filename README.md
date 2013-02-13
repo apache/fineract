@@ -1,7 +1,19 @@
-mifosx
+Mifos X: A Platform for Microfiance
 ======
 
 The next evolution of mifos focussing being faster, lighter and cheaper to change (than existing mifos) so that it is more responsive to the needs of MFI’s and Integrators
+
+Version
+==========
+
+The mifosx platform is currently still in BETA. That means its likely that there will be changes to the Public API so any use or development against is at your own risk.
+
+Latest release: 
+
+License
+=============
+
+This project is licensed under MPL V2. See https://github.com/openMF/mifosx/blob/master/LICENSE.md
 
 Video Demonstration
 ===============
