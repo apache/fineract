@@ -40,8 +40,6 @@ import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSeriali
 import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
-import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
-import org.mifosplatform.organisation.monetary.domain.Money;
 import org.mifosplatform.organisation.staff.data.BulkTransferLoanOfficerData;
 import org.mifosplatform.organisation.staff.data.StaffData;
 import org.mifosplatform.organisation.staff.service.StaffReadPlatformService;
@@ -54,7 +52,6 @@ import org.mifosplatform.portfolio.loanaccount.data.LoanAccountData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanBasicDetailsData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanChargeData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanCollateralData;
-import org.mifosplatform.portfolio.loanaccount.data.LoanPermissionData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanTransactionData;
 import org.mifosplatform.portfolio.loanaccount.guarantor.data.GuarantorData;
 import org.mifosplatform.portfolio.loanaccount.guarantor.service.GuarantorReadPlatformService;
@@ -86,11 +83,11 @@ public class LoansApiResource {
             "interestRateFrequencyType", "amortizationType", "interestType", "interestCalculationPeriodType", "submittedOnDate",
             "approvedOnDate", "expectedDisbursementDate", "actualDisbursementDate", "expectedFirstRepaymentOnDate",
             "interestChargedFromDate", "closedOnDate", "expectedMaturityDate", "status", "lifeCycleStatusDate", "repaymentSchedule",
-            "transactions", "permissions", "convenienceData", "charges", "guarantor", "collateral", "productOptions",
-            "amortizationTypeOptions", "interestTypeOptions", "interestCalculationPeriodTypeOptions", "repaymentFrequencyTypeOptions",
-            "termFrequencyTypeOptions", "interestRateFrequencyTypeOptions", "fundOptions", "repaymentStrategyOptions", "chargeOptions",
-            "loanOfficerOptions", "chargeTemplate", "transactionProcessingStrategyId", "termFrequency", "termPeriodFrequencyType",
-            "loanPurposeOptions", "loanCollateralOptions"));
+            "transactions", "convenienceData", "charges", "guarantor", "collateral", "productOptions", "amortizationTypeOptions",
+            "interestTypeOptions", "interestCalculationPeriodTypeOptions", "repaymentFrequencyTypeOptions", "termFrequencyTypeOptions",
+            "interestRateFrequencyTypeOptions", "fundOptions", "repaymentStrategyOptions", "chargeOptions", "loanOfficerOptions",
+            "chargeTemplate", "transactionProcessingStrategyId", "termFrequency", "termPeriodFrequencyType", "loanPurposeOptions",
+            "loanCollateralOptions"));
 
     private final String resourceNameForPermissions = "LOAN";
 
@@ -198,7 +195,7 @@ public class LoansApiResource {
                 .retrieveCodeValuesByCode("LoanCollateral");
 
         final boolean convenienceDataRequired = false;
-        final LoanAccountData newLoanAccount = new LoanAccountData(loanBasicDetails, convenienceDataRequired, null, null, null, charges,
+        final LoanAccountData newLoanAccount = new LoanAccountData(loanBasicDetails, convenienceDataRequired, null, null, charges,
                 collateral, guarantors, productOptions, loanTermFrequencyTypeOptions, repaymentFrequencyTypeOptions,
                 repaymentStrategyOptions, interestRateFrequencyTypeOptions, amortizationTypeOptions, interestTypeOptions,
                 interestCalculationPeriodTypeOptions, fundOptions, chargeOptions, chargeTemplate, allowedLoanOfficers, loanPurposeOptions,
@@ -218,10 +215,8 @@ public class LoansApiResource {
 
         final LoanBasicDetailsData loanBasicDetails = this.loanReadPlatformService.retrieveLoanAccountDetails(loanId);
 
-        int loanRepaymentsCount = 0;
         Collection<LoanTransactionData> loanRepayments = null;
         LoanScheduleData repaymentSchedule = null;
-        LoanPermissionData permissions = null;
         Collection<LoanChargeData> charges = null;
         Collection<GuarantorData> guarantors = null;
         Collection<LoanCollateralData> collateral = null;
@@ -263,32 +258,6 @@ public class LoansApiResource {
                         singleDisbursement, loanBasicDetails.getTotalDisbursementCharges(), loanBasicDetails.getInArrearsTolerance());
 
                 convenienceDataRequired = true;
-            }
-
-            if (associationParameters.contains("permissions")) {
-
-                if (repaymentSchedule == null) { throw new IllegalStateException(); }
-                mandatoryResponseParameters.add("permissions");
-
-                // FIXME - KW - Waive feature was changed to waive interest at
-                // anytime so this permission checking is probably not needed -
-                // look into.
-                final MonetaryCurrency currency = new MonetaryCurrency(loanBasicDetails.getCurrency().code(), loanBasicDetails
-                        .getCurrency().decimalPlaces());
-                final Money tolerance = Money.of(currency, loanBasicDetails.getInArrearsTolerance());
-
-                final Money totalOutstandingMoney = Money.of(currency, repaymentSchedule.totalOutstanding());
-
-                boolean isWaiveAllowed = totalOutstandingMoney.isGreaterThanZero()
-                        && (tolerance.isGreaterThan(totalOutstandingMoney) || tolerance.isEqualTo(totalOutstandingMoney));
-
-                loanRepaymentsCount = retrieveNonDisbursementTransactions(loanRepayments);
-                permissions = this.loanReadPlatformService.retrieveLoanPermissions(loanBasicDetails, isWaiveAllowed, loanRepaymentsCount);
-
-                // clear parent data which wasn't requested
-                if (!associationParameters.contains("repaymentSchedule")) {
-                    repaymentSchedule = null;
-                }
             }
 
             if (associationParameters.contains("charges")) {
@@ -345,7 +314,7 @@ public class LoansApiResource {
         }
 
         final LoanAccountData loanAccount = new LoanAccountData(loanBasicDetails, convenienceDataRequired, repaymentSchedule,
-                loanRepayments, permissions, charges, collateral, guarantors, productOptions, loanTermFrequencyTypeOptions,
+                loanRepayments, charges, collateral, guarantors, productOptions, loanTermFrequencyTypeOptions,
                 repaymentFrequencyTypeOptions, repaymentStrategyOptions, interestRateFrequencyTypeOptions, amortizationTypeOptions,
                 interestTypeOptions, interestCalculationPeriodTypeOptions, fundOptions, chargeOptions, chargeTemplate, allowedLoanOfficers,
                 loanPurposeOptions, loanCollateralOptions);
@@ -353,20 +322,6 @@ public class LoansApiResource {
         final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters(),
                 mandatoryResponseParameters);
         return this.toApiJsonSerializer.serialize(settings, loanAccount, LOAN_DATA_PARAMETERS);
-    }
-
-    private int retrieveNonDisbursementTransactions(final Collection<LoanTransactionData> loanRepayments) {
-        int loanRepaymentsCount = 0;
-        if (!CollectionUtils.isEmpty(loanRepayments)) {
-            for (LoanTransactionData transaction : loanRepayments) {
-                if (transaction.isNotDisbursement()) {
-                    // use this to decide if undo disbural should permission
-                    // should be set to true.
-                    loanRepaymentsCount++;
-                }
-            }
-        }
-        return loanRepaymentsCount;
     }
 
     @POST

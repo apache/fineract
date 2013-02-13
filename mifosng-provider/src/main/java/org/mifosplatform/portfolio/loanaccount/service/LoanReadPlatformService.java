@@ -11,7 +11,6 @@ import java.util.Collection;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.mifosplatform.portfolio.loanaccount.data.DisbursementData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanBasicDetailsData;
-import org.mifosplatform.portfolio.loanaccount.data.LoanPermissionData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanTransactionData;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.data.LoanScheduleData;
 
@@ -23,8 +22,6 @@ public interface LoanReadPlatformService {
             BigDecimal totalChargesAtDisbursement, BigDecimal inArrearsTolerance);
 
     Collection<LoanTransactionData> retrieveLoanTransactions(Long loanId);
-
-    LoanPermissionData retrieveLoanPermissions(LoanBasicDetailsData loanBasicDetails, boolean isWaiverAllowed, int repaymentAndWaiveCount);
 
     LoanBasicDetailsData retrieveClientAndProductDetails(Long clientId, Long productId);
 

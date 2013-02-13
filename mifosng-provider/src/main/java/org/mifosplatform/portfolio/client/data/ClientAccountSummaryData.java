@@ -5,7 +5,7 @@
  */
 package org.mifosplatform.portfolio.client.data;
 
-import org.mifosplatform.infrastructure.core.data.EnumOptionData;
+import org.mifosplatform.portfolio.loanaccount.data.LoanStatusEnumData;
 
 /**
  * Immutable data object for client loan accounts.
@@ -24,7 +24,7 @@ public class ClientAccountSummaryData {
     private final String productName;
 
     private final Integer accountStatusId;
-    private final EnumOptionData status;
+    private final LoanStatusEnumData status;
 
     public ClientAccountSummaryData(final Long id, final String externalId, final Long productId, final String loanProductName,
             final Integer loanStatusId) {
@@ -37,8 +37,8 @@ public class ClientAccountSummaryData {
         this.status = null;
     }
 
-    public ClientAccountSummaryData(final Long id, final String accountNo, final String externalId, final Long productId, final String loanProductName,
-            final EnumOptionData loanStatus) {
+    public ClientAccountSummaryData(final Long id, final String accountNo, final String externalId, final Long productId,
+            final String loanProductName, final LoanStatusEnumData loanStatus) {
         this.id = id;
         this.accountNo = accountNo;
         this.externalId = externalId;
@@ -51,7 +51,7 @@ public class ClientAccountSummaryData {
     public Integer accountStatusId() {
         Integer accountStatus = this.accountStatusId;
         if (accountStatus == null && this.status != null) {
-            accountStatus = this.status.getId().intValue();
+            accountStatus = this.status.id().intValue();
         }
         return accountStatus;
     }

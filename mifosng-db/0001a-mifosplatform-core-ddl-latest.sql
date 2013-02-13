@@ -501,7 +501,6 @@ CREATE TABLE `m_loan` (
   `product_id` bigint(20) DEFAULT NULL,
   `fund_id` bigint(20) DEFAULT NULL,
   `loan_officer_id` bigint(20) DEFAULT NULL,
-  `guarantor_id` bigint(20) DEFAULT NULL,
   `loanpurpose_cv_id` INT(11) DEFAULT NULL,
   `loan_status_id` smallint(5) NOT NULL,
   `currency_code` varchar(3) NOT NULL,

@@ -1189,7 +1189,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
             this.loanStatus = statusEnum.getValue();
             actualChanges.put("status", LoanEnumerations.status(this.loanStatus));
 
-            this.approvedOnDate = null;
+            this.disbursedOnDate = null;
             actualChanges.put("disbursedOnDate", "");
 
             updateLoanToPreDisbursalState();

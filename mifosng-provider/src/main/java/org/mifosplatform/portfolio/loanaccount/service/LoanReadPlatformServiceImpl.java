@@ -29,7 +29,7 @@ import org.mifosplatform.portfolio.group.service.GroupReadPlatformService;
 import org.mifosplatform.portfolio.loanaccount.data.DisbursementData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanBasicDetailsData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanChargeData;
-import org.mifosplatform.portfolio.loanaccount.data.LoanPermissionData;
+import org.mifosplatform.portfolio.loanaccount.data.LoanStatusEnumData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanTransactionData;
 import org.mifosplatform.portfolio.loanaccount.domain.Loan;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanRepository;
@@ -198,48 +198,6 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         } catch (EmptyResultDataAccessException e) {
             return null;
         }
-    }
-
-    @Override
-    public LoanPermissionData retrieveLoanPermissions(final LoanBasicDetailsData loanBasicDetails, final boolean isWaiverAllowed,
-            final int repaymentAndWaiveCount) {
-
-        final boolean pendingApproval = (loanBasicDetails.getStatus().getId().equals(100L));
-        final boolean waitingForDisbursal = (loanBasicDetails.getStatus().getId().equals(200L));
-        final boolean isActive = (loanBasicDetails.getStatus().getId().equals(300L));
-        final boolean closedObligationsMet = (loanBasicDetails.getStatus().getId().equals(600L));
-        final boolean closedWrittenOff = (loanBasicDetails.getStatus().getId().equals(602L));
-        final boolean closedRescheduled = (loanBasicDetails.getStatus().getId().equals(602L));
-
-        final boolean closed = closedObligationsMet || closedWrittenOff || closedRescheduled;
-
-        final boolean isOverpaid = (loanBasicDetails.getStatus().getId().equals(700L));
-        boolean addLoanChargeAllowed = true;
-        boolean setGuarantorAllowed = true;
-        boolean editGuarantorAllowed = true;
-        if (closed || isOverpaid) {
-            addLoanChargeAllowed = false;
-            setGuarantorAllowed = false;
-            editGuarantorAllowed = false;
-        }
-
-        final boolean waiveAllowed = isWaiverAllowed && isActive;
-        final boolean makeRepaymentAllowed = isActive;
-        final boolean closeLoanAllowed = !closed && isActive;
-        final boolean closeLoanAsRescheduledAllowed = !closed && !isOverpaid && isActive;
-
-        final boolean rejectAllowed = pendingApproval;
-        final boolean withdrawnByApplicantAllowed = waitingForDisbursal || pendingApproval;
-
-        final boolean undoApprovalAllowed = waitingForDisbursal;
-
-        final boolean undoDisbursalAllowed = isActive && (repaymentAndWaiveCount == 0);
-
-        final boolean disbursalAllowed = waitingForDisbursal;
-
-        return new LoanPermissionData(closeLoanAllowed, closeLoanAsRescheduledAllowed, addLoanChargeAllowed, waiveAllowed,
-                makeRepaymentAllowed, rejectAllowed, withdrawnByApplicantAllowed, undoApprovalAllowed, undoDisbursalAllowed,
-                disbursalAllowed, setGuarantorAllowed, editGuarantorAllowed, pendingApproval, waitingForDisbursal, closedObligationsMet);
     }
 
     @Override
@@ -454,7 +412,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             final int interestRateFrequencyTypeInt = JdbcSupport.getInteger(rs, "interestRateFrequencyType");
             final EnumOptionData interestRateFrequencyType = LoanEnumerations.interestRateFrequencyType(interestRateFrequencyTypeInt);
 
-            final Integer transactionStrategyId = JdbcSupport.getInteger(rs, "transactionStrategyId");
+            final Long transactionStrategyId = JdbcSupport.getLong(rs, "transactionStrategyId");
 
             final int amortizationTypeInt = JdbcSupport.getInteger(rs, "amortizationType");
             final int interestTypeInt = JdbcSupport.getInteger(rs, "interestType");
@@ -466,18 +424,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     .interestCalculationPeriodType(interestCalculationPeriodTypeInt);
 
             final Integer lifeCycleStatusId = JdbcSupport.getInteger(rs, "lifeCycleStatusId");
-            final EnumOptionData status = LoanEnumerations.status(lifeCycleStatusId);
-
-            LocalDate lifeCycleStatusDate = submittedOnDate;
-            if (approvedOnDate != null) {
-                lifeCycleStatusDate = approvedOnDate;
-            }
-            if (actualDisbursementDate != null) {
-                lifeCycleStatusDate = actualDisbursementDate;
-            }
-            if (closedOnDate != null) {
-                lifeCycleStatusDate = closedOnDate;
-            }
+            final LoanStatusEnumData status = LoanEnumerations.status(lifeCycleStatusId);
 
             Collection<LoanChargeData> charges = null;
             return new LoanBasicDetailsData(id, accountNo, externalId, clientId, clientName, clientOfficeId, groupId, groupName,
@@ -486,8 +433,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     expectedMaturityDate, expectedFirstRepaymentOnDate, interestChargedFromDate, currencyData, principal,
                     inArrearsTolerance, numberOfRepayments, repaymentEvery, interestRatePerPeriod, annualInterestRate,
                     repaymentFrequencyType, interestRateFrequencyType, amortizationType, interestType, interestCalculationPeriodType,
-                    status, lifeCycleStatusDate, termFrequency, termPeriodFrequencyType, transactionStrategyId, charges, loanOfficerId,
-                    loanOfficerName, totalDisbursementCharges);
+                    status, termFrequency, termPeriodFrequencyType, transactionStrategyId, charges, loanOfficerId, loanOfficerName,
+                    totalDisbursementCharges);
         }
     }
 

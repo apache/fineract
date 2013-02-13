@@ -36,7 +36,7 @@ public class LoanBasicDetailsData {
     private final Long loanProductId;
     private final String loanProductName;
     private final String loanProductDescription;
-    private final EnumOptionData status;
+    private final LoanStatusEnumData status;
     private final Long fundId;
     private final String fundName;
     private final Long loanPurposeId;
@@ -52,7 +52,7 @@ public class LoanBasicDetailsData {
     private final Integer numberOfRepayments;
     private final Integer repaymentEvery;
     private final EnumOptionData repaymentFrequencyType;
-    private final Integer transactionProcessingStrategyId;
+    private final Long transactionProcessingStrategyId;
     private final EnumOptionData amortizationType;
     private final BigDecimal interestRatePerPeriod;
     private final EnumOptionData interestRateFrequencyType;
@@ -68,7 +68,6 @@ public class LoanBasicDetailsData {
     private final LocalDate interestChargedFromDate;
     private final LocalDate closedOnDate;
     private final LocalDate expectedMaturityDate;
-    private final LocalDate lifeCycleStatusDate;
 
     private final BigDecimal totalDisbursementCharges;
     private final Collection<LoanChargeData> charges;
@@ -140,14 +139,7 @@ public class LoanBasicDetailsData {
         this.numberOfRepayments = numberOfRepayments;
         this.repaymentEvery = repaymentEvery;
         this.repaymentFrequencyType = repaymentFrequencyType;
-
-        // FIXME - kw - settle on using either long or integer for this
-        // throughout product and account fields for loan.
-        if (transactionStrategyId != null) {
-            this.transactionProcessingStrategyId = transactionStrategyId.intValue();
-        } else {
-            this.transactionProcessingStrategyId = null;
-        }
+        this.transactionProcessingStrategyId = transactionStrategyId;
         this.amortizationType = amortizationType;
 
         this.interestRatePerPeriod = interestRatePerPeriod;
@@ -165,7 +157,6 @@ public class LoanBasicDetailsData {
         this.expectedMaturityDate = null;
         this.repaymentsStartingFromDate = null;
         this.interestChargedFromDate = null;
-        this.lifeCycleStatusDate = null;
 
         this.charges = charges;
         this.totalDisbursementCharges = BigDecimal.ZERO;
@@ -208,8 +199,6 @@ public class LoanBasicDetailsData {
         this.interestType = null;
         this.interestCalculationPeriodType = null;
 
-        this.lifeCycleStatusDate = null;
-
         this.submittedOnDate = null;
         this.approvedOnDate = null;
         this.expectedDisbursementDate = expectedDisbursementDate;
@@ -234,10 +223,9 @@ public class LoanBasicDetailsData {
             final BigDecimal inArrearsTolerance, final Integer numberOfRepayments, final Integer repaymentEvery,
             final BigDecimal interestRatePerPeriod, final BigDecimal annualInterestRate, final EnumOptionData repaymentFrequencyType,
             final EnumOptionData interestRateFrequencyType, final EnumOptionData amortizationType, final EnumOptionData interestType,
-            final EnumOptionData interestCalculationPeriodType, final EnumOptionData status, final LocalDate lifeCycleStatusDate,
-            final Integer termFrequency, final EnumOptionData termPeriodFrequencyType, final Integer transactionStrategyId,
-            final Collection<LoanChargeData> charges, final Long loanOfficerId, String loanOfficerName,
-            final BigDecimal totalDisbursementCharges) {
+            final EnumOptionData interestCalculationPeriodType, final LoanStatusEnumData status, final Integer termFrequency,
+            final EnumOptionData termPeriodFrequencyType, final Long transactionStrategyId, final Collection<LoanChargeData> charges,
+            final Long loanOfficerId, String loanOfficerName, final BigDecimal totalDisbursementCharges) {
         this.id = id;
         this.accountNo = accountNo;
         this.externalId = externalId;
@@ -277,7 +265,6 @@ public class LoanBasicDetailsData {
         this.interestType = interestType;
         this.interestCalculationPeriodType = interestCalculationPeriodType;
         this.status = status;
-        this.lifeCycleStatusDate = lifeCycleStatusDate;
         this.termFrequency = termFrequency;
         this.termPeriodFrequencyType = termPeriodFrequencyType;
         this.transactionProcessingStrategyId = transactionStrategyId;
@@ -427,7 +414,7 @@ public class LoanBasicDetailsData {
         return loanProductDescription;
     }
 
-    public EnumOptionData getStatus() {
+    public LoanStatusEnumData getStatus() {
         return status;
     }
 
@@ -519,11 +506,7 @@ public class LoanBasicDetailsData {
         return interestCalculationPeriodType;
     }
 
-    public LocalDate getLifeCycleStatusDate() {
-        return lifeCycleStatusDate;
-    }
-
-    public Integer getTransactionStrategyId() {
+    public Long getTransactionStrategyId() {
         return this.transactionProcessingStrategyId;
     }
 
@@ -556,5 +539,4 @@ public class LoanBasicDetailsData {
 
         return officeId;
     }
-
 }

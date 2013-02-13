@@ -37,7 +37,7 @@ public class LoanAccountData {
     private final Long loanProductId;
     private final String loanProductName;
     private final String loanProductDescription;
-    private final EnumOptionData status;
+    private final LoanStatusEnumData status;
     private final Long fundId;
     private final String fundName;
     private final Long loanPurposeId;
@@ -53,7 +53,7 @@ public class LoanAccountData {
     private final Integer numberOfRepayments;
     private final Integer repaymentEvery;
     private final EnumOptionData repaymentFrequencyType;
-    private final Integer transactionProcessingStrategyId;
+    private final Long transactionProcessingStrategyId;
     private final EnumOptionData amortizationType;
     private final BigDecimal interestRatePerPeriod;
     private final EnumOptionData interestRateFrequencyType;
@@ -69,7 +69,6 @@ public class LoanAccountData {
     private final LocalDate interestChargedFromDate;
     private final LocalDate closedOnDate;
     private final LocalDate expectedMaturityDate;
-    private final LocalDate lifeCycleStatusDate;
 
     // associations
     private final LoanScheduleData repaymentSchedule;
@@ -77,7 +76,6 @@ public class LoanAccountData {
     private final Collection<LoanChargeData> charges;
     private final Collection<LoanCollateralData> collateral;
     private final Collection<GuarantorData> guarantors;
-    private final LoanPermissionData permissions;
     private final LoanConvenienceData convenienceData;
 
     // template
@@ -98,10 +96,9 @@ public class LoanAccountData {
 
     public LoanAccountData(final LoanBasicDetailsData basicDetails, final boolean convenienceDataRequired,
             final LoanScheduleData repaymentSchedule, final Collection<LoanTransactionData> transactions,
-            final LoanPermissionData permissions, final Collection<LoanChargeData> charges,
-            final Collection<LoanCollateralData> collateral, final Collection<GuarantorData> guarantors,
-            final Collection<LoanProductData> productOptions, final Collection<EnumOptionData> termFrequencyTypeOptions,
-            final Collection<EnumOptionData> repaymentFrequencyTypeOptions,
+            final Collection<LoanChargeData> charges, final Collection<LoanCollateralData> collateral,
+            final Collection<GuarantorData> guarantors, final Collection<LoanProductData> productOptions,
+            final Collection<EnumOptionData> termFrequencyTypeOptions, final Collection<EnumOptionData> repaymentFrequencyTypeOptions,
             final Collection<TransactionProcessingStrategyData> repaymentStrategyOptions,
             final Collection<EnumOptionData> interestRateFrequencyTypeOptions, final Collection<EnumOptionData> amortizationTypeOptions,
             final Collection<EnumOptionData> interestTypeOptions, final Collection<EnumOptionData> interestCalculationPeriodTypeOptions,
@@ -110,7 +107,6 @@ public class LoanAccountData {
             final Collection<CodeValueData> loanCollateralOptions) {
         this.repaymentSchedule = repaymentSchedule;
         this.transactions = transactions;
-        this.permissions = permissions;
         this.charges = charges;
         this.collateral = collateral;
         this.guarantors = guarantors;
@@ -190,7 +186,7 @@ public class LoanAccountData {
             this.interestCalculationPeriodType = basicDetails.getInterestCalculationPeriodType();
 
             this.status = basicDetails.getStatus();
-            this.lifeCycleStatusDate = basicDetails.getLifeCycleStatusDate();
+
         } else {
             this.id = null;
             this.accountNo = null;
@@ -236,7 +232,6 @@ public class LoanAccountData {
             this.interestCalculationPeriodType = null;
 
             this.status = null;
-            this.lifeCycleStatusDate = null;
         }
     }
 }

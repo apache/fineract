@@ -30,6 +30,7 @@ import org.mifosplatform.portfolio.client.domain.NoteEnumerations;
 import org.mifosplatform.portfolio.client.exception.ClientIdentifierNotFoundException;
 import org.mifosplatform.portfolio.client.exception.ClientNotFoundException;
 import org.mifosplatform.portfolio.client.exception.NoteNotFoundException;
+import org.mifosplatform.portfolio.loanaccount.data.LoanStatusEnumData;
 import org.mifosplatform.portfolio.loanproduct.service.LoanEnumerations;
 import org.mifosplatform.useradministration.data.AppUserData;
 import org.mifosplatform.useradministration.domain.AppUser;
@@ -325,7 +326,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             final Long productId = JdbcSupport.getLong(rs, "productId");
             final String loanProductName = rs.getString("productName");
             final Integer loanStatusId = JdbcSupport.getInteger(rs, "statusId");
-            final EnumOptionData loanStatus = LoanEnumerations.status(loanStatusId);
+            final LoanStatusEnumData loanStatus = LoanEnumerations.status(loanStatusId);
 
             return new ClientAccountSummaryData(id, accountNo, externalId, productId, loanProductName, loanStatus);
         }
