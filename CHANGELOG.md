@@ -1,4 +1,8 @@
 Changelog
 =====
 
-For releases we will follow semantic versioning approach. (http://semver.org/)
+See VERSIONING for information on what updates to the version number implies for the platform.
+
+Releases
+===============
+0.10.0.beta - Coming soon
