@@ -15,6 +15,8 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
@@ -347,9 +349,8 @@ public class LoanCharge extends AbstractPersistable<Long> {
     }
 
     public LoanChargeCommand toCommand() {
-
-        final LocalDate specifiedDueDate = getDueForCollectionAsOfLocalDate();
-        return new LoanChargeCommand(this.charge.getId(), this.amount, this.chargeTime, this.chargeCalculation, specifiedDueDate);
+        return new LoanChargeCommand(this.getId(), this.charge.getId(), this.amount, this.chargeTime, this.chargeCalculation,
+                getDueForCollectionAsOfLocalDate());
     }
 
     public LocalDate getDueForCollectionAsOfLocalDate() {
@@ -411,16 +412,14 @@ public class LoanCharge extends AbstractPersistable<Long> {
         return this.loan.hasIdentifyOf(loanId);
     }
 
-    public boolean isDueForCollectionBetween(final LocalDate fromNotInclusive, final LocalDate toInclusive) {
+    public boolean isDueForCollectionFromAndUpToAndIncluding(final LocalDate fromNotInclusive, final LocalDate upToAndInclusive) {
         final LocalDate specifiedDueDate = getDueForCollectionAsOfLocalDate();
-
-        return specifiedDueDateFallsWithinPeriod(fromNotInclusive, toInclusive, specifiedDueDate);
+        return occursOnDayFromAndUpToAndIncluding(fromNotInclusive, upToAndInclusive, specifiedDueDate);
     }
 
-    private boolean specifiedDueDateFallsWithinPeriod(final LocalDate fromNotInclusive, final LocalDate toInclusive,
-            final LocalDate specifiedDueDate) {
-        return specifiedDueDate != null && fromNotInclusive.isBefore(specifiedDueDate)
-                && (toInclusive.isAfter(specifiedDueDate) || toInclusive.isEqual(specifiedDueDate));
+    private boolean occursOnDayFromAndUpToAndIncluding(final LocalDate fromNotInclusive, final LocalDate upToAndInclusive,
+            final LocalDate target) {
+        return target != null && target.isAfter(fromNotInclusive) && !target.isAfter(upToAndInclusive);
     }
 
     public boolean isFeeCharge() {
@@ -492,5 +491,28 @@ public class LoanCharge extends AbstractPersistable<Long> {
 
     public String name() {
         return this.charge.getName();
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        if (obj == null) { return false; }
+        if (obj == this) { return true; }
+        if (obj.getClass() != getClass()) { return false; }
+        LoanCharge rhs = (LoanCharge) obj;
+        return new EqualsBuilder().appendSuper(super.equals(obj)) //
+                .append(this.getId(), rhs.getId()) //
+                .append(this.charge.getId(), rhs.charge.getId()) //
+                .append(this.amount, rhs.amount) //
+                .append(this.getDueForCollectionAsOfLocalDate(), rhs.getDueForCollectionAsOfLocalDate()) //
+                .isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(3, 5) //
+                .append(this.getId()) //
+                .append(this.charge.getId()) //
+                .append(this.amount).append(this.getDueForCollectionAsOfLocalDate()) //
+                .toHashCode();
     }
 }

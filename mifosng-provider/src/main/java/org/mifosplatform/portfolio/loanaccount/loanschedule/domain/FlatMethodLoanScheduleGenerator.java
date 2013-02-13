@@ -146,7 +146,7 @@ public class FlatMethodLoanScheduleGenerator implements LoanScheduleGenerator {
         Money cumulative = Money.zero(monetaryCurrency);
 
         for (LoanCharge loanCharge : loanCharges) {
-            if (loanCharge.isDueForCollectionBetween(periodStart, periodEnd) && loanCharge.isFeeCharge()) {
+            if (loanCharge.isDueForCollectionFromAndUpToAndIncluding(periodStart, periodEnd) && loanCharge.isFeeCharge()) {
                 cumulative = cumulative.plus(loanCharge.amount());
             }
         }
@@ -160,7 +160,7 @@ public class FlatMethodLoanScheduleGenerator implements LoanScheduleGenerator {
         Money cumulative = Money.zero(monetaryCurrency);
 
         for (LoanCharge loanCharge : loanCharges) {
-            if (loanCharge.isDueForCollectionBetween(periodStart, periodEnd) && loanCharge.isPenaltyCharge()) {
+            if (loanCharge.isDueForCollectionFromAndUpToAndIncluding(periodStart, periodEnd) && loanCharge.isPenaltyCharge()) {
                 cumulative = cumulative.plus(loanCharge.amount());
             }
         }

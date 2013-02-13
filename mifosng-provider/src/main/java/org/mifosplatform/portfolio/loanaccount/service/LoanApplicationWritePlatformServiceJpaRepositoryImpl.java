@@ -7,6 +7,7 @@ import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
+import org.mifosplatform.infrastructure.codes.domain.CodeValue;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.api.JsonQuery;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
@@ -15,6 +16,7 @@ import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityExce
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.infrastructure.security.exception.NoAuthorizationException;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
+import org.mifosplatform.organisation.staff.domain.Staff;
 import org.mifosplatform.portfolio.client.domain.AccountNumberGenerator;
 import org.mifosplatform.portfolio.client.domain.AccountNumberGeneratorFactory;
 import org.mifosplatform.portfolio.client.domain.Client;
@@ -23,16 +25,17 @@ import org.mifosplatform.portfolio.client.domain.Note;
 import org.mifosplatform.portfolio.client.domain.NoteRepository;
 import org.mifosplatform.portfolio.client.exception.ClientNotFoundException;
 import org.mifosplatform.portfolio.fund.domain.Fund;
-import org.mifosplatform.portfolio.loanaccount.command.LoanChargeCommand;
 import org.mifosplatform.portfolio.loanaccount.command.LoanStateTransitionCommand;
 import org.mifosplatform.portfolio.loanaccount.domain.DefaultLoanLifecycleStateMachine;
 import org.mifosplatform.portfolio.loanaccount.domain.Loan;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanCharge;
+import org.mifosplatform.portfolio.loanaccount.domain.LoanCollateral;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanLifecycleStateMachine;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanRepository;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanStatus;
+import org.mifosplatform.portfolio.loanaccount.exception.LoanApplicationNotInSubmittedAndPendingApprovalStateCannotBeDeleted;
+import org.mifosplatform.portfolio.loanaccount.exception.LoanApplicationNotInSubmittedAndPendingApprovalStateCannotBeModified;
 import org.mifosplatform.portfolio.loanaccount.exception.LoanNotFoundException;
-import org.mifosplatform.portfolio.loanaccount.exception.LoanNotInSubmittedAndPendingApprovalStateCannotBeDeleted;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.data.LoanScheduleData;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.AprCalculator;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.service.LoanScheduleCalculationPlatformService;
@@ -56,7 +59,7 @@ import com.google.gson.JsonElement;
 public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements LoanApplicationWritePlatformService {
 
     private final static Logger logger = LoggerFactory.getLogger(LoanApplicationWritePlatformServiceJpaRepositoryImpl.class);
-    
+
     private final PlatformSecurityContext context;
     private final FromJsonHelper fromJsonHelper;
     private final LoanApplicationCommandFromApiJsonHelper fromApiJsonDeserializer;
@@ -68,6 +71,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
     private final ClientRepository clientRepository;
     private final LoanProductRepository loanProductRepository;
     private final LoanChargeAssembler loanChargeAssembler;
+    private final LoanCollateralAssembler loanCollateralAssembler;
     private final AprCalculator aprCalculator;
     private final AccountNumberGeneratorFactory accountIdentifierGeneratorFactory;
 
@@ -76,9 +80,10 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             final LoanApplicationCommandFromApiJsonHelper fromApiJsonDeserializer,
             final LoanStateTransitionCommandFromApiJsonDeserializer loanStateTransitionCommandFromApiJsonDeserializer,
             final AprCalculator aprCalculator, final LoanAssembler loanAssembler, final LoanChargeAssembler loanChargeAssembler,
-            final LoanRepository loanRepository, final NoteRepository noteRepository,
-            final LoanScheduleCalculationPlatformService calculationPlatformService, final ClientRepository clientRepository,
-            final LoanProductRepository loanProductRepository, final AccountNumberGeneratorFactory accountIdentifierGeneratorFactory) {
+            final LoanCollateralAssembler loanCollateralAssembler, final LoanRepository loanRepository,
+            final NoteRepository noteRepository, final LoanScheduleCalculationPlatformService calculationPlatformService,
+            final ClientRepository clientRepository, final LoanProductRepository loanProductRepository,
+            final AccountNumberGeneratorFactory accountIdentifierGeneratorFactory) {
         this.context = context;
         this.fromJsonHelper = fromJsonHelper;
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
@@ -86,6 +91,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         this.aprCalculator = aprCalculator;
         this.loanAssembler = loanAssembler;
         this.loanChargeAssembler = loanChargeAssembler;
+        this.loanCollateralAssembler = loanCollateralAssembler;
         this.loanRepository = loanRepository;
         this.noteRepository = noteRepository;
         this.calculationPlatformService = calculationPlatformService;
@@ -149,9 +155,15 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
 
             final Loan existingLoanApplication = retrieveLoanBy(loanId);
 
-            final LoanChargeCommand[] charges = this.fromApiJsonDeserializer.extractLoanCharges(command.json());
+            if (!existingLoanApplication.isSubmittedAndPendingApproval()) { throw new LoanApplicationNotInSubmittedAndPendingApprovalStateCannotBeModified(
+                    loanId); }
 
-            final Map<String, Object> changes = existingLoanApplication.loanApplicationModification(command, charges, this.aprCalculator);
+            final Set<LoanCharge> possiblyModifedLoanCharges = this.loanChargeAssembler.fromParsedJson(command.parsedJson());
+            final Set<LoanCollateral> possiblyModifedLoanCollateralItems = this.loanCollateralAssembler
+                    .fromParsedJson(command.parsedJson());
+
+            final Map<String, Object> changes = existingLoanApplication.loanApplicationModification(command, possiblyModifedLoanCharges,
+                    possiblyModifedLoanCollateralItems, this.aprCalculator);
 
             final String clientIdParamName = "clientId";
             if (changes.containsKey(clientIdParamName)) {
@@ -179,6 +191,20 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 existingLoanApplication.updateFund(fund);
             }
 
+            final String loanPurposeIdParamName = "loanPurposeId";
+            if (changes.containsKey(loanPurposeIdParamName)) {
+                final Long loanPurposeId = command.longValueOfParameterNamed(loanPurposeIdParamName);
+                final CodeValue loanPurpose = this.loanAssembler.findCodeValueByIdIfProvided(loanPurposeId);
+                existingLoanApplication.updateLoanPurpose(loanPurpose);
+            }
+
+            final String loanOfficerIdParamName = "loanOfficerId";
+            if (changes.containsKey(loanOfficerIdParamName)) {
+                final Long loanOfficerId = command.longValueOfParameterNamed(loanOfficerIdParamName);
+                final Staff newValue = this.loanAssembler.findLoanOfficerByIdIfProvided(loanOfficerId);
+                existingLoanApplication.updateLoanOfficerOnLoanApplication(newValue);
+            }
+
             final String strategyIdParamName = "transactionProcessingStrategyId";
             if (changes.containsKey(strategyIdParamName)) {
                 final Long strategyId = command.longValueOfParameterNamed(strategyIdParamName);
@@ -191,6 +217,12 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             if (changes.containsKey(chargesParamName)) {
                 final Set<LoanCharge> loanCharges = this.loanChargeAssembler.fromParsedJson(command.parsedJson());
                 existingLoanApplication.updateLoanCharges(loanCharges);
+            }
+
+            final String collateralParamName = "collateral";
+            if (changes.containsKey(collateralParamName)) {
+                final Set<LoanCollateral> loanCollateral = this.loanCollateralAssembler.fromParsedJson(command.parsedJson());
+                existingLoanApplication.updateLoanCollateral(loanCollateral);
             }
 
             if (changes.containsKey("recalculateLoanSchedule")) {
@@ -224,7 +256,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             return CommandProcessingResult.empty();
         }
     }
-    
+
     /*
      * Guaranteed to throw an exception no matter what the data integrity issue
      * is.
@@ -245,10 +277,9 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         }
 
         logAsErrorUnexpectedDataIntegrityException(dve);
-        throw new PlatformDataIntegrityException("error.msg.unknown.data.integrity.issue",
-                "Unknown data integrity issue with resource.");
+        throw new PlatformDataIntegrityException("error.msg.unknown.data.integrity.issue", "Unknown data integrity issue with resource.");
     }
-    
+
     private void logAsErrorUnexpectedDataIntegrityException(final DataIntegrityViolationException dve) {
         logger.error(dve.getMessage(), dve);
     }
@@ -261,7 +292,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
 
         final Loan loan = retrieveLoanBy(loanId);
 
-        if (loan.isNotSubmittedAndPendingApproval()) { throw new LoanNotInSubmittedAndPendingApprovalStateCannotBeDeleted(loanId); }
+        if (loan.isNotSubmittedAndPendingApproval()) { throw new LoanApplicationNotInSubmittedAndPendingApprovalStateCannotBeDeleted(loanId); }
 
         List<Note> relatedNotes = this.noteRepository.findByLoanId(loan.getId());
         this.noteRepository.deleteInBatch(relatedNotes);
@@ -296,7 +327,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         final Map<String, Object> changes = loan.loanApplicationApproval(command, defaultLoanLifecycleStateMachine());
         if (!changes.isEmpty()) {
             this.loanRepository.save(loan);
-    
+
             final String noteText = command.stringValueOfParameterNamed("note");
             if (StringUtils.isNotBlank(noteText)) {
                 Note note = Note.loanNote(loan, noteText);
@@ -327,7 +358,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         final Map<String, Object> changes = loan.undoApproval(defaultLoanLifecycleStateMachine());
         if (!changes.isEmpty()) {
             this.loanRepository.save(loan);
-    
+
             String noteText = command.stringValueOfParameterNamed("note");
             if (StringUtils.isNotBlank(noteText)) {
                 Note note = Note.loanNote(loan, noteText);
@@ -365,7 +396,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         final Map<String, Object> changes = loan.loanApplicationRejection(command, defaultLoanLifecycleStateMachine());
         if (!changes.isEmpty()) {
             this.loanRepository.save(loan);
-    
+
             String noteText = command.stringValueOfParameterNamed("note");
             if (StringUtils.isNotBlank(noteText)) {
                 Note note = Note.loanNote(loan, noteText);
@@ -403,7 +434,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         final Map<String, Object> changes = loan.loanApplicationWithdrawnByApplicant(command, defaultLoanLifecycleStateMachine());
         if (!changes.isEmpty()) {
             this.loanRepository.save(loan);
-    
+
             String noteText = command.stringValueOfParameterNamed("note");
             if (StringUtils.isNotBlank(noteText)) {
                 Note note = Note.loanNote(loan, noteText);

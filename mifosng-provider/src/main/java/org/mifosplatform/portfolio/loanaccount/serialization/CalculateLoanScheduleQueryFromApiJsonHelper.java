@@ -17,7 +17,6 @@ import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
 import org.mifosplatform.infrastructure.core.exception.InvalidJsonException;
 import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
-import org.mifosplatform.portfolio.loanaccount.command.LoanChargeCommand;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -32,12 +31,12 @@ public final class CalculateLoanScheduleQueryFromApiJsonHelper {
     /**
      * The parameters supported for this command.
      */
-    final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("clientId", "groupId", "productId", "accountNo",
-            "externalId", "fundId", "transactionProcessingStrategyId", "principal", "inArrearsTolerance", "interestRatePerPeriod",
-            "repaymentEvery", "numberOfRepayments", "loanTermFrequency", "loanTermFrequencyType", "charges", "repaymentFrequencyType",
-            "interestRateFrequencyType", "amortizationType", "interestType", "interestCalculationPeriodType", "expectedDisbursementDate",
-            "repaymentsStartingFromDate", "interestChargedFromDate", "submittedOnDate", "submittedOnNote", "locale", "dateFormat",
-            "loanOfficerId", "id"));
+    final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("id", "clientId", "groupId", "productId", "accountNo",
+            "externalId", "fundId", "loanOfficerId", "loanPurposeId", "transactionProcessingStrategyId", "principal", "inArrearsTolerance",
+            "interestRatePerPeriod", "repaymentEvery", "numberOfRepayments", "loanTermFrequency", "loanTermFrequencyType",
+            "repaymentFrequencyType", "interestRateFrequencyType", "amortizationType", "interestType", "interestCalculationPeriodType",
+            "expectedDisbursementDate", "repaymentsStartingFromDate", "interestChargedFromDate", "submittedOnDate", "submittedOnNote",
+            "locale", "dateFormat", "charges", "collateral"));
 
     private final FromJsonHelper fromApiJsonHelper;
 
@@ -124,14 +123,16 @@ public final class CalculateLoanScheduleQueryFromApiJsonHelper {
         final String repaymentsStartingFromDateParameterName = "repaymentsStartingFromDate";
         if (fromApiJsonHelper.parameterExists(repaymentsStartingFromDateParameterName, element)) {
             repaymentsStartingFromDate = fromApiJsonHelper.extractLocalDateNamed(repaymentsStartingFromDateParameterName, element);
-            baseDataValidator.reset().parameter(repaymentsStartingFromDateParameterName).value(repaymentsStartingFromDate).ignoreIfNull().notNull();
+            baseDataValidator.reset().parameter(repaymentsStartingFromDateParameterName).value(repaymentsStartingFromDate).ignoreIfNull()
+                    .notNull();
         }
 
         LocalDate interestChargedFromDate = null;
         final String interestChargedFromDateParameterName = "interestChargedFromDate";
         if (fromApiJsonHelper.parameterExists(interestChargedFromDateParameterName, element)) {
             interestChargedFromDate = fromApiJsonHelper.extractLocalDateNamed(interestChargedFromDateParameterName, element);
-            baseDataValidator.reset().parameter(interestChargedFromDateParameterName).value(interestChargedFromDate).ignoreIfNull().notNull();
+            baseDataValidator.reset().parameter(interestChargedFromDateParameterName).value(interestChargedFromDate).ignoreIfNull()
+                    .notNull();
         }
 
         validateRepaymentsStartingFromDateIsAfterDisbursementDate(dataValidationErrors, expectedDisbursementDate,
@@ -140,13 +141,34 @@ public final class CalculateLoanScheduleQueryFromApiJsonHelper {
         validateRepaymentsStartingFromDateAndInterestChargedFromDate(dataValidationErrors, expectedDisbursementDate,
                 repaymentsStartingFromDate, interestChargedFromDate);
 
-        final LoanChargeCommand[] charges = extractInToLoanChargeCommands(element);
-        if (charges != null) {
-            for (LoanChargeCommand loanChargeCommand : charges) {
-                try {
-                    loanChargeCommand.validateForCreate();
-                } catch (PlatformApiDataValidationException e) {
-                    dataValidationErrors.addAll(e.getErrors());
+        // charges
+        final String chargesParameterName = "charges";
+        if (element.isJsonObject() && fromApiJsonHelper.parameterExists(chargesParameterName, element)) {
+            final JsonObject topLevelJsonElement = element.getAsJsonObject();
+            final String dateFormat = fromApiJsonHelper.extractDateFormatParameter(topLevelJsonElement);
+            final Locale locale = fromApiJsonHelper.extractLocaleParameter(topLevelJsonElement);
+
+            if (topLevelJsonElement.get(chargesParameterName).isJsonArray()) {
+                final Type arrayObjectParameterTypeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+                final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("id", "chargeId", "amount", "chargeTimeType",
+                        "chargeCalculationType", "specifiedDueDate"));
+
+                final JsonArray array = topLevelJsonElement.get("charges").getAsJsonArray();
+                for (int i = 1; i <= array.size(); i++) {
+
+                    final JsonObject loanChargeElement = array.get(i - 1).getAsJsonObject();
+                    final String arrayObjectJson = this.fromApiJsonHelper.toJson(loanChargeElement);
+                    fromApiJsonHelper.checkForUnsupportedParameters(arrayObjectParameterTypeOfMap, arrayObjectJson, supportedParameters);
+
+                    final Long chargeId = fromApiJsonHelper.extractLongNamed("chargeId", loanChargeElement);
+                    baseDataValidator.reset().parameter("charges").parameterAtIndexArray("chargeId", i).value(chargeId).notNull()
+                            .integerGreaterThanZero();
+
+                    final BigDecimal amount = fromApiJsonHelper.extractBigDecimalNamed("amount", loanChargeElement, locale);
+                    baseDataValidator.reset().parameter("charges").parameterAtIndexArray("amount", i).value(amount).notNull()
+                            .positiveAmount();
+
+                    fromApiJsonHelper.extractLocalDateNamed("specifiedDueDate", loanChargeElement, dateFormat, locale);
                 }
             }
         }
@@ -213,32 +235,47 @@ public final class CalculateLoanScheduleQueryFromApiJsonHelper {
         }
     }
 
-    private LoanChargeCommand[] extractInToLoanChargeCommands(final JsonElement element) {
-        LoanChargeCommand[] charges = null;
-        if (element.isJsonObject()) {
-            final JsonObject topLevelJsonElement = element.getAsJsonObject();
-            final String dateFormat = fromApiJsonHelper.extractDateFormatParameter(topLevelJsonElement);
-            final Locale locale = fromApiJsonHelper.extractLocaleParameter(topLevelJsonElement);
-            if (topLevelJsonElement.has("charges") && topLevelJsonElement.get("charges").isJsonArray()) {
-
-                final JsonArray array = topLevelJsonElement.get("charges").getAsJsonArray();
-                charges = new LoanChargeCommand[array.size()];
-                for (int i = 0; i < array.size(); i++) {
-
-                    final JsonObject loanChargeElement = array.get(i).getAsJsonObject();
-
-                    final Long chargeId = fromApiJsonHelper.extractLongNamed("chargeId", loanChargeElement);
-                    final BigDecimal amount = fromApiJsonHelper.extractBigDecimalNamed("amount", loanChargeElement, locale);
-                    final Integer chargeTimeType = fromApiJsonHelper.extractIntegerNamed("chargeTimeType", loanChargeElement, locale);
-                    final Integer chargeCalculationType = fromApiJsonHelper.extractIntegerNamed("chargeCalculationType", loanChargeElement,
-                            locale);
-                    final LocalDate specifiedDueDate = fromApiJsonHelper.extractLocalDateNamed("specifiedDueDate", loanChargeElement,
-                            dateFormat, locale);
-
-                    charges[i] = new LoanChargeCommand(chargeId, amount, chargeTimeType, chargeCalculationType, specifiedDueDate);
-                }
-            }
-        }
-        return charges;
-    }
+    // private LoanChargeCommand[] extractInToLoanChargeCommands(final
+    // JsonElement element) {
+    // LoanChargeCommand[] charges = null;
+    // if (element.isJsonObject()) {
+    // final JsonObject topLevelJsonElement = element.getAsJsonObject();
+    // final String dateFormat =
+    // fromApiJsonHelper.extractDateFormatParameter(topLevelJsonElement);
+    // final Locale locale =
+    // fromApiJsonHelper.extractLocaleParameter(topLevelJsonElement);
+    // if (topLevelJsonElement.has("charges") &&
+    // topLevelJsonElement.get("charges").isJsonArray()) {
+    //
+    // final JsonArray array =
+    // topLevelJsonElement.get("charges").getAsJsonArray();
+    // charges = new LoanChargeCommand[array.size()];
+    // for (int i = 0; i < array.size(); i++) {
+    //
+    // final JsonObject loanChargeElement = array.get(i).getAsJsonObject();
+    //
+    // final Long id = fromApiJsonHelper.extractLongNamed("id",
+    // loanChargeElement);
+    // final Long chargeId = fromApiJsonHelper.extractLongNamed("chargeId",
+    // loanChargeElement);
+    // final BigDecimal amount =
+    // fromApiJsonHelper.extractBigDecimalNamed("amount", loanChargeElement,
+    // locale);
+    // final Integer chargeTimeType =
+    // fromApiJsonHelper.extractIntegerNamed("chargeTimeType",
+    // loanChargeElement, locale);
+    // final Integer chargeCalculationType =
+    // fromApiJsonHelper.extractIntegerNamed("chargeCalculationType",
+    // loanChargeElement,
+    // locale);
+    // fromApiJsonHelper.extractLocalDateNamed("specifiedDueDate",
+    // loanChargeElement, dateFormat, locale);
+    //
+    // charges[i] = new LoanChargeCommand(id, chargeId, amount, chargeTimeType,
+    // chargeCalculationType);
+    // }
+    // }
+    // }
+    // return charges;
+    // }
 }

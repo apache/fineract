@@ -26,6 +26,7 @@ DROP TABLE IF EXISTS `m_group_client`;
 DROP TABLE IF EXISTS `m_guarantor`;
 DROP TABLE IF EXISTS `m_loan`;
 DROP TABLE IF EXISTS `m_loan_charge`;
+DROP TABLE IF EXISTS `m_loan_collateral`;
 DROP TABLE IF EXISTS `m_loan_officer_assignment_history`;
 DROP TABLE IF EXISTS `m_loan_repayment_schedule`;
 DROP TABLE IF EXISTS `m_loan_transaction`;
@@ -501,6 +502,7 @@ CREATE TABLE `m_loan` (
   `fund_id` bigint(20) DEFAULT NULL,
   `loan_officer_id` bigint(20) DEFAULT NULL,
   `guarantor_id` bigint(20) DEFAULT NULL,
+  `loanpurpose_cv_id` INT(11) DEFAULT NULL,
   `loan_status_id` smallint(5) NOT NULL,
   `currency_code` varchar(3) NOT NULL,
   `currency_digits` smallint(5) NOT NULL,
@@ -544,12 +546,14 @@ CREATE TABLE `m_loan` (
   KEY `FK7C885877240145` (`fund_id`),
   KEY `FK_loan_ltp_strategy` (`loan_transaction_strategy_id`),
   KEY `FK_m_loan_m_staff` (`loan_officer_id`),
+  KEY `FK_m_loanpurpose_codevalue` (`loanpurpose_cv_id`),
   KEY `group_id` (`group_id`),
   CONSTRAINT `FK7C885877240145` FOREIGN KEY (`fund_id`) REFERENCES `m_fund` (`id`),
   CONSTRAINT `FKB6F935D87179A0CB` FOREIGN KEY (`client_id`) REFERENCES `m_client` (`id`),
   CONSTRAINT `FKB6F935D8C8D4B434` FOREIGN KEY (`product_id`) REFERENCES `m_product_loan` (`id`),
   CONSTRAINT `FK_loan_ltp_strategy` FOREIGN KEY (`loan_transaction_strategy_id`) REFERENCES `ref_loan_transaction_processing_strategy` (`id`),
   CONSTRAINT `FK_m_loan_m_staff` FOREIGN KEY (`loan_officer_id`) REFERENCES `m_staff` (`id`),
+  CONSTRAINT `FK_m_loanpurpose_codevalue` FOREIGN KEY (`loanpurpose_cv_id`) REFERENCES `m_code_value` (`id`),
   CONSTRAINT `m_loan_ibfk_1` FOREIGN KEY (`group_id`) REFERENCES `m_group` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -600,6 +604,18 @@ CREATE TABLE `m_loan_charge` (
   KEY `m_loan_charge_ibfk_2` (`loan_id`),
   CONSTRAINT `m_loan_charge_ibfk_1` FOREIGN KEY (`charge_id`) REFERENCES `m_charge` (`id`),
   CONSTRAINT `m_loan_charge_ibfk_2` FOREIGN KEY (`loan_id`) REFERENCES `m_loan` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+CREATE TABLE `m_loan_collateral` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `loan_id` bigint(20) NOT NULL,
+  `type_cv_id` int(11) NOT NULL,
+  `description` varchar(500) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FK_collateral_m_loan` (`loan_id`),
+  KEY `FK_collateral_code_value` (`type_cv_id`),
+  CONSTRAINT `FK_collateral_m_loan` FOREIGN KEY (`loan_id`) REFERENCES `m_loan` (`id`),
+  CONSTRAINT `FK_collateral_code_value` FOREIGN KEY (`type_cv_id`) REFERENCES `m_code_value` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `m_loan_officer_assignment_history` (

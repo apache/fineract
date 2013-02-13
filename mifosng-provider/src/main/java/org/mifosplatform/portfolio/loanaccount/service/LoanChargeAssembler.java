@@ -89,10 +89,7 @@ public class LoanChargeAssembler {
                         loanCharges.add(loanCharge);
                     }
                 }
-            } else {
-                // no charges passed, use existing ones against loan
             }
-
         }
 
         return loanCharges;

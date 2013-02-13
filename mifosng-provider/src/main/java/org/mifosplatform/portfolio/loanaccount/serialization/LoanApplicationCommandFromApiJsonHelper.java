@@ -17,7 +17,6 @@ import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
 import org.mifosplatform.infrastructure.core.exception.InvalidJsonException;
 import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
-import org.mifosplatform.portfolio.loanaccount.command.LoanChargeCommand;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -32,12 +31,15 @@ public final class LoanApplicationCommandFromApiJsonHelper {
     /**
      * The parameters supported for this command.
      */
-    final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("id", "clientId", "groupId", "productId", "accountNo",
-            "externalId", "fundId", "loanOfficerId", "transactionProcessingStrategyId", "principal", "inArrearsTolerance",
-            "repaymentEvery", "numberOfRepayments", "loanTermFrequency", "loanTermFrequencyType", "charges", "repaymentFrequencyType",
-            "interestRatePerPeriod", "interestRateFrequencyType", "interestType", "interestCalculationPeriodType", "amortizationType",
-            "expectedDisbursementDate", "repaymentsStartingFromDate", "interestChargedFromDate", "submittedOnDate", "submittedOnNote",
-            "locale", "dateFormat"));
+    final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("dateFormat", "locale", "id", "clientId", "groupId",
+            "productId", "principal", "loanTermFrequency", "loanTermFrequencyType", "numberOfRepayments", "repaymentEvery",
+            "repaymentFrequencyType", "interestRatePerPeriod", "interestRateFrequencyType", "amortizationType", "interestType",
+            "interestCalculationPeriodType", "expectedDisbursementDate", "repaymentsStartingFromDate", "interestChargedFromDate",
+            "submittedOnDate", "submittedOnNote", //
+            "accountNo", "externalId", "fundId", "loanOfficerId", // optional
+            "loanPurposeId", "inArrearsTolerance", "charges", "collateral", // optional
+            "transactionProcessingStrategyId" // settings
+    ));
 
     private final FromJsonHelper fromApiJsonHelper;
 
@@ -97,6 +99,12 @@ public final class LoanApplicationCommandFromApiJsonHelper {
             baseDataValidator.reset().parameter(loanOfficerIdParameterName).value(loanOfficerId).ignoreIfNull().integerGreaterThanZero();
         }
 
+        final String loanPurposeIdParameterName = "loanPurposeId";
+        if (fromApiJsonHelper.parameterExists(loanPurposeIdParameterName, element)) {
+            final Long loanPurposeId = fromApiJsonHelper.extractLongNamed(loanPurposeIdParameterName, element);
+            baseDataValidator.reset().parameter(loanPurposeIdParameterName).value(loanPurposeId).ignoreIfNull().integerGreaterThanZero();
+        }
+
         final BigDecimal principal = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("principal", element);
         baseDataValidator.reset().parameter("principal").value(principal).notNull().positiveAmount();
 
@@ -105,7 +113,7 @@ public final class LoanApplicationCommandFromApiJsonHelper {
         baseDataValidator.reset().parameter(loanTermFrequencyParameterName).value(loanTermFrequency).notNull().integerGreaterThanZero();
 
         final String loanTermFrequencyTypeParameterName = "loanTermFrequencyType";
-        final Integer loanTermFrequencyType = fromApiJsonHelper.extractIntegerWithLocaleNamed(loanTermFrequencyTypeParameterName, element);
+        final Integer loanTermFrequencyType = fromApiJsonHelper.extractIntegerSansLocaleNamed(loanTermFrequencyTypeParameterName, element);
         baseDataValidator.reset().parameter(loanTermFrequencyTypeParameterName).value(loanTermFrequencyType).notNull().inMinMaxRange(0, 3);
 
         final String numberOfRepaymentsParameterName = "numberOfRepayments";
@@ -117,7 +125,7 @@ public final class LoanApplicationCommandFromApiJsonHelper {
         baseDataValidator.reset().parameter(repaymentEveryParameterName).value(repaymentEvery).notNull().integerGreaterThanZero();
 
         final String repaymentEveryFrequencyTypeParameterName = "repaymentFrequencyType";
-        final Integer repaymentEveryType = fromApiJsonHelper.extractIntegerWithLocaleNamed(repaymentEveryFrequencyTypeParameterName,
+        final Integer repaymentEveryType = fromApiJsonHelper.extractIntegerSansLocaleNamed(repaymentEveryFrequencyTypeParameterName,
                 element);
         baseDataValidator.reset().parameter(repaymentEveryFrequencyTypeParameterName).value(repaymentEveryType).notNull()
                 .inMinMaxRange(0, 3);
@@ -128,23 +136,23 @@ public final class LoanApplicationCommandFromApiJsonHelper {
         baseDataValidator.reset().parameter(interestRatePerPeriodParameterName).value(interestRatePerPeriod).notNull().positiveAmount();
 
         final String interestRateFrequencyTypeParameterName = "interestRateFrequencyType";
-        final Integer interestRateFrequencyType = fromApiJsonHelper.extractIntegerWithLocaleNamed(interestRateFrequencyTypeParameterName,
+        final Integer interestRateFrequencyType = fromApiJsonHelper.extractIntegerSansLocaleNamed(interestRateFrequencyTypeParameterName,
                 element);
         baseDataValidator.reset().parameter(interestRateFrequencyTypeParameterName).value(interestRateFrequencyType).notNull()
                 .inMinMaxRange(0, 3);
 
         final String interestTypeParameterName = "interestType";
-        final Integer interestType = fromApiJsonHelper.extractIntegerWithLocaleNamed(interestTypeParameterName, element);
+        final Integer interestType = fromApiJsonHelper.extractIntegerSansLocaleNamed(interestTypeParameterName, element);
         baseDataValidator.reset().parameter(interestTypeParameterName).value(interestType).notNull().inMinMaxRange(0, 1);
 
         final String interestCalculationPeriodTypeParameterName = "interestCalculationPeriodType";
-        final Integer interestCalculationPeriodType = fromApiJsonHelper.extractIntegerWithLocaleNamed(
+        final Integer interestCalculationPeriodType = fromApiJsonHelper.extractIntegerSansLocaleNamed(
                 interestCalculationPeriodTypeParameterName, element);
         baseDataValidator.reset().parameter(interestCalculationPeriodTypeParameterName).value(interestCalculationPeriodType).notNull()
                 .inMinMaxRange(0, 1);
 
         final String amortizationTypeParameterName = "amortizationType";
-        final Integer amortizationType = fromApiJsonHelper.extractIntegerWithLocaleNamed(amortizationTypeParameterName, element);
+        final Integer amortizationType = fromApiJsonHelper.extractIntegerSansLocaleNamed(amortizationTypeParameterName, element);
         baseDataValidator.reset().parameter(amortizationTypeParameterName).value(amortizationType).notNull().inMinMaxRange(0, 1);
 
         final String expectedDisbursementDateParameterName = "expectedDisbursementDate";
@@ -155,21 +163,24 @@ public final class LoanApplicationCommandFromApiJsonHelper {
         if (fromApiJsonHelper.parameterExists(repaymentsStartingFromDateParameterName, element)) {
             final LocalDate repaymentsStartingFromDate = fromApiJsonHelper.extractLocalDateNamed(repaymentsStartingFromDateParameterName,
                     element);
-            baseDataValidator.reset().parameter(repaymentsStartingFromDateParameterName).value(repaymentsStartingFromDate).ignoreIfNull().notNull();
+            baseDataValidator.reset().parameter(repaymentsStartingFromDateParameterName).value(repaymentsStartingFromDate).ignoreIfNull()
+                    .notNull();
         }
 
         final String interestChargedFromDateParameterName = "interestChargedFromDate";
         if (fromApiJsonHelper.parameterExists(interestChargedFromDateParameterName, element)) {
             final LocalDate interestChargedFromDate = fromApiJsonHelper
                     .extractLocalDateNamed(interestChargedFromDateParameterName, element);
-            baseDataValidator.reset().parameter(interestChargedFromDateParameterName).value(interestChargedFromDate).ignoreIfNull().notNull();
+            baseDataValidator.reset().parameter(interestChargedFromDateParameterName).value(interestChargedFromDate).ignoreIfNull()
+                    .notNull();
         }
 
         final String inArrearsToleranceParameterName = "inArrearsTolerance";
         if (fromApiJsonHelper.parameterExists(inArrearsToleranceParameterName, element)) {
             final BigDecimal inArrearsTolerance = fromApiJsonHelper.extractBigDecimalWithLocaleNamed(inArrearsToleranceParameterName,
                     element);
-            baseDataValidator.reset().parameter(inArrearsToleranceParameterName).value(inArrearsTolerance).ignoreIfNull().zeroOrPositiveAmount();
+            baseDataValidator.reset().parameter(inArrearsToleranceParameterName).value(inArrearsTolerance).ignoreIfNull()
+                    .zeroOrPositiveAmount();
         }
 
         final String submittedOnDateParameterName = "submittedOnDate";
@@ -181,7 +192,8 @@ public final class LoanApplicationCommandFromApiJsonHelper {
         final String submittedOnNoteParameterName = "submittedOnNote";
         if (fromApiJsonHelper.parameterExists(submittedOnNoteParameterName, element)) {
             final String submittedOnNote = fromApiJsonHelper.extractStringNamed(submittedOnNoteParameterName, element);
-            baseDataValidator.reset().parameter(submittedOnNoteParameterName).value(submittedOnNote).ignoreIfNull().notExceedingLengthOf(500);
+            baseDataValidator.reset().parameter(submittedOnNoteParameterName).value(submittedOnNote).ignoreIfNull()
+                    .notExceedingLengthOf(500);
         }
 
         // not optional at present but might make it so to allow it to pick up
@@ -193,14 +205,64 @@ public final class LoanApplicationCommandFromApiJsonHelper {
         baseDataValidator.reset().parameter(transactionProcessingStrategyIdParameterName).value(transactionProcessingStrategyId).notNull()
                 .integerGreaterThanZero();
 
-        final LoanChargeCommand[] charges = extractInToLoanChargeCommands(element);
-        if (charges != null) {
-            for (LoanChargeCommand loanChargeCommand : charges) {
-                try {
-                    loanChargeCommand.validateForCreate();
-                } catch (PlatformApiDataValidationException e) {
-                    dataValidationErrors.addAll(e.getErrors());
+        // charges
+        final String chargesParameterName = "charges";
+        if (element.isJsonObject() && fromApiJsonHelper.parameterExists(chargesParameterName, element)) {
+            final JsonObject topLevelJsonElement = element.getAsJsonObject();
+            final String dateFormat = fromApiJsonHelper.extractDateFormatParameter(topLevelJsonElement);
+            final Locale locale = fromApiJsonHelper.extractLocaleParameter(topLevelJsonElement);
+
+            if (topLevelJsonElement.get(chargesParameterName).isJsonArray()) {
+                final Type arrayObjectParameterTypeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+                final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("id", "chargeId", "amount", "chargeTimeType",
+                        "chargeCalculationType", "specifiedDueDate"));
+
+                final JsonArray array = topLevelJsonElement.get("charges").getAsJsonArray();
+                for (int i = 1; i <= array.size(); i++) {
+
+                    final JsonObject loanChargeElement = array.get(i - 1).getAsJsonObject();
+                    final String arrayObjectJson = this.fromApiJsonHelper.toJson(loanChargeElement);
+                    fromApiJsonHelper.checkForUnsupportedParameters(arrayObjectParameterTypeOfMap, arrayObjectJson, supportedParameters);
+
+                    final Long chargeId = fromApiJsonHelper.extractLongNamed("chargeId", loanChargeElement);
+                    baseDataValidator.reset().parameter("charges").parameterAtIndexArray("chargeId", i).value(chargeId).notNull()
+                            .integerGreaterThanZero();
+
+                    final BigDecimal amount = fromApiJsonHelper.extractBigDecimalNamed("amount", loanChargeElement, locale);
+                    baseDataValidator.reset().parameter("charges").parameterAtIndexArray("amount", i).value(amount).notNull()
+                            .positiveAmount();
+
+                    fromApiJsonHelper.extractLocalDateNamed("specifiedDueDate", loanChargeElement, dateFormat, locale);
                 }
+            }
+        }
+
+        // collateral
+        final String collateralParameterName = "collateral";
+        if (element.isJsonObject() && fromApiJsonHelper.parameterExists(collateralParameterName, element)) {
+            final JsonObject topLevelJsonElement = element.getAsJsonObject();
+            if (topLevelJsonElement.get("collateral").isJsonArray()) {
+
+                final Type collateralParameterTypeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+                final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("id", "type", "description"));
+                final JsonArray array = topLevelJsonElement.get("collateral").getAsJsonArray();
+                for (int i = 1; i <= array.size(); i++) {
+                    final JsonObject collateralItemElement = array.get(i - 1).getAsJsonObject();
+
+                    final String collateralJson = this.fromApiJsonHelper.toJson(collateralItemElement);
+                    fromApiJsonHelper.checkForUnsupportedParameters(collateralParameterTypeOfMap, collateralJson, supportedParameters);
+
+                    final Long collateralTypeId = fromApiJsonHelper.extractLongNamed("type", collateralItemElement);
+                    baseDataValidator.reset().parameter("collateral").parameterAtIndexArray("type", i).value(collateralTypeId).notNull()
+                            .integerGreaterThanZero();
+
+                    final String description = fromApiJsonHelper.extractStringNamed("description", collateralItemElement);
+                    baseDataValidator.reset().parameter("collateral").parameterAtIndexArray("description", i).value(description).notBlank()
+                            .notExceedingLengthOf(500);
+
+                }
+            } else {
+                baseDataValidator.reset().parameter(collateralParameterName).expectedArrayButIsNot();
             }
         }
 
@@ -328,7 +390,7 @@ public final class LoanApplicationCommandFromApiJsonHelper {
             final Integer repaymentEveryType = fromApiJsonHelper.extractIntegerWithLocaleNamed(repaymentEveryTypeParameterName, element);
             baseDataValidator.reset().parameter(repaymentEveryTypeParameterName).value(repaymentEveryType).notNull().inMinMaxRange(0, 3);
         }
-        
+
         final String interestRatePerPeriodParameterName = "interestRatePerPeriod";
         if (fromApiJsonHelper.parameterExists(interestRatePerPeriodParameterName, element)) {
             atLeastOneParameterPassedForUpdate = true;
@@ -412,6 +474,69 @@ public final class LoanApplicationCommandFromApiJsonHelper {
                     .notExceedingLengthOf(500);
         }
 
+        // charges
+        final String chargesParameterName = "charges";
+        if (element.isJsonObject() && fromApiJsonHelper.parameterExists(chargesParameterName, element)) {
+            atLeastOneParameterPassedForUpdate = true;
+
+            final JsonObject topLevelJsonElement = element.getAsJsonObject();
+            final String dateFormat = fromApiJsonHelper.extractDateFormatParameter(topLevelJsonElement);
+            final Locale locale = fromApiJsonHelper.extractLocaleParameter(topLevelJsonElement);
+
+            if (topLevelJsonElement.get(chargesParameterName).isJsonArray()) {
+                final Type arrayObjectParameterTypeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+                final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("id", "chargeId", "amount", "chargeTimeType",
+                        "chargeCalculationType", "specifiedDueDate"));
+
+                final JsonArray array = topLevelJsonElement.get("charges").getAsJsonArray();
+                for (int i = 1; i <= array.size(); i++) {
+
+                    final JsonObject loanChargeElement = array.get(i - 1).getAsJsonObject();
+                    final String arrayObjectJson = this.fromApiJsonHelper.toJson(loanChargeElement);
+                    fromApiJsonHelper.checkForUnsupportedParameters(arrayObjectParameterTypeOfMap, arrayObjectJson, supportedParameters);
+
+                    final Long chargeId = fromApiJsonHelper.extractLongNamed("chargeId", loanChargeElement);
+                    baseDataValidator.reset().parameter("charges").parameterAtIndexArray("chargeId", i).value(chargeId).notNull()
+                            .integerGreaterThanZero();
+
+                    final BigDecimal amount = fromApiJsonHelper.extractBigDecimalNamed("amount", loanChargeElement, locale);
+                    baseDataValidator.reset().parameter("charges").parameterAtIndexArray("amount", i).value(amount).notNull()
+                            .positiveAmount();
+
+                    fromApiJsonHelper.extractLocalDateNamed("specifiedDueDate", loanChargeElement, dateFormat, locale);
+                }
+            }
+        }
+
+        // collateral
+        final String collateralParameterName = "collateral";
+        if (element.isJsonObject() && fromApiJsonHelper.parameterExists(collateralParameterName, element)) {
+            final JsonObject topLevelJsonElement = element.getAsJsonObject();
+            if (topLevelJsonElement.get("collateral").isJsonArray()) {
+
+                final Type collateralParameterTypeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+                final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("id", "type", "description"));
+                final JsonArray array = topLevelJsonElement.get("collateral").getAsJsonArray();
+                for (int i = 1; i <= array.size(); i++) {
+                    final JsonObject collateralItemElement = array.get(i - 1).getAsJsonObject();
+
+                    final String collateralJson = this.fromApiJsonHelper.toJson(collateralItemElement);
+                    fromApiJsonHelper.checkForUnsupportedParameters(collateralParameterTypeOfMap, collateralJson, supportedParameters);
+
+                    final Long collateralTypeId = fromApiJsonHelper.extractLongNamed("type", collateralItemElement);
+                    baseDataValidator.reset().parameter("collateral").parameterAtIndexArray("type", i).value(collateralTypeId).notNull()
+                            .integerGreaterThanZero();
+
+                    final String description = fromApiJsonHelper.extractStringNamed("description", collateralItemElement);
+                    baseDataValidator.reset().parameter("collateral").parameterAtIndexArray("description", i).value(description).notBlank()
+                            .notExceedingLengthOf(500);
+
+                }
+            } else {
+                baseDataValidator.reset().parameter(collateralParameterName).expectedArrayButIsNot();
+            }
+        }
+
         if (!atLeastOneParameterPassedForUpdate) {
             final Object forceError = null;
             baseDataValidator.reset().anyOfNotNull(forceError);
@@ -419,39 +544,5 @@ public final class LoanApplicationCommandFromApiJsonHelper {
 
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
                 "Validation errors exist.", dataValidationErrors); }
-    }
-
-    public LoanChargeCommand[] extractLoanCharges(final String json) {
-        final JsonElement element = fromApiJsonHelper.parse(json);
-        return extractInToLoanChargeCommands(element);
-    }
-
-    private LoanChargeCommand[] extractInToLoanChargeCommands(final JsonElement element) {
-        LoanChargeCommand[] charges = null;
-        if (element.isJsonObject()) {
-            final JsonObject topLevelJsonElement = element.getAsJsonObject();
-            final String dateFormat = fromApiJsonHelper.extractDateFormatParameter(topLevelJsonElement);
-            final Locale locale = fromApiJsonHelper.extractLocaleParameter(topLevelJsonElement);
-            if (topLevelJsonElement.has("charges") && topLevelJsonElement.get("charges").isJsonArray()) {
-
-                final JsonArray array = topLevelJsonElement.get("charges").getAsJsonArray();
-                charges = new LoanChargeCommand[array.size()];
-                for (int i = 0; i < array.size(); i++) {
-
-                    final JsonObject loanChargeElement = array.get(i).getAsJsonObject();
-
-                    final Long chargeId = fromApiJsonHelper.extractLongNamed("chargeId", loanChargeElement);
-                    final BigDecimal amount = fromApiJsonHelper.extractBigDecimalNamed("amount", loanChargeElement, locale);
-                    final Integer chargeTimeType = fromApiJsonHelper.extractIntegerNamed("chargeTimeType", loanChargeElement, locale);
-                    final Integer chargeCalculationType = fromApiJsonHelper.extractIntegerNamed("chargeCalculationType", loanChargeElement,
-                            locale);
-                    final LocalDate specifiedDueDate = fromApiJsonHelper.extractLocalDateNamed("specifiedDueDate", loanChargeElement,
-                            dateFormat, locale);
-
-                    charges[i] = new LoanChargeCommand(chargeId, amount, chargeTimeType, chargeCalculationType, specifiedDueDate);
-                }
-            }
-        }
-        return charges;
     }
 }

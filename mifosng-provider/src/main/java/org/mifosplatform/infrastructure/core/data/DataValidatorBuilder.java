@@ -11,6 +11,8 @@ public class DataValidatorBuilder {
     private final List<ApiParameterError> dataValidationErrors;
     private String resource;
     private String parameter;
+    private String arrayPart;
+    private Integer arrayIndex;
     private Object value;
     private boolean ignoreNullValue = false;
 
@@ -29,6 +31,12 @@ public class DataValidatorBuilder {
 
     public DataValidatorBuilder parameter(final String parameter) {
         this.parameter = parameter;
+        return this;
+    }
+
+    public DataValidatorBuilder parameterAtIndexArray(final String arrayPart, final Integer arrayIndex) {
+        this.arrayPart = arrayPart;
+        this.arrayIndex = arrayIndex;
         return this;
     }
 
@@ -102,11 +110,19 @@ public class DataValidatorBuilder {
 
     public DataValidatorBuilder notNull() {
         if (value == null && !ignoreNullValue) {
-            StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append(resource).append(".").append(parameter)
-                    .append(".cannot.be.blank");
-            StringBuilder defaultEnglishMessage = new StringBuilder("The parameter ").append(parameter).append(" cannot be blank.");
+            
+            String realParameterName = this.parameter;
+            StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append(resource).append(".").append(parameter);
+            if (this.arrayIndex != null && StringUtils.isNotBlank(arrayPart)) {
+                validationErrorCode.append(".").append(this.arrayPart);
+                realParameterName = new StringBuilder(parameter).append('[').append(this.arrayIndex).append("][").append(arrayPart).append(']')
+                        .toString();
+            }
+
+            validationErrorCode.append(".cannot.be.blank");
+            StringBuilder defaultEnglishMessage = new StringBuilder("The parameter ").append(realParameterName).append(" is mandatory.");
             ApiParameterError error = ApiParameterError.parameterError(validationErrorCode.toString(), defaultEnglishMessage.toString(),
-                    parameter);
+                    realParameterName, arrayIndex);
             dataValidationErrors.add(error);
         }
         return this;
@@ -116,11 +132,18 @@ public class DataValidatorBuilder {
         if (value == null && ignoreNullValue) { return this; }
 
         if (value == null || StringUtils.isBlank(value.toString())) {
-            StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append(resource).append(".").append(parameter)
-                    .append(".cannot.be.blank");
-            StringBuilder defaultEnglishMessage = new StringBuilder("The parameter ").append(parameter).append(" cannot be blank.");
+            String realParameterName = this.parameter;
+            StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append(resource).append(".").append(parameter);
+            if (this.arrayIndex != null && StringUtils.isNotBlank(arrayPart)) {
+                validationErrorCode.append(".").append(this.arrayPart);
+                realParameterName = new StringBuilder(parameter).append('[').append(this.arrayIndex).append("][").append(arrayPart).append(']')
+                        .toString();
+            }
+
+            validationErrorCode.append(".cannot.be.blank");
+            StringBuilder defaultEnglishMessage = new StringBuilder("The parameter ").append(realParameterName).append(" is mandatory.");
             ApiParameterError error = ApiParameterError.parameterError(validationErrorCode.toString(), defaultEnglishMessage.toString(),
-                    parameter);
+                    realParameterName, arrayIndex);
             dataValidationErrors.add(error);
         }
         return this;
@@ -245,6 +268,15 @@ public class DataValidatorBuilder {
             dataValidationErrors.add(error);
         }
         return this;
+    }
+
+    public void expectedArrayButIsNot() {
+        StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append(resource).append(".").append(parameter)
+                .append(".is.not.an.array");
+        StringBuilder defaultEnglishMessage = new StringBuilder("The parameter ").append(parameter).append(" is not an array.");
+        ApiParameterError error = ApiParameterError.parameterError(validationErrorCode.toString(), defaultEnglishMessage.toString(),
+                parameter);
+        dataValidationErrors.add(error);
     }
 
     public DataValidatorBuilder anyOfNotNull(Object... object) {

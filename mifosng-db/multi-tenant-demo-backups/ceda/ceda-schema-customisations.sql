@@ -1,47 +1,146 @@
 ﻿DELETE FROM `mifostenant-ceda`.`ref_loan_transaction_processing_strategy` WHERE id in (1, 3, 4);
 
-INSERT INTO `mifostenant-ceda`.`m_code` (`id`,`code_name`, `is_system_defined`)
+INSERT INTO `mifostenant-ceda`.`m_code` (`code_name`, `is_system_defined`)
 VALUES
-(2,'Gender', '0'),
-(3,'YesNo', '0'),
-(4,'FieldOfEmployment', '0'),
-(5,'EducationLevel', '0'),
-(6,'MaritalStatus', '0'),
-(7,'PovertyStatus', '0'),
-(8,'PurposeOfLoan', '0'),
-(9,'CollateralType', '0');
+('FieldOfEmployment', '0'),
+('EducationLevel', '0'),
+('MaritalStatus', '0'),
+('PovertyStatus', '0');
 
-DELETE FROM `mifostenant-ceda`.`m_code_value` WHERE id > 0;
+INSERT INTO `m_code_value`(`code_id`,`code_value`,`order_position`)
+select mc.id, 'option.Banker', ifnull(max(mv.id), 1)
+from m_code mc
+join m_code_value mv on mv.code_id = mc.id
+where mc.`code_name` = "FieldOfEmployment";
 
-INSERT INTO `mifostenant-ceda`.`m_code_value`
-(`code_id`,`code_value`,`order_position`)
-VALUES
-(1, 'Passport', 1),
-(1, 'Id', 2),
-(1, 'Drivers License', 3),
-(1, 'Any Other Id Type', 4),
-(2, 'gender.Male', 1),
-(2, 'gender.Female', 2),
-(3, 'option.Yes', 1),
-(3, 'option.No', 2),
-(4, 'option.Banker', 1),
-(4, 'option.SoftwareDeveloper', 2),
-(5, 'option.University', 1),
-(5, 'option.Secondary', 2),
-(5, 'option.Primary', 3),
-(6, 'option.Married', 1),
-(6, 'option.Single', 2),
-(6, 'option.Divorced', 3),
-(6, 'option.Widow', 4),
-(7, 'option.PovertyStatus.Band1', 1),
-(7, 'option.PovertyStatus.Band2', 2),
-(7, 'option.PovertyStatus.Band3', 3),
-(8, 'option.Agriculture', 1),
-(8, 'option.Manufacturing', 2),
-(8, 'option.HousingImprovement', 3),
-(9, 'option.House', 1),
-(9, 'option.Television', 2),
-(9, 'option.Gold', 3);
+INSERT INTO `m_code_value`(`code_id`,`code_value`,`order_position`)
+select mc.id, 'option.SoftwareDeveloper', ifnull(max(mv.id), 1)
+from m_code mc
+join m_code_value mv on mv.code_id = mc.id
+where mc.`code_name` = "FieldOfEmployment";
+
+INSERT INTO `m_code_value`(`code_id`,`code_value`,`order_position`)
+select mc.id, 'option.University', ifnull(max(mv.id), 1)
+from m_code mc
+join m_code_value mv on mv.code_id = mc.id
+where mc.`code_name` = "EducationLevel";
+
+INSERT INTO `m_code_value`(`code_id`,`code_value`,`order_position`)
+select mc.id, 'option.Secondary', ifnull(max(mv.id), 1)
+from m_code mc
+join m_code_value mv on mv.code_id = mc.id
+where mc.`code_name` = "EducationLevel";
+
+INSERT INTO `m_code_value`(`code_id`,`code_value`,`order_position`)
+select mc.id, 'option.Primary', ifnull(max(mv.id), 1)
+from m_code mc
+join m_code_value mv on mv.code_id = mc.id
+where mc.`code_name` = "EducationLevel";
+
+INSERT INTO `m_code_value`(`code_id`,`code_value`,`order_position`)
+select mc.id, 'option.Married', ifnull(max(mv.id), 1)
+from m_code mc
+join m_code_value mv on mv.code_id = mc.id
+where mc.`code_name` = "MaritalStatus";
+
+INSERT INTO `m_code_value`(`code_id`,`code_value`,`order_position`)
+select mc.id, 'option.Single', ifnull(max(mv.id), 1)
+from m_code mc
+join m_code_value mv on mv.code_id = mc.id
+where mc.`code_name` = "MaritalStatus";
+
+INSERT INTO `m_code_value`(`code_id`,`code_value`,`order_position`)
+select mc.id, 'option.Divorced', ifnull(max(mv.id), 1)
+from m_code mc
+join m_code_value mv on mv.code_id = mc.id
+where mc.`code_name` = "MaritalStatus";
+
+INSERT INTO `m_code_value`(`code_id`,`code_value`,`order_position`)
+select mc.id, 'option.Widow', ifnull(max(mv.id), 1)
+from m_code mc
+join m_code_value mv on mv.code_id = mc.id
+where mc.`code_name` = "MaritalStatus";
+
+INSERT INTO `m_code_value`(`code_id`,`code_value`,`order_position`)
+select mc.id, 'option.PovertyStatus.Band1', ifnull(max(mv.id), 1)
+from m_code mc
+join m_code_value mv on mv.code_id = mc.id
+where mc.`code_name` = "PovertyStatus";
+
+INSERT INTO `m_code_value`(`code_id`,`code_value`,`order_position`)
+select mc.id, 'option.PovertyStatus.Band2', ifnull(max(mv.id), 1)
+from m_code mc
+join m_code_value mv on mv.code_id = mc.id
+where mc.`code_name` = "PovertyStatus";
+
+INSERT INTO `m_code_value`(`code_id`,`code_value`,`order_position`)
+select mc.id, 'option.PovertyStatus.Band3', ifnull(max(mv.id), 1)
+from m_code mc
+join m_code_value mv on mv.code_id = mc.id
+where mc.`code_name` = "PovertyStatus";
+
+-- ======= ADD in loan purspose and collateral values to enable this functionality
+INSERT INTO `m_code_value`(`code_id`,`code_value`,`order_position`)
+select mc.id, 'option.House', ifnull(max(mv.id), 1)
+from m_code mc
+join m_code_value mv on mv.code_id = mc.id
+where mc.`code_name` = "LoanCollateral";
+
+INSERT INTO `m_code_value`(`code_id`,`code_value`,`order_position`)
+select mc.id, 'option.Television', ifnull(max(mv.id), 1)
+from m_code mc
+join m_code_value mv on mv.code_id = mc.id
+where mc.`code_name` = "LoanCollateral";
+
+INSERT INTO `m_code_value`(`code_id`,`code_value`,`order_position`)
+select mc.id, 'option.Gold', ifnull(max(mv.id), 1)
+from m_code mc
+join m_code_value mv on mv.code_id = mc.id
+where mc.`code_name` = "LoanCollateral";
+
+INSERT INTO `m_code_value`(`code_id`,`code_value`,`order_position`)
+select mc.id, 'option.Agriculture', ifnull(max(mv.id), 1)
+from m_code mc
+join m_code_value mv on mv.code_id = mc.id
+where mc.`code_name` = "LoanPurpose";
+
+INSERT INTO `m_code_value`(`code_id`,`code_value`,`order_position`)
+select mc.id, 'option.Manufacturing', ifnull(max(mv.id), 1)
+from m_code mc
+join m_code_value mv on mv.code_id = mc.id
+where mc.`code_name` = "LoanPurpose";
+
+INSERT INTO `m_code_value`(`code_id`,`code_value`,`order_position`)
+select mc.id, 'option.HousingImprovement', ifnull(max(mv.id), 1)
+from m_code mc
+join m_code_value mv on mv.code_id = mc.id
+where mc.`code_name` = "LoanPurpose";
+
+INSERT INTO `m_code_value`(`code_id`,`code_value`,`order_position`)
+select mc.id, 'option.Male', ifnull(max(mv.id), 1)
+from m_code mc
+join m_code_value mv on mv.code_id = mc.id
+where mc.`code_name` = "Gender";
+
+INSERT INTO `m_code_value`(`code_id`,`code_value`,`order_position`)
+select mc.id, 'option.Female', ifnull(max(mv.id), 1)
+from m_code mc
+join m_code_value mv on mv.code_id = mc.id
+where mc.`code_name` = "Gender";
+
+INSERT INTO `m_code_value`(`code_id`,`code_value`,`order_position`)
+select mc.id, 'option.Yes', ifnull(max(mv.id), 1)
+from m_code mc
+join m_code_value mv on mv.code_id = mc.id
+where mc.`code_name` = "YesNo";
+
+INSERT INTO `m_code_value`(`code_id`,`code_value`,`order_position`)
+select mc.id, 'option.No', ifnull(max(mv.id), 1)
+from m_code mc
+join m_code_value mv on mv.code_id = mc.id
+where mc.`code_name` = "YesNo";
+
+
 
 DROP TABLE IF EXISTS `mifostenant-ceda`.`client additional data`;
 CREATE TABLE `mifostenant-ceda`.`client additional data` (

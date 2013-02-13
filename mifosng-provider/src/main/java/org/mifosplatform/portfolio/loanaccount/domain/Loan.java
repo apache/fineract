@@ -2,7 +2,6 @@ package org.mifosplatform.portfolio.loanaccount.domain;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
@@ -33,6 +32,7 @@ import org.hibernate.annotations.LazyCollectionOption;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+import org.mifosplatform.infrastructure.codes.domain.CodeValue;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.domain.AbstractAuditableCustom;
 import org.mifosplatform.infrastructure.core.service.DateUtils;
@@ -46,6 +46,7 @@ import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.fund.domain.Fund;
 import org.mifosplatform.portfolio.group.domain.Group;
 import org.mifosplatform.portfolio.loanaccount.command.LoanChargeCommand;
+import org.mifosplatform.portfolio.loanaccount.data.LoanCollateralData;
 import org.mifosplatform.portfolio.loanaccount.exception.InvalidLoanStateTransitionException;
 import org.mifosplatform.portfolio.loanaccount.exception.InvalidLoanTransactionTypeException;
 import org.mifosplatform.portfolio.loanaccount.exception.LoanOfficerAssignmentException;
@@ -67,8 +68,7 @@ import org.mifosplatform.portfolio.loanproduct.service.LoanEnumerations;
 import org.mifosplatform.useradministration.domain.AppUser;
 
 @Entity
-@Table(name = "m_loan", uniqueConstraints = { 
-        @UniqueConstraint(columnNames = { "account_no" }, name = "loan_account_no_UNIQUE"),
+@Table(name = "m_loan", uniqueConstraints = { @UniqueConstraint(columnNames = { "account_no" }, name = "loan_account_no_UNIQUE"),
         @UniqueConstraint(columnNames = { "external_id" }, name = "loan_externalid_UNIQUE") })
 public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 
@@ -77,7 +77,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 
     @Column(name = "external_id")
     private String externalId;
-    
+
     @ManyToOne(optional = true)
     @JoinColumn(name = "client_id")
     private Client client;
@@ -96,7 +96,11 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 
     @ManyToOne
     @JoinColumn(name = "loan_officer_id", nullable = true)
-    private Staff loanofficer;
+    private Staff loanOfficer;
+
+    @ManyToOne
+    @JoinColumn(name = "loanpurpose_cv_id", nullable = true)
+    private CodeValue loanPurpose;
 
     @ManyToOne
     @JoinColumn(name = "loan_transaction_strategy_id", nullable = true)
@@ -173,6 +177,10 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 
     @LazyCollection(LazyCollectionOption.FALSE)
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "loan", orphanRemoval = true)
+    private Set<LoanCollateral> collateral = null;
+
+    @LazyCollection(LazyCollectionOption.FALSE)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "loan", orphanRemoval = true)
     private Set<LoanOfficerAssignmentHistory> loanOfficerHistory;
 
     // see
@@ -198,21 +206,24 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
     private final LoanRepaymentScheduleTransactionProcessorFactory transactionProcessor = new LoanRepaymentScheduleTransactionProcessorFactory();
 
     public static Loan newIndividualLoanApplication(final String accountNo, final Client client, final LoanProduct loanProduct,
-            final Fund fund, final Staff officer, final LoanTransactionProcessingStrategy transactionProcessingStrategy,
-            final LoanSchedule loanSchedule, final Set<LoanCharge> loanCharges) {
+            final Fund fund, final Staff officer, final CodeValue loanPurpose,
+            final LoanTransactionProcessingStrategy transactionProcessingStrategy, final LoanSchedule loanSchedule,
+            final Set<LoanCharge> loanCharges, final Set<LoanCollateral> collateral) {
         final LoanStatus status = null;
         LoanProductRelatedDetail loanRepaymentScheduleDetail = loanSchedule.loanProductRelatedDetail();
-        return new Loan(accountNo, client, null, fund, officer, transactionProcessingStrategy, loanProduct, loanRepaymentScheduleDetail,
-                status, loanCharges);
+        return new Loan(accountNo, client, null, fund, officer, loanPurpose, transactionProcessingStrategy, loanProduct,
+                loanRepaymentScheduleDetail, status, loanCharges, collateral);
     }
 
     public static Loan newGroupLoanApplication(final String accountNo, final Group group, final LoanProduct loanProduct, final Fund fund,
             final Staff officer, final LoanTransactionProcessingStrategy transactionProcessingStrategy, final LoanSchedule loanSchedule,
             final Set<LoanCharge> loanCharges) {
         final LoanStatus status = null;
-        LoanProductRelatedDetail loanRepaymentScheduleDetail = loanSchedule.loanProductRelatedDetail();
-        return new Loan(accountNo, null, group, fund, officer, transactionProcessingStrategy, loanProduct, loanRepaymentScheduleDetail,
-                status, loanCharges);
+        final LoanProductRelatedDetail loanRepaymentScheduleDetail = loanSchedule.loanProductRelatedDetail();
+        final CodeValue loanPurpose = null;
+        final Set<LoanCollateral> collateral = null;
+        return new Loan(accountNo, null, group, fund, officer, loanPurpose, transactionProcessingStrategy, loanProduct,
+                loanRepaymentScheduleDetail, status, loanCharges, collateral);
     }
 
     public static Loan newIndividualLoanApplicationFromGroup(final String accountNo, final Client client, final Group group,
@@ -220,19 +231,21 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
             final LoanTransactionProcessingStrategy transactionProcessingStrategy, final LoanSchedule loanSchedule,
             final Set<LoanCharge> loanCharges) {
         final LoanStatus status = null;
-        LoanProductRelatedDetail loanRepaymentScheduleDetail = loanSchedule.loanProductRelatedDetail();
-        return new Loan(accountNo, client, group, fund, officer, transactionProcessingStrategy, loanProduct, loanRepaymentScheduleDetail,
-                status, loanCharges);
+        final LoanProductRelatedDetail loanRepaymentScheduleDetail = loanSchedule.loanProductRelatedDetail();
+        final CodeValue loanPurpose = null;
+        final Set<LoanCollateral> collateral = null;
+        return new Loan(accountNo, client, group, fund, officer, loanPurpose, transactionProcessingStrategy, loanProduct,
+                loanRepaymentScheduleDetail, status, loanCharges, collateral);
     }
 
     protected Loan() {
         //
     }
 
-    private Loan(final String accountNo, final Client client, final Group group, Fund fund, Staff loanOfficer,
-            final LoanTransactionProcessingStrategy transactionProcessingStrategy, final LoanProduct loanProduct,
-            final LoanProductRelatedDetail loanRepaymentScheduleDetail, final LoanStatus loanStatus, final Set<LoanCharge> loanCharges) {
-
+    private Loan(final String accountNo, final Client client, final Group group, final Fund fund, final Staff loanOfficer,
+            final CodeValue loanPurpose, final LoanTransactionProcessingStrategy transactionProcessingStrategy,
+            final LoanProduct loanProduct, final LoanProductRelatedDetail loanRepaymentScheduleDetail, final LoanStatus loanStatus,
+            final Set<LoanCharge> loanCharges, final Set<LoanCollateral> collateral) {
         if (StringUtils.isBlank(accountNo)) {
             this.accountNumber = new RandomPasswordGenerator(19).generate();
             this.accountNumberRequiresAutoGeneration = true;
@@ -242,7 +255,9 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
         this.client = client;
         this.group = group;
         this.fund = fund;
-        this.loanofficer = loanOfficer;
+        this.loanOfficer = loanOfficer;
+        this.loanPurpose = loanPurpose;
+
         this.transactionProcessingStrategy = transactionProcessingStrategy;
         this.loanProduct = loanProduct;
         this.loanRepaymentScheduleDetail = loanRepaymentScheduleDetail;
@@ -256,6 +271,11 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
             this.totalChargesDueAtDisbursement = deriveSumTotalOfChargesDueAtDisbursement();
         } else {
             this.charges = null;
+        }
+        if (collateral != null && !collateral.isEmpty()) {
+            this.collateral = associateWithThisLoan(collateral);
+        } else {
+            this.collateral = null;
         }
         this.loanOfficerHistory = null;
     }
@@ -280,14 +300,21 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
         return loanCharges;
     }
 
+    private Set<LoanCollateral> associateWithThisLoan(final Set<LoanCollateral> collateral) {
+        for (LoanCollateral item : collateral) {
+            item.associateWith(this);
+        }
+        return collateral;
+    }
+
     private void updateTotalChargesDueAtDisbursement() {
         this.totalChargesDueAtDisbursement = deriveSumTotalOfChargesDueAtDisbursement();
     }
-    
+
     public boolean isAccountNumberRequiresAutoGeneration() {
         return this.accountNumberRequiresAutoGeneration;
     }
-    
+
     public void setAccountNumberRequiresAutoGeneration(boolean accountNumberRequiresAutoGeneration) {
         this.accountNumberRequiresAutoGeneration = accountNumberRequiresAutoGeneration;
     }
@@ -354,7 +381,8 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 
     private void validateChargeHasValidSpecifiedDateIfApplicable(final LoanCharge loanCharge, final LocalDate disbursementDate,
             final LocalDate lastRepaymentPeriodDueDate) {
-        if (loanCharge.isSpecifiedDueDate() && !loanCharge.isDueForCollectionBetween(disbursementDate, lastRepaymentPeriodDueDate)) {
+        if (loanCharge.isSpecifiedDueDate()
+                && !loanCharge.isDueForCollectionFromAndUpToAndIncluding(disbursementDate, lastRepaymentPeriodDueDate)) {
             final String defaultUserMessage = "This charge which is due at disbursement cannot be added as the loan is already disbursed.";
             throw new LoanChargeCannotBeAddedException("loanCharge", "specified.due.date.outside.range", defaultUserMessage,
                     getDisbursementDate(), getLastRepaymentPeriodDueDate(), loanCharge.name());
@@ -505,8 +533,28 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
         this.loanProduct = loanProduct;
     }
 
+    public void updateAccountNo(final String newAccountNo) {
+        this.accountNumber = newAccountNo;
+        this.accountNumberRequiresAutoGeneration = false;
+    }
+
     public void updateFund(final Fund fund) {
         this.fund = fund;
+    }
+
+    public void updateLoanPurpose(final CodeValue loanPurpose) {
+        this.loanPurpose = loanPurpose;
+    }
+
+    public void updateLoanOfficerOnLoanApplication(final Staff newLoanOfficer) {
+        if (!this.isSubmittedAndPendingApproval()) {
+            Long loanOfficerId = null;
+            if (this.loanOfficer != null) {
+                loanOfficerId = this.loanOfficer.getId();
+            }
+            throw new LoanOfficerAssignmentException(this.getId(), loanOfficerId);
+        }
+        this.loanOfficer = newLoanOfficer;
     }
 
     public void updateTransactionProcessingStrategy(final LoanTransactionProcessingStrategy strategy) {
@@ -517,6 +565,14 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
         getNullPointerSafeLoanCharges().clear();
         getNullPointerSafeLoanCharges().addAll(associateChargesWithThisLoan(loanCharges));
         this.totalChargesDueAtDisbursement = deriveSumTotalOfChargesDueAtDisbursement();
+    }
+
+    public void updateLoanCollateral(final Set<LoanCollateral> loanCollateral) {
+        if (this.collateral == null) {
+            this.collateral = new HashSet<LoanCollateral>();
+        }
+        this.collateral.clear();
+        this.collateral.addAll(associateWithThisLoan(loanCollateral));
     }
 
     public void updateLoanSchedule(final LoanScheduleData modifiedLoanSchedule) {
@@ -548,8 +604,8 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
         this.expectedMaturityDate = determineExpectedMaturityDate().toDate();
     }
 
-    public Map<String, Object> loanApplicationModification(final JsonCommand command, final LoanChargeCommand[] loanChargeCommands,
-            final AprCalculator aprCalculator) {
+    public Map<String, Object> loanApplicationModification(final JsonCommand command, final Set<LoanCharge> possiblyModifedLoanCharges,
+            final Set<LoanCollateral> possiblyModifedLoanCollateralItems, final AprCalculator aprCalculator) {
 
         final Map<String, Object> actualChanges = this.loanRepaymentScheduleDetail.updateLoanApplicationAttributes(command, aprCalculator);
         if (!actualChanges.isEmpty()) {
@@ -566,7 +622,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
             actualChanges.put(accountNoParamName, newValue);
             this.accountNumber = StringUtils.defaultIfEmpty(newValue, null);
         }
-        
+
         final String externalIdParamName = "externalId";
         if (command.isChangeInStringParameterNamed(externalIdParamName, this.externalId)) {
             final String newValue = command.stringValueOfParameterNamed(externalIdParamName);
@@ -597,19 +653,30 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
             actualChanges.put(fundIdParamName, newValue);
         }
 
+        Long existingLoanOfficerId = null;
+        if (this.loanOfficer != null) {
+            existingLoanOfficerId = this.loanOfficer.getId();
+        }
+        final String loanOfficerIdParamName = "loanOfficerId";
+        if (command.isChangeInLongParameterNamed(loanOfficerIdParamName, existingLoanOfficerId)) {
+            final Long newValue = command.longValueOfParameterNamed(loanOfficerIdParamName);
+            actualChanges.put(loanOfficerIdParamName, newValue);
+        }
+
+        Long existingLoanPurposeId = null;
+        if (this.loanPurpose != null) {
+            existingLoanPurposeId = this.loanPurpose.getId();
+        }
+        final String loanPurposeIdParamName = "loanPurposeId";
+        if (command.isChangeInLongParameterNamed(loanPurposeIdParamName, existingLoanPurposeId)) {
+            final Long newValue = command.longValueOfParameterNamed(loanPurposeIdParamName);
+            actualChanges.put(loanPurposeIdParamName, newValue);
+        }
+
         final String strategyIdParamName = "transactionProcessingStrategyId";
         if (command.isChangeInLongParameterNamed(strategyIdParamName, this.transactionProcessingStrategy.getId())) {
             final Long newValue = command.longValueOfParameterNamed(strategyIdParamName);
             actualChanges.put(strategyIdParamName, newValue);
-        }
-
-        final String chargesParamName = "charges";
-        if (command.parameterExists(chargesParamName)) {
-            LoanChargeCommand[] existingLoanChargeData = getLoanCharges();
-            if (differenceExistsBetween(existingLoanChargeData, loanChargeCommands)) {
-                actualChanges.put(chargesParamName, loanChargeCommands);
-                actualChanges.put("recalculateLoanSchedule", true);
-            }
         }
 
         final String submittedOnDateParamName = "submittedOnDate";
@@ -668,7 +735,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
                 this.interestChargedFromDate = null;
             }
         }
-        
+
         if (getSubmittedOnDate().isAfter(new LocalDate())) {
             final String errorMessage = "The date on which a loan is submitted cannot be in the future.";
             throw new InvalidLoanStateTransitionException("submittal", "cannot.be.a.future.date", errorMessage, getSubmittedOnDate());
@@ -680,31 +747,57 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
             throw new InvalidLoanStateTransitionException("submittal", "cannot.be.after.expected.disbursement.date", errorMessage,
                     getSubmittedOnDate(), getExpectedDisbursedOnLocalDate());
         }
-        
-        // FIXME - this constraint doesnt really need to be here. should be
-        // possible to express loan term as say 12 months whilst also saying
-        // - that the repayment structure is 6 repayments every bi-monthly.
-//        validateSelectedPeriodFrequencyTypeIsTheSame(dataValidationErrors, loanTermFrequency, loanTermFrequencyType, numberOfRepayments,
-//                repaymentEvery, repaymentEveryType);
-//        
-//        validateRepaymentsStartingFromDateIsAfterDisbursementDate(dataValidationErrors, expectedDisbursementDate,
-//                repaymentsStartingFromDate);
-//
-//        validateRepaymentsStartingFromDateAndInterestChargedFromDate(dataValidationErrors, expectedDisbursementDate,
-//                repaymentsStartingFromDate, interestChargedFromDate);
 
-        // charges are optional
-        for (LoanCharge loanCharge : getNullPointerSafeLoanCharges()) {
-            validateChargeHasValidSpecifiedDateIfApplicable(loanCharge, getDisbursementDate(), getLastRepaymentPeriodDueDate());
+        final String chargesParamName = "charges";
+        if (command.parameterExists(chargesParamName)) {
+
+            final Set<LoanCharge> existingLoanCharges = getNullPointerSafeLoanCharges();
+
+            if (!possiblyModifedLoanCharges.equals(existingLoanCharges)) {
+                actualChanges.put(chargesParamName, getLoanCharges(possiblyModifedLoanCharges));
+
+                actualChanges.put(chargesParamName, getLoanCharges(possiblyModifedLoanCharges));
+                actualChanges.put("recalculateLoanSchedule", true);
+
+                for (LoanCharge loanCharge : possiblyModifedLoanCharges) {
+                    validateChargeHasValidSpecifiedDateIfApplicable(loanCharge, getDisbursementDate(), getLastRepaymentPeriodDueDate());
+                }
+            }
+
+            // final ImmutableSet<LoanCharge> difference =
+            // Sets.symmetricDifference(existingLoanCharges,
+            // possiblyModifedLoanCharges)
+            // .immutableCopy();
+            // if (!difference.isEmpty()) {
+            // actualChanges.put(chargesParamName, getLoanCharges(difference));
+            // actualChanges.put("recalculateLoanSchedule", true);
+            //
+            // for (LoanCharge loanCharge : possiblyModifedLoanCharges) {
+            // validateChargeHasValidSpecifiedDateIfApplicable(loanCharge,
+            // getDisbursementDate(), getLastRepaymentPeriodDueDate());
+            // }
+            // }
+        }
+
+        final String collateralParamName = "collateral";
+        if (command.parameterExists(collateralParamName)) {
+
+            if (!possiblyModifedLoanCollateralItems.equals(this.collateral)) {
+                actualChanges.put(collateralParamName, listOfLoanCollateralData(possiblyModifedLoanCollateralItems));
+            }
+
+            //
+            // final ImmutableSet<LoanCollateral> difference =
+            // Sets.symmetricDifference(this.collateral,
+            // possiblyModifedLoanCollateralItems)
+            // .immutableCopy();
+            // if (!difference.isEmpty()) {
+            // actualChanges.put(collateralParamName,
+            // listOfLoanCollateralData(difference));
+            // }
         }
 
         return actualChanges;
-    }
-
-    private boolean differenceExistsBetween(final LoanChargeCommand[] existingLoanChargeData, final LoanChargeCommand[] newLoanChargeData) {
-        Arrays.sort(existingLoanChargeData);
-        Arrays.sort(newLoanChargeData);
-        return !Arrays.equals(existingLoanChargeData, newLoanChargeData);
     }
 
     private Set<LoanCharge> getNullPointerSafeLoanCharges() {
@@ -715,18 +808,33 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
         return loanCharges;
     }
 
-    private LoanChargeCommand[] getLoanCharges() {
+    private LoanCollateralData[] listOfLoanCollateralData(final Set<LoanCollateral> setOfLoanCollateral) {
+
+        LoanCollateralData[] existingLoanCollateral = null;
+
+        List<LoanCollateralData> loanCollateralList = new ArrayList<LoanCollateralData>();
+        for (LoanCollateral loanCollateral : setOfLoanCollateral) {
+
+            LoanCollateralData data = loanCollateral.toData();
+
+            loanCollateralList.add(data);
+        }
+
+        existingLoanCollateral = loanCollateralList.toArray(new LoanCollateralData[loanCollateralList.size()]);
+
+        return existingLoanCollateral;
+    }
+
+    private LoanChargeCommand[] getLoanCharges(Set<LoanCharge> setOfLoanCharges) {
 
         LoanChargeCommand[] existingLoanCharges = null;
 
-        if (!getNullPointerSafeLoanCharges().isEmpty()) {
-            List<LoanChargeCommand> loanChargesList = new ArrayList<LoanChargeCommand>();
-            for (LoanCharge loanCharge : getNullPointerSafeLoanCharges()) {
-                loanChargesList.add(loanCharge.toCommand());
-            }
-
-            existingLoanCharges = loanChargesList.toArray(new LoanChargeCommand[loanChargesList.size()]);
+        List<LoanChargeCommand> loanChargesList = new ArrayList<LoanChargeCommand>();
+        for (LoanCharge loanCharge : setOfLoanCharges) {
+            loanChargesList.add(loanCharge.toCommand());
         }
+
+        existingLoanCharges = loanChargesList.toArray(new LoanChargeCommand[loanChargesList.size()]);
 
         return existingLoanCharges;
     }
@@ -744,12 +852,13 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
             final LocalDate submittedOn, final String externalId) {
 
         final LoanScheduleData loanScheduleData = loanSchedule.generate();
-        
-        // Have to set expectedDisbursementDate to avoid nullPointer so should be passed down to updateLoanSchedule method
+
+        // Have to set expectedDisbursementDate to avoid nullPointer so should
+        // be passed down to updateLoanSchedule method
         if (loanSchedule.getDisbursementDate() != null) {
             this.expectedDisbursedOnDate = loanSchedule.getDisbursementDate().toDate();
-        }        
-        
+        }
+
         updateLoanSchedule(loanScheduleData);
 
         LoanStatus from = null;
@@ -761,7 +870,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
         this.loanStatus = statusEnum.getValue();
 
         this.externalId = externalId;
-        
+
         this.termFrequency = loanSchedule.getLoanTermFrequency();
         this.termPeriodFrequencyType = loanSchedule.getLoanTermPeriodFrequencyType().getValue();
 
@@ -807,7 +916,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
         if (!statusEnum.hasStateOf(LoanStatus.fromInt(this.loanStatus))) {
             this.loanStatus = statusEnum.getValue();
             actualChanges.put("status", LoanEnumerations.status(this.loanStatus));
-            
+
             LocalDate rejectedOn = command.localDateValueOfParameterNamed("rejectedOnDate");
             if (rejectedOn == null) {
                 rejectedOn = command.localDateValueOfParameterNamed("eventDate");
@@ -847,7 +956,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
         if (!statusEnum.hasStateOf(LoanStatus.fromInt(this.loanStatus))) {
             this.loanStatus = statusEnum.getValue();
             actualChanges.put("status", LoanEnumerations.status(this.loanStatus));
-            
+
             LocalDate withdrawnOn = command.localDateValueOfParameterNamed("withdrawnOnDate");
             if (withdrawnOn == null) {
                 withdrawnOn = command.localDateValueOfParameterNamed("eventDate");
@@ -887,7 +996,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
         if (!statusEnum.hasStateOf(LoanStatus.fromInt(this.loanStatus))) {
             this.loanStatus = statusEnum.getValue();
             actualChanges.put("status", LoanEnumerations.status(this.loanStatus));
-            
+
             // only do below if status has changed in the 'approval' case
             LocalDate approvedOn = command.localDateValueOfParameterNamed("approvedOnDate");
             String approvedOnDateChange = command.stringValueOfParameterNamed("approvedOnDate");
@@ -905,17 +1014,17 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
             if (approvedOn.isBefore(submittalDate)) {
                 final String errorMessage = "The date on which a loan is approved cannot be before its submittal date: "
                         + submittalDate.toString();
-                throw new InvalidLoanStateTransitionException("approval", "cannot.be.before.submittal.date", errorMessage, getApprovedOnDate(),
-                        submittalDate);
+                throw new InvalidLoanStateTransitionException("approval", "cannot.be.before.submittal.date", errorMessage,
+                        getApprovedOnDate(), submittalDate);
             }
             if (approvedOn.isAfter(new LocalDate())) {
                 final String errorMessage = "The date on which a loan is approved cannot be in the future.";
                 throw new InvalidLoanStateTransitionException("approval", "cannot.be.a.future.date", errorMessage, getApprovedOnDate());
             }
 
-            if (this.loanofficer != null) {
+            if (this.loanOfficer != null) {
                 final LoanOfficerAssignmentHistory loanOfficerAssignmentHistory = LoanOfficerAssignmentHistory.createNew(this,
-                        this.loanofficer, approvedOn);
+                        this.loanOfficer, approvedOn);
                 this.loanOfficerHistory.add(loanOfficerAssignmentHistory);
             }
         }
@@ -932,7 +1041,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
         if (!statusEnum.hasStateOf(currentStatus)) {
             this.loanStatus = statusEnum.getValue();
             actualChanges.put("status", LoanEnumerations.status(this.loanStatus));
-            
+
             this.approvedOnDate = null;
             actualChanges.put("approvedOnDate", "");
 
@@ -959,7 +1068,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
         if (!statusEnum.hasStateOf(LoanStatus.fromInt(this.loanStatus))) {
             this.loanStatus = statusEnum.getValue();
             actualChanges.put("status", LoanEnumerations.status(this.loanStatus));
-            
+
             LocalDate disbursedOn = command.localDateValueOfParameterNamed("disbursedOnDate");
             if (disbursedOn == null) {
                 disbursedOn = command.localDateValueOfParameterNamed("eventDate");
@@ -1074,7 +1183,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
         if (!statusEnum.hasStateOf(currentStatus)) {
             this.loanStatus = statusEnum.getValue();
             actualChanges.put("status", LoanEnumerations.status(this.loanStatus));
-            
+
             this.approvedOnDate = null;
             actualChanges.put("disbursedOnDate", "");
 
@@ -1861,8 +1970,8 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
     public boolean hasLoanOfficer(final Staff fromLoanOfficer) {
 
         boolean matchesCurrentLoanOfficer = false;
-        if (this.loanofficer != null) {
-            matchesCurrentLoanOfficer = this.loanofficer.identifiedBy(fromLoanOfficer);
+        if (this.loanOfficer != null) {
+            matchesCurrentLoanOfficer = this.loanOfficer.identifiedBy(fromLoanOfficer);
         } else {
             matchesCurrentLoanOfficer = fromLoanOfficer == null;
         }
@@ -1920,11 +2029,11 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 
         final LoanOfficerAssignmentHistory latestHistoryRecord = findLatestIncompleteHistoryRecord();
 
-        if (latestHistoryRecord != null && this.loanofficer.identifiedBy(newLoanOfficer)) {
+        if (latestHistoryRecord != null && this.loanOfficer.identifiedBy(newLoanOfficer)) {
             latestHistoryRecord.updateStartDate(assignmentDate);
         } else if (latestHistoryRecord != null && latestHistoryRecord.matchesStartDateOf(assignmentDate)) {
             latestHistoryRecord.updateLoanOfficer(newLoanOfficer);
-            this.loanofficer = newLoanOfficer;
+            this.loanOfficer = newLoanOfficer;
         } else if (latestHistoryRecord != null && latestHistoryRecord.hasStartDateBefore(assignmentDate)) {
             throw new LoanOfficerAssignmentException(this.getId(), assignmentDate);
         } else {
@@ -1934,16 +2043,15 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
                 latestHistoryRecord.updateEndDate(assignmentDate);
             }
 
-            this.loanofficer = newLoanOfficer;
+            this.loanOfficer = newLoanOfficer;
             if (this.isNotSubmittedAndPendingApproval()) {
                 final LoanOfficerAssignmentHistory loanOfficerAssignmentHistory = LoanOfficerAssignmentHistory.createNew(this,
-                        this.loanofficer, assignmentDate);
+                        this.loanOfficer, assignmentDate);
                 this.loanOfficerHistory.add(loanOfficerAssignmentHistory);
             }
         }
     }
 
-    
     public void removeLoanOfficer(final LocalDate unassignDate) {
 
         final LoanOfficerAssignmentHistory latestHistoryRecord = findLatestIncompleteHistoryRecord();
@@ -1953,7 +2061,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
             latestHistoryRecord.updateEndDate(unassignDate);
         }
 
-        this.loanofficer = null;
+        this.loanOfficer = null;
     }
 
     private void validateUnassignDate(final LoanOfficerAssignmentHistory latestHistoryRecord, final LocalDate unassignDate) {
@@ -1963,8 +2071,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
         if (latestHistoryRecord.getStartDate().isAfter(unassignDate)) {
             throw new LoanOfficerUnassignmentDateException(this.getId(), this.getLoanOfficer().getId(), latestHistoryRecord.getStartDate(),
                     unassignDate);
-        } else if (unassignDate.isAfter(today)) { throw new LoanOfficerUnassignmentDateException(
-                this.getId()); }
+        } else if (unassignDate.isAfter(today)) { throw new LoanOfficerUnassignmentDateException(this.getId()); }
     }
 
     private LoanOfficerAssignmentHistory findLatestIncompleteHistoryRecord() {
@@ -2008,11 +2115,6 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
         return officeId;
     }
 
-    public void updateAccountNo(final String newAccountNo) {
-        this.accountNumber = newAccountNo;
-        this.accountNumberRequiresAutoGeneration=false;
-    }
-    
     public List<LoanTransaction> getLoanTransactions() {
         return this.loanTransactions;
     }
@@ -2020,21 +2122,20 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
     public boolean isAccountingEnabledOnLoanProduct() {
         return this.loanProduct.isAccountingEnabled();
     }
-    
-    public boolean isCashBasedAccountingEnabledOnLoanProduct(){
+
+    public boolean isCashBasedAccountingEnabledOnLoanProduct() {
         return this.loanProduct.isCashBasedAccountingEnabled();
     }
-    
-    public boolean isAccrualBasedAccountingEnabledOnLoanProduct(){
+
+    public boolean isAccrualBasedAccountingEnabledOnLoanProduct() {
         return this.loanProduct.isAccrualBasedAccountingEnabled();
     }
 
     public Long productId() {
         return this.loanProduct.getId();
     }
-    
-    public Staff getLoanOfficer() {
-        return this.loanofficer;
-    }
 
+    public Staff getLoanOfficer() {
+        return this.loanOfficer;
+    }
 }

@@ -30,6 +30,9 @@ VALUES
 (0, 1, 'keithwoodlock', 'Keith', 'Woodlock', 
 '4f607e9b6cffbe7d3db92d4bfa3391c7aa751727b4ea29d08fddf9dd72e6e7e3', 'keithwoodlock@gmail.com', 0, 1, 1, 1, 1);
 
+INSERT INTO `mifostenant-ceda`.`m_appuser_role`
+(`appuser_id`,`role_id`) VALUES (2,1);
+
 UPDATE `mifostenant-ceda`.`m_office` SET `name` = 'CEDA Microfinance Ltd.' WHERE id=1;
 
 INSERT INTO `mifostenant-ceda`.`m_office`

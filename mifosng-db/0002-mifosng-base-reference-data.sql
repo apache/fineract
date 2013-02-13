@@ -202,14 +202,6 @@ VALUES
 INSERT INTO `m_organisation_currency` (`id`, `code`, `decimal_places`, `name`, `display_symbol`, `internationalized_name_code`) 
 VALUES (21,'USD',2,'US Dollar','$','currency.USD');
 
--- create single code and code value for client identifiers
-INSERT INTO `m_code`
-(`id`,`code_name`, `is_system_defined`) VALUES (1,'Customer Identifier',1);
-
-INSERT INTO `m_code_value`
-(`id`,`code_id`,`code_value`,`order_position`)
-VALUES (1,1,'Passport number',0);
-
 INSERT INTO `m_office` (`id`, `parent_id`, `hierarchy`, `external_id`, `name`, `opening_date`) 
 VALUES 
 (1,NULL,'.','1','Head Office','2009-01-01');
@@ -521,3 +513,38 @@ from x_registered_table r;
 insert into m_permission(grouping, `code`, entity_name, action_name)
 select 'datatable', concat('DELETE_', r.registered_table_name), r.registered_table_name, 'DELETE'
 from x_registered_table r;
+
+
+-- create single code and code value for client identifiers
+INSERT INTO `m_code`
+(`code_name`, `is_system_defined`) 
+VALUES 
+('Customer Identifier',1),
+('LoanCollateral',1),
+('LoanPurpose',1),
+('Gender',1),
+('YesNo',1);
+
+INSERT INTO `m_code_value`(`code_id`,`code_value`,`order_position`)
+select mc.id, 'Passport', ifnull(max(mv.id), 1)
+from m_code mc
+join m_code_value mv on mv.code_id = mc.id
+where mc.`code_name` = "Customer Identifier";
+
+INSERT INTO `m_code_value`(`code_id`,`code_value`,`order_position`)
+select mc.id, 'Id', ifnull(max(mv.id), 1)
+from m_code mc
+join m_code_value mv on mv.code_id = mc.id
+where mc.`code_name` = "Customer Identifier";
+
+INSERT INTO `m_code_value`(`code_id`,`code_value`,`order_position`)
+select mc.id, 'Drivers License', ifnull(max(mv.id), 1)
+from m_code mc
+join m_code_value mv on mv.code_id = mc.id
+where mc.`code_name` = "Customer Identifier";
+
+INSERT INTO `m_code_value`(`code_id`,`code_value`,`order_position`)
+select mc.id, 'Any Other Id Type', ifnull(max(mv.id), 1)
+from m_code mc
+join m_code_value mv on mv.code_id = mc.id
+where mc.`code_name` = "Customer Identifier";

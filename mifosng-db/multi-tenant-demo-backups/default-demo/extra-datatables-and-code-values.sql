@@ -1,13 +1,53 @@
 -- add code and code values for datatables dropdowns
-INSERT INTO `m_code` (`id`, `code_name`, `is_system_defined`) VALUES (2, 'Gender', 1);
-INSERT INTO `m_code` (`id`, `code_name`, `is_system_defined`) VALUES (3, 'Education', 1);
 
-INSERT INTO `m_code_value` (`code_id`, `code_value`, `order_position`) VALUES (2, 'Male', 1); 
-INSERT INTO `m_code_value` (`code_id`, `code_value`, `order_position`) VALUES (2, 'Female', 2);
+INSERT INTO `m_code_value`(`code_id`,`code_value`,`order_position`)
+select mc.id, 'option.Male', ifnull(max(mv.id), 1)
+from m_code mc
+join m_code_value mv on mv.code_id = mc.id
+where mc.`code_name` = "Gender";
 
-INSERT INTO `m_code_value` (`code_id`, `code_value`, `order_position`) VALUES (3, 'Primary', 1); 
-INSERT INTO `m_code_value` (`code_id`, `code_value`, `order_position`) VALUES (3, 'Secondary', 2);
-INSERT INTO `m_code_value` (`code_id`, `code_value`, `order_position`) VALUES (3, 'University', 3);
+INSERT INTO `m_code_value`(`code_id`,`code_value`,`order_position`)
+select mc.id, 'option.Female', ifnull(max(mv.id), 1)
+from m_code mc
+join m_code_value mv on mv.code_id = mc.id
+where mc.`code_name` = "Gender";
+
+INSERT INTO `m_code_value`(`code_id`,`code_value`,`order_position`)
+select mc.id, 'option.Yes', ifnull(max(mv.id), 1)
+from m_code mc
+join m_code_value mv on mv.code_id = mc.id
+where mc.`code_name` = "YesNo";
+
+INSERT INTO `m_code_value`(`code_id`,`code_value`,`order_position`)
+select mc.id, 'option.No', ifnull(max(mv.id), 1)
+from m_code mc
+join m_code_value mv on mv.code_id = mc.id
+where mc.`code_name` = "YesNo";
+
+INSERT INTO `m_code`
+(`code_name`, `is_system_defined`) 
+VALUES 
+('Education',1);
+
+INSERT INTO `m_code_value`(`code_id`,`code_value`,`order_position`)
+select mc.id, 'Primary', ifnull(max(mv.id), 1)
+from m_code mc
+join m_code_value mv on mv.code_id = mc.id
+where mc.`code_name` = "Education";
+
+INSERT INTO `m_code_value`(`code_id`,`code_value`,`order_position`)
+select mc.id, 'Secondary', ifnull(max(mv.id), 1)
+from m_code mc
+join m_code_value mv on mv.code_id = mc.id
+where mc.`code_name` = "Education";
+
+INSERT INTO `m_code_value`(`code_id`,`code_value`,`order_position`)
+select mc.id, 'University', ifnull(max(mv.id), 1)
+from m_code mc
+join m_code_value mv on mv.code_id = mc.id
+where mc.`code_name` = "Education";
+
+-- ========= datatables=======
 
 DROP TABLE IF EXISTS `extra_client_details`;
 CREATE TABLE `extra_client_details` (
@@ -50,3 +90,11 @@ CREATE TABLE `extra_loan_details` (
   PRIMARY KEY (`loan_id`),
   CONSTRAINT `FK_extra_loan_details` FOREIGN KEY (`loan_id`) REFERENCES `m_loan` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- datatables mapping
+INSERT INTO `x_registered_table`
+(`registered_table_name`,`application_table_name`)
+VALUES
+('extra_client_details', 'm_client'),
+('extra_family_details', 'm_loan'),
+('extra_loan_details', 'm_loan');

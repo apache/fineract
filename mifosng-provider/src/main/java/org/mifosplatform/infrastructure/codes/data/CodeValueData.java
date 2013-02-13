@@ -18,6 +18,10 @@ public class CodeValueData {
         return new CodeValueData(id, name, position);
     }
 
+    public static CodeValueData instance(final Long id, final String name) {
+        return new CodeValueData(id, name, null);
+    }
+
     private CodeValueData(final Long id, final String name, final Integer position) {
         this.id = id;
         this.name = name;

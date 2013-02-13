@@ -7,7 +7,7 @@ import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 import org.mifosplatform.infrastructure.codes.domain.CodeValue;
-import org.mifosplatform.infrastructure.codes.domain.CodeValueRepository;
+import org.mifosplatform.infrastructure.codes.domain.CodeValueRepositoryWrapper;
 import org.mifosplatform.infrastructure.codes.exception.CodeValueNotFoundException;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
@@ -22,8 +22,8 @@ import org.mifosplatform.organisation.office.domain.OfficeRepository;
 import org.mifosplatform.organisation.office.exception.OfficeNotFoundException;
 import org.mifosplatform.portfolio.client.command.ClientIdentifierCommand;
 import org.mifosplatform.portfolio.client.command.ClientNoteCommand;
-import org.mifosplatform.portfolio.client.domain.AccountNumberGeneratorFactory;
 import org.mifosplatform.portfolio.client.domain.AccountNumberGenerator;
+import org.mifosplatform.portfolio.client.domain.AccountNumberGeneratorFactory;
 import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.client.domain.ClientIdentifier;
 import org.mifosplatform.portfolio.client.domain.ClientIdentifierRepository;
@@ -54,7 +54,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
     private final ClientIdentifierRepository clientIdentifierRepository;
     private final OfficeRepository officeRepository;
     private final NoteRepository noteRepository;
-    private final CodeValueRepository codeValueRepository;
+    private final CodeValueRepositoryWrapper codeValueRepository;
     private final ClientCommandFromApiJsonDeserializer fromApiJsonDeserializer;
     private final ClientNoteCommandFromApiJsonDeserializer clientNoteFromApiJsonDeserializer;
     private final ClientIdentifierCommandFromApiJsonDeserializer clientIdentifierCommandFromApiJsonDeserializer;
@@ -63,7 +63,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
     @Autowired
     public ClientWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final ClientRepository clientRepository,
             final ClientIdentifierRepository clientIdentifierRepository, final OfficeRepository officeRepository,
-            final NoteRepository noteRepository, final CodeValueRepository codeValueRepository,
+            final NoteRepository noteRepository, final CodeValueRepositoryWrapper codeValueRepository,
             final ClientCommandFromApiJsonDeserializer fromApiJsonDeserializer,
             final ClientNoteCommandFromApiJsonDeserializer clientNoteFromApiJsonDeserializer,
             final ClientIdentifierCommandFromApiJsonDeserializer clientIdentifierCommandFromApiJsonDeserializer,
@@ -254,9 +254,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             final Client client = this.clientRepository.findOne(clientId);
             if (client == null || client.isDeleted()) { throw new ClientNotFoundException(clientId); }
 
-            final CodeValue documentType = this.codeValueRepository.findOne(clientIdentifierCommand.getDocumentTypeId());
-            if (documentType == null) { throw new CodeValueNotFoundException(clientIdentifierCommand.getDocumentTypeId()); }
-
+            final CodeValue documentType = this.codeValueRepository.findOneWithNotFoundDetection(clientIdentifierCommand.getDocumentTypeId());
             documentTypeId = documentType.getId();
             documentTypeLabel = documentType.label();
 
@@ -297,7 +295,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             final Map<String, Object> changes = clientIdentifierForUpdate.update(command);
 
             if (changes.containsKey("documentTypeId")) {
-                documentType = this.codeValueRepository.findOne(documentTypeId);
+                documentType = this.codeValueRepository.findOneWithNotFoundDetection(documentTypeId);
                 if (documentType == null) { throw new CodeValueNotFoundException(documentTypeId); }
 
                 documentTypeId = documentType.getId();

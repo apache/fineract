@@ -34,6 +34,8 @@ public class LoanBasicDetailsData {
     private final EnumOptionData status;
     private final Long fundId;
     private final String fundName;
+    private final Long loanPurposeId;
+    private final String loanPurposeName;
     private final Long loanOfficerId;
     private final String loanOfficerName;
     private final CurrencyData currency;
@@ -120,6 +122,8 @@ public class LoanBasicDetailsData {
         this.status = null;
         this.fundId = fundId;
         this.fundName = fundName;
+        this.loanPurposeId = null;
+        this.loanPurposeName = null;
         this.loanOfficerId = null;
         this.loanOfficerName = null;
         this.currency = currency;
@@ -179,6 +183,8 @@ public class LoanBasicDetailsData {
         this.status = null;
         this.fundId = null;
         this.fundName = null;
+        this.loanPurposeId = null;
+        this.loanPurposeName = null;
         this.loanOfficerId = null;
         this.loanOfficerName = null;
         this.currency = null;
@@ -216,16 +222,17 @@ public class LoanBasicDetailsData {
     public LoanBasicDetailsData(final Long id, final String accountNo, final String externalId, final Long clientId,
             final String clientName, final Long clientOfficeId, final Long groupId, final String groupName, final Long groupOfficeId,
             final Long loanProductId, final String loanProductName, final String loanProductDescription, final Long fundId,
-            String fundName, final LocalDate closedOnDate, final LocalDate submittedOnDate, final LocalDate approvedOnDate,
-            final LocalDate expectedDisbursementDate, final LocalDate actualDisbursementDate, final LocalDate expectedMaturityDate,
-            final LocalDate repaymentsStartingFromDate, final LocalDate interestChargedFromDate, final CurrencyData currency,
-            final BigDecimal principal, final BigDecimal inArrearsTolerance, final Integer numberOfRepayments,
-            final Integer repaymentEvery, final BigDecimal interestRatePerPeriod, final BigDecimal annualInterestRate,
-            final EnumOptionData repaymentFrequencyType, final EnumOptionData interestRateFrequencyType,
-            final EnumOptionData amortizationType, final EnumOptionData interestType, final EnumOptionData interestCalculationPeriodType,
-            final EnumOptionData status, final LocalDate lifeCycleStatusDate, final Integer termFrequency,
-            final EnumOptionData termPeriodFrequencyType, final Integer transactionStrategyId, final Collection<LoanChargeData> charges,
-            final Long loanOfficerId, String loanOfficerName, final BigDecimal totalDisbursementCharges) {
+            final String fundName, final Long loanPurposeId, final String loanPurposeName, final LocalDate closedOnDate,
+            final LocalDate submittedOnDate, final LocalDate approvedOnDate, final LocalDate expectedDisbursementDate,
+            final LocalDate actualDisbursementDate, final LocalDate expectedMaturityDate, final LocalDate repaymentsStartingFromDate,
+            final LocalDate interestChargedFromDate, final CurrencyData currency, final BigDecimal principal,
+            final BigDecimal inArrearsTolerance, final Integer numberOfRepayments, final Integer repaymentEvery,
+            final BigDecimal interestRatePerPeriod, final BigDecimal annualInterestRate, final EnumOptionData repaymentFrequencyType,
+            final EnumOptionData interestRateFrequencyType, final EnumOptionData amortizationType, final EnumOptionData interestType,
+            final EnumOptionData interestCalculationPeriodType, final EnumOptionData status, final LocalDate lifeCycleStatusDate,
+            final Integer termFrequency, final EnumOptionData termPeriodFrequencyType, final Integer transactionStrategyId,
+            final Collection<LoanChargeData> charges, final Long loanOfficerId, String loanOfficerName,
+            final BigDecimal totalDisbursementCharges) {
         this.id = id;
         this.accountNo = accountNo;
         this.externalId = externalId;
@@ -240,6 +247,8 @@ public class LoanBasicDetailsData {
         this.loanProductDescription = loanProductDescription;
         this.fundId = fundId;
         this.fundName = fundName;
+        this.loanPurposeId = loanPurposeId;
+        this.loanPurposeName = loanPurposeName;
         this.loanOfficerId = loanOfficerId;
         this.loanOfficerName = loanOfficerName;
         this.closedOnDate = closedOnDate;
@@ -391,6 +400,14 @@ public class LoanBasicDetailsData {
 
     public String getFundName() {
         return fundName;
+    }
+
+    public Long getLoanPurposeId() {
+        return this.loanPurposeId;
+    }
+
+    public String getLoanPurposeName() {
+        return this.loanPurposeName;
     }
 
     public Long getLoanProductId() {

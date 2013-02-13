@@ -30,7 +30,7 @@ public final class LoanChargeCommandFromApiJsonDeserializer extends AbstractFrom
     /**
      * The parameters supported for this command.
      */
-    final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("chargeId", "amount", "chargeTimeType",
+    final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("id", "chargeId", "amount", "chargeTimeType",
             "chargeCalculationType", "specifiedDueDate", "locale", "dateFormat"));
 
     private final FromJsonHelper fromApiJsonHelper;
@@ -49,12 +49,13 @@ public final class LoanChargeCommandFromApiJsonDeserializer extends AbstractFrom
         fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, supportedParameters);
 
         final JsonElement element = fromApiJsonHelper.parse(json);
+        final Long id = fromApiJsonHelper.extractLongNamed("id", element);
         final Long chargeId = fromApiJsonHelper.extractLongNamed("chargeId", element);
         final BigDecimal amount = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("amount", element);
         final Integer chargeTimeType = fromApiJsonHelper.extractIntegerWithLocaleNamed("chargeTimeType", element);
         final Integer chargeCalculationType = fromApiJsonHelper.extractIntegerWithLocaleNamed("chargeCalculationType", element);
-        final LocalDate specifiedDueDate = fromApiJsonHelper.extractLocalDateNamed("specifiedDueDate", element);
+        final LocalDate dueAsOfDate = fromApiJsonHelper.extractLocalDateNamed("specifiedDueDate", element);
 
-        return new LoanChargeCommand(chargeId, amount, chargeTimeType, chargeCalculationType, specifiedDueDate);
+        return new LoanChargeCommand(id, chargeId, amount, chargeTimeType, chargeCalculationType, dueAsOfDate);
     }
 }

@@ -87,7 +87,7 @@ public class ClientIdentifiersApiResource {
 
         context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
 
-        final Collection<CodeValueData> codeValues = codeValueReadPlatformService.retrieveCustomIdentifierCodeValues();
+        final Collection<CodeValueData> codeValues = codeValueReadPlatformService.retrieveCodeValuesByCode("Customer Identifier");
         final ClientIdentifierData clientIdentifierData = ClientIdentifierData.template(codeValues);
 
         final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
@@ -132,7 +132,8 @@ public class ClientIdentifiersApiResource {
 
         ClientIdentifierData clientIdentifierData = this.clientReadPlatformService.retrieveClientIdentifier(clientId, clientIdentifierId);
         if (settings.isTemplate()) {
-            final Collection<CodeValueData> codeValues = codeValueReadPlatformService.retrieveCustomIdentifierCodeValues();
+            final Collection<CodeValueData> codeValues = codeValueReadPlatformService
+                    .retrieveCodeValuesByCode("Customer Identifier");
             clientIdentifierData = ClientIdentifierData.template(clientIdentifierData, codeValues);
         }
 

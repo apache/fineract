@@ -44,8 +44,8 @@ import org.mifosplatform.portfolio.loanaccount.domain.LoanTransaction;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.mifosplatform.portfolio.loanaccount.exception.LoanNotFoundException;
 import org.mifosplatform.portfolio.loanaccount.exception.LoanOfficerAssignmentException;
-import org.mifosplatform.portfolio.loanaccount.exception.LoanTransactionNotFoundException;
 import org.mifosplatform.portfolio.loanaccount.exception.LoanOfficerUnassignmentException;
+import org.mifosplatform.portfolio.loanaccount.exception.LoanTransactionNotFoundException;
 import org.mifosplatform.portfolio.loanaccount.serialization.LoanChargeCommandFromApiJsonDeserializer;
 import org.mifosplatform.portfolio.loanaccount.serialization.LoanStateTransitionCommandFromApiJsonDeserializer;
 import org.mifosplatform.portfolio.loanaccount.serialization.LoanTransactionCommandFromApiJsonDeserializer;
@@ -78,8 +78,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             final LoanStateTransitionCommandFromApiJsonDeserializer loanStateTransitionCommandFromApiJsonDeserializer,
             final LoanTransactionCommandFromApiJsonDeserializer loanTransactionCommandFromApiJsonDeserializer,
             final LoanChargeCommandFromApiJsonDeserializer loanChargeCommandFromApiJsonDeserializer,
-            final LoanUpdateCommandFromApiJsonDeserializer loanUpdateCommandFromApiJsonDeserializer,
-            final LoanAssembler loanAssembler,
+            final LoanUpdateCommandFromApiJsonDeserializer loanUpdateCommandFromApiJsonDeserializer, final LoanAssembler loanAssembler,
             final LoanRepository loanRepository, final LoanTransactionRepository loanTransactionRepository,
             final NoteRepository noteRepository, final ChargeRepository chargeRepository, final LoanChargeRepository loanChargeRepository,
             final ApplicationCurrencyRepository applicationCurrencyRepository,
@@ -96,7 +95,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         this.loanChargeRepository = loanChargeRepository;
         this.applicationCurrencyRepository = applicationCurrencyRepository;
         this.journalEntryWritePlatformService = journalEntryWritePlatformService;
-        this.loanUpdateCommandFromApiJsonDeserializer = loanUpdateCommandFromApiJsonDeserializer; 
+        this.loanUpdateCommandFromApiJsonDeserializer = loanUpdateCommandFromApiJsonDeserializer;
     }
 
     private boolean isBeforeToday(final LocalDate date) {
@@ -129,26 +128,27 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         final Map<String, Object> changes = loan.disburse(command, defaultLoanLifecycleStateMachine(), currency);
         if (!changes.isEmpty()) {
-            // variable stores Id's of all existing loan transactions (newly created
+            // variable stores Id's of all existing loan transactions (newly
+            // created
             // loan transactions would not have an Id before save)
             final Set<Long> existingLoanTransactionIds = new HashSet<Long>();
-            for(LoanTransaction loanTransaction:loan.getLoanTransactions()){
-                if(!(loanTransaction.getId()==null)){
+            for (LoanTransaction loanTransaction : loan.getLoanTransactions()) {
+                if (!(loanTransaction.getId() == null)) {
                     existingLoanTransactionIds.add(loanTransaction.getId());
                 }
             }
             this.loanRepository.save(loan);
-    
+
             if (StringUtils.isNotBlank(noteText)) {
                 Note note = Note.loanNote(loan, noteText);
                 this.noteRepository.save(note);
             }
-    
+
             // make a call to accounting
             if (loan.isAccountingEnabledOnLoanProduct()) {
                 /***
-                 * Variable holds list of all newly created loan transactions during
-                 * this disbursal
+                 * Variable holds list of all newly created loan transactions
+                 * during this disbursal
                  **/
                 List<LoanTransaction> newLoanTransactions = new ArrayList<LoanTransaction>();
                 for (LoanTransaction loanTransaction : loan.getLoanTransactions()) {
@@ -183,7 +183,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final Map<String, Object> changes = loan.undoDisbursal(defaultLoanLifecycleStateMachine());
         if (!changes.isEmpty()) {
             this.loanRepository.save(loan);
-    
+
             final String noteText = command.stringValueOfParameterNamed("note");
             if (StringUtils.isNotBlank(noteText)) {
                 Note note = Note.loanNote(loan, noteText);
@@ -276,15 +276,15 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final Map<String, Object> changes = new LinkedHashMap<String, Object>();
         changes.put("transactionDate", command.stringValueOfParameterNamed("transactionDate"));
         changes.put("transactionAmount", command.stringValueOfParameterNamed("transactionAmount"));
-        
-        boolean transactionIsRepayment= transactionToAdjust.isRepayment();
+
+        boolean transactionIsRepayment = transactionToAdjust.isRepayment();
 
         final LoanTransaction newTransactionDetail = loan.adjustExistingTransaction(transactionDate, transactionAmount,
                 defaultLoanLifecycleStateMachine(), transactionToAdjust);
         if (newTransactionDetail.isGreaterThanZero(loan.getPrincpal().getCurrency())) {
             this.loanTransactionRepository.save(newTransactionDetail);
         }
-        
+
         this.loanRepository.save(loan);
 
         final String noteText = command.stringValueOfParameterNamed("note");
@@ -296,8 +296,9 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         changes.put("locale", command.locale());
         changes.put("dateFormat", command.dateFormat());
-        
-        // make a call to accounting only if transaction being adjusted is a repayment (not waiver)
+
+        // make a call to accounting only if transaction being adjusted is a
+        // repayment (not waiver)
         if (loan.isAccountingEnabledOnLoanProduct() && transactionIsRepayment) {
             List<LoanTransaction> newLoanTransactions = new ArrayList<LoanTransaction>();
             if (newTransactionDetail.getId() != null) {
@@ -307,7 +308,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             LoanDTO loanDTO = populateLoanDTO(loan, newLoanTransactions);
             journalEntryWritePlatformService.createJournalEntriesForLoan(loanDTO);
         }
-        
+
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
                 .withEntityId(transactionId) //
@@ -389,7 +390,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         changes.put("locale", command.locale());
         changes.put("dateFormat", command.dateFormat());
-        
+
         // make a call to accounting
         if (loan.isAccountingEnabledOnLoanProduct()) {
             LoanDTO loanDTO = populateLoanData(loan, writeoff);
@@ -509,8 +510,9 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     public CommandProcessingResult addLoanCharge(final Long loanId, final JsonCommand command) {
         this.context.authenticatedUser();
 
+        // FIXME - KW - update loan charge api validation
         final LoanChargeCommand loanChargeCommand = this.loanChargeCommandFromApiJsonDeserializer.commandFromApiJson(command.json());
-        loanChargeCommand.validateForCreate();
+        // loanChargeCommand.validateForCreate();
 
         final Loan loan = retrieveLoanBy(loanId);
 
@@ -709,12 +711,10 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         this.context.authenticatedUser();
 
-        final LoanUpdateCommand loanUpdateCommand = this.loanUpdateCommandFromApiJsonDeserializer.commandFromApiJson(command
-                .json());
-        
+        final LoanUpdateCommand loanUpdateCommand = this.loanUpdateCommandFromApiJsonDeserializer.commandFromApiJson(command.json());
+
         loanUpdateCommand.validate();
 
-        
         final LocalDate dateOfLoanOfficerunAssigned = command.localDateValueOfParameterNamed("unassignedDate");
 
         final Loan loan = retrieveLoanBy(loanId);
@@ -738,11 +738,11 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     private LoanDTO populateLoanDTO(Loan loan, List<LoanTransaction> loanTransactions) {
         List<LoanTransactionDTO> loanTransactionDTOs = new ArrayList<LoanTransactionDTO>();
         for (LoanTransaction loanTransaction : loanTransactions) {
-            LoanTransactionDTO loanTransactionDTO = new LoanTransactionDTO(loanTransaction.getId().toString(),
-                    loanTransaction.getDateOf(), loanTransaction.getAmount(), loanTransaction.getPrincipalPortion(),
-                    loanTransaction.getInterestPortion(), loanTransaction.getFeePortion(), loanTransaction.getPenaltyChargesPortion(),
-                    loanTransaction.isDisbursement(), loanTransaction.isRepayment(), loanTransaction.isRepaymentAtDisbursement(),
-                    loanTransaction.isContra(), loanTransaction.isWriteOff());
+            LoanTransactionDTO loanTransactionDTO = new LoanTransactionDTO(loanTransaction.getId().toString(), loanTransaction.getDateOf(),
+                    loanTransaction.getAmount(), loanTransaction.getPrincipalPortion(), loanTransaction.getInterestPortion(),
+                    loanTransaction.getFeePortion(), loanTransaction.getPenaltyChargesPortion(), loanTransaction.isDisbursement(),
+                    loanTransaction.isRepayment(), loanTransaction.isRepaymentAtDisbursement(), loanTransaction.isContra(),
+                    loanTransaction.isWriteOff());
             loanTransactionDTOs.add(loanTransactionDTO);
         }
         return new LoanDTO(loan.getId(), loan.productId(), loan.getOfficeId(), loan.isCashBasedAccountingEnabledOnLoanProduct(),

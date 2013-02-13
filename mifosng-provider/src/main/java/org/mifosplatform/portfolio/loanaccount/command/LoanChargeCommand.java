@@ -14,14 +14,18 @@ import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidation
  */
 public class LoanChargeCommand implements Comparable<LoanChargeCommand> {
 
+    @SuppressWarnings("unused")
+    private final Long id;
     private final Long chargeId;
     private final BigDecimal amount;
     private final Integer chargeTimeType;
-    private final LocalDate specifiedDueDate;
     private final Integer chargeCalculationType;
+    @SuppressWarnings("unused")
+    private final LocalDate specifiedDueDate;
 
-    public LoanChargeCommand(final Long chargeId, final BigDecimal amount, final Integer chargeTimeType,
+    public LoanChargeCommand(final Long id, final Long chargeId, final BigDecimal amount, final Integer chargeTimeType,
             final Integer chargeCalculationType, final LocalDate specifiedDueDate) {
+        this.id = id;
         this.chargeId = chargeId;
         this.amount = amount;
         this.chargeTimeType = chargeTimeType;
@@ -38,28 +42,7 @@ public class LoanChargeCommand implements Comparable<LoanChargeCommand> {
         return comparison;
     }
 
-    public void validateForCreate() {
-        List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
-
-        DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("charge");
-
-        baseDataValidator.reset().parameter("chargeId").value(this.chargeId).notNull().longGreaterThanZero();
-        baseDataValidator.reset().parameter("amount").value(this.amount).notNull().positiveAmount();
-        // baseDataValidator.reset().parameter("chargeTimeType").value(command.getChargeTimeType()).ignoreIfNull().inMinMaxRange(1,
-        // 2);
-        //
-        // if (command.getChargeTimeType().equals(Integer.valueOf(2))) {
-        // // date must be provided
-        // baseDataValidator.reset().parameter("specifiedDueDate").value(command.getSpecifiedDueDate()).notNull();
-        // }
-        //
-        // baseDataValidator.reset().parameter("chargeCalculationType").value(command.getChargeCalculationType()).ignoreIfNull().inMinMaxRange(1,
-        // 4);
-
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
-                "Validation errors exist.", dataValidationErrors); }
-    }
-
+    @Deprecated
     public void validateForUpdate() {
         List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
 

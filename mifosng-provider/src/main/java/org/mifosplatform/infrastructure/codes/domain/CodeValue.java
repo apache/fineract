@@ -12,6 +12,7 @@ import javax.persistence.UniqueConstraint;
 
 import org.apache.commons.lang.StringUtils;
 import org.mifosplatform.infrastructure.codes.CodeConstants.CODEVALUE_JSON_INPUT_PARAMS;
+import org.mifosplatform.infrastructure.codes.data.CodeValueData;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
@@ -81,4 +82,7 @@ public class CodeValue extends AbstractPersistable<Long> {
         return actualChanges;
     }
 
+    public CodeValueData toData() {
+        return CodeValueData.instance(this.getId(), this.label, this.position);
+    }
 }

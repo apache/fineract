@@ -362,9 +362,11 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
     private static final class LoanMapper implements RowMapper<LoanBasicDetailsData> {
 
         public String loanSchema() {
-            return "l.id as id, l.account_no as accountNo, l.external_id as externalId, l.fund_id as fundId, f.name as fundName, "
-                    + " lp.id as loanProductId, lp.name as loanProductName, lp.description as loanProductDescription, c.id as clientId, c.display_name as clientName, "
-                    + " c.office_id as clientOfficeId, g.id as groupId, g.name as groupName, g.office_id as groupOfficeId,"
+            return "l.id as id, l.account_no as accountNo, l.external_id as externalId, l.fund_id as fundId, f.name as fundName,"
+                    + " l.loanpurpose_cv_id as loanPurposeId, cv.code_value as loanPurposeName,"
+                    + " lp.id as loanProductId, lp.name as loanProductName, lp.description as loanProductDescription,"
+                    + " c.id as clientId, c.display_name as clientName, c.office_id as clientOfficeId,"
+                    + " g.id as groupId, g.name as groupName, g.office_id as groupOfficeId,"
                     + " l.submittedon_date as submittedOnDate,"
                     + " l.total_charges_due_at_disbursement_derived as totalDisbursementCharges,"
                     + " l.approvedon_date as approvedOnDate, l.expected_disbursedon_date as expectedDisbursementDate, l.disbursedon_date as actualDisbursementDate, l.expected_firstrepaymenton_date as expectedFirstRepaymentOnDate,"
@@ -379,7 +381,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     + " l.loan_officer_id as loanOfficerId, s.display_name as loanOfficerName" + " from m_loan l"
                     + " left join m_client c on c.id = l.client_id" + " left join m_group g on g.id = l.group_id"
                     + " join m_product_loan lp on lp.id = l.product_id" + " join m_currency rc on rc.`code` = l.currency_code"
-                    + " left join m_fund f on f.id = l.fund_id" + " left join m_staff s on s.id = l.loan_officer_id";
+                    + " left join m_fund f on f.id = l.fund_id" + " left join m_staff s on s.id = l.loan_officer_id"
+                    + " left join m_code_value cv on cv.id = l.loanpurpose_cv_id";
         }
 
         @Override
@@ -407,8 +410,13 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
             final Long fundId = JdbcSupport.getLong(rs, "fundId");
             final String fundName = rs.getString("fundName");
+
             final Long loanOfficerId = JdbcSupport.getLong(rs, "loanOfficerId");
             final String loanOfficerName = rs.getString("loanOfficerName");
+
+            final Long loanPurposeId = JdbcSupport.getLong(rs, "loanPurposeId");
+            final String loanPurposeName = rs.getString("loanPurposeName");
+
             final Long loanProductId = JdbcSupport.getLong(rs, "loanProductId");
             final String loanProductName = rs.getString("loanProductName");
             final String loanProductDescription = rs.getString("loanProductDescription");
@@ -468,12 +476,13 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
             Collection<LoanChargeData> charges = null;
             return new LoanBasicDetailsData(id, accountNo, externalId, clientId, clientName, clientOfficeId, groupId, groupName,
-                    groupOfficeId, loanProductId, loanProductName, loanProductDescription, fundId, fundName, closedOnDate, submittedOnDate,
-                    approvedOnDate, expectedDisbursementDate, actualDisbursementDate, expectedMaturityDate, expectedFirstRepaymentOnDate,
-                    interestChargedFromDate, currencyData, principal, inArrearsTolerance, numberOfRepayments, repaymentEvery,
-                    interestRatePerPeriod, annualInterestRate, repaymentFrequencyType, interestRateFrequencyType, amortizationType,
-                    interestType, interestCalculationPeriodType, status, lifeCycleStatusDate, termFrequency, termPeriodFrequencyType,
-                    transactionStrategyId, charges, loanOfficerId, loanOfficerName, totalDisbursementCharges);
+                    groupOfficeId, loanProductId, loanProductName, loanProductDescription, fundId, fundName, loanPurposeId,
+                    loanPurposeName, closedOnDate, submittedOnDate, approvedOnDate, expectedDisbursementDate, actualDisbursementDate,
+                    expectedMaturityDate, expectedFirstRepaymentOnDate, interestChargedFromDate, currencyData, principal,
+                    inArrearsTolerance, numberOfRepayments, repaymentEvery, interestRatePerPeriod, annualInterestRate,
+                    repaymentFrequencyType, interestRateFrequencyType, amortizationType, interestType, interestCalculationPeriodType,
+                    status, lifeCycleStatusDate, termFrequency, termPeriodFrequencyType, transactionStrategyId, charges, loanOfficerId,
+                    loanOfficerName, totalDisbursementCharges);
         }
     }
 
