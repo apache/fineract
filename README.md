@@ -6,7 +6,7 @@ The next evolution of mifos focussing being faster, lighter and cheaper to chang
 Version
 ==========
 
-The mifosx platform is currently still in BETA. That means its likely that there will be changes to the Public API so any use or development against is at your own risk.
+The mifosx platform is currently still in BETA. That means its likely that there will be changes to the Platform API so any use or development against is at your own risk.
 
 Latest release: 
 
@@ -15,20 +15,17 @@ License
 
 This project is licensed under MPL V2. See https://github.com/openMF/mifosx/blob/master/LICENSE.md
 
-Video Demonstration
-===============
+Mifos Platform API
+=====================
 
-http://www.youtube.com/watch?v=zN5Dn1Lc_js
+<a target="_blank" href="https://demo.openmf.org/api-docs/apiLive.htm" title="mifos platform api beta 1">API Documentation (Demo Server)</a>
+
 
 Online Client Application Demos
 =============================
 
 <a target="_blank" href="https://demo.openmf.org" title="Client apps: Individual Lending">Individual Lending App</a>
 
-Mifos Platform API
-=====================
-
-<a target="_blank" href="https://demo.openmf.org/api-docs/apiLive.htm" title="mifos platform api beta 1">API Documentation (Demo Server)</a>
 
 Developers
 ==========
@@ -54,10 +51,9 @@ Launch instance <a target="_blank" href="https://console.aws.amazon.com/ec2/home
 Roadmap
 ==============
 
-- Round out Individual Lending platform and application cababilities:
-     - GK-maarg http://www.gfspl.in/maarg) - see see https://mifosforge.jira.com/browse/MIFOSX-31
-     - Elevate Africa, Heavens Family, CEDA Microfinance
-     
-- Solidatory Groups (Joint Liability Groups) & Linking loan functionality to these groups (@michal-At-soldevho - see https://mifosforge.jira.com/browse/MIFOSX-127, https://mifosforge.jira.com/browse/MIFOSX-5)
- 
-- Add spine of Fixed-Term Deposit Accounts and Savings Accounts (@madhukar-At-hugo - see https://mifosforge.jira.com/browse/MIFOSX-1)
+- Point to public published ROADMAP
+
+Video Demonstration
+===============
+
+Demonstration of first Prototype of this platform with browser App (April 2012) - http://www.youtube.com/watch?v=zN5Dn1Lc_js
