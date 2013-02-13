@@ -29,10 +29,11 @@ Online Client Application Demos
 
 Developers
 ==========
+see https://mifosforge.jira.com/wiki/display/MIFOSX/MifosX+Technical - Developers Wiki Page
 
-see https://github.com/keithwoodlock/mifosx/wiki for getting started.
+see https://mifosforge.jira.com/wiki/display/MIFOSX/Getting+started+-+Contributing+to+MifosX  - Getting Started.
 
-see https://mifosforge.jira.com/wiki/display/MIFOSX/MifosX+Technical
+see https://mifosforge.jira.com/wiki/display/MIFOSX/The+Basic+Design - Overview of Platform Implementation
 
 see https://github.com/keithwoodlock/mifosx/wiki/Screen-Based-Reporting for info around reporting
 
