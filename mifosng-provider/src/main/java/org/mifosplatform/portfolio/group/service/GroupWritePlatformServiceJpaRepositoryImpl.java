@@ -15,6 +15,10 @@ import org.mifosplatform.organisation.office.domain.Office;
 import org.mifosplatform.organisation.office.domain.OfficeRepository;
 import org.mifosplatform.organisation.office.exception.InvalidOfficeException;
 import org.mifosplatform.organisation.office.exception.OfficeNotFoundException;
+import org.mifosplatform.organisation.staff.domain.Staff;
+import org.mifosplatform.organisation.staff.domain.StaffRepository;
+import org.mifosplatform.organisation.staff.exception.StaffNotFoundException;
+import org.mifosplatform.organisation.staff.exception.StaffRoleException;
 import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.client.domain.ClientRepository;
 import org.mifosplatform.portfolio.client.exception.ClientNotFoundException;
@@ -23,6 +27,7 @@ import org.mifosplatform.portfolio.group.command.GroupCommandValidator;
 import org.mifosplatform.portfolio.group.domain.Group;
 import org.mifosplatform.portfolio.group.domain.GroupRepository;
 import org.mifosplatform.portfolio.group.exception.GroupNotFoundException;
+import org.mifosplatform.portfolio.group.exception.LoanOfficerNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,13 +49,16 @@ public class GroupWritePlatformServiceJpaRepositoryImpl implements GroupWritePla
 
     private final OfficeRepository officeRepository;
 
+    private final StaffRepository staffRepository;
+
     @Autowired
     public GroupWritePlatformServiceJpaRepositoryImpl(PlatformSecurityContext context, GroupRepository groupRepository,
-            ClientRepository clientRepository, OfficeRepository officeRepository) {
+            ClientRepository clientRepository, OfficeRepository officeRepository , StaffRepository staffRepository) {
         this.context = context;
         this.groupRepository = groupRepository;
         this.clientRepository = clientRepository;
         this.officeRepository = officeRepository;
+        this.staffRepository = staffRepository; 
     }
 
     @Transactional
@@ -63,13 +71,26 @@ public class GroupWritePlatformServiceJpaRepositoryImpl implements GroupWritePla
             validator.validateForCreate();
 
             Office groupOffice = this.officeRepository.findOne(command.getOfficeId());
+            
+            Staff loanOfficer = null;
+            Long loanOfficerId = command.getLoanOfficeId();
+            
+            if (loanOfficerId != null) {
+                // TODO Set the scope for staffRepository.findOneByOfficeId to a officer equal to groupOffice
+                loanOfficer = this.staffRepository.findOne(loanOfficerId);
+                if (loanOfficer == null) {
+                    throw new StaffNotFoundException(loanOfficerId);
+                } 
+            }
+            
+            
             if (groupOffice == null) {
                 throw new OfficeNotFoundException(command.getOfficeId());
             }
 
             final Set<Client> clientMembers = assembleSetOfClients(command);
 
-            Group newGroup = Group.newGroup(groupOffice, command.getName(), command.getExternalId(), clientMembers);
+            Group newGroup = Group.newGroup(groupOffice, loanOfficer , command.getName(), command.getExternalId(), clientMembers);
 
             this.groupRepository.saveAndFlush(newGroup);
 
@@ -103,10 +124,20 @@ public class GroupWritePlatformServiceJpaRepositoryImpl implements GroupWritePla
                     throw new OfficeNotFoundException(command.getOfficeId());
                 }
             }
+            
+            Staff loanOfficer = null;
+            Long loanOfficerId = command.getLoanOfficeId();
+            if (command.isLoanOfficerChanged() && loanOfficerId != null) {
+                loanOfficer = this.staffRepository.findOne(loanOfficerId);
+                if (loanOfficer == null) {
+                    throw new LoanOfficerNotFoundException(loanOfficerId);
+                }
+            }
+            
 
             final Set<Client> clientMembers = assembleSetOfClients(command);
 
-            groupForUpdate.update(command, groupOffice, clientMembers);
+            groupForUpdate.update(command, groupOffice, loanOfficer , clientMembers);
 
             groupRepository.saveAndFlush(groupForUpdate);
 

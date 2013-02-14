@@ -18,6 +18,7 @@ import javax.persistence.Table;
 
 import org.apache.commons.lang.StringUtils;
 import org.mifosplatform.organisation.office.domain.Office;
+import org.mifosplatform.organisation.staff.domain.Staff;
 import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.group.command.GroupCommand;
 import org.springframework.data.jpa.domain.AbstractPersistable;
@@ -30,6 +31,11 @@ public class Group extends AbstractPersistable<Long> {
     @ManyToOne
     @JoinColumn(name = "office_id", nullable = false)
     private Office office;
+
+    @SuppressWarnings("unused")
+    @ManyToOne
+    @JoinColumn(name = "loan_officer_id", nullable = false)
+    private Staff loanOfficer;
 
     @Column(name = "name", length = 100, unique = true)
     private String name;
@@ -50,12 +56,13 @@ public class Group extends AbstractPersistable<Long> {
         this.clientMembers = new HashSet<Client>();
     }
 
-    public static Group newGroup(Office office, String name, String externalId, Set<Client> clientMembers) {
-        return new Group(office, name, externalId, clientMembers);
+    public static Group newGroup(Office office, Staff loanOfficer , String name, String externalId, Set<Client> clientMembers) {
+        return new Group(office, loanOfficer , name, externalId, clientMembers);
     }
 
-    public Group(Office office, String name, String externalId, Set<Client> clientMembers) {
+    public Group(Office office, Staff loanOfficer , String name, String externalId, Set<Client> clientMembers) {
         this.office = office;
+        this.loanOfficer = loanOfficer;
         if (StringUtils.isNotBlank(name)) {
             this.name = name.trim();
         } else {
@@ -71,13 +78,17 @@ public class Group extends AbstractPersistable<Long> {
         }
     }
 
-    public void update(final GroupCommand command, final Office groupOffice, final Set<Client> clientMembers) {
+    public void update(final GroupCommand command, final Office groupOffice, final Staff newLoanOfficer, final Set<Client> clientMembers) {
         if (command.isExternalIdChanged()) {
             this.externalId = command.getExternalId();
         }
 
         if (command.isOfficeIdChanged()) {
             this.office = groupOffice;
+        }
+
+        if (command.isLoanOfficerChanged()) {
+            this.loanOfficer = newLoanOfficer;
         }
 
         if (command.isNameChanged()) {

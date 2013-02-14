@@ -68,13 +68,14 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         final Map<String, String> requestMap = gsonConverter.fromJson(json, typeOfMap);
 
-        final Set<String> supportedParams = new HashSet<String>(Arrays.asList("name", "officeId", "externalId", "clientMembers"));
+        final Set<String> supportedParams = new HashSet<String>(Arrays.asList("name", "officeId", "loanOfficerId" ,"externalId", "clientMembers"));
 
         checkForUnsupportedParameters(requestMap, supportedParams);
 
         final Set<String> modifiedParameters = new HashSet<String>();
 
         final Long officeId = extractLongParameter("officeId", requestMap, modifiedParameters);
+        final Long loanOfficeId = extractLongParameter("loanOfficerId", requestMap, modifiedParameters);
         final String externalId = extractStringParameter("externalId", requestMap, modifiedParameters);
         final String name = extractStringParameter("name", requestMap, modifiedParameters);
 
@@ -96,7 +97,7 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
         }
         //
 
-        return new GroupCommand(modifiedParameters, resourceIdentifier, externalId, name, officeId, clientMembers);
+        return new GroupCommand(modifiedParameters, resourceIdentifier, externalId, name, officeId, loanOfficeId , clientMembers);
     }
 
     private void checkForUnsupportedParameters(Map<String, ?> requestMap, Set<String> supportedParams) {
