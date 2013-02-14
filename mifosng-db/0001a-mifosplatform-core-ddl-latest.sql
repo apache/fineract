@@ -322,6 +322,7 @@ CREATE TABLE `m_staff` (
 CREATE TABLE `m_group` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `office_id` bigint(20) NOT NULL,
+  `loan_officer_id` BIGINT(20) DEFAULT NULL,
   `name` varchar(100) DEFAULT NULL,
   `external_id` varchar(100) DEFAULT NULL,
   `is_deleted` tinyint(1) NOT NULL DEFAULT '0',
@@ -329,7 +330,9 @@ CREATE TABLE `m_group` (
   UNIQUE KEY `name` (`name`),
   UNIQUE KEY `external_id` (`external_id`),
   KEY `office_id` (`office_id`),
-  CONSTRAINT `m_group_ibfk_1` FOREIGN KEY (`office_id`) REFERENCES `m_office` (`id`)
+  KEY `loan_officer_id` (`loan_officer_id`),
+  CONSTRAINT `m_group_ibfk_1` FOREIGN KEY (`office_id`) REFERENCES `m_office` (`id`),
+  CONSTRAINT `FK_m_group_m_staff` FOREIGN KEY (`loan_officer_id`) REFERENCES `m_staff` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `m_client` (
@@ -595,8 +598,6 @@ CREATE TABLE `m_guarantor` (
 	INDEX `FK_m_guarantor_m_loan` (`loan_id`),
 	CONSTRAINT `FK_m_guarantor_m_loan` FOREIGN KEY (`loan_id`) REFERENCES `m_loan` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
--- ALTER TABLE `m_loan` ADD CONSTRAINT `FK_m_loan_guarantor` FOREIGN KEY (`guarantor_id`) REFERENCES `m_guarantor` (`id`);
 
 CREATE TABLE `m_loan_charge` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
