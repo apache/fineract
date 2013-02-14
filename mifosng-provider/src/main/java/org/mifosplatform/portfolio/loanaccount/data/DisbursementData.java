@@ -14,29 +14,30 @@ import org.joda.time.LocalDate;
  */
 public class DisbursementData {
 
-	private final LocalDate expectedDisbursementDate;
-	private final LocalDate actualDisbursementDate;
-	private final BigDecimal principalDisbursed;
+    private final LocalDate expectedDisbursementDate;
+    private final LocalDate actualDisbursementDate;
+    private final BigDecimal principal;
 
-	public DisbursementData(final LocalDate expectedDisbursementDate, final LocalDate actualDisbursementDate, final BigDecimal principalDisbursed) {
-		this.expectedDisbursementDate = expectedDisbursementDate;
-		this.actualDisbursementDate = actualDisbursementDate;
-		this.principalDisbursed = principalDisbursed;
-	}
+    public DisbursementData(final LocalDate expectedDisbursementDate, final LocalDate actualDisbursementDate,
+            final BigDecimal principalDisbursed) {
+        this.expectedDisbursementDate = expectedDisbursementDate;
+        this.actualDisbursementDate = actualDisbursementDate;
+        this.principal = principalDisbursed;
+    }
 
-	public LocalDate disbursementDate() {
-		LocalDate disbursementDate = this.expectedDisbursementDate;
-		if (actualDisbursementDate != null) {
-			disbursementDate = actualDisbursementDate;
-		}
-		return disbursementDate;
-	}
+    public LocalDate disbursementDate() {
+        LocalDate disbursementDate = this.expectedDisbursementDate;
+        if (actualDisbursementDate != null) {
+            disbursementDate = actualDisbursementDate;
+        }
+        return disbursementDate;
+    }
 
-	public BigDecimal amount() {
-		return this.principalDisbursed;
-	}
-	
-	public boolean isDisbursed() {
-		return this.actualDisbursementDate != null;
-	}
+    public BigDecimal amount() {
+        return this.principal;
+    }
+
+    public boolean isDisbursed() {
+        return this.actualDisbursementDate != null;
+    }
 }

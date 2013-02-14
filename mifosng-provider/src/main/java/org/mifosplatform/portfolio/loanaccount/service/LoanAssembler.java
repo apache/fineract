@@ -43,6 +43,7 @@ import org.mifosplatform.portfolio.loanproduct.domain.LoanProduct;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanProductRepository;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanTransactionProcessingStrategy;
 import org.mifosplatform.portfolio.loanproduct.exception.LoanProductNotFoundException;
+import org.mifosplatform.useradministration.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -82,16 +83,16 @@ public class LoanAssembler {
         this.loanCollateralAssembler = loanCollateralAssembler;
     }
 
-    public Loan assembleFrom(final JsonCommand command) {
+    public Loan assembleFrom(final JsonCommand command, final AppUser currentUser) {
         final JsonElement element = command.parsedJson();
 
         final Long clientId = fromApiJsonHelper.extractLongNamed("clientId", element);
         final Long groupId = fromApiJsonHelper.extractLongNamed("groupId", element);
 
-        return assembleApplication(element, clientId, groupId);
+        return assembleApplication(element, clientId, groupId, currentUser);
     }
 
-    private Loan assembleApplication(final JsonElement element, final Long clientId, final Long groupId) {
+    private Loan assembleApplication(final JsonElement element, final Long clientId, final Long groupId, final AppUser currentUser) {
 
         final String accountNo = fromApiJsonHelper.extractStringNamed("accountNo", element);
         final Long productId = fromApiJsonHelper.extractLongNamed("productId", element);
@@ -148,7 +149,7 @@ public class LoanAssembler {
 
         if (loanApplication == null) { throw new IllegalStateException("No loan application exists for either a client or group (or both)."); }
 
-        loanApplication.loanApplicationSubmittal(loanSchedule, defaultLoanLifecycleStateMachine(), submittedOnDate, externalId);
+        loanApplication.loanApplicationSubmittal(currentUser, loanSchedule, defaultLoanLifecycleStateMachine(), submittedOnDate, externalId);
 
         return loanApplication;
     }

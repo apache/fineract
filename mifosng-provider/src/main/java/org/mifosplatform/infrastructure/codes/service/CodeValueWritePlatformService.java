@@ -14,5 +14,5 @@ public interface CodeValueWritePlatformService {
 
     CommandProcessingResult updateCodeValue(Long codeValueId, JsonCommand command);
 
-    CommandProcessingResult deleteCodeValue(Long codeValueId);
+    CommandProcessingResult deleteCodeValue(Long codeId, Long codeValueId);
 }

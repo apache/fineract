@@ -1,11 +1,12 @@
 /**
  * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this file,
- * You can obtain one at http://mozilla.org/MPL/2.0/.
+ * License, v. .0. If a copy of the MPL was not distributed with this file,
+ * You can obtain one at http://mozilla.org/MPL/.0/.
  */
 package org.mifosplatform.portfolio.loanaccount.data;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Collection;
 
 import org.joda.time.LocalDate;
@@ -29,15 +30,17 @@ public class LoanAccountData {
     // basic loan details
     private final Long id;
     private final String accountNo;
+    private final LoanStatusEnumData status;
     private final String externalId;
     private final Long clientId;
     private final String clientName;
+    private final Long clientOfficeId;
     private final Long groupId;
     private final String groupName;
+    private final Long groupOfficeId;
     private final Long loanProductId;
     private final String loanProductName;
     private final String loanProductDescription;
-    private final LoanStatusEnumData status;
     private final Long fundId;
     private final String fundName;
     private final Long loanPurposeId;
@@ -47,7 +50,6 @@ public class LoanAccountData {
     private final CurrencyData currency;
     private final BigDecimal principal;
     private final BigDecimal inArrearsTolerance;
-
     private final Integer termFrequency;
     private final EnumOptionData termPeriodFrequencyType;
     private final Integer numberOfRepayments;
@@ -61,14 +63,13 @@ public class LoanAccountData {
     private final EnumOptionData interestType;
     private final EnumOptionData interestCalculationPeriodType;
 
-    private final LocalDate submittedOnDate;
-    private final LocalDate approvedOnDate;
-    private final LocalDate expectedDisbursementDate;
-    private final LocalDate actualDisbursementDate;
-    private final LocalDate repaymentsStartingFromDate;
+    // settings
+    private final LocalDate expectedFirstRepaymentOnDate;
     private final LocalDate interestChargedFromDate;
-    private final LocalDate closedOnDate;
-    private final LocalDate expectedMaturityDate;
+    // timeline
+    private final LoanApplicationTimelineData timeline;
+    // totals
+    private final BigDecimal totalFeeChargesAtDisbursement;
 
     // associations
     private final LoanScheduleData repaymentSchedule;
@@ -76,7 +77,6 @@ public class LoanAccountData {
     private final Collection<LoanChargeData> charges;
     private final Collection<LoanCollateralData> collateral;
     private final Collection<GuarantorData> guarantors;
-    private final LoanConvenienceData convenienceData;
 
     // template
     private final Collection<StaffData> loanOfficerOptions;
@@ -94,7 +94,389 @@ public class LoanAccountData {
     private final Collection<CodeValueData> loanPurposeOptions;
     private final Collection<CodeValueData> loanCollateralOptions;
 
-    public LoanAccountData(final LoanBasicDetailsData basicDetails, final boolean convenienceDataRequired,
+    /**
+     * Used to produce a {@link LoanAccountData} with only collateral options
+     * for now.
+     */
+    public static LoanAccountData collateralTemplate(final Collection<CodeValueData> loanCollateralOptions) {
+        final Long id = null;
+        final String accountNo = null;
+        final LoanStatusEnumData status = null;
+        final String externalId = null;
+        final Long clientId = null;
+        final String clientName = null;
+        final Long clientOfficeId = null;
+        final Long groupId = null;
+        final String groupName = null;
+        final Long groupOfficeId = null;
+        final Long loanProductId = null;
+        final String loanProductName = null;
+        final String loanProductDescription = null;
+        final Long fundId = null;
+        final String fundName = null;
+        final Long loanPurposeId = null;
+        final String loanPurposeName = null;
+        final Long loanOfficerId = null;
+        final String loanOfficerName = null;
+        final CurrencyData currencyData = null;
+        final BigDecimal principal = null;
+        final BigDecimal inArrearsTolerance = null;
+        final Integer termFrequency = null;
+        final EnumOptionData termPeriodFrequencyType = null;
+        final Integer numberOfRepayments = null;
+        final Integer repaymentEvery = null;
+        final EnumOptionData repaymentFrequencyType = null;
+        final Long transactionProcessingStrategyId = null;
+        final EnumOptionData amortizationType = null;
+        final BigDecimal interestRatePerPeriod = null;
+        final EnumOptionData interestRateFrequencyType = null;
+        final BigDecimal annualInterestRate = null;
+        final EnumOptionData interestType = null;
+        final EnumOptionData interestCalculationPeriodType = null;
+        final LocalDate expectedFirstRepaymentOnDate = null;
+        final LocalDate interestChargedFromDate = null;
+        final LoanApplicationTimelineData timeline = null;
+        final BigDecimal totalFeeChargesAtDisbursement = null;
+
+        final LoanScheduleData repaymentSchedule = null;
+        final Collection<LoanTransactionData> transactions = null;
+        final Collection<LoanChargeData> charges = null;
+        final Collection<LoanCollateralData> collateral = null;
+        final Collection<GuarantorData> guarantors = null;
+        final Collection<LoanProductData> productOptions = null;
+        final Collection<EnumOptionData> termFrequencyTypeOptions = null;
+        final Collection<EnumOptionData> repaymentFrequencyTypeOptions = null;
+        final Collection<TransactionProcessingStrategyData> repaymentStrategyOptions = null;
+        final Collection<EnumOptionData> interestRateFrequencyTypeOptions = null;
+        final Collection<EnumOptionData> amortizationTypeOptions = null;
+        final Collection<EnumOptionData> interestTypeOptions = null;
+        final Collection<EnumOptionData> interestCalculationPeriodTypeOptions = null;
+        final Collection<FundData> fundOptions = null;
+        final Collection<ChargeData> chargeOptions = null;
+        final ChargeData chargeTemplate = null;
+        final Collection<StaffData> loanOfficerOptions = null;
+        final Collection<CodeValueData> loanPurposeOptions = null;
+
+        return new LoanAccountData(id, accountNo, status, externalId, clientId, clientName, clientOfficeId, groupId, groupName,
+                groupOfficeId, loanProductId, loanProductName, loanProductDescription, fundId, fundName, loanPurposeId, loanPurposeName,
+                loanOfficerId, loanOfficerName, currencyData, principal, inArrearsTolerance, termFrequency, termPeriodFrequencyType,
+                numberOfRepayments, repaymentEvery, repaymentFrequencyType, transactionProcessingStrategyId, amortizationType,
+                interestRatePerPeriod, interestRateFrequencyType, annualInterestRate, interestType, interestCalculationPeriodType,
+                expectedFirstRepaymentOnDate, interestChargedFromDate, timeline, totalFeeChargesAtDisbursement, repaymentSchedule,
+                transactions, charges, collateral, guarantors, productOptions, termFrequencyTypeOptions, repaymentFrequencyTypeOptions,
+                repaymentStrategyOptions, interestRateFrequencyTypeOptions, amortizationTypeOptions, interestTypeOptions,
+                interestCalculationPeriodTypeOptions, fundOptions, chargeOptions, chargeTemplate, loanOfficerOptions, loanPurposeOptions,
+                loanCollateralOptions);
+    }
+
+    /**
+     * Used to produce a {@link LoanAccountData} with only client information
+     * defaulted.
+     */
+    public static LoanAccountData clientDefaults(final Long clientId, final String clientName, final Long clientOfficeId,
+            final LocalDate expectedDisbursementDate) {
+        final Long id = null;
+        final String accountNo = null;
+        final LoanStatusEnumData status = null;
+        final String externalId = null;
+        final Long groupId = null;
+        final String groupName = null;
+        final Long groupOfficeId = null;
+        final Long loanProductId = null;
+        final String loanProductName = null;
+        final String loanProductDescription = null;
+        final Long fundId = null;
+        final String fundName = null;
+        final Long loanPurposeId = null;
+        final String loanPurposeName = null;
+        final Long loanOfficerId = null;
+        final String loanOfficerName = null;
+        final CurrencyData currencyData = null;
+        final BigDecimal principal = null;
+        final BigDecimal inArrearsTolerance = null;
+        final Integer termFrequency = null;
+        final EnumOptionData termPeriodFrequencyType = null;
+        final Integer numberOfRepayments = null;
+        final Integer repaymentEvery = null;
+        final EnumOptionData repaymentFrequencyType = null;
+        final Long transactionProcessingStrategyId = null;
+        final EnumOptionData amortizationType = null;
+        final BigDecimal interestRatePerPeriod = null;
+        final EnumOptionData interestRateFrequencyType = null;
+        final BigDecimal annualInterestRate = null;
+        final EnumOptionData interestType = null;
+        final EnumOptionData interestCalculationPeriodType = null;
+        final LocalDate expectedFirstRepaymentOnDate = null;
+        final LocalDate interestChargedFromDate = null;
+        final LoanApplicationTimelineData timeline = LoanApplicationTimelineData.templateDefault(expectedDisbursementDate);
+        final BigDecimal totalFeeChargesAtDisbursement = null;
+
+        final LoanScheduleData repaymentSchedule = null;
+        final Collection<LoanTransactionData> transactions = null;
+        final Collection<LoanChargeData> charges = null;
+        final Collection<LoanCollateralData> collateral = null;
+        final Collection<GuarantorData> guarantors = null;
+        final Collection<LoanProductData> productOptions = null;
+        final Collection<EnumOptionData> termFrequencyTypeOptions = null;
+        final Collection<EnumOptionData> repaymentFrequencyTypeOptions = null;
+        final Collection<TransactionProcessingStrategyData> repaymentStrategyOptions = null;
+        final Collection<EnumOptionData> interestRateFrequencyTypeOptions = null;
+        final Collection<EnumOptionData> amortizationTypeOptions = null;
+        final Collection<EnumOptionData> interestTypeOptions = null;
+        final Collection<EnumOptionData> interestCalculationPeriodTypeOptions = null;
+        final Collection<FundData> fundOptions = null;
+        final Collection<ChargeData> chargeOptions = null;
+        final ChargeData chargeTemplate = null;
+        final Collection<StaffData> loanOfficerOptions = null;
+        final Collection<CodeValueData> loanPurposeOptions = null;
+        final Collection<CodeValueData> loanCollateralOptions = null;
+
+        return new LoanAccountData(id, accountNo, status, externalId, clientId, clientName, clientOfficeId, groupId, groupName,
+                groupOfficeId, loanProductId, loanProductName, loanProductDescription, fundId, fundName, loanPurposeId, loanPurposeName,
+                loanOfficerId, loanOfficerName, currencyData, principal, inArrearsTolerance, termFrequency, termPeriodFrequencyType,
+                numberOfRepayments, repaymentEvery, repaymentFrequencyType, transactionProcessingStrategyId, amortizationType,
+                interestRatePerPeriod, interestRateFrequencyType, annualInterestRate, interestType, interestCalculationPeriodType,
+                expectedFirstRepaymentOnDate, interestChargedFromDate, timeline, totalFeeChargesAtDisbursement, repaymentSchedule,
+                transactions, charges, collateral, guarantors, productOptions, termFrequencyTypeOptions, repaymentFrequencyTypeOptions,
+                repaymentStrategyOptions, interestRateFrequencyTypeOptions, amortizationTypeOptions, interestTypeOptions,
+                interestCalculationPeriodTypeOptions, fundOptions, chargeOptions, chargeTemplate, loanOfficerOptions, loanPurposeOptions,
+                loanCollateralOptions);
+    }
+
+    /**
+     * Used to produce a {@link LoanAccountData} with only group information
+     * defaulted.
+     */
+    public static LoanAccountData groupDefaults(final Long groupId, final String groupName, final Long groupOfficeId,
+            final LocalDate expectedDisbursementDate) {
+
+        final Long id = null;
+        final String accountNo = null;
+        final LoanStatusEnumData status = null;
+        final String externalId = null;
+        final Long clientId = null;
+        final String clientName = null;
+        final Long clientOfficeId = null;
+        final Long loanProductId = null;
+        final String loanProductName = null;
+        final String loanProductDescription = null;
+        final Long fundId = null;
+        final String fundName = null;
+        final Long loanPurposeId = null;
+        final String loanPurposeName = null;
+        final Long loanOfficerId = null;
+        final String loanOfficerName = null;
+        final CurrencyData currencyData = null;
+        final BigDecimal principal = null;
+        final BigDecimal inArrearsTolerance = null;
+        final Integer termFrequency = null;
+        final EnumOptionData termPeriodFrequencyType = null;
+        final Integer numberOfRepayments = null;
+        final Integer repaymentEvery = null;
+        final EnumOptionData repaymentFrequencyType = null;
+        final Long transactionProcessingStrategyId = null;
+        final EnumOptionData amortizationType = null;
+        final BigDecimal interestRatePerPeriod = null;
+        final EnumOptionData interestRateFrequencyType = null;
+        final BigDecimal annualInterestRate = null;
+        final EnumOptionData interestType = null;
+        final EnumOptionData interestCalculationPeriodType = null;
+        final LocalDate expectedFirstRepaymentOnDate = null;
+        final LocalDate interestChargedFromDate = null;
+        final LoanApplicationTimelineData timeline = LoanApplicationTimelineData.templateDefault(expectedDisbursementDate);
+        final BigDecimal totalFeeChargesAtDisbursement = null;
+
+        final LoanScheduleData repaymentSchedule = null;
+        final Collection<LoanTransactionData> transactions = null;
+        final Collection<LoanChargeData> charges = null;
+        final Collection<LoanCollateralData> collateral = null;
+        final Collection<GuarantorData> guarantors = null;
+        final Collection<LoanProductData> productOptions = null;
+        final Collection<EnumOptionData> termFrequencyTypeOptions = null;
+        final Collection<EnumOptionData> repaymentFrequencyTypeOptions = null;
+        final Collection<TransactionProcessingStrategyData> repaymentStrategyOptions = null;
+        final Collection<EnumOptionData> interestRateFrequencyTypeOptions = null;
+        final Collection<EnumOptionData> amortizationTypeOptions = null;
+        final Collection<EnumOptionData> interestTypeOptions = null;
+        final Collection<EnumOptionData> interestCalculationPeriodTypeOptions = null;
+        final Collection<FundData> fundOptions = null;
+        final Collection<ChargeData> chargeOptions = null;
+        final ChargeData chargeTemplate = null;
+        final Collection<StaffData> loanOfficerOptions = null;
+        final Collection<CodeValueData> loanPurposeOptions = null;
+        final Collection<CodeValueData> loanCollateralOptions = null;
+
+        return new LoanAccountData(id, accountNo, status, externalId, clientId, clientName, clientOfficeId, groupId, groupName,
+                groupOfficeId, loanProductId, loanProductName, loanProductDescription, fundId, fundName, loanPurposeId, loanPurposeName,
+                loanOfficerId, loanOfficerName, currencyData, principal, inArrearsTolerance, termFrequency, termPeriodFrequencyType,
+                numberOfRepayments, repaymentEvery, repaymentFrequencyType, transactionProcessingStrategyId, amortizationType,
+                interestRatePerPeriod, interestRateFrequencyType, annualInterestRate, interestType, interestCalculationPeriodType,
+                expectedFirstRepaymentOnDate, interestChargedFromDate, timeline, totalFeeChargesAtDisbursement, repaymentSchedule,
+                transactions, charges, collateral, guarantors, productOptions, termFrequencyTypeOptions, repaymentFrequencyTypeOptions,
+                repaymentStrategyOptions, interestRateFrequencyTypeOptions, amortizationTypeOptions, interestTypeOptions,
+                interestCalculationPeriodTypeOptions, fundOptions, chargeOptions, chargeTemplate, loanOfficerOptions, loanPurposeOptions,
+                loanCollateralOptions);
+    }
+
+    public static LoanAccountData populateLoanProductDefaults(final LoanAccountData acc, final LoanProductData product) {
+
+        final LoanScheduleData repaymentSchedule = null;
+        final Collection<LoanTransactionData> transactions = null;
+        final Collection<LoanCollateralData> collateral = null;
+        final Collection<GuarantorData> guarantors = null;
+        final Collection<LoanProductData> productOptions = null;
+        final Collection<EnumOptionData> termFrequencyTypeOptions = null;
+        final Collection<EnumOptionData> repaymentFrequencyTypeOptions = null;
+        final Collection<TransactionProcessingStrategyData> repaymentStrategyOptions = null;
+        final Collection<EnumOptionData> interestRateFrequencyTypeOptions = null;
+        final Collection<EnumOptionData> amortizationTypeOptions = null;
+        final Collection<EnumOptionData> interestTypeOptions = null;
+        final Collection<EnumOptionData> interestCalculationPeriodTypeOptions = null;
+        final Collection<FundData> fundOptions = null;
+        final Collection<ChargeData> chargeOptions = null;
+        final ChargeData chargeTemplate = null;
+        final Collection<StaffData> loanOfficerOptions = null;
+        final Collection<CodeValueData> loanPurposeOptions = null;
+        final Collection<CodeValueData> loanCollateralOptions = null;
+
+        final Integer termFrequency = product.getNumberOfRepayments() * product.getRepaymentEvery();
+        final EnumOptionData termPeriodFrequencyType = product.getRepaymentFrequencyType();
+
+        final Collection<LoanChargeData> charges = new ArrayList<LoanChargeData>();
+        for (ChargeData charge : product.charges()) {
+            charges.add(LoanChargeData.newLoanChargeDetails(charge.getId(), charge.getName(), charge.getCurrency(), charge.getAmount(),
+                    charge.getChargeTimeType(), charge.getChargeCalculationType(), charge.isPenalty()));
+        }
+
+        return new LoanAccountData(acc.id, acc.accountNo, acc.status, acc.externalId, acc.clientId, acc.clientName, acc.clientOfficeId,
+                acc.groupId, acc.groupName, acc.groupOfficeId, product.getId(), product.getName(), product.getDescription(),
+                product.getFundId(), product.getFundName(), acc.loanPurposeId, acc.loanPurposeName, acc.loanOfficerId, acc.loanOfficerName,
+                product.getCurrency(), product.getPrincipal(), product.getInArrearsTolerance(), termFrequency, termPeriodFrequencyType,
+                product.getNumberOfRepayments(), product.getRepaymentEvery(), product.getRepaymentFrequencyType(),
+                product.getTransactionProcessingStrategyId(), product.getAmortizationType(), product.getInterestRatePerPeriod(),
+                product.getInterestRateFrequencyType(), product.getAnnualInterestRate(), product.getInterestType(),
+                product.getInterestCalculationPeriodType(), acc.expectedFirstRepaymentOnDate, acc.interestChargedFromDate, acc.timeline,
+                acc.totalFeeChargesAtDisbursement, repaymentSchedule, transactions, charges, collateral, guarantors, productOptions,
+                termFrequencyTypeOptions, repaymentFrequencyTypeOptions, repaymentStrategyOptions, interestRateFrequencyTypeOptions,
+                amortizationTypeOptions, interestTypeOptions, interestCalculationPeriodTypeOptions, fundOptions, chargeOptions,
+                chargeTemplate, loanOfficerOptions, loanPurposeOptions, loanCollateralOptions);
+    }
+
+    /*
+     * Used to send back loan account data with the basic details coming from
+     * query.
+     */
+    public static LoanAccountData basicLoanDetails(final Long id, final String accountNo, final LoanStatusEnumData status,
+            final String externalId, final Long clientId, final String clientName, final Long clientOfficeId, final Long groupId,
+            final String groupName, final Long groupOfficeId, final Long loanProductId, final String loanProductName,
+            final String loanProductDescription, final Long fundId, final String fundName, final Long loanPurposeId,
+            final String loanPurposeName, final Long loanOfficerId, final String loanOfficerName, final CurrencyData currencyData,
+            final BigDecimal principal, final BigDecimal inArrearsTolerance, final Integer termFrequency,
+            final EnumOptionData termPeriodFrequencyType, final Integer numberOfRepayments, final Integer repaymentEvery,
+            final EnumOptionData repaymentFrequencyType, final Long transactionStrategyId, final EnumOptionData amortizationType,
+            final BigDecimal interestRatePerPeriod, final EnumOptionData interestRateFrequencyType, final BigDecimal annualInterestRate,
+            final EnumOptionData interestType, final EnumOptionData interestCalculationPeriodType,
+            final LocalDate expectedFirstRepaymentOnDate, final LocalDate interestChargedFromDate,
+            final LoanApplicationTimelineData timeline, final BigDecimal totalFeeChargesAtDisbursement) {
+
+        final LoanScheduleData repaymentSchedule = null;
+        final Collection<LoanTransactionData> transactions = null;
+        final Collection<LoanChargeData> charges = null;
+        final Collection<LoanCollateralData> collateral = null;
+        final Collection<GuarantorData> guarantors = null;
+        final Collection<LoanProductData> productOptions = null;
+        final Collection<EnumOptionData> termFrequencyTypeOptions = null;
+        final Collection<EnumOptionData> repaymentFrequencyTypeOptions = null;
+        final Collection<TransactionProcessingStrategyData> repaymentStrategyOptions = null;
+        final Collection<EnumOptionData> interestRateFrequencyTypeOptions = null;
+        final Collection<EnumOptionData> amortizationTypeOptions = null;
+        final Collection<EnumOptionData> interestTypeOptions = null;
+        final Collection<EnumOptionData> interestCalculationPeriodTypeOptions = null;
+        final Collection<FundData> fundOptions = null;
+        final Collection<ChargeData> chargeOptions = null;
+        final ChargeData chargeTemplate = null;
+        final Collection<StaffData> loanOfficerOptions = null;
+        final Collection<CodeValueData> loanPurposeOptions = null;
+        final Collection<CodeValueData> loanCollateralOptions = null;
+
+        return new LoanAccountData(id, accountNo, status, externalId, clientId, clientName, clientOfficeId, groupId, groupName,
+                groupOfficeId, loanProductId, loanProductName, loanProductDescription, fundId, fundName, loanPurposeId, loanPurposeName,
+                loanOfficerId, loanOfficerName, currencyData, principal, inArrearsTolerance, termFrequency, termPeriodFrequencyType,
+                numberOfRepayments, repaymentEvery, repaymentFrequencyType, transactionStrategyId, amortizationType, interestRatePerPeriod,
+                interestRateFrequencyType, annualInterestRate, interestType, interestCalculationPeriodType, expectedFirstRepaymentOnDate,
+                interestChargedFromDate, timeline, totalFeeChargesAtDisbursement, repaymentSchedule, transactions, charges, collateral,
+                guarantors, productOptions, termFrequencyTypeOptions, repaymentFrequencyTypeOptions, repaymentStrategyOptions,
+                interestRateFrequencyTypeOptions, amortizationTypeOptions, interestTypeOptions, interestCalculationPeriodTypeOptions,
+                fundOptions, chargeOptions, chargeTemplate, loanOfficerOptions, loanPurposeOptions, loanCollateralOptions);
+    }
+
+    /*
+     * Used to combine the associations and template data on top of exist loan
+     * account data
+     */
+    public static LoanAccountData associationsAndTemplate(final LoanAccountData acc, final LoanScheduleData repaymentSchedule,
+            final Collection<LoanTransactionData> transactions, final Collection<LoanChargeData> charges,
+            final Collection<LoanCollateralData> collateral, final Collection<GuarantorData> guarantors,
+            final Collection<LoanProductData> productOptions, final Collection<EnumOptionData> termFrequencyTypeOptions,
+            final Collection<EnumOptionData> repaymentFrequencyTypeOptions,
+            final Collection<TransactionProcessingStrategyData> repaymentStrategyOptions,
+            final Collection<EnumOptionData> interestRateFrequencyTypeOptions, final Collection<EnumOptionData> amortizationTypeOptions,
+            final Collection<EnumOptionData> interestTypeOptions, final Collection<EnumOptionData> interestCalculationPeriodTypeOptions,
+            final Collection<FundData> fundOptions, final Collection<ChargeData> chargeOptions, final ChargeData chargeTemplate,
+            final Collection<StaffData> loanOfficerOptions, final Collection<CodeValueData> loanPurposeOptions,
+            final Collection<CodeValueData> loanCollateralOptions) {
+        return new LoanAccountData(acc.id, acc.accountNo, acc.status, acc.externalId, acc.clientId, acc.clientName, acc.clientOfficeId,
+                acc.groupId, acc.groupName, acc.groupOfficeId, acc.loanProductId, acc.loanProductName, acc.loanProductDescription,
+                acc.fundId, acc.fundName, acc.loanPurposeId, acc.loanPurposeName, acc.loanOfficerId, acc.loanOfficerName, acc.currency,
+                acc.principal, acc.inArrearsTolerance, acc.termFrequency, acc.termPeriodFrequencyType, acc.numberOfRepayments,
+                acc.repaymentEvery, acc.repaymentFrequencyType, acc.transactionProcessingStrategyId, acc.amortizationType,
+                acc.interestRatePerPeriod, acc.interestRateFrequencyType, acc.annualInterestRate, acc.interestType,
+                acc.interestCalculationPeriodType, acc.expectedFirstRepaymentOnDate, acc.interestChargedFromDate, acc.timeline,
+                acc.totalFeeChargesAtDisbursement, repaymentSchedule, transactions, charges, collateral, guarantors, productOptions,
+                termFrequencyTypeOptions, repaymentFrequencyTypeOptions, repaymentStrategyOptions, interestRateFrequencyTypeOptions,
+                amortizationTypeOptions, interestTypeOptions, interestCalculationPeriodTypeOptions, fundOptions, chargeOptions,
+                chargeTemplate, loanOfficerOptions, loanPurposeOptions, loanCollateralOptions);
+    }
+
+    private LoanAccountData(
+            final Long id, //
+            final String accountNo, //
+            final LoanStatusEnumData status, //
+            final String externalId, //
+            final Long clientId,
+            final String clientName,
+            final Long clientOfficeId, //
+            final Long groupId,
+            final String groupName,
+            final Long groupOfficeId, //
+            final Long loanProductId,
+            final String loanProductName,
+            final String loanProductDescription, //
+            final Long fundId,
+            final String fundName,
+            final Long loanPurposeId,
+            final String loanPurposeName, //
+            final Long loanOfficerId,
+            final String loanOfficerName, //
+            final CurrencyData currency,
+            final BigDecimal principal,
+            final BigDecimal inArrearsTolerance, //
+            final Integer termFrequency,
+            final EnumOptionData termPeriodFrequencyType, //
+            final Integer numberOfRepayments,
+            final Integer repaymentEvery,
+            final EnumOptionData repaymentFrequencyType, //
+            final Long transactionProcessingStrategyId,
+            final EnumOptionData amortizationType,
+            final BigDecimal interestRatePerPeriod,
+            final EnumOptionData interestRateFrequencyType,
+            final BigDecimal annualInterestRate,
+            final EnumOptionData interestType,
+            final EnumOptionData interestCalculationPeriodType,
+            final LocalDate expectedFirstRepaymentOnDate,
+            final LocalDate interestChargedFromDate,
+            final LoanApplicationTimelineData timeline,
+            final BigDecimal totalFeeChargesAtDisbursement, //
             final LoanScheduleData repaymentSchedule, final Collection<LoanTransactionData> transactions,
             final Collection<LoanChargeData> charges, final Collection<LoanCollateralData> collateral,
             final Collection<GuarantorData> guarantors, final Collection<LoanProductData> productOptions,
@@ -105,11 +487,55 @@ public class LoanAccountData {
             final Collection<FundData> fundOptions, final Collection<ChargeData> chargeOptions, final ChargeData chargeTemplate,
             final Collection<StaffData> loanOfficerOptions, final Collection<CodeValueData> loanPurposeOptions,
             final Collection<CodeValueData> loanCollateralOptions) {
+        this.id = id;
+        this.accountNo = accountNo;
+        this.status = status;
+        this.externalId = externalId;
+        this.clientId = clientId;
+        this.clientName = clientName;
+        this.clientOfficeId = clientOfficeId;
+        this.groupId = groupId;
+        this.groupName = groupName;
+        this.groupOfficeId = groupOfficeId;
+        this.loanProductId = loanProductId;
+        this.loanProductName = loanProductName;
+        this.loanProductDescription = loanProductDescription;
+        this.fundId = fundId;
+        this.fundName = fundName;
+        this.loanPurposeId = loanPurposeId;
+        this.loanPurposeName = loanPurposeName;
+        this.loanOfficerId = loanOfficerId;
+        this.loanOfficerName = loanOfficerName;
+        this.currency = currency;
+        this.principal = principal;
+        this.inArrearsTolerance = inArrearsTolerance;
+        this.termFrequency = termFrequency;
+        this.termPeriodFrequencyType = termPeriodFrequencyType;
+        this.numberOfRepayments = numberOfRepayments;
+        this.repaymentEvery = repaymentEvery;
+        this.repaymentFrequencyType = repaymentFrequencyType;
+        this.transactionProcessingStrategyId = transactionProcessingStrategyId;
+        this.amortizationType = amortizationType;
+        this.interestRatePerPeriod = interestRatePerPeriod;
+        this.interestRateFrequencyType = interestRateFrequencyType;
+        this.annualInterestRate = annualInterestRate;
+        this.interestType = interestType;
+        this.interestCalculationPeriodType = interestCalculationPeriodType;
+        this.expectedFirstRepaymentOnDate = expectedFirstRepaymentOnDate;
+        this.interestChargedFromDate = interestChargedFromDate;
+        this.timeline = timeline;
+
+        // totals
+        this.totalFeeChargesAtDisbursement = totalFeeChargesAtDisbursement;
+
+        // associations
         this.repaymentSchedule = repaymentSchedule;
         this.transactions = transactions;
         this.charges = charges;
         this.collateral = collateral;
         this.guarantors = guarantors;
+
+        // template
         this.productOptions = productOptions;
         this.termFrequencyTypeOptions = termFrequencyTypeOptions;
         this.repaymentFrequencyTypeOptions = repaymentFrequencyTypeOptions;
@@ -124,114 +550,28 @@ public class LoanAccountData {
         this.loanOfficerOptions = loanOfficerOptions;
         this.loanPurposeOptions = loanPurposeOptions;
         this.loanCollateralOptions = loanCollateralOptions;
+    }
 
-        if (convenienceDataRequired) {
-            int maxSubmittedOnOffsetFromToday = basicDetails.getMaxSubmittedOnOffsetFromToday();
-            int maxApprovedOnOffsetFromToday = basicDetails.getMaxApprovedOnOffsetFromToday();
-            int maxDisbursedOnOffsetFromToday = basicDetails.getMaxDisbursedOnOffsetFromToday();
-            int expectedLoanTermInDays = basicDetails.getLoanTermInDays();
-            int expectedLoanTermInMonths = basicDetails.getLoanTermInMonths();
-            int actualLoanTermInDays = basicDetails.getActualLoanTermInDays();
-            int actualLoanTermInMonths = basicDetails.getActualLoanTermInMonths();
+    public RepaymentScheduleRelatedLoanData repaymentScheduleRelatedData() {
+        return this.timeline.repaymentScheduleRelatedData(this.currency, this.principal, this.inArrearsTolerance,
+                this.totalFeeChargesAtDisbursement);
+    }
 
-            this.convenienceData = new LoanConvenienceData(maxSubmittedOnOffsetFromToday, maxApprovedOnOffsetFromToday,
-                    maxDisbursedOnOffsetFromToday, expectedLoanTermInDays, actualLoanTermInDays, expectedLoanTermInMonths,
-                    actualLoanTermInMonths);
-        } else {
-            this.convenienceData = null;
+    public Long officeId() {
+        Long officeId = this.clientOfficeId;
+
+        if (officeId == null) {
+            officeId = this.groupOfficeId;
         }
 
-        if (basicDetails != null) {
-            this.id = basicDetails.getId();
-            this.accountNo = basicDetails.getAccountNo();
-            this.externalId = basicDetails.getExternalId();
-            this.clientId = basicDetails.getClientId();
-            this.clientName = basicDetails.getClientName();
-            this.groupId = basicDetails.getGroupId();
-            this.groupName = basicDetails.getGroupName();
-            this.loanProductId = basicDetails.getLoanProductId();
-            this.loanProductName = basicDetails.getLoanProductName();
-            this.loanProductDescription = basicDetails.getLoanProductDescription();
-            this.fundId = basicDetails.getFundId();
-            this.fundName = basicDetails.getFundName();
-            this.loanPurposeId = basicDetails.getLoanPurposeId();
-            this.loanPurposeName = basicDetails.getLoanPurposeName();
-            this.loanOfficerId = basicDetails.getLoanOfficerId();
-            this.loanOfficerName = basicDetails.getLoanOfficerName();
+        return officeId;
+    }
 
-            this.submittedOnDate = basicDetails.getSubmittedOnDate();
-            this.approvedOnDate = basicDetails.getApprovedOnDate();
-            this.expectedDisbursementDate = basicDetails.getExpectedDisbursementDate();
-            this.actualDisbursementDate = basicDetails.getActualDisbursementDate();
-            this.closedOnDate = basicDetails.getClosedOnDate();
-            this.expectedMaturityDate = basicDetails.getExpectedMaturityDate();
-            this.repaymentsStartingFromDate = basicDetails.getRepaymentsStartingFromDate();
-            this.interestChargedFromDate = basicDetails.getInterestChargedFromDate();
+    public Long loanOfficerId() {
+        return this.loanOfficerId;
+    }
 
-            this.currency = basicDetails.getCurrency();
-            this.principal = basicDetails.getPrincipal();
-            this.inArrearsTolerance = basicDetails.getInArrearsTolerance();
-
-            this.termFrequency = basicDetails.getTermFrequency();
-            this.termPeriodFrequencyType = basicDetails.getTermPeriodFrequencyType();
-            this.numberOfRepayments = basicDetails.getNumberOfRepayments();
-            this.repaymentEvery = basicDetails.getRepaymentEvery();
-            this.transactionProcessingStrategyId = basicDetails.getTransactionStrategyId();
-            this.interestRatePerPeriod = basicDetails.getInterestRatePerPeriod();
-            this.annualInterestRate = basicDetails.getAnnualInterestRate();
-            this.repaymentFrequencyType = basicDetails.getRepaymentFrequencyType();
-            this.interestRateFrequencyType = basicDetails.getInterestRateFrequencyType();
-            this.amortizationType = basicDetails.getAmortizationType();
-            this.interestType = basicDetails.getInterestType();
-            this.interestCalculationPeriodType = basicDetails.getInterestCalculationPeriodType();
-
-            this.status = basicDetails.getStatus();
-
-        } else {
-            this.id = null;
-            this.accountNo = null;
-            this.externalId = null;
-            this.clientId = null;
-            this.clientName = null;
-            this.groupId = null;
-            this.groupName = null;
-            this.loanProductId = null;
-            this.loanProductName = null;
-            this.loanProductDescription = null;
-            this.fundId = null;
-            this.fundName = null;
-            this.loanPurposeId = null;
-            this.loanPurposeName = null;
-            this.loanOfficerId = null;
-            this.loanOfficerName = null;
-
-            this.submittedOnDate = null;
-            this.approvedOnDate = null;
-            this.expectedDisbursementDate = null;
-            this.actualDisbursementDate = null;
-            this.closedOnDate = null;
-            this.expectedMaturityDate = null;
-            this.repaymentsStartingFromDate = null;
-            this.interestChargedFromDate = null;
-
-            this.currency = null;
-            this.principal = null;
-            this.inArrearsTolerance = null;
-
-            this.termFrequency = null;
-            this.termPeriodFrequencyType = null;
-            this.numberOfRepayments = null;
-            this.repaymentEvery = null;
-            this.transactionProcessingStrategyId = null;
-            this.interestRatePerPeriod = null;
-            this.annualInterestRate = null;
-            this.repaymentFrequencyType = null;
-            this.interestRateFrequencyType = null;
-            this.amortizationType = null;
-            this.interestType = null;
-            this.interestCalculationPeriodType = null;
-
-            this.status = null;
-        }
+    public Collection<LoanChargeData> charges() {
+        return this.charges;
     }
 }

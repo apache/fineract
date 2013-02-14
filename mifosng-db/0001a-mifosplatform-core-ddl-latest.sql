@@ -501,7 +501,8 @@ CREATE TABLE `m_loan` (
   `product_id` bigint(20) DEFAULT NULL,
   `fund_id` bigint(20) DEFAULT NULL,
   `loan_officer_id` bigint(20) DEFAULT NULL,
-  `loanpurpose_cv_id` INT(11) DEFAULT NULL,
+  `loanpurpose_cv_id` int(11) DEFAULT NULL,
+  `loan_transaction_strategy_id` bigint(20) DEFAULT NULL,
   `loan_status_id` smallint(5) NOT NULL,
   `currency_code` varchar(3) NOT NULL,
   `currency_digits` smallint(5) NOT NULL,
@@ -514,29 +515,34 @@ CREATE TABLE `m_loan` (
   `interest_calculated_in_period_enum` smallint(5) NOT NULL DEFAULT '1',
   `term_frequency` smallint(5) NOT NULL DEFAULT '0',
   `term_period_frequency_enum` smallint(5) NOT NULL DEFAULT '2',
+  `number_of_repayments` smallint(5) NOT NULL,
   `repay_every` smallint(5) NOT NULL,
   `repayment_period_frequency_enum` smallint(5) NOT NULL,
-  `number_of_repayments` smallint(5) NOT NULL,
   `amortization_method_enum` smallint(5) NOT NULL,
   `total_charges_due_at_disbursement_derived` decimal(19,6) DEFAULT NULL,
-  `submittedon_date` datetime DEFAULT NULL,
-  `approvedon_date` datetime DEFAULT NULL,
+  `interest_calculated_from_date` date DEFAULT NULL,
   `expected_disbursedon_date` date DEFAULT NULL,
   `expected_firstrepaymenton_date` date DEFAULT NULL,
-  `interest_calculated_from_date` date DEFAULT NULL,
-  `disbursedon_date` date DEFAULT NULL,
   `expected_maturedon_date` date DEFAULT NULL,
   `maturedon_date` date DEFAULT NULL,
-  `closedon_date` datetime DEFAULT NULL,
-  `rejectedon_date` datetime DEFAULT NULL,
-  `rescheduledon_date` datetime DEFAULT NULL,
-  `withdrawnon_date` datetime DEFAULT NULL,
-  `writtenoffon_date` datetime DEFAULT NULL,
+  `submittedon_date` date DEFAULT NULL,
+  `submittedon_userid` bigint(20) DEFAULT NULL,
+  `approvedon_date` date DEFAULT NULL,
+  `approvedon_userid` bigint(20) DEFAULT NULL,
+  `rejectedon_date` date DEFAULT NULL,
+  `rejectedon_userid` bigint(20) DEFAULT NULL,
+  `withdrawnon_date` date DEFAULT NULL,
+  `withdrawnon_userid` bigint(20) DEFAULT NULL,
+  `disbursedon_date` date DEFAULT NULL,
+  `disbursedon_userid` bigint(20) DEFAULT NULL,
+  `rescheduledon_date` date DEFAULT NULL,
+  `writtenoffon_date` date DEFAULT NULL,
+  `closedon_date` date DEFAULT NULL,
+  `closedon_userid` bigint(20) DEFAULT NULL,
   `createdby_id` bigint(20) DEFAULT NULL,
   `created_date` datetime DEFAULT NULL,
   `lastmodified_date` datetime DEFAULT NULL,
   `lastmodifiedby_id` bigint(20) DEFAULT NULL,
-  `loan_transaction_strategy_id` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `loan_account_no_UNIQUE` (`account_no`),
   UNIQUE KEY `loan_externalid_UNIQUE` (`external_id`),
@@ -547,13 +553,25 @@ CREATE TABLE `m_loan` (
   KEY `FK_m_loan_m_staff` (`loan_officer_id`),
   KEY `FK_m_loanpurpose_codevalue` (`loanpurpose_cv_id`),
   KEY `group_id` (`group_id`),
-  CONSTRAINT `FK7C885877240145` FOREIGN KEY (`fund_id`) REFERENCES `m_fund` (`id`),
+  KEY `FK_submittedon_userid` (`submittedon_userid`),
+  KEY `FK_approvedon_userid` (`approvedon_userid`),
+  KEY `FK_rejectedon_userid` (`rejectedon_userid`),
+  KEY `FK_withdrawnon_userid` (`withdrawnon_userid`),
+  KEY `FK_closedon_userid` (`closedon_userid`),
+  KEY `FK_disbursedon_userid` (`disbursedon_userid`),
   CONSTRAINT `FKB6F935D87179A0CB` FOREIGN KEY (`client_id`) REFERENCES `m_client` (`id`),
+  CONSTRAINT `m_loan_ibfk_1` FOREIGN KEY (`group_id`) REFERENCES `m_group` (`id`),
   CONSTRAINT `FKB6F935D8C8D4B434` FOREIGN KEY (`product_id`) REFERENCES `m_product_loan` (`id`),
+  CONSTRAINT `FK7C885877240145` FOREIGN KEY (`fund_id`) REFERENCES `m_fund` (`id`),
   CONSTRAINT `FK_loan_ltp_strategy` FOREIGN KEY (`loan_transaction_strategy_id`) REFERENCES `ref_loan_transaction_processing_strategy` (`id`),
-  CONSTRAINT `FK_m_loan_m_staff` FOREIGN KEY (`loan_officer_id`) REFERENCES `m_staff` (`id`),
   CONSTRAINT `FK_m_loanpurpose_codevalue` FOREIGN KEY (`loanpurpose_cv_id`) REFERENCES `m_code_value` (`id`),
-  CONSTRAINT `m_loan_ibfk_1` FOREIGN KEY (`group_id`) REFERENCES `m_group` (`id`)
+  CONSTRAINT `FK_m_loan_m_staff` FOREIGN KEY (`loan_officer_id`) REFERENCES `m_staff` (`id`),
+  CONSTRAINT `FK_submittedon_userid` FOREIGN KEY (`submittedon_userid`) REFERENCES `m_appuser` (`id`),
+  CONSTRAINT `FK_approvedon_userid` FOREIGN KEY (`approvedon_userid`) REFERENCES `m_appuser` (`id`),
+  CONSTRAINT `FK_rejectedon_userid` FOREIGN KEY (`rejectedon_userid`) REFERENCES `m_appuser` (`id`),
+  CONSTRAINT `FK_withdrawnon_userid` FOREIGN KEY (`withdrawnon_userid`) REFERENCES `m_appuser` (`id`),
+  CONSTRAINT `FK_disbursedon_userid` FOREIGN KEY (`disbursedon_userid`) REFERENCES `m_appuser` (`id`),
+  CONSTRAINT `FK_closedon_userid` FOREIGN KEY (`closedon_userid`) REFERENCES `m_appuser` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `m_guarantor` (
@@ -576,11 +594,9 @@ CREATE TABLE `m_guarantor` (
 	PRIMARY KEY (`id`),
 	INDEX `FK_m_guarantor_m_loan` (`loan_id`),
 	CONSTRAINT `FK_m_guarantor_m_loan` FOREIGN KEY (`loan_id`) REFERENCES `m_loan` (`id`)
-)
-ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-ALTER TABLE `m_loan`
-	ADD CONSTRAINT `FK_m_loan_guarantor` FOREIGN KEY (`guarantor_id`) REFERENCES `m_guarantor` (`id`);
+-- ALTER TABLE `m_loan` ADD CONSTRAINT `FK_m_loan_guarantor` FOREIGN KEY (`guarantor_id`) REFERENCES `m_guarantor` (`id`);
 
 CREATE TABLE `m_loan_charge` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,

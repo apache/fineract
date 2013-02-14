@@ -27,6 +27,6 @@ public class DeleteCodeValueCommandHandler implements NewCommandSourceHandler {
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
 
-        return this.writePlatformService.deleteCodeValue(command.entityId());
+        return this.writePlatformService.deleteCodeValue(command.getCodeId(), command.entityId());
     }
 }

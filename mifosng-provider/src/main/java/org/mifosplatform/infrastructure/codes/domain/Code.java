@@ -12,13 +12,12 @@ import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import org.apache.commons.lang.StringUtils;
-import org.hibernate.annotations.LazyCollection;
-import org.hibernate.annotations.LazyCollectionOption;
 import org.mifosplatform.infrastructure.codes.exception.SystemDefinedCodeCannotBeChangedException;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.springframework.data.jpa.domain.AbstractPersistable;
@@ -33,9 +32,7 @@ public class Code extends AbstractPersistable<Long> {
     @Column(name = "is_system_defined")
     private final boolean systemDefined;
 
-    @SuppressWarnings("unused")
-    @LazyCollection(LazyCollectionOption.FALSE)
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "code", orphanRemoval = true)
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "code", orphanRemoval = true)
     private Set<CodeValue> values;
 
     public static Code fromJson(final JsonCommand command) {
@@ -72,7 +69,11 @@ public class Code extends AbstractPersistable<Long> {
             actualChanges.put(firstnameParamName, newValue);
             this.name = StringUtils.defaultIfEmpty(newValue, null);
         }
-        
+
         return actualChanges;
+    }
+
+    public boolean remove(final CodeValue codeValueToDelete) {
+        return this.values.remove(codeValueToDelete);
     }
 }

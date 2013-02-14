@@ -591,10 +591,11 @@ public class CommandWrapperBuilder {
         return this;
     }
 
-    public CommandWrapperBuilder deleteCodeValue(Long codeId, final Long codeValueId) {
+    public CommandWrapperBuilder deleteCodeValue(final Long codeId, final Long codeValueId) {
         this.actionName = "DELETE";
         this.entityName = "CODEVALUE";
         this.entityId = codeValueId;
+        this.codeId = codeId;
         this.href = "/codes/" + codeId + "/codevalues/" + codeValueId;
         return this;
     }

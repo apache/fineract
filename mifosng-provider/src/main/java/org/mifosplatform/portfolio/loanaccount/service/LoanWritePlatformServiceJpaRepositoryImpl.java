@@ -131,7 +131,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         final ApplicationCurrency currency = this.applicationCurrencyRepository.findOneByCode(loan.getPrincpal().getCurrencyCode());
 
-        final Map<String, Object> changes = loan.disburse(command, defaultLoanLifecycleStateMachine(), currency);
+        final Map<String, Object> changes = loan.disburse(currentUser, command, defaultLoanLifecycleStateMachine(), currency);
         if (!changes.isEmpty()) {
             // variable stores Id's of all existing loan transactions (newly
             // created
@@ -740,7 +740,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 .build();
     }
 
-    private LoanDTO populateLoanDTO(Loan loan, List<LoanTransaction> loanTransactions) {
+    private LoanDTO populateLoanDTO(final Loan loan, final List<LoanTransaction> loanTransactions) {
         List<LoanTransactionDTO> loanTransactionDTOs = new ArrayList<LoanTransactionDTO>();
         for (LoanTransaction loanTransaction : loanTransactions) {
             LoanTransactionDTO loanTransactionDTO = new LoanTransactionDTO(loanTransaction.getId().toString(), loanTransaction.getDateOf(),
@@ -754,7 +754,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 loan.isAccrualBasedAccountingEnabledOnLoanProduct(), loanTransactionDTOs);
     }
 
-    private LoanDTO populateLoanData(Loan loan, LoanTransaction loanTransaction) {
+    private LoanDTO populateLoanData(final Loan loan, final LoanTransaction loanTransaction) {
         List<LoanTransaction> loanTransactions = new ArrayList<LoanTransaction>();
         loanTransactions.add(loanTransaction);
         return populateLoanDTO(loan, loanTransactions);

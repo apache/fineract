@@ -201,9 +201,6 @@ public final class LoanApplicationCommandFromApiJsonHelper {
                     .notExceedingLengthOf(500);
         }
 
-        // not optional at present but might make it so to allow it to pick up
-        // on only available strategy
-        // by default which would probably be the norm.
         final String transactionProcessingStrategyIdParameterName = "transactionProcessingStrategyId";
         final Long transactionProcessingStrategyId = fromApiJsonHelper.extractLongNamed(transactionProcessingStrategyIdParameterName,
                 element);

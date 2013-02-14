@@ -61,6 +61,9 @@ public class LoanBasicDetailsData {
     private final EnumOptionData interestCalculationPeriodType;
 
     private final LocalDate submittedOnDate;
+    private final String submittedByUsername;
+    private final String submittedByFirstname;
+    private final String submittedByLastname;
     private final LocalDate approvedOnDate;
     private final LocalDate expectedDisbursementDate;
     private final LocalDate actualDisbursementDate;
@@ -149,6 +152,9 @@ public class LoanBasicDetailsData {
         this.interestCalculationPeriodType = interestCalculationPeriodType;
 
         this.submittedOnDate = null;
+        this.submittedByUsername = null;
+        this.submittedByFirstname = null;
+        this.submittedByLastname = null;
         this.approvedOnDate = null;
         this.expectedDisbursementDate = expectedDisbursementDate;
 
@@ -200,6 +206,9 @@ public class LoanBasicDetailsData {
         this.interestCalculationPeriodType = null;
 
         this.submittedOnDate = null;
+        this.submittedByUsername = null;
+        this.submittedByFirstname = null;
+        this.submittedByLastname = null;
         this.approvedOnDate = null;
         this.expectedDisbursementDate = expectedDisbursementDate;
 
@@ -217,7 +226,8 @@ public class LoanBasicDetailsData {
             final String clientName, final Long clientOfficeId, final Long groupId, final String groupName, final Long groupOfficeId,
             final Long loanProductId, final String loanProductName, final String loanProductDescription, final Long fundId,
             final String fundName, final Long loanPurposeId, final String loanPurposeName, final LocalDate closedOnDate,
-            final LocalDate submittedOnDate, final LocalDate approvedOnDate, final LocalDate expectedDisbursementDate,
+            final LocalDate submittedOnDate, final String submittedByUsername, final String submittedByFirstname,
+            final String submittedByLastname, final LocalDate approvedOnDate, final LocalDate expectedDisbursementDate,
             final LocalDate actualDisbursementDate, final LocalDate expectedMaturityDate, final LocalDate repaymentsStartingFromDate,
             final LocalDate interestChargedFromDate, final CurrencyData currency, final BigDecimal principal,
             final BigDecimal inArrearsTolerance, final Integer numberOfRepayments, final Integer repaymentEvery,
@@ -225,7 +235,7 @@ public class LoanBasicDetailsData {
             final EnumOptionData interestRateFrequencyType, final EnumOptionData amortizationType, final EnumOptionData interestType,
             final EnumOptionData interestCalculationPeriodType, final LoanStatusEnumData status, final Integer termFrequency,
             final EnumOptionData termPeriodFrequencyType, final Long transactionStrategyId, final Collection<LoanChargeData> charges,
-            final Long loanOfficerId, String loanOfficerName, final BigDecimal totalDisbursementCharges) {
+            final Long loanOfficerId, final String loanOfficerName, final BigDecimal totalDisbursementCharges) {
         this.id = id;
         this.accountNo = accountNo;
         this.externalId = externalId;
@@ -246,6 +256,9 @@ public class LoanBasicDetailsData {
         this.loanOfficerName = loanOfficerName;
         this.closedOnDate = closedOnDate;
         this.submittedOnDate = submittedOnDate;
+        this.submittedByUsername = submittedByUsername;
+        this.submittedByFirstname = submittedByFirstname;
+        this.submittedByLastname = submittedByLastname;
         this.approvedOnDate = approvedOnDate;
         this.expectedDisbursementDate = expectedDisbursementDate;
         this.actualDisbursementDate = actualDisbursementDate;
@@ -428,6 +441,18 @@ public class LoanBasicDetailsData {
 
     public LocalDate getSubmittedOnDate() {
         return submittedOnDate;
+    }
+
+    public String getSubmittedByUsername() {
+        return this.submittedByUsername;
+    }
+
+    public String getSubmittedByFirstname() {
+        return this.submittedByFirstname;
+    }
+
+    public String getSubmittedByLastname() {
+        return this.submittedByLastname;
     }
 
     public LocalDate getApprovedOnDate() {

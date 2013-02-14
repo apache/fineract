@@ -118,11 +118,11 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
     @Override
     public CommandProcessingResult submitLoanApplication(final JsonCommand command) {
 
-        context.authenticatedUser();
+        AppUser currentUser = context.authenticatedUser();
 
         this.fromApiJsonDeserializer.validateForCreate(command.json());
 
-        final Loan newLoanApplication = loanAssembler.assembleFrom(command);
+        final Loan newLoanApplication = loanAssembler.assembleFrom(command, currentUser);
 
         this.loanRepository.save(newLoanApplication);
 
@@ -317,7 +317,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
     @Override
     public CommandProcessingResult approveLoanApplication(final Long loanId, final JsonCommand command) {
 
-        AppUser currentUser = context.authenticatedUser();
+        final AppUser currentUser = context.authenticatedUser();
 
         final LoanStateTransitionCommand approveLoanApplication = this.loanStateTransitionCommandFromApiJsonDeserializer
                 .commandFromApiJson(command.json());
@@ -329,7 +329,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         if (this.isBeforeToday(approvedOnLocalDate) && currentUser.canNotApproveLoanInPast()) { throw new NoAuthorizationException(
                 "User has no authority to approve loan with a date in the past."); }
 
-        final Map<String, Object> changes = loan.loanApplicationApproval(command, defaultLoanLifecycleStateMachine());
+        final Map<String, Object> changes = loan.loanApplicationApproval(currentUser, command, defaultLoanLifecycleStateMachine());
         if (!changes.isEmpty()) {
             this.loanRepository.save(loan);
 
@@ -398,7 +398,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         if (this.isBeforeToday(eventDate) && currentUser.canNotRejectLoanInPast()) { throw new NoAuthorizationException(
                 "User has no authority to reject loan with a date in the past."); }
 
-        final Map<String, Object> changes = loan.loanApplicationRejection(command, defaultLoanLifecycleStateMachine());
+        final Map<String, Object> changes = loan.loanApplicationRejection(currentUser, command, defaultLoanLifecycleStateMachine());
         if (!changes.isEmpty()) {
             this.loanRepository.save(loan);
 
@@ -436,7 +436,8 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         if (this.isBeforeToday(eventDate) && currentUser.canNotWithdrawByClientLoanInPast()) { throw new NoAuthorizationException(
                 "User has no authority to mark loan as withdrawn by applicant with a date in the past."); }
 
-        final Map<String, Object> changes = loan.loanApplicationWithdrawnByApplicant(command, defaultLoanLifecycleStateMachine());
+        final Map<String, Object> changes = loan.loanApplicationWithdrawnByApplicant(currentUser, command,
+                defaultLoanLifecycleStateMachine());
         if (!changes.isEmpty()) {
             this.loanRepository.save(loan);
 

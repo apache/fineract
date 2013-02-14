@@ -84,18 +84,18 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
     private String externalId;
 
     @ManyToOne(optional = true)
-    @JoinColumn(name = "client_id")
+    @JoinColumn(name = "client_id", nullable = true)
     private Client client;
 
     @ManyToOne(optional = true)
-    @JoinColumn(name = "group_id")
+    @JoinColumn(name = "group_id", nullable = true)
     private Group group;
 
     @ManyToOne
-    @JoinColumn(name = "product_id")
+    @JoinColumn(name = "product_id", nullable = false)
     private LoanProduct loanProduct;
 
-    @ManyToOne
+    @ManyToOne(optional = true)
     @JoinColumn(name = "fund_id", nullable = true)
     private Fund fund;
 
@@ -123,48 +123,71 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
     @Column(name = "loan_status_id", nullable = false)
     private Integer loanStatus;
 
-    @Temporal(TemporalType.TIMESTAMP)
+    // loan application states
+    @Temporal(TemporalType.DATE)
     @Column(name = "submittedon_date")
     private Date submittedOnDate;
 
-    @Temporal(TemporalType.TIMESTAMP)
+    @SuppressWarnings("unused")
+    @ManyToOne(optional = true)
+    @JoinColumn(name = "submittedon_userid", nullable = true)
+    private AppUser submittedBy;
+
+    @Temporal(TemporalType.DATE)
     @Column(name = "rejectedon_date")
     private Date rejectedOnDate;
 
     @SuppressWarnings("unused")
-    @Temporal(TemporalType.TIMESTAMP)
+    @ManyToOne(optional = true)
+    @JoinColumn(name = "rejectedon_userid", nullable = true)
+    private AppUser rejectedBy;
+
+    @SuppressWarnings("unused")
+    @Temporal(TemporalType.DATE)
     @Column(name = "withdrawnon_date")
     private Date withdrawnOnDate;
 
-    @Temporal(TemporalType.TIMESTAMP)
+    @SuppressWarnings("unused")
+    @ManyToOne(optional = true)
+    @JoinColumn(name = "withdrawnon_userid", nullable = true)
+    private AppUser withdrawnBy;
+
+    @Temporal(TemporalType.DATE)
     @Column(name = "approvedon_date")
     private Date approvedOnDate;
+
+    @SuppressWarnings("unused")
+    @ManyToOne(optional = true)
+    @JoinColumn(name = "approvedon_userid", nullable = true)
+    private AppUser approvedBy;
 
     @Temporal(TemporalType.DATE)
     @Column(name = "expected_disbursedon_date")
     private Date expectedDisbursedOnDate;
 
     @Temporal(TemporalType.DATE)
-    @Column(name = "expected_firstrepaymenton_date")
-    private Date expectedFirstRepaymentOnDate;
-
-    @Temporal(TemporalType.DATE)
-    @Column(name = "interest_calculated_from_date")
-    private Date interestChargedFromDate;
-
-    @Temporal(TemporalType.DATE)
     @Column(name = "disbursedon_date")
     private Date disbursedOnDate;
 
-    @Temporal(TemporalType.TIMESTAMP)
+    @SuppressWarnings("unused")
+    @ManyToOne(optional = true)
+    @JoinColumn(name = "disbursedon_userid", nullable = true)
+    private AppUser disbursedBy;
+
+    @Temporal(TemporalType.DATE)
     @Column(name = "closedon_date")
     private Date closedOnDate;
 
-    @Temporal(TemporalType.TIMESTAMP)
+    @SuppressWarnings("unused")
+    @ManyToOne(optional = true)
+    @JoinColumn(name = "closedon_userid", nullable = true)
+    private AppUser closedBy;
+
+    @Temporal(TemporalType.DATE)
     @Column(name = "writtenoffon_date")
     private Date writtenOffOnDate;
 
-    @Temporal(TemporalType.TIMESTAMP)
+    @Temporal(TemporalType.DATE)
     @Column(name = "rescheduledon_date")
     private Date rescheduledOnDate;
 
@@ -175,6 +198,14 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
     @Temporal(TemporalType.DATE)
     @Column(name = "maturedon_date")
     private Date maturedOnDate;
+
+    @Temporal(TemporalType.DATE)
+    @Column(name = "expected_firstrepaymenton_date")
+    private Date expectedFirstRepaymentOnDate;
+
+    @Temporal(TemporalType.DATE)
+    @Column(name = "interest_calculated_from_date")
+    private Date interestChargedFromDate;
 
     @LazyCollection(LazyCollectionOption.FALSE)
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "loan", orphanRemoval = true)
@@ -320,7 +351,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
         return this.accountNumberRequiresAutoGeneration;
     }
 
-    public void setAccountNumberRequiresAutoGeneration(boolean accountNumberRequiresAutoGeneration) {
+    public void setAccountNumberRequiresAutoGeneration(final boolean accountNumberRequiresAutoGeneration) {
         this.accountNumberRequiresAutoGeneration = accountNumberRequiresAutoGeneration;
     }
 
@@ -830,7 +861,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
         return existingLoanCollateral;
     }
 
-    private LoanChargeCommand[] getLoanCharges(Set<LoanCharge> setOfLoanCharges) {
+    private LoanChargeCommand[] getLoanCharges(final Set<LoanCharge> setOfLoanCharges) {
 
         LoanChargeCommand[] existingLoanCharges = null;
 
@@ -853,8 +884,8 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
         }
     }
 
-    public void loanApplicationSubmittal(final LoanSchedule loanSchedule, final LoanLifecycleStateMachine lifecycleStateMachine,
-            final LocalDate submittedOn, final String externalId) {
+    public void loanApplicationSubmittal(final AppUser currentUser, final LoanSchedule loanSchedule,
+            final LoanLifecycleStateMachine lifecycleStateMachine, final LocalDate submittedOn, final String externalId) {
 
         final LoanScheduleData loanScheduleData = loanSchedule.generate();
 
@@ -880,6 +911,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
         this.termPeriodFrequencyType = loanSchedule.getLoanTermPeriodFrequencyType().getValue();
 
         this.submittedOnDate = submittedOn.toDate();
+        this.submittedBy = currentUser;
         this.expectedMaturityDate = determineExpectedMaturityDate().toDate();
 
         if (loanSchedule.getRepaymentStartFromDate() != null) {
@@ -890,7 +922,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
             this.interestChargedFromDate = loanSchedule.getInterestChargedFromDate().toDate();
         }
 
-        if (submittedOn.isAfter(new LocalDate())) {
+        if (submittedOn.isAfter(DateUtils.getLocalDateOfTenant())) {
             final String errorMessage = "The date on which a loan is submitted cannot be in the future.";
             throw new InvalidLoanStateTransitionException("submittal", "cannot.be.a.future.date", errorMessage, submittedOn);
         }
@@ -913,7 +945,8 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
         return this.repaymentScheduleInstallments.get(numberOfInstallments - 1).getDueDate();
     }
 
-    public Map<String, Object> loanApplicationRejection(final JsonCommand command, final LoanLifecycleStateMachine loanLifecycleStateMachine) {
+    public Map<String, Object> loanApplicationRejection(final AppUser currentUser, final JsonCommand command,
+            final LoanLifecycleStateMachine loanLifecycleStateMachine) {
 
         final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>();
 
@@ -931,7 +964,10 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
             final DateTimeFormatter fmt = DateTimeFormat.forPattern(command.dateFormat()).withLocale(locale);
 
             this.rejectedOnDate = rejectedOn.toDate();
+            this.rejectedBy = currentUser;
             this.closedOnDate = rejectedOn.toDate();
+            this.closedBy = currentUser;
+
             actualChanges.put("locale", command.locale());
             actualChanges.put("dateFormat", command.dateFormat());
             actualChanges.put("rejectedOnDate", rejectedOn.toString(fmt));
@@ -943,7 +979,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
                 throw new InvalidLoanStateTransitionException("reject", "cannot.be.before.submittal.date", errorMessage, rejectedOn,
                         getSubmittedOnDate());
             }
-            if (rejectedOn.isAfter(new LocalDate())) {
+            if (rejectedOn.isAfter(DateUtils.getLocalDateOfTenant())) {
                 final String errorMessage = "The date on which a loan is rejected cannot be in the future.";
                 throw new InvalidLoanStateTransitionException("reject", "cannot.be.a.future.date", errorMessage, rejectedOn);
             }
@@ -952,7 +988,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
         return actualChanges;
     }
 
-    public Map<String, Object> loanApplicationWithdrawnByApplicant(final JsonCommand command,
+    public Map<String, Object> loanApplicationWithdrawnByApplicant(final AppUser currentUser, final JsonCommand command,
             final LoanLifecycleStateMachine loanLifecycleStateMachine) {
 
         final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>();
@@ -971,7 +1007,10 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
             final DateTimeFormatter fmt = DateTimeFormat.forPattern(command.dateFormat()).withLocale(locale);
 
             this.withdrawnOnDate = withdrawnOn.toDate();
+            this.withdrawnBy = currentUser;
             this.closedOnDate = withdrawnOn.toDate();
+            this.closedBy = currentUser;
+
             actualChanges.put("locale", command.locale());
             actualChanges.put("dateFormat", command.dateFormat());
             actualChanges.put("withdrawnOnDate", withdrawnOn.toString(fmt));
@@ -984,7 +1023,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
                         getSubmittedOnDate());
             }
 
-            if (withdrawnOn.isAfter(new LocalDate())) {
+            if (withdrawnOn.isAfter(DateUtils.getLocalDateOfTenant())) {
                 final String errorMessage = "The date on which a loan is withdrawn cannot be in the future.";
                 throw new InvalidLoanStateTransitionException("reject", "cannot.be.a.future.date", errorMessage, command);
             }
@@ -993,7 +1032,8 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
         return actualChanges;
     }
 
-    public Map<String, Object> loanApplicationApproval(final JsonCommand command, final LoanLifecycleStateMachine loanLifecycleStateMachine) {
+    public Map<String, Object> loanApplicationApproval(final AppUser currentUser, final JsonCommand command,
+            final LoanLifecycleStateMachine loanLifecycleStateMachine) {
 
         final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>();
 
@@ -1011,6 +1051,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
             }
 
             this.approvedOnDate = approvedOn.toDate();
+            this.approvedBy = currentUser;
             actualChanges.put("locale", command.locale());
             actualChanges.put("dateFormat", command.dateFormat());
             actualChanges.put("approvedOnDate", approvedOnDateChange);
@@ -1022,7 +1063,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
                 throw new InvalidLoanStateTransitionException("approval", "cannot.be.before.submittal.date", errorMessage,
                         getApprovedOnDate(), submittalDate);
             }
-            if (approvedOn.isAfter(new LocalDate())) {
+            if (approvedOn.isAfter(DateUtils.getLocalDateOfTenant())) {
                 final String errorMessage = "The date on which a loan is approved cannot be in the future.";
                 throw new InvalidLoanStateTransitionException("approval", "cannot.be.a.future.date", errorMessage, getApprovedOnDate());
             }
@@ -1048,6 +1089,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
             actualChanges.put("status", LoanEnumerations.status(this.loanStatus));
 
             this.approvedOnDate = null;
+            this.approvedBy = null;
             actualChanges.put("approvedOnDate", "");
 
             this.loanOfficerHistory.clear();
@@ -1062,7 +1104,8 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
         handleDisbursementTransaction(expectedDisbursedOnLocalDate);
     }
 
-    public Map<String, Object> disburse(final JsonCommand command, final LoanLifecycleStateMachine loanLifecycleStateMachine,
+    public Map<String, Object> disburse(final AppUser currentUser, final JsonCommand command,
+            final LoanLifecycleStateMachine loanLifecycleStateMachine,
             final ApplicationCurrency currency) {
 
         final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>();
@@ -1083,6 +1126,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
             final DateTimeFormatter fmt = DateTimeFormat.forPattern(command.dateFormat()).withLocale(locale);
 
             this.disbursedOnDate = disbursedOn.toDate();
+            this.disbursedBy = currentUser;
             this.expectedMaturityDate = determineExpectedMaturityDate().toDate();
 
             actualChanges.put("locale", command.locale());
@@ -1190,6 +1234,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
             actualChanges.put("status", LoanEnumerations.status(this.loanStatus));
 
             this.disbursedOnDate = null;
+            this.disbursedBy = null;
             actualChanges.put("disbursedOnDate", "");
 
             updateLoanToPreDisbursalState();
@@ -1906,7 +1951,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
         return charges;
     }
 
-    public void setCharges(Set<LoanCharge> charges) {
+    public void setCharges(final Set<LoanCharge> charges) {
         this.charges = charges;
     }
 
@@ -1964,7 +2009,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
         return this.loanRepaymentScheduleDetail.getInArrearsTolerance();
     }
 
-    public boolean identifiedBy(String identifier) {
+    public boolean identifiedBy(final String identifier) {
         return identifier.equalsIgnoreCase(this.externalId) || identifier.equalsIgnoreCase(this.getId().toString());
     }
 
