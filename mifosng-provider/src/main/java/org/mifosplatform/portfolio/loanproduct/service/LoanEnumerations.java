@@ -7,6 +7,7 @@ package org.mifosplatform.portfolio.loanproduct.service;
 
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanStatusEnumData;
+import org.mifosplatform.portfolio.loanaccount.data.LoanTransactionEnumData;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanStatus;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanTransactionType;
 import org.mifosplatform.portfolio.loanproduct.domain.AccountingRuleType;
@@ -129,11 +130,11 @@ public class LoanEnumerations {
         return optionData;
     }
 
-    public static EnumOptionData amortizationType(Integer id) {
+    public static EnumOptionData amortizationType(final Integer id) {
         return amortizationType(AmortizationMethod.fromInt(id));
     }
 
-    public static EnumOptionData amortizationType(AmortizationMethod amortizationMethod) {
+    public static EnumOptionData amortizationType(final AmortizationMethod amortizationMethod) {
         EnumOptionData optionData = null;
         switch (amortizationMethod) {
             case EQUAL_INSTALLMENTS:
@@ -152,11 +153,11 @@ public class LoanEnumerations {
         return optionData;
     }
 
-    public static EnumOptionData interestType(Integer id) {
+    public static EnumOptionData interestType(final Integer id) {
         return interestType(InterestMethod.fromInt(id));
     }
 
-    public static EnumOptionData interestType(InterestMethod type) {
+    public static EnumOptionData interestType(final InterestMethod type) {
         EnumOptionData optionData = null;
         switch (type) {
             case FLAT:
@@ -173,11 +174,11 @@ public class LoanEnumerations {
         return optionData;
     }
 
-    public static EnumOptionData interestCalculationPeriodType(Integer id) {
+    public static EnumOptionData interestCalculationPeriodType(final Integer id) {
         return interestCalculationPeriodType(InterestCalculationPeriodMethod.fromInt(id));
     }
 
-    public static EnumOptionData interestCalculationPeriodType(InterestCalculationPeriodMethod type) {
+    public static EnumOptionData interestCalculationPeriodType(final InterestCalculationPeriodMethod type) {
         EnumOptionData optionData = null;
         switch (type) {
             case DAILY:
@@ -196,51 +197,53 @@ public class LoanEnumerations {
         return optionData;
     }
 
-    public static EnumOptionData transactionType(final Integer id) {
+    public static LoanTransactionEnumData transactionType(final Integer id) {
         return transactionType(LoanTransactionType.fromInt(id));
     }
 
-    public static EnumOptionData transactionType(final LoanTransactionType type) {
-        EnumOptionData optionData = null;
+    public static LoanTransactionEnumData transactionType(final LoanTransactionType type) {
+        LoanTransactionEnumData optionData = null;
         switch (type) {
             case INVALID:
-                optionData = new EnumOptionData(LoanTransactionType.INVALID.getValue().longValue(), LoanTransactionType.INVALID.getCode(),
+                optionData = new LoanTransactionEnumData(LoanTransactionType.INVALID.getValue().longValue(),
+                        LoanTransactionType.INVALID.getCode(),
                         "Invalid");
             break;
             case DISBURSEMENT:
-                optionData = new EnumOptionData(LoanTransactionType.DISBURSEMENT.getValue().longValue(),
+                optionData = new LoanTransactionEnumData(LoanTransactionType.DISBURSEMENT.getValue().longValue(),
                         LoanTransactionType.DISBURSEMENT.getCode(), "Dibursement");
             break;
             case REPAYMENT:
-                optionData = new EnumOptionData(LoanTransactionType.REPAYMENT.getValue().longValue(),
+                optionData = new LoanTransactionEnumData(LoanTransactionType.REPAYMENT.getValue().longValue(),
                         LoanTransactionType.REPAYMENT.getCode(), "Repayment");
             break;
             case REPAYMENT_AT_DISBURSEMENT:
-                optionData = new EnumOptionData(LoanTransactionType.REPAYMENT_AT_DISBURSEMENT.getValue().longValue(),
+                optionData = new LoanTransactionEnumData(LoanTransactionType.REPAYMENT_AT_DISBURSEMENT.getValue().longValue(),
                         LoanTransactionType.REPAYMENT_AT_DISBURSEMENT.getCode(), "Repayment (at time of disbursement)");
             break;
             case CONTRA:
-                optionData = new EnumOptionData(LoanTransactionType.CONTRA.getValue().longValue(), LoanTransactionType.CONTRA.getCode(),
+                optionData = new LoanTransactionEnumData(LoanTransactionType.CONTRA.getValue().longValue(),
+                        LoanTransactionType.CONTRA.getCode(),
                         "Reversal");
             break;
             case WAIVE_INTEREST:
-                optionData = new EnumOptionData(LoanTransactionType.WAIVE_INTEREST.getValue().longValue(),
+                optionData = new LoanTransactionEnumData(LoanTransactionType.WAIVE_INTEREST.getValue().longValue(),
                         LoanTransactionType.WAIVE_INTEREST.getCode(), "Waive interest");
             break;
             case MARKED_FOR_RESCHEDULING:
-                optionData = new EnumOptionData(LoanTransactionType.MARKED_FOR_RESCHEDULING.getValue().longValue(),
+                optionData = new LoanTransactionEnumData(LoanTransactionType.MARKED_FOR_RESCHEDULING.getValue().longValue(),
                         LoanTransactionType.MARKED_FOR_RESCHEDULING.getCode(), "Close (as rescheduled)");
             break;
             case WRITEOFF:
-                optionData = new EnumOptionData(LoanTransactionType.WRITEOFF.getValue().longValue(),
+                optionData = new LoanTransactionEnumData(LoanTransactionType.WRITEOFF.getValue().longValue(),
                         LoanTransactionType.WRITEOFF.getCode(), "Close (as written-off)");
             break;
             case RECOVERY_REPAYMENT:
-                optionData = new EnumOptionData(LoanTransactionType.RECOVERY_REPAYMENT.getValue().longValue(),
+                optionData = new LoanTransactionEnumData(LoanTransactionType.RECOVERY_REPAYMENT.getValue().longValue(),
                         LoanTransactionType.RECOVERY_REPAYMENT.getCode(), "Repayment (after write-off)");
             break;
             case WAIVE_CHARGES:
-                optionData = new EnumOptionData(LoanTransactionType.WAIVE_CHARGES.getValue().longValue(),
+                optionData = new LoanTransactionEnumData(LoanTransactionType.WAIVE_CHARGES.getValue().longValue(),
                         LoanTransactionType.WAIVE_CHARGES.getCode(), "Waive loan charges");
             break;
         }

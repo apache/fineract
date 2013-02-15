@@ -18,7 +18,6 @@ import org.mifosplatform.organisation.office.exception.OfficeNotFoundException;
 import org.mifosplatform.organisation.staff.domain.Staff;
 import org.mifosplatform.organisation.staff.domain.StaffRepository;
 import org.mifosplatform.organisation.staff.exception.StaffNotFoundException;
-import org.mifosplatform.organisation.staff.exception.StaffRoleException;
 import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.client.domain.ClientRepository;
 import org.mifosplatform.portfolio.client.exception.ClientNotFoundException;
@@ -52,8 +51,8 @@ public class GroupWritePlatformServiceJpaRepositoryImpl implements GroupWritePla
     private final StaffRepository staffRepository;
 
     @Autowired
-    public GroupWritePlatformServiceJpaRepositoryImpl(PlatformSecurityContext context, GroupRepository groupRepository,
-            ClientRepository clientRepository, OfficeRepository officeRepository , StaffRepository staffRepository) {
+    public GroupWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final GroupRepository groupRepository,
+            final ClientRepository clientRepository, final OfficeRepository officeRepository , final StaffRepository staffRepository) {
         this.context = context;
         this.groupRepository = groupRepository;
         this.clientRepository = clientRepository;
@@ -63,7 +62,7 @@ public class GroupWritePlatformServiceJpaRepositoryImpl implements GroupWritePla
 
     @Transactional
     @Override
-    public CommandProcessingResult createGroup(GroupCommand command) {
+    public CommandProcessingResult createGroup(final GroupCommand command) {
         try {
             this.context.authenticatedUser();
 
@@ -103,7 +102,7 @@ public class GroupWritePlatformServiceJpaRepositoryImpl implements GroupWritePla
 
     @Transactional
     @Override
-    public CommandProcessingResult updateGroup(GroupCommand command) {
+    public CommandProcessingResult updateGroup(final GroupCommand command) {
 
         try {
             context.authenticatedUser();
@@ -150,7 +149,7 @@ public class GroupWritePlatformServiceJpaRepositoryImpl implements GroupWritePla
 
     @Transactional
     @Override
-    public CommandProcessingResult deleteGroup(Long groupId) {
+    public CommandProcessingResult deleteGroup(final Long groupId) {
 
         context.authenticatedUser();
 
@@ -190,7 +189,7 @@ public class GroupWritePlatformServiceJpaRepositoryImpl implements GroupWritePla
     /*
       * Guaranteed to throw an exception no matter what the data integrity issue is.
       */
-    private void handleGroupDataIntegrityIssues(final GroupCommand command, DataIntegrityViolationException dve)  {
+    private void handleGroupDataIntegrityIssues(final GroupCommand command, final DataIntegrityViolationException dve)  {
 
         Throwable realCause = dve.getMostSpecificCause();
         if (realCause.getMessage().contains("external_id")) {

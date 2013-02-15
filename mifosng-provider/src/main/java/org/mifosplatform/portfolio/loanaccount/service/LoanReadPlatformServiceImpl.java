@@ -32,6 +32,7 @@ import org.mifosplatform.portfolio.loanaccount.data.LoanAccountData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanApplicationTimelineData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanStatusEnumData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanTransactionData;
+import org.mifosplatform.portfolio.loanaccount.data.LoanTransactionEnumData;
 import org.mifosplatform.portfolio.loanaccount.data.RepaymentScheduleRelatedLoanData;
 import org.mifosplatform.portfolio.loanaccount.domain.Loan;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanRepository;
@@ -262,7 +263,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         final LocalDate earliestUnpaidInstallmentDate = loan.possibleNextRepaymentDate();
 
         final Money possibleNextRepaymentAmount = loan.possibleNextRepaymentAmount();
-        final EnumOptionData transactionType = LoanEnumerations.transactionType(LoanTransactionType.REPAYMENT);
+        final LoanTransactionEnumData transactionType = LoanEnumerations.transactionType(LoanTransactionType.REPAYMENT);
         return new LoanTransactionData(null, transactionType, currencyData, earliestUnpaidInstallmentDate,
                 possibleNextRepaymentAmount.getAmount(), null, null, null, null);
     }
@@ -287,7 +288,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
         final LoanTransaction waiveOfInterest = loan.deriveDefaultInterestWaiverTransaction();
 
-        final EnumOptionData transactionType = LoanEnumerations.transactionType(LoanTransactionType.WAIVE_INTEREST);
+        final LoanTransactionEnumData transactionType = LoanEnumerations.transactionType(LoanTransactionType.WAIVE_INTEREST);
 
         return new LoanTransactionData(null, transactionType, currencyData, waiveOfInterest.getTransactionDate(),
                 waiveOfInterest.getAmount(), null, null, null, null);
@@ -298,8 +299,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
         context.authenticatedUser();
 
-        EnumOptionData transactionType = LoanEnumerations.transactionType(LoanTransactionType.WRITEOFF);
-
+        LoanTransactionEnumData transactionType = LoanEnumerations.transactionType(LoanTransactionType.WRITEOFF);
         return new LoanTransactionData(null, transactionType, null, new LocalDate(), null, null, null, null, null);
     }
 
@@ -605,7 +605,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
             final Long id = rs.getLong("id");
             final int transactionTypeInt = JdbcSupport.getInteger(rs, "transactionType");
-            final EnumOptionData transactionType = LoanEnumerations.transactionType(transactionTypeInt);
+            final LoanTransactionEnumData transactionType = LoanEnumerations.transactionType(transactionTypeInt);
             final LocalDate date = JdbcSupport.getLocalDate(rs, "date");
             final BigDecimal totalAmount = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "total");
             final BigDecimal principalPortion = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "principal");

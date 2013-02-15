@@ -90,9 +90,10 @@ public class LoanAccountData {
     private final Collection<EnumOptionData> interestCalculationPeriodTypeOptions;
     private final Collection<FundData> fundOptions;
     private final Collection<ChargeData> chargeOptions;
-    private final ChargeData chargeTemplate;
     private final Collection<CodeValueData> loanPurposeOptions;
     private final Collection<CodeValueData> loanCollateralOptions;
+
+    private final ChargeData chargeTemplate;
 
     /**
      * Used to produce a {@link LoanAccountData} with only collateral options

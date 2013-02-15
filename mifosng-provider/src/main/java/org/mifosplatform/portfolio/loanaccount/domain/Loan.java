@@ -7,6 +7,7 @@ package org.mifosplatform.portfolio.loanaccount.domain;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
@@ -42,6 +43,7 @@ import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.domain.AbstractAuditableCustom;
 import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.security.service.RandomPasswordGenerator;
+import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.mifosplatform.organisation.monetary.domain.ApplicationCurrency;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.organisation.monetary.domain.Money;
@@ -1104,9 +1106,51 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
         handleDisbursementTransaction(expectedDisbursedOnLocalDate);
     }
 
+    public Map<String, Object> deriveDisbursementData(final CurrencyData currencyData) {
+
+        final Map<String, Object> accountingBridgeData = new LinkedHashMap<String, Object>(20);
+
+        accountingBridgeData.put("loanId", this.getId());
+        accountingBridgeData.put("loanProductId", this.productId());
+        accountingBridgeData.put("officeId", this.getOfficeId());
+        accountingBridgeData.put("cashBasedAccountingEnabled", this.isCashBasedAccountingEnabledOnLoanProduct());
+        accountingBridgeData.put("accrualBasedAccountingEnabled", this.isAccrualBasedAccountingEnabledOnLoanProduct());
+
+        final List<Map<String, Object>> newLoanTransactions = new ArrayList<Map<String, Object>>();
+        final List<LoanTransaction> disbursementTransactions = findDisbursementTransactions();
+        for (LoanTransaction loanTransaction : disbursementTransactions) {
+            newLoanTransactions.add(loanTransaction.toMapData(currencyData));
+        }
+
+        accountingBridgeData.put("newLoanTransactions", newLoanTransactions);
+
+        return accountingBridgeData;
+    }
+
+    private List<LoanTransaction> findDisbursementTransactions() {
+        List<LoanTransaction> found = new ArrayList<LoanTransaction>();
+        for (LoanTransaction transaction : this.loanTransactions) {
+            if (transaction.isDisbursement() || transaction.isRepaymentAtDisbursement()) {
+                found.add(transaction);
+            }
+        }
+
+        return found;
+    }
+
+    private Collection<Long> findExistingTransactionIds() {
+
+        Collection<Long> ids = new ArrayList<Long>();
+
+        for (LoanTransaction transaction : this.loanTransactions) {
+            ids.add(transaction.getId());
+        }
+
+        return ids;
+    }
+
     public Map<String, Object> disburse(final AppUser currentUser, final JsonCommand command,
-            final LoanLifecycleStateMachine loanLifecycleStateMachine,
-            final ApplicationCurrency currency) {
+            final LoanLifecycleStateMachine loanLifecycleStateMachine, final ApplicationCurrency currency) {
 
         final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>();
 
@@ -1179,11 +1223,12 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
         updateLoanSchedule(generatedData);
     }
 
-    private void handleDisbursementTransaction(final LocalDate disbursedOn) {
+    private LoanTransaction handleDisbursementTransaction(final LocalDate disbursedOn) {
         // track disbursement transaction
-        final LoanTransaction loanTransaction = LoanTransaction.disbursement(this.loanRepaymentScheduleDetail.getPrincipal(), disbursedOn);
-        loanTransaction.updateLoan(this);
-        this.loanTransactions.add(loanTransaction);
+        final LoanTransaction disbursementTransaction = LoanTransaction.disbursement(this.loanRepaymentScheduleDetail.getPrincipal(),
+                disbursedOn);
+        disbursementTransaction.updateLoan(this);
+        this.loanTransactions.add(disbursementTransaction);
 
         // add repayment transaction to track incoming money from client to mfi
         // for (charges due at time of disbursement)
@@ -1221,9 +1266,12 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
             throw new InvalidLoanStateTransitionException("disbursal", "cannot.be.after.first.repayment.due.date", errorMessage,
                     disbursedOn, firstRepaymentDueDate);
         }
+
+        return disbursementTransaction;
     }
 
-    public Map<String, Object> undoDisbursal(final LoanLifecycleStateMachine loanLifecycleStateMachine) {
+    public Map<String, Object> undoDisbursal(final LoanLifecycleStateMachine loanLifecycleStateMachine,
+            final List<Long> existingTransactionIds) {
 
         final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>();
 
@@ -1237,14 +1285,31 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
             this.disbursedBy = null;
             actualChanges.put("disbursedOnDate", "");
 
+            existingTransactionIds.addAll(findExistingTransactionIds());
+
+            contraExistingTransactions();
+
             updateLoanToPreDisbursalState();
         }
 
         return actualChanges;
     }
 
+    private final void contraExistingTransactions() {
+
+        // final List<LoanTransaction> contras = new
+        // ArrayList<LoanTransaction>();
+        for (LoanTransaction transaction : this.loanTransactions) {
+            if (transaction.isNotContra()) {
+                LoanTransaction contra = transaction.contra();
+                // contras.add(contra);
+            }
+        }
+
+        // this.loanTransactions.addAll(contras);
+    }
+
     private void updateLoanToPreDisbursalState() {
-        this.loanTransactions.clear();
         this.disbursedOnDate = null;
 
         for (LoanCharge charge : getNullPointerSafeLoanCharges()) {
@@ -2165,27 +2230,44 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
         return officeId;
     }
 
-    public List<LoanTransaction> getLoanTransactions() {
-        return this.loanTransactions;
-    }
-
     public boolean isAccountingEnabledOnLoanProduct() {
         return this.loanProduct.isAccountingEnabled();
     }
 
-    public boolean isCashBasedAccountingEnabledOnLoanProduct() {
+    public Boolean isCashBasedAccountingEnabledOnLoanProduct() {
         return this.loanProduct.isCashBasedAccountingEnabled();
     }
 
-    public boolean isAccrualBasedAccountingEnabledOnLoanProduct() {
+    public Boolean isAccrualBasedAccountingEnabledOnLoanProduct() {
         return this.loanProduct.isAccrualBasedAccountingEnabled();
     }
 
+    // TODO - make private if possible
     public Long productId() {
         return this.loanProduct.getId();
     }
 
     public Staff getLoanOfficer() {
         return this.loanOfficer;
+    }
+
+    public Map<String, Object> deriveAccountingBridgeData(final CurrencyData currencyData, final List<Long> existingTransactionIds) {
+
+        final Map<String, Object> accountingBridgeData = new LinkedHashMap<String, Object>();
+        accountingBridgeData.put("loanId", this.getId());
+        accountingBridgeData.put("loanProductId", this.productId());
+        accountingBridgeData.put("officeId", this.getOfficeId());
+        accountingBridgeData.put("cashBasedAccountingEnabled", this.isCashBasedAccountingEnabledOnLoanProduct());
+        accountingBridgeData.put("accrualBasedAccountingEnabled", this.isAccrualBasedAccountingEnabledOnLoanProduct());
+
+        final List<Map<String, Object>> newLoanTransactions = new ArrayList<Map<String, Object>>();
+        for (LoanTransaction transaction : this.loanTransactions) {
+            if (!existingTransactionIds.contains(transaction.getId())) {
+                newLoanTransactions.add(transaction.toMapData(currencyData));
+            }
+        }
+
+        accountingBridgeData.put("newLoanTransactions", newLoanTransactions);
+        return accountingBridgeData;
     }
 }

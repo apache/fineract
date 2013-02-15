@@ -75,18 +75,17 @@ import com.google.gson.JsonElement;
 @Scope("singleton")
 public class LoansApiResource {
 
-    private final Set<String> LOAN_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "accountNo", "externalId", "clientId",
-            "groupId", "clientName", "groupName", "fundId", "fundName", "loanPurposeId", "loanOfficerId", "loanOfficerName",
-            "loanPurposeName", "loanProductId", "loanProductName", "loanProductDescription", "currency", "principal", "inArrearsTolerance",
-            "numberOfRepayments", "repaymentEvery", "interestRatePerPeriod", "annualInterestRate", "repaymentFrequencyType",
-            "interestRateFrequencyType", "amortizationType", "interestType", "interestCalculationPeriodType", "submittedOnDate",
-            "approvedOnDate", "expectedDisbursementDate", "actualDisbursementDate", "expectedFirstRepaymentOnDate",
-            "interestChargedFromDate", "closedOnDate", "expectedMaturityDate", "status", "lifeCycleStatusDate", "repaymentSchedule",
-            "transactions", "convenienceData", "charges", "guarantor", "collateral", "productOptions", "amortizationTypeOptions",
-            "interestTypeOptions", "interestCalculationPeriodTypeOptions", "repaymentFrequencyTypeOptions", "termFrequencyTypeOptions",
+    private final Set<String> LOAN_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "accountNo", "status", "externalId",
+            "clientId", "groupId", "clientName", "groupName", "loanProductId", "loanProductName", "loanProductDescription", "fundId",
+            "fundName", "loanPurposeId", "loanPurposeName", "loanOfficerId", "loanOfficerName", "currency", "principal",
+            "inArrearsTolerance", "termFrequency", "termPeriodFrequencyType", "numberOfRepayments", "repaymentEvery",
+            "interestRatePerPeriod", "annualInterestRate", "repaymentFrequencyType", "transactionProcessingStrategyId",
+            "interestRateFrequencyType", "amortizationType", "interestType", "interestCalculationPeriodType",
+            "expectedFirstRepaymentOnDate", "interestChargedFromDate", "timeline", "totalFeeChargesAtDisbursement", "repaymentSchedule",
+            "transactions", "charges", "collateral", "guarantors", "productOptions", "amortizationTypeOptions", "interestTypeOptions",
+            "interestCalculationPeriodTypeOptions", "repaymentFrequencyTypeOptions", "termFrequencyTypeOptions",
             "interestRateFrequencyTypeOptions", "fundOptions", "repaymentStrategyOptions", "chargeOptions", "loanOfficerOptions",
-            "chargeTemplate", "transactionProcessingStrategyId", "termFrequency", "termPeriodFrequencyType", "loanPurposeOptions",
-            "loanCollateralOptions"));
+            "loanPurposeOptions", "loanCollateralOptions", "chargeTemplate"));
 
     private final String resourceNameForPermissions = "LOAN";
 
@@ -189,23 +188,23 @@ public class LoansApiResource {
             final Long officeId = loanBasicDetails.officeId();
             final Collection<StaffData> allowedLoanOfficers = this.staffReadPlatformService.retrieveAllLoanOfficersByOffice(officeId);
 
-            newLoanAccount = LoanAccountData.associationsAndTemplate(loanBasicDetails, repaymentSchedule,
-                    loanRepayments, charges, collateral, guarantors, productOptions, loanTermFrequencyTypeOptions,
-                    repaymentFrequencyTypeOptions, repaymentStrategyOptions, interestRateFrequencyTypeOptions, amortizationTypeOptions,
-                    interestTypeOptions, interestCalculationPeriodTypeOptions, fundOptions, chargeOptions, chargeTemplate,
-                    allowedLoanOfficers, loanPurposeOptions, loanCollateralOptions);
+            newLoanAccount = LoanAccountData.associationsAndTemplate(loanBasicDetails, repaymentSchedule, loanRepayments, charges,
+                    collateral, guarantors, productOptions, loanTermFrequencyTypeOptions, repaymentFrequencyTypeOptions,
+                    repaymentStrategyOptions, interestRateFrequencyTypeOptions, amortizationTypeOptions, interestTypeOptions,
+                    interestCalculationPeriodTypeOptions, fundOptions, chargeOptions, chargeTemplate, allowedLoanOfficers,
+                    loanPurposeOptions, loanCollateralOptions);
 
         } else if (groupId != null) {
             final LoanAccountData loanBasicDetails = this.loanReadPlatformService.retrieveGroupAndProductDetails(groupId, productId);
             final Collection<LoanChargeData> charges = loanBasicDetails.charges();
             final Long officeId = loanBasicDetails.officeId();
-            final Collection<StaffData>allowedLoanOfficers = this.staffReadPlatformService.retrieveAllLoanOfficersByOffice(officeId);
+            final Collection<StaffData> allowedLoanOfficers = this.staffReadPlatformService.retrieveAllLoanOfficersByOffice(officeId);
 
-            newLoanAccount = LoanAccountData.associationsAndTemplate(loanBasicDetails, repaymentSchedule,
-                    loanRepayments, charges, collateral, guarantors, productOptions, loanTermFrequencyTypeOptions,
-                    repaymentFrequencyTypeOptions, repaymentStrategyOptions, interestRateFrequencyTypeOptions, amortizationTypeOptions,
-                    interestTypeOptions, interestCalculationPeriodTypeOptions, fundOptions, chargeOptions, chargeTemplate,
-                    allowedLoanOfficers, loanPurposeOptions, loanCollateralOptions);
+            newLoanAccount = LoanAccountData.associationsAndTemplate(loanBasicDetails, repaymentSchedule, loanRepayments, charges,
+                    collateral, guarantors, productOptions, loanTermFrequencyTypeOptions, repaymentFrequencyTypeOptions,
+                    repaymentStrategyOptions, interestRateFrequencyTypeOptions, amortizationTypeOptions, interestTypeOptions,
+                    interestCalculationPeriodTypeOptions, fundOptions, chargeOptions, chargeTemplate, allowedLoanOfficers,
+                    loanPurposeOptions, loanCollateralOptions);
         } else {
             newLoanAccount = LoanAccountData.collateralTemplate(loanCollateralOptions);
         }
@@ -235,12 +234,12 @@ public class LoansApiResource {
         if (!associationParameters.isEmpty()) {
 
             if (associationParameters.contains("all")) {
-                associationParameters.addAll(Arrays.asList("repaymentSchedule", "transactions", "permissions", "charges", "guarantor",
+                associationParameters.addAll(Arrays.asList("repaymentSchedule", "transactions", "permissions", "charges", "guarantors",
                         "collateral"));
             }
 
-            if (associationParameters.contains("guarantor")) {
-                mandatoryResponseParameters.add("guarantor");
+            if (associationParameters.contains("guarantors")) {
+                mandatoryResponseParameters.add("guarantors");
                 guarantors = this.guarantorReadPlatformService.retrieveGuarantorsForLoan(loanId);
                 if (CollectionUtils.isEmpty(guarantors)) {
                     guarantors = null;

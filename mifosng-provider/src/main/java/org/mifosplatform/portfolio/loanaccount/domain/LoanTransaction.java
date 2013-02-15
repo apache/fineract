@@ -7,6 +7,8 @@ package org.mifosplatform.portfolio.loanaccount.domain;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -19,15 +21,14 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
 import org.joda.time.LocalDate;
-import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.domain.AbstractAuditableCustom;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.organisation.monetary.domain.Money;
 import org.mifosplatform.portfolio.loanaccount.data.LoanTransactionData;
+import org.mifosplatform.portfolio.loanaccount.data.LoanTransactionEnumData;
 import org.mifosplatform.portfolio.loanproduct.service.LoanEnumerations;
 import org.mifosplatform.useradministration.domain.AppUser;
-import org.springframework.format.annotation.DateTimeFormat;
 
 /**
  * All monetary transactions against a loan are modelled through this entity.
@@ -61,7 +62,7 @@ public class LoanTransaction extends AbstractAuditableCustom<AppUser, Long> {
     private final Date dateOf;
 
     @Column(name = "transaction_type_enum", nullable = false)
-    private Integer typeOf;
+    private final Integer typeOf;
 
     @OneToOne(optional = true, cascade = { CascadeType.PERSIST })
     @JoinColumn(name = "contra_id")
@@ -123,11 +124,10 @@ public class LoanTransaction extends AbstractAuditableCustom<AppUser, Long> {
         return this.amount;
     }
 
-    public Money getAmount(MonetaryCurrency currency) {
+    public Money getAmount(final MonetaryCurrency currency) {
         return Money.of(currency, this.amount);
     }
 
-    @DateTimeFormat(style = "-M")
     public LocalDate getTransactionDate() {
         return new LocalDate(this.dateOf);
     }
@@ -200,10 +200,19 @@ public class LoanTransaction extends AbstractAuditableCustom<AppUser, Long> {
         return !isBelongingToLoanOf(check);
     }
 
-    public void contra() {
+    public LoanTransaction contra() {
         this.contra = LoanTransaction.contra(this);
         contra.updateLoan(this.loan);
+
+        return this.contra;
     }
+
+    // public LoanTransaction newContra() {
+    // // should update some flag old entry being contra'd
+    // LoanTransaction contra = LoanTransaction.contra(this);
+    // contra.updateLoan(this.loan);
+    // return contra;
+    // }
 
     public void updateLoan(final Loan loan) {
         this.loan = loan;
@@ -301,8 +310,36 @@ public class LoanTransaction extends AbstractAuditableCustom<AppUser, Long> {
     }
 
     public LoanTransactionData toData(final CurrencyData currencyData) {
-        final EnumOptionData transactionType = LoanEnumerations.transactionType(this.typeOf);
+        final LoanTransactionEnumData transactionType = LoanEnumerations.transactionType(this.typeOf);
         return new LoanTransactionData(this.getId(), transactionType, currencyData, getTransactionDate(), this.amount,
                 this.principalPortion, this.interestPortion, this.feeChargesPortion, this.penaltyChargesPortion);
+    }
+
+    public Map<String, Object> toMapData(final CurrencyData currencyData) {
+        final Map<String, Object> thisTransactionData = new LinkedHashMap<String, Object>();
+
+        LoanTransactionType type = LoanTransactionType.fromInt(this.typeOf);
+        final LoanTransactionEnumData transactionType = LoanEnumerations.transactionType(this.typeOf);
+
+        thisTransactionData.put("id", this.getId());
+        thisTransactionData.put("type", transactionType);
+        thisTransactionData.put("disbursement", type.isDisbursement());
+        thisTransactionData.put("repaymentAtDisbursement", type.isRepaymentAtDisbursement());
+        thisTransactionData.put("repayment", type.isRepayment());
+        thisTransactionData.put("recoveryRepayment", type.isRecoveryRepayment());
+        thisTransactionData.put("contra", type.isContra());
+        thisTransactionData.put("waiveInterest", type.isWaiveInterest());
+        thisTransactionData.put("waiveCharges", type.isWaiveCharges());
+        thisTransactionData.put("writeOff", type.isWriteOff());
+
+        thisTransactionData.put("date", this.getTransactionDate());
+        thisTransactionData.put("currency", currencyData);
+        thisTransactionData.put("amount", this.amount);
+        thisTransactionData.put("principalPortion", this.principalPortion);
+        thisTransactionData.put("interestPortion", this.interestPortion);
+        thisTransactionData.put("feeChargesPortion", this.feeChargesPortion);
+        thisTransactionData.put("penaltyChargesPortion", this.penaltyChargesPortion);
+
+        return thisTransactionData;
     }
 }

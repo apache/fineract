@@ -14,14 +14,14 @@ public class LoanStatusEnumData {
     private final Long id;
     private final String code;
     private final String value;
-    private boolean pendingApproval;
-    private boolean waitingForDisbursal;
-    private boolean active;
-    private boolean closedObligationsMet;
-    private boolean closedWrittenOff;
-    private boolean closedRescheduled;
-    private boolean closed;
-    private boolean overpaid;
+    private final boolean pendingApproval;
+    private final boolean waitingForDisbursal;
+    private final boolean active;
+    private final boolean closedObligationsMet;
+    private final boolean closedWrittenOff;
+    private final boolean closedRescheduled;
+    private final boolean closed;
+    private final boolean overpaid;
 
     public LoanStatusEnumData(final Long id, final String code, final String value) {
         this.id = id;

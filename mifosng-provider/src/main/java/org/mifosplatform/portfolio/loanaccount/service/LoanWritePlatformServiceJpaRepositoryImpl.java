@@ -8,11 +8,9 @@ package org.mifosplatform.portfolio.loanaccount.service;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
@@ -22,6 +20,7 @@ import org.mifosplatform.accounting.service.GLJournalEntryWritePlatformService;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.security.exception.NoAuthorizationException;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.monetary.domain.ApplicationCurrency;
@@ -104,7 +103,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     }
 
     private boolean isBeforeToday(final LocalDate date) {
-        return date.isBefore(new LocalDate());
+        return date.isBefore(DateUtils.getLocalDateOfTenant());
     }
 
     private LoanLifecycleStateMachine defaultLoanLifecycleStateMachine() {
@@ -133,37 +132,15 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         final Map<String, Object> changes = loan.disburse(currentUser, command, defaultLoanLifecycleStateMachine(), currency);
         if (!changes.isEmpty()) {
-            // variable stores Id's of all existing loan transactions (newly
-            // created
-            // loan transactions would not have an Id before save)
-            final Set<Long> existingLoanTransactionIds = new HashSet<Long>();
-            for (LoanTransaction loanTransaction : loan.getLoanTransactions()) {
-                if (!(loanTransaction.getId() == null)) {
-                    existingLoanTransactionIds.add(loanTransaction.getId());
-                }
-            }
             this.loanRepository.save(loan);
 
             if (StringUtils.isNotBlank(noteText)) {
                 Note note = Note.loanNote(loan, noteText);
                 this.noteRepository.save(note);
             }
-
-            // make a call to accounting
-            if (loan.isAccountingEnabledOnLoanProduct()) {
-                /***
-                 * Variable holds list of all newly created loan transactions
-                 * during this disbursal
-                 **/
-                List<LoanTransaction> newLoanTransactions = new ArrayList<LoanTransaction>();
-                for (LoanTransaction loanTransaction : loan.getLoanTransactions()) {
-                    if (!existingLoanTransactionIds.contains(loanTransaction.getId())) {
-                        newLoanTransactions.add(loanTransaction);
-                    }
-                }
-                LoanDTO loanDTO = populateLoanDTO(loan, newLoanTransactions);
-                journalEntryWritePlatformService.createJournalEntriesForLoan(loanDTO);
-            }
+            
+            final Map<String, Object> accountingBridgeData = loan.deriveDisbursementData(currency.toData());
+            journalEntryWritePlatformService.createJournalEntriesForLoan(accountingBridgeData);
         }
 
         return new CommandProcessingResultBuilder() //
@@ -185,15 +162,22 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         final Loan loan = retrieveLoanBy(loanId);
 
-        final Map<String, Object> changes = loan.undoDisbursal(defaultLoanLifecycleStateMachine());
+        final List<Long> existingTransactionIds = new ArrayList<Long>();
+        final Map<String, Object> changes = loan.undoDisbursal(defaultLoanLifecycleStateMachine(), existingTransactionIds);
         if (!changes.isEmpty()) {
-            this.loanRepository.save(loan);
+            this.loanRepository.saveAndFlush(loan);
 
             final String noteText = command.stringValueOfParameterNamed("note");
             if (StringUtils.isNotBlank(noteText)) {
                 Note note = Note.loanNote(loan, noteText);
                 this.noteRepository.save(note);
             }
+
+            final Loan loanRefetch = retrieveLoanBy(loanId);
+
+            final ApplicationCurrency currency = this.applicationCurrencyRepository.findOneByCode(loan.getPrincpal().getCurrencyCode());
+            final Map<String, Object> accountingBridgeData = loanRefetch.deriveAccountingBridgeData(currency.toData(), existingTransactionIds);
+            journalEntryWritePlatformService.createJournalEntriesForLoan(accountingBridgeData);
         }
 
         return new CommandProcessingResultBuilder() //

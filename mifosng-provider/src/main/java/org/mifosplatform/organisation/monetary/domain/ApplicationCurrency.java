@@ -9,6 +9,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
+import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
@@ -65,5 +66,9 @@ public class ApplicationCurrency extends AbstractPersistable<Long> {
 
     public String getDisplaySymbol() {
         return displaySymbol;
+    }
+
+    public CurrencyData toData() {
+        return new CurrencyData(this.code, this.name, this.decimalPlaces, this.displaySymbol, this.nameCode);
     }
 }

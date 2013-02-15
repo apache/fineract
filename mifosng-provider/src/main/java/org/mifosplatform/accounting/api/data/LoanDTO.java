@@ -16,8 +16,8 @@ public class LoanDTO {
     private boolean accrualBasedAccountingEnabled;
     private List<LoanTransactionDTO> newLoanTransactions;
 
-    public LoanDTO(Long loanId, Long loanProductId, Long officeId, boolean cashBasedAccountingEnabled,
-            boolean accrualBasedAccountingEnabled, List<LoanTransactionDTO> newLoanTransactions) {
+    public LoanDTO(final Long loanId, final Long loanProductId, final Long officeId, final boolean cashBasedAccountingEnabled,
+            final boolean accrualBasedAccountingEnabled, final List<LoanTransactionDTO> newLoanTransactions) {
         this.loanId = loanId;
         this.loanProductId = loanProductId;
         this.officeId = officeId;
@@ -30,7 +30,7 @@ public class LoanDTO {
         return this.loanId;
     }
 
-    public void setLoanId(Long loanId) {
+    public void setLoanId(final Long loanId) {
         this.loanId = loanId;
     }
 
@@ -38,7 +38,7 @@ public class LoanDTO {
         return this.loanProductId;
     }
 
-    public void setLoanProductId(Long loanProductId) {
+    public void setLoanProductId(final Long loanProductId) {
         this.loanProductId = loanProductId;
     }
 
@@ -46,7 +46,7 @@ public class LoanDTO {
         return this.officeId;
     }
 
-    public void setOfficeId(Long officeId) {
+    public void setOfficeId(final Long officeId) {
         this.officeId = officeId;
     }
 
@@ -54,7 +54,7 @@ public class LoanDTO {
         return this.cashBasedAccountingEnabled;
     }
 
-    public void setCashBasedAccountingEnabled(boolean cashBasedAccountingEnabled) {
+    public void setCashBasedAccountingEnabled(final boolean cashBasedAccountingEnabled) {
         this.cashBasedAccountingEnabled = cashBasedAccountingEnabled;
     }
 
@@ -62,7 +62,7 @@ public class LoanDTO {
         return this.accrualBasedAccountingEnabled;
     }
 
-    public void setAccrualBasedAccountingEnabled(boolean accrualBasedAccountingEnabled) {
+    public void setAccrualBasedAccountingEnabled(final boolean accrualBasedAccountingEnabled) {
         this.accrualBasedAccountingEnabled = accrualBasedAccountingEnabled;
     }
 
@@ -70,8 +70,7 @@ public class LoanDTO {
         return this.newLoanTransactions;
     }
 
-    public void setNewLoanTransactions(List<LoanTransactionDTO> newLoanTransactions) {
+    public void setNewLoanTransactions(final List<LoanTransactionDTO> newLoanTransactions) {
         this.newLoanTransactions = newLoanTransactions;
     }
-
 }

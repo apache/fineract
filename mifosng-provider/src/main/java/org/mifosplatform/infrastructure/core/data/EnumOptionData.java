@@ -7,7 +7,7 @@ package org.mifosplatform.infrastructure.core.data;
 
 /**
  * <p>
- * Immutable data object represent generic enumeration value.
+ * Immutable data object representing generic enumeration value.
  * </p>
  */
 @SuppressWarnings("unused")

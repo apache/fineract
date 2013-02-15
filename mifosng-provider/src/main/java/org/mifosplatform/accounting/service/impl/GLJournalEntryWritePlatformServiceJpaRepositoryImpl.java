@@ -6,8 +6,10 @@
 package org.mifosplatform.accounting.service.impl;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.StringUtils;
@@ -68,7 +70,7 @@ public class GLJournalEntryWritePlatformServiceJpaRepositoryImpl implements GLJo
 
     @Transactional
     @Override
-    public String createJournalEntry(GLJournalEntryCommand command) {
+    public String createJournalEntry(final GLJournalEntryCommand command) {
         try {
             GLJournalEntryCommandValidator validator = new GLJournalEntryCommandValidator(command);
             validator.validateForCreate();
@@ -96,7 +98,7 @@ public class GLJournalEntryWritePlatformServiceJpaRepositoryImpl implements GLJo
 
     @Transactional
     @Override
-    public String revertJournalEntry(String transactionId) {
+    public String revertJournalEntry(final String transactionId) {
 
         // is the transaction Id valid
         List<GLJournalEntry> journalEntries = glJournalEntryRepository.findUnReversedManualJournalEntriesByTransactionId(transactionId);
@@ -130,7 +132,7 @@ public class GLJournalEntryWritePlatformServiceJpaRepositoryImpl implements GLJo
 
     @Transactional
     @Override
-    public void createJournalEntriesForLoan(LoanDTO loanDTO) {
+    public void createJournalEntriesForLoan(final LoanDTO loanDTO) {
         // shouldn't be before an accounting closure
         if (loanDTO.isCashBasedAccountingEnabled()) {
             createJournalEntriesUsingCashRules(loanDTO);
@@ -139,11 +141,58 @@ public class GLJournalEntryWritePlatformServiceJpaRepositoryImpl implements GLJo
         }
     }
 
-    /**
-     * @param loanDTO
-     * @param loanTransactions
-     */
-    private void createJournalEntriesUsingCashRules(LoanDTO loanDTO) {
+    @Transactional
+    @Override
+    public void createJournalEntriesForLoan(final Map<String, Object> accountingBridgeData) {
+
+        final boolean cashBasedAccountingEnabled = (Boolean) accountingBridgeData.get("cashBasedAccountingEnabled");
+        final boolean accrualBasedAccountingEnabled = (Boolean) accountingBridgeData.get("accrualBasedAccountingEnabled");
+
+        if (cashBasedAccountingEnabled) {
+            final LoanDTO loanDTO = populateDtoFromMap(accountingBridgeData, cashBasedAccountingEnabled, accrualBasedAccountingEnabled);
+
+            createJournalEntriesUsingCashRules(loanDTO);
+        } else if (accrualBasedAccountingEnabled) {
+            // TODO Vishwas: add accrual based accounting rules
+        }
+    }
+
+    private LoanDTO populateDtoFromMap(final Map<String, Object> accountingBridgeData, final boolean cashBasedAccountingEnabled,
+            final boolean accrualBasedAccountingEnabled) {
+        final Long loanId = (Long) accountingBridgeData.get("loanId");
+        final Long loanProductId = (Long) accountingBridgeData.get("loanProductId");
+        final Long officeId = (Long) accountingBridgeData.get("officeId");
+
+        final List<LoanTransactionDTO> newLoanTransactions = new ArrayList<LoanTransactionDTO>();
+
+        @SuppressWarnings("unchecked")
+        final List<Map<String, Object>> newTransactionsMap = (List<Map<String, Object>>) accountingBridgeData.get("newLoanTransactions");
+
+        for (Map<String, Object> map : newTransactionsMap) {
+            String transactionId = ((Long) map.get("id")).toString();
+            Date transactionDate = ((LocalDate) map.get("date")).toDate();
+            BigDecimal amount = (BigDecimal) map.get("amount");
+            BigDecimal principal = (BigDecimal) map.get("principalPortion");
+            BigDecimal interest = (BigDecimal) map.get("interestPortion");
+            BigDecimal fees = (BigDecimal) map.get("feeChargesPortion");
+            BigDecimal penalties = (BigDecimal) map.get("penaltyChargesPortion");
+            boolean disbursement = (Boolean) map.get("disbursement");
+            boolean repayment = (Boolean) map.get("repayment");
+            boolean repaymentAtDisbursement = (Boolean) map.get("repaymentAtDisbursement");
+            boolean contra = (Boolean) map.get("contra");
+            boolean writeOff = (Boolean) map.get("writeOff");
+
+            final LoanTransactionDTO transaction = new LoanTransactionDTO(transactionId, transactionDate, amount, principal, interest,
+                    fees, penalties, disbursement, repayment, repaymentAtDisbursement, contra, writeOff);
+
+            newLoanTransactions.add(transaction);
+
+        }
+
+        return new LoanDTO(loanId, loanProductId, officeId, cashBasedAccountingEnabled, accrualBasedAccountingEnabled, newLoanTransactions);
+    }
+
+    private void createJournalEntriesUsingCashRules(final LoanDTO loanDTO) {
         GLClosure latestGLClosure = glClosureRepository.getLatestGLClosureByBranch(loanDTO.getOfficeId());
         Office office = officeRepository.findOne(loanDTO.getOfficeId());
         Long loanProductId = loanDTO.getLoanProductId();
@@ -198,16 +247,9 @@ public class GLJournalEntryWritePlatformServiceJpaRepositoryImpl implements GLJo
      * 
      * In case the loan transaction is a contra, all debits are turned into
      * credits and vice versa
-     * 
-     * @param office
-     * @param loanProductId
-     * @param loanTransaction
-     * @param entryDate
-     * @param transactionId
-     * @param loanId
      */
-    private void createJournalEntriesForRepaymentOrContraUsingCashRules(Office office, Long loanProductId,
-            LoanTransactionDTO loanTransactionDTO, Date entryDate, String transactionId, Long loanId) {
+    private void createJournalEntriesForRepaymentOrContraUsingCashRules(final Office office, final Long loanProductId,
+            final LoanTransactionDTO loanTransactionDTO, final Date entryDate, String transactionId, final Long loanId) {
         BigDecimal principalAmount = loanTransactionDTO.getPrincipal();
         BigDecimal interestAmount = loanTransactionDTO.getInterest();
         BigDecimal feesAmount = loanTransactionDTO.getFees();
@@ -270,30 +312,27 @@ public class GLJournalEntryWritePlatformServiceJpaRepositoryImpl implements GLJo
         }
     }
 
-    private GLAccount getLinkedFinAccountForLoanProduct(Long loanProductId, CASH_ACCOUNTS_FOR_LOAN finAccountType) {
+    private GLAccount getLinkedFinAccountForLoanProduct(final Long loanProductId, final CASH_ACCOUNTS_FOR_LOAN finAccountType) {
         ProductToGLAccountMapping accountMapping = accountMappingRepository.findByProductIdAndProductTypeAndFinancialAccountType(
                 loanProductId, PortfolioProductType.LOAN.getValue(), finAccountType.getValue());
         return accountMapping.getGlAccount();
     }
 
-    private void createCreditJournalEntryForLoanProduct(Office office, GLAccount account, Long loanId, String transactionId,
-            Date entryDate, BigDecimal amount) {
+    private void createCreditJournalEntryForLoanProduct(final Office office, final GLAccount account, final Long loanId,
+            final String transactionId, final Date entryDate, final BigDecimal amount) {
         GLJournalEntry journalEntry = GLJournalEntry.createNew(office, account, transactionId, true, entryDate, JournalEntryType.CREDIT,
                 amount, null, PortfolioProductType.LOAN.toString(), loanId);
         glJournalEntryRepository.saveAndFlush(journalEntry);
     }
 
-    private void createDebitJournalEntryForLoanProduct(Office office, GLAccount account, Long loanId, String transactionId, Date entryDate,
-            BigDecimal amount) {
+    private void createDebitJournalEntryForLoanProduct(final Office office, final GLAccount account, final Long loanId,
+            final String transactionId, final Date entryDate, final BigDecimal amount) {
         GLJournalEntry journalEntry = GLJournalEntry.createNew(office, account, transactionId, true, entryDate, JournalEntryType.DEBIT,
                 amount, null, PortfolioProductType.LOAN.toString(), loanId);
         glJournalEntryRepository.saveAndFlush(journalEntry);
     }
 
-    /**
-     * @param command
-     */
-    private void validateBusinessRulesForJournalEntries(GLJournalEntryCommand command) {
+    private void validateBusinessRulesForJournalEntries(final GLJournalEntryCommand command) {
 
         /** check if date of Journal entry is valid ***/
         final LocalDate entryLocalDate = command.getEntryDate();
@@ -333,15 +372,9 @@ public class GLJournalEntryWritePlatformServiceJpaRepositoryImpl implements GLJo
                 GL_JOURNAL_ENTRY_INVALID_REASON.DEBIT_CREDIT_SUM_MISMATCH, null, null, null); }
     }
 
-    /**
-     * @param command
-     * @param office
-     * @param entryDate
-     * @param singleDebitOrCreditEntryCommands
-     * @param transactionId
-     */
-    private void saveAllDebitOrCreditEntries(GLJournalEntryCommand command, final Office office, Date entryDate,
-            SingleDebitOrCreditEntryCommand[] singleDebitOrCreditEntryCommands, String transactionId, JournalEntryType type) {
+    private void saveAllDebitOrCreditEntries(final GLJournalEntryCommand command, final Office office, final Date entryDate,
+            final SingleDebitOrCreditEntryCommand[] singleDebitOrCreditEntryCommands, final String transactionId,
+            final JournalEntryType type) {
         for (SingleDebitOrCreditEntryCommand singleDebitOrCreditEntryCommand : singleDebitOrCreditEntryCommands) {
             GLAccount glAccount = glAccountRepository.findOne(singleDebitOrCreditEntryCommand.getGlAccountId());
             if (glAccount == null) { throw new GLAccountNotFoundException(singleDebitOrCreditEntryCommand.getGlAccountId()); }
@@ -367,11 +400,7 @@ public class GLJournalEntryWritePlatformServiceJpaRepositoryImpl implements GLJo
         }
     }
 
-    /**
-     * @param command
-     * @param dve
-     */
-    private void handleJournalEntryDataIntegrityIssues(DataIntegrityViolationException dve) {
+    private void handleJournalEntryDataIntegrityIssues(final DataIntegrityViolationException dve) {
         Throwable realCause = dve.getMostSpecificCause();
         logger.error(dve.getMessage(), dve);
         throw new PlatformDataIntegrityException("error.msg.glJournalEntry.unknown.data.integrity.issue",
@@ -381,11 +410,8 @@ public class GLJournalEntryWritePlatformServiceJpaRepositoryImpl implements GLJo
     /**
      * TODO: Need a better implementation with guaranteed uniqueness (but not a
      * long UUID)...maybe something tied to system clock..
-     * 
-     * @return
      */
     private String generateTransactionId() {
         return RandomStringUtils.random(15, "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890");
     }
-
 }
