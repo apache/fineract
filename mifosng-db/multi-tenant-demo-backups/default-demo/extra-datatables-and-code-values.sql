@@ -98,3 +98,22 @@ VALUES
 ('extra_client_details', 'm_client'),
 ('extra_family_details', 'm_loan'),
 ('extra_loan_details', 'm_loan');
+
+
+-- make sure permissions created for registered datatables
+/* add a create, read, update and delete permission for each registered datatable */
+insert into m_permission(grouping, `code`, entity_name, action_name)
+select 'datatable', concat('CREATE_', r.registered_table_name), r.registered_table_name, 'CREATE'
+from x_registered_table r;
+
+insert into m_permission(grouping, `code`, entity_name, action_name)
+select 'datatable', concat('READ_', r.registered_table_name), r.registered_table_name, 'READ'
+from x_registered_table r;
+
+insert into m_permission(grouping, `code`, entity_name, action_name)
+select 'datatable', concat('UPDATE_', r.registered_table_name), r.registered_table_name, 'UPDATE'
+from x_registered_table r;
+
+insert into m_permission(grouping, `code`, entity_name, action_name)
+select 'datatable', concat('DELETE_', r.registered_table_name), r.registered_table_name, 'DELETE'
+from x_registered_table r;
