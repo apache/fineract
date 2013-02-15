@@ -1,0 +1,6 @@
+language: java
+jdk:
+  - openjdk6
+script: ./travis_build.sh
+notifications:
+  email: true
