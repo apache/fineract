@@ -52,12 +52,12 @@ public class GroupWritePlatformServiceJpaRepositoryImpl implements GroupWritePla
 
     @Autowired
     public GroupWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final GroupRepository groupRepository,
-            final ClientRepository clientRepository, final OfficeRepository officeRepository , final StaffRepository staffRepository) {
+            final ClientRepository clientRepository, final OfficeRepository officeRepository, final StaffRepository staffRepository) {
         this.context = context;
         this.groupRepository = groupRepository;
         this.clientRepository = clientRepository;
         this.officeRepository = officeRepository;
-        this.staffRepository = staffRepository; 
+        this.staffRepository = staffRepository;
     }
 
     @Transactional
@@ -66,35 +66,29 @@ public class GroupWritePlatformServiceJpaRepositoryImpl implements GroupWritePla
         try {
             this.context.authenticatedUser();
 
-            GroupCommandValidator validator = new GroupCommandValidator(command);
+            final GroupCommandValidator validator = new GroupCommandValidator(command);
             validator.validateForCreate();
 
-            Office groupOffice = this.officeRepository.findOne(command.getOfficeId());
-            
+            final Office groupOffice = this.officeRepository.findOne(command.getOfficeId());
+
             Staff loanOfficer = null;
-            Long loanOfficerId = command.getLoanOfficeId();
-            
+            final Long loanOfficerId = command.getLoanOfficeId();
+
+            if (groupOffice == null) { throw new OfficeNotFoundException(command.getOfficeId()); }
+
             if (loanOfficerId != null) {
-                // TODO Set the scope for staffRepository.findOneByOfficeId to a officer equal to groupOffice
-                loanOfficer = this.staffRepository.findOne(loanOfficerId);
-                if (loanOfficer == null) {
-                    throw new StaffNotFoundException(loanOfficerId);
-                } 
-            }
-            
-            
-            if (groupOffice == null) {
-                throw new OfficeNotFoundException(command.getOfficeId());
+                loanOfficer = this.staffRepository.findByOffice(loanOfficerId, command.getOfficeId());
+                if (loanOfficer == null) { throw new StaffNotFoundException(loanOfficerId); }
             }
 
             final Set<Client> clientMembers = assembleSetOfClients(command);
 
-            Group newGroup = Group.newGroup(groupOffice, loanOfficer , command.getName(), command.getExternalId(), clientMembers);
+            final Group newGroup = Group.newGroup(groupOffice, loanOfficer, command.getName(), command.getExternalId(), clientMembers);
 
             this.groupRepository.saveAndFlush(newGroup);
 
             return new CommandProcessingResult(newGroup.getId());
-        } catch (DataIntegrityViolationException dve) {
+        } catch (final DataIntegrityViolationException dve) {
             handleGroupDataIntegrityIssues(command, dve);
             return new CommandProcessingResult(Long.valueOf(-1));
         }
@@ -105,43 +99,70 @@ public class GroupWritePlatformServiceJpaRepositoryImpl implements GroupWritePla
     public CommandProcessingResult updateGroup(final GroupCommand command) {
 
         try {
-            context.authenticatedUser();
+            this.context.authenticatedUser();
 
-            GroupCommandValidator validator = new GroupCommandValidator(command);
+            final GroupCommandValidator validator = new GroupCommandValidator(command);
             validator.validateForUpdate();
 
-            Group groupForUpdate = this.groupRepository.findOne(command.getId());
-            if (groupForUpdate == null || groupForUpdate.isDeleted()) {
-                throw new GroupNotFoundException(command.getId());
-            }
+            final Group groupForUpdate = this.groupRepository.findOne(command.getId());
+            if (groupForUpdate == null || groupForUpdate.isDeleted()) { throw new GroupNotFoundException(command.getId()); }
 
             Office groupOffice = null;
-            Long officeId = command.getOfficeId();
-            if (command.isOfficeIdChanged() && officeId != null) {
-                groupOffice = this.officeRepository.findOne(officeId);
-                if (groupOffice == null) {
-                    throw new OfficeNotFoundException(command.getOfficeId());
-                }
-            }
-            
+            final Long officeId = command.getOfficeId();
             Staff loanOfficer = null;
-            Long loanOfficerId = command.getLoanOfficeId();
-            if (command.isLoanOfficerChanged() && loanOfficerId != null) {
-                loanOfficer = this.staffRepository.findOne(loanOfficerId);
-                if (loanOfficer == null) {
-                    throw new LoanOfficerNotFoundException(loanOfficerId);
+            final Long loanOfficerId = command.getLoanOfficeId();
+
+            if (command.isOfficeIdChanged() && command.isLoanOfficerChanged()) {
+                /**
+                 * Scenario: Both Office and loan officer are changed, check new
+                 * loan officer is present in new office
+                 */
+                if (officeId != null) {
+                    groupOffice = this.officeRepository.findOne(officeId);
+                    if (groupOffice == null) { throw new OfficeNotFoundException(command.getOfficeId()); }
+                }
+                if (loanOfficerId != null) {
+                    loanOfficer = this.staffRepository.findByOffice(loanOfficerId, officeId);
+                    if (loanOfficer == null) { throw new LoanOfficerNotFoundException(loanOfficerId); }
+                }
+
+            } else if (command.isOfficeIdChanged()) {
+                /**
+                 * Scenario: Only Office is changed, check new office has
+                 * present loan officer, This situation is not practical as loan
+                 * officer can't be present in two offices
+                 */
+                // TODO When office is changed need to make sure all the loan
+                // officer at loan level are also updated or verified
+                
+                if (officeId != null) {
+                    groupOffice = this.officeRepository.findOne(officeId);
+                    if (groupOffice == null) { throw new OfficeNotFoundException(command.getOfficeId()); }
+                }
+                if (loanOfficerId != null) {
+                    loanOfficer = this.staffRepository.findByOffice(loanOfficerId, groupForUpdate.getOfficeId());
+                    if (loanOfficer == null) { throw new LoanOfficerNotFoundException(loanOfficerId); }
+                }
+
+            } else if (command.isLoanOfficerChanged()) {
+                /**
+                 * Scenario: Only Loan Officer is changed, check new new loan
+                 * officer is in present assigned office
+                 */
+                if (loanOfficerId != null) {
+                    loanOfficer = this.staffRepository.findByOffice(loanOfficerId, groupForUpdate.getOfficeId());
+                    if (loanOfficer == null) { throw new LoanOfficerNotFoundException(loanOfficerId); }
                 }
             }
-            
 
             final Set<Client> clientMembers = assembleSetOfClients(command);
 
-            groupForUpdate.update(command, groupOffice, loanOfficer , clientMembers);
+            groupForUpdate.update(command, groupOffice, loanOfficer, clientMembers);
 
-            groupRepository.saveAndFlush(groupForUpdate);
+            this.groupRepository.saveAndFlush(groupForUpdate);
 
             return new CommandProcessingResult(groupForUpdate.getId());
-        } catch (DataIntegrityViolationException dve) {
+        } catch (final DataIntegrityViolationException dve) {
             handleGroupDataIntegrityIssues(command, dve);
             return new CommandProcessingResult(Long.valueOf(-1));
         }
@@ -149,14 +170,65 @@ public class GroupWritePlatformServiceJpaRepositoryImpl implements GroupWritePla
 
     @Transactional
     @Override
+
+    public CommandProcessingResult assignLoanOfficer(final GroupCommand command) {
+
+        this.context.authenticatedUser();
+
+        final GroupCommandValidator validator = new GroupCommandValidator(command);
+        validator.validateForLoanOfficerUpdate();
+
+        final Group groupForUpdate = this.groupRepository.findOne(command.getId());
+        if (groupForUpdate == null || groupForUpdate.isDeleted()) { throw new GroupNotFoundException(command.getId()); }
+
+        Staff loanOfficer = null;
+        final Long loanOfficerId = command.getLoanOfficeId();
+        if (command.isLoanOfficerChanged() && loanOfficerId != null) {
+            loanOfficer = this.staffRepository.findByOffice(loanOfficerId, groupForUpdate.getOfficeId());
+            if (loanOfficer == null) { throw new LoanOfficerNotFoundException(loanOfficerId); }
+        }
+
+        groupForUpdate.assigLoanOfficer(command, loanOfficer);
+
+        this.groupRepository.saveAndFlush(groupForUpdate);
+
+        return new CommandProcessingResult(groupForUpdate.getId());
+    }
+
+    @Transactional
+    @Override
+    public CommandProcessingResult unassignLoanOfficer(final GroupCommand command) {
+
+        this.context.authenticatedUser();
+
+        final GroupCommandValidator validator = new GroupCommandValidator(command);
+        validator.validateForLoanOfficerUpdate();
+
+        final Group groupForUpdate = this.groupRepository.findOne(command.getId());
+        if (groupForUpdate == null || groupForUpdate.isDeleted()) { throw new GroupNotFoundException(command.getId()); }
+
+        final Long loanOfficerId = command.getLoanOfficeId();
+        final Long presentLoanOfficerId = groupForUpdate.getLoanOfficerId();
+
+        if (command.isLoanOfficerChanged() && loanOfficerId != null) {
+            if (!loanOfficerId.equals(presentLoanOfficerId)) { throw new LoanOfficerNotFoundException(loanOfficerId); }
+        }
+
+        groupForUpdate.unassigLoanOfficer(command);
+
+        this.groupRepository.saveAndFlush(groupForUpdate);
+
+        return new CommandProcessingResult(groupForUpdate.getId());
+    }
+
+    @Transactional
+    @Override
     public CommandProcessingResult deleteGroup(final Long groupId) {
 
-        context.authenticatedUser();
+        this.context.authenticatedUser();
 
-        Group groupForDelete = this.groupRepository.findOne(groupId);
-        if (groupForDelete == null || groupForDelete.isDeleted()) {
-            throw new GroupNotFoundException(groupId);
-        }
+        final Group groupForDelete = this.groupRepository.findOne(groupId);
+        if (groupForDelete == null || groupForDelete.isDeleted()) { throw new GroupNotFoundException(groupId); }
         groupForDelete.delete();
         this.groupRepository.save(groupForDelete);
 
@@ -165,18 +237,16 @@ public class GroupWritePlatformServiceJpaRepositoryImpl implements GroupWritePla
 
     private Set<Client> assembleSetOfClients(final GroupCommand command) {
 
-        Set<Client> clientMembers = new HashSet<Client>();
-        String[] clientMembersArray = command.getClientMembers();
+        final Set<Client> clientMembers = new HashSet<Client>();
+        final String[] clientMembersArray = command.getClientMembers();
 
         if (command.isClientMembersChanged() && !ObjectUtils.isEmpty(clientMembersArray)) {
-            for (String clientId : clientMembersArray) {
+            for (final String clientId : clientMembersArray) {
                 final Long id = Long.valueOf(clientId);
-                Client client = this.clientRepository.findOne(id);
-                if (client == null || client.isDeleted()) {
-                    throw new ClientNotFoundException(id);
-                }
-                if (!client.isOfficeIdentifiedBy(command.getOfficeId())){
-                    String errorMessage = "Group and Client must have the same office.";
+                final Client client = this.clientRepository.findOne(id);
+                if (client == null || client.isDeleted()) { throw new ClientNotFoundException(id); }
+                if (!client.isOfficeIdentifiedBy(command.getOfficeId())) {
+                    final String errorMessage = "Group and Client must have the same office.";
                     throw new InvalidOfficeException("client", "attach.to.group", errorMessage);
                 }
                 clientMembers.add(client);
@@ -187,18 +257,20 @@ public class GroupWritePlatformServiceJpaRepositoryImpl implements GroupWritePla
     }
 
     /*
-      * Guaranteed to throw an exception no matter what the data integrity issue is.
-      */
-    private void handleGroupDataIntegrityIssues(final GroupCommand command, final DataIntegrityViolationException dve)  {
+     * Guaranteed to throw an exception no matter what the data integrity issue
+     * is.
+     */
+    private void handleGroupDataIntegrityIssues(final GroupCommand command, final DataIntegrityViolationException dve) {
 
-        Throwable realCause = dve.getMostSpecificCause();
+        final Throwable realCause = dve.getMostSpecificCause();
         if (realCause.getMessage().contains("external_id")) {
-            throw new PlatformDataIntegrityException("error.msg.group.duplicate.externalId", "Group with externalId {0} already exists", "externalId", command.getExternalId());
-        } else if (realCause.getMessage().contains("name")) {
-            throw new PlatformDataIntegrityException("error.msg.group.duplicate.name", "Group with name {0} already exists", "name", command.getName());
-        }
+            throw new PlatformDataIntegrityException("error.msg.group.duplicate.externalId", "Group with externalId {0} already exists",
+                    "externalId", command.getExternalId());
+        } else if (realCause.getMessage().contains("name")) { throw new PlatformDataIntegrityException("error.msg.group.duplicate.name",
+                "Group with name {0} already exists", "name", command.getName()); }
 
         logger.error(dve.getMessage(), dve);
-        throw new PlatformDataIntegrityException("error.msg.group.unknown.data.integrity.issue", "Unknown data integrity issue with resource.");
+        throw new PlatformDataIntegrityException("error.msg.group.unknown.data.integrity.issue",
+                "Unknown data integrity issue with resource.");
     }
 }

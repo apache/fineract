@@ -34,7 +34,7 @@ public class Group extends AbstractPersistable<Long> {
 
     @SuppressWarnings("unused")
     @ManyToOne
-    @JoinColumn(name = "loan_officer_id", nullable = false)
+    @JoinColumn(name = "loan_officer_id", nullable = true)
     private Staff loanOfficer;
 
     @Column(name = "name", length = 100, unique = true)
@@ -78,6 +78,14 @@ public class Group extends AbstractPersistable<Long> {
         }
     }
 
+    public Long getOfficeId() {
+        return this.office.getId();
+    }
+
+    public Long getLoanOfficerId() {
+        return this.loanOfficer.getId();
+    }
+
     public void update(final GroupCommand command, final Office groupOffice, final Staff newLoanOfficer, final Set<Client> clientMembers) {
         if (command.isExternalIdChanged()) {
             this.externalId = command.getExternalId();
@@ -97,6 +105,18 @@ public class Group extends AbstractPersistable<Long> {
 
         if (clientMembers != null && command.isClientMembersChanged()) {
             this.clientMembers = clientMembers;
+        }
+    }
+
+    public void assigLoanOfficer(final GroupCommand command , final Staff newLoanOfficer){
+        if (command.isLoanOfficerChanged()) {
+            this.loanOfficer = newLoanOfficer;
+        }
+    }
+
+    public void unassigLoanOfficer(GroupCommand command) {
+        if (command.isLoanOfficerChanged()) {
+            this.loanOfficer = null;
         }
     }
 
@@ -123,4 +143,5 @@ public class Group extends AbstractPersistable<Long> {
     public boolean isDeleted() {
         return deleted;
     }
+
 }

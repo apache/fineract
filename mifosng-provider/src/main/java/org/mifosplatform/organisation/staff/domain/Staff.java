@@ -24,6 +24,7 @@ import org.springframework.data.jpa.domain.AbstractPersistable;
 @Table(name = "m_staff", uniqueConstraints = { @UniqueConstraint(columnNames = { "display_name" }, name = "display_name") })
 public class Staff extends AbstractPersistable<Long> {
 
+    
     @Column(name = "firstname", length = 50)
     private String firstname;
 

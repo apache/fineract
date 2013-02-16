@@ -59,4 +59,21 @@ public class GroupCommandValidator {
         }
     }
     
+   public void validateForLoanOfficerUpdate() {
+        
+        List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        
+        DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("group");
+        
+        baseDataValidator.reset().parameter("id").value(command.getId()).notNull();
+
+        if (command.isLoanOfficerChanged()) {
+            baseDataValidator.reset().parameter("loanOfficerId").value(command.getLoanOfficeId()).notNull().integerGreaterThanZero();
+        }
+
+        if (!dataValidationErrors.isEmpty()) {
+            throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.", dataValidationErrors);
+        }
+    }
+    
 }

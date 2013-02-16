@@ -24,9 +24,12 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.commons.lang.StringUtils;
+import org.mifosplatform.commands.domain.CommandWrapper;
+import org.mifosplatform.commands.service.CommandWrapperBuilder;
 import org.mifosplatform.infrastructure.core.api.ApiParameterHelper;
 import org.mifosplatform.infrastructure.core.api.ApiRequestParameterHelper;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
+import org.mifosplatform.infrastructure.core.exception.UnrecognizedQueryParamException;
 import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.mifosplatform.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
@@ -165,6 +168,32 @@ public class GroupsApiResource {
 
         return this.toApiJsonSerializer.serialize(entityIdentifier);
     }
+    
+    @POST
+    @Path("{groupId}/command/assign_loanofficer")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String assignLoanOfficer(@PathParam("groupId") final Long groupId, final String jsonRequestBody) {
+
+        final GroupCommand command = this.apiDataConversionService.convertJsonToGroupCommand(groupId, jsonRequestBody);
+
+        CommandProcessingResult entityIdentifier = this.groupWritePlatformService.assignLoanOfficer(command);
+
+        return this.toApiJsonSerializer.serialize(entityIdentifier);
+    }
+
+    @POST
+    @Path("{groupId}/command/unassign_loanofficer")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String unassignLoanOfficer(@PathParam("groupId") final Long groupId, final String jsonRequestBody) {
+
+        final GroupCommand command = this.apiDataConversionService.convertJsonToGroupCommand(groupId, jsonRequestBody);
+
+        CommandProcessingResult entityIdentifier = this.groupWritePlatformService.unassignLoanOfficer(command);
+
+        return this.toApiJsonSerializer.serialize(entityIdentifier);
+    }
 
     @PUT
     @Path("{groupId}")
@@ -242,5 +271,9 @@ public class GroupsApiResource {
         }
 
         return extraCriteria;
+    }
+    
+    private boolean is(final String commandParam, final String commandValue) {
+        return StringUtils.isNotBlank(commandParam) && commandParam.trim().equalsIgnoreCase(commandValue);
     }
 }

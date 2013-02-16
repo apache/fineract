@@ -75,7 +75,7 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
         final Set<String> modifiedParameters = new HashSet<String>();
 
         final Long officeId = extractLongParameter("officeId", requestMap, modifiedParameters);
-        final Long loanOfficeId = extractLongParameter("loanOfficerId", requestMap, modifiedParameters);
+        final Long loanOfficerId = extractLongParameter("loanOfficerId", requestMap, modifiedParameters);
         final String externalId = extractStringParameter("externalId", requestMap, modifiedParameters);
         final String name = extractStringParameter("name", requestMap, modifiedParameters);
 
@@ -97,7 +97,7 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
         }
         //
 
-        return new GroupCommand(modifiedParameters, resourceIdentifier, externalId, name, officeId, loanOfficeId , clientMembers);
+        return new GroupCommand(modifiedParameters, resourceIdentifier, externalId, name, officeId, loanOfficerId , clientMembers);
     }
 
     private void checkForUnsupportedParameters(Map<String, ?> requestMap, Set<String> supportedParams) {

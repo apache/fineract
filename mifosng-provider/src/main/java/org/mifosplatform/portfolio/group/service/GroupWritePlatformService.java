@@ -19,5 +19,11 @@ public interface GroupWritePlatformService {
 
     @PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'DELETE_GROUP')")
     CommandProcessingResult deleteGroup(Long groupId);
+
+    @PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'UPDATE_GROUP')")
+    CommandProcessingResult assignLoanOfficer(GroupCommand command);
+
+    @PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'UPDATE_GROUP')")
+    CommandProcessingResult unassignLoanOfficer(GroupCommand command);
     
 }
