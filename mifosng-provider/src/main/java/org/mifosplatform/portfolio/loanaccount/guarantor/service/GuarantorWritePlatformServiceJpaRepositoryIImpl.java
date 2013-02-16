@@ -100,7 +100,7 @@ public class GuarantorWritePlatformServiceJpaRepositoryIImpl implements Guaranto
             }
 
             if (!changesOnly.isEmpty()) {
-                this.guarantorRepository.save(guarantorForUpdate);
+                this.guarantorRepository.saveAndFlush(guarantorForUpdate);
             }
 
             return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withOfficeId(guarantorForUpdate.getOfficeId())

@@ -14,9 +14,9 @@ import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
-import org.mifosplatform.accounting.api.data.LoanDTO;
-import org.mifosplatform.accounting.api.data.LoanTransactionDTO;
-import org.mifosplatform.accounting.service.GLJournalEntryWritePlatformService;
+import org.mifosplatform.accounting.glaccount.data.LoanDTO;
+import org.mifosplatform.accounting.glaccount.data.LoanTransactionDTO;
+import org.mifosplatform.accounting.journalentry.service.JournalEntryWritePlatformService;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
@@ -75,7 +75,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     private final ChargeRepository chargeRepository;
     private final LoanChargeRepository loanChargeRepository;
     private final ApplicationCurrencyRepository applicationCurrencyRepository;
-    private final GLJournalEntryWritePlatformService journalEntryWritePlatformService;
+    private final JournalEntryWritePlatformService journalEntryWritePlatformService;
 
     @Autowired
     public LoanWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
@@ -86,7 +86,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             final LoanRepository loanRepository, final LoanTransactionRepository loanTransactionRepository,
             final NoteRepository noteRepository, final ChargeRepository chargeRepository, final LoanChargeRepository loanChargeRepository,
             final ApplicationCurrencyRepository applicationCurrencyRepository,
-            final GLJournalEntryWritePlatformService journalEntryWritePlatformService) {
+            final JournalEntryWritePlatformService journalEntryWritePlatformService) {
         this.context = context;
         this.loanStateTransitionCommandFromApiJsonDeserializer = loanStateTransitionCommandFromApiJsonDeserializer;
         this.loanTransactionCommandFromApiJsonDeserializer = loanTransactionCommandFromApiJsonDeserializer;

@@ -22,6 +22,7 @@ public class CommandWrapper {
     private final Long apptableId;
     private final Long datatableId;
     private final Long codeId;
+    private final String transactionId;
 
     public static CommandWrapper wrap(final String actionName, final String enityName, final Long resourceId) {
         return new CommandWrapper(null, actionName, enityName, resourceId);
@@ -47,11 +48,12 @@ public class CommandWrapper {
         this.codeId = null;
         this.href = null;
         this.json = null;
+        this.transactionId = null;
     }
 
     public CommandWrapper(final Long officeId, final Long groupId, final Long clientId, final Long loanId, final String actionName,
             final String entityName, final Long entityId, final Long apptableId, final Long datatableId, final Long codeId, final String href,
-            final String json) {
+            final String json, final String transactionId) {
         this.commandId = null;
         this.officeId = officeId;
         this.groupId = groupId;
@@ -66,6 +68,7 @@ public class CommandWrapper {
         this.codeId = codeId;
         this.href = href;
         this.json = json;
+        this.transactionId = transactionId;
     }
 
     public Long commandId() {
@@ -106,6 +109,10 @@ public class CommandWrapper {
 
     public String getJson() {
         return this.json;
+    }
+    
+    public String getTransactionId() {
+        return this.transactionId;
     }
 
     public String getEntityName() {
@@ -192,6 +199,22 @@ public class CommandWrapper {
     
     public boolean isGuarantorResource() {
         return this.entityName.equalsIgnoreCase("GUARANTOR");
+    }
+    
+    public boolean isGLAccountResource() {
+        return this.entityName.equalsIgnoreCase("GLACCOUNT");
+    }
+    
+    public boolean isGLClosureResource() {
+        return this.entityName.equalsIgnoreCase("GLCLOSURE");
+    }
+    
+    public boolean isJournalEntryResource() {
+        return this.entityName.equalsIgnoreCase("JOURNALENTRY");
+    }
+    
+    public boolean isRevertJournalEntry() {
+        return this.actionName.equalsIgnoreCase("REVERSE") && this.entityName.equalsIgnoreCase("JOURNALENTRY");
     }
 
     public boolean isFundResource() {

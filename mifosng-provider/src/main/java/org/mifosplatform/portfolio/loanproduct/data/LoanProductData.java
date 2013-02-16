@@ -11,7 +11,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import org.mifosplatform.accounting.api.data.GLAccountData;
+import org.mifosplatform.accounting.glaccount.data.GLAccountData;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.mifosplatform.portfolio.charge.data.ChargeData;

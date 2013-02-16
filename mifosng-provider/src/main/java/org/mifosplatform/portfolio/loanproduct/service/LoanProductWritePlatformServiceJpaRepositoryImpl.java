@@ -9,7 +9,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.mifosplatform.accounting.service.ProductToGLAccountMappingWritePlatformService;
+import org.mifosplatform.accounting.producttoaccountmapping.service.ProductToGLAccountMappingWritePlatformService;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
@@ -161,7 +161,7 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
             }
             
             // accounting related changes
-            boolean accountingTypeChanged = changes.containsKey("accountingType");
+            boolean accountingTypeChanged = changes.containsKey("accountingRule");
             final Map<String, Object> accountingMappingChanges = accountMappingWritePlatformService.updateLoanProductToGLAccountMapping(
                     product.getId(), command, accountingTypeChanged, product.getAccountingType());
             changes.putAll(accountingMappingChanges);
