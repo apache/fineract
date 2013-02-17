@@ -21,10 +21,11 @@ public class CommandWrapperBuilder {
     private Long apptableId;
     private Long datatableId;
     private Long codeId;
+    private String transactionId;
 
     public CommandWrapper build() {
         return new CommandWrapper(this.officeId, this.groupId, this.clientId, this.loanId, this.actionName, this.entityName, this.entityId,
-                this.apptableId, this.datatableId, this.codeId, this.href, this.json);
+                this.apptableId, this.datatableId, this.codeId, this.href, this.json, this.transactionId);
     }
 
     // public CommandWrapperBuilder withEntityId(final Long withId) {
@@ -597,6 +598,71 @@ public class CommandWrapperBuilder {
         this.entityId = codeValueId;
         this.codeId = codeId;
         this.href = "/codes/" + codeId + "/codevalues/" + codeValueId;
+        return this;
+    }
+
+    public CommandWrapperBuilder createGLClosure() {
+        this.actionName = "CREATE";
+        this.entityName = "GLCLOSURE";
+        this.entityId = null;
+        this.href = "/glclosures/template";
+        return this;
+    }
+
+    public CommandWrapperBuilder updateGLClosure(final Long glClosureId) {
+        this.actionName = "UPDATE";
+        this.entityName = "GLCLOSURE";
+        this.entityId = glClosureId;
+        this.href = "/glclosures/" + glClosureId;
+        return this;
+    }
+
+    public CommandWrapperBuilder deleteGLClosure(final Long glClosureId) {
+        this.actionName = "DELETE";
+        this.entityName = "GLCLOSURE";
+        this.entityId = glClosureId;
+        this.href = "/glclosures/" + glClosureId;
+        return this;
+    }
+
+    public CommandWrapperBuilder createGLAccount() {
+        this.actionName = "CREATE";
+        this.entityName = "GLACCOUNT";
+        this.entityId = null;
+        this.href = "/glaccounts/template";
+        return this;
+    }
+
+    public CommandWrapperBuilder updateGLAccount(final Long glAccountId) {
+        this.actionName = "UPDATE";
+        this.entityName = "GLACCOUNT";
+        this.entityId = glAccountId;
+        this.href = "/glaccounts/" + glAccountId;
+        return this;
+    }
+
+    public CommandWrapperBuilder deleteGLAccount(final Long glAccountId) {
+        this.actionName = "DELETE";
+        this.entityName = "GLACCOUNT";
+        this.entityId = glAccountId;
+        this.href = "/glaccounts/" + glAccountId;
+        return this;
+    }
+    
+    public CommandWrapperBuilder createJournalEntry() {
+        this.actionName = "CREATE";
+        this.entityName = "JOURNALENTRY";
+        this.entityId = null;
+        this.href = "/journalentries/template";
+        return this;
+    }
+    
+    public CommandWrapperBuilder reverseJournalEntry(final String transactionId) {
+        this.actionName = "REVERSE";
+        this.entityName = "JOURNALENTRY";
+        this.entityId = null;
+        this.transactionId = transactionId;
+        this.href = "/journalentries/"+transactionId;
         return this;
     }
 }

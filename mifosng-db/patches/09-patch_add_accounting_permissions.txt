@@ -1,0 +1,23 @@
+INSERT INTO `m_permission` (`grouping`, `code`, `entity_name`, `action_name`, `can_maker_checker`) 
+VALUES ('accounting', 'CREATE_GLACCOUNT', 'GLACCOUNT', 'CREATE', 1);
+
+INSERT INTO `m_permission` (`grouping`, `code`, `entity_name`, `action_name`, `can_maker_checker`) 
+VALUES ('accounting', 'UPDATE_GLACCOUNT', 'GLACCOUNT', 'UPDATE', 1);
+
+INSERT INTO `m_permission` (`grouping`, `code`, `entity_name`, `action_name`, `can_maker_checker`) 
+VALUES ('accounting', 'DELETE_GLACCOUNT', 'GLACCOUNT', 'DELETE', 1);
+
+INSERT INTO `m_permission` (`grouping`, `code`, `entity_name`, `action_name`, `can_maker_checker`) 
+VALUES ('accounting', 'CREATE_GLCLOSURE', 'GLCLOSURE', 'CREATE', 1);
+
+INSERT INTO `m_permission` (`grouping`, `code`, `entity_name`, `action_name`, `can_maker_checker`) 
+VALUES ('accounting', 'UPDATE_GLCLOSURE', 'GLCLOSURE', 'UPDATE', 1);
+
+INSERT INTO `m_permission` (`grouping`, `code`, `entity_name`, `action_name`, `can_maker_checker`) 
+VALUES ('accounting', 'DELETE_GLCLOSURE', 'GLCLOSURE', 'DELETE', 1);
+
+INSERT INTO `m_permission` (`grouping`, `code`, `entity_name`, `action_name`, `can_maker_checker`) 
+VALUES ('accounting', 'CREATE_JOURNALENTRY', 'JOURNALENTRY', 'CREATE', 1);
+
+INSERT INTO `m_permission` (`grouping`, `code`, `entity_name`, `action_name`, `can_maker_checker`) 
+VALUES ('accounting', 'REVERSE_JOURNALENTRY', 'JOURNALENTRY', 'REVERSE', 1);

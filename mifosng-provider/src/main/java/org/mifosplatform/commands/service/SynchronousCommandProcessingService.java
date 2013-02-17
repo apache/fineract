@@ -309,6 +309,34 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
             } else if (wrapper.isWaiveLoanCharge()) {
                 handler = applicationContext.getBean("waiveLoanChargeCommandHandler", NewCommandSourceHandler.class);
             }
+        } else if (wrapper.isGLAccountResource()) {
+            if (wrapper.isCreate()) {
+                handler = applicationContext.getBean("createGLAccountCommandHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isUpdate()) {
+                handler = applicationContext.getBean("updateGLAccountCommandHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isDelete()) {
+                handler = applicationContext.getBean("deleteGLAccountCommandHandler", NewCommandSourceHandler.class);
+            } else {
+                throw new UnsupportedCommandException(wrapper.commandName());
+            }
+        } else if (wrapper.isGLClosureResource()) {
+            if (wrapper.isCreate()) {
+                handler = applicationContext.getBean("createGLClosureCommandHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isUpdate()) {
+                handler = applicationContext.getBean("updateGLClosureCommandHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isDelete()) {
+                handler = applicationContext.getBean("deleteGLClosureCommandHandler", NewCommandSourceHandler.class);
+            } else {
+                throw new UnsupportedCommandException(wrapper.commandName());
+            }
+        } else if (wrapper.isJournalEntryResource()) {
+            if (wrapper.isCreate()) {
+                handler = applicationContext.getBean("createJournalEntryCommandHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isRevertJournalEntry()) {
+                handler = applicationContext.getBean("reverseJournalEntryCommandHandler", NewCommandSourceHandler.class);
+            } else {
+                throw new UnsupportedCommandException(wrapper.commandName());
+            }
         } else {
             throw new UnsupportedCommandException(wrapper.commandName());
         }

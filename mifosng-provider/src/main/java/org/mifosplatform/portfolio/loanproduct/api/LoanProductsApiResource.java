@@ -24,10 +24,10 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
-import org.mifosplatform.accounting.api.data.GLAccountData;
-import org.mifosplatform.accounting.domain.GLAccountType;
-import org.mifosplatform.accounting.service.GLAccountReadPlatformService;
-import org.mifosplatform.accounting.service.ProductToGLAccountMappingReadPlatformService;
+import org.mifosplatform.accounting.glaccount.data.GLAccountData;
+import org.mifosplatform.accounting.glaccount.domain.GLAccountType;
+import org.mifosplatform.accounting.glaccount.service.GLAccountReadPlatformService;
+import org.mifosplatform.accounting.producttoaccountmapping.service.ProductToGLAccountMappingReadPlatformService;
 import org.mifosplatform.commands.domain.CommandWrapper;
 import org.mifosplatform.commands.service.CommandWrapperBuilder;
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;

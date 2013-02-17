@@ -160,7 +160,7 @@ public class LoanProduct extends AbstractPersistable<Long> {
 
         final Map<String, Object> actualChanges = this.loanProductRelatedDetail.update(command, aprCalculator);
 
-        final String accountingTypeParamName = "accountingType";
+        final String accountingTypeParamName = "accountingRule";
         if (command.isChangeInIntegerParameterNamed(accountingTypeParamName, this.accountingType)) {
             final Integer newValue = command.integerValueOfParameterNamed(accountingTypeParamName);
             actualChanges.put(accountingTypeParamName, newValue);

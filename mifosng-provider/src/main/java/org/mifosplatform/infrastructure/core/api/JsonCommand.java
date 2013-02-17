@@ -39,22 +39,25 @@ public final class JsonCommand {
     private final Long apptableId;
     private final Long datatableId;
     private final Long codeId;
+    private final String transactionId;
 
     public static JsonCommand from(final String jsonCommand, final JsonElement parsedCommand, final FromJsonHelper fromApiJsonHelper,
             final String entityName, final Long resourceId, final Long groupId, final Long clientId, final Long loanId,
-            final Long apptableId, final Long datatableId, final Long codeId) {
+            final Long apptableId, final Long datatableId, final Long codeId, final String transactionId) {
         return new JsonCommand(null, jsonCommand, parsedCommand, fromApiJsonHelper, entityName, resourceId, groupId, clientId, loanId,
-                apptableId, datatableId, codeId);
+                apptableId, datatableId, codeId, transactionId);
     }
 
     public static JsonCommand fromExistingCommand(final Long commandId, final String jsonCommand, final JsonElement parsedCommand,
             final FromJsonHelper fromApiJsonHelper, final Long resourceId) {
-        return new JsonCommand(commandId, jsonCommand, parsedCommand, fromApiJsonHelper, null, resourceId, null, null, null, null, null, null);
+        return new JsonCommand(commandId, jsonCommand, parsedCommand, fromApiJsonHelper, null, resourceId, null, null, null, null, null,
+                null, null);
     }
 
     public JsonCommand(final Long commandId, final String jsonCommand, final JsonElement parsedCommand,
             final FromJsonHelper fromApiJsonHelper, final String entityName, final Long resourceId, final Long groupId,
-            final Long clientId, final Long loanId, final Long apptableId, final Long datatableId, final Long codeId) {
+            final Long clientId, final Long loanId, final Long apptableId, final Long datatableId, final Long codeId,
+            final String transactionId) {
         this.commandId = commandId;
         this.jsonCommand = jsonCommand;
         this.parsedCommand = parsedCommand;
@@ -67,6 +70,7 @@ public final class JsonCommand {
         this.apptableId = apptableId;
         this.datatableId = datatableId;
         this.codeId = codeId;
+        this.transactionId = transactionId;
     }
 
     public String json() {
@@ -109,10 +113,15 @@ public final class JsonCommand {
         return this.datatableId;
     }
 
-    public Long getCodeId(){
+    public Long getCodeId() {
         return this.codeId;
     }
     
+    public String getTransactionId(){
+        return this.transactionId;
+    }
+    
+
     private boolean differenceExists(final LocalDate baseValue, final LocalDate workingCopyValue) {
         boolean differenceExists = false;
 
@@ -207,13 +216,13 @@ public final class JsonCommand {
     public Long longValueOfParameterNamed(final String parameterName) {
         return this.fromApiJsonHelper.extractLongNamed(parameterName, parsedCommand);
     }
-    
+
     public boolean isChangeInDateParameterNamed(final String parameterName, final Date existingValue) {
         LocalDate localDate = null;
         if (existingValue != null) {
             localDate = LocalDate.fromDateFields(existingValue);
         }
-        return isChangeInLocalDateParameterNamed( parameterName, localDate);
+        return isChangeInLocalDateParameterNamed(parameterName, localDate);
     }
 
     public boolean isChangeInLocalDateParameterNamed(final String parameterName, final LocalDate existingValue) {
@@ -228,7 +237,7 @@ public final class JsonCommand {
     public LocalDate localDateValueOfParameterNamed(final String parameterName) {
         return this.fromApiJsonHelper.extractLocalDateNamed(parameterName, parsedCommand);
     }
-    
+
     public Date DateValueOfParameterNamed(final String parameterName) {
         LocalDate localDate = this.fromApiJsonHelper.extractLocalDateNamed(parameterName, parsedCommand);
         if (localDate == null) { return null; }
@@ -274,7 +283,7 @@ public final class JsonCommand {
     public Integer integerValueOfParameterNamed(final String parameterName) {
         return this.fromApiJsonHelper.extractIntegerWithLocaleNamed(parameterName, parsedCommand);
     }
-    
+
     public boolean isChangeInIntegerSansLocaleParameterNamed(final String parameterName, final Integer existingValue) {
         boolean isChanged = false;
         if (parameterExists(parameterName)) {
@@ -283,12 +292,10 @@ public final class JsonCommand {
         }
         return isChanged;
     }
-    
+
     public Integer integerValueSansLocaleOfParameterNamed(final String parameterName) {
         return this.fromApiJsonHelper.extractIntegerSansLocaleNamed(parameterName, parsedCommand);
     }
-    
-    
 
     public boolean isChangeInBooleanParameterNamed(final String parameterName, final Boolean existingValue) {
         boolean isChanged = false;

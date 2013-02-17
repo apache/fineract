@@ -41,7 +41,7 @@
 	
     <jpa:repositories base-package="org.mifosplatform.commands.domain" />
     <jpa:repositories base-package="org.mifosplatform.infrastructure.*.domain" />
-    <jpa:repositories base-package="org.mifosplatform.accounting.domain" />
+    <jpa:repositories base-package="org.mifosplatform.accounting.*.domain" />
     <jpa:repositories base-package="org.mifosplatform.useradministration.domain" />
     <jpa:repositories base-package="org.mifosplatform.organisation.*.domain" />
     <jpa:repositories base-package="org.mifosplatform.portfolio.*" />
