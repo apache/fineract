@@ -131,7 +131,7 @@ public class SavingAccount extends AbstractAuditableCustom<AppUser, Long> {
     private BigDecimal outstandingAmount;
 
     @Column(name = "is_preclosure_allowed", nullable = false)
-    private boolean preClosureAllowed = false;
+    private final boolean preClosureAllowed = false;
 
     @Column(name = "is_deleted", nullable = false)
     private boolean deleted = false;
@@ -197,20 +197,20 @@ public class SavingAccount extends AbstractAuditableCustom<AppUser, Long> {
         //
     }
 
-    public static SavingAccount openNew(Client client, SavingProduct product, String externalId, Money savingsDeposit,
-            BigDecimal reccuringInterestRate, BigDecimal savingInterestRate, Integer tenure, LocalDate commencementDate,
-            TenureTypeEnum tenureTypeEnum, SavingProductType savingProductType, SavingFrequencyType savingFrequencyType,
-            SavingsInterestType interestType, SavingInterestCalculationMethod savingInterestCalculationMethod,
-            boolean isLockinPeriodAllowed, Integer lockinPeriod, PeriodFrequencyType lockinPeriodType,
-            ReccuringDepositInterestCalculator reccuringDepositInterestCalculator,
-            final DepositLifecycleStateMachine lifecycleStateMachine, Integer depositEvery, Integer interestPostEvery,
-            Integer interestPostFrequency) {
+    public static SavingAccount openNew(final Client client, final SavingProduct product, final String externalId,
+            final Money savingsDeposit, final BigDecimal reccuringInterestRate, final BigDecimal savingInterestRate, final Integer tenure,
+            final LocalDate commencementDate, final TenureTypeEnum tenureTypeEnum, final SavingProductType savingProductType,
+            final SavingFrequencyType savingFrequencyType, final SavingsInterestType interestType,
+            final SavingInterestCalculationMethod savingInterestCalculationMethod, final boolean isLockinPeriodAllowed,
+            final Integer lockinPeriod, final PeriodFrequencyType lockinPeriodType,
+            final ReccuringDepositInterestCalculator reccuringDepositInterestCalculator,
+            final DepositLifecycleStateMachine lifecycleStateMachine, final Integer depositEvery, final Integer interestPostEvery,
+            final Integer interestPostFrequency) {
 
         Money futureValueOnMaturity = null;
         if (savingProductType.isReccuring() && tenureTypeEnum.isFixedPeriod()) {
             futureValueOnMaturity = reccuringDepositInterestCalculator.calculateInterestOnMaturityFor(savingsDeposit, tenure,
-                    reccuringInterestRate, commencementDate, tenureTypeEnum, savingFrequencyType, savingInterestCalculationMethod,
-                    depositEvery);
+                    reccuringInterestRate, savingFrequencyType, savingInterestCalculationMethod, depositEvery);
         } else if (savingProductType.isReccuring() && tenureTypeEnum.isPerpetual()) {
             futureValueOnMaturity = savingsDeposit;
         } else {
@@ -223,12 +223,14 @@ public class SavingAccount extends AbstractAuditableCustom<AppUser, Long> {
                 interestPostEvery, interestPostFrequency);
     }
 
-    public SavingAccount(Client client, String externalId, SavingProduct product, Money savingsDeposit, BigDecimal reccuringInterestRate,
-            BigDecimal savingInterestRate, Integer tenure, LocalDate commencementDate, TenureTypeEnum tenureTypeEnum,
-            SavingProductType savingProductType, SavingFrequencyType savingFrequencyType, SavingsInterestType interestType,
-            SavingInterestCalculationMethod savingInterestCalculationMethod, boolean isLockinPeriodAllowed, Integer lockinPeriod,
-            PeriodFrequencyType lockinPeriodType, Money futureValueOnMaturity, final DepositLifecycleStateMachine lifecycleStateMachine,
-            Integer payEvery, Integer interestPostEvery, Integer interestPostFrequency) {
+    public SavingAccount(final Client client, final String externalId, final SavingProduct product, final Money savingsDeposit,
+            final BigDecimal reccuringInterestRate, final BigDecimal savingInterestRate, final Integer tenure,
+            final LocalDate commencementDate, final TenureTypeEnum tenureTypeEnum, final SavingProductType savingProductType,
+            final SavingFrequencyType savingFrequencyType, final SavingsInterestType interestType,
+            final SavingInterestCalculationMethod savingInterestCalculationMethod, final boolean isLockinPeriodAllowed,
+            final Integer lockinPeriod, final PeriodFrequencyType lockinPeriodType, final Money futureValueOnMaturity,
+            final DepositLifecycleStateMachine lifecycleStateMachine, final Integer payEvery, final Integer interestPostEvery,
+            final Integer interestPostFrequency) {
 
         DepositAccountStatus from = null;
         if (accountStatus != null) {
@@ -274,18 +276,18 @@ public class SavingAccount extends AbstractAuditableCustom<AppUser, Long> {
         this.interestPostFrequency = interestPostFrequency;
     }
 
-    public void modifyAccount(SavingProduct product, String externalId, Money savingsDeposit, BigDecimal reccuringInterestRate,
-            BigDecimal savingInterestRate, Integer tenure, LocalDate commencementDate, TenureTypeEnum tenureTypeEnum,
-            SavingProductType savingProductType, SavingFrequencyType savingFrequencyType,
-            SavingInterestCalculationMethod savingInterestCalculationMethod, boolean isLockinPeriodAllowed, Integer lockinPeriod,
-            PeriodFrequencyType lockinPeriodType, ReccuringDepositInterestCalculator reccuringDepositInterestCalculator, Integer payEvery,
-            SavingsInterestType interestType, Integer interestPostEvery, Integer interestPostFrequency) {
+    public void modifyAccount(final SavingProduct product, final String externalId, final Money savingsDeposit,
+            final BigDecimal reccuringInterestRate, final BigDecimal savingInterestRate, final Integer tenure,
+            final LocalDate commencementDate, final TenureTypeEnum tenureTypeEnum, final SavingProductType savingProductType,
+            final SavingFrequencyType savingFrequencyType, final SavingInterestCalculationMethod savingInterestCalculationMethod,
+            final boolean isLockinPeriodAllowed, final Integer lockinPeriod, final PeriodFrequencyType lockinPeriodType,
+            final ReccuringDepositInterestCalculator reccuringDepositInterestCalculator, final Integer payEvery,
+            final SavingsInterestType interestType, final Integer interestPostEvery, final Integer interestPostFrequency) {
 
         Money futureValueOnMaturity = null;
         if (savingProductType.isReccuring() && tenureTypeEnum.isFixedPeriod()) {
-            futureValueOnMaturity = reccuringDepositInterestCalculator
-                    .calculateInterestOnMaturityFor(savingsDeposit, tenure, reccuringInterestRate, commencementDate, tenureTypeEnum,
-                            savingFrequencyType, savingInterestCalculationMethod, payEvery);
+            futureValueOnMaturity = reccuringDepositInterestCalculator.calculateInterestOnMaturityFor(savingsDeposit, tenure,
+                    reccuringInterestRate, savingFrequencyType, savingInterestCalculationMethod, payEvery);
         } else if (savingProductType.isReccuring() && tenureTypeEnum.isPerpetual()) {
             futureValueOnMaturity = savingsDeposit;
         } else {
@@ -432,7 +434,7 @@ public class SavingAccount extends AbstractAuditableCustom<AppUser, Long> {
         this.savingScheduleInstallments.add(installment);
     }
 
-    public void reject(LocalDate rejectedOn, DepositLifecycleStateMachine depositLifecycleStateMachine) {
+    public void reject(final LocalDate rejectedOn, final DepositLifecycleStateMachine depositLifecycleStateMachine) {
 
         DepositAccountStatus statusEnum = depositLifecycleStateMachine.transition(DepositAccountEvent.DEPOSIT_REJECTED,
                 DepositAccountStatus.fromInt(this.accountStatus));
@@ -467,7 +469,7 @@ public class SavingAccount extends AbstractAuditableCustom<AppUser, Long> {
         return date;
     }
 
-    public void withdrawnByApplicant(LocalDate withdrawnOn, DepositLifecycleStateMachine depositLifecycleStateMachine) {
+    public void withdrawnByApplicant(final LocalDate withdrawnOn, final DepositLifecycleStateMachine depositLifecycleStateMachine) {
 
         DepositAccountStatus statusEnum = depositLifecycleStateMachine.transition(DepositAccountEvent.DEPOSIT_WITHDRAWN,
                 DepositAccountStatus.fromInt(this.accountStatus));
@@ -493,7 +495,7 @@ public class SavingAccount extends AbstractAuditableCustom<AppUser, Long> {
         }
     }
 
-    public void undoSavingAccountApproval(DepositLifecycleStateMachine depositLifecycleStateMachine) {
+    public void undoSavingAccountApproval(final DepositLifecycleStateMachine depositLifecycleStateMachine) {
         DepositAccountStatus statusEnum = depositLifecycleStateMachine.transition(DepositAccountEvent.DEPOSIT_APPROVAL_UNDO,
                 DepositAccountStatus.fromInt(this.accountStatus));
         this.accountStatus = statusEnum.getValue();
@@ -501,10 +503,12 @@ public class SavingAccount extends AbstractAuditableCustom<AppUser, Long> {
         this.closedOnDate = new Date();
     }
 
-    public void approveSavingAccount(LocalDate approvalDate, BigDecimal savingsDepositAmountPerPeriod, BigDecimal recurringInterestRate,
-            BigDecimal savingInterestRate, Integer interestType, Integer tenure, Integer tenureType, Integer frequency, Integer payEvery,
-            DepositLifecycleStateMachine depositLifecycleStateMachine,
-            ReccuringDepositInterestCalculator reccuringDepositInterestCalculator, Integer interestPostEvery, Integer interestPostFrequency) {
+    public void approveSavingAccount(final LocalDate approvalDate, final BigDecimal savingsDepositAmountPerPeriod,
+            final BigDecimal recurringInterestRate, final BigDecimal savingInterestRate, final Integer interestType, final Integer tenure,
+            final Integer tenureType, final Integer frequency, final Integer payEvery,
+            final DepositLifecycleStateMachine depositLifecycleStateMachine,
+            final ReccuringDepositInterestCalculator reccuringDepositInterestCalculator, final Integer interestPostEvery,
+            final Integer interestPostFrequency) {
 
         DepositAccountStatus statusEnum = depositLifecycleStateMachine.transition(DepositAccountEvent.DEPOSIT_APPROVED,
                 DepositAccountStatus.fromInt(this.accountStatus));
@@ -518,7 +522,7 @@ public class SavingAccount extends AbstractAuditableCustom<AppUser, Long> {
         Money futureValueOnMaturity = null;
         if (SavingProductType.fromInt(this.savingProductType).isReccuring() && tenureTypeEnum.isFixedPeriod()) {
             futureValueOnMaturity = reccuringDepositInterestCalculator.calculateInterestOnMaturityFor(savingsAmountPerPeriod, tenure,
-                    recurringInterestRate, approvalDate, tenureTypeEnum, savingFrequencyType, interestCalculationMethod, payEvery);
+                    recurringInterestRate, savingFrequencyType, interestCalculationMethod, payEvery);
         } else if (SavingProductType.fromInt(this.savingProductType).isReccuring() && tenureTypeEnum.isPerpetual()) {
             futureValueOnMaturity = savingsAmountPerPeriod;
         } else {
@@ -552,7 +556,7 @@ public class SavingAccount extends AbstractAuditableCustom<AppUser, Long> {
         this.interestPostedAmount = BigDecimal.ZERO;
     }
 
-    public void depositMoney(SavingAccountDepositCommand command) {
+    public void depositMoney(final SavingAccountDepositCommand command) {
 
         BigDecimal depositAmount = BigDecimal.ZERO;
         BigDecimal remainAmountToBePaid = BigDecimal.ZERO;
@@ -600,7 +604,7 @@ public class SavingAccount extends AbstractAuditableCustom<AppUser, Long> {
         return DepositAccountStatus.fromInt(this.accountStatus).isActive();
     }
 
-    public void withdrawAmount(BigDecimal amount, LocalDate transactionDate) {
+    public void withdrawAmount(final BigDecimal amount, final LocalDate transactionDate) {
         this.outstandingAmount = this.outstandingAmount.subtract(amount);
         SavingAccountTransaction savingAccountTransaction = SavingAccountTransaction.withdraw(amount, transactionDate);
         savingAccountTransaction.updateAccount(this);

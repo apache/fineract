@@ -27,12 +27,10 @@ import org.springframework.data.jpa.domain.AbstractPersistable;
 @Table(name = "m_group")
 public class Group extends AbstractPersistable<Long> {
 
-    @SuppressWarnings("unused")
     @ManyToOne
     @JoinColumn(name = "office_id", nullable = false)
     private Office office;
 
-    @SuppressWarnings("unused")
     @ManyToOne
     @JoinColumn(name = "loan_officer_id", nullable = true)
     private Staff loanOfficer;
@@ -56,11 +54,11 @@ public class Group extends AbstractPersistable<Long> {
         this.clientMembers = new HashSet<Client>();
     }
 
-    public static Group newGroup(Office office, Staff loanOfficer , String name, String externalId, Set<Client> clientMembers) {
+    public static Group newGroup(final Office office, final Staff loanOfficer , final String name, final String externalId, final Set<Client> clientMembers) {
         return new Group(office, loanOfficer , name, externalId, clientMembers);
     }
 
-    public Group(Office office, Staff loanOfficer , String name, String externalId, Set<Client> clientMembers) {
+    public Group(final Office office, final Staff loanOfficer , final String name, final String externalId, final Set<Client> clientMembers) {
         this.office = office;
         this.loanOfficer = loanOfficer;
         if (StringUtils.isNotBlank(name)) {
@@ -114,7 +112,7 @@ public class Group extends AbstractPersistable<Long> {
         }
     }
 
-    public void unassigLoanOfficer(GroupCommand command) {
+    public void unassigLoanOfficer(final GroupCommand command) {
         if (command.isLoanOfficerChanged()) {
             this.loanOfficer = null;
         }

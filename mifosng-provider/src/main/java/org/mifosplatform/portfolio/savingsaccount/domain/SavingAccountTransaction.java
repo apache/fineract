@@ -26,12 +26,12 @@ import org.mifosplatform.useradministration.domain.AppUser;
 @Entity
 @Table(name = "m_saving_account_transaction")
 public class SavingAccountTransaction extends AbstractAuditableCustom<AppUser, Long> {
-	
+
+    @SuppressWarnings("unused")
     @ManyToOne(optional = false)
     @JoinColumn(name = "saving_account_id", nullable = false)
     private SavingAccount savingAccount;
 
-   // @Enumerated(EnumType.ORDINAL)
     @Column(name = "transaction_type_enum", nullable = false)
     private Integer typeOf;
 
@@ -46,49 +46,51 @@ public class SavingAccountTransaction extends AbstractAuditableCustom<AppUser, L
 
     @Column(name = "amount", scale = 6, precision = 19, nullable = false)
     private final BigDecimal amount;
-    
+
     public SavingAccountTransaction() {
-		this.transactionDate = null;
-		this.amount = BigDecimal.ZERO;
-	}
+        this.transactionDate = null;
+        this.amount = BigDecimal.ZERO;
+    }
 
-	public SavingAccountTransaction(DepositAccountTransactionType transactionType, BigDecimal amount, LocalDate paymentDate) {
-		this.typeOf = transactionType.getValue();
-		this.amount = amount;
-		this.transactionDate =paymentDate.toDate();
-	}
+    public SavingAccountTransaction(final DepositAccountTransactionType transactionType, final BigDecimal amount,
+            final LocalDate paymentDate) {
+        this.typeOf = transactionType.getValue();
+        this.amount = amount;
+        this.transactionDate = paymentDate.toDate();
+    }
 
-	public static SavingAccountTransaction deposit(BigDecimal amount, LocalDate paymentDate) {
-		 return new SavingAccountTransaction(DepositAccountTransactionType.DEPOSIT, amount == null ? new BigDecimal(0) : amount, paymentDate);
-	}
-	
-	public static SavingAccountTransaction withdraw(BigDecimal amount, LocalDate paymentDate) {
-		 return new SavingAccountTransaction(DepositAccountTransactionType.WITHDRAW, amount == null ? new BigDecimal(0) : amount, paymentDate);
-	}
-	
-	public static SavingAccountTransaction postInterest(BigDecimal amount, LocalDate paymentDate) {
-		 return new SavingAccountTransaction(DepositAccountTransactionType.INTEREST_POSTING, amount == null ? new BigDecimal(0) : amount, paymentDate);
-	}
+    public static SavingAccountTransaction deposit(final BigDecimal amount, final LocalDate paymentDate) {
+        return new SavingAccountTransaction(DepositAccountTransactionType.DEPOSIT, amount == null ? new BigDecimal(0) : amount, paymentDate);
+    }
 
-	public void updateAccount(SavingAccount savingAccount) {
-		this.savingAccount = savingAccount;
-	}
+    public static SavingAccountTransaction withdraw(final BigDecimal amount, final LocalDate paymentDate) {
+        return new SavingAccountTransaction(DepositAccountTransactionType.WITHDRAW, amount == null ? new BigDecimal(0) : amount,
+                paymentDate);
+    }
 
-	public DepositAccountTransactionType getTypeOf() {
-		return DepositAccountTransactionType.fromInt(this.typeOf);
-	}
+    public static SavingAccountTransaction postInterest(final BigDecimal amount, final LocalDate paymentDate) {
+        return new SavingAccountTransaction(DepositAccountTransactionType.INTEREST_POSTING, amount == null ? new BigDecimal(0) : amount,
+                paymentDate);
+    }
 
-	public BigDecimal getAmount() {
-		return this.amount;
-	}
+    public void updateAccount(final SavingAccount savingAccount) {
+        this.savingAccount = savingAccount;
+    }
 
-	public LocalDate getTransactionDate() {
-		LocalDate transactionDate = null;
-		if(this.transactionDate != null){
-		  transactionDate = new LocalDate(this.transactionDate);
-		}
-		return transactionDate;
-	}
-    
-    
+    public DepositAccountTransactionType getTypeOf() {
+        return DepositAccountTransactionType.fromInt(this.typeOf);
+    }
+
+    public BigDecimal getAmount() {
+        return this.amount;
+    }
+
+    public LocalDate getTransactionDate() {
+        LocalDate transactionDate = null;
+        if (this.transactionDate != null) {
+            transactionDate = new LocalDate(this.transactionDate);
+        }
+        return transactionDate;
+    }
+
 }

@@ -15,9 +15,8 @@ public interface DepositProductWritePlatformService {
     CommandProcessingResult createDepositProduct(JsonCommand command);
 
     @PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'UPDATE_DEPOSITPRODUCT')")
-    CommandProcessingResult updateDepositProduct(Long productId,JsonCommand command);
+    CommandProcessingResult updateDepositProduct(Long productId, JsonCommand command);
 
     @PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'DELETE_DEPOSITPRODUCT')")
     CommandProcessingResult deleteDepositProduct(Long productId);
-
 }

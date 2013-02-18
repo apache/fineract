@@ -9,17 +9,16 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class CreateDepositProductCommandHandler implements NewCommandSourceHandler {
-	
-	private final DepositProductWritePlatformService depositProductWritePlatformService;
-	
-	@Autowired 
-	public CreateDepositProductCommandHandler(final DepositProductWritePlatformService depositProductWritePlatformService) {
-		this.depositProductWritePlatformService = depositProductWritePlatformService;
-	}
 
-	@Override
-	public CommandProcessingResult processCommand(JsonCommand command) {
-		return this.depositProductWritePlatformService.createDepositProduct(command);
-	}
+    private final DepositProductWritePlatformService depositProductWritePlatformService;
 
+    @Autowired
+    public CreateDepositProductCommandHandler(final DepositProductWritePlatformService depositProductWritePlatformService) {
+        this.depositProductWritePlatformService = depositProductWritePlatformService;
+    }
+
+    @Override
+    public CommandProcessingResult processCommand(final JsonCommand command) {
+        return this.depositProductWritePlatformService.createDepositProduct(command);
+    }
 }

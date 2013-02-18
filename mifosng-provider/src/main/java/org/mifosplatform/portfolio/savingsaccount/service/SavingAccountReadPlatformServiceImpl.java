@@ -48,7 +48,8 @@ public class SavingAccountReadPlatformServiceImpl implements SavingAccountReadPl
 
     @Autowired
     public SavingAccountReadPlatformServiceImpl(final PlatformSecurityContext context, final TenantAwareRoutingDataSource dataSource,
-            ClientReadPlatformService clientReadPlatformService, SavingProductReadPlatformService savingProductReadPlatformService) {
+            final ClientReadPlatformService clientReadPlatformService,
+            final SavingProductReadPlatformService savingProductReadPlatformService) {
         this.context = context;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.clientReadPlatformService = clientReadPlatformService;
@@ -66,7 +67,7 @@ public class SavingAccountReadPlatformServiceImpl implements SavingAccountReadPl
     }
 
     @Override
-    public SavingAccountData retrieveSavingsAccount(Long accountId) {
+    public SavingAccountData retrieveSavingsAccount(final Long accountId) {
 
         this.context.authenticatedUser();
         SavingAccountMapper mapper = new SavingAccountMapper();
@@ -100,7 +101,7 @@ public class SavingAccountReadPlatformServiceImpl implements SavingAccountReadPl
         }
 
         @Override
-        public SavingAccountData mapRow(ResultSet rs, @SuppressWarnings("unused") int rowNum) throws SQLException {
+        public SavingAccountData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
 
             Long id = rs.getLong("id");
             String externalId = rs.getString("externalId");
@@ -174,7 +175,7 @@ public class SavingAccountReadPlatformServiceImpl implements SavingAccountReadPl
     }
 
     @Override
-    public SavingAccountData retrieveNewSavingsAccountDetails(Long clientId, Long productId) {
+    public SavingAccountData retrieveNewSavingsAccountDetails(final Long clientId, final Long productId) {
 
         context.authenticatedUser();
         ClientData clientAccount = this.clientReadPlatformService.retrieveIndividualClient(clientId);
@@ -190,9 +191,8 @@ public class SavingAccountReadPlatformServiceImpl implements SavingAccountReadPl
                     selectedProduct.getName(), currency, selectedProduct.getInterestRate(), selectedProduct.getSavingsDepositAmount(),
                     selectedProduct.getSavingProductType(), selectedProduct.getTenureType(), selectedProduct.getTenure(),
                     selectedProduct.getSavingFrequencyType(), selectedProduct.getInterestType(),
-                    selectedProduct.getInterestCalculationMethod(), selectedProduct.getMinimumBalanceForWithdrawal(),
-                    selectedProduct.isPartialDepositAllowed(), selectedProduct.isLockinPeriodAllowed(), selectedProduct.getLockinPeriod(),
-                    selectedProduct.getLockinPeriodType(), selectedProduct.getDepositEvery());
+                    selectedProduct.getInterestCalculationMethod(), selectedProduct.isLockinPeriodAllowed(),
+                    selectedProduct.getLockinPeriod(), selectedProduct.getLockinPeriodType(), selectedProduct.getDepositEvery());
 
         } else {
             accountData = SavingAccountData.createFrom(clientAccount.id(), clientAccount.displayName());
@@ -200,7 +200,7 @@ public class SavingAccountReadPlatformServiceImpl implements SavingAccountReadPl
         return accountData;
     }
 
-    private SavingProductData findSavingProductById(Collection<SavingProductLookup> savingProducts, Long productId) {
+    private SavingProductData findSavingProductById(final Collection<SavingProductLookup> savingProducts, final Long productId) {
         SavingProductData match = this.savingProductReadPlatformService.retrieveNewSavingProductDetails();
         for (SavingProductLookup savingProductLookup : savingProducts) {
             if (savingProductLookup.hasId(productId)) {
@@ -212,7 +212,7 @@ public class SavingAccountReadPlatformServiceImpl implements SavingAccountReadPl
     }
 
     @Override
-    public SavingPermissionData retrieveSavingAccountPermissions(SavingAccountData savingAccountData) {
+    public SavingPermissionData retrieveSavingAccountPermissions(final SavingAccountData savingAccountData) {
         boolean pendingApproval = (savingAccountData.getStatus().getId().equals(100L));
         boolean undoApprovalAllowed = (savingAccountData.getStatus().getId().equals(300L));
         boolean renewelAllowed = false;
@@ -230,7 +230,7 @@ public class SavingAccountReadPlatformServiceImpl implements SavingAccountReadPl
 
     @SuppressWarnings("unused")
     @Override
-    public BigDecimal deriveSavingDueAmount(SavingAccountData account) {
+    public BigDecimal deriveSavingDueAmount(final SavingAccountData account) {
 
         BigDecimal dueAmount = BigDecimal.ZERO;
         EnumOptionData status = account.getStatus();
@@ -254,7 +254,7 @@ public class SavingAccountReadPlatformServiceImpl implements SavingAccountReadPl
     }
 
     @Override
-    public SavingScheduleData retrieveSavingsAccountSchedule(Long accountId, CurrencyData currency) {
+    public SavingScheduleData retrieveSavingsAccountSchedule(final Long accountId, final CurrencyData currency) {
         this.context.authenticatedUser();
         SavingAccountScheduleMapper mapper = new SavingAccountScheduleMapper();
         String sql = "Select " + mapper.savingScheduleSchema() + " where ss.saving_account_id =? order by ss.installment";
@@ -281,7 +281,7 @@ public class SavingAccountReadPlatformServiceImpl implements SavingAccountReadPl
         }
 
         @Override
-        public SavingSchedulePeriodData mapRow(ResultSet rs, @SuppressWarnings("unused") int rowNum) throws SQLException {
+        public SavingSchedulePeriodData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
 
             LocalDate dueDate = JdbcSupport.getLocalDate(rs, "dueDate");
             Integer installment = JdbcSupport.getInteger(rs, "installment");
@@ -308,7 +308,7 @@ public class SavingAccountReadPlatformServiceImpl implements SavingAccountReadPl
         }
 
         @Override
-        public SavingAccountForLookup mapRow(ResultSet rs, @SuppressWarnings("unused") int rowNum) throws SQLException {
+        public SavingAccountForLookup mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
             Long id = rs.getLong("id");
             return new SavingAccountForLookup(id);
         }
@@ -316,7 +316,7 @@ public class SavingAccountReadPlatformServiceImpl implements SavingAccountReadPl
     }
 
     @Override
-    public Collection<SavingAccountTransactionsData> retrieveSavingsAccountTransactions(Long accountId) {
+    public Collection<SavingAccountTransactionsData> retrieveSavingsAccountTransactions(final Long accountId) {
         this.context.authenticatedUser();
         SavingAccountTransactionMapper savingAccountTransactionMapper = new SavingAccountTransactionMapper();
         String sql = "select " + savingAccountTransactionMapper.schema() + " where stxn.saving_account_id = ? ";
@@ -330,7 +330,7 @@ public class SavingAccountReadPlatformServiceImpl implements SavingAccountReadPl
         }
 
         @Override
-        public SavingAccountTransactionsData mapRow(ResultSet rs, @SuppressWarnings("unused") int rowNum) throws SQLException {
+        public SavingAccountTransactionsData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
             Long id = rs.getLong("id");
             LocalDate transactionDate = JdbcSupport.getLocalDate(rs, "transactionDate");
             Integer transactionTypeValue = JdbcSupport.getInteger(rs, "type");

@@ -562,14 +562,14 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long> {
         return date;
     }
 
-    public void updateAccount(DepositAccount account) {
+    public void updateAccount(final DepositAccount account) {
 
         this.renewdAccount = account;
 
     }
 
-    public void withdrawDepositAccountMoney(DepositLifecycleStateMachine depositLifecycleStateMachine,
-            FixedTermDepositInterestCalculator fixedTermDepositInterestCalculator, LocalDate eventDate) {
+    public void withdrawDepositAccountMoney(final DepositLifecycleStateMachine depositLifecycleStateMachine,
+            final FixedTermDepositInterestCalculator fixedTermDepositInterestCalculator, final LocalDate eventDate) {
 
         if (eventDate.isBefore(getLastInterestPostedDate())) {
             final String errorMessage = "Deposit Account Preclosed date \"" + eventDate + "\"cannot before last interest posted date \""
@@ -647,7 +647,7 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long> {
      * }
      */
 
-    public void withdrawInterest(Money interest) {
+    public void withdrawInterest(final Money interest) {
         @SuppressWarnings("unused")
         boolean statustest = isActive();
         if (isActive()) {
@@ -662,7 +662,7 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long> {
 
     }
 
-    public void closeDepositAccount(DepositLifecycleStateMachine depositLifecycleStateMachine) {
+    public void closeDepositAccount(final DepositLifecycleStateMachine depositLifecycleStateMachine) {
         DepositAccountStatus statusEnumForClose = depositLifecycleStateMachine.transition(DepositAccountEvent.DEPOSIT_CLOSED,
                 DepositAccountStatus.fromInt(this.depositStatus));
         this.depositStatus = statusEnumForClose.getValue();
@@ -732,7 +732,7 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long> {
         return DepositAccountStatus.fromInt(this.depositStatus).isActive();
     }
 
-    public void postInterestForDepositAccount(DepositAccount account, FixedTermDepositInterestCalculator fixedTermDepositInterestCalculator) {
+    public void postInterestForDepositAccount(final FixedTermDepositInterestCalculator fixedTermDepositInterestCalculator) {
 
         LocalDate lastInterestPostedDate = getLastInterestPostedDate();
         LocalDate nextInterestPostingDate = getNextInterestPostedDate();

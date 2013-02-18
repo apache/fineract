@@ -24,12 +24,9 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.commons.lang.StringUtils;
-import org.mifosplatform.commands.domain.CommandWrapper;
-import org.mifosplatform.commands.service.CommandWrapperBuilder;
 import org.mifosplatform.infrastructure.core.api.ApiParameterHelper;
 import org.mifosplatform.infrastructure.core.api.ApiRequestParameterHelper;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
-import org.mifosplatform.infrastructure.core.exception.UnrecognizedQueryParamException;
 import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.mifosplatform.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
@@ -56,7 +53,7 @@ public class GroupsApiResource {
             "clientMembers", "allowedClients", "allowedOffices"));
     
     private final PlatformSecurityContext context;
-    private GroupReadPlatformService groupReadPlatformService;
+    private final GroupReadPlatformService groupReadPlatformService;
     private final GroupWritePlatformService groupWritePlatformService;
     private final ClientReadPlatformService clientReadPlatformService;
     private final OfficeReadPlatformService officeReadPlatformService;
@@ -240,7 +237,7 @@ public class GroupsApiResource {
     // 'g.' preffix because of ERROR 1052 (23000): Column 'column_name' in where
     // clause is ambiguous
     // caused by the same name of columns in m_office and m_group tables
-    private String getGroupExtraCriteria(String sqlSearch, Long officeId, String externalId, String name, String hierarchy) {
+    private String getGroupExtraCriteria(String sqlSearch, final Long officeId, final String externalId, final String name, final String hierarchy) {
 
         String extraCriteria = "";
 
@@ -271,9 +268,5 @@ public class GroupsApiResource {
         }
 
         return extraCriteria;
-    }
-    
-    private boolean is(final String commandParam, final String commandValue) {
-        return StringUtils.isNotBlank(commandParam) && commandParam.trim().equalsIgnoreCase(commandValue);
     }
 }

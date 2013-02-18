@@ -78,16 +78,18 @@ public class SavingAccountData {
         return new SavingAccountData(clientId, clientDisplayName);
     }
 
-    public SavingAccountData(Long id, EnumOptionData status, String externalId, Long clientId, String clientName, Long productId,
-            String productName, EnumOptionData productType, CurrencyData currencyData, BigDecimal savingsDepositAmountPerPeriod,
-            EnumOptionData savingsFrequencyType, BigDecimal totalDepositAmount, BigDecimal recurringInterestRate,
-            BigDecimal savingInterestRate, EnumOptionData interestType, EnumOptionData interestCalculationMethod, Integer tenure,
-            EnumOptionData tenureType, LocalDate projectedCommencementDate, LocalDate actualCommencementDate, LocalDate maturesOnDate,
-            BigDecimal projectedInterestAccuredOnMaturity, BigDecimal actualInterestAccured, BigDecimal projectedMaturityAmount,
-            BigDecimal actualMaturityAmount, boolean preClosureAllowed, BigDecimal preClosureInterestRate, LocalDate withdrawnonDate,
-            LocalDate rejectedonDate, LocalDate closedonDate, boolean isLockinPeriodAllowed, Integer lockinPeriod,
-            EnumOptionData lockinPeriodType, Integer depositEvery, BigDecimal outstandingAmount, Integer interestPostEvery,
-            EnumOptionData interestPostFrequency) {
+    public SavingAccountData(final Long id, final EnumOptionData status, final String externalId, final Long clientId,
+            final String clientName, final Long productId, final String productName, final EnumOptionData productType,
+            final CurrencyData currencyData, final BigDecimal savingsDepositAmountPerPeriod, final EnumOptionData savingsFrequencyType,
+            final BigDecimal totalDepositAmount, final BigDecimal recurringInterestRate, final BigDecimal savingInterestRate,
+            final EnumOptionData interestType, final EnumOptionData interestCalculationMethod, final Integer tenure,
+            final EnumOptionData tenureType, final LocalDate projectedCommencementDate, final LocalDate actualCommencementDate,
+            final LocalDate maturesOnDate, final BigDecimal projectedInterestAccuredOnMaturity, final BigDecimal actualInterestAccured,
+            final BigDecimal projectedMaturityAmount, final BigDecimal actualMaturityAmount, final boolean preClosureAllowed,
+            final BigDecimal preClosureInterestRate, final LocalDate withdrawnonDate, final LocalDate rejectedonDate,
+            final LocalDate closedonDate, final boolean isLockinPeriodAllowed, final Integer lockinPeriod,
+            final EnumOptionData lockinPeriodType, final Integer depositEvery, final BigDecimal outstandingAmount,
+            final Integer interestPostEvery, final EnumOptionData interestPostFrequency) {
         this.id = id;
         this.status = status;
         this.externalId = externalId;
@@ -140,7 +142,7 @@ public class SavingAccountData {
         this.interestPostFrequency = interestPostFrequency;
     }
 
-    public SavingAccountData(Long clientId, String clientName) {
+    public SavingAccountData(final Long clientId, final String clientName) {
         this.id = null;
         this.status = null;
         this.externalId = null;
@@ -193,11 +195,11 @@ public class SavingAccountData {
         this.interestPostFrequency = null;
     }
 
-    public SavingAccountData(SavingAccountData account, Collection<SavingProductLookup> productOptions,
-            Collection<CurrencyData> currencyOptions, List<EnumOptionData> savingsProductTypeOptions,
-            List<EnumOptionData> tenureTypeOptions, List<EnumOptionData> savingFrequencyOptions,
-            List<EnumOptionData> savingsInterestTypeOptions, List<EnumOptionData> lockinPeriodTypeOptions,
-            List<EnumOptionData> interestCalculationOptions, BigDecimal dueAmount) {
+    public SavingAccountData(final SavingAccountData account, final Collection<SavingProductLookup> productOptions,
+            final Collection<CurrencyData> currencyOptions, final List<EnumOptionData> savingsProductTypeOptions,
+            final List<EnumOptionData> tenureTypeOptions, final List<EnumOptionData> savingFrequencyOptions,
+            final List<EnumOptionData> savingsInterestTypeOptions, final List<EnumOptionData> lockinPeriodTypeOptions,
+            final List<EnumOptionData> interestCalculationOptions, final BigDecimal dueAmount) {
         this.id = account.id;
         this.status = account.status;
         this.externalId = account.externalId;
@@ -252,12 +254,11 @@ public class SavingAccountData {
         this.interestPostFrequency = account.interestPostFrequency;
     }
 
-    // FIXME - Madhukar - unused variables been passed into construction - why?
-    public SavingAccountData(Long clientId, String clientName, Long productId, String productName, CurrencyData currency,
-            BigDecimal interestRate, BigDecimal savingsDepositAmountPerPeriod, EnumOptionData productType, EnumOptionData tenureType,
-            Integer tenure, EnumOptionData savingsFrequencyType, EnumOptionData interestType, EnumOptionData interestCalculationMethod,
-            BigDecimal minimumBalanceForWithdrawal, boolean partialDepositAllowed, boolean lockinPeriodAllowed, Integer lockinPeriod,
-            EnumOptionData lockinPeriodType, Integer depositEvery) {
+    public SavingAccountData(final Long clientId, final String clientName, final Long productId, final String productName,
+            final CurrencyData currency, final BigDecimal interestRate, final BigDecimal savingsDepositAmountPerPeriod,
+            final EnumOptionData productType, final EnumOptionData tenureType, final Integer tenure,
+            final EnumOptionData savingsFrequencyType, final EnumOptionData interestType, final EnumOptionData interestCalculationMethod,
+            final boolean lockinPeriodAllowed, final Integer lockinPeriod, final EnumOptionData lockinPeriodType, final Integer depositEvery) {
         this.id = null;
         this.status = null;
         this.externalId = null;
@@ -310,7 +311,7 @@ public class SavingAccountData {
         this.interestPostFrequency = savingsFrequencyType;
     }
 
-    public SavingAccountData(SavingAccountData account, SavingPermissionData permissions) {
+    public SavingAccountData(final SavingAccountData account, final SavingPermissionData permissions) {
         this.id = account.id;
         this.status = account.status;
         this.externalId = account.externalId;
@@ -364,7 +365,7 @@ public class SavingAccountData {
         this.interestPostFrequency = account.interestPostFrequency;
     }
 
-    public SavingAccountData(SavingAccountData account, SavingScheduleData savingScheduleData) {
+    public SavingAccountData(final SavingAccountData account, final SavingScheduleData savingScheduleData) {
         this.id = account.id;
         this.status = account.status;
         this.externalId = account.externalId;
@@ -418,7 +419,7 @@ public class SavingAccountData {
         this.interestPostFrequency = account.interestPostFrequency;
     }
 
-    public SavingAccountData(SavingAccountData account, Collection<SavingAccountTransactionsData> transactions) {
+    public SavingAccountData(final SavingAccountData account, final Collection<SavingAccountTransactionsData> transactions) {
         this.id = account.id;
         this.status = account.status;
         this.externalId = account.externalId;
