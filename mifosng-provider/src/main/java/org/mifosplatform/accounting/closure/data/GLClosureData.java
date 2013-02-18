@@ -61,6 +61,7 @@ public class GLClosureData {
         this.lastUpdatedByUserId = lastUpdatedByUserId;
         this.lastUpdatedByUsername = lastUpdatedByUsername;
         this.comments = comments;
+        this.allowedOffices = null;
     }
 
     public List<OfficeLookup> getAllowedOffices() {

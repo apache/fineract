@@ -102,7 +102,7 @@ public class GLClosureWritePlatformServiceJpaRepositoryImpl implements GLClosure
         }
 
         return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withOfficeId(glClosure.getOffice().getId())
-                .withEntityId(glClosure.getId()).build();
+                .withEntityId(glClosure.getId()).with(changesOnly).build();
     }
 
     @Transactional

@@ -1106,7 +1106,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
         handleDisbursementTransaction(expectedDisbursedOnLocalDate);
     }
 
-    public Map<String, Object> deriveDisbursementData(final CurrencyData currencyData) {
+    public Map<String, Object> deriveDisbursementData(final CurrencyData currencyData, final List<Long> existingTransactionIds) {
 
         final Map<String, Object> accountingBridgeData = new LinkedHashMap<String, Object>(20);
 
@@ -1119,7 +1119,9 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
         final List<Map<String, Object>> newLoanTransactions = new ArrayList<Map<String, Object>>();
         final List<LoanTransaction> disbursementTransactions = findDisbursementTransactions();
         for (LoanTransaction loanTransaction : disbursementTransactions) {
-            newLoanTransactions.add(loanTransaction.toMapData(currencyData));
+            if (!existingTransactionIds.contains(loanTransaction.getId())) {
+                newLoanTransactions.add(loanTransaction.toMapData(currencyData));
+            }
         }
 
         accountingBridgeData.put("newLoanTransactions", newLoanTransactions);
@@ -1150,7 +1152,8 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
     }
 
     public Map<String, Object> disburse(final AppUser currentUser, final JsonCommand command,
-            final LoanLifecycleStateMachine loanLifecycleStateMachine, final ApplicationCurrency currency) {
+            final LoanLifecycleStateMachine loanLifecycleStateMachine, final ApplicationCurrency currency,
+            final List<Long> existingTransactionIds) {
 
         final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>();
 
@@ -1183,6 +1186,8 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
             if (isRepaymentScheduleRegenerationRequiredForDisbursement(disbursedOn)) {
                 regenerateRepaymentSchedule(currency);
             }
+            
+            existingTransactionIds.addAll(findExistingTransactionIds());
         }
 
         return actualChanges;

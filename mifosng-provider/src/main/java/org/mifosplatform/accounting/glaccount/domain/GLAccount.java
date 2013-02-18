@@ -121,8 +121,6 @@ public class GLAccount extends AbstractPersistable<Long> {
                 newValue = command.integerValueOfParameterNamed(paramName);
             }
             actualChanges.put(paramName, newValue);
-            propertyToBeUpdated = newValue;
-
             // now update actual property
             if (paramName.equals(GLAccountJsonInputParams.TYPE.getValue())) {
                 this.type = newValue;
@@ -137,8 +135,6 @@ public class GLAccount extends AbstractPersistable<Long> {
         if (command.isChangeInStringParameterNamed(paramName, propertyToBeUpdated)) {
             final String newValue = command.stringValueOfParameterNamed(paramName);
             actualChanges.put(paramName, newValue);
-            propertyToBeUpdated = newValue;
-
             // now update actual property
             if (paramName.equals(GLAccountJsonInputParams.DESCRIPTION.getValue())) {
                 this.description = newValue;
@@ -155,8 +151,6 @@ public class GLAccount extends AbstractPersistable<Long> {
         if (command.isChangeInLongParameterNamed(paramName, propertyToBeUpdated)) {
             final Long newValue = command.longValueOfParameterNamed(paramName);
             actualChanges.put(paramName, newValue);
-            propertyToBeUpdated = newValue;
-
             // now update actual property
             if (paramName.equals(GLAccountJsonInputParams.PARENT_ID.getValue())) {
                 // do nothing as this is a nested property
@@ -169,8 +163,6 @@ public class GLAccount extends AbstractPersistable<Long> {
         if (command.isChangeInBooleanParameterNamed(paramName, propertyToBeUpdated)) {
             final Boolean newValue = command.booleanObjectValueOfParameterNamed(paramName);
             actualChanges.put(paramName, newValue);
-            propertyToBeUpdated = newValue;
-
             // now update actual property
             if (paramName.equals(GLAccountJsonInputParams.MANUAL_ENTRIES_ALLOWED.getValue())) {
                 this.manualEntriesAllowed = newValue;

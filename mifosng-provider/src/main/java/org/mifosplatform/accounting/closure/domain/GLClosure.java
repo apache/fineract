@@ -23,7 +23,6 @@ import org.mifosplatform.accounting.closure.api.GLClosureJsonInputParams;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.domain.AbstractAuditableCustom;
 import org.mifosplatform.organisation.office.domain.Office;
-import org.mifosplatform.portfolio.loanaccount.guarantor.GuarantorConstants.GUARANTOR_JSON_INPUT_PARAMS;
 import org.mifosplatform.useradministration.domain.AppUser;
 
 @Entity
@@ -65,7 +64,7 @@ public class GLClosure extends AbstractAuditableCustom<AppUser, Long> {
 
     public static GLClosure fromJson(Office office, final JsonCommand command) {
         Date closingDate = command.DateValueOfParameterNamed(GLClosureJsonInputParams.CLOSING_DATE.getValue());
-        String comments = command.stringValueOfParameterNamed(GUARANTOR_JSON_INPUT_PARAMS.COMMENT.getValue());
+        String comments = command.stringValueOfParameterNamed(GLClosureJsonInputParams.COMMENTS.getValue());
         return new GLClosure(office, closingDate, comments);
     }
 
@@ -80,9 +79,8 @@ public class GLClosure extends AbstractAuditableCustom<AppUser, Long> {
         if (command.isChangeInStringParameterNamed(paramName, propertyToBeUpdated)) {
             final String newValue = command.stringValueOfParameterNamed(paramName);
             actualChanges.put(paramName, newValue);
-            propertyToBeUpdated = newValue;
             // now update actual property
-            if (paramName.equals(GUARANTOR_JSON_INPUT_PARAMS.COMMENT.getValue())) {
+            if (paramName.equals(GLClosureJsonInputParams.COMMENTS.getValue())) {
                 this.comments = newValue;
             }
         }

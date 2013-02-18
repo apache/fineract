@@ -8998,7 +8998,7 @@ GET https://DomainName/api/v1/permissions
                             <td>glCode</td>
                         </tr>
                         <tr>
-                            <td class=fielddesc>The Ledger code associated with the 
+                            <td class=fielddesc>The ledger code associated with the 
                                 Account<br>These codes are mandatory and should be unique within
                                 an organization</td>
                         </tr>
@@ -9014,17 +9014,17 @@ GET https://DomainName/api/v1/permissions
                         </tr>
                         <tr>
                             <td class=fielddesc>Classifies the account into one of the following Types
-                            	<br/><b>Asset accounts:</b> represent the different types of economic resources
+                            	<br/><b>Asset:</b> represent the different types of economic resources
                             	owned or controlled by business, common examples of Asset accounts are cash, 
                             	cash in bank, building, inventory, prepaid rent, goodwill, accounts receivable<br/>
-								<b>Liability accounts:</b> represent the different types of economic obligations
+								<b>Liability:</b> represent the different types of economic obligations
 								by a business, such as accounts payable, bank loan, bonds payable<br/>
-								<b>Income accounts:</b> represent the company's gross earnings and common examples 
+								<b>Income:</b> represent the company's gross earnings and common examples 
 								include Interest Income, Sales and Service revenue<br/>
-								<b>Expense accounts:</b> represent the company's expenditures to enable itself to 
+								<b>Expense:</b> represent the company's expenditures to enable itself to 
 								operate. Common examples are electricity and water, rentals, depreciation, 
 								doubtful accounts, insurance.<br/>
-								<b>Equity accounts:</b> represent the residual equity of a business (after 
+								<b>Equity:</b> represent the residual equity of a business (after 
 								deducting from Assets all the liabilities) including Retained Earnings 
 								and Appropriations <br/><br/>
 								The options are fully listed in <a href="#glaccounts_template">Retrieve
@@ -9036,8 +9036,8 @@ GET https://DomainName/api/v1/permissions
                         </tr>
                         <tr>
                             <td class=fielddesc>Determines how the account shall be used<br> 
-                            "Header" accounts specify the title of a group of accounts. Header accounts are used
-                            only to group detail accounts that have a similar purpose; that is, detail accounts
+                            "Header" accounts specify the title of a group of accounts. They are used
+                            only for grouping together detail accounts that have a similar purpose; that is, detail accounts
                             are assigned to specific header accounts
                             <br/>
                             "Detail" accounts may have transactions logged against them<br/><br/>
@@ -9049,7 +9049,7 @@ GET https://DomainName/api/v1/permissions
                             <td>manualEntriesAllowed</td>
                         </tr>
                         <tr>
-                            <td class=fielddesc>Specifies if manual adjustments can be made
+                            <td class=fielddesc>Specifies if manual entries can be made
                             against this account using the <a href="#journalentries_create">
                             Create Journal Entries API</a> </td>
                         </tr>
@@ -9074,7 +9074,7 @@ GET https://DomainName/api/v1/permissions
                         <dd>
                             Integer <span>optional</span>
                         </dd>
-                        <dt>manualAdjustmentsAllowed</dt>
+                        <dt>manualEntriesAllowed</dt>
                         <dd>
                             boolean <span>optional</span>
                         </dd>
@@ -9091,7 +9091,7 @@ GET https://DomainName/api/v1/permissions
                     <div class=apiClick>glaccounts</div>
                     <br>
                     <br>
-                    <div class=apiClick>glaccounts?type=1&manualAdjustmentsAllowed=true&usage=1&disabled=false</div>
+                    <div class=apiClick>glaccounts?type=1&manualEntriesAllowed=true&usage=1&disabled=false</div>
                 </div>
                 <div class="method-example">
                     <code class="method-declaration">
@@ -9266,8 +9266,8 @@ GET https://DomainName/api/v1/glaccounts/{glaccountsId}
                 <div class="method-description">
                     <h4>Create a General Ledger Account</h4>
                     <p>
-                        <b>Note:</b> You can optionally<br>
-                        create a Hierarchical Chart of Account by using the "parentId"
+                        <b>Note:</b> You may optionally
+                        create Hierarchical Chart of Accounts by using the "parentId"
                         property of an Account<br>
                     </p>
                     <table class=matrixHeading>
@@ -9275,7 +9275,7 @@ GET https://DomainName/api/v1/glaccounts/{glaccountsId}
                             <td><div class="mifosXHeading2">Mandatory Fields</div></td>
                         </tr>
                         <tr class=alt>
-                            <td>name, glCode, classification, usage and manualEntriesAllowed
+                            <td>name, glCode, type, usage and manualEntriesAllowed
                             </td>
                         </tr>
                     </table>
@@ -9292,7 +9292,7 @@ Request Body:
     "name": "Cash at Bangalore",
     "glCode": "100017",
     "manualEntriesAllowed": true,
-    "classification": 1,
+    "type": 1,
     "usage": 1,
     "description": "Cash at Bangalore Branch"
 }
@@ -9315,16 +9315,19 @@ Request Body:
 PUT https://DomainName/api/v1/glaccounts/{glaccountId}
                         </code>
                     <code class="method-request">
-PUT glaccounts/1 
+PUT glaccounts/22 
 Content-Type: application/json 
 Request Body:
 {
-    "name": "Cash at Tumkur"
+    "name": "Cash at Bangalore rural"
 }
                     </code>
                     <code class="method-response">
 {
-    "resourceId": 1
+    "resourceId": 22,
+    "changes": {
+        "name": "Cash at Bangalore rural"
+    }
 }
                     </code>
                 </div>
@@ -9339,7 +9342,10 @@ Request Body:
                     </code>
                     <code class="method-response">
 {
-    "resourceId": 1
+    "resourceId": 1,
+    "changes": {
+        "disabled": true
+    }
 }
                     </code>
                 </div>
@@ -9365,7 +9371,8 @@ No Request Body:
                     </code>
                     <code class="method-response">
 {
-    "resourceId": 1
+    "resourceId": 1,
+    "changes": {}
 }
                     </code>
                 </div>
@@ -9376,8 +9383,9 @@ No Request Body:
                 <div class="method-description">
                     <h3>Accounting Closure</h3>
                     <p>An accounting closure indicates that no more journal
-                    	entries may be logged or reversed in the system 
-                    	(either manually or via the portfolio) prior to the closure date
+                    	entries may be logged (or reversed) in the system, 
+                    	either manually or via the portfolio with an entry date
+                    	prior to the defined closure date
                     </p>
                     <table class=matrixHeading>
                         <tr class="matrixHeadingBG">
@@ -9448,7 +9456,6 @@ GET https://DomainName/api/v1/glclosures
         "lastUpdatedByUserId": 1,
         "lastUpdatedByUsername": "mifos",
         "comments": "closed",
-        "allowedOffices": []
     },
     {
         "id": 6,
@@ -9475,7 +9482,6 @@ GET https://DomainName/api/v1/glclosures
         "lastUpdatedByUserId": 1,
         "lastUpdatedByUsername": "mifos",
         "comments": "hello",
-        "allowedOffices": []
     }
 ]
                     </code>
@@ -9523,7 +9529,6 @@ GET https://DomainName/api/v1/glclosures/{glclosureId}
     "lastUpdatedByUserId": 1,
     "lastUpdatedByUsername": "mifos",
     "comments": "closed",
-    "allowedOffices": []
 }
                     </code>
                 </div>
@@ -9554,14 +9559,15 @@ Request Body:
 {
     "officeId": 1,
     "closingDate": "06 December 2012",
-    "comments": "The accountants are heading for a carribean vacation"
+    "comments": "The accountants are heading for a carribean vacation",
  	"locale": "en" ,
   	"dateFormat": "dd MMMM yyyy"
 }
                     </code>
                     <code class="method-response">
 {
-    "resourceId": 1
+    "officeId": 1,
+    "resourceId": 9
 }
                     </code>
                 </div>
@@ -9571,7 +9577,7 @@ Request Body:
             <div class="method-section">
                 <div class="method-description">
                     <h4>Update an Accounting closure</h4>
-                    <p>Once an accounting closure is created, only the comment associated with it can be edited
+                    <p>Once an accounting closure is created, only the comments associated with it may be edited
                     </p>
                 </div>
                 <div class="method-example">
@@ -9588,22 +9594,11 @@ Request Body:
                     </code>
                     <code class="method-response">
 {
-    "resourceId": 1
-}
-                    </code>
-                </div>
-                <div class="method-example">
-                    <code class="method-request">
-PUT glclosures/1 
-Content-Type: application/json 
-Request Body:
-{
-    "disabled": true
-}
-                    </code>
-                    <code class="method-response">
-{
-    "resourceId": 1
+    "officeId": 1,
+    "resourceId": 1,
+    "changes": {
+        "comments": "All transactions verified by Johnny Cash"
+    }
 }
                     </code>
                 </div>
@@ -9612,10 +9607,10 @@ Request Body:
             <a id="glclosures_delete" name="glclosures_delete" class="old-syle-anchor">&nbsp;</a>
             <div class="method-section">
                 <div class="method-description">
-                    <h4>Delete An accounting closure</h4>
+                    <h4>Delete an accounting closure</h4>
                     <p>
                         <b>Note:</b> Only the latest accounting closure
-                        associated with a branch may be closed.
+                        associated with a branch may be deleted.
                     </p>
                 </div>
                 <div class="method-example">
@@ -9629,6 +9624,7 @@ No Request Body:
                     </code>
                     <code class="method-response">
 {
+    "officeId": 1,
     "resourceId": 1
 }
                     </code>
@@ -9641,7 +9637,7 @@ No Request Body:
                     <h3>Journal Entries</h3>
                     <p>A journal entry refers to the logging of 
                     transactions against general ledger accounts. A journal
-                    entry can consist of several line items, each of which is either a "debit" or a "credit". The total amount of the
+                    entry may consist of several line items, each of which is either a "debit" or a "credit". The total amount of the
                     debits must equal the total amount of the credits or the
                     journal entry is said to be "unbalanced" <br/><br/>
                     A journal entry directly changes the account balances on
@@ -9708,18 +9704,12 @@ No Request Body:
                             </td>
                         </tr>
                         <tr class=alt>
-                            <td>entryType</td>
-                        </tr>
-                        <tr>
-                            <td class=fielddesc>Either a Credit(1) or a Debit(2)</td>
-                        </tr>
-                        <tr class=alt>
                             <td>portfolioGenerated</td>
                         </tr>
                         <tr>
                             <td class=fielddesc>Flag determines if an entry is 
                             generated by the portfolio (posted automatically by 
-                            the system  during lifecycle of loan and saving
+                            the system  during the lifecycle of loan or saving
                             products) or manually created by using the <a href="
                             journalentries_create">Create (Balanced) Journal 
                             Entries</a> API
@@ -9761,7 +9751,7 @@ No Request Body:
                         </dd>
                         <dd>Flag determines if portfolio generated Journal
                         	Entries (posted automatically by the system 
-                        	during lifecycle of loan and saving products) 
+                        	during lifecycle of loan or saving products) 
                         	shall also be returned <br/>
                         	Set to "True" by default if not passed in explicity
                         </dd>
@@ -9803,7 +9793,7 @@ GET https://DomainName/api/v1/journalentries?transactionId=PB37X8Y21EQUY4S
         "glAccountName": "Something totally else",
         "glAccountId": 17,
         "glAccountCode": "340098",
-        "glAccountClassification": {
+        "glAccountType": {
             "id": 3,
             "code": "accountType.equity",
             "value": "EQUITY"
@@ -9837,7 +9827,7 @@ GET https://DomainName/api/v1/journalentries?transactionId=PB37X8Y21EQUY4S
         "glAccountName": "Something else",
         "glAccountId": 19,
         "glAccountCode": "560050",
-        "glAccountClassification": {
+        "glAccountType": {
             "id": 3,
             "code": "accountType.equity",
             "value": "EQUITY"
@@ -9879,7 +9869,7 @@ GET https://DomainName/api/v1/journalentries?transactionId=PB37X8Y21EQUY4S
                         amounts are equal <br/>
                         Compound Journal entries may have "n" debits and "m"
                         credits where both "m" and "n" are greater than 0
-                        and the sum or all debits and all credits are equal
+                        and the net sum or all debits and credits are equal
                         <br>
                     </p>
                     <table class=matrixHeading>
@@ -9901,9 +9891,9 @@ GET https://DomainName/api/v1/journalentries?transactionId=PB37X8Y21EQUY4S
                             	in the journal entry. Each credit entry contains
                             	the following items <br/>
                             	glAccountId: Identifier of the general ledger
-                            	account against which credit entry shall be 
+                            	account against which the credit entry shall be 
                             	made <br/>
-                            	amount: Amount of money involved in the credit
+                            	amount: Amount of money credited
                             	<br/>
                             	comments: Optional description associated with
                             	a credit entry
@@ -9918,7 +9908,7 @@ GET https://DomainName/api/v1/journalentries?transactionId=PB37X8Y21EQUY4S
                             	in the journal entry. Each debit entry contains the following items <br/>
                             	glAccountId: Identifier of the general ledger account against which the debit entry shall be
                             	made <br/>
-                            	amount: Amount of money involved in the debit
+                            	amount: Amount of money debited
                             	<br/>
                             	comments: Optional description associated with
                             	a debit entry
@@ -9955,7 +9945,8 @@ Request Body:
                     </code>
                     <code class="method-response">
 {
-    "resourceId": C1MAE935K0IAEYA
+    "officeId": 1,
+    "transactionId": "DNEEMS2LPD0NJ9O"
 }
                     </code>
                 </div>
@@ -9979,13 +9970,13 @@ GET https://DomainName/api/v1/journalentries/{entryId}
                     </code>
                     <code class="method-response">
 {
-    "id": 22,
+    "id": 1,
     "officeId": 2,
     "officeName": "sub branch 1",
     "glAccountName": "Income from interest",
     "glAccountId": 14,
     "glAccountCode": "400001",
-    "glAccountClassification": {
+    "glAccountType": {
         "id": 4,
         "code": "accountType.income",
         "value": "INCOME"
@@ -10024,7 +10015,8 @@ GET https://DomainName/api/v1/journalentries/{entryId}
                     <p>
                         <b>Note:</b> A journal entry is reversed by logging debits
                         for all credits that constitute the Journal entry and
-                        vice-versa 
+                        vice-versa. The transactionId of the "reversal Entry" is returned
+                        as the methods response 
                     </p>
                     <h5>Arguments</h5>
 					<dl class="argument-list">
@@ -10045,7 +10037,7 @@ Content-Type: application/json
 </code>
                     <code class="method-response">
 {
-    "resourceId": C1MAE935K0IAEYA
+    "transactionId": "YFDYMPBVVI9TRJP"
 }
                     </code>
                 </div>

@@ -130,7 +130,13 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         final ApplicationCurrency currency = this.applicationCurrencyRepository.findOneByCode(loan.getPrincpal().getCurrencyCode());
 
-        final Map<String, Object> changes = loan.disburse(currentUser, command, defaultLoanLifecycleStateMachine(), currency);
+        /***
+         * In cases where an "Undo disbursement is done and the loan is
+         * disbursed again, we need to ensure the old transactions are entered
+         * again in accounting
+         ***/
+        final List<Long> existingTransactionIds = new ArrayList<Long>();
+        final Map<String, Object> changes = loan.disburse(currentUser, command, defaultLoanLifecycleStateMachine(), currency, existingTransactionIds);
         if (!changes.isEmpty()) {
             this.loanRepository.save(loan);
 
@@ -139,7 +145,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 this.noteRepository.save(note);
             }
             
-            final Map<String, Object> accountingBridgeData = loan.deriveDisbursementData(currency.toData());
+            final Map<String, Object> accountingBridgeData = loan.deriveDisbursementData(currency.toData(), existingTransactionIds);
             journalEntryWritePlatformService.createJournalEntriesForLoan(accountingBridgeData);
         }
 
@@ -271,10 +277,10 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final LoanTransaction newTransactionDetail = loan.adjustExistingTransaction(transactionDate, transactionAmount,
                 defaultLoanLifecycleStateMachine(), transactionToAdjust);
         if (newTransactionDetail.isGreaterThanZero(loan.getPrincpal().getCurrency())) {
-            this.loanTransactionRepository.save(newTransactionDetail);
+            this.loanTransactionRepository.saveAndFlush(newTransactionDetail);
         }
 
-        this.loanRepository.save(loan);
+        this.loanRepository.saveAndFlush(loan);
 
         final String noteText = command.stringValueOfParameterNamed("note");
         if (StringUtils.isNotBlank(noteText)) {
