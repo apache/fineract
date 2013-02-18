@@ -27,9 +27,9 @@ public class LoanTransactionDTO {
     private boolean contra;
     private boolean writeOff;
 
-    public LoanTransactionDTO(String transactionId, Date transactionDate, BigDecimal amount, BigDecimal principal, BigDecimal interest,
-            BigDecimal fees, BigDecimal penalties, boolean disbursement, boolean repayment, boolean repaymentAtDisbursement,
-            boolean contra, boolean writeOff) {
+    public LoanTransactionDTO(final String transactionId, final Date transactionDate, final BigDecimal amount, final BigDecimal principal,
+            final BigDecimal interest, final BigDecimal fees, final BigDecimal penalties, final boolean disbursement,
+            final boolean repayment, final boolean repaymentAtDisbursement, final boolean contra, final boolean writeOff) {
         this.transactionId = transactionId;
         this.transactionDate = transactionDate;
         this.amount = amount;
@@ -48,7 +48,7 @@ public class LoanTransactionDTO {
         return this.transactionDate;
     }
 
-    public void setTransactionDate(Date transactionDate) {
+    public void setTransactionDate(final Date transactionDate) {
         this.transactionDate = transactionDate;
     }
 
@@ -56,7 +56,7 @@ public class LoanTransactionDTO {
         return this.transactionId;
     }
 
-    public void setTransactionId(String transactionId) {
+    public void setTransactionId(final String transactionId) {
         this.transactionId = transactionId;
     }
 
@@ -64,7 +64,7 @@ public class LoanTransactionDTO {
         return this.amount;
     }
 
-    public void setAmount(BigDecimal amount) {
+    public void setAmount(final BigDecimal amount) {
         this.amount = amount;
     }
 
@@ -72,7 +72,7 @@ public class LoanTransactionDTO {
         return this.principal;
     }
 
-    public void setPrincipal(BigDecimal principal) {
+    public void setPrincipal(final BigDecimal principal) {
         this.principal = principal;
     }
 
@@ -80,7 +80,7 @@ public class LoanTransactionDTO {
         return this.interest;
     }
 
-    public void setInterest(BigDecimal interest) {
+    public void setInterest(final BigDecimal interest) {
         this.interest = interest;
     }
 
@@ -88,7 +88,7 @@ public class LoanTransactionDTO {
         return this.fees;
     }
 
-    public void setFees(BigDecimal fees) {
+    public void setFees(final BigDecimal fees) {
         this.fees = fees;
     }
 
@@ -96,7 +96,7 @@ public class LoanTransactionDTO {
         return this.penalties;
     }
 
-    public void setPenalties(BigDecimal penalties) {
+    public void setPenalties(final BigDecimal penalties) {
         this.penalties = penalties;
     }
 
@@ -104,7 +104,7 @@ public class LoanTransactionDTO {
         return this.disbursement;
     }
 
-    public void setDisbursement(boolean disbursement) {
+    public void setDisbursement(final boolean disbursement) {
         this.disbursement = disbursement;
     }
 
@@ -112,7 +112,7 @@ public class LoanTransactionDTO {
         return this.repayment;
     }
 
-    public void setRepayment(boolean repayment) {
+    public void setRepayment(final boolean repayment) {
         this.repayment = repayment;
     }
 
@@ -120,7 +120,7 @@ public class LoanTransactionDTO {
         return this.contra;
     }
 
-    public void setContra(boolean contra) {
+    public void setContra(final boolean contra) {
         this.contra = contra;
     }
 
@@ -128,7 +128,7 @@ public class LoanTransactionDTO {
         return this.writeOff;
     }
 
-    public void setWriteOff(boolean writeOff) {
+    public void setWriteOff(final boolean writeOff) {
         this.writeOff = writeOff;
     }
 
@@ -136,7 +136,7 @@ public class LoanTransactionDTO {
         return this.repaymentAtDisbursement;
     }
 
-    public void setRepaymentAtDisbursement(boolean repaymentAtDisbursement) {
+    public void setRepaymentAtDisbursement(final boolean repaymentAtDisbursement) {
         this.repaymentAtDisbursement = repaymentAtDisbursement;
     }
 

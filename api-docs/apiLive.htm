@@ -5293,13 +5293,13 @@ GET https://DomainName/api/v1/loanproducts/{productId}
 				<div class="method-description">
 					<h4>Create a Loan Product</h4>
 					<p>Depending of the Accounting Rule (accountingRule) selected, 
-				     additional fields with details with the appropriate Ledger Account 
+				     additional fields with details of the appropriate Ledger Account 
 					 identifiers would need to be passed in.
 					</p>
 
 					</p>Refer <a href="https://mifosforge.jira.com/wiki/display/MIFOSX/A+Possible+accounting+Spec">
 					 MifosX Accounting Specs Draft</a> for more details regarding the 
-					 significance of the selected accounting Rule
+					 significance of the selected accounting rule
 					</p>
 
                     <table class=matrixHeading>
@@ -9665,7 +9665,7 @@ No Request Body:
                             </td>
                         </tr>
                         <tr class=alt>
-                            <td>entryDate</td>
+                            <td>transactionDate</td>
                         </tr>
                         <tr>
                             <td class=fielddesc>The target date for which this
@@ -9798,7 +9798,7 @@ GET https://DomainName/api/v1/journalentries?transactionId=PB37X8Y21EQUY4S
             "code": "accountType.equity",
             "value": "EQUITY"
         },
-        "entryDate": [
+        "transactionDate": [
             2012,
             12,
             12
@@ -9832,7 +9832,7 @@ GET https://DomainName/api/v1/journalentries?transactionId=PB37X8Y21EQUY4S
             "code": "accountType.equity",
             "value": "EQUITY"
         },
-        "entryDate": [
+        "transactionDate": [
             2012,
             12,
             12
@@ -9877,7 +9877,7 @@ GET https://DomainName/api/v1/journalentries?transactionId=PB37X8Y21EQUY4S
                             <td><div class="mifosXHeading2">Mandatory Fields</div></td>
                         </tr>
                         <tr class=alt>
-                            <td>officeId, entryDate 
+                            <td>officeId, transactionDate 
                             </td>
                         </tr>
                         <tr>
@@ -9927,7 +9927,7 @@ Content-Type: application/json
 Request Body:
 {
 "officeId": 1,
-"entryDate": "06 December 2012",
+"transactionDate": "06 December 2012",
 "comments": "Gifts for staff",
 "locale": "en" ,
 "dateFormat": "dd MMMM yyyy",
@@ -9981,7 +9981,7 @@ GET https://DomainName/api/v1/journalentries/{entryId}
         "code": "accountType.income",
         "value": "INCOME"
     },
-    "entryDate": [
+    "transactionDate": [
         2012,
         11,
         2

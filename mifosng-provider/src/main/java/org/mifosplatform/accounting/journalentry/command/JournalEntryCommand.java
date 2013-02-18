@@ -19,16 +19,16 @@ import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidation
 public class JournalEntryCommand {
 
     private final Long officeId;
-    private final LocalDate entryDate;
+    private final LocalDate transactionDate;
     private final String comments;
 
     private final SingleDebitOrCreditEntryCommand[] credits;
     private final SingleDebitOrCreditEntryCommand[] debits;
 
-    public JournalEntryCommand(Long officeId, LocalDate entryDate, String comments, SingleDebitOrCreditEntryCommand[] credits,
-            SingleDebitOrCreditEntryCommand[] debits) {
+    public JournalEntryCommand(final Long officeId, final LocalDate transactionDate, final String comments,
+            final SingleDebitOrCreditEntryCommand[] credits, final SingleDebitOrCreditEntryCommand[] debits) {
         this.officeId = officeId;
-        this.entryDate = entryDate;
+        this.transactionDate = transactionDate;
         this.comments = comments;
         this.credits = credits;
         this.debits = debits;
@@ -36,11 +36,11 @@ public class JournalEntryCommand {
 
     public void validateForCreate() {
 
-        List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
 
-        DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("GLJournalEntry");
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("GLJournalEntry");
 
-        baseDataValidator.reset().parameter("entryDate").value(this.entryDate).notBlank();
+        baseDataValidator.reset().parameter("transactionDate").value(this.transactionDate).notBlank();
 
         baseDataValidator.reset().parameter("officeId").value(this.officeId).notNull().integerGreaterThanZero();
 
@@ -56,7 +56,7 @@ public class JournalEntryCommand {
                 validateSingleDebitOrCredit(baseDataValidator, "credits", 0, new SingleDebitOrCreditEntryCommand(null, null, null, null));
             } else {
                 int i = 0;
-                for (SingleDebitOrCreditEntryCommand credit : this.credits) {
+                for (final SingleDebitOrCreditEntryCommand credit : this.credits) {
                     validateSingleDebitOrCredit(baseDataValidator, "credits", i, credit);
                     i++;
                 }
@@ -69,7 +69,7 @@ public class JournalEntryCommand {
                 validateSingleDebitOrCredit(baseDataValidator, "credits", 0, new SingleDebitOrCreditEntryCommand(null, null, null, null));
             } else {
                 int i = 0;
-                for (SingleDebitOrCreditEntryCommand debit : this.debits) {
+                for (final SingleDebitOrCreditEntryCommand debit : this.debits) {
                     validateSingleDebitOrCredit(baseDataValidator, "debits", i, debit);
                     i++;
                 }
@@ -85,8 +85,8 @@ public class JournalEntryCommand {
      * @param i
      * @param credit
      */
-    private void validateSingleDebitOrCredit(DataValidatorBuilder baseDataValidator, String paramSuffix, int arrayPos,
-            SingleDebitOrCreditEntryCommand credit) {
+    private void validateSingleDebitOrCredit(final DataValidatorBuilder baseDataValidator, final String paramSuffix, final int arrayPos,
+            final SingleDebitOrCreditEntryCommand credit) {
         baseDataValidator.reset().parameter(paramSuffix + "[" + arrayPos + "].glAccountId").value(credit.getGlAccountId()).notNull()
                 .integerGreaterThanZero();
         baseDataValidator.reset().parameter(paramSuffix + "[" + arrayPos + "].amount").value(credit.getAmount()).notNull()
@@ -97,8 +97,8 @@ public class JournalEntryCommand {
         return this.officeId;
     }
 
-    public LocalDate getEntryDate() {
-        return this.entryDate;
+    public LocalDate getTransactionDate() {
+        return this.transactionDate;
     }
 
     public String getComments() {

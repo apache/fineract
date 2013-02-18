@@ -28,7 +28,7 @@ public class DateParam {
 
     private final Date date;
 
-    public DateParam(String dateStr) throws WebApplicationException {
+    public DateParam(final String dateStr) throws WebApplicationException {
         if (StringUtils.isEmpty(dateStr)) {
             this.date = null;
             return;
@@ -36,13 +36,13 @@ public class DateParam {
         final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         try {
             this.date = dateFormat.parse(dateStr);
-        } catch (ParseException e) {
+        } catch (final ParseException e) {
             throw new WebApplicationException(Response.status(Status.BAD_REQUEST)
                     .entity("Couldn't parse date string: Expected format yyyy-mm-dd " + e.getMessage()).build());
         }
     }
 
     public Date getDate() {
-        return date;
+        return this.date;
     }
 }

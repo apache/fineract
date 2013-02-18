@@ -46,18 +46,18 @@ public class GLClosureReadPlatformServiceImpl implements GLClosureReadPlatformSe
         @Override
         public GLClosureData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
 
-            Long id = rs.getLong("id");
-            Long officeId = rs.getLong("officeId");
-            String officeName = rs.getString("officeName");
-            LocalDate closingDate = JdbcSupport.getLocalDate(rs, "closingDate");
-            Boolean deleted = rs.getBoolean("isDeleted");
-            LocalDate createdDate = JdbcSupport.getLocalDate(rs, "createdDate");
-            LocalDate lastUpdatedDate = JdbcSupport.getLocalDate(rs, "updatedDate");
-            Long creatingByUserId = rs.getLong("creatingUserId");
-            String createdByUserName = rs.getString("creatingUserName");
-            Long lastUpdatedByUserId = rs.getLong("updatingUserId");
-            String lastUpdatedByUserName = rs.getString("updatingUserName");
-            String comments = rs.getString("comments");
+            final Long id = rs.getLong("id");
+            final Long officeId = rs.getLong("officeId");
+            final String officeName = rs.getString("officeName");
+            final LocalDate closingDate = JdbcSupport.getLocalDate(rs, "closingDate");
+            final Boolean deleted = rs.getBoolean("isDeleted");
+            final LocalDate createdDate = JdbcSupport.getLocalDate(rs, "createdDate");
+            final LocalDate lastUpdatedDate = JdbcSupport.getLocalDate(rs, "updatedDate");
+            final Long creatingByUserId = rs.getLong("creatingUserId");
+            final String createdByUserName = rs.getString("creatingUserName");
+            final Long lastUpdatedByUserId = rs.getLong("updatingUserId");
+            final String lastUpdatedByUserName = rs.getString("updatingUserName");
+            final String comments = rs.getString("comments");
 
             return new GLClosureData(id, officeId, officeName, closingDate, deleted, createdDate, lastUpdatedDate, creatingByUserId,
                     createdByUserName, lastUpdatedByUserId, lastUpdatedByUserName, comments);
@@ -65,11 +65,11 @@ public class GLClosureReadPlatformServiceImpl implements GLClosureReadPlatformSe
     }
 
     @Override
-    public List<GLClosureData> retrieveAllGLClosures(Long officeId) {
-        GLClosureMapper rm = new GLClosureMapper();
+    public List<GLClosureData> retrieveAllGLClosures(final Long officeId) {
+        final GLClosureMapper rm = new GLClosureMapper();
 
         String sql = "select " + rm.schema() + " and glClosure.is_deleted = 0";
-        Object[] objectArray = new Object[1];
+        final Object[] objectArray = new Object[1];
         int arrayPos = 0;
         if (officeId != null && officeId != 0) {
             sql += " and glClosure.office_id = ?";
@@ -79,21 +79,21 @@ public class GLClosureReadPlatformServiceImpl implements GLClosureReadPlatformSe
 
         sql = sql + " order by glClosure.closing_date desc";
 
-        Object[] finalObjectArray = Arrays.copyOf(objectArray, arrayPos);
+        final Object[] finalObjectArray = Arrays.copyOf(objectArray, arrayPos);
         return this.jdbcTemplate.query(sql, rm, finalObjectArray);
     }
 
     @Override
-    public GLClosureData retrieveGLClosureById(long glClosureId) {
+    public GLClosureData retrieveGLClosureById(final long glClosureId) {
         try {
 
-            GLClosureMapper rm = new GLClosureMapper();
-            String sql = "select " + rm.schema() + " and glClosure.id = ?";
+            final GLClosureMapper rm = new GLClosureMapper();
+            final String sql = "select " + rm.schema() + " and glClosure.id = ?";
 
-            GLClosureData glAccountData = this.jdbcTemplate.queryForObject(sql, rm, new Object[] { glClosureId });
+            final GLClosureData glAccountData = this.jdbcTemplate.queryForObject(sql, rm, new Object[] { glClosureId });
 
             return glAccountData;
-        } catch (EmptyResultDataAccessException e) {
+        } catch (final EmptyResultDataAccessException e) {
             throw new GLClosureNotFoundException(glClosureId);
         }
     }

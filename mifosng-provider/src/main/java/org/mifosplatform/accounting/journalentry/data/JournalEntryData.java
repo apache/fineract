@@ -33,7 +33,7 @@ public class JournalEntryData {
     @SuppressWarnings("unused")
     private final EnumOptionData glAccountType;
     @SuppressWarnings("unused")
-    private final LocalDate entryDate;
+    private final LocalDate transactionDate;
     @SuppressWarnings("unused")
     private final EnumOptionData entryType;
     @SuppressWarnings("unused")
@@ -57,10 +57,11 @@ public class JournalEntryData {
     @SuppressWarnings("unused")
     private final Boolean reversed;
 
-    public JournalEntryData(Long id, Long officeId, String officeName, String glAccountName, Long glAccountId, String glAccountCode,
-            EnumOptionData glAccountClassification, LocalDate entryDate, EnumOptionData entryType, BigDecimal amount, String transactionId,
-            Boolean portfolioGenerated, String entityType, Long entityId, Long createdByUserId, LocalDate createdDate,
-            String createdByUserName, String comments, Boolean reversed) {
+    public JournalEntryData(final Long id, final Long officeId, final String officeName, final String glAccountName,
+            final Long glAccountId, final String glAccountCode, final EnumOptionData glAccountClassification,
+            final LocalDate transactionDate, final EnumOptionData entryType, final BigDecimal amount, final String transactionId,
+            final Boolean portfolioGenerated, final String entityType, final Long entityId, final Long createdByUserId,
+            final LocalDate createdDate, final String createdByUserName, final String comments, final Boolean reversed) {
         this.id = id;
         this.officeId = officeId;
         this.officeName = officeName;
@@ -68,7 +69,7 @@ public class JournalEntryData {
         this.glAccountId = glAccountId;
         this.glAccountCode = glAccountCode;
         this.glAccountType = glAccountClassification;
-        this.entryDate = entryDate;
+        this.transactionDate = transactionDate;
         this.entryType = entryType;
         this.amount = amount;
         this.transactionId = transactionId;

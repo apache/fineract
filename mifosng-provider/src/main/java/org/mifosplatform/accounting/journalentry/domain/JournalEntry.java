@@ -54,7 +54,7 @@ public class JournalEntry extends AbstractAuditableCustom<AppUser, Long> {
 
     @Column(name = "entry_date")
     @Temporal(TemporalType.DATE)
-    private Date entryDate;
+    private Date transactionDate;
 
     @Column(name = "type_enum", nullable = false, length = 50)
     private Integer type;
@@ -74,9 +74,10 @@ public class JournalEntry extends AbstractAuditableCustom<AppUser, Long> {
     @Column(name = "entity_id")
     private Long entityId;
 
-    public static JournalEntry createNew(Office office, GLAccount glAccount, String transactionId, boolean portfolioGenerated,
-            Date entryDate, JournalEntryType journalEntryType, BigDecimal amount, String description, String entityType, Long entityId) {
-        return new JournalEntry(office, glAccount, transactionId, portfolioGenerated, entryDate, journalEntryType.getValue(), amount,
+    public static JournalEntry createNew(final Office office, final GLAccount glAccount, final String transactionId,
+            final boolean portfolioGenerated, final Date transactionDate, final JournalEntryType journalEntryType, final BigDecimal amount,
+            final String description, final String entityType, final Long entityId) {
+        return new JournalEntry(office, glAccount, transactionId, portfolioGenerated, transactionDate, journalEntryType.getValue(), amount,
                 description, entityType, entityId);
     }
 
@@ -84,15 +85,16 @@ public class JournalEntry extends AbstractAuditableCustom<AppUser, Long> {
         //
     }
 
-    public JournalEntry(Office office, GLAccount glAccount, String transactionId, boolean portfolioGenerated, Date entryDate,
-            Integer type, BigDecimal amount, String description, String entityType, Long entityId) {
+    public JournalEntry(final Office office, final GLAccount glAccount, final String transactionId, final boolean portfolioGenerated,
+            final Date transactionDate, final Integer type, final BigDecimal amount, final String description, final String entityType,
+            final Long entityId) {
         this.office = office;
         this.glAccount = glAccount;
         this.reversalJournalEntry = null;
         this.transactionId = transactionId;
         this.reversed = false;
         this.portfolioGenerated = portfolioGenerated;
-        this.entryDate = entryDate;
+        this.transactionDate = transactionDate;
         this.type = type;
         this.amount = amount;
         this.description = StringUtils.defaultIfEmpty(description, null);
@@ -101,7 +103,7 @@ public class JournalEntry extends AbstractAuditableCustom<AppUser, Long> {
     }
 
     public boolean isDebitEntry() {
-        return JournalEntryType.DEBIT.getValue().equals(type);
+        return JournalEntryType.DEBIT.getValue().equals(this.type);
     }
 
     public Integer getType() {
@@ -116,19 +118,19 @@ public class JournalEntry extends AbstractAuditableCustom<AppUser, Long> {
         return this.glAccount;
     }
 
-    public Date getEntryDate() {
-        return this.entryDate;
+    public Date getTransactionDate() {
+        return this.transactionDate;
     }
 
     public BigDecimal getAmount() {
         return this.amount;
     }
 
-    public void setReversalJournalEntry(JournalEntry reversalJournalEntry) {
+    public void setReversalJournalEntry(final JournalEntry reversalJournalEntry) {
         this.reversalJournalEntry = reversalJournalEntry;
     }
 
-    public void setReversed(boolean reversed) {
+    public void setReversed(final boolean reversed) {
         this.reversed = reversed;
     }
 

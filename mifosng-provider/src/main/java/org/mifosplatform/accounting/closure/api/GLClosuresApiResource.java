@@ -51,8 +51,8 @@ public class GLClosuresApiResource {
 
     private final String resourceNameForPermission = "GLCLOSURE";
 
-    private GLClosureReadPlatformService glClosureReadPlatformService;
-    private OfficeReadPlatformService officeReadPlatformService;
+    private final GLClosureReadPlatformService glClosureReadPlatformService;
+    private final OfficeReadPlatformService officeReadPlatformService;
     private final DefaultToApiJsonSerializer<GLClosureData> apiJsonSerializerService;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final PlatformSecurityContext context;
@@ -76,10 +76,10 @@ public class GLClosuresApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveAllClosures(@Context final UriInfo uriInfo, @QueryParam("officeId") final Long officeId) {
 
-        context.authenticatedUser().validateHasReadPermission(resourceNameForPermission);
+        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermission);
         final List<GLClosureData> glClosureDatas = this.glClosureReadPlatformService.retrieveAllGLClosures(officeId);
 
-        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.apiJsonSerializerService.serialize(settings, glClosureDatas, RESPONSE_DATA_PARAMETERS);
     }
 
@@ -89,13 +89,13 @@ public class GLClosuresApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String retreiveClosure(@PathParam("glClosureId") final Long glClosureId, @Context final UriInfo uriInfo) {
 
-        context.authenticatedUser().validateHasReadPermission(resourceNameForPermission);
+        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermission);
 
-        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 
         final GLClosureData glClosureData = this.glClosureReadPlatformService.retrieveGLClosureById(glClosureId);
         if (settings.isTemplate()) {
-            glClosureData.setAllowedOffices(new ArrayList<OfficeLookup>(officeReadPlatformService.retrieveAllOfficesForLookup()));
+            glClosureData.setAllowedOffices(new ArrayList<OfficeLookup>(this.officeReadPlatformService.retrieveAllOfficesForLookup()));
         }
 
         return this.apiJsonSerializerService.serialize(settings, glClosureData, RESPONSE_DATA_PARAMETERS);

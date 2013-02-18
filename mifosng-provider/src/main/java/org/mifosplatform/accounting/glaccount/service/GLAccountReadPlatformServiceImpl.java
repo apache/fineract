@@ -47,25 +47,25 @@ public class GLAccountReadPlatformServiceImpl implements GLAccountReadPlatformSe
         @Override
         public GLAccountData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
 
-            Long id = rs.getLong("id");
-            String name = rs.getString("name");
-            Long parentId = JdbcSupport.getLong(rs,"parentId"); 
-            String glCode = rs.getString("glCode");
-            boolean disabled = rs.getBoolean("disabled");
-            boolean manualEntriesAllowed = rs.getBoolean("manualEntriesAllowed");
+            final Long id = rs.getLong("id");
+            final String name = rs.getString("name");
+            final Long parentId = JdbcSupport.getLong(rs, "parentId");
+            final String glCode = rs.getString("glCode");
+            final boolean disabled = rs.getBoolean("disabled");
+            final boolean manualEntriesAllowed = rs.getBoolean("manualEntriesAllowed");
             final int accountTypeId = JdbcSupport.getInteger(rs, "classification");
             final EnumOptionData accountType = AccountingEnumerations.gLAccountType(accountTypeId);
             final int usageId = JdbcSupport.getInteger(rs, "accountUsage");
             final EnumOptionData usage = AccountingEnumerations.gLAccountUsage(usageId);
-            String description = rs.getString("description");
+            final String description = rs.getString("description");
 
             return new GLAccountData(id, name, parentId, glCode, disabled, manualEntriesAllowed, accountType, usage, description);
         }
     }
 
     @Override
-    public List<GLAccountData> retrieveAllGLAccounts(Integer accountClassification, String searchParam, Integer usage,
-            Boolean manualTransactionsAllowed, Boolean disabled) {
+    public List<GLAccountData> retrieveAllGLAccounts(final Integer accountClassification, final String searchParam, final Integer usage,
+            final Boolean manualTransactionsAllowed, final Boolean disabled) {
         if (accountClassification != null) {
             if (!checkValidGLAccountType(accountClassification)) { throw new GLAccountInvalidClassificationException(accountClassification); }
         }
@@ -74,9 +74,9 @@ public class GLAccountReadPlatformServiceImpl implements GLAccountReadPlatformSe
             if (!checkValidGLAccountUsage(usage)) { throw new GLAccountInvalidClassificationException(accountClassification); }
         }
 
-        GLAccountMapper rm = new GLAccountMapper();
+        final GLAccountMapper rm = new GLAccountMapper();
         String sql = "select " + rm.schema();
-        Object[] paramaterArray = new Object[3];
+        final Object[] paramaterArray = new Object[3];
         int arrayPos = 0;
         boolean filtersPresent = false;
         if ((accountClassification != null) || StringUtils.isNotBlank(searchParam) || (usage != null)
@@ -142,39 +142,39 @@ public class GLAccountReadPlatformServiceImpl implements GLAccountReadPlatformSe
         }
 
         sql = sql + " order by glCode";
-        Object[] finalObjectArray = Arrays.copyOf(paramaterArray, arrayPos);
+        final Object[] finalObjectArray = Arrays.copyOf(paramaterArray, arrayPos);
         return this.jdbcTemplate.query(sql, rm, finalObjectArray);
     }
 
     @Override
-    public GLAccountData retrieveGLAccountById(long glAccountId) {
+    public GLAccountData retrieveGLAccountById(final long glAccountId) {
         try {
 
-            GLAccountMapper rm = new GLAccountMapper();
-            String sql = "select " + rm.schema() + " where id = ?";
+            final GLAccountMapper rm = new GLAccountMapper();
+            final String sql = "select " + rm.schema() + " where id = ?";
 
-            GLAccountData glAccountData = this.jdbcTemplate.queryForObject(sql, rm, new Object[] { glAccountId });
+            final GLAccountData glAccountData = this.jdbcTemplate.queryForObject(sql, rm, new Object[] { glAccountId });
 
             return glAccountData;
-        } catch (EmptyResultDataAccessException e) {
+        } catch (final EmptyResultDataAccessException e) {
             throw new GLAccountNotFoundException(glAccountId);
         }
     }
 
     @Override
-    public List<GLAccountData> retrieveAllEnabledDetailGLAccounts(GLAccountType accountType) {
+    public List<GLAccountData> retrieveAllEnabledDetailGLAccounts(final GLAccountType accountType) {
         return retrieveAllGLAccounts(accountType.getValue(), null, GLAccountUsage.DETAIL.getValue(), null, false);
     }
 
     private static boolean checkValidGLAccountType(final int type) {
-        for (GLAccountType accountType : GLAccountType.values()) {
+        for (final GLAccountType accountType : GLAccountType.values()) {
             if (accountType.getValue().equals(type)) { return true; }
         }
         return false;
     }
 
     private static boolean checkValidGLAccountUsage(final int type) {
-        for (GLAccountUsage accountUsage : GLAccountUsage.values()) {
+        for (final GLAccountUsage accountUsage : GLAccountUsage.values()) {
             if (accountUsage.getValue().equals(type)) { return true; }
         }
         return false;

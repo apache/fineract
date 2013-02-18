@@ -49,7 +49,8 @@ public class GLAccountData {
         this.usageOptions = null;
     }
 
-    public GLAccountData(GLAccountData accountData, List<EnumOptionData> accountTypeOptions, List<EnumOptionData> usageOptions) {
+    public GLAccountData(final GLAccountData accountData, final List<EnumOptionData> accountTypeOptions,
+            final List<EnumOptionData> usageOptions) {
         this.id = accountData.id;
         this.name = accountData.name;
         this.parentId = accountData.parentId;

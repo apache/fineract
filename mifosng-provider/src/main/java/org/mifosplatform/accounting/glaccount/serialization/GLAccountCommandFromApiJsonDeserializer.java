@@ -38,25 +38,25 @@ public final class GLAccountCommandFromApiJsonDeserializer extends AbstractFromA
     }
 
     @Override
-    public GLAccountCommand commandFromApiJson(String json) {
+    public GLAccountCommand commandFromApiJson(final String json) {
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        Set<String> supportedParameters = GLAccountJsonInputParams.getAllValues();
-        fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, supportedParameters);
+        final Set<String> supportedParameters = GLAccountJsonInputParams.getAllValues();
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, supportedParameters);
 
-        final JsonElement element = fromApiJsonHelper.parse(json);
+        final JsonElement element = this.fromApiJsonHelper.parse(json);
 
-        final Long id = fromApiJsonHelper.extractLongNamed(GLAccountJsonInputParams.ID.getValue(), element);
-        final String name = fromApiJsonHelper.extractStringNamed(GLAccountJsonInputParams.NAME.getValue(), element);
-        final Long parentId = fromApiJsonHelper.extractLongNamed(GLAccountJsonInputParams.PARENT_ID.getValue(), element);
-        final String glCode = fromApiJsonHelper.extractStringNamed(GLAccountJsonInputParams.GL_CODE.getValue(), element);
-        final Boolean disabled = fromApiJsonHelper.extractBooleanNamed(GLAccountJsonInputParams.DISABLED.getValue(), element);
-        final Boolean manualEntriesAllowed = fromApiJsonHelper.extractBooleanNamed(
+        final Long id = this.fromApiJsonHelper.extractLongNamed(GLAccountJsonInputParams.ID.getValue(), element);
+        final String name = this.fromApiJsonHelper.extractStringNamed(GLAccountJsonInputParams.NAME.getValue(), element);
+        final Long parentId = this.fromApiJsonHelper.extractLongNamed(GLAccountJsonInputParams.PARENT_ID.getValue(), element);
+        final String glCode = this.fromApiJsonHelper.extractStringNamed(GLAccountJsonInputParams.GL_CODE.getValue(), element);
+        final Boolean disabled = this.fromApiJsonHelper.extractBooleanNamed(GLAccountJsonInputParams.DISABLED.getValue(), element);
+        final Boolean manualEntriesAllowed = this.fromApiJsonHelper.extractBooleanNamed(
                 GLAccountJsonInputParams.MANUAL_ENTRIES_ALLOWED.getValue(), element);
-        final Integer type = fromApiJsonHelper.extractIntegerSansLocaleNamed(GLAccountJsonInputParams.TYPE.getValue(), element);
-        final Integer usage = fromApiJsonHelper.extractIntegerSansLocaleNamed(GLAccountJsonInputParams.USAGE.getValue(), element);
-        final String description = fromApiJsonHelper.extractStringNamed(GLAccountJsonInputParams.DESCRIPTION.getValue(), element);
+        final Integer type = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(GLAccountJsonInputParams.TYPE.getValue(), element);
+        final Integer usage = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(GLAccountJsonInputParams.USAGE.getValue(), element);
+        final String description = this.fromApiJsonHelper.extractStringNamed(GLAccountJsonInputParams.DESCRIPTION.getValue(), element);
 
         return new GLAccountCommand(id, name, parentId, glCode, disabled, manualEntriesAllowed, type, usage, description);
     }

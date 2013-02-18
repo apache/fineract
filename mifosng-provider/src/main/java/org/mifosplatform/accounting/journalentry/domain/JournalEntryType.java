@@ -8,7 +8,6 @@ package org.mifosplatform.accounting.journalentry.domain;
 import java.util.HashMap;
 import java.util.Map;
 
-
 public enum JournalEntryType {
 
     CREDIT(1, "journalEntryType.credit"), DEBIT(2, "journalEntrytType.debit");
@@ -26,18 +25,18 @@ public enum JournalEntryType {
     }
 
     public String getCode() {
-        return code;
+        return this.code;
     }
 
     private static final Map<Integer, JournalEntryType> intToEnumMap = new HashMap<Integer, JournalEntryType>();
     static {
-        for (JournalEntryType type : JournalEntryType.values()) {
+        for (final JournalEntryType type : JournalEntryType.values()) {
             intToEnumMap.put(type.value, type);
         }
     }
 
-    public static JournalEntryType fromInt(int i) {
-        JournalEntryType type = intToEnumMap.get(Integer.valueOf(i));
+    public static JournalEntryType fromInt(final int i) {
+        final JournalEntryType type = intToEnumMap.get(Integer.valueOf(i));
         return type;
     }
 

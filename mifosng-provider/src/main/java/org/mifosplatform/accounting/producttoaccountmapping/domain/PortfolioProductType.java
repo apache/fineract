@@ -29,18 +29,18 @@ public enum PortfolioProductType {
     }
 
     public String getCode() {
-        return code;
+        return this.code;
     }
 
     private static final Map<Integer, PortfolioProductType> intToEnumMap = new HashMap<Integer, PortfolioProductType>();
     static {
-        for (PortfolioProductType type : PortfolioProductType.values()) {
+        for (final PortfolioProductType type : PortfolioProductType.values()) {
             intToEnumMap.put(type.value, type);
         }
     }
 
-    public static PortfolioProductType fromInt(int i) {
-        PortfolioProductType type = intToEnumMap.get(Integer.valueOf(i));
+    public static PortfolioProductType fromInt(final int i) {
+        final PortfolioProductType type = intToEnumMap.get(Integer.valueOf(i));
         return type;
     }
 

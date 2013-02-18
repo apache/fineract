@@ -31,13 +31,13 @@ public class AccountingConstants {
 
         private static final Map<Integer, CASH_ACCOUNTS_FOR_LOAN> intToEnumMap = new HashMap<Integer, CASH_ACCOUNTS_FOR_LOAN>();
         static {
-            for (CASH_ACCOUNTS_FOR_LOAN type : CASH_ACCOUNTS_FOR_LOAN.values()) {
+            for (final CASH_ACCOUNTS_FOR_LOAN type : CASH_ACCOUNTS_FOR_LOAN.values()) {
                 intToEnumMap.put(type.value, type);
             }
         }
 
-        public static CASH_ACCOUNTS_FOR_LOAN fromInt(int i) {
-            CASH_ACCOUNTS_FOR_LOAN type = intToEnumMap.get(Integer.valueOf(i));
+        public static CASH_ACCOUNTS_FOR_LOAN fromInt(final int i) {
+            final CASH_ACCOUNTS_FOR_LOAN type = intToEnumMap.get(Integer.valueOf(i));
             return type;
         }
     }
@@ -64,13 +64,13 @@ public class AccountingConstants {
 
         private static final Map<Integer, ACCRUAL_ACCOUNTS_FOR_LOAN> intToEnumMap = new HashMap<Integer, ACCRUAL_ACCOUNTS_FOR_LOAN>();
         static {
-            for (ACCRUAL_ACCOUNTS_FOR_LOAN type : ACCRUAL_ACCOUNTS_FOR_LOAN.values()) {
+            for (final ACCRUAL_ACCOUNTS_FOR_LOAN type : ACCRUAL_ACCOUNTS_FOR_LOAN.values()) {
                 intToEnumMap.put(type.value, type);
             }
         }
 
-        public static ACCRUAL_ACCOUNTS_FOR_LOAN fromInt(int i) {
-            ACCRUAL_ACCOUNTS_FOR_LOAN type = intToEnumMap.get(Integer.valueOf(i));
+        public static ACCRUAL_ACCOUNTS_FOR_LOAN fromInt(final int i) {
+            final ACCRUAL_ACCOUNTS_FOR_LOAN type = intToEnumMap.get(Integer.valueOf(i));
             return type;
         }
 

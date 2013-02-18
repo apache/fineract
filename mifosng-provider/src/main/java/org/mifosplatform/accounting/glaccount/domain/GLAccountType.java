@@ -25,7 +25,7 @@ public enum GLAccountType {
     }
 
     public String getCode() {
-        return code;
+        return this.code;
     }
 
     private static final Map<Integer, GLAccountType> intToEnumMap = new HashMap<Integer, GLAccountType>();
@@ -33,7 +33,7 @@ public enum GLAccountType {
     private static int maxValue;
     static {
         int i = 0;
-        for (GLAccountType type : GLAccountType.values()) {
+        for (final GLAccountType type : GLAccountType.values()) {
             if (i == 0) {
                 minValue = type.value;
             }
@@ -48,8 +48,8 @@ public enum GLAccountType {
         }
     }
 
-    public static GLAccountType fromInt(int i) {
-        GLAccountType type = intToEnumMap.get(Integer.valueOf(i));
+    public static GLAccountType fromInt(final int i) {
+        final GLAccountType type = intToEnumMap.get(Integer.valueOf(i));
         return type;
     }
 

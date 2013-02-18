@@ -7,8 +7,8 @@ import java.util.Set;
  * Enum of all parameters passed in while creating/updating a loan product
  ***/
 public enum GLAccountJsonInputParams {
-    ID("id"), NAME("name"), PARENT_ID("parentId"), GL_CODE("glCode"), DISABLED("disabled"), MANUAL_ENTRIES_ALLOWED(
-            "manualEntriesAllowed"), TYPE("type"), USAGE("usage"), DESCRIPTION("description");
+    ID("id"), NAME("name"), PARENT_ID("parentId"), GL_CODE("glCode"), DISABLED("disabled"), MANUAL_ENTRIES_ALLOWED("manualEntriesAllowed"), TYPE(
+            "type"), USAGE("usage"), DESCRIPTION("description");
 
     private final String value;
 
@@ -18,7 +18,7 @@ public enum GLAccountJsonInputParams {
 
     private static final Set<String> values = new HashSet<String>();
     static {
-        for (GLAccountJsonInputParams type : GLAccountJsonInputParams.values()) {
+        for (final GLAccountJsonInputParams type : GLAccountJsonInputParams.values()) {
             values.add(type.value);
         }
     }

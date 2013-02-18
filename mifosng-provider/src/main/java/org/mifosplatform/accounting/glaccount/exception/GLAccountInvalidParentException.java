@@ -13,7 +13,7 @@ import org.mifosplatform.infrastructure.core.exception.AbstractPlatformDomainRul
  */
 public class GLAccountInvalidParentException extends AbstractPlatformDomainRuleException {
 
-    public GLAccountInvalidParentException(long glAccountId) {
+    public GLAccountInvalidParentException(final long glAccountId) {
         super("error.msg.glaccount.parent.invalid", "The account with id " + glAccountId
                 + " is a 'Detail' account and cannot be used as a parent", glAccountId);
     }

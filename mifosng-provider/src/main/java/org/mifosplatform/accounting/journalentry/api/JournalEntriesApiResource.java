@@ -44,12 +44,12 @@ import org.springframework.stereotype.Component;
 public class JournalEntriesApiResource {
 
     private static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "officeId", "officeName",
-            "glAccountName", "glAccountId", "glAccountCode", "glAccountType", "entryDate", "entryType", "amount", "transactionId",
+            "glAccountName", "glAccountId", "glAccountCode", "glAccountType", "transactionDate", "entryType", "amount", "transactionId",
             "portfolioGenerated", "entityType", "entityId", "createdByUserId", "createdDate", "createdByUserName", "comments", "reversed"));
 
     private final String resourceNameForPermission = "JOURNALENTRY";
 
-    private JournalEntryReadPlatformService journalEntryReadPlatformService;
+    private final JournalEntryReadPlatformService journalEntryReadPlatformService;
     private final DefaultToApiJsonSerializer<JournalEntryData> apiJsonSerializerService;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final PlatformSecurityContext context;
@@ -74,9 +74,9 @@ public class JournalEntriesApiResource {
     public String retrieveAllJournalEntries(@Context final UriInfo uriInfo, @QueryParam("officeId") final Long officeId,
             @QueryParam("glAccountId") final Long glAccountId, @QueryParam("portfolioGenerated") final Boolean portfolioGenerated,
             @QueryParam("fromDate") final DateParam fromDateParam, @QueryParam("toDate") final DateParam toDateParam,
-            @QueryParam("transactionId") String transactionId) {
+            @QueryParam("transactionId") final String transactionId) {
 
-        context.authenticatedUser().validateHasReadPermission(resourceNameForPermission);
+        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermission);
 
         List<JournalEntryData> glJournalEntryDatas = null;
         // get dates from date params
@@ -95,7 +95,7 @@ public class JournalEntriesApiResource {
             glJournalEntryDatas = this.journalEntryReadPlatformService.retrieveRelatedJournalEntries(transactionId);
         }
 
-        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.apiJsonSerializerService.serialize(settings, glJournalEntryDatas, RESPONSE_DATA_PARAMETERS);
     }
 
@@ -105,10 +105,10 @@ public class JournalEntriesApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String retreiveJournalEntryById(@PathParam("journalEntryId") final Long journalEntryId, @Context final UriInfo uriInfo) {
 
-        context.authenticatedUser().validateHasReadPermission(resourceNameForPermission);
+        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermission);
         final JournalEntryData glJournalEntryData = this.journalEntryReadPlatformService.retrieveGLJournalEntryById(journalEntryId);
 
-        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.apiJsonSerializerService.serialize(settings, glJournalEntryData, RESPONSE_DATA_PARAMETERS);
     }
 

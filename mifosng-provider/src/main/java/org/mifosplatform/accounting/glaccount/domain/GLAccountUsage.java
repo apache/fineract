@@ -25,7 +25,7 @@ public enum GLAccountUsage {
     }
 
     public String getCode() {
-        return code;
+        return this.code;
     }
 
     private static final Map<Integer, GLAccountUsage> intToEnumMap = new HashMap<Integer, GLAccountUsage>();
@@ -33,7 +33,7 @@ public enum GLAccountUsage {
     private static int maxValue;
     static {
         int i = 0;
-        for (GLAccountUsage type : GLAccountUsage.values()) {
+        for (final GLAccountUsage type : GLAccountUsage.values()) {
             if (i == 0) {
                 minValue = type.value;
             }
@@ -48,8 +48,8 @@ public enum GLAccountUsage {
         }
     }
 
-    public static GLAccountUsage fromInt(int i) {
-        GLAccountUsage type = intToEnumMap.get(Integer.valueOf(i));
+    public static GLAccountUsage fromInt(final int i) {
+        final GLAccountUsage type = intToEnumMap.get(Integer.valueOf(i));
         return type;
     }
 

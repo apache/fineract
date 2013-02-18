@@ -43,7 +43,7 @@ public class ProductToGLAccountMapping extends AbstractPersistable<Long> {
         //
     }
 
-    public ProductToGLAccountMapping(GLAccount glAccount, Long productId, int productType, int financialAccountType) {
+    public ProductToGLAccountMapping(final GLAccount glAccount, final Long productId, final int productType, final int financialAccountType) {
         this.glAccount = glAccount;
         this.productId = productId;
         this.productType = productType;
@@ -54,7 +54,7 @@ public class ProductToGLAccountMapping extends AbstractPersistable<Long> {
         return this.glAccount;
     }
 
-    public void setGlAccount(GLAccount glAccount) {
+    public void setGlAccount(final GLAccount glAccount) {
         this.glAccount = glAccount;
     }
 
@@ -62,7 +62,7 @@ public class ProductToGLAccountMapping extends AbstractPersistable<Long> {
         return this.productId;
     }
 
-    public void setProductId(Long productId) {
+    public void setProductId(final Long productId) {
         this.productId = productId;
     }
 
@@ -70,7 +70,7 @@ public class ProductToGLAccountMapping extends AbstractPersistable<Long> {
         return this.productType;
     }
 
-    public void setProductType(int productType) {
+    public void setProductType(final int productType) {
         this.productType = productType;
     }
 
@@ -78,7 +78,7 @@ public class ProductToGLAccountMapping extends AbstractPersistable<Long> {
         return this.financialAccountType;
     }
 
-    public void setFinancialAccountType(int financialAccountType) {
+    public void setFinancialAccountType(final int financialAccountType) {
         this.financialAccountType = financialAccountType;
     }
 

@@ -39,20 +39,20 @@ public final class GLClosureCommandFromApiJsonDeserializer extends AbstractFromA
     }
 
     @Override
-    public GLClosureCommand commandFromApiJson(String json) {
+    public GLClosureCommand commandFromApiJson(final String json) {
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        Set<String> supportedParameters = GLClosureJsonInputParams.getAllValues();
-        fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, supportedParameters);
+        final Set<String> supportedParameters = GLClosureJsonInputParams.getAllValues();
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, supportedParameters);
 
-        final JsonElement element = fromApiJsonHelper.parse(json);
+        final JsonElement element = this.fromApiJsonHelper.parse(json);
 
-        final Long id = fromApiJsonHelper.extractLongNamed(GLClosureJsonInputParams.ID.getValue(), element);
-        final Long officeId = fromApiJsonHelper.extractLongNamed(GLClosureJsonInputParams.OFFICE_ID.getValue(), element);
-        final String comments = fromApiJsonHelper.extractStringNamed(GLClosureJsonInputParams.COMMENTS.getValue(), element);
-        final LocalDate closingDate = fromApiJsonHelper
-                .extractLocalDateNamed(GLClosureJsonInputParams.CLOSING_DATE.getValue(), element);
+        final Long id = this.fromApiJsonHelper.extractLongNamed(GLClosureJsonInputParams.ID.getValue(), element);
+        final Long officeId = this.fromApiJsonHelper.extractLongNamed(GLClosureJsonInputParams.OFFICE_ID.getValue(), element);
+        final String comments = this.fromApiJsonHelper.extractStringNamed(GLClosureJsonInputParams.COMMENTS.getValue(), element);
+        final LocalDate closingDate = this.fromApiJsonHelper.extractLocalDateNamed(GLClosureJsonInputParams.CLOSING_DATE.getValue(),
+                element);
 
         return new GLClosureCommand(id, officeId, closingDate, comments);
     }

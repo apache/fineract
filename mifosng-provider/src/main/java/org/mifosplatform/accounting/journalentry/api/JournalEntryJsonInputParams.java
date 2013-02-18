@@ -7,7 +7,7 @@ import java.util.Set;
  * Enum of all parameters passed in while creating/updating a journal Entry
  ***/
 public enum JournalEntryJsonInputParams {
-    OFFICE_ID("officeId"), ENTRY_DATE("entryDate"), COMMENTS("comments"), CREDITS("credits"), DEBITS("debits"), LOCALE("locale"), DATE_FORMAT(
+    OFFICE_ID("officeId"), TRANSACTION_DATE("transactionDate"), COMMENTS("comments"), CREDITS("credits"), DEBITS("debits"), LOCALE("locale"), DATE_FORMAT(
             "dateFormat");
 
     private final String value;
@@ -18,7 +18,7 @@ public enum JournalEntryJsonInputParams {
 
     private static final Set<String> values = new HashSet<String>();
     static {
-        for (JournalEntryJsonInputParams type : JournalEntryJsonInputParams.values()) {
+        for (final JournalEntryJsonInputParams type : JournalEntryJsonInputParams.values()) {
             values.add(type.value);
         }
     }

@@ -46,9 +46,9 @@ public class GLClosureData {
 
     private List<OfficeLookup> allowedOffices = new ArrayList<OfficeLookup>();
 
-    public GLClosureData(Long id, Long officeId, String officeName, LocalDate closingDate, boolean deleted, LocalDate createdDate,
-            LocalDate lastUpdatedDate, Long createdByUserId, String createdByUsername, Long lastUpdatedByUserId,
-            String lastUpdatedByUsername, String comments) {
+    public GLClosureData(final Long id, final Long officeId, final String officeName, final LocalDate closingDate, final boolean deleted,
+            final LocalDate createdDate, final LocalDate lastUpdatedDate, final Long createdByUserId, final String createdByUsername,
+            final Long lastUpdatedByUserId, final String lastUpdatedByUsername, final String comments) {
         this.id = id;
         this.officeId = officeId;
         this.officeName = officeName;
@@ -68,7 +68,7 @@ public class GLClosureData {
         return this.allowedOffices;
     }
 
-    public void setAllowedOffices(List<OfficeLookup> allowedOffices) {
+    public void setAllowedOffices(final List<OfficeLookup> allowedOffices) {
         this.allowedOffices = allowedOffices;
     }
 

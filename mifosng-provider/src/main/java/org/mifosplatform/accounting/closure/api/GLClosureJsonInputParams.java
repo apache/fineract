@@ -17,7 +17,7 @@ public enum GLClosureJsonInputParams {
 
     private static final Set<String> values = new HashSet<String>();
     static {
-        for (GLClosureJsonInputParams type : GLClosureJsonInputParams.values()) {
+        for (final GLClosureJsonInputParams type : GLClosureJsonInputParams.values()) {
             values.add(type.value);
         }
     }

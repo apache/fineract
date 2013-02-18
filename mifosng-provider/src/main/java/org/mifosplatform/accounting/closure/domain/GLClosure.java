@@ -44,7 +44,7 @@ public class GLClosure extends AbstractAuditableCustom<AppUser, Long> {
     @Column(name = "comments", nullable = true, length = 500)
     private String comments;
 
-    public static GLClosure createNew(Office office, Date closingDate, String comments) {
+    public static GLClosure createNew(final Office office, final Date closingDate, final String comments) {
         return new GLClosure(office, closingDate, comments);
     }
 
@@ -52,7 +52,7 @@ public class GLClosure extends AbstractAuditableCustom<AppUser, Long> {
         //
     }
 
-    public GLClosure(Office office, Date closingDate, String comments) {
+    public GLClosure(final Office office, final Date closingDate, final String comments) {
         this.office = office;
         this.deleted = false;
         this.closingDate = closingDate;
@@ -62,9 +62,9 @@ public class GLClosure extends AbstractAuditableCustom<AppUser, Long> {
         }
     }
 
-    public static GLClosure fromJson(Office office, final JsonCommand command) {
-        Date closingDate = command.DateValueOfParameterNamed(GLClosureJsonInputParams.CLOSING_DATE.getValue());
-        String comments = command.stringValueOfParameterNamed(GLClosureJsonInputParams.COMMENTS.getValue());
+    public static GLClosure fromJson(final Office office, final JsonCommand command) {
+        final Date closingDate = command.DateValueOfParameterNamed(GLClosureJsonInputParams.CLOSING_DATE.getValue());
+        final String comments = command.stringValueOfParameterNamed(GLClosureJsonInputParams.COMMENTS.getValue());
         return new GLClosure(office, closingDate, comments);
     }
 
@@ -75,7 +75,7 @@ public class GLClosure extends AbstractAuditableCustom<AppUser, Long> {
     }
 
     private void handlePropertyUpdate(final JsonCommand command, final Map<String, Object> actualChanges, final String paramName,
-            String propertyToBeUpdated) {
+            final String propertyToBeUpdated) {
         if (command.isChangeInStringParameterNamed(paramName, propertyToBeUpdated)) {
             final String newValue = command.stringValueOfParameterNamed(paramName);
             actualChanges.put(paramName, newValue);

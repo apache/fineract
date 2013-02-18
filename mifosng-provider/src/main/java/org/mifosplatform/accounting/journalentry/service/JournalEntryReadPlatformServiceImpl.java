@@ -43,7 +43,7 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
             return " journalEntry.id as journalEntryId, glAccount.classification_enum as classification ,"
                     + " glAccount.name as glAccountName, glAccount.gl_code as glCode, journalEntry.account_id as glAccountId,"
                     + " journalEntry.office_id as officeId, office.name as officeName, "
-                    + " journalEntry.portfolio_generated as portfolioGenerated,journalEntry.entry_date as entryDate, "
+                    + " journalEntry.portfolio_generated as portfolioGenerated,journalEntry.entry_date as transactionDate, "
                     + " journalEntry.type_enum as entryType,journalEntry.amount as amount, journalEntry.transaction_id as transactionId,"
                     + " journalEntry.entity_type as entityType, journalEntry.entity_id as entityId, creatingUser.id as createdByUserId, "
                     + " creatingUser.username as createdByUserName, journalEntry.description as comments, "
@@ -56,41 +56,41 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
         @Override
         public JournalEntryData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
 
-            Long journalEntryId = rs.getLong("journalEntryId");
-            Long officeId = rs.getLong("officeId");
-            String officeName = rs.getString("officeName");
-            String glCode = rs.getString("glCode");
-            String glAccountName = rs.getString("glAccountName");
-            Long glAccountId = rs.getLong("glAccountId");
+            final Long journalEntryId = rs.getLong("journalEntryId");
+            final Long officeId = rs.getLong("officeId");
+            final String officeName = rs.getString("officeName");
+            final String glCode = rs.getString("glCode");
+            final String glAccountName = rs.getString("glAccountName");
+            final Long glAccountId = rs.getLong("glAccountId");
             final int accountTypeId = JdbcSupport.getInteger(rs, "classification");
             final EnumOptionData accountType = AccountingEnumerations.gLAccountType(accountTypeId);
-            LocalDate entryDate = JdbcSupport.getLocalDate(rs, "entryDate");
-            Boolean portfolioGenerated = rs.getBoolean("portfolioGenerated");
-            BigDecimal amount = rs.getBigDecimal("amount");
-            int entryTypeId = JdbcSupport.getInteger(rs, "entryType");
+            final LocalDate transactionDate = JdbcSupport.getLocalDate(rs, "transactionDate");
+            final Boolean portfolioGenerated = rs.getBoolean("portfolioGenerated");
+            final BigDecimal amount = rs.getBigDecimal("amount");
+            final int entryTypeId = JdbcSupport.getInteger(rs, "entryType");
             final EnumOptionData entryType = AccountingEnumerations.journalEntryType(entryTypeId);
-            String transactionId = rs.getString("transactionId");
-            String entityType = rs.getString("entityType");
-            Long entityId = JdbcSupport.getLong(rs, "entityId");
-            Long createdByUserId = rs.getLong("createdByUserId");
-            LocalDate createdDate = JdbcSupport.getLocalDate(rs, "createdDate");
-            String createdByUserName = rs.getString("createdByUserName");
-            String comments = rs.getString("comments");
-            Boolean reversed = rs.getBoolean("reversed");
+            final String transactionId = rs.getString("transactionId");
+            final String entityType = rs.getString("entityType");
+            final Long entityId = JdbcSupport.getLong(rs, "entityId");
+            final Long createdByUserId = rs.getLong("createdByUserId");
+            final LocalDate createdDate = JdbcSupport.getLocalDate(rs, "createdDate");
+            final String createdByUserName = rs.getString("createdByUserName");
+            final String comments = rs.getString("comments");
+            final Boolean reversed = rs.getBoolean("reversed");
 
-            return new JournalEntryData(journalEntryId, officeId, officeName, glAccountName, glAccountId, glCode, accountType, entryDate,
-                    entryType, amount, transactionId, portfolioGenerated, entityType, entityId, createdByUserId, createdDate,
-                    createdByUserName, comments, reversed);
+            return new JournalEntryData(journalEntryId, officeId, officeName, glAccountName, glAccountId, glCode, accountType,
+                    transactionDate, entryType, amount, transactionId, portfolioGenerated, entityType, entityId, createdByUserId,
+                    createdDate, createdByUserName, comments, reversed);
         }
     }
 
     @Override
-    public List<JournalEntryData> retrieveAllGLJournalEntries(Long officeId, Long glAccountId, Boolean portfolioGenerated, Date fromDate,
-            Date toDate) {
-        GLJournalEntryMapper rm = new GLJournalEntryMapper();
+    public List<JournalEntryData> retrieveAllGLJournalEntries(final Long officeId, final Long glAccountId,
+            final Boolean portfolioGenerated, final Date fromDate, final Date toDate) {
+        final GLJournalEntryMapper rm = new GLJournalEntryMapper();
 
         String sql = "select " + rm.schema();
-        Object[] objectArray = new Object[4];
+        final Object[] objectArray = new Object[4];
         int arrayPos = 0;
 
         if (officeId != null && officeId != 0) {
@@ -106,7 +106,7 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
         }
 
         if (fromDate != null || toDate != null) {
-            DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+            final DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
             String fromDateString = null;
             String toDateString = null;
             if (fromDate != null && toDate != null) {
@@ -140,36 +140,36 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
 
         sql += " order by journalEntry.entry_date desc,journalEntry.transaction_id";
 
-        Object[] finalObjectArray = Arrays.copyOf(objectArray, arrayPos);
+        final Object[] finalObjectArray = Arrays.copyOf(objectArray, arrayPos);
         return this.jdbcTemplate.query(sql, rm, finalObjectArray);
     }
 
     @Override
-    public JournalEntryData retrieveGLJournalEntryById(long glJournalEntryId) {
+    public JournalEntryData retrieveGLJournalEntryById(final long glJournalEntryId) {
         try {
 
-            GLJournalEntryMapper rm = new GLJournalEntryMapper();
-            String sql = "select " + rm.schema() + " and journalEntry.id = ?";
+            final GLJournalEntryMapper rm = new GLJournalEntryMapper();
+            final String sql = "select " + rm.schema() + " and journalEntry.id = ?";
 
-            JournalEntryData glJournalEntryData = this.jdbcTemplate.queryForObject(sql, rm, new Object[] { glJournalEntryId });
+            final JournalEntryData glJournalEntryData = this.jdbcTemplate.queryForObject(sql, rm, new Object[] { glJournalEntryId });
 
             return glJournalEntryData;
-        } catch (EmptyResultDataAccessException e) {
+        } catch (final EmptyResultDataAccessException e) {
             throw new JournalEntriesNotFoundException(glJournalEntryId);
         }
     }
 
     @Override
-    public List<JournalEntryData> retrieveRelatedJournalEntries(String transactionId) {
+    public List<JournalEntryData> retrieveRelatedJournalEntries(final String transactionId) {
         try {
 
-            GLJournalEntryMapper rm = new GLJournalEntryMapper();
-            String sql = "select " + rm.schema() + " and journalEntry.transaction_id = ?";
+            final GLJournalEntryMapper rm = new GLJournalEntryMapper();
+            final String sql = "select " + rm.schema() + " and journalEntry.transaction_id = ?";
 
-            List<JournalEntryData> journalEntryDatas = this.jdbcTemplate.query(sql, rm, new Object[] { transactionId });
+            final List<JournalEntryData> journalEntryDatas = this.jdbcTemplate.query(sql, rm, new Object[] { transactionId });
 
             return journalEntryDatas;
-        } catch (EmptyResultDataAccessException e) {
+        } catch (final EmptyResultDataAccessException e) {
             throw new JournalEntriesNotFoundException(transactionId);
         }
     }

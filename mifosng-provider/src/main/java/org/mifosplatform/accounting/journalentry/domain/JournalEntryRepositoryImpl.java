@@ -20,8 +20,8 @@ public class JournalEntryRepositoryImpl implements JournalEntryRepositoryCustom 
 
     @Override
     @SuppressWarnings("unchecked")
-    public List<JournalEntry> findFirstJournalEntryForAccount(long glAccountId) {
-        List<JournalEntry> journalEntries = entityManager
+    public List<JournalEntry> findFirstJournalEntryForAccount(final long glAccountId) {
+        final List<JournalEntry> journalEntries = this.entityManager
                 .createQuery("SELECT journalEntry FROM JournalEntry journalEntry where journalEntry.glAccount.id= :glAccountId")
                 .setParameter("glAccountId", glAccountId).setFirstResult(0).setMaxResults(1).getResultList();
         return journalEntries;

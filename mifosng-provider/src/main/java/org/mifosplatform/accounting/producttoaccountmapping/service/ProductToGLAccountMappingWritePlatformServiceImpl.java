@@ -111,7 +111,7 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
     @Override
     @Transactional
     public Map<String, Object> updateLoanProductToGLAccountMapping(final Long loanProductId, final JsonCommand command,
-            final boolean accountingRuleChanged, int accountingRuleTypeId) {
+            final boolean accountingRuleChanged, final int accountingRuleTypeId) {
         /***
          * Variable tracks all accounting mapping properties that have been
          * updated
@@ -125,7 +125,7 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
          * for the product and recreate a new set of mappings
          ***/
         if (accountingRuleChanged) {
-            deserializer.validateForCreate(command.json());
+            this.deserializer.validateForCreate(command.json());
             handleChangesToAccountingRuleType(loanProductId, command, changes, element, accountingRuleType);
         }/*** else examine and update individual changes ***/
         else {

@@ -49,8 +49,8 @@ public class GLAccountsApiResource {
 
     private final String resourceNameForPermission = "GLACCOUNT";
 
-    private GLAccountReadPlatformService glAccountReadPlatformService;
-    private AccountingDropdownReadPlatformService dropdownReadPlatformService;
+    private final GLAccountReadPlatformService glAccountReadPlatformService;
+    private final AccountingDropdownReadPlatformService dropdownReadPlatformService;
     private final DefaultToApiJsonSerializer<GLAccountData> apiJsonSerializerService;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final PlatformSecurityContext context;
@@ -75,12 +75,12 @@ public class GLAccountsApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveNewAccountDetails(@Context final UriInfo uriInfo) {
 
-        context.authenticatedUser().validateHasReadPermission(resourceNameForPermission);
+        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermission);
 
         GLAccountData glAccountData = this.glAccountReadPlatformService.retrieveNewGLAccountDetails();
         glAccountData = handleTemplate(glAccountData);
 
-        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.apiJsonSerializerService.serialize(settings, glAccountData, RESPONSE_DATA_PARAMETERS);
     }
 
@@ -91,11 +91,11 @@ public class GLAccountsApiResource {
             @QueryParam("searchParam") final String searchParam, @QueryParam("usage") final Integer usage,
             @QueryParam("manualEntriesAllowed") final Boolean manualEntriesAllowed, @QueryParam("disabled") final Boolean disabled) {
 
-        context.authenticatedUser().validateHasReadPermission(resourceNameForPermission);
+        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermission);
         final List<GLAccountData> glAccountDatas = this.glAccountReadPlatformService.retrieveAllGLAccounts(type, searchParam, usage,
                 manualEntriesAllowed, disabled);
 
-        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.apiJsonSerializerService.serialize(settings, glAccountDatas, RESPONSE_DATA_PARAMETERS);
     }
 
@@ -105,9 +105,9 @@ public class GLAccountsApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String retreiveAccount(@PathParam("glAccountId") final Long glAccountId, @Context final UriInfo uriInfo) {
 
-        context.authenticatedUser().validateHasReadPermission(resourceNameForPermission);
+        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermission);
 
-        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 
         GLAccountData glAccountData = this.glAccountReadPlatformService.retrieveGLAccountById(glAccountId);
         if (settings.isTemplate()) {
@@ -155,9 +155,9 @@ public class GLAccountsApiResource {
         return this.apiJsonSerializerService.serialize(result);
     }
 
-    private GLAccountData handleTemplate(GLAccountData glAccountData) {
-        List<EnumOptionData> accountTypeOptions = dropdownReadPlatformService.retrieveGLAccountTypeOptions();
-        List<EnumOptionData> usageOptions = dropdownReadPlatformService.retrieveGLAccountUsageOptions();
+    private GLAccountData handleTemplate(final GLAccountData glAccountData) {
+        final List<EnumOptionData> accountTypeOptions = this.dropdownReadPlatformService.retrieveGLAccountTypeOptions();
+        final List<EnumOptionData> usageOptions = this.dropdownReadPlatformService.retrieveGLAccountUsageOptions();
         return new GLAccountData(glAccountData, accountTypeOptions, usageOptions);
     }
 }

@@ -70,10 +70,10 @@ public class ProductToGLAccountMappingReadPlatformServiceImpl implements Product
 
         if (AccountingRuleType.CASH_BASED.getValue().equals(accountingType)) {
 
-            for (Map<String, Object> productToGLAccountMap : listOfProductToGLAccountMaps) {
+            for (final Map<String, Object> productToGLAccountMap : listOfProductToGLAccountMaps) {
 
                 final Integer financialAccountType = (Integer) productToGLAccountMap.get("financialAccountType");
-                CASH_ACCOUNTS_FOR_LOAN glAccountForLoan = CASH_ACCOUNTS_FOR_LOAN.fromInt(financialAccountType);
+                final CASH_ACCOUNTS_FOR_LOAN glAccountForLoan = CASH_ACCOUNTS_FOR_LOAN.fromInt(financialAccountType);
 
                 final Long glAccountId = (Long) productToGLAccountMap.get("glAccountId");
 
@@ -93,9 +93,9 @@ public class ProductToGLAccountMappingReadPlatformServiceImpl implements Product
             }
         } else if (AccountingRuleType.ACCRUAL_BASED.getValue().equals(accountingType)) {
 
-            for (Map<String, Object> productToGLAccountMap : listOfProductToGLAccountMaps) {
+            for (final Map<String, Object> productToGLAccountMap : listOfProductToGLAccountMaps) {
                 final Integer financialAccountType = (Integer) productToGLAccountMap.get("financialAccountType");
-                ACCRUAL_ACCOUNTS_FOR_LOAN glAccountForLoan = ACCRUAL_ACCOUNTS_FOR_LOAN.fromInt(financialAccountType);
+                final ACCRUAL_ACCOUNTS_FOR_LOAN glAccountForLoan = ACCRUAL_ACCOUNTS_FOR_LOAN.fromInt(financialAccountType);
 
                 final Long glAccountId = (Long) productToGLAccountMap.get("glAccountId");
 

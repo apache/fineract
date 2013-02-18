@@ -76,31 +76,31 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
 
     @Transactional
     @Override
-    public CommandProcessingResult createJournalEntry(JsonCommand command) {
+    public CommandProcessingResult createJournalEntry(final JsonCommand command) {
         try {
             final JournalEntryCommand journalEntryCommand = this.fromApiJsonDeserializer.commandFromApiJson(command.json());
             journalEntryCommand.validateForCreate();
 
             // check office is valid
-            Long officeId = command.longValueOfParameterNamed(JournalEntryJsonInputParams.OFFICE_ID.getValue());
+            final Long officeId = command.longValueOfParameterNamed(JournalEntryJsonInputParams.OFFICE_ID.getValue());
             final Office office = this.officeRepository.findOne(officeId);
             if (office == null) { throw new OfficeNotFoundException(officeId); }
 
             validateBusinessRulesForJournalEntries(journalEntryCommand);
 
             /** Set a transaction Id and save these Journal entries **/
-            Date entryDate = command.DateValueOfParameterNamed(JournalEntryJsonInputParams.ENTRY_DATE.getValue());
-            String transactionId = generateTransactionId();
+            final Date transactionDate = command.DateValueOfParameterNamed(JournalEntryJsonInputParams.TRANSACTION_DATE.getValue());
+            final String transactionId = generateTransactionId();
 
-            saveAllDebitOrCreditEntries(journalEntryCommand, office, entryDate, journalEntryCommand.getDebits(), transactionId,
+            saveAllDebitOrCreditEntries(journalEntryCommand, office, transactionDate, journalEntryCommand.getDebits(), transactionId,
                     JournalEntryType.DEBIT);
 
-            saveAllDebitOrCreditEntries(journalEntryCommand, office, entryDate, journalEntryCommand.getCredits(), transactionId,
+            saveAllDebitOrCreditEntries(journalEntryCommand, office, transactionDate, journalEntryCommand.getCredits(), transactionId,
                     JournalEntryType.CREDIT);
 
             return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withOfficeId(officeId)
                     .withTransactionId(transactionId).build();
-        } catch (DataIntegrityViolationException dve) {
+        } catch (final DataIntegrityViolationException dve) {
             handleJournalEntryDataIntegrityIssues(dve);
             return null;
         }
@@ -108,25 +108,27 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
 
     @Transactional
     @Override
-    public CommandProcessingResult revertJournalEntry(JsonCommand command) {
+    public CommandProcessingResult revertJournalEntry(final JsonCommand command) {
         // is the transaction Id valid
-        List<JournalEntry> journalEntries = glJournalEntryRepository.findUnReversedManualJournalEntriesByTransactionId(command
+        final List<JournalEntry> journalEntries = this.glJournalEntryRepository.findUnReversedManualJournalEntriesByTransactionId(command
                 .getTransactionId());
 
         if (journalEntries.size() <= 1) { throw new JournalEntriesNotFoundException(command.getTransactionId()); }
 
-        String reversalTransactionId = generateTransactionId();
+        final String reversalTransactionId = generateTransactionId();
 
-        for (JournalEntry journalEntry : journalEntries) {
+        for (final JournalEntry journalEntry : journalEntries) {
             JournalEntry reversalJournalEntry;
-            String reversalComment = "Reversal entry for Journal Entry with Entry Id  :" + journalEntry.getId() + " and transaction Id "
-                    + command.getTransactionId();
+            final String reversalComment = "Reversal entry for Journal Entry with Entry Id  :" + journalEntry.getId()
+                    + " and transaction Id " + command.getTransactionId();
             if (journalEntry.isDebitEntry()) {
                 reversalJournalEntry = JournalEntry.createNew(journalEntry.getOffice(), journalEntry.getGlAccount(), reversalTransactionId,
-                        false, journalEntry.getEntryDate(), JournalEntryType.CREDIT, journalEntry.getAmount(), reversalComment, null, null);
+                        false, journalEntry.getTransactionDate(), JournalEntryType.CREDIT, journalEntry.getAmount(), reversalComment, null,
+                        null);
             } else {
                 reversalJournalEntry = JournalEntry.createNew(journalEntry.getOffice(), journalEntry.getGlAccount(), reversalTransactionId,
-                        false, journalEntry.getEntryDate(), JournalEntryType.DEBIT, journalEntry.getAmount(), reversalComment, null, null);
+                        false, journalEntry.getTransactionDate(), JournalEntryType.DEBIT, journalEntry.getAmount(), reversalComment, null,
+                        null);
             }
             // save the reversal entry
             this.glJournalEntryRepository.saveAndFlush(reversalJournalEntry);
@@ -176,19 +178,19 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
         @SuppressWarnings("unchecked")
         final List<Map<String, Object>> newTransactionsMap = (List<Map<String, Object>>) accountingBridgeData.get("newLoanTransactions");
 
-        for (Map<String, Object> map : newTransactionsMap) {
-            String transactionId = ((Long) map.get("id")).toString();
-            Date transactionDate = ((LocalDate) map.get("date")).toDate();
-            BigDecimal amount = (BigDecimal) map.get("amount");
-            BigDecimal principal = (BigDecimal) map.get("principalPortion");
-            BigDecimal interest = (BigDecimal) map.get("interestPortion");
-            BigDecimal fees = (BigDecimal) map.get("feeChargesPortion");
-            BigDecimal penalties = (BigDecimal) map.get("penaltyChargesPortion");
-            boolean disbursement = (Boolean) map.get("disbursement");
-            boolean repayment = (Boolean) map.get("repayment");
-            boolean repaymentAtDisbursement = (Boolean) map.get("repaymentAtDisbursement");
-            boolean contra = (Boolean) map.get("contra");
-            boolean writeOff = (Boolean) map.get("writeOff");
+        for (final Map<String, Object> map : newTransactionsMap) {
+            final String transactionId = ((Long) map.get("id")).toString();
+            final Date transactionDate = ((LocalDate) map.get("date")).toDate();
+            final BigDecimal amount = (BigDecimal) map.get("amount");
+            final BigDecimal principal = (BigDecimal) map.get("principalPortion");
+            final BigDecimal interest = (BigDecimal) map.get("interestPortion");
+            final BigDecimal fees = (BigDecimal) map.get("feeChargesPortion");
+            final BigDecimal penalties = (BigDecimal) map.get("penaltyChargesPortion");
+            final boolean disbursement = (Boolean) map.get("disbursement");
+            final boolean repayment = (Boolean) map.get("repayment");
+            final boolean repaymentAtDisbursement = (Boolean) map.get("repaymentAtDisbursement");
+            final boolean contra = (Boolean) map.get("contra");
+            final boolean writeOff = (Boolean) map.get("writeOff");
 
             final LoanTransactionDTO transaction = new LoanTransactionDTO(transactionId, transactionDate, amount, principal, interest,
                     fees, penalties, disbursement, repayment, repaymentAtDisbursement, contra, writeOff);
@@ -201,48 +203,52 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
     }
 
     private void createJournalEntriesUsingCashRules(final LoanDTO loanDTO) {
-        GLClosure latestGLClosure = glClosureRepository.getLatestGLClosureByBranch(loanDTO.getOfficeId());
-        Office office = officeRepository.findOne(loanDTO.getOfficeId());
-        Long loanProductId = loanDTO.getLoanProductId();
+        final GLClosure latestGLClosure = this.glClosureRepository.getLatestGLClosureByBranch(loanDTO.getOfficeId());
+        final Office office = this.officeRepository.findOne(loanDTO.getOfficeId());
+        final Long loanProductId = loanDTO.getLoanProductId();
         // TODO: Check for accounting type
-        for (LoanTransactionDTO loanTransactionDTO : loanDTO.getNewLoanTransactions()) {
-            Date entryDate = loanTransactionDTO.getTransactionDate();
-            String transactionId = loanTransactionDTO.getTransactionId();
-            Long loanId = loanDTO.getLoanId();
+        for (final LoanTransactionDTO loanTransactionDTO : loanDTO.getNewLoanTransactions()) {
+            final Date transactionDate = loanTransactionDTO.getTransactionDate();
+            final String transactionId = loanTransactionDTO.getTransactionId();
+            final Long loanId = loanDTO.getLoanId();
             /**
              * check if an accounting closure has happened for this branch after
              * the transaction Date
              **/
             if (latestGLClosure != null) {
-                if (latestGLClosure.getClosingDate().after(entryDate) || latestGLClosure.getClosingDate().equals(entryDate)) { throw new JournalEntryInvalidException(
+                if (latestGLClosure.getClosingDate().after(transactionDate) || latestGLClosure.getClosingDate().equals(transactionDate)) { throw new JournalEntryInvalidException(
                         GL_JOURNAL_ENTRY_INVALID_REASON.ACCOUNTING_CLOSED, latestGLClosure.getClosingDate(), null, null); }
             }
 
             /*** Debit loan Portfolio and credit Fund source for Disbursal **/
             if (loanTransactionDTO.isDisbursement()) {
 
-                GLAccount loanPortfolioAccount = getLinkedFinAccountForLoanProduct(loanProductId, CASH_ACCOUNTS_FOR_LOAN.LOAN_PORTFOLIO);
-                GLAccount fundSourceAccount = getLinkedFinAccountForLoanProduct(loanProductId, CASH_ACCOUNTS_FOR_LOAN.FUND_SOURCE);
+                final GLAccount loanPortfolioAccount = getLinkedFinAccountForLoanProduct(loanProductId,
+                        CASH_ACCOUNTS_FOR_LOAN.LOAN_PORTFOLIO);
+                final GLAccount fundSourceAccount = getLinkedFinAccountForLoanProduct(loanProductId, CASH_ACCOUNTS_FOR_LOAN.FUND_SOURCE);
 
-                BigDecimal disbursalAmount = loanTransactionDTO.getAmount();
-                createDebitJournalEntryForLoanProduct(office, loanPortfolioAccount, loanId, transactionId, entryDate, disbursalAmount);
-                createCreditJournalEntryForLoanProduct(office, fundSourceAccount, loanId, transactionId, entryDate, disbursalAmount);
+                final BigDecimal disbursalAmount = loanTransactionDTO.getAmount();
+                createDebitJournalEntryForLoanProduct(office, loanPortfolioAccount, loanId, transactionId, transactionDate, disbursalAmount);
+                createCreditJournalEntryForLoanProduct(office, fundSourceAccount, loanId, transactionId, transactionDate, disbursalAmount);
             } else if (loanTransactionDTO.isRepayment() || loanTransactionDTO.isRepaymentAtDisbursement() || loanTransactionDTO.isContra()) {
-                createJournalEntriesForRepaymentOrContraUsingCashRules(office, loanProductId, loanTransactionDTO, entryDate, transactionId,
-                        loanId);
+                createJournalEntriesForRepaymentOrContraUsingCashRules(office, loanProductId, loanTransactionDTO, transactionDate,
+                        transactionId, loanId);
             }/***
              * Only principal write off affects cash based accounting (interest
              * and fee write off need not be considered). Debit losses written
              * off and credit Loan Portfolio
              **/
             else if (loanTransactionDTO.isWriteOff()) {
-                BigDecimal principalAmount = loanTransactionDTO.getPrincipal();
-                GLAccount lossesWrittenOffAccount = getLinkedFinAccountForLoanProduct(loanProductId,
+                final BigDecimal principalAmount = loanTransactionDTO.getPrincipal();
+                final GLAccount lossesWrittenOffAccount = getLinkedFinAccountForLoanProduct(loanProductId,
                         CASH_ACCOUNTS_FOR_LOAN.LOSSES_WRITTEN_OFF);
-                createDebitJournalEntryForLoanProduct(office, lossesWrittenOffAccount, loanId, transactionId, entryDate, principalAmount);
+                createDebitJournalEntryForLoanProduct(office, lossesWrittenOffAccount, loanId, transactionId, transactionDate,
+                        principalAmount);
 
-                GLAccount loanPortfolioAccount = getLinkedFinAccountForLoanProduct(loanProductId, CASH_ACCOUNTS_FOR_LOAN.LOAN_PORTFOLIO);
-                createCreditJournalEntryForLoanProduct(office, loanPortfolioAccount, loanId, transactionId, entryDate, principalAmount);
+                final GLAccount loanPortfolioAccount = getLinkedFinAccountForLoanProduct(loanProductId,
+                        CASH_ACCOUNTS_FOR_LOAN.LOAN_PORTFOLIO);
+                createCreditJournalEntryForLoanProduct(office, loanPortfolioAccount, loanId, transactionId, transactionDate,
+                        principalAmount);
             }
         }
     }
@@ -257,12 +263,12 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
      * credits and vice versa
      */
     private void createJournalEntriesForRepaymentOrContraUsingCashRules(final Office office, final Long loanProductId,
-            final LoanTransactionDTO loanTransactionDTO, final Date entryDate, String transactionId, final Long loanId) {
-        BigDecimal principalAmount = loanTransactionDTO.getPrincipal();
-        BigDecimal interestAmount = loanTransactionDTO.getInterest();
-        BigDecimal feesAmount = loanTransactionDTO.getFees();
-        BigDecimal penaltiesAmount = loanTransactionDTO.getPenalties();
-        boolean isContraTransaction = loanTransactionDTO.isContra();
+            final LoanTransactionDTO loanTransactionDTO, final Date transactionDate, String transactionId, final Long loanId) {
+        final BigDecimal principalAmount = loanTransactionDTO.getPrincipal();
+        final BigDecimal interestAmount = loanTransactionDTO.getInterest();
+        final BigDecimal feesAmount = loanTransactionDTO.getFees();
+        final BigDecimal penaltiesAmount = loanTransactionDTO.getPenalties();
+        final boolean isContraTransaction = loanTransactionDTO.isContra();
 
         BigDecimal totalDebitAmount = new BigDecimal(0);
 
@@ -273,90 +279,94 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
         if (principalAmount != null && !(principalAmount.compareTo(BigDecimal.ZERO) == 0)) {
             totalDebitAmount = totalDebitAmount.add(principalAmount);
 
-            GLAccount loanPortfolioAccount = getLinkedFinAccountForLoanProduct(loanProductId, CASH_ACCOUNTS_FOR_LOAN.LOAN_PORTFOLIO);
+            final GLAccount loanPortfolioAccount = getLinkedFinAccountForLoanProduct(loanProductId, CASH_ACCOUNTS_FOR_LOAN.LOAN_PORTFOLIO);
             if (isContraTransaction) {
-                createDebitJournalEntryForLoanProduct(office, loanPortfolioAccount, loanId, transactionId, entryDate, principalAmount);
+                createDebitJournalEntryForLoanProduct(office, loanPortfolioAccount, loanId, transactionId, transactionDate, principalAmount);
             } else {
-                createCreditJournalEntryForLoanProduct(office, loanPortfolioAccount, loanId, transactionId, entryDate, principalAmount);
+                createCreditJournalEntryForLoanProduct(office, loanPortfolioAccount, loanId, transactionId, transactionDate,
+                        principalAmount);
             }
         }
         if (interestAmount != null && !(interestAmount.compareTo(BigDecimal.ZERO) == 0)) {
             totalDebitAmount = totalDebitAmount.add(interestAmount);
 
-            GLAccount interestAccount = getLinkedFinAccountForLoanProduct(loanProductId, CASH_ACCOUNTS_FOR_LOAN.INTEREST_ON_LOANS);
+            final GLAccount interestAccount = getLinkedFinAccountForLoanProduct(loanProductId, CASH_ACCOUNTS_FOR_LOAN.INTEREST_ON_LOANS);
             if (isContraTransaction) {
-                createDebitJournalEntryForLoanProduct(office, interestAccount, loanId, transactionId, entryDate, interestAmount);
+                createDebitJournalEntryForLoanProduct(office, interestAccount, loanId, transactionId, transactionDate, interestAmount);
             } else {
-                createCreditJournalEntryForLoanProduct(office, interestAccount, loanId, transactionId, entryDate, interestAmount);
+                createCreditJournalEntryForLoanProduct(office, interestAccount, loanId, transactionId, transactionDate, interestAmount);
             }
         }
         if (feesAmount != null && !(feesAmount.compareTo(BigDecimal.ZERO) == 0)) {
             totalDebitAmount = totalDebitAmount.add(feesAmount);
 
-            GLAccount incomeFromFeesAccount = getLinkedFinAccountForLoanProduct(loanProductId, CASH_ACCOUNTS_FOR_LOAN.INCOME_FROM_FEES);
+            final GLAccount incomeFromFeesAccount = getLinkedFinAccountForLoanProduct(loanProductId,
+                    CASH_ACCOUNTS_FOR_LOAN.INCOME_FROM_FEES);
             if (isContraTransaction) {
-                createDebitJournalEntryForLoanProduct(office, incomeFromFeesAccount, loanId, transactionId, entryDate, feesAmount);
+                createDebitJournalEntryForLoanProduct(office, incomeFromFeesAccount, loanId, transactionId, transactionDate, feesAmount);
             } else {
-                createCreditJournalEntryForLoanProduct(office, incomeFromFeesAccount, loanId, transactionId, entryDate, feesAmount);
+                createCreditJournalEntryForLoanProduct(office, incomeFromFeesAccount, loanId, transactionId, transactionDate, feesAmount);
             }
         }
         if (penaltiesAmount != null && !(penaltiesAmount.compareTo(BigDecimal.ZERO) == 0)) {
             totalDebitAmount = totalDebitAmount.add(penaltiesAmount);
 
-            GLAccount incomeFromPenaltiesAccount = getLinkedFinAccountForLoanProduct(loanProductId,
+            final GLAccount incomeFromPenaltiesAccount = getLinkedFinAccountForLoanProduct(loanProductId,
                     CASH_ACCOUNTS_FOR_LOAN.INCOME_FROM_PENALTIES);
             if (isContraTransaction) {
-                createDebitJournalEntryForLoanProduct(office, incomeFromPenaltiesAccount, loanId, transactionId, entryDate, penaltiesAmount);
+                createDebitJournalEntryForLoanProduct(office, incomeFromPenaltiesAccount, loanId, transactionId, transactionDate,
+                        penaltiesAmount);
             } else {
-                createCreditJournalEntryForLoanProduct(office, incomeFromPenaltiesAccount, loanId, transactionId, entryDate,
+                createCreditJournalEntryForLoanProduct(office, incomeFromPenaltiesAccount, loanId, transactionId, transactionDate,
                         penaltiesAmount);
             }
         }
-        GLAccount fundSourceAccount = getLinkedFinAccountForLoanProduct(loanProductId, CASH_ACCOUNTS_FOR_LOAN.FUND_SOURCE);
+        final GLAccount fundSourceAccount = getLinkedFinAccountForLoanProduct(loanProductId, CASH_ACCOUNTS_FOR_LOAN.FUND_SOURCE);
         if (isContraTransaction) {
-            createCreditJournalEntryForLoanProduct(office, fundSourceAccount, loanId, transactionId, entryDate, totalDebitAmount);
+            createCreditJournalEntryForLoanProduct(office, fundSourceAccount, loanId, transactionId, transactionDate, totalDebitAmount);
         } else {
-            createDebitJournalEntryForLoanProduct(office, fundSourceAccount, loanId, transactionId, entryDate, totalDebitAmount);
+            createDebitJournalEntryForLoanProduct(office, fundSourceAccount, loanId, transactionId, transactionDate, totalDebitAmount);
         }
     }
 
     private GLAccount getLinkedFinAccountForLoanProduct(final Long loanProductId, final CASH_ACCOUNTS_FOR_LOAN finAccountType) {
-        ProductToGLAccountMapping accountMapping = accountMappingRepository.findByProductIdAndProductTypeAndFinancialAccountType(
-                loanProductId, PortfolioProductType.LOAN.getValue(), finAccountType.getValue());
+        final ProductToGLAccountMapping accountMapping = this.accountMappingRepository
+                .findByProductIdAndProductTypeAndFinancialAccountType(loanProductId, PortfolioProductType.LOAN.getValue(),
+                        finAccountType.getValue());
         return accountMapping.getGlAccount();
     }
 
-    private void createCreditJournalEntryForLoanProduct(Office office, GLAccount account, Long loanId, String transactionId,
-            Date entryDate, BigDecimal amount) {
-        JournalEntry journalEntry = JournalEntry.createNew(office, account, transactionId, true, entryDate, JournalEntryType.CREDIT,
-                amount, null, PortfolioProductType.LOAN.toString(), loanId);
-        glJournalEntryRepository.saveAndFlush(journalEntry);
+    private void createCreditJournalEntryForLoanProduct(final Office office, final GLAccount account, final Long loanId,
+            final String transactionId, final Date transactionDate, final BigDecimal amount) {
+        final JournalEntry journalEntry = JournalEntry.createNew(office, account, transactionId, true, transactionDate,
+                JournalEntryType.CREDIT, amount, null, PortfolioProductType.LOAN.toString(), loanId);
+        this.glJournalEntryRepository.saveAndFlush(journalEntry);
     }
 
-    private void createDebitJournalEntryForLoanProduct(Office office, GLAccount account, Long loanId, String transactionId, Date entryDate,
-            BigDecimal amount) {
-        JournalEntry journalEntry = JournalEntry.createNew(office, account, transactionId, true, entryDate, JournalEntryType.DEBIT, amount,
-                null, PortfolioProductType.LOAN.toString(), loanId);
-        glJournalEntryRepository.saveAndFlush(journalEntry);
+    private void createDebitJournalEntryForLoanProduct(final Office office, final GLAccount account, final Long loanId,
+            final String transactionId, final Date transactionDate, final BigDecimal amount) {
+        final JournalEntry journalEntry = JournalEntry.createNew(office, account, transactionId, true, transactionDate,
+                JournalEntryType.DEBIT, amount, null, PortfolioProductType.LOAN.toString(), loanId);
+        this.glJournalEntryRepository.saveAndFlush(journalEntry);
     }
 
-    private void validateBusinessRulesForJournalEntries(JournalEntryCommand command) {
+    private void validateBusinessRulesForJournalEntries(final JournalEntryCommand command) {
         /** check if date of Journal entry is valid ***/
-        final LocalDate entryLocalDate = command.getEntryDate();
-        Date entryDate = entryLocalDate.toDateMidnight().toDate();
+        final LocalDate entryLocalDate = command.getTransactionDate();
+        final Date transactionDate = entryLocalDate.toDateMidnight().toDate();
         // shouldn't be in the future
-        Date todaysDate = new Date();
-        if (entryDate.after(todaysDate)) { throw new JournalEntryInvalidException(GL_JOURNAL_ENTRY_INVALID_REASON.FUTURE_DATE, entryDate,
-                null, null); }
+        final Date todaysDate = new Date();
+        if (transactionDate.after(todaysDate)) { throw new JournalEntryInvalidException(GL_JOURNAL_ENTRY_INVALID_REASON.FUTURE_DATE,
+                transactionDate, null, null); }
         // shouldn't be before an accounting closure
-        GLClosure latestGLClosure = glClosureRepository.getLatestGLClosureByBranch(command.getOfficeId());
+        final GLClosure latestGLClosure = this.glClosureRepository.getLatestGLClosureByBranch(command.getOfficeId());
         if (latestGLClosure != null) {
-            if (latestGLClosure.getClosingDate().after(entryDate) || latestGLClosure.getClosingDate().equals(entryDate)) { throw new JournalEntryInvalidException(
+            if (latestGLClosure.getClosingDate().after(transactionDate) || latestGLClosure.getClosingDate().equals(transactionDate)) { throw new JournalEntryInvalidException(
                     GL_JOURNAL_ENTRY_INVALID_REASON.ACCOUNTING_CLOSED, latestGLClosure.getClosingDate(), null, null); }
         }
         /*** check if credits and debits are valid **/
-        SingleDebitOrCreditEntryCommand[] credits = command.getCredits();
-        SingleDebitOrCreditEntryCommand[] debits = command.getDebits();
+        final SingleDebitOrCreditEntryCommand[] credits = command.getCredits();
+        final SingleDebitOrCreditEntryCommand[] debits = command.getDebits();
 
         // atleast one debit or credit must be present
         if ((credits == null || credits.length <= 0) || (debits == null || debits.length <= 0)) { throw new JournalEntryInvalidException(
@@ -365,12 +375,12 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
         // sum of all debits must be = sum of all credits
         BigDecimal creditsSum = BigDecimal.ZERO;
         BigDecimal debitsSum = BigDecimal.ZERO;
-        for (SingleDebitOrCreditEntryCommand creditEntryCommand : credits) {
+        for (final SingleDebitOrCreditEntryCommand creditEntryCommand : credits) {
             if (creditEntryCommand.getAmount() == null || creditEntryCommand.getGlAccountId() == null) { throw new JournalEntryInvalidException(
                     GL_JOURNAL_ENTRY_INVALID_REASON.DEBIT_CREDIT_ACCOUNT_OR_AMOUNT_EMPTY, null, null, null); }
             creditsSum = creditsSum.add(creditEntryCommand.getAmount());
         }
-        for (SingleDebitOrCreditEntryCommand debitEntryCommand : debits) {
+        for (final SingleDebitOrCreditEntryCommand debitEntryCommand : debits) {
             if (debitEntryCommand.getAmount() == null || debitEntryCommand.getGlAccountId() == null) { throw new JournalEntryInvalidException(
                     GL_JOURNAL_ENTRY_INVALID_REASON.DEBIT_CREDIT_ACCOUNT_OR_AMOUNT_EMPTY, null, null, null); }
             debitsSum = debitsSum.add(debitEntryCommand.getAmount());
@@ -379,11 +389,11 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
                 GL_JOURNAL_ENTRY_INVALID_REASON.DEBIT_CREDIT_SUM_MISMATCH, null, null, null); }
     }
 
-    private void saveAllDebitOrCreditEntries(final JournalEntryCommand command, final Office office, final Date entryDate,
+    private void saveAllDebitOrCreditEntries(final JournalEntryCommand command, final Office office, final Date transactionDate,
             final SingleDebitOrCreditEntryCommand[] singleDebitOrCreditEntryCommands, final String transactionId,
             final JournalEntryType type) {
-        for (SingleDebitOrCreditEntryCommand singleDebitOrCreditEntryCommand : singleDebitOrCreditEntryCommands) {
-            GLAccount glAccount = glAccountRepository.findOne(singleDebitOrCreditEntryCommand.getGlAccountId());
+        for (final SingleDebitOrCreditEntryCommand singleDebitOrCreditEntryCommand : singleDebitOrCreditEntryCommands) {
+            final GLAccount glAccount = this.glAccountRepository.findOne(singleDebitOrCreditEntryCommand.getGlAccountId());
             if (glAccount == null) { throw new GLAccountNotFoundException(singleDebitOrCreditEntryCommand.getGlAccountId()); }
 
             /***
@@ -401,14 +411,14 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
             if (!StringUtils.isBlank(singleDebitOrCreditEntryCommand.getComments())) {
                 comments = singleDebitOrCreditEntryCommand.getComments();
             }
-            JournalEntry glJournalEntry = JournalEntry.createNew(office, glAccount, transactionId, false, entryDate, type,
+            final JournalEntry glJournalEntry = JournalEntry.createNew(office, glAccount, transactionId, false, transactionDate, type,
                     singleDebitOrCreditEntryCommand.getAmount(), comments, null, null);
-            glJournalEntryRepository.saveAndFlush(glJournalEntry);
+            this.glJournalEntryRepository.saveAndFlush(glJournalEntry);
         }
     }
 
     private void handleJournalEntryDataIntegrityIssues(final DataIntegrityViolationException dve) {
-        Throwable realCause = dve.getMostSpecificCause();
+        final Throwable realCause = dve.getMostSpecificCause();
         logger.error(dve.getMessage(), dve);
         throw new PlatformDataIntegrityException("error.msg.glJournalEntry.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource Journal Entry: " + realCause.getMessage());

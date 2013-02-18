@@ -36,7 +36,7 @@ public class GLAccount extends AbstractPersistable<Long> {
 
     @OneToMany(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id")
-    private List<GLAccount> children = new LinkedList<GLAccount>();
+    private final List<GLAccount> children = new LinkedList<GLAccount>();
 
     @Column(name = "name", nullable = false, length = 45)
     private String name;
@@ -80,15 +80,15 @@ public class GLAccount extends AbstractPersistable<Long> {
         this.parent = parent;
     }
 
-    public static GLAccount fromJson(GLAccount parent, final JsonCommand command) {
-        String name = command.stringValueOfParameterNamed(GLAccountJsonInputParams.NAME.getValue());
-        String glCode = command.stringValueOfParameterNamed(GLAccountJsonInputParams.GL_CODE.getValue());
-        boolean disabled = command.booleanPrimitiveValueOfParameterNamed(GLAccountJsonInputParams.DISABLED.getValue());
-        boolean manualEntriesAllowed = command.booleanPrimitiveValueOfParameterNamed(GLAccountJsonInputParams.MANUAL_ENTRIES_ALLOWED
+    public static GLAccount fromJson(final GLAccount parent, final JsonCommand command) {
+        final String name = command.stringValueOfParameterNamed(GLAccountJsonInputParams.NAME.getValue());
+        final String glCode = command.stringValueOfParameterNamed(GLAccountJsonInputParams.GL_CODE.getValue());
+        final boolean disabled = command.booleanPrimitiveValueOfParameterNamed(GLAccountJsonInputParams.DISABLED.getValue());
+        final boolean manualEntriesAllowed = command.booleanPrimitiveValueOfParameterNamed(GLAccountJsonInputParams.MANUAL_ENTRIES_ALLOWED
                 .getValue());
-        Integer usage = command.integerValueSansLocaleOfParameterNamed(GLAccountJsonInputParams.USAGE.getValue());
-        Integer type = command.integerValueSansLocaleOfParameterNamed(GLAccountJsonInputParams.TYPE.getValue());
-        String description = command.stringValueOfParameterNamed(GLAccountJsonInputParams.DESCRIPTION.getValue());
+        final Integer usage = command.integerValueSansLocaleOfParameterNamed(GLAccountJsonInputParams.USAGE.getValue());
+        final Integer type = command.integerValueSansLocaleOfParameterNamed(GLAccountJsonInputParams.TYPE.getValue());
+        final String description = command.stringValueOfParameterNamed(GLAccountJsonInputParams.DESCRIPTION.getValue());
         return new GLAccount(parent, name, glCode, disabled, manualEntriesAllowed, type, usage, description);
     }
 
@@ -106,7 +106,7 @@ public class GLAccount extends AbstractPersistable<Long> {
     }
 
     private void handlePropertyUpdate(final JsonCommand command, final Map<String, Object> actualChanges, final String paramName,
-            Integer propertyToBeUpdated, boolean sansLocale) {
+            final Integer propertyToBeUpdated, final boolean sansLocale) {
         boolean changeDetected = false;
         if (sansLocale) {
             changeDetected = command.isChangeInIntegerSansLocaleParameterNamed(paramName, propertyToBeUpdated);
@@ -131,7 +131,7 @@ public class GLAccount extends AbstractPersistable<Long> {
     }
 
     private void handlePropertyUpdate(final JsonCommand command, final Map<String, Object> actualChanges, final String paramName,
-            String propertyToBeUpdated) {
+            final String propertyToBeUpdated) {
         if (command.isChangeInStringParameterNamed(paramName, propertyToBeUpdated)) {
             final String newValue = command.stringValueOfParameterNamed(paramName);
             actualChanges.put(paramName, newValue);
@@ -147,7 +147,7 @@ public class GLAccount extends AbstractPersistable<Long> {
     }
 
     private void handlePropertyUpdate(final JsonCommand command, final Map<String, Object> actualChanges, final String paramName,
-            Long propertyToBeUpdated) {
+            final Long propertyToBeUpdated) {
         if (command.isChangeInLongParameterNamed(paramName, propertyToBeUpdated)) {
             final Long newValue = command.longValueOfParameterNamed(paramName);
             actualChanges.put(paramName, newValue);
@@ -159,7 +159,7 @@ public class GLAccount extends AbstractPersistable<Long> {
     }
 
     private void handlePropertyUpdate(final JsonCommand command, final Map<String, Object> actualChanges, final String paramName,
-            boolean propertyToBeUpdated) {
+            final boolean propertyToBeUpdated) {
         if (command.isChangeInBooleanParameterNamed(paramName, propertyToBeUpdated)) {
             final Boolean newValue = command.booleanObjectValueOfParameterNamed(paramName);
             actualChanges.put(paramName, newValue);

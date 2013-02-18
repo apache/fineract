@@ -19,7 +19,8 @@ public class SingleDebitOrCreditEntryCommand {
 
     private final Set<String> parametersPassedInRequest;
 
-    public SingleDebitOrCreditEntryCommand(Set<String> parametersPassedInRequest, Long glAccountId, BigDecimal amount, String comments) {
+    public SingleDebitOrCreditEntryCommand(final Set<String> parametersPassedInRequest, final Long glAccountId, final BigDecimal amount,
+            final String comments) {
         this.parametersPassedInRequest = parametersPassedInRequest;
         this.glAccountId = glAccountId;
         this.amount = amount;
