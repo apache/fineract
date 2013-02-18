@@ -21,7 +21,7 @@ public class DataValidatorBuilder {
     private Object value;
     private boolean ignoreNullValue = false;
 
-    public DataValidatorBuilder(List<ApiParameterError> dataValidationErrors) {
+    public DataValidatorBuilder(final List<ApiParameterError> dataValidationErrors) {
         this.dataValidationErrors = dataValidationErrors;
     }
 
@@ -45,7 +45,7 @@ public class DataValidatorBuilder {
         return this;
     }
 
-    public DataValidatorBuilder value(Object value) {
+    public DataValidatorBuilder value(final Object value) {
         this.value = value;
         return this;
     }
@@ -55,7 +55,7 @@ public class DataValidatorBuilder {
         return this;
     }
 
-    public DataValidatorBuilder andNotBlank(String linkedParameterName, String linkedValue) {
+    public DataValidatorBuilder andNotBlank(final String linkedParameterName, final String linkedValue) {
         if (value == null && linkedValue == null && ignoreNullValue) { return this; }
 
         if (StringUtils.isBlank(linkedValue)) {
@@ -70,7 +70,7 @@ public class DataValidatorBuilder {
         return this;
     }
 
-    public DataValidatorBuilder equalToParameter(String linkedParameterName, Object linkedValue) {
+    public DataValidatorBuilder equalToParameter(final String linkedParameterName, final Object linkedValue) {
         if (value == null && linkedValue == null && ignoreNullValue) { return this; }
 
         if (value != null && !value.equals(linkedValue)) {
@@ -85,7 +85,7 @@ public class DataValidatorBuilder {
         return this;
     }
 
-    public DataValidatorBuilder notSameAsParameter(String linkedParameterName, Object linkedValue) {
+    public DataValidatorBuilder notSameAsParameter(final String linkedParameterName, final Object linkedValue) {
         if (value == null && linkedValue == null && ignoreNullValue) { return this; }
 
         if (value != null && value.equals(linkedValue)) {
@@ -100,7 +100,7 @@ public class DataValidatorBuilder {
         return this;
     }
 
-    public DataValidatorBuilder trueOrFalseRequired(boolean trueOfFalseFieldProvided) {
+    public DataValidatorBuilder trueOrFalseRequired(final boolean trueOfFalseFieldProvided) {
         if (!trueOfFalseFieldProvided && !ignoreNullValue) {
             StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append(resource).append(".").append(parameter)
                     .append(".must.be.true.or.false");
@@ -115,13 +115,13 @@ public class DataValidatorBuilder {
 
     public DataValidatorBuilder notNull() {
         if (value == null && !ignoreNullValue) {
-            
+
             String realParameterName = this.parameter;
             StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append(resource).append(".").append(parameter);
             if (this.arrayIndex != null && StringUtils.isNotBlank(arrayPart)) {
                 validationErrorCode.append(".").append(this.arrayPart);
-                realParameterName = new StringBuilder(parameter).append('[').append(this.arrayIndex).append("][").append(arrayPart).append(']')
-                        .toString();
+                realParameterName = new StringBuilder(parameter).append('[').append(this.arrayIndex).append("][").append(arrayPart)
+                        .append(']').toString();
             }
 
             validationErrorCode.append(".cannot.be.blank");
@@ -141,8 +141,8 @@ public class DataValidatorBuilder {
             StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append(resource).append(".").append(parameter);
             if (this.arrayIndex != null && StringUtils.isNotBlank(arrayPart)) {
                 validationErrorCode.append(".").append(this.arrayPart);
-                realParameterName = new StringBuilder(parameter).append('[').append(this.arrayIndex).append("][").append(arrayPart).append(']')
-                        .toString();
+                realParameterName = new StringBuilder(parameter).append('[').append(this.arrayIndex).append("][").append(arrayPart)
+                        .append(']').toString();
             }
 
             validationErrorCode.append(".cannot.be.blank");
@@ -154,7 +154,7 @@ public class DataValidatorBuilder {
         return this;
     }
 
-    public DataValidatorBuilder notExceedingLengthOf(Integer maxLength) {
+    public DataValidatorBuilder notExceedingLengthOf(final Integer maxLength) {
         if (value == null && ignoreNullValue) { return this; }
 
         if (value != null && value.toString().trim().length() > maxLength) {
@@ -169,7 +169,7 @@ public class DataValidatorBuilder {
         return this;
     }
 
-    public DataValidatorBuilder inMinMaxRange(Integer min, Integer max) {
+    public DataValidatorBuilder inMinMaxRange(final Integer min, final Integer max) {
         if (value == null && ignoreNullValue) { return this; }
 
         if (value != null) {
@@ -284,7 +284,7 @@ public class DataValidatorBuilder {
         dataValidationErrors.add(error);
     }
 
-    public DataValidatorBuilder anyOfNotNull(Object... object) {
+    public DataValidatorBuilder anyOfNotNull(final Object... object) {
         boolean hasData = false;
         for (Object obj : object) {
             if (obj != null) {
@@ -303,7 +303,7 @@ public class DataValidatorBuilder {
         return this;
     }
 
-    public DataValidatorBuilder inValidValue(String parameterValueCode, Object invalidValue) {
+    public DataValidatorBuilder inValidValue(final String parameterValueCode, final Object invalidValue) {
         StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append(resource).append(".").append(parameter)
                 .append(".invalid.").append(parameterValueCode);
         StringBuilder defaultEnglishMessage = new StringBuilder("The parameter ").append(parameter).append(" has an invalid value.");
@@ -313,7 +313,7 @@ public class DataValidatorBuilder {
         return this;
     }
 
-    public DataValidatorBuilder mustBeBlankWhenParameterProvided(String parameterName, Object parameterValue) {
+    public DataValidatorBuilder mustBeBlankWhenParameterProvided(final String parameterName, final Object parameterValue) {
         if (value == null && ignoreNullValue) { return this; }
 
         if (value == null && parameterValue != null) { return this; }
@@ -331,7 +331,7 @@ public class DataValidatorBuilder {
         return this;
     }
 
-    public DataValidatorBuilder comapareMinimumAndMaximumAmounts(BigDecimal minimumBalance, BigDecimal maximumBalance) {
+    public DataValidatorBuilder comapareMinimumAndMaximumAmounts(final BigDecimal minimumBalance, final BigDecimal maximumBalance) {
         if (minimumBalance != null && maximumBalance != null)
             if (maximumBalance.compareTo(minimumBalance) == -1) {
                 StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append(resource).append(".").append(parameter)
@@ -346,7 +346,7 @@ public class DataValidatorBuilder {
         return this;
     }
 
-    public DataValidatorBuilder comapareMinAndMaxOfTwoBigDecmimalNos(BigDecimal min, BigDecimal max) {
+    public DataValidatorBuilder comapareMinAndMaxOfTwoBigDecmimalNos(final BigDecimal min, final BigDecimal max) {
         if (min != null && max != null)
             if (max.compareTo(min) == -1) {
                 StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append(resource).append(".").append(parameter)
