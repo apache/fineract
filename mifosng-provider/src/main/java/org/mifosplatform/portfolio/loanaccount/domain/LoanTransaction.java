@@ -10,12 +10,10 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -36,7 +34,7 @@ import org.mifosplatform.useradministration.domain.AppUser;
  */
 @Entity
 @Table(name = "m_loan_transaction")
-public class LoanTransaction extends AbstractAuditableCustom<AppUser, Long> {
+public final class LoanTransaction extends AbstractAuditableCustom<AppUser, Long> {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "loan_id", nullable = false)
@@ -64,9 +62,8 @@ public class LoanTransaction extends AbstractAuditableCustom<AppUser, Long> {
     @Column(name = "transaction_type_enum", nullable = false)
     private final Integer typeOf;
 
-    @OneToOne(optional = true, cascade = { CascadeType.PERSIST })
-    @JoinColumn(name = "contra_id")
-    private LoanTransaction contra;
+    @Column(name = "is_reversed", nullable = false)
+    private boolean reversed;
 
     protected LoanTransaction() {
         this.loan = null;
@@ -98,19 +95,8 @@ public class LoanTransaction extends AbstractAuditableCustom<AppUser, Long> {
         return waiver;
     }
 
-    private static LoanTransaction contra(final LoanTransaction originalTransaction) {
-        LoanTransaction contra = new LoanTransaction(null, LoanTransactionType.CONTRA, originalTransaction.getAmount().negate(),
-                new LocalDate(originalTransaction.getDateOf()));
-        contra.updateContra(originalTransaction);
-        return contra;
-    }
-
     public static LoanTransaction writeoff(final Loan loan, final LocalDate writeOffDate) {
         return new LoanTransaction(loan, LoanTransactionType.WRITEOFF, null, writeOffDate);
-    }
-
-    public void updateContra(final LoanTransaction transaction) {
-        this.contra = transaction;
     }
 
     private LoanTransaction(final Loan loan, final LoanTransactionType type, final BigDecimal amount, final LocalDate date) {
@@ -120,106 +106,19 @@ public class LoanTransaction extends AbstractAuditableCustom<AppUser, Long> {
         this.dateOf = date.toDateMidnight().toDate();
     }
 
-    public BigDecimal getAmount() {
-        return this.amount;
+    public void reverse() {
+        this.reversed = true;
     }
 
-    public Money getAmount(final MonetaryCurrency currency) {
-        return Money.of(currency, this.amount);
+    public void resetDerivedComponents() {
+        this.principalPortion = null;
+        this.interestPortion = null;
+        this.feeChargesPortion = null;
+        this.penaltyChargesPortion = null;
     }
-
-    public LocalDate getTransactionDate() {
-        return new LocalDate(this.dateOf);
-    }
-
-    public Date getDateOf() {
-        return dateOf;
-    }
-
-    public LoanTransactionType getTypeOf() {
-        return LoanTransactionType.fromInt(this.typeOf);
-    }
-
-    public boolean isRepayment() {
-        return LoanTransactionType.REPAYMENT.equals(getTypeOf()) && isNotContra();
-    }
-
-    public boolean isNotRepayment() {
-        return !isRepayment();
-    }
-
-    public boolean isNotContra() {
-        return this.contra == null;
-    }
-    
-    public boolean isContra() {
-        return this.contra != null;
-    }
-
-    public boolean isDisbursement() {
-        return LoanTransactionType.DISBURSEMENT.equals(getTypeOf());
-    }
-
-    public boolean isRepaymentAtDisbursement() {
-        return LoanTransactionType.REPAYMENT_AT_DISBURSEMENT.equals(getTypeOf());
-    }
-
-    public boolean isInterestWaiver() {
-        return LoanTransactionType.WAIVE_INTEREST.equals(getTypeOf()) && isNotContra();
-    }
-
-    public boolean isChargesWaiver() {
-        return LoanTransactionType.WAIVE_CHARGES.equals(getTypeOf()) && isNotContra();
-    }
-
-    public boolean isNotInterestWaiver() {
-        return !isInterestWaiver();
-    }
-
-    public boolean isWaiver() {
-        return isInterestWaiver() || isChargesWaiver();
-    }
-
-    public boolean isNotWaiver() {
-        return !isInterestWaiver() && !isChargesWaiver();
-    }
-
-    public boolean isWriteOff() {
-        return getTypeOf().isWriteOff() && isNotContra();
-    }
-
-    public boolean isIdentifiedBy(final Long identifier) {
-        return this.getId().equals(identifier);
-    }
-
-    public boolean isBelongingToLoanOf(final Loan check) {
-        return this.loan.getId().equals(check.getId());
-    }
-
-    public boolean isNotBelongingToLoanOf(final Loan check) {
-        return !isBelongingToLoanOf(check);
-    }
-
-    public LoanTransaction contra() {
-        this.contra = LoanTransaction.contra(this);
-        contra.updateLoan(this.loan);
-
-        return this.contra;
-    }
-
-    // public LoanTransaction newContra() {
-    // // should update some flag old entry being contra'd
-    // LoanTransaction contra = LoanTransaction.contra(this);
-    // contra.updateLoan(this.loan);
-    // return contra;
-    // }
 
     public void updateLoan(final Loan loan) {
         this.loan = loan;
-    }
-
-    public boolean isNonZero() {
-        return this.amount.subtract(BigDecimal.ZERO).doubleValue() > 0;
     }
 
     /**
@@ -282,11 +181,92 @@ public class LoanTransaction extends AbstractAuditableCustom<AppUser, Long> {
         return this.penaltyChargesPortion;
     }
 
-    public void resetDerivedComponents() {
-        this.principalPortion = null;
-        this.interestPortion = null;
-        this.feeChargesPortion = null;
-        this.penaltyChargesPortion = null;
+    public BigDecimal getAmount() {
+        return this.amount;
+    }
+
+    public Money getAmount(final MonetaryCurrency currency) {
+        return Money.of(currency, this.amount);
+    }
+
+    public LocalDate getTransactionDate() {
+        return new LocalDate(this.dateOf);
+    }
+
+    public Date getDateOf() {
+        return dateOf;
+    }
+
+    public LoanTransactionType getTypeOf() {
+        return LoanTransactionType.fromInt(this.typeOf);
+    }
+
+    public boolean isReversed() {
+        return this.reversed;
+    }
+
+    public boolean isNotReversed() {
+        return !isReversed();
+    }
+
+    public boolean isRepayment() {
+        return LoanTransactionType.REPAYMENT.equals(getTypeOf()) && isNotReversed();
+    }
+
+    public boolean isNotRepayment() {
+        return !isRepayment();
+    }
+
+    public boolean isDisbursement() {
+        return LoanTransactionType.DISBURSEMENT.equals(getTypeOf()) && isNotReversed();
+    }
+
+    public boolean isRepaymentAtDisbursement() {
+        return LoanTransactionType.REPAYMENT_AT_DISBURSEMENT.equals(getTypeOf()) && isNotReversed();
+    }
+
+    private boolean isRecoveryRepayment() {
+        return LoanTransactionType.RECOVERY_REPAYMENT.equals(getTypeOf()) && isNotReversed();
+    }
+
+    public boolean isInterestWaiver() {
+        return LoanTransactionType.WAIVE_INTEREST.equals(getTypeOf()) && isNotReversed();
+    }
+
+    public boolean isChargesWaiver() {
+        return LoanTransactionType.WAIVE_CHARGES.equals(getTypeOf()) && isNotReversed();
+    }
+
+    public boolean isNotInterestWaiver() {
+        return !isInterestWaiver();
+    }
+
+    public boolean isWaiver() {
+        return isInterestWaiver() || isChargesWaiver();
+    }
+
+    public boolean isNotWaiver() {
+        return !isInterestWaiver() && !isChargesWaiver();
+    }
+
+    public boolean isWriteOff() {
+        return getTypeOf().isWriteOff() && isNotReversed();
+    }
+
+    public boolean isIdentifiedBy(final Long identifier) {
+        return this.getId().equals(identifier);
+    }
+
+    public boolean isBelongingToLoanOf(final Loan check) {
+        return this.loan.getId().equals(check.getId());
+    }
+
+    public boolean isNotBelongingToLoanOf(final Loan check) {
+        return !isBelongingToLoanOf(check);
+    }
+
+    public boolean isNonZero() {
+        return this.amount.subtract(BigDecimal.ZERO).doubleValue() > 0;
     }
 
     public boolean isGreaterThan(final Money monetaryAmount) {
@@ -318,19 +298,18 @@ public class LoanTransaction extends AbstractAuditableCustom<AppUser, Long> {
     public Map<String, Object> toMapData(final CurrencyData currencyData) {
         final Map<String, Object> thisTransactionData = new LinkedHashMap<String, Object>();
 
-        LoanTransactionType type = LoanTransactionType.fromInt(this.typeOf);
         final LoanTransactionEnumData transactionType = LoanEnumerations.transactionType(this.typeOf);
 
         thisTransactionData.put("id", this.getId());
         thisTransactionData.put("type", transactionType);
-        thisTransactionData.put("disbursement", type.isDisbursement());
-        thisTransactionData.put("repaymentAtDisbursement", type.isRepaymentAtDisbursement());
-        thisTransactionData.put("repayment", type.isRepayment());
-        thisTransactionData.put("recoveryRepayment", type.isRecoveryRepayment());
-        thisTransactionData.put("contra", type.isContra());
-        thisTransactionData.put("waiveInterest", type.isWaiveInterest());
-        thisTransactionData.put("waiveCharges", type.isWaiveCharges());
-        thisTransactionData.put("writeOff", type.isWriteOff());
+        thisTransactionData.put("disbursement", Boolean.valueOf(this.isDisbursement()));
+        thisTransactionData.put("repaymentAtDisbursement", Boolean.valueOf(this.isRepaymentAtDisbursement()));
+        thisTransactionData.put("repayment", Boolean.valueOf(this.isRepayment()));
+        thisTransactionData.put("recoveryRepayment", Boolean.valueOf(this.isRecoveryRepayment()));
+        thisTransactionData.put("contra", Boolean.valueOf(this.isReversed()));
+        thisTransactionData.put("waiveInterest", Boolean.valueOf(this.isInterestWaiver()));
+        thisTransactionData.put("waiveCharges", Boolean.valueOf(this.isChargesWaiver()));
+        thisTransactionData.put("writeOff", Boolean.valueOf(this.isWriteOff()));
 
         thisTransactionData.put("date", this.getTransactionDate());
         thisTransactionData.put("currency", currencyData);

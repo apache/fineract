@@ -77,35 +77,31 @@ public enum LoanTransactionType {
         return loanTransactionType;
     }
 
-    public Boolean isDisbursement() {
+    public boolean isDisbursement() {
         return this.value.equals(LoanTransactionType.DISBURSEMENT.getValue());
     }
 
-    public Boolean isRepaymentAtDisbursement() {
+    public boolean isRepaymentAtDisbursement() {
         return this.value.equals(LoanTransactionType.REPAYMENT_AT_DISBURSEMENT.getValue());
     }
 
-    public Boolean isRepayment() {
+    public boolean isRepayment() {
         return this.value.equals(LoanTransactionType.REPAYMENT.getValue());
     }
 
-    public Boolean isRecoveryRepayment() {
+    public boolean isRecoveryRepayment() {
         return this.value.equals(LoanTransactionType.RECOVERY_REPAYMENT.getValue());
     }
 
-    public Boolean isContra() {
-        return this.value.equals(LoanTransactionType.CONTRA.getValue());
-    }
-
-    public Boolean isWaiveInterest() {
+    public boolean isWaiveInterest() {
         return this.value.equals(LoanTransactionType.WAIVE_INTEREST.getValue());
     }
 
-    public Boolean isWaiveCharges() {
+    public boolean isWaiveCharges() {
         return this.value.equals(LoanTransactionType.WAIVE_CHARGES.getValue());
     }
 
-    public Boolean isWriteOff() {
+    public boolean isWriteOff() {
         return this.value.equals(LoanTransactionType.WRITEOFF.getValue());
     }
 }

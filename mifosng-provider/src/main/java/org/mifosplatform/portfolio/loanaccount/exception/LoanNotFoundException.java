@@ -12,7 +12,7 @@ import org.mifosplatform.infrastructure.core.exception.AbstractPlatformResourceN
  */
 public class LoanNotFoundException extends AbstractPlatformResourceNotFoundException {
 
-	public LoanNotFoundException(Long id) {
-		super("error.msg.loan.id.invalid", "Loan with identifier " + id + " does not exist", id);
-	}
+    public LoanNotFoundException(final Long id) {
+        super("error.msg.loan.id.invalid", "Loan with identifier " + id + " does not exist", id);
+    }
 }

@@ -130,13 +130,10 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         final ApplicationCurrency currency = this.applicationCurrencyRepository.findOneByCode(loan.getPrincpal().getCurrencyCode());
 
-        /***
-         * In cases where an "Undo disbursement is done and the loan is
-         * disbursed again, we need to ensure the old transactions are entered
-         * again in accounting
-         ***/
         final List<Long> existingTransactionIds = new ArrayList<Long>();
-        final Map<String, Object> changes = loan.disburse(currentUser, command, defaultLoanLifecycleStateMachine(), currency, existingTransactionIds);
+        final List<Long> existingReversedTransactionIds = new ArrayList<Long>();
+        final Map<String, Object> changes = loan.disburse(currentUser, command, defaultLoanLifecycleStateMachine(), currency,
+                existingTransactionIds, existingReversedTransactionIds);
         if (!changes.isEmpty()) {
             this.loanRepository.save(loan);
 
@@ -144,8 +141,9 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 Note note = Note.loanNote(loan, noteText);
                 this.noteRepository.save(note);
             }
-            
-            final Map<String, Object> accountingBridgeData = loan.deriveDisbursementData(currency.toData(), existingTransactionIds);
+
+            final Map<String, Object> accountingBridgeData = loan.deriveAccountingBridgeData(currency.toData(), existingTransactionIds,
+                    existingReversedTransactionIds);
             journalEntryWritePlatformService.createJournalEntriesForLoan(accountingBridgeData);
         }
 
@@ -169,7 +167,9 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final Loan loan = retrieveLoanBy(loanId);
 
         final List<Long> existingTransactionIds = new ArrayList<Long>();
-        final Map<String, Object> changes = loan.undoDisbursal(defaultLoanLifecycleStateMachine(), existingTransactionIds);
+        final List<Long> existingReversedTransactionIds = new ArrayList<Long>();
+        final Map<String, Object> changes = loan.undoDisbursal(defaultLoanLifecycleStateMachine(), existingTransactionIds,
+                existingReversedTransactionIds);
         if (!changes.isEmpty()) {
             this.loanRepository.saveAndFlush(loan);
 
@@ -179,10 +179,9 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 this.noteRepository.save(note);
             }
 
-            final Loan loanRefetch = retrieveLoanBy(loanId);
-
-            final ApplicationCurrency currency = this.applicationCurrencyRepository.findOneByCode(loan.getPrincpal().getCurrencyCode());
-            final Map<String, Object> accountingBridgeData = loanRefetch.deriveAccountingBridgeData(currency.toData(), existingTransactionIds);
+            final ApplicationCurrency currency = this.applicationCurrencyRepository.findOneByCode(loan.getCurrencyCode());
+            final Map<String, Object> accountingBridgeData = loan.deriveAccountingBridgeData(currency.toData(), existingTransactionIds,
+                    existingReversedTransactionIds);
             journalEntryWritePlatformService.createJournalEntriesForLoan(accountingBridgeData);
         }
 
@@ -736,7 +735,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             LoanTransactionDTO loanTransactionDTO = new LoanTransactionDTO(loanTransaction.getId().toString(), loanTransaction.getDateOf(),
                     loanTransaction.getAmount(), loanTransaction.getPrincipalPortion(), loanTransaction.getInterestPortion(),
                     loanTransaction.getFeePortion(), loanTransaction.getPenaltyChargesPortion(), loanTransaction.isDisbursement(),
-                    loanTransaction.isRepayment(), loanTransaction.isRepaymentAtDisbursement(), loanTransaction.isContra(),
+                    loanTransaction.isRepayment(), loanTransaction.isRepaymentAtDisbursement(), loanTransaction.isReversed(),
                     loanTransaction.isWriteOff());
             loanTransactionDTOs.add(loanTransactionDTO);
         }

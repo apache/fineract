@@ -1106,40 +1106,6 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
         handleDisbursementTransaction(expectedDisbursedOnLocalDate);
     }
 
-    public Map<String, Object> deriveDisbursementData(final CurrencyData currencyData, final List<Long> existingTransactionIds) {
-
-        final Map<String, Object> accountingBridgeData = new LinkedHashMap<String, Object>(20);
-
-        accountingBridgeData.put("loanId", this.getId());
-        accountingBridgeData.put("loanProductId", this.productId());
-        accountingBridgeData.put("officeId", this.getOfficeId());
-        accountingBridgeData.put("cashBasedAccountingEnabled", this.isCashBasedAccountingEnabledOnLoanProduct());
-        accountingBridgeData.put("accrualBasedAccountingEnabled", this.isAccrualBasedAccountingEnabledOnLoanProduct());
-
-        final List<Map<String, Object>> newLoanTransactions = new ArrayList<Map<String, Object>>();
-        final List<LoanTransaction> disbursementTransactions = findDisbursementTransactions();
-        for (LoanTransaction loanTransaction : disbursementTransactions) {
-            if (!existingTransactionIds.contains(loanTransaction.getId())) {
-                newLoanTransactions.add(loanTransaction.toMapData(currencyData));
-            }
-        }
-
-        accountingBridgeData.put("newLoanTransactions", newLoanTransactions);
-
-        return accountingBridgeData;
-    }
-
-    private List<LoanTransaction> findDisbursementTransactions() {
-        List<LoanTransaction> found = new ArrayList<LoanTransaction>();
-        for (LoanTransaction transaction : this.loanTransactions) {
-            if (transaction.isDisbursement() || transaction.isRepaymentAtDisbursement()) {
-                found.add(transaction);
-            }
-        }
-
-        return found;
-    }
-
     private Collection<Long> findExistingTransactionIds() {
 
         Collection<Long> ids = new ArrayList<Long>();
@@ -1151,9 +1117,22 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
         return ids;
     }
 
+    private Collection<Long> findExistingReversedTransactionIds() {
+
+        final Collection<Long> ids = new ArrayList<Long>();
+
+        for (LoanTransaction transaction : this.loanTransactions) {
+            if (transaction.isReversed()) {
+                ids.add(transaction.getId());
+            }
+        }
+
+        return ids;
+    }
+
     public Map<String, Object> disburse(final AppUser currentUser, final JsonCommand command,
             final LoanLifecycleStateMachine loanLifecycleStateMachine, final ApplicationCurrency currency,
-            final List<Long> existingTransactionIds) {
+            final List<Long> existingTransactionIds, final List<Long> existingReversedTransactionIds) {
 
         final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>();
 
@@ -1161,6 +1140,10 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 
         final LoanStatus statusEnum = loanLifecycleStateMachine.transition(LoanEvent.LOAN_DISBURSED, LoanStatus.fromInt(this.loanStatus));
         if (!statusEnum.hasStateOf(LoanStatus.fromInt(this.loanStatus))) {
+
+            existingTransactionIds.addAll(findExistingTransactionIds());
+            existingReversedTransactionIds.addAll(findExistingReversedTransactionIds());
+
             this.loanStatus = statusEnum.getValue();
             actualChanges.put("status", LoanEnumerations.status(this.loanStatus));
 
@@ -1186,8 +1169,6 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
             if (isRepaymentScheduleRegenerationRequiredForDisbursement(disbursedOn)) {
                 regenerateRepaymentSchedule(currency);
             }
-            
-            existingTransactionIds.addAll(findExistingTransactionIds());
         }
 
         return actualChanges;
@@ -1276,7 +1257,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
     }
 
     public Map<String, Object> undoDisbursal(final LoanLifecycleStateMachine loanLifecycleStateMachine,
-            final List<Long> existingTransactionIds) {
+            final List<Long> existingTransactionIds, final List<Long> existingReversedTransactionIds) {
 
         final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>();
 
@@ -1291,8 +1272,9 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
             actualChanges.put("disbursedOnDate", "");
 
             existingTransactionIds.addAll(findExistingTransactionIds());
+            existingReversedTransactionIds.addAll(findExistingReversedTransactionIds());
 
-            contraExistingTransactions();
+            reverseExistingTransactions();
 
             updateLoanToPreDisbursalState();
         }
@@ -1300,18 +1282,11 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
         return actualChanges;
     }
 
-    private final void contraExistingTransactions() {
+    private final void reverseExistingTransactions() {
 
-        // final List<LoanTransaction> contras = new
-        // ArrayList<LoanTransaction>();
         for (LoanTransaction transaction : this.loanTransactions) {
-            if (transaction.isNotContra()) {
-                LoanTransaction contra = transaction.contra();
-                // contras.add(contra);
-            }
+            transaction.reverse();
         }
-
-        // this.loanTransactions.addAll(contras);
     }
 
     private void updateLoanToPreDisbursalState() {
@@ -1415,7 +1390,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
     private List<LoanTransaction> retreiveListOfTransactionsPostDisbursement() {
         List<LoanTransaction> repaymentsOrWaivers = new ArrayList<LoanTransaction>();
         for (LoanTransaction transaction : this.loanTransactions) {
-            if (!transaction.isDisbursement() && transaction.isNotContra()) {
+            if (!transaction.isDisbursement() && transaction.isNotReversed()) {
                 repaymentsOrWaivers.add(transaction);
             }
         }
@@ -1462,7 +1437,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 
         LocalDate currentTransactionDate = loanTransaction.getTransactionDate();
         for (LoanTransaction previousTransaction : loanTransactions) {
-            if (!previousTransaction.isDisbursement() && previousTransaction.isNotContra()) {
+            if (!previousTransaction.isDisbursement() && previousTransaction.isNotReversed()) {
                 if (currentTransactionDate.isBefore(previousTransaction.getTransactionDate())
                         || currentTransactionDate.isEqual(previousTransaction.getTransactionDate())) {
                     isChronologicallyLatestRepaymentOrWaiver = false;
@@ -1480,7 +1455,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 
         LocalDate currentTransactionDate = loanTransaction.getTransactionDate();
         for (LoanTransaction previousTransaction : loanTransactions) {
-            if (previousTransaction.isNotContra()) {
+            if (previousTransaction.isNotReversed()) {
                 if (currentTransactionDate.isBefore(previousTransaction.getTransactionDate())
                         || currentTransactionDate.isEqual(previousTransaction.getTransactionDate())) {
                     isChronologicallyLatestRepaymentOrWaiver = false;
@@ -1574,7 +1549,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
             throw new InvalidLoanTransactionTypeException("transaction", "adjustment.is.not.allowed.on.closed.loan", errorMessage);
         }
 
-        transactionForAdjustment.contra();
+        transactionForAdjustment.reverse();
         if (newTransactionDetail.isRepayment() || newTransactionDetail.isInterestWaiver()) {
             handleRepaymentOrWaiverTransaction(newTransactionDetail, loanLifecycleStateMachine, transactionForAdjustment);
         }
@@ -2137,7 +2112,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
         return getCurrencyCode().equalsIgnoreCase(matchingCurrencyCode);
     }
 
-    private String getCurrencyCode() {
+    public String getCurrencyCode() {
         return this.loanRepaymentScheduleDetail.getPrincipal().getCurrencyCode();
     }
 
@@ -2256,7 +2231,8 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
         return this.loanOfficer;
     }
 
-    public Map<String, Object> deriveAccountingBridgeData(final CurrencyData currencyData, final List<Long> existingTransactionIds) {
+    public Map<String, Object> deriveAccountingBridgeData(final CurrencyData currencyData, final List<Long> existingTransactionIds,
+            final List<Long> existingReversedTransactionIds) {
 
         final Map<String, Object> accountingBridgeData = new LinkedHashMap<String, Object>();
         accountingBridgeData.put("loanId", this.getId());
@@ -2267,7 +2243,9 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 
         final List<Map<String, Object>> newLoanTransactions = new ArrayList<Map<String, Object>>();
         for (LoanTransaction transaction : this.loanTransactions) {
-            if (!existingTransactionIds.contains(transaction.getId())) {
+            if (transaction.isReversed() && !existingReversedTransactionIds.contains(transaction.getId())) {
+                newLoanTransactions.add(transaction.toMapData(currencyData));
+            } else if (!existingTransactionIds.contains(transaction.getId())) {
                 newLoanTransactions.add(transaction.toMapData(currencyData));
             }
         }

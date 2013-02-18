@@ -1085,7 +1085,6 @@ CREATE TABLE `m_loan_transaction` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `loan_id` bigint(20) NOT NULL,
   `transaction_type_enum` smallint(5) NOT NULL,
-  `contra_id` bigint(20) DEFAULT NULL,
   `transaction_date` date NOT NULL,
   `amount` decimal(19,6) NOT NULL,
   `createdby_id` bigint(20) DEFAULT NULL,
@@ -1096,11 +1095,10 @@ CREATE TABLE `m_loan_transaction` (
   `interest_portion_derived` decimal(19,6) DEFAULT NULL,
   `fee_charges_portion_derived` decimal(19,6) DEFAULT NULL,
   `penalty_charges_portion_derived` decimal(19,6) DEFAULT NULL,
+  `is_reversed` tinyint(1) NOT NULL,
   PRIMARY KEY (`id`),
   KEY `FKCFCEA42640BE0710` (`loan_id`),
-  KEY `FKCFCEA426FC69F3F1` (`contra_id`),
-  CONSTRAINT `FKCFCEA42640BE0710` FOREIGN KEY (`loan_id`) REFERENCES `m_loan` (`id`),
-  CONSTRAINT `FKCFCEA426FC69F3F1` FOREIGN KEY (`contra_id`) REFERENCES `m_loan_transaction` (`id`)
+  CONSTRAINT `FKCFCEA42640BE0710` FOREIGN KEY (`loan_id`) REFERENCES `m_loan` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1939,4 +1937,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2013-02-14 23:47:02
+-- Dump completed on 2013-02-18 13:20:24

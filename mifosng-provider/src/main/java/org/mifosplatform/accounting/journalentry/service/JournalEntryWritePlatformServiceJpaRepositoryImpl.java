@@ -221,7 +221,7 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
             }
 
             /*** Debit loan Portfolio and credit Fund source for Disbursal **/
-            if (loanTransactionDTO.isDisbursement()) {
+            if (loanTransactionDTO.isDisbursement() && !loanTransactionDTO.isContra()) {
 
                 final GLAccount loanPortfolioAccount = getLinkedFinAccountForLoanProduct(loanProductId,
                         CASH_ACCOUNTS_FOR_LOAN.LOAN_PORTFOLIO);
