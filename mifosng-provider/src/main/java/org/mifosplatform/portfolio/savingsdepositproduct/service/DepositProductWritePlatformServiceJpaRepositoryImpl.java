@@ -5,16 +5,18 @@
  */
 package org.mifosplatform.portfolio.savingsdepositproduct.service;
 
+import java.util.Map;
+
+import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
-import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.portfolio.loanproduct.domain.PeriodFrequencyType;
-import org.mifosplatform.portfolio.savingsdepositproduct.command.DepositProductCommand;
 import org.mifosplatform.portfolio.savingsdepositproduct.domain.DepositProduct;
 import org.mifosplatform.portfolio.savingsdepositproduct.domain.DepositProductRepository;
 import org.mifosplatform.portfolio.savingsdepositproduct.exception.DepositProductNotFoundException;
+import org.mifosplatform.portfolio.savingsdepositproduct.serialization.DepositProductCommandFromApiJsonDeserializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,95 +31,95 @@ public class DepositProductWritePlatformServiceJpaRepositoryImpl implements Depo
 
     private final PlatformSecurityContext context;
     private final DepositProductRepository depositProductRepository;
+    private final DepositProductCommandFromApiJsonDeserializer fromApiJsonDeserializer;
 
     @Autowired
     public DepositProductWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
-            final DepositProductRepository depositProductRepository) {
+            final DepositProductRepository depositProductRepository,
+            final DepositProductCommandFromApiJsonDeserializer fromApiJsonDeserializer) {
         this.context = context;
         this.depositProductRepository = depositProductRepository;
+        this.fromApiJsonDeserializer = fromApiJsonDeserializer;
     }
 
     /*
      * Guaranteed to throw an exception no matter what the data integrity issue
      * is.
      */
-    private void handleDataIntegrityIssues(final DepositProductCommand command, final DataIntegrityViolationException dve) {
+    private void handleDataIntegrityIssues(final JsonCommand command, final DataIntegrityViolationException dve) {
 
         Throwable realCause = dve.getMostSpecificCause();
-        if (realCause.getMessage().contains("name_deposit_product")) { throw new PlatformDataIntegrityException(
-                "error.msg.desposit.product.duplicate.name", "Deposit product with name: " + command.getName() + " already exists", "name",
-                command.getName()); }
-        if (realCause.getMessage().contains("externalid_deposit_product")) { throw new PlatformDataIntegrityException(
-                "error.msg.desposit.product.duplicate.externalId", "Deposit product with externalId " + command.getExternalId()
-                        + " already exists", "externalId", command.getExternalId()); }
+        if (realCause.getMessage().contains("name_deposit_product")) { 
+        	final String name = command.stringValueOfParameterNamed("name");
+        	throw new PlatformDataIntegrityException(
+                "error.msg.desposit.product.duplicate.name", "Deposit product with name: " + name + " already exists", "name",
+                name); }
+        if (realCause.getMessage().contains("externalid_deposit_product")) {
+        	final String externalId = command.stringValueOfParameterNamed("externalId");
+        	throw new PlatformDataIntegrityException(
+                "error.msg.desposit.product.duplicate.externalId", "Deposit product with externalId " + externalId
+                        + " already exists", "externalId", externalId); }
 
         logger.error(dve.getMessage(), dve);
         throw new PlatformDataIntegrityException("error.msg.deposit.product.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource.");
     }
 
-    @Transactional
+	@Transactional
     @Override
-    public CommandProcessingResult createDepositProduct(final DepositProductCommand command) {
+	public CommandProcessingResult createDepositProduct(JsonCommand command) {
+		try {			
+			this.context.authenticatedUser();
+			this.fromApiJsonDeserializer.validateForCreate(command.json());
+			
+			final Integer interestCompoundingPeriodTypeIntValue = command.integerValueOfParameterNamed("interestCompoundedEveryPeriodType");
+			PeriodFrequencyType interestCompoundingPeriodType = PeriodFrequencyType.fromInt(interestCompoundingPeriodTypeIntValue);
+			
+			final Integer lockinPeriodTypeIntValue = command.integerValueOfParameterNamed("lockinPeriodType");
+	        PeriodFrequencyType lockinPeriodType = PeriodFrequencyType.fromInt(lockinPeriodTypeIntValue);
+	        
+	        DepositProduct product = DepositProduct.assembleFromJson(command,interestCompoundingPeriodType,lockinPeriodType);
+			
+	        this.depositProductRepository.save(product);
+	
+	        return new CommandProcessingResultBuilder() //
+	                .withEntityId(product.getId()) //
+	                .build();
+		} catch (DataIntegrityViolationException dve) {
+			handleDataIntegrityIssues(command, dve);
+	        return new CommandProcessingResult(Long.valueOf(-1));
+	    }
+	}
 
-        try {
-            this.context.authenticatedUser();
-            DepositProductCommandValidator validator = new DepositProductCommandValidator(command);
-            validator.validateForCreate();
-
-            PeriodFrequencyType interestCompoundingPeriodType = PeriodFrequencyType.fromInt(command.getInterestCompoundedEveryPeriodType());
-            PeriodFrequencyType lockinPeriodType = PeriodFrequencyType.fromInt(command.getLockinPeriodType());
-            MonetaryCurrency currency = new MonetaryCurrency(command.getCurrencyCode(), command.getDigitsAfterDecimal());
-            DepositProduct product = new DepositProduct(command.getName(), command.getExternalId(), command.getDescription(), currency,
-                    command.getMinimumBalance(), command.getMaximumBalance(), command.getTenureInMonths(),
-                    command.getMaturityDefaultInterestRate(), command.getMaturityMinInterestRate(), command.getMaturityMaxInterestRate(),
-                    command.getInterestCompoundedEvery(), interestCompoundingPeriodType, command.isRenewalAllowed(),
-                    command.isPreClosureAllowed(), command.getPreClosureInterestRate(), command.isInterestCompoundingAllowed(),
-                    command.isLockinPeriodAllowed(), command.getLockinPeriod(), lockinPeriodType);
-            this.depositProductRepository.save(product);
-
-            return new CommandProcessingResultBuilder() //
-                    .withEntityId(product.getId()) //
-                    .build();
-        } catch (DataIntegrityViolationException dve) {
-            handleDataIntegrityIssues(command, dve);
-            return new CommandProcessingResult(Long.valueOf(-1));
-        }
-    }
-
-    @Transactional
-    @Override
-    public CommandProcessingResult updateDepositProduct(final DepositProductCommand command) {
-
-        try {
-            this.context.authenticatedUser();
-            DepositProductCommandValidator validator = new DepositProductCommandValidator(command);
-            validator.validateForUpdate();
-
-            DepositProduct product = this.depositProductRepository.findOne(command.getId());
-            if (product == null) { throw new DepositProductNotFoundException(command.getId()); }
-
-            PeriodFrequencyType interestCompoundingFrequency = null;
-            if (command.isInterestCompoundedEveryPeriodTypeChanged()) {
-                interestCompoundingFrequency = PeriodFrequencyType.fromInt(command.getInterestCompoundedEveryPeriodType());
+	@Transactional
+	@Override
+	public CommandProcessingResult updateDepositProduct(final Long productId, final JsonCommand command) {
+		try {
+			
+			this.context.authenticatedUser();
+			
+			this.fromApiJsonDeserializer.validateForUpdate(command.json());
+			
+			DepositProduct product = this.depositProductRepository.findOne(productId);
+            if (product == null || product.isDeleted()) { throw new DepositProductNotFoundException(productId); }
+            
+	        final Map<String, Object> changes = product.update(command);
+            
+	        if (!changes.isEmpty()) {
+                this.depositProductRepository.saveAndFlush(product);
             }
-
-            PeriodFrequencyType lockinPeriodType = null;
-            if (command.isLockinPeriodTypeChanged()) {
-                lockinPeriodType = PeriodFrequencyType.fromInt(command.getLockinPeriodType());
-            }
-
-            product.update(command, interestCompoundingFrequency, lockinPeriodType);
-            this.depositProductRepository.save(product);
-
-            return new CommandProcessingResultBuilder() //
-                    .withEntityId(product.getId()) //
-                    .build();
-        } catch (DataIntegrityViolationException dve) {
-            handleDataIntegrityIssues(command, dve);
-            return new CommandProcessingResult(Long.valueOf(-1));
-        }
-    }
+			
+	        return new CommandProcessingResultBuilder() //
+            .withCommandId(command.commandId()) //
+            .withEntityId(productId) //
+            .with(changes) //
+            .build();
+			
+		} catch (DataIntegrityViolationException dve) {
+			handleDataIntegrityIssues(command, dve);
+			return new CommandProcessingResult(Long.valueOf(-1));
+		}
+	}	
 
     @Transactional
     @Override
@@ -125,7 +127,7 @@ public class DepositProductWritePlatformServiceJpaRepositoryImpl implements Depo
 
         this.context.authenticatedUser();
         DepositProduct product = this.depositProductRepository.findOne(productId);
-        if (product == null) { throw new DepositProductNotFoundException(productId); }
+        if (product == null || product.isDeleted()) { throw new DepositProductNotFoundException(productId); }
         product.delete();
 
         this.depositProductRepository.save(product);
@@ -134,4 +136,5 @@ public class DepositProductWritePlatformServiceJpaRepositoryImpl implements Depo
                 .withEntityId(product.getId()) //
                 .build();
     }
+
 }

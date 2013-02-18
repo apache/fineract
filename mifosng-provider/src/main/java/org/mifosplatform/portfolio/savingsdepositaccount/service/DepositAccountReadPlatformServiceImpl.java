@@ -155,7 +155,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
                     + " ecd.father_name as fatherName, ecd.client_address as clientAddress " + " from m_deposit_account da "
                     + " join m_currency curr on curr.code = da.currency_code " + " join m_client c on c.id = da.client_id "
                     + " join m_product_deposit pd on pd.id = da.product_id"
-                    + " left join extra_client_details ecd on da.client_id = ecd.client_id ";
+                    + " left join extra_client_details_hugo_specific ecd on da.client_id = ecd.client_id ";
         }
 
         @Override

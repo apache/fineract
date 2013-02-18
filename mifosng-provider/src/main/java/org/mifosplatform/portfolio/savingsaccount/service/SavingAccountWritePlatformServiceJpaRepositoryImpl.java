@@ -6,6 +6,8 @@
 package org.mifosplatform.portfolio.savingsaccount.service;
 
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
+import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
+
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -72,7 +74,9 @@ public class SavingAccountWritePlatformServiceJpaRepositoryImpl implements Savin
             SavingAccount account = this.savingAccountAssembler.assembleFrom(command);
             this.savingAccountRepository.save(account);
 
-            return new CommandProcessingResult(account.getId());
+            return new CommandProcessingResultBuilder() //
+            .withEntityId(account.getId()) //
+            .build();
         } catch (DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(command, dve);
             return new CommandProcessingResult(Long.valueOf(-1));
@@ -93,7 +97,9 @@ public class SavingAccountWritePlatformServiceJpaRepositoryImpl implements Savin
                 this.savingAccountAssembler.assembleFrom(command, account);
                 this.savingAccountRepository.save(account);
             }
-            return new CommandProcessingResult(account.getId());
+            return new CommandProcessingResultBuilder() //
+            .withEntityId(account.getId()) //
+            .build();
         } catch (DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(command, dve);
             return new CommandProcessingResult(Long.valueOf(-1));
@@ -138,7 +144,9 @@ public class SavingAccountWritePlatformServiceJpaRepositoryImpl implements Savin
             this.noteRepository.save(note);
         }
 		
-		return new CommandProcessingResult(account.getId());
+        return new CommandProcessingResultBuilder() //
+        .withEntityId(account.getId()) //
+        .build();
 	}
 	
 	private DepositLifecycleStateMachine defaultDepositLifecycleStateMachine() {
@@ -167,7 +175,9 @@ public class SavingAccountWritePlatformServiceJpaRepositoryImpl implements Savin
             this.noteRepository.save(note);
         }
 		
-		return new CommandProcessingResult(account.getId());
+        return new CommandProcessingResultBuilder() //
+        .withEntityId(account.getId()) //
+        .build();
 	}
 
 	@Override
@@ -187,7 +197,9 @@ public class SavingAccountWritePlatformServiceJpaRepositoryImpl implements Savin
             this.noteRepository.save(note);
         }
 		
-		return new CommandProcessingResult(account.getId());
+        return new CommandProcessingResultBuilder() //
+        .withEntityId(account.getId()) //
+        .build();
 	}
 
 	@Override
@@ -213,7 +225,9 @@ public class SavingAccountWritePlatformServiceJpaRepositoryImpl implements Savin
             this.noteRepository.save(note);
         }
 		
-		return new CommandProcessingResult(account.getId());
+        return new CommandProcessingResultBuilder() //
+        .withEntityId(account.getId()) //
+        .build();
 	}
 
 	@Override
@@ -236,7 +250,9 @@ public class SavingAccountWritePlatformServiceJpaRepositoryImpl implements Savin
             Note note = Note.savingNote(account, noteText);
             this.noteRepository.save(note);
         }
-		return new CommandProcessingResult(account.getId());
+        return new CommandProcessingResultBuilder() //
+        .withEntityId(account.getId()) //
+        .build();
 	}
 
 	@Override
@@ -255,7 +271,9 @@ public class SavingAccountWritePlatformServiceJpaRepositoryImpl implements Savin
             Note note = Note.savingNote(account, noteText);
             this.noteRepository.save(note);
         }
-		return new CommandProcessingResult(account.getId());
+        return new CommandProcessingResultBuilder() //
+        .withEntityId(account.getId()) //
+        .build();
 	}
 
 	@Override
@@ -267,7 +285,9 @@ public class SavingAccountWritePlatformServiceJpaRepositoryImpl implements Savin
 		}
 		account.delete();
 		this.savingAccountRepository.save(account);
-		return new CommandProcessingResult(accountId);
+		return new CommandProcessingResultBuilder() //
+        .withEntityId(account.getId()) //
+        .build();
 	}
 
 	@Override
@@ -280,7 +300,9 @@ public class SavingAccountWritePlatformServiceJpaRepositoryImpl implements Savin
 			this.savingAccountAssembler.postInterest(account);
 			this.savingAccountRepository.save(account);
 		}
-		return new CommandProcessingResult(new Long(savingAccounts.size()));
+		return new CommandProcessingResultBuilder() //
+        .withEntityId(Long.valueOf(savingAccounts.size())) //
+        .build();
 		} catch (Exception e) {
 			return new CommandProcessingResult(Long.valueOf(-1));
 		}

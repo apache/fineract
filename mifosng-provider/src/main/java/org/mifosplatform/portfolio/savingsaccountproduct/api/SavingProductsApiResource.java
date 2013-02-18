@@ -21,12 +21,12 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
 import org.mifosplatform.infrastructure.core.api.ApiParameterHelper;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
+import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.mifosplatform.organisation.monetary.service.CurrencyReadPlatformService;
@@ -52,46 +52,53 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class SavingProductsApiResource {
 
-    @Autowired
-    private SavingProductReadPlatformService savingProductReadPlatformService;
-
-    @Autowired
-    private SavingProductWritePlatformService savingProductWritePlatformService;
-
-    @Autowired
-    private PortfolioApiDataConversionService apiDataConversionService;
-
-    @Autowired
-    private PortfolioApiJsonSerializerService apiJsonSerializerService;
-
-    @Autowired
-    private CurrencyReadPlatformService currencyReadPlatformService;
-
+    private final SavingProductReadPlatformService savingProductReadPlatformService;
+    private final SavingProductWritePlatformService savingProductWritePlatformService;
+    private final PortfolioApiDataConversionService apiDataConversionService;
+    private final PortfolioApiJsonSerializerService apiJsonSerializerService;
+    private final CurrencyReadPlatformService currencyReadPlatformService;
     private final String entityType = "SAVINGSPRODUCT";
+    private final PlatformSecurityContext context;
+    private final DefaultToApiJsonSerializer<SavingProductData> toApiJsonSerializer;
+    
     @Autowired
-    private PlatformSecurityContext context;
+    public SavingProductsApiResource(final SavingProductReadPlatformService savingProductReadPlatformService,
+    		final SavingProductWritePlatformService savingProductWritePlatformService,
+    		final PortfolioApiDataConversionService apiDataConversionService,
+    		final PortfolioApiJsonSerializerService apiJsonSerializerService,
+    		final CurrencyReadPlatformService currencyReadPlatformService,
+    		final PlatformSecurityContext context,
+    		final DefaultToApiJsonSerializer<SavingProductData> toApiJsonSerializer) {
+    	this.savingProductReadPlatformService = savingProductReadPlatformService;
+    	this.savingProductWritePlatformService = savingProductWritePlatformService;
+    	this.apiDataConversionService = apiDataConversionService;
+    	this.apiJsonSerializerService = apiJsonSerializerService;
+    	this.currencyReadPlatformService = currencyReadPlatformService;
+    	this.context = context;
+    	this.toApiJsonSerializer = toApiJsonSerializer;
+	}
 
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public Response createSavingProduct(final String jsonRequestBody) {
+    public String createSavingProduct(final String jsonRequestBody) {
 
         final SavingProductCommand command = this.apiDataConversionService.convertJsonToSavingProductCommand(null, jsonRequestBody);
 
         CommandProcessingResult entityIdentifier = this.savingProductWritePlatformService.createSavingProduct(command);
 
-        return Response.ok().entity(entityIdentifier).build();
+        return this.toApiJsonSerializer.serialize(entityIdentifier);
     }
 
     @PUT
     @Path("{productId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public Response updateSavingProduct(@PathParam("productId") final Long productId, final String jsonRequestBody) {
+    public String updateSavingProduct(@PathParam("productId") final Long productId, final String jsonRequestBody) {
 
         SavingProductCommand command = this.apiDataConversionService.convertJsonToSavingProductCommand(productId, jsonRequestBody);
         CommandProcessingResult entityIdentifier = this.savingProductWritePlatformService.updateSavingProduct(command);
-        return Response.ok().entity(entityIdentifier).build();
+        return this.toApiJsonSerializer.serialize(entityIdentifier);
     }
 
     @GET
@@ -210,10 +217,10 @@ public class SavingProductsApiResource {
     @Path("{productId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public Response deleteProduct(@PathParam("productId") final Long productId) {
+    public String deleteProduct(@PathParam("productId") final Long productId) {
 
         this.savingProductWritePlatformService.deleteSavingProduct(productId);
 
-        return Response.ok(new CommandProcessingResult(productId)).build();
+        return this.toApiJsonSerializer.serialize(productId);
     }
 }

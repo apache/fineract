@@ -70,34 +70,16 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class SavingsAccountApiResource {
 
-    @Autowired
-    private SavingAccountWritePlatformService savingAccountWritePlatformService;
-
-    @Autowired
-    private SavingAccountReadPlatformService savingAccountReadPlatformService;
-
-    @Autowired
-    private PortfolioApiDataConversionService apiDataConversionService;
-
-    @Autowired
-    private PortfolioApiJsonSerializerService apiJsonSerializerService;
-
-    @Autowired
-    private SavingProductReadPlatformService savingProductReadPlatformService;
-
-    @Autowired
-    private CurrencyReadPlatformService currencyReadPlatformService;
-
+    private final SavingAccountWritePlatformService savingAccountWritePlatformService;
+    private final SavingAccountReadPlatformService savingAccountReadPlatformService;
+    private final PortfolioApiDataConversionService apiDataConversionService;
+    private final PortfolioApiJsonSerializerService apiJsonSerializerService;
+    private final SavingProductReadPlatformService savingProductReadPlatformService;
+    private final CurrencyReadPlatformService currencyReadPlatformService;
     private final String entityType = "SAVINGSACCOUNT";
-
-    @Autowired
-    private PlatformSecurityContext context;
-
-    @Autowired
-    private CalculateSavingSchedule calculateSavingSchedule;
-
-    @Autowired
-    private ToApiJsonSerializer<SavingAccountData> toApiJsonSerializer;
+    private final PlatformSecurityContext context;
+    private final CalculateSavingSchedule calculateSavingSchedule;
+    private final ToApiJsonSerializer<SavingAccountData> toApiJsonSerializer;
 
     private static final Set<String> typicalResponseParameters = new HashSet<String>(Arrays.asList("id", "status", "externalId",
             "clientId", "clientName", "productId", "productName", "productType", "currencyData", "savingsDepostiAmountPerPeriod",
@@ -107,6 +89,26 @@ public class SavingsAccountApiResource {
             "preClosureAllowed", "preClosureInterestRate", "withdrawnonDate", "rejectedonDate", "closedonDate", "isLockinPeriodAllowed",
             "lockinPeriod", "lockinPeriodType", "outstandingAmount", "savingScheduleData", "transactions", "interestPostEvery",
             "interestPostFrequency"));
+    
+    @Autowired
+    public SavingsAccountApiResource(final SavingAccountWritePlatformService savingAccountWritePlatformService,
+    		final SavingAccountReadPlatformService savingAccountReadPlatformService,
+    		final PortfolioApiDataConversionService apiDataConversionService,
+    		final PortfolioApiJsonSerializerService apiJsonSerializerService,
+    		final SavingProductReadPlatformService savingProductReadPlatformService,
+    		final CurrencyReadPlatformService currencyReadPlatformService,
+    		final PlatformSecurityContext context,final CalculateSavingSchedule calculateSavingSchedule,
+    		final ToApiJsonSerializer<SavingAccountData> toApiJsonSerializer) {
+    	this.savingAccountWritePlatformService = savingAccountWritePlatformService;
+    	this.savingAccountReadPlatformService = savingAccountReadPlatformService;
+    	this.apiDataConversionService = apiDataConversionService;
+    	this.apiJsonSerializerService =apiJsonSerializerService;
+    	this.savingProductReadPlatformService = savingProductReadPlatformService;
+    	this.currencyReadPlatformService = currencyReadPlatformService;
+    	this.context = context;
+    	this.calculateSavingSchedule = calculateSavingSchedule;
+    	this.toApiJsonSerializer = toApiJsonSerializer;
+	}
 
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
@@ -139,13 +141,13 @@ public class SavingsAccountApiResource {
     @Path("{accountId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public Response updateSavingAccount(@PathParam("accountId") final Long accountId, final String jsonRequestBody) {
+    public String updateSavingAccount(@PathParam("accountId") final Long accountId, final String jsonRequestBody) {
 
         final SavingAccountCommand command = this.apiDataConversionService.convertJsonToSavingAccountCommand(accountId, jsonRequestBody);
 
         CommandProcessingResult entityIdentifier = this.savingAccountWritePlatformService.updateSavingAccount(command);
 
-        return Response.ok().entity(entityIdentifier).build();
+        return this.toApiJsonSerializer.serialize(entityIdentifier);
     }
 
     @GET
@@ -283,38 +285,38 @@ public class SavingsAccountApiResource {
     @Path("{accountId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public Response savingStateTransitions(@PathParam("accountId") final Long accountId, @QueryParam("command") final String commandParam,
+    public String savingStateTransitions(@PathParam("accountId") final Long accountId, @QueryParam("command") final String commandParam,
             final String jsonRequestBody) {
-        Response response = null;
+        String response = null;
         if (is(commandParam, "approve")) {
             SavingAccountApprovalCommand command = this.apiDataConversionService.convertJsonToSavingApprovalCommand(accountId,
                     jsonRequestBody);
             CommandProcessingResult identifier = this.savingAccountWritePlatformService.approveSavingAccount(command);
-            response = Response.ok().entity(identifier).build();
+            response = this.toApiJsonSerializer.serialize(identifier);
         } else if (is(commandParam, "depositmoney")) {
             SavingAccountDepositCommand command = this.apiDataConversionService.convertJsonToSavingAccountDepositCommand(accountId,
                     jsonRequestBody);
             CommandProcessingResult identifier = this.savingAccountWritePlatformService.depositMoney(command);
-            response = Response.ok().entity(identifier).build();
+            response = this.toApiJsonSerializer.serialize(identifier);
         } else if (is(commandParam, "withdraw")) {
             SavingAccountWithdrawalCommand command = this.apiDataConversionService.convertJsonToSavingAccountWithdrawalCommand(accountId,
                     jsonRequestBody);
             CommandProcessingResult identifier = this.savingAccountWritePlatformService.withdrawSavingAmount(command);
-            response = Response.ok().entity(identifier).build();
+            response = this.toApiJsonSerializer.serialize(identifier);
         } else {
             SavingStateTransitionsCommand command = this.apiDataConversionService.convertJsonToSavingStateTransitionCommand(accountId,
                     jsonRequestBody);
             if (is(commandParam, "reject")) {
                 CommandProcessingResult identifier = this.savingAccountWritePlatformService.rejectSavingApplication(command);
-                response = Response.ok().entity(identifier).build();
+                response = this.toApiJsonSerializer.serialize(identifier);
             } else if (is(commandParam, "withdrewbyclient")) {
                 CommandProcessingResult identifier = this.savingAccountWritePlatformService.withdrawSavingApplication(command);
-                response = Response.ok().entity(identifier).build();
+                response =this.toApiJsonSerializer.serialize(identifier);
             }
             UndoStateTransitionCommand undoCommand = new UndoStateTransitionCommand(accountId, command.getNote());
             if (is(commandParam, "undoapproval")) {
                 CommandProcessingResult identifier = this.savingAccountWritePlatformService.undoSavingAccountApproval(undoCommand);
-                response = Response.ok().entity(identifier).build();
+                response = this.toApiJsonSerializer.serialize(identifier);
             }
         }
         if (response == null) { throw new UnrecognizedQueryParamException("command", commandParam); }
@@ -336,11 +338,11 @@ public class SavingsAccountApiResource {
     @Path("postinterest")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public Response postInterest() {
+    public String postInterest() {
 
         Collection<SavingAccountForLookup> savingAccounts = this.savingAccountReadPlatformService.retrieveSavingAccountsForLookUp();
         CommandProcessingResult entityIdentifier = this.savingAccountWritePlatformService.postInterest(savingAccounts);
-        return Response.ok().entity(entityIdentifier).build();
+        return this.toApiJsonSerializer.serialize(entityIdentifier);
     }
 
 }

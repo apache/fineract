@@ -6,6 +6,7 @@
 package org.mifosplatform.portfolio.savingsaccountproduct.service;
 
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
+import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.portfolio.loanproduct.domain.PeriodFrequencyType;
@@ -69,7 +70,9 @@ public class SavingProductWritePlatformServiceJpaRepositoryImpl implements Savin
                 command.getLockinPeriod(), lockinPeriodType);
 
         this.savingProductRepository.save(product);
-        return new CommandProcessingResult(product.getId());
+        return new CommandProcessingResultBuilder() //
+        .withEntityId(product.getId()) //
+        .build();
     }
 
     @Transactional
@@ -84,7 +87,9 @@ public class SavingProductWritePlatformServiceJpaRepositoryImpl implements Savin
         if (product == null) { throw new SavingProductNotFoundException(command.getId()); }
         product.update(command);
         this.savingProductRepository.save(product);
-        return new CommandProcessingResult(Long.valueOf(product.getId()));
+        return new CommandProcessingResultBuilder() //
+        .withEntityId(product.getId()) //
+        .build();
     }
 
     @Transactional
@@ -96,7 +101,9 @@ public class SavingProductWritePlatformServiceJpaRepositoryImpl implements Savin
         if (product == null || product.isDeleted()) { throw new SavingsProductNotFoundException(productId); }
         product.delete();
         this.savingProductRepository.save(product);
-        return new CommandProcessingResult(Long.valueOf(product.getId()));
+        return new CommandProcessingResultBuilder() //
+        .withEntityId(product.getId()) //
+        .build();
     }
 
 }

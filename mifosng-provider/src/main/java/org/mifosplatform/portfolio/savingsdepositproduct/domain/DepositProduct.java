@@ -6,6 +6,8 @@
 package org.mifosplatform.portfolio.savingsdepositproduct.domain;
 
 import java.math.BigDecimal;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import javax.persistence.Column;
 import javax.persistence.Embedded;
@@ -14,10 +16,10 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import org.apache.commons.lang.StringUtils;
+import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.domain.AbstractAuditableCustom;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.portfolio.loanproduct.domain.PeriodFrequencyType;
-import org.mifosplatform.portfolio.savingsdepositproduct.command.DepositProductCommand;
 import org.mifosplatform.portfolio.savingsdepositproduct.exception.DepositProductValueOutsideRangeException;
 import org.mifosplatform.useradministration.domain.AppUser;
 
@@ -206,93 +208,175 @@ public class DepositProduct extends AbstractAuditableCustom<AppUser, Long> {
 		this.externalId = this.getId() + "_DELETED_" + this.externalId;
 	}
 	
-	public void update(final DepositProductCommand command, final PeriodFrequencyType interestCompoundingFrequency, final PeriodFrequencyType lockinPeriodType){
+	public Map<String, Object> update(final JsonCommand command){
 		
-		if (command.isExternalIdChanged()) {
-			this.externalId = command.getExternalId();
-		}
-		
-		if (command.isNameChanged()) {
-			this.name = command.getName();
-		}
+		final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(20);
 
-		if (command.isDescriptionChanged()) {
-			this.description = command.getDescription();
-		}
+        final String localeAsInput = command.locale();
+
+        final String nameParamName = "name";
+        if (command.isChangeInStringParameterNamed(nameParamName, this.name)) {
+            final String newValue = command.stringValueOfParameterNamed(nameParamName);
+            actualChanges.put(nameParamName, newValue);
+            this.name = newValue;
+        }
+
+        final String descriptionParamName = "description";
+        if (command.isChangeInStringParameterNamed(descriptionParamName, this.description)) {
+            final String newValue = command.stringValueOfParameterNamed(descriptionParamName);
+            actualChanges.put(descriptionParamName, newValue);
+            this.description = newValue;
+        }
+        
+        final String externalIdParamName = "externalId";
+        if (command.isChangeInStringParameterNamed(externalIdParamName, this.externalId)) {
+            final String newValue = command.stringValueOfParameterNamed(externalIdParamName);
+            actualChanges.put(externalIdParamName, newValue);
+            this.externalId = newValue;
+        }
+        
+        String currencyCode = this.currency.getCode();
+        Integer digitsAfterDecimal = this.currency.getDigitsAfterDecimal();
+        
+        final String digitsAfterDecimalParamName = "digitsAfterDecimal";
+        if (command.isChangeInIntegerParameterNamed(digitsAfterDecimalParamName, digitsAfterDecimal)) {
+            final Integer newValue = command.integerValueOfParameterNamed(digitsAfterDecimalParamName);
+            actualChanges.put(digitsAfterDecimalParamName, newValue);
+            actualChanges.put("locale", localeAsInput);
+            digitsAfterDecimal = newValue;
+            this.currency = new MonetaryCurrency(currencyCode, digitsAfterDecimal);
+        }
+
+        final String currencyCodeParamName = "currencyCode";
+        if (command.isChangeInStringParameterNamed(currencyCodeParamName, currencyCode)) {
+            final String newValue = command.stringValueOfParameterNamed(currencyCodeParamName);
+            actualChanges.put(currencyCodeParamName, newValue);
+            currencyCode = newValue;
+            this.currency = new MonetaryCurrency(currencyCode, digitsAfterDecimal);
+        }
+        
+        final String minimumBalanceParamName = "minimumBalance";
+        if (command.isChangeInBigDecimalParameterNamed(minimumBalanceParamName, this.minimumBalance)) {
+            final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(minimumBalanceParamName);
+            actualChanges.put(minimumBalanceParamName, newValue);
+            actualChanges.put("locale", localeAsInput);
+            this.minimumBalance = newValue;
+        }
+        
+        final String maximumBalanceParamName = "maximumBalance";
+        if (command.isChangeInBigDecimalParameterNamed(maximumBalanceParamName, this.maximumBalance)) {
+            final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(maximumBalanceParamName);
+            actualChanges.put(maximumBalanceParamName, newValue);
+            actualChanges.put("locale", localeAsInput);
+            this.maximumBalance = newValue;
+        }
+        
+        final String tenureInMonthsParamName = "tenureInMonths";
+        if (command.isChangeInIntegerParameterNamed(tenureInMonthsParamName, this.tenureInMonths)) {
+            final Integer newValue = command.integerValueOfParameterNamed(tenureInMonthsParamName);
+            actualChanges.put(tenureInMonthsParamName, newValue);
+            actualChanges.put("locale", localeAsInput);
+            this.tenureInMonths = newValue;
+        }
+        
+        final String defaultInterestRateParamName = "maturityDefaultInterestRate";
+        if (command.isChangeInBigDecimalParameterNamed(defaultInterestRateParamName, this.maturityDefaultInterestRate)) {
+            final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(defaultInterestRateParamName);
+            actualChanges.put(defaultInterestRateParamName, newValue);
+            actualChanges.put("locale", localeAsInput);
+            this.maturityDefaultInterestRate = newValue;
+        }
+        
+        final String minInterestRateParamName = "maturityMinInterestRate";
+        if (command.isChangeInBigDecimalParameterNamed(minInterestRateParamName, this.maturityMinInterestRate)) {
+            final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(minInterestRateParamName);
+            actualChanges.put(minInterestRateParamName, newValue);
+            actualChanges.put("locale", localeAsInput);
+            this.maturityMinInterestRate = newValue;
+        }
+        
+        final String maxInterestRateParamName = "maturityMaxInterestRate";
+        if (command.isChangeInBigDecimalParameterNamed(maxInterestRateParamName, this.maturityMaxInterestRate)) {
+            final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(maxInterestRateParamName);
+            actualChanges.put(maxInterestRateParamName, newValue);
+            actualChanges.put("locale", localeAsInput);
+            this.maturityMaxInterestRate = newValue;
+        }
+        
+        final String interestCompoundedEveryParamName = "interestCompoundedEvery";
+        if (command.isChangeInIntegerParameterNamed(interestCompoundedEveryParamName, this.interestCompoundedEvery)) {
+            final Integer newValue = command.integerValueOfParameterNamed(interestCompoundedEveryParamName);
+            actualChanges.put(interestCompoundedEveryParamName, newValue);
+            actualChanges.put("locale", localeAsInput);
+            this.interestCompoundedEvery = newValue;
+        }
+        
+        final String interestCompoundedEveryPeriodTypeParamName = "interestCompoundedEveryPeriodType";
+        if (command.isChangeInIntegerParameterNamed(interestCompoundedEveryPeriodTypeParamName, this.interestCompoundedEveryPeriodType.getValue())) {
+            final Integer newValue = command.integerValueOfParameterNamed(interestCompoundedEveryPeriodTypeParamName);
+            actualChanges.put(interestCompoundedEveryPeriodTypeParamName, newValue);
+            actualChanges.put("locale", localeAsInput);
+            this.interestCompoundedEveryPeriodType = PeriodFrequencyType.fromInt(newValue);
+        }
 		
-		Integer digitsAfterDecimalChanged = this.currency.getDigitsAfterDecimal();
-		if (command.isDigitsAfterDecimalChanged()) {
-			digitsAfterDecimalChanged = command.getDigitsAfterDecimal();
-		}
+        final String renewalAllowedParamName = "renewalAllowed";
+        if (command.isChangeInBooleanParameterNamed(renewalAllowedParamName, this.renewalAllowed)) {
+        	final Boolean newValue = command.booleanObjectValueOfParameterNamed(renewalAllowedParamName);
+            actualChanges.put(renewalAllowedParamName, newValue);
+            actualChanges.put("locale", localeAsInput);
+            this.renewalAllowed = newValue;
+        }
+        
+        final String preClosureAllowedParamName = "preClosureAllowed";
+        if (command.isChangeInBooleanParameterNamed(preClosureAllowedParamName, this.preClosureAllowed)) {
+        	final Boolean newValue = command.booleanObjectValueOfParameterNamed(preClosureAllowedParamName);
+            actualChanges.put(preClosureAllowedParamName, newValue);
+            actualChanges.put("locale", localeAsInput);
+            this.preClosureAllowed = newValue;
+        }
 		
-		String currencyCodeChanged = this.currency.getCode();
-		if (command.isCurrencyCodeChanged()) {
-			currencyCodeChanged = command.getCurrencyCode();
-		}
+        final String preClosureInterestRateParamName = "preClosureInterestRate";
+        if (command.isChangeInBigDecimalParameterNamed(preClosureInterestRateParamName, this.preClosureInterestRate)) {
+            final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(preClosureInterestRateParamName);
+            actualChanges.put(preClosureInterestRateParamName, newValue);
+            actualChanges.put("locale", localeAsInput);
+            this.preClosureInterestRate = newValue;
+        }
+
+		final String interestCompoundingAllowedParamName = "interestCompoundingAllowed";
+        if (command.isChangeInBooleanParameterNamed(interestCompoundingAllowedParamName, this.interestCompoundingAllowed)) {
+        	final Boolean newValue = command.booleanObjectValueOfParameterNamed(interestCompoundingAllowedParamName);
+            actualChanges.put(interestCompoundingAllowedParamName, newValue);
+            actualChanges.put("locale", localeAsInput);
+            this.interestCompoundingAllowed = newValue;
+        }
 		
-		if (command.isDigitsAfterDecimalChanged() || command.isCurrencyCodeChanged()) {
-			this.currency = new MonetaryCurrency(currencyCodeChanged, digitsAfterDecimalChanged);
-		}
-				
-		if(command.isMinimumBalanceChanged()){
-			this.minimumBalance=command.getMinimumBalance();
-		}
+        final String isLockinPeriodAllowedParamName = "isLockinPeriodAllowed";
+        if (command.isChangeInBooleanParameterNamed(isLockinPeriodAllowedParamName, this.isLockinPeriodAllowed)) {
+        	final Boolean newValue = command.booleanObjectValueOfParameterNamed(isLockinPeriodAllowedParamName);
+            actualChanges.put(isLockinPeriodAllowedParamName, newValue);
+            actualChanges.put("locale", localeAsInput);
+            this.isLockinPeriodAllowed = newValue;
+        }
 		
-		if(command.isMaximumBalanceChanged()){
-			this.maximumBalance=command.getMaximumBalance();
-		}
+		final String lockinPeriodParamName = "lockinPeriod";
+        if (command.isChangeInIntegerParameterNamed(lockinPeriodParamName, this.lockinPeriod)) {
+            final Integer newValue = command.integerValueOfParameterNamed(lockinPeriodParamName);
+            actualChanges.put(lockinPeriodParamName, newValue);
+            actualChanges.put("locale", localeAsInput);
+            this.lockinPeriod = newValue;
+        }
 		
-		if(command.isTenureMonthsChanged()){
-			this.tenureInMonths=command.getTenureInMonths();
-		}
 		
-		if (command.isMaturityDefaultInterestRateChanged()) {
-			this.maturityDefaultInterestRate=command.getMaturityDefaultInterestRate();
-		}
-		
-		if(command.isMaturityMaxInterestRateChanged()){
-			this.maturityMaxInterestRate=command.getMaturityMaxInterestRate();
-		}
-		
-		if (command.isMaturityMinInterestRateChanged()) {
-			this.maturityMinInterestRate=command.getMaturityMinInterestRate();
-		}
-		
-		if (command.isInterestCompoundedEveryChanged()) {
-			this.interestCompoundedEvery = command.getInterestCompoundedEvery();
-		}
-		
-		if (command.isInterestCompoundedEveryPeriodTypeChanged()) {
-			this.interestCompoundedEveryPeriodType = interestCompoundingFrequency;
-		}
-		
-		if (command.isRenewalAllowedChanged()) {
-			this.renewalAllowed=command.isRenewalAllowed();
-		}
-		
-		if (command.isPreClosureAllowed()) {
-			this.preClosureAllowed=command.isPreClosureAllowed();
-		}
-		
-		if (command.isPreClosureInterestRateChanged()) {
-			this.preClosureInterestRate=command.getPreClosureInterestRate();
-		}
-		
-		if(command.interestCompoundingAllowedChanged()){
-			this.interestCompoundingAllowed = command.isInterestCompoundingAllowed();
-		}
-		
-		if(command.isLockinPeriodAllowedChanged()){
-			this.isLockinPeriodAllowed = command.isLockinPeriodAllowed();
-		}
-		
-		if(command.isLockinPeriodChanged()){
-			this.lockinPeriod = command.getLockinPeriod();
-		}
-		
-		if(command.isLockinPeriodTypeChanged()){
-			this.lockinPeriodType = lockinPeriodType;
-		}
+		final String lockinPeriodTypeParamName = "lockinPeriodType";
+        if (command.isChangeInIntegerParameterNamed(lockinPeriodTypeParamName, this.lockinPeriodType.getValue())) {
+            final Integer newValue = command.integerValueOfParameterNamed(lockinPeriodTypeParamName);
+            actualChanges.put(lockinPeriodTypeParamName, newValue);
+            actualChanges.put("locale", localeAsInput);
+            this.lockinPeriodType = PeriodFrequencyType.fromInt(newValue);
+        }
+        
+        return actualChanges;
 	}
 	
 	public void validateInterestRateInRange(final BigDecimal interestRate) {
@@ -329,5 +413,36 @@ public class DepositProduct extends AbstractAuditableCustom<AppUser, Long> {
 			final String maxValue = (this.maximumBalance == null) ? "" : this.maximumBalance.toPlainString();
 			throw new DepositProductValueOutsideRangeException(actualValue, minValue, maxValue, "deposit.account.deposit.amount");
 		}
+	}
+
+	public static DepositProduct assembleFromJson(JsonCommand command, PeriodFrequencyType interestCompoundingPeriodType,
+			PeriodFrequencyType lockinPeriodType) {
+		
+		final String name = command.stringValueOfParameterNamed("name");
+		final String externalId = command.stringValueOfParameterNamed("externalId");
+		final String description = command.stringValueOfParameterNamed("description");
+        final String currencyCode = command.stringValueOfParameterNamed("currencyCode");
+        final Integer digitsAfterDecimal = command.integerValueOfParameterNamed("digitsAfterDecimal");
+        
+        final MonetaryCurrency currency = new MonetaryCurrency(currencyCode, digitsAfterDecimal);
+        final BigDecimal minimumBalance = command.bigDecimalValueOfParameterNamed("minimumBalance");
+        final BigDecimal maximumBalance = command.bigDecimalValueOfParameterNamed("maximumBalance");
+        
+        final Integer tenureMonths = command.integerValueOfParameterNamed("tenureInMonths");
+        final BigDecimal maturityDefaultInterestRate = command.bigDecimalValueOfParameterNamed("maturityDefaultInterestRate");
+        final BigDecimal maturityMinInterestRate = command.bigDecimalValueOfParameterNamed("maturityMinInterestRate");
+        final BigDecimal maturityMaxInterestRate = command.bigDecimalValueOfParameterNamed("maturityMaxInterestRate");
+        final Integer interestCompoundedEvery = command.integerValueOfParameterNamed("interestCompoundedEvery");
+        
+        final boolean canRenew = command.booleanPrimitiveValueOfParameterNamed("canRenew");
+        final boolean canPreClose = command.booleanPrimitiveValueOfParameterNamed("canPreClose");
+        final BigDecimal preClosureInterestRate = command.bigDecimalValueOfParameterNamed("preClosureInterestRate");
+        final boolean isInterestCompoundingAllowed = command.booleanPrimitiveValueOfParameterNamed("isInterestCompoundingAllowed");
+        final boolean isLockinPeriodAllowed = command.booleanPrimitiveValueOfParameterNamed("isLockinPeriodAllowed");
+        final Integer lockinPeriod = command.integerValueOfParameterNamed("lockinPeriod");
+		
+		return new DepositProduct(name, externalId, description, currency, minimumBalance, maximumBalance, tenureMonths, maturityDefaultInterestRate,
+				maturityMinInterestRate, maturityMaxInterestRate, interestCompoundedEvery, interestCompoundingPeriodType, canRenew, canPreClose,
+				preClosureInterestRate, isInterestCompoundingAllowed, isLockinPeriodAllowed, lockinPeriod, lockinPeriodType);
 	}
 }

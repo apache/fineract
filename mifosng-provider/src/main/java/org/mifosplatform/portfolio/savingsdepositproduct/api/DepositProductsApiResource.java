@@ -23,22 +23,21 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
-import org.mifosplatform.infrastructure.core.api.ApiParameterHelper;
+import org.mifosplatform.commands.domain.CommandWrapper;
+import org.mifosplatform.commands.service.CommandWrapperBuilder;
+import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
+import org.mifosplatform.infrastructure.core.api.ApiRequestParameterHelper;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
-import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
+import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.mifosplatform.organisation.monetary.service.CurrencyReadPlatformService;
 import org.mifosplatform.portfolio.loanproduct.domain.PeriodFrequencyType;
-import org.mifosplatform.portfolio.savingsaccount.PortfolioApiDataConversionService;
-import org.mifosplatform.portfolio.savingsaccount.PortfolioApiJsonSerializerService;
 import org.mifosplatform.portfolio.savingsaccountproduct.service.SavingsDepositEnumerations;
-import org.mifosplatform.portfolio.savingsdepositproduct.command.DepositProductCommand;
 import org.mifosplatform.portfolio.savingsdepositproduct.data.DepositProductData;
 import org.mifosplatform.portfolio.savingsdepositproduct.service.DepositProductReadPlatformService;
-import org.mifosplatform.portfolio.savingsdepositproduct.service.DepositProductWritePlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -47,42 +46,44 @@ import org.springframework.stereotype.Component;
 @Component
 @Scope("singleton")
 public class DepositProductsApiResource {
+	
+	private final Set<String> DEPOSIT_PRODUCT_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "externalId", "name", "description", "createdOn", "lastModifedOn",
+			"currencyCode", "digitsAfterDecimal", "minimumBalance", "maximumBalance", "tenureInMonths", "maturityDefaultInterestRate", "maturityMinInterestRate",
+			"maturityMaxInterestRate", "interestCompoundedEvery", "interestCompoundedEveryPeriodType", "renewalAllowed", "preClosureAllowed", "preClosureInterestRate",
+            "interestCompoundingAllowed", "isLockinPeriodAllowed", "lockinPeriod", "lockinPeriodType", "currency","currencyOptions", "interestCompoundedEveryPeriodTypeOptions"));
 
     private final String entityType = "DEPOSITPRODUCT";
 
     private final PlatformSecurityContext context;
     private final DepositProductReadPlatformService depositProductReadPlatformService;
     private final CurrencyReadPlatformService currencyReadPlatformService;
-    private final DepositProductWritePlatformService depositProductWritePlatformService;
-    private final PortfolioApiDataConversionService apiDataConversionService;
-    private final PortfolioApiJsonSerializerService apiJsonSerializerService;
     private final DefaultToApiJsonSerializer<DepositProductData> toApiJsonSerializer;
+    private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
+    private final ApiRequestParameterHelper apiRequestParameterHelper;
 
     @Autowired
     public DepositProductsApiResource(final PlatformSecurityContext context,
             final DepositProductReadPlatformService depositProductReadPlatformService,
             final CurrencyReadPlatformService currencyReadPlatformService,
-            final DepositProductWritePlatformService depositProductWritePlatformService,
-            final PortfolioApiDataConversionService apiDataConversionService,
-            final PortfolioApiJsonSerializerService apiJsonSerializerService,
-            final DefaultToApiJsonSerializer<DepositProductData> toApiJsonSerializer) {
+            final DefaultToApiJsonSerializer<DepositProductData> toApiJsonSerializer,
+            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
+            final ApiRequestParameterHelper apiRequestParameterHelper) {
         this.context = context;
         this.depositProductReadPlatformService = depositProductReadPlatformService;
         this.currencyReadPlatformService = currencyReadPlatformService;
-        this.depositProductWritePlatformService = depositProductWritePlatformService;
-        this.apiDataConversionService = apiDataConversionService;
-        this.apiJsonSerializerService = apiJsonSerializerService;
         this.toApiJsonSerializer = toApiJsonSerializer;
+        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
+        this.apiRequestParameterHelper = apiRequestParameterHelper;
     }
 
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String createDepositProduct(final String jsonRequestBody) {
-
-        final DepositProductCommand command = this.apiDataConversionService.convertJsonToDepositProductCommand(null, jsonRequestBody);
-
-        final CommandProcessingResult result = this.depositProductWritePlatformService.createDepositProduct(command);
+    public String createDepositProduct(final String apiRequestBodyAsJson) {
+    	
+    	final CommandWrapper commandRequest = new CommandWrapperBuilder().createDepositProduct().withJson(apiRequestBodyAsJson).build();
+    	
+    	final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
         return this.toApiJsonSerializer.serialize(result);
     }
@@ -91,10 +92,11 @@ public class DepositProductsApiResource {
     @Path("{productId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String updateDepositProduct(@PathParam("productId") final Long productId, final String jsonRequestBody) {
-
-        final DepositProductCommand command = this.apiDataConversionService.convertJsonToDepositProductCommand(productId, jsonRequestBody);
-        final CommandProcessingResult result = this.depositProductWritePlatformService.updateDepositProduct(command);
+    public String updateDepositProduct(@PathParam("productId") final Long productId, final String apiRequestBodyAsJson) {
+    	
+    	final CommandWrapper commandRequest = new CommandWrapperBuilder().updateDepositProduct(productId).withJson(apiRequestBodyAsJson).build();
+    	
+    	final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
         return this.toApiJsonSerializer.serialize(result);
     }
@@ -104,10 +106,10 @@ public class DepositProductsApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String deleteDepositProduct(@PathParam("productId") final Long productId) {
-
-        this.depositProductWritePlatformService.deleteDepositProduct(productId);
-
-        final CommandProcessingResult result = new CommandProcessingResultBuilder().withEntityId(productId).build();
+    	
+    	final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteDepositProduct(productId).build();
+    	
+    	final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
         return this.toApiJsonSerializer.serialize(result);
     }
@@ -116,23 +118,10 @@ public class DepositProductsApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveAllDepositProducts(@Context final UriInfo uriInfo) {
-
         context.authenticatedUser().validateHasReadPermission(entityType);
-
-        Set<String> typicalResponseParameters = new HashSet<String>(Arrays.asList("id", "externalId", "name", "description", "createdOn",
-                "lastModifedOn", "currencyCode", "digitsAfterDecimal", "minimumBalance", "maximumBalance", "tenureInMonths",
-                "maturityDefaultInterestRate", "maturityMinInterestRate", "maturityMaxInterestRate", "interestCompoundedEvery",
-                "interestCompoundedEveryPeriodType", "renewalAllowed", "preClosureAllowed", "preClosureInterestRate",
-                "interestCompoundingAllowed", "isLockinPeriodAllowed", "lockinPeriod", "lockinPeriodType", "currency"));
-
-        Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
-        if (responseParameters.isEmpty()) {
-            responseParameters.addAll(typicalResponseParameters);
-        }
-        boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
-
         Collection<DepositProductData> products = this.depositProductReadPlatformService.retrieveAllDepositProducts();
-        return this.apiJsonSerializerService.serializeDepositProductDataToJson(prettyPrint, responseParameters, products);
+        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        return this.toApiJsonSerializer.serialize(settings, products, DEPOSIT_PRODUCT_DATA_PARAMETERS);
     }
 
     @GET
@@ -142,27 +131,14 @@ public class DepositProductsApiResource {
     public String retrieveDepositProductDetails(@PathParam("productId") final Long productId, @Context final UriInfo uriInfo) {
 
         context.authenticatedUser().validateHasReadPermission(entityType);
-
-        Set<String> typicalResponseParameters = new HashSet<String>(Arrays.asList("id", "externalId", "name", "description", "createdOn",
-                "lastModifedOn", "currencyCode", "digitsAfterDecimal", "minimumBalance", "maximumBalance", "tenureInMonths",
-                "maturityDefaultInterestRate", "maturityMinInterestRate", "maturityMaxInterestRate", "interestCompoundedEvery",
-                "interestCompoundedEveryPeriodType", "renewalAllowed", "preClosureAllowed", "preClosureInterestRate",
-                "interestCompoundingAllowed", "isLockinPeriodAllowed", "lockinPeriod", "lockinPeriodType", "currency"));
-
-        Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
-        if (responseParameters.isEmpty()) {
-            responseParameters.addAll(typicalResponseParameters);
-        }
-        boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
-
         DepositProductData productData = this.depositProductReadPlatformService.retrieveDepositProductData(productId);
-
-        boolean template = ApiParameterHelper.template(uriInfo.getQueryParameters());
-        if (template) {
-            productData = handleTemplateRelatedData(responseParameters, productData);
+        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        
+        if (settings.isTemplate()) {
+            productData = handleTemplateRelatedData(productData);
         }
-
-        return this.apiJsonSerializerService.serializeDepositProductDataToJson(prettyPrint, responseParameters, productData);
+        
+        return this.toApiJsonSerializer.serialize(settings, productData, DEPOSIT_PRODUCT_DATA_PARAMETERS);
     }
 
     @GET
@@ -173,29 +149,16 @@ public class DepositProductsApiResource {
 
         context.authenticatedUser().validateHasReadPermission(entityType);
 
-        Set<String> typicalResponseParameters = new HashSet<String>(Arrays.asList("currencyOptions",
-                "interestCompoundedEveryPeriodTypeOptions", "id", "externalId", "name", "description", "createdOn", "lastModifedOn",
-                "currencyCode", "digitsAfterDecimal", "minimumBalance", "maximumBalance", "tenureInMonths", "maturityDefaultInterestRate",
-                "maturityMinInterestRate", "maturityMaxInterestRate", "interestCompoundedEvery", "interestCompoundedEveryPeriodType",
-                "renewalAllowed", "preClosureAllowed", "preClosureInterestRate", "isLockinPeriodAllowed", "lockinPeriod",
-                "lockinPeriodType", "currency"));
-
-        Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
-        if (responseParameters.isEmpty()) {
-            responseParameters.addAll(typicalResponseParameters);
-        }
-        boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
-
         DepositProductData depositProduct = this.depositProductReadPlatformService.retrieveNewDepositProductDetails();
 
-        depositProduct = handleTemplateRelatedData(responseParameters, depositProduct);
+        depositProduct = handleTemplateRelatedData(depositProduct);
 
-        return this.apiJsonSerializerService.serializeDepositProductDataToJson(prettyPrint, responseParameters, depositProduct);
+        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        return this.toApiJsonSerializer.serialize(settings, depositProduct, DEPOSIT_PRODUCT_DATA_PARAMETERS);
     }
 
-    private DepositProductData handleTemplateRelatedData(final Set<String> responseParameters, final DepositProductData productData) {
+    private DepositProductData handleTemplateRelatedData(final DepositProductData productData) {
 
-        responseParameters.addAll(Arrays.asList("currencyOptions", "interestCompoundedEveryPeriodTypeOptions"));
         Collection<CurrencyData> allowedCurrencies = this.currencyReadPlatformService.retrieveAllowedCurrencies();
 
         EnumOptionData monthly = SavingsDepositEnumerations.interestCompoundingPeriodType(PeriodFrequencyType.MONTHS);

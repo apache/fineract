@@ -85,8 +85,8 @@ public class DepositProductData {
         this.lockinPeriodType = lockinPeriodType;
         this.isLockinPeriodAllowed = isLockinPeriodAllowed;
         this.currency = currencyData;
-        this.currencyOptions = new ArrayList<CurrencyData>();
-        this.interestCompoundedEveryPeriodTypeOptions = new ArrayList<EnumOptionData>();
+        this.currencyOptions = null;
+        this.interestCompoundedEveryPeriodTypeOptions = null;
     }
 
     public DepositProductData(final Collection<CurrencyData> currencyOptions,

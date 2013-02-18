@@ -336,6 +336,40 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
                 handler = applicationContext.getBean("reverseJournalEntryCommandHandler", NewCommandSourceHandler.class);
             } else {
                 throw new UnsupportedCommandException(wrapper.commandName());
+            }    
+        } else if (wrapper.isDepositProductResource()) {
+        	if (wrapper.isCreate()) {
+                handler = applicationContext.getBean("createDepositProductCommandHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isUpdate()) {
+                handler = applicationContext.getBean("updateDepositProductCommandHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isDelete()) {
+                handler = applicationContext.getBean("deleteDepositProductCommandHandler", NewCommandSourceHandler.class);
+            } else {
+                throw new UnsupportedCommandException(wrapper.commandName());
+            }
+        } else if (wrapper.isDepositAccountResource()) {
+        	if (wrapper.isCreate()) {
+                handler = applicationContext.getBean("createDepositAccountCommandHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isUpdate()) {
+                handler = applicationContext.getBean("updateDepositAccountCommandHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isDelete()) {
+                handler = applicationContext.getBean("deleteDepositAccountCommandHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isApprovalOfDeposit()) {
+            	handler = applicationContext.getBean("approveDepositAccountCommandHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isWithdrawDepositAmount()) {
+            	handler = applicationContext.getBean("withdrawDepositAccountAmountCommandHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isWithdrawInterest()) {
+            	handler = applicationContext.getBean("withdrawInterestDepositAccountAmountCommandHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isRenewOfDepositApplicaion()) {
+            	handler = applicationContext.getBean("renewDepositAccountCommandHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isRejectionOfDepositApplicaion()) {
+            	handler = applicationContext.getBean("rejectDepositAccountCommandHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isWithdrawByApplicant()) {
+            	handler = applicationContext.getBean("withDrawByApplicantDepositAccountCommandHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isUndoApprovalOfDepositApplication()) {
+            	handler = applicationContext.getBean("undoApprovalDepositAccountCommandHandler", NewCommandSourceHandler.class);
+            } else {
+                throw new UnsupportedCommandException(wrapper.commandName());
             }
         } else {
             throw new UnsupportedCommandException(wrapper.commandName());

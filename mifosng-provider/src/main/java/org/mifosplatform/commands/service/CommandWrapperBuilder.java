@@ -665,4 +665,109 @@ public class CommandWrapperBuilder {
         this.href = "/journalentries/"+transactionId;
         return this;
     }
+    
+    public CommandWrapperBuilder createDepositProduct() {
+        this.actionName = "CREATE";
+        this.entityName = "DEPOSITPRODUCT";
+        this.entityId = null;
+        this.href = "/depositproducts/template";
+        return this;
+    }
+
+	public CommandWrapperBuilder updateDepositProduct(final Long productId) {
+		this.actionName = "UPDATE";
+        this.entityName = "DEPOSITPRODUCT";
+        this.entityId = productId;
+        this.href = "/depositproducts/"+productId;
+        return this;
+	}
+	
+	public CommandWrapperBuilder deleteDepositProduct(final Long productId) {
+		this.actionName = "DELETE";
+        this.entityName = "DEPOSITPRODUCT";
+        this.entityId = productId;
+        this.href = "/depositproducts/"+productId;
+        return this;
+	}
+
+	public CommandWrapperBuilder createDepositAccount() {
+		this.actionName = "CREATE";
+        this.entityName = "DEPOSITACCOUNT";
+        this.entityId = null;
+        this.href = "/depositaccounts/template";
+        return this;
+	}
+
+	public CommandWrapperBuilder updateDepositAccount(Long accountId) {
+		this.actionName = "UPDATE";
+        this.entityName = "DEPOSITACCOUNT";
+        this.entityId = accountId;
+        this.href = "/depositaccounts/"+accountId;
+        return this;
+	}
+
+	public CommandWrapperBuilder deleteDepositAccount(Long accountId) {
+		this.actionName = "DELETE";
+        this.entityName = "DEPOSITACCOUNT";
+        this.entityId = accountId;
+        this.href = "/depositaccounts/"+accountId;
+        return this;
+	}
+
+	public CommandWrapperBuilder approveDepositApplication(Long accountId) {
+		this.actionName = "APPROVE";
+        this.entityName = "DEPOSITACCOUNT";
+        this.entityId = accountId;
+        this.href = "/depositaccounts/"+accountId;
+        return this;
+	}
+
+	public CommandWrapperBuilder withdrawDepositAmount(Long accountId) {
+		this.actionName = "WITHDRAWAL";
+        this.entityName = "DEPOSITACCOUNT";
+        this.entityId = accountId;
+        this.href = "/depositaccounts/"+accountId;
+        return this;
+	}
+
+	public CommandWrapperBuilder withdrawInterestDepositAmount(Long accountId) {
+		this.actionName = "INTEREST";
+        this.entityName = "DEPOSITACCOUNT";
+        this.entityId = accountId;
+        this.href = "/depositaccounts/"+accountId;
+        return this;
+	}
+
+	public CommandWrapperBuilder renewDepositAccount(Long accountId) {
+		this.actionName = "RENEW";
+        this.entityName = "DEPOSITACCOUNT";
+        this.entityId = accountId;
+        this.href = "/depositaccounts/"+accountId;
+        return this;
+	}
+
+	public CommandWrapperBuilder rejectDepositAccount(Long accountId) {
+		this.actionName = "REJECT";
+        this.entityName = "DEPOSITACCOUNT";
+        this.entityId = accountId;
+        this.href = "/depositaccounts/"+accountId;
+        return this;
+	}
+
+	public CommandWrapperBuilder withdrawDepositApplication(Long accountId) {
+		this.actionName = "WITHDRAW";
+        this.entityName = "DEPOSITACCOUNT";
+        this.entityId = accountId;
+        this.href = "/depositaccounts/"+accountId;
+        return this;
+	}
+
+	public CommandWrapperBuilder undoDepositApplicationApproval(Long accountId) {
+		this.actionName = "APPROVALUNDO";
+        this.entityName = "DEPOSITACCOUNT";
+        this.entityId = accountId;
+        this.href = "/depositaccounts/"+accountId;
+        return this;
+	}
+	
 }
