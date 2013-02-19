@@ -49,4 +49,5 @@ public class SavingSchedulePeriodData {
 	public BigDecimal getInterestAccured() {
 		return this.interestAccured;
 	}
+
 }

@@ -5,12 +5,15 @@
  */
 package org.mifosplatform.portfolio.savingsaccountproduct.service;
 
+import java.util.Map;
+
+import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
+import org.mifosplatform.infrastructure.security.exception.NoAuthorizationException;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.portfolio.loanproduct.domain.PeriodFrequencyType;
-import org.mifosplatform.portfolio.savingsaccountproduct.command.SavingProductCommand;
 import org.mifosplatform.portfolio.savingsaccountproduct.domain.SavingFrequencyType;
 import org.mifosplatform.portfolio.savingsaccountproduct.domain.SavingInterestCalculationMethod;
 import org.mifosplatform.portfolio.savingsaccountproduct.domain.SavingProduct;
@@ -19,6 +22,7 @@ import org.mifosplatform.portfolio.savingsaccountproduct.domain.SavingProductTyp
 import org.mifosplatform.portfolio.savingsaccountproduct.domain.SavingsInterestType;
 import org.mifosplatform.portfolio.savingsaccountproduct.exception.SavingProductNotFoundException;
 import org.mifosplatform.portfolio.savingsaccountproduct.exception.SavingsProductNotFoundException;
+import org.mifosplatform.portfolio.savingsaccountproduct.serialization.SavingProductCommandFromApiJsonDeserializer;
 import org.mifosplatform.portfolio.savingsdepositproduct.domain.TenureTypeEnum;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -29,29 +33,39 @@ public class SavingProductWritePlatformServiceJpaRepositoryImpl implements Savin
 
     private final PlatformSecurityContext context;
     private final SavingProductRepository savingProductRepository;
+    private final SavingProductCommandFromApiJsonDeserializer fromApiJsonDeserializer;
 
     @Autowired
     public SavingProductWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
-            final SavingProductRepository savingProductRepository) {
+            final SavingProductRepository savingProductRepository,
+            final SavingProductCommandFromApiJsonDeserializer fromApiJsonDeserializer) {
         this.context = context;
         this.savingProductRepository = savingProductRepository;
+        this.fromApiJsonDeserializer = fromApiJsonDeserializer;
     }
 
     @Transactional
     @Override
-    public CommandProcessingResult createSavingProduct(final SavingProductCommand command) {
+    public CommandProcessingResult createSavingProduct(final JsonCommand command) {
 
         this.context.authenticatedUser();
-        SavingProductCommandValidator validator = new SavingProductCommandValidator(command);
-        validator.validateForCreate();
-
-        SavingProductType savingProductType = SavingProductType.fromInt(command.getSavingProductType());
-        TenureTypeEnum tenureType = TenureTypeEnum.fromInt(command.getTenureType());
-        SavingFrequencyType savingFrequencyType = SavingFrequencyType.fromInt(command.getFrequency());
-        SavingsInterestType interestType = SavingsInterestType.fromInt(command.getInterestType());
-        PeriodFrequencyType lockinPeriodType = PeriodFrequencyType.fromInt(command.getLockinPeriodType());
-        SavingInterestCalculationMethod savingInterestCalculationMethod = SavingInterestCalculationMethod.fromInt(command.getInterestCalculationMethod());
-        MonetaryCurrency currency = new MonetaryCurrency(command.getCurrencyCode(), command.getDigitsAfterDecimal());
+        this.fromApiJsonDeserializer.validateForCreate(command.json());
+        
+        final Integer savingProductTypeCommandValue = command.integerValueOfParameterNamed("savingProductType");
+        SavingProductType savingProductType = SavingProductType.fromInt(savingProductTypeCommandValue);
+        final Integer tenureTypeCommandValue = command.integerValueOfParameterNamed("tenureType");
+        TenureTypeEnum tenureType = TenureTypeEnum.fromInt(tenureTypeCommandValue);
+        final Integer frequencyCommandValue = command.integerValueOfParameterNamed("frequency");
+        SavingFrequencyType savingFrequencyType = SavingFrequencyType.fromInt(frequencyCommandValue);
+        final Integer interestTypeCommandValue = command.integerValueOfParameterNamed("interestType");
+        SavingsInterestType interestType = SavingsInterestType.fromInt(interestTypeCommandValue);
+        final Integer lockinPeriodTypeCommandValue = command.integerValueOfParameterNamed("lockinPeriodType");
+        PeriodFrequencyType lockinPeriodType = PeriodFrequencyType.fromInt(lockinPeriodTypeCommandValue);
+        final Integer interestCalculationMethodCommandValue = command.integerValueOfParameterNamed("interestCalculationMethod");
+        SavingInterestCalculationMethod savingInterestCalculationMethod = SavingInterestCalculationMethod.fromInt(interestCalculationMethodCommandValue);
+        final String currencyCode = command.stringValueOfParameterNamed("currencyCode");
+        final Integer digitsAfterDecimal = command.integerValueOfParameterNamed("digitsAfterDecimal");
+        MonetaryCurrency currency = new MonetaryCurrency(currencyCode, digitsAfterDecimal);
         
         if ( savingProductType.equals(SavingProductType.INVALID) ||
         	 tenureType.equals(TenureTypeEnum.INVALID) ||
@@ -60,14 +74,11 @@ public class SavingProductWritePlatformServiceJpaRepositoryImpl implements Savin
         	 lockinPeriodType.equals(PeriodFrequencyType.INVALID)||
         	 savingInterestCalculationMethod.equals(SavingInterestCalculationMethod.INVALID)
         		) {
-			throw new RuntimeException("Please select a valid types"); 
+			throw new NoAuthorizationException("Please select a valid types"); 
 		}
-
-        SavingProduct product = new SavingProduct(command.getName(), command.getDescription(), currency, command.getInterestRate(),
-                command.getMinInterestRate(), command.getMaxInterestRate(), command.getSavingsDepositAmount(),command.getDepositEvery(), savingProductType,
-                tenureType, command.getTenure(), savingFrequencyType, interestType, savingInterestCalculationMethod,
-                command.getMinimumBalanceForWithdrawal(), command.isPartialDepositAllowed(), command.isLockinPeriodAllowed(),
-                command.getLockinPeriod(), lockinPeriodType);
+        
+        SavingProduct product = SavingProduct.assembleFromJson(command, currency, savingProductType, tenureType, savingFrequencyType, 
+        		interestType, savingInterestCalculationMethod, lockinPeriodType);
 
         this.savingProductRepository.save(product);
         return new CommandProcessingResultBuilder() //
@@ -77,18 +88,22 @@ public class SavingProductWritePlatformServiceJpaRepositoryImpl implements Savin
 
     @Transactional
     @Override
-    public CommandProcessingResult updateSavingProduct(final SavingProductCommand command) {
+    public CommandProcessingResult updateSavingProduct(final Long productId, final JsonCommand command) {
 
         this.context.authenticatedUser();
-        SavingProductCommandValidator validator = new SavingProductCommandValidator(command);
-        validator.validateForUpdate();
+        this.fromApiJsonDeserializer.validateForUpdate(command.json());
 
-        SavingProduct product = this.savingProductRepository.findOne(command.getId());
-        if (product == null) { throw new SavingProductNotFoundException(command.getId()); }
-        product.update(command);
+        SavingProduct product = this.savingProductRepository.findOne(productId);
+        
+        if (product == null) { throw new SavingProductNotFoundException(productId); }
+        
+        Map<String, Object> changes = product.update(command);
+        
         this.savingProductRepository.save(product);
+        
         return new CommandProcessingResultBuilder() //
         .withEntityId(product.getId()) //
+        .with(changes)
         .build();
     }
 

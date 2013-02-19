@@ -5,37 +5,31 @@
  */
 package org.mifosplatform.portfolio.savingsaccount.service;
 
-import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
-import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
-
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
-import org.bouncycastle.crypto.RuntimeCryptoException;
 import org.joda.time.LocalDate;
+import org.mifosplatform.infrastructure.core.api.JsonCommand;
+import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
+import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.portfolio.client.domain.Note;
 import org.mifosplatform.portfolio.client.domain.NoteRepository;
-import org.mifosplatform.portfolio.loanaccount.command.UndoStateTransitionCommand;
-import org.mifosplatform.portfolio.savingsaccount.command.SavingAccountApprovalCommand;
-import org.mifosplatform.portfolio.savingsaccount.command.SavingAccountApprovalCommandValidator;
-import org.mifosplatform.portfolio.savingsaccount.command.SavingAccountCommand;
-import org.mifosplatform.portfolio.savingsaccount.command.SavingAccountCommandValidator;
-import org.mifosplatform.portfolio.savingsaccount.command.SavingAccountDepositCommand;
-import org.mifosplatform.portfolio.savingsaccount.command.SavingAccountDepositCommandValidator;
-import org.mifosplatform.portfolio.savingsaccount.command.SavingAccountStateTransitionCommandValidator;
-import org.mifosplatform.portfolio.savingsaccount.command.SavingAccountWithdrawalCommand;
-import org.mifosplatform.portfolio.savingsaccount.command.SavingStateTransitionsCommand;
 import org.mifosplatform.portfolio.savingsaccount.data.SavingAccountForLookup;
 import org.mifosplatform.portfolio.savingsaccount.domain.SavingAccount;
 import org.mifosplatform.portfolio.savingsaccount.domain.SavingAccountRepository;
 import org.mifosplatform.portfolio.savingsaccount.exception.SavingAccountNotFoundException;
+import org.mifosplatform.portfolio.savingsaccount.serialization.SavingAccountCommandFromApiJsonDeserializer;
+import org.mifosplatform.portfolio.savingsaccount.serialization.SavingAccountStateTransitionCommandFromApiJsonDeserializer;
 import org.mifosplatform.portfolio.savingsdepositaccount.domain.DepositAccountStatus;
 import org.mifosplatform.portfolio.savingsdepositaccount.domain.DepositLifecycleStateMachine;
 import org.mifosplatform.portfolio.savingsdepositaccount.domain.DepositLifecycleStateMachineImpl;
+import org.mifosplatform.portfolio.savingsdepositaccount.exception.InvalidSavingStateTransitionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,24 +46,29 @@ public class SavingAccountWritePlatformServiceJpaRepositoryImpl implements Savin
     private final SavingAccountRepository savingAccountRepository;
     private final SavingAccountAssembler savingAccountAssembler;
     private final NoteRepository noteRepository;
+    private final SavingAccountCommandFromApiJsonDeserializer fromApiJsonDeserializer;
+    private final SavingAccountStateTransitionCommandFromApiJsonDeserializer savingAccountStateTransitionCommandFromApiJsonDeserializer;
 
     @Autowired
     public SavingAccountWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
             final SavingAccountRepository savingAccountRepository, final SavingAccountAssembler savingAccountAssembler,
-            final NoteRepository noteRepository) {
+            final NoteRepository noteRepository,
+            final SavingAccountCommandFromApiJsonDeserializer fromApiJsonDeserializer,
+            final SavingAccountStateTransitionCommandFromApiJsonDeserializer savingAccountStateTransitionCommandFromApiJsonDeserializer) {
         this.context = context;
         this.savingAccountRepository = savingAccountRepository;
         this.savingAccountAssembler = savingAccountAssembler;
         this.noteRepository = noteRepository;
+        this.fromApiJsonDeserializer = fromApiJsonDeserializer;
+        this.savingAccountStateTransitionCommandFromApiJsonDeserializer = savingAccountStateTransitionCommandFromApiJsonDeserializer;
     }
 
     @Transactional
     @Override
-    public CommandProcessingResult createSavingAccount(final SavingAccountCommand command) {
+    public CommandProcessingResult createSavingAccount(final JsonCommand command) {
         try {
             this.context.authenticatedUser();
-            SavingAccountCommandValidator validator = new SavingAccountCommandValidator(command);
-            validator.validateForCreate();
+            this.fromApiJsonDeserializer.validateForCreate(command.json());
 
             SavingAccount account = this.savingAccountAssembler.assembleFrom(command);
             this.savingAccountRepository.save(account);
@@ -85,20 +84,22 @@ public class SavingAccountWritePlatformServiceJpaRepositoryImpl implements Savin
     }
 
     @Override
-    public CommandProcessingResult updateSavingAccount(final SavingAccountCommand command) {
+    public CommandProcessingResult updateSavingAccount(final Long accountId, final JsonCommand command) {
         try {
             this.context.authenticatedUser();
-            SavingAccountCommandValidator validator = new SavingAccountCommandValidator(command);
-            validator.validateForUpdate();
+            this.fromApiJsonDeserializer.validateForUpdate(command.json());
+            
+            Map<String, Object> changes =  new LinkedHashMap<String, Object>(20);;
 
-            SavingAccount account = this.savingAccountRepository.findOne(command.getId());
-            if (account == null || account.isDeleted()) { throw new SavingAccountNotFoundException(command.getId()); }
+            SavingAccount account = this.savingAccountRepository.findOne(accountId);
+            if (account == null || account.isDeleted()) { throw new SavingAccountNotFoundException(accountId); }
             if (account.isPendingApproval()) {
-                this.savingAccountAssembler.assembleFrom(command, account);
+               changes = this.savingAccountAssembler.assembleFrom(command, account);
                 this.savingAccountRepository.save(account);
             }
             return new CommandProcessingResultBuilder() //
             .withEntityId(account.getId()) //
+            .with(changes)
             .build();
         } catch (DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(command, dve);
@@ -110,12 +111,14 @@ public class SavingAccountWritePlatformServiceJpaRepositoryImpl implements Savin
      * Guaranteed to throw an exception no matter what the data integrity issue
      * is.
      */
-    private void handleDataIntegrityIssues(final SavingAccountCommand command, final DataIntegrityViolationException dve) {
+    private void handleDataIntegrityIssues(final JsonCommand command, final DataIntegrityViolationException dve) {
 
         Throwable realCause = dve.getMostSpecificCause();
-        if (realCause.getMessage().contains("saving_acc_external_id")) { throw new PlatformDataIntegrityException(
-                "error.msg.saving.account.duplicate.externalId", "Saving account with externalId " + command.getExternalId()
-                        + " already exists", "externalId", command.getExternalId()); }
+        if (realCause.getMessage().contains("saving_acc_external_id")) { 
+        	final String externalId = command.stringValueOfParameterNamed("externalId");
+        	throw new PlatformDataIntegrityException(
+                "error.msg.saving.account.duplicate.externalId", "Saving account with externalId " + externalId
+                        + " already exists", "externalId", externalId); }
 
         logger.error(dve.getMessage(), dve);
         throw new PlatformDataIntegrityException("error.msg.saving.account.unknown.data.integrity.issue",
@@ -123,22 +126,25 @@ public class SavingAccountWritePlatformServiceJpaRepositoryImpl implements Savin
     }
 
 	@Override
-	public CommandProcessingResult rejectSavingApplication(SavingStateTransitionsCommand command) {
+	public CommandProcessingResult rejectSavingApplication(JsonCommand command) {
 		
 		this.context.authenticatedUser();
+		this.savingAccountStateTransitionCommandFromApiJsonDeserializer.validateForReject(command.json());
 		
-		SavingAccountStateTransitionCommandValidator validator = new SavingAccountStateTransitionCommandValidator(command);
-		validator.validate();
-		
-		SavingAccount account = this.savingAccountRepository.findOne(command.getAccountId());
+		SavingAccount account = this.savingAccountRepository.findOne(command.entityId());
 		if (account == null || account.isDeleted()) {
-			throw new SavingAccountNotFoundException(command.getAccountId());
+			throw new SavingAccountNotFoundException(command.entityId());
 		}
-		LocalDate eventDate = command.getEventDate();
+		LocalDate eventDate = command.localDateValueOfParameterNamed("eventDate");
+		if (this.isBeforeToday(eventDate)) {
+        	final String errorMessage = "User has no authority to reject saving with a date in the past. ";
+			
+			throw new InvalidSavingStateTransitionException("reject", "cannot.be.before.submittal.date", errorMessage, account.projectedCommencementDate(), eventDate);
+        }
 		account.reject(eventDate, defaultDepositLifecycleStateMachine());
 		this.savingAccountRepository.save(account);
 		
-		String noteText = command.getNote();
+		String noteText = command.stringValueOfParameterNamed("note");
         if (StringUtils.isNotBlank(noteText)) {
             Note note = Note.savingNote(account, noteText);
             this.noteRepository.save(note);
@@ -155,21 +161,25 @@ public class SavingAccountWritePlatformServiceJpaRepositoryImpl implements Savin
     }
 
 	@Override
-	public CommandProcessingResult withdrawSavingApplication(SavingStateTransitionsCommand command) {
+	public CommandProcessingResult withdrawSavingApplication(JsonCommand command) {
 		this.context.authenticatedUser();
+		this.savingAccountStateTransitionCommandFromApiJsonDeserializer.validateForWithdrawApplication(command.json());
 		
-		SavingAccountStateTransitionCommandValidator validator = new SavingAccountStateTransitionCommandValidator(command);
-		validator.validate();
-		
-		SavingAccount account = this.savingAccountRepository.findOne(command.getAccountId());
+		SavingAccount account = this.savingAccountRepository.findOne(command.entityId());
 		if (account == null || account.isDeleted()) {
-			throw new SavingAccountNotFoundException(command.getAccountId());
+			throw new SavingAccountNotFoundException(command.entityId());
 		}
-		LocalDate eventDate = command.getEventDate();
+		LocalDate eventDate = command.localDateValueOfParameterNamed("eventDate");
+		if (this.isBeforeToday(eventDate)) {
+			final String errorMessage = "User has no authority to withdraw saving with a date in the past. ";
+			
+			throw new InvalidSavingStateTransitionException("reject", "cannot.be.before.submittal.date", errorMessage, account.projectedCommencementDate(), eventDate);
+        }
+		
 		account.withdrawnByApplicant(eventDate, defaultDepositLifecycleStateMachine());
 		this.savingAccountRepository.save(account);
 		
-		String noteText = command.getNote();
+		String noteText = command.stringValueOfParameterNamed("note");
         if (StringUtils.isNotBlank(noteText)) {
             Note note = Note.savingNote(account, noteText);
             this.noteRepository.save(note);
@@ -181,17 +191,17 @@ public class SavingAccountWritePlatformServiceJpaRepositoryImpl implements Savin
 	}
 
 	@Override
-	public CommandProcessingResult undoSavingAccountApproval(UndoStateTransitionCommand command) {
+	public CommandProcessingResult undoSavingAccountApproval(JsonCommand command) {
 		
 		this.context.authenticatedUser();
-		SavingAccount account = this.savingAccountRepository.findOne(command.getLoanId());
+		SavingAccount account = this.savingAccountRepository.findOne(command.entityId());
 		if (account == null || account.isDeleted()) {
 			throw new SavingAccountNotFoundException(command.getLoanId());
 		}
 		account.undoSavingAccountApproval(defaultDepositLifecycleStateMachine());
 		this.savingAccountRepository.save(account);
 		
-		String noteText = command.getNote();
+		String noteText = command.stringValueOfParameterNamed("note");
         if (StringUtils.isNotBlank(noteText)) {
             Note note = Note.savingNote(account, noteText);
             this.noteRepository.save(note);
@@ -203,23 +213,27 @@ public class SavingAccountWritePlatformServiceJpaRepositoryImpl implements Savin
 	}
 
 	@Override
-	public CommandProcessingResult approveSavingAccount(SavingAccountApprovalCommand command) {
+	public CommandProcessingResult approveSavingAccount(JsonCommand command) {
 		
 		this.context.authenticatedUser();
-		SavingAccountApprovalCommandValidator validator = new SavingAccountApprovalCommandValidator(command);
-		validator.validate();
-		SavingAccount account = this.savingAccountRepository.findOne(command.getAccountId());
+		this.savingAccountStateTransitionCommandFromApiJsonDeserializer.validateForApprove(command.json());
+		
+		SavingAccount account = this.savingAccountRepository.findOne(command.entityId());
 		if (account == null || account.isDeleted()) {
-			throw new SavingAccountNotFoundException(command.getAccountId());
+			throw new SavingAccountNotFoundException(command.entityId());
 		}
-		LocalDate approvalDate = command.getApprovalDate();
+		LocalDate approvalDate = command.localDateValueOfParameterNamed("commencementDate");
 		if (approvalDate.isBefore(account.projectedCommencementDate())) {
-			throw new RuntimeCryptoException("Date of approval cannot before application submission date");
+			final String errorMessage = "The date on which a saving is approved cannot be before its submittal date: "
+                    + approvalDate.toString();
+			
+			throw new InvalidSavingStateTransitionException("approval", "cannot.be.before.submittal.date", errorMessage,
+					account.projectedCommencementDate(), approvalDate);
 		}
-		this.savingAccountAssembler.approveSavingAccount(command,account);
+		Map<String, Object> changes = this.savingAccountAssembler.approveSavingAccount(command,account);
 		this.savingAccountRepository.save(account);
 		
-		String noteText = command.getNote();
+		String noteText = command.stringValueOfParameterNamed("note");
         if (StringUtils.isNotBlank(noteText)) {
             Note note = Note.savingNote(account, noteText);
             this.noteRepository.save(note);
@@ -227,25 +241,25 @@ public class SavingAccountWritePlatformServiceJpaRepositoryImpl implements Savin
 		
         return new CommandProcessingResultBuilder() //
         .withEntityId(account.getId()) //
+        .with(changes)
         .build();
 	}
 
 	@Override
-	public CommandProcessingResult depositMoney(SavingAccountDepositCommand command) {
+	public CommandProcessingResult depositMoney(JsonCommand command) {
 		
 		this.context.authenticatedUser();
-		SavingAccountDepositCommandValidator validator = new SavingAccountDepositCommandValidator(command);
-		validator.validate();
+		this.savingAccountStateTransitionCommandFromApiJsonDeserializer.validateForDepositAmount(command.json());
 		
-		SavingAccount account = this.savingAccountRepository.findOne(command.getAccountId());
+		SavingAccount account = this.savingAccountRepository.findOne(command.entityId());
 		if (account == null || account.isDeleted()) {
-			throw new SavingAccountNotFoundException(command.getAccountId());
+			throw new SavingAccountNotFoundException(command.entityId());
 		}
 		
 		if (account.isActive())
 		account.depositMoney(command);
 		this.savingAccountRepository.save(account);
-		String noteText = command.getNote();
+		String noteText = command.stringValueOfParameterNamed("note");
         if (StringUtils.isNotBlank(noteText)) {
             Note note = Note.savingNote(account, noteText);
             this.noteRepository.save(note);
@@ -256,17 +270,17 @@ public class SavingAccountWritePlatformServiceJpaRepositoryImpl implements Savin
 	}
 
 	@Override
-	public CommandProcessingResult withdrawSavingAmount(SavingAccountWithdrawalCommand command) {
+	public CommandProcessingResult withdrawSavingAmount(JsonCommand command) {
 		
 		this.context.authenticatedUser();
-		SavingAccount account = this.savingAccountRepository.findOne(command.getAccountId());
+		SavingAccount account = this.savingAccountRepository.findOne(command.entityId());
 		if (account == null || account.isDeleted()) {
-			throw new SavingAccountNotFoundException(command.getAccountId());
+			throw new SavingAccountNotFoundException(command.entityId());
 		}
 		if (account.isActive())
 			this.savingAccountAssembler.withdrawSavingAccountMoney(command,account);
 		this.savingAccountRepository.save(account);
-		String noteText = command.getNote();
+		String noteText = command.stringValueOfParameterNamed("note");
         if (StringUtils.isNotBlank(noteText)) {
             Note note = Note.savingNote(account, noteText);
             this.noteRepository.save(note);
@@ -307,4 +321,7 @@ public class SavingAccountWritePlatformServiceJpaRepositoryImpl implements Savin
 			return new CommandProcessingResult(Long.valueOf(-1));
 		}
 	}
+	private boolean isBeforeToday(final LocalDate date) {
+    	return date.isBefore(new LocalDate());
+    }
 }

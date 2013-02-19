@@ -396,4 +396,39 @@ public class CommandWrapper {
 	public boolean isUndoApprovalOfDepositApplication() {
 		return this.actionName.equalsIgnoreCase("APPROVALUNDO") && this.entityName.equalsIgnoreCase("DEPOSITACCOUNT");
 	}
+
+	public boolean isSavingProductResource() {
+		return this.entityName.equalsIgnoreCase("SAVINGSPRODUCT");
+	}
+
+	public boolean isSavingAccountResource() {
+		return this.entityName.equalsIgnoreCase("SAVINGSACCOUNT");
+	}
+
+	public boolean isApprovalOfSaving() {
+		return this.actionName.equalsIgnoreCase("APPROVE") && this.entityName.equalsIgnoreCase("SAVINGSACCOUNT");
+	}
+
+	public boolean isSavingAccountDeposit() {
+		return this.actionName.equalsIgnoreCase("DEPOSIT") && this.entityName.equalsIgnoreCase("SAVINGSACCOUNT");
+	}
+
+	public boolean isRejectOfSavingAccount() {
+		return this.actionName.equalsIgnoreCase("REJECT") && this.entityName.equalsIgnoreCase("SAVINGSACCOUNT");
+	}
+
+	public boolean isWithdrawSavingAmount() {
+		return this.actionName.equalsIgnoreCase("WITHDRAWAL") && this.entityName.equalsIgnoreCase("SAVINGSACCOUNT");
+	}
+
+	public boolean isWithdrawOfSavingApplicatin() {
+		return this.actionName.equalsIgnoreCase("WITHDRAW") && this.entityName.equalsIgnoreCase("SAVINGSACCOUNT");
+	}
+
+	public boolean isUndoApprovalOfSavingAccount() {
+		return this.actionName.equalsIgnoreCase("APPROVALUNDO") && this.entityName.equalsIgnoreCase("SAVINGSACCOUNT");
+	}
+	
+	
+	
 }

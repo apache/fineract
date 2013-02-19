@@ -6,14 +6,15 @@
 package org.mifosplatform.portfolio.savingsaccountproduct.domain;
 
 import java.math.BigDecimal;
+import java.util.Map;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.Embedded;
 
+import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.portfolio.loanproduct.domain.PeriodFrequencyType;
-import org.mifosplatform.portfolio.savingsaccountproduct.command.SavingProductCommand;
 import org.mifosplatform.portfolio.savingsdepositproduct.domain.TenureTypeEnum;
 
 @Embeddable
@@ -114,76 +115,145 @@ public class SavingProductRelatedDetail {
         return BigDecimal.valueOf(Double.valueOf(this.savingsDepositAmount.stripTrailingZeros().toString()));
     }
 
-    public void update(SavingProductCommand command) {
-        Integer digitsAfterDecimal = this.currency.getDigitsAfterDecimal();
-        if (command.isDigitsAfterDecimalChanged()) {
-            digitsAfterDecimal = command.getDigitsAfterDecimal();
+    public Map<String, Object>  update(final JsonCommand command, final Map<String, Object> actualChanges) {
+    	
+    	final String localeAsInput = command.locale();
+    	
+    	Integer digitsAfterDecimal = this.currency.getDigitsAfterDecimal();
+    	final String digitsAfterDecimalParamName = "digitsAfterDecimal";
+        if (command.isChangeInIntegerParameterNamed(digitsAfterDecimalParamName, digitsAfterDecimal)) {
+            final Integer newValue = command.integerValueOfParameterNamed(digitsAfterDecimalParamName);
+            actualChanges.put(digitsAfterDecimalParamName, newValue);
+            actualChanges.put("locale", localeAsInput);
+            digitsAfterDecimal = newValue;
+            this.currency = new MonetaryCurrency(this.currency.getCode(), digitsAfterDecimal);
         }
 
-        String currencyCodeChanged = this.currency.getCode();
-        if (command.isCurrencyCodeChanged()) {
-            currencyCodeChanged = command.getCurrencyCode();
-        }
-
-        if (command.isDigitsAfterDecimalChanged() || command.isCurrencyCodeChanged()) {
-            this.currency = new MonetaryCurrency(currencyCodeChanged, digitsAfterDecimal);
-        }
-
-        if (command.isInterestRateChanged()) {
-            this.interestRate = command.getInterestRate();
-        }
-
-        if (command.isSavingsDepositAmountChanged()) {
-            this.savingsDepositAmount = command.getSavingsDepositAmount();
+        String currencyCode = this.currency.getCode();
+        final String currencyCodeParamName = "currencyCode";
+        if (command.isChangeInStringParameterNamed(currencyCodeParamName, currencyCode)) {
+            final String newValue = command.stringValueOfParameterNamed(currencyCodeParamName);
+            actualChanges.put(currencyCodeParamName, newValue);
+            currencyCode = newValue;
+            this.currency = new MonetaryCurrency(currencyCode, this.currency.getDigitsAfterDecimal());
         }
         
-        if (command.isDepositEveryChanged()) {
-			this.depositEvery=command.getDepositEvery();
-		}
-
-        if (command.isSavingProductTypeChanged()) {
-            this.savingProductType = SavingProductType.fromInt(command.getSavingProductType()).getValue();
+        final String interestRateParamName = "interestRate";
+        if (command.isChangeInBigDecimalParameterNamed(interestRateParamName, this.interestRate)) {
+            final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(interestRateParamName);
+            actualChanges.put(interestRateParamName, newValue);
+            actualChanges.put("locale", localeAsInput);
+            this.interestRate = newValue;
         }
 
-        if (command.isTenureTypeChanged()) {
-            this.tenureType = TenureTypeEnum.fromInt(command.getTenureType()).getValue();
+        final String savingsDepositAmountParamName = "savingsDepositAmount";
+        if (command.isChangeInBigDecimalParameterNamed(savingsDepositAmountParamName, this.savingsDepositAmount)) {
+            final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(savingsDepositAmountParamName);
+            actualChanges.put(savingsDepositAmountParamName, newValue);
+            actualChanges.put("locale", localeAsInput);
+            this.savingsDepositAmount = newValue;
+        }
+        
+        final String depositEveryParamName = "depositEvery";
+        if (command.isChangeInIntegerParameterNamed(depositEveryParamName, this.depositEvery)) {
+            final Integer newValue = command.integerValueOfParameterNamed(depositEveryParamName);
+            actualChanges.put(depositEveryParamName, newValue);
+            actualChanges.put("locale", localeAsInput);
+            this.depositEvery = newValue;
+        }
+        
+        
+        final String savingProductTypeParamName = "savingProductType";
+        if (command.isChangeInIntegerParameterNamed(savingProductTypeParamName, this.savingProductType)) {
+            final Integer newValue = command.integerValueOfParameterNamed(savingProductTypeParamName);
+            actualChanges.put(savingProductTypeParamName, newValue);
+            actualChanges.put("locale", localeAsInput);
+            this.savingProductType = SavingProductType.fromInt(newValue).getValue();
+        }
+        
+        final String tenureTypeParamName = "tenureType";
+        if (command.isChangeInIntegerParameterNamed(tenureTypeParamName, this.tenureType)) {
+            final Integer newValue = command.integerValueOfParameterNamed(tenureTypeParamName);
+            actualChanges.put(tenureTypeParamName, newValue);
+            actualChanges.put("locale", localeAsInput);
+            this.tenureType = TenureTypeEnum.fromInt(newValue).getValue();
         }
 
-        if (command.isTenureChanged()) {
-            this.tenure = command.getTenure();
+        final String tenureParamName = "tenure";
+        if (command.isChangeInIntegerParameterNamed(tenureParamName, this.tenure)) {
+            final Integer newValue = command.integerValueOfParameterNamed(tenureParamName);
+            actualChanges.put(tenureParamName, newValue);
+            actualChanges.put("locale", localeAsInput);
+            this.tenure = newValue;
+        }
+        
+        final String frequencyParamName = "frequency";
+        if (command.isChangeInIntegerParameterNamed(frequencyParamName, this.frequency)) {
+            final Integer newValue = command.integerValueOfParameterNamed(frequencyParamName);
+            actualChanges.put(frequencyParamName, newValue);
+            actualChanges.put("locale", localeAsInput);
+            this.frequency = SavingFrequencyType.fromInt(newValue).getValue();
+        }
+        
+        final String interestTypeParamName = "interestType";
+        if (command.isChangeInIntegerParameterNamed(interestTypeParamName, this.interestType)) {
+            final Integer newValue = command.integerValueOfParameterNamed(interestTypeParamName);
+            actualChanges.put(interestTypeParamName, newValue);
+            actualChanges.put("locale", localeAsInput);
+            this.interestType = SavingsInterestType.fromInt(newValue).getValue();
+        }
+        
+        final String interestCalculationMethodParamName = "interestCalculationMethod";
+        if (command.isChangeInIntegerParameterNamed(interestCalculationMethodParamName, this.interestCalculationMethod)) {
+            final Integer newValue = command.integerValueOfParameterNamed(interestCalculationMethodParamName);
+            actualChanges.put(interestCalculationMethodParamName, newValue);
+            actualChanges.put("locale", localeAsInput);
+            this.interestCalculationMethod = SavingInterestCalculationMethod.fromInt(newValue).getValue();
         }
 
-        if (command.isFrequencyChanged()) {
-            this.frequency = SavingFrequencyType.fromInt(command.getFrequency()).getValue();
+        final String minimumBalanceForWithdrawalParamName = "minimumBalanceForWithdrawal";
+        if (command.isChangeInBigDecimalParameterNamed(minimumBalanceForWithdrawalParamName, this.minimumBalanceForWithdrawal)) {
+            final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(minimumBalanceForWithdrawalParamName);
+            actualChanges.put(minimumBalanceForWithdrawalParamName, newValue);
+            actualChanges.put("locale", localeAsInput);
+            this.minimumBalanceForWithdrawal = newValue;
         }
 
-        if (command.isInterestTypeChanged()) {
-            this.interestType = SavingsInterestType.fromInt(command.getInterestType()).getValue();
+        final String isPartialDepositAllowedParamName = "isPartialDepositAllowed";
+        if (command.isChangeInBooleanParameterNamed(isPartialDepositAllowedParamName, this.isPartialDepositAllowed)) {
+        	final Boolean newValue = command.booleanObjectValueOfParameterNamed(isPartialDepositAllowedParamName);
+            actualChanges.put(isPartialDepositAllowedParamName, newValue);
+            actualChanges.put("locale", localeAsInput);
+            this.isPartialDepositAllowed = newValue;
         }
+        
+        final String isLockinPeriodAllowedParamName = "isLockinPeriodAllowed";
+        if (command.isChangeInBooleanParameterNamed(isLockinPeriodAllowedParamName, this.isLockinPeriodAllowed)) {
+        	final Boolean newValue = command.booleanObjectValueOfParameterNamed(isLockinPeriodAllowedParamName);
+            actualChanges.put(isLockinPeriodAllowedParamName, newValue);
+            actualChanges.put("locale", localeAsInput);
+            this.isLockinPeriodAllowed = newValue;
+        }
+		
+		final String lockinPeriodParamName = "lockinPeriod";
+        if (command.isChangeInIntegerParameterNamed(lockinPeriodParamName, this.lockinPeriod)) {
+            final Integer newValue = command.integerValueOfParameterNamed(lockinPeriodParamName);
+            actualChanges.put(lockinPeriodParamName, newValue);
+            actualChanges.put("locale", localeAsInput);
+            this.lockinPeriod = newValue;
+        }
+		
+		
+		final String lockinPeriodTypeParamName = "lockinPeriodType";
+        if (command.isChangeInIntegerParameterNamed(lockinPeriodTypeParamName, this.lockinPeriodType)) {
+            final Integer newValue = command.integerValueOfParameterNamed(lockinPeriodTypeParamName);
+            actualChanges.put(lockinPeriodTypeParamName, newValue);
+            actualChanges.put("locale", localeAsInput);
+            this.lockinPeriodType = PeriodFrequencyType.fromInt(newValue).getValue();
+        }
+        
+        return actualChanges;
 
-        if (command.isInterestCalculationMethodChanged()) {
-            this.interestCalculationMethod = SavingInterestCalculationMethod.fromInt(command.getInterestCalculationMethod()).getValue();
-        }
-
-        if (command.isMinimumBalanceForWithdrawalChanged()) {
-            this.minimumBalanceForWithdrawal = command.getMinimumBalanceForWithdrawal();
-        }
-
-        if (command.isPartialDepositAllowedChanged()) {
-            this.isPartialDepositAllowed = command.isPartialDepositAllowed();
-        }
-
-        if (command.isLockinPeriodAllowedChanged()) {
-            this.isLockinPeriodAllowed = command.isLockinPeriodAllowed();
-        }
-
-        if (command.isLockinPeriodChanged()) {
-            this.lockinPeriod = command.getLockinPeriod();
-        }
-
-        if (command.isLockinPeriodTypeChanged()) {
-            this.lockinPeriodType = PeriodFrequencyType.fromInt(command.getLockinPeriodType()).getValue();
-        }
     }
 
     public BigDecimal getSavingsDepositAmount() {

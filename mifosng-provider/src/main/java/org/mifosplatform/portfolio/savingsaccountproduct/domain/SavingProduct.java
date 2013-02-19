@@ -6,6 +6,8 @@
 package org.mifosplatform.portfolio.savingsaccountproduct.domain;
 
 import java.math.BigDecimal;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import javax.persistence.Column;
 import javax.persistence.Embedded;
@@ -13,10 +15,10 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 
 import org.apache.commons.lang.StringUtils;
+import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.domain.AbstractAuditableCustom;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.portfolio.loanproduct.domain.PeriodFrequencyType;
-import org.mifosplatform.portfolio.savingsaccountproduct.command.SavingProductCommand;
 import org.mifosplatform.portfolio.savingsdepositproduct.domain.TenureTypeEnum;
 import org.mifosplatform.useradministration.domain.AppUser;
 
@@ -94,16 +96,46 @@ public class SavingProduct extends AbstractAuditableCustom<AppUser, Long> {
         return savingProductRelatedDetail;
     }
 
-    public void update(final SavingProductCommand command) {
+    public Map<String, Object> update(final JsonCommand command) {
 
-        if (command.isNameChanged()) {
-            this.name = command.getName();
+    	final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(20);
+    	
+    	final String nameParamName = "name";
+        if (command.isChangeInStringParameterNamed(nameParamName, this.name)) {
+            final String newValue = command.stringValueOfParameterNamed(nameParamName);
+            actualChanges.put(nameParamName, newValue);
+            this.name = newValue;
+        }
+    	
+        final String descriptionParamName = "description";
+        if (command.isChangeInStringParameterNamed(descriptionParamName, this.description)) {
+            final String newValue = command.stringValueOfParameterNamed(descriptionParamName);
+            actualChanges.put(descriptionParamName, newValue);
+            this.description = newValue;
         }
 
-        if (command.isDescriptionChanged()) {
-            this.description = command.getDescription();
-        }
-
-        this.savingProductRelatedDetail.update(command);
+        return this.savingProductRelatedDetail.update(command, actualChanges);
     }
+
+	public static SavingProduct assembleFromJson(JsonCommand command, MonetaryCurrency currency, SavingProductType savingProductType, TenureTypeEnum tenureType, 
+			SavingFrequencyType savingFrequencyType, SavingsInterestType interestType, SavingInterestCalculationMethod savingInterestCalculationMethod,
+			PeriodFrequencyType lockinPeriodType) {
+
+		final String name = command.stringValueOfParameterNamed("name");
+		final String description = command.stringValueOfParameterNamed("description");
+		final BigDecimal interestRate = command.bigDecimalValueOfParameterNamed("interestRate");
+		final BigDecimal minInterestRate = command.bigDecimalValueOfParameterNamed("minInterestRate");
+		final BigDecimal maxInterestRate = command.bigDecimalValueOfParameterNamed("maxInterestRate");
+		final BigDecimal savingsDepositAmount = command.bigDecimalValueOfParameterNamed("savingsDepositAmount");
+		final Integer tenure = command.integerValueOfParameterNamed("tenure");
+		final BigDecimal minimumBalanceForWithdrawal = command.bigDecimalValueOfParameterNamed("minimumBalanceForWithdrawal");
+		final boolean isPartialDepositAllowed = command.booleanPrimitiveValueOfParameterNamed("isPartialDepositAllowed");
+		final boolean isLockinPeriodAllowed = command.booleanPrimitiveValueOfParameterNamed("isLockinPeriodAllowed");
+        final Integer lockinPeriod = command.integerValueOfParameterNamed("lockinPeriod");
+        final Integer depositEvery = command.integerValueOfParameterNamed("depositEvery");
+        
+        return new SavingProduct(name, description, currency, interestRate, minInterestRate, maxInterestRate, savingsDepositAmount, depositEvery, savingProductType,
+        		tenureType, tenure, savingFrequencyType, interestType, savingInterestCalculationMethod, minimumBalanceForWithdrawal, isPartialDepositAllowed, 
+        		isLockinPeriodAllowed, lockinPeriod, lockinPeriodType);
+	}
 }

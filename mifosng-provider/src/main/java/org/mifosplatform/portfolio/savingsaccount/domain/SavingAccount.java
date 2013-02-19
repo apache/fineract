@@ -29,12 +29,12 @@ import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 import org.joda.time.LocalDate;
 import org.joda.time.Months;
+import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.domain.AbstractAuditableCustom;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.organisation.monetary.domain.Money;
 import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.loanproduct.domain.PeriodFrequencyType;
-import org.mifosplatform.portfolio.savingsaccount.command.SavingAccountDepositCommand;
 import org.mifosplatform.portfolio.savingsaccountproduct.domain.SavingFrequencyType;
 import org.mifosplatform.portfolio.savingsaccountproduct.domain.SavingInterestCalculationMethod;
 import org.mifosplatform.portfolio.savingsaccountproduct.domain.SavingProduct;
@@ -556,18 +556,20 @@ public class SavingAccount extends AbstractAuditableCustom<AppUser, Long> {
         this.interestPostedAmount = BigDecimal.ZERO;
     }
 
-    public void depositMoney(final SavingAccountDepositCommand command) {
-
+    public void depositMoney(final JsonCommand command) {
+    	
+    	final BigDecimal depositAmountCommandValue = command.bigDecimalValueOfParameterNamed("savingsDepositAmountPerPeriod");
+    	final LocalDate depositDateCommandValue = command.localDateValueOfParameterNamed("depositDate");
+    	
         BigDecimal depositAmount = BigDecimal.ZERO;
         BigDecimal remainAmountToBePaid = BigDecimal.ZERO;
-        BigDecimal commandRemainDepositAmount = command.getSavingsDepostiAmountPerPeriod();
+        BigDecimal commandRemainDepositAmount = depositAmountCommandValue;
 
-        SavingAccountTransaction savingAccountTransaction = SavingAccountTransaction.deposit(command.getSavingsDepostiAmountPerPeriod(),
-                command.getDepositDate());
+        SavingAccountTransaction savingAccountTransaction = SavingAccountTransaction.deposit(depositAmountCommandValue,	depositDateCommandValue);
         savingAccountTransaction.updateAccount(this);
         this.savingAccountTransactions.add(savingAccountTransaction);
-        this.outstandingAmount = this.outstandingAmount.add(command.getSavingsDepostiAmountPerPeriod());
-        this.totalSavingsAmount = this.totalSavingsAmount.add(command.getSavingsDepostiAmountPerPeriod());
+        this.outstandingAmount = this.outstandingAmount.add(depositAmountCommandValue);
+        this.totalSavingsAmount = this.totalSavingsAmount.add(depositAmountCommandValue);
 
         if (SavingProductType.fromInt(this.savingProductType).isReccuring() && TenureTypeEnum.fromInt(tenureType).isFixedPeriod()) {
             for (SavingScheduleInstallments savingScheduleInstallment : this.savingScheduleInstallments) {
@@ -579,13 +581,13 @@ public class SavingAccount extends AbstractAuditableCustom<AppUser, Long> {
                             if (commandRemainDepositAmount.doubleValue() >= remainAmountToBePaid.doubleValue()) {
                                 savingScheduleInstallment.setDepositPaid(remainAmountToBePaid.add(savingScheduleInstallment
                                         .getDepositPaid()));
-                                savingScheduleInstallment.setPaymentDate(command.getDepositDate().toDate());
+                                savingScheduleInstallment.setPaymentDate(depositDateCommandValue.toDate());
                                 savingScheduleInstallment.setCompleted(true);
                                 commandRemainDepositAmount = commandRemainDepositAmount.subtract(remainAmountToBePaid);
                             } else if (commandRemainDepositAmount.doubleValue() < remainAmountToBePaid.doubleValue()) {
                                 savingScheduleInstallment.setDepositPaid(commandRemainDepositAmount.add(savingScheduleInstallment
                                         .getDepositPaid()));
-                                savingScheduleInstallment.setPaymentDate(command.getDepositDate().toDate());
+                                savingScheduleInstallment.setPaymentDate(depositDateCommandValue.toDate());
                                 commandRemainDepositAmount = BigDecimal.ZERO;
                             }
                         }
@@ -595,7 +597,7 @@ public class SavingAccount extends AbstractAuditableCustom<AppUser, Long> {
         } else {
             for (SavingScheduleInstallments savingScheduleInstallment : this.savingScheduleInstallments) {
                 savingScheduleInstallment.setDepositPaid(remainAmountToBePaid.add(savingScheduleInstallment.getDepositPaid()));
-                savingScheduleInstallment.setPaymentDate(command.getDepositDate().toDate());
+                savingScheduleInstallment.setPaymentDate(depositDateCommandValue.toDate());
             }
         }
     }

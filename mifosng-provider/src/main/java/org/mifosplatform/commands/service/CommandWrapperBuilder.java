@@ -769,5 +769,101 @@ public class CommandWrapperBuilder {
         this.href = "/depositaccounts/"+accountId;
         return this;
 	}
+
+	public CommandWrapperBuilder createSavingProduct() {
+		this.actionName = "CREATE";
+        this.entityName = "SAVINGSPRODUCT";
+        this.entityId = null;
+        this.href = "/savingproducts/template";
+        return this;
+	}
+
+	public CommandWrapperBuilder updateSavingProduct(Long productId) {
+		this.actionName = "UPDATE";
+        this.entityName = "SAVINGSPRODUCT";
+        this.entityId = productId;
+        this.href = "/savingproducts/"+productId;
+        return this;
+	}
+
+	public CommandWrapperBuilder deleteSavingProduct(Long productId) {
+		this.actionName = "DELETE";
+        this.entityName = "SAVINGSPRODUCT";
+        this.entityId = productId;
+        this.href = "/savingproducts/"+productId;
+        return this;
+	}
+
+	public CommandWrapperBuilder createSavingAccount() {
+		this.actionName = "CREATE";
+        this.entityName = "SAVINGSACCOUNT";
+        this.entityId = null;
+        this.href = "/savingaccounts/template";
+        return this;
+	}
+
+	public CommandWrapperBuilder updateSavingAccount(Long accountId) {
+		this.actionName = "UPDATE";
+        this.entityName = "SAVINGSACCOUNT";
+        this.entityId = accountId;
+        this.href = "/savingproducts/"+accountId;
+        return this;
+	}
+
+	public CommandWrapperBuilder deleteSavingAccount(Long accountId) {
+		this.actionName = "DELETE";
+        this.entityName = "SAVINGSACCOUNT";
+        this.entityId = accountId;
+        this.href = "/savingproducts/"+accountId;
+        return this;
+	}
+
+	public CommandWrapperBuilder approveSavingAccountApplication(Long accountId) {
+		this.actionName = "APPROVE";
+        this.entityName = "SAVINGSACCOUNT";
+        this.entityId = accountId;
+        this.href = "/depositaccounts/"+accountId;
+        return this;
+	}
+
+	public CommandWrapperBuilder depositOfSavingAmount(Long accountId) {
+		this.actionName = "DEPOSIT";
+        this.entityName = "SAVINGSACCOUNT";
+        this.entityId = accountId;
+        this.href = "/depositaccounts/"+accountId;
+        return this;
+	}
+
+	public CommandWrapperBuilder withdrawSavingAmount(Long accountId) {
+		this.actionName = "WITHDRAWAL";
+        this.entityName = "SAVINGSACCOUNT";
+        this.entityId = accountId;
+        this.href = "/depositaccounts/"+accountId;
+        return this;
+	}
+
+	public CommandWrapperBuilder rejectSavingApplication(Long accountId) {
+		this.actionName = "REJECT";
+        this.entityName = "SAVINGSACCOUNT";
+        this.entityId = accountId;
+        this.href = "/depositaccounts/"+accountId;
+        return this;
+	}
+
+	public CommandWrapperBuilder withdrawSavingApplication(Long accountId) {
+		this.actionName = "WITHDRAW";
+        this.entityName = "SAVINGSACCOUNT";
+        this.entityId = accountId;
+        this.href = "/depositaccounts/"+accountId;
+        return this;
+	}
+
+	public CommandWrapperBuilder undoApprovalOfSavingApplication(Long accountId) {
+		this.actionName = "APPROVALUNDO";
+        this.entityName = "SAVINGSACCOUNT";
+        this.entityId = accountId;
+        this.href = "/depositaccounts/"+accountId;
+        return this;
+	}
 	
 }

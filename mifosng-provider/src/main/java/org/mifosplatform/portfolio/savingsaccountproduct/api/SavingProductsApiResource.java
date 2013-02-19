@@ -23,16 +23,17 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
-import org.mifosplatform.infrastructure.core.api.ApiParameterHelper;
+import org.mifosplatform.commands.domain.CommandWrapper;
+import org.mifosplatform.commands.service.CommandWrapperBuilder;
+import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
+import org.mifosplatform.infrastructure.core.api.ApiRequestParameterHelper;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
+import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.mifosplatform.organisation.monetary.service.CurrencyReadPlatformService;
-import org.mifosplatform.portfolio.savingsaccount.PortfolioApiDataConversionService;
-import org.mifosplatform.portfolio.savingsaccount.PortfolioApiJsonSerializerService;
-import org.mifosplatform.portfolio.savingsaccountproduct.command.SavingProductCommand;
 import org.mifosplatform.portfolio.savingsaccountproduct.data.SavingProductData;
 import org.mifosplatform.portfolio.savingsaccountproduct.domain.SavingFrequencyType;
 import org.mifosplatform.portfolio.savingsaccountproduct.domain.SavingInterestCalculationMethod;
@@ -41,7 +42,6 @@ import org.mifosplatform.portfolio.savingsaccountproduct.domain.SavingsInterestT
 import org.mifosplatform.portfolio.savingsaccountproduct.domain.SavingsLockinPeriodEnum;
 import org.mifosplatform.portfolio.savingsaccountproduct.service.SavingProductEnumerations;
 import org.mifosplatform.portfolio.savingsaccountproduct.service.SavingProductReadPlatformService;
-import org.mifosplatform.portfolio.savingsaccountproduct.service.SavingProductWritePlatformService;
 import org.mifosplatform.portfolio.savingsdepositproduct.domain.TenureTypeEnum;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -51,78 +51,76 @@ import org.springframework.stereotype.Component;
 @Component
 @Scope("singleton")
 public class SavingProductsApiResource {
+	
+	private final Set<String> SAVINGS_PRODUCT_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("currencyOptions", "id",
+            "createdOn", "lastModifedOn", "locale", "name", "description", "currencyCode", "digitsAfterDecimal", "interstRate",
+            "minInterestRate", "maxInterestRate", "savingsDepositAmount", "savingProductType", "tenureType", "tenure", "frequency",
+            "interestType", "interestCalculationMethod", "minimumBalanceForWithdrawal", "isPartialDepositAllowed", "isLockinPeriodAllowed",
+            "lockinPeriod", "lockinPeriodType", "currencyOptions", "savingsProductTypeOptions", "tenureTypeOptions", "depositEvery",
+            "savingFrequencyOptions", "savingsInterestTypeOptions", "lockinPeriodTypeOptions", "interestCalculationOptions"));
 
     private final SavingProductReadPlatformService savingProductReadPlatformService;
-    private final SavingProductWritePlatformService savingProductWritePlatformService;
-    private final PortfolioApiDataConversionService apiDataConversionService;
-    private final PortfolioApiJsonSerializerService apiJsonSerializerService;
     private final CurrencyReadPlatformService currencyReadPlatformService;
     private final String entityType = "SAVINGSPRODUCT";
     private final PlatformSecurityContext context;
     private final DefaultToApiJsonSerializer<SavingProductData> toApiJsonSerializer;
+    private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
+    private final ApiRequestParameterHelper apiRequestParameterHelper;
     
     @Autowired
     public SavingProductsApiResource(final SavingProductReadPlatformService savingProductReadPlatformService,
-    		final SavingProductWritePlatformService savingProductWritePlatformService,
-    		final PortfolioApiDataConversionService apiDataConversionService,
-    		final PortfolioApiJsonSerializerService apiJsonSerializerService,
     		final CurrencyReadPlatformService currencyReadPlatformService,
     		final PlatformSecurityContext context,
-    		final DefaultToApiJsonSerializer<SavingProductData> toApiJsonSerializer) {
+    		final DefaultToApiJsonSerializer<SavingProductData> toApiJsonSerializer,
+    		final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
+    		final ApiRequestParameterHelper apiRequestParameterHelper) {
     	this.savingProductReadPlatformService = savingProductReadPlatformService;
-    	this.savingProductWritePlatformService = savingProductWritePlatformService;
-    	this.apiDataConversionService = apiDataConversionService;
-    	this.apiJsonSerializerService = apiJsonSerializerService;
     	this.currencyReadPlatformService = currencyReadPlatformService;
     	this.context = context;
     	this.toApiJsonSerializer = toApiJsonSerializer;
+    	this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
+    	this.apiRequestParameterHelper = apiRequestParameterHelper;
 	}
 
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String createSavingProduct(final String jsonRequestBody) {
+    public String createSavingProduct(final String apiRequestBodyAsJson) {
+    	
+    	final CommandWrapper commandRequest = new CommandWrapperBuilder().createSavingProduct().withJson(apiRequestBodyAsJson).build();
+    	
+    	final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
-        final SavingProductCommand command = this.apiDataConversionService.convertJsonToSavingProductCommand(null, jsonRequestBody);
+        return this.toApiJsonSerializer.serialize(result);
 
-        CommandProcessingResult entityIdentifier = this.savingProductWritePlatformService.createSavingProduct(command);
-
-        return this.toApiJsonSerializer.serialize(entityIdentifier);
     }
 
     @PUT
     @Path("{productId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String updateSavingProduct(@PathParam("productId") final Long productId, final String jsonRequestBody) {
+    public String updateSavingProduct(@PathParam("productId") final Long productId, final String apiRequestBodyAsJson) {
 
-        SavingProductCommand command = this.apiDataConversionService.convertJsonToSavingProductCommand(productId, jsonRequestBody);
-        CommandProcessingResult entityIdentifier = this.savingProductWritePlatformService.updateSavingProduct(command);
-        return this.toApiJsonSerializer.serialize(entityIdentifier);
+    	final CommandWrapper commandRequest = new CommandWrapperBuilder().updateSavingProduct(productId).withJson(apiRequestBodyAsJson).build();
+    	
+    	final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+
+        return this.toApiJsonSerializer.serialize(result);
+        
     }
 
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveAllSavingProducts(@Context final UriInfo uriInfo) {
-
-        context.authenticatedUser().validateHasReadPermission(entityType);
-
-        Set<String> typicalResponseParameters = new HashSet<String>(Arrays.asList("id", "createdOn", "lastModifedOn", "locale", "name",
-                "description", "currencyCode", "digitsAfterDecimal", "interstRate", "minInterestRate", "maxInterestRate",
-                "savingsDepositAmount", "savingProductType", "tenureType", "tenure", "frequency", "interestType",
-                "interestCalculationMethod", "minimumBalanceForWithdrawal", "isPartialDepositAllowed", "isLockinPeriodAllowed",
-                "lockinPeriod", "lockinPeriodType", "depositEvery"));
-
-        Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
-        if (responseParameters.isEmpty()) {
-            responseParameters.addAll(typicalResponseParameters);
-        }
-        boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
-
+        
+    	context.authenticatedUser().validateHasReadPermission(entityType);
+        
         Collection<SavingProductData> products = this.savingProductReadPlatformService.retrieveAllSavingProducts();
-
-        return this.apiJsonSerializerService.serializeSavingProductDataToJson(prettyPrint, responseParameters, products);
+        
+        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        
+        return this.toApiJsonSerializer.serialize(settings, products, SAVINGS_PRODUCT_DATA_PARAMETERS);
     }
 
     @GET
@@ -133,26 +131,15 @@ public class SavingProductsApiResource {
 
         context.authenticatedUser().validateHasReadPermission(entityType);
 
-        Set<String> typicalResponseParameters = new HashSet<String>(Arrays.asList("id", "createdOn", "lastModifedOn", "locale", "name",
-                "description", "currencyCode", "digitsAfterDecimal", "interstRate", "minInterestRate", "maxInterestRate",
-                "savingsDepositAmount", "savingProductType", "tenureType", "tenure", "frequency", "interestType",
-                "interestCalculationMethod", "minimumBalanceForWithdrawal", "isPartialDepositAllowed", "isLockinPeriodAllowed",
-                "lockinPeriod", "lockinPeriodType", "depositEvery"));
-
-        Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
-        if (responseParameters.isEmpty()) {
-            responseParameters.addAll(typicalResponseParameters);
-        }
-
         SavingProductData savingProduct = this.savingProductReadPlatformService.retrieveSavingProduct(productId);
+        
+        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 
-        boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
-        boolean template = ApiParameterHelper.template(uriInfo.getQueryParameters());
-        if (template) {
-            savingProduct = handleTemplateRelatedData(responseParameters, savingProduct);
+        if (settings.isTemplate()) {
+            savingProduct = handleTemplateRelatedData(savingProduct);
         }
 
-        return this.apiJsonSerializerService.serializeSavingProductDataToJson(prettyPrint, responseParameters, savingProduct);
+        return this.toApiJsonSerializer.serialize(settings, savingProduct, SAVINGS_PRODUCT_DATA_PARAMETERS);
     }
 
     @GET
@@ -163,26 +150,17 @@ public class SavingProductsApiResource {
 
         context.authenticatedUser().validateHasReadPermission(entityType);
 
-        Set<String> typicalResponseParameters = new HashSet<String>(Arrays.asList("id", "createdOn", "lastModifedOn", "locale", "name",
-                "description", "currencyCode", "digitsAfterDecimal", "interstRate", "savingsDepositAmount", "savingProductType",
-                "tenureType", "tenure", "frequency", "interestType", "interestCalculationMethod", "minimumBalanceForWithdrawal",
-                "isPartialDepositAllowed", "isLockinPeriodAllowed", "lockinPeriod", "lockinPeriodType", "currencyOptions", "depositEvery"));
-
-        Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
-        if (responseParameters.isEmpty()) {
-            responseParameters.addAll(typicalResponseParameters);
-        }
-        boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
-
         SavingProductData savingProduct = this.savingProductReadPlatformService.retrieveNewSavingProductDetails();
-        savingProduct = handleTemplateRelatedData(responseParameters, savingProduct);
-        return this.apiJsonSerializerService.serializeSavingProductDataToJson(prettyPrint, responseParameters, savingProduct);
+        
+        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        
+        savingProduct = handleTemplateRelatedData(savingProduct);
+        
+        return this.toApiJsonSerializer.serialize(settings, savingProduct, SAVINGS_PRODUCT_DATA_PARAMETERS);
     }
 
-    private SavingProductData handleTemplateRelatedData(Set<String> responseParameters, SavingProductData savingProduct) {
+    private SavingProductData handleTemplateRelatedData(SavingProductData savingProduct) {
 
-        responseParameters.addAll(Arrays.asList("currencyOptions", "savingsProductTypeOptions", "tenureTypeOptions",
-                "savingFrequencyOptions", "savingsInterestTypeOptions", "lockinPeriodTypeOptions", "interestCalculationOptions"));
         Collection<CurrencyData> currencyOptions = this.currencyReadPlatformService.retrieveAllowedCurrencies();
 
         EnumOptionData reccuring = SavingProductEnumerations.savingProductType(SavingProductType.RECURRING);
@@ -218,9 +196,12 @@ public class SavingProductsApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String deleteProduct(@PathParam("productId") final Long productId) {
+    	
+    	final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteSavingProduct(productId).build();
+    	
+    	final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
-        this.savingProductWritePlatformService.deleteSavingProduct(productId);
+        return this.toApiJsonSerializer.serialize(result);
 
-        return this.toApiJsonSerializer.serialize(productId);
     }
 }

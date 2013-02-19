@@ -204,7 +204,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 
         LocalDate eventDate = command.localDateValueOfParameterNamed("eventDate");
         if (this.isBeforeToday(eventDate)) {
-        	throw new NoAuthorizationException("User has no authority to reject deposit with a date in the past.");
+        	throw new NoAuthorizationException("User has no authority to withdraw deposit application with a date in the past.");
         }
 
         account.withdrawnByApplicant(eventDate, defaultDepositLifecycleStateMachine());
@@ -333,12 +333,14 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
                 && (new LocalDate().isAfter(account.maturesOnDate()) || new LocalDate().isEqual(account.maturesOnDate()))) {
 
             if (account.isActive()) {
-                final DepositAccount renewedAccount = this.depositAccountAssembler.assembleFrom(account, command);
+            	final Map<String, Object> changes = new LinkedHashMap<String, Object>(20);
+                final DepositAccount renewedAccount = this.depositAccountAssembler.assembleFrom(account, command,changes);
                 this.depositAccountRepository.save(renewedAccount);
                 account.closeDepositAccount(defaultDepositLifecycleStateMachine());
                 this.depositAccountRepository.save(account);
                 return new CommandProcessingResultBuilder() //
                 .withEntityId(account.getId()) //
+                .with(changes)
                 .build();
             }
 
@@ -357,7 +359,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 	            this.context.authenticatedUser();
 	            this.fromApiJsonDeserializer.validateForUpdate(command.json());
 	            
-	            Map<String, Object> changes =  new LinkedHashMap<String, Object>(20);;
+	            Map<String, Object> changes =  new LinkedHashMap<String, Object>(20);
 	            
 	            final DepositAccount account = this.depositAccountRepository.findOne(accountId);
 	            if (account == null || account.isDeleted()) { throw new DepositAccountNotFoundException(accountId); }

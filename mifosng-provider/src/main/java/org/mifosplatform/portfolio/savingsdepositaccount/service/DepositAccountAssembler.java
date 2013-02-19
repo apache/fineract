@@ -164,10 +164,10 @@ public class DepositAccountAssembler {
         return new DepositLifecycleStateMachineImpl(allowedDepositStatuses);
     }
 
-    public DepositAccount assembleFrom(final DepositAccount account, final JsonCommand command) {
 
-        final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(20);
-        final String localeAsInput = command.locale();
+    public DepositAccount assembleFrom(DepositAccount account, JsonCommand command, Map<String, Object> actualChanges) {
+    	
+    	final String localeAsInput = command.locale();
 
         Client client = account.client();
 
