@@ -37,7 +37,7 @@ import com.sun.jersey.core.header.FormDataContentDisposition;
 import com.sun.jersey.multipart.FormDataBodyPart;
 import com.sun.jersey.multipart.FormDataParam;
 
-// FIXME - kw- image should be images to keep consitent with rest of API - even if we only support one image per client.
+// FIXME - KW - image should be images to keep consistent with rest of API - even if we only support one image per client.
 @Path("/clients/{clientId}/image")
 @Component
 @Scope("singleton")
@@ -63,9 +63,9 @@ public class ClientImagesApiResource {
     @POST
     @Consumes({ MediaType.MULTIPART_FORM_DATA })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String addNewClientImage(@PathParam("clientId") final Long clientId, @HeaderParam("Content-Length") Long fileSize,
-            @FormDataParam("file") InputStream inputStream, @FormDataParam("file") FormDataContentDisposition fileDetails,
-            @FormDataParam("file") FormDataBodyPart bodyPart) {
+    public String addNewClientImage(@PathParam("clientId") final Long clientId, @HeaderParam("Content-Length") final Long fileSize,
+            @FormDataParam("file") final InputStream inputStream, @FormDataParam("file") final FormDataContentDisposition fileDetails,
+            @FormDataParam("file") final FormDataBodyPart bodyPart) {
 
         // TODO: vishwas might need more advances validation (like reading magic
         // number) for handling malicious clients
@@ -119,9 +119,9 @@ public class ClientImagesApiResource {
     @PUT
     @Consumes({ MediaType.MULTIPART_FORM_DATA })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String updateClientImage(@PathParam("clientId") final Long clientId, @HeaderParam("Content-Length") Long fileSize,
-            @FormDataParam("file") InputStream inputStream, @FormDataParam("file") FormDataContentDisposition fileDetails,
-            @FormDataParam("file") FormDataBodyPart bodyPart) {
+    public String updateClientImage(@PathParam("clientId") final Long clientId, @HeaderParam("Content-Length") final Long fileSize,
+            @FormDataParam("file") final InputStream inputStream, @FormDataParam("file") final FormDataContentDisposition fileDetails,
+            @FormDataParam("file") final FormDataBodyPart bodyPart) {
 
         return addNewClientImage(clientId, fileSize, inputStream, fileDetails, bodyPart);
     }

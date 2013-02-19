@@ -45,12 +45,12 @@ public class CalculateSavingScheduleImpl implements CalculateSavingSchedule {
     }
 
     @Override
-    public SavingScheduleData calculateSavingSchedule(CalculateSavingScheduleCommand command) {
+    public SavingScheduleData calculateSavingSchedule(final CalculateSavingScheduleCommand command) {
 
         context.authenticatedUser();
         SavingScheduleData savingScheduleData = null;
 
-        // FIXME Validations should write here
+        // FIXME - HUGO - Validations should write here
         final SavingProduct savingProduct = this.savingProductRepository.findOne(command.getProductId());
         if (savingProduct == null) throw new SavingProductNotFoundException(command.getProductId());
 

@@ -433,6 +433,22 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
         return interestDue;
     }
 
+    public Money writeOffOutstandingFeeCharges(final MonetaryCurrency currency) {
+        final Money feeChargesOutstanding = getFeeChargesOutstanding(currency);
+        this.feeChargesWrittenOff = defaultToNullIfZero(feeChargesOutstanding.getAmount());
+        this.completed = getTotalOutstanding(currency).isZero();
+
+        return feeChargesOutstanding;
+    }
+
+    public Money writeOffOutstandingPenaltyCharges(final MonetaryCurrency currency) {
+        final Money penaltyChargesOutstanding = getPenaltyChargesOutstanding(currency);
+        this.penaltyChargesWrittenOff = defaultToNullIfZero(penaltyChargesOutstanding.getAmount());
+        this.completed = getTotalOutstanding(currency).isZero();
+
+        return penaltyChargesOutstanding;
+    }
+
     public boolean isOverdueOn(final LocalDate transactionDate) {
         return this.getDueDate().isBefore(transactionDate);
     }

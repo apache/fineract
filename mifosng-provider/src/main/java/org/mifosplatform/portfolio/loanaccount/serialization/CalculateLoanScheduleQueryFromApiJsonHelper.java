@@ -89,7 +89,7 @@ public final class CalculateLoanScheduleQueryFromApiJsonHelper {
         baseDataValidator.reset().parameter(repaymentEveryFrequencyTypeParameterName).value(repaymentEveryType).notNull()
                 .inMinMaxRange(0, 3);
 
-        // FIXME - this constraint doesnt really need to be here. should be
+        // FIXME - KW - this constraint doesnt really need to be here. should be
         // possible to express loan term as say 12 months whilst also saying
         // - that the repayment structure is 6 repayments every bi-monthly.
         validateSelectedPeriodFrequencyTypeIsTheSame(dataValidationErrors, loanTermFrequency, loanTermFrequencyType, numberOfRepayments,
@@ -207,7 +207,7 @@ public final class CalculateLoanScheduleQueryFromApiJsonHelper {
     }
 
     private void validateRepaymentsStartingFromDateAndInterestChargedFromDate(final List<ApiParameterError> dataValidationErrors,
-            final LocalDate expectedDisbursementDate, LocalDate repaymentsStartingFromDate, LocalDate interestChargedFromDate) {
+            final LocalDate expectedDisbursementDate, final LocalDate repaymentsStartingFromDate, final LocalDate interestChargedFromDate) {
         if (repaymentsStartingFromDate != null && interestChargedFromDate == null) {
 
             ApiParameterError error = ApiParameterError.parameterError(
@@ -228,7 +228,7 @@ public final class CalculateLoanScheduleQueryFromApiJsonHelper {
     }
 
     private void validateRepaymentsStartingFromDateIsAfterDisbursementDate(final List<ApiParameterError> dataValidationErrors,
-            final LocalDate expectedDisbursementDate, LocalDate repaymentsStartingFromDate) {
+            final LocalDate expectedDisbursementDate, final LocalDate repaymentsStartingFromDate) {
         if (expectedDisbursementDate != null) {
             if (repaymentsStartingFromDate != null && expectedDisbursementDate.isAfter(repaymentsStartingFromDate)) {
                 ApiParameterError error = ApiParameterError.parameterError(

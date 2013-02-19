@@ -144,7 +144,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
         }
     }
 
-    private LoanCharge findEarliestUnpaidChargeFromUnOrderedSet(Set<LoanCharge> charges) {
+    private LoanCharge findEarliestUnpaidChargeFromUnOrderedSet(final Set<LoanCharge> charges) {
         LoanCharge earliestUnpaidCharge = null;
 
         for (LoanCharge loanCharge : charges) {
@@ -175,6 +175,8 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
             if (currentInstallment.isNotFullyCompleted()) {
                 principalPortion = principalPortion.plus(currentInstallment.writeOffOutstandingPrincipal(currency));
                 interestPortion = interestPortion.plus(currentInstallment.writeOffOutstandingInterest(currency));
+                feeChargesPortion = feeChargesPortion.plus(currentInstallment.writeOffOutstandingFeeCharges(currency));
+                penaltychargesPortion = penaltychargesPortion.plus(currentInstallment.writeOffOutstandingPenaltyCharges(currency));
             }
         }
 

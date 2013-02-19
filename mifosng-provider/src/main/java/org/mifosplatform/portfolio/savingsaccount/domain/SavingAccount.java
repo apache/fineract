@@ -625,11 +625,10 @@ public class SavingAccount extends AbstractAuditableCustom<AppUser, Long> {
     public void postInterest() {
 
         LocalDate lastInterestPostedDate = getLastInterestPostedDate();
-        @SuppressWarnings("unused")
-        LocalDate nextInterestPostingDate = getNextInterestPostedDate();
-        @SuppressWarnings("unused")
-        SavingInterestCalculationMethod savingInterestCalculationMethod = SavingInterestCalculationMethod
-                .fromInt(this.interestCalculationMethod);
+        // LocalDate nextInterestPostingDate = getNextInterestPostedDate();
+        // SavingInterestCalculationMethod savingInterestCalculationMethod =
+        // SavingInterestCalculationMethod
+        // .fromInt(this.interestCalculationMethod);
 
         Integer monthsForInterestCalculation = Months.monthsBetween(lastInterestPostedDate, new LocalDate()).getMonths();
         Integer postInterestItereations = monthsForInterestCalculation / this.interestPostEvery;
@@ -644,7 +643,7 @@ public class SavingAccount extends AbstractAuditableCustom<AppUser, Long> {
 
         while (postInterestItereations > 0) {
             lastInterestPostedDate = getLastInterestPostedDate();
-            nextInterestPostingDate = getNextInterestPostedDate();
+            // nextInterestPostingDate = getNextInterestPostedDate();
             LocalDate transactionStartDate = lastInterestPostedDate;
 
             BigDecimal termTotalAmount = BigDecimal.ZERO;
@@ -687,7 +686,7 @@ public class SavingAccount extends AbstractAuditableCustom<AppUser, Long> {
                 isOutstandingAmountCalculated = true;
 
             }
-            // TODO- calculate interest on calculation method
+            // TODO - HUGO - calculate interest on calculation method
 
             // if (savingInterestCalculationMethod.isAverageBalance()) {
             averageBalanceForTerm = BigDecimal.valueOf(termTotalAmount.doubleValue() / this.interestPostEvery);

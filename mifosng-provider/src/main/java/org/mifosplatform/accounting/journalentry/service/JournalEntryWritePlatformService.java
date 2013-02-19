@@ -7,7 +7,6 @@ package org.mifosplatform.accounting.journalentry.service;
 
 import java.util.Map;
 
-import org.mifosplatform.accounting.glaccount.data.LoanDTO;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 
@@ -18,7 +17,4 @@ public interface JournalEntryWritePlatformService {
     CommandProcessingResult revertJournalEntry(JsonCommand command);
 
     void createJournalEntriesForLoan(Map<String, Object> accountingBridgeData);
-
-    void createJournalEntriesForLoan(LoanDTO loanDTO);
-
 }

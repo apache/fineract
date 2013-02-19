@@ -33,10 +33,11 @@ public class ApiRequestJsonSerializationSettings {
     public static ApiRequestJsonSerializationSettings from(final boolean prettyPrint, final Set<String> parametersForPartialResponse,
             final boolean template, final Long commandId, final boolean makerCheckerable, final boolean includeJson) {
 
-        // FIXME - kw - rather than always creating new objects for this could
+        // FIXME - KW - rather than always creating new objects for this could
         // just send by common ones like, prettyprint=false, empty response
         // parameters
-        return new ApiRequestJsonSerializationSettings(prettyPrint, parametersForPartialResponse, template, commandId, makerCheckerable, includeJson);
+        return new ApiRequestJsonSerializationSettings(prettyPrint, parametersForPartialResponse, template, commandId, makerCheckerable,
+                includeJson);
     }
 
     public boolean isPrettyPrint() {
@@ -50,7 +51,7 @@ public class ApiRequestJsonSerializationSettings {
     public boolean isMakerCheckerable() {
         return this.makerCheckerable;
     }
-    
+
     public boolean isIncludeJson() {
         return this.includeJson;
     }

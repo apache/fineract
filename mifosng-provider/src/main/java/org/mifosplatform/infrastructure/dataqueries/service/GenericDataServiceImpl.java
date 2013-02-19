@@ -27,7 +27,7 @@ import org.springframework.stereotype.Service;
 
 import com.sun.rowset.CachedRowSetImpl;
 
-//TODO - Performance Item - most items (code values etc) can be cached but not doing that yet
+//TODO - JW - Performance Item - most items (code values etc) can be cached but not doing that yet
 @Service
 public class GenericDataServiceImpl implements GenericDataService {
 
@@ -41,8 +41,8 @@ public class GenericDataServiceImpl implements GenericDataService {
 
     @Override
     public CachedRowSet getCachedResultSet(final String sql, final String sqlErrorMsg) {
-        // FIXME - Need to reimplement this away from Sun library - could be
-        // mixture of Lists and jdbcTemplate.query
+        // FIXME - KW - Need to reimplement this away from Sun library - could
+        // be mixture of Lists and jdbcTemplate.query
 
         // long startTime = System.currentTimeMillis();
         Connection db_connection = null;
@@ -195,7 +195,7 @@ public class GenericDataServiceImpl implements GenericDataService {
                             writer.append("[" + localDate.getYear() + ", " + localDate.getMonthOfYear() + ", " + localDate.getDayOfMonth()
                                     + "]");
                         } else
-                            writer.append(doubleQuote + replace(currVal, doubleQuote,slashDoubleQuote) + doubleQuote);
+                            writer.append(doubleQuote + replace(currVal, doubleQuote, slashDoubleQuote) + doubleQuote);
                     }
                 } else
                     writer.append("null");

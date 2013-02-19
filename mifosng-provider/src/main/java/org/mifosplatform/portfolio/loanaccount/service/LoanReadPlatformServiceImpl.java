@@ -248,7 +248,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
         context.authenticatedUser();
 
-        // TODO - OPTIMIZE - write simple sql query to fetch back date of
+        // TODO - KW - OPTIMIZE - write simple sql query to fetch back date of
         // possible next transaction date.
         Loan loan = this.loanRepository.findOne(loanId);
         if (loan == null) { throw new LoanNotFoundException(loanId); }
@@ -273,7 +273,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
         context.authenticatedUser();
 
-        // TODO - OPTIMIZE - write simple sql query to fetch back overdue
+        // TODO - KW -OPTIMIZE - write simple sql query to fetch back overdue
         // interest that can be waived along with the date of repayment period
         // interest is overdue.
         final Loan loan = this.loanRepository.findOne(loanId);
@@ -290,8 +290,10 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
         final LoanTransactionEnumData transactionType = LoanEnumerations.transactionType(LoanTransactionType.WAIVE_INTEREST);
 
-        return new LoanTransactionData(null, transactionType, currencyData, waiveOfInterest.getTransactionDate(),
-                waiveOfInterest.getAmount(), null, null, null, null);
+        final MonetaryCurrency monetaryCurrency = new MonetaryCurrency(currency.getCode(), currency.getDecimalPlaces());
+        final BigDecimal amount = waiveOfInterest.getAmount(monetaryCurrency).getAmount();
+        return new LoanTransactionData(null, transactionType, currencyData, waiveOfInterest.getTransactionDate(), amount, null, null, null,
+                null);
     }
 
     @Override
@@ -299,8 +301,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
         context.authenticatedUser();
 
-        LoanTransactionEnumData transactionType = LoanEnumerations.transactionType(LoanTransactionType.WRITEOFF);
-        return new LoanTransactionData(null, transactionType, null, new LocalDate(), null, null, null, null, null);
+        final LoanTransactionEnumData transactionType = LoanEnumerations.transactionType(LoanTransactionType.WRITEOFF);
+        return new LoanTransactionData(null, transactionType, null, DateUtils.getLocalDateOfTenant(), null, null, null, null, null);
     }
 
     @Override
@@ -429,7 +431,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             final String closedByUsername = rs.getString("closedByUsername");
             final String closedByFirstname = rs.getString("closedByFirstname");
             final String closedByLastname = rs.getString("closedByLastname");
-            
+
             final LocalDate expectedMaturityDate = JdbcSupport.getLocalDate(rs, "expectedMaturityDate");
 
             final LoanApplicationTimelineData timeline = new LoanApplicationTimelineData(submittedOnDate, submittedByUsername,

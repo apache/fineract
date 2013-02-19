@@ -39,7 +39,7 @@ public class SavingProductEnumerations {
         return savingsLockinPeriod(SavingsLockinPeriodEnum.fromInt(id));
     }
 
-    public static EnumOptionData savingsLockinPeriod(SavingsLockinPeriodEnum type) {
+    public static EnumOptionData savingsLockinPeriod(final SavingsLockinPeriodEnum type) {
         final String codePrefix = "savings.product.";
         EnumOptionData optionData = null;
         switch (type) {
@@ -67,7 +67,7 @@ public class SavingProductEnumerations {
         return optionData;
     }
 
-    public static EnumOptionData savingInterestCalculationMethod(SavingInterestCalculationMethod type) {
+    public static EnumOptionData savingInterestCalculationMethod(final SavingInterestCalculationMethod type) {
         final String codePrefix = "savings.interestCalculation.method.";
         EnumOptionData optionData = null;
         switch (type) {
@@ -95,7 +95,7 @@ public class SavingProductEnumerations {
         return optionData;
     }
 
-    public static EnumOptionData savingInterestType(SavingsInterestType type) {
+    public static EnumOptionData savingInterestType(final SavingsInterestType type) {
         final String codePrefix = "savings.interest.type.";
         EnumOptionData optionData = null;
         switch (type) {
@@ -115,7 +115,7 @@ public class SavingProductEnumerations {
         return optionData;
     }
 
-    public static EnumOptionData interestFrequencyType(SavingFrequencyType type) {
+    public static EnumOptionData interestFrequencyType(final SavingFrequencyType type) {
         final String codePrefix = "saving.product.frequency.period.";
         EnumOptionData optionData = null;
         switch (type) {
@@ -171,7 +171,6 @@ public class SavingProductEnumerations {
         final String codePrefix = "savings.product.";
         EnumOptionData optionData = null;
         switch (type) {
-        // FIXME - Madhukar - spelling mistake on 'Recurring'
             case RECURRING:
                 optionData = new EnumOptionData(SavingProductType.RECURRING.getValue().longValue(), codePrefix
                         + SavingProductType.RECURRING.getCode(), "Recurring");

@@ -103,7 +103,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         String updatePermissionChecker = "'UPDATE_" + datatable + "_CHECKER'";
         String deletePermission = "'DELETE_" + datatable + "'";
         String deletePermissionChecker = "'DELETE_" + datatable + "_CHECKER'";
-        // TODO - put in batch command later
+        // TODO - JW - put in batch command later
         String sql = "insert into x_registered_table (registered_table_name, application_table_name) values ('" + datatable + "', '"
                 + appTable + "')";
 
@@ -125,7 +125,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
 
     @Override
     public void deregisterDatatable(final String datatable) {
-        // TODO - put in batch command later
+        // TODO - JW - put in batch command later
 
         String permissionList = "('CREATE_" + datatable + "', 'CREATE_" + datatable + "_CHECKER', 'READ_" + datatable + "', 'UPDATE_"
                 + datatable + "', 'UPDATE_" + datatable + "_CHECKER', 'DELETE_" + datatable + "', 'DELETE_" + datatable + "_CHECKER')";
@@ -356,7 +356,8 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
     }
 
     private String getApplicationTableName(final String datatable) {
-        // TODO - only used for update... can probably remove this after as its
+        // TODO - JW - only used for update... can probably remove this after as
+        // its
         // a reread
         String sql = "SELECT application_table_name FROM x_registered_table where registered_table_name = '" + datatable + "'";
 

@@ -50,16 +50,16 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
     private BigDecimal amount;
 
     @Column(name = "principal_portion_derived", scale = 6, precision = 19, nullable = true)
-    private BigDecimal principalPortion = BigDecimal.ZERO;
+    private BigDecimal principalPortion;
 
     @Column(name = "interest_portion_derived", scale = 6, precision = 19, nullable = true)
-    private BigDecimal interestPortion = BigDecimal.ZERO;
+    private BigDecimal interestPortion;
 
     @Column(name = "fee_charges_portion_derived", scale = 6, precision = 19, nullable = true)
-    private BigDecimal feeChargesPortion = BigDecimal.ZERO;
+    private BigDecimal feeChargesPortion;
 
     @Column(name = "penalty_charges_portion_derived", scale = 6, precision = 19, nullable = true)
-    private BigDecimal penaltyChargesPortion = BigDecimal.ZERO;
+    private BigDecimal penaltyChargesPortion;
 
     @Column(name = "is_reversed", nullable = false)
     private boolean reversed;
@@ -160,28 +160,12 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
         return Money.of(currency, this.interestPortion);
     }
 
-    public BigDecimal getInterestPortion() {
-        return this.interestPortion;
-    }
-
     public Money getFeeChargesPortion(final MonetaryCurrency currency) {
         return Money.of(currency, this.feeChargesPortion);
     }
 
-    public BigDecimal getFeePortion() {
-        return this.feeChargesPortion;
-    }
-
     public Money getPenaltyChargesPortion(final MonetaryCurrency currency) {
         return Money.of(currency, this.penaltyChargesPortion);
-    }
-
-    public BigDecimal getPenaltyChargesPortion() {
-        return this.penaltyChargesPortion;
-    }
-
-    public BigDecimal getAmount() {
-        return this.amount;
     }
 
     public Money getAmount(final MonetaryCurrency currency) {

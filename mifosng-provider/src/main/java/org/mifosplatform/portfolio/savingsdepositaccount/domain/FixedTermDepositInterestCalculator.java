@@ -16,11 +16,11 @@ import org.springframework.stereotype.Service;
 @Service
 public class FixedTermDepositInterestCalculator {
 
-    // FIXME - MADHUKAR - Are the unused field here needed?
+    // FIXME - HUGO - Are the unused field here needed?
     public Money calculateInterestOnMaturityFor(final Money deposit, final Integer tenureInMonths, final BigDecimal maturityInterestRate,
             final Integer interestCompoundedEvery, final PeriodFrequencyType interestCompoundedFrequencyPeriodType) {
 
-        // TODO - Can change 'interest compounding' fields into something
+        // TODO - HUGO - Can change 'interest compounding' fields into something
         // simpler like interestCompoundedFrequency {None (Simple Interest),
         // Monthly, Quarterly, Half-Yearly, Annually}
         // - the 'interestCompoundedEvery' would then be inferred form the
@@ -28,7 +28,7 @@ public class FixedTermDepositInterestCalculator {
         // - the special case of 'simple interest' or 'no compounding' would use
         // simple formula rather than 'future value' function.
 
-        // FIXME - assuming only monthly compounding period for now
+        // FIXME - HUGO - assuming only monthly compounding period for now
         MathContext mc = new MathContext(8, RoundingMode.HALF_EVEN);
         Integer monthsInYear = 12;
 
@@ -59,8 +59,8 @@ public class FixedTermDepositInterestCalculator {
      * payments are due at the beginning of period (false => payments are due at
      * end of period)
      */
-    private static double fv(double ratePeriodCompoundingPeriod, double numberOfCompoundingPeriods, double pmtPerPeriod,
-            double presentValue, boolean type) {
+    private static double fv(final double ratePeriodCompoundingPeriod, final double numberOfCompoundingPeriods, final double pmtPerPeriod,
+            final double presentValue, final boolean type) {
         double retval = 0;
         if (ratePeriodCompoundingPeriod == 0) {
             retval = -1 * (presentValue + (numberOfCompoundingPeriods * pmtPerPeriod));
@@ -72,8 +72,8 @@ public class FixedTermDepositInterestCalculator {
         return retval;
     }
 
-    public Money calculateInterestOnMaturityForSimpleInterest(Money deposit, Integer tenureInMonths, BigDecimal maturityInterestRate,
-            Integer interestCompoundedEvery, PeriodFrequencyType interestCompoundedFrequencyPeriodType) {
+    public Money calculateInterestOnMaturityForSimpleInterest(final Money deposit, final Integer tenureInMonths, final BigDecimal maturityInterestRate,
+            final Integer interestCompoundedEvery, final PeriodFrequencyType interestCompoundedFrequencyPeriodType) {
 
         MathContext mc = new MathContext(8, RoundingMode.HALF_EVEN);
         Integer monthsInYear = 12;
@@ -91,7 +91,7 @@ public class FixedTermDepositInterestCalculator {
         return Money.of(deposit.getCurrency(), totalAmount);
     }
 
-    public Money calculateRemainInterest(Money deposit, Integer days, BigDecimal interestRate) {
+    public Money calculateRemainInterest(final Money deposit, final Integer days, final BigDecimal interestRate) {
 
         MathContext mc = new MathContext(8, RoundingMode.HALF_EVEN);
         Integer daysInYear = 365;

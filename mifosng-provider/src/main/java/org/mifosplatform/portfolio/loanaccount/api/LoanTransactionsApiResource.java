@@ -36,12 +36,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-// FIXME: - undo disbursal fails when transactions have notes against them
-// FIXME: - modifying loan after disbursement
-// FIXME: - does not take into account 'actual disbursement' date being different to 'expected'
-// FIXME: - the schedule is 'generated' rather than been read from current loan schedule
-// FIXME: - should not allow modify loan after disbursal (should be only restructure/reschedule)
-// FIXME: - ui problem with default date for disburse dialog on some screens
 @Path("/loans/{loanId}/transactions")
 @Component
 @Scope("singleton")

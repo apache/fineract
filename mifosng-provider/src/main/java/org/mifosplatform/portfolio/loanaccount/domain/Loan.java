@@ -387,8 +387,6 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
         final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = this.transactionProcessor
                 .determineProcessor(this.transactionProcessingStrategy);
 
-        // TODO - only need to reprocess transactions against loan schedule
-        // if loan charge is added with due date before latest transaction.
         if (!loanCharge.isDueAtDisbursement()) {
             final List<LoanTransaction> allNonContraTransactionsPostDisbursement = retreiveListOfTransactionsPostDisbursement();
             loanRepaymentScheduleTransactionProcessor.handleTransaction(getDisbursementDate(), allNonContraTransactionsPostDisbursement,
@@ -1351,7 +1349,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
                     loanTransactionDate, this.getDisbursementDate());
         }
 
-        if (loanTransactionDate.isAfter(new LocalDate())) {
+        if (loanTransactionDate.isAfter(DateUtils.getLocalDateOfTenant())) {
             final String errorMessage = "The transaction date cannot be in the future.";
             throw new InvalidLoanStateTransitionException("transaction", "cannot.be.a.future.date", errorMessage, loanTransactionDate);
         }
@@ -1359,12 +1357,12 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
         if (loanTransaction.isInterestWaiver()) {
             Money totalInterestOutstandingOnLoan = getTotalInterestOutstandingOnLoan();
             if (adjustedTransaction != null) {
-                totalInterestOutstandingOnLoan = totalInterestOutstandingOnLoan.plus(adjustedTransaction.getAmount());
+                totalInterestOutstandingOnLoan = totalInterestOutstandingOnLoan.plus(adjustedTransaction.getAmount(loanCurrency()));
             }
             if (loanTransaction.getAmount(loanCurrency()).isGreaterThan(totalInterestOutstandingOnLoan)) {
                 final String errorMessage = "The amount of interest to waive cannot be greater than total interest outstanding on loan.";
                 throw new InvalidLoanStateTransitionException("waive.interest", "amount.exceeds.total.outstanding.interest", errorMessage,
-                        loanTransaction.getAmount(), totalInterestOutstandingOnLoan.getAmount());
+                        loanTransaction.getAmount(loanCurrency()), totalInterestOutstandingOnLoan.getAmount());
             }
         }
 
@@ -1616,53 +1614,61 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
     }
 
     public LoanTransaction closeAsWrittenOff(final JsonCommand command, final LoanLifecycleStateMachine loanLifecycleStateMachine,
-            final Map<String, Object> changes) {
+            final Map<String, Object> changes, final List<Long> existingTransactionIds, final List<Long> existingReversedTransactionIds) {
 
         final LoanStatus statusEnum = loanLifecycleStateMachine.transition(LoanEvent.WRITE_OFF_OUTSTANDING,
                 LoanStatus.fromInt(this.loanStatus));
+
+        LoanTransaction loanTransaction = null;
         if (!statusEnum.hasStateOf(LoanStatus.fromInt(this.loanStatus))) {
             this.loanStatus = statusEnum.getValue();
             changes.put("status", LoanEnumerations.status(this.loanStatus));
+
+            existingTransactionIds.addAll(findExistingTransactionIds());
+            existingReversedTransactionIds.addAll(findExistingReversedTransactionIds());
+
+            final LocalDate writtenOffOnLocalDate = command.localDateValueOfParameterNamed("transactionDate");
+
+            this.closedOnDate = writtenOffOnLocalDate.toDate();
+            this.writtenOffOnDate = writtenOffOnLocalDate.toDate();
+            changes.put("closedOnDate", command.stringValueOfParameterNamed("transactionDate"));
+            changes.put("writtenOffOnDate", command.stringValueOfParameterNamed("transactionDate"));
+
+            if (writtenOffOnLocalDate.isBefore(this.getDisbursementDate())) {
+                final String errorMessage = "The date on which a loan is written off cannot be before the loan disbursement date: "
+                        + getDisbursementDate().toString();
+                throw new InvalidLoanStateTransitionException("writeoff", "cannot.be.before.submittal.date", errorMessage,
+                        writtenOffOnLocalDate, getDisbursementDate());
+            }
+
+            if (writtenOffOnLocalDate.isAfter(DateUtils.getLocalDateOfTenant())) {
+                final String errorMessage = "The date on which a loan is written off cannot be in the future.";
+                throw new InvalidLoanStateTransitionException("writeoff", "cannot.be.a.future.date", errorMessage, writtenOffOnLocalDate);
+            }
+
+            loanTransaction = LoanTransaction.writeoff(this, writtenOffOnLocalDate);
+            final boolean isLastTransaction = isChronologicallyLatestTransaction(loanTransaction, loanTransactions);
+            if (!isLastTransaction) {
+                final String errorMessage = "The date of the writeoff transaction must occur on or before previous transactions.";
+                throw new InvalidLoanStateTransitionException("writeoff", "must.occur.on.or.after.other.transaction.dates", errorMessage,
+                        writtenOffOnLocalDate);
+            }
+
+            this.loanTransactions.add(loanTransaction);
+
+            final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = this.transactionProcessor
+                    .determineProcessor(this.transactionProcessingStrategy);
+            loanRepaymentScheduleTransactionProcessor.handleWriteOff(loanTransaction, loanCurrency(), this.repaymentScheduleInstallments);
         }
-
-        final LocalDate writtenOffOnLocalDate = command.localDateValueOfParameterNamed("transactionDate");
-
-        this.closedOnDate = writtenOffOnLocalDate.toDate();
-        this.writtenOffOnDate = writtenOffOnLocalDate.toDate();
-        changes.put("closedOnDate", command.stringValueOfParameterNamed("transactionDate"));
-        changes.put("writtenOffOnDate", command.stringValueOfParameterNamed("transactionDate"));
-
-        if (writtenOffOnLocalDate.isBefore(this.getDisbursementDate())) {
-            final String errorMessage = "The date on which a loan is written off cannot be before the loan disbursement date: "
-                    + getDisbursementDate().toString();
-            throw new InvalidLoanStateTransitionException("writeoff", "cannot.be.before.submittal.date", errorMessage,
-                    writtenOffOnLocalDate, getDisbursementDate());
-        }
-
-        if (writtenOffOnLocalDate.isAfter(new LocalDate())) {
-            final String errorMessage = "The date on which a loan is written off cannot be in the future.";
-            throw new InvalidLoanStateTransitionException("writeoff", "cannot.be.a.future.date", errorMessage, writtenOffOnLocalDate);
-        }
-
-        final LoanTransaction loanTransaction = LoanTransaction.writeoff(this, writtenOffOnLocalDate);
-        boolean isLastTransaction = isChronologicallyLatestTransaction(loanTransaction, loanTransactions);
-        if (!isLastTransaction) {
-            final String errorMessage = "The date of the writeoff transaction must occur on or before previous transactions.";
-            throw new InvalidLoanStateTransitionException("writeoff", "must.occur.on.or.after.other.transaction.dates", errorMessage,
-                    writtenOffOnLocalDate);
-        }
-
-        this.loanTransactions.add(loanTransaction);
-
-        final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = this.transactionProcessor
-                .determineProcessor(this.transactionProcessingStrategy);
-        loanRepaymentScheduleTransactionProcessor.handleWriteOff(loanTransaction, loanCurrency(), this.repaymentScheduleInstallments);
 
         return loanTransaction;
     }
 
     public LoanTransaction close(final JsonCommand command, final LoanLifecycleStateMachine loanLifecycleStateMachine,
-            final Map<String, Object> changes) {
+            final Map<String, Object> changes, final List<Long> existingTransactionIds, final List<Long> existingReversedTransactionIds) {
+
+        existingTransactionIds.addAll(findExistingTransactionIds());
+        existingReversedTransactionIds.addAll(findExistingReversedTransactionIds());
 
         final LocalDate closureDate = command.localDateValueOfParameterNamed("transactionDate");
 
@@ -1676,7 +1682,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
                     getDisbursementDate());
         }
 
-        if (closureDate.isAfter(new LocalDate())) {
+        if (closureDate.isAfter(DateUtils.getLocalDateOfTenant())) {
             final String errorMessage = "The date on which a loan is closed cannot be in the future.";
             throw new InvalidLoanStateTransitionException("close", "cannot.be.a.future.date", errorMessage, closureDate);
         }
@@ -1712,10 +1718,9 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 
         if (isOverPaid()) {
             final Money totalLoanOverpayment = calculateTotalOverpayment();
-            // FIXME - kw - use overpaymentTolerance setting when in place on
-            // loan product settings.
             if (totalLoanOverpayment.isGreaterThanZero() && getInArrearsTolerance().isGreaterThanOrEqualTo(totalLoanOverpayment)) {
-                // TODO - technically should set somewhere that this loan has
+                // TODO - KW - technically should set somewhere that this loan
+                // has
                 // 'overpaid' amount
                 updateLoanForClosure(closureDate, loanLifecycleStateMachine, changes);
             } else if (totalLoanOverpayment.isGreaterThanZero()) {
@@ -1729,11 +1734,10 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 
     private Money getTotalOutstanding() {
         Money totalOutstanding = Money.zero(loanCurrency());
-        // 1. check totalOutstanding value on loan
 
-        // 2. if null calculate from loan schedule
         final LoanScheduleWrapper wrapper = new LoanScheduleWrapper();
         totalOutstanding = wrapper.calculateTotalOutstanding(loanCurrency(), this.repaymentScheduleInstallments);
+
         return totalOutstanding;
     }
 
@@ -1751,8 +1755,6 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
     /**
      * Behaviour added to comply with capability of previous mifos product to
      * support easier transition to mifosx platform.
-     * 
-     * @param changes
      */
     public void closeAsMarkedForReschedule(final JsonCommand command, final LoanLifecycleStateMachine loanLifecycleStateMachine,
             final Map<String, Object> changes) {
@@ -2013,11 +2015,11 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
     }
 
     private Money getTotalPaidInRepayments() {
-        Money cumulativePaid = Money.zero(this.loanRepaymentScheduleDetail.getPrincipal().getCurrency());
+        Money cumulativePaid = Money.zero(loanCurrency());
 
         for (LoanTransaction repayment : this.loanTransactions) {
             if (repayment.isRepayment()) {
-                cumulativePaid = cumulativePaid.plus(repayment.getAmount());
+                cumulativePaid = cumulativePaid.plus(repayment.getAmount(loanCurrency()));
             }
         }
 
@@ -2209,20 +2211,15 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
         return officeId;
     }
 
-    public boolean isAccountingEnabledOnLoanProduct() {
-        return this.loanProduct.isAccountingEnabled();
-    }
-
-    public Boolean isCashBasedAccountingEnabledOnLoanProduct() {
+    private Boolean isCashBasedAccountingEnabledOnLoanProduct() {
         return this.loanProduct.isCashBasedAccountingEnabled();
     }
 
-    public Boolean isAccrualBasedAccountingEnabledOnLoanProduct() {
+    private Boolean isAccrualBasedAccountingEnabledOnLoanProduct() {
         return this.loanProduct.isAccrualBasedAccountingEnabled();
     }
 
-    // TODO - make private if possible
-    public Long productId() {
+    private Long productId() {
         return this.loanProduct.getId();
     }
 

@@ -96,7 +96,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
     }
 
     @Override
-    public Collection<ClientLookup> retrieveAllIndividualClientsForLookup(String extraCriteria) {
+    public Collection<ClientLookup> retrieveAllIndividualClientsForLookup(final String extraCriteria) {
 
         this.context.authenticatedUser();
 
@@ -112,7 +112,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
     }
 
     @Override
-    public Collection<ClientLookup> retrieveAllIndividualClientsForLookupByOfficeId(Long officeId) {
+    public Collection<ClientLookup> retrieveAllIndividualClientsForLookupByOfficeId(final Long officeId) {
         this.context.authenticatedUser();
 
         ClientLookupMapper rm = new ClientLookupMapper();
@@ -290,7 +290,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
     }
 
     @Override
-    public Collection<ClientAccountSummaryData> retrieveClientLoanAccountsByLoanOfficerId(Long clientId, Long loanOfficerId) {
+    public Collection<ClientAccountSummaryData> retrieveClientLoanAccountsByLoanOfficerId(final Long clientId, final Long loanOfficerId) {
 
         this.context.authenticatedUser();
 
@@ -357,7 +357,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
     }
 
     @Override
-    public NoteData retrieveClientNote(Long clientId, Long noteId) {
+    public NoteData retrieveClientNote(final Long clientId, final Long noteId) {
 
         try {
             context.authenticatedUser();
@@ -365,7 +365,8 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             // Check if client exists
             retrieveIndividualClient(clientId);
 
-            // FIXME - use join on sql query to fetch user information for note
+            // FIXME - KW - use join on sql query to fetch user information for
+            // note
             // rather than fetching users?
             Collection<AppUserData> allUsers = this.appUserReadPlatformService.retrieveAllUsers();
 
@@ -380,14 +381,14 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
     }
 
     @Override
-    public Collection<NoteData> retrieveAllClientNotes(Long clientId) {
+    public Collection<NoteData> retrieveAllClientNotes(final Long clientId) {
 
         context.authenticatedUser();
 
         // Check if client exists
         retrieveIndividualClient(clientId);
 
-        // FIXME - use join on sql query to fetch user information for note
+        // FIXME - KW - use join on sql query to fetch user information for note
         // rather than fetching users?
         Collection<AppUserData> allUsers = this.appUserReadPlatformService.retrieveAllUsers();
 
@@ -402,7 +403,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
         private final Collection<AppUserData> allUsers;
 
-        public NoteMapper(Collection<AppUserData> allUsers) {
+        public NoteMapper(final Collection<AppUserData> allUsers) {
             this.allUsers = allUsers;
         }
 

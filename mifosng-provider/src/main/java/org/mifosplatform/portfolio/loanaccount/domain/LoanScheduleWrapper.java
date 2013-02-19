@@ -33,7 +33,7 @@ public class LoanScheduleWrapper {
     }
 
     /**
-     * FIXME - this is not a side effect free approach so move this into a
+     * FIXME - KW - this is not a side effect free approach so move this into a
      * specific wrapper than makes this obvious from the read-only wrapper.
      */
     public void reprocess(final MonetaryCurrency currency, final LocalDate disbursementDate,

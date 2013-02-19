@@ -82,7 +82,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
         return new StreamingOutput() {
 
             @Override
-            public void write(OutputStream out) {
+            public void write(final OutputStream out) {
                 try {
 
                     GenericResultsetData result = retrieveGenericResultset(name, type, queryParams);
@@ -108,7 +108,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
 
     }
 
-    private static StringBuffer generateCsvFileBuffer(GenericResultsetData result) {
+    private static StringBuffer generateCsvFileBuffer(final GenericResultsetData result) {
         StringBuffer writer = new StringBuffer();
 
         List<ResultsetColumnHeader> columnHeaders = result.getColumnHeaders();
@@ -206,7 +206,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
 
     }
 
-    private String getSql(String name, String type) {
+    private String getSql(final String name, final String type) {
 
         String inputSql = "select " + type + "_sql as the_sql from stretchy_" + type + " where " + type + "_name = '" + name + "'";
         inputSql = genericDataService.wrapSQL(inputSql);
@@ -226,7 +226,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
     }
 
     @Override
-    public String getReportType(String reportName) {
+    public String getReportType(final String reportName) {
         String sql = "SELECT ifnull(report_type,'') as report_type FROM `stretchy_report` where report_name = '" + reportName + "'";
 
         sql = genericDataService.wrapSQL(sql);
@@ -246,7 +246,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
     }
 
     @Override
-    public Response processPentahoRequest(String reportName, String outputTypeParam, Map<String, String> queryParams) {
+    public Response processPentahoRequest(final String reportName, final String outputTypeParam, final Map<String, String> queryParams) {
 
         String outputType = "HTML";
         if (StringUtils.isNotBlank(outputTypeParam)) outputType = outputTypeParam;
@@ -258,7 +258,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
         if (noPentaho)
             throw new PlatformDataIntegrityException("error.msg.no.pentaho", "Pentaho is not enabled", "Pentaho is not enabled");
 
-        // TODO - use pentaho location finder like Pawel does in Mifos
+        // TODO - JW - use pentaho location finder like Pawel does in Mifos
         // String reportPath =
         // "C:\\dev\\apache-tomcat-7.0.25\\webapps\\ROOT\\PentahoReports\\"
         // + reportName + ".prpt";
@@ -313,7 +313,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
 
     }
 
-    private void addParametersToReport(MasterReport report, Map<String, String> queryParams) {
+    private void addParametersToReport(final MasterReport report, final Map<String, String> queryParams) {
 
         try {
             ReportParameterValues rptParamValues = report.getParameterValues();

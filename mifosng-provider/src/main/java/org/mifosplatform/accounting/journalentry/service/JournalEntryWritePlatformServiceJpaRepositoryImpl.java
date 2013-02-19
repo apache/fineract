@@ -142,17 +142,6 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
 
     @Transactional
     @Override
-    public void createJournalEntriesForLoan(final LoanDTO loanDTO) {
-        // shouldn't be before an accounting closure
-        if (loanDTO.isCashBasedAccountingEnabled()) {
-            createJournalEntriesUsingCashRules(loanDTO);
-        } else if (loanDTO.isAccrualBasedAccountingEnabled()) {
-            // TODO Vishwas: add accrual based accounting rules
-        }
-    }
-
-    @Transactional
-    @Override
     public void createJournalEntriesForLoan(final Map<String, Object> accountingBridgeData) {
 
         final boolean cashBasedAccountingEnabled = (Boolean) accountingBridgeData.get("cashBasedAccountingEnabled");
