@@ -32,7 +32,7 @@ public class Group extends AbstractPersistable<Long> {
     private Office office;
 
     @ManyToOne
-    @JoinColumn(name = "loan_officer_id", nullable = true)
+    @JoinColumn(name = "staff_id", nullable = true)
     private Staff loanOfficer;
 
     @Column(name = "name", length = 100, unique = true)
