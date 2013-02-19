@@ -1087,10 +1087,6 @@ CREATE TABLE `m_loan_transaction` (
   `transaction_type_enum` smallint(5) NOT NULL,
   `transaction_date` date NOT NULL,
   `amount` decimal(19,6) NOT NULL,
-  `createdby_id` bigint(20) DEFAULT NULL,
-  `created_date` datetime DEFAULT NULL,
-  `lastmodified_date` datetime DEFAULT NULL,
-  `lastmodifiedby_id` bigint(20) DEFAULT NULL,
   `principal_portion_derived` decimal(19,6) DEFAULT NULL,
   `interest_portion_derived` decimal(19,6) DEFAULT NULL,
   `fee_charges_portion_derived` decimal(19,6) DEFAULT NULL,
@@ -1937,4 +1933,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2013-02-18 13:20:24
+-- Dump completed on 2013-02-19  0:44:13

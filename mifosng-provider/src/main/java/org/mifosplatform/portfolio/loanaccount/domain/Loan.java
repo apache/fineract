@@ -165,11 +165,11 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 
     @Temporal(TemporalType.DATE)
     @Column(name = "expected_disbursedon_date")
-    private Date expectedDisbursedOnDate;
+    private Date expectedDisbursementDate;
 
     @Temporal(TemporalType.DATE)
     @Column(name = "disbursedon_date")
-    private Date disbursedOnDate;
+    private Date actualDisbursementDate;
 
     @SuppressWarnings("unused")
     @ManyToOne(optional = true)
@@ -199,7 +199,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 
     @Temporal(TemporalType.DATE)
     @Column(name = "maturedon_date")
-    private Date maturedOnDate;
+    private Date actualMaturityDate;
 
     @Temporal(TemporalType.DATE)
     @Column(name = "expected_firstrepaymenton_date")
@@ -387,12 +387,9 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
         final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = this.transactionProcessor
                 .determineProcessor(this.transactionProcessingStrategy);
 
-        if (!loanCharge.isDueAtDisbursement()) { // TODO - only need to
-                                                 // reprocess transactions
-                                                 // against loan schedule if
-                                                 // loan charge is added with
-                                                 // due date before latest
-                                                 // transaction.
+        // TODO - only need to reprocess transactions against loan schedule
+        // if loan charge is added with due date before latest transaction.
+        if (!loanCharge.isDueAtDisbursement()) {
             final List<LoanTransaction> allNonContraTransactionsPostDisbursement = retreiveListOfTransactionsPostDisbursement();
             loanRepaymentScheduleTransactionProcessor.handleTransaction(getDisbursementDate(), allNonContraTransactionsPostDisbursement,
                     getCurrency(), this.repaymentScheduleInstallments, getNullPointerSafeLoanCharges());
@@ -640,6 +637,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 
     public void updateLoanScheduleDependentDerivedFields() {
         this.expectedMaturityDate = determineExpectedMaturityDate().toDate();
+        this.actualMaturityDate = determineExpectedMaturityDate().toDate();
     }
 
     public Map<String, Object> loanApplicationModification(final JsonCommand command, final Set<LoanCharge> possiblyModifedLoanCharges,
@@ -737,7 +735,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
             actualChanges.put("recalculateLoanSchedule", true);
 
             final LocalDate newValue = command.localDateValueOfParameterNamed(expectedDisbursementDateParamName);
-            this.expectedDisbursedOnDate = newValue.toDate();
+            this.expectedDisbursementDate = newValue.toDate();
             removeFirstDisbursementTransaction();
             disburse(getExpectedDisbursedOnLocalDate());
         }
@@ -894,7 +892,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
         // Have to set expectedDisbursementDate to avoid nullPointer so should
         // be passed down to updateLoanSchedule method
         if (loanSchedule.getDisbursementDate() != null) {
-            this.expectedDisbursedOnDate = loanSchedule.getDisbursementDate().toDate();
+            this.expectedDisbursementDate = loanSchedule.getDisbursementDate().toDate();
         }
 
         updateLoanSchedule(loanScheduleData);
@@ -914,7 +912,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 
         this.submittedOnDate = submittedOn.toDate();
         this.submittedBy = currentUser;
-        this.expectedMaturityDate = determineExpectedMaturityDate().toDate();
+        updateLoanScheduleDependentDerivedFields();
 
         if (loanSchedule.getRepaymentStartFromDate() != null) {
             this.expectedFirstRepaymentOnDate = loanSchedule.getRepaymentStartFromDate().toDate();
@@ -1101,8 +1099,8 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
     }
 
     private void disburse(final LocalDate expectedDisbursedOnLocalDate) {
-        this.disbursedOnDate = expectedDisbursedOnLocalDate.toDate();
-        this.expectedMaturityDate = determineExpectedMaturityDate().toDate();
+        this.actualDisbursementDate = expectedDisbursedOnLocalDate.toDate();
+        updateLoanScheduleDependentDerivedFields();
         handleDisbursementTransaction(expectedDisbursedOnLocalDate);
     }
 
@@ -1147,26 +1145,19 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
             this.loanStatus = statusEnum.getValue();
             actualChanges.put("status", LoanEnumerations.status(this.loanStatus));
 
-            LocalDate disbursedOn = command.localDateValueOfParameterNamed("disbursedOnDate");
-            if (disbursedOn == null) {
-                disbursedOn = command.localDateValueOfParameterNamed("eventDate");
-            }
+            final LocalDate actualDisbursementDate = command.localDateValueOfParameterNamed("actualDisbursementDate");
 
-            final Locale locale = new Locale(command.locale());
-            final DateTimeFormatter fmt = DateTimeFormat.forPattern(command.dateFormat()).withLocale(locale);
-
-            this.disbursedOnDate = disbursedOn.toDate();
+            this.actualDisbursementDate = actualDisbursementDate.toDate();
             this.disbursedBy = currentUser;
-            this.expectedMaturityDate = determineExpectedMaturityDate().toDate();
+            updateLoanScheduleDependentDerivedFields();
 
             actualChanges.put("locale", command.locale());
             actualChanges.put("dateFormat", command.dateFormat());
-            actualChanges.put("disbursedOnDate", disbursedOn.toString(fmt));
-            actualChanges.put("expectedMaturityDate", LocalDate.fromDateFields(this.expectedDisbursedOnDate).toString(fmt));
+            actualChanges.put("actualDisbursementDate", command.stringValueOfParameterNamed("actualDisbursementDate"));
 
-            handleDisbursementTransaction(disbursedOn);
+            handleDisbursementTransaction(actualDisbursementDate);
 
-            if (isRepaymentScheduleRegenerationRequiredForDisbursement(disbursedOn)) {
+            if (isRepaymentScheduleRegenerationRequiredForDisbursement(actualDisbursementDate)) {
                 regenerateRepaymentSchedule(currency);
             }
         }
@@ -1267,9 +1258,9 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
             this.loanStatus = statusEnum.getValue();
             actualChanges.put("status", LoanEnumerations.status(this.loanStatus));
 
-            this.disbursedOnDate = null;
+            this.actualDisbursementDate = null;
             this.disbursedBy = null;
-            actualChanges.put("disbursedOnDate", "");
+            actualChanges.put("actualDisbursementDate", "");
 
             existingTransactionIds.addAll(findExistingTransactionIds());
             existingReversedTransactionIds.addAll(findExistingReversedTransactionIds());
@@ -1290,7 +1281,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
     }
 
     private void updateLoanToPreDisbursalState() {
-        this.disbursedOnDate = null;
+        this.actualDisbursementDate = null;
 
         for (LoanCharge charge : getNullPointerSafeLoanCharges()) {
             charge.resetToOriginal(loanCurrency());
@@ -1318,10 +1309,14 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
     }
 
     public LoanTransaction makeRepayment(final LocalDate transactionDate, final BigDecimal transactionAmount,
-            final LoanLifecycleStateMachine loanLifecycleStateMachine) {
+            final LoanLifecycleStateMachine loanLifecycleStateMachine, final List<Long> existingTransactionIds,
+            final List<Long> existingReversedTransactionIds) {
 
         final Money repayment = Money.of(loanCurrency(), transactionAmount);
         final LoanTransaction loanTransaction = LoanTransaction.repayment(repayment, transactionDate);
+
+        existingTransactionIds.addAll(findExistingTransactionIds());
+        existingReversedTransactionIds.addAll(findExistingReversedTransactionIds());
 
         handleRepaymentOrWaiverTransaction(loanTransaction, loanLifecycleStateMachine, null);
 
@@ -1418,7 +1413,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
         this.loanStatus = statusEnum.getValue();
 
         this.closedOnDate = transactionDate.toDate();
-        this.maturedOnDate = transactionDate.toDate();
+        this.actualMaturityDate = transactionDate.toDate();
     }
 
     private void handleLoanOverpayment(final LoanLifecycleStateMachine loanLifecycleStateMachine) {
@@ -1427,7 +1422,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
         this.loanStatus = statusEnum.getValue();
 
         this.closedOnDate = null;
-        this.maturedOnDate = null;
+        this.actualMaturityDate = null;
     }
 
     private boolean isChronologicallyLatestRepaymentOrWaiver(final LoanTransaction loanTransaction,
@@ -1530,7 +1525,11 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
     }
 
     public LoanTransaction adjustExistingTransaction(final LocalDate transactionDate, final BigDecimal transactionAmountValue,
-            final LoanLifecycleStateMachine loanLifecycleStateMachine, final LoanTransaction transactionForAdjustment) {
+            final LoanLifecycleStateMachine loanLifecycleStateMachine, final LoanTransaction transactionForAdjustment,
+            final List<Long> existingTransactionIds, final List<Long> existingReversedTransactionIds) {
+
+        existingTransactionIds.addAll(findExistingTransactionIds());
+        existingReversedTransactionIds.addAll(findExistingReversedTransactionIds());
 
         final Money transactionAmount = Money.of(loanCurrency(), transactionAmountValue);
         LoanTransaction newTransactionDetail = LoanTransaction.repayment(transactionAmount, transactionDate);
@@ -1914,8 +1913,8 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 
     public LocalDate getDisbursedOnDate() {
         LocalDate date = null;
-        if (this.disbursedOnDate != null) {
-            date = new LocalDate(this.disbursedOnDate);
+        if (this.actualDisbursementDate != null) {
+            date = new LocalDate(this.actualDisbursementDate);
         }
         return date;
     }
@@ -1937,13 +1936,13 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
     }
 
     public Date getExpectedDisbursedOnDate() {
-        return this.expectedDisbursedOnDate;
+        return this.expectedDisbursementDate;
     }
 
     public LocalDate getExpectedDisbursedOnLocalDate() {
         LocalDate expectedDisbursementDate = null;
-        if (this.expectedDisbursedOnDate != null) {
-            expectedDisbursementDate = new LocalDate(this.expectedDisbursedOnDate);
+        if (this.expectedDisbursementDate != null) {
+            expectedDisbursementDate = new LocalDate(this.expectedDisbursementDate);
         }
         return expectedDisbursementDate;
     }
@@ -1958,8 +1957,8 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 
     public LocalDate getDisbursementDate() {
         LocalDate disbursementDate = getExpectedDisbursedOnLocalDate();
-        if (this.disbursedOnDate != null) {
-            disbursementDate = new LocalDate(this.disbursedOnDate);
+        if (this.actualDisbursementDate != null) {
+            disbursementDate = new LocalDate(this.actualDisbursementDate);
         }
         return disbursementDate;
     }
@@ -1974,8 +1973,8 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
 
     public LocalDate getActualMaturityDate() {
         LocalDate possibleMaturityDate = null;
-        if (this.maturedOnDate != null) {
-            possibleMaturityDate = new LocalDate(this.maturedOnDate);
+        if (this.actualMaturityDate != null) {
+            possibleMaturityDate = new LocalDate(this.actualMaturityDate);
         }
         return possibleMaturityDate;
     }
@@ -1986,8 +1985,8 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
         if (this.expectedMaturityDate != null) {
             possibleMaturityDate = new LocalDate(this.expectedMaturityDate);
         }
-        if (this.maturedOnDate != null) {
-            possibleMaturityDate = new LocalDate(this.maturedOnDate);
+        if (this.actualMaturityDate != null) {
+            possibleMaturityDate = new LocalDate(this.actualMaturityDate);
         }
         return possibleMaturityDate;
     }
@@ -2006,7 +2005,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
     }
 
     public boolean isActualDisbursedOnDateEarlierOrLaterThanExpected(final LocalDate actualDisbursedOnDate) {
-        return !new LocalDate(this.expectedDisbursedOnDate).isEqual(actualDisbursedOnDate);
+        return !new LocalDate(this.expectedDisbursementDate).isEqual(actualDisbursedOnDate);
     }
 
     public boolean isRepaymentScheduleRegenerationRequiredForDisbursement(final LocalDate actualDisbursementDate) {
@@ -2090,7 +2089,7 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
         }
 
         if (isDisbursed()) {
-            statusSinceDate = new LocalDate(this.disbursedOnDate);
+            statusSinceDate = new LocalDate(this.actualDisbursementDate);
         }
 
         if (isClosed()) {

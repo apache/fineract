@@ -9,3 +9,10 @@ ALTER TABLE `m_loan_transaction` DROP FOREIGN KEY `FKCFCEA426FC69F3F1`;
 ALTER TABLE `m_loan_transaction` 
 DROP COLUMN `contra_id` , 
 DROP INDEX `FKCFCEA426FC69F3F1`;
+
+
+ALTER TABLE `m_loan_transaction` 
+DROP COLUMN `lastmodifiedby_id`,
+DROP COLUMN `lastmodified_date`,
+DROP COLUMN `created_date`,
+DROP COLUMN `createdby_id`;

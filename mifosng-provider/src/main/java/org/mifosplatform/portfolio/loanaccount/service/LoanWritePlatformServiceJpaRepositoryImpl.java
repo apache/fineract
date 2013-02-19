@@ -34,7 +34,6 @@ import org.mifosplatform.portfolio.charge.exception.LoanChargeNotFoundException;
 import org.mifosplatform.portfolio.client.domain.Note;
 import org.mifosplatform.portfolio.client.domain.NoteRepository;
 import org.mifosplatform.portfolio.loanaccount.command.LoanChargeCommand;
-import org.mifosplatform.portfolio.loanaccount.command.LoanStateTransitionCommand;
 import org.mifosplatform.portfolio.loanaccount.command.LoanTransactionCommand;
 import org.mifosplatform.portfolio.loanaccount.command.LoanUpdateCommand;
 import org.mifosplatform.portfolio.loanaccount.domain.DefaultLoanLifecycleStateMachine;
@@ -51,7 +50,7 @@ import org.mifosplatform.portfolio.loanaccount.exception.LoanOfficerAssignmentEx
 import org.mifosplatform.portfolio.loanaccount.exception.LoanOfficerUnassignmentException;
 import org.mifosplatform.portfolio.loanaccount.exception.LoanTransactionNotFoundException;
 import org.mifosplatform.portfolio.loanaccount.serialization.LoanChargeCommandFromApiJsonDeserializer;
-import org.mifosplatform.portfolio.loanaccount.serialization.LoanStateTransitionCommandFromApiJsonDeserializer;
+import org.mifosplatform.portfolio.loanaccount.serialization.LoanEventApiJsonValidator;
 import org.mifosplatform.portfolio.loanaccount.serialization.LoanTransactionCommandFromApiJsonDeserializer;
 import org.mifosplatform.portfolio.loanaccount.serialization.LoanUpdateCommandFromApiJsonDeserializer;
 import org.mifosplatform.portfolio.loanproduct.exception.InvalidCurrencyException;
@@ -64,7 +63,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatformService {
 
     private final PlatformSecurityContext context;
-    private final LoanStateTransitionCommandFromApiJsonDeserializer loanStateTransitionCommandFromApiJsonDeserializer;
+    private final LoanEventApiJsonValidator loanEventApiJsonValidator;
     private final LoanTransactionCommandFromApiJsonDeserializer loanTransactionCommandFromApiJsonDeserializer;
     private final LoanChargeCommandFromApiJsonDeserializer loanChargeCommandFromApiJsonDeserializer;
     private final LoanUpdateCommandFromApiJsonDeserializer loanUpdateCommandFromApiJsonDeserializer;
@@ -79,7 +78,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
     @Autowired
     public LoanWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
-            final LoanStateTransitionCommandFromApiJsonDeserializer loanStateTransitionCommandFromApiJsonDeserializer,
+            final LoanEventApiJsonValidator loanEventApiJsonValidator,
             final LoanTransactionCommandFromApiJsonDeserializer loanTransactionCommandFromApiJsonDeserializer,
             final LoanChargeCommandFromApiJsonDeserializer loanChargeCommandFromApiJsonDeserializer,
             final LoanUpdateCommandFromApiJsonDeserializer loanUpdateCommandFromApiJsonDeserializer, final LoanAssembler loanAssembler,
@@ -88,7 +87,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             final ApplicationCurrencyRepository applicationCurrencyRepository,
             final JournalEntryWritePlatformService journalEntryWritePlatformService) {
         this.context = context;
-        this.loanStateTransitionCommandFromApiJsonDeserializer = loanStateTransitionCommandFromApiJsonDeserializer;
+        this.loanEventApiJsonValidator = loanEventApiJsonValidator;
         this.loanTransactionCommandFromApiJsonDeserializer = loanTransactionCommandFromApiJsonDeserializer;
         this.loanChargeCommandFromApiJsonDeserializer = loanChargeCommandFromApiJsonDeserializer;
         this.loanAssembler = loanAssembler;
@@ -117,18 +116,11 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         final AppUser currentUser = context.authenticatedUser();
 
-        final LoanStateTransitionCommand disburseLoan = this.loanStateTransitionCommandFromApiJsonDeserializer.commandFromApiJson(command
-                .json());
-        disburseLoan.validate();
+        this.loanEventApiJsonValidator.validateDisbursement(command.json());
 
         final Loan loan = retrieveLoanBy(loanId);
 
-        final String noteText = command.stringValueOfParameterNamed("note");
-        final LocalDate actualDisbursementDate = disburseLoan.getDisbursedOnDate();
-        if (this.isBeforeToday(actualDisbursementDate) && currentUser.canNotDisburseLoanInPast()) { throw new NoAuthorizationException(
-                "User has no authority to disburse loan with a date in the past."); }
-
-        final ApplicationCurrency currency = this.applicationCurrencyRepository.findOneByCode(loan.getPrincpal().getCurrencyCode());
+        final ApplicationCurrency currency = this.applicationCurrencyRepository.findOneByCode(loan.getCurrencyCode());
 
         final List<Long> existingTransactionIds = new ArrayList<Long>();
         final List<Long> existingReversedTransactionIds = new ArrayList<Long>();
@@ -137,6 +129,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         if (!changes.isEmpty()) {
             this.loanRepository.save(loan);
 
+            final String noteText = command.stringValueOfParameterNamed("note");
             if (StringUtils.isNotBlank(noteText)) {
                 Note note = Note.loanNote(loan, noteText);
                 this.noteRepository.save(note);
@@ -171,7 +164,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final Map<String, Object> changes = loan.undoDisbursal(defaultLoanLifecycleStateMachine(), existingTransactionIds,
                 existingReversedTransactionIds);
         if (!changes.isEmpty()) {
-            this.loanRepository.saveAndFlush(loan);
+            this.loanRepository.save(loan);
 
             final String noteText = command.stringValueOfParameterNamed("note");
             if (StringUtils.isNotBlank(noteText)) {
@@ -218,7 +211,11 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         if (this.isBeforeToday(transactionDate) && currentUser.canNotMakeRepaymentOnLoanInPast()) { throw new NoAuthorizationException(
                 "error.msg.no.permission.to.make.repayment.on.loan.in.past"); }
 
-        final LoanTransaction loanRepayment = loan.makeRepayment(transactionDate, transactionAmount, defaultLoanLifecycleStateMachine());
+        final List<Long> existingTransactionIds = new ArrayList<Long>();
+        final List<Long> existingReversedTransactionIds = new ArrayList<Long>();
+
+        final LoanTransaction loanRepayment = loan.makeRepayment(transactionDate, transactionAmount, defaultLoanLifecycleStateMachine(),
+                existingTransactionIds, existingReversedTransactionIds);
         this.loanTransactionRepository.save(loanRepayment);
         this.loanRepository.save(loan);
 
@@ -232,11 +229,10 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         changes.put("locale", command.locale());
         changes.put("dateFormat", command.dateFormat());
 
-        // make a call to accounting
-        if (loan.isAccountingEnabledOnLoanProduct()) {
-            LoanDTO loanDTO = populateLoanData(loan, loanRepayment);
-            journalEntryWritePlatformService.createJournalEntriesForLoan(loanDTO);
-        }
+        final ApplicationCurrency currency = this.applicationCurrencyRepository.findOneByCode(loan.getCurrencyCode());
+        final Map<String, Object> accountingBridgeData = loan.deriveAccountingBridgeData(currency.toData(), existingTransactionIds,
+                existingReversedTransactionIds);
+        journalEntryWritePlatformService.createJournalEntriesForLoan(accountingBridgeData);
 
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
@@ -271,15 +267,17 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         changes.put("transactionDate", command.stringValueOfParameterNamed("transactionDate"));
         changes.put("transactionAmount", command.stringValueOfParameterNamed("transactionAmount"));
 
-        boolean transactionIsRepayment = transactionToAdjust.isRepayment();
+        final List<Long> existingTransactionIds = new ArrayList<Long>();
+        final List<Long> existingReversedTransactionIds = new ArrayList<Long>();
 
         final LoanTransaction newTransactionDetail = loan.adjustExistingTransaction(transactionDate, transactionAmount,
-                defaultLoanLifecycleStateMachine(), transactionToAdjust);
+                defaultLoanLifecycleStateMachine(), transactionToAdjust, existingTransactionIds, existingReversedTransactionIds);
+
         if (newTransactionDetail.isGreaterThanZero(loan.getPrincpal().getCurrency())) {
-            this.loanTransactionRepository.saveAndFlush(newTransactionDetail);
+            this.loanTransactionRepository.save(newTransactionDetail);
         }
 
-        this.loanRepository.saveAndFlush(loan);
+        this.loanRepository.save(loan);
 
         final String noteText = command.stringValueOfParameterNamed("note");
         if (StringUtils.isNotBlank(noteText)) {
@@ -291,17 +289,10 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         changes.put("locale", command.locale());
         changes.put("dateFormat", command.dateFormat());
 
-        // make a call to accounting only if transaction being adjusted is a
-        // repayment (not waiver)
-        if (loan.isAccountingEnabledOnLoanProduct() && transactionIsRepayment) {
-            List<LoanTransaction> newLoanTransactions = new ArrayList<LoanTransaction>();
-            if (newTransactionDetail.getId() != null) {
-                newLoanTransactions.add(newTransactionDetail);
-            }
-            newLoanTransactions.add(transactionToAdjust);
-            LoanDTO loanDTO = populateLoanDTO(loan, newLoanTransactions);
-            journalEntryWritePlatformService.createJournalEntriesForLoan(loanDTO);
-        }
+        final ApplicationCurrency currency = this.applicationCurrencyRepository.findOneByCode(loan.getCurrencyCode());
+        final Map<String, Object> accountingBridgeData = loan.deriveAccountingBridgeData(currency.toData(), existingTransactionIds,
+                existingReversedTransactionIds);
+        journalEntryWritePlatformService.createJournalEntriesForLoan(accountingBridgeData);
 
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
@@ -655,7 +646,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         loan.reassignLoanOfficer(toLoanOfficer, dateOfLoanOfficerAssignment);
 
-        this.loanRepository.saveAndFlush(loan);
+        this.loanRepository.save(loan);
 
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
@@ -717,7 +708,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         loan.removeLoanOfficer(dateOfLoanOfficerunAssigned);
 
-        this.loanRepository.saveAndFlush(loan);
+        this.loanRepository.save(loan);
 
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //

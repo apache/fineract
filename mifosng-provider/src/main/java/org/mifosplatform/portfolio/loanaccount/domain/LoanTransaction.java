@@ -19,14 +19,13 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
 import org.joda.time.LocalDate;
-import org.mifosplatform.infrastructure.core.domain.AbstractAuditableCustom;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.organisation.monetary.domain.Money;
 import org.mifosplatform.portfolio.loanaccount.data.LoanTransactionData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanTransactionEnumData;
 import org.mifosplatform.portfolio.loanproduct.service.LoanEnumerations;
-import org.mifosplatform.useradministration.domain.AppUser;
+import org.springframework.data.jpa.domain.AbstractPersistable;
 
 /**
  * All monetary transactions against a loan are modelled through this entity.
@@ -34,11 +33,18 @@ import org.mifosplatform.useradministration.domain.AppUser;
  */
 @Entity
 @Table(name = "m_loan_transaction")
-public final class LoanTransaction extends AbstractAuditableCustom<AppUser, Long> {
+public final class LoanTransaction extends AbstractPersistable<Long> {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "loan_id", nullable = false)
     private Loan loan;
+
+    @Column(name = "transaction_type_enum", nullable = false)
+    private final Integer typeOf;
+
+    @Temporal(TemporalType.DATE)
+    @Column(name = "transaction_date", nullable = false)
+    private final Date dateOf;
 
     @Column(name = "amount", scale = 6, precision = 19, nullable = false)
     private BigDecimal amount;
@@ -54,13 +60,6 @@ public final class LoanTransaction extends AbstractAuditableCustom<AppUser, Long
 
     @Column(name = "penalty_charges_portion_derived", scale = 6, precision = 19, nullable = true)
     private BigDecimal penaltyChargesPortion = BigDecimal.ZERO;
-
-    @Temporal(TemporalType.DATE)
-    @Column(name = "transaction_date", nullable = false)
-    private final Date dateOf;
-
-    @Column(name = "transaction_type_enum", nullable = false)
-    private final Integer typeOf;
 
     @Column(name = "is_reversed", nullable = false)
     private boolean reversed;
@@ -152,7 +151,7 @@ public final class LoanTransaction extends AbstractAuditableCustom<AppUser, Long
     public Money getPrincipalPortion(final MonetaryCurrency currency) {
         return Money.of(currency, this.principalPortion);
     }
-    
+
     public BigDecimal getPrincipalPortion() {
         return this.principalPortion;
     }
@@ -160,7 +159,7 @@ public final class LoanTransaction extends AbstractAuditableCustom<AppUser, Long
     public Money getInterestPortion(final MonetaryCurrency currency) {
         return Money.of(currency, this.interestPortion);
     }
-    
+
     public BigDecimal getInterestPortion() {
         return this.interestPortion;
     }
@@ -168,11 +167,11 @@ public final class LoanTransaction extends AbstractAuditableCustom<AppUser, Long
     public Money getFeeChargesPortion(final MonetaryCurrency currency) {
         return Money.of(currency, this.feeChargesPortion);
     }
-    
+
     public BigDecimal getFeePortion() {
         return this.feeChargesPortion;
     }
-    
+
     public Money getPenaltyChargesPortion(final MonetaryCurrency currency) {
         return Money.of(currency, this.penaltyChargesPortion);
     }
