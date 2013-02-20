@@ -732,7 +732,10 @@ DROP TABLE IF EXISTS `m_group`;
 CREATE TABLE `m_group` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `office_id` bigint(20) NOT NULL,
-  `loan_officer_id` bigint(20) DEFAULT NULL,
+  `level_Id` int(11) NOT NULL,
+  `parent_id` bigint(20) DEFAULT NULL,
+  `hierarchy` varchar(100) DEFAULT NULL,
+  `staff_id` bigint(20) DEFAULT NULL,
   `name` varchar(100) DEFAULT NULL,
   `external_id` varchar(100) DEFAULT NULL,
   `is_deleted` tinyint(1) NOT NULL DEFAULT '0',
@@ -740,9 +743,13 @@ CREATE TABLE `m_group` (
   UNIQUE KEY `name` (`name`),
   UNIQUE KEY `external_id` (`external_id`),
   KEY `office_id` (`office_id`),
-  KEY `loan_officer_id` (`loan_officer_id`),
+  KEY `loan_officer_id` (`staff_id`),
+  KEY `Parent_Id_reference` (`parent_id`),
+  KEY `FK_m_group_level` (`level_Id`),
+  CONSTRAINT `FK_m_group_level` FOREIGN KEY (`level_Id`) REFERENCES `m_group_level` (`id`),
+  CONSTRAINT `FK_m_group_m_staff` FOREIGN KEY (`staff_id`) REFERENCES `m_staff` (`id`),
   CONSTRAINT `m_group_ibfk_1` FOREIGN KEY (`office_id`) REFERENCES `m_office` (`id`),
-  CONSTRAINT `FK_m_group_m_staff` FOREIGN KEY (`loan_officer_id`) REFERENCES `m_staff` (`id`)
+  CONSTRAINT `Parent_Id_reference` FOREIGN KEY (`parent_id`) REFERENCES `m_group` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -779,6 +786,35 @@ CREATE TABLE `m_group_client` (
 LOCK TABLES `m_group_client` WRITE;
 /*!40000 ALTER TABLE `m_group_client` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_group_client` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `m_group_level`
+--
+
+DROP TABLE IF EXISTS `m_group_level`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `m_group_level` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `parent_id` int(11) DEFAULT NULL,
+  `level_name` varchar(100) NOT NULL,
+  `recursable` tinyint(1) NOT NULL,
+  `can_have_clients` tinyint(1) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `Parent_levelId_reference` (`parent_id`),
+  CONSTRAINT `Parent_levelId_reference` FOREIGN KEY (`parent_id`) REFERENCES `m_group_level` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `m_group_level`
+--
+
+LOCK TABLES `m_group_level` WRITE;
+/*!40000 ALTER TABLE `m_group_level` DISABLE KEYS */;
+INSERT INTO `m_group_level` VALUES (1,NULL,'Center',1,0),(2,NULL,'Group',0,1);
+/*!40000 ALTER TABLE `m_group_level` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -1933,4 +1969,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2013-02-19  0:44:13
+-- Dump completed on 2013-02-20  9:57:08

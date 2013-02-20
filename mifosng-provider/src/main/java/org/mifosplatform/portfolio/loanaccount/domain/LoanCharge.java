@@ -50,7 +50,7 @@ public class LoanCharge extends AbstractPersistable<Long> {
 
     @Temporal(TemporalType.DATE)
     @Column(name = "due_for_collection_as_of_date")
-    private Date dueForCollectionAsOfDate;
+    private Date dueDate;
 
     @Column(name = "charge_calculation_enum")
     private Integer chargeCalculation;
@@ -85,29 +85,32 @@ public class LoanCharge extends AbstractPersistable<Long> {
     public static LoanCharge createNewFromJson(final Loan loan, final Charge chargeDefinition, final JsonCommand command) {
 
         final BigDecimal amount = command.bigDecimalValueOfParameterNamed("amount");
-        final Integer chargeTimeType = command.integerValueOfParameterNamed("chargeTimeType");
-        final Integer chargeCalculationType = command.integerValueOfParameterNamed("chargeCalculationType");
-        final LocalDate specifiedDueDate = command.localDateValueOfParameterNamed("specifiedDueDate");
+        // final Integer chargeTimeType =
+        // command.integerValueOfParameterNamed("chargeTimeType");
+        // final Integer chargeCalculationType =
+        // command.integerValueOfParameterNamed("chargeCalculationType");
+        final LocalDate dueDate = command.localDateValueOfParameterNamed("dueDate");
 
         ChargeTimeType chargeTime = null;
-        if (chargeTimeType != null) {
-            chargeTime = ChargeTimeType.fromInt(chargeTimeType);
-        }
+        // if (chargeTimeType != null) {
+        // chargeTime = ChargeTimeType.fromInt(chargeTimeType);
+        // }
         ChargeCalculationType chargeCalculation = null;
-        if (chargeCalculationType != null) {
-            chargeCalculation = ChargeCalculationType.fromInt(chargeCalculationType);
-        }
+        // if (chargeCalculationType != null) {
+        // chargeCalculation =
+        // ChargeCalculationType.fromInt(chargeCalculationType);
+        // }
 
         return new LoanCharge(loan, chargeDefinition, loan.getPrincpal().getAmount(), amount, chargeTime, chargeCalculation,
-                specifiedDueDate);
+                dueDate);
     }
 
     /*
      * loanPrincipal is required for charges that are percentage based
      */
     public static LoanCharge createNewWithoutLoan(final Charge chargeDefinition, final BigDecimal loanPrincipal, final BigDecimal amount,
-            final ChargeTimeType chargeTime, final ChargeCalculationType chargeCalculation, final LocalDate specifiedDueDate) {
-        return new LoanCharge(null, chargeDefinition, loanPrincipal, amount, chargeTime, chargeCalculation, specifiedDueDate);
+            final ChargeTimeType chargeTime, final ChargeCalculationType chargeCalculation, final LocalDate dueDate) {
+        return new LoanCharge(null, chargeDefinition, loanPrincipal, amount, chargeTime, chargeCalculation, dueDate);
     }
 
     protected LoanCharge() {
@@ -115,7 +118,7 @@ public class LoanCharge extends AbstractPersistable<Long> {
     }
 
     public LoanCharge(final Loan loan, final Charge chargeDefinition, final BigDecimal loanPrincipal, final BigDecimal amount,
-            final ChargeTimeType chargeTime, final ChargeCalculationType chargeCalculation, final LocalDate specifiedDueDate) {
+            final ChargeTimeType chargeTime, final ChargeCalculationType chargeCalculation, final LocalDate dueDate) {
         this.loan = loan;
         this.charge = chargeDefinition;
         this.penaltyCharge = chargeDefinition.isPenalty();
@@ -127,15 +130,15 @@ public class LoanCharge extends AbstractPersistable<Long> {
 
         if (ChargeTimeType.fromInt(this.chargeTime).equals(ChargeTimeType.SPECIFIED_DUE_DATE)) {
 
-            if (specifiedDueDate == null) {
-                final String defaultUserMessage = "Loan charge is missing specified due date";
-                throw new LoanChargeWithoutMandatoryFieldException("loancharge", "specifiedDueDate", defaultUserMessage,
+            if (dueDate == null) {
+                final String defaultUserMessage = "Loan charge is missing due date.";
+                throw new LoanChargeWithoutMandatoryFieldException("loanCharge", "dueDate", defaultUserMessage,
                         chargeDefinition.getId(), chargeDefinition.getName());
             }
 
-            this.dueForCollectionAsOfDate = specifiedDueDate.toDate();
+            this.dueDate = dueDate.toDate();
         } else {
-            this.dueForCollectionAsOfDate = null;
+            this.dueDate = null;
         }
 
         this.chargeCalculation = chargeDefinition.getChargeCalculation();
@@ -240,7 +243,7 @@ public class LoanCharge extends AbstractPersistable<Long> {
 
     public void update(final BigDecimal amount, final LocalDate specifiedDueDate, final BigDecimal loanPrincipal) {
         if (specifiedDueDate != null) {
-            this.dueForCollectionAsOfDate = specifiedDueDate.toDate();
+            this.dueDate = specifiedDueDate.toDate();
         }
 
         if (amount != null) {
@@ -279,31 +282,37 @@ public class LoanCharge extends AbstractPersistable<Long> {
         final String dateFormatAsInput = command.dateFormat();
         final String localeAsInput = command.locale();
 
-        final String chargeTimeParamName = "chargeTime";
-        if (command.isChangeInIntegerParameterNamed(chargeTimeParamName, this.chargeTime)) {
-            final Integer newValue = command.integerValueOfParameterNamed(chargeTimeParamName);
-            actualChanges.put(chargeTimeParamName, newValue);
-            actualChanges.put("locale", localeAsInput);
-            this.chargeTime = ChargeTimeType.fromInt(newValue).getValue();
-        }
+        // final String chargeTimeParamName = "chargeTime";
+        // if (command.isChangeInIntegerParameterNamed(chargeTimeParamName,
+        // this.chargeTime)) {
+        // final Integer newValue =
+        // command.integerValueOfParameterNamed(chargeTimeParamName);
+        // actualChanges.put(chargeTimeParamName, newValue);
+        // actualChanges.put("locale", localeAsInput);
+        // this.chargeTime = ChargeTimeType.fromInt(newValue).getValue();
+        // }
+        //
+        // final String chargeCalculationParamName = "chargeCalculation";
+        // if
+        // (command.isChangeInIntegerParameterNamed(chargeCalculationParamName,
+        // this.chargeCalculation)) {
+        // final Integer newValue =
+        // command.integerValueOfParameterNamed(chargeCalculationParamName);
+        // actualChanges.put(chargeCalculationParamName, newValue);
+        // actualChanges.put("locale", localeAsInput);
+        // this.chargeCalculation =
+        // ChargeCalculationType.fromInt(newValue).getValue();
+        // }
 
-        final String chargeCalculationParamName = "chargeCalculation";
-        if (command.isChangeInIntegerParameterNamed(chargeCalculationParamName, this.chargeCalculation)) {
-            final Integer newValue = command.integerValueOfParameterNamed(chargeCalculationParamName);
-            actualChanges.put(chargeCalculationParamName, newValue);
-            actualChanges.put("locale", localeAsInput);
-            this.chargeCalculation = ChargeCalculationType.fromInt(newValue).getValue();
-        }
-
-        final String specifiedDueDateParamName = "specifiedDueDate";
-        if (command.isChangeInLocalDateParameterNamed(specifiedDueDateParamName, getDueForCollectionAsOfLocalDate())) {
+        final String specifiedDueDateParamName = "dueDate";
+        if (command.isChangeInLocalDateParameterNamed(specifiedDueDateParamName, getDueLocalDate())) {
             final String valueAsInput = command.stringValueOfParameterNamed(specifiedDueDateParamName);
             actualChanges.put(specifiedDueDateParamName, valueAsInput);
             actualChanges.put("dateFormat", dateFormatAsInput);
             actualChanges.put("locale", localeAsInput);
 
             final LocalDate newValue = command.localDateValueOfParameterNamed(specifiedDueDateParamName);
-            this.dueForCollectionAsOfDate = newValue.toDate();
+            this.dueDate = newValue.toDate();
         }
 
         final String amountParamName = "amount";
@@ -355,13 +364,13 @@ public class LoanCharge extends AbstractPersistable<Long> {
 
     public LoanChargeCommand toCommand() {
         return new LoanChargeCommand(this.getId(), this.charge.getId(), this.amount, this.chargeTime, this.chargeCalculation,
-                getDueForCollectionAsOfLocalDate());
+                getDueLocalDate());
     }
 
-    public LocalDate getDueForCollectionAsOfLocalDate() {
+    public LocalDate getDueLocalDate() {
         LocalDate specifiedDueDate = null;
-        if (this.dueForCollectionAsOfDate != null) {
-            specifiedDueDate = new LocalDate(this.dueForCollectionAsOfDate);
+        if (this.dueDate != null) {
+            specifiedDueDate = new LocalDate(this.dueDate);
         }
         return specifiedDueDate;
     }
@@ -418,7 +427,7 @@ public class LoanCharge extends AbstractPersistable<Long> {
     }
 
     public boolean isDueForCollectionFromAndUpToAndIncluding(final LocalDate fromNotInclusive, final LocalDate upToAndInclusive) {
-        final LocalDate specifiedDueDate = getDueForCollectionAsOfLocalDate();
+        final LocalDate specifiedDueDate = getDueLocalDate();
         return occursOnDayFromAndUpToAndIncluding(fromNotInclusive, upToAndInclusive, specifiedDueDate);
     }
 
@@ -508,7 +517,7 @@ public class LoanCharge extends AbstractPersistable<Long> {
                 .append(this.getId(), rhs.getId()) //
                 .append(this.charge.getId(), rhs.charge.getId()) //
                 .append(this.amount, rhs.amount) //
-                .append(this.getDueForCollectionAsOfLocalDate(), rhs.getDueForCollectionAsOfLocalDate()) //
+                .append(this.getDueLocalDate(), rhs.getDueLocalDate()) //
                 .isEquals();
     }
 
@@ -517,7 +526,7 @@ public class LoanCharge extends AbstractPersistable<Long> {
         return new HashCodeBuilder(3, 5) //
                 .append(this.getId()) //
                 .append(this.charge.getId()) //
-                .append(this.amount).append(this.getDueForCollectionAsOfLocalDate()) //
+                .append(this.amount).append(this.getDueLocalDate()) //
                 .toHashCode();
     }
 }

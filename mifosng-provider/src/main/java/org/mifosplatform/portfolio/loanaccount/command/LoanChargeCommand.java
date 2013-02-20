@@ -6,16 +6,12 @@
 package org.mifosplatform.portfolio.loanaccount.command;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.joda.time.LocalDate;
-import org.mifosplatform.infrastructure.core.data.ApiParameterError;
-import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
-import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
+import org.mifosplatform.portfolio.loanaccount.domain.LoanCharge;
 
 /**
- * Immutable command for creating and updating loan charges.
+ * Java object representation of {@link LoanCharge} API JSON.
  */
 public class LoanChargeCommand implements Comparable<LoanChargeCommand> {
 
@@ -23,10 +19,12 @@ public class LoanChargeCommand implements Comparable<LoanChargeCommand> {
     private final Long id;
     private final Long chargeId;
     private final BigDecimal amount;
+    @SuppressWarnings("unused")
     private final Integer chargeTimeType;
+    @SuppressWarnings("unused")
     private final Integer chargeCalculationType;
     @SuppressWarnings("unused")
-    private final LocalDate specifiedDueDate;
+    private final LocalDate dueDate;
 
     public LoanChargeCommand(final Long id, final Long chargeId, final BigDecimal amount, final Integer chargeTimeType,
             final Integer chargeCalculationType, final LocalDate specifiedDueDate) {
@@ -35,7 +33,7 @@ public class LoanChargeCommand implements Comparable<LoanChargeCommand> {
         this.amount = amount;
         this.chargeTimeType = chargeTimeType;
         this.chargeCalculationType = chargeCalculationType;
-        this.specifiedDueDate = specifiedDueDate;
+        this.dueDate = specifiedDueDate;
     }
 
     @Override
@@ -45,19 +43,5 @@ public class LoanChargeCommand implements Comparable<LoanChargeCommand> {
             comparison = this.amount.compareTo(o.amount);
         }
         return comparison;
-    }
-
-    @Deprecated
-    public void validateForUpdate() {
-        List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
-
-        DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("charge");
-
-        baseDataValidator.reset().parameter("amount").value(this.amount).ignoreIfNull().positiveAmount();
-        baseDataValidator.reset().parameter("chargeTimeType").value(this.chargeTimeType).ignoreIfNull().inMinMaxRange(1, 2);
-        baseDataValidator.reset().parameter("chargeCalculationType").value(this.chargeCalculationType).ignoreIfNull().inMinMaxRange(1, 4);
-
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
-                "Validation errors exist.", dataValidationErrors); }
     }
 }

@@ -14,10 +14,8 @@ import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.portfolio.charge.domain.Charge;
 import org.mifosplatform.portfolio.charge.domain.ChargeCalculationType;
-import org.mifosplatform.portfolio.charge.domain.ChargeRepository;
+import org.mifosplatform.portfolio.charge.domain.ChargeRepositoryWrapper;
 import org.mifosplatform.portfolio.charge.domain.ChargeTimeType;
-import org.mifosplatform.portfolio.charge.exception.ChargeIsNotActiveException;
-import org.mifosplatform.portfolio.charge.exception.ChargeNotFoundException;
 import org.mifosplatform.portfolio.charge.exception.LoanChargeNotFoundException;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanCharge;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanChargeRepository;
@@ -32,11 +30,11 @@ import com.google.gson.JsonObject;
 public class LoanChargeAssembler {
 
     private final FromJsonHelper fromApiJsonHelper;
-    private final ChargeRepository chargeRepository;
+    private final ChargeRepositoryWrapper chargeRepository;
     private final LoanChargeRepository loanChargeRepository;
 
     @Autowired
-    public LoanChargeAssembler(final FromJsonHelper fromApiJsonHelper, final ChargeRepository chargeRepository,
+    public LoanChargeAssembler(final FromJsonHelper fromApiJsonHelper, final ChargeRepositoryWrapper chargeRepository,
             final LoanChargeRepository loanChargeRepository) {
         this.fromApiJsonHelper = fromApiJsonHelper;
         this.chargeRepository = chargeRepository;
@@ -69,10 +67,7 @@ public class LoanChargeAssembler {
                             dateFormat, locale);
 
                     if (id == null) {
-                        final Charge chargeDefinition = this.chargeRepository.findOne(chargeId);
-                        if (chargeDefinition == null || chargeDefinition.isDeleted()) { throw new ChargeNotFoundException(chargeId); }
-
-                        if (!chargeDefinition.isActive()) { throw new ChargeIsNotActiveException(chargeId, chargeDefinition.getName()); }
+                        final Charge chargeDefinition = this.chargeRepository.findOneWithNotFoundDetection(chargeId);
                         ChargeTimeType chargeTime = null;
                         if (chargeTimeType != null) {
                             ChargeTimeType.fromInt(chargeTimeType);

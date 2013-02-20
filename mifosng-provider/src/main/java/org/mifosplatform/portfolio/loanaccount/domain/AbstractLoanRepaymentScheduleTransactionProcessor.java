@@ -150,7 +150,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
         for (LoanCharge loanCharge : charges) {
             if (loanCharge.isNotFullyPaid() && !loanCharge.isDueAtDisbursement()) {
                 if (earliestUnpaidCharge == null
-                        || loanCharge.getDueForCollectionAsOfLocalDate().isBefore(earliestUnpaidCharge.getDueForCollectionAsOfLocalDate())) {
+                        || loanCharge.getDueLocalDate().isBefore(earliestUnpaidCharge.getDueLocalDate())) {
                     earliestUnpaidCharge = loanCharge;
                 }
             }

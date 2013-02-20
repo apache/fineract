@@ -31,7 +31,7 @@ public class LoanChargeData {
     private final EnumOptionData chargeTimeType;
 
     @SuppressWarnings("unused")
-    private final LocalDate dueAsOfDate;
+    private final LocalDate dueDate;
 
     @SuppressWarnings("unused")
     private final EnumOptionData chargeCalculationType;
@@ -81,7 +81,7 @@ public class LoanChargeData {
 
     public LoanChargeData(final Long id, final Long chargeId, final String name, final CurrencyData currency, final BigDecimal amount,
             final BigDecimal amountPaid, final BigDecimal amountWaived, final BigDecimal amountWrittenOff,
-            final BigDecimal amountOutstanding, final EnumOptionData chargeTimeType, final LocalDate dueAsOfDate,
+            final BigDecimal amountOutstanding, final EnumOptionData chargeTimeType, final LocalDate dueDate,
             final EnumOptionData chargeCalculationType, final BigDecimal percentage, final BigDecimal amountPercentageAppliedTo,
             final boolean penalty) {
         this.id = id;
@@ -94,7 +94,7 @@ public class LoanChargeData {
         this.amountWrittenOff = amountWrittenOff;
         this.amountOutstanding = amountOutstanding;
         this.chargeTimeType = chargeTimeType;
-        this.dueAsOfDate = dueAsOfDate;
+        this.dueDate = dueDate;
         this.chargeCalculationType = chargeCalculationType;
         this.percentage = percentage;
         this.amountPercentageAppliedTo = amountPercentageAppliedTo;
@@ -122,7 +122,7 @@ public class LoanChargeData {
         this.amountWrittenOff = BigDecimal.ZERO;
         this.amountOutstanding = amount;
         this.chargeTimeType = chargeTimeType;
-        this.dueAsOfDate = null;
+        this.dueDate = null;
         this.chargeCalculationType = chargeCalculationType;
         this.percentage = null;
         this.amountPercentageAppliedTo = null;

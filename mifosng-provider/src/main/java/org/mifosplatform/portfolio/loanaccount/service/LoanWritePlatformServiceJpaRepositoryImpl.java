@@ -23,13 +23,10 @@ import org.mifosplatform.organisation.monetary.domain.ApplicationCurrency;
 import org.mifosplatform.organisation.monetary.domain.ApplicationCurrencyRepository;
 import org.mifosplatform.organisation.staff.domain.Staff;
 import org.mifosplatform.portfolio.charge.domain.Charge;
-import org.mifosplatform.portfolio.charge.domain.ChargeRepository;
-import org.mifosplatform.portfolio.charge.exception.ChargeIsNotActiveException;
-import org.mifosplatform.portfolio.charge.exception.ChargeNotFoundException;
+import org.mifosplatform.portfolio.charge.domain.ChargeRepositoryWrapper;
 import org.mifosplatform.portfolio.charge.exception.LoanChargeNotFoundException;
 import org.mifosplatform.portfolio.client.domain.Note;
 import org.mifosplatform.portfolio.client.domain.NoteRepository;
-import org.mifosplatform.portfolio.loanaccount.command.LoanChargeCommand;
 import org.mifosplatform.portfolio.loanaccount.command.LoanUpdateCommand;
 import org.mifosplatform.portfolio.loanaccount.domain.DefaultLoanLifecycleStateMachine;
 import org.mifosplatform.portfolio.loanaccount.domain.Loan;
@@ -44,7 +41,6 @@ import org.mifosplatform.portfolio.loanaccount.exception.LoanNotFoundException;
 import org.mifosplatform.portfolio.loanaccount.exception.LoanOfficerAssignmentException;
 import org.mifosplatform.portfolio.loanaccount.exception.LoanOfficerUnassignmentException;
 import org.mifosplatform.portfolio.loanaccount.exception.LoanTransactionNotFoundException;
-import org.mifosplatform.portfolio.loanaccount.serialization.LoanChargeCommandFromApiJsonDeserializer;
 import org.mifosplatform.portfolio.loanaccount.serialization.LoanEventApiJsonValidator;
 import org.mifosplatform.portfolio.loanaccount.serialization.LoanUpdateCommandFromApiJsonDeserializer;
 import org.mifosplatform.portfolio.loanproduct.exception.InvalidCurrencyException;
@@ -58,13 +54,12 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
     private final PlatformSecurityContext context;
     private final LoanEventApiJsonValidator loanEventApiJsonValidator;
-    private final LoanChargeCommandFromApiJsonDeserializer loanChargeCommandFromApiJsonDeserializer;
     private final LoanUpdateCommandFromApiJsonDeserializer loanUpdateCommandFromApiJsonDeserializer;
     private final LoanRepository loanRepository;
     private final NoteRepository noteRepository;
     private final LoanTransactionRepository loanTransactionRepository;
     private final LoanAssembler loanAssembler;
-    private final ChargeRepository chargeRepository;
+    private final ChargeRepositoryWrapper chargeRepository;
     private final LoanChargeRepository loanChargeRepository;
     private final ApplicationCurrencyRepository applicationCurrencyRepository;
     private final JournalEntryWritePlatformService journalEntryWritePlatformService;
@@ -72,15 +67,14 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     @Autowired
     public LoanWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
             final LoanEventApiJsonValidator loanEventApiJsonValidator,
-            final LoanChargeCommandFromApiJsonDeserializer loanChargeCommandFromApiJsonDeserializer,
             final LoanUpdateCommandFromApiJsonDeserializer loanUpdateCommandFromApiJsonDeserializer, final LoanAssembler loanAssembler,
             final LoanRepository loanRepository, final LoanTransactionRepository loanTransactionRepository,
-            final NoteRepository noteRepository, final ChargeRepository chargeRepository, final LoanChargeRepository loanChargeRepository,
+            final NoteRepository noteRepository, final ChargeRepositoryWrapper chargeRepository,
+            final LoanChargeRepository loanChargeRepository,
             final ApplicationCurrencyRepository applicationCurrencyRepository,
             final JournalEntryWritePlatformService journalEntryWritePlatformService) {
         this.context = context;
         this.loanEventApiJsonValidator = loanEventApiJsonValidator;
-        this.loanChargeCommandFromApiJsonDeserializer = loanChargeCommandFromApiJsonDeserializer;
         this.loanAssembler = loanAssembler;
         this.loanRepository = loanRepository;
         this.loanTransactionRepository = loanTransactionRepository;
@@ -472,24 +466,21 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     @Transactional
     @Override
     public CommandProcessingResult addLoanCharge(final Long loanId, final JsonCommand command) {
+
         this.context.authenticatedUser();
 
-        // FIXME - KW - update loan charge api validation
-        final LoanChargeCommand loanChargeCommand = this.loanChargeCommandFromApiJsonDeserializer.commandFromApiJson(command.json());
-        // loanChargeCommand.validateForCreate();
+        this.loanEventApiJsonValidator.validateAddLoanCharge(command.json());
 
         final Loan loan = retrieveLoanBy(loanId);
 
         final Long chargeDefinitionId = command.longValueOfParameterNamed("chargeId");
-        final Charge chargeDefinition = this.chargeRepository.findOne(chargeDefinitionId);
-        if (chargeDefinition == null || chargeDefinition.isDeleted()) { throw new ChargeNotFoundException(chargeDefinitionId); }
-        if (!chargeDefinition.isActive()) { throw new ChargeIsNotActiveException(chargeDefinition.getId(), chargeDefinition.getName()); }
+        final Charge chargeDefinition = this.chargeRepository.findOneWithNotFoundDetection(chargeDefinitionId);
 
         final LoanCharge loanCharge = LoanCharge.createNewFromJson(loan, chargeDefinition, command);
 
         if (!loan.hasCurrencyCodeOf(chargeDefinition.getCurrencyCode())) {
-            String errorMessage = "Charge and Loan must have the same currency.";
-            throw new InvalidCurrencyException("charge", "attach.to.loan", errorMessage);
+            final String errorMessage = "Charge and Loan must have the same currency.";
+            throw new InvalidCurrencyException("loanCharge", "attach.to.loan", errorMessage);
         }
 
         this.loanChargeRepository.save(loanCharge);
@@ -513,8 +504,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         this.context.authenticatedUser();
 
-        final LoanChargeCommand loanChargeCommand = this.loanChargeCommandFromApiJsonDeserializer.commandFromApiJson(command.json());
-        loanChargeCommand.validateForUpdate();
+        this.loanEventApiJsonValidator.validateUpdateOfLoanCharge(command.json());
 
         final Loan loan = retrieveLoanBy(loanId);
         final LoanCharge loanCharge = retrieveLoanChargeBy(loanId, loanChargeId);
@@ -540,9 +530,6 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         this.context.authenticatedUser();
 
-        final LoanChargeCommand loanChargeCommand = this.loanChargeCommandFromApiJsonDeserializer.commandFromApiJson(command.json());
-        loanChargeCommand.validateForUpdate();
-
         final Loan loan = retrieveLoanBy(loanId);
         final LoanCharge loanCharge = retrieveLoanChargeBy(loanId, loanChargeId);
 
@@ -552,12 +539,6 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         this.loanTransactionRepository.save(waiveTransaction);
         this.loanRepository.save(loan);
-
-        final String noteText = ""; // command.getNote();
-        if (StringUtils.isNotBlank(noteText)) {
-            final Note note = Note.loanTransactionNote(loan, waiveTransaction, noteText);
-            this.noteRepository.save(note);
-        }
 
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //

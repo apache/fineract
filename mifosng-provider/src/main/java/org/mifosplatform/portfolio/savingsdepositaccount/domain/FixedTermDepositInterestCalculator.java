@@ -10,25 +10,14 @@ import java.math.MathContext;
 import java.math.RoundingMode;
 
 import org.mifosplatform.organisation.monetary.domain.Money;
-import org.mifosplatform.portfolio.loanproduct.domain.PeriodFrequencyType;
 import org.springframework.stereotype.Service;
 
 @Service
 public class FixedTermDepositInterestCalculator {
 
-    // FIXME - HUGO - Are the unused field here needed?
     public Money calculateInterestOnMaturityFor(final Money deposit, final Integer tenureInMonths, final BigDecimal maturityInterestRate,
-            final Integer interestCompoundedEvery, final PeriodFrequencyType interestCompoundedFrequencyPeriodType) {
+            final Integer interestCompoundedEvery) {
 
-        // TODO - HUGO - Can change 'interest compounding' fields into something
-        // simpler like interestCompoundedFrequency {None (Simple Interest),
-        // Monthly, Quarterly, Half-Yearly, Annually}
-        // - the 'interestCompoundedEvery' would then be inferred form the
-        // selected type.
-        // - the special case of 'simple interest' or 'no compounding' would use
-        // simple formula rather than 'future value' function.
-
-        // FIXME - HUGO - assuming only monthly compounding period for now
         MathContext mc = new MathContext(8, RoundingMode.HALF_EVEN);
         Integer monthsInYear = 12;
 
@@ -72,8 +61,8 @@ public class FixedTermDepositInterestCalculator {
         return retval;
     }
 
-    public Money calculateInterestOnMaturityForSimpleInterest(final Money deposit, final Integer tenureInMonths, final BigDecimal maturityInterestRate,
-            final Integer interestCompoundedEvery, final PeriodFrequencyType interestCompoundedFrequencyPeriodType) {
+    public Money calculateInterestOnMaturityForSimpleInterest(final Money deposit, final Integer tenureInMonths,
+            final BigDecimal maturityInterestRate, final Integer interestCompoundedEvery) {
 
         MathContext mc = new MathContext(8, RoundingMode.HALF_EVEN);
         Integer monthsInYear = 12;
