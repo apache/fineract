@@ -8,9 +8,7 @@ CREATE TABLE `m_group_level` (
 PRIMARY KEY (`id`),
 INDEX `Parent_levelId_reference` (`parent_id`),
 CONSTRAINT `Parent_levelId_reference` FOREIGN KEY (`parent_id`) REFERENCES `m_group_level` (`id`)
-)
-COLLATE='utf8_general_ci'
-ENGINE=InnoDB;
+)ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 INSERT INTO `m_group_level` (`id`, `parent_id`, `is_super_parent`, `level_name`, `recursable`, `can_have_clients`) VALUES (1, NULL, 1, 'Center', 1, 0);
 INSERT INTO `m_group_level` (`id`, `parent_id`, `is_super_parent`, `level_name`, `recursable`, `can_have_clients`) VALUES (2, 1, 0, 'Group', 0, 1);

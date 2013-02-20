@@ -9,7 +9,6 @@ import java.util.Collection;
 
 import org.mifosplatform.organisation.office.data.OfficeLookup;
 import org.mifosplatform.portfolio.client.data.ClientLookup;
-import org.mifosplatform.portfolio.group.domain.GroupLevel;
 
 /**
  * Immutable data object representing groups.
@@ -21,7 +20,8 @@ public class GroupData {
     private final String externalId;
     private final Long officeId;
     private final String officeName;
-    private final GroupLevelData groupLevelData; 
+    @SuppressWarnings("unused")
+    private final GroupLevelData groupLevelData;
 
     private final Collection<ClientLookup> clientMembers;
     @SuppressWarnings("unused")
@@ -31,7 +31,7 @@ public class GroupData {
     @SuppressWarnings("unused")
     private final Collection<GroupLookupData> allowedParentGroups;
 
-    public GroupData(final Long id, final Long officeId, final String officeName, final String name, final String externalId ) {
+    public GroupData(final Long id, final Long officeId, final String officeName, final String name, final String externalId) {
         this.id = id;
         this.officeId = officeId;
         this.officeName = officeName;
@@ -46,7 +46,8 @@ public class GroupData {
     }
 
     public GroupData(final GroupData group, final Collection<ClientLookup> clientMembers, final Collection<ClientLookup> allowedClients,
-            final Collection<OfficeLookup> allowedOffices, final Collection<GroupLookupData> allowedParentGroups , final GroupLevelData groupLevelData) {
+            final Collection<OfficeLookup> allowedOffices, final Collection<GroupLookupData> allowedParentGroups,
+            final GroupLevelData groupLevelData) {
         this.id = group.getId();
         this.officeId = group.getOfficeId();
         this.officeName = group.getOfficeName();
@@ -61,7 +62,7 @@ public class GroupData {
     }
 
     public GroupData(final Long officeId, final Collection<ClientLookup> allowedClients, final Collection<OfficeLookup> allowedOffices,
-            final Collection<GroupLookupData> allowedParentGroups , final GroupLevelData groupLevelData ) {
+            final Collection<GroupLookupData> allowedParentGroups, final GroupLevelData groupLevelData) {
         this.id = null;
         this.officeId = officeId;
         this.officeName = null;

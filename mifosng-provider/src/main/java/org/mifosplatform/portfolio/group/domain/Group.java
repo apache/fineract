@@ -47,6 +47,7 @@ public class Group extends AbstractPersistable<Long> {
     @JoinColumn(name = "staff_id", nullable = true)
     private Staff loanOfficer;
     
+    @SuppressWarnings("unused")
     @Column(name = "level_id", nullable = false)
     private Long levelId;
 
@@ -180,7 +181,7 @@ public class Group extends AbstractPersistable<Long> {
         }
     }
 
-    private String hierarchyOf(Long id) {
+    private String hierarchyOf(final Long id) {
         return this.hierarchy + id.toString() + ".";
     }
 
