@@ -12,7 +12,7 @@ import org.mifosplatform.accounting.journalentry.data.JournalEntryData;
 
 public interface JournalEntryReadPlatformService {
 
-    List<JournalEntryData> retrieveAllGLJournalEntries(Long officeId, Long glAccountId, Boolean portfolioGenerated, Date fromDate,
+    List<JournalEntryData> retrieveAllGLJournalEntries(Long officeId, Long glAccountId, Boolean onlyManualEntries, Date fromDate,
             Date toDate);
 
     List<JournalEntryData> retrieveRelatedJournalEntries(String transactionId);

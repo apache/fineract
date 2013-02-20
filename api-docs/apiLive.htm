@@ -9697,14 +9697,15 @@ No Request Body:
                         </tr>
                         <tr>
                             <td class=fielddesc>A unique Identifier for a set 
-                            	of related Credit and Debit entries that make up a "balanced" jounral Entry.
-                            	For a manual entry, this feild is a unique string.<br/>
+                            	of related Credit and Debit entries that make up 
+                            	a "balanced" jounral Entry. For a manual entry,
+                            	this feild is a unique string.<br/>
                             	For a system generated entry, the combination
                             	of transactionId and entityId is unique
                             </td>
                         </tr>
                         <tr class=alt>
-                            <td>portfolioGenerated</td>
+                            <td>manualEntry</td>
                         </tr>
                         <tr>
                             <td class=fielddesc>Flag determines if an entry is 
@@ -9721,7 +9722,8 @@ No Request Body:
                         <tr>
                             <td class=fielddesc>Flag determines if this manual
                             journal entry has been reversed using the <a href="
-                            journalentries_reverse">Reverse a Journal Entry</a> API. <br/>
+                            journalentries_reverse">Reverse a Journal Entry</a> 
+                            API. <br/>
                             Note: A journal entry is reversed by logging debits
                             for all credits that make up the Journal entry and
                             vice-versa
@@ -9745,15 +9747,16 @@ No Request Body:
                         <dd>
                             Integer <span>optional</span>
                         </dd>
-                        <dt>portfolioGenerated</dt>
+                        <dt>manualEntriesOnly</dt>
                         <dd>
                             Boolean <span>optional</span>
                         </dd>
-                        <dd>Flag determines if portfolio generated Journal
-                        	Entries (posted automatically by the system 
-                        	during lifecycle of loan or saving products) 
-                        	shall also be returned <br/>
-                        	Set to "True" by default if not passed in explicity
+                        <dd>Flag determines if only manually created journal entries
+                        	are to be returned( journal entries created by 
+                        	the system during lifecycle of loan or saving 
+                        	products etc shall be excluded) 
+                        	<br/>
+                        	Set to "false" by default if not passed in explicity
                         </dd>
                         <dt>fromDate</dt>
                         <dd>
@@ -9778,7 +9781,7 @@ No Request Body:
                     <div class=apiClick>journalentries?transactionId=PB37X8Y21EQUY4S</div>
                     <br>
                     <br>
-                    <div class=apiClick>journalentries?officeId=1&glAccountId=17&portfolioGenerated=false&fromDate=2012-01-01&toDate=2013-01-01</div>
+                    <div class=apiClick>journalentries?officeId=1&glAccountId=17&manualEntriesOnly=true&fromDate=2012-01-01&toDate=2013-01-01</div>
                 </div>
                 <div class="method-example">
                     <code class="method-declaration">
@@ -9810,7 +9813,7 @@ GET https://DomainName/api/v1/journalentries?transactionId=PB37X8Y21EQUY4S
         },
         "amount": 120,
         "transactionId": "PB37X8Y21EQUY4S",
-        "portfolioGenerated": false,
+        "manualEntry": true,
         "createdByUserId": 1,
         "createdDate": [
             2012,
@@ -9844,7 +9847,7 @@ GET https://DomainName/api/v1/journalentries?transactionId=PB37X8Y21EQUY4S
         },
         "amount": 120,
         "transactionId": "PB37X8Y21EQUY4S",
-        "portfolioGenerated": false,
+        "manualEntry": true,
         "createdByUserId": 1,
         "createdDate": [
             2012,
@@ -9905,8 +9908,10 @@ GET https://DomainName/api/v1/journalentries?transactionId=PB37X8Y21EQUY4S
                         </tr>
                         <tr>
                             <td class=fielddesc>Details of the debits contained
-                            	in the journal entry. Each debit entry contains the following items <br/>
-                            	glAccountId: Identifier of the general ledger account against which the debit entry shall be
+                            	in the journal entry. Each debit entry contains the 
+                            	following items <br/>
+                            	glAccountId: Identifier of the general ledger account 
+                            	against which the debit entry shall be
                             	made <br/>
                             	amount: Amount of money debited
                             	<br/>
@@ -9993,7 +9998,7 @@ GET https://DomainName/api/v1/journalentries/{entryId}
     },
     "amount": 900,
     "transactionId": "13",
-    "portfolioGenerated": true,
+    "manualEntry": true,
     "createdByUserId": 1,
     "createdDate": [
         2012,

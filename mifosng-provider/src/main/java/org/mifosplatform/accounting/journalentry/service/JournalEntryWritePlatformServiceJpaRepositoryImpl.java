@@ -116,6 +116,7 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
         if (journalEntries.size() <= 1) { throw new JournalEntriesNotFoundException(command.getTransactionId()); }
 
         final String reversalTransactionId = generateTransactionId();
+        final boolean manualEntry = true;
 
         for (final JournalEntry journalEntry : journalEntries) {
             JournalEntry reversalJournalEntry;
@@ -123,12 +124,12 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
                     + " and transaction Id " + command.getTransactionId();
             if (journalEntry.isDebitEntry()) {
                 reversalJournalEntry = JournalEntry.createNew(journalEntry.getOffice(), journalEntry.getGlAccount(), reversalTransactionId,
-                        false, journalEntry.getTransactionDate(), JournalEntryType.CREDIT, journalEntry.getAmount(), reversalComment, null,
-                        null);
+                        manualEntry, journalEntry.getTransactionDate(), JournalEntryType.CREDIT, journalEntry.getAmount(), reversalComment,
+                        null, null);
             } else {
                 reversalJournalEntry = JournalEntry.createNew(journalEntry.getOffice(), journalEntry.getGlAccount(), reversalTransactionId,
-                        false, journalEntry.getTransactionDate(), JournalEntryType.DEBIT, journalEntry.getAmount(), reversalComment, null,
-                        null);
+                        manualEntry, journalEntry.getTransactionDate(), JournalEntryType.DEBIT, journalEntry.getAmount(), reversalComment,
+                        null, null);
             }
             // save the reversal entry
             this.glJournalEntryRepository.saveAndFlush(reversalJournalEntry);
@@ -381,6 +382,7 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
     private void saveAllDebitOrCreditEntries(final JournalEntryCommand command, final Office office, final Date transactionDate,
             final SingleDebitOrCreditEntryCommand[] singleDebitOrCreditEntryCommands, final String transactionId,
             final JournalEntryType type) {
+        final boolean manualEntry = true;
         for (final SingleDebitOrCreditEntryCommand singleDebitOrCreditEntryCommand : singleDebitOrCreditEntryCommands) {
             final GLAccount glAccount = this.glAccountRepository.findOne(singleDebitOrCreditEntryCommand.getGlAccountId());
             if (glAccount == null) { throw new GLAccountNotFoundException(singleDebitOrCreditEntryCommand.getGlAccountId()); }
@@ -400,8 +402,8 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
             if (!StringUtils.isBlank(singleDebitOrCreditEntryCommand.getComments())) {
                 comments = singleDebitOrCreditEntryCommand.getComments();
             }
-            final JournalEntry glJournalEntry = JournalEntry.createNew(office, glAccount, transactionId, false, transactionDate, type,
-                    singleDebitOrCreditEntryCommand.getAmount(), comments, null, null);
+            final JournalEntry glJournalEntry = JournalEntry.createNew(office, glAccount, transactionId, manualEntry, transactionDate,
+                    type, singleDebitOrCreditEntryCommand.getAmount(), comments, null, null);
             this.glJournalEntryRepository.saveAndFlush(glJournalEntry);
         }
     }

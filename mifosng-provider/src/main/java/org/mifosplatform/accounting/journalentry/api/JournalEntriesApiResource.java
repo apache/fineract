@@ -45,7 +45,7 @@ public class JournalEntriesApiResource {
 
     private static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "officeId", "officeName",
             "glAccountName", "glAccountId", "glAccountCode", "glAccountType", "transactionDate", "entryType", "amount", "transactionId",
-            "portfolioGenerated", "entityType", "entityId", "createdByUserId", "createdDate", "createdByUserName", "comments", "reversed"));
+            "manualEntry", "entityType", "entityId", "createdByUserId", "createdDate", "createdByUserName", "comments", "reversed"));
 
     private final String resourceNameForPermission = "JOURNALENTRY";
 
@@ -72,7 +72,7 @@ public class JournalEntriesApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveAllJournalEntries(@Context final UriInfo uriInfo, @QueryParam("officeId") final Long officeId,
-            @QueryParam("glAccountId") final Long glAccountId, @QueryParam("portfolioGenerated") final Boolean portfolioGenerated,
+            @QueryParam("glAccountId") final Long glAccountId, @QueryParam("manualEntriesOnly") final Boolean onlyManualEntries,
             @QueryParam("fromDate") final DateParam fromDateParam, @QueryParam("toDate") final DateParam toDateParam,
             @QueryParam("transactionId") final String transactionId) {
 
@@ -90,7 +90,7 @@ public class JournalEntriesApiResource {
         }
         if (StringUtils.isBlank(transactionId)) {
             glJournalEntryDatas = this.journalEntryReadPlatformService.retrieveAllGLJournalEntries(officeId, glAccountId,
-                    portfolioGenerated, fromDate, toDate);
+                    onlyManualEntries, fromDate, toDate);
         } else {
             glJournalEntryDatas = this.journalEntryReadPlatformService.retrieveRelatedJournalEntries(transactionId);
         }

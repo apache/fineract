@@ -49,8 +49,8 @@ public class JournalEntry extends AbstractAuditableCustom<AppUser, Long> {
     private boolean reversed = false;
 
     @SuppressWarnings("unused")
-    @Column(name = "portfolio_generated", nullable = false)
-    private boolean portfolioGenerated = false;
+    @Column(name = "manual_entry", nullable = false)
+    private boolean manualEntry = false;
 
     @Column(name = "entry_date")
     @Temporal(TemporalType.DATE)
@@ -75,9 +75,9 @@ public class JournalEntry extends AbstractAuditableCustom<AppUser, Long> {
     private Long entityId;
 
     public static JournalEntry createNew(final Office office, final GLAccount glAccount, final String transactionId,
-            final boolean portfolioGenerated, final Date transactionDate, final JournalEntryType journalEntryType, final BigDecimal amount,
+            final boolean manualEntry, final Date transactionDate, final JournalEntryType journalEntryType, final BigDecimal amount,
             final String description, final String entityType, final Long entityId) {
-        return new JournalEntry(office, glAccount, transactionId, portfolioGenerated, transactionDate, journalEntryType.getValue(), amount,
+        return new JournalEntry(office, glAccount, transactionId, manualEntry, transactionDate, journalEntryType.getValue(), amount,
                 description, entityType, entityId);
     }
 
@@ -85,7 +85,7 @@ public class JournalEntry extends AbstractAuditableCustom<AppUser, Long> {
         //
     }
 
-    public JournalEntry(final Office office, final GLAccount glAccount, final String transactionId, final boolean portfolioGenerated,
+    public JournalEntry(final Office office, final GLAccount glAccount, final String transactionId, final boolean manualEntry,
             final Date transactionDate, final Integer type, final BigDecimal amount, final String description, final String entityType,
             final Long entityId) {
         this.office = office;
@@ -93,7 +93,7 @@ public class JournalEntry extends AbstractAuditableCustom<AppUser, Long> {
         this.reversalJournalEntry = null;
         this.transactionId = transactionId;
         this.reversed = false;
-        this.portfolioGenerated = portfolioGenerated;
+        this.manualEntry = manualEntry;
         this.transactionDate = transactionDate;
         this.type = type;
         this.amount = amount;

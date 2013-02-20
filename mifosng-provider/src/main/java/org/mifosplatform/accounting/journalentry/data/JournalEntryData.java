@@ -41,7 +41,7 @@ public class JournalEntryData {
     @SuppressWarnings("unused")
     private final String transactionId;
     @SuppressWarnings("unused")
-    private final Boolean portfolioGenerated;
+    private final Boolean manualEntry;
     @SuppressWarnings("unused")
     private final String entityType;
     @SuppressWarnings("unused")
@@ -60,7 +60,7 @@ public class JournalEntryData {
     public JournalEntryData(final Long id, final Long officeId, final String officeName, final String glAccountName,
             final Long glAccountId, final String glAccountCode, final EnumOptionData glAccountClassification,
             final LocalDate transactionDate, final EnumOptionData entryType, final BigDecimal amount, final String transactionId,
-            final Boolean portfolioGenerated, final String entityType, final Long entityId, final Long createdByUserId,
+            final Boolean manualEntry, final String entityType, final Long entityId, final Long createdByUserId,
             final LocalDate createdDate, final String createdByUserName, final String comments, final Boolean reversed) {
         this.id = id;
         this.officeId = officeId;
@@ -73,7 +73,7 @@ public class JournalEntryData {
         this.entryType = entryType;
         this.amount = amount;
         this.transactionId = transactionId;
-        this.portfolioGenerated = portfolioGenerated;
+        this.manualEntry = manualEntry;
         this.entityType = entityType;
         this.entityId = entityId;
         this.createdByUserId = createdByUserId;

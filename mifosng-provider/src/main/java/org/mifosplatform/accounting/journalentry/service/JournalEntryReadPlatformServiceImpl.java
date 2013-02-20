@@ -43,7 +43,7 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
             return " journalEntry.id as journalEntryId, glAccount.classification_enum as classification ,"
                     + " glAccount.name as glAccountName, glAccount.gl_code as glCode, journalEntry.account_id as glAccountId,"
                     + " journalEntry.office_id as officeId, office.name as officeName, "
-                    + " journalEntry.portfolio_generated as portfolioGenerated,journalEntry.entry_date as transactionDate, "
+                    + " journalEntry.manual_entry as manualEntry,journalEntry.entry_date as transactionDate, "
                     + " journalEntry.type_enum as entryType,journalEntry.amount as amount, journalEntry.transaction_id as transactionId,"
                     + " journalEntry.entity_type as entityType, journalEntry.entity_id as entityId, creatingUser.id as createdByUserId, "
                     + " creatingUser.username as createdByUserName, journalEntry.description as comments, "
@@ -65,7 +65,7 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
             final int accountTypeId = JdbcSupport.getInteger(rs, "classification");
             final EnumOptionData accountType = AccountingEnumerations.gLAccountType(accountTypeId);
             final LocalDate transactionDate = JdbcSupport.getLocalDate(rs, "transactionDate");
-            final Boolean portfolioGenerated = rs.getBoolean("portfolioGenerated");
+            final Boolean manualEntry = rs.getBoolean("manualEntry");
             final BigDecimal amount = rs.getBigDecimal("amount");
             final int entryTypeId = JdbcSupport.getInteger(rs, "entryType");
             final EnumOptionData entryType = AccountingEnumerations.journalEntryType(entryTypeId);
@@ -79,14 +79,14 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
             final Boolean reversed = rs.getBoolean("reversed");
 
             return new JournalEntryData(journalEntryId, officeId, officeName, glAccountName, glAccountId, glCode, accountType,
-                    transactionDate, entryType, amount, transactionId, portfolioGenerated, entityType, entityId, createdByUserId,
+                    transactionDate, entryType, amount, transactionId, manualEntry, entityType, entityId, createdByUserId,
                     createdDate, createdByUserName, comments, reversed);
         }
     }
 
     @Override
     public List<JournalEntryData> retrieveAllGLJournalEntries(final Long officeId, final Long glAccountId,
-            final Boolean portfolioGenerated, final Date fromDate, final Date toDate) {
+            final Boolean onlyManualEntries, final Date fromDate, final Date toDate) {
         final GLJournalEntryMapper rm = new GLJournalEntryMapper();
 
         String sql = "select " + rm.schema();
@@ -130,15 +130,13 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
             }
         }
 
-        if (portfolioGenerated != null) {
-            if (portfolioGenerated) {
-                sql += " and journalEntry.portfolio_generated = 1";
-            } else {
-                sql += " and journalEntry.portfolio_generated = 0";
-            }
+        if (onlyManualEntries != null) {
+            if (onlyManualEntries) {
+                sql += " and journalEntry.manual_entry = 1";
+            } 
         }
 
-        sql += " order by journalEntry.entry_date desc,journalEntry.transaction_id";
+        sql += " order by journalEntry.entry_date desc,journalEntry.id desc";
 
         final Object[] finalObjectArray = Arrays.copyOf(objectArray, arrayPos);
         return this.jdbcTemplate.query(sql, rm, finalObjectArray);
