@@ -71,21 +71,49 @@ public class GroupWritePlatformServiceJpaRepositoryImpl implements GroupWritePla
 
             final Office groupOffice = this.officeRepository.findOne(command.getOfficeId());
 
+            if (groupOffice == null) { throw new OfficeNotFoundException(command.getOfficeId()); }
+
             Staff loanOfficer = null;
             final Long loanOfficerId = command.getLoanOfficeId();
 
-            if (groupOffice == null) { throw new OfficeNotFoundException(command.getOfficeId()); }
-
+            /**
+             * Validate the loan officer is present in the given office or not
+             */
             if (loanOfficerId != null) {
                 loanOfficer = this.staffRepository.findByOffice(loanOfficerId, command.getOfficeId());
                 if (loanOfficer == null) { throw new StaffNotFoundException(loanOfficerId); }
             }
 
+            final Long parentId = command.getParentId();
+            Group parent = null;
+            
+            /**
+             * Validate the parent group to check it is present.
+             */
+                      
+            if (parentId != null) {
+                parent = this.groupRepository.findOne(parentId);
+                if (parent == null) { throw new GroupNotFoundException(parentId); }
+            }
+            
+            /**
+             * Need to validate level is immediate child level of the Parent group's level
+             */
+            // TODO level validation
+            
+            final Long levelId = command.getLevelId();
+            
             final Set<Client> clientMembers = assembleSetOfClients(command);
 
-            final Group newGroup = Group.newGroup(groupOffice, loanOfficer, command.getName(), command.getExternalId(), clientMembers);
+            final Group newGroup = Group.newGroup(groupOffice, loanOfficer, parent , levelId , command.getName(), command.getExternalId(), clientMembers);
 
+         // pre save to generate id for use in group hierarchy
+            this.groupRepository.save(newGroup);
+            
+            newGroup.generateHierarchy();
+            
             this.groupRepository.saveAndFlush(newGroup);
+            
 
             return new CommandProcessingResult(newGroup.getId());
         } catch (final DataIntegrityViolationException dve) {

@@ -18,7 +18,7 @@ public class GroupLevel extends AbstractPersistable<Long> {
     @Column(name = "parent_id")
     private final Long parentId;
 
-    @Column(name = "is_super_parent", nullable = false)
+    @Column(name = "super_parent", nullable = false)
     private final boolean isSuperParent;
 
     @Column(name = "level_name", nullable = false, length = 100, unique = true)

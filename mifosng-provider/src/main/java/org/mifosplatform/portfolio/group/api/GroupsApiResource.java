@@ -37,6 +37,7 @@ import org.mifosplatform.portfolio.client.service.ClientReadPlatformService;
 import org.mifosplatform.portfolio.group.command.GroupCommand;
 import org.mifosplatform.portfolio.group.data.GroupAccountSummaryCollectionData;
 import org.mifosplatform.portfolio.group.data.GroupData;
+import org.mifosplatform.portfolio.group.data.GroupLookupData;
 import org.mifosplatform.portfolio.group.service.GroupReadPlatformService;
 import org.mifosplatform.portfolio.group.service.GroupWritePlatformService;
 import org.mifosplatform.portfolio.savingsaccount.PortfolioApiDataConversionService;
@@ -50,7 +51,7 @@ import org.springframework.stereotype.Component;
 public class GroupsApiResource {
 
     private static final Set<String> GROUP_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "officeId", "name", "externalId",
-            "clientMembers", "allowedClients", "allowedOffices"));
+            "clientMembers", "allowedClients", "allowedOffices" , "allowedParentGroups" ,"groupLevel"));
     
     private final PlatformSecurityContext context;
     private final GroupReadPlatformService groupReadPlatformService;
@@ -113,8 +114,9 @@ public class GroupsApiResource {
         final Collection<ClientLookup> clientMembers = this.groupReadPlatformService.retrieveClientMembers(groupId);
         Collection<ClientLookup> availableClients = null;
         Collection<OfficeLookup> allowedOffices = null;
+        Collection<GroupLookupData> allowedParentGroups = null;
 
-        group = new GroupData(group, clientMembers, availableClients, allowedOffices);
+        group = new GroupData(group, clientMembers, availableClients, allowedOffices , allowedParentGroups , null);
 
         boolean template = ApiParameterHelper.template(uriInfo.getQueryParameters());
         if (template) {
@@ -128,7 +130,7 @@ public class GroupsApiResource {
 
             allowedOffices = officeReadPlatformService.retrieveAllOfficesForLookup();
 
-            group = new GroupData(group, group.clientMembers(), availableClients, allowedOffices);
+            group = new GroupData(group, group.clientMembers(), availableClients, allowedOffices , allowedParentGroups ,null);
         }
 
         final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
@@ -139,15 +141,16 @@ public class GroupsApiResource {
     @Path("template")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String newGroupDetails(@Context final UriInfo uriInfo, @QueryParam("officeId") final Long officeId) {
+    public String newGroupDetails(@Context final UriInfo uriInfo, @QueryParam("officeId") final Long officeId,
+            @QueryParam("levelId") final Long levelId) {
 
         context.authenticatedUser().validateHasReadPermission("GROUP");
 
-        GroupData groupTemplateData;
-        if (officeId != null) {
-            groupTemplateData = this.groupReadPlatformService.retrieveNewGroupDetails(officeId);
-        } else {
-            groupTemplateData = this.groupReadPlatformService.retrieveNewGroupDetails(context.authenticatedUser().getOffice().getId());
+        GroupData groupTemplateData = null;
+        if (officeId != null && levelId != null) {
+            groupTemplateData = this.groupReadPlatformService.retrieveNewGroupDetails(officeId, levelId);
+        } else if (levelId != null) {
+            groupTemplateData = this.groupReadPlatformService.retrieveNewGroupDetails(context.authenticatedUser().getOffice().getId(), levelId);
         }
 
         final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());

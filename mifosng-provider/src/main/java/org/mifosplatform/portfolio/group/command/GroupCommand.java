@@ -14,16 +14,20 @@ public class GroupCommand {
     private final String name;
     private final Long officeId;
     private final Long loanOfficerId;
+    private final Long parentId;
+    private final Long levelId;
 
     private final String[] clientMembers;
 
     private final Set<String> modifiedParameters;
 
     public GroupCommand(Set<String> modifiedParameters, final Long id, final String externalId, final String name,
-                        final Long officeId, final Long loanOfficerId, String[] clientMembers) {
+                        final Long officeId, final Long loanOfficerId, String[] clientMembers , final Long parentId ,final Long levelId) {
         this.id = id;
         this.officeId = officeId;
         this.loanOfficerId = loanOfficerId;
+        this.parentId = parentId;
+        this.levelId = levelId;
         this.externalId = externalId;
         this.name = name;
         this.clientMembers = clientMembers;
@@ -33,6 +37,14 @@ public class GroupCommand {
 
     public Long getOfficeId() {
         return officeId;
+    }
+
+    public Long getParentId() {
+        return parentId;
+    }
+
+    public Long getLevelId() {
+        return levelId;
     }
 
     public Long getLoanOfficeId() {
@@ -57,6 +69,14 @@ public class GroupCommand {
 
     public boolean isOfficeIdChanged() {
         return this.modifiedParameters.contains("officeId");
+    }
+
+    public boolean isParentIdChanged() {
+        return this.modifiedParameters.contains("parentId");
+    }
+    
+    public boolean isLevelIdChanged() {
+        return this.modifiedParameters.contains("levelId");
     }
 
     public boolean isLoanOfficerChanged() {

@@ -28,10 +28,8 @@ public class GroupCommandValidator {
         
         baseDataValidator.reset().parameter("name").value(command.getName()).notBlank();
         baseDataValidator.reset().parameter("externalId").value(command.getExternalId()).ignoreIfNull().notExceedingLengthOf(100);
-        
-        baseDataValidator.reset().parameter("clientMembers").value(command.getClientMembers()).arrayNotEmpty();
-
         baseDataValidator.reset().parameter("officeId").value(command.getOfficeId()).notNull().integerGreaterThanZero();
+        baseDataValidator.reset().parameter("levelId").value(command.getLevelId()).notNull().integerGreaterThanZero();
 
         if (!dataValidationErrors.isEmpty()) {
             throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.", dataValidationErrors);

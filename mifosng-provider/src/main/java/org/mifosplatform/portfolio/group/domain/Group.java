@@ -6,14 +6,18 @@
 package org.mifosplatform.portfolio.group.domain;
 
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import org.apache.commons.lang.StringUtils;
@@ -27,6 +31,14 @@ import org.springframework.data.jpa.domain.AbstractPersistable;
 @Table(name = "m_group")
 public class Group extends AbstractPersistable<Long> {
 
+    @OneToMany(fetch = FetchType.EAGER)
+    @JoinColumn(name = "parent_id")
+    private final List<Group> children = new LinkedList<Group>();
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parent_id")
+    private Group parent;
+
     @ManyToOne
     @JoinColumn(name = "office_id", nullable = false)
     private Office office;
@@ -34,6 +46,12 @@ public class Group extends AbstractPersistable<Long> {
     @ManyToOne
     @JoinColumn(name = "staff_id", nullable = true)
     private Staff loanOfficer;
+    
+    @Column(name = "level_id", nullable = false)
+    private Long levelId;
+
+    @Column(name = "hierarchy", length = 100)
+    private String hierarchy;
 
     @Column(name = "name", length = 100, unique = true)
     private String name;
@@ -54,13 +72,20 @@ public class Group extends AbstractPersistable<Long> {
         this.clientMembers = new HashSet<Client>();
     }
 
-    public static Group newGroup(final Office office, final Staff loanOfficer , final String name, final String externalId, final Set<Client> clientMembers) {
-        return new Group(office, loanOfficer , name, externalId, clientMembers);
+    public static Group newGroup(final Office office, final Staff loanOfficer , final Group parent ,final long levelId , final String name, final String externalId, final Set<Client> clientMembers) {
+        return new Group(office, loanOfficer , parent , levelId , name, externalId, clientMembers);
     }
 
-    public Group(final Office office, final Staff loanOfficer , final String name, final String externalId, final Set<Client> clientMembers) {
+    public Group(final Office office, final Staff loanOfficer , final Group parent ,final long levelId , final String name, final String externalId, final Set<Client> clientMembers) {
         this.office = office;
         this.loanOfficer = loanOfficer;
+        this.levelId =levelId;
+        this.parent = parent;
+        
+        if (parent != null) {
+            this.parent.addChild(this);
+        }
+        
         if (StringUtils.isNotBlank(name)) {
             this.name = name.trim();
         } else {
@@ -74,6 +99,10 @@ public class Group extends AbstractPersistable<Long> {
         if (clientMembers != null) {
             this.clientMembers = clientMembers;
         }
+    }
+
+    private void addChild(final Group group) {
+        this.children.add(group);
     }
 
     public Long getOfficeId() {
@@ -140,6 +169,19 @@ public class Group extends AbstractPersistable<Long> {
 
     public boolean isDeleted() {
         return deleted;
+    }
+    
+    public void generateHierarchy() {
+
+        if (parent != null) {
+            this.hierarchy = this.parent.hierarchyOf(this.getId());
+        } else {
+            this.hierarchy = ".";
+        }
+    }
+
+    private String hierarchyOf(Long id) {
+        return this.hierarchy + id.toString() + ".";
     }
 
 }

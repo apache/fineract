@@ -68,18 +68,20 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         final Map<String, String> requestMap = gsonConverter.fromJson(json, typeOfMap);
 
-        final Set<String> supportedParams = new HashSet<String>(Arrays.asList("name", "officeId", "loanOfficerId" ,"externalId", "clientMembers"));
+        final Set<String> supportedParams = new HashSet<String>(Arrays.asList("name", "officeId", "levelId", "parentId", "loanOfficerId",
+                "externalId", "clientMembers"));
 
         checkForUnsupportedParameters(requestMap, supportedParams);
 
         final Set<String> modifiedParameters = new HashSet<String>();
 
+        final String name = extractStringParameter("name", requestMap, modifiedParameters);
         final Long officeId = extractLongParameter("officeId", requestMap, modifiedParameters);
+        final Long levelId = extractLongParameter("levelId", requestMap, modifiedParameters);
+        final Long parentId = extractLongParameter("parentId", requestMap, modifiedParameters);
         final Long loanOfficerId = extractLongParameter("loanOfficerId", requestMap, modifiedParameters);
         final String externalId = extractStringParameter("externalId", requestMap, modifiedParameters);
-        final String name = extractStringParameter("name", requestMap, modifiedParameters);
 
-        // check array
         final JsonParser parser = new JsonParser();
 
         String[] clientMembers = null;
@@ -95,9 +97,8 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
                 }
             }
         }
-        //
 
-        return new GroupCommand(modifiedParameters, resourceIdentifier, externalId, name, officeId, loanOfficerId , clientMembers);
+        return new GroupCommand(modifiedParameters, resourceIdentifier, externalId, name, officeId, loanOfficerId , clientMembers ,parentId ,levelId);
     }
 
     private void checkForUnsupportedParameters(Map<String, ?> requestMap, Set<String> supportedParams) {
