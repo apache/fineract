@@ -7,6 +7,7 @@ package org.mifosplatform.portfolio.group.service;
 
 import java.util.Collection;
 
+import org.mifosplatform.organisation.staff.data.StaffData;
 import org.mifosplatform.portfolio.client.data.ClientLookup;
 import org.mifosplatform.portfolio.group.data.GroupAccountSummaryCollectionData;
 import org.mifosplatform.portfolio.group.data.GroupAccountSummaryData;
@@ -31,4 +32,10 @@ public interface GroupReadPlatformService {
     Collection<GroupLookupData> retrieveAllGroupsbyOfficeIdAndLevelId(Long officeId , Long levelId);
 
     GroupLevelData retrieveGroupLevelDetails(Long levelId);
+
+    Collection<StaffData> retrieveStaffsbyOfficeId(Long officeId);
+
+    GroupData retrieveGroupDetails(Long groupId, boolean template);
+
+    Collection<GroupLookupData> retrieveChildGroupsbyGroupId(Long groupId);
 }
