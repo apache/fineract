@@ -17,6 +17,8 @@ import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSourc
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.office.data.OfficeLookup;
 import org.mifosplatform.organisation.office.service.OfficeReadPlatformService;
+import org.mifosplatform.organisation.staff.data.StaffData;
+import org.mifosplatform.organisation.staff.exception.StaffNotFoundException;
 import org.mifosplatform.portfolio.client.data.ClientLookup;
 import org.mifosplatform.portfolio.client.service.ClientReadPlatformService;
 import org.mifosplatform.portfolio.client.service.LoanStatusMapper;
@@ -40,10 +42,10 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
     private final PlatformSecurityContext context;
     private final ClientReadPlatformService clientReadPlatformService;
     private final OfficeReadPlatformService officeReadPlatformService;
-    
+
     @Autowired
     public GroupReadPlatformServiceImpl(final PlatformSecurityContext context, final TenantAwareRoutingDataSource dataSource,
-            ClientReadPlatformService clientReadPlatformService, final OfficeReadPlatformService officeReadPlatformService ) {
+            ClientReadPlatformService clientReadPlatformService, final OfficeReadPlatformService officeReadPlatformService) {
         this.context = context;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.clientReadPlatformService = clientReadPlatformService;
@@ -90,14 +92,31 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
 
             GroupLookupMapper rm = new GroupLookupMapper();
 
-            String sql = "select " + rm.groupLookupSchema() + " where g.office_id = ? and level_id = ? and g.is_deleted=0";
+            String sql = "select " + rm.groupLookupSchema() + " from m_group g where g.office_id = ? and level_id = ? and g.is_deleted=0";
 
             return this.jdbcTemplate.query(sql, rm, new Object[] { officeId, levelId });
 
         } catch (EmptyResultDataAccessException e) {
-            
+
             // TODO need throw proper exception
             throw new GroupNotFoundException(officeId);
+        }
+    }
+
+    @Override
+    public Collection<GroupLookupData> retrieveChildGroupsbyGroupId(final Long groupId) {
+
+        try {
+            this.context.authenticatedUser();
+
+            GroupLookupMapper rm = new GroupLookupMapper();
+
+            String sql = "select " + rm.groupLookupSchema() + " from m_group pg join m_group g where pg.id = g.parent_id and pg.id = ? and g.is_deleted=0";
+
+            return this.jdbcTemplate.query(sql, rm, new Object[] { groupId });
+
+        } catch (EmptyResultDataAccessException e) {
+            throw new GroupNotFoundException(groupId);
         }
     }
 
@@ -119,9 +138,9 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
     }
 
     @Override
-    public GroupData retrieveNewGroupDetails(final Long officeId , final Long levelId) {
-        
-        GroupLevelData groupLevelData  = this.retrieveGroupLevelDetails(levelId);
+    public GroupData retrieveNewGroupDetails(final Long officeId, final Long levelId) {
+
+        GroupLevelData groupLevelData = this.retrieveGroupLevelDetails(levelId);
 
         if (groupLevelData == null) { throw new GroupLevelNotFoundException(levelId); }
 
@@ -131,23 +150,78 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
             allowedClients = new ArrayList<ClientLookup>(
                     this.clientReadPlatformService.retrieveAllIndividualClientsForLookupByOfficeId(officeId));
         }
-        
+
         List<OfficeLookup> allowedOffices = new ArrayList<OfficeLookup>(officeReadPlatformService.retrieveAllOfficesForLookup());
 
         List<GroupLookupData> allowedParentGroups = null;
 
-        if(groupLevelData.getParentLevelId() != null){
-            allowedParentGroups = new ArrayList<GroupLookupData>(this.retrieveAllGroupsbyOfficeIdAndLevelId(officeId , groupLevelData.getParentLevelId()));
+        if (groupLevelData.getParentLevelId() != null) {
+            allowedParentGroups = new ArrayList<GroupLookupData>(this.retrieveAllGroupsbyOfficeIdAndLevelId(officeId,
+                    groupLevelData.getParentLevelId()));
+        }
+
+        List<StaffData> allowedStaffs = new ArrayList<StaffData>(this.retrieveStaffsbyOfficeId(officeId));
+
+        return new GroupData(officeId, allowedClients, allowedOffices, allowedParentGroups, groupLevelData, allowedStaffs);
+    }
+
+    @Override
+    public GroupData retrieveGroupDetails(final Long groupId, final boolean template) {
+
+        GroupData group = this.retrieveGroup(groupId);
+        final Collection<ClientLookup> clientMembers = this.retrieveClientMembers(groupId);
+        Collection<ClientLookup> availableClients = null;
+        Collection<OfficeLookup> allowedOffices = null;
+        Collection<GroupLookupData> allowedParentGroups = null;
+        GroupLevelData groupLevelData = this.retrieveGroupLevelDetails(group.getGroupLevel());;
+        Collection<StaffData> allowedStaffs = null;
+        Collection<GroupLookupData> childGroups = this.retrieveChildGroupsbyGroupId(groupId);
+        
+        group = new GroupData(group, clientMembers, availableClients, allowedOffices, allowedParentGroups, groupLevelData, allowedStaffs , childGroups);
+
+        if (template) {
+
+            if (groupLevelData.isCanHaveClients()) {
+                availableClients = this.clientReadPlatformService.retrieveAllIndividualClientsForLookupByOfficeId(group.getOfficeId());
+                availableClients.removeAll(group.clientMembers());
+            }
+            allowedOffices = officeReadPlatformService.retrieveAllOfficesForLookup();
+            if (groupLevelData.getParentLevelId() != null) {
+                allowedParentGroups = this.retrieveAllGroupsbyOfficeIdAndLevelId(group.getOfficeId(),
+                        groupLevelData.getParentLevelId());
+            }
+
+            allowedStaffs = this.retrieveStaffsbyOfficeId(group.getOfficeId());
+
+            group = new GroupData(group, group.clientMembers(), availableClients, allowedOffices, allowedParentGroups, groupLevelData,
+                    allowedStaffs , childGroups);
         }
         
-        
-        return new GroupData(officeId, allowedClients, allowedOffices , allowedParentGroups , groupLevelData);
+        return group;
+    }
+
+    @Override
+    public Collection<StaffData> retrieveStaffsbyOfficeId(final Long officeId) {
+
+        try {
+            this.context.authenticatedUser();
+
+            StaffDataMapper rm = new StaffDataMapper();
+
+            String sql = "select " + rm.staffDataSchema() + " where o.id = ?";
+
+            return this.jdbcTemplate.query(sql, rm, new Object[] { officeId });
+
+        } catch (EmptyResultDataAccessException e) {
+            // TODO throw Staff not found in given office
+            throw new StaffNotFoundException(officeId);
+        }
     }
 
     private static final class GroupDataMapper implements RowMapper<GroupData> {
 
         public String groupSchema() {
-            return "g.office_id as officeId, o.name as officeName, g.id as id, g.external_id as externalId, "
+            return "g.office_id as officeId, g.level_id as groupLevel , o.name as officeName, g.id as id, g.external_id as externalId, "
                     + "g.name as name from m_group g join m_office o on o.id = g.office_id";
         }
 
@@ -157,19 +231,18 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
             Long id = rs.getLong("id");
             String name = rs.getString("name");
             String externalId = rs.getString("externalId");
-
             Long officeId = rs.getLong("officeId");
             String officeName = rs.getString("officeName");
-
-            return new GroupData(id, officeId, officeName, name, externalId);
+            Long groupLevel = rs.getLong("groupLevel");
+            return new GroupData(id, officeId, officeName, name, externalId, groupLevel);
         }
 
     }
-    
+
     private static final class GroupLookupMapper implements RowMapper<GroupLookupData> {
 
         public String groupLookupSchema() {
-            return "g.id as id, g.name as name from m_group g";
+            return "g.id as id, g.name as name ";
         }
 
         @Override
@@ -186,8 +259,8 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
     private static final class GroupLevelDataMapper implements RowMapper<GroupLevelData> {
 
         public String groupLevelSchema() {
-            return "gl.id as id, gl.parent_id as parentLevelId , gl.level_name as levelName , gl.super_parent as superParent ," +
-                    " gl.recursable as recursable , gl.can_have_clients as canHaveClients from m_group_level gl";
+            return "gl.id as id, gl.parent_id as parentLevelId , gl.level_name as levelName , gl.super_parent as superParent ,"
+                    + " gl.recursable as recursable , gl.can_have_clients as canHaveClients from m_group_level gl";
         }
 
         @Override
@@ -201,6 +274,29 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
             boolean canHaveClients = rs.getBoolean("canHaveClients");
 
             return new GroupLevelData(levelId, parentLevelId, levelName, superParent, recursable, canHaveClients);
+        }
+
+    }
+
+    private static final class StaffDataMapper implements RowMapper<StaffData> {
+
+        public String staffDataSchema() {
+            return "s.id as id , s.is_loan_officer as isLoanOfficer , s.office_id as officeId , s.firstname as firstname, "
+                    + "s.lastname as lastname , s.display_name as displayName , o.name as officeName from m_staff s join m_office o on s.office_id =o.id ";
+        }
+
+        @Override
+        public StaffData mapRow(ResultSet rs, @SuppressWarnings("unused") int rowNum) throws SQLException {
+
+            Long id = rs.getLong("id");
+            String firstname = rs.getString("firstname");
+            String lastname = rs.getString("lastname");
+            String displayName = rs.getString("displayName");
+            Long officeId = rs.getLong("officeId");
+            String officeName = rs.getString("officeName");
+            boolean isLoanOfficer = rs.getBoolean("isLoanOfficer");
+
+            return StaffData.instance(id, firstname, lastname, displayName, officeId, officeName, isLoanOfficer);
         }
 
     }
