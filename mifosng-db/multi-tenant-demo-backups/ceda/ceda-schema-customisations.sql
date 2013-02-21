@@ -1,6 +1,6 @@
-﻿DELETE FROM `mifostenant-ceda`.`ref_loan_transaction_processing_strategy` WHERE id in (1, 3, 4);
+﻿DELETE FROM `ref_loan_transaction_processing_strategy` WHERE id in (1, 3, 4);
 
-INSERT INTO `mifostenant-ceda`.`m_code` (`code_name`, `is_system_defined`)
+INSERT INTO `m_code` (`code_name`, `is_system_defined`)
 VALUES
 ('FieldOfEmployment', '0'),
 ('EducationLevel', '0'),
@@ -142,8 +142,8 @@ where mc.`code_name` = "YesNo";
 
 
 
-DROP TABLE IF EXISTS `mifostenant-ceda`.`client additional data`;
-CREATE TABLE `mifostenant-ceda`.`client additional data` (
+DROP TABLE IF EXISTS `client additional data`;
+CREATE TABLE `client additional data` (
   `client_id` bigint(20) NOT NULL,
   `Gender_cd` int(11) NOT NULL,
   `Date of Birth` date NOT NULL,
@@ -186,8 +186,8 @@ CREATE TABLE `mifostenant-ceda`.`client additional data` (
   CONSTRAINT `FK_client_additional_data` FOREIGN KEY (`client_id`) REFERENCES `m_client` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-DROP TABLE IF EXISTS `mifostenant-ceda`.`impact measurement`;
-CREATE TABLE `mifostenant-ceda`.`impact measurement` (
+DROP TABLE IF EXISTS `impact measurement`;
+CREATE TABLE `impact measurement` (
   `loan_id` bigint(20) NOT NULL,
   `YesNo_cd_RepaidOnSchedule` int(11) NOT NULL,
   `ReasonNotRepaidOnSchedule` text DEFAULT NULL,
@@ -200,8 +200,8 @@ CREATE TABLE `mifostenant-ceda`.`impact measurement` (
   CONSTRAINT `FK_impact measurement` FOREIGN KEY (`loan_id`) REFERENCES `m_loan` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-DROP TABLE IF EXISTS `mifostenant-ceda`.`loan additional data`;
-CREATE TABLE `mifostenant-ceda`.`loan additional data` (
+DROP TABLE IF EXISTS `loan additional data`;
+CREATE TABLE `loan additional data` (
   `loan_id` bigint(20) NOT NULL,
   `PurposeOfLoan_cd` int(11) NOT NULL,
   `CollateralType_cd` int(11) NOT NULL,
@@ -216,7 +216,7 @@ CREATE TABLE `mifostenant-ceda`.`loan additional data` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- datatables mapping
-INSERT INTO `mifostenant-ceda`.`x_registered_table`
+INSERT INTO `x_registered_table`
 (`registered_table_name`,
 `application_table_name`)
 VALUES
@@ -244,9 +244,8 @@ from x_registered_table r;
 
 
 -- ==== Chart of Accounts =====
-DELETE FROM `mifostenant-ceda`.`acc_gl_account` WHERE id>0;
-
-INSERT INTO `mifostenant-ceda`.`acc_gl_account` VALUES 
+truncate `acc_gl_account`;
+INSERT INTO `acc_gl_account` VALUES 
 (1,'Petty Cash Balances',NULL,'11100',0,1,2,1,NULL),
 (2,'Cash in Valut 1',NULL,'11101',0,1,1,1,NULL),
 (3,'Bank Balances',NULL,'11200',0,1,2,1,NULL),

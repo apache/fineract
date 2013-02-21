@@ -46,6 +46,3 @@ ALTER TABLE `m_loan`
 ADD COLUMN `closedon_userid` BIGINT(20) DEFAULT NULL AFTER `closedon_date`,
 ADD KEY `FK_closedon_userid` (`closedon_userid`),
 ADD CONSTRAINT `FK_closedon_userid` FOREIGN KEY (`closedon_userid`) REFERENCES `m_appuser` (`id`);
-
-
-

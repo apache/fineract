@@ -241,9 +241,9 @@ public class LoanCharge extends AbstractPersistable<Long> {
         this.loan = loan;
     }
 
-    public void update(final BigDecimal amount, final LocalDate specifiedDueDate, final BigDecimal loanPrincipal) {
-        if (specifiedDueDate != null) {
-            this.dueDate = specifiedDueDate.toDate();
+    public void update(final BigDecimal amount, final LocalDate dueDate, final BigDecimal loanPrincipal) {
+        if (dueDate != null) {
+            this.dueDate = dueDate.toDate();
         }
 
         if (amount != null) {
@@ -304,14 +304,14 @@ public class LoanCharge extends AbstractPersistable<Long> {
         // ChargeCalculationType.fromInt(newValue).getValue();
         // }
 
-        final String specifiedDueDateParamName = "dueDate";
-        if (command.isChangeInLocalDateParameterNamed(specifiedDueDateParamName, getDueLocalDate())) {
-            final String valueAsInput = command.stringValueOfParameterNamed(specifiedDueDateParamName);
-            actualChanges.put(specifiedDueDateParamName, valueAsInput);
+        final String dueDateParamName = "dueDate";
+        if (command.isChangeInLocalDateParameterNamed(dueDateParamName, getDueLocalDate())) {
+            final String valueAsInput = command.stringValueOfParameterNamed(dueDateParamName);
+            actualChanges.put(dueDateParamName, valueAsInput);
             actualChanges.put("dateFormat", dateFormatAsInput);
             actualChanges.put("locale", localeAsInput);
 
-            final LocalDate newValue = command.localDateValueOfParameterNamed(specifiedDueDateParamName);
+            final LocalDate newValue = command.localDateValueOfParameterNamed(dueDateParamName);
             this.dueDate = newValue.toDate();
         }
 
@@ -368,11 +368,11 @@ public class LoanCharge extends AbstractPersistable<Long> {
     }
 
     public LocalDate getDueLocalDate() {
-        LocalDate specifiedDueDate = null;
+        LocalDate dueDate = null;
         if (this.dueDate != null) {
-            specifiedDueDate = new LocalDate(this.dueDate);
+            dueDate = new LocalDate(this.dueDate);
         }
-        return specifiedDueDate;
+        return dueDate;
     }
 
     private boolean determineIfFullyPaid() {
@@ -427,8 +427,8 @@ public class LoanCharge extends AbstractPersistable<Long> {
     }
 
     public boolean isDueForCollectionFromAndUpToAndIncluding(final LocalDate fromNotInclusive, final LocalDate upToAndInclusive) {
-        final LocalDate specifiedDueDate = getDueLocalDate();
-        return occursOnDayFromAndUpToAndIncluding(fromNotInclusive, upToAndInclusive, specifiedDueDate);
+        final LocalDate dueDate = getDueLocalDate();
+        return occursOnDayFromAndUpToAndIncluding(fromNotInclusive, upToAndInclusive, dueDate);
     }
 
     private boolean occursOnDayFromAndUpToAndIncluding(final LocalDate fromNotInclusive, final LocalDate upToAndInclusive,

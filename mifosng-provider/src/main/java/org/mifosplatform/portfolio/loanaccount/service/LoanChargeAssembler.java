@@ -63,7 +63,7 @@ public class LoanChargeAssembler {
                     final Integer chargeTimeType = fromApiJsonHelper.extractIntegerNamed("chargeTimeType", loanChargeElement, locale);
                     final Integer chargeCalculationType = fromApiJsonHelper.extractIntegerNamed("chargeCalculationType", loanChargeElement,
                             locale);
-                    final LocalDate specifiedDueDate = fromApiJsonHelper.extractLocalDateNamed("specifiedDueDate", loanChargeElement,
+                    final LocalDate dueDate = fromApiJsonHelper.extractLocalDateNamed("dueDate", loanChargeElement,
                             dateFormat, locale);
 
                     if (id == null) {
@@ -77,14 +77,14 @@ public class LoanChargeAssembler {
                             ChargeCalculationType.fromInt(chargeCalculationType);
                         }
                         final LoanCharge loanCharge = LoanCharge.createNewWithoutLoan(chargeDefinition, principal, amount, chargeTime,
-                                chargeCalculation, specifiedDueDate);
+                                chargeCalculation, dueDate);
                         loanCharges.add(loanCharge);
                     } else {
                         final Long loanChargeId = id;
                         final LoanCharge loanCharge = this.loanChargeRepository.findOne(loanChargeId);
                         if (loanCharge == null) { throw new LoanChargeNotFoundException(loanChargeId); }
 
-                        loanCharge.update(amount, specifiedDueDate, principal);
+                        loanCharge.update(amount, dueDate, principal);
 
                         loanCharges.add(loanCharge);
                     }

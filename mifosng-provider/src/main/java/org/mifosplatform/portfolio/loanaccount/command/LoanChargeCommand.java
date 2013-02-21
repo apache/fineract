@@ -27,13 +27,13 @@ public class LoanChargeCommand implements Comparable<LoanChargeCommand> {
     private final LocalDate dueDate;
 
     public LoanChargeCommand(final Long id, final Long chargeId, final BigDecimal amount, final Integer chargeTimeType,
-            final Integer chargeCalculationType, final LocalDate specifiedDueDate) {
+            final Integer chargeCalculationType, final LocalDate dueDate) {
         this.id = id;
         this.chargeId = chargeId;
         this.amount = amount;
         this.chargeTimeType = chargeTimeType;
         this.chargeCalculationType = chargeCalculationType;
-        this.dueDate = specifiedDueDate;
+        this.dueDate = dueDate;
     }
 
     @Override

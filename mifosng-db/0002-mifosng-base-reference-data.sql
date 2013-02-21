@@ -206,6 +206,9 @@ INSERT INTO `m_office` (`id`, `parent_id`, `hierarchy`, `external_id`, `name`, `
 VALUES 
 (1,NULL,'.','1','Head Office','2009-01-01');
 
+INSERT INTO `m_group_level` (`id`, `parent_id`, `is_super_parent`, `level_name`, `recursable`, `can_have_clients`) VALUES (1, NULL, 1, 'Center', 1, 0);
+INSERT INTO `m_group_level` (`id`, `parent_id`, `is_super_parent`, `level_name`, `recursable`, `can_have_clients`) VALUES (2, 1, 0, 'Group', 0, 1);
+
 -- ========= roles and permissions =========
 /*
 this scripts removes all current m_role_permission and m_permission entries
@@ -456,6 +459,18 @@ INSERT INTO `m_permission`
 ('transaction_deposit', 'WITHDRAWAL_DEPOSITACCOUNT_CHECKER', 'DEPOSITACCOUNT', 'WITHDRAWAL', '0'),
 ('transaction_deposit', 'INTEREST_DEPOSITACCOUNT_CHECKER', 'DEPOSITACCOUNT', 'INTEREST', '0'),
 ('transaction_deposit', 'RENEW_DEPOSITACCOUNT_CHECKER', 'DEPOSITACCOUNT', 'RENEW', '0');
+
+-- == accounting related permissions
+INSERT INTO `m_permission` (`grouping`, `code`, `entity_name`, `action_name`, `can_maker_checker`) VALUES 
+('accounting', 'CREATE_GLACCOUNT', 'GLACCOUNT', 'CREATE', 1),
+('accounting', 'UPDATE_GLACCOUNT', 'GLACCOUNT', 'UPDATE', 1),
+('accounting', 'DELETE_GLACCOUNT', 'GLACCOUNT', 'DELETE', 1),
+('accounting', 'CREATE_GLCLOSURE', 'GLCLOSURE', 'CREATE', 1),
+('accounting', 'UPDATE_GLCLOSURE', 'GLCLOSURE', 'UPDATE', 1),
+('accounting', 'DELETE_GLCLOSURE', 'GLCLOSURE', 'DELETE', 1), 
+('accounting', 'CREATE_JOURNALENTRY', 'JOURNALENTRY', 'CREATE', 1),
+('accounting', 'REVERSE_JOURNALENTRY', 'JOURNALENTRY', 'REVERSE', 1);
+
 
 INSERT INTO `m_role` (`id`, `name`, `description`) 
 VALUES 

@@ -156,7 +156,7 @@ public final class CalculateLoanScheduleQueryFromApiJsonHelper {
             if (topLevelJsonElement.get(chargesParameterName).isJsonArray()) {
                 final Type arrayObjectParameterTypeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
                 final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("id", "chargeId", "amount", "chargeTimeType",
-                        "chargeCalculationType", "specifiedDueDate"));
+                        "chargeCalculationType", "dueDate"));
 
                 final JsonArray array = topLevelJsonElement.get("charges").getAsJsonArray();
                 for (int i = 1; i <= array.size(); i++) {
@@ -173,7 +173,7 @@ public final class CalculateLoanScheduleQueryFromApiJsonHelper {
                     baseDataValidator.reset().parameter("charges").parameterAtIndexArray("amount", i).value(amount).notNull()
                             .positiveAmount();
 
-                    fromApiJsonHelper.extractLocalDateNamed("specifiedDueDate", loanChargeElement, dateFormat, locale);
+                    fromApiJsonHelper.extractLocalDateNamed("dueDate", loanChargeElement, dateFormat, locale);
                 }
             }
         }
@@ -239,48 +239,4 @@ public final class CalculateLoanScheduleQueryFromApiJsonHelper {
             }
         }
     }
-
-    // private LoanChargeCommand[] extractInToLoanChargeCommands(final
-    // JsonElement element) {
-    // LoanChargeCommand[] charges = null;
-    // if (element.isJsonObject()) {
-    // final JsonObject topLevelJsonElement = element.getAsJsonObject();
-    // final String dateFormat =
-    // fromApiJsonHelper.extractDateFormatParameter(topLevelJsonElement);
-    // final Locale locale =
-    // fromApiJsonHelper.extractLocaleParameter(topLevelJsonElement);
-    // if (topLevelJsonElement.has("charges") &&
-    // topLevelJsonElement.get("charges").isJsonArray()) {
-    //
-    // final JsonArray array =
-    // topLevelJsonElement.get("charges").getAsJsonArray();
-    // charges = new LoanChargeCommand[array.size()];
-    // for (int i = 0; i < array.size(); i++) {
-    //
-    // final JsonObject loanChargeElement = array.get(i).getAsJsonObject();
-    //
-    // final Long id = fromApiJsonHelper.extractLongNamed("id",
-    // loanChargeElement);
-    // final Long chargeId = fromApiJsonHelper.extractLongNamed("chargeId",
-    // loanChargeElement);
-    // final BigDecimal amount =
-    // fromApiJsonHelper.extractBigDecimalNamed("amount", loanChargeElement,
-    // locale);
-    // final Integer chargeTimeType =
-    // fromApiJsonHelper.extractIntegerNamed("chargeTimeType",
-    // loanChargeElement, locale);
-    // final Integer chargeCalculationType =
-    // fromApiJsonHelper.extractIntegerNamed("chargeCalculationType",
-    // loanChargeElement,
-    // locale);
-    // fromApiJsonHelper.extractLocalDateNamed("specifiedDueDate",
-    // loanChargeElement, dateFormat, locale);
-    //
-    // charges[i] = new LoanChargeCommand(id, chargeId, amount, chargeTimeType,
-    // chargeCalculationType);
-    // }
-    // }
-    // }
-    // return charges;
-    // }
 }

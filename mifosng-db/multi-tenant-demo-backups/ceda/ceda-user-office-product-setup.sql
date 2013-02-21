@@ -1,6 +1,6 @@
-﻿DELETE FROM `mifostenant-ceda`.`m_organisation_currency` WHERE id>0;
+﻿DELETE FROM `m_organisation_currency` WHERE id>0;
 
-INSERT INTO `mifostenant-ceda`.`m_organisation_currency`
+INSERT INTO `m_organisation_currency`
 (
 `code`,
 `decimal_places`,
@@ -11,9 +11,9 @@ VALUES
 ('UGX', 2, 'Uganda Shilling', 'USh', 'currency.UGX');
 
 
-UPDATE `mifostenant-ceda`.`m_appuser` SET `username` = 'admin' WHERE id=1;
+UPDATE `m_appuser` SET `username` = 'admin' WHERE id=1;
 
-INSERT INTO `mifostenant-ceda`.`m_appuser`
+INSERT INTO `m_appuser`
 (`is_deleted`,
 `office_id`,
 `username`,
@@ -30,12 +30,12 @@ VALUES
 (0, 1, 'keithwoodlock', 'Keith', 'Woodlock', 
 '4f607e9b6cffbe7d3db92d4bfa3391c7aa751727b4ea29d08fddf9dd72e6e7e3', 'keithwoodlock@gmail.com', 0, 1, 1, 1, 1);
 
-INSERT INTO `mifostenant-ceda`.`m_appuser_role`
+INSERT INTO `m_appuser_role`
 (`appuser_id`,`role_id`) VALUES (2,1);
 
-UPDATE `mifostenant-ceda`.`m_office` SET `name` = 'CEDA Microfinance Ltd.' WHERE id=1;
+UPDATE `m_office` SET `name` = 'CEDA Microfinance Ltd.' WHERE id=1;
 
-INSERT INTO `mifostenant-ceda`.`m_office`
+INSERT INTO `m_office`
 (
 `parent_id`,
 `hierarchy`,
@@ -46,7 +46,7 @@ VALUES
 (1, '.2.', 2, 'Uganda (Kampala)', '2009-01-01');
 
 
-INSERT INTO `mifostenant-ceda`.`m_staff`
+INSERT INTO `m_staff`
 (
 `is_loan_officer`,
 `office_id`,
@@ -58,7 +58,7 @@ VALUES
 (1, 2, 'Kampala', 'LoanOfficer', 'LoanOfficer, Kampala');
 
 
-INSERT INTO `mifostenant-ceda`.`m_charge`
+INSERT INTO `m_charge`
 (
 `name`,
 `currency_code`,
@@ -72,7 +72,7 @@ INSERT INTO `mifostenant-ceda`.`m_charge`
 VALUES ('Bank Fee (per installment)', 'UGX', 1, 2, 1, 1500.000000, 0, 1, 0);
 
 
-INSERT INTO `mifostenant-ceda`.`m_product_loan`
+INSERT INTO `m_product_loan`
 (
 `currency_code`,
 `currency_digits`,
@@ -98,5 +98,5 @@ VALUES
 24.000000, 3, 24.000000, 1, 1, 1, 2, 12, 1, 2, 2);
 
 -- mapping of that loan product to GL Accounts
-INSERT INTO `mifostenant-ceda`.`acc_product_mapping` 
+INSERT INTO `acc_product_mapping` 
 VALUES (1,4,1,1,1),(2,8,1,1,2),(3,34,1,1,3),(4,37,1,1,4),(5,35,1,1,5),(6,97,1,1,6);

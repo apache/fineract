@@ -22,6 +22,7 @@ DROP TABLE IF EXISTS `m_deposit_account_transaction`;
 DROP TABLE IF EXISTS `m_document`;
 DROP TABLE IF EXISTS `m_fund`;
 DROP TABLE IF EXISTS `m_group`;
+DROP TABLE IF EXISTS `m_group_level`;
 DROP TABLE IF EXISTS `m_group_client`;
 DROP TABLE IF EXISTS `m_guarantor`;
 DROP TABLE IF EXISTS `m_loan`;
@@ -319,10 +320,25 @@ CREATE TABLE `m_staff` (
 -- ============ end of organisation wide related tables ===========
 
 -- DDL client/group related tables
+CREATE TABLE `m_group_level` (
+`id` INT(11) NOT NULL AUTO_INCREMENT,
+`parent_id` INT(11) NULL DEFAULT NULL,
+`super_parent` TINYINT(1) NOT NULL,
+`level_name` VARCHAR(100) NOT NULL,
+`recursable` TINYINT(1) NOT NULL,
+`can_have_clients` TINYINT(1) NOT NULL,
+PRIMARY KEY (`id`),
+INDEX `Parent_levelId_reference` (`parent_id`),
+CONSTRAINT `Parent_levelId_reference` FOREIGN KEY (`parent_id`) REFERENCES `m_group_level` (`id`)
+)ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 CREATE TABLE `m_group` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `office_id` bigint(20) NOT NULL,
-  `loan_officer_id` BIGINT(20) DEFAULT NULL,
+  `staff_id` BIGINT(20) DEFAULT NULL,
+  `parent_id` BIGINT(20) NULL DEFAULT NULL,
+  `level_Id` INT(11) NOT NULL,
+  `hierarchy` VARCHAR(100) NULL DEFAULT NULL,
   `name` varchar(100) DEFAULT NULL,
   `external_id` varchar(100) DEFAULT NULL,
   `is_deleted` tinyint(1) NOT NULL DEFAULT '0',
@@ -330,9 +346,11 @@ CREATE TABLE `m_group` (
   UNIQUE KEY `name` (`name`),
   UNIQUE KEY `external_id` (`external_id`),
   KEY `office_id` (`office_id`),
-  KEY `loan_officer_id` (`loan_officer_id`),
+  KEY `staff_id` (`staff_id`),
   CONSTRAINT `m_group_ibfk_1` FOREIGN KEY (`office_id`) REFERENCES `m_office` (`id`),
-  CONSTRAINT `FK_m_group_m_staff` FOREIGN KEY (`loan_officer_id`) REFERENCES `m_staff` (`id`)
+  CONSTRAINT `Parent_Id_reference` FOREIGN KEY (`parent_id`) REFERENCES `m_group` (`id`),
+  CONSTRAINT `FK_m_group_level` FOREIGN KEY (`level_Id`) REFERENCES `m_group_level` (`id`),
+  CONSTRAINT `FK_m_group_m_staff` FOREIGN KEY (`staff_id`) REFERENCES `m_staff` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `m_client` (
@@ -685,23 +703,17 @@ CREATE TABLE `m_loan_repayment_schedule` (
 CREATE TABLE `m_loan_transaction` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `loan_id` bigint(20) NOT NULL,
+  `is_reversed` TINYINT(1) NOT NULL,
   `transaction_type_enum` smallint(5) NOT NULL,
-  `contra_id` bigint(20) DEFAULT NULL,
   `transaction_date` date NOT NULL,
   `amount` decimal(19,6) NOT NULL,
-  `createdby_id` bigint(20) DEFAULT NULL,
-  `created_date` datetime DEFAULT NULL,
-  `lastmodified_date` datetime DEFAULT NULL,
-  `lastmodifiedby_id` bigint(20) DEFAULT NULL,
   `principal_portion_derived` decimal(19,6) DEFAULT NULL,
   `interest_portion_derived` decimal(19,6) DEFAULT NULL,
   `fee_charges_portion_derived` decimal(19,6) DEFAULT NULL,
   `penalty_charges_portion_derived` decimal(19,6) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `FKCFCEA42640BE0710` (`loan_id`),
-  KEY `FKCFCEA426FC69F3F1` (`contra_id`),
-  CONSTRAINT `FKCFCEA42640BE0710` FOREIGN KEY (`loan_id`) REFERENCES `m_loan` (`id`),
-  CONSTRAINT `FKCFCEA426FC69F3F1` FOREIGN KEY (`contra_id`) REFERENCES `m_loan_transaction` (`id`)
+  CONSTRAINT `FKCFCEA42640BE0710` FOREIGN KEY (`loan_id`) REFERENCES `m_loan` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 -- ======== end of loan related tables ==========
 
@@ -942,7 +954,7 @@ CREATE TABLE `acc_gl_journal_entry` (
   `reversal_id` bigint(20) DEFAULT NULL,
   `transaction_id` varchar(50) NOT NULL,
   `reversed` tinyint(1) NOT NULL DEFAULT '0',
-  `portfolio_generated` tinyint(1) NOT NULL DEFAULT '0',
+  `manual_entry` TINYINT(1) NOT NULL DEFAULT '0',
   `entry_date` date NOT NULL,
   `type_enum` smallint(50) NOT NULL,
   `amount` decimal(19,6) NOT NULL,
