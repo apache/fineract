@@ -71,58 +71,71 @@ public final class DepositProductCommandFromApiJsonDeserializer {
         baseDataValidator.reset().parameter("minimumBalance").value(minimumBalance).notNull().zeroOrPositiveAmount();
 
         final BigDecimal maximumBalance = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("maximumBalance", element);
-		baseDataValidator.reset().parameter("maximumBalance").value(maximumBalance).zeroOrPositiveAmount();
-		baseDataValidator.reset().parameter("minimumBalance").comapareMinimumAndMaximumAmounts(minimumBalance, maximumBalance);
-        
-		final Integer tenureInMonths = fromApiJsonHelper.extractIntegerNamed("tenureInMonths", element, Locale.getDefault());
-		baseDataValidator.reset().parameter("tenureInMonths").value(tenureInMonths).notNull().zeroOrPositiveAmount();
-		
-		final BigDecimal maturityDefaultInterestRate = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("maturityDefaultInterestRate", element);
-		baseDataValidator.reset().parameter("maturityDefaultInterestRate").value(maturityDefaultInterestRate).notNull().zeroOrPositiveAmount();
-		
-		final BigDecimal maturityMinInterestRate = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("maturityMinInterestRate", element);
-		baseDataValidator.reset().parameter("maturityMinInterestRate").value(maturityMinInterestRate).notNull().zeroOrPositiveAmount();
-		
-		final BigDecimal maturityMaxInterestRate = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("maturityMaxInterestRate", element);
-		baseDataValidator.reset().parameter("maturityMaxInterestRate").value(maturityMaxInterestRate).notNull().zeroOrPositiveAmount();
-		baseDataValidator.reset().parameter("maturityMinInterestRate").comapareMinAndMaxOfTwoBigDecmimalNos(maturityMinInterestRate, maturityMaxInterestRate);
-		baseDataValidator.reset().parameter("maturityDefaultInterestRate").comapareMinAndMaxOfTwoBigDecmimalNos(maturityDefaultInterestRate, maturityMaxInterestRate);
-		baseDataValidator.reset().parameter("maturityMinInterestRate").comapareMinAndMaxOfTwoBigDecmimalNos(maturityMinInterestRate, maturityDefaultInterestRate);
-		
-		final Integer interestCompoundedEvery = fromApiJsonHelper.extractIntegerNamed("interestCompoundedEvery", element, Locale.getDefault());
-		baseDataValidator.reset().parameter("interestCompoundedEvery").value(interestCompoundedEvery).notNull().zeroOrPositiveAmount();
-		
-		final Integer interestCompoundedEveryPeriodType = fromApiJsonHelper.extractIntegerNamed("interestCompoundedEveryPeriodType", element, Locale.getDefault());
-		baseDataValidator.reset().parameter("interestCompoundedEveryPeriodType").value(interestCompoundedEveryPeriodType).notNull().inMinMaxRange(1, 3);
-		
-		final Boolean renewalAllowed = fromApiJsonHelper.extractBooleanNamed("renewalAllowed", element);
-		baseDataValidator.reset().parameter("renewalAllowed").value(renewalAllowed).trueOrFalseRequired(isBooleanValueUpdated(renewalAllowed));
-		
-		final Boolean preClosureAllowed = fromApiJsonHelper.extractBooleanNamed("preClosureAllowed", element);
-		baseDataValidator.reset().parameter("preClosureAllowed").value(preClosureAllowed).trueOrFalseRequired(isBooleanValueUpdated(preClosureAllowed));
-		
-		final Boolean interestCompoundingAllowed = fromApiJsonHelper.extractBooleanNamed("interestCompoundingAllowed", element);
-		baseDataValidator.reset().parameter("interestCompoundingAllowed").value(interestCompoundingAllowed).trueOrFalseRequired(isBooleanValueUpdated(interestCompoundingAllowed));
+        baseDataValidator.reset().parameter("maximumBalance").value(maximumBalance).zeroOrPositiveAmount();
+        baseDataValidator.reset().parameter("minimumBalance").comapareMinimumAndMaximumAmounts(minimumBalance, maximumBalance);
 
-		final BigDecimal preClosureInterestRate = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("preClosureInterestRate", element);
-		baseDataValidator.reset().parameter("preClosureInterestRate").value(preClosureInterestRate).notNull().zeroOrPositiveAmount();
-		baseDataValidator.reset().parameter("preClosureInterestRate").comapareMinAndMaxOfTwoBigDecmimalNos(preClosureInterestRate,maturityMinInterestRate);
-		
-		final Boolean isLockinPeriodAllowed = fromApiJsonHelper.extractBooleanNamed("isLockinPeriodAllowed", element);
-		baseDataValidator.reset().parameter("isLockinPeriodAllowed").value(isLockinPeriodAllowed).trueOrFalseRequired(isBooleanValueUpdated(isLockinPeriodAllowed));
-		
-		final Integer lockinPeriod = fromApiJsonHelper.extractIntegerNamed("lockinPeriod", element, Locale.getDefault());
-		baseDataValidator.reset().parameter("lockinPeriod").value(lockinPeriod).notNull().zeroOrPositiveAmount();
-		
-		final Integer lockinPeriodType = fromApiJsonHelper.extractIntegerNamed("lockinPeriodType", element, Locale.getDefault());
-		baseDataValidator.reset().parameter("lockinPeriodType").value(lockinPeriodType).notNull().inMinMaxRange(1, 3);
-		
-		throwExceptionIfValidationWarningsExist(dataValidationErrors);
-	}	
-	
-	public void validateForUpdate(String json) {
-		
-		if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        final Integer tenureInMonths = fromApiJsonHelper.extractIntegerNamed("tenureInMonths", element, Locale.getDefault());
+        baseDataValidator.reset().parameter("tenureInMonths").value(tenureInMonths).notNull().zeroOrPositiveAmount();
+
+        final BigDecimal maturityDefaultInterestRate = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("maturityDefaultInterestRate",
+                element);
+        baseDataValidator.reset().parameter("maturityDefaultInterestRate").value(maturityDefaultInterestRate).notNull()
+                .zeroOrPositiveAmount();
+
+        final BigDecimal maturityMinInterestRate = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("maturityMinInterestRate", element);
+        baseDataValidator.reset().parameter("maturityMinInterestRate").value(maturityMinInterestRate).notNull().zeroOrPositiveAmount();
+
+        final BigDecimal maturityMaxInterestRate = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("maturityMaxInterestRate", element);
+        baseDataValidator.reset().parameter("maturityMaxInterestRate").value(maturityMaxInterestRate).notNull().zeroOrPositiveAmount();
+        baseDataValidator.reset().parameter("maturityMinInterestRate")
+                .comapareMinAndMaxOfTwoBigDecmimalNos(maturityMinInterestRate, maturityMaxInterestRate);
+        baseDataValidator.reset().parameter("maturityDefaultInterestRate")
+                .comapareMinAndMaxOfTwoBigDecmimalNos(maturityDefaultInterestRate, maturityMaxInterestRate);
+        baseDataValidator.reset().parameter("maturityMinInterestRate")
+                .comapareMinAndMaxOfTwoBigDecmimalNos(maturityMinInterestRate, maturityDefaultInterestRate);
+
+        final Integer interestCompoundedEvery = fromApiJsonHelper.extractIntegerNamed("interestCompoundedEvery", element,
+                Locale.getDefault());
+        baseDataValidator.reset().parameter("interestCompoundedEvery").value(interestCompoundedEvery).notNull().zeroOrPositiveAmount();
+
+        final Integer interestCompoundedEveryPeriodType = fromApiJsonHelper.extractIntegerNamed("interestCompoundedEveryPeriodType",
+                element, Locale.getDefault());
+        baseDataValidator.reset().parameter("interestCompoundedEveryPeriodType").value(interestCompoundedEveryPeriodType).notNull()
+                .inMinMaxRange(1, 3);
+
+        final Boolean renewalAllowed = fromApiJsonHelper.extractBooleanNamed("renewalAllowed", element);
+        baseDataValidator.reset().parameter("renewalAllowed").value(renewalAllowed)
+                .trueOrFalseRequired(isBooleanValueUpdated(renewalAllowed));
+
+        final Boolean preClosureAllowed = fromApiJsonHelper.extractBooleanNamed("preClosureAllowed", element);
+        baseDataValidator.reset().parameter("preClosureAllowed").value(preClosureAllowed)
+                .trueOrFalseRequired(isBooleanValueUpdated(preClosureAllowed));
+
+        final Boolean interestCompoundingAllowed = fromApiJsonHelper.extractBooleanNamed("interestCompoundingAllowed", element);
+        baseDataValidator.reset().parameter("interestCompoundingAllowed").value(interestCompoundingAllowed)
+                .trueOrFalseRequired(isBooleanValueUpdated(interestCompoundingAllowed));
+
+        final BigDecimal preClosureInterestRate = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("preClosureInterestRate", element);
+        baseDataValidator.reset().parameter("preClosureInterestRate").value(preClosureInterestRate).notNull().zeroOrPositiveAmount();
+        baseDataValidator.reset().parameter("preClosureInterestRate")
+                .comapareMinAndMaxOfTwoBigDecmimalNos(preClosureInterestRate, maturityMinInterestRate);
+
+        final Boolean isLockinPeriodAllowed = fromApiJsonHelper.extractBooleanNamed("isLockinPeriodAllowed", element);
+        baseDataValidator.reset().parameter("isLockinPeriodAllowed").value(isLockinPeriodAllowed)
+                .trueOrFalseRequired(isBooleanValueUpdated(isLockinPeriodAllowed));
+
+        final Integer lockinPeriod = fromApiJsonHelper.extractIntegerNamed("lockinPeriod", element, Locale.getDefault());
+        baseDataValidator.reset().parameter("lockinPeriod").value(lockinPeriod).notNull().zeroOrPositiveAmount();
+
+        final Integer lockinPeriodType = fromApiJsonHelper.extractIntegerNamed("lockinPeriodType", element, Locale.getDefault());
+        baseDataValidator.reset().parameter("lockinPeriodType").value(lockinPeriodType).notNull().inMinMaxRange(1, 3);
+
+        throwExceptionIfValidationWarningsExist(dataValidationErrors);
+    }
+
+    public void validateForUpdate(final String json) {
+
+        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, supportedParams);
@@ -150,67 +163,80 @@ public final class DepositProductCommandFromApiJsonDeserializer {
         baseDataValidator.reset().parameter("minimumBalance").value(minimumBalance).ignoreIfNull().zeroOrPositiveAmount();
 
         final BigDecimal maximumBalance = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("maximumBalance", element);
-		baseDataValidator.reset().parameter("maximumBalance").value(maximumBalance).zeroOrPositiveAmount();
-		baseDataValidator.reset().parameter("minimumBalance").comapareMinimumAndMaximumAmounts(minimumBalance, maximumBalance);
-        
-		final Integer tenureInMonths = fromApiJsonHelper.extractIntegerNamed("tenureInMonths", element, Locale.getDefault());
-		baseDataValidator.reset().parameter("tenureInMonths").value(tenureInMonths).ignoreIfNull().zeroOrPositiveAmount();
-		
-		final BigDecimal maturityDefaultInterestRate = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("maturityDefaultInterestRate", element);
-		baseDataValidator.reset().parameter("maturityDefaultInterestRate").value(maturityDefaultInterestRate).ignoreIfNull().zeroOrPositiveAmount();
-		
-		final BigDecimal maturityMinInterestRate = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("maturityMinInterestRate", element);
-		baseDataValidator.reset().parameter("maturityMinInterestRate").value(maturityMinInterestRate).ignoreIfNull().zeroOrPositiveAmount();
-		
-		final BigDecimal maturityMaxInterestRate = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("maturityMaxInterestRate", element);
-		baseDataValidator.reset().parameter("maturityMaxInterestRate").value(maturityMaxInterestRate).ignoreIfNull().zeroOrPositiveAmount();
-		baseDataValidator.reset().parameter("maturityMinInterestRate").comapareMinAndMaxOfTwoBigDecmimalNos(maturityMinInterestRate, maturityMaxInterestRate);
-		baseDataValidator.reset().parameter("maturityDefaultInterestRate").comapareMinAndMaxOfTwoBigDecmimalNos(maturityDefaultInterestRate, maturityMaxInterestRate);
-		baseDataValidator.reset().parameter("maturityMinInterestRate").comapareMinAndMaxOfTwoBigDecmimalNos(maturityMinInterestRate, maturityDefaultInterestRate);
-		
-		final Integer interestCompoundedEvery = fromApiJsonHelper.extractIntegerNamed("interestCompoundedEvery", element, Locale.getDefault());
-		baseDataValidator.reset().parameter("interestCompoundedEvery").value(interestCompoundedEvery).ignoreIfNull().zeroOrPositiveAmount();
-		
-		final Integer interestCompoundedEveryPeriodType = fromApiJsonHelper.extractIntegerNamed("interestCompoundedEveryPeriodType", element, Locale.getDefault());
-		baseDataValidator.reset().parameter("interestCompoundedEveryPeriodType").value(interestCompoundedEveryPeriodType).ignoreIfNull().inMinMaxRange(1, 3);
-		
-		final Boolean renewalAllowed = fromApiJsonHelper.extractBooleanNamed("renewalAllowed", element);
-		baseDataValidator.reset().parameter("renewalAllowed").value(renewalAllowed).trueOrFalseRequired(isBooleanValueUpdated(renewalAllowed));
-		
-		final Boolean preClosureAllowed = fromApiJsonHelper.extractBooleanNamed("preClosureAllowed", element);
-		baseDataValidator.reset().parameter("preClosureAllowed").value(preClosureAllowed).trueOrFalseRequired(isBooleanValueUpdated(preClosureAllowed));
-		
-		final Boolean interestCompoundingAllowed = fromApiJsonHelper.extractBooleanNamed("interestCompoundingAllowed", element);
-		baseDataValidator.reset().parameter("interestCompoundingAllowed").value(interestCompoundingAllowed).trueOrFalseRequired(isBooleanValueUpdated(interestCompoundingAllowed));
+        baseDataValidator.reset().parameter("maximumBalance").value(maximumBalance).zeroOrPositiveAmount();
+        baseDataValidator.reset().parameter("minimumBalance").comapareMinimumAndMaximumAmounts(minimumBalance, maximumBalance);
 
-		final BigDecimal preClosureInterestRate = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("preClosureInterestRate", element);
-		baseDataValidator.reset().parameter("preClosureInterestRate").value(preClosureInterestRate).ignoreIfNull().zeroOrPositiveAmount();
-		baseDataValidator.reset().parameter("preClosureInterestRate").comapareMinAndMaxOfTwoBigDecmimalNos(preClosureInterestRate,maturityMinInterestRate);
-		
-		final Boolean lockinPeriodAllowed = fromApiJsonHelper.extractBooleanNamed("isLockinPeriodAllowed", element);
-		baseDataValidator.reset().parameter("isLockinPeriodAllowed").value(lockinPeriodAllowed).trueOrFalseRequired(isBooleanValueUpdated(lockinPeriodAllowed));
-		
-		final Integer lockinPeriod = fromApiJsonHelper.extractIntegerNamed("lockinPeriod", element, Locale.getDefault());
-		baseDataValidator.reset().parameter("lockinPeriod").value(lockinPeriod).ignoreIfNull().zeroOrPositiveAmount();
-		
-		final Integer lockinPeriodType = fromApiJsonHelper.extractIntegerNamed("lockinPeriodType", element, Locale.getDefault());
-		baseDataValidator.reset().parameter("lockinPeriodType").value(lockinPeriodType).ignoreIfNull().inMinMaxRange(1, 3);
-		
-		throwExceptionIfValidationWarningsExist(dataValidationErrors);
-		 
-	}
-	
-	 private Boolean isBooleanValueUpdated(Boolean actualValue) {
-		 Boolean isUpdated = false;
-		if(actualValue != null){
-			isUpdated = true;
-		}
-		return isUpdated;
-	}
+        final Integer tenureInMonths = fromApiJsonHelper.extractIntegerNamed("tenureInMonths", element, Locale.getDefault());
+        baseDataValidator.reset().parameter("tenureInMonths").value(tenureInMonths).ignoreIfNull().zeroOrPositiveAmount();
 
-	private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
-	        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
-	                "Validation errors exist.", dataValidationErrors); }
-	}
+        final BigDecimal maturityDefaultInterestRate = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("maturityDefaultInterestRate",
+                element);
+        baseDataValidator.reset().parameter("maturityDefaultInterestRate").value(maturityDefaultInterestRate).ignoreIfNull()
+                .zeroOrPositiveAmount();
+
+        final BigDecimal maturityMinInterestRate = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("maturityMinInterestRate", element);
+        baseDataValidator.reset().parameter("maturityMinInterestRate").value(maturityMinInterestRate).ignoreIfNull().zeroOrPositiveAmount();
+
+        final BigDecimal maturityMaxInterestRate = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("maturityMaxInterestRate", element);
+        baseDataValidator.reset().parameter("maturityMaxInterestRate").value(maturityMaxInterestRate).ignoreIfNull().zeroOrPositiveAmount();
+        baseDataValidator.reset().parameter("maturityMinInterestRate")
+                .comapareMinAndMaxOfTwoBigDecmimalNos(maturityMinInterestRate, maturityMaxInterestRate);
+        baseDataValidator.reset().parameter("maturityDefaultInterestRate")
+                .comapareMinAndMaxOfTwoBigDecmimalNos(maturityDefaultInterestRate, maturityMaxInterestRate);
+        baseDataValidator.reset().parameter("maturityMinInterestRate")
+                .comapareMinAndMaxOfTwoBigDecmimalNos(maturityMinInterestRate, maturityDefaultInterestRate);
+
+        final Integer interestCompoundedEvery = fromApiJsonHelper.extractIntegerNamed("interestCompoundedEvery", element,
+                Locale.getDefault());
+        baseDataValidator.reset().parameter("interestCompoundedEvery").value(interestCompoundedEvery).ignoreIfNull().zeroOrPositiveAmount();
+
+        final Integer interestCompoundedEveryPeriodType = fromApiJsonHelper.extractIntegerNamed("interestCompoundedEveryPeriodType",
+                element, Locale.getDefault());
+        baseDataValidator.reset().parameter("interestCompoundedEveryPeriodType").value(interestCompoundedEveryPeriodType).ignoreIfNull()
+                .inMinMaxRange(1, 3);
+
+        final Boolean renewalAllowed = fromApiJsonHelper.extractBooleanNamed("renewalAllowed", element);
+        baseDataValidator.reset().parameter("renewalAllowed").value(renewalAllowed)
+                .trueOrFalseRequired(isBooleanValueUpdated(renewalAllowed));
+
+        final Boolean preClosureAllowed = fromApiJsonHelper.extractBooleanNamed("preClosureAllowed", element);
+        baseDataValidator.reset().parameter("preClosureAllowed").value(preClosureAllowed)
+                .trueOrFalseRequired(isBooleanValueUpdated(preClosureAllowed));
+
+        final Boolean interestCompoundingAllowed = fromApiJsonHelper.extractBooleanNamed("interestCompoundingAllowed", element);
+        baseDataValidator.reset().parameter("interestCompoundingAllowed").value(interestCompoundingAllowed)
+                .trueOrFalseRequired(isBooleanValueUpdated(interestCompoundingAllowed));
+
+        final BigDecimal preClosureInterestRate = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("preClosureInterestRate", element);
+        baseDataValidator.reset().parameter("preClosureInterestRate").value(preClosureInterestRate).ignoreIfNull().zeroOrPositiveAmount();
+        baseDataValidator.reset().parameter("preClosureInterestRate")
+                .comapareMinAndMaxOfTwoBigDecmimalNos(preClosureInterestRate, maturityMinInterestRate);
+
+        final Boolean lockinPeriodAllowed = fromApiJsonHelper.extractBooleanNamed("isLockinPeriodAllowed", element);
+        baseDataValidator.reset().parameter("isLockinPeriodAllowed").value(lockinPeriodAllowed)
+                .trueOrFalseRequired(isBooleanValueUpdated(lockinPeriodAllowed));
+
+        final Integer lockinPeriod = fromApiJsonHelper.extractIntegerNamed("lockinPeriod", element, Locale.getDefault());
+        baseDataValidator.reset().parameter("lockinPeriod").value(lockinPeriod).ignoreIfNull().zeroOrPositiveAmount();
+
+        final Integer lockinPeriodType = fromApiJsonHelper.extractIntegerNamed("lockinPeriodType", element, Locale.getDefault());
+        baseDataValidator.reset().parameter("lockinPeriodType").value(lockinPeriodType).ignoreIfNull().inMinMaxRange(1, 3);
+
+        throwExceptionIfValidationWarningsExist(dataValidationErrors);
+
+    }
+
+    private Boolean isBooleanValueUpdated(final Boolean actualValue) {
+        Boolean isUpdated = false;
+        if (actualValue != null) {
+            isUpdated = true;
+        }
+        return isUpdated;
+    }
+
+    private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
+        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
+                "Validation errors exist.", dataValidationErrors); }
+    }
 
 }
