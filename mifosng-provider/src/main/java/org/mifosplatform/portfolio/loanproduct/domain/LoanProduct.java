@@ -64,7 +64,7 @@ public class LoanProduct extends AbstractPersistable<Long> {
     private final LoanProductRelatedDetail loanProductRelatedDetail;
 
     @Column(name = "accounting_type", nullable = false)
-    private Integer accountingType;
+    private Integer accountingRule;
 
     public static LoanProduct assembleFromJson(final Fund fund, final LoanTransactionProcessingStrategy loanTransactionProcessingStrategy,
             final Set<Charge> productCharges, final JsonCommand command, final AprCalculator aprCalculator) {
@@ -91,7 +91,7 @@ public class LoanProduct extends AbstractPersistable<Long> {
         final Integer repaymentEvery = command.integerValueOfParameterNamed("repaymentEvery");
         final Integer numberOfRepayments = command.integerValueOfParameterNamed("numberOfRepayments");
         final BigDecimal inArrearsTolerance = command.bigDecimalValueOfParameterNamed("inArrearsTolerance");
-        final AccountingRuleType accountingRuleType = AccountingRuleType.fromInt(command.integerValueOfParameterNamed("accountingType"));
+        final AccountingRuleType accountingRuleType = AccountingRuleType.fromInt(command.integerValueOfParameterNamed("accountingRule"));
 
         return new LoanProduct(fund, loanTransactionProcessingStrategy, name, description, currency, principal, interestRatePerPeriod,
                 interestFrequencyType, annualInterestRate, interestMethod, interestCalculationPeriodMethod, repaymentEvery,
@@ -128,7 +128,7 @@ public class LoanProduct extends AbstractPersistable<Long> {
                 repaymentFrequencyType, defaultNumberOfInstallments, amortizationMethod, inArrearsTolerance);
 
         if (accountingRuleType != null) {
-            this.accountingType = accountingRuleType.getValue();
+            this.accountingRule = accountingRuleType.getValue();
         }
     }
 
@@ -153,7 +153,7 @@ public class LoanProduct extends AbstractPersistable<Long> {
     }
 
     public Integer getAccountingType() {
-        return this.accountingType;
+        return this.accountingRule;
     }
 
     public Map<String, Object> update(final JsonCommand command, final AprCalculator aprCalculator) {
@@ -161,10 +161,10 @@ public class LoanProduct extends AbstractPersistable<Long> {
         final Map<String, Object> actualChanges = this.loanProductRelatedDetail.update(command, aprCalculator);
 
         final String accountingTypeParamName = "accountingRule";
-        if (command.isChangeInIntegerParameterNamed(accountingTypeParamName, this.accountingType)) {
+        if (command.isChangeInIntegerParameterNamed(accountingTypeParamName, this.accountingRule)) {
             final Integer newValue = command.integerValueOfParameterNamed(accountingTypeParamName);
             actualChanges.put(accountingTypeParamName, newValue);
-            this.accountingType = newValue;
+            this.accountingRule = newValue;
         }
 
         final String nameParamName = "name";
@@ -223,14 +223,14 @@ public class LoanProduct extends AbstractPersistable<Long> {
     }
 
     public boolean isAccountingEnabled() {
-        return !AccountingRuleType.NONE.getValue().equals(this.accountingType);
+        return !AccountingRuleType.NONE.getValue().equals(this.accountingRule);
     }
 
     public boolean isCashBasedAccountingEnabled() {
-        return AccountingRuleType.CASH_BASED.getValue().equals(this.accountingType);
+        return AccountingRuleType.CASH_BASED.getValue().equals(this.accountingRule);
     }
 
     public boolean isAccrualBasedAccountingEnabled() {
-        return AccountingRuleType.ACCRUAL_BASED.getValue().equals(this.accountingType);
+        return AccountingRuleType.ACCRUAL_BASED.getValue().equals(this.accountingRule);
     }
 }

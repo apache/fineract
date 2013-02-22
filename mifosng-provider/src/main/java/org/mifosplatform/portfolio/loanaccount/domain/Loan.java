@@ -931,9 +931,6 @@ public class Loan extends AbstractAuditableCustom<AppUser, Long> {
             actualChanges.put("status", LoanEnumerations.status(this.loanStatus));
 
             LocalDate rejectedOn = command.localDateValueOfParameterNamed("rejectedOnDate");
-            if (rejectedOn == null) {
-                rejectedOn = command.localDateValueOfParameterNamed("eventDate");
-            }
 
             final Locale locale = new Locale(command.locale());
             final DateTimeFormatter fmt = DateTimeFormat.forPattern(command.dateFormat()).withLocale(locale);

@@ -146,6 +146,12 @@ public final class CalculateLoanScheduleQueryFromApiJsonHelper {
         validateRepaymentsStartingFromDateAndInterestChargedFromDate(dataValidationErrors, expectedDisbursementDate,
                 repaymentsStartingFromDate, interestChargedFromDate);
 
+        final String transactionProcessingStrategyIdParameterName = "transactionProcessingStrategyId";
+        final Long transactionProcessingStrategyId = fromApiJsonHelper.extractLongNamed(transactionProcessingStrategyIdParameterName,
+                element);
+        baseDataValidator.reset().parameter(transactionProcessingStrategyIdParameterName).value(transactionProcessingStrategyId).notNull()
+                .integerGreaterThanZero();
+
         // charges
         final String chargesParameterName = "charges";
         if (element.isJsonObject() && fromApiJsonHelper.parameterExists(chargesParameterName, element)) {

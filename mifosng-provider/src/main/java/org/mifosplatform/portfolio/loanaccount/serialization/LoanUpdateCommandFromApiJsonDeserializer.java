@@ -15,9 +15,7 @@ import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.exception.InvalidJsonException;
 import org.mifosplatform.infrastructure.core.serialization.AbstractFromApiJsonDeserializer;
-import org.mifosplatform.infrastructure.core.serialization.FromApiJsonDeserializer;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
-import org.mifosplatform.portfolio.loanaccount.command.LoanStateTransitionCommand;
 import org.mifosplatform.portfolio.loanaccount.command.LoanUpdateCommand;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -25,10 +23,6 @@ import org.springframework.stereotype.Component;
 import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
 
-/**
- * Implementation of {@link FromApiJsonDeserializer} for
- * {@link LoanStateTransitionCommand}'s.
- */
 @Component
 public final class LoanUpdateCommandFromApiJsonDeserializer extends AbstractFromApiJsonDeserializer<LoanUpdateCommand> {
 

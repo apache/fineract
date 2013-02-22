@@ -206,8 +206,8 @@ INSERT INTO `m_office` (`id`, `parent_id`, `hierarchy`, `external_id`, `name`, `
 VALUES 
 (1,NULL,'.','1','Head Office','2009-01-01');
 
-INSERT INTO `m_group_level` (`id`, `parent_id`, `is_super_parent`, `level_name`, `recursable`, `can_have_clients`) VALUES (1, NULL, 1, 'Center', 1, 0);
-INSERT INTO `m_group_level` (`id`, `parent_id`, `is_super_parent`, `level_name`, `recursable`, `can_have_clients`) VALUES (2, 1, 0, 'Group', 0, 1);
+INSERT INTO `m_group_level` (`id`, `parent_id`, `super_parent`, `level_name`, `recursable`, `can_have_clients`) VALUES (1, NULL, 1, 'Center', 1, 0);
+INSERT INTO `m_group_level` (`id`, `parent_id`, `super_parent`, `level_name`, `recursable`, `can_have_clients`) VALUES (2, 1, 0, 'Group', 0, 1);
 
 -- ========= roles and permissions =========
 /*
@@ -496,13 +496,8 @@ VALUES
 INSERT INTO `m_appuser_role` (`appuser_id`, `role_id`) VALUES (1,1);
 
 
--- Add in permissions for any special datatables or reports added in base reference data
+-- Add in permissions for any special datatables added in base reference data
 -- This needs to always happen at end of the script
-/* add a read permission for each defined report */
-insert into m_permission(grouping, `code`, entity_name, action_name)
-select 'report', concat('READ_', sr.report_name), 
-sr.report_name, 'READ'
-from stretchy_report sr;
 
 /* add a create, read, update and delete permission for each registered datatable */
 insert into m_permission(grouping, `code`, entity_name, action_name)

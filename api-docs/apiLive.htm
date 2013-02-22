@@ -349,22 +349,75 @@
 							</tr>
 							<tr class="alt">
 								<td><a href="#loans">LOAN</a></td>
-								<td>loans</td>
-								<td><a href="#loans_create">Create a New Loan / Submit
-										a Loan Application</a></td>
+								<td>loans?calculateLoanSchedule</td>
+								<td><a href="#loans_calculate">Calculate Loan Repayment Schedule</a></td>
 								<td></td>
 								<td></td>
 								<td></td>
 							</tr>
 							<tr>
 								<td></td>
+								<td>loans</td>
+								<td><a href="#loans_create">Submit a new Loan Application</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr class="alt">
+								<td></td>
 								<td>loans/{loanId}</td>
-								<td><a href="#loans_approve_etc">Approve, Undo
-										Approval, Disburse, Undo Disbursal, Reject a Loan or Withdraw
-										a Loan Application</a></td>
+								<td></td>
 								<td><a href="#loans_retrieve">Retrieve a Loan</a></td>
 								<td></td>
 								<td><a href="#loans_delete">Delete a Loan</a></td>
+							</tr>
+							<tr class="alt">
+								<td></td>
+								<td>loans/{loanId}?command=approve</td>
+								<td><a href="#loans_approve">Approve Loan Application</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr class="alt">
+								<td></td>
+								<td>loans/{loanId}?command=undoApproval</td>
+								<td><a href="#loans_approve_undo">Undo Loan Application Approval</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr class="alt">
+								<td></td>
+								<td>loans/{loanId}?command=reject</td>
+								<td><a href="#loans_reject">Reject Loan Application</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr class="alt">
+								<td></td>
+								<td>loans/{loanId}?command=withdraw</td>
+								<td><a href="#loans_withdraw">Withdraw Loan Application</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr class="alt">
+								<td></td>
+								<td>loans/{loanId}?command=disburse</td>
+								<td><a href="#loans_disburse">Disburse Loan</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr class="alt">
+								<td></td>
+								<td>loans/{loanId}?command=undoDisbursal</td>
+								<td><a href="#loans_disburse_undo">Undo Loan Application Disbursal</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
 							</tr>
 							<tr class="alt">
 								<td></td>
@@ -2798,22 +2851,19 @@ GET https://DomainName/api/v1/loans/template?clientId=1
 							<b>'all':</b> Gets all association data.
 						</dd>
 						<dd>
-							<b>'summary':</b> Loan summary data.
+							<b>'repaymentSchedule':</b> Loan schedule data.
 						</dd>
 						<dd>
-							<b>'repaymentSchedule':</b> Loan Schedule data.
+							<b>'transactions':</b> Loan transactions data.
 						</dd>
 						<dd>
-							<b>'loanRepayments':</b> Loan Repayment data.
+							<b>'charges':</b> Loan charges data.
 						</dd>
 						<dd>
-							<b>'permissions':</b> Data that describes what things can happen
-							to the loan in its current state. Very specific to the needs of
-							the current Individual Lending client application.
+							<b>'guarantors':</b> Loan guarantors data.
 						</dd>
 						<dd>
-							<b>'convenienceData':</b> Some derived data that is specific to
-							the needs of the current Individual Lending client application.
+							<b>'collateral':</b> Loan collateral data.
 						</dd>
 					</dl>
 					<p>Example Requests:</p>
@@ -2834,66 +2884,234 @@ GET https://DomainName/api/v1/loans/{loanId}
 					</code>
 					<code class="method-response">
 {
+  "id": 1,
+  "accountNo": "000000001",
+  "status": {
+    "id": 100,
+    "code": "loanStatusType.submitted.and.pending.approval",
+    "value": "Submitted and pending approval",
+    "pendingApproval": true,
+    "waitingForDisbursal": false,
+    "active": false,
+    "closedObligationsMet": false,
+    "closedWrittenOff": false,
+    "closedRescheduled": false,
+    "closed": false,
+    "overpaid": false
+  },
+  "clientId": 1,
+  "clientName": "Petra Yton",
+  "clientOfficeId": 1,
+  "loanProductId": 1,
+  "loanProductName": "A new loan product for me",
+  "currency": {
+    "code": "USD",
+    "name": "US Dollar",
+    "decimalPlaces": 2,
+    "displaySymbol": "$",
+    "nameCode": "currency.USD",
+    "displayLabel": "US Dollar ($)"
+  },
+  "principal": 100000,
+  "termFrequency": 12,
+  "termPeriodFrequencyType": {
+    "id": 2,
+    "code": "termFrequency.periodFrequencyType.months",
+    "value": "Months"
+  },
+  "numberOfRepayments": 12,
+  "repaymentEvery": 1,
+  "repaymentFrequencyType": {
+    "id": 2,
+    "code": "repaymentFrequency.periodFrequencyType.months",
+    "value": "Months"
+  },
+  "transactionProcessingStrategyId": 1,
+  "amortizationType": {
     "id": 1,
-    "accountNo": "000000001",
-    "clientId": 1,
-    "clientName": "Petra Yton",
-    "loanProductId": 1,
-    "loanProductName": "A new loan product for me",
-    "status": {
-        "id": 100,
-        "code": "loanStatusType.submitted.and.pending.approval",
-        "value": "Submitted and pending approval"
-    },
-    "currency": {
-        "code": "USD",
-        "name": "US Dollar",
-        "decimalPlaces": 2,
-        "displaySymbol": "$",
-        "nameCode": "currency.USD",
-        "displayLabel": "US Dollar ($)"
-    },
-    "principal": 100000,
-    "termFrequency": 12,
-    "termPeriodFrequencyType": {
-        "id": 2,
-        "code": "termFrequency.periodFrequencyType.months",
-        "value": "Months"
-    },
+    "code": "amortizationType.equal.installments",
+    "value": "Equal installments"
+  },
+  "interestRatePerPeriod": 2,
+  "interestRateFrequencyType": {
+    "id": 2,
+    "code": "interestRateFrequency.periodFrequencyType.months",
+    "value": "Per month"
+  },
+  "annualInterestRate": 24,
+  "interestType": {
+    "id": 0,
+    "code": "interestType.declining.balance",
+    "value": "Declining Balance"
+  },
+  "interestCalculationPeriodType": {
+    "id": 1,
+    "code": "interestCalculationPeriodType.same.as.repayment.period",
+    "value": "Same as repayment period"
+  },
+  "timeline": {
+    "submittedOnDate": [
+      2011,
+      9,
+      20
+    ],
+    "submittedByUsername": "mifos",
+    "submittedByFirstname": "App",
+    "submittedByLastname": "Administrator",
+    "expectedDisbursementDate": [
+      2011,
+      9,
+      20
+    ],
+    "expectedMaturityDate": [
+      2012,
+      9,
+      20
+    ]
+  }
+}
+					</code>
+				</div>
+			</div>
+
+			<a id="loans_calculate" name="loans_calculate" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Calculate loan repayment schedule</h4>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Mandatory Fields</div></td>
+						</tr>
+						<tr class=alt>
+							<td>productId, principal, loanTermFrequency,
+								loanTermFrequencyType, numberOfRepayments, repaymentEvery,
+								repaymentFrequencyType, interestRatePerPeriod,
+								interestRateFrequencyType, amortizationType, interestType,
+								interestCalculationPeriodType, expectedDisbursementDate,
+								transactionProcessingStrategyId</td>
+						</tr>
+					</table>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+POST https://DomainName/api/v1/loans?command=calculateLoanSchedule
+					</code>
+					<code class="method-request">
+POST loans?command=calculateLoanSchedule
+Content-Type: application/json 
+Request Body:
+{
+    "dateFormat": "dd MMMM yyyy",
+    "locale": "en_GB",
+    "productId": 1,
+    "principal": "100,000.00",
+    "loanTermFrequency": 12,
+    "loanTermFrequencyType": 2,
     "numberOfRepayments": 12,
     "repaymentEvery": 1,
-    "repaymentFrequencyType": {
-        "id": 2,
-        "code": "repaymentFrequency.periodFrequencyType.months",
-        "value": "Months"
-    },
-    "transactionProcessingStrategyId": 1,
-    "amortizationType": {
-        "id": 1,
-        "code": "amortizationType.equal.installments",
-        "value": "Equal installments"
-    },
+    "repaymentFrequencyType": 2,
     "interestRatePerPeriod": 2,
-    "interestRateFrequencyType": {
-        "id": 2,
-        "code": "interestRateFrequency.periodFrequencyType.months",
-        "value": "Per month"
+    "interestRateFrequencyType": 2,
+    "amortizationType": 1,
+    "interestType": 0,
+    "interestCalculationPeriodType": 1,
+    "expectedDisbursementDate": "20 September 2011",
+    "transactionProcessingStrategyId": 2
+}
+					</code>
+					<code class="method-response">
+{
+  "loanTermInDays": 366,
+  "currency": {
+    "code": "UGX",
+    "name": "Uganda Shilling",
+    "decimalPlaces": 2,
+    "displaySymbol": "USh",
+    "nameCode": "currency.UGX",
+    "displayLabel": "Uganda Shilling (USh)"
+  },
+  "cumulativePrincipalDisbursed": 100000,
+  "cumulativePrincipalDue": 100000,
+  "cumulativePrincipalOutstanding": 0,
+  "cumulativeInterestExpected": 13471.52,
+  "cumulativeFeeChargesToDate": 0,
+  "totalCostOfLoan": 13471.52,
+  "totalExpectedRepayment": 113471.52,
+  "totalPaidToDate": 0,
+  "totalWaivedToDate": 0,
+  "totalWrittenOffToDate": 0,
+  "totalOutstanding": 113471.52,
+  "totalInArrears": 0,
+  "periods": [
+    {
+      "period": 0,
+      "dueDate": [
+        2011,
+        9,
+        20
+      ],
+      "principalDisbursed": 100000,
+      "principalLoanBalanceOutstanding": 100000,
+      "feeChargesDue": 0,
+      "feeChargesOutstanding": 0,
+      "totalOriginalDueForPeriod": 0,
+      "totalDueForPeriod": 0,
+      "totalOutstandingForPeriod": 0,
+      "totalOverdue": 0,
+      "totalActualCostOfLoanForPeriod": 0
     },
-    "annualInterestRate": 24,
-    "interestType": {
-        "id": 0,
-        "code": "interestType.declining.balance",
-        "value": "Declining Balance"
+    {
+      "period": 1,
+      "fromDate": [
+        2011,
+        9,
+        20
+      ],
+      "dueDate": [
+        2011,
+        10,
+        20
+      ],
+      "daysInPeriod": 30,
+      "principalOriginalDue": 7455.96,
+      "principalDue": 7455.96,
+      "principalOutstanding": 7455.96,
+      "principalLoanBalanceOutstanding": 92544.04,
+      "interestOriginalDue": 2000,
+      "interestDue": 2000,
+      "interestOutstanding": 2000,
+      "feeChargesDue": 0,
+      "penaltyChargesDue": 0,
+      "totalOriginalDueForPeriod": 9455.96,
+      "totalDueForPeriod": 9455.96,
+      "totalPaidForPeriod": 0,
+      "totalOutstandingForPeriod": 9455.96,
+      "totalOverdue": 9455.96,
+      "totalActualCostOfLoanForPeriod": 2000
     },
-    "interestCalculationPeriodType": {
-        "id": 1,
-        "code": "interestCalculationPeriodType.same.as.repayment.period",
-        "value": "Same as repayment period"
-    },
-    "submittedOnDate": [2011,9,20],
-    "expectedDisbursementDate": [2011,9,20],
-    "expectedMaturityDate": [2011,9,20],
-    "lifeCycleStatusDate": [2011,9,20]
+    ...
+    {
+      "period": 12,
+      "fromDate": [2012,8,20],
+      "dueDate": [2012,9,20],
+      "daysInPeriod": 31,
+      "principalOriginalDue": 9270.56,
+      "principalDue": 9270.56,
+      "principalOutstanding": 9270.56,
+      "principalLoanBalanceOutstanding": 0,
+      "interestOriginalDue": 185.4,
+      "interestDue": 185.4,
+      "interestOutstanding": 185.4,
+      "feeChargesDue": 0,
+      "penaltyChargesDue": 0,
+      "totalOriginalDueForPeriod": 9455.96,
+      "totalDueForPeriod": 9455.96,
+      "totalPaidForPeriod": 0,
+      "totalOutstandingForPeriod": 9455.96,
+      "totalOverdue": 9455.96,
+      "totalActualCostOfLoanForPeriod": 185.4
+    }
+  ]
 }
 					</code>
 				</div>
@@ -2902,24 +3120,7 @@ GET https://DomainName/api/v1/loans/{loanId}
 			<a id="loans_create" name="loans_create" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
-					<h4>Create a New Loan / Submit a Loan Application</h4>
-					<h5>Arguments</h5>
-					<dl class="argument-list">
-						<dt>command</dt>
-						<dd>
-							String<span> Optional, case-insensitive</span>
-						</dd>
-						<dd>
-							The default action is to Submit a New Loan Application
-							("Submitted and awaiting approval" status).<br>
-						</dd>
-						<dd>If "?command=calculateLoanSchedule" is added to the URL
-							then no update is made but the loan schedule (as would have been
-							if the loan had been submitted) is returned. This gives the
-							ability to try out various loan options and 'preview' the
-							schedule before committing to it.</dd>
-					</dl>
-					<br>
+					<h4>Submit a new Loan Application</h4>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
 							<td><div class="mifosXHeading2">Mandatory Fields</div></td>
@@ -2974,40 +3175,23 @@ Request Body:
 				</div>
 			</div>
 
-			<a id="loans_approve_etc" name="loans_approve_etc"
-				class="old-syle-anchor">&nbsp;</a>
+			<!-- ok -->
+			<a id="loans_approve" name="loans_approve" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
-					<h4>Approve, Undo Approval, Disburse, Undo Disbursal, Reject
-						or Withdraw a Loan Application</h4>
-					<h5>Arguments</h5>
-					<dl class="argument-list">
-						<dt>command</dt>
-						<dd>
-							String<span> Mandatory, case-insensitive</span>
-						</dd>
-						<dd>'approve' : Approve Loan</dd>
-						<dd>'disburse' : Disburse Loan</dd>
-						<dd>'reject' : Reject Loan</dd>
-						<dd>'withdrewbyclient' : Client Withdrew Loan Application</dd>
-						<dd>'undoapproval' : Undo Loan Approval</dd>
-						<dd>'undodisbursal' : Undo Loan Disbursal</dd>
-						<dd>'assignloanofficer' : Assign Loan Officer</dd>
-						<dd>'unassignloanofficer' : Unassign Loan Officer as of today or in past but not beyond assigned date. Does not support unassigning in future date</dd>
-					</dl>
-					<br>
+					<h4>Approve Loan Application</h4>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
 							<td><div class="mifosXHeading2">Mandatory Fields</div></td>
 						</tr>
 						<tr class=alt>
-							<td>eventDate</td>
+							<td>approvedOnDate</td>
 						</tr>
 					</table>
 				</div>
 				<div class="method-example">
 					<code class="method-declaration">
-POST https://DomainName/api/v1/loans/{loanId}
+POST https://DomainName/api/v1/loans/{loanId}?command=approve
 					</code>
 					<code class="method-request">
 POST loans/1?command=approve
@@ -3016,31 +3200,293 @@ Request Body:
 {
     "locale": "en",
     "dateFormat": "dd MMMM yyyy",
-    "eventDate": "20 September 2011",
-    "note": "and event note is added"
+    "approvedOnDate": "20 September 2011",
+    "note": "Loan approval note"
 }
 </code>
 					<code class="method-response">
 {
-    "officeId": 1,
-    "clientId": 1,
-    "loanId": 2,
-    "resourceId": 2,
-    "changes": {
-        "status": {
-            "id": 200,
-            "code": "loanStatusType.approved",
-            "value": "Approved"
-        },
-        "locale": "en",
-        "dateFormat": "dd MMMM yyyy",
-        "approvedOnDate": "20 September 2011",
-        "note": "and event note is added"
-    }
+  "officeId": 1,
+  "clientId": 1,
+  "loanId": 1,
+  "resourceId": 1,
+  "changes": {
+    "status": {
+      "id": 200,
+      "code": "loanStatusType.approved",
+      "value": "Approved",
+      "pendingApproval": false,
+      "waitingForDisbursal": true,
+      "active": false,
+      "closedObligationsMet": false,
+      "closedWrittenOff": false,
+      "closedRescheduled": false,
+      "closed": false,
+      "overpaid": false
+    },
+    "locale": "en",
+    "dateFormat": "dd MMMM yyyy",
+    "approvedOnDate": "20 September 2011",
+    "note": "Loan approval note"
+  }
 }
 					</code>
 				</div>
 			</div>
+
+			<a id="loans_approve_undo" name="loans_approve_undo" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Undo Loan Application Approval</h4>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+POST https://DomainName/api/v1/loans/{loanId}?command=undoApproval
+					</code>
+					<code class="method-request">
+POST loans/1?command=approve
+Content-Type: application/json 
+					</code>
+					<code class="method-response">
+{
+  "officeId": 1,
+  "clientId": 1,
+  "loanId": 1,
+  "resourceId": 1,
+  "changes": {
+    "status": {
+      "id": 100,
+      "code": "loanStatusType.submitted.and.pending.approval",
+      "value": "Submitted and pending approval",
+      "pendingApproval": true,
+      "waitingForDisbursal": false,
+      "active": false,
+      "closedObligationsMet": false,
+      "closedWrittenOff": false,
+      "closedRescheduled": false,
+      "closed": false,
+      "overpaid": false
+    },
+    "approvedOnDate": ""
+  }
+}
+					</code>
+				</div>
+			</div>
+
+			<a id="loans_reject" name="loans_reject" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Reject Loan Application</h4>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Mandatory Fields</div></td>
+						</tr>
+						<tr class=alt>
+							<td>rejectedOnDate</td>
+						</tr>
+					</table>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+POST https://DomainName/api/v1/loans/{loanId}?command=reject
+					</code>
+					<code class="method-request">
+POST loans/1?command=reject
+Content-Type: application/json 
+Request Body:
+{
+    "locale": "en",
+    "dateFormat": "dd MMMM yyyy",
+    "rejectedOnDate": "20 September 2011",
+    "note": "Loan rejection reason."
+}
+</code>
+					<code class="method-response">
+{
+  "officeId": 1,
+  "clientId": 1,
+  "loanId": 1,
+  "resourceId": 1,
+  "changes": {
+    "status": {
+      "id": 500,
+      "code": "loanStatusType.rejected",
+      "value": "Rejected",
+      "pendingApproval": false,
+      "waitingForDisbursal": false,
+      "active": false,
+      "closedObligationsMet": false,
+      "closedWrittenOff": false,
+      "closedRescheduled": false,
+      "closed": false,
+      "overpaid": false
+    },
+    "locale": "en",
+    "dateFormat": "dd MMMM yyyy",
+    "rejectedOnDate": "20 September 2011",
+    "closedOnDate": "20 September 2011"
+  }
+}
+					</code>
+				</div>
+			</div>
+
+			<a id="loans_withdraw" name="loans_withdraw" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Applicant Withdraws from Loan Application</h4>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Mandatory Fields</div></td>
+						</tr>
+						<tr class=alt>
+							<td>withdrawnOnDate</td>
+						</tr>
+					</table>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+POST https://DomainName/api/v1/loans/{loanId}?command=withdrawnByApplicant
+					</code>
+					<code class="method-request">
+POST loans/1?command=withdrawnByApplicant
+Content-Type: application/json 
+Request Body:
+{
+    "locale": "en",
+    "dateFormat": "dd MMMM yyyy",
+    "withdrawnOnDate": "20 September 2011",
+    "note": "Reason loan applicant withdrew from application."
+}
+</code>
+					<code class="method-response">
+{
+  "officeId": 1,
+  "clientId": 1,
+  "loanId": 2,
+  "resourceId": 2,
+  "changes": {
+    "status": {
+      "id": 400,
+      "code": "loanStatusType.withdrawn.by.client",
+      "value": "Withdrawn by applicant",
+      "pendingApproval": false,
+      "waitingForDisbursal": false,
+      "active": false,
+      "closedObligationsMet": false,
+      "closedWrittenOff": false,
+      "closedRescheduled": false,
+      "closed": false,
+      "overpaid": false
+    },
+    "locale": "en",
+    "dateFormat": "dd MMMM yyyy",
+    "withdrawnOnDate": "20 September 2011",
+    "closedOnDate": "20 September 2011"
+  }
+}
+					</code>
+				</div>
+			</div>
+
+			<a id="loans_disburse" name="loans_disburse" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Disburse Loan</h4>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Mandatory Fields</div></td>
+						</tr>
+						<tr class=alt>
+							<td>actualDisbursementDate</td>
+						</tr>
+					</table>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+POST https://DomainName/api/v1/loans/{loanId}?command=disburse
+					</code>
+					<code class="method-request">
+POST loans/1?command=disburse
+Content-Type: application/json 
+Request Body:
+{
+    "locale": "en",
+    "dateFormat": "dd MMMM yyyy",
+    "actualDisbursementDate": "20 September 2011",
+    "note": "Any additional info related to disbursement of funds to applicant."
+}
+</code>
+					<code class="method-response">
+{
+  "officeId": 1,
+  "clientId": 1,
+  "loanId": 4,
+  "resourceId": 4,
+  "changes": {
+    "status": {
+      "id": 300,
+      "code": "loanStatusType.active",
+      "value": "Active",
+      "pendingApproval": false,
+      "waitingForDisbursal": false,
+      "active": true,
+      "closedObligationsMet": false,
+      "closedWrittenOff": false,
+      "closedRescheduled": false,
+      "closed": false,
+      "overpaid": false
+    },
+    "locale": "en",
+    "dateFormat": "dd MMMM yyyy",
+    "actualDisbursementDate": "20 September 2011"
+  }
+}
+					</code>
+				</div>
+			</div>
+
+<a id="loans_disburse_undo" name="loans_disburse_undo" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Undo Loan Disbursal</h4>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+POST https://DomainName/api/v1/loans/{loanId}?command=undoDisbursal
+					</code>
+					<code class="method-request">
+POST loans/1?command=undoDisbursal
+Content-Type: application/json 
+					</code>
+					<code class="method-response">
+{
+  "officeId": 1,
+  "clientId": 1,
+  "loanId": 4,
+  "resourceId": 4,
+  "changes": {
+    "status": {
+      "id": 200,
+      "code": "loanStatusType.approved",
+      "value": "Approved",
+      "pendingApproval": false,
+      "waitingForDisbursal": true,
+      "active": false,
+      "closedObligationsMet": false,
+      "closedWrittenOff": false,
+      "closedRescheduled": false,
+      "closed": false,
+      "overpaid": false
+    },
+    "actualDisbursementDate": ""
+  }
+}
+					</code>
+				</div>
+			</div>
+
 			<a id="loans_delete" name="loans_delete" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
@@ -10150,11 +10596,18 @@ Content-Type: application/json
 					<td><a href="#clients_updatenote">Update a Client Note</a></td>
 					<td></td>
 				</tr>
-				<tr>
+				<tr class="alt">
 					<td><a href="#loans">LOAN</a></td>
+					<td>loans?calculateLoanSchedule</td>
+					<td><a href="#loans_calculate">Calculate Loan Repayment Schedule</a></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr class="alt">
+					<td></td>
 					<td>loans</td>
-					<td><a href="#loans_create">Create a New Loan / Submit a
-							Loan Application</a></td>
+					<td><a href="#loans_create">Submit a new Loan Application</a></td>
 					<td></td>
 					<td></td>
 					<td></td>
@@ -10162,12 +10615,58 @@ Content-Type: application/json
 				<tr class="alt">
 					<td></td>
 					<td>loans/{loanId}</td>
-					<td><a href="#loans_approve_etc">Approve, Undo Approval,
-							Disburse, Undo Disbursal, Reject a Loan or Withdraw a Loan
-							Application</a></td>
+					<td></td>
 					<td><a href="#loans_retrieve">Retrieve a Loan</a></td>
 					<td></td>
 					<td><a href="#loans_delete">Delete a Loan</a></td>
+				</tr>
+				<tr class="alt">
+					<td></td>
+					<td>loans/{loanId}?command=approve</td>
+					<td><a href="#loans_approve">Approve Loan Application</a></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr class="alt">
+					<td></td>
+					<td>loans/{loanId}?command=undoApproval</td>
+					<td><a href="#loans_approve_undo">Undo Loan Application Approval</a></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr class="alt">
+					<td></td>
+					<td>loans/{loanId}?command=reject</td>
+					<td><a href="#loans_reject">Reject Loan Application</a></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr class="alt">
+					<td></td>
+					<td>loans/{loanId}?command=withdraw</td>
+					<td><a href="#loans_withdraw">Withdraw Loan Application</a></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr class="alt">
+					<td></td>
+					<td>loans/{loanId}?command=disburse</td>
+					<td><a href="#loans_disburse">Disburse Loan</a></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr class="alt">
+					<td></td>
+					<td>loans/{loanId}?command=undoDisbursal</td>
+					<td><a href="#loans_disburse_undo">Undo Loan Application Disbursal</a></td>
+					<td></td>
+					<td></td>
+					<td></td>
 				</tr>
 				<tr class="alt">
 					<td></td>

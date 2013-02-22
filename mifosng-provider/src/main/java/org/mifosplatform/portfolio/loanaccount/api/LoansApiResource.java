@@ -234,8 +234,7 @@ public class LoansApiResource {
         if (!associationParameters.isEmpty()) {
 
             if (associationParameters.contains("all")) {
-                associationParameters.addAll(Arrays.asList("repaymentSchedule", "transactions", "permissions", "charges", "guarantors",
-                        "collateral"));
+                associationParameters.addAll(Arrays.asList("repaymentSchedule", "transactions", "charges", "guarantors", "collateral"));
             }
 
             if (associationParameters.contains("guarantors")) {
@@ -254,11 +253,8 @@ public class LoansApiResource {
                 }
             }
 
-            if (associationParameters.contains("repaymentSchedule") || associationParameters.contains("permissions")) {
-
-                if (associationParameters.contains("repaymentSchedule")) {
-                    mandatoryResponseParameters.add("repaymentSchedule");
-                }
+            if (associationParameters.contains("repaymentSchedule")) {
+                mandatoryResponseParameters.add("repaymentSchedule");
 
                 final RepaymentScheduleRelatedLoanData repaymentScheduleRelatedData = loanBasicDetails.repaymentScheduleRelatedData();
                 repaymentSchedule = this.loanReadPlatformService.retrieveRepaymentSchedule(loanId, repaymentScheduleRelatedData);
@@ -393,7 +389,7 @@ public class LoansApiResource {
         if (is(commandParam, "reject")) {
             final CommandWrapper commandRequest = builder.rejectLoanApplication(loanId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        } else if (is(commandParam, "withdrewbyclient")) {
+        } else if (is(commandParam, "withdrawnByApplicant")) {
             final CommandWrapper commandRequest = builder.withdrawLoanApplication(loanId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, "approve")) {

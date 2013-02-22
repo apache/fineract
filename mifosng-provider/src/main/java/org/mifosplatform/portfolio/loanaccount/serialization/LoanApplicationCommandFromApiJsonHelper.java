@@ -547,4 +547,25 @@ public final class LoanApplicationCommandFromApiJsonHelper {
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
                 "Validation errors exist.", dataValidationErrors); }
     }
+
+    public void validateForUndo(final String json) {
+        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+
+        final Set<String> undoSupportedParameters = new HashSet<String>(Arrays.asList("note"));
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, undoSupportedParameters);
+
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loanapplication.undo");
+        final JsonElement element = fromApiJsonHelper.parse(json);
+
+        final String note = "note";
+        if (fromApiJsonHelper.parameterExists(note, element)) {
+            final String noteText = fromApiJsonHelper.extractStringNamed(note, element);
+            baseDataValidator.reset().parameter(note).value(noteText).notExceedingLengthOf(1000);
+        }
+
+        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
+                "Validation errors exist.", dataValidationErrors); }
+    }
 }

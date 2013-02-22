@@ -11,7 +11,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
-import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.codes.domain.CodeValue;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.api.JsonQuery;
@@ -19,7 +18,6 @@ import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
-import org.mifosplatform.infrastructure.security.exception.NoAuthorizationException;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.staff.domain.Staff;
 import org.mifosplatform.portfolio.client.domain.AccountNumberGenerator;
@@ -30,7 +28,6 @@ import org.mifosplatform.portfolio.client.domain.Note;
 import org.mifosplatform.portfolio.client.domain.NoteRepository;
 import org.mifosplatform.portfolio.client.exception.ClientNotFoundException;
 import org.mifosplatform.portfolio.fund.domain.Fund;
-import org.mifosplatform.portfolio.loanaccount.command.LoanStateTransitionCommand;
 import org.mifosplatform.portfolio.loanaccount.domain.DefaultLoanLifecycleStateMachine;
 import org.mifosplatform.portfolio.loanaccount.domain.Loan;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanCharge;
@@ -45,7 +42,7 @@ import org.mifosplatform.portfolio.loanaccount.loanschedule.data.LoanScheduleDat
 import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.AprCalculator;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.service.LoanScheduleCalculationPlatformService;
 import org.mifosplatform.portfolio.loanaccount.serialization.LoanApplicationCommandFromApiJsonHelper;
-import org.mifosplatform.portfolio.loanaccount.serialization.LoanStateTransitionCommandFromApiJsonDeserializer;
+import org.mifosplatform.portfolio.loanaccount.serialization.LoanApplicationTransitionApiJsonValidator;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanProduct;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanProductRepository;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanTransactionProcessingStrategy;
@@ -67,8 +64,8 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
 
     private final PlatformSecurityContext context;
     private final FromJsonHelper fromJsonHelper;
+    private final LoanApplicationTransitionApiJsonValidator loanApplicationTransitionApiJsonValidator;
     private final LoanApplicationCommandFromApiJsonHelper fromApiJsonDeserializer;
-    private final LoanStateTransitionCommandFromApiJsonDeserializer loanStateTransitionCommandFromApiJsonDeserializer;
     private final LoanRepository loanRepository;
     private final NoteRepository noteRepository;
     private final LoanScheduleCalculationPlatformService calculationPlatformService;
@@ -82,17 +79,17 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
 
     @Autowired
     public LoanApplicationWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final FromJsonHelper fromJsonHelper,
-            final LoanApplicationCommandFromApiJsonHelper fromApiJsonDeserializer,
-            final LoanStateTransitionCommandFromApiJsonDeserializer loanStateTransitionCommandFromApiJsonDeserializer,
-            final AprCalculator aprCalculator, final LoanAssembler loanAssembler, final LoanChargeAssembler loanChargeAssembler,
+            final LoanApplicationTransitionApiJsonValidator loanApplicationTransitionApiJsonValidator,
+            final LoanApplicationCommandFromApiJsonHelper fromApiJsonDeserializer, final AprCalculator aprCalculator,
+            final LoanAssembler loanAssembler, final LoanChargeAssembler loanChargeAssembler,
             final LoanCollateralAssembler loanCollateralAssembler, final LoanRepository loanRepository,
             final NoteRepository noteRepository, final LoanScheduleCalculationPlatformService calculationPlatformService,
             final ClientRepository clientRepository, final LoanProductRepository loanProductRepository,
             final AccountNumberGeneratorFactory accountIdentifierGeneratorFactory) {
         this.context = context;
         this.fromJsonHelper = fromJsonHelper;
+        this.loanApplicationTransitionApiJsonValidator = loanApplicationTransitionApiJsonValidator;
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
-        this.loanStateTransitionCommandFromApiJsonDeserializer = loanStateTransitionCommandFromApiJsonDeserializer;
         this.aprCalculator = aprCalculator;
         this.loanAssembler = loanAssembler;
         this.loanChargeAssembler = loanChargeAssembler;
@@ -103,10 +100,6 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         this.clientRepository = clientRepository;
         this.loanProductRepository = loanProductRepository;
         this.accountIdentifierGeneratorFactory = accountIdentifierGeneratorFactory;
-    }
-
-    private boolean isBeforeToday(final LocalDate date) {
-        return date.isBefore(new LocalDate());
     }
 
     private LoanLifecycleStateMachine defaultLoanLifecycleStateMachine() {
@@ -319,15 +312,9 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
 
         final AppUser currentUser = context.authenticatedUser();
 
-        final LoanStateTransitionCommand approveLoanApplication = this.loanStateTransitionCommandFromApiJsonDeserializer
-                .commandFromApiJson(command.json());
-        approveLoanApplication.validate();
+        this.loanApplicationTransitionApiJsonValidator.validateApproval(command.json());
 
         final Loan loan = retrieveLoanBy(loanId);
-
-        final LocalDate approvedOnLocalDate = approveLoanApplication.getApprovedOnDate();
-        if (this.isBeforeToday(approvedOnLocalDate) && currentUser.canNotApproveLoanInPast()) { throw new NoAuthorizationException(
-                "User has no authority to approve loan with a date in the past."); }
 
         final Map<String, Object> changes = loan.loanApplicationApproval(currentUser, command, defaultLoanLifecycleStateMachine());
         if (!changes.isEmpty()) {
@@ -357,6 +344,8 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
     public CommandProcessingResult undoLoanApplicationApproval(final Long loanId, final JsonCommand command) {
 
         context.authenticatedUser();
+
+        this.fromApiJsonDeserializer.validateForUndo(command.json());
 
         final Loan loan = retrieveLoanBy(loanId);
 
@@ -388,15 +377,9 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
 
         final AppUser currentUser = context.authenticatedUser();
 
-        final LoanStateTransitionCommand rejectLoanApplication = this.loanStateTransitionCommandFromApiJsonDeserializer
-                .commandFromApiJson(command.json());
-        rejectLoanApplication.validate();
+        this.loanApplicationTransitionApiJsonValidator.validateRejection(command.json());
 
         final Loan loan = retrieveLoanBy(loanId);
-
-        final LocalDate eventDate = rejectLoanApplication.getRejectedOnDate();
-        if (this.isBeforeToday(eventDate) && currentUser.canNotRejectLoanInPast()) { throw new NoAuthorizationException(
-                "User has no authority to reject loan with a date in the past."); }
 
         final Map<String, Object> changes = loan.loanApplicationRejection(currentUser, command, defaultLoanLifecycleStateMachine());
         if (!changes.isEmpty()) {
@@ -426,15 +409,9 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
 
         final AppUser currentUser = context.authenticatedUser();
 
-        final LoanStateTransitionCommand applicantWithdrawsFromLoanApplication = this.loanStateTransitionCommandFromApiJsonDeserializer
-                .commandFromApiJson(command.json());
-        applicantWithdrawsFromLoanApplication.validate();
+        this.loanApplicationTransitionApiJsonValidator.validateApplicantWithdrawal(command.json());
 
         final Loan loan = retrieveLoanBy(loanId);
-
-        final LocalDate eventDate = applicantWithdrawsFromLoanApplication.getWithdrawnOnDate();
-        if (this.isBeforeToday(eventDate) && currentUser.canNotWithdrawByClientLoanInPast()) { throw new NoAuthorizationException(
-                "User has no authority to mark loan as withdrawn by applicant with a date in the past."); }
 
         final Map<String, Object> changes = loan.loanApplicationWithdrawnByApplicant(currentUser, command,
                 defaultLoanLifecycleStateMachine());
