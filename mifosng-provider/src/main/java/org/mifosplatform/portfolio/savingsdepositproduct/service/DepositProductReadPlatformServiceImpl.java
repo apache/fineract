@@ -60,7 +60,7 @@ public class DepositProductReadPlatformServiceImpl implements DepositProductRead
     @Override
     public DepositProductData retrieveDepositProductData(Long productId) {
         DepositProductMapper depositProductMapper = new DepositProductMapper();
-        String sql = "select " + depositProductMapper.depositProductSchema() + " where dp.id = ? and dp.is_deleted=0";
+        String sql = "select " + depositProductMapper.depositProductSchema() + " where dp.id = ? ";
 
         return this.jdbcTemplate.queryForObject(sql, depositProductMapper, new Object[] { productId });
     }
