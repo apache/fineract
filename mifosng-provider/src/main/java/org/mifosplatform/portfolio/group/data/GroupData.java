@@ -21,7 +21,11 @@ public class GroupData {
     private final String externalId;
     private final Long officeId;
     private final String officeName;
+    private final Long staffId;
+    private final String staffName;
     private final Long groupLevel;
+    private final Long parentId;
+    private final String parentName;
     @SuppressWarnings("unused")
     private final GroupLevelData groupLevelData;
     private final Collection<ClientLookup> clientMembers;
@@ -36,13 +40,18 @@ public class GroupData {
     @SuppressWarnings("unused")
     private final Collection<GroupLookupData> childGroups;
 
-    public GroupData(final Long id, final Long officeId, final String officeName, final String name, final String externalId , final Long groupLevel ) {
+    public GroupData(final Long id, final Long officeId, final String officeName, final String name, final String externalId,
+            final Long groupLevel, final Long parentId, final String parentName, final Long staffId, final String staffName) {
         this.id = id;
         this.officeId = officeId;
         this.officeName = officeName;
         this.name = name;
         this.externalId = externalId;
-        this.groupLevel =groupLevel;
+        this.groupLevel = groupLevel;
+        this.parentId = parentId;
+        this.parentName = parentName;
+        this.staffId = staffId;
+        this.staffName = staffName;
         this.groupLevelData = null;
         this.clientMembers = null;
         this.allowedClients = null;
@@ -54,13 +63,17 @@ public class GroupData {
 
     public GroupData(final GroupData group, final Collection<ClientLookup> clientMembers, final Collection<ClientLookup> allowedClients,
             final Collection<OfficeLookup> allowedOffices, final Collection<GroupLookupData> allowedParentGroups,
-            final GroupLevelData groupLevelData , final Collection<StaffData> allowedStaffs , final Collection<GroupLookupData> childGroups) {
+            final GroupLevelData groupLevelData, final Collection<StaffData> allowedStaffs, final Collection<GroupLookupData> childGroups) {
         this.id = group.getId();
         this.officeId = group.getOfficeId();
         this.officeName = group.getOfficeName();
         this.name = group.getName();
         this.externalId = group.getExternalId();
         this.groupLevel = group.getGroupLevel();
+        this.parentId = group.getParentId();
+        this.parentName = group.getParentName();
+        this.staffId = group.getStaffId();
+        this.staffName = group.getStaffName();
 
         this.groupLevelData = groupLevelData;
         this.clientMembers = clientMembers;
@@ -72,14 +85,19 @@ public class GroupData {
     }
 
     public GroupData(final Long officeId, final Collection<ClientLookup> allowedClients, final Collection<OfficeLookup> allowedOffices,
-            final Collection<GroupLookupData> allowedParentGroups, final GroupLevelData groupLevelData , final Collection<StaffData> allowedStaffs ) {
+            final Collection<GroupLookupData> allowedParentGroups, final GroupLevelData groupLevelData,
+            final Collection<StaffData> allowedStaffs) {
         this.id = null;
         this.officeId = officeId;
         this.officeName = null;
         this.name = null;
         this.externalId = null;
         this.clientMembers = null;
-        this.groupLevel =null;
+        this.groupLevel = null;
+        this.parentId = null;
+        this.parentName = null;
+        this.staffId = null;
+        this.staffName = null;
         this.groupLevelData = groupLevelData;
         this.allowedClients = allowedClients;
         this.allowedOffices = allowedOffices;
@@ -107,11 +125,26 @@ public class GroupData {
     public String getOfficeName() {
         return officeName;
     }
-    
+
     public Long getGroupLevel() {
         return this.groupLevel;
     }
 
+    public Long getParentId() {
+        return this.parentId;
+    }
+
+    public Long getStaffId() {
+        return this.staffId;
+    }
+
+    public String getStaffName() {
+        return this.staffName;
+    }
+
+    public String getParentName() {
+        return this.parentName;
+    }
 
     public Collection<ClientLookup> clientMembers() {
         return this.clientMembers;

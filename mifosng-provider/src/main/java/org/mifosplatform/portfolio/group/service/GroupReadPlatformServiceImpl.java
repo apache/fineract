@@ -221,8 +221,10 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
     private static final class GroupDataMapper implements RowMapper<GroupData> {
 
         public String groupSchema() {
-            return "g.office_id as officeId, g.level_id as groupLevel , o.name as officeName, g.id as id, g.external_id as externalId, "
-                    + "g.name as name from m_group g join m_office o on o.id = g.office_id";
+            return "g.office_id as officeId, g.level_id as groupLevel , g.parent_id as parentId , o.name as officeName,"
+                    + " g.id as id, g.external_id as externalId, g.name as name , s.display_name as staffName , pg.name as"
+                    + " parentName , g.staff_id as staffId from m_group g join m_office o on o.id = g.office_id left join "
+                    + "m_staff s on s.id = g.staff_id left join m_group pg on pg.id = g.parent_id";
         }
 
         @Override
@@ -234,7 +236,12 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
             Long officeId = rs.getLong("officeId");
             String officeName = rs.getString("officeName");
             Long groupLevel = rs.getLong("groupLevel");
-            return new GroupData(id, officeId, officeName, name, externalId, groupLevel);
+            Long parentId = rs.getLong("parentId");
+            String parentName = rs.getString("parentName");
+            Long staffId = rs.getLong("staffId");
+            String staffName = rs.getString("staffName");
+            
+            return new GroupData(id, officeId, officeName, name, externalId, groupLevel, parentId, parentName, staffId, staffName);
         }
 
     }
