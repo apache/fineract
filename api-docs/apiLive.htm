@@ -348,7 +348,7 @@
 									</table></td>
 							</tr>
 							<tr class="alt">
-								<td><a href="#loans">LOAN</a></td>
+								<td><a href="#loans">Loans</a></td>
 								<td>loans?calculateLoanSchedule</td>
 								<td><a href="#loans_calculate">Calculate Loan Repayment Schedule</a></td>
 								<td></td>
@@ -369,9 +369,9 @@
 								<td></td>
 								<td><a href="#loans_retrieve">Retrieve a Loan</a></td>
 								<td></td>
-								<td><a href="#loans_delete">Delete a Loan</a></td>
+								<td><a href="#loans_delete">Delete a Loan Application</a></td>
 							</tr>
-							<tr class="alt">
+							<tr>
 								<td></td>
 								<td>loans/{loanId}?command=approve</td>
 								<td><a href="#loans_approve">Approve Loan Application</a></td>
@@ -387,7 +387,7 @@
 								<td></td>
 								<td></td>
 							</tr>
-							<tr class="alt">
+							<tr>
 								<td></td>
 								<td>loans/{loanId}?command=reject</td>
 								<td><a href="#loans_reject">Reject Loan Application</a></td>
@@ -403,7 +403,7 @@
 								<td></td>
 								<td></td>
 							</tr>
-							<tr class="alt">
+							<tr>
 								<td></td>
 								<td>loans/{loanId}?command=disburse</td>
 								<td><a href="#loans_disburse">Disburse Loan</a></td>
@@ -419,11 +419,18 @@
 								<td></td>
 								<td></td>
 							</tr>
+							<tr>
+								<td><a href="#loans_transactions">Loan Transactions</a></td>
+								<td>loans/{loanId}/transactions?command=repayment</td>
+								<td><a href="#loans_transaction_repayment">Enter a repayment</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
 							<tr class="alt">
 								<td></td>
-								<td>loans/{loanId}/transactions</td>
-								<td><a href="#loans_repayment_etc">Make a Repayment /
-										Loan Waiver</a></td>
+								<td>loans/{loanId}/transactions?command=waiveInterest</td>
+								<td><a href="#loans_transaction_waiveinterest">Waive Interest</a></td>
 								<td></td>
 								<td></td>
 								<td></td>
@@ -431,33 +438,18 @@
 							<tr>
 								<td></td>
 								<td>loans/{loanId}/transactions/{transactionId}</td>
-								<td><a href="#loans_repaymentadjust_etc">Adjust a
-										Repayment or Waiver</a></td>
-								<td><a href="#loans_repaymentretrieve_etc">Retrieve a
-										Repayment or Waiver Details</a></td>
+								<td></td>
+								<td><a href="#loans_transaction_retrieve">Retrieve a transactions details</a></td>
 								<td></td>
 								<td></td>
 							</tr>
-							<tr>
-								<td><a href="#guarantors">Guarantors</a></td>
-								<td>loans/{loanId}/guarantors</td>
-								<td><a href="#guarantors_create">Create a Guarantor
-								</a></td>
-								<td><a href="#guarantors_list">List Guarantors
-								</a></td>
+							<tr class="alt">
+								<td></td>
+								<td>loans/{loanId}/transactions/{transactionId}</td>
+								<td><a href="#loans_transaction_adjust">Adjust a Transaction</a></td>
 								<td></td>
 								<td></td>
-							</tr>
-							<tr>
 								<td></td>
-								<td>loans/{loanId}/guarantors/{guarantorId}</td>
-								<td></td>
-								<td><a href="#guarantors_retrieve">Retrieve a Guarantor
-								</a></td>
-								<td><a href="#guarantors_update">Update a Guarantor
-								</a></td>
-								<td><a href="#guarantors_delete">Delete a Guarantor
-								</a></td>
 							</tr>
 						</table>
 					</div>
@@ -1027,8 +1019,7 @@
 							</tr>
 							<tr class="alt">
 								<td>loans/{loanId}/transactions/template</td>
-								<td><a href="#loans_repaymenttemplate_etc">Retrieve
-										Loan Repayment/Loan Waiver Template</a></td>
+								<td><a href="#loans_repaymenttemplate_etc">Retrieve Loan Transaction Template</a></td>
 							</tr>
 							<tr>
 								<td>offices/template</td>
@@ -2459,7 +2450,6 @@ DELETE groups/7
 			<!-- group end anchor grpxxxx -->
 
 			<!-- start of loans api docs -->
-
 			<a id="loans" name="loans" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
@@ -2583,7 +2573,6 @@ DELETE groups/7
 					</table>
 				</div>
 			</div>
-
 
 			<a id="loans_template" name="loans_template" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
@@ -3175,7 +3164,6 @@ Request Body:
 				</div>
 			</div>
 
-			<!-- ok -->
 			<a id="loans_approve" name="loans_approve" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
@@ -3490,7 +3478,7 @@ Content-Type: application/json
 			<a id="loans_delete" name="loans_delete" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
-					<h4>Delete a Loan</h4>
+					<h4>Delete a Loan Application</h4>
 					<p>
 						<b>Note:</b> Only loans in "Submitted and awaiting approval"
 						status can be deleted.
@@ -3516,11 +3504,37 @@ No Request Body:
 				</div>
 			</div>
 
+			<!-- Loan Transactions API-->
+			<a id="loans_transactions" name="loans_transactions" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h3>Loan Transactions</h3>
+					<p>Capabilities include loan repayment's, interest waivers and the ability to 'adjust' an existing transaction. An 'adjust'ment of a transaction is really a 'reversal' of existing transaction followed by creation of a new transaction with the provided details.</p>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Field Descriptions</div></td>
+						</tr>
+						<tr class=alt>
+							<td>transactionAmount</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>The amount of the transaction.</td>
+						</tr>
+						<tr class=alt>
+							<td>transactionDate</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>The date of the transaction.</td>
+						</tr>
+					</table>
+				</div>
+			</div>
+
 			<a id="loans_repaymenttemplate_etc"
 				name="loans_repaymenttemplate_etc" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
-					<h4>Retrieve Loan Repayment/Loan Waiver Template</h4>
+					<h4>Retrieve Loan Transaction Template</h4>
 					<p>This is a convenience resource. It can be useful when
 						building maintenance user interface screens for client
 						applications. The template data returned consists of any or all
@@ -3582,47 +3596,91 @@ GET https://DomainName/api/v1/loans/{loanId}/transactions/template"
 					</code>
 				</div>
 			</div>
-			<a id="loans_repayment_etc" name="loans_repayment_etc"
-				class="old-syle-anchor">&nbsp;</a>
+
+			<a id="loans_transaction_repayment" name="loans_transaction_repayment" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
-					<h4>Make a Repayment / Loan Waiver</h4>
-					<dl class="argument-list">
-						<dt>command</dt>
-						<dd>
-							String<span> Optional, case-insensitive</span>
-						</dd>
-						<dd>'repayment' : Make Loan Repayment.</dd>
-						<dd>'waiver' : Loan Waiver.</dd>
-					</dl>
+					<h4>Make a Repayment </h4>
 				</div>
 				<div class="method-example">
 					<code class="method-declaration">
-POST https://DomainName/api/v1/loans/{loanId}/transactions
+POST https://DomainName/api/v1/loans/{loanId}/transactions?command=repayment
 					</code>
 					<code class="method-request">
-POST loans/1/transactions?command=repayment 
-Content-Type: application/json 
+POST loans/5/transactions?command=repayment
+Content-Type: application/json
 Request Body:
 {
-    "locale": "en_GB",
-    "dateFormat": "dd MMMM yyyy",
-    "transactionDate": "14 May 2012",
-    "transactionAmount": "559.88",
-    "note": "Repayment at branch"
+	"locale": "en_GB",
+	"dateFormat": "dd MMMM yyyy",
+	"transactionDate": "14 May 2012",
+	"transactionAmount": "559.88",
+	"note": "Optional note related to the transaction."
 }
 					</code>
-					<code class="method-response">{ "resourceId": 37 } </code>
+					<code class="method-response">
+{
+  "officeId": 1,
+  "clientId": 1,
+  "loanId": 5,
+  "resourceId": 3,
+  "changes": {
+    "transactionDate": "14 May 2012",
+    "transactionAmount": "559.88",
+    "locale": "en_GB",
+    "dateFormat": "dd MMMM yyyy",
+    "note": "Optional note related to the transaction."
+  }
+}
+					</code>
 				</div>
 			</div>
 
-			<a id="loans_repaymentretrieve_etc"
-				name="loans_repaymentretrieve_etc" class="old-syle-anchor">&nbsp;</a>
+			<a id="loans_transaction_waiveinterest" name="loans_transaction_waiveinterest" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
-					<h4>Retrieve a Repayment or Waiver Details</h4>
+					<h4>Waive Interest</h4>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+POST https://DomainName/api/v1/loans/{loanId}/transactions?command=waiveInterest
+					</code>
+					<code class="method-request">
+POST loans/5/transactions?command=waiveInterest
+Content-Type: application/json
+Request Body:
+{
+	"locale": "en_GB",
+	"dateFormat": "dd MMMM yyyy",
+	"transactionDate": "14 May 2012",
+	"transactionAmount": "400",
+	"note": "Optional note related to the waiving of interest."
+}
+					</code>
+					<code class="method-response">
+{
+  "officeId": 1,
+  "clientId": 1,
+  "loanId": 5,
+  "resourceId": 5,
+  "changes": {
+    "transactionDate": "14 May 2012",
+    "transactionAmount": "400",
+    "locale": "en_GB",
+    "dateFormat": "dd MMMM yyyy",
+    "note": "Optional note related to the interest waiver."
+  }
+}
+					</code>
+				</div>
+			</div>
+
+			<a id="loans_transaction_retrieve" name="loans_transaction_retrieve" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Retrieve a Transaction Details</h4>
 					<p>Example Request:</p>
-					<div class=apiClick>loans/1/transactions/2</div>
+					<div class=apiClick>loans/5/transactions/3</div>
 				</div>
 				<div class="method-example">
 					<code class="method-declaration">
@@ -3630,37 +3688,45 @@ GET https://DomainName/api/v1/loans/{loanId}/transactions/{transactionId}
 					</code>
 					<code class="method-response">
 {
-    "id": 10,
-    "date": [
-        2009,
-        1,
-        29
-    ],
-    "total": {
-        "currencyCode": "XOF",
-        "digitsAfterDecimal": 0,
-        "amount": 300000,
-        "defaultName": "CFA Franc BCEAO",
-        "nameCode": "currency.XOF",
-        "displaySymbol": "CFA",
-        "zero": false,
-        "greaterThanZero": true,
-        "displaySymbolValue": "300000 CFA"
-    },
-    "transactionOffsetFromToday": -1218
+  "id": 3,
+  "type": {
+    "id": 2,
+    "code": "loanTransactionType.repayment",
+    "value": "Repayment",
+    "disbursement": false,
+    "repaymentAtDisbursement": false,
+    "repayment": true,
+    "contra": false,
+    "waiveInterest": false,
+    "waiveCharges": false,
+    "writeOff": false,
+    "recoveryRepayment": false
+  },
+  "date": [
+    2012,
+    5,
+    14
+  ],
+  "currency": {
+    "code": "USD",
+    "name": "US Dollar",
+    "decimalPlaces": 2,
+    "displaySymbol": "$",
+    "nameCode": "currency.USD",
+    "displayLabel": "US Dollar ($)"
+  },
+  "amount": 559.88,
+  "interestPortion": 559.88
 }
 					</code>
 				</div>
 			</div>
-			<a id="loans_repaymentadjust_etc" name="loans_repaymentadjust_etc"
-				class="old-syle-anchor">&nbsp;</a>
+			
+			<a id="loans_transaction_adjust" name="loans_transaction_adjust" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
-					<h4>Adjust a Repayment or Waiver</h4>
-					<p>
-						<b>Note:</b> there is no need to specify command={transactionType}
-						parameter.
-					</p>
+					<h4>Adjust a Transaction</h4>
+					<p><b>Note:</b> there is no need to specify command={transactionType} parameter.</p>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
 							<td><div class="mifosXHeading2">Mandatory Fields</div></td>
@@ -3683,14 +3749,266 @@ Request Body:
     "dateFormat": "dd MMMM yyyy",
     "transactionDate": "25 May 2012",
     "transactionAmount": "50,000.00",
-    "note": "adj note"
+    "note": "An optional note about why your adjusting or changing the transaction."
 }
 					</code>
 					<code class="method-response">
-					{ "resourceId": 16 }
+{ 
+	"resourceId": 16
+}
 					</code>
 				</div>
 			</div>
+
+			<!-- Loan Charges API-->
+			<a id="loans_charges" name="loans_charges" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h3>Loan Charges</h3>
+					<p>Loan charges can be fees or penalities. They can be defined using the charges api and associated with loan products.</p>
+					<p></p>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Field Descriptions</div></td>
+						</tr>
+						<tr class=alt>
+							<td>chargeId</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>The id of the charge definition.</td>
+						</tr>
+						<tr class=alt>
+							<td>amount</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>The flat amount or percenatge amount of the charge. (depending on its type)</td>
+						</tr>
+						<tr class=alt>
+							<td>dueDate</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>The date the loan charge is due for collection. Relevant for charges defined as <b>specified due date</b>.</td>
+						</tr>
+					</table>
+				</div>
+			</div>
+
+			<a id="loans_charges_template" name="loans_charges_template" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Retrieve Loan Charge Template</h4>
+					<p>This is a convenience resource. It can be useful when
+						building maintenance user interface screens for client
+						applications. The template data returned consists of any or all
+						of:
+					<ul>
+						<li class=normalli>Field Defaults</li>
+						<li class=normalli>Allowed Value Lists</li>
+					</ul>
+					</p>
+					<p>Example Request:</p>
+					<div class=apiClick>loans/1/charges/template</div>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+GET https://DomainName/api/v1/loans/{loanId}/charges/template
+					</code>
+					<code class="method-response">
+{
+	{
+  "amountPaid": 0,
+  "amountWaived": 0,
+  "amountWrittenOff": 0,
+  "chargeOptions": [
+    {
+      "id": 1,
+      "name": "Bank Fee (per installment)",
+      "active": true,
+      "penalty": false,
+      "currency": {
+        "code": "UGX",
+        "name": "Uganda Shilling",
+        "decimalPlaces": 2,
+        "displaySymbol": "USh",
+        "nameCode": "currency.UGX",
+        "displayLabel": "Uganda Shilling (USh)"
+      },
+      "amount": 1500,
+      "chargeTimeType": {
+        "id": 2,
+        "code": "chargeTimeType.specifiedDueDate",
+        "value": "Specified due date"
+      },
+      "chargeAppliesTo": {
+        "id": 1,
+        "code": "chargeAppliesTo.loan",
+        "value": "Loan"
+      },
+      "chargeCalculationType": {
+        "id": 1,
+        "code": "chargeCalculationType.flat",
+        "value": "Flat"
+      }
+    }
+  ],
+  "penalty": false
+}
+}
+					</code>
+				</div>
+			</div>
+
+			<a id="loans_charges_create" name="loans_charges_create" class="old-syle-anchor">&nbsp;</a>
+            <div class="method-section">
+                <div class="method-description">
+                    <h4>Create a Loan Charge</h4>
+                    <table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Mandatory Fields</div></td>
+						</tr>
+						<tr class=alt>
+							<td>chargeId, amount, dueDate (depending on chargeTimeType of charge definition)</td>
+						</tr>
+                    </table>
+                </div>
+                <div class="method-example">
+                    <code class="method-declaration">
+POST https://DomainName/api/v1//loans/{loanId}/charges
+                    </code>
+                    <code class="method-request">
+POST /loans/1/charges
+Content-Type: application/json 
+Request Body:
+{
+	"locale": "en",
+	"dateFormat": "dd MMMM yyyy",
+	"chargeId": 1,
+	"amount": "333",
+	"dueDate": "21 November 2011"
+}
+                    </code>
+                    <code class="method-response">
+{
+ 	"officeId": 1,
+	"clientId": 1,
+	"loanId": 1,
+	"resourceId": 14
+}
+					</code>
+                </div>
+            </div>
+
+            <a id="loans_charges_update" name="loans_charges_update" class="old-syle-anchor">&nbsp;</a>
+            <div class="method-section">
+                <div class="method-description">
+                    <h4>Update a Loan Charge</h4>
+                </div>
+                <div class="method-example">
+                    <code class="method-declaration">
+PUT https://DomainName/api/v1//loans/{loanId}/charges/{loanChargeId}
+                    </code>
+                    <code class="method-request">
+PUT /loans/1/charges/14
+Content-Type: application/json 
+Request Body:
+{
+	"locale": "en",
+	"amount": "650"
+}
+                    </code>
+                    <code class="method-response">
+{
+  "officeId": 1,
+  "clientId": 1,
+  "loanId": 1,
+  "resourceId": 14,
+  "changes": {
+    "amount": 650,
+    "locale": "en"
+  }
+}
+					</code>
+                </div>
+            </div>
+
+            <a id="loans_charges_delete" name="loans_charges_delete" class="old-syle-anchor">&nbsp;</a>
+            <div class="method-section">
+                <div class="method-description">
+                    <h4>Delete a Loan Charge</h4>
+                </div>
+                <div class="method-example">
+                    <code class="method-declaration">
+DELETE https://DomainName/api/v1//loans/{loanId}/charges/{loanChargeId}
+                    </code>
+                    <code class="method-request">
+DELETE /loans/1/charges/14
+Content-Type: application/json
+                    </code>
+                    <code class="method-response">
+{
+  "officeId": 1,
+  "clientId": 1,
+  "loanId": 1,
+  "resourceId": 14
+}
+					</code>
+                </div>
+            </div>
+
+            <a id="loans_charges_retrieve" name="loans_charges_retrieve" class="old-syle-anchor">&nbsp;</a>
+            <div class="method-section">
+                <div class="method-description">
+                    <h4>Retrieve a Loan Charge</h4>
+                </div>
+                <div class="method-example">
+                    <code class="method-declaration">
+GET https://DomainName/api/v1//loans/{loanId}/charges/{loanChargeId}
+                    </code>
+                    <code class="method-request">
+GET /loans/1/charges/1
+Content-Type: application/json 
+                    </code>
+					<code class="method-response">
+{
+  "id": 14,
+  "chargeId": 1,
+  "name": "Bank Fee (per installment)",
+  "chargeTimeType": {
+    "id": 2,
+    "code": "chargeTimeType.specifiedDueDate",
+    "value": "Specified due date"
+  },
+  "dueDate": [
+    2011,
+    11,
+    21
+  ],
+  "chargeCalculationType": {
+    "id": 1,
+    "code": "chargeCalculationType.flat",
+    "value": "Flat"
+  },
+  "percentage": 0,
+  "amountPercentageAppliedTo": 0,
+  "currency": {
+    "code": "UGX",
+    "name": "Uganda Shilling",
+    "decimalPlaces": 2,
+    "displaySymbol": "USh",
+    "nameCode": "currency.UGX",
+    "displayLabel": "Uganda Shilling (USh)"
+  },
+  "amount": 650,
+  "amountPaid": 0,
+  "amountWaived": 0,
+  "amountWrittenOff": 0,
+  "amountOutstanding": 650,
+  "amountOrPercentage": 650,
+  "penalty": false
+}
+					</code>
+                </div>
+            </div>
 
 			<a id="guarantors" name="guarantors" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
@@ -10526,8 +10844,7 @@ Content-Type: application/json
 								<td><div class="matrixHeadingVerbs">POST</div></td>
 							</tr>
 							<tr>
-								<td><div class=matrixHeadingCommands>create/complex
-										update</div></td>
+								<td><div class=matrixHeadingCommands>create/complex update</div></td>
 							</tr>
 						</table></td>
 					<td><table>
@@ -10556,7 +10873,7 @@ Content-Type: application/json
 						</table></td>
 				</tr>
 				<tr class="alt">
-					<td><a href="#clients">CLIENT</a></td>
+					<td><a href="#clients">Clients</a></td>
 					<td>clients</td>
 					<td><a href="#clients_create">Create a Client</a></td>
 					<td><a href="#clients_list">List Clients</a></td>
@@ -10596,15 +10913,16 @@ Content-Type: application/json
 					<td><a href="#clients_updatenote">Update a Client Note</a></td>
 					<td></td>
 				</tr>
+				<!-- loans api full matrix-->
 				<tr class="alt">
-					<td><a href="#loans">LOAN</a></td>
+					<td><a href="#loans">Loans</a></td>
 					<td>loans?calculateLoanSchedule</td>
 					<td><a href="#loans_calculate">Calculate Loan Repayment Schedule</a></td>
 					<td></td>
 					<td></td>
 					<td></td>
 				</tr>
-				<tr class="alt">
+				<tr>
 					<td></td>
 					<td>loans</td>
 					<td><a href="#loans_create">Submit a new Loan Application</a></td>
@@ -10618,9 +10936,9 @@ Content-Type: application/json
 					<td></td>
 					<td><a href="#loans_retrieve">Retrieve a Loan</a></td>
 					<td></td>
-					<td><a href="#loans_delete">Delete a Loan</a></td>
+					<td><a href="#loans_delete">Delete a Loan Application</a></td>
 				</tr>
-				<tr class="alt">
+				<tr>
 					<td></td>
 					<td>loans/{loanId}?command=approve</td>
 					<td><a href="#loans_approve">Approve Loan Application</a></td>
@@ -10636,7 +10954,7 @@ Content-Type: application/json
 					<td></td>
 					<td></td>
 				</tr>
-				<tr class="alt">
+				<tr>
 					<td></td>
 					<td>loans/{loanId}?command=reject</td>
 					<td><a href="#loans_reject">Reject Loan Application</a></td>
@@ -10652,7 +10970,7 @@ Content-Type: application/json
 					<td></td>
 					<td></td>
 				</tr>
-				<tr class="alt">
+				<tr>
 					<td></td>
 					<td>loans/{loanId}?command=disburse</td>
 					<td><a href="#loans_disburse">Disburse Loan</a></td>
@@ -10668,11 +10986,18 @@ Content-Type: application/json
 					<td></td>
 					<td></td>
 				</tr>
+				<tr>
+					<td><a href="#loans_transactions">Loan Transactions</a></td>
+					<td>loans/{loanId}/transactions?command=repayment</td>
+					<td><a href="#loans_transaction_repayment">Enter a repayment</a></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
 				<tr class="alt">
 					<td></td>
-					<td>loans/{loanId}/transactions</td>
-					<td><a href="#loans_repayment_etc">Make a Repayment / Loan
-							Waiver</a></td>
+					<td>loans/{loanId}/transactions?command=waiveInterest</td>
+					<td><a href="#loans_transaction_waiveinterest">Waive Interest</a></td>
 					<td></td>
 					<td></td>
 					<td></td>
@@ -10680,13 +11005,54 @@ Content-Type: application/json
 				<tr>
 					<td></td>
 					<td>loans/{loanId}/transactions/{transactionId}</td>
-					<td><a href="#loans_repaymentadjust_etc">Adjust a
-							Repayment or Waiver</a></td>
-					<td><a href="#loans_repaymentretrieve_etc">Retrieve a
-							Repayment or Waiver Details</a></td>
+					<td></td>
+					<td><a href="#loans_transaction_retrieve">Retrieve a transactions details</a></td>
 					<td></td>
 					<td></td>
 				</tr>
+				<tr class="alt">
+					<td></td>
+					<td>loans/{loanId}/transactions/{transactionId}</td>
+					<td><a href="#loans_transaction_adjust">Adjust a Transaction</a></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td><a href="#loans_charges">Loan Charges</a></td>
+					<td>loans/{loanId}/charges</td>
+					<td><a href="#loans_charges_create">Add a loan charge</a></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr class="alt">
+					<td></td>
+					<td>loans/{loanId}/charges/{loanChargeId}</td>
+					<td></td>
+					<td><a href="#loans_charges_retrieve">Retrieve a Loan Charge</a></td>
+					<td><a href="#loans_charges_update">Modify a Loan Charge</a></td>
+					<td><a href="#loans_charges_delete">Delete a Loan Charge</a></td>
+				</tr>
+				<tr>
+					<td><a href="#guarantors">Loan Guarantors</a></td>
+					<td>loans/{loanId}/guarantors</td>
+					<td><a href="#guarantors_create">Create a Guarantor
+					</a></td>
+					<td><a href="#guarantors_list">List Guarantors
+					</a></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr class="alt">
+					<td></td>
+					<td>loans/{loanId}/guarantors/{guarantorId}</td>
+					<td></td>
+					<td><a href="#guarantors_retrieve">Retrieve a Guarantor</a></td>
+					<td><a href="#guarantors_update">Update a Guarantor</a></td>
+					<td><a href="#guarantors_delete">Delete a Guarantor</a></td>
+				</tr>
+
 				<tr class="alt">
 					<td><a href="#offices">OFFICE</a></td>
 					<td>offices</td>
@@ -10957,8 +11323,7 @@ Content-Type: application/json
 				</tr>
 				<tr class="alt">
 					<td>loans/{loanId}/transactions/template</td>
-					<td><a href="#loans_repaymenttemplate_etc">Retrieve Loan
-							Repayment/Loan Waiver Template</a></td>
+					<td><a href="#loans_repaymenttemplate_etc">Retrieve Tranaction Template</a></td>
 				</tr>
 				<tr>
 					<td>offices/template</td>
