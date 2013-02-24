@@ -196,7 +196,6 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
         final GLClosure latestGLClosure = this.glClosureRepository.getLatestGLClosureByBranch(loanDTO.getOfficeId());
         final Office office = this.officeRepository.findOne(loanDTO.getOfficeId());
         final Long loanProductId = loanDTO.getLoanProductId();
-        // TODO: Check for accounting type
         for (final LoanTransactionDTO loanTransactionDTO : loanDTO.getNewLoanTransactions()) {
             final Date transactionDate = loanTransactionDTO.getTransactionDate();
             final String transactionId = loanTransactionDTO.getTransactionId();
@@ -262,10 +261,6 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
 
         BigDecimal totalDebitAmount = new BigDecimal(0);
 
-        if (isContraTransaction) {
-            transactionId = "reversal-" + transactionId;
-        }
-
         if (principalAmount != null && !(principalAmount.compareTo(BigDecimal.ZERO) == 0)) {
             totalDebitAmount = totalDebitAmount.add(principalAmount);
 
@@ -328,15 +323,17 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
 
     private void createCreditJournalEntryForLoanProduct(final Office office, final GLAccount account, final Long loanId,
             final String transactionId, final Date transactionDate, final BigDecimal amount) {
-        final JournalEntry journalEntry = JournalEntry.createNew(office, account, transactionId, true, transactionDate,
-                JournalEntryType.CREDIT, amount, null, PortfolioProductType.LOAN.toString(), loanId);
+        final boolean manualEntry = false;
+        final JournalEntry journalEntry = JournalEntry.createNew(office, account, transactionId, manualEntry, transactionDate,
+                JournalEntryType.CREDIT, amount, null, PortfolioProductType.LOAN.getValue(), loanId);
         this.glJournalEntryRepository.saveAndFlush(journalEntry);
     }
 
     private void createDebitJournalEntryForLoanProduct(final Office office, final GLAccount account, final Long loanId,
             final String transactionId, final Date transactionDate, final BigDecimal amount) {
-        final JournalEntry journalEntry = JournalEntry.createNew(office, account, transactionId, true, transactionDate,
-                JournalEntryType.DEBIT, amount, null, PortfolioProductType.LOAN.toString(), loanId);
+        final boolean manualEntry = false;
+        final JournalEntry journalEntry = JournalEntry.createNew(office, account, transactionId, manualEntry, transactionDate,
+                JournalEntryType.DEBIT, amount, null, PortfolioProductType.LOAN.getValue(), loanId);
         this.glJournalEntryRepository.saveAndFlush(journalEntry);
     }
 

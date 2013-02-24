@@ -67,8 +67,8 @@ public class JournalEntry extends AbstractAuditableCustom<AppUser, Long> {
     private String description;
 
     @SuppressWarnings("unused")
-    @Column(name = "entity_type", length = 50)
-    private String entityType;
+    @Column(name = "entity_type_enum", length = 50)
+    private Integer entityType;
 
     @SuppressWarnings("unused")
     @Column(name = "entity_id")
@@ -76,7 +76,7 @@ public class JournalEntry extends AbstractAuditableCustom<AppUser, Long> {
 
     public static JournalEntry createNew(final Office office, final GLAccount glAccount, final String transactionId,
             final boolean manualEntry, final Date transactionDate, final JournalEntryType journalEntryType, final BigDecimal amount,
-            final String description, final String entityType, final Long entityId) {
+            final String description, final Integer entityType, final Long entityId) {
         return new JournalEntry(office, glAccount, transactionId, manualEntry, transactionDate, journalEntryType.getValue(), amount,
                 description, entityType, entityId);
     }
@@ -86,7 +86,7 @@ public class JournalEntry extends AbstractAuditableCustom<AppUser, Long> {
     }
 
     public JournalEntry(final Office office, final GLAccount glAccount, final String transactionId, final boolean manualEntry,
-            final Date transactionDate, final Integer type, final BigDecimal amount, final String description, final String entityType,
+            final Date transactionDate, final Integer type, final BigDecimal amount, final String description, final Integer entityType,
             final Long entityId) {
         this.office = office;
         this.glAccount = glAccount;
@@ -98,7 +98,7 @@ public class JournalEntry extends AbstractAuditableCustom<AppUser, Long> {
         this.type = type;
         this.amount = amount;
         this.description = StringUtils.defaultIfEmpty(description, null);
-        this.entityType = StringUtils.defaultIfEmpty(entityType, null);
+        this.entityType = entityType;
         this.entityId = entityId;
     }
 

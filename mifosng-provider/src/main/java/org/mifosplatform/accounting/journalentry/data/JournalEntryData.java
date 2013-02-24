@@ -43,7 +43,7 @@ public class JournalEntryData {
     @SuppressWarnings("unused")
     private final Boolean manualEntry;
     @SuppressWarnings("unused")
-    private final String entityType;
+    private final EnumOptionData entityType;
     @SuppressWarnings("unused")
     private final Long entityId;
     @SuppressWarnings("unused")
@@ -60,7 +60,7 @@ public class JournalEntryData {
     public JournalEntryData(final Long id, final Long officeId, final String officeName, final String glAccountName,
             final Long glAccountId, final String glAccountCode, final EnumOptionData glAccountClassification,
             final LocalDate transactionDate, final EnumOptionData entryType, final BigDecimal amount, final String transactionId,
-            final Boolean manualEntry, final String entityType, final Long entityId, final Long createdByUserId,
+            final Boolean manualEntry, final EnumOptionData entityType, final Long entityId, final Long createdByUserId,
             final LocalDate createdDate, final String createdByUserName, final String comments, final Boolean reversed) {
         this.id = id;
         this.officeId = officeId;
