@@ -125,6 +125,10 @@ public class ApiParameterHelper {
         return genericResultSet;
     }
 
+    public static boolean genericResultSetPassed(MultivaluedMap<String, String> queryParams) {
+        return queryParams.getFirst("genericResultSet") != null;
+    }
+    
     public static String sqlEncodeString(String str) {
         String singleQuote = "'";
         String twoSingleQuotes = "''";

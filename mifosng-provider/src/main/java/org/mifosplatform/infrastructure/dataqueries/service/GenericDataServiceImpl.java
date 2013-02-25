@@ -185,35 +185,49 @@ public class GenericDataServiceImpl implements GenericDataService {
 
                 writer.append(doubleQuote + columnHeaders.get(j).getColumnName() + doubleQuote + ": ");
                 currColType = columnHeaders.get(j).getColumnDisplayType();
+                final String colType = columnHeaders.get(j).getColumnType();
+                if (currColType == null && colType.equalsIgnoreCase("INT")) {
+                    currColType = "INTEGER";
+                }
+                if (currColType == null && colType.equalsIgnoreCase("VARCHAR")) {
+                    currColType = "VARCHAR";
+                }
+                if (currColType == null && colType.equalsIgnoreCase("DATE")) {
+                    currColType = "DATE";
+                }
                 currVal = row.get(j);
-                if (currVal != null) {
-                    if (currColType.equals("DECIMAL") || currColType.equals("INTEGER"))
+                if (currVal != null && currColType != null) {
+                    if (currColType.equals("DECIMAL") || currColType.equals("INTEGER")) {
                         writer.append(currVal);
-                    else {
+                    } else {
                         if (currColType.equals("DATE")) {
                             LocalDate localDate = new LocalDate(currVal);
                             writer.append("[" + localDate.getYear() + ", " + localDate.getMonthOfYear() + ", " + localDate.getDayOfMonth()
                                     + "]");
-                        } else
-                            writer.append(doubleQuote + replace(currVal, doubleQuote, slashDoubleQuote) + doubleQuote);
+                        } else {
+                        
+                            writer.append(doubleQuote + replace(currVal, doubleQuote,slashDoubleQuote) + doubleQuote);
+                        }
                     }
-                } else
+                } else {
                     writer.append("null");
-
+                }
                 if (j < (rSize - 1)) writer.append(",\n");
             }
 
-            if (i < (data.size() - 1))
+            if (i < (data.size() - 1)) {
                 writer.append("},");
-            else
+            }
+            else {
                 writer.append("}");
+            }
         }
 
         writer.append("\n]");
         return writer.toString();
 
     }
-
+    
     private void dbClose(Statement db_statement, Connection db_connection) {
         // logger.debug("dbClose");
         try {

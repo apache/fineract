@@ -26,6 +26,7 @@ import javax.ws.rs.core.UriInfo;
 import org.mifosplatform.infrastructure.core.api.ApiParameterHelper;
 import org.mifosplatform.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.mifosplatform.infrastructure.dataqueries.data.GenericResultsetData;
+import org.mifosplatform.infrastructure.dataqueries.service.GenericDataService;
 import org.mifosplatform.infrastructure.dataqueries.service.ReadReportingService;
 import org.mifosplatform.infrastructure.security.exception.NoAuthorizationException;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
@@ -42,15 +43,16 @@ public class ReportsApiResource {
     private final PlatformSecurityContext context;
     private final ToApiJsonSerializer<GenericResultsetData> toApiJsonSerializer;
     private final ReadReportingService readExtraDataAndReportingService;
+    private final GenericDataService genericDataService;
 
     @Autowired
     public ReportsApiResource(final PlatformSecurityContext context, final ReadReportingService readExtraDataAndReportingService,
-            final ToApiJsonSerializer<GenericResultsetData> toApiJsonSerializer) {
+            final GenericDataService genericDataService, final ToApiJsonSerializer<GenericResultsetData> toApiJsonSerializer) {
         this.context = context;
         this.readExtraDataAndReportingService = readExtraDataAndReportingService;
+        this.genericDataService = genericDataService;
         this.toApiJsonSerializer = toApiJsonSerializer;
     }
-
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON, "application/x-msdownload" })
@@ -130,11 +132,22 @@ public class ReportsApiResource {
             GenericResultsetData result = this.readExtraDataAndReportingService.retrieveGenericResultset(reportName, parameterTypeValue,
                     reportParams);
 
-            final String json = this.toApiJsonSerializer.serializePretty(prettyPrint, result);
-
+            String json = "";
+            final boolean genericResultSetIsPassed = ApiParameterHelper.genericResultSetPassed(uriInfo.getQueryParameters());
+            final boolean genericResultSet = ApiParameterHelper.genericResultSet(uriInfo.getQueryParameters());
+            if (genericResultSetIsPassed) {
+                if (genericResultSet) {
+                    json = this.toApiJsonSerializer.serializePretty(prettyPrint, result);
+                } else {
+                    json = this.genericDataService.generateJsonFromGenericResultsetData(result);
+                }
+            } else {
+                json = this.toApiJsonSerializer.serializePretty(prettyPrint, result);
+            }
+            
             return Response.ok().entity(json).type(MediaType.APPLICATION_JSON).build();
         }
-
+        
         // CSV Export
         Map<String, String> reportParams = getReportParams(queryParams, false);
         StreamingOutput result = this.readExtraDataAndReportingService.retrieveReportCSV(reportName, parameterTypeValue, reportParams);

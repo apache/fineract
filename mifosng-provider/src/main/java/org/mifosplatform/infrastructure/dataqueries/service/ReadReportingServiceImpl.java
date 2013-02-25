@@ -63,7 +63,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
     private final static Logger logger = LoggerFactory.getLogger(ReadReportingServiceImpl.class);
 
     private Boolean noPentaho = false;
-
+    
     @Autowired
     public ReadReportingServiceImpl(final PlatformSecurityContext context) {
         // kick off pentaho reports server
@@ -108,7 +108,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
 
     }
 
-    private static StringBuffer generateCsvFileBuffer(final GenericResultsetData result) {
+    private StringBuffer generateCsvFileBuffer(final GenericResultsetData result) {
         StringBuffer writer = new StringBuffer();
 
         List<ResultsetColumnHeader> columnHeaders = result.getColumnHeaders();
@@ -126,6 +126,8 @@ public class ReadReportingServiceImpl implements ReadReportingService {
         // String currCol;
         String currColType;
         String currVal;
+        String doubleQuote = "\"";
+        String twoDoubleQuotes = doubleQuote + doubleQuote;
         logger.info("NO. of Rows: " + data.size());
         for (int i = 0; i < data.size(); i++) {
             row = data.get(i).getRow();
@@ -139,7 +141,8 @@ public class ReadReportingServiceImpl implements ReadReportingService {
                             || currColType.equals("SMALLINT") || currColType.equals("INT"))
                         writer.append(currVal);
                     else
-                        writer.append('"' + currVal + '"');
+                    writer.append('"' + genericDataService.replace(currVal, doubleQuote, twoDoubleQuotes) + '"');
+
                 }
                 if (j < (rSize - 1)) writer.append(",");
             }
@@ -148,7 +151,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
 
         return writer;
     }
-
+    
     @Override
     public GenericResultsetData retrieveGenericResultset(final String name, final String type, final Map<String, String> queryParams) {
 
