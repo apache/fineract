@@ -11,7 +11,6 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
 
-import org.joda.time.DateTime;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
 import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
@@ -78,13 +77,14 @@ public class DepositProductReadPlatformServiceImpl implements DepositProductRead
     private static final class DepositProductMapper implements RowMapper<DepositProductData> {
 
         public String depositProductSchema() {
-            return " dp.id as id, dp.external_id as exernalId, dp.name as name, dp.description as description,dp.currency_code as currencyCode, dp.currency_digits as currencyDigits,dp.minimum_balance as minimumBalance,dp.maximum_balance as maximumBalance,"
-                    + "dp.created_date as createdon, dp.lastmodified_date as modifiedon,dp.tenure_months as tenureMonths, "
+            return " dp.id as id, dp.external_id as exernalId, dp.name as name, dp.description as description,dp.currency_code as currencyCode, dp.currency_digits as currencyDigits, "
+                    + "dp.minimum_balance as minimumBalance,dp.maximum_balance as maximumBalance, dp.tenure_months as tenureMonths, "
                     + "dp.interest_compounded_every as interestCompoundedEvery, dp.interest_compounded_every_period_enum as interestCompoundedEveryPeriodType, "
                     + "dp.maturity_default_interest_rate as maturityDefaultInterestRate, dp.is_compounding_interest_allowed as interestCompoundingAllowed, "
-                    + "dp.maturity_min_interest_rate as maturityMinInterestRate, dp.maturity_max_interest_rate as maturityMaxInterestRate, dp.is_renewal_allowed as canRenew, dp.is_preclosure_allowed as canPreClose, dp.pre_closure_interest_rate as preClosureInterestRate, "
+                    + "dp.maturity_min_interest_rate as maturityMinInterestRate, dp.maturity_max_interest_rate as maturityMaxInterestRate, "
+                    + "dp.is_renewal_allowed as canRenew, dp.is_preclosure_allowed as canPreClose, dp.pre_closure_interest_rate as preClosureInterestRate, "
                     + "dp.is_lock_in_period_allowed as isLockinPeriodAllowed, dp.lock_in_period as lockinPeriod, dp.lock_in_period_type as lockinPeriodType, "
-                    + "curr.name as currencyName, curr.internationalized_name_code as currencyNameCode, curr.display_symbol as currencyDisplaySymbol "
+                    + "curr.name as currencyName, curr.internationalized_name_code as currencyNameCode, curr.display_symbol as currencyDisplaySymbol, dp.is_deleted as isDeleted "
                     + "from m_product_deposit dp join m_currency curr on curr.code = dp.currency_code ";
         }
 
@@ -102,9 +102,6 @@ public class DepositProductReadPlatformServiceImpl implements DepositProductRead
             String currencyNameCode = rs.getString("currencyNameCode");
             String currencyDisplaySymbol = rs.getString("currencyDisplaySymbol");
             CurrencyData currencyData = new CurrencyData(currencyCode, currencyName, currencyDigits, currencyDisplaySymbol, currencyNameCode);
-
-            DateTime createdOn = JdbcSupport.getDateTime(rs, "createdon");
-            DateTime lastModifedOn = JdbcSupport.getDateTime(rs, "modifiedon");
 
             BigDecimal minimumBalance = rs.getBigDecimal("minimumBalance");
             BigDecimal maximumBalance = rs.getBigDecimal("maximumBalance");
@@ -129,11 +126,12 @@ public class DepositProductReadPlatformServiceImpl implements DepositProductRead
             Integer lockinPeriod = JdbcSupport.getInteger(rs, "lockinPeriod");
             Integer lockinPeriodTypeValue = JdbcSupport.getInteger(rs, "lockinPeriodType");
             EnumOptionData lockinPeriodType = SavingsDepositEnumerations.interestCompoundingPeriodType(lockinPeriodTypeValue);
+            Boolean isDeleted = rs.getBoolean("isDeleted");
 
-            return new DepositProductData(createdOn, lastModifedOn, id, exernalId, name, description, currencyCode, currencyDigits,
+            return new DepositProductData(id, exernalId, name, description, currencyCode, currencyDigits,
                     minimumBalance, maximumBalance, tenureMonths, maturityDefaultInterestRate, maturityMinInterestRate,
                     maturityMaxInterestRate, interestCompoundedEvery, interestCompoundedEveryPeriodType, canRenew, canPreClose,
-                    preClosureInterestRate, interestCompoundingAllowed, isLockinPeriodAllowed, lockinPeriod, lockinPeriodType, currencyData);
+                    preClosureInterestRate, interestCompoundingAllowed, isLockinPeriodAllowed, lockinPeriod, lockinPeriodType, currencyData,isDeleted);
         }
 
     }

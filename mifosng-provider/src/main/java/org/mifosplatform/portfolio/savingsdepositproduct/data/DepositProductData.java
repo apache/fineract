@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.joda.time.DateTime;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
 
@@ -44,23 +43,19 @@ public class DepositProductData {
     private final Integer lockinPeriod;
     private final EnumOptionData lockinPeriodType;
 
-    private final DateTime createdOn;
-    private final DateTime lastModifedOn;
-
     private final Collection<CurrencyData> currencyOptions;
     private final List<EnumOptionData> interestCompoundedEveryPeriodTypeOptions;
+	private final Boolean isDeleted;
 
-    public DepositProductData(final DateTime createdOn, final DateTime lastModifedOn, final Long id, final String externalId,
+    public DepositProductData(final Long id, final String externalId,
             final String name, final String description, final String currencyCode, final Integer digitsAfterDecimal,
             final BigDecimal minimumBalance, final BigDecimal maximumBalance, final Integer tenureMonths,
             final BigDecimal maturityDefaultInterestRate, final BigDecimal maturityMinInterestRate,
             final BigDecimal maturityMaxInterestRate, final Integer interestCompoundedEvery,
             final EnumOptionData interestCompoundedEveryPeriodType, final boolean renewalAllowed, final boolean preClosureAllowed,
             final BigDecimal preClosureInterestRate, final boolean interestCompoundingAllowed, final boolean isLockinPeriodAllowed,
-            final Integer lockinPeriod, final EnumOptionData lockinPeriodType,final CurrencyData currencyData) {
+            final Integer lockinPeriod, final EnumOptionData lockinPeriodType,final CurrencyData currencyData, final Boolean isDeleted) {
 
-        this.createdOn = createdOn;
-        this.lastModifedOn = lastModifedOn;
         this.id = id;
         this.externalId = externalId;
         this.name = name;
@@ -87,13 +82,12 @@ public class DepositProductData {
         this.currency = currencyData;
         this.currencyOptions = null;
         this.interestCompoundedEveryPeriodTypeOptions = null;
+        this.isDeleted = isDeleted;
     }
 
     public DepositProductData(final Collection<CurrencyData> currencyOptions,
             final EnumOptionData defaultInterestCompoundedEveryPeriodType,
             final List<EnumOptionData> interestCompoundedEveryPeriodTypeOptions) {
-        this.createdOn = null;
-        this.lastModifedOn = null;
         this.id = null;
         this.externalId = null;
         this.name = null;
@@ -123,12 +117,11 @@ public class DepositProductData {
 
         this.currencyOptions = currencyOptions;
         this.interestCompoundedEveryPeriodTypeOptions = interestCompoundedEveryPeriodTypeOptions;
+        this.isDeleted = false;
     }
 
     public DepositProductData(final DepositProductData product, final Collection<CurrencyData> currencyOptions,
             final List<EnumOptionData> interestCompoundedEveryPeriodTypeOptions) {
-        this.createdOn = product.getCreatedOn();
-        this.lastModifedOn = product.getLastModifedOn();
         this.id = product.getId();
         this.externalId = product.getExternalId();
         this.name = product.getName();
@@ -162,6 +155,8 @@ public class DepositProductData {
         } else {
             this.currency = product.currency;
         }
+        
+        this.isDeleted = product.isDeleted;
     }
 
     public Long getId() {
@@ -232,14 +227,6 @@ public class DepositProductData {
         return preClosureInterestRate;
     }
 
-    public DateTime getCreatedOn() {
-        return createdOn;
-    }
-
-    public DateTime getLastModifedOn() {
-        return lastModifedOn;
-    }
-
     public Collection<CurrencyData> getCurrencyOptions() {
         return currencyOptions;
     }
@@ -263,5 +250,9 @@ public class DepositProductData {
     public EnumOptionData getLockinPeriodType() {
         return lockinPeriodType;
     }
+
+	public Boolean isDeleted() {
+		return this.isDeleted;
+	}
 
 }

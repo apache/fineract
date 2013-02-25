@@ -17,16 +17,15 @@ import javax.persistence.UniqueConstraint;
 
 import org.apache.commons.lang.StringUtils;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
-import org.mifosplatform.infrastructure.core.domain.AbstractAuditableCustom;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.portfolio.loanproduct.domain.PeriodFrequencyType;
 import org.mifosplatform.portfolio.savingsdepositproduct.exception.DepositProductValueOutsideRangeException;
-import org.mifosplatform.useradministration.domain.AppUser;
+import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
 @Table(name = "m_product_deposit", uniqueConstraints = { @UniqueConstraint(columnNames = { "name" }, name = "name_deposit_product"),
         @UniqueConstraint(columnNames = { "external_id" }, name = "externalid_deposit_product") })
-public class DepositProduct extends AbstractAuditableCustom<AppUser, Long> {
+public class DepositProduct extends AbstractPersistable<Long> {
 
     @Column(name = "name", nullable = false)
     private String name;

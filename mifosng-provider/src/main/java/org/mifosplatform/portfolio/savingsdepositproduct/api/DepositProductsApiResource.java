@@ -37,6 +37,7 @@ import org.mifosplatform.organisation.monetary.service.CurrencyReadPlatformServi
 import org.mifosplatform.portfolio.loanproduct.domain.PeriodFrequencyType;
 import org.mifosplatform.portfolio.savingsaccountproduct.service.SavingsDepositEnumerations;
 import org.mifosplatform.portfolio.savingsdepositproduct.data.DepositProductData;
+import org.mifosplatform.portfolio.savingsdepositproduct.exception.DepositProductNotFoundException;
 import org.mifosplatform.portfolio.savingsdepositproduct.service.DepositProductReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -47,7 +48,7 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class DepositProductsApiResource {
 	
-	private final Set<String> DEPOSIT_PRODUCT_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "externalId", "name", "description", "createdOn", "lastModifedOn",
+	private final Set<String> DEPOSIT_PRODUCT_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "externalId", "name", "description", 
 			"currencyCode", "digitsAfterDecimal", "minimumBalance", "maximumBalance", "tenureInMonths", "maturityDefaultInterestRate", "maturityMinInterestRate",
 			"maturityMaxInterestRate", "interestCompoundedEvery", "interestCompoundedEveryPeriodType", "renewalAllowed", "preClosureAllowed", "preClosureInterestRate",
             "interestCompoundingAllowed", "isLockinPeriodAllowed", "lockinPeriod", "lockinPeriodType", "currency","currencyOptions", "interestCompoundedEveryPeriodTypeOptions"));
@@ -132,6 +133,9 @@ public class DepositProductsApiResource {
 
         context.authenticatedUser().validateHasReadPermission(entityType);
         DepositProductData productData = this.depositProductReadPlatformService.retrieveDepositProductData(productId);
+        if (productData.isDeleted()) {
+			throw new DepositProductNotFoundException(productId);
+		}
         final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         
         if (settings.isTemplate()) {
