@@ -177,7 +177,7 @@ public class Group extends AbstractPersistable<Long> {
         if (parent != null) {
             this.hierarchy = this.parent.hierarchyOf(this.getId());
         } else {
-            this.hierarchy = ".";
+            this.hierarchy = "." + this.getId() + ".";
         }
     }
 

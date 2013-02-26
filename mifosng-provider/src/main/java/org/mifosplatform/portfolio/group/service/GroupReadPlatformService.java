@@ -7,6 +7,7 @@ package org.mifosplatform.portfolio.group.service;
 
 import java.util.Collection;
 
+import org.mifosplatform.organisation.monetary.data.MoneyData;
 import org.mifosplatform.organisation.staff.data.StaffData;
 import org.mifosplatform.portfolio.client.data.ClientLookup;
 import org.mifosplatform.portfolio.group.data.GroupAccountSummaryCollectionData;
@@ -38,4 +39,10 @@ public interface GroupReadPlatformService {
     GroupData retrieveGroupDetails(Long groupId, boolean template);
 
     Collection<GroupLookupData> retrieveChildGroupsbyGroupId(Long groupId);
+
+    Long retrieveTotalClients(Long groupId);
+
+    Long retrieveTotalNoOfChildGroups(Long groupId);
+
+    Collection<MoneyData> retrieveGroupLoanPortfolio(Long groupId);
 }

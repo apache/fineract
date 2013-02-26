@@ -27,6 +27,8 @@ public class GroupData {
     private final Long parentId;
     private final String parentName;
     @SuppressWarnings("unused")
+    private final GroupSummaryData groupSummaryData;
+    @SuppressWarnings("unused")
     private final GroupLevelData groupLevelData;
     private final Collection<ClientLookup> clientMembers;
     @SuppressWarnings("unused")
@@ -52,6 +54,7 @@ public class GroupData {
         this.parentName = parentName;
         this.staffId = staffId;
         this.staffName = staffName;
+        this.groupSummaryData = null;
         this.groupLevelData = null;
         this.clientMembers = null;
         this.allowedClients = null;
@@ -63,7 +66,7 @@ public class GroupData {
 
     public GroupData(final GroupData group, final Collection<ClientLookup> clientMembers, final Collection<ClientLookup> allowedClients,
             final Collection<OfficeLookup> allowedOffices, final Collection<GroupLookupData> allowedParentGroups,
-            final GroupLevelData groupLevelData, final Collection<StaffData> allowedStaffs, final Collection<GroupLookupData> childGroups) {
+            final GroupLevelData groupLevelData, final Collection<StaffData> allowedStaffs, final Collection<GroupLookupData> childGroups , final GroupSummaryData groupSummaryData) {
         this.id = group.getId();
         this.officeId = group.getOfficeId();
         this.officeName = group.getOfficeName();
@@ -75,6 +78,7 @@ public class GroupData {
         this.staffId = group.getStaffId();
         this.staffName = group.getStaffName();
 
+        this.groupSummaryData = groupSummaryData;
         this.groupLevelData = groupLevelData;
         this.clientMembers = clientMembers;
         this.allowedClients = allowedClients;
@@ -98,6 +102,7 @@ public class GroupData {
         this.parentName = null;
         this.staffId = null;
         this.staffName = null;
+        this.groupSummaryData = null;
         this.groupLevelData = groupLevelData;
         this.allowedClients = allowedClients;
         this.allowedOffices = allowedOffices;
