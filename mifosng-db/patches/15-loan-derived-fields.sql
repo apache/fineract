@@ -40,4 +40,4 @@ ADD COLUMN `total_waived_derived` DECIMAL(19,6) NOT NULL DEFAULT 0.0 AFTER `tota
 ADD COLUMN `total_writtenoff_derived` DECIMAL(19,6) NOT NULL DEFAULT 0.0 AFTER `total_waived_derived`,
 ADD COLUMN `total_outstanding_derived` DECIMAL(19,6) NOT NULL DEFAULT 0.0 AFTER `total_writtenoff_derived`,
 ADD COLUMN `total_overdue_derived` DECIMAL(19,6) NOT NULL DEFAULT 0.0 AFTER `total_outstanding_derived`,
-ADD COLUMN `overdue_since_date_derived` DATE NULL AFTER `total_outstanding_derived`;
+ADD COLUMN `overdue_since_date_derived` DATE NULL AFTER `total_overdue_derived`;
