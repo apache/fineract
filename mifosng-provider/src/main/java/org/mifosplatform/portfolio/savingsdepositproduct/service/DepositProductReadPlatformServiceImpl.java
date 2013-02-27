@@ -20,7 +20,9 @@ import org.mifosplatform.portfolio.loanproduct.domain.PeriodFrequencyType;
 import org.mifosplatform.portfolio.savingsaccountproduct.service.SavingsDepositEnumerations;
 import org.mifosplatform.portfolio.savingsdepositproduct.data.DepositProductData;
 import org.mifosplatform.portfolio.savingsdepositproduct.data.DepositProductLookup;
+import org.mifosplatform.portfolio.savingsdepositproduct.exception.DepositProductNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
@@ -58,10 +60,14 @@ public class DepositProductReadPlatformServiceImpl implements DepositProductRead
 
     @Override
     public DepositProductData retrieveDepositProductData(Long productId) {
-        DepositProductMapper depositProductMapper = new DepositProductMapper();
-        String sql = "select " + depositProductMapper.depositProductSchema() + " where dp.id = ? ";
-
-        return this.jdbcTemplate.queryForObject(sql, depositProductMapper, new Object[] { productId });
+	    try{
+	    	this.context.authenticatedUser();
+	        DepositProductMapper depositProductMapper = new DepositProductMapper();
+	        String sql = "select " + depositProductMapper.depositProductSchema() + " where dp.id = ? and dp.is_deleted=0";
+	        return this.jdbcTemplate.queryForObject(sql, depositProductMapper, new Object[] { productId });
+    	} catch (EmptyResultDataAccessException e){
+    		throw new DepositProductNotFoundException(productId);
+    	}
     }
 
     @Override
@@ -84,7 +90,7 @@ public class DepositProductReadPlatformServiceImpl implements DepositProductRead
                     + "dp.maturity_min_interest_rate as maturityMinInterestRate, dp.maturity_max_interest_rate as maturityMaxInterestRate, "
                     + "dp.is_renewal_allowed as canRenew, dp.is_preclosure_allowed as canPreClose, dp.pre_closure_interest_rate as preClosureInterestRate, "
                     + "dp.is_lock_in_period_allowed as isLockinPeriodAllowed, dp.lock_in_period as lockinPeriod, dp.lock_in_period_type as lockinPeriodType, "
-                    + "curr.name as currencyName, curr.internationalized_name_code as currencyNameCode, curr.display_symbol as currencyDisplaySymbol, dp.is_deleted as isDeleted "
+                    + "curr.name as currencyName, curr.internationalized_name_code as currencyNameCode, curr.display_symbol as currencyDisplaySymbol "
                     + "from m_product_deposit dp join m_currency curr on curr.code = dp.currency_code ";
         }
 
@@ -126,12 +132,11 @@ public class DepositProductReadPlatformServiceImpl implements DepositProductRead
             Integer lockinPeriod = JdbcSupport.getInteger(rs, "lockinPeriod");
             Integer lockinPeriodTypeValue = JdbcSupport.getInteger(rs, "lockinPeriodType");
             EnumOptionData lockinPeriodType = SavingsDepositEnumerations.interestCompoundingPeriodType(lockinPeriodTypeValue);
-            Boolean isDeleted = rs.getBoolean("isDeleted");
 
             return new DepositProductData(id, exernalId, name, description, currencyCode, currencyDigits,
                     minimumBalance, maximumBalance, tenureMonths, maturityDefaultInterestRate, maturityMinInterestRate,
                     maturityMaxInterestRate, interestCompoundedEvery, interestCompoundedEveryPeriodType, canRenew, canPreClose,
-                    preClosureInterestRate, interestCompoundingAllowed, isLockinPeriodAllowed, lockinPeriod, lockinPeriodType, currencyData,isDeleted);
+                    preClosureInterestRate, interestCompoundingAllowed, isLockinPeriodAllowed, lockinPeriod, lockinPeriodType, currencyData);
         }
 
     }

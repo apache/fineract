@@ -1041,15 +1041,25 @@
 								<td><a href="#audit_searchtemplate">Retrieve Audit
 										Search Data</a></td>
 							</tr>
-							<tr class="alt">
+							<tr>
 								<td>depositproducts/template</td>
 								<td><a href="#depositproducts_template">Retrieve Deposit
 										Product Details Template</a></td>
 							</tr>
 							<tr class="alt">
-								<td>loanproducts/template</td>
+								<td>savingproducts/template</td>
 								<td><a href="#savingproducts_template">Retrieve Saving
 										Product Details Template</a></td>
+							</tr>
+							<tr>
+								<td>depositaccounts/template</td>
+								<td><a href="#fixeddeposits_template">Retrieve Deposit 
+										Account Details Template</a></td>
+							</tr>
+							<tr class="alt">
+								<td>savingaccounts/template</td>
+								<td><a href="#savingaccounts_template">Retrieve Saving
+										Account Details Template</a></td>
 							</tr>
 						</table>
 					</div>
@@ -1101,14 +1111,6 @@
 											<td><div class=matrixHeadingCommands>delete</div></td>
 										</tr>
 									</table></td>
-							</tr>
-							<tr class="alt">
-								<td>Work in Progress</a></td>
-								<td></td>
-								<td></td>
-								<td></td>
-								<td></td>
-								<td></td>
 							</tr>
 							<tr class="alt">
 								<td><a href="#fixeddeposits">FIXED DEPOSITS</a></td>
@@ -11290,6 +11292,82 @@ Content-Type: application/json
 							Permissions</a></td>
 					<td></td>
 					<td></td>
+				</tr>
+				<tr class="alt">
+					<td><a href="#depositproducts">DEPOSIT PRODUCT</a></td>
+					<td>depositproducts</td>
+					<td><a href="#depositproducts_create">Create a Deposit product</a></td>
+					<td><a href="#depositproducts_list">List Deposit products</a></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>depositproducts/{prodcutId}</td>
+					<td></td>
+					<td><a href="#depositproducts_retrieve">Retrieve a Deposit product</a></td>
+					<td><a href="#depositproducts_update">Update a Deposit product</a></td>
+					<td><a href="#depositproducts_delete">Delete a Deposit product</a></td>
+				</tr>
+				<tr class="alt">
+					<td><a href="#savingproducts">SAVING PRODUCT</a></td>
+					<td>savingproducts</td>
+					<td><a href="#savingproducts_create">Create a Saving product</a></td>
+					<td><a href="#savingproducts_list">List Saving products</a></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>savingproducts/{prodcutId}</td>
+					<td></td>
+					<td><a href="#savingproducts_retrieve">Retrieve a Saving procduct</a></td>
+					<td><a href="#savingproducts_update">Update a Saving product</a></td>
+					<td><a href="#savingproducts_delete">Delete a Saving product</a></td>
+				</tr>
+				
+				<tr class="alt">
+					<td><a href="#fixeddeposits">FIXED DEPOSITS</a></td>
+					<td>depositaccounts</td>
+					<td><a href="#fixeddeposits_create">Create a New Deposit
+							Application</a></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>depositaccounts/{accountId}</td>
+					<td><a href="#fixeddeposits_approve_etc">Approve, Undo Approve,
+							Interest withdraw, Reject a Deposit Application or Withdraw a
+							Deposit Application</a></td>
+					<td><a href="#fixeddeposits_retrieve">Retrieve a Deposit
+							Application</a></td>
+					<td></td>
+					<td><a href="#fixeddeposits_delete">Delete a Deposit
+							Application</a></td>
+				</tr>
+				
+				<tr class="alt">
+					<td><a href="#savingaccounts">SAVING ACCOUNTS</a></td>
+					<td>savingaccounts</td>
+					<td><a href="#savingaccounts_create">Create a New Saving 
+							Application</a></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>savingaccounts/{accountId}</td>
+					<td><a href="#savingaccounts_approve_etc">Approve, Undo Approve,
+							Interest withdraw, Reject a Saving Application or Withdraw a
+							Saving Application</a></td>
+					<td><a href="#savingaccounts_retrieve">Retrieve a Saving
+							Application</a></td>
+					<td></td>
+					<td><a href="#savingaccounts_delete">Delete a Saving
+							Application</a></td>
 				</tr>
 			</table>
 			<br>

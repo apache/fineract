@@ -45,7 +45,6 @@ public class DepositProductData {
 
     private final Collection<CurrencyData> currencyOptions;
     private final List<EnumOptionData> interestCompoundedEveryPeriodTypeOptions;
-	private final Boolean isDeleted;
 
     public DepositProductData(final Long id, final String externalId,
             final String name, final String description, final String currencyCode, final Integer digitsAfterDecimal,
@@ -54,7 +53,7 @@ public class DepositProductData {
             final BigDecimal maturityMaxInterestRate, final Integer interestCompoundedEvery,
             final EnumOptionData interestCompoundedEveryPeriodType, final boolean renewalAllowed, final boolean preClosureAllowed,
             final BigDecimal preClosureInterestRate, final boolean interestCompoundingAllowed, final boolean isLockinPeriodAllowed,
-            final Integer lockinPeriod, final EnumOptionData lockinPeriodType,final CurrencyData currencyData, final Boolean isDeleted) {
+            final Integer lockinPeriod, final EnumOptionData lockinPeriodType,final CurrencyData currencyData) {
 
         this.id = id;
         this.externalId = externalId;
@@ -82,7 +81,6 @@ public class DepositProductData {
         this.currency = currencyData;
         this.currencyOptions = null;
         this.interestCompoundedEveryPeriodTypeOptions = null;
-        this.isDeleted = isDeleted;
     }
 
     public DepositProductData(final Collection<CurrencyData> currencyOptions,
@@ -117,7 +115,6 @@ public class DepositProductData {
 
         this.currencyOptions = currencyOptions;
         this.interestCompoundedEveryPeriodTypeOptions = interestCompoundedEveryPeriodTypeOptions;
-        this.isDeleted = false;
     }
 
     public DepositProductData(final DepositProductData product, final Collection<CurrencyData> currencyOptions,
@@ -156,7 +153,6 @@ public class DepositProductData {
             this.currency = product.currency;
         }
         
-        this.isDeleted = product.isDeleted;
     }
 
     public Long getId() {
@@ -250,9 +246,5 @@ public class DepositProductData {
     public EnumOptionData getLockinPeriodType() {
         return lockinPeriodType;
     }
-
-	public Boolean isDeleted() {
-		return this.isDeleted;
-	}
 
 }
