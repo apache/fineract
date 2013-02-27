@@ -182,9 +182,9 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
         Collection<StaffData> allowedStaffs = null;
         Collection<GroupLookupData> childGroups = this.retrieveChildGroupsbyGroupId(groupId);
 
-        final Long totalActiveClients = this.retrieveTotalClients(groupId);
+        final Long totalActiveClients = this.retrieveTotalClients(group.getHierarchy());
         final Long totalChildGroups = this.retrieveTotalNoOfChildGroups(groupId);
-        Collection<MoneyData> totalLoanPortfolio = this.retrieveGroupLoanPortfolio(groupId);
+        Collection<MoneyData> totalLoanPortfolio = this.retrieveGroupLoanPortfolio(group.getHierarchy());
 
         GroupSummaryData groupSummaryData = new GroupSummaryData(totalActiveClients, totalChildGroups, totalLoanPortfolio, null);
 
@@ -230,11 +230,11 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
     }
 
     @Override
-    public Long retrieveTotalClients(final Long groupId) {
+    public Long retrieveTotalClients(final String  hierarchy) {
 
         this.context.authenticatedUser();
 
-        String groupHierarchy = "." +  groupId + "%";
+        String groupHierarchy = hierarchy + "%";
         String sqlTotalClients = "SELECT count(gc.client_id) FROM m_group_client gc JOIN m_group g "
                 + "ON gc.group_id = g.id WHERE g.hierarchy LIKE ? ";
         return this.jdbcTemplate.queryForLong(sqlTotalClients, new Object[] { groupHierarchy });
@@ -251,13 +251,13 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
     }
 
     @Override
-    public Collection<MoneyData> retrieveGroupLoanPortfolio(final Long groupId) {
+    public Collection<MoneyData> retrieveGroupLoanPortfolio(final String hierarchy) {
 
         this.context.authenticatedUser();
 
         MoneyDataMapper rm = new MoneyDataMapper();
 
-        String groupHierarchy = "." +  groupId + "%";
+        String groupHierarchy = hierarchy + "%";
         String sql = "select " + rm.moneyDataSchema() + " FROM m_group_client gc JOIN m_group g ON gc.group_id = g.id "
                 + "JOIN m_loan l ON l.client_id = gc.client_id LEFT JOIN m_organisation_currency oc ON oc.code = l.currency_code "
                 + " WHERE g.hierarchy LIKE ? GROUP BY l.currency_code ";
@@ -289,7 +289,7 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
         public String groupSchema() {
             return "g.office_id as officeId, g.level_id as groupLevel , g.parent_id as parentId , o.name as officeName,"
                     + " g.id as id, g.external_id as externalId, g.name as name , s.display_name as staffName , pg.name as"
-                    + " parentName , g.staff_id as staffId from m_group g join m_office o on o.id = g.office_id left join "
+                    + " parentName , g.staff_id as staffId , g.hierarchy as hierarchy from m_group g join m_office o on o.id = g.office_id left join "
                     + "m_staff s on s.id = g.staff_id left join m_group pg on pg.id = g.parent_id";
         }
 
@@ -306,8 +306,9 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
             String parentName = rs.getString("parentName");
             Long staffId = rs.getLong("staffId");
             String staffName = rs.getString("staffName");
+            String hierarchy =rs.getString("hierarchy");
 
-            return new GroupData(id, officeId, officeName, name, externalId, groupLevel, parentId, parentName, staffId, staffName);
+            return new GroupData(id, officeId, officeName, name, externalId, groupLevel, parentId, parentName, staffId, staffName , hierarchy);
         }
 
     }

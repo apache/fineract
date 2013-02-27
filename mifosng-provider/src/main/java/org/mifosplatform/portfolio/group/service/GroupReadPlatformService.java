@@ -40,9 +40,9 @@ public interface GroupReadPlatformService {
 
     Collection<GroupLookupData> retrieveChildGroupsbyGroupId(Long groupId);
 
-    Long retrieveTotalClients(Long groupId);
-
     Long retrieveTotalNoOfChildGroups(Long groupId);
 
-    Collection<MoneyData> retrieveGroupLoanPortfolio(Long groupId);
+    Long retrieveTotalClients(String hierarchy);
+
+    Collection<MoneyData> retrieveGroupLoanPortfolio(String hierarchy);
 }

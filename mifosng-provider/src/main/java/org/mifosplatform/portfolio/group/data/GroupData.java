@@ -26,6 +26,7 @@ public class GroupData {
     private final Long groupLevel;
     private final Long parentId;
     private final String parentName;
+    private final String hierarchy;
     @SuppressWarnings("unused")
     private final GroupSummaryData groupSummaryData;
     @SuppressWarnings("unused")
@@ -43,7 +44,7 @@ public class GroupData {
     private final Collection<GroupLookupData> childGroups;
 
     public GroupData(final Long id, final Long officeId, final String officeName, final String name, final String externalId,
-            final Long groupLevel, final Long parentId, final String parentName, final Long staffId, final String staffName) {
+            final Long groupLevel, final Long parentId, final String parentName, final Long staffId, final String staffName , final String hierarchy) {
         this.id = id;
         this.officeId = officeId;
         this.officeName = officeName;
@@ -54,6 +55,7 @@ public class GroupData {
         this.parentName = parentName;
         this.staffId = staffId;
         this.staffName = staffName;
+        this.hierarchy = hierarchy;
         this.groupSummaryData = null;
         this.groupLevelData = null;
         this.clientMembers = null;
@@ -77,6 +79,7 @@ public class GroupData {
         this.parentName = group.getParentName();
         this.staffId = group.getStaffId();
         this.staffName = group.getStaffName();
+        this.hierarchy = group.getHierarchy();
 
         this.groupSummaryData = groupSummaryData;
         this.groupLevelData = groupLevelData;
@@ -102,6 +105,7 @@ public class GroupData {
         this.parentName = null;
         this.staffId = null;
         this.staffName = null;
+        this.hierarchy = null;
         this.groupSummaryData = null;
         this.groupLevelData = groupLevelData;
         this.allowedClients = allowedClients;
@@ -149,6 +153,11 @@ public class GroupData {
 
     public String getParentName() {
         return this.parentName;
+    }
+
+    
+    public String getHierarchy() {
+        return this.hierarchy;
     }
 
     public Collection<ClientLookup> clientMembers() {
