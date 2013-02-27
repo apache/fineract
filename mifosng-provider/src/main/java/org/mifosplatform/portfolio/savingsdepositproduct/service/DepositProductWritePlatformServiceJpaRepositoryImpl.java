@@ -87,7 +87,7 @@ public class DepositProductWritePlatformServiceJpaRepositoryImpl implements Depo
                     .build();
         } catch (DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(command, dve);
-            return new CommandProcessingResult(Long.valueOf(-1));
+            return CommandProcessingResult.empty();
         }
     }
 
@@ -117,7 +117,7 @@ public class DepositProductWritePlatformServiceJpaRepositoryImpl implements Depo
 
         } catch (DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(command, dve);
-            return new CommandProcessingResult(Long.valueOf(-1));
+            return CommandProcessingResult.empty();
         }
     }
 

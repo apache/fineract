@@ -55,14 +55,18 @@ public final class DepositProductCommandFromApiJsonDeserializer {
         final String name = fromApiJsonHelper.extractStringNamed("name", element);
         baseDataValidator.reset().parameter("name").value(name).notBlank().notExceedingLengthOf(100);
 
-        final String externalId = fromApiJsonHelper.extractStringNamed("externalId", element);
-        baseDataValidator.reset().parameter("externalId").value(externalId).ignoreIfNull().notExceedingLengthOf(100);
+        if (fromApiJsonHelper.parameterExists("externalId", element)) {
+            final String externalId = fromApiJsonHelper.extractStringNamed("externalId", element);
+            baseDataValidator.reset().parameter("externalId").value(externalId).notExceedingLengthOf(100);
+        }
 
-        final String description = fromApiJsonHelper.extractStringNamed("description", element);
-        baseDataValidator.reset().parameter("description").value(description).notExceedingLengthOf(500);
+        if (fromApiJsonHelper.parameterExists("description", element)) {
+            final String description = fromApiJsonHelper.extractStringNamed("description", element);
+            baseDataValidator.reset().parameter("description").value(description).notExceedingLengthOf(500);
+        }
 
         final String currencyCode = fromApiJsonHelper.extractStringNamed("currencyCode", element);
-        baseDataValidator.reset().parameter("currencyCode").value(currencyCode).notBlank();
+        baseDataValidator.reset().parameter("currencyCode").value(currencyCode).notBlank().notExceedingLengthOf(3);
 
         final Integer digitsAfterDecimal = fromApiJsonHelper.extractIntegerNamed("digitsAfterDecimal", element, Locale.getDefault());
         baseDataValidator.reset().parameter("digitsAfterDecimal").value(digitsAfterDecimal).notNull().inMinMaxRange(0, 6);
@@ -70,9 +74,11 @@ public final class DepositProductCommandFromApiJsonDeserializer {
         final BigDecimal minimumBalance = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("minimumBalance", element);
         baseDataValidator.reset().parameter("minimumBalance").value(minimumBalance).notNull().zeroOrPositiveAmount();
 
-        final BigDecimal maximumBalance = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("maximumBalance", element);
-        baseDataValidator.reset().parameter("maximumBalance").value(maximumBalance).zeroOrPositiveAmount();
-        baseDataValidator.reset().parameter("minimumBalance").comapareMinimumAndMaximumAmounts(minimumBalance, maximumBalance);
+        if (fromApiJsonHelper.parameterExists("maximumBalance", element)) {
+            final BigDecimal maximumBalance = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("maximumBalance", element);
+            baseDataValidator.reset().parameter("maximumBalance").value(maximumBalance).zeroOrPositiveAmount();
+            baseDataValidator.reset().parameter("minimumBalance").comapareMinimumAndMaximumAmounts(minimumBalance, maximumBalance);
+        }
 
         final Integer tenureInMonths = fromApiJsonHelper.extractIntegerNamed("tenureInMonths", element, Locale.getDefault());
         baseDataValidator.reset().parameter("tenureInMonths").value(tenureInMonths).notNull().zeroOrPositiveAmount();

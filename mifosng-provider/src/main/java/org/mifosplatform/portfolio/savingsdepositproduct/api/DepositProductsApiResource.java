@@ -46,11 +46,13 @@ import org.springframework.stereotype.Component;
 @Component
 @Scope("singleton")
 public class DepositProductsApiResource {
-	
-	private final Set<String> DEPOSIT_PRODUCT_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "externalId", "name", "description", 
-			"currencyCode", "digitsAfterDecimal", "minimumBalance", "maximumBalance", "tenureInMonths", "maturityDefaultInterestRate", "maturityMinInterestRate",
-			"maturityMaxInterestRate", "interestCompoundedEvery", "interestCompoundedEveryPeriodType", "renewalAllowed", "preClosureAllowed", "preClosureInterestRate",
-            "interestCompoundingAllowed", "isLockinPeriodAllowed", "lockinPeriod", "lockinPeriodType", "currency","currencyOptions", "interestCompoundedEveryPeriodTypeOptions"));
+
+    private final Set<String> DEPOSIT_PRODUCT_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "externalId", "name",
+            "description", "currencyCode", "digitsAfterDecimal", "minimumBalance", "maximumBalance", "tenureInMonths",
+            "maturityDefaultInterestRate", "maturityMinInterestRate", "maturityMaxInterestRate", "interestCompoundedEvery",
+            "interestCompoundedEveryPeriodType", "renewalAllowed", "preClosureAllowed", "preClosureInterestRate",
+            "interestCompoundingAllowed", "isLockinPeriodAllowed", "lockinPeriod", "lockinPeriodType", "currency", "currencyOptions",
+            "interestCompoundedEveryPeriodTypeOptions"));
 
     private final String entityType = "DEPOSITPRODUCT";
 
@@ -80,10 +82,10 @@ public class DepositProductsApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String createDepositProduct(final String apiRequestBodyAsJson) {
-    	
-    	final CommandWrapper commandRequest = new CommandWrapperBuilder().createDepositProduct().withJson(apiRequestBodyAsJson).build();
-    	
-    	final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().createDepositProduct().withJson(apiRequestBodyAsJson).build();
+
+        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
         return this.toApiJsonSerializer.serialize(result);
     }
@@ -93,10 +95,11 @@ public class DepositProductsApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String updateDepositProduct(@PathParam("productId") final Long productId, final String apiRequestBodyAsJson) {
-    	
-    	final CommandWrapper commandRequest = new CommandWrapperBuilder().updateDepositProduct(productId).withJson(apiRequestBodyAsJson).build();
-    	
-    	final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().updateDepositProduct(productId).withJson(apiRequestBodyAsJson)
+                .build();
+
+        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
         return this.toApiJsonSerializer.serialize(result);
     }
@@ -106,10 +109,10 @@ public class DepositProductsApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String deleteDepositProduct(@PathParam("productId") final Long productId) {
-    	
-    	final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteDepositProduct(productId).build();
-    	
-    	final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteDepositProduct(productId).build();
+
+        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
         return this.toApiJsonSerializer.serialize(result);
     }
@@ -133,11 +136,11 @@ public class DepositProductsApiResource {
         context.authenticatedUser().validateHasReadPermission(entityType);
         DepositProductData productData = this.depositProductReadPlatformService.retrieveDepositProductData(productId);
         final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        
+
         if (settings.isTemplate()) {
             productData = handleTemplateRelatedData(productData);
         }
-        
+
         return this.toApiJsonSerializer.serialize(settings, productData, DEPOSIT_PRODUCT_DATA_PARAMETERS);
     }
 
