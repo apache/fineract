@@ -75,10 +75,17 @@ public class FlatMethodLoanScheduleGenerator implements LoanScheduleGenerator {
         periods.add(disbursementPeriod);
 
         int loanTermInDays = Integer.valueOf(0);
-        BigDecimal cumulativePrincipalDisbursed = principalDisbursed.getAmount();
-        BigDecimal cumulativePrincipalDue = BigDecimal.ZERO;
-        BigDecimal cumulativeInterestExpected = BigDecimal.ZERO;
-        BigDecimal totalExpectedRepayment = chargesDueAtTimeOfDisbursement;
+        BigDecimal totalPrincipalDisbursed = principalDisbursed.getAmount();
+        BigDecimal totalPrincipalExpected = BigDecimal.ZERO;
+        BigDecimal totalPrincipalPaid = BigDecimal.ZERO;
+        BigDecimal totalInterestCharged = BigDecimal.ZERO;
+        BigDecimal totalFeeChargesCharged = BigDecimal.ZERO;
+        BigDecimal totalPenaltyChargesCharged = BigDecimal.ZERO;
+        BigDecimal totalWaived = BigDecimal.ZERO;
+        BigDecimal totalWrittenOff = BigDecimal.ZERO;
+        BigDecimal totalRepaymentExpected = chargesDueAtTimeOfDisbursement;
+        BigDecimal totalRepayment = BigDecimal.ZERO;
+        BigDecimal totalOutstanding = BigDecimal.ZERO;
 
         LocalDate startDate = disbursementDate;
         int periodNumber = 1;
@@ -128,21 +135,20 @@ public class FlatMethodLoanScheduleGenerator implements LoanScheduleGenerator {
 
             // handle cumulative fields
             loanTermInDays += daysInPeriod;
-            cumulativePrincipalDue = cumulativePrincipalDue.add(principalPerInstallment.getAmount());
-            cumulativeInterestExpected = cumulativeInterestExpected.add(interestPerInstallment.getAmount());
-            totalExpectedRepayment = totalExpectedRepayment.add(totalInstallmentDue.getAmount());
+            totalPrincipalExpected = totalPrincipalExpected.add(principalPerInstallment.getAmount());
+            totalInterestCharged = totalInterestCharged.add(interestPerInstallment.getAmount());
+            totalRepaymentExpected = totalRepaymentExpected.add(totalInstallmentDue.getAmount());
             startDate = scheduledDueDate;
 
             periodNumber++;
         }
 
-        final BigDecimal cumulativePrincipalOutstanding = cumulativePrincipalDisbursed.subtract(cumulativePrincipalDue);
+        final CurrencyData currencyData = new CurrencyData(currency.getCode(), currency.getName(),
+                monetaryCurrency.getDigitsAfterDecimal(), currency.getDisplaySymbol(), currency.getNameCode());
 
-        CurrencyData currencyData = new CurrencyData(currency.getCode(), currency.getName(), monetaryCurrency.getDigitsAfterDecimal(),
-                currency.getDisplaySymbol(), currency.getNameCode());
-
-        return new LoanScheduleData(currencyData, periods, loanTermInDays, cumulativePrincipalDisbursed, cumulativePrincipalDue,
-                cumulativePrincipalOutstanding, cumulativeInterestExpected, cumulativeChargesToDate, totalExpectedRepayment);
+        return new LoanScheduleData(currencyData, periods, loanTermInDays, totalPrincipalDisbursed, totalPrincipalExpected,
+                totalPrincipalPaid, totalInterestCharged, totalFeeChargesCharged, totalPenaltyChargesCharged, totalWaived, totalWrittenOff,
+                totalRepaymentExpected, totalRepayment, totalOutstanding);
     }
 
     private Money cumulativeFeeChargesDueWithin(final LocalDate periodStart, final LocalDate periodEnd, final Set<LoanCharge> loanCharges,

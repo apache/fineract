@@ -46,7 +46,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
 
         // re-process loan charges over repayment periods (picking up on waived
         // loan charges)
-        LoanScheduleWrapper wrapper = new LoanScheduleWrapper();
+        LoanRepaymentScheduleProcessingWrapper wrapper = new LoanRepaymentScheduleProcessingWrapper();
         wrapper.reprocess(currency, disbursementDate, installments, charges);
 
         for (LoanTransaction loanTransaction : transactionsPostDisbursement) {

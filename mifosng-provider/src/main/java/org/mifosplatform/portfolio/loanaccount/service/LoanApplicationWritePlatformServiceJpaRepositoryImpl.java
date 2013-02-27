@@ -33,8 +33,10 @@ import org.mifosplatform.portfolio.loanaccount.domain.Loan;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanCharge;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanCollateral;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanLifecycleStateMachine;
+import org.mifosplatform.portfolio.loanaccount.domain.LoanRepaymentScheduleTransactionProcessorFactory;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanRepository;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanStatus;
+import org.mifosplatform.portfolio.loanaccount.domain.LoanSummaryWrapper;
 import org.mifosplatform.portfolio.loanaccount.exception.LoanApplicationNotInSubmittedAndPendingApprovalStateCannotBeDeleted;
 import org.mifosplatform.portfolio.loanaccount.exception.LoanApplicationNotInSubmittedAndPendingApprovalStateCannotBeModified;
 import org.mifosplatform.portfolio.loanaccount.exception.LoanNotFoundException;
@@ -76,6 +78,8 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
     private final LoanCollateralAssembler loanCollateralAssembler;
     private final AprCalculator aprCalculator;
     private final AccountNumberGeneratorFactory accountIdentifierGeneratorFactory;
+    private final LoanSummaryWrapper loanSummaryWrapper;
+    private final LoanRepaymentScheduleTransactionProcessorFactory loanRepaymentScheduleTransactionProcessorFactory;
 
     @Autowired
     public LoanApplicationWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final FromJsonHelper fromJsonHelper,
@@ -85,7 +89,8 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             final LoanCollateralAssembler loanCollateralAssembler, final LoanRepository loanRepository,
             final NoteRepository noteRepository, final LoanScheduleCalculationPlatformService calculationPlatformService,
             final ClientRepository clientRepository, final LoanProductRepository loanProductRepository,
-            final AccountNumberGeneratorFactory accountIdentifierGeneratorFactory) {
+            final AccountNumberGeneratorFactory accountIdentifierGeneratorFactory, final LoanSummaryWrapper loanSummaryWrapper,
+            final LoanRepaymentScheduleTransactionProcessorFactory loanRepaymentScheduleTransactionProcessorFactory) {
         this.context = context;
         this.fromJsonHelper = fromJsonHelper;
         this.loanApplicationTransitionApiJsonValidator = loanApplicationTransitionApiJsonValidator;
@@ -100,6 +105,8 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         this.clientRepository = clientRepository;
         this.loanProductRepository = loanProductRepository;
         this.accountIdentifierGeneratorFactory = accountIdentifierGeneratorFactory;
+        this.loanSummaryWrapper = loanSummaryWrapper;
+        this.loanRepaymentScheduleTransactionProcessorFactory = loanRepaymentScheduleTransactionProcessorFactory;
     }
 
     private LoanLifecycleStateMachine defaultLoanLifecycleStateMachine() {
@@ -231,7 +238,6 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
 
                 final LoanScheduleData loanSchedule = this.calculationPlatformService.calculateLoanSchedule(query);
                 existingLoanApplication.updateLoanSchedule(loanSchedule);
-                existingLoanApplication.updateLoanScheduleDependentDerivedFields();
             }
 
             this.loanRepository.saveAndFlush(existingLoanApplication);
@@ -439,6 +445,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
     private Loan retrieveLoanBy(final Long loanId) {
         final Loan loan = this.loanRepository.findOne(loanId);
         if (loan == null) { throw new LoanNotFoundException(loanId); }
+        loan.setHelpers(defaultLoanLifecycleStateMachine(), this.loanSummaryWrapper, this.loanRepaymentScheduleTransactionProcessorFactory);
         return loan;
     }
 }

@@ -15,27 +15,9 @@ import org.mifosplatform.organisation.monetary.domain.Money;
 /**
  * A wrapper around loan schedule related data exposing needed behaviour by
  * loan.
- * 
- * This wrapper should be side-effect free. It should not attempt to change
- * state of loan parts passed through to it.
  */
-public class LoanScheduleWrapper {
+public class LoanRepaymentScheduleProcessingWrapper {
 
-    public Money calculateTotalOutstanding(final MonetaryCurrency currency, final List<LoanRepaymentScheduleInstallment> installments) {
-
-        Money cumulativeValue = Money.zero(currency);
-
-        for (LoanRepaymentScheduleInstallment scheduledRepayment : installments) {
-            cumulativeValue = cumulativeValue.plus(scheduledRepayment.getTotalOutstanding(currency));
-        }
-
-        return cumulativeValue;
-    }
-
-    /**
-     * FIXME - KW - this is not a side effect free approach so move this into a
-     * specific wrapper than makes this obvious from the read-only wrapper.
-     */
     public void reprocess(final MonetaryCurrency currency, final LocalDate disbursementDate,
             final List<LoanRepaymentScheduleInstallment> repaymentPeriods, final Set<LoanCharge> loanCharges) {
 

@@ -9,6 +9,8 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import javax.persistence.Transient;
+
 import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.codes.data.CodeValueData;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
@@ -69,7 +71,7 @@ public class LoanAccountData {
     // timeline
     private final LoanApplicationTimelineData timeline;
     // totals
-    private final BigDecimal totalFeeChargesAtDisbursement;
+    private final LoanSummaryData summary;
 
     // associations
     private final LoanScheduleData repaymentSchedule;
@@ -94,6 +96,9 @@ public class LoanAccountData {
     private final Collection<CodeValueData> loanCollateralOptions;
 
     private final ChargeData chargeTemplate;
+
+    @Transient
+    private BigDecimal feeChargesAtDisbursementCharged;
 
     /**
      * Used to produce a {@link LoanAccountData} with only collateral options
@@ -137,7 +142,8 @@ public class LoanAccountData {
         final LocalDate expectedFirstRepaymentOnDate = null;
         final LocalDate interestChargedFromDate = null;
         final LoanApplicationTimelineData timeline = null;
-        final BigDecimal totalFeeChargesAtDisbursement = null;
+        final LoanSummaryData summary = null;
+        final BigDecimal feeChargesDueAtDisbursementCharged = null;
 
         final LoanScheduleData repaymentSchedule = null;
         final Collection<LoanTransactionData> transactions = null;
@@ -163,11 +169,11 @@ public class LoanAccountData {
                 loanOfficerId, loanOfficerName, currencyData, principal, inArrearsTolerance, termFrequency, termPeriodFrequencyType,
                 numberOfRepayments, repaymentEvery, repaymentFrequencyType, transactionProcessingStrategyId, amortizationType,
                 interestRatePerPeriod, interestRateFrequencyType, annualInterestRate, interestType, interestCalculationPeriodType,
-                expectedFirstRepaymentOnDate, interestChargedFromDate, timeline, totalFeeChargesAtDisbursement, repaymentSchedule,
-                transactions, charges, collateral, guarantors, productOptions, termFrequencyTypeOptions, repaymentFrequencyTypeOptions,
-                repaymentStrategyOptions, interestRateFrequencyTypeOptions, amortizationTypeOptions, interestTypeOptions,
-                interestCalculationPeriodTypeOptions, fundOptions, chargeOptions, chargeTemplate, loanOfficerOptions, loanPurposeOptions,
-                loanCollateralOptions);
+                expectedFirstRepaymentOnDate, interestChargedFromDate, timeline, summary, feeChargesDueAtDisbursementCharged,
+                repaymentSchedule, transactions, charges, collateral, guarantors, productOptions, termFrequencyTypeOptions,
+                repaymentFrequencyTypeOptions, repaymentStrategyOptions, interestRateFrequencyTypeOptions, amortizationTypeOptions,
+                interestTypeOptions, interestCalculationPeriodTypeOptions, fundOptions, chargeOptions, chargeTemplate, loanOfficerOptions,
+                loanPurposeOptions, loanCollateralOptions);
     }
 
     /**
@@ -210,7 +216,8 @@ public class LoanAccountData {
         final LocalDate expectedFirstRepaymentOnDate = null;
         final LocalDate interestChargedFromDate = null;
         final LoanApplicationTimelineData timeline = LoanApplicationTimelineData.templateDefault(expectedDisbursementDate);
-        final BigDecimal totalFeeChargesAtDisbursement = null;
+        final LoanSummaryData summary = null;
+        final BigDecimal feeChargesDueAtDisbursementCharged = null;
 
         final LoanScheduleData repaymentSchedule = null;
         final Collection<LoanTransactionData> transactions = null;
@@ -237,11 +244,11 @@ public class LoanAccountData {
                 loanOfficerId, loanOfficerName, currencyData, principal, inArrearsTolerance, termFrequency, termPeriodFrequencyType,
                 numberOfRepayments, repaymentEvery, repaymentFrequencyType, transactionProcessingStrategyId, amortizationType,
                 interestRatePerPeriod, interestRateFrequencyType, annualInterestRate, interestType, interestCalculationPeriodType,
-                expectedFirstRepaymentOnDate, interestChargedFromDate, timeline, totalFeeChargesAtDisbursement, repaymentSchedule,
-                transactions, charges, collateral, guarantors, productOptions, termFrequencyTypeOptions, repaymentFrequencyTypeOptions,
-                repaymentStrategyOptions, interestRateFrequencyTypeOptions, amortizationTypeOptions, interestTypeOptions,
-                interestCalculationPeriodTypeOptions, fundOptions, chargeOptions, chargeTemplate, loanOfficerOptions, loanPurposeOptions,
-                loanCollateralOptions);
+                expectedFirstRepaymentOnDate, interestChargedFromDate, timeline, summary, feeChargesDueAtDisbursementCharged,
+                repaymentSchedule, transactions, charges, collateral, guarantors, productOptions, termFrequencyTypeOptions,
+                repaymentFrequencyTypeOptions, repaymentStrategyOptions, interestRateFrequencyTypeOptions, amortizationTypeOptions,
+                interestTypeOptions, interestCalculationPeriodTypeOptions, fundOptions, chargeOptions, chargeTemplate, loanOfficerOptions,
+                loanPurposeOptions, loanCollateralOptions);
     }
 
     /**
@@ -285,7 +292,8 @@ public class LoanAccountData {
         final LocalDate expectedFirstRepaymentOnDate = null;
         final LocalDate interestChargedFromDate = null;
         final LoanApplicationTimelineData timeline = LoanApplicationTimelineData.templateDefault(expectedDisbursementDate);
-        final BigDecimal totalFeeChargesAtDisbursement = null;
+        final LoanSummaryData summary = null;
+        final BigDecimal feeChargesDueAtDisbursementCharged = null;
 
         final LoanScheduleData repaymentSchedule = null;
         final Collection<LoanTransactionData> transactions = null;
@@ -312,11 +320,11 @@ public class LoanAccountData {
                 loanOfficerId, loanOfficerName, currencyData, principal, inArrearsTolerance, termFrequency, termPeriodFrequencyType,
                 numberOfRepayments, repaymentEvery, repaymentFrequencyType, transactionProcessingStrategyId, amortizationType,
                 interestRatePerPeriod, interestRateFrequencyType, annualInterestRate, interestType, interestCalculationPeriodType,
-                expectedFirstRepaymentOnDate, interestChargedFromDate, timeline, totalFeeChargesAtDisbursement, repaymentSchedule,
-                transactions, charges, collateral, guarantors, productOptions, termFrequencyTypeOptions, repaymentFrequencyTypeOptions,
-                repaymentStrategyOptions, interestRateFrequencyTypeOptions, amortizationTypeOptions, interestTypeOptions,
-                interestCalculationPeriodTypeOptions, fundOptions, chargeOptions, chargeTemplate, loanOfficerOptions, loanPurposeOptions,
-                loanCollateralOptions);
+                expectedFirstRepaymentOnDate, interestChargedFromDate, timeline, summary, feeChargesDueAtDisbursementCharged,
+                repaymentSchedule, transactions, charges, collateral, guarantors, productOptions, termFrequencyTypeOptions,
+                repaymentFrequencyTypeOptions, repaymentStrategyOptions, interestRateFrequencyTypeOptions, amortizationTypeOptions,
+                interestTypeOptions, interestCalculationPeriodTypeOptions, fundOptions, chargeOptions, chargeTemplate, loanOfficerOptions,
+                loanPurposeOptions, loanCollateralOptions);
     }
 
     public static LoanAccountData populateLoanProductDefaults(final LoanAccountData acc, final LoanProductData product) {
@@ -357,10 +365,10 @@ public class LoanAccountData {
                 product.getTransactionProcessingStrategyId(), product.getAmortizationType(), product.getInterestRatePerPeriod(),
                 product.getInterestRateFrequencyType(), product.getAnnualInterestRate(), product.getInterestType(),
                 product.getInterestCalculationPeriodType(), acc.expectedFirstRepaymentOnDate, acc.interestChargedFromDate, acc.timeline,
-                acc.totalFeeChargesAtDisbursement, repaymentSchedule, transactions, charges, collateral, guarantors, productOptions,
-                termFrequencyTypeOptions, repaymentFrequencyTypeOptions, repaymentStrategyOptions, interestRateFrequencyTypeOptions,
-                amortizationTypeOptions, interestTypeOptions, interestCalculationPeriodTypeOptions, fundOptions, chargeOptions,
-                chargeTemplate, loanOfficerOptions, loanPurposeOptions, loanCollateralOptions);
+                acc.summary, acc.feeChargesAtDisbursementCharged, repaymentSchedule, transactions, charges, collateral, guarantors,
+                productOptions, termFrequencyTypeOptions, repaymentFrequencyTypeOptions, repaymentStrategyOptions,
+                interestRateFrequencyTypeOptions, amortizationTypeOptions, interestTypeOptions, interestCalculationPeriodTypeOptions,
+                fundOptions, chargeOptions, chargeTemplate, loanOfficerOptions, loanPurposeOptions, loanCollateralOptions);
     }
 
     /*
@@ -378,7 +386,8 @@ public class LoanAccountData {
             final BigDecimal interestRatePerPeriod, final EnumOptionData interestRateFrequencyType, final BigDecimal annualInterestRate,
             final EnumOptionData interestType, final EnumOptionData interestCalculationPeriodType,
             final LocalDate expectedFirstRepaymentOnDate, final LocalDate interestChargedFromDate,
-            final LoanApplicationTimelineData timeline, final BigDecimal totalFeeChargesAtDisbursement) {
+            final LoanApplicationTimelineData timeline, final LoanSummaryData loanSummary,
+            final BigDecimal feeChargesDueAtDisbursementCharged) {
 
         final LoanScheduleData repaymentSchedule = null;
         final Collection<LoanTransactionData> transactions = null;
@@ -405,10 +414,11 @@ public class LoanAccountData {
                 loanOfficerId, loanOfficerName, currencyData, principal, inArrearsTolerance, termFrequency, termPeriodFrequencyType,
                 numberOfRepayments, repaymentEvery, repaymentFrequencyType, transactionStrategyId, amortizationType, interestRatePerPeriod,
                 interestRateFrequencyType, annualInterestRate, interestType, interestCalculationPeriodType, expectedFirstRepaymentOnDate,
-                interestChargedFromDate, timeline, totalFeeChargesAtDisbursement, repaymentSchedule, transactions, charges, collateral,
-                guarantors, productOptions, termFrequencyTypeOptions, repaymentFrequencyTypeOptions, repaymentStrategyOptions,
-                interestRateFrequencyTypeOptions, amortizationTypeOptions, interestTypeOptions, interestCalculationPeriodTypeOptions,
-                fundOptions, chargeOptions, chargeTemplate, loanOfficerOptions, loanPurposeOptions, loanCollateralOptions);
+                interestChargedFromDate, timeline, loanSummary, feeChargesDueAtDisbursementCharged, repaymentSchedule, transactions,
+                charges, collateral, guarantors, productOptions, termFrequencyTypeOptions, repaymentFrequencyTypeOptions,
+                repaymentStrategyOptions, interestRateFrequencyTypeOptions, amortizationTypeOptions, interestTypeOptions,
+                interestCalculationPeriodTypeOptions, fundOptions, chargeOptions, chargeTemplate, loanOfficerOptions, loanPurposeOptions,
+                loanCollateralOptions);
     }
 
     /*
@@ -433,10 +443,10 @@ public class LoanAccountData {
                 acc.repaymentEvery, acc.repaymentFrequencyType, acc.transactionProcessingStrategyId, acc.amortizationType,
                 acc.interestRatePerPeriod, acc.interestRateFrequencyType, acc.annualInterestRate, acc.interestType,
                 acc.interestCalculationPeriodType, acc.expectedFirstRepaymentOnDate, acc.interestChargedFromDate, acc.timeline,
-                acc.totalFeeChargesAtDisbursement, repaymentSchedule, transactions, charges, collateral, guarantors, productOptions,
-                termFrequencyTypeOptions, repaymentFrequencyTypeOptions, repaymentStrategyOptions, interestRateFrequencyTypeOptions,
-                amortizationTypeOptions, interestTypeOptions, interestCalculationPeriodTypeOptions, fundOptions, chargeOptions,
-                chargeTemplate, loanOfficerOptions, loanPurposeOptions, loanCollateralOptions);
+                acc.summary, acc.feeChargesAtDisbursementCharged, repaymentSchedule, transactions, charges, collateral, guarantors,
+                productOptions, termFrequencyTypeOptions, repaymentFrequencyTypeOptions, repaymentStrategyOptions,
+                interestRateFrequencyTypeOptions, amortizationTypeOptions, interestTypeOptions, interestCalculationPeriodTypeOptions,
+                fundOptions, chargeOptions, chargeTemplate, loanOfficerOptions, loanPurposeOptions, loanCollateralOptions);
     }
 
     private LoanAccountData(
@@ -477,11 +487,12 @@ public class LoanAccountData {
             final LocalDate expectedFirstRepaymentOnDate,
             final LocalDate interestChargedFromDate,
             final LoanApplicationTimelineData timeline,
-            final BigDecimal totalFeeChargesAtDisbursement, //
-            final LoanScheduleData repaymentSchedule, final Collection<LoanTransactionData> transactions,
-            final Collection<LoanChargeData> charges, final Collection<LoanCollateralData> collateral,
-            final Collection<GuarantorData> guarantors, final Collection<LoanProductData> productOptions,
-            final Collection<EnumOptionData> termFrequencyTypeOptions, final Collection<EnumOptionData> repaymentFrequencyTypeOptions,
+            final LoanSummaryData summary, //
+            final BigDecimal feeChargesDueAtDisbursementCharged, final LoanScheduleData repaymentSchedule,
+            final Collection<LoanTransactionData> transactions, final Collection<LoanChargeData> charges,
+            final Collection<LoanCollateralData> collateral, final Collection<GuarantorData> guarantors,
+            final Collection<LoanProductData> productOptions, final Collection<EnumOptionData> termFrequencyTypeOptions,
+            final Collection<EnumOptionData> repaymentFrequencyTypeOptions,
             final Collection<TransactionProcessingStrategyData> repaymentStrategyOptions,
             final Collection<EnumOptionData> interestRateFrequencyTypeOptions, final Collection<EnumOptionData> amortizationTypeOptions,
             final Collection<EnumOptionData> interestTypeOptions, final Collection<EnumOptionData> interestCalculationPeriodTypeOptions,
@@ -527,7 +538,7 @@ public class LoanAccountData {
         this.timeline = timeline;
 
         // totals
-        this.totalFeeChargesAtDisbursement = totalFeeChargesAtDisbursement;
+        this.summary = summary;
 
         // associations
         this.repaymentSchedule = repaymentSchedule;
@@ -555,7 +566,7 @@ public class LoanAccountData {
 
     public RepaymentScheduleRelatedLoanData repaymentScheduleRelatedData() {
         return this.timeline.repaymentScheduleRelatedData(this.currency, this.principal, this.inArrearsTolerance,
-                this.totalFeeChargesAtDisbursement);
+                this.feeChargesAtDisbursementCharged);
     }
 
     public Long officeId() {

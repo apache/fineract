@@ -11,6 +11,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import org.joda.time.Days;
 import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
@@ -31,6 +32,7 @@ import org.mifosplatform.portfolio.loanaccount.data.DisbursementData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanAccountData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanApplicationTimelineData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanStatusEnumData;
+import org.mifosplatform.portfolio.loanaccount.data.LoanSummaryData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanTransactionData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanTransactionEnumData;
 import org.mifosplatform.portfolio.loanaccount.data.RepaymentScheduleRelatedLoanData;
@@ -47,8 +49,10 @@ import org.mifosplatform.portfolio.loanproduct.data.LoanProductData;
 import org.mifosplatform.portfolio.loanproduct.service.LoanEnumerations;
 import org.mifosplatform.portfolio.loanproduct.service.LoanProductReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
@@ -90,11 +94,9 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             String sql = "select " + rm.loanSchema() + " where l.id = ?";
 
             return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { loanId });
-
         } catch (EmptyResultDataAccessException e) {
             throw new LoanNotFoundException(loanId);
         }
-
     }
 
     @Override
@@ -104,85 +106,11 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         try {
             context.authenticatedUser();
 
-            final DisbursementData disbursement = repaymentScheduleRelatedLoanData.disbursementData();
+            final LoanScheduleResultSetExtractor fullResultsetExtractor = new LoanScheduleResultSetExtractor(
+                    repaymentScheduleRelatedLoanData);
+            final String sql = "select " + fullResultsetExtractor.schema() + " where ls.loan_id = ? order by ls.loan_id, ls.installment";
 
-            final LoanScheduleMapper rm = new LoanScheduleMapper(disbursement);
-            final String sql = "select " + rm.loanScheduleSchema() + " where l.id = ? order by ls.loan_id, ls.installment";
-
-            final LoanSchedulePeriodData disbursementPeriod = LoanSchedulePeriodData.disbursementOnlyPeriod(
-                    disbursement.disbursementDate(), disbursement.amount(),
-                    repaymentScheduleRelatedLoanData.getTotalFeeChargesAtDisbursement(), disbursement.isDisbursed());
-
-            final Collection<LoanSchedulePeriodData> repaymentSchedulePeriods = this.jdbcTemplate.query(sql, rm, new Object[] { loanId });
-
-            final Collection<LoanSchedulePeriodData> periods = new ArrayList<LoanSchedulePeriodData>(repaymentSchedulePeriods.size() + 1);
-            periods.add(disbursementPeriod);
-            periods.addAll(repaymentSchedulePeriods);
-
-            LoanSchedulePeriodDataWrapper wrapper = new LoanSchedulePeriodDataWrapper(periods);
-
-            final Integer loanTermInDays = wrapper.deriveCumulativeLoanTermInDays();
-
-            final BigDecimal cumulativePrincipalDisbursed = wrapper.deriveCumulativePrincipalDisbursed();
-            final BigDecimal cumulativePrincipalDue = wrapper.deriveCumulativePrincipalDue();
-            final BigDecimal cumulativePrincipalPaid = wrapper.deriveCumulativePrincipalPaid();
-            final BigDecimal cumulativePrincipalWrittenOff = wrapper.deriveCumulativePrincipalWrittenOff();
-            final BigDecimal cumulativePrincipalOutstanding = wrapper.deriveCumulativePrincipalOutstanding();
-
-            final BigDecimal cumulativeInterestExpected = wrapper.deriveCumulativeInterestExpected();
-            final BigDecimal cumulativeInterestPaid = wrapper.deriveCumulativeInterestPaid();
-            final BigDecimal cumulativeInterestWaived = wrapper.deriveCumulativeInterestWaived();
-            final BigDecimal cumulativeInterestWrittenOff = wrapper.deriveCumulativeInterestWrittenOff();
-            final BigDecimal cumulativeInterestOutstanding = wrapper.deriveCumulativeInterestOutstanding();
-
-            final BigDecimal cumulativeFeeChargesExpected = wrapper.deriveCumulativeFeeChargesToDate();
-            final BigDecimal cumulativeFeeChargesPaid = wrapper.deriveCumulativeFeeChargesPaid();
-            final BigDecimal cumulativeFeeChargesWaived = wrapper.deriveCumulativeFeeChargesWaived();
-            final BigDecimal cumulativeFeeChargesWrittenOff = wrapper.deriveCumulativeFeeChargesWrittenOff();
-            final BigDecimal cumulativeFeeChargesOutstanding = wrapper.deriveCumulativeFeeChargesOutstanding();
-
-            final BigDecimal cumulativePenaltyChargesExpected = wrapper.deriveCumulativePenaltyChargesToDate();
-            final BigDecimal cumulativePenaltyChargesPaid = wrapper.deriveCumulativePenaltyChargesPaid();
-            final BigDecimal cumulativePenaltyChargesWaived = wrapper.deriveCumulativePenaltyChargesWaived();
-            final BigDecimal cumulativePenaltyChargesWrittenOff = wrapper.deriveCumulativePenaltyChargesWrittenOff();
-            final BigDecimal cumulativePenaltyChargesOutstanding = wrapper.deriveCumulativePenaltyChargesOutstanding();
-
-            final BigDecimal totalExpectedCostOfLoan = cumulativeInterestExpected.add(cumulativeFeeChargesExpected).add(
-                    cumulativePenaltyChargesExpected);
-            final BigDecimal totalExpectedRepayment = cumulativePrincipalDisbursed.add(totalExpectedCostOfLoan);
-
-            final BigDecimal totalPaidToDate = cumulativePrincipalPaid.add(cumulativeInterestPaid).add(cumulativeFeeChargesPaid)
-                    .add(cumulativePenaltyChargesPaid);
-            final BigDecimal totalWaivedToDate = cumulativeInterestWaived.add(cumulativeFeeChargesWaived).add(
-                    cumulativePenaltyChargesWaived);
-            final BigDecimal totalWrittenOffToDate = cumulativePrincipalWrittenOff.add(cumulativeInterestWrittenOff)
-                    .add(cumulativeFeeChargesWrittenOff).add(cumulativePenaltyChargesWrittenOff);
-
-            final BigDecimal totalOutstanding = cumulativePrincipalOutstanding.add(cumulativeInterestOutstanding)
-                    .add(cumulativeFeeChargesOutstanding).add(cumulativePenaltyChargesOutstanding);
-
-            final BigDecimal totalOverdue = wrapper.deriveCumulativeTotalOverdue();
-
-            final CurrencyData currency = repaymentScheduleRelatedLoanData.getCurrency();
-            final MonetaryCurrency monetaryCurrency = new MonetaryCurrency(currency.code(), currency.decimalPlaces());
-            final Money tolerance = Money.of(monetaryCurrency, repaymentScheduleRelatedLoanData.getInArrearsTolerance());
-            final Money totalOverdueMoney = Money.of(monetaryCurrency, totalOverdue);
-            boolean isWaiveAllowed = totalOverdueMoney.isGreaterThanZero()
-                    && (tolerance.isGreaterThan(totalOverdueMoney) || tolerance.isEqualTo(totalOverdueMoney));
-
-            BigDecimal totalInArrears = null;
-            if (!isWaiveAllowed) {
-                totalInArrears = totalOverdueMoney.getAmount();
-            }
-
-            return new LoanScheduleData(currency, periods, loanTermInDays, cumulativePrincipalDisbursed, cumulativePrincipalDue,
-                    cumulativePrincipalPaid, cumulativePrincipalWrittenOff, cumulativePrincipalOutstanding, cumulativeInterestExpected,
-                    cumulativeInterestPaid, cumulativeInterestWaived, cumulativeInterestWrittenOff, cumulativeInterestOutstanding,
-                    cumulativeFeeChargesExpected, cumulativeFeeChargesPaid, cumulativeFeeChargesWaived, cumulativeFeeChargesWrittenOff,
-                    cumulativeFeeChargesOutstanding, cumulativePenaltyChargesExpected, cumulativePenaltyChargesPaid,
-                    cumulativePenaltyChargesWaived, cumulativePenaltyChargesWrittenOff, cumulativePenaltyChargesOutstanding,
-                    totalExpectedCostOfLoan, totalExpectedRepayment, totalPaidToDate, totalWaivedToDate, totalWrittenOffToDate,
-                    totalOutstanding, totalInArrears);
+            return this.jdbcTemplate.query(sql, fullResultsetExtractor, new Object[] { loanId });
         } catch (EmptyResultDataAccessException e) {
             throw new LoanNotFoundException(loanId);
         }
@@ -342,9 +270,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     + " l.approvedon_date as approvedOnDate, abu.username as approvedByUsername, abu.firstname as approvedByFirstname, abu.lastname as approvedByLastname,"
                     + " l.expected_disbursedon_date as expectedDisbursementDate, l.disbursedon_date as actualDisbursementDate, dbu.username as disbursedByUsername, dbu.firstname as disbursedByFirstname, dbu.lastname as disbursedByLastname,"
                     + " l.closedon_date as closedOnDate, cbu.username as closedByUsername, cbu.firstname as closedByFirstname, cbu.lastname as closedByLastname,"
-
                     + " l.expected_firstrepaymenton_date as expectedFirstRepaymentOnDate, l.interest_calculated_from_date as interestChargedFromDate, l.expected_maturedon_date as expectedMaturityDate, "
-                    + " l.total_charges_due_at_disbursement_derived as totalDisbursementCharges,"
                     + " l.principal_amount as principal, l.arrearstolerance_amount as inArrearsTolerance, l.number_of_repayments as numberOfRepayments, l.repay_every as repaymentEvery,"
                     + " l.nominal_interest_rate_per_period as interestRatePerPeriod, l.annual_nominal_interest_rate as annualInterestRate, "
                     + " l.repayment_period_frequency_enum as repaymentFrequencyType, l.interest_period_frequency_enum as interestRateFrequencyType, "
@@ -352,10 +278,47 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     + " l.amortization_method_enum as amortizationType, l.interest_method_enum as interestType, l.interest_calculated_in_period_enum as interestCalculationPeriodType,"
                     + " l.loan_status_id as lifeCycleStatusId, l.loan_transaction_strategy_id as transactionStrategyId, "
                     + " l.currency_code as currencyCode, l.currency_digits as currencyDigits, rc.`name` as currencyName, rc.display_symbol as currencyDisplaySymbol, rc.internationalized_name_code as currencyNameCode, "
-                    + " l.loan_officer_id as loanOfficerId, s.display_name as loanOfficerName" + " from m_loan l"
-                    + " left join m_client c on c.id = l.client_id" + " left join m_group g on g.id = l.group_id"
-                    + " join m_product_loan lp on lp.id = l.product_id" + " join m_currency rc on rc.`code` = l.currency_code"
-                    + " left join m_fund f on f.id = l.fund_id" + " left join m_staff s on s.id = l.loan_officer_id"
+                    + " l.loan_officer_id as loanOfficerId, s.display_name as loanOfficerName, "
+                    + " l.principal_disbursed_derived as principalDisbursed,"
+                    + " l.principal_repaid_derived as principalPaid,"
+                    + " l.principal_writtenoff_derived as principalWrittenOff,"
+                    + " l.principal_outstanding_derived as principalOutstanding,"
+                    + " l.principal_overdue_derived as principalOverdue,"
+                    + " l.interest_charged_derived as interestCharged,"
+                    + " l.interest_repaid_derived as interestPaid,"
+                    + " l.interest_waived_derived as interestWaived,"
+                    + " l.interest_writtenoff_derived as interestWrittenOff,"
+                    + " l.interest_outstanding_derived as interestOutstanding,"
+                    + " l.interest_overdue_derived as interestOverdue,"
+                    + " l.fee_charges_charged_derived as feeChargesCharged,"
+                    + " l.total_charges_due_at_disbursement_derived as feeChargesDueAtDisbursementCharged,"
+                    + " l.fee_charges_repaid_derived as feeChargesPaid,"
+                    + " l.fee_charges_waived_derived as feeChargesWaived,"
+                    + " l.fee_charges_writtenoff_derived as feeChargesWrittenOff,"
+                    + " l.fee_charges_outstanding_derived as feeChargesOutstanding,"
+                    + " l.fee_charges_overdue_derived as feeChargesOverdue,"
+                    + " l.penalty_charges_charged_derived as penaltyChargesCharged,"
+                    + " l.penalty_charges_repaid_derived as penaltyChargesPaid,"
+                    + " l.penalty_charges_waived_derived as penaltyChargesWaived,"
+                    + " l.penalty_charges_writtenoff_derived as penaltyChargesWrittenOff,"
+                    + " l.penalty_charges_outstanding_derived as penaltyChargesOutstanding,"
+                    + " l.penalty_charges_overdue_derived as penaltyChargesOverdue,"
+                    + " l.total_expected_repayment_derived as totalExpectedRepayment,"
+                    + " l.total_repayment_derived as totalRepayment,"
+                    + " l.total_expected_costofloan_derived as totalExpectedCostOfLoan,"
+                    + " l.total_costofloan_derived as totalCostOfLoan,"
+                    + " l.total_waived_derived as totalWaived,"
+                    + " l.total_writtenoff_derived as totalWrittenOff,"
+                    + " l.total_outstanding_derived as totalOutstanding,"
+                    + " l.total_overdue_derived as totalOverdue,"
+                    + " l.overdue_since_date_derived as overdueSinceDate"
+                    + " from m_loan l" //
+                    + " left join m_client c on c.id = l.client_id" //
+                    + " left join m_group g on g.id = l.group_id" //
+                    + " join m_product_loan lp on lp.id = l.product_id" //
+                    + " join m_currency rc on rc.`code` = l.currency_code" //
+                    + " left join m_fund f on f.id = l.fund_id" //
+                    + " left join m_staff s on s.id = l.loan_officer_id" //
                     + " left join m_appuser sbu on sbu.id = l.submittedon_userid"
                     + " left join m_appuser rbu on rbu.id = l.rejectedon_userid"
                     + " left join m_appuser wbu on wbu.id = l.withdrawnon_userid"
@@ -443,7 +406,6 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
             final BigDecimal principal = rs.getBigDecimal("principal");
             final BigDecimal inArrearsTolerance = rs.getBigDecimal("inArrearsTolerance");
-            final BigDecimal totalFeeChargesAtDisbursement = rs.getBigDecimal("totalDisbursementCharges");
 
             final Integer numberOfRepayments = JdbcSupport.getInteger(rs, "numberOfRepayments");
             final Integer repaymentEvery = JdbcSupport.getInteger(rs, "repaymentEvery");
@@ -478,106 +440,212 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             final LocalDate expectedFirstRepaymentOnDate = JdbcSupport.getLocalDate(rs, "expectedFirstRepaymentOnDate");
             final LocalDate interestChargedFromDate = JdbcSupport.getLocalDate(rs, "interestChargedFromDate");
 
+            final BigDecimal feeChargesDueAtDisbursementCharged = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs,
+                    "feeChargesDueAtDisbursementCharged");
+            LoanSummaryData loanSummary = null;
+            if (status.id().intValue() >= 300) {
+
+                // loan summary
+                final BigDecimal principalDisbursed = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "principalDisbursed");
+                final BigDecimal principalPaid = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "principalPaid");
+                final BigDecimal principalWrittenOff = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "principalWrittenOff");
+                final BigDecimal principalOutstanding = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "principalOutstanding");
+                final BigDecimal principalOverdue = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "principalOverdue");
+
+                final BigDecimal interestCharged = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "interestCharged");
+                final BigDecimal interestPaid = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "interestPaid");
+                final BigDecimal interestWaived = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "interestWaived");
+                final BigDecimal interestWrittenOff = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "interestWrittenOff");
+                final BigDecimal interestOutstanding = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "interestOutstanding");
+                final BigDecimal interestOverdue = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "interestOverdue");
+
+                final BigDecimal feeChargesCharged = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "feeChargesCharged");
+                final BigDecimal feeChargesPaid = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "feeChargesPaid");
+                final BigDecimal feeChargesWaived = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "feeChargesWaived");
+                final BigDecimal feeChargesWrittenOff = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "feeChargesWrittenOff");
+                final BigDecimal feeChargesOutstanding = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "feeChargesOutstanding");
+                final BigDecimal feeChargesOverdue = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "feeChargesOverdue");
+
+                final BigDecimal penaltyChargesCharged = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "penaltyChargesCharged");
+                final BigDecimal penaltyChargesPaid = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "penaltyChargesPaid");
+                final BigDecimal penaltyChargesWaived = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "penaltyChargesWaived");
+                final BigDecimal penaltyChargesWrittenOff = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "penaltyChargesWrittenOff");
+                final BigDecimal penaltyChargesOutstanding = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "penaltyChargesOutstanding");
+                final BigDecimal penaltyChargesOverdue = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "penaltyChargesOverdue");
+
+                final BigDecimal totalExpectedRepayment = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "totalExpectedRepayment");
+                final BigDecimal totalRepayment = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "totalRepayment");
+                final BigDecimal totalExpectedCostOfLoan = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "totalExpectedCostOfLoan");
+                final BigDecimal totalCostOfLoan = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "totalCostOfLoan");
+                final BigDecimal totalWaived = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "totalWaived");
+                final BigDecimal totalWrittenOff = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "totalWrittenOff");
+                final BigDecimal totalOutstanding = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "totalOutstanding");
+                final BigDecimal totalOverdue = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "totalOverdue");
+
+                final LocalDate overdueSinceDate = JdbcSupport.getLocalDate(rs, "overdueSinceDate");
+
+                loanSummary = new LoanSummaryData(currencyData, principalDisbursed, principalPaid, principalWrittenOff,
+                        principalOutstanding, principalOverdue, interestCharged, interestPaid, interestWaived, interestWrittenOff,
+                        interestOutstanding, interestOverdue, feeChargesCharged, feeChargesDueAtDisbursementCharged, feeChargesPaid,
+                        feeChargesWaived, feeChargesWrittenOff, feeChargesOutstanding, feeChargesOverdue, penaltyChargesCharged,
+                        penaltyChargesPaid, penaltyChargesWaived, penaltyChargesWrittenOff, penaltyChargesOutstanding,
+                        penaltyChargesOverdue, totalExpectedRepayment, totalRepayment, totalExpectedCostOfLoan, totalCostOfLoan,
+                        totalWaived, totalWrittenOff, totalOutstanding, totalOverdue, overdueSinceDate);
+            }
+
             return LoanAccountData.basicLoanDetails(id, accountNo, status, externalId, clientId, clientName, clientOfficeId, groupId,
                     groupName, groupOfficeId, loanProductId, loanProductName, loanProductDescription, fundId, fundName, loanPurposeId,
                     loanPurposeName, loanOfficerId, loanOfficerName, currencyData, principal, inArrearsTolerance, termFrequency,
                     termPeriodFrequencyType, numberOfRepayments, repaymentEvery, repaymentFrequencyType, transactionStrategyId,
                     amortizationType, interestRatePerPeriod, interestRateFrequencyType, annualInterestRate, interestType,
-                    interestCalculationPeriodType, expectedFirstRepaymentOnDate, interestChargedFromDate, timeline,
-                    totalFeeChargesAtDisbursement);
+                    interestCalculationPeriodType, expectedFirstRepaymentOnDate, interestChargedFromDate, timeline, loanSummary,
+                    feeChargesDueAtDisbursementCharged);
         }
     }
 
-    private static final class LoanScheduleMapper implements RowMapper<LoanSchedulePeriodData> {
+    private static final class LoanScheduleResultSetExtractor implements ResultSetExtractor<LoanScheduleData> {
 
+        private final CurrencyData currency;
+        private final DisbursementData disbursement;
+        private final BigDecimal totalFeeChargesDueAtDisbursement;
         private LocalDate lastDueDate;
         private BigDecimal outstandingLoanPrincipalBalance;
 
-        public LoanScheduleMapper(final DisbursementData disbursement) {
+        public LoanScheduleResultSetExtractor(final RepaymentScheduleRelatedLoanData repaymentScheduleRelatedLoanData) {
+            this.currency = repaymentScheduleRelatedLoanData.getCurrency();
+            this.disbursement = repaymentScheduleRelatedLoanData.disbursementData();
+            this.totalFeeChargesDueAtDisbursement = repaymentScheduleRelatedLoanData.getTotalFeeChargesAtDisbursement();
             this.lastDueDate = disbursement.disbursementDate();
             this.outstandingLoanPrincipalBalance = disbursement.amount();
         }
 
-        public String loanScheduleSchema() {
+        public String schema() {
 
             return " ls.loan_id as loanId, ls.installment as period, ls.fromdate as fromDate, ls.duedate as dueDate, "
                     + " ls.principal_amount as principalDue, ls.principal_completed_derived as principalPaid, ls.principal_writtenoff_derived as principalWrittenOff, "
                     + " ls.interest_amount as interestDue, ls.interest_completed_derived as interestPaid, ls.interest_waived_derived as interestWaived, ls.interest_writtenoff_derived as interestWrittenOff, "
                     + " ls.fee_charges_amount as feeChargesDue, ls.fee_charges_completed_derived as feeChargesPaid, ls.fee_charges_waived_derived as feeChargesWaived, ls.fee_charges_writtenoff_derived as feeChargesWrittenOff, "
                     + " ls.penalty_charges_amount as penaltyChargesDue, ls.penalty_charges_completed_derived as penaltyChargesPaid, ls.penalty_charges_waived_derived as penaltyChargesWaived, ls.penalty_charges_writtenoff_derived as penaltyChargesWrittenOff "
-                    + " from m_loan l " + " join m_loan_repayment_schedule ls on ls.loan_id = l.id ";
+                    + " from m_loan_repayment_schedule ls ";
         }
 
         @Override
-        public LoanSchedulePeriodData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+        public LoanScheduleData extractData(final ResultSet rs) throws SQLException, DataAccessException {
 
-            final Long loanId = rs.getLong("loanId");
-            final Integer period = JdbcSupport.getInteger(rs, "period");
-            LocalDate fromDate = JdbcSupport.getLocalDate(rs, "fromDate");
-            final LocalDate dueDate = JdbcSupport.getLocalDate(rs, "dueDate");
-            final BigDecimal principalDue = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "principalDue");
-            final BigDecimal principalPaid = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "principalPaid");
-            final BigDecimal principalWrittenOff = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "principalWrittenOff");
+            final LoanSchedulePeriodData disbursementPeriod = LoanSchedulePeriodData.disbursementOnlyPeriod(
+                    this.disbursement.disbursementDate(), this.disbursement.amount(), this.totalFeeChargesDueAtDisbursement,
+                    this.disbursement.isDisbursed());
 
-            // TODO - KW - rather than calculate this here should we put
-            // calculation on derived column on table like other columns?
-            final BigDecimal principalOutstanding = principalDue.subtract(principalPaid).subtract(principalWrittenOff);
+            final Collection<LoanSchedulePeriodData> periods = new ArrayList<LoanSchedulePeriodData>();
+            periods.add(disbursementPeriod);
 
-            final BigDecimal interestExpectedDue = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "interestDue");
-            final BigDecimal interestPaid = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "interestPaid");
-            final BigDecimal interestWaived = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "interestWaived");
-            final BigDecimal interestWrittenOff = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "interestWrittenOff");
+            final MonetaryCurrency monCurrency = new MonetaryCurrency(this.currency.code(), this.currency.decimalPlaces());
+            final BigDecimal totalPrincipalDisbursed = Money.of(monCurrency, this.disbursement.amount()).getAmount();
+            Money totalPrincipalExpected = Money.zero(monCurrency);
+            Money totalPrincipalPaid = Money.zero(monCurrency);
+            Money totalInterestCharged = Money.zero(monCurrency);
+            Money totalFeeChargesCharged = Money.zero(monCurrency);
+            Money totalPenaltyChargesCharged = Money.zero(monCurrency);
+            Money totalWaived = Money.zero(monCurrency);
+            Money totalWrittenOff = Money.zero(monCurrency);
+            Money totalRepaymentExpected = Money.zero(monCurrency);
+            Money totalRepayment = Money.zero(monCurrency);
+            Money totalOutstanding = Money.zero(monCurrency);
 
-            // TODO - KW - rather than calculate this here should we put
-            // calculation on derived column on table like other columns?
-            final BigDecimal interestActualDue = interestExpectedDue.subtract(interestWaived).subtract(interestWrittenOff);
-            final BigDecimal interestOutstanding = interestActualDue.subtract(interestPaid);
+            Integer loanTermInDays = Integer.valueOf(0);
+            while (rs.next()) {
 
-            final BigDecimal feeChargesExpectedDue = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "feeChargesDue");
-            final BigDecimal feeChargesPaid = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "feeChargesPaid");
-            final BigDecimal feeChargesWaived = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "feeChargesWaived");
-            final BigDecimal feeChargesWrittenOff = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "feeChargesWrittenOff");
+                final Long loanId = rs.getLong("loanId");
+                final Integer period = JdbcSupport.getInteger(rs, "period");
+                LocalDate fromDate = JdbcSupport.getLocalDate(rs, "fromDate");
+                final LocalDate dueDate = JdbcSupport.getLocalDate(rs, "dueDate");
 
-            final BigDecimal feeChargesActualDue = feeChargesExpectedDue.subtract(feeChargesWaived).subtract(feeChargesWrittenOff);
-            final BigDecimal feeChargesOutstanding = feeChargesActualDue.subtract(feeChargesPaid);
+                Integer daysInPeriod = Integer.valueOf(0);
+                if (fromDate != null) {
+                    daysInPeriod = Days.daysBetween(fromDate, dueDate).getDays();
+                    loanTermInDays = Integer.valueOf(loanTermInDays.intValue() + daysInPeriod.intValue());
+                }
 
-            final BigDecimal penaltyChargesExpectedDue = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "penaltyChargesDue");
-            final BigDecimal penaltyChargesPaid = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "penaltyChargesPaid");
-            final BigDecimal penaltyChargesWaived = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "penaltyChargesWaived");
-            final BigDecimal penaltyChargesWrittenOff = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "penaltyChargesWrittenOff");
+                final BigDecimal principalDue = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "principalDue");
+                totalPrincipalExpected = totalPrincipalExpected.plus(principalDue);
+                final BigDecimal principalPaid = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "principalPaid");
+                totalPrincipalPaid = totalPrincipalPaid.plus(principalPaid);
+                final BigDecimal principalWrittenOff = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "principalWrittenOff");
 
-            final BigDecimal penaltyChargesActualDue = penaltyChargesExpectedDue.subtract(penaltyChargesWaived).subtract(
-                    penaltyChargesWrittenOff);
-            final BigDecimal penaltyChargesOutstanding = penaltyChargesActualDue.subtract(penaltyChargesPaid);
+                final BigDecimal principalOutstanding = principalDue.subtract(principalPaid).subtract(principalWrittenOff);
 
-            final BigDecimal totalExpectedCostOfLoanForPeriod = interestExpectedDue.add(feeChargesExpectedDue).add(
-                    penaltyChargesExpectedDue);
+                final BigDecimal interestExpectedDue = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "interestDue");
+                totalInterestCharged = totalInterestCharged.plus(interestExpectedDue);
+                final BigDecimal interestPaid = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "interestPaid");
+                final BigDecimal interestWaived = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "interestWaived");
+                final BigDecimal interestWrittenOff = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "interestWrittenOff");
 
-            final BigDecimal totalDueForPeriod = principalDue.add(totalExpectedCostOfLoanForPeriod);
-            final BigDecimal totalPaidForPeriod = principalPaid.add(interestPaid).add(feeChargesPaid).add(penaltyChargesPaid);
-            final BigDecimal totalWaivedForPeriod = interestWaived.add(feeChargesWaived).add(penaltyChargesWaived);
-            final BigDecimal totalWrittenOffForPeriod = principalWrittenOff.add(interestWrittenOff).add(feeChargesWrittenOff)
-                    .add(penaltyChargesWrittenOff);
-            final BigDecimal totalOutstandingForPeriod = principalOutstanding.add(interestOutstanding).add(feeChargesOutstanding)
-                    .add(penaltyChargesOutstanding);
+                final BigDecimal interestActualDue = interestExpectedDue.subtract(interestWaived).subtract(interestWrittenOff);
+                final BigDecimal interestOutstanding = interestActualDue.subtract(interestPaid);
 
-            final BigDecimal totalActualCostOfLoanForPeriod = interestActualDue.add(feeChargesActualDue).add(penaltyChargesActualDue);
+                final BigDecimal feeChargesExpectedDue = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "feeChargesDue");
+                totalFeeChargesCharged = totalFeeChargesCharged.plus(feeChargesExpectedDue);
+                final BigDecimal feeChargesPaid = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "feeChargesPaid");
+                final BigDecimal feeChargesWaived = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "feeChargesWaived");
+                final BigDecimal feeChargesWrittenOff = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "feeChargesWrittenOff");
 
-            if (fromDate == null) {
-                fromDate = this.lastDueDate;
+                final BigDecimal feeChargesActualDue = feeChargesExpectedDue.subtract(feeChargesWaived).subtract(feeChargesWrittenOff);
+                final BigDecimal feeChargesOutstanding = feeChargesActualDue.subtract(feeChargesPaid);
+
+                final BigDecimal penaltyChargesExpectedDue = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "penaltyChargesDue");
+                totalPenaltyChargesCharged = totalPenaltyChargesCharged.plus(penaltyChargesExpectedDue);
+                final BigDecimal penaltyChargesPaid = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "penaltyChargesPaid");
+                final BigDecimal penaltyChargesWaived = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "penaltyChargesWaived");
+                final BigDecimal penaltyChargesWrittenOff = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "penaltyChargesWrittenOff");
+
+                final BigDecimal penaltyChargesActualDue = penaltyChargesExpectedDue.subtract(penaltyChargesWaived).subtract(
+                        penaltyChargesWrittenOff);
+                final BigDecimal penaltyChargesOutstanding = penaltyChargesActualDue.subtract(penaltyChargesPaid);
+
+                final BigDecimal totalExpectedCostOfLoanForPeriod = interestExpectedDue.add(feeChargesExpectedDue).add(
+                        penaltyChargesExpectedDue);
+
+                final BigDecimal totalDueForPeriod = principalDue.add(totalExpectedCostOfLoanForPeriod);
+                final BigDecimal totalPaidForPeriod = principalPaid.add(interestPaid).add(feeChargesPaid).add(penaltyChargesPaid);
+                final BigDecimal totalWaivedForPeriod = interestWaived.add(feeChargesWaived).add(penaltyChargesWaived);
+                totalWaived = totalWaived.plus(totalWaivedForPeriod);
+                final BigDecimal totalWrittenOffForPeriod = principalWrittenOff.add(interestWrittenOff).add(feeChargesWrittenOff)
+                        .add(penaltyChargesWrittenOff);
+                totalWrittenOff = totalWrittenOff.plus(totalWrittenOffForPeriod);
+                final BigDecimal totalOutstandingForPeriod = principalOutstanding.add(interestOutstanding).add(feeChargesOutstanding)
+                        .add(penaltyChargesOutstanding);
+
+                final BigDecimal totalActualCostOfLoanForPeriod = interestActualDue.add(feeChargesActualDue).add(penaltyChargesActualDue);
+
+                totalRepaymentExpected = totalRepaymentExpected.plus(totalDueForPeriod);
+                totalRepayment = totalRepayment.plus(totalPaidForPeriod);
+                totalOutstanding = totalOutstanding.plus(totalOutstandingForPeriod);
+
+                if (fromDate == null) {
+                    fromDate = this.lastDueDate;
+                }
+                final BigDecimal outstandingPrincipleBalanceOfLoan = outstandingLoanPrincipalBalance.subtract(principalDue);
+
+                // update based on current period values
+                this.lastDueDate = dueDate;
+                outstandingLoanPrincipalBalance = outstandingLoanPrincipalBalance.subtract(principalDue);
+
+                final LoanSchedulePeriodData periodData = LoanSchedulePeriodData.repaymentPeriodWithPayments(loanId, period, fromDate,
+                        dueDate, principalDue, principalPaid, principalWrittenOff, principalOutstanding, outstandingPrincipleBalanceOfLoan,
+                        interestExpectedDue, interestPaid, interestWaived, interestWrittenOff, interestOutstanding, feeChargesExpectedDue,
+                        feeChargesPaid, feeChargesWaived, feeChargesWrittenOff, feeChargesOutstanding, penaltyChargesExpectedDue,
+                        penaltyChargesPaid, penaltyChargesWaived, penaltyChargesWrittenOff, penaltyChargesOutstanding, totalDueForPeriod,
+                        totalPaidForPeriod, totalWaivedForPeriod, totalWrittenOffForPeriod, totalOutstandingForPeriod,
+                        totalActualCostOfLoanForPeriod);
+
+                periods.add(periodData);
             }
-            final BigDecimal outstandingPrincipleBalanceOfLoan = outstandingLoanPrincipalBalance.subtract(principalDue);
 
-            // update based on current period values
-            this.lastDueDate = dueDate;
-            outstandingLoanPrincipalBalance = outstandingLoanPrincipalBalance.subtract(principalDue);
-
-            return LoanSchedulePeriodData.repaymentPeriodWithPayments(loanId, period, fromDate, dueDate, principalDue, principalPaid,
-                    principalWrittenOff, principalOutstanding, outstandingPrincipleBalanceOfLoan, interestExpectedDue, interestPaid,
-                    interestWaived, interestWrittenOff, interestOutstanding, feeChargesExpectedDue, feeChargesPaid, feeChargesWaived,
-                    feeChargesWrittenOff, feeChargesOutstanding, penaltyChargesExpectedDue, penaltyChargesPaid, penaltyChargesWaived,
-                    penaltyChargesWrittenOff, penaltyChargesOutstanding, totalDueForPeriod, totalPaidForPeriod, totalWaivedForPeriod,
-                    totalWrittenOffForPeriod, totalOutstandingForPeriod, totalActualCostOfLoanForPeriod);
+            return new LoanScheduleData(this.currency, periods, loanTermInDays, totalPrincipalDisbursed,
+                    totalPrincipalExpected.getAmount(), totalPrincipalPaid.getAmount(), totalInterestCharged.getAmount(),
+                    totalFeeChargesCharged.getAmount(), totalPenaltyChargesCharged.getAmount(), totalWaived.getAmount(),
+                    totalWrittenOff.getAmount(), totalRepaymentExpected.getAmount(), totalRepayment.getAmount(),
+                    totalOutstanding.getAmount());
         }
     }
 

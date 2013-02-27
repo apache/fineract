@@ -81,9 +81,9 @@ public class LoansApiResource {
             "inArrearsTolerance", "termFrequency", "termPeriodFrequencyType", "numberOfRepayments", "repaymentEvery",
             "interestRatePerPeriod", "annualInterestRate", "repaymentFrequencyType", "transactionProcessingStrategyId",
             "interestRateFrequencyType", "amortizationType", "interestType", "interestCalculationPeriodType",
-            "expectedFirstRepaymentOnDate", "interestChargedFromDate", "timeline", "totalFeeChargesAtDisbursement", "repaymentSchedule",
-            "transactions", "charges", "collateral", "guarantors", "productOptions", "amortizationTypeOptions", "interestTypeOptions",
-            "interestCalculationPeriodTypeOptions", "repaymentFrequencyTypeOptions", "termFrequencyTypeOptions",
+            "expectedFirstRepaymentOnDate", "interestChargedFromDate", "timeline", "totalFeeChargesAtDisbursement", "summary",
+            "repaymentSchedule", "transactions", "charges", "collateral", "guarantors", "productOptions", "amortizationTypeOptions",
+            "interestTypeOptions", "interestCalculationPeriodTypeOptions", "repaymentFrequencyTypeOptions", "termFrequencyTypeOptions",
             "interestRateFrequencyTypeOptions", "fundOptions", "repaymentStrategyOptions", "chargeOptions", "loanOfficerOptions",
             "loanPurposeOptions", "loanCollateralOptions", "chargeTemplate"));
 
@@ -146,7 +146,7 @@ public class LoansApiResource {
     @Path("template")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String templateForNewLoanApplication(@QueryParam("clientId") final Long clientId, @QueryParam("groupId") final Long groupId,
+    public String template(@QueryParam("clientId") final Long clientId, @QueryParam("groupId") final Long groupId,
             @QueryParam("productId") final Long productId, @Context final UriInfo uriInfo) {
 
         context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
@@ -217,7 +217,7 @@ public class LoansApiResource {
     @Path("{loanId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveLoanAccountDetails(@PathParam("loanId") final Long loanId, @Context final UriInfo uriInfo) {
+    public String retrieveLoan(@PathParam("loanId") final Long loanId, @Context final UriInfo uriInfo) {
 
         context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
 

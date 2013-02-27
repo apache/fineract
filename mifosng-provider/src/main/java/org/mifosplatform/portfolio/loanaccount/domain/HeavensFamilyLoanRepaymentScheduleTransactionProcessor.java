@@ -84,7 +84,7 @@ public class HeavensFamilyLoanRepaymentScheduleTransactionProcessor extends Abst
                 if (currentInstallment.isPrincipalCompleted(currency)) {
                     // FIXME - KW - if auto waiving interest need to create
                     // another transaction to handle this.
-                    currentInstallment.waiveInterestComponent(currentInstallment.getInterest(currency));
+                    currentInstallment.waiveInterestComponent(currentInstallment.getInterestCharged(currency));
                 }
 
                 loanTransaction.updateComponents(principalPortion, interestPortion, feeChargesPortion, penaltyChargesPortion);

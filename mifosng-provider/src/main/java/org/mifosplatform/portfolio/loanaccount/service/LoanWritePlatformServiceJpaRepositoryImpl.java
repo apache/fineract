@@ -33,8 +33,10 @@ import org.mifosplatform.portfolio.loanaccount.domain.Loan;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanCharge;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanChargeRepository;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanLifecycleStateMachine;
+import org.mifosplatform.portfolio.loanaccount.domain.LoanRepaymentScheduleTransactionProcessorFactory;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanRepository;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanStatus;
+import org.mifosplatform.portfolio.loanaccount.domain.LoanSummaryWrapper;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanTransaction;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.mifosplatform.portfolio.loanaccount.exception.LoanNotFoundException;
@@ -63,6 +65,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     private final LoanChargeRepository loanChargeRepository;
     private final ApplicationCurrencyRepository applicationCurrencyRepository;
     private final JournalEntryWritePlatformService journalEntryWritePlatformService;
+    private final LoanSummaryWrapper loanSummaryWrapper;
+    private final LoanRepaymentScheduleTransactionProcessorFactory loanRepaymentScheduleTransactionProcessorFactory;
 
     @Autowired
     public LoanWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
@@ -70,9 +74,9 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             final LoanUpdateCommandFromApiJsonDeserializer loanUpdateCommandFromApiJsonDeserializer, final LoanAssembler loanAssembler,
             final LoanRepository loanRepository, final LoanTransactionRepository loanTransactionRepository,
             final NoteRepository noteRepository, final ChargeRepositoryWrapper chargeRepository,
-            final LoanChargeRepository loanChargeRepository,
-            final ApplicationCurrencyRepository applicationCurrencyRepository,
-            final JournalEntryWritePlatformService journalEntryWritePlatformService) {
+            final LoanChargeRepository loanChargeRepository, final ApplicationCurrencyRepository applicationCurrencyRepository,
+            final JournalEntryWritePlatformService journalEntryWritePlatformService, final LoanSummaryWrapper loanSummaryWrapper,
+            final LoanRepaymentScheduleTransactionProcessorFactory loanRepaymentScheduleTransactionProcessorFactory) {
         this.context = context;
         this.loanEventApiJsonValidator = loanEventApiJsonValidator;
         this.loanAssembler = loanAssembler;
@@ -84,6 +88,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         this.applicationCurrencyRepository = applicationCurrencyRepository;
         this.journalEntryWritePlatformService = journalEntryWritePlatformService;
         this.loanUpdateCommandFromApiJsonDeserializer = loanUpdateCommandFromApiJsonDeserializer;
+        this.loanSummaryWrapper = loanSummaryWrapper;
+        this.loanRepaymentScheduleTransactionProcessorFactory = loanRepaymentScheduleTransactionProcessorFactory;
     }
 
     private LoanLifecycleStateMachine defaultLoanLifecycleStateMachine() {
@@ -105,8 +111,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         final List<Long> existingTransactionIds = new ArrayList<Long>();
         final List<Long> existingReversedTransactionIds = new ArrayList<Long>();
-        final Map<String, Object> changes = loan.disburse(currentUser, command, defaultLoanLifecycleStateMachine(), currency,
-                existingTransactionIds, existingReversedTransactionIds);
+        final Map<String, Object> changes = loan.disburse(currentUser, command, currency, existingTransactionIds,
+                existingReversedTransactionIds);
         if (!changes.isEmpty()) {
             this.loanRepository.save(loan);
 
@@ -142,8 +148,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         final List<Long> existingTransactionIds = new ArrayList<Long>();
         final List<Long> existingReversedTransactionIds = new ArrayList<Long>();
-        final Map<String, Object> changes = loan.undoDisbursal(defaultLoanLifecycleStateMachine(), existingTransactionIds,
-                existingReversedTransactionIds);
+        final Map<String, Object> changes = loan.undoDisbursal(existingTransactionIds, existingReversedTransactionIds);
         if (!changes.isEmpty()) {
             this.loanRepository.save(loan);
 
@@ -576,6 +581,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     private Loan retrieveLoanBy(final Long loanId) {
         final Loan loan = this.loanRepository.findOne(loanId);
         if (loan == null) { throw new LoanNotFoundException(loanId); }
+        loan.setHelpers(defaultLoanLifecycleStateMachine(), this.loanSummaryWrapper, this.loanRepaymentScheduleTransactionProcessorFactory);
         return loan;
     }
 

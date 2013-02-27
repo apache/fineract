@@ -34,7 +34,9 @@ import org.mifosplatform.portfolio.loanaccount.domain.Loan;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanCharge;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanCollateral;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanLifecycleStateMachine;
+import org.mifosplatform.portfolio.loanaccount.domain.LoanRepaymentScheduleTransactionProcessorFactory;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanStatus;
+import org.mifosplatform.portfolio.loanaccount.domain.LoanSummaryWrapper;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanTransactionProcessingStrategyRepository;
 import org.mifosplatform.portfolio.loanaccount.exception.LoanTransactionProcessingStrategyNotFoundException;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.LoanSchedule;
@@ -63,13 +65,17 @@ public class LoanAssembler {
     private final LoanChargeAssembler loanChargeAssembler;
     private final LoanCollateralAssembler loanCollateralAssembler;
     private final FromJsonHelper fromApiJsonHelper;
+    private final LoanSummaryWrapper loanSummaryWrapper;
+    private final LoanRepaymentScheduleTransactionProcessorFactory loanRepaymentScheduleTransactionProcessorFactory;
 
     @Autowired
     public LoanAssembler(final FromJsonHelper fromApiJsonHelper, final LoanProductRepository loanProductRepository,
             final ClientRepository clientRepository, final GroupRepository groupRepository, final FundRepository fundRepository,
             final LoanTransactionProcessingStrategyRepository loanTransactionProcessingStrategyRepository,
             final StaffRepository staffRepository, final CodeValueRepositoryWrapper codeValueRepository,
-            final LoanScheduleAssembler loanScheduleAssembler, final LoanChargeAssembler loanChargeAssembler, final LoanCollateralAssembler loanCollateralAssembler) {
+            final LoanScheduleAssembler loanScheduleAssembler, final LoanChargeAssembler loanChargeAssembler,
+            final LoanCollateralAssembler loanCollateralAssembler, final LoanSummaryWrapper loanSummaryWrapper,
+            final LoanRepaymentScheduleTransactionProcessorFactory loanRepaymentScheduleTransactionProcessorFactory) {
         this.fromApiJsonHelper = fromApiJsonHelper;
         this.loanProductRepository = loanProductRepository;
         this.clientRepository = clientRepository;
@@ -81,6 +87,8 @@ public class LoanAssembler {
         this.loanScheduleAssembler = loanScheduleAssembler;
         this.loanChargeAssembler = loanChargeAssembler;
         this.loanCollateralAssembler = loanCollateralAssembler;
+        this.loanSummaryWrapper = loanSummaryWrapper;
+        this.loanRepaymentScheduleTransactionProcessorFactory = loanRepaymentScheduleTransactionProcessorFactory;
     }
 
     public Loan assembleFrom(final JsonCommand command, final AppUser currentUser) {
@@ -148,8 +156,11 @@ public class LoanAssembler {
         final LocalDate submittedOnDate = fromApiJsonHelper.extractLocalDateNamed("submittedOnDate", element);
 
         if (loanApplication == null) { throw new IllegalStateException("No loan application exists for either a client or group (or both)."); }
+        loanApplication.setHelpers(defaultLoanLifecycleStateMachine(), this.loanSummaryWrapper,
+                this.loanRepaymentScheduleTransactionProcessorFactory);
 
-        loanApplication.loanApplicationSubmittal(currentUser, loanSchedule, defaultLoanLifecycleStateMachine(), submittedOnDate, externalId);
+        loanApplication
+                .loanApplicationSubmittal(currentUser, loanSchedule, defaultLoanLifecycleStateMachine(), submittedOnDate, externalId);
 
         return loanApplication;
     }
@@ -158,7 +169,7 @@ public class LoanAssembler {
         List<LoanStatus> allowedLoanStatuses = Arrays.asList(LoanStatus.values());
         return new DefaultLoanLifecycleStateMachine(allowedLoanStatuses);
     }
-    
+
     public CodeValue findCodeValueByIdIfProvided(final Long codeValueId) {
         CodeValue codeValue = null;
         if (codeValueId != null) {
