@@ -57,7 +57,7 @@ Launch instance <a target="_blank" href="https://console.aws.amazon.com/ec2/home
 Roadmap
 ==============
 
-- Point to public published ROADMAP
+- http://goo.gl/IXS9Q
 
 Video Demonstration
 ===============
