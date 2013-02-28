@@ -72,11 +72,14 @@ public class DepositProductWritePlatformServiceJpaRepositoryImpl implements Depo
             this.context.authenticatedUser();
             this.fromApiJsonDeserializer.validateForCreate(command.json());
 
+            PeriodFrequencyType lockinPeriodType = null;
             final Integer interestCompoundingPeriodTypeIntValue = command.integerValueOfParameterNamed("interestCompoundedEveryPeriodType");
             PeriodFrequencyType interestCompoundingPeriodType = PeriodFrequencyType.fromInt(interestCompoundingPeriodTypeIntValue);
 
             final Integer lockinPeriodTypeIntValue = command.integerValueOfParameterNamed("lockinPeriodType");
-            PeriodFrequencyType lockinPeriodType = PeriodFrequencyType.fromInt(lockinPeriodTypeIntValue);
+            if (lockinPeriodTypeIntValue != null) {
+            	lockinPeriodType = PeriodFrequencyType.fromInt(lockinPeriodTypeIntValue);
+			}
 
             DepositProduct product = DepositProduct.assembleFromJson(command, interestCompoundingPeriodType, lockinPeriodType);
 

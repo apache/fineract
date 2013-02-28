@@ -48,8 +48,8 @@ import org.springframework.stereotype.Component;
 public class DepositProductsApiResource {
 
     private final Set<String> DEPOSIT_PRODUCT_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "externalId", "name",
-            "description", "currencyCode", "digitsAfterDecimal", "minimumBalance", "maximumBalance", "tenureInMonths",
-            "maturityDefaultInterestRate", "maturityMinInterestRate", "maturityMaxInterestRate", "interestCompoundedEvery",
+            "description", "currencyCode", "digitsAfterDecimal", "minDeposit", "defaultDeposit", "maxDeposit", "tenureInMonths",
+            "defaultInterestRate", "minInterestRate", "maxInterestRate", "interestCompoundedEvery",
             "interestCompoundedEveryPeriodType", "renewalAllowed", "preClosureAllowed", "preClosureInterestRate",
             "interestCompoundingAllowed", "isLockinPeriodAllowed", "lockinPeriod", "lockinPeriodType", "currency", "currencyOptions",
             "interestCompoundedEveryPeriodTypeOptions"));
