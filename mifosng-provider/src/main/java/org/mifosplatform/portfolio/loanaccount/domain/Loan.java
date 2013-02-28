@@ -239,114 +239,8 @@ public class Loan extends AbstractPersistable<Long> {
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "loan", orphanRemoval = true)
     private final List<LoanTransaction> loanTransactions = new ArrayList<LoanTransaction>();
 
-    // derived totals fields
-    @Column(name = "principal_disbursed_derived", scale = 6, precision = 19)
-    private BigDecimal totalPrincipalDisbursed;
-
-    @Column(name = "principal_repaid_derived", scale = 6, precision = 19)
-    private BigDecimal totalPrincipalRepaid;
-
-    @Column(name = "principal_writtenoff_derived", scale = 6, precision = 19)
-    private BigDecimal totalPrincipalWrittenOff;
-
-    @Column(name = "principal_outstanding_derived", scale = 6, precision = 19)
-    private BigDecimal totalPrincipalOutstanding;
-
-    @Column(name = "principal_overdue_derived", scale = 6, precision = 19)
-    private BigDecimal totalPrincipalOverdue;
-
-    @Column(name = "interest_charged_derived", scale = 6, precision = 19)
-    private BigDecimal totalInterestCharged;
-
-    @Column(name = "interest_repaid_derived", scale = 6, precision = 19)
-    private BigDecimal totalInterestRepaid;
-
-    @Column(name = "interest_waived_derived", scale = 6, precision = 19)
-    private BigDecimal totalInterestWaived;
-
-    @Column(name = "interest_writtenoff_derived", scale = 6, precision = 19)
-    private BigDecimal totalInterestWrittenOff;
-
-    @Column(name = "interest_outstanding_derived", scale = 6, precision = 19)
-    private BigDecimal totalInterestOutstanding;
-
-    @Column(name = "interest_overdue_derived", scale = 6, precision = 19)
-    private BigDecimal totalInterestOverdue;
-
-    @Column(name = "fee_charges_charged_derived", scale = 6, precision = 19)
-    private BigDecimal totalFeeChargesCharged;
-
-    @Column(name = "total_charges_due_at_disbursement_derived", scale = 6, precision = 19)
-    private BigDecimal totalChargesDueAtDisbursement;
-
-    @Column(name = "fee_charges_repaid_derived", scale = 6, precision = 19)
-    private BigDecimal totalFeeChargesRepaid;
-
-    @Column(name = "fee_charges_waived_derived", scale = 6, precision = 19)
-    private BigDecimal totalFeeChargesWaived;
-
-    @Column(name = "fee_charges_writtenoff_derived", scale = 6, precision = 19)
-    private BigDecimal totalFeeChargesWrittenOff;
-
-    @Column(name = "fee_charges_outstanding_derived", scale = 6, precision = 19)
-    private BigDecimal totalFeeChargesOutstanding;
-
-    @Column(name = "fee_charges_overdue_derived", scale = 6, precision = 19)
-    private BigDecimal totalFeeChargesOverdue;
-
-    @Column(name = "penalty_charges_charged_derived", scale = 6, precision = 19)
-    private BigDecimal totalPenaltyChargesCharged;
-
-    @Column(name = "penalty_charges_repaid_derived", scale = 6, precision = 19)
-    private BigDecimal totalPenaltyChargesRepaid;
-
-    @Column(name = "penalty_charges_waived_derived", scale = 6, precision = 19)
-    private BigDecimal totalPenaltyChargesWaived;
-
-    @Column(name = "penalty_charges_writtenoff_derived", scale = 6, precision = 19)
-    private BigDecimal totalPenaltyChargesWrittenOff;
-
-    @Column(name = "penalty_charges_outstanding_derived", scale = 6, precision = 19)
-    private BigDecimal totalPenaltyChargesOutstanding;
-
-    @Column(name = "penalty_charges_overdue_derived", scale = 6, precision = 19)
-    private BigDecimal totalPenaltyChargesOverdue;
-
-    @SuppressWarnings("unused")
-    @Column(name = "total_expected_repayment_derived", scale = 6, precision = 19)
-    private BigDecimal totalExpectedRepayment;
-
-    @SuppressWarnings("unused")
-    @Column(name = "total_repayment_derived", scale = 6, precision = 19)
-    private BigDecimal totalRepayment;
-
-    @SuppressWarnings("unused")
-    @Column(name = "total_expected_costofloan_derived", scale = 6, precision = 19)
-    private BigDecimal totalExpectedCostOfLoan;
-
-    @SuppressWarnings("unused")
-    @Column(name = "total_costofloan_derived", scale = 6, precision = 19)
-    private BigDecimal totalCostOfLoan;
-
-    @SuppressWarnings("unused")
-    @Column(name = "total_waived_derived", scale = 6, precision = 19)
-    private BigDecimal totalWaived;
-
-    @SuppressWarnings("unused")
-    @Column(name = "total_writtenoff_derived", scale = 6, precision = 19)
-    private BigDecimal totalWrittenOff;
-
-    @Column(name = "total_outstanding_derived", scale = 6, precision = 19)
-    private BigDecimal totalOutstanding;
-
-    @SuppressWarnings("unused")
-    @Column(name = "total_overdue_derived", scale = 6, precision = 19)
-    private BigDecimal totalOverdue;
-
-    @SuppressWarnings("unused")
-    @Temporal(TemporalType.DATE)
-    @Column(name = "overdue_since_date_derived")
-    private Date overdueSinceDate;
+    @Embedded
+    private LoanSummary summary;
 
     @Transient
     private boolean accountNumberRequiresAutoGeneration = false;
@@ -420,9 +314,10 @@ public class Loan extends AbstractPersistable<Long> {
         }
         if (loanCharges != null && !loanCharges.isEmpty()) {
             this.charges = associateChargesWithThisLoan(loanCharges);
-            this.totalChargesDueAtDisbursement = deriveSumTotalOfChargesDueAtDisbursement();
+            this.summary = updateSummaryWithTotalFeeChargesDueAtDisbursement(deriveSumTotalOfChargesDueAtDisbursement());
         } else {
             this.charges = null;
+            this.summary = new LoanSummary();
         }
         if (collateral != null && !collateral.isEmpty()) {
             this.collateral = associateWithThisLoan(collateral);
@@ -430,6 +325,15 @@ public class Loan extends AbstractPersistable<Long> {
             this.collateral = null;
         }
         this.loanOfficerHistory = null;
+    }
+
+    private LoanSummary updateSummaryWithTotalFeeChargesDueAtDisbursement(final BigDecimal feeChargesDueAtDisbursement) {
+        if (this.summary == null) {
+            this.summary = LoanSummary.create(feeChargesDueAtDisbursement);
+        } else {
+            this.summary.updateTotalFeeChargesDueAtDisbursement(feeChargesDueAtDisbursement);
+        }
+        return this.summary;
     }
 
     private BigDecimal deriveSumTotalOfChargesDueAtDisbursement() {
@@ -457,10 +361,6 @@ public class Loan extends AbstractPersistable<Long> {
             item.associateWith(this);
         }
         return collateral;
-    }
-
-    private void updateTotalChargesDueAtDisbursement() {
-        this.totalChargesDueAtDisbursement = deriveSumTotalOfChargesDueAtDisbursement();
     }
 
     public boolean isAccountNumberRequiresAutoGeneration() {
@@ -497,7 +397,7 @@ public class Loan extends AbstractPersistable<Long> {
         loanCharge.update(this);
         setOfLoanCharges().add(loanCharge);
 
-        updateTotalChargesDueAtDisbursement();
+        this.summary = updateSummaryWithTotalFeeChargesDueAtDisbursement(deriveSumTotalOfChargesDueAtDisbursement());
 
         final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = this.transactionProcessorFactory
                 .determineProcessor(this.transactionProcessingStrategy);
@@ -512,7 +412,7 @@ public class Loan extends AbstractPersistable<Long> {
             wrapper.reprocess(getCurrency(), getDisbursementDate(), this.repaymentScheduleInstallments, setOfLoanCharges());
         }
 
-        updateLoanSummaryDerivedFields(this.loanSummaryWrapper);
+        updateLoanSummaryDerivedFields();
     }
 
     private void validateLoanIsNotClosed(final LoanCharge loanCharge) {
@@ -554,7 +454,7 @@ public class Loan extends AbstractPersistable<Long> {
 
         boolean removed = setOfLoanCharges().remove(loanCharge);
         if (removed) {
-            updateTotalChargesDueAtDisbursement();
+            updateSummaryWithTotalFeeChargesDueAtDisbursement(deriveSumTotalOfChargesDueAtDisbursement());
         }
 
         removeOrModifyTransactionAssociatedWithLoanChargeIfDueAtDisbursement(loanCharge);
@@ -567,7 +467,7 @@ public class Loan extends AbstractPersistable<Long> {
                     getCurrency(), this.repaymentScheduleInstallments, setOfLoanCharges());
         }
 
-        updateLoanSummaryDerivedFields(this.loanSummaryWrapper);
+        updateLoanSummaryDerivedFields();
     }
 
     private void removeOrModifyTransactionAssociatedWithLoanChargeIfDueAtDisbursement(final LoanCharge loanCharge) {
@@ -606,7 +506,7 @@ public class Loan extends AbstractPersistable<Long> {
         if (setOfLoanCharges().contains(loanCharge)) {
             final Map<String, Object> loanChargeChanges = loanCharge.update(command, getPrincpal().getAmount());
             actualChanges.putAll(loanChargeChanges);
-            updateTotalChargesDueAtDisbursement();
+            updateSummaryWithTotalFeeChargesDueAtDisbursement(deriveSumTotalOfChargesDueAtDisbursement());
         }
 
         final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = this.transactionProcessorFactory
@@ -621,7 +521,7 @@ public class Loan extends AbstractPersistable<Long> {
             wrapper.reprocess(getCurrency(), getDisbursementDate(), this.repaymentScheduleInstallments, setOfLoanCharges());
         }
 
-        updateLoanSummaryDerivedFields(this.loanSummaryWrapper);
+        updateLoanSummaryDerivedFields();
 
         return actualChanges;
     }
@@ -647,7 +547,7 @@ public class Loan extends AbstractPersistable<Long> {
             transactionDate = loanCharge.getDueLocalDate();
         }
 
-        updateTotalChargesDueAtDisbursement();
+        updateSummaryWithTotalFeeChargesDueAtDisbursement(deriveSumTotalOfChargesDueAtDisbursement());
 
         final LoanTransaction waiveLoanChargeTransaction = LoanTransaction.waiveLoanCharge(this, amountWaived, transactionDate,
                 feeChargesWaived, penaltyChargesWaived);
@@ -666,7 +566,7 @@ public class Loan extends AbstractPersistable<Long> {
             wrapper.reprocess(getCurrency(), getDisbursementDate(), this.repaymentScheduleInstallments, setOfLoanCharges());
         }
 
-        updateLoanSummaryDerivedFields(this.loanSummaryWrapper);
+        updateLoanSummaryDerivedFields();
 
         doPostLoanTransactionChecks(waiveLoanChargeTransaction.getTransactionDate(), loanLifecycleStateMachine);
 
@@ -720,7 +620,7 @@ public class Loan extends AbstractPersistable<Long> {
     public void updateLoanCharges(final Set<LoanCharge> loanCharges) {
         setOfLoanCharges().clear();
         setOfLoanCharges().addAll(associateChargesWithThisLoan(loanCharges));
-        this.totalChargesDueAtDisbursement = deriveSumTotalOfChargesDueAtDisbursement();
+        updateSummaryWithTotalFeeChargesDueAtDisbursement(deriveSumTotalOfChargesDueAtDisbursement());
     }
 
     public void updateLoanCollateral(final Set<LoanCollateral> loanCollateral) {
@@ -756,7 +656,7 @@ public class Loan extends AbstractPersistable<Long> {
                 this.repaymentScheduleInstallments, setOfLoanCharges());
 
         updateLoanScheduleDependentDerivedFields();
-        updateLoanSummaryDerivedFields(this.loanSummaryWrapper);
+        updateLoanSummaryDerivedFields();
     }
 
     private void updateLoanScheduleDependentDerivedFields() {
@@ -764,138 +664,13 @@ public class Loan extends AbstractPersistable<Long> {
         this.actualMaturityDate = determineExpectedMaturityDate().toDate();
     }
 
-    private void updateLoanSummaryDerivedFields(final LoanSummaryWrapper summary) {
-
-        final Money principal = this.loanRepaymentScheduleDetail.getPrincipal();
-        final MonetaryCurrency currency = loanCurrency();
+    private void updateLoanSummaryDerivedFields() {
 
         if (isNotDisbursed()) {
-            this.totalPrincipalDisbursed = BigDecimal.ZERO;
-            this.totalPrincipalRepaid = BigDecimal.ZERO;
-            this.totalPrincipalWrittenOff = BigDecimal.ZERO;
-            this.totalPrincipalOutstanding = BigDecimal.ZERO;
-            this.totalPrincipalOverdue = BigDecimal.ZERO;
-            this.totalInterestCharged = BigDecimal.ZERO;
-            this.totalInterestRepaid = BigDecimal.ZERO;
-            this.totalInterestWaived = BigDecimal.ZERO;
-            this.totalInterestWrittenOff = BigDecimal.ZERO;
-            this.totalInterestOutstanding = BigDecimal.ZERO;
-            this.totalInterestOverdue = BigDecimal.ZERO;
-            this.totalFeeChargesCharged = BigDecimal.ZERO;
-            this.totalFeeChargesRepaid = BigDecimal.ZERO;
-            this.totalFeeChargesWaived = BigDecimal.ZERO;
-            this.totalFeeChargesWrittenOff = BigDecimal.ZERO;
-            this.totalFeeChargesOutstanding = BigDecimal.ZERO;
-            this.totalFeeChargesOverdue = BigDecimal.ZERO;
-            this.totalPenaltyChargesCharged = BigDecimal.ZERO;
-            this.totalPenaltyChargesRepaid = BigDecimal.ZERO;
-            this.totalPenaltyChargesWaived = BigDecimal.ZERO;
-            this.totalPenaltyChargesWrittenOff = BigDecimal.ZERO;
-            this.totalPenaltyChargesOutstanding = BigDecimal.ZERO;
-            this.totalPenaltyChargesOverdue = BigDecimal.ZERO;
-            this.totalExpectedRepayment = BigDecimal.ZERO;
-            this.totalRepayment = BigDecimal.ZERO;
-            this.totalExpectedCostOfLoan = BigDecimal.ZERO;
-            this.totalCostOfLoan = BigDecimal.ZERO;
-            this.totalWaived = BigDecimal.ZERO;
-            this.totalWrittenOff = BigDecimal.ZERO;
-            this.totalOutstanding = BigDecimal.ZERO;
-            this.totalOverdue = BigDecimal.ZERO;
-            this.overdueSinceDate = null;
+            this.summary.zeroFields();
         } else {
-            this.totalPrincipalDisbursed = principal.getAmount();
-            this.totalPrincipalRepaid = summary.calculateTotalPrincipalRepaid(this.repaymentScheduleInstallments, currency).getAmount();
-            this.totalPrincipalWrittenOff = summary.calculateTotalPrincipalWrittenOff(this.repaymentScheduleInstallments, currency)
-                    .getAmount();
-
-            this.totalPrincipalOutstanding = principal.minus(totalPrincipalRepaid).minus(totalPrincipalWrittenOff).getAmount();
-            this.totalPrincipalOverdue = summary.calculateTotalPrincipalOverdueOn(this.repaymentScheduleInstallments, currency,
-                    DateUtils.getLocalDateOfTenant()).getAmount();
-
-            final Money totalInterestCharged = summary.calculateTotalInterestCharged(this.repaymentScheduleInstallments, currency);
-            this.totalInterestCharged = totalInterestCharged.getAmount();
-            this.totalInterestRepaid = summary.calculateTotalInterestRepaid(this.repaymentScheduleInstallments, currency).getAmount();
-            this.totalInterestWaived = summary.calculateTotalInterestWaived(this.repaymentScheduleInstallments, currency).getAmount();
-            this.totalInterestWrittenOff = summary.calculateTotalInterestWrittenOff(this.repaymentScheduleInstallments, currency)
-                    .getAmount();
-
-            if (totalInterestCharged.isGreaterThanZero()) {
-                this.totalInterestOutstanding = totalInterestCharged.minus(this.totalInterestRepaid).minus(this.totalInterestWaived)
-                        .minus(this.totalInterestWrittenOff).getAmount();
-                this.totalInterestOverdue = summary.calculateTotalInterestOverdueOn(this.repaymentScheduleInstallments, currency,
-                        DateUtils.getLocalDateOfTenant()).getAmount();
-            }
-
-            final Money totalFeeChargesCharged = summary.calculateTotalFeeChargesCharged(this.repaymentScheduleInstallments, currency);
-            this.totalFeeChargesCharged = totalFeeChargesCharged.getAmount();
-            this.totalFeeChargesRepaid = summary.calculateTotalFeeChargesRepaid(this.repaymentScheduleInstallments, currency).getAmount();
-            this.totalFeeChargesWaived = summary.calculateTotalFeeChargesWaived(this.repaymentScheduleInstallments, currency).getAmount();
-            this.totalFeeChargesWrittenOff = summary.calculateTotalFeeChargesWrittenOff(this.repaymentScheduleInstallments, currency)
-                    .getAmount();
-
-            if (totalFeeChargesCharged.isGreaterThanZero()) {
-                this.totalFeeChargesOutstanding = totalFeeChargesCharged.minus(this.totalFeeChargesRepaid)
-                        .minus(this.totalFeeChargesWaived).minus(this.totalFeeChargesWrittenOff).getAmount();
-                this.totalFeeChargesOverdue = summary.calculateTotalFeeChargesOverdueOn(this.repaymentScheduleInstallments, currency,
-                        DateUtils.getLocalDateOfTenant()).getAmount();
-            }
-
-            final Money totalPenaltyChargesCharged = summary.calculateTotalPenaltyChargesCharged(this.repaymentScheduleInstallments,
-                    currency);
-            this.totalPenaltyChargesCharged = totalPenaltyChargesCharged.getAmount();
-            this.totalPenaltyChargesRepaid = summary.calculateTotalPenaltyChargesRepaid(this.repaymentScheduleInstallments, currency)
-                    .getAmount();
-            this.totalPenaltyChargesWaived = summary.calculateTotalPenaltyChargesWaived(this.repaymentScheduleInstallments, currency)
-                    .getAmount();
-            this.totalPenaltyChargesWrittenOff = summary.calculateTotalPenaltyChargesWrittenOff(this.repaymentScheduleInstallments,
-                    currency).getAmount();
-
-            if (totalPenaltyChargesCharged.isGreaterThanZero()) {
-                this.totalPenaltyChargesOutstanding = totalPenaltyChargesCharged.minus(this.totalPenaltyChargesRepaid)
-                        .minus(this.totalPenaltyChargesWaived).minus(this.totalPenaltyChargesWrittenOff).getAmount();
-                this.totalPenaltyChargesOverdue = summary.calculateTotalPenaltyChargesOverdueOn(this.repaymentScheduleInstallments,
-                        currency, DateUtils.getLocalDateOfTenant()).getAmount();
-            }
-
-            final Money totalExpectedRepayment = Money.of(currency, this.totalPrincipalDisbursed).plus(this.totalInterestCharged)
-                    .plus(this.totalFeeChargesCharged).plus(this.totalPenaltyChargesCharged);
-            this.totalExpectedRepayment = totalExpectedRepayment.getAmount();
-
-            final Money totalRepayment = Money.of(currency, this.totalPrincipalRepaid).plus(this.totalInterestRepaid)
-                    .plus(this.totalFeeChargesRepaid).plus(this.totalPenaltyChargesRepaid);
-            this.totalRepayment = totalRepayment.getAmount();
-
-            final Money totalExpectedCostOfLoan = Money.of(currency, this.totalInterestCharged).plus(this.totalFeeChargesCharged)
-                    .plus(this.totalPenaltyChargesCharged);
-            this.totalExpectedCostOfLoan = totalExpectedCostOfLoan.getAmount();
-
-            final Money totalCostOfLoan = Money.of(currency, this.totalInterestRepaid).plus(this.totalFeeChargesRepaid)
-                    .plus(this.totalPenaltyChargesRepaid);
-            this.totalCostOfLoan = totalCostOfLoan.getAmount();
-
-            final Money totalWaived = Money.of(currency, this.totalInterestWaived).plus(this.totalFeeChargesWaived)
-                    .plus(this.totalPenaltyChargesWaived);
-            this.totalWaived = totalWaived.getAmount();
-
-            final Money totalWrittenOff = Money.of(currency, this.totalPrincipalWrittenOff).plus(this.totalInterestWrittenOff)
-                    .plus(this.totalFeeChargesWrittenOff).plus(this.totalPenaltyChargesWrittenOff);
-            this.totalWrittenOff = totalWrittenOff.getAmount();
-
-            final Money totalOutstanding = Money.of(currency, this.totalPrincipalOutstanding).plus(this.totalInterestOutstanding)
-                    .plus(this.totalFeeChargesOutstanding).plus(this.totalPenaltyChargesOutstanding);
-            this.totalOutstanding = totalOutstanding.getAmount();
-
-            final Money totalOverdue = Money.of(currency, this.totalPrincipalOverdue).plus(this.totalInterestOverdue)
-                    .plus(this.totalFeeChargesOverdue).plus(this.totalPenaltyChargesOverdue);
-            this.totalOverdue = totalOverdue.getAmount();
-
-            final LocalDate overdueSinceLocalDate = summary.determineOverdueSinceDateFrom(this.repaymentScheduleInstallments, currency,
-                    DateUtils.getLocalDateOfTenant());
-            if (overdueSinceLocalDate != null) {
-                this.overdueSinceDate = overdueSinceLocalDate.toDate();
-            } else {
-                this.overdueSinceDate = null;
-            }
+            final Money principal = this.loanRepaymentScheduleDetail.getPrincipal();
+            this.summary.updateSummary(loanCurrency(), principal, this.repaymentScheduleInstallments, this.loanSummaryWrapper);
         }
     }
 
@@ -1365,7 +1140,7 @@ public class Loan extends AbstractPersistable<Long> {
 
         final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>();
 
-        updateLoanToPreDisbursalState(this.loanSummaryWrapper);
+        updateLoanToPreDisbursalState();
 
         final LoanStatus statusEnum = loanLifecycleStateMachine.transition(LoanEvent.LOAN_DISBURSED, LoanStatus.fromInt(this.loanStatus));
         if (!statusEnum.hasStateOf(LoanStatus.fromInt(this.loanStatus))) {
@@ -1391,7 +1166,7 @@ public class Loan extends AbstractPersistable<Long> {
             if (isRepaymentScheduleRegenerationRequiredForDisbursement(actualDisbursementDate)) {
                 regenerateRepaymentSchedule(currency);
             } else {
-                updateLoanSummaryDerivedFields(this.loanSummaryWrapper);
+                updateLoanSummaryDerivedFields();
             }
         }
 
@@ -1442,11 +1217,13 @@ public class Loan extends AbstractPersistable<Long> {
 
         // add repayment transaction to track incoming money from client to mfi
         // for (charges due at time of disbursement)
-        if (getTotalChargesDueAtDisbursement().isGreaterThanZero()) {
+        final Money totalFeeChargesDueAtDisbursement = this.summary.getTotalFeeChargesDueAtDisbursement(loanCurrency());
+        if (totalFeeChargesDueAtDisbursement.isGreaterThanZero()) {
 
-            LoanTransaction chargesPayment = LoanTransaction.repaymentAtDisbursement(getTotalChargesDueAtDisbursement(), disbursedOn);
+            LoanTransaction chargesPayment = LoanTransaction.repaymentAtDisbursement(totalFeeChargesDueAtDisbursement,
+                    disbursedOn);
             Money zero = Money.zero(getCurrency());
-            chargesPayment.updateComponents(zero, zero, getTotalChargesDueAtDisbursement(), zero);
+            chargesPayment.updateComponents(zero, zero, totalFeeChargesDueAtDisbursement, zero);
             chargesPayment.updateLoan(this);
             this.loanTransactions.add(chargesPayment);
 
@@ -1499,7 +1276,7 @@ public class Loan extends AbstractPersistable<Long> {
 
             reverseExistingTransactions();
 
-            updateLoanToPreDisbursalState(this.loanSummaryWrapper);
+            updateLoanToPreDisbursalState();
         }
 
         return actualChanges;
@@ -1512,7 +1289,7 @@ public class Loan extends AbstractPersistable<Long> {
         }
     }
 
-    private void updateLoanToPreDisbursalState(final LoanSummaryWrapper summaryWrapper) {
+    private void updateLoanToPreDisbursalState() {
         this.actualDisbursementDate = null;
 
         for (LoanCharge charge : setOfLoanCharges()) {
@@ -1526,7 +1303,7 @@ public class Loan extends AbstractPersistable<Long> {
         LoanRepaymentScheduleProcessingWrapper wrapper = new LoanRepaymentScheduleProcessingWrapper();
         wrapper.reprocess(getCurrency(), getDisbursementDate(), this.repaymentScheduleInstallments, setOfLoanCharges());
 
-        updateLoanSummaryDerivedFields(summaryWrapper);
+        updateLoanSummaryDerivedFields();
     }
 
     public LoanTransaction waiveInterest(final JsonCommand command, final LoanLifecycleStateMachine loanLifecycleStateMachine) {
@@ -1613,7 +1390,7 @@ public class Loan extends AbstractPersistable<Long> {
                     getCurrency(), this.repaymentScheduleInstallments, setOfLoanCharges());
         }
 
-        updateLoanSummaryDerivedFields(this.loanSummaryWrapper);
+        updateLoanSummaryDerivedFields();
 
         doPostLoanTransactionChecks(loanTransaction.getTransactionDate(), loanLifecycleStateMachine);
     }
@@ -1634,7 +1411,7 @@ public class Loan extends AbstractPersistable<Long> {
 
         if (this.isOverPaid()) {
             handleLoanOverpayment(loanLifecycleStateMachine);
-        } else if (this.isRepaidInFull()) {
+        } else if (this.summary.isRepaidInFull(loanCurrency())) {
             // TODO - KW - probably should not close the loan automatically but
             // let user decide if loan is closed or not and provide closing
             // date.
@@ -1792,10 +1569,6 @@ public class Loan extends AbstractPersistable<Long> {
         return newTransactionDetail;
     }
 
-    private boolean isRepaidInFull() {
-        return Money.of(loanCurrency(), this.totalOutstanding).isZero();
-    }
-
     private boolean isOverPaid() {
         return calculateTotalOverpayment().isGreaterThanZero();
     }
@@ -1873,7 +1646,7 @@ public class Loan extends AbstractPersistable<Long> {
                     .determineProcessor(this.transactionProcessingStrategy);
             loanRepaymentScheduleTransactionProcessor.handleWriteOff(loanTransaction, loanCurrency(), this.repaymentScheduleInstallments);
 
-            updateLoanSummaryDerivedFields(this.loanSummaryWrapper);
+            updateLoanSummaryDerivedFields();
         }
 
         return loanTransaction;
@@ -1904,8 +1677,8 @@ public class Loan extends AbstractPersistable<Long> {
 
         LoanTransaction loanTransaction = null;
         if (isOpen()) {
-            final Money outstanding = Money.of(loanCurrency(), this.totalOutstanding);
-            if (outstanding.isGreaterThanZero() && getInArrearsTolerance().isGreaterThanOrEqualTo(outstanding)) {
+            final Money totalOutstanding = this.summary.getTotalOutstanding(loanCurrency());
+            if (totalOutstanding.isGreaterThanZero() && getInArrearsTolerance().isGreaterThanOrEqualTo(totalOutstanding)) {
 
                 final LoanStatus statusEnum = loanLifecycleStateMachine.transition(LoanEvent.REPAID_IN_FULL, LoanStatus.fromInt(this.loanStatus));
                 if (!statusEnum.hasStateOf(LoanStatus.fromInt(this.loanStatus))) {
@@ -1929,10 +1702,10 @@ public class Loan extends AbstractPersistable<Long> {
                 loanRepaymentScheduleTransactionProcessor.handleWriteOff(loanTransaction, loanCurrency(),
                         this.repaymentScheduleInstallments);
 
-                updateLoanSummaryDerivedFields(this.loanSummaryWrapper);
-            } else if (outstanding.isGreaterThanZero()) {
+                updateLoanSummaryDerivedFields();
+            } else if (totalOutstanding.isGreaterThanZero()) {
                 final String errorMessage = "A loan with money outstanding cannot be closed";
-                throw new InvalidLoanStateTransitionException("close", "loan.has.money.outstanding", errorMessage, outstanding.toString());
+                throw new InvalidLoanStateTransitionException("close", "loan.has.money.outstanding", errorMessage, totalOutstanding.toString());
             }
         }
 
@@ -2159,10 +1932,6 @@ public class Loan extends AbstractPersistable<Long> {
 
     public Money getPrincpal() {
         return this.loanRepaymentScheduleDetail.getPrincipal();
-    }
-
-    private Money getTotalChargesDueAtDisbursement() {
-        return Money.of(getCurrency(), this.totalChargesDueAtDisbursement);
     }
 
     public boolean hasCurrencyCodeOf(final String matchingCurrencyCode) {
