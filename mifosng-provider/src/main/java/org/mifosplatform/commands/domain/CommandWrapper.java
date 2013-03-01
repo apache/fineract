@@ -23,6 +23,8 @@ public class CommandWrapper {
     private final Long datatableId;
     private final Long codeId;
     private final String transactionId;
+    private String supportedEntityType;
+    private Long supportedEntityId;
 
     public static CommandWrapper wrap(final String actionName, final String enityName, final Long resourceId) {
         return new CommandWrapper(null, actionName, enityName, resourceId);
@@ -46,14 +48,16 @@ public class CommandWrapper {
         this.apptableId = null;
         this.datatableId = null;
         this.codeId = null;
+        this.supportedEntityType = null;
+        this.supportedEntityId = null;
         this.href = null;
         this.json = null;
         this.transactionId = null;
     }
 
     public CommandWrapper(final Long officeId, final Long groupId, final Long clientId, final Long loanId, final String actionName,
-            final String entityName, final Long entityId, final Long apptableId, final Long datatableId, final Long codeId, final String href,
-            final String json, final String transactionId) {
+            final String entityName, final Long entityId, final Long apptableId, final Long datatableId, final Long codeId,
+            final String supportedEntityType, final Long supportedEntityId, final String href, final String json, final String transactionId) {
         this.commandId = null;
         this.officeId = officeId;
         this.groupId = groupId;
@@ -66,6 +70,8 @@ public class CommandWrapper {
         this.apptableId = apptableId;
         this.datatableId = datatableId;
         this.codeId = codeId;
+        this.supportedEntityType = supportedEntityType;
+        this.supportedEntityId = supportedEntityId;
         this.href = href;
         this.json = json;
         this.transactionId = transactionId;
@@ -141,6 +147,14 @@ public class CommandWrapper {
 
     public Long getDatatableId() {
         return this.datatableId;
+    }
+
+    public Long getSupportedEntityId() {
+        return this.supportedEntityId;
+    }
+
+    public String getSupportedEntityType() {
+        return this.supportedEntityType;
     }
 
     public boolean isUpdate() {
@@ -431,4 +445,8 @@ public class CommandWrapper {
 	
 	
 	
+    public boolean isCalendarResource() {
+        return this.entityName.equalsIgnoreCase("CALENDAR");
+    }
+
 }

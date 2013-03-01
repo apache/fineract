@@ -39,25 +39,28 @@ public final class JsonCommand {
     private final Long apptableId;
     private final Long datatableId;
     private final Long codeId;
+    private String supportedEntityType;
+    private Long supportedEntityId;
     private final String transactionId;
 
     public static JsonCommand from(final String jsonCommand, final JsonElement parsedCommand, final FromJsonHelper fromApiJsonHelper,
             final String entityName, final Long resourceId, final Long groupId, final Long clientId, final Long loanId,
-            final Long apptableId, final Long datatableId, final Long codeId, final String transactionId) {
+            final Long apptableId, final Long datatableId, final Long codeId, final String supportedEntityType, final Long supportedEntityId, 
+            final String transactionId) {
         return new JsonCommand(null, jsonCommand, parsedCommand, fromApiJsonHelper, entityName, resourceId, groupId, clientId, loanId,
-                apptableId, datatableId, codeId, transactionId);
+                apptableId, datatableId, codeId, supportedEntityType, supportedEntityId, transactionId);
     }
 
     public static JsonCommand fromExistingCommand(final Long commandId, final String jsonCommand, final JsonElement parsedCommand,
             final FromJsonHelper fromApiJsonHelper, final Long resourceId) {
         return new JsonCommand(commandId, jsonCommand, parsedCommand, fromApiJsonHelper, null, resourceId, null, null, null, null, null,
-                null, null);
+                null, null, null, null);
     }
 
     public JsonCommand(final Long commandId, final String jsonCommand, final JsonElement parsedCommand,
             final FromJsonHelper fromApiJsonHelper, final String entityName, final Long resourceId, final Long groupId,
-            final Long clientId, final Long loanId, final Long apptableId, final Long datatableId, final Long codeId,
-            final String transactionId) {
+            final Long clientId, final Long loanId, final Long apptableId, final Long datatableId, final Long codeId, 
+            final String supportedEntityType, final Long supportedEntityId, final String transactionId) {
         this.commandId = commandId;
         this.jsonCommand = jsonCommand;
         this.parsedCommand = parsedCommand;
@@ -70,6 +73,8 @@ public final class JsonCommand {
         this.apptableId = apptableId;
         this.datatableId = datatableId;
         this.codeId = codeId;
+        this.supportedEntityType = supportedEntityType;
+        this.supportedEntityId = supportedEntityId;
         this.transactionId = transactionId;
     }
 
@@ -116,7 +121,15 @@ public final class JsonCommand {
     public Long getCodeId() {
         return this.codeId;
     }
+
+    public Long getSupportedEntityId() {
+        return this.supportedEntityId;
+    }
     
+    public String getSupportedEntityType() {
+        return this.supportedEntityType;
+    }
+
     public String getTransactionId(){
         return this.transactionId;
     }

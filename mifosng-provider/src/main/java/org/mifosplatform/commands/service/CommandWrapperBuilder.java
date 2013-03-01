@@ -22,10 +22,12 @@ public class CommandWrapperBuilder {
     private Long datatableId;
     private Long codeId;
     private String transactionId;
+    private String supportedEntityType;
+    private Long supportedEntityId;
 
     public CommandWrapper build() {
         return new CommandWrapper(this.officeId, this.groupId, this.clientId, this.loanId, this.actionName, this.entityName, this.entityId,
-                this.apptableId, this.datatableId, this.codeId, this.href, this.json, this.transactionId);
+                this.apptableId, this.datatableId, this.codeId, this.supportedEntityType, this.supportedEntityId, this.href, this.json, this.transactionId);
     }
 
     // public CommandWrapperBuilder withEntityId(final Long withId) {
@@ -866,4 +868,28 @@ public class CommandWrapperBuilder {
         return this;
 	}
 	
+    public CommandWrapperBuilder createCalendar(final String supportedEntityType, final Long supportedEntityId) {
+        this.actionName = "CREATE";
+        this.entityName = "CALENDAR";
+        this.supportedEntityType = supportedEntityType;
+        this.supportedEntityId = supportedEntityId;
+        this.href = "/" + supportedEntityType + "/" + supportedEntityId + "/calendars/template";
+        return this;
+    }
+
+    public CommandWrapperBuilder updateCalendar(final String supportedEntityType, final Long supportedEntityId, final Long calendarId) {
+        this.actionName = "UPDATE";
+        this.entityName = "CALENDAR";
+        this.entityId = calendarId;
+        this.href = "/" + supportedEntityType + "/" + supportedEntityId + "/calendars/" + calendarId;
+        return this;
+    }
+
+    public CommandWrapperBuilder deleteCalendar(final String supportedEntityType, final Long supportedEntityId, final Long calendarId) {
+        this.actionName = "DELETE";
+        this.entityName = "CALENDAR";
+        this.entityId = calendarId;
+        this.href = "/" + supportedEntityType + "/" + supportedEntityId + "/calendars/" + calendarId;
+        return this;
+    }
 }
