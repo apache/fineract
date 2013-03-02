@@ -10,19 +10,22 @@ public class SearchConditions {
     private final Boolean clientSearch;
     private final Boolean groupSearch;
     private final Boolean loanSeach;
+    private final Boolean clientIdentifierSearch;
     public SearchConditions(String searchQueryParam, String searchResource) {
         this.searchQuery = searchQueryParam;
         this.searchResource = searchResource;
-        this.clientSearch = (null == searchResource || searchResource.toLowerCase().contains(SEARCH_SUPPORTED_RESOURCES.CLIENT.name().toLowerCase()))? true : false;
-        this.groupSearch = (null == searchResource || searchResource.toLowerCase().contains(SEARCH_SUPPORTED_RESOURCES.GROUP.name().toLowerCase()))? true : false;
-        this.loanSeach = (null == searchResource || searchResource.toLowerCase().contains(SEARCH_SUPPORTED_RESOURCES.LOAN.name().toLowerCase()))? true : false;
+        this.clientSearch = (null == searchResource || searchResource.toLowerCase().contains(SEARCH_SUPPORTED_RESOURCES.CLIENTS.name().toLowerCase()))? true : false;
+        this.groupSearch = (null == searchResource || searchResource.toLowerCase().contains(SEARCH_SUPPORTED_RESOURCES.GROUPS.name().toLowerCase()))? true : false;
+        this.loanSeach = (null == searchResource || searchResource.toLowerCase().contains(SEARCH_SUPPORTED_RESOURCES.LOANS.name().toLowerCase()))? true : false;
+        this.clientIdentifierSearch = (null == searchResource || searchResource.toLowerCase().contains(SEARCH_SUPPORTED_RESOURCES.CLIENTIDENTIFIERS.name().toLowerCase()))? true : false;
     }
-    public SearchConditions(String searchQueryParam, String searchResource, Boolean clientSearch, Boolean groupSearch, Boolean loanSeach) {
+    public SearchConditions(String searchQueryParam, String searchResource, Boolean clientSearch, Boolean groupSearch, Boolean loanSeach, Boolean clientIdentifierSearch) {
         this.searchQuery = searchQueryParam;
         this.searchResource = searchResource;
         this.clientSearch = clientSearch;
         this.groupSearch = groupSearch;
         this.loanSeach = loanSeach;
+        this.clientIdentifierSearch = clientIdentifierSearch;
     }
     
     public String getSearchQuery() {
@@ -44,5 +47,10 @@ public class SearchConditions {
     public Boolean isLoanSeach() {
         return this.loanSeach;
     }
+    
+    public Boolean isClientIdentifierSearch() {
+        return this.clientIdentifierSearch;
+    }
+
     
 }
