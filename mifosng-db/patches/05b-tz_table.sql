@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS `timezones` (
   `timezonename` varchar(100) NOT NULL,
   `comments` varchar(150) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=416 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=416 DEFAULT CHARSET=utf8;
 
 INSERT INTO `timezones` (`id`, `country_code`, `timezonename`, `comments`) VALUES
 	(1, 'AD', 'Europe/Andorra', NULL),

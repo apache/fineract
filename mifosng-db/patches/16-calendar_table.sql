@@ -16,4 +16,4 @@ CREATE TABLE IF NOT EXISTS `m_calendar` (
   `first_reminder` smallint(11) NOT NULL,
   `second_reminder` smallint(11) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
