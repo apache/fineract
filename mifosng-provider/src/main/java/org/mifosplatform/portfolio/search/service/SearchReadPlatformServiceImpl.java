@@ -66,6 +66,16 @@ public class SearchReadPlatformServiceImpl implements SearchReadPlatformService 
                     + " , c.id as parentId, c.display_name as parentName "
                     + " from m_loan l join m_client c on l.client_id = c.id join m_office o on o.id = c.office_id where o.hierarchy like :hierarchy and l.account_no like :partialSearch and l.account_no not like :search) ";
 
+            String clientIdentifierExactMatchSql = " (select 'CLIENTIDENTIFIER' as entityType, ci.id as entityId, ci.document_key as entityName, "
+                    + " null as entityExternalId, null as entityAccountNo, c.id as parentId, c.display_name as parentName "
+                    + " from m_client_identifier ci join m_client c on ci.client_id=c.id join m_office o on o.id = c.office_id "
+                    + " where o.hierarchy like :hierarchy and ci.document_key like :search) ";
+            
+            String clientIdentifierMatchSql = " (select 'CLIENTIDENTIFIER' as entityType, ci.id as entityId, ci.document_key as entityName, "
+                    + " null as entityExternalId, null as entityAccountNo, c.id as parentId, c.display_name as parentName "
+                    + " from m_client_identifier ci join m_client c on ci.client_id=c.id join m_office o on o.id = c.office_id "
+                    + " where o.hierarchy like :hierarchy and ci.document_key like :partialSearch and ci.document_key not like :search) ";
+
             String groupExactMatchSql = " (select 'GROUP' as entityType, g.id as entityId, g.name as entityName, g.external_id as entityExternalId, NULL as entityAccountNo "
                     + " , g.office_id as parentId, o.name as parentName "
                     + " from m_group g join m_office o on o.id = g.office_id where o.hierarchy like :hierarchy and g.name like :search) ";
@@ -85,6 +95,10 @@ public class SearchReadPlatformServiceImpl implements SearchReadPlatformService 
                 sql.append(loanExactMatchSql).append(union);
             }
 
+            if(searchConditions.isClientIdentifierSearch()){
+                sql.append(clientIdentifierExactMatchSql).append(union);
+            }
+            
             if (searchConditions.isGroupSearch()) {
                 sql.append(groupExactMatchSql).append(union);
             }
@@ -96,6 +110,10 @@ public class SearchReadPlatformServiceImpl implements SearchReadPlatformService 
 
             if (searchConditions.isLoanSeach()) {
                 sql.append(loanMatchSql).append(union);
+            }
+            
+            if(searchConditions.isClientIdentifierSearch()){
+                sql.append(clientIdentifierMatchSql).append(union);
             }
 
             if (searchConditions.isGroupSearch()) {
