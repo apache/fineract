@@ -13,11 +13,11 @@ public class SavingProductLookup implements Serializable {
     private final String name;
 
     public SavingProductLookup() {
-        this.id=null;
-        this.name=null;
+        this.id = null;
+        this.name = null;
     }
 
-    public SavingProductLookup(Long id, String name) {
+    public SavingProductLookup(final Long id, final String name) {
         this.id = id;
         this.name = name;
     }

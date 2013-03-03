@@ -9,17 +9,16 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class DeleteSavingProductCommandHandler implements NewCommandSourceHandler {
-	
-	private final SavingProductWritePlatformService savingProductWritePlatformService;
-	
-	@Autowired
-	public DeleteSavingProductCommandHandler(final SavingProductWritePlatformService savingProductWritePlatformService) {
-		this.savingProductWritePlatformService = savingProductWritePlatformService;
-	}
- 
-	@Override
-	public CommandProcessingResult processCommand(JsonCommand command) {
-		return this.savingProductWritePlatformService.deleteSavingProduct(command.entityId());
-	}
 
+    private final SavingProductWritePlatformService savingProductWritePlatformService;
+
+    @Autowired
+    public DeleteSavingProductCommandHandler(final SavingProductWritePlatformService savingProductWritePlatformService) {
+        this.savingProductWritePlatformService = savingProductWritePlatformService;
+    }
+
+    @Override
+    public CommandProcessingResult processCommand(final JsonCommand command) {
+        return this.savingProductWritePlatformService.deleteSavingProduct(command.entityId());
+    }
 }

@@ -557,15 +557,16 @@ public class SavingAccount extends AbstractAuditableCustom<AppUser, Long> {
     }
 
     public void depositMoney(final JsonCommand command) {
-    	
-    	final BigDecimal depositAmountCommandValue = command.bigDecimalValueOfParameterNamed("savingsDepositAmountPerPeriod");
-    	final LocalDate depositDateCommandValue = command.localDateValueOfParameterNamed("depositDate");
-    	
+
+        final BigDecimal depositAmountCommandValue = command.bigDecimalValueOfParameterNamed("savingsDepositAmountPerPeriod");
+        final LocalDate depositDateCommandValue = command.localDateValueOfParameterNamed("depositDate");
+
         BigDecimal depositAmount = BigDecimal.ZERO;
         BigDecimal remainAmountToBePaid = BigDecimal.ZERO;
         BigDecimal commandRemainDepositAmount = depositAmountCommandValue;
 
-        SavingAccountTransaction savingAccountTransaction = SavingAccountTransaction.deposit(depositAmountCommandValue,	depositDateCommandValue);
+        SavingAccountTransaction savingAccountTransaction = SavingAccountTransaction.deposit(depositAmountCommandValue,
+                depositDateCommandValue);
         savingAccountTransaction.updateAccount(this);
         this.savingAccountTransactions.add(savingAccountTransaction);
         this.outstandingAmount = this.outstandingAmount.add(depositAmountCommandValue);

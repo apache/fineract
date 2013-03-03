@@ -37,8 +37,7 @@ public class SavingProductWritePlatformServiceJpaRepositoryImpl implements Savin
 
     @Autowired
     public SavingProductWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
-            final SavingProductRepository savingProductRepository,
-            final SavingProductCommandFromApiJsonDeserializer fromApiJsonDeserializer) {
+            final SavingProductRepository savingProductRepository, final SavingProductCommandFromApiJsonDeserializer fromApiJsonDeserializer) {
         this.context = context;
         this.savingProductRepository = savingProductRepository;
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
@@ -50,7 +49,7 @@ public class SavingProductWritePlatformServiceJpaRepositoryImpl implements Savin
 
         this.context.authenticatedUser();
         this.fromApiJsonDeserializer.validateForCreate(command.json());
-        
+
         final Integer savingProductTypeCommandValue = command.integerValueOfParameterNamed("savingProductType");
         SavingProductType savingProductType = SavingProductType.fromInt(savingProductTypeCommandValue);
         final Integer tenureTypeCommandValue = command.integerValueOfParameterNamed("tenureType");
@@ -62,28 +61,25 @@ public class SavingProductWritePlatformServiceJpaRepositoryImpl implements Savin
         final Integer lockinPeriodTypeCommandValue = command.integerValueOfParameterNamed("lockinPeriodType");
         PeriodFrequencyType lockinPeriodType = PeriodFrequencyType.fromInt(lockinPeriodTypeCommandValue);
         final Integer interestCalculationMethodCommandValue = command.integerValueOfParameterNamed("interestCalculationMethod");
-        SavingInterestCalculationMethod savingInterestCalculationMethod = SavingInterestCalculationMethod.fromInt(interestCalculationMethodCommandValue);
+        SavingInterestCalculationMethod savingInterestCalculationMethod = SavingInterestCalculationMethod
+                .fromInt(interestCalculationMethodCommandValue);
         final String currencyCode = command.stringValueOfParameterNamed("currencyCode");
         final Integer digitsAfterDecimal = command.integerValueOfParameterNamed("digitsAfterDecimal");
         MonetaryCurrency currency = new MonetaryCurrency(currencyCode, digitsAfterDecimal);
-        
-        if ( savingProductType.equals(SavingProductType.INVALID) ||
-        	 tenureType.equals(TenureTypeEnum.INVALID) ||
-        	 savingFrequencyType.equals(SavingFrequencyType.INVALID) ||
-        	 interestType.equals(SavingsInterestType.INVALID) ||
-        	 lockinPeriodType.equals(PeriodFrequencyType.INVALID)||
-        	 savingInterestCalculationMethod.equals(SavingInterestCalculationMethod.INVALID)
-        		) {
-			throw new NoAuthorizationException("Please select a valid types"); 
-		}
-        
-        SavingProduct product = SavingProduct.assembleFromJson(command, currency, savingProductType, tenureType, savingFrequencyType, 
-        		interestType, savingInterestCalculationMethod, lockinPeriodType);
+
+        if (savingProductType.equals(SavingProductType.INVALID) || tenureType.equals(TenureTypeEnum.INVALID)
+                || savingFrequencyType.equals(SavingFrequencyType.INVALID) || interestType.equals(SavingsInterestType.INVALID)
+                || lockinPeriodType.equals(PeriodFrequencyType.INVALID)
+                || savingInterestCalculationMethod.equals(SavingInterestCalculationMethod.INVALID)) { throw new NoAuthorizationException(
+                "Please select a valid types"); }
+
+        SavingProduct product = SavingProduct.assembleFromJson(command, currency, savingProductType, tenureType, savingFrequencyType,
+                interestType, savingInterestCalculationMethod, lockinPeriodType);
 
         this.savingProductRepository.save(product);
         return new CommandProcessingResultBuilder() //
-        .withEntityId(product.getId()) //
-        .build();
+                .withEntityId(product.getId()) //
+                .build();
     }
 
     @Transactional
@@ -93,23 +89,22 @@ public class SavingProductWritePlatformServiceJpaRepositoryImpl implements Savin
         this.context.authenticatedUser();
         this.fromApiJsonDeserializer.validateForUpdate(command.json());
 
-        SavingProduct product = this.savingProductRepository.findOne(productId);
-        
-        if (product == null) { throw new SavingProductNotFoundException(productId); }
-        
-        Map<String, Object> changes = product.update(command);
-        
+        final SavingProduct product = this.savingProductRepository.findOne(productId);
+
+        if (product == null || product.isDeleted()) { throw new SavingProductNotFoundException(productId); }
+
+        final Map<String, Object> changes = product.update(command);
+
         this.savingProductRepository.save(product);
-        
+
         return new CommandProcessingResultBuilder() //
-        .withEntityId(product.getId()) //
-        .with(changes)
-        .build();
+                .withEntityId(product.getId()) //
+                .with(changes).build();
     }
 
     @Transactional
     @Override
-    public CommandProcessingResult deleteSavingProduct(Long productId) {
+    public CommandProcessingResult deleteSavingProduct(final Long productId) {
 
         this.context.authenticatedUser();
         SavingProduct product = this.savingProductRepository.findOne(productId);
@@ -117,8 +112,7 @@ public class SavingProductWritePlatformServiceJpaRepositoryImpl implements Savin
         product.delete();
         this.savingProductRepository.save(product);
         return new CommandProcessingResultBuilder() //
-        .withEntityId(product.getId()) //
-        .build();
+                .withEntityId(product.getId()) //
+                .build();
     }
-
 }

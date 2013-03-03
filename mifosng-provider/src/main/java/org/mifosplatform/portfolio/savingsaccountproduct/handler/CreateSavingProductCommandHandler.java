@@ -8,18 +8,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class CreateSavingProductCommandHandler implements NewCommandSourceHandler{
-	
-	private final SavingProductWritePlatformService savingProductWritePlatformService;
-	
-	@Autowired 
-	public CreateSavingProductCommandHandler(final SavingProductWritePlatformService savingProductWritePlatformService) {
-		this.savingProductWritePlatformService = savingProductWritePlatformService;
-	}
+public class CreateSavingProductCommandHandler implements NewCommandSourceHandler {
 
-	@Override
-	public CommandProcessingResult processCommand(JsonCommand command) {
-		return this.savingProductWritePlatformService.createSavingProduct(command);
-	}
+    private final SavingProductWritePlatformService savingProductWritePlatformService;
 
+    @Autowired
+    public CreateSavingProductCommandHandler(final SavingProductWritePlatformService savingProductWritePlatformService) {
+        this.savingProductWritePlatformService = savingProductWritePlatformService;
+    }
+
+    @Override
+    public CommandProcessingResult processCommand(final JsonCommand command) {
+        return this.savingProductWritePlatformService.createSavingProduct(command);
+    }
 }

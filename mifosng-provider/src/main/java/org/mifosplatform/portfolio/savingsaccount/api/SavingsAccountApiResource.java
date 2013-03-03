@@ -69,16 +69,17 @@ import com.google.gson.JsonElement;
 @Component
 @Scope("singleton")
 public class SavingsAccountApiResource {
-	
-	private final Set<String> SAVINGS_ACCOUNTS_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "status", "externalId",
+
+    private final Set<String> SAVINGS_ACCOUNTS_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "status", "externalId",
             "clientId", "clientName", "productId", "productName", "productType", "currencyData", "savingsDepostiAmountPerPeriod",
             "savingsFrequencyType", "totalDepositAmount", "reccuringInterestRate", "savingInterestRate", "interestType",
             "interestCalculationMethod", "tenure", "tenureType", "projectedCommencementDate", "actualCommencementDate", "maturesOnDate",
-            "projectedInterestAccuredOnMaturity", "actualInterestAccured", "projectedMaturityAmount", "actualMaturityAmount","outstandingAmount",
-            "preClosureAllowed", "preClosureInterestRate", "withdrawnonDate", "rejectedonDate", "closedonDate", "isLockinPeriodAllowed",
-            "lockinPeriod", "lockinPeriodType", "productOptions", "currencyOptions", "savingsProductTypeOptions", "tenureTypeOptions",
-            "savingFrequencyOptions", "savingsInterestTypeOptions", "lockinPeriodTypeOptions", "interestCalculationOptions","permissions","savingScheduleDatas",
-            "dueAmount", "savingScheduleData", "transactions","interestPostEvery","interestPostFrequency"));
+            "projectedInterestAccuredOnMaturity", "actualInterestAccured", "projectedMaturityAmount", "actualMaturityAmount",
+            "outstandingAmount", "preClosureAllowed", "preClosureInterestRate", "withdrawnonDate", "rejectedonDate", "closedonDate",
+            "isLockinPeriodAllowed", "lockinPeriod", "lockinPeriodType", "productOptions", "currencyOptions", "savingsProductTypeOptions",
+            "tenureTypeOptions", "savingFrequencyOptions", "savingsInterestTypeOptions", "lockinPeriodTypeOptions",
+            "interestCalculationOptions", "permissions", "savingScheduleDatas", "dueAmount", "savingScheduleData", "transactions",
+            "interestPostEvery", "interestPostFrequency"));
 
     private final SavingAccountWritePlatformService savingAccountWritePlatformService;
     private final SavingAccountReadPlatformService savingAccountReadPlatformService;
@@ -92,68 +93,66 @@ public class SavingsAccountApiResource {
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final FromJsonHelper fromJsonHelper;
     private final DefaultToApiJsonSerializer<SavingScheduleData> savingScheduleToApiJsonSerializer;
-    
+
     @Autowired
     public SavingsAccountApiResource(final SavingAccountWritePlatformService savingAccountWritePlatformService,
-    		final SavingAccountReadPlatformService savingAccountReadPlatformService,
-    		final SavingProductReadPlatformService savingProductReadPlatformService,
-    		final CurrencyReadPlatformService currencyReadPlatformService,
-    		final PlatformSecurityContext context,final CalculateSavingSchedule calculateSavingSchedule,
-    		final ToApiJsonSerializer<SavingAccountData> toApiJsonSerializer,
-    		final ApiRequestParameterHelper apiRequestParameterHelper,
-    		final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
-    		final FromJsonHelper fromJsonHelper,
-    		final DefaultToApiJsonSerializer<SavingScheduleData> savingScheduleToApiJsonSerializer) {
-    	this.savingAccountWritePlatformService = savingAccountWritePlatformService;
-    	this.savingAccountReadPlatformService = savingAccountReadPlatformService;
-    	this.savingProductReadPlatformService = savingProductReadPlatformService;
-    	this.currencyReadPlatformService = currencyReadPlatformService;
-    	this.context = context;
-    	this.calculateSavingSchedule = calculateSavingSchedule;
-    	this.toApiJsonSerializer = toApiJsonSerializer;
-    	this.apiRequestParameterHelper = apiRequestParameterHelper;
-    	this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
-    	this.fromJsonHelper = fromJsonHelper;
-    	this.savingScheduleToApiJsonSerializer = savingScheduleToApiJsonSerializer;
-	}
+            final SavingAccountReadPlatformService savingAccountReadPlatformService,
+            final SavingProductReadPlatformService savingProductReadPlatformService,
+            final CurrencyReadPlatformService currencyReadPlatformService, final PlatformSecurityContext context,
+            final CalculateSavingSchedule calculateSavingSchedule, final ToApiJsonSerializer<SavingAccountData> toApiJsonSerializer,
+            final ApiRequestParameterHelper apiRequestParameterHelper,
+            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService, final FromJsonHelper fromJsonHelper,
+            final DefaultToApiJsonSerializer<SavingScheduleData> savingScheduleToApiJsonSerializer) {
+        this.savingAccountWritePlatformService = savingAccountWritePlatformService;
+        this.savingAccountReadPlatformService = savingAccountReadPlatformService;
+        this.savingProductReadPlatformService = savingProductReadPlatformService;
+        this.currencyReadPlatformService = currencyReadPlatformService;
+        this.context = context;
+        this.calculateSavingSchedule = calculateSavingSchedule;
+        this.toApiJsonSerializer = toApiJsonSerializer;
+        this.apiRequestParameterHelper = apiRequestParameterHelper;
+        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
+        this.fromJsonHelper = fromJsonHelper;
+        this.savingScheduleToApiJsonSerializer = savingScheduleToApiJsonSerializer;
+    }
 
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String createSavingAccount(@QueryParam("command") final String commandParam, @Context final UriInfo uriInfo,
             final String apiRequestBodyAsJson) {
-    	
-    	if (is(commandParam, "calculateSavingSchedule")) {
-    		
-    		final JsonElement parsedQuery = this.fromJsonHelper.parse(apiRequestBodyAsJson);
+
+        if (is(commandParam, "calculateSavingSchedule")) {
+
+            final JsonElement parsedQuery = this.fromJsonHelper.parse(apiRequestBodyAsJson);
             final JsonQuery query = JsonQuery.from(apiRequestBodyAsJson, parsedQuery, this.fromJsonHelper);
-    		
+
             SavingScheduleData savingSchedule = this.calculateSavingSchedule.calculateSavingSchedule(query);
-            
+
             final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-            
+
             return this.savingScheduleToApiJsonSerializer.serialize(settings, savingSchedule, new HashSet<String>());
-            
+
         }
-    	
-    	final CommandWrapper commandRequest = new CommandWrapperBuilder().createSavingAccount().withJson(apiRequestBodyAsJson).build();
-    	
-    	final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().createSavingAccount().withJson(apiRequestBodyAsJson).build();
+
+        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
         return this.toApiJsonSerializer.serialize(result);
 
     }
-
 
     @PUT
     @Path("{accountId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String updateSavingAccount(@PathParam("accountId") final Long accountId, final String apiRequestBodyAsJson) {
-    	
-    	final CommandWrapper commandRequest = new CommandWrapperBuilder().updateSavingAccount(accountId).withJson(apiRequestBodyAsJson).build();
-    	
-    	final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().updateSavingAccount(accountId).withJson(apiRequestBodyAsJson)
+                .build();
+
+        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
         return this.toApiJsonSerializer.serialize(result);
     }
@@ -166,7 +165,7 @@ public class SavingsAccountApiResource {
         context.authenticatedUser().validateHasReadPermission(entityType);
 
         Collection<SavingAccountData> accounts = this.savingAccountReadPlatformService.retrieveAllSavingsAccounts();
-        
+
         final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 
         return this.toApiJsonSerializer.serialize(settings, accounts, SAVINGS_ACCOUNTS_DATA_PARAMETERS);
@@ -185,7 +184,7 @@ public class SavingsAccountApiResource {
         Collection<SavingAccountTransactionsData> transactions = null;
 
         SavingAccountData account = this.savingAccountReadPlatformService.retrieveSavingsAccount(accountId);
-        
+
         final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 
         if (settings.isTemplate()) {
@@ -196,7 +195,7 @@ public class SavingsAccountApiResource {
         if (!associationParameters.isEmpty()) {
             if (associationParameters.contains("all")) {
                 associationParameters.addAll(Arrays.asList("savingScheduleData", "transactions"));
-            } 
+            }
 
             if (associationParameters.contains("savingScheduleData")) {
                 CurrencyData currencyData = account.getCurrencyData();
@@ -225,13 +224,13 @@ public class SavingsAccountApiResource {
 
         SavingAccountData account = this.savingAccountReadPlatformService.retrieveNewSavingsAccountDetails(clientId, productId);
         account = handleTemplateRelatedData(account);
-        
+
         final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serialize(settings, account, SAVINGS_ACCOUNTS_DATA_PARAMETERS);
     }
 
-    private SavingAccountData handleTemplateRelatedData(SavingAccountData account) {
-    	
+    private SavingAccountData handleTemplateRelatedData(final SavingAccountData account) {
+
         Collection<SavingProductLookup> productOptions = savingProductReadPlatformService.retrieveAllSavingProductsForLookup();
         Collection<CurrencyData> currencyOptions = this.currencyReadPlatformService.retrieveAllowedCurrencies();
 
@@ -274,30 +273,32 @@ public class SavingsAccountApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String savingStateTransitions(@PathParam("accountId") final Long accountId, @QueryParam("command") final String commandParam,
             final String apiRequestBodyAsJson) {
-    	
-    	CommandWrapperBuilder builder = new CommandWrapperBuilder().withJson(apiRequestBodyAsJson);
-    	CommandProcessingResult result = null;
-    	
+
+        CommandWrapperBuilder builder = new CommandWrapperBuilder().withJson(apiRequestBodyAsJson);
+        CommandProcessingResult result = null;
+
         if (is(commandParam, "approve")) {
-        	final CommandWrapper commandRequest = builder.approveSavingAccountApplication(accountId).build();
-        	result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            final CommandWrapper commandRequest = builder.approveSavingAccountApplication(accountId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, "depositmoney")) {
-        	final CommandWrapper commandRequest = builder.depositOfSavingAmount(accountId).build();
-        	result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            final CommandWrapper commandRequest = builder.depositOfSavingAmount(accountId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, "withdraw")) {
-        	final CommandWrapper commandRequest = builder.withdrawSavingAmount(accountId).build();
-        	result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            final CommandWrapper commandRequest = builder.withdrawSavingAmount(accountId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, "reject")) {
-           	final CommandWrapper commandRequest = builder.rejectSavingApplication(accountId).build();
-           	result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            final CommandWrapper commandRequest = builder.rejectSavingApplication(accountId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, "withdrewbyclient")) {
-           	final CommandWrapper commandRequest = builder.withdrawSavingApplication(accountId).build();
-           	result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            final CommandWrapper commandRequest = builder.withdrawSavingApplication(accountId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, "undoapproval")) {
             final CommandWrapper commandRequest = builder.undoApprovalOfSavingApplication(accountId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        } else { throw new UnrecognizedQueryParamException("command", commandParam); }
-        
+        } else {
+            throw new UnrecognizedQueryParamException("command", commandParam);
+        }
+
         return this.toApiJsonSerializer.serialize(result);
     }
 
@@ -306,10 +307,10 @@ public class SavingsAccountApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String deleteSavingAccount(@PathParam("accountId") final Long accountId) {
-    	
-    	final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteSavingAccount(accountId).build();
-    	
-    	final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteSavingAccount(accountId).build();
+
+        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
         return this.toApiJsonSerializer.serialize(result);
 

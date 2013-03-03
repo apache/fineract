@@ -7,7 +7,9 @@ package org.mifosplatform.portfolio.savingsaccountproduct.domain;
 
 public enum SavingsInterestType {
 
-    INVALID(0, "savingsInterestType.invalid"), SIMPLE(1, "savingsInterestType.simple"), COMPOUNDING(2, "savingsInterestType.compounding");
+    INVALID(0, "savingsInterestType.invalid"), //
+    SIMPLE(1, "savingsInterestType.simple"), //
+    COMPOUNDING(2, "savingsInterestType.compounding");
 
     private final Integer value;
     private final String code;
@@ -41,5 +43,4 @@ public enum SavingsInterestType {
         }
         return savingsInterestType;
     }
-
 }

@@ -51,12 +51,12 @@ import org.springframework.stereotype.Component;
 @Component
 @Scope("singleton")
 public class SavingProductsApiResource {
-	
-	private final Set<String> SAVINGS_PRODUCT_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("currencyOptions", "id",
-            "createdOn", "lastModifedOn", "locale", "name", "description", "currencyCode", "digitsAfterDecimal", "interstRate",
-            "minInterestRate", "maxInterestRate", "savingsDepositAmount", "savingProductType", "tenureType", "tenure", "frequency",
-            "interestType", "interestCalculationMethod", "minimumBalanceForWithdrawal", "isPartialDepositAllowed", "isLockinPeriodAllowed",
-            "lockinPeriod", "lockinPeriodType", "currencyOptions", "savingsProductTypeOptions", "tenureTypeOptions", "depositEvery",
+
+    private final Set<String> SAVINGS_PRODUCT_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("currencyOptions", "id", "createdOn",
+            "lastModifedOn", "locale", "name", "description", "currencyCode", "digitsAfterDecimal", "interstRate", "minInterestRate",
+            "maxInterestRate", "savingsDepositAmount", "savingProductType", "tenureType", "tenure", "frequency", "interestType",
+            "interestCalculationMethod", "minimumBalanceForWithdrawal", "isPartialDepositAllowed", "isLockinPeriodAllowed", "lockinPeriod",
+            "lockinPeriodType", "currencyOptions", "savingsProductTypeOptions", "tenureTypeOptions", "depositEvery",
             "savingFrequencyOptions", "savingsInterestTypeOptions", "lockinPeriodTypeOptions", "interestCalculationOptions"));
 
     private final SavingProductReadPlatformService savingProductReadPlatformService;
@@ -66,30 +66,29 @@ public class SavingProductsApiResource {
     private final DefaultToApiJsonSerializer<SavingProductData> toApiJsonSerializer;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
-    
+
     @Autowired
     public SavingProductsApiResource(final SavingProductReadPlatformService savingProductReadPlatformService,
-    		final CurrencyReadPlatformService currencyReadPlatformService,
-    		final PlatformSecurityContext context,
-    		final DefaultToApiJsonSerializer<SavingProductData> toApiJsonSerializer,
-    		final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
-    		final ApiRequestParameterHelper apiRequestParameterHelper) {
-    	this.savingProductReadPlatformService = savingProductReadPlatformService;
-    	this.currencyReadPlatformService = currencyReadPlatformService;
-    	this.context = context;
-    	this.toApiJsonSerializer = toApiJsonSerializer;
-    	this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
-    	this.apiRequestParameterHelper = apiRequestParameterHelper;
-	}
+            final CurrencyReadPlatformService currencyReadPlatformService, final PlatformSecurityContext context,
+            final DefaultToApiJsonSerializer<SavingProductData> toApiJsonSerializer,
+            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
+            final ApiRequestParameterHelper apiRequestParameterHelper) {
+        this.savingProductReadPlatformService = savingProductReadPlatformService;
+        this.currencyReadPlatformService = currencyReadPlatformService;
+        this.context = context;
+        this.toApiJsonSerializer = toApiJsonSerializer;
+        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
+        this.apiRequestParameterHelper = apiRequestParameterHelper;
+    }
 
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String createSavingProduct(final String apiRequestBodyAsJson) {
-    	
-    	final CommandWrapper commandRequest = new CommandWrapperBuilder().createSavingProduct().withJson(apiRequestBodyAsJson).build();
-    	
-    	final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().createSavingProduct().withJson(apiRequestBodyAsJson).build();
+
+        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
         return this.toApiJsonSerializer.serialize(result);
 
@@ -101,25 +100,26 @@ public class SavingProductsApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String updateSavingProduct(@PathParam("productId") final Long productId, final String apiRequestBodyAsJson) {
 
-    	final CommandWrapper commandRequest = new CommandWrapperBuilder().updateSavingProduct(productId).withJson(apiRequestBodyAsJson).build();
-    	
-    	final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().updateSavingProduct(productId).withJson(apiRequestBodyAsJson)
+                .build();
+
+        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
         return this.toApiJsonSerializer.serialize(result);
-        
+
     }
 
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveAllSavingProducts(@Context final UriInfo uriInfo) {
-        
-    	context.authenticatedUser().validateHasReadPermission(entityType);
-        
+
+        context.authenticatedUser().validateHasReadPermission(entityType);
+
         Collection<SavingProductData> products = this.savingProductReadPlatformService.retrieveAllSavingProducts();
-        
+
         final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        
+
         return this.toApiJsonSerializer.serialize(settings, products, SAVINGS_PRODUCT_DATA_PARAMETERS);
     }
 
@@ -132,7 +132,7 @@ public class SavingProductsApiResource {
         context.authenticatedUser().validateHasReadPermission(entityType);
 
         SavingProductData savingProduct = this.savingProductReadPlatformService.retrieveSavingProduct(productId);
-        
+
         final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 
         if (settings.isTemplate()) {
@@ -151,15 +151,15 @@ public class SavingProductsApiResource {
         context.authenticatedUser().validateHasReadPermission(entityType);
 
         SavingProductData savingProduct = this.savingProductReadPlatformService.retrieveNewSavingProductDetails();
-        
+
         final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        
+
         savingProduct = handleTemplateRelatedData(savingProduct);
-        
+
         return this.toApiJsonSerializer.serialize(settings, savingProduct, SAVINGS_PRODUCT_DATA_PARAMETERS);
     }
 
-    private SavingProductData handleTemplateRelatedData(SavingProductData savingProduct) {
+    private SavingProductData handleTemplateRelatedData(final SavingProductData savingProduct) {
 
         Collection<CurrencyData> currencyOptions = this.currencyReadPlatformService.retrieveAllowedCurrencies();
 
@@ -196,10 +196,10 @@ public class SavingProductsApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String deleteProduct(@PathParam("productId") final Long productId) {
-    	
-    	final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteSavingProduct(productId).build();
-    	
-    	final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteSavingProduct(productId).build();
+
+        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
         return this.toApiJsonSerializer.serialize(result);
 

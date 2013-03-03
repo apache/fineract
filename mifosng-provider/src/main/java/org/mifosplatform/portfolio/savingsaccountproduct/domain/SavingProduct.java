@@ -36,7 +36,7 @@ public class SavingProduct extends AbstractAuditableCustom<AppUser, Long> {
     private boolean deleted = false;
 
     @Embedded
-    SavingProductRelatedDetail savingProductRelatedDetail;
+    private final SavingProductRelatedDetail savingProductRelatedDetail;
 
     protected SavingProduct() {
         this.name = null;
@@ -45,10 +45,10 @@ public class SavingProduct extends AbstractAuditableCustom<AppUser, Long> {
     }
 
     public SavingProduct(final String name, final String description, final MonetaryCurrency currency, final BigDecimal interestRate,
-            final BigDecimal minInterestRate, final BigDecimal maxInterestRate, final BigDecimal savingsDepositAmount,Integer depositEvery,
-            final SavingProductType savingProductType, final TenureTypeEnum tenureType, final Integer tenure,
+            final BigDecimal minInterestRate, final BigDecimal maxInterestRate, final BigDecimal savingsDepositAmount,
+            final Integer depositEvery, final SavingProductType savingProductType, final TenureTypeEnum tenureType, final Integer tenure,
             final SavingFrequencyType savingFrequencyType, final SavingsInterestType savingsInterestType,
-            SavingInterestCalculationMethod savingInterestCalculationMethod, final BigDecimal minimumBalanceForWithdrawal,
+            final SavingInterestCalculationMethod savingInterestCalculationMethod, final BigDecimal minimumBalanceForWithdrawal,
             final boolean isPartialDepositAllowed, final boolean isLockinPeriodAllowed, final Integer lockinPeriod,
             final PeriodFrequencyType lockinPeriodType) {
 
@@ -98,15 +98,15 @@ public class SavingProduct extends AbstractAuditableCustom<AppUser, Long> {
 
     public Map<String, Object> update(final JsonCommand command) {
 
-    	final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(20);
-    	
-    	final String nameParamName = "name";
+        final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(20);
+
+        final String nameParamName = "name";
         if (command.isChangeInStringParameterNamed(nameParamName, this.name)) {
             final String newValue = command.stringValueOfParameterNamed(nameParamName);
             actualChanges.put(nameParamName, newValue);
             this.name = newValue;
         }
-    	
+
         final String descriptionParamName = "description";
         if (command.isChangeInStringParameterNamed(descriptionParamName, this.description)) {
             final String newValue = command.stringValueOfParameterNamed(descriptionParamName);
@@ -117,25 +117,26 @@ public class SavingProduct extends AbstractAuditableCustom<AppUser, Long> {
         return this.savingProductRelatedDetail.update(command, actualChanges);
     }
 
-	public static SavingProduct assembleFromJson(JsonCommand command, MonetaryCurrency currency, SavingProductType savingProductType, TenureTypeEnum tenureType, 
-			SavingFrequencyType savingFrequencyType, SavingsInterestType interestType, SavingInterestCalculationMethod savingInterestCalculationMethod,
-			PeriodFrequencyType lockinPeriodType) {
+    public static SavingProduct assembleFromJson(final JsonCommand command, final MonetaryCurrency currency,
+            final SavingProductType savingProductType, final TenureTypeEnum tenureType, final SavingFrequencyType savingFrequencyType,
+            final SavingsInterestType interestType, final SavingInterestCalculationMethod savingInterestCalculationMethod,
+            final PeriodFrequencyType lockinPeriodType) {
 
-		final String name = command.stringValueOfParameterNamed("name");
-		final String description = command.stringValueOfParameterNamed("description");
-		final BigDecimal interestRate = command.bigDecimalValueOfParameterNamed("interestRate");
-		final BigDecimal minInterestRate = command.bigDecimalValueOfParameterNamed("minInterestRate");
-		final BigDecimal maxInterestRate = command.bigDecimalValueOfParameterNamed("maxInterestRate");
-		final BigDecimal savingsDepositAmount = command.bigDecimalValueOfParameterNamed("savingsDepositAmount");
-		final Integer tenure = command.integerValueOfParameterNamed("tenure");
-		final BigDecimal minimumBalanceForWithdrawal = command.bigDecimalValueOfParameterNamed("minimumBalanceForWithdrawal");
-		final boolean isPartialDepositAllowed = command.booleanPrimitiveValueOfParameterNamed("isPartialDepositAllowed");
-		final boolean isLockinPeriodAllowed = command.booleanPrimitiveValueOfParameterNamed("isLockinPeriodAllowed");
+        final String name = command.stringValueOfParameterNamed("name");
+        final String description = command.stringValueOfParameterNamed("description");
+        final BigDecimal interestRate = command.bigDecimalValueOfParameterNamed("interestRate");
+        final BigDecimal minInterestRate = command.bigDecimalValueOfParameterNamed("minInterestRate");
+        final BigDecimal maxInterestRate = command.bigDecimalValueOfParameterNamed("maxInterestRate");
+        final BigDecimal savingsDepositAmount = command.bigDecimalValueOfParameterNamed("savingsDepositAmount");
+        final Integer tenure = command.integerValueOfParameterNamed("tenure");
+        final BigDecimal minimumBalanceForWithdrawal = command.bigDecimalValueOfParameterNamed("minimumBalanceForWithdrawal");
+        final boolean isPartialDepositAllowed = command.booleanPrimitiveValueOfParameterNamed("isPartialDepositAllowed");
+        final boolean isLockinPeriodAllowed = command.booleanPrimitiveValueOfParameterNamed("isLockinPeriodAllowed");
         final Integer lockinPeriod = command.integerValueOfParameterNamed("lockinPeriod");
         final Integer depositEvery = command.integerValueOfParameterNamed("depositEvery");
-        
-        return new SavingProduct(name, description, currency, interestRate, minInterestRate, maxInterestRate, savingsDepositAmount, depositEvery, savingProductType,
-        		tenureType, tenure, savingFrequencyType, interestType, savingInterestCalculationMethod, minimumBalanceForWithdrawal, isPartialDepositAllowed, 
-        		isLockinPeriodAllowed, lockinPeriod, lockinPeriodType);
-	}
+
+        return new SavingProduct(name, description, currency, interestRate, minInterestRate, maxInterestRate, savingsDepositAmount,
+                depositEvery, savingProductType, tenureType, tenure, savingFrequencyType, interestType, savingInterestCalculationMethod,
+                minimumBalanceForWithdrawal, isPartialDepositAllowed, isLockinPeriodAllowed, lockinPeriod, lockinPeriodType);
+    }
 }

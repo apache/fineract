@@ -36,7 +36,7 @@ public class SavingProductRelatedDetail {
 
     @Column(name = "savings_deposit_amount", scale = 6, precision = 19, nullable = false)
     private BigDecimal savingsDepositAmount;
-    
+
     @Column(name = "deposit_every")
     private Integer depositEvery;
 
@@ -79,17 +79,18 @@ public class SavingProductRelatedDetail {
     }
 
     public SavingProductRelatedDetail(final MonetaryCurrency currency, final BigDecimal interestRate, final BigDecimal minInterestRate,
-            final BigDecimal maxInterestRate, final BigDecimal savingsDepositAmount,final Integer depositEvery, final SavingProductType savingProductType,
-            final TenureTypeEnum tenureType, final Integer tenure, final SavingFrequencyType frequency,
-            final SavingsInterestType interestType, final SavingInterestCalculationMethod interestCalculationMethod,
-            final BigDecimal minimumBalanceForWithdrawal, final boolean isPartialDepositAllowed, final boolean isLockinPeriodAllowed,
-            final Integer lockinPeriod, final PeriodFrequencyType lockinPeriodType) {
+            final BigDecimal maxInterestRate, final BigDecimal savingsDepositAmount, final Integer depositEvery,
+            final SavingProductType savingProductType, final TenureTypeEnum tenureType, final Integer tenure,
+            final SavingFrequencyType frequency, final SavingsInterestType interestType,
+            final SavingInterestCalculationMethod interestCalculationMethod, final BigDecimal minimumBalanceForWithdrawal,
+            final boolean isPartialDepositAllowed, final boolean isLockinPeriodAllowed, final Integer lockinPeriod,
+            final PeriodFrequencyType lockinPeriodType) {
         this.currency = currency;
         this.interestRate = interestRate;
         this.minInterestRate = minInterestRate;
         this.maxInterestRate = maxInterestRate;
         this.savingsDepositAmount = savingsDepositAmount;
-        this.depositEvery=depositEvery;
+        this.depositEvery = depositEvery;
         this.savingProductType = savingProductType.getValue();
         this.tenureType = tenureType.getValue();
         this.tenure = tenure;
@@ -115,12 +116,12 @@ public class SavingProductRelatedDetail {
         return BigDecimal.valueOf(Double.valueOf(this.savingsDepositAmount.stripTrailingZeros().toString()));
     }
 
-    public Map<String, Object>  update(final JsonCommand command, final Map<String, Object> actualChanges) {
-    	
-    	final String localeAsInput = command.locale();
-    	
-    	Integer digitsAfterDecimal = this.currency.getDigitsAfterDecimal();
-    	final String digitsAfterDecimalParamName = "digitsAfterDecimal";
+    public Map<String, Object> update(final JsonCommand command, final Map<String, Object> actualChanges) {
+
+        final String localeAsInput = command.locale();
+
+        Integer digitsAfterDecimal = this.currency.getDigitsAfterDecimal();
+        final String digitsAfterDecimalParamName = "digitsAfterDecimal";
         if (command.isChangeInIntegerParameterNamed(digitsAfterDecimalParamName, digitsAfterDecimal)) {
             final Integer newValue = command.integerValueOfParameterNamed(digitsAfterDecimalParamName);
             actualChanges.put(digitsAfterDecimalParamName, newValue);
@@ -137,7 +138,7 @@ public class SavingProductRelatedDetail {
             currencyCode = newValue;
             this.currency = new MonetaryCurrency(currencyCode, this.currency.getDigitsAfterDecimal());
         }
-        
+
         final String interestRateParamName = "interestRate";
         if (command.isChangeInBigDecimalParameterNamed(interestRateParamName, this.interestRate)) {
             final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(interestRateParamName);
@@ -153,7 +154,7 @@ public class SavingProductRelatedDetail {
             actualChanges.put("locale", localeAsInput);
             this.savingsDepositAmount = newValue;
         }
-        
+
         final String depositEveryParamName = "depositEvery";
         if (command.isChangeInIntegerParameterNamed(depositEveryParamName, this.depositEvery)) {
             final Integer newValue = command.integerValueOfParameterNamed(depositEveryParamName);
@@ -161,8 +162,7 @@ public class SavingProductRelatedDetail {
             actualChanges.put("locale", localeAsInput);
             this.depositEvery = newValue;
         }
-        
-        
+
         final String savingProductTypeParamName = "savingProductType";
         if (command.isChangeInIntegerParameterNamed(savingProductTypeParamName, this.savingProductType)) {
             final Integer newValue = command.integerValueOfParameterNamed(savingProductTypeParamName);
@@ -170,7 +170,7 @@ public class SavingProductRelatedDetail {
             actualChanges.put("locale", localeAsInput);
             this.savingProductType = SavingProductType.fromInt(newValue).getValue();
         }
-        
+
         final String tenureTypeParamName = "tenureType";
         if (command.isChangeInIntegerParameterNamed(tenureTypeParamName, this.tenureType)) {
             final Integer newValue = command.integerValueOfParameterNamed(tenureTypeParamName);
@@ -186,7 +186,7 @@ public class SavingProductRelatedDetail {
             actualChanges.put("locale", localeAsInput);
             this.tenure = newValue;
         }
-        
+
         final String frequencyParamName = "frequency";
         if (command.isChangeInIntegerParameterNamed(frequencyParamName, this.frequency)) {
             final Integer newValue = command.integerValueOfParameterNamed(frequencyParamName);
@@ -194,7 +194,7 @@ public class SavingProductRelatedDetail {
             actualChanges.put("locale", localeAsInput);
             this.frequency = SavingFrequencyType.fromInt(newValue).getValue();
         }
-        
+
         final String interestTypeParamName = "interestType";
         if (command.isChangeInIntegerParameterNamed(interestTypeParamName, this.interestType)) {
             final Integer newValue = command.integerValueOfParameterNamed(interestTypeParamName);
@@ -202,7 +202,7 @@ public class SavingProductRelatedDetail {
             actualChanges.put("locale", localeAsInput);
             this.interestType = SavingsInterestType.fromInt(newValue).getValue();
         }
-        
+
         final String interestCalculationMethodParamName = "interestCalculationMethod";
         if (command.isChangeInIntegerParameterNamed(interestCalculationMethodParamName, this.interestCalculationMethod)) {
             final Integer newValue = command.integerValueOfParameterNamed(interestCalculationMethodParamName);
@@ -221,37 +221,36 @@ public class SavingProductRelatedDetail {
 
         final String isPartialDepositAllowedParamName = "isPartialDepositAllowed";
         if (command.isChangeInBooleanParameterNamed(isPartialDepositAllowedParamName, this.isPartialDepositAllowed)) {
-        	final Boolean newValue = command.booleanObjectValueOfParameterNamed(isPartialDepositAllowedParamName);
+            final Boolean newValue = command.booleanObjectValueOfParameterNamed(isPartialDepositAllowedParamName);
             actualChanges.put(isPartialDepositAllowedParamName, newValue);
             actualChanges.put("locale", localeAsInput);
             this.isPartialDepositAllowed = newValue;
         }
-        
+
         final String isLockinPeriodAllowedParamName = "isLockinPeriodAllowed";
         if (command.isChangeInBooleanParameterNamed(isLockinPeriodAllowedParamName, this.isLockinPeriodAllowed)) {
-        	final Boolean newValue = command.booleanObjectValueOfParameterNamed(isLockinPeriodAllowedParamName);
+            final Boolean newValue = command.booleanObjectValueOfParameterNamed(isLockinPeriodAllowedParamName);
             actualChanges.put(isLockinPeriodAllowedParamName, newValue);
             actualChanges.put("locale", localeAsInput);
             this.isLockinPeriodAllowed = newValue;
         }
-		
-		final String lockinPeriodParamName = "lockinPeriod";
+
+        final String lockinPeriodParamName = "lockinPeriod";
         if (command.isChangeInIntegerParameterNamed(lockinPeriodParamName, this.lockinPeriod)) {
             final Integer newValue = command.integerValueOfParameterNamed(lockinPeriodParamName);
             actualChanges.put(lockinPeriodParamName, newValue);
             actualChanges.put("locale", localeAsInput);
             this.lockinPeriod = newValue;
         }
-		
-		
-		final String lockinPeriodTypeParamName = "lockinPeriodType";
+
+        final String lockinPeriodTypeParamName = "lockinPeriodType";
         if (command.isChangeInIntegerParameterNamed(lockinPeriodTypeParamName, this.lockinPeriodType)) {
             final Integer newValue = command.integerValueOfParameterNamed(lockinPeriodTypeParamName);
             actualChanges.put(lockinPeriodTypeParamName, newValue);
             actualChanges.put("locale", localeAsInput);
             this.lockinPeriodType = PeriodFrequencyType.fromInt(newValue).getValue();
         }
-        
+
         return actualChanges;
 
     }
@@ -261,10 +260,10 @@ public class SavingProductRelatedDetail {
     }
 
     public Integer getDepositEvery() {
-		return this.depositEvery;
-	}
+        return this.depositEvery;
+    }
 
-	public Integer getSavingProductType() {
+    public Integer getSavingProductType() {
         return savingProductType;
     }
 

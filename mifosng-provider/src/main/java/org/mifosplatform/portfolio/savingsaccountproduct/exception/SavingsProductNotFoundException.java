@@ -9,7 +9,7 @@ import org.mifosplatform.infrastructure.core.exception.AbstractPlatformResourceN
 
 public class SavingsProductNotFoundException extends AbstractPlatformResourceNotFoundException {
 
-    public SavingsProductNotFoundException(Long id) {
+    public SavingsProductNotFoundException(final Long id) {
         super("error.msg.product.id.invalid", "Product with identifier " + id + " does not exist", id);
     }
 

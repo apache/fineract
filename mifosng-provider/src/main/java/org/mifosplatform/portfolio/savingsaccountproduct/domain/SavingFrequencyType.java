@@ -7,8 +7,12 @@ package org.mifosplatform.portfolio.savingsaccountproduct.domain;
 
 public enum SavingFrequencyType {
 
-    INVALID(0, "savingFrequencyType.invalid"), DAILY(1, "savingFrequencyType.daily"), MONTHLY(2, "savingFrequencyType.monthly"), QUATERLY(
-            3, "savingFrequencyType.quaterly"), HALFYEARLY(4, "savingFrequencyType.halfyearly"), YEARLY(5, "savingFrequencyType.yearly");
+    INVALID(0, "savingFrequencyType.invalid"), //
+    DAILY(1, "savingFrequencyType.daily"), //
+    MONTHLY(2, "savingFrequencyType.monthly"), //
+    QUATERLY(3, "savingFrequencyType.quaterly"), //
+    HALFYEARLY(4, "savingFrequencyType.halfyearly"), //
+    YEARLY(5, "savingFrequencyType.yearly");
 
     private final Integer value;
     private final String code;
