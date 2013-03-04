@@ -42,11 +42,14 @@ public class DepositProduct extends AbstractPersistable<Long> {
     @Embedded
     private MonetaryCurrency currency;
 
-    @Column(name = "minimum_balance", scale = 6, precision = 19, nullable = false)
-    private BigDecimal minimumBalance;
+    @Column(name = "min_deposit", scale = 6, precision = 19, nullable = false)
+    private BigDecimal minDeposit;
+    
+    @Column(name = "default_deposit", scale = 6, precision = 19, nullable = false)
+    private BigDecimal defaultDeposit;
 
-    @Column(name = "maximum_balance", scale = 6, precision = 19, nullable = false)
-    private BigDecimal maximumBalance;
+    @Column(name = "max_deposit", scale = 6, precision = 19, nullable = false)
+    private BigDecimal maxDeposit;
 
     @Column(name = "interest_compounded_every", nullable = false)
     private Integer interestCompoundedEvery;
@@ -54,14 +57,14 @@ public class DepositProduct extends AbstractPersistable<Long> {
     @Column(name = "interest_compounded_every_period_enum", nullable = false)
     private PeriodFrequencyType interestCompoundedEveryPeriodType;
 
-    @Column(name = "maturity_default_interest_rate", scale = 6, precision = 19, nullable = false)
-    private BigDecimal maturityDefaultInterestRate;
+    @Column(name = "default_interest_rate", scale = 6, precision = 19, nullable = false)
+    private BigDecimal defaultInterestRate;
 
-    @Column(name = "maturity_min_interest_rate", scale = 6, precision = 19, nullable = false)
-    private BigDecimal maturityMinInterestRate;
+    @Column(name = "min_interest_rate", scale = 6, precision = 19, nullable = false)
+    private BigDecimal minInterestRate;
 
-    @Column(name = "maturity_max_interest_rate", scale = 6, precision = 19, nullable = false)
-    private BigDecimal maturityMaxInterestRate;
+    @Column(name = "max_interest_rate", scale = 6, precision = 19, nullable = false)
+    private BigDecimal maxInterestRate;
 
     @Column(name = "tenure_months", nullable = false)
     private Integer tenureInMonths;
@@ -97,13 +100,14 @@ public class DepositProduct extends AbstractPersistable<Long> {
         final Integer digitsAfterDecimal = command.integerValueOfParameterNamed("digitsAfterDecimal");
 
         final MonetaryCurrency currency = new MonetaryCurrency(currencyCode, digitsAfterDecimal);
-        final BigDecimal minimumBalance = command.bigDecimalValueOfParameterNamed("minimumBalance");
-        final BigDecimal maximumBalance = command.bigDecimalValueOfParameterNamed("maximumBalance");
+        final BigDecimal minDeposit = command.bigDecimalValueOfParameterNamed("minDeposit");
+        final BigDecimal defaultDeposit = command.bigDecimalValueOfParameterNamed("defaultDeposit");
+        final BigDecimal maxDeposit = command.bigDecimalValueOfParameterNamed("maxDeposit");
 
         final Integer tenureMonths = command.integerValueOfParameterNamed("tenureInMonths");
-        final BigDecimal maturityDefaultInterestRate = command.bigDecimalValueOfParameterNamed("maturityDefaultInterestRate");
-        final BigDecimal maturityMinInterestRate = command.bigDecimalValueOfParameterNamed("maturityMinInterestRate");
-        final BigDecimal maturityMaxInterestRate = command.bigDecimalValueOfParameterNamed("maturityMaxInterestRate");
+        final BigDecimal defaultInterestRate = command.bigDecimalValueOfParameterNamed("defaultInterestRate");
+        final BigDecimal minInterestRate = command.bigDecimalValueOfParameterNamed("minInterestRate");
+        final BigDecimal maxInterestRate = command.bigDecimalValueOfParameterNamed("maxInterestRate");
         final Integer interestCompoundedEvery = command.integerValueOfParameterNamed("interestCompoundedEvery");
 
         final boolean canRenew = command.booleanPrimitiveValueOfParameterNamed("canRenew");
@@ -113,8 +117,8 @@ public class DepositProduct extends AbstractPersistable<Long> {
         final boolean isLockinPeriodAllowed = command.booleanPrimitiveValueOfParameterNamed("isLockinPeriodAllowed");
         final Integer lockinPeriod = command.integerValueOfParameterNamed("lockinPeriod");
 
-        return new DepositProduct(name, externalId, description, currency, minimumBalance, maximumBalance, tenureMonths,
-                maturityDefaultInterestRate, maturityMinInterestRate, maturityMaxInterestRate, interestCompoundedEvery,
+        return new DepositProduct(name, externalId, description, currency, minDeposit, defaultDeposit, maxDeposit, tenureMonths,
+        		defaultInterestRate, minInterestRate, maxInterestRate, interestCompoundedEvery,
                 interestCompoundingPeriodType, canRenew, canPreClose, preClosureInterestRate, isInterestCompoundingAllowed,
                 isLockinPeriodAllowed, lockinPeriod, lockinPeriodType);
     }
@@ -124,9 +128,9 @@ public class DepositProduct extends AbstractPersistable<Long> {
     }
 
     private DepositProduct(final String name, final String externalId, final String description, final MonetaryCurrency currency,
-            final BigDecimal minimumBalance, final BigDecimal maximumBalance, final Integer tenureMonths,
-            final BigDecimal maturityDefaultInterestRate, final BigDecimal maturityMinInterestRate,
-            final BigDecimal maturityMaxInterestRate, final Integer interestCompoundedEvery,
+            final BigDecimal minDeposit, final BigDecimal defaultDeposit, final BigDecimal maxDeposit, final Integer tenureMonths,
+            final BigDecimal defaultInterestRate, final BigDecimal minInterestRate,
+            final BigDecimal maxInterestRate, final Integer interestCompoundedEvery,
             final PeriodFrequencyType interestCompoundedEveryPeriodType, final boolean canRenew, final boolean canPreClose,
             final BigDecimal preClosureInterestRate, final boolean isInterestCompoundingAllowed, final boolean isLockinPeriodAllowed,
             final Integer lockinPeriod, final PeriodFrequencyType lockinPeriodType) {
@@ -143,12 +147,13 @@ public class DepositProduct extends AbstractPersistable<Long> {
         }
 
         this.currency = currency;
-        this.minimumBalance = minimumBalance;
-        this.maximumBalance = maximumBalance;
+        this.minDeposit = minDeposit;
+        this.defaultDeposit = defaultDeposit;
+        this.maxDeposit = maxDeposit;
         this.tenureInMonths = tenureMonths;
-        this.maturityDefaultInterestRate = maturityDefaultInterestRate;
-        this.maturityMinInterestRate = maturityMinInterestRate;
-        this.maturityMaxInterestRate = maturityMaxInterestRate;
+        this.defaultInterestRate = defaultInterestRate;
+        this.minInterestRate = minInterestRate;
+        this.maxInterestRate = maxInterestRate;
         this.interestCompoundedEvery = interestCompoundedEvery;
         this.interestCompoundedEveryPeriodType = interestCompoundedEveryPeriodType;
         this.renewalAllowed = canRenew;
@@ -176,12 +181,12 @@ public class DepositProduct extends AbstractPersistable<Long> {
         return tenureInMonths;
     }
 
-    public BigDecimal getMaturityDefaultInterestRate() {
-        return maturityDefaultInterestRate;
+    public BigDecimal getDefaultInterestRate() {
+        return defaultInterestRate;
     }
 
-    public BigDecimal getMaturityMinInterestRate() {
-        return maturityMinInterestRate;
+    public BigDecimal getMinInterestRate() {
+        return minInterestRate;
     }
 
     public BigDecimal getPreClosureInterestRate() {
@@ -275,20 +280,28 @@ public class DepositProduct extends AbstractPersistable<Long> {
             this.currency = new MonetaryCurrency(currencyCode, digitsAfterDecimal);
         }
 
-        final String minimumBalanceParamName = "minimumBalance";
-        if (command.isChangeInBigDecimalParameterNamed(minimumBalanceParamName, this.minimumBalance)) {
-            final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(minimumBalanceParamName);
-            actualChanges.put(minimumBalanceParamName, newValue);
+        final String minDepositParamName = "minDeposit";
+        if (command.isChangeInBigDecimalParameterNamed(minDepositParamName, this.minDeposit)) {
+            final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(minDepositParamName);
+            actualChanges.put(minDepositParamName, newValue);
             actualChanges.put("locale", localeAsInput);
-            this.minimumBalance = newValue;
+            this.minDeposit = newValue;
+        }
+        
+        final String defaultDepositParamName = "defaultDeposit";
+        if (command.isChangeInBigDecimalParameterNamed(defaultDepositParamName, this.defaultDeposit)) {
+            final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(defaultDepositParamName);
+            actualChanges.put(defaultDepositParamName, newValue);
+            actualChanges.put("locale", localeAsInput);
+            this.defaultDeposit = newValue;
         }
 
-        final String maximumBalanceParamName = "maximumBalance";
-        if (command.isChangeInBigDecimalParameterNamed(maximumBalanceParamName, this.maximumBalance)) {
-            final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(maximumBalanceParamName);
-            actualChanges.put(maximumBalanceParamName, newValue);
+        final String maxDepositParamName = "maxDeposit";
+        if (command.isChangeInBigDecimalParameterNamed(maxDepositParamName, this.maxDeposit)) {
+            final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(maxDepositParamName);
+            actualChanges.put(maxDepositParamName, newValue);
             actualChanges.put("locale", localeAsInput);
-            this.maximumBalance = newValue;
+            this.maxDeposit = newValue;
         }
 
         final String tenureInMonthsParamName = "tenureInMonths";
@@ -299,28 +312,28 @@ public class DepositProduct extends AbstractPersistable<Long> {
             this.tenureInMonths = newValue;
         }
 
-        final String defaultInterestRateParamName = "maturityDefaultInterestRate";
-        if (command.isChangeInBigDecimalParameterNamed(defaultInterestRateParamName, this.maturityDefaultInterestRate)) {
+        final String defaultInterestRateParamName = "defaultInterestRate";
+        if (command.isChangeInBigDecimalParameterNamed(defaultInterestRateParamName, this.defaultInterestRate)) {
             final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(defaultInterestRateParamName);
             actualChanges.put(defaultInterestRateParamName, newValue);
             actualChanges.put("locale", localeAsInput);
-            this.maturityDefaultInterestRate = newValue;
+            this.defaultInterestRate = newValue;
         }
 
-        final String minInterestRateParamName = "maturityMinInterestRate";
-        if (command.isChangeInBigDecimalParameterNamed(minInterestRateParamName, this.maturityMinInterestRate)) {
+        final String minInterestRateParamName = "minInterestRate";
+        if (command.isChangeInBigDecimalParameterNamed(minInterestRateParamName, this.minInterestRate)) {
             final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(minInterestRateParamName);
             actualChanges.put(minInterestRateParamName, newValue);
             actualChanges.put("locale", localeAsInput);
-            this.maturityMinInterestRate = newValue;
+            this.minInterestRate = newValue;
         }
 
-        final String maxInterestRateParamName = "maturityMaxInterestRate";
-        if (command.isChangeInBigDecimalParameterNamed(maxInterestRateParamName, this.maturityMaxInterestRate)) {
+        final String maxInterestRateParamName = "maxInterestRate";
+        if (command.isChangeInBigDecimalParameterNamed(maxInterestRateParamName, this.maxInterestRate)) {
             final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(maxInterestRateParamName);
             actualChanges.put(maxInterestRateParamName, newValue);
             actualChanges.put("locale", localeAsInput);
-            this.maturityMaxInterestRate = newValue;
+            this.maxInterestRate = newValue;
         }
 
         final String interestCompoundedEveryParamName = "interestCompoundedEvery";
@@ -401,36 +414,36 @@ public class DepositProduct extends AbstractPersistable<Long> {
 
     public void validateInterestRateInRange(final BigDecimal interestRate) {
         boolean inRange = true;
-        if (interestRate.compareTo(this.maturityMinInterestRate) < 0) {
+        if (interestRate.compareTo(this.minInterestRate) < 0) {
             inRange = false;
         }
 
-        if (this.maturityMaxInterestRate.compareTo(interestRate) < 0) {
+        if (this.maxInterestRate.compareTo(interestRate) < 0) {
             inRange = false;
         }
 
         if (!inRange) {
             final String actualValue = interestRate.toPlainString();
-            final String minValue = (this.maturityMinInterestRate == null) ? "" : this.maturityMinInterestRate.toPlainString();
-            final String maxValue = (this.maturityMaxInterestRate == null) ? "" : this.maturityMaxInterestRate.toPlainString();
+            final String minValue = (this.minInterestRate == null) ? "" : this.minInterestRate.toPlainString();
+            final String maxValue = (this.maxInterestRate == null) ? "" : this.maxInterestRate.toPlainString();
             throw new DepositProductValueOutsideRangeException(actualValue, minValue, maxValue, "deposit.account.maturityInterestRate");
         }
     }
 
     public void validateDepositInRange(final BigDecimal depositAmount) {
         boolean inRange = true;
-        if (depositAmount.compareTo(this.minimumBalance) < 0) {
+        if (depositAmount.compareTo(this.minDeposit) < 0) {
             inRange = false;
         }
 
-        if (this.maximumBalance != null && this.maximumBalance.compareTo(depositAmount) < 0) {
+        if (this.maxDeposit != null && this.maxDeposit.compareTo(depositAmount) < 0) {
             inRange = false;
         }
 
         if (!inRange) {
             final String actualValue = depositAmount.toPlainString();
-            final String minValue = (this.minimumBalance == null) ? "" : this.minimumBalance.toPlainString();
-            final String maxValue = (this.maximumBalance == null) ? "" : this.maximumBalance.toPlainString();
+            final String minValue = (this.minDeposit == null) ? "" : this.minDeposit.toPlainString();
+            final String maxValue = (this.maxDeposit == null) ? "" : this.maxDeposit.toPlainString();
             throw new DepositProductValueOutsideRangeException(actualValue, minValue, maxValue, "deposit.account.deposit.amount");
         }
     }

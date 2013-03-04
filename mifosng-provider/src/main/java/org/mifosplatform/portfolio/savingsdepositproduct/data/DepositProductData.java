@@ -24,12 +24,13 @@ public class DepositProductData {
     private final String description;
     private final String currencyCode;
     private final Integer digitsAfterDecimal;
-    private final BigDecimal minimumBalance;
-    private final BigDecimal maximumBalance;
+    private final BigDecimal minDeposit;
+    private final BigDecimal defaultDeposit;
+    private final BigDecimal maxDeposit;
     private final Integer tenureInMonths;
-    private final BigDecimal maturityDefaultInterestRate;
-    private final BigDecimal maturityMinInterestRate;
-    private final BigDecimal maturityMaxInterestRate;
+    private final BigDecimal defaultInterestRate;
+    private final BigDecimal minInterestRate;
+    private final BigDecimal maxInterestRate;
     private final Integer interestCompoundedEvery;
     private final EnumOptionData interestCompoundedEveryPeriodType;
     private final CurrencyData currency;
@@ -48,9 +49,9 @@ public class DepositProductData {
 
     public DepositProductData(final Long id, final String externalId,
             final String name, final String description, final String currencyCode, final Integer digitsAfterDecimal,
-            final BigDecimal minimumBalance, final BigDecimal maximumBalance, final Integer tenureMonths,
-            final BigDecimal maturityDefaultInterestRate, final BigDecimal maturityMinInterestRate,
-            final BigDecimal maturityMaxInterestRate, final Integer interestCompoundedEvery,
+            final BigDecimal minDeposit, final BigDecimal defaultDeposit, final BigDecimal maxDeposit, final Integer tenureMonths,
+            final BigDecimal defaultInterestRate, final BigDecimal minInterestRate,
+            final BigDecimal maxInterestRate, final Integer interestCompoundedEvery,
             final EnumOptionData interestCompoundedEveryPeriodType, final boolean renewalAllowed, final boolean preClosureAllowed,
             final BigDecimal preClosureInterestRate, final boolean interestCompoundingAllowed, final boolean isLockinPeriodAllowed,
             final Integer lockinPeriod, final EnumOptionData lockinPeriodType,final CurrencyData currencyData) {
@@ -61,13 +62,14 @@ public class DepositProductData {
         this.description = description;
         this.currencyCode = currencyCode;
         this.digitsAfterDecimal = digitsAfterDecimal;
-        this.minimumBalance = minimumBalance;
-        this.maximumBalance = maximumBalance;
+        this.minDeposit = minDeposit;
+        this.defaultDeposit = defaultDeposit;
+        this.maxDeposit = maxDeposit;
 
         this.tenureInMonths = tenureMonths;
-        this.maturityDefaultInterestRate = maturityDefaultInterestRate;
-        this.maturityMinInterestRate = maturityMinInterestRate;
-        this.maturityMaxInterestRate = maturityMaxInterestRate;
+        this.defaultInterestRate = defaultInterestRate;
+        this.minInterestRate = minInterestRate;
+        this.maxInterestRate = maxInterestRate;
         this.interestCompoundedEvery = interestCompoundedEvery;
         this.interestCompoundedEveryPeriodType = interestCompoundedEveryPeriodType;
         this.renewalAllowed = renewalAllowed;
@@ -92,13 +94,14 @@ public class DepositProductData {
         this.description = null;
         this.currencyCode = null;
         this.digitsAfterDecimal = null;
-        this.minimumBalance = null;
-        this.maximumBalance = null;
+        this.minDeposit = null;
+        this.defaultDeposit = null;
+        this.maxDeposit = null;
 
         this.tenureInMonths = null;
-        this.maturityDefaultInterestRate = null;
-        this.maturityMinInterestRate = null;
-        this.maturityMaxInterestRate = null;
+        this.defaultInterestRate = null;
+        this.minInterestRate = null;
+        this.maxInterestRate = null;
         this.interestCompoundedEvery = null;
         this.interestCompoundedEveryPeriodType = defaultInterestCompoundedEveryPeriodType;
 
@@ -119,30 +122,31 @@ public class DepositProductData {
 
     public DepositProductData(final DepositProductData product, final Collection<CurrencyData> currencyOptions,
             final List<EnumOptionData> interestCompoundedEveryPeriodTypeOptions) {
-        this.id = product.getId();
-        this.externalId = product.getExternalId();
-        this.name = product.getName();
-        this.description = product.getDescription();
-        this.currencyCode = product.getCurrencyCode();
-        this.digitsAfterDecimal = product.getDigitsAfterDecimal();
-        this.minimumBalance = product.getMinimumBalance();
-        this.maximumBalance = product.getMaximumBalance();
+        this.id = product.id;
+        this.externalId = product.externalId;
+        this.name = product.name;
+        this.description = product.description;
+        this.currencyCode = product.currencyCode;
+        this.digitsAfterDecimal = product.digitsAfterDecimal;
+        this.minDeposit = product.minDeposit;
+        this.defaultDeposit = product.defaultDeposit;
+        this.maxDeposit = product.maxDeposit;
 
-        this.tenureInMonths = product.getTenureInMonths();
-        this.maturityDefaultInterestRate = product.getMaturityDefaultInterestRate();
-        this.maturityMinInterestRate = product.getMaturityMinInterestRate();
-        this.maturityMaxInterestRate = product.getMaturityMaxInterestRate();
-        this.interestCompoundedEvery = product.getInterestCompoundedEvery();
-        this.interestCompoundedEveryPeriodType = product.getInterestCompoundedEveryPeriodType();
+        this.tenureInMonths = product.tenureInMonths;
+        this.defaultInterestRate = product.defaultInterestRate;
+        this.minInterestRate = product.minInterestRate;
+        this.maxInterestRate = product.maxInterestRate;
+        this.interestCompoundedEvery = product.interestCompoundedEvery;
+        this.interestCompoundedEveryPeriodType = product.interestCompoundedEveryPeriodType;
 
-        this.renewalAllowed = product.isRenewalAllowed();
-        this.preClosureAllowed = product.isPreClosureAllowed();
-        this.preClosureInterestRate = product.getPreClosureInterestRate();
-        this.interestCompoundingAllowed = product.isInterestCompoundingAllowed();
+        this.renewalAllowed = product.renewalAllowed;
+        this.preClosureAllowed = product.preClosureAllowed;
+        this.preClosureInterestRate = product.preClosureInterestRate;
+        this.interestCompoundingAllowed = product.interestCompoundingAllowed;
 
-        this.lockinPeriod = product.getLockinPeriod();
-        this.lockinPeriodType = product.getLockinPeriodType();
-        this.isLockinPeriodAllowed = product.isLockinPeriodAllowed();
+        this.lockinPeriod = product.lockinPeriod;
+        this.lockinPeriodType = product.lockinPeriodType;
+        this.isLockinPeriodAllowed = product.isLockinPeriodAllowed;
         
         this.currencyOptions = currencyOptions;
         this.interestCompoundedEveryPeriodTypeOptions = interestCompoundedEveryPeriodTypeOptions;
@@ -180,11 +184,11 @@ public class DepositProductData {
     }
 
     public BigDecimal getMinimumBalance() {
-        return minimumBalance;
+        return minDeposit;
     }
 
     public BigDecimal getMaximumBalance() {
-        return maximumBalance;
+        return maxDeposit;
     }
 
     public Integer getTenureInMonths() {
@@ -192,15 +196,15 @@ public class DepositProductData {
     }
 
     public BigDecimal getMaturityDefaultInterestRate() {
-        return maturityDefaultInterestRate;
+        return defaultInterestRate;
     }
 
     public BigDecimal getMaturityMinInterestRate() {
-        return maturityMinInterestRate;
+        return minInterestRate;
     }
 
     public BigDecimal getMaturityMaxInterestRate() {
-        return maturityMaxInterestRate;
+        return maxInterestRate;
     }
 
     public Integer getInterestCompoundedEvery() {

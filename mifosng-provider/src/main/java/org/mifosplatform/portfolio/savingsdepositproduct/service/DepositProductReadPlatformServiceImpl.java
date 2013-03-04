@@ -84,10 +84,10 @@ public class DepositProductReadPlatformServiceImpl implements DepositProductRead
 
         public String depositProductSchema() {
             return " dp.id as id, dp.external_id as exernalId, dp.name as name, dp.description as description,dp.currency_code as currencyCode, dp.currency_digits as currencyDigits, "
-                    + "dp.minimum_balance as minimumBalance,dp.maximum_balance as maximumBalance, dp.tenure_months as tenureMonths, "
+                    + "dp.min_deposit as minDeposit, dp.default_deposit as defaultDeposit, dp.max_deposit as maxDeposit, dp.tenure_months as tenureMonths, "
                     + "dp.interest_compounded_every as interestCompoundedEvery, dp.interest_compounded_every_period_enum as interestCompoundedEveryPeriodType, "
-                    + "dp.maturity_default_interest_rate as maturityDefaultInterestRate, dp.is_compounding_interest_allowed as interestCompoundingAllowed, "
-                    + "dp.maturity_min_interest_rate as maturityMinInterestRate, dp.maturity_max_interest_rate as maturityMaxInterestRate, "
+                    + "dp.default_interest_rate as defaultInterestRate, dp.is_compounding_interest_allowed as interestCompoundingAllowed, "
+                    + "dp.min_interest_rate as minInterestRate, dp.max_interest_rate as maxInterestRate, "
                     + "dp.is_renewal_allowed as canRenew, dp.is_preclosure_allowed as canPreClose, dp.pre_closure_interest_rate as preClosureInterestRate, "
                     + "dp.is_lock_in_period_allowed as isLockinPeriodAllowed, dp.lock_in_period as lockinPeriod, dp.lock_in_period_type as lockinPeriodType, "
                     + "curr.name as currencyName, curr.internationalized_name_code as currencyNameCode, curr.display_symbol as currencyDisplaySymbol "
@@ -109,8 +109,9 @@ public class DepositProductReadPlatformServiceImpl implements DepositProductRead
             String currencyDisplaySymbol = rs.getString("currencyDisplaySymbol");
             CurrencyData currencyData = new CurrencyData(currencyCode, currencyName, currencyDigits, currencyDisplaySymbol, currencyNameCode);
 
-            BigDecimal minimumBalance = rs.getBigDecimal("minimumBalance");
-            BigDecimal maximumBalance = rs.getBigDecimal("maximumBalance");
+            BigDecimal minDeposit = rs.getBigDecimal("minDeposit");
+            BigDecimal defaultDeposit = rs.getBigDecimal("defaultDeposit");
+            BigDecimal maxDeposit = rs.getBigDecimal("maxDeposit");
 
             Integer tenureMonths = JdbcSupport.getInteger(rs, "tenureMonths");
             Integer interestCompoundedEvery = JdbcSupport.getInteger(rs, "interestCompoundedEvery");
@@ -118,9 +119,9 @@ public class DepositProductReadPlatformServiceImpl implements DepositProductRead
             EnumOptionData interestCompoundedEveryPeriodType = SavingsDepositEnumerations
                     .interestCompoundingPeriodType(interestCompoundedEveryPeriodTypeValue);
 
-            BigDecimal maturityDefaultInterestRate = rs.getBigDecimal("maturityDefaultInterestRate");
-            BigDecimal maturityMinInterestRate = rs.getBigDecimal("maturityMinInterestRate");
-            BigDecimal maturityMaxInterestRate = rs.getBigDecimal("maturityMaxInterestRate");
+            BigDecimal defaultInterestRate = rs.getBigDecimal("defaultInterestRate");
+            BigDecimal minInterestRate = rs.getBigDecimal("minInterestRate");
+            BigDecimal maxInterestRate = rs.getBigDecimal("maxInterestRate");
 
             Boolean canRenew = rs.getBoolean("canRenew");
             Boolean canPreClose = rs.getBoolean("canPreClose");
@@ -134,8 +135,8 @@ public class DepositProductReadPlatformServiceImpl implements DepositProductRead
             EnumOptionData lockinPeriodType = SavingsDepositEnumerations.interestCompoundingPeriodType(lockinPeriodTypeValue);
 
             return new DepositProductData(id, exernalId, name, description, currencyCode, currencyDigits,
-                    minimumBalance, maximumBalance, tenureMonths, maturityDefaultInterestRate, maturityMinInterestRate,
-                    maturityMaxInterestRate, interestCompoundedEvery, interestCompoundedEveryPeriodType, canRenew, canPreClose,
+                    minDeposit, defaultDeposit, maxDeposit, tenureMonths, defaultInterestRate, minInterestRate,
+                    maxInterestRate, interestCompoundedEvery, interestCompoundedEveryPeriodType, canRenew, canPreClose,
                     preClosureInterestRate, interestCompoundingAllowed, isLockinPeriodAllowed, lockinPeriod, lockinPeriodType, currencyData);
         }
 

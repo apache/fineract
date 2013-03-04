@@ -97,7 +97,7 @@ public class DepositAccountAssembler {
             tenureInMonths = tenureInMonthsCommandValue;
         }
 
-        BigDecimal maturityInterestRate = product.getMaturityDefaultInterestRate();
+        BigDecimal maturityInterestRate = product.getDefaultInterestRate();
         if (maturityInterestRateCommandValue != null) {
             maturityInterestRate = maturityInterestRateCommandValue;
         }
@@ -107,8 +107,8 @@ public class DepositAccountAssembler {
             preClosureInterestRate = preClosureInterestRateCommandValue;
         }
 
-        if (product.getMaturityMinInterestRate().compareTo(preClosureInterestRate) == -1) { throw new DepositAccounDataValidationtException(
-                preClosureInterestRate, product.getMaturityMinInterestRate()); }
+        if (product.getMinInterestRate().compareTo(preClosureInterestRate) == -1) { throw new DepositAccounDataValidationtException(
+                preClosureInterestRate, product.getMinInterestRate()); }
 
         Integer compoundingInterestEvery = product.getInterestCompoundedEvery();
         if (interestCompoundedEveryCommandValue != null) {
@@ -219,8 +219,8 @@ public class DepositAccountAssembler {
             preClosureInterestRate = newValue;
         }
 
-        if (product.getMaturityMinInterestRate().compareTo(preClosureInterestRate) == -1) { throw new DepositAccounDataValidationtException(
-                preClosureInterestRate, product.getMaturityMinInterestRate()); }
+        if (product.getMinInterestRate().compareTo(preClosureInterestRate) == -1) { throw new DepositAccounDataValidationtException(
+                preClosureInterestRate, product.getMinInterestRate()); }
 
         Integer interestCompoundedEvery = account.getInterestCompoundedEvery();
         final String interestCompoundedEveryParamName = "interestCompoundedEvery";
@@ -384,8 +384,8 @@ public class DepositAccountAssembler {
             preClosureInterestRate = newValue;
         }
 
-        if (product.getMaturityMinInterestRate().compareTo(preClosureInterestRate) == -1) { throw new DepositAccounDataValidationtException(
-                preClosureInterestRate, product.getMaturityMinInterestRate()); }
+        if (product.getMinInterestRate().compareTo(preClosureInterestRate) == -1) { throw new DepositAccounDataValidationtException(
+                preClosureInterestRate, product.getMinInterestRate()); }
 
         Integer interestCompoundedEvery = account.getInterestCompoundedEvery();
         final String interestCompoundedEveryParamName = "interestCompoundedEvery";
