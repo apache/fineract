@@ -313,11 +313,11 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     + " la.total_overdue_derived as totalOverdue,"
                     + " la.overdue_since_date_derived as overdueSinceDate"
                     + " from m_loan l" //
-                    + " left join m_client c on c.id = l.client_id" //
-                    + " left join m_group g on g.id = l.group_id" //
                     + " join m_product_loan lp on lp.id = l.product_id" //
                     + " join m_currency rc on rc.`code` = l.currency_code" //
-                    + " join m_loan_arrears_aging la on la.loan_id = l.id" //
+                    + " left join m_client c on c.id = l.client_id" //
+                    + " left join m_group g on g.id = l.group_id" //
+                    + " left join m_loan_arrears_aging la on la.loan_id = l.id" //
                     + " left join m_fund f on f.id = l.fund_id" //
                     + " left join m_staff s on s.id = l.loan_officer_id" //
                     + " left join m_appuser sbu on sbu.id = l.submittedon_userid"

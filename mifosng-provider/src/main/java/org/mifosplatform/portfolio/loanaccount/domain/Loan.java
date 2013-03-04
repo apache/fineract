@@ -243,7 +243,7 @@ public class Loan extends AbstractPersistable<Long> {
     @Embedded
     private LoanSummary summary;
 
-    @OneToOne(mappedBy = "loan", cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "loan", cascade = CascadeType.ALL, optional = true, orphanRemoval = true)
     private LoanSummaryArrearsAging summaryArrearsAging;
 
     @Transient
@@ -319,11 +319,9 @@ public class Loan extends AbstractPersistable<Long> {
         if (loanCharges != null && !loanCharges.isEmpty()) {
             this.charges = associateChargesWithThisLoan(loanCharges);
             this.summary = updateSummaryWithTotalFeeChargesDueAtDisbursement(deriveSumTotalOfChargesDueAtDisbursement());
-            this.summaryArrearsAging = new LoanSummaryArrearsAging(this);
         } else {
             this.charges = null;
             this.summary = new LoanSummary();
-            this.summaryArrearsAging = new LoanSummaryArrearsAging(this);
         }
         if (collateral != null && !collateral.isEmpty()) {
             this.collateral = associateWithThisLoan(collateral);
@@ -674,11 +672,17 @@ public class Loan extends AbstractPersistable<Long> {
 
         if (isNotDisbursed()) {
             this.summary.zeroFields();
-            this.summaryArrearsAging.zeroFields();
+            this.summaryArrearsAging = null;
         } else {
             final Money principal = this.loanRepaymentScheduleDetail.getPrincipal();
             this.summary.updateSummary(loanCurrency(), principal, this.repaymentScheduleInstallments, this.loanSummaryWrapper);
+            if (this.summaryArrearsAging == null) {
+                this.summaryArrearsAging = new LoanSummaryArrearsAging(this);
+            }
             this.summaryArrearsAging.updateSummary(loanCurrency(), this.repaymentScheduleInstallments, this.loanSummaryWrapper);
+            if (this.summaryArrearsAging.isNotInArrears(loanCurrency())) {
+                this.summaryArrearsAging = null;
+            }
         }
     }
 

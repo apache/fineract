@@ -55,7 +55,6 @@ public final class LoanSummaryArrearsAging implements Persistable<Long> {
     @Column(name = "penalty_charges_overdue_derived", scale = 6, precision = 19)
     private BigDecimal totalPenaltyChargesOverdue;
 
-    @SuppressWarnings("unused")
     @Column(name = "total_overdue_derived", scale = 6, precision = 19)
     private BigDecimal totalOverdue;
 
@@ -64,6 +63,7 @@ public final class LoanSummaryArrearsAging implements Persistable<Long> {
     @Column(name = "overdue_since_date_derived")
     private Date overdueSinceDate;
 
+    @SuppressWarnings("unused")
     @OneToOne
     @PrimaryKeyJoinColumn
     private Loan loan;
@@ -119,5 +119,9 @@ public final class LoanSummaryArrearsAging implements Persistable<Long> {
         } else {
             this.overdueSinceDate = null;
         }
+    }
+
+    public boolean isNotInArrears(final MonetaryCurrency currency) {
+        return Money.of(currency, this.totalOverdue).isZero();
     }
 }
