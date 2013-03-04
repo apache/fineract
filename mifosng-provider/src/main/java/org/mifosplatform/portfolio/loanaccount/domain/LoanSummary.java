@@ -1,16 +1,11 @@
 package org.mifosplatform.portfolio.loanaccount.domain;
 
 import java.math.BigDecimal;
-import java.util.Date;
 import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 
-import org.joda.time.LocalDate;
-import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.organisation.monetary.domain.Money;
 
@@ -33,9 +28,6 @@ public final class LoanSummary {
     @Column(name = "principal_outstanding_derived", scale = 6, precision = 19)
     private BigDecimal totalPrincipalOutstanding;
 
-    @Column(name = "principal_overdue_derived", scale = 6, precision = 19)
-    private BigDecimal totalPrincipalOverdue;
-
     @Column(name = "interest_charged_derived", scale = 6, precision = 19)
     private BigDecimal totalInterestCharged;
 
@@ -50,9 +42,6 @@ public final class LoanSummary {
 
     @Column(name = "interest_outstanding_derived", scale = 6, precision = 19)
     private BigDecimal totalInterestOutstanding;
-
-    @Column(name = "interest_overdue_derived", scale = 6, precision = 19)
-    private BigDecimal totalInterestOverdue;
 
     @Column(name = "fee_charges_charged_derived", scale = 6, precision = 19)
     private BigDecimal totalFeeChargesCharged;
@@ -72,9 +61,6 @@ public final class LoanSummary {
     @Column(name = "fee_charges_outstanding_derived", scale = 6, precision = 19)
     private BigDecimal totalFeeChargesOutstanding;
 
-    @Column(name = "fee_charges_overdue_derived", scale = 6, precision = 19)
-    private BigDecimal totalFeeChargesOverdue;
-
     @Column(name = "penalty_charges_charged_derived", scale = 6, precision = 19)
     private BigDecimal totalPenaltyChargesCharged;
 
@@ -89,9 +75,6 @@ public final class LoanSummary {
 
     @Column(name = "penalty_charges_outstanding_derived", scale = 6, precision = 19)
     private BigDecimal totalPenaltyChargesOutstanding;
-
-    @Column(name = "penalty_charges_overdue_derived", scale = 6, precision = 19)
-    private BigDecimal totalPenaltyChargesOverdue;
 
     @SuppressWarnings("unused")
     @Column(name = "total_expected_repayment_derived", scale = 6, precision = 19)
@@ -119,15 +102,6 @@ public final class LoanSummary {
 
     @Column(name = "total_outstanding_derived", scale = 6, precision = 19)
     private BigDecimal totalOutstanding;
-
-    @SuppressWarnings("unused")
-    @Column(name = "total_overdue_derived", scale = 6, precision = 19)
-    private BigDecimal totalOverdue;
-
-    @SuppressWarnings("unused")
-    @Temporal(TemporalType.DATE)
-    @Column(name = "overdue_since_date_derived")
-    private Date overdueSinceDate;
 
     public static LoanSummary create(final BigDecimal totalFeeChargesDueAtDisbursement) {
         return new LoanSummary(totalFeeChargesDueAtDisbursement);
@@ -166,25 +140,21 @@ public final class LoanSummary {
         this.totalPrincipalRepaid = BigDecimal.ZERO;
         this.totalPrincipalWrittenOff = BigDecimal.ZERO;
         this.totalPrincipalOutstanding = BigDecimal.ZERO;
-        this.totalPrincipalOverdue = BigDecimal.ZERO;
         this.totalInterestCharged = BigDecimal.ZERO;
         this.totalInterestRepaid = BigDecimal.ZERO;
         this.totalInterestWaived = BigDecimal.ZERO;
         this.totalInterestWrittenOff = BigDecimal.ZERO;
         this.totalInterestOutstanding = BigDecimal.ZERO;
-        this.totalInterestOverdue = BigDecimal.ZERO;
         this.totalFeeChargesCharged = BigDecimal.ZERO;
         this.totalFeeChargesRepaid = BigDecimal.ZERO;
         this.totalFeeChargesWaived = BigDecimal.ZERO;
         this.totalFeeChargesWrittenOff = BigDecimal.ZERO;
         this.totalFeeChargesOutstanding = BigDecimal.ZERO;
-        this.totalFeeChargesOverdue = BigDecimal.ZERO;
         this.totalPenaltyChargesCharged = BigDecimal.ZERO;
         this.totalPenaltyChargesRepaid = BigDecimal.ZERO;
         this.totalPenaltyChargesWaived = BigDecimal.ZERO;
         this.totalPenaltyChargesWrittenOff = BigDecimal.ZERO;
         this.totalPenaltyChargesOutstanding = BigDecimal.ZERO;
-        this.totalPenaltyChargesOverdue = BigDecimal.ZERO;
         this.totalExpectedRepayment = BigDecimal.ZERO;
         this.totalRepayment = BigDecimal.ZERO;
         this.totalExpectedCostOfLoan = BigDecimal.ZERO;
@@ -192,8 +162,6 @@ public final class LoanSummary {
         this.totalWaived = BigDecimal.ZERO;
         this.totalWrittenOff = BigDecimal.ZERO;
         this.totalOutstanding = BigDecimal.ZERO;
-        this.totalOverdue = BigDecimal.ZERO;
-        this.overdueSinceDate = null;
     }
 
     public void updateSummary(final MonetaryCurrency currency, final Money principal,
@@ -205,8 +173,6 @@ public final class LoanSummary {
                 .getAmount();
 
         this.totalPrincipalOutstanding = principal.minus(totalPrincipalRepaid).minus(totalPrincipalWrittenOff).getAmount();
-        this.totalPrincipalOverdue = summaryWrapper.calculateTotalPrincipalOverdueOn(repaymentScheduleInstallments, currency,
-                DateUtils.getLocalDateOfTenant()).getAmount();
 
         final Money totalInterestCharged = summaryWrapper.calculateTotalInterestCharged(repaymentScheduleInstallments, currency);
         this.totalInterestCharged = totalInterestCharged.getAmount();
@@ -217,8 +183,6 @@ public final class LoanSummary {
         if (totalInterestCharged.isGreaterThanZero()) {
             this.totalInterestOutstanding = totalInterestCharged.minus(this.totalInterestRepaid).minus(this.totalInterestWaived)
                     .minus(this.totalInterestWrittenOff).getAmount();
-            this.totalInterestOverdue = summaryWrapper.calculateTotalInterestOverdueOn(repaymentScheduleInstallments, currency,
-                    DateUtils.getLocalDateOfTenant()).getAmount();
         }
 
         final Money totalFeeChargesCharged = summaryWrapper.calculateTotalFeeChargesCharged(repaymentScheduleInstallments, currency);
@@ -231,8 +195,6 @@ public final class LoanSummary {
         if (totalFeeChargesCharged.isGreaterThanZero()) {
             this.totalFeeChargesOutstanding = totalFeeChargesCharged.minus(this.totalFeeChargesRepaid).minus(this.totalFeeChargesWaived)
                     .minus(this.totalFeeChargesWrittenOff).getAmount();
-            this.totalFeeChargesOverdue = summaryWrapper.calculateTotalFeeChargesOverdueOn(repaymentScheduleInstallments, currency,
-                    DateUtils.getLocalDateOfTenant()).getAmount();
         }
 
         final Money totalPenaltyChargesCharged = summaryWrapper
@@ -248,8 +210,6 @@ public final class LoanSummary {
         if (totalPenaltyChargesCharged.isGreaterThanZero()) {
             this.totalPenaltyChargesOutstanding = totalPenaltyChargesCharged.minus(this.totalPenaltyChargesRepaid)
                     .minus(this.totalPenaltyChargesWaived).minus(this.totalPenaltyChargesWrittenOff).getAmount();
-            this.totalPenaltyChargesOverdue = summaryWrapper.calculateTotalPenaltyChargesOverdueOn(repaymentScheduleInstallments, currency,
-                    DateUtils.getLocalDateOfTenant()).getAmount();
         }
 
         final Money totalExpectedRepayment = Money.of(currency, this.totalPrincipalDisbursed).plus(this.totalInterestCharged)
@@ -279,17 +239,5 @@ public final class LoanSummary {
         final Money totalOutstanding = Money.of(currency, this.totalPrincipalOutstanding).plus(this.totalInterestOutstanding)
                 .plus(this.totalFeeChargesOutstanding).plus(this.totalPenaltyChargesOutstanding);
         this.totalOutstanding = totalOutstanding.getAmount();
-
-        final Money totalOverdue = Money.of(currency, this.totalPrincipalOverdue).plus(this.totalInterestOverdue)
-                .plus(this.totalFeeChargesOverdue).plus(this.totalPenaltyChargesOverdue);
-        this.totalOverdue = totalOverdue.getAmount();
-
-        final LocalDate overdueSinceLocalDate = summaryWrapper.determineOverdueSinceDateFrom(repaymentScheduleInstallments, currency,
-                DateUtils.getLocalDateOfTenant());
-        if (overdueSinceLocalDate != null) {
-            this.overdueSinceDate = overdueSinceLocalDate.toDate();
-        } else {
-            this.overdueSinceDate = null;
-        }
     }
 }

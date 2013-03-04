@@ -283,26 +283,22 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     + " l.principal_repaid_derived as principalPaid,"
                     + " l.principal_writtenoff_derived as principalWrittenOff,"
                     + " l.principal_outstanding_derived as principalOutstanding,"
-                    + " l.principal_overdue_derived as principalOverdue,"
                     + " l.interest_charged_derived as interestCharged,"
                     + " l.interest_repaid_derived as interestPaid,"
                     + " l.interest_waived_derived as interestWaived,"
                     + " l.interest_writtenoff_derived as interestWrittenOff,"
                     + " l.interest_outstanding_derived as interestOutstanding,"
-                    + " l.interest_overdue_derived as interestOverdue,"
                     + " l.fee_charges_charged_derived as feeChargesCharged,"
                     + " l.total_charges_due_at_disbursement_derived as feeChargesDueAtDisbursementCharged,"
                     + " l.fee_charges_repaid_derived as feeChargesPaid,"
                     + " l.fee_charges_waived_derived as feeChargesWaived,"
                     + " l.fee_charges_writtenoff_derived as feeChargesWrittenOff,"
                     + " l.fee_charges_outstanding_derived as feeChargesOutstanding,"
-                    + " l.fee_charges_overdue_derived as feeChargesOverdue,"
                     + " l.penalty_charges_charged_derived as penaltyChargesCharged,"
                     + " l.penalty_charges_repaid_derived as penaltyChargesPaid,"
                     + " l.penalty_charges_waived_derived as penaltyChargesWaived,"
                     + " l.penalty_charges_writtenoff_derived as penaltyChargesWrittenOff,"
                     + " l.penalty_charges_outstanding_derived as penaltyChargesOutstanding,"
-                    + " l.penalty_charges_overdue_derived as penaltyChargesOverdue,"
                     + " l.total_expected_repayment_derived as totalExpectedRepayment,"
                     + " l.total_repayment_derived as totalRepayment,"
                     + " l.total_expected_costofloan_derived as totalExpectedCostOfLoan,"
@@ -310,13 +306,18 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     + " l.total_waived_derived as totalWaived,"
                     + " l.total_writtenoff_derived as totalWrittenOff,"
                     + " l.total_outstanding_derived as totalOutstanding,"
-                    + " l.total_overdue_derived as totalOverdue,"
-                    + " l.overdue_since_date_derived as overdueSinceDate"
+                    + " la.principal_overdue_derived as principalOverdue,"
+                    + " la.interest_overdue_derived as interestOverdue,"
+                    + " la.fee_charges_overdue_derived as feeChargesOverdue,"
+                    + " la.penalty_charges_overdue_derived as penaltyChargesOverdue,"
+                    + " la.total_overdue_derived as totalOverdue,"
+                    + " la.overdue_since_date_derived as overdueSinceDate"
                     + " from m_loan l" //
                     + " left join m_client c on c.id = l.client_id" //
                     + " left join m_group g on g.id = l.group_id" //
                     + " join m_product_loan lp on lp.id = l.product_id" //
                     + " join m_currency rc on rc.`code` = l.currency_code" //
+                    + " join m_loan_arrears_aging la on la.loan_id = l.id" //
                     + " left join m_fund f on f.id = l.fund_id" //
                     + " left join m_staff s on s.id = l.loan_officer_id" //
                     + " left join m_appuser sbu on sbu.id = l.submittedon_userid"

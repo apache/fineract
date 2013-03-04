@@ -24,6 +24,7 @@ import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
@@ -242,6 +243,9 @@ public class Loan extends AbstractPersistable<Long> {
     @Embedded
     private LoanSummary summary;
 
+    @OneToOne(mappedBy = "loan", cascade = CascadeType.ALL)
+    private LoanSummaryArrearsAging summaryArrearsAging;
+
     @Transient
     private boolean accountNumberRequiresAutoGeneration = false;
     @Transient
@@ -315,9 +319,11 @@ public class Loan extends AbstractPersistable<Long> {
         if (loanCharges != null && !loanCharges.isEmpty()) {
             this.charges = associateChargesWithThisLoan(loanCharges);
             this.summary = updateSummaryWithTotalFeeChargesDueAtDisbursement(deriveSumTotalOfChargesDueAtDisbursement());
+            this.summaryArrearsAging = new LoanSummaryArrearsAging(this);
         } else {
             this.charges = null;
             this.summary = new LoanSummary();
+            this.summaryArrearsAging = new LoanSummaryArrearsAging(this);
         }
         if (collateral != null && !collateral.isEmpty()) {
             this.collateral = associateWithThisLoan(collateral);
@@ -668,9 +674,11 @@ public class Loan extends AbstractPersistable<Long> {
 
         if (isNotDisbursed()) {
             this.summary.zeroFields();
+            this.summaryArrearsAging.zeroFields();
         } else {
             final Money principal = this.loanRepaymentScheduleDetail.getPrincipal();
             this.summary.updateSummary(loanCurrency(), principal, this.repaymentScheduleInstallments, this.loanSummaryWrapper);
+            this.summaryArrearsAging.updateSummary(loanCurrency(), this.repaymentScheduleInstallments, this.loanSummaryWrapper);
         }
     }
 
