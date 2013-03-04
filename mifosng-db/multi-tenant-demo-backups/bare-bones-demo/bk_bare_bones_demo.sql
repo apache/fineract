@@ -185,6 +185,96 @@ INSERT INTO `c_configuration` VALUES (1,'maker-checker',0);
 UNLOCK TABLES;
 
 --
+-- Table structure for table `extra_client_details`
+--
+
+DROP TABLE IF EXISTS `extra_client_details`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `extra_client_details` (
+  `client_id` bigint(20) NOT NULL,
+  `Business Description` varchar(100) DEFAULT NULL,
+  `Years in Business` int(11) DEFAULT NULL,
+  `Gender_cd` int(11) DEFAULT NULL,
+  `Education_cv` varchar(60) DEFAULT NULL,
+  `Next Visit` date DEFAULT NULL,
+  `Highest Rate Paid` decimal(19,6) DEFAULT NULL,
+  `Comment` text,
+  PRIMARY KEY (`client_id`),
+  CONSTRAINT `FK_extra_client_details` FOREIGN KEY (`client_id`) REFERENCES `m_client` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `extra_client_details`
+--
+
+LOCK TABLES `extra_client_details` WRITE;
+/*!40000 ALTER TABLE `extra_client_details` DISABLE KEYS */;
+/*!40000 ALTER TABLE `extra_client_details` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `extra_family_details`
+--
+
+DROP TABLE IF EXISTS `extra_family_details`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `extra_family_details` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `client_id` bigint(20) NOT NULL,
+  `Name` varchar(40) DEFAULT NULL,
+  `Date of Birth` date DEFAULT NULL,
+  `Points Score` int(11) DEFAULT NULL,
+  `Education_cd_Highest` int(11) DEFAULT NULL,
+  `Other Notes` text,
+  PRIMARY KEY (`id`),
+  KEY `FK_Extra Family Details Data_1` (`client_id`),
+  CONSTRAINT `FK_family_details` FOREIGN KEY (`client_id`) REFERENCES `m_client` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `extra_family_details`
+--
+
+LOCK TABLES `extra_family_details` WRITE;
+/*!40000 ALTER TABLE `extra_family_details` DISABLE KEYS */;
+/*!40000 ALTER TABLE `extra_family_details` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `extra_loan_details`
+--
+
+DROP TABLE IF EXISTS `extra_loan_details`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `extra_loan_details` (
+  `loan_id` bigint(20) NOT NULL,
+  `Business Description` varchar(100) DEFAULT NULL,
+  `Years in Business` int(11) DEFAULT NULL,
+  `Gender_cd` int(11) DEFAULT NULL,
+  `Education_cv` varchar(60) DEFAULT NULL,
+  `Next Visit` date DEFAULT NULL,
+  `Highest Rate Paid` decimal(19,6) DEFAULT NULL,
+  `Comment` text,
+  PRIMARY KEY (`loan_id`),
+  CONSTRAINT `FK_extra_loan_details` FOREIGN KEY (`loan_id`) REFERENCES `m_loan` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `extra_loan_details`
+--
+
+LOCK TABLES `extra_loan_details` WRITE;
+/*!40000 ALTER TABLE `extra_loan_details` DISABLE KEYS */;
+/*!40000 ALTER TABLE `extra_loan_details` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `m_appuser`
 --
 
@@ -786,7 +876,6 @@ CREATE TABLE `m_loan` (
   `fund_id` bigint(20) DEFAULT NULL,
   `loan_officer_id` bigint(20) DEFAULT NULL,
   `loanpurpose_cv_id` int(11) DEFAULT NULL,
-  `loan_transaction_strategy_id` bigint(20) DEFAULT NULL,
   `loan_status_id` smallint(5) NOT NULL,
   `currency_code` varchar(3) NOT NULL,
   `currency_digits` smallint(5) NOT NULL,
@@ -799,27 +888,21 @@ CREATE TABLE `m_loan` (
   `interest_calculated_in_period_enum` smallint(5) NOT NULL DEFAULT '1',
   `term_frequency` smallint(5) NOT NULL DEFAULT '0',
   `term_period_frequency_enum` smallint(5) NOT NULL DEFAULT '2',
-  `number_of_repayments` smallint(5) NOT NULL,
   `repay_every` smallint(5) NOT NULL,
   `repayment_period_frequency_enum` smallint(5) NOT NULL,
+  `number_of_repayments` smallint(5) NOT NULL,
   `amortization_method_enum` smallint(5) NOT NULL,
-  `interest_calculated_from_date` date DEFAULT NULL,
-  `expected_disbursedon_date` date DEFAULT NULL,
-  `expected_firstrepaymenton_date` date DEFAULT NULL,
-  `expected_maturedon_date` date DEFAULT NULL,
-  `maturedon_date` date DEFAULT NULL,
   `submittedon_date` date DEFAULT NULL,
   `submittedon_userid` bigint(20) DEFAULT NULL,
   `approvedon_date` date DEFAULT NULL,
   `approvedon_userid` bigint(20) DEFAULT NULL,
-  `rejectedon_date` date DEFAULT NULL,
-  `rejectedon_userid` bigint(20) DEFAULT NULL,
-  `withdrawnon_date` date DEFAULT NULL,
-  `withdrawnon_userid` bigint(20) DEFAULT NULL,
+  `expected_disbursedon_date` date DEFAULT NULL,
+  `expected_firstrepaymenton_date` date DEFAULT NULL,
+  `interest_calculated_from_date` date DEFAULT NULL,
   `disbursedon_date` date DEFAULT NULL,
   `disbursedon_userid` bigint(20) DEFAULT NULL,
-  `rescheduledon_date` date DEFAULT NULL,
-  `writtenoffon_date` date DEFAULT NULL,
+  `expected_maturedon_date` date DEFAULT NULL,
+  `maturedon_date` date DEFAULT NULL,
   `closedon_date` date DEFAULT NULL,
   `closedon_userid` bigint(20) DEFAULT NULL,
   `total_charges_due_at_disbursement_derived` decimal(19,6) DEFAULT NULL,
@@ -827,25 +910,21 @@ CREATE TABLE `m_loan` (
   `principal_repaid_derived` decimal(19,6) NOT NULL DEFAULT '0.000000',
   `principal_writtenoff_derived` decimal(19,6) NOT NULL DEFAULT '0.000000',
   `principal_outstanding_derived` decimal(19,6) NOT NULL DEFAULT '0.000000',
-  `principal_overdue_derived` decimal(19,6) NOT NULL DEFAULT '0.000000',
   `interest_charged_derived` decimal(19,6) NOT NULL DEFAULT '0.000000',
   `interest_repaid_derived` decimal(19,6) NOT NULL DEFAULT '0.000000',
   `interest_waived_derived` decimal(19,6) NOT NULL DEFAULT '0.000000',
   `interest_writtenoff_derived` decimal(19,6) NOT NULL DEFAULT '0.000000',
   `interest_outstanding_derived` decimal(19,6) NOT NULL DEFAULT '0.000000',
-  `interest_overdue_derived` decimal(19,6) NOT NULL DEFAULT '0.000000',
   `fee_charges_charged_derived` decimal(19,6) NOT NULL DEFAULT '0.000000',
   `fee_charges_repaid_derived` decimal(19,6) NOT NULL DEFAULT '0.000000',
   `fee_charges_waived_derived` decimal(19,6) NOT NULL DEFAULT '0.000000',
   `fee_charges_writtenoff_derived` decimal(19,6) NOT NULL DEFAULT '0.000000',
   `fee_charges_outstanding_derived` decimal(19,6) NOT NULL DEFAULT '0.000000',
-  `fee_charges_overdue_derived` decimal(19,6) NOT NULL DEFAULT '0.000000',
   `penalty_charges_charged_derived` decimal(19,6) NOT NULL DEFAULT '0.000000',
   `penalty_charges_repaid_derived` decimal(19,6) NOT NULL DEFAULT '0.000000',
   `penalty_charges_waived_derived` decimal(19,6) NOT NULL DEFAULT '0.000000',
   `penalty_charges_writtenoff_derived` decimal(19,6) NOT NULL DEFAULT '0.000000',
   `penalty_charges_outstanding_derived` decimal(19,6) NOT NULL DEFAULT '0.000000',
-  `penalty_charges_overdue_derived` decimal(19,6) NOT NULL DEFAULT '0.000000',
   `total_expected_repayment_derived` decimal(19,6) NOT NULL DEFAULT '0.000000',
   `total_repayment_derived` decimal(19,6) NOT NULL DEFAULT '0.000000',
   `total_expected_costofloan_derived` decimal(19,6) NOT NULL DEFAULT '0.000000',
@@ -853,8 +932,13 @@ CREATE TABLE `m_loan` (
   `total_waived_derived` decimal(19,6) NOT NULL DEFAULT '0.000000',
   `total_writtenoff_derived` decimal(19,6) NOT NULL DEFAULT '0.000000',
   `total_outstanding_derived` decimal(19,6) NOT NULL DEFAULT '0.000000',
-  `total_overdue_derived` decimal(19,6) NOT NULL DEFAULT '0.000000',
-  `overdue_since_date_derived` date DEFAULT NULL,
+  `rejectedon_date` date DEFAULT NULL,
+  `rejectedon_userid` bigint(20) DEFAULT NULL,
+  `rescheduledon_date` date DEFAULT NULL,
+  `withdrawnon_date` date DEFAULT NULL,
+  `withdrawnon_userid` bigint(20) DEFAULT NULL,
+  `writtenoffon_date` date DEFAULT NULL,
+  `loan_transaction_strategy_id` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `loan_account_no_UNIQUE` (`account_no`),
   UNIQUE KEY `loan_externalid_UNIQUE` (`external_id`),
@@ -863,27 +947,27 @@ CREATE TABLE `m_loan` (
   KEY `FK7C885877240145` (`fund_id`),
   KEY `FK_loan_ltp_strategy` (`loan_transaction_strategy_id`),
   KEY `FK_m_loan_m_staff` (`loan_officer_id`),
-  KEY `FK_m_loanpurpose_codevalue` (`loanpurpose_cv_id`),
   KEY `group_id` (`group_id`),
+  KEY `FK_m_loanpurpose_codevalue` (`loanpurpose_cv_id`),
   KEY `FK_submittedon_userid` (`submittedon_userid`),
   KEY `FK_approvedon_userid` (`approvedon_userid`),
   KEY `FK_rejectedon_userid` (`rejectedon_userid`),
   KEY `FK_withdrawnon_userid` (`withdrawnon_userid`),
-  KEY `FK_closedon_userid` (`closedon_userid`),
   KEY `FK_disbursedon_userid` (`disbursedon_userid`),
-  CONSTRAINT `FKB6F935D87179A0CB` FOREIGN KEY (`client_id`) REFERENCES `m_client` (`id`),
-  CONSTRAINT `m_loan_ibfk_1` FOREIGN KEY (`group_id`) REFERENCES `m_group` (`id`),
-  CONSTRAINT `FKB6F935D8C8D4B434` FOREIGN KEY (`product_id`) REFERENCES `m_product_loan` (`id`),
+  KEY `FK_closedon_userid` (`closedon_userid`),
   CONSTRAINT `FK7C885877240145` FOREIGN KEY (`fund_id`) REFERENCES `m_fund` (`id`),
+  CONSTRAINT `FKB6F935D87179A0CB` FOREIGN KEY (`client_id`) REFERENCES `m_client` (`id`),
+  CONSTRAINT `FKB6F935D8C8D4B434` FOREIGN KEY (`product_id`) REFERENCES `m_product_loan` (`id`),
+  CONSTRAINT `FK_approvedon_userid` FOREIGN KEY (`approvedon_userid`) REFERENCES `m_appuser` (`id`),
+  CONSTRAINT `FK_closedon_userid` FOREIGN KEY (`closedon_userid`) REFERENCES `m_appuser` (`id`),
+  CONSTRAINT `FK_disbursedon_userid` FOREIGN KEY (`disbursedon_userid`) REFERENCES `m_appuser` (`id`),
   CONSTRAINT `FK_loan_ltp_strategy` FOREIGN KEY (`loan_transaction_strategy_id`) REFERENCES `ref_loan_transaction_processing_strategy` (`id`),
   CONSTRAINT `FK_m_loanpurpose_codevalue` FOREIGN KEY (`loanpurpose_cv_id`) REFERENCES `m_code_value` (`id`),
   CONSTRAINT `FK_m_loan_m_staff` FOREIGN KEY (`loan_officer_id`) REFERENCES `m_staff` (`id`),
-  CONSTRAINT `FK_submittedon_userid` FOREIGN KEY (`submittedon_userid`) REFERENCES `m_appuser` (`id`),
-  CONSTRAINT `FK_approvedon_userid` FOREIGN KEY (`approvedon_userid`) REFERENCES `m_appuser` (`id`),
   CONSTRAINT `FK_rejectedon_userid` FOREIGN KEY (`rejectedon_userid`) REFERENCES `m_appuser` (`id`),
+  CONSTRAINT `FK_submittedon_userid` FOREIGN KEY (`submittedon_userid`) REFERENCES `m_appuser` (`id`),
   CONSTRAINT `FK_withdrawnon_userid` FOREIGN KEY (`withdrawnon_userid`) REFERENCES `m_appuser` (`id`),
-  CONSTRAINT `FK_disbursedon_userid` FOREIGN KEY (`disbursedon_userid`) REFERENCES `m_appuser` (`id`),
-  CONSTRAINT `FK_closedon_userid` FOREIGN KEY (`closedon_userid`) REFERENCES `m_appuser` (`id`)
+  CONSTRAINT `m_loan_ibfk_1` FOREIGN KEY (`group_id`) REFERENCES `m_group` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -894,6 +978,35 @@ CREATE TABLE `m_loan` (
 LOCK TABLES `m_loan` WRITE;
 /*!40000 ALTER TABLE `m_loan` DISABLE KEYS */;
 /*!40000 ALTER TABLE `m_loan` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `m_loan_arrears_aging`
+--
+
+DROP TABLE IF EXISTS `m_loan_arrears_aging`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `m_loan_arrears_aging` (
+  `loan_id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `principal_overdue_derived` decimal(19,6) NOT NULL DEFAULT '0.000000',
+  `interest_overdue_derived` decimal(19,6) NOT NULL DEFAULT '0.000000',
+  `fee_charges_overdue_derived` decimal(19,6) NOT NULL DEFAULT '0.000000',
+  `penalty_charges_overdue_derived` decimal(19,6) NOT NULL DEFAULT '0.000000',
+  `total_overdue_derived` decimal(19,6) NOT NULL DEFAULT '0.000000',
+  `overdue_since_date_derived` date DEFAULT NULL,
+  PRIMARY KEY (`loan_id`),
+  CONSTRAINT `m_loan_arrears_aging_ibfk_1` FOREIGN KEY (`loan_id`) REFERENCES `m_loan` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `m_loan_arrears_aging`
+--
+
+LOCK TABLES `m_loan_arrears_aging` WRITE;
+/*!40000 ALTER TABLE `m_loan_arrears_aging` DISABLE KEYS */;
+/*!40000 ALTER TABLE `m_loan_arrears_aging` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -1313,14 +1426,15 @@ CREATE TABLE `m_product_deposit` (
   `description` varchar(500) DEFAULT NULL,
   `currency_code` varchar(3) NOT NULL,
   `currency_digits` smallint(5) NOT NULL,
-  `minimum_balance` decimal(19,6) DEFAULT NULL,
-  `maximum_balance` decimal(19,6) DEFAULT NULL,
+  `min_deposit` decimal(19,6) NOT NULL,
+  `max_deposit` decimal(19,6) NOT NULL,
+  `default_deposit` decimal(19,6) NOT NULL,
   `tenure_months` int(11) NOT NULL,
   `interest_compounded_every` smallint(5) NOT NULL DEFAULT '1',
   `interest_compounded_every_period_enum` smallint(5) NOT NULL DEFAULT '2',
-  `maturity_default_interest_rate` decimal(19,6) NOT NULL,
-  `maturity_min_interest_rate` decimal(19,6) NOT NULL,
-  `maturity_max_interest_rate` decimal(19,6) NOT NULL,
+  `min_interest_rate` decimal(19,6) NOT NULL,
+  `max_interest_rate` decimal(19,6) NOT NULL,
+  `default_interest_rate` decimal(19,6) NOT NULL,
   `is_compounding_interest_allowed` tinyint(1) NOT NULL DEFAULT '0',
   `is_renewal_allowed` tinyint(1) NOT NULL DEFAULT '0',
   `is_preclosure_allowed` tinyint(1) NOT NULL DEFAULT '0',
@@ -1714,7 +1828,7 @@ CREATE TABLE `r_enum_value` (
 
 LOCK TABLES `r_enum_value` WRITE;
 /*!40000 ALTER TABLE `r_enum_value` DISABLE KEYS */;
-INSERT INTO `r_enum_value` VALUES ('amortization_method_enum',0,'Equal principle payments','Equal principle payments'),('amortization_method_enum',1,'Equal installments','Equal installments'),('interest_calculated_in_period_enum',0,'Daily','Daily'),('interest_calculated_in_period_enum',1,'Same as repayment period','Same as repayment period'),('interest_method_enum',0,'Declining Balance','Declining Balance'),('interest_method_enum',1,'Flat','Flat'),('interest_period_frequency_enum',2,'Per month','Per month'),('interest_period_frequency_enum',3,'Per year','Per year'),('loan_status_id',100,'Submitted and awaiting approval','Submitted and awaiting approval'),('loan_status_id',200,'Approved','Approved'),('loan_status_id',300,'Active','Active'),('loan_status_id',400,'Withdrawn by client','Withdrawn by client'),('loan_status_id',500,'Rejected','Rejected'),('loan_status_id',600,'Closed','Closed'),('loan_status_id',601,'Written-Off','Written-Off'),('loan_status_id',602,'Rescheduled','Rescheduled'),('loan_status_id',700,'Overpaid','Overpaid'),('loan_transaction_strategy_id',1,'mifos-standard-strategy','Mifos style'),('loan_transaction_strategy_id',2,'heavensfamily-strategy','Heavensfamily'),('loan_transaction_strategy_id',3,'creocore-strategy','Creocore'),('loan_transaction_strategy_id',4,'rbi-india-strategy','RBI (India)'),('processing_result_enum',0,'invalid','Invalid'),('processing_result_enum',1,'processed','Processed'),('processing_result_enum',2,'awaiting.approval','Awaiting Approval'),('processing_result_enum',3,'rejected','Rejected'),('repayment_period_frequency_enum',0,'Days','Days'),('repayment_period_frequency_enum',1,'Weeks','Weeks'),('repayment_period_frequency_enum',2,'Months','Months'),('term_period_frequency_enum',0,'Days','Days'),('term_period_frequency_enum',1,'Weeks','Weeks'),('term_period_frequency_enum',2,'Months','Months'),('term_period_frequency_enum',3,'Years','Years');
+INSERT INTO `r_enum_value` VALUES ('amortization_method_enum',0,'Equal principle payments','Equal principle payments'),('amortization_method_enum',1,'Equal installments','Equal installments'),('interest_calculated_in_period_enum',0,'Daily','Daily'),('interest_calculated_in_period_enum',1,'Same as repayment period','Same as repayment period'),('interest_method_enum',0,'Declining Balance','Declining Balance'),('interest_method_enum',1,'Flat','Flat'),('interest_period_frequency_enum',2,'Per month','Per month'),('interest_period_frequency_enum',3,'Per year','Per year'),('loan_status_id',100,'Submitted and awaiting approval','Submitted and awaiting approval'),('loan_status_id',200,'Approved','Approved'),('loan_status_id',300,'Active','Active'),('loan_status_id',400,'Withdrawn by client','Withdrawn by client'),('loan_status_id',500,'Rejected','Rejected'),('loan_status_id',600,'Closed','Closed'),('loan_status_id',601,'Written-Off','Written-Off'),('loan_status_id',602,'Rescheduled','Rescheduled'),('loan_status_id',700,'Overpaid','Overpaid'),('loan_transaction_strategy_id',1,'mifos-standard-strategy','Mifos style'),('loan_transaction_strategy_id',2,'heavensfamily-strategy','Heavensfamily'),('loan_transaction_strategy_id',3,'creocore-strategy','Creocore'),('loan_transaction_strategy_id',4,'rbi-india-strategy','RBI (India)'),('processing_result_enum',0,'invalid','Invalid'),('processing_result_enum',1,'processed','Processed'),('processing_result_enum',2,'awaiting.approval','Awaiting Approval'),('processing_result_enum',3,'rejected','Rejected'),('repayment_period_frequency_enum',0,'Days','Days'),('repayment_period_frequency_enum',1,'Weeks','Weeks'),('repayment_period_frequency_enum',2,'Months','Months'),('term_period_frequency_enum',0,'Days','Days'),('term_period_frequency_enum',1,'Weeks','Weeks'),('term_period_frequency_enum',2,'Months','Months'),('term_period_frequency_enum',3,'Years','Years'),('transaction_type_enum',1,'Disbursement','Disbursement'),('transaction_type_enum',2,'Repayment','Repayment'),('transaction_type_enum',3,'Contra','Contra'),('transaction_type_enum',4,'Waive Interest','Waive Interest'),('transaction_type_enum',5,'Repayment At Disbursement','Repayment At Disbursement'),('transaction_type_enum',6,'Write-Off','Write-Off'),('transaction_type_enum',8,'Recovery Repayment','Recovery Repayment'),('transaction_type_enum',9,'Waive Charges','Waive Charges');
 /*!40000 ALTER TABLE `r_enum_value` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1894,4 +2008,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2013-03-03  2:22:01
+-- Dump completed on 2013-03-04 16:15:45
