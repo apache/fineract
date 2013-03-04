@@ -16,7 +16,7 @@ VALUES ('transaction_type_enum', '5', 'Repayment At Disbursement', 'Repayment At
 INSERT INTO `r_enum_value` (`enum_name`, `enum_id`, `enum_message_property`, `enum_value`) 
 VALUES ('transaction_type_enum', '6', 'Write-Off', 'Write-Off');
 
-INSERT INTO `r_enum_value` (`enum_name`, `enum_id`, enum_message_property`, `enum_value`) 
+INSERT INTO `r_enum_value` (`enum_name`, `enum_id`, `enum_message_property`, `enum_value`) 
 VALUES ('transaction_type_enum', '8', 'Recovery Repayment', 'Recovery Repayment');
 
 INSERT INTO `r_enum_value` (`enum_name`, `enum_id`, `enum_message_property`, `enum_value`) 
