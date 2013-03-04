@@ -6974,8 +6974,7 @@ Content-Type: application/json
 				</div>
 			</div>
 			
-			<!-- start of deposit products api docs -->    
-   
+		<!-- start of deposit products api docs -->
         <a id="depositproducts" name="depositproducts" class="old-syle-anchor">&nbsp;</a>
         <div class="method-section">
             <div class="method-description">
@@ -6986,22 +6985,23 @@ Content-Type: application/json
                     <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Field Descriptions</div></td></tr>
 					
 					<tr class=alt><td>name</td></tr>
-                    <tr><td class=fielddesc>Used as product name</td></tr>
+                    <tr><td class=fielddesc>The name of the product offering.</td></tr>
 					
 					<tr class=alt><td>description</td></tr>
-                    <tr><td class=fielddesc>Used to describe about the product.</td></tr>
+                    <tr><td class=fielddesc>Used to provide extra textual information about the product.</td></tr>
 					
                     <tr class=alt><td>digitsAfterDecimal</td></tr>
                     <tr><td class=fielddesc>Override the currency default value for digitsAfterDecimal.</td></tr>
 					
-                    <tr class=alt><td>minDeposit :</td></tr>
-                    <tr><td class=fielddesc>Minimum deposit amount that is required to create a deposit account.</td></tr>
+                    <tr class=alt><td>minDeposit</td></tr>
+                    <tr><td class=fielddesc>The minimum amount allowed when opening a deposit account.</td></tr>
 					
-					<tr class=alt><td>defaultDeposit :</td></tr>
-                    <tr><td class=fielddesc>Default deposit amount that is required to create a deposit account.</td></tr>
-					
-                    <tr class=alt><td>maxDeposit :</td></tr>
-                    <tr><td class=fielddesc>The max deposit amount that can be limited to create a deposit account.</td></tr>
+                    <tr class=alt><td>maxDeposit</td></tr>
+                    <tr><td class=fielddesc>The maximum amount allowed when opening a deposit account.</td></tr>
+
+                    <tr class=alt><td>defaultDeposit</td></tr>
+                    <tr><td class=fielddesc>The amount presented by default when opening a deposit account.</td></tr>
+
                     <tr class=alt><td></td></tr>
 								                 
                     <tr class=alt><td>tenureInMonths</td></tr>
@@ -7009,40 +7009,39 @@ Content-Type: application/json
                     e.g. 12
                     </td></tr>
 				 
-                    <tr class=alt><td>defaultInterestRate</td></tr>
-                    <tr><td class=fielddesc>Default interest rate for Fixed Deposit product <br>
-                    e.g. 12</td></tr>
                     <tr class=alt><td>minInterestRate</td></tr>
-                    <tr><td class=fielddesc>Minimum supported interest rate for Fixed Deposit product<br>
-					e.g. 8</td></tr>
+                    <tr><td class=fielddesc>The minimum allowed interest rate for this product.<br>
+					e.g. 1.5</td></tr>
 					
                     <tr class=alt><td>maxInterestRate</td></tr>
-                    <tr><td class=fielddesc>Maximum supported interest rate for Fixed Deposit product<br>
-                    e.g. 14 </td></tr>
+                    <tr><td class=fielddesc>The maximum allowed interest rate for this product.<br>
+                    e.g. 11.5</td></tr>
 					
+					<tr class=alt><td>defaultInterestRate</td></tr>
+                    <tr><td class=fielddesc>The interest rate presented by default when opening an account.<br>
+                    e.g. 6.5</td></tr>
+
 					<tr class=alt><td>interestCompoundedEvery</td></tr>
                     <tr><td class=fielddesc>Interest amount which is accrued or earned during the tenure of the deposit account will be posted to customer as interest as per the selected period in "interestCompoundedEvery" and combination of "interestCompoundedEveryPeriodType" <br>
                     e.g.Every <b>1</b>-Month</td></tr>
 					
 					<tr class=alt><td>interestCompoundedEveryPeriodType</td></tr>
                     <tr><td class=fielddesc>Denotes the interest compounding period type, used with combination of interestCompoundedEvery <br>
-					e.g. Months, Weeks etc</td></tr>
+					e.g. Days=0, Weeks=1, Months=2, Years=3</td></tr>
 					
 				    <tr class=alt><td>renewalAllowed</td></tr>					
-					<tr><td class=fielddesc> Allows to renew the deposit account on maturity<br>
-                       Used like: renewalAllowed:true </td></tr>	
+					<tr><td class=fielddesc>Indicates whether accounts are allowed to be renewed on maturity. <br>
+                       Used like: renewalAllowed:true </td></tr>
 					
 					<tr class=alt><td>preClosureAllowed</td></tr>
-					<tr><td class=fielddesc>Support for pre-closing a Fixed deposit account before maturity<br>
-                     If 'true' : preClosureAllowed else preClosure is not allowed.</tr></td>
+					<tr><td class=fielddesc>Indicates whether accounts are allowed to be closed before maturity. <br>
+                     If 'true' : Closure before maturity is allowed; otherwise closure before maturity is not allowed.</tr></td>
 					
 					<tr class=alt><td>preClosureInterestRate</td></tr>
-					<tr><td class=fielddesc>Denotes the interest rate for deposit accounts for pre-closure accounts.<br>
-						This rate is applicable if the account is pre-closed / Before maturity. </td></tr>
+					<tr><td class=fielddesc>The interest rate used in cases where pre-closure occurs. Mandatory if preClosureAllowed=true</td></tr>
 					
 					<tr class=alt><td>interestCompoundingAllowed</td></tr>
-					<tr><td class=fielddesc>Denotes whether the interest is calculated on compounding basis or not.<br>
-                     if true:interest calculated on compounding basis, else interest calculated on simple calculation basis.</tr></td>
+					<tr><td class=fielddesc>Denotes whether the interest is calculated using <b>simple interest</b> or <b>compounding interest</b>.</tr></td>
 					
 					<tr class=alt><td>isLockinPeriodAllowed</td></tr>
 					<tr><td class=fielddesc>This will allow to set the lock-in period for a fixed deposit product<br>

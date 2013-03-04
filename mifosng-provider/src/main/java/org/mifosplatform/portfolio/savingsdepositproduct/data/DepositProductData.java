@@ -25,12 +25,12 @@ public class DepositProductData {
     private final String currencyCode;
     private final Integer digitsAfterDecimal;
     private final BigDecimal minDeposit;
-    private final BigDecimal defaultDeposit;
     private final BigDecimal maxDeposit;
+    private final BigDecimal defaultDeposit;
     private final Integer tenureInMonths;
-    private final BigDecimal defaultInterestRate;
     private final BigDecimal minInterestRate;
     private final BigDecimal maxInterestRate;
+    private final BigDecimal defaultInterestRate;
     private final Integer interestCompoundedEvery;
     private final EnumOptionData interestCompoundedEveryPeriodType;
     private final CurrencyData currency;
