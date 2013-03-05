@@ -67,8 +67,6 @@ public class FlatMethodLoanScheduleGenerator implements LoanScheduleGenerator {
             }
         }
 
-        BigDecimal cumulativeChargesToDate = chargesDueAtTimeOfDisbursement;
-
         // create entries of disbursement period on loan schedule
         final LoanSchedulePeriodData disbursementPeriod = LoanSchedulePeriodData.disbursementOnlyPeriod(disbursementDate,
                 principalDisbursed.getAmount(), chargesDueAtTimeOfDisbursement, false);
@@ -79,7 +77,7 @@ public class FlatMethodLoanScheduleGenerator implements LoanScheduleGenerator {
         BigDecimal totalPrincipalExpected = BigDecimal.ZERO;
         BigDecimal totalPrincipalPaid = BigDecimal.ZERO;
         BigDecimal totalInterestCharged = BigDecimal.ZERO;
-        BigDecimal totalFeeChargesCharged = BigDecimal.ZERO;
+        BigDecimal totalFeeChargesCharged = chargesDueAtTimeOfDisbursement;
         BigDecimal totalPenaltyChargesCharged = BigDecimal.ZERO;
         BigDecimal totalWaived = BigDecimal.ZERO;
         BigDecimal totalWrittenOff = BigDecimal.ZERO;
@@ -124,9 +122,6 @@ public class FlatMethodLoanScheduleGenerator implements LoanScheduleGenerator {
                     .plus(feeChargesForInstallment) //
                     .plus(penaltyChargesForInstallment);
 
-            cumulativeChargesToDate = cumulativeChargesToDate.add(feeChargesForInstallment.getAmount()).add(
-                    penaltyChargesForInstallment.getAmount());
-
             LoanSchedulePeriodData installment = LoanSchedulePeriodData.repaymentOnlyPeriod(periodNumber, startDate, scheduledDueDate,
                     principalPerInstallment.getAmount(), outstandingBalance.getAmount(), interestPerInstallment.getAmount(),
                     feeChargesForInstallment.getAmount(), penaltyChargesForInstallment.getAmount(), totalInstallmentDue.getAmount());
@@ -137,6 +132,8 @@ public class FlatMethodLoanScheduleGenerator implements LoanScheduleGenerator {
             loanTermInDays += daysInPeriod;
             totalPrincipalExpected = totalPrincipalExpected.add(principalPerInstallment.getAmount());
             totalInterestCharged = totalInterestCharged.add(interestPerInstallment.getAmount());
+            totalFeeChargesCharged = totalFeeChargesCharged.add(feeChargesForInstallment.getAmount());
+            totalPenaltyChargesCharged = totalPenaltyChargesCharged.add(penaltyChargesForInstallment.getAmount());
             totalRepaymentExpected = totalRepaymentExpected.add(totalInstallmentDue.getAmount());
             startDate = scheduledDueDate;
 
