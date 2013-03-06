@@ -208,7 +208,7 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
         return LoanTransactionType.REPAYMENT_AT_DISBURSEMENT.equals(getTypeOf()) && isNotReversed();
     }
 
-    private boolean isRecoveryRepayment() {
+    public boolean isRecoveryRepayment() {
         return LoanTransactionType.RECOVERY_REPAYMENT.equals(getTypeOf()) && isNotReversed();
     }
 
@@ -285,15 +285,7 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
 
         thisTransactionData.put("id", this.getId());
         thisTransactionData.put("type", transactionType);
-        thisTransactionData.put("disbursement", Boolean.valueOf(this.isDisbursement()));
-        thisTransactionData.put("repaymentAtDisbursement", Boolean.valueOf(this.isRepaymentAtDisbursement()));
-        thisTransactionData.put("repayment", Boolean.valueOf(this.isRepayment()));
-        thisTransactionData.put("recoveryRepayment", Boolean.valueOf(this.isRecoveryRepayment()));
-        thisTransactionData.put("contra", Boolean.valueOf(this.isReversed()));
-        thisTransactionData.put("waiveInterest", Boolean.valueOf(this.isInterestWaiver()));
-        thisTransactionData.put("waiveCharges", Boolean.valueOf(this.isChargesWaiver()));
-        thisTransactionData.put("writeOff", Boolean.valueOf(this.isWriteOff()));
-
+        thisTransactionData.put("reversed", Boolean.valueOf(this.isReversed()));
         thisTransactionData.put("date", this.getTransactionDate());
         thisTransactionData.put("currency", currencyData);
         thisTransactionData.put("amount", this.amount);

@@ -41,4 +41,33 @@ public class LoanTransactionEnumData {
     public Long id() {
         return this.id;
     }
+
+    public boolean isDisbursement() {
+        return this.disbursement;
+    }
+
+    public boolean isRepaymentAtDisbursement() {
+        return this.repaymentAtDisbursement;
+    }
+
+    public boolean isRepayment() {
+        return this.repayment;
+    }
+
+    public boolean isWaiveInterest() {
+        return this.waiveInterest;
+    }
+
+    public boolean isWaiveCharges() {
+        return this.waiveCharges;
+    }
+
+    public boolean isWriteOff() {
+        return this.writeOff;
+    }
+
+    public boolean isRecoveryRepayment() {
+        return this.recoveryRepayment;
+    }
+
 }

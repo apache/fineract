@@ -130,6 +130,10 @@ public final class LoanSummary {
     public boolean isRepaidInFull(final MonetaryCurrency currency) {
         return getTotalOutstanding(currency).isZero();
     }
+    
+    public BigDecimal getTotalInterestCharged() {
+        return this.totalInterestCharged;
+    }
 
     /**
      * All fields but <code>totalFeeChargesDueAtDisbursement</code> should be

@@ -3,8 +3,9 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this file,
  * You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-package org.mifosplatform.accounting.glaccount.data;
+package org.mifosplatform.accounting.journalentry.data;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 public class LoanDTO {
@@ -12,15 +13,18 @@ public class LoanDTO {
     private Long loanId;
     private Long loanProductId;
     private Long officeId;
+    private BigDecimal calculatedInterest;
     private boolean cashBasedAccountingEnabled;
     private boolean accrualBasedAccountingEnabled;
     private List<LoanTransactionDTO> newLoanTransactions;
 
-    public LoanDTO(final Long loanId, final Long loanProductId, final Long officeId, final boolean cashBasedAccountingEnabled,
-            final boolean accrualBasedAccountingEnabled, final List<LoanTransactionDTO> newLoanTransactions) {
+    public LoanDTO(final Long loanId, final Long loanProductId, final Long officeId, final BigDecimal calculatedInterest,
+            final boolean cashBasedAccountingEnabled, final boolean accrualBasedAccountingEnabled,
+            final List<LoanTransactionDTO> newLoanTransactions) {
         this.loanId = loanId;
         this.loanProductId = loanProductId;
         this.officeId = officeId;
+        this.calculatedInterest = calculatedInterest;
         this.cashBasedAccountingEnabled = cashBasedAccountingEnabled;
         this.accrualBasedAccountingEnabled = accrualBasedAccountingEnabled;
         this.newLoanTransactions = newLoanTransactions;
@@ -72,5 +76,13 @@ public class LoanDTO {
 
     public void setNewLoanTransactions(final List<LoanTransactionDTO> newLoanTransactions) {
         this.newLoanTransactions = newLoanTransactions;
+    }
+
+    public BigDecimal getCalculatedInterest() {
+        return this.calculatedInterest;
+    }
+
+    public void setCalculatedInterest(BigDecimal calculatedInterest) {
+        this.calculatedInterest = calculatedInterest;
     }
 }
