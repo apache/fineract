@@ -14,8 +14,6 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
-import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.annotations.Parameter;
 import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
@@ -35,13 +33,15 @@ import org.springframework.data.domain.Persistable;
  */
 @Entity
 @Table(name = "m_loan_arrears_aging")
+@org.hibernate.annotations.GenericGenerator(name = "loan-primarykey", strategy = "foreign", parameters = { //
+@org.hibernate.annotations.Parameter(name = "property", value = "loan") //
+})
 public final class LoanSummaryArrearsAging implements Persistable<Long> {
 
     @Id
-    @GeneratedValue(generator = "SharedPrimaryKeyGenerator")
-    @GenericGenerator(name = "SharedPrimaryKeyGenerator", strategy = "foreign", parameters = @Parameter(name = "property", value = "loan"))
+    @GeneratedValue(generator = "loan-primarykey")
     @Column(name = "loan_id", unique = true, nullable = false)
-    private Long id;
+    private Long loanId;
 
     @Column(name = "principal_overdue_derived", scale = 6, precision = 19)
     private BigDecimal totalPrincipalOverdue;
@@ -64,7 +64,7 @@ public final class LoanSummaryArrearsAging implements Persistable<Long> {
     private Date overdueSinceDate;
 
     @SuppressWarnings("unused")
-    @OneToOne
+    @OneToOne(optional = false)
     @PrimaryKeyJoinColumn
     private Loan loan;
 
@@ -79,7 +79,7 @@ public final class LoanSummaryArrearsAging implements Persistable<Long> {
 
     @Override
     public Long getId() {
-        return this.id;
+        return this.loanId;
     }
 
     @Override
