@@ -21,8 +21,8 @@ import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityExce
 import org.mifosplatform.infrastructure.security.exception.NoAuthorizationException;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.monetary.domain.Money;
-import org.mifosplatform.portfolio.client.domain.Note;
-import org.mifosplatform.portfolio.client.domain.NoteRepository;
+import org.mifosplatform.portfolio.note.domain.Note;
+import org.mifosplatform.portfolio.note.domain.NoteRepository;
 import org.mifosplatform.portfolio.savingsdepositaccount.data.DepositAccountsForLookup;
 import org.mifosplatform.portfolio.savingsdepositaccount.domain.DepositAccount;
 import org.mifosplatform.portfolio.savingsdepositaccount.domain.DepositAccountRepository;

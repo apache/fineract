@@ -301,23 +301,6 @@ public class CommandWrapperBuilder {
         return this;
     }
 
-    public CommandWrapperBuilder createClientNote(final Long clientId) {
-        this.actionName = "CREATE";
-        this.entityName = "CLIENTNOTE";
-        this.clientId = clientId;
-        this.href = "/clients/" + clientId + "/notes/template";
-        return this;
-    }
-
-    public CommandWrapperBuilder updateClientNote(final Long clientId, final Long noteId) {
-        this.actionName = "UPDATE";
-        this.entityName = "CLIENTNOTE";
-        this.entityId = noteId;
-        this.clientId = clientId;
-        this.href = "/clients/" + clientId + "/notes";
-        return this;
-    }
-
     public CommandWrapperBuilder createClient() {
         this.actionName = "CREATE";
         this.entityName = "CLIENT";
@@ -890,6 +873,35 @@ public class CommandWrapperBuilder {
         this.entityName = "CALENDAR";
         this.entityId = calendarId;
         this.href = "/" + supportedEntityType + "/" + supportedEntityId + "/calendars/" + calendarId;
+        return this;
+    }
+    
+    public CommandWrapperBuilder createNote(final String entityName, final String resourceType, final Long resourceId) {
+        this.actionName = "CREATE";
+        this.entityName = entityName;//Note supports multiple resources. Note Permissions are set for each resource.
+        this.supportedEntityType = resourceType;
+        this.supportedEntityId = resourceId;
+        this.href = "/" + resourceType + "/" + resourceId + "/notes/template";
+        return this;
+    }
+
+    public CommandWrapperBuilder updateNote(final String entityName, final String resourceType, final Long resourceId, final Long noteId) {
+        this.actionName = "UPDATE";
+        this.entityName = entityName;//Note supports multiple resources. Note Permissions are set for each resource.
+        this.entityId = noteId;
+        this.supportedEntityType = resourceType;
+        this.supportedEntityId = resourceId;
+        this.href = "/" + resourceType + "/" + resourceId + "/notes";
+        return this;
+    }
+
+    public CommandWrapperBuilder deleteNote(final String entityName, final String resourceType, final Long resourceId, final Long noteId) {
+        this.actionName = "DELETE";
+        this.entityName = entityName;//Note supports multiple resources. Note Permissions are set for each resource.
+        this.entityId = noteId;
+        this.supportedEntityType = resourceType;
+        this.supportedEntityId = resourceId;
+        this.href = "/" + resourceType + "/" + resourceId + "/calendars/" + noteId;
         return this;
     }
 }

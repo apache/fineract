@@ -26,22 +26,17 @@ import org.mifosplatform.organisation.office.domain.Office;
 import org.mifosplatform.organisation.office.domain.OfficeRepository;
 import org.mifosplatform.organisation.office.exception.OfficeNotFoundException;
 import org.mifosplatform.portfolio.client.command.ClientIdentifierCommand;
-import org.mifosplatform.portfolio.client.command.ClientNoteCommand;
 import org.mifosplatform.portfolio.client.domain.AccountNumberGenerator;
 import org.mifosplatform.portfolio.client.domain.AccountNumberGeneratorFactory;
 import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.client.domain.ClientIdentifier;
 import org.mifosplatform.portfolio.client.domain.ClientIdentifierRepository;
 import org.mifosplatform.portfolio.client.domain.ClientRepository;
-import org.mifosplatform.portfolio.client.domain.Note;
-import org.mifosplatform.portfolio.client.domain.NoteRepository;
 import org.mifosplatform.portfolio.client.exception.ClientIdentifierNotFoundException;
 import org.mifosplatform.portfolio.client.exception.ClientNotFoundException;
 import org.mifosplatform.portfolio.client.exception.DuplicateClientIdentifierException;
-import org.mifosplatform.portfolio.client.exception.NoteNotFoundException;
 import org.mifosplatform.portfolio.client.serialization.ClientCommandFromApiJsonDeserializer;
 import org.mifosplatform.portfolio.client.serialization.ClientIdentifierCommandFromApiJsonDeserializer;
-import org.mifosplatform.portfolio.client.serialization.ClientNoteCommandFromApiJsonDeserializer;
 import org.mifosplatform.portfolio.group.domain.Group;
 import org.mifosplatform.portfolio.group.domain.GroupRepository;
 import org.mifosplatform.portfolio.group.exception.GroupNotFoundException;
@@ -62,19 +57,16 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
     private final ClientIdentifierRepository clientIdentifierRepository;
     private final OfficeRepository officeRepository;
     private final GroupRepository groupRepository;
-    private final NoteRepository noteRepository;
     private final CodeValueRepositoryWrapper codeValueRepository;
     private final ClientCommandFromApiJsonDeserializer fromApiJsonDeserializer;
-    private final ClientNoteCommandFromApiJsonDeserializer clientNoteFromApiJsonDeserializer;
     private final ClientIdentifierCommandFromApiJsonDeserializer clientIdentifierCommandFromApiJsonDeserializer;
     private final AccountNumberGeneratorFactory accountIdentifierGeneratorFactory;
 
     @Autowired
     public ClientWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final ClientRepository clientRepository,
             final ClientIdentifierRepository clientIdentifierRepository, final OfficeRepository officeRepository,
-            final NoteRepository noteRepository, final CodeValueRepositoryWrapper codeValueRepository,
+            final CodeValueRepositoryWrapper codeValueRepository,
             final ClientCommandFromApiJsonDeserializer fromApiJsonDeserializer,
-            final ClientNoteCommandFromApiJsonDeserializer clientNoteFromApiJsonDeserializer,
             final ClientIdentifierCommandFromApiJsonDeserializer clientIdentifierCommandFromApiJsonDeserializer,
             final AccountNumberGeneratorFactory accountIdentifierGeneratorFactory,
             final GroupRepository groupRepository) {
@@ -82,10 +74,8 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
         this.clientRepository = clientRepository;
         this.clientIdentifierRepository = clientIdentifierRepository;
         this.officeRepository = officeRepository;
-        this.noteRepository = noteRepository;
         this.codeValueRepository = codeValueRepository;
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
-        this.clientNoteFromApiJsonDeserializer = clientNoteFromApiJsonDeserializer;
         this.clientIdentifierCommandFromApiJsonDeserializer = clientIdentifierCommandFromApiJsonDeserializer;
         this.accountIdentifierGeneratorFactory = accountIdentifierGeneratorFactory;
         this.groupRepository = groupRepository;
@@ -211,51 +201,6 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             handleDataIntegrityIssues(command, dve);
             return new CommandProcessingResult(Long.valueOf(-1));
         }
-    }
-
-    @Transactional
-    @Override
-    public CommandProcessingResult addClientNote(final Long clientId, final JsonCommand command) {
-
-        context.authenticatedUser();
-
-        final ClientNoteCommand clientNoteCommand = this.clientNoteFromApiJsonDeserializer.commandFromApiJson(command.json());
-        clientNoteCommand.validate();
-
-        final Client clientForUpdate = this.clientRepository.findOne(clientId);
-        if (clientForUpdate == null) { throw new ClientNotFoundException(clientId); }
-
-        final Note note = Note.clientNoteFromJson(clientForUpdate, command);
-
-        this.noteRepository.save(note);
-
-        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withOfficeId(clientForUpdate.getOffice().getId())
-                .withClientId(clientId).withEntityId(note.getId()).build();
-    }
-
-    @Transactional
-    @Override
-    public CommandProcessingResult updateClientNote(final Long clientId, final Long noteId, final JsonCommand command) {
-
-        context.authenticatedUser();
-
-        final ClientNoteCommand clientNoteCommand = this.clientNoteFromApiJsonDeserializer.commandFromApiJson(command.json());
-        clientNoteCommand.validate();
-
-        final Note noteForUpdate = this.noteRepository.findOne(noteId);
-        if (noteForUpdate == null || noteForUpdate.isNotAgainstClientWithIdOf(clientId)) { throw new NoteNotFoundException(noteId,
-                clientId, "client"); }
-
-        final Client client = this.clientRepository.findOne(clientId);
-
-        final Map<String, Object> changes = noteForUpdate.update(command);
-
-        if (!changes.isEmpty()) {
-            this.noteRepository.save(noteForUpdate);
-        }
-
-        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withOfficeId(client.getOffice().getId())
-                .withClientId(clientId).withEntityId(noteId).with(changes).build();
     }
 
     @Transactional

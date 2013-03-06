@@ -12,9 +12,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
-import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
-import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
 import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
@@ -25,14 +23,10 @@ import org.mifosplatform.portfolio.client.data.ClientAccountSummaryData;
 import org.mifosplatform.portfolio.client.data.ClientData;
 import org.mifosplatform.portfolio.client.data.ClientIdentifierData;
 import org.mifosplatform.portfolio.client.data.ClientLookup;
-import org.mifosplatform.portfolio.client.data.NoteData;
-import org.mifosplatform.portfolio.client.domain.NoteEnumerations;
 import org.mifosplatform.portfolio.client.exception.ClientIdentifierNotFoundException;
 import org.mifosplatform.portfolio.client.exception.ClientNotFoundException;
-import org.mifosplatform.portfolio.client.exception.NoteNotFoundException;
 import org.mifosplatform.portfolio.loanaccount.data.LoanStatusEnumData;
 import org.mifosplatform.portfolio.loanproduct.service.LoanEnumerations;
-import org.mifosplatform.useradministration.data.AppUserData;
 import org.mifosplatform.useradministration.domain.AppUser;
 import org.mifosplatform.useradministration.service.AppUserReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -356,98 +350,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         }
     }
 
-    @Override
-    public NoteData retrieveClientNote(final Long clientId, final Long noteId) {
-
-        try {
-            context.authenticatedUser();
-
-            // Check if client exists
-            retrieveIndividualClient(clientId);
-
-            // FIXME - KW - use join on sql query to fetch user information for
-            // note
-            // rather than fetching users?
-            Collection<AppUserData> allUsers = this.appUserReadPlatformService.retrieveAllUsers();
-
-            NoteMapper noteMapper = new NoteMapper(allUsers);
-
-            String sql = "select " + noteMapper.schema() + " where n.client_id = ? and n.id = ?";
-
-            return this.jdbcTemplate.queryForObject(sql, noteMapper, new Object[] { clientId, noteId });
-        } catch (EmptyResultDataAccessException e) {
-            throw new NoteNotFoundException(clientId);
-        }
-    }
-
-    @Override
-    public Collection<NoteData> retrieveAllClientNotes(final Long clientId) {
-
-        context.authenticatedUser();
-
-        // Check if client exists
-        retrieveIndividualClient(clientId);
-
-        // FIXME - KW - use join on sql query to fetch user information for note
-        // rather than fetching users?
-        Collection<AppUserData> allUsers = this.appUserReadPlatformService.retrieveAllUsers();
-
-        NoteMapper noteMapper = new NoteMapper(allUsers);
-
-        String sql = "select " + noteMapper.schema() + " where n.client_id = ? order by n.created_date DESC";
-
-        return this.jdbcTemplate.query(sql, noteMapper, new Object[] { clientId });
-    }
-
-    private static final class NoteMapper implements RowMapper<NoteData> {
-
-        private final Collection<AppUserData> allUsers;
-
-        public NoteMapper(final Collection<AppUserData> allUsers) {
-            this.allUsers = allUsers;
-        }
-
-        public String schema() {
-            return "n.id as id, n.client_id as clientId, n.loan_id as loanId, n.loan_transaction_id as transactionId, n.note_type_enum as noteTypeEnum, n.note as note, "
-                    + "n.created_date as createdDate, n.createdby_id as createdById, n.lastmodified_date as lastModifiedDate, n.lastmodifiedby_id as lastModifiedById"
-                    + " from m_note n";
-        }
-
-        @Override
-        public NoteData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
-
-            Long id = JdbcSupport.getLong(rs, "id");
-            Long clientId = JdbcSupport.getLong(rs, "clientId");
-            Long loanId = JdbcSupport.getLong(rs, "loanId");
-            Long transactionId = JdbcSupport.getLong(rs, "transactionId");
-            Integer noteTypeId = JdbcSupport.getInteger(rs, "noteTypeEnum");
-            EnumOptionData noteType = NoteEnumerations.noteType(noteTypeId);
-            String note = rs.getString("note");
-
-            DateTime createdDate = JdbcSupport.getDateTime(rs, "createdDate");
-            Long createdById = JdbcSupport.getLong(rs, "createdById");
-            String createdByUsername = findUserById(createdById, allUsers);
-
-            DateTime lastModifiedDate = JdbcSupport.getDateTime(rs, "lastModifiedDate");
-            Long lastModifiedById = JdbcSupport.getLong(rs, "lastModifiedById");
-            String updatedByUsername = findUserById(createdById, allUsers);
-
-            return new NoteData(id, clientId, loanId, transactionId, noteType, note, createdDate, createdById, createdByUsername,
-                    lastModifiedDate, lastModifiedById, updatedByUsername);
-        }
-
-        private String findUserById(final Long createdById, final Collection<AppUserData> allUsers) {
-            String username = "";
-            for (AppUserData appUserData : allUsers) {
-                if (appUserData.hasIdentifyOf(createdById)) {
-                    username = appUserData.username();
-                    break;
-                }
-            }
-            return username;
-        }
-    }
-
+    
     @Override
     public Collection<ClientIdentifierData> retrieveClientIdentifiers(final Long clientId) {
 

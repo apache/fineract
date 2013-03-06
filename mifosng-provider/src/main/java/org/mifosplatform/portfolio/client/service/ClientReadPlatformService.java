@@ -12,7 +12,6 @@ import org.mifosplatform.portfolio.client.data.ClientAccountSummaryData;
 import org.mifosplatform.portfolio.client.data.ClientData;
 import org.mifosplatform.portfolio.client.data.ClientIdentifierData;
 import org.mifosplatform.portfolio.client.data.ClientLookup;
-import org.mifosplatform.portfolio.client.data.NoteData;
 
 public interface ClientReadPlatformService {
 
@@ -29,10 +28,6 @@ public interface ClientReadPlatformService {
     ClientAccountSummaryCollectionData retrieveClientAccountDetails(Long clientId);
 
     Collection<ClientAccountSummaryData> retrieveClientLoanAccountsByLoanOfficerId(Long clientId, Long loanOfficerId);
-
-    Collection<NoteData> retrieveAllClientNotes(Long clientId);
-
-    NoteData retrieveClientNote(Long clientId, Long noteId);
 
     Collection<ClientIdentifierData> retrieveClientIdentifiers(Long clientId);
 

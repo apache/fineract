@@ -448,5 +448,18 @@ public class CommandWrapper {
     public boolean isCalendarResource() {
         return this.entityName.equalsIgnoreCase("CALENDAR");
     }
+    
+    public boolean isNoteResource() {
+        boolean isnoteResource = false;
+        if(this.entityName.equalsIgnoreCase("CLIENTNOTE") || 
+                this.entityName.equalsIgnoreCase("LOANNOTE") ||
+                this.entityName.equalsIgnoreCase("LOANTRANSACTIONNOTE") || 
+                this.entityName.equalsIgnoreCase("DEPOSITNOTE") ||
+                this.entityName.equalsIgnoreCase("SAVINGNOTE") ||
+                this.entityName.equalsIgnoreCase("GROUPNOTE")){
+            isnoteResource = true;
+        }
+        return isnoteResource;
+    }
 
 }

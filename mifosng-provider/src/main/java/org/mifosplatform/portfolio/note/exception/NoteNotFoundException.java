@@ -3,7 +3,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this file,
  * You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-package org.mifosplatform.portfolio.client.exception;
+package org.mifosplatform.portfolio.note.exception;
 
 import org.mifosplatform.infrastructure.core.exception.AbstractPlatformResourceNotFoundException;
 
@@ -12,12 +12,13 @@ import org.mifosplatform.infrastructure.core.exception.AbstractPlatformResourceN
  */
 public class NoteNotFoundException extends AbstractPlatformResourceNotFoundException {
 
-    public NoteNotFoundException(Long id) {
+    public NoteNotFoundException(final Long id) {
         super("error.msg.note.id.invalid", "Note with identifier " + id + " does not exist", id);
     }
 
-    public NoteNotFoundException(Long id, Long clientId, final String resource) {
+    public NoteNotFoundException(final Long id, final Long resourceId, final String resource) {
         super("error.msg." + resource + ".note.id.invalid", "Note with identifier " + id + " does not exist for " + resource
-                + " with identifier " + clientId, id, clientId);
+                + " with identifier " + resourceId, id, resourceId);
     }
+
 }

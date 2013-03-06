@@ -296,4 +296,10 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
 
         return thisTransactionData;
     }
+
+    
+    public Loan getLoan() {
+        return this.loan;
+    }
+    
 }
