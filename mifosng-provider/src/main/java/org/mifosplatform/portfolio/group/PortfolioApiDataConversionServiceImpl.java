@@ -45,7 +45,7 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         final Map<String, String> requestMap = gsonConverter.fromJson(json, typeOfMap);
 
-        final Set<String> supportedParams = new HashSet<String>(Arrays.asList("name", "officeId", "levelId", "parentId", "loanOfficerId",
+        final Set<String> supportedParams = new HashSet<String>(Arrays.asList("name", "officeId", "levelId", "parentId", "staffId",
                 "externalId", "clientMembers"));
 
         checkForUnsupportedParameters(requestMap, supportedParams);
@@ -56,7 +56,7 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
         final Long officeId = extractLongParameter("officeId", requestMap, modifiedParameters);
         final Long levelId = extractLongParameter("levelId", requestMap, modifiedParameters);
         final Long parentId = extractLongParameter("parentId", requestMap, modifiedParameters);
-        final Long loanOfficerId = extractLongParameter("loanOfficerId", requestMap, modifiedParameters);
+        final Long staffId = extractLongParameter("staffId", requestMap, modifiedParameters);
         final String externalId = extractStringParameter("externalId", requestMap, modifiedParameters);
 
         final JsonParser parser = new JsonParser();
@@ -75,7 +75,7 @@ public class PortfolioApiDataConversionServiceImpl implements PortfolioApiDataCo
             }
         }
 
-        return new GroupCommand(modifiedParameters, resourceIdentifier, externalId, name, officeId, loanOfficerId, clientMembers, parentId,
+        return new GroupCommand(modifiedParameters, resourceIdentifier, externalId, name, officeId, staffId, clientMembers, parentId,
                 levelId);
     }
 

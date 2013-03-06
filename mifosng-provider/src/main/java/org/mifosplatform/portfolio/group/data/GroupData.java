@@ -7,7 +7,7 @@ package org.mifosplatform.portfolio.group.data;
 
 import java.util.Collection;
 
-import org.mifosplatform.organisation.office.data.OfficeLookup;
+import org.mifosplatform.organisation.office.data.OfficeData;
 import org.mifosplatform.organisation.staff.data.StaffData;
 import org.mifosplatform.portfolio.client.data.ClientLookup;
 
@@ -35,7 +35,7 @@ public class GroupData {
     @SuppressWarnings("unused")
     private final Collection<ClientLookup> allowedClients;
     @SuppressWarnings("unused")
-    private final Collection<OfficeLookup> allowedOffices;
+    private final Collection<OfficeData> allowedOffices;
     @SuppressWarnings("unused")
     private final Collection<GroupLookupData> allowedParentGroups;
     @SuppressWarnings("unused")
@@ -67,7 +67,7 @@ public class GroupData {
     }
 
     public GroupData(final GroupData group, final Collection<ClientLookup> clientMembers, final Collection<ClientLookup> allowedClients,
-            final Collection<OfficeLookup> allowedOffices, final Collection<GroupLookupData> allowedParentGroups,
+            final Collection<OfficeData> allowedOffices, final Collection<GroupLookupData> allowedParentGroups,
             final GroupLevelData groupLevelData, final Collection<StaffData> allowedStaffs, final Collection<GroupLookupData> childGroups , final GroupSummaryData groupSummaryData) {
         this.id = group.getId();
         this.officeId = group.getOfficeId();
@@ -91,7 +91,7 @@ public class GroupData {
         this.childGroups = childGroups;
     }
 
-    public GroupData(final Long officeId, final Collection<ClientLookup> allowedClients, final Collection<OfficeLookup> allowedOffices,
+    public GroupData(final Long officeId, final Collection<ClientLookup> allowedClients, final Collection<OfficeData> allowedOffices,
             final Collection<GroupLookupData> allowedParentGroups, final GroupLevelData groupLevelData,
             final Collection<StaffData> allowedStaffs) {
         this.id = null;

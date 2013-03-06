@@ -24,8 +24,12 @@ import org.mifosplatform.portfolio.client.exception.ClientNotFoundException;
 import org.mifosplatform.portfolio.group.command.GroupCommand;
 import org.mifosplatform.portfolio.group.command.GroupCommandValidator;
 import org.mifosplatform.portfolio.group.domain.Group;
+import org.mifosplatform.portfolio.group.domain.GroupLevel;
+import org.mifosplatform.portfolio.group.domain.GroupLevelRepository;
 import org.mifosplatform.portfolio.group.domain.GroupRepository;
+import org.mifosplatform.portfolio.group.exception.GroupLevelNotFoundException;
 import org.mifosplatform.portfolio.group.exception.GroupNotFoundException;
+import org.mifosplatform.portfolio.group.exception.InvalidGroupLevelException;
 import org.mifosplatform.portfolio.group.exception.LoanOfficerNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,15 +53,19 @@ public class GroupWritePlatformServiceJpaRepositoryImpl implements GroupWritePla
     private final OfficeRepository officeRepository;
 
     private final StaffRepository staffRepository;
+    
+    private final GroupLevelRepository groupLevelRepository; 
 
     @Autowired
     public GroupWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final GroupRepository groupRepository,
-            final ClientRepository clientRepository, final OfficeRepository officeRepository, final StaffRepository staffRepository) {
+            final ClientRepository clientRepository, final OfficeRepository officeRepository, final StaffRepository staffRepository,
+            final GroupLevelRepository groupLevelRepository) {
         this.context = context;
         this.groupRepository = groupRepository;
         this.clientRepository = clientRepository;
         this.officeRepository = officeRepository;
         this.staffRepository = staffRepository;
+        this.groupLevelRepository = groupLevelRepository; 
     }
 
     @Transactional
@@ -73,15 +81,15 @@ public class GroupWritePlatformServiceJpaRepositoryImpl implements GroupWritePla
 
             if (groupOffice == null) { throw new OfficeNotFoundException(command.getOfficeId()); }
 
-            Staff loanOfficer = null;
-            final Long loanOfficerId = command.getLoanOfficeId();
+            Staff staff = null;
+            final Long staffId = command.getStaffId();
 
             /**
-             * Validate the loan officer is present in the given office or not
+             * Validate the staff is present in the given office or not
              */
-            if (loanOfficerId != null) {
-                loanOfficer = this.staffRepository.findByOffice(loanOfficerId, command.getOfficeId());
-                if (loanOfficer == null) { throw new StaffNotFoundException(loanOfficerId); }
+            if (staffId != null) {
+                staff = this.staffRepository.findByOffice(staffId, command.getOfficeId());
+                if (staff == null) { throw new StaffNotFoundException(staffId); }
             }
 
             final Long parentId = command.getParentId();
@@ -90,22 +98,36 @@ public class GroupWritePlatformServiceJpaRepositoryImpl implements GroupWritePla
             /**
              * Validate the parent group to check it is present.
              */
-                      
+            Long parentGroupLevelId = null;
             if (parentId != null) {
                 parent = this.groupRepository.findOne(parentId);
                 if (parent == null) { throw new GroupNotFoundException(parentId); }
+                parentGroupLevelId = parent.getLevelId();
             }
-            
-            /**
-             * Need to validate level is immediate child level of the Parent group's level
-             */
-            // TODO level validation
             
             final Long levelId = command.getLevelId();
             
+            final GroupLevel groupLevel = groupLevelRepository.findOne(levelId);
+            
+            if(groupLevel == null){throw new GroupLevelNotFoundException(levelId);}
+            
+            final Long parentLevelId = groupLevel.getParentId();
+                
+            /*
+             * If Group is not super parent then validate group level's parent level is same as group parent's level
+             * this check makes sure new group is added at immediate next level in hierarchy 
+             */
+            if(!groupLevel.isSuperParent()){
+                if (parentGroupLevelId != parentLevelId) {
+                    final String errorMessage = "Parent group's level[" + parentLevelId + "] is  not equal to child level's parent level ["
+                            + parentGroupLevelId + "]";
+                    throw new InvalidGroupLevelException("add", "invalid.level", errorMessage, parentLevelId , parentGroupLevelId);
+                }
+            }
+            
             final Set<Client> clientMembers = assembleSetOfClients(command);
 
-            final Group newGroup = Group.newGroup(groupOffice, loanOfficer, parent , levelId , command.getName(), command.getExternalId(), clientMembers);
+            final Group newGroup = Group.newGroup(groupOffice, staff, parent , levelId , command.getName(), command.getExternalId(), clientMembers);
 
          // pre save to generate id for use in group hierarchy
             this.groupRepository.save(newGroup);
@@ -137,55 +159,55 @@ public class GroupWritePlatformServiceJpaRepositoryImpl implements GroupWritePla
 
             Office groupOffice = null;
             final Long officeId = command.getOfficeId();
-            Staff loanOfficer = null;
-            final Long loanOfficerId = command.getLoanOfficeId();
+            Staff staff = null;
+            final Long staffId = command.getStaffId();
 
-            if (command.isOfficeIdChanged() && command.isLoanOfficerChanged()) {
+            if (command.isOfficeIdChanged() && command.isStaffChanged()) {
                 /**
-                 * Scenario: Both Office and loan officer are changed, check new
-                 * loan officer is present in new office
+                 * Scenario: Both Office and Staff are changed, check new
+                 * staff is present in new office
                  */
                 if (officeId != null) {
                     groupOffice = this.officeRepository.findOne(officeId);
                     if (groupOffice == null) { throw new OfficeNotFoundException(command.getOfficeId()); }
                 }
-                if (loanOfficerId != null) {
-                    loanOfficer = this.staffRepository.findByOffice(loanOfficerId, officeId);
-                    if (loanOfficer == null) { throw new LoanOfficerNotFoundException(loanOfficerId); }
+                if (staffId != null) {
+                    staff = this.staffRepository.findByOffice(staffId, officeId);
+                    if (staff == null) { throw new LoanOfficerNotFoundException(staffId); }
                 }
 
             } else if (command.isOfficeIdChanged()) {
                 /**
                  * Scenario: Only Office is changed, check new office has
-                 * present loan officer, This situation is not practical as loan
-                 * officer can't be present in two offices
+                 * present staff, This situation is not practical as 
+                 * staff can't be present in two offices
                  */
-                // TODO When office is changed need to make sure all the loan
-                // officer at loan level are also updated or verified
+                // TODO When office is changed need to make sure all the staff
+                // at loan level are also updated or verified
                 
                 if (officeId != null) {
                     groupOffice = this.officeRepository.findOne(officeId);
                     if (groupOffice == null) { throw new OfficeNotFoundException(command.getOfficeId()); }
                 }
-                if (loanOfficerId != null) {
-                    loanOfficer = this.staffRepository.findByOffice(loanOfficerId, groupForUpdate.getOfficeId());
-                    if (loanOfficer == null) { throw new LoanOfficerNotFoundException(loanOfficerId); }
+                if (staffId != null) {
+                    staff = this.staffRepository.findByOffice(staffId, groupForUpdate.getOfficeId());
+                    if (staff == null) { throw new LoanOfficerNotFoundException(staffId); }
                 }
 
-            } else if (command.isLoanOfficerChanged()) {
+            } else if (command.isStaffChanged()) {
                 /**
-                 * Scenario: Only Loan Officer is changed, check new new loan
+                 * Scenario: Only staff is changed, check new new loan
                  * officer is in present assigned office
                  */
-                if (loanOfficerId != null) {
-                    loanOfficer = this.staffRepository.findByOffice(loanOfficerId, groupForUpdate.getOfficeId());
-                    if (loanOfficer == null) { throw new LoanOfficerNotFoundException(loanOfficerId); }
+                if (staffId != null) {
+                    staff = this.staffRepository.findByOffice(staffId, groupForUpdate.getOfficeId());
+                    if (staff == null) { throw new LoanOfficerNotFoundException(staffId); }
                 }
             }
 
             final Set<Client> clientMembers = assembleSetOfClients(command);
 
-            groupForUpdate.update(command, groupOffice, loanOfficer, clientMembers);
+            groupForUpdate.update(command, groupOffice, staff, clientMembers);
 
             this.groupRepository.saveAndFlush(groupForUpdate);
 
@@ -199,24 +221,24 @@ public class GroupWritePlatformServiceJpaRepositoryImpl implements GroupWritePla
     @Transactional
     @Override
 
-    public CommandProcessingResult assignLoanOfficer(final GroupCommand command) {
+    public CommandProcessingResult assignStaff(final GroupCommand command) {
 
         this.context.authenticatedUser();
 
         final GroupCommandValidator validator = new GroupCommandValidator(command);
-        validator.validateForLoanOfficerUpdate();
+        validator.validateForStaffUpdate();
 
         final Group groupForUpdate = this.groupRepository.findOne(command.getId());
         if (groupForUpdate == null || groupForUpdate.isDeleted()) { throw new GroupNotFoundException(command.getId()); }
 
-        Staff loanOfficer = null;
-        final Long loanOfficerId = command.getLoanOfficeId();
-        if (command.isLoanOfficerChanged() && loanOfficerId != null) {
-            loanOfficer = this.staffRepository.findByOffice(loanOfficerId, groupForUpdate.getOfficeId());
-            if (loanOfficer == null) { throw new LoanOfficerNotFoundException(loanOfficerId); }
+        Staff staff = null;
+        final Long staffId = command.getStaffId();
+        if (command.isStaffChanged() && staffId != null) {
+            staff = this.staffRepository.findByOffice(staffId, groupForUpdate.getOfficeId());
+            if (staff == null) { throw new LoanOfficerNotFoundException(staffId); }
         }
 
-        groupForUpdate.assigLoanOfficer(command, loanOfficer);
+        groupForUpdate.assigStaff(command, staff);
 
         this.groupRepository.saveAndFlush(groupForUpdate);
 
@@ -225,24 +247,24 @@ public class GroupWritePlatformServiceJpaRepositoryImpl implements GroupWritePla
 
     @Transactional
     @Override
-    public CommandProcessingResult unassignLoanOfficer(final GroupCommand command) {
+    public CommandProcessingResult unassignStaff(final GroupCommand command) {
 
         this.context.authenticatedUser();
 
         final GroupCommandValidator validator = new GroupCommandValidator(command);
-        validator.validateForLoanOfficerUpdate();
+        validator.validateForStaffUpdate();
 
         final Group groupForUpdate = this.groupRepository.findOne(command.getId());
         if (groupForUpdate == null || groupForUpdate.isDeleted()) { throw new GroupNotFoundException(command.getId()); }
 
-        final Long loanOfficerId = command.getLoanOfficeId();
-        final Long presentLoanOfficerId = groupForUpdate.getLoanOfficerId();
+        final Long staffId = command.getStaffId();
+        final Long presentStaffId = groupForUpdate.getStaffId();
 
-        if (command.isLoanOfficerChanged() && loanOfficerId != null) {
-            if (!loanOfficerId.equals(presentLoanOfficerId)) { throw new LoanOfficerNotFoundException(loanOfficerId); }
+        if (command.isStaffChanged() && staffId != null) {
+            if (!staffId.equals(presentStaffId)) { throw new LoanOfficerNotFoundException(staffId); }
         }
 
-        groupForUpdate.unassigLoanOfficer(command);
+        groupForUpdate.unassigStaff(command);
 
         this.groupRepository.saveAndFlush(groupForUpdate);
 

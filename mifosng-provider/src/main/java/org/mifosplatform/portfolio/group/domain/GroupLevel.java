@@ -19,7 +19,7 @@ public class GroupLevel extends AbstractPersistable<Long> {
     private final Long parentId;
 
     @Column(name = "super_parent", nullable = false)
-    private final boolean isSuperParent;
+    private final boolean superParent;
 
     @Column(name = "level_name", nullable = false, length = 100, unique = true)
     private final String levelName;
@@ -33,7 +33,7 @@ public class GroupLevel extends AbstractPersistable<Long> {
     public GroupLevel() {
 
         this.parentId = null;
-        this.isSuperParent = false;
+        this.superParent = false;
         this.levelName = null;
         this.recursable = false;
         this.canHaveClients = false;
@@ -43,7 +43,7 @@ public class GroupLevel extends AbstractPersistable<Long> {
     public GroupLevel(final Long parentId, final boolean isSuperParent, final String levelName, final boolean recursable,
             final boolean canHaveClients) {
 
-        this.isSuperParent = isSuperParent;
+        this.superParent = isSuperParent;
         this.parentId = parentId;
         this.levelName = levelName;
         this.recursable = recursable;
@@ -56,7 +56,7 @@ public class GroupLevel extends AbstractPersistable<Long> {
     }
 
     public boolean getIsSuperParent() {
-        return this.isSuperParent;
+        return this.superParent;
     }
 
     public String getLevelName() {
@@ -69,6 +69,11 @@ public class GroupLevel extends AbstractPersistable<Long> {
 
     public boolean getCanHaveClients() {
         return this.canHaveClients;
+    }
+
+    
+    public boolean isSuperParent() {
+        return this.superParent;
     }
 
 }

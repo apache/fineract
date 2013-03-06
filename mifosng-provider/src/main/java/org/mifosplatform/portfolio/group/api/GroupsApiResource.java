@@ -110,15 +110,18 @@ public class GroupsApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String newGroupDetails(@Context final UriInfo uriInfo, @QueryParam("officeId") final Long officeId,
-            @QueryParam("levelId") final Long levelId) {
+            @QueryParam("levelId") final Long levelId, @QueryParam("parentGroupId") final Long parentGroupId) {
 
         context.authenticatedUser().validateHasReadPermission("GROUP");
 
         GroupData groupTemplateData = null;
-        if (officeId != null && levelId != null) {
+        if (levelId != null && parentGroupId != null) {
+            groupTemplateData = this.groupReadPlatformService.retrieveNewChildGroupDetails(officeId, levelId, parentGroupId);
+        } else if (officeId != null && levelId != null) {
             groupTemplateData = this.groupReadPlatformService.retrieveNewGroupDetails(officeId, levelId);
         } else if (levelId != null) {
-            groupTemplateData = this.groupReadPlatformService.retrieveNewGroupDetails(context.authenticatedUser().getOffice().getId(), levelId);
+            groupTemplateData = this.groupReadPlatformService.retrieveNewGroupDetails(context.authenticatedUser().getOffice().getId(),
+                    levelId);
         }
 
         final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
@@ -138,27 +141,27 @@ public class GroupsApiResource {
     }
     
     @POST
-    @Path("{groupId}/command/assign_loanofficer")
+    @Path("{groupId}/command/assign_staff")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String assignLoanOfficer(@PathParam("groupId") final Long groupId, final String jsonRequestBody) {
 
         final GroupCommand command = this.apiDataConversionService.convertJsonToGroupCommand(groupId, jsonRequestBody);
 
-        CommandProcessingResult entityIdentifier = this.groupWritePlatformService.assignLoanOfficer(command);
+        CommandProcessingResult entityIdentifier = this.groupWritePlatformService.assignStaff(command);
 
         return this.toApiJsonSerializer.serialize(entityIdentifier);
     }
 
     @POST
-    @Path("{groupId}/command/unassign_loanofficer")
+    @Path("{groupId}/command/unassign_staff")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String unassignLoanOfficer(@PathParam("groupId") final Long groupId, final String jsonRequestBody) {
 
         final GroupCommand command = this.apiDataConversionService.convertJsonToGroupCommand(groupId, jsonRequestBody);
 
-        CommandProcessingResult entityIdentifier = this.groupWritePlatformService.unassignLoanOfficer(command);
+        CommandProcessingResult entityIdentifier = this.groupWritePlatformService.unassignStaff(command);
 
         return this.toApiJsonSerializer.serialize(entityIdentifier);
     }

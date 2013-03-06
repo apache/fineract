@@ -17,9 +17,10 @@ import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
 import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.monetary.data.MoneyData;
-import org.mifosplatform.organisation.office.data.OfficeLookup;
+import org.mifosplatform.organisation.office.data.OfficeData;
 import org.mifosplatform.organisation.office.service.OfficeReadPlatformService;
 import org.mifosplatform.organisation.staff.data.StaffData;
+import org.mifosplatform.organisation.staff.domain.Staff;
 import org.mifosplatform.organisation.staff.exception.StaffNotFoundException;
 import org.mifosplatform.portfolio.client.data.ClientLookup;
 import org.mifosplatform.portfolio.client.service.ClientReadPlatformService;
@@ -30,6 +31,8 @@ import org.mifosplatform.portfolio.group.data.GroupData;
 import org.mifosplatform.portfolio.group.data.GroupLevelData;
 import org.mifosplatform.portfolio.group.data.GroupLookupData;
 import org.mifosplatform.portfolio.group.data.GroupSummaryData;
+import org.mifosplatform.portfolio.group.domain.Group;
+import org.mifosplatform.portfolio.group.domain.GroupRepository;
 import org.mifosplatform.portfolio.group.exception.GroupLevelNotFoundException;
 import org.mifosplatform.portfolio.group.exception.GroupNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,14 +48,17 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
     private final PlatformSecurityContext context;
     private final ClientReadPlatformService clientReadPlatformService;
     private final OfficeReadPlatformService officeReadPlatformService;
+    private final GroupRepository groupRepository;
 
     @Autowired
     public GroupReadPlatformServiceImpl(final PlatformSecurityContext context, final TenantAwareRoutingDataSource dataSource,
-            ClientReadPlatformService clientReadPlatformService, final OfficeReadPlatformService officeReadPlatformService) {
+            ClientReadPlatformService clientReadPlatformService, final OfficeReadPlatformService officeReadPlatformService,
+            final GroupRepository groupRepository) {
         this.context = context;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.clientReadPlatformService = clientReadPlatformService;
         this.officeReadPlatformService = officeReadPlatformService;
+        this.groupRepository = groupRepository;
     }
 
     @Override
@@ -90,38 +96,34 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
     @Override
     public Collection<GroupLookupData> retrieveAllGroupsbyOfficeIdAndLevelId(final Long officeId, final Long levelId) {
 
+        this.context.authenticatedUser();
+        GroupLookupMapper rm = new GroupLookupMapper();
+        String sql = "select " + rm.groupLookupSchema() + " from m_group g where g.office_id = ? and level_id = ? and g.is_deleted=0";
+        return this.jdbcTemplate.query(sql, rm, new Object[] { officeId, levelId });
+    }
+
+    private GroupLookupData retrieveGroupbyId(Long parentGroupId) {
         try {
             this.context.authenticatedUser();
-
             GroupLookupMapper rm = new GroupLookupMapper();
-
-            String sql = "select " + rm.groupLookupSchema() + " from m_group g where g.office_id = ? and level_id = ? and g.is_deleted=0";
-
-            return this.jdbcTemplate.query(sql, rm, new Object[] { officeId, levelId });
+            String sql = "select " + rm.groupLookupSchema() + " from m_group g where g.id = ? and g.is_deleted=0";
+            return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { parentGroupId });
 
         } catch (EmptyResultDataAccessException e) {
-
-            // TODO need throw proper exception
-            throw new GroupNotFoundException(officeId);
+            throw new GroupNotFoundException(parentGroupId);
         }
     }
 
     @Override
     public Collection<GroupLookupData> retrieveChildGroupsbyGroupId(final Long groupId) {
 
-        try {
-            this.context.authenticatedUser();
+        this.context.authenticatedUser();
+        GroupLookupMapper rm = new GroupLookupMapper();
+        String sql = "select " + rm.groupLookupSchema()
+                + " from m_group pg join m_group g where pg.id = g.parent_id and pg.id = ? and g.is_deleted=0";
 
-            GroupLookupMapper rm = new GroupLookupMapper();
+        return this.jdbcTemplate.query(sql, rm, new Object[] { groupId });
 
-            String sql = "select " + rm.groupLookupSchema()
-                    + " from m_group pg join m_group g where pg.id = g.parent_id and pg.id = ? and g.is_deleted=0";
-
-            return this.jdbcTemplate.query(sql, rm, new Object[] { groupId });
-
-        } catch (EmptyResultDataAccessException e) {
-            throw new GroupNotFoundException(groupId);
-        }
     }
 
     @Override
@@ -129,11 +131,8 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
 
         try {
             this.context.authenticatedUser();
-
             GroupLevelDataMapper rm = new GroupLevelDataMapper();
-
             String sql = "select " + rm.groupLevelSchema() + " where gl.id = ? ";
-
             return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { levelId });
 
         } catch (EmptyResultDataAccessException e) {
@@ -155,7 +154,7 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
                     this.clientReadPlatformService.retrieveAllIndividualClientsForLookupByOfficeId(officeId));
         }
 
-        List<OfficeLookup> allowedOffices = new ArrayList<OfficeLookup>(officeReadPlatformService.retrieveAllOfficesForLookup());
+        List<OfficeData> allowedOffices = new ArrayList<OfficeData>(officeReadPlatformService.retrieveAllOfficesForDropdown());
 
         List<GroupLookupData> allowedParentGroups = null;
 
@@ -170,12 +169,48 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
     }
 
     @Override
+    public GroupData retrieveNewChildGroupDetails(Long officeId, Long levelId, Long parentGroupId) {
+        GroupLevelData groupLevelData = this.retrieveGroupLevelDetails(levelId);
+        if (groupLevelData == null) { throw new GroupLevelNotFoundException(levelId); }
+
+        Group group = groupRepository.findOne(parentGroupId);
+        if (group == null) { throw new GroupNotFoundException(parentGroupId); }
+
+        if (officeId == null) {
+            officeId = group.getOfficeId();
+        }
+
+        List<ClientLookup> allowedClients = null;
+
+        if (groupLevelData.isCanHaveClients()) {
+            allowedClients = new ArrayList<ClientLookup>(
+                    this.clientReadPlatformService.retrieveAllIndividualClientsForLookupByOfficeId(officeId));
+        }
+
+        List<OfficeData> allowedOffices = new ArrayList<OfficeData>();
+        allowedOffices.add(officeReadPlatformService.retrieveOffice(officeId));
+
+        List<GroupLookupData> allowedParentGroups = new ArrayList<GroupLookupData>();
+        allowedParentGroups.add(this.retrieveGroupbyId(parentGroupId));
+
+        List<StaffData> allowedStaffs = new ArrayList<StaffData>();
+        final Staff staff = group.getStaff();
+        if (staff == null) {
+            allowedStaffs.addAll(this.retrieveStaffsbyOfficeId(officeId));
+        } else {
+            allowedStaffs.add(this.retrieveStaffsbyId(staff.getId()));
+        }
+
+        return new GroupData(officeId, allowedClients, allowedOffices, allowedParentGroups, groupLevelData, allowedStaffs);
+    }
+
+    @Override
     public GroupData retrieveGroupDetails(final Long groupId, final boolean template) {
 
         GroupData group = this.retrieveGroup(groupId);
         final Collection<ClientLookup> clientMembers = this.retrieveClientMembers(groupId);
         Collection<ClientLookup> availableClients = null;
-        Collection<OfficeLookup> allowedOffices = null;
+        Collection<OfficeData> allowedOffices = null;
         Collection<GroupLookupData> allowedParentGroups = null;
         GroupLevelData groupLevelData = this.retrieveGroupLevelDetails(group.getGroupLevel());
         ;
@@ -197,7 +232,7 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
                 availableClients = this.clientReadPlatformService.retrieveAllIndividualClientsForLookupByOfficeId(group.getOfficeId());
                 availableClients.removeAll(group.clientMembers());
             }
-            allowedOffices = officeReadPlatformService.retrieveAllOfficesForLookup();
+            allowedOffices = officeReadPlatformService.retrieveAllOfficesForDropdown();
             if (groupLevelData.getParentLevelId() != null) {
                 allowedParentGroups = this.retrieveAllGroupsbyOfficeIdAndLevelId(group.getOfficeId(), groupLevelData.getParentLevelId());
             }
@@ -214,23 +249,29 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
     @Override
     public Collection<StaffData> retrieveStaffsbyOfficeId(final Long officeId) {
 
+        this.context.authenticatedUser();
+        StaffDataMapper rm = new StaffDataMapper();
+        String sql = "select " + rm.staffDataSchema() + " where o.id = ?";
+        return this.jdbcTemplate.query(sql, rm, new Object[] { officeId });
+
+    }
+
+    @Override
+    public StaffData retrieveStaffsbyId(final Long staffId) {
+
         try {
             this.context.authenticatedUser();
-
             StaffDataMapper rm = new StaffDataMapper();
-
-            String sql = "select " + rm.staffDataSchema() + " where o.id = ?";
-
-            return this.jdbcTemplate.query(sql, rm, new Object[] { officeId });
+            String sql = "select " + rm.staffDataSchema() + " where s.id = ?";
+            return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { staffId });
 
         } catch (EmptyResultDataAccessException e) {
-            // TODO throw Staff not found in given office
-            throw new StaffNotFoundException(officeId);
+            throw new StaffNotFoundException(staffId);
         }
     }
 
     @Override
-    public Long retrieveTotalClients(final String  hierarchy) {
+    public Long retrieveTotalClients(final String hierarchy) {
 
         this.context.authenticatedUser();
 
@@ -239,6 +280,7 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
                 + "ON gc.group_id = g.id WHERE g.hierarchy LIKE ? ";
         return this.jdbcTemplate.queryForLong(sqlTotalClients, new Object[] { groupHierarchy });
 
+        // TODO to need catch EmptyResultDataAccessException ? 
     }
 
     @Override
@@ -306,9 +348,10 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
             String parentName = rs.getString("parentName");
             Long staffId = rs.getLong("staffId");
             String staffName = rs.getString("staffName");
-            String hierarchy =rs.getString("hierarchy");
+            String hierarchy = rs.getString("hierarchy");
 
-            return new GroupData(id, officeId, officeName, name, externalId, groupLevel, parentId, parentName, staffId, staffName , hierarchy);
+            return new GroupData(id, officeId, officeName, name, externalId, groupLevel, parentId, parentName, staffId, staffName,
+                    hierarchy);
         }
 
     }
@@ -516,4 +559,5 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
             return new GroupAccountSummaryData(id, externalId, productId, loanProductName, loanStatusId);
         }
     }
+
 }

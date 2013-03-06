@@ -45,7 +45,7 @@ public class Group extends AbstractPersistable<Long> {
 
     @ManyToOne
     @JoinColumn(name = "staff_id", nullable = true)
-    private Staff loanOfficer;
+    private Staff staff;
     
     @SuppressWarnings("unused")
     @Column(name = "level_id", nullable = false)
@@ -73,13 +73,13 @@ public class Group extends AbstractPersistable<Long> {
         this.clientMembers = new HashSet<Client>();
     }
 
-    public static Group newGroup(final Office office, final Staff loanOfficer , final Group parent ,final long levelId , final String name, final String externalId, final Set<Client> clientMembers) {
-        return new Group(office, loanOfficer , parent , levelId , name, externalId, clientMembers);
+    public static Group newGroup(final Office office, final Staff staff , final Group parent ,final long levelId , final String name, final String externalId, final Set<Client> clientMembers) {
+        return new Group(office, staff , parent , levelId , name, externalId, clientMembers);
     }
 
-    public Group(final Office office, final Staff loanOfficer , final Group parent ,final long levelId , final String name, final String externalId, final Set<Client> clientMembers) {
+    public Group(final Office office, final Staff staff , final Group parent ,final long levelId , final String name, final String externalId, final Set<Client> clientMembers) {
         this.office = office;
-        this.loanOfficer = loanOfficer;
+        this.staff = staff;
         this.levelId =levelId;
         this.parent = parent;
         
@@ -110,11 +110,31 @@ public class Group extends AbstractPersistable<Long> {
         return this.office.getId();
     }
 
-    public Long getLoanOfficerId() {
-        return this.loanOfficer.getId();
+    
+    public Staff getStaff() {
+        return this.staff;
     }
 
-    public void update(final GroupCommand command, final Office groupOffice, final Staff newLoanOfficer, final Set<Client> clientMembers) {
+    
+    public void setStaff(Staff staff) {
+        this.staff = staff;
+    }
+
+    public Long getStaffId() {
+        return this.staff.getId();
+    }
+
+    
+    public Long getLevelId() {
+        return this.levelId;
+    }
+
+    
+    public void setLevelId(Long levelId) {
+        this.levelId = levelId;
+    }
+
+    public void update(final GroupCommand command, final Office groupOffice, final Staff staff, final Set<Client> clientMembers) {
         if (command.isExternalIdChanged()) {
             this.externalId = command.getExternalId();
         }
@@ -123,8 +143,8 @@ public class Group extends AbstractPersistable<Long> {
             this.office = groupOffice;
         }
 
-        if (command.isLoanOfficerChanged()) {
-            this.loanOfficer = newLoanOfficer;
+        if (command.isStaffChanged()) {
+            this.staff = staff;
         }
 
         if (command.isNameChanged()) {
@@ -136,15 +156,15 @@ public class Group extends AbstractPersistable<Long> {
         }
     }
 
-    public void assigLoanOfficer(final GroupCommand command , final Staff newLoanOfficer){
-        if (command.isLoanOfficerChanged()) {
-            this.loanOfficer = newLoanOfficer;
+    public void assigStaff(final GroupCommand command , final Staff newStaff){
+        if (command.isStaffChanged()) {
+            this.staff = newStaff;
         }
     }
 
-    public void unassigLoanOfficer(final GroupCommand command) {
-        if (command.isLoanOfficerChanged()) {
-            this.loanOfficer = null;
+    public void unassigStaff(final GroupCommand command) {
+        if (command.isStaffChanged()) {
+            this.staff = null;
         }
     }
 

@@ -42,6 +42,9 @@ import org.mifosplatform.portfolio.client.exception.NoteNotFoundException;
 import org.mifosplatform.portfolio.client.serialization.ClientCommandFromApiJsonDeserializer;
 import org.mifosplatform.portfolio.client.serialization.ClientIdentifierCommandFromApiJsonDeserializer;
 import org.mifosplatform.portfolio.client.serialization.ClientNoteCommandFromApiJsonDeserializer;
+import org.mifosplatform.portfolio.group.domain.Group;
+import org.mifosplatform.portfolio.group.domain.GroupRepository;
+import org.mifosplatform.portfolio.group.exception.GroupNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,6 +61,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
     private final ClientRepository clientRepository;
     private final ClientIdentifierRepository clientIdentifierRepository;
     private final OfficeRepository officeRepository;
+    private final GroupRepository groupRepository;
     private final NoteRepository noteRepository;
     private final CodeValueRepositoryWrapper codeValueRepository;
     private final ClientCommandFromApiJsonDeserializer fromApiJsonDeserializer;
@@ -72,7 +76,8 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             final ClientCommandFromApiJsonDeserializer fromApiJsonDeserializer,
             final ClientNoteCommandFromApiJsonDeserializer clientNoteFromApiJsonDeserializer,
             final ClientIdentifierCommandFromApiJsonDeserializer clientIdentifierCommandFromApiJsonDeserializer,
-            final AccountNumberGeneratorFactory accountIdentifierGeneratorFactory) {
+            final AccountNumberGeneratorFactory accountIdentifierGeneratorFactory,
+            final GroupRepository groupRepository) {
         this.context = context;
         this.clientRepository = clientRepository;
         this.clientIdentifierRepository = clientIdentifierRepository;
@@ -83,6 +88,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
         this.clientNoteFromApiJsonDeserializer = clientNoteFromApiJsonDeserializer;
         this.clientIdentifierCommandFromApiJsonDeserializer = clientIdentifierCommandFromApiJsonDeserializer;
         this.accountIdentifierGeneratorFactory = accountIdentifierGeneratorFactory;
+        this.groupRepository = groupRepository;
     }
 
     @Transactional
@@ -136,8 +142,17 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 
             final Office clientOffice = this.officeRepository.findOne(officeId);
             if (clientOffice == null) { throw new OfficeNotFoundException(officeId); }
-
-            final Client newClient = Client.fromJson(clientOffice, command);
+            
+            final Long groupId = command.longValueOfParameterNamed("groupId");
+            
+            Group clientParentGroup = null;
+            
+            if(groupId != null){
+                clientParentGroup = this.groupRepository.findOne(groupId);
+                if (clientParentGroup == null) { throw new GroupNotFoundException(groupId); }
+            }
+            
+            final Client newClient = Client.fromJson(clientOffice, clientParentGroup , command);
             this.clientRepository.save(newClient);
 
             if (newClient.isAccountNumberRequiresAutoGeneration()) {

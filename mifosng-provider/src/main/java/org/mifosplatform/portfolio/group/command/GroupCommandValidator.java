@@ -55,7 +55,7 @@ public class GroupCommandValidator {
         }
     }
     
-   public void validateForLoanOfficerUpdate() {
+   public void validateForStaffUpdate() {
         
         List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
         
@@ -63,8 +63,8 @@ public class GroupCommandValidator {
         
         baseDataValidator.reset().parameter("id").value(command.getId()).notNull();
 
-        if (command.isLoanOfficerChanged()) {
-            baseDataValidator.reset().parameter("loanOfficerId").value(command.getLoanOfficeId()).notNull().integerGreaterThanZero();
+        if (command.isStaffChanged()) {
+            baseDataValidator.reset().parameter("staffId").value(command.getStaffId()).notNull().integerGreaterThanZero();
         }
 
         if (!dataValidationErrors.isEmpty()) {

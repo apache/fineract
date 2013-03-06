@@ -45,4 +45,8 @@ public interface GroupReadPlatformService {
     Long retrieveTotalClients(String hierarchy);
 
     Collection<MoneyData> retrieveGroupLoanPortfolio(String hierarchy);
+
+    GroupData retrieveNewChildGroupDetails(Long officeId, Long levelId, Long parentGroupId);
+
+    StaffData retrieveStaffsbyId(Long staffId);
 }

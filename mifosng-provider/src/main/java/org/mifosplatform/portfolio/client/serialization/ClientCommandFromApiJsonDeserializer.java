@@ -40,7 +40,7 @@ public final class ClientCommandFromApiJsonDeserializer extends AbstractFromApiJ
      * The parameters supported for this command.
      */
     private final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("id", "accountNo", "externalId", "firstname",
-            "middlename", "lastname", "fullname", "officeId", "joinedDate", "locale", "dateFormat"));
+            "middlename", "lastname", "fullname", "officeId", "joinedDate", "locale", "dateFormat", "groupId"));
 
     private final FromJsonHelper fromApiJsonHelper;
 
@@ -172,6 +172,12 @@ public final class ClientCommandFromApiJsonDeserializer extends AbstractFromApiJ
         if (fromApiJsonHelper.parameterExists(officeIdParameterName, element)) {
             final Long officeId = fromApiJsonHelper.extractLongNamed(officeIdParameterName, element);
             baseDataValidator.reset().parameter(officeIdParameterName).value(officeId).notNull().integerGreaterThanZero();
+        }
+        
+        final String groupIdParameterName = "groupId";
+        if (fromApiJsonHelper.parameterExists(groupIdParameterName, element)) {
+            final Long groupId = fromApiJsonHelper.extractLongNamed(groupIdParameterName, element);
+            baseDataValidator.reset().parameter(groupIdParameterName).value(groupId).notNull().integerGreaterThanZero();
         }
 
         final String joinedDateParameterName = "joinedDate";

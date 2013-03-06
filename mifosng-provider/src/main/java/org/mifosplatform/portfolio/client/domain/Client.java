@@ -7,13 +7,17 @@ package org.mifosplatform.portfolio.client.domain;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
@@ -29,6 +33,7 @@ import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
 import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.mifosplatform.infrastructure.security.service.RandomPasswordGenerator;
 import org.mifosplatform.organisation.office.domain.Office;
+import org.mifosplatform.portfolio.group.domain.Group;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
@@ -71,10 +76,14 @@ public class Client extends AbstractPersistable<Long> {
     @Column(name = "image_key", length = 500)
     private String imageKey;
 
+    @ManyToMany
+    @JoinTable(name = "m_group_client", joinColumns = @JoinColumn(name = "client_id"), inverseJoinColumns = @JoinColumn(name = "group_id"))
+    private Set<Group> parentGroups;
+    
     @Transient
     private boolean accountNumberRequiresAutoGeneration = false;
 
-    public static Client fromJson(final Office clientOffice, final JsonCommand command) {
+    public static Client fromJson(final Office clientOffice, final Group clientParentGroup , final JsonCommand command) {
 
         final String accountNo = command.stringValueOfParameterNamed("accountNo");
         final String firstname = command.stringValueOfParameterNamed("firstname");
@@ -84,14 +93,14 @@ public class Client extends AbstractPersistable<Long> {
         final LocalDate joiningDate = command.localDateValueOfParameterNamed("joinedDate");
         final String externalId = command.stringValueOfParameterNamed("externalId");
 
-        return new Client(clientOffice, accountNo, firstname, middlename, lastname, fullname, joiningDate, externalId);
+        return new Client(clientOffice, clientParentGroup ,accountNo, firstname, middlename, lastname, fullname, joiningDate, externalId);
     }
 
     protected Client() {
-        //
+        
     }
 
-    private Client(final Office office, final String accountNo, final String firstname, final String middlename, final String lastname,
+    private Client(final Office office, final Group clientParentGroup, final String accountNo, final String firstname, final String middlename, final String lastname,
             final String fullname, final LocalDate openingDate, final String externalId) {
         if (StringUtils.isBlank(accountNo)) {
             this.accountNumber = new RandomPasswordGenerator(19).generate();
@@ -130,6 +139,11 @@ public class Client extends AbstractPersistable<Long> {
             this.fullname = null;
         }
 
+        if(clientParentGroup != null){
+            this.parentGroups = new HashSet<Group>();
+            this.parentGroups.add(clientParentGroup);
+        }
+        
         deriveDisplayName();
         validateNameParts();
     }
