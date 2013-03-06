@@ -35,7 +35,7 @@ public class CashBasedAccountingProcessorForLoan implements AccountingProcessorF
             helper.checkForBranchClosures(latestGLClosure, transactionDate);
 
             /** Handle Disbursements and reversals of disbursements **/
-            if (loanTransactionDTO.getTransactionType().isDisbursement() && !loanTransactionDTO.isReversed()) {
+            if (loanTransactionDTO.getTransactionType().isDisbursement()) {
                 createJournalEntriesForDisbursements(loanDTO, loanTransactionDTO, office);
             }
             /***
