@@ -47,7 +47,6 @@ public class Group extends AbstractPersistable<Long> {
     @JoinColumn(name = "staff_id", nullable = true)
     private Staff staff;
     
-    @SuppressWarnings("unused")
     @Column(name = "level_id", nullable = false)
     private Long levelId;
 
@@ -116,7 +115,7 @@ public class Group extends AbstractPersistable<Long> {
     }
 
     
-    public void setStaff(Staff staff) {
+    public void setStaff(final Staff staff) {
         this.staff = staff;
     }
 
@@ -130,7 +129,7 @@ public class Group extends AbstractPersistable<Long> {
     }
 
     
-    public void setLevelId(Long levelId) {
+    public void setLevelId(final Long levelId) {
         this.levelId = levelId;
     }
 

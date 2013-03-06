@@ -28,7 +28,6 @@ import org.mifosplatform.portfolio.client.exception.ClientNotFoundException;
 import org.mifosplatform.portfolio.loanaccount.data.LoanStatusEnumData;
 import org.mifosplatform.portfolio.loanproduct.service.LoanEnumerations;
 import org.mifosplatform.useradministration.domain.AppUser;
-import org.mifosplatform.useradministration.service.AppUserReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -41,14 +40,12 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
     private final JdbcTemplate jdbcTemplate;
     private final PlatformSecurityContext context;
     private final OfficeReadPlatformService officeReadPlatformService;
-    private final AppUserReadPlatformService appUserReadPlatformService;
 
     @Autowired
     public ClientReadPlatformServiceImpl(final PlatformSecurityContext context, final TenantAwareRoutingDataSource dataSource,
-            final OfficeReadPlatformService officeReadPlatformService, final AppUserReadPlatformService appUserReadPlatformService) {
+            final OfficeReadPlatformService officeReadPlatformService) {
         this.context = context;
         this.officeReadPlatformService = officeReadPlatformService;
-        this.appUserReadPlatformService = appUserReadPlatformService;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
     }
 
@@ -162,8 +159,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
     private static final class ClientLookupMapper implements RowMapper<ClientLookup> {
 
         public String clientLookupSchema() {
-            return "c.id as id, c.display_name as displayName, " 
-                    + "c.office_id as officeId, o.name as officeName "
+            return "c.id as id, c.display_name as displayName, " + "c.office_id as officeId, o.name as officeName "
                     + "from m_client c join m_office o on o.id = c.office_id where c.is_deleted=0 ";
         }
 
@@ -350,7 +346,6 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         }
     }
 
-    
     @Override
     public Collection<ClientIdentifierData> retrieveClientIdentifiers(final Long clientId) {
 
