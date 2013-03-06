@@ -23,7 +23,6 @@ import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext
 import org.mifosplatform.organisation.monetary.domain.Money;
 import org.mifosplatform.portfolio.client.domain.Note;
 import org.mifosplatform.portfolio.client.domain.NoteRepository;
-import org.mifosplatform.portfolio.savingsaccountproduct.exception.SavingsProductNotFoundException;
 import org.mifosplatform.portfolio.savingsdepositaccount.data.DepositAccountsForLookup;
 import org.mifosplatform.portfolio.savingsdepositaccount.domain.DepositAccount;
 import org.mifosplatform.portfolio.savingsdepositaccount.domain.DepositAccountRepository;
@@ -116,7 +115,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
         this.context.authenticatedUser();
 
         DepositAccount account = this.depositAccountRepository.findOne(accountId);
-        if (account == null || account.isDeleted()) { throw new SavingsProductNotFoundException(accountId); }
+        if (account == null || account.isDeleted()) { throw new DepositAccountNotFoundException(accountId); }
 
         account.delete();
         this.depositAccountRepository.save(account);

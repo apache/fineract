@@ -18,10 +18,10 @@ import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.mifosplatform.organisation.monetary.service.CurrencyReadPlatformService;
 import org.mifosplatform.portfolio.loanproduct.domain.PeriodFrequencyType;
-import org.mifosplatform.portfolio.loanproduct.exception.LoanProductNotFoundException;
 import org.mifosplatform.portfolio.savingsaccountproduct.data.SavingProductData;
 import org.mifosplatform.portfolio.savingsaccountproduct.data.SavingProductLookup;
 import org.mifosplatform.portfolio.savingsaccountproduct.domain.SavingProductType;
+import org.mifosplatform.portfolio.savingsaccountproduct.exception.SavingProductNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -81,7 +81,7 @@ public class SavingProductReadPlatformServiceImpl implements SavingProductReadPl
 
             return productData;
         } catch (EmptyResultDataAccessException e) {
-            throw new LoanProductNotFoundException(savingProductId);
+            throw new SavingProductNotFoundException(savingProductId);
         }
     }
 

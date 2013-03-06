@@ -21,7 +21,6 @@ import org.mifosplatform.portfolio.savingsaccountproduct.domain.SavingProductRep
 import org.mifosplatform.portfolio.savingsaccountproduct.domain.SavingProductType;
 import org.mifosplatform.portfolio.savingsaccountproduct.domain.SavingsInterestType;
 import org.mifosplatform.portfolio.savingsaccountproduct.exception.SavingProductNotFoundException;
-import org.mifosplatform.portfolio.savingsaccountproduct.exception.SavingsProductNotFoundException;
 import org.mifosplatform.portfolio.savingsaccountproduct.serialization.SavingProductCommandFromApiJsonDeserializer;
 import org.mifosplatform.portfolio.savingsdepositproduct.domain.TenureTypeEnum;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,8 +69,8 @@ public class SavingProductWritePlatformServiceJpaRepositoryImpl implements Savin
         if (savingProductType.equals(SavingProductType.INVALID) || tenureType.equals(TenureTypeEnum.INVALID)
                 || savingFrequencyType.equals(SavingFrequencyType.INVALID) || interestType.equals(SavingsInterestType.INVALID)
                 || lockinPeriodType.equals(PeriodFrequencyType.INVALID)
-                || savingInterestCalculationMethod.equals(SavingInterestCalculationMethod.INVALID)) { throw new NoAuthorizationException(
-                "Please select a valid types"); }
+                || savingInterestCalculationMethod.equals(SavingInterestCalculationMethod.INVALID)) { 
+        	throw new NoAuthorizationException("Please select a valid types"); }
 
         SavingProduct product = SavingProduct.assembleFromJson(command, currency, savingProductType, tenureType, savingFrequencyType,
                 interestType, savingInterestCalculationMethod, lockinPeriodType);
@@ -108,7 +107,7 @@ public class SavingProductWritePlatformServiceJpaRepositoryImpl implements Savin
 
         this.context.authenticatedUser();
         SavingProduct product = this.savingProductRepository.findOne(productId);
-        if (product == null || product.isDeleted()) { throw new SavingsProductNotFoundException(productId); }
+        if (product == null || product.isDeleted()) { throw new SavingProductNotFoundException(productId); }
         product.delete();
         this.savingProductRepository.save(product);
         return new CommandProcessingResultBuilder() //
