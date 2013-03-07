@@ -122,9 +122,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 this.noteRepository.save(note);
             }
 
-            final Map<String, Object> accountingBridgeData = loan.deriveAccountingBridgeData(currency.toData(), existingTransactionIds,
-                    existingReversedTransactionIds);
-            journalEntryWritePlatformService.createJournalEntriesForLoan(accountingBridgeData);
+            postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
         }
 
         return new CommandProcessingResultBuilder() //
@@ -145,6 +143,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         context.authenticatedUser();
 
         final Loan loan = retrieveLoanBy(loanId);
+        final BigDecimal totalInterestCharged = loan.getSummary().getTotalInterestCharged(); 
 
         final List<Long> existingTransactionIds = new ArrayList<Long>();
         final List<Long> existingReversedTransactionIds = new ArrayList<Long>();
@@ -161,6 +160,11 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             final ApplicationCurrency currency = this.applicationCurrencyRepository.findOneByCode(loan.getCurrencyCode());
             final Map<String, Object> accountingBridgeData = loan.deriveAccountingBridgeData(currency.toData(), existingTransactionIds,
                     existingReversedTransactionIds);
+            // add the previously calculated net charged interest back to
+            // accountingBridgedate, this would not work if interest
+            // recalculation in introduced
+            accountingBridgeData.put("calculatedInterest", totalInterestCharged);
+            
             journalEntryWritePlatformService.createJournalEntriesForLoan(accountingBridgeData);
         }
 
@@ -209,10 +213,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             this.noteRepository.save(note);
         }
 
-        final ApplicationCurrency currency = this.applicationCurrencyRepository.findOneByCode(loan.getCurrencyCode());
-        final Map<String, Object> accountingBridgeData = loan.deriveAccountingBridgeData(currency.toData(), existingTransactionIds,
-                existingReversedTransactionIds);
-        journalEntryWritePlatformService.createJournalEntriesForLoan(accountingBridgeData);
+        postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
 
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
@@ -266,10 +267,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             this.noteRepository.save(note);
         }
 
-        final ApplicationCurrency currency = this.applicationCurrencyRepository.findOneByCode(loan.getCurrencyCode());
-        final Map<String, Object> accountingBridgeData = loan.deriveAccountingBridgeData(currency.toData(), existingTransactionIds,
-                existingReversedTransactionIds);
-        journalEntryWritePlatformService.createJournalEntriesForLoan(accountingBridgeData);
+        postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
 
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
@@ -298,7 +296,10 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         final Loan loan = retrieveLoanBy(loanId);
 
-        final LoanTransaction waiveTransaction = loan.waiveInterest(command, defaultLoanLifecycleStateMachine());
+        final List<Long> existingTransactionIds = new ArrayList<Long>();
+        final List<Long> existingReversedTransactionIds = new ArrayList<Long>();
+        final LoanTransaction waiveTransaction = loan.waiveInterest(command, defaultLoanLifecycleStateMachine(), existingTransactionIds,
+                existingReversedTransactionIds);
 
         this.loanTransactionRepository.save(waiveTransaction);
         this.loanRepository.save(loan);
@@ -309,6 +310,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             final Note note = Note.loanTransactionNote(loan, waiveTransaction, noteText);
             this.noteRepository.save(note);
         }
+        
+        postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
 
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
@@ -350,10 +353,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             this.noteRepository.save(note);
         }
 
-        final ApplicationCurrency currency = this.applicationCurrencyRepository.findOneByCode(loan.getCurrencyCode());
-        final Map<String, Object> accountingBridgeData = loan.deriveAccountingBridgeData(currency.toData(), existingTransactionIds,
-                existingReversedTransactionIds);
-        journalEntryWritePlatformService.createJournalEntriesForLoan(accountingBridgeData);
+        postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
 
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
@@ -399,10 +399,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         }
 
         if (possibleClosingTransaction != null) {
-            final ApplicationCurrency currency = this.applicationCurrencyRepository.findOneByCode(loan.getCurrencyCode());
-            final Map<String, Object> accountingBridgeData = loan.deriveAccountingBridgeData(currency.toData(), existingTransactionIds,
-                    existingReversedTransactionIds);
-            journalEntryWritePlatformService.createJournalEntriesForLoan(accountingBridgeData);
+            postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
         }
 
         CommandProcessingResult result = null;
@@ -539,11 +536,16 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final LoanCharge loanCharge = retrieveLoanChargeBy(loanId, loanChargeId);
 
         final Map<String, Object> changes = new LinkedHashMap<String, Object>(3);
-
-        final LoanTransaction waiveTransaction = loan.waiveLoanCharge(loanCharge, defaultLoanLifecycleStateMachine(), changes);
+        
+        final List<Long> existingTransactionIds = new ArrayList<Long>();
+        final List<Long> existingReversedTransactionIds = new ArrayList<Long>();
+        final LoanTransaction waiveTransaction = loan.waiveLoanCharge(loanCharge, defaultLoanLifecycleStateMachine(), changes,
+                existingTransactionIds, existingReversedTransactionIds);
 
         this.loanTransactionRepository.save(waiveTransaction);
         this.loanRepository.save(loan);
+        
+        postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
 
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
@@ -555,6 +557,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 .with(changes) //
                 .build();
     }
+
 
     @Transactional
     @Override
@@ -684,5 +687,18 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 .withGroupId(loan.getGroupId()) //
                 .withLoanId(loanId) //
                 .build();
+    }
+    
+    /**
+     * @param loan
+     * @param existingTransactionIds
+     * @param existingReversedTransactionIds
+     */
+    private void postJournalEntries(final Loan loan, final List<Long> existingTransactionIds,
+            final List<Long> existingReversedTransactionIds) {
+        final ApplicationCurrency currency = this.applicationCurrencyRepository.findOneByCode(loan.getCurrencyCode());
+        final Map<String, Object> accountingBridgeData = loan.deriveAccountingBridgeData(currency.toData(), existingTransactionIds,
+                existingReversedTransactionIds);
+        journalEntryWritePlatformService.createJournalEntriesForLoan(accountingBridgeData);
     }
 }

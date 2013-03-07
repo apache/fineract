@@ -8,7 +8,6 @@ import org.mifosplatform.accounting.common.AccountingConstants.ACCRUAL_ACCOUNTS_
 import org.mifosplatform.accounting.glaccount.domain.GLAccount;
 import org.mifosplatform.accounting.journalentry.data.LoanDTO;
 import org.mifosplatform.accounting.journalentry.data.LoanTransactionDTO;
-import org.mifosplatform.infrastructure.core.service.FileUtils;
 import org.mifosplatform.organisation.office.domain.Office;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -50,7 +49,7 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
 
             /** Handle Write Offs and waivers **/
             else if ((loanTransactionDTO.getTransactionType().isWriteOff() || loanTransactionDTO.getTransactionType().isWaiveInterest() || loanTransactionDTO
-                    .getTransactionType().isWaiveCharges()) && !loanTransactionDTO.isReversed()) {
+                    .getTransactionType().isWaiveCharges())) {
                 createJournalEntriesForWriteOff(loanDTO, loanTransactionDTO, office);
             }
         }
@@ -68,8 +67,6 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
     private void createJournalEntriesForDisbursements(final LoanDTO loanDTO, final LoanTransactionDTO loanTransactionDTO,
             final Office office) {
 
-        // TODO: remove the junk transaction Id
-        String junkTransactionId = "junk" + FileUtils.generateRandomString();
         // loan properties
         final Long loanProductId = loanDTO.getLoanProductId();
         final Long loanId = loanDTO.getLoanId();
@@ -106,14 +103,14 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
             final GLAccount interestOnLoansAccount = helper.getLinkedAccrualAccountsForLoanProduct(loanProductId,
                     ACCRUAL_ACCOUNTS_FOR_LOAN.INTEREST_ON_LOANS);
             if (isReversed) {
-                helper.createDebitJournalEntryForLoanProduct(office, interestOnLoansAccount, loanId, junkTransactionId, transactionDate,
+                helper.createDebitJournalEntryForLoanProduct(office, interestOnLoansAccount, loanId, transactionId, transactionDate,
                         interestApplied);
-                helper.createCreditJournalEntryForLoanProduct(office, interestReceivableAccount, loanId, junkTransactionId,
-                        transactionDate, interestApplied);
+                helper.createCreditJournalEntryForLoanProduct(office, interestReceivableAccount, loanId, transactionId, transactionDate,
+                        interestApplied);
             } else {
-                helper.createDebitJournalEntryForLoanProduct(office, interestReceivableAccount, loanId, junkTransactionId, transactionDate,
+                helper.createDebitJournalEntryForLoanProduct(office, interestReceivableAccount, loanId, transactionId, transactionDate,
                         interestApplied);
-                helper.createCreditJournalEntryForLoanProduct(office, interestOnLoansAccount, loanId, junkTransactionId, transactionDate,
+                helper.createCreditJournalEntryForLoanProduct(office, interestOnLoansAccount, loanId, transactionId, transactionDate,
                         interestApplied);
             }
         }
@@ -240,6 +237,7 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
         final BigDecimal interestAmount = loanTransactionDTO.getInterest();
         final BigDecimal feesAmount = loanTransactionDTO.getFees();
         final BigDecimal penaltiesAmount = loanTransactionDTO.getPenalties();
+        final boolean isReversed = loanTransactionDTO.isReversed();
 
         BigDecimal totalDebitAmount = new BigDecimal(0);
 
@@ -248,34 +246,63 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
 
             final GLAccount loanPortfolioAccount = helper.getLinkedAccrualAccountsForLoanProduct(loanProductId,
                     ACCRUAL_ACCOUNTS_FOR_LOAN.LOAN_PORTFOLIO);
-            helper.createCreditJournalEntryForLoanProduct(office, loanPortfolioAccount, loanId, transactionId, transactionDate,
-                    principalAmount);
+            if (isReversed) {
+                helper.createDebitJournalEntryForLoanProduct(office, loanPortfolioAccount, loanId, transactionId, transactionDate,
+                        principalAmount);
+            } else {
+                helper.createCreditJournalEntryForLoanProduct(office, loanPortfolioAccount, loanId, transactionId, transactionDate,
+                        principalAmount);
+            }
+
         }
         if (interestAmount != null && !(interestAmount.compareTo(BigDecimal.ZERO) == 0)) {
             totalDebitAmount = totalDebitAmount.add(interestAmount);
 
             final GLAccount interestAccount = helper.getLinkedAccrualAccountsForLoanProduct(loanProductId,
                     ACCRUAL_ACCOUNTS_FOR_LOAN.INTEREST_RECEIVABLE);
-            helper.createCreditJournalEntryForLoanProduct(office, interestAccount, loanId, transactionId, transactionDate, interestAmount);
+            if (isReversed) {
+                helper.createDebitJournalEntryForLoanProduct(office, interestAccount, loanId, transactionId, transactionDate,
+                        interestAmount);
+            } else {
+                helper.createCreditJournalEntryForLoanProduct(office, interestAccount, loanId, transactionId, transactionDate,
+                        interestAmount);
+            }
         }
         if (feesAmount != null && !(feesAmount.compareTo(BigDecimal.ZERO) == 0)) {
             totalDebitAmount = totalDebitAmount.add(feesAmount);
 
             final GLAccount incomeFromFeesAccount = helper.getLinkedAccrualAccountsForLoanProduct(loanProductId,
                     ACCRUAL_ACCOUNTS_FOR_LOAN.FEES_RECEIVABLE);
-            helper.createCreditJournalEntryForLoanProduct(office, incomeFromFeesAccount, loanId, transactionId, transactionDate, feesAmount);
+            if (isReversed) {
+                helper.createDebitJournalEntryForLoanProduct(office, incomeFromFeesAccount, loanId, transactionId, transactionDate,
+                        feesAmount);
+            } else {
+                helper.createCreditJournalEntryForLoanProduct(office, incomeFromFeesAccount, loanId, transactionId, transactionDate,
+                        feesAmount);
+            }
         }
         if (penaltiesAmount != null && !(penaltiesAmount.compareTo(BigDecimal.ZERO) == 0)) {
             totalDebitAmount = totalDebitAmount.add(penaltiesAmount);
 
             final GLAccount incomeFromPenaltiesAccount = helper.getLinkedAccrualAccountsForLoanProduct(loanProductId,
                     ACCRUAL_ACCOUNTS_FOR_LOAN.PENALTIES_RECEIVABLE);
-            helper.createCreditJournalEntryForLoanProduct(office, incomeFromPenaltiesAccount, loanId, transactionId, transactionDate,
-                    penaltiesAmount);
+            if (isReversed) {
+                helper.createDebitJournalEntryForLoanProduct(office, incomeFromPenaltiesAccount, loanId, transactionId, transactionDate,
+                        penaltiesAmount);
+            } else {
+                helper.createCreditJournalEntryForLoanProduct(office, incomeFromPenaltiesAccount, loanId, transactionId, transactionDate,
+                        penaltiesAmount);
+            }
         }
         final GLAccount fundSourceAccount = helper.getLinkedAccrualAccountsForLoanProduct(loanProductId,
                 ACCRUAL_ACCOUNTS_FOR_LOAN.LOSSES_WRITTEN_OFF);
-        helper.createDebitJournalEntryForLoanProduct(office, fundSourceAccount, loanId, transactionId, transactionDate, totalDebitAmount);
+        if (isReversed) {
+            helper.createCreditJournalEntryForLoanProduct(office, fundSourceAccount, loanId, transactionId, transactionDate,
+                    totalDebitAmount);
+        } else {
+            helper.createDebitJournalEntryForLoanProduct(office, fundSourceAccount, loanId, transactionId, transactionDate,
+                    totalDebitAmount);
+        }
     }
 
 }

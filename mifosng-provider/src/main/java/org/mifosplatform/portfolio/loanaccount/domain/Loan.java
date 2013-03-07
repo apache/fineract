@@ -251,6 +251,7 @@ public class Loan extends AbstractPersistable<Long> {
     private boolean accountNumberRequiresAutoGeneration = false;
     @Transient
     private LoanRepaymentScheduleTransactionProcessorFactory transactionProcessorFactory;
+    
     @Transient
     private LoanLifecycleStateMachine loanLifecycleStateMachine;
     @Transient
@@ -532,7 +533,7 @@ public class Loan extends AbstractPersistable<Long> {
     }
 
     public LoanTransaction waiveLoanCharge(final LoanCharge loanCharge, final LoanLifecycleStateMachine loanLifecycleStateMachine,
-            final Map<String, Object> changes) {
+            final Map<String, Object> changes, final List<Long> existingTransactionIds, final List<Long> existingReversedTransactionIds) {
 
         validateLoanIsNotClosed(loanCharge);
 
@@ -553,6 +554,9 @@ public class Loan extends AbstractPersistable<Long> {
         }
 
         updateSummaryWithTotalFeeChargesDueAtDisbursement(deriveSumTotalOfChargesDueAtDisbursement());
+        
+        existingTransactionIds.addAll(findExistingTransactionIds());
+        existingReversedTransactionIds.addAll(findExistingReversedTransactionIds());
 
         final LoanTransaction waiveLoanChargeTransaction = LoanTransaction.waiveLoanCharge(this, amountWaived, transactionDate,
                 feeChargesWaived, penaltyChargesWaived);
@@ -1319,13 +1323,17 @@ public class Loan extends AbstractPersistable<Long> {
         updateLoanSummaryDerivedFields();
     }
 
-    public LoanTransaction waiveInterest(final JsonCommand command, final LoanLifecycleStateMachine loanLifecycleStateMachine) {
+    public LoanTransaction waiveInterest(final JsonCommand command, final LoanLifecycleStateMachine loanLifecycleStateMachine,final List<Long> existingTransactionIds,
+            final List<Long> existingReversedTransactionIds) {
 
         final LocalDate transactionDate = command.localDateValueOfParameterNamed("transactionDate");
         final BigDecimal transactionAmount = command.bigDecimalValueOfParameterNamed("transactionAmount");
 
         final Money amountToWaive = Money.of(loanCurrency(), transactionAmount);
         final LoanTransaction waiveInterestTransaction = LoanTransaction.waiver(this, amountToWaive, transactionDate);
+        
+        existingTransactionIds.addAll(findExistingTransactionIds());
+        existingReversedTransactionIds.addAll(findExistingReversedTransactionIds());
 
         handleRepaymentOrWaiverTransaction(waiveInterestTransaction, loanLifecycleStateMachine, null);
 
@@ -2059,6 +2067,10 @@ public class Loan extends AbstractPersistable<Long> {
 
     public Staff getLoanOfficer() {
         return this.loanOfficer;
+    }
+    
+    public LoanSummary getSummary() {
+        return this.summary;
     }
 
     public Map<String, Object> deriveAccountingBridgeData(final CurrencyData currencyData, final List<Long> existingTransactionIds,
