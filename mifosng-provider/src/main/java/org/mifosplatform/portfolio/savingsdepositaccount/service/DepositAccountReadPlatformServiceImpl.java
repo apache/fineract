@@ -19,12 +19,12 @@ import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.mifosplatform.portfolio.client.data.ClientData;
 import org.mifosplatform.portfolio.client.service.ClientReadPlatformService;
-import org.mifosplatform.portfolio.loanproduct.exception.LoanProductNotFoundException;
 import org.mifosplatform.portfolio.savingsaccountproduct.service.SavingsDepositEnumerations;
 import org.mifosplatform.portfolio.savingsdepositaccount.data.DepositAccountData;
 import org.mifosplatform.portfolio.savingsdepositaccount.data.DepositAccountTransactionData;
 import org.mifosplatform.portfolio.savingsdepositaccount.data.DepositAccountsForLookup;
 import org.mifosplatform.portfolio.savingsdepositaccount.data.DepositPermissionData;
+import org.mifosplatform.portfolio.savingsdepositaccount.exception.DepositAccountNotFoundException;
 import org.mifosplatform.portfolio.savingsdepositproduct.data.DepositProductData;
 import org.mifosplatform.portfolio.savingsdepositproduct.data.DepositProductLookup;
 import org.mifosplatform.portfolio.savingsdepositproduct.service.DepositProductReadPlatformService;
@@ -90,7 +90,7 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
 
             return depositAccountData;
         } catch (EmptyResultDataAccessException e) {
-            throw new LoanProductNotFoundException(accountId);
+            throw new DepositAccountNotFoundException(accountId);
         }
     }
 
