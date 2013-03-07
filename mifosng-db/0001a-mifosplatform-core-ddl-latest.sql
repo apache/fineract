@@ -932,7 +932,8 @@ CREATE TABLE `m_saving_schedule` (
 -- DDL for notes associated with all client/group and financial accounts
 CREATE TABLE `m_note` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `client_id` bigint(20) NOT NULL,
+  `client_id` bigint(20) DEFAULT NULL,
+  `group_id` bigint(20) DEFAULT NULL,
   `loan_id` bigint(20) DEFAULT NULL,
   `loan_transaction_id` bigint(20) DEFAULT NULL,
   `deposit_account_id` bigint(20) DEFAULT NULL,
@@ -947,6 +948,7 @@ CREATE TABLE `m_note` (
   KEY `FK7C9708924D26803` (`loan_transaction_id`),
   KEY `FK7C97089541F0A56` (`createdby_id`),
   KEY `FK7C970897179A0CB` (`client_id`),
+  KEY `FK_m_note_m_group` (`group_id`),
   KEY `FK7C970898F889C3F` (`lastmodifiedby_id`),
   KEY `FK7C9708940BE0710` (`loan_id`),
   KEY `FK_m_note_m_deposit_account` (`deposit_account_id`),
@@ -956,6 +958,7 @@ CREATE TABLE `m_note` (
   CONSTRAINT `FK7C9708940BE0710` FOREIGN KEY (`loan_id`) REFERENCES `m_loan` (`id`),
   CONSTRAINT `FK7C97089541F0A56` FOREIGN KEY (`createdby_id`) REFERENCES `m_appuser` (`id`),
   CONSTRAINT `FK7C970897179A0CB` FOREIGN KEY (`client_id`) REFERENCES `m_client` (`id`),
+  CONSTRAINT `FK_m_note_m_group` FOREIGN KEY (`group_id`) REFERENCES `m_group` (`id`),
   CONSTRAINT `FK7C970898F889C3F` FOREIGN KEY (`lastmodifiedby_id`) REFERENCES `m_appuser` (`id`),
   CONSTRAINT `FK_m_note_m_deposit_account` FOREIGN KEY (`deposit_account_id`) REFERENCES `m_deposit_account` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
