@@ -353,8 +353,7 @@ public class LoanAccountData {
 
         final Collection<LoanChargeData> charges = new ArrayList<LoanChargeData>();
         for (ChargeData charge : product.charges()) {
-            charges.add(LoanChargeData.newLoanChargeDetails(charge.getId(), charge.getName(), charge.getCurrency(), charge.getAmount(),
-                    charge.getChargeTimeType(), charge.getChargeCalculationType(), charge.isPenalty()));
+            charges.add(charge.toLoanChargeData());
         }
 
         return new LoanAccountData(acc.id, acc.accountNo, acc.status, acc.externalId, acc.clientId, acc.clientName, acc.clientOfficeId,

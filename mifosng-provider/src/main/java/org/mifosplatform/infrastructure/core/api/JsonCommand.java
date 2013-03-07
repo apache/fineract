@@ -17,6 +17,7 @@ import org.mifosplatform.infrastructure.security.domain.BasicPasswordEncodablePl
 import org.mifosplatform.infrastructure.security.domain.PlatformUser;
 import org.mifosplatform.infrastructure.security.service.PlatformPasswordEncoder;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 
 /**
@@ -39,8 +40,8 @@ public final class JsonCommand {
     private final Long apptableId;
     private final Long datatableId;
     private final Long codeId;
-    private String supportedEntityType;
-    private Long supportedEntityId;
+    private final String supportedEntityType;
+    private final Long supportedEntityId;
     private final String transactionId;
 
     public static JsonCommand from(final String jsonCommand, final JsonElement parsedCommand, final FromJsonHelper fromApiJsonHelper,
@@ -84,6 +85,15 @@ public final class JsonCommand {
 
     public JsonElement parsedJson() {
         return this.parsedCommand;
+    }
+
+    public String jsonFragment(final String paramName) {
+        String jsonFragment = null;
+        if (this.parsedCommand.getAsJsonObject().has(paramName)) {
+            JsonElement fragment = this.parsedCommand.getAsJsonObject().get(paramName);
+            jsonFragment = this.fromApiJsonHelper.toJson(fragment);
+        }
+        return jsonFragment;
     }
 
     public Long commandId() {
@@ -345,6 +355,10 @@ public final class JsonCommand {
 
     public String[] arrayValueOfParameterNamed(final String parameterName) {
         return this.fromApiJsonHelper.extractArrayNamed(parameterName, parsedCommand);
+    }
+
+    public JsonArray arrayOfParameterNamed(final String parameterName) {
+        return this.fromApiJsonHelper.extractJsonArrayNamed(parameterName, parsedCommand);
     }
 
     public boolean isChangeInPasswordParameterNamed(final String parameterName, final String existingValue,

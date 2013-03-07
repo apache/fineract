@@ -57,12 +57,13 @@ import org.springframework.stereotype.Component;
 public class LoanProductsApiResource {
 
     private final Set<String> LOAN_PRODUCT_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "name", "description", "fundId",
-            "fundName", "transactionProcessingStrategyId", "transactionProcessingStrategyName", "principal", "inArrearsTolerance",
-            "numberOfRepayments", "repaymentEvery", "interestRatePerPeriod", "annualInterestRate", "repaymentFrequencyType",
-            "interestRateFrequencyType", "amortizationType", "interestType", "interestCalculationPeriodType", "charges", "createdOn",
-            "lastModifedOn", "currencyOptions", "amortizationTypeOptions", "interestTypeOptions", "interestCalculationPeriodTypeOptions",
-            "repaymentFrequencyTypeOptions", "interestRateFrequencyTypeOptions", "fundOptions", "transactionProcessingStrategyOptions",
-            "chargeOptions", "accountingOptions", "accountingRule","accountingRuleOptions","accountingMappings","accountingMappingOptions"));
+            "fundName", "currency", "principal", "numberOfRepayments", "repaymentEvery", "repaymentFrequencyType", "interestRatePerPeriod",
+            "interestRateFrequencyType", "annualInterestRate", "amortizationType", "interestType", "interestCalculationPeriodType",
+            "inArrearsTolerance", "transactionProcessingStrategyId", "transactionProcessingStrategyName", "charges", "accountingRule",
+            "accountingMappings", "fundOptions", "currencyOptions", "repaymentFrequencyTypeOptions", "interestRateFrequencyTypeOptions",
+            "amortizationTypeOptions", "interestTypeOptions", "interestCalculationPeriodTypeOptions",
+            "transactionProcessingStrategyOptions", "chargeOptions", "accountingOptions", "accountingRuleOptions",
+            "accountingMappingOptions"));
 
     private final String resourceNameForPermissions = "LOANPRODUCT";
 
@@ -129,7 +130,7 @@ public class LoanProductsApiResource {
     @Path("template")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveNewLoanProductDetails(@Context final UriInfo uriInfo) {
+    public String retrieveTemplate(@Context final UriInfo uriInfo) {
 
         context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
 
@@ -154,7 +155,8 @@ public class LoanProductsApiResource {
 
         Map<String, Object> accountingMappings = null;
         if (loanProduct.hasAccountingEnabled()) {
-            accountingMappings = accountMappingReadPlatformService.fetchAccountMappingDetailsForLoanProduct(productId, loanProduct.accountingRuleType().getId().intValue());
+            accountingMappings = accountMappingReadPlatformService.fetchAccountMappingDetailsForLoanProduct(productId, loanProduct
+                    .accountingRuleType().getId().intValue());
             loanProduct = LoanProductData.withAccountingMappings(loanProduct, accountingMappings);
         }
 
@@ -182,7 +184,6 @@ public class LoanProductsApiResource {
 
         final boolean feeChargesOnly = true;
         Collection<ChargeData> chargeOptions = this.chargeReadPlatformService.retrieveLoanApplicableCharges(feeChargesOnly);
-        chargeOptions.removeAll(productData.charges());
         if (chargeOptions.isEmpty()) {
             chargeOptions = null;
         }
@@ -192,7 +193,6 @@ public class LoanProductsApiResource {
         final List<EnumOptionData> interestTypeOptions = dropdownReadPlatformService.retrieveLoanInterestTypeOptions();
         final List<EnumOptionData> interestCalculationPeriodTypeOptions = dropdownReadPlatformService
                 .retrieveLoanInterestRateCalculatedInPeriodOptions();
-        final List<EnumOptionData> loanTermFrequencyTypeOptions = dropdownReadPlatformService.retrieveLoanTermFrequencyTypeOptions();
         final List<EnumOptionData> repaymentFrequencyTypeOptions = dropdownReadPlatformService.retrieveRepaymentFrequencyTypeOptions();
         final List<EnumOptionData> interestRateFrequencyTypeOptions = dropdownReadPlatformService
                 .retrieveInterestRateFrequencyTypeOptions();
@@ -204,29 +204,29 @@ public class LoanProductsApiResource {
         final Collection<TransactionProcessingStrategyData> transactionProcessingStrategyOptions = this.dropdownReadPlatformService
                 .retreiveTransactionProcessingStrategies();
 
-        Map<String, List<GLAccountData>> accountOptions= new HashMap<String, List<GLAccountData>>();
+        Map<String, List<GLAccountData>> accountOptions = new HashMap<String, List<GLAccountData>>();
         List<GLAccountData> assetAccountOptions = accountReadPlatformService.retrieveAllEnabledDetailGLAccounts(GLAccountType.ASSET);
         if (assetAccountOptions.isEmpty()) {
             assetAccountOptions = null;
         }
         accountOptions.put("assetAccountOptions", assetAccountOptions);
-        
+
         List<GLAccountData> incomeAccountOptions = accountReadPlatformService.retrieveAllEnabledDetailGLAccounts(GLAccountType.INCOME);
         if (incomeAccountOptions.isEmpty()) {
             incomeAccountOptions = null;
         }
         accountOptions.put("incomeAccountOptions", incomeAccountOptions);
-        
+
         List<GLAccountData> expenseAccountOptions = accountReadPlatformService.retrieveAllEnabledDetailGLAccounts(GLAccountType.EXPENSE);
         if (expenseAccountOptions.isEmpty()) {
             expenseAccountOptions = null;
         }
         accountOptions.put("expenseAccountOptions", expenseAccountOptions);
-        
+
         List<EnumOptionData> accountingRuleTypeOptions = dropdownReadPlatformService.retrieveAccountingRuleTypeOptions();
 
         return new LoanProductData(productData, chargeOptions, currencyOptions, amortizationTypeOptions, interestTypeOptions,
-                interestCalculationPeriodTypeOptions, loanTermFrequencyTypeOptions, repaymentFrequencyTypeOptions,
-                interestRateFrequencyTypeOptions, fundOptions, transactionProcessingStrategyOptions, accountOptions, accountingRuleTypeOptions,accountingMappings);
+                interestCalculationPeriodTypeOptions, repaymentFrequencyTypeOptions, interestRateFrequencyTypeOptions, fundOptions,
+                transactionProcessingStrategyOptions, accountOptions, accountingRuleTypeOptions, accountingMappings);
     }
 }

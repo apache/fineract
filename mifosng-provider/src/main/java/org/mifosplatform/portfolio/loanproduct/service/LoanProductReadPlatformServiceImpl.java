@@ -134,18 +134,15 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
 
             final Integer numberOfRepayments = JdbcSupport.getInteger(rs, "numberOfRepayments");
             final Integer repaymentEvery = JdbcSupport.getInteger(rs, "repaidEvery");
-            
-            final Integer accountingTypeId = JdbcSupport.getInteger(rs, "accountingType");
-            final EnumOptionData accountingRuleType = LoanEnumerations.accountingRuleType(accountingTypeId);
-            
-            final Integer loanTermFrequency = repaymentEvery * numberOfRepayments;
+
+            final Integer accountingRuleId = JdbcSupport.getInteger(rs, "accountingType");
+            final EnumOptionData accountingRuleType = LoanEnumerations.accountingRuleType(accountingRuleId);
+
             final BigDecimal interestRatePerPeriod = rs.getBigDecimal("interestRatePerPeriod");
             final BigDecimal annualInterestRate = rs.getBigDecimal("annualInterestRate");
 
             final int repaymentFrequencyTypeId = JdbcSupport.getInteger(rs, "repaymentPeriodFrequency");
             final EnumOptionData repaymentFrequencyType = LoanEnumerations.repaymentFrequencyType(repaymentFrequencyTypeId);
-
-            final EnumOptionData loanTermFrequencyType = LoanEnumerations.loanTermFrequencyType(repaymentFrequencyTypeId);
 
             final int amortizationTypeId = JdbcSupport.getInteger(rs, "amortizationMethod");
             final EnumOptionData amortizationType = LoanEnumerations.amortizationType(amortizationTypeId);
@@ -160,10 +157,10 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
             final EnumOptionData interestCalculationPeriodType = LoanEnumerations
                     .interestCalculationPeriodType(interestCalculationPeriodTypeId);
 
-            return new LoanProductData(id, name, description, currency, principal, tolerance, numberOfRepayments, loanTermFrequency,
-                    repaymentEvery, interestRatePerPeriod, annualInterestRate, loanTermFrequencyType, repaymentFrequencyType,
-                    interestRateFrequencyType, amortizationType, interestType, interestCalculationPeriodType, fundId, fundName,
-                    transactionStrategyId, transactionStrategyName, this.charges, accountingRuleType);
+            return new LoanProductData(id, name, description, currency, principal, tolerance, numberOfRepayments, repaymentEvery,
+                    interestRatePerPeriod, annualInterestRate, repaymentFrequencyType, interestRateFrequencyType, amortizationType,
+                    interestType, interestCalculationPeriodType, fundId, fundName, transactionStrategyId, transactionStrategyName,
+                    this.charges, accountingRuleType);
         }
 
     }

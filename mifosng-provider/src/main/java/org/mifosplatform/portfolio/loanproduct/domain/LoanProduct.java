@@ -6,7 +6,7 @@
 package org.mifosplatform.portfolio.loanproduct.domain;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -29,6 +29,8 @@ import org.mifosplatform.portfolio.fund.domain.Fund;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.AprCalculator;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
+import com.google.gson.JsonArray;
+
 /**
  * Loan products allow for categorisation of an organisations loans into
  * something meaningful to them.
@@ -39,7 +41,7 @@ import org.springframework.data.jpa.domain.AbstractPersistable;
  * They allow for constraints to be added at product level.
  */
 @Entity
-@Table(name = "m_product_loan" , uniqueConstraints = { @UniqueConstraint(columnNames = { "name" }, name = "unq_name")})
+@Table(name = "m_product_loan", uniqueConstraints = { @UniqueConstraint(columnNames = { "name" }, name = "unq_name") })
 public class LoanProduct extends AbstractPersistable<Long> {
 
     @ManyToOne
@@ -50,7 +52,7 @@ public class LoanProduct extends AbstractPersistable<Long> {
     @JoinColumn(name = "loan_transaction_strategy_id", nullable = true)
     private LoanTransactionProcessingStrategy transactionProcessingStrategy;
 
-    @Column(name = "name", nullable = false , unique = true)
+    @Column(name = "name", nullable = false, unique = true)
     private String name;
 
     @Column(name = "description")
@@ -58,7 +60,7 @@ public class LoanProduct extends AbstractPersistable<Long> {
 
     @ManyToMany
     @JoinTable(name = "m_product_loan_charge", joinColumns = @JoinColumn(name = "product_loan_id"), inverseJoinColumns = @JoinColumn(name = "charge_id"))
-    private Set<Charge> charges;
+    private List<Charge> charges;
 
     @Embedded
     private final LoanProductRelatedDetail loanProductRelatedDetail;
@@ -67,7 +69,7 @@ public class LoanProduct extends AbstractPersistable<Long> {
     private Integer accountingRule;
 
     public static LoanProduct assembleFromJson(final Fund fund, final LoanTransactionProcessingStrategy loanTransactionProcessingStrategy,
-            final Set<Charge> productCharges, final JsonCommand command, final AprCalculator aprCalculator) {
+            final List<Charge> productCharges, final JsonCommand command, final AprCalculator aprCalculator) {
 
         final String name = command.stringValueOfParameterNamed("name");
         final String description = command.stringValueOfParameterNamed("description");
@@ -108,7 +110,7 @@ public class LoanProduct extends AbstractPersistable<Long> {
             final BigDecimal defaultAnnualNominalInterestRate, final InterestMethod interestMethod,
             final InterestCalculationPeriodMethod interestCalculationPeriodMethod, final Integer repayEvery,
             final PeriodFrequencyType repaymentFrequencyType, final Integer defaultNumberOfInstallments,
-            final AmortizationMethod amortizationMethod, final BigDecimal inArrearsTolerance, final Set<Charge> charges,
+            final AmortizationMethod amortizationMethod, final BigDecimal inArrearsTolerance, final List<Charge> charges,
             final AccountingRuleType accountingRuleType) {
         this.fund = fund;
         this.transactionProcessingStrategy = transactionProcessingStrategy;
@@ -136,10 +138,6 @@ public class LoanProduct extends AbstractPersistable<Long> {
         return this.loanProductRelatedDetail.getCurrency();
     }
 
-    public Set<Charge> getCharges() {
-        return charges;
-    }
-
     public void update(final Fund fund) {
         this.fund = fund;
     }
@@ -148,8 +146,17 @@ public class LoanProduct extends AbstractPersistable<Long> {
         this.transactionProcessingStrategy = strategy;
     }
 
-    public void update(final Set<Charge> charges) {
-        this.charges = charges;
+    public boolean update(final List<Charge> newProductCharges) {
+        boolean updated = false;
+        if (this.charges != null) {
+            final Set<Charge> setOfCharges = new HashSet<Charge>(this.charges);
+
+            updated = setOfCharges.addAll(newProductCharges);
+            if (updated) {
+                this.charges = newProductCharges;
+            }
+        }
+        return updated;
     }
 
     public Integer getAccountingType() {
@@ -202,28 +209,15 @@ public class LoanProduct extends AbstractPersistable<Long> {
         }
 
         final String chargesParamName = "charges";
-        if (command.isChangeInArrayParameterNamed(chargesParamName, getChargesIds())) {
-            final String[] newValue = command.arrayValueOfParameterNamed(chargesParamName);
-            actualChanges.put(chargesParamName, newValue);
+        if (command.hasParameter(chargesParamName)) {
+            JsonArray jsonArray = command.arrayOfParameterNamed(chargesParamName);
+            if (jsonArray != null) {
+
+            }
+            actualChanges.put(chargesParamName, command.jsonFragment(chargesParamName));
         }
 
         return actualChanges;
-    }
-
-    private String[] getChargesIds() {
-        final List<String> chargeIds = new ArrayList<String>();
-
-        if (this.charges != null) {
-            for (Charge charge : this.charges) {
-                chargeIds.add(charge.getId().toString());
-            }
-        }
-
-        return chargeIds.toArray(new String[chargeIds.size()]);
-    }
-
-    public boolean isAccountingEnabled() {
-        return !AccountingRuleType.NONE.getValue().equals(this.accountingRule);
     }
 
     public boolean isCashBasedAccountingEnabled() {

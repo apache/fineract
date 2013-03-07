@@ -11,11 +11,12 @@ import java.util.List;
 
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
+import org.mifosplatform.portfolio.loanaccount.data.LoanChargeData;
 
 /**
  * Immutable data object for charge data.
  */
-public class ChargeData {
+public class ChargeData implements Comparable<ChargeData> {
 
     private final Long id;
     private final String name;
@@ -72,36 +73,8 @@ public class ChargeData {
         this.chargeTimeTypeOptions = chargeTimeTypeOptions;
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public boolean isPenalty() {
-        return this.penalty;
-    }
-
-    public BigDecimal getAmount() {
-        return amount;
-    }
-
-    public CurrencyData getCurrency() {
-        return currency;
-    }
-
-    public EnumOptionData getChargeTimeType() {
-        return chargeTimeType;
-    }
-
-    public EnumOptionData getChargeCalculationType() {
-        return chargeCalculationType;
-    }
-
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         ChargeData chargeData = (ChargeData) obj;
         return this.id.equals(chargeData.id);
     }
@@ -109,5 +82,17 @@ public class ChargeData {
     @Override
     public int hashCode() {
         return this.id.hashCode();
+    }
+
+    @Override
+    public int compareTo(final ChargeData obj) {
+        if (obj == null) { return -1; }
+
+        return obj.id.compareTo(this.id);
+    }
+
+    public LoanChargeData toLoanChargeData() {
+        return LoanChargeData.newLoanChargeDetails(this.id, this.name, this.currency, this.amount, this.chargeTimeType,
+                this.chargeCalculationType, this.penalty);
     }
 }

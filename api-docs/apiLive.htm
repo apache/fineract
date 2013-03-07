@@ -5466,7 +5466,7 @@ Request Body:
 							<td class=fielddesc>Used like: numberOfRepayments Every
 								repaymentEvery repaymentFrequencyType<br> e.g. 10
 								(repayments) Every 12 <b>Weeks</b> <br>
-							<span>Example Values:</span> Days, Weeks, Months
+							<span>Example Values:</span> 0=Days, 1=Weeks, 2=Months
 							</td>
 						</tr>
 						<tr class=alt>
@@ -5476,15 +5476,15 @@ Request Body:
 							<td class=fielddesc>Used like: interestRatePerPeriod%
 								interestRateFrequencyType - interestType<br> e.g. 12.0000%
 								<b>Per year</b> - Declining Balance <br>
-							<span>Example Values:</span> Per month, Per year
+							<span>Example Values:</span> 2=Per month, 3=Per year
 							</td>
 						</tr>
 						<tr class=alt>
 							<td>amortizationType</td>
 						</tr>
 						<tr>
-							<td class=fielddesc><span>Example Values:</span> Equal
-								principle payments, Equal installments</td>
+							<td class=fielddesc><span>Example Values:</span> 0=Equal
+								principle payments, 1=Equal installments</td>
 						</tr>
 						</td>
 						</tr>
@@ -5495,7 +5495,7 @@ Request Body:
 							<td class=fielddesc>Used like: interestRatePerPeriod%
 								interestRateFrequencyType - interestType<br> e.g. 12.0000%
 								Per year - <b>Declining Balance</b> <br>
-							<span>Example Values:</span> Declining Balance, Flat
+							<span>Example Values:</span> 0=Declining Balance, 1=Flat
 							</td>
 						</tr>
 						</td>
@@ -5504,8 +5504,8 @@ Request Body:
 							<td>interestCalculationPeriodType</td>
 						</tr>
 						<tr>
-							<td class=fielddesc><span>Example Values:</span> Same as
-								repayment period, Daily</td>
+							<td class=fielddesc><span>Example Values:</span> 0=Daily, 
+								1=Same as repayment period</td>
 						</tr>
 						</td>
 						</tr>
@@ -5514,8 +5514,8 @@ Request Body:
 							<td>accountingRule</td>
 						</tr>
 						<tr>
-							<td class=fielddesc><span>Example Values:</span>NONE(1),
-								CASH_BASED(2), ACCRUAL_BASED(3)</td>
+							<td class=fielddesc><span>Example Values:</span>1=NONE,
+								2=CASH_BASED, 3=ACCRUAL_BASED</td>
 						</tr>
 						</td>
 						</tr>
@@ -5541,61 +5541,55 @@ GET https://DomainName/api/v1/loanproducts
 					</code>
 					<code class="method-response">
 [
-    {
-        "id": 1,
-        "name": "A new loan product for me",
-        "currency": {
-            "code": "USD",
-            "name": "US Dollar",
-            "decimalPlaces": 2,
-            "displaySymbol": "$",
-            "nameCode": "currency.USD",
-            "displayLabel": "US Dollar ($)"
-        },
-        "principal": 100000,
-        "numberOfRepayments": 12,
-        "loanTermFrequency": 12,
-        "repaymentEvery": 1,
-        "loanTermFrequencyType": {
-            "id": 2,
-            "code": "loanTermFrequency.periodFrequencyType.months",
-            "value": "Months"
-        },
-        "repaymentFrequencyType": {
-            "id": 2,
-            "code": "repaymentFrequency.periodFrequencyType.months",
-            "value": "Months"
-        },
-        "transactionProcessingStrategyId": 1,
-        "transactionProcessingStrategyName": "Mifos style",
-        "interestRatePerPeriod": 1.75,
-        "interestRateFrequencyType": {
-            "id": 2,
-            "code": "interestRateFrequency.periodFrequencyType.months",
-            "value": "Per month"
-        },
-        "annualInterestRate": 21,
-        "amortizationType": {
-            "id": 1,
-            "code": "amortizationType.equal.installments",
-            "value": "Equal installments"
-        },
-        "interestType": {
-            "id": 0,
-            "code": "interestType.declining.balance",
-            "value": "Declining Balance"
-        },
-        "interestCalculationPeriodType": {
-            "id": 1,
-            "code": "interestCalculationPeriodType.same.as.repayment.period",
-            "value": "Same as repayment period"
-        },
-        "accountingRule": {
-            "id": 1,
-            "code": "accountingRuleType.none",
-            "value": "NONE"
-        }
+  {
+    "id": 1,
+    "name": "LP with Charges but no accounting)",
+    "currency": {
+      "code": "USD",
+      "name": "US Dollar",
+      "decimalPlaces": 2,
+      "displaySymbol": "$",
+      "nameCode": "currency.USD",
+      "displayLabel": "US Dollar ($)"
+    },
+    "principal": 100000,
+    "numberOfRepayments": 12,
+    "repaymentEvery": 1,
+    "repaymentFrequencyType": {
+      "id": 2,
+      "code": "repaymentFrequency.periodFrequencyType.months",
+      "value": "Months"
+    },
+    "interestRatePerPeriod": 1.75,
+    "interestRateFrequencyType": {
+      "id": 2,
+      "code": "interestRateFrequency.periodFrequencyType.months",
+      "value": "Per month"
+    },
+    "annualInterestRate": 21,
+    "amortizationType": {
+      "id": 1,
+      "code": "amortizationType.equal.installments",
+      "value": "Equal installments"
+    },
+    "interestType": {
+      "id": 0,
+      "code": "interestType.declining.balance",
+      "value": "Declining Balance"
+    },
+    "interestCalculationPeriodType": {
+      "id": 1,
+      "code": "interestCalculationPeriodType.same.as.repayment.period",
+      "value": "Same as repayment period"
+    },
+    "transactionProcessingStrategyId": 1,
+    "transactionProcessingStrategyName": "Mifos style",
+    "accountingRule": {
+      "id": 1,
+      "code": "accountingRuleType.none",
+      "value": "NONE"
     }
+  }
 ]
 					</code>
 				</div>
@@ -5625,17 +5619,12 @@ GET https://DomainName/api/v1/loanproducts/template
 					<code class="method-response">
 {
   "currency": {
-    "code": "USD",
-    "name": "US Dollar",
+    "code": "UGX",
+    "name": "Uganda Shilling",
     "decimalPlaces": 2,
-    "displaySymbol": "$",
-    "nameCode": "currency.USD",
-    "displayLabel": "US Dollar ($)"
-  },
-  "loanTermFrequencyType": {
-    "id": 2,
-    "code": "loanTermFrequency.periodFrequencyType.months",
-    "value": "Months"
+    "displaySymbol": "USh",
+    "nameCode": "currency.UGX",
+    "displayLabel": "Uganda Shilling (USh)"
   },
   "repaymentFrequencyType": {
     "id": 2,
@@ -5662,43 +5651,51 @@ GET https://DomainName/api/v1/loanproducts/template
     "code": "interestCalculationPeriodType.same.as.repayment.period",
     "value": "Same as repayment period"
   },
-  "accountingRule": 1,
+  "transactionProcessingStrategyId": 2,
+  "transactionProcessingStrategyName": "Heavensfamily",
+  "accountingRule": {
+    "id": 1,
+    "code": "accountingRuleType.none",
+    "value": "NONE"
+  },
+  "accountingMappings": {},
   "currencyOptions": [
     {
-      "code": "USD",
-      "name": "US Dollar",
+      "code": "UGX",
+      "name": "Uganda Shilling",
       "decimalPlaces": 2,
-      "displaySymbol": "$",
-      "nameCode": "currency.USD",
-      "displayLabel": "US Dollar ($)"
+      "displaySymbol": "USh",
+      "nameCode": "currency.UGX",
+      "displayLabel": "Uganda Shilling (USh)"
     }
   ],
-  "fundOptions": [
+  "repaymentFrequencyTypeOptions": [
+    {
+      "id": 0,
+      "code": "repaymentFrequency.periodFrequencyType.days",
+      "value": "Days"
+    },
     {
       "id": 1,
-      "name": "EU Agri Fund"
-    }
-  ],
-  "transactionProcessingStrategyOptions": [
-    {
-      "id": 1,
-      "code": "mifos-standard-strategy",
-      "name": "Mifos style"
+      "code": "repaymentFrequency.periodFrequencyType.weeks",
+      "value": "Weeks"
     },
     {
       "id": 2,
-      "code": "heavensfamily-strategy",
-      "name": "Heavensfamily"
+      "code": "repaymentFrequency.periodFrequencyType.months",
+      "value": "Months"
+    }
+  ],
+  "interestRateFrequencyTypeOptions": [
+    {
+      "id": 2,
+      "code": "interestRateFrequency.periodFrequencyType.months",
+      "value": "Per month"
     },
     {
       "id": 3,
-      "code": "creocore-strategy",
-      "name": "Creocore"
-    },
-    {
-      "id": 4,
-      "code": "rbi-india-strategy",
-      "name": "RBI (India)"
+      "code": "interestRateFrequency.periodFrequencyType.years",
+      "value": "Per year"
     }
   ],
   "amortizationTypeOptions": [
@@ -5737,58 +5734,274 @@ GET https://DomainName/api/v1/loanproducts/template
       "value": "Same as repayment period"
     }
   ],
-  "repaymentFrequencyTypeOptions": [
-    {
-      "id": 0,
-      "code": "repaymentFrequency.periodFrequencyType.days",
-      "value": "Days"
-    },
-    {
-      "id": 1,
-      "code": "repaymentFrequency.periodFrequencyType.weeks",
-      "value": "Weeks"
-    },
+  "transactionProcessingStrategyOptions": [
     {
       "id": 2,
-      "code": "repaymentFrequency.periodFrequencyType.months",
-      "value": "Months"
-    }
-  ],
-  "interestRateFrequencyTypeOptions": [
-    {
-      "id": 2,
-      "code": "interestRateFrequency.periodFrequencyType.months",
-      "value": "Per month"
-    },
-    {
-      "id": 3,
-      "code": "interestRateFrequency.periodFrequencyType.years",
-      "value": "Per year"
-    }
-  ],
-  "loanTermFrequencyTypeOptions": [
-    {
-      "id": 0,
-      "code": "loanTermFrequency.periodFrequencyType.days",
-      "value": "Days"
-    },
-    {
-      "id": 1,
-      "code": "loanTermFrequency.periodFrequencyType.weeks",
-      "value": "Weeks"
-    },
-    {
-      "id": 2,
-      "code": "loanTermFrequency.periodFrequencyType.months",
-      "value": "Months"
-    },
-    {
-      "id": 3,
-      "code": "loanTermFrequency.periodFrequencyType.years",
-      "value": "Years"
+      "code": "heavensfamily-strategy",
+      "name": "Heavensfamily"
     }
   ],
   "chargeOptions": [
+    {
+      "id": 1,
+      "name": "Bank Fee (per installment)",
+      "active": true,
+      "penalty": false,
+      "currency": {
+        "code": "UGX",
+        "name": "Uganda Shilling",
+        "decimalPlaces": 2,
+        "displaySymbol": "USh",
+        "nameCode": "currency.UGX",
+        "displayLabel": "Uganda Shilling (USh)"
+      },
+      "amount": 1500,
+      "chargeTimeType": {
+        "id": 2,
+        "code": "chargeTimeType.specifiedDueDate",
+        "value": "Specified due date"
+      },
+      "chargeAppliesTo": {
+        "id": 1,
+        "code": "chargeAppliesTo.loan",
+        "value": "Loan"
+      },
+      "chargeCalculationType": {
+        "id": 1,
+        "code": "chargeCalculationType.flat",
+        "value": "Flat"
+      }
+    }
+  ],
+  "accountingRuleOptions": [
+    {
+      "id": 1,
+      "code": "accountingRuleType.none",
+      "value": "NONE"
+    },
+    {
+      "id": 2,
+      "code": "accountingRuleType.cash",
+      "value": "CASH BASED"
+    },
+    {
+      "id": 3,
+      "code": "accountingRuleType.accrual",
+      "value": "ACCRUAL BASED"
+    }
+  ],
+  "accountingMappingOptions": {
+    "assetAccountOptions": [
+      {
+        "id": 2,
+        "name": "Cash in Valut 1",
+        "glCode": "11101",
+        "disabled": false,
+        "manualEntriesAllowed": true,
+        "type": {
+          "id": 1,
+          "code": "accountType.asset",
+          "value": "ASSET"
+        },
+        "usage": {
+          "id": 1,
+          "code": "accountUsage.detail",
+          "value": "DETAIL"
+        }
+      },
+      {
+        "id": 4,
+        "name": "Centenary Opening Account",
+        "glCode": "11201",
+        "disabled": false,
+        "manualEntriesAllowed": true,
+        "type": {
+          "id": 1,
+          "code": "accountType.asset",
+          "value": "ASSET"
+        },
+        "usage": {
+          "id": 1,
+          "code": "accountUsage.detail",
+          "value": "DETAIL"
+        }
+      }
+    ],
+    "expenseAccountOptions": [
+      {
+        "id": 41,
+        "name": "Water Charges",
+        "glCode": "42102",
+        "disabled": false,
+        "manualEntriesAllowed": true,
+        "type": {
+          "id": 5,
+          "code": "accountType.expense",
+          "value": "EXPENSE"
+        },
+        "usage": {
+          "id": 1,
+          "code": "accountUsage.detail",
+          "value": "DETAIL"
+        }
+      },
+      {
+        "id": 42,
+        "name": "Electricity Charges",
+        "glCode": "42103",
+        "disabled": false,
+        "manualEntriesAllowed": true,
+        "type": {
+          "id": 5,
+          "code": "accountType.expense",
+          "value": "EXPENSE"
+        },
+        "usage": {
+          "id": 1,
+          "code": "accountUsage.detail",
+          "value": "DETAIL"
+        }
+      },
+      {
+        "id": 97,
+        "name": "Miscellaneous",
+        "glCode": "42905",
+        "disabled": false,
+        "manualEntriesAllowed": true,
+        "type": {
+          "id": 5,
+          "code": "accountType.expense",
+          "value": "EXPENSE"
+        },
+        "usage": {
+          "id": 1,
+          "code": "accountUsage.detail",
+          "value": "DETAIL"
+        }
+      }
+    ],
+    "incomeAccountOptions": [
+      {
+        "id": 34,
+        "name": "Interest on Loans",
+        "glCode": "31101",
+        "disabled": false,
+        "manualEntriesAllowed": true,
+        "type": {
+          "id": 4,
+          "code": "accountType.income",
+          "value": "INCOME"
+        },
+        "usage": {
+          "id": 1,
+          "code": "accountUsage.detail",
+          "value": "DETAIL"
+        }
+      },
+      {
+        "id": 35,
+        "name": "Late Payment Interest",
+        "glCode": "31102",
+        "disabled": false,
+        "manualEntriesAllowed": true,
+        "type": {
+          "id": 4,
+          "code": "accountType.income",
+          "value": "INCOME"
+        },
+        "usage": {
+          "id": 1,
+          "code": "accountUsage.detail",
+          "value": "DETAIL"
+        }
+      },
+      {
+        "id": 37,
+        "name": "Collected Bank Fees Receivable",
+        "glCode": "6201",
+        "disabled": false,
+        "manualEntriesAllowed": true,
+        "type": {
+          "id": 4,
+          "code": "accountType.income",
+          "value": "INCOME"
+        },
+        "usage": {
+          "id": 1,
+          "code": "accountUsage.detail",
+          "value": "DETAIL"
+        }
+      }
+    ]
+  }
+}
+					</code>
+				</div>
+			</div>
+
+			<a id="loanproducts_retrieve" name="loanproducts_retrieve"
+				class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Retrieve a Loan Product</h4>
+					<p>Example Requests:</p>
+					<div class=apiClick>loanproducts/1</div>
+					<br>
+					<br>
+					<div class=apiClick>loanproducts/1?template=true</div>
+					<br>
+					<br>
+					<div class=apiClick>loanproducts/1?fields=name,description,numberOfRepayments</div>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+GET https://DomainName/api/v1/loanproducts/{productId}
+					</code>
+					<code class="method-response">
+{
+  "id": 1,
+  "name": "LP with Charges but no accounting)",
+  "currency": {
+    "code": "USD",
+    "name": "US Dollar",
+    "decimalPlaces": 2,
+    "displaySymbol": "$",
+    "nameCode": "currency.USD",
+    "displayLabel": "US Dollar ($)"
+  },
+  "principal": 100000,
+  "numberOfRepayments": 12,
+  "repaymentEvery": 1,
+  "repaymentFrequencyType": {
+    "id": 2,
+    "code": "repaymentFrequency.periodFrequencyType.months",
+    "value": "Months"
+  },
+  "interestRatePerPeriod": 1.75,
+  "interestRateFrequencyType": {
+    "id": 2,
+    "code": "interestRateFrequency.periodFrequencyType.months",
+    "value": "Per month"
+  },
+  "annualInterestRate": 21,
+  "amortizationType": {
+    "id": 1,
+    "code": "amortizationType.equal.installments",
+    "value": "Equal installments"
+  },
+  "interestType": {
+    "id": 0,
+    "code": "interestType.declining.balance",
+    "value": "Declining Balance"
+  },
+  "interestCalculationPeriodType": {
+    "id": 1,
+    "code": "interestCalculationPeriodType.same.as.repayment.period",
+    "value": "Same as repayment period"
+  },
+  "transactionProcessingStrategyId": 1,
+  "transactionProcessingStrategyName": "Mifos style",
+  "charges": [
     {
       "id": 1,
       "name": "Loan service fee",
@@ -5820,234 +6033,11 @@ GET https://DomainName/api/v1/loanproducts/template
       }
     }
   ],
-  "accountingOptions": {
-        "assetAccountOptions": [
-            {
-                "id": 1,
-                "name": "Fund Source For Loans",
-                "glCode": "100001",
-                "disabled": false,
-                "manualEntriesAllowed": true,
-                "type": {
-                    "id": 1,
-                    "code": "accountType.asset",
-                    "value": "ASSET"
-                },
-                "usage": {
-                    "id": 1,
-                    "code": "accountUsage.detail",
-                    "value": "DETAIL"
-                },
-                "description": "Desc"
-            },
-            {
-                "id": 2,
-                "name": "Interest Receivable",
-                "glCode": "100002",
-                "disabled": false,
-                "manualEntriesAllowed": true,
-                "type": {
-                    "id": 1,
-                    "code": "accountType.asset",
-                    "value": "ASSET"
-                },
-                "usage": {
-                    "id": 1,
-                    "code": "accountUsage.detail",
-                    "value": "DETAIL"
-                },
-                "description": "Desc"
-            },
-            {
-                "id": 3,
-                "name": "Fees Receivable",
-                "glCode": "100003",
-                "disabled": false,
-                "manualEntriesAllowed": true,
-                "type": {
-                    "id": 1,
-                    "code": "accountType.asset",
-                    "value": "ASSET"
-                },
-                "usage": {
-                    "id": 1,
-                    "code": "accountUsage.detail",
-                    "value": "DETAIL"
-                },
-                "description": "Desc"
-            },
-            {
-                "id": 4,
-                "name": "Penalties Receivable",
-                "glCode": "100004",
-                "disabled": false,
-                "manualEntriesAllowed": true,
-                "type": {
-                    "id": 1,
-                    "code": "accountType.asset",
-                    "value": "ASSET"
-                },
-                "usage": {
-                    "id": 1,
-                    "code": "accountUsage.detail",
-                    "value": "DETAIL"
-                },
-                "description": "better duddette"
-            }
-        ],
-        "expenseAccountOptions": [
-            {
-                "id": 5,
-                "name": "Written Off Losses",
-                "glCode": "500005",
-                "disabled": false,
-                "manualEntriesAllowed": true,
-                "type": {
-                    "id": 5,
-                    "code": "accountType.expense",
-                    "value": "EXPENSE"
-                },
-                "usage": {
-                    "id": 1,
-                    "code": "accountUsage.detail",
-                    "value": "DETAIL"
-                },
-                "description": "Desc"
-            }
-        ],
-        "incomeAccountOptions": [
-            {
-                "id": 6,
-                "name": "Income from Interest",
-                "glCode": "400001",
-                "disabled": false,
-                "manualEntriesAllowed": true,
-                "type": {
-                    "id": 4,
-                    "code": "accountType.income",
-                    "value": "INCOME"
-                },
-                "usage": {
-                    "id": 1,
-                    "code": "accountUsage.detail",
-                    "value": "DETAIL"
-                },
-                "description": "Desc"
-            },
-            {
-                "id": 7,
-                "name": "Income from Fees",
-                "glCode": "400002",
-                "disabled": false,
-                "manualEntriesAllowed": true,
-                "type": {
-                    "id": 4,
-                    "code": "accountType.income",
-                    "value": "INCOME"
-                },
-                "usage": {
-                    "id": 1,
-                    "code": "accountUsage.detail",
-                    "value": "DETAIL"
-                },
-                "description": "Desc"
-            },
-            {
-                "id": 8,
-                "name": "Income from Penalties",
-                "glCode": "400003",
-                "disabled": false,
-                "manualEntriesAllowed": true,
-                "type": {
-                    "id": 4,
-                    "code": "accountType.income",
-                    "value": "INCOME"
-                },
-                "usage": {
-                    "id": 1,
-                    "code": "accountUsage.detail",
-                    "value": "DETAIL"
-                },
-                "description": "Desc"
-            }
-        ]
-  },
-  "accountingMappings": {}
-}
-					</code>
-				</div>
-			</div>
-
-			<a id="loanproducts_retrieve" name="loanproducts_retrieve"
-				class="old-syle-anchor">&nbsp;</a>
-			<div class="method-section">
-				<div class="method-description">
-					<h4>Retrieve a Loan Product</h4>
-					<p>Example Requests:</p>
-					<div class=apiClick>loanproducts/1</div>
-					<br>
-					<br>
-					<div class=apiClick>loanproducts/1?template=true</div>
-					<br>
-					<br>
-					<div class=apiClick>loanproducts/1?fields=name,description,numberOfRepayments</div>
-				</div>
-				<div class="method-example">
-					<code class="method-declaration">
-GET https://DomainName/api/v1/loanproducts/{productId}
-					</code>
-					<code class="method-response">
-{
+  "accountingRule": {
     "id": 1,
-    "name": "A new loan product for me",
-    "currency": {
-        "code": "USD",
-        "name": "US Dollar",
-        "decimalPlaces": 2,
-        "displaySymbol": "$",
-        "nameCode": "currency.USD",
-        "displayLabel": "US Dollar ($)"
-    },
-    "principal": 100000,
-    "numberOfRepayments": 12,
-    "loanTermFrequency": 12,
-    "repaymentEvery": 1,
-    "loanTermFrequencyType": {
-        "id": 2,
-        "code": "loanTermFrequency.periodFrequencyType.months",
-        "value": "Months"
-    },
-    "repaymentFrequencyType": {
-        "id": 2,
-        "code": "repaymentFrequency.periodFrequencyType.months",
-        "value": "Months"
-    },
-    "transactionProcessingStrategyId": 1,
-    "transactionProcessingStrategyName": "Mifos style",
-    "interestRatePerPeriod": 1.75,
-    "interestRateFrequencyType": {
-        "id": 2,
-        "code": "interestRateFrequency.periodFrequencyType.months",
-        "value": "Per month"
-    },
-    "annualInterestRate": 21,
-    "amortizationType": {
-        "id": 1,
-        "code": "amortizationType.equal.installments",
-        "value": "Equal installments"
-    },
-    "interestType": {
-        "id": 0,
-        "code": "interestType.declining.balance",
-        "value": "Declining Balance"
-    },
-    "interestCalculationPeriodType": {
-        "id": 1,
-        "code": "interestCalculationPeriodType.same.as.repayment.period",
-        "value": "Same as repayment period"
-    },
-    "accountingRule": 1,
-    "charges": []
+    "code": "accountingRuleType.none",
+    "value": "NONE"
+  }
 }
 					</code>
 				</div>
@@ -6074,11 +6064,17 @@ GET https://DomainName/api/v1/loanproducts/{productId}
 						</tr>
 						<tr class=alt>
 							<td>name, currencyCode, digitsAfterDecimal, principal,
-								inArrearsTolerance, repaymentFrequencyType, repaymentEvery,
-								numberOfRepayments, interestRatePerPeriod,
-								interestRateFrequencyType, amortizationType, interestType,
-								interestCalculationPeriodType, accountingRule</td>
+								numberOfRepayments, repaymentEvery, repaymentFrequencyType, 
+								interestRatePerPeriod, interestRateFrequencyType, amortizationType, interestType,
+								interestCalculationPeriodType, transactionProcessingStrategyId, accountingRule</td>
 						</tr>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Optional Fields</div></td>
+						</tr>
+						<tr class=alt>
+							<td>inArrearsTolerance, charges</td>
+						</tr>
+
 						<tr class="matrixHeadingBG">
 							<td><div class="mifosXHeading2">Additional Mandatory Fields for Cash(2) based accounting</div></td>
 						</tr>
@@ -6107,7 +6103,7 @@ POST loanproducts
 Content-Type: application/json 
 Request Body:
 {
-    "name": "A new loan product for me",
+    "name": "LP with Charges but no accounting)",
     "currencyCode": "USD",
     "locale": "en_GB",
     "digitsAfterDecimal": "2",
@@ -6115,12 +6111,14 @@ Request Body:
     "numberOfRepayments": "12",
     "repaymentEvery": "1",
     "repaymentFrequencyType": 2,
-    "transactionProcessingStrategyId": 1,
     "interestRatePerPeriod": "1.75",
     "interestRateFrequencyType": 2,
     "amortizationType": 1,
     "interestType": 0,
     "interestCalculationPeriodType": 1,
+    "inArrearsTolerance": "0",
+    "transactionProcessingStrategyId": 1,
+    "charges":[{"id":"1"},{"id":"1"}],
     "accountingRule": 1
 }
 					</code>
@@ -6134,7 +6132,7 @@ POST loanproducts
 Content-Type: application/json 
 Request Body:
 {
-    "name": "A new loan product for me",
+    "name": "LP Cash Accounting",
     "currencyCode": "USD",
     "locale": "en_GB",
     "digitsAfterDecimal": "2",
@@ -6148,13 +6146,13 @@ Request Body:
     "amortizationType": 1,
     "interestType": 0,
     "interestCalculationPeriodType": 1,
-    "accountingRule":"3",
-    "fundSourceAccountId":"15",
-    "loanPortfolioAccountId":"16",
-    "interestOnLoanAccountId":"14",
-    "incomeFromFeeAccountId":"13",
-    "incomeFromPenaltyAccountId":"12",
-    "writeOffAccountId":"11"
+    "accountingRule":"2",
+    "fundSourceAccountId":"4",
+    "loanPortfolioAccountId":"8",
+    "interestOnLoanAccountId":"34",
+    "incomeFromFeeAccountId":"37",
+    "incomeFromPenaltyAccountId":"35",
+    "writeOffAccountId":"41"
 }
 					</code>
 					<code class="method-response">
@@ -6167,7 +6165,7 @@ POST loanproducts
 Content-Type: application/json 
 Request Body:
 {
-    "name": "A new loan product for me",
+    "name": "LP Accrual Accounting",
     "currencyCode": "USD",
     "locale": "en_GB",
     "digitsAfterDecimal": "2",
@@ -6182,15 +6180,15 @@ Request Body:
     "interestType": 0,
     "interestCalculationPeriodType": 1,
     "accountingRule":"3",
-    "fundSourceAccountId":"15",
-    "loanPortfolioAccountId":"16",
-    "receivableInterestAccountId":"10",
-    "receivableFeeAccountId":"9",
-    "receivablePenaltyAccountId":"8",
-    "interestOnLoanAccountId":"14",
-    "incomeFromFeeAccountId":"13",
-    "incomeFromPenaltyAccountId":"12",
-    "writeOffAccountId":"11"
+    "fundSourceAccountId":"4",
+    "loanPortfolioAccountId":"8",
+    "receivableInterestAccountId":"9",
+    "receivableFeeAccountId":"11",
+    "receivablePenaltyAccountId":"10",
+    "interestOnLoanAccountId":"34",
+    "incomeFromFeeAccountId":"37",
+    "incomeFromPenaltyAccountId":"35",
+    "writeOffAccountId":"41"
 }
 					</code>
 					<code class="method-response">
@@ -6823,7 +6821,8 @@ Request Body:
     "locale": "en",
     "amount": "230.56",
     "chargeTimeType": "1",
-    "chargeCalculationType": "1"
+    "chargeCalculationType": "1",
+    "active": true
 }
 					</code>
 					<code class="method-response">{ "resourceId": 1 }</code>

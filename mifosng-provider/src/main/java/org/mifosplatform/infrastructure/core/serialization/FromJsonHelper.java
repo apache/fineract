@@ -21,6 +21,7 @@ import org.mifosplatform.infrastructure.core.exception.UnsupportedParameterExcep
 import org.springframework.stereotype.Component;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -46,7 +47,7 @@ public class FromJsonHelper {
         return this.gsonConverter.fromJson(json, typeOfMap);
     }
 
-    public <T> T fromJson(final String json, Class<T> classOfT) {
+    public <T> T fromJson(final String json, final Class<T> classOfT) {
         return this.gsonConverter.fromJson(json, classOfT);
     }
 
@@ -93,6 +94,10 @@ public class FromJsonHelper {
         return helperDelegator.extractLongNamed(parameterName, element, parametersPassedInRequest);
     }
 
+    public JsonArray extractJsonArrayNamed(final String parameterName, final JsonElement element) {
+        return helperDelegator.extractJsonArrayNamed(parameterName, element);
+    }
+
     public String[] extractArrayNamed(final String parameterName, final JsonElement element) {
         return helperDelegator.extractArrayNamed(parameterName, element, new HashSet<String>());
     }
@@ -109,7 +114,7 @@ public class FromJsonHelper {
         return helperDelegator.extractBooleanNamed(parameterName, element, parametersPassedInRequest);
     }
 
-    public LocalDate extractLocalDateNamed(final String parameterName, JsonElement element) {
+    public LocalDate extractLocalDateNamed(final String parameterName, final JsonElement element) {
         return helperDelegator.extractLocalDateNamed(parameterName, element, new HashSet<String>());
     }
 

@@ -32,7 +32,7 @@ import com.google.gson.JsonPrimitive;
  * Helper class to extract values of json named attributes.
  */
 public class JsonParserHelper {
-    
+
     public boolean parameterExists(final String parameterName, final JsonElement element) {
         return element.getAsJsonObject().has(parameterName);
     }
@@ -137,19 +137,21 @@ public class JsonParserHelper {
         }
         return value;
     }
-    
-    /** Method used to extract integers from unformatted strings.
-     * Ex: "1" , "100002" etc
+
+    /**
+     * Method used to extract integers from unformatted strings. Ex: "1" ,
+     * "100002" etc
      * 
-     * Please note that this method does not support extracting Integers from locale
-     * specific formatted strings Ex "1,000" etc
+     * Please note that this method does not support extracting Integers from
+     * locale specific formatted strings Ex "1,000" etc
      * 
      * @param parameterName
      * @param element
      * @param parametersPassedInRequest
      * @return
      */
-    public Integer extractIntegerSansLocaleNamed(final String parameterName, final JsonElement element, final Set<String> parametersPassedInRequest) {
+    public Integer extractIntegerSansLocaleNamed(final String parameterName, final JsonElement element,
+            final Set<String> parametersPassedInRequest) {
         Integer intValue = null;
         if (element.isJsonObject()) {
             JsonObject object = element.getAsJsonObject();
@@ -209,6 +211,19 @@ public class JsonParserHelper {
             }
         }
         return arrayValue;
+    }
+
+    public JsonArray extractJsonArrayNamed(final String parameterName, final JsonElement element) {
+        JsonArray jsonArray = null;
+
+        if (element.isJsonObject()) {
+            JsonObject object = element.getAsJsonObject();
+            if (object.has(parameterName)) {
+                jsonArray = object.get(parameterName).getAsJsonArray();
+            }
+        }
+
+        return jsonArray;
     }
 
     /**
@@ -391,15 +406,14 @@ public class JsonParserHelper {
         } catch (NumberFormatException e) {
 
             List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
-            ApiParameterError error = ApiParameterError.parameterError("validation.msg.invalid.integer", "The parameter "
-                    + parameterName + " has value: " + numericalValueFormatted + " which is invalid integer.", parameterName, numericalValueFormatted);
+            ApiParameterError error = ApiParameterError.parameterError("validation.msg.invalid.integer", "The parameter " + parameterName
+                    + " has value: " + numericalValueFormatted + " which is invalid integer.", parameterName, numericalValueFormatted);
             dataValidationErrors.add(error);
 
             throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
                     dataValidationErrors);
         }
     }
-
 
     public BigDecimal convertFrom(final String numericalValueFormatted, final String parameterName, final Locale clientApplicationLocale) {
 
