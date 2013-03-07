@@ -32,6 +32,7 @@ import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSeria
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.portfolio.note.data.NoteData;
 import org.mifosplatform.portfolio.note.domain.NoteType;
+import org.mifosplatform.portfolio.note.exception.NoteResourceNotSupportedFoundException;
 import org.mifosplatform.portfolio.note.service.NoteReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -70,6 +71,9 @@ public class NotesApiResource {
             @PathParam("resourceId") final Long resourceId, @Context final UriInfo uriInfo) {
         
         NoteType noteType = NoteType.fromApiUrl(resourceType);
+        
+        if(noteType == null){ throw new NoteResourceNotSupportedFoundException(resourceType); };
+        
         this.context.authenticatedUser().validateHasReadPermission(getResourceNameForPermissions(noteType));
         
         final Integer noteTypeId = noteType.getValue();
@@ -88,6 +92,9 @@ public class NotesApiResource {
             @PathParam("noteId") final Long noteId, @Context final UriInfo uriInfo) {
 
         NoteType noteType = NoteType.fromApiUrl(resourceType);
+        
+        if(noteType == null){ throw new NoteResourceNotSupportedFoundException(resourceType); };
+        
         this.context.authenticatedUser().validateHasReadPermission(getResourceNameForPermissions(noteType));
 
         final Integer noteTypeId = noteType.getValue();
@@ -105,6 +112,9 @@ public class NotesApiResource {
             final String apiRequestBodyAsJson) {
 
         NoteType noteType = NoteType.fromApiUrl(resourceType);
+        
+        if(noteType == null){ throw new NoteResourceNotSupportedFoundException(resourceType); };
+        
         final String resourceNameForPermissions = getResourceNameForPermissions(noteType);
         final CommandWrapper commandRequest = new CommandWrapperBuilder().createNote(resourceNameForPermissions, resourceType, resourceId)
                 .withJson(apiRequestBodyAsJson).build();
@@ -122,6 +132,9 @@ public class NotesApiResource {
             @PathParam("noteId") final Long noteId, final String apiRequestBodyAsJson) {
         
         NoteType noteType = NoteType.fromApiUrl(resourceType);
+        
+        if(noteType == null){ throw new NoteResourceNotSupportedFoundException(resourceType); };
+        
         final String resourceNameForPermissions = getResourceNameForPermissions(noteType);
         
         final CommandWrapper commandRequest = new CommandWrapperBuilder().updateNote(resourceNameForPermissions, resourceType, resourceId, noteId).withJson(apiRequestBodyAsJson).build();
@@ -139,6 +152,9 @@ public class NotesApiResource {
             @PathParam("noteId") final Long noteId) {
 
         NoteType noteType = NoteType.fromApiUrl(resourceType);
+        
+        if(noteType == null){ throw new NoteResourceNotSupportedFoundException(resourceType); };
+        
         final String resourceNameForPermissions = getResourceNameForPermissions(noteType);
         
         final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteNote(resourceNameForPermissions, resourceType, resourceId, noteId).build();

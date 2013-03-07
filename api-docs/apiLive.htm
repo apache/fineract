@@ -187,23 +187,6 @@
 								<td></td>
 								<td></td>
 							</tr>
-							<tr>
-								<td></td>
-								<td>clients/{clientId}/notes</td>
-								<td><a href="#clients_addnote">Add a Client Note</a></td>
-								<td><a href="#clients_notes">Retrieve a Client's Notes</a></td>
-								<td></td>
-								<td></td>
-							</tr>
-							<tr class="alt">
-								<td></td>
-								<td>clients/{clientId}/notes/{noteId}</td>
-								<td></td>
-								<td><a href="#clients_retrievenote">Retrieve a Client
-										Note</a></td>
-								<td><a href="#clients_updatenote">Update a Client Note</a></td>
-								<td></td>
-							</tr>
 						</table>
 					</div>
 				</div>
@@ -803,6 +786,22 @@
 								<td><a href="#datatables_delete_1M">Delete Entry in
 										Data Table (One to Many)</a></td>
 							</tr>
+							<tr>
+								<td><a href="#notes">NOTE</a></td>
+								<td>{resource}/{resourceId}/notes</td>
+								<td><a href="#resources_addnote">Add a Resource Note</td>
+								<td><a href="#resource_notelist">Retrieve a Resource's Notes</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr class="alt">
+								<td></td>
+								<td>{resource}/{resourceId}/notes/{noteId}</td>
+								<td></td>
+								<td><a href="#resources_retrievenote">Retrieve a Resource Note</a></td>
+								<td><a href="#resources_updatenote">Update a Resource Note</a></td>
+								<td><a href="#resources_deletenote">Delete a Resource Note</a></td>
+							</tr>
 						</table>
 					</div>
 				</div>
@@ -1266,6 +1265,8 @@
 					</div>
 				</div>
 			</div>
+			
+		
 		</div>
 
 		<div id="main-content-wrapper">
@@ -2015,140 +2016,6 @@ GET https://DomainName/api/v1/clients/{clientId}/loans
 				</div>
 			</div>
 
-			<a id="clients_notes" name="clients_notes" class="old-syle-anchor">&nbsp;</a>
-			<div class="method-section">
-				<div class="method-description">
-					<h4>Retrieve a Client's Notes</h4>
-					<p>
-						<b>Note:</b> Notes are returned in descending createOn order.
-					</p>
-					<p>Example Requests:</p>
-					<div class=apiClick>clients/2/notes</div>
-					<br>
-					<br>
-					<div class=apiClick>clients/2/notes?fields=note,createdOn,createdByUsername</div>
-				</div>
-				<div class="method-example">
-					<code class="method-declaration">
-GET https://DomainName/api/v1/clients/{clientId}/notes
-					</code>
-					<code class="method-response">
-[
-    {
-        "id": 2,
-        "clientId": 1,
-        "noteType": {
-            "id": 100,
-            "code": "noteType.client",
-            "value": "Client note"
-        },
-        "note": "First note edited",
-        "createdById": 1,
-        "createdByUsername": "mifos",
-        "createdOn": 1342498505000,
-        "updatedById": 1,
-        "updatedByUsername": "mifos",
-        "updatedOn": 1342498517000
-    }
-]
-					</code>
-				</div>
-			</div>
-
-			<a id="clients_addnote" name="clients_addnote"
-				class="old-syle-anchor">&nbsp;</a>
-			<div class="method-section">
-				<div class="method-description">
-					<h4>Add a Client Note</h4>
-				</div>
-				<div class="method-example">
-					<code class="method-declaration">
-POST https://DomainName/api/v1/clients/{clientId}/notes
-					</code>
-					<code class="method-request">
-POST clients/1/notes
-Content-Type: application/json 
-Request Body: 
-{ 
-	"note": "a note about the client"
-} 
-					</code>
-					<code class="method-response">
-{
-    "officeId": 1,
-    "clientId": 1,
-    "resourceId": 76
-}
-					</code>
-				</div>
-			</div>
-
-			<a id="clients_retrievenote" name="clients_retrievenote"
-				class="old-syle-anchor">&nbsp;</a>
-			<div class="method-section">
-				<div class="method-description">
-					<h4>Retrieve a Client Note</h4>
-					<p>Example Requests:</p>
-					<div class=apiClick>clients/1/notes/76</div>
-					<br>
-					<br>
-					<div class=apiClick>clients/1/notes/76?fields=note,createdOn,createdByUsername</div>
-				</div>
-				<div class="method-example">
-					<code class="method-declaration">
-GET https://DomainName/api/v1/clients/{clientId}/notes/{noteId}
-					</code>
-					<code class="method-response">
-{
-    "id": 76,
-    "clientId": 1,
-    "noteType": {
-        "id": 100,
-        "code": "noteType.client",
-        "value": "Client note"
-    },
-    "note": "a note about the client",
-    "createdById": 1,
-    "createdByUsername": "mifos",
-    "createdOn": 1359463135000,
-    "updatedById": 1,
-    "updatedByUsername": "mifos",
-    "updatedOn": 1359463135000
-}
-					</code>
-				</div>
-			</div>
-
-			<a id="clients_updatenote" name="clients_updatenote"
-				class="old-syle-anchor">&nbsp;</a>
-			<div class="method-section">
-				<div class="method-description">
-					<h4>Update a Client Note</h4>
-				</div>
-				<div class="method-example">
-					<code class="method-declaration">
-PUT https://DomainName/api/v1/clients/{clientId}/notes/{noteId}
-					</code>
-					<code class="method-request">
-PUT clients/1/notes/76
-Content-Type: application/json 
-Request Body: 
-{ 
-	"note": "and here the note is updated nicely." }
-					</code>
-					<code class="method-response">
-{
-    "officeId": 1,
-    "clientId": 1,
-    "resourceId": 76,
-    "changes": {
-        "note": "and here the note is updated nicely."
-    }
-}
-					</code>
-				</div>
-			</div>
-
 			<!-- start of Groups api docs -->
 			<a id="groups" name="groups" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
@@ -2449,7 +2316,7 @@ DELETE groups/7
 					</code>
 				</div>
 			</div>
-			<!-- group end anchor grpxxxx -->
+			<!-- end of group api docs -->
 
 			<!-- start of loans api docs -->
 			<a id="loans" name="loans" class="old-syle-anchor">&nbsp;</a>
@@ -8297,7 +8164,229 @@ Request Body:
 				</div>
 			</div>
 
+			<!-- start of datatables api docs -->
+			
+			<!-- start of Notes api docs -->
+			<a id="notes" name="notes" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h3>Notes</h3>
+					<p>Notes API allows to enter notes for supported resources.</p>
 
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Field Descriptions</div></td>
+						</tr>
+						<tr class=alt>
+							<td>note</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>A simple text note created for supported resources.</td>
+						</tr>
+					</table>
+					<br>
+					<br>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Supported Resources</div></td>
+						</tr>
+						<tr class=alt>
+							<td>
+								<a href="#clients">Client</a>
+								<br>
+								<a href="#loans">Loan</a>
+								<br>
+								<a href="#groups">Group</a>
+								<br>
+								<a href="#fixeddeposits">Deposit Account</a>
+								<br>
+								<a href="#savingaccounts">Saving Account</a>
+							</td>
+						</tr>
+					</table>
+				</div>
+			</div>			
+			
+			<a id="resources_addnote" name="resources_addnote"
+				class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Add a Resource Note</h4>
+					<p>Adds a new note to a supported resource.</p>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Mandatory Fields</div></td>
+						</tr>
+						<tr class=alt>
+							<td>note</td>
+						</tr>
+					</table>
+					<p>Example Requests:</p>
+					<div class=apiClick>clients/1/notes</div>
+					<br>
+					<br>
+					<div class=apiClick>groups/1/notes</div>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+POST https://DomainName/api/v1/{resource}/{resourceId}/notes
+					</code>
+					<code class="method-request">
+POST clients/1/notes
+Content-Type: application/json 
+Request Body: 
+{ 
+	"note": "a note about the client"
+} 
+					</code>
+					<code class="method-response">
+{
+    "officeId": 1,
+    "clientId": 1,
+    "resourceId": 76
+}
+					</code>
+				</div>
+			</div>
+			
+			<a id="resource_notelist" name="resource_notelist"
+				class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Retrieve a Resource's Notes</h4>
+					<p>
+						<b>Note:</b> Notes are returned in descending createOn order.
+					</p>
+					<p>Example Requests:</p>
+					<div class=apiClick>clients/2/notes</div>
+					<br>
+					<br>
+					<div class=apiClick>groups/2/notes?fields=note,createdOn,createdByUsername</div>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+GET https://DomainName/api/v1/{resource}/{resourceId}/notes
+					</code>
+					<code class="method-response">
+[
+    {
+        "id": 2,
+        "clientId": 1,
+        "noteType": {
+            "id": 100,
+            "code": "noteType.client",
+            "value": "Client note"
+        },
+        "note": "First note edited",
+        "createdById": 1,
+        "createdByUsername": "mifos",
+        "createdOn": 1342498505000,
+        "updatedById": 1,
+        "updatedByUsername": "mifos",
+        "updatedOn": 1342498517000
+    }
+]
+					</code>
+				</div>
+			</div>
+			
+			<a id="resources_retrievenote" name="resources_retrievenote"
+				class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Retrieve a Resource Note</h4>
+					<p>Example Requests:</p>
+					<div class=apiClick>clients/1/notes/76</div>
+					<br>
+					<br>
+					<div class=apiClick>groups/1/notes/20</div>
+					<br>
+					<br>
+					<div class=apiClick>clients/1/notes/76?fields=note,createdOn,createdByUsername</div>
+					<br>
+					<br>
+					<div class=apiClick>groups/1/notes/20?fields=note,createdOn,createdByUsername</div>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+GET https://DomainName/api/v1/{resource}/{resourceId}/notes/{noteId}
+					</code>
+					<code class="method-response">
+{
+    "id": 76,
+    "clientId": 1,
+    "noteType": {
+        "id": 100,
+        "code": "noteType.client",
+        "value": "Client note"
+    },
+    "note": "a note about the client",
+    "createdById": 1,
+    "createdByUsername": "mifos",
+    "createdOn": 1359463135000,
+    "updatedById": 1,
+    "updatedByUsername": "mifos",
+    "updatedOn": 1359463135000
+}
+					</code>
+				</div>
+			</div>
+
+			<a id="resources_updatenote" name="resources_updatenote"
+				class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Update a Resource Note</h4>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+PUT https://DomainName/api/v1/{resource}/{resourceId}/notes/{noteId}
+					</code>
+					<code class="method-request">
+PUT clients/1/notes/76
+Content-Type: application/json 
+Request Body: 
+{ 
+	"note": "and here the note is updated nicely." 
+}
+					</code>
+					<code class="method-response">
+{
+    "officeId": 1,
+    "clientId": 1,
+    "resourceId": 76,
+    "changes": {
+        "note": "and here the note is updated nicely."
+    }
+}
+					</code>
+				</div>
+			</div>
+
+			<a id="resources_deletenote" name="resources_deletenote"
+				class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Delete a Resource Note</h4>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+DELETE https://DomainName/api/v1/{resource}/{resourceId}/notes/{noteId}
+					</code>
+					<code class="method-request">
+DELETE clients/1/notes/76
+Content-Type: application/json 
+No Request Body:
+					</code>
+					<code class="method-response">
+{
+    "resourceId": 76
+}
+					</code>
+				</div>
+			</div>
+			
+			<!-- end of Notes api docs -->
 			<!-- start of reports api docs -->
 			<a id="reports" name="reports" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
@@ -10909,22 +10998,6 @@ Content-Type: application/json
 					<td><a href="#clients_loansummary">Retrieve a Client's
 							Loan Account Summary</a></td>
 					<td></td>
-					<td></td>
-				</tr>
-				<tr>
-					<td></td>
-					<td>clients/{clientId}/notes</td>
-					<td><a href="#clients_addnote">Add a Client Note</a></td>
-					<td><a href="#clients_notes">Retrieve a Client's Notes</a></td>
-					<td></td>
-					<td></td>
-				</tr>
-				<tr class="alt">
-					<td></td>
-					<td>clients/{clientId}/notes/{noteId}</td>
-					<td></td>
-					<td><a href="#clients_retrievenote">Retrieve a Client Note</a></td>
-					<td><a href="#clients_updatenote">Update a Client Note</a></td>
 					<td></td>
 				</tr>
 				<!-- loans api full matrix-->
