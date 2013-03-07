@@ -323,7 +323,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
             ReportParameterDefinition paramsDefinition = report.getParameterDefinition();
 
             /*
-             * only allow integer and string parameter types and assume all
+             * only allow integer, long, date and string parameter types and assume all
              * mandatory - could go more detailed like Pawel did in Mifos later
              * and could match incoming and pentaho parameters better...
              * currently assuming they come in ok... and if not an error
@@ -337,9 +337,10 @@ public class ReadReportingServiceImpl implements ReadReportingService {
 
                 Class<?> clazz = paramDefEntry.getValueType();
                 logger.info("addParametersToReport(" + paramName + " : " + pValue + " : " + clazz.getCanonicalName() + ")");
-
                 if (clazz.getCanonicalName().equalsIgnoreCase("java.lang.Integer"))
                     rptParamValues.put(paramName, Integer.parseInt(pValue));
+                else if (clazz.getCanonicalName().equalsIgnoreCase("java.lang.Long"))
+                    rptParamValues.put(paramName, Long.parseLong(pValue));
                 else if (clazz.getCanonicalName().equalsIgnoreCase("java.sql.Date"))
                     rptParamValues.put(paramName, Date.valueOf(pValue));
                 else
