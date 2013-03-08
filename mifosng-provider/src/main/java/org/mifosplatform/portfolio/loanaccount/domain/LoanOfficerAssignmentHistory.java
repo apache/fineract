@@ -83,4 +83,8 @@ public class LoanOfficerAssignmentHistory extends AbstractAuditableCustom<AppUse
 	public boolean isCurrentRecord() {
 		return this.endDate == null;
 	}
+
+	public LocalDate getEndDate() {
+            return new LocalDate(endDate);
+    }
 }
