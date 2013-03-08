@@ -10,9 +10,9 @@ import org.mifosplatform.infrastructure.core.exception.AbstractPlatformResourceN
 /**
  * A {@link RuntimeException} thrown when Note does not support a resource.
  */
-public class NoteResourceNotSupportedFoundException extends AbstractPlatformResourceNotFoundException {
+public class NoteResourceNotSupportedException extends AbstractPlatformResourceNotFoundException {
 
-    public NoteResourceNotSupportedFoundException(final String resource) {
+    public NoteResourceNotSupportedException(final String resource) {
         super("error.msg.note.resource.not.supported", "Note does not support resource " + resource);
     }
 }

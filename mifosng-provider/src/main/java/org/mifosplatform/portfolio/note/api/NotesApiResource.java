@@ -32,7 +32,7 @@ import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSeria
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.portfolio.note.data.NoteData;
 import org.mifosplatform.portfolio.note.domain.NoteType;
-import org.mifosplatform.portfolio.note.exception.NoteResourceNotSupportedFoundException;
+import org.mifosplatform.portfolio.note.exception.NoteResourceNotSupportedException;
 import org.mifosplatform.portfolio.note.service.NoteReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -72,7 +72,7 @@ public class NotesApiResource {
         
         NoteType noteType = NoteType.fromApiUrl(resourceType);
         
-        if(noteType == null){ throw new NoteResourceNotSupportedFoundException(resourceType); };
+        if(noteType == null){ throw new NoteResourceNotSupportedException(resourceType); };
         
         this.context.authenticatedUser().validateHasReadPermission(getResourceNameForPermissions(noteType));
         
@@ -93,7 +93,7 @@ public class NotesApiResource {
 
         NoteType noteType = NoteType.fromApiUrl(resourceType);
         
-        if(noteType == null){ throw new NoteResourceNotSupportedFoundException(resourceType); };
+        if(noteType == null){ throw new NoteResourceNotSupportedException(resourceType); };
         
         this.context.authenticatedUser().validateHasReadPermission(getResourceNameForPermissions(noteType));
 
@@ -113,7 +113,7 @@ public class NotesApiResource {
 
         NoteType noteType = NoteType.fromApiUrl(resourceType);
         
-        if(noteType == null){ throw new NoteResourceNotSupportedFoundException(resourceType); };
+        if(noteType == null){ throw new NoteResourceNotSupportedException(resourceType); };
         
         final String resourceNameForPermissions = getResourceNameForPermissions(noteType);
         final CommandWrapper commandRequest = new CommandWrapperBuilder().createNote(resourceNameForPermissions, resourceType, resourceId)
@@ -133,7 +133,7 @@ public class NotesApiResource {
         
         NoteType noteType = NoteType.fromApiUrl(resourceType);
         
-        if(noteType == null){ throw new NoteResourceNotSupportedFoundException(resourceType); };
+        if(noteType == null){ throw new NoteResourceNotSupportedException(resourceType); };
         
         final String resourceNameForPermissions = getResourceNameForPermissions(noteType);
         
@@ -153,7 +153,7 @@ public class NotesApiResource {
 
         NoteType noteType = NoteType.fromApiUrl(resourceType);
         
-        if(noteType == null){ throw new NoteResourceNotSupportedFoundException(resourceType); };
+        if(noteType == null){ throw new NoteResourceNotSupportedException(resourceType); };
         
         final String resourceNameForPermissions = getResourceNameForPermissions(noteType);
         

@@ -26,7 +26,7 @@ import org.mifosplatform.portfolio.note.domain.Note;
 import org.mifosplatform.portfolio.note.domain.NoteRepository;
 import org.mifosplatform.portfolio.note.domain.NoteType;
 import org.mifosplatform.portfolio.note.exception.NoteNotFoundException;
-import org.mifosplatform.portfolio.note.exception.NoteResourceNotSupportedFoundException;
+import org.mifosplatform.portfolio.note.exception.NoteResourceNotSupportedException;
 import org.mifosplatform.portfolio.note.serialization.NoteCommandFromApiJsonDeserializer;
 import org.mifosplatform.portfolio.savingsaccount.domain.SavingAccount;
 import org.mifosplatform.portfolio.savingsaccount.domain.SavingAccountRepository;
@@ -208,7 +208,7 @@ public class NoteWritePlatformServiceJpaRepositoryImpl implements NoteWritePlatf
                 return createSavingAccountNote(command);
             }
             default:
-                throw new NoteResourceNotSupportedFoundException(resourceUrl);
+                throw new NoteResourceNotSupportedException(resourceUrl);
         }
 
     }
@@ -409,7 +409,7 @@ public class NoteWritePlatformServiceJpaRepositoryImpl implements NoteWritePlatf
                 return updateSavingAccountNote(command);
             }
             default:
-                throw new NoteResourceNotSupportedFoundException(resourceUrl);
+                throw new NoteResourceNotSupportedException(resourceUrl);
         }
     }
 
