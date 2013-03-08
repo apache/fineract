@@ -1008,13 +1008,11 @@
 							</tr>
 							<tr class="alt">
 								<td>clients/template</td>
-								<td><a href="#clients_template">Retrieve Client Details
-										Template</a></td>
+								<td><a href="#clients_template">Retrieve Client Details Template</a></td>
 							</tr>
 							<tr>
-								<td>loans/template</td>
-								<td><a href="#loans_template">Retrieve Loan Details
-										Template</a></td>
+								<td>loans/template?clientId={clientId}</td>
+								<td><a href="#loans_template">Retrieve Loan Details Template</a></td>
 							</tr>
 							<tr class="alt">
 								<td>loans/{loanId}/transactions/template</td>
@@ -2323,15 +2321,16 @@ DELETE groups/7
 			<div class="method-section">
 				<div class="method-description">
 					<h3>Loans</h3>
+					<p>The API concept of <b>loans</b> models the <b>loan application process</b> and the <b>loan contract/monitoring process</b>.</p>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
 							<td><div class="mifosXHeading2">Field Descriptions</div></td>
 						</tr>
 						<tr class=alt>
-							<td>principal</td>
+							<td>accountNo</td>
 						</tr>
 						<tr>
-							<td class=fielddesc>The amount to be provided in the loan.</td>
+							<td class=fielddesc>The account no. associated with this loan. Is auto generated if not provided at loan application creation time.</td>
 						</tr>
 						<tr class=alt>
 							<td>externalId</td>
@@ -2341,6 +2340,141 @@ DELETE groups/7
 								this loan e.g. The ID another system uses.<br> If provided,
 								it must be unique.
 							</td>
+						</tr>
+						<tr class=alt>
+							<td>fundId</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Optional: For associating a loan with a given fund.</td>
+						</tr>
+						<tr class=alt>
+							<td>loanOfficerId</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Optional: For associating a loan with a given staff member who is a loan officer.</td>
+						</tr>
+						<tr class=alt>
+							<td>loanPurposeId</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Optional: For marking a loan with a given loan purpose option. Loan purposes are configurable and can be setup by system admin through code/code values screens.</td>
+						</tr>
+						<tr class=alt>
+							<td>currencyCode</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>A three letter ISO code of currency.</td>
+						</tr>
+						<tr class=alt>
+							<td>digitsAfterDecimal</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Override the currency default value for digitsAfterDecimal.</td>
+						</tr>
+						<tr class=alt>
+							<td>principal</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>The loan amount to be disbursed to through loan.</td>
+						</tr>
+						<tr class=alt>
+							<td>loanTermFrequency</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>The length of loan term<br> Used like:
+								<b>loanTermFrequency</b> loanTermFrequencyType<br> e.g. <b>12</b> Months
+							</td>
+						</tr>
+						<tr class=alt>
+							<td>loanTermFrequencyType</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>The loan term period to use. Used like:
+								loanTermFrequency <b>loanTermFrequencyType</b><br> e.g. 12 <b>Months</b>
+							<span>Example Values:</span> 0=Days, 1=Weeks, 2=Months, 3=Years
+							</td>
+						</tr>
+						<tr class=alt>
+							<td>numberOfRepayments</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Number of installments to repay.<br>
+								Used like: <b>numberOfRepayments</b> Every <i>repaymentEvery</i>
+								<i>repaymentFrequencyType</i><br> e.g. <b>10</b> (repayments) Every 12 Weeks
+							</td>
+						</tr>
+						<tr class=alt>
+							<td>repaymentEvery</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Used like: numberOfRepayments Every
+								<b>repaymentEvery</b> repaymentFrequencyType<br> e.g. 10
+								(repayments) Every <b>12</b> Weeks
+							</td>
+						</tr>
+						<tr class=alt>
+							<td>repaymentFrequencyType</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Used like: <i>numberOfRepayments</i> Every
+								repaymentEvery <b>repaymentFrequencyType</b><br> e.g. 10
+								(repayments) Every 12 <b>Weeks</b> <br>
+								<span>Example Values:</span> 0=Days, 1=Weeks, 2=Months
+							</td>
+						</tr>
+						<tr class=alt>
+							<td>interestRatePerPeriod</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Interest Rate.<br> Used like:
+								<b>interestRatePerPeriod</b> % interestRateFrequencyType - interestType<br>
+								e.g. <b>12.0000</b>% Per year - Declining Balance
+							</td>
+						</tr>
+						<tr class=alt>
+							<td>interestRateFrequencyType</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Used like: interestRatePerPeriod%
+								interestRateFrequencyType - interestType<br> e.g. 12.0000%
+								<b>Per year</b> - Declining Balance <br>
+							<span>Example Values:</span> 2=Per month, 3=Per year
+							</td>
+						</tr>
+						<tr class=alt>
+							<td>expectedDisbursementDate</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>The proposed <b>disbursement date</b> of the loan so a proposed repayment schedule can be provided.</td>
+						</tr>
+						<tr class=alt>
+							<td>submittedOnDate</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>The date the <b>loan application</b> was submitted by applicant.</td>
+						</tr>
+						<tr class=alt>
+							<td>amortizationType</td>
+						</tr>
+						<tr>
+							<td class=fielddesc><span>Example Values:</span> 0=Equal
+								principle payments, 1=Equal installments</td>
+						</tr>
+						<tr class=alt>
+							<td>interestType</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Used like: interestRatePerPeriod%
+								interestRateFrequencyType - interestType<br> e.g. 12.0000%
+								Per year - <b>Declining Balance</b> <br>
+							<span>Example Values:</span> 0=Declining Balance, 1=Flat
+							</td>
+						</tr>
+						<tr class=alt>
+							<td>interestCalculationPeriodType</td>
+						</tr>
+						<tr>
+							<td class=fielddesc><span>Example Values:</span> 0=Daily, 1=Same as repayment period</td>
 						</tr>
 						<tr class=alt>
 							<td>inArrearsTolerance</td>
@@ -2353,91 +2487,20 @@ DELETE groups/7
 							</td>
 						</tr>
 						<tr class=alt>
-							<td>numberOfRepayments</td>
+							<td>transactionProcessingStrategyId</td>
 						</tr>
 						<tr>
-							<td class=fielddesc>Number of installments to repay.<br>
-								Used like: numberOfRepayments Every repaymentEvery
-								repaymentFrequencyType<br> e.g. <b>10</b> (repayments)
-								Every 12 Weeks
+							<td class=fielddesc>The type of transaction processing strategy to be used.<br>
+								At present some MFI specific ones exist. This is an important point of change for many MFIs.
+								<br>Responsible for things like payment order and how early or late repayments should be processed.<br>
+								Out of the box, four available:
+								<ol>
+									<li>id=1, code=mifos-standard-strategy, name=Mifos style</li>
+									<li>id=2, code=heavensfamily-strategy, name=Heavensfamily</li>
+									<li>id=3, code=creocore-strategy, name=Creocore</li>
+									<li>id=4, code=rbi-india-strategy, name=RBI (India)</li>
+								</ol>
 							</td>
-						</tr>
-						<tr class=alt>
-							<td>interestRatePerPeriod</td>
-						</tr>
-						<tr>
-							<td class=fielddesc>Interest Rate.<br> Used like:
-								interestRatePerPeriod% interestRateFrequencyType - interestType<br>
-								e.g. <b>12.0000</b>% Per year - Declining Balance
-							</td>
-						</tr>
-						<tr class=alt>
-							<td>repaymentEvery</td>
-						</tr>
-						<tr>
-							<td class=fielddesc>Used like: numberOfRepayments Every
-								repaymentEvery repaymentFrequencyType<br> e.g. 10
-								(repayments) Every <b>12</b> Weeks
-							</td>
-						</tr>
-						<tr>
-							<td class=fieldtype>Each of the items below has an id, code
-								and (english) value.<br> Only the id (integer) is used when
-								updating. All 3 are returned on GET (read) requests.<br>
-								The options are fully listed in <a href="#loanproducts_template">Retrieve
-									Loan Product Details Template</a>.
-							</td>
-						</tr>
-						<tr class=alt>
-							<td>repaymentFrequencyType</td>
-						</tr>
-						<tr>
-							<td class=fielddesc>Used like: numberOfRepayments Every
-								repaymentEvery repaymentFrequencyType<br> e.g. 10
-								(repayments) Every 12 <b>Weeks</b> <br>
-							<span>Example Values:</span> Days, Weeks, Months
-							</td>
-						</tr>
-						<tr class=alt>
-							<td>interestRateFrequencyType</td>
-						</tr>
-						<tr>
-							<td class=fielddesc>Used like: interestRatePerPeriod%
-								interestRateFrequencyType - interestType<br> e.g. 12.0000%
-								<b>Per year</b> - Declining Balance <br>
-							<span>Example Values:</span> Per month, Per year
-							</td>
-						</tr>
-						<tr class=alt>
-							<td>amortizationType</td>
-						</tr>
-						<tr>
-							<td class=fielddesc><span>Example Values:</span> Equal
-								principle payments, Equal installments</td>
-						</tr>
-						</td>
-						</tr>
-						<tr class=alt>
-							<td>interestType</td>
-						</tr>
-						<tr>
-							<td class=fielddesc>Used like: interestRatePerPeriod%
-								interestRateFrequencyType - interestType<br> e.g. 12.0000%
-								Per year - <b>Declining Balance</b> <br>
-							<span>Example Values:</span> Declining Balance, Flat
-							</td>
-						</tr>
-						</td>
-						</tr>
-						<tr class=alt>
-							<td>interestCalculationPeriodType</td>
-						</tr>
-						<tr>
-							<td class=fielddesc><span>Example Values:</span> Same as
-								repayment period, Daily</td>
-						</tr>
-						</td>
-						</tr>
 						</tr>
 					</table>
 				</div>
@@ -2470,10 +2533,10 @@ DELETE groups/7
 							fields are returned.</dd>
 					</dl>
 					<p>Example Requests:</p>
-					<div class=apiClick>loans/template?clientId=1&productId=1</div>
-					<br>
-					<br>
 					<div class=apiClick>loans/template?clientId=1</div>
+					<br>
+					<br>
+					<div class=apiClick>loans/template?clientId=1&productId=1</div>
 				</div>
 				<div class="method-example">
 					<code class="method-declaration">
@@ -2481,205 +2544,265 @@ GET https://DomainName/api/v1/loans/template?clientId=1
 					</code>
 					<code class="method-response">
 {
-    "clientId": 1,
-    "clientName": "Petra Yton",
+  "clientId": 1,
+  "clientName": "Kampala first Client",
+  "clientOfficeId": 2,
+  "timeline": {
     "expectedDisbursementDate": [
-        2013,
-        2,
-        5
-    ],
-    "loanOfficerOptions": [
-        {
-            "id": 1,
-            "firstname": "John",
-            "lastname": "Doe",
-            "displayName": "Doe, John",
-            "officeId": 1,
-            "officeName": "Head Office",
-            "isLoanOfficer": true
-        }
-    ],
-    "productOptions": [
-        {
-            "id": 1,
-            "name": "A new loan product for me"
-        }
-    ],
-    "termFrequencyTypeOptions": [
-        {
-            "id": 0,
-            "code": "loanTermFrequency.periodFrequencyType.days",
-            "value": "Days"
-        },
-        {
-            "id": 1,
-            "code": "loanTermFrequency.periodFrequencyType.weeks",
-            "value": "Weeks"
-        },
-        {
-            "id": 2,
-            "code": "loanTermFrequency.periodFrequencyType.months",
-            "value": "Months"
-        },
-        {
-            "id": 3,
-            "code": "loanTermFrequency.periodFrequencyType.years",
-            "value": "Years"
-        }
-    ],
-    "repaymentFrequencyTypeOptions": [
-        {
-            "id": 0,
-            "code": "repaymentFrequency.periodFrequencyType.days",
-            "value": "Days"
-        },
-        {
-            "id": 1,
-            "code": "repaymentFrequency.periodFrequencyType.weeks",
-            "value": "Weeks"
-        },
-        {
-            "id": 2,
-            "code": "repaymentFrequency.periodFrequencyType.months",
-            "value": "Months"
-        }
-    ],
-    "repaymentStrategyOptions": [
-        {
-            "id": 1,
-            "code": "mifos-standard-strategy",
-            "name": "Mifos style"
-        },
-        {
-            "id": 2,
-            "code": "heavensfamily-strategy",
-            "name": "Heavensfamily"
-        },
-        {
-            "id": 3,
-            "code": "creocore-strategy",
-            "name": "Creocore"
-        },
-        {
-            "id": 4,
-            "code": "rbi-india-strategy",
-            "name": "RBI (India)"
-        }
-    ],
-    "interestRateFrequencyTypeOptions": [
-        {
-            "id": 2,
-            "code": "interestRateFrequency.periodFrequencyType.months",
-            "value": "Per month"
-        },
-        {
-            "id": 3,
-            "code": "interestRateFrequency.periodFrequencyType.years",
-            "value": "Per year"
-        }
-    ],
-    "amortizationTypeOptions": [
-        {
-            "id": 1,
-            "code": "amortizationType.equal.installments",
-            "value": "Equal installments"
-        },
-        {
-            "id": 0,
-            "code": "amortizationType.equal.principal",
-            "value": "Equal principle payments"
-        }
-    ],
-    "interestTypeOptions": [
-        {
-            "id": 1,
-            "code": "interestType.flat",
-            "value": "Flat"
-        },
-        {
-            "id": 0,
-            "code": "interestType.declining.balance",
-            "value": "Declining Balance"
-        }
-    ],
-    "interestCalculationPeriodTypeOptions": [
-        {
-            "id": 0,
-            "code": "interestCalculationPeriodType.daily",
-            "value": "Daily"
-        },
-        {
-            "id": 1,
-            "code": "interestCalculationPeriodType.same.as.repayment.period",
-            "value": "Same as repayment period"
-        }
-    ],
-    "fundOptions": [
-        {
-            "id": 1,
-            "name": "EU Agri Fund"
-        }
-    ],
-    "chargeOptions": [
-        {
-            "id": 1,
-            "name": "Loan service fee",
-            "active": true,
-            "penalty": false,
-            "currency": {
-                "code": "USD",
-                "name": "US Dollar",
-                "decimalPlaces": 2,
-                "displaySymbol": "$",
-                "nameCode": "currency.USD",
-                "displayLabel": "US Dollar ($)"
-            },
-            "amount": 230.56,
-            "chargeTimeType": {
-                "id": 1,
-                "code": "chargeTimeType.disbursement",
-                "value": "Disbursement"
-            },
-            "chargeAppliesTo": {
-                "id": 1,
-                "code": "chargeAppliesTo.loan",
-                "value": "Loan"
-            },
-            "chargeCalculationType": {
-                "id": 1,
-                "code": "chargeCalculationType.flat",
-                "value": "Flat"
-            }
-        }
-    ],
-    "chargeTemplate": {
-        "active": false,
-        "penalty": false,
-        "chargeCalculationTypeOptions": [
-            {
-                "id": 1,
-                "code": "chargeCalculationType.flat",
-                "value": "Flat"
-            },
-            {
-                "id": 2,
-                "code": "chargeCalculationType.percent.of.amount",
-                "value": "% Amount"
-            }
-        ],
-        "chargeTimeTypeOptions": [
-            {
-                "id": 1,
-                "code": "chargeTimeType.disbursement",
-                "value": "Disbursement"
-            },
-            {
-                "id": 2,
-                "code": "chargeTimeType.specifiedDueDate",
-                "value": "Specified due date"
-            }
-        ]
+      2013,
+      3,
+      8
+    ]
+  },
+  "productOptions": [
+    {
+      "id": 1,
+      "name": "Kampala Product (with cash accounting)"
     }
+  ]
+}
+					</code>
+					<code class="method-declaration">
+GET https://DomainName/api/v1/loans/template?clientId=1&productId=1
+					</code>
+					<code class="method-response">
+{
+  "clientId": 1,
+  "clientName": "Kampala first Client",
+  "clientOfficeId": 2,
+  "loanProductId": 1,
+  "loanProductName": "Kampala Product (with cash accounting)",
+  "loanProductDescription": "Typical Kampala loan product with cash accounting enabled for testing.",
+  "currency": {
+    "code": "UGX",
+    "name": "Uganda Shilling",
+    "decimalPlaces": 2,
+    "displaySymbol": "USh",
+    "nameCode": "currency.UGX",
+    "displayLabel": "Uganda Shilling (USh)"
+  },
+  "principal": 1000000,
+  "termFrequency": 12,
+  "termPeriodFrequencyType": {
+    "id": 2,
+    "code": "repaymentFrequency.periodFrequencyType.months",
+    "value": "Months"
+  },
+  "numberOfRepayments": 12,
+  "repaymentEvery": 1,
+  "repaymentFrequencyType": {
+    "id": 2,
+    "code": "repaymentFrequency.periodFrequencyType.months",
+    "value": "Months"
+  },
+  "interestRatePerPeriod": 24,
+  "interestRateFrequencyType": {
+    "id": 3,
+    "code": "interestRateFrequency.periodFrequencyType.years",
+    "value": "Per year"
+  },
+  "annualInterestRate": 24,
+  "amortizationType": {
+    "id": 1,
+    "code": "amortizationType.equal.installments",
+    "value": "Equal installments"
+  },
+  "interestType": {
+    "id": 1,
+    "code": "interestType.flat",
+    "value": "Flat"
+  },
+  "interestCalculationPeriodType": {
+    "id": 1,
+    "code": "interestCalculationPeriodType.same.as.repayment.period",
+    "value": "Same as repayment period"
+  },
+  "transactionProcessingStrategyId": 2,
+  "timeline": {
+    "expectedDisbursementDate": [
+      2013,
+      3,
+      8
+    ]
+  },
+  "charges": [],
+  "productOptions": [
+    {
+      "id": 1,
+      "name": "Kampala Product (with cash accounting)"
+    }
+  ],
+  "loanOfficerOptions": [
+    {
+      "id": 2,
+      "firstname": "Kampala",
+      "lastname": "LoanOfficer",
+      "displayName": "LoanOfficer, Kampala",
+      "officeId": 2,
+      "officeName": "Uganda (Kampala)",
+      "isLoanOfficer": true
+    }
+  ],
+  "loanPurposeOptions": [
+    {
+      "id": 20,
+      "name": "option.Agriculture",
+      "position": 1
+    },
+    {
+      "id": 21,
+      "name": "option.Manufacturing",
+      "position": 20
+    },
+    {
+      "id": 22,
+      "name": "option.HousingImprovement",
+      "position": 21
+    }
+  ],
+  "termFrequencyTypeOptions": [
+    {
+      "id": 0,
+      "code": "loanTermFrequency.periodFrequencyType.days",
+      "value": "Days"
+    },
+    {
+      "id": 1,
+      "code": "loanTermFrequency.periodFrequencyType.weeks",
+      "value": "Weeks"
+    },
+    {
+      "id": 2,
+      "code": "loanTermFrequency.periodFrequencyType.months",
+      "value": "Months"
+    },
+    {
+      "id": 3,
+      "code": "loanTermFrequency.periodFrequencyType.years",
+      "value": "Years"
+    }
+  ],
+  "repaymentFrequencyTypeOptions": [
+    {
+      "id": 0,
+      "code": "repaymentFrequency.periodFrequencyType.days",
+      "value": "Days"
+    },
+    {
+      "id": 1,
+      "code": "repaymentFrequency.periodFrequencyType.weeks",
+      "value": "Weeks"
+    },
+    {
+      "id": 2,
+      "code": "repaymentFrequency.periodFrequencyType.months",
+      "value": "Months"
+    }
+  ],
+  "interestRateFrequencyTypeOptions": [
+    {
+      "id": 2,
+      "code": "interestRateFrequency.periodFrequencyType.months",
+      "value": "Per month"
+    },
+    {
+      "id": 3,
+      "code": "interestRateFrequency.periodFrequencyType.years",
+      "value": "Per year"
+    }
+  ],
+  "amortizationTypeOptions": [
+    {
+      "id": 1,
+      "code": "amortizationType.equal.installments",
+      "value": "Equal installments"
+    },
+    {
+      "id": 0,
+      "code": "amortizationType.equal.principal",
+      "value": "Equal principle payments"
+    }
+  ],
+  "interestTypeOptions": [
+    {
+      "id": 1,
+      "code": "interestType.flat",
+      "value": "Flat"
+    },
+    {
+      "id": 0,
+      "code": "interestType.declining.balance",
+      "value": "Declining Balance"
+    }
+  ],
+  "interestCalculationPeriodTypeOptions": [
+    {
+      "id": 0,
+      "code": "interestCalculationPeriodType.daily",
+      "value": "Daily"
+    },
+    {
+      "id": 1,
+      "code": "interestCalculationPeriodType.same.as.repayment.period",
+      "value": "Same as repayment period"
+    }
+  ],
+  "transactionProcessingStrategyOptions": [
+    {
+      "id": 2,
+      "code": "heavensfamily-strategy",
+      "name": "Heavensfamily"
+    }
+  ],
+  "chargeOptions": [
+    {
+      "id": 1,
+      "name": "Bank Fee (per installment)",
+      "active": true,
+      "penalty": false,
+      "currency": {
+        "code": "UGX",
+        "name": "Uganda Shilling",
+        "decimalPlaces": 2,
+        "displaySymbol": "USh",
+        "nameCode": "currency.UGX",
+        "displayLabel": "Uganda Shilling (USh)"
+      },
+      "amount": 1500,
+      "chargeTimeType": {
+        "id": 2,
+        "code": "chargeTimeType.specifiedDueDate",
+        "value": "Specified due date"
+      },
+      "chargeAppliesTo": {
+        "id": 1,
+        "code": "chargeAppliesTo.loan",
+        "value": "Loan"
+      },
+      "chargeCalculationType": {
+        "id": 1,
+        "code": "chargeCalculationType.flat",
+        "value": "Flat"
+      }
+    }
+  ],
+  "loanCollateralOptions": [
+    {
+      "id": 17,
+      "name": "option.House",
+      "position": 1
+    },
+    {
+      "id": 18,
+      "name": "option.Television",
+      "position": 17
+    },
+    {
+      "id": 19,
+      "name": "option.Gold",
+      "position": 18
+    }
+  ]
 }
 					</code>
 				</div>
@@ -2745,12 +2868,12 @@ GET https://DomainName/api/v1/loans/{loanId}
   "id": 1,
   "accountNo": "000000001",
   "status": {
-    "id": 100,
-    "code": "loanStatusType.submitted.and.pending.approval",
-    "value": "Submitted and pending approval",
-    "pendingApproval": true,
+    "id": 300,
+    "code": "loanStatusType.active",
+    "value": "Active",
+    "pendingApproval": false,
     "waitingForDisbursal": false,
-    "active": false,
+    "active": true,
     "closedObligationsMet": false,
     "closedWrittenOff": false,
     "closedRescheduled": false,
@@ -2758,19 +2881,24 @@ GET https://DomainName/api/v1/loans/{loanId}
     "overpaid": false
   },
   "clientId": 1,
-  "clientName": "Petra Yton",
-  "clientOfficeId": 1,
+  "clientName": "Kampala first Client",
+  "clientOfficeId": 2,
   "loanProductId": 1,
-  "loanProductName": "A new loan product for me",
+  "loanProductName": "Kampala Product (with cash accounting)",
+  "loanProductDescription": "Typical Kampala loan product with cash accounting enabled for testing.",
+  "loanPurposeId": 22,
+  "loanPurposeName": "option.HousingImprovement",
+  "loanOfficerId": 2,
+  "loanOfficerName": "LoanOfficer, Kampala",
   "currency": {
-    "code": "USD",
-    "name": "US Dollar",
+    "code": "UGX",
+    "name": "Uganda Shilling",
     "decimalPlaces": 2,
-    "displaySymbol": "$",
-    "nameCode": "currency.USD",
-    "displayLabel": "US Dollar ($)"
+    "displaySymbol": "USh",
+    "nameCode": "currency.UGX",
+    "displayLabel": "Uganda Shilling (USh)"
   },
-  "principal": 100000,
+  "principal": 1000000,
   "termFrequency": 12,
   "termPeriodFrequencyType": {
     "id": 2,
@@ -2784,47 +2912,110 @@ GET https://DomainName/api/v1/loans/{loanId}
     "code": "repaymentFrequency.periodFrequencyType.months",
     "value": "Months"
   },
-  "transactionProcessingStrategyId": 1,
+  "interestRatePerPeriod": 24,
+  "interestRateFrequencyType": {
+    "id": 3,
+    "code": "interestRateFrequency.periodFrequencyType.years",
+    "value": "Per year"
+  },
+  "annualInterestRate": 24,
   "amortizationType": {
     "id": 1,
     "code": "amortizationType.equal.installments",
     "value": "Equal installments"
   },
-  "interestRatePerPeriod": 2,
-  "interestRateFrequencyType": {
-    "id": 2,
-    "code": "interestRateFrequency.periodFrequencyType.months",
-    "value": "Per month"
-  },
-  "annualInterestRate": 24,
   "interestType": {
-    "id": 0,
-    "code": "interestType.declining.balance",
-    "value": "Declining Balance"
+    "id": 1,
+    "code": "interestType.flat",
+    "value": "Flat"
   },
   "interestCalculationPeriodType": {
     "id": 1,
     "code": "interestCalculationPeriodType.same.as.repayment.period",
     "value": "Same as repayment period"
   },
+  "transactionProcessingStrategyId": 2,
   "timeline": {
     "submittedOnDate": [
-      2011,
-      9,
-      20
+      2012,
+      4,
+      3
     ],
-    "submittedByUsername": "mifos",
+    "submittedByUsername": "admin",
     "submittedByFirstname": "App",
     "submittedByLastname": "Administrator",
-    "expectedDisbursementDate": [
-      2011,
-      9,
-      20
-    ],
-    "expectedMaturityDate": [
+    "approvedOnDate": [
       2012,
-      9,
-      20
+      4,
+      3
+    ],
+    "approvedByUsername": "admin",
+    "approvedByFirstname": "App",
+    "approvedByLastname": "Administrator",
+    "expectedDisbursementDate": [
+      2012,
+      4,
+      10
+    ],
+    "actualDisbursementDate": [
+      2012,
+      4,
+      10
+    ],
+    "disbursedByUsername": "admin",
+    "disbursedByFirstname": "App",
+    "disbursedByLastname": "Administrator",
+    "expectedMaturityDate": [
+      2013,
+      4,
+      10
+    ]
+  },
+  "summary": {
+    "currency": {
+      "code": "UGX",
+      "name": "Uganda Shilling",
+      "decimalPlaces": 2,
+      "displaySymbol": "USh",
+      "nameCode": "currency.UGX",
+      "displayLabel": "Uganda Shilling (USh)"
+    },
+    "principalDisbursed": 1000000,
+    "principalPaid": 0,
+    "principalWrittenOff": 0,
+    "principalOutstanding": 1000000,
+    "principalOverdue": 833333.3,
+    "interestCharged": 240000,
+    "interestPaid": 0,
+    "interestWaived": 0,
+    "interestWrittenOff": 0,
+    "interestOutstanding": 240000,
+    "interestOverdue": 200000,
+    "feeChargesCharged": 18000,
+    "feeChargesDueAtDisbursementCharged": 0,
+    "feeChargesPaid": 0,
+    "feeChargesWaived": 0,
+    "feeChargesWrittenOff": 0,
+    "feeChargesOutstanding": 18000,
+    "feeChargesOverdue": 15000,
+    "penaltyChargesCharged": 0,
+    "penaltyChargesPaid": 0,
+    "penaltyChargesWaived": 0,
+    "penaltyChargesWrittenOff": 0,
+    "penaltyChargesOutstanding": 0,
+    "penaltyChargesOverdue": 0,
+    "totalExpectedRepayment": 1258000,
+    "totalRepayment": 0,
+    "totalExpectedCostOfLoan": 258000,
+    "totalCostOfLoan": 0,
+    "totalWaived": 0,
+    "totalWrittenOff": 0,
+    "totalOutstanding": 1258000,
+    "totalOverdue": 1048333.3,
+    "overdueSinceDate": [
+      2012,
+      5,
+      10
     ]
   }
 }
@@ -2879,7 +3070,6 @@ Request Body:
 					</code>
 					<code class="method-response">
 {
-  "loanTermInDays": 366,
   "currency": {
     "code": "UGX",
     "name": "Uganda Shilling",
@@ -2888,18 +3078,18 @@ Request Body:
     "nameCode": "currency.UGX",
     "displayLabel": "Uganda Shilling (USh)"
   },
-  "cumulativePrincipalDisbursed": 100000,
-  "cumulativePrincipalDue": 100000,
-  "cumulativePrincipalOutstanding": 0,
-  "cumulativeInterestExpected": 13471.52,
-  "cumulativeFeeChargesToDate": 0,
-  "totalCostOfLoan": 13471.52,
-  "totalExpectedRepayment": 113471.52,
-  "totalPaidToDate": 0,
-  "totalWaivedToDate": 0,
-  "totalWrittenOffToDate": 0,
-  "totalOutstanding": 113471.52,
-  "totalInArrears": 0,
+  "loanTermInDays": 366,
+  "totalPrincipalDisbursed": 100000,
+  "totalPrincipalExpected": 100000,
+  "totalPrincipalPaid": 0,
+  "totalInterestCharged": 13471.52,
+  "totalFeeChargesCharged": 0,
+  "totalPenaltyChargesCharged": 0,
+  "totalWaived": 0,
+  "totalWrittenOff": 0,
+  "totalRepaymentExpected": 113471.52,
+  "totalRepayment": 0,
+  "totalOutstanding": 0,
   "periods": [
     {
       "period": 0,
@@ -2948,10 +3138,19 @@ Request Body:
       "totalActualCostOfLoanForPeriod": 2000
     },
     ...
+    ...
     {
       "period": 12,
-      "fromDate": [2012,8,20],
-      "dueDate": [2012,9,20],
+      "fromDate": [
+        2012,
+        8,
+        20
+      ],
+      "dueDate": [
+        2012,
+        9,
+        20
+      ],
       "daysInPeriod": 31,
       "principalOriginalDue": 9270.56,
       "principalDue": 9270.56,
@@ -2988,8 +3187,8 @@ Request Body:
 								loanTermFrequencyType, numberOfRepayments, repaymentEvery,
 								repaymentFrequencyType, interestRatePerPeriod,
 								interestRateFrequencyType, amortizationType, interestType,
-								interestCalculationPeriodType, expectedDisbursementDate,
-								submittedOnDate, transactionProcessingStrategyId</td>
+								interestCalculationPeriodType, transactionProcessingStrategyId,
+								expectedDisbursementDate, submittedOnDate</td>
 						</tr>
 					</table>
 				</div>
@@ -3017,9 +3216,9 @@ Request Body:
     "amortizationType": 1,
     "interestType": 0,
     "interestCalculationPeriodType": 1,
+    "transactionProcessingStrategyId": 1,
     "expectedDisbursementDate": "20 September 2011",
-    "submittedOnDate": "20 September 2011",
-    "transactionProcessingStrategyId": 1
+    "submittedOnDate": "20 September 2011"
 }
 					</code>
 					<code class="method-response">
@@ -5263,50 +5462,54 @@ Request Body:
 					<p>A Loan product is a template that is used when creating a
 						loan. Much of the template definition can be overridden during
 						loan creation.</p>
+
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
 							<td><div class="mifosXHeading2">Field Descriptions</div></td>
 						</tr>
 						<tr class=alt>
+							<td>name</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Name associated with loan product on system.</td>
+						</tr>
+						<tr class=alt>
+							<td>description</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>For providing helpful description of product offering.</td>
+						</tr>
+						<tr class=alt>
+							<td>fundId</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>For associating a loan product with a given fund by default.</td>
+						</tr>
+						<tr class=alt>
+							<td>currencyCode</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>A three letter ISO code of currency.</td>
+						</tr>
+						<tr class=alt>
 							<td>digitsAfterDecimal</td>
 						</tr>
 						<tr>
-							<td class=fielddesc>Override the currency default value for
-								digitsAfterDecimal.</td>
+							<td class=fielddesc>Override the currency default value for digitsAfterDecimal.</td>
 						</tr>
 						<tr class=alt>
 							<td>principal</td>
 						</tr>
 						<tr>
-							<td class=fielddesc>Loan amount.</td>
-						</tr>
-						<tr class=alt>
-							<td>inArrearsTolerance</td>
-						</tr>
-						<tr>
-							<td class=fielddesc>The amount that can be 'waived' at end
-								of all loan payments because it is too small to worry about.<br>
-								This is also the tolerance amount assessed when determining if a
-								loan is in arrears.
-							</td>
+							<td class=fielddesc>The loan amount to be disbursed to through loan.</td>
 						</tr>
 						<tr class=alt>
 							<td>numberOfRepayments</td>
 						</tr>
 						<tr>
 							<td class=fielddesc>Number of installments to repay.<br>
-								Used like: numberOfRepayments Every repaymentEvery
-								repaymentFrequencyType<br> e.g. <b>10</b> (repayments)
-								Every 12 Weeks
-							</td>
-						</tr>
-						<tr class=alt>
-							<td>interestRatePerPeriod</td>
-						</tr>
-						<tr>
-							<td class=fielddesc>Interest Rate.<br> Used like:
-								interestRatePerPeriod% interestRateFrequencyType - interestType<br>
-								e.g. <b>12.0000</b>% Per year - Declining Balance
+								Used like: <b>numberOfRepayments</b> Every <i>repaymentEvery</i>
+								<i>repaymentFrequencyType</i><br> e.g. <b>10</b> (repayments) Every 12 Weeks
 							</td>
 						</tr>
 						<tr class=alt>
@@ -5314,26 +5517,27 @@ Request Body:
 						</tr>
 						<tr>
 							<td class=fielddesc>Used like: numberOfRepayments Every
-								repaymentEvery repaymentFrequencyType<br> e.g. 10
+								<b>repaymentEvery</b> repaymentFrequencyType<br> e.g. 10
 								(repayments) Every <b>12</b> Weeks
-							</td>
-						</tr>
-						<tr>
-							<td class=fieldtype>Each of the items below has an id, code
-								and (english) value.<br> Only the id (integer) is used when
-								updating. All 3 are returned on GET (read) requests.<br>
-								The options are fully listed in <a href="#loanproducts_template">Retrieve
-									Loan Product Details Template</a>.
 							</td>
 						</tr>
 						<tr class=alt>
 							<td>repaymentFrequencyType</td>
 						</tr>
 						<tr>
-							<td class=fielddesc>Used like: numberOfRepayments Every
-								repaymentEvery repaymentFrequencyType<br> e.g. 10
+							<td class=fielddesc>Used like: <i>numberOfRepayments</i> Every
+								repaymentEvery <b>repaymentFrequencyType</b><br> e.g. 10
 								(repayments) Every 12 <b>Weeks</b> <br>
-							<span>Example Values:</span> 0=Days, 1=Weeks, 2=Months
+								<span>Example Values:</span> 0=Days, 1=Weeks, 2=Months
+							</td>
+						</tr>
+						<tr class=alt>
+							<td>interestRatePerPeriod</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Interest Rate.<br> Used like:
+								<b>interestRatePerPeriod</b> % interestRateFrequencyType - interestType<br>
+								e.g. <b>12.0000</b>% Per year - Declining Balance
 							</td>
 						</tr>
 						<tr class=alt>
@@ -5353,8 +5557,6 @@ Request Body:
 							<td class=fielddesc><span>Example Values:</span> 0=Equal
 								principle payments, 1=Equal installments</td>
 						</tr>
-						</td>
-						</tr>
 						<tr class=alt>
 							<td>interestType</td>
 						</tr>
@@ -5365,17 +5567,37 @@ Request Body:
 							<span>Example Values:</span> 0=Declining Balance, 1=Flat
 							</td>
 						</tr>
-						</td>
-						</tr>
 						<tr class=alt>
 							<td>interestCalculationPeriodType</td>
 						</tr>
 						<tr>
-							<td class=fielddesc><span>Example Values:</span> 0=Daily, 
-								1=Same as repayment period</td>
+							<td class=fielddesc><span>Example Values:</span> 0=Daily, 1=Same as repayment period</td>
 						</tr>
-						</td>
+						<tr class=alt>
+							<td>inArrearsTolerance</td>
 						</tr>
+						<tr>
+							<td class=fielddesc>The amount that can be 'waived' at end
+								of all loan payments because it is too small to worry about.<br>
+								This is also the tolerance amount assessed when determining if a
+								loan is in arrears.
+							</td>
+						</tr>
+						<tr class=alt>
+							<td>transactionProcessingStrategyId</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>The type of transaction processing strategy to be used.<br>
+								At present some MFI specific ones exist. This is an important point of change for many MFIs.
+								<br>Responsible for things like payment order and how early or late repayments should be processed.<br>
+								Out of the box, four available:
+								<ol>
+									<li>id=1, code=mifos-standard-strategy, name=Mifos style</li>
+									<li>id=2, code=heavensfamily-strategy, name=Heavensfamily</li>
+									<li>id=3, code=creocore-strategy, name=Creocore</li>
+									<li>id=4, code=rbi-india-strategy, name=RBI (India)</li>
+								</ol>
+							</td>
 						</tr>
 						<tr class=alt>
 							<td>accountingRule</td>
@@ -5985,7 +6207,7 @@ Request Body:
     "interestCalculationPeriodType": 1,
     "inArrearsTolerance": "0",
     "transactionProcessingStrategyId": 1,
-    "charges":[{"id":"1"},{"id":"1"}],
+    "charges":[{"id":"1"}],
     "accountingRule": 1
 }
 					</code>
@@ -11476,13 +11698,11 @@ Content-Type: application/json
 				</tr>
 				<tr class="alt">
 					<td>clients/template</td>
-					<td><a href="#clients_template">Retrieve Client Details
-							Template</a></td>
+					<td><a href="#clients_template">Retrieve Client Details Template</a></td>
 				</tr>
 				<tr>
-					<td>loans/template</td>
-					<td><a href="#loans_template">Retrieve Loan Details
-							Template</a></td>
+					<td>loans/template?clientId={clientId}</td>
+					<td><a href="#loans_template">Retrieve Loan Details Template</a></td>
 				</tr>
 				<tr class="alt">
 					<td>loans/{loanId}/transactions/template</td>

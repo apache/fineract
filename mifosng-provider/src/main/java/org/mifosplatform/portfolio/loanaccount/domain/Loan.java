@@ -252,7 +252,7 @@ public class Loan extends AbstractPersistable<Long> {
     private boolean accountNumberRequiresAutoGeneration = false;
     @Transient
     private LoanRepaymentScheduleTransactionProcessorFactory transactionProcessorFactory;
-    
+
     @Transient
     private LoanLifecycleStateMachine loanLifecycleStateMachine;
     @Transient
@@ -555,7 +555,7 @@ public class Loan extends AbstractPersistable<Long> {
         }
 
         updateSummaryWithTotalFeeChargesDueAtDisbursement(deriveSumTotalOfChargesDueAtDisbursement());
-        
+
         existingTransactionIds.addAll(findExistingTransactionIds());
         existingReversedTransactionIds.addAll(findExistingReversedTransactionIds());
 
@@ -1238,8 +1238,7 @@ public class Loan extends AbstractPersistable<Long> {
         final Money totalFeeChargesDueAtDisbursement = this.summary.getTotalFeeChargesDueAtDisbursement(loanCurrency());
         if (totalFeeChargesDueAtDisbursement.isGreaterThanZero()) {
 
-            LoanTransaction chargesPayment = LoanTransaction.repaymentAtDisbursement(totalFeeChargesDueAtDisbursement,
-                    disbursedOn);
+            LoanTransaction chargesPayment = LoanTransaction.repaymentAtDisbursement(totalFeeChargesDueAtDisbursement, disbursedOn);
             Money zero = Money.zero(getCurrency());
             chargesPayment.updateComponents(zero, zero, totalFeeChargesDueAtDisbursement, zero);
             chargesPayment.updateLoan(this);
@@ -1324,15 +1323,15 @@ public class Loan extends AbstractPersistable<Long> {
         updateLoanSummaryDerivedFields();
     }
 
-    public LoanTransaction waiveInterest(final JsonCommand command, final LoanLifecycleStateMachine loanLifecycleStateMachine,final List<Long> existingTransactionIds,
-            final List<Long> existingReversedTransactionIds) {
+    public LoanTransaction waiveInterest(final JsonCommand command, final LoanLifecycleStateMachine loanLifecycleStateMachine,
+            final List<Long> existingTransactionIds, final List<Long> existingReversedTransactionIds) {
 
         final LocalDate transactionDate = command.localDateValueOfParameterNamed("transactionDate");
         final BigDecimal transactionAmount = command.bigDecimalValueOfParameterNamed("transactionAmount");
 
         final Money amountToWaive = Money.of(loanCurrency(), transactionAmount);
         final LoanTransaction waiveInterestTransaction = LoanTransaction.waiver(this, amountToWaive, transactionDate);
-        
+
         existingTransactionIds.addAll(findExistingTransactionIds());
         existingReversedTransactionIds.addAll(findExistingReversedTransactionIds());
 
@@ -1702,7 +1701,8 @@ public class Loan extends AbstractPersistable<Long> {
             final Money totalOutstanding = this.summary.getTotalOutstanding(loanCurrency());
             if (totalOutstanding.isGreaterThanZero() && getInArrearsTolerance().isGreaterThanOrEqualTo(totalOutstanding)) {
 
-                final LoanStatus statusEnum = loanLifecycleStateMachine.transition(LoanEvent.REPAID_IN_FULL, LoanStatus.fromInt(this.loanStatus));
+                final LoanStatus statusEnum = loanLifecycleStateMachine.transition(LoanEvent.REPAID_IN_FULL,
+                        LoanStatus.fromInt(this.loanStatus));
                 if (!statusEnum.hasStateOf(LoanStatus.fromInt(this.loanStatus))) {
                     this.loanStatus = statusEnum.getValue();
                     changes.put("status", LoanEnumerations.status(this.loanStatus));
@@ -1727,7 +1727,8 @@ public class Loan extends AbstractPersistable<Long> {
                 updateLoanSummaryDerivedFields();
             } else if (totalOutstanding.isGreaterThanZero()) {
                 final String errorMessage = "A loan with money outstanding cannot be closed";
-                throw new InvalidLoanStateTransitionException("close", "loan.has.money.outstanding", errorMessage, totalOutstanding.toString());
+                throw new InvalidLoanStateTransitionException("close", "loan.has.money.outstanding", errorMessage,
+                        totalOutstanding.toString());
             }
         }
 
@@ -1737,7 +1738,8 @@ public class Loan extends AbstractPersistable<Long> {
                 // TODO - KW - technically should set somewhere that this loan
                 // has
                 // 'overpaid' amount
-                final LoanStatus statusEnum = loanLifecycleStateMachine.transition(LoanEvent.REPAID_IN_FULL, LoanStatus.fromInt(this.loanStatus));
+                final LoanStatus statusEnum = loanLifecycleStateMachine.transition(LoanEvent.REPAID_IN_FULL,
+                        LoanStatus.fromInt(this.loanStatus));
                 if (!statusEnum.hasStateOf(LoanStatus.fromInt(this.loanStatus))) {
                     this.loanStatus = statusEnum.getValue();
                     changes.put("status", LoanEnumerations.status(this.loanStatus));
@@ -1971,24 +1973,32 @@ public class Loan extends AbstractPersistable<Long> {
     public void reassignLoanOfficer(final Staff newLoanOfficer, final LocalDate assignmentDate) {
 
         final LoanOfficerAssignmentHistory latestHistoryRecord = findLatestIncompleteHistoryRecord();
-        final LoanOfficerAssignmentHistory  lastAssignmentRecordWithNoEndDate = findLastAssignmentHistoryRecord();
+        final LoanOfficerAssignmentHistory lastAssignmentRecordWithNoEndDate = findLastAssignmentHistoryRecord();
 
-      //assignment date should not be less than loan submitted date
+        // assignment date should not be less than loan submitted date
         if (getSubmittedOnDate().isAfter(assignmentDate)) {
-            final String errorMessage = "The Loan Officer assignment date (" + assignmentDate.toString() + ") cannot be before loan submitted date (" + getSubmittedOnDate().toString() + ").";
-            throw new LoanOfficerAssignmentDateException("cannot.be.before.loan.submittal.date", errorMessage, assignmentDate, getSubmittedOnDate());
+            final String errorMessage = "The Loan Officer assignment date (" + assignmentDate.toString()
+                    + ") cannot be before loan submitted date (" + getSubmittedOnDate().toString() + ").";
+            throw new LoanOfficerAssignmentDateException("cannot.be.before.loan.submittal.date", errorMessage, assignmentDate,
+                    getSubmittedOnDate());
 
-          //assignment date should not be less than latest unassignment date
+            // assignment date should not be less than latest unassignment date
+            // FIXME - rather then fetching the data from the object all the
+            // time e.g
+            // getEndDate() and asking questions of it - move the operation to
+            // the object e.g. obj.isEndDateAfter(date)
         } else if (lastAssignmentRecordWithNoEndDate != null && lastAssignmentRecordWithNoEndDate.getEndDate() != null
                 && lastAssignmentRecordWithNoEndDate.getEndDate().isAfter(assignmentDate)) {
-            final String errorMessage = "The Loan Officer assignment date (" + assignmentDate + ") cannot be before previous Loan Officer unassigned date (" + lastAssignmentRecordWithNoEndDate.getEndDate() + ").";
-            throw new LoanOfficerAssignmentDateException("cannot.be.before.previous.unassignement.date", errorMessage, assignmentDate, lastAssignmentRecordWithNoEndDate.getEndDate());
+            final String errorMessage = "The Loan Officer assignment date (" + assignmentDate
+                    + ") cannot be before previous Loan Officer unassigned date (" + lastAssignmentRecordWithNoEndDate.getEndDate() + ").";
+            throw new LoanOfficerAssignmentDateException("cannot.be.before.previous.unassignement.date", errorMessage, assignmentDate,
+                    lastAssignmentRecordWithNoEndDate.getEndDate());
 
-         //assignment date should not be in the future
+            // assignment date should not be in the future
         } else if (DateUtils.getLocalDateOfTenant().isBefore(assignmentDate)) {
             final String errorMessage = "The Loan Officer assignment date (" + assignmentDate + ") cannot be in the future.";
             throw new LoanOfficerAssignmentDateException("cannot.be.a.future.date", errorMessage, assignmentDate);
-        }else if (latestHistoryRecord != null && this.loanOfficer.identifiedBy(newLoanOfficer)) {
+        } else if (latestHistoryRecord != null && this.loanOfficer.identifiedBy(newLoanOfficer)) {
             latestHistoryRecord.updateStartDate(assignmentDate);
         } else if (latestHistoryRecord != null && latestHistoryRecord.matchesStartDateOf(assignmentDate)) {
             latestHistoryRecord.updateLoanOfficer(newLoanOfficer);
@@ -2065,9 +2075,9 @@ public class Loan extends AbstractPersistable<Long> {
                 break;
             }
 
-            if(lastAssignmentRecordWithNoEndDate == null){
+            if (lastAssignmentRecordWithNoEndDate == null) {
                 lastAssignmentRecordWithNoEndDate = historyRecord;
-            } else if(historyRecord.getEndDate().isAfter(lastAssignmentRecordWithNoEndDate.getEndDate())){
+            } else if (historyRecord.getEndDate().isAfter(lastAssignmentRecordWithNoEndDate.getEndDate())) {
                 lastAssignmentRecordWithNoEndDate = historyRecord;
             }
         }
@@ -2115,7 +2125,7 @@ public class Loan extends AbstractPersistable<Long> {
     public Staff getLoanOfficer() {
         return this.loanOfficer;
     }
-    
+
     public LoanSummary getSummary() {
         return this.summary;
     }
