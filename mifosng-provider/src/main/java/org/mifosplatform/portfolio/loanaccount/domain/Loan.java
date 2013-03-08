@@ -2029,9 +2029,19 @@ public class Loan extends AbstractPersistable<Long> {
         final LocalDate today = DateUtils.getLocalDateOfTenant();
 
         if (latestHistoryRecord.getStartDate().isAfter(unassignDate)) {
-            throw new LoanOfficerUnassignmentDateException(this.getId(), this.getLoanOfficer().getId(), latestHistoryRecord.getStartDate(),
-                    unassignDate);
-        } else if (unassignDate.isAfter(today)) { throw new LoanOfficerUnassignmentDateException(this.getId()); }
+
+            final String errorMessage = "The Loan officer Unassign date(" + unassignDate + ") cannot be before its assignment date ("
+                    + latestHistoryRecord.getStartDate() + ").";
+
+            throw new LoanOfficerUnassignmentDateException("cannot.be.before.assignment.date", errorMessage, this.getId(), this
+                    .getLoanOfficer().getId(), latestHistoryRecord.getStartDate(), unassignDate);
+
+        } else if (unassignDate.isAfter(today)) {
+
+            final String errorMessage = "The Loan Officer Unassign date (" + unassignDate + ") cannot be in the future.";
+
+            throw new LoanOfficerUnassignmentDateException("cannot.be.a.future.date", errorMessage, unassignDate);
+        }
     }
 
     private LoanOfficerAssignmentHistory findLatestIncompleteHistoryRecord() {
