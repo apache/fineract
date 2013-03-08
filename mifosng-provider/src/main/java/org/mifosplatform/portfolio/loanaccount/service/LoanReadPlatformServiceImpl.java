@@ -136,7 +136,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
     }
 
     @Override
-    public LoanAccountData retrieveClientAndProductDetails(final Long clientId, final Long productId) {
+    public LoanAccountData retrieveTemplateWithClientAndProductDetails(final Long clientId, final Long productId) {
 
         context.authenticatedUser();
 
@@ -154,7 +154,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
     }
 
     @Override
-    public LoanAccountData retrieveGroupAndProductDetails(final Long groupId, final Long productId) {
+    public LoanAccountData retrieveTemplateWithGroupAndProductDetails(final Long groupId, final Long productId) {
 
         context.authenticatedUser();
 

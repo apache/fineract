@@ -156,11 +156,9 @@ public class LoanProductData {
         this.principal = principal;
         this.inArrearsTolerance = tolerance;
         this.numberOfRepayments = numberOfRepayments;
-        // this.loanTermFrequency = loanTermFrequency;
         this.repaymentEvery = repaymentEvery;
         this.interestRatePerPeriod = interestRatePerPeriod;
         this.annualInterestRate = annualInterestRate;
-        // this.loanTermFrequencyType = loanTermFrequencyType;
         this.repaymentFrequencyType = repaymentFrequencyType;
         this.interestRateFrequencyType = interestRateFrequencyType;
         this.amortizationType = amortizationType;
@@ -180,7 +178,6 @@ public class LoanProductData {
         this.amortizationTypeOptions = null;
         this.interestTypeOptions = null;
         this.interestCalculationPeriodTypeOptions = null;
-        // this.loanTermFrequencyTypeOptions = null;
         this.repaymentFrequencyTypeOptions = null;
         this.interestRateFrequencyTypeOptions = null;
 

@@ -20,9 +20,9 @@ public interface LoanReadPlatformService {
 
     Collection<LoanTransactionData> retrieveLoanTransactions(Long loanId);
 
-    LoanAccountData retrieveClientAndProductDetails(Long clientId, Long productId);
+    LoanAccountData retrieveTemplateWithClientAndProductDetails(Long clientId, Long productId);
 
-    LoanAccountData retrieveGroupAndProductDetails(Long groupId, Long productId);
+    LoanAccountData retrieveTemplateWithGroupAndProductDetails(Long groupId, Long productId);
 
     LoanTransactionData retrieveLoanTransactionTemplate(Long loanId);
 

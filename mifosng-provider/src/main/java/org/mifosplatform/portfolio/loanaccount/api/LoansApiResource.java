@@ -153,27 +153,6 @@ public class LoansApiResource {
 
         // template
         final Collection<LoanProductData> productOptions = this.loanProductReadPlatformService.retrieveAllLoanProductsForLookup();
-        final Collection<EnumOptionData> loanTermFrequencyTypeOptions = dropdownReadPlatformService.retrieveLoanTermFrequencyTypeOptions();
-        final Collection<EnumOptionData> repaymentFrequencyTypeOptions = dropdownReadPlatformService
-                .retrieveRepaymentFrequencyTypeOptions();
-        final Collection<EnumOptionData> interestRateFrequencyTypeOptions = dropdownReadPlatformService
-                .retrieveInterestRateFrequencyTypeOptions();
-
-        final Collection<EnumOptionData> amortizationTypeOptions = dropdownReadPlatformService.retrieveLoanAmortizationTypeOptions();
-        final Collection<EnumOptionData> interestTypeOptions = dropdownReadPlatformService.retrieveLoanInterestTypeOptions();
-        final Collection<EnumOptionData> interestCalculationPeriodTypeOptions = dropdownReadPlatformService
-                .retrieveLoanInterestRateCalculatedInPeriodOptions();
-
-        final Collection<FundData> fundOptions = this.fundReadPlatformService.retrieveAllFunds();
-        final Collection<TransactionProcessingStrategyData> repaymentStrategyOptions = this.dropdownReadPlatformService
-                .retreiveTransactionProcessingStrategies();
-        final Collection<CodeValueData> loanPurposeOptions = this.codeValueReadPlatformService.retrieveCodeValuesByCode("LoanPurpose");
-        final Collection<CodeValueData> loanCollateralOptions = this.codeValueReadPlatformService
-                .retrieveCodeValuesByCode("LoanCollateral");
-
-        final boolean feeChargesOnly = false;
-        final Collection<ChargeData> chargeOptions = this.chargeReadPlatformService.retrieveLoanApplicableCharges(feeChargesOnly);
-        final ChargeData chargeTemplate = this.loanChargeReadPlatformService.retrieveLoanChargeTemplate();
 
         // associations
         final LoanScheduleData repaymentSchedule = null;
@@ -181,12 +160,50 @@ public class LoansApiResource {
         final Collection<LoanCollateralData> collateral = null;
         final Collection<GuarantorData> guarantors = null;
 
+        // options
+        Collection<EnumOptionData> loanTermFrequencyTypeOptions = null;
+        Collection<EnumOptionData> repaymentFrequencyTypeOptions = null;
+        Collection<EnumOptionData> interestRateFrequencyTypeOptions = null;
+        Collection<EnumOptionData> amortizationTypeOptions = null;
+        Collection<EnumOptionData> interestTypeOptions = null;
+        Collection<EnumOptionData> interestCalculationPeriodTypeOptions = null;
+        Collection<FundData> fundOptions = null;
+        Collection<TransactionProcessingStrategyData> repaymentStrategyOptions = null;
+        Collection<StaffData> allowedLoanOfficers = null;
+        Collection<CodeValueData> loanPurposeOptions = null;
+        Collection<CodeValueData> loanCollateralOptions = null;
+        Collection<ChargeData> chargeOptions = null;
+        ChargeData chargeTemplate = null;
+
+        if (productId != null) {
+            loanTermFrequencyTypeOptions = dropdownReadPlatformService.retrieveLoanTermFrequencyTypeOptions();
+            repaymentFrequencyTypeOptions = dropdownReadPlatformService.retrieveRepaymentFrequencyTypeOptions();
+            interestRateFrequencyTypeOptions = dropdownReadPlatformService.retrieveInterestRateFrequencyTypeOptions();
+
+            amortizationTypeOptions = dropdownReadPlatformService.retrieveLoanAmortizationTypeOptions();
+            interestTypeOptions = dropdownReadPlatformService.retrieveLoanInterestTypeOptions();
+            interestCalculationPeriodTypeOptions = dropdownReadPlatformService.retrieveLoanInterestRateCalculatedInPeriodOptions();
+
+            fundOptions = this.fundReadPlatformService.retrieveAllFunds();
+            repaymentStrategyOptions = this.dropdownReadPlatformService.retreiveTransactionProcessingStrategies();
+            loanPurposeOptions = this.codeValueReadPlatformService.retrieveCodeValuesByCode("LoanPurpose");
+            loanCollateralOptions = this.codeValueReadPlatformService.retrieveCodeValuesByCode("LoanCollateral");
+
+            final boolean feeChargesOnly = false;
+            chargeOptions = this.chargeReadPlatformService.retrieveLoanApplicableCharges(feeChargesOnly);
+            // chargeTemplate =
+            // this.loanChargeReadPlatformService.retrieveLoanChargeTemplate();
+        }
+
         LoanAccountData newLoanAccount = null;
         if (clientId != null) {
-            final LoanAccountData loanBasicDetails = this.loanReadPlatformService.retrieveClientAndProductDetails(clientId, productId);
+            final LoanAccountData loanBasicDetails = this.loanReadPlatformService.retrieveTemplateWithClientAndProductDetails(clientId,
+                    productId);
             final Collection<LoanChargeData> charges = loanBasicDetails.charges();
-            final Long officeId = loanBasicDetails.officeId();
-            final Collection<StaffData> allowedLoanOfficers = this.staffReadPlatformService.retrieveAllLoanOfficersByOffice(officeId);
+            if (productId != null) {
+                final Long officeId = loanBasicDetails.officeId();
+                allowedLoanOfficers = this.staffReadPlatformService.retrieveAllLoanOfficersByOffice(officeId);
+            }
 
             newLoanAccount = LoanAccountData.associationsAndTemplate(loanBasicDetails, repaymentSchedule, loanRepayments, charges,
                     collateral, guarantors, productOptions, loanTermFrequencyTypeOptions, repaymentFrequencyTypeOptions,
@@ -195,10 +212,13 @@ public class LoansApiResource {
                     loanPurposeOptions, loanCollateralOptions);
 
         } else if (groupId != null) {
-            final LoanAccountData loanBasicDetails = this.loanReadPlatformService.retrieveGroupAndProductDetails(groupId, productId);
+            final LoanAccountData loanBasicDetails = this.loanReadPlatformService.retrieveTemplateWithGroupAndProductDetails(groupId,
+                    productId);
             final Collection<LoanChargeData> charges = loanBasicDetails.charges();
-            final Long officeId = loanBasicDetails.officeId();
-            final Collection<StaffData> allowedLoanOfficers = this.staffReadPlatformService.retrieveAllLoanOfficersByOffice(officeId);
+            if (productId != null) {
+                final Long officeId = loanBasicDetails.officeId();
+                allowedLoanOfficers = this.staffReadPlatformService.retrieveAllLoanOfficersByOffice(officeId);
+            }
 
             newLoanAccount = LoanAccountData.associationsAndTemplate(loanBasicDetails, repaymentSchedule, loanRepayments, charges,
                     collateral, guarantors, productOptions, loanTermFrequencyTypeOptions, repaymentFrequencyTypeOptions,

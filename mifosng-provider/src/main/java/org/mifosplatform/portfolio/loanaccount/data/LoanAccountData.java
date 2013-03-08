@@ -22,6 +22,7 @@ import org.mifosplatform.portfolio.loanaccount.guarantor.data.GuarantorData;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.data.LoanScheduleData;
 import org.mifosplatform.portfolio.loanproduct.data.LoanProductData;
 import org.mifosplatform.portfolio.loanproduct.data.TransactionProcessingStrategyData;
+import org.springframework.util.CollectionUtils;
 
 /**
  * Immutable data object representing loan account data.
@@ -30,10 +31,16 @@ import org.mifosplatform.portfolio.loanproduct.data.TransactionProcessingStrateg
 public class LoanAccountData {
 
     // basic loan details
+
+    // identity
     private final Long id;
     private final String accountNo;
-    private final LoanStatusEnumData status;
     private final String externalId;
+
+    // status
+    private final LoanStatusEnumData status;
+
+    // related to
     private final Long clientId;
     private final String clientName;
     private final Long clientOfficeId;
@@ -49,27 +56,31 @@ public class LoanAccountData {
     private final String loanPurposeName;
     private final Long loanOfficerId;
     private final String loanOfficerName;
+
+    // terms
     private final CurrencyData currency;
     private final BigDecimal principal;
-    private final BigDecimal inArrearsTolerance;
     private final Integer termFrequency;
     private final EnumOptionData termPeriodFrequencyType;
     private final Integer numberOfRepayments;
     private final Integer repaymentEvery;
     private final EnumOptionData repaymentFrequencyType;
-    private final Long transactionProcessingStrategyId;
-    private final EnumOptionData amortizationType;
     private final BigDecimal interestRatePerPeriod;
     private final EnumOptionData interestRateFrequencyType;
     private final BigDecimal annualInterestRate;
-    private final EnumOptionData interestType;
-    private final EnumOptionData interestCalculationPeriodType;
 
     // settings
+    private final EnumOptionData amortizationType;
+    private final EnumOptionData interestType;
+    private final EnumOptionData interestCalculationPeriodType;
+    private final BigDecimal inArrearsTolerance;
+    private final Long transactionProcessingStrategyId;
     private final LocalDate expectedFirstRepaymentOnDate;
     private final LocalDate interestChargedFromDate;
+
     // timeline
     private final LoanApplicationTimelineData timeline;
+
     // totals
     private final LoanSummaryData summary;
 
@@ -81,21 +92,19 @@ public class LoanAccountData {
     private final Collection<GuarantorData> guarantors;
 
     // template
-    private final Collection<StaffData> loanOfficerOptions;
     private final Collection<LoanProductData> productOptions;
+    private final Collection<StaffData> loanOfficerOptions;
+    private final Collection<CodeValueData> loanPurposeOptions;
+    private final Collection<FundData> fundOptions;
     private final Collection<EnumOptionData> termFrequencyTypeOptions;
     private final Collection<EnumOptionData> repaymentFrequencyTypeOptions;
-    private final Collection<TransactionProcessingStrategyData> repaymentStrategyOptions;
     private final Collection<EnumOptionData> interestRateFrequencyTypeOptions;
     private final Collection<EnumOptionData> amortizationTypeOptions;
     private final Collection<EnumOptionData> interestTypeOptions;
     private final Collection<EnumOptionData> interestCalculationPeriodTypeOptions;
-    private final Collection<FundData> fundOptions;
+    private final Collection<TransactionProcessingStrategyData> transactionProcessingStrategyOptions;
     private final Collection<ChargeData> chargeOptions;
-    private final Collection<CodeValueData> loanPurposeOptions;
     private final Collection<CodeValueData> loanCollateralOptions;
-
-    private final ChargeData chargeTemplate;
 
     @Transient
     private BigDecimal feeChargesAtDisbursementCharged;
@@ -153,7 +162,7 @@ public class LoanAccountData {
         final Collection<LoanProductData> productOptions = null;
         final Collection<EnumOptionData> termFrequencyTypeOptions = null;
         final Collection<EnumOptionData> repaymentFrequencyTypeOptions = null;
-        final Collection<TransactionProcessingStrategyData> repaymentStrategyOptions = null;
+        final Collection<TransactionProcessingStrategyData> transactionProcessingStrategyOptions = null;
         final Collection<EnumOptionData> interestRateFrequencyTypeOptions = null;
         final Collection<EnumOptionData> amortizationTypeOptions = null;
         final Collection<EnumOptionData> interestTypeOptions = null;
@@ -171,9 +180,9 @@ public class LoanAccountData {
                 interestRatePerPeriod, interestRateFrequencyType, annualInterestRate, interestType, interestCalculationPeriodType,
                 expectedFirstRepaymentOnDate, interestChargedFromDate, timeline, summary, feeChargesDueAtDisbursementCharged,
                 repaymentSchedule, transactions, charges, collateral, guarantors, productOptions, termFrequencyTypeOptions,
-                repaymentFrequencyTypeOptions, repaymentStrategyOptions, interestRateFrequencyTypeOptions, amortizationTypeOptions,
-                interestTypeOptions, interestCalculationPeriodTypeOptions, fundOptions, chargeOptions, chargeTemplate, loanOfficerOptions,
-                loanPurposeOptions, loanCollateralOptions);
+                repaymentFrequencyTypeOptions, transactionProcessingStrategyOptions, interestRateFrequencyTypeOptions,
+                amortizationTypeOptions, interestTypeOptions, interestCalculationPeriodTypeOptions, fundOptions, chargeOptions,
+                chargeTemplate, loanOfficerOptions, loanPurposeOptions, loanCollateralOptions);
     }
 
     /**
@@ -429,7 +438,7 @@ public class LoanAccountData {
             final Collection<LoanCollateralData> collateral, final Collection<GuarantorData> guarantors,
             final Collection<LoanProductData> productOptions, final Collection<EnumOptionData> termFrequencyTypeOptions,
             final Collection<EnumOptionData> repaymentFrequencyTypeOptions,
-            final Collection<TransactionProcessingStrategyData> repaymentStrategyOptions,
+            final Collection<TransactionProcessingStrategyData> transactionProcessingStrategyOptions,
             final Collection<EnumOptionData> interestRateFrequencyTypeOptions, final Collection<EnumOptionData> amortizationTypeOptions,
             final Collection<EnumOptionData> interestTypeOptions, final Collection<EnumOptionData> interestCalculationPeriodTypeOptions,
             final Collection<FundData> fundOptions, final Collection<ChargeData> chargeOptions, final ChargeData chargeTemplate,
@@ -443,7 +452,7 @@ public class LoanAccountData {
                 acc.interestRatePerPeriod, acc.interestRateFrequencyType, acc.annualInterestRate, acc.interestType,
                 acc.interestCalculationPeriodType, acc.expectedFirstRepaymentOnDate, acc.interestChargedFromDate, acc.timeline,
                 acc.summary, acc.feeChargesAtDisbursementCharged, repaymentSchedule, transactions, charges, collateral, guarantors,
-                productOptions, termFrequencyTypeOptions, repaymentFrequencyTypeOptions, repaymentStrategyOptions,
+                productOptions, termFrequencyTypeOptions, repaymentFrequencyTypeOptions, transactionProcessingStrategyOptions,
                 interestRateFrequencyTypeOptions, amortizationTypeOptions, interestTypeOptions, interestCalculationPeriodTypeOptions,
                 fundOptions, chargeOptions, chargeTemplate, loanOfficerOptions, loanPurposeOptions, loanCollateralOptions);
     }
@@ -476,23 +485,16 @@ public class LoanAccountData {
             final Integer numberOfRepayments,
             final Integer repaymentEvery,
             final EnumOptionData repaymentFrequencyType, //
-            final Long transactionProcessingStrategyId,
-            final EnumOptionData amortizationType,
-            final BigDecimal interestRatePerPeriod,
-            final EnumOptionData interestRateFrequencyType,
-            final BigDecimal annualInterestRate,
-            final EnumOptionData interestType,
-            final EnumOptionData interestCalculationPeriodType,
-            final LocalDate expectedFirstRepaymentOnDate,
-            final LocalDate interestChargedFromDate,
-            final LoanApplicationTimelineData timeline,
-            final LoanSummaryData summary, //
+            final Long transactionProcessingStrategyId, final EnumOptionData amortizationType, final BigDecimal interestRatePerPeriod,
+            final EnumOptionData interestRateFrequencyType, final BigDecimal annualInterestRate, final EnumOptionData interestType,
+            final EnumOptionData interestCalculationPeriodType, final LocalDate expectedFirstRepaymentOnDate,
+            final LocalDate interestChargedFromDate, final LoanApplicationTimelineData timeline, final LoanSummaryData summary,
             final BigDecimal feeChargesDueAtDisbursementCharged, final LoanScheduleData repaymentSchedule,
             final Collection<LoanTransactionData> transactions, final Collection<LoanChargeData> charges,
             final Collection<LoanCollateralData> collateral, final Collection<GuarantorData> guarantors,
             final Collection<LoanProductData> productOptions, final Collection<EnumOptionData> termFrequencyTypeOptions,
             final Collection<EnumOptionData> repaymentFrequencyTypeOptions,
-            final Collection<TransactionProcessingStrategyData> repaymentStrategyOptions,
+            final Collection<TransactionProcessingStrategyData> transactionProcessingStrategyOptions,
             final Collection<EnumOptionData> interestRateFrequencyTypeOptions, final Collection<EnumOptionData> amortizationTypeOptions,
             final Collection<EnumOptionData> interestTypeOptions, final Collection<EnumOptionData> interestCalculationPeriodTypeOptions,
             final Collection<FundData> fundOptions, final Collection<ChargeData> chargeOptions, final ChargeData chargeTemplate,
@@ -550,17 +552,46 @@ public class LoanAccountData {
         this.productOptions = productOptions;
         this.termFrequencyTypeOptions = termFrequencyTypeOptions;
         this.repaymentFrequencyTypeOptions = repaymentFrequencyTypeOptions;
-        this.repaymentStrategyOptions = repaymentStrategyOptions;
         this.interestRateFrequencyTypeOptions = interestRateFrequencyTypeOptions;
         this.amortizationTypeOptions = amortizationTypeOptions;
         this.interestTypeOptions = interestTypeOptions;
         this.interestCalculationPeriodTypeOptions = interestCalculationPeriodTypeOptions;
-        this.fundOptions = fundOptions;
-        this.chargeOptions = chargeOptions;
-        this.chargeTemplate = chargeTemplate;
-        this.loanOfficerOptions = loanOfficerOptions;
-        this.loanPurposeOptions = loanPurposeOptions;
-        this.loanCollateralOptions = loanCollateralOptions;
+
+        if (CollectionUtils.isEmpty(transactionProcessingStrategyOptions)) {
+            this.transactionProcessingStrategyOptions = null;
+        } else {
+            this.transactionProcessingStrategyOptions = transactionProcessingStrategyOptions;
+        }
+
+        if (CollectionUtils.isEmpty(fundOptions)) {
+            this.fundOptions = null;
+        } else {
+            this.fundOptions = fundOptions;
+        }
+
+        if (CollectionUtils.isEmpty(chargeOptions)) {
+            this.chargeOptions = null;
+        } else {
+            this.chargeOptions = chargeOptions;
+        }
+
+        if (CollectionUtils.isEmpty(loanOfficerOptions)) {
+            this.loanOfficerOptions = null;
+        } else {
+            this.loanOfficerOptions = loanOfficerOptions;
+        }
+
+        if (CollectionUtils.isEmpty(loanPurposeOptions)) {
+            this.loanPurposeOptions = null;
+        } else {
+            this.loanPurposeOptions = loanPurposeOptions;
+        }
+
+        if (CollectionUtils.isEmpty(loanCollateralOptions)) {
+            this.loanCollateralOptions = null;
+        } else {
+            this.loanCollateralOptions = loanCollateralOptions;
+        }
     }
 
     public RepaymentScheduleRelatedLoanData repaymentScheduleRelatedData() {
