@@ -60,7 +60,7 @@ import com.lowagie.text.pdf.PdfWriter;
 @Service
 public class ReadReportingServiceImpl implements ReadReportingService {
 
-    private final DataSource dataSource;
+	private final DataSource dataSource;
 	private final PlatformSecurityContext context;
 
 	private final static Logger logger = LoggerFactory
@@ -69,13 +69,14 @@ public class ReadReportingServiceImpl implements ReadReportingService {
 	private Boolean noPentaho = false;
 
 	@Autowired
-	public ReadReportingServiceImpl(final PlatformSecurityContext context, final TenantAwareRoutingDataSource dataSource) {
+	public ReadReportingServiceImpl(final PlatformSecurityContext context,
+			final TenantAwareRoutingDataSource dataSource) {
 		// kick off pentaho reports server
 		ClassicEngineBoot.getInstance().start();
 		noPentaho = false;
 
 		this.context = context;
-        this.dataSource = dataSource;
+		this.dataSource = dataSource;
 	}
 
 	@Autowired
@@ -384,8 +385,8 @@ public class ReadReportingServiceImpl implements ReadReportingService {
 	private void addParametersToReport(final MasterReport report,
 			final Map<String, String> queryParams) {
 
-		//AppUser currentUser = context.authenticatedUser();
-		
+		// AppUser currentUser = context.authenticatedUser();
+
 		try {
 			ReportParameterValues rptParamValues = report.getParameterValues();
 			ReportParameterDefinition paramsDefinition = report
@@ -401,7 +402,8 @@ public class ReadReportingServiceImpl implements ReadReportingService {
 			for (ParameterDefinitionEntry paramDefEntry : paramsDefinition
 					.getParameterDefinitions()) {
 				String paramName = paramDefEntry.getName();
-				if (paramName != "tenantdb") {
+				if (!(paramName.equals("tenantdb"))) {
+					logger.info("paramName:" + paramName);
 					String pValue = queryParams.get(paramName);
 					if (StringUtils.isBlank(pValue))
 						throw new PlatformDataIntegrityException(
@@ -424,11 +426,14 @@ public class ReadReportingServiceImpl implements ReadReportingService {
 					else
 						rptParamValues.put(paramName, pValue);
 				}
-				logger.info("db name:" + dataSource.getConnection().getCatalog());
-				rptParamValues.put("tenantdb", "mifostenants-heavensfamily" /*dataSource.getConnection().getCatalog()*/);
+				String tenantdb = dataSource.getConnection().getCatalog();
+				logger.info("db name:" + tenantdb);
+				rptParamValues.put("tenantdb", tenantdb);
 			}
 
 		} catch (Exception e) {
+
+			logger.info("error.msg.reporting.error:" + e.getMessage());
 			throw new PlatformDataIntegrityException(
 					"error.msg.reporting.error", e.getMessage());
 		}

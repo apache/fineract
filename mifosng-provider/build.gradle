@@ -138,6 +138,7 @@ dependencies {
 	            
 	            [group: 'pentaho-reporting-engine', name: 'pentaho-reporting-engine-classic-core', version: '3.9.1.1'],
 	            [group: 'pentaho-reporting-engine', name: 'pentaho-reporting-engine-classic-extensions', version: '3.9.1-GA'],
+	            [group: 'pentaho-reporting-engine', name: 'pentaho-reporting-engine-classic-extensions-scripting', version: '3.9.1-GA'],
 				[group: 'pentaho-reporting-engine', name: 'pentaho-reporting-engine-wizard-core', version: '3.9.1-GA'],
 	            [group: 'pentaho-report-designer', name: 'pentaho-reporting-engine-wizard-xul', version: '3.9.1-GA'],
 	            
