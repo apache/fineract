@@ -20,7 +20,6 @@ import org.mifosplatform.organisation.monetary.data.MoneyData;
 import org.mifosplatform.organisation.office.data.OfficeData;
 import org.mifosplatform.organisation.office.service.OfficeReadPlatformService;
 import org.mifosplatform.organisation.staff.data.StaffData;
-import org.mifosplatform.organisation.staff.domain.Staff;
 import org.mifosplatform.organisation.staff.exception.StaffNotFoundException;
 import org.mifosplatform.portfolio.client.data.ClientLookup;
 import org.mifosplatform.portfolio.client.service.ClientReadPlatformService;
@@ -52,7 +51,7 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
 
     @Autowired
     public GroupReadPlatformServiceImpl(final PlatformSecurityContext context, final TenantAwareRoutingDataSource dataSource,
-            ClientReadPlatformService clientReadPlatformService, final OfficeReadPlatformService officeReadPlatformService,
+            final ClientReadPlatformService clientReadPlatformService, final OfficeReadPlatformService officeReadPlatformService,
             final GroupRepository groupRepository) {
         this.context = context;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
@@ -66,7 +65,7 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
 
         this.context.authenticatedUser();
 
-        GroupDataMapper rm = new GroupDataMapper();
+        final GroupDataMapper rm = new GroupDataMapper();
 
         String sql = "select " + rm.groupSchema() + " where g.is_deleted=0";
 
@@ -83,12 +82,12 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
         try {
             this.context.authenticatedUser();
 
-            GroupDataMapper rm = new GroupDataMapper();
+            final GroupDataMapper rm = new GroupDataMapper();
 
-            String sql = "select " + rm.groupSchema() + " where g.id = ? and g.is_deleted=0";
+            final String sql = "select " + rm.groupSchema() + " where g.id = ? and g.is_deleted=0";
 
             return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { groupId });
-        } catch (EmptyResultDataAccessException e) {
+        } catch (final EmptyResultDataAccessException e) {
             throw new GroupNotFoundException(groupId);
         }
     }
@@ -97,19 +96,19 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
     public Collection<GroupLookupData> retrieveAllGroupsbyOfficeIdAndLevelId(final Long officeId, final Long levelId) {
 
         this.context.authenticatedUser();
-        GroupLookupMapper rm = new GroupLookupMapper();
-        String sql = "select " + rm.groupLookupSchema() + " from m_group g where g.office_id = ? and level_id = ? and g.is_deleted=0";
+        final GroupLookupMapper rm = new GroupLookupMapper();
+        final String sql = "select " + rm.groupLookupSchema() + " from m_group g where g.office_id = ? and level_id = ? and g.is_deleted=0";
         return this.jdbcTemplate.query(sql, rm, new Object[] { officeId, levelId });
     }
 
-    private GroupLookupData retrieveGroupbyId(Long parentGroupId) {
+    private GroupLookupData retrieveGroupbyId(final Long parentGroupId) {
         try {
             this.context.authenticatedUser();
-            GroupLookupMapper rm = new GroupLookupMapper();
-            String sql = "select " + rm.groupLookupSchema() + " from m_group g where g.id = ? and g.is_deleted=0";
+            final GroupLookupMapper rm = new GroupLookupMapper();
+            final String sql = "select " + rm.groupLookupSchema() + " from m_group g where g.id = ? and g.is_deleted=0";
             return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { parentGroupId });
 
-        } catch (EmptyResultDataAccessException e) {
+        } catch (final EmptyResultDataAccessException e) {
             throw new GroupNotFoundException(parentGroupId);
         }
     }
@@ -118,8 +117,8 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
     public Collection<GroupLookupData> retrieveChildGroupsbyGroupId(final Long groupId) {
 
         this.context.authenticatedUser();
-        GroupLookupMapper rm = new GroupLookupMapper();
-        String sql = "select " + rm.groupLookupSchema()
+        final GroupLookupMapper rm = new GroupLookupMapper();
+        final String sql = "select " + rm.groupLookupSchema()
                 + " from m_group pg join m_group g where pg.id = g.parent_id and pg.id = ? and g.is_deleted=0";
 
         return this.jdbcTemplate.query(sql, rm, new Object[] { groupId });
@@ -131,11 +130,11 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
 
         try {
             this.context.authenticatedUser();
-            GroupLevelDataMapper rm = new GroupLevelDataMapper();
-            String sql = "select " + rm.groupLevelSchema() + " where gl.id = ? ";
+            final GroupLevelDataMapper rm = new GroupLevelDataMapper();
+            final String sql = "select " + rm.groupLevelSchema() + " where gl.id = ? ";
             return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { levelId });
 
-        } catch (EmptyResultDataAccessException e) {
+        } catch (final EmptyResultDataAccessException e) {
             throw new GroupLevelNotFoundException(levelId);
         }
     }
@@ -143,7 +142,7 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
     @Override
     public GroupData retrieveNewGroupDetails(final Long officeId, final Long levelId) {
 
-        GroupLevelData groupLevelData = this.retrieveGroupLevelDetails(levelId);
+        final GroupLevelData groupLevelData = retrieveGroupLevelDetails(levelId);
 
         if (groupLevelData == null) { throw new GroupLevelNotFoundException(levelId); }
 
@@ -154,27 +153,28 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
                     this.clientReadPlatformService.retrieveAllIndividualClientsForLookupByOfficeId(officeId));
         }
 
-        List<OfficeData> allowedOffices = new ArrayList<OfficeData>(officeReadPlatformService.retrieveAllOfficesForDropdown());
+        final List<OfficeData> allowedOffices = new ArrayList<OfficeData>(this.officeReadPlatformService.retrieveAllOfficesForDropdown());
 
         List<GroupLookupData> allowedParentGroups = null;
 
         if (groupLevelData.getParentLevelId() != null) {
-            allowedParentGroups = new ArrayList<GroupLookupData>(this.retrieveAllGroupsbyOfficeIdAndLevelId(officeId,
+            allowedParentGroups = new ArrayList<GroupLookupData>(retrieveAllGroupsbyOfficeIdAndLevelId(officeId,
                     groupLevelData.getParentLevelId()));
         }
 
-        List<StaffData> allowedStaffs = new ArrayList<StaffData>(this.retrieveStaffsbyOfficeId(officeId));
+        final List<StaffData> allowedStaffs = new ArrayList<StaffData>(retrieveStaffsbyOfficeId(officeId));
 
         return new GroupData(officeId, allowedClients, allowedOffices, allowedParentGroups, groupLevelData, allowedStaffs);
     }
 
     @Override
-    public GroupData retrieveNewChildGroupDetails(Long officeId, Long levelId, Long parentGroupId) {
-        GroupLevelData groupLevelData = this.retrieveGroupLevelDetails(levelId);
+    public GroupData retrieveNewChildGroupDetails(Long officeId, final Long levelId, final Long parentGroupId) {
+
+        final GroupLevelData groupLevelData = retrieveGroupLevelDetails(levelId);
         if (groupLevelData == null) { throw new GroupLevelNotFoundException(levelId); }
 
-        Group group = groupRepository.findOne(parentGroupId);
-        if (group == null) { throw new GroupNotFoundException(parentGroupId); }
+        final Group group = this.groupRepository.findOne(parentGroupId);
+        if (group == null || group.isDeleted()) { throw new GroupNotFoundException(parentGroupId); }
 
         if (officeId == null) {
             officeId = group.getOfficeId();
@@ -187,19 +187,14 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
                     this.clientReadPlatformService.retrieveAllIndividualClientsForLookupByOfficeId(officeId));
         }
 
-        List<OfficeData> allowedOffices = new ArrayList<OfficeData>();
-        allowedOffices.add(officeReadPlatformService.retrieveOffice(officeId));
+        final List<OfficeData> allowedOffices = new ArrayList<OfficeData>();
+        allowedOffices.add(this.officeReadPlatformService.retrieveOffice(officeId));
 
-        List<GroupLookupData> allowedParentGroups = new ArrayList<GroupLookupData>();
-        allowedParentGroups.add(this.retrieveGroupbyId(parentGroupId));
+        final List<GroupLookupData> allowedParentGroups = new ArrayList<GroupLookupData>();
+        allowedParentGroups.add(retrieveGroupbyId(parentGroupId));
 
-        List<StaffData> allowedStaffs = new ArrayList<StaffData>();
-        final Staff staff = group.getStaff();
-        if (staff == null) {
-            allowedStaffs.addAll(this.retrieveStaffsbyOfficeId(officeId));
-        } else {
-            allowedStaffs.add(this.retrieveStaffsbyId(staff.getId()));
-        }
+        final List<StaffData> allowedStaffs = new ArrayList<StaffData>();
+        allowedStaffs.addAll(retrieveStaffsbyOfficeId(officeId));
 
         return new GroupData(officeId, allowedClients, allowedOffices, allowedParentGroups, groupLevelData, allowedStaffs);
     }
@@ -207,21 +202,21 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
     @Override
     public GroupData retrieveGroupDetails(final Long groupId, final boolean template) {
 
-        GroupData group = this.retrieveGroup(groupId);
-        final Collection<ClientLookup> clientMembers = this.retrieveClientMembers(groupId);
+        GroupData group = retrieveGroup(groupId);
+        final Collection<ClientLookup> clientMembers = retrieveClientMembers(groupId);
         Collection<ClientLookup> availableClients = null;
         Collection<OfficeData> allowedOffices = null;
         Collection<GroupLookupData> allowedParentGroups = null;
-        GroupLevelData groupLevelData = this.retrieveGroupLevelDetails(group.getGroupLevel());
+        final GroupLevelData groupLevelData = retrieveGroupLevelDetails(group.getGroupLevel());
         ;
         Collection<StaffData> allowedStaffs = null;
-        Collection<GroupLookupData> childGroups = this.retrieveChildGroupsbyGroupId(groupId);
+        final Collection<GroupLookupData> childGroups = retrieveChildGroupsbyGroupId(groupId);
 
-        final Long totalActiveClients = this.retrieveTotalClients(group.getHierarchy());
-        final Long totalChildGroups = this.retrieveTotalNoOfChildGroups(groupId);
-        Collection<MoneyData> totalLoanPortfolio = this.retrieveGroupLoanPortfolio(group.getHierarchy());
+        final Long totalActiveClients = retrieveTotalClients(group.getHierarchy());
+        final Long totalChildGroups = retrieveTotalNoOfChildGroups(groupId);
+        final Collection<MoneyData> totalLoanPortfolio = retrieveGroupLoanPortfolio(group.getHierarchy());
 
-        GroupSummaryData groupSummaryData = new GroupSummaryData(totalActiveClients, totalChildGroups, totalLoanPortfolio, null);
+        final GroupSummaryData groupSummaryData = new GroupSummaryData(totalActiveClients, totalChildGroups, totalLoanPortfolio, null);
 
         group = new GroupData(group, clientMembers, availableClients, allowedOffices, allowedParentGroups, groupLevelData, allowedStaffs,
                 childGroups, groupSummaryData);
@@ -232,12 +227,12 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
                 availableClients = this.clientReadPlatformService.retrieveAllIndividualClientsForLookupByOfficeId(group.getOfficeId());
                 availableClients.removeAll(group.clientMembers());
             }
-            allowedOffices = officeReadPlatformService.retrieveAllOfficesForDropdown();
+            allowedOffices = this.officeReadPlatformService.retrieveAllOfficesForDropdown();
             if (groupLevelData.getParentLevelId() != null) {
-                allowedParentGroups = this.retrieveAllGroupsbyOfficeIdAndLevelId(group.getOfficeId(), groupLevelData.getParentLevelId());
+                allowedParentGroups = retrieveAllGroupsbyOfficeIdAndLevelId(group.getOfficeId(), groupLevelData.getParentLevelId());
             }
 
-            allowedStaffs = this.retrieveStaffsbyOfficeId(group.getOfficeId());
+            allowedStaffs = retrieveStaffsbyOfficeId(group.getOfficeId());
 
             group = new GroupData(group, group.clientMembers(), availableClients, allowedOffices, allowedParentGroups, groupLevelData,
                     allowedStaffs, childGroups, groupSummaryData);
@@ -250,8 +245,8 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
     public Collection<StaffData> retrieveStaffsbyOfficeId(final Long officeId) {
 
         this.context.authenticatedUser();
-        StaffDataMapper rm = new StaffDataMapper();
-        String sql = "select " + rm.staffDataSchema() + " where o.id = ?";
+        final StaffDataMapper rm = new StaffDataMapper();
+        final String sql = "select " + rm.staffDataSchema() + " where o.id = ?";
         return this.jdbcTemplate.query(sql, rm, new Object[] { officeId });
 
     }
@@ -261,11 +256,11 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
 
         try {
             this.context.authenticatedUser();
-            StaffDataMapper rm = new StaffDataMapper();
-            String sql = "select " + rm.staffDataSchema() + " where s.id = ?";
+            final StaffDataMapper rm = new StaffDataMapper();
+            final String sql = "select " + rm.staffDataSchema() + " where s.id = ?";
             return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { staffId });
 
-        } catch (EmptyResultDataAccessException e) {
+        } catch (final EmptyResultDataAccessException e) {
             throw new StaffNotFoundException(staffId);
         }
     }
@@ -275,19 +270,18 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
 
         this.context.authenticatedUser();
 
-        String groupHierarchy = hierarchy + "%";
-        String sqlTotalClients = "SELECT count(gc.client_id) FROM m_group_client gc JOIN m_group g "
+        final String groupHierarchy = hierarchy + "%";
+        final String sqlTotalClients = "SELECT count(gc.client_id) FROM m_group_client gc JOIN m_group g "
                 + "ON gc.group_id = g.id WHERE g.hierarchy LIKE ? ";
         return this.jdbcTemplate.queryForLong(sqlTotalClients, new Object[] { groupHierarchy });
 
-        // TODO to need catch EmptyResultDataAccessException ? 
     }
 
     @Override
     public Long retrieveTotalNoOfChildGroups(final Long groupId) {
 
         this.context.authenticatedUser();
-        String sqlTotalClients = "SELECT count(gc.id) FROM m_group g JOIN m_group gc WHERE g.id = gc.parent_id and g.id = ?";
+        final String sqlTotalClients = "SELECT count(gc.id) FROM m_group g JOIN m_group gc WHERE g.id = gc.parent_id and g.id = ?";
         return this.jdbcTemplate.queryForLong(sqlTotalClients, new Object[] { groupId });
 
     }
@@ -297,10 +291,10 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
 
         this.context.authenticatedUser();
 
-        MoneyDataMapper rm = new MoneyDataMapper();
+        final MoneyDataMapper rm = new MoneyDataMapper();
 
-        String groupHierarchy = hierarchy + "%";
-        String sql = "select " + rm.moneyDataSchema() + " FROM m_group_client gc JOIN m_group g ON gc.group_id = g.id "
+        final String groupHierarchy = hierarchy + "%";
+        final String sql = "select " + rm.moneyDataSchema() + " FROM m_group_client gc JOIN m_group g ON gc.group_id = g.id "
                 + "JOIN m_loan l ON l.client_id = gc.client_id LEFT JOIN m_organisation_currency oc ON oc.code = l.currency_code "
                 + " WHERE g.hierarchy LIKE ? GROUP BY l.currency_code ";
 
@@ -315,11 +309,11 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
         }
 
         @Override
-        public MoneyData mapRow(ResultSet rs, @SuppressWarnings("unused") int rowNum) throws SQLException {
+        public MoneyData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
 
-            String currencyCode = rs.getString("currencyCode");
-            Integer decimalPlaces = rs.getInt("decimalPlaces");
-            BigDecimal amount = rs.getBigDecimal("amount");
+            final String currencyCode = rs.getString("currencyCode");
+            final Integer decimalPlaces = rs.getInt("decimalPlaces");
+            final BigDecimal amount = rs.getBigDecimal("amount");
 
             return new MoneyData(currencyCode, amount, decimalPlaces);
         }
@@ -336,19 +330,19 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
         }
 
         @Override
-        public GroupData mapRow(ResultSet rs, @SuppressWarnings("unused") int rowNum) throws SQLException {
+        public GroupData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
 
-            Long id = rs.getLong("id");
-            String name = rs.getString("name");
-            String externalId = rs.getString("externalId");
-            Long officeId = rs.getLong("officeId");
-            String officeName = rs.getString("officeName");
-            Long groupLevel = rs.getLong("groupLevel");
-            Long parentId = rs.getLong("parentId");
-            String parentName = rs.getString("parentName");
-            Long staffId = rs.getLong("staffId");
-            String staffName = rs.getString("staffName");
-            String hierarchy = rs.getString("hierarchy");
+            final Long id = rs.getLong("id");
+            final String name = rs.getString("name");
+            final String externalId = rs.getString("externalId");
+            final Long officeId = rs.getLong("officeId");
+            final String officeName = rs.getString("officeName");
+            final Long groupLevel = rs.getLong("groupLevel");
+            final Long parentId = rs.getLong("parentId");
+            final String parentName = rs.getString("parentName");
+            final Long staffId = rs.getLong("staffId");
+            final String staffName = rs.getString("staffName");
+            final String hierarchy = rs.getString("hierarchy");
 
             return new GroupData(id, officeId, officeName, name, externalId, groupLevel, parentId, parentName, staffId, staffName,
                     hierarchy);
@@ -363,10 +357,10 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
         }
 
         @Override
-        public GroupLookupData mapRow(ResultSet rs, @SuppressWarnings("unused") int rowNum) throws SQLException {
+        public GroupLookupData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
 
-            Long id = rs.getLong("id");
-            String name = rs.getString("name");
+            final Long id = rs.getLong("id");
+            final String name = rs.getString("name");
 
             return new GroupLookupData(id, name);
         }
@@ -383,17 +377,17 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
         }
 
         @Override
-        public GroupLevelData mapRow(ResultSet rs, @SuppressWarnings("unused") int rowNum) throws SQLException {
+        public GroupLevelData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
 
-            Long levelId = rs.getLong("id");
-            String levelName = rs.getString("levelName");
-            Long parentLevelId = rs.getLong("parentLevelId");
-            String parentLevelName = rs.getString("parentName");
-            Long childLevelId = rs.getLong("childLevelId");
-            String childLevelName = rs.getString("childLevelName");
-            boolean superParent = rs.getBoolean("superParent");
-            boolean recursable = rs.getBoolean("recursable");
-            boolean canHaveClients = rs.getBoolean("canHaveClients");
+            final Long levelId = rs.getLong("id");
+            final String levelName = rs.getString("levelName");
+            final Long parentLevelId = rs.getLong("parentLevelId");
+            final String parentLevelName = rs.getString("parentName");
+            final Long childLevelId = rs.getLong("childLevelId");
+            final String childLevelName = rs.getString("childLevelName");
+            final boolean superParent = rs.getBoolean("superParent");
+            final boolean recursable = rs.getBoolean("recursable");
+            final boolean canHaveClients = rs.getBoolean("canHaveClients");
 
             return new GroupLevelData(levelId, levelName, parentLevelId, parentLevelName, childLevelId, childLevelName, superParent,
                     recursable, canHaveClients);
@@ -409,15 +403,15 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
         }
 
         @Override
-        public StaffData mapRow(ResultSet rs, @SuppressWarnings("unused") int rowNum) throws SQLException {
+        public StaffData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
 
-            Long id = rs.getLong("id");
-            String firstname = rs.getString("firstname");
-            String lastname = rs.getString("lastname");
-            String displayName = rs.getString("displayName");
-            Long officeId = rs.getLong("officeId");
-            String officeName = rs.getString("officeName");
-            boolean isLoanOfficer = rs.getBoolean("isLoanOfficer");
+            final Long id = rs.getLong("id");
+            final String firstname = rs.getString("firstname");
+            final String lastname = rs.getString("lastname");
+            final String displayName = rs.getString("displayName");
+            final Long officeId = rs.getLong("officeId");
+            final String officeName = rs.getString("officeName");
+            final boolean isLoanOfficer = rs.getBoolean("isLoanOfficer");
 
             return StaffData.instance(id, firstname, lastname, displayName, officeId, officeName, isLoanOfficer);
         }
@@ -425,13 +419,13 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
     }
 
     @Override
-    public Collection<ClientLookup> retrieveClientMembers(Long groupId) {
+    public Collection<ClientLookup> retrieveClientMembers(final Long groupId) {
 
         this.context.authenticatedUser();
 
-        ClientMemberSummaryDataMapper rm = new ClientMemberSummaryDataMapper();
+        final ClientMemberSummaryDataMapper rm = new ClientMemberSummaryDataMapper();
 
-        String sql = "select " + rm.clientMemberSummarySchema() + " where cm.is_deleted = 0 and pgc.group_id = ?";
+        final String sql = "select " + rm.clientMemberSummarySchema() + " where cm.is_deleted = 0 and pgc.group_id = ?";
 
         return this.jdbcTemplate.query(sql, rm, new Object[] { groupId });
     }
@@ -443,9 +437,9 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
         }
 
         @Override
-        public ClientLookup mapRow(ResultSet rs, @SuppressWarnings("unused") int rowNum) throws SQLException {
-            Long id = rs.getLong("id");
-            String displayName = rs.getString("displayName");
+        public ClientLookup mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+            final Long id = rs.getLong("id");
+            final String displayName = rs.getString("displayName");
 
             return ClientLookup.create(id, displayName);
         }
@@ -453,27 +447,27 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
     }
 
     @Override
-    public GroupAccountSummaryCollectionData retrieveGroupAccountDetails(Long groupId) {
+    public GroupAccountSummaryCollectionData retrieveGroupAccountDetails(final Long groupId) {
         try {
             this.context.authenticatedUser();
 
             // Check if group exists
             retrieveGroup(groupId);
 
-            List<GroupAccountSummaryData> pendingApprovalLoans = new ArrayList<GroupAccountSummaryData>();
-            List<GroupAccountSummaryData> awaitingDisbursalLoans = new ArrayList<GroupAccountSummaryData>();
-            List<GroupAccountSummaryData> openLoans = new ArrayList<GroupAccountSummaryData>();
-            List<GroupAccountSummaryData> closedLoans = new ArrayList<GroupAccountSummaryData>();
+            final List<GroupAccountSummaryData> pendingApprovalLoans = new ArrayList<GroupAccountSummaryData>();
+            final List<GroupAccountSummaryData> awaitingDisbursalLoans = new ArrayList<GroupAccountSummaryData>();
+            final List<GroupAccountSummaryData> openLoans = new ArrayList<GroupAccountSummaryData>();
+            final List<GroupAccountSummaryData> closedLoans = new ArrayList<GroupAccountSummaryData>();
 
-            GroupLoanAccountSummaryDataMapper rm = new GroupLoanAccountSummaryDataMapper();
+            final GroupLoanAccountSummaryDataMapper rm = new GroupLoanAccountSummaryDataMapper();
 
             String sql = "select " + rm.loanAccountSummarySchema() + " where l.group_id = ? and l.client_id is null";
 
             List<GroupAccountSummaryData> results = this.jdbcTemplate.query(sql, rm, new Object[] { groupId });
             if (results != null) {
-                for (GroupAccountSummaryData row : results) {
+                for (final GroupAccountSummaryData row : results) {
 
-                    LoanStatusMapper statusMapper = new LoanStatusMapper(row.getAccountStatusId());
+                    final LoanStatusMapper statusMapper = new LoanStatusMapper(row.getAccountStatusId());
 
                     if (statusMapper.isOpen()) {
                         openLoans.add(row);
@@ -487,18 +481,18 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
                 }
             }
 
-            List<GroupAccountSummaryData> pendingApprovalIndividualLoans = new ArrayList<GroupAccountSummaryData>();
-            List<GroupAccountSummaryData> awaitingDisbursalIndividualLoans = new ArrayList<GroupAccountSummaryData>();
-            List<GroupAccountSummaryData> openIndividualLoans = new ArrayList<GroupAccountSummaryData>();
-            List<GroupAccountSummaryData> closedIndividualLoans = new ArrayList<GroupAccountSummaryData>();
+            final List<GroupAccountSummaryData> pendingApprovalIndividualLoans = new ArrayList<GroupAccountSummaryData>();
+            final List<GroupAccountSummaryData> awaitingDisbursalIndividualLoans = new ArrayList<GroupAccountSummaryData>();
+            final List<GroupAccountSummaryData> openIndividualLoans = new ArrayList<GroupAccountSummaryData>();
+            final List<GroupAccountSummaryData> closedIndividualLoans = new ArrayList<GroupAccountSummaryData>();
 
             sql = "select " + rm.loanAccountSummarySchema() + " where l.group_id = ? and l.client_id is not null";
 
             results = this.jdbcTemplate.query(sql, rm, new Object[] { groupId });
             if (results != null) {
-                for (GroupAccountSummaryData row : results) {
+                for (final GroupAccountSummaryData row : results) {
 
-                    LoanStatusMapper statusMapper = new LoanStatusMapper(row.getAccountStatusId());
+                    final LoanStatusMapper statusMapper = new LoanStatusMapper(row.getAccountStatusId());
 
                     if (statusMapper.isOpen()) {
                         openIndividualLoans.add(row);
@@ -514,24 +508,25 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
 
             return new GroupAccountSummaryCollectionData(pendingApprovalLoans, awaitingDisbursalLoans, openLoans, closedLoans,
                     pendingApprovalIndividualLoans, awaitingDisbursalIndividualLoans, openIndividualLoans, closedIndividualLoans);
-        } catch (EmptyResultDataAccessException e) {
+        } catch (final EmptyResultDataAccessException e) {
             throw new GroupNotFoundException(groupId);
         }
     }
 
     @Override
-    public Collection<GroupAccountSummaryData> retrieveGroupLoanAccountsByLoanOfficerId(Long groupId, Long loanOfficerId) {
+    public Collection<GroupAccountSummaryData> retrieveGroupLoanAccountsByLoanOfficerId(final Long groupId, final Long loanOfficerId) {
 
         this.context.authenticatedUser();
 
         // Check if group exists
         retrieveGroup(groupId);
 
-        GroupLoanAccountSummaryDataMapper rm = new GroupLoanAccountSummaryDataMapper();
+        final GroupLoanAccountSummaryDataMapper rm = new GroupLoanAccountSummaryDataMapper();
 
-        String sql = "select " + rm.loanAccountSummarySchema() + " where l.group_id = ? and l.client_id is null and l.loan_officer_id = ?";
+        final String sql = "select " + rm.loanAccountSummarySchema()
+                + " where l.group_id = ? and l.client_id is null and l.loan_officer_id = ?";
 
-        List<GroupAccountSummaryData> loanAccounts = this.jdbcTemplate.query(sql, rm, new Object[] { groupId, loanOfficerId });
+        final List<GroupAccountSummaryData> loanAccounts = this.jdbcTemplate.query(sql, rm, new Object[] { groupId, loanOfficerId });
 
         return loanAccounts;
     }
@@ -540,7 +535,7 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
 
         public String loanAccountSummarySchema() {
 
-            StringBuilder accountsSummary = new StringBuilder("l.id as id, l.external_id as externalId,");
+            final StringBuilder accountsSummary = new StringBuilder("l.id as id, l.external_id as externalId,");
             accountsSummary.append("l.product_id as productId, lp.name as productName,").append("l.loan_status_id as statusId ")
                     .append("from m_loan l ").append("LEFT JOIN m_product_loan AS lp ON lp.id = l.product_id ");
 
@@ -550,11 +545,11 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
         @Override
         public GroupAccountSummaryData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
 
-            Long id = JdbcSupport.getLong(rs, "id");
-            String externalId = rs.getString("externalId");
-            Long productId = JdbcSupport.getLong(rs, "productId");
-            String loanProductName = rs.getString("productName");
-            Integer loanStatusId = JdbcSupport.getInteger(rs, "statusId");
+            final Long id = JdbcSupport.getLong(rs, "id");
+            final String externalId = rs.getString("externalId");
+            final Long productId = JdbcSupport.getLong(rs, "productId");
+            final String loanProductName = rs.getString("productName");
+            final Integer loanStatusId = JdbcSupport.getInteger(rs, "statusId");
 
             return new GroupAccountSummaryData(id, externalId, productId, loanProductName, loanStatusId);
         }

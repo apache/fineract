@@ -16,10 +16,8 @@ public class GroupAccountSummaryData {
     private final String productName;
     private final Integer accountStatusId;
 
-    public GroupAccountSummaryData(Long id, String externalId,
-                                   Long productId,
-                                   String productName,
-                                   Integer accountStatusId) {
+    public GroupAccountSummaryData(final Long id, final String externalId, final Long productId, final String productName,
+            final Integer accountStatusId) {
         this.id = id;
         this.externalId = externalId;
         this.productId = productId;
@@ -28,22 +26,22 @@ public class GroupAccountSummaryData {
     }
 
     public Long getId() {
-        return id;
+        return this.id;
     }
 
     public String getExternalId() {
-        return externalId;
+        return this.externalId;
     }
 
     public Long getProductId() {
-        return productId;
+        return this.productId;
     }
 
     public String getProductName() {
-        return productName;
+        return this.productName;
     }
 
     public Integer getAccountStatusId() {
-        return accountStatusId;
+        return this.accountStatusId;
     }
 }

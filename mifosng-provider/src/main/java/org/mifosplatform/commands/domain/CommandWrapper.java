@@ -367,6 +367,10 @@ public class CommandWrapper {
         return isDatatableResource() && isUpdateOperation() && this.apptableId != null && this.datatableId != null;
     }
 
+    public boolean isUnassignStaff() {
+        return this.actionName.equalsIgnoreCase("UNASSIGNSTAFF") && this.entityName.equalsIgnoreCase("GROUP");
+    }
+    
     public String commandName() {
         return this.actionName + "_" + this.entityName;
     }
@@ -461,5 +465,10 @@ public class CommandWrapper {
         }
         return isnoteResource;
     }
+    
+    public boolean isGroupResource() {
+        return this.entityName.equalsIgnoreCase("GROUP");
+    }
+
 
 }

@@ -10,10 +10,10 @@ import org.mifosplatform.infrastructure.core.exception.AbstractPlatformResourceN
 /**
  * A {@link RuntimeException} thrown when group resources are not found.
  */
-public class LoanOfficerNotFoundException extends AbstractPlatformResourceNotFoundException {
+public class GroupHasNoStaffException extends AbstractPlatformResourceNotFoundException {
 
-    public LoanOfficerNotFoundException(Long id){
-        super("error.msg.loanofficer.id.invalid", "Loan Officer with identifier " + id + " does not exist", id);
+    public GroupHasNoStaffException(final Long groupId) {
+        super("error.msg.group.has.no.staff", "Group with identifier " + groupId + " does not have staff", groupId);
     }
-    
+
 }

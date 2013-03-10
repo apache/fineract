@@ -10,7 +10,6 @@ package org.mifosplatform.portfolio.group.data;
  */
 public class GroupLevelData {
 
-
     private final Long levelId;
     private final String levelName;
     private final Long parentLevelId;
@@ -20,9 +19,10 @@ public class GroupLevelData {
     private final boolean superParent;
     private final boolean recursable;
     private final boolean canHaveClients;
-    
-    public GroupLevelData(Long levelId, String levelName, Long parentLevelId, String parentLevelName, Long childLevelId,
-            String childLevelName, boolean superParent, boolean recursable, boolean canHaveClients) {
+
+    public GroupLevelData(final Long levelId, final String levelName, final Long parentLevelId, final String parentLevelName,
+            final Long childLevelId, final String childLevelName, final boolean superParent, final boolean recursable,
+            final boolean canHaveClients) {
         super();
         this.levelId = levelId;
         this.levelName = levelName;
@@ -35,50 +35,38 @@ public class GroupLevelData {
         this.canHaveClients = canHaveClients;
     }
 
-
-    
     public String getParentLevelName() {
         return this.parentLevelName;
     }
 
-
-    
     public Long getChildLevelId() {
         return this.childLevelId;
     }
 
-
-    
     public String getChildLevelName() {
         return this.childLevelName;
     }
-
 
     public Long getLevelId() {
         return this.levelId;
     }
 
-    
     public Long getParentLevelId() {
         return this.parentLevelId;
     }
 
-    
     public String getLevelName() {
         return this.levelName;
     }
 
-    
     public boolean isSuperParent() {
         return this.superParent;
     }
 
-    
     public boolean isRecursable() {
         return this.recursable;
     }
 
-    
     public boolean isCanHaveClients() {
         return this.canHaveClients;
     }

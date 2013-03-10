@@ -5,94 +5,54 @@
  */
 package org.mifosplatform.portfolio.group.command;
 
-import java.util.Set;
-
 public class GroupCommand {
 
-    private final Long id;
     private final String externalId;
     private final String name;
     private final Long officeId;
     private final Long staffId;
     private final Long parentId;
-    private final Long levelId;
-
     private final String[] clientMembers;
+    private final String[] childGroups;
 
-    private final Set<String> modifiedParameters;
-
-    public GroupCommand(Set<String> modifiedParameters, final Long id, final String externalId, final String name,
-                        final Long officeId, final Long staffId, String[] clientMembers , final Long parentId ,final Long levelId) {
-        this.id = id;
+    public GroupCommand(final String externalId, final String name, final Long officeId, final Long staffId, final String[] clientMembers,
+            final String[] childGroups, final Long parentId) {
         this.officeId = officeId;
         this.staffId = staffId;
         this.parentId = parentId;
-        this.levelId = levelId;
         this.externalId = externalId;
         this.name = name;
         this.clientMembers = clientMembers;
-        this.modifiedParameters = modifiedParameters;
-        
+        this.childGroups = childGroups;
+
     }
 
     public Long getOfficeId() {
-        return officeId;
+        return this.officeId;
     }
 
     public Long getParentId() {
-        return parentId;
-    }
-
-    public Long getLevelId() {
-        return levelId;
+        return this.parentId;
     }
 
     public Long getStaffId() {
-        return staffId;
+        return this.staffId;
     }
-    
+
     public String getExternalId() {
-        return externalId;
+        return this.externalId;
     }
 
     public String getName() {
-        return name;
-    }
-
-    public Long getId() {
-        return id;
+        return this.name;
     }
 
     public String[] getClientMembers() {
-        return clientMembers;
+        return this.clientMembers;
     }
 
-    public boolean isOfficeIdChanged() {
-        return this.modifiedParameters.contains("officeId");
+    public String[] getChildGroups() {
+        return this.childGroups;
     }
 
-    public boolean isParentIdChanged() {
-        return this.modifiedParameters.contains("parentId");
-    }
-    
-    public boolean isLevelIdChanged() {
-        return this.modifiedParameters.contains("levelId");
-    }
-
-    public boolean isStaffChanged() {
-        return this.modifiedParameters.contains("staffId");
-    }
-
-    public boolean isNameChanged() {
-        return this.modifiedParameters.contains("name");
-    }
-    
-    public boolean isExternalIdChanged() {
-        return this.modifiedParameters.contains("externalId");
-    }
-    
-    public boolean isClientMembersChanged() {
-        return this.modifiedParameters.contains("clientMembers");
-    }
-    
 }

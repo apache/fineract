@@ -19,18 +19,18 @@ import org.mifosplatform.portfolio.group.data.GroupLookupData;
 public interface GroupReadPlatformService {
 
     Collection<GroupData> retrieveAllGroups(String extraCriteria);
-    
+
     GroupData retrieveGroup(Long groupId);
 
-    GroupData retrieveNewGroupDetails(Long officeId , Long levelId);
+    GroupData retrieveNewGroupDetails(Long officeId, Long levelId);
 
     Collection<ClientLookup> retrieveClientMembers(Long groupId);
 
     GroupAccountSummaryCollectionData retrieveGroupAccountDetails(Long groupId);
 
     Collection<GroupAccountSummaryData> retrieveGroupLoanAccountsByLoanOfficerId(Long groupId, Long loanOfficerId);
-    
-    Collection<GroupLookupData> retrieveAllGroupsbyOfficeIdAndLevelId(Long officeId , Long levelId);
+
+    Collection<GroupLookupData> retrieveAllGroupsbyOfficeIdAndLevelId(Long officeId, Long levelId);
 
     GroupLevelData retrieveGroupLevelDetails(Long levelId);
 
