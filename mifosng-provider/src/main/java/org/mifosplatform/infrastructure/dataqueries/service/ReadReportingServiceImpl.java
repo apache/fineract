@@ -27,7 +27,6 @@ import org.apache.commons.lang.StringUtils;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.mifosplatform.infrastructure.core.service.FileUtils;
 import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
-import org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil;
 import org.mifosplatform.infrastructure.dataqueries.data.GenericResultsetData;
 import org.mifosplatform.infrastructure.dataqueries.data.ResultsetColumnHeader;
 import org.mifosplatform.infrastructure.dataqueries.data.ResultsetDataRow;
@@ -310,10 +309,13 @@ public class ReadReportingServiceImpl implements ReadReportingService {
 		// String reportPath =
 		// "C:\\dev\\apache-tomcat-7.0.25\\webapps\\ROOT\\PentahoReports\\"
 		// + reportName + ".prpt";
-		String reportPath = FileUtils.MIFOSX_BASE_DIR
+		/*String reportPath = FileUtils.MIFOSX_BASE_DIR
 				+ File.separator
 				+ ThreadLocalContextUtil.getTenant().getName()
 						.replaceAll(" ", "").trim() + File.separator
+				+ "reports" + File.separator + reportName + ".prpt";*/
+		String reportPath = FileUtils.MIFOSX_BASE_DIR
+				+ File.separator
 				+ "reports" + File.separator + reportName + ".prpt";
 		logger.info("Report path: " + reportPath);
 
@@ -385,9 +387,11 @@ public class ReadReportingServiceImpl implements ReadReportingService {
 	private void addParametersToReport(final MasterReport report,
 			final Map<String, String> queryParams) {
 
-		// AppUser currentUser = context.authenticatedUser();
+		AppUser currentUser = context.authenticatedUser();
 
 		try {
+
+			logger.info("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
 			ReportParameterValues rptParamValues = report.getParameterValues();
 			ReportParameterDefinition paramsDefinition = report
 					.getParameterDefinition();
@@ -402,7 +406,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
 			for (ParameterDefinitionEntry paramDefEntry : paramsDefinition
 					.getParameterDefinitions()) {
 				String paramName = paramDefEntry.getName();
-				if (!(paramName.equals("tenantdb"))) {
+				if (!((paramName.equals("tenantdb")) || (paramName.equals("userhierarchy")))) {
 					logger.info("paramName:" + paramName);
 					String pValue = queryParams.get(paramName);
 					if (StringUtils.isBlank(pValue))
@@ -426,9 +430,15 @@ public class ReadReportingServiceImpl implements ReadReportingService {
 					else
 						rptParamValues.put(paramName, pValue);
 				}
+
+				// tenant database name and current user's office hierarchy
+				// passed as parameters to allow multitenant penaho reporting and
+				// data scoping
 				String tenantdb = dataSource.getConnection().getCatalog();
-				logger.info("db name:" + tenantdb);
+				String userhierarchy = currentUser.getOffice().getHierarchy();
+				logger.info("db name:" + tenantdb + "      userhierarchy:" + userhierarchy);
 				rptParamValues.put("tenantdb", tenantdb);
+				rptParamValues.put("userhierarchy", userhierarchy);
 			}
 
 		} catch (Exception e) {
