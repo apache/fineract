@@ -12,8 +12,8 @@ import org.mifosplatform.infrastructure.core.exception.AbstractPlatformResourceN
  */
 public class GroupLevelNotFoundException extends AbstractPlatformResourceNotFoundException {
 
-    public GroupLevelNotFoundException(Long id){
+    public GroupLevelNotFoundException(final Long id) {
         super("error.msg.group.level.id.invalid", "Group level with identifier " + id + " does not exist", id);
     }
-    
+
 }

@@ -55,25 +55,24 @@ public class GroupLevel extends AbstractPersistable<Long> {
         return this.parentId;
     }
 
-    public boolean getIsSuperParent() {
-        return this.superParent;
-    }
-
     public String getLevelName() {
         return this.levelName;
     }
 
-    public boolean getRecursable() {
+    public boolean isRecursable() {
         return this.recursable;
     }
 
-    public boolean getCanHaveClients() {
+    public boolean canHaveClients() {
         return this.canHaveClients;
     }
 
-    
     public boolean isSuperParent() {
         return this.superParent;
+    }
+
+    public boolean isIdentifiedByParentId(final Long parentLevelId) {
+        return this.parentId.equals(parentLevelId);
     }
 
 }

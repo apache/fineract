@@ -904,4 +904,35 @@ public class CommandWrapperBuilder {
         this.href = "/" + resourceType + "/" + resourceId + "/calendars/" + noteId;
         return this;
     }
+    
+    public CommandWrapperBuilder createGroup() {
+        this.actionName = "CREATE";
+        this.entityName = "GROUP";
+        this.href = "/groups/template";
+        return this;
+    }
+    
+    public CommandWrapperBuilder updateGroup(final Long groupId) {
+        this.actionName = "UPDATE";
+        this.entityName = "GROUP";
+        this.entityId = groupId;
+        this.href = "/groups/" + groupId;
+        return this;
+    }
+
+    public CommandWrapperBuilder unassignStaff(final Long groupId) {
+        this.actionName = "UNASSIGNSTAFF";
+        this.entityName = "GROUP";
+        this.entityId = groupId;
+        this.href = "/groups/" + groupId;
+        return this;
+    }
+
+    public CommandWrapperBuilder deleteGroup(final Long groupId) {
+        this.actionName = "DELETE";
+        this.entityName = "GROUP";
+        this.entityId = groupId;
+        this.href = "/groups/" + groupId;
+        return this;
+    }
 }

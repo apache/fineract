@@ -34,11 +34,11 @@ public class GroupAccountSummaryCollectionData {
     @SuppressWarnings("unused")
     private final List<GroupAccountSummaryData> closedIndividualLoans;
 
-    public GroupAccountSummaryCollectionData(List<GroupAccountSummaryData> pendingApprovalLoans,
-            List<GroupAccountSummaryData> awaitingDisbursalLoans, List<GroupAccountSummaryData> openLoans,
-            List<GroupAccountSummaryData> closedLoans, List<GroupAccountSummaryData> pendingApprovalIndividualLoans,
-            List<GroupAccountSummaryData> awaitingDisbursalIndividualLoans, List<GroupAccountSummaryData> openIndividualLoans,
-            List<GroupAccountSummaryData> closedIndividualLoans) {
+    public GroupAccountSummaryCollectionData(final List<GroupAccountSummaryData> pendingApprovalLoans,
+            final List<GroupAccountSummaryData> awaitingDisbursalLoans, final List<GroupAccountSummaryData> openLoans,
+            final List<GroupAccountSummaryData> closedLoans, final List<GroupAccountSummaryData> pendingApprovalIndividualLoans,
+            final List<GroupAccountSummaryData> awaitingDisbursalIndividualLoans, final List<GroupAccountSummaryData> openIndividualLoans,
+            final List<GroupAccountSummaryData> closedIndividualLoans) {
         this.pendingApprovalLoans = pendingApprovalLoans;
         this.pendingApprovalLoanCount = pendingApprovalLoans.size();
         this.awaitingDisbursalLoans = awaitingDisbursalLoans;
@@ -48,7 +48,7 @@ public class GroupAccountSummaryCollectionData {
         this.closedLoans = closedLoans;
         this.closedLoanCount = closedLoans.size();
 
-        this.anyLoanCount = pendingApprovalLoanCount + awaitingDisbursalLoanCount + activeLoanCount + closedLoanCount;
+        this.anyLoanCount = this.pendingApprovalLoanCount + this.awaitingDisbursalLoanCount + this.activeLoanCount + this.closedLoanCount;
 
         this.pendingApprovalIndividualLoans = pendingApprovalIndividualLoans;
         this.pendingApprovalIndividualLoanCount = pendingApprovalIndividualLoans.size();
@@ -59,43 +59,43 @@ public class GroupAccountSummaryCollectionData {
         this.closedIndividualLoans = closedIndividualLoans;
         this.closedIndividualLoanCount = closedIndividualLoans.size();
 
-        this.anyIndividualLoanCount = pendingApprovalIndividualLoanCount + awaitingDisbursalIndividualLoanCount + activeIndividualLoanCount
-                + closedIndividualLoanCount;
+        this.anyIndividualLoanCount = this.pendingApprovalIndividualLoanCount + this.awaitingDisbursalIndividualLoanCount
+                + this.activeIndividualLoanCount + this.closedIndividualLoanCount;
     }
 
     public int getAnyLoanCount() {
-        return anyLoanCount;
+        return this.anyLoanCount;
     }
 
     public int getPendingApprovalLoanCount() {
-        return pendingApprovalLoanCount;
+        return this.pendingApprovalLoanCount;
     }
 
     public List<GroupAccountSummaryData> getPendingApprovalLoans() {
-        return pendingApprovalLoans;
+        return this.pendingApprovalLoans;
     }
 
     public int getAwaitingDisbursalLoanCount() {
-        return awaitingDisbursalLoanCount;
+        return this.awaitingDisbursalLoanCount;
     }
 
     public List<GroupAccountSummaryData> getAwaitingDisbursalLoans() {
-        return awaitingDisbursalLoans;
+        return this.awaitingDisbursalLoans;
     }
 
     public int getActiveLoanCount() {
-        return activeLoanCount;
+        return this.activeLoanCount;
     }
 
     public List<GroupAccountSummaryData> getOpenLoans() {
-        return openLoans;
+        return this.openLoans;
     }
 
     public int getClosedLoanCount() {
-        return closedLoanCount;
+        return this.closedLoanCount;
     }
 
     public List<GroupAccountSummaryData> getClosedLoans() {
-        return closedLoans;
+        return this.closedLoans;
     }
 }

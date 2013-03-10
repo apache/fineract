@@ -24,7 +24,6 @@ import org.apache.commons.lang.StringUtils;
 import org.mifosplatform.organisation.office.domain.Office;
 import org.mifosplatform.organisation.staff.domain.Staff;
 import org.mifosplatform.portfolio.client.domain.Client;
-import org.mifosplatform.portfolio.group.command.GroupCommand;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
@@ -46,9 +45,10 @@ public class Group extends AbstractPersistable<Long> {
     @ManyToOne
     @JoinColumn(name = "staff_id", nullable = true)
     private Staff staff;
-    
-    @Column(name = "level_id", nullable = false)
-    private Long levelId;
+
+    @ManyToOne
+    @JoinColumn(name = "level_id", nullable = false)
+    private GroupLevel groupLevel;
 
     @Column(name = "hierarchy", length = 100)
     private String hierarchy;
@@ -72,20 +72,22 @@ public class Group extends AbstractPersistable<Long> {
         this.clientMembers = new HashSet<Client>();
     }
 
-    public static Group newGroup(final Office office, final Staff staff , final Group parent ,final long levelId , final String name, final String externalId, final Set<Client> clientMembers) {
-        return new Group(office, staff , parent , levelId , name, externalId, clientMembers);
+    public static Group newGroup(final Office office, final Staff staff, final Group parent, final GroupLevel groupLevel,
+            final String name, final String externalId, final Set<Client> clientMembers, final Set<Group> childGroups) {
+        return new Group(office, staff, parent, groupLevel, name, externalId, clientMembers, childGroups);
     }
 
-    public Group(final Office office, final Staff staff , final Group parent ,final long levelId , final String name, final String externalId, final Set<Client> clientMembers) {
+    public Group(final Office office, final Staff staff, final Group parent, final GroupLevel groupLevel, final String name,
+            final String externalId, final Set<Client> clientMembers, final Set<Group> childGroups) {
         this.office = office;
         this.staff = staff;
-        this.levelId =levelId;
+        this.groupLevel = groupLevel;
         this.parent = parent;
-        
+
         if (parent != null) {
             this.parent.addChild(this);
         }
-        
+
         if (StringUtils.isNotBlank(name)) {
             this.name = name.trim();
         } else {
@@ -99,6 +101,9 @@ public class Group extends AbstractPersistable<Long> {
         if (clientMembers != null) {
             this.clientMembers = clientMembers;
         }
+        if (childGroups != null) {
+            this.children.addAll(childGroups);
+        }
     }
 
     private void addChild(final Group group) {
@@ -109,12 +114,10 @@ public class Group extends AbstractPersistable<Long> {
         return this.office.getId();
     }
 
-    
     public Staff getStaff() {
         return this.staff;
     }
 
-    
     public void setStaff(final Staff staff) {
         this.staff = staff;
     }
@@ -123,48 +126,52 @@ public class Group extends AbstractPersistable<Long> {
         return this.staff.getId();
     }
 
-    
-    public Long getLevelId() {
-        return this.levelId;
+    public GroupLevel getGroupLevel() {
+        return this.groupLevel;
     }
 
-    
-    public void setLevelId(final Long levelId) {
-        this.levelId = levelId;
+    public String getExternalId() {
+        return this.externalId;
     }
 
-    public void update(final GroupCommand command, final Office groupOffice, final Staff staff, final Set<Client> clientMembers) {
-        if (command.isExternalIdChanged()) {
-            this.externalId = command.getExternalId();
-        }
-
-        if (command.isOfficeIdChanged()) {
-            this.office = groupOffice;
-        }
-
-        if (command.isStaffChanged()) {
-            this.staff = staff;
-        }
-
-        if (command.isNameChanged()) {
-            this.name = command.getName();
-        }
-
-        if (clientMembers != null && command.isClientMembersChanged()) {
-            this.clientMembers = clientMembers;
-        }
+    public String getName() {
+        return this.name;
     }
 
-    public void assigStaff(final GroupCommand command , final Staff newStaff){
-        if (command.isStaffChanged()) {
-            this.staff = newStaff;
-        }
+    public Set<Client> getClientMembers() {
+        return this.clientMembers;
     }
 
-    public void unassigStaff(final GroupCommand command) {
-        if (command.isStaffChanged()) {
-            this.staff = null;
-        }
+    public Group getParent() {
+        return this.parent;
+    }
+
+    public void setParent(final Group parent) {
+        this.parent = parent;
+    }
+
+    public void setClientMembers(final Set<Client> clientMembers) {
+        this.clientMembers = clientMembers;
+    }
+
+    public void setName(final String name) {
+        this.name = name;
+    }
+
+    public void setExternalId(final String externalId) {
+        this.externalId = externalId;
+    }
+
+    public void setLevelId(final GroupLevel groupLevel) {
+        this.groupLevel = groupLevel;
+    }
+
+    public void assigStaff(final Staff newStaff) {
+        this.staff = newStaff;
+    }
+
+    public void unassigStaff() {
+        this.staff = null;
     }
 
     public void addClientMember(final Client member) {
@@ -183,25 +190,29 @@ public class Group extends AbstractPersistable<Long> {
      */
     public void delete() {
         this.deleted = true;
-        this.externalId = this.getId() + "_" + this.externalId;
-        this.name = this.getId() + "_" + this.name;
+        this.externalId = getId() + "_" + this.externalId;
+        this.name = getId() + "_" + this.name;
     }
 
     public boolean isDeleted() {
-        return deleted;
+        return this.deleted;
     }
-    
+
     public void generateHierarchy() {
 
-        if (parent != null) {
-            this.hierarchy = this.parent.hierarchyOf(this.getId());
+        if (this.parent != null) {
+            this.hierarchy = this.parent.hierarchyOf(getId());
         } else {
-            this.hierarchy = "." + this.getId() + ".";
+            this.hierarchy = "." + getId() + ".";
         }
     }
 
     private String hierarchyOf(final Long id) {
         return this.hierarchy + id.toString() + ".";
+    }
+
+    public boolean isOfficeIdentifiedBy(final Long officeId) {
+        return this.office.identifiedBy(officeId);
     }
 
 }

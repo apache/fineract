@@ -44,7 +44,8 @@ public class GroupData {
     private final Collection<GroupLookupData> childGroups;
 
     public GroupData(final Long id, final Long officeId, final String officeName, final String name, final String externalId,
-            final Long groupLevel, final Long parentId, final String parentName, final Long staffId, final String staffName , final String hierarchy) {
+            final Long groupLevel, final Long parentId, final String parentName, final Long staffId, final String staffName,
+            final String hierarchy) {
         this.id = id;
         this.officeId = officeId;
         this.officeName = officeName;
@@ -68,7 +69,8 @@ public class GroupData {
 
     public GroupData(final GroupData group, final Collection<ClientLookup> clientMembers, final Collection<ClientLookup> allowedClients,
             final Collection<OfficeData> allowedOffices, final Collection<GroupLookupData> allowedParentGroups,
-            final GroupLevelData groupLevelData, final Collection<StaffData> allowedStaffs, final Collection<GroupLookupData> childGroups , final GroupSummaryData groupSummaryData) {
+            final GroupLevelData groupLevelData, final Collection<StaffData> allowedStaffs, final Collection<GroupLookupData> childGroups,
+            final GroupSummaryData groupSummaryData) {
         this.id = group.getId();
         this.officeId = group.getOfficeId();
         this.officeName = group.getOfficeName();
@@ -116,23 +118,23 @@ public class GroupData {
     }
 
     public Long getId() {
-        return id;
+        return this.id;
     }
 
     public String getName() {
-        return name;
+        return this.name;
     }
 
     public String getExternalId() {
-        return externalId;
+        return this.externalId;
     }
 
     public Long getOfficeId() {
-        return officeId;
+        return this.officeId;
     }
 
     public String getOfficeName() {
-        return officeName;
+        return this.officeName;
     }
 
     public Long getGroupLevel() {
@@ -155,7 +157,6 @@ public class GroupData {
         return this.parentName;
     }
 
-    
     public String getHierarchy() {
         return this.hierarchy;
     }
