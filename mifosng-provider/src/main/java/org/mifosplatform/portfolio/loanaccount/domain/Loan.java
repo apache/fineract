@@ -1840,6 +1840,10 @@ public class Loan extends AbstractPersistable<Long> {
         return hasRepaymentTransaction;
     }
 
+    public boolean isSubmittedOnDateAfter(final LocalDate compareDate) {
+        return this.submittedOnDate == null ? false : (new LocalDate(submittedOnDate)).isAfter(compareDate);
+    }
+    
     private LocalDate getSubmittedOnDate() {
         return (LocalDate) ObjectUtils.defaultIfNull(new LocalDate(this.submittedOnDate), null);
     }
@@ -1973,31 +1977,31 @@ public class Loan extends AbstractPersistable<Long> {
     public void reassignLoanOfficer(final Staff newLoanOfficer, final LocalDate assignmentDate) {
 
         final LoanOfficerAssignmentHistory latestHistoryRecord = findLatestIncompleteHistoryRecord();
-        final LoanOfficerAssignmentHistory lastAssignmentRecordWithNoEndDate = findLastAssignmentHistoryRecord();
+        final LoanOfficerAssignmentHistory lastAssignmentRecord = findLastAssignmentHistoryRecord(newLoanOfficer);
 
         // assignment date should not be less than loan submitted date
-        if (getSubmittedOnDate().isAfter(assignmentDate)) {
+        if (this.isSubmittedOnDateAfter(assignmentDate)) {
+
             final String errorMessage = "The Loan Officer assignment date (" + assignmentDate.toString()
                     + ") cannot be before loan submitted date (" + getSubmittedOnDate().toString() + ").";
+
             throw new LoanOfficerAssignmentDateException("cannot.be.before.loan.submittal.date", errorMessage, assignmentDate,
                     getSubmittedOnDate());
 
-            // assignment date should not be less than latest unassignment date
-            // FIXME - rather then fetching the data from the object all the
-            // time e.g
-            // getEndDate() and asking questions of it - move the operation to
-            // the object e.g. obj.isEndDateAfter(date)
-        } else if (lastAssignmentRecordWithNoEndDate != null && lastAssignmentRecordWithNoEndDate.getEndDate() != null
-                && lastAssignmentRecordWithNoEndDate.getEndDate().isAfter(assignmentDate)) {
-            final String errorMessage = "The Loan Officer assignment date (" + assignmentDate
-                    + ") cannot be before previous Loan Officer unassigned date (" + lastAssignmentRecordWithNoEndDate.getEndDate() + ").";
-            throw new LoanOfficerAssignmentDateException("cannot.be.before.previous.unassignement.date", errorMessage, assignmentDate,
-                    lastAssignmentRecordWithNoEndDate.getEndDate());
+        } else if (lastAssignmentRecord != null && lastAssignmentRecord.isEndDateAfter(assignmentDate)) {
 
-            // assignment date should not be in the future
+            final String errorMessage = "The Loan Officer assignment date (" + assignmentDate
+                    + ") cannot be before previous Loan Officer unassigned date (" + lastAssignmentRecord.getEndDate() + ").";
+
+            throw new LoanOfficerAssignmentDateException("cannot.be.before.previous.unassignement.date", errorMessage, assignmentDate,
+                    lastAssignmentRecord.getEndDate());
+
         } else if (DateUtils.getLocalDateOfTenant().isBefore(assignmentDate)) {
+
             final String errorMessage = "The Loan Officer assignment date (" + assignmentDate + ") cannot be in the future.";
+
             throw new LoanOfficerAssignmentDateException("cannot.be.a.future.date", errorMessage, assignmentDate);
+
         } else if (latestHistoryRecord != null && this.loanOfficer.identifiedBy(newLoanOfficer)) {
             latestHistoryRecord.updateStartDate(assignmentDate);
         } else if (latestHistoryRecord != null && latestHistoryRecord.matchesStartDateOf(assignmentDate)) {
@@ -2066,22 +2070,24 @@ public class Loan extends AbstractPersistable<Long> {
         return latestRecordWithNoEndDate;
     }
 
-    private LoanOfficerAssignmentHistory findLastAssignmentHistoryRecord() {
+    private LoanOfficerAssignmentHistory findLastAssignmentHistoryRecord(final Staff newLoanOfficer) {
 
-        LoanOfficerAssignmentHistory lastAssignmentRecordWithNoEndDate = null;
+        LoanOfficerAssignmentHistory lastAssignmentRecordLatestEndDate = null;
         for (LoanOfficerAssignmentHistory historyRecord : this.loanOfficerHistory) {
-            if (historyRecord.isCurrentRecord()) {
-                lastAssignmentRecordWithNoEndDate = historyRecord;
+
+            if (historyRecord.isCurrentRecord() && !historyRecord.isSameLoanOfficer(newLoanOfficer)) {
+                lastAssignmentRecordLatestEndDate = historyRecord;
                 break;
             }
 
-            if (lastAssignmentRecordWithNoEndDate == null) {
-                lastAssignmentRecordWithNoEndDate = historyRecord;
-            } else if (historyRecord.getEndDate().isAfter(lastAssignmentRecordWithNoEndDate.getEndDate())) {
-                lastAssignmentRecordWithNoEndDate = historyRecord;
+            if (lastAssignmentRecordLatestEndDate == null){ 
+                lastAssignmentRecordLatestEndDate = historyRecord;
+            } else if (historyRecord.isEndDateAfter(lastAssignmentRecordLatestEndDate.getEndDate())
+                    && !historyRecord.isSameLoanOfficer(newLoanOfficer)) {
+                lastAssignmentRecordLatestEndDate = historyRecord;
             }
         }
-        return lastAssignmentRecordWithNoEndDate;
+        return lastAssignmentRecordLatestEndDate;
     }
 
     public Long getClientId() {

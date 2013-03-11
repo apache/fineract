@@ -58,13 +58,13 @@ public class SearchReadPlatformServiceImpl implements SearchReadPlatformService 
                     + "(c.display_name like :partialSearch and c.display_name not like :search) or "
                     + "(c.external_id like :partialSearch and c.external_id not like :search))";
 
-            String loanExactMatchSql = " (select 'LOAN' as entityType, l.id as entityId, l.account_no as entityName, l.external_id as entityExternalId, l.account_no as entityAccountNo "
+            String loanExactMatchSql = " (select 'LOAN' as entityType, l.id as entityId, pl.name as entityName, l.external_id as entityExternalId, l.account_no as entityAccountNo "
                     + " , c.id as parentId, c.display_name as parentName "
-                    + " from m_loan l join m_client c on l.client_id = c.id join m_office o on o.id = c.office_id where o.hierarchy like :hierarchy and l.account_no like :search) ";
+                    + " from m_loan l join m_client c on l.client_id = c.id join m_office o on o.id = c.office_id join m_product_loan pl on pl.id=l.product_id where o.hierarchy like :hierarchy and l.account_no like :search) ";
 
-            String loanMatchSql = " (select 'LOAN' as entityType, l.id as entityId, l.account_no as entityName, l.external_id as entityExternalId, l.account_no as entityAccountNo "
+            String loanMatchSql = " (select 'LOAN' as entityType, l.id as entityId, pl.name as entityName, l.external_id as entityExternalId, l.account_no as entityAccountNo "
                     + " , c.id as parentId, c.display_name as parentName "
-                    + " from m_loan l join m_client c on l.client_id = c.id join m_office o on o.id = c.office_id where o.hierarchy like :hierarchy and l.account_no like :partialSearch and l.account_no not like :search) ";
+                    + " from m_loan l join m_client c on l.client_id = c.id join m_office o on o.id = c.office_id join m_product_loan pl on pl.id=l.product_id where o.hierarchy like :hierarchy and l.account_no like :partialSearch and l.account_no not like :search) ";
 
             String clientIdentifierExactMatchSql = " (select 'CLIENTIDENTIFIER' as entityType, ci.id as entityId, ci.document_key as entityName, "
                     + " null as entityExternalId, null as entityAccountNo, c.id as parentId, c.display_name as parentName "

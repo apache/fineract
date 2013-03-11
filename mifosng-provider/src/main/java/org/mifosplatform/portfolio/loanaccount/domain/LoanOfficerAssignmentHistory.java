@@ -15,6 +15,7 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import org.apache.commons.lang.ObjectUtils;
 import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.domain.AbstractAuditableCustom;
 import org.mifosplatform.organisation.staff.domain.Staff;
@@ -29,7 +30,6 @@ public class LoanOfficerAssignmentHistory extends AbstractAuditableCustom<AppUse
     @JoinColumn(name = "loan_id", nullable = false)
     private Loan loan;
 
-    @SuppressWarnings("unused")
     @ManyToOne
     @JoinColumn(name = "loan_officer_id", nullable = true)
     private Staff loanOfficer;
@@ -85,9 +85,20 @@ public class LoanOfficerAssignmentHistory extends AbstractAuditableCustom<AppUse
         return this.endDate == null;
     }
 
-    public LocalDate getEndDate() {
-        // FIXME - new LocalDate(null) will return todays date and endDate is
-        // likely to be null so you need to test for it.
-        return new LocalDate(endDate);
+    /**
+     *  If endDate is null then return false.
+     * @param compareDate
+     * @return
+     */
+    public boolean isEndDateAfter(final LocalDate compareDate){
+        return this.endDate == null ? false : (new LocalDate(endDate)).isAfter(compareDate);
+    }
+ 
+    public LocalDate getEndDate(){
+        return (LocalDate) ObjectUtils.defaultIfNull(new LocalDate(this.endDate), null);
+    }
+ 
+    public boolean isSameLoanOfficer(final Staff staff){
+        return this.loanOfficer.identifiedBy(staff);
     }
 }
