@@ -53,6 +53,7 @@ public class ReportsApiResource {
         this.genericDataService = genericDataService;
         this.toApiJsonSerializer = toApiJsonSerializer;
     }
+
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON, "application/x-msdownload" })
@@ -144,10 +145,10 @@ public class ReportsApiResource {
             } else {
                 json = this.toApiJsonSerializer.serializePretty(prettyPrint, result);
             }
-            
+
             return Response.ok().entity(json).type(MediaType.APPLICATION_JSON).build();
         }
-        
+
         // CSV Export
         Map<String, String> reportParams = getReportParams(queryParams, false);
         StreamingOutput result = this.readExtraDataAndReportingService.retrieveReportCSV(reportName, parameterTypeValue, reportParams);
@@ -160,15 +161,10 @@ public class ReportsApiResource {
 
         // Anyone can run a 'report' that is simply getting possible parameter
         // (dropdown listbox) values.
-
         if (!parameterType) {
             AppUser currentUser = context.authenticatedUser();
-            if (currentUser.hasNotPermissionForReport(reportName)) {
-                // FIXME - JW - message isnt passing back the message in the
-                // string in
-                // the json just a generalised not authorised message
-                throw new NoAuthorizationException("Not Authorised to Run Report: " + reportName);
-            }
+            if (currentUser.hasNotPermissionForReport(reportName)) { throw new NoAuthorizationException("Not authorised to run report: "
+                    + reportName); }
         }
     }
 

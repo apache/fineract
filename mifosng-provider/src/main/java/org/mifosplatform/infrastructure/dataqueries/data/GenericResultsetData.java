@@ -13,19 +13,19 @@ import java.util.List;
  */
 public class GenericResultsetData {
 
-    private final List<ResultsetColumnHeader> columnHeaders;
-    private final List<ResultsetDataRow> data;
+    private final List<ResultsetColumnHeaderData> columnHeaders;
+    private final List<ResultsetRowData> data;
 
-    public GenericResultsetData(final List<ResultsetColumnHeader> columnHeaders, final List<ResultsetDataRow> resultsetDataRows) {
+    public GenericResultsetData(final List<ResultsetColumnHeaderData> columnHeaders, final List<ResultsetRowData> resultsetDataRows) {
         this.columnHeaders = columnHeaders;
         this.data = resultsetDataRows;
     }
 
-    public List<ResultsetColumnHeader> getColumnHeaders() {
+    public List<ResultsetColumnHeaderData> getColumnHeaders() {
         return columnHeaders;
     }
 
-    public List<ResultsetDataRow> getData() {
+    public List<ResultsetRowData> getData() {
         return data;
     }
 }

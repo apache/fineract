@@ -15,7 +15,11 @@ public class DatatableData {
     @SuppressWarnings("unused")
     private final String registeredTableName;
 
-    public DatatableData(final String applicationTableName, final String registeredTableName) {
+    public static DatatableData create(final String applicationTableName, final String registeredTableName) {
+        return new DatatableData(applicationTableName, registeredTableName);
+    }
+
+    private DatatableData(final String applicationTableName, final String registeredTableName) {
         this.applicationTableName = applicationTableName;
         this.registeredTableName = registeredTableName;
     }

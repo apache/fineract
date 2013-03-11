@@ -5,15 +5,12 @@
  */
 package org.mifosplatform.infrastructure.dataqueries.service;
 
-import javax.sql.rowset.CachedRowSet;
+import java.util.List;
 
 import org.mifosplatform.infrastructure.dataqueries.data.GenericResultsetData;
+import org.mifosplatform.infrastructure.dataqueries.data.ResultsetColumnHeaderData;
 
 public interface GenericDataService {
-
-    CachedRowSet getCachedResultSet(String sql, String errorMsg);
-
-    void updateSQL(String sql, String sqlErrorMsg);
 
     GenericResultsetData fillGenericResultSet(final String sql);
 
@@ -25,4 +22,5 @@ public interface GenericDataService {
 
     String getDatabaseName();
 
+    List<ResultsetColumnHeaderData> fillResultsetColumnHeaders(String datatable);
 }

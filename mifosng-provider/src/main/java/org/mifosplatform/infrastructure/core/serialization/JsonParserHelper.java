@@ -386,6 +386,7 @@ public class JsonParserHelper {
             ApiParameterError error = ApiParameterError.parameterError("validation.msg.invalid.integer.format", "The parameter "
                     + parameterName + " has value: " + numericalValueFormatted + " which is invalid integer value for provided locale of ["
                     + clientApplicationLocale.toString() + "].", parameterName, numericalValueFormatted, clientApplicationLocale);
+            error.setValue(numericalValueFormatted);
             dataValidationErrors.add(error);
 
             throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
@@ -408,6 +409,7 @@ public class JsonParserHelper {
             List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
             ApiParameterError error = ApiParameterError.parameterError("validation.msg.invalid.integer", "The parameter " + parameterName
                     + " has value: " + numericalValueFormatted + " which is invalid integer.", parameterName, numericalValueFormatted);
+            error.setValue(numericalValueFormatted);
             dataValidationErrors.add(error);
 
             throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
@@ -458,6 +460,7 @@ public class JsonParserHelper {
             ApiParameterError error = ApiParameterError.parameterError("validation.msg.invalid.decimal.format", "The parameter "
                     + parameterName + " has value: " + numericalValueFormatted + " which is invalid decimal value for provided locale of ["
                     + clientApplicationLocale.toString() + "].", parameterName, numericalValueFormatted, clientApplicationLocale);
+            error.setValue(numericalValueFormatted);
             dataValidationErrors.add(error);
 
             throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",

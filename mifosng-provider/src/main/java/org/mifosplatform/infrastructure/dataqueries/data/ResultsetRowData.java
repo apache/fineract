@@ -5,22 +5,21 @@
  */
 package org.mifosplatform.infrastructure.dataqueries.data;
 
-import java.util.ArrayList;
 import java.util.List;
 
-public class ResultsetDataRow {
+public class ResultsetRowData {
 
-    private List<String> row = new ArrayList<String>();
+    private final List<String> row;
 
-    public ResultsetDataRow() {
+    public static ResultsetRowData create(final List<String> rowValues) {
+        return new ResultsetRowData(rowValues);
+    }
 
+    private ResultsetRowData(final List<String> rowValues) {
+        this.row = rowValues;
     }
 
     public List<String> getRow() {
         return row;
-    }
-
-    public void setRow(List<String> row) {
-        this.row = row;
     }
 }
