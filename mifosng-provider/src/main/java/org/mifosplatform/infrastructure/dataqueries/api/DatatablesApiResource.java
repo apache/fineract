@@ -25,6 +25,7 @@ import org.mifosplatform.commands.service.CommandWrapperBuilder;
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.mifosplatform.infrastructure.core.api.ApiParameterHelper;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
+import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.mifosplatform.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.mifosplatform.infrastructure.dataqueries.data.DatatableData;
 import org.mifosplatform.infrastructure.dataqueries.data.GenericResultsetData;
@@ -38,7 +39,7 @@ import org.springframework.stereotype.Component;
 @Path("/datatables")
 @Component
 @Scope("singleton")
-public class DataTableApiResource {
+public class DatatablesApiResource {
 
     private final PlatformSecurityContext context;
     private final GenericDataService genericDataService;
@@ -47,7 +48,7 @@ public class DataTableApiResource {
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 
     @Autowired
-    public DataTableApiResource(final PlatformSecurityContext context, final GenericDataService genericDataService,
+    public DatatablesApiResource(final PlatformSecurityContext context, final GenericDataService genericDataService,
             final ReadWriteNonCoreDataService readWriteNonCoreDataService,
             final ToApiJsonSerializer<GenericResultsetData> toApiJsonSerializer,
             final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
@@ -77,7 +78,9 @@ public class DataTableApiResource {
 
         this.readWriteNonCoreDataService.registerDatatable(datatable, apptable);
 
-        return this.toApiJsonSerializer.serialize(CommandProcessingResult.empty());
+        final CommandProcessingResult result = new CommandProcessingResultBuilder().withResourceIdAsString(datatable).build();
+
+        return this.toApiJsonSerializer.serialize(result);
     }
 
     @POST
@@ -88,7 +91,9 @@ public class DataTableApiResource {
 
         this.readWriteNonCoreDataService.deregisterDatatable(datatable);
 
-        return this.toApiJsonSerializer.serialize(CommandProcessingResult.empty());
+        final CommandProcessingResult result = new CommandProcessingResultBuilder().withResourceIdAsString(datatable).build();
+
+        return this.toApiJsonSerializer.serialize(result);
     }
 
     @GET
@@ -143,7 +148,7 @@ public class DataTableApiResource {
     @Path("{datatable}/{apptableId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String newDatatableEntry(@PathParam("datatable") final String datatable, @PathParam("apptableId") final Long apptableId,
+    public String createDatatableEntry(@PathParam("datatable") final String datatable, @PathParam("apptableId") final Long apptableId,
             final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().createDatatable(datatable, apptableId, null)

@@ -8126,20 +8126,19 @@ GET https://DomainName/api/v1/datatables
 POST https://DomainName/api/v1/datatables/register/{datatable}/{apptable}
 					</code>
 					<code class="method-request">
-POST datatables/register/userDefinedTableName/m_client 
+POST datatables/register/extra_client_details/m_client 
 
 Content-Type: application/json 
 Request Body: 
 {} 
 					</code>
 					<code class="method-response">
-{ 
-	"resourceId": null 
+{
+  "resourceIdentifier": "extra_client_details"
 } 
 				</code>
 				</div>
 			</div>
-
 
 			<a id="datatables_deregister" name="datatables_deregister"
 				class="old-syle-anchor">&nbsp;</a>
@@ -8154,7 +8153,7 @@ Request Body:
 POST https://DomainName/api/v1/datatables/deregister/{datatable}
 					</code>
 					<code class="method-request">
-POST datatables/deregister/userDefinedTableName 
+POST datatables/deregister/extra_client_details 
 
 Content-Type: application/json 
 Request Body: 
@@ -8162,8 +8161,8 @@ Request Body:
 					</code>
 					<code class="method-response">
 {
-	"resourceId": null
-} 
+  "resourceIdentifier": "extra_client_details"
+}
 					</code>
 				</div>
 			</div>
@@ -8186,20 +8185,20 @@ Request Body:
 POST https://DomainName/api/v1/datatables/{datatable}/{apptableId}
 					</code>
 					<code class="method-request">
-POST datatables/Additional Client Fields Data/1 
+POST datatables/extra_client_details/1 
 
 Content-Type: application/json 
 Request Body:
 {
 	"Business Description": "Livestock sales", 
-	Comment: "First	comment\nmade", 
-	Education_cv: "Trade", 
-	Gender_cd: "21", 
+	"Comment": "First	comment made", 
+	"Education_cv": "Primary", 
+	"Gender_cd": "6", 
 	"Highest Rate Paid": "8.5", 
 	"Next Visit": "01 October 2012", 
 	"Years in Business": "5", 
-	dateFormat: "dd MMMM yyyy", 
-	locale: "en" 
+	"dateFormat": "dd MMMM yyyy", 
+	"locale": "en" 
 }
 					</code>
 					<code class="method-response">
@@ -8235,46 +8234,142 @@ Request Body:
 						<dd>
 							<span>optional</span>
 						</dd>
-						<dd>If 'true' a Generic Result Set JSON format is returned.
+						<dd>If 'true' an optimised JSON format is returned suitable for tabular display of data.
 							This format is used by the default data tables UI functionality.</dd>
 					</dl>
 
 					<p>Example Requests:</p>
-					<div class=apiClick>datatables/Additional Client Fields
-						Data/1</div>
+					<div class=apiClick>datatables/extra_client_details/1</div>
 					<br>
 					<br>
-					<div class=apiClick>datatables/Extra Family Details
-						Data/1?order=`Date of Birth` desc</div>
+					<div class=apiClick>datatables/extra_family_details/1?order=`Date of Birth` desc</div>
 					<br>
 					<br>
-					<div class=apiClick>datatables/Additional Client Fields
-						Data/1?genericResultSet=true</div>
+					<div class=apiClick>datatables/extra_client_details/1?genericResultSet=true</div>
 				</div>
 				<div class="method-example">
 					<code class="method-declaration">
-GET https://DomainName/api/v1/datatables/{datatable}/{apptableId}
+GET https://DomainName/api/v1/datatables/{datatable}/{apptableId}?genericResultSet=true
 					</code>
 					<code class="method-response">
-[
 {
-	"client_id": 1, 
-	"Business Description": "Livestock sales", 
-	"Years in Business": 5,
-	"Gender_cd": "21", 
-	"Education_cv": "Trade", 
-	"Next Visit": [2012, 10, 1], 
-	"Highest Rate Paid": 8.500000, 
-	"Comment": "First comment made"
-} 
-] 
+    "columnHeaders": [
+        {
+            "columnName": "client_id",
+            "columnType": "bigint",
+            "columnLength": 0,
+            "columnDisplayType": "INTEGER",
+            "isColumnNullable": false,
+            "isColumnPrimaryKey": true,
+            "columnValues": []
+        },
+        {
+            "columnName": "Business Description",
+            "columnType": "varchar",
+            "columnLength": 100,
+            "columnDisplayType": "STRING",
+            "isColumnNullable": true,
+            "isColumnPrimaryKey": false,
+            "columnValues": []
+        },
+        {
+            "columnName": "Years in Business",
+            "columnType": "int",
+            "columnLength": 0,
+            "columnDisplayType": "INTEGER",
+            "isColumnNullable": true,
+            "isColumnPrimaryKey": false,
+            "columnValues": []
+        },
+        {
+            "columnName": "Gender_cd",
+            "columnType": "int",
+            "columnLength": 0,
+            "columnDisplayType": "CODELOOKUP",
+            "isColumnNullable": true,
+            "isColumnPrimaryKey": false,
+            "columnValues": [
+                {
+                    "id": 5,
+                    "value": "option.Male"
+                },
+                {
+                    "id": 6,
+                    "value": "option.Female"
+                }
+            ]
+        },
+        {
+            "columnName": "Education_cv",
+            "columnType": "varchar",
+            "columnLength": 60,
+            "columnDisplayType": "CODEVALUE",
+            "isColumnNullable": true,
+            "isColumnPrimaryKey": false,
+            "columnValues": [
+                {
+                    "id": 9,
+                    "value": "Primary"
+                },
+                {
+                    "id": 10,
+                    "value": "Secondary"
+                },
+                {
+                    "id": 11,
+                    "value": "University"
+                }
+            ]
+        },
+        {
+            "columnName": "Next Visit",
+            "columnType": "date",
+            "columnLength": 0,
+            "columnDisplayType": "DATE",
+            "isColumnNullable": true,
+            "isColumnPrimaryKey": false,
+            "columnValues": []
+        },
+        {
+            "columnName": "Highest Rate Paid",
+            "columnType": "decimal",
+            "columnLength": 0,
+            "columnDisplayType": "DECIMAL",
+            "isColumnNullable": true,
+            "isColumnPrimaryKey": false,
+            "columnValues": []
+        },
+        {
+            "columnName": "Comment",
+            "columnType": "text",
+            "columnLength": 65535,
+            "columnDisplayType": "TEXT",
+            "isColumnNullable": true,
+            "isColumnPrimaryKey": false,
+            "columnValues": []
+        }
+    ],
+    "data": [
+        {
+            "row": [
+                "1",
+                "Livestock sales",
+                "5",
+                "6",
+                "Primary",
+                "2012-10-01",
+                "8.500000",
+                "First\tcomment made"
+            ]
+        }
+    ]
+}
 					</code>
 				</div>
 			</div>
 
 
-			<a id="datatables_update" name="datatables_update"
-				class="old-syle-anchor">&nbsp;</a>
+			<a id="datatables_update" name="datatables_update" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
 					<h4>Update Entry in Data Table (One to One)</h4>
@@ -8285,23 +8380,22 @@ GET https://DomainName/api/v1/datatables/{datatable}/{apptableId}
 PUT https://DomainName/api/v1/datatables/{datatable}/{apptableId}
 					</code>
 					<code class="method-request">
-PUT datatables/Additional Client Fields Data/1 
+PUT datatables/extra_client_details/1 
 
 Content-Type: application/json 
 Request Body:
-{ 
-	"Business Description": "Livestock sales updated", 
-	Comment: "First comment\nmade", 
-	Education_cv: "Trade", 
-	Gender_cd: "21",
-	"Highest Rate Paid": "8.5", 
-	"Next Visit": "01 October 2012",
-	"Years in Business": "5", 
-	dateFormat: "dd MMMM yyyy", 
-	locale: "en"
-} 
+{
+    "Business Description": "Livestock sales updated",
+}
 					</code>
-					<code class="method-response">{ "resourceId": 1 } </code>
+					<code class="method-response">
+{
+  "resourceId": 1,
+  "changes": {
+    "Business Description": "Livestock sales updated"
+  }
+}
+					</code>
 				</div>
 			</div>
 
@@ -8385,8 +8479,7 @@ Request Body:
 					<code class="method-response">{ "resourceId": 1 } </code>
 				</div>
 			</div>
-
-			<!-- start of datatables api docs -->
+			<!-- end of datatables api docs -->
 			
 			<!-- start of Notes api docs -->
 			<a id="notes" name="notes" class="old-syle-anchor">&nbsp;</a>

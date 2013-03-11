@@ -13,6 +13,6 @@ import org.mifosplatform.infrastructure.core.exception.AbstractPlatformResourceN
 public class ReportNotFoundException extends AbstractPlatformResourceNotFoundException {
 
     public ReportNotFoundException(final String reportSql) {
-        super("error.msg.report.name.not.found", "Reporting Meta Data Entry Not Found", "Input Sql: " + reportSql);
+        super("error.msg.report.name.not.found", "Reporting meta-data entry not found.", "Input sql: " + reportSql);
     }
 }

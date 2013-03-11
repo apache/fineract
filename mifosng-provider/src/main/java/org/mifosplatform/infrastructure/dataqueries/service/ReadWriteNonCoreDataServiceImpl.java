@@ -17,6 +17,7 @@ import java.util.Set;
 import javax.sql.DataSource;
 
 import org.apache.commons.lang.StringUtils;
+import org.hibernate.exception.ConstraintViolationException;
 import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.ApiParameterError;
@@ -29,12 +30,14 @@ import org.mifosplatform.infrastructure.dataqueries.data.DatatableData;
 import org.mifosplatform.infrastructure.dataqueries.data.GenericResultsetData;
 import org.mifosplatform.infrastructure.dataqueries.data.ResultsetColumnHeaderData;
 import org.mifosplatform.infrastructure.dataqueries.data.ResultsetRowData;
-import org.mifosplatform.infrastructure.dataqueries.exception.DataTableNotFoundException;
+import org.mifosplatform.infrastructure.dataqueries.exception.DatatableNotFoundException;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.useradministration.domain.AppUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.jdbc.support.rowset.SqlRowSetMetaData;
@@ -96,63 +99,89 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         return datatables;
     }
 
+    private void logAsErrorUnexpectedDataIntegrityException(final Exception dve) {
+        logger.error(dve.getMessage(), dve);
+    }
+
     @Override
-    public void registerDatatable(final String datatable, final String appTable) {
+    public void registerDatatable(final String dataTableName, final String applicationTableName) {
 
-        validateAppTable(appTable);
+        // FIXME - KW - hardcoded supported app tables are m_loan or m_client?
+        validateAppTable(applicationTableName);
 
-        final String createPermission = "'CREATE_" + datatable + "'";
-        final String createPermissionChecker = "'CREATE_" + datatable + "_CHECKER'";
-        final String readPermission = "'READ_" + datatable + "'";
-        final String updatePermission = "'UPDATE_" + datatable + "'";
-        final String updatePermissionChecker = "'UPDATE_" + datatable + "_CHECKER'";
-        final String deletePermission = "'DELETE_" + datatable + "'";
-        final String deletePermissionChecker = "'DELETE_" + datatable + "_CHECKER'";
+        try {
+            // TODO - JW - put in batch command later
+            final String registerDatatableSql = "insert into x_registered_table (registered_table_name, application_table_name) values ('"
+                    + dataTableName + "', '" + applicationTableName + "')";
 
-        // TODO - JW - put in batch command later
-        final String registerDatatableSql = "insert into x_registered_table (registered_table_name, application_table_name) values ('"
-                + datatable + "', '" + appTable + "')";
+            this.jdbcTemplate.update(registerDatatableSql);
+        } catch (DataIntegrityViolationException dve) {
+            Throwable realCause = dve.getMostSpecificCause();
+            if (realCause.getMessage().contains("Duplicate entry")) { throw new PlatformDataIntegrityException(
+                    "error.msg.datatable.registered", "Datatable `" + dataTableName
+                            + "` is already registered against an application table.", "dataTableName", dataTableName); }
 
-        this.jdbcTemplate.update(registerDatatableSql);
+            logAsErrorUnexpectedDataIntegrityException(dve);
+            throw new PlatformDataIntegrityException("error.msg.unknown.data.integrity.issue",
+                    "Unknown data integrity issue with resource.");
+        }
 
-        final String permissionsSql = "insert into m_permission (grouping, code, action_name, entity_name, can_maker_checker) values "
-                + "('datatable', "
-                + createPermission
-                + ", 'CREATE', '"
-                + datatable
-                + "', true),"
-                + "('datatable', "
-                + createPermissionChecker
-                + ", 'CREATE', '"
-                + datatable
-                + "', false),"
-                + "('datatable', "
-                + readPermission
-                + ", 'READ', '"
-                + datatable
-                + "', false),"
-                + "('datatable', "
-                + updatePermission
-                + ", 'UPDATE', '"
-                + datatable
-                + "', true),"
-                + "('datatable', "
-                + updatePermissionChecker
-                + ", 'UPDATE', '"
-                + datatable
-                + "', false),"
-                + "('datatable', "
-                + deletePermission
-                + ", 'DELETE', '"
-                + datatable
-                + "', true),"
-                + "('datatable', "
-                + deletePermissionChecker
-                + ", 'DELETE', '"
-                + datatable
-                + "', false)";
+        try {
+            final String createPermission = "'CREATE_" + dataTableName + "'";
+            final String createPermissionChecker = "'CREATE_" + dataTableName + "_CHECKER'";
+            final String readPermission = "'READ_" + dataTableName + "'";
+            final String updatePermission = "'UPDATE_" + dataTableName + "'";
+            final String updatePermissionChecker = "'UPDATE_" + dataTableName + "_CHECKER'";
+            final String deletePermission = "'DELETE_" + dataTableName + "'";
+            final String deletePermissionChecker = "'DELETE_" + dataTableName + "_CHECKER'";
 
-        this.jdbcTemplate.update(permissionsSql);
+            final String permissionsSql = "insert into m_permission (grouping, code, action_name, entity_name, can_maker_checker) values "
+                    + "('datatable', "
+                    + createPermission
+                    + ", 'CREATE', '"
+                    + dataTableName
+                    + "', true),"
+                    + "('datatable', "
+                    + createPermissionChecker
+                    + ", 'CREATE', '"
+                    + dataTableName
+                    + "', false),"
+                    + "('datatable', "
+                    + readPermission
+                    + ", 'READ', '"
+                    + dataTableName
+                    + "', false),"
+                    + "('datatable', "
+                    + updatePermission
+                    + ", 'UPDATE', '"
+                    + dataTableName
+                    + "', true),"
+                    + "('datatable', "
+                    + updatePermissionChecker
+                    + ", 'UPDATE', '"
+                    + dataTableName
+                    + "', false),"
+                    + "('datatable', "
+                    + deletePermission
+                    + ", 'DELETE', '"
+                    + dataTableName
+                    + "', true),"
+                    + "('datatable', "
+                    + deletePermissionChecker
+                    + ", 'DELETE', '"
+                    + dataTableName + "', false)";
+
+            this.jdbcTemplate.update(permissionsSql);
+        } catch (DataIntegrityViolationException dve) {
+            Throwable realCause = dve.getMostSpecificCause();
+            if (realCause.getMessage().contains("Duplicate entry")) { throw new PlatformDataIntegrityException(
+                    "error.msg.permissions.datatable.duplicate", "Permissions for datatable `" + dataTableName + "` already exist.",
+                    "dataTableName", dataTableName); }
+
+            logAsErrorUnexpectedDataIntegrityException(dve);
+            throw new PlatformDataIntegrityException("error.msg.unknown.data.integrity.issue",
+                    "Unknown data integrity issue with resource.");
+        }
     }
 
     @Override
@@ -161,29 +190,53 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         final String permissionList = "('CREATE_" + datatable + "', 'CREATE_" + datatable + "_CHECKER', 'READ_" + datatable + "', 'UPDATE_"
                 + datatable + "', 'UPDATE_" + datatable + "_CHECKER', 'DELETE_" + datatable + "', 'DELETE_" + datatable + "_CHECKER')";
 
-        String sql = "delete from m_role_permission where m_role_permission.permission_id in (select id from m_permission where code in "
+        final String deleteRolePermissionsSql = "delete from m_role_permission where m_role_permission.permission_id in (select id from m_permission where code in "
                 + permissionList + ")";
-        this.jdbcTemplate.update(sql);
+        this.jdbcTemplate.update(deleteRolePermissionsSql);
 
-        sql = "delete from m_permission where code in " + permissionList;
-        this.jdbcTemplate.update(sql);
+        final String deletePermissionsSql = "delete from m_permission where code in " + permissionList;
+        this.jdbcTemplate.update(deletePermissionsSql);
 
-        sql = "delete from x_registered_table where registered_table_name = '" + datatable + "'";
-        this.jdbcTemplate.update(sql);
+        final String deleteRegisteredDatatableSql = "delete from x_registered_table where registered_table_name = '" + datatable + "'";
+        this.jdbcTemplate.update(deleteRegisteredDatatableSql);
     }
 
     @Override
-    public void newDatatableEntry(final String datatable, final Long appTableId, final JsonCommand command) {
-        String appTable = getWithinScopeApplicationTableName(datatable, appTableId);
+    public void createNewDatatableEntry(final String dataTableName, final Long appTableId, final JsonCommand command) {
 
-        final List<ResultsetColumnHeaderData> columnHeaders = this.genericDataService.fillResultsetColumnHeaders(datatable);
+        try {
+            final String appTable = getWithinScopeApplicationTableName(dataTableName, appTableId);
 
-        final Type typeOfMap = new TypeToken<Map<String, String>>() {}.getType();
-        final Map<String, String> dataParams = this.fromJsonHelper.extractDataMap(typeOfMap, command.json());
+            final List<ResultsetColumnHeaderData> columnHeaders = this.genericDataService.fillResultsetColumnHeaders(dataTableName);
 
-        final String sql = getAddSql(columnHeaders, datatable, getFKField(appTable), appTableId, dataParams);
+            final Type typeOfMap = new TypeToken<Map<String, String>>() {}.getType();
+            final Map<String, String> dataParams = this.fromJsonHelper.extractDataMap(typeOfMap, command.json());
 
-        this.jdbcTemplate.update(sql);
+            final String sql = getAddSql(columnHeaders, dataTableName, getFKField(appTable), appTableId, dataParams);
+
+            this.jdbcTemplate.update(sql);
+        } catch (ConstraintViolationException dve) {
+            // NOTE: jdbctemplate throws a
+            // org.hibernate.exception.ConstraintViolationException even though
+            // it should be a DataAccessException?
+            Throwable realCause = dve.getCause();
+            if (realCause.getMessage().contains("Duplicate entry")) { throw new PlatformDataIntegrityException(
+                    "error.msg.datatable.entry.duplicate", "An entry already exists for datatable `" + dataTableName
+                            + "` and application table with identifier `" + appTableId + "`.", "dataTableName", dataTableName, appTableId); }
+
+            logAsErrorUnexpectedDataIntegrityException(dve);
+            throw new PlatformDataIntegrityException("error.msg.unknown.data.integrity.issue",
+                    "Unknown data integrity issue with resource.");
+        } catch (DataAccessException dve) {
+            Throwable realCause = dve.getMostSpecificCause();
+            if (realCause.getMessage().contains("Duplicate entry")) { throw new PlatformDataIntegrityException(
+                    "error.msg.datatable.entry.duplicate", "An entry already exists for datatable `" + dataTableName
+                            + "` and application table with identifier `" + appTableId + "`.", "dataTableName", dataTableName, appTableId); }
+
+            logAsErrorUnexpectedDataIntegrityException(dve);
+            throw new PlatformDataIntegrityException("error.msg.unknown.data.integrity.issue",
+                    "Unknown data integrity issue with resource.");
+        }
     }
 
     @Override
@@ -191,7 +244,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
 
         GenericResultsetData grs = retrieveDataTableGenericResultSet(datatable, appTableId, null, null);
 
-        if (grs.getData().size() == 0) throw new DataTableNotFoundException(datatable, appTableId);
+        if (grs.getData().size() == 0) throw new DatatableNotFoundException(datatable, appTableId);
 
         if (grs.getData().size() > 1)
             throw new PlatformDataIntegrityException("error.msg.attempting.multiple.update", "Application Table: " + datatable
@@ -223,7 +276,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
 
         final GenericResultsetData grs = retrieveDataTableGenericResultSet(datatable, appTableId, null, datatableId);
 
-        if (grs.getData().size() == 0) throw new DataTableNotFoundException(datatable, appTableId);
+        if (grs.getData().size() == 0) throw new DatatableNotFoundException(datatable, appTableId);
 
         final Type typeOfMap = new TypeToken<Map<String, String>>() {}.getType();
         final Map<String, String> dataParams = this.fromJsonHelper.extractDataMap(typeOfMap, command.json());
@@ -296,7 +349,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
 
         final SqlRowSet rs = this.jdbcTemplate.queryForRowSet(sql);
 
-        if (!rs.next()) { throw new DataTableNotFoundException(appTable, appTableId); }
+        if (!rs.next()) { throw new DatatableNotFoundException(appTable, appTableId); }
     }
 
     private String dataScopedSQL(final String unscopedSQL, final String appTable) {
@@ -374,7 +427,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         if (rs.next()) {
             applicationTableName = rs.getString("application_table_name");
         } else {
-            throw new DataTableNotFoundException(datatable);
+            throw new DatatableNotFoundException(datatable);
         }
 
         return applicationTableName;

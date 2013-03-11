@@ -5,20 +5,18 @@
  */
 package org.mifosplatform.infrastructure.dataqueries.service;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.sql.DataSource;
 
 import org.joda.time.LocalDate;
-import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
 import org.mifosplatform.infrastructure.dataqueries.data.GenericResultsetData;
 import org.mifosplatform.infrastructure.dataqueries.data.ResultsetColumnHeaderData;
 import org.mifosplatform.infrastructure.dataqueries.data.ResultsetColumnValueData;
 import org.mifosplatform.infrastructure.dataqueries.data.ResultsetRowData;
-import org.mifosplatform.infrastructure.dataqueries.exception.DataTableNotFoundException;
+import org.mifosplatform.infrastructure.dataqueries.exception.DatatableNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
@@ -169,15 +167,6 @@ public class GenericDataServiceImpl implements GenericDataService {
     }
 
     @Override
-    public String getDatabaseName() {
-        try {
-            return dataSource.getConnection().getCatalog();
-        } catch (SQLException e) {
-            throw new PlatformDataIntegrityException("error.msg.sql.error", e.getMessage(), "Error Accessing Database Name");
-        }
-    }
-
-    @Override
     public List<ResultsetColumnHeaderData> fillResultsetColumnHeaders(final String datatable) {
 
         final SqlRowSet columnDefinitions = getDatatableMetaData(datatable);
@@ -249,6 +238,6 @@ public class GenericDataServiceImpl implements GenericDataService {
         final SqlRowSet columnDefinitions = this.jdbcTemplate.queryForRowSet(sql);
         if (columnDefinitions.next()) { return columnDefinitions; }
 
-        throw new DataTableNotFoundException(datatable);
+        throw new DatatableNotFoundException(datatable);
     }
 }

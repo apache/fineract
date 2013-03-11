@@ -25,7 +25,7 @@ public interface ReadWriteNonCoreDataService {
 
     GenericResultsetData retrieveDataTableGenericResultSet(String datatable, Long appTableId, String order, Long id);
 
-    void newDatatableEntry(String datatable, Long appTableId, JsonCommand command);
+    void createNewDatatableEntry(String datatable, Long appTableId, JsonCommand command);
 
     Map<String, Object> updateDatatableEntryOneToOne(String datatable, Long appTableId, JsonCommand command);
 

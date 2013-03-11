@@ -20,7 +20,5 @@ public interface GenericDataService {
 
     String wrapSQL(String sql);
 
-    String getDatabaseName();
-
     List<ResultsetColumnHeaderData> fillResultsetColumnHeaders(String datatable);
 }

@@ -10,15 +10,13 @@ import org.mifosplatform.infrastructure.core.exception.AbstractPlatformResourceN
 /**
  * A {@link RuntimeException} thrown when client resources are not found.
  */
-public class DataTableNotFoundException extends AbstractPlatformResourceNotFoundException {
+public class DatatableNotFoundException extends AbstractPlatformResourceNotFoundException {
 
-	public DataTableNotFoundException(final String datatable, Long id) {
-		super("error.msg.datatable.data.not.found", "Data Not Found for Data Table: ",
-				datatable + "     Id:" + id);
-	}
-	
-	public DataTableNotFoundException(final String datatable) {
-		super("error.msg.datatable.not.found", "Data Table Not Found",
-				datatable);
-	}
+    public DatatableNotFoundException(final String datatable, final Long id) {
+        super("error.msg.datatable.data.not.found", "Data not found for datatable: ", datatable + "  Id:" + id);
+    }
+
+    public DatatableNotFoundException(final String datatable) {
+        super("error.msg.datatable.not.found", "Datatable not found.", datatable);
+    }
 }

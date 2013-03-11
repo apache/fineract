@@ -19,13 +19,17 @@ public class CommandProcessingResult {
     private final Long groupId;
     private final Long clientId;
     private final Long loanId;
-    private Long resourceId;
+    private final Long resourceId;
     private final String transactionId;
-    private Map<String, Object> changes;
+    private final Map<String, Object> changes;
+    @SuppressWarnings("unused")
+    private final String resourceIdentifier;
 
     public static CommandProcessingResult fromDetails(final Long commandId, final Long officeId, final Long groupId, final Long clientId,
-            final Long loanId, final Long entityId, final String transactionId, final Map<String, Object> changes) {
-        return new CommandProcessingResult(commandId, officeId, groupId, clientId, loanId, entityId, transactionId, changes);
+            final Long loanId, final String resourceIdentifier, final Long entityId, final String transactionId,
+            final Map<String, Object> changes) {
+        return new CommandProcessingResult(commandId, officeId, groupId, clientId, loanId, resourceIdentifier, entityId, transactionId,
+                changes);
     }
 
     public static CommandProcessingResult commandOnlyResult(final Long commandId) {
@@ -54,10 +58,18 @@ public class CommandProcessingResult {
     }
 
     public static CommandProcessingResult empty() {
-        return new CommandProcessingResult(Long.valueOf(-1), Long.valueOf(-1), Long.valueOf(-1), null);
+        return new CommandProcessingResult(null, null, null, null);
     }
 
+    /*
+     * Deprecated
+     */
     public CommandProcessingResult(final Long entityId) {
+        if (entityId != null) {
+            this.resourceIdentifier = entityId.toString();
+        } else {
+            this.resourceIdentifier = null;
+        }
         this.resourceId = entityId;
         this.officeId = null;
         this.groupId = null;
@@ -68,18 +80,24 @@ public class CommandProcessingResult {
     }
 
     private CommandProcessingResult(final Long commandId, final Long officeId, final Long groupId, final Long clientId, final Long loanId,
-            final Long resourceId, final String transactionId, final Map<String, Object> changesOnly) {
+            final String resourceIdentifier, final Long resourceId, final String transactionId, final Map<String, Object> changesOnly) {
         this.commandId = commandId;
         this.officeId = officeId;
         this.groupId = groupId;
         this.clientId = clientId;
         this.loanId = loanId;
+        this.resourceIdentifier = resourceIdentifier;
         this.resourceId = resourceId;
         this.changes = changesOnly;
         this.transactionId = transactionId;
     }
 
     private CommandProcessingResult(final Long resourceId, final Long officeId, final Long commandId, final Map<String, Object> changesOnly) {
+        if (resourceId != null) {
+            this.resourceIdentifier = resourceId.toString();
+        } else {
+            this.resourceIdentifier = null;
+        }
         this.resourceId = resourceId;
         this.officeId = officeId;
         this.groupId = null;
@@ -102,7 +120,7 @@ public class CommandProcessingResult {
         return this.officeId;
     }
 
-    public void setOfficeId(Long officeId) {
+    public void setOfficeId(final Long officeId) {
         this.officeId = officeId;
     }
 
