@@ -231,10 +231,13 @@ INSERT INTO `m_office` (`id`, `parent_id`, `hierarchy`, `external_id`, `name`, `
 VALUES 
 (1,NULL,'.','1','Head Office','2009-01-01');
 
-INSERT INTO `m_group_level` (`id`, `parent_id`, `super_parent`, `level_name`, `recursable`, `can_have_clients`) VALUES (1, NULL, 1, 'Center', 1, 0);
-INSERT INTO `m_group_level` (`id`, `parent_id`, `super_parent`, `level_name`, `recursable`, `can_have_clients`) VALUES (2, 1, 0, 'Group', 0, 1);
+INSERT INTO `m_group_level` (`id`, `parent_id`, `super_parent`, `level_name`, `recursable`, `can_have_clients`) 
+VALUES (1, NULL, 1, 'Center', 1, 0);
+INSERT INTO `m_group_level` (`id`, `parent_id`, `super_parent`, `level_name`, `recursable`, `can_have_clients`) 
+VALUES (2, 1, 0, 'Group', 0, 1);
 
 -- ========= roles and permissions =========
+
 /*
 this scripts removes all current m_role_permission and m_permission entries
 and then inserts new m_permission entries and just one m_role_permission entry
@@ -242,9 +245,10 @@ which gives the role (id 1 - super user) an ALL_FUNCTIONS permission
 
 If you had other roles set up with specific permissions you will have to set up their permissions again.
 */
-truncate `m_role_permission`;
-truncate `m_permission`;
-truncate `x_registered_table`;
+
+-- truncate `m_role_permission`;
+-- truncate `m_permission`;
+-- truncate `x_registered_table`;
 
 INSERT INTO `m_permission`
 (`grouping`,`code`,`entity_name`,`action_name`,`can_maker_checker`) VALUES 

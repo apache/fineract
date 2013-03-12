@@ -130,7 +130,7 @@ dependencies {
 	            [group: 'ch.qos.logback', name: 'logback-classic', version: '1.0.9'],
 	            
 	            [group: 'mysql', name: 'mysql-connector-java', version: '5.1.22'],
-	            [group: 'org.apache.tomcat', name: 'tomcat-jdbc', version: '7.0.37'],
+	            [group: 'org.apache.tomcat', name: 'tomcat-jdbc', version: '7.0.34'],
 	            
 	            [group: 'pentaho-reporting-engine', name: 'pentaho-reporting-engine-classic-core', version: '3.9.1.1'],
 	            [group: 'pentaho-reporting-engine', name: 'pentaho-reporting-engine-classic-extensions', version: '3.9.1-GA'],
