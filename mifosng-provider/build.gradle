@@ -166,6 +166,11 @@ dependencies {
 task dist(type:Zip){
 	baseName= 'mifosplatform'
 	version = qualifyVersionIfNecessary(releaseVersion)
+	from('src/main/pentahoReports/') {
+        fileMode = 0755
+        include '*'
+        into('pentahoReports')
+    }
     from jar.outputs.files
     from war.outputs.files
 }
