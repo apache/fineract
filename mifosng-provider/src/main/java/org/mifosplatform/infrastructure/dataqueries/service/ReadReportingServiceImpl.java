@@ -260,7 +260,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
          * "").trim() + File.separator + "reports" + File.separator + reportName
          * + ".prpt";
          */
-        final String reportPath = FileUtils.MIFOSX_BASE_DIR + File.separator + "reports" + File.separator + reportName + ".prpt";
+        final String reportPath = FileUtils.MIFOSX_BASE_DIR + File.separator + "pentahoReports" + File.separator + reportName + ".prpt";
         logger.info("Report path: " + reportPath);
 
         // load report definition
