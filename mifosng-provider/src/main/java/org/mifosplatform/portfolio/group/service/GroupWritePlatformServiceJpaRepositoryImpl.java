@@ -6,6 +6,7 @@
 package org.mifosplatform.portfolio.group.service;
 
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
@@ -41,6 +42,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
+import com.google.common.collect.Sets;
 
 @Service
 public class GroupWritePlatformServiceJpaRepositoryImpl implements GroupWritePlatformService {
@@ -243,9 +245,9 @@ public class GroupWritePlatformServiceJpaRepositoryImpl implements GroupWritePla
             final String clientMembersParamName = "clientMembers";
 
             if (!clientMembers.equals(groupForUpdate.getClientMembers())) {
-                final String[] newValue = command.arrayValueOfParameterNamed(clientMembersParamName);
-                // TODO Use Guava's symmetricDifference
-                actualChanges.put(clientMembersParamName, newValue);
+                Set<Client> diffClients = Sets.symmetricDifference(clientMembers, groupForUpdate.getClientMembers());  
+                final String[] diffClientsIds = getClientIds(diffClients);
+                actualChanges.put(clientMembersParamName, diffClientsIds);
                 groupForUpdate.setClientMembers(clientMembers);
             }
 
@@ -360,6 +362,16 @@ public class GroupWritePlatformServiceJpaRepositoryImpl implements GroupWritePla
         }
 
         return childGroups;
+    }
+
+    private String[] getClientIds(final Set<Client> clients) {
+
+        String[] clientIds = new String[clients.size()];
+        Iterator<Client> it = clients.iterator();
+        for (int i = 0; it.hasNext(); i++) {	
+        	clientIds[i] = it.next().getId().toString();
+        }
+        return clientIds;
     }
 
     /*
