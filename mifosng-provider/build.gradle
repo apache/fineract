@@ -1,10 +1,6 @@
 description = '''\
-To run this build script we must first 
-set an environment variable 
-ORG_GRADLE_PROJECT_property5=environment property
-
 Run as: 
-gradle -Property4="argument property" -Dorg.gradle.project.property6="system property"
+gradle clean tomcatrunwar
 '''
 
 buildscript {
@@ -172,6 +168,19 @@ task dist(type:Zip){
 	version = qualifyVersionIfNecessary(releaseVersion)
     from jar.outputs.files
     from war.outputs.files
+}
+
+task deployPentahoReports() {
+	def pentahoReportDir = System.properties['user.home'] + System.properties['file.separator'] + '.mifosx' + System.properties['file.separator'] + 'pentahoReports'
+	println ":deployPentahoReports - moving pentaho reports under: " + pentahoReportDir
+	copy {
+        from "src/main/pentahoReports"
+        into pentahoReportDir
+    }
+}
+
+war {
+    it.dependsOn deployPentahoReports
 }
 
 license {
