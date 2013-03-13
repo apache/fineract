@@ -22,7 +22,7 @@ import org.mifosplatform.infrastructure.core.api.ApiRequestParameterHelper;
 import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.mifosplatform.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
-import org.mifosplatform.portfolio.group.domain.GroupLevel;
+import org.mifosplatform.portfolio.group.data.GroupLevelData;
 import org.mifosplatform.portfolio.group.service.GroupLevelReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -33,17 +33,17 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class GroupsLevelApiResource {
 
-    private static final Set<String> GROUPLEVEL_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("parentId", "isSuperParent", "levelId",
-            "levelName", "recursable", "canHaveClients"));
+    private static final Set<String> GROUPLEVEL_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("levelId", "levelName", "parentLevelId",
+            "parentLevelName", "childLevelId", "childLevelName" , "superParent" , "recursable" , "canHaveClients"));
 
     private final PlatformSecurityContext context;
     private final GroupLevelReadPlatformService groupLevelReadPlatformService;
-    private final ToApiJsonSerializer<GroupLevel> toApiJsonSerializer;
+    private final ToApiJsonSerializer<GroupLevelData> toApiJsonSerializer;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
 
     @Autowired
     public GroupsLevelApiResource(final PlatformSecurityContext context, final GroupLevelReadPlatformService groupLevelReadPlatformService,
-            final ToApiJsonSerializer<GroupLevel> toApiJsonSerializer, final ApiRequestParameterHelper apiRequestParameterHelper) {
+            final ToApiJsonSerializer<GroupLevelData> toApiJsonSerializer, final ApiRequestParameterHelper apiRequestParameterHelper) {
         this.context = context;
         this.groupLevelReadPlatformService = groupLevelReadPlatformService;
         this.toApiJsonSerializer = toApiJsonSerializer;
@@ -57,7 +57,7 @@ public class GroupsLevelApiResource {
 
         this.context.authenticatedUser().validateHasReadPermission("GROUP");
 
-        final Collection<GroupLevel> groupLevel = this.groupLevelReadPlatformService.retrieveAllLevels();
+        final Collection<GroupLevelData> groupLevel = this.groupLevelReadPlatformService.retrieveAllLevels();
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 
         return this.toApiJsonSerializer.serialize(settings, groupLevel, GROUPLEVEL_DATA_PARAMETERS);

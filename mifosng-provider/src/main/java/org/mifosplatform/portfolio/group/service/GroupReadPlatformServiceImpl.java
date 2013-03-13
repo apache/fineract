@@ -338,9 +338,9 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
             final Long officeId = rs.getLong("officeId");
             final String officeName = rs.getString("officeName");
             final Long groupLevel = rs.getLong("groupLevel");
-            final Long parentId = rs.getLong("parentId");
+            final Long parentId = JdbcSupport.getLong(rs, "parentId");
             final String parentName = rs.getString("parentName");
-            final Long staffId = rs.getLong("staffId");
+            final Long staffId = JdbcSupport.getLong(rs, "staffId");
             final String staffName = rs.getString("staffName");
             final String hierarchy = rs.getString("hierarchy");
 

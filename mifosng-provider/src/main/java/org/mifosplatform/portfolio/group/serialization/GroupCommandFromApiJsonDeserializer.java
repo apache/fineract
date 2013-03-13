@@ -99,7 +99,7 @@ public final class GroupCommandFromApiJsonDeserializer extends AbstractFromApiJs
             baseDataValidator.reset().parameter(parentIdParameterName).value(parentId).notNull().integerGreaterThanZero();
         }
 
-        final String staffIdParameterName = "stafftId";
+        final String staffIdParameterName = "staffId";
         if (this.fromApiJsonHelper.parameterExists(staffIdParameterName, element)) {
             final Long staffId = this.fromApiJsonHelper.extractLongNamed(staffIdParameterName, element);
             baseDataValidator.reset().parameter(staffIdParameterName).value(staffId).notNull().integerGreaterThanZero();
@@ -140,7 +140,7 @@ public final class GroupCommandFromApiJsonDeserializer extends AbstractFromApiJs
             baseDataValidator.reset().parameter(parentIdParameterName).value(parentId).notNull().integerGreaterThanZero();
         }
 
-        final String staffIdParameterName = "stafftId";
+        final String staffIdParameterName = "staffId";
         if (this.fromApiJsonHelper.parameterExists(staffIdParameterName, element)) {
             final Long staffId = this.fromApiJsonHelper.extractLongNamed(staffIdParameterName, element);
             baseDataValidator.reset().parameter(staffIdParameterName).value(staffId).notNull().integerGreaterThanZero();
@@ -167,7 +167,7 @@ public final class GroupCommandFromApiJsonDeserializer extends AbstractFromApiJs
 
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("group");
 
-        final String staffIdParameterName = "stafftId";
+        final String staffIdParameterName = "staffId";
         if (this.fromApiJsonHelper.parameterExists(staffIdParameterName, element)) {
             final Long staffId = this.fromApiJsonHelper.extractLongNamed(staffIdParameterName, element);
             baseDataValidator.reset().parameter(staffIdParameterName).value(staffId).notNull().integerGreaterThanZero();

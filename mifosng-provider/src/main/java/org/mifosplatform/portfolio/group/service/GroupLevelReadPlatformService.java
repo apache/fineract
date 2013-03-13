@@ -7,10 +7,10 @@ package org.mifosplatform.portfolio.group.service;
 
 import java.util.Collection;
 
-import org.mifosplatform.portfolio.group.domain.GroupLevel;
+import org.mifosplatform.portfolio.group.data.GroupLevelData;
 
 public interface GroupLevelReadPlatformService {
 
-    Collection<GroupLevel> retrieveAllLevels();
+    Collection<GroupLevelData> retrieveAllLevels();
 
 }

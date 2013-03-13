@@ -74,11 +74,12 @@ public class GroupsApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveAllGroups(@Context final UriInfo uriInfo, @QueryParam("sqlSearch") final String sqlSearch,
             @QueryParam("officeId") final Long officeId, @QueryParam("externalId") final String externalId,
-            @QueryParam("name") final String name, @QueryParam("underHierarchy") final String hierarchy) {
+            @QueryParam("name") final String name, @QueryParam("underHierarchy") final String hierarchy,
+            @QueryParam("levelId") final Long levelId) {
 
         this.context.authenticatedUser().validateHasReadPermission("GROUP");
 
-        final String extraCriteria = getGroupExtraCriteria(sqlSearch, officeId, externalId, name, hierarchy);
+        final String extraCriteria = getGroupExtraCriteria(sqlSearch, officeId, externalId, name, hierarchy, levelId);
         final Collection<GroupData> groups = this.groupReadPlatformService.retrieveAllGroups(extraCriteria);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
@@ -202,7 +203,7 @@ public class GroupsApiResource {
     // clause is ambiguous
     // caused by the same name of columns in m_office and m_group tables
     private String getGroupExtraCriteria(String sqlSearch, final Long officeId, final String externalId, final String name,
-            final String hierarchy) {
+            final String hierarchy, final Long levelId) {
 
         String extraCriteria = "";
 
@@ -213,15 +214,19 @@ public class GroupsApiResource {
         }
 
         if (officeId != null) {
-            extraCriteria += " and office_id = " + officeId;
+            extraCriteria += " and g.office_id = " + officeId;
+        }
+
+        if (levelId != null) {
+            extraCriteria += " and g.level_Id = " + levelId;
         }
 
         if (externalId != null) {
-            extraCriteria += " and g.external_id like " + ApiParameterHelper.sqlEncodeString(externalId);
+            extraCriteria += " and g.external_id = " + ApiParameterHelper.sqlEncodeString(externalId);
         }
 
         if (name != null) {
-            extraCriteria += " and g.name = " + ApiParameterHelper.sqlEncodeString(name);
+            extraCriteria += " and g.name like " + ApiParameterHelper.sqlEncodeString(name + "%");
         }
 
         if (hierarchy != null) {
