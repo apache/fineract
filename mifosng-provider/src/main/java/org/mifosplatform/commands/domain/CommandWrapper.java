@@ -23,8 +23,8 @@ public class CommandWrapper {
     private final Long datatableId;
     private final Long codeId;
     private final String transactionId;
-    private String supportedEntityType;
-    private Long supportedEntityId;
+    private final String supportedEntityType;
+    private final Long supportedEntityId;
 
     public static CommandWrapper wrap(final String actionName, final String enityName, final Long resourceId) {
         return new CommandWrapper(null, actionName, enityName, resourceId);
@@ -163,7 +163,7 @@ public class CommandWrapper {
                 || (isUpdateOperation() && this.entityId != null);
     }
 
-    private boolean isUpdateOperation() {
+    public boolean isUpdateOperation() {
         return this.actionName.equalsIgnoreCase("UPDATE");
     }
 

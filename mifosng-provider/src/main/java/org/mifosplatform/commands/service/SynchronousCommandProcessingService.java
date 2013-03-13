@@ -77,7 +77,7 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
             commandSourceResult.updateJsonTo(changesOnlyJson);
         }
 
-        if (!result.hasChanges() && wrapper.isUpdate()) {
+        if (!result.hasChanges() && wrapper.isUpdateOperation()) {
             commandSourceResult.updateJsonTo(null);
         }
 

@@ -8435,10 +8435,7 @@ Request Body:
 				<div class="method-description">
 					<h4>Delete Entry(s) in Data Table</h4>
 					<p>
-						Deletes the entry (if it exists) for data tables that are one to
-						one with the application table. <br> Deletes the entries (if
-						they exist) for data tables that are one to many with the
-						application table.
+						Deletes the entry (if it exists) for data tables that are one-to-one with the application table. <br> Deletes the entries (if they exist) for data tables that are one-to-many with the application table.
 					</p>
 				</div>
 				<div class="method-example">
@@ -8446,14 +8443,17 @@ Request Body:
 DELETE https://DomainName/api/v1/datatables/{datatable}/{apptableId}
 					</code>
 					<code class="method-request">
-DELETE datatables/Additional Client Fields Data/1 
+DELETE datatables/extra_client_details/1 
 
 Content-Type: application/json 
-
 Request Body:
 {}
 					 </code>
-					<code class="method-response">{ "resourceId": 1 } </code>
+					<code class="method-response">
+{ 
+	"resourceId": 1
+}
+					</code>
 				</div>
 			</div>
 
@@ -8461,7 +8461,7 @@ Request Body:
 				class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
-					<h4>Delete Entry in Data Table (One to Many)</h4>
+					<h4>Delete Entry in Datatable (One to Many)</h4>
 					<p>Deletes the entry (if it exists) for data tables that are
 						one to many with the application table.</p>
 				</div>
@@ -8470,13 +8470,17 @@ Request Body:
 DELETE https://DomainName/api/v1/datatables/{datatable}/{apptableId}/{datatableId}
 					</code>
 					<code class="method-request">
-DELETE datatables/Extra Family Details Data/1/2 
+DELETE datatables/extra_family_details/1/2 
 
 Content-Type: application/json 
 Request Body: 
 {}
 					</code>
-					<code class="method-response">{ "resourceId": 1 } </code>
+					<code class="method-response">
+{
+	"resourceId": 1
+}
+					</code>
 				</div>
 			</div>
 			<!-- end of datatables api docs -->

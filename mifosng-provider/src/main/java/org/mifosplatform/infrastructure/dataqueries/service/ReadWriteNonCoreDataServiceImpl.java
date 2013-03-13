@@ -242,29 +242,26 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
     @Override
     public Map<String, Object> updateDatatableEntryOneToOne(final String datatable, final Long appTableId, final JsonCommand command) {
 
-        GenericResultsetData grs = retrieveDataTableGenericResultSet(datatable, appTableId, null, null);
+        final GenericResultsetData grs = retrieveDataTableGenericResultSet(datatable, appTableId, null, null);
 
-        if (grs.getData().size() == 0) throw new DatatableNotFoundException(datatable, appTableId);
+        if (grs.hasNoEntries()) { throw new DatatableNotFoundException(datatable, appTableId); }
 
-        if (grs.getData().size() > 1)
-            throw new PlatformDataIntegrityException("error.msg.attempting.multiple.update", "Application Table: " + datatable
-                    + "   Foreign Key Id: " + appTableId);
+        if (grs.hasMoreThanOneEntry()) { throw new PlatformDataIntegrityException("error.msg.attempting.multiple.update",
+                "Application table: " + datatable + " Foreign key id: " + appTableId); }
 
-        String fkName = getFKField(queryForApplicationTableName(datatable));
+        final String fkName = getFKField(queryForApplicationTableName(datatable));
 
         final Type typeOfMap = new TypeToken<Map<String, String>>() {}.getType();
         Map<String, String> dataParams = this.fromJsonHelper.extractDataMap(typeOfMap, command.json());
 
         final Map<String, Object> changes = getAffectedAndChangedColumns(grs, dataParams, fkName);
 
-        if (changes.size() == 0) return changes;
+        if (!changes.isEmpty()) {
+            final String updateOneToOneDatatableSql = getUpdateSql(datatable, fkName, appTableId, changes);
 
-        final String sql = getUpdateSql(datatable, fkName, appTableId, changes);
-
-        if (StringUtils.isNotBlank(sql)) {
-            this.jdbcTemplate.update(sql);
-        } else {
-            logger.info("No Changes");
+            if (StringUtils.isNotBlank(updateOneToOneDatatableSql)) {
+                this.jdbcTemplate.update(updateOneToOneDatatableSql);
+            }
         }
 
         return changes;
@@ -301,9 +298,10 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
 
         final String appTable = getWithinScopeApplicationTableName(datatable, appTableId);
 
-        final String sql = getDeleteEntriesSql(datatable, getFKField(appTable), appTableId);
+        final String deleteOneToOneEntrySql = getDeleteEntriesSql(datatable, getFKField(appTable), appTableId);
 
-        this.jdbcTemplate.update(sql);
+        int rowsDeleted = this.jdbcTemplate.update(deleteOneToOneEntrySql);
+        if (rowsDeleted < 1) { throw new DatatableNotFoundException(datatable, appTableId); }
     }
 
     @Override
@@ -334,9 +332,11 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             sql = sql + "select * from `" + datatable + "` where id = " + id;
         }
 
-        if (order != null) sql = sql + " order by " + order;
+        if (order != null) {
+            sql = sql + " order by " + order;
+        }
 
-        List<ResultsetRowData> result = fillDatatableResultSetDataRows(sql);
+        final List<ResultsetRowData> result = fillDatatableResultSetDataRows(sql);
 
         return new GenericResultsetData(columnHeaders, result);
     }
@@ -513,13 +513,13 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
     private Map<String, Object> getAffectedAndChangedColumns(final GenericResultsetData grs, final Map<String, String> queryParams,
             final String fkName) {
 
-        Map<String, String> affectedColumns = getAffectedColumns(grs.getColumnHeaders(), queryParams, fkName);
-        Map<String, Object> affectedAndChangedColumns = new HashMap<String, Object>();
-        String columnValue;
+        final Map<String, String> affectedColumns = getAffectedColumns(grs.getColumnHeaders(), queryParams, fkName);
+        final Map<String, Object> affectedAndChangedColumns = new HashMap<String, Object>();
 
-        for (String key : affectedColumns.keySet()) {
-            columnValue = affectedColumns.get(key);
-            if (columnChanged(key, columnValue, grs)) {
+        for (final String key : affectedColumns.keySet()) {
+            final String columnValue = affectedColumns.get(key);
+            final String colType = grs.getColTypeOfColumnNamed(key);
+            if (columnChanged(key, columnValue, colType, grs)) {
                 affectedAndChangedColumns.put(key, columnValue);
             }
         }
@@ -527,7 +527,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         return affectedAndChangedColumns;
     }
 
-    private boolean columnChanged(final String key, final String keyValue, final GenericResultsetData grs) {
+    private boolean columnChanged(final String key, final String keyValue, final String colType, final GenericResultsetData grs) {
 
         List<String> columnValues = grs.getData().get(0).getRow();
 
@@ -537,12 +537,8 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             if (key.equals(grs.getColumnHeaders().get(i).getColumnName())) {
                 columnValue = columnValues.get(i);
 
-                if (notTheSame(columnValue, keyValue)) {
-                    // logger.info("Difference - Column: " + key +
-                    // "- Current Value: " + columnValue + "    New Value: " +
-                    // keyValue);
+                if (notTheSame(columnValue, keyValue, colType)) {
                     return true;
-
                 }
                 return false;
             }
@@ -691,12 +687,19 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
 
     }
 
-    private boolean notTheSame(final String currValue, final String pValue) {
+    private boolean notTheSame(final String currValue, final String pValue, final String colType) {
         if (StringUtils.isEmpty(currValue) && StringUtils.isEmpty(pValue)) return false;
 
         if (StringUtils.isEmpty(currValue)) return true;
 
         if (StringUtils.isEmpty(pValue)) return true;
+
+        if ("DECIMAL".equalsIgnoreCase(colType)) {
+            final BigDecimal currentDecimal = BigDecimal.valueOf(Double.valueOf(currValue));
+            final BigDecimal newDecimal = BigDecimal.valueOf(Double.valueOf(pValue));
+
+            return currentDecimal.compareTo(newDecimal) != 0;
+        }
 
         if (currValue.equals(pValue)) return false;
 

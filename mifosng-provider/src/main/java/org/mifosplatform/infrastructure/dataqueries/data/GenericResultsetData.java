@@ -11,7 +11,7 @@ import java.util.List;
 /**
  * Immutable data object for generic resultset data.
  */
-public class GenericResultsetData {
+public final class GenericResultsetData {
 
     private final List<ResultsetColumnHeaderData> columnHeaders;
     private final List<ResultsetRowData> data;
@@ -27,5 +27,29 @@ public class GenericResultsetData {
 
     public List<ResultsetRowData> getData() {
         return data;
+    }
+
+    public String getColTypeOfColumnNamed(final String columnName) {
+
+        String colType = null;
+        for (ResultsetColumnHeaderData columnHeader : this.columnHeaders) {
+            if (columnHeader.isNamed(columnName)) {
+                colType = columnHeader.getColumnType();
+            }
+        }
+
+        return colType;
+    }
+
+    public boolean hasNoEntries() {
+        return this.data.isEmpty();
+    }
+
+    public boolean hasEntries() {
+        return !hasNoEntries();
+    }
+
+    public boolean hasMoreThanOneEntry() {
+        return this.data.size() > 1;
     }
 }

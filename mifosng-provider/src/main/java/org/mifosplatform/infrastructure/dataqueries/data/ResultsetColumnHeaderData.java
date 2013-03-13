@@ -80,6 +80,10 @@ public final class ResultsetColumnHeaderData {
         this.columnDisplayType = displayType;
     }
 
+    public boolean isNamed(final String columnName) {
+        return this.columnName.equalsIgnoreCase(columnName);
+    }
+
     private boolean isAnyText() {
         return isText() || isTinyText() || isMediumText() || isLongText();
     }

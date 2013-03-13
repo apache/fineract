@@ -30,6 +30,9 @@ public class DeleteOneToOneDatatableEntryCommandHandler implements NewCommandSou
 
         this.writePlatformService.deleteDatatableEntries(command.entityName(), command.getApptableId());
 
-        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(command.getApptableId()).build();
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(command.commandId()) //
+                .withEntityId(command.getApptableId()) //
+                .build();
     }
 }
