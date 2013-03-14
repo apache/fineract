@@ -80,6 +80,13 @@ public final class GroupCommandFromApiJsonDeserializer extends AbstractFromApiJs
         final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
 
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("group");
+        
+        /*
+         * Name is a mandatory field and not exceeding length 100 character 
+         */
+        final String nameParameterName = "name";
+        final String name = this.fromApiJsonHelper.extractStringNamed(nameParameterName, element);
+        baseDataValidator.reset().parameter(nameParameterName).value(name).notNull().notExceedingLengthOf(100);
 
         final String externalIdParameterName = "externalId";
         if (this.fromApiJsonHelper.parameterExists(externalIdParameterName, element)) {
@@ -87,11 +94,13 @@ public final class GroupCommandFromApiJsonDeserializer extends AbstractFromApiJs
             baseDataValidator.reset().parameter(externalIdParameterName).value(externalId).ignoreIfNull().notExceedingLengthOf(100);
         }
 
+        /*
+         * OfficeId is mandatory field
+         */
         final String officeIdParameterName = "officeId";
-        if (this.fromApiJsonHelper.parameterExists(officeIdParameterName, element)) {
-            final Long officeId = this.fromApiJsonHelper.extractLongNamed(officeIdParameterName, element);
-            baseDataValidator.reset().parameter(officeIdParameterName).value(officeId).notNull().integerGreaterThanZero();
-        }
+        final Long officeId = this.fromApiJsonHelper.extractLongNamed(officeIdParameterName, element);
+        baseDataValidator.reset().parameter(officeIdParameterName).value(officeId).notNull().integerGreaterThanZero();
+
 
         final String parentIdParameterName = "parentId";
         if (this.fromApiJsonHelper.parameterExists(parentIdParameterName, element)) {

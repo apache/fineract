@@ -28,8 +28,8 @@ import org.mifosplatform.portfolio.group.data.GroupAccountSummaryCollectionData;
 import org.mifosplatform.portfolio.group.data.GroupAccountSummaryData;
 import org.mifosplatform.portfolio.group.data.GroupData;
 import org.mifosplatform.portfolio.group.data.GroupLevelData;
-import org.mifosplatform.portfolio.group.data.GroupLookupData;
-import org.mifosplatform.portfolio.group.data.GroupSummaryData;
+import org.mifosplatform.portfolio.group.data.GroupLookup;
+import org.mifosplatform.portfolio.group.data.GroupSummary;
 import org.mifosplatform.portfolio.group.domain.Group;
 import org.mifosplatform.portfolio.group.domain.GroupRepository;
 import org.mifosplatform.portfolio.group.exception.GroupLevelNotFoundException;
@@ -93,7 +93,7 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
     }
 
     @Override
-    public Collection<GroupLookupData> retrieveAllGroupsbyOfficeIdAndLevelId(final Long officeId, final Long levelId) {
+    public Collection<GroupLookup> retrieveAllGroupsbyOfficeIdAndLevelId(final Long officeId, final Long levelId) {
 
         this.context.authenticatedUser();
         final GroupLookupMapper rm = new GroupLookupMapper();
@@ -101,7 +101,7 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
         return this.jdbcTemplate.query(sql, rm, new Object[] { officeId, levelId });
     }
 
-    private GroupLookupData retrieveGroupbyId(final Long parentGroupId) {
+    private GroupLookup retrieveGroupbyId(final Long parentGroupId) {
         try {
             this.context.authenticatedUser();
             final GroupLookupMapper rm = new GroupLookupMapper();
@@ -114,7 +114,7 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
     }
 
     @Override
-    public Collection<GroupLookupData> retrieveChildGroupsbyGroupId(final Long groupId) {
+    public Collection<GroupLookup> retrieveChildGroupsbyGroupId(final Long groupId) {
 
         this.context.authenticatedUser();
         final GroupLookupMapper rm = new GroupLookupMapper();
@@ -155,10 +155,10 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
 
         final List<OfficeData> allowedOffices = new ArrayList<OfficeData>(this.officeReadPlatformService.retrieveAllOfficesForDropdown());
 
-        List<GroupLookupData> allowedParentGroups = null;
+        List<GroupLookup> allowedParentGroups = null;
 
         if (groupLevelData.getParentLevelId() != null) {
-            allowedParentGroups = new ArrayList<GroupLookupData>(retrieveAllGroupsbyOfficeIdAndLevelId(officeId,
+            allowedParentGroups = new ArrayList<GroupLookup>(retrieveAllGroupsbyOfficeIdAndLevelId(officeId,
                     groupLevelData.getParentLevelId()));
         }
 
@@ -190,7 +190,7 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
         final List<OfficeData> allowedOffices = new ArrayList<OfficeData>();
         allowedOffices.add(this.officeReadPlatformService.retrieveOffice(officeId));
 
-        final List<GroupLookupData> allowedParentGroups = new ArrayList<GroupLookupData>();
+        final List<GroupLookup> allowedParentGroups = new ArrayList<GroupLookup>();
         allowedParentGroups.add(retrieveGroupbyId(parentGroupId));
 
         final List<StaffData> allowedStaffs = new ArrayList<StaffData>();
@@ -206,17 +206,17 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
         final Collection<ClientLookup> clientMembers = retrieveClientMembers(groupId);
         Collection<ClientLookup> availableClients = null;
         Collection<OfficeData> allowedOffices = null;
-        Collection<GroupLookupData> allowedParentGroups = null;
-        final GroupLevelData groupLevelData = retrieveGroupLevelDetails(group.getGroupLevel());
+        Collection<GroupLookup> allowedParentGroups = null;
+        final GroupLevelData groupLevelData = retrieveGroupLevelDetails(getLevelIdByGroupId(groupId));
         ;
         Collection<StaffData> allowedStaffs = null;
-        final Collection<GroupLookupData> childGroups = retrieveChildGroupsbyGroupId(groupId);
+        final Collection<GroupLookup> childGroups = retrieveChildGroupsbyGroupId(groupId);
 
         final Long totalActiveClients = retrieveTotalClients(group.getHierarchy());
         final Long totalChildGroups = retrieveTotalNoOfChildGroups(groupId);
         final Collection<MoneyData> totalLoanPortfolio = retrieveGroupLoanPortfolio(group.getHierarchy());
 
-        final GroupSummaryData groupSummaryData = new GroupSummaryData(totalActiveClients, totalChildGroups, totalLoanPortfolio, null);
+        final GroupSummary groupSummaryData = new GroupSummary(totalActiveClients, totalChildGroups, totalLoanPortfolio, null);
 
         group = new GroupData(group, clientMembers, availableClients, allowedOffices, allowedParentGroups, groupLevelData, allowedStaffs,
                 childGroups, groupSummaryData);
@@ -265,6 +265,15 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
         }
     }
 
+    @Override
+    public Long getLevelIdByGroupId(final Long groupId){
+
+        this.context.authenticatedUser();
+        final String sqlTotalClients = "SELECT g.level_Id as levelId FROM m_group g WHERE g.id = ?";
+        return this.jdbcTemplate.queryForLong(sqlTotalClients, new Object[] { groupId });
+        
+    }
+    
     @Override
     public Long retrieveTotalClients(final String hierarchy) {
 
@@ -323,7 +332,7 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
     private static final class GroupDataMapper implements RowMapper<GroupData> {
 
         public String groupSchema() {
-            return "g.office_id as officeId, g.level_id as groupLevel , g.parent_id as parentId , o.name as officeName,"
+            return "g.office_id as officeId, g.parent_id as parentId , o.name as officeName,"
                     + " g.id as id, g.external_id as externalId, g.name as name , s.display_name as staffName , pg.name as"
                     + " parentName , g.staff_id as staffId , g.hierarchy as hierarchy from m_group g join m_office o on o.id = g.office_id left join "
                     + "m_staff s on s.id = g.staff_id left join m_group pg on pg.id = g.parent_id";
@@ -337,32 +346,31 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
             final String externalId = rs.getString("externalId");
             final Long officeId = rs.getLong("officeId");
             final String officeName = rs.getString("officeName");
-            final Long groupLevel = rs.getLong("groupLevel");
-            final Long parentId = JdbcSupport.getLong(rs, "parentId");
+            final Long parentId = rs.getLong("parentId");
             final String parentName = rs.getString("parentName");
             final Long staffId = JdbcSupport.getLong(rs, "staffId");
             final String staffName = rs.getString("staffName");
             final String hierarchy = rs.getString("hierarchy");
 
-            return new GroupData(id, officeId, officeName, name, externalId, groupLevel, parentId, parentName, staffId, staffName,
+            return new GroupData(id, officeId, officeName, name, externalId, parentId, parentName, staffId, staffName,
                     hierarchy);
         }
 
     }
 
-    private static final class GroupLookupMapper implements RowMapper<GroupLookupData> {
+    private static final class GroupLookupMapper implements RowMapper<GroupLookup> {
 
         public String groupLookupSchema() {
             return "g.id as id, g.name as name ";
         }
 
         @Override
-        public GroupLookupData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+        public GroupLookup mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
 
             final Long id = rs.getLong("id");
             final String name = rs.getString("name");
 
-            return new GroupLookupData(id, name);
+            return new GroupLookup(id, name);
         }
 
     }

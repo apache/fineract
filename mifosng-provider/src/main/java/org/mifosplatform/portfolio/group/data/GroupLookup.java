@@ -8,12 +8,12 @@ package org.mifosplatform.portfolio.group.data;
 /**
  * Immutable data object representing groups.
  */
-public class GroupLookupData {
+public class GroupLookup {
 
     private final Long id;
     private final String name;
 
-    public GroupLookupData(final Long id, final String name) {
+    public GroupLookup(final Long id, final String name) {
         this.id = id;
         this.name = name;
     }
