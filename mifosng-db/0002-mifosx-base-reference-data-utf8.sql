@@ -447,6 +447,8 @@ INSERT INTO `m_permission`
 ('portfolio', 'UPDATE_GROUP_CHECKER', 'GROUP', 'UPDATE', '0'),
 ('portfolio', 'DELETE_GROUP', 'GROUP', 'DELETE', '1'),
 ('portfolio', 'DELETE_GROUP_CHECKER', 'GROUP', 'DELETE', '0'),
+('portfolio', 'UNASSIGNSTAFF_GROUP', 'GROUP', 'UNASSIGNSTAFF', 1),
+('portfolio', 'UNASSIGNSTAFF_GROUP_CHECKER', 'GROUP', 'UNASSIGNSTAFF', 0),
 ('portfolio', 'CREATE_LOANCHARGE', 'LOANCHARGE', 'CREATE', '1'),
 ('portfolio', 'CREATE_LOANCHARGE_CHECKER', 'LOANCHARGE', 'CREATE', '0'),
 ('portfolio', 'UPDATE_LOANCHARGE', 'LOANCHARGE', 'UPDATE', '1'),

@@ -16,3 +16,4 @@ repos
 *.ipr
 *.iws
 rebel.xml
+*.sublime-workspace

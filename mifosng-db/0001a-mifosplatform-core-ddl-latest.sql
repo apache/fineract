@@ -683,6 +683,7 @@ CREATE TABLE `m_loan_charge` (
   `amount_writtenoff_derived` decimal(19,6) DEFAULT NULL,
   `amount_outstanding_derived` decimal(19,6) NOT NULL DEFAULT '0.000000',
   `is_paid_derived` tinyint(1) NOT NULL DEFAULT '0',
+  `waived` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `charge_id` (`charge_id`),
   KEY `m_loan_charge_ibfk_2` (`loan_id`),
@@ -1059,8 +1060,11 @@ CREATE TABLE `stretchy_parameter` (
   `selectOne` varchar(1) DEFAULT NULL,
   `selectAll` varchar(1) DEFAULT NULL,
   `parameter_sql` text,
+  `parent_parameter_id` int(11) NULL DEFAULT NULL,
   PRIMARY KEY (`parameter_id`),
-  UNIQUE KEY `name_UNIQUE` (`parameter_name`)
+  UNIQUE KEY `name_UNIQUE` (`parameter_name`),
+  INDEX `fk_stretchy_parameter_0001_idx` (`parent_parameter_id`),
+  CONSTRAINT `fk_stretchy_parameter_0001` FOREIGN KEY (`parent_parameter_id`) REFERENCES `stretchy_parameter` (`parameter_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE `stretchy_report` (
