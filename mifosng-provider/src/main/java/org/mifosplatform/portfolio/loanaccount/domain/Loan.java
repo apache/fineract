@@ -430,7 +430,7 @@ public class Loan extends AbstractPersistable<Long> {
     }
 
     private void validateLoanChargeIsNotWaived(final LoanCharge loanCharge) {
-        if (loanCharge.isWaivedOrPartiallyWaived(loanCurrency())) {
+        if (loanCharge.isWaived()) {
             final String defaultUserMessage = "This loan charge cannot be removed as the charge as already been waived.";
             throw new LoanChargeCannotBeAddedException("loanCharge", "loanCharge.is.waived", defaultUserMessage, getId(), loanCharge.name());
         }
@@ -1793,7 +1793,7 @@ public class Loan extends AbstractPersistable<Long> {
         return !isSubmittedAndPendingApproval();
     }
 
-    private LoanStatus status() {
+    public LoanStatus status() {
         return LoanStatus.fromInt(this.loanStatus);
     }
 

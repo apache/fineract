@@ -82,6 +82,9 @@ public class LoanCharge extends AbstractPersistable<Long> {
     @Column(name = "is_paid_derived", nullable = false)
     private boolean paid = false;
 
+    @Column(name = "waived", nullable = false)
+    private boolean waived = false;
+
     public static LoanCharge createNewFromJson(final Loan loan, final Charge chargeDefinition, final JsonCommand command) {
 
         final BigDecimal amount = command.bigDecimalValueOfParameterNamed("amount");
@@ -101,8 +104,7 @@ public class LoanCharge extends AbstractPersistable<Long> {
         // ChargeCalculationType.fromInt(chargeCalculationType);
         // }
 
-        return new LoanCharge(loan, chargeDefinition, loan.getPrincpal().getAmount(), amount, chargeTime, chargeCalculation,
-                dueDate);
+        return new LoanCharge(loan, chargeDefinition, loan.getPrincpal().getAmount(), amount, chargeTime, chargeCalculation, dueDate);
     }
 
     /*
@@ -132,8 +134,8 @@ public class LoanCharge extends AbstractPersistable<Long> {
 
             if (dueDate == null) {
                 final String defaultUserMessage = "Loan charge is missing due date.";
-                throw new LoanChargeWithoutMandatoryFieldException("loanCharge", "dueDate", defaultUserMessage,
-                        chargeDefinition.getId(), chargeDefinition.getName());
+                throw new LoanChargeWithoutMandatoryFieldException("loanCharge", "dueDate", defaultUserMessage, chargeDefinition.getId(),
+                        chargeDefinition.getName());
             }
 
             this.dueDate = dueDate.toDate();
@@ -218,6 +220,7 @@ public class LoanCharge extends AbstractPersistable<Long> {
         this.amountWrittenOff = BigDecimal.ZERO;
         this.amountOutstanding = calculateAmountOutstanding(currency);
         this.paid = false;
+        this.waived = false;
     }
 
     public void resetPaidAmount(final MonetaryCurrency currency) {
@@ -227,9 +230,10 @@ public class LoanCharge extends AbstractPersistable<Long> {
     }
 
     public Money waive(final MonetaryCurrency currency) {
-        this.amountWaived = this.amount;
-        this.amountOutstanding = calculateAmountOutstanding(currency);
-        this.paid = determineIfFullyPaid();
+        this.amountWaived = this.amountOutstanding;
+        this.amountOutstanding = BigDecimal.ZERO;
+        this.paid = false;
+        this.waived = true;
         return getAmountWaived(currency);
     }
 
@@ -452,14 +456,14 @@ public class LoanCharge extends AbstractPersistable<Long> {
         return this.paid;
     }
 
+    public boolean isWaived() {
+        return this.waived;
+    }
+
     public boolean isPaidOrPartiallyPaid(final MonetaryCurrency currency) {
 
         final Money amountWaivedOrWrittenOff = getAmountWaived(currency).plus(getAmountWrittenOff(currency));
         return Money.of(currency, this.amountPaid).plus(amountWaivedOrWrittenOff).isGreaterThanZero();
-    }
-
-    public boolean isWaivedOrPartiallyWaived(final MonetaryCurrency currency) {
-        return getAmountWaived(currency).isGreaterThanZero();
     }
 
     private Money getAmount(final MonetaryCurrency currency) {

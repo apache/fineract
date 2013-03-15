@@ -24,6 +24,10 @@ import org.mifosplatform.organisation.monetary.domain.ApplicationCurrencyReposit
 import org.mifosplatform.organisation.staff.domain.Staff;
 import org.mifosplatform.portfolio.charge.domain.Charge;
 import org.mifosplatform.portfolio.charge.domain.ChargeRepositoryWrapper;
+import org.mifosplatform.portfolio.charge.exception.LoanChargeCannotBeDeletedException;
+import org.mifosplatform.portfolio.charge.exception.LoanChargeCannotBeDeletedException.LOAN_CHARGE_CANNOT_BE_DELETED_REASON;
+import org.mifosplatform.portfolio.charge.exception.LoanChargeCannotBeWaivedException;
+import org.mifosplatform.portfolio.charge.exception.LoanChargeCannotBeWaivedException.LOAN_CHARGE_CANNOT_BE_WAIVED_REASON;
 import org.mifosplatform.portfolio.charge.exception.LoanChargeNotFoundException;
 import org.mifosplatform.portfolio.loanaccount.command.LoanUpdateCommand;
 import org.mifosplatform.portfolio.loanaccount.domain.DefaultLoanLifecycleStateMachine;
@@ -143,7 +147,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         context.authenticatedUser();
 
         final Loan loan = retrieveLoanBy(loanId);
-        final BigDecimal totalInterestCharged = loan.getSummary().getTotalInterestCharged(); 
+        final BigDecimal totalInterestCharged = loan.getSummary().getTotalInterestCharged();
 
         final List<Long> existingTransactionIds = new ArrayList<Long>();
         final List<Long> existingReversedTransactionIds = new ArrayList<Long>();
@@ -164,7 +168,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             // accountingBridgedate, this would not work if interest
             // recalculation in introduced
             accountingBridgeData.put("calculatedInterest", totalInterestCharged);
-            
+
             journalEntryWritePlatformService.createJournalEntriesForLoan(accountingBridgeData);
         }
 
@@ -310,7 +314,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             final Note note = Note.loanTransactionNote(loan, waiveTransaction, noteText);
             this.noteRepository.save(note);
         }
-        
+
         postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
 
         return new CommandProcessingResultBuilder() //
@@ -535,16 +539,28 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final Loan loan = retrieveLoanBy(loanId);
         final LoanCharge loanCharge = retrieveLoanChargeBy(loanId, loanChargeId);
 
+        // Charges may be waived only when the loan associated with them are
+        // active
+        if (!loan.status().isActive()) { throw new LoanChargeCannotBeWaivedException(LOAN_CHARGE_CANNOT_BE_WAIVED_REASON.LOAN_INACTIVE,
+                loanCharge.getId()); }
+
+        // validate loan charge is not already paid or waived
+        if (loanCharge.isWaived()) {
+            throw new LoanChargeCannotBeWaivedException(LOAN_CHARGE_CANNOT_BE_WAIVED_REASON.ALREADY_WAIVED, loanCharge.getId());
+        } else if (loanCharge.isPaid()) { throw new LoanChargeCannotBeWaivedException(LOAN_CHARGE_CANNOT_BE_WAIVED_REASON.ALREADY_PAID,
+                loanCharge.getId()); }
+
         final Map<String, Object> changes = new LinkedHashMap<String, Object>(3);
-        
+
         final List<Long> existingTransactionIds = new ArrayList<Long>();
         final List<Long> existingReversedTransactionIds = new ArrayList<Long>();
+
         final LoanTransaction waiveTransaction = loan.waiveLoanCharge(loanCharge, defaultLoanLifecycleStateMachine(), changes,
                 existingTransactionIds, existingReversedTransactionIds);
 
         this.loanTransactionRepository.save(waiveTransaction);
         this.loanRepository.save(loan);
-        
+
         postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
 
         return new CommandProcessingResultBuilder() //
@@ -558,7 +574,6 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 .build();
     }
 
-
     @Transactional
     @Override
     public CommandProcessingResult deleteLoanCharge(final Long loanId, final Long loanChargeId, final JsonCommand command) {
@@ -567,6 +582,12 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         final Loan loan = retrieveLoanBy(loanId);
         final LoanCharge loanCharge = retrieveLoanChargeBy(loanId, loanChargeId);
+
+        // validate loan charge is not partly paid or waived
+        if (loanCharge.isWaived()) {
+            throw new LoanChargeCannotBeDeletedException(LOAN_CHARGE_CANNOT_BE_DELETED_REASON.ALREADY_WAIVED, loanCharge.getId());
+        } else if (loanCharge.isPaidOrPartiallyPaid(loan.getCurrency())) { throw new LoanChargeCannotBeDeletedException(
+                LOAN_CHARGE_CANNOT_BE_DELETED_REASON.ALREADY_PAID, loanCharge.getId()); }
 
         loan.removeLoanCharge(loanCharge);
         this.loanRepository.save(loan);
@@ -688,7 +709,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 .withLoanId(loanId) //
                 .build();
     }
-    
+
     /**
      * @param loan
      * @param existingTransactionIds
