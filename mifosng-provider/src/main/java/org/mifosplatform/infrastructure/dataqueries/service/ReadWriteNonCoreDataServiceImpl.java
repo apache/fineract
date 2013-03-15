@@ -109,14 +109,62 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         // FIXME - KW - hardcoded supported app tables are m_loan or m_client?
         validateAppTable(applicationTableName);
 
-        try {
-            // TODO - JW - put in batch command later
-            final String registerDatatableSql = "insert into x_registered_table (registered_table_name, application_table_name) values ('"
-                    + dataTableName + "', '" + applicationTableName + "')";
+        final String registerDatatableSql = "insert into x_registered_table (registered_table_name, application_table_name) values ('"
+                + dataTableName + "', '" + applicationTableName + "')";
+        
+        final String createPermission = "'CREATE_" + dataTableName + "'";
+        final String createPermissionChecker = "'CREATE_" + dataTableName + "_CHECKER'";
+        final String readPermission = "'READ_" + dataTableName + "'";
+        final String updatePermission = "'UPDATE_" + dataTableName + "'";
+        final String updatePermissionChecker = "'UPDATE_" + dataTableName + "_CHECKER'";
+        final String deletePermission = "'DELETE_" + dataTableName + "'";
+        final String deletePermissionChecker = "'DELETE_" + dataTableName + "_CHECKER'";
 
-            this.jdbcTemplate.update(registerDatatableSql);
+        final String permissionsSql = "insert into m_permission (grouping, code, action_name, entity_name, can_maker_checker) values "
+                + "('datatable', "
+                + createPermission
+                + ", 'CREATE', '"
+                + dataTableName
+                + "', true),"
+                + "('datatable', "
+                + createPermissionChecker
+                + ", 'CREATE', '"
+                + dataTableName
+                + "', false),"
+                + "('datatable', "
+                + readPermission
+                + ", 'READ', '"
+                + dataTableName
+                + "', false),"
+                + "('datatable', "
+                + updatePermission
+                + ", 'UPDATE', '"
+                + dataTableName
+                + "', true),"
+                + "('datatable', "
+                + updatePermissionChecker
+                + ", 'UPDATE', '"
+                + dataTableName
+                + "', false),"
+                + "('datatable', "
+                + deletePermission
+                + ", 'DELETE', '"
+                + dataTableName
+                + "', true),"
+                + "('datatable', "
+                + deletePermissionChecker
+                + ", 'DELETE', '"
+                + dataTableName + "', false)";
+
+        
+        
+        try {
+            String[] sqlArray = {registerDatatableSql, permissionsSql};
+            this.jdbcTemplate.batchUpdate(sqlArray);
+            
         } catch (DataIntegrityViolationException dve) {
             Throwable realCause = dve.getMostSpecificCause();
+            //even if duplicate is only due to permission duplicate, okay to show duplicate datatable error msg
             if (realCause.getMessage().contains("Duplicate entry")) { throw new PlatformDataIntegrityException(
                     "error.msg.datatable.registered", "Datatable `" + dataTableName
                             + "` is already registered against an application table.", "dataTableName", dataTableName); }
@@ -126,79 +174,22 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
                     "Unknown data integrity issue with resource.");
         }
 
-        try {
-            final String createPermission = "'CREATE_" + dataTableName + "'";
-            final String createPermissionChecker = "'CREATE_" + dataTableName + "_CHECKER'";
-            final String readPermission = "'READ_" + dataTableName + "'";
-            final String updatePermission = "'UPDATE_" + dataTableName + "'";
-            final String updatePermissionChecker = "'UPDATE_" + dataTableName + "_CHECKER'";
-            final String deletePermission = "'DELETE_" + dataTableName + "'";
-            final String deletePermissionChecker = "'DELETE_" + dataTableName + "_CHECKER'";
-
-            final String permissionsSql = "insert into m_permission (grouping, code, action_name, entity_name, can_maker_checker) values "
-                    + "('datatable', "
-                    + createPermission
-                    + ", 'CREATE', '"
-                    + dataTableName
-                    + "', true),"
-                    + "('datatable', "
-                    + createPermissionChecker
-                    + ", 'CREATE', '"
-                    + dataTableName
-                    + "', false),"
-                    + "('datatable', "
-                    + readPermission
-                    + ", 'READ', '"
-                    + dataTableName
-                    + "', false),"
-                    + "('datatable', "
-                    + updatePermission
-                    + ", 'UPDATE', '"
-                    + dataTableName
-                    + "', true),"
-                    + "('datatable', "
-                    + updatePermissionChecker
-                    + ", 'UPDATE', '"
-                    + dataTableName
-                    + "', false),"
-                    + "('datatable', "
-                    + deletePermission
-                    + ", 'DELETE', '"
-                    + dataTableName
-                    + "', true),"
-                    + "('datatable', "
-                    + deletePermissionChecker
-                    + ", 'DELETE', '"
-                    + dataTableName + "', false)";
-
-            this.jdbcTemplate.update(permissionsSql);
-        } catch (DataIntegrityViolationException dve) {
-            Throwable realCause = dve.getMostSpecificCause();
-            if (realCause.getMessage().contains("Duplicate entry")) { throw new PlatformDataIntegrityException(
-                    "error.msg.permissions.datatable.duplicate", "Permissions for datatable `" + dataTableName + "` already exist.",
-                    "dataTableName", dataTableName); }
-
-            logAsErrorUnexpectedDataIntegrityException(dve);
-            throw new PlatformDataIntegrityException("error.msg.unknown.data.integrity.issue",
-                    "Unknown data integrity issue with resource.");
-        }
     }
 
     @Override
     public void deregisterDatatable(final String datatable) {
-        // TODO - JW - put in batch command later
         final String permissionList = "('CREATE_" + datatable + "', 'CREATE_" + datatable + "_CHECKER', 'READ_" + datatable + "', 'UPDATE_"
                 + datatable + "', 'UPDATE_" + datatable + "_CHECKER', 'DELETE_" + datatable + "', 'DELETE_" + datatable + "_CHECKER')";
 
         final String deleteRolePermissionsSql = "delete from m_role_permission where m_role_permission.permission_id in (select id from m_permission where code in "
                 + permissionList + ")";
-        this.jdbcTemplate.update(deleteRolePermissionsSql);
 
         final String deletePermissionsSql = "delete from m_permission where code in " + permissionList;
-        this.jdbcTemplate.update(deletePermissionsSql);
 
-        final String deleteRegisteredDatatableSql = "delete from x_registered_table where registered_table_name = '" + datatable + "'";
-        this.jdbcTemplate.update(deleteRegisteredDatatableSql);
+        final String deleteRegisteredDatatableSql = "delete from x_registered_table where registered_table_name = '" + datatable + "'";        
+
+        String[] sqlArray = {deleteRolePermissionsSql, deletePermissionsSql, deleteRegisteredDatatableSql};
+        this.jdbcTemplate.batchUpdate(sqlArray);
     }
 
     @Override
