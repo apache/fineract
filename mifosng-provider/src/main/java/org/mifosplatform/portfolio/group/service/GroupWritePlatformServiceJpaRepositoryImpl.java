@@ -255,7 +255,7 @@ public class GroupWritePlatformServiceJpaRepositoryImpl implements GroupWritePla
                     
                     groupForUpdate.setParent(newParentGroup);
                     
-                    // Parent has changed, re-generate as parent is changed   
+                    // Parent has changed, re-generate 'Hierarchy' as parent is changed   
                     groupForUpdate.generateHierarchy();
                     
                 }
