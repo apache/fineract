@@ -80,6 +80,13 @@ public final class GroupCommandFromApiJsonDeserializer extends AbstractFromApiJs
         final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
 
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("group");
+        
+        /*
+         * Name is a mandatory field and not exceeding length 100 character 
+         */
+        final String nameParameterName = "name";
+        final String name = this.fromApiJsonHelper.extractStringNamed(nameParameterName, element);
+        baseDataValidator.reset().parameter(nameParameterName).value(name).notNull().notExceedingLengthOf(100);
 
         final String externalIdParameterName = "externalId";
         if (this.fromApiJsonHelper.parameterExists(externalIdParameterName, element)) {
@@ -87,22 +94,24 @@ public final class GroupCommandFromApiJsonDeserializer extends AbstractFromApiJs
             baseDataValidator.reset().parameter(externalIdParameterName).value(externalId).ignoreIfNull().notExceedingLengthOf(100);
         }
 
-        final String officeIdParameterName = "officeId";
-        if (this.fromApiJsonHelper.parameterExists(officeIdParameterName, element)) {
-            final Long officeId = this.fromApiJsonHelper.extractLongNamed(officeIdParameterName, element);
-            baseDataValidator.reset().parameter(officeIdParameterName).value(officeId).notNull().integerGreaterThanZero();
-        }
+        /*
+         * Either OfficeId or ParentId is mandatory to have value
+         */
 
         final String parentIdParameterName = "parentId";
         if (this.fromApiJsonHelper.parameterExists(parentIdParameterName, element)) {
             final Long parentId = this.fromApiJsonHelper.extractLongNamed(parentIdParameterName, element);
             baseDataValidator.reset().parameter(parentIdParameterName).value(parentId).notNull().integerGreaterThanZero();
+        }else{
+            final String officeIdParameterName = "officeId";
+            final Long officeId = this.fromApiJsonHelper.extractLongNamed(officeIdParameterName, element);
+            baseDataValidator.reset().parameter(officeIdParameterName).value(officeId).notNull().integerGreaterThanZero();
         }
 
         final String staffIdParameterName = "staffId";
         if (this.fromApiJsonHelper.parameterExists(staffIdParameterName, element)) {
             final Long staffId = this.fromApiJsonHelper.extractLongNamed(staffIdParameterName, element);
-            baseDataValidator.reset().parameter(staffIdParameterName).value(staffId).notNull().integerGreaterThanZero();
+            baseDataValidator.reset().parameter(staffIdParameterName).value(staffId).ignoreIfNull().integerGreaterThanZero();
         }
 
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
@@ -137,13 +146,13 @@ public final class GroupCommandFromApiJsonDeserializer extends AbstractFromApiJs
         final String parentIdParameterName = "parentId";
         if (this.fromApiJsonHelper.parameterExists(parentIdParameterName, element)) {
             final Long parentId = this.fromApiJsonHelper.extractLongNamed(parentIdParameterName, element);
-            baseDataValidator.reset().parameter(parentIdParameterName).value(parentId).notNull().integerGreaterThanZero();
+            baseDataValidator.reset().parameter(parentIdParameterName).value(parentId).ignoreIfNull().integerGreaterThanZero();
         }
 
         final String staffIdParameterName = "staffId";
         if (this.fromApiJsonHelper.parameterExists(staffIdParameterName, element)) {
             final Long staffId = this.fromApiJsonHelper.extractLongNamed(staffIdParameterName, element);
-            baseDataValidator.reset().parameter(staffIdParameterName).value(staffId).notNull().integerGreaterThanZero();
+            baseDataValidator.reset().parameter(staffIdParameterName).value(staffId).ignoreIfNull().integerGreaterThanZero();
         }
 
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
@@ -155,9 +164,6 @@ public final class GroupCommandFromApiJsonDeserializer extends AbstractFromApiJs
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
 
-        /*
-         * Office updated is not supported
-         */
         final Set<String> supportedParametersUnassignStaff = new HashSet<String>(Arrays.asList("staffId"));
 
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, supportedParametersUnassignStaff);
@@ -168,10 +174,8 @@ public final class GroupCommandFromApiJsonDeserializer extends AbstractFromApiJs
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("group");
 
         final String staffIdParameterName = "staffId";
-        if (this.fromApiJsonHelper.parameterExists(staffIdParameterName, element)) {
-            final Long staffId = this.fromApiJsonHelper.extractLongNamed(staffIdParameterName, element);
-            baseDataValidator.reset().parameter(staffIdParameterName).value(staffId).notNull().integerGreaterThanZero();
-        }
+        final Long staffId = this.fromApiJsonHelper.extractLongNamed(staffIdParameterName, element);
+        baseDataValidator.reset().parameter(staffIdParameterName).value(staffId).notNull().integerGreaterThanZero();
 
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
                 "Validation errors exist.", dataValidationErrors); }

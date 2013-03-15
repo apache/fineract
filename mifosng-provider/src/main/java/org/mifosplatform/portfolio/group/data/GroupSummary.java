@@ -9,14 +9,14 @@ import java.util.Collection;
 
 import org.mifosplatform.organisation.monetary.data.MoneyData;
 
-public class GroupSummaryData {
+public class GroupSummary {
 
     private final Long totalActiveClients;
     private final Long totalChildGroups;
     private final Collection<MoneyData> totalLoanPortfolio;
     private final Collection<MoneyData> totalSavings;
 
-    public GroupSummaryData(final Long totalActiveClients, final Long totalChildGroups, final Collection<MoneyData> totalLoanPortfolio,
+    public GroupSummary(final Long totalActiveClients, final Long totalChildGroups, final Collection<MoneyData> totalLoanPortfolio,
             final Collection<MoneyData> totalSavings) {
         this.totalActiveClients = totalActiveClients;
         this.totalChildGroups = totalChildGroups;

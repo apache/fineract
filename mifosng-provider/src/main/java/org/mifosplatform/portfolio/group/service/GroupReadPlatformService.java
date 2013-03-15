@@ -14,7 +14,7 @@ import org.mifosplatform.portfolio.group.data.GroupAccountSummaryCollectionData;
 import org.mifosplatform.portfolio.group.data.GroupAccountSummaryData;
 import org.mifosplatform.portfolio.group.data.GroupData;
 import org.mifosplatform.portfolio.group.data.GroupLevelData;
-import org.mifosplatform.portfolio.group.data.GroupLookupData;
+import org.mifosplatform.portfolio.group.data.GroupLookup;
 
 public interface GroupReadPlatformService {
 
@@ -30,7 +30,7 @@ public interface GroupReadPlatformService {
 
     Collection<GroupAccountSummaryData> retrieveGroupLoanAccountsByLoanOfficerId(Long groupId, Long loanOfficerId);
 
-    Collection<GroupLookupData> retrieveAllGroupsbyOfficeIdAndLevelId(Long officeId, Long levelId);
+    Collection<GroupLookup> retrieveAllGroupsbyOfficeIdAndLevelId(Long officeId, Long levelId);
 
     GroupLevelData retrieveGroupLevelDetails(Long levelId);
 
@@ -38,7 +38,7 @@ public interface GroupReadPlatformService {
 
     GroupData retrieveGroupDetails(Long groupId, boolean template);
 
-    Collection<GroupLookupData> retrieveChildGroupsbyGroupId(Long groupId);
+    Collection<GroupLookup> retrieveChildGroupsbyGroupId(Long groupId);
 
     Long retrieveTotalNoOfChildGroups(Long groupId);
 
@@ -49,4 +49,6 @@ public interface GroupReadPlatformService {
     GroupData retrieveNewChildGroupDetails(Long officeId, Long levelId, Long parentGroupId);
 
     StaffData retrieveStaffsbyId(Long staffId);
+    
+    Long getLevelIdByGroupId(final Long groupId);
 }

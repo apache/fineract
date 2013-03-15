@@ -23,12 +23,11 @@ public class GroupData {
     private final String officeName;
     private final Long staffId;
     private final String staffName;
-    private final Long groupLevel;
     private final Long parentId;
     private final String parentName;
     private final String hierarchy;
     @SuppressWarnings("unused")
-    private final GroupSummaryData groupSummaryData;
+    private final GroupSummary groupSummaryData;
     @SuppressWarnings("unused")
     private final GroupLevelData groupLevelData;
     private final Collection<ClientLookup> clientMembers;
@@ -37,21 +36,19 @@ public class GroupData {
     @SuppressWarnings("unused")
     private final Collection<OfficeData> allowedOffices;
     @SuppressWarnings("unused")
-    private final Collection<GroupLookupData> allowedParentGroups;
+    private final Collection<GroupLookup> allowedParentGroups;
     @SuppressWarnings("unused")
     private final Collection<StaffData> allowedStaffs;
     @SuppressWarnings("unused")
-    private final Collection<GroupLookupData> childGroups;
+    private final Collection<GroupLookup> childGroups;
 
     public GroupData(final Long id, final Long officeId, final String officeName, final String name, final String externalId,
-            final Long groupLevel, final Long parentId, final String parentName, final Long staffId, final String staffName,
-            final String hierarchy) {
+            final Long parentId, final String parentName, final Long staffId, final String staffName, final String hierarchy) {
         this.id = id;
         this.officeId = officeId;
         this.officeName = officeName;
         this.name = name;
         this.externalId = externalId;
-        this.groupLevel = groupLevel;
         this.parentId = parentId;
         this.parentName = parentName;
         this.staffId = staffId;
@@ -68,15 +65,14 @@ public class GroupData {
     }
 
     public GroupData(final GroupData group, final Collection<ClientLookup> clientMembers, final Collection<ClientLookup> allowedClients,
-            final Collection<OfficeData> allowedOffices, final Collection<GroupLookupData> allowedParentGroups,
-            final GroupLevelData groupLevelData, final Collection<StaffData> allowedStaffs, final Collection<GroupLookupData> childGroups,
-            final GroupSummaryData groupSummaryData) {
+            final Collection<OfficeData> allowedOffices, final Collection<GroupLookup> allowedParentGroups,
+            final GroupLevelData groupLevelData, final Collection<StaffData> allowedStaffs, final Collection<GroupLookup> childGroups,
+            final GroupSummary groupSummaryData) {
         this.id = group.getId();
         this.officeId = group.getOfficeId();
         this.officeName = group.getOfficeName();
         this.name = group.getName();
         this.externalId = group.getExternalId();
-        this.groupLevel = group.getGroupLevel();
         this.parentId = group.getParentId();
         this.parentName = group.getParentName();
         this.staffId = group.getStaffId();
@@ -94,7 +90,7 @@ public class GroupData {
     }
 
     public GroupData(final Long officeId, final Collection<ClientLookup> allowedClients, final Collection<OfficeData> allowedOffices,
-            final Collection<GroupLookupData> allowedParentGroups, final GroupLevelData groupLevelData,
+            final Collection<GroupLookup> allowedParentGroups, final GroupLevelData groupLevelData,
             final Collection<StaffData> allowedStaffs) {
         this.id = null;
         this.officeId = officeId;
@@ -102,7 +98,6 @@ public class GroupData {
         this.name = null;
         this.externalId = null;
         this.clientMembers = null;
-        this.groupLevel = null;
         this.parentId = null;
         this.parentName = null;
         this.staffId = null;
@@ -135,10 +130,6 @@ public class GroupData {
 
     public String getOfficeName() {
         return this.officeName;
-    }
-
-    public Long getGroupLevel() {
-        return this.groupLevel;
     }
 
     public Long getParentId() {

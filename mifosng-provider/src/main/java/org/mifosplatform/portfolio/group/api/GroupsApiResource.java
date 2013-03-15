@@ -45,9 +45,13 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class GroupsApiResource {
 
-    private static final Set<String> GROUP_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "officeId", "name", "externalId",
-            "clientMembers", "allowedClients", "allowedOffices", "allowedParentGroups", "groupLevel", "allowedStaffs", "childGroups"));
-
+    /*
+     * GROUP_DATA_PARAMETERS is used by ToApiJsonSerializer<E>, make sure E's properties and E_PARAMETERS are in same 
+     */
+    private static final Set<String> GROUP_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "name", "externalId", "officeId",
+            "officeName", "staffId", "staffName", "parentId", "parentName", "hierarchy", "groupSummaryData", "groupLevelData",
+            "clientMembers", "allowedClients", "allowedOffices", "allowedParentGroups", "allowedStaffs", "childGroups"));
+    
     private final PlatformSecurityContext context;
     private final GroupReadPlatformService groupReadPlatformService;
     private final ToApiJsonSerializer<GroupData> toApiJsonSerializer;
