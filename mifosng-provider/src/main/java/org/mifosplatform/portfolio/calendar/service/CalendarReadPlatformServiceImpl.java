@@ -60,7 +60,8 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
             final boolean repeating = rs.getBoolean("repeating");
             final String recurrence = rs.getString("recurrence");
             final Integer remindById = rs.getInt("remindById");
-            final EnumOptionData remindBy = CalendarEnumerations.calendarRemindBy(remindById);
+            EnumOptionData remindBy = null;
+            if(remindById != null) remindBy = CalendarEnumerations.calendarRemindBy(remindById);
             final Integer firstReminder = rs.getInt("firstReminder");
             final Integer secondReminder = rs.getInt("secondReminder");
 

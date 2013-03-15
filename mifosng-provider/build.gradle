@@ -155,6 +155,7 @@ dependencies {
 	            
 	            [group: 'com.lowagie', name: 'itext', version: '2.1.7'],
 	            [group: 'com.lowagie', name: 'itext-rtf', version: '2.1.7'],
+				[group: 'org.mnode.ical4j', name: 'ical4j', version: '1.0.4'],
  	        )
  	        
  	 testCompile 'junit:junit:4.10', 

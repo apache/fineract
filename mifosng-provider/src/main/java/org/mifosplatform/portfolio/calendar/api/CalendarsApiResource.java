@@ -82,9 +82,12 @@ public class CalendarsApiResource {
 
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
         final Integer entityTypeId = CalendarEntityType.valueOf(entityType.toUpperCase()).getValue();
-        final CalendarData calendar = this.readPlatformService.retrieveCalendar(calendarId, entityId, entityTypeId);
+        CalendarData calendar = this.readPlatformService.retrieveCalendar(calendarId, entityId, entityTypeId);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        if(settings.isTemplate()){
+        	calendar = handleTemplate(calendar);
+        }
         return this.toApiJsonSerializer.serialize(settings, calendar, this.RESPONSE_DATA_PARAMETERS);
     }
 

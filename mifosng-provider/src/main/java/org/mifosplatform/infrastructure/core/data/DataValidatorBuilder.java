@@ -6,7 +6,11 @@
 package org.mifosplatform.infrastructure.core.data;
 
 import java.math.BigDecimal;
+import java.text.ParseException;
 import java.util.List;
+
+import net.fortuna.ical4j.model.ValidationException;
+import net.fortuna.ical4j.model.property.RRule;
 
 import org.apache.commons.lang.StringUtils;
 import org.springframework.util.ObjectUtils;
@@ -359,5 +363,23 @@ public class DataValidatorBuilder {
                 return this;
             }
         return this;
+    }
+
+    public DataValidatorBuilder isValidateRecurringRule(final String recurringRule){
+    	if(StringUtils.isNotBlank(recurringRule)){
+    		try {
+				RRule rRule = new RRule(recurringRule);
+				rRule.validate();
+			} catch (ValidationException e) {
+				ApiParameterError error = ApiParameterError.parameterError("validation.msg.invalid.recurring.rule", "The Recurring Rule value: " + recurringRule + " is not valid.", parameter, recurringRule );
+				dataValidationErrors.add(error);
+                return this;
+			} catch (ParseException e) {
+				ApiParameterError error = ApiParameterError.parameterError("validation.msg.invalid.recurring.rule", "The Recurring Rule value: " + recurringRule + " is not valid.", parameter, recurringRule );
+				dataValidationErrors.add(error);
+                return this;
+			}
+    	}
+    	return this;
     }
 }
