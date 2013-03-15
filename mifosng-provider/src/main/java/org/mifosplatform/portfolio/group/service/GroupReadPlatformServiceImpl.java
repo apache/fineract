@@ -34,6 +34,7 @@ import org.mifosplatform.portfolio.group.domain.Group;
 import org.mifosplatform.portfolio.group.domain.GroupRepository;
 import org.mifosplatform.portfolio.group.exception.GroupLevelNotFoundException;
 import org.mifosplatform.portfolio.group.exception.GroupNotFoundException;
+import org.mifosplatform.useradministration.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -64,16 +65,20 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
     public Collection<GroupData> retrieveAllGroups(final String extraCriteria) {
 
         this.context.authenticatedUser();
+        
+        AppUser currentUser = context.authenticatedUser();
+        String hierarchy = currentUser.getOffice().getHierarchy();
+        String hierarchySearchString = hierarchy + "%";
 
         final GroupDataMapper rm = new GroupDataMapper();
 
-        String sql = "select " + rm.groupSchema() + " where g.is_deleted=0";
-
+        String sql = "select " + rm.groupSchema() + " where o.hierarchy like ? and g.is_deleted=0 ";
+        
         if (StringUtils.isNotBlank(extraCriteria)) {
             sql += " and (" + extraCriteria + ")";
         }
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] {});
+        return this.jdbcTemplate.query(sql, rm, new Object[] {hierarchySearchString});
     }
 
     @Override
@@ -334,8 +339,8 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
         public String groupSchema() {
             return "g.office_id as officeId, g.parent_id as parentId , o.name as officeName,"
                     + " g.id as id, g.external_id as externalId, g.name as name , s.display_name as staffName , pg.name as"
-                    + " parentName , g.staff_id as staffId , g.hierarchy as hierarchy from m_group g join m_office o on o.id = g.office_id left join "
-                    + "m_staff s on s.id = g.staff_id left join m_group pg on pg.id = g.parent_id";
+                    + " parentName , g.staff_id as staffId , g.hierarchy as hierarchy from m_group g join m_office o on o.id = g.office_id left join"
+                    + " m_staff s on s.id = g.staff_id left join m_group pg on pg.id = g.parent_id";
         }
 
         @Override
@@ -346,7 +351,7 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
             final String externalId = rs.getString("externalId");
             final Long officeId = rs.getLong("officeId");
             final String officeName = rs.getString("officeName");
-            final Long parentId = rs.getLong("parentId");
+            final Long parentId = JdbcSupport.getLong(rs, "parentId");
             final String parentName = rs.getString("parentName");
             final Long staffId = JdbcSupport.getLong(rs, "staffId");
             final String staffName = rs.getString("staffName");

@@ -9,6 +9,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 
+import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
 import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.portfolio.group.data.GroupLevelData;
@@ -54,9 +55,9 @@ public class GroupLevelReadPlatformServiceImpl implements GroupLevelReadPlatform
 
             final Long levelId = rs.getLong("id");
             final String levelName = rs.getString("levelName");
-            final Long parentLevelId = rs.getLong("parentLevelId");
+            final Long parentLevelId = JdbcSupport.getLong(rs, "parentLevelId");
             final String parentLevelName = rs.getString("parentName");
-            final Long childLevelId = rs.getLong("childLevelId");
+            final Long childLevelId = JdbcSupport.getLong(rs, "childLevelId");
             final String childLevelName = rs.getString("childLevelName");
             final boolean superParent = rs.getBoolean("superParent");
             final boolean recursable = rs.getBoolean("recursable");

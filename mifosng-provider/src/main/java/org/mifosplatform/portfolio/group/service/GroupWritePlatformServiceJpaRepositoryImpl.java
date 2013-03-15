@@ -73,6 +73,8 @@ public class GroupWritePlatformServiceJpaRepositoryImpl implements GroupWritePla
     @Transactional
     @Override
     public CommandProcessingResult createGroup(final JsonCommand command) {
+        
+        GroupLevel groupLevel = null;
         try {
             this.context.authenticatedUser();
 
@@ -84,7 +86,7 @@ public class GroupWritePlatformServiceJpaRepositoryImpl implements GroupWritePla
             final Long parentId = command.longValueOfParameterNamed("parentId");
 
             Long officeId = null;
-            GroupLevel groupLevel = null;
+
             Group parentGroup = null;
 
             if (parentId == null) {
@@ -152,7 +154,7 @@ public class GroupWritePlatformServiceJpaRepositoryImpl implements GroupWritePla
                     .build();
 
         } catch (final DataIntegrityViolationException dve) {
-            handleGroupDataIntegrityIssues(command, dve);
+            handleGroupDataIntegrityIssues(command, dve , groupLevel );
             return new CommandProcessingResult(Long.valueOf(-1));
         }
     }
@@ -161,6 +163,8 @@ public class GroupWritePlatformServiceJpaRepositoryImpl implements GroupWritePla
     @Override
     public CommandProcessingResult updateGroup(final Long grouptId, final JsonCommand command) {
 
+        GroupLevel groupLevel = null;
+        
         try {
             this.context.authenticatedUser();
 
@@ -197,12 +201,16 @@ public class GroupWritePlatformServiceJpaRepositoryImpl implements GroupWritePla
             if (command.isChangeInLongParameterNamed(staffIdParamName, presentStaffId)) {
                 final Long newValue = command.longValueOfParameterNamed(staffIdParamName);
                 actualChanges.put(staffIdParamName, newValue);
-                final Staff newStaff = this.staffRepository.findByOffice(newValue, officeId);
-                if (newStaff == null) { throw new StaffNotFoundException(newValue); }
+                
+                Staff newStaff = null;
+                if(newValue != null){
+                    newStaff = this.staffRepository.findByOffice(newValue, officeId);
+                    if (newStaff == null) { throw new StaffNotFoundException(newValue); }
+                }
                 groupForUpdate.setStaff(newStaff);
             }
 
-            final GroupLevel groupLevel = this.groupLevelRepository.findOne(groupForUpdate.getGroupLevel().getId());
+            groupLevel = this.groupLevelRepository.findOne(groupForUpdate.getGroupLevel().getId());
 
             /*
              * Ignoring parentId param, if group for update is super parent.
@@ -216,27 +224,28 @@ public class GroupWritePlatformServiceJpaRepositoryImpl implements GroupWritePla
 
                     final Long newValue = command.longValueOfParameterNamed(parentIdParamName);
                     actualChanges.put(parentIdParamName, newValue);
-                    final Group newParentGroup = this.groupRepository.findOne(newValue);
+                    Group newParentGroup = null;
+                    if (newValue != null) {
+                        newParentGroup = this.groupRepository.findOne(newValue);
+                        if (newParentGroup == null || newParentGroup.isDeleted()) { throw new StaffNotFoundException(newValue); }
 
-                    if (newParentGroup == null || newParentGroup.isDeleted()) { throw new StaffNotFoundException(newValue); }
+                        if (!newParentGroup.isOfficeIdentifiedBy(officeId)) {
+                            final String errorMessage = "Group and parent group must have the same office";
+                            throw new InvalidOfficeException("group", "attach.to.parent.group", errorMessage);
+                        }
+                        /*
+                         * If Group is not super parent then validate group
+                         * level's parent level is same as group parent's level
+                         * this check makes sure new group is added at immediate
+                         * next level in hierarchy
+                         */
 
-                    if (!newParentGroup.isOfficeIdentifiedBy(officeId)) {
-                        final String errorMessage = "Group and parent group must have the same office";
-                        throw new InvalidOfficeException("group", "attach.to.parent.group", errorMessage);
+                        if (!groupForUpdate.getGroupLevel().isIdentifiedByParentId(newParentGroup.getGroupLevel().getId())) {
+                            final String errorMessage = "Parent group's level is  not equal to child level's parent level ";
+                            throw new InvalidGroupLevelException("add", "invalid.level", errorMessage);
+                        }
                     }
-
-                    /*
-                     * If Group is not super parent then validate group level's
-                     * parent level is same as group parent's level this check
-                     * makes sure new group is added at immediate next level in
-                     * hierarchy
-                     */
-
-                    if (!groupForUpdate.getGroupLevel().isIdentifiedByParentId(newParentGroup.getGroupLevel().getId())) {
-                        final String errorMessage = "Parent group's level is  not equal to child level's parent level ";
-                        throw new InvalidGroupLevelException("add", "invalid.level", errorMessage);
-                    }
-
+                    
                     groupForUpdate.setParent(newParentGroup);
                 }
             }
@@ -262,7 +271,7 @@ public class GroupWritePlatformServiceJpaRepositoryImpl implements GroupWritePla
                     .build();
 
         } catch (final DataIntegrityViolationException dve) {
-            handleGroupDataIntegrityIssues(command, dve);
+            handleGroupDataIntegrityIssues(command, dve , groupLevel);
             return new CommandProcessingResult(Long.valueOf(-1));
         }
     }
@@ -378,14 +387,27 @@ public class GroupWritePlatformServiceJpaRepositoryImpl implements GroupWritePla
      * Guaranteed to throw an exception no matter what the data integrity issue
      * is.
      */
-    private void handleGroupDataIntegrityIssues(final JsonCommand command, final DataIntegrityViolationException dve) {
+    private void handleGroupDataIntegrityIssues(final JsonCommand command, final DataIntegrityViolationException dve, GroupLevel groupLevel) {
 
         final Throwable realCause = dve.getMostSpecificCause();
+        String errorMessageForUser = null;
+        String errorMessageForMachine = null;
+
         if (realCause.getMessage().contains("external_id")) {
-            throw new PlatformDataIntegrityException("error.msg.group.duplicate.externalId", "Group with externalId {0} already exists",
-                    "externalId", command.stringValueOfParameterNamed("externalId"));
-        } else if (realCause.getMessage().contains("name")) { throw new PlatformDataIntegrityException("error.msg.group.duplicate.name",
-                "Group with name {0} already exists", "name", command.stringValueOfParameterNamed("name")); }
+
+            errorMessageForUser = groupLevel.getLevelName() + " with externalId {0} already exists";
+            errorMessageForMachine = "error.msg." + groupLevel.getLevelName().toLowerCase() + ".duplicate.externalId";
+            throw new PlatformDataIntegrityException(errorMessageForMachine, errorMessageForUser, "externalId",
+                    command.stringValueOfParameterNamed("externalId"));
+
+        } else if (realCause.getMessage().contains("name")) {
+
+            errorMessageForUser = groupLevel.getLevelName() + " with name {0} already exists";
+            errorMessageForMachine = "error.msg." + groupLevel.getLevelName().toLowerCase() + ".duplicate.name";
+            throw new PlatformDataIntegrityException(errorMessageForMachine, errorMessageForUser, "name",
+                    command.stringValueOfParameterNamed("name"));
+
+        }
 
         logger.error(dve.getMessage(), dve);
         throw new PlatformDataIntegrityException("error.msg.group.unknown.data.integrity.issue",
