@@ -218,8 +218,15 @@ public class GroupWritePlatformServiceJpaRepositoryImpl implements GroupWritePla
              * param
              */
             if (!groupLevel.isSuperParent()) {
+
                 final String parentIdParamName = "parentId";
-                final Long parentId = groupForUpdate.getParent().getId();
+                Long parentId = null;
+                final Group presentParentGroup = groupForUpdate.getParent();
+
+                if (presentParentGroup != null) {
+                    parentId = presentParentGroup.getId();
+                }
+
                 if (command.isChangeInLongParameterNamed(parentIdParamName, parentId)) {
 
                     final Long newValue = command.longValueOfParameterNamed(parentIdParamName);
@@ -247,6 +254,10 @@ public class GroupWritePlatformServiceJpaRepositoryImpl implements GroupWritePla
                     }
                     
                     groupForUpdate.setParent(newParentGroup);
+                    
+                    // Parent has changed, re-generate as parent is changed   
+                    groupForUpdate.generateHierarchy();
+                    
                 }
             }
 
