@@ -88,7 +88,7 @@ public class ClientIdentifiersApiResource {
     @Path("template")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String newClientDetails(@Context final UriInfo uriInfo) {
+    public String newClientIdentifierDetails(@Context final UriInfo uriInfo) {
 
         context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
 
