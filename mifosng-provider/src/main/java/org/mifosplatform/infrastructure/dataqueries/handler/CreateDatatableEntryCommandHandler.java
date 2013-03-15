@@ -12,6 +12,7 @@ import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder
 import org.mifosplatform.infrastructure.dataqueries.service.ReadWriteNonCoreDataService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class CreateDatatableEntryCommandHandler implements NewCommandSourceHandler {
@@ -23,6 +24,7 @@ public class CreateDatatableEntryCommandHandler implements NewCommandSourceHandl
         this.writePlatformService = writePlatformService;
     }
 
+    @Transactional
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
 
