@@ -314,7 +314,6 @@ public class ReadReportingServiceImpl implements ReadReportingService {
 
         try {
 
-            logger.info("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
             ReportParameterValues rptParamValues = report.getParameterValues();
             ReportParameterDefinition paramsDefinition = report.getParameterDefinition();
 
@@ -346,17 +345,17 @@ public class ReadReportingServiceImpl implements ReadReportingService {
                         rptParamValues.put(paramName, pValue);
                 }
 
-                // tenant database name and current user's office hierarchy
-                // passed as parameters to allow multitenant penaho reporting
-                // and
-                // data scoping
-                String tenantdb = dataSource.getConnection().getCatalog();
-                String userhierarchy = currentUser.getOffice().getHierarchy();
-                logger.info("db name:" + tenantdb + "      userhierarchy:" + userhierarchy);
-                rptParamValues.put("tenantdb", tenantdb);
-                rptParamValues.put("userhierarchy", userhierarchy);
             }
 
+            // tenant database name and current user's office hierarchy
+            // passed as parameters to allow multitenant penaho reporting
+            // and
+            // data scoping
+            String tenantdb = dataSource.getConnection().getCatalog();
+            String userhierarchy = currentUser.getOffice().getHierarchy();
+            logger.info("db name:" + tenantdb + "      userhierarchy:" + userhierarchy);
+            rptParamValues.put("tenantdb", tenantdb);
+            rptParamValues.put("userhierarchy", userhierarchy);
         } catch (Exception e) {
             logger.error("error.msg.reporting.error:" + e.getMessage());
             throw new PlatformDataIntegrityException("error.msg.reporting.error", e.getMessage());
