@@ -37,114 +37,133 @@ import com.sun.jersey.core.header.FormDataContentDisposition;
 import com.sun.jersey.multipart.FormDataBodyPart;
 import com.sun.jersey.multipart.FormDataParam;
 
-// FIXME - KW - image should be images to keep consistent with rest of API - even if we only support one image per client.
-@Path("/clients/{clientId}/image")
+@Path("/clients/{clientId}/images")
 @Component
 @Scope("singleton")
 public class ClientImagesApiResource {
 
-    private final PlatformSecurityContext context;
-    private final ClientReadPlatformService clientReadPlatformService;
-    private final ClientWritePlatformService clientWritePlatformService;
-    private final DefaultToApiJsonSerializer<ClientData> toApiJsonSerializer;
+	private final PlatformSecurityContext context;
+	private final ClientReadPlatformService clientReadPlatformService;
+	private final ClientWritePlatformService clientWritePlatformService;
+	private final DefaultToApiJsonSerializer<ClientData> toApiJsonSerializer;
 
-    @Autowired
-    public ClientImagesApiResource(final PlatformSecurityContext context, final ClientReadPlatformService readPlatformService,
-            final ClientWritePlatformService clientWritePlatformService, final DefaultToApiJsonSerializer<ClientData> toApiJsonSerializer) {
-        this.context = context;
-        this.clientReadPlatformService = readPlatformService;
-        this.clientWritePlatformService = clientWritePlatformService;
-        this.toApiJsonSerializer = toApiJsonSerializer;
-    }
+	@Autowired
+	public ClientImagesApiResource(final PlatformSecurityContext context,
+			final ClientReadPlatformService readPlatformService,
+			final ClientWritePlatformService clientWritePlatformService,
+			final DefaultToApiJsonSerializer<ClientData> toApiJsonSerializer) {
+		this.context = context;
+		this.clientReadPlatformService = readPlatformService;
+		this.clientWritePlatformService = clientWritePlatformService;
+		this.toApiJsonSerializer = toApiJsonSerializer;
+	}
 
-    /**
-     * Upload images through multi-part form upload
-     */
-    @POST
-    @Consumes({ MediaType.MULTIPART_FORM_DATA })
-    @Produces({ MediaType.APPLICATION_JSON })
-    public String addNewClientImage(@PathParam("clientId") final Long clientId, @HeaderParam("Content-Length") final Long fileSize,
-            @FormDataParam("file") final InputStream inputStream, @FormDataParam("file") final FormDataContentDisposition fileDetails,
-            @FormDataParam("file") final FormDataBodyPart bodyPart) {
+	/**
+	 * Upload images through multi-part form upload
+	 */
+	@POST
+	@Consumes({ MediaType.MULTIPART_FORM_DATA })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public String addNewClientImage(
+			@PathParam("clientId") final Long clientId,
+			@HeaderParam("Content-Length") final Long fileSize,
+			@FormDataParam("file") final InputStream inputStream,
+			@FormDataParam("file") final FormDataContentDisposition fileDetails,
+			@FormDataParam("file") final FormDataBodyPart bodyPart) {
 
-        // TODO: vishwas might need more advances validation (like reading magic
-        // number) for handling malicious clients
-        // and clients not setting mime type
-        FileUtils.validateClientImageNotEmpty(fileDetails.getFileName());
-        FileUtils.validateImageMimeType(bodyPart.getMediaType().toString());
-        FileUtils.validateFileSizeWithinPermissibleRange(fileSize, fileDetails.getFileName(), ApiConstants.MAX_FILE_UPLOAD_SIZE_IN_MB);
+		// TODO: vishwas might need more advances validation (like reading magic
+		// number) for handling malicious clients
+		// and clients not setting mime type
+		FileUtils.validateClientImageNotEmpty(fileDetails.getFileName());
+		FileUtils.validateImageMimeType(bodyPart.getMediaType().toString());
+		FileUtils.validateFileSizeWithinPermissibleRange(fileSize,
+				fileDetails.getFileName(),
+				ApiConstants.MAX_FILE_UPLOAD_SIZE_IN_MB);
 
-        final CommandProcessingResult result = this.clientWritePlatformService.saveOrUpdateClientImage(clientId, fileDetails.getFileName(),
-                inputStream);
+		final CommandProcessingResult result = this.clientWritePlatformService
+				.saveOrUpdateClientImage(clientId, fileDetails.getFileName(),
+						inputStream);
 
-        return this.toApiJsonSerializer.serialize(result);
-    }
+		return this.toApiJsonSerializer.serialize(result);
+	}
 
-    /**
-     * Upload image as a Data URL (essentially a base64 encoded stream)
-     */
-    @POST
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    public String addNewClientImage(@PathParam("clientId") final Long clientId, final String jsonRequestBody) {
+	/**
+	 * Upload image as a Data URL (essentially a base64 encoded stream)
+	 */
+	@POST
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public String addNewClientImage(@PathParam("clientId") final Long clientId,
+			final String jsonRequestBody) {
 
-        final Base64EncodedImage base64EncodedImage = FileUtils.extractImageFromDataURL(jsonRequestBody);
+		final Base64EncodedImage base64EncodedImage = FileUtils
+				.extractImageFromDataURL(jsonRequestBody);
 
-        final CommandProcessingResult result = this.clientWritePlatformService.saveOrUpdateClientImage(clientId, base64EncodedImage);
+		final CommandProcessingResult result = this.clientWritePlatformService
+				.saveOrUpdateClientImage(clientId, base64EncodedImage);
 
-        return this.toApiJsonSerializer.serialize(result);
-    }
+		return this.toApiJsonSerializer.serialize(result);
+	}
 
-    /**
-     * Returns a base 64 encoded client image
-     */
-    @GET
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveClientImage(@PathParam("clientId") final Long clientId) {
+	/**
+	 * Returns a base 64 encoded client image
+	 */
+	@GET
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public String retrieveClientImage(@PathParam("clientId") final Long clientId) {
 
-        context.authenticatedUser().validateHasReadPermission("CLIENTIMAGE");
+		context.authenticatedUser().validateHasReadPermission("CLIENTIMAGE");
 
-        final ClientData clientData = this.clientReadPlatformService.retrieveIndividualClient(clientId);
+		final ClientData clientData = this.clientReadPlatformService
+				.retrieveIndividualClient(clientId);
 
-        if (clientData.imageKeyDoesNotExist()) { throw new ImageNotFoundException("clients", clientId); }
+		if (clientData.imageKeyDoesNotExist()) {
+			throw new ImageNotFoundException("clients", clientId);
+		}
 
-        return Base64.encodeFromFile(clientData.imageKey());
-    }
+		return Base64.encodeFromFile(clientData.imageKey());
+	}
 
-    /**
-     * This method is added only for consistency with other URL patterns and for
-     * maintaining consistency of usage of the HTTP "verb" at the client side
-     */
-    @PUT
-    @Consumes({ MediaType.MULTIPART_FORM_DATA })
-    @Produces({ MediaType.APPLICATION_JSON })
-    public String updateClientImage(@PathParam("clientId") final Long clientId, @HeaderParam("Content-Length") final Long fileSize,
-            @FormDataParam("file") final InputStream inputStream, @FormDataParam("file") final FormDataContentDisposition fileDetails,
-            @FormDataParam("file") final FormDataBodyPart bodyPart) {
+	/**
+	 * This method is added only for consistency with other URL patterns and for
+	 * maintaining consistency of usage of the HTTP "verb" at the client side
+	 */
+	@PUT
+	@Consumes({ MediaType.MULTIPART_FORM_DATA })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public String updateClientImage(
+			@PathParam("clientId") final Long clientId,
+			@HeaderParam("Content-Length") final Long fileSize,
+			@FormDataParam("file") final InputStream inputStream,
+			@FormDataParam("file") final FormDataContentDisposition fileDetails,
+			@FormDataParam("file") final FormDataBodyPart bodyPart) {
 
-        return addNewClientImage(clientId, fileSize, inputStream, fileDetails, bodyPart);
-    }
+		return addNewClientImage(clientId, fileSize, inputStream, fileDetails,
+				bodyPart);
+	}
 
-    @DELETE
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    public String deleteClientImage(@PathParam("clientId") final Long clientId) {
-        this.clientWritePlatformService.deleteClientImage(clientId);
+	@DELETE
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public String deleteClientImage(@PathParam("clientId") final Long clientId) {
+		this.clientWritePlatformService.deleteClientImage(clientId);
 
-        return this.toApiJsonSerializer.serialize(new CommandProcessingResult(clientId));
-    }
+		return this.toApiJsonSerializer.serialize(new CommandProcessingResult(
+				clientId));
+	}
 
-    /**
-     * This method is added only for consistency with other URL patterns and for
-     * maintaining consistency of usage of the HTTP "verb" at the client side
-     * 
-     * Upload image as a Data URL (essentially a base64 encoded stream)
-     */
-    @PUT
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    public String updateClientImage(@PathParam("clientId") final Long clientId, final String jsonRequestBody) {
-        return addNewClientImage(clientId, jsonRequestBody);
-    }
+	/**
+	 * This method is added only for consistency with other URL patterns and for
+	 * maintaining consistency of usage of the HTTP "verb" at the client side
+	 * 
+	 * Upload image as a Data URL (essentially a base64 encoded stream)
+	 */
+	@PUT
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public String updateClientImage(@PathParam("clientId") final Long clientId,
+			final String jsonRequestBody) {
+		return addNewClientImage(clientId, jsonRequestBody);
+	}
 }

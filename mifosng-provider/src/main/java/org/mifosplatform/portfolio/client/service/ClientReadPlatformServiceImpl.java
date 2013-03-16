@@ -21,9 +21,7 @@ import org.mifosplatform.organisation.office.service.OfficeReadPlatformService;
 import org.mifosplatform.portfolio.client.data.ClientAccountSummaryCollectionData;
 import org.mifosplatform.portfolio.client.data.ClientAccountSummaryData;
 import org.mifosplatform.portfolio.client.data.ClientData;
-import org.mifosplatform.portfolio.client.data.ClientIdentifierData;
 import org.mifosplatform.portfolio.client.data.ClientLookup;
-import org.mifosplatform.portfolio.client.exception.ClientIdentifierNotFoundException;
 import org.mifosplatform.portfolio.client.exception.ClientNotFoundException;
 import org.mifosplatform.portfolio.loanaccount.data.LoanStatusEnumData;
 import org.mifosplatform.portfolio.loanproduct.service.LoanEnumerations;
@@ -344,72 +342,6 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
             return new ClientAccountSummaryData(id, externalId, productId, productName, accountStatusId);
         }
-    }
-
-    @Override
-    public Collection<ClientIdentifierData> retrieveClientIdentifiers(final Long clientId) {
-
-        AppUser currentUser = context.authenticatedUser();
-        String hierarchy = currentUser.getOffice().getHierarchy();
-        String hierarchySearchString = hierarchy + "%";
-
-        ClientIdentityMapper rm = new ClientIdentityMapper();
-
-        String sql = "select " + rm.schema();
-
-        sql += " order by ci.id";
-
-        return this.jdbcTemplate.query(sql, rm, new Object[] { clientId, hierarchySearchString });
-    }
-
-    @Override
-    public ClientIdentifierData retrieveClientIdentifier(final Long clientId, final Long clientIdentifierId) {
-        try {
-            AppUser currentUser = context.authenticatedUser();
-            String hierarchy = currentUser.getOffice().getHierarchy();
-            String hierarchySearchString = hierarchy + "%";
-
-            ClientIdentityMapper rm = new ClientIdentityMapper();
-
-            String sql = "select " + rm.schema();
-
-            sql += " and ci.id = ?";
-
-            final ClientIdentifierData clientIdentifierData = this.jdbcTemplate.queryForObject(sql, rm, new Object[] { clientId,
-                    hierarchySearchString, clientIdentifierId });
-
-            return clientIdentifierData;
-        } catch (EmptyResultDataAccessException e) {
-            throw new ClientIdentifierNotFoundException(clientIdentifierId);
-        }
-
-    }
-
-    private static final class ClientIdentityMapper implements RowMapper<ClientIdentifierData> {
-
-        public ClientIdentityMapper() {}
-
-        public String schema() {
-            return "ci.id as id, ci.client_id as clientId, ci.document_type_id as documentTypeId, ci.document_key as documentKey,"
-                    + " ci.description as description, cv.code_value as documentType "
-                    + " from m_client_identifier ci, m_client c, m_office o, m_code_value cv"
-                    + " where ci.client_id=c.id and c.office_id=o.id" + " and ci.document_type_id=cv.id"
-                    + " and ci.client_id = ? and o.hierarchy like ? ";
-        }
-
-        @Override
-        public ClientIdentifierData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
-
-            final Long id = JdbcSupport.getLong(rs, "id");
-            final Long clientId = JdbcSupport.getLong(rs, "clientId");
-            final Long documentTypeId = JdbcSupport.getLong(rs, "documentTypeId");
-            final String documentKey = rs.getString("documentKey");
-            final String description = rs.getString("description");
-            final String documentTypeName = rs.getString("documentType");
-
-            return ClientIdentifierData.singleItem(id, clientId, documentTypeId, documentKey, description, documentTypeName);
-        }
-
     }
 
     @Override

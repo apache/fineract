@@ -187,6 +187,22 @@
 								<td></td>
 								<td></td>
 							</tr>
+							<tr class="alt">
+								<td><a href="#client_identifiers">Client Identifiers</a></td>
+								<td>clients/{clientId}/identifiers</td>
+								<td><a href="#client_identifiers_create">Create an Identifier for a Client</a></td>
+								<td><a href="#client_identifiers_list">List all Identifiers for a Client</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>clients/{clientId}/identifiers/{identifierId}</td>
+								<td></td>
+								<td><a href="#client_identifiers_retrieve">Retrieve a Client Identifier</a></td>
+								<td><a href="#client_identifiers_update">Update a Client Identifier</a></td>
+								<td><a href="#client_identifiers_delete">Delete a Client Identifier</a></td>
+							</tr>
 						</table>
 					</div>
 				</div>
@@ -433,6 +449,24 @@
 								<td></td>
 								<td></td>
 								<td></td>
+							</tr>
+							<tr>
+								<td><a href="#guarantors">Loan Guarantors</a></td>
+								<td>loans/{loanId}/guarantors</td>
+								<td><a href="#guarantors_create">Create a Guarantor
+								</a></td>
+								<td><a href="#guarantors_list">List Guarantors
+								</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr class="alt">
+								<td></td>
+								<td>loans/{loanId}/guarantors/{guarantorId}</td>
+								<td></td>
+								<td><a href="#guarantors_retrieve">Retrieve a Guarantor</a></td>
+								<td><a href="#guarantors_update">Update a Guarantor</a></td>
+								<td><a href="#guarantors_delete">Delete a Guarantor</a></td>
 							</tr>
 						</table>
 					</div>
@@ -2013,6 +2047,256 @@ GET https://DomainName/api/v1/clients/{clientId}/loans
 					</code>
 				</div>
 			</div>
+
+			<!-- start of client Identifiers API docs-->
+			<a id="client_identifiers" name="client_identifiers" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h3>Client Identifiers</h3>
+					<p>Client Identifiers refer to documents that are 
+					used to uniquely identify a customer <br/>
+					Ex: Drivers License, Passport, Ration card etc 
+					</p>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Field Descriptions</div></td>
+						</tr>
+						<tr class=alt>
+							<td>documentKey</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Number/String used to uniquely identify a particular
+								document (Driving License number for a driving license etc)</td>
+						</tr>
+						<tr class=alt>
+							<td>documentType</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Type of the identification document 
+								(License, Passport Etc)</td>
+						</tr>
+						<tr class=alt>
+							<td>description</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Any user comments to be associated 
+								with the Client Identifier</td>
+						</tr>
+					</table>
+				</div>
+			</div>
+
+			<a id="client_identifiers_list" name="client_identifiers_list" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>List all Identifiers for a Client</h4>
+					<p>Example Requests:</p>
+					<div class=apiClick>clients/1/identifiers</div>
+					<br>
+					<br>
+					<div class=apiClick>clients/1/identifiers?fields=documentKey,documentType,description</div>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+GET https://DomainName/api/v1/clients/{clientId}/identifiers
+					</code>
+					<code class="method-response">
+[
+  {
+    "id": 2,
+    "clientId": 1,
+    "documentType": {
+      "id": 3,
+      "name": "Drivers License"
+    },
+    "documentKey": "12345",
+    "description": "Issued in the year 2--7"
+  }
+]
+					</code>
+				</div>
+			</div>
+
+			<a id="client_identifiers_template" name="client_identifiers_template"
+				class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Retrieve Client Identifier Details Template</h4>
+					<p>This is a convenience resource. It can be useful when
+						building maintenance user interface screens for client
+						applications. The template data returned consists of any or all
+						of:
+					<ul>
+						<li class=normalli>Field Defaults</li>
+						<li class=normalli>Allowed Value Lists</li>
+					</ul>
+					</p>
+					<p>Example Request:</p>
+					<div class=apiClick>clients/1/identifiers/template</div>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+GET https://DomainName/api/v1/clients/{clientId}/identifiers/template
+					</code>
+					<code class="method-response">
+{
+  "allowedDocumentTypes": [
+    {
+      "id": 1,
+      "name": "Passport",
+      "position": 0
+    },
+    {
+      "id": 2,
+      "name": "Id",
+      "position": 0
+    },
+    {
+      "id": 3,
+      "name": "Drivers License",
+      "position": 0
+    },
+    {
+      "id": 4,
+      "name": "Any Other Id Type",
+      "position": 0
+    }
+  ]
+}
+					</code>
+				</div>
+			</div>
+
+
+			<a id="client_identifiers_retrieve" name="client_identifiers_retrieve"
+				class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Retrieve a Client Identifier</h4>
+					<p>Example Requests:</p>
+					<div class=apiClick>clients/1/identifier/2</div>
+					<br>
+					<br>
+					<div class=apiClick>clients/1/identifier/2?template=true</div>
+					<br>
+					<br>
+					<div class=apiClick>clients/1/identifiers/2?fields=documentKey,documentType,description</div>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+GET https://DomainName/api/v1/clients/{clientId}/identifiers/{identifierId}
+					</code>
+					<code class="method-response">
+{
+  "id": 2,
+  "clientId": 1,
+  "documentType": {
+    "id": 3,
+    "name": "Drivers License"
+  },
+  "documentKey": "12345",
+  "description": "Issued in 2007"
+}
+					</code>
+				</div>
+			</div>
+
+			<a id="client_identifiers_create" name="client_identifiers_create" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Create an Identifier for a Client</h4>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Mandatory Fields</div></td>
+						</tr>
+						<tr class=alt>
+							<td>documentKey, documentTypeId
+							</td>
+						</tr>
+					</table>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+POST https://DomainName/api/v1/clients/{clientId}/identifiers
+					</code>
+					<code class="method-request">
+POST clients/1/identifiers
+Content-Type: application/json 
+Request Body:
+{
+"documentTypeId":"1",
+"documentKey":"KA-54677",
+"description":"Document has been verified"
+}
+					</code>
+					<code class="method-response">
+{
+  "officeId": 1,
+  "clientId": 1,
+  "resourceId": 3
+}
+					</code>
+				</div>
+			</div>
+
+			<a id="client_identifiers_update" name="client_identifiers_update" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Update a Client Identifier</h4>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+PUT https://DomainName/api/v1/clients/{clientId}/identifiers/{identifierId}
+					</code>
+					<code class="method-request">
+PUT clients/1/identifiers/3 
+Content-Type: application/json 
+Request Body:
+{
+"documentTypeId":"4",
+"documentKey":"KA-94667",
+"description":"Document has been updated"
+}
+					</code>
+					<code class="method-response">
+{
+  "officeId": 1,
+  "clientId": 1,
+  "resourceId": 3,
+  "changes": {
+    "documentTypeId": 4,
+    "documentKey": "KA-94667",
+    "description": "Document has been updated"
+  }
+}
+					</code>
+				</div>
+			</div>
+
+			<a id="client_identifiers_delete" name="client_identifiers_delete" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Delete a Client Identifier</h4>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+DELETE https://DomainName/api/v1/clients/{clientId}/identifiers/{identifierId}
+					</code>
+					<code class="method-request">
+DELETE clients/1/identifiers/3 
+Content-Type: application/json 
+No Request Body:
+					</code>
+					<code class="method-response">
+{
+  "officeId": 1,
+  "clientId": 1,
+  "resourceId": 3
+}
+					</code>
+				</div>
+			</div>
+
 
 			<!-- start of Groups api docs -->
 			<a id="groups" name="groups" class="old-syle-anchor">&nbsp;</a>
@@ -11319,8 +11603,24 @@ Content-Type: application/json
 					<td></td>
 					<td></td>
 				</tr>
-				<!-- loans api full matrix-->
+				<tr>
+					<td><a href="#client_identifiers">Client Identifiers</a></td>
+					<td>clients/{clientId}/identifiers</td>
+					<td><a href="#client_identifiers_create">Create an Identifier for a Client</a></td>
+					<td><a href="#client_identifiers_list">List all Identifiers for a Client</a></td>
+					<td></td>
+					<td></td>
+				</tr>
 				<tr class="alt">
+					<td></td>
+					<td>clients/{clientId}/identifiers/{identifierId}</td>
+					<td></td>
+					<td><a href="#client_identifiers_retrieve">Retrieve a Client Identifier</a></td>
+					<td><a href="#client_identifiers_update">Update a Client Identifier</a></td>
+					<td><a href="#client_identifiers_delete">Delete a Client Identifier</a></td>
+				</tr>
+				<!-- loans api full matrix-->
+				<tr>
 					<td><a href="#loans">Loans</a></td>
 					<td>loans?calculateLoanSchedule</td>
 					<td><a href="#loans_calculate">Calculate Loan Repayment Schedule</a></td>
@@ -11328,7 +11628,7 @@ Content-Type: application/json
 					<td></td>
 					<td></td>
 				</tr>
-				<tr>
+				<tr class="alt">
 					<td></td>
 					<td>loans</td>
 					<td><a href="#loans_create">Submit a new Loan Application</a></td>
@@ -11336,7 +11636,7 @@ Content-Type: application/json
 					<td></td>
 					<td></td>
 				</tr>
-				<tr class="alt">
+				<tr>
 					<td></td>
 					<td>loans/{loanId}</td>
 					<td></td>
@@ -11344,7 +11644,7 @@ Content-Type: application/json
 					<td></td>
 					<td><a href="#loans_delete">Delete a Loan Application</a></td>
 				</tr>
-				<tr>
+				<tr class="alt">
 					<td></td>
 					<td>loans/{loanId}?command=approve</td>
 					<td><a href="#loans_approve">Approve Loan Application</a></td>
@@ -11352,7 +11652,7 @@ Content-Type: application/json
 					<td></td>
 					<td></td>
 				</tr>
-				<tr class="alt">
+				<tr>
 					<td></td>
 					<td>loans/{loanId}?command=undoApproval</td>
 					<td><a href="#loans_approve_undo">Undo Loan Application Approval</a></td>
@@ -11360,7 +11660,7 @@ Content-Type: application/json
 					<td></td>
 					<td></td>
 				</tr>
-				<tr>
+				<tr class="alt">
 					<td></td>
 					<td>loans/{loanId}?command=reject</td>
 					<td><a href="#loans_reject">Reject Loan Application</a></td>
@@ -11368,7 +11668,7 @@ Content-Type: application/json
 					<td></td>
 					<td></td>
 				</tr>
-				<tr class="alt">
+				<tr>
 					<td></td>
 					<td>loans/{loanId}?command=withdraw</td>
 					<td><a href="#loans_withdraw">Withdraw Loan Application</a></td>
@@ -11376,7 +11676,7 @@ Content-Type: application/json
 					<td></td>
 					<td></td>
 				</tr>
-				<tr>
+				<tr class="alt">
 					<td></td>
 					<td>loans/{loanId}?command=disburse</td>
 					<td><a href="#loans_disburse">Disburse Loan</a></td>
@@ -11384,7 +11684,7 @@ Content-Type: application/json
 					<td></td>
 					<td></td>
 				</tr>
-				<tr class="alt">
+				<tr>
 					<td></td>
 					<td>loans/{loanId}?command=undoDisbursal</td>
 					<td><a href="#loans_disburse_undo">Undo Loan Application Disbursal</a></td>
@@ -11392,7 +11692,7 @@ Content-Type: application/json
 					<td></td>
 					<td></td>
 				</tr>
-				<tr>
+				<tr class="alt">
 					<td><a href="#loans_transactions">Loan Transactions</a></td>
 					<td>loans/{loanId}/transactions?command=repayment</td>
 					<td><a href="#loans_transaction_repayment">Enter a repayment</a></td>
@@ -11400,7 +11700,7 @@ Content-Type: application/json
 					<td></td>
 					<td></td>
 				</tr>
-				<tr class="alt">
+				<tr>
 					<td></td>
 					<td>loans/{loanId}/transactions?command=waiveInterest</td>
 					<td><a href="#loans_transaction_waiveinterest">Waive Interest</a></td>
@@ -11408,7 +11708,7 @@ Content-Type: application/json
 					<td></td>
 					<td></td>
 				</tr>
-				<tr>
+				<tr class="alt">
 					<td></td>
 					<td>loans/{loanId}/transactions/{transactionId}</td>
 					<td></td>
@@ -11416,7 +11716,7 @@ Content-Type: application/json
 					<td></td>
 					<td></td>
 				</tr>
-				<tr class="alt">
+				<tr>
 					<td></td>
 					<td>loans/{loanId}/transactions/{transactionId}</td>
 					<td><a href="#loans_transaction_adjust">Adjust a Transaction</a></td>
@@ -11424,7 +11724,7 @@ Content-Type: application/json
 					<td></td>
 					<td></td>
 				</tr>
-				<tr>
+				<tr class="alt">
 					<td><a href="#loans_charges">Loan Charges</a></td>
 					<td>loans/{loanId}/charges</td>
 					<td><a href="#loans_charges_create">Add a loan charge</a></td>
@@ -11432,7 +11732,7 @@ Content-Type: application/json
 					<td></td>
 					<td></td>
 				</tr>
-				<tr class="alt">
+				<tr>
 					<td></td>
 					<td>loans/{loanId}/charges/{loanChargeId}</td>
 					<td></td>
@@ -11440,7 +11740,7 @@ Content-Type: application/json
 					<td><a href="#loans_charges_update">Modify a Loan Charge</a></td>
 					<td><a href="#loans_charges_delete">Delete a Loan Charge</a></td>
 				</tr>
-				<tr>
+				<tr class="alt">
 					<td><a href="#guarantors">Loan Guarantors</a></td>
 					<td>loans/{loanId}/guarantors</td>
 					<td><a href="#guarantors_create">Create a Guarantor
@@ -11450,7 +11750,7 @@ Content-Type: application/json
 					<td></td>
 					<td></td>
 				</tr>
-				<tr class="alt">
+				<tr>
 					<td></td>
 					<td>loans/{loanId}/guarantors/{guarantorId}</td>
 					<td></td>
@@ -11458,7 +11758,6 @@ Content-Type: application/json
 					<td><a href="#guarantors_update">Update a Guarantor</a></td>
 					<td><a href="#guarantors_delete">Delete a Guarantor</a></td>
 				</tr>
-
 				<tr class="alt">
 					<td><a href="#offices">OFFICE</a></td>
 					<td>offices</td>
@@ -11623,6 +11922,62 @@ Content-Type: application/json
 							Table (One to Many)</a></td>
 				</tr>
 				<tr>
+					<td><a href="#glaccounts">General Ledger Account</a></td>
+					<td>glaccounts</td>
+					<td><a href="#glaccounts_create">Create a New Ledger Account</a></td>
+					<td><a href="#glaccounts_list">List Ledger Accounts</a></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr class="alt">
+					<td></td>
+					<td>glaccounts/{glaccountId}</td>
+					<td></td>
+					<td><a href="#glaccounts_retrieve">Retrieve a Ledger Account</a></td>
+					<td><a href="#glaccounts_update">Update a Ledger Account</a></td>
+					<td><a href="#glaccounts_delete">Delete a Ledger Account</a></td>
+				</tr>
+				<tr>
+					<td><a href="#glclosures">Accounting Closure</a></td>
+					<td>glclosures</td>
+					<td><a href="#glclosures_create">Create an Accounting Closure</a></td>
+					<td><a href="#glclosures_list">List Accounting Closures</a></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr class="alt">
+					<td></td>
+					<td>glclosures/{glclosureId}</td>
+					<td></td>
+					<td><a href="#glclosures_retrieve">Retrieve an Accounting Closure</a></td>
+					<td><a href="#glclosures_update">Update an Accounting Closure</a></td>
+					<td><a href="#glclosures_delete">Delete an Accounting Closure</a></td>
+				</tr>
+				<tr>
+					<td><a href="#journalentries">Journal Entries</a></td>
+					<td>journalentries</td>
+					<td><a href="#journalentries_create">Create Journal Entries</a></td>
+					<td><a href="#journalentries_list">List Journal Entries</a></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr class="alt">
+					<td></td>
+					<td>journalentries/{entryId}</td>
+					<td></td>
+					<td><a href="#journalentries_retrieve">Retrieve a single Entry</a></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>journalentries/{transactionId}/reversal</td>
+					<td><a href="#journalentries_reverse">Reverse Journal Entries</a></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr class="alt">
 					<td><a href="#reports">REPORT</a></td>
 					<td>reports</td>
 					<td></td>
@@ -11630,7 +11985,7 @@ Content-Type: application/json
 					<td></td>
 					<td></td>
 				</tr>
-				<tr class="alt">
+				<tr>
 					<td></td>
 					<td>reports/{reportName}</td>
 					<td></td>
@@ -11638,7 +11993,7 @@ Content-Type: application/json
 					<td></td>
 					<td></td>
 				</tr>
-				<tr>
+				<tr class="alt">
 					<td><a href="#authentication">AUTHENTICATION</a></td>
 					<td>authentication</td>
 					<td><a href="#authenticate_request">Verify Authentication</a></td>
@@ -11646,7 +12001,7 @@ Content-Type: application/json
 					<td></td>
 					<td></td>
 				</tr>
-				<tr class="alt">
+				<tr>
 					<td><a href="#users">USER</a></td>
 					<td>users</td>
 					<td><a href="#users_create">Create a User</a></td>
@@ -11654,7 +12009,7 @@ Content-Type: application/json
 					<td></td>
 					<td></td>
 				</tr>
-				<tr>
+				<tr class="alt">
 					<td></td>
 					<td>users/{userId}</td>
 					<td></td>
@@ -11662,7 +12017,7 @@ Content-Type: application/json
 					<td><a href="#users_update">Update a User</a></td>
 					<td><a href="#users_delete">Delete a User</a></td>
 				</tr>
-				<tr class="alt">
+				<tr>
 					<td><a href="#roles">ROLE</a></td>
 					<td>roles</td>
 					<td><a href="#roles_create">Create a New Role</a></td>
@@ -11670,7 +12025,7 @@ Content-Type: application/json
 					<td></td>
 					<td></td>
 				</tr>
-				<tr>
+				<tr class="alt">
 					<td></td>
 					<td>roles/{roleId}</td>
 					<td></td>
@@ -11678,7 +12033,7 @@ Content-Type: application/json
 					<td><a href="#roles_update">Update a Role</a></td>
 					<td></td>
 				</tr>
-				<tr class="alt">
+				<tr>
 					<td></td>
 					<td>roles/{roleId}/permissions</td>
 					<td></td>
@@ -11688,7 +12043,7 @@ Content-Type: application/json
 							Permissions</a></td>
 					<td></td>
 				</tr>
-				<tr>
+				<tr class="alt">
 					<td><a href="#permissions">PERMISSION</a></td>
 					<td>permissions</td>
 					<td></td>
@@ -11697,7 +12052,7 @@ Content-Type: application/json
 					<td></td>
 					<td></td>
 				</tr>
-				<tr class="alt">
+				<tr>
 					<td><a href="#depositproducts">DEPOSIT PRODUCT</a></td>
 					<td>depositproducts</td>
 					<td><a href="#depositproducts_create">Create a Deposit product</a></td>
@@ -11705,7 +12060,7 @@ Content-Type: application/json
 					<td></td>
 					<td></td>
 				</tr>
-				<tr>
+				<tr class="alt">
 					<td></td>
 					<td>depositproducts/{prodcutId}</td>
 					<td></td>
@@ -11713,7 +12068,7 @@ Content-Type: application/json
 					<td><a href="#depositproducts_update">Update a Deposit product</a></td>
 					<td><a href="#depositproducts_delete">Delete a Deposit product</a></td>
 				</tr>
-				<tr class="alt">
+				<tr>
 					<td><a href="#savingproducts">SAVING PRODUCT</a></td>
 					<td>savingproducts</td>
 					<td><a href="#savingproducts_create">Create a Saving product</a></td>
@@ -11721,7 +12076,7 @@ Content-Type: application/json
 					<td></td>
 					<td></td>
 				</tr>
-				<tr>
+				<tr class="alt">
 					<td></td>
 					<td>savingproducts/{prodcutId}</td>
 					<td></td>
@@ -11730,7 +12085,7 @@ Content-Type: application/json
 					<td><a href="#savingproducts_delete">Delete a Saving product</a></td>
 				</tr>
 				
-				<tr class="alt">
+				<tr>
 					<td><a href="#fixeddeposits">FIXED DEPOSITS</a></td>
 					<td>depositaccounts</td>
 					<td><a href="#fixeddeposits_create">Create a New Deposit
@@ -11739,7 +12094,7 @@ Content-Type: application/json
 					<td></td>
 					<td></td>
 				</tr>
-				<tr>
+				<tr class="alt">
 					<td></td>
 					<td>depositaccounts/{accountId}</td>
 					<td><a href="#fixeddeposits_approve_etc">Approve, Undo Approve,
@@ -11752,7 +12107,7 @@ Content-Type: application/json
 							Application</a></td>
 				</tr>
 				
-				<tr class="alt">
+				<tr>
 					<td><a href="#savingaccounts">SAVING ACCOUNTS</a></td>
 					<td>savingaccounts</td>
 					<td><a href="#savingaccounts_create">Create a New Saving 
@@ -11761,7 +12116,7 @@ Content-Type: application/json
 					<td></td>
 					<td></td>
 				</tr>
-				<tr>
+				<tr class="alt">
 					<td></td>
 					<td>savingaccounts/{accountId}</td>
 					<td><a href="#savingaccounts_approve_etc">Approve, Undo Approve,
