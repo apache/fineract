@@ -78,6 +78,8 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
             sql += " and (" + extraCriteria + ")";
         }
 
+        sql += "order by g.hierarchy";
+        
         return this.jdbcTemplate.query(sql, rm, new Object[] {hierarchySearchString});
     }
 
