@@ -71,12 +71,7 @@ public class TomcatJdbcDataSourcePerTenantService implements DataSourcePerTenant
         poolConfiguration.setUsername(tenant.getSchemaUsername());
         poolConfiguration.setPassword(tenant.getSchemaPassword());
 
-        //poolConfiguration.setInitialSize(5);
-        //poolConfiguration.setMaxActive(5);
-        //poolConfiguration.setMinIdle(1);
-        //poolConfiguration.setMaxIdle(4);
-        
-        poolConfiguration.setInitialSize(15);
+        poolConfiguration.setInitialSize(5);
         //poolConfiguration.setMaxActive(5);
         //poolConfiguration.setMinIdle(1);
         //poolConfiguration.setMaxIdle(4);
