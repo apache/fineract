@@ -85,6 +85,14 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
     public static LoanTransaction waiver(final Loan loan, final Money waived, final LocalDate waiveDate) {
         return new LoanTransaction(loan, LoanTransactionType.WAIVE_INTEREST, waived.getAmount(), waiveDate);
     }
+    
+    public static LoanTransaction applyLoanCharge(final Loan loan, final Money amount, final LocalDate applyDate,
+            final Money feeCharges, final Money penaltyCharges) {
+        LoanTransaction applyCharge = new LoanTransaction(loan, LoanTransactionType.APPLY_CHARGES, amount.getAmount(), applyDate);
+        applyCharge.updateChargesComponents(feeCharges, penaltyCharges);
+
+        return applyCharge;
+    }
 
     public static LoanTransaction waiveLoanCharge(final Loan loan, final Money waived, final LocalDate waiveDate,
             final Money feeChargesWaived, final Money penaltyChargesWaived) {

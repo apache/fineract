@@ -489,10 +489,24 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             throw new InvalidCurrencyException("loanCharge", "attach.to.loan", errorMessage);
         }
 
+        final List<Long> existingTransactionIds = new ArrayList<Long>();
+        final List<Long> existingReversedTransactionIds = new ArrayList<Long>();
         this.loanChargeRepository.save(loanCharge);
 
-        loan.addLoanCharge(loanCharge);
+        LoanTransaction applyChargeTransaction = loan.addLoanCharge(loanCharge, existingTransactionIds, existingReversedTransactionIds);
+
+        // we want to apply charge transactions only for those loans charges
+        // that are applied when a loan is active
+        if (loan.status().isActive()) {
+            this.loanTransactionRepository.save(applyChargeTransaction);
+        }
+
         this.loanRepository.save(loan);
+
+        // we post Journal entries only for loans in active status
+        if (loan.status().isActive()) {
+            postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
+        }
 
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //

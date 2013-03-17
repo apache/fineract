@@ -5,7 +5,6 @@ import java.util.Date;
 
 import org.mifosplatform.accounting.closure.domain.GLClosure;
 import org.mifosplatform.accounting.common.AccountingConstants.CASH_ACCOUNTS_FOR_LOAN;
-import org.mifosplatform.accounting.glaccount.domain.GLAccount;
 import org.mifosplatform.accounting.journalentry.data.LoanDTO;
 import org.mifosplatform.accounting.journalentry.data.LoanTransactionDTO;
 import org.mifosplatform.organisation.office.domain.Office;
@@ -53,15 +52,9 @@ public class CashBasedAccountingProcessorForLoan implements AccountingProcessorF
              **/
             else if (loanTransactionDTO.getTransactionType().isWriteOff() && !loanTransactionDTO.isReversed()) {
                 final BigDecimal principalAmount = loanTransactionDTO.getPrincipal();
-                final GLAccount lossesWrittenOffAccount = helper.getLinkedCashAccountsForLoanProduct(loanProductId,
-                        CASH_ACCOUNTS_FOR_LOAN.LOSSES_WRITTEN_OFF);
-                helper.createDebitJournalEntryForLoanProduct(office, lossesWrittenOffAccount, loanId, transactionId, transactionDate,
-                        principalAmount);
-
-                final GLAccount loanPortfolioAccount = helper.getLinkedCashAccountsForLoanProduct(loanProductId,
-                        CASH_ACCOUNTS_FOR_LOAN.LOAN_PORTFOLIO);
-                helper.createCreditJournalEntryForLoanProduct(office, loanPortfolioAccount, loanId, transactionId, transactionDate,
-                        principalAmount);
+                helper.createCashBasedJournalEntriesAndReversalsForLoan(office, CASH_ACCOUNTS_FOR_LOAN.LOSSES_WRITTEN_OFF,
+                        CASH_ACCOUNTS_FOR_LOAN.LOAN_PORTFOLIO, loanProductId, loanId, transactionId, transactionDate, principalAmount,
+                        false);
             }
         }
     }
@@ -87,22 +80,10 @@ public class CashBasedAccountingProcessorForLoan implements AccountingProcessorF
         final String transactionId = loanTransactionDTO.getTransactionId();
         final Date transactionDate = loanTransactionDTO.getTransactionDate();
         final BigDecimal disbursalAmount = loanTransactionDTO.getAmount();
-        final boolean isReversed = loanTransactionDTO.isReversed();
+        final boolean isReversal = loanTransactionDTO.isReversed();
 
-        final GLAccount loanPortfolioAccount = helper.getLinkedCashAccountsForLoanProduct(loanProductId,
-                CASH_ACCOUNTS_FOR_LOAN.LOAN_PORTFOLIO);
-        final GLAccount fundSourceAccount = helper.getLinkedCashAccountsForLoanProduct(loanProductId, CASH_ACCOUNTS_FOR_LOAN.FUND_SOURCE);
-        if (isReversed) {
-            helper.createDebitJournalEntryForLoanProduct(office, fundSourceAccount, loanId, transactionId, transactionDate, disbursalAmount);
-            helper.createCreditJournalEntryForLoanProduct(office, loanPortfolioAccount, loanId, transactionId, transactionDate,
-                    disbursalAmount);
-
-        } else {
-            helper.createDebitJournalEntryForLoanProduct(office, loanPortfolioAccount, loanId, transactionId, transactionDate,
-                    disbursalAmount);
-            helper.createCreditJournalEntryForLoanProduct(office, fundSourceAccount, loanId, transactionId, transactionDate,
-                    disbursalAmount);
-        }
+        helper.createCashBasedJournalEntriesAndReversalsForLoan(office, CASH_ACCOUNTS_FOR_LOAN.LOAN_PORTFOLIO,
+                CASH_ACCOUNTS_FOR_LOAN.FUND_SOURCE, loanProductId, loanId, transactionId, transactionDate, disbursalAmount, isReversal);
     }
 
     /**
@@ -132,63 +113,30 @@ public class CashBasedAccountingProcessorForLoan implements AccountingProcessorF
 
         if (principalAmount != null && !(principalAmount.compareTo(BigDecimal.ZERO) == 0)) {
             totalDebitAmount = totalDebitAmount.add(principalAmount);
-
-            final GLAccount loanPortfolioAccount = helper.getLinkedCashAccountsForLoanProduct(loanProductId,
-                    CASH_ACCOUNTS_FOR_LOAN.LOAN_PORTFOLIO);
-            if (isReversal) {
-                helper.createDebitJournalEntryForLoanProduct(office, loanPortfolioAccount, loanId, transactionId, transactionDate,
-                        principalAmount);
-            } else {
-                helper.createCreditJournalEntryForLoanProduct(office, loanPortfolioAccount, loanId, transactionId, transactionDate,
-                        principalAmount);
-            }
+            helper.createCreditJournalEntryOrReversalForLoan(office, CASH_ACCOUNTS_FOR_LOAN.LOAN_PORTFOLIO, loanProductId, loanId,
+                    transactionId, transactionDate, principalAmount, isReversal);
         }
+
         if (interestAmount != null && !(interestAmount.compareTo(BigDecimal.ZERO) == 0)) {
             totalDebitAmount = totalDebitAmount.add(interestAmount);
-
-            final GLAccount interestAccount = helper.getLinkedCashAccountsForLoanProduct(loanProductId,
-                    CASH_ACCOUNTS_FOR_LOAN.INTEREST_ON_LOANS);
-            if (isReversal) {
-                helper.createDebitJournalEntryForLoanProduct(office, interestAccount, loanId, transactionId, transactionDate,
-                        interestAmount);
-            } else {
-                helper.createCreditJournalEntryForLoanProduct(office, interestAccount, loanId, transactionId, transactionDate,
-                        interestAmount);
-            }
+            helper.createCreditJournalEntryOrReversalForLoan(office, CASH_ACCOUNTS_FOR_LOAN.INTEREST_ON_LOANS, loanProductId, loanId,
+                    transactionId, transactionDate, interestAmount, isReversal);
         }
+
         if (feesAmount != null && !(feesAmount.compareTo(BigDecimal.ZERO) == 0)) {
             totalDebitAmount = totalDebitAmount.add(feesAmount);
-
-            final GLAccount incomeFromFeesAccount = helper.getLinkedCashAccountsForLoanProduct(loanProductId,
-                    CASH_ACCOUNTS_FOR_LOAN.INCOME_FROM_FEES);
-            if (isReversal) {
-                helper.createDebitJournalEntryForLoanProduct(office, incomeFromFeesAccount, loanId, transactionId, transactionDate,
-                        feesAmount);
-            } else {
-                helper.createCreditJournalEntryForLoanProduct(office, incomeFromFeesAccount, loanId, transactionId, transactionDate,
-                        feesAmount);
-            }
+            helper.createCreditJournalEntryOrReversalForLoan(office, CASH_ACCOUNTS_FOR_LOAN.INCOME_FROM_FEES, loanProductId, loanId,
+                    transactionId, transactionDate, feesAmount, isReversal);
         }
+
         if (penaltiesAmount != null && !(penaltiesAmount.compareTo(BigDecimal.ZERO) == 0)) {
             totalDebitAmount = totalDebitAmount.add(penaltiesAmount);
+            helper.createCreditJournalEntryOrReversalForLoan(office, CASH_ACCOUNTS_FOR_LOAN.INCOME_FROM_PENALTIES, loanProductId, loanId,
+                    transactionId, transactionDate, penaltiesAmount, isReversal);
+        }
 
-            final GLAccount incomeFromPenaltiesAccount = helper.getLinkedCashAccountsForLoanProduct(loanProductId,
-                    CASH_ACCOUNTS_FOR_LOAN.INCOME_FROM_PENALTIES);
-            if (isReversal) {
-                helper.createDebitJournalEntryForLoanProduct(office, incomeFromPenaltiesAccount, loanId, transactionId, transactionDate,
-                        penaltiesAmount);
-            } else {
-                helper.createCreditJournalEntryForLoanProduct(office, incomeFromPenaltiesAccount, loanId, transactionId, transactionDate,
-                        penaltiesAmount);
-            }
-        }
-        final GLAccount fundSourceAccount = helper.getLinkedCashAccountsForLoanProduct(loanProductId, CASH_ACCOUNTS_FOR_LOAN.FUND_SOURCE);
-        if (isReversal) {
-            helper.createCreditJournalEntryForLoanProduct(office, fundSourceAccount, loanId, transactionId, transactionDate,
-                    totalDebitAmount);
-        } else {
-            helper.createDebitJournalEntryForLoanProduct(office, fundSourceAccount, loanId, transactionId, transactionDate,
-                    totalDebitAmount);
-        }
+        /*** create a single debit entry (or reversal) for the entire amount **/
+        helper.createDebitJournalEntryOrReversalForLoan(office, CASH_ACCOUNTS_FOR_LOAN.FUND_SOURCE, loanProductId, loanId, transactionId,
+                transactionDate, totalDebitAmount, isReversal);
     }
 }

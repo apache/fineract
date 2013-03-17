@@ -206,8 +206,7 @@ public class LoanEnumerations {
         switch (type) {
             case INVALID:
                 optionData = new LoanTransactionEnumData(LoanTransactionType.INVALID.getValue().longValue(),
-                        LoanTransactionType.INVALID.getCode(),
-                        "Invalid");
+                        LoanTransactionType.INVALID.getCode(), "Invalid");
             break;
             case DISBURSEMENT:
                 optionData = new LoanTransactionEnumData(LoanTransactionType.DISBURSEMENT.getValue().longValue(),
@@ -223,8 +222,7 @@ public class LoanEnumerations {
             break;
             case CONTRA:
                 optionData = new LoanTransactionEnumData(LoanTransactionType.CONTRA.getValue().longValue(),
-                        LoanTransactionType.CONTRA.getCode(),
-                        "Reversal");
+                        LoanTransactionType.CONTRA.getCode(), "Reversal");
             break;
             case WAIVE_INTEREST:
                 optionData = new LoanTransactionEnumData(LoanTransactionType.WAIVE_INTEREST.getValue().longValue(),
@@ -245,6 +243,10 @@ public class LoanEnumerations {
             case WAIVE_CHARGES:
                 optionData = new LoanTransactionEnumData(LoanTransactionType.WAIVE_CHARGES.getValue().longValue(),
                         LoanTransactionType.WAIVE_CHARGES.getCode(), "Waive loan charges");
+            break;
+            case APPLY_CHARGES:
+                optionData = new LoanTransactionEnumData(LoanTransactionType.APPLY_CHARGES.getValue().longValue(),
+                        LoanTransactionType.APPLY_CHARGES.getCode(), "Apply Charge");
             break;
         }
         return optionData;
