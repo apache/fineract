@@ -34,11 +34,14 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
     private static final class CalendarDataMapper implements RowMapper<CalendarData> {
 
         public String schema() {
-            return " select c.id as id, c.entity_id as entityId, c.entity_type_enum as entityTypeId, c.title as title, "
+            return " select c.id as id, ci.entity_id as entityId, ci.entity_type_enum as entityTypeId, c.title as title, "
                     + " c.description as description, c.location as location, c.start_date as startDate, c.end_date as endDate, "
-                    + " c.created_date as createdDate, c.duration as duration, c.calendar_type_enum as typeId, c.repeating as repeating, "
-                    + " c.recurrence as recurrence, c.remind_by_enum as remindById, c.first_reminder as firstReminder, c.second_reminder as secondReminder "
-                    + " from m_calendar c ";
+                    + " c.duration as duration, c.calendar_type_enum as typeId, c.repeating as repeating, "
+                    + " c.recurrence as recurrence, c.remind_by_enum as remindById, c.first_reminder as firstReminder, c.second_reminder as secondReminder, "
+                    + " c.created_date as createdDate, c.lastmodified_date as updatedDate, creatingUser.id as creatingUserId, creatingUser.username as creatingUserName, "
+                    + " updatingUser.id as updatingUserId, updatingUser.username as updatingUserName "
+                    + " from m_calendar c join m_calendar_instance ci on ci.calendar_id=c.id, m_appuser as creatingUser, m_appuser as updatingUser"
+                    + " where c.createdby_id=creatingUser.id and c.lastmodifiedby_id=updatingUser.id ";
         }
 
         @Override
@@ -53,7 +56,6 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
             final String location = rs.getString("location");
             final LocalDate startDate = JdbcSupport.getLocalDate(rs, "startDate");
             final LocalDate endDate = JdbcSupport.getLocalDate(rs, "endDate");
-            final LocalDate createdDate = JdbcSupport.getLocalDate(rs, "createdDate");
             final Integer duration = rs.getInt("duration");
             final Integer typeId = rs.getInt("typeId");
             final EnumOptionData type = CalendarEnumerations.calendarType(typeId);
@@ -64,9 +66,16 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
             if(remindById != null) remindBy = CalendarEnumerations.calendarRemindBy(remindById);
             final Integer firstReminder = rs.getInt("firstReminder");
             final Integer secondReminder = rs.getInt("secondReminder");
+            final String humanReadable = CalendarWrapperService.getRRuleReadable(startDate, recurrence);
+            
+            final LocalDate createdDate = JdbcSupport.getLocalDate(rs, "createdDate");
+            final LocalDate lastUpdatedDate = JdbcSupport.getLocalDate(rs, "updatedDate");
+            final Long createdByUserId = rs.getLong("creatingUserId");
+            final String createdByUserName = rs.getString("creatingUserName");
+            final Long lastUpdatedByUserId = rs.getLong("updatingUserId");
+            final String lastUpdatedByUserName = rs.getString("updatingUserName");
 
-            return new CalendarData(id, entityId, entityType, title, description, location, startDate, endDate, createdDate, duration,
-                    type, repeating, recurrence, remindBy, firstReminder, secondReminder);
+            return new CalendarData(id, entityId, entityType, title, description, location, startDate, endDate, duration, type, repeating, recurrence, remindBy, firstReminder, secondReminder, humanReadable, createdDate, lastUpdatedDate, createdByUserId, createdByUserName, lastUpdatedByUserId, lastUpdatedByUserName);
         }
     }
 
@@ -76,7 +85,7 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
         try {
             final CalendarDataMapper rm = new CalendarDataMapper();
 
-            final String sql = rm.schema() + "where c.id = ? and c.entity_id = ? and c.entity_type_enum = ?";
+            final String sql = rm.schema() + " and c.id = ? and ci.entity_id = ? and ci.entity_type_enum = ? ";
 
             return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { calendarId, entityId, entityTypeId });
         } catch (final EmptyResultDataAccessException e) {
@@ -88,7 +97,7 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
     public Collection<CalendarData> retrieveCalendarsByEntity(final Long entityId, final Integer entityTypeId) {
         final CalendarDataMapper rm = new CalendarDataMapper();
 
-        final String sql = rm.schema() + "where c.entity_id = ? and c.entity_type_enum = ?";
+        final String sql = rm.schema() + " and ci.entity_id = ? and ci.entity_type_enum = ? order by c.start_date ";
 
         return this.jdbcTemplate.query(sql, rm, new Object[] { entityId, entityTypeId });
     }

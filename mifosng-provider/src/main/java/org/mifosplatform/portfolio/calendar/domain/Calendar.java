@@ -19,18 +19,13 @@ import javax.persistence.TemporalType;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
+import org.mifosplatform.infrastructure.core.domain.AbstractAuditableCustom;
 import org.mifosplatform.portfolio.calendar.CalendarConstants.CALENDAR_SUPPORTED_PARAMETERS;
-import org.springframework.data.jpa.domain.AbstractPersistable;
+import org.mifosplatform.useradministration.domain.AppUser;
 
 @Entity
 @Table(name = "m_calendar")
-public class Calendar extends AbstractPersistable<Long> {
-
-    @Column(name = "entity_id", nullable = false)
-    private Long entityId;
-
-    @Column(name = "entity_type_enum", nullable = false)
-    private Integer entityTypeId;
+public class Calendar extends AbstractAuditableCustom<AppUser, Long> {
 
     @Column(name = "title", length = 50, nullable = false)
     private String title;
@@ -48,10 +43,6 @@ public class Calendar extends AbstractPersistable<Long> {
     @Column(name = "end_date", nullable = true)
     @Temporal(TemporalType.DATE)
     private Date endDate;
-
-    @Column(name = "created_date", nullable = false)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date createdDate;
 
     @Column(name = "duration", nullable = true)
     private Integer duration;
@@ -78,12 +69,9 @@ public class Calendar extends AbstractPersistable<Long> {
 
     }
 
-    public Calendar(final Long entityId, final Integer entityTypeId, final String title, final String description, final String location,
-            final LocalDate startDate, final LocalDate endDate, final LocalDate createdDate, final Integer duration, final Integer typeId,
-            final boolean repeating, final String recurrence, final Integer remindById, final Integer firstReminder,
-            final Integer secondReminder) {
-        this.entityId = entityId;
-        this.entityTypeId = entityTypeId;
+    public Calendar(final String title, final String description, final String location, final LocalDate startDate,
+            final LocalDate endDate, final Integer duration, final Integer typeId, final boolean repeating,
+            final String recurrence, final Integer remindById, final Integer firstReminder, final Integer secondReminder) {
         this.title = StringUtils.defaultIfEmpty(title, null);
         this.description = StringUtils.defaultIfEmpty(description, null);
         this.location = StringUtils.defaultIfEmpty(location, null);
@@ -100,12 +88,6 @@ public class Calendar extends AbstractPersistable<Long> {
             this.endDate = null;
         }
 
-        if (null != createdDate) {
-            this.createdDate = createdDate.toDateMidnight().toDate();
-        } else {
-            this.createdDate = null;
-        }
-
         this.duration = duration;
         this.typeId = typeId;
         this.repeating = repeating;
@@ -117,14 +99,14 @@ public class Calendar extends AbstractPersistable<Long> {
 
     public static Calendar fromJson(final JsonCommand command) {
 
-        final Long entityId = command.getSupportedEntityId();
-        final Integer entityTypeId = CalendarEntityType.valueOf(command.getSupportedEntityType().toUpperCase()).getValue();
+        // final Long entityId = command.getSupportedEntityId();
+        // final Integer entityTypeId =
+        // CalendarEntityType.valueOf(command.getSupportedEntityType().toUpperCase()).getValue();
         final String title = command.stringValueOfParameterNamed(CALENDAR_SUPPORTED_PARAMETERS.TITLE.getValue());
         final String description = command.stringValueOfParameterNamed(CALENDAR_SUPPORTED_PARAMETERS.DESCRIPTION.getValue());
         final String location = command.stringValueOfParameterNamed(CALENDAR_SUPPORTED_PARAMETERS.LOCATION.getValue());
         final LocalDate startDate = command.localDateValueOfParameterNamed(CALENDAR_SUPPORTED_PARAMETERS.START_DATE.getValue());
         final LocalDate endDate = command.localDateValueOfParameterNamed(CALENDAR_SUPPORTED_PARAMETERS.END_DATE.getValue());
-        final LocalDate createdDate = command.localDateValueOfParameterNamed(CALENDAR_SUPPORTED_PARAMETERS.CREATED_DATE.getValue());
         final Integer duration = command.integerValueSansLocaleOfParameterNamed(CALENDAR_SUPPORTED_PARAMETERS.DURATION.getValue());
         final Integer typeId = command.integerValueSansLocaleOfParameterNamed(CALENDAR_SUPPORTED_PARAMETERS.TYPE_ID.getValue());
         final boolean repeating = command.booleanPrimitiveValueOfParameterNamed(CALENDAR_SUPPORTED_PARAMETERS.REPEATING.getValue());
@@ -135,8 +117,8 @@ public class Calendar extends AbstractPersistable<Long> {
         final Integer secondReminder = command.integerValueSansLocaleOfParameterNamed(CALENDAR_SUPPORTED_PARAMETERS.SECOND_REMINDER
                 .getValue());
 
-        return new Calendar(entityId, entityTypeId, title, description, location, startDate, endDate, createdDate, duration, typeId,
-                repeating, recurrence, remindById, firstReminder, secondReminder);
+        return new Calendar(title, description, location, startDate, endDate, duration, typeId, repeating, recurrence,
+                remindById, firstReminder, secondReminder);
     }
 
     public Map<String, Object> update(final JsonCommand command) {
@@ -237,14 +219,6 @@ public class Calendar extends AbstractPersistable<Long> {
         return actualChanges;
     }
 
-    public Long getEntityId() {
-        return this.entityId;
-    }
-
-    public Integer getEntityTypeId() {
-        return this.entityTypeId;
-    }
-
     public String getTitle() {
         return this.title;
     }
@@ -263,10 +237,6 @@ public class Calendar extends AbstractPersistable<Long> {
 
     public Date getEndDate() {
         return this.endDate;
-    }
-
-    public Date getCreatedDate() {
-        return this.createdDate;
     }
 
     public Integer getDuration() {
