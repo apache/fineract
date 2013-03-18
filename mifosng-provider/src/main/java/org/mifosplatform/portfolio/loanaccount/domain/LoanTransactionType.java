@@ -13,13 +13,15 @@ public enum LoanTransactionType {
     CONTRA(3, "loanTransactionType.contra"), //
     WAIVE_INTEREST(4, "loanTransactionType.waiver"), //
     REPAYMENT_AT_DISBURSEMENT(5, "loanTransactionType.repaymentAtDisbursement"), //
-    WRITEOFF(6, "loanTransactionType.writeOff"), MARKED_FOR_RESCHEDULING(7, "loanTransactionType.marked.for.rescheduling"), //
+    WRITEOFF(6, "loanTransactionType.writeOff"), //
+    MARKED_FOR_RESCHEDULING(7, "loanTransactionType.marked.for.rescheduling"), //
     /**
      * This type of transactions is allowed on written-off loans where mfi still
      * attempts to recover payments from applicant after writing-off.
      */
     RECOVERY_REPAYMENT(8, "loanTransactionType.recoveryRepayment"), //
-    WAIVE_CHARGES(9, "loanTransactionType.waiveCharges");
+    WAIVE_CHARGES(9, "loanTransactionType.waiveCharges"), //
+    APPLY_CHARGES(10, "loanTransactionType.applyCharges");
 
     private final Integer value;
     private final String code;
@@ -70,6 +72,9 @@ public enum LoanTransactionType {
             case 9:
                 loanTransactionType = LoanTransactionType.WAIVE_CHARGES;
             break;
+            case 10:
+                loanTransactionType = LoanTransactionType.APPLY_CHARGES;
+            break;
             default:
                 loanTransactionType = LoanTransactionType.INVALID;
             break;
@@ -99,6 +104,10 @@ public enum LoanTransactionType {
 
     public boolean isWaiveCharges() {
         return this.value.equals(LoanTransactionType.WAIVE_CHARGES.getValue());
+    }
+
+    public boolean isApplyCharges() {
+        return this.value.equals(LoanTransactionType.APPLY_CHARGES.getValue());
     }
 
     public boolean isWriteOff() {

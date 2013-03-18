@@ -378,7 +378,8 @@ public class Loan extends AbstractPersistable<Long> {
         this.accountNumberRequiresAutoGeneration = accountNumberRequiresAutoGeneration;
     }
 
-    public void addLoanCharge(final LoanCharge loanCharge) {
+    public LoanTransaction addLoanCharge(final LoanCharge loanCharge, final List<Long> existingTransactionIds,
+            final List<Long> existingReversedTransactionIds) {
 
         validateLoanIsNotClosed(loanCharge);
 
@@ -420,6 +421,53 @@ public class Loan extends AbstractPersistable<Long> {
         }
 
         updateLoanSummaryDerivedFields();
+
+        existingTransactionIds.addAll(findExistingTransactionIds());
+        existingReversedTransactionIds.addAll(findExistingReversedTransactionIds());
+        final LoanTransaction applyLoanChargeTransaction = getChargeAppliedTransaction(loanCharge, null);
+
+        return applyLoanChargeTransaction;
+    }
+
+    /**
+     * Creates a loanTransaction for "Apply Charge Event" with transaction date
+     * set to "suppliedTransactionDate"
+     * 
+     * If "suppliedTransactionDate" is not passed Id, the transaction date is
+     * set to the loans due date if the due date is lesser than todays date. If
+     * not, the transaction date is set to todays date
+     * 
+     * @param loanCharge
+     * @param suppliedTransactionDate
+     * @return
+     */
+    private LoanTransaction getChargeAppliedTransaction(final LoanCharge loanCharge, LocalDate suppliedTransactionDate) {
+        final Money chargeAmount = loanCharge.getAmount(getCurrency());
+        Money feeCharges = chargeAmount;
+        Money penaltyCharges = Money.zero(loanCurrency());
+        if (loanCharge.isPenaltyCharge()) {
+            penaltyCharges = chargeAmount;
+            feeCharges = Money.zero(loanCurrency());
+        }
+
+        LocalDate transactionDate = null;
+
+        if (suppliedTransactionDate != null) {
+            transactionDate = suppliedTransactionDate;
+        } else {
+            transactionDate = loanCharge.getDueLocalDate();
+            LocalDate currentDate = DateUtils.getLocalDateOfTenant();
+
+            // if loan charge is to be applied on a future date, the loan
+            // transaction would show todays date as applied date
+            if (currentDate.isBefore(transactionDate)) {
+                transactionDate = currentDate;
+            }
+        }
+
+        final LoanTransaction applyLoanChargeTransaction = LoanTransaction.applyLoanCharge(this, chargeAmount, transactionDate, feeCharges,
+                penaltyCharges);
+        return applyLoanChargeTransaction;
     }
 
     private void validateLoanIsNotClosed(final LoanCharge loanCharge) {
@@ -542,10 +590,10 @@ public class Loan extends AbstractPersistable<Long> {
 
         changes.put("amount", amountWaived.getAmount());
 
-        Money feeChargesWaived = Money.of(loanCurrency(), loanCharge.amount());
+        Money feeChargesWaived = amountWaived;
         Money penaltyChargesWaived = Money.zero(loanCurrency());
         if (loanCharge.isPenaltyCharge()) {
-            penaltyChargesWaived = Money.of(loanCurrency(), loanCharge.amount());
+            penaltyChargesWaived = amountWaived;
             feeChargesWaived = Money.zero(loanCurrency());
         }
 
@@ -1244,9 +1292,17 @@ public class Loan extends AbstractPersistable<Long> {
             chargesPayment.updateLoan(this);
             this.loanTransactions.add(chargesPayment);
 
+            /**
+             * all Charges repaid at disbursal is marked as repaid and
+             * "APPLY Charge" transactions are created for all other fees (
+             * which are created during disbursal but not repaid)
+             **/
             for (LoanCharge charge : setOfLoanCharges()) {
                 if (charge.isDueAtDisbursement()) {
                     charge.markAsFullyPaid();
+                } else {
+                    LoanTransaction loanChargeAppliedTransaction = getChargeAppliedTransaction(charge, disbursedOn);
+                    this.loanTransactions.add(loanChargeAppliedTransaction);
                 }
             }
         }
@@ -1843,7 +1899,7 @@ public class Loan extends AbstractPersistable<Long> {
     public boolean isSubmittedOnDateAfter(final LocalDate compareDate) {
         return this.submittedOnDate == null ? false : (new LocalDate(submittedOnDate)).isAfter(compareDate);
     }
-    
+
     private LocalDate getSubmittedOnDate() {
         return (LocalDate) ObjectUtils.defaultIfNull(new LocalDate(this.submittedOnDate), null);
     }
@@ -2080,7 +2136,7 @@ public class Loan extends AbstractPersistable<Long> {
                 break;
             }
 
-            if (lastAssignmentRecordLatestEndDate == null){ 
+            if (lastAssignmentRecordLatestEndDate == null) {
                 lastAssignmentRecordLatestEndDate = historyRecord;
             } else if (historyRecord.isEndDateAfter(lastAssignmentRecordLatestEndDate.getEndDate())
                     && !historyRecord.isSameLoanOfficer(newLoanOfficer)) {
