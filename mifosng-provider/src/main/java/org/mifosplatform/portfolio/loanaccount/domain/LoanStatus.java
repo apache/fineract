@@ -11,7 +11,7 @@ package org.mifosplatform.portfolio.loanaccount.domain;
 public enum LoanStatus {
 
     INVALID(0, "loanStatusType.invalid"), //
-    SUBMITED_AND_PENDING_APPROVAL(100, "loanStatusType.submitted.and.pending.approval"), //
+    SUBMITTED_AND_PENDING_APPROVAL(100, "loanStatusType.submitted.and.pending.approval"), //
     APPROVED(200, "loanStatusType.approved"), //
     ACTIVE(300, "loanStatusType.active"), //
     WITHDRAWN_BY_CLIENT(400, "loanStatusType.withdrawn.by.client"), //
@@ -29,7 +29,7 @@ public enum LoanStatus {
         LoanStatus enumeration = LoanStatus.INVALID;
         switch (statusValue) {
             case 100:
-                enumeration = LoanStatus.SUBMITED_AND_PENDING_APPROVAL;
+                enumeration = LoanStatus.SUBMITTED_AND_PENDING_APPROVAL;
             break;
             case 200:
                 enumeration = LoanStatus.APPROVED;
@@ -77,7 +77,7 @@ public enum LoanStatus {
     }
 
     public boolean isSubmittedAndPendingApproval() {
-        return this.value.equals(LoanStatus.SUBMITED_AND_PENDING_APPROVAL.getValue());
+        return this.value.equals(LoanStatus.SUBMITTED_AND_PENDING_APPROVAL.getValue());
     }
 
     public boolean isApproved() {

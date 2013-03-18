@@ -23,21 +23,21 @@ public class DefaultLoanLifecycleStateMachine implements LoanLifecycleStateMachi
         switch (loanEvent) {
             case LOAN_CREATED:
                 if (from == null) {
-                    newState = stateOf(LoanStatus.SUBMITED_AND_PENDING_APPROVAL, allowedLoanStatuses);
+                    newState = stateOf(LoanStatus.SUBMITTED_AND_PENDING_APPROVAL, allowedLoanStatuses);
                 }
             break;
             case LOAN_REJECTED:
-                if (from.hasStateOf(LoanStatus.SUBMITED_AND_PENDING_APPROVAL)) {
+                if (from.hasStateOf(LoanStatus.SUBMITTED_AND_PENDING_APPROVAL)) {
                     newState = stateOf(LoanStatus.REJECTED, allowedLoanStatuses);
                 }
             break;
             case LOAN_APPROVED:
-                if (from.hasStateOf(LoanStatus.SUBMITED_AND_PENDING_APPROVAL)) {
+                if (from.hasStateOf(LoanStatus.SUBMITTED_AND_PENDING_APPROVAL)) {
                     newState = stateOf(LoanStatus.APPROVED, allowedLoanStatuses);
                 }
             break;
             case LOAN_WITHDRAWN:
-                if (this.anyOfAllowedWhenComingFrom(from, LoanStatus.SUBMITED_AND_PENDING_APPROVAL, LoanStatus.APPROVED)) {
+                if (this.anyOfAllowedWhenComingFrom(from, LoanStatus.SUBMITTED_AND_PENDING_APPROVAL, LoanStatus.APPROVED)) {
                     newState = stateOf(LoanStatus.WITHDRAWN_BY_CLIENT, allowedLoanStatuses);
                 }
             break;
@@ -48,7 +48,7 @@ public class DefaultLoanLifecycleStateMachine implements LoanLifecycleStateMachi
             break;
             case LOAN_APPROVAL_UNDO:
                 if (from.hasStateOf(LoanStatus.APPROVED)) {
-                    newState = stateOf(LoanStatus.SUBMITED_AND_PENDING_APPROVAL, allowedLoanStatuses);
+                    newState = stateOf(LoanStatus.SUBMITTED_AND_PENDING_APPROVAL, allowedLoanStatuses);
                 }
             break;
             case LOAN_DISBURSAL_UNDO:

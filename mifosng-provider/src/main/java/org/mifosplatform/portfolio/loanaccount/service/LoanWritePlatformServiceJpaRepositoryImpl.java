@@ -26,6 +26,8 @@ import org.mifosplatform.portfolio.charge.domain.Charge;
 import org.mifosplatform.portfolio.charge.domain.ChargeRepositoryWrapper;
 import org.mifosplatform.portfolio.charge.exception.LoanChargeCannotBeDeletedException;
 import org.mifosplatform.portfolio.charge.exception.LoanChargeCannotBeDeletedException.LOAN_CHARGE_CANNOT_BE_DELETED_REASON;
+import org.mifosplatform.portfolio.charge.exception.LoanChargeCannotBeUpdatedException;
+import org.mifosplatform.portfolio.charge.exception.LoanChargeCannotBeUpdatedException.LOAN_CHARGE_CANNOT_BE_UPDATED_REASON;
 import org.mifosplatform.portfolio.charge.exception.LoanChargeCannotBeWaivedException;
 import org.mifosplatform.portfolio.charge.exception.LoanChargeCannotBeWaivedException.LOAN_CHARGE_CANNOT_BE_WAIVED_REASON;
 import org.mifosplatform.portfolio.charge.exception.LoanChargeNotFoundException;
@@ -529,6 +531,11 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final Loan loan = retrieveLoanBy(loanId);
         final LoanCharge loanCharge = retrieveLoanChargeBy(loanId, loanChargeId);
 
+        // Charges may be edited only when the loan associated with them are
+        // yet to be approved (are in submitted and pending status)
+        if (!loan.status().isSubmittedAndPendingApproval()) { throw new LoanChargeCannotBeUpdatedException(
+                LOAN_CHARGE_CANNOT_BE_UPDATED_REASON.LOAN_NOT_IN_SUBMITTED_AND_PENDING_APPROVAL_STAGE, loanCharge.getId()); }
+
         final Map<String, Object> changes = loan.updateLoanCharge(loanCharge, command);
 
         this.loanRepository.save(loan);
@@ -597,11 +604,10 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final Loan loan = retrieveLoanBy(loanId);
         final LoanCharge loanCharge = retrieveLoanChargeBy(loanId, loanChargeId);
 
-        // validate loan charge is not partly paid or waived
-        if (loanCharge.isWaived()) {
-            throw new LoanChargeCannotBeDeletedException(LOAN_CHARGE_CANNOT_BE_DELETED_REASON.ALREADY_WAIVED, loanCharge.getId());
-        } else if (loanCharge.isPaidOrPartiallyPaid(loan.getCurrency())) { throw new LoanChargeCannotBeDeletedException(
-                LOAN_CHARGE_CANNOT_BE_DELETED_REASON.ALREADY_PAID, loanCharge.getId()); }
+        // Charges may be deleted only when the loan associated with them are
+        // yet to be approved (are in submitted and pending status)
+        if (!loan.status().isSubmittedAndPendingApproval()) { throw new LoanChargeCannotBeDeletedException(
+                LOAN_CHARGE_CANNOT_BE_DELETED_REASON.LOAN_NOT_IN_SUBMITTED_AND_PENDING_APPROVAL_STAGE, loanCharge.getId()); }
 
         loan.removeLoanCharge(loanCharge);
         this.loanRepository.save(loan);

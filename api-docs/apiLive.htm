@@ -203,6 +203,26 @@
 								<td><a href="#client_identifiers_update">Update a Client Identifier</a></td>
 								<td><a href="#client_identifiers_delete">Delete a Client Identifier</a></td>
 							</tr>
+							<tr class="alt">
+								<td><a href="#client_images">Client Images</a></td>
+								<td>clients/{clientId}/images</td>
+								<td><a href="#client_images_create">Upload an Image for a Client (as  DATA URI)</a></td>
+								<td><a href="#client_images_retrieve">Get Client Image (DATA URI)</a></td>
+								<td><a href="#client_images_update">Update Client Image (DATA URI)</a></td>
+								<td><a href="#client_images_delete">Delete Client Image</a></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td></td>
+								<td><a href="#client_images_create_form">
+									Upload an Image for a Client (Multi-part form data)</a>
+								</td>
+								<td><a href="#client_images_retrieve_binary">Get Client Image (Binary file)</a></td>
+								<td><a href="#client_images_update_form">
+									Update Client Image (Multi-part form data)</a>
+								</td>
+								<td></td>
+							</tr>
 						</table>
 					</div>
 				</div>
@@ -2292,6 +2312,225 @@ No Request Body:
   "officeId": 1,
   "clientId": 1,
   "resourceId": 3
+}
+					</code>
+				</div>
+			</div>
+
+			<!-- start of Client Images API docs-->
+
+			<a id="client_images" name="client_images" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h3>Client Images</h3>
+					<p>The current API provides support for the addition of a single 
+					image for a Client<br/>
+					Allowed formats: JPEG (.jpg or .jpeg), GIF (.gif) and PNG (.png) 
+					</p>
+					<p> The API supports two different Approaches for manipulating Client Images
+					 <ul>
+					 	<li><a href="http://en.wikipedia.org/wiki/Data_URI_scheme" target="_blank"> Data URI's: </a>
+					  For easier manipulation by Javascript clients etc in supported Browsers.
+					 	</li>
+					 	<li><a href="http://www.w3.org/TR/html401/interact/forms.html#h-17.13.4.2">
+						Multi-part form data:</a>
+					  Images can be uploaded using Multi part forms and downloaded as regular binary files 
+					 	</li>
+					 <br/>
+				</div>
+			</div>
+
+			<a id="client_images_retrieve" name="client_images_retrieve"
+				class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Get Client Image (DATA URI)</h4>
+					<p>Example Requests:</p>
+					<div class=apiClick>clients/1/images</div>
+					<br>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+GET https://DomainName/api/v1/clients/{clientId}/images
+					</code>
+					<code class="method-response">
+data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJ
+bWFnZVJlYWR5ccllPAAAAJ1JREFUeNpi+P//PwMIA4E9EG8E4idQDGLbw+WhiiqA+D8OXAFVAzbp
+DxBvB2JLIGaGYkuoGEjOhhFIHAbij0BdPgxYACMj42ogJQpifwBiXSDeC8JIbt4LxSC5DyxQjTeB
++BeaYb+Q5EBOAVutCzMJHUNNPADzzDokiYdAfAmJvwLkGeTgWQfyKZICS6hYBTwc0QL8ORSjBDhA
+gAEAOg13B6R/SAgAAAAASUVORK5CYII=
+					</code>
+				</div>
+			</div>
+
+			<a id="client_images_retrieve_binary" name="client_images_retrieve_binary"
+				class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Get Client Image (Binary file)</h4>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+GET https://DomainName/api/v1/clients/{clientId}/images
+					</code>
+					<code class="method-request">
+POST clients/1/images
+Accept: application/octet-stream 
+					</code>
+					<code class="method-response">
+<i>Not shown</i>: The corresponding binary (image) file
+					</code>
+				</div>
+			</div>
+
+			<a id="client_images_create" name="client_images_create" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Upload an Image for a Client (Data URI)</h4>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+POST https://DomainName/api/v1/clients/{clientId}/images
+					</code>
+					<code class="method-request">
+POST clients/1/images
+Content-Type: text/plain 
+Request Body:
+data:image/png;base64,iVBORw0KGgoAA
+AANSUhEUgAAABAAAAAQAQMAAAAlPW0iAAAABlBMVEUAAAD///+l2Z/dAAAAM0l
+EQVR4nGP4/5/h/1+G/58ZDrAz3D/McH8yw83NDDeNGe4Ug9C9zwz3gVLMDA/A6
+P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC
+					</code>
+					<code class="method-response">
+{
+  "resourceId": 1,
+  "changes": {},
+  "resourceIdentifier": "1"
+}
+					</code>
+				</div>
+			</div>
+
+			<a id="client_images_create_form" name="client_images_create_form" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Upload an Image for a Client (Multi-part Form data)</h4>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Mandatory Fields</div></td>
+						</tr>
+						<tr class=alt>
+							<td>file
+							</td>
+						</tr>
+					</table>
+					<p>
+						The form should contain a required named body part with the 
+						name "file". <br/> <br/> 
+						If you are using a HTML form, a snippet like 
+						<small> &lt;input type="file" name="file"&gt;&lt;/input&gt; </small> 
+						can be used for uploading the image file
+					</p>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+POST https://DomainName/api/v1/clients/{clientId}/images
+					</code>
+					<code class="method-request">
+POST clients/1/images
+Content-Type: multipart/form-data 
+Request Body: <i>Not shown</i>
+					</code>
+					<code class="method-response">
+{
+  "resourceId": 1,
+  "changes": {},
+  "resourceIdentifier": "1"
+}
+					</code>
+				</div>
+			</div>
+
+			<a id="client_images_update" name="client_images_update" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Update a Client Image (Data URI)</h4>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+PUT https://DomainName/api/v1/clients/{clientId}/images
+					</code>
+					<code class="method-request">
+PUT clients/1/images
+Content-Type: text/plain 
+Request Body:
+data:image/png;base64,iVBORw0KGgoAA
+AANSUhEUgAAABAAAAAQAQMAAAAlPW0iAAAABlBMVEUAAAD///+l2Z/dAAAAM0l
+EQVR4nGP4/5/h/1+G/58ZDrAz3D/McH8yw83NDDeNGe4Ug9C9zwz3gVLMDA/A6
+P9/AFGGFyjOXZtQAAAAAElFTkSuQmCC
+					</code>
+					<code class="method-response">
+{
+  "resourceId": 1,
+  "changes": {},
+  "resourceIdentifier": "1"
+}
+					</code>
+				</div>
+			</div>
+
+			<a id="client_images_update_form" name="client_images_update_form" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Update a Client Image (Multi-part Form data)</h4>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Mandatory Fields</div></td>
+						</tr>
+						<tr class=alt>
+							<td>file
+							</td>
+						</tr>
+					</table>
+					<p>
+						The form should contain a required named body part with the 
+						name "file". <br/> <br/> 
+						If you are using a HTML form, a snippet like 
+						<small> &lt;input type="file" name="file"&gt;&lt;/input&gt; </small> 
+						can be used for uploading the image file
+					</p>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+PUT https://DomainName/api/v1/clients/{clientId}/images
+					</code>
+					<code class="method-request">
+PUT clients/1/images
+Content-Type: multipart/form-data 
+Request Body: <i>Not shown</i>
+					</code>
+				</div>
+			</div>
+
+			<a id="client_images_delete" name="client_images_delete" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Delete a Client Image</h4>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+DELETE https://DomainName/api/v1/clients/{clientId}/images
+					</code>
+					<code class="method-request">
+DELETE clients/1/images
+Content-Type: application/json 
+No Request Body:
+					</code>
+					<code class="method-response">
+{
+  "resourceId": 1,
+  "changes": {},
+  "resourceIdentifier": "1"
 }
 					</code>
 				</div>
@@ -11618,6 +11857,26 @@ Content-Type: application/json
 					<td><a href="#client_identifiers_retrieve">Retrieve a Client Identifier</a></td>
 					<td><a href="#client_identifiers_update">Update a Client Identifier</a></td>
 					<td><a href="#client_identifiers_delete">Delete a Client Identifier</a></td>
+				</tr>
+				<tr>
+					<td><a href="#client_images">Client Images</a></td>
+					<td>clients/{clientId}/images</td>
+					<td><a href="#client_images_create">Upload an Image for a Client (as  DATA URI)</a></td>
+					<td><a href="#client_images_retrieve">Get Client Image (DATA URI)</a></td>
+					<td><a href="#client_images_update">Update Client Image (DATA URI)</a></td>
+					<td><a href="#client_images_delete">Delete Client Image</a></td>
+				</tr>
+				<tr class="alt">
+					<td></td>
+					<td></td>
+					<td><a href="#client_images_create_form">
+						Upload an Image for a Client (Multi-part form data)</a>
+					</td>
+					<td><a href="#client_images_retrieve_binary">Get Client Image (Binary file)</a></td>
+					<td><a href="#client_images_update_form">
+						Update Client Image (Multi-part form data)</a>
+					</td>
+					<td></td>
 				</tr>
 				<!-- loans api full matrix-->
 				<tr>

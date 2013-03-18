@@ -263,9 +263,9 @@ public class LoanEnumerations {
             case INVALID:
                 optionData = new LoanStatusEnumData(LoanStatus.INVALID.getValue().longValue(), LoanStatus.INVALID.getCode(), "Invalid");
             break;
-            case SUBMITED_AND_PENDING_APPROVAL:
-                optionData = new LoanStatusEnumData(LoanStatus.SUBMITED_AND_PENDING_APPROVAL.getValue().longValue(),
-                        LoanStatus.SUBMITED_AND_PENDING_APPROVAL.getCode(), "Submitted and pending approval");
+            case SUBMITTED_AND_PENDING_APPROVAL:
+                optionData = new LoanStatusEnumData(LoanStatus.SUBMITTED_AND_PENDING_APPROVAL.getValue().longValue(),
+                        LoanStatus.SUBMITTED_AND_PENDING_APPROVAL.getCode(), "Submitted and pending approval");
             break;
             case APPROVED:
                 optionData = new LoanStatusEnumData(LoanStatus.APPROVED.getValue().longValue(), LoanStatus.APPROVED.getCode(), "Approved");

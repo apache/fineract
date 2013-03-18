@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import org.apache.commons.lang.StringUtils;
 import org.mifosplatform.infrastructure.core.data.ApiParameterError;
 import org.mifosplatform.infrastructure.core.domain.Base64EncodedImage;
 import org.mifosplatform.infrastructure.core.exception.ImageDataURLNotValidException;
@@ -30,6 +31,49 @@ public class FileUtils {
     private final static Logger logger = LoggerFactory.getLogger(FileUtils.class);
 
     public static final String MIFOSX_BASE_DIR = System.getProperty("user.home") + File.separator + ".mifosx";
+
+    public static enum IMAGE_MIME_TYPE {
+        GIF("image/gif"), JPEG("image/jpeg"), PNG("image/png");
+
+        private final String value;
+
+        private IMAGE_MIME_TYPE(final String value) {
+            this.value = value;
+        }
+
+        public String getValue() {
+            return this.value;
+        }
+    };
+
+    public static enum IMAGE_FILE_EXTENSION {
+        GIF(".gif"), JPEG(".jpeg"), JPG(".jpg"), PNG(".png");
+
+        private final String value;
+
+        private IMAGE_FILE_EXTENSION(final String value) {
+            this.value = value;
+        }
+
+        public String getValue() {
+            return this.value;
+        }
+    };
+
+    public static enum IMAGE_DATA_URI_SUFFIX {
+        GIF("data:" + IMAGE_MIME_TYPE.GIF.getValue() + ";base64,"), JPEG("data:" + IMAGE_MIME_TYPE.JPEG.getValue() + ";base64,"), PNG(
+                "data:" + IMAGE_MIME_TYPE.PNG.getValue() + ";base64,");
+
+        private final String value;
+
+        private IMAGE_DATA_URI_SUFFIX(final String value) {
+            this.value = value;
+        }
+
+        public String getValue() {
+            return this.value;
+        }
+    };
 
     public static Random random = new Random();
 
@@ -138,7 +182,8 @@ public class FileUtils {
      * @param mimeType
      */
     public static void validateImageMimeType(String mimeType) {
-        if (!(mimeType.equalsIgnoreCase("image/gif") || mimeType.equalsIgnoreCase("image/jpeg") || mimeType.equalsIgnoreCase("image/png"))) { throw new ImageUploadException(); }
+        if (!(mimeType.equalsIgnoreCase(IMAGE_MIME_TYPE.GIF.getValue()) || mimeType.equalsIgnoreCase(IMAGE_MIME_TYPE.JPEG.getValue()) || mimeType
+                .equalsIgnoreCase(IMAGE_MIME_TYPE.PNG.getValue()))) { throw new ImageUploadException(); }
     }
 
     /**
@@ -149,19 +194,15 @@ public class FileUtils {
     public static Base64EncodedImage extractImageFromDataURL(String dataURL) {
         String fileExtension = "";
         String base64EncodedString = null;
-        String gifDataURLSnippet = "data:image/gif;base64,";
-        String pngDataURLSnippet = "data:image/png;base64,";
-        String jpegDataURLSnippet = "data:image/jpeg;base64,";
-
-        if (dataURL.contains(gifDataURLSnippet)) {
-            base64EncodedString = dataURL.replaceAll(gifDataURLSnippet, "");
-            fileExtension = ".gif";
-        } else if (dataURL.contains(pngDataURLSnippet)) {
-            base64EncodedString = dataURL.replaceAll(pngDataURLSnippet, "");
-            fileExtension = ".png";
-        } else if (dataURL.contains(jpegDataURLSnippet)) {
-            base64EncodedString = dataURL.replaceAll(jpegDataURLSnippet, "");
-            fileExtension = ".jpeg";
+        if (StringUtils.startsWith(dataURL, IMAGE_DATA_URI_SUFFIX.GIF.getValue())) {
+            base64EncodedString = dataURL.replaceAll(IMAGE_DATA_URI_SUFFIX.GIF.getValue(), "");
+            fileExtension = IMAGE_FILE_EXTENSION.GIF.getValue();
+        } else if (StringUtils.startsWith(dataURL, IMAGE_DATA_URI_SUFFIX.PNG.getValue())) {
+            base64EncodedString = dataURL.replaceAll(IMAGE_DATA_URI_SUFFIX.PNG.getValue(), "");
+            fileExtension = IMAGE_FILE_EXTENSION.PNG.getValue();
+        } else if (StringUtils.startsWith(dataURL, IMAGE_DATA_URI_SUFFIX.JPEG.getValue())) {
+            base64EncodedString = dataURL.replaceAll(IMAGE_DATA_URI_SUFFIX.JPEG.getValue(), "");
+            fileExtension = IMAGE_FILE_EXTENSION.JPEG.getValue();
         } else {
             throw new ImageDataURLNotValidException();
         }
