@@ -58,12 +58,12 @@ public class ClientIdentifierWritePlatformServiceJpaRepositoryImpl implements Cl
     @Override
     public CommandProcessingResult addClientIdentifier(final Long clientId, final JsonCommand command) {
 
-        context.authenticatedUser();
+        this.context.authenticatedUser();
         final ClientIdentifierCommand clientIdentifierCommand = this.clientIdentifierCommandFromApiJsonDeserializer
                 .commandFromApiJson(command.json());
         clientIdentifierCommand.validateForCreate();
 
-        String documentKey = clientIdentifierCommand.getDocumentKey();
+        final String documentKey = clientIdentifierCommand.getDocumentKey();
         String documentTypeLabel = null;
         Long documentTypeId = null;
         try {
@@ -85,7 +85,7 @@ public class ClientIdentifierWritePlatformServiceJpaRepositoryImpl implements Cl
                     .withClientId(clientId) //
                     .withEntityId(clientIdentifier.getId()) //
                     .build();
-        } catch (DataIntegrityViolationException dve) {
+        } catch (final DataIntegrityViolationException dve) {
             handleClientIdentifierDataIntegrityViolation(documentTypeLabel, documentTypeId, documentKey, dve);
             return CommandProcessingResult.empty();
         }
@@ -95,7 +95,7 @@ public class ClientIdentifierWritePlatformServiceJpaRepositoryImpl implements Cl
     @Override
     public CommandProcessingResult updateClientIdentifier(final Long clientId, final Long identifierId, final JsonCommand command) {
 
-        context.authenticatedUser();
+        this.context.authenticatedUser();
         final ClientIdentifierCommand clientIdentifierCommand = this.clientIdentifierCommandFromApiJsonDeserializer
                 .commandFromApiJson(command.json());
         clientIdentifierCommand.validateForUpdate();
@@ -143,7 +143,7 @@ public class ClientIdentifierWritePlatformServiceJpaRepositoryImpl implements Cl
                     .withEntityId(identifierId) //
                     .with(changes) //
                     .build();
-        } catch (DataIntegrityViolationException dve) {
+        } catch (final DataIntegrityViolationException dve) {
             handleClientIdentifierDataIntegrityViolation(documentTypeLabel, documentTypeId, documentKey, dve);
             return new CommandProcessingResult(Long.valueOf(-1));
         }

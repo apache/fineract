@@ -24,7 +24,7 @@ public class DocumentData {
     private final String type;
     @SuppressWarnings("unused")
     private final String description;
-    private final String location;
+    private String location;
 
     public DocumentData(final Long id, final String parentEntityType, final Long parentEntityId, final String name, final String fileName,
             final Long size, final String type, final String description, final String location) {
@@ -50,4 +50,9 @@ public class DocumentData {
     public String fileLocation() {
         return this.location;
     }
+
+    public void setLocation(final String location) {
+        this.location = location;
+    }
+
 }

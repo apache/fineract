@@ -49,12 +49,12 @@ public final class ClientIdentifierCommandFromApiJsonDeserializer extends Abstra
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, supportedParameters);
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, this.supportedParameters);
 
-        final JsonElement element = fromApiJsonHelper.parse(json);
-        final Long documentTypeId = fromApiJsonHelper.extractLongNamed("documentTypeId", element);
-        final String documentKey = fromApiJsonHelper.extractStringNamed("documentKey", element);
-        final String documentDescription = fromApiJsonHelper.extractStringNamed("documentDescription", element);
+        final JsonElement element = this.fromApiJsonHelper.parse(json);
+        final Long documentTypeId = this.fromApiJsonHelper.extractLongNamed("documentTypeId", element);
+        final String documentKey = this.fromApiJsonHelper.extractStringNamed("documentKey", element);
+        final String documentDescription = this.fromApiJsonHelper.extractStringNamed("documentDescription", element);
 
         return new ClientIdentifierCommand(documentTypeId, documentKey, documentDescription);
     }

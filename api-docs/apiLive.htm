@@ -660,7 +660,7 @@
 								<td></td>
 								<td>savingproducts/{prodcutId}</td>
 								<td></td>
-								<td><a href="#savingproducts_retrieve">Retrieve a Saving procduct</a></td>
+								<td><a href="#savingproducts_retrieve">Retrieve a Saving product</a></td>
 								<td><a href="#savingproducts_update">Update a Saving product</a></td>
 								<td><a href="#savingproducts_delete">Delete a Saving product</a></td>
 							</tr>
@@ -741,6 +741,22 @@
 								<td><a href="#configs_code_retrieve">Retrieve a Code</a></td>
 								<td><a href="#configs_code_update">Update a Code</a></td>
 								<td><a href="#configs_code_delete">Delete a Code</a></td>
+							</tr>
+							<tr>
+								<td><a href="#configs_codes_codevalues">CODE VALUES</a></td>
+								<td>codes/{codeId}/codevalues</td>
+								<td><a href="#configs_codes_codevalues_create">Create a Code Value</a></td>
+								<td><a href="#configs_codes_codevalues_list">List Code Values</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr class="alt">
+								<td></td>
+								<td>codes/{codeId}/codevalues/{codevalueId}</td>
+								<td></td>
+								<td><a href="#configs_codes_codevalues_retrieve">Retrieve a Code Value</a></td>
+								<td><a href="#configs_codes_codevalues_update">Update a Code Value</a></td>
+								<td><a href="#configs_codes_codevalues_delete">Delete a Code Value</a></td>
 							</tr>
 						</table>
 					</div>
@@ -841,7 +857,7 @@
 										Data Table (One to Many)</a></td>
 							</tr>
 							<tr>
-								<td><a href="#notes">NOTE</a></td>
+								<td><a href="#notes">NOTES</a></td>
 								<td>{resource}/{resourceId}/notes</td>
 								<td><a href="#resources_addnote">Add a Resource Note</td>
 								<td><a href="#resource_notelist">Retrieve a Resource's Notes</a></td>
@@ -852,9 +868,37 @@
 								<td></td>
 								<td>{resource}/{resourceId}/notes/{noteId}</td>
 								<td></td>
-								<td><a href="#resources_retrievenote">Retrieve a Resource Note</a></td>
+								<td><a href="#resources_retrievenote">List All
+								Notes for a Resource</a></td>
 								<td><a href="#resources_updatenote">Update a Resource Note</a></td>
 								<td><a href="#resources_deletenote">Delete a Resource Note</a></td>
+							</tr>
+							<tr>
+								<td><a href="#documents">Documents</a></td>
+								<td>{entityType}/{entityId}/documents</td>
+								<td><a href="#documents_create">Create a Document</td>
+								<td><a href="#documents_list">List All Document Details</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr class="alt">
+								<td></td>
+								<td>{entityType}/{entityId}/documents/{documentId}</td>
+								<td></td>
+								<td><a href="#documents_retrieve">Retrieve a Documents Details</a></td>
+								<td><a href="#documents_update">Update a Document</a></td>
+								<td><a href="#documents_delete">Delete a Document</a></td>
+							</tr>
+							<tr class="alt">
+								<td></td>
+								<td>{entityType}/{entityId}/documents/{documentId}/attachment</td>
+								<td></td>
+								<td><a href="#documents_retrieve_file">Retrieve 
+									binary file associated with a 
+									Document</a>
+								</td>
+								<td></td>
+								<td></td>
 							</tr>
 						</table>
 					</div>
@@ -7018,7 +7062,7 @@ Request Body: { }
 						data, their code values are a specific instance of that category.</p>
 					<p>
 						Codes are mostly <b>system defined</b> which means the code itself
-						comes out of the box and cannot be modifed however its code values
+						comes out of the box and cannot be modified however its code values
 						can be. e.g. 'Customer Identifier', it defaults to a code value of
 						'Passport' but could be 'Drivers License, National Id' etc
 					<p />
@@ -7164,6 +7208,174 @@ Content-Type: application/json
 				</div>
 			</div>
 
+			<!-- Code Value starts here -->
+			<a id="configs_codes_codevalues" name="configs_codes_codevalues" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h3>Code Values</h3>
+					<p>Code and code values: Codes represent a specific category of
+						data, their code values are a specific instance of that category.</p>
+					<p>
+						Codes are mostly <b>system defined</b> which means the code itself
+						comes out of the box and cannot be modified however its code values
+						can be. e.g. 'Customer Identifier', it defaults to a code value of
+						'Passport' but could be 'Drivers License, National Id' etc
+					<p />
+				</div>
+			</div>
+
+			<a id="configs_codes_codevalues_create" name="configs_codes_codevalues_create"
+				class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Create a Code Value</h4>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+POST https://DomainName/api/v1/codes/1/codevalues
+					</code>
+					<code class="method-request">
+POST codes/1/codevalues 
+Content-Type: application/json 
+Request Body: 
+{
+	"name":"Ration Card",
+	"position":"1"
+}
+					</code>
+					<code class="method-response">
+{ 
+	"resourceId": 4 
+}
+					</code>
+				</div>
+			</div>
+
+			<a id="configs_codes_codevalues_list" name="configs_codes_codevalues_list"
+				class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>List Code Values</h4>
+					<p>Returns the list of Code Values for a given Code</p>
+					<p>Example Requests:</p>
+					<div class=apiClick>codes/1/codevalues</div>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+GET https://DomainName/api/v1/codes/{codeId}/codevalues
+					</code>
+					<code class="method-response">
+[
+  {
+    "id": 1,
+    "name": "Passport",
+    "position": 0
+  },
+  {
+    "id": 2,
+    "name": "Id",
+    "position": 0
+  },
+  {
+    "id": 3,
+    "name": "Drivers License",
+    "position": 0
+  },
+  {
+    "id": 4,
+    "name": "Any Other Id Type",
+    "position": 0
+  },
+  {
+    "id": 5,
+    "name": "Ration Card",
+    "position": 1
+  }
+]
+					</code>
+				</div>
+			</div>
+
+			<a id="configs_codes_codevalues_retrieve" name="configs_codes_codevalues_retrieve"
+				class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Retrieve a Code Value</h4>
+					<p>Returns the details of a Code Value</p>
+					<p>Example Requests:</p>
+					<div class=apiClick>codes/1/codevalues/1</div>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+GET https://DomainName/api/v1/codes/{codeId}/codevalues/{codevalueId}
+					</code>
+					<code class="method-response">
+{
+  "id": 1,
+  "name": "Passport",
+  "position": 0
+}
+					</code>
+				</div>
+			</div>
+
+			<a id="configs_codes_codevalues_update" name="configs_codes_codevalues_update"
+				class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Update a Code Value</h4>
+					<p>Updates the details of a code value.</p>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+PUT https://DomainName/api/v1/codes/{codeId}/codevalues/{codevalueId}
+					</code>
+					<code class="method-request">
+PUT codes/1/codevalues/1
+Content-Type: application/json 
+Request Body: 
+{ 
+	"name": "Indian Passport",
+	"position":2
+}
+					</code>
+					<code class="method-response">
+{
+  "resourceId": 1,
+  "changes": {
+    "name": "Indian Passport",
+    "position": 2
+  }
+}
+					</code>
+				</div>
+			</div>
+
+			<a id="configs_codes_codevalues_delete" name="configs_codes_codevalues_delete"
+				class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Delete a Code Value</h4>
+					<p>Deletes a code value</p>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+DELETE https://DomainName/api/v1/codes/{codeId}/codevalues/{codevalueId}
+					</code>
+					<code class="method-request">
+DELETE codes/1/codevalues/5 
+Content-Type: application/json
+					</code>
+					<code class="method-response">
+{ 
+	"resourceId": 5
+}
+					</code>
+				</div>
+			</div>
+
+
+			<!-- Funds starts here-->
 			<a id="funds" name="funds" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
@@ -9229,6 +9441,336 @@ No Request Body:
 			</div>
 			
 			<!-- end of Notes api docs -->
+
+			<!-- start of documents api docs -->
+			<a id="documents" name="documents" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h3>Documents</h3>
+					<p>Multiple Documents (a combination of a name, description
+						and a file) may be attached to different Entities 
+						like Clients, Staff, Loans, Savings and Client
+						Identifiers in the system
+					</p>
+					<p>Note: The currently allowed Entities are
+						<ul>
+							<li>Clients: URL Pattern as <i>clients</i></li>
+							<li>Staff: URL Pattern as <i>staff</i></li>
+							<li>Loans: URL Pattern as <i>loans</i></li>
+							<li>Savings: URL Pattern as <i>savings</i></li>
+							<li>Client Identifiers: URL Pattern as <i>client_identifiers</i></li>
+						</ul>
+					</p>
+					<br/>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Field Descriptions</div></td>
+						</tr>
+						<tr class=alt>
+							<td>parentEntityType</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>The type of the Entity
+								with which this document is associated
+							</td>
+						</tr>
+						<tr class=alt>
+							<td>parentEntityId</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>The ID of the entity (client,
+								loan etc) with which this document is 
+								associated</td>
+						</tr>
+						<tr class=alt>
+							<td>name</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>User Defined name for the
+								document, need not be the same as the name
+								of the file associated with the document
+							</td>
+						</tr>
+						<tr class=alt>
+							<td>fileName</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>The name of the file associated
+								with this document</td>
+						</tr>
+						<tr class=alt>
+							<td>size</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>The size (in bytes) of the file
+								associated with this document</td>
+						</tr>
+						<tr class=alt>
+							<td>type</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Mime Type of the file
+								associated with this document
+							</td>
+						</tr>
+						<tr class=alt>
+							<td>description</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>A description of this document
+							</td>
+						</tr>
+					</table>
+				</div>
+			</div>
+
+			<a id="documents_list" name="documents_list" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>List documents</h4>
+					<p>Example Requests:</p>
+					<div class=apiClick>clients/1/documents</div>
+					<br>
+					<div class=apiClick>client_identifiers/1/documents</div>
+					<br>
+					<div class=apiClick>loans/1/documents?fields=name,description</div>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+GET https://DomainName/api/v1/{entityType}/{entityId}/documents
+					</code>
+					<code class="method-response">
+[
+   {
+       "id": 1,
+       "parentEntityType": "clients",
+       "parentEntityId": 1,
+       "name": "Client Details Form ",
+       "fileName": "CGAP.pdf",
+       "size": 5246719,
+       "type": "application/pdf",
+       "description": "A signed form signed by new member"
+   }
+]
+					</code>
+				</div>
+			</div>
+
+			<a id="documents_retrieve" name="documents_retrieve"
+				class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Retrieve a Document</h4>
+					<p>Example Requests:</p>
+					<div class=apiClick>clients/1/documents/1</div>
+					<br>
+					<br>
+					<div class=apiClick>loans/1/documents/1</div>
+					<br>
+					<br>
+					<div class=apiClick>client_identifiers/1/documents/1?fields=name,description</div>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+GET https://DomainName/api/v1/documents/{clientId}
+					</code>
+					<code class="method-response">
+{
+   "id": 1,
+   "parentEntityType": "clients",
+   "parentEntityId": 1,
+   "name": "Client Details Form ",
+   "fileName": "CGAP.pdf",
+   "size": 5246719,
+   "type": "application/pdf",
+   "description": "A signed form signed by new member"
+}
+					</code>
+				</div>
+			</div>
+
+			<a id="documents_create" name="documents_create" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Create a Document</h4>
+					<p>
+						<b>Note:</b> A document is created using a Multi-part form upload
+						<br>
+						<table class=matrixHeading>
+
+							<tr class="matrixHeadingBG">
+								<td><div class="mifosXHeading2">Body Parts</div></td>
+							</tr>
+							<tr class=alt>
+								<td>name</td>
+							</tr>
+							<tr>
+								<td class=fielddesc>Name or summary of the document
+								</td>
+							</tr>
+							<tr class=alt>
+								<td>description</td>
+							</tr>
+							<tr>
+								<td class=fielddesc>Description of the document
+							</tr>
+							<tr class=alt>
+								<td>file</td>
+							</tr>
+							<tr>
+								<td class=fielddesc>The file to be uploaded
+								</td>							
+							</tr>
+						</table>
+					</p>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Mandatory Fields</div></td>
+						</tr>
+						<tr class=alt>
+							<td>file and description</td>
+						</tr>
+					</table>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+POST https://DomainName/api/v1/{entityType}/{entityId}/documents
+					</code>
+					<code class="method-request">
+POST clients/1/documents
+Content-Type: multipart/form-data 
+Request Body:
+<i>Not Shown (multi-part form data)</i>
+					</code>
+					<code class="method-response">
+{
+	"resourceId":3,
+	"resourceIdentifier":"3"
+}
+					</code>
+				</div>
+			</div>
+
+			<a id="documents_update" name="documents_update" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Update a Document</h4>
+					<p>
+						<b>Note:</b> A document is updated using a Multi-part form upload
+						<br>
+						<table class=matrixHeading>
+
+							<tr class="matrixHeadingBG">
+								<td><div class="mifosXHeading2">Body Parts</div></td>
+							</tr>
+							<tr class=alt>
+								<td>name</td>
+							</tr>
+							<tr>
+								<td class=fielddesc>Name or summary of the document
+								</td>
+							</tr>
+							<tr class=alt>
+								<td>description</td>
+							</tr>
+							<tr>
+								<td class=fielddesc>Description of the document
+							</tr>
+							<tr class=alt>
+								<td>file</td>
+							</tr>
+							<tr>
+								<td class=fielddesc>The file to be uploaded
+								</td>							
+							</tr>
+						</table>
+					</p>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+PUT https://DomainName/api/v1/{entityType}/{entityId}/documents/{documentId}
+						</code>
+					<code class="method-request">
+PUT clients/1/documents/1 
+Content-Type: multipart/form-data 
+Request Body:
+<i>Not Shown (multi-part form data)</i>
+					</code>
+					<code class="method-response">
+{
+	"resourceId":3,
+	"changes":{},
+	"resourceIdentifier":"3"
+}
+					</code>
+				</div>
+			</div>
+
+			<a id="documents_retrieve_file" name="documents_retrieve"
+				class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Retrieve Binary File associated with Document</h4>
+					<p>Request used to download the file associated with the document</p>
+					<p>Example Requests:</p>
+					<div class=apiClick>clients/1/documents/1/attachment</div>
+					<br>
+					<br>
+					<div class=apiClick>loans/1/documents/1/attachment</div>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+GET https://DomainName/api/v1/{entityType}/{entityId}/documents/{documentId}/attachment
+					</code>
+					<code class="method-response">
+<i>Not Shown: The corresponding Binary file</i>
+					</code>
+				</div>
+			</div>
+
+			<a id="documents_delete" name="documents_delete" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Remove a Document</h4>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+DELETE https://DomainName/api/v1/{entityType}/{entityId}/documents/{documentId}
+					</code>
+					<code class="method-request">
+DELETE clients/1/documents/1
+Content-Type: application/json 
+No Request Body:
+					</code>
+					<code class="method-response">
+{
+	"resourceId":1,
+	"changes":{},
+	"resourceIdentifier":"1"
+}
+					</code>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+DELETE https://DomainName/api/v1/{entityType}/{entityId}/documents/{documentId}
+					</code>
+					<code class="method-request">
+DELETE loans/1/documents/1
+Content-Type: application/json 
+No Request Body:
+					</code>
+					<code class="method-response">
+{
+	"resourceId":1,
+	"changes":{},
+	"resourceIdentifier":"1"
+}
+					</code>
+				</div>
+
+			</div>
+
+
 			<!-- start of reports api docs -->
 			<a id="reports" name="reports" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
@@ -12087,6 +12629,22 @@ Content-Type: application/json
 					<td><a href="#configs_code_delete">Delete a Code</a></td>
 				</tr>
 				<tr class="alt">
+					<td><a href="#configs_codes_codevalues">CODE VALUES</a></td>
+					<td>codes/{codeId}/codevalues</td>
+					<td><a href="#configs_codes_codevalues_create">Create a Code Value</a></td>
+					<td><a href="#configs_codes_codevalues_list">List Code Values</a></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr >
+					<td></td>
+					<td>codes/{codeId}/codevalues/{codevalueId}</td>
+					<td></td>
+					<td><a href="#configs_codes_codevalues_retrieve">Retrieve a Code Value</a></td>
+					<td><a href="#configs_codes_codevalues_update">Update a Code Value</a></td>
+					<td><a href="#configs_codes_codevalues_delete">Delete a Code Value</a></td>
+				</tr>
+				<tr class="alt">
 					<td><a href="#funds">FUNDS</a></td>
 					<td>funds</td>
 					<td><a href="#funds_create">Create a Fund</a></td>
@@ -12181,6 +12739,50 @@ Content-Type: application/json
 							Table (One to Many)</a></td>
 				</tr>
 				<tr>
+					<td><a href="#documents">Documents</a></td>
+					<td>{entityType}/{entityId}/documents</td>
+					<td><a href="#documents_create">Create a Document</td>
+					<td><a href="#documents_list">List All Document Details</a></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr class="alt">
+					<td></td>
+					<td>{entityType}/{entityId}/documents/{documentId}</td>
+					<td></td>
+					<td><a href="#documents_retrieve">Retrieve a Documents Details</a></td>
+					<td><a href="#documents_update">Update a Document</a></td>
+					<td><a href="#documents_delete">Delete a Document</a></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>{entityType}/{entityId}/documents/{documentId}/attachment</td>
+					<td></td>
+					<td><a href="#documents_retrieve_file">Retrieve 
+						binary file associated with a 
+						Document</a>
+					</td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr class="alt">
+					<td><a href="#notes">NOTES</a></td>
+					<td>{resource}/{resourceId}/notes</td>
+					<td><a href="#resources_addnote">Add a Resource Note</td>
+					<td><a href="#resource_notelist">Retrieve a Resource's Notes</a></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>{resource}/{resourceId}/notes/{noteId}</td>
+					<td></td>
+					<td><a href="#resources_retrievenote">List All
+					Notes for a Resource</a></td>
+					<td><a href="#resources_updatenote">Update a Resource Note</a></td>
+					<td><a href="#resources_deletenote">Delete a Resource Note</a></td>
+				</tr>
+				<tr class="alt">
 					<td><a href="#glaccounts">General Ledger Account</a></td>
 					<td>glaccounts</td>
 					<td><a href="#glaccounts_create">Create a New Ledger Account</a></td>
@@ -12188,7 +12790,7 @@ Content-Type: application/json
 					<td></td>
 					<td></td>
 				</tr>
-				<tr class="alt">
+				<tr>
 					<td></td>
 					<td>glaccounts/{glaccountId}</td>
 					<td></td>
@@ -12196,7 +12798,7 @@ Content-Type: application/json
 					<td><a href="#glaccounts_update">Update a Ledger Account</a></td>
 					<td><a href="#glaccounts_delete">Delete a Ledger Account</a></td>
 				</tr>
-				<tr>
+				<tr class="alt">
 					<td><a href="#glclosures">Accounting Closure</a></td>
 					<td>glclosures</td>
 					<td><a href="#glclosures_create">Create an Accounting Closure</a></td>
@@ -12204,7 +12806,7 @@ Content-Type: application/json
 					<td></td>
 					<td></td>
 				</tr>
-				<tr class="alt">
+				<tr>
 					<td></td>
 					<td>glclosures/{glclosureId}</td>
 					<td></td>
@@ -12212,7 +12814,7 @@ Content-Type: application/json
 					<td><a href="#glclosures_update">Update an Accounting Closure</a></td>
 					<td><a href="#glclosures_delete">Delete an Accounting Closure</a></td>
 				</tr>
-				<tr>
+				<tr class="alt">
 					<td><a href="#journalentries">Journal Entries</a></td>
 					<td>journalentries</td>
 					<td><a href="#journalentries_create">Create Journal Entries</a></td>
@@ -12220,7 +12822,7 @@ Content-Type: application/json
 					<td></td>
 					<td></td>
 				</tr>
-				<tr class="alt">
+				<tr>
 					<td></td>
 					<td>journalentries/{entryId}</td>
 					<td></td>
@@ -12228,7 +12830,7 @@ Content-Type: application/json
 					<td></td>
 					<td></td>
 				</tr>
-				<tr>
+				<tr class="alt">
 					<td></td>
 					<td>journalentries/{transactionId}/reversal</td>
 					<td><a href="#journalentries_reverse">Reverse Journal Entries</a></td>
@@ -12236,7 +12838,7 @@ Content-Type: application/json
 					<td></td>
 					<td></td>
 				</tr>
-				<tr class="alt">
+				<tr>
 					<td><a href="#reports">REPORT</a></td>
 					<td>reports</td>
 					<td></td>
@@ -12244,7 +12846,7 @@ Content-Type: application/json
 					<td></td>
 					<td></td>
 				</tr>
-				<tr>
+				<tr class="alt">
 					<td></td>
 					<td>reports/{reportName}</td>
 					<td></td>
@@ -12252,7 +12854,7 @@ Content-Type: application/json
 					<td></td>
 					<td></td>
 				</tr>
-				<tr class="alt">
+				<tr>
 					<td><a href="#authentication">AUTHENTICATION</a></td>
 					<td>authentication</td>
 					<td><a href="#authenticate_request">Verify Authentication</a></td>
@@ -12260,7 +12862,7 @@ Content-Type: application/json
 					<td></td>
 					<td></td>
 				</tr>
-				<tr>
+				<tr class="alt">
 					<td><a href="#users">USER</a></td>
 					<td>users</td>
 					<td><a href="#users_create">Create a User</a></td>
@@ -12268,7 +12870,7 @@ Content-Type: application/json
 					<td></td>
 					<td></td>
 				</tr>
-				<tr class="alt">
+				<tr>
 					<td></td>
 					<td>users/{userId}</td>
 					<td></td>
@@ -12276,7 +12878,7 @@ Content-Type: application/json
 					<td><a href="#users_update">Update a User</a></td>
 					<td><a href="#users_delete">Delete a User</a></td>
 				</tr>
-				<tr>
+				<tr class="alt">
 					<td><a href="#roles">ROLE</a></td>
 					<td>roles</td>
 					<td><a href="#roles_create">Create a New Role</a></td>
@@ -12284,7 +12886,7 @@ Content-Type: application/json
 					<td></td>
 					<td></td>
 				</tr>
-				<tr class="alt">
+				<tr>
 					<td></td>
 					<td>roles/{roleId}</td>
 					<td></td>
@@ -12292,7 +12894,7 @@ Content-Type: application/json
 					<td><a href="#roles_update">Update a Role</a></td>
 					<td></td>
 				</tr>
-				<tr>
+				<tr class="alt">
 					<td></td>
 					<td>roles/{roleId}/permissions</td>
 					<td></td>
@@ -12302,7 +12904,7 @@ Content-Type: application/json
 							Permissions</a></td>
 					<td></td>
 				</tr>
-				<tr class="alt">
+				<tr>
 					<td><a href="#permissions">PERMISSION</a></td>
 					<td>permissions</td>
 					<td></td>
@@ -12311,7 +12913,7 @@ Content-Type: application/json
 					<td></td>
 					<td></td>
 				</tr>
-				<tr>
+				<tr class="alt">
 					<td><a href="#depositproducts">DEPOSIT PRODUCT</a></td>
 					<td>depositproducts</td>
 					<td><a href="#depositproducts_create">Create a Deposit product</a></td>
@@ -12319,7 +12921,7 @@ Content-Type: application/json
 					<td></td>
 					<td></td>
 				</tr>
-				<tr class="alt">
+				<tr>
 					<td></td>
 					<td>depositproducts/{prodcutId}</td>
 					<td></td>
@@ -12327,7 +12929,7 @@ Content-Type: application/json
 					<td><a href="#depositproducts_update">Update a Deposit product</a></td>
 					<td><a href="#depositproducts_delete">Delete a Deposit product</a></td>
 				</tr>
-				<tr>
+				<tr class="alt">
 					<td><a href="#savingproducts">SAVING PRODUCT</a></td>
 					<td>savingproducts</td>
 					<td><a href="#savingproducts_create">Create a Saving product</a></td>
@@ -12335,7 +12937,7 @@ Content-Type: application/json
 					<td></td>
 					<td></td>
 				</tr>
-				<tr class="alt">
+				<tr>
 					<td></td>
 					<td>savingproducts/{prodcutId}</td>
 					<td></td>
@@ -12344,7 +12946,7 @@ Content-Type: application/json
 					<td><a href="#savingproducts_delete">Delete a Saving product</a></td>
 				</tr>
 				
-				<tr>
+				<tr class="alt">
 					<td><a href="#fixeddeposits">FIXED DEPOSITS</a></td>
 					<td>depositaccounts</td>
 					<td><a href="#fixeddeposits_create">Create a New Deposit
@@ -12353,7 +12955,7 @@ Content-Type: application/json
 					<td></td>
 					<td></td>
 				</tr>
-				<tr class="alt">
+				<tr>
 					<td></td>
 					<td>depositaccounts/{accountId}</td>
 					<td><a href="#fixeddeposits_approve_etc">Approve, Undo Approve,
@@ -12366,7 +12968,7 @@ Content-Type: application/json
 							Application</a></td>
 				</tr>
 				
-				<tr>
+				<tr class="alt">
 					<td><a href="#savingaccounts">SAVING ACCOUNTS</a></td>
 					<td>savingaccounts</td>
 					<td><a href="#savingaccounts_create">Create a New Saving 
@@ -12375,7 +12977,7 @@ Content-Type: application/json
 					<td></td>
 					<td></td>
 				</tr>
-				<tr class="alt">
+				<tr>
 					<td></td>
 					<td>savingaccounts/{accountId}</td>
 					<td><a href="#savingaccounts_approve_etc">Approve, Undo Approve,
