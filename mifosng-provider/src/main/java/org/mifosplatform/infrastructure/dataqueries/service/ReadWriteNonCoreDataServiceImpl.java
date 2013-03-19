@@ -362,6 +362,14 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             dataScopeCriteria = " join m_client c on c.id = t.client_id " + " join m_office o on o.id = c.office_id and o.hierarchy like '"
                     + currentUser.getOffice().getHierarchy() + "%'";
         }
+         if (appTable.equalsIgnoreCase("m_group")) {
+            dataScopeCriteria = " join m_office o on o.id = t.office_id and o.hierarchy like '"
+                    + currentUser.getOffice().getHierarchy() + "%'";
+        }   
+        if (appTable.equalsIgnoreCase("m_office")) {
+            dataScopeCriteria = " join m_office o on o.id = t.id and o.hierarchy like '"
+                    + currentUser.getOffice().getHierarchy() + "%'";
+        }        
 
         if (dataScopeCriteria == null) { throw new PlatformDataIntegrityException("error.msg.invalid.dataScopeCriteria",
                 "Application Table: " + appTable + " not catered for in data Scoping"); }
@@ -374,6 +382,8 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
 
         if (appTable.equalsIgnoreCase("m_client")) return;
         if (appTable.equalsIgnoreCase("m_loan")) return;
+        if (appTable.equalsIgnoreCase("m_group")) return;
+        if (appTable.equalsIgnoreCase("m_office")) return;
 
         throw new PlatformDataIntegrityException("error.msg.invalid.application.table", "Invalid Application Table: " + appTable);
     }
