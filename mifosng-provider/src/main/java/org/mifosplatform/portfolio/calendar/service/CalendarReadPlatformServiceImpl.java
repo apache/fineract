@@ -14,6 +14,7 @@ import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
 import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
 import org.mifosplatform.portfolio.calendar.data.CalendarData;
+import org.mifosplatform.portfolio.calendar.domain.CalendarEntityType;
 import org.mifosplatform.portfolio.calendar.exception.CalendarNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -101,6 +102,18 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
 
         return this.jdbcTemplate.query(sql, rm, new Object[] { entityId, entityTypeId });
     }
+    
+    @Override
+    public Collection<CalendarData> retrieveParentCalendarsByEntity(Long entityId, Integer entityTypeId) {
+        
+        final CalendarDataMapper rm = new CalendarDataMapper();
+        CalendarEntityType ceType = CalendarEntityType.fromInt(entityTypeId);
+        String parentHeirarchyCondition = getParentHierarchyCondition(ceType);
+        final String sql = rm.schema() + " " + parentHeirarchyCondition        		
+                + " and ci.entity_type_enum = ? order by c.start_date ";
+        
+        return this.jdbcTemplate.query(sql, rm, new Object[] { entityId, CalendarEntityType.GROUPS.getValue() });
+    }
 
     @Override
     public Collection<CalendarData> retrieveAllCalendars() {
@@ -115,6 +128,33 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
     @Override
     public CalendarData retrieveNewCalendarDetails() {
         return CalendarData.sensibleDefaultsForNewCalendarCreation();
+    }
+    
+    public static String getParentHierarchyCondition(final CalendarEntityType calendarEntityType) {
+        String conditionSql = "";
+        
+        switch (calendarEntityType) {
+            case CLIENTS:
+                //TODO : AA : do we need to propagate to top level parent in hierarchy?
+                conditionSql = " and ci.entity_id in (select gc.group_id from m_client c join m_group_client gc "
+                        + " on c.id=gc.client_id where c.id = ? ) ";
+            break;
+            
+            case GROUPS:
+                //TODO : AA: add parent hierarchy for groups                
+                conditionSql = " and ci.entity_id = ? ) ";
+            break;
+            
+            case LOANS:
+              //TODO : AA: do we need parent hierarchy calendars for loans?
+                conditionSql = " and ci.entity_id = ? ) ";
+            break;
+
+            default:
+            break;
+        }
+
+        return conditionSql;
     }
 
 }

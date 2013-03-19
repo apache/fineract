@@ -14,6 +14,8 @@ public interface CalendarReadPlatformService {
     CalendarData retrieveCalendar(final Long calendarId, Long entityId, Integer entityTypeId);
 
     Collection<CalendarData> retrieveCalendarsByEntity(final Long entityId, final Integer entityTypeId);
+    
+    Collection<CalendarData> retrieveParentCalendarsByEntity(final Long entityId, final Integer entityTypeId);
 
     Collection<CalendarData> retrieveAllCalendars();
 

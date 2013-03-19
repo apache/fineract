@@ -138,6 +138,12 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             Note note = Note.loanNote(newLoanApplication, submittedOnNote);
             this.noteRepository.save(note);
         }
+        
+        //get calendar
+        final Long calendarId = command.longValueOfParameterNamed("calendarId");
+        if(calendarId != null && calendarId != 0){
+            //Save calendar instance
+        }
 
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //

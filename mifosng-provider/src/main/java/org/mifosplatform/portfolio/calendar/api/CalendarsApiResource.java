@@ -28,6 +28,7 @@ import org.joda.time.LocalDate;
 import org.mifosplatform.commands.domain.CommandWrapper;
 import org.mifosplatform.commands.service.CommandWrapperBuilder;
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
+import org.mifosplatform.infrastructure.core.api.ApiParameterHelper;
 import org.mifosplatform.infrastructure.core.api.ApiRequestParameterHelper;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
@@ -107,9 +108,21 @@ public class CalendarsApiResource {
             @Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
+        
+        final Set<String> associationParameters = ApiParameterHelper.extractAssociationsForResponseIfProvided(uriInfo.getQueryParameters());
+        
+        Collection<CalendarData> calendarsData = new ArrayList<CalendarData>();
+        
+        if (!associationParameters.isEmpty()) {
+            if (associationParameters.contains("parentCalendars")) {
+                calendarsData.addAll(this.readPlatformService.retrieveParentCalendarsByEntity(entityId,
+                        CalendarEntityType.valueOf(entityType.toUpperCase()).getValue()));
+            }
+        }
 
-        Collection<CalendarData> calendarsData = this.readPlatformService.retrieveCalendarsByEntity(entityId,
-                CalendarEntityType.valueOf(entityType.toUpperCase()).getValue());
+        calendarsData.addAll(this.readPlatformService.retrieveCalendarsByEntity(entityId, CalendarEntityType.valueOf(entityType.toUpperCase())
+                .getValue()));
+
         //Add recurring dates
         calendarsData = handleRecurringDates(calendarsData);
         
