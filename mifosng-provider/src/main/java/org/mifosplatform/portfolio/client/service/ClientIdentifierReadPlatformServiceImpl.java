@@ -37,11 +37,11 @@ public class ClientIdentifierReadPlatformServiceImpl implements ClientIdentifier
     @Override
     public Collection<ClientIdentifierData> retrieveClientIdentifiers(final Long clientId) {
 
-        AppUser currentUser = context.authenticatedUser();
-        String hierarchy = currentUser.getOffice().getHierarchy();
-        String hierarchySearchString = hierarchy + "%";
+        final AppUser currentUser = this.context.authenticatedUser();
+        final String hierarchy = currentUser.getOffice().getHierarchy();
+        final String hierarchySearchString = hierarchy + "%";
 
-        ClientIdentityMapper rm = new ClientIdentityMapper();
+        final ClientIdentityMapper rm = new ClientIdentityMapper();
 
         String sql = "select " + rm.schema();
 
@@ -53,11 +53,11 @@ public class ClientIdentifierReadPlatformServiceImpl implements ClientIdentifier
     @Override
     public ClientIdentifierData retrieveClientIdentifier(final Long clientId, final Long clientIdentifierId) {
         try {
-            AppUser currentUser = context.authenticatedUser();
-            String hierarchy = currentUser.getOffice().getHierarchy();
-            String hierarchySearchString = hierarchy + "%";
+            final AppUser currentUser = this.context.authenticatedUser();
+            final String hierarchy = currentUser.getOffice().getHierarchy();
+            final String hierarchySearchString = hierarchy + "%";
 
-            ClientIdentityMapper rm = new ClientIdentityMapper();
+            final ClientIdentityMapper rm = new ClientIdentityMapper();
 
             String sql = "select " + rm.schema();
 
@@ -67,7 +67,7 @@ public class ClientIdentifierReadPlatformServiceImpl implements ClientIdentifier
                     hierarchySearchString, clientIdentifierId });
 
             return clientIdentifierData;
-        } catch (EmptyResultDataAccessException e) {
+        } catch (final EmptyResultDataAccessException e) {
             throw new ClientIdentifierNotFoundException(clientIdentifierId);
         }
 
@@ -95,7 +95,7 @@ public class ClientIdentifierReadPlatformServiceImpl implements ClientIdentifier
             final String description = rs.getString("description");
             final String documentTypeName = rs.getString("documentType");
 
-            CodeValueData documentType = CodeValueData.instance(documentTypeId, documentTypeName);
+            final CodeValueData documentType = CodeValueData.instance(documentTypeId, documentTypeName);
 
             return ClientIdentifierData.singleItem(id, clientId, documentType, documentKey, description);
         }

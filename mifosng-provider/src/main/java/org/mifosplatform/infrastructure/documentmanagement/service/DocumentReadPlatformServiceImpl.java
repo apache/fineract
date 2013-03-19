@@ -35,13 +35,13 @@ public class DocumentReadPlatformServiceImpl implements DocumentReadPlatformServ
     @Override
     public Collection<DocumentData> retrieveAllDocuments(final String entityType, final Long entityId) {
 
-        context.authenticatedUser();
+        this.context.authenticatedUser();
 
         // TODO verify if the entities are valid and a user
         // has data
         // scope for the particular entities
-        DocumentMapper mapper = new DocumentMapper();
-        String sql = "select " + mapper.schema() + " order by d.id";
+        final DocumentMapper mapper = new DocumentMapper(true);
+        final String sql = "select " + mapper.schema() + " order by d.id";
         return this.jdbcTemplate.query(sql, mapper, new Object[] { entityType, entityId });
     }
 
@@ -49,20 +49,26 @@ public class DocumentReadPlatformServiceImpl implements DocumentReadPlatformServ
     public DocumentData retrieveDocument(final String entityType, final Long entityId, final Long documentId) {
 
         try {
-            context.authenticatedUser();
+            this.context.authenticatedUser();
 
             // TODO verify if the entities are valid and a
             // user has data
             // scope for the particular entities
-            DocumentMapper mapper = new DocumentMapper();
-            String sql = "select " + mapper.schema() + " and d.id=? ";
+            final DocumentMapper mapper = new DocumentMapper(false);
+            final String sql = "select " + mapper.schema() + " and d.id=? ";
             return this.jdbcTemplate.queryForObject(sql, mapper, new Object[] { entityType, entityId, documentId });
-        } catch (EmptyResultDataAccessException e) {
+        } catch (final EmptyResultDataAccessException e) {
             throw new DocumentNotFoundException(entityType, entityId, documentId);
         }
     }
 
     private static final class DocumentMapper implements RowMapper<DocumentData> {
+
+        private final boolean hideLocation;
+
+        public DocumentMapper(final boolean hideLocation) {
+            this.hideLocation = hideLocation;
+        }
 
         public String schema() {
             return "d.id as id, d.parent_entity_type as parentEntityType, d.parent_entity_id as parentEntityId, d.name as name, "
@@ -82,7 +88,10 @@ public class DocumentReadPlatformServiceImpl implements DocumentReadPlatformServ
             final String fileName = rs.getString("fileName");
             final String fileType = rs.getString("fileType");
             final String description = rs.getString("description");
-            final String location = rs.getString("location");
+            String location = null;
+            if (!this.hideLocation) {
+                location = rs.getString("location");
+            }
 
             return new DocumentData(id, parentEntityType, parentEntityId, name, fileName, fileSize, fileType, description, location);
         }

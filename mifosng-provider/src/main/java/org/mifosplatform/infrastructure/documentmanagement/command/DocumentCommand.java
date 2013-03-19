@@ -26,7 +26,7 @@ public class DocumentCommand {
     private final Set<String> modifiedParameters;
 
     public DocumentCommand(final Set<String> modifiedParameters, final Long id, final String parentEntityType, final Long parentEntityId,
-            final String name, final String fileName, Long size, String type, final String description, String location) {
+            final String name, final String fileName, final Long size, final String type, final String description, final String location) {
         this.modifiedParameters = modifiedParameters;
         this.id = id;
         this.parentEntityType = parentEntityType;
@@ -40,58 +40,58 @@ public class DocumentCommand {
     }
 
     public Long getId() {
-        return id;
+        return this.id;
     }
 
     public String getParentEntityType() {
-        return parentEntityType;
+        return this.parentEntityType;
     }
 
     public Long getParentEntityId() {
-        return parentEntityId;
+        return this.parentEntityId;
     }
 
     public String getName() {
-        return name;
+        return this.name;
     }
 
     public String getFileName() {
-        return fileName;
+        return this.fileName;
     }
 
     public Long getSize() {
-        return size;
+        return this.size;
     }
 
     public String getType() {
-        return type;
+        return this.type;
     }
 
     public String getDescription() {
-        return description;
+        return this.description;
     }
 
     public String getLocation() {
-        return location;
+        return this.location;
     }
 
     public Set<String> getModifiedParameters() {
-        return modifiedParameters;
+        return this.modifiedParameters;
     }
 
-    public void setFileName(String fileName) {
+    public void setFileName(final String fileName) {
         this.fileName = fileName;
     }
 
-    public void setSize(Long size) {
+    public void setSize(final Long size) {
         this.size = size;
     }
 
-    public void setType(String type) {
+    public void setType(final String type) {
         this.type = type;
     }
 
-    public void setLocation(String location) {
+    public void setLocation(final String location) {
         this.location = location;
     }
 

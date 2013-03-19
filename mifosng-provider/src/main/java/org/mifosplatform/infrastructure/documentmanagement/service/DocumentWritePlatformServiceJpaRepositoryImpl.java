@@ -45,15 +45,15 @@ public class DocumentWritePlatformServiceJpaRepositoryImpl implements DocumentWr
     @Override
     public Long createDocument(final DocumentCommand documentCommand, final InputStream inputStream) {
         try {
-            context.authenticatedUser();
+            this.context.authenticatedUser();
 
-            DocumentCommandValidator validator = new DocumentCommandValidator(documentCommand);
+            final DocumentCommandValidator validator = new DocumentCommandValidator(documentCommand);
 
             validateParentEntityType(documentCommand);
 
             validator.validateForCreate();
 
-            String fileUploadLocation = FileUtils.generateFileParentDirectory(documentCommand.getParentEntityType(),
+            final String fileUploadLocation = FileUtils.generateFileParentDirectory(documentCommand.getParentEntityType(),
                     documentCommand.getParentEntityId());
 
             /** Recursively create the directory if it does not exist **/
@@ -61,20 +61,20 @@ public class DocumentWritePlatformServiceJpaRepositoryImpl implements DocumentWr
                 new File(fileUploadLocation).mkdirs();
             }
 
-            String fileLocation = FileUtils.saveToFileSystem(inputStream, fileUploadLocation, documentCommand.getFileName());
+            final String fileLocation = FileUtils.saveToFileSystem(inputStream, fileUploadLocation, documentCommand.getFileName());
 
-            Document document = Document.createNew(documentCommand.getParentEntityType(), documentCommand.getParentEntityId(),
+            final Document document = Document.createNew(documentCommand.getParentEntityType(), documentCommand.getParentEntityId(),
                     documentCommand.getName(), documentCommand.getFileName(), documentCommand.getSize(), documentCommand.getType(),
                     documentCommand.getDescription(), fileLocation);
 
             this.documentRepository.save(document);
 
             return document.getId();
-        } catch (DataIntegrityViolationException dve) {
+        } catch (final DataIntegrityViolationException dve) {
             logger.error(dve.getMessage(), dve);
             throw new PlatformDataIntegrityException("error.msg.document.unknown.data.integrity.issue",
                     "Unknown data integrity issue with resource.");
-        } catch (IOException ioe) {
+        } catch (final IOException ioe) {
             logger.error(ioe.getMessage(), ioe);
             throw new DocumentManagementException(documentCommand.getName());
         }
@@ -84,20 +84,20 @@ public class DocumentWritePlatformServiceJpaRepositoryImpl implements DocumentWr
     @Override
     public CommandProcessingResult updateDocument(final DocumentCommand documentCommand, final InputStream inputStream) {
         try {
-            context.authenticatedUser();
+            this.context.authenticatedUser();
 
             String oldLocation = null;
-            DocumentCommandValidator validator = new DocumentCommandValidator(documentCommand);
+            final DocumentCommandValidator validator = new DocumentCommandValidator(documentCommand);
             validator.validateForUpdate();
             // TODO check if entity id is valid and within data scope for the
             // user
-            Document documentForUpdate = this.documentRepository.findOne(documentCommand.getId());
+            final Document documentForUpdate = this.documentRepository.findOne(documentCommand.getId());
             if (documentForUpdate == null) { throw new DocumentNotFoundException(documentCommand.getParentEntityType(),
                     documentCommand.getParentEntityId(), documentCommand.getId()); }
             oldLocation = documentForUpdate.getLocation();
             // if a new file is also passed in
             if (inputStream != null && documentCommand.isFileNameChanged()) {
-                String fileUploadLocation = FileUtils.generateFileParentDirectory(documentCommand.getParentEntityType(),
+                final String fileUploadLocation = FileUtils.generateFileParentDirectory(documentCommand.getParentEntityType(),
                         documentCommand.getParentEntityId());
 
                 /** Recursively create the directory if it does not exist **/
@@ -105,8 +105,9 @@ public class DocumentWritePlatformServiceJpaRepositoryImpl implements DocumentWr
                     new File(fileUploadLocation).mkdirs();
                 }
 
-                // TODO replace file system appender with an Amazon S3 appender
-                String fileLocation = FileUtils.saveToFileSystem(inputStream, fileUploadLocation, documentCommand.getFileName());
+                // TODO provide switch to toggle between file system appender
+                // and Amazon S3 appender
+                final String fileLocation = FileUtils.saveToFileSystem(inputStream, fileUploadLocation, documentCommand.getFileName());
                 documentCommand.setLocation(fileLocation);
             }
 
@@ -120,11 +121,11 @@ public class DocumentWritePlatformServiceJpaRepositoryImpl implements DocumentWr
             this.documentRepository.saveAndFlush(documentForUpdate);
 
             return new CommandProcessingResult(documentForUpdate.getId());
-        } catch (DataIntegrityViolationException dve) {
+        } catch (final DataIntegrityViolationException dve) {
             logger.error(dve.getMessage(), dve);
             throw new PlatformDataIntegrityException("error.msg.document.unknown.data.integrity.issue",
                     "Unknown data integrity issue with resource.");
-        } catch (IOException ioe) {
+        } catch (final IOException ioe) {
             logger.error(ioe.getMessage(), ioe);
             throw new DocumentManagementException(documentCommand.getName());
         }
@@ -133,11 +134,11 @@ public class DocumentWritePlatformServiceJpaRepositoryImpl implements DocumentWr
     @Transactional
     @Override
     public CommandProcessingResult deleteDocument(final DocumentCommand documentCommand) {
-        context.authenticatedUser();
+        this.context.authenticatedUser();
 
         validateParentEntityType(documentCommand);
         // TODO: Check document is present under this entity Id
-        Document document = this.documentRepository.findOne(documentCommand.getId());
+        final Document document = this.documentRepository.findOne(documentCommand.getId());
         if (document == null) { throw new DocumentNotFoundException(documentCommand.getParentEntityType(),
                 documentCommand.getParentEntityId(), documentCommand.getId()); }
 
@@ -146,20 +147,20 @@ public class DocumentWritePlatformServiceJpaRepositoryImpl implements DocumentWr
         return new CommandProcessingResult(document.getId());
     }
 
-    private void deleteFile(String documentName, String location) {
-        File fileToBeDeleted = new File(location);
-        boolean fileDeleted = fileToBeDeleted.delete();
+    private void deleteFile(final String documentName, final String location) {
+        final File fileToBeDeleted = new File(location);
+        final boolean fileDeleted = fileToBeDeleted.delete();
         if (!fileDeleted) { throw new DocumentManagementException(documentName); }
     }
 
-    private void validateParentEntityType(DocumentCommand documentCommand) {
+    private void validateParentEntityType(final DocumentCommand documentCommand) {
         if (!checkValidEntityType(documentCommand.getParentEntityType())) { throw new InvalidEntityTypeForDocumentManagementException(
                 documentCommand.getParentEntityType()); }
     }
 
     private static boolean checkValidEntityType(final String entityType) {
 
-        for (DOCUMENT_MANAGEMENT_ENTITY entities : DOCUMENT_MANAGEMENT_ENTITY.values()) {
+        for (final DOCUMENT_MANAGEMENT_ENTITY entities : DOCUMENT_MANAGEMENT_ENTITY.values()) {
             if (entities.name().equalsIgnoreCase(entityType)) { return true; }
         }
         return false;
