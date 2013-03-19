@@ -43,7 +43,8 @@ public final class LoanApplicationCommandFromApiJsonHelper {
             "submittedOnDate", "submittedOnNote", //
             "accountNo", "externalId", "fundId", "loanOfficerId", // optional
             "loanPurposeId", "inArrearsTolerance", "charges", "collateral", // optional
-            "transactionProcessingStrategyId" // settings
+            "transactionProcessingStrategyId", // settings
+            "calendarId" // optional
     ));
 
     private final FromJsonHelper fromApiJsonHelper;
@@ -207,6 +208,12 @@ public final class LoanApplicationCommandFromApiJsonHelper {
         baseDataValidator.reset().parameter(transactionProcessingStrategyIdParameterName).value(transactionProcessingStrategyId).notNull()
                 .integerGreaterThanZero();
 
+        final String calendarIdParameterName = "calendarId";
+        if (fromApiJsonHelper.parameterExists(calendarIdParameterName, element)) {
+            final Long calendarId = fromApiJsonHelper.extractLongNamed(calendarIdParameterName, element);
+            baseDataValidator.reset().parameter(calendarIdParameterName).value(calendarId).ignoreIfNull().integerGreaterThanZero();
+        }
+        
         // charges
         final String chargesParameterName = "charges";
         if (element.isJsonObject() && fromApiJsonHelper.parameterExists(chargesParameterName, element)) {

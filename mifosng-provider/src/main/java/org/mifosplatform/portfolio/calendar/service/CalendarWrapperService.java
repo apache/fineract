@@ -43,16 +43,17 @@ public class CalendarWrapperService {
 
     public Collection<LocalDate> getNextRecurrencesList(final CalendarData calendarData) {
         int maxCount = 10;//Default number of recurring dates
-        return getNextRecurrencesList(calendarData, maxCount);
+        LocalDate periodStartDate = new LocalDate(Calendar.getInstance().getTime());
+        return getNextRecurrencesList(calendarData, maxCount, periodStartDate);
     }
     
-    public Collection<LocalDate> getNextRecurrencesList(final CalendarData calendarData, int maxCount) {
+    public Collection<LocalDate> getNextRecurrencesList(final CalendarData calendarData, int maxCount, final LocalDate psDate) {
         final Recur recur = getRecur(calendarData);
 
         if (recur == null) { return null; }
 
         final Date seed = new Date(calendarData.getStartDate().toDate());
-        final DateTime periodStart = new DateTime(calendarData.getStartDate().toDate());
+        final DateTime periodStart = new DateTime(psDate.toDate());
         
         Calendar endDate = Calendar.getInstance();
         endDate.setTime(calendarData.getStartDate().toDate());
