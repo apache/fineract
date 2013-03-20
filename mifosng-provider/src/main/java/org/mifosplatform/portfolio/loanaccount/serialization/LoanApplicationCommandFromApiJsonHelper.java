@@ -483,6 +483,12 @@ public final class LoanApplicationCommandFromApiJsonHelper {
                     .notExceedingLengthOf(500);
         }
 
+        final String calendarIdParameterName = "calendarId";
+        if (fromApiJsonHelper.parameterExists(calendarIdParameterName, element)) {
+            final Long calendarId = fromApiJsonHelper.extractLongNamed(calendarIdParameterName, element);
+            baseDataValidator.reset().parameter(calendarIdParameterName).value(calendarId).ignoreIfNull().integerGreaterThanZero();
+        }
+
         // charges
         final String chargesParameterName = "charges";
         if (element.isJsonObject() && fromApiJsonHelper.parameterExists(chargesParameterName, element)) {

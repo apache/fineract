@@ -365,7 +365,7 @@ public class DataValidatorBuilder {
         return this;
     }
 
-    public DataValidatorBuilder isValidateRecurringRule(final String recurringRule) {
+    public DataValidatorBuilder isValidRecurringRule(final String recurringRule) {
         if (StringUtils.isNotBlank(recurringRule)) {
             try {
                 RRule rRule = new RRule(recurringRule);

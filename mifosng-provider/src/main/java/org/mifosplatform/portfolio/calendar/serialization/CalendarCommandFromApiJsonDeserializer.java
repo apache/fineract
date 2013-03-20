@@ -142,7 +142,7 @@ public class CalendarCommandFromApiJsonDeserializer extends AbstractFromApiJsonD
             if(repeating){
 	            final String recurrence = this.fromApiJsonHelper.extractStringNamed(CALENDAR_SUPPORTED_PARAMETERS.RECURRENCE.getValue(), element);
 	            baseDataValidator.reset().parameter(CALENDAR_SUPPORTED_PARAMETERS.RECURRENCE.getValue()).value(recurrence).notNull()
-	                    .notExceedingLengthOf(100).isValidateRecurringRule(recurrence);
+	                    .notExceedingLengthOf(100).isValidRecurringRule(recurrence);
             }
         }
 
@@ -235,7 +235,7 @@ public class CalendarCommandFromApiJsonDeserializer extends AbstractFromApiJsonD
             if(repeating){
 	            final String recurrence = this.fromApiJsonHelper.extractStringNamed(CALENDAR_SUPPORTED_PARAMETERS.RECURRENCE.getValue(), element);
 	            baseDataValidator.reset().parameter(CALENDAR_SUPPORTED_PARAMETERS.RECURRENCE.getValue()).value(recurrence).notNull()
-	                    .notExceedingLengthOf(100).isValidateRecurringRule(recurrence);
+	                    .notExceedingLengthOf(100).isValidRecurringRule(recurrence);
             }
         }
         
