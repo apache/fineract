@@ -267,7 +267,7 @@ public class Calendar extends AbstractAuditableCustom<AppUser, Long> {
         return this.secondReminder;
     }
 
-    private LocalDate getStartDateLocalDate() {
+    public LocalDate getStartDateLocalDate() {
         LocalDate startDateLocalDate = null;
         if (this.startDate != null) {
             startDateLocalDate = LocalDate.fromDateFields(this.startDate);
@@ -275,7 +275,7 @@ public class Calendar extends AbstractAuditableCustom<AppUser, Long> {
         return startDateLocalDate;
     }
 
-    private LocalDate getEndDateLocalDate() {
+    public LocalDate getEndDateLocalDate() {
         LocalDate endDateLocalDate = null;
         if (this.endDate != null) {
             endDateLocalDate = LocalDate.fromDateFields(this.endDate);

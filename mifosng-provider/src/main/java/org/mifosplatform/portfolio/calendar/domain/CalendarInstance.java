@@ -29,12 +29,20 @@ public class CalendarInstance extends AbstractPersistable<Long> {
         this.entityTypeId = entityTypeId;
     }
 
+    protected CalendarInstance(){
+
+    }
+
     public static CalendarInstance fromJson(final Calendar calendar, final JsonCommand command) {
         final Long entityId = command.getSupportedEntityId();
         final Integer entityTypeId = CalendarEntityType.valueOf(command.getSupportedEntityType().toUpperCase()).getValue();
         return new CalendarInstance(calendar, entityId, entityTypeId);
     }
     
+    public void updateCalendar(final Calendar calendar){
+        this.calendar = calendar;
+    }
+
     public Calendar getCalendar() {
         return this.calendar;
     }
