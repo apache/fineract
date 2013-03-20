@@ -23,6 +23,7 @@ import org.mifosplatform.portfolio.client.data.ClientAccountSummaryData;
 import org.mifosplatform.portfolio.client.data.ClientData;
 import org.mifosplatform.portfolio.client.data.ClientLookup;
 import org.mifosplatform.portfolio.client.exception.ClientNotFoundException;
+import org.mifosplatform.portfolio.group.data.GroupLookup;
 import org.mifosplatform.portfolio.loanaccount.data.LoanStatusEnumData;
 import org.mifosplatform.portfolio.loanproduct.service.LoanEnumerations;
 import org.mifosplatform.useradministration.domain.AppUser;
@@ -75,10 +76,15 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             String hierarchySearchString = hierarchy + "%";
 
             ClientMapper rm = new ClientMapper();
-
             String sql = "select " + rm.clientSchema() + " and c.id = " + clientId;
+            ClientData clientData =  this.jdbcTemplate.queryForObject(sql, rm, new Object[] { hierarchySearchString });
 
-            return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { hierarchySearchString });
+            ParentGroupsMapper cgrm = new ParentGroupsMapper();
+            String cgSql = "select " + cgrm.parentGroupsSchema();
+            Collection<GroupLookup> parentGroups = this.jdbcTemplate.query(cgSql, cgrm, new Object[] { clientId }); 
+            
+            return ClientData.setParentGroups(clientData , parentGroups);
+            
         } catch (EmptyResultDataAccessException e) {
             throw new ClientNotFoundException(clientId);
         }
@@ -149,7 +155,25 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             final String officeName = rs.getString("officeName");
 
             return new ClientData(accountNo, officeId, officeName, id, firstname, middlename, lastname, fullname, displayName, externalId,
-                    joinedDate, imageKey, null, null, null);
+                    joinedDate, imageKey, null, null, null ,null);
+        }
+
+    }
+
+    private static final class ParentGroupsMapper implements RowMapper<GroupLookup> {
+
+        public String parentGroupsSchema() {
+            return "gp.id As groupId , gp.name As groupName from m_client cl JOIN m_group_client gc ON cl.id = gc.client_id "
+                    + "JOIN m_group gp ON gp.id = gc.group_id WHERE cl.id  = ? AND gp.is_deleted = 0 ";
+       }
+
+        @Override
+        public GroupLookup mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+
+            final Long groupId = JdbcSupport.getLong(rs, "groupId");
+            final String groupName = rs.getString("groupName");
+
+            return new GroupLookup(groupId, groupName);
         }
 
     }

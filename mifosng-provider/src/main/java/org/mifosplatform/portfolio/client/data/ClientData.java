@@ -11,6 +11,7 @@ import java.util.List;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
 import org.mifosplatform.organisation.office.data.OfficeLookup;
+import org.mifosplatform.portfolio.group.data.GroupLookup;
 
 /**
  * Immutable data object representing client data.
@@ -31,7 +32,7 @@ final public class ClientData {
     private final String imageKey;
     @SuppressWarnings("unused")
     private final Boolean imagePresent;
-
+    private final Collection<GroupLookup> parentGroups;
     private final List<OfficeLookup> allowedOffices;
 
     private final ClientData currentChange;
@@ -42,24 +43,33 @@ final public class ClientData {
 
         String localDisplayName = null;
         return new ClientData(null, officeId, null, id, firstname, middlename, lastname, fullname, localDisplayName, externalId,
-                joiningDate, null, null, null, null);
+                joiningDate, null, null, null, null, null);
     }
 
     public static ClientData integrateChanges(final ClientData clientData, ClientData currentChange, final Collection<ClientData> allChanges) {
         return new ClientData(clientData.accountNo, clientData.officeId, clientData.officeName, clientData.id, clientData.firstname,
                 clientData.middlename, clientData.lastname, clientData.fullname, clientData.displayName, clientData.externalId,
-                clientData.joinedDate, clientData.imageKey, clientData.allowedOffices, currentChange, allChanges);
+                clientData.joinedDate, clientData.imageKey, clientData.allowedOffices, currentChange, allChanges, clientData.parentGroups);
     }
 
     public static ClientData template(final Long officeId, final LocalDate joinedDate, final List<OfficeLookup> allowedOffices) {
-        return new ClientData(null, officeId, null, null, null, null, null, null, null, null, joinedDate, null, allowedOffices, null, null);
+        return new ClientData(null, officeId, null, null, null, null, null, null, null, null, joinedDate, null, allowedOffices, null, null,
+                null);
     }
 
     public static ClientData templateOnTop(final ClientData clientData, final List<OfficeLookup> allowedOffices) {
 
         return new ClientData(clientData.accountNo, clientData.officeId, clientData.officeName, clientData.id, clientData.firstname,
                 clientData.middlename, clientData.lastname, clientData.fullname, clientData.displayName, clientData.externalId,
-                clientData.joinedDate, clientData.imageKey, allowedOffices, clientData.currentChange, clientData.allChanges);
+                clientData.joinedDate, clientData.imageKey, allowedOffices, clientData.currentChange, clientData.allChanges,
+                clientData.parentGroups);
+    }
+
+    public static ClientData setParentGroups(final ClientData clientData, final Collection<GroupLookup> parentGroups) {
+        return new ClientData(clientData.accountNo, clientData.officeId, clientData.officeName, clientData.id, clientData.firstname,
+                clientData.middlename, clientData.lastname, clientData.fullname, clientData.displayName, clientData.externalId,
+                clientData.joinedDate, clientData.imageKey, clientData.allowedOffices, clientData.currentChange, clientData.allChanges,
+                parentGroups);
     }
 
     public static ClientData clientIdentifier(final Long id, final String accountIdentifier, final String firstname,
@@ -67,13 +77,13 @@ final public class ClientData {
             final String officeName) {
 
         return new ClientData(accountIdentifier, officeId, officeName, id, firstname, middlename, lastname, fullname, displayName, null,
-                null, null, null, null, null);
+                null, null, null, null, null, null);
     }
 
     public ClientData(final String accountNo, final Long officeId, final String officeName, final Long id, final String firstname,
             final String middlename, final String lastname, final String fullname, final String displayName, final String externalId,
             final LocalDate joinedDate, final String imageKey, final List<OfficeLookup> allowedOffices, final ClientData currentChange,
-            final Collection<ClientData> allChanges) {
+            final Collection<ClientData> allChanges, final Collection<GroupLookup> parentGroups) {
         this.accountNo = accountNo;
         this.officeId = officeId;
         this.officeName = officeName;
@@ -94,6 +104,7 @@ final public class ClientData {
         this.allowedOffices = allowedOffices;
         this.currentChange = currentChange;
         this.allChanges = allChanges;
+        this.parentGroups = parentGroups;
     }
 
     public String displayName() {

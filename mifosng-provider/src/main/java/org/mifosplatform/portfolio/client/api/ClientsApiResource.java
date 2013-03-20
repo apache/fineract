@@ -53,9 +53,9 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class ClientsApiResource {
 
-    private final Set<String> CLIENT_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "accountNo", "officeId", "officeName",
-            "externalId", "firstname", "middlename", "lastname", "fullname", "joinedDate", "displayName", "clientOrBusinessName",
-            "allowedOffices", "imagePresent"));
+    private final Set<String> CLIENT_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "accountNo", "externalId", "firstname",
+            "middlename", "lastname", "fullname", "displayName", "officeId", "officeName", "joinedDate", "imageKey", "imagePresent",
+            "parentGroups", "allowedOffices", "currentChange", "allChanges"));
 
     private final PlatformSecurityContext context;
     private final ClientReadPlatformService clientReadPlatformService;
