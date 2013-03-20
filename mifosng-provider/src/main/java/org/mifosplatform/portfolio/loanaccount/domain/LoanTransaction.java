@@ -85,13 +85,33 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
     public static LoanTransaction waiver(final Loan loan, final Money waived, final LocalDate waiveDate) {
         return new LoanTransaction(loan, LoanTransactionType.WAIVE_INTEREST, waived.getAmount(), waiveDate);
     }
-    
-    public static LoanTransaction applyLoanCharge(final Loan loan, final Money amount, final LocalDate applyDate,
-            final Money feeCharges, final Money penaltyCharges) {
+
+    public static LoanTransaction copyTransactionProperties(LoanTransaction loanTransaction) {
+        return new LoanTransaction(loanTransaction.loan, loanTransaction.typeOf, loanTransaction.dateOf, loanTransaction.amount,
+                loanTransaction.principalPortion, loanTransaction.interestPortion, loanTransaction.feeChargesPortion,
+                loanTransaction.penaltyChargesPortion, loanTransaction.reversed);
+    }
+
+    public static LoanTransaction applyLoanCharge(final Loan loan, final Money amount, final LocalDate applyDate, final Money feeCharges,
+            final Money penaltyCharges) {
         LoanTransaction applyCharge = new LoanTransaction(loan, LoanTransactionType.APPLY_CHARGES, amount.getAmount(), applyDate);
         applyCharge.updateChargesComponents(feeCharges, penaltyCharges);
 
         return applyCharge;
+    }
+
+    private LoanTransaction(Loan loan, Integer typeOf, Date dateOf, BigDecimal amount, BigDecimal principalPortion,
+            BigDecimal interestPortion, BigDecimal feeChargesPortion, BigDecimal penaltyChargesPortion, boolean reversed) {
+        super();
+        this.loan = loan;
+        this.typeOf = typeOf;
+        this.dateOf = dateOf;
+        this.amount = amount;
+        this.principalPortion = principalPortion;
+        this.interestPortion = interestPortion;
+        this.feeChargesPortion = feeChargesPortion;
+        this.penaltyChargesPortion = penaltyChargesPortion;
+        this.reversed = reversed;
     }
 
     public static LoanTransaction waiveLoanCharge(final Loan loan, final Money waived, final LocalDate waiveDate,
@@ -305,9 +325,8 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
         return thisTransactionData;
     }
 
-    
     public Loan getLoan() {
         return this.loan;
     }
-    
+
 }

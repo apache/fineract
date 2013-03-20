@@ -29,8 +29,9 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
      * existing in which case the entire loan schedule needs to be re-processed.
      */
     @Override
-    public void handleTransaction(final LocalDate disbursementDate, final List<LoanTransaction> transactionsPostDisbursement,
-            final MonetaryCurrency currency, final List<LoanRepaymentScheduleInstallment> installments, final Set<LoanCharge> charges) {
+    public ChangedTransactionDetail handleTransaction(final LocalDate disbursementDate,
+            final List<LoanTransaction> transactionsPostDisbursement, final MonetaryCurrency currency,
+            final List<LoanRepaymentScheduleInstallment> installments, final Set<LoanCharge> charges) {
 
         if (charges != null) {
             for (LoanCharge loanCharge : charges) {
@@ -49,16 +50,36 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
         LoanRepaymentScheduleProcessingWrapper wrapper = new LoanRepaymentScheduleProcessingWrapper();
         wrapper.reprocess(currency, disbursementDate, installments, charges);
 
+        ChangedTransactionDetail changedTransactionDetail = new ChangedTransactionDetail();
         for (LoanTransaction loanTransaction : transactionsPostDisbursement) {
 
             if (loanTransaction.isRepayment() || loanTransaction.isInterestWaiver()) {
-                loanTransaction.resetDerivedComponents();
-                handleTransaction(loanTransaction, currency, installments, charges);
+                // pass through for new transactions
+                if (loanTransaction.getId() == null) {
+                    loanTransaction.resetDerivedComponents();
+                    handleTransaction(loanTransaction, currency, installments, charges);
+                } else {
+                    /**
+                     * reverse existing transactions and create new transactions
+                     * in their Lieu
+                     **/
+                    LoanTransaction newLoanTransaction = LoanTransaction.copyTransactionProperties(loanTransaction);
+
+                    // Reverse the original loan transaction
+                    loanTransaction.reverse();
+                    changedTransactionDetail.getReversedTransactions().add(loanTransaction);
+                    // Reset derived component of new loan transaction
+                    newLoanTransaction.resetDerivedComponents();
+                    changedTransactionDetail.getNewTransactions().add(newLoanTransaction);
+                    handleTransaction(newLoanTransaction, currency, installments, charges);
+                }
+
             } else if (loanTransaction.isWriteOff()) {
                 loanTransaction.resetDerivedComponents();
                 handleWriteOff(loanTransaction, currency, installments);
             }
         }
+        return changedTransactionDetail;
     }
 
     /**
@@ -149,8 +170,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
 
         for (LoanCharge loanCharge : charges) {
             if (loanCharge.isNotFullyPaid() && !loanCharge.isDueAtDisbursement()) {
-                if (earliestUnpaidCharge == null
-                        || loanCharge.getDueLocalDate().isBefore(earliestUnpaidCharge.getDueLocalDate())) {
+                if (earliestUnpaidCharge == null || loanCharge.getDueLocalDate().isBefore(earliestUnpaidCharge.getDueLocalDate())) {
                     earliestUnpaidCharge = loanCharge;
                 }
             }

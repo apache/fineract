@@ -21,6 +21,7 @@ import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.monetary.domain.ApplicationCurrency;
 import org.mifosplatform.organisation.monetary.domain.ApplicationCurrencyRepository;
+import org.mifosplatform.organisation.monetary.domain.Money;
 import org.mifosplatform.organisation.staff.domain.Staff;
 import org.mifosplatform.portfolio.charge.domain.Charge;
 import org.mifosplatform.portfolio.charge.domain.ChargeRepositoryWrapper;
@@ -32,6 +33,7 @@ import org.mifosplatform.portfolio.charge.exception.LoanChargeCannotBeWaivedExce
 import org.mifosplatform.portfolio.charge.exception.LoanChargeCannotBeWaivedException.LOAN_CHARGE_CANNOT_BE_WAIVED_REASON;
 import org.mifosplatform.portfolio.charge.exception.LoanChargeNotFoundException;
 import org.mifosplatform.portfolio.loanaccount.command.LoanUpdateCommand;
+import org.mifosplatform.portfolio.loanaccount.domain.ChangedTransactionDetail;
 import org.mifosplatform.portfolio.loanaccount.domain.DefaultLoanLifecycleStateMachine;
 import org.mifosplatform.portfolio.loanaccount.domain.Loan;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanCharge;
@@ -207,15 +209,31 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final List<Long> existingTransactionIds = new ArrayList<Long>();
         final List<Long> existingReversedTransactionIds = new ArrayList<Long>();
 
-        final LoanTransaction loanRepayment = loan.makeRepayment(transactionDate, transactionAmount, defaultLoanLifecycleStateMachine(),
-                existingTransactionIds, existingReversedTransactionIds);
-        this.loanTransactionRepository.save(loanRepayment);
+        final Money repaymentAmount = Money.of(loan.getCurrency(), transactionAmount);
+        final LoanTransaction newRepaymentTransaction = LoanTransaction.repayment(repaymentAmount, transactionDate);
+
+        final ChangedTransactionDetail changedTransactionDetail = loan.makeRepayment(newRepaymentTransaction,
+                defaultLoanLifecycleStateMachine(), existingTransactionIds, existingReversedTransactionIds);
+
+        this.loanTransactionRepository.save(newRepaymentTransaction);
+        /***
+         * TODO Vishwas Batch save is giving me a
+         * HibernateOptimisticLockingFailureException, looping and saving for
+         * the time being, not a major issue for now as this loop is entered
+         * only in edge cases (when a payment is made before the latest payment
+         * recorded against the loan)
+         ***/
+        if (changedTransactionDetail != null) {
+            for (LoanTransaction loanTransaction : changedTransactionDetail.getNewTransactions()) {
+                this.loanTransactionRepository.save(loanTransaction);
+            }
+        }
         this.loanRepository.save(loan);
 
         final String noteText = command.stringValueOfParameterNamed("note");
         if (StringUtils.isNotBlank(noteText)) {
             changes.put("note", noteText);
-            Note note = Note.loanTransactionNote(loan, loanRepayment, noteText);
+            Note note = Note.loanTransactionNote(loan, newRepaymentTransaction, noteText);
             this.noteRepository.save(note);
         }
 
@@ -223,7 +241,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
-                .withEntityId(loanRepayment.getId()) //
+                .withEntityId(newRepaymentTransaction.getId()) //
                 .withOfficeId(loan.getOfficeId()) //
                 .withClientId(loan.getClientId()) //
                 .withGroupId(loan.getGroupId()) //
@@ -257,11 +275,30 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final List<Long> existingTransactionIds = new ArrayList<Long>();
         final List<Long> existingReversedTransactionIds = new ArrayList<Long>();
 
-        final LoanTransaction newTransactionDetail = loan.adjustExistingTransaction(transactionDate, transactionAmount,
+        final Money transactionAmountAsMoney = Money.of(loan.getCurrency(), transactionAmount);
+        LoanTransaction newTransactionDetail = LoanTransaction.repayment(transactionAmountAsMoney, transactionDate);
+        if (transactionToAdjust.isInterestWaiver()) {
+            newTransactionDetail = LoanTransaction.waiver(loan, transactionAmountAsMoney, transactionDate);
+        }
+
+        final ChangedTransactionDetail changedTransactionDetail = loan.adjustExistingTransaction(newTransactionDetail,
                 defaultLoanLifecycleStateMachine(), transactionToAdjust, existingTransactionIds, existingReversedTransactionIds);
 
         if (newTransactionDetail.isGreaterThanZero(loan.getPrincpal().getCurrency())) {
             this.loanTransactionRepository.save(newTransactionDetail);
+        }
+
+        /***
+         * TODO Vishwas Batch save is giving me a
+         * HibernateOptimisticLockingFailureException, looping and saving for
+         * the time being, not a major issue for now as this loop is entered
+         * only in edge cases (when a payment is made before the latest payment
+         * recorded against the loan)
+         ***/
+        if (changedTransactionDetail != null) {
+            for (LoanTransaction loanTransaction : changedTransactionDetail.getNewTransactions()) {
+                this.loanTransactionRepository.save(loanTransaction);
+            }
         }
 
         this.loanRepository.save(loan);
@@ -495,12 +532,26 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final List<Long> existingReversedTransactionIds = new ArrayList<Long>();
         this.loanChargeRepository.save(loanCharge);
 
-        LoanTransaction applyChargeTransaction = loan.addLoanCharge(loanCharge, existingTransactionIds, existingReversedTransactionIds);
+        final LoanTransaction applyLoanChargeTransaction = loan.getChargeAppliedTransaction(loanCharge, null);
+        final ChangedTransactionDetail changedTransactionDetail = loan.addLoanCharge(loanCharge, existingTransactionIds,
+                existingReversedTransactionIds);
 
         // we want to apply charge transactions only for those loans charges
         // that are applied when a loan is active
         if (loan.status().isActive()) {
-            this.loanTransactionRepository.save(applyChargeTransaction);
+            this.loanTransactionRepository.save(applyLoanChargeTransaction);
+            /***
+             * TODO Vishwas Batch save is giving me a
+             * HibernateOptimisticLockingFailureException, looping and saving
+             * for the time being, not a major issue for now as this loop is
+             * entered only in edge cases (when a payment is made before the
+             * latest payment recorded against the loan)
+             ***/
+            if (changedTransactionDetail != null) {
+                for (LoanTransaction loanTransaction : changedTransactionDetail.getNewTransactions()) {
+                    this.loanTransactionRepository.save(loanTransaction);
+                }
+            }
         }
 
         this.loanRepository.save(loan);
