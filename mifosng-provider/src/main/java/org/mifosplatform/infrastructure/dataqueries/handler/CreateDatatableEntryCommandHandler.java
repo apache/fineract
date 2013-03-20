@@ -28,11 +28,16 @@ public class CreateDatatableEntryCommandHandler implements NewCommandSourceHandl
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
 
-        this.writePlatformService.createNewDatatableEntry(command.entityName(), command.getApptableId(), command);
+        Long appTableId = command.getApptableId();
+        if (appTableId == null) {
+            appTableId = command.entityId();
+        }
+
+        this.writePlatformService.createNewDatatableEntry(command.entityName(), appTableId, command);
 
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
-                .withEntityId(command.getApptableId()) //
+                .withEntityId(appTableId) //
                 .build();
     }
 }

@@ -27,15 +27,16 @@ public class CommandWrapper {
     private final Long supportedEntityId;
 
     public static CommandWrapper wrap(final String actionName, final String enityName, final Long resourceId) {
-        return new CommandWrapper(null, actionName, enityName, resourceId);
+        return new CommandWrapper(null, actionName, enityName, resourceId, null);
     }
 
     public static CommandWrapper fromExistingCommand(final Long commandId, final String actionName, final String enityName,
-            final Long resourceId) {
-        return new CommandWrapper(commandId, actionName, enityName, resourceId);
+            final Long resourceId, final String resourceGetUrl) {
+        return new CommandWrapper(commandId, actionName, enityName, resourceId, resourceGetUrl);
     }
 
-    private CommandWrapper(final Long commandId, final String actionName, final String enityName, final Long resourceId) {
+    private CommandWrapper(final Long commandId, final String actionName, final String enityName, final Long resourceId,
+            final String resourceGetUrl) {
         this.commandId = commandId;
         this.officeId = null;
         this.groupId = null;
@@ -45,14 +46,19 @@ public class CommandWrapper {
         this.entityName = enityName;
         this.taskPermissionName = actionName + "_" + entityName;
         this.entityId = resourceId;
-        this.apptableId = null;
         this.datatableId = null;
         this.codeId = null;
         this.supportedEntityType = null;
         this.supportedEntityId = null;
-        this.href = null;
+        this.href = resourceGetUrl;
         this.json = null;
         this.transactionId = null;
+
+        if (this.href.contains("datatables")) {
+            this.apptableId = resourceId;
+        } else {
+            this.apptableId = null;
+        }
     }
 
     public CommandWrapper(final Long officeId, final Long groupId, final Long clientId, final Long loanId, final String actionName,

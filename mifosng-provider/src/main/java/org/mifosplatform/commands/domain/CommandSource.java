@@ -47,7 +47,6 @@ public class CommandSource extends AbstractPersistable<Long> {
     @Column(name = "loan_id")
     private Long loanId;
     
-    @SuppressWarnings("unused")
     @Column(name = "api_get_url", length = 100)
     private String resourceGetUrl;
 
@@ -155,5 +154,9 @@ public class CommandSource extends AbstractPersistable<Long> {
         this.groupId = groupId;
         this.clientId = clientId;
         this.loanId = loanId;
+    }
+
+    public String getResourceGetUrl() {
+        return this.resourceGetUrl;
     }
 }

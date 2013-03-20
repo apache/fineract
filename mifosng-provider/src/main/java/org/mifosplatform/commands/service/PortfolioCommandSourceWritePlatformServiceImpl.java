@@ -66,8 +66,15 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
             final String jsonToUse = StringUtils.defaultIfEmpty(e.getJsonOfChangesOnly(), json);
 
             final JsonElement parsedCommand = this.fromApiJsonHelper.parse(jsonToUse);
+
+            // for datatables
+            Long entityId = wrapper.getEntityId();
+            if (entityId == null && wrapper.isDatatableResource()) {
+                entityId = wrapper.getApptableId();
+            }
+
             final JsonCommand command = JsonCommand.from(jsonToUse, parsedCommand, this.fromApiJsonHelper, wrapper.getEntityName(),
-                    wrapper.getEntityId(), wrapper.getGroupId(), wrapper.getClientId(), wrapper.getLoanId(), wrapper.getApptableId(),
+                    entityId, wrapper.getGroupId(), wrapper.getClientId(), wrapper.getLoanId(), wrapper.getApptableId(),
                     wrapper.getDatatableId(), wrapper.getCodeId(), wrapper.getSupportedEntityType(), wrapper.getSupportedEntityId(), wrapper.getTransactionId());
 
             result = this.processAndLogCommandService.logCommand(wrapper, command);
@@ -84,11 +91,11 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
         context.authenticatedUser().validateHasCheckerPermissionTo(commandSourceInput.getPermissionCode());
 
         final CommandWrapper wrapper = CommandWrapper.fromExistingCommand(commandId, commandSourceInput.getActionName(),
-                commandSourceInput.getEntityName(), commandSourceInput.resourceId());
+                commandSourceInput.getEntityName(), commandSourceInput.resourceId(), commandSourceInput.getResourceGetUrl());
 
         final JsonElement parsedCommand = this.fromApiJsonHelper.parse(commandSourceInput.json());
         final JsonCommand command = JsonCommand.fromExistingCommand(commandId, commandSourceInput.json(), parsedCommand,
-                this.fromApiJsonHelper, commandSourceInput.resourceId());
+                this.fromApiJsonHelper, commandSourceInput.getEntityName(), commandSourceInput.resourceId());
 
         final boolean makerCheckerApproval = true;
         return this.processAndLogCommandService.processAndLogCommand(wrapper, command, makerCheckerApproval);
