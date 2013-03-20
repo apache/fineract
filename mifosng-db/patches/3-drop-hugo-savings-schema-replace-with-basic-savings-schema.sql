@@ -1,23 +1,23 @@
-ALTER TABLE `mifostenant-default`.`m_note` 
+ALTER TABLE `m_note` 
 DROP FOREIGN KEY `FK_m_note_m_saving_account`,
 DROP FOREIGN KEY `FK_m_note_m_deposit_account`;
 
-ALTER TABLE `mifostenant-default`.`m_note` 
+ALTER TABLE `m_note` 
 DROP COLUMN `saving_account_id`,
 DROP COLUMN `deposit_account_id`, 
 DROP INDEX `FK_m_note_m_saving_account`,
 DROP INDEX `FK_m_note_m_deposit_account`;
 
 
-drop table `mifostenant-default`.`m_saving_account_transaction`;
-drop table `mifostenant-default`.`m_saving_schedule`;
-drop table `mifostenant-default`.`m_saving_account`;
+drop table `m_saving_account_transaction`;
+drop table `m_saving_schedule`;
+drop table `m_saving_account`;
 
-drop table `mifostenant-default`.`m_deposit_account_transaction`;
-drop table `mifostenant-default`.`m_deposit_account`;
+drop table `m_deposit_account_transaction`;
+drop table `m_deposit_account`;
 
-drop table `mifostenant-default`.`m_product_savings`;
-drop table `mifostenant-default`.`m_product_deposit`;
+drop table `m_product_savings`;
+drop table `m_product_deposit`;
 
 
 
