@@ -17,7 +17,9 @@ import javax.ws.rs.core.MediaType;
 
 import org.mifosplatform.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.mifosplatform.infrastructure.security.data.AuthenticatedUserData;
+import org.mifosplatform.useradministration.data.RoleData;
 import org.mifosplatform.useradministration.domain.AppUser;
+import org.mifosplatform.useradministration.service.RoleReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Scope;
@@ -36,13 +38,15 @@ public class AuthenticationApiResource {
 
     private final DaoAuthenticationProvider customAuthenticationProvider;
     private final ToApiJsonSerializer<AuthenticatedUserData> apiJsonSerializerService;
+    private final RoleReadPlatformService roleReadPlatformService;
 
     @Autowired
     public AuthenticationApiResource(
             @Qualifier("customAuthenticationProvider") final DaoAuthenticationProvider customAuthenticationProvider,
-            final ToApiJsonSerializer<AuthenticatedUserData> apiJsonSerializerService) {
+            final ToApiJsonSerializer<AuthenticatedUserData> apiJsonSerializerService, final RoleReadPlatformService roleReadPlatformService) {
         this.customAuthenticationProvider = customAuthenticationProvider;
         this.apiJsonSerializerService = apiJsonSerializerService;
+        this.roleReadPlatformService = roleReadPlatformService;
     }
 
     @POST
@@ -64,7 +68,9 @@ public class AuthenticationApiResource {
             AppUser principal = (AppUser) authenticationCheck.getPrincipal();
             byte[] base64EncodedAuthenticationKey = Base64.encode(username + ":" + password);
 
-            authenticatedUserData = new AuthenticatedUserData(username, permissions, principal.getId(), new String(
+            Collection<RoleData> roles = this.roleReadPlatformService.retrieveAll();
+
+            authenticatedUserData = new AuthenticatedUserData(username, roles, permissions, principal.getId(), new String(
                     base64EncodedAuthenticationKey));
         }
 

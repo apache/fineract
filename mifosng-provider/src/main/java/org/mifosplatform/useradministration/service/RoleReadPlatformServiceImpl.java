@@ -11,12 +11,10 @@ import java.util.Collection;
 
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
 import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
-import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.useradministration.data.RoleData;
-import org.mifosplatform.useradministration.domain.Role;
-import org.mifosplatform.useradministration.domain.RoleRepository;
 import org.mifosplatform.useradministration.exception.RoleNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
@@ -25,35 +23,31 @@ import org.springframework.stereotype.Service;
 public class RoleReadPlatformServiceImpl implements RoleReadPlatformService {
 
     private final JdbcTemplate jdbcTemplate;
-    private final PlatformSecurityContext context;
-    private final RoleRepository roleRepository;
+    private final RoleMapper roleRowMapper;
 
     @Autowired
-    public RoleReadPlatformServiceImpl(final PlatformSecurityContext context, final TenantAwareRoutingDataSource dataSource,
-            final RoleRepository roleRepository) {
-        this.context = context;
-        this.roleRepository = roleRepository;
+    public RoleReadPlatformServiceImpl(final TenantAwareRoutingDataSource dataSource) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.roleRowMapper = new RoleMapper();
     }
 
     @Override
-    public Collection<RoleData> retrieveAllRoles() {
-        context.authenticatedUser();
+    public Collection<RoleData> retrieveAll() {
+        final String sql = "select " + roleRowMapper.schema() + " order by r.id";
 
-        final RoleMapper mapper = new RoleMapper();
-        final String sql = "select " + mapper.schema() + " order by r.id";
-
-        return this.jdbcTemplate.query(sql, mapper, new Object[] {});
+        return this.jdbcTemplate.query(sql, this.roleRowMapper);
     }
 
     @Override
-    public RoleData retrieveRole(final Long id) {
-        context.authenticatedUser();
+    public RoleData retrieveOne(final Long id) {
 
-        final Role role = this.roleRepository.findOne(id);
-        if (role == null) { throw new RoleNotFoundException(id); }
-        
-        return role.toData();
+        try {
+            final String sql = "select " + roleRowMapper.schema() + " where r.id=?";
+
+            return this.jdbcTemplate.queryForObject(sql, this.roleRowMapper, new Object[] { id });
+        } catch (EmptyResultDataAccessException e) {
+            throw new RoleNotFoundException(id);
+        }
     }
 
     protected static final class RoleMapper implements RowMapper<RoleData> {

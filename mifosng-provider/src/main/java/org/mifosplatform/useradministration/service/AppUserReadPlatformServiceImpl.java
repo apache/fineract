@@ -76,7 +76,7 @@ public class AppUserReadPlatformServiceImpl implements AppUserReadPlatformServic
     public AppUserData retrieveNewUserDetails() {
 
         final Collection<OfficeData> offices = this.officeReadPlatformService.retrieveAllOfficesForDropdown();
-        final Collection<RoleData> availableRoles = this.roleReadPlatformService.retrieveAllRoles();
+        final Collection<RoleData> availableRoles = this.roleReadPlatformService.retrieveAll();
 
         return AppUserData.template(offices, availableRoles);
     }
@@ -89,7 +89,7 @@ public class AppUserReadPlatformServiceImpl implements AppUserReadPlatformServic
         final AppUser user = this.appUserRepository.findOne(userId);
         if (user == null || user.isDeleted()) { throw new UserNotFoundException(userId); }
 
-        Collection<RoleData> availableRoles = this.roleReadPlatformService.retrieveAllRoles();
+        Collection<RoleData> availableRoles = this.roleReadPlatformService.retrieveAll();
 
         Collection<RoleData> selectedUserRoles = new ArrayList<RoleData>();
         Set<Role> userRoles = user.getRoles();

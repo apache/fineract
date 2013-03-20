@@ -104,7 +104,7 @@ public class RolesApiResource {
 
         context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
 
-        final Collection<RoleData> roles = this.roleReadPlatformService.retrieveAllRoles();
+        final Collection<RoleData> roles = this.roleReadPlatformService.retrieveAll();
 
         final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serialize(settings, roles, RESPONSE_DATA_PARAMETERS);
@@ -135,7 +135,7 @@ public class RolesApiResource {
 
         final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 
-        RoleData role = this.roleReadPlatformService.retrieveRole(roleId);
+        RoleData role = this.roleReadPlatformService.retrieveOne(roleId);
         if (settings.isCommandIdPassed()) {
             final CommandSourceData entry = this.commandSourceReadPlatformService.retrieveById(settings.getCommandId());
             final RoleCommand changesOnly = this.fromApiJsonDeserializer.commandFromApiJson(entry.json());
@@ -172,7 +172,7 @@ public class RolesApiResource {
 
         final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 
-        final RoleData role = this.roleReadPlatformService.retrieveRole(roleId);
+        final RoleData role = this.roleReadPlatformService.retrieveOne(roleId);
         final Collection<PermissionData> permissionUsageData = this.permissionReadPlatformService.retrieveAllRolePermissions(roleId);
         Collection<PermissionData> currentChanges = null;
 

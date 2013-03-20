@@ -989,8 +989,7 @@
 							<tr>
 								<td><a href="#authentication">AUTHENTICATION</a></td>
 								<td>authentication</td>
-								<td><a href="#authenticate_request">Verify
-										Authentication</a></td>
+								<td><a href="#authenticate_request">Verify Authentication</a></td>
 								<td></td>
 								<td></td>
 								<td></td>
@@ -9423,8 +9422,7 @@ GET https://DomainName/api/v1/reports/{reportName}
 			<div class="method-section">
 				<div class="method-description">
 					<h4>Verify authentication</h4>
-					<p>Authenticates the credentials provided and returns the set
-						of permissions allowed.</p>
+					<p>Authenticates the credentials provided and returns the set roles and permissions allowed.</p>
 				</div>
 				<div class="method-example">
 					<code class="method-declaration">
@@ -9437,13 +9435,20 @@ No Request Body
 					</code>
 					<code class="method-response">
 {
-    "username": "mifos",
-    "userId": 1,
-    "base64EncodedAuthenticationKey": "bWlmb3M6cGFzc3dvcmQ=",
-    "authenticated": true,
-    "permissions": [
-        "ALL_FUNCTIONS"
-    ]
+  "username": "mifos",
+  "userId": 1,
+  "base64EncodedAuthenticationKey": "bWlmb3M6cGFzc3dvcmQ=",
+  "authenticated": true,
+  "roles": [
+    {
+      "id": 1,
+      "name": "Super user",
+      "description": "This role provides all application permissions."
+    }
+  ],
+  "permissions": [
+    "ALL_FUNCTIONS"
+  ]
 }
 					</code>
 					<code class="method-request">

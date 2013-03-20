@@ -11,7 +11,7 @@ import org.mifosplatform.useradministration.data.RoleData;
 
 public interface RoleReadPlatformService {
 
-    Collection<RoleData> retrieveAllRoles();
+    Collection<RoleData> retrieveAll();
 
-    RoleData retrieveRole(Long roleId);
+    RoleData retrieveOne(Long roleId);
 }
