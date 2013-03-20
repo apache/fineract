@@ -441,7 +441,7 @@ public class Loan extends AbstractPersistable<Long> {
      * @param suppliedTransactionDate
      * @return
      */
-    private LoanTransaction getChargeAppliedTransaction(final LoanCharge loanCharge, LocalDate suppliedTransactionDate) {
+    private LoanTransaction getChargeAppliedTransaction(final LoanCharge loanCharge, final LocalDate suppliedTransactionDate) {
         final Money chargeAmount = loanCharge.getAmount(getCurrency());
         Money feeCharges = chargeAmount;
         Money penaltyCharges = Money.zero(loanCurrency());
@@ -2165,9 +2165,9 @@ public class Loan extends AbstractPersistable<Long> {
     public Long getOfficeId() {
         Long officeId = null;
         if (this.client != null) {
-            officeId = this.client.getOffice().getId();
+            officeId = this.client.officeId();
         } else {
-            // officeId = this.group.getOffice().getId();
+            officeId = this.group.officeId();
         }
         return officeId;
     }

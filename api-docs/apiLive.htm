@@ -632,38 +632,6 @@
 								<td><a href="#charges_update">Update a Charge</a></td>
 								<td><a href="#charges_delete">Delete a Charge</a></td>
 							</tr>
-							<tr>
-								<td><a href="#depositproducts">DEPOSIT PRODUCT</a></td>
-								<td>depositproducts</td>
-								<td><a href="#depositproducts_create">Create a Deposit product</a></td>
-								<td><a href="#depositproducts_list">List Deposit products</a></td>
-								<td></td>
-								<td></td>
-							</tr>
-							<tr class="alt">
-								<td></td>
-								<td>depositproducts/{prodcutId}</td>
-								<td></td>
-								<td><a href="#depositproducts_retrieve">Retrieve a Deposit product</a></td>
-								<td><a href="#depositproducts_update">Update a Deposit product</a></td>
-								<td><a href="#depositproducts_delete">Delete a Deposit product</a></td>
-							</tr>
-							<tr>
-								<td><a href="#savingproducts">SAVING PRODUCT</a></td>
-								<td>savingproducts</td>
-								<td><a href="#savingproducts_create">Create a Saving product</a></td>
-								<td><a href="#savingproducts_list">List Saving products</a></td>
-								<td></td>
-								<td></td>
-							</tr>
-							<tr class="alt">
-								<td></td>
-								<td>savingproducts/{prodcutId}</td>
-								<td></td>
-								<td><a href="#savingproducts_retrieve">Retrieve a Saving product</a></td>
-								<td><a href="#savingproducts_update">Update a Saving product</a></td>
-								<td><a href="#savingproducts_delete">Delete a Saving product</a></td>
-							</tr>
 						</table>
 					</div>
 				</div>
@@ -1082,6 +1050,7 @@
 					</div>
 				</div>
 			</div>
+
 			<div class="flybar-nav">
 				<h2 class="flybar-button">Template</h2>
 				<div id="toc-menu-template" class="flybar-menu">
@@ -1106,154 +1075,45 @@
 							</tr>
 							<tr class="alt">
 								<td>clients/template</td>
-								<td><a href="#clients_template">Retrieve Client Details Template</a></td>
+								<td><a href="#clients_template">Retrieve Client Template</a></td>
+							</tr>
+							<tr class="alt">
+								<td>loanproducts/template</td>
+								<td><a href="#loanproducts_template">Retrieve Loan Product Template</a></td>
 							</tr>
 							<tr>
 								<td>loans/template?clientId={clientId}</td>
-								<td><a href="#loans_template">Retrieve Loan Details Template</a></td>
+								<td><a href="#loans_template">Retrieve Loan Template</a></td>
 							</tr>
 							<tr class="alt">
 								<td>loans/{loanId}/transactions/template</td>
 								<td><a href="#loans_repaymenttemplate_etc">Retrieve Loan Transaction Template</a></td>
 							</tr>
-							<tr>
-								<td>offices/template</td>
-								<td><a href="#offices_template">Retrieve Office Details
-										Template</a></td>
+							<tr class="alt">
+								<td>savingproducts/template</td>
+								<td><a href="#savingsproducts_template">Retrieve Savings Product Template</a></td>
 							</tr>
 							<tr class="alt">
-								<td>loanproducts/template</td>
-								<td><a href="#loanproducts_template">Retrieve Loan
-										Product Details Template</a></td>
+								<td>savingsaccounts/template?clientId={clientId}</td>
+								<td><a href="#savingsaccounts_template">Retrieve Savings Account Template</a></td>
+							</tr>
+							<tr>
+								<td>offices/template</td>
+								<td><a href="#offices_template">Retrieve Office Template</a></td>
 							</tr>
 							<tr>
 								<td>users/template</td>
-								<td><a href="#users_template">Retrieve User Details
-										Template</a></td>
+								<td><a href="#users_template">Retrieve User Template</a></td>
 							</tr>
 							<tr class="alt">
 								<td>audit/searchtemplate</td>
-								<td><a href="#audit_searchtemplate">Retrieve Audit
-										Search Data</a></td>
-							</tr>
-							<tr>
-								<td>depositproducts/template</td>
-								<td><a href="#depositproducts_template">Retrieve Deposit
-										Product Details Template</a></td>
-							</tr>
-							<tr class="alt">
-								<td>savingproducts/template</td>
-								<td><a href="#savingproducts_template">Retrieve Saving
-										Product Details Template</a></td>
-							</tr>
-							<tr>
-								<td>depositaccounts/template</td>
-								<td><a href="#fixeddeposits_template">Retrieve Deposit 
-										Account Details Template</a></td>
-							</tr>
-							<tr class="alt">
-								<td>savingaccounts/template</td>
-								<td><a href="#savingaccounts_template">Retrieve Saving
-										Account Details Template</a></td>
+								<td><a href="#audit_searchtemplate">Retrieve Audit Search Data</a></td>
 							</tr>
 						</table>
 					</div>
 				</div>
 			</div>
-			<div class="flybar-nav">
-				<h2 class="flybar-button">Savings</h2>
-				<div id="toc-menu-savings" class="flybar-menu">
-					<div class="tocMatrix">
-						<table class=matrixHeading>
-							<tr class="matrixHeadingBG">
-								<td colspan=2 valign="top"><div class="matrixHeadingVerbs">
-										<table>
-											<tr>
-												<td>RESOURCES</td>
-											</tr>
-										</table>
-									</div></td>
-								<td><table>
-										<tr>
-											<td><div class="matrixHeadingVerbs">POST</div></td>
-										</tr>
-										<tr>
-											<td><div class=matrixHeadingCommands>create/complex
-													update</div></td>
-										</tr>
-									</table></td>
-								<td><table>
-										<tr>
-											<td><div class="matrixHeadingVerbs">GET</div></td>
-										</tr>
-										<tr>
-											<td><div class=matrixHeadingCommands>read</div></td>
-										</tr>
-									</table></td>
-								<td><table>
-										<tr>
-											<td><div class="matrixHeadingVerbs">PUT</div></td>
-										</tr>
-										<tr>
-											<td><div class=matrixHeadingCommands>update</div></td>
-										</tr>
-									</table></td>
-								<td><table>
-										<tr>
-											<td><div class="matrixHeadingVerbs">DELETE</div></td>
-										</tr>
-										<tr>
-											<td><div class=matrixHeadingCommands>delete</div></td>
-										</tr>
-									</table></td>
-							</tr>
-							<tr class="alt">
-								<td><a href="#fixeddeposits">FIXED DEPOSITS</a></td>
-								<td>depositaccounts</td>
-								<td><a href="#fixeddeposits_create">Create a New Deposit
-										Application</a></td>
-								<td></td>
-								<td></td>
-								<td></td>
-							</tr>
-							<tr>
-								<td></td>
-								<td>depositaccounts/{accountId}</td>
-								<td><a href="#fixeddeposits_approve_etc">Approve, Undo Approve,
-										Interest withdraw, Reject a Deposit Application or Withdraw a
-										Deposit Application</a></td>
-								<td><a href="#fixeddeposits_retrieve">Retrieve a Deposit
-										Application</a></td>
-								<td></td>
-								<td><a href="#fixeddeposits_delete">Delete a Deposit
-										Application</a></td>
-							</tr>
-							
-							<tr class="alt">
-								<td><a href="#savingaccounts">SAVING ACCOUNTS</a></td>
-								<td>savingaccounts</td>
-								<td><a href="#savingaccounts_create">Create a New Saving 
-										Application</a></td>
-								<td></td>
-								<td></td>
-								<td></td>
-							</tr>
-							<tr>
-								<td></td>
-								<td>savingaccounts/{accountId}</td>
-								<td><a href="#savingaccounts_approve_etc">Approve, Undo Approve,
-										Interest withdraw, Reject a Saving Application or Withdraw a
-										Saving Application</a></td>
-								<td><a href="#savingaccounts_retrieve">Retrieve a Saving
-										Application</a></td>
-								<td></td>
-								<td><a href="#savingaccounts_delete">Delete a Saving
-										Application</a></td>
-							</tr>
-						</table>
-					</div>
-				</div>
-			</div>
+
 			<div class="flybar-nav">
 				<h2 class="flybar-button">Accounting</h2>
 				<div id="toc-menu-group" class="flybar-menu">
@@ -2925,18 +2785,6 @@ DELETE groups/7
 						</tr>
 						<tr>
 							<td class=fielddesc>Optional: For marking a loan with a given loan purpose option. Loan purposes are configurable and can be setup by system admin through code/code values screens.</td>
-						</tr>
-						<tr class=alt>
-							<td>currencyCode</td>
-						</tr>
-						<tr>
-							<td class=fielddesc>A three letter ISO code of currency.</td>
-						</tr>
-						<tr class=alt>
-							<td>digitsAfterDecimal</td>
-						</tr>
-						<tr>
-							<td class=fielddesc>Override the currency default value for digitsAfterDecimal.</td>
 						</tr>
 						<tr class=alt>
 							<td>principal</td>
@@ -4961,846 +4809,7 @@ No Request Body:
 				</div>
 			</div>
 
-			<!-- start of fixed deposits   -->
-			
-<a id="fixeddeposits" name="fixeddeposits" class="old-syle-anchor">&nbsp;</a>
-        <div class="method-section">
-            <div class="method-description">
-                <h2>Fixed Deposit Account:</h2>
-                <table class=matrixHeading>
-                    <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Field Descriptions</div></td></tr>
-                    <tr class=alt><td>deposit :</td></tr>
-                    <tr><td class=fielddesc>The amount to be deposited in the deposit account.</td></tr>
-                    <tr class=alt><td>externalId :</td></tr>
-                    <tr><td class=fielddesc>A place to put an external reference for this deposit account. e.g. The ID another system uses.<br>
-                    If provided, it must be unique.</td></tr>
-					
-                    <tr class=alt><td>tenureInMonths:</td></tr>
-                    <tr><td class=fielddesc>The time period for fixed deposit to mature(in months). <br> 
-						Eg:The period of deposit shall be 24 months<br>
-						tenureInMonths=24.
-					</td></tr>
-					
-                    <tr class=alt><td>renewalAllowed:</td></tr>
-                    <tr><td class=fielddesc>Used to renew the deposit account after maturity.
-					<br> if 'true' the account is eligible for renew.
-					</td></tr>
-					
-                    <tr class=alt><td>isInterestWithdrawable:</td></tr>
-                    <tr><td class=fielddesc>Denotes whether one can withdraw the interest from deposit account.</td></tr>
-					
-					<tr class=alt><td>interestCompoundingAllowed:</td></tr>
-                    <tr><td class=fielddesc>Denotes whether the interest is calculated on compounding basis or not.<br>
-					if true:interest calculated on compounding basis, else interest calculated on simple calculation basis.
-					</td></tr>
-					
-                    <tr class=alt><td>maturityInterestRate:</td></tr>
-                    <tr><td class=fielddesc>Denotes the interest rate % on deposit amount.	</td></tr>
-					
-					<tr class=alt><td>preClosureInterestRate:</td></tr>
-                    <tr><td class=fielddesc>Denotes the interest rate % of deposit amount for preclosing accounts.<br>
-					This rate is applicable if the account is preclosed.
-					</td></tr>
-					
-                    <tr class=alt><td>interestCompoundedEvery:</td></tr>
-                    <tr><td class=fielddesc>Interest is calculated on deposit amount for every interestCompoundedEvery period</td></tr>
-					
-					<tr class=alt><td>lockinPeriod:</td></tr>
-					<tr><td class=fielddesc>Defines a lockin period for deposit account. <br>
-					With in the lockin period one cannot preclose the deposit account.
-					</td></tr>
-										
-                    </tr>
-                </table>
-            </div>
-        </div>
-                
-        
-<a id="fixeddeposits_template" name="fixeddeposits_template" class="old-syle-anchor">&nbsp;</a>
-<div class="method-section">
-    <div class="method-description">
-        <h2>Retrieve Deposit Account Details Template:</h2>
-			<p>This is a convenience resource.  It can be useful when building maintenance user interface screens for client applications. The template data returned consists of any or all of:
-				<ul>
-				<li class=normalli>Field Defaults</li>   
-				<li class=normalli>Allowed Value Lists</li>    
-				</ul>
-			</p>
-        <h4>Arguments</h4>
-        <dl class="argument-list">
-            <dt>clientId</dt>
-            <dd>Integer <span>mandatory</span></dd>
-            <dt>productId</dt>
-            <dd>Integer <span>optional</span></dd>
-            <dd>If entered productId, productName and selectedProduct fields are returned. </dd>
-        </dl>
-        <p>Example Requests: </p>
-        <div class=apiClick>depositaccounts/template?clientId=17&productId=1</div>
-        <br><br>
-        <div class=apiClick>depositaccounts/template?clientId=17</div>
-    </div>
-    <div class="method-example">
-    	<code class="method-declaration">GET https://Domain Name/api/v1/depositaccounts/template?clientId={clientId}&productId={productId}</code>
-    	<code class="method-response">
-{
-  "clientId": 1,
-  "clientName": "First Client",
-  "productId": 1,
-  "productName": "MyFirstDepositProduct",
-  "currency": {
-    "code": "USD",
-    "name": "",
-    "decimalPlaces": 2,
-    "displaySymbol": "",
-    "nameCode": "",
-    "displayLabel": " [USD]"
-  },
-  "deposit": 100,
-  "maturityInterestRate": 6,
-  "tenureInMonths": 12,
-  "projectedCommencementDate": [
-    2013,
-    2,
-    6
-  ],
-  "interestCompoundedEvery": 1,
-  "interestCompoundedEveryPeriodType": {
-    "id": 2,
-    "code": "deposit.interest.compounding.period.periodFrequencyType.months",
-    "value": "Months"
-  },
-  "renewalAllowed": true,
-  "preClosureAllowed": true,
-  "preClosureInterestRate": 3,
-  "isInterestWithdrawable": false,
-  "interestCompoundingAllowed": true,
-  "interestCompoundedEveryPeriodTypeOptions": [
-    {
-      "id": 2,
-      "code": "deposit.interest.compounding.period.periodFrequencyType.months",
-      "value": "Months"
-    }
-  ],
-  "productOptions": [
-    {
-      "id": 1,
-      "name": "MyFirstDepositProduct"
-    }
-  ],
-  "availableInterestForWithdrawal": 0,
-  "availableWithdrawalAmount": 0,
-  "todaysDate": [
-    2013,
-    2,
-    6
-  ],
-  "isLockinPeriodAllowed": true,
-  "lockinPeriod": 0,
-  "lockinPeriodType": {
-    "id": 2,
-    "code": "deposit.interest.compounding.period.periodFrequencyType.months",
-    "value": "Months"
-  },
-  "availableInterest": 0,
-  "interestPostedAmount": 0
-}
-		</code>
-
-        <code class="method-declaration">GET https://Domain Name/api/v1/depositaccounts/template?clientId={clientId}</code>
-<code class="method-response">{
-  "clientId": 1,
-  "clientName": "First Client",
-  "renewalAllowed": false,
-  "preClosureAllowed": false,
-  "isInterestWithdrawable": false,
-  "interestCompoundingAllowed": true,
-  "interestCompoundedEveryPeriodTypeOptions": [
-    {
-      "id": 2,
-      "code": "deposit.interest.compounding.period.periodFrequencyType.months",
-      "value": "Months"
-    }
-  ],
-  "productOptions": [
-    {
-      "id": 1,
-      "name": "MyFirstDepositProduct"
-    }
-  ],
-  "availableInterestForWithdrawal": 0,
-  "availableWithdrawalAmount": 0,
-  "todaysDate": [
-    2013,
-    2,
-    6
-  ],
-  "isLockinPeriodAllowed": true,
-  "availableInterest": 0,
-  "interestPostedAmount": 0
-}
-</code>
-    </div>
-</div>
-        
-<a id="fixeddeposits_retrieve" name="fixeddeposits_retrieve" class="old-syle-anchor">&nbsp;</a>
-<div class="method-section">
-    <div class="method-description">
-        <h2>Retrieve a fixeddeposit:</h2>
-        
-        <h4>Arguments</h4>
-        <dl class="argument-list">
-            <dt>associations</dt>        
-            <dd>optional, <span>'all' deposit associations are itemised below </span></dd>
-            <dd><br>Associations are just extra pieces of data that you might or might not want to retrieve.<br><br></dd>
-            <dd><b>'all':</b> Gets all association data.</dd>
-            <dd><b>'permissions':</b> Data that describes what things can happen to the deposit in its current state.
-            Very specific to the needs of the current Individual Lending client application.</dd>
-        </dl>
-        <p>Example Requests: </p>
-        <div class=apiClick>depositaccounts/1</div>
-        <br><br>
-        <div class=apiClick>depositaccounts/1?associations=all</div>
-    </div>
-    <div class="method-example">
-        <code class="method-declaration">GET https://DomainName/api/v1/depositaccounts/{depositaccountId}</code>
-        <code class="method-response">{
-{
-	"id": 5,
-	"status": {
-		"id": 100,
-		"code": "depositStatusType.submitted.and.pending.approval",
-		"value": "Submitted and pending approval"
-	},
-	"clientId": 17,
-	"clientName": "Agri",
-	"productId": 1,
-	"productName": "Micro Savings",
-	"currency": {
-		"code": "INR",
-		"name": "Indian Rupee",
-		"decimalPlaces": 2,
-		"nameCode": "currency.INR",
-		"displayLabel": "Indian Rupee [INR]"
-	},
-	"deposit": 200.000000,
-	"maturityInterestRate": 12.000000,
-	"tenureInMonths": 12,
-	"projectedCommencementDate": [2012,	12,	16],
-	"maturedOn": [2013,	12,	15],
-	"projectedInterestAccrued": 24.000000,
-	"projectedMaturityAmount": 224.000000,
-	"interestCompoundedEvery": 6,
-	"interestCompoundedEveryPeriodType": {
-		"id": 2,
-		"code": "deposit.interest.compounding.period.periodFrequencyType.months",
-		"value": "Months"
-	},
-	"renewalAllowed": true,
-	"preClosureAllowed": true,
-	"preClosureInterestRate": 5.000000,
-	"isInterestWithdrawable": true,
-	"interestPaid": 0.000000,
-	"interestCompoundingAllowed": false,
-	"permissions": {
-		"rejectAllowed": true,
-		"withdrawnByApplicantAllowed": true,
-		"undoApprovalAllowed": false,
-		"pendingApproval": true,
-		"isInterestWithdrawalAllowed": true,
-		"renewelAllowed": false,
-		"isMaturedDepositAccount": false,
-		"anyActionOnAccountAllowed": true
-	},
-	"availableInterestForWithdrawal": 0,
-	"availableWithdrawalAmount": 200.000000,
-	"todaysDate": [2013, 1,	30],
-	"isLockinPeriodAllowed": true,
-	"lockinPeriod": 0,
-	"lockinPeriodType": {
-		"id": 2,
-		"code": "deposit.interest.compounding.period.periodFrequencyType.months",
-		"value": "Months"
-	},
-	"availableInterest": 0.000000,
-	"interestPostedAmount": 0.000000,
-	"imageKey": "/root/.mifosx/DefaultDemoTenant/images/clients/33/places.png"
-}
-}
-        </code>
-    </div>
-</div>
-
-<a id="fixeddeposits_create" name="fixeddeposits_create" class="old-syle-anchor">&nbsp;</a>
-<div class="method-section">
-    <div class="method-description">
-        <h2>Create a New DepositAccount / Submit a DepositAccount Application</h2>
-        <h4>Arguments</h4>
-        <dl class="argument-list">
-            <dt>command</dt>
-            <dd>String<span> Optional, case-insensitive</span></dd>
-            <dd>The default action is to Submit a New DepositAccount Application ("Submitted and awaiting approval" status).<br></dd>
-        </dl>
-        <br>
-        <table class=matrixHeading>
-            <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Mandatory Fields</div></td></tr>
-            <tr class=alt><td>clientId, productId, deposit, maturityInterestRate, commencementDate</td></tr>
-        </table>
-    </div>
-    <div class="method-example">
-        <code class="method-declaration">POST https://Domain Name/api/v1/depositaccounts</code>
-        <code class="method-request">POST depositaccount
-Content-Type: application/json
-Request Body:
-{
-    "clientId": "17",
-	"dateFormat": "dd MMMM yyyy",
-	"locale": "en",
-	"productId": "1",
-	"commencementDate": "25 January 2013",
-	"externalId": "123",
-	"deposit": "20000",
-	"tenureInMonths": "3",
-	"renewalAllowed": "true",
-	"preClosureAllowed": "true",
-	"interestCompoundingAllowed": "false",
-	"isInterestWithdrawable": "true",
-	"isLockinPeriodAllowed": "true",
-	"maturityInterestRate": "12",
-	"preClosureInterestRate": "5",
-	"interestCompoundedEvery": "6",
-	"interestCompoundedEveryPeriodType": "2",
-	"lockinPeriod": "1",
-	"lockinPeriodType": "2"
-}
-
-        </code>
-        <code class="method-response">{
- "resourceId": 42
-}
-        </code>
-    </div>
-</div>
-        
-        <a id="fixeddeposits_approve_etc" name="fixeddeposits_approve_etc" class="old-syle-anchor">&nbsp;</a>
-        <div class="method-section">
-            <div class="method-description">
-                <h2> Approval, Reject or Withdraw a DepositAccount Application</h2>
-                <h4>Arguments</h4> 
-                <dl class="argument-list">
-                    <dt>command</dt>
-                    <dd>String<span> Mandatory, case-insensitive</span></dd>
-                    <dd>'approve' : Approve DepositAccount</dd>
-                    <dd>'reject' : Reject DepositAccount</dd>
-                    <dd>'withdrewbyclient' : Client Withdrew DepositAccount Application</dd>
-					<dt>Deposit amount</dt>
-					<dd>Integer<span>Mandatory</span></dd>
-					<dt>Deposit interest rate</dt>
-					<dd>Integer<span>Mandatory</span></dd>
-					<dt>Tenure month</dt>
-					<dd>Integer<span>Mandatory</span></dd>
-					<dt>Interest posted every</dt>
-					<dd>Integer<span>Mandatory</span></dd>
-                </dl>
-                <br>
-                <table class=matrixHeading>
-                    <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Mandatory Fields</div></td></tr>
-                    <tr class=alt><td>eventDate</td></tr>
-                </table>
-            </div>
-            <div class="method-example">
-                <code class="method-declaration">POST https://DomainName/api/v1/depositaccounts/{depositaccountId}</code>
-                <code class="method-request">POST depositaccounts/1?command=reject
-Content-Type: application/json
-Request Body:
-{
- "dateFormat": "dd MMMM yyyy",
- "eventDate": "07 May 2012",
- "note": "and event note is added"
-}                </code>
-                <code class="method-response">
-{
-"resourceId": 37
-}
-                </code>
-            </div>
-        </div>
-        <a id="fixeddeposits_delete" name="fixeddeposits_delete" class="old-syle-anchor">&nbsp;</a>
-        <div class="method-section">
-            <div class="method-description">
-                <h2>Delete a DepositAccount</h2>
-                <p>
-                    <b>Note:</b> depositaccount is deleted.
-                </p>
-            </div>
-            <div class="method-example">
-                <code class="method-declaration">DELETE https://Domain Name/api/v1/depositaccounts/{depositaccountsId}</code>
-                <code class="method-request">DELETE depositaccounts/1              
-Content-Type: application/json
-No Request Body:
-                </code>
-                <code class="method-response">{
-"resourceId": 1
-}
-                </code>
-            </div>
-        </div>
-<!-- End of Fixed deposits-->
-<!--Start of saving -->
-<a id="savingaccounts" name="savingaccounts" class="old-syle-anchor">&nbsp;</a>
-        <div class="method-section">
-            <div class="method-description">
-                <h2>Saving Account :</h2>
-              <table class=matrixHeading>
-                    <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Field Descriptions</div></td></tr>
-                    <tr class=alt><td>savingsDepositAmountPerPeriod :</td></tr>
-                    <tr><td class=fielddesc>The amount to be depositd in the savingaccount for every period.<br>
-					If the account is regular account enter what ever the amount you want to deposit </td></tr><br>
-                    <tr class=alt><td>externalId :</td></tr>
-                    <tr><td class=fielddesc>A place to put an external reference for this savingaccount. e.g. The ID another system uses.<br>
-                    If provided, it must be unique.</td></tr>
-					
-                    <tr class=alt><td>tenure :</td></tr>
-                    <tr><td class=fielddesc>denotes the tenure period of savings account </td></tr>
-					
-                    <tr class=alt><td>depositEvery :</td></tr>
-                    <tr><td class=fielddesc>For every 'depositEvery' period the client has to deposit 'savingsDepositAmountPerPeriod' amount </td></tr>
-					
-                    <tr class=alt><td>interestCalculationMethod:</td></tr> 	
-                    <tr><td class=fielddesc>denotes on what basis the interest is calculated<br>
-					e.g. AverageBal,Monthly Collection etc</td></tr>
-					
-					<tr class=alt><td>recurringInterestRate :</td></tr>
-                    <tr><td class=fielddesc>The interest rate applicable on recurring deposit  savingaccounts</td></tr>
-					
-                    <tr class=alt><td>savingInterestRate :</td></tr>
-                    <tr><td class=fielddesc>The interest rate applicable on regular savingaccounts </td></tr>
-					
-					<tr class=alt><td>interestPostEvery:</td></tr>
-					<tr><td class=fielddesc>Denotes for how many months the interest is posted for recurring/regular saving accounts</td></tr>
-					
-					<tr class=alt><td>lockinPeriod :</td></tr>
-					<tr><td class=fielddesc>With in a lockin period you cannot withdraw whole money(cannot Preclose) </td></tr>
-                    </tr>
-                </table>
-            </div>
-        </div>
-                
-        
-<a id="savingaccounts_template" name="savingaccounts_template" class="old-syle-anchor">&nbsp;</a>
-<div class="method-section">
-    <div class="method-description">
-        <h2>Retrieve SavingAccount Details Template :</h2>
-                <p>This is a convenience resource.  It can be useful when building maintenance user interface screens for client applications. The template data returned consists of any or all of:
-                    <ul>
-                    <li class=normalli>Field Defaults</li>   
-                    <li class=normalli>Allowed Value Lists</li>    
-                    </ul>
-                </p>
-        <h4>Arguments</h4>
-        <dl class="argument-list">
-            <dt>clientId</dt>
-            <dd>Integer <span>mandatory</span></dd>
-            <dt>productId</dt>
-            <dd>Integer <span>optional</span></dd>
-            <dd>If entered, productId, productName and selectedProduct fields are returned. </dd>
-        </dl>
-        <p>Example Requests: </p>
-        <div class=apiClick>savingaccounts/template?clientId=25&productId=5</div>
-        <br><br>
-        <div class=apiClick>savingaccounts/template?clientId=25</div>
-    </div>
-    <div class="method-example">
-        <code class="method-declaration">GET https://Domain Name/api/v1/savingaccounts/template</code>
-<code class="method-response">{
-	"clientId": 25,
-	"clientName": "Clark Kent",
-	"productId": 5,
-	"productName": "Shares",
-	"productType": {
-		"id": 2,
-		"code": "savings.product.savingProductType.regular",
-		"value": "Regular"
-	},
-	"currencyData": {
-		"code": "ZAR",
-		"name": "South African Rand",
-		"decimalPlaces": 2,
-		"displaySymbol": "R",
-		"nameCode": "currency.ZAR",
-		"displayLabel": "South African Rand (R)"
-	},
-	"savingsDepositAmountPerPeriod": 500.000000,
-	"savingsFrequencyType": {
-		"id": 2,
-		"code": "saving.product.frequency.period.savingFrequencyType.monthly",
-		"value": "Months"
-	},
-	"recurringInterestRate": 12.000000,
-	"savingInterestRate": 12.000000,
-	"interestType": {
-		"id": 2,
-		"code": "savings.interest.type.savingsInterestType.compounding",
-		"value": "Compounding"
-	},
-	"interestCalculationMethod": {
-		"id": 1,
-		"code": "savings.interestCalculation.method.savinginterest.calculation.method.averagebal",
-		"value": "AverageBalance"
-	},
-	"tenure": 12,
-	"tenureType": {
-		"id": 1,
-		"code": "savings.tenure.tenureTypeEnum.fixedPeriod",
-		"value": "FixedPeriod"
-	},
-	"projectedCommencementDate": [2013,
-	2,
-	1],
-	"preClosureAllowed": true,
-	"isLockinPeriodAllowed": false,
-	"lockinPeriod": 0,
-	"lockinPeriodType": {
-		"id": 2,
-		"code": "deposit.interest.compounding.period.periodFrequencyType.months",
-		"value": "Months"
-	},
-	"depositEvery": 1,
-	"productOptions": [{
-		"id": 4,
-		"name": "sb01"
-	},
-	{
-		"id": 5,
-		"name": "Shares"
-	}],
-	"currencyOptions": [{
-		"code": "ZAR",
-		"name": "South African Rand",
-		"decimalPlaces": 2,
-		"displaySymbol": "R",
-		"nameCode": "currency.ZAR",
-		"displayLabel": "South African Rand (R)"
-	},
-	{
-		"code": "VND",
-		"name": "Vietnamese Dong",
-		"decimalPlaces": 2,
-		"nameCode": "currency.VND",
-		"displayLabel": "Vietnamese Dong [VND]"
-	}],
-	"savingsProductTypeOptions": [{
-		"id": 1,
-		"code": "savings.product.savingProductType.reccuring",
-		"value": "Recurring"
-	},
-	{
-		"id": 2,
-		"code": "savings.product.savingProductType.regular",
-		"value": "Regular"
-	}],
-	"tenureTypeOptions": [{
-		"id": 1,
-		"code": "savings.tenure.tenureTypeEnum.fixedPeriod",
-		"value": "FixedPeriod"
-	},
-	{
-		"id": 2,
-		"code": "savings.tenure.tenureTypeEnum.perpetual",
-		"value": "Perpetual"
-	}],
-	"savingFrequencyOptions": [{
-		"id": 2,
-		"code": "saving.product.frequency.period.savingFrequencyType.monthly",
-		"value": "Months"
-	}],
-	"savingsInterestTypeOptions": [{
-		"id": 1,
-		"code": "savings.interest.type.savingsInterestType.simple",
-		"value": "Simple"
-	},
-	{
-		"id": 2,
-		"code": "savings.interest.type.savingsInterestType.compounding",
-		"value": "Compounding"
-	}],
-	"lockinPeriodTypeOptions": [{
-		"id": 2,
-		"code": "savings.product.lockin.period.type.months",
-		"value": "Months"
-	}],
-	"interestCalculationOptions": [{
-		"id": 1,
-		"code": "savings.interestCalculation.method.savinginterest.calculation.method.averagebal",
-		"value": "AverageBalance"
-	},
-	{
-		"id": 3,
-		"code": "savings.interestCalculation.method.savinginterest.calculation.method.monthlycllection",
-		"value": "MonthlyCollection"
-	}],
-	"outstandingAmount": 0,
-	"dueAmount": 0,
-	"interestPostEvery": 3,
-	"interestPostFrequency": {
-		"id": 2,
-		"code": "saving.product.frequency.period.savingFrequencyType.monthly",
-		"value": "Months"
-	}
-}
-
-</code>
-    </div>
-</div>
-        
-<a id="savingaccounts_retrieve" name="savingaccounts_retrieve" class="old-syle-anchor">&nbsp;</a>
-<div class="method-section">
-    <div class="method-description">
-        <h2>Retrieve a SavingAccount :</h2>
-        <p>
-            <b>Note:</b> template=true parameter doesn't apply to this resource.
-        </p>
-        <h4>Arguments</h4>
-        <dl class="argument-list">
-            <dt>associations</dt>        
-            <dd>optional, <span>Either 'all' or a comma separated list of savings 'associations' (itemised below).</span></dd>
-            <dd><br>Associations are just extra pieces of data that you might or might not want to retrieve.<br><br></dd>
-            <dd><b>'all':</b> Gets all association data.</dd>
-            <dd><b>'permissions':</b> Data that describes what things can happen to the saving account in its current state.
-            Very specific to the needs of the current Individual Lending client application.</dd>
-            <dd><b>'savingScheduleData':</b> Some derived data that </dd>
-			<dd><b>'transactions' :</b> Some data </dd>
-        </dl>
-        <p>Example Requests : </p>
-        <div class=apiClick>savingaccounts/15</div>
-        <br><br>
-        <div class=apiClick>savingaccounts/15?associations=all</div>
-    </div>
-    <div class="method-example">
-        <code class="method-declaration">GET https://DomainName/api/v1/savingaccounts/{savingaccountId}</code>
-        <code class="method-response">{
-	"id": 15,
-	"status": {
-		"id": 100,
-		"code": "depositStatusType.submitted.and.pending.approval",
-		"value": "Submitted and pending approval"
-	},
-	"externalId": "23",
-	"clientId": 50,
-	"clientName": "Brendan Fahy",
-	"productId": 4,
-	"productName": "sb01",
-	"productType": {
-		"id": 2,
-		"code": "savings.product.savingProductType.regular",
-		"value": "Regular"
-	},
-	"currencyData": {
-		"code": "USD",
-		"name": "US Dollar",
-		"decimalPlaces": 2,
-		"displaySymbol": "$",
-		"nameCode": "currency.USD",
-		"displayLabel": "US Dollar ($)"
-	},
-	"savingsDepositAmountPerPeriod": 200.000000,
-	"savingsFrequencyType": {
-		"id": 2,
-		"code": "saving.product.frequency.period.savingFrequencyType.monthly",
-		"value": "Months"
-	},
-	"totalDepositAmount": 0.000000,
-	"recurringInterestRate": 4.000000,
-	"savingInterestRate": 4.000000,
-	"interestType": {
-		"id": 1,
-		"code": "savings.interest.type.savingsInterestType.simple",
-		"value": "Simple"
-	},
-	"interestCalculationMethod": {
-		"id": 1,
-		"code": "savings.interestCalculation.method.savinginterest.calculation.method.averagebal",
-		"value": "AverageBalance"
-	},
-	"tenure": 12,
-	"tenureType": {
-		"id": 1,
-		"code": "savings.tenure.tenureTypeEnum.fixedPeriod",
-		"value": "FixedPeriod"
-	},
-	"projectedCommencementDate": [2013,
-	2,
-	1],
-	"projectedInterestAccuredOnMaturity": 0.000000,
-	"actualInterestAccured": 0.000000,
-	"projectedMaturityAmount": 200.000000,
-	"actualMaturityAmount": 0.000000,
-	"preClosureAllowed": false,
-	"preClosureInterestRate": 0.000000,
-	"isLockinPeriodAllowed": false,
-	"lockinPeriod": 0,
-	"lockinPeriodType": {
-		"id": 2,
-		"code": "savings.product.lockin.period.type.months",
-		"value": "Months"
-	},
-	"depositEvery": 1,
-	"permissions": {
-		"rejectAllowed": true,
-		"withdrawnByApplicantAllowed": true,
-		"undoApprovalAllowed": false,
-		"pendingApproval": true,
-		"renewelAllowed": false,
-		"isMaturedDepositAccount": false,
-		"anyActionOnAccountAllowed": true
-	},
-	"outstandingAmount": 0.000000,
-	"savingScheduleData": {
-		"currency": {
-			"code": "USD",
-			"name": "US Dollar",
-			"decimalPlaces": 2,
-			"displaySymbol": "$",
-			"nameCode": "currency.USD",
-			"displayLabel": "US Dollar ($)"
-		},
-		"cumulativeDepositDue": 200.0000,
-		"cumulativeDepositPaid": 0.0000,
-		"cummulativeInterestAccured": 0.0000,
-		"periods": [{
-			"period": 1,
-			"dueDate": [2013,
-			3,
-			1],
-			"depositDue": 200.0000,
-			"depositPaid": 0.0000,
-			"interestAccured": 0.0000
-		}]
-	},
-	"transactions": [],
-	"interestPostEvery": 3,
-	"interestPostFrequency": {
-		"id": 2,
-		"code": "saving.product.frequency.period.savingFrequencyType.monthly",
-		"value": "Months"
-	}
-}
-        </code>
-    </div>
-</div>
-
-<a id="savingaccounts_create" name="savingaccounts_create" class="old-syle-anchor">&nbsp;</a>
-<div class="method-section">
-    <div class="method-description">
-        <h2>Create a New SavingAccount / Submit a SavingAccount Application</h2>
-        <h4>Arguments</h4>
-        <dl class="argument-list">
-            <dt>command</dt>
-            <dd>String<span> Optional, case-insensitive</span></dd>
-            <dd>The default action is to Submit a New SavingAccount Application ("Submitted and awaiting approval" status).<br></dd>
-        </dl>
-        <br>
-        <table class=matrixHeading>
-            <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Mandatory Fields</div></td></tr>
-            <tr class=alt><td>clientId, productId, savingsDepositAmountPerPeriod, tenureMonths, depositEvery, interestCalculationMethod, recurringInterestRate, commencementDate, interestPostEvery </td></tr>
-        </table>
-    </div>
-    <div class="method-example">
-        <code class="method-declaration">POST https://Domain Name/api/v1/savingaccounts</code>
-        <code class="method-request">POST savingaccount
-Content-Type: application/json
-Request Body:
-{
-	"clientId": "17",
-	"dateFormat": "dd MMMM yyyy",
-	"locale": "en",
-	"currencyCode": "ZAR",
-	"digitsAfterDecimal": "2",
-	"productId": "5",
-	"commencementDate": "05 February 2013",
-	"externalId": "",
-	"savingsDepositAmountPerPeriod": "500",
-	"minimumBalanceForWithdrawal": "100",
-	"tenure": "12",
-	"tenureType": "1",
-	"depositEvery": "1",
-	"frequency": "2",
-	"isLockinPeriodAllowed": "false",
-	"isPartialDepositAllowed": "false",
-	"interestCalculationMethod": "1",
-	"recurringInterestRate": "12",
-	"interestType": "2",
-	"savingInterestRate": "12",
-	"interestPostEvery": "3",
-	"interestPostFrequency": "2",
-	"lockinPeriod": "0",
-	"lockinPeriodType": "2"
-}        </code>
-        <code class="method-response">{
- "resourceId": 42
-}
-        </code>
-    </div>
-</div>
-        
-        <a id="savingaccounts_approve_etc" name="savingaccounts_approve_etc" class="old-syle-anchor">&nbsp;</a>
-        <div class="method-section">
-            <div class="method-description">
-                <h2> Approval, Reject or Withdraw a SavingAccount Application</h2>
-                <h4>Arguments</h4> 
-                <dl class="argument-list">
-                    <dt>command</dt>
-                    <dd>String<span> Mandatory, case-insensitive</span></dd>
-                    <dd>'approve' : Approve SavingAccount</dd>
-                    <dd>'reject' : Reject SavingAccount</dd>
-                    <dd>'withdrewbyclient' : Client Withdrew SavingAccount Application</dd>					
-                </dl>
-                <br>
-                <table class=matrixHeading>
-                    <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Mandatory Fields</div></td></tr>
-                    <tr class=alt><td>eventDate</td></tr>
-                </table>
-            </div>
-            <div class="method-example">
-                <code class="method-declaration">POST https://Domain Name/api/v1/savingaccounts/{savingaccountId}</code>
-                <code class="method-request">POST savingaccounts/1?command=reject
-Content-Type: application/json
-Request Body:
-{
- "dateFormat": "dd MMMM yyyy",
- "eventDate": "07 May 2012",
- "note": "and event note is added"
-}                </code>
-                <code class="method-response">
-{
-"resourceId": 37
-}
-                </code>
-            </div>
-        </div>
-        <a id="savingaccounts_delete" name="savingaccounts_delete" class="old-syle-anchor">&nbsp;</a>
-        <div class="method-section">
-            <div class="method-description">
-                <h2>Delete a SavingAccount</h2>
-                <p>
-                    <b>Note:</b> savingaccount is deleted.
-                </p>
-            </div>
-            <div class="method-example">
-                <code class="method-declaration">DELETE https://Domain Name/api/v1/savingaccounts/{savingaccountsId}</code>
-                <code class="method-request">DELETE savingaccounts/1              
-Content-Type: application/json
-No Request Body:
-                </code>
-                <code class="method-response">{
-"resourceId": 1
-}
-                </code>
-            </div>
-        </div>
-<!-- End of saving -->
-
-
-			<!-- start of offices content -->
+<!-- start of offices content -->
 			<a id="offices" name="offices" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
@@ -7796,811 +6805,78 @@ Content-Type: application/json
 					<code class="method-response">{ "resourceId": 1 } </code>
 				</div>
 			</div>
-			
-		<!-- start of deposit products api docs -->
-        <a id="depositproducts" name="depositproducts" class="old-syle-anchor">&nbsp;</a>
-        <div class="method-section">
-            <div class="method-description">
-                <h3>Deposit Products :</h3>
-                <p>A Deposit product is a template that is used when creating a Fixed Deposit Account. 
-                </p>
-                <table class=matrixHeading>
-                    <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Field Descriptions</div></td></tr>
-					
-					<tr class=alt><td>name</td></tr>
-                    <tr><td class=fielddesc>The name of the product offering.</td></tr>
-					
-					<tr class=alt><td>description</td></tr>
-                    <tr><td class=fielddesc>Used to provide extra textual information about the product.</td></tr>
-					
-                    <tr class=alt><td>digitsAfterDecimal</td></tr>
-                    <tr><td class=fielddesc>Override the currency default value for digitsAfterDecimal.</td></tr>
-					
-                    <tr class=alt><td>minDeposit</td></tr>
-                    <tr><td class=fielddesc>The minimum amount allowed when opening a deposit account.</td></tr>
-					
-                    <tr class=alt><td>maxDeposit</td></tr>
-                    <tr><td class=fielddesc>The maximum amount allowed when opening a deposit account.</td></tr>
 
-                    <tr class=alt><td>defaultDeposit</td></tr>
-                    <tr><td class=fielddesc>The amount presented by default when opening a deposit account.</td></tr>
-
-                    <tr class=alt><td></td></tr>
-								                 
-                    <tr class=alt><td>tenureInMonths</td></tr>
-                    <tr><td class=fielddesc>The duration for fixed deposit (in months). <br>
-                    e.g. 12
-                    </td></tr>
-				 
-                    <tr class=alt><td>minInterestRate</td></tr>
-                    <tr><td class=fielddesc>The minimum allowed interest rate for this product.<br>
-					e.g. 1.5</td></tr>
-					
-                    <tr class=alt><td>maxInterestRate</td></tr>
-                    <tr><td class=fielddesc>The maximum allowed interest rate for this product.<br>
-                    e.g. 11.5</td></tr>
-					
-					<tr class=alt><td>defaultInterestRate</td></tr>
-                    <tr><td class=fielddesc>The interest rate presented by default when opening an account.<br>
-                    e.g. 6.5</td></tr>
-
-					<tr class=alt><td>interestCompoundedEvery</td></tr>
-                    <tr><td class=fielddesc>Interest amount which is accrued or earned during the tenure of the deposit account will be posted to customer as interest as per the selected period in "interestCompoundedEvery" and combination of "interestCompoundedEveryPeriodType" <br>
-                    e.g.Every <b>1</b>-Month</td></tr>
-					
-					<tr class=alt><td>interestCompoundedEveryPeriodType</td></tr>
-                    <tr><td class=fielddesc>Denotes the interest compounding period type, used with combination of interestCompoundedEvery <br>
-					e.g. Days=0, Weeks=1, Months=2, Years=3</td></tr>
-					
-				    <tr class=alt><td>renewalAllowed</td></tr>					
-					<tr><td class=fielddesc>Indicates whether accounts are allowed to be renewed on maturity. <br>
-                       Used like: renewalAllowed:true </td></tr>
-					
-					<tr class=alt><td>preClosureAllowed</td></tr>
-					<tr><td class=fielddesc>Indicates whether accounts are allowed to be closed before maturity. <br>
-                     If 'true' : Closure before maturity is allowed; otherwise closure before maturity is not allowed.</tr></td>
-					
-					<tr class=alt><td>preClosureInterestRate</td></tr>
-					<tr><td class=fielddesc>The interest rate used in cases where pre-closure occurs. Mandatory if preClosureAllowed=true</td></tr>
-					
-					<tr class=alt><td>interestCompoundingAllowed</td></tr>
-					<tr><td class=fielddesc>Denotes whether the interest is calculated using <b>simple interest</b> or <b>compounding interest</b>.</tr></td>
-					
-					<tr class=alt><td>isLockinPeriodAllowed</td></tr>
-					<tr><td class=fielddesc>This will allow to set the lock-in period for a fixed deposit product<br>
-                     If 'true' :isLockinPeriodAllowed otherwise isLockinPeriod not allowed</tr></td>
-					
-					<tr class=alt><td>lockinPeriod</td></tr>
-					<tr><td class=fielddesc>Defines a lock-in period for deposit account.</tr></td>
-					
-                    </tr>
-                </table>
-            </div>
-        </div>
-    
-        <a id="depositproducts_list" name="depositproducts_list" class="old-syle-anchor">&nbsp;</a>
-        <div class="method-section">
-            <div class="method-description">
-                <h4>List DepositProducts</h4>
-                <p>Example Requests:</p> 
-                <div class=apiClick>depositproducts</div>
-                <br><br>
-                <div class=apiClick>depositproducts?fields=name,   ......    </div>
-            </div>
-            <div class="method-example">
-                <code class="method-declaration">GET https://Domain Name/api/v1/depositproducts</code>
-                <code class="method-response">
-[{
-	"id": 1,
-	"name": "Test",
-	"description": "asdf",
-	"currencyCode": "USD",
-	"digitsAfterDecimal": 2,
-	"minimumBalance": 100.000000,
-	"maximumBalance": 1000.000000,
-	"tenureInMonths": 12,
-	"maturityDefaultInterestRate": 12.000000,
-	"maturityMinInterestRate": 8.000000,
-	"maturityMaxInterestRate": 12.000000,
-	"interestCompoundedEvery": 1,
-	"interestCompoundedEveryPeriodType": {
-		"id": 2,
-		"code": "deposit.interest.compounding.period.periodFrequencyType.months",
-		"value": "Months"
-	},
-	"currency": {
-		"code": "USD",
-		"name": "US Dollar",
-		"decimalPlaces": 2,
-		"displaySymbol": "$",
-		"nameCode": "currency.USD",
-		"displayLabel": "US Dollar ($)"
-	},
-	"renewalAllowed": false,
-	"preClosureAllowed": false,
-	"preClosureInterestRate": 6.000000,
-	"interestCompoundingAllowed": true,
-	"isLockinPeriodAllowed": false,
-	"lockinPeriod": 2,
-	"lockinPeriodType": {
-		"id": 2,
-		"code": "deposit.interest.compounding.period.periodFrequencyType.months",
-		"value": "Months"
-	},
-	"createdOn": 1360576753000,
-	"lastModifedOn": 1360579312000
-}...]
-				</code>
-            </div>
-        </div>
-    
-        <a id="depositproducts_template" name="depositproducts_template" class="old-syle-anchor">&nbsp;</a>
-        <div class="method-section">
-            <div class="method-description">
-                <h4>Retrieve DepositProduct Details Template</h4>
-                <p>This is a convenience resource.  It can be useful when building maintenance user interface screens for client applications. The template data returned consists of any or all of:
-                    <ul>
-                    <li class=normalli>Field Defaults</li>   
-                    <li class=normalli>Allowed Value Lists</li>    
-                    </ul>
-                </p>
-                <p>Example Request: </p>
-                <div class=apiClick>depositproducts/template</div>
-            </div>
-            <div class="method-example">
-                <code class="method-declaration">GET https://Domain Name/api/v1/depositproducts/template</code>
-				<code class="method-response">
-{
-	"interestCompoundedEveryPeriodType": {
-		"id": 2,
-		"code": "deposit.interest.compounding.period.periodFrequencyType.months",
-		"value": "Months"
-	},
-	"currency": {
-		"code": "USD",
-		"name": "US Dollar",
-		"decimalPlaces": 2,
-		"displaySymbol": "$",
-		"nameCode": "currency.USD",
-		"displayLabel": "US Dollar ($)"
-	},
-	"renewalAllowed": false,
-	"preClosureAllowed": false,
-	"isLockinPeriodAllowed": false,
-	"lockinPeriodType": {
-		"id": 2,
-		"code": "deposit.interest.compounding.period.periodFrequencyType.months",
-		"value": "Months"
-	},
-	"currencyOptions": [{
-		"code": "USD",
-		"name": "US Dollar",
-		"decimalPlaces": 2,
-		"displaySymbol": "$",
-		"nameCode": "currency.USD",
-		"displayLabel": "US Dollar ($)"
-	}],
-	"interestCompoundedEveryPeriodTypeOptions": [{
-		"id": 2,
-		"code": "deposit.interest.compounding.period.periodFrequencyType.months",
-		"value": "Months"
-	}]
-}
-				</code>
-            </div>
-        </div>
-    
-        <a id="depositproducts_retrieve" name="depositproducts_retrieve" class="old-syle-anchor">&nbsp;</a>
-        <div class="method-section">
-            <div class="method-description">
-                <h4>Retrieve a Deposit Product</h4>
-                <p>Example Requests: </p>
-                <div class=apiClick>depositproducts/1</div>
-                <br><br>
-                <div class=apiClick>depositproducts/1?template=true</div>
-                 <br><br>
-                <div class=apiClick>depositproducts/1?fields=name,description</div>
-            </div>
-            <div class="method-example">
-				<code class="method-declaration">GET https://Domain Name/api/v1/depositproducts/1</code>
-				<code class="method-response">
-{
-  "id": 1,
-  "name": "Test",
-  "description": "asdf",
-  "currencyCode": "USD",
-  "digitsAfterDecimal": 2,
-  "minimumBalance": 100,
-  "maximumBalance": 1000,
-  "tenureInMonths": 12,
-  "maturityDefaultInterestRate": 12,
-  "maturityMinInterestRate": 8,
-  "maturityMaxInterestRate": 12,
-  "interestCompoundedEvery": 1,
-  "interestCompoundedEveryPeriodType": {
-	"id": 2,
-	"code": "deposit.interest.compounding.period.periodFrequencyType.months",
-	"value": "Months"
-  },
-  "currency": {
-	"code": "USD",
-	"name": "US Dollar",
-	"decimalPlaces": 2,
-	"displaySymbol": "$",
-	"nameCode": "currency.USD",
-	"displayLabel": "US Dollar ($)"
-  },
-  "renewalAllowed": false,
-  "preClosureAllowed": false,
-  "preClosureInterestRate": 6,
-  "interestCompoundingAllowed": true,
-  "isLockinPeriodAllowed": false,
-  "lockinPeriod": 2,
-  "lockinPeriodType": {
-	"id": 2,
-	"code": "deposit.interest.compounding.period.periodFrequencyType.months",
-	"value": "Months"
-  },
-  "createdOn": 1360576753000,
-  "lastModifedOn": 1360579312000
-}				
-				</code>
+<!-- start of saving products api docs -->
+	<a id="savingsproducts" name="savingsproducts" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h3>Savings Product:</h3>
+	        <p>An MFIs savings product offerings are modelled using this API.</p>
+	        <p>When creating savings accounts, the details from the savings product are used to autofill details of savings account.</p>
+	        <table class=matrixHeading>
+	            <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Field Descriptions</div></td></tr>
 				
-                <code class="method-declaration">GET https://Domain Name/api/v1/depositproducts/1?template=true</code>
-				<code class="method-response">
-{
-	"id": 1,
-	"name": "Test",
-	"description": "asdf",
-	"currencyCode": "USD",
-	"digitsAfterDecimal": 2,
-	"minimumBalance": 100.000000,
-	"maximumBalance": 1000.000000,
-	"tenureInMonths": 12,
-	"maturityDefaultInterestRate": 12.000000,
-	"maturityMinInterestRate": 8.000000,
-	"maturityMaxInterestRate": 12.000000,
-	"interestCompoundedEvery": 1,
-	"interestCompoundedEveryPeriodType": {
-		"id": 2,
-		"code": "deposit.interest.compounding.period.periodFrequencyType.months",
-		"value": "Months"
-	},
-	"currency": {
-		"code": "USD",
-		"name": "US Dollar",
-		"decimalPlaces": 2,
-		"displaySymbol": "$",
-		"nameCode": "currency.USD",
-		"displayLabel": "US Dollar ($)"
-	},
-	"renewalAllowed": false,
-	"preClosureAllowed": false,
-	"preClosureInterestRate": 6.000000,
-	"interestCompoundingAllowed": true,
-	"isLockinPeriodAllowed": false,
-	"lockinPeriod": 2,
-	"lockinPeriodType": {
-		"id": 2,
-		"code": "deposit.interest.compounding.period.periodFrequencyType.months",
-		"value": "Months"
-	},
-	"createdOn": 1360576753000,
-	"lastModifedOn": 1360579312000,
-	"currencyOptions": [{
-		"code": "USD",
-		"name": "US Dollar",
-		"decimalPlaces": 2,
-		"displaySymbol": "$",
-		"nameCode": "currency.USD",
-		"displayLabel": "US Dollar ($)"
-	}],
-	"interestCompoundedEveryPeriodTypeOptions": [{
-		"id": 2,
-		"code": "deposit.interest.compounding.period.periodFrequencyType.months",
-		"value": "Months"
-	}]
-}				
-				</code>
-            </div>
-        </div>
-     
-        <a id="depositproducts_create" name="depositproducts_create" class="old-syle-anchor">&nbsp;</a>
-        <div class="method-section">
-            <div class="method-description">
-                <h4>Create a Deposit Product</h4>
-                <table class=matrixHeading>
-                    <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Mandatory Fields</div></td></tr>
-                    <tr class=alt><td>name, currencyCode, digitsAfterDecimal,interestPostedEvery, minimumBalance,
-                    </td></tr>
-					<tr><td>
-					tenureInMonths, maturityDefaultInterestRate,maturityMinInterestRate,
-                    </td></tr>
-					<tr class=alt><td>
-					maturityMaxInterestRate,interestCompoundedEvery,preClosureInterestRate.
-                    </td></tr>
-                </table>
-            </div>
-            <div class="method-example">
-                <code class="method-declaration">POST https://Domain Name/api/v1/depositproducts</code>
-				<code class="method-request">POST depositproducts
-Content-Type: application/json
-Request Body:
-{
-	"locale": "en",
-	"name": "Test",
-	"description": "asdf",
-	"currencyCode": "USD",
-	"digitsAfterDecimal": "2",
-	"minimumBalance": "100",
-	"maximumBalance": "1,000",
-	"tenureInMonths": "12",
-	"renewalAllowed": "true",
-	"preClosureAllowed": "false",
-	"interestCompoundingAllowed": "true",
-	"isLockinPeriodAllowed": "false",
-	"maturityDefaultInterestRate": "12",
-	"maturityMinInterestRate": "8",
-	"maturityMaxInterestRate": "12",
-	"preClosureInterestRate": "6",
-	"interestCompoundedEvery": "1",
-	"interestCompoundedEveryPeriodType": "2",
-	"lockinPeriod": "2",
-	"lockinPeriodType": "2"
-}
-				</code>
-				<code class="method-response">{
-  "resourceId": 1
-}
-				</code>
-            </div>
-        </div>
-    
-        <a id="depositproducts_update" name="depositproducts_update" class="old-syle-anchor">&nbsp;</a>
-        <div class="method-section">
-            <div class="method-description">
-                <h4>Update a Deposit Product</h4>
-            </div>
-            <div class="method-example">
-                <code class="method-declaration">PUT https://Domain Name/api/v1/depositproducts/{depositId}</code>
-				<code class="method-request">POST depositproducts/1
-Content-Type: application/json
-Request Body:
-{
- "locale": "en",
- "description": "Update desc"
-}
-				</code>
-				<code class="method-response">{
-  "resourceId": 1
-}
-				</code>
-            </div>
-        </div>
-		
-		<a id="depositproducts_delete" name="depositproducts_delete" class="old-syle-anchor">&nbsp;</a>
-			<div class="method-section">
-				<div class="method-description">
-					<h4>Delete a Deposit Product</h4>
-					<p>Deletes a Deposit Product.</p>
-				</div>
-				<div class="method-example">
-					<code class="method-declaration">
-DELETE https://Domain Name/api/v1/depositproducts/{productId}
-					</code>
-					<code class="method-request">
-DELETE depositproducts/1
-Content-Type: application/json
-					</code>
-					<code class="method-response">{ "resourceId": 1 } </code>
-				</div>
-			</div>
-<!-- end of deposit products api docs -->    
+				<tr class=alt><td>name</td></tr>
+	            <tr><td class=fielddesc>The name of the product offering.</td></tr>
 
-<!-- start of saving products api docs -->    
-   
-        <a id="savingproducts" name="savingproducts" class="old-syle-anchor">&nbsp;</a>
-        <div class="method-section">
-            <div class="method-description">
-                <h3>Saving Products :</h3>
-                <p>A Saving product is a template that is used when creating a Saving Account. 
-                </p>
-                <table class=matrixHeading>
-                    <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Field Descriptions</div></td></tr>
-					
-                    <tr class=alt><td>digitsAfterDecimal</td></tr>
-                    <tr><td class=fielddesc>Override the currency default value for digitsAfterDecimal.</td></tr>
-					
-                    <tr class=alt><td>savingsDepositAmount :</td></tr>
-                    <tr><td class=fielddesc>The deposit amount need to be deposited every depositEvery period.</td></tr>
-					
-                    <tr class=alt><td>minimumBalanceForWithdrawal :</td></tr>
-                    <tr><td class=fielddesc>The minimumbal that is need to be maintained in saving account</td></tr>
-                    <tr class=alt><td></td></tr>
-					
-					<tr class=alt><td>depositEvery:</td></tr>
-                    <tr><td class=fielddesc>The time period to deposit the amount to saving account every "depositEvery" "frequency" <br>
-					  e.g. Every <b>1</b> Month </td></tr>
-                  
-                    <tr class=alt><td>tenureType</td></tr>
-                    <tr><td class=fielddesc>This denotes the tenureType for savings account </td></tr>
-								                 
-                    <tr class=alt><td>tenure</td></tr>
-                    <tr><td class=fielddesc>The duration for fixed deposit (in months). <br>
-                    e.g. 12
-                    </td></tr>
-                    <tr class=alt><td>interestRate</td></tr>
-                    <tr><td class=fielddesc>Default interest rate for Saving account <br>
-                    e.g. 12</td></tr>
-					
-					<tr class=alt><td>interestType</td></tr>
-                    <tr><td class=fielddesc>Denotes the interestType for Saving account <br>
-                     simple/compounding</td></tr>
-					 
-                    <tr class=alt><td>minInterestRate</td></tr>
-                    <tr><td class=fielddesc>Minimum supported interest rate for Saving account<br>
-					e.g. 8</td></tr>
-					
-                    <tr class=alt><td>maxInterestRate</td></tr>
-                    <tr><td class=fielddesc>Maximum supported interest rate for Saving account<br>
-                    e.g. 14 </td></tr>
-					
-				    <tr class=alt><td>isPartialDepositAllowed</td></tr>					
-					<tr><td class=fielddesc> Allows to deposit the partial amount for saving account.<br>
-                       Used like: isPartialDepositAllowed:true </td></tr>	
-					
-					<tr class=alt><td>isLockinPeriodAllowed</td></tr>
-					<tr><td class=fielddesc>This will allow to set the lock-in period for a saving account<br>
-                     If 'true' :isLockinPeriodAllowed otherwise isLockinPeriod not allowed</tr></td>
-					
-					<tr class=alt><td>lockinPeriod</td></tr>
-					<tr><td class=fielddesc>Defines a lock-in period for saving account.</tr></td>
-					
-					<tr class=alt><td>savingProductType</td></tr>
-					<tr><td class=fielddesc>Defines the savingProductType for saving account.<br>
-					Recurring/Regular</tr></td>
-                    </tr>
-					
-					<tr class=alt><td>interestCalculationMethod</td></tr>
-					<tr><td class=fielddesc>Defines the interestCalculationMethod for saving account.<br>
-					Montly Collection/Average Balance etc</tr></td>
-                    </tr>
-                </table>
-            </div>
+	            <tr class=alt><td>description</td></tr>
+	            <tr><td class=fielddesc>A description of the product offering.</td></tr>
+
+				<tr class=alt><td>currencyCode</td></tr>
+	            <tr><td class=fielddesc>Three letter ISO code reprsenting currency.</td></tr>
+
+	            <tr class=alt><td>digitsAfterDecimal</td></tr>
+	            <tr><td class=fielddesc>Override the currency default value for digitsAfterDecimal.</td></tr>
+
+				<tr class=alt><td>interestRate</td></tr>
+	            <tr><td class=fielddesc>The default interest rate set when creating savings accounts of this type of product. e.g. <b>5</b>% Per year</td></tr>
+
+	            <tr class=alt><td>interestRatePeriodFrequencyType</td></tr>
+	            <tr><td class=fielddesc>The default interest rate period type. 2=Per month, 3=Per year e.g. 5% <b>Per year</b></td></tr>
+
+				<tr class=alt><td>minRequiredOpeningBalance</td></tr>
+	            <tr><td class=fielddesc><b>Optional</b>: If provided, sets the minimum deposit amount required to open a savings account e.g. <b>2,000</b></td></tr>
+
+	            <tr class=alt><td>lockinPeriodFrequency</td></tr>
+	            <tr><td class=fielddesc><b>Optional</b>: If provided, used along with <i>lockinPeriodFrequencyType</i> to indicate the length of time that the savings account is 'locked in' and withdrawals are not allowed. e.g. <b>6</b> Months</td></tr>
+
+	            <tr class=alt><td>lockinPeriodFrequencyType</td></tr>
+	            <tr><td class=fielddesc><b>Optional</b>: If provided, used along with <i>lockinPeriodFrequency</i> to indicate the length of time that the savings account is 'locked in' and withdrawals are not allowed. 0=Days, 1=Weeks, 2=Months, 3=Years
+	            e.g. 6 <b>Months</b></td></tr>
+	        </table>
+	    </div>
+	</div>
+
+	    <a id="savingsproducts_template" name="savingsproducts_template" class="old-syle-anchor">&nbsp;</a>
+    <div class="method-section">
+        <div class="method-description">
+            <h4>Retrieve Savings Product Template</h4>
+            <p>This is a convenience resource.  It can be useful when building maintenance user interface screens for client applications. The template data returned consists of any or all of:
+                <ul>
+                <li class=normalli>Field Defaults</li>   
+                <li class=normalli>Allowed Value Lists</li>    
+                </ul>
+            </p>
+            <p>Example Request: </p>
+            <div class=apiClick>savingsproducts/template</div>
         </div>
-    
-        <a id="savingproducts_list" name="savingproducts_list" class="old-syle-anchor">&nbsp;</a>
-        <div class="method-section">
-            <div class="method-description">
-                <h4>List SavingProducts</h4>
-                <p>Example Requests:</p> 
-                <div class=apiClick>savingproducts</div>
-                <br><br>
-                <div class=apiClick>savingproducts?fields=name,   ......    </div>
-            </div>
-            <div class="method-example">
-                <code class="method-declaration">GET https://Domain Name/api/v1/savingproducts</code>
-                <code class="method-response">
-[{
-	"id": 1,
-	"name": "Test",
-	"currency": {
-		"code": "USD",
-		"name": "US Dollar",
-		"decimalPlaces": 2,
-		"displaySymbol": "$",
-		"nameCode": "currency.USD",
-		"displayLabel": "US Dollar ($)"
-	},
-	"digitsAfterDecimal": 2,
-	"interestRate": 12.000000,
-	"minInterestRate": 6.000000,
-	"maxInterestRate": 12.000000,
-	"savingsDepositAmount": 1000.000000,
-	"savingProductType": {
-		"id": 1,
-		"code": "savings.product.savingProductType.reccuring",
-		"value": "Recurring"
-	},
-	"tenureType": {
-		"id": 1,
-		"code": "savings.tenure.tenureTypeEnum.fixedPeriod",
-		"value": "FixedPeriod"
-	},
-	"tenure": 12,
-	"savingFrequencyType": {
-		"id": 2,
-		"code": "saving.product.frequency.period.savingFrequencyType.monthly",
-		"value": "Months"
-	},
-	"interestType": {
-		"id": 2,
-		"code": "savings.interest.type.savingsInterestType.compounding",
-		"value": "Compounding"
-	},
-	"interestCalculationMethod": {
-		"id": 1,
-		"code": "savings.interestCalculation.method.savinginterest.calculation.method.averagebal",
-		"value": "AverageBalance"
-	},
-	"minimumBalanceForWithdrawal": 100.000000,
-	"isPartialDepositAllowed": false,
-	"isLockinPeriodAllowed": false,
-	"lockinPeriod": 0,
-	"lockinPeriodType": {
-		"id": 2,
-		"code": "deposit.interest.compounding.period.periodFrequencyType.months",
-		"value": "Months"
-	},
-	"createdOn": 1360594232000,
-	"lastModifedOn": 1360594232000,
-	"depositEvery": 3
-}]
-				</code>
-            </div>
-        </div>
-    
-        <a id="savingproducts_template" name="savingproducts_template" class="old-syle-anchor">&nbsp;</a>
-        <div class="method-section">
-            <div class="method-description">
-                <h4>Retrieve SavingProduct Details Template</h4>
-                <p>This is a convenience resource.  It can be useful when building maintenance user interface screens for client applications. The template data returned consists of any or all of:
-                    <ul>
-                    <li class=normalli>Field Defaults</li>   
-                    <li class=normalli>Allowed Value Lists</li>    
-                    </ul>
-                </p>
-                <p>Example Request: </p>
-                <div class=apiClick>savingproducts/template</div>
-            </div>
-            <div class="method-example">
-                <code class="method-declaration">GET https://Domain Name/api/v1/savingproducts/template</code>
-				<code class="method-response">
+        <div class="method-example">
+            <code class="method-declaration">GET https://Domain Name/api/v1/savingsproducts/template</code>
+			<code class="method-response">
 {
-	"currency": {
-		"code": "USD",
-		"name": "US Dollar",
-		"decimalPlaces": 2,
-		"displaySymbol": "$",
-		"nameCode": "currency.USD",
-		"displayLabel": "US Dollar ($)"
-	},
-	"digitsAfterDecimal": 2,
-	"interestRate": 0,
-	"savingsDepositAmount": 0,
-	"savingProductType": {
-		"id": 1,
-		"code": "savings.product.savingProductType.reccuring",
-		"value": "Recurring"
-	},
-	"tenureType": {
-		"id": 1,
-		"code": "savings.tenure.tenureTypeEnum.fixedPeriod",
-		"value": "FixedPeriod"
-	},
-	"tenure": 12,
-	"savingFrequencyType": {
-		"id": 2,
-		"code": "saving.product.frequency.period.savingFrequencyType.monthly",
-		"value": "Months"
-	},
-	"interestType": {
-		"id": 2,
-		"code": "savings.interest.type.savingsInterestType.compounding",
-		"value": "Compounding"
-	},
-	"interestCalculationMethod": {
-		"id": 1,
-		"code": "savings.interestCalculation.method.savinginterest.calculation.method.averagebal",
-		"value": "AverageBalance"
-	},
-	"minimumBalanceForWithdrawal": 100,
-	"isPartialDepositAllowed": false,
-	"isLockinPeriodAllowed": false,
-	"lockinPeriod": 0,
-	"lockinPeriodType": {
-		"id": 2,
-		"code": "savings.product.lockin.period.type.months",
-		"value": "Months"
-	},
-	"createdOn": 1360596667364,
-	"lastModifedOn": 1360596667364,
-	"depositEvery": 3,
-	"currencyOptions": [{
-		"code": "USD",
-		"name": "US Dollar",
-		"decimalPlaces": 2,
-		"displaySymbol": "$",
-		"nameCode": "currency.USD",
-		"displayLabel": "US Dollar ($)"
-	}],
-	"savingsProductTypeOptions": [{
-		"id": 1,
-		"code": "savings.product.savingProductType.reccuring",
-		"value": "Recurring"
-	},
-	{
-		"id": 2,
-		"code": "savings.product.savingProductType.regular",
-		"value": "Regular"
-	}],
-	"tenureTypeOptions": [{
-		"id": 1,
-		"code": "savings.tenure.tenureTypeEnum.fixedPeriod",
-		"value": "FixedPeriod"
-	},
-	{
-		"id": 2,
-		"code": "savings.tenure.tenureTypeEnum.perpetual",
-		"value": "Perpetual"
-	}],
-	"savingFrequencyOptions": [{
-		"id": 2,
-		"code": "saving.product.frequency.period.savingFrequencyType.monthly",
-		"value": "Months"
-	}],
-	"savingsInterestTypeOptions": [{
-		"id": 1,
-		"code": "savings.interest.type.savingsInterestType.simple",
-		"value": "Simple"
-	},
-	{
-		"id": 2,
-		"code": "savings.interest.type.savingsInterestType.compounding",
-		"value": "Compounding"
-	}],
-	"lockinPeriodTypeOptions": [{
-		"id": 2,
-		"code": "savings.product.lockin.period.type.months",
-		"value": "Months"
-	}],
-	"interestCalculationOptions": [{
-		"id": 1,
-		"code": "savings.interestCalculation.method.savinginterest.calculation.method.averagebal",
-		"value": "AverageBalance"
-	},
-	{
-		"id": 2,
-		"code": "savings.interestCalculation.method.savinginterest.calculation.method.minbal",
-		"value": "Minimumbalance"
-	},
-	{
-		"id": 3,
-		"code": "savings.interestCalculation.method.savinginterest.calculation.method.monthlycllection",
-		"value": "MonthlyCollection"
-	}]
-}
-				</code>
-            </div>
-        </div>
-    
-        <a id="savingproducts_retrieve" name="savingproducts_retrieve" class="old-syle-anchor">&nbsp;</a>
-        <div class="method-section">
-            <div class="method-description">
-                <h4>Retrieve a Saving Product</h4>
-                <p>Example Requests: </p>
-                <div class=apiClick>savingproducts/1</div>
-                <br><br>
-                <div class=apiClick>savingproducts/1?template=true</div>
-                 <br><br>
-                <div class=apiClick>savingproducts/1?fields=name,description</div>
-            </div>
-            <div class="method-example">
-				<code class="method-declaration">GET https://Domain Name/api/v1/savingproducts/1</code>
-				<code class="method-response">
-{
-  "id": 1,
-  "name": "Test",
   "currency": {
-    "code": "USD",
-    "name": "US Dollar",
-    "decimalPlaces": 2,
-    "displaySymbol": "$",
-    "nameCode": "currency.USD",
-    "displayLabel": "US Dollar ($)"
+    "code": "",
+    "name": "",
+    "decimalPlaces": 0,
+    "displaySymbol": "",
+    "nameCode": "",
+    "displayLabel": " []"
   },
-  "digitsAfterDecimal": 2,
-  "interestRate": 12,
-  "minInterestRate": 6,
-  "maxInterestRate": 12,
-  "savingsDepositAmount": 1000,
-  "savingProductType": {
-    "id": 1,
-    "code": "savings.product.savingProductType.reccuring",
-    "value": "Recurring"
+  "interestRatePeriodFrequencyType": {
+    "id": 3,
+    "code": "savings.interest.rate.periodFrequencyType.years",
+    "value": "Per year"
   },
-  "tenureType": {
-    "id": 1,
-    "code": "savings.tenure.tenureTypeEnum.fixedPeriod",
-    "value": "FixedPeriod"
-  },
-  "tenure": 12,
-  "savingFrequencyType": {
-    "id": 2,
-    "code": "saving.product.frequency.period.savingFrequencyType.monthly",
-    "value": "Months"
-  },
-  "interestType": {
-    "id": 2,
-    "code": "savings.interest.type.savingsInterestType.compounding",
-    "value": "Compounding"
-  },
-  "interestCalculationMethod": {
-    "id": 1,
-    "code": "savings.interestCalculation.method.savinginterest.calculation.method.averagebal",
-    "value": "AverageBalance"
-  },
-  "minimumBalanceForWithdrawal": 100,
-  "isPartialDepositAllowed": false,
-  "isLockinPeriodAllowed": false,
-  "lockinPeriod": 0,
-  "lockinPeriodType": {
-    "id": 2,
-    "code": "deposit.interest.compounding.period.periodFrequencyType.months",
-    "value": "Months"
-  },
-  "createdOn": 1360594232000,
-  "lastModifedOn": 1360594232000,
-  "depositEvery": 3
-}				
-				</code>
-				
-                <code class="method-declaration">GET https://Domain Name/api/v1/depositproducts/1?template=true</code>
-				<code class="method-response">
-{
-  "id": 1,
-  "name": "Test",
-  "currency": {
-    "code": "USD",
-    "name": "US Dollar",
-    "decimalPlaces": 2,
-    "displaySymbol": "$",
-    "nameCode": "currency.USD",
-    "displayLabel": "US Dollar ($)"
-  },
-  "digitsAfterDecimal": 2,
-  "interestRate": 12,
-  "minInterestRate": 6,
-  "maxInterestRate": 12,
-  "savingsDepositAmount": 1000,
-  "savingProductType": {
-    "id": 1,
-    "code": "savings.product.savingProductType.reccuring",
-    "value": "Recurring"
-  },
-  "tenureType": {
-    "id": 1,
-    "code": "savings.tenure.tenureTypeEnum.fixedPeriod",
-    "value": "FixedPeriod"
-  },
-  "tenure": 12,
-  "savingFrequencyType": {
-    "id": 2,
-    "code": "saving.product.frequency.period.savingFrequencyType.monthly",
-    "value": "Months"
-  },
-  "interestType": {
-    "id": 2,
-    "code": "savings.interest.type.savingsInterestType.compounding",
-    "value": "Compounding"
-  },
-  "interestCalculationMethod": {
-    "id": 1,
-    "code": "savings.interestCalculation.method.savinginterest.calculation.method.averagebal",
-    "value": "AverageBalance"
-  },
-  "minimumBalanceForWithdrawal": 100,
-  "isPartialDepositAllowed": false,
-  "isLockinPeriodAllowed": false,
-  "lockinPeriod": 0,
-  "lockinPeriodType": {
-    "id": 2,
-    "code": "deposit.interest.compounding.period.periodFrequencyType.months",
-    "value": "Months"
-  },
-  "createdOn": 1360594232000,
-  "lastModifedOn": 1360594232000,
-  "depositEvery": 3,
   "currencyOptions": [
     {
       "code": "USD",
@@ -8611,172 +6887,600 @@ Content-Type: application/json
       "displayLabel": "US Dollar ($)"
     }
   ],
-  "savingsProductTypeOptions": [
-    {
-      "id": 1,
-      "code": "savings.product.savingProductType.reccuring",
-      "value": "Recurring"
-    },
+  "interestRatePeriodFrequencyTypeOptions": [
     {
       "id": 2,
-      "code": "savings.product.savingProductType.regular",
-      "value": "Regular"
-    }
-  ],
-  "tenureTypeOptions": [
-    {
-      "id": 1,
-      "code": "savings.tenure.tenureTypeEnum.fixedPeriod",
-      "value": "FixedPeriod"
-    },
-    {
-      "id": 2,
-      "code": "savings.tenure.tenureTypeEnum.perpetual",
-      "value": "Perpetual"
-    }
-  ],
-  "savingFrequencyOptions": [
-    {
-      "id": 2,
-      "code": "saving.product.frequency.period.savingFrequencyType.monthly",
-      "value": "Months"
-    }
-  ],
-  "savingsInterestTypeOptions": [
-    {
-      "id": 1,
-      "code": "savings.interest.type.savingsInterestType.simple",
-      "value": "Simple"
-    },
-    {
-      "id": 2,
-      "code": "savings.interest.type.savingsInterestType.compounding",
-      "value": "Compounding"
-    }
-  ],
-  "lockinPeriodTypeOptions": [
-    {
-      "id": 2,
-      "code": "savings.product.lockin.period.type.months",
-      "value": "Months"
-    }
-  ],
-  "interestCalculationOptions": [
-    {
-      "id": 1,
-      "code": "savings.interestCalculation.method.savinginterest.calculation.method.averagebal",
-      "value": "AverageBalance"
-    },
-    {
-      "id": 2,
-      "code": "savings.interestCalculation.method.savinginterest.calculation.method.minbal",
-      "value": "Minimumbalance"
+      "code": "savings.interest.rate.periodFrequencyType.months",
+      "value": "Per month"
     },
     {
       "id": 3,
-      "code": "savings.interestCalculation.method.savinginterest.calculation.method.monthlycllection",
-      "value": "MonthlyCollection"
+      "code": "savings.interest.rate.periodFrequencyType.years",
+      "value": "Per year"
+    }
+  ],
+  "lockinPeriodFrequencyTypeOptions": [
+    {
+      "id": 0,
+      "code": "savings.lockin.periodFrequencyType.days",
+      "value": "Days"
+    },
+    {
+      "id": 1,
+      "code": "savings.lockin.periodFrequencyType.weeks",
+      "value": "Weeks"
+    },
+    {
+      "id": 2,
+      "code": "savings.lockin.periodFrequencyType.months",
+      "value": "Months"
+    },
+    {
+      "id": 3,
+      "code": "savings.lockin.periodFrequencyType.years",
+      "value": "Years"
     }
   ]
-}				
-				</code>
-            </div>
+}
+			</code>
         </div>
-     
-        <a id="savingproducts_create" name="savingproducts_create" class="old-syle-anchor">&nbsp;</a>
-        <div class="method-section">
-            <div class="method-description">
-                <h4>Create a Saving Product</h4>
-                <table class=matrixHeading>
-                    <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Mandatory Fields</div></td></tr>
-                    <tr class=alt><td>name, currencyCode, digitsAfterDecimal,interestPostedEvery, minimumBalance,
-                    </td></tr>
-					<tr><td>
-					tenureInMonths, maturityDefaultInterestRate,maturityMinInterestRate,
-                    </td></tr>
-					<tr class=alt><td>
-					maturityMaxInterestRate,interestCompoundedEvery,preClosureInterestRate.
-                    </td></tr>
-                </table>
-            </div>
-            <div class="method-example">
-                <code class="method-declaration">POST https://Domain Name/api/v1/savingproducts</code>
-				<code class="method-request">POST savingproducts
+    </div>
+
+    <a id="savingsproducts_create" name="savingsproducts_create" class="old-syle-anchor">&nbsp;</a>
+    <div class="method-section">
+        <div class="method-description">
+            <h4>Create a Savings Product</h4>
+            <table class=matrixHeading>
+                <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Mandatory Fields</div></td></tr>
+                <tr class=alt><td>name, description, currencyCode, digitsAfterDecimal, interestRate, interestRatePeriodFrequencyType</tr>
+            </table>
+            <br/>
+            <table class=matrixHeading>
+                <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Optional Fields</div></td></tr>
+                <tr class=alt><td>minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType</tr>
+            </table>
+        </div>
+        <div class="method-example">
+            <code class="method-declaration">POST https://Domain Name/api/v1/savingsproducts</code>
+			<code class="method-request">POST savingsproducts
 Content-Type: application/json
 Request Body:
 {
-	"locale": "en",
-	"interestCalculationMethod": "1",
-	"name": "Test",
-	"savingProductType": "1",
-	"description": "",
-	"currencyCode": "USD",
-	"digitsAfterDecimal": "2",
-	"savingsDepositAmount": "1000",
-	"minimumBalanceForWithdrawal": "100",
-	"tenure": "12",
-	"tenureType": "1",
-	"isLockinPeriodAllowed": "false",
-	"isPartialDepositAllowed": "false",
-	"interestRate": "12",
-	"interestType": "2",
-	"minInterestRate": "6",
-	"maxInterestRate": "12",
-	"depositEvery": "3",
-	"frequency": "2",
-	"lockinPeriod": "0",
-	"lockinPeriodType": "2"
+  "name": "individual savings",
+  "description": "An savings product offering for individuals.",
+  "currencyCode": "USD",
+  "digitsAfterDecimal": 2,
+  "locale": "en",
+  "interestRate": "5.65",
+  "interestRatePeriodFrequencyType": 2
 }
-				</code>
-				<code class="method-response">{
+			</code>
+			<code class="method-response">
+{
   "resourceId": 1
 }
-				</code>
-            </div>
+			</code>
         </div>
+    </div>
+
+    <a id="savingsproducts_retrieve" name="savingsproducts_retrieve" class="old-syle-anchor">&nbsp;</a>
+    <div class="method-section">
+        <div class="method-description">
+            <h4>Retrieve a Savings Product</h4>
+            <p>Example Requests: </p>
+            <div class=apiClick>savingsproducts/1</div>
+            <br><br>
+            <div class=apiClick>savingsproducts/1?template=true</div>
+             <br><br>
+            <div class=apiClick>savingsproducts/1?fields=name,description</div>
+        </div>
+        <div class="method-example">
+			<code class="method-declaration">GET https://Domain Name/api/v1/savingsproducts/1</code>
+			<code class="method-response">
+{
+  "id": 1,
+  "name": "individual savings",
+  "description": "An savings product offering for individuals. (updated)",
+  "currency": {
+    "code": "USD",
+    "name": "US Dollar",
+    "decimalPlaces": 2,
+    "displaySymbol": "$",
+    "nameCode": "currency.USD",
+    "displayLabel": "US Dollar ($)"
+  },
+  "interestRate": 5.73,
+  "interestRatePeriodFrequencyType": {
+    "id": 2,
+    "code": "savings.interest.rate.periodFrequencyType.months",
+    "value": "Per month"
+  }
+}
+			</code>
+        </div>
+    </div>
     
-        <a id="savingproducts_update" name="savingproducts_update" class="old-syle-anchor">&nbsp;</a>
-        <div class="method-section">
-            <div class="method-description">
-                <h4>Update a Saving Product</h4>
-            </div>
-            <div class="method-example">
-                <code class="method-declaration">PUT https://Domain Name/api/v1/savingproducts/{depositId}</code>
-				<code class="method-request">POST savingproducts/1
+    <a id="savingsproducts_update" name="savingsproducts_update" class="old-syle-anchor">&nbsp;</a>
+    <div class="method-section">
+        <div class="method-description">
+            <h4>Update a Savings Product</h4>
+        </div>
+        <div class="method-example">
+            <code class="method-declaration">PUT https://Domain Name/api/v1/savingsproducts/{productId}</code>
+			<code class="method-request">POST savingsproducts/1
 Content-Type: application/json
 Request Body:
 {
- "locale": "en",
- "description": "Update desc"
+  "description": "An savings product offering for individuals. (updated)",
+  "locale": "en",
+  "interestRate": "5.73"
 }
-				</code>
-				<code class="method-response">{
-  "resourceId": 1
+			</code>
+			<code class="method-response">
+{
+  "resourceId": 1,
+  "changes": {
+    "description": "An savings product offering for individuals. (updated)",
+    "interestRate": 5.73,
+    "locale": "en"
+  }
 }
-				</code>
-            </div>
+			</code>
         </div>
+    </div>
 		
-		<a id="savingproducts_delete" name="savingproducts_delete" class="old-syle-anchor">&nbsp;</a>
-			<div class="method-section">
-				<div class="method-description">
-					<h4>Delete a Saving Product</h4>
-					<p>Deletes a Saving Product.</p>
-				</div>
-				<div class="method-example">
-					<code class="method-declaration">
-DELETE https://Domain Name/api/v1/savingproducts/{productId}
-					</code>
-					<code class="method-request">
-DELETE savingproducts/1
+	<a id="savingsproducts_delete" name="savingsproducts_delete" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+		<div class="method-description">
+			<h4>Delete a Savings Product</h4>
+		</div>
+		<div class="method-example">
+			<code class="method-declaration">
+DELETE https://Domain Name/api/v1/savingsproducts/{productId}
+			</code>
+			<code class="method-request">
+DELETE savingsproducts/1
 Content-Type: application/json
-					</code>
-					<code class="method-response">{ "resourceId": 1 } </code>
-				</div>
-			</div>
-<!-- end of saving products api docs -->
+			</code>
+			<code class="method-response">
+{
+	"resourceId": 1
+}
+			</code>
+		</div>
+	</div>
     
-			<!-- start of datatables api docs -->
+    <a id="savingsproducts_list" name="savingsproducts_list" class="old-syle-anchor">&nbsp;</a>
+    <div class="method-section">
+        <div class="method-description">
+            <h4>List Savings Products</h4>
+            <p>Example Requests:</p> 
+            <div class=apiClick>savingsproducts</div>
+            <br><br>
+            <div class=apiClick>savingsproducts?fields=name</div>
+        </div>
+        <div class="method-example">
+            <code class="method-declaration">GET https://Domain Name/api/v1/savingsproducts</code>
+            <code class="method-response">
+[
+  {
+    "id": 1,
+    "name": "individual savings",
+  	"description": "An savings product offering for individuals. (updated)",
+    "currency": {
+      "code": "USD",
+      "name": "US Dollar",
+      "decimalPlaces": 2,
+      "displaySymbol": "$",
+      "nameCode": "currency.USD",
+      "displayLabel": "US Dollar ($)"
+    },
+    "interestRate": 9.85,
+    "interestRatePeriodFrequencyType": {
+      "id": 3,
+      "code": "savings.interest.rate.periodFrequencyType.years",
+      "value": "Per year"
+    },
+    "minRequiredOpeningBalance": 1000,
+    "lockinPeriodFrequency": 3,
+    "lockinPeriodFrequencyType": {
+      "id": 2,
+      "code": "savings.interest.rate.periodFrequencyType.months",
+      "value": "Per month"
+    }
+  }
+]
+			</code>
+        </div>
+    </div>
+<!-- end of saving products api docs -->
+
+<!-- start of savings accounts api -->
+	<a id="savingsaccounts" name="savingsaccounts" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Savings Account:</h2>
+	        <p>An instance of a savings account for a individual or group.</p>
+	      	<table class=matrixHeading>
+	            <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Field Descriptions</div></td></tr>
+
+				<tr class=alt><td>clientId</td></tr>
+				<tr><td class=fielddesc>The client you are creating the savings account for. Either <i>clientId</i> or <i>groupId</i> must be provided.</td></tr>
+
+				<tr class=alt><td>groupId</td></tr>
+				<tr><td class=fielddesc>The group you are creating the savings account for. Either <i>clientId</i> or <i>groupId</i> must be provided.</td></tr>
+
+				<tr class=alt><td>productId</td></tr>
+				<tr><td class=fielddesc>The id of the product used for this savings account. The savings account <b>inherits the selected currency</b> of the product and <b>possibly other details if not overridden</b> in the savings account creation request.</td></tr>
+
+        		<tr class=alt><td>accountNo</td></tr>
+				<tr><td class=fielddesc>The account no. associated with this loan. Is auto generated if not provided at creation time.</td></tr>
+
+				<tr class=alt><td>externalId</td></tr>
+				<tr><td class=fielddesc>A place to put an external reference for this savings account e.g. The ID another system uses. If provided, it must be unique.</td></tr>
+
+	            <tr class=alt><td>interestRate</td></tr>
+	            <tr><td class=fielddesc>The default interest rate set when creating savings accounts of this type of product. e.g. <b>5</b>% Per year</td></tr>
+
+	            <tr class=alt><td>interestRatePeriodFrequencyType</td></tr>
+	            <tr><td class=fielddesc>The default interest rate period type. 2=Per month, 3=Per year e.g. 5% <b>Per year</b></td></tr>
+
+				<tr class=alt><td>minRequiredOpeningBalance</td></tr>
+	            <tr><td class=fielddesc><b>Optional</b>: If provided, sets the minimum deposit amount required to open a savings account e.g. <b>2,000</b></td></tr>
+
+	            <tr class=alt><td>lockinPeriodFrequency</td></tr>
+	            <tr><td class=fielddesc><b>Optional</b>: If provided, used along with <i>lockinPeriodFrequencyType</i> to indicate the length of time that the savings account is 'locked in' and withdrawals are not allowed. e.g. <b>6</b> Months</td></tr>
+
+	            <tr class=alt><td>lockinPeriodFrequencyType</td></tr>
+	            <tr><td class=fielddesc><b>Optional</b>: If provided, used along with <i>lockinPeriodFrequency</i> to indicate the length of time that the savings account is 'locked in' and withdrawals are not allowed. 0=Days, 1=Weeks, 2=Months, 3=Years
+	            e.g. 6 <b>Months</b></td></tr>
+	        </table>
+	    </div>
+	</div>
+
+	<a id="savingsaccounts_template" name="savingsaccounts_template" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Retrieve Savings Account Template:</h2>
+	            <p>This is a convenience resource. It can be useful when building maintenance user interface screens for client applications. The template data returned consists of any or all of:
+	                <ul>
+	                <li class=normalli>Field Defaults</li>   
+	                <li class=normalli>Allowed Value Lists</li>    
+	                </ul>
+	            </p>
+	        <h4>Arguments</h4>
+	        <dl class="argument-list">
+	            <dt>clientId</dt>
+	            <dd>Integer <span>mandatory</span></dd>
+	            <dt>productId</dt>
+	            <dd>Integer <span>optional</span></dd>
+	            <dd>If entered, productId, productName and selectedProduct fields are returned.</dd>
+	        </dl>
+	        <p>Example Requests: </p>
+	        <div class=apiClick>savingsaccounts/template?clientId=1</div>
+	        <br><br>
+	        <div class=apiClick>savingsaccounts/template?clientId=1&productId=1</div>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">GET https://Domain Name/api/v1/savingsaccounts/template?clientId={clientId}</code>
+			<code class="method-response">
+{
+  "clientId": 1,
+  "clientName": "Client A AB",
+  "productOptions": [
+    {
+      "id": 1,
+      "name": "First"
+    }
+  ]
+}
+			</code>
+	    </div>
+
+	    <div class="method-example">
+	        <code class="method-declaration">GET https://Domain Name/api/v1/savingsaccounts/template?clientId={clientId}&productId={productId}</code>
+			<code class="method-response">
+{
+  "clientId": 1,
+  "clientName": "Client A AB",
+  "savingsProductId": 1,
+  "savingsProductName": "First",
+  "currency": {
+    "code": "USD",
+    "name": "US Dollar",
+    "decimalPlaces": 2,
+    "displaySymbol": "$",
+    "nameCode": "currency.USD",
+    "displayLabel": "US Dollar ($)"
+  },
+  "interestRate": 12,
+  "interestRatePeriodFrequencyType": {
+    "id": 3,
+    "code": "savings.interest.rate.periodFrequencyType.years",
+    "value": "Per year"
+  },
+  "minRequiredOpeningBalance": 1000,
+  "lockinPeriodFrequency": 3,
+  "lockinPeriodFrequencyType": {
+    "id": 2,
+    "code": "savings.interest.rate.periodFrequencyType.months",
+    "value": "Per month"
+  },
+  "productOptions": [
+    {
+      "id": 1,
+      "name": "First"
+    }
+  ],
+  "interestRatePeriodFrequencyTypeOptions": [
+    {
+      "id": 2,
+      "code": "savings.interest.rate.periodFrequencyType.months",
+      "value": "Per month"
+    },
+    {
+      "id": 3,
+      "code": "savings.interest.rate.periodFrequencyType.years",
+      "value": "Per year"
+    }
+  ],
+  "lockinPeriodFrequencyTypeOptions": [
+    {
+      "id": 0,
+      "code": "savings.lockin.periodFrequencyType.days",
+      "value": "Days"
+    },
+    {
+      "id": 1,
+      "code": "savings.lockin.periodFrequencyType.weeks",
+      "value": "Weeks"
+    },
+    {
+      "id": 2,
+      "code": "savings.lockin.periodFrequencyType.months",
+      "value": "Months"
+    },
+    {
+      "id": 3,
+      "code": "savings.lockin.periodFrequencyType.years",
+      "value": "Years"
+    }
+  ]
+}
+			</code>
+	    </div>
+	</div>
+
+	<a id="savingsaccounts_create" name="savingsaccounts_create" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Create a New Savings Account</h2>
+	        <br/>
+	        <table class=matrixHeading>
+	            <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Mandatory Fields</div></td></tr>
+	            <tr class=alt><td>clientId or groupId, productId, accountNo, externalId</td></tr>
+	        </table>
+	        <br/>
+	        <table class=matrixHeading>
+	            <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Optional Fields</div></td></tr>
+	            <tr class=alt><td>accountNo, externalId</td></tr>
+	        </table>
+	        <br/>
+	        <table class=matrixHeading>
+	            <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Inherited from Product (if not provided)</div></td></tr>
+	            <tr class=alt><td>interestRate, interestRatePeriodFrequencyType, minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType</td></tr>
+	        </table>
+	    </div>
+	    <div class="method-example">
+	    	<p>Minimal request: accountNo auto generated, remaining details inherited from savings product.</p>
+	        <code class="method-declaration">POST https://Domain Name/api/v1/savingsaccounts</code>
+	        <code class="method-request">POST savingaccount
+Content-Type: application/json
+Request Body:
+{
+  "clientId": 1,
+  "productId": 1
+}
+			</code>
+			<p>Minimal request: accountNo provided (must be unique), remaining details inherited from savings product.</p>
+			<code class="method-request">POST savingaccount
+Content-Type: application/json
+Request Body:
+{
+  "clientId": 1,
+  "productId": 1,
+  "accountNo": "SA000023",
+  "externalId": "SYS-23"
+}
+			</code>
+			<p>Full request: accountNo provided (must be unique), remaining details override details from savings product (except currency).</p>
+			<code class="method-request">POST savingaccount
+Content-Type: application/json
+Request Body:
+{
+  "clientId": 1,
+  "productId": 1,
+  "accountNo": "SA000023",
+  "externalId": "SYS-23",
+  "locale": "en", 
+  "interestRate": "5.65", 
+  "interestRatePeriodFrequencyType": 2,
+  "minRequiredOpeningBalance": "1,000", 
+  "lockinPeriodFrequency": 6,
+  "lockinPeriodFrequencyType": 2
+}
+			</code>
+	        <code class="method-response">
+{
+  "officeId": 1,
+  "clientId": 1,
+  "resourceId": 1
+}
+	        </code>
+	    </div>
+	</div>
+
+	<a id="savingsaccounts_list" name="savingsaccounts_list" class="old-syle-anchor">&nbsp;</a>
+    <div class="method-section">
+        <div class="method-description">
+            <h4>List Savings Accounts</h4>
+            <p>Example Requests:</p> 
+            <div class=apiClick>savingsaccounts</div>
+            <br><br>
+            <div class=apiClick>savingsaccounts?fields=name</div>
+        </div>
+        <div class="method-example">
+            <code class="method-declaration">GET https://Domain Name/api/v1/savingsaccounts</code>
+            <code class="method-response">
+[
+  {
+    "id": 1,
+    "accountNo": "SA000023",
+    "externalId": "SYS-23",
+    "groupId": 0,
+    "clientId": 1,
+    "clientName": "Client A AB",
+    "savingsProductId": 1,
+    "savingsProductName": "First",
+    "currency": {
+      "code": "USD",
+      "name": "US Dollar",
+      "decimalPlaces": 2,
+      "displaySymbol": "$",
+      "nameCode": "currency.USD",
+      "displayLabel": "US Dollar ($)"
+    },
+    "interestRate": 5.65,
+    "interestRatePeriodFrequencyType": {
+      "id": 2,
+      "code": "savings.interest.rate.periodFrequencyType.months",
+      "value": "Per month"
+    },
+    "annualInterestRate": 67.8,
+    "minRequiredOpeningBalance": 1000,
+    "lockinPeriodFrequency": 6,
+    "lockinPeriodFrequencyType": {
+      "id": 2,
+      "code": "savings.interest.rate.periodFrequencyType.months",
+      "value": "Per month"
+    }
+  }
+]
+			</code>
+        </div>
+    </div>
+        
+	<a id="savingsaccounts_retrieve" name="savingsaccounts_retrieve" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Retrieve a Savings Account:</h2>
+	        <h4>Arguments</h4>
+	        <dl class="argument-list">
+	            <dt>associations</dt>        
+	            <dd>optional, <span>Either 'all' or a comma separated list of savings 'associations' (itemised below).</span></dd>
+	            <dd><br>Associations are just extra pieces of data that you might or might not want to retrieve.<br><br></dd>
+	            <dd><b>'all':</b> Gets data related to all associations e.g. ?associations=all.</dd>
+				<dd><b>'transactions':</b> Gets data related to transactions on the account e.g. ?associations=transactions</dd>
+	        </dl>
+	        <p>Example Requests : </p>
+	        <div class=apiClick>savingsaccounts/1</div>
+	        <br><br>
+	        <div class=apiClick>savingsaccounts/1?associations=all</div>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">GET https://DomainName/api/v1/savingsaccounts/{accountId}</code>
+	        <code class="method-response">
+{
+  "id": 1,
+  "accountNo": "SA000023",
+  "externalId": "SYS-23",
+  "groupId": 0,
+  "clientId": 1,
+  "clientName": "Client A AB",
+  "savingsProductId": 1,
+  "savingsProductName": "First",
+  "currency": {
+    "code": "USD",
+    "name": "US Dollar",
+    "decimalPlaces": 2,
+    "displaySymbol": "$",
+    "nameCode": "currency.USD",
+    "displayLabel": "US Dollar ($)"
+  },
+  "interestRate": 5.65,
+  "interestRatePeriodFrequencyType": {
+    "id": 2,
+    "code": "savings.interest.rate.periodFrequencyType.months",
+    "value": "Per month"
+  },
+  "annualInterestRate": 67.8,
+  "minRequiredOpeningBalance": 1000,
+  "lockinPeriodFrequency": 6,
+  "lockinPeriodFrequencyType": {
+    "id": 2,
+    "code": "savings.interest.rate.periodFrequencyType.months",
+    "value": "Per month"
+  }
+}
+	        </code>
+	    </div>
+	</div>
+
+	<a id="savingsaccounts_update" name="savingsaccounts_update" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Update a Savings Account</h2>
+	        <p>Will most likely have a restriction to only allow 'inactive' savings accounts to be updated.</p>
+	        <p>As other updates like change of interest rate are possibly special cases for savings.</p>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">PUT https://Domain Name/api/v1/savingsaccounts/{accountsId}</code>
+	        <code class="method-request">PUT savingsaccounts/1              
+Content-Type: application/json
+No Request Body:
+{
+	"locale": "en", 
+	"interestRate": "5.2323"
+}
+	        </code>
+	        <code class="method-response">
+{
+  "officeId": 1,
+  "clientId": 1,
+  "resourceId": 1,
+  "changes": {
+    "interestRate": 5.2323,
+    "locale": "en"
+  }
+}
+	        </code>
+	    </div>
+	</div>
+
+	<a id="savingsaccounts_delete" name="savingsaccounts_delete" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Delete a Savings Account</h2>
+	        <p>At present we support <b>hard</b> delete of savings account but this is likely to change to a savings account <b>closure</b> or <b>de-activation</b> process/command.</p>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">DELETE https://Domain Name/api/v1/savingsaccounts/{accountsId}</code>
+	        <code class="method-request">DELETE savingsaccounts/1              
+Content-Type: application/json
+No Request Body:
+	        </code>
+	        <code class="method-response">
+{
+  "officeId": 1,
+  "clientId": 1,
+  "resourceId": 1
+}
+	        </code>
+	    </div>
+	</div>
+<!-- end of savings accounts api -->
+    
+<!-- start of datatables api docs -->
 			<a id="datatables" name="datatables" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
@@ -9252,9 +7956,7 @@ Request Body:
 								<br>
 								<a href="#groups">Group</a>
 								<br>
-								<a href="#fixeddeposits">Deposit Account</a>
-								<br>
-								<a href="#savingaccounts">Saving Account</a>
+								<a href="#savingsaccounts">Savings Account</a>
 							</td>
 						</tr>
 					</table>
@@ -12421,6 +11123,23 @@ Content-Type: application/json
 					<td></td>
 				</tr>
 				<!-- loans api full matrix-->
+				<tr class="alt">
+					<td><a href="#loanproducts">Loan Product</a></td>
+					<td>loanproducts</td>
+					<td><a href="#loanproducts_create">Create a Loan Product</a></td>
+					<td><a href="#loanproducts_list">List Loan Products</a></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>loanproducts/{productId}</td>
+					<td></td>
+					<td><a href="#loanproducts_retrieve">Retrieve a Loan
+							Product</a></td>
+					<td><a href="#loanproducts_update">Update a Loan Product</a></td>
+					<td></td>
+				</tr>
 				<tr>
 					<td><a href="#loans">Loans</a></td>
 					<td>loans?calculateLoanSchedule</td>
@@ -12560,7 +11279,39 @@ Content-Type: application/json
 					<td><a href="#guarantors_delete">Delete a Guarantor</a></td>
 				</tr>
 				<tr class="alt">
-					<td><a href="#offices">OFFICE</a></td>
+					<td><a href="#savingsproducts">Savings Product</a></td>
+					<td>savingsproducts</td>
+					<td><a href="#savingsproducts_create">Create a Savings product</a></td>
+					<td><a href="#savingsproducts_list">List Savings products</a></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>savingsproducts/{productId}</td>
+					<td></td>
+					<td><a href="#savingsproducts_retrieve">Retrieve a Savings product</a></td>
+					<td><a href="#savingsproducts_update">Update a Savings product</a></td>
+					<td><a href="#savingsproducts_delete">Delete a Savings product</a></td>
+				</tr>
+				<tr class="alt">
+					<td><a href="#savingsaccounts">Savings Accounts</a></td>
+					<td>savingsaccounts</td>
+					<td><a href="#savingsaccounts_create">Create new Savings Account</a></td>
+					<td><a href="#savingsaccounts_list">List Savings Accounts</a></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>savingsaccounts/{accountId}</td>
+					<td></td>
+					<td><a href="#savingsaccounts_retrieve">Retrieve a Savings Account</a></td>
+					<td><a href="#savingsaccounts_update">Update a Savings Account</a></td>
+					<td><a href="#savingsaccounts_delete">Delete a Savings Account</a></td>
+				</tr>
+				<tr class="alt">
+					<td><a href="#offices">Office</a></td>
 					<td>offices</td>
 					<td><a href="#offices_create">Create an Office</a></td>
 					<td><a href="#offices_list">List Offices</a></td>
@@ -12575,23 +11326,7 @@ Content-Type: application/json
 					<td><a href="#offices_update">Update an Office</a></td>
 					<td></td>
 				</tr>
-				<tr class="alt">
-					<td><a href="#loanproducts">LOAN PRODUCT</a></td>
-					<td>loanproducts</td>
-					<td><a href="#loanproducts_create">Create a Loan Product</a></td>
-					<td><a href="#loanproducts_list">List Loan Products</a></td>
-					<td></td>
-					<td></td>
-				</tr>
-				<tr>
-					<td></td>
-					<td>loanproducts/{productId}</td>
-					<td></td>
-					<td><a href="#loanproducts_retrieve">Retrieve a Loan
-							Product</a></td>
-					<td><a href="#loanproducts_update">Update a Loan Product</a></td>
-					<td></td>
-				</tr>
+				
 				<tr class="alt">
 					<td><a href="#configs">CURRENCY</a></td>
 					<td>currencies</td>
@@ -12908,87 +11643,10 @@ Content-Type: application/json
 					<td><a href="#permissions">PERMISSION</a></td>
 					<td>permissions</td>
 					<td></td>
-					<td><a href="#permissions_list">List Application
-							Permissions</a></td>
+					<td><a href="#permissions_list">List Permissions</a></td>
 					<td></td>
 					<td></td>
-				</tr>
-				<tr class="alt">
-					<td><a href="#depositproducts">DEPOSIT PRODUCT</a></td>
-					<td>depositproducts</td>
-					<td><a href="#depositproducts_create">Create a Deposit product</a></td>
-					<td><a href="#depositproducts_list">List Deposit products</a></td>
-					<td></td>
-					<td></td>
-				</tr>
-				<tr>
-					<td></td>
-					<td>depositproducts/{prodcutId}</td>
-					<td></td>
-					<td><a href="#depositproducts_retrieve">Retrieve a Deposit product</a></td>
-					<td><a href="#depositproducts_update">Update a Deposit product</a></td>
-					<td><a href="#depositproducts_delete">Delete a Deposit product</a></td>
-				</tr>
-				<tr class="alt">
-					<td><a href="#savingproducts">SAVING PRODUCT</a></td>
-					<td>savingproducts</td>
-					<td><a href="#savingproducts_create">Create a Saving product</a></td>
-					<td><a href="#savingproducts_list">List Saving products</a></td>
-					<td></td>
-					<td></td>
-				</tr>
-				<tr>
-					<td></td>
-					<td>savingproducts/{prodcutId}</td>
-					<td></td>
-					<td><a href="#savingproducts_retrieve">Retrieve a Saving procduct</a></td>
-					<td><a href="#savingproducts_update">Update a Saving product</a></td>
-					<td><a href="#savingproducts_delete">Delete a Saving product</a></td>
-				</tr>
-				
-				<tr class="alt">
-					<td><a href="#fixeddeposits">FIXED DEPOSITS</a></td>
-					<td>depositaccounts</td>
-					<td><a href="#fixeddeposits_create">Create a New Deposit
-							Application</a></td>
-					<td></td>
-					<td></td>
-					<td></td>
-				</tr>
-				<tr>
-					<td></td>
-					<td>depositaccounts/{accountId}</td>
-					<td><a href="#fixeddeposits_approve_etc">Approve, Undo Approve,
-							Interest withdraw, Reject a Deposit Application or Withdraw a
-							Deposit Application</a></td>
-					<td><a href="#fixeddeposits_retrieve">Retrieve a Deposit
-							Application</a></td>
-					<td></td>
-					<td><a href="#fixeddeposits_delete">Delete a Deposit
-							Application</a></td>
-				</tr>
-				
-				<tr class="alt">
-					<td><a href="#savingaccounts">SAVING ACCOUNTS</a></td>
-					<td>savingaccounts</td>
-					<td><a href="#savingaccounts_create">Create a New Saving 
-							Application</a></td>
-					<td></td>
-					<td></td>
-					<td></td>
-				</tr>
-				<tr>
-					<td></td>
-					<td>savingaccounts/{accountId}</td>
-					<td><a href="#savingaccounts_approve_etc">Approve, Undo Approve,
-							Interest withdraw, Reject a Saving Application or Withdraw a
-							Saving Application</a></td>
-					<td><a href="#savingaccounts_retrieve">Retrieve a Saving
-							Application</a></td>
-					<td></td>
-					<td><a href="#savingaccounts_delete">Delete a Saving
-							Application</a></td>
-				</tr>
+				</tr>				
 			</table>
 			<br>
 			<table class=matrixHeading>
@@ -13011,35 +11669,39 @@ Content-Type: application/json
 				</tr>
 				<tr class="alt">
 					<td>clients/template</td>
-					<td><a href="#clients_template">Retrieve Client Details Template</a></td>
+					<td><a href="#clients_template">Retrieve Client Template</a></td>
+				</tr>
+				<tr class="alt">
+					<td>loanproducts/template</td>
+					<td><a href="#loanproducts_template">Retrieve Loan Product Template</a></td>
 				</tr>
 				<tr>
 					<td>loans/template?clientId={clientId}</td>
-					<td><a href="#loans_template">Retrieve Loan Details Template</a></td>
+					<td><a href="#loans_template">Retrieve Loan Template</a></td>
 				</tr>
 				<tr class="alt">
 					<td>loans/{loanId}/transactions/template</td>
 					<td><a href="#loans_repaymenttemplate_etc">Retrieve Tranaction Template</a></td>
 				</tr>
-				<tr>
-					<td>offices/template</td>
-					<td><a href="#offices_template">Retrieve Office Details
-							Template</a></td>
+				<tr class="alt">
+					<td>savingproducts/template</td>
+					<td><a href="#savingsproducts_template">Retrieve Savings Product Template</a></td>
 				</tr>
 				<tr class="alt">
-					<td>loanproducts/template</td>
-					<td><a href="#loanproducts_template">Retrieve Loan Product
-							Details Template</a></td>
+					<td>savingsaccounts/template?clientId={clientId}</td>
+					<td><a href="#savingsaccounts_template">Retrieve Savings Account Template</a></td>
+				</tr>
+				<tr>
+					<td>offices/template</td>
+					<td><a href="#offices_template">Retrieve Office Template</a></td>
 				</tr>
 				<tr>
 					<td>users/template</td>
-					<td><a href="#users_template">Retrieve User Details
-							Template</a></td>
+					<td><a href="#users_template">Retrieve User Template</a></td>
 				</tr>
 				<tr class="alt">
 					<td>audit/searchtemplate</td>
-					<td><a href="#audit_searchtemplate">Retrieve Audit Search
-							Data</a></td>
+					<td><a href="#audit_searchtemplate">Retrieve Audit Search Template</a></td>
 				</tr>
 			</table>
 		</div>

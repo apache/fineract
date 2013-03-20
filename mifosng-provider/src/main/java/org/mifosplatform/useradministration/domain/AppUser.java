@@ -364,10 +364,10 @@ public class AppUser extends AbstractPersistable<Long> implements PlatformUser {
         return hasNotPermission;
     }
 
-    public void validateHasReadPermission(final String entityType) {
+    public void validateHasReadPermission(final String resourceType) {
 
-        String authorizationMessage = "User has no authority to view " + entityType.toLowerCase() + "s";
-        String matchPermission = "READ_" + entityType.toUpperCase();
+        final String authorizationMessage = "User has no authority to view " + resourceType.toLowerCase() + "s";
+        final String matchPermission = "READ_" + resourceType.toUpperCase();
 
         if (!(hasNotPermissionForAnyOf("ALL_FUNCTIONS", "ALL_FUNCTIONS_READ", matchPermission))) return;
 

@@ -26,11 +26,8 @@ public class NoteEnumerations {
             case LOAN_TRANSACTION:
                 optionData = new EnumOptionData(type.getValue().longValue(), type.getCode(), "Loan transaction note");
             break;
-            case DEPOSIT:
-                optionData = new EnumOptionData(type.getValue().longValue(), type.getCode(), "Deposit transaction note");
-            break;
-            case SAVING:
-                optionData = new EnumOptionData(type.getValue().longValue(), type.getCode(), "Saving transaction note");
+            case SAVING_ACCOUNT:
+                optionData = new EnumOptionData(type.getValue().longValue(), type.getCode(), "Saving account note");
             break;
             case GROUP:
                 optionData = new EnumOptionData(type.getValue().longValue(), type.getCode(), "Group note");
@@ -41,5 +38,5 @@ public class NoteEnumerations {
         }
         return optionData;
     }
-    
+
 }

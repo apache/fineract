@@ -5,9 +5,11 @@ import java.util.Map;
 
 public enum NoteType {
 
-    CLIENT(100, "noteType.client", "clients"), LOAN(200, "noteType.loan", "loans"), LOAN_TRANSACTION(300, "noteType.loan.transaction",
-            "loanTransactions"), DEPOSIT(400, "noteType.deposit", "deposits"), SAVING(500, "noteType.saving", "savings"), GROUP(600,
-            "noteType.group", "groups");
+    CLIENT(100, "noteType.client", "clients"), //
+    LOAN(200, "noteType.loan", "loans"), //
+    LOAN_TRANSACTION(300, "noteType.loan.transaction", "loanTransactions"), //
+    SAVING_ACCOUNT(500, "noteType.saving", "savings"), //
+    GROUP(600, "noteType.group", "groups");
 
     private Integer value;
     private String code;

@@ -37,7 +37,7 @@ import org.mifosplatform.portfolio.group.domain.Group;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
-@Table(name = "m_client", uniqueConstraints = { @UniqueConstraint(columnNames = { "account_no" }, name = "account_no_UNIQUE")})
+@Table(name = "m_client", uniqueConstraints = { @UniqueConstraint(columnNames = { "account_no" }, name = "account_no_UNIQUE") })
 public class Client extends AbstractPersistable<Long> {
 
     @Column(name = "account_no", length = 20, unique = true, nullable = false)
@@ -79,11 +79,11 @@ public class Client extends AbstractPersistable<Long> {
     @ManyToMany
     @JoinTable(name = "m_group_client", joinColumns = @JoinColumn(name = "client_id"), inverseJoinColumns = @JoinColumn(name = "group_id"))
     private Set<Group> parentGroups;
-    
+
     @Transient
     private boolean accountNumberRequiresAutoGeneration = false;
 
-    public static Client fromJson(final Office clientOffice, final Group clientParentGroup , final JsonCommand command) {
+    public static Client fromJson(final Office clientOffice, final Group clientParentGroup, final JsonCommand command) {
 
         final String accountNo = command.stringValueOfParameterNamed("accountNo");
         final String firstname = command.stringValueOfParameterNamed("firstname");
@@ -93,15 +93,15 @@ public class Client extends AbstractPersistable<Long> {
         final LocalDate joiningDate = command.localDateValueOfParameterNamed("joinedDate");
         final String externalId = command.stringValueOfParameterNamed("externalId");
 
-        return new Client(clientOffice, clientParentGroup ,accountNo, firstname, middlename, lastname, fullname, joiningDate, externalId);
+        return new Client(clientOffice, clientParentGroup, accountNo, firstname, middlename, lastname, fullname, joiningDate, externalId);
     }
 
     protected Client() {
-        
+
     }
 
-    private Client(final Office office, final Group clientParentGroup, final String accountNo, final String firstname, final String middlename, final String lastname,
-            final String fullname, final LocalDate openingDate, final String externalId) {
+    private Client(final Office office, final Group clientParentGroup, final String accountNo, final String firstname,
+            final String middlename, final String lastname, final String fullname, final LocalDate openingDate, final String externalId) {
         if (StringUtils.isBlank(accountNo)) {
             this.accountNumber = new RandomPasswordGenerator(19).generate();
             this.accountNumberRequiresAutoGeneration = true;
@@ -139,11 +139,11 @@ public class Client extends AbstractPersistable<Long> {
             this.fullname = null;
         }
 
-        if(clientParentGroup != null){
+        if (clientParentGroup != null) {
             this.parentGroups = new HashSet<Group>();
             this.parentGroups.add(clientParentGroup);
         }
-        
+
         deriveDisplayName();
         validateNameParts();
     }
@@ -152,7 +152,7 @@ public class Client extends AbstractPersistable<Long> {
         return this.accountNumberRequiresAutoGeneration;
     }
 
-    public void setAccountNumberRequiresAutoGeneration(boolean accountNumberRequiresAutoGeneration) {
+    public void setAccountNumberRequiresAutoGeneration(final boolean accountNumberRequiresAutoGeneration) {
         this.accountNumberRequiresAutoGeneration = accountNumberRequiresAutoGeneration;
     }
 
@@ -160,7 +160,7 @@ public class Client extends AbstractPersistable<Long> {
         return identifier.equalsIgnoreCase(this.externalId);
     }
 
-    public boolean identifiedBy(Long clientId) {
+    public boolean identifiedBy(final Long clientId) {
         return getId().equals(clientId);
     }
 
@@ -346,7 +346,11 @@ public class Client extends AbstractPersistable<Long> {
         return imageKey;
     }
 
-    public void setImageKey(String imageKey) {
+    public void setImageKey(final String imageKey) {
         this.imageKey = imageKey;
+    }
+
+    public Long officeId() {
+        return this.office.getId();
     }
 }

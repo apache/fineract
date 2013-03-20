@@ -42,6 +42,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.jdbc.support.rowset.SqlRowSetMetaData;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.google.gson.reflect.TypeToken;
 
@@ -103,6 +104,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         logger.error(dve.getMessage(), dve);
     }
 
+    @Transactional
     @Override
     public void registerDatatable(final String dataTableName, final String applicationTableName) {
 
@@ -176,6 +178,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
 
     }
 
+    @Transactional
     @Override
     public void deregisterDatatable(final String datatable) {
         final String permissionList = "('CREATE_" + datatable + "', 'CREATE_" + datatable + "_CHECKER', 'READ_" + datatable + "', 'UPDATE_"
@@ -192,6 +195,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         this.jdbcTemplate.batchUpdate(sqlArray);
     }
 
+    @Transactional
     @Override
     public void createNewDatatableEntry(final String dataTableName, final Long appTableId, final JsonCommand command) {
 
@@ -230,6 +234,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         }
     }
 
+    @Transactional
     @Override
     public Map<String, Object> updateDatatableEntryOneToOne(final String datatable, final Long appTableId, final JsonCommand command) {
 
@@ -258,6 +263,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         return changes;
     }
 
+    @Transactional
     @Override
     public Map<String, Object> updateDatatableEntryOneToMany(final String datatable, final Long appTableId, final Long datatableId,
             final JsonCommand command) {
@@ -284,6 +290,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         return changes;
     }
 
+    @Transactional
     @Override
     public void deleteDatatableEntries(final String datatable, final Long appTableId) {
 
@@ -295,6 +302,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         if (rowsDeleted < 1) { throw new DatatableNotFoundException(datatable, appTableId); }
     }
 
+    @Transactional
     @Override
     public void deleteDatatableEntry(final String datatable, final Long appTableId, final Long datatableId) {
 

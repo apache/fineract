@@ -17,4 +17,8 @@ public class AccountNumberGeneratorFactory {
     public AccountNumberGenerator determineLoanAccountNoGenerator(final Long loanId) {
         return new ZeroPaddedAccountNumberGenerator(loanId, 9);
     }
+
+    public AccountNumberGenerator determineSavingsAccountNoGenerator(final Long savingsAccountId) {
+        return new ZeroPaddedAccountNumberGenerator(savingsAccountId, 9);
+    }
 }

@@ -216,31 +216,35 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             List<ClientAccountSummaryData> preclosedDepositAccounts = new ArrayList<ClientAccountSummaryData>();
             List<ClientAccountSummaryData> maturedDepositAccounts = new ArrayList<ClientAccountSummaryData>();
 
-            ClientDespoitAccountSummaryDataMapper depositAccountMapper = new ClientDespoitAccountSummaryDataMapper();
-
-            String depositAccountsSql = "select " + depositAccountMapper.schema() + " where da.client_id = ? and da.is_deleted=0";
-            List<ClientAccountSummaryData> depositAccountResults = this.jdbcTemplate.query(depositAccountsSql, depositAccountMapper,
-                    new Object[] { clientId });
-            if (depositAccountResults != null) {
-                for (ClientAccountSummaryData row : depositAccountResults) {
-
-                    if (row.accountStatusId() == 100) {
-                        pendingApprovalDepositAccounts.add(row);
-                    } else if (row.accountStatusId() == 300) {
-                        approvedDepositAccounts.add(row);
-                    } else if (row.accountStatusId() == 400) {
-                        withdrawnByClientDespositAccounts.add(row);
-                    } else if (row.accountStatusId() == 500) {
-                        rejectedDepositAccounts.add(row);
-                    } else if (row.accountStatusId() == 600) {
-                        closedDepositAccounts.add(row);
-                    } else if (row.accountStatusId() == 700) {
-                        maturedDepositAccounts.add(row);
-                    } else if (row.accountStatusId() == 800) {
-                        preclosedDepositAccounts.add(row);
-                    }
-                }
-            }
+            // ClientDespoitAccountSummaryDataMapper depositAccountMapper = new
+            // ClientDespoitAccountSummaryDataMapper();
+            //
+            // String depositAccountsSql = "select " +
+            // depositAccountMapper.schema() +
+            // " where da.client_id = ? and da.is_deleted=0";
+            // List<ClientAccountSummaryData> depositAccountResults =
+            // this.jdbcTemplate.query(depositAccountsSql, depositAccountMapper,
+            // new Object[] { clientId });
+            // if (depositAccountResults != null) {
+            // for (ClientAccountSummaryData row : depositAccountResults) {
+            //
+            // if (row.accountStatusId() == 100) {
+            // pendingApprovalDepositAccounts.add(row);
+            // } else if (row.accountStatusId() == 300) {
+            // approvedDepositAccounts.add(row);
+            // } else if (row.accountStatusId() == 400) {
+            // withdrawnByClientDespositAccounts.add(row);
+            // } else if (row.accountStatusId() == 500) {
+            // rejectedDepositAccounts.add(row);
+            // } else if (row.accountStatusId() == 600) {
+            // closedDepositAccounts.add(row);
+            // } else if (row.accountStatusId() == 700) {
+            // maturedDepositAccounts.add(row);
+            // } else if (row.accountStatusId() == 800) {
+            // preclosedDepositAccounts.add(row);
+            // }
+            // }
+            // }
 
             List<ClientAccountSummaryData> pendingApprovalSavingAccounts = new ArrayList<ClientAccountSummaryData>();
             List<ClientAccountSummaryData> approvedSavingAccounts = new ArrayList<ClientAccountSummaryData>();
@@ -248,25 +252,30 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             List<ClientAccountSummaryData> rejectedSavingAccounts = new ArrayList<ClientAccountSummaryData>();
             List<ClientAccountSummaryData> closedSavingAccounts = new ArrayList<ClientAccountSummaryData>();
 
-            ClientSavingAccountSummaryDataMapper clientSavingAccountSummaryDataMapper = new ClientSavingAccountSummaryDataMapper();
-            String savingAccountsSql = "select " + clientSavingAccountSummaryDataMapper.schema()
-                    + " where sa.client_id=? and sa.is_deleted=0";
-            List<ClientAccountSummaryData> savingAccountsResults = this.jdbcTemplate.query(savingAccountsSql,
-                    clientSavingAccountSummaryDataMapper, new Object[] { clientId });
-
-            if (savingAccountsResults != null) {
-                for (ClientAccountSummaryData account : savingAccountsResults) {
-                    if (account.accountStatusId() == 100)
-                        pendingApprovalSavingAccounts.add(account);
-                    else if (account.accountStatusId() == 300)
-                        approvedSavingAccounts.add(account);
-                    else if (account.accountStatusId() == 400)
-                        withdrawnByClientSavingAccounts.add(account);
-                    else if (account.accountStatusId() == 500)
-                        rejectedSavingAccounts.add(account);
-                    else if (account.accountStatusId() == 600) closedSavingAccounts.add(account);
-                }
-            }
+            // ClientSavingAccountSummaryDataMapper
+            // clientSavingAccountSummaryDataMapper = new
+            // ClientSavingAccountSummaryDataMapper();
+            // String savingAccountsSql = "select " +
+            // clientSavingAccountSummaryDataMapper.schema()
+            // + " where sa.client_id=? and sa.is_deleted=0";
+            // List<ClientAccountSummaryData> savingAccountsResults =
+            // this.jdbcTemplate.query(savingAccountsSql,
+            // clientSavingAccountSummaryDataMapper, new Object[] { clientId });
+            //
+            // if (savingAccountsResults != null) {
+            // for (ClientAccountSummaryData account : savingAccountsResults) {
+            // if (account.accountStatusId() == 100)
+            // pendingApprovalSavingAccounts.add(account);
+            // else if (account.accountStatusId() == 300)
+            // approvedSavingAccounts.add(account);
+            // else if (account.accountStatusId() == 400)
+            // withdrawnByClientSavingAccounts.add(account);
+            // else if (account.accountStatusId() == 500)
+            // rejectedSavingAccounts.add(account);
+            // else if (account.accountStatusId() == 600)
+            // closedSavingAccounts.add(account);
+            // }
+            // }
 
             return new ClientAccountSummaryCollectionData(pendingApprovalLoans, awaitingDisbursalLoans, openLoans, closedLoans,
                     pendingApprovalDepositAccounts, approvedDepositAccounts, withdrawnByClientDespositAccounts, rejectedDepositAccounts,
@@ -320,30 +329,6 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         }
     }
 
-    private static final class ClientDespoitAccountSummaryDataMapper implements RowMapper<ClientAccountSummaryData> {
-
-        public String schema() {
-
-            StringBuilder accountsSummary = new StringBuilder("da.id as id, da.external_id as externalId,");
-            accountsSummary.append("da.product_id as productId, dp.name as productName,").append("da.status_enum as statusId ")
-                    .append("from m_deposit_account da ").append("LEFT JOIN m_product_deposit AS dp ON dp.id = da.product_id ");
-
-            return accountsSummary.toString();
-        }
-
-        @Override
-        public ClientAccountSummaryData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
-
-            Long id = JdbcSupport.getLong(rs, "id");
-            String externalId = rs.getString("externalId");
-            Long productId = JdbcSupport.getLong(rs, "productId");
-            String productName = rs.getString("productName");
-            Integer accountStatusId = JdbcSupport.getInteger(rs, "statusId");
-
-            return new ClientAccountSummaryData(id, externalId, productId, productName, accountStatusId);
-        }
-    }
-
     @Override
     public ClientData retrieveClientByIdentifier(final Long identifierTypeId, final String identifierKey) {
         try {
@@ -383,29 +368,4 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             return ClientData.clientIdentifier(id, accountNo, firstname, middlename, lastname, fullname, displayName, officeId, officeName);
         }
     }
-
-    private static final class ClientSavingAccountSummaryDataMapper implements RowMapper<ClientAccountSummaryData> {
-
-        public String schema() {
-
-            StringBuilder accountsSummary = new StringBuilder("sa.id as id, sa.external_id as externalId,");
-            accountsSummary.append("sa.product_id as productId, sp.name as productName,").append("sa.status_enum as statusId ")
-                    .append("from m_saving_account sa ").append("LEFT JOIN m_product_savings AS sp ON sp.id = sa.product_id ");
-
-            return accountsSummary.toString();
-        }
-
-        @Override
-        public ClientAccountSummaryData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
-
-            Long id = JdbcSupport.getLong(rs, "id");
-            String externalId = rs.getString("externalId");
-            Long productId = JdbcSupport.getLong(rs, "productId");
-            String productName = rs.getString("productName");
-            Integer accountStatusId = JdbcSupport.getInteger(rs, "statusId");
-
-            return new ClientAccountSummaryData(id, externalId, productId, productName, accountStatusId);
-        }
-    }
-
 }

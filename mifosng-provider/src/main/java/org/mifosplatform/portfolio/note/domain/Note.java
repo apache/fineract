@@ -21,8 +21,6 @@ import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.group.domain.Group;
 import org.mifosplatform.portfolio.loanaccount.domain.Loan;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanTransaction;
-import org.mifosplatform.portfolio.savingsaccount.domain.SavingAccount;
-import org.mifosplatform.portfolio.savingsdepositaccount.domain.DepositAccount;
 import org.mifosplatform.useradministration.domain.AppUser;
 
 @Entity
@@ -55,15 +53,10 @@ public class Note extends AbstractAuditableCustom<AppUser, Long> {
     @Column(name = "note_type_enum")
     private final Integer noteTypeId;
 
-    @SuppressWarnings("unused")
-    @ManyToOne
-    @JoinColumn(name = "deposit_account_id", nullable = true)
-    private DepositAccount depositAccount;
-
-    @SuppressWarnings("unused")
-    @ManyToOne
-    @JoinColumn(name = "saving_account_id", nullable = true)
-    private SavingAccount savingAccount;
+    // @SuppressWarnings("unused")
+    // @ManyToOne
+    // @JoinColumn(name = "saving_account_id", nullable = true)
+    // private SavingAccount savingAccount;
 
     public static Note clientNoteFromJson(final Client client, final JsonCommand command) {
         final String note = command.stringValueOfParameterNamed("note");
@@ -83,13 +76,10 @@ public class Note extends AbstractAuditableCustom<AppUser, Long> {
         return new Note(loan, loanTransaction, note);
     }
 
-    public static Note depositNote(final DepositAccount account, final String note) {
-        return new Note(account, note);
-    }
-
-    public static Note savingNote(final SavingAccount account, final String note) {
-        return new Note(account, note);
-    }
+    // public static Note savingNote(final SavingAccount account, final String
+    // note) {
+    // return new Note(account, note);
+    // }
     
     private Note(final Client client, final String note) {
         this.client = client;
@@ -128,19 +118,12 @@ public class Note extends AbstractAuditableCustom<AppUser, Long> {
         this.noteTypeId = null;
     }
 
-    public Note(final DepositAccount account, final String note) {
-        this.depositAccount = account;
-        this.client = account.client();
-        this.note = note;
-        this.noteTypeId = NoteType.DEPOSIT.getValue();
-    }
-
-    public Note(final SavingAccount account, final String note) {
-        this.savingAccount = account;
-        this.client = account.getClient();
-        this.note = note;
-        this.noteTypeId = NoteType.SAVING.getValue();
-    }
+    // public Note(final SavingAccount account, final String note) {
+    // this.savingAccount = account;
+    // this.client = account.getClient();
+    // this.note = note;
+    // this.noteTypeId = NoteType.SAVING_ACCOUNT.getValue();
+    // }
 
     public Map<String, Object> update(final JsonCommand command) {
         final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(7);

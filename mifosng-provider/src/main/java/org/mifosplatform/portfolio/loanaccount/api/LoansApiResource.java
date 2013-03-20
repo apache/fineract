@@ -191,8 +191,6 @@ public class LoansApiResource {
 
             final boolean feeChargesOnly = false;
             chargeOptions = this.chargeReadPlatformService.retrieveLoanApplicableCharges(feeChargesOnly);
-            // chargeTemplate =
-            // this.loanChargeReadPlatformService.retrieveLoanChargeTemplate();
         }
 
         LoanAccountData newLoanAccount = null;

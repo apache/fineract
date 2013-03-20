@@ -375,33 +375,21 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
             }
         } else if (wrapper.isSavingProductResource()) {
         	if (wrapper.isCreate()) {
-                handler = applicationContext.getBean("createSavingProductCommandHandler", NewCommandSourceHandler.class);
+                handler = applicationContext.getBean("createSavingsProductCommandHandler", NewCommandSourceHandler.class);
             } else if (wrapper.isUpdate()) {
-                handler = applicationContext.getBean("updateSavingProductCommandHandler", NewCommandSourceHandler.class);
+                handler = applicationContext.getBean("updateSavingsProductCommandHandler", NewCommandSourceHandler.class);
             } else if (wrapper.isDelete()) {
-                handler = applicationContext.getBean("deleteSavingProductCommandHandler", NewCommandSourceHandler.class);
+                handler = applicationContext.getBean("deleteSavingsProductCommandHandler", NewCommandSourceHandler.class);
             } else {
                 throw new UnsupportedCommandException(wrapper.commandName());
             }
         } else if (wrapper.isSavingAccountResource()) {
         	if (wrapper.isCreate()) {
-                handler = applicationContext.getBean("createSavingAccountCommandHandler", NewCommandSourceHandler.class);
+                handler = applicationContext.getBean("createSavingsAccountCommandHandler", NewCommandSourceHandler.class);
             } else if (wrapper.isUpdate()) {
-                handler = applicationContext.getBean("updateSavingAccountCommandHandler", NewCommandSourceHandler.class);
+                handler = applicationContext.getBean("updateSavingsAccountCommandHandler", NewCommandSourceHandler.class);
             } else if (wrapper.isDelete()) {
-                handler = applicationContext.getBean("deleteSavingAccountCommandHandler", NewCommandSourceHandler.class);
-            } else if (wrapper.isApprovalOfSaving()) {
-                handler = applicationContext.getBean("approveSavingAccountCommandHandler", NewCommandSourceHandler.class);
-            } else if (wrapper.isSavingAccountDeposit()) {
-                handler = applicationContext.getBean("depositSavingAmountCommandHandler", NewCommandSourceHandler.class);
-            } else if (wrapper.isRejectOfSavingAccount()) {
-                handler = applicationContext.getBean("rejectSavingAccountCommandHandler", NewCommandSourceHandler.class);
-            } else if (wrapper.isWithdrawSavingAmount()) {
-                handler = applicationContext.getBean("withdrawSavingAmountCommandHandler", NewCommandSourceHandler.class);
-            } else if (wrapper.isWithdrawOfSavingApplicatin()) {
-                handler = applicationContext.getBean("withdrawSavingApplicationCommandHandler", NewCommandSourceHandler.class);
-            } else if (wrapper.isUndoApprovalOfSavingAccount()) {
-                handler = applicationContext.getBean("undoApprovalSavingAccountCommandHandler", NewCommandSourceHandler.class);
+                handler = applicationContext.getBean("deleteSavingsAccountCommandHandler", NewCommandSourceHandler.class);
             } else {
                 throw new UnsupportedCommandException(wrapper.commandName());
             }

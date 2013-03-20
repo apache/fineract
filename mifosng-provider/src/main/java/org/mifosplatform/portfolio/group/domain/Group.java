@@ -215,4 +215,7 @@ public class Group extends AbstractPersistable<Long> {
         return this.office.identifiedBy(officeId);
     }
 
+    public Long officeId() {
+        return this.office.getId();
+    }
 }

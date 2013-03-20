@@ -69,13 +69,14 @@ public class NotesApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveNotesByResource(@PathParam("resourceType") final String resourceType,
             @PathParam("resourceId") final Long resourceId, @Context final UriInfo uriInfo) {
-        
+
         NoteType noteType = NoteType.fromApiUrl(resourceType);
-        
-        if(noteType == null){ throw new NoteResourceNotSupportedException(resourceType); };
-        
+
+        if (noteType == null) { throw new NoteResourceNotSupportedException(resourceType); }
+        ;
+
         this.context.authenticatedUser().validateHasReadPermission(getResourceNameForPermissions(noteType));
-        
+
         final Integer noteTypeId = noteType.getValue();
 
         final Collection<NoteData> notes = this.readPlatformService.retrieveNotesByResource(resourceId, noteTypeId);
@@ -92,9 +93,10 @@ public class NotesApiResource {
             @PathParam("noteId") final Long noteId, @Context final UriInfo uriInfo) {
 
         NoteType noteType = NoteType.fromApiUrl(resourceType);
-        
-        if(noteType == null){ throw new NoteResourceNotSupportedException(resourceType); };
-        
+
+        if (noteType == null) { throw new NoteResourceNotSupportedException(resourceType); }
+        ;
+
         this.context.authenticatedUser().validateHasReadPermission(getResourceNameForPermissions(noteType));
 
         final Integer noteTypeId = noteType.getValue();
@@ -112,9 +114,10 @@ public class NotesApiResource {
             final String apiRequestBodyAsJson) {
 
         NoteType noteType = NoteType.fromApiUrl(resourceType);
-        
-        if(noteType == null){ throw new NoteResourceNotSupportedException(resourceType); };
-        
+
+        if (noteType == null) { throw new NoteResourceNotSupportedException(resourceType); }
+        ;
+
         final String resourceNameForPermissions = getResourceNameForPermissions(noteType);
         final CommandWrapper commandRequest = new CommandWrapperBuilder().createNote(resourceNameForPermissions, resourceType, resourceId)
                 .withJson(apiRequestBodyAsJson).build();
@@ -130,20 +133,22 @@ public class NotesApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String updateNote(@PathParam("resourceType") final String resourceType, @PathParam("resourceId") final Long resourceId,
             @PathParam("noteId") final Long noteId, final String apiRequestBodyAsJson) {
-        
+
         NoteType noteType = NoteType.fromApiUrl(resourceType);
-        
-        if(noteType == null){ throw new NoteResourceNotSupportedException(resourceType); };
-        
+
+        if (noteType == null) { throw new NoteResourceNotSupportedException(resourceType); }
+        ;
+
         final String resourceNameForPermissions = getResourceNameForPermissions(noteType);
-        
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().updateNote(resourceNameForPermissions, resourceType, resourceId, noteId).withJson(apiRequestBodyAsJson).build();
+
+        final CommandWrapper commandRequest = new CommandWrapperBuilder()
+                .updateNote(resourceNameForPermissions, resourceType, resourceId, noteId).withJson(apiRequestBodyAsJson).build();
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
         return this.toApiJsonSerializer.serialize(result);
     }
-    
+
     @DELETE
     @Path("{noteId}")
     @Consumes({ MediaType.APPLICATION_JSON })
@@ -152,42 +157,41 @@ public class NotesApiResource {
             @PathParam("noteId") final Long noteId) {
 
         NoteType noteType = NoteType.fromApiUrl(resourceType);
-        
-        if(noteType == null){ throw new NoteResourceNotSupportedException(resourceType); };
-        
+
+        if (noteType == null) { throw new NoteResourceNotSupportedException(resourceType); }
+        ;
+
         final String resourceNameForPermissions = getResourceNameForPermissions(noteType);
-        
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteNote(resourceNameForPermissions, resourceType, resourceId, noteId).build();
+
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteNote(resourceNameForPermissions, resourceType, resourceId,
+                noteId).build();
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
         return this.toApiJsonSerializer.serialize(result);
     }
-    
-    private String getResourceNameForPermissions(NoteType type){
+
+    private String getResourceNameForPermissions(final NoteType type) {
         String resourceNameForPermissions = "INVALIDNOTE";
-        switch(type){
+        switch (type) {
             case CLIENT:
                 resourceNameForPermissions = "CLIENTNOTE";
-                break;
+            break;
             case LOAN:
                 resourceNameForPermissions = "LOANNOTE";
-                break;
+            break;
             case LOAN_TRANSACTION:
                 resourceNameForPermissions = "LOANTRANSACTIONNOTE";
-                break;
-            case DEPOSIT:
-                resourceNameForPermissions = "DEPOSITNOTE";
-                break;
-            case SAVING:
+            break;
+            case SAVING_ACCOUNT:
                 resourceNameForPermissions = "SAVINGNOTE";
-                break;
+            break;
             case GROUP:
                 resourceNameForPermissions = "GROUPNOTE";
-                break;
-                
+            break;
+
         }
-        
+
         return resourceNameForPermissions;
     }
 
