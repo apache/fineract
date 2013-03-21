@@ -142,12 +142,12 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
             
             case GROUPS:
                 //TODO : AA: add parent hierarchy for groups                
-                conditionSql = " and ci.entity_id = ? ) ";
+                conditionSql = " and ci.entity_id in (select g.parent_id from m_group g where g.id = ? ) ";
             break;
             
             case LOANS:
               //TODO : AA: do we need parent hierarchy calendars for loans?
-                conditionSql = " and ci.entity_id = ? ) ";
+                conditionSql = " and ci.entity_id = ?  ";
             break;
 
             default:
