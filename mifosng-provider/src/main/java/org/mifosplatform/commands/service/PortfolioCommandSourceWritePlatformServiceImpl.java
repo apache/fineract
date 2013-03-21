@@ -57,8 +57,7 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
         try {
             final JsonElement parsedCommand = this.fromApiJsonHelper.parse(json);
             final JsonCommand command = JsonCommand.from(json, parsedCommand, this.fromApiJsonHelper, wrapper.getEntityName(),
-            		wrapper.getEntityId(), wrapper.getSubentityId(), wrapper.getGroupId(), wrapper.getClientId(), wrapper.getLoanId(), wrapper.getApptableId(),
-                    wrapper.getDatatableId(), wrapper.getCodeId(), wrapper.getSupportedEntityType(), wrapper.getSupportedEntityId(), wrapper.getTransactionId());
+            		wrapper.getEntityId(), wrapper.getSubentityId(), wrapper.getGroupId(), wrapper.getClientId(), wrapper.getLoanId(), wrapper.getCodeId(), wrapper.getSupportedEntityType(), wrapper.getSupportedEntityId(), wrapper.getTransactionId());
 
             result = this.processAndLogCommandService.processAndLogCommand(wrapper, command, isApprovedByChecker);
         } catch (RollbackTransactionAsCommandIsNotApprovedByCheckerException e) {
@@ -67,15 +66,8 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
 
             final JsonElement parsedCommand = this.fromApiJsonHelper.parse(jsonToUse);
 
-            // for datatables
-            Long entityId = wrapper.getEntityId();
-            if (entityId == null && wrapper.isDatatableResource()) {
-                entityId = wrapper.getApptableId();
-            }
-
             final JsonCommand command = JsonCommand.from(jsonToUse, parsedCommand, this.fromApiJsonHelper, wrapper.getEntityName(),
-                    entityId, wrapper.getSubentityId(), wrapper.getGroupId(), wrapper.getClientId(), wrapper.getLoanId(), wrapper.getApptableId(),
-                    wrapper.getDatatableId(), wrapper.getCodeId(), wrapper.getSupportedEntityType(), wrapper.getSupportedEntityId(), wrapper.getTransactionId());
+                    wrapper.getEntityId(), wrapper.getSubentityId(), wrapper.getGroupId(), wrapper.getClientId(), wrapper.getLoanId(), wrapper.getCodeId(), wrapper.getSupportedEntityType(), wrapper.getSupportedEntityId(), wrapper.getTransactionId());
 
             result = this.processAndLogCommandService.logCommand(wrapper, command);
         }

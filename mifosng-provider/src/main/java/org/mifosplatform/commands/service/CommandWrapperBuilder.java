@@ -19,8 +19,6 @@ public class CommandWrapperBuilder {
     private Long subentityId;
     private String href;
     private String json = "{}";
-    private Long apptableId;
-    private Long datatableId;
     private Long codeId;
     private String transactionId;
     private String supportedEntityType;
@@ -28,7 +26,7 @@ public class CommandWrapperBuilder {
 
     public CommandWrapper build() {
         return new CommandWrapper(this.officeId, this.groupId, this.clientId, this.loanId, this.actionName, this.entityName, this.entityId, this.subentityId,
-                this.apptableId, this.datatableId, this.codeId, this.supportedEntityType, this.supportedEntityId, this.href, this.json,
+                this.codeId, this.supportedEntityType, this.supportedEntityId, this.href, this.json,
                 this.transactionId);
     }
 
@@ -347,9 +345,6 @@ public class CommandWrapperBuilder {
 
 
     private void commonDatatableSettings(final String datatable, final Long apptableId, final Long datatableId) {
-    	//TODO - remove apptableId and datatableId later JPW
-        this.apptableId = apptableId;
-        this.datatableId = datatableId;
         
         this.entityName = datatable;
         this.entityId = apptableId;

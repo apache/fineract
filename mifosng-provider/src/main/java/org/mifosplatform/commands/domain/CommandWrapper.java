@@ -20,8 +20,6 @@ public class CommandWrapper {
     private final Long subentityId;
     private final String href;
     private final String json;
-    private final Long apptableId;
-    private final Long datatableId;
     private final Long codeId;
     private final String transactionId;
     private final String supportedEntityType;
@@ -54,20 +52,11 @@ public class CommandWrapper {
         this.href = resourceGetUrl;
         this.json = null;
         this.transactionId = null;
-
-        /* TODO - jpw taking this out later*/
-        if (this.href.startsWith("/datatables/")) {
-            this.apptableId = resourceId;
-            this.datatableId = subresourceId;
-        } else {
-            this.apptableId = null;
-            this.datatableId = null;
-        }
         
     }
 
     public CommandWrapper(final Long officeId, final Long groupId, final Long clientId, final Long loanId, final String actionName,
-            final String entityName, final Long entityId, final Long subentityId, final Long apptableId, final Long datatableId, final Long codeId,
+            final String entityName, final Long entityId, final Long subentityId, final Long codeId,
             final String supportedEntityType, final Long supportedEntityId, final String href, final String json, final String transactionId) {
         this.commandId = null;
         this.officeId = officeId;
@@ -79,8 +68,6 @@ public class CommandWrapper {
         this.taskPermissionName = actionName + "_" + entityName;
         this.entityId = entityId;
         this.subentityId = subentityId;
-        this.apptableId = apptableId;
-        this.datatableId = datatableId;
         this.codeId = codeId;
         this.supportedEntityType = supportedEntityType;
         this.supportedEntityId = supportedEntityId;
@@ -159,14 +146,6 @@ public class CommandWrapper {
 
     public Long getLoanId() {
         return this.loanId;
-    }
-
-    public Long getApptableId() {
-        return this.apptableId;
-    }
-
-    public Long getDatatableId() {
-        return this.datatableId;
     }
 
     public Long getSupportedEntityId() {
@@ -372,19 +351,20 @@ public class CommandWrapper {
     }
 
     public boolean isDeleteOneToOne() {
-        return isDatatableResource() && isDeleteOperation() && this.apptableId != null;
+    	/* also covers case of deleting all of a one to many*/
+        return isDatatableResource() && isDeleteOperation() && this.subentityId == null;
     }
     
     public boolean isDeleteMultiple() {
-        return isDatatableResource() && isDeleteOperation() && this.apptableId != null && this.datatableId != null;
+        return isDatatableResource() && isDeleteOperation() && this.subentityId != null;
     }
 
     public boolean isUpdateOneToOne() {
-        return isDatatableResource() && isUpdateOperation() && this.apptableId != null;
+        return isDatatableResource() && isUpdateOperation() && this.subentityId == null;
     }
     
     public boolean isUpdateMultiple() {
-        return isDatatableResource() && isUpdateOperation() && this.apptableId != null && this.datatableId != null;
+        return isDatatableResource() && isUpdateOperation() && this.subentityId != null;
     }
 
     public boolean isUnassignStaff() {
