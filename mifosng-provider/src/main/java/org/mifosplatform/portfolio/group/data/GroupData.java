@@ -42,6 +42,27 @@ public class GroupData {
     @SuppressWarnings("unused")
     private final Collection<GroupLookup> childGroups;
 
+    public GroupData(Long id, String name, String externalId, Long officeId, Long staffId, Long parentId, String hierarchy) {
+        this.id = id;
+        this.name = name;
+        this.externalId = externalId;
+        this.officeId = officeId;
+        this.staffId = staffId;
+        this.parentId = parentId;
+        this.hierarchy = hierarchy;
+        this.officeName = null;
+        this.parentName = null;
+        this.staffName = null;
+        this.groupSummaryData = null;
+        this.groupLevelData = null;
+        this.clientMembers = null;
+        this.allowedClients = null;
+        this.allowedOffices = null;
+        this.allowedParentGroups = null;
+        this.allowedStaffs = null;
+        this.childGroups = null;
+    }
+
     public GroupData(final Long id, final Long officeId, final String officeName, final String name, final String externalId,
             final Long parentId, final String parentName, final Long staffId, final String staffName, final String hierarchy) {
         this.id = id;
