@@ -520,6 +520,14 @@ public class Loan extends AbstractPersistable<Long> {
         final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = this.transactionProcessorFactory
                 .determineProcessor(this.transactionProcessingStrategy);
         if (!loanCharge.isDueAtDisbursement() && loanCharge.isPaidOrPartiallyPaid(loanCurrency())) {
+            /****
+             * TODO Vishwas Currently we do not allow removing a loan charge
+             * after a loan is approved (hence there is no need to adjust any
+             * loan transactions).
+             * 
+             * Consider removing this block of code or logically completing it
+             * for the future by getting the list of affected Transactions
+             ***/
             final List<LoanTransaction> allNonContraTransactionsPostDisbursement = retreiveListOfTransactionsPostDisbursement();
             loanRepaymentScheduleTransactionProcessor.handleTransaction(getDisbursementDate(), allNonContraTransactionsPostDisbursement,
                     getCurrency(), this.repaymentScheduleInstallments, setOfLoanCharges());
@@ -570,6 +578,14 @@ public class Loan extends AbstractPersistable<Long> {
         final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = this.transactionProcessorFactory
                 .determineProcessor(this.transactionProcessingStrategy);
         if (!loanCharge.isDueAtDisbursement()) {
+            /****
+             * TODO Vishwas Currently we do not allow waiving updating loan
+             * charge after a loan is approved (hence there is no need to adjust
+             * any loan transactions).
+             * 
+             * Consider removing this block of code or logically completing it
+             * for the future by getting the list of affected Transactions
+             ***/
             final List<LoanTransaction> allNonContraTransactionsPostDisbursement = retreiveListOfTransactionsPostDisbursement();
             loanRepaymentScheduleTransactionProcessor.handleTransaction(getDisbursementDate(), allNonContraTransactionsPostDisbursement,
                     getCurrency(), this.repaymentScheduleInstallments, setOfLoanCharges());
@@ -619,7 +635,7 @@ public class Loan extends AbstractPersistable<Long> {
                 .determineProcessor(this.transactionProcessingStrategy);
         if (!loanCharge.isDueAtDisbursement() && loanCharge.isPaidOrPartiallyPaid(loanCurrency())) {
             /****
-             * TODO vishwas Currently we do not allow waiving fully paid loan
+             * TODO Vishwas Currently we do not allow waiving fully paid loan
              * charge and waiving partially paid loan charges only waives the
              * remaining amount.
              * 
@@ -717,6 +733,15 @@ public class Loan extends AbstractPersistable<Long> {
 
         // if the loan application/contract is modified when repayments are
         // already against it - then need to re-process it
+
+        /****
+         * TODO Vishwas Currently we do not allow modifying a Loan contract once
+         * the loan is approved (hence there is no need to adjust any loan
+         * transactions).
+         * 
+         * Consider removing this block of code or logically completing it for
+         * the future by getting the list of affected Transactions
+         ***/
         final List<LoanTransaction> repaymentsOrWaivers = retreiveListOfTransactionsPostDisbursement();
 
         final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = this.transactionProcessorFactory
@@ -1390,21 +1415,17 @@ public class Loan extends AbstractPersistable<Long> {
         updateLoanSummaryDerivedFields();
     }
 
-    public LoanTransaction waiveInterest(final JsonCommand command, final LoanLifecycleStateMachine loanLifecycleStateMachine,
-            final List<Long> existingTransactionIds, final List<Long> existingReversedTransactionIds) {
-
-        final LocalDate transactionDate = command.localDateValueOfParameterNamed("transactionDate");
-        final BigDecimal transactionAmount = command.bigDecimalValueOfParameterNamed("transactionAmount");
-
-        final Money amountToWaive = Money.of(loanCurrency(), transactionAmount);
-        final LoanTransaction waiveInterestTransaction = LoanTransaction.waiver(this, amountToWaive, transactionDate);
+    public ChangedTransactionDetail waiveInterest(final LoanTransaction waiveInterestTransaction,
+            final LoanLifecycleStateMachine loanLifecycleStateMachine, final List<Long> existingTransactionIds,
+            final List<Long> existingReversedTransactionIds) {
 
         existingTransactionIds.addAll(findExistingTransactionIds());
         existingReversedTransactionIds.addAll(findExistingReversedTransactionIds());
 
-        handleRepaymentOrWaiverTransaction(waiveInterestTransaction, loanLifecycleStateMachine, null);
+        ChangedTransactionDetail changedTransactionDetail = handleRepaymentOrWaiverTransaction(waiveInterestTransaction,
+                loanLifecycleStateMachine, null);
 
-        return waiveInterestTransaction;
+        return changedTransactionDetail;
     }
 
     public ChangedTransactionDetail makeRepayment(final LoanTransaction repaymentTransaction,
