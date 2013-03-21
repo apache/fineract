@@ -28,8 +28,8 @@ public class DeleteOneToManyDatatableEntryCommandHandler implements NewCommandSo
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
 
-        this.writePlatformService.deleteDatatableEntry(command.entityName(), command.getApptableId(), command.getDatatableId());
+        this.writePlatformService.deleteDatatableEntry(command.entityName(), command.entityId(), command.subentityId());
 
-        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(command.getDatatableId()).build();
+        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(command.entityId()).build();
     }
 }

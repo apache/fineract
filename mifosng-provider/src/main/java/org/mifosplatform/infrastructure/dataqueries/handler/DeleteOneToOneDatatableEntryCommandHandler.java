@@ -28,16 +28,11 @@ public class DeleteOneToOneDatatableEntryCommandHandler implements NewCommandSou
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
 
-        Long appTableId = command.getApptableId();
-        if (appTableId == null) {
-            appTableId = command.entityId();
-        }
-
-        this.writePlatformService.deleteDatatableEntries(command.entityName(), appTableId);
+        this.writePlatformService.deleteDatatableEntries(command.entityName(), command.entityId());
 
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
-                .withEntityId(appTableId) //
+                .withEntityId(command.entityId()) //
                 .build();
     }
 }

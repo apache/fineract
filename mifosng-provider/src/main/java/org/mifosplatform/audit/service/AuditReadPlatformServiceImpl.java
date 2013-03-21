@@ -50,7 +50,7 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
             String commandAsJsonString = "";
             if (includeJson) commandAsJsonString = ", aud.command_as_json as commandAsJson ";
 
-            return " aud.id as id, aud.action_name as actionName, aud.entity_name as entityName," + " aud.resource_id as resourceId,"
+            return " aud.id as id, aud.action_name as actionName, aud.entity_name as entityName," + " aud.resource_id as resourceId, aud.subresource_id as subresourceId,"
                     + " mk.username as maker, aud.made_on_date as madeOnDate, "
                     + "ck.username as checker, aud.checked_on_date as checkedOnDate, ev.enum_message_property as processingResult "
                     + commandAsJsonString + " from m_portfolio_command_source aud " + " left join m_appuser mk on mk.id = aud.maker_id"
@@ -65,6 +65,7 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
             final String actionName = rs.getString("actionName");
             final String entityName = rs.getString("entityName");
             final Long resourceId = JdbcSupport.getLong(rs, "resourceId");
+            final Long subresourceId = JdbcSupport.getLong(rs, "subresourceId");
             final String maker = rs.getString("maker");
             final DateTime madeOnDate = JdbcSupport.getDateTime(rs, "madeOnDate");
             final String checker = rs.getString("checker");
@@ -77,7 +78,7 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
             } catch (SQLException e) {
                 commandAsJson = null;
             }
-            return new AuditData(id, actionName, entityName, resourceId, maker, madeOnDate, checker, checkedOnDate, processingResult,
+            return new AuditData(id, actionName, entityName, resourceId, subresourceId, maker, madeOnDate, checker, checkedOnDate, processingResult,
                     commandAsJson);
         }
     }

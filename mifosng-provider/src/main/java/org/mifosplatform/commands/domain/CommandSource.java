@@ -52,6 +52,9 @@ public class CommandSource extends AbstractPersistable<Long> {
 
     @Column(name = "resource_id")
     private Long resourceId;
+    
+    @Column(name = "subresource_id")
+    private Long subresourceId;
 
     @Column(name = "command_as_json", length = 1000)
     private String commandAsJson;
@@ -81,7 +84,7 @@ public class CommandSource extends AbstractPersistable<Long> {
     private Integer processingResult;
 
     public static CommandSource fullEntryFrom(final CommandWrapper wrapper, final JsonCommand command, final AppUser maker) {
-        return new CommandSource(wrapper.actionName(), wrapper.entityName(), wrapper.getHref(), command.entityId(), command.json(), maker, DateTime.now());
+        return new CommandSource(wrapper.actionName(), wrapper.entityName(), wrapper.getHref(), command.entityId(), command.subentityId(), command.json(), maker, DateTime.now());
     }
 
     protected CommandSource() {
@@ -90,13 +93,14 @@ public class CommandSource extends AbstractPersistable<Long> {
 
     private CommandSource(
             final String actionName, final String entityName, final String href,
-            final Long resourceId,
+            final Long resourceId, final Long subresourceId,
             final String commandSerializedAsJson, final AppUser maker,
             final DateTime madeOnDateTime) {
         this.actionName = actionName;
         this.entityName = entityName;
         this.resourceGetUrl = href;
         this.resourceId = resourceId;
+        this.subresourceId = subresourceId;
         this.commandAsJson = commandSerializedAsJson;
         this.maker = maker;
         this.madeOnDate = madeOnDateTime.toDate();
@@ -112,6 +116,10 @@ public class CommandSource extends AbstractPersistable<Long> {
     public void updateResourceId(final Long resourceId) {
         this.resourceId = resourceId;
     }
+    
+    public void updateSubresourceId(final Long subresourceId) {
+        this.subresourceId = subresourceId;
+    }
 
     public void updateJsonTo(final String json) {
         this.commandAsJson = json;
@@ -119,6 +127,10 @@ public class CommandSource extends AbstractPersistable<Long> {
 
     public Long resourceId() {
         return this.resourceId;
+    }
+    
+    public Long subresourceId() {
+        return this.subresourceId;
     }
 
     public boolean hasJson() {
@@ -143,6 +155,10 @@ public class CommandSource extends AbstractPersistable<Long> {
 
     public Long getResourceId() {
         return this.resourceId;
+    }
+    
+    public Long getSubresourceId() {
+        return this.subresourceId;
     }
 
     public void markAsAwaitingApproval() {

@@ -31,8 +31,8 @@ public class UpdateOneToManyDatatableEntryCommandHandler implements NewCommandSo
     public CommandProcessingResult processCommand(final JsonCommand command) {
 
         final Map<String, Object> changes = this.writePlatformService.updateDatatableEntryOneToMany(command.entityName(),
-                command.getApptableId(), command.getDatatableId(), command);
+                command.entityId(), command.subentityId(), command);
 
-        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(command.getDatatableId()).with(changes).build();
+        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(command.entityId()).with(changes).build();
     }
 }

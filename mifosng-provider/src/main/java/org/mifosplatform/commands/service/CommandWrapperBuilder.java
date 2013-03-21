@@ -16,6 +16,7 @@ public class CommandWrapperBuilder {
     private String actionName;
     private String entityName;
     private Long entityId;
+    private Long subentityId;
     private String href;
     private String json = "{}";
     private Long apptableId;
@@ -26,7 +27,7 @@ public class CommandWrapperBuilder {
     private Long supportedEntityId;
 
     public CommandWrapper build() {
-        return new CommandWrapper(this.officeId, this.groupId, this.clientId, this.loanId, this.actionName, this.entityName, this.entityId,
+        return new CommandWrapper(this.officeId, this.groupId, this.clientId, this.loanId, this.actionName, this.entityName, this.entityId, this.subentityId,
                 this.apptableId, this.datatableId, this.codeId, this.supportedEntityType, this.supportedEntityId, this.href, this.json,
                 this.transactionId);
     }
@@ -326,45 +327,41 @@ public class CommandWrapperBuilder {
         return this;
     }
 
-    public CommandWrapperBuilder createDatatable(final String datatable, final Long apptableId, final Long datatableId) {
-        this.apptableId = apptableId;
-        this.datatableId = datatableId;
+    public CommandWrapperBuilder createDatatable(final String datatable, final Long apptableId, final Long datatableId) {       
         this.actionName = "CREATE";
-        this.entityName = datatable;
-        if (datatableId == null) {
-            this.href = "/datatables/" + datatable + "/" + apptableId;
-        } else {
-            this.href = "/datatables/" + datatable + "/" + apptableId + "/" + datatableId;
-        }
+        commonDatatableSettings(datatable, apptableId, datatableId);
         return this;
     }
 
     public CommandWrapperBuilder updateDatatable(final String datatable, final Long apptableId, final Long datatableId) {
-        this.apptableId = apptableId;
-        this.datatableId = datatableId;
         this.actionName = "UPDATE";
-        this.entityName = datatable;
-        if (datatableId == null) {
-            this.href = "/datatables/" + datatable + "/" + apptableId;
-        } else {
-            this.href = "/datatables/" + datatable + "/" + apptableId + "/" + datatableId;
-        }
+        commonDatatableSettings(datatable, apptableId, datatableId);
         return this;
     }
 
     public CommandWrapperBuilder deleteDatatable(final String datatable, final Long apptableId, final Long datatableId) {
+        this.actionName = "DELETE";
+        commonDatatableSettings(datatable, apptableId, datatableId);
+        return this;
+    }
+
+
+    private void commonDatatableSettings(final String datatable, final Long apptableId, final Long datatableId) {
+    	//TODO - remove apptableId and datatableId later JPW
         this.apptableId = apptableId;
         this.datatableId = datatableId;
-        this.actionName = "DELETE";
+        
         this.entityName = datatable;
+        this.entityId = apptableId;
+        this.subentityId = datatableId;
         if (datatableId == null) {
             this.href = "/datatables/" + datatable + "/" + apptableId;
         } else {
             this.href = "/datatables/" + datatable + "/" + apptableId + "/" + datatableId;
         }
-        return this;
     }
-
+    
+    
     public CommandWrapperBuilder createLoanCharge(final Long loanId) {
         this.actionName = "CREATE";
         this.entityName = "LOANCHARGE";

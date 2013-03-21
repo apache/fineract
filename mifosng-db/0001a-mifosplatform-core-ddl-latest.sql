@@ -291,6 +291,7 @@ CREATE TABLE `m_portfolio_command_source` (
   `loan_id` bigint(20) DEFAULT NULL,
   `api_get_url` varchar(100) NOT NULL,
   `resource_id` bigint(20) DEFAULT NULL,
+  `subresource_id` bigint(20) DEFAULT NULL,
   `command_as_json` text NOT NULL,
   `maker_id` bigint(20) NOT NULL,
   `made_on_date` datetime NOT NULL,

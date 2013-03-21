@@ -33,6 +33,7 @@ public final class JsonCommand {
     private final FromJsonHelper fromApiJsonHelper;
     private final Long commandId;
     private final Long resourceId;
+    private final Long subresourceId;
     private final Long groupId;
     private final Long clientId;
     private final Long loanId;
@@ -45,21 +46,21 @@ public final class JsonCommand {
     private final String transactionId;
 
     public static JsonCommand from(final String jsonCommand, final JsonElement parsedCommand, final FromJsonHelper fromApiJsonHelper,
-            final String entityName, final Long resourceId, final Long groupId, final Long clientId, final Long loanId,
+            final String entityName, final Long resourceId, final Long subresourceId, final Long groupId, final Long clientId, final Long loanId,
             final Long apptableId, final Long datatableId, final Long codeId, final String supportedEntityType,
             final Long supportedEntityId, final String transactionId) {
-        return new JsonCommand(null, jsonCommand, parsedCommand, fromApiJsonHelper, entityName, resourceId, groupId, clientId, loanId,
+        return new JsonCommand(null, jsonCommand, parsedCommand, fromApiJsonHelper, entityName, resourceId, subresourceId, groupId, clientId, loanId,
                 apptableId, datatableId, codeId, supportedEntityType, supportedEntityId, transactionId);
     }
 
     public static JsonCommand fromExistingCommand(final Long commandId, final String jsonCommand, final JsonElement parsedCommand,
-            final FromJsonHelper fromApiJsonHelper, final String entityName, final Long resourceId) {
-        return new JsonCommand(commandId, jsonCommand, parsedCommand, fromApiJsonHelper, entityName, resourceId, null, null, null, null,
+            final FromJsonHelper fromApiJsonHelper, final String entityName, final Long resourceId, final Long subresourceId) {
+        return new JsonCommand(commandId, jsonCommand, parsedCommand, fromApiJsonHelper, entityName, resourceId, subresourceId, null, null, null, null,
                 null, null, null, null, null);
     }
 
     public JsonCommand(final Long commandId, final String jsonCommand, final JsonElement parsedCommand,
-            final FromJsonHelper fromApiJsonHelper, final String entityName, final Long resourceId, final Long groupId,
+            final FromJsonHelper fromApiJsonHelper, final String entityName, final Long resourceId, final Long subresourceId, final Long groupId,
             final Long clientId, final Long loanId, final Long apptableId, final Long datatableId, final Long codeId,
             final String supportedEntityType, final Long supportedEntityId, final String transactionId) {
         this.commandId = commandId;
@@ -68,6 +69,7 @@ public final class JsonCommand {
         this.fromApiJsonHelper = fromApiJsonHelper;
         this.entityName = entityName;
         this.resourceId = resourceId;
+        this.subresourceId = subresourceId;
         this.groupId = groupId;
         this.clientId = clientId;
         this.loanId = loanId;
@@ -106,6 +108,10 @@ public final class JsonCommand {
 
     public Long entityId() {
         return this.resourceId;
+    }
+    
+    public Long subentityId() {
+        return this.subresourceId;
     }
 
     public Long getGroupId() {

@@ -17,6 +17,7 @@ public class CommandWrapper {
     private final String entityName;
     private final String taskPermissionName;
     private final Long entityId;
+    private final Long subentityId;
     private final String href;
     private final String json;
     private final Long apptableId;
@@ -26,16 +27,16 @@ public class CommandWrapper {
     private final String supportedEntityType;
     private final Long supportedEntityId;
 
-    public static CommandWrapper wrap(final String actionName, final String enityName, final Long resourceId) {
-        return new CommandWrapper(null, actionName, enityName, resourceId, null);
+    public static CommandWrapper wrap(final String actionName, final String entityName, final Long resourceId, final Long subresourceId) {
+        return new CommandWrapper(null, actionName, entityName, resourceId, subresourceId, null);
     }
 
-    public static CommandWrapper fromExistingCommand(final Long commandId, final String actionName, final String enityName,
-            final Long resourceId, final String resourceGetUrl) {
-        return new CommandWrapper(commandId, actionName, enityName, resourceId, resourceGetUrl);
+    public static CommandWrapper fromExistingCommand(final Long commandId, final String actionName, final String entityName,
+    		final Long resourceId, final Long subresourceId, final String resourceGetUrl) {
+        return new CommandWrapper(commandId, actionName, entityName, resourceId, subresourceId, resourceGetUrl);
     }
 
-    private CommandWrapper(final Long commandId, final String actionName, final String enityName, final Long resourceId,
+    private CommandWrapper(final Long commandId, final String actionName, final String entityName, final Long resourceId, final Long subresourceId,
             final String resourceGetUrl) {
         this.commandId = commandId;
         this.officeId = null;
@@ -43,10 +44,10 @@ public class CommandWrapper {
         this.clientId = null;
         this.loanId = null;
         this.actionName = actionName;
-        this.entityName = enityName;
+        this.entityName = entityName;
         this.taskPermissionName = actionName + "_" + entityName;
         this.entityId = resourceId;
-        this.datatableId = null;
+        this.subentityId = subresourceId;
         this.codeId = null;
         this.supportedEntityType = null;
         this.supportedEntityId = null;
@@ -54,15 +55,19 @@ public class CommandWrapper {
         this.json = null;
         this.transactionId = null;
 
-        if (this.href.contains("datatables")) {
+        /* TODO - jpw taking this out later*/
+        if (this.href.startsWith("/datatables/")) {
             this.apptableId = resourceId;
+            this.datatableId = subresourceId;
         } else {
             this.apptableId = null;
+            this.datatableId = null;
         }
+        
     }
 
     public CommandWrapper(final Long officeId, final Long groupId, final Long clientId, final Long loanId, final String actionName,
-            final String entityName, final Long entityId, final Long apptableId, final Long datatableId, final Long codeId,
+            final String entityName, final Long entityId, final Long subentityId, final Long apptableId, final Long datatableId, final Long codeId,
             final String supportedEntityType, final Long supportedEntityId, final String href, final String json, final String transactionId) {
         this.commandId = null;
         this.officeId = officeId;
@@ -73,6 +78,7 @@ public class CommandWrapper {
         this.entityName = entityName;
         this.taskPermissionName = actionName + "_" + entityName;
         this.entityId = entityId;
+        this.subentityId = subentityId;
         this.apptableId = apptableId;
         this.datatableId = datatableId;
         this.codeId = codeId;
@@ -97,6 +103,10 @@ public class CommandWrapper {
 
     public Long resourceId() {
         return this.entityId;
+    }
+    
+    public Long subresourceId() {
+        return this.subentityId;
     }
 
     public String taskPermissionName() {
@@ -133,6 +143,10 @@ public class CommandWrapper {
 
     public Long getEntityId() {
         return this.entityId;
+    }
+    
+    public Long getSubentityId() {
+        return this.subentityId;
     }
 
     public Long getGroupId() {
@@ -353,8 +367,8 @@ public class CommandWrapper {
         return this.actionName.equalsIgnoreCase("BULKREASSIGN") && this.entityName.equalsIgnoreCase("LOAN");
     }
 
-    public boolean isDatatableResource() {
-        return this.apptableId != null;
+    public boolean isDatatableResource() {       
+        return this.href.startsWith("/datatables/");
     }
 
     public boolean isDeleteOneToOne() {

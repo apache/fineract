@@ -57,7 +57,7 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
         try {
             final JsonElement parsedCommand = this.fromApiJsonHelper.parse(json);
             final JsonCommand command = JsonCommand.from(json, parsedCommand, this.fromApiJsonHelper, wrapper.getEntityName(),
-                    wrapper.getEntityId(), wrapper.getGroupId(), wrapper.getClientId(), wrapper.getLoanId(), wrapper.getApptableId(),
+            		wrapper.getEntityId(), wrapper.getSubentityId(), wrapper.getGroupId(), wrapper.getClientId(), wrapper.getLoanId(), wrapper.getApptableId(),
                     wrapper.getDatatableId(), wrapper.getCodeId(), wrapper.getSupportedEntityType(), wrapper.getSupportedEntityId(), wrapper.getTransactionId());
 
             result = this.processAndLogCommandService.processAndLogCommand(wrapper, command, isApprovedByChecker);
@@ -74,7 +74,7 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
             }
 
             final JsonCommand command = JsonCommand.from(jsonToUse, parsedCommand, this.fromApiJsonHelper, wrapper.getEntityName(),
-                    entityId, wrapper.getGroupId(), wrapper.getClientId(), wrapper.getLoanId(), wrapper.getApptableId(),
+                    entityId, wrapper.getSubentityId(), wrapper.getGroupId(), wrapper.getClientId(), wrapper.getLoanId(), wrapper.getApptableId(),
                     wrapper.getDatatableId(), wrapper.getCodeId(), wrapper.getSupportedEntityType(), wrapper.getSupportedEntityId(), wrapper.getTransactionId());
 
             result = this.processAndLogCommandService.logCommand(wrapper, command);
@@ -91,11 +91,11 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
         context.authenticatedUser().validateHasCheckerPermissionTo(commandSourceInput.getPermissionCode());
 
         final CommandWrapper wrapper = CommandWrapper.fromExistingCommand(commandId, commandSourceInput.getActionName(),
-                commandSourceInput.getEntityName(), commandSourceInput.resourceId(), commandSourceInput.getResourceGetUrl());
+                commandSourceInput.getEntityName(), commandSourceInput.resourceId(), commandSourceInput.subresourceId(), commandSourceInput.getResourceGetUrl());
 
         final JsonElement parsedCommand = this.fromApiJsonHelper.parse(commandSourceInput.json());
         final JsonCommand command = JsonCommand.fromExistingCommand(commandId, commandSourceInput.json(), parsedCommand,
-                this.fromApiJsonHelper, commandSourceInput.getEntityName(), commandSourceInput.resourceId());
+                this.fromApiJsonHelper, commandSourceInput.getEntityName(), commandSourceInput.resourceId(), commandSourceInput.subresourceId());
 
         final boolean makerCheckerApproval = true;
         return this.processAndLogCommandService.processAndLogCommand(wrapper, command, makerCheckerApproval);
