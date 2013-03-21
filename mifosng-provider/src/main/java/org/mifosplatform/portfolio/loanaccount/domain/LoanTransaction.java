@@ -100,6 +100,16 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
         return applyCharge;
     }
 
+    public static boolean transactionAmountsMatch(MonetaryCurrency currency, LoanTransaction loanTransaction,
+            LoanTransaction newLoanTransaction) {
+        if (loanTransaction.getAmount(currency).isEqualTo(newLoanTransaction.getAmount(currency))
+                && (loanTransaction.getPrincipalPortion(currency).isEqualTo(newLoanTransaction.getPrincipalPortion(currency)))
+                && (loanTransaction.getInterestPortion(currency).isEqualTo(newLoanTransaction.getInterestPortion(currency)))
+                && (loanTransaction.getFeeChargesPortion(currency).isEqualTo(newLoanTransaction.getFeeChargesPortion(currency)))
+                && (loanTransaction.getPenaltyChargesPortion(currency).isEqualTo(newLoanTransaction.getPenaltyChargesPortion(currency)))) { return true; }
+        return false;
+    }
+
     private LoanTransaction(Loan loan, Integer typeOf, Date dateOf, BigDecimal amount, BigDecimal principalPortion,
             BigDecimal interestPortion, BigDecimal feeChargesPortion, BigDecimal penaltyChargesPortion, boolean reversed) {
         super();

@@ -292,8 +292,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
          * TODO Vishwas Batch save is giving me a
          * HibernateOptimisticLockingFailureException, looping and saving for
          * the time being, not a major issue for now as this loop is entered
-         * only in edge cases (when a payment is made before the latest payment
-         * recorded against the loan)
+         * only in edge cases (when a adjustment is made before the latest
+         * payment recorded against the loan)
          ***/
         if (changedTransactionDetail != null) {
             for (LoanTransaction loanTransaction : changedTransactionDetail.getNewTransactions()) {
@@ -336,21 +336,41 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         changes.put("transactionAmount", command.stringValueOfParameterNamed("transactionAmount"));
         changes.put("locale", command.locale());
         changes.put("dateFormat", command.dateFormat());
+        final LocalDate transactionDate = command.localDateValueOfParameterNamed("transactionDate");
+        final BigDecimal transactionAmount = command.bigDecimalValueOfParameterNamed("transactionAmount");
 
         final Loan loan = retrieveLoanBy(loanId);
 
         final List<Long> existingTransactionIds = new ArrayList<Long>();
         final List<Long> existingReversedTransactionIds = new ArrayList<Long>();
-        final LoanTransaction waiveTransaction = loan.waiveInterest(command, defaultLoanLifecycleStateMachine(), existingTransactionIds,
-                existingReversedTransactionIds);
 
-        this.loanTransactionRepository.save(waiveTransaction);
+        final Money transactionAmountAsMoney = Money.of(loan.getCurrency(), transactionAmount);
+        LoanTransaction waiveInterestTransaction = LoanTransaction.waiver(loan, transactionAmountAsMoney, transactionDate);
+
+        final ChangedTransactionDetail changedTransactionDetail = loan.waiveInterest(waiveInterestTransaction,
+                defaultLoanLifecycleStateMachine(), existingTransactionIds, existingReversedTransactionIds);
+
+        this.loanTransactionRepository.save(waiveInterestTransaction);
+
+        /***
+         * TODO Vishwas Batch save is giving me a
+         * HibernateOptimisticLockingFailureException, looping and saving for
+         * the time being, not a major issue for now as this loop is entered
+         * only in edge cases (when a waiver is made before the latest payment
+         * recorded against the loan)
+         ***/
+        if (changedTransactionDetail != null) {
+            for (LoanTransaction loanTransaction : changedTransactionDetail.getNewTransactions()) {
+                this.loanTransactionRepository.save(loanTransaction);
+            }
+        }
+
         this.loanRepository.save(loan);
 
         final String noteText = command.stringValueOfParameterNamed("note");
         if (StringUtils.isNotBlank(noteText)) {
             changes.put("note", noteText);
-            final Note note = Note.loanTransactionNote(loan, waiveTransaction, noteText);
+            final Note note = Note.loanTransactionNote(loan, waiveInterestTransaction, noteText);
             this.noteRepository.save(note);
         }
 
@@ -358,7 +378,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
-                .withEntityId(waiveTransaction.getId()) //
+                .withEntityId(waiveInterestTransaction.getId()) //
                 .withOfficeId(loan.getOfficeId()) //
                 .withClientId(loan.getClientId()) //
                 .withGroupId(loan.getGroupId()) //

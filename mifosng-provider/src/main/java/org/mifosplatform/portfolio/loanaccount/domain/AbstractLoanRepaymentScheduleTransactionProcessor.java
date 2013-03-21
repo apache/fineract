@@ -60,18 +60,27 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
                     handleTransaction(loanTransaction, currency, installments, charges);
                 } else {
                     /**
-                     * reverse existing transactions and create new transactions
-                     * in their Lieu
+                     * For existing transactions, check if the re-payment
+                     * breakup (principal, interest, fees, penalties) has
+                     * changed.<br>
                      **/
                     LoanTransaction newLoanTransaction = LoanTransaction.copyTransactionProperties(loanTransaction);
 
-                    // Reverse the original loan transaction
-                    loanTransaction.reverse();
-                    changedTransactionDetail.getReversedTransactions().add(loanTransaction);
-                    // Reset derived component of new loan transaction
+                    // Reset derived component of new loan transaction and
+                    // re-process transaction
                     newLoanTransaction.resetDerivedComponents();
-                    changedTransactionDetail.getNewTransactions().add(newLoanTransaction);
                     handleTransaction(newLoanTransaction, currency, installments, charges);
+
+                    /**
+                     * Check if the transaction amounts have changed. If so,
+                     * reverse the original transaction and update
+                     * changedTransactionDetail accordingly
+                     **/
+                    if (!LoanTransaction.transactionAmountsMatch(currency, loanTransaction, newLoanTransaction)) {
+                        loanTransaction.reverse();
+                        changedTransactionDetail.getReversedTransactions().add(loanTransaction);
+                        changedTransactionDetail.getNewTransactions().add(newLoanTransaction);
+                    }
                 }
 
             } else if (loanTransaction.isWriteOff()) {
