@@ -7477,6 +7477,120 @@ No Request Body:
 	        </code>
 	    </div>
 	</div>
+	
+	<a id="savingsaccounts_transactions" name="savingsaccounts_transactions" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Savings Account Transactions:</h2>
+	        <p>Transactions possible on a savings account.</p>
+	      	<table class=matrixHeading>
+	            <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Field Descriptions</div></td></tr>
+
+				<tr class=alt><td>transactionDate</td></tr>
+				<tr><td class=fielddesc>The date of the transaction.</td></tr>
+
+				<tr class=alt><td>transactionAmount</td></tr>
+				<tr><td class=fielddesc>The amount of the transaction.</td></tr>
+	        </table>
+	    </div>
+	</div>
+
+	savingsaccounts_transactions_template
+	<a id="savingsaccounts_transactions_template" name="savingsaccounts_transactions_template" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Retrieve Savings Account Transaction Template:</h2>
+	            <p>This is a convenience resource. It can be useful when building maintenance user interface screens for client applications. The template data returned consists of any or all of:
+	                <ul>
+	                <li class=normalli>Field Defaults</li>   
+	                <li class=normalli>Allowed Value Lists</li>    
+	                </ul>
+	            </p>
+	        <p>Example Requests: </p>
+	        <div class=apiClick>savingsaccounts/1/transactions/template</div>
+	        <br/>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">GET https://Domain Name/api/v1/savingsaccounts/{accountId}/transactions/template
+	        </code>
+			<code class="method-response">
+{
+  "accountId": 2,
+  "accountNo": "000000002",
+  "date": [
+    2013,
+    3,
+    22
+  ],
+  "currency": {
+    "code": "USD",
+    "name": "US Dollar",
+    "decimalPlaces": 2,
+    "displaySymbol": "$",
+    "nameCode": "currency.USD",
+    "displayLabel": "US Dollar ($)"
+  }
+}
+			</code>
+	    </div>
+	</div>
+
+
+	<a id="savingsaccounts_deposit" name="savingsaccounts_deposit" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Deposit Transaction</h2>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">POST https://Domain Name/api/v1/savingsaccounts/{accountsId}/transactions?command=deposit</code>
+	        <code class="method-request">POST savingsaccounts/1/transactions?command=deposit              
+Content-Type: application/json
+No Request Body:
+{
+	"dateFormat": "dd MMMM yyyy", 
+	"locale": "en",
+	"transactionDate": "02 March 2011",
+	"transactionAmount": "256.67"
+}
+	        </code>
+	        <code class="method-response">
+{
+  "officeId": 1,
+  "clientId": 1,
+  "savingsId": 1,
+  "resourceId": 1
+}
+	        </code>
+	    </div>
+	</div>
+
+	<a id="savingsaccounts_withdrawal" name="savingsaccounts_withdrawal" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Withdrawal Transaction</h2>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">POST https://Domain Name/api/v1/savingsaccounts/{accountsId}/transactions?command=withdrawal</code>
+	        <code class="method-request">POST savingsaccounts/1/transactions?command=withdrawal              
+Content-Type: application/json
+No Request Body:
+{
+	"dateFormat": "dd MMMM yyyy", 
+	"locale": "en",
+	"transactionDate": "02 March 2011",
+	"transactionAmount": "99.50"
+}
+	        </code>
+	        <code class="method-response">
+{
+  "officeId": 1,
+  "clientId": 1,
+  "savingsId": 1,
+  "resourceId": 2
+}
+	        </code>
+	    </div>
+	</div>
 <!-- end of savings accounts api -->
     
 <!-- start of datatables api docs -->
@@ -11317,6 +11431,22 @@ Content-Type: application/json
 					<td><a href="#savingsaccounts_delete">Delete a Savings Account</a></td>
 				</tr>
 				<tr class="alt">
+					<td><a href="#savingsaccounts_transactions">Savings Transactions</a></td>
+					<td>savingsaccounts/{accountId}/transactions?command=deposit</td>
+					<td><a href="#savingsaccounts_deposit">Make a Deposit</a></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>savingsaccounts/{accountId}/transactions?command=withdrawal</td>
+					<td><a href="#savingsaccounts_withdrawal">Make a Withdrawal</a></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr class="alt">
 					<td><a href="#offices">Office</a></td>
 					<td>offices</td>
 					<td><a href="#offices_create">Create an Office</a></td>
@@ -11677,15 +11807,15 @@ Content-Type: application/json
 					<td>clients/template</td>
 					<td><a href="#clients_template">Retrieve Client Template</a></td>
 				</tr>
-				<tr class="alt">
+				<tr>
 					<td>loanproducts/template</td>
 					<td><a href="#loanproducts_template">Retrieve Loan Product Template</a></td>
 				</tr>
-				<tr>
+				<tr class="alt">
 					<td>loans/template?clientId={clientId}</td>
 					<td><a href="#loans_template">Retrieve Loan Template</a></td>
 				</tr>
-				<tr class="alt">
+				<tr>
 					<td>loans/{loanId}/transactions/template</td>
 					<td><a href="#loans_repaymenttemplate_etc">Retrieve Tranaction Template</a></td>
 				</tr>
@@ -11693,9 +11823,13 @@ Content-Type: application/json
 					<td>savingproducts/template</td>
 					<td><a href="#savingsproducts_template">Retrieve Savings Product Template</a></td>
 				</tr>
-				<tr class="alt">
+				<tr>
 					<td>savingsaccounts/template?clientId={clientId}</td>
 					<td><a href="#savingsaccounts_template">Retrieve Savings Account Template</a></td>
+				</tr>
+				<tr class="alt">
+					<td>savingsaccounts/{accountId}/transactions/template</td>
+					<td><a href="#savingsaccounts_transactions_template">Retrieve Savings Account Transaction Template</a></td>
 				</tr>
 				<tr>
 					<td>offices/template</td>
