@@ -1,6 +1,6 @@
 -- MySQL dump 10.13  Distrib 5.1.60, for Win32 (ia32)
 --
--- Host: localhost    Database: mifostenant-default
+-- Host: localhost    Database: mifostenant-ceda
 -- ------------------------------------------------------
 -- Server version	5.1.60-community
 
@@ -186,6 +186,66 @@ INSERT INTO `c_configuration` VALUES (1,'maker-checker',0);
 UNLOCK TABLES;
 
 --
+-- Table structure for table `client additional data`
+--
+
+DROP TABLE IF EXISTS `client additional data`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `client additional data` (
+  `client_id` bigint(20) NOT NULL,
+  `Gender_cd` int(11) NOT NULL,
+  `Date of Birth` date NOT NULL,
+  `Home address` text NOT NULL,
+  `Telephone number` varchar(20) NOT NULL,
+  `Telephone number (2nd)` varchar(20) NOT NULL,
+  `Email address` varchar(50) NOT NULL,
+  `EducationLevel_cd` int(11) NOT NULL,
+  `MaritalStatus_cd` int(11) NOT NULL,
+  `Number of children` int(11) NOT NULL,
+  `Citizenship` varchar(50) NOT NULL,
+  `PovertyStatus_cd` int(11) NOT NULL,
+  `YesNo_cd_Employed` int(11) NOT NULL,
+  `FieldOfEmployment_cd_Field of employment` int(11) DEFAULT NULL,
+  `Employer name` varchar(50) DEFAULT NULL,
+  `Number of years` int(11) DEFAULT NULL,
+  `Monthly salary` decimal(19,6) DEFAULT NULL,
+  `YesNo_cd_Self employed` int(11) NOT NULL,
+  `FieldOfEmployment_cd_Field of self-employment` int(11) DEFAULT NULL,
+  `Business address` text,
+  `Number of employees` int(11) DEFAULT NULL,
+  `Monthly salaries paid` decimal(19,6) DEFAULT NULL,
+  `Monthly net income of business activity` decimal(19,6) DEFAULT NULL,
+  `Monthly rent` decimal(19,6) DEFAULT NULL,
+  `Other income generating activities` varchar(100) DEFAULT NULL,
+  `YesNo_cd_Bookkeeping` int(11) DEFAULT NULL,
+  `YesNo_cd_Loans with other institutions` int(11) NOT NULL,
+  `From whom` varchar(100) DEFAULT NULL,
+  `Amount` decimal(19,6) DEFAULT NULL,
+  `Interest rate pa` decimal(19,6) DEFAULT NULL,
+  `Number of people depending on overal income` int(11) NOT NULL,
+  `YesNo_cd_Bank account` int(11) NOT NULL,
+  `YesNo_cd_Business plan provided` int(11) NOT NULL,
+  `YesNo_cd_Access to internet` int(11) DEFAULT NULL,
+  `Introduced by` varchar(100) DEFAULT NULL,
+  `Known to introducer since` varchar(100) NOT NULL,
+  `Last visited by` varchar(100) DEFAULT NULL,
+  `Last visited on` date NOT NULL,
+  PRIMARY KEY (`client_id`),
+  CONSTRAINT `FK_client_additional_data` FOREIGN KEY (`client_id`) REFERENCES `m_client` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `client additional data`
+--
+
+LOCK TABLES `client additional data` WRITE;
+/*!40000 ALTER TABLE `client additional data` DISABLE KEYS */;
+/*!40000 ALTER TABLE `client additional data` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `extra_client_details`
 --
 
@@ -273,6 +333,67 @@ CREATE TABLE `extra_loan_details` (
 LOCK TABLES `extra_loan_details` WRITE;
 /*!40000 ALTER TABLE `extra_loan_details` DISABLE KEYS */;
 /*!40000 ALTER TABLE `extra_loan_details` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `impact measurement`
+--
+
+DROP TABLE IF EXISTS `impact measurement`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `impact measurement` (
+  `loan_id` bigint(20) NOT NULL,
+  `YesNo_cd_RepaidOnSchedule` int(11) NOT NULL,
+  `ReasonNotRepaidOnSchedule` text,
+  `How was Loan Amount Invested` text NOT NULL,
+  `Additional Income Generated` decimal(19,6) NOT NULL,
+  `Additional Income Used For` text NOT NULL,
+  `YesNo_cd_NewJobsCreated` int(11) NOT NULL,
+  `Number of Jobs Created` bigint(20) DEFAULT NULL,
+  PRIMARY KEY (`loan_id`),
+  CONSTRAINT `FK_impact measurement` FOREIGN KEY (`loan_id`) REFERENCES `m_loan` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `impact measurement`
+--
+
+LOCK TABLES `impact measurement` WRITE;
+/*!40000 ALTER TABLE `impact measurement` DISABLE KEYS */;
+/*!40000 ALTER TABLE `impact measurement` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `loan additional data`
+--
+
+DROP TABLE IF EXISTS `loan additional data`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `loan additional data` (
+  `loan_id` bigint(20) NOT NULL,
+  `PurposeOfLoan_cd` int(11) NOT NULL,
+  `CollateralType_cd` int(11) NOT NULL,
+  `Collateral notes` text NOT NULL,
+  `YesNo_cd_Guarantor` int(11) NOT NULL,
+  `Guarantor name` varchar(100) DEFAULT NULL,
+  `Guarantor relation` varchar(100) DEFAULT NULL,
+  `Guarantor address` varchar(100) DEFAULT NULL,
+  `Guarantor telephone number` varchar(20) DEFAULT NULL,
+  PRIMARY KEY (`loan_id`),
+  CONSTRAINT `FK_loan_additional_data` FOREIGN KEY (`loan_id`) REFERENCES `m_loan` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `loan additional data`
+--
+
+LOCK TABLES `loan additional data` WRITE;
+/*!40000 ALTER TABLE `loan additional data` DISABLE KEYS */;
+/*!40000 ALTER TABLE `loan additional data` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -1795,7 +1916,7 @@ CREATE TABLE `x_registered_table` (
 
 LOCK TABLES `x_registered_table` WRITE;
 /*!40000 ALTER TABLE `x_registered_table` DISABLE KEYS */;
-INSERT INTO `x_registered_table` VALUES ('extra_client_details','m_client'),('extra_family_details','m_loan'),('extra_loan_details','m_loan');
+INSERT INTO `x_registered_table` VALUES ('extra_client_details','m_client'),('extra_family_details','m_client'),('extra_loan_details','m_loan');
 /*!40000 ALTER TABLE `x_registered_table` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -1808,4 +1929,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2013-03-22 10:15:38
+-- Dump completed on 2013-03-22 12:38:04

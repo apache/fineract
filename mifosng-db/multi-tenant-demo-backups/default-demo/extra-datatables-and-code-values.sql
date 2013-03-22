@@ -96,7 +96,7 @@ INSERT INTO `x_registered_table`
 (`registered_table_name`,`application_table_name`)
 VALUES
 ('extra_client_details', 'm_client'),
-('extra_family_details', 'm_loan'),
+('extra_family_details', 'm_client'),
 ('extra_loan_details', 'm_loan');
 
 
