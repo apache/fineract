@@ -40,15 +40,18 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
 
     @Override
     public CommandProcessingResult logCommandSource(final CommandWrapper wrapper) {
-        
+
         boolean isApprovedByChecker = false;
         // check if is update of own account details
         if (wrapper.isUpdateOfOwnUserDetails(context.authenticatedUser().getId())) {
             // then allow this operation to proceed.
             // maker checker doesnt mean anything here.
-            isApprovedByChecker = true; // set to true in case permissions have been maker-checker enabled by accident.
+            isApprovedByChecker = true; // set to true in case permissions have
+                                        // been maker-checker enabled by
+                                        // accident.
         } else {
-            // if not user changing their own details - check user has permission to perform specific task.
+            // if not user changing their own details - check user has
+            // permission to perform specific task.
             context.authenticatedUser().validateHasPermissionTo(wrapper.getTaskPermissionName());
         }
 
@@ -57,7 +60,9 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
         try {
             final JsonElement parsedCommand = this.fromApiJsonHelper.parse(json);
             final JsonCommand command = JsonCommand.from(json, parsedCommand, this.fromApiJsonHelper, wrapper.getEntityName(),
-            		wrapper.getEntityId(), wrapper.getSubentityId(), wrapper.getGroupId(), wrapper.getClientId(), wrapper.getLoanId(), wrapper.getCodeId(), wrapper.getSupportedEntityType(), wrapper.getSupportedEntityId(), wrapper.getTransactionId());
+                    wrapper.getEntityId(), wrapper.getSubentityId(), wrapper.getGroupId(), wrapper.getClientId(), wrapper.getLoanId(),
+                    wrapper.getSavingsId(), wrapper.getCodeId(), wrapper.getSupportedEntityType(), wrapper.getSupportedEntityId(),
+                    wrapper.getTransactionId());
 
             result = this.processAndLogCommandService.processAndLogCommand(wrapper, command, isApprovedByChecker);
         } catch (RollbackTransactionAsCommandIsNotApprovedByCheckerException e) {
@@ -67,7 +72,9 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
             final JsonElement parsedCommand = this.fromApiJsonHelper.parse(jsonToUse);
 
             final JsonCommand command = JsonCommand.from(jsonToUse, parsedCommand, this.fromApiJsonHelper, wrapper.getEntityName(),
-                    wrapper.getEntityId(), wrapper.getSubentityId(), wrapper.getGroupId(), wrapper.getClientId(), wrapper.getLoanId(), wrapper.getCodeId(), wrapper.getSupportedEntityType(), wrapper.getSupportedEntityId(), wrapper.getTransactionId());
+                    wrapper.getEntityId(), wrapper.getSubentityId(), wrapper.getGroupId(), wrapper.getClientId(), wrapper.getLoanId(),
+                    wrapper.getSavingsId(), wrapper.getCodeId(), wrapper.getSupportedEntityType(), wrapper.getSupportedEntityId(),
+                    wrapper.getTransactionId());
 
             result = this.processAndLogCommandService.logCommand(wrapper, command);
         }
@@ -83,11 +90,13 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
         context.authenticatedUser().validateHasCheckerPermissionTo(commandSourceInput.getPermissionCode());
 
         final CommandWrapper wrapper = CommandWrapper.fromExistingCommand(commandId, commandSourceInput.getActionName(),
-                commandSourceInput.getEntityName(), commandSourceInput.resourceId(), commandSourceInput.subresourceId(), commandSourceInput.getResourceGetUrl());
+                commandSourceInput.getEntityName(), commandSourceInput.resourceId(), commandSourceInput.subresourceId(),
+                commandSourceInput.getResourceGetUrl());
 
         final JsonElement parsedCommand = this.fromApiJsonHelper.parse(commandSourceInput.json());
         final JsonCommand command = JsonCommand.fromExistingCommand(commandId, commandSourceInput.json(), parsedCommand,
-                this.fromApiJsonHelper, commandSourceInput.getEntityName(), commandSourceInput.resourceId(), commandSourceInput.subresourceId());
+                this.fromApiJsonHelper, commandSourceInput.getEntityName(), commandSourceInput.resourceId(),
+                commandSourceInput.subresourceId());
 
         final boolean makerCheckerApproval = true;
         return this.processAndLogCommandService.processAndLogCommand(wrapper, command, makerCheckerApproval);

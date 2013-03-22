@@ -13,6 +13,7 @@ public class CommandWrapperBuilder {
     private Long groupId;
     private Long clientId;
     private Long loanId;
+    private Long savingsId;
     private String actionName;
     private String entityName;
     private Long entityId;
@@ -25,15 +26,10 @@ public class CommandWrapperBuilder {
     private Long supportedEntityId;
 
     public CommandWrapper build() {
-        return new CommandWrapper(this.officeId, this.groupId, this.clientId, this.loanId, this.actionName, this.entityName, this.entityId, this.subentityId,
-                this.codeId, this.supportedEntityType, this.supportedEntityId, this.href, this.json,
-                this.transactionId);
+        return new CommandWrapper(this.officeId, this.groupId, this.clientId, this.loanId, this.savingsId, this.actionName,
+                this.entityName, this.entityId, this.subentityId, this.codeId, this.supportedEntityType, this.supportedEntityId, this.href,
+                this.json, this.transactionId);
     }
-
-    // public CommandWrapperBuilder withEntityId(final Long withId) {
-    // this.entityId = withId;
-    // return this;
-    // }
 
     public CommandWrapperBuilder withLoanId(final Long withLoanId) {
         this.loanId = withLoanId;
@@ -325,7 +321,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
-    public CommandWrapperBuilder createDatatable(final String datatable, final Long apptableId, final Long datatableId) {       
+    public CommandWrapperBuilder createDatatable(final String datatable, final Long apptableId, final Long datatableId) {
         this.actionName = "CREATE";
         commonDatatableSettings(datatable, apptableId, datatableId);
         return this;
@@ -343,9 +339,8 @@ public class CommandWrapperBuilder {
         return this;
     }
 
-
     private void commonDatatableSettings(final String datatable, final Long apptableId, final Long datatableId) {
-        
+
         this.entityName = datatable;
         this.entityId = apptableId;
         this.subentityId = datatableId;
@@ -355,8 +350,7 @@ public class CommandWrapperBuilder {
             this.href = "/datatables/" + datatable + "/" + apptableId + "/" + datatableId;
         }
     }
-    
-    
+
     public CommandWrapperBuilder createLoanCharge(final Long loanId) {
         this.actionName = "CREATE";
         this.entityName = "LOANCHARGE";
@@ -644,110 +638,6 @@ public class CommandWrapperBuilder {
         return this;
     }
 
-    public CommandWrapperBuilder createDepositProduct() {
-        this.actionName = "CREATE";
-        this.entityName = "DEPOSITPRODUCT";
-        this.entityId = null;
-        this.href = "/depositproducts/template";
-        return this;
-    }
-
-    public CommandWrapperBuilder updateDepositProduct(final Long productId) {
-        this.actionName = "UPDATE";
-        this.entityName = "DEPOSITPRODUCT";
-        this.entityId = productId;
-        this.href = "/depositproducts/" + productId;
-        return this;
-    }
-
-    public CommandWrapperBuilder deleteDepositProduct(final Long productId) {
-        this.actionName = "DELETE";
-        this.entityName = "DEPOSITPRODUCT";
-        this.entityId = productId;
-        this.href = "/depositproducts/" + productId;
-        return this;
-    }
-
-    public CommandWrapperBuilder createDepositAccount() {
-        this.actionName = "CREATE";
-        this.entityName = "DEPOSITACCOUNT";
-        this.entityId = null;
-        this.href = "/depositaccounts/template";
-        return this;
-    }
-
-    public CommandWrapperBuilder updateDepositAccount(final Long accountId) {
-        this.actionName = "UPDATE";
-        this.entityName = "DEPOSITACCOUNT";
-        this.entityId = accountId;
-        this.href = "/depositaccounts/" + accountId;
-        return this;
-    }
-
-    public CommandWrapperBuilder deleteDepositAccount(final Long accountId) {
-        this.actionName = "DELETE";
-        this.entityName = "DEPOSITACCOUNT";
-        this.entityId = accountId;
-        this.href = "/depositaccounts/" + accountId;
-        return this;
-    }
-
-    public CommandWrapperBuilder approveDepositApplication(final Long accountId) {
-        this.actionName = "APPROVE";
-        this.entityName = "DEPOSITACCOUNT";
-        this.entityId = accountId;
-        this.href = "/depositaccounts/" + accountId;
-        return this;
-    }
-
-    public CommandWrapperBuilder withdrawDepositAmount(final Long accountId) {
-        this.actionName = "WITHDRAWAL";
-        this.entityName = "DEPOSITACCOUNT";
-        this.entityId = accountId;
-        this.href = "/depositaccounts/" + accountId;
-        return this;
-    }
-
-    public CommandWrapperBuilder withdrawInterestDepositAmount(final Long accountId) {
-        this.actionName = "INTEREST";
-        this.entityName = "DEPOSITACCOUNT";
-        this.entityId = accountId;
-        this.href = "/depositaccounts/" + accountId;
-        return this;
-    }
-
-    public CommandWrapperBuilder renewDepositAccount(final Long accountId) {
-        this.actionName = "RENEW";
-        this.entityName = "DEPOSITACCOUNT";
-        this.entityId = accountId;
-        this.href = "/depositaccounts/" + accountId;
-        return this;
-    }
-
-    public CommandWrapperBuilder rejectDepositAccount(final Long accountId) {
-        this.actionName = "REJECT";
-        this.entityName = "DEPOSITACCOUNT";
-        this.entityId = accountId;
-        this.href = "/depositaccounts/" + accountId;
-        return this;
-    }
-
-    public CommandWrapperBuilder withdrawDepositApplication(final Long accountId) {
-        this.actionName = "WITHDRAW";
-        this.entityName = "DEPOSITACCOUNT";
-        this.entityId = accountId;
-        this.href = "/depositaccounts/" + accountId;
-        return this;
-    }
-
-    public CommandWrapperBuilder undoDepositApplicationApproval(final Long accountId) {
-        this.actionName = "APPROVALUNDO";
-        this.entityName = "DEPOSITACCOUNT";
-        this.entityId = accountId;
-        this.href = "/depositaccounts/" + accountId;
-        return this;
-    }
-
     public CommandWrapperBuilder createSavingProduct() {
         this.actionName = "CREATE";
         this.entityName = "SAVINGSPRODUCT";
@@ -796,19 +686,21 @@ public class CommandWrapperBuilder {
         return this;
     }
 
-    public CommandWrapperBuilder depositOfSavingAmount(final Long accountId) {
+    public CommandWrapperBuilder savingsAccountDeposit(final Long accountId) {
         this.actionName = "DEPOSIT";
         this.entityName = "SAVINGSACCOUNT";
-        this.entityId = accountId;
-        this.href = "/savingsaccounts/" + accountId;
+        this.loanId = accountId;
+        this.entityId = null;
+        this.href = "/savingsaccounts/" + accountId + "/transactions";
         return this;
     }
 
-    public CommandWrapperBuilder withdrawSavingAmount(final Long accountId) {
+    public CommandWrapperBuilder savingsAccountWithdrawal(final Long accountId) {
         this.actionName = "WITHDRAWAL";
         this.entityName = "SAVINGSACCOUNT";
-        this.entityId = accountId;
-        this.href = "/savingsaccounts/" + accountId;
+        this.loanId = accountId;
+        this.entityId = null;
+        this.href = "/savingsaccounts/" + accountId + "/transactions";
         return this;
     }
 

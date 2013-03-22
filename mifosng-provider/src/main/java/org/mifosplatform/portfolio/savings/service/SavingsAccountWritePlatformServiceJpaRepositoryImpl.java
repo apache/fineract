@@ -5,9 +5,11 @@
  */
 package org.mifosplatform.portfolio.savings.service;
 
+import java.math.BigDecimal;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
@@ -23,12 +25,14 @@ import org.mifosplatform.portfolio.group.domain.GroupRepository;
 import org.mifosplatform.portfolio.group.exception.GroupNotFoundException;
 import org.mifosplatform.portfolio.savings.api.SavingsApiConstants;
 import org.mifosplatform.portfolio.savings.data.SavingsAccountDataValidator;
+import org.mifosplatform.portfolio.savings.data.SavingsAccountTransactionDataValidator;
 import org.mifosplatform.portfolio.savings.domain.SavingsAccount;
 import org.mifosplatform.portfolio.savings.domain.SavingsAccountAssembler;
-import org.mifosplatform.portfolio.savings.domain.SavingsAccountRepository;
+import org.mifosplatform.portfolio.savings.domain.SavingsAccountRepositoryWrapper;
+import org.mifosplatform.portfolio.savings.domain.SavingsAccountTransaction;
+import org.mifosplatform.portfolio.savings.domain.SavingsAccountTransactionRepository;
 import org.mifosplatform.portfolio.savings.domain.SavingsProduct;
 import org.mifosplatform.portfolio.savings.domain.SavingsProductRepository;
-import org.mifosplatform.portfolio.savings.exception.SavingsAccountNotFoundException;
 import org.mifosplatform.portfolio.savings.exception.SavingsProductNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,9 +47,11 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
     private final static Logger logger = LoggerFactory.getLogger(SavingsAccountWritePlatformServiceJpaRepositoryImpl.class);
 
     private final PlatformSecurityContext context;
-    private final SavingsAccountRepository savingAccountRepository;
+    private final SavingsAccountRepositoryWrapper savingAccountRepository;
+    private final SavingsAccountTransactionRepository savingsAccountTransactionRepository;
     private final SavingsAccountAssembler savingAccountAssembler;
     private final SavingsAccountDataValidator savingsAccountDataValidator;
+    private final SavingsAccountTransactionDataValidator savingsAccountTransactionDataValidator;
     private final AccountNumberGeneratorFactory accountIdentifierGeneratorFactory;
     private final ClientRepository clientRepository;
     private final GroupRepository groupRepository;
@@ -53,13 +59,18 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
 
     @Autowired
     public SavingsAccountWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
-            final SavingsAccountRepository savingAccountRepository, final SavingsAccountAssembler savingAccountAssembler,
+            final SavingsAccountRepositoryWrapper savingAccountRepository,
+            final SavingsAccountTransactionRepository savingsAccountTransactionRepository,
+            final SavingsAccountAssembler savingAccountAssembler,
             final SavingsAccountDataValidator savingsAccountDataValidator,
+            final SavingsAccountTransactionDataValidator savingsAccountTransactionDataValidator,
             final AccountNumberGeneratorFactory accountIdentifierGeneratorFactory, final ClientRepository clientRepository,
             final GroupRepository groupRepository, final SavingsProductRepository savingsProductRepository) {
         this.context = context;
         this.savingAccountRepository = savingAccountRepository;
+        this.savingsAccountTransactionRepository = savingsAccountTransactionRepository;
         this.savingAccountAssembler = savingAccountAssembler;
+        this.savingsAccountTransactionDataValidator = savingsAccountTransactionDataValidator;
         this.accountIdentifierGeneratorFactory = accountIdentifierGeneratorFactory;
         this.savingsAccountDataValidator = savingsAccountDataValidator;
         this.clientRepository = clientRepository;
@@ -136,8 +147,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
 
             final Map<String, Object> changes = new LinkedHashMap<String, Object>(20);
 
-            final SavingsAccount account = this.savingAccountRepository.findOne(accountId);
-            if (account == null) { throw new SavingsAccountNotFoundException(accountId); }
+            final SavingsAccount account = this.savingAccountRepository.findOneWithNotFoundDetection(accountId);
 
             account.update(command, changes);
 
@@ -194,52 +204,11 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
 
     @Transactional
     @Override
-    public CommandProcessingResult deposit(final JsonCommand command) {
-
-        this.context.authenticatedUser();
-
-        SavingsAccount account = this.savingAccountRepository.findOne(command.entityId());
-        if (account == null) { throw new SavingsAccountNotFoundException(command.entityId()); }
-
-        // FIXME - add basic support for deposits
-
-        return new CommandProcessingResultBuilder() //
-                .withEntityId(account.getId()) //
-                .withOfficeId(account.officeId()) //
-                .withClientId(account.clientId()) //
-                .withGroupId(account.groupId()) //
-                .build();
-    }
-
-    @Transactional
-    @Override
-    public CommandProcessingResult withdraw(final JsonCommand command) {
-
-        this.context.authenticatedUser();
-
-        final SavingsAccount account = this.savingAccountRepository.findOne(command.entityId());
-        if (account == null) { throw new SavingsAccountNotFoundException(command.entityId()); }
-
-        // FIXME - add basic support for withdrawals
-
-        this.savingAccountRepository.save(account);
-
-        return new CommandProcessingResultBuilder() //
-                .withEntityId(account.getId()) //
-                .withOfficeId(account.officeId()) //
-                .withClientId(account.clientId()) //
-                .withGroupId(account.groupId()) //
-                .build();
-    }
-
-    @Transactional
-    @Override
     public CommandProcessingResult deleteSavingAccount(final Long accountId) {
 
         this.context.authenticatedUser();
 
-        final SavingsAccount account = this.savingAccountRepository.findOne(accountId);
-        if (account == null) { throw new SavingsAccountNotFoundException(accountId); }
+        final SavingsAccount account = this.savingAccountRepository.findOneWithNotFoundDetection(accountId);
 
         this.savingAccountRepository.delete(account);
 
@@ -248,6 +217,62 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
                 .withOfficeId(account.officeId()) //
                 .withClientId(account.clientId()) //
                 .withGroupId(account.groupId()) //
+                .build();
+    }
+
+    @Transactional
+    @Override
+    public CommandProcessingResult deposit(final Long savingsId, final JsonCommand command) {
+
+        this.context.authenticatedUser();
+
+        this.savingsAccountTransactionDataValidator.validate(command);
+
+        final SavingsAccount account = this.savingAccountRepository.findOneWithNotFoundDetection(savingsId);
+
+        final LocalDate transactionDate = command.localDateValueOfParameterNamed("transactionDate");
+        final BigDecimal transactionAmount = command.bigDecimalValueOfParameterNamed("transactionAmount");
+
+        final SavingsAccountTransaction deposit = account.deposit(transactionDate, transactionAmount);
+        final Long transactionId = saveTransactionToGenerateTransactionId(deposit);
+
+        this.savingAccountRepository.save(account);
+
+        return new CommandProcessingResultBuilder() //
+                .withEntityId(transactionId) //
+                .withOfficeId(account.officeId()) //
+                .withClientId(account.clientId()) //
+                .withGroupId(account.groupId()) //
+                .withSavingsId(savingsId) //
+                .build();
+    }
+
+    private Long saveTransactionToGenerateTransactionId(final SavingsAccountTransaction transaction) {
+        this.savingsAccountTransactionRepository.save(transaction);
+        return transaction.getId();
+    }
+
+    @Transactional
+    @Override
+    public CommandProcessingResult withdrawal(final Long savingsId, final JsonCommand command) {
+
+        this.context.authenticatedUser();
+
+        final SavingsAccount account = this.savingAccountRepository.findOneWithNotFoundDetection(savingsId);
+
+        final LocalDate transactionDate = command.localDateValueOfParameterNamed("transactionDate");
+        final BigDecimal transactionAmount = command.bigDecimalValueOfParameterNamed("transactionAmount");
+
+        final SavingsAccountTransaction withdrawal = account.withdrawal(transactionDate, transactionAmount);
+        final Long transactionId = saveTransactionToGenerateTransactionId(withdrawal);
+        this.savingAccountRepository.save(account);
+
+        return new CommandProcessingResultBuilder() //
+                .withEntityId(transactionId) //
+                .withOfficeId(account.officeId()) //
+                .withClientId(account.clientId()) //
+                .withGroupId(account.groupId()) //
+                .withSavingsId(savingsId) //
                 .build();
     }
 }

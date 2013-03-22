@@ -5,7 +5,10 @@
  */
 package org.mifosplatform.portfolio.savings.api;
 
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -23,6 +26,7 @@ import javax.ws.rs.core.UriInfo;
 import org.mifosplatform.commands.domain.CommandWrapper;
 import org.mifosplatform.commands.service.CommandWrapperBuilder;
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
+import org.mifosplatform.infrastructure.core.api.ApiParameterHelper;
 import org.mifosplatform.infrastructure.core.api.ApiRequestParameterHelper;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
@@ -30,6 +34,7 @@ import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSeriali
 import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.portfolio.savings.data.SavingsAccountData;
+import org.mifosplatform.portfolio.savings.data.SavingsAccountTransactionData;
 import org.mifosplatform.portfolio.savings.data.SavingsProductData;
 import org.mifosplatform.portfolio.savings.service.SavingsAccountReadPlatformService;
 import org.mifosplatform.portfolio.savings.service.SavingsDropdownReadPlatformService;
@@ -37,6 +42,7 @@ import org.mifosplatform.portfolio.savings.service.SavingsProductReadPlatformSer
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 @Path("/savingsaccounts")
 @Component
@@ -67,31 +73,19 @@ public class SavingsAccountsApiResource {
         this.apiRequestParameterHelper = apiRequestParameterHelper;
     }
 
-    @POST
+    @GET
+    @Path("template")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String create(final String apiRequestBodyAsJson) {
+    public String retrieveTemplate(@QueryParam("clientId") final Long clientId, @QueryParam("groupId") final Long groupId,
+            @QueryParam("productId") final Long productId, @Context final UriInfo uriInfo) {
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().createSavingsAccount().withJson(apiRequestBodyAsJson).build();
+        context.authenticatedUser().validateHasReadPermission(SavingsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME);
 
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        final SavingsAccountData savingsAccount = this.savingsAccountReadPlatformService.retrieveTemplate(clientId, groupId, productId);
 
-        return this.toApiJsonSerializer.serialize(result);
-    }
-
-    @PUT
-    @Path("{accountId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    public String update(@PathParam("accountId") final Long accountId, final String apiRequestBodyAsJson) {
-
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().updateSavingsAccount(accountId).withJson(apiRequestBodyAsJson)
-                .build();
-
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-
-        return this.toApiJsonSerializer.serialize(result);
-
+        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        return this.toApiJsonSerializer.serialize(settings, savingsAccount, SavingsApiConstants.SAVINGS_ACCOUNT_RESPONSE_DATA_PARAMETERS);
     }
 
     @GET
@@ -107,6 +101,18 @@ public class SavingsAccountsApiResource {
         return this.toApiJsonSerializer.serialize(settings, products, SavingsApiConstants.SAVINGS_ACCOUNT_RESPONSE_DATA_PARAMETERS);
     }
 
+    @POST
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String create(final String apiRequestBodyAsJson) {
+
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().createSavingsAccount().withJson(apiRequestBodyAsJson).build();
+
+        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+
+        return this.toApiJsonSerializer.serialize(result);
+    }
+
     @GET
     @Path("{accountId}")
     @Consumes({ MediaType.APPLICATION_JSON })
@@ -115,42 +121,66 @@ public class SavingsAccountsApiResource {
 
         context.authenticatedUser().validateHasReadPermission(SavingsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME);
 
-        SavingsAccountData savingsAccount = this.savingsAccountReadPlatformService.retrieveOne(accountId);
+        final SavingsAccountData savingsAccount = this.savingsAccountReadPlatformService.retrieveOne(accountId);
 
-        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        final Set<String> mandatoryResponseParameters = new HashSet<String>();
+        SavingsAccountData savingsAccountTemplate = populateTemplateAndAssociations(accountId, savingsAccount, uriInfo,
+                mandatoryResponseParameters);
 
-        if (settings.isTemplate()) {
-            savingsAccount = populateTemplateOptions(savingsAccount);
+        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters(),
+                mandatoryResponseParameters);
+        return this.toApiJsonSerializer.serialize(settings, savingsAccountTemplate,
+                SavingsApiConstants.SAVINGS_ACCOUNT_RESPONSE_DATA_PARAMETERS);
+    }
+
+    private SavingsAccountData populateTemplateAndAssociations(final Long accountId, final SavingsAccountData savingsAccount,
+            final UriInfo uriInfo, final Set<String> mandatoryResponseParameters) {
+
+        Collection<SavingsAccountTransactionData> transactions = null;
+        Collection<SavingsProductData> productOptions = null;
+        Collection<EnumOptionData> interestRatePeriodFrequencyTypeOptions = null;
+        Collection<EnumOptionData> lockinPeriodFrequencyTypeOptions = null;
+
+        final Set<String> associationParameters = ApiParameterHelper.extractAssociationsForResponseIfProvided(uriInfo.getQueryParameters());
+        if (!associationParameters.isEmpty()) {
+
+            if (associationParameters.contains("all")) {
+                associationParameters.addAll(Arrays.asList("transactions"));
+            }
+
+            if (associationParameters.contains("transactions")) {
+                mandatoryResponseParameters.add("transactions");
+                final Collection<SavingsAccountTransactionData> currentTransactions = this.savingsAccountReadPlatformService
+                        .retrieveAllTransactions(accountId);
+                if (!CollectionUtils.isEmpty(currentTransactions)) {
+                    transactions = currentTransactions;
+                }
+            }
         }
 
-        return this.toApiJsonSerializer.serialize(settings, savingsAccount, SavingsApiConstants.SAVINGS_ACCOUNT_RESPONSE_DATA_PARAMETERS);
-    }
-
-    private SavingsAccountData populateTemplateOptions(final SavingsAccountData savingsAccount) {
-
-        final Collection<SavingsProductData> productOptions = this.savingsProductReadPlatformService.retrieveAllForLookup();
-        final Collection<EnumOptionData> interestRatePeriodFrequencyTypeOptions = this.dropdownReadPlatformService
-                .retrieveInterestRatePeriodFrequencyTypeOptions();
-        final Collection<EnumOptionData> lockinPeriodFrequencyTypeOptions = this.dropdownReadPlatformService
-                .retrieveLockinPeriodFrequencyTypeOptions();
+        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        if (settings.isTemplate()) {
+            productOptions = this.savingsProductReadPlatformService.retrieveAllForLookup();
+            interestRatePeriodFrequencyTypeOptions = this.dropdownReadPlatformService.retrieveInterestRatePeriodFrequencyTypeOptions();
+            lockinPeriodFrequencyTypeOptions = this.dropdownReadPlatformService.retrieveLockinPeriodFrequencyTypeOptions();
+        }
 
         return SavingsAccountData.withTemplateOptions(savingsAccount, productOptions, interestRatePeriodFrequencyTypeOptions,
-                lockinPeriodFrequencyTypeOptions);
+                lockinPeriodFrequencyTypeOptions, transactions);
     }
 
-    @GET
-    @Path("template")
+    @PUT
+    @Path("{accountId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveTemplate(@QueryParam("clientId") final Long clientId, @QueryParam("groupId") final Long groupId,
-            @QueryParam("productId") final Long productId, @Context final UriInfo uriInfo) {
+    public String update(@PathParam("accountId") final Long accountId, final String apiRequestBodyAsJson) {
 
-        context.authenticatedUser().validateHasReadPermission(SavingsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME);
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().updateSavingsAccount(accountId).withJson(apiRequestBodyAsJson)
+                .build();
 
-        final SavingsAccountData savingsAccount = this.savingsAccountReadPlatformService.retrieveTemplate(clientId, groupId, productId);
+        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
-        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, savingsAccount, SavingsApiConstants.SAVINGS_ACCOUNT_RESPONSE_DATA_PARAMETERS);
+        return this.toApiJsonSerializer.serialize(result);
     }
 
     @DELETE

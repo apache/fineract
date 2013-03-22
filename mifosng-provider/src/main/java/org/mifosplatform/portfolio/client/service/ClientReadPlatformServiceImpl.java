@@ -240,71 +240,24 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             List<ClientAccountSummaryData> preclosedDepositAccounts = new ArrayList<ClientAccountSummaryData>();
             List<ClientAccountSummaryData> maturedDepositAccounts = new ArrayList<ClientAccountSummaryData>();
 
-            // ClientDespoitAccountSummaryDataMapper depositAccountMapper = new
-            // ClientDespoitAccountSummaryDataMapper();
-            //
-            // String depositAccountsSql = "select " +
-            // depositAccountMapper.schema() +
-            // " where da.client_id = ? and da.is_deleted=0";
-            // List<ClientAccountSummaryData> depositAccountResults =
-            // this.jdbcTemplate.query(depositAccountsSql, depositAccountMapper,
-            // new Object[] { clientId });
-            // if (depositAccountResults != null) {
-            // for (ClientAccountSummaryData row : depositAccountResults) {
-            //
-            // if (row.accountStatusId() == 100) {
-            // pendingApprovalDepositAccounts.add(row);
-            // } else if (row.accountStatusId() == 300) {
-            // approvedDepositAccounts.add(row);
-            // } else if (row.accountStatusId() == 400) {
-            // withdrawnByClientDespositAccounts.add(row);
-            // } else if (row.accountStatusId() == 500) {
-            // rejectedDepositAccounts.add(row);
-            // } else if (row.accountStatusId() == 600) {
-            // closedDepositAccounts.add(row);
-            // } else if (row.accountStatusId() == 700) {
-            // maturedDepositAccounts.add(row);
-            // } else if (row.accountStatusId() == 800) {
-            // preclosedDepositAccounts.add(row);
-            // }
-            // }
-            // }
-
             List<ClientAccountSummaryData> pendingApprovalSavingAccounts = new ArrayList<ClientAccountSummaryData>();
             List<ClientAccountSummaryData> approvedSavingAccounts = new ArrayList<ClientAccountSummaryData>();
             List<ClientAccountSummaryData> withdrawnByClientSavingAccounts = new ArrayList<ClientAccountSummaryData>();
             List<ClientAccountSummaryData> rejectedSavingAccounts = new ArrayList<ClientAccountSummaryData>();
             List<ClientAccountSummaryData> closedSavingAccounts = new ArrayList<ClientAccountSummaryData>();
 
-            // ClientSavingAccountSummaryDataMapper
-            // clientSavingAccountSummaryDataMapper = new
-            // ClientSavingAccountSummaryDataMapper();
-            // String savingAccountsSql = "select " +
-            // clientSavingAccountSummaryDataMapper.schema()
-            // + " where sa.client_id=? and sa.is_deleted=0";
-            // List<ClientAccountSummaryData> savingAccountsResults =
-            // this.jdbcTemplate.query(savingAccountsSql,
-            // clientSavingAccountSummaryDataMapper, new Object[] { clientId });
-            //
-            // if (savingAccountsResults != null) {
-            // for (ClientAccountSummaryData account : savingAccountsResults) {
-            // if (account.accountStatusId() == 100)
-            // pendingApprovalSavingAccounts.add(account);
-            // else if (account.accountStatusId() == 300)
-            // approvedSavingAccounts.add(account);
-            // else if (account.accountStatusId() == 400)
-            // withdrawnByClientSavingAccounts.add(account);
-            // else if (account.accountStatusId() == 500)
-            // rejectedSavingAccounts.add(account);
-            // else if (account.accountStatusId() == 600)
-            // closedSavingAccounts.add(account);
-            // }
-            // }
+            final ClientSavingsAccountSummaryDataMapper savingsAccountSummaryDataMapper = new ClientSavingsAccountSummaryDataMapper();
+            final String savingsSql = "select " + savingsAccountSummaryDataMapper.schema() + " where sa.client_id = ?";
+            final List<ClientAccountSummaryData> savingsAccounts = this.jdbcTemplate.query(savingsSql, savingsAccountSummaryDataMapper,
+                    new Object[] { clientId });
+
+            approvedSavingAccounts.addAll(savingsAccounts);
 
             return new ClientAccountSummaryCollectionData(pendingApprovalLoans, awaitingDisbursalLoans, openLoans, closedLoans,
                     pendingApprovalDepositAccounts, approvedDepositAccounts, withdrawnByClientDespositAccounts, rejectedDepositAccounts,
                     closedDepositAccounts, preclosedDepositAccounts, maturedDepositAccounts, pendingApprovalSavingAccounts,
                     approvedSavingAccounts, withdrawnByClientSavingAccounts, rejectedSavingAccounts, closedSavingAccounts);
+
         } catch (EmptyResultDataAccessException e) {
             throw new ClientNotFoundException(clientId);
         }
@@ -325,6 +278,38 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         List<ClientAccountSummaryData> loanAccounts = this.jdbcTemplate.query(sql, rm, new Object[] { clientId, loanOfficerId });
 
         return loanAccounts;
+    }
+
+    private static final class ClientSavingsAccountSummaryDataMapper implements RowMapper<ClientAccountSummaryData> {
+
+        final String schemaSql;
+
+        public ClientSavingsAccountSummaryDataMapper() {
+            StringBuilder accountsSummary = new StringBuilder();
+            accountsSummary.append("sa.id as id, sa.account_no as accountNo, sa.external_id as externalId,");
+            accountsSummary.append("sa.product_id as productId, p.name as productName ");
+            accountsSummary.append("from m_savings_account sa ");
+            accountsSummary.append("join m_savings_product as p on p.id = sa.product_id ");
+
+            this.schemaSql = accountsSummary.toString();
+        }
+
+        public String schema() {
+            return this.schemaSql;
+        }
+
+        @Override
+        public ClientAccountSummaryData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+
+            final Long id = JdbcSupport.getLong(rs, "id");
+            final String accountNo = rs.getString("accountNo");
+            final String externalId = rs.getString("externalId");
+            final Long productId = JdbcSupport.getLong(rs, "productId");
+            final String loanProductName = rs.getString("productName");
+            final LoanStatusEnumData loanStatus = null;
+
+            return new ClientAccountSummaryData(id, accountNo, externalId, productId, loanProductName, loanStatus);
+        }
     }
 
     private static final class ClientLoanAccountSummaryDataMapper implements RowMapper<ClientAccountSummaryData> {

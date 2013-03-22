@@ -11,8 +11,13 @@ public class SavingsApiConstants {
 
     public static final String SAVINGS_PRODUCT_RESOURCE_NAME = "savingsproduct";
     public static final String SAVINGS_ACCOUNT_RESOURCE_NAME = "savingsaccount";
+    public static final String SAVINGS_ACCOUNT_TRANSACTION_RESOURCE_NAME = "savingsaccount.transaction";
 
+    // general
     public static final String localeParamName = "locale";
+    public static final String dateFormatParamName = "dateFormat";
+    
+    // savings product and account parameters
     public static final String idParamName = "id";
     public static final String accountNoParamName = "accountNo";
     public static final String externalIdParamName = "externalId";
@@ -29,6 +34,10 @@ public class SavingsApiConstants {
     public static final String lockinPeriodFrequencyParamName = "lockinPeriodFrequency";
     public static final String lockinPeriodFrequencyTypeParamName = "lockinPeriodFrequencyType";
 
+    // transaction parameters
+    public static final String transactionDateParamName = "transactionDate";
+    public static final String transactionAmountParamName = "transactionAmount";
+    
     public static final Set<String> SAVINGS_PRODUCT_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(localeParamName,
             nameParamName, descriptionParamName, currencyCodeParamName, digitsAfterDecimalParamName, interestRateParamName,
             interestRatePeriodFrequencyTypeParamName, minRequiredOpeningBalanceParamName, lockinPeriodFrequencyParamName,
@@ -60,4 +69,10 @@ public class SavingsApiConstants {
             "savingsProductName", "currency", interestRateParamName, interestRatePeriodFrequencyTypeParamName, "annualInterestRate",
             minRequiredOpeningBalanceParamName, lockinPeriodFrequencyParamName, lockinPeriodFrequencyTypeParamName, "productOptions",
             "interestRatePeriodFrequencyTypeOptions", "lockinPeriodFrequencyTypeOptions"));
+
+    public static final Set<String> SAVINGS_ACCOUNT_TRANSACTION_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(
+            localeParamName, dateFormatParamName, transactionDateParamName, transactionAmountParamName));
+
+    public static final Set<String> SAVINGS_TRANSACTION_RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(idParamName,
+            "accountId", accountNoParamName, "currency", "amount"));
 }

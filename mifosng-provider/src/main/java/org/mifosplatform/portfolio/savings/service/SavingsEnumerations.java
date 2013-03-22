@@ -7,6 +7,8 @@ package org.mifosplatform.portfolio.savings.service;
 
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.portfolio.loanproduct.domain.PeriodFrequencyType;
+import org.mifosplatform.portfolio.savings.data.SavingsAccountTransactionEnumData;
+import org.mifosplatform.portfolio.savings.domain.SavingsAccountTransactionType;
 
 public class SavingsEnumerations {
 
@@ -67,6 +69,36 @@ public class SavingsEnumerations {
             case YEARS:
                 optionData = new EnumOptionData(PeriodFrequencyType.YEARS.getValue().longValue(), codePrefix
                         + PeriodFrequencyType.YEARS.getCode(), "Years");
+            break;
+        }
+        return optionData;
+    }
+
+    public static SavingsAccountTransactionEnumData transactionType(final int transactionType) {
+        return transactionType(SavingsAccountTransactionType.fromInt(transactionType));
+    }
+
+    public static SavingsAccountTransactionEnumData transactionType(final SavingsAccountTransactionType type) {
+
+        SavingsAccountTransactionEnumData optionData = new SavingsAccountTransactionEnumData(SavingsAccountTransactionType.INVALID
+                .getValue().longValue(), SavingsAccountTransactionType.INVALID.getCode(), "Invalid");
+
+        switch (type) {
+            case INVALID:
+                optionData = new SavingsAccountTransactionEnumData(SavingsAccountTransactionType.INVALID.getValue().longValue(),
+                        SavingsAccountTransactionType.INVALID.getCode(), "Invalid");
+            break;
+            case DEPOSIT:
+                optionData = new SavingsAccountTransactionEnumData(SavingsAccountTransactionType.DEPOSIT.getValue().longValue(),
+                        SavingsAccountTransactionType.DEPOSIT.getCode(), "Deposit");
+            break;
+            case WITHDRAWAL:
+                optionData = new SavingsAccountTransactionEnumData(SavingsAccountTransactionType.WITHDRAWAL.getValue().longValue(),
+                        SavingsAccountTransactionType.WITHDRAWAL.getCode(), "Withdrawal");
+            break;
+            case INTEREST_POSTING:
+                optionData = new SavingsAccountTransactionEnumData(SavingsAccountTransactionType.INTEREST_POSTING.getValue().longValue(),
+                        SavingsAccountTransactionType.INTEREST_POSTING.getCode(), "Interest posting");
             break;
         }
         return optionData;

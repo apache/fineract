@@ -93,8 +93,8 @@ public class Money implements Comparable<Money> {
     }
 
     public Money plus(final BigDecimal amountToAdd) {
-        if (amountToAdd.compareTo(BigDecimal.ZERO) == 0) { return this; }
-        BigDecimal newAmount = this.amount.add(amountToAdd);
+        if (amountToAdd == null || amountToAdd.compareTo(BigDecimal.ZERO) == 0) { return this; }
+        final BigDecimal newAmount = this.amount.add(amountToAdd);
         return Money.of(monetaryCurrency(), newAmount);
     }
 
@@ -110,8 +110,8 @@ public class Money implements Comparable<Money> {
     }
 
     public Money minus(final BigDecimal amountToSubtract) {
-        if (amountToSubtract.compareTo(BigDecimal.ZERO) == 0) { return this; }
-        BigDecimal newAmount = this.amount.subtract(amountToSubtract);
+        if (amountToSubtract == null || amountToSubtract.compareTo(BigDecimal.ZERO) == 0) { return this; }
+        final BigDecimal newAmount = this.amount.subtract(amountToSubtract);
         return Money.of(monetaryCurrency(), newAmount);
     }
 
@@ -221,6 +221,18 @@ public class Money implements Comparable<Money> {
 
     public BigDecimal getAmount() {
         return this.amount;
+    }
+
+    public BigDecimal getAmountDefaultedToNullIfZero() {
+        return defaultToNullIfZero(this.amount);
+    }
+
+    private static BigDecimal defaultToNullIfZero(final BigDecimal value) {
+        BigDecimal result = value;
+        if (value != null && BigDecimal.ZERO.compareTo(value) == 0) {
+            result = null;
+        }
+        return result;
     }
 
     @Override

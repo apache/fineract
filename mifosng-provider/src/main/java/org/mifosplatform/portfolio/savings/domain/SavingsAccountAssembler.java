@@ -32,6 +32,7 @@ import com.google.gson.JsonElement;
 @Service
 public class SavingsAccountAssembler {
 
+    private final SavingsAccountTransactionSummaryWrapper savingsAccountTransactionSummaryWrapper;
     private final ClientRepository clientRepository;
     private final GroupRepository groupRepository;
     private final SavingsProductRepository savingProductRepository;
@@ -39,9 +40,11 @@ public class SavingsAccountAssembler {
     private final AprCalculator aprCalculator;
 
     @Autowired
-    public SavingsAccountAssembler(final ClientRepository clientRepository, final GroupRepository groupRepository,
+    public SavingsAccountAssembler(final SavingsAccountTransactionSummaryWrapper savingsAccountTransactionSummaryWrapper,
+            final ClientRepository clientRepository, final GroupRepository groupRepository,
             final SavingsProductRepository savingProductRepository, final AprCalculator aprCalculator,
             final FromJsonHelper fromApiJsonHelper) {
+        this.savingsAccountTransactionSummaryWrapper = savingsAccountTransactionSummaryWrapper;
         this.clientRepository = clientRepository;
         this.groupRepository = groupRepository;
         this.savingProductRepository = savingProductRepository;
@@ -106,7 +109,7 @@ public class SavingsAccountAssembler {
         } else {
             minRequiredOpeningBalance = product.minRequiredOpeningBalance();
         }
-        
+
         Integer lockinPeriodFrequency = null;
         if (command.parameterExists(lockinPeriodFrequencyParamName)) {
             lockinPeriodFrequency = command.integerValueOfParameterNamed(lockinPeriodFrequencyParamName);
@@ -125,8 +128,11 @@ public class SavingsAccountAssembler {
             lockinPeriodFrequencyType = product.lockinPeriodFrequencyType();
         }
 
-        return SavingsAccount.createNewAccount(client, group, product, accountNo, externalId, interestRate,
+        final SavingsAccount account = SavingsAccount.createNewAccount(client, group, product, accountNo, externalId, interestRate,
                 interestRatePeriodFrequencyType, annualInterestRate, minRequiredOpeningBalance, lockinPeriodFrequency,
                 lockinPeriodFrequencyType);
+        account.setHelpers(this.savingsAccountTransactionSummaryWrapper);
+
+        return account;
     }
 }

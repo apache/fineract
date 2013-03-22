@@ -6,19 +6,28 @@
 package org.mifosplatform.portfolio.savings.domain;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
+import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
 import org.apache.commons.lang.StringUtils;
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
+import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.security.service.RandomPasswordGenerator;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.organisation.monetary.domain.Money;
@@ -26,6 +35,8 @@ import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.group.domain.Group;
 import org.mifosplatform.portfolio.loanproduct.domain.PeriodFrequencyType;
 import org.mifosplatform.portfolio.savings.api.SavingsApiConstants;
+import org.mifosplatform.portfolio.savings.exception.InsufficientAccountBalanceException;
+import org.mifosplatform.portfolio.savings.exception.InvalidSavingsAccountTransactionException;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
@@ -73,8 +84,18 @@ public class SavingsAccount extends AbstractPersistable<Long> {
     @Column(name = "lockin_period_frequency_enum", nullable = false)
     private Integer lockinPeriodFrequencyType;
 
+    @Embedded
+    private SavingsAccountSummary summary;
+
+    @OrderBy(value = "dateOf, id")
+    @LazyCollection(LazyCollectionOption.FALSE)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "savingsAccount", orphanRemoval = true)
+    private final List<SavingsAccountTransaction> transactions = new ArrayList<SavingsAccountTransaction>();
+
     @Transient
     private boolean accountNumberRequiresAutoGeneration = false;
+    @Transient
+    private SavingsAccountTransactionSummaryWrapper savingsAccountTransactionSummaryWrapper;
 
     protected SavingsAccount() {
         //
@@ -113,6 +134,73 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         if (lockinPeriodFrequencyType != null) {
             this.lockinPeriodFrequencyType = lockinPeriodFrequencyType.getValue();
         }
+        this.summary = new SavingsAccountSummary();
+    }
+
+    /**
+     * Used after fetching/hydrating a {@link SavingsAccount} object to inject
+     * helper services/components used for update summary details after
+     * events/transactions on a loan.
+     */
+    public void setHelpers(final SavingsAccountTransactionSummaryWrapper savingsAccountTransactionSummaryWrapper) {
+        this.savingsAccountTransactionSummaryWrapper = savingsAccountTransactionSummaryWrapper;
+    }
+
+    public SavingsAccountTransaction deposit(final LocalDate transactionDate, final BigDecimal transactionAmount) {
+
+        final Money amount = Money.of(this.currency, transactionAmount);
+
+        // FIXME - kw - check transactionDate is not before savings account
+        // activation date.
+
+        if (isTransactionInTheFuture(transactionDate)) {
+            final String defaultUserMessage = "Transaction date cannot be in the future.";
+            throw new InvalidSavingsAccountTransactionException("in.the.future", defaultUserMessage, "transactionDate", transactionDate);
+        }
+
+        final SavingsAccountTransaction transaction = SavingsAccountTransaction.deposit(this, transactionDate, amount);
+        this.transactions.add(transaction);
+
+        this.summary.updateSummary(this.currency, this.savingsAccountTransactionSummaryWrapper, this.transactions);
+
+        return transaction;
+    }
+
+    public SavingsAccountTransaction withdrawal(final LocalDate transactionDate, final BigDecimal transactionAmount) {
+
+        final Money amount = Money.of(this.currency, transactionAmount);
+
+        // FIXME - kw - check transactionDate is not before savings account
+        // activation date.
+
+        if (isTransactionInTheFuture(transactionDate)) {
+            final String defaultUserMessage = "Transaction date cannot be in the future.";
+            throw new InvalidSavingsAccountTransactionException("in.the.future", defaultUserMessage, "transactionDate", transactionDate);
+        }
+
+        if (isNotAllowedToWithdraw(amount)) {
+            //
+            throw new InsufficientAccountBalanceException("transactionAmount", getAccountBalance(), transactionAmount);
+        }
+
+        final SavingsAccountTransaction transaction = SavingsAccountTransaction.withdrawal(this, transactionDate, amount);
+        this.transactions.add(transaction);
+
+        this.summary.updateSummary(this.currency, this.savingsAccountTransactionSummaryWrapper, this.transactions);
+
+        return transaction;
+    }
+
+    private boolean isTransactionInTheFuture(final LocalDate transactionDate) {
+        return transactionDate.isAfter(DateUtils.getLocalDateOfTenant());
+    }
+
+    private BigDecimal getAccountBalance() {
+        return this.summary.getAccountBalance(this.currency).getAmount();
+    }
+
+    private boolean isNotAllowedToWithdraw(final Money amount) {
+        return this.summary.isLessThanOrEqualToAccountBalance(amount);
     }
 
     public void update(final JsonCommand command, final Map<String, Object> actualChanges) {

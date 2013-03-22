@@ -15,7 +15,7 @@ public abstract class AbstractPlatformDomainRuleException extends RuntimeExcepti
     private final String defaultUserMessage;
     private final Object[] defaultUserMessageArgs;
 
-    public AbstractPlatformDomainRuleException(String globalisationMessageCode, String defaultUserMessage, Object... defaultUserMessageArgs) {
+    public AbstractPlatformDomainRuleException(final String globalisationMessageCode, final String defaultUserMessage, final Object... defaultUserMessageArgs) {
         this.globalisationMessageCode = globalisationMessageCode;
         this.defaultUserMessage = defaultUserMessage;
         this.defaultUserMessageArgs = defaultUserMessageArgs;

@@ -10,8 +10,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 
+import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
@@ -21,6 +23,9 @@ import org.mifosplatform.portfolio.group.data.GroupData;
 import org.mifosplatform.portfolio.group.service.GroupReadPlatformService;
 import org.mifosplatform.portfolio.loanproduct.domain.PeriodFrequencyType;
 import org.mifosplatform.portfolio.savings.data.SavingsAccountData;
+import org.mifosplatform.portfolio.savings.data.SavingsAccountSummaryData;
+import org.mifosplatform.portfolio.savings.data.SavingsAccountTransactionData;
+import org.mifosplatform.portfolio.savings.data.SavingsAccountTransactionEnumData;
 import org.mifosplatform.portfolio.savings.data.SavingsProductData;
 import org.mifosplatform.portfolio.savings.exception.SavingsAccountNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +43,8 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
     private final GroupReadPlatformService groupReadPlatformService;
     private final SavingsProductReadPlatformService savingsProductReadPlatformService;
     private final SavingsDropdownReadPlatformService dropdownReadPlatformService;
+    private final SavingsAccountTransactionTemplateMapper transactionTemplateMapper;
+    private final SavingsAccountTransactionsMapper transactionsMapper;
 
     @Autowired
     public SavingsAccountReadPlatformServiceImpl(final PlatformSecurityContext context, final TenantAwareRoutingDataSource dataSource,
@@ -50,6 +57,8 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
         this.groupReadPlatformService = groupReadPlatformService;
         this.savingsProductReadPlatformService = savingProductReadPlatformService;
         this.dropdownReadPlatformService = dropdownReadPlatformService;
+        transactionTemplateMapper = new SavingsAccountTransactionTemplateMapper();
+        transactionsMapper = new SavingsAccountTransactionsMapper();
     }
 
     @Override
@@ -59,7 +68,6 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
         final SavingAccountMapper mapper = new SavingAccountMapper();
         final String sql = "select " + mapper.schema();
         return this.jdbcTemplate.query(sql, mapper, new Object[] {});
-
     }
 
     @Override
@@ -88,14 +96,18 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             sqlBuilder.append("g.id as groupId, g.name as groupName, ");
             sqlBuilder.append("sp.id as productId, sp.name as productName, ");
             sqlBuilder.append("sa.currency_code as currencyCode, sa.currency_digits as currencyDigits, ");
-            sqlBuilder
-                    .append("curr.name as currencyName, curr.internationalized_name_code as currencyNameCode, curr.display_symbol as currencyDisplaySymbol, ");
-            sqlBuilder
-                    .append("sa.nominal_interest_rate_per_period as interestRate, sa.nominal_interest_rate_period_frequency_enum as interestRatePeriodFrequencyType, ");
+            sqlBuilder.append("curr.name as currencyName, curr.internationalized_name_code as currencyNameCode, ");
+            sqlBuilder.append("curr.display_symbol as currencyDisplaySymbol, ");
+            sqlBuilder.append("sa.nominal_interest_rate_per_period as interestRate, ");
+            sqlBuilder.append("sa.nominal_interest_rate_period_frequency_enum as interestRatePeriodFrequencyType, ");
             sqlBuilder.append("sa.annual_nominal_interest_rate as annualInterestRate, ");
             sqlBuilder.append("sa.min_required_opening_balance as minRequiredOpeningBalance, ");
-            sqlBuilder
-                    .append("sa.lockin_period_frequency as lockinPeriodFrequency, sa.lockin_period_frequency_enum as lockinPeriodFrequencyType ");
+            sqlBuilder.append("sa.lockin_period_frequency as lockinPeriodFrequency,");
+            sqlBuilder.append("sa.lockin_period_frequency_enum as lockinPeriodFrequencyType, ");
+            sqlBuilder.append("sa.total_deposits_derived as totalDeposits, ");
+            sqlBuilder.append("sa.total_withdrawals_derived as totalWithdrawals, ");
+            sqlBuilder.append("sa.total_interest_posted_derived as totalInterestPosted, ");
+            sqlBuilder.append("sa.account_balance_derived as accountBalance ");
             sqlBuilder.append("from m_savings_account sa ");
             sqlBuilder.append("left outer join m_client c ON c.id = sa.client_id ");
             sqlBuilder.append("left outer join m_group g ON g.id = sa.group_id ");
@@ -137,7 +149,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
                     .fromInt(JdbcSupport.getInteger(rs, "interestRatePeriodFrequencyType")));
             final BigDecimal annualInterestRate = rs.getBigDecimal("annualInterestRate");
 
-            final BigDecimal minRequiredOpeningBalance = rs.getBigDecimal("minRequiredOpeningBalance");
+            final BigDecimal minRequiredOpeningBalance = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "minRequiredOpeningBalance");
 
             final Integer lockinPeriodFrequency = JdbcSupport.getInteger(rs, "lockinPeriodFrequency");
             EnumOptionData lockinPeriodFrequencyType = null;
@@ -147,9 +159,17 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
                         .fromInt(lockinPeriodFrequencyTypeValue));
             }
 
+            final BigDecimal totalDeposits = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "totalDeposits");
+            final BigDecimal totalWithdrawals = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "totalWithdrawals");
+            final BigDecimal totalInterestPosted = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "totalInterestPosted");
+            final BigDecimal accountBalance = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "accountBalance");
+
+            final SavingsAccountSummaryData summary = new SavingsAccountSummaryData(currency, totalDeposits, totalWithdrawals,
+                    totalInterestPosted, accountBalance);
+
             return SavingsAccountData.instance(id, accountNo, externalId, groupId, groupName, clientId, clientName, productId, productName,
                     currency, interestRate, interestRatePeriodFrequencyType, annualInterestRate, minRequiredOpeningBalance,
-                    lockinPeriodFrequency, lockinPeriodFrequencyType);
+                    lockinPeriodFrequency, lockinPeriodFrequencyType, summary);
         }
     }
 
@@ -181,9 +201,10 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
                     .retrieveInterestRatePeriodFrequencyTypeOptions();
             final Collection<EnumOptionData> lockinPeriodFrequencyTypeOptions = this.dropdownReadPlatformService
                     .retrieveLockinPeriodFrequencyTypeOptions();
+            final Collection<SavingsAccountTransactionData> transactions = null;
 
             template = SavingsAccountData.withTemplateOptions(template, productOptions, interestRatePeriodFrequencyTypeOptions,
-                    lockinPeriodFrequencyTypeOptions);
+                    lockinPeriodFrequencyTypeOptions, transactions);
         } else {
 
             String clientName = null;
@@ -200,11 +221,122 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
 
             final Collection<EnumOptionData> interestRatePeriodFrequencyTypeOptions = null;
             final Collection<EnumOptionData> lockinPeriodFrequencyTypeOptions = null;
+            final Collection<SavingsAccountTransactionData> transactions = null;
+
             template = SavingsAccountData.withTemplateOptions(template, productOptions, interestRatePeriodFrequencyTypeOptions,
-                    lockinPeriodFrequencyTypeOptions);
+                    lockinPeriodFrequencyTypeOptions, transactions);
         }
 
         return template;
+    }
+
+    @Override
+    public SavingsAccountTransactionData retrieveDepositTransactionTemplate(final Long savingsId) {
+
+        try {
+            this.context.authenticatedUser();
+
+            final String sql = "select " + transactionTemplateMapper.schema() + " where sa.id = ?";
+
+            return this.jdbcTemplate.queryForObject(sql, transactionTemplateMapper, new Object[] { savingsId });
+        } catch (EmptyResultDataAccessException e) {
+            throw new SavingsAccountNotFoundException(savingsId);
+        }
+    }
+
+    @Override
+    public Collection<SavingsAccountTransactionData> retrieveAllTransactions(final Long savingsId) {
+
+        final String sql = "select " + this.transactionsMapper.schema() + " where sa.id = ?";
+
+        return this.jdbcTemplate.query(sql, this.transactionsMapper, new Object[] { savingsId });
+    }
+
+    private static final class SavingsAccountTransactionsMapper implements RowMapper<SavingsAccountTransactionData> {
+
+        private final String schemaSql;
+
+        public SavingsAccountTransactionsMapper() {
+
+            final StringBuilder sqlBuilder = new StringBuilder(400);
+            sqlBuilder.append("tr.id as transactionId, tr.transaction_type_enum as transactionType, ");
+            sqlBuilder.append("tr.transaction_date as transactionDate, tr.amount as transactionAmount,");
+            sqlBuilder.append("sa.id as savingsId, sa.account_no as accountNo, ");
+            sqlBuilder.append("sa.currency_code as currencyCode, sa.currency_digits as currencyDigits, ");
+            sqlBuilder.append("curr.name as currencyName, curr.internationalized_name_code as currencyNameCode, ");
+            sqlBuilder.append("curr.display_symbol as currencyDisplaySymbol ");
+            sqlBuilder.append("from m_savings_account sa ");
+            sqlBuilder.append("join m_savings_account_transaction tr on tr.savings_account_id = sa.id ");
+            sqlBuilder.append("join m_currency curr on curr.code = sa.currency_code ");
+
+            this.schemaSql = sqlBuilder.toString();
+        }
+
+        public String schema() {
+            return this.schemaSql;
+        }
+
+        @Override
+        public SavingsAccountTransactionData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+            final Long id = rs.getLong("transactionId");
+            final int transactionTypeInt = JdbcSupport.getInteger(rs, "transactionType");
+            final SavingsAccountTransactionEnumData transactionType = SavingsEnumerations.transactionType(transactionTypeInt);
+
+            final LocalDate date = JdbcSupport.getLocalDate(rs, "transactionDate");
+            final BigDecimal amount = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "transactionAmount");
+
+            final Long savingsId = rs.getLong("savingsId");
+            final String accountNo = rs.getString("accountNo");
+
+            final String currencyCode = rs.getString("currencyCode");
+            final String currencyName = rs.getString("currencyName");
+            final String currencyNameCode = rs.getString("currencyNameCode");
+            final String currencyDisplaySymbol = rs.getString("currencyDisplaySymbol");
+            final Integer currencyDigits = JdbcSupport.getInteger(rs, "currencyDigits");
+            final CurrencyData currency = new CurrencyData(currencyCode, currencyName, currencyDigits, currencyDisplaySymbol,
+                    currencyNameCode);
+
+            return SavingsAccountTransactionData.create(id, transactionType, savingsId, accountNo, date, currency, amount);
+        }
+    }
+
+    private static final class SavingsAccountTransactionTemplateMapper implements RowMapper<SavingsAccountTransactionData> {
+
+        private final String schemaSql;
+
+        public SavingsAccountTransactionTemplateMapper() {
+            final StringBuilder sqlBuilder = new StringBuilder(400);
+            sqlBuilder.append("sa.id as id, sa.account_no as accountNo, ");
+            sqlBuilder.append("sa.currency_code as currencyCode, sa.currency_digits as currencyDigits, ");
+            sqlBuilder.append("curr.name as currencyName, curr.internationalized_name_code as currencyNameCode, ");
+            sqlBuilder.append("curr.display_symbol as currencyDisplaySymbol, ");
+            sqlBuilder.append("sa.min_required_opening_balance as minRequiredOpeningBalance ");
+            sqlBuilder.append("from m_savings_account sa ");
+            sqlBuilder.append("join m_currency curr on curr.code = sa.currency_code ");
+
+            this.schemaSql = sqlBuilder.toString();
+        }
+
+        public String schema() {
+            return this.schemaSql;
+        }
+
+        @Override
+        public SavingsAccountTransactionData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+
+            final Long savingsId = rs.getLong("id");
+            final String accountNo = rs.getString("accountNo");
+
+            final String currencyCode = rs.getString("currencyCode");
+            final String currencyName = rs.getString("currencyName");
+            final String currencyNameCode = rs.getString("currencyNameCode");
+            final String currencyDisplaySymbol = rs.getString("currencyDisplaySymbol");
+            final Integer currencyDigits = JdbcSupport.getInteger(rs, "currencyDigits");
+            final CurrencyData currency = new CurrencyData(currencyCode, currencyName, currencyDigits, currencyDisplaySymbol,
+                    currencyNameCode);
+
+            return SavingsAccountTransactionData.template(savingsId, accountNo, DateUtils.getLocalDateOfTenant(), currency);
+        }
     }
 
     private static final class SavingAccountTemplateMapper implements RowMapper<SavingsAccountData> {
@@ -257,7 +389,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
                     .fromInt(JdbcSupport.getInteger(rs, "interestRatePeriodFrequencyType")));
             final BigDecimal annualInterestRate = null;
 
-            final BigDecimal minRequiredOpeningBalance = rs.getBigDecimal("minRequiredOpeningBalance");
+            final BigDecimal minRequiredOpeningBalance = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "minRequiredOpeningBalance");
 
             final Integer lockinPeriodFrequency = JdbcSupport.getInteger(rs, "lockinPeriodFrequency");
             EnumOptionData lockinPeriodFrequencyType = null;
@@ -281,9 +413,10 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
                 groupName = group.getName();
             }
 
+            final SavingsAccountSummaryData summary = null;
             return SavingsAccountData.instance(null, null, null, groupId, groupName, clientId, clientName, productId, productName,
                     currency, interestRate, interestRatePeriodFrequencyType, annualInterestRate, minRequiredOpeningBalance,
-                    lockinPeriodFrequency, lockinPeriodFrequencyType);
+                    lockinPeriodFrequency, lockinPeriodFrequencyType, summary);
         }
     }
 }

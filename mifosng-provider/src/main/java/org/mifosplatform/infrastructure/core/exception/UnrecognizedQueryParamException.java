@@ -10,7 +10,7 @@ public class UnrecognizedQueryParamException extends RuntimeException {
     private final String queryParamKey;
     private final String queryParamValue;
 
-    public UnrecognizedQueryParamException(String queryParamKey, String queryParamValue) {
+    public UnrecognizedQueryParamException(final String queryParamKey, final String queryParamValue) {
         this.queryParamKey = queryParamKey;
         this.queryParamValue = queryParamValue;
     }

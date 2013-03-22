@@ -8,12 +8,17 @@ package org.mifosplatform.portfolio.savings.service;
 import java.util.Collection;
 
 import org.mifosplatform.portfolio.savings.data.SavingsAccountData;
+import org.mifosplatform.portfolio.savings.data.SavingsAccountTransactionData;
 
 public interface SavingsAccountReadPlatformService {
 
     Collection<SavingsAccountData> retrieveAll();
 
-    SavingsAccountData retrieveOne(Long accountId);
+    SavingsAccountData retrieveOne(Long savingsId);
 
     SavingsAccountData retrieveTemplate(Long clientId, Long groupId, Long productId);
+
+    SavingsAccountTransactionData retrieveDepositTransactionTemplate(Long savingsId);
+
+    Collection<SavingsAccountTransactionData> retrieveAllTransactions(Long savingsId);
 }

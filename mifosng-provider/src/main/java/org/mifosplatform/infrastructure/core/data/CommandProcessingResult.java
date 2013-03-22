@@ -19,6 +19,7 @@ public class CommandProcessingResult {
     private final Long groupId;
     private final Long clientId;
     private final Long loanId;
+    private final Long savingsId;
     private final Long resourceId;
     private final String transactionId;
     private final Map<String, Object> changes;
@@ -26,10 +27,10 @@ public class CommandProcessingResult {
     private final String resourceIdentifier;
 
     public static CommandProcessingResult fromDetails(final Long commandId, final Long officeId, final Long groupId, final Long clientId,
-            final Long loanId, final String resourceIdentifier, final Long entityId, final String transactionId,
+            final Long loanId, final Long savingsId, final String resourceIdentifier, final Long entityId, final String transactionId,
             final Map<String, Object> changes) {
-        return new CommandProcessingResult(commandId, officeId, groupId, clientId, loanId, resourceIdentifier, entityId, transactionId,
-                changes);
+        return new CommandProcessingResult(commandId, officeId, groupId, clientId, loanId, savingsId, resourceIdentifier, entityId,
+                transactionId, changes);
     }
 
     public static CommandProcessingResult commandOnlyResult(final Long commandId) {
@@ -75,17 +76,20 @@ public class CommandProcessingResult {
         this.groupId = null;
         this.clientId = null;
         this.loanId = null;
+        this.savingsId = null;
         this.transactionId = null;
         this.changes = new HashMap<String, Object>();
     }
 
     private CommandProcessingResult(final Long commandId, final Long officeId, final Long groupId, final Long clientId, final Long loanId,
-            final String resourceIdentifier, final Long resourceId, final String transactionId, final Map<String, Object> changesOnly) {
+            final Long savingsId, final String resourceIdentifier, final Long resourceId, final String transactionId,
+            final Map<String, Object> changesOnly) {
         this.commandId = commandId;
         this.officeId = officeId;
         this.groupId = groupId;
         this.clientId = clientId;
         this.loanId = loanId;
+        this.savingsId = savingsId;
         this.resourceIdentifier = resourceIdentifier;
         this.resourceId = resourceId;
         this.changes = changesOnly;
@@ -103,6 +107,7 @@ public class CommandProcessingResult {
         this.groupId = null;
         this.clientId = null;
         this.loanId = null;
+        this.savingsId = null;
         this.transactionId = null;
         this.commandId = commandId;
         this.changes = changesOnly;
@@ -134,6 +139,10 @@ public class CommandProcessingResult {
 
     public Long getLoanId() {
         return this.loanId;
+    }
+
+    public Long getSavingsId() {
+        return this.savingsId;
     }
 
     public String getTransactionId() {

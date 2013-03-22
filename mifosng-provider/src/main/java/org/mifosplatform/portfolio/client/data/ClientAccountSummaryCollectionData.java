@@ -114,19 +114,6 @@ public class ClientAccountSummaryCollectionData {
 
         this.anyLoanCount = countOf(this.pendingApprovalLoanCount, this.awaitingDisbursalLoanCount, this.activeLoanCount,
                 this.closedLoanCount);
-        //
-        // , this.pendingApprovalDepositAccountsCount,
-        // this.approvedDepositAccountsCount
-        // , this.withdrawnByClientDepositAccountsCount,
-        // this.closedDepositAccountsCount, this.rejectedDepositAccountsCount
-        // , this.preclosedDepositAccountsCount,
-        // this.maturedDepositAccountsCount,
-        // this.pendingApprovalSavingAccountsCount
-        // , this.approvedSavingAccountsCount,
-        // this.withdrawnByClientSavingAccountsCount,
-        // this.rejectedSavingAccountsCount
-        // , this.closedSavingAccountsCount);
-
     }
 
     private Integer countOf(final Integer... objects) {
