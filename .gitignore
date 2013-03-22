@@ -17,3 +17,4 @@ repos
 *.iws
 rebel.xml
 *.sublime-workspace
+*.DS_Store
