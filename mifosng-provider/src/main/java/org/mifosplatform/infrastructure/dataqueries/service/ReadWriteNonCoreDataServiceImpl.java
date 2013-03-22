@@ -257,6 +257,8 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
 
             if (StringUtils.isNotBlank(updateOneToOneDatatableSql)) {
                 this.jdbcTemplate.update(updateOneToOneDatatableSql);
+                changes.put("locale", dataParams.get("locale"));
+                changes.put("dateFormat", "yyyy-MM-dd");
             }
         }
 
@@ -283,6 +285,8 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
 
         if (StringUtils.isNotBlank(sql)) {
             this.jdbcTemplate.update(sql);
+            changes.put("locale", dataParams.get("locale"));
+            changes.put("dateFormat", "yyyy-MM-dd");
         } else {
             logger.info("No Changes");
         }
@@ -532,7 +536,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
                 affectedAndChangedColumns.put(key, columnValue);
             }
         }
-
+        
         return affectedAndChangedColumns;
     }
 
