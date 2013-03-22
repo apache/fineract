@@ -211,8 +211,8 @@ public class AccountingProcessorHelper {
             final Long loanProductId, final Long loanId, final String transactionId, final Date transactionDate, final BigDecimal amount) {
         GLAccount debitAccount = getLinkedGLAccountForLoanProduct(loanProductId, accountTypeToDebitId);
         GLAccount creditAccount = getLinkedGLAccountForLoanProduct(loanProductId, accountTypeToCreditId);
-        createCreditJournalEntryForLoan(office, debitAccount, loanId, transactionId, transactionDate, amount);
-        createDebitJournalEntryForLoan(office, creditAccount, loanId, transactionId, transactionDate, amount);
+        createDebitJournalEntryForLoan(office, debitAccount, loanId, transactionId, transactionDate, amount);
+        createCreditJournalEntryForLoan(office, creditAccount, loanId, transactionId, transactionDate, amount);
     }
 
     private void createDebitJournalEntryOrReversalForLoan(final Office office, final int accountMappingTypeId, final Long loanProductId,
