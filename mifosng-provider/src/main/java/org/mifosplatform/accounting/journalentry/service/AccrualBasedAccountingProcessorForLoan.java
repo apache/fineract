@@ -45,13 +45,14 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
              ***/
             else if (loanTransactionDTO.getTransactionType().isRepayment()
                     || loanTransactionDTO.getTransactionType().isRepaymentAtDisbursement()) {
-                createJournalEntriesForRepaymentsAndWriteOffs(loanDTO, loanTransactionDTO, office, false);
+                createJournalEntriesForRepaymentsAndWriteOffs(loanDTO, loanTransactionDTO, office, false, loanTransactionDTO
+                        .getTransactionType().isRepaymentAtDisbursement());
             }
 
-            /** Handle Write Offs, waivers and thier reversals **/
+            /** Handle Write Offs, waivers and their reversals **/
             else if ((loanTransactionDTO.getTransactionType().isWriteOff() || loanTransactionDTO.getTransactionType().isWaiveInterest() || loanTransactionDTO
                     .getTransactionType().isWaiveCharges())) {
-                createJournalEntriesForRepaymentsAndWriteOffs(loanDTO, loanTransactionDTO, office, true);
+                createJournalEntriesForRepaymentsAndWriteOffs(loanDTO, loanTransactionDTO, office, true, false);
             }
         }
     }
@@ -104,8 +105,8 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
      * <b>Interest Repayment</b>:Debits "Fund Source" and and Credits
      * "Receivable Interest" <br/>
      * 
-     * <b>Fee Write Repayment</b>:Debits "Fund Source" and and Credits
-     * "Receivable Fees" <br/>
+     * <b>Fee Repayment</b>:Debits "Fund Source" (or "Interest on Loans" in case
+     * of repayment at disbursement) and and Credits "Receivable Fees" <br/>
      * 
      * <b>Penalty Repayment</b>: Debits "Fund Source" and and Credits
      * "Receivable Penalties" <br/>
@@ -134,7 +135,7 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
      * 
      */
     private void createJournalEntriesForRepaymentsAndWriteOffs(final LoanDTO loanDTO, final LoanTransactionDTO loanTransactionDTO,
-            final Office office, final boolean writeOff) {
+            final Office office, final boolean writeOff, final boolean repaymentAtDisbursement) {
         // loan properties
         final Long loanProductId = loanDTO.getLoanProductId();
         final Long loanId = loanDTO.getLoanId();
@@ -167,8 +168,15 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
         // handle fees payment of writeOff (and reversals)
         if (feesAmount != null && !(feesAmount.compareTo(BigDecimal.ZERO) == 0)) {
             totalDebitAmount = totalDebitAmount.add(feesAmount);
-            helper.createCreditJournalEntryOrReversalForLoan(office, ACCRUAL_ACCOUNTS_FOR_LOAN.FEES_RECEIVABLE, loanProductId, loanId,
-                    transactionId, transactionDate, feesAmount, isReversal);
+
+            ACCRUAL_ACCOUNTS_FOR_LOAN feeAccountToCredit = ACCRUAL_ACCOUNTS_FOR_LOAN.FEES_RECEIVABLE;
+
+            if (repaymentAtDisbursement) {
+                feeAccountToCredit = ACCRUAL_ACCOUNTS_FOR_LOAN.INCOME_FROM_FEES;
+            }
+
+            helper.createCreditJournalEntryOrReversalForLoan(office, feeAccountToCredit, loanProductId, loanId, transactionId,
+                    transactionDate, feesAmount, isReversal);
         }
 
         // handle penalties payment of writeOff (and reversals)
@@ -222,8 +230,9 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
 
         // create journal entries for the fees application (or reversal)
         if (feesAmount != null && !(feesAmount.compareTo(BigDecimal.ZERO) == 0)) {
-            helper.createAccrualBasedJournalEntriesAndReversalsForLoan(office, ACCRUAL_ACCOUNTS_FOR_LOAN.LOAN_PORTFOLIO,
-                    ACCRUAL_ACCOUNTS_FOR_LOAN.FUND_SOURCE, loanProductId, loanId, transactionId, transactionDate, feesAmount, isReversed);
+            helper.createAccrualBasedJournalEntriesAndReversalsForLoan(office, ACCRUAL_ACCOUNTS_FOR_LOAN.FEES_RECEIVABLE,
+                    ACCRUAL_ACCOUNTS_FOR_LOAN.INCOME_FROM_FEES, loanProductId, loanId, transactionId, transactionDate, feesAmount,
+                    isReversed);
         }
         // create journal entries for the penalties application (or reversal)
         else if (penaltiesAmount != null && !(penaltiesAmount.compareTo(BigDecimal.ZERO) == 0)) {

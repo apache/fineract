@@ -19,16 +19,8 @@ public class ChangedTransactionDetail {
         return this.newTransactions;
     }
 
-    public void setNewTransactions(List<LoanTransaction> newTransactions) {
-        this.newTransactions = newTransactions;
-    }
-
     public List<LoanTransaction> getReversedTransactions() {
         return this.reversedTransactions;
-    }
-
-    public void setReversedTransactions(List<LoanTransaction> reversedTransactions) {
-        this.reversedTransactions = reversedTransactions;
     }
 
 }
