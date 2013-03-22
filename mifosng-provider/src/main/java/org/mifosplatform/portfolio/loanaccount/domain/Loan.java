@@ -418,6 +418,7 @@ public class Loan extends AbstractPersistable<Long> {
             for (LoanTransaction transaction : changedTransactionDetail.getNewTransactions()) {
                 transaction.updateLoan(this);
             }
+            this.loanTransactions.addAll(changedTransactionDetail.getNewTransactions());
         } else {
             // just reprocess the loan schedule only for now.
             LoanRepaymentScheduleProcessingWrapper wrapper = new LoanRepaymentScheduleProcessingWrapper();
@@ -1500,6 +1501,7 @@ public class Loan extends AbstractPersistable<Long> {
             for (LoanTransaction newLoanTransaction : changedTransactionDetail.getNewTransactions()) {
                 newLoanTransaction.updateLoan(this);
             }
+            this.loanTransactions.addAll(changedTransactionDetail.getNewTransactions());
         }
 
         updateLoanSummaryDerivedFields();
