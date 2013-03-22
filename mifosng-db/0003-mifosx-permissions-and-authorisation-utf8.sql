@@ -117,13 +117,6 @@ INSERT INTO `m_permission`
 ('organisation', 'UPDATE_SAVINGSPRODUCT_CHECKER', 'SAVINGSPRODUCT', 'UPDATE', '0'),
 ('organisation', 'DELETE_SAVINGSPRODUCT', 'SAVINGSPRODUCT', 'DELETE', '1'),
 ('organisation', 'DELETE_SAVINGSPRODUCT_CHECKER', 'SAVINGSPRODUCT', 'DELETE', '0'),
-('organisation', 'READ_DEPOSITPRODUCT', 'DEPOSITPRODUCT', 'READ', '0'),
-('organisation', 'CREATE_DEPOSITPRODUCT', 'DEPOSITPRODUCT', 'CREATE', '1'),
-('organisation', 'CREATE_DEPOSITPRODUCT_CHECKER', 'DEPOSITPRODUCT', 'CREATE', '0'),
-('organisation', 'UPDATE_DEPOSITPRODUCT', 'DEPOSITPRODUCT', 'UPDATE', '1'),
-('organisation', 'UPDATE_DEPOSITPRODUCT_CHECKER', 'DEPOSITPRODUCT', 'UPDATE', '0'),
-('organisation', 'DELETE_DEPOSITPRODUCT', 'DEPOSITPRODUCT', 'DELETE', '1'),
-('organisation', 'DELETE_DEPOSITPRODUCT_CHECKER', 'DEPOSITPRODUCT', 'DELETE', '0'),
 ('portfolio', 'READ_LOAN', 'LOAN', 'READ', '0'),
 ('portfolio', 'CREATE_LOAN', 'LOAN', 'CREATE', '1'),
 ('portfolio', 'CREATE_LOAN_CHECKER', 'LOAN', 'CREATE', '0'),
@@ -175,13 +168,6 @@ INSERT INTO `m_permission`
 ('portfolio', 'CREATE_LOANTRANSACTIONNOTE_CHECKER', 'LOANTRANSACTIONNOTE', 'CREATE', '0'),
 ('portfolio', 'UPDATE_LOANTRANSACTIONNOTE_CHECKER', 'LOANTRANSACTIONNOTE', 'UPDATE', '0'),
 ('portfolio', 'DELETE_LOANTRANSACTIONNOTE_CHECKER', 'LOANTRANSACTIONNOTE', 'DELETE', '0'),
-('portfolio', 'READ_DEPOSITNOTE', 'DEPOSITNOTE', 'READ', '0'),
-('portfolio', 'CREATE_DEPOSITNOTE', 'DEPOSITNOTE', 'CREATE', '1'),
-('portfolio', 'UPDATE_DEPOSITNOTE', 'DEPOSITNOTE', 'UPDATE', '1'),
-('portfolio', 'DELETE_DEPOSITNOTE', 'DEPOSITNOTE', 'DELETE', '1'),
-('portfolio', 'CREATE_DEPOSITNOTE_CHECKER', 'DEPOSITNOTE', 'CREATE', '0'),
-('portfolio', 'UPDATE_DEPOSITNOTE_CHECKER', 'DEPOSITNOTE', 'UPDATE', '0'),
-('portfolio', 'DELETE_DEPOSITNOTE_CHECKER', 'DEPOSITNOTE', 'DELETE', '0'),
 ('portfolio', 'READ_SAVINGNOTE', 'SAVINGNOTE', 'READ', '0'),
 ('portfolio', 'CREATE_SAVINGNOTE', 'SAVINGNOTE', 'CREATE', '1'),
 ('portfolio', 'UPDATE_SAVINGNOTE', 'SAVINGNOTE', 'UPDATE', '1'),
@@ -220,13 +206,6 @@ INSERT INTO `m_permission`
 ('portfolio', 'DELETE_LOANCHARGE_CHECKER', 'LOANCHARGE', 'DELETE', '0'),
 ('portfolio', 'WAIVE_LOANCHARGE', 'LOANCHARGE', 'WAIVE', '1'),
 ('portfolio', 'WAIVE_LOANCHARGE_CHECKER', 'LOANCHARGE', 'WAIVE', '0'),
-('portfolio', 'READ_DEPOSITACCOUNT', 'DEPOSITACCOUNT', 'READ', '0'),
-('portfolio', 'CREATE_DEPOSITACCOUNT', 'DEPOSITACCOUNT', 'CREATE', '1'),
-('portfolio', 'CREATE_DEPOSITACCOUNT_CHECKER', 'DEPOSITACCOUNT', 'CREATE', '0'),
-('portfolio', 'UPDATE_DEPOSITACCOUNT', 'DEPOSITACCOUNT', 'UPDATE', '1'),
-('portfolio', 'UPDATE_DEPOSITACCOUNT_CHECKER', 'DEPOSITACCOUNT', 'UPDATE', '0'),
-('portfolio', 'DELETE_DEPOSITACCOUNT', 'DEPOSITACCOUNT', 'DELETE', '1'),
-('portfolio', 'DELETE_DEPOSITACCOUNT_CHECKER', 'DEPOSITACCOUNT', 'DELETE', '0'),
 ('portfolio', 'READ_SAVINGSACCOUNT', 'SAVINGSACCOUNT', 'READ', '0'),
 ('portfolio', 'CREATE_SAVINGSACCOUNT', 'SAVINGSACCOUNT', 'CREATE', '1'),
 ('portfolio', 'CREATE_SAVINGSACCOUNT_CHECKER', 'SAVINGSACCOUNT', 'CREATE', '0'),
@@ -281,20 +260,10 @@ INSERT INTO `m_permission`
 ('transaction_loan', 'WRITEOFF_LOAN_CHECKER', 'LOAN', 'WRITEOFF', '0'),
 ('transaction_loan', 'CLOSE_LOAN_CHECKER', 'LOAN', 'CLOSE', '0'),
 ('transaction_loan', 'CLOSEASRESCHEDULED_LOAN_CHECKER', 'LOAN', 'CLOSEASRESCHEDULED', '0'),
-('transaction_deposit', 'APPROVE_DEPOSITACCOUNT', 'DEPOSITACCOUNT', 'APPROVE', '1'),
-('transaction_deposit', 'REJECT_DEPOSITACCOUNT', 'DEPOSITACCOUNT', 'REJECT', '1'),
-('transaction_deposit', 'WITHDRAW_DEPOSITACCOUNT', 'DEPOSITACCOUNT', 'WITHDRAW', '1'),
-('transaction_deposit', 'APPROVALUNDO_DEPOSITACCOUNT', 'DEPOSITACCOUNT', 'APPROVALUNDO', '1'),
-('transaction_deposit', 'WITHDRAWAL_DEPOSITACCOUNT', 'DEPOSITACCOUNT', 'WITHDRAWAL', '1'),
-('transaction_deposit', 'INTEREST_DEPOSITACCOUNT', 'DEPOSITACCOUNT', 'INTEREST', '1'),
-('transaction_deposit', 'RENEW_DEPOSITACCOUNT', 'DEPOSITACCOUNT', 'RENEW', '1'),
-('transaction_deposit', 'APPROVE_DEPOSITACCOUNT_CHECKER', 'DEPOSITACCOUNT', 'APPROVE', '0'),
-('transaction_deposit', 'REJECT_DEPOSITACCOUNT_CHECKER', 'DEPOSITACCOUNT', 'REJECT', '0'),
-('transaction_deposit', 'WITHDRAW_DEPOSITACCOUNT_CHECKER', 'DEPOSITACCOUNT', 'WITHDRAW', '0'),
-('transaction_deposit', 'APPROVALUNDO_DEPOSITACCOUNT_CHECKER', 'DEPOSITACCOUNT', 'APPROVALUNDO', '0'),
-('transaction_deposit', 'WITHDRAWAL_DEPOSITACCOUNT_CHECKER', 'DEPOSITACCOUNT', 'WITHDRAWAL', '0'),
-('transaction_deposit', 'INTEREST_DEPOSITACCOUNT_CHECKER', 'DEPOSITACCOUNT', 'INTEREST', '0'),
-('transaction_deposit', 'RENEW_DEPOSITACCOUNT_CHECKER', 'DEPOSITACCOUNT', 'RENEW', '0');
+('transaction_savings', 'DEPOSIT_SAVINGSACCOUNT', 'SAVINGSACCOUNT', 'DEPOSIT', '1'),
+('transaction_savings', 'DEPOSIT_SAVINGSACCOUNT_CHECKER', 'SAVINGSACCOUNT', 'DEPOSIT', '0'),
+('transaction_savings', 'WITHDRAWAL_SAVINGSACCOUNT', 'SAVINGSACCOUNT', 'WITHDRAWAL', '1'),
+('transaction_savings', 'WITHDRAWAL_SAVINGSACCOUNT_CHECKER', 'SAVINGSACCOUNT', 'WITHDRAWAL', '0');
 
 -- == accounting related permissions
 INSERT INTO `m_permission` (`grouping`, `code`, `entity_name`, `action_name`, `can_maker_checker`) VALUES 
@@ -327,8 +296,6 @@ VALUES
 INSERT INTO `m_appuser_role` (`appuser_id`, `role_id`) VALUES (1,1);
 
 
-
-
 -- Add in permissions for any special datatables added in base reference data
 -- This needs to always happen at end of the script
 
@@ -353,6 +320,4 @@ from x_registered_table r;
 /* regardless of inserted permission settings above, no permissions (transactions) are preselected as being part of the maker-checker process
 so, just set the flag to false... the end-user can decide which permissions should be maker-checkerable
 */
-update m_permission
-set can_maker_checker = false;
-
+update m_permission set can_maker_checker = false;
