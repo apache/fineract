@@ -160,7 +160,8 @@ dependencies {
  	        
  	 testCompile 'junit:junit:4.10', 
                  'org.mockito:mockito-all:1.9.0',
-                 'org.hamcrest:hamcrest-all:1.1'
+                 'org.hamcrest:hamcrest-all:1.1',
+                 'com.jayway.restassured:rest-assured:1.7.2'
  	 
 }
 
@@ -209,6 +210,24 @@ tomcatRunWar {
     enableSSL = true
     configFile = file('src/test/resources/META-INF/context.xml')
 }
+
+
+sourceSets {
+    integrationTest {
+    }
+}
+
+configurations {
+    integrationTestCompile.extendsFrom testCompile
+    integrationTestRuntime.extendsFrom testRuntime
+}
+
+task integrationTest(type:Test){
+    description = "Run integration tests (located in src/integrationTest/java). Requires server to be running."
+    testClassesDir = project.sourceSets.integrationTest.output.classesDir
+    classpath = project.sourceSets.integrationTest.runtimeClasspath
+}
+
 
 /*
 * Support publication of artifacts versioned by topic branch.
