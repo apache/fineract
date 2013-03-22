@@ -7391,13 +7391,12 @@ Request Body:
 	        <code class="method-response">
 {
   "id": 1,
-  "accountNo": "SA000023",
-  "externalId": "SYS-23",
+  "accountNo": "000000002",
   "groupId": 0,
   "clientId": 1,
-  "clientName": "Client A AB",
+  "clientName": "Test b Client",
   "savingsProductId": 1,
-  "savingsProductName": "First",
+  "savingsProductName": "individual savings",
   "currency": {
     "code": "USD",
     "name": "US Dollar",
@@ -7406,19 +7405,25 @@ Request Body:
     "nameCode": "currency.USD",
     "displayLabel": "US Dollar ($)"
   },
-  "interestRate": 5.65,
+  "interestRate": 9.8,
   "interestRatePeriodFrequencyType": {
-    "id": 2,
-    "code": "savings.interest.rate.periodFrequencyType.months",
-    "value": "Per month"
+    "id": 3,
+    "code": "savings.interest.rate.periodFrequencyType.years",
+    "value": "Per year"
   },
-  "annualInterestRate": 67.8,
-  "minRequiredOpeningBalance": 1000,
-  "lockinPeriodFrequency": 6,
-  "lockinPeriodFrequencyType": {
-    "id": 2,
-    "code": "savings.interest.rate.periodFrequencyType.months",
-    "value": "Per month"
+  "annualInterestRate": 9.8,
+  "summary": {
+    "currency": {
+      "code": "USD",
+      "name": "US Dollar",
+      "decimalPlaces": 2,
+      "displaySymbol": "$",
+      "nameCode": "currency.USD",
+      "displayLabel": "US Dollar ($)"
+    },
+    "totalDeposits": 456.67,
+    "totalWithdrawals": 173,
+    "accountBalance": 283.67
   }
 }
 	        </code>

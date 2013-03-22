@@ -16,7 +16,7 @@ public class SavingsApiConstants {
     // general
     public static final String localeParamName = "locale";
     public static final String dateFormatParamName = "dateFormat";
-    
+
     // savings product and account parameters
     public static final String idParamName = "id";
     public static final String accountNoParamName = "accountNo";
@@ -37,7 +37,7 @@ public class SavingsApiConstants {
     // transaction parameters
     public static final String transactionDateParamName = "transactionDate";
     public static final String transactionAmountParamName = "transactionAmount";
-    
+
     public static final Set<String> SAVINGS_PRODUCT_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(localeParamName,
             nameParamName, descriptionParamName, currencyCodeParamName, digitsAfterDecimalParamName, interestRateParamName,
             interestRatePeriodFrequencyTypeParamName, minRequiredOpeningBalanceParamName, lockinPeriodFrequencyParamName,
@@ -67,8 +67,8 @@ public class SavingsApiConstants {
     public static final Set<String> SAVINGS_ACCOUNT_RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(idParamName,
             accountNoParamName, externalIdParamName, clientIdParamName, "clientName", groupIdParamName, "groupName", "savingsProductId",
             "savingsProductName", "currency", interestRateParamName, interestRatePeriodFrequencyTypeParamName, "annualInterestRate",
-            minRequiredOpeningBalanceParamName, lockinPeriodFrequencyParamName, lockinPeriodFrequencyTypeParamName, "productOptions",
-            "interestRatePeriodFrequencyTypeOptions", "lockinPeriodFrequencyTypeOptions"));
+            minRequiredOpeningBalanceParamName, lockinPeriodFrequencyParamName, lockinPeriodFrequencyTypeParamName, "summary",
+            "transactions", "productOptions", "interestRatePeriodFrequencyTypeOptions", "lockinPeriodFrequencyTypeOptions"));
 
     public static final Set<String> SAVINGS_ACCOUNT_TRANSACTION_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(
             localeParamName, dateFormatParamName, transactionDateParamName, transactionAmountParamName));
