@@ -552,7 +552,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final List<Long> existingReversedTransactionIds = new ArrayList<Long>();
         this.loanChargeRepository.save(loanCharge);
 
-        final LoanTransaction applyLoanChargeTransaction = loan.getChargeAppliedTransaction(loanCharge, null);
+        final LoanTransaction applyLoanChargeTransaction = loan.handleChargeAppliedTransaction(loanCharge, null);
         final ChangedTransactionDetail changedTransactionDetail = loan.addLoanCharge(loanCharge, existingTransactionIds,
                 existingReversedTransactionIds);
 

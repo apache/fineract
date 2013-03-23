@@ -77,6 +77,7 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
         final String transactionId = loanTransactionDTO.getTransactionId();
         final Date transactionDate = loanTransactionDTO.getTransactionDate();
         final BigDecimal disbursalAmount = loanTransactionDTO.getAmount();
+        final BigDecimal interestAmount = loanDTO.getCalculatedInterest();
         final boolean isReversed = loanTransactionDTO.isReversed();
 
         // create journal entries for the disbursement (or disbursement
@@ -88,7 +89,7 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
         BigDecimal interestApplied = loanDTO.getCalculatedInterest();
         if (interestApplied != null && !(interestApplied.compareTo(BigDecimal.ZERO) == 0)) {
             helper.createAccrualBasedJournalEntriesAndReversalsForLoan(office, ACCRUAL_ACCOUNTS_FOR_LOAN.INTEREST_RECEIVABLE,
-                    ACCRUAL_ACCOUNTS_FOR_LOAN.INTEREST_ON_LOANS, loanProductId, loanId, transactionId, transactionDate, disbursalAmount,
+                    ACCRUAL_ACCOUNTS_FOR_LOAN.INTEREST_ON_LOANS, loanProductId, loanId, transactionId, transactionDate, interestAmount,
                     isReversed);
         }
     }
@@ -237,8 +238,8 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
         // create journal entries for the penalties application (or reversal)
         else if (penaltiesAmount != null && !(penaltiesAmount.compareTo(BigDecimal.ZERO) == 0)) {
             helper.createAccrualBasedJournalEntriesAndReversalsForLoan(office, ACCRUAL_ACCOUNTS_FOR_LOAN.PENALTIES_RECEIVABLE,
-                    ACCRUAL_ACCOUNTS_FOR_LOAN.INCOME_FROM_PENALTIES, loanProductId, loanId, transactionId, transactionDate, feesAmount,
-                    isReversed);
+                    ACCRUAL_ACCOUNTS_FOR_LOAN.INCOME_FROM_PENALTIES, loanProductId, loanId, transactionId, transactionDate,
+                    penaltiesAmount, isReversed);
         }
     }
 

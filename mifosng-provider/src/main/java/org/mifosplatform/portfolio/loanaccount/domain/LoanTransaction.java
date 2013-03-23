@@ -96,7 +96,6 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
             final Money penaltyCharges) {
         LoanTransaction applyCharge = new LoanTransaction(loan, LoanTransactionType.APPLY_CHARGES, amount.getAmount(), applyDate);
         applyCharge.updateChargesComponents(feeCharges, penaltyCharges);
-
         return applyCharge;
     }
 
