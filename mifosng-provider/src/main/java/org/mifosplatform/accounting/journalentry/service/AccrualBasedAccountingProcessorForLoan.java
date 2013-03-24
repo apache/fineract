@@ -34,6 +34,11 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
                 createJournalEntriesForDisbursements(loanDTO, loanTransactionDTO, office);
             }
 
+            /*** Handle Interest Postings ***/
+            if (loanTransactionDTO.getTransactionType().isApplyInterest()) {
+                createJournalEntriesForInterestPostings(loanDTO, loanTransactionDTO, office);
+            }
+
             /*** Handle Apply charges ***/
             else if (loanTransactionDTO.getTransactionType().isApplyCharges()) {
                 createJournalEntriesForApplyCharges(loanDTO, loanTransactionDTO, office);
@@ -58,9 +63,7 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
     }
 
     /**
-     * Debit loan Portfolio and credit Fund source for Disbursement. Also
-     * recognise the receivable interest (Debit "Interest Receivable" and credit
-     * "Income from Interest")
+     * Debit loan Portfolio and credit Fund source for Disbursement.
      * 
      * @param loanDTO
      * @param loanTransactionDTO
@@ -77,7 +80,6 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
         final String transactionId = loanTransactionDTO.getTransactionId();
         final Date transactionDate = loanTransactionDTO.getTransactionDate();
         final BigDecimal disbursalAmount = loanTransactionDTO.getAmount();
-        final BigDecimal interestAmount = loanDTO.getCalculatedInterest();
         final boolean isReversed = loanTransactionDTO.isReversed();
 
         // create journal entries for the disbursement (or disbursement
@@ -85,12 +87,33 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
         helper.createAccrualBasedJournalEntriesAndReversalsForLoan(office, ACCRUAL_ACCOUNTS_FOR_LOAN.LOAN_PORTFOLIO,
                 ACCRUAL_ACCOUNTS_FOR_LOAN.FUND_SOURCE, loanProductId, loanId, transactionId, transactionDate, disbursalAmount, isReversed);
 
+    }
+
+    /**
+     * Recognise the receivable interest <br/>
+     * Debit "Interest Receivable" and Credit "Income from Interest"
+     * 
+     * @param loanDTO
+     * @param loanTransactionDTO
+     * @param office
+     */
+    private void createJournalEntriesForInterestPostings(final LoanDTO loanDTO, final LoanTransactionDTO loanTransactionDTO,
+            final Office office) {
+
+        // loan properties
+        final Long loanProductId = loanDTO.getLoanProductId();
+        final Long loanId = loanDTO.getLoanId();
+
+        // transaction properties
+        final String transactionId = loanTransactionDTO.getTransactionId();
+        final Date transactionDate = loanTransactionDTO.getTransactionDate();
+        final BigDecimal amount = loanTransactionDTO.getAmount();
+        final boolean isReversed = loanTransactionDTO.isReversed();
+
         // create journal entries for recognising interest (or reversal)
-        BigDecimal interestApplied = loanDTO.getCalculatedInterest();
-        if (interestApplied != null && !(interestApplied.compareTo(BigDecimal.ZERO) == 0)) {
+        if (amount != null && !(amount.compareTo(BigDecimal.ZERO) == 0)) {
             helper.createAccrualBasedJournalEntriesAndReversalsForLoan(office, ACCRUAL_ACCOUNTS_FOR_LOAN.INTEREST_RECEIVABLE,
-                    ACCRUAL_ACCOUNTS_FOR_LOAN.INTEREST_ON_LOANS, loanProductId, loanId, transactionId, transactionDate, interestAmount,
-                    isReversed);
+                    ACCRUAL_ACCOUNTS_FOR_LOAN.INTEREST_ON_LOANS, loanProductId, loanId, transactionId, transactionDate, amount, isReversed);
         }
     }
 

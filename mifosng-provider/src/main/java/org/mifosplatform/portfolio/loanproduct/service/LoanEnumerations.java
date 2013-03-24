@@ -248,6 +248,10 @@ public class LoanEnumerations {
                 optionData = new LoanTransactionEnumData(LoanTransactionType.APPLY_CHARGES.getValue().longValue(),
                         LoanTransactionType.APPLY_CHARGES.getCode(), "Apply Charge");
             break;
+            case APPLY_INTEREST:
+                optionData = new LoanTransactionEnumData(LoanTransactionType.APPLY_INTEREST.getValue().longValue(),
+                        LoanTransactionType.APPLY_INTEREST.getCode(), "Apply Interest");
+            break;
         }
         return optionData;
     }

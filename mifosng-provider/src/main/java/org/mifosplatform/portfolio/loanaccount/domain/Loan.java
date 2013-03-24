@@ -1215,6 +1215,11 @@ public class Loan extends AbstractPersistable<Long> {
     private void disburse(final LocalDate expectedDisbursedOnLocalDate) {
         this.actualDisbursementDate = expectedDisbursedOnLocalDate.toDate();
         updateLoanScheduleDependentDerivedFields();
+        /****
+         * Vishwas TODO: Refactor to skip unnecessary creation of Disbursement
+         * and fees applied transactions (though they are not persisted) on
+         * modifications to loan application modification
+         *****/
         handleDisbursementTransaction(expectedDisbursedOnLocalDate);
     }
 
@@ -1275,6 +1280,17 @@ public class Loan extends AbstractPersistable<Long> {
             } else {
                 updateLoanSummaryDerivedFields();
             }
+
+            /***
+             * Adding a temporary Interest applied transaction (applying the
+             * full Interest as soon as the loan is disbursed), will have to
+             * re-look into this logic once loans with Interest calculation need
+             * to be created or more advances accrual accounting support has to
+             * be provided
+             ***/
+            Money interestApplied = Money.of(this.getCurrency(), this.summary.getTotalInterestCharged());
+            final LoanTransaction interestAppliedTransaction = LoanTransaction.applyInterest(this, interestApplied, actualDisbursementDate);
+            this.loanTransactions.add(interestAppliedTransaction);
         }
 
         return actualChanges;

@@ -19,6 +19,7 @@ public class LoanTransactionEnumData {
     private final boolean repaymentAtDisbursement;
     private final boolean repayment;
     private final boolean contra;
+    private final boolean applyInterest;
     private final boolean waiveInterest;
     private final boolean waiveCharges;
     private final boolean applyCharges;
@@ -36,6 +37,7 @@ public class LoanTransactionEnumData {
         this.waiveInterest = Long.valueOf(4).equals(this.id);
         this.waiveCharges = Long.valueOf(9).equals(this.id);
         this.applyCharges = Long.valueOf(10).equals(this.id);
+        this.applyInterest = Long.valueOf(11).equals(this.id);
         this.writeOff = Long.valueOf(6).equals(this.id);
         this.recoveryRepayment = Long.valueOf(8).equals(this.id);
     }
@@ -74,6 +76,10 @@ public class LoanTransactionEnumData {
 
     public boolean isApplyCharges() {
         return this.applyCharges;
+    }
+
+    public boolean isApplyInterest() {
+        return this.applyInterest;
     }
 
 }
