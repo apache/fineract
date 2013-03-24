@@ -50,10 +50,19 @@ INSERT INTO `r_enum_value` (`enum_name`, `enum_id`, `enum_message_property`, `en
 VALUES ('transaction_type_enum', '6', 'Write-Off', 'Write-Off');
 
 INSERT INTO `r_enum_value` (`enum_name`, `enum_id`, `enum_message_property`, `enum_value`) 
+VALUES ('transaction_type_enum', '7', 'Marked for Rescheduling', 'Marked for Rescheduling');
+
+INSERT INTO `r_enum_value` (`enum_name`, `enum_id`, `enum_message_property`, `enum_value`) 
 VALUES ('transaction_type_enum', '8', 'Recovery Repayment', 'Recovery Repayment');
 
 INSERT INTO `r_enum_value` (`enum_name`, `enum_id`, `enum_message_property`, `enum_value`) 
 VALUES ('transaction_type_enum', '9', 'Waive Charges', 'Waive Charges');
+
+INSERT INTO `r_enum_value` (`enum_name`, `enum_id`, `enum_message_property`, `enum_value`) 
+VALUES ('transaction_type_enum', '10', 'Apply Charges', 'Apply Charges');
+
+INSERT INTO `r_enum_value` (`enum_name`, `enum_id`, `enum_message_property`, `enum_value`) 
+VALUES ('transaction_type_enum', '11', 'Apply Interest', 'Apply Interest');
 
 
 INSERT INTO `m_currency`
