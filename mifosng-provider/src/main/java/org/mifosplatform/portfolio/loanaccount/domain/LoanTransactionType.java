@@ -21,7 +21,8 @@ public enum LoanTransactionType {
      */
     RECOVERY_REPAYMENT(8, "loanTransactionType.recoveryRepayment"), //
     WAIVE_CHARGES(9, "loanTransactionType.waiveCharges"), //
-    APPLY_CHARGES(10, "loanTransactionType.applyCharges");
+    APPLY_CHARGES(10, "loanTransactionType.applyCharges"), //
+    APPLY_INTEREST(11, "loanTransactionType.applyInterest");
 
     private final Integer value;
     private final String code;
@@ -74,6 +75,9 @@ public enum LoanTransactionType {
             break;
             case 10:
                 loanTransactionType = LoanTransactionType.APPLY_CHARGES;
+            break;
+            case 11:
+                loanTransactionType = LoanTransactionType.APPLY_INTEREST;
             break;
             default:
                 loanTransactionType = LoanTransactionType.INVALID;

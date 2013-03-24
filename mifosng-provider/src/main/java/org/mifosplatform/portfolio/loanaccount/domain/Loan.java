@@ -411,6 +411,11 @@ public class Loan extends AbstractPersistable<Long> {
         final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = this.transactionProcessorFactory
                 .determineProcessor(this.transactionProcessingStrategy);
 
+        // store Id's of existing loan transactions and existing reversed loan
+        // transactions
+        existingTransactionIds.addAll(findExistingTransactionIds());
+        existingReversedTransactionIds.addAll(findExistingReversedTransactionIds());
+
         if (!loanCharge.isDueAtDisbursement()) {
             final List<LoanTransaction> allNonContraTransactionsPostDisbursement = retreiveListOfTransactionsPostDisbursement();
             changedTransactionDetail = loanRepaymentScheduleTransactionProcessor.handleTransaction(getDisbursementDate(),
@@ -426,16 +431,13 @@ public class Loan extends AbstractPersistable<Long> {
         }
 
         updateLoanSummaryDerivedFields();
-
-        existingTransactionIds.addAll(findExistingTransactionIds());
-        existingReversedTransactionIds.addAll(findExistingReversedTransactionIds());
-
         return changedTransactionDetail;
     }
 
     /**
      * Creates a loanTransaction for "Apply Charge Event" with transaction date
-     * set to "suppliedTransactionDate"
+     * set to "suppliedTransactionDate". The newly created transaction is also
+     * added to the Loan on which this method is called.
      * 
      * If "suppliedTransactionDate" is not passed Id, the transaction date is
      * set to the loans due date if the due date is lesser than todays date. If
@@ -445,7 +447,7 @@ public class Loan extends AbstractPersistable<Long> {
      * @param suppliedTransactionDate
      * @return
      */
-    public LoanTransaction getChargeAppliedTransaction(final LoanCharge loanCharge, final LocalDate suppliedTransactionDate) {
+    public LoanTransaction handleChargeAppliedTransaction(final LoanCharge loanCharge, final LocalDate suppliedTransactionDate) {
         final Money chargeAmount = loanCharge.getAmount(getCurrency());
         Money feeCharges = chargeAmount;
         Money penaltyCharges = Money.zero(loanCurrency());
@@ -471,6 +473,7 @@ public class Loan extends AbstractPersistable<Long> {
 
         final LoanTransaction applyLoanChargeTransaction = LoanTransaction.applyLoanCharge(this, chargeAmount, transactionDate, feeCharges,
                 penaltyCharges);
+        this.loanTransactions.add(applyLoanChargeTransaction);
         return applyLoanChargeTransaction;
     }
 
@@ -629,6 +632,7 @@ public class Loan extends AbstractPersistable<Long> {
 
         final LoanTransaction waiveLoanChargeTransaction = LoanTransaction.waiveLoanCharge(this, amountWaived, transactionDate,
                 feeChargesWaived, penaltyChargesWaived);
+        this.loanTransactions.add(waiveLoanChargeTransaction);
 
         // Waive of charges whose due date falls after latest 'repayment'
         // transaction dont require entire loan schedule to be reprocessed.
@@ -1211,6 +1215,11 @@ public class Loan extends AbstractPersistable<Long> {
     private void disburse(final LocalDate expectedDisbursedOnLocalDate) {
         this.actualDisbursementDate = expectedDisbursedOnLocalDate.toDate();
         updateLoanScheduleDependentDerivedFields();
+        /****
+         * Vishwas TODO: Refactor to skip unnecessary creation of Disbursement
+         * and fees applied transactions (though they are not persisted) on
+         * modifications to loan application modification
+         *****/
         handleDisbursementTransaction(expectedDisbursedOnLocalDate);
     }
 
@@ -1271,6 +1280,17 @@ public class Loan extends AbstractPersistable<Long> {
             } else {
                 updateLoanSummaryDerivedFields();
             }
+
+            /***
+             * Adding a temporary Interest applied transaction (applying the
+             * full Interest as soon as the loan is disbursed), will have to
+             * re-look into this logic once loans with Interest calculation need
+             * to be created or more advances accrual accounting support has to
+             * be provided
+             ***/
+            Money interestApplied = Money.of(this.getCurrency(), this.summary.getTotalInterestCharged());
+            final LoanTransaction interestAppliedTransaction = LoanTransaction.applyInterest(this, interestApplied, actualDisbursementDate);
+            this.loanTransactions.add(interestAppliedTransaction);
         }
 
         return actualChanges;
@@ -1338,8 +1358,7 @@ public class Loan extends AbstractPersistable<Long> {
                 if (charge.isDueAtDisbursement()) {
                     charge.markAsFullyPaid();
                 } else {
-                    LoanTransaction loanChargeAppliedTransaction = getChargeAppliedTransaction(charge, disbursedOn);
-                    this.loanTransactions.add(loanChargeAppliedTransaction);
+                    handleChargeAppliedTransaction(charge, disbursedOn);
                 }
             }
         }

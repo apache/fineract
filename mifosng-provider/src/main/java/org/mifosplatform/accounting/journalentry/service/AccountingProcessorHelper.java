@@ -56,8 +56,6 @@ public class AccountingProcessorHelper {
         final Long loanId = (Long) accountingBridgeData.get("loanId");
         final Long loanProductId = (Long) accountingBridgeData.get("loanProductId");
         final Long officeId = (Long) accountingBridgeData.get("officeId");
-        final BigDecimal calculatedInterest = (BigDecimal) accountingBridgeData.get("calculatedInterest");
-
         final List<LoanTransactionDTO> newLoanTransactions = new ArrayList<LoanTransactionDTO>();
 
         @SuppressWarnings("unchecked")
@@ -81,8 +79,7 @@ public class AccountingProcessorHelper {
 
         }
 
-        return new LoanDTO(loanId, loanProductId, officeId, calculatedInterest, cashBasedAccountingEnabled, accrualBasedAccountingEnabled,
-                newLoanTransactions);
+        return new LoanDTO(loanId, loanProductId, officeId, cashBasedAccountingEnabled, accrualBasedAccountingEnabled, newLoanTransactions);
     }
 
     /**
