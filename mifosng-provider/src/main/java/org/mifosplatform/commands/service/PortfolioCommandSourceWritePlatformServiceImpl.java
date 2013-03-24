@@ -14,6 +14,7 @@ import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
+import org.mifosplatform.portfolio.client.exception.ClientNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -86,7 +87,8 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
     public CommandProcessingResult approveEntry(final Long commandId) {
 
         final CommandSource commandSourceInput = this.commandSourceRepository.findOne(commandId);
-
+        if (commandSourceInput == null) {throw new ClientNotFoundException(commandId);}
+        
         context.authenticatedUser().validateHasCheckerPermissionTo(commandSourceInput.getPermissionCode());
 
         final CommandWrapper wrapper = CommandWrapper.fromExistingCommand(commandId, commandSourceInput.getActionName(),
