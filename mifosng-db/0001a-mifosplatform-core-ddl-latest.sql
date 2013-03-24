@@ -34,7 +34,6 @@ DROP TABLE IF EXISTS `m_loan_collateral`;
 DROP TABLE IF EXISTS `m_loan_officer_assignment_history`;
 DROP TABLE IF EXISTS `m_loan_repayment_schedule`;
 DROP TABLE IF EXISTS `m_loan_transaction`;
-DROP TABLE IF EXISTS `m_calendar`;
 DROP TABLE IF EXISTS `m_note`;
 DROP TABLE IF EXISTS `m_office`;
 DROP TABLE IF EXISTS `m_office_transaction`;
