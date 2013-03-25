@@ -289,6 +289,7 @@ CREATE TABLE `m_portfolio_command_source` (
   `group_id` bigint(20) DEFAULT NULL,
   `client_id` bigint(20) DEFAULT NULL,
   `loan_id` bigint(20) DEFAULT NULL,
+  `savings_id` BIGINT(20) DEFAULT NULL,
   `api_get_url` varchar(100) NOT NULL,
   `resource_id` bigint(20) DEFAULT NULL,
   `subresource_id` bigint(20) DEFAULT NULL,
