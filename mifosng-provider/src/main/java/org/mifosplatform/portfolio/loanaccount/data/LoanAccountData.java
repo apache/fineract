@@ -537,6 +537,7 @@ public class LoanAccountData {
         this.expectedFirstRepaymentOnDate = expectedFirstRepaymentOnDate;
         this.interestChargedFromDate = interestChargedFromDate;
         this.timeline = timeline;
+        this.feeChargesAtDisbursementCharged = feeChargesDueAtDisbursementCharged;
 
         // totals
         this.summary = summary;
