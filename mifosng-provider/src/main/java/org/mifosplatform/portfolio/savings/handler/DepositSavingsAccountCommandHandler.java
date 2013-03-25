@@ -21,6 +21,6 @@ public class DepositSavingsAccountCommandHandler implements NewCommandSourceHand
     @Transactional
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.savingAccountWritePlatformService.deposit(command.getLoanId(), command);
+        return this.savingAccountWritePlatformService.deposit(command.getSavingsId(), command);
     }
 }

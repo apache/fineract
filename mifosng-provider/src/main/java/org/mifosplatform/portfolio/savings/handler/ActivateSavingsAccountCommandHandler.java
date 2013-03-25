@@ -9,18 +9,18 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class WithdrawSavingsAccountCommandHandler implements NewCommandSourceHandler {
+public class ActivateSavingsAccountCommandHandler implements NewCommandSourceHandler {
 
     private final SavingsAccountWritePlatformService savingAccountWritePlatformService;
 
     @Autowired
-    public WithdrawSavingsAccountCommandHandler(final SavingsAccountWritePlatformService savingAccountWritePlatformService) {
+    public ActivateSavingsAccountCommandHandler(final SavingsAccountWritePlatformService savingAccountWritePlatformService) {
         this.savingAccountWritePlatformService = savingAccountWritePlatformService;
     }
 
     @Transactional
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.savingAccountWritePlatformService.withdrawal(command.getSavingsId(), command);
+        return this.savingAccountWritePlatformService.activate(command.getSavingsId(), command);
     }
 }

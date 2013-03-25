@@ -1,6 +1,8 @@
 package org.mifosplatform.portfolio.savings.data;
 
 import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.accountNoParamName;
+import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.activationDateParamName;
+import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.activeParamName;
 import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.clientIdParamName;
 import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.externalIdParamName;
 import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.groupIdParamName;
@@ -18,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
+import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.data.ApiParameterError;
 import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
 import org.mifosplatform.infrastructure.core.exception.InvalidJsonException;
@@ -68,6 +71,15 @@ public class SavingsAccountDataValidator {
 
         final Long productId = fromApiJsonHelper.extractLongNamed(productIdParamName, element);
         baseDataValidator.reset().parameter(productIdParamName).value(productId).notNull().integerGreaterThanZero();
+
+        final Boolean active = fromApiJsonHelper.extractBooleanNamed(activeParamName, element);
+        baseDataValidator.reset().parameter(activeParamName).value(active).notNull();
+
+        LocalDate activationDate = null;
+        if (active != null && active.booleanValue()) {
+            activationDate = fromApiJsonHelper.extractLocalDateNamed(activationDateParamName, element);
+            baseDataValidator.reset().parameter(activationDateParamName).value(activationDate).notNull();
+        }
 
         if (fromApiJsonHelper.parameterExists(accountNoParamName, element)) {
             final String accountNo = fromApiJsonHelper.extractStringNamed(accountNoParamName, element);

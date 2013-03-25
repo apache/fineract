@@ -29,11 +29,11 @@ import org.springframework.stereotype.Component;
 public class PlatformApiDataValidationExceptionMapper implements ExceptionMapper<PlatformApiDataValidationException> {
 
     @Override
-    public Response toResponse(PlatformApiDataValidationException exception) {
+    public Response toResponse(final PlatformApiDataValidationException exception) {
 
-        ApiGlobalErrorResponse dataIntegrityError = ApiGlobalErrorResponse.badClientRequest(exception.getGlobalisationMessageCode(),
+        final ApiGlobalErrorResponse dataValidationErrorResponse = ApiGlobalErrorResponse.badClientRequest(exception.getGlobalisationMessageCode(),
                 exception.getDefaultUserMessage(), exception.getErrors());
 
-        return Response.status(Status.BAD_REQUEST).entity(dataIntegrityError).type(MediaType.APPLICATION_JSON).build();
+        return Response.status(Status.BAD_REQUEST).entity(dataValidationErrorResponse).type(MediaType.APPLICATION_JSON).build();
     }
 }

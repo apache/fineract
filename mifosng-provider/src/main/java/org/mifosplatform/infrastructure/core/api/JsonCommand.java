@@ -8,6 +8,7 @@ package org.mifosplatform.infrastructure.core.api;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.Locale;
 
 import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
@@ -376,5 +377,9 @@ public final class JsonCommand {
 
         final PlatformUser dummyPlatformUser = new BasicPasswordEncodablePlatformUser(saltValue, "", passwordPlainText);
         return platformPasswordEncoder.encode(dummyPlatformUser);
+    }
+
+    public Locale extractLocale() {
+        return this.fromApiJsonHelper.extractLocaleParameter(this.parsedCommand.getAsJsonObject());
     }
 }

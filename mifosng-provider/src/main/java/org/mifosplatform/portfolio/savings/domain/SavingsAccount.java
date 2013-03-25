@@ -7,6 +7,8 @@ package org.mifosplatform.portfolio.savings.domain;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -19,6 +21,8 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
@@ -26,7 +30,10 @@ import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 import org.joda.time.LocalDate;
+import org.joda.time.format.DateTimeFormatter;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
+import org.mifosplatform.infrastructure.core.data.ApiParameterError;
+import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.security.service.RandomPasswordGenerator;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
@@ -36,7 +43,6 @@ import org.mifosplatform.portfolio.group.domain.Group;
 import org.mifosplatform.portfolio.loanproduct.domain.PeriodFrequencyType;
 import org.mifosplatform.portfolio.savings.api.SavingsApiConstants;
 import org.mifosplatform.portfolio.savings.exception.InsufficientAccountBalanceException;
-import org.mifosplatform.portfolio.savings.exception.InvalidSavingsAccountTransactionException;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
@@ -47,7 +53,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
     @Column(name = "account_no", length = 20, unique = true, nullable = false)
     private String accountNumber;
 
-    @Column(name = "external_id")
+    @Column(name = "external_id", nullable = true)
     private String externalId;
 
     @ManyToOne(optional = true)
@@ -61,6 +67,13 @@ public class SavingsAccount extends AbstractPersistable<Long> {
     @ManyToOne
     @JoinColumn(name = "product_id", nullable = false)
     private SavingsProduct product;
+
+    @Column(name = "status_enum", nullable = false)
+    private Integer status;
+
+    @Temporal(TemporalType.DATE)
+    @Column(name = "activation_date", nullable = true)
+    private Date activationDate;
 
     @Embedded
     private MonetaryCurrency currency;
@@ -84,6 +97,15 @@ public class SavingsAccount extends AbstractPersistable<Long> {
     @Column(name = "lockin_period_frequency_enum", nullable = false)
     private Integer lockinPeriodFrequencyType;
 
+    /**
+     * When account is becomes <code>active</code> this field is derived if
+     * <code>lockinPeriodFrequency</code> and
+     * <code>lockinPeriodFrequencyType</code> details are present.
+     */
+    @Temporal(TemporalType.DATE)
+    @Column(name = "lockedin_until_date_derived", nullable = true)
+    private Date lockedInUntilDate;
+
     @Embedded
     private SavingsAccountSummary summary;
 
@@ -102,18 +124,25 @@ public class SavingsAccount extends AbstractPersistable<Long> {
     }
 
     public static SavingsAccount createNewAccount(final Client client, final Group group, final SavingsProduct product,
-            final String accountNo, final String externalId, final BigDecimal interestRate,
-            final PeriodFrequencyType interestRatePeriodFrequencyType, final BigDecimal annualInterestRate,
+            final String accountNo, final String externalId, final boolean active, final LocalDate activationDate,
+            final BigDecimal interestRate, final PeriodFrequencyType interestRatePeriodFrequencyType, final BigDecimal annualInterestRate,
             final BigDecimal minRequiredOpeningBalance, final Integer lockinPeriodFrequency,
             final PeriodFrequencyType lockinPeriodFrequencyType) {
 
-        return new SavingsAccount(client, group, product, accountNo, externalId, interestRate, interestRatePeriodFrequencyType,
-                annualInterestRate, minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType);
+        SavingsAccountStatusType status = SavingsAccountStatusType.UNACTIVATED;
+        if (active) {
+            status = SavingsAccountStatusType.ACTIVE;
+        }
+
+        return new SavingsAccount(client, group, product, accountNo, externalId, status, activationDate, interestRate,
+                interestRatePeriodFrequencyType, annualInterestRate, minRequiredOpeningBalance, lockinPeriodFrequency,
+                lockinPeriodFrequencyType);
     }
 
     private SavingsAccount(final Client client, final Group group, final SavingsProduct product, final String accountNo,
-            final String externalId, final BigDecimal interestRate, final PeriodFrequencyType interestRatePeriodFrequencyType,
-            final BigDecimal annualInterestRate, final BigDecimal minRequiredOpeningBalance, final Integer lockinPeriodFrequency,
+            final String externalId, final SavingsAccountStatusType status, final LocalDate activationDate, final BigDecimal interestRate,
+            final PeriodFrequencyType interestRatePeriodFrequencyType, final BigDecimal annualInterestRate,
+            final BigDecimal minRequiredOpeningBalance, final Integer lockinPeriodFrequency,
             final PeriodFrequencyType lockinPeriodFrequencyType) {
         this.client = client;
         this.group = group;
@@ -126,6 +155,10 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         }
         this.currency = product.currency();
         this.externalId = externalId;
+        this.status = status.getValue();
+        if (activationDate != null) {
+            this.activationDate = activationDate.toDate();
+        }
         this.interestRate = interestRate;
         this.interestRatePeriodFrequencyType = interestRatePeriodFrequencyType.getValue();
         this.annualInterestRate = annualInterestRate;
@@ -140,24 +173,121 @@ public class SavingsAccount extends AbstractPersistable<Long> {
     /**
      * Used after fetching/hydrating a {@link SavingsAccount} object to inject
      * helper services/components used for update summary details after
-     * events/transactions on a loan.
+     * events/transactions on a {@link SavingsAccount}.
      */
     public void setHelpers(final SavingsAccountTransactionSummaryWrapper savingsAccountTransactionSummaryWrapper) {
         this.savingsAccountTransactionSummaryWrapper = savingsAccountTransactionSummaryWrapper;
     }
 
-    public SavingsAccountTransaction deposit(final LocalDate transactionDate, final BigDecimal transactionAmount) {
+    public boolean isNotActive() {
+        return !isActive();
+    }
 
-        final Money amount = Money.of(this.currency, transactionAmount);
+    public boolean isActive() {
+        return SavingsAccountStatusType.fromInt(this.status).isActive();
+    }
 
-        // FIXME - kw - check transactionDate is not before savings account
-        // activation date.
+    public void activate(final DateTimeFormatter formatter, final LocalDate activationDate) {
 
-        if (isTransactionInTheFuture(transactionDate)) {
-            final String defaultUserMessage = "Transaction date cannot be in the future.";
-            throw new InvalidSavingsAccountTransactionException("in.the.future", defaultUserMessage, "transactionDate", transactionDate);
+        if (isActive()) {
+            final String defaultUserMessage = "Cannot activate account. Account is already active.";
+            final ApiParameterError error = ApiParameterError.parameterError("error.msg.savingsaccount.transaction.account.already.active",
+                    defaultUserMessage, "activationDate", activationDate.toString(formatter));
+
+            final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+            dataValidationErrors.add(error);
+
+            throw new PlatformApiDataValidationException(dataValidationErrors);
         }
 
+        if (isDateInTheFuture(activationDate)) {
+
+            final String defaultUserMessage = "Activation date cannot be in the future.";
+            final ApiParameterError error = ApiParameterError.parameterError("error.msg.savingsaccount.transaction.in.the.future",
+                    defaultUserMessage, "activationDate", activationDate);
+
+            final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+            dataValidationErrors.add(error);
+
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
+
+        this.activationDate = activationDate.toDate();
+        this.status = SavingsAccountStatusType.ACTIVE.getValue();
+
+        this.lockedInUntilDate = calculateDateAccountIsLockedUntil(getActivationLocalDate());
+
+        // auto enter deposit for minimum required opening balance when
+        // activating account.
+        final Money minRequiredOpeningBalance = Money.of(this.currency, this.minRequiredOpeningBalance);
+        if (minRequiredOpeningBalance.isGreaterThanZero()) {
+            deposit(formatter, activationDate, minRequiredOpeningBalance.getAmount());
+        }
+    }
+
+    private Date calculateDateAccountIsLockedUntil(final LocalDate activationLocalDate) {
+
+        Date lockedInUntilLocalDate = null;
+        final PeriodFrequencyType lockinPeriodFrequencyType = PeriodFrequencyType.fromInt(this.lockinPeriodFrequencyType);
+        switch (lockinPeriodFrequencyType) {
+            case INVALID:
+            break;
+            case DAYS:
+                lockedInUntilLocalDate = activationLocalDate.plusDays(this.lockinPeriodFrequency).toDate();
+            break;
+            case WEEKS:
+                lockedInUntilLocalDate = activationLocalDate.plusWeeks(this.lockinPeriodFrequency).toDate();
+            break;
+            case MONTHS:
+                lockedInUntilLocalDate = activationLocalDate.plusMonths(this.lockinPeriodFrequency).toDate();
+            break;
+            case YEARS:
+                lockedInUntilLocalDate = activationLocalDate.plusYears(this.lockinPeriodFrequency).toDate();
+            break;
+        }
+
+        return lockedInUntilLocalDate;
+    }
+
+    public SavingsAccountTransaction deposit(final DateTimeFormatter formatter, final LocalDate transactionDate,
+            final BigDecimal transactionAmount) {
+
+        if (isNotActive()) {
+            final String defaultUserMessage = "Transaction is not allowed. Account is not active.";
+            final ApiParameterError error = ApiParameterError.parameterError("error.msg.savingsaccount.transaction.account.is.not.active",
+                    defaultUserMessage, "transactionDate", transactionDate.toString(formatter));
+
+            final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+            dataValidationErrors.add(error);
+
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
+
+        if (isDateInTheFuture(transactionDate)) {
+            final String defaultUserMessage = "Transaction date cannot be in the future.";
+            final ApiParameterError error = ApiParameterError.parameterError("error.msg.savingsaccount.transaction.in.the.future",
+                    defaultUserMessage, "transactionDate", transactionDate.toString(formatter));
+
+            final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+            dataValidationErrors.add(error);
+
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
+
+        if (transactionDate.isBefore(getActivationLocalDate())) {
+            final Object[] defaultUserArgs = Arrays.asList(transactionDate.toString(formatter),
+                    getActivationLocalDate().toString(formatter)).toArray();
+            final String defaultUserMessage = "Transaction date cannot be before accounts activation date.";
+            final ApiParameterError error = ApiParameterError.parameterError("error.msg.savingsaccount.transaction.before.activation.date",
+                    defaultUserMessage, "transactionDate", defaultUserArgs);
+
+            final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+            dataValidationErrors.add(error);
+
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
+
+        final Money amount = Money.of(this.currency, transactionAmount);
         final SavingsAccountTransaction transaction = SavingsAccountTransaction.deposit(this, transactionDate, amount);
         this.transactions.add(transaction);
 
@@ -166,19 +296,69 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         return transaction;
     }
 
-    public SavingsAccountTransaction withdrawal(final LocalDate transactionDate, final BigDecimal transactionAmount) {
+    private LocalDate getActivationLocalDate() {
+        LocalDate activationLocalDate = null;
+        if (this.activationDate != null) {
+            activationLocalDate = new LocalDate(this.activationDate);
+        }
+        return activationLocalDate;
+    }
+
+    public SavingsAccountTransaction withdraw(final DateTimeFormatter formatter, final LocalDate transactionDate,
+            final BigDecimal transactionAmount) {
+
+        if (isNotActive()) {
+
+            final String defaultUserMessage = "Transaction is not allowed. Account is not active.";
+            final ApiParameterError error = ApiParameterError.parameterError("error.msg.savingsaccount.transaction.account.is.not.active",
+                    defaultUserMessage, "transactionDate", transactionDate.toString(formatter));
+
+            final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+            dataValidationErrors.add(error);
+
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
+
+        if (isDateInTheFuture(transactionDate)) {
+            final String defaultUserMessage = "Transaction date cannot be in the future.";
+            final ApiParameterError error = ApiParameterError.parameterError("error.msg.savingsaccount.transaction.in.the.future",
+                    defaultUserMessage, "transactionDate", transactionDate.toString(formatter));
+
+            final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+            dataValidationErrors.add(error);
+
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
+
+        if (transactionDate.isBefore(getActivationLocalDate())) {
+            final Object[] defaultUserArgs = Arrays.asList(transactionDate.toString(formatter),
+                    getActivationLocalDate().toString(formatter)).toArray();
+            final String defaultUserMessage = "Transaction date cannot be before accounts activation date.";
+            final ApiParameterError error = ApiParameterError.parameterError("error.msg.savingsaccount.transaction.before.activation.date",
+                    defaultUserMessage, "transactionDate", defaultUserArgs);
+
+            final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+            dataValidationErrors.add(error);
+
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
+
+        if (isAccountLocked(transactionDate)) {
+            final String defaultUserMessage = "Withdrawal is not allowed. No withdrawals are allowed until after "
+                    + getLockedInUntilLocalDate().toString(formatter);
+            final ApiParameterError error = ApiParameterError.parameterError(
+                    "error.msg.savingsaccount.transaction.withdrawals.blocked.during.lockin.period", defaultUserMessage, "transactionDate",
+                    transactionDate.toString(formatter), getLockedInUntilLocalDate().toString(formatter));
+
+            final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+            dataValidationErrors.add(error);
+
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
 
         final Money amount = Money.of(this.currency, transactionAmount);
 
-        // FIXME - kw - check transactionDate is not before savings account
-        // activation date.
-
-        if (isTransactionInTheFuture(transactionDate)) {
-            final String defaultUserMessage = "Transaction date cannot be in the future.";
-            throw new InvalidSavingsAccountTransactionException("in.the.future", defaultUserMessage, "transactionDate", transactionDate);
-        }
-
-        if (isNotAllowedToWithdraw(amount)) {
+        if (isNotEnoughFundsToWithdraw(amount)) {
             //
             throw new InsufficientAccountBalanceException("transactionAmount", getAccountBalance(), transactionAmount);
         }
@@ -191,7 +371,24 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         return transaction;
     }
 
-    private boolean isTransactionInTheFuture(final LocalDate transactionDate) {
+    private boolean isAccountLocked(final LocalDate transactionDate) {
+        boolean isLocked = false;
+        final boolean accountHasLockedInSetting = this.lockedInUntilDate != null;
+        if (accountHasLockedInSetting) {
+            isLocked = getLockedInUntilLocalDate().isAfter(transactionDate);
+        }
+        return isLocked;
+    }
+
+    private LocalDate getLockedInUntilLocalDate() {
+        LocalDate lockedInUntilLocalDate = null;
+        if (this.lockedInUntilDate != null) {
+            lockedInUntilLocalDate = new LocalDate(this.lockedInUntilDate);
+        }
+        return lockedInUntilLocalDate;
+    }
+
+    private boolean isDateInTheFuture(final LocalDate transactionDate) {
         return transactionDate.isAfter(DateUtils.getLocalDateOfTenant());
     }
 
@@ -199,7 +396,11 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         return this.summary.getAccountBalance(this.currency).getAmount();
     }
 
-    private boolean isNotAllowedToWithdraw(final Money amount) {
+    private boolean isNotEnoughFundsToWithdraw(final Money amount) {
+        return !isEnoughFundsToWithdraw(amount);
+    }
+
+    private boolean isEnoughFundsToWithdraw(final Money amount) {
         return this.summary.isLessThanOrEqualToAccountBalance(amount);
     }
 

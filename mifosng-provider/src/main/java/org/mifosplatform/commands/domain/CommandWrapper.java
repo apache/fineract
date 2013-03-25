@@ -31,12 +31,12 @@ public class CommandWrapper {
     }
 
     public static CommandWrapper fromExistingCommand(final Long commandId, final String actionName, final String entityName,
-    		final Long resourceId, final Long subresourceId, final String resourceGetUrl) {
+            final Long resourceId, final Long subresourceId, final String resourceGetUrl) {
         return new CommandWrapper(commandId, actionName, entityName, resourceId, subresourceId, resourceGetUrl);
     }
 
-    private CommandWrapper(final Long commandId, final String actionName, final String entityName, final Long resourceId, final Long subresourceId,
-            final String resourceGetUrl) {
+    private CommandWrapper(final Long commandId, final String actionName, final String entityName, final Long resourceId,
+            final Long subresourceId, final String resourceGetUrl) {
         this.commandId = commandId;
         this.officeId = null;
         this.groupId = null;
@@ -54,13 +54,12 @@ public class CommandWrapper {
         this.href = resourceGetUrl;
         this.json = null;
         this.transactionId = null;
-        
+
     }
 
     public CommandWrapper(final Long officeId, final Long groupId, final Long clientId, final Long loanId, final Long savingsId,
-            final String actionName, final String entityName, final Long entityId, final Long subentityId,
-            final Long codeId, final String supportedEntityType, final Long supportedEntityId, final String href, final String json,
-            final String transactionId) {
+            final String actionName, final String entityName, final Long entityId, final Long subentityId, final Long codeId,
+            final String supportedEntityType, final Long supportedEntityId, final String href, final String json, final String transactionId) {
         this.commandId = null;
         this.officeId = officeId;
         this.groupId = groupId;
@@ -95,7 +94,7 @@ public class CommandWrapper {
     public Long resourceId() {
         return this.entityId;
     }
-    
+
     public Long subresourceId() {
         return this.subentityId;
     }
@@ -135,7 +134,7 @@ public class CommandWrapper {
     public Long getEntityId() {
         return this.entityId;
     }
-    
+
     public Long getSubentityId() {
         return this.subentityId;
     }
@@ -354,12 +353,12 @@ public class CommandWrapper {
         return this.actionName.equalsIgnoreCase("BULKREASSIGN") && this.entityName.equalsIgnoreCase("LOAN");
     }
 
-    public boolean isDatatableResource() {       
+    public boolean isDatatableResource() {
         return this.href.startsWith("/datatables/");
     }
 
     public boolean isDeleteOneToOne() {
-    	/* also covers case of deleting all of a one to many*/
+        /* also covers case of deleting all of a one to many */
         return isDatatableResource() && isDeleteOperation() && this.subentityId == null;
     }
 
@@ -431,6 +430,10 @@ public class CommandWrapper {
         return this.entityName.equalsIgnoreCase("SAVINGSACCOUNT");
     }
 
+    public boolean isSavingsAccountActivation() {
+        return this.actionName.equalsIgnoreCase("ACTIVATE") && this.entityName.equalsIgnoreCase("SAVINGSACCOUNT");
+    }
+
     public boolean isSavingsAccountDeposit() {
         return this.actionName.equalsIgnoreCase("DEPOSIT") && this.entityName.equalsIgnoreCase("SAVINGSACCOUNT");
     }
@@ -446,8 +449,8 @@ public class CommandWrapper {
     public boolean isNoteResource() {
         boolean isnoteResource = false;
         if (this.entityName.equalsIgnoreCase("CLIENTNOTE") || this.entityName.equalsIgnoreCase("LOANNOTE")
-                || this.entityName.equalsIgnoreCase("LOANTRANSACTIONNOTE") || this.entityName.equalsIgnoreCase("DEPOSITNOTE")
-                || this.entityName.equalsIgnoreCase("SAVINGNOTE") || this.entityName.equalsIgnoreCase("GROUPNOTE")) {
+                || this.entityName.equalsIgnoreCase("LOANTRANSACTIONNOTE") || this.entityName.equalsIgnoreCase("SAVINGNOTE")
+                || this.entityName.equalsIgnoreCase("GROUPNOTE")) {
             isnoteResource = true;
         }
         return isnoteResource;
@@ -456,5 +459,4 @@ public class CommandWrapper {
     public boolean isGroupResource() {
         return this.entityName.equalsIgnoreCase("GROUP");
     }
-
 }

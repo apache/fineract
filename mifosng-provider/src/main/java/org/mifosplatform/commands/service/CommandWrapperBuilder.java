@@ -686,10 +686,19 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    public CommandWrapperBuilder savingsAccountActivation(final Long accountId) {
+        this.actionName = "ACTIVATE";
+        this.entityName = "SAVINGSACCOUNT";
+        this.savingsId = accountId;
+        this.entityId = null;
+        this.href = "/savingsaccounts/" + accountId + "?command=activate";
+        return this;
+    }
+
     public CommandWrapperBuilder savingsAccountDeposit(final Long accountId) {
         this.actionName = "DEPOSIT";
         this.entityName = "SAVINGSACCOUNT";
-        this.loanId = accountId;
+        this.savingsId = accountId;
         this.entityId = null;
         this.href = "/savingsaccounts/" + accountId + "/transactions";
         return this;
@@ -698,7 +707,7 @@ public class CommandWrapperBuilder {
     public CommandWrapperBuilder savingsAccountWithdrawal(final Long accountId) {
         this.actionName = "WITHDRAWAL";
         this.entityName = "SAVINGSACCOUNT";
-        this.loanId = accountId;
+        this.savingsId = accountId;
         this.entityId = null;
         this.href = "/savingsaccounts/" + accountId + "/transactions";
         return this;

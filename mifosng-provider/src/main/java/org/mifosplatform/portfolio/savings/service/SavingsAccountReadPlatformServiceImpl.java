@@ -23,6 +23,7 @@ import org.mifosplatform.portfolio.group.data.GroupData;
 import org.mifosplatform.portfolio.group.service.GroupReadPlatformService;
 import org.mifosplatform.portfolio.loanproduct.domain.PeriodFrequencyType;
 import org.mifosplatform.portfolio.savings.data.SavingsAccountData;
+import org.mifosplatform.portfolio.savings.data.SavingsAccountStatusEnumData;
 import org.mifosplatform.portfolio.savings.data.SavingsAccountSummaryData;
 import org.mifosplatform.portfolio.savings.data.SavingsAccountTransactionData;
 import org.mifosplatform.portfolio.savings.data.SavingsAccountTransactionEnumData;
@@ -92,6 +93,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
         public SavingAccountMapper() {
             final StringBuilder sqlBuilder = new StringBuilder(400);
             sqlBuilder.append("sa.id as id, sa.account_no as accountNo, sa.external_id as externalId, ");
+            sqlBuilder.append("sa.status_enum as statusEnum, sa.activation_date as activationDate, ");
             sqlBuilder.append("c.id as clientId, c.display_name as clientName, ");
             sqlBuilder.append("g.id as groupId, g.name as groupName, ");
             sqlBuilder.append("sp.id as productId, sp.name as productName, ");
@@ -128,9 +130,14 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             final String accountNo = rs.getString("accountNo");
             final String externalId = rs.getString("externalId");
 
-            final Long groupId = rs.getLong("groupId");
+            final Integer statusEnum = JdbcSupport.getInteger(rs, "statusEnum");
+            final SavingsAccountStatusEnumData status = SavingsEnumerations.status(statusEnum);
+
+            final LocalDate activationDate = JdbcSupport.getLocalDate(rs, "activationDate");
+
+            final Long groupId = JdbcSupport.getLong(rs, "groupId");
             final String groupName = rs.getString("groupName");
-            final Long clientId = rs.getLong("clientId");
+            final Long clientId = JdbcSupport.getLong(rs, "clientId");
             final String clientName = rs.getString("clientName");
 
             final Long productId = rs.getLong("productId");
@@ -167,9 +174,9 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             final SavingsAccountSummaryData summary = new SavingsAccountSummaryData(currency, totalDeposits, totalWithdrawals,
                     totalInterestPosted, accountBalance);
 
-            return SavingsAccountData.instance(id, accountNo, externalId, groupId, groupName, clientId, clientName, productId, productName,
-                    currency, interestRate, interestRatePeriodFrequencyType, annualInterestRate, minRequiredOpeningBalance,
-                    lockinPeriodFrequency, lockinPeriodFrequencyType, summary);
+            return SavingsAccountData.instance(id, accountNo, externalId, status, activationDate, groupId, groupName, clientId, clientName,
+                    productId, productName, currency, interestRate, interestRatePeriodFrequencyType, annualInterestRate,
+                    minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType, summary);
         }
     }
 
@@ -413,10 +420,12 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
                 groupName = group.getName();
             }
 
+            final SavingsAccountStatusEnumData status = null;
+            final LocalDate activationDate = null;
             final SavingsAccountSummaryData summary = null;
-            return SavingsAccountData.instance(null, null, null, groupId, groupName, clientId, clientName, productId, productName,
-                    currency, interestRate, interestRatePeriodFrequencyType, annualInterestRate, minRequiredOpeningBalance,
-                    lockinPeriodFrequency, lockinPeriodFrequencyType, summary);
+            return SavingsAccountData.instance(null, null, null, status, activationDate, groupId, groupName, clientId, clientName,
+                    productId, productName, currency, interestRate, interestRatePeriodFrequencyType, annualInterestRate,
+                    minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType, summary);
         }
     }
 }

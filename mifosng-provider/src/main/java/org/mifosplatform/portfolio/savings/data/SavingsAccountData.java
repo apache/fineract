@@ -8,6 +8,7 @@ package org.mifosplatform.portfolio.savings.data;
 import java.math.BigDecimal;
 import java.util.Collection;
 
+import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
 
@@ -20,6 +21,8 @@ public class SavingsAccountData {
     private final Long id;
     private final String accountNo;
     private final String externalId;
+    private final SavingsAccountStatusEnumData status;
+    private final LocalDate activationDate;
     private final Long groupId;
     private final String groupName;
     private final Long clientId;
@@ -43,10 +46,11 @@ public class SavingsAccountData {
     private final Collection<EnumOptionData> interestRatePeriodFrequencyTypeOptions;
     private final Collection<EnumOptionData> lockinPeriodFrequencyTypeOptions;
 
-    public static SavingsAccountData instance(final Long id, final String accountNo, final String externalId, final Long groupId,
-            final String groupName, final Long clientId, final String clientName, final Long productId, final String productName,
-            final CurrencyData currency, final BigDecimal interestRate, final EnumOptionData interestRatePeriodFrequencyType,
-            final BigDecimal annualInterestRate, final BigDecimal minRequiredOpeningBalance, final Integer lockinPeriodFrequency,
+    public static SavingsAccountData instance(final Long id, final String accountNo, final String externalId,
+            final SavingsAccountStatusEnumData status, final LocalDate activationDate, final Long groupId, final String groupName,
+            final Long clientId, final String clientName, final Long productId, final String productName, final CurrencyData currency,
+            final BigDecimal interestRate, final EnumOptionData interestRatePeriodFrequencyType, final BigDecimal annualInterestRate,
+            final BigDecimal minRequiredOpeningBalance, final Integer lockinPeriodFrequency,
             final EnumOptionData lockinPeriodFrequencyType, final SavingsAccountSummaryData summary) {
 
         final Collection<SavingsProductData> productOptions = null;
@@ -54,21 +58,22 @@ public class SavingsAccountData {
         final Collection<EnumOptionData> lockinPeriodFrequencyTypeOptions = null;
         final Collection<SavingsAccountTransactionData> transactions = null;
 
-        return new SavingsAccountData(id, accountNo, externalId, groupId, groupName, clientId, clientName, productId, productName,
-                currency, interestRate, interestRatePeriodFrequencyType, annualInterestRate, minRequiredOpeningBalance,
-                lockinPeriodFrequency, lockinPeriodFrequencyType, summary, productOptions, interestRatePeriodFrequencyTypeOptions,
-                lockinPeriodFrequencyTypeOptions, transactions);
+        return new SavingsAccountData(id, accountNo, externalId, status, activationDate, groupId, groupName, clientId, clientName,
+                productId, productName, currency, interestRate, interestRatePeriodFrequencyType, annualInterestRate,
+                minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType, summary, productOptions,
+                interestRatePeriodFrequencyTypeOptions, lockinPeriodFrequencyTypeOptions, transactions);
     }
 
     public static SavingsAccountData withTemplateOptions(final SavingsAccountData account,
             final Collection<SavingsProductData> productOptions, final Collection<EnumOptionData> interestRatePeriodFrequencyTypeOptions,
             final Collection<EnumOptionData> lockinPeriodFrequencyTypeOptions, final Collection<SavingsAccountTransactionData> transactions) {
 
-        return new SavingsAccountData(account.id, account.accountNo, account.externalId, account.groupId, account.groupName,
-                account.clientId, account.clientName, account.savingsProductId, account.savingsProductName, account.currency,
-                account.interestRate, account.interestRatePeriodFrequencyType, account.annualInterestRate,
-                account.minRequiredOpeningBalance, account.lockinPeriodFrequency, account.lockinPeriodFrequencyType, account.summary,
-                productOptions, interestRatePeriodFrequencyTypeOptions, lockinPeriodFrequencyTypeOptions, transactions);
+        return new SavingsAccountData(account.id, account.accountNo, account.externalId, account.status, account.activationDate,
+                account.groupId, account.groupName, account.clientId, account.clientName, account.savingsProductId,
+                account.savingsProductName, account.currency, account.interestRate, account.interestRatePeriodFrequencyType,
+                account.annualInterestRate, account.minRequiredOpeningBalance, account.lockinPeriodFrequency,
+                account.lockinPeriodFrequencyType, account.summary, productOptions, interestRatePeriodFrequencyTypeOptions,
+                lockinPeriodFrequencyTypeOptions, transactions);
     }
 
     public static SavingsAccountData withClientTemplate(final Long clientId, final String clientName, final Long groupId,
@@ -77,6 +82,8 @@ public class SavingsAccountData {
         final Long id = null;
         final String accountNo = null;
         final String externalId = null;
+        final SavingsAccountStatusEnumData status = null;
+        final LocalDate activationDate = null;
         final Long productId = null;
         final String productName = null;
         final CurrencyData currency = null;
@@ -93,15 +100,16 @@ public class SavingsAccountData {
         final Collection<EnumOptionData> lockinPeriodFrequencyTypeOptions = null;
         final Collection<SavingsAccountTransactionData> transactions = null;
 
-        return new SavingsAccountData(id, accountNo, externalId, groupId, groupName, clientId, clientName, productId, productName,
-                currency, interestRate, interestRatePeriodFrequencyType, annualInterestRate, minRequiredOpeningBalance,
-                lockinPeriodFrequency, lockinPeriodFrequencyType, summary, productOptions, interestRatePeriodFrequencyTypeOptions,
-                lockinPeriodFrequencyTypeOptions, transactions);
+        return new SavingsAccountData(id, accountNo, externalId, status, activationDate, groupId, groupName, clientId, clientName,
+                productId, productName, currency, interestRate, interestRatePeriodFrequencyType, annualInterestRate,
+                minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType, summary, productOptions,
+                interestRatePeriodFrequencyTypeOptions, lockinPeriodFrequencyTypeOptions, transactions);
     }
 
-    private SavingsAccountData(final Long id, final String accountNo, final String externalId, final Long groupId, final String groupName,
-            final Long clientId, final String clientName, final Long productId, final String productName, final CurrencyData currency,
-            final BigDecimal interestRate, final EnumOptionData interestRatePeriodFrequencyType, final BigDecimal annualInterestRate,
+    private SavingsAccountData(final Long id, final String accountNo, final String externalId, final SavingsAccountStatusEnumData status,
+            final LocalDate activationDate, final Long groupId, final String groupName, final Long clientId, final String clientName,
+            final Long productId, final String productName, final CurrencyData currency, final BigDecimal interestRate,
+            final EnumOptionData interestRatePeriodFrequencyType, final BigDecimal annualInterestRate,
             final BigDecimal minRequiredOpeningBalance, final Integer lockinPeriodFrequency,
             final EnumOptionData lockinPeriodFrequencyType, final SavingsAccountSummaryData summary,
             final Collection<SavingsProductData> productOptions, final Collection<EnumOptionData> interestRatePeriodFrequencyTypeOptions,
@@ -109,6 +117,8 @@ public class SavingsAccountData {
         this.id = id;
         this.accountNo = accountNo;
         this.externalId = externalId;
+        this.status = status;
+        this.activationDate = activationDate;
         this.groupId = groupId;
         this.groupName = groupName;
         this.clientId = clientId;

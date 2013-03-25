@@ -16,6 +16,8 @@ public interface SavingsAccountWritePlatformService {
 
     CommandProcessingResult deleteSavingAccount(Long accountId);
 
+    CommandProcessingResult activate(Long savingsId, JsonCommand command);
+
     CommandProcessingResult deposit(Long savingsId, JsonCommand command);
 
     CommandProcessingResult withdrawal(Long savingsId, JsonCommand command);

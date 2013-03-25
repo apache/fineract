@@ -23,12 +23,6 @@ public class ApiGlobalErrorResponse {
     private String developerMessage;
 
     /**
-     * A link to a URL which provides more information on the details of this
-     * type of error.
-     */
-    private String developerDocLink;
-
-    /**
      * The HTTP status code of the response.
      */
     private String httpStatusCode;
@@ -57,7 +51,6 @@ public class ApiGlobalErrorResponse {
         ApiGlobalErrorResponse globalErrorResponse = new ApiGlobalErrorResponse();
         globalErrorResponse.setHttpStatusCode("401");
         globalErrorResponse.setDeveloperMessage("Invalid authentication details were passed in api request.");
-        globalErrorResponse.setDeveloperDocLink("https://github.com/keithwoodlock/mifosx/wiki/HTTP-API-Error-codes");
         globalErrorResponse.setUserMessageGlobalisationCode("error.msg.not.authenticated");
         globalErrorResponse.setDefaultUserMessage("Unauthenticated. Please login.");
 
@@ -69,7 +62,6 @@ public class ApiGlobalErrorResponse {
         ApiGlobalErrorResponse globalErrorResponse = new ApiGlobalErrorResponse();
         globalErrorResponse.setHttpStatusCode("401");
         globalErrorResponse.setDeveloperMessage("Invalid tenant details were passed in api request.");
-        globalErrorResponse.setDeveloperDocLink("https://github.com/keithwoodlock/mifosx/wiki/HTTP-API-Error-codes");
         globalErrorResponse.setUserMessageGlobalisationCode("error.msg.invalid.tenant.identifier");
         globalErrorResponse.setDefaultUserMessage("Invalide tenant identifier provided with request.");
 
@@ -81,7 +73,6 @@ public class ApiGlobalErrorResponse {
         globalErrorResponse.setHttpStatusCode("403");
         globalErrorResponse
                 .setDeveloperMessage("The user associated with credentials passed on this request does not have sufficient privileges to perform this action.");
-        globalErrorResponse.setDeveloperDocLink("https://github.com/keithwoodlock/mifosx/wiki/HTTP-API-Error-codes");
         globalErrorResponse.setUserMessageGlobalisationCode("error.msg.not.authorized");
         globalErrorResponse.setDefaultUserMessage("Insufficient privileges to perform this action.");
 
@@ -97,7 +88,6 @@ public class ApiGlobalErrorResponse {
         ApiGlobalErrorResponse globalErrorResponse = new ApiGlobalErrorResponse();
         globalErrorResponse.setHttpStatusCode("403");
         globalErrorResponse.setDeveloperMessage("Request was understood but caused a domain rule violation.");
-        globalErrorResponse.setDeveloperDocLink("https://github.com/keithwoodlock/mifosx/wiki/HTTP-API-Error-codes");
         globalErrorResponse.setUserMessageGlobalisationCode("validation.msg.domain.rule.violation");
         globalErrorResponse.setDefaultUserMessage("Errors contain reason for domain rule violation.");
 
@@ -114,7 +104,6 @@ public class ApiGlobalErrorResponse {
         ApiGlobalErrorResponse globalErrorResponse = new ApiGlobalErrorResponse();
         globalErrorResponse.setHttpStatusCode("404");
         globalErrorResponse.setDeveloperMessage("The requested resource is not available.");
-        globalErrorResponse.setDeveloperDocLink("https://github.com/keithwoodlock/mifosx/wiki/HTTP-API-Error-codes");
         globalErrorResponse.setUserMessageGlobalisationCode("error.msg.resource.not.found");
         globalErrorResponse.setDefaultUserMessage("The requested resource is not available.");
 
@@ -131,7 +120,6 @@ public class ApiGlobalErrorResponse {
         ApiGlobalErrorResponse globalErrorResponse = new ApiGlobalErrorResponse();
         globalErrorResponse.setHttpStatusCode("403");
         globalErrorResponse.setDeveloperMessage("The request caused a data integrity issue to be fired by the database.");
-        globalErrorResponse.setDeveloperDocLink("https://github.com/keithwoodlock/mifosx/wiki/HTTP-API-Error-codes");
         globalErrorResponse.setUserMessageGlobalisationCode(globalisationMessageCode);
         globalErrorResponse.setDefaultUserMessage(defaultUserMessage);
 
@@ -149,7 +137,6 @@ public class ApiGlobalErrorResponse {
         globalErrorResponse.setHttpStatusCode("400");
         globalErrorResponse
                 .setDeveloperMessage("The request was invalid. This typically will happen due to validation errors which are provided.");
-        globalErrorResponse.setDeveloperDocLink("https://github.com/keithwoodlock/mifosx/wiki/HTTP-API-Error-codes");
         globalErrorResponse.setUserMessageGlobalisationCode(globalisationMessageCode);
         globalErrorResponse.setDefaultUserMessage(defaultUserMessage);
 
@@ -164,7 +151,6 @@ public class ApiGlobalErrorResponse {
         ApiGlobalErrorResponse globalErrorResponse = new ApiGlobalErrorResponse();
         globalErrorResponse.setHttpStatusCode("500");
         globalErrorResponse.setDeveloperMessage("An unexpected error occured on the platform server.");
-        globalErrorResponse.setDeveloperDocLink("https://github.com/keithwoodlock/mifosx/wiki/HTTP-API-Error-codes");
         globalErrorResponse.setUserMessageGlobalisationCode("error.msg.platform.server.side.error");
         globalErrorResponse.setDefaultUserMessage("An unexpected error occured on the platform server.");
 
@@ -223,13 +209,5 @@ public class ApiGlobalErrorResponse {
 
     public void setUserMessageGlobalisationCode(final String userMessageGlobalisationCode) {
         this.userMessageGlobalisationCode = userMessageGlobalisationCode;
-    }
-
-    public String getDeveloperDocLink() {
-        return developerDocLink;
-    }
-
-    public void setDeveloperDocLink(final String developerDocLink) {
-        this.developerDocLink = developerDocLink;
     }
 }

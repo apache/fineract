@@ -7,7 +7,9 @@ package org.mifosplatform.portfolio.savings.service;
 
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.portfolio.loanproduct.domain.PeriodFrequencyType;
+import org.mifosplatform.portfolio.savings.data.SavingsAccountStatusEnumData;
 import org.mifosplatform.portfolio.savings.data.SavingsAccountTransactionEnumData;
+import org.mifosplatform.portfolio.savings.domain.SavingsAccountStatusType;
 import org.mifosplatform.portfolio.savings.domain.SavingsAccountTransactionType;
 
 public class SavingsEnumerations {
@@ -99,6 +101,37 @@ public class SavingsEnumerations {
             case INTEREST_POSTING:
                 optionData = new SavingsAccountTransactionEnumData(SavingsAccountTransactionType.INTEREST_POSTING.getValue().longValue(),
                         SavingsAccountTransactionType.INTEREST_POSTING.getCode(), "Interest posting");
+            break;
+        }
+        return optionData;
+    }
+
+    public static SavingsAccountStatusEnumData status(final Integer statusEnum) {
+        return status(SavingsAccountStatusType.fromInt(statusEnum));
+    }
+
+    public static SavingsAccountStatusEnumData status(final SavingsAccountStatusType type) {
+
+        SavingsAccountStatusEnumData optionData = new SavingsAccountStatusEnumData(SavingsAccountStatusType.INVALID.getValue().longValue(),
+                SavingsAccountStatusType.INVALID.getCode(), "Invalid", false, false, false);
+
+        switch (type) {
+            case INVALID:
+                optionData = new SavingsAccountStatusEnumData(SavingsAccountStatusType.INVALID.getValue().longValue(),
+                        SavingsAccountStatusType.INVALID.getCode(), "Invalid", type.isUnactivated(), type.isActive(), type.isClosed());
+            break;
+            case UNACTIVATED:
+                optionData = new SavingsAccountStatusEnumData(SavingsAccountStatusType.UNACTIVATED.getValue().longValue(),
+                        SavingsAccountStatusType.UNACTIVATED.getCode(), "Unactivated", type.isUnactivated(), type.isActive(),
+                        type.isClosed());
+            break;
+            case ACTIVE:
+                optionData = new SavingsAccountStatusEnumData(SavingsAccountStatusType.ACTIVE.getValue().longValue(),
+                        SavingsAccountStatusType.ACTIVE.getCode(), "Active", type.isUnactivated(), type.isActive(), type.isClosed());
+            break;
+            case CLOSED:
+                optionData = new SavingsAccountStatusEnumData(SavingsAccountStatusType.CLOSED.getValue().longValue(),
+                        SavingsAccountStatusType.CLOSED.getCode(), "Closed", type.isUnactivated(), type.isActive(), type.isClosed());
             break;
         }
         return optionData;

@@ -69,7 +69,8 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
             commandSourceResult = CommandSource.fullEntryFrom(wrapper, command, maker);
         }
         commandSourceResult.updateResourceId(result.resourceId());
-        commandSourceResult.updateForAudit(result.getOfficeId(), result.getGroupId(), result.getClientId(), result.getLoanId());
+        commandSourceResult.updateForAudit(result.getOfficeId(), result.getGroupId(), result.getClientId(), result.getLoanId(),
+                result.getSavingsId());
 
         String changesOnlyJson = null;
         if (result.hasChanges()) {
@@ -360,6 +361,8 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
                 handler = applicationContext.getBean("depositSavingsAccountCommandHandler", NewCommandSourceHandler.class);
             } else if (wrapper.isSavingsAccountWithdrawal()) {
                 handler = applicationContext.getBean("withdrawSavingsAccountCommandHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isSavingsAccountActivation()) {
+                handler = applicationContext.getBean("activateSavingsAccountCommandHandler", NewCommandSourceHandler.class);
             } else {
                 throw new UnsupportedCommandException(wrapper.commandName());
             }

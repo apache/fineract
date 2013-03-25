@@ -21,9 +21,12 @@ public class SavingsApiConstants {
     public static final String idParamName = "id";
     public static final String accountNoParamName = "accountNo";
     public static final String externalIdParamName = "externalId";
+    public static final String statusParamName = "status";
     public static final String clientIdParamName = "clientId";
     public static final String groupIdParamName = "groupId";
     public static final String productIdParamName = "productId";
+    public static final String activeParamName = "active";
+    public static final String activationDateParamName = "activationDate";
     public static final String nameParamName = "name";
     public static final String descriptionParamName = "description";
     public static final String currencyCodeParamName = "currencyCode";
@@ -55,9 +58,9 @@ public class SavingsApiConstants {
             "lockinPeriodFrequencyTypeOptions"));
 
     public static final Set<String> SAVINGS_ACCOUNT_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(localeParamName,
-            accountNoParamName, externalIdParamName, clientIdParamName, groupIdParamName, productIdParamName, interestRateParamName,
-            interestRatePeriodFrequencyTypeParamName, minRequiredOpeningBalanceParamName, lockinPeriodFrequencyParamName,
-            lockinPeriodFrequencyTypeParamName));
+            dateFormatParamName, accountNoParamName, externalIdParamName, clientIdParamName, groupIdParamName, productIdParamName,
+            activeParamName, activationDateParamName, interestRateParamName, interestRatePeriodFrequencyTypeParamName,
+            minRequiredOpeningBalanceParamName, lockinPeriodFrequencyParamName, lockinPeriodFrequencyTypeParamName));
 
     /**
      * These parameters will match the class level parameters of
@@ -65,14 +68,18 @@ public class SavingsApiConstants {
      * parameters to match those of request parameters.
      */
     public static final Set<String> SAVINGS_ACCOUNT_RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(idParamName,
-            accountNoParamName, externalIdParamName, clientIdParamName, "clientName", groupIdParamName, "groupName", "savingsProductId",
-            "savingsProductName", "currency", interestRateParamName, interestRatePeriodFrequencyTypeParamName, "annualInterestRate",
-            minRequiredOpeningBalanceParamName, lockinPeriodFrequencyParamName, lockinPeriodFrequencyTypeParamName, "summary",
-            "transactions", "productOptions", "interestRatePeriodFrequencyTypeOptions", "lockinPeriodFrequencyTypeOptions"));
+            accountNoParamName, externalIdParamName, statusParamName, activationDateParamName, clientIdParamName, "clientName",
+            groupIdParamName, "groupName", "savingsProductId", "savingsProductName", "currency", interestRateParamName,
+            interestRatePeriodFrequencyTypeParamName, "annualInterestRate", minRequiredOpeningBalanceParamName,
+            lockinPeriodFrequencyParamName, lockinPeriodFrequencyTypeParamName, "summary", "transactions", "productOptions",
+            "interestRatePeriodFrequencyTypeOptions", "lockinPeriodFrequencyTypeOptions"));
 
     public static final Set<String> SAVINGS_ACCOUNT_TRANSACTION_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(
             localeParamName, dateFormatParamName, transactionDateParamName, transactionAmountParamName));
 
     public static final Set<String> SAVINGS_TRANSACTION_RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(idParamName,
             "accountId", accountNoParamName, "currency", "amount"));
+
+    public static final Set<String> SAVINGS_ACCOUNT_ACTIVATION_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(localeParamName,
+            dateFormatParamName, activationDateParamName));
 }

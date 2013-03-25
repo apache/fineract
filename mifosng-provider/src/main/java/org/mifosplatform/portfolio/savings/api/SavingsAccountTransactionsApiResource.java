@@ -96,7 +96,10 @@ public class SavingsAccountTransactionsApiResource {
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         }
 
-        if (result == null) { throw new UnrecognizedQueryParamException("command", commandParam); }
+        if (result == null) {
+            // FIXME - KW - handle blank command param use case
+            throw new UnrecognizedQueryParamException("command", commandParam);
+        }
 
         return this.toApiJsonSerializer.serialize(result);
     }

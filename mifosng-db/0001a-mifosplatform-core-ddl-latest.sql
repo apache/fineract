@@ -729,6 +729,7 @@ CREATE TABLE `m_savings_product` (
   UNIQUE KEY `sp_unq_name` (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+
 CREATE TABLE `m_savings_account` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `account_no` varchar(20) NOT NULL,
@@ -736,6 +737,8 @@ CREATE TABLE `m_savings_account` (
   `client_id` bigint(20) DEFAULT NULL,
   `group_id` bigint(20) DEFAULT NULL,
   `product_id` bigint(20) DEFAULT NULL,
+  `status_enum` SMALLINT(5) NOT NULL DEFAULT 300,
+  `activation_date` DATE DEFAULT NULL,
   `currency_code` varchar(3) NOT NULL,
   `currency_digits` smallint(5) NOT NULL,
   `nominal_interest_rate_per_period` decimal(19,6) NOT NULL,
@@ -744,6 +747,7 @@ CREATE TABLE `m_savings_account` (
   `min_required_opening_balance` decimal(19,6) DEFAULT NULL,
   `lockin_period_frequency` decimal(19,6) DEFAULT NULL,
   `lockin_period_frequency_enum` smallint(5) DEFAULT NULL,
+  `lockedin_until_date_derived` DATE DEFAULT NULL,
   `total_deposits_derived` decimal(19,6) DEFAULT NULL,
   `total_withdrawals_derived` decimal(19,6) DEFAULT NULL,
   `total_interest_posted_derived` decimal(19,6) DEFAULT NULL,

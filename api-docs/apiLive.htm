@@ -7118,6 +7118,12 @@ Content-Type: application/json
 				<tr class=alt><td>externalId</td></tr>
 				<tr><td class=fielddesc>A place to put an external reference for this savings account e.g. The ID another system uses. If provided, it must be unique.</td></tr>
 
+				<tr class=alt><td>active</td></tr>
+				<tr><td class=fielddesc>Indicates whether this savings account should go into active state or not automatically</td></tr>
+
+				<tr class=alt><td>activationDate</td></tr>
+				<tr><td class=fielddesc>If <b>active</b> is true the <i>activationDate</i> must be provided. If the savings account has an entry for <i>minRequiredOpeningBalance</i> then a deposit for that amount with <i>activationDate</i> as the date is automatically entered.</td></tr>
+
 	            <tr class=alt><td>interestRate</td></tr>
 	            <tr><td class=fielddesc>The default interest rate set when creating savings accounts of this type of product. e.g. <b>5</b>% Per year</td></tr>
 
@@ -7257,7 +7263,7 @@ Content-Type: application/json
 	        <br/>
 	        <table class=matrixHeading>
 	            <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Mandatory Fields</div></td></tr>
-	            <tr class=alt><td>clientId or groupId, productId, accountNo, externalId</td></tr>
+	            <tr class=alt><td>clientId or groupId, productId, accountNo, externalId, active, (activationDate if active is true)</td></tr>
 	        </table>
 	        <br/>
 	        <table class=matrixHeading>
@@ -7273,27 +7279,29 @@ Content-Type: application/json
 	    <div class="method-example">
 	    	<p>Minimal request: accountNo auto generated, remaining details inherited from savings product.</p>
 	        <code class="method-declaration">POST https://Domain Name/api/v1/savingsaccounts</code>
-	        <code class="method-request">POST savingaccount
-Content-Type: application/json
-Request Body:
-{
-  "clientId": 1,
-  "productId": 1
-}
-			</code>
-			<p>Minimal request: accountNo provided (must be unique), remaining details inherited from savings product.</p>
-			<code class="method-request">POST savingaccount
+	        <code class="method-request">POST savingsaccount
 Content-Type: application/json
 Request Body:
 {
   "clientId": 1,
   "productId": 1,
+  "active": false
+}
+			</code>
+			<p>Minimal request: accountNo provided (must be unique), remaining details inherited from savings product.</p>
+			<code class="method-request">POST savingsaccount
+Content-Type: application/json
+Request Body:
+{
+  "clientId": 1,
+  "productId": 1,
+  "active": false,
   "accountNo": "SA000023",
   "externalId": "SYS-23"
 }
 			</code>
 			<p>Full request: accountNo provided (must be unique), remaining details override details from savings product (except currency).</p>
-			<code class="method-request">POST savingaccount
+			<code class="method-request">POST savingsaccount
 Content-Type: application/json
 Request Body:
 {
@@ -7301,7 +7309,10 @@ Request Body:
   "productId": 1,
   "accountNo": "SA000023",
   "externalId": "SYS-23",
-  "locale": "en", 
+  "active": true,
+  "locale": "en",
+  "dateFormat": "dd MMMM yyyy",
+  "activationDate": "01 March 2011", 
   "interestRate": "5.65", 
   "interestRatePeriodFrequencyType": 2,
   "minRequiredOpeningBalance": "1,000", 
@@ -7313,6 +7324,35 @@ Request Body:
 {
   "officeId": 1,
   "clientId": 1,
+  "savingsId": 1,
+  "resourceId": 1
+}
+	        </code>
+	    </div>
+	</div>
+
+	<a id="savingsaccounts_activate" name="savingsaccounts_activate" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Activate a Savings Account</h2>
+	        <p>Activates a savings account.</p>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">POST https://Domain Name/api/v1/savingsaccounts/{savingsId}?command=activate</code>
+	        <code class="method-request">POST savingsaccount/1?command=activate
+Content-Type: application/json
+Request Body:
+{
+  "locale": "en",
+  "dateFormat": "dd MMMM yyyy",
+  "activationDate": "01 March 2011"
+}
+			</code>
+	        <code class="method-response">
+{
+  "officeId": 1,
+  "clientId": 1,
+  "savingsId": 1,
   "resourceId": 1
 }
 	        </code>
@@ -11436,6 +11476,14 @@ Content-Type: application/json
 					<td><a href="#savingsaccounts_delete">Delete a Savings Account</a></td>
 				</tr>
 				<tr class="alt">
+					<td></td>
+					<td>savingsaccounts/{accountId}?command=activate</td>
+					<td><a href="#savingsaccounts_activate">Activate a Savings Account</a></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
 					<td><a href="#savingsaccounts_transactions">Savings Transactions</a></td>
 					<td>savingsaccounts/{accountId}/transactions?command=deposit</td>
 					<td><a href="#savingsaccounts_deposit">Make a Deposit</a></td>
@@ -11443,7 +11491,7 @@ Content-Type: application/json
 					<td></td>
 					<td></td>
 				</tr>
-				<tr>
+				<tr class="alt">
 					<td></td>
 					<td>savingsaccounts/{accountId}/transactions?command=withdrawal</td>
 					<td><a href="#savingsaccounts_withdrawal">Make a Withdrawal</a></td>
@@ -11467,7 +11515,6 @@ Content-Type: application/json
 					<td><a href="#offices_update">Update an Office</a></td>
 					<td></td>
 				</tr>
-				
 				<tr class="alt">
 					<td><a href="#configs">CURRENCY</a></td>
 					<td>currencies</td>

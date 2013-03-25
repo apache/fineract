@@ -45,7 +45,7 @@ public final class SavingsAccountSummary {
 
     public boolean isLessThanOrEqualToAccountBalance(final Money amount) {
         final Money accountBalance = getAccountBalance(amount.getCurrency());
-        return accountBalance.isGreaterThanOrEqualTo(accountBalance);
+        return accountBalance.isGreaterThanOrEqualTo(amount);
     }
 
     public Money getAccountBalance(final MonetaryCurrency currency) {

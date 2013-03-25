@@ -5,6 +5,8 @@
  */
 package org.mifosplatform.portfolio.savings.domain;
 
+import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.activationDateParamName;
+import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.activeParamName;
 import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.interestRateParamName;
 import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.interestRatePeriodFrequencyTypeParamName;
 import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.lockinPeriodFrequencyParamName;
@@ -12,7 +14,11 @@ import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.lockin
 import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.minRequiredOpeningBalanceParamName;
 
 import java.math.BigDecimal;
+import java.util.Locale;
 
+import org.joda.time.LocalDate;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.portfolio.client.domain.Client;
@@ -90,6 +96,9 @@ public class SavingsAccountAssembler {
             interestRate = product.interestRate();
         }
 
+        final boolean active = fromApiJsonHelper.extractBooleanNamed(activeParamName, element);
+        final LocalDate activationDate = fromApiJsonHelper.extractLocalDateNamed(activationDateParamName, element);
+
         PeriodFrequencyType interestRatePeriodFrequencyType = null;
         Integer interestRatePeriodFrequencyTypeValue = null;
         if (command.parameterExists(interestRatePeriodFrequencyTypeParamName)) {
@@ -128,10 +137,16 @@ public class SavingsAccountAssembler {
             lockinPeriodFrequencyType = product.lockinPeriodFrequencyType();
         }
 
-        final SavingsAccount account = SavingsAccount.createNewAccount(client, group, product, accountNo, externalId, interestRate,
-                interestRatePeriodFrequencyType, annualInterestRate, minRequiredOpeningBalance, lockinPeriodFrequency,
-                lockinPeriodFrequencyType);
+        final SavingsAccount account = SavingsAccount.createNewAccount(client, group, product, accountNo, externalId, active,
+                activationDate, interestRate, interestRatePeriodFrequencyType, annualInterestRate, minRequiredOpeningBalance,
+                lockinPeriodFrequency, lockinPeriodFrequencyType);
         account.setHelpers(this.savingsAccountTransactionSummaryWrapper);
+
+        if (account.isActive()) {
+            final Locale locale = command.extractLocale();
+            final DateTimeFormatter formatter = DateTimeFormat.forPattern(command.dateFormat()).withLocale(locale);
+            account.activate(formatter, activationDate);
+        }
 
         return account;
     }

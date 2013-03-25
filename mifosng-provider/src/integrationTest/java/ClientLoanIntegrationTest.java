@@ -1,4 +1,17 @@
 
+import static com.jayway.restassured.RestAssured.given;
+import static com.jayway.restassured.RestAssured.post;
+import static com.jayway.restassured.path.json.JsonPath.from;
+import static junit.framework.Assert.assertEquals;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Random;
+
+import org.junit.Before;
+import org.junit.Test;
+
 import com.google.gson.Gson;
 import com.jayway.restassured.builder.RequestSpecBuilder;
 import com.jayway.restassured.builder.ResponseSpecBuilder;
@@ -6,22 +19,11 @@ import com.jayway.restassured.http.ContentType;
 import com.jayway.restassured.path.json.JsonPath;
 import com.jayway.restassured.specification.RequestSpecification;
 import com.jayway.restassured.specification.ResponseSpecification;
-import org.junit.Before;
-import org.junit.Test;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Random;
-
-import static com.jayway.restassured.RestAssured.given;
-import static com.jayway.restassured.RestAssured.post;
-import static com.jayway.restassured.path.json.JsonPath.from;
-import static junit.framework.Assert.assertEquals;
 
 /**
  * Client Loan Integration Test for checking Loan Application Repayment Schedule.
  */
+@SuppressWarnings({ "rawtypes", "unchecked" })
 public class ClientLoanIntegrationTest {
     String basicAuthKey;
     ResponseSpecification responseSpec;
@@ -70,7 +72,7 @@ public class ClientLoanIntegrationTest {
         return  from(json).get("clientId");
     }
 
-    private void checkClientCreatedOnServer(Integer generatedClientID) {
+    private void checkClientCreatedOnServer(final Integer generatedClientID) {
         System.out.println("------------------------------CHECK CLIENT DETAILS------------------------------------\n");
         given().spec(requestSpec)
         .expect().spec(responseSpec)
@@ -86,14 +88,14 @@ public class ClientLoanIntegrationTest {
         return from(json).get("resourceId");
     }
 
-    private void applyForLoanApplication(Integer clientID, Integer loanProductID) {
+    private void applyForLoanApplication(final Integer clientID, final Integer loanProductID) {
         System.out.println("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
         given().spec(requestSpec).body(getLoanApplicationBodyAsJSON(clientID.toString(), loanProductID.toString()))
         .expect().spec(responseSpec)
         .when().post("/mifosng-provider/api/v1/loans?tenantIdentifier=default");
     }
 
-    private ArrayList  getLoanRepaymentSchedule(Integer productID)
+    private ArrayList  getLoanRepaymentSchedule(final Integer productID)
     {
         System.out.println("---------------------------GETTING LOAN REPAYMENT SCHEDULE--------------------------------");
        String json = given().spec(requestSpec).body(getLoanCalculationBodyAsJSON(productID.toString()))
@@ -102,7 +104,7 @@ public class ClientLoanIntegrationTest {
         return from(json).get("periods");
     }
 
-    private void verifyLoanRepaymentSchedule(ArrayList<HashMap> loanSchedule) {
+    private void verifyLoanRepaymentSchedule(final ArrayList<HashMap> loanSchedule) {
         System.out.println("--------------------VERIFYING THE PRINCIPAL DUES,INTEREST DUE AND DUE DATE--------------------------");
         
         assertEquals("Checking for Due Date for 1st Month",new ArrayList<Integer>(Arrays.asList(2011, 10, 20)),loanSchedule.get(1).get("dueDate"));
@@ -156,7 +158,7 @@ public class ClientLoanIntegrationTest {
         return new Gson().toJson(map);
     }
 
-    private String getLoanApplicationBodyAsJSON(String clientID,String productID){
+    private String getLoanApplicationBodyAsJSON(final String clientID,final String productID){
         HashMap<String, String> map = new HashMap<String, String>();
         map.put("dateFormat", "dd MMMM yyyy");
         map.put("locale", "en_GB");
@@ -179,7 +181,7 @@ public class ClientLoanIntegrationTest {
         return new Gson().toJson(map);
     }
 
-    private String getLoanCalculationBodyAsJSON(String productID){
+    private String getLoanCalculationBodyAsJSON(final String productID){
          HashMap<String, String> map = new HashMap<String, String>();
          map.put("dateFormat", "dd MMMM yyyy");
          map.put("locale", "en_GB");
@@ -200,15 +202,15 @@ public class ClientLoanIntegrationTest {
          return new Gson().toJson(map);
      }
 
-    public String randomIDGenerator(String prefix, int lenOfRandomSuffix) {
+    public String randomIDGenerator(final String prefix, final int lenOfRandomSuffix) {
         return randomStringGenerator(prefix,lenOfRandomSuffix, "ABCDEFGHIJKLMNOPQRSTUVWXYZ");
     }
 
-    public String randomNameGenerator(String prefix, int lenOfRandomSuffix) {
+    public String randomNameGenerator(final String prefix, final int lenOfRandomSuffix) {
         return randomStringGenerator(prefix,lenOfRandomSuffix, "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ");
     }
 
-    private String randomStringGenerator(String prefix,int len, String sourceSetString) {
+    private String randomStringGenerator(final String prefix,final int len, final String sourceSetString) {
         int lengthOfSource = sourceSetString.length();
         Random rnd = new Random();
         StringBuilder sb = new StringBuilder(len);

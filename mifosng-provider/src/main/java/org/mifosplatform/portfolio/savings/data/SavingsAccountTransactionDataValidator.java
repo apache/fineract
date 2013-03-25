@@ -1,5 +1,6 @@
 package org.mifosplatform.portfolio.savings.data;
 
+import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.activationDateParamName;
 import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.transactionAmountParamName;
 import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.transactionDateParamName;
 
@@ -54,7 +55,28 @@ public class SavingsAccountTransactionDataValidator {
         baseDataValidator.reset().parameter(transactionDateParamName).value(transactionDate).notNull();
 
         final BigDecimal transactionAmount = fromApiJsonHelper.extractBigDecimalWithLocaleNamed(transactionAmountParamName, element);
-        baseDataValidator.reset().parameter(transactionAmountParamName).value(transactionAmount).notNull().zeroOrPositiveAmount();
+        baseDataValidator.reset().parameter(transactionAmountParamName).value(transactionAmount).notNull().positiveAmount();
+
+        throwExceptionIfValidationWarningsExist(dataValidationErrors);
+    }
+
+    public void validateActivation(final JsonCommand command) {
+        final String json = command.json();
+
+        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,
+                SavingsApiConstants.SAVINGS_ACCOUNT_ACTIVATION_REQUEST_DATA_PARAMETERS);
+
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+                .resource(SavingsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME);
+
+        final JsonElement element = command.parsedJson();
+
+        final LocalDate activationDate = fromApiJsonHelper.extractLocalDateNamed(activationDateParamName, element);
+        baseDataValidator.reset().parameter(activationDateParamName).value(activationDate).notNull();
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
