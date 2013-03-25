@@ -366,13 +366,17 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
          */
 
         AppUser currentUser = context.authenticatedUser();
-        if (appTable.equalsIgnoreCase("m_client")) {
-            dataScopeCriteria = " join m_office o on o.id = t.office_id and o.hierarchy like '" + currentUser.getOffice().getHierarchy()
-                    + "%'";
-        }
         if (appTable.equalsIgnoreCase("m_loan")) {
             dataScopeCriteria = " join m_client c on c.id = t.client_id " + " join m_office o on o.id = c.office_id and o.hierarchy like '"
                     + currentUser.getOffice().getHierarchy() + "%'";
+        }
+        if (appTable.equalsIgnoreCase("m_savings_account")) {
+            dataScopeCriteria = " join m_client c on c.id = t.client_id " + " join m_office o on o.id = c.office_id and o.hierarchy like '"
+                    + currentUser.getOffice().getHierarchy() + "%'";
+        }
+        if (appTable.equalsIgnoreCase("m_client")) {
+            dataScopeCriteria = " join m_office o on o.id = t.office_id and o.hierarchy like '" + currentUser.getOffice().getHierarchy()
+                    + "%'";
         }
          if (appTable.equalsIgnoreCase("m_group")) {
             dataScopeCriteria = " join m_office o on o.id = t.office_id and o.hierarchy like '"
@@ -392,8 +396,9 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
 
     private void validateAppTable(final String appTable) {
 
-        if (appTable.equalsIgnoreCase("m_client")) return;
         if (appTable.equalsIgnoreCase("m_loan")) return;
+        if (appTable.equalsIgnoreCase("m_savings_account")) return;
+        if (appTable.equalsIgnoreCase("m_client")) return;
         if (appTable.equalsIgnoreCase("m_group")) return;
         if (appTable.equalsIgnoreCase("m_office")) return;
 
