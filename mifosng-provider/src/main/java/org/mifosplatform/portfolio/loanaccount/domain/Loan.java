@@ -770,7 +770,8 @@ public class Loan extends AbstractPersistable<Long> {
             this.summaryArrearsAging = null;
         } else {
             final Money principal = this.loanRepaymentScheduleDetail.getPrincipal();
-            this.summary.updateSummary(loanCurrency(), principal, this.repaymentScheduleInstallments, this.loanSummaryWrapper);
+            this.summary.updateSummary(loanCurrency(), principal, this.repaymentScheduleInstallments, this.loanSummaryWrapper,
+                    isDisbursed());
             if (this.summaryArrearsAging == null) {
                 this.summaryArrearsAging = new LoanSummaryArrearsAging(this);
             }

@@ -130,7 +130,7 @@ public final class LoanSummary {
     public boolean isRepaidInFull(final MonetaryCurrency currency) {
         return getTotalOutstanding(currency).isZero();
     }
-    
+
     public BigDecimal getTotalInterestCharged() {
         return this.totalInterestCharged;
     }
@@ -169,7 +169,8 @@ public final class LoanSummary {
     }
 
     public void updateSummary(final MonetaryCurrency currency, final Money principal,
-            final List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments, final LoanSummaryWrapper summaryWrapper) {
+            final List<LoanRepaymentScheduleInstallment> repaymentScheduleInstallments, final LoanSummaryWrapper summaryWrapper,
+            final Boolean disbursed) {
 
         this.totalPrincipalDisbursed = principal.getAmount();
         this.totalPrincipalRepaid = summaryWrapper.calculateTotalPrincipalRepaid(repaymentScheduleInstallments, currency).getAmount();
@@ -189,9 +190,16 @@ public final class LoanSummary {
                     .minus(this.totalInterestWrittenOff).getAmount();
         }
 
-        final Money totalFeeChargesCharged = summaryWrapper.calculateTotalFeeChargesCharged(repaymentScheduleInstallments, currency);
+        final Money totalFeeChargesCharged = summaryWrapper.calculateTotalFeeChargesCharged(repaymentScheduleInstallments, currency).plus(
+                this.totalFeeChargesDueAtDisbursement);
         this.totalFeeChargesCharged = totalFeeChargesCharged.getAmount();
-        this.totalFeeChargesRepaid = summaryWrapper.calculateTotalFeeChargesRepaid(repaymentScheduleInstallments, currency).getAmount();
+
+        Money totalFeeChargesRepaid = summaryWrapper.calculateTotalFeeChargesRepaid(repaymentScheduleInstallments, currency);
+        if (disbursed) {
+            totalFeeChargesRepaid = totalFeeChargesRepaid.plus(this.totalFeeChargesDueAtDisbursement);
+        }
+        this.totalFeeChargesRepaid = totalFeeChargesRepaid.getAmount();
+
         this.totalFeeChargesWaived = summaryWrapper.calculateTotalFeeChargesWaived(repaymentScheduleInstallments, currency).getAmount();
         this.totalFeeChargesWrittenOff = summaryWrapper.calculateTotalFeeChargesWrittenOff(repaymentScheduleInstallments, currency)
                 .getAmount();
