@@ -33,6 +33,7 @@ import org.mifosplatform.infrastructure.dataqueries.data.GenericResultsetData;
 import org.mifosplatform.infrastructure.dataqueries.data.ResultsetColumnHeaderData;
 import org.mifosplatform.infrastructure.dataqueries.data.ResultsetRowData;
 import org.mifosplatform.infrastructure.dataqueries.exception.DatatableNotFoundException;
+import org.mifosplatform.infrastructure.dataqueries.exception.DatatableSystemErrorException;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.useradministration.domain.AppUser;
 import org.slf4j.Logger;
@@ -384,7 +385,6 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         final String sql = dataScopedSQL(appTable, appTableId);
 logger.info("data scoped sql: " + sql);
         final SqlRowSet rs = this.jdbcTemplate.queryForRowSet(sql);
-
         
         if (!rs.next()) { throw new DatatableNotFoundException(appTable, appTableId); }
 
@@ -393,6 +393,8 @@ logger.info("data scoped sql: " + sql);
         Long clientId = getLongSqlRowSet(rs, "clientId");
         Long savingsId = getLongSqlRowSet(rs, "savingsId");
         Long LoanId = getLongSqlRowSet(rs, "loanId");
+        
+        if (rs.next()) { throw new DatatableSystemErrorException("System Error: More than one row returned from data scoping query"); }
                 
         return new CommandProcessingResultBuilder() //
         					.withOfficeId(officeId) //
@@ -413,27 +415,46 @@ logger.info("data scoped sql: " + sql);
     private String dataScopedSQL(final String appTable, final Long appTableId) {
         /*
          * unfortunately have to, one way or another, be able to restrict data
-         * to the users office hierarchy. Here it's hardcoded for client and
-         * loan. They are the main application tables. But if additional fields
-         * are needed on other tables like group, loan_transaction or others the
-         * same applies (hardcoding of some sort)
+         * to the users office hierarchy. Here, a few key tables are done.
+         * But if additional fields are needed on other tables the
+         * same pattern applies
          */
 
         AppUser currentUser = context.authenticatedUser();
         String scopedSQL = null;
+        /*
+         * m_loan and m_savings_account are connected to an m_office thru either an m_client or an m_group 
+         * If both it means it relates to an m_client that is in a group (still an m_client account)
+         */
         if (appTable.equalsIgnoreCase("m_loan")) {
-        	scopedSQL = "select o.id as officeId, null as groupId, c.id as clientId, null as savingsId, l.id as loanId from m_loan l " +
+        	scopedSQL = "select  distinctrow x.* from (" +
+        			" (select o.id as officeId, l.group_id as groupId, l.client_id as clientId, null as savingsId, l.id as loanId from m_loan l " +
         			" join m_client c on c.id = l.client_id " + 
         			" join m_office o on o.id = c.office_id and o.hierarchy like '" +
                     currentUser.getOffice().getHierarchy() + "%'" +
-        			" where l.id = " + appTableId;
+        			" where l.id = " + appTableId + ")" +
+                    " union all " +
+        			" (select o.id as officeId, l.group_id as groupId, l.client_id as clientId, null as savingsId, l.id as loanId from m_loan l " +
+        			" join m_group g on g.id = l.group_id " + 
+        			" join m_office o on o.id = g.office_id and o.hierarchy like '" +
+                    currentUser.getOffice().getHierarchy() + "%'" +
+        			" where l.id = " + appTableId + ")" +
+        			" ) x";
         }
         if (appTable.equalsIgnoreCase("m_savings_account")) {
-        	scopedSQL = "select o.id as officeId, null as groupId, c.id as clientId, s.id as savingsId, null as loanId from m_savings_account s " +
+        	scopedSQL = "select  distinctrow x.* from (" +
+        			" (select o.id as officeId, s.group_id as groupId, s.client_id as clientId, s.id as savingsId, null as loanId from m_savings_account s " +
         			" join m_client c on c.id = s.client_id " + 
         			" join m_office o on o.id = c.office_id and o.hierarchy like '" +
                     currentUser.getOffice().getHierarchy() + "%'" +
-        			" where s.id = " + appTableId;
+        			" where s.id = " + appTableId+ ")" +
+                    " union all " +
+        			" (select o.id as officeId, s.group_id as groupId, s.client_id as clientId, s.id as savingsId, null as loanId from m_savings_account s " +
+        			" join m_group g on g.id = s.group_id " + 
+        			" join m_office o on o.id = g.office_id and o.hierarchy like '" +
+                    currentUser.getOffice().getHierarchy() + "%'" +
+        			" where s.id = " + appTableId+ ")" +
+        			" ) x";
         }
         if (appTable.equalsIgnoreCase("m_client")) {
         	scopedSQL = "select o.id as officeId, null as groupId, c.id as clientId, null as savingsId, null as loanId from m_client c " +
