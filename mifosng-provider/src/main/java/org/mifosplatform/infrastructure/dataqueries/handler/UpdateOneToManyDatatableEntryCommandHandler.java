@@ -5,8 +5,6 @@
  */
 package org.mifosplatform.infrastructure.dataqueries.handler;
 
-import java.util.Map;
-
 import org.mifosplatform.commands.handler.NewCommandSourceHandler;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
@@ -30,9 +28,18 @@ public class UpdateOneToManyDatatableEntryCommandHandler implements NewCommandSo
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
 
-        final Map<String, Object> changes = this.writePlatformService.updateDatatableEntryOneToMany(command.entityName(),
+        final CommandProcessingResult commandProcessingResult = this.writePlatformService.updateDatatableEntryOneToMany(command.entityName(),
                 command.entityId(), command.subentityId(), command);
 
-        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(command.entityId()).with(changes).build();
+        return new CommandProcessingResultBuilder() //
+        .withCommandId(command.commandId()) //
+        .withEntityId(command.entityId()) //
+		.withOfficeId(commandProcessingResult.getOfficeId()) //
+		.withGroupId(commandProcessingResult.getGroupId()) //
+		.withClientId(commandProcessingResult.getClientId()) //
+		.withSavingsId(commandProcessingResult.getSavingsId()) //
+		.withLoanId(commandProcessingResult.getLoanId()) //        
+		.with(commandProcessingResult.getChanges()) //
+        .build();
     }
 }

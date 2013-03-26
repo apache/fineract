@@ -21,6 +21,8 @@ import org.hibernate.exception.ConstraintViolationException;
 import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.ApiParameterError;
+import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
+import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
@@ -108,7 +110,6 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
     @Override
     public void registerDatatable(final String dataTableName, final String applicationTableName) {
 
-        // FIXME - KW - hardcoded supported app tables are m_loan or m_client?
         validateAppTable(applicationTableName);
 
         final String registerDatatableSql = "insert into x_registered_table (registered_table_name, application_table_name) values ('"
@@ -197,10 +198,11 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
 
     @Transactional
     @Override
-    public void createNewDatatableEntry(final String dataTableName, final Long appTableId, final JsonCommand command) {
+    public CommandProcessingResult createNewDatatableEntry(final String dataTableName, final Long appTableId, final JsonCommand command) {
 
         try {
-            final String appTable = getWithinScopeApplicationTableName(dataTableName, appTableId);
+            final String appTable = queryForApplicationTableName(dataTableName);
+            CommandProcessingResult commandProcessingResult = checkMainResourceExistsWithinScope(appTable, appTableId);
 
             final List<ResultsetColumnHeaderData> columnHeaders = this.genericDataService.fillResultsetColumnHeaders(dataTableName);
 
@@ -210,6 +212,9 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             final String sql = getAddSql(columnHeaders, dataTableName, getFKField(appTable), appTableId, dataParams);
 
             this.jdbcTemplate.update(sql);
+            
+            return commandProcessingResult; //
+            
         } catch (ConstraintViolationException dve) {
             // NOTE: jdbctemplate throws a
             // org.hibernate.exception.ConstraintViolationException even though
@@ -236,103 +241,112 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
 
     @Transactional
     @Override
-    public Map<String, Object> updateDatatableEntryOneToOne(final String datatable, final Long appTableId, final JsonCommand command) {
+    public CommandProcessingResult updateDatatableEntryOneToOne(final String dataTableName, final Long appTableId, final JsonCommand command) {
 
-        final GenericResultsetData grs = retrieveDataTableGenericResultSet(datatable, appTableId, null, null);
+    	return updateDatatableEntry(dataTableName, appTableId, null, command);
+    }
 
-        if (grs.hasNoEntries()) { throw new DatatableNotFoundException(datatable, appTableId); }
+    @Transactional
+    @Override
+    public CommandProcessingResult updateDatatableEntryOneToMany(final String dataTableName, final Long appTableId, final Long datatableId,
+            final JsonCommand command) {
 
+    	return updateDatatableEntry(dataTableName, appTableId, datatableId, command);
+    }
+    
+
+    private CommandProcessingResult updateDatatableEntry(final String dataTableName, final Long appTableId, final Long datatableId,
+            final JsonCommand command) {
+    	
+        final String appTable = queryForApplicationTableName(dataTableName);
+        CommandProcessingResult commandProcessingResult = checkMainResourceExistsWithinScope(appTable, appTableId);
+        
+        final GenericResultsetData grs = retrieveDataTableGenericResultSetForUpdate(appTable, dataTableName, appTableId, datatableId);
+    	
+        if (grs.hasNoEntries()) { throw new DatatableNotFoundException(dataTableName, appTableId); }
+    	
         if (grs.hasMoreThanOneEntry()) { throw new PlatformDataIntegrityException("error.msg.attempting.multiple.update",
-                "Application table: " + datatable + " Foreign key id: " + appTableId); }
-
-        final String fkName = getFKField(queryForApplicationTableName(datatable));
-
+                "Application table: " + dataTableName + " Foreign key id: " + appTableId); }
+    	
         final Type typeOfMap = new TypeToken<Map<String, String>>() {}.getType();
         Map<String, String> dataParams = this.fromJsonHelper.extractDataMap(typeOfMap, command.json());
 
-        final Map<String, Object> changes = getAffectedAndChangedColumns(grs, dataParams, fkName);
+        String pkName = "id"; //1:M datatable
+        if (datatableId == null) { pkName = getFKField(appTable);} //1:1 datatable
+        
+        final Map<String, Object> changes = getAffectedAndChangedColumns(grs, dataParams, pkName);
 
         if (!changes.isEmpty()) {
-            final String updateOneToOneDatatableSql = getUpdateSql(datatable, fkName, appTableId, changes);
-
-            if (StringUtils.isNotBlank(updateOneToOneDatatableSql)) {
-                this.jdbcTemplate.update(updateOneToOneDatatableSql);
+        	Long pkValue = appTableId;
+        	if (datatableId != null) { pkValue = datatableId;}
+            final String sql = getUpdateSql(dataTableName, pkName, pkValue, changes);
+            logger.info("Update sql: " + sql);
+            if (StringUtils.isNotBlank(sql)) {
+                this.jdbcTemplate.update(sql);
                 changes.put("locale", dataParams.get("locale"));
                 changes.put("dateFormat", "yyyy-MM-dd");
-            }
+            } else {
+            	logger.info("No Changes");
+    		}
         }
 
-        return changes;
+        return new CommandProcessingResultBuilder() //
+		.withOfficeId(commandProcessingResult.getOfficeId()) //
+		.withGroupId(commandProcessingResult.getGroupId()) //
+		.withClientId(commandProcessingResult.getClientId()) //
+		.withSavingsId(commandProcessingResult.getSavingsId()) //
+		.withLoanId(commandProcessingResult.getLoanId()) //        
+		.with(changes) //
+        .build();      
     }
+    
 
     @Transactional
     @Override
-    public Map<String, Object> updateDatatableEntryOneToMany(final String datatable, final Long appTableId, final Long datatableId,
-            final JsonCommand command) {
+    public CommandProcessingResult deleteDatatableEntries(final String dataTableName, final Long appTableId) {
 
-        final GenericResultsetData grs = retrieveDataTableGenericResultSet(datatable, appTableId, null, datatableId);
+        final String appTable = queryForApplicationTableName(dataTableName);
+        CommandProcessingResult commandProcessingResult = checkMainResourceExistsWithinScope(appTable, appTableId);
+        
 
-        if (grs.getData().size() == 0) throw new DatatableNotFoundException(datatable, appTableId);
-
-        final Type typeOfMap = new TypeToken<Map<String, String>>() {}.getType();
-        final Map<String, String> dataParams = this.fromJsonHelper.extractDataMap(typeOfMap, command.json());
-
-        final Map<String, Object> changes = getAffectedAndChangedColumns(grs, dataParams, "id");
-
-        if (changes.size() == 0) return changes;
-
-        final String sql = getUpdateSql(datatable, "id", datatableId, changes);
-
-        if (StringUtils.isNotBlank(sql)) {
-            this.jdbcTemplate.update(sql);
-            changes.put("locale", dataParams.get("locale"));
-            changes.put("dateFormat", "yyyy-MM-dd");
-        } else {
-            logger.info("No Changes");
-        }
-
-        return changes;
-    }
-
-    @Transactional
-    @Override
-    public void deleteDatatableEntries(final String datatable, final Long appTableId) {
-
-        final String appTable = getWithinScopeApplicationTableName(datatable, appTableId);
-
-        final String deleteOneToOneEntrySql = getDeleteEntriesSql(datatable, getFKField(appTable), appTableId);
+        final String deleteOneToOneEntrySql = getDeleteEntriesSql(dataTableName, getFKField(appTable), appTableId);
 
         int rowsDeleted = this.jdbcTemplate.update(deleteOneToOneEntrySql);
-        if (rowsDeleted < 1) { throw new DatatableNotFoundException(datatable, appTableId); }
+        if (rowsDeleted < 1) { throw new DatatableNotFoundException(dataTableName, appTableId); }
+        
+        return commandProcessingResult;
     }
 
     @Transactional
     @Override
-    public void deleteDatatableEntry(final String datatable, final Long appTableId, final Long datatableId) {
+    public CommandProcessingResult deleteDatatableEntry(final String dataTableName, final Long appTableId, final Long datatableId) {
 
-        getWithinScopeApplicationTableName(datatable, appTableId);
+        final String appTable = queryForApplicationTableName(dataTableName);
+        CommandProcessingResult commandProcessingResult = checkMainResourceExistsWithinScope(appTable, appTableId);
 
-        final String sql = getDeleteEntrySql(datatable, datatableId);
+        final String sql = getDeleteEntrySql(dataTableName, datatableId);
 
         this.jdbcTemplate.update(sql);
+        return commandProcessingResult;
     }
 
     @Override
-    public GenericResultsetData retrieveDataTableGenericResultSet(final String datatable, final Long appTableId, final String order,
+    public GenericResultsetData retrieveDataTableGenericResultSet(final String dataTableName, final Long appTableId, final String order,
             final Long id) {
 
-        final String appTable = getWithinScopeApplicationTableName(datatable, appTableId);
+        final String appTable = queryForApplicationTableName(dataTableName);
+        checkMainResourceExistsWithinScope(appTable, appTableId);
 
-        final List<ResultsetColumnHeaderData> columnHeaders = this.genericDataService.fillResultsetColumnHeaders(datatable);
+        final List<ResultsetColumnHeaderData> columnHeaders = this.genericDataService.fillResultsetColumnHeaders(dataTableName);
 
         String sql = "";
 
         // id only used for reading a specific entry in a one to many datatable
         // (when updating)
         if (id == null) {
-            sql = sql + "select * from `" + datatable + "` where " + getFKField(appTable) + " = " + appTableId;
+            sql = sql + "select * from `" + dataTableName + "` where " + getFKField(appTable) + " = " + appTableId;
         } else {
-            sql = sql + "select * from `" + datatable + "` where id = " + id;
+            sql = sql + "select * from `" + dataTableName + "` where id = " + id;
         }
 
         if (order != null) {
@@ -343,20 +357,60 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
 
         return new GenericResultsetData(columnHeaders, result);
     }
+    
 
-    private void checkMainResourceExistsWithinScope(final String appTable, final Long appTableId) {
+    private GenericResultsetData retrieveDataTableGenericResultSetForUpdate(final String appTable, String dataTableName, final Long appTableId, 
+            final Long id) {
 
-        final String unscopedSql = "select t.id from `" + appTable + "` t ${dataScopeCriteria} where t.id = " + appTableId;
+        final List<ResultsetColumnHeaderData> columnHeaders = this.genericDataService.fillResultsetColumnHeaders(dataTableName);
 
-        final String sql = dataScopedSQL(unscopedSql, appTable);
+        String sql = "";
 
-        final SqlRowSet rs = this.jdbcTemplate.queryForRowSet(sql);
+        // id only used for reading a specific entry in a one to many datatable
+        // (when updating)
+        if (id == null) {
+            sql = sql + "select * from `" + dataTableName + "` where " + getFKField(appTable) + " = " + appTableId;
+        } else {
+            sql = sql + "select * from `" + dataTableName + "` where id = " + id;
+        }
 
-        if (!rs.next()) { throw new DatatableNotFoundException(appTable, appTableId); }
+        final List<ResultsetRowData> result = fillDatatableResultSetDataRows(sql);
+
+        return new GenericResultsetData(columnHeaders, result);
     }
 
-    private String dataScopedSQL(final String unscopedSQL, final String appTable) {
-        String dataScopeCriteria = null;
+    private CommandProcessingResult checkMainResourceExistsWithinScope(final String appTable, final Long appTableId) {
+
+        final String sql = dataScopedSQL(appTable, appTableId);
+logger.info("data scoped sql: " + sql);
+        final SqlRowSet rs = this.jdbcTemplate.queryForRowSet(sql);
+
+        
+        if (!rs.next()) { throw new DatatableNotFoundException(appTable, appTableId); }
+
+        Long officeId = getLongSqlRowSet(rs, "officeId");
+        Long groupId = getLongSqlRowSet(rs, "groupId");
+        Long clientId = getLongSqlRowSet(rs, "clientId");
+        Long savingsId = getLongSqlRowSet(rs, "savingsId");
+        Long LoanId = getLongSqlRowSet(rs, "loanId");
+                
+        return new CommandProcessingResultBuilder() //
+        					.withOfficeId(officeId) //
+        					.withGroupId(groupId) //
+        					.withClientId(clientId) //
+        					.withSavingsId(savingsId) //
+        					.withLoanId(LoanId) //        
+        					.build();
+    }
+    
+    private Long getLongSqlRowSet(SqlRowSet rs, String column) {
+        Long val = rs.getLong(column);
+        if (val == 0) val = null;
+    	return val;
+    }
+    
+
+    private String dataScopedSQL(final String appTable, final Long appTableId) {
         /*
          * unfortunately have to, one way or another, be able to restrict data
          * to the users office hierarchy. Here it's hardcoded for client and
@@ -366,31 +420,44 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
          */
 
         AppUser currentUser = context.authenticatedUser();
+        String scopedSQL = null;
         if (appTable.equalsIgnoreCase("m_loan")) {
-            dataScopeCriteria = " join m_client c on c.id = t.client_id " + " join m_office o on o.id = c.office_id and o.hierarchy like '"
-                    + currentUser.getOffice().getHierarchy() + "%'";
+        	scopedSQL = "select o.id as officeId, null as groupId, c.id as clientId, null as savingsId, l.id as loanId from m_loan l " +
+        			" join m_client c on c.id = l.client_id " + 
+        			" join m_office o on o.id = c.office_id and o.hierarchy like '" +
+                    currentUser.getOffice().getHierarchy() + "%'" +
+        			" where l.id = " + appTableId;
         }
         if (appTable.equalsIgnoreCase("m_savings_account")) {
-            dataScopeCriteria = " join m_client c on c.id = t.client_id " + " join m_office o on o.id = c.office_id and o.hierarchy like '"
-                    + currentUser.getOffice().getHierarchy() + "%'";
+        	scopedSQL = "select o.id as officeId, null as groupId, c.id as clientId, s.id as savingsId, null as loanId from m_savings_account s " +
+        			" join m_client c on c.id = s.client_id " + 
+        			" join m_office o on o.id = c.office_id and o.hierarchy like '" +
+                    currentUser.getOffice().getHierarchy() + "%'" +
+        			" where s.id = " + appTableId;
         }
         if (appTable.equalsIgnoreCase("m_client")) {
-            dataScopeCriteria = " join m_office o on o.id = t.office_id and o.hierarchy like '" + currentUser.getOffice().getHierarchy()
-                    + "%'";
+        	scopedSQL = "select o.id as officeId, null as groupId, c.id as clientId, null as savingsId, null as loanId from m_client c " +
+        			" join m_office o on o.id = c.office_id and o.hierarchy like '" +
+                    currentUser.getOffice().getHierarchy() + "%'" +
+        			" where c.id = " + appTableId;
         }
          if (appTable.equalsIgnoreCase("m_group")) {
-            dataScopeCriteria = " join m_office o on o.id = t.office_id and o.hierarchy like '"
-                    + currentUser.getOffice().getHierarchy() + "%'";
+        	scopedSQL = "select o.id as officeId, g.id as groupId, null as clientId, null as savingsId, null as loanId from m_group g " +
+        			" join m_office o on o.id = g.office_id and o.hierarchy like '" +
+                    currentUser.getOffice().getHierarchy() + "%'" +
+        			" where g.id = " + appTableId;
         }   
         if (appTable.equalsIgnoreCase("m_office")) {
-            dataScopeCriteria = " join m_office o on o.id = t.id and o.hierarchy like '"
-                    + currentUser.getOffice().getHierarchy() + "%'";
+        	scopedSQL = "select o.id as officeId, null as groupId, null as clientId, null as savingsId, null as loanId from m_office o " +
+        			" where o.hierarchy like '" +
+                    currentUser.getOffice().getHierarchy() + "%'" +
+        			" and o.id = " + appTableId;
         }        
 
-        if (dataScopeCriteria == null) { throw new PlatformDataIntegrityException("error.msg.invalid.dataScopeCriteria",
+        if (scopedSQL == null) { throw new PlatformDataIntegrityException("error.msg.invalid.dataScopeCriteria",
                 "Application Table: " + appTable + " not catered for in data Scoping"); }
 
-        return genericDataService.replace(unscopedSQL, "${dataScopeCriteria}", dataScopeCriteria);
+        return scopedSQL;
 
     }
 
@@ -426,14 +493,6 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         }
 
         return resultsetDataRows;
-    }
-
-    private String getWithinScopeApplicationTableName(final String datatable, final Long appTableId) {
-
-        final String applicationTableName = queryForApplicationTableName(datatable);
-        checkMainResourceExistsWithinScope(applicationTableName, appTableId);
-
-        return applicationTableName;
     }
 
     private String queryForApplicationTableName(final String datatable) {
