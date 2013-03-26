@@ -45,11 +45,12 @@ import org.mifosplatform.organisation.staff.data.StaffData;
 import org.mifosplatform.organisation.staff.service.StaffReadPlatformService;
 import org.mifosplatform.portfolio.charge.data.ChargeData;
 import org.mifosplatform.portfolio.charge.service.ChargeReadPlatformService;
+import org.mifosplatform.portfolio.collateral.data.CollateralData;
+import org.mifosplatform.portfolio.collateral.service.CollateralReadPlatformService;
 import org.mifosplatform.portfolio.fund.data.FundData;
 import org.mifosplatform.portfolio.fund.service.FundReadPlatformService;
 import org.mifosplatform.portfolio.loanaccount.data.LoanAccountData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanChargeData;
-import org.mifosplatform.portfolio.loanaccount.data.LoanCollateralData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanTransactionData;
 import org.mifosplatform.portfolio.loanaccount.data.RepaymentScheduleRelatedLoanData;
 import org.mifosplatform.portfolio.loanaccount.guarantor.data.GuarantorData;
@@ -57,7 +58,6 @@ import org.mifosplatform.portfolio.loanaccount.guarantor.service.GuarantorReadPl
 import org.mifosplatform.portfolio.loanaccount.loanschedule.data.LoanScheduleData;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.service.LoanScheduleCalculationPlatformService;
 import org.mifosplatform.portfolio.loanaccount.service.LoanChargeReadPlatformService;
-import org.mifosplatform.portfolio.loanaccount.service.LoanCollateralReadPlatformService;
 import org.mifosplatform.portfolio.loanaccount.service.LoanReadPlatformService;
 import org.mifosplatform.portfolio.loanproduct.data.LoanProductData;
 import org.mifosplatform.portfolio.loanproduct.data.TransactionProcessingStrategyData;
@@ -96,7 +96,7 @@ public class LoansApiResource {
     private final FundReadPlatformService fundReadPlatformService;
     private final ChargeReadPlatformService chargeReadPlatformService;
     private final LoanChargeReadPlatformService loanChargeReadPlatformService;
-    private final LoanCollateralReadPlatformService loanCollateralReadPlatformService;
+    private final CollateralReadPlatformService loanCollateralReadPlatformService;
     private final LoanScheduleCalculationPlatformService calculationPlatformService;
     private final StaffReadPlatformService staffReadPlatformService;
     private final GuarantorReadPlatformService guarantorReadPlatformService;
@@ -113,7 +113,7 @@ public class LoansApiResource {
             final LoanProductReadPlatformService loanProductReadPlatformService,
             final LoanDropdownReadPlatformService dropdownReadPlatformService, final FundReadPlatformService fundReadPlatformService,
             final ChargeReadPlatformService chargeReadPlatformService, final LoanChargeReadPlatformService loanChargeReadPlatformService,
-            final LoanCollateralReadPlatformService loanCollateralReadPlatformService,
+            final CollateralReadPlatformService loanCollateralReadPlatformService,
             final LoanScheduleCalculationPlatformService calculationPlatformService,
             final StaffReadPlatformService staffReadPlatformService, final GuarantorReadPlatformService guarantorReadPlatformService,
             final CodeValueReadPlatformService codeValueReadPlatformService,
@@ -157,7 +157,7 @@ public class LoansApiResource {
         // associations
         final LoanScheduleData repaymentSchedule = null;
         final Collection<LoanTransactionData> loanRepayments = null;
-        final Collection<LoanCollateralData> collateral = null;
+        final Collection<CollateralData> collateral = null;
         final Collection<GuarantorData> guarantors = null;
 
         // options
@@ -245,7 +245,7 @@ public class LoansApiResource {
         LoanScheduleData repaymentSchedule = null;
         Collection<LoanChargeData> charges = null;
         Collection<GuarantorData> guarantors = null;
-        Collection<LoanCollateralData> collateral = null;
+        Collection<CollateralData> collateral = null;
 
         final Set<String> mandatoryResponseParameters = new HashSet<String>();
         final Set<String> associationParameters = ApiParameterHelper.extractAssociationsForResponseIfProvided(uriInfo.getQueryParameters());
@@ -288,7 +288,7 @@ public class LoansApiResource {
 
             if (associationParameters.contains("collateral")) {
                 mandatoryResponseParameters.add("collateral");
-                collateral = this.loanCollateralReadPlatformService.retrieveLoanCollateral(loanId);
+                collateral = this.loanCollateralReadPlatformService.retrieveCollaterals(loanId);
                 if (CollectionUtils.isEmpty(collateral)) {
                     collateral = null;
                 }

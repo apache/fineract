@@ -3,8 +3,9 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this file,
  * You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-package org.mifosplatform.portfolio.loanaccount.domain;
+package org.mifosplatform.portfolio.collateral.domain;
 
+import java.math.BigDecimal;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -20,7 +21,8 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.mifosplatform.infrastructure.codes.data.CodeValueData;
 import org.mifosplatform.infrastructure.codes.domain.CodeValue;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
-import org.mifosplatform.portfolio.loanaccount.data.LoanCollateralData;
+import org.mifosplatform.portfolio.collateral.data.CollateralData;
+import org.mifosplatform.portfolio.loanaccount.domain.Loan;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
@@ -36,30 +38,41 @@ public class LoanCollateral extends AbstractPersistable<Long> {
     @JoinColumn(name = "type_cv_id", nullable = false)
     private CodeValue type;
 
+    @Column(name = "value", scale = 6, precision = 19)
+    private BigDecimal value;
+
     @Column(name = "description", length = 500)
     private String description;
 
-    public static LoanCollateral from(final CodeValue collateralType, final String description) {
-        return new LoanCollateral(null, collateralType, description);
+    public static LoanCollateral from(final CodeValue collateralType, final BigDecimal value, final String description) {
+        return new LoanCollateral(null, collateralType, value, description);
     }
 
     protected LoanCollateral() {
         //
     }
 
-    private LoanCollateral(final Loan loan, final CodeValue collateralType, final String description) {
+    private LoanCollateral(final Loan loan, final CodeValue collateralType, final BigDecimal value, final String description) {
         this.loan = loan;
         this.type = collateralType;
+        this.value = value;
         this.description = StringUtils.defaultIfEmpty(description, null);
     }
 
-    public void assembleFrom(final CodeValue collateralType, final String description) {
+    public void assembleFrom(final CodeValue collateralType, final BigDecimal value, final String description) {
         this.type = collateralType;
         this.description = description;
+        this.value = value;
     }
 
     public void associateWith(final Loan loan) {
         this.loan = loan;
+    }
+
+    public static LoanCollateral fromJson(final Loan loan, final CodeValue collateralType, final JsonCommand command) {
+        final String description = command.stringValueOfParameterNamed("description");
+        final BigDecimal value = command.bigDecimalValueOfParameterNamed("value");
+        return new LoanCollateral(loan, collateralType, value, description);
     }
 
     public Map<String, Object> update(final JsonCommand command) {
@@ -79,12 +92,23 @@ public class LoanCollateral extends AbstractPersistable<Long> {
             this.description = StringUtils.defaultIfEmpty(newValue, null);
         }
 
+        final String valueParamName = "value";
+        if (command.isChangeInBigDecimalParameterNamed(valueParamName, this.value)) {
+            final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(valueParamName);
+            actualChanges.put(valueParamName, newValue);
+            this.value = newValue;
+        }
+
         return actualChanges;
     }
 
-    public LoanCollateralData toData() {
+    public CollateralData toData() {
         final CodeValueData typeData = this.type.toData();
-        return LoanCollateralData.instance(this.getId(), typeData, this.description);
+        return CollateralData.instance(this.getId(), typeData, this.value, this.description);
+    }
+
+    public void setCollateralType(CodeValue type) {
+        this.type = type;
     }
 
     @Override
@@ -97,6 +121,7 @@ public class LoanCollateral extends AbstractPersistable<Long> {
                 .append(this.getId(), rhs.getId()) //
                 .append(this.type.getId(), rhs.type.getId()) //
                 .append(this.description, rhs.description) //
+                .append(this.value, this.value)//
                 .isEquals();
     }
 
@@ -106,6 +131,7 @@ public class LoanCollateral extends AbstractPersistable<Long> {
                 .append(this.getId()) //
                 .append(this.type.getId()) //
                 .append(this.description) //
+                .append(this.value)//
                 .toHashCode();
     }
 }

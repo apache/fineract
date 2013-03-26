@@ -22,6 +22,8 @@ import org.mifosplatform.organisation.staff.exception.StaffRoleException;
 import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.client.domain.ClientRepository;
 import org.mifosplatform.portfolio.client.exception.ClientNotFoundException;
+import org.mifosplatform.portfolio.collateral.domain.LoanCollateral;
+import org.mifosplatform.portfolio.collateral.service.CollateralAssembler;
 import org.mifosplatform.portfolio.fund.domain.Fund;
 import org.mifosplatform.portfolio.fund.domain.FundRepository;
 import org.mifosplatform.portfolio.fund.exception.FundNotFoundException;
@@ -32,7 +34,6 @@ import org.mifosplatform.portfolio.group.exception.GroupNotFoundException;
 import org.mifosplatform.portfolio.loanaccount.domain.DefaultLoanLifecycleStateMachine;
 import org.mifosplatform.portfolio.loanaccount.domain.Loan;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanCharge;
-import org.mifosplatform.portfolio.loanaccount.domain.LoanCollateral;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanLifecycleStateMachine;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanRepaymentScheduleTransactionProcessorFactory;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanStatus;
@@ -63,7 +64,7 @@ public class LoanAssembler {
     private final CodeValueRepositoryWrapper codeValueRepository;
     private final LoanScheduleAssembler loanScheduleAssembler;
     private final LoanChargeAssembler loanChargeAssembler;
-    private final LoanCollateralAssembler loanCollateralAssembler;
+    private final CollateralAssembler loanCollateralAssembler;
     private final FromJsonHelper fromApiJsonHelper;
     private final LoanSummaryWrapper loanSummaryWrapper;
     private final LoanRepaymentScheduleTransactionProcessorFactory loanRepaymentScheduleTransactionProcessorFactory;
@@ -74,7 +75,7 @@ public class LoanAssembler {
             final LoanTransactionProcessingStrategyRepository loanTransactionProcessingStrategyRepository,
             final StaffRepository staffRepository, final CodeValueRepositoryWrapper codeValueRepository,
             final LoanScheduleAssembler loanScheduleAssembler, final LoanChargeAssembler loanChargeAssembler,
-            final LoanCollateralAssembler loanCollateralAssembler, final LoanSummaryWrapper loanSummaryWrapper,
+            final CollateralAssembler loanCollateralAssembler, final LoanSummaryWrapper loanSummaryWrapper,
             final LoanRepaymentScheduleTransactionProcessorFactory loanRepaymentScheduleTransactionProcessorFactory) {
         this.fromApiJsonHelper = fromApiJsonHelper;
         this.loanProductRepository = loanProductRepository;

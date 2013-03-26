@@ -12,7 +12,7 @@ import org.mifosplatform.portfolio.loanaccount.guarantor.data.GuarantorData;
 public interface GuarantorReadPlatformService {
 
     /**
-     * Validates the passed in loanId before retrieving Loans for the same
+     * Validates the passed in loanId before retrieving Guarantors for the same
      * 
      * @param loanId
      * @return

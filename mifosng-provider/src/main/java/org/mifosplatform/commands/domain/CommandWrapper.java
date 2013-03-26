@@ -277,6 +277,10 @@ public class CommandWrapper {
         return this.entityName.equalsIgnoreCase("LOANCHARGE");
     }
 
+    public boolean isCollateralResource() {
+        return this.entityName.equalsIgnoreCase("COLLATERAL");
+    }
+
     public boolean isApproveLoanApplication() {
         return this.actionName.equalsIgnoreCase("APPROVE") && this.entityName.equalsIgnoreCase("LOAN");
     }

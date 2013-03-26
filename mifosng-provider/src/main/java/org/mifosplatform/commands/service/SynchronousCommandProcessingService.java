@@ -69,7 +69,8 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
             commandSourceResult = CommandSource.fullEntryFrom(wrapper, command, maker);
         }
         commandSourceResult.updateResourceId(result.resourceId());
-        commandSourceResult.updateForAudit(result.getOfficeId(), result.getGroupId(), result.getClientId(), result.getLoanId(), result.getSavingsId());
+        commandSourceResult.updateForAudit(result.getOfficeId(), result.getGroupId(), result.getClientId(), result.getLoanId(),
+                result.getSavingsId());
 
         String changesOnlyJson = null;
         if (result.hasChanges()) {
@@ -189,6 +190,16 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
                 handler = applicationContext.getBean("updateGuarantorCommandHandler", NewCommandSourceHandler.class);
             } else if (wrapper.isDelete()) {
                 handler = applicationContext.getBean("deleteGuarantorCommandHandler", NewCommandSourceHandler.class);
+            } else {
+                throw new UnsupportedCommandException(wrapper.commandName());
+            }
+        } else if (wrapper.isCollateralResource()) {
+            if (wrapper.isCreate()) {
+                handler = applicationContext.getBean("createCollateralCommandHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isUpdate()) {
+                handler = applicationContext.getBean("updateCollateralCommandHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isDelete()) {
+                handler = applicationContext.getBean("deleteCollateralCommandHandler", NewCommandSourceHandler.class);
             } else {
                 throw new UnsupportedCommandException(wrapper.commandName());
             }

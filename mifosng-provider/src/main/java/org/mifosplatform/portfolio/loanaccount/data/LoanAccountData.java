@@ -17,6 +17,7 @@ import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.mifosplatform.organisation.staff.data.StaffData;
 import org.mifosplatform.portfolio.charge.data.ChargeData;
+import org.mifosplatform.portfolio.collateral.data.CollateralData;
 import org.mifosplatform.portfolio.fund.data.FundData;
 import org.mifosplatform.portfolio.loanaccount.guarantor.data.GuarantorData;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.data.LoanScheduleData;
@@ -88,7 +89,7 @@ public class LoanAccountData {
     private final LoanScheduleData repaymentSchedule;
     private final Collection<LoanTransactionData> transactions;
     private final Collection<LoanChargeData> charges;
-    private final Collection<LoanCollateralData> collateral;
+    private final Collection<CollateralData> collateral;
     private final Collection<GuarantorData> guarantors;
 
     // template
@@ -157,7 +158,7 @@ public class LoanAccountData {
         final LoanScheduleData repaymentSchedule = null;
         final Collection<LoanTransactionData> transactions = null;
         final Collection<LoanChargeData> charges = null;
-        final Collection<LoanCollateralData> collateral = null;
+        final Collection<CollateralData> collateral = null;
         final Collection<GuarantorData> guarantors = null;
         final Collection<LoanProductData> productOptions = null;
         final Collection<EnumOptionData> termFrequencyTypeOptions = null;
@@ -231,7 +232,7 @@ public class LoanAccountData {
         final LoanScheduleData repaymentSchedule = null;
         final Collection<LoanTransactionData> transactions = null;
         final Collection<LoanChargeData> charges = null;
-        final Collection<LoanCollateralData> collateral = null;
+        final Collection<CollateralData> collateral = null;
         final Collection<GuarantorData> guarantors = null;
         final Collection<LoanProductData> productOptions = null;
         final Collection<EnumOptionData> termFrequencyTypeOptions = null;
@@ -307,7 +308,7 @@ public class LoanAccountData {
         final LoanScheduleData repaymentSchedule = null;
         final Collection<LoanTransactionData> transactions = null;
         final Collection<LoanChargeData> charges = null;
-        final Collection<LoanCollateralData> collateral = null;
+        final Collection<CollateralData> collateral = null;
         final Collection<GuarantorData> guarantors = null;
         final Collection<LoanProductData> productOptions = null;
         final Collection<EnumOptionData> termFrequencyTypeOptions = null;
@@ -340,7 +341,7 @@ public class LoanAccountData {
 
         final LoanScheduleData repaymentSchedule = null;
         final Collection<LoanTransactionData> transactions = null;
-        final Collection<LoanCollateralData> collateral = null;
+        final Collection<CollateralData> collateral = null;
         final Collection<GuarantorData> guarantors = null;
         final Collection<LoanProductData> productOptions = null;
         final Collection<EnumOptionData> termFrequencyTypeOptions = null;
@@ -400,7 +401,7 @@ public class LoanAccountData {
         final LoanScheduleData repaymentSchedule = null;
         final Collection<LoanTransactionData> transactions = null;
         final Collection<LoanChargeData> charges = null;
-        final Collection<LoanCollateralData> collateral = null;
+        final Collection<CollateralData> collateral = null;
         final Collection<GuarantorData> guarantors = null;
         final Collection<LoanProductData> productOptions = null;
         final Collection<EnumOptionData> termFrequencyTypeOptions = null;
@@ -435,7 +436,7 @@ public class LoanAccountData {
      */
     public static LoanAccountData associationsAndTemplate(final LoanAccountData acc, final LoanScheduleData repaymentSchedule,
             final Collection<LoanTransactionData> transactions, final Collection<LoanChargeData> charges,
-            final Collection<LoanCollateralData> collateral, final Collection<GuarantorData> guarantors,
+            final Collection<CollateralData> collateral, final Collection<GuarantorData> guarantors,
             final Collection<LoanProductData> productOptions, final Collection<EnumOptionData> termFrequencyTypeOptions,
             final Collection<EnumOptionData> repaymentFrequencyTypeOptions,
             final Collection<TransactionProcessingStrategyData> transactionProcessingStrategyOptions,
@@ -491,7 +492,7 @@ public class LoanAccountData {
             final LocalDate interestChargedFromDate, final LoanApplicationTimelineData timeline, final LoanSummaryData summary,
             final BigDecimal feeChargesDueAtDisbursementCharged, final LoanScheduleData repaymentSchedule,
             final Collection<LoanTransactionData> transactions, final Collection<LoanChargeData> charges,
-            final Collection<LoanCollateralData> collateral, final Collection<GuarantorData> guarantors,
+            final Collection<CollateralData> collateral, final Collection<GuarantorData> guarantors,
             final Collection<LoanProductData> productOptions, final Collection<EnumOptionData> termFrequencyTypeOptions,
             final Collection<EnumOptionData> repaymentFrequencyTypeOptions,
             final Collection<TransactionProcessingStrategyData> transactionProcessingStrategyOptions,

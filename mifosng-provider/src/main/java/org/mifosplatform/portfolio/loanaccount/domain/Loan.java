@@ -51,10 +51,11 @@ import org.mifosplatform.organisation.monetary.domain.Money;
 import org.mifosplatform.organisation.staff.domain.Staff;
 import org.mifosplatform.portfolio.charge.exception.LoanChargeCannotBeAddedException;
 import org.mifosplatform.portfolio.client.domain.Client;
+import org.mifosplatform.portfolio.collateral.data.CollateralData;
+import org.mifosplatform.portfolio.collateral.domain.LoanCollateral;
 import org.mifosplatform.portfolio.fund.domain.Fund;
 import org.mifosplatform.portfolio.group.domain.Group;
 import org.mifosplatform.portfolio.loanaccount.command.LoanChargeCommand;
-import org.mifosplatform.portfolio.loanaccount.data.LoanCollateralData;
 import org.mifosplatform.portfolio.loanaccount.exception.InvalidLoanStateTransitionException;
 import org.mifosplatform.portfolio.loanaccount.exception.InvalidLoanTransactionTypeException;
 import org.mifosplatform.portfolio.loanaccount.exception.LoanOfficerAssignmentDateException;
@@ -962,19 +963,19 @@ public class Loan extends AbstractPersistable<Long> {
         return loanCharges;
     }
 
-    private LoanCollateralData[] listOfLoanCollateralData(final Set<LoanCollateral> setOfLoanCollateral) {
+    private CollateralData[] listOfLoanCollateralData(final Set<LoanCollateral> setOfLoanCollateral) {
 
-        LoanCollateralData[] existingLoanCollateral = null;
+        CollateralData[] existingLoanCollateral = null;
 
-        List<LoanCollateralData> loanCollateralList = new ArrayList<LoanCollateralData>();
+        List<CollateralData> loanCollateralList = new ArrayList<CollateralData>();
         for (LoanCollateral loanCollateral : setOfLoanCollateral) {
 
-            LoanCollateralData data = loanCollateral.toData();
+            CollateralData data = loanCollateral.toData();
 
             loanCollateralList.add(data);
         }
 
-        existingLoanCollateral = loanCollateralList.toArray(new LoanCollateralData[loanCollateralList.size()]);
+        existingLoanCollateral = loanCollateralList.toArray(new CollateralData[loanCollateralList.size()]);
 
         return existingLoanCollateral;
     }
@@ -2246,6 +2247,10 @@ public class Loan extends AbstractPersistable<Long> {
 
     public LoanSummary getSummary() {
         return this.summary;
+    }
+
+    public Set<LoanCollateral> getCollateral() {
+        return this.collateral;
     }
 
     public Map<String, Object> deriveAccountingBridgeData(final CurrencyData currencyData, final List<Long> existingTransactionIds,

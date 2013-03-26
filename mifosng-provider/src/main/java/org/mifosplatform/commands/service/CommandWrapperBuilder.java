@@ -800,4 +800,31 @@ public class CommandWrapperBuilder {
         this.href = "/groups/" + groupId;
         return this;
     }
+
+    public CommandWrapperBuilder createCollateral(final Long loanId) {
+        this.actionName = "CREATE";
+        this.entityName = "COLLATERAL";
+        this.entityId = null;
+        this.loanId = loanId;
+        this.href = "/loans/" + loanId + "/collaterals/template";
+        return this;
+    }
+
+    public CommandWrapperBuilder updateCollateral(final Long loanId, final Long collateralId) {
+        this.actionName = "UPDATE";
+        this.entityName = "COLLATERAL";
+        this.entityId = collateralId;
+        this.loanId = loanId;
+        this.href = "/loans/" + loanId + "/collaterals/" + collateralId;
+        return this;
+    }
+
+    public CommandWrapperBuilder deleteCollateral(final Long loanId, final Long collateralId) {
+        this.actionName = "DELETE";
+        this.entityName = "COLLATERAL";
+        this.entityId = collateralId;
+        this.loanId = loanId;
+        this.href = "/loans/" + loanId + "/collaterals/" + collateralId;
+        return this;
+    }
 }

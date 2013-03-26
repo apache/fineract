@@ -34,11 +34,12 @@ import org.mifosplatform.portfolio.client.domain.AccountNumberGeneratorFactory;
 import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.client.domain.ClientRepository;
 import org.mifosplatform.portfolio.client.exception.ClientNotFoundException;
+import org.mifosplatform.portfolio.collateral.domain.LoanCollateral;
+import org.mifosplatform.portfolio.collateral.service.CollateralAssembler;
 import org.mifosplatform.portfolio.fund.domain.Fund;
 import org.mifosplatform.portfolio.loanaccount.domain.DefaultLoanLifecycleStateMachine;
 import org.mifosplatform.portfolio.loanaccount.domain.Loan;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanCharge;
-import org.mifosplatform.portfolio.loanaccount.domain.LoanCollateral;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanLifecycleStateMachine;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanRepaymentScheduleTransactionProcessorFactory;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanRepository;
@@ -84,7 +85,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
     private final ClientRepository clientRepository;
     private final LoanProductRepository loanProductRepository;
     private final LoanChargeAssembler loanChargeAssembler;
-    private final LoanCollateralAssembler loanCollateralAssembler;
+    private final CollateralAssembler loanCollateralAssembler;
     private final AprCalculator aprCalculator;
     private final AccountNumberGeneratorFactory accountIdentifierGeneratorFactory;
     private final LoanSummaryWrapper loanSummaryWrapper;
@@ -97,7 +98,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             final LoanApplicationTransitionApiJsonValidator loanApplicationTransitionApiJsonValidator,
             final LoanApplicationCommandFromApiJsonHelper fromApiJsonDeserializer, final AprCalculator aprCalculator,
             final LoanAssembler loanAssembler, final LoanChargeAssembler loanChargeAssembler,
-            final LoanCollateralAssembler loanCollateralAssembler, final LoanRepository loanRepository,
+            final CollateralAssembler loanCollateralAssembler, final LoanRepository loanRepository,
             final NoteRepository noteRepository, final LoanScheduleCalculationPlatformService calculationPlatformService,
             final ClientRepository clientRepository, final LoanProductRepository loanProductRepository,
             final AccountNumberGeneratorFactory accountIdentifierGeneratorFactory, final LoanSummaryWrapper loanSummaryWrapper,
