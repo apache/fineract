@@ -5,7 +5,6 @@
  */
 package org.mifosplatform.commands.service;
 
-import org.apache.commons.lang.StringUtils;
 import org.mifosplatform.commands.domain.CommandSource;
 import org.mifosplatform.commands.domain.CommandSourceRepository;
 import org.mifosplatform.commands.domain.CommandWrapper;
@@ -68,16 +67,7 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
             result = this.processAndLogCommandService.processAndLogCommand(wrapper, command, isApprovedByChecker);
         } catch (RollbackTransactionAsCommandIsNotApprovedByCheckerException e) {
 
-            final String jsonToUse = StringUtils.defaultIfEmpty(e.getJsonOfChangesOnly(), json);
-
-            final JsonElement parsedCommand = this.fromApiJsonHelper.parse(jsonToUse);
-
-            final JsonCommand command = JsonCommand.from(jsonToUse, parsedCommand, this.fromApiJsonHelper, wrapper.getEntityName(),
-                    wrapper.getEntityId(), wrapper.getSubentityId(), wrapper.getGroupId(), wrapper.getClientId(), wrapper.getLoanId(),
-                    wrapper.getSavingsId(), wrapper.getCodeId(), wrapper.getSupportedEntityType(), wrapper.getSupportedEntityId(),
-                    wrapper.getTransactionId());
-
-            result = this.processAndLogCommandService.logCommand(wrapper, command);
+            result = this.processAndLogCommandService.logCommand(e.getCommandSourceResult());
         }
 
         return result;

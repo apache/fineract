@@ -85,24 +85,19 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
             commandSourceRepository.save(commandSourceResult);
         }
 
-        if (rollbackTransaction) { throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(changesOnlyJson); }
+        if (rollbackTransaction) { throw new RollbackTransactionAsCommandIsNotApprovedByCheckerException(commandSourceResult); }
 
         return result;
     }
 
     @Transactional
     @Override
-    public CommandProcessingResult logCommand(final CommandWrapper wrapper, final JsonCommand command) {
+    public CommandProcessingResult logCommand(final CommandSource commandSourceResult) {
 
-        final AppUser maker = context.authenticatedUser();
-
-        final CommandSource commandSourceResult = CommandSource.fullEntryFrom(wrapper, command, maker);
-        if (commandSourceResult.hasJson()) {
-            commandSourceResult.markAsAwaitingApproval();
-            commandSourceRepository.save(commandSourceResult);
-        }
-
-        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(commandSourceResult.resourceId())
+        commandSourceResult.markAsAwaitingApproval();
+        commandSourceRepository.save(commandSourceResult);
+        
+        return new CommandProcessingResultBuilder().withCommandId(commandSourceResult.getId()).withEntityId(commandSourceResult.getResourceId())
                 .build();
     }
 
