@@ -32,6 +32,10 @@ import org.mifosplatform.portfolio.charge.exception.LoanChargeCannotBeUpdatedExc
 import org.mifosplatform.portfolio.charge.exception.LoanChargeCannotBeWaivedException;
 import org.mifosplatform.portfolio.charge.exception.LoanChargeCannotBeWaivedException.LOAN_CHARGE_CANNOT_BE_WAIVED_REASON;
 import org.mifosplatform.portfolio.charge.exception.LoanChargeNotFoundException;
+import org.mifosplatform.portfolio.collectionsheet.command.CollectionSheetBulkDisbursalCommand;
+import org.mifosplatform.portfolio.collectionsheet.command.CollectionSheetBulkRepaymentCommand;
+import org.mifosplatform.portfolio.collectionsheet.command.SingleDisbursalCommand;
+import org.mifosplatform.portfolio.collectionsheet.command.SingleRepaymentCommand;
 import org.mifosplatform.portfolio.loanaccount.command.LoanUpdateCommand;
 import org.mifosplatform.portfolio.loanaccount.domain.ChangedTransactionDetail;
 import org.mifosplatform.portfolio.loanaccount.domain.DefaultLoanLifecycleStateMachine;
@@ -143,6 +147,44 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 .with(changes) //
                 .build();
     }
+    
+    @Transactional
+    @Override
+    public Map<String, Object> bulkLoanDisbursal(JsonCommand command, CollectionSheetBulkDisbursalCommand bulkDisbursalCommand) {
+        final AppUser currentUser = context.authenticatedUser();
+
+        SingleDisbursalCommand[] disbursalCommand = bulkDisbursalCommand.getDisburseTransactions();
+        Map<String, Object> changes = new LinkedHashMap<String, Object>();
+        if(disbursalCommand == null){
+            return changes;
+        }
+        
+        for (int i = 0; i < disbursalCommand.length; i++) {
+            SingleDisbursalCommand singleLoanDisbursalCommand = disbursalCommand[i];
+
+            final Loan loan = retrieveLoanBy(singleLoanDisbursalCommand.getLoanId());
+    
+            final ApplicationCurrency currency = this.applicationCurrencyRepository.findOneByCode(loan.getCurrencyCode());
+    
+            final List<Long> existingTransactionIds = new ArrayList<Long>();
+            final List<Long> existingReversedTransactionIds = new ArrayList<Long>();
+            
+            changes.putAll(loan.disburse(currentUser, command, currency, existingTransactionIds,
+                    existingReversedTransactionIds));
+            if (!changes.isEmpty()) {
+                this.loanRepository.save(loan);
+    
+                final String noteText = command.stringValueOfParameterNamed("note");
+                if (StringUtils.isNotBlank(noteText)) {
+                    Note note = Note.loanNote(loan, noteText);
+                    this.noteRepository.save(note);
+                }
+    
+                postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
+            }
+        }
+        return changes;
+    }
 
     @Transactional
     @Override
@@ -204,6 +246,22 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         changes.put("locale", command.locale());
         changes.put("dateFormat", command.dateFormat());
 
+        final String noteText = command.stringValueOfParameterNamed("note");
+        if (StringUtils.isNotBlank(noteText)) {
+            changes.put("note", noteText);
+        }
+        
+        CommandProcessingResultBuilder commandProcessingResultBuilder = saveLoanRepayment(loanId, transactionAmount, transactionDate, noteText);
+        
+        return  commandProcessingResultBuilder
+                .withCommandId(command.commandId()) //
+                .withLoanId(loanId) //
+                .with(changes) //
+                .build();
+    }
+    
+    private CommandProcessingResultBuilder saveLoanRepayment(final Long loanId, final BigDecimal transactionAmount,
+            final LocalDate transactionDate, final String noteText) {
         final Loan loan = retrieveLoanBy(loanId);
 
         final List<Long> existingTransactionIds = new ArrayList<Long>();
@@ -230,9 +288,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         }
         this.loanRepository.save(loan);
 
-        final String noteText = command.stringValueOfParameterNamed("note");
+        
         if (StringUtils.isNotBlank(noteText)) {
-            changes.put("note", noteText);
             Note note = Note.loanTransactionNote(loan, newRepaymentTransaction, noteText);
             this.noteRepository.save(note);
         }
@@ -240,16 +297,29 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
 
         return new CommandProcessingResultBuilder() //
-                .withCommandId(command.commandId()) //
-                .withEntityId(newRepaymentTransaction.getId()) //
-                .withOfficeId(loan.getOfficeId()) //
-                .withClientId(loan.getClientId()) //
-                .withGroupId(loan.getGroupId()) //
-                .withLoanId(loanId) //
-                .with(changes) //
-                .build();
+        .withEntityId(newRepaymentTransaction.getId()) //
+        .withOfficeId(loan.getOfficeId()) //
+        .withClientId(loan.getClientId()) //
+        .withGroupId(loan.getGroupId()); //
     }
 
+    @Transactional
+    @Override
+    public Map<String, Object> makeLoanBulkRepayment(final CollectionSheetBulkRepaymentCommand bulkRepaymentCommand) {
+
+        context.authenticatedUser();
+        final SingleRepaymentCommand[] repaymentCommand = bulkRepaymentCommand.getLoanTransactions();
+        final Map<String, Object> changes = new LinkedHashMap<String, Object>();
+        
+        if(repaymentCommand == null) return changes;
+        
+        for (SingleRepaymentCommand singleLoanRepaymentCommand : repaymentCommand) {
+            saveLoanRepayment(singleLoanRepaymentCommand.getLoanId(), singleLoanRepaymentCommand.getTransactionAmount(), bulkRepaymentCommand.getTransactionDate(), bulkRepaymentCommand.getNote());
+            changes.put("bulkTransations", singleLoanRepaymentCommand);
+        }
+        return changes;
+    }
+    
     @Transactional
     @Override
     public CommandProcessingResult adjustLoanTransaction(final Long loanId, final Long transactionId, final JsonCommand command) {

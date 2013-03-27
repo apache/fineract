@@ -7,6 +7,8 @@ package org.mifosplatform.portfolio.collectionsheet.data;
 
 import java.math.BigDecimal;
 
+import org.mifosplatform.organisation.monetary.data.CurrencyData;
+
 /**
  * Immutable data object for representing loan with dues (example: loan is due for disbursement, repayments).
  */
@@ -17,17 +19,17 @@ public class LoanDueData {
     private final Integer accountStatusId;
     private final String productShortName;
     private final Long productId;
-    private final String currencyCode;
-    private final Integer currencyDigits;
+    private final CurrencyData currency;
     private BigDecimal disbursementAmount = BigDecimal.ZERO;
     private BigDecimal principalDue = BigDecimal.ZERO;
     private BigDecimal principalPaid = BigDecimal.ZERO;
     private BigDecimal interestDue = BigDecimal.ZERO;
     private BigDecimal interestPaid = BigDecimal.ZERO;
     private BigDecimal chargesDue = BigDecimal.ZERO;
+    private BigDecimal totalDue = BigDecimal.ZERO;
 
     public LoanDueData(final Long loanId, final String accountId, final Integer accountStatusId, final String productShortName,
-            final Long productId, final String currencyCode, final Integer currencyDigits, final BigDecimal disbursementAmount,
+            final Long productId, final CurrencyData currency, final BigDecimal disbursementAmount,
             final BigDecimal principalDue, final BigDecimal principalPaid, final BigDecimal interestDue, final BigDecimal interestPaid,
             final BigDecimal chargesDue) {
         this.loanId = loanId;
@@ -35,14 +37,14 @@ public class LoanDueData {
         this.accountStatusId = accountStatusId;
         this.productShortName = productShortName;
         this.productId = productId;
-        this.currencyCode = currencyCode;
-        this.currencyDigits = currencyDigits;
+        this.currency = currency;
         this.disbursementAmount = disbursementAmount;
         this.principalDue = principalDue;
         this.principalPaid = principalPaid;
         this.interestDue = interestDue;
         this.interestPaid = interestPaid;
         this.chargesDue = chargesDue;
+        this.totalDue = this.totalDue.add(principalDue).add(interestDue);
     }
 
     public Long getLoanId() {
@@ -64,13 +66,9 @@ public class LoanDueData {
     public Long getProductId() {
         return this.productId;
     }
-
-    public String getCurrencyCode() {
-        return this.currencyCode;
-    }
-
-    public Integer getCurrencyDigits() {
-        return this.currencyDigits;
+ 
+    public CurrencyData getCurrency() {
+        return this.currency;
     }
 
     public BigDecimal getDisbursementAmount() {

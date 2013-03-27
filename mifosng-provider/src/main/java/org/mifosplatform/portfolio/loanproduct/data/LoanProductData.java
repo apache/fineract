@@ -102,6 +102,32 @@ public class LoanProductData {
                 interestType, interestCalculationPeriodType, fundId, fundName, transactionProcessingStrategyId,
                 transactionProcessingStrategyName, charges, accountingType);
     }
+    
+    public static LoanProductData lookupWithCurrency(final Long id, final String name, final CurrencyData currency) {
+        final String description = null;
+        final BigDecimal principal = null;
+        final BigDecimal tolerance = null;
+        final Integer numberOfRepayments = null;
+        final Integer repaymentEvery = null;
+        final BigDecimal interestRatePerPeriod = null;
+        final BigDecimal annualInterestRate = null;
+        final EnumOptionData repaymentFrequencyType = null;
+        final EnumOptionData interestRateFrequencyType = null;
+        final EnumOptionData amortizationType = null;
+        final EnumOptionData interestType = null;
+        final EnumOptionData interestCalculationPeriodType = null;
+        final Long fundId = null;
+        final String fundName = null;
+        final Long transactionProcessingStrategyId = null;
+        final String transactionProcessingStrategyName = null;
+        final Collection<ChargeData> charges = null;
+        final EnumOptionData accountingType = null;
+
+        return new LoanProductData(id, name, description, currency, principal, tolerance, numberOfRepayments, repaymentEvery,
+                interestRatePerPeriod, annualInterestRate, repaymentFrequencyType, interestRateFrequencyType, amortizationType,
+                interestType, interestCalculationPeriodType, fundId, fundName, transactionProcessingStrategyId,
+                transactionProcessingStrategyName, charges, accountingType);
+    }    
 
     public static LoanProductData sensibleDefaultsForNewLoanProductCreation() {
         final Long id = null;
@@ -377,5 +403,15 @@ public class LoanProductData {
 
     public Collection<ChargeData> getChargeOptions() {
         return chargeOptions;
+    }
+    @Override
+    public boolean equals(Object obj) {
+        LoanProductData loanProductData = (LoanProductData) obj;
+        return loanProductData.id.equals(this.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return this.id.hashCode();
     }
 }

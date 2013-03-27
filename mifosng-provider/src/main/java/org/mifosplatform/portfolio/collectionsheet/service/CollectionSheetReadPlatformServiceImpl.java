@@ -5,12 +5,15 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
 import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
+import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.mifosplatform.portfolio.collectionsheet.data.ClientLoansData;
 import org.mifosplatform.portfolio.collectionsheet.data.JLGClientsData;
 import org.mifosplatform.portfolio.collectionsheet.data.JLGCollectionSheetData;
@@ -19,6 +22,7 @@ import org.mifosplatform.portfolio.collectionsheet.data.LoanDueData;
 import org.mifosplatform.portfolio.group.data.GroupData;
 import org.mifosplatform.portfolio.group.exception.GroupNotFoundException;
 import org.mifosplatform.portfolio.group.service.GroupReadPlatformServiceImpl;
+import org.mifosplatform.portfolio.loanproduct.data.LoanProductData;
 import org.mifosplatform.useradministration.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.RowMapper;
@@ -88,11 +92,12 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
         JLGCollectionSheetData jlgCollectionSheetData = null;
         JLGCollectionSheetFlatData prevCollectioSheetFlatData = null;
         JLGCollectionSheetFlatData corrCollectioSheetFlatData = null;
-
+        Set<LoanProductData> loanProducts = new HashSet<LoanProductData>();
         if (jlgCollectionSheetFlatData != null) {
 
             for (final JLGCollectionSheetFlatData collectionSheetFlatData : jlgCollectionSheetFlatData) {
-
+                
+                loanProducts.add(LoanProductData.lookupWithCurrency(collectionSheetFlatData.getProductId(), collectionSheetFlatData.getProductShortName(), collectionSheetFlatData.getCurrency()));
                 corrCollectioSheetFlatData = collectionSheetFlatData;
 
                 if (firstTime || collectionSheetFlatData.getGroupId().equals(prevGroupId)) {
@@ -149,7 +154,7 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
 
             jlgClientsDatas.add(jlgClientsData);
 
-            jlgCollectionSheetData = new JLGCollectionSheetData(dueDate, jlgClientsDatas);
+            jlgCollectionSheetData = new JLGCollectionSheetData(dueDate, loanProducts, jlgClientsDatas);
         }
 
         return jlgCollectionSheetData;
@@ -184,12 +189,11 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
                     + "ln.loan_status_id As accountStatusId, "
                     + "pl.name As productShortName, "
                     + "ln.product_id As productId, "
-                    + "ln.currency_code As currencyCode, "
-                    + "ln.currency_digits As currencyDigits, "
+                    + "ln.currency_code as currencyCode, ln.currency_digits as currencyDigits, rc.`name` as currencyName, rc.display_symbol as currencyDisplaySymbol, rc.internationalized_name_code as currencyNameCode, "
                     + "if(ln.loan_status_id = 200 , ln.principal_amount , null) As disbursementAmount, "
-                    + "sum(ls.principal_amount - ls.principal_completed_derived) As principalDue, "
+                    + "sum(ifnull(ls.principal_amount, 0.0) - ifnull(ls.principal_completed_derived, 0.0)) As principalDue, "
                     + "ln.principal_repaid_derived As principalPaid, "
-                    + "sum(ls.interest_amount - ls.interest_completed_derived) As interestDue, "
+                    + "sum(ifnull(ls.interest_amount, 0.0) - ifnull(ls.interest_completed_derived, 0.0)) As interestDue, "
                     + "ln.interest_repaid_derived As interestPaid, "
                     + "sum(lc.amount_outstanding_derived) as chargesDue "
                     + "FROM m_group gp "
@@ -200,6 +204,7 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
                     + "JOIN m_client cl ON cl.id = gc.client_id "
                     + "LEFT JOIN m_loan ln ON cl.id = ln.client_id AND ln.group_id is not null AND ( ln.loan_status_id = 300 OR ( ln.loan_status_id =200 AND ln.expected_disbursedon_date <= :dueDate )) "
                     + "LEFT JOIN m_product_loan pl ON pl.id = ln.product_id "
+                    + "JOIN m_currency rc on rc.`code` = ln.currency_code "
                     + "LEFT JOIN m_loan_repayment_schedule ls ON ls.loan_id = ln.id AND ls.completed_derived = 0 AND ls.duedate <= :dueDate "
                     + "LEFT JOIN m_loan_charge lc ON lc.loan_id = ln.id AND lc.is_paid_derived = 0 AND ( lc.due_for_collection_as_of_date  <= :dueDate OR lc.charge_time_enum = 1) "
                     + "WHERE gp.hierarchy like :hierarchy " + "GROUP BY gp.id ,cl.id , ln.id " + "ORDER BY gp.id , cl.id , ln.id ";
@@ -221,8 +226,15 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
             final Integer accountStatusId = JdbcSupport.getInteger(rs, "accountStatusId");
             final String productShortName = rs.getString("productShortName");
             final Long productId = JdbcSupport.getLong(rs, "productId");
+            
             final String currencyCode = rs.getString("currencyCode");
+            final String currencyName = rs.getString("currencyName");
+            final String currencyNameCode = rs.getString("currencyNameCode");
+            final String currencyDisplaySymbol = rs.getString("currencyDisplaySymbol");
             final Integer currencyDigits = JdbcSupport.getInteger(rs, "currencyDigits");
+            final CurrencyData currencyData = new CurrencyData(currencyCode, currencyName, currencyDigits, currencyDisplaySymbol,
+                    currencyNameCode);
+            
             final BigDecimal disbursementAmount = rs.getBigDecimal("disbursementAmount");
             final BigDecimal principalDue = rs.getBigDecimal("principalDue");
             final BigDecimal principalPaid = rs.getBigDecimal("principalPaid");
@@ -231,7 +243,7 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
             final BigDecimal chargesDue = rs.getBigDecimal("chargesDue");
 
             return new JLGCollectionSheetFlatData(groupName, groupId, staffId, staffName, levelId, levelName, clientName, clientId, loanId,
-                    accountId, accountStatusId, productShortName, productId, currencyCode, currencyDigits, disbursementAmount,
+                    accountId, accountStatusId, productShortName, productId, currencyData, disbursementAmount,
                     principalDue, principalPaid, interestDue, interestPaid, chargesDue);
         }
 

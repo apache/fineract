@@ -463,4 +463,9 @@ public class CommandWrapper {
     public boolean isGroupResource() {
         return this.entityName.equalsIgnoreCase("GROUP");
     }
+
+    public boolean isCollectionSheetResource(){
+        return this.entityName.equals("COLLECTIONSHEET");
+    }
+
 }

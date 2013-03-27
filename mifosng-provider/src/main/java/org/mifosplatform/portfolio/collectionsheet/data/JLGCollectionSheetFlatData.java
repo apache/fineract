@@ -7,6 +7,8 @@ package org.mifosplatform.portfolio.collectionsheet.data;
 
 import java.math.BigDecimal;
 
+import org.mifosplatform.organisation.monetary.data.CurrencyData;
+
 /**
  * Immutable data object for extracting flat data for joint liability group's collection sheet.
  */
@@ -25,8 +27,7 @@ public class JLGCollectionSheetFlatData {
     private final Integer accountStatusId;
     private final String productShortName;
     private final Long productId;
-    private final String currencyCode;
-    private final Integer currencyDigits;
+    private final CurrencyData currency;
     private BigDecimal disbursementAmount = BigDecimal.ZERO;
     private BigDecimal principalDue = BigDecimal.ZERO;
     private BigDecimal principalPaid = BigDecimal.ZERO;
@@ -37,7 +38,7 @@ public class JLGCollectionSheetFlatData {
     public JLGCollectionSheetFlatData(final String groupName, final Long groupId, final Long staffId, final String staffName,
             final Long levelId, final String levelName, final String clientName, final Long clientId, final Long loanId,
             final String accountId, final Integer accountStatusId, final String productShortName, final Long productId,
-            final String currencyCode, final Integer currencyDigits, final BigDecimal disbursementAmount, final BigDecimal principalDue,
+            final CurrencyData currency, final BigDecimal disbursementAmount, final BigDecimal principalDue,
             final BigDecimal principalPaid, final BigDecimal interestDue, final BigDecimal interestPaid, final BigDecimal chargesDue) {
         this.groupName = groupName;
         this.groupId = groupId;
@@ -52,8 +53,7 @@ public class JLGCollectionSheetFlatData {
         this.accountStatusId = accountStatusId;
         this.productShortName = productShortName;
         this.productId = productId;
-        this.currencyCode = currencyCode;
-        this.currencyDigits = currencyDigits;
+        this.currency = currency;
         this.disbursementAmount = disbursementAmount;
         this.principalDue = principalDue;
         this.principalPaid = principalPaid;
@@ -113,13 +113,9 @@ public class JLGCollectionSheetFlatData {
     public Long getProductId() {
         return this.productId;
     }
-
-    public String getCurrencyCode() {
-        return this.currencyCode;
-    }
-
-    public Integer getCurrencyDigits() {
-        return this.currencyDigits;
+    
+    public CurrencyData getCurrency() {
+        return this.currency;
     }
 
     public BigDecimal getDisbursementAmount() {
@@ -147,9 +143,8 @@ public class JLGCollectionSheetFlatData {
     }
 
     public LoanDueData getLoanDueData() {
-        return new LoanDueData(this.loanId, this.accountId, this.accountStatusId, this.productShortName, this.productId, this.currencyCode,
-                this.currencyDigits, this.disbursementAmount, this.principalDue, this.principalPaid, this.interestDue, this.interestPaid,
-                this.chargesDue);
+        return new LoanDueData(this.loanId, this.accountId, this.accountStatusId, this.productShortName, this.productId, this.currency,
+                this.disbursementAmount, this.principalDue, this.principalPaid, this.interestDue, this.interestPaid, this.chargesDue);
     }
 
     public ClientLoansData getClientLoansData() {

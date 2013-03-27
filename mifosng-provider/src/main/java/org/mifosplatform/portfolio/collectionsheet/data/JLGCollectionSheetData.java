@@ -8,6 +8,7 @@ package org.mifosplatform.portfolio.collectionsheet.data;
 import java.util.Collection;
 
 import org.joda.time.LocalDate;
+import org.mifosplatform.portfolio.loanproduct.data.LoanProductData;
 
 /**
  * Immutable data object for join liability group's collection sheet.
@@ -15,10 +16,12 @@ import org.joda.time.LocalDate;
 public class JLGCollectionSheetData {
 
     private final LocalDate dueDate;
+    private final Collection<LoanProductData> loanProducts;
     private final Collection<JLGClientsData> groups;
 
-    public JLGCollectionSheetData(final LocalDate date, final Collection<JLGClientsData> groups) {
+    public JLGCollectionSheetData(final LocalDate date, final Collection<LoanProductData> loanProducts, final Collection<JLGClientsData> groups) {
         this.dueDate = date;
+        this.loanProducts = loanProducts;
         this.groups = groups;
     }
 
@@ -30,4 +33,7 @@ public class JLGCollectionSheetData {
         return this.groups;
     }
 
+    public Collection<LoanProductData> getLoanProducts() {
+        return this.loanProducts;
+    }
 }

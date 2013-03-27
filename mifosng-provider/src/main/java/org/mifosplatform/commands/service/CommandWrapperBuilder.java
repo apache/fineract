@@ -826,5 +826,13 @@ public class CommandWrapperBuilder {
         this.loanId = loanId;
         this.href = "/loans/" + loanId + "/collaterals/" + collateralId;
         return this;
+    }    
+
+    public CommandWrapperBuilder updateCollectionSheet(final Long groupId) {
+        this.actionName = "UPDATE";
+        this.entityName = "COLLECTIONSHEET";
+        this.entityId = groupId;
+        this.href = "/groups/" + groupId + "/collectionsheet";
+        return this;
     }
 }
