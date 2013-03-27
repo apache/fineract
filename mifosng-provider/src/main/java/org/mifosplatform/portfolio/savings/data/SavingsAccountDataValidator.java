@@ -6,6 +6,9 @@ import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.active
 import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.clientIdParamName;
 import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.externalIdParamName;
 import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.groupIdParamName;
+import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.interestCalculationDaysInYearTypeParamName;
+import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.interestCalculationTypeParamName;
+import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.interestPeriodTypeParamName;
 import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.interestRateParamName;
 import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.interestRatePeriodFrequencyTypeParamName;
 import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.lockinPeriodFrequencyParamName;
@@ -102,6 +105,17 @@ public class SavingsAccountDataValidator {
             baseDataValidator.reset().parameter(interestRatePeriodFrequencyTypeParamName).value(interestRatePeriodFrequencyType).notNull()
                     .inMinMaxRange(1, 3);
         }
+
+        final Integer interestPeriodType = fromApiJsonHelper.extractIntegerSansLocaleNamed(interestPeriodTypeParamName, element);
+        baseDataValidator.reset().parameter(interestPeriodTypeParamName).value(interestPeriodType).notNull().inMinMaxRange(1, 7);
+
+        final Integer interestCalculationType = fromApiJsonHelper.extractIntegerSansLocaleNamed(interestCalculationTypeParamName, element);
+        baseDataValidator.reset().parameter(interestCalculationTypeParamName).value(interestCalculationType).notNull().inMinMaxRange(1, 2);
+
+        final Integer interestCalculationDaysInYearType = fromApiJsonHelper.extractIntegerSansLocaleNamed(
+                interestCalculationDaysInYearTypeParamName, element);
+        baseDataValidator.reset().parameter(interestCalculationDaysInYearTypeParamName).value(interestCalculationDaysInYearType).notNull()
+                .inOfTheseValues(360, 365);
 
         if (this.fromApiJsonHelper.parameterExists(minRequiredOpeningBalanceParamName, element)) {
             final BigDecimal minOpeningBalance = fromApiJsonHelper.extractBigDecimalWithLocaleNamed(minRequiredOpeningBalanceParamName,
@@ -211,6 +225,25 @@ public class SavingsAccountDataValidator {
                     interestRatePeriodFrequencyTypeParamName, element);
             baseDataValidator.reset().parameter(interestRatePeriodFrequencyTypeParamName).value(interestRatePeriodFrequencyType).notNull()
                     .inMinMaxRange(1, 3);
+        }
+
+        if (this.fromApiJsonHelper.parameterExists(interestPeriodTypeParamName, element)) {
+            final Integer interestPeriodType = fromApiJsonHelper.extractIntegerSansLocaleNamed(interestPeriodTypeParamName, element);
+            baseDataValidator.reset().parameter(interestPeriodTypeParamName).value(interestPeriodType).notNull().inMinMaxRange(1, 7);
+        }
+
+        if (this.fromApiJsonHelper.parameterExists(interestCalculationTypeParamName, element)) {
+            final Integer interestCalculationType = fromApiJsonHelper.extractIntegerSansLocaleNamed(interestCalculationTypeParamName,
+                    element);
+            baseDataValidator.reset().parameter(interestCalculationTypeParamName).value(interestCalculationType).notNull()
+                    .inMinMaxRange(1, 2);
+        }
+
+        if (this.fromApiJsonHelper.parameterExists(interestCalculationDaysInYearTypeParamName, element)) {
+            final Integer interestCalculationDaysInYearType = fromApiJsonHelper.extractIntegerSansLocaleNamed(
+                    interestCalculationDaysInYearTypeParamName, element);
+            baseDataValidator.reset().parameter(interestCalculationDaysInYearTypeParamName).value(interestCalculationDaysInYearType)
+                    .notNull().inOfTheseValues(360, 365);
         }
 
         if (this.fromApiJsonHelper.parameterExists(minRequiredOpeningBalanceParamName, element)) {

@@ -15,8 +15,11 @@ import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
 import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
-import org.mifosplatform.portfolio.loanproduct.domain.PeriodFrequencyType;
 import org.mifosplatform.portfolio.savings.data.SavingsProductData;
+import org.mifosplatform.portfolio.savings.domain.SavingsInterestCalculationDaysInYearType;
+import org.mifosplatform.portfolio.savings.domain.SavingsInterestCalculationType;
+import org.mifosplatform.portfolio.savings.domain.SavingsInterestPeriodType;
+import org.mifosplatform.portfolio.savings.domain.SavingsPeriodFrequencyType;
 import org.mifosplatform.portfolio.savings.exception.SavingsProductNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -69,15 +72,30 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
 
     private static final class SavingProductMapper implements RowMapper<SavingsProductData> {
 
+        private final String schemaSql;
+
+        public SavingProductMapper() {
+            final StringBuilder sqlBuilder = new StringBuilder(400);
+            sqlBuilder.append("sp.id as id, sp.name as name, sp.description as description, ");
+            sqlBuilder.append("sp.currency_code as currencyCode, sp.currency_digits as currencyDigits, ");
+            sqlBuilder.append("curr.name as currencyName, curr.internationalized_name_code as currencyNameCode, ");
+            sqlBuilder.append("curr.display_symbol as currencyDisplaySymbol, ");
+            sqlBuilder.append("sp.nominal_interest_rate_per_period as interestRate, ");
+            sqlBuilder.append("sp.nominal_interest_rate_period_frequency_enum as interestRatePeriodFrequencyType, ");
+            sqlBuilder.append("sp.interest_period_enum as interestPeriodType, ");
+            sqlBuilder.append("sp.interest_calculation_type_enum as interestCalculationType, ");
+            sqlBuilder.append("sp.interest_calculation_days_in_year_type_enum as interestCalculationDaysInYearType, ");
+            sqlBuilder.append("sp.min_required_opening_balance as minRequiredOpeningBalance, ");
+            sqlBuilder.append("sp.lockin_period_frequency as lockinPeriodFrequency,");
+            sqlBuilder.append("sp.lockin_period_frequency_enum as lockinPeriodFrequencyType ");
+            sqlBuilder.append("from m_savings_product sp ");
+            sqlBuilder.append("join m_currency curr on curr.code = sp.currency_code ");
+
+            this.schemaSql = sqlBuilder.toString();
+        }
+
         public String schema() {
-            return "sp.id as id,sp.name as name, sp.description as description, "
-                    + "sp.currency_code as currencyCode, sp.currency_digits as currencyDigits, "
-                    + "curr.name as currencyName, curr.internationalized_name_code as currencyNameCode, curr.display_symbol as currencyDisplaySymbol, "
-                    + "sp.nominal_interest_rate_per_period as interestRate, sp.nominal_interest_rate_period_frequency_enum as interestRatePeriodFrequencyType, "
-                    + "sp.min_required_opening_balance as minRequiredOpeningBalance, "
-                    + "sp.lockin_period_frequency as lockinPeriodFrequency, sp.lockin_period_frequency_enum as lockinPeriodFrequencyType " //
-                    + "from m_savings_product sp " //
-                    + "join m_currency curr on curr.code = sp.currency_code";
+            return this.schemaSql;
         }
 
         @Override
@@ -96,8 +114,23 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
             final CurrencyData currency = new CurrencyData(currencyCode, currencyName, currencyDigits, currencyDisplaySymbol,
                     currencyNameCode);
             BigDecimal interestRate = rs.getBigDecimal("interestRate");
-            EnumOptionData interestRatePeriodFrequencyType = SavingsEnumerations.interestRatePeriodFrequencyType(PeriodFrequencyType
+
+            EnumOptionData interestRatePeriodFrequencyType = SavingsEnumerations.interestRatePeriodFrequencyType(SavingsPeriodFrequencyType
                     .fromInt(JdbcSupport.getInteger(rs, "interestRatePeriodFrequencyType")));
+
+            EnumOptionData interestPeriodType = SavingsEnumerations.interestPeriodType(SavingsInterestPeriodType.fromInt(JdbcSupport
+                    .getInteger(rs, "interestPeriodType")));
+
+            EnumOptionData interestCalculationType = SavingsEnumerations.interestCalculationType(SavingsInterestCalculationType
+                    .fromInt(JdbcSupport.getInteger(rs, "interestCalculationType")));
+
+            EnumOptionData interestCalculationDaysInYearType = null;
+            final Integer interestCalculationDaysInYearTypeValue = JdbcSupport.getInteger(rs, "interestCalculationDaysInYearType");
+            if (interestCalculationDaysInYearTypeValue != null) {
+                interestCalculationDaysInYearType = SavingsEnumerations
+                        .interestCalculationDaysInYearType(SavingsInterestCalculationDaysInYearType
+                                .fromInt(interestCalculationDaysInYearTypeValue));
+            }
 
             final BigDecimal minRequiredOpeningBalance = rs.getBigDecimal("minRequiredOpeningBalance");
 
@@ -105,12 +138,13 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
             EnumOptionData lockinPeriodFrequencyType = null;
             final Integer lockinPeriodFrequencyTypeValue = JdbcSupport.getInteger(rs, "lockinPeriodFrequencyType");
             if (lockinPeriodFrequencyTypeValue != null) {
-                lockinPeriodFrequencyType = SavingsEnumerations.interestRatePeriodFrequencyType(PeriodFrequencyType
+                lockinPeriodFrequencyType = SavingsEnumerations.lockinPeriodFrequencyType(SavingsPeriodFrequencyType
                         .fromInt(lockinPeriodFrequencyTypeValue));
             }
 
             return SavingsProductData.instance(id, name, description, currency, interestRate, interestRatePeriodFrequencyType,
-                    minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType);
+                    interestPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance,
+                    lockinPeriodFrequency, lockinPeriodFrequencyType);
         }
     }
 

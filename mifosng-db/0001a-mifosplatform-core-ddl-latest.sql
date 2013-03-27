@@ -723,13 +723,15 @@ CREATE TABLE `m_savings_product` (
   `currency_digits` smallint(5) NOT NULL,
   `nominal_interest_rate_per_period` decimal(19,6) NOT NULL,
   `nominal_interest_rate_period_frequency_enum` smallint(5) NOT NULL,
+  `interest_period_enum` SMALLINT(5) NOT NULL,
+  `interest_calculation_type_enum` SMALLINT(5) NOT NULL,
+  `interest_calculation_days_in_year_type_enum` SMALLINT(5) NOT NULL,
   `min_required_opening_balance` decimal(19,6) DEFAULT NULL,
   `lockin_period_frequency` decimal(19,6) DEFAULT NULL,
   `lockin_period_frequency_enum` smallint(5) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `sp_unq_name` (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
 
 CREATE TABLE `m_savings_account` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -745,12 +747,16 @@ CREATE TABLE `m_savings_account` (
   `nominal_interest_rate_per_period` decimal(19,6) NOT NULL,
   `nominal_interest_rate_period_frequency_enum` smallint(5) NOT NULL,
   `annual_nominal_interest_rate` decimal(19,6) NOT NULL,
+  `interest_period_enum` SMALLINT(5) NOT NULL,
+  `interest_calculation_type_enum` SMALLINT(5) NOT NULL,
+  `interest_calculation_days_in_year_type_enum` SMALLINT(5) NOT NULL,
   `min_required_opening_balance` decimal(19,6) DEFAULT NULL,
   `lockin_period_frequency` decimal(19,6) DEFAULT NULL,
   `lockin_period_frequency_enum` smallint(5) DEFAULT NULL,
   `lockedin_until_date_derived` DATE DEFAULT NULL,
   `total_deposits_derived` decimal(19,6) DEFAULT NULL,
   `total_withdrawals_derived` decimal(19,6) DEFAULT NULL,
+  `total_interest_earned_derived` decimal(19,6) DEFAULT NULL,
   `total_interest_posted_derived` decimal(19,6) DEFAULT NULL,
   `account_balance_derived` decimal(19,6) NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`),
@@ -771,6 +777,10 @@ CREATE TABLE `m_savings_account_transaction` (
   `transaction_date` date NOT NULL,
   `amount` decimal(19,6) NOT NULL,
   `is_reversed` tinyint(1) NOT NULL,
+  `running_balance_derived` DECIMAL(19,6) NULL,
+  `balance_number_of_days_derived` INT NULL,
+  `balance_end_date_derived` DATE NULL,
+  `cumulative_balance_derived` DECIMAL(19,6) NULL,
   PRIMARY KEY (`id`),
   KEY `FKSAT0000000001` (`savings_account_id`),
   CONSTRAINT `FKSAT0000000001` FOREIGN KEY (`savings_account_id`) REFERENCES `m_savings_account` (`id`)

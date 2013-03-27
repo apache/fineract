@@ -18,14 +18,16 @@ public class SavingsAccountSummaryData {
     private final CurrencyData currency;
     private final BigDecimal totalDeposits;
     private final BigDecimal totalWithdrawals;
+    private final BigDecimal totalInterestEarned;
     private final BigDecimal totalInterestPosted;
     private final BigDecimal accountBalance;
 
     public SavingsAccountSummaryData(final CurrencyData currency, final BigDecimal totalDeposits, final BigDecimal totalWithdrawals,
-            final BigDecimal totalInterestPosted, final BigDecimal accountBalance) {
+            final BigDecimal totalInterestEarned, final BigDecimal totalInterestPosted, final BigDecimal accountBalance) {
         this.currency = currency;
         this.totalDeposits = totalDeposits;
         this.totalWithdrawals = totalWithdrawals;
+        this.totalInterestEarned = totalInterestEarned;
         this.totalInterestPosted = totalInterestPosted;
         this.accountBalance = accountBalance;
     }

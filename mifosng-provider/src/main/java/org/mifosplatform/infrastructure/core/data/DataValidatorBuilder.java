@@ -7,6 +7,7 @@ package org.mifosplatform.infrastructure.core.data;
 
 import java.math.BigDecimal;
 import java.text.ParseException;
+import java.util.Arrays;
 import java.util.List;
 
 import net.fortuna.ical4j.model.ValidationException;
@@ -185,6 +186,27 @@ public class DataValidatorBuilder {
                         .append(min).append(" and ").append(max).append(".");
                 ApiParameterError error = ApiParameterError.parameterError(validationErrorCode.toString(),
                         defaultEnglishMessage.toString(), parameter, number, min, max);
+                dataValidationErrors.add(error);
+            }
+        }
+        return this;
+    }
+
+    public DataValidatorBuilder inOfTheseValues(final Object... values) {
+        if (value == null && ignoreNullValue) { return this; }
+
+        if (value != null) {
+            List<Object> valuesList = Arrays.asList(values);
+
+            if (!valuesList.contains(this.value)) {
+                StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append(resource).append(".").append(parameter)
+                        .append(".is.not.one.of.expected.enumerations");
+                StringBuilder defaultEnglishMessage = new StringBuilder("The parameter ").append(parameter).append(" must be one of [ ")
+                        .append(values).append(" ] ").append(".");
+
+                ApiParameterError error = ApiParameterError.parameterError(validationErrorCode.toString(),
+                        defaultEnglishMessage.toString(), parameter, this.value, values);
+
                 dataValidationErrors.add(error);
             }
         }

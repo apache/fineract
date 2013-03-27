@@ -37,7 +37,6 @@ public final class SavingsAccountTransaction extends AbstractPersistable<Long> {
     @Column(name = "transaction_type_enum", nullable = false)
     private final Integer typeOf;
 
-    @SuppressWarnings("unused")
     @Temporal(TemporalType.DATE)
     @Column(name = "transaction_date", nullable = false)
     private final Date dateOf;
@@ -47,6 +46,20 @@ public final class SavingsAccountTransaction extends AbstractPersistable<Long> {
 
     @Column(name = "is_reversed", nullable = false)
     private boolean reversed;
+
+    @Column(name = "running_balance_derived", scale = 6, precision = 19, nullable = false)
+    private BigDecimal runningBalance;
+
+    @SuppressWarnings("unused")
+    @Column(name = "cumulative_balance_derived", scale = 6, precision = 19, nullable = false)
+    private BigDecimal cumulativeBalance;
+
+    @Temporal(TemporalType.DATE)
+    @Column(name = "balance_end_date_derived", nullable = false)
+    private Date balanceEndDate;
+
+    @Column(name = "balance_number_of_days_derived", nullable = false)
+    private Integer balanceNumberOfDays;
 
     protected SavingsAccountTransaction() {
         this.dateOf = null;
@@ -63,13 +76,17 @@ public final class SavingsAccountTransaction extends AbstractPersistable<Long> {
         return new SavingsAccountTransaction(savingsAccount, SavingsAccountTransactionType.WITHDRAWAL.getValue(), date, amount, isReversed);
     }
 
-    private SavingsAccountTransaction(final SavingsAccount savingsAccount, final Integer typeOf, final LocalDate dateOf,
+    private SavingsAccountTransaction(final SavingsAccount savingsAccount, final Integer typeOf, final LocalDate transactionLocalDate,
             final Money amount, final boolean isReversed) {
         this.savingsAccount = savingsAccount;
         this.typeOf = typeOf;
-        this.dateOf = dateOf.toDate();
+        this.dateOf = transactionLocalDate.toDate();
         this.amount = amount.getAmount();
         this.reversed = isReversed;
+    }
+
+    public LocalDate localDate() {
+        return new LocalDate(this.dateOf);
     }
 
     public void reverse() {
@@ -98,5 +115,54 @@ public final class SavingsAccountTransaction extends AbstractPersistable<Long> {
 
     public boolean isReversed() {
         return this.reversed;
+    }
+
+    public void zeroBalanceFields() {
+        this.runningBalance = null;
+        this.cumulativeBalance = null;
+        this.balanceEndDate = null;
+        this.balanceNumberOfDays = null;
+    }
+
+    public void updateRunningBalance(final Money balance) {
+        this.runningBalance = balance.getAmount();
+    }
+
+    public void updateCumulativeBalanceAndDates(final MonetaryCurrency currency, final LocalDate endOfBalanceDate) {
+        this.balanceEndDate = endOfBalanceDate.toDate();
+        this.balanceNumberOfDays = InterestPeriodInterval.create(getTransactionLocalDate(), endOfBalanceDate)
+                .daysInPeriodInclusiveOfEndDate();
+        this.cumulativeBalance = Money.of(currency, this.runningBalance).multipliedBy(this.balanceNumberOfDays).getAmount();
+    }
+
+    private LocalDate getTransactionLocalDate() {
+        return new LocalDate(this.dateOf);
+    }
+
+    private LocalDate getEndOfBalanceLocalDate() {
+        LocalDate endDate = null;
+        if (this.balanceEndDate != null) {
+            endDate = new LocalDate(this.balanceEndDate);
+        }
+        return endDate;
+    }
+
+    public boolean isAcceptableForDailyBalance(final InterestPeriodInterval interestPeriodInterval) {
+        return isNotReversed() && interestPeriodInterval.contains(getTransactionLocalDate()) && isABalanceForAtLeastOneDay();
+    }
+
+    private boolean isABalanceForAtLeastOneDay() {
+        return this.balanceNumberOfDays != null && this.balanceNumberOfDays > 0;
+    }
+
+    public SavingsAccountDailyBalance toDailyBalance(final LocalDate periodEnd) {
+
+        LocalDate balanceValidTo = getEndOfBalanceLocalDate();
+        if (periodEnd.isBefore(getEndOfBalanceLocalDate())) {
+            balanceValidTo = periodEnd;
+        }
+
+        final InterestPeriodInterval interestPeriodInterval = InterestPeriodInterval.create(getTransactionLocalDate(), balanceValidTo);
+        return SavingsAccountDailyBalance.createFrom(interestPeriodInterval, this.runningBalance);
     }
 }

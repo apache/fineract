@@ -6,6 +6,8 @@
 package org.mifosplatform.portfolio.savings.domain;
 
 import java.math.BigDecimal;
+import java.math.MathContext;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -29,6 +31,7 @@ import javax.persistence.UniqueConstraint;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
+import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormatter;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
@@ -84,7 +87,28 @@ public class SavingsAccount extends AbstractPersistable<Long> {
     @Column(name = "nominal_interest_rate_period_frequency_enum", nullable = false)
     private Integer interestRatePeriodFrequencyType;
 
-    @SuppressWarnings("unused")
+    /**
+     * The interest period is the span of time at the end of which savings in a
+     * client’s account earn interest.
+     * 
+     * A value from the {@link SavingsInterestPeriodType} enumeration.
+     */
+    @Column(name = "interest_period_enum", nullable = false)
+    private Integer interestPeriodType;
+
+    /**
+     * A value from the {@link SavingsInterestCalculationType} enumeration.
+     */
+    @Column(name = "interest_calculation_type_enum", nullable = false)
+    private Integer interestCalculationType;
+
+    /**
+     * A value from the {@link SavingsInterestCalculationDaysInYearType}
+     * enumeration.
+     */
+    @Column(name = "interest_calculation_days_in_year_type_enum", nullable = false)
+    private Integer interestCalculationDaysInYearType;
+
     @Column(name = "annual_nominal_interest_rate", scale = 6, precision = 19, nullable = false)
     private BigDecimal annualInterestRate;
 
@@ -124,26 +148,25 @@ public class SavingsAccount extends AbstractPersistable<Long> {
     }
 
     public static SavingsAccount createNewAccount(final Client client, final Group group, final SavingsProduct product,
-            final String accountNo, final String externalId, final boolean active, final LocalDate activationDate,
-            final BigDecimal interestRate, final PeriodFrequencyType interestRatePeriodFrequencyType, final BigDecimal annualInterestRate,
-            final BigDecimal minRequiredOpeningBalance, final Integer lockinPeriodFrequency,
-            final PeriodFrequencyType lockinPeriodFrequencyType) {
+            final String accountNo, final String externalId, final BigDecimal interestRate,
+            final PeriodFrequencyType interestRatePeriodFrequencyType, final BigDecimal annualInterestRate,
+            final SavingsInterestPeriodType interestPeriodType, final SavingsInterestCalculationType interestCalculationType,
+            final SavingsInterestCalculationDaysInYearType interestCalculationDaysInYearType, final BigDecimal minRequiredOpeningBalance,
+            final Integer lockinPeriodFrequency, final PeriodFrequencyType lockinPeriodFrequencyType) {
 
-        SavingsAccountStatusType status = SavingsAccountStatusType.UNACTIVATED;
-        if (active) {
-            status = SavingsAccountStatusType.ACTIVE;
-        }
-
+        final SavingsAccountStatusType status = SavingsAccountStatusType.UNACTIVATED;
+        final LocalDate activationDate = null;
         return new SavingsAccount(client, group, product, accountNo, externalId, status, activationDate, interestRate,
-                interestRatePeriodFrequencyType, annualInterestRate, minRequiredOpeningBalance, lockinPeriodFrequency,
-                lockinPeriodFrequencyType);
+                interestRatePeriodFrequencyType, annualInterestRate, interestPeriodType, interestCalculationType,
+                interestCalculationDaysInYearType, minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType);
     }
 
     private SavingsAccount(final Client client, final Group group, final SavingsProduct product, final String accountNo,
             final String externalId, final SavingsAccountStatusType status, final LocalDate activationDate, final BigDecimal interestRate,
             final PeriodFrequencyType interestRatePeriodFrequencyType, final BigDecimal annualInterestRate,
-            final BigDecimal minRequiredOpeningBalance, final Integer lockinPeriodFrequency,
-            final PeriodFrequencyType lockinPeriodFrequencyType) {
+            final SavingsInterestPeriodType interestPeriodType, final SavingsInterestCalculationType interestCalculationType,
+            final SavingsInterestCalculationDaysInYearType interestCalculationDaysInYearType, final BigDecimal minRequiredOpeningBalance,
+            final Integer lockinPeriodFrequency, final PeriodFrequencyType lockinPeriodFrequencyType) {
         this.client = client;
         this.group = group;
         this.product = product;
@@ -162,6 +185,9 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         this.interestRate = interestRate;
         this.interestRatePeriodFrequencyType = interestRatePeriodFrequencyType.getValue();
         this.annualInterestRate = annualInterestRate;
+        this.interestPeriodType = interestPeriodType.getValue();
+        this.interestCalculationType = interestCalculationType.getValue();
+        this.interestCalculationDaysInYearType = interestCalculationDaysInYearType.getValue();
         this.minRequiredOpeningBalance = minRequiredOpeningBalance;
         this.lockinPeriodFrequency = lockinPeriodFrequency;
         if (lockinPeriodFrequencyType != null) {
@@ -249,6 +275,224 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         return lockedInUntilLocalDate;
     }
 
+    /**
+     * All interest calculation based on END-OF-DAY-BALANCE.
+     * 
+     * Interest calculation is performed on-the-fly over all account
+     * transactions.
+     */
+    /*
+     * The daily balance method is the application of a daily interest rate to
+     * the full amount of principal in the account each day. For the days the
+     * account is overdrawn, a zero balance is used to calculate the interest
+     * for those days.
+     */
+    public void calculateInterest() {
+
+        // no openingBalance concept supported yet but probably will to all for
+        // migrations.
+        final Money openingAccountBalance = Money.zero(this.currency);
+
+        // 1. update existing transactions so derived balance fields are
+        // correct.
+        recalculateDailyBalances(openingAccountBalance);
+
+        // 2. determine interest periods
+        final SavingsInterestPeriodType interestPeriodType = SavingsInterestPeriodType.fromInt(this.interestPeriodType);
+        final SavingsInterestCalculationDaysInYearType daysInYearType = SavingsInterestCalculationDaysInYearType
+                .fromInt(this.interestCalculationDaysInYearType);
+        final List<InterestPeriodInterval> interestPeriods = determineInterestPeriods(getActivationLocalDate(), interestPeriodType);
+
+        final List<InterestPeriodSummary> interestPeriodSummaries = deriveInterestPeriodSummaries(openingAccountBalance, interestPeriods,
+                this.annualInterestRate, daysInYearType);
+
+        this.summary.updateFromInterestPeriodSummaries(currency, interestPeriodSummaries);
+    }
+
+    private List<InterestPeriodInterval> determineInterestPeriods(final LocalDate activationLocalDate,
+            final SavingsInterestPeriodType interestPeriodType) {
+
+        LocalDate today = DateUtils.getLocalDateOfTenant();
+        LocalDate periodStartDate = activationLocalDate;
+        LocalDate periodEndDate = periodStartDate;
+
+        final List<InterestPeriodInterval> interestPeriods = new ArrayList<InterestPeriodInterval>();
+
+        while (!periodStartDate.isAfter(today) && !periodEndDate.isAfter(today)) {
+
+            periodEndDate = determineInterestPeriodEndDateFrom(periodStartDate, interestPeriodType);
+            interestPeriods.add(InterestPeriodInterval.create(periodStartDate, periodEndDate));
+
+            // move periodStartDate forward to day after this period
+            periodStartDate = periodEndDate.plusDays(1);
+        }
+
+        return interestPeriods;
+    }
+
+    private LocalDate determineInterestPeriodEndDateFrom(final LocalDate periodStartDate, final SavingsInterestPeriodType interestPeriodType) {
+
+        LocalDate periodEndDate = DateUtils.getLocalDateOfTenant();
+
+        switch (interestPeriodType) {
+            case INVALID:
+            break;
+            case DAILY:
+                periodEndDate = periodStartDate;
+            break;
+            case WEEKLY:
+                periodEndDate = periodStartDate.dayOfWeek().withMaximumValue();
+            break;
+            case BIWEEKLY:
+                final LocalDate closestEndOfWeek = periodStartDate.dayOfWeek().withMaximumValue();
+                periodEndDate = closestEndOfWeek.plusWeeks(1);
+            break;
+            case MONTHLY:
+                // produce period end date on last day of current month
+                periodEndDate = periodStartDate.dayOfMonth().withMaximumValue();
+            break;
+            case QUATERLY:
+                // jan 1st to mar 31st, 1st apr to jun 30, jul 1st to sept 30,
+                // oct 1st to dec 31
+                int year = periodStartDate.getYearOfEra();
+                int monthofYear = periodStartDate.getMonthOfYear();
+                if (monthofYear <= 3) {
+                    periodEndDate = new DateTime().withDate(year, 3, 31).toLocalDate();
+                } else if (monthofYear <= 6) {
+                    periodEndDate = new DateTime().withDate(year, 6, 30).toLocalDate();
+                } else if (monthofYear <= 9) {
+                    periodEndDate = new DateTime().withDate(year, 9, 30).toLocalDate();
+                } else if (monthofYear <= 12) {
+                    periodEndDate = new DateTime().withDate(year, 12, 31).toLocalDate();
+                }
+            break;
+            case SEMIANNUAL:
+                // jan 1st to 30, jul 1st to dec 31
+                year = periodStartDate.getYearOfEra();
+                monthofYear = periodStartDate.getMonthOfYear();
+                if (monthofYear <= 6) {
+                    periodEndDate = new DateTime().withDate(year, 6, 30).toLocalDate();
+                } else if (monthofYear <= 12) {
+                    periodEndDate = new DateTime().withDate(year, 12, 31).toLocalDate();
+                }
+            break;
+            case ANNUAL:
+                periodEndDate = periodStartDate.monthOfYear().withMaximumValue();
+                periodEndDate = periodStartDate.dayOfMonth().withMaximumValue();
+            break;
+        }
+
+        return periodEndDate;
+    }
+
+    private BigDecimal determinePeriodsInOneYear(final SavingsInterestCalculationDaysInYearType daysInYearType) {
+
+        BigDecimal periodsInOneYear = BigDecimal.ZERO;
+
+        switch (daysInYearType) {
+            case DAYS_360:
+                periodsInOneYear = BigDecimal.valueOf(360l);
+            break;
+            case DAYS_365:
+                periodsInOneYear = BigDecimal.valueOf(365l);
+            break;
+            case INVALID:
+            break;
+        }
+
+        return periodsInOneYear;
+    }
+
+    private List<InterestPeriodSummary> deriveInterestPeriodSummaries(final Money openingAccountBalance,
+            final List<InterestPeriodInterval> interestPeriods, final BigDecimal annualInterestRate,
+            final SavingsInterestCalculationDaysInYearType daysInYearType) {
+
+        final List<InterestPeriodSummary> summaries = new ArrayList<InterestPeriodSummary>();
+
+        final MathContext mc = new MathContext(10, RoundingMode.HALF_EVEN);
+        final BigDecimal percentageDivisor = BigDecimal.valueOf(100l);
+        final BigDecimal periodsInOneYear = determinePeriodsInOneYear(daysInYearType);
+        final BigDecimal periodsInOneYearAsFraction = BigDecimal.ONE.divide(periodsInOneYear, mc);
+        final BigDecimal annualInterestRateAsFraction = annualInterestRate.divide(percentageDivisor, mc);
+
+        final SavingsInterestCalculationType interestCalculationType = SavingsInterestCalculationType.fromInt(this.interestCalculationType);
+
+        final SavingsInterestCalculatorFactory interestCalculatorFactory = new SavingsInterestCalculatorFactory();
+        final SavingsInterestCalculator interestCalculator = interestCalculatorFactory.createFrom(interestCalculationType,
+                periodsInOneYearAsFraction, annualInterestRateAsFraction);
+
+        Money periodOpeningBalance = openingAccountBalance.copy();
+        for (InterestPeriodInterval interestPeriodInterval : interestPeriods) {
+
+            InterestPeriodSummary interestPeriodSummary = calculateInterestPeriodSummaryFor(interestPeriodInterval, periodOpeningBalance,
+                    interestCalculator);
+
+            periodOpeningBalance = interestPeriodSummary.closingBalance(this.currency);
+
+            summaries.add(interestPeriodSummary);
+        }
+
+        return summaries;
+    }
+
+    private InterestPeriodSummary calculateInterestPeriodSummaryFor(final InterestPeriodInterval interestPeriodInterval,
+            final Money startingBalanceForPeriod, final SavingsInterestCalculator interestCalculator) {
+
+        List<SavingsAccountDailyBalance> dailyBalances = new ArrayList<SavingsAccountDailyBalance>();
+        for (SavingsAccountTransaction transaction : this.transactions) {
+
+            if (transaction.isAcceptableForDailyBalance(interestPeriodInterval)) {
+                SavingsAccountDailyBalance dailyBalance = transaction.toDailyBalance(interestPeriodInterval.endDate());
+                dailyBalances.add(dailyBalance);
+            }
+        }
+
+        if (dailyBalances.isEmpty()) {
+            SavingsAccountDailyBalance dailyBalance = SavingsAccountDailyBalance.createFrom(interestPeriodInterval,
+                    startingBalanceForPeriod.getAmount());
+            dailyBalances.add(dailyBalance);
+        }
+
+        final BigDecimal totalInterestEarnedUnrounded = interestCalculator.calculate(dailyBalances,
+                interestPeriodInterval.daysInPeriodInclusiveOfEndDate());
+
+        return InterestPeriodSummary.from(interestPeriodInterval, startingBalanceForPeriod, dailyBalances, totalInterestEarnedUnrounded);
+    }
+
+    private void recalculateDailyBalances(final Money openingAccountBalance) {
+
+        Money runningBalance = openingAccountBalance.copy();
+        for (SavingsAccountTransaction transaction : this.transactions) {
+
+            if (transaction.isReversed()) {
+                transaction.zeroBalanceFields();
+            } else {
+                Money transactionAmount = Money.zero(this.currency);
+                if (transaction.isDeposit()) {
+                    transactionAmount = transactionAmount.plus(transaction.getAmount(this.currency));
+                } else if (transaction.isWithdrawal()) {
+                    transactionAmount = transactionAmount.minus(transaction.getAmount(this.currency));
+                } else if (transaction.isInterestPosting()) {
+                    transactionAmount = transactionAmount.plus(transaction.getAmount(this.currency));
+                }
+
+                runningBalance = runningBalance.plus(transactionAmount);
+                transaction.updateRunningBalance(runningBalance);
+            }
+        }
+
+        // loop over transactions in reverse
+        LocalDate endOfBalanceDate = DateUtils.getLocalDateOfTenant();
+        for (int i = this.transactions.size() - 1; i >= 0; i--) {
+            SavingsAccountTransaction transaction = this.transactions.get(i);
+            transaction.updateCumulativeBalanceAndDates(this.currency, endOfBalanceDate);
+
+            // this transactions transaction date is end of balance date for
+            // previous transaction.
+            endOfBalanceDate = transaction.localDate().minusDays(1);
+        }
+    }
+
     public SavingsAccountTransaction deposit(final DateTimeFormatter formatter, final LocalDate transactionDate,
             final BigDecimal transactionAmount) {
 
@@ -292,6 +536,8 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         this.transactions.add(transaction);
 
         this.summary.updateSummary(this.currency, this.savingsAccountTransactionSummaryWrapper, this.transactions);
+
+        calculateInterest();
 
         return transaction;
     }
@@ -367,6 +613,8 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         this.transactions.add(transaction);
 
         this.summary.updateSummary(this.currency, this.savingsAccountTransactionSummaryWrapper, this.transactions);
+
+        calculateInterest();
 
         return transaction;
     }

@@ -8,6 +8,9 @@ package org.mifosplatform.portfolio.savings.domain;
 import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.currencyCodeParamName;
 import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.descriptionParamName;
 import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.digitsAfterDecimalParamName;
+import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.interestCalculationDaysInYearTypeParamName;
+import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.interestCalculationTypeParamName;
+import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.interestPeriodTypeParamName;
 import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.interestRateParamName;
 import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.interestRatePeriodFrequencyTypeParamName;
 import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.localeParamName;
@@ -51,6 +54,28 @@ public class SavingsProduct extends AbstractPersistable<Long> {
     @Column(name = "nominal_interest_rate_period_frequency_enum", nullable = false)
     private Integer interestRatePeriodFrequencyType;
 
+    /**
+     * The interest period is the span of time at the end of which savings in a
+     * client’s account earn interest.
+     * 
+     * A value from the {@link SavingsInterestPeriodType} enumeration.
+     */
+    @Column(name = "interest_period_enum", nullable = false)
+    private Integer interestPeriodType;
+
+    /**
+     * A value from the {@link SavingsInterestCalculationType} enumeration.
+     */
+    @Column(name = "interest_calculation_type_enum", nullable = false)
+    private Integer interestCalculationType;
+
+    /**
+     * A value from the {@link SavingsInterestCalculationDaysInYearType}
+     * enumeration.
+     */
+    @Column(name = "interest_calculation_days_in_year_type_enum", nullable = false)
+    private Integer interestCalculationDaysInYearType;
+
     @Column(name = "min_required_opening_balance", scale = 6, precision = 19, nullable = false)
     private BigDecimal minRequiredOpeningBalance;
 
@@ -61,12 +86,15 @@ public class SavingsProduct extends AbstractPersistable<Long> {
     private Integer lockinPeriodFrequencyType;
 
     public static SavingsProduct createNew(final String name, final String description, final MonetaryCurrency currency,
-            final BigDecimal interestRate, final PeriodFrequencyType interestRatePeriodFrequencyType,
-            final BigDecimal minRequiredOpeningBalance, final Integer lockinPeriodFrequency,
+            final BigDecimal interestRate, final SavingsPeriodFrequencyType interestRatePeriodFrequencyType,
+            final SavingsInterestPeriodType interestPeriodType, final SavingsInterestCalculationType interestCalculationType,
+            final SavingsInterestCalculationDaysInYearType interestCalculationDaysInYearType, final BigDecimal minRequiredOpeningBalance,
+            final Integer lockinPeriodFrequency,
             final PeriodFrequencyType lockinPeriodFrequencyType) {
 
-        return new SavingsProduct(name, description, currency, interestRate, interestRatePeriodFrequencyType, minRequiredOpeningBalance,
-                lockinPeriodFrequency, lockinPeriodFrequencyType);
+        return new SavingsProduct(name, description, currency, interestRate, interestRatePeriodFrequencyType, interestPeriodType,
+                interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance, lockinPeriodFrequency,
+                lockinPeriodFrequencyType);
     }
 
     protected SavingsProduct() {
@@ -75,7 +103,9 @@ public class SavingsProduct extends AbstractPersistable<Long> {
     }
 
     private SavingsProduct(final String name, final String description, final MonetaryCurrency currency, final BigDecimal interestRate,
-            final PeriodFrequencyType interestRatePeriodFrequencyType, final BigDecimal minRequiredOpeningBalance,
+            final SavingsPeriodFrequencyType interestRatePeriodFrequencyType, final SavingsInterestPeriodType interestPeriodType,
+            final SavingsInterestCalculationType interestCalculationType,
+            final SavingsInterestCalculationDaysInYearType interestCalculationDaysInYearType, final BigDecimal minRequiredOpeningBalance,
             final Integer lockinPeriodFrequency, final PeriodFrequencyType lockinPeriodFrequencyType) {
 
         this.name = name;
@@ -84,6 +114,9 @@ public class SavingsProduct extends AbstractPersistable<Long> {
         this.currency = currency;
         this.interestRate = interestRate;
         this.interestRatePeriodFrequencyType = interestRatePeriodFrequencyType.getValue();
+        this.interestPeriodType = interestPeriodType.getValue();
+        this.interestCalculationType = interestCalculationType.getValue();
+        this.interestCalculationDaysInYearType = interestCalculationDaysInYearType.getValue();
 
         if (minRequiredOpeningBalance != null) {
             this.minRequiredOpeningBalance = Money.of(currency, minRequiredOpeningBalance).getAmount();
@@ -174,7 +207,25 @@ public class SavingsProduct extends AbstractPersistable<Long> {
         if (command.isChangeInIntegerParameterNamed(interestRatePeriodFrequencyTypeParamName, this.interestRatePeriodFrequencyType)) {
             final Integer newValue = command.integerValueOfParameterNamed(interestRatePeriodFrequencyTypeParamName);
             actualChanges.put(interestRatePeriodFrequencyTypeParamName, newValue);
-            this.interestRatePeriodFrequencyType = PeriodFrequencyType.fromInt(newValue).getValue();
+            this.interestRatePeriodFrequencyType = SavingsPeriodFrequencyType.fromInt(newValue).getValue();
+        }
+
+        if (command.isChangeInIntegerParameterNamed(interestPeriodTypeParamName, this.interestPeriodType)) {
+            final Integer newValue = command.integerValueOfParameterNamed(interestPeriodTypeParamName);
+            actualChanges.put(interestPeriodTypeParamName, newValue);
+            this.interestPeriodType = SavingsInterestPeriodType.fromInt(newValue).getValue();
+        }
+
+        if (command.isChangeInIntegerParameterNamed(interestCalculationTypeParamName, this.interestCalculationType)) {
+            final Integer newValue = command.integerValueOfParameterNamed(interestCalculationTypeParamName);
+            actualChanges.put(interestCalculationTypeParamName, newValue);
+            this.interestCalculationType = SavingsInterestCalculationType.fromInt(newValue).getValue();
+        }
+
+        if (command.isChangeInIntegerParameterNamed(interestCalculationDaysInYearTypeParamName, this.interestCalculationDaysInYearType)) {
+            final Integer newValue = command.integerValueOfParameterNamed(interestCalculationDaysInYearTypeParamName);
+            actualChanges.put(interestCalculationDaysInYearTypeParamName, newValue);
+            this.interestCalculationDaysInYearType = SavingsInterestCalculationDaysInYearType.fromInt(newValue).getValue();
         }
 
         if (command.isChangeInBigDecimalParameterNamed(minRequiredOpeningBalanceParamName, this.minRequiredOpeningBalance)) {
@@ -194,7 +245,7 @@ public class SavingsProduct extends AbstractPersistable<Long> {
         if (command.isChangeInIntegerParameterNamed(lockinPeriodFrequencyTypeParamName, this.lockinPeriodFrequencyType)) {
             final Integer newValue = command.integerValueOfParameterNamed(lockinPeriodFrequencyTypeParamName);
             actualChanges.put(lockinPeriodFrequencyTypeParamName, newValue);
-            this.lockinPeriodFrequencyType = PeriodFrequencyType.fromInt(newValue).getValue();
+            this.lockinPeriodFrequencyType = SavingsPeriodFrequencyType.fromInt(newValue).getValue();
         }
 
         validateLockinDetails();
@@ -203,9 +254,11 @@ public class SavingsProduct extends AbstractPersistable<Long> {
     }
 
     private void validateLockinDetails() {
-        if (isInvalidConfigurationOfLockinSettings()) { throw new InvalidSavingsProductSettingsException(
-                "error.msg.product.savings.invalid.lockin.settings", "Invalid configuration of lock in settings.",
-                lockinPeriodFrequencyParamName); }
+        if (isInvalidConfigurationOfLockinSettings()) {
+            //
+            throw new InvalidSavingsProductSettingsException("error.msg.product.savings.invalid.lockin.settings",
+                    "Invalid configuration of lock in settings.", lockinPeriodFrequencyParamName);
+        }
     }
 
     private boolean isInvalidConfigurationOfLockinSettings() {

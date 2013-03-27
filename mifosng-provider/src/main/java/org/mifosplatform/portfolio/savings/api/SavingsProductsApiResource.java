@@ -30,8 +30,11 @@ import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSeria
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.mifosplatform.organisation.monetary.service.CurrencyReadPlatformService;
-import org.mifosplatform.portfolio.loanproduct.domain.PeriodFrequencyType;
 import org.mifosplatform.portfolio.savings.data.SavingsProductData;
+import org.mifosplatform.portfolio.savings.domain.SavingsInterestCalculationDaysInYearType;
+import org.mifosplatform.portfolio.savings.domain.SavingsInterestCalculationType;
+import org.mifosplatform.portfolio.savings.domain.SavingsInterestPeriodType;
+import org.mifosplatform.portfolio.savings.domain.SavingsPeriodFrequencyType;
 import org.mifosplatform.portfolio.savings.service.SavingsDropdownReadPlatformService;
 import org.mifosplatform.portfolio.savings.service.SavingsEnumerations;
 import org.mifosplatform.portfolio.savings.service.SavingsProductReadPlatformService;
@@ -144,21 +147,41 @@ public class SavingsProductsApiResource {
     private SavingsProductData handleTemplateRelatedData(final SavingsProductData savingsProduct) {
 
         final EnumOptionData interestRatePeriodFrequencyType = SavingsEnumerations
-                .interestRatePeriodFrequencyType(PeriodFrequencyType.YEARS);
+                .interestRatePeriodFrequencyType(SavingsPeriodFrequencyType.YEARS);
+
+        final EnumOptionData interestPeriodType = SavingsEnumerations.interestPeriodType(SavingsInterestPeriodType.MONTHLY);
+
+        final EnumOptionData interestCalculationType = SavingsEnumerations
+                .interestCalculationType(SavingsInterestCalculationType.AVERAGE_DAILY_BALANCE);
+
+        final EnumOptionData interestCalculationDaysInYearType = SavingsEnumerations
+                .interestCalculationDaysInYearType(SavingsInterestCalculationDaysInYearType.DAYS_365);
 
         final Collection<CurrencyData> currencyOptions = this.currencyReadPlatformService.retrieveAllowedCurrencies();
         final Collection<EnumOptionData> interestRatePeriodFrequencyTypeOptions = this.dropdownReadPlatformService
                 .retrieveInterestRatePeriodFrequencyTypeOptions();
+
+        final Collection<EnumOptionData> interestPeriodTypeOptions = this.dropdownReadPlatformService.retrieveInterestPeriodTypeOptions();
+
+        final Collection<EnumOptionData> interestCalculationTypeOptions = this.dropdownReadPlatformService
+                .retrieveInterestCalculationTypeOptions();
+
+        final Collection<EnumOptionData> interestCalculationDaysInYearTypeOptions = this.dropdownReadPlatformService
+                .retrieveInterestCalculationDaysInYearTypeOptions();
+
         final Collection<EnumOptionData> lockinPeriodFrequencyTypeOptions = this.dropdownReadPlatformService
                 .retrieveLockinPeriodFrequencyTypeOptions();
 
         SavingsProductData savingsProductToReturn = null;
         if (savingsProduct != null) {
             savingsProductToReturn = SavingsProductData.withTemplate(savingsProduct, currencyOptions,
-                    interestRatePeriodFrequencyTypeOptions, lockinPeriodFrequencyTypeOptions);
+                    interestRatePeriodFrequencyTypeOptions, interestPeriodTypeOptions, interestCalculationTypeOptions,
+                    interestCalculationDaysInYearTypeOptions, lockinPeriodFrequencyTypeOptions);
         } else {
-            savingsProductToReturn = SavingsProductData.template(CurrencyData.blank(), interestRatePeriodFrequencyType, currencyOptions,
-                    interestRatePeriodFrequencyTypeOptions, lockinPeriodFrequencyTypeOptions);
+            savingsProductToReturn = SavingsProductData.template(CurrencyData.blank(), interestRatePeriodFrequencyType, interestPeriodType,
+                    interestCalculationType, interestCalculationDaysInYearType, currencyOptions, interestRatePeriodFrequencyTypeOptions,
+                    interestPeriodTypeOptions, interestCalculationTypeOptions, interestCalculationDaysInYearTypeOptions,
+                    lockinPeriodFrequencyTypeOptions);
         }
 
         return savingsProductToReturn;

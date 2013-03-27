@@ -713,6 +713,15 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    public CommandWrapperBuilder savingsAccountInterestCalculation(final Long accountId) {
+        this.actionName = "CALCULATEINTEREST";
+        this.entityName = "SAVINGSACCOUNT";
+        this.savingsId = accountId;
+        this.entityId = null;
+        this.href = "/savingsaccounts/" + accountId + "?command=calculateInterest";
+        return this;
+    }
+
     public CommandWrapperBuilder createCalendar(final String supportedEntityType, final Long supportedEntityId) {
         this.actionName = "CREATE";
         this.entityName = "CALENDAR";

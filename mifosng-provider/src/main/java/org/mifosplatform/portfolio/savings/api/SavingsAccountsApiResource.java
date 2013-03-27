@@ -141,6 +141,9 @@ public class SavingsAccountsApiResource {
         Collection<SavingsAccountTransactionData> transactions = null;
         Collection<SavingsProductData> productOptions = null;
         Collection<EnumOptionData> interestRatePeriodFrequencyTypeOptions = null;
+        Collection<EnumOptionData> interestPeriodTypeOptions = null;
+        Collection<EnumOptionData> interestCalculationTypeOptions = null;
+        Collection<EnumOptionData> interestCalculationDaysInYearTypeOptions = null;
         Collection<EnumOptionData> lockinPeriodFrequencyTypeOptions = null;
 
         final Set<String> associationParameters = ApiParameterHelper.extractAssociationsForResponseIfProvided(uriInfo.getQueryParameters());
@@ -164,10 +167,13 @@ public class SavingsAccountsApiResource {
         if (settings.isTemplate()) {
             productOptions = this.savingsProductReadPlatformService.retrieveAllForLookup();
             interestRatePeriodFrequencyTypeOptions = this.dropdownReadPlatformService.retrieveInterestRatePeriodFrequencyTypeOptions();
+            interestPeriodTypeOptions = this.dropdownReadPlatformService.retrieveInterestPeriodTypeOptions();
+            interestCalculationTypeOptions = this.dropdownReadPlatformService.retrieveInterestCalculationTypeOptions();
             lockinPeriodFrequencyTypeOptions = this.dropdownReadPlatformService.retrieveLockinPeriodFrequencyTypeOptions();
         }
 
         return SavingsAccountData.withTemplateOptions(savingsAccount, productOptions, interestRatePeriodFrequencyTypeOptions,
+                interestPeriodTypeOptions, interestCalculationTypeOptions, interestCalculationDaysInYearTypeOptions,
                 lockinPeriodFrequencyTypeOptions, transactions);
     }
 
@@ -197,6 +203,9 @@ public class SavingsAccountsApiResource {
         CommandProcessingResult result = null;
         if (is(commandParam, "activate")) {
             final CommandWrapper commandRequest = builder.savingsAccountActivation(accountId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        } else if (is(commandParam, "calculateInterest")) {
+            final CommandWrapper commandRequest = builder.savingsAccountInterestCalculation(accountId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         }
 

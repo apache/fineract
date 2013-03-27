@@ -33,6 +33,9 @@ public class SavingsApiConstants {
     public static final String digitsAfterDecimalParamName = "digitsAfterDecimal";
     public static final String interestRateParamName = "interestRate";
     public static final String interestRatePeriodFrequencyTypeParamName = "interestRatePeriodFrequencyType";
+    public static final String interestPeriodTypeParamName = "interestPeriodType";
+    public static final String interestCalculationTypeParamName = "interestCalculationType";
+    public static final String interestCalculationDaysInYearTypeParamName = "interestCalculationDaysInYearType";
     public static final String minRequiredOpeningBalanceParamName = "minRequiredOpeningBalance";
     public static final String lockinPeriodFrequencyParamName = "lockinPeriodFrequency";
     public static final String lockinPeriodFrequencyTypeParamName = "lockinPeriodFrequencyType";
@@ -43,7 +46,8 @@ public class SavingsApiConstants {
 
     public static final Set<String> SAVINGS_PRODUCT_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(localeParamName,
             nameParamName, descriptionParamName, currencyCodeParamName, digitsAfterDecimalParamName, interestRateParamName,
-            interestRatePeriodFrequencyTypeParamName, minRequiredOpeningBalanceParamName, lockinPeriodFrequencyParamName,
+            interestRatePeriodFrequencyTypeParamName, interestPeriodTypeParamName, interestCalculationTypeParamName,
+            interestCalculationDaysInYearTypeParamName, minRequiredOpeningBalanceParamName, lockinPeriodFrequencyParamName,
             lockinPeriodFrequencyTypeParamName));
 
     /**
@@ -53,13 +57,15 @@ public class SavingsApiConstants {
      */
     public static final Set<String> SAVINGS_PRODUCT_RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(idParamName,
             nameParamName, descriptionParamName, "currency", digitsAfterDecimalParamName, interestRateParamName,
-            interestRatePeriodFrequencyTypeParamName, minRequiredOpeningBalanceParamName, lockinPeriodFrequencyParamName,
+            interestRatePeriodFrequencyTypeParamName, interestPeriodTypeParamName, interestCalculationTypeParamName,
+            interestCalculationDaysInYearTypeParamName, minRequiredOpeningBalanceParamName, lockinPeriodFrequencyParamName,
             lockinPeriodFrequencyTypeParamName, "currencyOptions", "interestRatePeriodFrequencyTypeOptions",
             "lockinPeriodFrequencyTypeOptions"));
 
     public static final Set<String> SAVINGS_ACCOUNT_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(localeParamName,
             dateFormatParamName, accountNoParamName, externalIdParamName, clientIdParamName, groupIdParamName, productIdParamName,
             activeParamName, activationDateParamName, interestRateParamName, interestRatePeriodFrequencyTypeParamName,
+            interestPeriodTypeParamName, interestCalculationTypeParamName, interestCalculationDaysInYearTypeParamName,
             minRequiredOpeningBalanceParamName, lockinPeriodFrequencyParamName, lockinPeriodFrequencyTypeParamName));
 
     /**
@@ -70,9 +76,10 @@ public class SavingsApiConstants {
     public static final Set<String> SAVINGS_ACCOUNT_RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(idParamName,
             accountNoParamName, externalIdParamName, statusParamName, activationDateParamName, clientIdParamName, "clientName",
             groupIdParamName, "groupName", "savingsProductId", "savingsProductName", "currency", interestRateParamName,
-            interestRatePeriodFrequencyTypeParamName, "annualInterestRate", minRequiredOpeningBalanceParamName,
-            lockinPeriodFrequencyParamName, lockinPeriodFrequencyTypeParamName, "summary", "transactions", "productOptions",
-            "interestRatePeriodFrequencyTypeOptions", "lockinPeriodFrequencyTypeOptions"));
+            interestRatePeriodFrequencyTypeParamName, "annualInterestRate", interestPeriodTypeParamName, interestCalculationTypeParamName,
+            interestCalculationDaysInYearTypeParamName, minRequiredOpeningBalanceParamName, lockinPeriodFrequencyParamName,
+            lockinPeriodFrequencyTypeParamName, "summary", "transactions", "productOptions", "interestRatePeriodFrequencyTypeOptions",
+            "lockinPeriodFrequencyTypeOptions"));
 
     public static final Set<String> SAVINGS_ACCOUNT_TRANSACTION_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(
             localeParamName, dateFormatParamName, transactionDateParamName, transactionAmountParamName));

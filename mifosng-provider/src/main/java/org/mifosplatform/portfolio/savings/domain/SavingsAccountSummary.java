@@ -22,6 +22,10 @@ public final class SavingsAccountSummary {
     @Column(name = "total_withdrawals_derived", scale = 6, precision = 19)
     private BigDecimal totalWithdrawals;
 
+    @SuppressWarnings("unused")
+    @Column(name = "total_interest_earned_derived", scale = 6, precision = 19)
+    private BigDecimal totalInterestEarned;
+
     @Column(name = "total_interest_posted_derived", scale = 6, precision = 19)
     private BigDecimal totalInterestPosted;
 
@@ -41,6 +45,15 @@ public final class SavingsAccountSummary {
 
         this.accountBalance = Money.of(currency, this.totalDeposits).plus(this.totalInterestPosted).minus(this.totalWithdrawals)
                 .getAmount();
+    }
+
+    public void updateFromInterestPeriodSummaries(final MonetaryCurrency currency, final List<InterestPeriodSummary> interestPeriodSummaries) {
+        Money totalInterestEarned = Money.zero(currency);
+        for (InterestPeriodSummary interestPeriodSummary : interestPeriodSummaries) {
+            totalInterestEarned = totalInterestEarned.plus(interestPeriodSummary.interest());
+        }
+
+        this.totalInterestEarned = totalInterestEarned.getAmountDefaultedToNullIfZero();
     }
 
     public boolean isLessThanOrEqualToAccountBalance(final Money amount) {

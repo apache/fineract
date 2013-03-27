@@ -314,4 +314,22 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
                 .withSavingsId(savingsId) //
                 .build();
     }
+
+    @Override
+    public CommandProcessingResult calculateInterest(final Long savingsId, final JsonCommand command) {
+        this.context.authenticatedUser();
+
+        final SavingsAccount account = this.savingAccountRepository.findOneWithNotFoundDetection(savingsId);
+
+        account.calculateInterest();
+        this.savingAccountRepository.save(account);
+
+        return new CommandProcessingResultBuilder() //
+                .withEntityId(savingsId) //
+                .withOfficeId(account.officeId()) //
+                .withClientId(account.clientId()) //
+                .withGroupId(account.groupId()) //
+                .withSavingsId(savingsId) //
+                .build();
+    }
 }

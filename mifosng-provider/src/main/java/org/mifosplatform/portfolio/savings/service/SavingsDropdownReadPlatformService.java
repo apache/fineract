@@ -9,4 +9,10 @@ public interface SavingsDropdownReadPlatformService {
     Collection<EnumOptionData> retrieveInterestRatePeriodFrequencyTypeOptions();
 
     Collection<EnumOptionData> retrieveLockinPeriodFrequencyTypeOptions();
+
+    Collection<EnumOptionData> retrieveInterestPeriodTypeOptions();
+
+    Collection<EnumOptionData> retrieveInterestCalculationTypeOptions();
+
+    Collection<EnumOptionData> retrieveInterestCalculationDaysInYearTypeOptions();
 }

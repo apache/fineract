@@ -7,6 +7,9 @@ package org.mifosplatform.portfolio.savings.domain;
 
 import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.activationDateParamName;
 import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.activeParamName;
+import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.interestCalculationDaysInYearTypeParamName;
+import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.interestCalculationTypeParamName;
+import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.interestPeriodTypeParamName;
 import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.interestRateParamName;
 import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.interestRatePeriodFrequencyTypeParamName;
 import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.lockinPeriodFrequencyParamName;
@@ -112,6 +115,25 @@ public class SavingsAccountAssembler {
 
         final BigDecimal annualInterestRate = this.aprCalculator.calculateFrom(interestRatePeriodFrequencyType, interestRate);
 
+        SavingsInterestPeriodType interestPeriodType = null;
+        final Integer interestPeriodTypeValue = command.integerValueOfParameterNamed(interestPeriodTypeParamName);
+        if (interestPeriodTypeValue != null) {
+            interestPeriodType = SavingsInterestPeriodType.fromInt(interestPeriodTypeValue);
+        }
+
+        SavingsInterestCalculationType interestCalculationType = null;
+        final Integer interestCalculationTypeValue = command.integerValueOfParameterNamed(interestCalculationTypeParamName);
+        if (interestCalculationTypeValue != null) {
+            interestCalculationType = SavingsInterestCalculationType.fromInt(interestCalculationTypeValue);
+        }
+
+        SavingsInterestCalculationDaysInYearType interestCalculationDaysInYearType = null;
+        final Integer interestCalculationDaysInYearTypeValue = command
+                .integerValueOfParameterNamed(interestCalculationDaysInYearTypeParamName);
+        if (interestCalculationDaysInYearTypeValue != null) {
+            interestCalculationDaysInYearType = SavingsInterestCalculationDaysInYearType.fromInt(interestCalculationDaysInYearTypeValue);
+        }
+
         BigDecimal minRequiredOpeningBalance = null;
         if (command.parameterExists(minRequiredOpeningBalanceParamName)) {
             minRequiredOpeningBalance = command.bigDecimalValueOfParameterNamed(minRequiredOpeningBalanceParamName);
@@ -137,12 +159,12 @@ public class SavingsAccountAssembler {
             lockinPeriodFrequencyType = product.lockinPeriodFrequencyType();
         }
 
-        final SavingsAccount account = SavingsAccount.createNewAccount(client, group, product, accountNo, externalId, active,
-                activationDate, interestRate, interestRatePeriodFrequencyType, annualInterestRate, minRequiredOpeningBalance,
-                lockinPeriodFrequency, lockinPeriodFrequencyType);
+        final SavingsAccount account = SavingsAccount.createNewAccount(client, group, product, accountNo, externalId, interestRate,
+                interestRatePeriodFrequencyType, annualInterestRate, interestPeriodType, interestCalculationType,
+                interestCalculationDaysInYearType, minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType);
         account.setHelpers(this.savingsAccountTransactionSummaryWrapper);
 
-        if (account.isActive()) {
+        if (active) {
             final Locale locale = command.extractLocale();
             final DateTimeFormatter formatter = DateTimeFormat.forPattern(command.dateFormat()).withLocale(locale);
             account.activate(formatter, activationDate);
