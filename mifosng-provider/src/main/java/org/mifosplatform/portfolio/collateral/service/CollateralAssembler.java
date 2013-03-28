@@ -13,9 +13,9 @@ import java.util.Set;
 import org.mifosplatform.infrastructure.codes.domain.CodeValue;
 import org.mifosplatform.infrastructure.codes.domain.CodeValueRepositoryWrapper;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
-import org.mifosplatform.portfolio.charge.exception.LoanCollateralNotFoundException;
 import org.mifosplatform.portfolio.collateral.domain.LoanCollateral;
 import org.mifosplatform.portfolio.collateral.domain.LoanCollateralRepository;
+import org.mifosplatform.portfolio.collateral.exception.CollateralNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -62,7 +62,7 @@ public class CollateralAssembler {
                         collateralItems.add(LoanCollateral.from(collateralType, value, description));
                     } else {
                         LoanCollateral loanCollateralItem = this.loanCollateralRepository.findOne(id);
-                        if (loanCollateralItem == null) { throw new LoanCollateralNotFoundException(id); }
+                        if (loanCollateralItem == null) { throw new CollateralNotFoundException(id); }
 
                         loanCollateralItem.assembleFrom(collateralType, value, description);
 
