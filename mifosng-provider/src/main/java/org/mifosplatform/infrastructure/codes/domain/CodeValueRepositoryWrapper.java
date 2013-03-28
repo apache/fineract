@@ -12,8 +12,9 @@ import org.springframework.stereotype.Service;
 /**
  * <p>
  * Wrapper for {@link CodeValueRepository} that is responsible for checking if
- * {@link CodeValue} is returned when using <code>findOne</code> repository
- * method and throwing an appropriate not found exception.
+ * {@link CodeValue} is returned when using <code>findOne</code> and
+ * <code>findByCodeNameAndId</code> repository methods and throwing an
+ * appropriate not found exception.
  * </p>
  * 
  * <p>
@@ -34,6 +35,12 @@ public class CodeValueRepositoryWrapper {
     public CodeValue findOneWithNotFoundDetection(final Long id) {
         final CodeValue codeValue = this.repository.findOne(id);
         if (codeValue == null) { throw new CodeValueNotFoundException(id); }
+        return codeValue;
+    }
+
+    public CodeValue findOneByCodeNameAndIdWithNotFoundDetection(final String codeName, final Long id) {
+        final CodeValue codeValue = this.repository.findByCodeNameAndId(codeName, id);
+        if (codeValue == null) { throw new CodeValueNotFoundException(codeName, id); }
         return codeValue;
     }
 }

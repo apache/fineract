@@ -23,5 +23,4 @@ public interface CollateralReadPlatformService {
 
     CollateralData retrieveCollateral(Long loanId, Long collateralId);
 
-    CollateralData retrieveNewCollateralDetails();
 }

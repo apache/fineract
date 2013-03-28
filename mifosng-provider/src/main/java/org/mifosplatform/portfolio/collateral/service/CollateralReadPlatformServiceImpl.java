@@ -14,6 +14,7 @@ import org.mifosplatform.infrastructure.codes.data.CodeValueData;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
 import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
+import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.mifosplatform.portfolio.collateral.data.CollateralData;
 import org.mifosplatform.portfolio.collateral.exception.CollateralNotFoundException;
 import org.mifosplatform.portfolio.loanaccount.domain.Loan;
@@ -43,9 +44,12 @@ public class CollateralReadPlatformServiceImpl implements CollateralReadPlatform
     private static final class CollateralMapper implements RowMapper<CollateralData> {
 
         private StringBuilder sqlBuilder = new StringBuilder(
-                "lc.id as id, lc.description as description, lc.value as value, cv.id as typeId, cv.code_value as typeName") //
+                "lc.id as id, lc.description as description, lc.value as value, cv.id as typeId, cv.code_value as typeName, oc.code as currencyCode, ")
+                .append(" oc.name as currencyName,oc.decimal_places as currencyDecimalPlaces, oc.display_symbol as currencyDisplaySymbol, oc.internationalized_name_code as currencyNameCode")
                 .append(" FROM m_loan_collateral lc") //
-                .append(" JOIN m_code_value cv on lc.type_cv_id = cv.id");
+                .append(" JOIN m_code_value cv on lc.type_cv_id = cv.id")//
+                .append(" JOIN m_loan loan on lc.loan_id = loan.id")//
+                .append(" JOIN m_organisation_currency oc on loan.currency_code = oc.code");
 
         public String schema() {
             return sqlBuilder.toString();
@@ -55,14 +59,23 @@ public class CollateralReadPlatformServiceImpl implements CollateralReadPlatform
         public CollateralData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
 
             final Long id = rs.getLong("id");
-            final String name = rs.getString("description");
+            final String description = rs.getString("description");
             final Long typeId = rs.getLong("typeId");
             final BigDecimal value = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "value");
             final String typeName = rs.getString("typeName");
 
             final CodeValueData type = CodeValueData.instance(typeId, typeName);
 
-            return CollateralData.instance(id, type, value, name);
+            final String currencyCode = rs.getString("currencyCode");
+            final String currencyName = rs.getString("currencyName");
+            final String currencyNameCode = rs.getString("currencyNameCode");
+            final String currencyDisplaySymbol = rs.getString("currencyDisplaySymbol");
+            final Integer currencyDecimalPlaces = JdbcSupport.getInteger(rs, "currencyDecimalPlaces");
+
+            final CurrencyData currencyData = new CurrencyData(currencyCode, currencyName, currencyDecimalPlaces, currencyDisplaySymbol,
+                    currencyNameCode);
+
+            return CollateralData.instance(id, type, value, description, currencyData);
         }
     }
 
@@ -95,12 +108,6 @@ public class CollateralReadPlatformServiceImpl implements CollateralReadPlatform
         Loan loan = this.loanRepository.findOne(loanId);
         if (loan == null) { throw new LoanNotFoundException(loanId); }
         return retrieveCollaterals(loanId);
-    }
-
-    @Override
-    public CollateralData retrieveNewCollateralDetails() {
-        // TODO Auto-generated method stub
-        return null;
     }
 
 }

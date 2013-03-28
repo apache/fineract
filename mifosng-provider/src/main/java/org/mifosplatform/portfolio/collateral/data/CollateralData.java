@@ -9,6 +9,7 @@ import java.math.BigDecimal;
 import java.util.Collection;
 
 import org.mifosplatform.infrastructure.codes.data.CodeValueData;
+import org.mifosplatform.organisation.monetary.data.CurrencyData;
 
 /**
  * Immutable data object for Collateral data.
@@ -21,33 +22,39 @@ public class CollateralData {
     private final String description;
     @SuppressWarnings("unused")
     private final Collection<CodeValueData> allowedCollateralTypes;
+    private final CurrencyData currency;
 
-    public static CollateralData instance(final Long id, final CodeValueData type, final BigDecimal value, final String description) {
-        return new CollateralData(id, type, value, description);
+    public static CollateralData instance(final Long id, final CodeValueData type, final BigDecimal value, final String description,
+            final CurrencyData currencyData) {
+        return new CollateralData(id, type, value, description, currencyData);
     }
 
     public static CollateralData template(final Collection<CodeValueData> codeValues) {
-        return new CollateralData(null, null, null, null, codeValues);
+        return new CollateralData(null, null, null, null, null, codeValues);
     }
 
-    private CollateralData(final Long id, final CodeValueData type, final BigDecimal value, final String description) {
+    private CollateralData(final Long id, final CodeValueData type, final BigDecimal value, final String description,
+            final CurrencyData currencyData) {
         this.id = id;
         this.type = type;
         this.value = value;
         this.description = description;
+        this.currency = currencyData;
         this.allowedCollateralTypes = null;
     }
 
     private CollateralData(final Long id, final CodeValueData type, final BigDecimal value, final String description,
-            Collection<CodeValueData> allowedCollateralTypes) {
+            final CurrencyData currencyData, Collection<CodeValueData> allowedCollateralTypes) {
         this.id = id;
         this.type = type;
         this.value = value;
         this.description = description;
+        this.currency = currencyData;
         this.allowedCollateralTypes = allowedCollateralTypes;
     }
 
     public CollateralData template(CollateralData collateralData, Collection<CodeValueData> codeValues) {
-        return new CollateralData(collateralData.id, collateralData.type, collateralData.value, collateralData.description, codeValues);
+        return new CollateralData(collateralData.id, collateralData.type, collateralData.value, collateralData.description,
+                collateralData.currency, codeValues);
     }
 }

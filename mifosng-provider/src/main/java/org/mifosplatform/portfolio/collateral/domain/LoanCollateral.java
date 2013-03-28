@@ -21,6 +21,7 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.mifosplatform.infrastructure.codes.data.CodeValueData;
 import org.mifosplatform.infrastructure.codes.domain.CodeValue;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
+import org.mifosplatform.portfolio.collateral.api.CollateralApiConstants.COLLATERAL_JSON_INPUT_PARAMS;
 import org.mifosplatform.portfolio.collateral.data.CollateralData;
 import org.mifosplatform.portfolio.loanaccount.domain.Loan;
 import org.springframework.data.jpa.domain.AbstractPersistable;
@@ -70,8 +71,8 @@ public class LoanCollateral extends AbstractPersistable<Long> {
     }
 
     public static LoanCollateral fromJson(final Loan loan, final CodeValue collateralType, final JsonCommand command) {
-        final String description = command.stringValueOfParameterNamed("description");
-        final BigDecimal value = command.bigDecimalValueOfParameterNamed("value");
+        final String description = command.stringValueOfParameterNamed(COLLATERAL_JSON_INPUT_PARAMS.DESCRIPTION.getValue());
+        final BigDecimal value = command.bigDecimalValueOfParameterNamed(COLLATERAL_JSON_INPUT_PARAMS.VALUE.getValue());
         return new LoanCollateral(loan, collateralType, value, description);
     }
 
@@ -79,20 +80,20 @@ public class LoanCollateral extends AbstractPersistable<Long> {
 
         final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(7);
 
-        final String collateralTypeIdParamName = "type";
+        final String collateralTypeIdParamName = COLLATERAL_JSON_INPUT_PARAMS.COLLATERAL_TYPE_ID.getValue();
         if (command.isChangeInLongParameterNamed(collateralTypeIdParamName, this.type.getId())) {
             final Long newValue = command.longValueOfParameterNamed(collateralTypeIdParamName);
             actualChanges.put(collateralTypeIdParamName, newValue);
         }
 
-        final String descriptionParamName = "description";
+        final String descriptionParamName = COLLATERAL_JSON_INPUT_PARAMS.DESCRIPTION.getValue();
         if (command.isChangeInStringParameterNamed(descriptionParamName, this.description)) {
             final String newValue = command.stringValueOfParameterNamed(descriptionParamName);
             actualChanges.put(descriptionParamName, newValue);
             this.description = StringUtils.defaultIfEmpty(newValue, null);
         }
 
-        final String valueParamName = "value";
+        final String valueParamName = COLLATERAL_JSON_INPUT_PARAMS.VALUE.getValue();
         if (command.isChangeInBigDecimalParameterNamed(valueParamName, this.value)) {
             final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(valueParamName);
             actualChanges.put(valueParamName, newValue);
@@ -104,7 +105,7 @@ public class LoanCollateral extends AbstractPersistable<Long> {
 
     public CollateralData toData() {
         final CodeValueData typeData = this.type.toData();
-        return CollateralData.instance(this.getId(), typeData, this.value, this.description);
+        return CollateralData.instance(this.getId(), typeData, this.value, this.description, null);
     }
 
     public void setCollateralType(CodeValue type) {
