@@ -45,7 +45,7 @@ import org.springframework.stereotype.Component;
 public class CollateralsApiResource {
 
     private static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "type", "value", "description",
-            "allowedCollateralTypes"));
+            "allowedCollateralTypes", "currency"));
 
     private final String resourceNameForPermission = "COLLATERAL";
 
@@ -111,7 +111,8 @@ public class CollateralsApiResource {
 
         final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         if (settings.isTemplate()) {
-            final Collection<CodeValueData> codeValues = this.codeValueReadPlatformService.retrieveCodeValuesByCode("LoanCollateral");
+            final Collection<CodeValueData> codeValues = this.codeValueReadPlatformService
+                    .retrieveCodeValuesByCode(CollateralApiConstants.COLLATERAL_CODE_NAME);
             CollateralData = CollateralData.template(CollateralData, codeValues);
         }
 

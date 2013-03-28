@@ -12,6 +12,7 @@ import java.util.List;
 import org.mifosplatform.infrastructure.core.data.ApiParameterError;
 import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
 import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
+import org.mifosplatform.portfolio.collateral.api.CollateralApiConstants.COLLATERAL_JSON_INPUT_PARAMS;
 
 /**
  * Immutable command for creating or updating details of a Collateral.
@@ -45,9 +46,12 @@ public class CollateralCommand {
 
         DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("collateral");
 
-        baseDataValidator.reset().parameter("collateralTypeId").value(this.collateralTypeId).notNull().integerGreaterThanZero();
-        baseDataValidator.reset().parameter("value").value(this.value).ignoreIfNull().positiveAmount();
-        baseDataValidator.reset().parameter("description").value(this.description).ignoreIfNull().notExceedingLengthOf(500);
+        baseDataValidator.reset().parameter(COLLATERAL_JSON_INPUT_PARAMS.COLLATERAL_TYPE_ID.getValue()).value(this.collateralTypeId)
+                .notNull().integerGreaterThanZero();
+        baseDataValidator.reset().parameter(COLLATERAL_JSON_INPUT_PARAMS.VALUE.getValue()).value(this.value).ignoreIfNull()
+                .positiveAmount();
+        baseDataValidator.reset().parameter(COLLATERAL_JSON_INPUT_PARAMS.DESCRIPTION.getValue()).value(this.description).ignoreIfNull()
+                .notExceedingLengthOf(500);
 
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
                 "Validation errors exist.", dataValidationErrors); }
@@ -58,9 +62,12 @@ public class CollateralCommand {
 
         DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("collateral");
 
-        baseDataValidator.reset().parameter("collateralTypeId").value(this.collateralTypeId).ignoreIfNull().integerGreaterThanZero();
-        baseDataValidator.reset().parameter("value").value(this.value).ignoreIfNull().positiveAmount();
-        baseDataValidator.reset().parameter("description").value(this.description).ignoreIfNull().notExceedingLengthOf(500);
+        baseDataValidator.reset().parameter(COLLATERAL_JSON_INPUT_PARAMS.COLLATERAL_TYPE_ID.getValue()).value(this.collateralTypeId)
+                .ignoreIfNull().integerGreaterThanZero();
+        baseDataValidator.reset().parameter(COLLATERAL_JSON_INPUT_PARAMS.VALUE.getValue()).value(this.value).ignoreIfNull()
+                .positiveAmount();
+        baseDataValidator.reset().parameter(COLLATERAL_JSON_INPUT_PARAMS.DESCRIPTION.getValue()).value(this.description).ignoreIfNull()
+                .notExceedingLengthOf(500);
 
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
                 "Validation errors exist.", dataValidationErrors); }
