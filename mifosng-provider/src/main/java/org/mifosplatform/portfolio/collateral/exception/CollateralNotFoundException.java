@@ -16,4 +16,8 @@ public class CollateralNotFoundException extends AbstractPlatformResourceNotFoun
         super("error.msg.loan.collateral.", "Collateral with Id " + collateralId + " does not exist for loan with Id " + loanId, loanId,
                 collateralId);
     }
+
+    public CollateralNotFoundException(final Long id) {
+        super("error.msg.loan.collateral.id.invalid", "Loan collateral with identifier " + id + " does not exist", id);
+    }
 }
