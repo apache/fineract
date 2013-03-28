@@ -1099,8 +1099,8 @@ public class Loan extends AbstractPersistable<Long> {
                 final String errorMessage = "The date on which a loan is rejected cannot be in the future.";
                 throw new InvalidLoanStateTransitionException("reject", "cannot.be.a.future.date", errorMessage, rejectedOn);
             }
-        }else{
-            final String errorMessage = "Only the Loan applications with status 'Submitted and Pending approval' are allowed to reject.";
+        } else {
+            final String errorMessage = "Only the loan applications with status 'Submitted and pending approval' are allowed to be rejected.";
             throw new InvalidLoanStateTransitionException("reject", "cannot.reject", errorMessage);
         }
 
@@ -1146,8 +1146,8 @@ public class Loan extends AbstractPersistable<Long> {
                 final String errorMessage = "The date on which a loan is withdrawn cannot be in the future.";
                 throw new InvalidLoanStateTransitionException("reject", "cannot.be.a.future.date", errorMessage, command);
             }
-        }else{
-            final String errorMessage = "Only the Loan applications with status 'Submitted and Pending approval' are allowed to Withdraw By Client.";
+        } else {
+            final String errorMessage = "Only the loan applications with status 'Submitted and pending approval' are allowed to be withdrawn by applicant.";
             throw new InvalidLoanStateTransitionException("withdraw", "cannot.withdraw", errorMessage);
         }
 
