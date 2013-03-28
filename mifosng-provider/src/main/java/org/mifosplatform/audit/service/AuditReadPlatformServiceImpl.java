@@ -30,143 +30,187 @@ import org.springframework.stereotype.Service;
 @Service
 public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
 
-    private final static Logger logger = LoggerFactory.getLogger(AuditReadPlatformServiceImpl.class);
-    private final JdbcTemplate jdbcTemplate;
-    private final PlatformSecurityContext context;
-    private final AppUserReadPlatformService appUserReadPlatformService;
+	private final static Logger logger = LoggerFactory
+			.getLogger(AuditReadPlatformServiceImpl.class);
+	private final JdbcTemplate jdbcTemplate;
+	private final PlatformSecurityContext context;
+	private final AppUserReadPlatformService appUserReadPlatformService;
 
-    @Autowired
-    public AuditReadPlatformServiceImpl(final PlatformSecurityContext context, final TenantAwareRoutingDataSource dataSource,
-            final AppUserReadPlatformService appUserReadPlatformService) {
-        this.context = context;
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
-        this.appUserReadPlatformService = appUserReadPlatformService;
-    }
+	@Autowired
+	public AuditReadPlatformServiceImpl(final PlatformSecurityContext context,
+			final TenantAwareRoutingDataSource dataSource,
+			final AppUserReadPlatformService appUserReadPlatformService) {
+		this.context = context;
+		this.jdbcTemplate = new JdbcTemplate(dataSource);
+		this.appUserReadPlatformService = appUserReadPlatformService;
+	}
 
-    private static final class AuditMapper implements RowMapper<AuditData> {
+	private static final class AuditMapper implements RowMapper<AuditData> {
 
-        public String schema(boolean includeJson) {
+		public String schema(boolean includeJson) {
 
-            String commandAsJsonString = "";
-            if (includeJson) commandAsJsonString = ", aud.command_as_json as commandAsJson ";
+			String commandAsJsonString = "";
+			if (includeJson)
+				commandAsJsonString = ", aud.command_as_json as commandAsJson ";
 
-            return " aud.id as id, aud.action_name as actionName, aud.entity_name as entityName," + " aud.resource_id as resourceId, aud.subresource_id as subresourceId,"
-                    + " mk.username as maker, aud.made_on_date as madeOnDate, "
-                    + "ck.username as checker, aud.checked_on_date as checkedOnDate, ev.enum_message_property as processingResult "
-                    + commandAsJsonString + " from m_portfolio_command_source aud " + " left join m_appuser mk on mk.id = aud.maker_id"
-                    + " left join m_appuser ck on ck.id = aud.checker_id"
-                    + " left join r_enum_value ev on ev.enum_name = 'processing_result_enum' and ev.enum_id = aud.processing_result_enum";
-        }
+			return " aud.id as id, aud.action_name as actionName, aud.entity_name as entityName,"
+					+ " aud.resource_id as resourceId, aud.subresource_id as subresourceId,"
+					+ " mk.username as maker, aud.made_on_date as madeOnDate, "
+					+ "ck.username as checker, aud.checked_on_date as checkedOnDate, ev.enum_message_property as processingResult "
+					+ commandAsJsonString
+					+ ", "
+					+ " o.name as officeName, gl.level_name as groupLevelName, g.name as groupName, c.display_name as clientName, "
+					+ " l.account_no as loanAccountNo, s.account_no as savingsAccountNo "
+					+ " from m_portfolio_command_source aud "
+					+ " left join m_appuser mk on mk.id = aud.maker_id"
+					+ " left join m_appuser ck on ck.id = aud.checker_id"
+					+ " left join m_office o on o.id = aud.office_id"
+					+ " left join m_group g on g.id = aud.group_id"
+					+ " left join m_group_level gl on gl.id = g.level_id"
+					+ " left join m_client c on c.id = aud.client_id"
+					+ " left join m_loan l on l.id = aud.loan_id"
+					+ " left join m_savings_account s on s.id = aud.savings_account_id"
+					+ " left join r_enum_value ev on ev.enum_name = 'processing_result_enum' and ev.enum_id = aud.processing_result_enum";
+		}
 
-        @Override
-        public AuditData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+		@Override
+		public AuditData mapRow(final ResultSet rs,
+				@SuppressWarnings("unused") final int rowNum)
+				throws SQLException {
 
-            final Long id = rs.getLong("id");
-            final String actionName = rs.getString("actionName");
-            final String entityName = rs.getString("entityName");
-            final Long resourceId = JdbcSupport.getLong(rs, "resourceId");
-            final Long subresourceId = JdbcSupport.getLong(rs, "subresourceId");
-            final String maker = rs.getString("maker");
-            final DateTime madeOnDate = JdbcSupport.getDateTime(rs, "madeOnDate");
-            final String checker = rs.getString("checker");
-            final DateTime checkedOnDate = JdbcSupport.getDateTime(rs, "checkedOnDate");
-            final String processingResult = rs.getString("processingResult");
-            String commandAsJson;
-            // commandAsJson might not be on the select list of columns
-            try {
-                commandAsJson = rs.getString("commandAsJson");
-            } catch (SQLException e) {
-                commandAsJson = null;
-            }
-            return new AuditData(id, actionName, entityName, resourceId, subresourceId, maker, madeOnDate, checker, checkedOnDate, processingResult,
-                    commandAsJson);
-        }
-    }
+			final Long id = rs.getLong("id");
+			final String actionName = rs.getString("actionName");
+			final String entityName = rs.getString("entityName");
+			final Long resourceId = JdbcSupport.getLong(rs, "resourceId");
+			final Long subresourceId = JdbcSupport.getLong(rs, "subresourceId");
+			final String maker = rs.getString("maker");
+			final DateTime madeOnDate = JdbcSupport.getDateTime(rs,
+					"madeOnDate");
+			final String checker = rs.getString("checker");
+			final DateTime checkedOnDate = JdbcSupport.getDateTime(rs,
+					"checkedOnDate");
+			final String processingResult = rs.getString("processingResult");
+			String commandAsJson;
+			// commandAsJson might not be on the select list of columns
+			try {
+				commandAsJson = rs.getString("commandAsJson");
+			} catch (SQLException e) {
+				commandAsJson = null;
+			}
 
-    @Override
-    public Collection<AuditData> retrieveAuditEntries(String extraCriteria, boolean includeJson) {
-        context.authenticatedUser();
+			String officeName = rs.getString("officeName");
+			String groupLevelName = rs.getString("groupLevelName");
+			String groupName = rs.getString("groupName");
+			String clientName = rs.getString("clientName");
+			String loanAccountNo = rs.getString("loanAccountNo");
+			String savingsAccountNo = rs.getString("savingsAccountNo");
 
-        final AuditMapper rm = new AuditMapper();
+			return new AuditData(id, actionName, entityName, resourceId,
+					subresourceId, maker, madeOnDate, checker, checkedOnDate,
+					processingResult, commandAsJson, officeName,
+					groupLevelName, groupName, clientName, loanAccountNo,
+					savingsAccountNo);
+		}
+	}
 
-        String sql = "select " + rm.schema(includeJson);
-        if (StringUtils.isNotBlank(extraCriteria)) sql += " where (" + extraCriteria + ")";
-        sql += " order by aud.id DESC";
-        logger.info("sql: " + sql);
-        return this.jdbcTemplate.query(sql, rm, new Object[] {});
-    }
+	@Override
+	public Collection<AuditData> retrieveAuditEntries(String extraCriteria,
+			boolean includeJson) {
+		context.authenticatedUser();
 
-    @Override
-    public AuditData retrieveAuditEntry(Long auditId) {
-        context.authenticatedUser();
+		final AuditMapper rm = new AuditMapper();
 
-        final AuditMapper rm = new AuditMapper();
+		String sql = "select " + rm.schema(includeJson);
+		if (StringUtils.isNotBlank(extraCriteria))
+			sql += " where (" + extraCriteria + ")";
+		sql += " order by aud.id DESC";
+		logger.info("sql: " + sql);
+		return this.jdbcTemplate.query(sql, rm, new Object[] {});
+	}
 
-        String sql = "select " + rm.schema(true);
-        sql += " where aud.id = " + auditId;
+	@Override
+	public AuditData retrieveAuditEntry(Long auditId) {
+		context.authenticatedUser();
 
-        return this.jdbcTemplate.queryForObject(sql, rm, new Object[] {});
-    }
+		final AuditMapper rm = new AuditMapper();
 
-    @Override
-    public AuditSearchData retrieveSearchTemplate() {
-        final Collection<AppUserData> appUsers = appUserReadPlatformService.retrieveSearchTemplate();
+		String sql = "select " + rm.schema(true);
+		sql += " where aud.id = " + auditId;
 
-        ActionNamesMapper mapper = new ActionNamesMapper();
-        List<String> actionNames = this.jdbcTemplate.query(mapper.schema(), mapper, new Object[] {});
+		return this.jdbcTemplate.queryForObject(sql, rm, new Object[] {});
+	}
 
-        EntityNamesMapper mapper2 = new EntityNamesMapper();
-        List<String> entityNames = this.jdbcTemplate.query(mapper2.schema(), mapper2, new Object[] {});
+	@Override
+	public AuditSearchData retrieveSearchTemplate() {
+		final Collection<AppUserData> appUsers = appUserReadPlatformService
+				.retrieveSearchTemplate();
 
-        ProcessingResultsMapper mapper3 = new ProcessingResultsMapper();
-        Collection<ProcessingResultLookup> processingResults = this.jdbcTemplate.query(mapper3.schema(), mapper3, new Object[] {});
+		ActionNamesMapper mapper = new ActionNamesMapper();
+		List<String> actionNames = this.jdbcTemplate.query(mapper.schema(),
+				mapper, new Object[] {});
 
-        return new AuditSearchData(appUsers, actionNames, entityNames, processingResults);
-    }
+		EntityNamesMapper mapper2 = new EntityNamesMapper();
+		List<String> entityNames = this.jdbcTemplate.query(mapper2.schema(),
+				mapper2, new Object[] {});
 
-    private static final class ActionNamesMapper implements RowMapper<String> {
+		ProcessingResultsMapper mapper3 = new ProcessingResultsMapper();
+		Collection<ProcessingResultLookup> processingResults = this.jdbcTemplate
+				.query(mapper3.schema(), mapper3, new Object[] {});
 
-        @Override
-        public String mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+		return new AuditSearchData(appUsers, actionNames, entityNames,
+				processingResults);
+	}
 
-            return rs.getString("actionName");
-        }
+	private static final class ActionNamesMapper implements RowMapper<String> {
 
-        public String schema() {
+		@Override
+		public String mapRow(final ResultSet rs,
+				@SuppressWarnings("unused") final int rowNum)
+				throws SQLException {
 
-            return " SELECT distinct(action_name) as actionName FROM m_permission "
-                    + " where action_name is not null and action_name <> 'READ' "
-                    + " order by if(action_name in ('CREATE', 'DELETE', 'UPDATE'), action_name, 'ZZZ'), action_name";
-        }
+			return rs.getString("actionName");
+		}
 
-    }
+		public String schema() {
 
-    private static final class EntityNamesMapper implements RowMapper<String> {
+			return " SELECT distinct(action_name) as actionName FROM m_permission "
+					+ " where action_name is not null and action_name <> 'READ' "
+					+ " order by if(action_name in ('CREATE', 'DELETE', 'UPDATE'), action_name, 'ZZZ'), action_name";
+		}
 
-        @Override
-        public String mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
-            return rs.getString("entityName");
-        }
+	}
 
-        public String schema() {
-            return " select distinct(entity_name) as entityName from m_permission where action_name is not null and action_name <> 'READ' "
-                    + " order by if(grouping = 'datatable', 'ZZZ', entity_name), entity_name";
-        }
-    }
+	private static final class EntityNamesMapper implements RowMapper<String> {
 
-    private static final class ProcessingResultsMapper implements RowMapper<ProcessingResultLookup> {
+		@Override
+		public String mapRow(final ResultSet rs,
+				@SuppressWarnings("unused") final int rowNum)
+				throws SQLException {
+			return rs.getString("entityName");
+		}
 
-        @Override
-        public ProcessingResultLookup mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
-            Long id = JdbcSupport.getLong(rs, "id");
-            String processingResult = rs.getString("processingResult");
+		public String schema() {
+			return " select distinct(entity_name) as entityName from m_permission where action_name is not null and action_name <> 'READ' "
+					+ " order by if(grouping = 'datatable', 'ZZZ', entity_name), entity_name";
+		}
+	}
 
-            return new ProcessingResultLookup(id, processingResult);
-        }
+	private static final class ProcessingResultsMapper implements
+			RowMapper<ProcessingResultLookup> {
 
-        public String schema() {
-            return " select enum_id as id, enum_message_property as processingResult from r_enum_value where enum_name = 'processing_result_enum' "
-                    + " order by enum_id";
-        }
-    }
+		@Override
+		public ProcessingResultLookup mapRow(final ResultSet rs,
+				@SuppressWarnings("unused") final int rowNum)
+				throws SQLException {
+			Long id = JdbcSupport.getLong(rs, "id");
+			String processingResult = rs.getString("processingResult");
+
+			return new ProcessingResultLookup(id, processingResult);
+		}
+
+		public String schema() {
+			return " select enum_id as id, enum_message_property as processingResult from r_enum_value where enum_name = 'processing_result_enum' "
+					+ " order by enum_id";
+		}
+	}
 }
