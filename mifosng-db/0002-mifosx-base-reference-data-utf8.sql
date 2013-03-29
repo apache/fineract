@@ -274,25 +274,21 @@ VALUES
 ('YesNo',1);
 
 INSERT INTO `m_code_value`(`code_id`,`code_value`,`order_position`)
-select mc.id, 'Passport', ifnull(max(mv.id), 1)
+select mc.id, 'Passport', 1
 from m_code mc
-join m_code_value mv on mv.code_id = mc.id
 where mc.`code_name` = "Customer Identifier";
 
 INSERT INTO `m_code_value`(`code_id`,`code_value`,`order_position`)
-select mc.id, 'Id', ifnull(max(mv.id), 1)
+select mc.id, 'Id', 2
 from m_code mc
-join m_code_value mv on mv.code_id = mc.id
 where mc.`code_name` = "Customer Identifier";
 
 INSERT INTO `m_code_value`(`code_id`,`code_value`,`order_position`)
-select mc.id, 'Drivers License', ifnull(max(mv.id), 1)
+select mc.id, 'Drivers License', 3
 from m_code mc
-join m_code_value mv on mv.code_id = mc.id
 where mc.`code_name` = "Customer Identifier";
 
 INSERT INTO `m_code_value`(`code_id`,`code_value`,`order_position`)
-select mc.id, 'Any Other Id Type', ifnull(max(mv.id), 1)
+select mc.id, 'Any Other Id Type', 4
 from m_code mc
-join m_code_value mv on mv.code_id = mc.id
 where mc.`code_name` = "Customer Identifier";
