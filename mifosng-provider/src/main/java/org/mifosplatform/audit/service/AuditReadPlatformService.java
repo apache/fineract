@@ -18,4 +18,6 @@ public interface AuditReadPlatformService {
 
     AuditSearchData retrieveSearchTemplate();
 
+    Collection<AuditData> retrieveAllEntriesToBeChecked();
+
 }

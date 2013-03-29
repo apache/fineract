@@ -46,7 +46,7 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
 	}
 
 	private static final class AuditMapper implements RowMapper<AuditData> {
-
+//TODO - jpw need to break this down, also data scope etc.
 		public String schema(boolean includeJson) {
 
 			String commandAsJsonString = "";
@@ -161,6 +161,20 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
 				processingResults);
 	}
 
+    @Override
+    public Collection<AuditData> retrieveAllEntriesToBeChecked() {
+        context.authenticatedUser();
+
+        final AuditMapper rm = new AuditMapper();
+		
+        final String sql = "select " + rm.schema(false)
+                + " where aud.checker_id is null and aud.processing_result_enum = 2 order by aud.id";
+        //+ " where mc.checker_id is null and mc.processing_result_enum = 2 order by mc.made_on_date DESC, mc.entity_name ASC, mc.action_name ASC";
+		logger.info("sql: " + sql);
+
+        return this.jdbcTemplate.query(sql, rm, new Object[] {});
+    }
+    
 	private static final class ActionNamesMapper implements RowMapper<String> {
 
 		@Override

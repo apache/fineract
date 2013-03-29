@@ -23,9 +23,10 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.commons.lang.StringUtils;
+import org.mifosplatform.audit.data.AuditData;
+import org.mifosplatform.audit.service.AuditReadPlatformService;
 import org.mifosplatform.commands.data.CommandSourceData;
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
-import org.mifosplatform.commands.service.PortfolioCommandsReadPlatformService;
 import org.mifosplatform.infrastructure.core.api.ApiRequestParameterHelper;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.exception.UnrecognizedQueryParamException;
@@ -41,23 +42,28 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class CommandsApiResource {
 
-    private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "taskName", "madeOnDate"));
+	private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<String>(
+			Arrays.asList("id", "actionName", "entityName", "resourceId", "subresourceId",
+					"maker", "madeOnDate", "checker", "checkedOnDate", "processingResult",
+					"commandAsJson", "officeName", "groupLevelName", "groupName", "clientName", "loanAccountNo", "savingsAccountNo"));
     private final String resourceNameForPermissions = "MAKERCHECKER";
 
     private final PlatformSecurityContext context;
-    private final PortfolioCommandsReadPlatformService readPlatformService;
+    private final AuditReadPlatformService readPlatformService;
     private final DefaultToApiJsonSerializer<CommandSourceData> toApiJsonSerializer;
+    private final DefaultToApiJsonSerializer<AuditData> toApiJsonSerializerAudit;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final PortfolioCommandSourceWritePlatformService writePlatformService;
 
     @Autowired
-    public CommandsApiResource(final PlatformSecurityContext context, final PortfolioCommandsReadPlatformService readPlatformService,
-            final DefaultToApiJsonSerializer<CommandSourceData> toApiJsonSerializer,
+    public CommandsApiResource(final PlatformSecurityContext context, final AuditReadPlatformService readPlatformService, 
+            final DefaultToApiJsonSerializer<CommandSourceData> toApiJsonSerializer, final DefaultToApiJsonSerializer<AuditData> toApiJsonSerializerAudit,
             final ApiRequestParameterHelper apiRequestParameterHelper, final PortfolioCommandSourceWritePlatformService writePlatformService) {
         this.context = context;
         this.readPlatformService = readPlatformService;
         this.toApiJsonSerializer = toApiJsonSerializer;
         this.apiRequestParameterHelper = apiRequestParameterHelper;
+        this.toApiJsonSerializerAudit = toApiJsonSerializerAudit;
         this.writePlatformService = writePlatformService;
     }
 
@@ -68,10 +74,10 @@ public class CommandsApiResource {
 
         context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
 
-        final Collection<CommandSourceData> entries = this.readPlatformService.retrieveAllEntriesToBeChecked();
+        final Collection<AuditData> entries = this.readPlatformService.retrieveAllEntriesToBeChecked();
 
         final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, entries, RESPONSE_DATA_PARAMETERS);
+        return this.toApiJsonSerializerAudit.serialize(settings, entries, RESPONSE_DATA_PARAMETERS);
     }
 
     @POST

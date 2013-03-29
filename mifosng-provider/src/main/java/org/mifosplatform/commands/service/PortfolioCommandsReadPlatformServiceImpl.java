@@ -53,16 +53,6 @@ public class PortfolioCommandsReadPlatformServiceImpl implements PortfolioComman
         }
     }
 
-    @Override
-    public Collection<CommandSourceData> retrieveAllEntriesToBeChecked() {
-        context.authenticatedUser();
-
-        final CommandSourceMapper rm = new CommandSourceMapper();
-        final String sql = "select " + rm.schema()
-                + " where mc.checker_id is null and mc.processing_result_enum = 2 order by mc.made_on_date DESC, mc.entity_name ASC, mc.action_name ASC";
-
-        return this.jdbcTemplate.query(sql, rm, new Object[] {});
-    }
 
     @Override
     public CommandSourceData retrieveById(final Long id) {
