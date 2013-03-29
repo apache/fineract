@@ -156,6 +156,7 @@ dependencies {
 	            [group: 'com.lowagie', name: 'itext', version: '2.1.7'],
 	            [group: 'com.lowagie', name: 'itext-rtf', version: '2.1.7'],
 				[group: 'org.mnode.ical4j', name: 'ical4j', version: '1.0.4'],
+                [group: 'com.googlecode.flyway', name: 'flyway-maven-plugin', version: '2.1.1']
  	        )
  	        
  	 testCompile 'junit:junit:4.10', 

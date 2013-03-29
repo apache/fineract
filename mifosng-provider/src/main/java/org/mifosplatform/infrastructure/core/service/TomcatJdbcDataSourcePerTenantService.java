@@ -12,6 +12,7 @@ import javax.sql.DataSource;
 
 import org.apache.tomcat.jdbc.pool.PoolConfiguration;
 import org.apache.tomcat.jdbc.pool.PoolProperties;
+import org.mifosplatform.database.DBMigrationHelper;
 import org.mifosplatform.infrastructure.core.domain.MifosPlatformTenant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -51,6 +52,7 @@ public class TomcatJdbcDataSourcePerTenantService implements DataSourcePerTenant
             } else {
                 tenantDataSource = createNewDataSourceFor(tenant);
                 this.tenantToDataSourceMap.put(tenant.getId(), tenantDataSource);
+                new DBMigrationHelper().migrateDB(tenantDataSource);
             }
         }
 
