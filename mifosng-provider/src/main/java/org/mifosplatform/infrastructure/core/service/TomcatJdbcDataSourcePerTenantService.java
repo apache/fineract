@@ -12,7 +12,6 @@ import javax.sql.DataSource;
 
 import org.apache.tomcat.jdbc.pool.PoolConfiguration;
 import org.apache.tomcat.jdbc.pool.PoolProperties;
-import org.mifosplatform.database.DBMigrationHelper;
 import org.mifosplatform.infrastructure.core.domain.MifosPlatformTenant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
