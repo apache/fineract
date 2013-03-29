@@ -10,13 +10,16 @@ import java.util.Set;
 
 public class GuarantorConstants {
 
+    public static final String GUARANTOR_RELATIONSHIP_CODE_NAME = "GuarantorRelationship";
+
     /***
      * Enum of all parameters passed in while creating/updating a loan product
      ***/
     public static enum GUARANTOR_JSON_INPUT_PARAMS {
-        LOAN_ID("loanId"), GUARANTOR_TYPE_ID("guarantorTypeId"), ENTITY_ID("entityId"), FIRSTNAME("firstname"), LASTNAME("lastname"), ADDRESS_LINE_1(
-                "addressLine1"), ADDRESS_LINE_2("addressLine2"), CITY("city"), STATE("state"), ZIP("zip"), COUNTRY("country"), MOBILE_NUMBER(
-                "mobileNumber"), PHONE_NUMBER("housePhoneNumber"), COMMENT("comment"), DATE_OF_BIRTH("dob");
+        LOAN_ID("loanId"), CLIENT_RELATIONSHIP_TYPE_ID("clientRelationshipTypeId"), GUARANTOR_TYPE_ID("guarantorTypeId"), ENTITY_ID(
+                "entityId"), FIRSTNAME("firstname"), LASTNAME("lastname"), ADDRESS_LINE_1("addressLine1"), ADDRESS_LINE_2("addressLine2"), CITY(
+                "city"), STATE("state"), ZIP("zip"), COUNTRY("country"), MOBILE_NUMBER("mobileNumber"), PHONE_NUMBER("housePhoneNumber"), COMMENT(
+                "comment"), DATE_OF_BIRTH("dob");
 
         private final String value;
 

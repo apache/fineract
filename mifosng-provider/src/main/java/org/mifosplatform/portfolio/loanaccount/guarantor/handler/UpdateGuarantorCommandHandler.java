@@ -26,6 +26,6 @@ public class UpdateGuarantorCommandHandler implements NewCommandSourceHandler {
     @Transactional
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.writePlatformService.updateGuarantor(command.entityId(), command);
+        return this.writePlatformService.updateGuarantor(command.getLoanId(), command.entityId(), command);
     }
 }

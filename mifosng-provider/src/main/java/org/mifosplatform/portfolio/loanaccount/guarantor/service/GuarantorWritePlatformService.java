@@ -10,10 +10,10 @@ import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 
 public interface GuarantorWritePlatformService {
 
-    CommandProcessingResult createGuarantor(final JsonCommand command);
+    CommandProcessingResult createGuarantor(final Long loanId, final JsonCommand command);
 
-    CommandProcessingResult updateGuarantor(final Long guarantorId, final JsonCommand command);
+    CommandProcessingResult updateGuarantor(final Long loanId, final Long guarantorId, final JsonCommand command);
 
-    CommandProcessingResult removeGuarantor(final Long guarantorId);
+    CommandProcessingResult removeGuarantor(final Long loanId, final Long guarantorId);
 
 }

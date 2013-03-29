@@ -7,19 +7,17 @@ package org.mifosplatform.portfolio.loanaccount.guarantor.service;
 
 import java.util.Map;
 
+import org.mifosplatform.infrastructure.codes.domain.CodeValue;
+import org.mifosplatform.infrastructure.codes.domain.CodeValueRepositoryWrapper;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
-import org.mifosplatform.organisation.staff.domain.Staff;
-import org.mifosplatform.organisation.staff.domain.StaffRepository;
-import org.mifosplatform.organisation.staff.exception.StaffNotFoundException;
-import org.mifosplatform.portfolio.client.domain.Client;
-import org.mifosplatform.portfolio.client.domain.ClientRepository;
-import org.mifosplatform.portfolio.client.exception.ClientNotFoundException;
+import org.mifosplatform.organisation.staff.domain.StaffRepositoryWrapper;
+import org.mifosplatform.portfolio.client.domain.ClientRepositoryWrapper;
 import org.mifosplatform.portfolio.loanaccount.domain.Loan;
-import org.mifosplatform.portfolio.loanaccount.domain.LoanRepository;
-import org.mifosplatform.portfolio.loanaccount.exception.LoanNotFoundException;
+import org.mifosplatform.portfolio.loanaccount.domain.LoanRepositoryWrapper;
+import org.mifosplatform.portfolio.loanaccount.guarantor.GuarantorConstants;
 import org.mifosplatform.portfolio.loanaccount.guarantor.GuarantorConstants.GUARANTOR_JSON_INPUT_PARAMS;
 import org.mifosplatform.portfolio.loanaccount.guarantor.command.GuarantorCommand;
 import org.mifosplatform.portfolio.loanaccount.guarantor.domain.Guarantor;
@@ -39,34 +37,45 @@ public class GuarantorWritePlatformServiceJpaRepositoryIImpl implements Guaranto
 
     private final static Logger logger = LoggerFactory.getLogger(GuarantorWritePlatformServiceJpaRepositoryIImpl.class);
 
-    private final ClientRepository clientRepository;
-    private final StaffRepository staffRepository;
-    private final LoanRepository loanRepository;
+    private final ClientRepositoryWrapper clientRepositoryWrapper;
+    private final StaffRepositoryWrapper staffRepositoryWrapper;
+    private final LoanRepositoryWrapper loanRepositoryWrapper;
     private final GuarantorRepository guarantorRepository;
     private final GuarantorCommandFromApiJsonDeserializer fromApiJsonDeserializer;
+    private final CodeValueRepositoryWrapper codeValueRepositoryWrapper;
 
     @Autowired
-    public GuarantorWritePlatformServiceJpaRepositoryIImpl(final LoanRepository loanRepository,
-            final GuarantorRepository guarantorRepository, final ClientRepository clientRepository, final StaffRepository staffRepository,
-            final GuarantorCommandFromApiJsonDeserializer fromApiJsonDeserializer) {
-        this.loanRepository = loanRepository;
-        this.clientRepository = clientRepository;
+    public GuarantorWritePlatformServiceJpaRepositoryIImpl(final LoanRepositoryWrapper loanRepositoryWrapper,
+            final GuarantorRepository guarantorRepository, final ClientRepositoryWrapper clientRepositoryWrapper,
+            final StaffRepositoryWrapper staffRepositoryWrapper, final GuarantorCommandFromApiJsonDeserializer fromApiJsonDeserializer,
+            final CodeValueRepositoryWrapper codeValueRepositoryWrapper) {
+        this.loanRepositoryWrapper = loanRepositoryWrapper;
+        this.clientRepositoryWrapper = clientRepositoryWrapper;
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
         this.guarantorRepository = guarantorRepository;
-        this.staffRepository = staffRepository;
+        this.staffRepositoryWrapper = staffRepositoryWrapper;
+        this.codeValueRepositoryWrapper = codeValueRepositoryWrapper;
     }
 
     @Override
     @Transactional
-    public CommandProcessingResult createGuarantor(final JsonCommand command) {
+    public CommandProcessingResult createGuarantor(final Long loanId, final JsonCommand command) {
         try {
             final GuarantorCommand guarantorCommand = this.fromApiJsonDeserializer.commandFromApiJson(command.json());
             guarantorCommand.validateForCreate();
 
-            final Long loanId = command.getLoanId();
-            Loan loan = retrieveLoanById(loanId);
+            Loan loan = this.loanRepositoryWrapper.findOneWithNotFoundDetection(loanId);
+
+            Long clientRelationshipId = guarantorCommand.getClientRelationshipTypeId();
+            CodeValue clientRelationshipType = null;
+
+            if (clientRelationshipId != null) {
+                clientRelationshipType = this.codeValueRepositoryWrapper.findOneByCodeNameAndIdWithNotFoundDetection(
+                        GuarantorConstants.GUARANTOR_RELATIONSHIP_CODE_NAME, clientRelationshipId);
+            }
+
             Guarantor guarantor = null;
-            guarantor = Guarantor.fromJson(loan, command);
+            guarantor = Guarantor.fromJson(loan, clientRelationshipType, command);
 
             validateGuarantorBusinessRules(guarantor);
 
@@ -78,21 +87,30 @@ public class GuarantorWritePlatformServiceJpaRepositoryIImpl implements Guaranto
             handleGuarantorDataIntegrityIssues(command, dve);
             return CommandProcessingResult.empty();
         }
-
     }
 
     @Override
     @Transactional
-    public CommandProcessingResult updateGuarantor(final Long guarantorId, final JsonCommand command) {
+    public CommandProcessingResult updateGuarantor(final Long loanId, final Long guarantorId, final JsonCommand command) {
         try {
             final GuarantorCommand guarantorCommand = this.fromApiJsonDeserializer.commandFromApiJson(command.json());
             guarantorCommand.validateForUpdate();
 
-            // TODO: Vishwas need to fetch by both loan and Guarantor Id
-            final Guarantor guarantorForUpdate = this.guarantorRepository.findOne(guarantorId);
-            if (guarantorForUpdate == null) { throw new GuarantorNotFoundException(guarantorId); }
+            final Loan loan = this.loanRepositoryWrapper.findOneWithNotFoundDetection(loanId);
+            final Guarantor guarantorForUpdate = this.guarantorRepository.findByLoanAndId(loan, guarantorId);
+            if (guarantorForUpdate == null) { throw new GuarantorNotFoundException(loanId, guarantorId); }
 
             final Map<String, Object> changesOnly = guarantorForUpdate.update(command);
+
+            if (changesOnly.containsKey(GUARANTOR_JSON_INPUT_PARAMS.CLIENT_RELATIONSHIP_TYPE_ID)) {
+                Long clientRelationshipId = guarantorCommand.getClientRelationshipTypeId();
+                CodeValue clientRelationshipType = null;
+                if (clientRelationshipId != null) {
+                    clientRelationshipType = this.codeValueRepositoryWrapper.findOneByCodeNameAndIdWithNotFoundDetection(
+                            GuarantorConstants.GUARANTOR_RELATIONSHIP_CODE_NAME, clientRelationshipId);
+                }
+                guarantorForUpdate.setClientRelationshipType(clientRelationshipType);
+            }
 
             if (changesOnly.containsKey(GUARANTOR_JSON_INPUT_PARAMS.ENTITY_ID)
                     || changesOnly.containsKey(GUARANTOR_JSON_INPUT_PARAMS.GUARANTOR_TYPE_ID)) {
@@ -113,10 +131,10 @@ public class GuarantorWritePlatformServiceJpaRepositoryIImpl implements Guaranto
 
     @Override
     @Transactional
-    public CommandProcessingResult removeGuarantor(final Long guarantorId) {
-        // TODO: Vishwas need to fetch by both loan and Guarantor Id
-        final Guarantor guarantorForDelete = this.guarantorRepository.findOne(guarantorId);
-        if (guarantorForDelete == null) { throw new GuarantorNotFoundException(guarantorId); }
+    public CommandProcessingResult removeGuarantor(final Long loanId, final Long guarantorId) {
+        final Loan loan = this.loanRepositoryWrapper.findOneWithNotFoundDetection(loanId);
+        final Guarantor guarantorForDelete = this.guarantorRepository.findByLoanAndId(loan, guarantorId);
+        if (guarantorForDelete == null) { throw new GuarantorNotFoundException(loanId, guarantorId); }
 
         this.guarantorRepository.delete(guarantorForDelete);
 
@@ -133,22 +151,13 @@ public class GuarantorWritePlatformServiceJpaRepositoryIImpl implements Guaranto
         // validate guarantor conditions
         if (guarantor.isExistingCustomer()) {
             // check client exists
-            Client client = clientRepository.findOne(guarantor.getEntityId());
-            if (client == null) { throw new ClientNotFoundException(guarantor.getEntityId()); }
-
+            clientRepositoryWrapper.findOneWithNotFoundDetection(guarantor.getEntityId());
             // validate that the client is not set as a self guarantor
             if (guarantor.getClientId().equals(guarantor.getEntityId())) { throw new InvalidGuarantorException(guarantor.getEntityId(),
                     guarantor.getLoanId()); }
         } else if (guarantor.isExistingEmployee()) {
-            Staff staff = staffRepository.findOne(guarantor.getEntityId());
-            if (staff == null) { throw new StaffNotFoundException(guarantor.getEntityId()); }
+            staffRepositoryWrapper.findOneWithNotFoundDetection(guarantor.getEntityId());
         }
-    }
-
-    private Loan retrieveLoanById(final Long loanId) {
-        Loan loan = loanRepository.findOne(loanId);
-        if (loan == null) { throw new LoanNotFoundException(loanId); }
-        return loan;
     }
 
     /**

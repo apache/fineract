@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.joda.time.LocalDate;
+import org.mifosplatform.infrastructure.codes.data.CodeValueData;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
 import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
@@ -22,7 +23,6 @@ import org.mifosplatform.portfolio.loanaccount.domain.Loan;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanRepository;
 import org.mifosplatform.portfolio.loanaccount.exception.LoanNotFoundException;
 import org.mifosplatform.portfolio.loanaccount.guarantor.data.GuarantorData;
-import org.mifosplatform.portfolio.loanaccount.guarantor.domain.GuarantorType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -48,17 +48,28 @@ public class GuarantorReadPlatformServiceImpl implements GuarantorReadPlatformSe
 
     private static final class GuarantorMapper implements RowMapper<GuarantorData> {
 
+        private StringBuilder sqlBuilder = new StringBuilder(
+                " g.id as id, g.loan_id as loanId, g.client_reln_cv_id clientRelationshipTypeId, g.entity_id as entityId, g.type_enum guarantorType ,g.firstname as firstname, g.lastname as lastname, g.dob as dateOfBirth, g.address_line_1 as addressLine1, g.address_line_2 as addressLine2, g.city as city, g.state as state, g.country as country, g.zip as zip, g.house_phone_number as housePhoneNumber, g.mobile_number as mobilePhoneNumber, g.comment as comment, ")
+                .append(" cv.code_value as typeName")//
+                .append(" FROM m_guarantor g") //
+                .append(" left JOIN m_code_value cv on g.client_reln_cv_id = cv.id");
+
         public String schema() {
-            return "  g.id as id, g.loan_id as loanId, g.entity_id as entityId, g.type_enum guarantorType ,g.firstname as firstname,"
-                    + " g.lastname as lastname, g.dob as dateOfBirth, g.address_line_1 as addressLine1, g.address_line_2 as addressLine2,"
-                    + " g.city as city, g.state as state, g.country as country, g.zip as zip, g.house_phone_number as housePhoneNumber, "
-                    + " g.mobile_number as mobilePhoneNumber, g.comment as comment from m_guarantor g";
+            return sqlBuilder.toString();
         }
 
         @Override
         public GuarantorData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
             Long id = rs.getLong("id");
             Long loanId = rs.getLong("loanId");
+            Long clientRelationshipTypeId = JdbcSupport.getLong(rs, "clientRelationshipTypeId");
+            CodeValueData clientRelationshipType = null;
+
+            if (clientRelationshipTypeId != null) {
+                final String typeName = rs.getString("typeName");
+                clientRelationshipType = CodeValueData.instance(clientRelationshipTypeId, typeName);
+            }
+
             Integer guarantorTypeId = rs.getInt("guarantorType");
             final EnumOptionData guarantorType = GuarantorEnumerations.guarantorType(guarantorTypeId);
             Long entityId = rs.getLong("entityId");
@@ -74,8 +85,8 @@ public class GuarantorReadPlatformServiceImpl implements GuarantorReadPlatformSe
             String mobileNumber = rs.getString("mobilePhoneNumber");
             String housePhoneNumber = rs.getString("housePhoneNumber");
             String comment = rs.getString("comment");
-            return new GuarantorData(id, loanId, entityId, guarantorType, firstname, lastname, dob, addressLine1, addressLine2, city,
-                    state, zip, country, mobileNumber, housePhoneNumber, comment, null, null, null, null);
+            return new GuarantorData(id, loanId, clientRelationshipType, entityId, guarantorType, firstname, lastname, dob, addressLine1,
+                    addressLine2, city, state, zip, country, mobileNumber, housePhoneNumber, comment, null, null, null, null, null);
         }
     }
 
@@ -109,12 +120,6 @@ public class GuarantorReadPlatformServiceImpl implements GuarantorReadPlatformSe
         GuarantorData guarantorData = this.jdbcTemplate.queryForObject(sql, rm, new Object[] { loanId, guarantorId });
 
         return mergeDetailsForClientOrStaffGuarantor(guarantorData);
-    }
-
-    @Override
-    public GuarantorData retrieveNewGuarantorDetails() {
-        final List<EnumOptionData> guarantorTypeOptions = GuarantorEnumerations.guarantorType(GuarantorType.values());
-        return GuarantorData.template(guarantorTypeOptions);
     }
 
     /**

@@ -5,9 +5,11 @@
  */
 package org.mifosplatform.portfolio.loanaccount.guarantor.data;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.joda.time.LocalDate;
+import org.mifosplatform.infrastructure.codes.data.CodeValueData;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.organisation.staff.data.StaffData;
 import org.mifosplatform.portfolio.client.data.ClientData;
@@ -18,6 +20,7 @@ public class GuarantorData {
 
     private final Long id;
     private final Long loanId;
+    private final CodeValueData clientRelationshipType;
     private final EnumOptionData guarantorType;
 
     private final String firstname;
@@ -45,38 +48,46 @@ public class GuarantorData {
     // template
     @SuppressWarnings("unused")
     private final List<EnumOptionData> guarantorTypeOptions;
+    private final Collection<CodeValueData> allowedClientRelationshipTypes;
 
-    public static GuarantorData template(final List<EnumOptionData> guarantorTypeOptions) {
-        return new GuarantorData(null, null, null, GuarantorEnumerations.guarantorType(GuarantorType.CUSTOMER), null, null, null, null,
-                null, null, null, null, null, null, null, null, null, null, null, guarantorTypeOptions);
+    public static GuarantorData template(final List<EnumOptionData> guarantorTypeOptions,
+            final Collection<CodeValueData> allowedClientRelationshipTypes) {
+        return new GuarantorData(null, null, null, null, GuarantorEnumerations.guarantorType(GuarantorType.CUSTOMER), null, null, null,
+                null, null, null, null, null, null, null, null, null, null, null, null, guarantorTypeOptions,
+                allowedClientRelationshipTypes);
     }
 
-    public static GuarantorData templateOnTop(final GuarantorData guarantorData, final List<EnumOptionData> guarantorTypeOptions) {
-        return new GuarantorData(guarantorData.id, guarantorData.loanId, guarantorData.entityId, guarantorData.guarantorType,
-                guarantorData.firstname, guarantorData.lastname, guarantorData.dob, guarantorData.addressLine1, guarantorData.addressLine2,
-                guarantorData.city, guarantorData.state, guarantorData.zip, guarantorData.country, guarantorData.mobileNumber,
-                guarantorData.housePhoneNumber, guarantorData.comment, guarantorData.officeName, guarantorData.joinedDate,
-                guarantorData.externalId, guarantorTypeOptions);
+    public static GuarantorData templateOnTop(final GuarantorData guarantorData, final List<EnumOptionData> guarantorTypeOptions,
+            final Collection<CodeValueData> allowedClientRelationshipTypes) {
+        return new GuarantorData(guarantorData.id, guarantorData.loanId, guarantorData.clientRelationshipType, guarantorData.entityId,
+                guarantorData.guarantorType, guarantorData.firstname, guarantorData.lastname, guarantorData.dob,
+                guarantorData.addressLine1, guarantorData.addressLine2, guarantorData.city, guarantorData.state, guarantorData.zip,
+                guarantorData.country, guarantorData.mobileNumber, guarantorData.housePhoneNumber, guarantorData.comment,
+                guarantorData.officeName, guarantorData.joinedDate, guarantorData.externalId, guarantorTypeOptions,
+                allowedClientRelationshipTypes);
     }
 
     public static GuarantorData mergeClientData(ClientData clientData, GuarantorData guarantorData) {
-        return new GuarantorData(guarantorData.id, guarantorData.loanId, guarantorData.entityId, guarantorData.guarantorType,
-                clientData.getFirstname(), clientData.getLastname(), null, null, null, null, null, null, null, null, null, null,
-                clientData.getOfficeName(), clientData.getJoinedDate(), clientData.getExternalId(), null);
+        return new GuarantorData(guarantorData.id, guarantorData.loanId, guarantorData.clientRelationshipType, guarantorData.entityId,
+                guarantorData.guarantorType, clientData.getFirstname(), clientData.getLastname(), null, null, null, null, null, null, null,
+                null, null, null, clientData.getOfficeName(), clientData.getJoinedDate(), clientData.getExternalId(), null,
+                guarantorData.allowedClientRelationshipTypes);
     }
 
     public static GuarantorData mergeStaffData(StaffData staffData, GuarantorData guarantorData) {
-        return new GuarantorData(guarantorData.id, guarantorData.loanId, guarantorData.entityId, guarantorData.guarantorType,
-                staffData.getFirstname(), staffData.getLastname(), null, null, null, null, null, null, null, null, null, null,
-                staffData.getOfficeName(), null, null, null);
+        return new GuarantorData(guarantorData.id, guarantorData.loanId, guarantorData.clientRelationshipType, guarantorData.entityId,
+                guarantorData.guarantorType, staffData.getFirstname(), staffData.getLastname(), null, null, null, null, null, null, null,
+                null, null, null, staffData.getOfficeName(), null, null, null, guarantorData.allowedClientRelationshipTypes);
     }
 
-    public GuarantorData(Long id, Long loanId, Long entityId, EnumOptionData guarantorType, String firstname, String lastname,
-            LocalDate dob, String addressLine1, String addressLine2, String city, String state, String zip, String country,
-            String mobileNumber, String housePhoneNumber, String comment, String officeName, LocalDate joinedDate, String externalId,
-            List<EnumOptionData> guarantorTypeOptions) {
+    public GuarantorData(Long id, Long loanId, final CodeValueData clientRelationshipType, Long entityId, EnumOptionData guarantorType,
+            String firstname, String lastname, LocalDate dob, String addressLine1, String addressLine2, String city, String state,
+            String zip, String country, String mobileNumber, String housePhoneNumber, String comment, String officeName,
+            LocalDate joinedDate, String externalId, List<EnumOptionData> guarantorTypeOptions,
+            Collection<CodeValueData> allowedClientRelationshipTypes) {
         this.id = id;
         this.loanId = loanId;
+        this.clientRelationshipType = clientRelationshipType;
         this.guarantorType = guarantorType;
         this.entityId = entityId;
         this.firstname = firstname;
@@ -95,6 +106,7 @@ public class GuarantorData {
         this.joinedDate = joinedDate;
         this.externalId = externalId;
         this.guarantorTypeOptions = guarantorTypeOptions;
+        this.allowedClientRelationshipTypes = allowedClientRelationshipTypes;
     }
 
     public boolean isExternalGuarantor() {
