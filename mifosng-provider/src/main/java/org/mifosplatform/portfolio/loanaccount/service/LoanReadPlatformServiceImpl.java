@@ -158,10 +158,9 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
         context.authenticatedUser();
 
-        final GroupData groupAccount = this.groupReadPlatformService.retrieveGroup(groupId);
+        final GroupData groupAccount = this.groupReadPlatformService.retrieveGroupDetails(groupId , false);
         final LocalDate expectedDisbursementDate = DateUtils.getLocalDateOfTenant();
-        LoanAccountData loanDetails = LoanAccountData.groupDefaults(groupAccount.getId(), groupAccount.getName(),
-                groupAccount.getOfficeId(), expectedDisbursementDate);
+        LoanAccountData loanDetails = LoanAccountData.groupDefaults(groupAccount, expectedDisbursementDate);
 
         if (productId != null) {
             LoanProductData selectedProduct = this.loanProductReadPlatformService.retrieveLoanProduct(productId);
@@ -170,7 +169,25 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
         return loanDetails;
     }
+    
+    @Override
+    public LoanAccountData retrieveTemplateWithCompleteGroupAndProductDetails(Long groupId, Long productId){
+        
+        context.authenticatedUser();
 
+        final GroupData groupAccount = this.groupReadPlatformService.retrieveGroup(groupId);
+        final LocalDate expectedDisbursementDate = DateUtils.getLocalDateOfTenant();
+        LoanAccountData loanDetails = LoanAccountData.groupDefaults(groupAccount, expectedDisbursementDate);
+
+        if (productId != null) {
+            LoanProductData selectedProduct = this.loanProductReadPlatformService.retrieveLoanProduct(productId);
+            loanDetails = LoanAccountData.populateLoanProductDefaults(loanDetails, selectedProduct);
+        }
+
+        return loanDetails;
+    }
+    
+    
     @Override
     public LoanTransactionData retrieveLoanTransactionTemplate(final Long loanId) {
 
@@ -263,7 +280,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     + " l.loanpurpose_cv_id as loanPurposeId, cv.code_value as loanPurposeName,"
                     + " lp.id as loanProductId, lp.name as loanProductName, lp.description as loanProductDescription,"
                     + " c.id as clientId, c.display_name as clientName, c.office_id as clientOfficeId,"
-                    + " g.id as groupId, g.name as groupName, g.office_id as groupOfficeId,"
+                    + " g.id as groupId, g.name as groupName, g.office_id as groupOfficeId, g.staff_id As groupStaffId , g.parent_id as groupParentId , g.hierarchy As groupHierarchy , g.external_id As groupExternalId , "
                     + " l.submittedon_date as submittedOnDate, sbu.username as submittedByUsername, sbu.firstname as submittedByFirstname, sbu.lastname as submittedByLastname,"
                     + " l.rejectedon_date as rejectedOnDate, rbu.username as rejectedByUsername, rbu.firstname as rejectedByFirstname, rbu.lastname as rejectedByLastname,"
                     + " l.withdrawnon_date as withdrawnOnDate, wbu.username as withdrawnByUsername, wbu.firstname as withdrawnByFirstname, wbu.lastname as withdrawnByLastname,"
@@ -349,8 +366,12 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             final String clientName = rs.getString("clientName");
 
             final Long groupId = JdbcSupport.getLong(rs, "groupId");
-            final Long groupOfficeId = JdbcSupport.getLong(rs, "groupOfficeId");
             final String groupName = rs.getString("groupName");
+            final String groupExternalId = rs.getString("groupExternalId");
+            final Long groupOfficeId = JdbcSupport.getLong(rs, "groupOfficeId");
+            final Long groupStaffId = JdbcSupport.getLong(rs, "groupStaffId");
+            final Long groupParentId = JdbcSupport.getLong(rs, "groupParentId");
+            final String groupHierarchy = rs.getString("groupHierarchy");
 
             final Long fundId = JdbcSupport.getLong(rs, "fundId");
             final String fundName = rs.getString("fundName");
@@ -494,8 +515,15 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                         totalWaived, totalWrittenOff, totalOutstanding, totalOverdue, overdueSinceDate);
             }
 
-            return LoanAccountData.basicLoanDetails(id, accountNo, status, externalId, clientId, clientName, clientOfficeId, groupId,
-                    groupName, groupOfficeId, loanProductId, loanProductName, loanProductDescription, fundId, fundName, loanPurposeId,
+            GroupData groupData = null;
+            
+            if(groupId != null){
+                
+                groupData = new GroupData(groupId, groupName, groupExternalId, groupOfficeId, groupStaffId, groupParentId, groupHierarchy);
+            }
+            
+            return LoanAccountData.basicLoanDetails(id, accountNo, status, externalId, clientId, clientName, clientOfficeId, groupData,
+                    loanProductId, loanProductName, loanProductDescription, fundId, fundName, loanPurposeId,
                     loanPurposeName, loanOfficerId, loanOfficerName, currencyData, principal, inArrearsTolerance, termFrequency,
                     termPeriodFrequencyType, numberOfRepayments, repaymentEvery, repaymentFrequencyType, transactionStrategyId,
                     amortizationType, interestRatePerPeriod, interestRateFrequencyType, annualInterestRate, interestType,

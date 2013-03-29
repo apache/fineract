@@ -61,6 +61,8 @@ import org.mifosplatform.portfolio.loanaccount.service.LoanChargeReadPlatformSer
 import org.mifosplatform.portfolio.loanaccount.service.LoanReadPlatformService;
 import org.mifosplatform.portfolio.loanproduct.data.LoanProductData;
 import org.mifosplatform.portfolio.loanproduct.data.TransactionProcessingStrategyData;
+import org.mifosplatform.portfolio.loanproduct.domain.LendingStrategy;
+import org.mifosplatform.portfolio.loanproduct.exception.InvalidLendingStrategy;
 import org.mifosplatform.portfolio.loanproduct.service.LoanDropdownReadPlatformService;
 import org.mifosplatform.portfolio.loanproduct.service.LoanProductReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -76,16 +78,16 @@ import com.google.gson.JsonElement;
 public class LoansApiResource {
 
     private final Set<String> LOAN_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "accountNo", "status", "externalId",
-            "clientId", "groupId", "clientName", "groupName", "loanProductId", "loanProductName", "loanProductDescription", "fundId",
-            "fundName", "loanPurposeId", "loanPurposeName", "loanOfficerId", "loanOfficerName", "currency", "principal",
-            "inArrearsTolerance", "termFrequency", "termPeriodFrequencyType", "numberOfRepayments", "repaymentEvery",
-            "interestRatePerPeriod", "annualInterestRate", "repaymentFrequencyType", "transactionProcessingStrategyId",
-            "interestRateFrequencyType", "amortizationType", "interestType", "interestCalculationPeriodType",
-            "expectedFirstRepaymentOnDate", "interestChargedFromDate", "timeline", "totalFeeChargesAtDisbursement", "summary",
-            "repaymentSchedule", "transactions", "charges", "collateral", "guarantors", "productOptions", "amortizationTypeOptions",
-            "interestTypeOptions", "interestCalculationPeriodTypeOptions", "repaymentFrequencyTypeOptions", "termFrequencyTypeOptions",
-            "interestRateFrequencyTypeOptions", "fundOptions", "repaymentStrategyOptions", "chargeOptions", "loanOfficerOptions",
-            "loanPurposeOptions", "loanCollateralOptions", "chargeTemplate"));
+            "clientId", "group", "loanProductId", "loanProductName", "loanProductDescription", "fundId", "fundName", "loanPurposeId",
+            "loanPurposeName", "loanOfficerId", "loanOfficerName", "currency", "principal", "inArrearsTolerance", "termFrequency",
+            "termPeriodFrequencyType", "numberOfRepayments", "repaymentEvery", "interestRatePerPeriod", "annualInterestRate",
+            "repaymentFrequencyType", "transactionProcessingStrategyId", "interestRateFrequencyType", "amortizationType", "interestType",
+            "interestCalculationPeriodType", "expectedFirstRepaymentOnDate", "interestChargedFromDate", "timeline",
+            "totalFeeChargesAtDisbursement", "summary", "repaymentSchedule", "transactions", "charges", "collateral", "guarantors",
+            "productOptions", "amortizationTypeOptions", "interestTypeOptions", "interestCalculationPeriodTypeOptions",
+            "repaymentFrequencyTypeOptions", "termFrequencyTypeOptions", "interestRateFrequencyTypeOptions", "fundOptions",
+            "repaymentStrategyOptions", "chargeOptions", "loanOfficerOptions", "loanPurposeOptions", "loanCollateralOptions",
+            "chargeTemplate"));
 
     private final String resourceNameForPermissions = "LOAN";
 
@@ -147,7 +149,7 @@ public class LoansApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String template(@QueryParam("clientId") final Long clientId, @QueryParam("groupId") final Long groupId,
-            @QueryParam("productId") final Long productId, @Context final UriInfo uriInfo) {
+            @QueryParam("productId") final Long productId, @QueryParam("lendingStrategy") final Integer lendingStrategy, @Context final UriInfo uriInfo) {
 
         context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
 
@@ -198,6 +200,7 @@ public class LoansApiResource {
             final LoanAccountData loanBasicDetails = this.loanReadPlatformService.retrieveTemplateWithClientAndProductDetails(clientId,
                     productId);
             final Collection<LoanChargeData> charges = loanBasicDetails.charges();
+            
             if (productId != null) {
                 final Long officeId = loanBasicDetails.officeId();
                 allowedLoanOfficers = this.staffReadPlatformService.retrieveAllLoanOfficersByOffice(officeId);
@@ -209,9 +212,22 @@ public class LoansApiResource {
                     interestCalculationPeriodTypeOptions, fundOptions, chargeOptions, chargeTemplate, allowedLoanOfficers,
                     loanPurposeOptions, loanCollateralOptions);
 
-        } else if (groupId != null) {
-            final LoanAccountData loanBasicDetails = this.loanReadPlatformService.retrieveTemplateWithGroupAndProductDetails(groupId,
-                    productId);
+        } else if (groupId != null ) {
+
+            LoanAccountData loanBasicDetails = null;
+            
+            if (LendingStrategy.JOINT_LIABILITY_LOAN.getId().equals(lendingStrategy)){
+                loanBasicDetails = this.loanReadPlatformService.retrieveTemplateWithCompleteGroupAndProductDetails(groupId,
+                        productId);
+            }
+            else if( LendingStrategy.GROUP_LOAN.getId().equals(lendingStrategy)){
+                loanBasicDetails = this.loanReadPlatformService.retrieveTemplateWithGroupAndProductDetails(groupId,
+                        productId);
+            }else{
+                throw new InvalidLendingStrategy(lendingStrategy);
+            }
+            
+            
             final Collection<LoanChargeData> charges = loanBasicDetails.charges();
             if (productId != null) {
                 final Long officeId = loanBasicDetails.officeId();
@@ -223,7 +239,8 @@ public class LoansApiResource {
                     repaymentStrategyOptions, interestRateFrequencyTypeOptions, amortizationTypeOptions, interestTypeOptions,
                     interestCalculationPeriodTypeOptions, fundOptions, chargeOptions, chargeTemplate, allowedLoanOfficers,
                     loanPurposeOptions, loanCollateralOptions);
-        } else {
+        }
+        else {
             newLoanAccount = LoanAccountData.collateralTemplate(loanCollateralOptions);
         }
 

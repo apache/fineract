@@ -31,4 +31,6 @@ public interface LoanReadPlatformService {
     LoanTransactionData retrieveLoanTransaction(Long loanId, Long transactionId);
 
     LoanTransactionData retrieveNewClosureDetails();
+
+    LoanAccountData retrieveTemplateWithCompleteGroupAndProductDetails(Long groupId, Long productId);
 }

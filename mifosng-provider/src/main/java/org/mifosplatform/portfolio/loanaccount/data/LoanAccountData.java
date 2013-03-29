@@ -19,6 +19,7 @@ import org.mifosplatform.organisation.staff.data.StaffData;
 import org.mifosplatform.portfolio.charge.data.ChargeData;
 import org.mifosplatform.portfolio.collateral.data.CollateralData;
 import org.mifosplatform.portfolio.fund.data.FundData;
+import org.mifosplatform.portfolio.group.data.GroupData;
 import org.mifosplatform.portfolio.loanaccount.guarantor.data.GuarantorData;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.data.LoanScheduleData;
 import org.mifosplatform.portfolio.loanproduct.data.LoanProductData;
@@ -45,9 +46,7 @@ public class LoanAccountData {
     private final Long clientId;
     private final String clientName;
     private final Long clientOfficeId;
-    private final Long groupId;
-    private final String groupName;
-    private final Long groupOfficeId;
+    private final GroupData group;
     private final Long loanProductId;
     private final String loanProductName;
     private final String loanProductDescription;
@@ -122,9 +121,7 @@ public class LoanAccountData {
         final Long clientId = null;
         final String clientName = null;
         final Long clientOfficeId = null;
-        final Long groupId = null;
-        final String groupName = null;
-        final Long groupOfficeId = null;
+        final GroupData group = null;
         final Long loanProductId = null;
         final String loanProductName = null;
         final String loanProductDescription = null;
@@ -174,8 +171,8 @@ public class LoanAccountData {
         final Collection<StaffData> loanOfficerOptions = null;
         final Collection<CodeValueData> loanPurposeOptions = null;
 
-        return new LoanAccountData(id, accountNo, status, externalId, clientId, clientName, clientOfficeId, groupId, groupName,
-                groupOfficeId, loanProductId, loanProductName, loanProductDescription, fundId, fundName, loanPurposeId, loanPurposeName,
+        return new LoanAccountData(id, accountNo, status, externalId, clientId, clientName, clientOfficeId, group, 
+                loanProductId, loanProductName, loanProductDescription, fundId, fundName, loanPurposeId, loanPurposeName,
                 loanOfficerId, loanOfficerName, currencyData, principal, inArrearsTolerance, termFrequency, termPeriodFrequencyType,
                 numberOfRepayments, repaymentEvery, repaymentFrequencyType, transactionProcessingStrategyId, amortizationType,
                 interestRatePerPeriod, interestRateFrequencyType, annualInterestRate, interestType, interestCalculationPeriodType,
@@ -196,9 +193,8 @@ public class LoanAccountData {
         final String accountNo = null;
         final LoanStatusEnumData status = null;
         final String externalId = null;
-        final Long groupId = null;
+        final GroupData group = null;
         final String groupName = null;
-        final Long groupOfficeId = null;
         final Long loanProductId = null;
         final String loanProductName = null;
         final String loanProductDescription = null;
@@ -249,8 +245,8 @@ public class LoanAccountData {
         final Collection<CodeValueData> loanPurposeOptions = null;
         final Collection<CodeValueData> loanCollateralOptions = null;
 
-        return new LoanAccountData(id, accountNo, status, externalId, clientId, clientName, clientOfficeId, groupId, groupName,
-                groupOfficeId, loanProductId, loanProductName, loanProductDescription, fundId, fundName, loanPurposeId, loanPurposeName,
+        return new LoanAccountData(id, accountNo, status, externalId, clientId, clientName, clientOfficeId, group, 
+                loanProductId, loanProductName, loanProductDescription, fundId, fundName, loanPurposeId, loanPurposeName,
                 loanOfficerId, loanOfficerName, currencyData, principal, inArrearsTolerance, termFrequency, termPeriodFrequencyType,
                 numberOfRepayments, repaymentEvery, repaymentFrequencyType, transactionProcessingStrategyId, amortizationType,
                 interestRatePerPeriod, interestRateFrequencyType, annualInterestRate, interestType, interestCalculationPeriodType,
@@ -265,7 +261,7 @@ public class LoanAccountData {
      * Used to produce a {@link LoanAccountData} with only group information
      * defaulted.
      */
-    public static LoanAccountData groupDefaults(final Long groupId, final String groupName, final Long groupOfficeId,
+    public static LoanAccountData groupDefaults(final GroupData group, 
             final LocalDate expectedDisbursementDate) {
 
         final Long id = null;
@@ -325,8 +321,8 @@ public class LoanAccountData {
         final Collection<CodeValueData> loanPurposeOptions = null;
         final Collection<CodeValueData> loanCollateralOptions = null;
 
-        return new LoanAccountData(id, accountNo, status, externalId, clientId, clientName, clientOfficeId, groupId, groupName,
-                groupOfficeId, loanProductId, loanProductName, loanProductDescription, fundId, fundName, loanPurposeId, loanPurposeName,
+        return new LoanAccountData(id, accountNo, status, externalId, clientId, clientName, clientOfficeId, group, 
+                loanProductId, loanProductName, loanProductDescription, fundId, fundName, loanPurposeId, loanPurposeName,
                 loanOfficerId, loanOfficerName, currencyData, principal, inArrearsTolerance, termFrequency, termPeriodFrequencyType,
                 numberOfRepayments, repaymentEvery, repaymentFrequencyType, transactionProcessingStrategyId, amortizationType,
                 interestRatePerPeriod, interestRateFrequencyType, annualInterestRate, interestType, interestCalculationPeriodType,
@@ -367,7 +363,7 @@ public class LoanAccountData {
         }
 
         return new LoanAccountData(acc.id, acc.accountNo, acc.status, acc.externalId, acc.clientId, acc.clientName, acc.clientOfficeId,
-                acc.groupId, acc.groupName, acc.groupOfficeId, product.getId(), product.getName(), product.getDescription(),
+                acc.group, product.getId(), product.getName(), product.getDescription(),
                 product.getFundId(), product.getFundName(), acc.loanPurposeId, acc.loanPurposeName, acc.loanOfficerId, acc.loanOfficerName,
                 product.getCurrency(), product.getPrincipal(), product.getInArrearsTolerance(), termFrequency, termPeriodFrequencyType,
                 product.getNumberOfRepayments(), product.getRepaymentEvery(), product.getRepaymentFrequencyType(),
@@ -385,8 +381,8 @@ public class LoanAccountData {
      * query.
      */
     public static LoanAccountData basicLoanDetails(final Long id, final String accountNo, final LoanStatusEnumData status,
-            final String externalId, final Long clientId, final String clientName, final Long clientOfficeId, final Long groupId,
-            final String groupName, final Long groupOfficeId, final Long loanProductId, final String loanProductName,
+            final String externalId, final Long clientId, final String clientName, final Long clientOfficeId, final GroupData group,
+            final Long loanProductId, final String loanProductName,
             final String loanProductDescription, final Long fundId, final String fundName, final Long loanPurposeId,
             final String loanPurposeName, final Long loanOfficerId, final String loanOfficerName, final CurrencyData currencyData,
             final BigDecimal principal, final BigDecimal inArrearsTolerance, final Integer termFrequency,
@@ -418,8 +414,8 @@ public class LoanAccountData {
         final Collection<CodeValueData> loanPurposeOptions = null;
         final Collection<CodeValueData> loanCollateralOptions = null;
 
-        return new LoanAccountData(id, accountNo, status, externalId, clientId, clientName, clientOfficeId, groupId, groupName,
-                groupOfficeId, loanProductId, loanProductName, loanProductDescription, fundId, fundName, loanPurposeId, loanPurposeName,
+        return new LoanAccountData(id, accountNo, status, externalId, clientId, clientName, clientOfficeId, group,
+                loanProductId, loanProductName, loanProductDescription, fundId, fundName, loanPurposeId, loanPurposeName,
                 loanOfficerId, loanOfficerName, currencyData, principal, inArrearsTolerance, termFrequency, termPeriodFrequencyType,
                 numberOfRepayments, repaymentEvery, repaymentFrequencyType, transactionStrategyId, amortizationType, interestRatePerPeriod,
                 interestRateFrequencyType, annualInterestRate, interestType, interestCalculationPeriodType, expectedFirstRepaymentOnDate,
@@ -446,7 +442,7 @@ public class LoanAccountData {
             final Collection<StaffData> loanOfficerOptions, final Collection<CodeValueData> loanPurposeOptions,
             final Collection<CodeValueData> loanCollateralOptions) {
         return new LoanAccountData(acc.id, acc.accountNo, acc.status, acc.externalId, acc.clientId, acc.clientName, acc.clientOfficeId,
-                acc.groupId, acc.groupName, acc.groupOfficeId, acc.loanProductId, acc.loanProductName, acc.loanProductDescription,
+                acc.group, acc.loanProductId, acc.loanProductName, acc.loanProductDescription,
                 acc.fundId, acc.fundName, acc.loanPurposeId, acc.loanPurposeName, acc.loanOfficerId, acc.loanOfficerName, acc.currency,
                 acc.principal, acc.inArrearsTolerance, acc.termFrequency, acc.termPeriodFrequencyType, acc.numberOfRepayments,
                 acc.repaymentEvery, acc.repaymentFrequencyType, acc.transactionProcessingStrategyId, acc.amortizationType,
@@ -466,9 +462,7 @@ public class LoanAccountData {
             final Long clientId,
             final String clientName,
             final Long clientOfficeId, //
-            final Long groupId,
-            final String groupName,
-            final Long groupOfficeId, //
+            final GroupData group,
             final Long loanProductId,
             final String loanProductName,
             final String loanProductDescription, //
@@ -508,9 +502,7 @@ public class LoanAccountData {
         this.clientId = clientId;
         this.clientName = clientName;
         this.clientOfficeId = clientOfficeId;
-        this.groupId = groupId;
-        this.groupName = groupName;
-        this.groupOfficeId = groupOfficeId;
+        this.group = group;
         this.loanProductId = loanProductId;
         this.loanProductName = loanProductName;
         this.loanProductDescription = loanProductDescription;
@@ -602,13 +594,7 @@ public class LoanAccountData {
     }
 
     public Long officeId() {
-        Long officeId = this.clientOfficeId;
-
-        if (officeId == null) {
-            officeId = this.groupOfficeId;
-        }
-
-        return officeId;
+        return this.clientOfficeId;
     }
 
     public Long loanOfficerId() {
