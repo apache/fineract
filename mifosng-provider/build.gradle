@@ -156,6 +156,7 @@ dependencies {
 	            [group: 'com.lowagie', name: 'itext', version: '2.1.7'],
 	            [group: 'com.lowagie', name: 'itext-rtf', version: '2.1.7'],
 				[group: 'org.mnode.ical4j', name: 'ical4j', version: '1.0.4'],
+                [group: 'com.googlecode.flyway', name: 'flyway-maven-plugin', version: '2.1.1']
  	        )
  	        
  	 testCompile 'junit:junit:4.10', 
@@ -226,6 +227,32 @@ task integrationTest(type:Test){
     description = "Run integration tests (located in src/integrationTest/java). Requires server to be running."
     testClassesDir = project.sourceSets.integrationTest.output.classesDir
     classpath = project.sourceSets.integrationTest.runtimeClasspath
+}
+
+
+apply plugin: 'flyway'
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath 'com.github.ben-manes:gradle-flyway-plugin:0.2'
+        classpath 'mysql:mysql-connector-java:5.1.22'
+    }
+}
+
+
+flyway {
+    url = "jdbc:mysql://localhost:3306/mifostenant-default"
+    user = 'root'
+    password = 'mysql'
+    locations = [
+            'filesystem:../mifosng-db/migrations',
+    ]
+
+    //$dbName    $dbUser   $dbPassword
+
 }
 
 
