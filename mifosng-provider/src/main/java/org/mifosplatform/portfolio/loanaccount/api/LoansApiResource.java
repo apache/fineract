@@ -63,7 +63,6 @@ import org.mifosplatform.portfolio.loanproduct.data.LoanProductData;
 import org.mifosplatform.portfolio.loanproduct.data.TransactionProcessingStrategyData;
 import org.mifosplatform.portfolio.loanproduct.domain.LendingStrategy;
 import org.mifosplatform.portfolio.loanproduct.exception.InvalidLendingStrategy;
-import org.mifosplatform.portfolio.loanproduct.service.LendingStrategyEnumerations;
 import org.mifosplatform.portfolio.loanproduct.service.LoanDropdownReadPlatformService;
 import org.mifosplatform.portfolio.loanproduct.service.LoanProductReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
