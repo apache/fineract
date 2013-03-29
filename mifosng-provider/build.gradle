@@ -230,6 +230,32 @@ task integrationTest(type:Test){
 }
 
 
+apply plugin: 'flyway'
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath 'com.github.ben-manes:gradle-flyway-plugin:0.2'
+        classpath 'mysql:mysql-connector-java:5.1.22'
+    }
+}
+
+
+flyway {
+    url = "jdbc:mysql://localhost:3306/mifostenant-default"
+    user = 'root'
+    password = 'mysql'
+    locations = [
+            'filesystem:../mifosng-db/migrations',
+    ]
+
+    //$dbName    $dbUser   $dbPassword
+
+}
+
+
 /*
 * Support publication of artifacts versioned by topic branch.
 * CI builds supply `-P BRANCH_NAME=<TOPIC>` to gradle at build time.
