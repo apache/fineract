@@ -52,7 +52,6 @@ public class TomcatJdbcDataSourcePerTenantService implements DataSourcePerTenant
             } else {
                 tenantDataSource = createNewDataSourceFor(tenant);
                 this.tenantToDataSourceMap.put(tenant.getId(), tenantDataSource);
-                new DBMigrationHelper().migrateDB(tenantDataSource);
             }
         }
 
