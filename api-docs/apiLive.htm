@@ -488,6 +488,24 @@
 								<td><a href="#guarantors_update">Update a Guarantor</a></td>
 								<td><a href="#guarantors_delete">Delete a Guarantor</a></td>
 							</tr>
+							<tr>
+								<td><a href="#collaterals">Loan Collateral</a></td>
+								<td>loans/{loanId}/collaterals</td>
+								<td><a href="#collaterals_create">Create a Collateral
+								</a></td>
+								<td><a href="#collaterals_list">List collaterals
+								</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr  class="alt">
+								<td></td>
+								<td>loans/{loanId}/collaterals/{collateralId}</td>
+								<td></td>
+								<td><a href="#collaterals_retrieve">Retrieve a Collateral</a></td>
+								<td><a href="#collaterals_update">Update a Collateral</a></td>
+								<td><a href="#collaterals_delete">Delete a Collateral</a></td>
+							</tr>
 						</table>
 					</div>
 				</div>
@@ -4803,6 +4821,296 @@ No Request Body:
     "officeId": 2,
     "loanId": 1,
     "resourceId": 1
+}
+					</code>
+				</div>
+			</div>
+<!-- start of collaterals content -->
+			<a id="collaterals" name="collaterals" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h3> Loan Collateral</h3>
+					<p>In lending agreements, collateral is a borrower's pledge of specific property to a lender, 
+					to secure repayment of a loan. The collateral serves as protection for a lender against a 
+					borrower's default - that is, any borrower failing to pay the principal and interest under
+					the terms of a loan obligation. If a borrower does default on a loan (due to insolvency 
+					or other event), that borrower forfeits (gives up) the property pledged as collateral 
+					- and the lender then becomes the owner of the collateral                   
+					</p>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Field Descriptions</div></td>
+						</tr>
+						<tr class=alt>
+							<td>type</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Identifies the type of a collateral <br/>
+							Ex: Gold, property etc (permitted types can be configured using 
+							<a href="#configs_codes_codevalues">Code Values</a> for 
+							the <a href="#configs_codes">Code</a> <i>LoanCollateral</i>) <br/>
+							Refer <a href="#collaterals_template">Retrieve
+							Collateral Details Template</a> for complete
+							details
+						</td>
+						</tr>
+						<tr class=alt>
+							<td>value</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>The market value of a Collateral.
+							</td>
+						</tr>
+						<tr class=alt>
+							<td>description</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Description for the collateral
+							</td>
+						</tr>
+						<tr class=alt>
+							<td>currency</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Details of the currency used
+								to estimate the value of a Collateral.
+								The currency defaults to the currency of the 
+								Loan for which this Collateral serves as a 
+								guarantee
+							</td>
+						</tr>
+					</table>
+				</div>
+			</div>
+
+			<a id="collaterals_list" name="collaterals_list"
+				class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>List Loan Collaterals</h4>
+					<p>Example Requests:</p>
+					<div class=apiClick>loans/1/collaterals</div>
+					<br>
+					<br>
+					<div class=apiClick>loans/1/collaterals?fields=value,description</div>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+GET https://DomainName/api/v1/loans/{loanId}/collaterals
+					</code>
+					<code class="method-response">
+[
+  {
+    "id": 12,
+    "type": {
+      "id": 8,
+      "name": "Gold"
+    },
+    "value": 50000,
+    "description": "24 Carat Gold chain weighing 12 grams",
+    "currency": {
+      "code": "USD",
+      "name": "US Dollar",
+      "decimalPlaces": 2,
+      "displaySymbol": "$",
+      "nameCode": "currency.USD",
+      "displayLabel": "US Dollar ($)"
+    }
+  }
+]
+					</code>
+				</div>
+			</div>
+
+			<a id="collaterals_template" name="collaterals_template"
+				class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Retrieve Collateral Details Template</h4>
+					<p>This is a convenience resource. It can be useful when
+						building maintenance user interface screens for client
+						applications. The template data returned consists of any or all
+						of:
+					<ul>
+						<li class=normalli>Field Defaults</li>
+						<li class=normalli>Allowed Value Lists</li>
+					</ul>
+					</p>
+					<p>Example Request:</p>
+					<div class=apiClick>loans/1/collaterals/template</div>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+GET https://DomainName/api/v1/loans/{loanId}/collaterals/template
+					</code>
+					<code class="method-response">
+{
+  "allowedCollateralTypes": [
+    {
+      "id": 9,
+      "name": "Silver",
+      "position": 0
+    },
+    {
+      "id": 8,
+      "name": "Gold",
+      "position": 0
+    },
+    {
+      "id": 10,
+      "name": "Property",
+      "position": 0
+    }
+  ]
+}
+					</code>
+				</div>
+			</div>
+
+			<a id="collaterals_retrieve" name="collaterals_retrieve"
+				class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Retrieve a Collateral</h4>
+					<p>Example Requests:</p>
+					<div class=apiClick>/loans/1/collaterals/1</div>
+					<br>
+					<br>
+					<div class=apiClick>/loans/1/collaterals/1?fields=value,description</div>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+GET https://DomainName/api/v1/loans/{loanId}/collaterals/{guarantorId}
+					</code>
+					<code class="method-response">
+{
+  "id": 12,
+  "type": {
+    "id": 8,
+    "name": "Gold"
+  },
+  "value": 50000,
+  "description": "24 Carat Gold chain weighing 12 grams",
+  "currency": {
+    "code": "USD",
+    "name": "US Dollar",
+    "decimalPlaces": 2,
+    "displaySymbol": "$",
+    "nameCode": "currency.USD",
+    "displayLabel": "US Dollar ($)"
+  }
+}				</code>
+				</div>
+			</div>
+
+			<a id="collaterals_create" name="collaterals_create" class="old-syle-anchor">&nbsp;</a>
+            <div class="method-section">
+                <div class="method-description">
+                    <h4>Create a Collateral</h4>
+                    <p>
+                        <b>Note:</b> Currently, Collaterals may be added only before a Loan
+                        is approved<br>
+                    </p>
+                    <table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Mandatory Fields
+								for "internal" collaterals</div></td>
+						</tr>
+						<tr class=alt>
+							<td>collateralTypeId</td>
+						</tr>
+                    </table>
+                </div>
+                <div class="method-example">
+                    <code class="method-declaration">
+POST https://DomainName/api/v1//loans/{loanId}/collaterals
+                    </code>
+                    <code class="method-request">
+POST /loans/1/collaterals
+Content-Type: application/json 
+Request Body:
+{
+  collateralTypeId:9,
+}
+                    </code>
+                    <code class="method-response">
+{
+  "loanId": 1,
+  "resourceId": 12
+}
+                    </code>
+                    <code class="method-request">
+POST /loans/1/collaterals
+Content-Type: application/json 
+Request Body:
+{
+	"collateralTypeId":"8",
+	"value": "50000",
+	"dateFormat":"dd MMMM yyyy",
+	"locale": "en",
+	"description": "24 Carat Gold chain weighing 12 grams"
+}
+                    </code>
+                    <code class="method-response">
+{
+  "loanId": 1,
+  "resourceId": 13
+}
+                    </code>
+                </div>
+            </div>
+
+            <a id="collaterals_update" name="collaterals_update"
+				class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Update a Collateral</h4>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+PUT https://DomainName/api/v1/loans/{loanId}/collaterals/{collateralId}
+					</code>
+					<code class="method-request">
+PUT loans/1/collaterals/12
+Content-Type: application/json 
+Request Body: 
+{ 
+"description": "22 Carat Gold chain weighing 12 grams"
+}
+					</code>
+					<code class="method-response">
+{
+  "loanId": 1,
+  "resourceId": 12,
+  "changes": {
+    "description": "22 Carat Gold chain weighing 12 grams"
+  }
+}
+					</code>
+				</div>
+			</div>
+
+			<a id="collaterals_delete" name="collaterals_delete" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Remove a Collateral</h4>
+					<p>
+						<b>Note:</b> A collateral can only be removed from Loans that are not yet approved.
+					</p>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+DELETE https://DomainName/api/v1/loans/{loanId}/collaterals/{collateralId}
+					</code>
+					<code class="method-request">
+DELETE loans/1/collaterals/13
+Content-Type: application/json 
+No Request Body:
+					</code>
+					<code class="method-response">
+{
+  "loanId": 1,
+  "resourceId": 13
 }
 					</code>
 				</div>
@@ -11442,6 +11750,24 @@ Content-Type: application/json
 					<td><a href="#guarantors_retrieve">Retrieve a Guarantor</a></td>
 					<td><a href="#guarantors_update">Update a Guarantor</a></td>
 					<td><a href="#guarantors_delete">Delete a Guarantor</a></td>
+				</tr>
+				<tr class="alt">
+					<td><a href="#collaterals">Loan Collateral</a></td>
+					<td>loans/{loanId}/collaterals</td>
+					<td><a href="#collaterals_create">Create a Collateral
+					</a></td>
+					<td><a href="#collaterals_list">List collaterals
+					</a></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>loans/{loanId}/collaterals/{collateralId}</td>
+					<td></td>
+					<td><a href="#collaterals_retrieve">Retrieve a Collateral</a></td>
+					<td><a href="#collaterals_update">Update a Collateral</a></td>
+					<td><a href="#collaterals_delete">Delete a Collateral</a></td>
 				</tr>
 				<tr class="alt">
 					<td><a href="#savingsproducts">Savings Product</a></td>
