@@ -207,7 +207,8 @@ body {
     display: none;
     position: absolute;
     top: 41px;
-
+    max-height:550px;
+    overflow:auto;
     width: 850px;
     background-color: rgba(249, 249, 249, 0.99);
     border: 1px solid rgb(187, 187, 187);
