@@ -160,4 +160,27 @@ public final class LoanEventApiJsonValidator {
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
+
+    public void validateUpdateOfLoanOfficer(final String json) {
+        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+
+        final Set<String> disbursementParameters = new HashSet<String>(Arrays.asList("assignmentDate", "fromLoanOfficerId",
+                "toLoanOfficerId", "locale", "dateFormat"));
+
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, disbursementParameters);
+
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loanOfficer");
+
+        final JsonElement element = fromApiJsonHelper.parse(json);
+
+        // final Long fromLoanOfficerId =
+        // fromApiJsonHelper.extractLongNamed("fromLoanOfficerId", element);
+        final Long toLoanOfficerId = fromApiJsonHelper.extractLongNamed("toLoanOfficerId", element);
+
+        baseDataValidator.reset().parameter("toLoanOfficerId").value(toLoanOfficerId).ignoreIfNull().integerGreaterThanZero();
+
+        throwExceptionIfValidationWarningsExist(dataValidationErrors);
+    }
 }

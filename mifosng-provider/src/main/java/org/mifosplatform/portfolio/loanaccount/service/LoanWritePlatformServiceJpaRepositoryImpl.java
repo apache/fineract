@@ -147,7 +147,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 .with(changes) //
                 .build();
     }
-    
+
     @Transactional
     @Override
     public Map<String, Object> bulkLoanDisbursal(JsonCommand command, CollectionSheetBulkDisbursalCommand bulkDisbursalCommand) {
@@ -155,31 +155,28 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         SingleDisbursalCommand[] disbursalCommand = bulkDisbursalCommand.getDisburseTransactions();
         Map<String, Object> changes = new LinkedHashMap<String, Object>();
-        if(disbursalCommand == null){
-            return changes;
-        }
-        
+        if (disbursalCommand == null) { return changes; }
+
         for (int i = 0; i < disbursalCommand.length; i++) {
             SingleDisbursalCommand singleLoanDisbursalCommand = disbursalCommand[i];
 
             final Loan loan = retrieveLoanBy(singleLoanDisbursalCommand.getLoanId());
-    
+
             final ApplicationCurrency currency = this.applicationCurrencyRepository.findOneByCode(loan.getCurrencyCode());
-    
+
             final List<Long> existingTransactionIds = new ArrayList<Long>();
             final List<Long> existingReversedTransactionIds = new ArrayList<Long>();
-            
-            changes.putAll(loan.disburse(currentUser, command, currency, existingTransactionIds,
-                    existingReversedTransactionIds));
+
+            changes.putAll(loan.disburse(currentUser, command, currency, existingTransactionIds, existingReversedTransactionIds));
             if (!changes.isEmpty()) {
                 this.loanRepository.save(loan);
-    
+
                 final String noteText = command.stringValueOfParameterNamed("note");
                 if (StringUtils.isNotBlank(noteText)) {
                     Note note = Note.loanNote(loan, noteText);
                     this.noteRepository.save(note);
                 }
-    
+
                 postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
             }
         }
@@ -250,16 +247,16 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         if (StringUtils.isNotBlank(noteText)) {
             changes.put("note", noteText);
         }
-        
-        CommandProcessingResultBuilder commandProcessingResultBuilder = saveLoanRepayment(loanId, transactionAmount, transactionDate, noteText);
-        
-        return  commandProcessingResultBuilder
-                .withCommandId(command.commandId()) //
+
+        CommandProcessingResultBuilder commandProcessingResultBuilder = saveLoanRepayment(loanId, transactionAmount, transactionDate,
+                noteText);
+
+        return commandProcessingResultBuilder.withCommandId(command.commandId()) //
                 .withLoanId(loanId) //
                 .with(changes) //
                 .build();
     }
-    
+
     private CommandProcessingResultBuilder saveLoanRepayment(final Long loanId, final BigDecimal transactionAmount,
             final LocalDate transactionDate, final String noteText) {
         final Loan loan = retrieveLoanBy(loanId);
@@ -288,7 +285,6 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         }
         this.loanRepository.save(loan);
 
-        
         if (StringUtils.isNotBlank(noteText)) {
             Note note = Note.loanTransactionNote(loan, newRepaymentTransaction, noteText);
             this.noteRepository.save(note);
@@ -297,10 +293,10 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
 
         return new CommandProcessingResultBuilder() //
-        .withEntityId(newRepaymentTransaction.getId()) //
-        .withOfficeId(loan.getOfficeId()) //
-        .withClientId(loan.getClientId()) //
-        .withGroupId(loan.getGroupId()); //
+                .withEntityId(newRepaymentTransaction.getId()) //
+                .withOfficeId(loan.getOfficeId()) //
+                .withClientId(loan.getClientId()) //
+                .withGroupId(loan.getGroupId()); //
     }
 
     @Transactional
@@ -310,16 +306,17 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         context.authenticatedUser();
         final SingleRepaymentCommand[] repaymentCommand = bulkRepaymentCommand.getLoanTransactions();
         final Map<String, Object> changes = new LinkedHashMap<String, Object>();
-        
-        if(repaymentCommand == null) return changes;
-        
+
+        if (repaymentCommand == null) return changes;
+
         for (SingleRepaymentCommand singleLoanRepaymentCommand : repaymentCommand) {
-            saveLoanRepayment(singleLoanRepaymentCommand.getLoanId(), singleLoanRepaymentCommand.getTransactionAmount(), bulkRepaymentCommand.getTransactionDate(), bulkRepaymentCommand.getNote());
+            saveLoanRepayment(singleLoanRepaymentCommand.getLoanId(), singleLoanRepaymentCommand.getTransactionAmount(),
+                    bulkRepaymentCommand.getTransactionDate(), bulkRepaymentCommand.getNote());
             changes.put("bulkTransations", singleLoanRepaymentCommand);
         }
         return changes;
     }
-    
+
     @Transactional
     @Override
     public CommandProcessingResult adjustLoanTransaction(final Long loanId, final Long transactionId, final JsonCommand command) {
@@ -783,6 +780,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     public CommandProcessingResult loanReassignment(final Long loanId, final JsonCommand command) {
 
         this.context.authenticatedUser();
+
+        this.loanEventApiJsonValidator.validateUpdateOfLoanOfficer(command.json());
 
         final Long fromLoanOfficerId = command.longValueOfParameterNamed("fromLoanOfficerId");
         final Long toLoanOfficerId = command.longValueOfParameterNamed("toLoanOfficerId");
