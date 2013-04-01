@@ -41,7 +41,6 @@ public class ClientLoanIntegrationTest {
 
     @Test
     public void checkClientLoanCreateAndDisburseFlow(){
-
         Integer clientID = Utils.createClient(requestSpec, responseSpec);
         checkClientCreatedOnServer(clientID);
 
@@ -52,6 +51,8 @@ public class ClientLoanIntegrationTest {
         verifyLoanRepaymentSchedule(loanSchedule);
 
     }
+
+
 
     private void checkClientCreatedOnServer(final Integer generatedClientID) {
         System.out.println("------------------------------CHECK CLIENT DETAILS------------------------------------\n");
