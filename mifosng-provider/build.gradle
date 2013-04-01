@@ -200,6 +200,7 @@ tomcatRun {
     httpPort = 8080
     httpsPort = 8443
     stopPort = 8081
+    stopKey=   'stopKey'
     enableSSL = true
     configFile = file('src/test/resources/META-INF/context.xml')
 }
@@ -208,6 +209,7 @@ tomcatRunWar {
     httpPort = 8080
     httpsPort = 8443
     stopPort = 8081
+    stopKey=   'stopKey'
     enableSSL = true
     configFile = file('src/test/resources/META-INF/context.xml')
 }
@@ -224,9 +226,50 @@ configurations {
 }
 
 task integrationTest(type:Test){
-    description = "Run integration tests (located in src/integrationTest/java). Requires server to be running."
+    description = "Run integration tests (located in src/integrationTest/java). Starts tomcat in daemon mode before executing the tests."
+    doFirst {
+        tomcatRunWar.daemon = true
+        tomcatRunWar.execute()
+    }
+
+    doLast {
+        tomcatStop.execute()
+    }
     testClassesDir = project.sourceSets.integrationTest.output.classesDir
     classpath = project.sourceSets.integrationTest.runtimeClasspath
+}
+
+
+import groovy.sql.Sql
+
+repositories {
+    mavenCentral()
+}
+configurations {
+    driver
+}
+dependencies {
+    driver 'mysql:mysql-connector-java:5.1.16'
+}
+
+URLClassLoader loader = GroovyObject.class.classLoader
+configurations.driver.each {File file ->
+    loader.addURL(file.toURL())
+}
+
+task createDatabase<<{
+    description= "Creates the Database mifosplatform-tenants and mifostenant-default"
+    sql = Sql.newInstance( 'jdbc:mysql://localhost:3306/', 'root', 'mysql', 'com.mysql.jdbc.Driver' )
+    sql.execute( 'create database `mifosplatform-tenants`' )
+    sql.execute( 'create database `mifostenant-default`' )
+
+}
+task dropDatabase<<{
+    description= "Drops the created Databases mifosplatform-tenants and mifostenant-default"
+    sql = Sql.newInstance( 'jdbc:mysql://localhost:3306/', 'root', 'mysql', 'com.mysql.jdbc.Driver' )
+    sql.execute( 'DROP DATABASE `mifosplatform-tenants`' )
+    sql.execute( 'DROP DATABASE `mifostenant-default`' )
+
 }
 
 
@@ -273,3 +316,4 @@ def qualifyVersionIfNecessary(version) {
 	}
 	return version
 }
+
