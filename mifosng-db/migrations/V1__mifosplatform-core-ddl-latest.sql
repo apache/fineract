@@ -595,6 +595,7 @@ CREATE TABLE `m_loan_arrears_aging` (
 CREATE TABLE `m_guarantor` (
 	`id` BIGINT(20) NOT NULL AUTO_INCREMENT,
 	`loan_id` BIGINT(20) NOT NULL,
+        `client_reln_cv_id` INT(11) DEFAULT NULL,
 	`type_enum` SMALLINT(5) NOT NULL,
 	`entity_id` BIGINT(20) NULL DEFAULT NULL,
 	`firstname` VARCHAR(50) NULL DEFAULT NULL,
@@ -611,6 +612,7 @@ CREATE TABLE `m_guarantor` (
 	`comment` VARCHAR(500) NULL DEFAULT NULL,
 	PRIMARY KEY (`id`),
 	INDEX `FK_m_guarantor_m_loan` (`loan_id`),
+        CONSTRAINT `FK_m_guarantor_m_code_value` FOREIGN KEY (`client_reln_cv_id`) REFERENCES `m_code_value` (`id`),
 	CONSTRAINT `FK_m_guarantor_m_loan` FOREIGN KEY (`loan_id`) REFERENCES `m_loan` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -642,6 +644,7 @@ CREATE TABLE `m_loan_collateral` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `loan_id` bigint(20) NOT NULL,
   `type_cv_id` int(11) NOT NULL,
+  `value` DECIMAL(19,6) DEFAULT NULL,
   `description` varchar(500) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `FK_collateral_m_loan` (`loan_id`),
