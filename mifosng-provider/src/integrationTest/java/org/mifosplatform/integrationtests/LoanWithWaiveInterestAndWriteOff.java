@@ -59,7 +59,7 @@ public class LoanWithWaiveInterestAndWriteOff {
     public void checkClientLoanCreateAndDisburseFlow(){
         //CREATE CLIENT
         Integer clientID = Utils.createClient(requestSpec, responseSpec, DATE_OF_JOINING);
-        verifyClientCreatedOnServer(clientID);
+        Utils.verifyClientCreatedOnServer(requestSpec, responseSpec, clientID);
 
         //CREATE LOAN PRODUCT
         Integer loanProductID = createLoanProduct();
@@ -113,15 +113,6 @@ public class LoanWithWaiveInterestAndWriteOff {
 
     }
 
-    private HashMap writeOffLoan(String transactionDate, Integer loanID){
-        System.out.println("--------------------LOAN WRITTEN OFF ON "+transactionDate+"-------------------------------\n");
-        String json = given().spec(requestSpec).body(Utils.getWriteOffBodyAsJSON(transactionDate))
-                .expect().spec(responseSpec).log().ifError()
-                .when().post("/mifosng-provider/api/v1/loans/" + loanID + "/transactions?command=writeoff&tenantIdentifier=default")
-                .andReturn().asString();
-        HashMap response = from(json).get("changes");
-        return (HashMap)response.get("status");
-    }
 
     private void waiveInterest(String transactionDate, Integer loanID){
         System.out.println("--------------------Waive INTEREST On "+transactionDate+"-------------------------------\n");
@@ -155,41 +146,24 @@ public class LoanWithWaiveInterestAndWriteOff {
         return from(json).get("status");
     }
 
-    private HashMap undoApproval(Integer loanID){
-        System.out.println("-----------------------------------UNDO LOAN APPROVAL-----------------------------------------");
-        String json =  given().spec(requestSpec).body("{'note':'UNDO APPROVAL'}")
-                    .expect().spec(responseSpec).log().ifError()
-                    .when().post("/mifosng-provider/api/v1/loans/" + loanID + "?command=undoApproval&tenantIdentifier=default")
-                    .andReturn().asString();
-        HashMap response = from(json).get("changes");
-        return (HashMap)response.get("status");
-    }
-    private HashMap disburseLoan(Integer loanID){
-        System.out.println("-----------------------------------DISBURSE LOAN-----------------------------------------");
-        String json =  given().spec(requestSpec).body(Utils.getDisburseLoanAsJSON(DISBURSEMENT_DATE))
-                    .expect().spec(responseSpec).log().ifError()
-                    .when().post("/mifosng-provider/api/v1/loans/" + loanID + "?command=disburse&tenantIdentifier=default")
-                    .andReturn().asString();
-        HashMap response = from(json).get("changes");
-        return (HashMap)response.get("status");
-    }
-
     private HashMap approveLoan(String approvalDate, Integer loanID){
         System.out.println("-----------------------------------APPROVE LOAN-----------------------------------------");
-        String json =given().spec(requestSpec).body(Utils.getApproveLoanAsJSON(approvalDate))
-                     .expect().spec(responseSpec).log().ifError()
-                     .when().post("/mifosng-provider/api/v1/loans/"+ loanID +"?command=approve&tenantIdentifier=default")
-                     .andReturn().asString();
-        HashMap response = from(json).get("changes");
-        return (HashMap)response.get("status");
+        return Utils.approveLoan(requestSpec,responseSpec,approvalDate,loanID);
     }
 
 
-    private void verifyClientCreatedOnServer(final Integer generatedClientID) {
-        System.out.println("------------------------------CHECK CLIENT DETAILS------------------------------------\n");
-        given().spec(requestSpec)
-                .expect().spec(responseSpec).log().ifError()
-                .when().get("/mifosng-provider/api/v1/clients/" + generatedClientID + "?tenantIdentifier=default");
+    private HashMap undoApproval(Integer loanID){
+        System.out.println("-----------------------------------UNDO LOAN APPROVAL-----------------------------------------");
+        return Utils.undoApproval(requestSpec,responseSpec,loanID);
+    }
+
+    private HashMap disburseLoan(Integer loanID){
+        System.out.println("-----------------------------------DISBURSE LOAN-----------------------------------------");
+        return Utils.disburseLoan(requestSpec,responseSpec,loanID,DISBURSEMENT_DATE);
+    }
+    private HashMap writeOffLoan(String transactionDate, Integer loanID){
+        System.out.println("--------------------LOAN WRITTEN OFF ON "+transactionDate+"-------------------------------\n");
+        return Utils.writeOffLoan(requestSpec,responseSpec,transactionDate,loanID);
     }
 
     private Integer createLoanProduct() {
@@ -205,11 +179,7 @@ public class LoanWithWaiveInterestAndWriteOff {
                 .withAmortizationTypeAsEqualPrinciplePayment()
                 .withInterestTypeAsFlat()
                 .build();
-        String json = given().spec(requestSpec).body(loanProductJSON)
-                .expect().spec(responseSpec).log().ifError()
-                .when().post("/mifosng-provider/api/v1/loanproducts?tenantIdentifier=default")
-                .andReturn().asString();
-        return from(json).get("resourceId");
+       return Utils.getLoanProductId(requestSpec,responseSpec,loanProductJSON);
     }
 
     private Integer applyForLoanApplication(final Integer clientID, final Integer loanProductID) {
@@ -229,11 +199,7 @@ public class LoanWithWaiveInterestAndWriteOff {
                 .withExpectedDisbursementDate(EXPECTED_DISBURSAL_DATE)
                 .withSubmittedOnDate(LOAN_APPLICATION_SUBMISSION_DATE)
                 .Build(clientID.toString(), loanProductID.toString());
-        String json = given().spec(requestSpec).body(loanApplicationJSON)
-                .expect().spec(responseSpec).log().ifError()
-                .when().post("/mifosng-provider/api/v1/loans?tenantIdentifier=default")
-                .andReturn().asString();
-        return from(json).get("loanId");
+       return Utils.getLoanId(requestSpec,responseSpec,loanApplicationJSON);
     }
 }
 

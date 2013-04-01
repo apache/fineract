@@ -13,7 +13,6 @@ import java.util.HashMap;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.google.gson.Gson;
 import com.jayway.restassured.builder.RequestSpecBuilder;
 import com.jayway.restassured.builder.ResponseSpecBuilder;
 import com.jayway.restassured.http.ContentType;
@@ -42,7 +41,7 @@ public class ClientLoanIntegrationTest {
     @Test
     public void checkClientLoanCreateAndDisburseFlow(){
         Integer clientID = Utils.createClient(requestSpec, responseSpec);
-        checkClientCreatedOnServer(clientID);
+        Utils.verifyClientCreatedOnServer(requestSpec, responseSpec, clientID);
 
         Integer loanProductID = createLoanProduct();
         applyForLoanApplication(clientID, loanProductID);
@@ -52,14 +51,6 @@ public class ClientLoanIntegrationTest {
 
     }
 
-
-
-    private void checkClientCreatedOnServer(final Integer generatedClientID) {
-        System.out.println("------------------------------CHECK CLIENT DETAILS------------------------------------\n");
-        given().spec(requestSpec)
-        .expect().spec(responseSpec)
-        .when().get("/mifosng-provider/api/v1/clients/" + generatedClientID + "?tenantIdentifier=default");
-    }
 
     private Integer createLoanProduct() {
         System.out.println("------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
@@ -74,14 +65,10 @@ public class ClientLoanIntegrationTest {
                             .withInterestTypeAsDecliningBalance()
                             .withinterestRatePerPeriod("1")
                             .build();
-        String json = given().spec(requestSpec).body(loanProductJSON)
-                      .expect().spec(responseSpec)
-                      .when().post("/mifosng-provider/api/v1/loanproducts?tenantIdentifier=default")
-                      .andReturn().asString();
-        return from(json).get("resourceId");
+        return Utils.getLoanProductId(requestSpec, responseSpec, loanProductJSON);
     }
 
-    private void applyForLoanApplication(final Integer clientID, final Integer loanProductID) {
+    private Integer applyForLoanApplication(final Integer clientID, final Integer loanProductID) {
         System.out.println("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
         String loanApplicationJSON = new LoanApplicationTestBuilder()
                                      .withPrincipal("12,000.00")
@@ -98,18 +85,13 @@ public class ClientLoanIntegrationTest {
                                      .withExpectedDisbursementDate("20 September 2011")
                                      .withSubmittedOnDate("20 September 2011")
                                      .Build(clientID.toString(),loanProductID.toString());
-        given().spec(requestSpec).body(loanApplicationJSON)
-        .expect().spec(responseSpec)
-        .when().post("/mifosng-provider/api/v1/loans?tenantIdentifier=default");
+        return Utils.getLoanId(requestSpec, responseSpec, loanApplicationJSON);
     }
 
     private ArrayList  getLoanRepaymentSchedule(final Integer productID)
     {
         System.out.println("---------------------------GETTING LOAN REPAYMENT SCHEDULE--------------------------------");
-       String json = given().spec(requestSpec).body(getLoanCalculationBodyAsJSON(productID.toString()))
-                .expect().spec(responseSpec)
-                .when().post("/mifosng-provider/api/v1/loans?command=calculateLoanSchedule&tenantIdentifier=default").andReturn().asString();
-        return from(json).get("periods");
+        return Utils.getRepaymentSchedule(requestSpec,responseSpec,productID);
     }
 
     private void verifyLoanRepaymentSchedule(final ArrayList<HashMap> loanSchedule) {
@@ -132,29 +114,6 @@ public class ClientLoanIntegrationTest {
         assertEquals("Checking for Interest Due for 4th Month",new Float("61.79"),loanSchedule.get(4).get("interestOriginalDue"));
     }
 
-
-
-
-    private String getLoanCalculationBodyAsJSON(final String productID){
-         HashMap<String, String> map = new HashMap<String, String>();
-         map.put("dateFormat", "dd MMMM yyyy");
-         map.put("locale", "en_GB");
-         map.put("productId", productID);
-         map.put("principal", "12,000.00");
-         map.put("loanTermFrequency", "4");
-         map.put("loanTermFrequencyType", "2");
-         map.put("numberOfRepayments", "4");
-         map.put("repaymentEvery", "1");
-         map.put("repaymentFrequencyType", "2");
-         map.put("interestRateFrequencyType", "2");
-         map.put("interestRatePerPeriod", "2");
-         map.put("amortizationType", "1");
-         map.put("interestType", "0");
-         map.put("interestCalculationPeriodType", "1");
-         map.put("expectedDisbursementDate", "20 September 2011");
-         map.put("transactionProcessingStrategyId", "1");
-         return new Gson().toJson(map);
-     }
 
 
 }
