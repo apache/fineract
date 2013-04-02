@@ -1,4 +1,5 @@
 bin
+out/
 build
 repos
 .classpath
