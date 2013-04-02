@@ -810,9 +810,12 @@ public class Loan extends AbstractPersistable<Long> {
         }
 
         final String clientIdParamName = "clientId";
-        if (command.isChangeInLongParameterNamed(clientIdParamName, this.client.getId())) {
-            final Long newValue = command.longValueOfParameterNamed(clientIdParamName);
-            actualChanges.put(clientIdParamName, newValue);
+        //FIXME AA : Client is null for group loans. Group loan modifications require group validation.
+        if (this.client != null) {
+            if (command.isChangeInLongParameterNamed(clientIdParamName, this.client.getId())) {
+                final Long newValue = command.longValueOfParameterNamed(clientIdParamName);
+                actualChanges.put(clientIdParamName, newValue);
+            }
         }
 
         final String productIdParamName = "productId";

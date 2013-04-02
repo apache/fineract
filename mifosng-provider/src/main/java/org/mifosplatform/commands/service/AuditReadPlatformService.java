@@ -3,12 +3,12 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this file,
  * You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-package org.mifosplatform.audit.service;
+package org.mifosplatform.commands.service;
 
 import java.util.Collection;
 
-import org.mifosplatform.audit.data.AuditData;
-import org.mifosplatform.audit.data.AuditSearchData;
+import org.mifosplatform.commands.data.AuditData;
+import org.mifosplatform.commands.data.AuditSearchData;
 
 public interface AuditReadPlatformService {
 
@@ -16,7 +16,7 @@ public interface AuditReadPlatformService {
 
     AuditData retrieveAuditEntry(Long auditId);
 
-    AuditSearchData retrieveSearchTemplate();
+    AuditSearchData retrieveSearchTemplate(String useType);
 
     Collection<AuditData> retrieveAllEntriesToBeChecked();
 

@@ -3,7 +3,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this file,
  * You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-package org.mifosplatform.audit.service;
+package org.mifosplatform.commands.service;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -12,10 +12,11 @@ import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
-import org.mifosplatform.audit.api.ProcessingResultLookup;
-import org.mifosplatform.audit.data.AuditData;
-import org.mifosplatform.audit.data.AuditSearchData;
+import org.mifosplatform.commands.data.AuditData;
+import org.mifosplatform.commands.data.AuditSearchData;
+import org.mifosplatform.commands.data.ProcessingResultLookup;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
+import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.useradministration.data.AppUserData;
@@ -141,7 +142,12 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
 	}
 
 	@Override
-	public AuditSearchData retrieveSearchTemplate() {
+	public AuditSearchData retrieveSearchTemplate(String useType) {
+		
+        if (!(useType.equals("audit") || useType.equals("makerchecker"))) { 
+        	throw new PlatformDataIntegrityException("error.msg.invalid.auditSearchTemplate.useType",
+                "Invalid Audit Search Template UseType: " + useType); }
+		
 		final Collection<AppUserData> appUsers = appUserReadPlatformService
 				.retrieveSearchTemplate();
 
@@ -153,10 +159,12 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
 		List<String> entityNames = this.jdbcTemplate.query(mapper2.schema(),
 				mapper2, new Object[] {});
 
-		ProcessingResultsMapper mapper3 = new ProcessingResultsMapper();
-		Collection<ProcessingResultLookup> processingResults = this.jdbcTemplate
-				.query(mapper3.schema(), mapper3, new Object[] {});
-
+		Collection<ProcessingResultLookup> processingResults = null;
+		if (useType.equals("audit")) {
+			ProcessingResultsMapper mapper3 = new ProcessingResultsMapper();
+			processingResults = this.jdbcTemplate.query(mapper3.schema(), mapper3, new Object[] {});
+		}
+		
 		return new AuditSearchData(appUsers, actionNames, entityNames,
 				processingResults);
 	}
