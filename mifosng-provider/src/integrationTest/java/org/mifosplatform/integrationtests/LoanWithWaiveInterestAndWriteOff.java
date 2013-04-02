@@ -18,10 +18,7 @@ import com.jayway.restassured.builder.ResponseSpecBuilder;
 import com.jayway.restassured.http.ContentType;
 import com.jayway.restassured.specification.RequestSpecification;
 import com.jayway.restassured.specification.ResponseSpecification;
-import org.mifosplatform.integrationtests.common.LoanApplicationTestBuilder;
-import org.mifosplatform.integrationtests.common.LoanProductTestBuilder;
-import org.mifosplatform.integrationtests.common.LoanStatusChecker;
-import org.mifosplatform.integrationtests.common.Utils;
+import org.mifosplatform.integrationtests.common.*;
 
 /**
  * Client Loan Integration Test for checking Loan Disbursement with Waive Interest and Write-Off.
@@ -65,106 +62,58 @@ public class LoanWithWaiveInterestAndWriteOff {
         Integer loanProductID = createLoanProduct();
         //APPLY FOR LOAN
         Integer loanID = applyForLoanApplication(clientID, loanProductID);
-        HashMap loanStatusHashMap = getStatusOfLoan(loanID);
+        HashMap loanStatusHashMap = LoanStatusChecker.getStatusOfLoan(requestSpec,responseSpec,loanID);
 
         LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
 
         //APPROVE LOAN
-        loanStatusHashMap = approveLoan("28 September 2010", loanID);
+        System.out.println("-----------------------------------APPROVE LOAN-----------------------------------------");
+        loanStatusHashMap = LoanTransactionHelper.approveLoan(requestSpec, responseSpec, "28 September 2010", loanID);
         LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
         LoanStatusChecker.verifyLoanIsWaitingForDisbursal(loanStatusHashMap);
 
         //UNDO APPROVAL
-        loanStatusHashMap = undoApproval(loanID);
+        loanStatusHashMap = LoanTransactionHelper.undoApproval(requestSpec, responseSpec, loanID);
         LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
 
         //RE-APPROVE LOAN ON 1 OCTOBER 2010
-        loanStatusHashMap = approveLoan("1 October 2010", loanID);
+        System.out.println("-----------------------------------APPROVE LOAN-----------------------------------------");
+        loanStatusHashMap = LoanTransactionHelper.approveLoan(requestSpec, responseSpec, "1 October 2010", loanID);
         LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
         LoanStatusChecker.verifyLoanIsWaitingForDisbursal(loanStatusHashMap);
 
         //DISBURSE
-        loanStatusHashMap = disburseLoan(loanID);
+        loanStatusHashMap = LoanTransactionHelper.disburseLoan(requestSpec, responseSpec, DISBURSEMENT_DATE, loanID);
         System.out.println("DISBURSE "+loanStatusHashMap);
         LoanStatusChecker.verifyLoanIsActive(loanStatusHashMap);
 
         //PERFORM REPAYMENTS AND CHECK LOAN STATUS
         verifyRepaymentScheduleEntryFor(1, 4000.0F,loanID);
-        makeRepayment(540.0f, "1 January 2011", loanID);
-        makeRepayment(540.0f, "1 March 2011", loanID);
-        waiveInterest("1 May 2011", loanID);
-        makeRepayment(500.0f, "1 May 2011", loanID);
-        makeRepayment(540.0f, "1 July 2011", loanID);
-        waiveInterest("1 September 2011", loanID);
-        makeRepayment(500.0f, "1 September 2011", loanID);
-        makeRepayment(540.0f, "1 November 2011", loanID);
-        waiveInterest("1 January 2012", loanID);
-        makeRepayment(500.0f, "1 January 2012", loanID);
+        LoanTransactionHelper.makeRepayment(requestSpec,responseSpec, "1 January 2011", 540.0f, loanID);
+        LoanTransactionHelper.makeRepayment(requestSpec,responseSpec, "1 March 2011", 540.0f, loanID);
+        LoanTransactionHelper.waiveInterest(requestSpec,responseSpec, "1 May 2011",INTEREST_VALUE_AMOUNT, loanID);
+        LoanTransactionHelper.makeRepayment(requestSpec,responseSpec, "1 May 2011", 500.0f, loanID);
+        LoanTransactionHelper.makeRepayment(requestSpec,responseSpec, "1 July 2011", 540.0f, loanID);
+        LoanTransactionHelper.waiveInterest(requestSpec,responseSpec, "1 September 2011",INTEREST_VALUE_AMOUNT, loanID);
+        LoanTransactionHelper.makeRepayment(requestSpec,responseSpec, "1 September 2011", 500.0f, loanID);
+        LoanTransactionHelper.makeRepayment(requestSpec,responseSpec, "1 November 2011", 540.0f, loanID);
+        LoanTransactionHelper.waiveInterest(requestSpec,responseSpec, "1 January 2012",INTEREST_VALUE_AMOUNT, loanID);
+        LoanTransactionHelper.makeRepayment(requestSpec,responseSpec, "1 January 2012", 500.0f, loanID);
+
         verifyRepaymentScheduleEntryFor(7,1000.0f,loanID);
 
         //WRITE OFF LOAN AND CHECK ACCOUNT IS CLOSED
-        LoanStatusChecker.verifyLoanAccountIsClosed(writeOffLoan("1 March 2012", loanID));
+        LoanStatusChecker.verifyLoanAccountIsClosed(LoanTransactionHelper.writeOffLoan(requestSpec, responseSpec, "1 March 2012", loanID));
 
     }
 
     private void verifyRepaymentScheduleEntryFor(int repaymentNumber, float expectedPrincipalOutstanding ,Integer loanID) {
-        ArrayList<HashMap> repaymentPeriods = getLoanRepaymentSchedule(loanID);
-        assertEquals(repaymentPeriods.get(repaymentNumber).get("principalLoanBalanceOutstanding"), expectedPrincipalOutstanding);
-
-    }
-
-
-    private void waiveInterest(String transactionDate, Integer loanID){
-        System.out.println("--------------------Waive INTEREST On "+transactionDate+"-------------------------------\n");
-        given().spec(requestSpec).body(Utils.getWaiveBodyAsJSON(transactionDate, INTEREST_VALUE_AMOUNT))
-                      .expect().spec(responseSpec).log().ifError()
-                      .when().post("/mifosng-provider/api/v1/loans/" + loanID + "/transactions?command=waiveinterest&tenantIdentifier=default");
-    }
-
-    private void makeRepayment(Float transactionAmount, String transactionDate, Integer loanID){
-        System.out.print("------------------------MADE REPAYMENT ON " + transactionDate + "---------------------------------\n");
-        given().spec(requestSpec).body(Utils.getRepaymentBodyAsJSON(transactionDate, transactionAmount))
-        .expect().spec(responseSpec).log().ifError()
-        .when().post("/mifosng-provider/api/v1/loans/" + loanID + "/transactions?command=repayment&tenantIdentifier=default");
-    }
-
-    private ArrayList  getLoanRepaymentSchedule(Integer loanID)
-    {
         System.out.println("---------------------------GETTING LOAN REPAYMENT SCHEDULE--------------------------------");
-        String json = given().spec(requestSpec)
-                .expect().spec(responseSpec).log().ifError()
-                .when().get("/mifosng-provider/api/v1/loans/" + loanID +"?associations=repaymentSchedule&tenantIdentifier=default").andReturn().asString();
-        HashMap repaymentSchedule = from(json).get("repaymentSchedule");
-       return (ArrayList)repaymentSchedule.get("periods");
+        ArrayList<HashMap> repaymentPeriods = LoanTransactionHelper.getLoanRepaymentSchedule(requestSpec, responseSpec, loanID);
+        System.out.println("**********RESPOSE : "+repaymentPeriods);
+        assertEquals(expectedPrincipalOutstanding,repaymentPeriods.get(repaymentNumber).get("principalLoanBalanceOutstanding"));
     }
 
-    private HashMap getStatusOfLoan(Integer loanID){
-        String json= given().spec(requestSpec)
-                     .expect().spec(responseSpec).log().ifError()
-                     .when().get("/mifosng-provider/api/v1/loans/" + loanID + "?tenantIdentifier=default")
-                     .andReturn().asString();
-        return from(json).get("status");
-    }
-
-    private HashMap approveLoan(String approvalDate, Integer loanID){
-        System.out.println("-----------------------------------APPROVE LOAN-----------------------------------------");
-        return Utils.approveLoan(requestSpec,responseSpec,approvalDate,loanID);
-    }
-
-
-    private HashMap undoApproval(Integer loanID){
-        System.out.println("-----------------------------------UNDO LOAN APPROVAL-----------------------------------------");
-        return Utils.undoApproval(requestSpec,responseSpec,loanID);
-    }
-
-    private HashMap disburseLoan(Integer loanID){
-        System.out.println("-----------------------------------DISBURSE LOAN-----------------------------------------");
-        return Utils.disburseLoan(requestSpec,responseSpec,loanID,DISBURSEMENT_DATE);
-    }
-    private HashMap writeOffLoan(String transactionDate, Integer loanID){
-        System.out.println("--------------------LOAN WRITTEN OFF ON "+transactionDate+"-------------------------------\n");
-        return Utils.writeOffLoan(requestSpec,responseSpec,transactionDate,loanID);
-    }
 
     private Integer createLoanProduct() {
         System.out.println("------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
@@ -179,7 +128,7 @@ public class LoanWithWaiveInterestAndWriteOff {
                 .withAmortizationTypeAsEqualPrinciplePayment()
                 .withInterestTypeAsFlat()
                 .build();
-       return Utils.getLoanProductId(requestSpec,responseSpec,loanProductJSON);
+       return LoanTransactionHelper.getLoanProductId(requestSpec,responseSpec,loanProductJSON);
     }
 
     private Integer applyForLoanApplication(final Integer clientID, final Integer loanProductID) {
@@ -199,7 +148,7 @@ public class LoanWithWaiveInterestAndWriteOff {
                 .withExpectedDisbursementDate(EXPECTED_DISBURSAL_DATE)
                 .withSubmittedOnDate(LOAN_APPLICATION_SUBMISSION_DATE)
                 .Build(clientID.toString(), loanProductID.toString());
-       return Utils.getLoanId(requestSpec,responseSpec,loanApplicationJSON);
+       return LoanTransactionHelper.getLoanId(requestSpec,responseSpec,loanApplicationJSON);
     }
 }
 

@@ -20,6 +20,7 @@ import com.jayway.restassured.specification.RequestSpecification;
 import com.jayway.restassured.specification.ResponseSpecification;
 import org.mifosplatform.integrationtests.common.LoanApplicationTestBuilder;
 import org.mifosplatform.integrationtests.common.LoanProductTestBuilder;
+import org.mifosplatform.integrationtests.common.LoanTransactionHelper;
 import org.mifosplatform.integrationtests.common.Utils;
 
 /**
@@ -44,13 +45,12 @@ public class ClientLoanIntegrationTest {
         Utils.verifyClientCreatedOnServer(requestSpec, responseSpec, clientID);
 
         Integer loanProductID = createLoanProduct();
-        applyForLoanApplication(clientID, loanProductID);
+        Integer loanID= applyForLoanApplication(clientID, loanProductID);
 
-        ArrayList <HashMap> loanSchedule = getLoanRepaymentSchedule(loanProductID);
+        ArrayList <HashMap> loanSchedule = LoanTransactionHelper.getLoanRepaymentSchedule(requestSpec, responseSpec, loanID);
         verifyLoanRepaymentSchedule(loanSchedule);
 
     }
-
 
     private Integer createLoanProduct() {
         System.out.println("------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
@@ -65,7 +65,7 @@ public class ClientLoanIntegrationTest {
                             .withInterestTypeAsDecliningBalance()
                             .withinterestRatePerPeriod("1")
                             .build();
-        return Utils.getLoanProductId(requestSpec, responseSpec, loanProductJSON);
+        return LoanTransactionHelper.getLoanProductId(requestSpec, responseSpec, loanProductJSON);
     }
 
     private Integer applyForLoanApplication(final Integer clientID, final Integer loanProductID) {
@@ -85,13 +85,7 @@ public class ClientLoanIntegrationTest {
                                      .withExpectedDisbursementDate("20 September 2011")
                                      .withSubmittedOnDate("20 September 2011")
                                      .Build(clientID.toString(),loanProductID.toString());
-        return Utils.getLoanId(requestSpec, responseSpec, loanApplicationJSON);
-    }
-
-    private ArrayList  getLoanRepaymentSchedule(final Integer productID)
-    {
-        System.out.println("---------------------------GETTING LOAN REPAYMENT SCHEDULE--------------------------------");
-        return Utils.getRepaymentSchedule(requestSpec,responseSpec,productID);
+        return LoanTransactionHelper.getLoanId(requestSpec, responseSpec, loanApplicationJSON);
     }
 
     private void verifyLoanRepaymentSchedule(final ArrayList<HashMap> loanSchedule) {
