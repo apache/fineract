@@ -16,6 +16,7 @@ import org.mifosplatform.audit.api.ProcessingResultLookup;
 import org.mifosplatform.audit.data.AuditData;
 import org.mifosplatform.audit.data.AuditSearchData;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
+import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.useradministration.data.AppUserData;
@@ -141,7 +142,12 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
 	}
 
 	@Override
-	public AuditSearchData retrieveSearchTemplate() {
+	public AuditSearchData retrieveSearchTemplate(String useType) {
+		
+        if (!(useType.equals("audit") || useType.equals("makerchecker"))) { 
+        	throw new PlatformDataIntegrityException("error.msg.invalid.auditSearchTemplate.useType",
+                "Invalid Audit Search Template UseType: " + useType); }
+		
 		final Collection<AppUserData> appUsers = appUserReadPlatformService
 				.retrieveSearchTemplate();
 
@@ -153,10 +159,12 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
 		List<String> entityNames = this.jdbcTemplate.query(mapper2.schema(),
 				mapper2, new Object[] {});
 
-		ProcessingResultsMapper mapper3 = new ProcessingResultsMapper();
-		Collection<ProcessingResultLookup> processingResults = this.jdbcTemplate
-				.query(mapper3.schema(), mapper3, new Object[] {});
-
+		Collection<ProcessingResultLookup> processingResults = null;
+		if (useType.equals("audit")) {
+			ProcessingResultsMapper mapper3 = new ProcessingResultsMapper();
+			processingResults = this.jdbcTemplate.query(mapper3.schema(), mapper3, new Object[] {});
+		}
+		
 		return new AuditSearchData(appUsers, actionNames, entityNames,
 				processingResults);
 	}

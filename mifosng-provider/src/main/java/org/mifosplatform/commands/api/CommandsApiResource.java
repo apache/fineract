@@ -24,6 +24,7 @@ import javax.ws.rs.core.UriInfo;
 
 import org.apache.commons.lang.StringUtils;
 import org.mifosplatform.audit.data.AuditData;
+import org.mifosplatform.audit.data.AuditSearchData;
 import org.mifosplatform.audit.service.AuditReadPlatformService;
 import org.mifosplatform.commands.data.CommandSourceData;
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -52,18 +53,21 @@ public class CommandsApiResource {
     private final AuditReadPlatformService readPlatformService;
     private final DefaultToApiJsonSerializer<CommandSourceData> toApiJsonSerializer;
     private final DefaultToApiJsonSerializer<AuditData> toApiJsonSerializerAudit;
+	private final DefaultToApiJsonSerializer<AuditSearchData> toApiJsonSerializerSearchTemplate;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final PortfolioCommandSourceWritePlatformService writePlatformService;
 
     @Autowired
     public CommandsApiResource(final PlatformSecurityContext context, final AuditReadPlatformService readPlatformService, 
-            final DefaultToApiJsonSerializer<CommandSourceData> toApiJsonSerializer, final DefaultToApiJsonSerializer<AuditData> toApiJsonSerializerAudit,
+            final DefaultToApiJsonSerializer<CommandSourceData> toApiJsonSerializer, final DefaultToApiJsonSerializer<AuditData> toApiJsonSerializerAudit, 
+            final DefaultToApiJsonSerializer<AuditSearchData> toApiJsonSerializerSearchTemplate,
             final ApiRequestParameterHelper apiRequestParameterHelper, final PortfolioCommandSourceWritePlatformService writePlatformService) {
         this.context = context;
         this.readPlatformService = readPlatformService;
         this.toApiJsonSerializer = toApiJsonSerializer;
         this.apiRequestParameterHelper = apiRequestParameterHelper;
         this.toApiJsonSerializerAudit = toApiJsonSerializerAudit;
+        this.toApiJsonSerializerSearchTemplate = toApiJsonSerializerSearchTemplate;
         this.writePlatformService = writePlatformService;
     }
 
@@ -80,6 +84,28 @@ public class CommandsApiResource {
         return this.toApiJsonSerializerAudit.serialize(settings, entries, RESPONSE_DATA_PARAMETERS);
     }
 
+	@GET
+	@Path("/searchtemplate")
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public String retrieveAuditSearchTemplate(@Context final UriInfo uriInfo) {
+
+		context.authenticatedUser().validateHasReadPermission(
+				resourceNameForPermissions);
+
+		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper
+				.process(uriInfo.getQueryParameters());
+
+		final AuditSearchData auditSearchData = this.readPlatformService
+				.retrieveSearchTemplate("makerchecker");
+
+		final Set<String> RESPONSE_DATA_PARAMETERS_SEARCH_TEMPLATE = new HashSet<String>(
+				Arrays.asList("appUsers", "actionNames", "entityNames"));
+
+		return this.toApiJsonSerializerSearchTemplate.serialize(settings,
+				auditSearchData, RESPONSE_DATA_PARAMETERS_SEARCH_TEMPLATE);
+	}
+	
     @POST
     @Path("{commandId}")
     @Consumes({ MediaType.APPLICATION_JSON })

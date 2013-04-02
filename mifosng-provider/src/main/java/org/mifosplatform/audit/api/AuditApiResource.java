@@ -130,10 +130,10 @@ public class AuditApiResource {
 				.process(uriInfo.getQueryParameters());
 
 		final AuditSearchData auditSearchData = this.auditReadPlatformService
-				.retrieveSearchTemplate();
+				.retrieveSearchTemplate("audit");
 
 		final Set<String> RESPONSE_DATA_PARAMETERS_SEARCH_TEMPLATE = new HashSet<String>(
-				Arrays.asList("appUsers", "apiOperations", "resources"));
+				Arrays.asList("appUsers", "actionNames", "entityNames", "processingResults"));
 
 		return this.toApiJsonSerializerSearchTemplate.serialize(settings,
 				auditSearchData, RESPONSE_DATA_PARAMETERS_SEARCH_TEMPLATE);

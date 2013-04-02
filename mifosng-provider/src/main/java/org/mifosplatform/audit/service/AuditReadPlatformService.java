@@ -16,7 +16,7 @@ public interface AuditReadPlatformService {
 
     AuditData retrieveAuditEntry(Long auditId);
 
-    AuditSearchData retrieveSearchTemplate();
+    AuditSearchData retrieveSearchTemplate(String useType);
 
     Collection<AuditData> retrieveAllEntriesToBeChecked();
 
