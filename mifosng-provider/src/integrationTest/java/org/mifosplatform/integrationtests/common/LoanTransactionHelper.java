@@ -1,12 +1,13 @@
 package org.mifosplatform.integrationtests.common;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+
 import com.google.gson.Gson;
 import com.jayway.restassured.specification.RequestSpecification;
 import com.jayway.restassured.specification.ResponseSpecification;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-
+@SuppressWarnings("rawtypes")
 public class LoanTransactionHelper {
 
     private static final String CREATE_LOAN_PRODUCT_URL = "/mifosng-provider/api/v1/loanproducts?tenantIdentifier=default";
@@ -18,49 +19,60 @@ public class LoanTransactionHelper {
     private static final String WAIVE_INTEREST_COMMAND = "waiveinterest";
     private static final String MAKE_REPAYMENT_COMMAND = "repayment";
 
-
-
-
-    public static Integer getLoanProductId(RequestSpecification requestSpec, ResponseSpecification responseSpec, String loanProductJSON) {
+    public static Integer getLoanProductId(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final String loanProductJSON) {
         return Utils.performServerPost(requestSpec, responseSpec, CREATE_LOAN_PRODUCT_URL, loanProductJSON, "resourceId");
     }
 
-    public static Integer getLoanId(RequestSpecification requestSpec, ResponseSpecification responseSpec, String loanApplicationJSON) {
+    public static Integer getLoanId(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final String loanApplicationJSON) {
         return Utils.performServerPost(requestSpec, responseSpec, APPLY_LOAN_URL, loanApplicationJSON, "loanId");
     }
 
-    public static ArrayList getLoanRepaymentSchedule(RequestSpecification requestSpec, ResponseSpecification responseSpec,final Integer loanID){
-        String URL = "/mifosng-provider/api/v1/loans/" + loanID +"?associations=repaymentSchedule&tenantIdentifier=default";
+    public static ArrayList getLoanRepaymentSchedule(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final Integer loanID) {
+        String URL = "/mifosng-provider/api/v1/loans/" + loanID + "?associations=repaymentSchedule&tenantIdentifier=default";
         HashMap response = Utils.performServerGet(requestSpec, responseSpec, URL, "repaymentSchedule");
         return (ArrayList) response.get("periods");
     }
 
-    public static HashMap approveLoan(RequestSpecification requestSpec, ResponseSpecification responseSpec, String approvalDate, Integer loanID) {
-        return performLoanTransaction(requestSpec, responseSpec, createLoanOperationURL(APPROVE_LOAN_COMMAND, loanID), getApproveLoanAsJSON(approvalDate));
+    public static HashMap approveLoan(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final String approvalDate, final Integer loanID) {
+        return performLoanTransaction(requestSpec, responseSpec, createLoanOperationURL(APPROVE_LOAN_COMMAND, loanID),
+                getApproveLoanAsJSON(approvalDate));
     }
 
-    public static HashMap undoApproval(RequestSpecification requestSpec, ResponseSpecification responseSpec, Integer loanID) {
+    public static HashMap undoApproval(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final Integer loanID) {
         String undoBodyJson = "{'note':'UNDO APPROVAL'}";
         return performLoanTransaction(requestSpec, responseSpec, createLoanOperationURL(UNDO_APPROVAL_LOAN_COMMAND, loanID), undoBodyJson);
     }
 
-    public static HashMap disburseLoan(RequestSpecification requestSpec, ResponseSpecification responseSpec, String date, Integer loanID) {
-        return performLoanTransaction(requestSpec, responseSpec, createLoanOperationURL(DISBURSE_LOAN_COMMAND, loanID), getDisburseLoanAsJSON(date));
+    public static HashMap disburseLoan(final RequestSpecification requestSpec, final ResponseSpecification responseSpec, final String date,
+            final Integer loanID) {
+        return performLoanTransaction(requestSpec, responseSpec, createLoanOperationURL(DISBURSE_LOAN_COMMAND, loanID),
+                getDisburseLoanAsJSON(date));
     }
 
-    public static HashMap writeOffLoan(RequestSpecification requestSpec, ResponseSpecification responseSpec, String date, Integer loanID) {
-        return performLoanTransaction(requestSpec, responseSpec, createLoanTransactionURL(WRITE_OFF_LOAN_COMMAND, loanID), getWriteOffBodyAsJSON(date));
+    public static HashMap writeOffLoan(final RequestSpecification requestSpec, final ResponseSpecification responseSpec, final String date,
+            final Integer loanID) {
+        return performLoanTransaction(requestSpec, responseSpec, createLoanTransactionURL(WRITE_OFF_LOAN_COMMAND, loanID),
+                getWriteOffBodyAsJSON(date));
     }
 
-    public static HashMap waiveInterest(RequestSpecification requestSpec, ResponseSpecification responseSpec, String date,String amountToBeWaived, Integer loanID) {
-        return performLoanTransaction(requestSpec, responseSpec, createLoanTransactionURL(WAIVE_INTEREST_COMMAND,loanID), getWaiveBodyAsJSON(date, amountToBeWaived));
+    public static HashMap waiveInterest(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final String date, final String amountToBeWaived, final Integer loanID) {
+        return performLoanTransaction(requestSpec, responseSpec, createLoanTransactionURL(WAIVE_INTEREST_COMMAND, loanID),
+                getWaiveBodyAsJSON(date, amountToBeWaived));
     }
 
-    public static HashMap makeRepayment(RequestSpecification requestSpec, ResponseSpecification responseSpec, String date,Float amountToBePaid, Integer loanID) {
-        return performLoanTransaction(requestSpec, responseSpec, createLoanTransactionURL(MAKE_REPAYMENT_COMMAND,loanID), getRepaymentBodyAsJSON(date,amountToBePaid));
+    public static HashMap makeRepayment(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final String date, final Float amountToBePaid, final Integer loanID) {
+        return performLoanTransaction(requestSpec, responseSpec, createLoanTransactionURL(MAKE_REPAYMENT_COMMAND, loanID),
+                getRepaymentBodyAsJSON(date, amountToBePaid));
     }
 
-    public static String getDisburseLoanAsJSON(String actualDisbursementDate) {
+    public static String getDisburseLoanAsJSON(final String actualDisbursementDate) {
         HashMap<String, String> map = new HashMap<String, String>();
         map.put("locale", "en");
         map.put("dateFormat", "dd MMMM yyyy");
@@ -69,7 +81,7 @@ public class LoanTransactionHelper {
         return new Gson().toJson(map);
     }
 
-    public static String getApproveLoanAsJSON(String approvalDate) {
+    public static String getApproveLoanAsJSON(final String approvalDate) {
         HashMap<String, String> map = new HashMap<String, String>();
         map.put("locale", "en");
         map.put("dateFormat", "dd MMMM yyyy");
@@ -78,7 +90,7 @@ public class LoanTransactionHelper {
         return new Gson().toJson(map);
     }
 
-    public static String getRepaymentBodyAsJSON(String transactionDate, Float transactionAmount) {
+    public static String getRepaymentBodyAsJSON(final String transactionDate, final Float transactionAmount) {
         HashMap<String, String> map = new HashMap<String, String>();
         map.put("locale", "en");
         map.put("dateFormat", "dd MMMM yyyy");
@@ -88,7 +100,7 @@ public class LoanTransactionHelper {
         return new Gson().toJson(map);
     }
 
-    public static String getWriteOffBodyAsJSON(String transactionDate) {
+    public static String getWriteOffBodyAsJSON(final String transactionDate) {
         HashMap<String, String> map = new HashMap<String, String>();
         map.put("dateFormat", "dd MMMM yyyy");
         map.put("locale", "en");
@@ -97,7 +109,7 @@ public class LoanTransactionHelper {
         return new Gson().toJson(map);
     }
 
-    public static String getWaiveBodyAsJSON(String transactionDate, String amountToBeWaived) {
+    public static String getWaiveBodyAsJSON(final String transactionDate, final String amountToBeWaived) {
         HashMap<String, String> map = new HashMap<String, String>();
         map.put("locale", "en");
         map.put("dateFormat", "dd MMMM yyyy");
@@ -128,19 +140,18 @@ public class LoanTransactionHelper {
         return new Gson().toJson(map);
     }
 
-
-    private static String createLoanOperationURL(String command, Integer loanID) {
+    private static String createLoanOperationURL(final String command, final Integer loanID) {
         return "/mifosng-provider/api/v1/loans/" + loanID + "?command=" + command + "&tenantIdentifier=default";
     }
 
-    private static String createLoanTransactionURL(String command, Integer loanID) {
-        return "/mifosng-provider/api/v1/loans/" + loanID + "/transactions?command="+command+"&tenantIdentifier=default";
+    private static String createLoanTransactionURL(final String command, final Integer loanID) {
+        return "/mifosng-provider/api/v1/loans/" + loanID + "/transactions?command=" + command + "&tenantIdentifier=default";
     }
 
-    private static HashMap performLoanTransaction(RequestSpecification requestSpec, ResponseSpecification responseSpec, String postURLForLoanTransaction, String jsonToBeSent) {
+    private static HashMap performLoanTransaction(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final String postURLForLoanTransaction, final String jsonToBeSent) {
 
         HashMap response = Utils.performServerPost(requestSpec, responseSpec, postURLForLoanTransaction, jsonToBeSent, "changes");
         return (HashMap) response.get("status");
     }
-
 }

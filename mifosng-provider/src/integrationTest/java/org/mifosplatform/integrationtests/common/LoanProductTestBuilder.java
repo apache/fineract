@@ -1,8 +1,8 @@
 package org.mifosplatform.integrationtests.common;
 
-import com.google.gson.Gson;
-
 import java.util.HashMap;
+
+import com.google.gson.Gson;
 
 public class LoanProductTestBuilder {
     private static final String LOCALE = "en_GB";
@@ -18,9 +18,9 @@ public class LoanProductTestBuilder {
     private static final String DECLINING_BALANCE="0";
     private static final String FLAT_BALANCE="1";
     private static final String MIFOS_STANDARD_STRATEGY ="1";
-    private static final String HEAVENS_FAMILY_STRATEGY ="2";
-    private static final String CREO_CORE_STRATEGY ="3";
-    private static final String RBI_INDIA_STRATEGY ="4";
+    // private static final String HEAVENS_FAMILY_STRATEGY ="2";
+    // private static final String CREO_CORE_STRATEGY ="3";
+    // private static final String RBI_INDIA_STRATEGY ="4";
     private static final String NONE ="1";
     private static final String CASH_BASED ="2";
     private static final String ACCRUAL_BASED ="3";
@@ -36,9 +36,9 @@ public class LoanProductTestBuilder {
     private String interestType = FLAT_BALANCE;
     private String interestCalculationPeriodType=CALCULATION_PERIOD_SAME_AS_REPAYMENT_PERIOD;
     private String inArrearsTolerance="0";
-    private String transactionProcessingStrategy=MIFOS_STANDARD_STRATEGY;
+    private final String transactionProcessingStrategy=MIFOS_STANDARD_STRATEGY;
     private String accountingRule =NONE;
-    private String currencyCode = INR;
+    private final String currencyCode = INR;
     private String amortizationType= EQUAL_INSTALLMENTS;
 
     public String build() {
