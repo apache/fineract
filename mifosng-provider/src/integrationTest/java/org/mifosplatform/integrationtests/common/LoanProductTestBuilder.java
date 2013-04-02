@@ -26,7 +26,7 @@ public class LoanProductTestBuilder {
     private static final String ACCRUAL_BASED ="3";
 
 
-    private String nameOfLoanProduct = ClientBuilder.randomNameGenerator("LOAN_PRODUCT_", 6);
+    private String nameOfLoanProduct = ClientHelper.randomNameGenerator("LOAN_PRODUCT_", 6);
     private String principal = "10000.00";
     private String numberOfRepayments = "0";
     private String repaymentFrequency = WEEK;

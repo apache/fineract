@@ -17,30 +17,24 @@ public class LoanApplicationTestBuilder {
     private static final String CALCULATION_PERIOD_SAME_AS_REPAYMENT_PERIOD="1";
     private static final String MIFOS_STANDARD_STRATEGY ="1";
 
-
     private String principal = "10,000";
-    private String clientID="0";
-    private String loanProductId = "0";
     private String loanTermFrequency = "";
-    private String loanTermFrequencyType="";       //0=Days, 1=Weeks, 2=Months, 3=Years
+    private String loanTermFrequencyType = "";
     private String numberOfRepayment = "0";
     private String repaymentPeriod = "0";
-    private String repaymentFrequencyType = "";    //0=Days, 1=Weeks, 2=Months
+    private String repaymentFrequencyType = "";
 
-                                                    // 12 %             per Year                 Declining Balance
-                                                    // interest rate    per Interest_frequency   interest type
     private String interestRate  = "2";
-    private String interestRateFrequencyType="0";       //2=Per month, 3=Per year
-    private String interestType= "";                    //0=Declining Balance, 1=Flat
-    private String amortizationType ="";                //0=Equal principle payments, 1=Equal installments
-    private String interestCalculationPeriodType =CALCULATION_PERIOD_SAME_AS_REPAYMENT_PERIOD;
-    private String transactionProcessingID= MIFOS_STANDARD_STRATEGY;
-    private String expectedDisbursmentDate="";
-    private String submittedOndate ="";
+    private String interestRateFrequencyType = "0";
+    private String interestType = "";
+    private String amortizationType = "";
+    private String interestCalculationPeriodType = CALCULATION_PERIOD_SAME_AS_REPAYMENT_PERIOD;
+    private String transactionProcessingID = MIFOS_STANDARD_STRATEGY;
+    private String expectedDisbursmentDate = "";
+    private String submittedOndate = "";
 
-    public String Build(String clientID, String loanProductId){
-        this.clientID = clientID;
-        this.loanProductId = loanProductId;
+    public String build(String clientID, String loanProductId){
+
         HashMap<String, String> map = new HashMap<String, String>();
         map.put("dateFormat", "dd MMMM yyyy");
         map.put("locale", "en_GB");

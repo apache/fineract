@@ -13,10 +13,6 @@ import static org.junit.Assert.assertTrue;
 
 public class LoanStatusChecker {
 
-    private static boolean getStatus(HashMap loanStatusMap, String nameOfLoanStatusString){
-       return (Boolean)loanStatusMap.get(nameOfLoanStatusString);
-    }
-
     public static void verifyLoanIsApproved(HashMap loanStatusHashMap) {
         assertFalse(getStatus(loanStatusHashMap, "pendingApproval"));
     }
@@ -45,4 +41,12 @@ public class LoanStatusChecker {
          String url = "/mifosng-provider/api/v1/loans/" + loanID + "?tenantIdentifier=default";
         return Utils.performServerGet(requestSpec, responseSpec, url, "status");
     }
+
+
+
+    private static boolean getStatus(HashMap loanStatusMap, String nameOfLoanStatusString){
+        return (Boolean)loanStatusMap.get(nameOfLoanStatusString);
+    }
+
+
 }

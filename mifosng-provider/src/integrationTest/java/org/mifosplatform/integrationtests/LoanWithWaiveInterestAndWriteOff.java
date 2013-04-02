@@ -1,24 +1,18 @@
 package org.mifosplatform.integrationtests;
 
-import static com.jayway.restassured.RestAssured.given;
-import static com.jayway.restassured.RestAssured.post;
-import static com.jayway.restassured.path.json.JsonPath.from;
-import static junit.framework.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-
-import org.junit.Before;
-import org.junit.Test;
-
 import com.jayway.restassured.builder.RequestSpecBuilder;
 import com.jayway.restassured.builder.ResponseSpecBuilder;
 import com.jayway.restassured.http.ContentType;
 import com.jayway.restassured.specification.RequestSpecification;
 import com.jayway.restassured.specification.ResponseSpecification;
+import org.junit.Before;
+import org.junit.Test;
 import org.mifosplatform.integrationtests.common.*;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+
+import static junit.framework.Assert.assertEquals;
 
 /**
  * Client Loan Integration Test for checking Loan Disbursement with Waive Interest and Write-Off.
@@ -55,8 +49,8 @@ public class LoanWithWaiveInterestAndWriteOff {
     @Test
     public void checkClientLoanCreateAndDisburseFlow(){
         //CREATE CLIENT
-        Integer clientID = ClientBuilder.createClient(requestSpec, responseSpec, DATE_OF_JOINING);
-        ClientBuilder.verifyClientCreatedOnServer(requestSpec, responseSpec, clientID);
+        Integer clientID = ClientHelper.createClient(requestSpec, responseSpec, DATE_OF_JOINING);
+        ClientHelper.verifyClientCreatedOnServer(requestSpec, responseSpec, clientID);
 
         //CREATE LOAN PRODUCT
         Integer loanProductID = createLoanProduct();
@@ -66,7 +60,6 @@ public class LoanWithWaiveInterestAndWriteOff {
 
         LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
 
-        //APPROVE LOAN
         System.out.println("-----------------------------------APPROVE LOAN-----------------------------------------");
         loanStatusHashMap = LoanTransactionHelper.approveLoan(requestSpec, responseSpec, "28 September 2010", loanID);
         LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
@@ -76,8 +69,7 @@ public class LoanWithWaiveInterestAndWriteOff {
         loanStatusHashMap = LoanTransactionHelper.undoApproval(requestSpec, responseSpec, loanID);
         LoanStatusChecker.verifyLoanIsPending(loanStatusHashMap);
 
-        //RE-APPROVE LOAN ON 1 OCTOBER 2010
-        System.out.println("-----------------------------------APPROVE LOAN-----------------------------------------");
+        System.out.println("-----------------------------------RE-APPROVE LOAN-----------------------------------------");
         loanStatusHashMap = LoanTransactionHelper.approveLoan(requestSpec, responseSpec, "1 October 2010", loanID);
         LoanStatusChecker.verifyLoanIsApproved(loanStatusHashMap);
         LoanStatusChecker.verifyLoanIsWaitingForDisbursal(loanStatusHashMap);
@@ -107,10 +99,9 @@ public class LoanWithWaiveInterestAndWriteOff {
 
     }
 
-    private void verifyRepaymentScheduleEntryFor(int repaymentNumber, float expectedPrincipalOutstanding ,Integer loanID) {
+    private void verifyRepaymentScheduleEntryFor(int repaymentNumber, float expectedPrincipalOutstanding, Integer loanID) {
         System.out.println("---------------------------GETTING LOAN REPAYMENT SCHEDULE--------------------------------");
         ArrayList<HashMap> repaymentPeriods = LoanTransactionHelper.getLoanRepaymentSchedule(requestSpec, responseSpec, loanID);
-        System.out.println("**********RESPOSE : "+repaymentPeriods);
         assertEquals(expectedPrincipalOutstanding,repaymentPeriods.get(repaymentNumber).get("principalLoanBalanceOutstanding"));
     }
 
@@ -147,7 +138,7 @@ public class LoanWithWaiveInterestAndWriteOff {
                 .withInterestCalculationPeriodTypeSameAsRepaymentPeriod()
                 .withExpectedDisbursementDate(EXPECTED_DISBURSAL_DATE)
                 .withSubmittedOnDate(LOAN_APPLICATION_SUBMISSION_DATE)
-                .Build(clientID.toString(), loanProductID.toString());
+                .build(clientID.toString(), loanProductID.toString());
        return LoanTransactionHelper.getLoanId(requestSpec,responseSpec,loanApplicationJSON);
     }
 }

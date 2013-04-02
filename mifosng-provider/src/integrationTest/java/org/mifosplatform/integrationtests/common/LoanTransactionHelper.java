@@ -7,8 +7,6 @@ import com.jayway.restassured.specification.ResponseSpecification;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import static com.jayway.restassured.RestAssured.given;
-
 public class LoanTransactionHelper {
 
     private static final String CREATE_LOAN_PRODUCT_URL = "/mifosng-provider/api/v1/loanproducts?tenantIdentifier=default";

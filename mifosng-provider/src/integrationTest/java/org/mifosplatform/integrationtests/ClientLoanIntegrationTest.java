@@ -38,11 +38,11 @@ public class ClientLoanIntegrationTest {
 
     @Test
     public void checkClientLoanCreateAndDisburseFlow(){
-        Integer clientID = ClientBuilder.createClient(requestSpec, responseSpec);
-        ClientBuilder.verifyClientCreatedOnServer(requestSpec, responseSpec, clientID);
+        Integer clientID = ClientHelper.createClient(requestSpec, responseSpec);
+        ClientHelper.verifyClientCreatedOnServer(requestSpec, responseSpec, clientID);
 
         Integer loanProductID = createLoanProduct();
-        Integer loanID= applyForLoanApplication(clientID, loanProductID);
+        Integer loanID = applyForLoanApplication(clientID, loanProductID);
 
         ArrayList <HashMap> loanSchedule = LoanTransactionHelper.getLoanRepaymentSchedule(requestSpec, responseSpec, loanID);
         verifyLoanRepaymentSchedule(loanSchedule);
@@ -81,7 +81,7 @@ public class ClientLoanIntegrationTest {
                                      .withInterestCalculationPeriodTypeSameAsRepaymentPeriod()
                                      .withExpectedDisbursementDate("20 September 2011")
                                      .withSubmittedOnDate("20 September 2011")
-                                     .Build(clientID.toString(),loanProductID.toString());
+                                     .build(clientID.toString(), loanProductID.toString());
         return LoanTransactionHelper.getLoanId(requestSpec, responseSpec, loanApplicationJSON);
     }
 

@@ -13,6 +13,13 @@ import static com.jayway.restassured.path.json.JsonPath.from;
 public class Utils {
     private static final String LOGIN_URL = "/mifosng-provider/api/v1/authentication?username=mifos&password=password&tenantIdentifier=default";
 
+    public static String loginIntoServerAndGetBase64EncodedAuthenticationKey() {
+        System.out.println("-----------------------------------LOGIN-----------------------------------------");
+        String json = RestAssured.post(LOGIN_URL).asString();
+        return JsonPath.with(json).get("base64EncodedAuthenticationKey");
+    }
+
+
     public static <T> T performServerGet(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
                                          final String getURL, final String jsonAttributeToGetBack){
         String json = given().spec(requestSpec)
@@ -31,9 +38,4 @@ public class Utils {
         return (T) from(json).get(jsonAttributeToGetBack);
     }
 
-    public static String loginIntoServerAndGetBase64EncodedAuthenticationKey() {
-        System.out.println("-----------------------------------LOGIN-----------------------------------------");
-        String json = RestAssured.post(LOGIN_URL).asString();
-        return JsonPath.with(json).get("base64EncodedAuthenticationKey");
-    }
 }
