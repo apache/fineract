@@ -55,8 +55,8 @@ public class LoanWithWaiveInterestAndWriteOff {
     @Test
     public void checkClientLoanCreateAndDisburseFlow(){
         //CREATE CLIENT
-        Integer clientID = Utils.createClient(requestSpec, responseSpec, DATE_OF_JOINING);
-        Utils.verifyClientCreatedOnServer(requestSpec, responseSpec, clientID);
+        Integer clientID = ClientBuilder.createClient(requestSpec, responseSpec, DATE_OF_JOINING);
+        ClientBuilder.verifyClientCreatedOnServer(requestSpec, responseSpec, clientID);
 
         //CREATE LOAN PRODUCT
         Integer loanProductID = createLoanProduct();

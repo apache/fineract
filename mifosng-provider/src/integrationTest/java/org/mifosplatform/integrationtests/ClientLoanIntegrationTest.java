@@ -18,10 +18,7 @@ import com.jayway.restassured.builder.ResponseSpecBuilder;
 import com.jayway.restassured.http.ContentType;
 import com.jayway.restassured.specification.RequestSpecification;
 import com.jayway.restassured.specification.ResponseSpecification;
-import org.mifosplatform.integrationtests.common.LoanApplicationTestBuilder;
-import org.mifosplatform.integrationtests.common.LoanProductTestBuilder;
-import org.mifosplatform.integrationtests.common.LoanTransactionHelper;
-import org.mifosplatform.integrationtests.common.Utils;
+import org.mifosplatform.integrationtests.common.*;
 
 /**
  * Client Loan Integration Test for checking Loan Application Repayment Schedule.
@@ -41,8 +38,8 @@ public class ClientLoanIntegrationTest {
 
     @Test
     public void checkClientLoanCreateAndDisburseFlow(){
-        Integer clientID = Utils.createClient(requestSpec, responseSpec);
-        Utils.verifyClientCreatedOnServer(requestSpec, responseSpec, clientID);
+        Integer clientID = ClientBuilder.createClient(requestSpec, responseSpec);
+        ClientBuilder.verifyClientCreatedOnServer(requestSpec, responseSpec, clientID);
 
         Integer loanProductID = createLoanProduct();
         Integer loanID= applyForLoanApplication(clientID, loanProductID);

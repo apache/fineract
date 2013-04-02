@@ -26,7 +26,7 @@ public class LoanProductTestBuilder {
     private static final String ACCRUAL_BASED ="3";
 
 
-    private String nameOfLoanProduct = Utils.randomNameGenerator("LOAN_PRODUCT_", 6);
+    private String nameOfLoanProduct = ClientBuilder.randomNameGenerator("LOAN_PRODUCT_", 6);
     private String principal = "10000.00";
     private String numberOfRepayments = "0";
     private String repaymentFrequency = WEEK;
@@ -63,16 +63,16 @@ public class LoanProductTestBuilder {
         return new Gson().toJson(map);
     }
 
-    public LoanProductTestBuilder withLoanName(String loanName){
+    public LoanProductTestBuilder withLoanName(final String loanName){
         this.nameOfLoanProduct=loanName;
         return this;
     }
-    public LoanProductTestBuilder withPrincipal(String principal){
+    public LoanProductTestBuilder withPrincipal(final String principal){
         this.principal = principal;
         return this;
     }
 
-    public LoanProductTestBuilder withNumberOfRepayments(String numberOfRepayment){
+    public LoanProductTestBuilder withNumberOfRepayments(final String numberOfRepayment){
         this.numberOfRepayments = numberOfRepayment;
         return this;
     }
@@ -93,7 +93,7 @@ public class LoanProductTestBuilder {
         return this;
     }
 
-    public LoanProductTestBuilder withRepaymentAfterEvery(String repaymentAfterEvery){
+    public LoanProductTestBuilder withRepaymentAfterEvery(final String repaymentAfterEvery){
         this.repaymentPeriod=repaymentAfterEvery;
         return this;
     }
@@ -108,7 +108,7 @@ public class LoanProductTestBuilder {
         return this;
     }
 
-    public LoanProductTestBuilder withinterestRatePerPeriod(String interestRatePerPeriod) {
+    public LoanProductTestBuilder withinterestRatePerPeriod(final String interestRatePerPeriod) {
         this.interestRatePerPeriod=interestRatePerPeriod;
         return this;
     }
@@ -143,7 +143,7 @@ public class LoanProductTestBuilder {
         return this;
     }
 
-    public LoanProductTestBuilder withInArrearsTolerance (String amountCanBeWaved){
+    public LoanProductTestBuilder withInArrearsTolerance (final String amountCanBeWaved){
         this.inArrearsTolerance = amountCanBeWaved;
         return this;
     }
