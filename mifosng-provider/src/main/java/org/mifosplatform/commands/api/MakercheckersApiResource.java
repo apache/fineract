@@ -23,10 +23,10 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.commons.lang.StringUtils;
-import org.mifosplatform.audit.data.AuditData;
-import org.mifosplatform.audit.data.AuditSearchData;
-import org.mifosplatform.audit.service.AuditReadPlatformService;
+import org.mifosplatform.commands.data.AuditData;
+import org.mifosplatform.commands.data.AuditSearchData;
 import org.mifosplatform.commands.data.CommandSourceData;
+import org.mifosplatform.commands.service.AuditReadPlatformService;
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.mifosplatform.infrastructure.core.api.ApiRequestParameterHelper;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
@@ -41,7 +41,7 @@ import org.springframework.stereotype.Component;
 @Path("/makercheckers")
 @Component
 @Scope("singleton")
-public class CommandsApiResource {
+public class MakercheckersApiResource {
 
 	private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<String>(
 			Arrays.asList("id", "actionName", "entityName", "resourceId", "subresourceId",
@@ -58,7 +58,7 @@ public class CommandsApiResource {
     private final PortfolioCommandSourceWritePlatformService writePlatformService;
 
     @Autowired
-    public CommandsApiResource(final PlatformSecurityContext context, final AuditReadPlatformService readPlatformService, 
+    public MakercheckersApiResource(final PlatformSecurityContext context, final AuditReadPlatformService readPlatformService, 
             final DefaultToApiJsonSerializer<CommandSourceData> toApiJsonSerializer, final DefaultToApiJsonSerializer<AuditData> toApiJsonSerializerAudit, 
             final DefaultToApiJsonSerializer<AuditSearchData> toApiJsonSerializerSearchTemplate,
             final ApiRequestParameterHelper apiRequestParameterHelper, final PortfolioCommandSourceWritePlatformService writePlatformService) {

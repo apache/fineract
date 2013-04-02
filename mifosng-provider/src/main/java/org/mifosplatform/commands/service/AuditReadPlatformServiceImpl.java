@@ -3,7 +3,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this file,
  * You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-package org.mifosplatform.audit.service;
+package org.mifosplatform.commands.service;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -12,9 +12,9 @@ import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
-import org.mifosplatform.audit.api.ProcessingResultLookup;
-import org.mifosplatform.audit.data.AuditData;
-import org.mifosplatform.audit.data.AuditSearchData;
+import org.mifosplatform.commands.data.AuditData;
+import org.mifosplatform.commands.data.AuditSearchData;
+import org.mifosplatform.commands.data.ProcessingResultLookup;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;

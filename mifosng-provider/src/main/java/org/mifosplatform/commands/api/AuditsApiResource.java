@@ -3,7 +3,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this file,
  * You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-package org.mifosplatform.audit.api;
+package org.mifosplatform.commands.api;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -21,9 +21,9 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.commons.lang.StringUtils;
-import org.mifosplatform.audit.data.AuditData;
-import org.mifosplatform.audit.data.AuditSearchData;
-import org.mifosplatform.audit.service.AuditReadPlatformService;
+import org.mifosplatform.commands.data.AuditData;
+import org.mifosplatform.commands.data.AuditSearchData;
+import org.mifosplatform.commands.service.AuditReadPlatformService;
 import org.mifosplatform.infrastructure.core.api.ApiParameterHelper;
 import org.mifosplatform.infrastructure.core.api.ApiRequestParameterHelper;
 import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
@@ -36,7 +36,7 @@ import org.springframework.stereotype.Component;
 @Path("/audits")
 @Component
 @Scope("singleton")
-public class AuditApiResource {
+public class AuditsApiResource {
 
 	private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<String>(
 			Arrays.asList("id", "actionName", "entityName", "resourceId", "subresourceId",
@@ -52,7 +52,7 @@ public class AuditApiResource {
 	private final DefaultToApiJsonSerializer<AuditSearchData> toApiJsonSerializerSearchTemplate;
 
 	@Autowired
-	public AuditApiResource(
+	public AuditsApiResource(
 			final PlatformSecurityContext context,
 			final AuditReadPlatformService auditReadPlatformService,
 			final ApiRequestParameterHelper apiRequestParameterHelper,
