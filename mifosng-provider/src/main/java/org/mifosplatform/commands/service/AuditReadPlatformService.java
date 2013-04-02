@@ -14,10 +14,10 @@ public interface AuditReadPlatformService {
 
     Collection<AuditData> retrieveAuditEntries(String extraCriteria, boolean includeJson);
 
+    Collection<AuditData> retrieveAllEntriesToBeChecked(String extraCriteria, boolean includeJson);
+
     AuditData retrieveAuditEntry(Long auditId);
 
     AuditSearchData retrieveSearchTemplate(String useType);
-
-    Collection<AuditData> retrieveAllEntriesToBeChecked();
 
 }

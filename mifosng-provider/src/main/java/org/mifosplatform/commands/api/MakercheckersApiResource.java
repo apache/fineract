@@ -28,6 +28,7 @@ import org.mifosplatform.commands.data.AuditSearchData;
 import org.mifosplatform.commands.data.CommandSourceData;
 import org.mifosplatform.commands.service.AuditReadPlatformService;
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
+import org.mifosplatform.infrastructure.core.api.ApiParameterHelper;
 import org.mifosplatform.infrastructure.core.api.ApiRequestParameterHelper;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.exception.UnrecognizedQueryParamException;
@@ -44,45 +45,66 @@ import org.springframework.stereotype.Component;
 public class MakercheckersApiResource {
 
 	private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<String>(
-			Arrays.asList("id", "actionName", "entityName", "resourceId", "subresourceId",
-					"maker", "madeOnDate", "checker", "checkedOnDate", "processingResult",
-					"commandAsJson", "officeName", "groupLevelName", "groupName", "clientName", "loanAccountNo", "savingsAccountNo"));
-    private final String resourceNameForPermissions = "MAKERCHECKER";
+			Arrays.asList("id", "actionName", "entityName", "resourceId",
+					"subresourceId", "maker", "madeOnDate", "checker",
+					"checkedOnDate", "processingResult", "commandAsJson",
+					"officeName", "groupLevelName", "groupName", "clientName",
+					"loanAccountNo", "savingsAccountNo"));
+	private final String resourceNameForPermissions = "MAKERCHECKER";
 
-    private final PlatformSecurityContext context;
-    private final AuditReadPlatformService readPlatformService;
-    private final DefaultToApiJsonSerializer<CommandSourceData> toApiJsonSerializer;
-    private final DefaultToApiJsonSerializer<AuditData> toApiJsonSerializerAudit;
+	private final PlatformSecurityContext context;
+	private final AuditReadPlatformService readPlatformService;
+	private final DefaultToApiJsonSerializer<CommandSourceData> toApiJsonSerializer;
+	private final DefaultToApiJsonSerializer<AuditData> toApiJsonSerializerAudit;
 	private final DefaultToApiJsonSerializer<AuditSearchData> toApiJsonSerializerSearchTemplate;
-    private final ApiRequestParameterHelper apiRequestParameterHelper;
-    private final PortfolioCommandSourceWritePlatformService writePlatformService;
+	private final ApiRequestParameterHelper apiRequestParameterHelper;
+	private final PortfolioCommandSourceWritePlatformService writePlatformService;
 
-    @Autowired
-    public MakercheckersApiResource(final PlatformSecurityContext context, final AuditReadPlatformService readPlatformService, 
-            final DefaultToApiJsonSerializer<CommandSourceData> toApiJsonSerializer, final DefaultToApiJsonSerializer<AuditData> toApiJsonSerializerAudit, 
-            final DefaultToApiJsonSerializer<AuditSearchData> toApiJsonSerializerSearchTemplate,
-            final ApiRequestParameterHelper apiRequestParameterHelper, final PortfolioCommandSourceWritePlatformService writePlatformService) {
-        this.context = context;
-        this.readPlatformService = readPlatformService;
-        this.toApiJsonSerializer = toApiJsonSerializer;
-        this.apiRequestParameterHelper = apiRequestParameterHelper;
-        this.toApiJsonSerializerAudit = toApiJsonSerializerAudit;
-        this.toApiJsonSerializerSearchTemplate = toApiJsonSerializerSearchTemplate;
-        this.writePlatformService = writePlatformService;
-    }
+	@Autowired
+	public MakercheckersApiResource(
+			final PlatformSecurityContext context,
+			final AuditReadPlatformService readPlatformService,
+			final DefaultToApiJsonSerializer<CommandSourceData> toApiJsonSerializer,
+			final DefaultToApiJsonSerializer<AuditData> toApiJsonSerializerAudit,
+			final DefaultToApiJsonSerializer<AuditSearchData> toApiJsonSerializerSearchTemplate,
+			final ApiRequestParameterHelper apiRequestParameterHelper,
+			final PortfolioCommandSourceWritePlatformService writePlatformService) {
+		this.context = context;
+		this.readPlatformService = readPlatformService;
+		this.toApiJsonSerializer = toApiJsonSerializer;
+		this.apiRequestParameterHelper = apiRequestParameterHelper;
+		this.toApiJsonSerializerAudit = toApiJsonSerializerAudit;
+		this.toApiJsonSerializerSearchTemplate = toApiJsonSerializerSearchTemplate;
+		this.writePlatformService = writePlatformService;
+	}
 
-    @GET
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveCommands(@Context final UriInfo uriInfo) {
+	@GET
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public String retrieveCommands(@Context final UriInfo uriInfo,
+			@QueryParam("actionName") final String actionName,
+			@QueryParam("entityName") final String entityName,
+			@QueryParam("resourceId") final Long resourceId,
+			@QueryParam("makerId") final Long makerId,
+			@QueryParam("makerDateTimeFrom") final String makerDateTimeFrom,
+			@QueryParam("makerDateTimeTo") final String makerDateTimeTo) {
 
-        context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
+		context.authenticatedUser().validateHasReadPermission(
+				resourceNameForPermissions);
 
-        final Collection<AuditData> entries = this.readPlatformService.retrieveAllEntriesToBeChecked();
+		final String extraCriteria = getExtraCriteria(actionName, entityName,
+				resourceId, makerId, makerDateTimeFrom, makerDateTimeTo);
 
-        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializerAudit.serialize(settings, entries, RESPONSE_DATA_PARAMETERS);
-    }
+		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper
+				.process(uriInfo.getQueryParameters());
+
+		final Collection<AuditData> entries = this.readPlatformService
+				.retrieveAllEntriesToBeChecked(extraCriteria,
+						settings.isIncludeJson());
+
+		return this.toApiJsonSerializerAudit.serialize(settings, entries,
+				RESPONSE_DATA_PARAMETERS);
+	}
 
 	@GET
 	@Path("/searchtemplate")
@@ -105,35 +127,77 @@ public class MakercheckersApiResource {
 		return this.toApiJsonSerializerSearchTemplate.serialize(settings,
 				auditSearchData, RESPONSE_DATA_PARAMETERS_SEARCH_TEMPLATE);
 	}
-	
-    @POST
-    @Path("{commandId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    public String approveMakerCheckerEntry(@PathParam("commandId") final Long commandId, @QueryParam("command") final String commandParam) {
 
-        CommandProcessingResult result = null;
-        if (is(commandParam, "approve")) {
-            result = this.writePlatformService.approveEntry(commandId);
-        } else {
-            throw new UnrecognizedQueryParamException("command", commandParam);
-        }
+	@POST
+	@Path("{commandId}")
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public String approveMakerCheckerEntry(
+			@PathParam("commandId") final Long commandId,
+			@QueryParam("command") final String commandParam) {
 
-        return this.toApiJsonSerializer.serialize(result);
-    }
+		CommandProcessingResult result = null;
+		if (is(commandParam, "approve")) {
+			result = this.writePlatformService.approveEntry(commandId);
+		} else {
+			throw new UnrecognizedQueryParamException("command", commandParam);
+		}
 
-    private boolean is(final String commandParam, final String commandValue) {
-        return StringUtils.isNotBlank(commandParam) && commandParam.trim().equalsIgnoreCase(commandValue);
-    }
+		return this.toApiJsonSerializer.serialize(result);
+	}
 
-    @DELETE
-    @Path("{commandId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    public String deleteMakerCheckerEntry(@PathParam("commandId") final Long commandId) {
+	private boolean is(final String commandParam, final String commandValue) {
+		return StringUtils.isNotBlank(commandParam)
+				&& commandParam.trim().equalsIgnoreCase(commandValue);
+	}
 
-        final Long id = this.writePlatformService.deleteEntry(commandId);
+	@DELETE
+	@Path("{commandId}")
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public String deleteMakerCheckerEntry(
+			@PathParam("commandId") final Long commandId) {
 
-        return this.toApiJsonSerializer.serialize(CommandProcessingResult.commandOnlyResult(id));
-    }
+		final Long id = this.writePlatformService.deleteEntry(commandId);
+
+		return this.toApiJsonSerializer.serialize(CommandProcessingResult
+				.commandOnlyResult(id));
+	}
+
+	private String getExtraCriteria(final String actionName,
+			final String entityName, final Long resourceId, final Long makerId,
+			final String makerDateTimeFrom, final String makerDateTimeTo) {
+
+		String extraCriteria = "";
+
+		if (actionName != null) {
+			extraCriteria += " and aud.action_name = "
+					+ ApiParameterHelper.sqlEncodeString(actionName);
+		}
+		if (entityName != null) {
+			extraCriteria += " and aud.entity_name like "
+					+ ApiParameterHelper.sqlEncodeString(entityName + "%");
+		}
+
+		if (resourceId != null) {
+			extraCriteria += " and aud.resource_id = " + resourceId;
+		}
+		if (makerId != null) {
+			extraCriteria += " and aud.maker_id = " + makerId;
+		}
+		if (makerDateTimeFrom != null) {
+			extraCriteria += " and aud.made_on_date >= "
+					+ ApiParameterHelper.sqlEncodeString(makerDateTimeFrom);
+		}
+		if (makerDateTimeTo != null) {
+			extraCriteria += " and aud.made_on_date <= "
+					+ ApiParameterHelper.sqlEncodeString(makerDateTimeTo);
+		}
+
+		if (StringUtils.isNotBlank(extraCriteria)) {
+			extraCriteria = extraCriteria.substring(4);
+		}
+
+		return extraCriteria;
+	}
 }
