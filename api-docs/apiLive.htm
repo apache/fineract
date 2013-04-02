@@ -902,6 +902,14 @@
 								<td></td>
 								<td></td>
 							</tr>
+							<tr>
+								<td><a href="#search">SEARCH</a></td>
+								<td>search</td>
+								<td></td>
+								<td><a href="#search_resource">Search Resources</td>
+								<td></td>
+								<td></td>
+							</tr>
 						</table>
 					</div>
 				</div>
@@ -11826,10 +11834,129 @@ Content-Type: application/json
                     </code>
                 </div>
             </div>
-
-
 			
+			<!-- start of Search API doc -->
+		<a id="search" name="search" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h3>Search</h3>
+					<p>Search API allows to search scoped resources clients, loans and groups on specified fields.</p>
 
+					<table class=matrixHeading id=scoped_resources>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Scoped Resources</div></td>
+							<td><div class="mifosXHeading2">Scoped fields</div></td>
+						</tr>
+						<tr class=alt>
+							<td rowspan="3"><a href="#clients">Client</a></td>
+							<td>Display Name</td>
+						</td>	
+						<tr class=alt>
+							<td>Account Number</td>
+						</tr>
+						<tr class=alt>
+							<td>External Id</td>
+						</tr>
+						<tr>
+							<td><a href="#loans">Loan</a></td>
+							<td>Account Number</td>
+						</td>
+						<tr class=alt>
+							<td><a href="#client_identifiers">Client Identifiers</a></td>
+							<td>Document Key</td>
+						</td>
+						<tr>
+							<td rowspan=2><a href="#groups">Group</a></td>
+							<td>Name</td>
+						</td>
+						<tr>
+							<td>External Id</td>
+						</td>
+					</table>
+				</div>
+			</div>
+			<a id="search_resource" name="search_resource"
+				class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Search Resources</h4>
+					<p>Example Requests:</p>
+					<div class=apiClick>search?query=000000001</div>
+					<br>
+					<div class=apiClick>search?query=Petra&resource=clients,groups</div>
+					<br>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Parameters</div></td>
+							<td><div class="mifosXHeading2">Description</div></td>
+						</tr>
+						<tr class=alt>
+							<td>
+								query
+								<br><i>(mandatory)</i>
+							</td>
+							<td class=fielddesc>
+								String which is searched on scoped resources
+							</td>
+						</tr>
+						<tr>
+							<td>
+								resource
+								<br><i>(non-mandatory)</i>
+							</td>
+							<td class=fielddesc>
+								Scoped resources on which search can be performed. If there is no resource parameter passed then search will be performed on all <a href="#search">scoped</a> resources.
+							</td>
+						</tr>
+					</table>
+					<br>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Order of Search results</div></td>
+						</tr>
+						<tr class=alt>
+							<td class=fielddesc>
+								<b>List exact match results in following order</b>
+								<ol start=1>
+									<li>1. Clients</li>
+									<li>2. Loans</li>
+									<li>3. Client Identifiers</li>
+									<li>4. Groups</li>
+								</ol>
+							</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>
+								<b>List partial match results in following order</b>
+								<ol start=1>
+									<li>1. Clients</li>
+									<li>2. Loans</li>
+									<li>3. Client Identifiers</li>
+									<li>4. Groups</li>
+								</ol>
+							</td>
+						</tr>
+					</table>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+GET https://DomainName/api/v1/search?query=000000111
+					</code>
+					<code class="method-response">
+[
+  {
+    "entityId": 111,
+    "entityAccountNo": "000000111",
+    "entityName": "12-A Flat Loan",
+    "entityType": "LOAN",
+    "parentId": 65,
+    "parentName": "aaaa aaaaa"
+  }
+]
+					</code>
+				</div>
+			</div>
+		<!-- ends Search API docs-->
         </div>
 		<!-- main-content-wrapper -->
 
@@ -12383,6 +12510,14 @@ Content-Type: application/json
 					Notes for a Resource</a></td>
 					<td><a href="#resources_updatenote">Update a Resource Note</a></td>
 					<td><a href="#resources_deletenote">Delete a Resource Note</a></td>
+				</tr>
+				<tr>
+					<td><a href="#search">SEARCH</a></td>
+					<td>search</td>
+					<td></td>
+					<td><a href="#search_resource">Search Resources</td>
+					<td></td>
+					<td></td>
 				</tr>
 				<tr class="alt">
 					<td><a href="#glaccounts">General Ledger Account</a></td>
