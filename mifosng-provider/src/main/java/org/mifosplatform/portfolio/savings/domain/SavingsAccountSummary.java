@@ -47,13 +47,19 @@ public final class SavingsAccountSummary {
                 .getAmount();
     }
 
-    public void updateFromInterestPeriodSummaries(final MonetaryCurrency currency, final List<InterestPeriodSummary> interestPeriodSummaries) {
-        Money totalInterestEarned = Money.zero(currency);
-        for (InterestPeriodSummary interestPeriodSummary : interestPeriodSummaries) {
-            totalInterestEarned = totalInterestEarned.plus(interestPeriodSummary.interest());
+    public void updateFromInterestPeriodSummaries(final MonetaryCurrency currency,
+            final List<InterestCompoundingPeriodSummary> compoundingPeriods) {
+
+        // get the max compounded interest
+        final BigDecimal compoundedInterestToDate = compoundingPeriods.get(compoundingPeriods.size() - 1).compoundedInterest();
+        final Money maxIntrestCompoundedToDate = Money.of(currency, compoundedInterestToDate);
+
+        BigDecimal totalInterestUnrounded = BigDecimal.ZERO;
+        for (InterestCompoundingPeriodSummary interestPeriodSummary : compoundingPeriods) {
+            totalInterestUnrounded = totalInterestUnrounded.add(interestPeriodSummary.interestUnrounded());
         }
 
-        this.totalInterestEarned = totalInterestEarned.getAmountDefaultedToNullIfZero();
+        this.totalInterestEarned = maxIntrestCompoundedToDate.getAmountDefaultedToNullIfZero();
     }
 
     public boolean isLessThanOrEqualToAccountBalance(final Money amount) {

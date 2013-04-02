@@ -27,9 +27,9 @@ import org.mifosplatform.portfolio.savings.data.SavingsAccountSummaryData;
 import org.mifosplatform.portfolio.savings.data.SavingsAccountTransactionData;
 import org.mifosplatform.portfolio.savings.data.SavingsAccountTransactionEnumData;
 import org.mifosplatform.portfolio.savings.data.SavingsProductData;
+import org.mifosplatform.portfolio.savings.domain.SavingsCompoundingInterestPeriodType;
 import org.mifosplatform.portfolio.savings.domain.SavingsInterestCalculationDaysInYearType;
 import org.mifosplatform.portfolio.savings.domain.SavingsInterestCalculationType;
-import org.mifosplatform.portfolio.savings.domain.SavingsInterestPeriodType;
 import org.mifosplatform.portfolio.savings.domain.SavingsPeriodFrequencyType;
 import org.mifosplatform.portfolio.savings.exception.SavingsAccountNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -103,10 +103,8 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             sqlBuilder.append("sa.currency_code as currencyCode, sa.currency_digits as currencyDigits, ");
             sqlBuilder.append("curr.name as currencyName, curr.internationalized_name_code as currencyNameCode, ");
             sqlBuilder.append("curr.display_symbol as currencyDisplaySymbol, ");
-            sqlBuilder.append("sa.nominal_interest_rate_per_period as interestRate, ");
-            sqlBuilder.append("sa.nominal_interest_rate_period_frequency_enum as interestRatePeriodFrequencyType, ");
-            sqlBuilder.append("sa.annual_nominal_interest_rate as annualInterestRate, ");
-            sqlBuilder.append("sa.interest_period_enum as interestPeriodType, ");
+            sqlBuilder.append("sa.nominal_annual_interest_rate as nominalAnnualInterestRate, ");
+            sqlBuilder.append("sa.interest_compounding_period_enum as interestCompoundingPeriodType, ");
             sqlBuilder.append("sa.interest_calculation_type_enum as interestCalculationType, ");
             sqlBuilder.append("sa.interest_calculation_days_in_year_type_enum as interestCalculationDaysInYearType, ");
             sqlBuilder.append("sa.min_required_opening_balance as minRequiredOpeningBalance, ");
@@ -158,20 +156,16 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             final CurrencyData currency = new CurrencyData(currencyCode, currencyName, currencyDigits, currencyDisplaySymbol,
                     currencyNameCode);
 
-            final BigDecimal interestRate = rs.getBigDecimal("interestRate");
-            final SavingsPeriodFrequencyType interestRatePeriodType = SavingsPeriodFrequencyType.fromInt(JdbcSupport.getInteger(rs,
-                    "interestRatePeriodFrequencyType"));
-            final EnumOptionData interestRatePeriodFrequencyType = SavingsEnumerations
-                    .interestRatePeriodFrequencyType(interestRatePeriodType);
-            final BigDecimal annualInterestRate = rs.getBigDecimal("annualInterestRate");
+            final BigDecimal nominalAnnualInterestRate = rs.getBigDecimal("nominalAnnualInterestRate");
 
-            EnumOptionData interestPeriodType = SavingsEnumerations.interestPeriodType(SavingsInterestPeriodType.fromInt(JdbcSupport
-                    .getInteger(rs, "interestPeriodType")));
+            final EnumOptionData interestCompoundingPeriodType = SavingsEnumerations
+                    .compoundingInterestPeriodType(SavingsCompoundingInterestPeriodType.fromInt(JdbcSupport.getInteger(rs,
+                            "interestCompoundingPeriodType")));
 
-            EnumOptionData interestCalculationType = SavingsEnumerations.interestCalculationType(SavingsInterestCalculationType
+            final EnumOptionData interestCalculationType = SavingsEnumerations.interestCalculationType(SavingsInterestCalculationType
                     .fromInt(JdbcSupport.getInteger(rs, "interestCalculationType")));
 
-            EnumOptionData interestCalculationDaysInYearType = SavingsEnumerations
+            final EnumOptionData interestCalculationDaysInYearType = SavingsEnumerations
                     .interestCalculationDaysInYearType(SavingsInterestCalculationDaysInYearType.fromInt(JdbcSupport.getInteger(rs,
                             "interestCalculationDaysInYearType")));
 
@@ -194,10 +188,11 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             final SavingsAccountSummaryData summary = new SavingsAccountSummaryData(currency, totalDeposits, totalWithdrawals,
                     totalInterestEarned, totalInterestPosted, accountBalance);
 
-            return SavingsAccountData.instance(id, accountNo, externalId, status, activationDate, groupId, groupName, clientId, clientName,
-                    productId, productName, currency, interestRate, interestRatePeriodFrequencyType, annualInterestRate,
-                    interestPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance,
-                    lockinPeriodFrequency, lockinPeriodFrequencyType, summary);
+            return SavingsAccountData
+                    .instance(id, accountNo, externalId, status, activationDate, groupId, groupName, clientId, clientName, productId,
+                            productName, currency, nominalAnnualInterestRate, interestCompoundingPeriodType, interestCalculationType,
+                            interestCalculationDaysInYearType, minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType,
+                            summary);
         }
     }
 
@@ -225,11 +220,8 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             final String sql = "select " + mapper.schema() + " where sp.id = ?";
             template = this.jdbcTemplate.queryForObject(sql, mapper, new Object[] { productId });
 
-            final Collection<EnumOptionData> interestRatePeriodFrequencyTypeOptions = this.dropdownReadPlatformService
-                    .retrieveInterestRatePeriodFrequencyTypeOptions();
-
-            final Collection<EnumOptionData> interestPeriodTypeOptions = this.dropdownReadPlatformService
-                    .retrieveInterestPeriodTypeOptions();
+            final Collection<EnumOptionData> interestCompoundingPeriodTypeOptions = this.dropdownReadPlatformService
+                    .retrieveCompoundingInterestPeriodTypeOptions();
 
             final Collection<EnumOptionData> interestCalculationTypeOptions = this.dropdownReadPlatformService
                     .retrieveInterestCalculationTypeOptions();
@@ -241,9 +233,9 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
                     .retrieveLockinPeriodFrequencyTypeOptions();
             final Collection<SavingsAccountTransactionData> transactions = null;
 
-            template = SavingsAccountData.withTemplateOptions(template, productOptions, interestRatePeriodFrequencyTypeOptions,
-                    interestPeriodTypeOptions, interestCalculationTypeOptions, interestCalculationDaysInYearTypeOptions,
-                    lockinPeriodFrequencyTypeOptions, transactions);
+            template = SavingsAccountData.withTemplateOptions(template, productOptions, interestCompoundingPeriodTypeOptions,
+                    interestCalculationTypeOptions, interestCalculationDaysInYearTypeOptions, lockinPeriodFrequencyTypeOptions,
+                    transactions);
         } else {
 
             String clientName = null;
@@ -258,16 +250,15 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
 
             template = SavingsAccountData.withClientTemplate(clientId, clientName, groupId, groupName);
 
-            final Collection<EnumOptionData> interestRatePeriodFrequencyTypeOptions = null;
-            final Collection<EnumOptionData> interestPeriodTypeOptions = null;
+            final Collection<EnumOptionData> interestCompoundingPeriodTypeOptions = null;
             final Collection<EnumOptionData> interestCalculationTypeOptions = null;
             final Collection<EnumOptionData> interestCalculationDaysInYearTypeOptions = null;
             final Collection<EnumOptionData> lockinPeriodFrequencyTypeOptions = null;
             final Collection<SavingsAccountTransactionData> transactions = null;
 
-            template = SavingsAccountData.withTemplateOptions(template, productOptions, interestRatePeriodFrequencyTypeOptions,
-                    interestPeriodTypeOptions, interestCalculationTypeOptions, interestCalculationDaysInYearTypeOptions,
-                    lockinPeriodFrequencyTypeOptions, transactions);
+            template = SavingsAccountData.withTemplateOptions(template, productOptions, interestCompoundingPeriodTypeOptions,
+                    interestCalculationTypeOptions, interestCalculationDaysInYearTypeOptions, lockinPeriodFrequencyTypeOptions,
+                    transactions);
         }
 
         return template;
@@ -398,9 +389,8 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             sqlBuilder.append("sp.currency_code as currencyCode, sp.currency_digits as currencyDigits, ");
             sqlBuilder.append("curr.name as currencyName, curr.internationalized_name_code as currencyNameCode, ");
             sqlBuilder.append("curr.display_symbol as currencyDisplaySymbol, ");
-            sqlBuilder.append("sp.nominal_interest_rate_per_period as interestRate, ");
-            sqlBuilder.append("sp.nominal_interest_rate_period_frequency_enum as interestRatePeriodFrequencyType, ");
-            sqlBuilder.append("sp.interest_period_enum as interestPeriodType, ");
+            sqlBuilder.append("sp.nominal_annual_interest_rate as nominalAnnualIterestRate, ");
+            sqlBuilder.append("sp.interest_compounding_period_enum as interestCompoundingPeriodType, ");
             sqlBuilder.append("sp.interest_calculation_type_enum as interestCalculationType, ");
             sqlBuilder.append("sp.interest_calculation_days_in_year_type_enum as interestCalculationDaysInYearType, ");
             sqlBuilder.append("sp.min_required_opening_balance as minRequiredOpeningBalance, ");
@@ -430,15 +420,10 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             final CurrencyData currency = new CurrencyData(currencyCode, currencyName, currencyDigits, currencyDisplaySymbol,
                     currencyNameCode);
 
-            final BigDecimal interestRate = rs.getBigDecimal("interestRate");
-            final SavingsPeriodFrequencyType interestRatePeriodType = SavingsPeriodFrequencyType.fromInt(JdbcSupport.getInteger(rs,
-                    "interestRatePeriodFrequencyType"));
-            final EnumOptionData interestRatePeriodFrequencyType = SavingsEnumerations
-                    .interestRatePeriodFrequencyType(interestRatePeriodType);
-            final BigDecimal annualInterestRate = null;
+            final BigDecimal nominalAnnualIterestRate = rs.getBigDecimal("nominalAnnualIterestRate");
 
-            EnumOptionData interestPeriodType = SavingsEnumerations.interestPeriodType(SavingsInterestPeriodType.fromInt(JdbcSupport
-                    .getInteger(rs, "interestPeriodType")));
+            EnumOptionData interestPeriodType = SavingsEnumerations.compoundingInterestPeriodType(SavingsCompoundingInterestPeriodType
+                    .fromInt(JdbcSupport.getInteger(rs, "interestCompoundingPeriodType")));
 
             EnumOptionData interestCalculationType = SavingsEnumerations.interestCalculationType(SavingsInterestCalculationType
                     .fromInt(JdbcSupport.getInteger(rs, "interestCalculationType")));
@@ -474,10 +459,11 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             final SavingsAccountStatusEnumData status = null;
             final LocalDate activationDate = null;
             final SavingsAccountSummaryData summary = null;
-            return SavingsAccountData.instance(null, null, null, status, activationDate, groupId, groupName, clientId, clientName,
-                    productId, productName, currency, interestRate, interestRatePeriodFrequencyType, annualInterestRate,
-                    interestPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance,
-                    lockinPeriodFrequency, lockinPeriodFrequencyType, summary);
+            return SavingsAccountData
+                    .instance(null, null, null, status, activationDate, groupId, groupName, clientId, clientName, productId, productName,
+                            currency, nominalAnnualIterestRate, interestPeriodType, interestCalculationType,
+                            interestCalculationDaysInYearType, minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType,
+                            summary);
         }
     }
 }

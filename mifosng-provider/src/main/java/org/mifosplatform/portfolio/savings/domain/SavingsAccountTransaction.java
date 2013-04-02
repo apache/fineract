@@ -130,7 +130,7 @@ public final class SavingsAccountTransaction extends AbstractPersistable<Long> {
 
     public void updateCumulativeBalanceAndDates(final MonetaryCurrency currency, final LocalDate endOfBalanceDate) {
         this.balanceEndDate = endOfBalanceDate.toDate();
-        this.balanceNumberOfDays = InterestPeriodInterval.create(getTransactionLocalDate(), endOfBalanceDate)
+        this.balanceNumberOfDays = LocalDateInterval.create(getTransactionLocalDate(), endOfBalanceDate)
                 .daysInPeriodInclusiveOfEndDate();
         this.cumulativeBalance = Money.of(currency, this.runningBalance).multipliedBy(this.balanceNumberOfDays).getAmount();
     }
@@ -147,7 +147,7 @@ public final class SavingsAccountTransaction extends AbstractPersistable<Long> {
         return endDate;
     }
 
-    public boolean isAcceptableForDailyBalance(final InterestPeriodInterval interestPeriodInterval) {
+    public boolean isAcceptableForDailyBalance(final LocalDateInterval interestPeriodInterval) {
         return isNotReversed() && interestPeriodInterval.contains(getTransactionLocalDate()) && isABalanceForAtLeastOneDay();
     }
 
@@ -162,7 +162,17 @@ public final class SavingsAccountTransaction extends AbstractPersistable<Long> {
             balanceValidTo = periodEnd;
         }
 
-        final InterestPeriodInterval interestPeriodInterval = InterestPeriodInterval.create(getTransactionLocalDate(), balanceValidTo);
-        return SavingsAccountDailyBalance.createFrom(interestPeriodInterval, this.runningBalance);
+        final LocalDateInterval interestPeriodInterval = LocalDateInterval.create(getTransactionLocalDate(), balanceValidTo);
+        return SavingsAccountDailyBalance.createFrom(interestPeriodInterval, this.runningBalance, BigDecimal.ZERO);
+    }
+
+    public SavingsAccountDailyBalance toCompoundedDailyBalance(final LocalDate periodEnd, final BigDecimal compoundedInterestToDate) {
+        LocalDate balanceValidTo = getEndOfBalanceLocalDate();
+        if (periodEnd.isBefore(getEndOfBalanceLocalDate())) {
+            balanceValidTo = periodEnd;
+        }
+
+        final LocalDateInterval interestPeriodInterval = LocalDateInterval.create(getTransactionLocalDate(), balanceValidTo);
+        return SavingsAccountDailyBalance.createFrom(interestPeriodInterval, this.runningBalance, compoundedInterestToDate);
     }
 }

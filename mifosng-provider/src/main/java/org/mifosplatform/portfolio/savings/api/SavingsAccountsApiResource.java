@@ -140,8 +140,7 @@ public class SavingsAccountsApiResource {
 
         Collection<SavingsAccountTransactionData> transactions = null;
         Collection<SavingsProductData> productOptions = null;
-        Collection<EnumOptionData> interestRatePeriodFrequencyTypeOptions = null;
-        Collection<EnumOptionData> interestPeriodTypeOptions = null;
+        Collection<EnumOptionData> interestCompoundingPeriodTypeOptions = null;
         Collection<EnumOptionData> interestCalculationTypeOptions = null;
         Collection<EnumOptionData> interestCalculationDaysInYearTypeOptions = null;
         Collection<EnumOptionData> lockinPeriodFrequencyTypeOptions = null;
@@ -166,15 +165,13 @@ public class SavingsAccountsApiResource {
         final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         if (settings.isTemplate()) {
             productOptions = this.savingsProductReadPlatformService.retrieveAllForLookup();
-            interestRatePeriodFrequencyTypeOptions = this.dropdownReadPlatformService.retrieveInterestRatePeriodFrequencyTypeOptions();
-            interestPeriodTypeOptions = this.dropdownReadPlatformService.retrieveInterestPeriodTypeOptions();
+            interestCompoundingPeriodTypeOptions = this.dropdownReadPlatformService.retrieveCompoundingInterestPeriodTypeOptions();
             interestCalculationTypeOptions = this.dropdownReadPlatformService.retrieveInterestCalculationTypeOptions();
             lockinPeriodFrequencyTypeOptions = this.dropdownReadPlatformService.retrieveLockinPeriodFrequencyTypeOptions();
         }
 
-        return SavingsAccountData.withTemplateOptions(savingsAccount, productOptions, interestRatePeriodFrequencyTypeOptions,
-                interestPeriodTypeOptions, interestCalculationTypeOptions, interestCalculationDaysInYearTypeOptions,
-                lockinPeriodFrequencyTypeOptions, transactions);
+        return SavingsAccountData.withTemplateOptions(savingsAccount, productOptions, interestCompoundingPeriodTypeOptions,
+                interestCalculationTypeOptions, interestCalculationDaysInYearTypeOptions, lockinPeriodFrequencyTypeOptions, transactions);
     }
 
     @PUT
@@ -195,7 +192,7 @@ public class SavingsAccountsApiResource {
     @Path("{accountId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String activate(@PathParam("accountId") final Long accountId, @QueryParam("command") final String commandParam,
+    public String handleCommands(@PathParam("accountId") final Long accountId, @QueryParam("command") final String commandParam,
             final String apiRequestBodyAsJson) {
 
         final CommandWrapperBuilder builder = new CommandWrapperBuilder().withJson(apiRequestBodyAsJson);

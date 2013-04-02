@@ -5,24 +5,14 @@ import java.util.Collection;
 import java.util.List;
 
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
+import org.mifosplatform.portfolio.savings.domain.SavingsCompoundingInterestPeriodType;
 import org.mifosplatform.portfolio.savings.domain.SavingsInterestCalculationDaysInYearType;
 import org.mifosplatform.portfolio.savings.domain.SavingsInterestCalculationType;
-import org.mifosplatform.portfolio.savings.domain.SavingsInterestPeriodType;
 import org.mifosplatform.portfolio.savings.domain.SavingsPeriodFrequencyType;
 import org.springframework.stereotype.Service;
 
 @Service
 public class SavingsDropdownReadPlatformServiceImpl implements SavingsDropdownReadPlatformService {
-
-    @Override
-    public List<EnumOptionData> retrieveInterestRatePeriodFrequencyTypeOptions() {
-        List<EnumOptionData> allowedInterestRatePeriodFrequencyTypeOptions = Arrays.asList( //
-                SavingsEnumerations.interestRatePeriodFrequencyType(SavingsPeriodFrequencyType.MONTHS), //
-                SavingsEnumerations.interestRatePeriodFrequencyType(SavingsPeriodFrequencyType.YEARS) //
-                );
-
-        return allowedInterestRatePeriodFrequencyTypeOptions;
-    }
 
     @Override
     public List<EnumOptionData> retrieveLockinPeriodFrequencyTypeOptions() {
@@ -37,15 +27,16 @@ public class SavingsDropdownReadPlatformServiceImpl implements SavingsDropdownRe
     }
 
     @Override
-    public Collection<EnumOptionData> retrieveInterestPeriodTypeOptions() {
+    public Collection<EnumOptionData> retrieveCompoundingInterestPeriodTypeOptions() {
         List<EnumOptionData> allowedOptions = Arrays.asList( //
-                SavingsEnumerations.interestPeriodType(SavingsInterestPeriodType.DAILY), //
-                SavingsEnumerations.interestPeriodType(SavingsInterestPeriodType.WEEKLY), //
-                SavingsEnumerations.interestPeriodType(SavingsInterestPeriodType.BIWEEKLY), //
-                SavingsEnumerations.interestPeriodType(SavingsInterestPeriodType.MONTHLY), //
-                SavingsEnumerations.interestPeriodType(SavingsInterestPeriodType.QUATERLY), //
-                SavingsEnumerations.interestPeriodType(SavingsInterestPeriodType.SEMIANNUAL), //
-                SavingsEnumerations.interestPeriodType(SavingsInterestPeriodType.ANNUAL) //
+                SavingsEnumerations.compoundingInterestPeriodType(SavingsCompoundingInterestPeriodType.DAILY), //
+                SavingsEnumerations.compoundingInterestPeriodType(SavingsCompoundingInterestPeriodType.WEEKLY), //
+                SavingsEnumerations.compoundingInterestPeriodType(SavingsCompoundingInterestPeriodType.BIWEEKLY), //
+                SavingsEnumerations.compoundingInterestPeriodType(SavingsCompoundingInterestPeriodType.MONTHLY), //
+                SavingsEnumerations.compoundingInterestPeriodType(SavingsCompoundingInterestPeriodType.QUATERLY), //
+                SavingsEnumerations.compoundingInterestPeriodType(SavingsCompoundingInterestPeriodType.BI_ANNUAL), //
+                SavingsEnumerations.compoundingInterestPeriodType(SavingsCompoundingInterestPeriodType.ANNUAL), //
+                SavingsEnumerations.compoundingInterestPeriodType(SavingsCompoundingInterestPeriodType.NO_COMPOUNDING_SIMPLE_INTEREST) //
                 );
 
         return allowedOptions;

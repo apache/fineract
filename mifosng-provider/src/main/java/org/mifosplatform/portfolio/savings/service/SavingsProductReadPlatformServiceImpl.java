@@ -16,9 +16,9 @@ import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSourc
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.mifosplatform.portfolio.savings.data.SavingsProductData;
+import org.mifosplatform.portfolio.savings.domain.SavingsCompoundingInterestPeriodType;
 import org.mifosplatform.portfolio.savings.domain.SavingsInterestCalculationDaysInYearType;
 import org.mifosplatform.portfolio.savings.domain.SavingsInterestCalculationType;
-import org.mifosplatform.portfolio.savings.domain.SavingsInterestPeriodType;
 import org.mifosplatform.portfolio.savings.domain.SavingsPeriodFrequencyType;
 import org.mifosplatform.portfolio.savings.exception.SavingsProductNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,9 +80,8 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
             sqlBuilder.append("sp.currency_code as currencyCode, sp.currency_digits as currencyDigits, ");
             sqlBuilder.append("curr.name as currencyName, curr.internationalized_name_code as currencyNameCode, ");
             sqlBuilder.append("curr.display_symbol as currencyDisplaySymbol, ");
-            sqlBuilder.append("sp.nominal_interest_rate_per_period as interestRate, ");
-            sqlBuilder.append("sp.nominal_interest_rate_period_frequency_enum as interestRatePeriodFrequencyType, ");
-            sqlBuilder.append("sp.interest_period_enum as interestPeriodType, ");
+            sqlBuilder.append("sp.nominal_annual_interest_rate as nominalAnnualInterestRate, ");
+            sqlBuilder.append("sp.interest_compounding_period_enum as compoundingInterestPeriodType, ");
             sqlBuilder.append("sp.interest_calculation_type_enum as interestCalculationType, ");
             sqlBuilder.append("sp.interest_calculation_days_in_year_type_enum as interestCalculationDaysInYearType, ");
             sqlBuilder.append("sp.min_required_opening_balance as minRequiredOpeningBalance, ");
@@ -113,13 +112,11 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
 
             final CurrencyData currency = new CurrencyData(currencyCode, currencyName, currencyDigits, currencyDisplaySymbol,
                     currencyNameCode);
-            BigDecimal interestRate = rs.getBigDecimal("interestRate");
+            final BigDecimal nominalAnnualInterestRate = rs.getBigDecimal("nominalAnnualInterestRate");
 
-            EnumOptionData interestRatePeriodFrequencyType = SavingsEnumerations.interestRatePeriodFrequencyType(SavingsPeriodFrequencyType
-                    .fromInt(JdbcSupport.getInteger(rs, "interestRatePeriodFrequencyType")));
-
-            EnumOptionData interestPeriodType = SavingsEnumerations.interestPeriodType(SavingsInterestPeriodType.fromInt(JdbcSupport
-                    .getInteger(rs, "interestPeriodType")));
+            EnumOptionData compoundingInterestPeriodType = SavingsEnumerations
+                    .compoundingInterestPeriodType(SavingsCompoundingInterestPeriodType.fromInt(JdbcSupport.getInteger(rs,
+                            "compoundingInterestPeriodType")));
 
             EnumOptionData interestCalculationType = SavingsEnumerations.interestCalculationType(SavingsInterestCalculationType
                     .fromInt(JdbcSupport.getInteger(rs, "interestCalculationType")));
@@ -142,9 +139,9 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
                         .fromInt(lockinPeriodFrequencyTypeValue));
             }
 
-            return SavingsProductData.instance(id, name, description, currency, interestRate, interestRatePeriodFrequencyType,
-                    interestPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance,
-                    lockinPeriodFrequency, lockinPeriodFrequencyType);
+            return SavingsProductData.instance(id, name, description, currency, nominalAnnualInterestRate, compoundingInterestPeriodType,
+                    interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance, lockinPeriodFrequency,
+                    lockinPeriodFrequencyType);
         }
     }
 

@@ -4,18 +4,18 @@ import java.math.BigDecimal;
 
 public class SavingsInterestCalculatorFactory {
 
-    public SavingsInterestCalculator createFrom(final SavingsInterestCalculationType interestCalculationType,
+    public SavingsCompoundInterestCalculator createFrom(final SavingsInterestCalculationType interestCalculationType,
             final BigDecimal periodsInOneYearAsFraction, final BigDecimal annualInterestRateAsFraction) {
 
-        SavingsInterestCalculator savingsInterestCalculator = new SavingsInterestCalculatorForDailyBalance(periodsInOneYearAsFraction,
+        SavingsCompoundInterestCalculator savingsInterestCalculator = new SavingsCompoundInterestCalculatorForDailyBalance(periodsInOneYearAsFraction,
                 annualInterestRateAsFraction);
         switch (interestCalculationType) {
             case AVERAGE_DAILY_BALANCE:
-                savingsInterestCalculator = new SavingsInterestCalculatorForAverageBalance(periodsInOneYearAsFraction,
+                savingsInterestCalculator = new SavingsCompoundInterestCalculatorForAverageBalance(periodsInOneYearAsFraction,
                         annualInterestRateAsFraction);
             break;
             case DAILY_BALANCE:
-                savingsInterestCalculator = new SavingsInterestCalculatorForDailyBalance(periodsInOneYearAsFraction,
+                savingsInterestCalculator = new SavingsCompoundInterestCalculatorForDailyBalance(periodsInOneYearAsFraction,
                         annualInterestRateAsFraction);
             break;
             case INVALID:

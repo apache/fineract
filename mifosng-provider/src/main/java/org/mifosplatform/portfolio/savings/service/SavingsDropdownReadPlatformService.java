@@ -6,11 +6,9 @@ import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 
 public interface SavingsDropdownReadPlatformService {
 
-    Collection<EnumOptionData> retrieveInterestRatePeriodFrequencyTypeOptions();
-
     Collection<EnumOptionData> retrieveLockinPeriodFrequencyTypeOptions();
 
-    Collection<EnumOptionData> retrieveInterestPeriodTypeOptions();
+    Collection<EnumOptionData> retrieveCompoundingInterestPeriodTypeOptions();
 
     Collection<EnumOptionData> retrieveInterestCalculationTypeOptions();
 

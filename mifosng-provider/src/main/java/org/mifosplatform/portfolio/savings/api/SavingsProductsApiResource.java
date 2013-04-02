@@ -5,6 +5,7 @@
  */
 package org.mifosplatform.portfolio.savings.api;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 import javax.ws.rs.Consumes;
@@ -31,10 +32,9 @@ import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.mifosplatform.organisation.monetary.service.CurrencyReadPlatformService;
 import org.mifosplatform.portfolio.savings.data.SavingsProductData;
+import org.mifosplatform.portfolio.savings.domain.SavingsCompoundingInterestPeriodType;
 import org.mifosplatform.portfolio.savings.domain.SavingsInterestCalculationDaysInYearType;
 import org.mifosplatform.portfolio.savings.domain.SavingsInterestCalculationType;
-import org.mifosplatform.portfolio.savings.domain.SavingsInterestPeriodType;
-import org.mifosplatform.portfolio.savings.domain.SavingsPeriodFrequencyType;
 import org.mifosplatform.portfolio.savings.service.SavingsDropdownReadPlatformService;
 import org.mifosplatform.portfolio.savings.service.SavingsEnumerations;
 import org.mifosplatform.portfolio.savings.service.SavingsProductReadPlatformService;
@@ -146,22 +146,23 @@ public class SavingsProductsApiResource {
 
     private SavingsProductData handleTemplateRelatedData(final SavingsProductData savingsProduct) {
 
-        final EnumOptionData interestRatePeriodFrequencyType = SavingsEnumerations
-                .interestRatePeriodFrequencyType(SavingsPeriodFrequencyType.YEARS);
-
-        final EnumOptionData interestPeriodType = SavingsEnumerations.interestPeriodType(SavingsInterestPeriodType.MONTHLY);
+        final EnumOptionData interestPeriodType = SavingsEnumerations
+                .compoundingInterestPeriodType(SavingsCompoundingInterestPeriodType.DAILY);
 
         final EnumOptionData interestCalculationType = SavingsEnumerations
-                .interestCalculationType(SavingsInterestCalculationType.AVERAGE_DAILY_BALANCE);
+                .interestCalculationType(SavingsInterestCalculationType.DAILY_BALANCE);
 
         final EnumOptionData interestCalculationDaysInYearType = SavingsEnumerations
                 .interestCalculationDaysInYearType(SavingsInterestCalculationDaysInYearType.DAYS_365);
 
+        CurrencyData currency = CurrencyData.blank();
         final Collection<CurrencyData> currencyOptions = this.currencyReadPlatformService.retrieveAllowedCurrencies();
-        final Collection<EnumOptionData> interestRatePeriodFrequencyTypeOptions = this.dropdownReadPlatformService
-                .retrieveInterestRatePeriodFrequencyTypeOptions();
+        if (currencyOptions.size() == 1) {
+            currency = new ArrayList<CurrencyData>(currencyOptions).get(0);
+        }
 
-        final Collection<EnumOptionData> interestPeriodTypeOptions = this.dropdownReadPlatformService.retrieveInterestPeriodTypeOptions();
+        final Collection<EnumOptionData> interestPeriodTypeOptions = this.dropdownReadPlatformService
+                .retrieveCompoundingInterestPeriodTypeOptions();
 
         final Collection<EnumOptionData> interestCalculationTypeOptions = this.dropdownReadPlatformService
                 .retrieveInterestCalculationTypeOptions();
@@ -174,14 +175,12 @@ public class SavingsProductsApiResource {
 
         SavingsProductData savingsProductToReturn = null;
         if (savingsProduct != null) {
-            savingsProductToReturn = SavingsProductData.withTemplate(savingsProduct, currencyOptions,
-                    interestRatePeriodFrequencyTypeOptions, interestPeriodTypeOptions, interestCalculationTypeOptions,
-                    interestCalculationDaysInYearTypeOptions, lockinPeriodFrequencyTypeOptions);
+            savingsProductToReturn = SavingsProductData.withTemplate(savingsProduct, currencyOptions, interestPeriodTypeOptions,
+                    interestCalculationTypeOptions, interestCalculationDaysInYearTypeOptions, lockinPeriodFrequencyTypeOptions);
         } else {
-            savingsProductToReturn = SavingsProductData.template(CurrencyData.blank(), interestRatePeriodFrequencyType, interestPeriodType,
-                    interestCalculationType, interestCalculationDaysInYearType, currencyOptions, interestRatePeriodFrequencyTypeOptions,
-                    interestPeriodTypeOptions, interestCalculationTypeOptions, interestCalculationDaysInYearTypeOptions,
-                    lockinPeriodFrequencyTypeOptions);
+            savingsProductToReturn = SavingsProductData.template(currency, interestPeriodType, interestCalculationType,
+                    interestCalculationDaysInYearType, currencyOptions, interestPeriodTypeOptions, interestCalculationTypeOptions,
+                    interestCalculationDaysInYearTypeOptions, lockinPeriodFrequencyTypeOptions);
         }
 
         return savingsProductToReturn;

@@ -9,12 +9,11 @@ import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.activa
 import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.activeParamName;
 import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.interestCalculationDaysInYearTypeParamName;
 import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.interestCalculationTypeParamName;
-import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.interestPeriodTypeParamName;
-import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.interestRateParamName;
-import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.interestRatePeriodFrequencyTypeParamName;
+import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.interestCompoundingPeriodTypeParamName;
 import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.lockinPeriodFrequencyParamName;
 import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.lockinPeriodFrequencyTypeParamName;
 import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.minRequiredOpeningBalanceParamName;
+import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.nominalAnnualInterestRateParamName;
 
 import java.math.BigDecimal;
 import java.util.Locale;
@@ -30,8 +29,6 @@ import org.mifosplatform.portfolio.client.exception.ClientNotFoundException;
 import org.mifosplatform.portfolio.group.domain.Group;
 import org.mifosplatform.portfolio.group.domain.GroupRepository;
 import org.mifosplatform.portfolio.group.exception.GroupNotFoundException;
-import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.AprCalculator;
-import org.mifosplatform.portfolio.loanproduct.domain.PeriodFrequencyType;
 import org.mifosplatform.portfolio.savings.exception.SavingsProductNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -46,18 +43,15 @@ public class SavingsAccountAssembler {
     private final GroupRepository groupRepository;
     private final SavingsProductRepository savingProductRepository;
     private final FromJsonHelper fromApiJsonHelper;
-    private final AprCalculator aprCalculator;
 
     @Autowired
     public SavingsAccountAssembler(final SavingsAccountTransactionSummaryWrapper savingsAccountTransactionSummaryWrapper,
             final ClientRepository clientRepository, final GroupRepository groupRepository,
-            final SavingsProductRepository savingProductRepository, final AprCalculator aprCalculator,
-            final FromJsonHelper fromApiJsonHelper) {
+            final SavingsProductRepository savingProductRepository, final FromJsonHelper fromApiJsonHelper) {
         this.savingsAccountTransactionSummaryWrapper = savingsAccountTransactionSummaryWrapper;
         this.clientRepository = clientRepository;
         this.groupRepository = groupRepository;
         this.savingProductRepository = savingProductRepository;
-        this.aprCalculator = aprCalculator;
         this.fromApiJsonHelper = fromApiJsonHelper;
     }
 
@@ -93,8 +87,8 @@ public class SavingsAccountAssembler {
         }
 
         BigDecimal interestRate = null;
-        if (command.parameterExists(interestRateParamName)) {
-            interestRate = command.bigDecimalValueOfParameterNamed(interestRateParamName);
+        if (command.parameterExists(nominalAnnualInterestRateParamName)) {
+            interestRate = command.bigDecimalValueOfParameterNamed(nominalAnnualInterestRateParamName);
         } else {
             interestRate = product.interestRate();
         }
@@ -102,23 +96,10 @@ public class SavingsAccountAssembler {
         final boolean active = fromApiJsonHelper.extractBooleanNamed(activeParamName, element);
         final LocalDate activationDate = fromApiJsonHelper.extractLocalDateNamed(activationDateParamName, element);
 
-        PeriodFrequencyType interestRatePeriodFrequencyType = null;
-        Integer interestRatePeriodFrequencyTypeValue = null;
-        if (command.parameterExists(interestRatePeriodFrequencyTypeParamName)) {
-            interestRatePeriodFrequencyTypeValue = command.integerValueOfParameterNamed(interestRatePeriodFrequencyTypeParamName);
-            if (interestRatePeriodFrequencyTypeValue != null) {
-                interestRatePeriodFrequencyType = PeriodFrequencyType.fromInt(interestRatePeriodFrequencyTypeValue);
-            }
-        } else {
-            interestRatePeriodFrequencyType = product.interestRatePeriodFrequencyType();
-        }
-
-        final BigDecimal annualInterestRate = this.aprCalculator.calculateFrom(interestRatePeriodFrequencyType, interestRate);
-
-        SavingsInterestPeriodType interestPeriodType = null;
-        final Integer interestPeriodTypeValue = command.integerValueOfParameterNamed(interestPeriodTypeParamName);
+        SavingsCompoundingInterestPeriodType interestPeriodType = null;
+        final Integer interestPeriodTypeValue = command.integerValueOfParameterNamed(interestCompoundingPeriodTypeParamName);
         if (interestPeriodTypeValue != null) {
-            interestPeriodType = SavingsInterestPeriodType.fromInt(interestPeriodTypeValue);
+            interestPeriodType = SavingsCompoundingInterestPeriodType.fromInt(interestPeriodTypeValue);
         }
 
         SavingsInterestCalculationType interestCalculationType = null;
@@ -148,20 +129,20 @@ public class SavingsAccountAssembler {
             lockinPeriodFrequency = product.lockinPeriodFrequency();
         }
 
-        PeriodFrequencyType lockinPeriodFrequencyType = null;
+        SavingsPeriodFrequencyType lockinPeriodFrequencyType = null;
         Integer lockinPeriodFrequencyTypeValue = null;
         if (command.parameterExists(lockinPeriodFrequencyTypeParamName)) {
             lockinPeriodFrequencyTypeValue = command.integerValueOfParameterNamed(lockinPeriodFrequencyTypeParamName);
             if (lockinPeriodFrequencyTypeValue != null) {
-                lockinPeriodFrequencyType = PeriodFrequencyType.fromInt(lockinPeriodFrequencyTypeValue);
+                lockinPeriodFrequencyType = SavingsPeriodFrequencyType.fromInt(lockinPeriodFrequencyTypeValue);
             }
         } else {
             lockinPeriodFrequencyType = product.lockinPeriodFrequencyType();
         }
 
         final SavingsAccount account = SavingsAccount.createNewAccount(client, group, product, accountNo, externalId, interestRate,
-                interestRatePeriodFrequencyType, annualInterestRate, interestPeriodType, interestCalculationType,
-                interestCalculationDaysInYearType, minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType);
+                interestPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance,
+                lockinPeriodFrequency, lockinPeriodFrequencyType);
         account.setHelpers(this.savingsAccountTransactionSummaryWrapper);
 
         if (active) {

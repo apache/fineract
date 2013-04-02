@@ -7496,11 +7496,17 @@ Content-Type: application/json
 	            <tr class=alt><td>digitsAfterDecimal</td></tr>
 	            <tr><td class=fielddesc>Override the currency default value for digitsAfterDecimal.</td></tr>
 
-				<tr class=alt><td>interestRate</td></tr>
-	            <tr><td class=fielddesc>The default interest rate set when creating savings accounts of this type of product. e.g. <b>5</b>% Per year</td></tr>
+				<tr class=alt><td>nominalAnnualInterestRate</td></tr>
+	            <tr><td class=fielddesc>The default interest rate set when creating savings accounts of this type of product. e.g. <b>5</b>% Per year - It number here is always expressed as the Nominal APR.</td></tr>
 
-	            <tr class=alt><td>interestRatePeriodFrequencyType</td></tr>
-	            <tr><td class=fielddesc>The default interest rate period type. 2=Per month, 3=Per year e.g. 5% <b>Per year</b></td></tr>
+				<tr class=alt><td>interestCompoundingPeriodType</td></tr>
+	            <tr><td class=fielddesc>The period at which interest rate is compounded. 1=Daily, 2=Weekly (at end of week, sunday), 3=Every two weeks (at end of two weeks, sunday), 4=Monthly (at end of month), 5=Quarterly (at end of quarter, 31st Mar, 30th Jun, 30th Sep, 31st Dec), 6=Bi-Annually (30th June, 31st Dec), 7=Annually (31st Dec), 8=No Compounding - Simple Interest</td></tr>
+
+	            <tr class=alt><td>interestCalculationType</td></tr>
+	            <tr><td class=fielddesc>The interest calculation method used: 1=Daily Balance or 2=Average Daily Balance</td></tr>
+
+				<tr class=alt><td>interestCalculationDaysInYearType</td></tr>
+	            <tr><td class=fielddesc>The setting for number of days in year to use: 360=360 Days, 365=365 Days</td></tr>	
 
 				<tr class=alt><td>minRequiredOpeningBalance</td></tr>
 	            <tr><td class=fielddesc><b>Optional</b>: If provided, sets the minimum deposit amount required to open a savings account e.g. <b>2,000</b></td></tr>
@@ -7515,7 +7521,7 @@ Content-Type: application/json
 	    </div>
 	</div>
 
-	    <a id="savingsproducts_template" name="savingsproducts_template" class="old-syle-anchor">&nbsp;</a>
+	<a id="savingsproducts_template" name="savingsproducts_template" class="old-syle-anchor">&nbsp;</a>
     <div class="method-section">
         <div class="method-description">
             <h4>Retrieve Savings Product Template</h4>
@@ -7533,17 +7539,27 @@ Content-Type: application/json
 			<code class="method-response">
 {
   "currency": {
-    "code": "",
-    "name": "",
-    "decimalPlaces": 0,
-    "displaySymbol": "",
-    "nameCode": "",
-    "displayLabel": " []"
+    "code": "USD",
+    "name": "US Dollar",
+    "decimalPlaces": 2,
+    "displaySymbol": "$",
+    "nameCode": "currency.USD",
+    "displayLabel": "US Dollar ($)"
   },
-  "interestRatePeriodFrequencyType": {
-    "id": 3,
-    "code": "savings.interest.rate.periodFrequencyType.years",
-    "value": "Per year"
+  "interestCompoundingPeriodType": {
+    "id": 1,
+    "code": "savings.interest.period.savingsCompoundingInterestPeriodType.daily",
+    "value": "Daily"
+  },
+  "interestCalculationType": {
+    "id": 1,
+    "code": "savingsInterestCalculationType.dailybalance",
+    "value": "Daily Balance"
+  },
+  "interestCalculationDaysInYearType": {
+    "id": 365,
+    "code": "savingsInterestCalculationDaysInYearType.days365",
+    "value": "365 Days"
   },
   "currencyOptions": [
     {
@@ -7555,37 +7571,91 @@ Content-Type: application/json
       "displayLabel": "US Dollar ($)"
     }
   ],
-  "interestRatePeriodFrequencyTypeOptions": [
+  "interestCompoundingPeriodTypeOptions": [
+    {
+      "id": 1,
+      "code": "savings.interest.period.savingsCompoundingInterestPeriodType.daily",
+      "value": "Daily"
+    },
     {
       "id": 2,
-      "code": "savings.interest.rate.periodFrequencyType.months",
-      "value": "Per month"
+      "code": "savings.interest.period.savingsCompoundingInterestPeriodType.weekly",
+      "value": "Weekly"
     },
     {
       "id": 3,
-      "code": "savings.interest.rate.periodFrequencyType.years",
-      "value": "Per year"
+      "code": "savings.interest.period.savingsCompoundingInterestPeriodType.biweekly",
+      "value": "Bi-Weekly"
+    },
+    {
+      "id": 4,
+      "code": "savings.interest.period.savingsCompoundingInterestPeriodType.monthly",
+      "value": "Monthly"
+    },
+    {
+      "id": 5,
+      "code": "savings.interest.period.savingsCompoundingInterestPeriodType.quarterly",
+      "value": "Quarterly"
+    },
+    {
+      "id": 6,
+      "code": "savings.interest.period.savingsCompoundingInterestPeriodType.biannual",
+      "value": "Semi-Annual"
+    },
+    {
+      "id": 7,
+      "code": "savings.interest.period.savingsCompoundingInterestPeriodType.annual",
+      "value": "Annually"
+    },
+    {
+      "id": 8,
+      "code": "savings.interest.period.savingsCompoundingInterestPeriodType.nocompounding",
+      "value": "No Compounding - Simple Interest"
+    }
+  ],
+  "interestCalculationTypeOptions": [
+    {
+      "id": 1,
+      "code": "savingsInterestCalculationType.dailybalance",
+      "value": "Daily Balance"
+    },
+    {
+      "id": 2,
+      "code": "savingsInterestCalculationType.averagedailybalance",
+      "value": "Average Daily Balance"
+    }
+  ],
+  "interestCalculationDaysInYearTypeOptions": [
+    {
+      "id": 360,
+      "code": "savingsInterestCalculationDaysInYearType.days360",
+      "value": "360 Days"
+    },
+    {
+      "id": 365,
+      "code": "savingsInterestCalculationDaysInYearType.days365",
+      "value": "365 Days"
     }
   ],
   "lockinPeriodFrequencyTypeOptions": [
     {
       "id": 0,
-      "code": "savings.lockin.periodFrequencyType.days",
+      "code": "savings.lockin.savingsPeriodFrequencyType.days",
       "value": "Days"
     },
     {
       "id": 1,
-      "code": "savings.lockin.periodFrequencyType.weeks",
+      "code": "savings.lockin.savingsPeriodFrequencyType.weeks",
       "value": "Weeks"
     },
     {
       "id": 2,
-      "code": "savings.lockin.periodFrequencyType.months",
+      "code": "savings.lockin.savingsPeriodFrequencyType.months",
       "value": "Months"
     },
     {
       "id": 3,
-      "code": "savings.lockin.periodFrequencyType.years",
+      "code": "savings.lockin.savingsPeriodFrequencyType.years",
       "value": "Years"
     }
   ]
@@ -7600,7 +7670,10 @@ Content-Type: application/json
             <h4>Create a Savings Product</h4>
             <table class=matrixHeading>
                 <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Mandatory Fields</div></td></tr>
-                <tr class=alt><td>name, description, currencyCode, digitsAfterDecimal, interestRate, interestRatePeriodFrequencyType</tr>
+                <tr class=alt>
+                	<td>name, description, currencyCode, digitsAfterDecimal, nominalAnnualInterestRate,
+                		interestCompoundingPeriodType, interestCalculationType, interestCalculationDaysInYearType</td>
+                </tr>
             </table>
             <br/>
             <table class=matrixHeading>
@@ -7614,13 +7687,15 @@ Content-Type: application/json
 Content-Type: application/json
 Request Body:
 {
-  "name": "individual savings",
-  "description": "An savings product offering for individuals.",
+  "name": "Passbook Savings",
+  "description": "Daily compounding using Daily Balance, 5% per year, 365 days in year",
   "currencyCode": "USD",
   "digitsAfterDecimal": 2,
   "locale": "en",
-  "interestRate": "5.65",
-  "interestRatePeriodFrequencyType": 2
+  "nominalAnnualInterestRate": "5.0",
+  "interestCompoundingPeriodType": 1, 
+  "interestCalculationType": 1,
+  "interestCalculationDaysInYearType": "365"
 }
 			</code>
 			<code class="method-response">
@@ -7647,8 +7722,8 @@ Request Body:
 			<code class="method-response">
 {
   "id": 1,
-  "name": "individual savings",
-  "description": "An savings product offering for individuals. (updated)",
+  "name": "Passbook Savings",
+  "description": "Daily compounding using Daily Balance, 5% per year, 365 days in year",
   "currency": {
     "code": "USD",
     "name": "US Dollar",
@@ -7657,13 +7732,23 @@ Request Body:
     "nameCode": "currency.USD",
     "displayLabel": "US Dollar ($)"
   },
-  "interestRate": 5.73,
-  "interestRatePeriodFrequencyType": {
-    "id": 2,
-    "code": "savings.interest.rate.periodFrequencyType.months",
-    "value": "Per month"
+  "nominalAnnualInterestRate": 5,
+  "interestCompoundingPeriodType": {
+    "id": 1,
+    "code": "savings.interest.period.savingsCompoundingInterestPeriodType.daily",
+    "value": "Daily"
+  },
+  "interestCalculationType": {
+    "id": 1,
+    "code": "savingsInterestCalculationType.dailybalance",
+    "value": "Daily Balance"
+  },
+  "interestCalculationDaysInYearType": {
+    "id": 365,
+    "code": "savingsInterestCalculationDaysInYearType.days365",
+    "value": "365 Days"
   }
-}
+}	
 			</code>
         </div>
     </div>
@@ -7679,7 +7764,7 @@ Request Body:
 Content-Type: application/json
 Request Body:
 {
-  "description": "An savings product offering for individuals. (updated)",
+  "description": "Passbook Savings Lite.",
   "locale": "en",
   "interestRate": "5.73"
 }
@@ -7688,7 +7773,7 @@ Request Body:
 {
   "resourceId": 1,
   "changes": {
-    "description": "An savings product offering for individuals. (updated)",
+    "description": "Passbook Savings Lite.",
     "interestRate": 5.73,
     "locale": "en"
   }
@@ -7731,32 +7816,35 @@ Content-Type: application/json
             <code class="method-declaration">GET https://Domain Name/api/v1/savingsproducts</code>
             <code class="method-response">
 [
-  {
+ {
+  "id": 1,
+  "name": "Passbook Savings",
+  "description": "Daily compounding using Daily Balance, 5% per year, 365 days in year",
+  "currency": {
+    "code": "USD",
+    "name": "US Dollar",
+    "decimalPlaces": 2,
+    "displaySymbol": "$",
+    "nameCode": "currency.USD",
+    "displayLabel": "US Dollar ($)"
+  },
+  "nominalAnnualInterestRate": 5,
+  "interestCompoundingPeriodType": {
     "id": 1,
-    "name": "individual savings",
-  	"description": "An savings product offering for individuals. (updated)",
-    "currency": {
-      "code": "USD",
-      "name": "US Dollar",
-      "decimalPlaces": 2,
-      "displaySymbol": "$",
-      "nameCode": "currency.USD",
-      "displayLabel": "US Dollar ($)"
-    },
-    "interestRate": 9.85,
-    "interestRatePeriodFrequencyType": {
-      "id": 3,
-      "code": "savings.interest.rate.periodFrequencyType.years",
-      "value": "Per year"
-    },
-    "minRequiredOpeningBalance": 1000,
-    "lockinPeriodFrequency": 3,
-    "lockinPeriodFrequencyType": {
-      "id": 2,
-      "code": "savings.interest.rate.periodFrequencyType.months",
-      "value": "Per month"
-    }
+    "code": "savings.interest.period.savingsCompoundingInterestPeriodType.daily",
+    "value": "Daily"
+  },
+  "interestCalculationType": {
+    "id": 1,
+    "code": "savingsInterestCalculationType.dailybalance",
+    "value": "Daily Balance"
+  },
+  "interestCalculationDaysInYearType": {
+    "id": 365,
+    "code": "savingsInterestCalculationDaysInYearType.days365",
+    "value": "365 Days"
   }
+ } 
 ]
 			</code>
         </div>
@@ -7793,11 +7881,17 @@ Content-Type: application/json
 				<tr class=alt><td>activationDate</td></tr>
 				<tr><td class=fielddesc>If <b>active</b> is true the <i>activationDate</i> must be provided. If the savings account has an entry for <i>minRequiredOpeningBalance</i> then a deposit for that amount with <i>activationDate</i> as the date is automatically entered.</td></tr>
 
-	            <tr class=alt><td>interestRate</td></tr>
-	            <tr><td class=fielddesc>The default interest rate set when creating savings accounts of this type of product. e.g. <b>5</b>% Per year</td></tr>
+				<tr class=alt><td>nominalAnnualInterestRate</td></tr>
+	            <tr><td class=fielddesc>The interest rate set for savings account e.g. <b>5</b>% Per year - It is always expressed as the Nominal APR.</td></tr>
 
-	            <tr class=alt><td>interestRatePeriodFrequencyType</td></tr>
-	            <tr><td class=fielddesc>The default interest rate period type. 2=Per month, 3=Per year e.g. 5% <b>Per year</b></td></tr>
+				<tr class=alt><td>interestCompoundingPeriodType</td></tr>
+	            <tr><td class=fielddesc>The period at which interest rate is compounded. 1=Daily, 2=Weekly (at end of week, sunday), 3=Every two weeks (at end of two weeks, sunday), 4=Monthly (at end of month), 5=Quarterly (at end of quarter, 31st Mar, 30th Jun, 30th Sep, 31st Dec), 6=Bi-Annually (30th June, 31st Dec), 7=Annually (31st Dec), 8=No Compounding - Simple Interest</td></tr>
+
+	            <tr class=alt><td>interestCalculationType</td></tr>
+	            <tr><td class=fielddesc>The interest calculation method used: 1=Daily Balance or 2=Average Daily Balance</td></tr>
+
+				<tr class=alt><td>interestCalculationDaysInYearType</td></tr>
+	            <tr><td class=fielddesc>The setting for number of days in year to use: 360=360 Days, 365=365 Days</td></tr>	
 
 				<tr class=alt><td>minRequiredOpeningBalance</td></tr>
 	            <tr><td class=fielddesc><b>Optional</b>: If provided, sets the minimum deposit amount required to open a savings account e.g. <b>2,000</b></td></tr>
@@ -7856,9 +7950,9 @@ Content-Type: application/json
 			<code class="method-response">
 {
   "clientId": 1,
-  "clientName": "Client A AB",
-  "savingsProductId": 1,
-  "savingsProductName": "First",
+  "clientName": "John Doe",
+  "savingsProductId": 3,
+  "savingsProductName": "Passbook Savings",
   "currency": {
     "code": "USD",
     "name": "US Dollar",
@@ -7867,56 +7961,121 @@ Content-Type: application/json
     "nameCode": "currency.USD",
     "displayLabel": "US Dollar ($)"
   },
-  "interestRate": 12,
-  "interestRatePeriodFrequencyType": {
-    "id": 3,
-    "code": "savings.interest.rate.periodFrequencyType.years",
-    "value": "Per year"
+  "nominalAnnualInterestRate": 5,
+  "interestCompoundingPeriodType": {
+    "id": 1,
+    "code": "savings.interest.period.savingsCompoundingInterestPeriodType.daily",
+    "value": "Daily"
   },
-  "minRequiredOpeningBalance": 1000,
-  "lockinPeriodFrequency": 3,
-  "lockinPeriodFrequencyType": {
-    "id": 2,
-    "code": "savings.interest.rate.periodFrequencyType.months",
-    "value": "Per month"
+  "interestCalculationType": {
+    "id": 1,
+    "code": "savingsInterestCalculationType.dailybalance",
+    "value": "Daily Balance"
+  },
+  "interestCalculationDaysInYearType": {
+    "id": 365,
+    "code": "savingsInterestCalculationDaysInYearType.days365",
+    "value": "365 Days"
   },
   "productOptions": [
     {
       "id": 1,
-      "name": "First"
-    }
-  ],
-  "interestRatePeriodFrequencyTypeOptions": [
+      "name": "01-Compounding Daily"
+    },
     {
       "id": 2,
-      "code": "savings.interest.rate.periodFrequencyType.months",
-      "value": "Per month"
+      "name": "02-Compounding Monthly"
     },
     {
       "id": 3,
-      "code": "savings.interest.rate.periodFrequencyType.years",
-      "value": "Per year"
+      "name": "Passbook Savings"
+    }
+  ],
+  "interestCompoundingPeriodTypeOptions": [
+    {
+      "id": 1,
+      "code": "savings.interest.period.savingsCompoundingInterestPeriodType.daily",
+      "value": "Daily"
+    },
+    {
+      "id": 2,
+      "code": "savings.interest.period.savingsCompoundingInterestPeriodType.weekly",
+      "value": "Weekly"
+    },
+    {
+      "id": 3,
+      "code": "savings.interest.period.savingsCompoundingInterestPeriodType.biweekly",
+      "value": "Bi-Weekly"
+    },
+    {
+      "id": 4,
+      "code": "savings.interest.period.savingsCompoundingInterestPeriodType.monthly",
+      "value": "Monthly"
+    },
+    {
+      "id": 5,
+      "code": "savings.interest.period.savingsCompoundingInterestPeriodType.quarterly",
+      "value": "Quarterly"
+    },
+    {
+      "id": 6,
+      "code": "savings.interest.period.savingsCompoundingInterestPeriodType.biannual",
+      "value": "Semi-Annual"
+    },
+    {
+      "id": 7,
+      "code": "savings.interest.period.savingsCompoundingInterestPeriodType.annual",
+      "value": "Annually"
+    },
+    {
+      "id": 8,
+      "code": "savings.interest.period.savingsCompoundingInterestPeriodType.nocompounding",
+      "value": "No Compounding - Simple Interest"
+    }
+  ],
+  "interestCalculationTypeOptions": [
+    {
+      "id": 1,
+      "code": "savingsInterestCalculationType.dailybalance",
+      "value": "Daily Balance"
+    },
+    {
+      "id": 2,
+      "code": "savingsInterestCalculationType.averagedailybalance",
+      "value": "Average Daily Balance"
+    }
+  ],
+  "interestCalculationDaysInYearTypeOptions": [
+    {
+      "id": 360,
+      "code": "savingsInterestCalculationDaysInYearType.days360",
+      "value": "360 Days"
+    },
+    {
+      "id": 365,
+      "code": "savingsInterestCalculationDaysInYearType.days365",
+      "value": "365 Days"
     }
   ],
   "lockinPeriodFrequencyTypeOptions": [
     {
       "id": 0,
-      "code": "savings.lockin.periodFrequencyType.days",
+      "code": "savings.lockin.savingsPeriodFrequencyType.days",
       "value": "Days"
     },
     {
       "id": 1,
-      "code": "savings.lockin.periodFrequencyType.weeks",
+      "code": "savings.lockin.savingsPeriodFrequencyType.weeks",
       "value": "Weeks"
     },
     {
       "id": 2,
-      "code": "savings.lockin.periodFrequencyType.months",
+      "code": "savings.lockin.savingsPeriodFrequencyType.months",
       "value": "Months"
     },
     {
       "id": 3,
-      "code": "savings.lockin.periodFrequencyType.years",
+      "code": "savings.lockin.savingsPeriodFrequencyType.years",
       "value": "Years"
     }
   ]
@@ -7932,7 +8091,8 @@ Content-Type: application/json
 	        <br/>
 	        <table class=matrixHeading>
 	            <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Mandatory Fields</div></td></tr>
-	            <tr class=alt><td>clientId or groupId, productId, accountNo, externalId, active, (activationDate if active is true)</td></tr>
+	            <tr class=alt><td>clientId or groupId, productId, accountNo, externalId, 
+	            	active, (activationDate if active is true)</td></tr>
 	        </table>
 	        <br/>
 	        <table class=matrixHeading>
@@ -7942,7 +8102,7 @@ Content-Type: application/json
 	        <br/>
 	        <table class=matrixHeading>
 	            <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Inherited from Product (if not provided)</div></td></tr>
-	            <tr class=alt><td>interestRate, interestRatePeriodFrequencyType, minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType</td></tr>
+	            <tr class=alt><td>nominalAnnualInterestRate, interestCompoundingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType</td></tr>
 	        </table>
 	    </div>
 	    <div class="method-example">
@@ -8015,6 +8175,33 @@ Request Body:
   "locale": "en",
   "dateFormat": "dd MMMM yyyy",
   "activationDate": "01 March 2011"
+}
+			</code>
+	        <code class="method-response">
+{
+  "officeId": 1,
+  "clientId": 1,
+  "savingsId": 1,
+  "resourceId": 1
+}
+	        </code>
+	    </div>
+	</div>
+
+	<a id="savingsaccounts_calculate_interest" name="savingsaccounts_calculate_interest" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Calculate Interest on Savings Account</h2>
+	        <p>
+	        	Calculates interest earned on a savings account based on todays date. It does not attempt to <b>post or credit</b> the interest on the account. That is responsibility of another API that will be called by overnight process.
+	        </p>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">POST https://Domain Name/api/v1/savingsaccounts/{savingsId}?command=calculateInterest</code>
+	        <code class="method-request">POST savingsaccount/1?command=calculateInterest
+Content-Type: application/json
+Request Body:
+{
 }
 			</code>
 	        <code class="method-response">
@@ -12290,6 +12477,14 @@ GET https://DomainName/api/v1/search?query=000000111
 					<td></td>
 				</tr>
 				<tr>
+					<td></td>
+					<td>savingsaccounts/{accountId}?command=calculateInterest</td>
+					<td><a href="#savingsaccounts_calculate_interest">Calculate Interest on a Savings Account</a></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr class="alt">
 					<td><a href="#savingsaccounts_transactions">Savings Transactions</a></td>
 					<td>savingsaccounts/{accountId}/transactions?command=deposit</td>
 					<td><a href="#savingsaccounts_deposit">Make a Deposit</a></td>
@@ -12297,7 +12492,7 @@ GET https://DomainName/api/v1/search?query=000000111
 					<td></td>
 					<td></td>
 				</tr>
-				<tr class="alt">
+				<tr>
 					<td></td>
 					<td>savingsaccounts/{accountId}/transactions?command=withdrawal</td>
 					<td><a href="#savingsaccounts_withdrawal">Make a Withdrawal</a></td>

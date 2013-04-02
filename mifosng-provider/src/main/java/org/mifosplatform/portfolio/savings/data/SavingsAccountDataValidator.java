@@ -8,12 +8,11 @@ import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.extern
 import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.groupIdParamName;
 import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.interestCalculationDaysInYearTypeParamName;
 import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.interestCalculationTypeParamName;
-import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.interestPeriodTypeParamName;
-import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.interestRateParamName;
-import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.interestRatePeriodFrequencyTypeParamName;
+import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.interestCompoundingPeriodTypeParamName;
 import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.lockinPeriodFrequencyParamName;
 import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.lockinPeriodFrequencyTypeParamName;
 import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.minRequiredOpeningBalanceParamName;
+import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.nominalAnnualInterestRateParamName;
 import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.productIdParamName;
 
 import java.lang.reflect.Type;
@@ -94,20 +93,13 @@ public class SavingsAccountDataValidator {
             baseDataValidator.reset().parameter(externalIdParamName).value(externalId).notExceedingLengthOf(100);
         }
 
-        if (fromApiJsonHelper.parameterExists(interestRateParamName, element)) {
-            final BigDecimal interestRate = fromApiJsonHelper.extractBigDecimalWithLocaleNamed(interestRateParamName, element);
-            baseDataValidator.reset().parameter(interestRateParamName).value(interestRate).notNull().zeroOrPositiveAmount();
+        if (fromApiJsonHelper.parameterExists(nominalAnnualInterestRateParamName, element)) {
+            final BigDecimal interestRate = fromApiJsonHelper.extractBigDecimalWithLocaleNamed(nominalAnnualInterestRateParamName, element);
+            baseDataValidator.reset().parameter(nominalAnnualInterestRateParamName).value(interestRate).notNull().zeroOrPositiveAmount();
         }
 
-        if (fromApiJsonHelper.parameterExists(interestRatePeriodFrequencyTypeParamName, element)) {
-            final Integer interestRatePeriodFrequencyType = fromApiJsonHelper.extractIntegerSansLocaleNamed(
-                    interestRatePeriodFrequencyTypeParamName, element);
-            baseDataValidator.reset().parameter(interestRatePeriodFrequencyTypeParamName).value(interestRatePeriodFrequencyType).notNull()
-                    .inMinMaxRange(1, 3);
-        }
-
-        final Integer interestPeriodType = fromApiJsonHelper.extractIntegerSansLocaleNamed(interestPeriodTypeParamName, element);
-        baseDataValidator.reset().parameter(interestPeriodTypeParamName).value(interestPeriodType).notNull().inMinMaxRange(1, 7);
+        final Integer interestPeriodType = fromApiJsonHelper.extractIntegerSansLocaleNamed(interestCompoundingPeriodTypeParamName, element);
+        baseDataValidator.reset().parameter(interestCompoundingPeriodTypeParamName).value(interestPeriodType).notNull().inMinMaxRange(1, 7);
 
         final Integer interestCalculationType = fromApiJsonHelper.extractIntegerSansLocaleNamed(interestCalculationTypeParamName, element);
         baseDataValidator.reset().parameter(interestCalculationTypeParamName).value(interestCalculationType).notNull().inMinMaxRange(1, 2);
@@ -215,21 +207,14 @@ public class SavingsAccountDataValidator {
             baseDataValidator.reset().parameter(externalIdParamName).value(externalId).notExceedingLengthOf(100);
         }
 
-        if (fromApiJsonHelper.parameterExists(interestRateParamName, element)) {
-            final BigDecimal interestRate = fromApiJsonHelper.extractBigDecimalWithLocaleNamed(interestRateParamName, element);
-            baseDataValidator.reset().parameter(interestRateParamName).value(interestRate).notNull().zeroOrPositiveAmount();
+        if (fromApiJsonHelper.parameterExists(nominalAnnualInterestRateParamName, element)) {
+            final BigDecimal interestRate = fromApiJsonHelper.extractBigDecimalWithLocaleNamed(nominalAnnualInterestRateParamName, element);
+            baseDataValidator.reset().parameter(nominalAnnualInterestRateParamName).value(interestRate).notNull().zeroOrPositiveAmount();
         }
 
-        if (fromApiJsonHelper.parameterExists(interestRatePeriodFrequencyTypeParamName, element)) {
-            final Integer interestRatePeriodFrequencyType = fromApiJsonHelper.extractIntegerSansLocaleNamed(
-                    interestRatePeriodFrequencyTypeParamName, element);
-            baseDataValidator.reset().parameter(interestRatePeriodFrequencyTypeParamName).value(interestRatePeriodFrequencyType).notNull()
-                    .inMinMaxRange(1, 3);
-        }
-
-        if (this.fromApiJsonHelper.parameterExists(interestPeriodTypeParamName, element)) {
-            final Integer interestPeriodType = fromApiJsonHelper.extractIntegerSansLocaleNamed(interestPeriodTypeParamName, element);
-            baseDataValidator.reset().parameter(interestPeriodTypeParamName).value(interestPeriodType).notNull().inMinMaxRange(1, 7);
+        if (this.fromApiJsonHelper.parameterExists(interestCompoundingPeriodTypeParamName, element)) {
+            final Integer interestPeriodType = fromApiJsonHelper.extractIntegerSansLocaleNamed(interestCompoundingPeriodTypeParamName, element);
+            baseDataValidator.reset().parameter(interestCompoundingPeriodTypeParamName).value(interestPeriodType).notNull().inMinMaxRange(1, 7);
         }
 
         if (this.fromApiJsonHelper.parameterExists(interestCalculationTypeParamName, element)) {
