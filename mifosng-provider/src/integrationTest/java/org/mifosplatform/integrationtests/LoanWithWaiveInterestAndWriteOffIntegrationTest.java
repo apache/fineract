@@ -39,6 +39,7 @@ public class LoanWithWaiveInterestAndWriteOffIntegrationTest {
 
     @Before
     public void setup() {
+        Utils.initializeRESTAssured();
         requestSpec = new RequestSpecBuilder().setContentType(ContentType.JSON).build();
         requestSpec.header("Authorization", "Basic " + Utils.loginIntoServerAndGetBase64EncodedAuthenticationKey());
         responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
@@ -100,7 +101,7 @@ public class LoanWithWaiveInterestAndWriteOffIntegrationTest {
     private void verifyRepaymentScheduleEntryFor(final int repaymentNumber, final float expectedPrincipalOutstanding, final Integer loanID) {
         System.out.println("---------------------------GETTING LOAN REPAYMENT SCHEDULE--------------------------------");
         ArrayList<HashMap> repaymentPeriods = LoanTransactionHelper.getLoanRepaymentSchedule(requestSpec, responseSpec, loanID);
-        assertEquals(expectedPrincipalOutstanding, repaymentPeriods.get(repaymentNumber).get("principalLoanBalanceOutstanding"));
+        assertEquals("Mismatch in Principal Loan Balance Outstanding ", expectedPrincipalOutstanding, repaymentPeriods.get(repaymentNumber).get("principalLoanBalanceOutstanding"));
     }
 
     private Integer createLoanProduct() {

@@ -2,7 +2,9 @@ package org.mifosplatform.integrationtests.common;
 
 import static com.jayway.restassured.RestAssured.given;
 import static com.jayway.restassured.path.json.JsonPath.from;
-import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertThat;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.fail;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.conn.HttpHostConnectException;
@@ -17,21 +19,24 @@ public class Utils {
 
     private static final String LOGIN_URL = "/mifosng-provider/api/v1/authentication?username=mifos&password=password&tenantIdentifier=default";
 
+
+    public static void initializeRESTAssured() {
+        RestAssured.baseURI ="https://localhost";
+        RestAssured.port = 8443;
+        RestAssured.keystore("../keystore.jks", "openmf");
+    }
+
     public static String loginIntoServerAndGetBase64EncodedAuthenticationKey() {
         try {
             System.out.println("-----------------------------------LOGIN-----------------------------------------");
             String json = RestAssured.post(LOGIN_URL).asString();
-            if (StringUtils.isBlank(json)) {
-                assertThat(
-                        "Failed to login into mifosx platform: Please check it is running and you have changed its securityContext.xml from requires-channel=\"https\" to requires-channel=\"http\"",
-                        false);
-            }
+            assertThat("Failed to login into mifosx platform",StringUtils.isBlank(json),is(false));
             return JsonPath.with(json).get("base64EncodedAuthenticationKey");
-        } catch (Exception e) {
-
+        }
+        catch (Exception e) {
             if (e instanceof HttpHostConnectException) {
                 HttpHostConnectException hh = (HttpHostConnectException) e;
-                assertThat("Failed to connect to mifosx platform: " + hh.getMessage(), false);
+                fail("Failed to connect to mifosx platform:"+hh.getMessage());
             }
 
             throw new RuntimeException(e);

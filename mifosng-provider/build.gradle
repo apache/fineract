@@ -236,9 +236,7 @@ task integrationTest(type:Test){
         tomcatRunWar.execute()
     }
 
-    doLast {
-        tomcatStop.execute()
-    }
+
     testClassesDir = project.sourceSets.integrationTest.output.classesDir
     classpath = project.sourceSets.integrationTest.runtimeClasspath
 }

@@ -3,11 +3,12 @@ package org.mifosplatform.integrationtests.common;
 import java.util.HashMap;
 import java.util.Random;
 
-import org.junit.Assert;
 
 import com.google.gson.Gson;
 import com.jayway.restassured.specification.RequestSpecification;
 import com.jayway.restassured.specification.ResponseSpecification;
+
+import static org.junit.Assert.assertEquals;
 
 public class ClientHelper {
 
@@ -41,7 +42,7 @@ public class ClientHelper {
         System.out.println("------------------------------CHECK CLIENT DETAILS------------------------------------\n");
         String CLIENT_URL = "/mifosng-provider/api/v1/clients/" + generatedClientID + "?tenantIdentifier=default";
         Integer responseClientID = Utils.performServerGet(requestSpec, responseSpec, CLIENT_URL, "id");
-        Assert.assertEquals(generatedClientID, responseClientID);
+        assertEquals("ERROR IN CREATING THE CLIENT",generatedClientID, responseClientID);
     }
 
     private static String randomStringGenerator(final String prefix, final int len, final String sourceSetString) {
