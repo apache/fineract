@@ -133,7 +133,7 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
 			updatedExtraCriteria = " where (" + extraCriteria + ")";
 
 		updatedExtraCriteria += " order by aud.id DESC";
-		return retrieveEntries(updatedExtraCriteria, includeJson);
+		return retrieveEntries("audit", updatedExtraCriteria, includeJson);
 	}
 
 	@Override
@@ -148,20 +148,43 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
 			updatedExtraCriteria = " where aud.processing_result_enum = 2";
 
 		updatedExtraCriteria += " order by aud.id";
-		//TODO - should only be pulling back makerchecker entries that the user has maker-checker permissions for
-		return retrieveEntries(updatedExtraCriteria, includeJson);
+
+		return retrieveEntries("makerchecker", updatedExtraCriteria,
+				includeJson);
 	}
 
-	public Collection<AuditData> retrieveEntries(String extraCriteria,
-			boolean includeJson) {
+	public Collection<AuditData> retrieveEntries(String useType,
+			String extraCriteria, boolean includeJson) {
+
+		if (!(useType.equals("audit") || useType.equals("makerchecker"))) {
+			throw new PlatformDataIntegrityException(
+					"error.msg.invalid.auditSearchTemplate.useType",
+					"Invalid Audit Search Template UseType: " + useType);
+		}
 
 		AppUser currentUser = context.authenticatedUser();
 		String hierarchy = currentUser.getOffice().getHierarchy();
 
 		final AuditMapper rm = new AuditMapper();
+		String sql = "select " + rm.schema(includeJson, hierarchy);
 
-		String sql = "select " + rm.schema(includeJson, hierarchy)
-				+ extraCriteria;
+		Boolean isLimitedChecker = false;
+		if (useType.equals("makerchecker")) {
+			if (currentUser.hasNotPermissionForAnyOf("ALL_FUNCTIONS",
+					"CHECKER_SUPER_USER")) {
+				isLimitedChecker = true;
+			}
+		}
+
+		if (isLimitedChecker) {
+			sql += " join m_permission p on p.action_name = aud.action_name and p.entity_name = aud.entity_name and p.code like '%\\_CHECKER'"
+					+ " join m_role_permission rp on rp.permission_id = p.id"
+					+ " join m_role r on r.id = rp.role_id "
+					+ " join m_appuser_role ur on ur.role_id = r.id and ur.appuser_id = "
+					+ currentUser.getId();
+		}
+		sql += extraCriteria;
+
 		logger.info("sql: " + sql);
 
 		return this.jdbcTemplate.query(sql, rm, new Object[] {});
@@ -190,16 +213,24 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
 					"Invalid Audit Search Template UseType: " + useType);
 		}
 
+		AppUser currentUser = context.authenticatedUser();
+
 		final Collection<AppUserData> appUsers = appUserReadPlatformService
 				.retrieveSearchTemplate();
 
+		String sql = " SELECT distinct(action_name) as actionName FROM m_permission p ";
+		sql += makercheckerCapabilityOnly(useType, currentUser);
+		sql += " order by if(action_name in ('CREATE', 'DELETE', 'UPDATE'), action_name, 'ZZZ'), action_name";
 		ActionNamesMapper mapper = new ActionNamesMapper();
-		List<String> actionNames = this.jdbcTemplate.query(mapper.schema(),
-				mapper, new Object[] {});
+		List<String> actionNames = this.jdbcTemplate.query(sql, mapper,
+				new Object[] {});
 
+		sql = " select distinct(entity_name) as entityName from m_permission p ";
+		sql += makercheckerCapabilityOnly(useType, currentUser);
+		sql += " order by if(grouping = 'datatable', 'ZZZ', entity_name), entity_name";
 		EntityNamesMapper mapper2 = new EntityNamesMapper();
-		List<String> entityNames = this.jdbcTemplate.query(mapper2.schema(),
-				mapper2, new Object[] {});
+		List<String> entityNames = this.jdbcTemplate.query(sql, mapper2,
+				new Object[] {});
 
 		Collection<ProcessingResultLookup> processingResults = null;
 		if (useType.equals("audit")) {
@@ -212,6 +243,31 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
 				processingResults);
 	}
 
+	private String makercheckerCapabilityOnly(String useType,
+			AppUser currentUser) {
+		String sql = "";
+		Boolean isLimitedChecker = false;
+		if (useType.equals("makerchecker")) {
+			if (currentUser.hasNotPermissionForAnyOf("ALL_FUNCTIONS",
+					"CHECKER_SUPER_USER")) {
+				isLimitedChecker = true;
+			}
+		}
+
+		if (isLimitedChecker) {
+			sql += " join m_role_permission rp on rp.permission_id = p.id"
+					+ " join m_role r on r.id = rp.role_id "
+					+ " join m_appuser_role ur on ur.role_id = r.id and ur.appuser_id = "
+					+ currentUser.getId();
+
+		}
+		sql += " where p.action_name is not null and p.action_name <> 'READ' ";
+		if (isLimitedChecker) {
+			sql += "and p.code like '%\\_CHECKER'";
+		}
+		return sql;
+	}
+
 	private static final class ActionNamesMapper implements RowMapper<String> {
 
 		@Override
@@ -220,13 +276,6 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
 				throws SQLException {
 
 			return rs.getString("actionName");
-		}
-
-		public String schema() {
-
-			return " SELECT distinct(action_name) as actionName FROM m_permission "
-					+ " where action_name is not null and action_name <> 'READ' "
-					+ " order by if(action_name in ('CREATE', 'DELETE', 'UPDATE'), action_name, 'ZZZ'), action_name";
 		}
 
 	}
@@ -240,10 +289,6 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
 			return rs.getString("entityName");
 		}
 
-		public String schema() {
-			return " select distinct(entity_name) as entityName from m_permission where action_name is not null and action_name <> 'READ' "
-					+ " order by if(grouping = 'datatable', 'ZZZ', entity_name), entity_name";
-		}
 	}
 
 	private static final class ProcessingResultsMapper implements
