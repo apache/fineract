@@ -36,7 +36,7 @@ public final class LoanProductCommandFromApiJsonDeserializer {
      * The parameters supported for this command.
      */
     private final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("locale", "name", "description", "fundId",
-            "currencyCode", "digitsAfterDecimal", "principal", "repaymentEvery", "numberOfRepayments", "repaymentFrequencyType",
+            "currencyCode", "digitsAfterDecimal", "principal", "minPrincipal", "maxPrincipal", "repaymentEvery", "numberOfRepayments", "repaymentFrequencyType",
             "interestRatePerPeriod", "interestRateFrequencyType", "amortizationType", "interestType", "interestCalculationPeriodType",
             "inArrearsTolerance", "transactionProcessingStrategyId", "charges", "accountingRule",
             LOAN_PRODUCT_ACCOUNTING_PARAMS.FEES_RECEIVABLE.getValue(), LOAN_PRODUCT_ACCOUNTING_PARAMS.FUND_SOURCE.getValue(),
@@ -81,9 +81,15 @@ public final class LoanProductCommandFromApiJsonDeserializer {
         final Integer digitsAfterDecimal = fromApiJsonHelper.extractIntegerNamed("digitsAfterDecimal", element, Locale.getDefault());
         baseDataValidator.reset().parameter("digitsAfterDecimal").value(digitsAfterDecimal).notNull().inMinMaxRange(0, 6);
 
+        final BigDecimal minPrincipal = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("minPrincipal", element);
+        baseDataValidator.reset().parameter("minPrincipal").value(minPrincipal).notNull().positiveAmount();
+        
+        final BigDecimal maxPrincipal = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("maxPrincipal", element);
+        baseDataValidator.reset().parameter("maxPrincipal").value(maxPrincipal).notNull().positiveAmount();
+        
         final BigDecimal principal = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("principal", element);
-        baseDataValidator.reset().parameter("principal").value(principal).notNull().positiveAmount();
-
+        baseDataValidator.reset().parameter("principal").value(principal).notNull().positiveAmount().inMinAndMaxAmountRange(minPrincipal, maxPrincipal);
+        
         final Integer numberOfRepayments = fromApiJsonHelper.extractIntegerWithLocaleNamed("numberOfRepayments", element);
         baseDataValidator.reset().parameter("numberOfRepayments").value(numberOfRepayments).notNull().integerGreaterThanZero();
 
@@ -212,10 +218,33 @@ public final class LoanProductCommandFromApiJsonDeserializer {
             final Integer digitsAfterDecimal = fromApiJsonHelper.extractIntegerNamed("digitsAfterDecimal", element, Locale.getDefault());
             baseDataValidator.reset().parameter("digitsAfterDecimal").value(digitsAfterDecimal).notNull().inMinMaxRange(0, 6);
         }
+        
+        String minPrincipalParameterName = "minPrincipal";
+        BigDecimal minPrincipalAmount = null;  
+        if(fromApiJsonHelper.parameterExists(minPrincipalParameterName, element)){
+            minPrincipalAmount = fromApiJsonHelper.extractBigDecimalWithLocaleNamed(minPrincipalParameterName, element);
+        }
+        
+        String maxPrincipalParameterName = "maxPrincipal";
+        BigDecimal maxPrincipalAmount = null;  
+        if(fromApiJsonHelper.parameterExists(maxPrincipalParameterName, element)){
+            maxPrincipalAmount = fromApiJsonHelper.extractBigDecimalWithLocaleNamed(maxPrincipalParameterName, element);
+        }
+
+        //Principal amount is allowed to change only when Min and Max principal amounts are sent in JSON request
+        //Validate if minPrincipal amount or principal amount is part of JSON request. 
+        if(fromApiJsonHelper.parameterExists(minPrincipalParameterName, element) || fromApiJsonHelper.parameterExists("principal", element)){
+            baseDataValidator.reset().parameter(minPrincipalParameterName).value(minPrincipalAmount).notNull().positiveAmount();
+        }
+
+        //Validate if maxPrincipal amount or principal amount is part of JSON request.
+        if(fromApiJsonHelper.parameterExists(maxPrincipalParameterName, element) || fromApiJsonHelper.parameterExists("principal", element)){
+            baseDataValidator.reset().parameter(maxPrincipalParameterName).value(maxPrincipalAmount).notNull().positiveAmount();
+        }
 
         if (fromApiJsonHelper.parameterExists("principal", element)) {
             final BigDecimal principal = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("principal", element);
-            baseDataValidator.reset().parameter("principal").value(principal).notNull().positiveAmount();
+            baseDataValidator.reset().parameter("principal").value(principal).notNull().positiveAmount().inMinAndMaxAmountRange(minPrincipalAmount, maxPrincipalAmount);
         }
 
         if (fromApiJsonHelper.parameterExists("inArrearsTolerance", element)) {

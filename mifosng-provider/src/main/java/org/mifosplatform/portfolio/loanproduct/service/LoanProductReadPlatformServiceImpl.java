@@ -96,7 +96,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
         public String loanProductSchema() {
             return "lp.id as id, lp.fund_id as fundId, f.name as fundName, lp.loan_transaction_strategy_id as transactionStrategyId, ltps.name as transactionStrategyName, "
                     + "lp.name as name, lp.description as description, "
-                    + "lp.principal_amount as principal, lp.currency_code as currencyCode, lp.currency_digits as currencyDigits, "
+                    + "lp.principal_amount as principal, lp.min_principal_amount as minPrincipal, lp.max_principal_amount as maxPrincipal, lp.currency_code as currencyCode, lp.currency_digits as currencyDigits, "
                     + "lp.nominal_interest_rate_per_period as interestRatePerPeriod, lp.interest_period_frequency_enum as interestRatePerPeriodFreq, "
                     + "lp.annual_nominal_interest_rate as annualInterestRate, lp.interest_method_enum as interestMethod, lp.interest_calculated_in_period_enum as interestCalculationInPeriodMethod,"
                     + "lp.repay_every as repaidEvery, lp.repayment_period_frequency_enum as repaymentPeriodFrequency, lp.number_of_repayments as numberOfRepayments, "
@@ -130,6 +130,8 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
                     currencyNameCode);
 
             final BigDecimal principal = rs.getBigDecimal("principal");
+            final BigDecimal minPrincipal = rs.getBigDecimal("minPrincipal");
+            final BigDecimal maxPrincipal = rs.getBigDecimal("maxPrincipal");
             final BigDecimal tolerance = rs.getBigDecimal("tolerance");
 
             final Integer numberOfRepayments = JdbcSupport.getInteger(rs, "numberOfRepayments");
@@ -157,10 +159,10 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
             final EnumOptionData interestCalculationPeriodType = LoanEnumerations
                     .interestCalculationPeriodType(interestCalculationPeriodTypeId);
 
-            return new LoanProductData(id, name, description, currency, principal, tolerance, numberOfRepayments, repaymentEvery,
-                    interestRatePerPeriod, annualInterestRate, repaymentFrequencyType, interestRateFrequencyType, amortizationType,
-                    interestType, interestCalculationPeriodType, fundId, fundName, transactionStrategyId, transactionStrategyName,
-                    this.charges, accountingRuleType);
+            return new LoanProductData(id, name, description, currency, principal, minPrincipal, maxPrincipal, tolerance,
+                    numberOfRepayments, repaymentEvery, interestRatePerPeriod, annualInterestRate, repaymentFrequencyType,
+                    interestRateFrequencyType, amortizationType, interestType, interestCalculationPeriodType, fundId, fundName,
+                    transactionStrategyId, transactionStrategyName, this.charges, accountingRuleType);
         }
 
     }

@@ -37,6 +37,8 @@ public class LoanProductData {
     // terms
     private final CurrencyData currency;
     private final BigDecimal principal;
+    private BigDecimal minPrincipal;
+    private BigDecimal maxPrincipal;
     private final Integer numberOfRepayments;
     private final Integer repaymentEvery;
     private final EnumOptionData repaymentFrequencyType;
@@ -80,6 +82,8 @@ public class LoanProductData {
         final String description = null;
         final CurrencyData currency = null;
         final BigDecimal principal = null;
+        final BigDecimal minPrincipal = null;
+        final BigDecimal maxPrincipal = null;
         final BigDecimal tolerance = null;
         final Integer numberOfRepayments = null;
         final Integer repaymentEvery = null;
@@ -97,7 +101,7 @@ public class LoanProductData {
         final Collection<ChargeData> charges = null;
         final EnumOptionData accountingType = null;
 
-        return new LoanProductData(id, name, description, currency, principal, tolerance, numberOfRepayments, repaymentEvery,
+        return new LoanProductData(id, name, description, currency, principal, minPrincipal, maxPrincipal, tolerance, numberOfRepayments, repaymentEvery,
                 interestRatePerPeriod, annualInterestRate, repaymentFrequencyType, interestRateFrequencyType, amortizationType,
                 interestType, interestCalculationPeriodType, fundId, fundName, transactionProcessingStrategyId,
                 transactionProcessingStrategyName, charges, accountingType);
@@ -106,6 +110,8 @@ public class LoanProductData {
     public static LoanProductData lookupWithCurrency(final Long id, final String name, final CurrencyData currency) {
         final String description = null;
         final BigDecimal principal = null;
+        final BigDecimal minPrincipal = null;
+        final BigDecimal maxPrincipal = null;
         final BigDecimal tolerance = null;
         final Integer numberOfRepayments = null;
         final Integer repaymentEvery = null;
@@ -123,7 +129,7 @@ public class LoanProductData {
         final Collection<ChargeData> charges = null;
         final EnumOptionData accountingType = null;
 
-        return new LoanProductData(id, name, description, currency, principal, tolerance, numberOfRepayments, repaymentEvery,
+        return new LoanProductData(id, name, description, currency, principal, minPrincipal, maxPrincipal, tolerance, numberOfRepayments, repaymentEvery,
                 interestRatePerPeriod, annualInterestRate, repaymentFrequencyType, interestRateFrequencyType, amortizationType,
                 interestType, interestCalculationPeriodType, fundId, fundName, transactionProcessingStrategyId,
                 transactionProcessingStrategyName, charges, accountingType);
@@ -135,6 +141,8 @@ public class LoanProductData {
         final String description = null;
         final CurrencyData currency = CurrencyData.blank();
         final BigDecimal principal = null;
+        final BigDecimal minPrincipal = null;
+        final BigDecimal maxPrincipal = null;
         final BigDecimal tolerance = null;
         final Integer numberOfRepayments = null;
         final Integer repaymentEvery = null;
@@ -153,7 +161,7 @@ public class LoanProductData {
         final Collection<ChargeData> charges = null;
         final EnumOptionData accountingType = LoanEnumerations.accountingRuleType(AccountingRuleType.NONE);
 
-        return new LoanProductData(id, name, description, currency, principal, tolerance, numberOfRepayments, repaymentEvery,
+        return new LoanProductData(id, name, description, currency, principal, minPrincipal, maxPrincipal, tolerance, numberOfRepayments, repaymentEvery,
                 interestRatePerPeriod, annualInterestRate, repaymentFrequencyType, interestRateFrequencyType, amortizationType,
                 interestType, interestCalculationPeriodType, fundId, fundName, transactionProcessingStrategyId,
                 transactionProcessingStrategyName, charges, accountingType);
@@ -169,8 +177,9 @@ public class LoanProductData {
     }
 
     public LoanProductData(final Long id, final String name, final String description, final CurrencyData currency,
-            final BigDecimal principal, final BigDecimal tolerance, final Integer numberOfRepayments, final Integer repaymentEvery,
-            final BigDecimal interestRatePerPeriod, final BigDecimal annualInterestRate, final EnumOptionData repaymentFrequencyType,
+            final BigDecimal principal, final BigDecimal minPrincipal, final BigDecimal maxPrincipal, final BigDecimal tolerance,
+            final Integer numberOfRepayments, final Integer repaymentEvery, final BigDecimal interestRatePerPeriod,
+            final BigDecimal annualInterestRate, final EnumOptionData repaymentFrequencyType,
             final EnumOptionData interestRateFrequencyType, final EnumOptionData amortizationType, final EnumOptionData interestType,
             final EnumOptionData interestCalculationPeriodType, final Long fundId, final String fundName,
             final Long transactionProcessingStrategyId, final String transactionProcessingStrategyName,
@@ -180,6 +189,8 @@ public class LoanProductData {
         this.description = description;
         this.currency = currency;
         this.principal = principal;
+        this.minPrincipal = minPrincipal;
+        this.maxPrincipal = maxPrincipal;
         this.inArrearsTolerance = tolerance;
         this.numberOfRepayments = numberOfRepayments;
         this.repaymentEvery = repaymentEvery;
@@ -227,6 +238,8 @@ public class LoanProductData {
         this.fundName = productData.fundName;
 
         this.principal = productData.principal;
+        this.minPrincipal = productData.minPrincipal;
+        this.maxPrincipal = productData.maxPrincipal;
         this.inArrearsTolerance = productData.inArrearsTolerance;
         this.numberOfRepayments = productData.numberOfRepayments;
         this.repaymentEvery = productData.repaymentEvery;
@@ -335,6 +348,14 @@ public class LoanProductData {
 
     public BigDecimal getPrincipal() {
         return principal;
+    }
+
+    public BigDecimal getMinPrincipal() {
+        return this.minPrincipal;
+    }
+    
+    public BigDecimal getMaxPrincipal() {
+        return this.maxPrincipal;
     }
 
     public BigDecimal getInArrearsTolerance() {

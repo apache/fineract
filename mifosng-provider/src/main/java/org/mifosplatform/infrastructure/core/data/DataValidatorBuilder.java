@@ -372,6 +372,23 @@ public class DataValidatorBuilder {
         return this;
     }
 
+    public DataValidatorBuilder inMinAndMaxAmountRange(final BigDecimal minimumAmount, final BigDecimal maximumAmount) {
+        if (minimumAmount != null && maximumAmount != null && value != null){
+            BigDecimal amount = BigDecimal.valueOf(Double.valueOf(value.toString()));
+            if (amount.compareTo(minimumAmount) == -1 || amount.compareTo(maximumAmount) == 1) {
+                StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append(resource).append(".").append(parameter)
+                        .append(".amount.is.not.within.min.max.range");
+                StringBuilder defaultEnglishMessage = new StringBuilder("The ").append(parameter) .append(" amount ").append(amount)
+                        .append(" must be between ").append(minimumAmount).append(" and ").append(maximumAmount).append(" .");
+                ApiParameterError error = ApiParameterError.parameterError(validationErrorCode.toString(),
+                        defaultEnglishMessage.toString(), parameter, amount, minimumAmount, maximumAmount);
+                dataValidationErrors.add(error);
+                return this;
+            }
+        }
+        return this;
+    }
+
     public DataValidatorBuilder comapareMinAndMaxOfTwoBigDecmimalNos(final BigDecimal min, final BigDecimal max) {
         if (min != null && max != null)
             if (max.compareTo(min) == -1) {

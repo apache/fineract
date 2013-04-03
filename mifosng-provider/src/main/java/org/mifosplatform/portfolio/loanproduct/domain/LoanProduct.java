@@ -24,6 +24,7 @@ import javax.persistence.UniqueConstraint;
 import org.apache.commons.lang.StringUtils;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
+import org.mifosplatform.organisation.monetary.domain.Money;
 import org.mifosplatform.portfolio.charge.domain.Charge;
 import org.mifosplatform.portfolio.fund.domain.Fund;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.AprCalculator;
@@ -78,6 +79,8 @@ public class LoanProduct extends AbstractPersistable<Long> {
 
         final MonetaryCurrency currency = new MonetaryCurrency(currencyCode, digitsAfterDecimal);
         final BigDecimal principal = command.bigDecimalValueOfParameterNamed("principal");
+        final BigDecimal minPrincipal = command.bigDecimalValueOfParameterNamed("minPrincipal");
+        final BigDecimal maxPrincipal = command.bigDecimalValueOfParameterNamed("maxPrincipal");
 
         final InterestMethod interestMethod = InterestMethod.fromInt(command.integerValueOfParameterNamed("interestType"));
         final InterestCalculationPeriodMethod interestCalculationPeriodMethod = InterestCalculationPeriodMethod.fromInt(command
@@ -95,9 +98,10 @@ public class LoanProduct extends AbstractPersistable<Long> {
         final BigDecimal inArrearsTolerance = command.bigDecimalValueOfParameterNamed("inArrearsTolerance");
         final AccountingRuleType accountingRuleType = AccountingRuleType.fromInt(command.integerValueOfParameterNamed("accountingRule"));
 
-        return new LoanProduct(fund, loanTransactionProcessingStrategy, name, description, currency, principal, interestRatePerPeriod,
-                interestFrequencyType, annualInterestRate, interestMethod, interestCalculationPeriodMethod, repaymentEvery,
-                repaymentFrequencyType, numberOfRepayments, amortizationMethod, inArrearsTolerance, productCharges, accountingRuleType);
+        return new LoanProduct(fund, loanTransactionProcessingStrategy, name, description, currency, principal, minPrincipal, maxPrincipal,
+                interestRatePerPeriod, interestFrequencyType, annualInterestRate, interestMethod, interestCalculationPeriodMethod,
+                repaymentEvery, repaymentFrequencyType, numberOfRepayments, amortizationMethod, inArrearsTolerance, productCharges,
+                accountingRuleType);
     }
 
     protected LoanProduct() {
@@ -106,6 +110,7 @@ public class LoanProduct extends AbstractPersistable<Long> {
 
     public LoanProduct(final Fund fund, final LoanTransactionProcessingStrategy transactionProcessingStrategy, final String name,
             final String description, final MonetaryCurrency currency, final BigDecimal defaultPrincipal,
+            final BigDecimal defaultMinPrincipal, final BigDecimal defaultMaxPrincipal,
             final BigDecimal defaultNominalInterestRatePerPeriod, final PeriodFrequencyType interestPeriodFrequencyType,
             final BigDecimal defaultAnnualNominalInterestRate, final InterestMethod interestMethod,
             final InterestCalculationPeriodMethod interestCalculationPeriodMethod, final Integer repayEvery,
@@ -125,9 +130,10 @@ public class LoanProduct extends AbstractPersistable<Long> {
             this.charges = charges;
         }
 
-        this.loanProductRelatedDetail = new LoanProductRelatedDetail(currency, defaultPrincipal, defaultNominalInterestRatePerPeriod,
-                interestPeriodFrequencyType, defaultAnnualNominalInterestRate, interestMethod, interestCalculationPeriodMethod, repayEvery,
-                repaymentFrequencyType, defaultNumberOfInstallments, amortizationMethod, inArrearsTolerance);
+        this.loanProductRelatedDetail = new LoanProductRelatedDetail(currency, defaultPrincipal, defaultMinPrincipal, defaultMaxPrincipal,
+                defaultNominalInterestRatePerPeriod, interestPeriodFrequencyType, defaultAnnualNominalInterestRate, interestMethod,
+                interestCalculationPeriodMethod, repayEvery, repaymentFrequencyType, defaultNumberOfInstallments, amortizationMethod,
+                inArrearsTolerance);
 
         if (accountingRuleType != null) {
             this.accountingRule = accountingRuleType.getValue();
@@ -226,5 +232,13 @@ public class LoanProduct extends AbstractPersistable<Long> {
 
     public boolean isAccrualBasedAccountingEnabled() {
         return AccountingRuleType.ACCRUAL_BASED.getValue().equals(this.accountingRule);
+    }
+    
+    public Money getMinPrincipalAmount(){
+        return this.loanProductRelatedDetail.getMinPrincipal();
+    }
+    
+    public Money getMaxPrincipalAmount(){
+        return this.loanProductRelatedDetail.getMaxPrincipal();
     }
 }

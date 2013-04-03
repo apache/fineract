@@ -72,6 +72,8 @@ public class LoanScheduleAssembler {
         final ApplicationCurrency applicationCurrency = this.applicationCurrencyRepository.findOneByCode(currency.getCode());
 
         final BigDecimal principal = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("principal", element);
+        final BigDecimal minPrincipal = loanProduct.getMinPrincipalAmount().getAmount();//Copy minPrincipal from loan product to loan
+        final BigDecimal maxPrincipal = loanProduct.getMaxPrincipalAmount().getAmount();//Copy maxPrincipal from loan product to loan
         final BigDecimal interestRatePerPeriod = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("interestRatePerPeriod", element);
         final Integer interestRateFrequencyType = fromApiJsonHelper.extractIntegerWithLocaleNamed("interestRateFrequencyType", element);
         final Integer interestType = fromApiJsonHelper.extractIntegerWithLocaleNamed("interestType", element);
@@ -105,7 +107,7 @@ public class LoanScheduleAssembler {
 
         final LoanScheduleGenerator loanScheduleGenerator = this.loanScheduleFactory.create(interestMethod);
 
-        return new LoanSchedule(loanScheduleGenerator, applicationCurrency, principal, interestRatePerPeriod,
+        return new LoanSchedule(loanScheduleGenerator, applicationCurrency, principal, minPrincipal, maxPrincipal, interestRatePerPeriod,
                 interestRatePeriodFrequencyType, defaultAnnualNominalInterestRate, interestMethod, interestCalculationPeriodMethod,
                 repaymentEvery, repaymentPeriodFrequencyType, numberOfRepayments, amortizationMethod, loanTermFrequency,
                 loanTermPeriodFrequencyType, loanCharges, expectedDisbursementDate, repaymentsStartingFromDate, interestChargedFromDate, inArrearsTolerance);
