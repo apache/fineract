@@ -38,7 +38,7 @@ CREATE TABLE `tenants` (
   `schema_password` varchar(100) NOT NULL DEFAULT 'mysql',
   `auto_update` tinyint(1) NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -47,8 +47,7 @@ CREATE TABLE `tenants` (
 
 LOCK TABLES `tenants` WRITE;
 /*!40000 ALTER TABLE `tenants` DISABLE KEYS */;
-INSERT INTO `tenants` VALUES 
-(1,'default','Default Demo Tenant','mifostenant-default','Asia/Kolkata',NULL,NULL,NULL,NULL,'localhost','3306','root','mysql');
+INSERT INTO `tenants` VALUES (1,'default','Default Demo Tenant','mifostenant-default','Asia/Kolkata',NULL,NULL,NULL,NULL,'localhost','3306','root','mysql',1);
 /*!40000 ALTER TABLE `tenants` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -87,4 +86,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2013-03-04 16:05:03
+-- Dump completed on 2013-04-03 18:11:34

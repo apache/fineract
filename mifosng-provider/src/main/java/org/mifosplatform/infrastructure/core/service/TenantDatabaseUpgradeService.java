@@ -17,20 +17,19 @@ import org.springframework.stereotype.Service;
 import com.googlecode.flyway.core.Flyway;
 
 /**
- * A JDBC implementation of {@link TenantDetailsService} for loading a tenants
- * details by a <code>tenantIdentifier</code>.
+ * A service that picks up on tenants that are configured to auto-update their
+ * specific schema on application startup.
  */
 @Service
-public class TenantUpgradeService implements ITenantUpgradeService {
+public class TenantDatabaseUpgradeService {
 
     private final TenantDetailsService tenantDetailsService;
 
     @Autowired
-    public TenantUpgradeService(TenantDetailsService detailsService) {
+    public TenantDatabaseUpgradeService(final TenantDetailsService detailsService) {
         this.tenantDetailsService = detailsService;
     }
 
-    @Override
     @PostConstruct
     public void upgradeAllTenants() {
         List<MifosPlatformTenant> tenants = tenantDetailsService.findAllTenants();
