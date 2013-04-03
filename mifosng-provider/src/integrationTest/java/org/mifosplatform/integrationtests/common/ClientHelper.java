@@ -3,7 +3,7 @@ package org.mifosplatform.integrationtests.common;
 import java.util.HashMap;
 import java.util.Random;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 
 import com.google.gson.Gson;
 import com.jayway.restassured.specification.RequestSpecification;

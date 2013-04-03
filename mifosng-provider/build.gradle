@@ -159,9 +159,8 @@ dependencies {
                 [group: 'com.googlecode.flyway', name: 'flyway-maven-plugin', version: '2.1.1']
  	        )
  	        
- 	 testCompile 'junit:junit:4.10', 
-                 'org.mockito:mockito-all:1.9.0',
-                 'org.hamcrest:hamcrest-all:1.1',
+ 	 testCompile 'junit:junit:4.11', 
+                 'org.mockito:mockito-all:1.9.5',
                  'com.jayway.restassured:rest-assured:1.7.2'
  	 
 }

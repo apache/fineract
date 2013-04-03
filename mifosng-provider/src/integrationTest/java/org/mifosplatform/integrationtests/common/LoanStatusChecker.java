@@ -5,8 +5,6 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.HashMap;
 
-import junit.framework.Assert;
-
 import com.jayway.restassured.specification.RequestSpecification;
 import com.jayway.restassured.specification.ResponseSpecification;
 
@@ -34,7 +32,7 @@ public class LoanStatusChecker {
     }
 
     public static void verifyLoanAccountIsClosed(final HashMap loanStatusHashMap) {
-        Assert.assertTrue(getStatus(loanStatusHashMap, "closed"));
+        assertTrue(getStatus(loanStatusHashMap, "closed"));
     }
 
     public static HashMap getStatusOfLoan(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
