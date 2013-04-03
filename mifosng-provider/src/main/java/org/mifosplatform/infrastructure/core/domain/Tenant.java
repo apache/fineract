@@ -5,7 +5,7 @@
  */
 package org.mifosplatform.infrastructure.core.domain;
 
-public class MifosPlatformTenant {
+public class Tenant {
 
     private final Long id;
     private final String name;
@@ -15,11 +15,10 @@ public class MifosPlatformTenant {
     private final String schemaUsername;
     private final String schemaPassword;
     private final String timezoneId;
-    private final boolean autoUpdateEnabled;
+    
 
-    public MifosPlatformTenant(final Long id, final String name, final String schemaName, final String schemaServer,
-            final String schemaServerPort, final String schemaUsername, final String schemaPassword, String timezoneId,
-            final boolean autoUpdateEnabled) {
+    public Tenant(final Long id, final String name, final String schemaName, final String schemaServer,
+            final String schemaServerPort, final String schemaUsername, final String schemaPassword, String timezoneId) {
         this.id = id;
         this.name = name;
         this.schemaName = schemaName;
@@ -28,14 +27,7 @@ public class MifosPlatformTenant {
         this.schemaUsername = schemaUsername;
         this.schemaPassword = schemaPassword;
         this.timezoneId = timezoneId;
-        this.autoUpdateEnabled = autoUpdateEnabled;
-
-    }
-
-    public String databaseURL() {
-        String url = new StringBuilder("jdbc:mysql://").append(schemaServer).append(':').append(schemaServerPort).append('/')
-                .append(schemaName).toString();
-        return url;
+        
     }
 
     public Long getId() {
@@ -47,7 +39,15 @@ public class MifosPlatformTenant {
     }
 
     public String getSchemaName() {
-        return this.schemaName;
+        return schemaName;
+    }
+
+    public String getSchemaServer() {
+        return schemaServer;
+    }
+
+    public String getSchemaServerPort() {
+        return schemaServerPort;
     }
 
     public String getSchemaUsername() {
@@ -57,13 +57,9 @@ public class MifosPlatformTenant {
     public String getSchemaPassword() {
         return schemaPassword;
     }
-
+    
     public String getTimezoneId() {
         return timezoneId;
     }
-
-    public boolean isAutoUpdateEnabled() {
-        return this.autoUpdateEnabled;
-    }
-
+      
 }

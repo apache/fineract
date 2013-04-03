@@ -27,7 +27,7 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class TomcatJdbcDataSourcePerTenantService implements DataSourcePerTenantService {
-	
+
     private final Map<Long, DataSource> tenantToDataSourceMap = new ConcurrentHashMap<Long, DataSource>(1);
     private final DataSource tenantDataSource;
 
@@ -61,24 +61,23 @@ public class TomcatJdbcDataSourcePerTenantService implements DataSourcePerTenant
         // see
         // http://www.tomcatexpert.com/blog/2010/04/01/configuring-jdbc-pool-high-concurrency
 
-        StringBuilder jdbcUrlBuilder = new StringBuilder("jdbc:mysql://").append(tenant.getSchemaServer()).append(':')
-                .append(tenant.getSchemaServerPort()).append('/').append(tenant.getSchemaName());
+        String jdbcUrl = tenant.databaseURL();
 
         PoolConfiguration poolConfiguration = new PoolProperties();
         poolConfiguration.setDriverClassName("com.mysql.jdbc.Driver");
         poolConfiguration.setName(tenant.getSchemaName() + "_pool");
-        poolConfiguration.setUrl(jdbcUrlBuilder.toString());
+        poolConfiguration.setUrl(jdbcUrl);
         poolConfiguration.setUsername(tenant.getSchemaUsername());
         poolConfiguration.setPassword(tenant.getSchemaPassword());
 
         poolConfiguration.setInitialSize(5);
-        //poolConfiguration.setMaxActive(5);
-        //poolConfiguration.setMinIdle(1);
-        //poolConfiguration.setMaxIdle(4);
+        // poolConfiguration.setMaxActive(5);
+        // poolConfiguration.setMinIdle(1);
+        // poolConfiguration.setMaxIdle(4);
 
-        //poolConfiguration.setSuspectTimeout(60);
-        //poolConfiguration.setTimeBetweenEvictionRunsMillis(30000);
-        //poolConfiguration.setMinEvictableIdleTimeMillis(60000);
+        // poolConfiguration.setSuspectTimeout(60);
+        // poolConfiguration.setTimeBetweenEvictionRunsMillis(30000);
+        // poolConfiguration.setMinEvictableIdleTimeMillis(60000);
 
         poolConfiguration.setTestOnBorrow(true);
         poolConfiguration.setValidationQuery("SELECT 1");

@@ -13,7 +13,7 @@
     	http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
     	http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-3.0.xsd">
 
-    <bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+    <bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean" depends-on="tenantUpgradeService">
         <property name="dataSource" ref="tenantAwareDataSource" />
         <property name="persistenceUnitName" value="jpa-pu" />
         <property name="jpaVendorAdapter">
