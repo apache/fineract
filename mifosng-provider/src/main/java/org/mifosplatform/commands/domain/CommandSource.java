@@ -79,7 +79,7 @@ public class CommandSource extends AbstractPersistable<Long> {
     private AppUser checker;
 
     @SuppressWarnings("unused")
-    @Column(name = "checked_on_date", nullable = false)
+    @Column(name = "checked_on_date", nullable = true)
     @Temporal(TemporalType.TIMESTAMP)
     private Date checkedOnDate;
 
