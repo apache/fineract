@@ -40,6 +40,9 @@ public class LoanProductTestBuilder {
     private String accountingRule =NONE;
     private final String currencyCode = INR;
     private String amortizationType= EQUAL_INSTALLMENTS;
+    private String minPrincipal = "1000.00";
+    private String maxPrincipal = "100000.00";
+
 
     public String build() {
         HashMap<String, String> map = new HashMap<String, String>();
@@ -60,7 +63,18 @@ public class LoanProductTestBuilder {
         map.put("inArrearsTolerance", inArrearsTolerance);
         map.put("transactionProcessingStrategyId", transactionProcessingStrategy);
         map.put("accountingRule", accountingRule);
+        map.put("minPrincipal",minPrincipal);
+        map.put("maxPrincipal",maxPrincipal);
         return new Gson().toJson(map);
+    }
+
+    public LoanProductTestBuilder withMinPrincipal(final String minPrincipal){
+        this.minPrincipal=minPrincipal;
+        return this;
+    }
+    public LoanProductTestBuilder withMaxPrincipal(final String maxPrincipal){
+        this.maxPrincipal=maxPrincipal;
+        return this;
     }
 
     public LoanProductTestBuilder withLoanName(final String loanName){

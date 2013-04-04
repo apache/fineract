@@ -1,6 +1,6 @@
 package org.mifosplatform.integrationtests;
 
-import static org.junit.Assert.assertEquals;
+//import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,10 +20,12 @@ import com.jayway.restassured.http.ContentType;
 import com.jayway.restassured.specification.RequestSpecification;
 import com.jayway.restassured.specification.ResponseSpecification;
 
+import static org.junit.Assert.assertEquals;
+
 /**
- * Client Loan Integration Test for checking Loan Disbursement with Waive
- * Interest and Write-Off.
- */
+* Client Loan Integration Test for checking Loan Disbursement with Waive
+* Interest and Write-Off.
+*/
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public class LoanWithWaiveInterestAndWriteOffIntegrationTest {
 

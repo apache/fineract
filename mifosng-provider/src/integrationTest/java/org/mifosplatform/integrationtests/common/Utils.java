@@ -30,7 +30,8 @@ public class Utils {
         try {
             System.out.println("-----------------------------------LOGIN-----------------------------------------");
             String json = RestAssured.post(LOGIN_URL).asString();
-            assertThat("Failed to login into mifosx platform",StringUtils.isBlank(json),is(false));
+            System.out.println("JSON:****************"+json);
+//            assertThat("Failed to login into mifosx platform",StringUtils.isBlank(json),is(false));
             return JsonPath.with(json).get("base64EncodedAuthenticationKey");
         }
         catch (Exception e) {
