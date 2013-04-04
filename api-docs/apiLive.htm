@@ -12,7 +12,7 @@
 		var result = {};
 		if (window.location.search) {
 			// split up the query string and store in an associative array
-			var params = window.location.search.slice(1).split("&");
+			var params = window.location.search.slice(1).split("&");                                 x
 			for ( var i = 0; i < params.length; i++) {
 				var tmp = params[i].split("=");
 				result[tmp[0]] = unescape(tmp[1]);
@@ -454,6 +454,14 @@
 								<td></td>
 								<td></td>
 							</tr>
+                            <tr class="alt">
+                                <td></td>
+                                <td>loans/{loanId}/transactions?command=writeoff</td>
+                                <td><a href="#loans_transaction_write-off_loan">Write-off Loan</a></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                            </tr>
 							<tr>
 								<td></td>
 								<td>loans/{loanId}/transactions/{transactionId}</td>
@@ -3807,8 +3815,12 @@ Request Body:
 POST https://DomainName/api/v1/loans/{loanId}?command=undoApproval
 					</code>
 					<code class="method-request">
-POST loans/1?command=approve
-Content-Type: application/json 
+POST loans/1?command=undoApproval
+Content-Type: application/json
+Request Body:
+{
+  "note": "Loan undo approval note"
+}
 					</code>
 					<code class="method-response">
 {
@@ -4250,7 +4262,62 @@ Request Body:
 				</div>
 			</div>
 
-			<a id="loans_transaction_retrieve" name="loans_transaction_retrieve" class="old-syle-anchor">&nbsp;</a>
+
+            <a id="loans_transaction_write-off_loan" name="loans_transaction_write-off_loan" class="old-syle-anchor">&nbsp;</a>
+            <div class="method-section">
+                <div class="method-description">
+                    <h4>Write-off Loan</h4>
+                </div>
+                <div class="method-example">
+                    <code class="method-declaration">
+                        POST https://DomainName/api/v1/loans/{loanId}/transactions?command=writeoff
+                    </code>
+                    <code class="method-request">
+                        POST loans/70/transactions?command=writeoff
+                        Content-Type: application/json
+                        Request Body:
+                        {
+                        "locale": "en_GB",
+                        "dateFormat": "dd MMMM yyyy",
+                        "transactionDate": "14 May 2012",
+                        "note": "Write-off note"
+                        }
+                    </code>
+                    <code class="method-response">
+                        {
+                        "officeId": 1,
+                        "clientId": 7,
+                        "loanId": 70,
+                        "resourceId": 442,
+                        "changes": {
+                        "transactionDate": "1 March 2012",
+                        "locale": "en",
+                        "dateFormat": "dd MMMM yyyy",
+                        "status": {
+                        "id": 601,
+                        "code": "loanStatusType.closed.written.off",
+                        "value": "Closed (written off)",
+                        "pendingApproval": false,
+                        "waitingForDisbursal": false,
+                        "active": false,
+                        "closedObligationsMet": false,
+                        "closedWrittenOff": true,
+                        "closedRescheduled": false,
+                        "closed": true,
+                        "overpaid": false
+                        },
+                        "closedOnDate": "1 March 2012",
+                        "writtenOffOnDate": "1 March 2012",
+                        "note": "Write-off note"
+                        }
+                        }
+
+                    </code>
+                </div>
+            </div>
+
+
+            <a id="loans_transaction_retrieve" name="loans_transaction_retrieve" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
 					<h4>Retrieve a Transaction Details</h4>
