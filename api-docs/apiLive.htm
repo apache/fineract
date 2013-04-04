@@ -163,7 +163,7 @@
 									</table></td>
 							</tr>
 							<tr class="alt">
-								<td><a href="#clients">CLIENT</a></td>
+								<td><a href="#clients">Client</a></td>
 								<td>clients</td>
 								<td><a href="#clients_create">Create a Client</a></td>
 								<td><a href="#clients_list">List Clients</a></td>
@@ -229,7 +229,7 @@
 			</div>
 			<div class="flybar-nav">
 				<h2 class="flybar-button">Group</h2>
-				<div id="toc-menu-client" class="flybar-menu">
+				<div id="toc-menu-group" class="flybar-menu">
 					<div class="tocMatrix">
 						<table class=matrixHeading>
 							<tr class="matrixHeadingBG">
@@ -275,7 +275,7 @@
 									</table></td>
 							</tr>
 							<tr class="alt">
-								<td><a href="#groups">GROUP</a></td>
+								<td><a href="#groups">Group</a></td>
 								<td>groups</td>
 								<td><a href="#groups_create">Create a Group</a></td>
 								<td><a href="#groups_list">List Groups</a></td>
@@ -527,8 +527,8 @@
 				</div>
 			</div>
 			<div class="flybar-nav">
-				<h2 class="flybar-button">Org</h2>
-				<div id="toc-menu-org" class="flybar-menu">
+				<h2 class="flybar-button">Savings</h2>
+				<div id="toc-menu-savings" class="flybar-menu">
 					<div class="tocMatrix">
 						<table class=matrixHeading>
 							<tr class="matrixHeadingBG">
@@ -573,591 +573,13 @@
 										</tr>
 									</table></td>
 							</tr>
-							<tr class="alt">
-								<td><a href="#offices">OFFICE</a></td>
-								<td>offices</td>
-								<td><a href="#offices_create">Create an Office</a></td>
-								<td><a href="#offices_list">List Offices</a></td>
-								<td></td>
-								<td></td>
-							</tr>
-							<tr>
-								<td></td>
-								<td>offices/{officeId}</td>
-								<td></td>
-								<td><a href="#offices_retrieve">Retrieve an Office</a></td>
-								<td><a href="#offices_update">Update an Office</a></td>
-								<td></td>
-							</tr>
-							<tr class="alt">
-								<td><a href="#loanproducts">LOAN PRODUCT</a></td>
-								<td>loanproducts</td>
-								<td><a href="#loanproducts_create">Create a Loan
-										Product</a></td>
-								<td><a href="#loanproducts_list">List Loan Products</a></td>
-								<td></td>
-								<td></td>
-							</tr>
-							<tr>
-								<td></td>
-								<td>loanproducts/{productId}</td>
-								<td></td>
-								<td><a href="#loanproducts_retrieve">Retrieve a Loan
-										Product</a></td>
-								<td><a href="#loanproducts_update">Update a Loan
-										Product</a></td>
-								<td></td>
-							</tr>
-							<tr class="alt">
-								<td><a href="#configs">CURRENCY</a></td>
-								<td>currencies</td>
-								<td></td>
-								<td><a href="#configs_currencyretrieve">Retrieve
-										Currency Configuration</a></td>
-								<td><a href="#configs_currencyupdate">Update Currency
-										Configuration</a></td>
-								<td></td>
-							</tr>
-							<tr>
-								<td><a href="#funds">FUNDS</a></td>
-								<td>funds</td>
-								<td><a href="#funds_create">Create a Fund</a></td>
-								<td><a href="#funds_retrieve">List Funds</a></td>
-								<td></td>
-								<td></td>
-							</tr>
-							<tr class="alt">
-								<td></td>
-								<td>funds/{fundId}</td>
-								<td></td>
-								<td><a href="#fund_retrieve">Retrieve a Fund</a></td>
-								<td><a href="#fund_update">Update a Fund</a></td>
-								<td></td>
-							</tr>
-							<tr>
-								<td><a href="#staff">STAFF</a></td>
-								<td>staff</td>
-								<td><a href="#staff_create">Create a Staff</a></td>
-								<td><a href="#staff_list">List Staff</a></td>
-								<td></td>
-								<td></td>
-							</tr>
-							<tr class="alt">
-								<td></td>
-								<td>staff/{staffId}</td>
-								<td></td>
-								<td><a href="#staff_retrieve">Retrieve a Staff Member</a></td>
-								<td><a href="#staff_update">Update a Staff Member</a></td>
-								<td></td>
-							</tr>
-							<tr>
-								<td><a href="#charges">CHARGES</a></td>
-								<td>charges</td>
-								<td><a href="#charges_create">Create a Charge</a></td>
-								<td><a href="#charges_list">List Charges</a></td>
-								<td></td>
-								<td></td>
-							</tr>
-							<tr class="alt">
-								<td></td>
-								<td>charges/{chargeId}</td>
-								<td></td>
-								<td><a href="#charges_retrieve">Retrieve a Charge</a></td>
-								<td><a href="#charges_update">Update a Charge</a></td>
-								<td><a href="#charges_delete">Delete a Charge</a></td>
-							</tr>
 						</table>
 					</div>
 				</div>
 			</div>
-			
-			<div class="flybar-nav">
-				<h2 class="flybar-button">System</h2>
-				<div id="toc-menu-system" class="flybar-menu">
-					<div class="tocMatrix">
-						<table class=matrixHeading>
-							<tr class="matrixHeadingBG">
-								<td colspan=2 valign="top"><div class="matrixHeadingVerbs">
-										<table>
-											<tr>
-												<td>RESOURCES</td>
-											</tr>
-										</table>
-									</div></td>
-								<td><table>
-										<tr>
-											<td><div class="matrixHeadingVerbs">POST</div></td>
-										</tr>
-										<tr>
-											<td><div class=matrixHeadingCommands>create/complex
-													update</div></td>
-										</tr>
-									</table></td>
-								<td><table>
-										<tr>
-											<td><div class="matrixHeadingVerbs">GET</div></td>
-										</tr>
-										<tr>
-											<td><div class=matrixHeadingCommands>read</div></td>
-										</tr>
-									</table></td>
-								<td><table>
-										<tr>
-											<td><div class="matrixHeadingVerbs">PUT</div></td>
-										</tr>
-										<tr>
-											<td><div class=matrixHeadingCommands>update</div></td>
-										</tr>
-									</table></td>
-								<td><table>
-										<tr>
-											<td><div class="matrixHeadingVerbs">DELETE</div></td>
-										</tr>
-										<tr>
-											<td><div class=matrixHeadingCommands>delete</div></td>
-										</tr>
-									</table></td>
-							</tr>
-							<tr class="alt">
-								<td><a href="#configs_global">GLOBAL CONFIGURATION</a></td>
-								<td>configurations</td>
-								<td></td>
-								<td><a href="#configs_globalconfig_retrieve">Retrieve
-										Global Configuration</a></td>
-								<td><a href="#configs_globalconfig_update">Update
-										Global Configuration</a></td>
-								<td></td>
-							</tr>
-							<tr>
-								<td><a href="#configs_codes">CODES</a></td>
-								<td>codes</td>
-								<td><a href="#configs_codes_create">Create a Code</a></td>
-								<td><a href="#configs_codes_retrieve">List Codes</a></td>
-								<td></td>
-								<td></td>
-							</tr>
-							<tr class="alt">
-								<td></td>
-								<td>codes/{codeId}</td>
-								<td></td>
-								<td><a href="#configs_code_retrieve">Retrieve a Code</a></td>
-								<td><a href="#configs_code_update">Update a Code</a></td>
-								<td><a href="#configs_code_delete">Delete a Code</a></td>
-							</tr>
-							<tr>
-								<td><a href="#configs_codes_codevalues">CODE VALUES</a></td>
-								<td>codes/{codeId}/codevalues</td>
-								<td><a href="#configs_codes_codevalues_create">Create a Code Value</a></td>
-								<td><a href="#configs_codes_codevalues_list">List Code Values</a></td>
-								<td></td>
-								<td></td>
-							</tr>
-							<tr class="alt">
-								<td></td>
-								<td>codes/{codeId}/codevalues/{codevalueId}</td>
-								<td></td>
-								<td><a href="#configs_codes_codevalues_retrieve">Retrieve a Code Value</a></td>
-								<td><a href="#configs_codes_codevalues_update">Update a Code Value</a></td>
-								<td><a href="#configs_codes_codevalues_delete">Delete a Code Value</a></td>
-							</tr>
-						</table>
-					</div>
-				</div>
-			</div>
-			<div class="flybar-nav">
-				<h2 class="flybar-button">Non-Core</h2>
-				<div id="toc-menu-noncore" class="flybar-menu">
-					<div class="tocMatrix">
-						<table class=matrixHeading>
-							<tr class="matrixHeadingBG">
-								<td colspan=2 valign="top"><div class="matrixHeadingVerbs">
-										<table>
-											<tr>
-												<td>RESOURCES</td>
-											</tr>
-										</table>
-									</div></td>
-								<td><table>
-										<tr>
-											<td><div class="matrixHeadingVerbs">POST</div></td>
-										</tr>
-										<tr>
-											<td><div class=matrixHeadingCommands>create/complex
-													update</div></td>
-										</tr>
-									</table></td>
-								<td><table>
-										<tr>
-											<td><div class="matrixHeadingVerbs">GET</div></td>
-										</tr>
-										<tr>
-											<td><div class=matrixHeadingCommands>read</div></td>
-										</tr>
-									</table></td>
-								<td><table>
-										<tr>
-											<td><div class="matrixHeadingVerbs">PUT</div></td>
-										</tr>
-										<tr>
-											<td><div class=matrixHeadingCommands>update</div></td>
-										</tr>
-									</table></td>
-								<td><table>
-										<tr>
-											<td><div class="matrixHeadingVerbs">DELETE</div></td>
-										</tr>
-										<tr>
-											<td><div class=matrixHeadingCommands>delete</div></td>
-										</tr>
-									</table></td>
-							</tr>
-							<tr>
-								<td><a href="#datatables">DATA TABLE</a></td>
-								<td>datatables</td>
-								<td></td>
-								<td><a href="#datatables_list">List Data Tables</a></td>
-								<td></td>
-								<td></td>
-							</tr>
-							<tr class="alt">
-								<td></td>
-								<td>datatables/register/{datatable}/{apptable}</td>
-								<td><a href="#datatables_register">Register Data Table</a></td>
-								<td></td>
-								<td></td>
-								<td></td>
-							</tr>
-							<tr>
-								<td></td>
-								<td>datatables/deregister/{datatable}</td>
-								<td><a href="#datatables_deregister">Deregister Data
-										Table</a></td>
-								<td></td>
-								<td></td>
-								<td></td>
-							</tr>
-							<tr class="alt">
-								<td></td>
-								<td>datatables/{datatable}/{apptableId}</td>
-								<td><a href="#datatables_create">Create Entry in Data
-										Table</a></td>
-								<td><a href="#datatables_retrieve">Retrieve Entry(s)
-										from Data Table</a></td>
-								<td><a href="#datatables_update">Update Entry in Data
-										Table (One to One)</a></td>
-								<td><a href="#datatables_delete">Delete Entry(s) in
-										Data Table</a></td>
-							</tr>
-							<tr>
-								<td></td>
-								<td>datatables/{datatable}/{apptableId}/{datatableId}</td>
-								<td></td>
-								<td><a href="#datatables_update_1M">Update Entry in
-										Data Table (One to Many)</a></td>
-								<td></td>
-								<td><a href="#datatables_delete_1M">Delete Entry in
-										Data Table (One to Many)</a></td>
-							</tr>
-							<tr>
-								<td><a href="#notes">NOTES</a></td>
-								<td>{resource}/{resourceId}/notes</td>
-								<td><a href="#resources_addnote">Add a Resource Note</td>
-								<td><a href="#resource_notelist">Retrieve a Resource's Notes</a></td>
-								<td></td>
-								<td></td>
-							</tr>
-							<tr class="alt">
-								<td></td>
-								<td>{resource}/{resourceId}/notes/{noteId}</td>
-								<td></td>
-								<td><a href="#resources_retrievenote">List All
-								Notes for a Resource</a></td>
-								<td><a href="#resources_updatenote">Update a Resource Note</a></td>
-								<td><a href="#resources_deletenote">Delete a Resource Note</a></td>
-							</tr>
-							<tr>
-								<td><a href="#documents">Documents</a></td>
-								<td>{entityType}/{entityId}/documents</td>
-								<td><a href="#documents_create">Create a Document</td>
-								<td><a href="#documents_list">List All Document Details</a></td>
-								<td></td>
-								<td></td>
-							</tr>
-							<tr class="alt">
-								<td></td>
-								<td>{entityType}/{entityId}/documents/{documentId}</td>
-								<td></td>
-								<td><a href="#documents_retrieve">Retrieve a Documents Details</a></td>
-								<td><a href="#documents_update">Update a Document</a></td>
-								<td><a href="#documents_delete">Delete a Document</a></td>
-							</tr>
-							<tr class="alt">
-								<td></td>
-								<td>{entityType}/{entityId}/documents/{documentId}/attachment</td>
-								<td></td>
-								<td><a href="#documents_retrieve_file">Retrieve 
-									binary file associated with a 
-									Document</a>
-								</td>
-								<td></td>
-								<td></td>
-							</tr>
-							<tr>
-								<td><a href="#search">SEARCH</a></td>
-								<td>search</td>
-								<td></td>
-								<td><a href="#search_resource">Search Resources</td>
-								<td></td>
-								<td></td>
-							</tr>
-						</table>
-					</div>
-				</div>
-			</div>
-			<div class="flybar-nav">
-				<h2 class="flybar-button">Report</h2>
-				<div id="toc-menu-report" class="flybar-menu">
-					<div class="tocMatrix">
-						<table class=matrixHeading>
-							<tr class="matrixHeadingBG">
-								<td colspan=2 valign="top"><div class="matrixHeadingVerbs">
-										<table>
-											<tr>
-												<td>RESOURCES</td>
-											</tr>
-										</table>
-									</div></td>
-								<td><table>
-										<tr>
-											<td><div class="matrixHeadingVerbs">POST</div></td>
-										</tr>
-										<tr>
-											<td><div class=matrixHeadingCommands>create/complex
-													update</div></td>
-										</tr>
-									</table></td>
-								<td><table>
-										<tr>
-											<td><div class="matrixHeadingVerbs">GET</div></td>
-										</tr>
-										<tr>
-											<td><div class=matrixHeadingCommands>read</div></td>
-										</tr>
-									</table></td>
-								<td><table>
-										<tr>
-											<td><div class="matrixHeadingVerbs">PUT</div></td>
-										</tr>
-										<tr>
-											<td><div class=matrixHeadingCommands>update</div></td>
-										</tr>
-									</table></td>
-								<td><table>
-										<tr>
-											<td><div class="matrixHeadingVerbs">DELETE</div></td>
-										</tr>
-										<tr>
-											<td><div class=matrixHeadingCommands>delete</div></td>
-										</tr>
-									</table></td>
-							</tr>
-							<tr>
-								<td><a href="#reports">REPORT</a></td>
-								<td>reports</td>
-								<td></td>
-								<td><a href="#reports_list">List Reports</a></td>
-								<td></td>
-								<td></td>
-							</tr>
-							<tr class="alt">
-								<td></td>
-								<td>reports/{reportName}</td>
-								<td></td>
-								<td><a href="#report_run">Run a Report</a></td>
-								<td></td>
-								<td></td>
-							</tr>
-						</table>
-					</div>
-				</div>
-			</div>
-			<div class="flybar-nav">
-				<h2 class="flybar-button">User</h2>
-				<div id="toc-menu-user" class="flybar-menu">
-					<div class="tocMatrix">
-						<table class=matrixHeading>
-							<tr class="matrixHeadingBG">
-								<td colspan=2 valign="top"><div class="matrixHeadingVerbs">
-										<table>
-											<tr>
-												<td>RESOURCES</td>
-											</tr>
-										</table>
-									</div></td>
-								<td><table>
-										<tr>
-											<td><div class="matrixHeadingVerbs">POST</div></td>
-										</tr>
-										<tr>
-											<td><div class=matrixHeadingCommands>create/complex
-													update</div></td>
-										</tr>
-									</table></td>
-								<td><table>
-										<tr>
-											<td><div class="matrixHeadingVerbs">GET</div></td>
-										</tr>
-										<tr>
-											<td><div class=matrixHeadingCommands>read</div></td>
-										</tr>
-									</table></td>
-								<td><table>
-										<tr>
-											<td><div class="matrixHeadingVerbs">PUT</div></td>
-										</tr>
-										<tr>
-											<td><div class=matrixHeadingCommands>update</div></td>
-										</tr>
-									</table></td>
-								<td><table>
-										<tr>
-											<td><div class="matrixHeadingVerbs">DELETE</div></td>
-										</tr>
-										<tr>
-											<td><div class=matrixHeadingCommands>delete</div></td>
-										</tr>
-									</table></td>
-							</tr>
-							<tr>
-								<td><a href="#authentication">AUTHENTICATION</a></td>
-								<td>authentication</td>
-								<td><a href="#authenticate_request">Verify Authentication</a></td>
-								<td></td>
-								<td></td>
-								<td></td>
-							</tr>
-							<tr class="alt">
-								<td><a href="#users">USER</a></td>
-								<td>users</td>
-								<td><a href="#users_create">Create a User</a></td>
-								<td><a href="#users_list">List Users</a></td>
-								<td></td>
-								<td></td>
-							</tr>
-							<tr>
-								<td></td>
-								<td>users/{userId}</td>
-								<td></td>
-								<td><a href="#users_retrieve">Retrieve a User</a></td>
-								<td><a href="#users_update">Update a User</a></td>
-								<td><a href="#users_delete">Delete a User</a></td>
-							</tr>
-							<tr class="alt">
-								<td><a href="#roles">ROLE</a></td>
-								<td>roles</td>
-								<td><a href="#roles_create">Create a New Role</a></td>
-								<td><a href="#roles_list">List Roles</a></td>
-								<td></td>
-								<td></td>
-							</tr>
-							<tr>
-								<td></td>
-								<td>roles/{roleId}</td>
-								<td></td>
-								<td><a href="#roles_retrieve">Retrieve a Role</a></td>
-								<td><a href="#roles_update">Update a Role</a></td>
-								<td></td>
-							</tr>
-							<tr class="alt">
-								<td></td>
-								<td>roles/{roleId}/permissions</td>
-								<td></td>
-								<td><a href="#rolespermissions_retrieve">Retrieve a
-										Role's Permissions</a></td>
-								<td><a href="#rolespermissions_update">Update a Role's
-										Permissions</a></td>
-								<td></td>
-							</tr>
-							<tr>
-								<td><a href="#permissions">PERMISSION</a></td>
-								<td>permissions</td>
-								<td></td>
-								<td><a href="#permissions_list">List Application
-										Permissions</a></td>
-								<td></td>
-								<td></td>
-							</tr>
-						</table>
-					</div>
-				</div>
-			</div>
-
-			<div class="flybar-nav">
-				<h2 class="flybar-button">Template</h2>
-				<div id="toc-menu-template" class="flybar-menu">
-					<div class="tocMatrix">
-						<table class=matrixHeading>
-							<tr class="matrixHeadingBG">
-								<td valign="top"><div class="matrixHeadingVerbs">
-										<table>
-											<tr>
-												<td>RESOURCES</td>
-											</tr>
-										</table>
-									</div></td>
-								<td><table>
-										<tr>
-											<td><div class="matrixHeadingVerbs">GET</div></td>
-										</tr>
-										<tr>
-											<td><div class=matrixHeadingCommands>read</div></td>
-										</tr>
-									</table></td>
-							</tr>
-							<tr class="alt">
-								<td>clients/template</td>
-								<td><a href="#clients_template">Retrieve Client Template</a></td>
-							</tr>
-							<tr class="alt">
-								<td>loanproducts/template</td>
-								<td><a href="#loanproducts_template">Retrieve Loan Product Template</a></td>
-							</tr>
-							<tr>
-								<td>loans/template?clientId={clientId}</td>
-								<td><a href="#loans_template">Retrieve Loan Template</a></td>
-							</tr>
-							<tr class="alt">
-								<td>loans/{loanId}/transactions/template</td>
-								<td><a href="#loans_repaymenttemplate_etc">Retrieve Loan Transaction Template</a></td>
-							</tr>
-							<tr class="alt">
-								<td>savingproducts/template</td>
-								<td><a href="#savingsproducts_template">Retrieve Savings Product Template</a></td>
-							</tr>
-							<tr class="alt">
-								<td>savingsaccounts/template?clientId={clientId}</td>
-								<td><a href="#savingsaccounts_template">Retrieve Savings Account Template</a></td>
-							</tr>
-							<tr>
-								<td>offices/template</td>
-								<td><a href="#offices_template">Retrieve Office Template</a></td>
-							</tr>
-							<tr>
-								<td>users/template</td>
-								<td><a href="#users_template">Retrieve User Template</a></td>
-							</tr>
-							<tr class="alt">
-								<td>audit/searchtemplate</td>
-								<td><a href="#audit_searchtemplate">Retrieve Audit Search Data</a></td>
-							</tr>
-						</table>
-					</div>
-				</div>
-			</div>
-
 			<div class="flybar-nav">
 				<h2 class="flybar-button">Accounting</h2>
-				<div id="toc-menu-group" class="flybar-menu">
+				<div id="toc-menu-accounting" class="flybar-menu">
 					<div class="tocMatrix">
 						<table class=matrixHeading>
 							<tr class="matrixHeadingBG">
@@ -1262,7 +684,636 @@
 					</div>
 				</div>
 			</div>
-			
+			<div class="flybar-nav">
+				<h2 class="flybar-button">Org</h2>
+				<div id="toc-menu-org" class="flybar-menu">
+					<div class="tocMatrix">
+						<table class=matrixHeading>
+							<tr class="matrixHeadingBG">
+								<td colspan=2 valign="top"><div class="matrixHeadingVerbs">
+										<table>
+											<tr>
+												<td>RESOURCES</td>
+											</tr>
+										</table>
+									</div></td>
+								<td><table>
+										<tr>
+											<td><div class="matrixHeadingVerbs">POST</div></td>
+										</tr>
+										<tr>
+											<td><div class=matrixHeadingCommands>create/complex
+													update</div></td>
+										</tr>
+									</table></td>
+								<td><table>
+										<tr>
+											<td><div class="matrixHeadingVerbs">GET</div></td>
+										</tr>
+										<tr>
+											<td><div class=matrixHeadingCommands>read</div></td>
+										</tr>
+									</table></td>
+								<td><table>
+										<tr>
+											<td><div class="matrixHeadingVerbs">PUT</div></td>
+										</tr>
+										<tr>
+											<td><div class=matrixHeadingCommands>update</div></td>
+										</tr>
+									</table></td>
+								<td><table>
+										<tr>
+											<td><div class="matrixHeadingVerbs">DELETE</div></td>
+										</tr>
+										<tr>
+											<td><div class=matrixHeadingCommands>delete</div></td>
+										</tr>
+									</table></td>
+							</tr>
+							<tr class="alt">
+								<td><a href="#offices">Office</a></td>
+								<td>offices</td>
+								<td><a href="#offices_create">Create an Office</a></td>
+								<td><a href="#offices_list">List Offices</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>offices/{officeId}</td>
+								<td></td>
+								<td><a href="#offices_retrieve">Retrieve an Office</a></td>
+								<td><a href="#offices_update">Update an Office</a></td>
+								<td></td>
+							</tr>
+							<tr class="alt">
+								<td><a href="#loanproducts">Loan Product</a></td>
+								<td>loanproducts</td>
+								<td><a href="#loanproducts_create">Create a Loan
+										Product</a></td>
+								<td><a href="#loanproducts_list">List Loan Products</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>loanproducts/{productId}</td>
+								<td></td>
+								<td><a href="#loanproducts_retrieve">Retrieve a Loan
+										Product</a></td>
+								<td><a href="#loanproducts_update">Update a Loan
+										Product</a></td>
+								<td></td>
+							</tr>
+							<tr class="alt">
+								<td><a href="#configs">Currency</a></td>
+								<td>currencies</td>
+								<td></td>
+								<td><a href="#configs_currencyretrieve">Retrieve
+										Currency Configuration</a></td>
+								<td><a href="#configs_currencyupdate">Update Currency
+										Configuration</a></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td><a href="#funds">Funds</a></td>
+								<td>funds</td>
+								<td><a href="#funds_create">Create a Fund</a></td>
+								<td><a href="#funds_retrieve">List Funds</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr class="alt">
+								<td></td>
+								<td>funds/{fundId}</td>
+								<td></td>
+								<td><a href="#fund_retrieve">Retrieve a Fund</a></td>
+								<td><a href="#fund_update">Update a Fund</a></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td><a href="#staff">Staff</a></td>
+								<td>staff</td>
+								<td><a href="#staff_create">Create a Staff</a></td>
+								<td><a href="#staff_list">List Staff</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr class="alt">
+								<td></td>
+								<td>staff/{staffId}</td>
+								<td></td>
+								<td><a href="#staff_retrieve">Retrieve a Staff Member</a></td>
+								<td><a href="#staff_update">Update a Staff Member</a></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td><a href="#charges">Charges</a></td>
+								<td>charges</td>
+								<td><a href="#charges_create">Create a Charge</a></td>
+								<td><a href="#charges_list">List Charges</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr class="alt">
+								<td></td>
+								<td>charges/{chargeId}</td>
+								<td></td>
+								<td><a href="#charges_retrieve">Retrieve a Charge</a></td>
+								<td><a href="#charges_update">Update a Charge</a></td>
+								<td><a href="#charges_delete">Delete a Charge</a></td>
+							</tr>
+						</table>
+					</div>
+				</div>
+			</div>
+			<div class="flybar-nav">
+				<h2 class="flybar-button">User</h2>
+				<div id="toc-menu-user" class="flybar-menu">
+					<div class="tocMatrix">
+						<table class=matrixHeading>
+							<tr class="matrixHeadingBG">
+								<td colspan=2 valign="top"><div class="matrixHeadingVerbs">
+										<table>
+											<tr>
+												<td>RESOURCES</td>
+											</tr>
+										</table>
+									</div></td>
+								<td><table>
+										<tr>
+											<td><div class="matrixHeadingVerbs">POST</div></td>
+										</tr>
+										<tr>
+											<td><div class=matrixHeadingCommands>create/complex
+													update</div></td>
+										</tr>
+									</table></td>
+								<td><table>
+										<tr>
+											<td><div class="matrixHeadingVerbs">GET</div></td>
+										</tr>
+										<tr>
+											<td><div class=matrixHeadingCommands>read</div></td>
+										</tr>
+									</table></td>
+								<td><table>
+										<tr>
+											<td><div class="matrixHeadingVerbs">PUT</div></td>
+										</tr>
+										<tr>
+											<td><div class=matrixHeadingCommands>update</div></td>
+										</tr>
+									</table></td>
+								<td><table>
+										<tr>
+											<td><div class="matrixHeadingVerbs">DELETE</div></td>
+										</tr>
+										<tr>
+											<td><div class=matrixHeadingCommands>delete</div></td>
+										</tr>
+									</table></td>
+							</tr>
+							<tr>
+								<td><a href="#authentication">Authentication</a></td>
+								<td>authentication</td>
+								<td><a href="#authenticate_request">Verify Authentication</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr class="alt">
+								<td><a href="#users">User</a></td>
+								<td>users</td>
+								<td><a href="#users_create">Create a User</a></td>
+								<td><a href="#users_list">List Users</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>users/{userId}</td>
+								<td></td>
+								<td><a href="#users_retrieve">Retrieve a User</a></td>
+								<td><a href="#users_update">Update a User</a></td>
+								<td><a href="#users_delete">Delete a User</a></td>
+							</tr>
+							<tr class="alt">
+								<td><a href="#roles">Role</a></td>
+								<td>roles</td>
+								<td><a href="#roles_create">Create a New Role</a></td>
+								<td><a href="#roles_list">List Roles</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>roles/{roleId}</td>
+								<td></td>
+								<td><a href="#roles_retrieve">Retrieve a Role</a></td>
+								<td><a href="#roles_update">Update a Role</a></td>
+								<td></td>
+							</tr>
+							<tr class="alt">
+								<td></td>
+								<td>roles/{roleId}/permissions</td>
+								<td></td>
+								<td><a href="#rolespermissions_retrieve">Retrieve a
+										Role's Permissions</a></td>
+								<td><a href="#rolespermissions_update">Update a Role's
+										Permissions</a></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td><a href="#permissions">Permission</a></td>
+								<td>permissions</td>
+								<td></td>
+								<td><a href="#permissions_list">List Application
+										Permissions</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+						</table>
+					</div>
+				</div>
+			</div>
+			<div class="flybar-nav">
+				<h2 class="flybar-button">System</h2>
+				<div id="toc-menu-system" class="flybar-menu">
+					<div class="tocMatrix">
+						<table class=matrixHeading>
+							<tr class="matrixHeadingBG">
+								<td colspan=2 valign="top"><div class="matrixHeadingVerbs">
+										<table>
+											<tr>
+												<td>RESOURCES</td>
+											</tr>
+										</table>
+									</div></td>
+								<td><table>
+										<tr>
+											<td><div class="matrixHeadingVerbs">POST</div></td>
+										</tr>
+										<tr>
+											<td><div class=matrixHeadingCommands>create/complex
+													update</div></td>
+										</tr>
+									</table></td>
+								<td><table>
+										<tr>
+											<td><div class="matrixHeadingVerbs">GET</div></td>
+										</tr>
+										<tr>
+											<td><div class=matrixHeadingCommands>read</div></td>
+										</tr>
+									</table></td>
+								<td><table>
+										<tr>
+											<td><div class="matrixHeadingVerbs">PUT</div></td>
+										</tr>
+										<tr>
+											<td><div class=matrixHeadingCommands>update</div></td>
+										</tr>
+									</table></td>
+								<td><table>
+										<tr>
+											<td><div class="matrixHeadingVerbs">DELETE</div></td>
+										</tr>
+										<tr>
+											<td><div class=matrixHeadingCommands>delete</div></td>
+										</tr>
+									</table></td>
+							</tr>
+							<tr class="alt">
+								<td><a href="#configs_global">Global Configuration</a></td>
+								<td>configurations</td>
+								<td></td>
+								<td><a href="#configs_globalconfig_retrieve">Retrieve
+										Global Configuration</a></td>
+								<td><a href="#configs_globalconfig_update">Update
+										Global Configuration</a></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td><a href="#configs_codes">Codes</a></td>
+								<td>codes</td>
+								<td><a href="#configs_codes_create">Create a Code</a></td>
+								<td><a href="#configs_codes_retrieve">List Codes</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr class="alt">
+								<td></td>
+								<td>codes/{codeId}</td>
+								<td></td>
+								<td><a href="#configs_code_retrieve">Retrieve a Code</a></td>
+								<td><a href="#configs_code_update">Update a Code</a></td>
+								<td><a href="#configs_code_delete">Delete a Code</a></td>
+							</tr>
+							<tr>
+								<td><a href="#configs_codes_codevalues">Code Values</a></td>
+								<td>codes/{codeId}/codevalues</td>
+								<td><a href="#configs_codes_codevalues_create">Create a Code Value</a></td>
+								<td><a href="#configs_codes_codevalues_list">List Code Values</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr class="alt">
+								<td></td>
+								<td>codes/{codeId}/codevalues/{codevalueId}</td>
+								<td></td>
+								<td><a href="#configs_codes_codevalues_retrieve">Retrieve a Code Value</a></td>
+								<td><a href="#configs_codes_codevalues_update">Update a Code Value</a></td>
+								<td><a href="#configs_codes_codevalues_delete">Delete a Code Value</a></td>
+							</tr>
+						</table>
+					</div>
+				</div>
+			</div>
+			<div class="flybar-nav">
+				<h2 class="flybar-button">Non-Core</h2>
+				<div id="toc-menu-noncore" class="flybar-menu">
+					<div class="tocMatrix">
+						<table class=matrixHeading>
+							<tr class="matrixHeadingBG">
+								<td colspan=2 valign="top"><div class="matrixHeadingVerbs">
+										<table>
+											<tr>
+												<td>RESOURCES</td>
+											</tr>
+										</table>
+									</div></td>
+								<td><table>
+										<tr>
+											<td><div class="matrixHeadingVerbs">POST</div></td>
+										</tr>
+										<tr>
+											<td><div class=matrixHeadingCommands>create/complex
+													update</div></td>
+										</tr>
+									</table></td>
+								<td><table>
+										<tr>
+											<td><div class="matrixHeadingVerbs">GET</div></td>
+										</tr>
+										<tr>
+											<td><div class=matrixHeadingCommands>read</div></td>
+										</tr>
+									</table></td>
+								<td><table>
+										<tr>
+											<td><div class="matrixHeadingVerbs">PUT</div></td>
+										</tr>
+										<tr>
+											<td><div class=matrixHeadingCommands>update</div></td>
+										</tr>
+									</table></td>
+								<td><table>
+										<tr>
+											<td><div class="matrixHeadingVerbs">DELETE</div></td>
+										</tr>
+										<tr>
+											<td><div class=matrixHeadingCommands>delete</div></td>
+										</tr>
+									</table></td>
+							</tr>
+							<tr>
+								<td><a href="#datatables">Data Table</a></td>
+								<td>datatables</td>
+								<td></td>
+								<td><a href="#datatables_list">List Data Tables</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr class="alt">
+								<td></td>
+								<td>datatables/register/{datatable}/{apptable}</td>
+								<td><a href="#datatables_register">Register Data Table</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>datatables/deregister/{datatable}</td>
+								<td><a href="#datatables_deregister">Deregister Data
+										Table</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr class="alt">
+								<td></td>
+								<td>datatables/{datatable}/{apptableId}</td>
+								<td><a href="#datatables_create">Create Entry in Data
+										Table</a></td>
+								<td><a href="#datatables_retrieve">Retrieve Entry(s)
+										from Data Table</a></td>
+								<td><a href="#datatables_update">Update Entry in Data
+										Table (One to One)</a></td>
+								<td><a href="#datatables_delete">Delete Entry(s) in
+										Data Table</a></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>datatables/{datatable}/{apptableId}/{datatableId}</td>
+								<td></td>
+								<td><a href="#datatables_update_1M">Update Entry in
+										Data Table (One to Many)</a></td>
+								<td></td>
+								<td><a href="#datatables_delete_1M">Delete Entry in
+										Data Table (One to Many)</a></td>
+							</tr>
+							<tr>
+								<td><a href="#notes">Notes</a></td>
+								<td>{resource}/{resourceId}/notes</td>
+								<td><a href="#resources_addnote">Add a Resource Note</td>
+								<td><a href="#resource_notelist">Retrieve a Resource's Notes</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr class="alt">
+								<td></td>
+								<td>{resource}/{resourceId}/notes/{noteId}</td>
+								<td></td>
+								<td><a href="#resources_retrievenote">List All
+								Notes for a Resource</a></td>
+								<td><a href="#resources_updatenote">Update a Resource Note</a></td>
+								<td><a href="#resources_deletenote">Delete a Resource Note</a></td>
+							</tr>
+							<tr>
+								<td><a href="#documents">Documents</a></td>
+								<td>{entityType}/{entityId}/documents</td>
+								<td><a href="#documents_create">Create a Document</td>
+								<td><a href="#documents_list">List All Document Details</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr class="alt">
+								<td></td>
+								<td>{entityType}/{entityId}/documents/{documentId}</td>
+								<td></td>
+								<td><a href="#documents_retrieve">Retrieve a Documents Details</a></td>
+								<td><a href="#documents_update">Update a Document</a></td>
+								<td><a href="#documents_delete">Delete a Document</a></td>
+							</tr>
+							<tr class="alt">
+								<td></td>
+								<td>{entityType}/{entityId}/documents/{documentId}/attachment</td>
+								<td></td>
+								<td><a href="#documents_retrieve_file">Retrieve 
+									binary file associated with a 
+									Document</a>
+								</td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td><a href="#search">Search</a></td>
+								<td>search</td>
+								<td></td>
+								<td><a href="#search_resource">Search Resources</td>
+								<td></td>
+								<td></td>
+							</tr>
+						</table>
+					</div>
+				</div>
+			</div>
+			<div class="flybar-nav">
+				<h2 class="flybar-button">Report</h2>
+				<div id="toc-menu-report" class="flybar-menu">
+					<div class="tocMatrix">
+						<table class=matrixHeading>
+							<tr class="matrixHeadingBG">
+								<td colspan=2 valign="top"><div class="matrixHeadingVerbs">
+										<table>
+											<tr>
+												<td>RESOURCES</td>
+											</tr>
+										</table>
+									</div></td>
+								<td><table>
+										<tr>
+											<td><div class="matrixHeadingVerbs">POST</div></td>
+										</tr>
+										<tr>
+											<td><div class=matrixHeadingCommands>create/complex
+													update</div></td>
+										</tr>
+									</table></td>
+								<td><table>
+										<tr>
+											<td><div class="matrixHeadingVerbs">GET</div></td>
+										</tr>
+										<tr>
+											<td><div class=matrixHeadingCommands>read</div></td>
+										</tr>
+									</table></td>
+								<td><table>
+										<tr>
+											<td><div class="matrixHeadingVerbs">PUT</div></td>
+										</tr>
+										<tr>
+											<td><div class=matrixHeadingCommands>update</div></td>
+										</tr>
+									</table></td>
+								<td><table>
+										<tr>
+											<td><div class="matrixHeadingVerbs">DELETE</div></td>
+										</tr>
+										<tr>
+											<td><div class=matrixHeadingCommands>delete</div></td>
+										</tr>
+									</table></td>
+							</tr>
+							<tr>
+								<td><a href="#reports">Report</a></td>
+								<td>reports</td>
+								<td></td>
+								<td><a href="#reports_list">List Reports</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr class="alt">
+								<td></td>
+								<td>reports/{reportName}</td>
+								<td></td>
+								<td><a href="#report_run">Run a Report</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+						</table>
+					</div>
+				</div>
+			</div>
+			<div class="flybar-nav">
+				<h2 class="flybar-button">Template</h2>
+				<div id="toc-menu-template" class="flybar-menu">
+					<div class="tocMatrix">
+						<table class=matrixHeading>
+							<tr class="matrixHeadingBG">
+								<td valign="top"><div class="matrixHeadingVerbs">
+										<table>
+											<tr>
+												<td>RESOURCES</td>
+											</tr>
+										</table>
+									</div></td>
+								<td><table>
+										<tr>
+											<td><div class="matrixHeadingVerbs">GET</div></td>
+										</tr>
+										<tr>
+											<td><div class=matrixHeadingCommands>read</div></td>
+										</tr>
+									</table></td>
+							</tr>
+							<tr class="alt">
+								<td>clients/template</td>
+								<td><a href="#clients_template">Retrieve Client Template</a></td>
+							</tr>
+							<tr >
+								<td>loanproducts/template</td>
+								<td><a href="#loanproducts_template">Retrieve Loan Product Template</a></td>
+							</tr>
+							<tr class="alt">
+								<td>loans/template?clientId={clientId}</td>
+								<td><a href="#loans_template">Retrieve Loan Template</a></td>
+							</tr>
+							<tr>
+								<td>loans/{loanId}/transactions/template</td>
+								<td><a href="#loans_repaymenttemplate_etc">Retrieve Loan Transaction Template</a></td>
+							</tr>
+							<tr class="alt">
+								<td>savingproducts/template</td>
+								<td><a href="#savingsproducts_template">Retrieve Savings Product Template</a></td>
+							</tr>
+							<tr >
+								<td>savingsaccounts/template?clientId={clientId}</td>
+								<td><a href="#savingsaccounts_template">Retrieve Savings Account Template</a></td>
+							</tr>
+							<tr class="alt">
+								<td>offices/template</td>
+								<td><a href="#offices_template">Retrieve Office Template</a></td>
+							</tr>
+							<tr>
+								<td>users/template</td>
+								<td><a href="#users_template">Retrieve User Template</a></td>
+							</tr>
+                                                        <tr class="alt">
+                                                                <td>audits/searchtemplate</td>
+                                                                <td><a href="#audits_searchtemplate">Retrieve Audit Search Template</a></td>
+                                                        </tr>
+                                                        <tr>
+                                                                <td>makercheckers/searchtemplate</td>
+                                                                <td><a href="#makercheckers_searchtemplate">Retrieve Maker Checker Search Template</a></td>
+                                                        </tr>
+						</table>
+					</div>
+				</div>
+			</div>			
 		
 		</div>
 
@@ -12517,7 +12568,7 @@ GET https://DomainName/api/v1/search?query=000000111
 					<td></td>
 				</tr>
 				<tr class="alt">
-					<td><a href="#configs">CURRENCY</a></td>
+					<td><a href="#configs">Currency</a></td>
 					<td>currencies</td>
 					<td></td>
 					<td><a href="#configs_currencyretrieve">Retrieve Currency
@@ -12527,7 +12578,7 @@ GET https://DomainName/api/v1/search?query=000000111
 					<td></td>
 				</tr>
 				<tr>
-					<td><a href="#configs_global">GLOBAL CONFIGURATION</a></td>
+					<td><a href="#configs_global">Global Configuration</a></td>
 					<td>configurations</td>
 					<td></td>
 					<td><a href="#configs_globalconfig_retrieve">Retrieve
@@ -12537,7 +12588,7 @@ GET https://DomainName/api/v1/search?query=000000111
 					<td></td>
 				</tr>
 				<tr class="alt">
-					<td><a href="#configs_codes">CODES</a></td>
+					<td><a href="#configs_codes">Codes</a></td>
 					<td>codes</td>
 					<td><a href="#configs_codes_create">Create a Code</a></td>
 					<td><a href="#configs_codes_retrieve">List Codes</a></td>
@@ -12553,7 +12604,7 @@ GET https://DomainName/api/v1/search?query=000000111
 					<td><a href="#configs_code_delete">Delete a Code</a></td>
 				</tr>
 				<tr class="alt">
-					<td><a href="#configs_codes_codevalues">CODE VALUES</a></td>
+					<td><a href="#configs_codes_codevalues">Code Values</a></td>
 					<td>codes/{codeId}/codevalues</td>
 					<td><a href="#configs_codes_codevalues_create">Create a Code Value</a></td>
 					<td><a href="#configs_codes_codevalues_list">List Code Values</a></td>
@@ -12569,7 +12620,7 @@ GET https://DomainName/api/v1/search?query=000000111
 					<td><a href="#configs_codes_codevalues_delete">Delete a Code Value</a></td>
 				</tr>
 				<tr class="alt">
-					<td><a href="#funds">FUNDS</a></td>
+					<td><a href="#funds">Funds</a></td>
 					<td>funds</td>
 					<td><a href="#funds_create">Create a Fund</a></td>
 					<td><a href="#funds_retrieve">List Funds</a></td>
@@ -12585,7 +12636,7 @@ GET https://DomainName/api/v1/search?query=000000111
 					<td></td>
 				</tr>
 				<tr class="alt">
-					<td><a href="#staff">STAFF</a></td>
+					<td><a href="#staff">Staff</a></td>
 					<td>staff</td>
 					<td><a href="#staff_create">Create a Staff</a></td>
 					<td><a href="#staff_list">List Staff</a></td>
@@ -12601,7 +12652,7 @@ GET https://DomainName/api/v1/search?query=000000111
 					<td></td>
 				</tr>
 				<tr class="alt">
-					<td><a href="#charges">CHARGES</a></td>
+					<td><a href="#charges">Charges</a></td>
 					<td>charges</td>
 					<td><a href="#charges_create">Create a Charge</a></td>
 					<td><a href="#charges_list">List Charges</a></td>
@@ -12617,7 +12668,7 @@ GET https://DomainName/api/v1/search?query=000000111
 					<td><a href="#charges_delete">Delete a Charge</a></td>
 				</tr>
 				<tr class="alt">
-					<td><a href="#datatables">DATA TABLE</a></td>
+					<td><a href="#datatables">Data Table</a></td>
 					<td>datatables</td>
 					<td></td>
 					<td><a href="#datatables_list">List Data Tables</a></td>
@@ -12690,7 +12741,7 @@ GET https://DomainName/api/v1/search?query=000000111
 					<td></td>
 				</tr>
 				<tr class="alt">
-					<td><a href="#notes">NOTES</a></td>
+					<td><a href="#notes">Notes</a></td>
 					<td>{resource}/{resourceId}/notes</td>
 					<td><a href="#resources_addnote">Add a Resource Note</td>
 					<td><a href="#resource_notelist">Retrieve a Resource's Notes</a></td>
@@ -12707,7 +12758,7 @@ GET https://DomainName/api/v1/search?query=000000111
 					<td><a href="#resources_deletenote">Delete a Resource Note</a></td>
 				</tr>
 				<tr>
-					<td><a href="#search">SEARCH</a></td>
+					<td><a href="#search">Search</a></td>
 					<td>search</td>
 					<td></td>
 					<td><a href="#search_resource">Search Resources</td>
@@ -12771,7 +12822,7 @@ GET https://DomainName/api/v1/search?query=000000111
 					<td></td>
 				</tr>
 				<tr>
-					<td><a href="#reports">REPORT</a></td>
+					<td><a href="#reports">Report</a></td>
 					<td>reports</td>
 					<td></td>
 					<td><a href="#reports_list">List Reports</a></td>
@@ -12787,7 +12838,7 @@ GET https://DomainName/api/v1/search?query=000000111
 					<td></td>
 				</tr>
 				<tr>
-					<td><a href="#authentication">AUTHENTICATION</a></td>
+					<td><a href="#authentication">Authentication</a></td>
 					<td>authentication</td>
 					<td><a href="#authenticate_request">Verify Authentication</a></td>
 					<td></td>
@@ -12795,7 +12846,7 @@ GET https://DomainName/api/v1/search?query=000000111
 					<td></td>
 				</tr>
 				<tr class="alt">
-					<td><a href="#users">USER</a></td>
+					<td><a href="#users">User</a></td>
 					<td>users</td>
 					<td><a href="#users_create">Create a User</a></td>
 					<td><a href="#users_list">List Users</a></td>
@@ -12811,7 +12862,7 @@ GET https://DomainName/api/v1/search?query=000000111
 					<td><a href="#users_delete">Delete a User</a></td>
 				</tr>
 				<tr class="alt">
-					<td><a href="#roles">ROLE</a></td>
+					<td><a href="#roles">Role</a></td>
 					<td>roles</td>
 					<td><a href="#roles_create">Create a New Role</a></td>
 					<td><a href="#roles_list">List Roles</a></td>
@@ -12837,7 +12888,7 @@ GET https://DomainName/api/v1/search?query=000000111
 					<td></td>
 				</tr>
 				<tr>
-					<td><a href="#permissions">PERMISSION</a></td>
+					<td><a href="#permissions">Permission</a></td>
 					<td>permissions</td>
 					<td></td>
 					<td><a href="#permissions_list">List Permissions</a></td>
@@ -12896,13 +12947,17 @@ GET https://DomainName/api/v1/search?query=000000111
 					<td>offices/template</td>
 					<td><a href="#offices_template">Retrieve Office Template</a></td>
 				</tr>
-				<tr>
+				<tr class="alt">
 					<td>users/template</td>
 					<td><a href="#users_template">Retrieve User Template</a></td>
 				</tr>
+				<tr>
+					<td>audits/searchtemplate</td>
+					<td><a href="#audits_searchtemplate">Retrieve Audit Search Template</a></td>
+				</tr>
 				<tr class="alt">
-					<td>audit/searchtemplate</td>
-					<td><a href="#audit_searchtemplate">Retrieve Audit Search Template</a></td>
+					<td>makercheckers/searchtemplate</td>
+					<td><a href="#makercheckers_searchtemplate">Retrieve Maker Checker Search Template</a></td>
 				</tr>
 			</table>
 		</div>

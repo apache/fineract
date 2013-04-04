@@ -209,7 +209,7 @@ body {
     top: 41px;
     max-height:550px;
     overflow:auto;
-    width: 850px;
+    width: 1000px;
     background-color: rgba(249, 249, 249, 0.99);
     border: 1px solid rgb(187, 187, 187);
     border-top: 0;
@@ -244,23 +244,23 @@ body {
 	position:absolute;
 	left:-50px;
 }
-#toc-menu-loan {
+#toc-menu-group {
 	position:absolute;
 	left:-130px;
 }
-#toc-menu-org {
+#toc-menu-loan {
 	position:absolute;
 	left:-210px;
 }
-#toc-menu-system {
+#toc-menu-savings {
 	position:absolute;
 	left:-290px;
 }
-#toc-menu-noncore {
+#toc-menu-accounting {
 	position:absolute;
 	left:-370px;
 }
-#toc-menu-report {
+#toc-menu-org {
 	position:absolute;
 	left:-450px;
 }
@@ -268,23 +268,22 @@ body {
 	position:absolute;
 	left:-530px;
 }
+#toc-menu-system {
+	position:absolute;
+	left:-610px;
+}
+#toc-menu-noncore {
+	position:absolute;
+	left:-690px;
+}
+#toc-menu-report {
+	position:absolute;
+	left:-770px;
+}
 #toc-menu-template {
 	position:absolute;
-	left:-610px;
+	left:-850px;
 }
-#toc-menu-account {
-	position:absolute;
-	left:-610px;
-}
-#toc-menu-group {
-	position:absolute;
-	left:-690px;
-}
-#toc-menu-savings {
-	position:absolute;
-	left:-690px;
-}
-
 
 #language-menu {
     left: -25px;
