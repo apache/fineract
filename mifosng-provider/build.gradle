@@ -1,5 +1,5 @@
 description = '''\
-Run as: 
+Run as:
 gradle clean tomcatrunwar
 '''
 
@@ -10,7 +10,7 @@ buildscript {
      mavenRepo(name: 'zt-public-snapshots',
                url: 'http://repos.zeroturnaround.com/nexus/content/groups/zt-public/')
   }
-  
+
   dependencies {
      classpath group: 'org.zeroturnaround', name: 'gradle-jrebel-plugin', version: '1.0.2-SNAPSHOT'
   }
@@ -20,7 +20,7 @@ buildscript {
  	repositories {
         mavenCentral()
     }
-    
+
     dependencies {
         classpath 'org.gradle.api.plugins:gradle-tomcat-plugin:0.9.7'
   	}
@@ -55,6 +55,10 @@ project.ext.hibernateValidatorVersion = '4.3.1.Final'
 project.ext.hibernateCoreVersion = '4.2.0.Final'
 project.ext.jerseyVersion = '1.17'
 project.ext.springDataJpaVersion = '1.2.1.RELEASE'
+
+project.ext.mysqlUser='root'
+project.ext.mysqlPassword='mysql'
+
 
 group = 'org.mifosplatform'
 
@@ -92,7 +96,7 @@ dependencies {
 				[group: 'javax.servlet', name: 'servlet-api', version: '2.5'],
 			)
 
-	compile(    
+	compile(
 	   			[group: 'org.springframework', name: 'spring-core', version: springVersion],
 	   			[group: 'org.springframework', name: 'spring-aspects', version: springVersion],
 	   			[group: 'org.springframework', name: 'spring-web', version: springVersion],
@@ -100,11 +104,11 @@ dependencies {
 	   			[group: 'org.springframework.security', name: 'spring-security-web', version: springSecurityVersion],
 	   			[group: 'org.springframework.security', name: 'spring-security-config', version: springSecurityVersion],
 	            [group: 'org.aspectj', name: 'aspectjrt', version: '1.7.0.RELEASE'],
-	            
+
 	            [group: 'org.hibernate', name: 'hibernate-core', version: hibernateCoreVersion],
 	            [group: 'org.hibernate', name: 'hibernate-entitymanager', version: hibernateCoreVersion],
 	            [group: 'org.hibernate.javax.persistence', name: 'hibernate-jpa-2.0-api', version: '1.0.1.Final'],
-	            
+
 	            [group: 'javax.ws.rs', name: 'jsr311-api', version: '1.1.1'],
 	            [group: 'com.sun.jersey', name: 'jersey-core', version: jerseyVersion],
 	            [group: 'com.sun.jersey', name: 'jersey-servlet', version: jerseyVersion],
@@ -112,32 +116,32 @@ dependencies {
 	            [group: 'com.sun.jersey', name: 'jersey-json', version: jerseyVersion],
 	            [group: 'com.sun.jersey.contribs', name: 'jersey-spring', version: jerseyVersion],
 	            [group: 'com.sun.jersey.contribs', name: 'jersey-multipart', version: jerseyVersion],
-	            
+
 	            [group: 'com.google.code.gson', name: 'gson', version: '2.2.2'],
 	            [group: 'com.google.guava', name: 'guava', version: '14.0-rc2'],
-	            
+
 	            [group: 'org.springframework.data', name: 'spring-data-jpa', version: springDataJpaVersion],
-	            
+
 	            [group: 'joda-time', name: 'joda-time', version: '2.1'],
 	            [group: 'net.sourceforge.javacsv', name: 'javacsv', version: '2.0'],
 	            [group: 'org.apache.commons', name: 'commons-email', version: '1.2'],
 	            [group: 'commons-lang', name: 'commons-lang', version: '2.4'],
-	            
+
 	            [group: 'org.slf4j', name: 'slf4j-api', version: '1.7.2'],
 	            [group: 'org.slf4j', name: 'jcl-over-slf4j', version: '1.7.2'],
-	            
+
 	            [group: 'ch.qos.logback', name: 'logback-core', version: '1.0.9'],
 	            [group: 'ch.qos.logback', name: 'logback-classic', version: '1.0.9'],
-	            
+
 	            [group: 'mysql', name: 'mysql-connector-java', version: '5.1.22'],
 	            [group: 'org.apache.tomcat', name: 'tomcat-jdbc', version: '7.0.34'],
-	            
+
 	            [group: 'pentaho-reporting-engine', name: 'pentaho-reporting-engine-classic-core', version: '3.9.1.1'],
 	            [group: 'pentaho-reporting-engine', name: 'pentaho-reporting-engine-classic-extensions', version: '3.9.1-GA'],
 	            [group: 'pentaho-reporting-engine', name: 'pentaho-reporting-engine-classic-extensions-scripting', version: '3.9.1-GA'],
 				[group: 'pentaho-reporting-engine', name: 'pentaho-reporting-engine-wizard-core', version: '3.9.1-GA'],
 	            [group: 'pentaho-report-designer', name: 'pentaho-reporting-engine-wizard-xul', version: '3.9.1-GA'],
-	            
+
 	            [group: 'pentaho-library', name: 'libbase', version: '1.2.8'],
  	        	[group: 'pentaho-library',name: 'libdocbundle', version: '1.2.8'],
  	        	[group: 'pentaho-library',name: 'libfonts', version: '1.2.8'],
@@ -148,21 +152,21 @@ dependencies {
  	        	[group: 'pentaho-library',name: 'libserializer', version: '1.2.8'],
  	        	[group: 'pentaho-library',name: 'libsparkline', version: '1.2.8'],
  	        	[group: 'pentaho-library',name: 'libxml', version: '1.2.8'],
- 	        	
+
  	        	[group: 'org.apache.poi',name: 'poi', version: '3.9'],
  	        	[group: 'org.apache.poi',name: 'poi-ooxml', version: '3.9'],
  	        	[group: 'org.apache.poi',name: 'poi-ooxml-schemas', version: '3.9'],
-	            
+
 	            [group: 'com.lowagie', name: 'itext', version: '2.1.7'],
 	            [group: 'com.lowagie', name: 'itext-rtf', version: '2.1.7'],
 				[group: 'org.mnode.ical4j', name: 'ical4j', version: '1.0.4'],
                 [group: 'com.googlecode.flyway', name: 'flyway-maven-plugin', version: '2.1.1']
  	        )
- 	        
- 	 testCompile 'junit:junit:4.11', 
+
+ 	 testCompile 'junit:junit:4.11',
                  'org.mockito:mockito-all:1.9.5',
                  'com.jayway.restassured:rest-assured:1.7.2'
- 	 
+
 }
 
 task dist(type:Zip){
@@ -183,7 +187,7 @@ task deployPentahoReports() {
         from "src/main/pentahoReports"
         into pentahoReportDir
     }
-    
+
     doLast {
         println ':deployPentahoReports - moving pentaho reports under: ' + pentahoReportDir
     }
@@ -263,19 +267,21 @@ configurations.driver.each {File file ->
     loader.addURL(file.toURL())
 }
 
-task createDatabase<<{
-    description= "Creates the Database mifosplatform-tenants and mifostenant-default"
-    sql = Sql.newInstance( 'jdbc:mysql://localhost:3306/', 'root', 'mysql', 'com.mysql.jdbc.Driver' )
-    sql.execute( 'create database `mifosplatform-tenants`' )
-    sql.execute( 'create database `mifostenant-default`' )
-
+task createDB<<{
+    description= "Creates the Database. Needs database name to be passed (like: -PdbName=someDBname)"
+    sql = Sql.newInstance( 'jdbc:mysql://localhost:3306/', mysqlUser, mysqlPassword, 'com.mysql.jdbc.Driver' )
+    sql.execute( 'create database '+"`$dbName`" )
 }
-task dropDatabase<<{
-    description= "Drops the created Databases mifosplatform-tenants and mifostenant-default"
-    sql = Sql.newInstance( 'jdbc:mysql://localhost:3306/', 'root', 'mysql', 'com.mysql.jdbc.Driver' )
-    sql.execute( 'DROP DATABASE `mifosplatform-tenants`' )
-    sql.execute( 'DROP DATABASE `mifostenant-default`' )
 
+task dropDB<<{
+    description= "Drops the specified database. The database name has to be passed (like: -PdbName=someDBname)"
+    sql = Sql.newInstance( 'jdbc:mysql://localhost:3306/', mysqlUser, mysqlPassword, 'com.mysql.jdbc.Driver' )
+    sql.execute( 'DROP DATABASE '+"`$dbName`")
+}
+task setBlankPassword<<{
+    sql = Sql.newInstance( 'jdbc:mysql://localhost:3306/', mysqlUser, mysqlPassword, 'com.mysql.jdbc.Driver' )
+    sql.execute('USE `mifosplatform-tenants`')
+    sql.execute('UPDATE mifosplatform-tenants.tenants SET schema_server = \'localhost\', schema_server_port = \'3306\', schema_username = \'mifos\', schema_password = \'mysql\' WHERE id=1;')
 }
 
 
@@ -294,15 +300,35 @@ buildscript {
 
 flyway {
     url = "jdbc:mysql://localhost:3306/mifostenant-default"
-    user = 'root'
-    password = 'mysql'
+    user = mysqlUser
+    password = mysqlPassword
     locations = [
             'filesystem:../mifosng-db/migrations',
     ]
 
-    //$dbName    $dbUser   $dbPassword
-
 }
+
+
+task migrateDB<<{
+    description="Migrates the DB. Have to pass dbName and folder name where the .sql file are kept for that DB. (Example: -PdbName=someDBname -PmigrationScriptFolder=someFolderName). "
+
+    flyway.url= "jdbc:mysql://localhost:3306/$dbName"
+    flyway.locations= [
+            "filesystem:../mifosng-db/migrations/$migrationScriptFolder",
+    ]
+
+    flywayMigrate.execute()
+}
+
+task showDBInfo<<{
+    description="Shows the migration info for a DB. Have to pass dbName and folder name where the .sql file are kept for that DB. (Example: -PdbName=someDBname -PmigrationScriptFolder=someFolderName)"
+    flyway.url= "jdbc:mysql://localhost:3306/$dbName"
+    flyway.locations= [
+            "filesystem:../mifosng-db/migrations/$migrationScriptFolder",
+    ]
+    flywayInfo.execute()
+}
+
 
 
 /*
@@ -313,7 +339,7 @@ flyway {
 * e.g. 1.1.0.BUILD-SNAPSHOT => 1.0.0.MIFOSX-1234-SNAPSHOT
 */
 def qualifyVersionIfNecessary(version) {
-	
+
 	if (rootProject.hasProperty("BRANCH_NAME")) {
 		def qualifier = rootProject.getProperty("BRANCH_NAME")
 		if (qualifier.startsWith("MIFOSX-")) {
