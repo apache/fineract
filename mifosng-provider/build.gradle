@@ -308,21 +308,31 @@ flyway {
 
 }
 
-
 task migrateTenantDB<<{
-    description="Migrates a Tenant DB. Have to pass dbName. (Example: -PdbName=someTenantDBname). "
+    description="Migrates a Tenant DB. Optionally can pass dbName. Defaults to 'mifostenant-default' (Example: -PdbName=someTenantDBname)"
 
-    flyway.url= "jdbc:mysql://localhost:3306/$dbName"
+	def tenantDbName = 'mifostenant-default';
+    if (rootProject.hasProperty("dbName")) {
+		tenantDbName = rootProject.getProperty("dbName")
+	}
+	
+    flyway.url= "jdbc:mysql://localhost:3306/$tenantDbName"
     flyway.locations= [
-            "filesystem:../mifosng-db/migrations/core_db",
+	    "filesystem:../mifosng-db/migrations/core_db",
     ]
 
     flywayMigrate.execute()
 }
 
 task showTenantDBInfo<<{
-    description="Shows the migration info for a Tenant DB. Have to pass dbName. (Example: -PdbName=someTenantDBname)"
-    flyway.url= "jdbc:mysql://localhost:3306/$dbName"
+    description="Shows the migration info for a Tenant DB. Optionally can pass dbName. Defaults to 'mifostenant-default' (Example: -PdbName=someTenantDBname)"
+    
+    def tenantDbName = 'mifostenant-default';
+    if (rootProject.hasProperty("dbName")) {
+		tenantDbName = rootProject.getProperty("dbName")
+	}
+	
+    flyway.url= "jdbc:mysql://localhost:3306/$tenantDbName"
     flyway.locations= [
             "filesystem:../mifosng-db/migrations/core_db",
     ]
@@ -331,9 +341,14 @@ task showTenantDBInfo<<{
 
 
 task migrateTenantListDB<<{
-    description="Migrates a Tenant List DB. Have to pass dbName. (Example: -PdbName=someDBname)"
+    description="Migrates a Tenant List DB. Optionally can pass dbName. Defaults to 'mifosplatform-tenants' (Example: -PdbName=someDBname)"
 
-    flyway.url= "jdbc:mysql://localhost:3306/$dbName"
+ 	def tenantsDbName = 'mifosplatform-tenants';
+    if (rootProject.hasProperty("dbName")) {
+		tenantsDbName = rootProject.getProperty("dbName")
+	}
+	
+    flyway.url= "jdbc:mysql://localhost:3306/$tenantsDbName"
     flyway.locations= [
             "filesystem:../mifosng-db/migrations/list_db",
     ]
@@ -341,16 +356,20 @@ task migrateTenantListDB<<{
     flywayMigrate.execute()
 }
 
-task showTenentListDBInfo<<{
-    description="Shows the migration info for a List DB. Have to pass dbName. (Example: -PdbName=someDBname)"
-    flyway.url= "jdbc:mysql://localhost:3306/$dbName"
+task showTenantListDBInfo<<{
+    description="Shows the migration info for a List DB. Optionally can pass dbName. Defaults to 'mifosplatform-tenants' (Example: -PdbName=someDBname)"
+    
+    def tenantsDbName = 'mifosplatform-tenants';
+    if (rootProject.hasProperty("dbName")) {
+		tenantsDbName = rootProject.getProperty("dbName")
+	}
+    
+    flyway.url= "jdbc:mysql://localhost:3306/$tenantsDbName"
     flyway.locations= [
-            "filesystem:../mifosng-db/migrations/list_db",
+    	"filesystem:../mifosng-db/migrations/list_db",
     ]
     flywayInfo.execute()
 }
-
-
 
 /*
 * Support publication of artifacts versioned by topic branch.
@@ -369,4 +388,3 @@ def qualifyVersionIfNecessary(version) {
 	}
 	return version
 }
-
