@@ -195,7 +195,7 @@ task deployPentahoReports() {
 
 war {
     it.dependsOn deployPentahoReports
-    from ('../mifosng-db/migrations') {
+    from ('../mifosng-db/migrations/core_db') {
     	into "WEB-INF/classes/sql"
     }
 }
@@ -309,22 +309,43 @@ flyway {
 }
 
 
-task migrateDB<<{
-    description="Migrates the DB. Have to pass dbName and folder name where the .sql file are kept for that DB. (Example: -PdbName=someDBname -PmigrationScriptFolder=someFolderName). "
+task migrateTenantDB<<{
+    description="Migrates a Tenant DB. Have to pass dbName. (Example: -PdbName=someTenantDBname). "
 
     flyway.url= "jdbc:mysql://localhost:3306/$dbName"
     flyway.locations= [
-            "filesystem:../mifosng-db/migrations/$migrationScriptFolder",
+            "filesystem:../mifosng-db/migrations/core_db",
     ]
 
     flywayMigrate.execute()
 }
 
-task showDBInfo<<{
-    description="Shows the migration info for a DB. Have to pass dbName and folder name where the .sql file are kept for that DB. (Example: -PdbName=someDBname -PmigrationScriptFolder=someFolderName)"
+task showTenantDBInfo<<{
+    description="Shows the migration info for a Tenant DB. Have to pass dbName. (Example: -PdbName=someTenantDBname)"
     flyway.url= "jdbc:mysql://localhost:3306/$dbName"
     flyway.locations= [
-            "filesystem:../mifosng-db/migrations/$migrationScriptFolder",
+            "filesystem:../mifosng-db/migrations/core_db",
+    ]
+    flywayInfo.execute()
+}
+
+
+task migrateTenantListDB<<{
+    description="Migrates a Tenant List DB. Have to pass dbName. (Example: -PdbName=someDBname)"
+
+    flyway.url= "jdbc:mysql://localhost:3306/$dbName"
+    flyway.locations= [
+            "filesystem:../mifosng-db/migrations/list_db",
+    ]
+
+    flywayMigrate.execute()
+}
+
+task showTenentListDBInfo<<{
+    description="Shows the migration info for a List DB. Have to pass dbName. (Example: -PdbName=someDBname)"
+    flyway.url= "jdbc:mysql://localhost:3306/$dbName"
+    flyway.locations= [
+            "filesystem:../mifosng-db/migrations/list_db",
     ]
     flywayInfo.execute()
 }
