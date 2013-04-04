@@ -43,7 +43,7 @@ import org.springframework.stereotype.Component;
 @Path("/groups")
 @Component
 @Scope("singleton")
-public class GroupsApiResource {
+public class CenterApiResource {
 
     /*
      * GROUP_DATA_PARAMETERS is used by ToApiJsonSerializer<E>, make sure E's properties and E_PARAMETERS are in same 
@@ -58,11 +58,9 @@ public class GroupsApiResource {
     private final ToApiJsonSerializer<GroupAccountSummaryCollectionData> groupSummaryToApiJsonSerializer;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
-    
-    private static final Long LEVEL_ID = (long) 2;
 
     @Autowired
-    public GroupsApiResource(final PlatformSecurityContext context, final GroupReadPlatformService groupReadPlatformService,
+    public CenterApiResource(final PlatformSecurityContext context, final GroupReadPlatformService groupReadPlatformService,
             final ToApiJsonSerializer<GroupData> toApiJsonSerializer,
             final ToApiJsonSerializer<GroupAccountSummaryCollectionData> groupSummaryToApiJsonSerializer,
             final ApiRequestParameterHelper apiRequestParameterHelper,
@@ -80,11 +78,12 @@ public class GroupsApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveAllGroups(@Context final UriInfo uriInfo, @QueryParam("sqlSearch") final String sqlSearch,
             @QueryParam("officeId") final Long officeId, @QueryParam("externalId") final String externalId,
-            @QueryParam("name") final String name) {
+            @QueryParam("name") final String name, @QueryParam("underHierarchy") final String hierarchy,
+            @QueryParam("levelId") final Long levelId) {
 
         this.context.authenticatedUser().validateHasReadPermission("GROUP");
 
-        final String extraCriteria = getGroupExtraCriteria(sqlSearch, officeId, externalId, name , LEVEL_ID);
+        final String extraCriteria = getGroupExtraCriteria(sqlSearch, officeId, externalId, name, hierarchy, levelId);
         final Collection<GroupData> groups = this.groupReadPlatformService.retrieveAllGroups(extraCriteria);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
@@ -111,18 +110,18 @@ public class GroupsApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String newGroupDetails(@Context final UriInfo uriInfo, @QueryParam("officeId") final Long officeId,
-            @QueryParam("centerId") final Long centerId) {
+            @QueryParam("levelId") final Long levelId, @QueryParam("parentGroupId") final Long parentGroupId) {
 
         this.context.authenticatedUser().validateHasReadPermission("GROUP");
 
         GroupData groupTemplateData = null;
-        if (centerId != null) {
-            groupTemplateData = this.groupReadPlatformService.retrieveNewChildGroupDetails(officeId, LEVEL_ID, centerId);
-        } else if (officeId != null ) {
-            groupTemplateData = this.groupReadPlatformService.retrieveNewGroupDetails(officeId, LEVEL_ID);
-        } else{
+        if (levelId != null && parentGroupId != null) {
+            groupTemplateData = this.groupReadPlatformService.retrieveNewChildGroupDetails(officeId, levelId, parentGroupId);
+        } else if (officeId != null && levelId != null) {
+            groupTemplateData = this.groupReadPlatformService.retrieveNewGroupDetails(officeId, levelId);
+        } else if (levelId != null) {
             groupTemplateData = this.groupReadPlatformService.retrieveNewGroupDetails(this.context.authenticatedUser().getOffice().getId(),
-            		LEVEL_ID);
+                    levelId);
         }
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
@@ -208,7 +207,7 @@ public class GroupsApiResource {
     // clause is ambiguous
     // caused by the same name of columns in m_office and m_group tables
     private String getGroupExtraCriteria(String sqlSearch, final Long officeId, final String externalId, final String name,
-            final Long levelId) {
+            final String hierarchy, final Long levelId) {
 
         String extraCriteria = "";
 
@@ -232,6 +231,10 @@ public class GroupsApiResource {
 
         if (name != null) {
             extraCriteria += " and g.name like " + ApiParameterHelper.sqlEncodeString(name + "%");
+        }
+
+        if (hierarchy != null) {
+            extraCriteria += " and o.hierarchy like " + ApiParameterHelper.sqlEncodeString(hierarchy + "%");
         }
 
         if (StringUtils.isNotBlank(extraCriteria)) {

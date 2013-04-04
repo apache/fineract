@@ -72,7 +72,7 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
 
         final GroupDataMapper rm = new GroupDataMapper();
 
-        String sql = "select " + rm.groupSchema() + " where o.hierarchy like ? and g.is_deleted=0 ";
+        String sql = "select " + rm.groupSchema() + " where o.hierarchy like ? and g.is_deleted=0";
         
         if (StringUtils.isNotBlank(extraCriteria)) {
             sql += " and (" + extraCriteria + ")";
