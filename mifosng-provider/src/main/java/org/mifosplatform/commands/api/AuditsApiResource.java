@@ -39,10 +39,12 @@ import org.springframework.stereotype.Component;
 public class AuditsApiResource {
 
 	private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<String>(
-			Arrays.asList("id", "actionName", "entityName", "resourceId", "subresourceId",
-					"maker", "madeOnDate", "checker", "checkedOnDate", "processingResult",
-					"commandAsJson", "officeName", "groupLevelName", "groupName", "clientName", "loanAccountNo", "savingsAccountNo"));
-	
+			Arrays.asList("id", "actionName", "entityName", "resourceId",
+					"subresourceId", "maker", "madeOnDate", "checker",
+					"checkedOnDate", "processingResult", "commandAsJson",
+					"officeName", "groupLevelName", "groupName", "clientName",
+					"loanAccountNo", "savingsAccountNo"));
+
 	private final String resourceNameForPermissions = "AUDIT";
 
 	private final PlatformSecurityContext context;
@@ -79,14 +81,21 @@ public class AuditsApiResource {
 			@QueryParam("checkerId") final Long checkerId,
 			@QueryParam("checkerDateTimeFrom") final String checkerDateTimeFrom,
 			@QueryParam("checkerDateTimeTo") final String checkerDateTimeTo,
-			@QueryParam("processingResult") final Integer processingResult) {
+			@QueryParam("processingResult") final Integer processingResult,
+			@QueryParam("officeId") final Integer officeId,
+			@QueryParam("groupId") final Integer groupId,
+			@QueryParam("clientId") final Integer clientId,
+			@QueryParam("loanid") final Integer loanId,
+			@QueryParam("savingsAccountId") final Integer savingsAccountId) {
 
 		context.authenticatedUser().validateHasReadPermission(
 				resourceNameForPermissions);
 
 		final String extraCriteria = getExtraCriteria(actionName, entityName,
 				resourceId, makerId, makerDateTimeFrom, makerDateTimeTo,
-				checkerId, checkerDateTimeFrom, checkerDateTimeTo, processingResult);
+				checkerId, checkerDateTimeFrom, checkerDateTimeTo,
+				processingResult, officeId, groupId, clientId, loanId,
+				savingsAccountId);
 
 		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper
 				.process(uriInfo.getQueryParameters());
@@ -133,7 +142,8 @@ public class AuditsApiResource {
 				.retrieveSearchTemplate("audit");
 
 		final Set<String> RESPONSE_DATA_PARAMETERS_SEARCH_TEMPLATE = new HashSet<String>(
-				Arrays.asList("appUsers", "actionNames", "entityNames", "processingResults"));
+				Arrays.asList("appUsers", "actionNames", "entityNames",
+						"processingResults"));
 
 		return this.toApiJsonSerializerSearchTemplate.serialize(settings,
 				auditSearchData, RESPONSE_DATA_PARAMETERS_SEARCH_TEMPLATE);
@@ -143,7 +153,10 @@ public class AuditsApiResource {
 			final String entityName, final Long resourceId, final Long makerId,
 			final String makerDateTimeFrom, final String makerDateTimeTo,
 			final Long checkerId, final String checkerDateTimeFrom,
-			final String checkerDateTimeTo, final Integer processingResult) {
+			final String checkerDateTimeTo, final Integer processingResult,
+			final Integer officeId, final Integer groupId,
+			final Integer clientId, final Integer loanId,
+			final Integer savingsAccountId) {
 
 		String extraCriteria = "";
 
@@ -183,9 +196,30 @@ public class AuditsApiResource {
 		}
 
 		if (processingResult != null) {
-			extraCriteria += " and aud.processing_result_enum = " + processingResult;
+			extraCriteria += " and aud.processing_result_enum = "
+					+ processingResult;
 		}
-		
+
+		if (officeId != null) {
+			extraCriteria += " and aud.office_id = " + officeId;
+		}
+
+		if (groupId != null) {
+			extraCriteria += " and aud.group_id = " + groupId;
+		}
+
+		if (clientId != null) {
+			extraCriteria += " and aud.client_id = " + clientId;
+		}
+
+		if (loanId != null) {
+			extraCriteria += " and aud.loan_id = " + loanId;
+		}
+
+		if (savingsAccountId != null) {
+			extraCriteria += " and aud.savings_account_id = " + savingsAccountId;
+		}
+
 		if (StringUtils.isNotBlank(extraCriteria)) {
 			extraCriteria = extraCriteria.substring(4);
 		}

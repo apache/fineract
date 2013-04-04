@@ -1035,6 +1035,46 @@
 								<td><a href="#configs_codes_codevalues_update">Update a Code Value</a></td>
 								<td><a href="#configs_codes_codevalues_delete">Delete a Code Value</a></td>
 							</tr>
+							<tr>
+								<td><a href="#audits">Audits</a></td>
+								<td>audits</td>
+								<td></td>
+								<td><a href="#audits_list">List Audits</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr class="alt">
+								<td></td>
+								<td>audits/{auditId}</td>
+								<td></td>
+								<td><a href="#audits_retrieve">Retrieve an Audit Entry</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td><a href="#makercheckers">Makercheckers</a></td>
+								<td>makercheckers</td>
+								<td></td>
+								<td><a href="#makercheckers_list">List Maker Checker Entries</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr class="alt">
+								<td></td>
+								<td>makercheckers/{auditId}</td>
+								<td></td>
+								<td></td>
+								<td></td>
+								<td><a href="#makercheckers_delete">Delete Maker Checker Entry</a></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>makercheckers/{auditId}?command=approve</td>
+								<td><a href="#makercheckers_approve">Approve Maker Checker Entry</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
 						</table>
 					</div>
 				</div>
@@ -7010,18 +7050,277 @@ Content-Type: application/json
 			</div>
 
 
-			<!-- Funds starts here-->
-			<a id="funds" name="funds" class="old-syle-anchor">&nbsp;</a>
+			<!-- Audit starts here -->
+			<a id="audits" name="audits" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
-					<h3>Funds</h3>
-					<p>Simple implementation of funds. At present funds can
-						optionally be associated with a Loan.</p>
-					<p>This information can then be used to produce reports on
-						loans/loan amounts drawn from a fund.</p>
+					<h3>Audits</h3>
+					<p>
+					<p />
 				</div>
 			</div>
 
+			<a id="audits_list" name="audits_list"
+				class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>List Audits</h4>
+					<p></p>
+					<p>Example Requests:</p>
+					<div class=apiClick>audits</div>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+GET https://DomainName/api/v1/audits
+					</code>
+					<code class="method-response">
+[
+  {
+    "id": 671,
+    "actionName": "PERMISSIONS",
+    "entityName": "ROLE",
+    "resourceId": 6,
+    "maker": "keithwoodlock",
+    "madeOnDate": 1365014262000,
+    "processingResult": "processed"
+  },
+  {
+    "id": 670,
+    "actionName": "CREATE",
+    "entityName": "CLIENTNOTE",
+    "resourceId": 287,
+    "maker": "keithwoodlock",
+    "madeOnDate": 1365014204000,
+    "processingResult": "awaiting.approval",
+    "officeName": "my office",
+    "clientName": "gg ggg"
+  },
+  {
+    "id": 668,
+    "actionName": "UPDATE",
+    "entityName": "PERMISSION",
+    "maker": "keithwoodlock",
+    "madeOnDate": 1365014186000,
+    "processingResult": "processed"
+  },
+  {
+    "id": 667,
+    "actionName": "CREATE",
+    "entityName": "CLIENTNOTE",
+    "resourceId": 286,
+    "maker": "keithwoodlock",
+    "madeOnDate": 1365014169000,
+    "processingResult": "processed",
+    "officeName": "my office name",
+    "clientName": "gg ggg"
+  },
+  {
+    "id": 666,
+    "actionName": "CREATE",
+    "entityName": "CLIENT",
+    "resourceId": 363,
+    "maker": "keithwoodlock",
+    "madeOnDate": 1365012843000,
+    "processingResult": "awaiting.approval",
+    "officeName": "my office name"
+  },
+  {
+    "id": 657,
+    "actionName": "CREATE",
+    "entityName": "CLIENT",
+    "resourceId": 362,
+    "maker": "ii",
+    "madeOnDate": 1364953928000,
+    "checker": "ii",
+    "checkedOnDate": 1365010060000,
+    "processingResult": "processed",
+    "officeName": "my office name",
+    "clientName": "gg ggg"
+  },
+  {
+    "id": 645,
+    "actionName": "CREATE",
+    "entityName": "LOAN",
+    "resourceId": 373,
+    "maker": "keithwoodlock",
+    "madeOnDate": 1364860260000,
+    "checker": "keithwoodlock",
+    "checkedOnDate": 1364861222000,
+    "processingResult": "processed",
+    "officeName": "another office",
+    "clientName": "another client",
+    "loanAccountNo": "000000373"
+  },...
+  ]
+					</code>
+				</div>
+			</div>
+
+
+			<a id="audits_searchtemplate" name="audits_searchtemplate"
+				class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Audit Search Template</h4>
+					<p>This is a convenience resource. It can be useful when
+                                        building an Audit Search UI. "appUsers" are data scoped to
+                                        the office/branch the requestor is associated with.
+					</p>
+					<p>Example Requests:</p>
+					<div class=apiClick>audits/searchtemplate</div>
+					<div class=apiClick>audits/searchtemplate?fields=actionNames</div>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+GET https://DomainName/api/v1/audits/searchtemplate
+					</code>
+					<code class="method-response">
+{
+  "appUsers": [
+    {
+      "id": 30,
+      "username": "user 1"
+    },
+    {
+      "id": 28,
+      "username": "user 2"
+    },
+    {
+      "id": 35,
+      "username": "user 3"
+    },...
+  ],
+  "actionNames": [
+    "CREATE",
+    "DELETE",
+    "UPDATE",
+    "ACTIVATE",
+    "ADJUST",
+    "APPROVALUNDO",
+    "APPROVE",
+    "APPROVEINPAST",
+    "BULKREASSIGN",
+    "CALCULATEINTEREST",
+    "CLOSE",
+    "CLOSEASRESCHEDULED",
+    "CREATEHISTORIC",
+    "DEPOSIT",
+    "DEREGISTER",
+    "DISBURSALUNDO",
+    "DISBURSE",
+    "DISBURSEINPAST",
+    "INTEREST",
+    "PERMISSIONS",
+    "REGISTER",
+    "REJECT",...
+  ],
+  "entityNames": [
+    "CALENDAR",
+    "CENTER",
+    "CHARGE",
+    "CLIENT",
+    "CLIENTIDENTIFIER",
+    "CLIENTIMAGE",
+    "CLIENTNOTE",
+    "CODE",
+    "CODEVALUE",
+    "COLLATERAL",
+    "CONFIGURATION",
+    "CURRENCY",
+    "DATATABLE",
+    "DEPOSITACCOUNT",
+    "DEPOSITNOTE",
+    "DEPOSITPRODUCT",
+    "DOCUMENT",
+    "FUND",
+    "GLACCOUNT",
+    "GLCLOSURE",
+    "GROUP",
+    "GROUPNOTE",...
+  ],
+  "processingResults": [
+    {
+      "id": 0,
+      "processingResult": "invalid"
+    },
+    {
+      "id": 1,
+      "processingResult": "processed"
+    },
+    {
+      "id": 2,
+      "processingResult": "awaiting.approval"
+    },
+    {
+      "id": 3,
+      "processingResult": "rejected"
+    }
+  ]
+}
+					</code>
+				</div>
+			</div>
+
+
+
+
+			<a id="makercheckers_searchtemplate" name="makercheckers_searchtemplate"
+				class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Maker Checker Search Template</h4>
+					<p>This is a convenience resource. It can be useful when
+                                        building a Checker Inbox UI. "appUsers" are data scoped to
+                                        the office/branch the requestor is associated with.
+                                        "actionNames" and "entityNames" returned are those that the
+                                        requestor has Checker approval permissions for.
+					</p>
+					<p>Example Requests:</p>
+					<div class=apiClick>makercheckers/searchtemplate</div>
+					<div class=apiClick>makercheckers/searchtemplate?fields=entityNames</div>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+GET https://DomainName/api/v1/audits/searchtemplate
+					</code>
+					<code class="method-response">
+{
+  "appUsers": [
+    {
+      "id": 30,
+      "username": "user 1"
+    },
+    {
+      "id": 28,
+      "username": "user 2"
+    },
+    {
+      "id": 35,
+      "username": "user 3"
+    },...
+  ],
+  "actionNames": [
+    "CREATE",
+    "DELETE",
+    "UPDATE",
+    "ACTIVATE",
+    "ADJUST",
+    "APPROVALUNDO",
+    "APPROVE",...
+  ],
+  "entityNames": [
+    "CALENDAR",
+    "CENTER",
+    "CHARGE",
+    "CLIENT",
+    "CLIENTIDENTIFIER",...
+  ]
+}
+					</code>
+				</div>
+			</div>
+
+			<!-- Fund starts here -->
 			<a id="funds_create" name="funds_create" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
@@ -12686,6 +12985,46 @@ GET https://DomainName/api/v1/search?query=000000111
 					<td><a href="#configs_codes_codevalues_update">Update a Code Value</a></td>
 					<td><a href="#configs_codes_codevalues_delete">Delete a Code Value</a></td>
 				</tr>
+							<tr>
+								<td><a href="#audits">Audits</a></td>
+								<td>audits</td>
+								<td></td>
+								<td><a href="#audits_list">List Audits</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr class="alt">
+								<td></td>
+								<td>audits/{auditId}</td>
+								<td></td>
+								<td><a href="#audits_retrieve">Retrieve an Audit Entry</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td><a href="#makercheckers">Makercheckers</a></td>
+								<td>makercheckers</td>
+								<td></td>
+								<td><a href="#makercheckers_list">List Maker Checker Entries</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr class="alt">
+								<td></td>
+								<td>makercheckers/{auditId}</td>
+								<td></td>
+								<td></td>
+								<td></td>
+								<td><a href="#makercheckers_delete">Delete Maker Checker Entry</a></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>makercheckers/{auditId}?command=approve</td>
+								<td><a href="#makercheckers_approve">Approve Maker Checker Entry</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
 				<tr class="alt">
 					<td><a href="#funds">Funds</a></td>
 					<td>funds</td>

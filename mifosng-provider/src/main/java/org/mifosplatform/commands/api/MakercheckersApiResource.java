@@ -87,13 +87,19 @@ public class MakercheckersApiResource {
 			@QueryParam("resourceId") final Long resourceId,
 			@QueryParam("makerId") final Long makerId,
 			@QueryParam("makerDateTimeFrom") final String makerDateTimeFrom,
-			@QueryParam("makerDateTimeTo") final String makerDateTimeTo) {
+			@QueryParam("makerDateTimeTo") final String makerDateTimeTo,
+			@QueryParam("officeId") final Integer officeId,
+			@QueryParam("groupId") final Integer groupId,
+			@QueryParam("clientId") final Integer clientId,
+			@QueryParam("loanid") final Integer loanId,
+			@QueryParam("savingsAccountId") final Integer savingsAccountId) {
 
 		context.authenticatedUser().validateHasReadPermission(
 				resourceNameForPermissions);
 
 		final String extraCriteria = getExtraCriteria(actionName, entityName,
-				resourceId, makerId, makerDateTimeFrom, makerDateTimeTo);
+				resourceId, makerId, makerDateTimeFrom, makerDateTimeTo,
+				officeId, groupId, clientId, loanId, savingsAccountId);
 
 		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper
 				.process(uriInfo.getQueryParameters());
@@ -129,16 +135,16 @@ public class MakercheckersApiResource {
 	}
 
 	@POST
-	@Path("{commandId}")
+	@Path("{auditId}")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
 	public String approveMakerCheckerEntry(
-			@PathParam("commandId") final Long commandId,
+			@PathParam("auditId") final Long auditId,
 			@QueryParam("command") final String commandParam) {
 
 		CommandProcessingResult result = null;
 		if (is(commandParam, "approve")) {
-			result = this.writePlatformService.approveEntry(commandId);
+			result = this.writePlatformService.approveEntry(auditId);
 		} else {
 			throw new UnrecognizedQueryParamException("command", commandParam);
 		}
@@ -152,13 +158,13 @@ public class MakercheckersApiResource {
 	}
 
 	@DELETE
-	@Path("{commandId}")
+	@Path("{auditId}")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
 	public String deleteMakerCheckerEntry(
-			@PathParam("commandId") final Long commandId) {
+			@PathParam("auditId") final Long auditId) {
 
-		final Long id = this.writePlatformService.deleteEntry(commandId);
+		final Long id = this.writePlatformService.deleteEntry(auditId);
 
 		return this.toApiJsonSerializer.serialize(CommandProcessingResult
 				.commandOnlyResult(id));
@@ -166,7 +172,10 @@ public class MakercheckersApiResource {
 
 	private String getExtraCriteria(final String actionName,
 			final String entityName, final Long resourceId, final Long makerId,
-			final String makerDateTimeFrom, final String makerDateTimeTo) {
+			final String makerDateTimeFrom, final String makerDateTimeTo,
+			final Integer officeId, final Integer groupId,
+			final Integer clientId, final Integer loanId,
+			final Integer savingsAccountId) {
 
 		String extraCriteria = "";
 
@@ -192,6 +201,27 @@ public class MakercheckersApiResource {
 		if (makerDateTimeTo != null) {
 			extraCriteria += " and aud.made_on_date <= "
 					+ ApiParameterHelper.sqlEncodeString(makerDateTimeTo);
+		}
+
+		if (officeId != null) {
+			extraCriteria += " and aud.office_id = " + officeId;
+		}
+
+		if (groupId != null) {
+			extraCriteria += " and aud.group_id = " + groupId;
+		}
+
+		if (clientId != null) {
+			extraCriteria += " and aud.client_id = " + clientId;
+		}
+
+		if (loanId != null) {
+			extraCriteria += " and aud.loan_id = " + loanId;
+		}
+
+		if (savingsAccountId != null) {
+			extraCriteria += " and aud.savings_account_id = "
+					+ savingsAccountId;
 		}
 
 		if (StringUtils.isNotBlank(extraCriteria)) {
