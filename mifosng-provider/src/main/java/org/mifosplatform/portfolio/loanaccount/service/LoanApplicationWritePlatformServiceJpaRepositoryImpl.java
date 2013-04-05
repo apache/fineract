@@ -57,6 +57,7 @@ import org.mifosplatform.portfolio.loanproduct.domain.LoanProduct;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanProductRepository;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanTransactionProcessingStrategy;
 import org.mifosplatform.portfolio.loanproduct.exception.LoanProductNotFoundException;
+import org.mifosplatform.portfolio.loanproduct.serialization.LoanProductCommandFromApiJsonDeserializer;
 import org.mifosplatform.portfolio.note.domain.Note;
 import org.mifosplatform.portfolio.note.domain.NoteRepository;
 import org.mifosplatform.useradministration.domain.AppUser;
@@ -92,19 +93,21 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
     private final LoanRepaymentScheduleTransactionProcessorFactory loanRepaymentScheduleTransactionProcessorFactory;
     private final CalendarRepository calendarRepository;
     private final CalendarInstanceRepository calendarInstanceRepository;
+    private final LoanProductCommandFromApiJsonDeserializer loanProductCommandFromApiJsonDeserializer;
 
     @Autowired
     public LoanApplicationWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final FromJsonHelper fromJsonHelper,
             final LoanApplicationTransitionApiJsonValidator loanApplicationTransitionApiJsonValidator,
             final LoanApplicationCommandFromApiJsonHelper fromApiJsonDeserializer, final AprCalculator aprCalculator,
             final LoanAssembler loanAssembler, final LoanChargeAssembler loanChargeAssembler,
-            final CollateralAssembler loanCollateralAssembler, final LoanRepository loanRepository,
-            final NoteRepository noteRepository, final LoanScheduleCalculationPlatformService calculationPlatformService,
-            final ClientRepository clientRepository, final LoanProductRepository loanProductRepository,
-            final AccountNumberGeneratorFactory accountIdentifierGeneratorFactory, final LoanSummaryWrapper loanSummaryWrapper,
+            final CollateralAssembler loanCollateralAssembler, final LoanRepository loanRepository, final NoteRepository noteRepository,
+            final LoanScheduleCalculationPlatformService calculationPlatformService, final ClientRepository clientRepository,
+            final LoanProductRepository loanProductRepository, final AccountNumberGeneratorFactory accountIdentifierGeneratorFactory,
+            final LoanSummaryWrapper loanSummaryWrapper,
             final LoanRepaymentScheduleTransactionProcessorFactory loanRepaymentScheduleTransactionProcessorFactory,
-            final CalendarRepository calendarRepository, final CalendarInstanceRepository calendarInstanceRepository) {
-        this.context = context;
+            final CalendarRepository calendarRepository, final CalendarInstanceRepository calendarInstanceRepository,
+            final LoanProductCommandFromApiJsonDeserializer loanProductCommandFromApiJsonDeserializer) {
+     this.context = context;
         this.fromJsonHelper = fromJsonHelper;
         this.loanApplicationTransitionApiJsonValidator = loanApplicationTransitionApiJsonValidator;
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
@@ -122,6 +125,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         this.loanRepaymentScheduleTransactionProcessorFactory = loanRepaymentScheduleTransactionProcessorFactory;
         this.calendarRepository = calendarRepository;
         this.calendarInstanceRepository = calendarInstanceRepository;
+        this.loanProductCommandFromApiJsonDeserializer = loanProductCommandFromApiJsonDeserializer;
     }
 
     private LoanLifecycleStateMachine defaultLoanLifecycleStateMachine() {
@@ -199,6 +203,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             }
             
             final Loan existingLoanApplication = retrieveLoanBy(loanId);
+            this.loanProductCommandFromApiJsonDeserializer.validateMinMaxConstraints(command.parsedJson(), existingLoanApplication.repaymentScheduleDetail(), "loan");
 
             if (!existingLoanApplication.isSubmittedAndPendingApproval()) { throw new LoanApplicationNotInSubmittedAndPendingApprovalStateCannotBeModified(
                     loanId); }

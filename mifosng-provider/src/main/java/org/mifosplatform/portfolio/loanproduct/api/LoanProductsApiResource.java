@@ -57,11 +57,12 @@ import org.springframework.stereotype.Component;
 public class LoanProductsApiResource {
 
     private final Set<String> LOAN_PRODUCT_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "name", "description", "fundId",
-            "fundName", "currency", "principal", "numberOfRepayments", "repaymentEvery", "repaymentFrequencyType", "interestRatePerPeriod",
-            "interestRateFrequencyType", "annualInterestRate", "amortizationType", "interestType", "interestCalculationPeriodType",
-            "inArrearsTolerance", "transactionProcessingStrategyId", "transactionProcessingStrategyName", "charges", "accountingRule",
-            "accountingMappings", "fundOptions", "currencyOptions", "repaymentFrequencyTypeOptions", "interestRateFrequencyTypeOptions",
-            "amortizationTypeOptions", "interestTypeOptions", "interestCalculationPeriodTypeOptions",
+            "fundName", "currency", "principal", "minPrincipal", "maxPrincipal", "numberOfRepayments", "minNumberOfRepayments",
+            "maxNumberOfRepayments", "repaymentEvery", "repaymentFrequencyType", "interestRatePerPeriod", "minInterestRatePerPeriod",
+            "maxInterestRatePerPeriod", "interestRateFrequencyType", "annualInterestRate", "amortizationType", "interestType",
+            "interestCalculationPeriodType", "inArrearsTolerance", "transactionProcessingStrategyId", "transactionProcessingStrategyName",
+            "charges", "accountingRule", "accountingMappings", "fundOptions", "currencyOptions", "repaymentFrequencyTypeOptions",
+            "interestRateFrequencyTypeOptions", "amortizationTypeOptions", "interestTypeOptions", "interestCalculationPeriodTypeOptions",
             "transactionProcessingStrategyOptions", "chargeOptions", "accountingOptions", "accountingRuleOptions",
             "accountingMappingOptions"));
 

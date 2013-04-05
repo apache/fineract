@@ -289,6 +289,19 @@ public final class JsonCommand {
         }
         return isChanged;
     }
+    
+    public boolean isChangeInBigDecimalParameterNamedWithNullCheck(final String parameterName, final BigDecimal existingValue) {
+        boolean isChanged = false;
+        if (parameterExists(parameterName)) {
+            final BigDecimal workingValue = bigDecimalValueOfParameterNamed(parameterName);
+            if(workingValue == null && existingValue != null){
+                isChanged = true;
+            }else{
+                isChanged = differenceExists(existingValue, workingValue);
+            }
+        }
+        return isChanged;
+    }
 
     public BigDecimal bigDecimalValueOfParameterNamed(final String parameterName) {
         return this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(parameterName, parsedCommand);
@@ -303,6 +316,19 @@ public final class JsonCommand {
         return isChanged;
     }
 
+    public boolean isChangeInIntegerParameterNamedWithNullCheck(final String parameterName, final Integer existingValue) {
+        boolean isChanged = false;
+        if (parameterExists(parameterName)) {
+            final Integer workingValue = integerValueOfParameterNamed(parameterName);
+            if(workingValue == null && existingValue != null){
+                isChanged = true;
+            }else{
+                isChanged = differenceExists(existingValue, workingValue);
+            }
+        }
+        return isChanged;
+    }
+    
     public Integer integerValueOfParameterNamed(final String parameterName) {
         return this.fromApiJsonHelper.extractIntegerWithLocaleNamed(parameterName, parsedCommand);
     }

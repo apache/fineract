@@ -137,6 +137,8 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
             final LoanProduct product = this.loanProductRepository.findOne(loanProductId);
             if (product == null) { throw new LoanProductNotFoundException(loanProductId); }
 
+            this.fromApiJsonDeserializer.validateMinMaxConstraints(command.parsedJson(), product.loanProductRelatedDetail(), "loanproduct");
+            
             final Map<String, Object> changes = product.update(command, this.aprCalculator);
 
             if (changes.containsKey("fundId")) {

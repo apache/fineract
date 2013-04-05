@@ -75,6 +75,8 @@ public class LoanScheduleAssembler {
         final BigDecimal minPrincipal = loanProduct.getMinPrincipalAmount().getAmount();//Copy minPrincipal from loan product to loan
         final BigDecimal maxPrincipal = loanProduct.getMaxPrincipalAmount().getAmount();//Copy maxPrincipal from loan product to loan
         final BigDecimal interestRatePerPeriod = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("interestRatePerPeriod", element);
+        final BigDecimal minInterestRatePerPeriod = loanProduct.getMinNominalInterestRatePerPeriod();//Copy from Loan product to Loan
+        final BigDecimal maxInterestRatePerPeriod = loanProduct.getMaxNominalInterestRatePerPeriod();//Copy from Loan product to Loan
         final Integer interestRateFrequencyType = fromApiJsonHelper.extractIntegerWithLocaleNamed("interestRateFrequencyType", element);
         final Integer interestType = fromApiJsonHelper.extractIntegerWithLocaleNamed("interestType", element);
         final Integer interestCalculationPeriodType = fromApiJsonHelper.extractIntegerWithLocaleNamed("interestCalculationPeriodType",
@@ -91,6 +93,8 @@ public class LoanScheduleAssembler {
         final Integer repaymentEvery = fromApiJsonHelper.extractIntegerWithLocaleNamed("repaymentEvery", element);
         final Integer repaymentFrequencyType = fromApiJsonHelper.extractIntegerWithLocaleNamed("repaymentFrequencyType", element);
         final Integer numberOfRepayments = fromApiJsonHelper.extractIntegerWithLocaleNamed("numberOfRepayments", element);
+        final Integer minNumberOfRepayments = loanProduct.getMinNumberOfRepayments();//Copy from Loan product to Loan
+        final Integer maxNumberOfRepayments = loanProduct.getMaxNumberOfRepayments();//Copy from Loan product to Loan
         final Integer amortizationType = fromApiJsonHelper.extractIntegerWithLocaleNamed("amortizationType", element);
         final PeriodFrequencyType repaymentPeriodFrequencyType = PeriodFrequencyType.fromInt(repaymentFrequencyType);
         final AmortizationMethod amortizationMethod = AmortizationMethod.fromInt(amortizationType);
@@ -107,9 +111,9 @@ public class LoanScheduleAssembler {
 
         final LoanScheduleGenerator loanScheduleGenerator = this.loanScheduleFactory.create(interestMethod);
 
-        return new LoanSchedule(loanScheduleGenerator, applicationCurrency, principal, minPrincipal, maxPrincipal, interestRatePerPeriod,
+        return new LoanSchedule(loanScheduleGenerator, applicationCurrency, principal, minPrincipal, maxPrincipal, interestRatePerPeriod, minInterestRatePerPeriod, maxInterestRatePerPeriod,
                 interestRatePeriodFrequencyType, defaultAnnualNominalInterestRate, interestMethod, interestCalculationPeriodMethod,
-                repaymentEvery, repaymentPeriodFrequencyType, numberOfRepayments, amortizationMethod, loanTermFrequency,
+                repaymentEvery, repaymentPeriodFrequencyType, numberOfRepayments, minNumberOfRepayments, maxNumberOfRepayments, amortizationMethod, loanTermFrequency,
                 loanTermPeriodFrequencyType, loanCharges, expectedDisbursementDate, repaymentsStartingFromDate, interestChargedFromDate, inArrearsTolerance);
     }
 }

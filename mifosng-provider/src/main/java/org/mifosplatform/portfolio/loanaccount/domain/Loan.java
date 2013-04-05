@@ -1321,6 +1321,8 @@ public class Loan extends AbstractPersistable<Long> {
         final BigDecimal maxPrincipal = this.loanRepaymentScheduleDetail.getMaxPrincipal().getAmount();
         final BigDecimal inArrearsTolerance = this.loanRepaymentScheduleDetail.getInArrearsTolerance().getAmount();
         final BigDecimal interestRatePerPeriod = this.loanRepaymentScheduleDetail.getNominalInterestRatePerPeriod();
+        final BigDecimal minInterestRatePerPeriod = this.loanRepaymentScheduleDetail.getMinNominalInterestRatePerPeriod();
+        final BigDecimal maxInterestRatePerPeriod = this.loanRepaymentScheduleDetail.getMaxNominalInterestRatePerPeriod();
         final PeriodFrequencyType interestRatePeriodFrequencyType = this.loanRepaymentScheduleDetail.getInterestPeriodFrequencyType();
         final BigDecimal defaultAnnualNominalInterestRate = this.loanRepaymentScheduleDetail.getAnnualNominalInterestRate();
 
@@ -1329,13 +1331,16 @@ public class Loan extends AbstractPersistable<Long> {
         final Integer repaymentEvery = this.loanRepaymentScheduleDetail.getRepayEvery();
         final PeriodFrequencyType repaymentPeriodFrequencyType = this.loanRepaymentScheduleDetail.getRepaymentPeriodFrequencyType();
         final Integer numberOfRepayments = this.loanRepaymentScheduleDetail.getNumberOfRepayments();
+        final Integer minNumberOfRepayments = this.loanRepaymentScheduleDetail.getMinNumberOfRepayments();
+        final Integer maxNumberOfRepayments = this.loanRepaymentScheduleDetail.getMaxNumberOfRepayments();
         final AmortizationMethod amortizationMethod = this.loanRepaymentScheduleDetail.getAmortizationMethod();
         final Integer loanTermFrequency = this.termFrequency;
         final PeriodFrequencyType loanTermPeriodFrequencyType = PeriodFrequencyType.fromInt(this.termPeriodFrequencyType);
 
         final LoanSchedule loanSchedule = new LoanSchedule(loanScheduleGenerator, applicationCurrency, principal, minPrincipal,
-                maxPrincipal, interestRatePerPeriod, interestRatePeriodFrequencyType, defaultAnnualNominalInterestRate, interestMethod,
-                interestCalculationPeriodMethod, repaymentEvery, repaymentPeriodFrequencyType, numberOfRepayments, amortizationMethod,
+                maxPrincipal, interestRatePerPeriod, minInterestRatePerPeriod, maxInterestRatePerPeriod, interestRatePeriodFrequencyType,
+                defaultAnnualNominalInterestRate, interestMethod, interestCalculationPeriodMethod, repaymentEvery,
+                repaymentPeriodFrequencyType, numberOfRepayments, minNumberOfRepayments, maxNumberOfRepayments, amortizationMethod,
                 loanTermFrequency, loanTermPeriodFrequencyType, setOfLoanCharges(), this.getDisbursementDate(),
                 this.getExpectedFirstRepaymentOnDate(), this.getInterestChargedFromDate(), inArrearsTolerance);
 

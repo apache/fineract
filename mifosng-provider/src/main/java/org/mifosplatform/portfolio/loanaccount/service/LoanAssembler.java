@@ -42,11 +42,11 @@ import org.mifosplatform.portfolio.loanaccount.domain.LoanTransactionProcessingS
 import org.mifosplatform.portfolio.loanaccount.exception.LoanTransactionProcessingStrategyNotFoundException;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.LoanSchedule;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.service.LoanScheduleAssembler;
-import org.mifosplatform.portfolio.loanaccount.serialization.LoanApplicationCommandFromApiJsonHelper;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanProduct;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanProductRepository;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanTransactionProcessingStrategy;
 import org.mifosplatform.portfolio.loanproduct.exception.LoanProductNotFoundException;
+import org.mifosplatform.portfolio.loanproduct.serialization.LoanProductCommandFromApiJsonDeserializer;
 import org.mifosplatform.useradministration.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -69,7 +69,7 @@ public class LoanAssembler {
     private final FromJsonHelper fromApiJsonHelper;
     private final LoanSummaryWrapper loanSummaryWrapper;
     private final LoanRepaymentScheduleTransactionProcessorFactory loanRepaymentScheduleTransactionProcessorFactory;
-    private final LoanApplicationCommandFromApiJsonHelper fromApiJsonDeserializer;
+    private final LoanProductCommandFromApiJsonDeserializer loanProductCommandFromApiJsonDeserializer;
 
     @Autowired
     public LoanAssembler(final FromJsonHelper fromApiJsonHelper, final LoanProductRepository loanProductRepository,
@@ -79,7 +79,7 @@ public class LoanAssembler {
             final LoanScheduleAssembler loanScheduleAssembler, final LoanChargeAssembler loanChargeAssembler,
             final CollateralAssembler loanCollateralAssembler, final LoanSummaryWrapper loanSummaryWrapper,
             final LoanRepaymentScheduleTransactionProcessorFactory loanRepaymentScheduleTransactionProcessorFactory,
-            final LoanApplicationCommandFromApiJsonHelper fromApiJsonDeserializer) {
+            final LoanProductCommandFromApiJsonDeserializer loanProductCommandFromApiJsonDeserializer) {
         this.fromApiJsonHelper = fromApiJsonHelper;
         this.loanProductRepository = loanProductRepository;
         this.clientRepository = clientRepository;
@@ -93,7 +93,7 @@ public class LoanAssembler {
         this.loanCollateralAssembler = loanCollateralAssembler;
         this.loanSummaryWrapper = loanSummaryWrapper;
         this.loanRepaymentScheduleTransactionProcessorFactory = loanRepaymentScheduleTransactionProcessorFactory;
-        this.fromApiJsonDeserializer = fromApiJsonDeserializer;
+        this.loanProductCommandFromApiJsonDeserializer = loanProductCommandFromApiJsonDeserializer;
     }
 
     public Loan assembleFrom(final JsonCommand command, final AppUser currentUser) {
@@ -118,7 +118,7 @@ public class LoanAssembler {
         if (loanProduct == null) { throw new LoanProductNotFoundException(productId); }
 
         //validate min and max constraint parameters
-        this.fromApiJsonDeserializer.validateMinMaxConstraintValues(element, loanProduct);
+        this.loanProductCommandFromApiJsonDeserializer.validateMinMaxConstraints(element, loanProduct.loanProductRelatedDetail(), "loan");
         
         final Fund fund = findFundByIdIfProvided(fundId);
         final Staff loanOfficer = findLoanOfficerByIdIfProvided(loanOfficerId);
