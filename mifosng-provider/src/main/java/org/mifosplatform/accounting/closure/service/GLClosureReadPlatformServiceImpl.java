@@ -38,7 +38,7 @@ public class GLClosureReadPlatformServiceImpl implements GLClosureReadPlatformSe
                     + " glClosure.is_deleted as isDeleted, creatingUser.id as creatingUserId,creatingUser.username as creatingUserName,"
                     + " updatingUser.id as updatingUserId,updatingUser.username as updatingUserName, glClosure.created_date as createdDate,"
                     + " glClosure.lastmodified_date as updatedDate, glClosure.comments as comments "
-                    + " from acc_gl_Closure as glClosure, m_appuser as creatingUser, m_appuser as updatingUser,m_office as office"
+                    + " from acc_gl_closure as glClosure, m_appuser as creatingUser, m_appuser as updatingUser,m_office as office"
                     + " where glClosure.createdby_id=creatingUser.id and "
                     + " glClosure.lastmodifiedby_id=updatingUser.id and glClosure.office_id=office.id";
         }
