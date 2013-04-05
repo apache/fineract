@@ -177,6 +177,11 @@ task dist(type:Zip){
         include '*'
         into('pentahoReports')
     }
+    from('../api-docs/') {
+        fileMode = 0755
+        include '*'
+        into('api-docs')
+    }
     from jar.outputs.files
     from war.outputs.files
 }
