@@ -937,9 +937,8 @@
 								<td><a href="#permissions">Permission</a></td>
 								<td>permissions</td>
 								<td></td>
-								<td><a href="#permissions_list">List Application
-										Permissions</a></td>
-								<td></td>
+								<td><a href="#permissions_list">List Application Permissions</a></td>
+								<td><a href="#permissions_update">Enable/Disable Permissions for Maker Checker</a></td>
 								<td></td>
 							</tr>
 						</table>
@@ -7055,8 +7054,17 @@ Content-Type: application/json
 			<div class="method-section">
 				<div class="method-description">
 					<h3>Audits</h3>
-					<p>
-					<p />
+					<p>Every non-read Mifos API request is audited.  A fully processed request can
+                                        not be changed or deleted.  See maker checker api for situations where an audit is not
+                                        fully processed.<br><br>                                 
+                                        
+                                        Permissions: To search and look at audit entries a user needs to be attached to a role
+                                        that has one of the ALL_FUNCTIONS, ALL_FUNCTIONS_READ or READ_AUDIT permissions.<br><br>
+                                        
+                                        Data Scope: A user can only see audits that are within their data scope.  However,
+                                        'head office' users can see all audits including those that aren't office/branch related
+                                        e.g. Loan Product changes.                                        
+					<p/>
 				</div>
 			</div>
 
@@ -7065,9 +7073,106 @@ Content-Type: application/json
 			<div class="method-section">
 				<div class="method-description">
 					<h4>List Audits</h4>
-					<p></p>
+					<p>Get a list of audits that match the criteria supplied,
+                                        and are within the requestors' data scope.</p>
+					<h5>Arguments</h5>
+					<dl class="argument-list">
+                                            <dt>actionName</dt>
+                                            <dd>optional</dd>
+                                            <dd>Examples: CREATE, UPDATE, DISBURSE</dd>
+                                            
+                                            <dt>entityName</dt>
+                                            <dd>optional</dd>
+                                            <dd>Examples: CLIENT, LOAN, FUND</dd>
+                                                
+					    <dt>resourceId</dt>
+                                            <dd>optional, <span>
+                                            The id value of the entityName</span>
+                                            </dd>
+                                            
+					    <dt>makerId</dt>
+                                            <dd>optional, <span>
+                                            The id value of the application user creating the entry</span>
+                                            </dd>
+                                            
+                                            <dt>makerDateTimeFrom</dt>
+                                            <dd>optional, <span>
+                                            Get entries created on or after this</span>
+                                            </dd>
+                                            <dd>Example: 2013-04-10 08:00:00</dd>
+                                            
+                                            <dt>makerDateTimeTo</dt>
+                                            <dd>optional, <span>
+                                            Get entries created on or before this</span>
+                                            </dd>
+                                            <dd>Example: 2013-05-10 08:00:00</dd>
+                                            
+					    <dt>checkerId</dt>
+                                            <dd>optional, <span>
+                                            The id value of the application user that checked (approved) the entry</span>
+                                            </dd>
+                                            
+                                            <dt>checkerDateTimeFrom</dt>
+                                            <dd>optional, <span>
+                                            Get entries checked on or after this</span>
+                                            </dd>
+                                            <dd>Example: 2013-04-10 08:00:00</dd>
+                                            
+                                            <dt>checkerDateTimeTo</dt>
+                                            <dd>optional, <span>
+                                            Get entries checked on or before this</span>
+                                            </dd>
+                                            <dd>Example: 2013-05-10 18:00:00</dd>
+                                            
+					    <dt>processingResult</dt>
+                                            <dd>optional, <span>
+                                            The enum value of the processing status</span>
+                                            </dd>
+                                            <dd>values:<br>
+                                            0: Invalid<br>
+                                            1: processed<br>
+                                            2: awaiting.approval<br>
+                                            3: rejected
+                                            </dd>
+                                            
+					    <dt>officeId</dt>
+                                            <dd>optional, <span>
+                                            The id value of the office/branch associated with the entry (if there is one)</span>
+                                            </dd>
+                                            
+					    <dt>groupId</dt>
+                                            <dd>optional, <span>
+                                            The id value of the group associated with the entry (if there is one).
+                                            A group is a general idea and may be a Center, a Group, a Communal Bank or other.</span>
+                                            </dd>
+                                            
+					    <dt>clientId</dt>
+                                            <dd>optional, <span>
+                                            The id value of the client associated with the entry (if there is one)</span>
+                                            </dd>
+                                            
+					    <dt>loanId</dt>
+                                            <dd>optional, <span>
+                                            The id value of the loan associated with the entry (if there is one)</span>
+                                            </dd>
+                                            
+					    <dt>savingsAccountId</dt>
+                                            <dd>optional, <span>
+                                            The id value of the savings account associated with the entry (if there is one)</span>
+                                            </dd>
+                                            
+					    <dt>includeJson</dt>
+                                            <dd>optional, <span>
+                                            Values are true, false.  Default is false.</span>
+                                            </dd>
+                                            
+					</dl>
 					<p>Example Requests:</p>
-					<div class=apiClick>audits</div>
+					<div class=apiClick>audits</div><br>
+					<div class=apiClick>audits?fields=madeOnDate,maker,processingResult</div><br>
+					<div class=apiClick>audits?makerDateTimeFrom=2013-03-25 08:00:00&makerDateTimeTo=2013-04-04 18:00:00</div><br>
+					<div class=apiClick>audits?officeId=1</div><br>
+					<div class=apiClick>audits?officeId=1&includeJson=true</div>
 				</div>
 				<div class="method-example">
 					<code class="method-declaration">
@@ -7155,7 +7260,6 @@ GET https://DomainName/api/v1/audits
 					</code>
 				</div>
 			</div>
-
 
 			<a id="audits_searchtemplate" name="audits_searchtemplate"
 				class="old-syle-anchor">&nbsp;</a>
@@ -7262,7 +7366,211 @@ GET https://DomainName/api/v1/audits/searchtemplate
 			</div>
 
 
+			<a id="audits_retrieve" name="audits_retrieve"
+				class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Retrieve an Audit Entry</h4>
+					<p></p>
+					<p>Example Requests:</p>
+					<div class=apiClick>audits/20</div>
+					<div class=apiClick>audits/20?fields=madeOnDate,maker,processingResult</div>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+GET https://DomainName/api/v1/audits
+					</code>
+					<code class="method-response">
+{
+  "id": 20,
+  "actionName": "REPAYMENT",
+  "entityName": "LOAN",
+  "resourceId": 868,
+  "maker": "dataentry1",
+  "madeOnDate": 1358449025000,
+  "processingResult": "processed",
+  "commandAsJson": "{\"transactionDate\":\"28 September 2012\",\"transactionAmount\":\"1,967.00\",\"locale\":\"en\",\"dateFormat\":\"dd MMMM yyyy\"}",
+  "officeName": "another office",
+  "clientName": "another client",
+  "loanAccountNo": "23"
+}
+					</code>
+				</div>
+			</div>
 
+
+			<!-- Maker Checker starts here -->
+			<a id="makercheckers" name="makercheckers" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h3>Maker Checker (or 4-eye) functionality</h3>
+                                        <p>Mifos X Maker Checker functionality allows an MFI to define transactions
+                                        as having a maker and a checker phase.  One user enters, deletes or changes data.
+                                        Then, another user that has "Checker" rights for that transaction, can inspect
+                                        and approve the data.
+                                        </p>
+                                        
+                                        <p>By default, Maker Checker functionality is disabled.
+                                        See <a href="#configs_globalconfig_update">Update Global Configuration</a> to enable/disable
+                                        Maker Checker functionality at a global level.
+                                        </p>
+                                        
+                                        <p>
+                                        Additionally, Maker Checker functionality for each transaction (permission) is disabled by default.
+                                        see <a href="#permissions_update">Enable/Disable Permissions for Maker Checker</a> to enable/disable
+                                        Maker Checker functionality at a transaction (permission) level.
+                                        </p>
+                                        
+                                        <p>
+                                        Finally, to give checking rights to a user (via a role associated with the user) see
+                                        <a href="#rolespermissions_update">Update a Role's Permissions</a>
+                                        </p>
+                                        <p>For example, <br>
+<code>
+{
+ "permissions":{
+    "CREATE_GUARANTOR_CHECKER":true,
+    "CREATE_CLIENT_CHECKER":true
+ }
+}
+</code>
+                                        <br>
+                                        will give checking rights for CREATE_GUARANTOR and CREATE_CLIENT</p>
+                                        <p>Alternatively, the special permissions ALL_FUNCTIONS or CHECKER_SUPER_USER will give blanket
+                                        checking rights.
+                                        </p>
+                                        <p>
+                                        When a user "makes" an entry that is enabled for Maker Checker, it is audited and the audit status
+                                        is set to a value of 2 (awaiting.approval).
+                                        </p>
+                                                                                                                        
+                                        Checkers can only Check and approve entries that they have been permitted to check.<br><br>
+                                        
+                                        Checkers can only Check and approve entries that are within their data scope.  However,
+                                        'head office' Checkers can Check and approve all entries 
+                                        including those that aren't office/branch related (as long as they have the Checker permissions)
+                                        e.g. Loan Product changes.                                        
+					<p/>
+				</div>
+			</div>
+
+			<a id="makercheckers_list" name="makercheckers_list"
+				class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>List Maker Checker Entries</h4>
+					<p>Get a list of entries that can be checked by the requestor that match the criteria supplied.</p>
+					<h5>Arguments</h5>
+					<dl class="argument-list">
+                                            <dt>actionName</dt>
+                                            <dd>optional</dd>
+                                            <dd>Examples: CREATE, UPDATE, DISBURSE</dd>
+                                            
+                                            <dt>entityName</dt>
+                                            <dd>optional</dd>
+                                            <dd>Examples: CLIENT, LOAN, FUND</dd>
+                                                
+					    <dt>resourceId</dt>
+                                            <dd>optional, <span>
+                                            The id value of the entityName</span>
+                                            </dd>
+                                            
+					    <dt>makerId</dt>
+                                            <dd>optional, <span>
+                                            The id value of the application user creating the entry</span>
+                                            </dd>
+                                            
+                                            <dt>makerDateTimeFrom</dt>
+                                            <dd>optional, <span>
+                                            Get entries created on or after this</span>
+                                            </dd>
+                                            <dd>Example: 2013-04-10 08:00:00</dd>
+                                            
+                                            <dt>makerDateTimeTo</dt>
+                                            <dd>optional, <span>
+                                            Get entries created on or before this</span>
+                                            </dd>
+                                            <dd>Example: 2013-05-10 08:00:00</dd>
+                                                                                                                                    
+					    <dt>officeId</dt>
+                                            <dd>optional, <span>
+                                            The id value of the office/branch associated with the entry (if there is one)</span>
+                                            </dd>
+                                            
+					    <dt>groupId</dt>
+                                            <dd>optional, <span>
+                                            The id value of the group associated with the entry (if there is one).
+                                            A group is a general idea and may be a Center, a Group, a Communal Bank or other.</span>
+                                            </dd>
+                                            
+					    <dt>clientId</dt>
+                                            <dd>optional, <span>
+                                            The id value of the client associated with the entry (if there is one)</span>
+                                            </dd>
+                                            
+					    <dt>loanId</dt>
+                                            <dd>optional, <span>
+                                            The id value of the loan associated with the entry (if there is one)</span>
+                                            </dd>
+                                            
+					    <dt>savingsAccountId</dt>
+                                            <dd>optional, <span>
+                                            The id value of the savings account associated with the entry (if there is one)</span>
+                                            </dd>
+                                            
+					    <dt>includeJson</dt>
+                                            <dd>optional, <span>
+                                            Values are true, false.  Default is false.</span>
+                                            </dd>
+                                            
+					</dl>
+					<p>Example Requests:</p>
+					<div class=apiClick>makercheckers</div><br>
+					<div class=apiClick>makercheckers?fields=madeOnDate,maker,processingResult</div><br>
+					<div class=apiClick>makercheckers?makerDateTimeFrom=2013-03-25 08:00:00&makerDateTimeTo=2013-04-04 18:00:00</div><br>
+					<div class=apiClick>makercheckers?officeId=1</div><br>
+					<div class=apiClick>makercheckers?officeId=1&includeJson=true</div>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+GET https://DomainName/api/v1/makercheckers
+					</code>
+					<code class="method-response">
+[
+  {
+    "id": 654,
+    "actionName": "CREATE",
+    "entityName": "LOANPRODUCT",
+    "resourceId": 15,
+    "maker": "keithwoodlock",
+    "madeOnDate": 1364924512000,
+    "processingResult": "awaiting.approval"
+  },
+  {
+    "id": 666,
+    "actionName": "CREATE",
+    "entityName": "CLIENT",
+    "resourceId": 363,
+    "maker": "keithwoodlock",
+    "madeOnDate": 1365012843000,
+    "processingResult": "awaiting.approval",
+    "officeName": "my office name"
+  },
+  {
+    "id": 670,
+    "actionName": "CREATE",
+    "entityName": "CLIENTNOTE",
+    "resourceId": 287,
+    "maker": "keithwoodlock",
+    "madeOnDate": 1365014204000,
+    "processingResult": "awaiting.approval",
+    "officeName": "my office name",
+    "clientName": "gg ggg"
+  }
+]
+					</code>
+				</div>
+			</div>
 
 			<a id="makercheckers_searchtemplate" name="makercheckers_searchtemplate"
 				class="old-syle-anchor">&nbsp;</a>
@@ -7319,6 +7627,42 @@ GET https://DomainName/api/v1/audits/searchtemplate
 					</code>
 				</div>
 			</div>
+
+			<a id="makercheckers_approve" name="makercheckers_approve" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Approve Maker Checker Entry</h4>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+POST https://DomainName/api/v1/makercheckers/{auditId}?command=approve
+					</code>
+					<code class="method-request">
+POST makercheckers/1?command=approve
+Content-Type: application/json
+					</code>
+					<code class="method-response">{ "auditId": 1 } </code>
+				</div>
+			</div>
+                        
+			<a id="makercheckers_delete" name="makercheckers_delete" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Delete Maker Checker Entry</h4>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+DELETE https://DomainName/api/v1/makercheckers/{auditId}
+					</code>
+					<code class="method-request">
+DELETE makercheckers/1
+Content-Type: application/json
+					</code>
+					<code class="method-response">{ "auditId": 1 } </code>
+				</div>
+			</div>
+
+
 
 			<!-- Fund starts here -->
 			<a id="funds_create" name="funds_create" class="old-syle-anchor">&nbsp;</a>
@@ -11324,6 +11668,9 @@ Request body:
 				<div class="method-description">
 					<h3>Permissions</h3>
 					<p>An API capability to support management of application permissions for user administration.</p>
+                                        <p>There is no Mifos X functionality for creating or deleting permissions.  Permissions come pre-installed.</p>
+                                        <p>Permissions are not updated, except in the case of enabling or disabling non-read transactions for
+                                        Maker Checker functionality</p>
 				</div>
 			</div>
 
@@ -11332,10 +11679,25 @@ Request body:
 			<div class="method-section">
 				<div class="method-description">
 					<h4>List Application Permissions</h4>
+					<h5>Arguments</h5>
+					<dl class="argument-list">
+					    <dt>makerCheckerable</dt>
+                                            <dd>optional, <span>
+                                            Values are true, false.  Default is false.</span>
+                                            <p>If makerCheckerable=false or not supplied then a list of application permissions is returned.  The "selected"
+                                            attribute is always true in this case.
+                                            </p>
+                                            <p>If makerCheckerable=true then the "selected" attribute shows whether the permission is
+                                            enabled for Maker Check functionality.
+                                            </p>
+                                            <p>
+                                            Note: Each Mifos X transaction is associated with a permission.
+                                            </p>
+                                            </dd>
+                                        </dl>
 					<p>Example Requests:</p>
-					<div class=apiClick>permissions</div>
-					<br>
-					<br>
+					<div class=apiClick>permissions</div><br><br>
+					<div class=apiClick>permissions?makerCheckerable=true</div><br><br>
 					<div class=apiClick>permissions?fields=grouping,code</div>
 				</div>
 				<div class="method-example">
@@ -11363,6 +11725,30 @@ GET https://DomainName/api/v1/permissions
 					</code>
 				</div>
 			</div>
+
+			<a id="permissions_update" name="permissions_update" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Enable/Disable Permissions for Maker Checker</h4>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+PUT https://DomainName/api/v1/permissions
+						</code>
+					<code class="method-request">
+PUT permissions 
+Content-Type: application/json 
+Request Body:
+{
+ "permissions":{
+    "CREATE_GUARANTOR":true,
+    "CREATE_CLIENT":true
+ }
+}
+					</code>
+				</div>
+			</div>
+
 
 			<!-- start of accounting api docs -->
             <a id="glaccounts" name="glaccounts" class="old-syle-anchor">&nbsp;</a>
@@ -12985,46 +13371,46 @@ GET https://DomainName/api/v1/search?query=000000111
 					<td><a href="#configs_codes_codevalues_update">Update a Code Value</a></td>
 					<td><a href="#configs_codes_codevalues_delete">Delete a Code Value</a></td>
 				</tr>
-							<tr>
-								<td><a href="#audits">Audits</a></td>
-								<td>audits</td>
-								<td></td>
-								<td><a href="#audits_list">List Audits</a></td>
-								<td></td>
-								<td></td>
-							</tr>
-							<tr class="alt">
-								<td></td>
-								<td>audits/{auditId}</td>
-								<td></td>
-								<td><a href="#audits_retrieve">Retrieve an Audit Entry</a></td>
-								<td></td>
-								<td></td>
-							</tr>
-							<tr>
-								<td><a href="#makercheckers">Makercheckers</a></td>
-								<td>makercheckers</td>
-								<td></td>
-								<td><a href="#makercheckers_list">List Maker Checker Entries</a></td>
-								<td></td>
-								<td></td>
-							</tr>
-							<tr class="alt">
-								<td></td>
-								<td>makercheckers/{auditId}</td>
-								<td></td>
-								<td></td>
-								<td></td>
-								<td><a href="#makercheckers_delete">Delete Maker Checker Entry</a></td>
-							</tr>
-							<tr>
-								<td></td>
-								<td>makercheckers/{auditId}?command=approve</td>
-								<td><a href="#makercheckers_approve">Approve Maker Checker Entry</a></td>
-								<td></td>
-								<td></td>
-								<td></td>
-							</tr>
+                                <tr>
+                                        <td><a href="#audits">Audits</a></td>
+                                        <td>audits</td>
+                                        <td></td>
+                                        <td><a href="#audits_list">List Audits</a></td>
+                                        <td></td>
+                                        <td></td>
+                                </tr>
+                                <tr class="alt">
+                                        <td></td>
+                                        <td>audits/{auditId}</td>
+                                        <td></td>
+                                        <td><a href="#audits_retrieve">Retrieve an Audit Entry</a></td>
+                                        <td></td>
+                                        <td></td>
+                                </tr>
+                                <tr>
+                                        <td><a href="#makercheckers">Makercheckers</a></td>
+                                        <td>makercheckers</td>
+                                        <td></td>
+                                        <td><a href="#makercheckers_list">List Maker Checker Entries</a></td>
+                                        <td></td>
+                                        <td></td>
+                                </tr>
+                                <tr class="alt">
+                                        <td></td>
+                                        <td>makercheckers/{auditId}</td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td><a href="#makercheckers_delete">Delete Maker Checker Entry</a></td>
+                                </tr>
+                                <tr>
+                                        <td></td>
+                                        <td>makercheckers/{auditId}?command=approve</td>
+                                        <td><a href="#makercheckers_approve">Approve Maker Checker Entry</a></td>
+                                        <td></td>
+                                        <td></td>
+                                        <td></td>
+                                </tr>
 				<tr class="alt">
 					<td><a href="#funds">Funds</a></td>
 					<td>funds</td>
@@ -13297,8 +13683,8 @@ GET https://DomainName/api/v1/search?query=000000111
 					<td><a href="#permissions">Permission</a></td>
 					<td>permissions</td>
 					<td></td>
-					<td><a href="#permissions_list">List Permissions</a></td>
-					<td></td>
+					<td><a href="#permissions_list">List Application Permissions</a></td>
+					<td><a href="#permissions_update">Enable/Disable Permissions for Maker Checker</a></td>
 					<td></td>
 				</tr>				
 			</table>

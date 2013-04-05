@@ -34,7 +34,6 @@ import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.exception.UnrecognizedQueryParamException;
 import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
-import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -50,9 +49,10 @@ public class MakercheckersApiResource {
 					"checkedOnDate", "processingResult", "commandAsJson",
 					"officeName", "groupLevelName", "groupName", "clientName",
 					"loanAccountNo", "savingsAccountNo"));
-	private final String resourceNameForPermissions = "MAKERCHECKER";
+	
+	//Next line removed because read permissions checks part of read services
+	//private final String resourceNameForPermissions = "MAKERCHECKER";
 
-	private final PlatformSecurityContext context;
 	private final AuditReadPlatformService readPlatformService;
 	private final DefaultToApiJsonSerializer<CommandSourceData> toApiJsonSerializer;
 	private final DefaultToApiJsonSerializer<AuditData> toApiJsonSerializerAudit;
@@ -62,14 +62,12 @@ public class MakercheckersApiResource {
 
 	@Autowired
 	public MakercheckersApiResource(
-			final PlatformSecurityContext context,
 			final AuditReadPlatformService readPlatformService,
 			final DefaultToApiJsonSerializer<CommandSourceData> toApiJsonSerializer,
 			final DefaultToApiJsonSerializer<AuditData> toApiJsonSerializerAudit,
 			final DefaultToApiJsonSerializer<AuditSearchData> toApiJsonSerializerSearchTemplate,
 			final ApiRequestParameterHelper apiRequestParameterHelper,
 			final PortfolioCommandSourceWritePlatformService writePlatformService) {
-		this.context = context;
 		this.readPlatformService = readPlatformService;
 		this.toApiJsonSerializer = toApiJsonSerializer;
 		this.apiRequestParameterHelper = apiRequestParameterHelper;
@@ -94,9 +92,6 @@ public class MakercheckersApiResource {
 			@QueryParam("loanid") final Integer loanId,
 			@QueryParam("savingsAccountId") final Integer savingsAccountId) {
 
-		context.authenticatedUser().validateHasReadPermission(
-				resourceNameForPermissions);
-
 		final String extraCriteria = getExtraCriteria(actionName, entityName,
 				resourceId, makerId, makerDateTimeFrom, makerDateTimeTo,
 				officeId, groupId, clientId, loanId, savingsAccountId);
@@ -117,9 +112,6 @@ public class MakercheckersApiResource {
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
 	public String retrieveAuditSearchTemplate(@Context final UriInfo uriInfo) {
-
-		context.authenticatedUser().validateHasReadPermission(
-				resourceNameForPermissions);
 
 		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper
 				.process(uriInfo.getQueryParameters());

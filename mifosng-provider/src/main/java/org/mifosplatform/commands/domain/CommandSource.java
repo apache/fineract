@@ -25,159 +25,175 @@ import org.springframework.data.jpa.domain.AbstractPersistable;
 @Table(name = "m_portfolio_command_source")
 public class CommandSource extends AbstractPersistable<Long> {
 
-    @Column(name = "action_name", nullable = true, length = 100)
-    private String actionName;
-    
-    @Column(name = "entity_name", nullable = true, length = 100)
-    private String entityName;
-    
-    @SuppressWarnings("unused")
-    @Column(name = "office_id")
-    private Long officeId;
+	@Column(name = "action_name", nullable = true, length = 100)
+	private String actionName;
 
-    @SuppressWarnings("unused")
-    @Column(name = "group_id")
-    private Long groupId;
-    
-    @SuppressWarnings("unused")
-    @Column(name = "client_id")
-    private Long clientId;
+	@Column(name = "entity_name", nullable = true, length = 100)
+	private String entityName;
 
-    @SuppressWarnings("unused")
-    @Column(name = "loan_id")
-    private Long loanId;
-    
-    @SuppressWarnings("unused")
-    @Column(name = "savings_account_id")
-    private Long savingsId;
-    
-    @Column(name = "api_get_url", length = 100)
-    private String resourceGetUrl;
+	@SuppressWarnings("unused")
+	@Column(name = "office_id")
+	private Long officeId;
 
-    @Column(name = "resource_id")
-    private Long resourceId;
-    
-    @Column(name = "subresource_id")
-    private Long subresourceId;
+	@SuppressWarnings("unused")
+	@Column(name = "group_id")
+	private Long groupId;
 
-    @Column(name = "command_as_json", length = 1000)
-    private String commandAsJson;
+	@SuppressWarnings("unused")
+	@Column(name = "client_id")
+	private Long clientId;
 
-    @SuppressWarnings("unused")
-    @ManyToOne
-    @JoinColumn(name = "maker_id", nullable = false)
-    private AppUser maker;
+	@SuppressWarnings("unused")
+	@Column(name = "loan_id")
+	private Long loanId;
 
-    @SuppressWarnings("unused")
-    @Column(name = "made_on_date", nullable = false)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date madeOnDate;
+	@SuppressWarnings("unused")
+	@Column(name = "savings_account_id")
+	private Long savingsId;
 
-    @SuppressWarnings("unused")
-    @ManyToOne
-    @JoinColumn(name = "checker_id", nullable = true)
-    private AppUser checker;
+	@Column(name = "api_get_url", length = 100)
+	private String resourceGetUrl;
 
-    @SuppressWarnings("unused")
-    @Column(name = "checked_on_date", nullable = true)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date checkedOnDate;
+	@Column(name = "resource_id")
+	private Long resourceId;
 
-    @SuppressWarnings("unused")
-    @Column(name = "processing_result_enum", nullable = false)
-    private Integer processingResult;
+	@Column(name = "subresource_id")
+	private Long subresourceId;
 
-    public static CommandSource fullEntryFrom(final CommandWrapper wrapper, final JsonCommand command, final AppUser maker) {
-        return new CommandSource(wrapper.actionName(), wrapper.entityName(), wrapper.getHref(), command.entityId(), command.subentityId(), command.json(), maker, DateTime.now());
-    }
+	@Column(name = "command_as_json", length = 1000)
+	private String commandAsJson;
 
-    protected CommandSource() {
-        //
-    }
+	@SuppressWarnings("unused")
+	@ManyToOne
+	@JoinColumn(name = "maker_id", nullable = false)
+	private AppUser maker;
 
-    private CommandSource(
-            final String actionName, final String entityName, final String href,
-            final Long resourceId, final Long subresourceId,
-            final String commandSerializedAsJson, final AppUser maker,
-            final DateTime madeOnDateTime) {
-        this.actionName = actionName;
-        this.entityName = entityName;
-        this.resourceGetUrl = href;
-        this.resourceId = resourceId;
-        this.subresourceId = subresourceId;
-        this.commandAsJson = commandSerializedAsJson;
-        this.maker = maker;
-        this.madeOnDate = madeOnDateTime.toDate();
-        this.processingResult = CommandProcessingResultType.PROCESSED.getValue();
-    }
+	@SuppressWarnings("unused")
+	@Column(name = "made_on_date", nullable = false)
+	@Temporal(TemporalType.TIMESTAMP)
+	private Date madeOnDate;
 
-    public void markAsChecked(final AppUser checker, final DateTime checkedOnDate) {
-        this.checker = checker;
-        this.checkedOnDate = checkedOnDate.toDate();
-        this.processingResult = CommandProcessingResultType.PROCESSED.getValue();
-    }
+	@SuppressWarnings("unused")
+	@ManyToOne
+	@JoinColumn(name = "checker_id", nullable = true)
+	private AppUser checker;
 
-    public void updateResourceId(final Long resourceId) {
-        this.resourceId = resourceId;
-    }
-    
-    public void updateSubresourceId(final Long subresourceId) {
-        this.subresourceId = subresourceId;
-    }
+	@SuppressWarnings("unused")
+	@Column(name = "checked_on_date", nullable = true)
+	@Temporal(TemporalType.TIMESTAMP)
+	private Date checkedOnDate;
 
-    public void updateJsonTo(final String json) {
-        this.commandAsJson = json;
-    }
+	@SuppressWarnings("unused")
+	@Column(name = "processing_result_enum", nullable = false)
+	private Integer processingResult;
 
-    public Long resourceId() {
-        return this.resourceId;
-    }
-    
-    public Long subresourceId() {
-        return this.subresourceId;
-    }
+	public static CommandSource fullEntryFrom(final CommandWrapper wrapper,
+			final JsonCommand command, final AppUser maker) {
+		return new CommandSource(wrapper.actionName(), wrapper.entityName(),
+				wrapper.getHref(), command.entityId(), command.subentityId(),
+				command.json(), maker, DateTime.now());
+	}
 
-    public boolean hasJson() {
-        return StringUtils.isNotBlank(this.commandAsJson);
-    }
+	protected CommandSource() {
+		//
+	}
 
-    public String json() {
-        return this.commandAsJson;
-    }
+	private CommandSource(final String actionName, final String entityName,
+			final String href, final Long resourceId, final Long subresourceId,
+			final String commandSerializedAsJson, final AppUser maker,
+			final DateTime madeOnDateTime) {
+		this.actionName = actionName;
+		this.entityName = entityName;
+		this.resourceGetUrl = href;
+		this.resourceId = resourceId;
+		this.subresourceId = subresourceId;
+		this.commandAsJson = commandSerializedAsJson;
+		this.maker = maker;
+		this.madeOnDate = madeOnDateTime.toDate();
+		this.processingResult = CommandProcessingResultType.PROCESSED
+				.getValue();
+	}
 
-    public String getActionName() {
-        return this.actionName;
-    }
-    
-    public String getEntityName() {
-        return this.entityName;
-    }
+	public void markAsChecked(final AppUser checker,
+			final DateTime checkedOnDate) {
+		this.checker = checker;
+		this.checkedOnDate = checkedOnDate.toDate();
+		this.processingResult = CommandProcessingResultType.PROCESSED
+				.getValue();
+	}
 
-    public String getPermissionCode() {
-        return this.actionName + "_" + this.entityName;
-    }
+	public void updateResourceId(final Long resourceId) {
+		this.resourceId = resourceId;
+	}
 
-    public Long getResourceId() {
-        return this.resourceId;
-    }
-    
-    public Long getSubresourceId() {
-        return this.subresourceId;
-    }
+	public void updateSubresourceId(final Long subresourceId) {
+		this.subresourceId = subresourceId;
+	}
 
-    public void markAsAwaitingApproval() {
-        this.processingResult = CommandProcessingResultType.AWAITING_APPROVAL.getValue();
-    }
+	public void updateJsonTo(final String json) {
+		this.commandAsJson = json;
+	}
 
-    public void updateForAudit(final Long officeId, final Long groupId, final Long clientId, final Long loanId, final Long savingsId) {
-        this.officeId = officeId;
-        this.groupId = groupId;
-        this.clientId = clientId;
-        this.loanId = loanId;
-        this.savingsId = savingsId;
-    }
+	public Long resourceId() {
+		return this.resourceId;
+	}
 
-    public String getResourceGetUrl() {
-        return this.resourceGetUrl;
-    }
+	public Long subresourceId() {
+		return this.subresourceId;
+	}
+
+	public boolean hasJson() {
+		return StringUtils.isNotBlank(this.commandAsJson);
+	}
+
+	public String json() {
+		return this.commandAsJson;
+	}
+
+	public String getActionName() {
+		return this.actionName;
+	}
+
+	public String getEntityName() {
+		return this.entityName;
+	}
+
+	public String getPermissionCode() {
+		return this.actionName + "_" + this.entityName;
+	}
+
+	public Long getResourceId() {
+		return this.resourceId;
+	}
+
+	public Long getSubresourceId() {
+		return this.subresourceId;
+	}
+
+	public void markAsAwaitingApproval() {
+		this.processingResult = CommandProcessingResultType.AWAITING_APPROVAL
+				.getValue();
+	}
+
+	public boolean isMarkedAsAwaitingApproval() {
+		if (this.processingResult
+				.equals(CommandProcessingResultType.AWAITING_APPROVAL
+						.getValue()))
+			return true;
+
+		return false;
+	}
+
+	public void updateForAudit(final Long officeId, final Long groupId,
+			final Long clientId, final Long loanId, final Long savingsId) {
+		this.officeId = officeId;
+		this.groupId = groupId;
+		this.clientId = clientId;
+		this.loanId = loanId;
+		this.savingsId = savingsId;
+	}
+
+	public String getResourceGetUrl() {
+		return this.resourceGetUrl;
+	}
 }

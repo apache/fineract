@@ -10,9 +10,9 @@ import org.mifosplatform.infrastructure.core.exception.AbstractPlatformResourceN
 /**
  * A {@link RuntimeException} thrown when client resources are not found.
  */
-public class CommandNotFoundException extends AbstractPlatformResourceNotFoundException {
+public class CommandNotAwaitingApprovalException extends AbstractPlatformResourceNotFoundException {
 
-	public CommandNotFoundException(Long id) {
-		super("error.msg.command.id.invalid", "Audit with identifier " + id + " does not exist", id);
+	public CommandNotAwaitingApprovalException(Long id) {
+		super("error.msg.command.id.not.awaiting.approval", "Audit with identifier " + id + " is Not Awaiting Approval", id);
 	}
 }
