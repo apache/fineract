@@ -2,11 +2,8 @@ package org.mifosplatform.integrationtests.common;
 
 import static com.jayway.restassured.RestAssured.given;
 import static com.jayway.restassured.path.json.JsonPath.from;
-import static org.junit.Assert.assertThat;
-import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.fail;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.http.conn.HttpHostConnectException;
 
 import com.jayway.restassured.RestAssured;
