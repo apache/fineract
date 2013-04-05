@@ -6,7 +6,14 @@ See VERSIONING (https://github.com/openMF/mifosx/blob/master/VERSIONING.md) for 
 Releases
 ===============
 
+05 April 2013 - 0.11.1.beta
 05 April 2013 - 0.11.0.beta
+
+0.11.1.beta
+==========
+Bug Release.
+  - Revert back to hibernate 4.1.9.Final to allow datatables to be persisted
+  - MIFOSX-291 - unable to create office
 
 0.11.0.beta
 ==========
