@@ -148,7 +148,7 @@ CREATE TABLE `acc_product_mapping` (
   `product_type` smallint(5) DEFAULT NULL,
   `financial_account_type` smallint(5) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -157,6 +157,7 @@ CREATE TABLE `acc_product_mapping` (
 
 LOCK TABLES `acc_product_mapping` WRITE;
 /*!40000 ALTER TABLE `acc_product_mapping` DISABLE KEYS */;
+INSERT INTO `acc_product_mapping` VALUES (1,4,1,1,1),(2,8,1,1,2),(3,34,1,1,3),(4,37,1,1,4),(5,35,1,1,5),(6,97,1,1,6);
 /*!40000 ALTER TABLE `acc_product_mapping` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -331,7 +332,7 @@ CREATE TABLE `m_appuser` (
   UNIQUE KEY `username_org` (`username`),
   KEY `FKB3D587CE0DD567A` (`office_id`),
   CONSTRAINT `FKB3D587CE0DD567A` FOREIGN KEY (`office_id`) REFERENCES `m_office` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -340,7 +341,7 @@ CREATE TABLE `m_appuser` (
 
 LOCK TABLES `m_appuser` WRITE;
 /*!40000 ALTER TABLE `m_appuser` DISABLE KEYS */;
-INSERT INTO `m_appuser` VALUES (1,0,1,'mifos','App','Administrator','5787039480429368bf94732aacc771cd0a3ea02bcf504ffe1185ab94213bc63a','demomfi@mifos.org','\0','','','','');
+INSERT INTO `m_appuser` VALUES (1,0,1,'admin','App','Administrator','5787039480429368bf94732aacc771cd0a3ea02bcf504ffe1185ab94213bc63a','demomfi@mifos.org','\0','','','',''),(2,0,1,'keithwoodlock','Keith','Woodlock','4f607e9b6cffbe7d3db92d4bfa3391c7aa751727b4ea29d08fddf9dd72e6e7e3','keithwoodlock@gmail.com','\0','','','','');
 /*!40000 ALTER TABLE `m_appuser` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -368,7 +369,7 @@ CREATE TABLE `m_appuser_role` (
 
 LOCK TABLES `m_appuser_role` WRITE;
 /*!40000 ALTER TABLE `m_appuser_role` DISABLE KEYS */;
-INSERT INTO `m_appuser_role` VALUES (1,1);
+INSERT INTO `m_appuser_role` VALUES (1,1),(2,1);
 /*!40000 ALTER TABLE `m_appuser_role` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -457,7 +458,7 @@ CREATE TABLE `m_charge` (
   `is_deleted` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -466,6 +467,7 @@ CREATE TABLE `m_charge` (
 
 LOCK TABLES `m_charge` WRITE;
 /*!40000 ALTER TABLE `m_charge` DISABLE KEYS */;
+INSERT INTO `m_charge` VALUES (1,'Bank Fee (per installment)','UGX',1,2,1,'1500.000000',0,1,0);
 /*!40000 ALTER TABLE `m_charge` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -494,7 +496,7 @@ CREATE TABLE `m_client` (
   UNIQUE KEY `external_id` (`external_id`),
   KEY `FKCE00CAB3E0DD567A` (`office_id`),
   CONSTRAINT `FKCE00CAB3E0DD567A` FOREIGN KEY (`office_id`) REFERENCES `m_office` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -503,6 +505,7 @@ CREATE TABLE `m_client` (
 
 LOCK TABLES `m_client` WRITE;
 /*!40000 ALTER TABLE `m_client` DISABLE KEYS */;
+INSERT INTO `m_client` VALUES (1,'000000001',2,NULL,'Test',NULL,'One',NULL,'Test One',NULL,'2011-02-01',0);
 /*!40000 ALTER TABLE `m_client` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -555,7 +558,7 @@ CREATE TABLE `m_code` (
   `is_system_defined` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `code_name` (`code_name`)
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -564,7 +567,7 @@ CREATE TABLE `m_code` (
 
 LOCK TABLES `m_code` WRITE;
 /*!40000 ALTER TABLE `m_code` DISABLE KEYS */;
-INSERT INTO `m_code` VALUES (1,'Customer Identifier',1),(2,'LoanCollateral',1),(3,'LoanPurpose',1),(4,'Gender',1),(5,'YesNo',1),(6,'FieldOfEmployment',0),(7,'EducationLevel',0),(8,'MaritalStatus',0),(9,'PovertyStatus',0);
+INSERT INTO `m_code` VALUES (1,'Customer Identifier',1),(2,'LoanCollateral',1),(3,'LoanPurpose',1),(4,'Gender',1),(5,'YesNo',1),(6,'GuarantorRelationship',1),(7,'FieldOfEmployment',0),(8,'EducationLevel',0),(9,'MaritalStatus',0),(10,'PovertyStatus',0);
 /*!40000 ALTER TABLE `m_code` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -584,7 +587,7 @@ CREATE TABLE `m_code_value` (
   UNIQUE KEY `code_value` (`code_id`,`code_value`),
   KEY `FKCFCEA42640BE071Z` (`code_id`),
   CONSTRAINT `FKCFCEA42640BE071Z` FOREIGN KEY (`code_id`) REFERENCES `m_code` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=27 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=32 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -593,7 +596,7 @@ CREATE TABLE `m_code_value` (
 
 LOCK TABLES `m_code_value` WRITE;
 /*!40000 ALTER TABLE `m_code_value` DISABLE KEYS */;
-INSERT INTO `m_code_value` VALUES (1,1,'Passport',1),(2,1,'Id',1),(3,1,'Drivers License',2),(4,1,'Any Other Id Type',3),(5,6,'option.Banker',1),(6,6,'option.SoftwareDeveloper',5),(7,7,'option.University',1),(8,7,'option.Secondary',7),(9,7,'option.Primary',8),(10,8,'option.Married',1),(11,8,'option.Single',10),(12,8,'option.Divorced',11),(13,8,'option.Widow',12),(14,9,'option.PovertyStatus.Band1',1),(15,9,'option.PovertyStatus.Band2',14),(16,9,'option.PovertyStatus.Band3',15),(17,2,'option.House',1),(18,2,'option.Television',17),(19,2,'option.Gold',18),(20,3,'option.Agriculture',1),(21,3,'option.Manufacturing',20),(22,3,'option.HousingImprovement',21),(23,4,'option.Male',1),(24,4,'option.Female',23),(25,5,'option.Yes',1),(26,5,'option.No',25);
+INSERT INTO `m_code_value` VALUES (1,1,'Passport',1),(2,1,'Id',2),(3,1,'Drivers License',3),(4,1,'Any Other Id Type',4),(5,6,'Spouse',0),(6,6,'Parent',0),(7,6,'Sibling',0),(8,6,'Business Associate',0),(9,6,'Other',0),(10,7,'option.Banker',1),(11,7,'option.SoftwareDeveloper',10),(12,8,'option.University',1),(13,8,'option.Secondary',12),(14,8,'option.Primary',13),(15,9,'option.Married',1),(16,9,'option.Single',15),(17,9,'option.Divorced',16),(18,9,'option.Widow',17),(19,10,'option.PovertyStatus.Band1',1),(20,10,'option.PovertyStatus.Band2',19),(21,10,'option.PovertyStatus.Band3',20),(22,2,'option.House',1),(23,2,'option.Television',22),(24,2,'option.Gold',23),(25,3,'option.Agriculture',1),(26,3,'option.Manufacturing',25),(27,3,'option.HousingImprovement',26),(28,4,'option.Male',1),(29,4,'option.Female',28),(30,5,'option.Yes',1),(31,5,'option.No',30);
 /*!40000 ALTER TABLE `m_code_value` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -788,6 +791,7 @@ DROP TABLE IF EXISTS `m_guarantor`;
 CREATE TABLE `m_guarantor` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `loan_id` bigint(20) NOT NULL,
+  `client_reln_cv_id` int(11) DEFAULT NULL,
   `type_enum` smallint(5) NOT NULL,
   `entity_id` bigint(20) DEFAULT NULL,
   `firstname` varchar(50) DEFAULT NULL,
@@ -804,6 +808,8 @@ CREATE TABLE `m_guarantor` (
   `comment` varchar(500) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `FK_m_guarantor_m_loan` (`loan_id`),
+  KEY `FK_m_guarantor_m_code_value` (`client_reln_cv_id`),
+  CONSTRAINT `FK_m_guarantor_m_code_value` FOREIGN KEY (`client_reln_cv_id`) REFERENCES `m_code_value` (`id`),
   CONSTRAINT `FK_m_guarantor_m_loan` FOREIGN KEY (`loan_id`) REFERENCES `m_loan` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -838,6 +844,8 @@ CREATE TABLE `m_loan` (
   `currency_code` varchar(3) NOT NULL,
   `currency_digits` smallint(5) NOT NULL,
   `principal_amount` decimal(19,6) NOT NULL,
+  `min_principal_amount` decimal(19,6) NOT NULL,
+  `max_principal_amount` decimal(19,6) NOT NULL,
   `arrearstolerance_amount` decimal(19,6) DEFAULT NULL,
   `nominal_interest_rate_per_period` decimal(19,6) NOT NULL,
   `interest_period_frequency_enum` smallint(5) NOT NULL,
@@ -926,7 +934,7 @@ CREATE TABLE `m_loan` (
   CONSTRAINT `FK_submittedon_userid` FOREIGN KEY (`submittedon_userid`) REFERENCES `m_appuser` (`id`),
   CONSTRAINT `FK_withdrawnon_userid` FOREIGN KEY (`withdrawnon_userid`) REFERENCES `m_appuser` (`id`),
   CONSTRAINT `m_loan_ibfk_1` FOREIGN KEY (`group_id`) REFERENCES `m_group` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -935,6 +943,7 @@ CREATE TABLE `m_loan` (
 
 LOCK TABLES `m_loan` WRITE;
 /*!40000 ALTER TABLE `m_loan` DISABLE KEYS */;
+INSERT INTO `m_loan` VALUES (1,'000000001',NULL,1,NULL,1,NULL,2,25,200,'UGX',2,'1000000.000000','0.000000','1000000000000.000000',NULL,'24.000000',3,'24.000000',1,1,12,2,1,2,12,1,'2011-04-01',1,'2011-04-01',1,'2011-04-01',NULL,NULL,NULL,NULL,'2012-04-01','2012-04-01',NULL,NULL,'0.000000','0.000000','0.000000','0.000000','0.000000','0.000000','0.000000','0.000000','0.000000','0.000000','0.000000','0.000000','0.000000','0.000000','0.000000','0.000000','0.000000','0.000000','0.000000','0.000000','0.000000','0.000000','0.000000','0.000000','0.000000','0.000000','0.000000',NULL,NULL,NULL,NULL,NULL,NULL,2);
 /*!40000 ALTER TABLE `m_loan` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -996,7 +1005,7 @@ CREATE TABLE `m_loan_charge` (
   KEY `m_loan_charge_ibfk_2` (`loan_id`),
   CONSTRAINT `m_loan_charge_ibfk_1` FOREIGN KEY (`charge_id`) REFERENCES `m_charge` (`id`),
   CONSTRAINT `m_loan_charge_ibfk_2` FOREIGN KEY (`loan_id`) REFERENCES `m_loan` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1005,6 +1014,7 @@ CREATE TABLE `m_loan_charge` (
 
 LOCK TABLES `m_loan_charge` WRITE;
 /*!40000 ALTER TABLE `m_loan_charge` DISABLE KEYS */;
+INSERT INTO `m_loan_charge` VALUES (1,1,1,0,2,'2011-06-01',1,NULL,NULL,'1500.000000','0.000000',NULL,NULL,'1500.000000',0,0),(2,1,1,0,2,'2011-12-01',1,NULL,NULL,'1500.000000','0.000000',NULL,NULL,'1500.000000',0,0),(3,1,1,0,2,'2011-09-01',1,NULL,NULL,'1500.000000','0.000000',NULL,NULL,'1500.000000',0,0),(4,1,1,0,2,'2011-08-01',1,NULL,NULL,'1500.000000','0.000000',NULL,NULL,'1500.000000',0,0),(5,1,1,0,2,'2011-11-01',1,NULL,NULL,'1500.000000','0.000000',NULL,NULL,'1500.000000',0,0),(6,1,1,0,2,'2011-05-01',1,NULL,NULL,'1500.000000','0.000000',NULL,NULL,'1500.000000',0,0),(7,1,1,0,2,'2012-03-01',1,NULL,NULL,'1500.000000','0.000000',NULL,NULL,'1500.000000',0,0),(8,1,1,0,2,'2012-02-01',1,NULL,NULL,'1500.000000','0.000000',NULL,NULL,'1500.000000',0,0),(9,1,1,0,2,'2012-04-01',1,NULL,NULL,'1500.000000','0.000000',NULL,NULL,'1500.000000',0,0),(10,1,1,0,2,'2012-01-01',1,NULL,NULL,'1500.000000','0.000000',NULL,NULL,'1500.000000',0,0),(11,1,1,0,2,'2011-10-01',1,NULL,NULL,'1500.000000','0.000000',NULL,NULL,'1500.000000',0,0),(12,1,1,0,2,'2011-07-01',1,NULL,NULL,'1500.000000','0.000000',NULL,NULL,'1500.000000',0,0);
 /*!40000 ALTER TABLE `m_loan_charge` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1019,13 +1029,14 @@ CREATE TABLE `m_loan_collateral` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `loan_id` bigint(20) NOT NULL,
   `type_cv_id` int(11) NOT NULL,
+  `value` decimal(19,6) DEFAULT NULL,
   `description` varchar(500) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `FK_collateral_m_loan` (`loan_id`),
   KEY `FK_collateral_code_value` (`type_cv_id`),
   CONSTRAINT `FK_collateral_m_loan` FOREIGN KEY (`loan_id`) REFERENCES `m_loan` (`id`),
   CONSTRAINT `FK_collateral_code_value` FOREIGN KEY (`type_cv_id`) REFERENCES `m_code_value` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1034,6 +1045,7 @@ CREATE TABLE `m_loan_collateral` (
 
 LOCK TABLES `m_loan_collateral` WRITE;
 /*!40000 ALTER TABLE `m_loan_collateral` DISABLE KEYS */;
+INSERT INTO `m_loan_collateral` VALUES (1,1,23,NULL,' small description.');
 /*!40000 ALTER TABLE `m_loan_collateral` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1059,7 +1071,7 @@ CREATE TABLE `m_loan_officer_assignment_history` (
   KEY `fk_m_loan_officer_assignment_history_0002` (`loan_officer_id`),
   CONSTRAINT `fk_m_loan_officer_assignment_history_0001` FOREIGN KEY (`loan_id`) REFERENCES `m_loan` (`id`),
   CONSTRAINT `fk_m_loan_officer_assignment_history_0002` FOREIGN KEY (`loan_officer_id`) REFERENCES `m_staff` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1068,6 +1080,7 @@ CREATE TABLE `m_loan_officer_assignment_history` (
 
 LOCK TABLES `m_loan_officer_assignment_history` WRITE;
 /*!40000 ALTER TABLE `m_loan_officer_assignment_history` DISABLE KEYS */;
+INSERT INTO `m_loan_officer_assignment_history` VALUES (1,1,2,'2011-04-01',NULL,1,'2013-04-05 12:42:09','2013-04-05 12:42:09',1);
 /*!40000 ALTER TABLE `m_loan_officer_assignment_history` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1107,7 +1120,7 @@ CREATE TABLE `m_loan_repayment_schedule` (
   PRIMARY KEY (`id`),
   KEY `FK488B92AA40BE0710` (`loan_id`),
   CONSTRAINT `FK488B92AA40BE0710` FOREIGN KEY (`loan_id`) REFERENCES `m_loan` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1116,6 +1129,7 @@ CREATE TABLE `m_loan_repayment_schedule` (
 
 LOCK TABLES `m_loan_repayment_schedule` WRITE;
 /*!40000 ALTER TABLE `m_loan_repayment_schedule` DISABLE KEYS */;
+INSERT INTO `m_loan_repayment_schedule` VALUES (1,1,'2011-04-01','2011-05-01',1,'83333.330000',NULL,NULL,'20000.000000',NULL,NULL,'1500.000000',NULL,NULL,NULL,NULL,NULL,NULL,NULL,'\0',1,'2013-04-05 12:41:57','2013-04-05 12:41:57',1,NULL),(2,1,'2011-05-01','2011-06-01',2,'83333.330000',NULL,NULL,'20000.000000',NULL,NULL,'1500.000000',NULL,NULL,NULL,NULL,NULL,NULL,NULL,'\0',1,'2013-04-05 12:41:57','2013-04-05 12:41:57',1,NULL),(3,1,'2011-06-01','2011-07-01',3,'83333.330000',NULL,NULL,'20000.000000',NULL,NULL,'1500.000000',NULL,NULL,NULL,NULL,NULL,NULL,NULL,'\0',1,'2013-04-05 12:41:57','2013-04-05 12:41:57',1,NULL),(4,1,'2011-07-01','2011-08-01',4,'83333.330000',NULL,NULL,'20000.000000',NULL,NULL,'1500.000000',NULL,NULL,NULL,NULL,NULL,NULL,NULL,'\0',1,'2013-04-05 12:41:57','2013-04-05 12:41:57',1,NULL),(5,1,'2011-08-01','2011-09-01',5,'83333.330000',NULL,NULL,'20000.000000',NULL,NULL,'1500.000000',NULL,NULL,NULL,NULL,NULL,NULL,NULL,'\0',1,'2013-04-05 12:41:57','2013-04-05 12:41:57',1,NULL),(6,1,'2011-09-01','2011-10-01',6,'83333.330000',NULL,NULL,'20000.000000',NULL,NULL,'1500.000000',NULL,NULL,NULL,NULL,NULL,NULL,NULL,'\0',1,'2013-04-05 12:41:57','2013-04-05 12:41:57',1,NULL),(7,1,'2011-10-01','2011-11-01',7,'83333.330000',NULL,NULL,'20000.000000',NULL,NULL,'1500.000000',NULL,NULL,NULL,NULL,NULL,NULL,NULL,'\0',1,'2013-04-05 12:41:57','2013-04-05 12:41:57',1,NULL),(8,1,'2011-11-01','2011-12-01',8,'83333.330000',NULL,NULL,'20000.000000',NULL,NULL,'1500.000000',NULL,NULL,NULL,NULL,NULL,NULL,NULL,'\0',1,'2013-04-05 12:41:57','2013-04-05 12:41:57',1,NULL),(9,1,'2011-12-01','2012-01-01',9,'83333.330000',NULL,NULL,'20000.000000',NULL,NULL,'1500.000000',NULL,NULL,NULL,NULL,NULL,NULL,NULL,'\0',1,'2013-04-05 12:41:57','2013-04-05 12:41:57',1,NULL),(10,1,'2012-01-01','2012-02-01',10,'83333.330000',NULL,NULL,'20000.000000',NULL,NULL,'1500.000000',NULL,NULL,NULL,NULL,NULL,NULL,NULL,'\0',1,'2013-04-05 12:41:57','2013-04-05 12:41:57',1,NULL),(11,1,'2012-02-01','2012-03-01',11,'83333.330000',NULL,NULL,'20000.000000',NULL,NULL,'1500.000000',NULL,NULL,NULL,NULL,NULL,NULL,NULL,'\0',1,'2013-04-05 12:41:57','2013-04-05 12:41:57',1,NULL),(12,1,'2012-03-01','2012-04-01',12,'83333.370000',NULL,NULL,'20000.000000',NULL,NULL,'1500.000000',NULL,NULL,NULL,NULL,NULL,NULL,NULL,'\0',1,'2013-04-05 12:41:57','2013-04-05 12:41:57',1,NULL);
 /*!40000 ALTER TABLE `m_loan_repayment_schedule` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1215,7 +1229,7 @@ CREATE TABLE `m_office` (
   UNIQUE KEY `externalid_org` (`external_id`),
   KEY `FK2291C477E2551DCC` (`parent_id`),
   CONSTRAINT `FK2291C477E2551DCC` FOREIGN KEY (`parent_id`) REFERENCES `m_office` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1224,7 +1238,7 @@ CREATE TABLE `m_office` (
 
 LOCK TABLES `m_office` WRITE;
 /*!40000 ALTER TABLE `m_office` DISABLE KEYS */;
-INSERT INTO `m_office` VALUES (1,NULL,'.','1','Head Office','2009-01-01');
+INSERT INTO `m_office` VALUES (1,NULL,'.','1','CEDA Microfinance Ltd.','2009-01-01'),(2,1,'.2.','2','Uganda (Kampala)','2009-01-01');
 /*!40000 ALTER TABLE `m_office` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1276,7 +1290,7 @@ CREATE TABLE `m_organisation_currency` (
   `display_symbol` varchar(10) DEFAULT NULL,
   `internationalized_name_code` varchar(50) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=23 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1285,7 +1299,7 @@ CREATE TABLE `m_organisation_currency` (
 
 LOCK TABLES `m_organisation_currency` WRITE;
 /*!40000 ALTER TABLE `m_organisation_currency` DISABLE KEYS */;
-INSERT INTO `m_organisation_currency` VALUES (21,'USD',2,'US Dollar','$','currency.USD');
+INSERT INTO `m_organisation_currency` VALUES (22,'UGX',2,'Uganda Shilling','USh','currency.UGX');
 /*!40000 ALTER TABLE `m_organisation_currency` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1305,7 +1319,7 @@ CREATE TABLE `m_permission` (
   `can_maker_checker` tinyint(1) NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`),
   UNIQUE KEY `code` (`code`)
-) ENGINE=InnoDB AUTO_INCREMENT=297 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=308 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1314,7 +1328,7 @@ CREATE TABLE `m_permission` (
 
 LOCK TABLES `m_permission` WRITE;
 /*!40000 ALTER TABLE `m_permission` DISABLE KEYS */;
-INSERT INTO `m_permission` VALUES (1,'special','ALL_FUNCTIONS',NULL,NULL,0),(2,'special','ALL_FUNCTIONS_READ',NULL,NULL,0),(3,'special','CHECKER_SUPER_USER',NULL,NULL,0),(4,'special','REPORTING_SUPER_USER',NULL,NULL,0),(5,'authorisation','READ_PERMISSION','PERMISSION','READ',0),(6,'authorisation','PERMISSIONS_ROLE','ROLE','PERMISSIONS',0),(7,'authorisation','CREATE_ROLE','ROLE','CREATE',0),(8,'authorisation','CREATE_ROLE_CHECKER','ROLE','CREATE',0),(9,'authorisation','READ_ROLE','ROLE','READ',0),(10,'authorisation','UPDATE_ROLE','ROLE','UPDATE',0),(11,'authorisation','UPDATE_ROLE_CHECKER','ROLE','UPDATE',0),(12,'authorisation','DELETE_ROLE','ROLE','DELETE',0),(13,'authorisation','DELETE_ROLE_CHECKER','ROLE','DELETE',0),(14,'authorisation','CREATE_USER','USER','CREATE',0),(15,'authorisation','CREATE_USER_CHECKER','USER','CREATE',0),(16,'authorisation','READ_USER','USER','READ',0),(17,'authorisation','UPDATE_USER','USER','UPDATE',0),(18,'authorisation','UPDATE_USER_CHECKER','USER','UPDATE',0),(19,'authorisation','DELETE_USER','USER','DELETE',0),(20,'authorisation','DELETE_USER_CHECKER','USER','DELETE',0),(21,'configuration','READ_CONFIGURATION','CONFIGURATION','READ',0),(22,'configuration','UPDATE_CONFIGURATION','CONFIGURATION','UPDATE',0),(23,'configuration','UPDATE_CONFIGURATION_CHECKER','CONFIGURATION','UPDATE',0),(24,'configuration','READ_CODE','CODE','READ',0),(25,'configuration','CREATE_CODE','CODE','CREATE',0),(26,'configuration','CREATE_CODE_CHECKER','CODE','CREATE',0),(27,'configuration','UPDATE_CODE','CODE','UPDATE',0),(28,'configuration','UPDATE_CODE_CHECKER','CODE','UPDATE',0),(29,'configuration','DELETE_CODE','CODE','DELETE',0),(30,'configuration','DELETE_CODE_CHECKER','CODE','DELETE',0),(31,'configuration','READ_CODEVALUE','CODEVALUE','READ',0),(32,'configuration','CREATE_CODEVALUE','CODEVALUE','CREATE',0),(33,'configuration','CREATE_CODEVALUE_CHECKER','CODEVALUE','CREATE',0),(34,'configuration','UPDATE_CODEVALUE','CODEVALUE','UPDATE',0),(35,'configuration','UPDATE_CODEVALUE_CHECKER','CODEVALUE','UPDATE',0),(36,'configuration','DELETE_CODEVALUE','CODEVALUE','DELETE',0),(37,'configuration','DELETE_CODEVALUE_CHECKER','CODEVALUE','DELETE',0),(38,'configuration','READ_CURRENCY','CURRENCY','READ',0),(39,'configuration','UPDATE_CURRENCY','CURRENCY','UPDATE',0),(40,'configuration','UPDATE_CURRENCY_CHECKER','CURRENCY','UPDATE',0),(41,'configuration','UPDATE_PERMISSION','PERMISSION','UPDATE',0),(42,'configuration','UPDATE_PERMISSION_CHECKER','PERMISSION','UPDATE',0),(43,'configuration','READ_DATATABLE','DATATABLE','READ',0),(44,'configuration','REGISTER_DATATABLE','DATATABLE','REGISTER',0),(45,'configuration','REGISTER_DATATABLE_CHECKER','DATATABLE','REGISTER',0),(46,'configuration','DEREGISTER_DATATABLE','DATATABLE','DEREGISTER',0),(47,'configuration','DEREGISTER_DATATABLE_CHECKER','DATATABLE','DEREGISTER',0),(48,'configuration','READ_AUDIT','AUDIT','READ',0),(49,'configuration','CREATE_CALENDAR','CALENDAR','CREATE',0),(50,'configuration','READ_CALENDAR','CALENDAR','READ',0),(51,'configuration','UPDATE_CALENDAR','CALENDAR','UPDATE',0),(52,'configuration','DELETE_CALENDAR','CALENDAR','DELETE',0),(53,'configuration','CREATE_CALENDAR_CHECKER','CALENDAR','CREATE',0),(54,'configuration','UPDATE_CALENDAR_CHECKER','CALENDAR','UPDATE',0),(55,'configuration','DELETE_CALENDAR_CHECKER','CALENDAR','DELETE',0),(56,'organisation','READ_MAKERCHECKER','MAKERCHECKER','READ',0),(57,'organisation','READ_CHARGE','CHARGE','READ',0),(58,'organisation','CREATE_CHARGE','CHARGE','CREATE',0),(59,'organisation','CREATE_CHARGE_CHECKER','CHARGE','CREATE',0),(60,'organisation','UPDATE_CHARGE','CHARGE','UPDATE',0),(61,'organisation','UPDATE_CHARGE_CHECKER','CHARGE','UPDATE',0),(62,'organisation','DELETE_CHARGE','CHARGE','DELETE',0),(63,'organisation','DELETE_CHARGE_CHECKER','CHARGE','DELETE',0),(64,'organisation','READ_FUND','FUND','READ',0),(65,'organisation','CREATE_FUND','FUND','CREATE',0),(66,'organisation','CREATE_FUND_CHECKER','FUND','CREATE',0),(67,'organisation','UPDATE_FUND','FUND','UPDATE',0),(68,'organisation','UPDATE_FUND_CHECKER','FUND','UPDATE',0),(69,'organisation','DELETE_FUND','FUND','DELETE',0),(70,'organisation','DELETE_FUND_CHECKER','FUND','DELETE',0),(71,'organisation','READ_LOANPRODUCT','LOANPRODUCT','READ',0),(72,'organisation','CREATE_LOANPRODUCT','LOANPRODUCT','CREATE',0),(73,'organisation','CREATE_LOANPRODUCT_CHECKER','LOANPRODUCT','CREATE',0),(74,'organisation','UPDATE_LOANPRODUCT','LOANPRODUCT','UPDATE',0),(75,'organisation','UPDATE_LOANPRODUCT_CHECKER','LOANPRODUCT','UPDATE',0),(76,'organisation','DELETE_LOANPRODUCT','LOANPRODUCT','DELETE',0),(77,'organisation','DELETE_LOANPRODUCT_CHECKER','LOANPRODUCT','DELETE',0),(78,'organisation','READ_OFFICE','OFFICE','READ',0),(79,'organisation','CREATE_OFFICE','OFFICE','CREATE',0),(80,'organisation','CREATE_OFFICE_CHECKER','OFFICE','CREATE',0),(81,'organisation','UPDATE_OFFICE','OFFICE','UPDATE',0),(82,'organisation','UPDATE_OFFICE_CHECKER','OFFICE','UPDATE',0),(83,'organisation','READ_OFFICETRANSACTION','OFFICETRANSACTION','READ',0),(84,'organisation','DELETE_OFFICE_CHECKER','OFFICE','DELETE',0),(85,'organisation','CREATE_OFFICETRANSACTION','OFFICETRANSACTION','CREATE',0),(86,'organisation','CREATE_OFFICETRANSACTION_CHECKER','OFFICETRANSACTION','CREATE',0),(87,'organisation','DELETE_OFFICETRANSACTION','OFFICETRANSACTION','DELETE',0),(88,'organisation','DELETE_OFFICETRANSACTION_CHECKER','OFFICETRANSACTION','DELETE',0),(89,'organisation','READ_STAFF','STAFF','READ',0),(90,'organisation','CREATE_STAFF','STAFF','CREATE',0),(91,'organisation','CREATE_STAFF_CHECKER','STAFF','CREATE',0),(92,'organisation','UPDATE_STAFF','STAFF','UPDATE',0),(93,'organisation','UPDATE_STAFF_CHECKER','STAFF','UPDATE',0),(94,'organisation','DELETE_STAFF','STAFF','DELETE',0),(95,'organisation','DELETE_STAFF_CHECKER','STAFF','DELETE',0),(96,'organisation','READ_SAVINGSPRODUCT','SAVINGSPRODUCT','READ',0),(97,'organisation','CREATE_SAVINGSPRODUCT','SAVINGSPRODUCT','CREATE',0),(98,'organisation','CREATE_SAVINGSPRODUCT_CHECKER','SAVINGSPRODUCT','CREATE',0),(99,'organisation','UPDATE_SAVINGSPRODUCT','SAVINGSPRODUCT','UPDATE',0),(100,'organisation','UPDATE_SAVINGSPRODUCT_CHECKER','SAVINGSPRODUCT','UPDATE',0),(101,'organisation','DELETE_SAVINGSPRODUCT','SAVINGSPRODUCT','DELETE',0),(102,'organisation','DELETE_SAVINGSPRODUCT_CHECKER','SAVINGSPRODUCT','DELETE',0),(103,'portfolio','READ_LOAN','LOAN','READ',0),(104,'portfolio','CREATE_LOAN','LOAN','CREATE',0),(105,'portfolio','CREATE_LOAN_CHECKER','LOAN','CREATE',0),(106,'portfolio','UPDATE_LOAN','LOAN','UPDATE',0),(107,'portfolio','UPDATE_LOAN_CHECKER','LOAN','UPDATE',0),(108,'portfolio','DELETE_LOAN','LOAN','DELETE',0),(109,'portfolio','DELETE_LOAN_CHECKER','LOAN','DELETE',0),(110,'portfolio','READ_CLIENT','CLIENT','READ',0),(111,'portfolio','CREATE_CLIENT','CLIENT','CREATE',0),(112,'portfolio','CREATE_CLIENT_CHECKER','CLIENT','CREATE',0),(113,'portfolio','UPDATE_CLIENT','CLIENT','UPDATE',0),(114,'portfolio','UPDATE_CLIENT_CHECKER','CLIENT','UPDATE',0),(115,'portfolio','DELETE_CLIENT','CLIENT','DELETE',0),(116,'portfolio','DELETE_CLIENT_CHECKER','CLIENT','DELETE',0),(117,'portfolio','READ_CLIENTIMAGE','CLIENTIMAGE','READ',0),(118,'portfolio','CREATE_CLIENTIMAGE','CLIENTIMAGE','CREATE',0),(119,'portfolio','CREATE_CLIENTIMAGE_CHECKER','CLIENTIMAGE','CREATE',0),(120,'portfolio','DELETE_CLIENTIMAGE','CLIENTIMAGE','DELETE',0),(121,'portfolio','DELETE_CLIENTIMAGE_CHECKER','CLIENTIMAGE','DELETE',0),(122,'portfolio','READ_CLIENTNOTE','CLIENTNOTE','READ',0),(123,'portfolio','CREATE_CLIENTNOTE','CLIENTNOTE','CREATE',0),(124,'portfolio','CREATE_CLIENTNOTE_CHECKER','CLIENTNOTE','CREATE',0),(125,'portfolio','UPDATE_CLIENTNOTE','CLIENTNOTE','UPDATE',0),(126,'portfolio','UPDATE_CLIENTNOTE_CHECKER','CLIENTNOTE','UPDATE',0),(127,'portfolio','DELETE_CLIENTNOTE','CLIENTNOTE','DELETE',0),(128,'portfolio','DELETE_CLIENTNOTE_CHECKER','CLIENTNOTE','DELETE',0),(129,'portfolio','READ_GROUPNOTE','GROUPNOTE','READ',0),(130,'portfolio','CREATE_GROUPNOTE','GROUPNOTE','CREATE',0),(131,'portfolio','UPDATE_GROUPNOTE','GROUPNOTE','UPDATE',0),(132,'portfolio','DELETE_GROUPNOTE','GROUPNOTE','DELETE',0),(133,'portfolio','CREATE_GROUPNOTE_CHECKER','GROUPNOTE','CREATE',0),(134,'portfolio','UPDATE_GROUPNOTE_CHECKER','GROUPNOTE','UPDATE',0),(135,'portfolio','DELETE_GROUPNOTE_CHECKER','GROUPNOTE','DELETE',0),(136,'portfolio','READ_LOANNOTE','LOANNOTE','READ',0),(137,'portfolio','CREATE_LOANNOTE','LOANNOTE','CREATE',0),(138,'portfolio','UPDATE_LOANNOTE','LOANNOTE','UPDATE',0),(139,'portfolio','DELETE_LOANNOTE','LOANNOTE','DELETE',0),(140,'portfolio','CREATE_LOANNOTE_CHECKER','LOANNOTE','CREATE',0),(141,'portfolio','UPDATE_LOANNOTE_CHECKER','LOANNOTE','UPDATE',0),(142,'portfolio','DELETE_LOANNOTE_CHECKER','LOANNOTE','DELETE',0),(143,'portfolio','READ_LOANTRANSACTIONNOTE','LOANTRANSACTIONNOTE','READ',0),(144,'portfolio','CREATE_LOANTRANSACTIONNOTE','LOANTRANSACTIONNOTE','CREATE',0),(145,'portfolio','UPDATE_LOANTRANSACTIONNOTE','LOANTRANSACTIONNOTE','UPDATE',0),(146,'portfolio','DELETE_LOANTRANSACTIONNOTE','LOANTRANSACTIONNOTE','DELETE',0),(147,'portfolio','CREATE_LOANTRANSACTIONNOTE_CHECKER','LOANTRANSACTIONNOTE','CREATE',0),(148,'portfolio','UPDATE_LOANTRANSACTIONNOTE_CHECKER','LOANTRANSACTIONNOTE','UPDATE',0),(149,'portfolio','DELETE_LOANTRANSACTIONNOTE_CHECKER','LOANTRANSACTIONNOTE','DELETE',0),(150,'portfolio','READ_SAVINGNOTE','SAVINGNOTE','READ',0),(151,'portfolio','CREATE_SAVINGNOTE','SAVINGNOTE','CREATE',0),(152,'portfolio','UPDATE_SAVINGNOTE','SAVINGNOTE','UPDATE',0),(153,'portfolio','DELETE_SAVINGNOTE','SAVINGNOTE','DELETE',0),(154,'portfolio','CREATE_SAVINGNOTE_CHECKER','SAVINGNOTE','CREATE',0),(155,'portfolio','UPDATE_SAVINGNOTE_CHECKER','SAVINGNOTE','UPDATE',0),(156,'portfolio','DELETE_SAVINGNOTE_CHECKER','SAVINGNOTE','DELETE',0),(157,'portfolio','READ_CLIENTIDENTIFIER','CLIENTIDENTIFIER','READ',0),(158,'portfolio','CREATE_CLIENTIDENTIFIER','CLIENTIDENTIFIER','CREATE',0),(159,'portfolio','CREATE_CLIENTIDENTIFIER_CHECKER','CLIENTIDENTIFIER','CREATE',0),(160,'portfolio','UPDATE_CLIENTIDENTIFIER','CLIENTIDENTIFIER','UPDATE',0),(161,'portfolio','UPDATE_CLIENTIDENTIFIER_CHECKER','CLIENTIDENTIFIER','UPDATE',0),(162,'portfolio','DELETE_CLIENTIDENTIFIER','CLIENTIDENTIFIER','DELETE',0),(163,'portfolio','DELETE_CLIENTIDENTIFIER_CHECKER','CLIENTIDENTIFIER','DELETE',0),(164,'portfolio','READ_DOCUMENT','DOCUMENT','READ',0),(165,'portfolio','CREATE_DOCUMENT','DOCUMENT','CREATE',0),(166,'portfolio','CREATE_DOCUMENT_CHECKER','DOCUMENT','CREATE',0),(167,'portfolio','UPDATE_DOCUMENT','DOCUMENT','UPDATE',0),(168,'portfolio','UPDATE_DOCUMENT_CHECKER','DOCUMENT','UPDATE',0),(169,'portfolio','DELETE_DOCUMENT','DOCUMENT','DELETE',0),(170,'portfolio','DELETE_DOCUMENT_CHECKER','DOCUMENT','DELETE',0),(171,'portfolio','READ_GROUP','GROUP','READ',0),(172,'portfolio','CREATE_GROUP','GROUP','CREATE',0),(173,'portfolio','CREATE_GROUP_CHECKER','GROUP','CREATE',0),(174,'portfolio','UPDATE_GROUP','GROUP','UPDATE',0),(175,'portfolio','UPDATE_GROUP_CHECKER','GROUP','UPDATE',0),(176,'portfolio','DELETE_GROUP','GROUP','DELETE',0),(177,'portfolio','DELETE_GROUP_CHECKER','GROUP','DELETE',0),(178,'portfolio','UNASSIGNSTAFF_GROUP','GROUP','UNASSIGNSTAFF',0),(179,'portfolio','UNASSIGNSTAFF_GROUP_CHECKER','GROUP','UNASSIGNSTAFF',0),(180,'portfolio','CREATE_LOANCHARGE','LOANCHARGE','CREATE',0),(181,'portfolio','CREATE_LOANCHARGE_CHECKER','LOANCHARGE','CREATE',0),(182,'portfolio','UPDATE_LOANCHARGE','LOANCHARGE','UPDATE',0),(183,'portfolio','UPDATE_LOANCHARGE_CHECKER','LOANCHARGE','UPDATE',0),(184,'portfolio','DELETE_LOANCHARGE','LOANCHARGE','DELETE',0),(185,'portfolio','DELETE_LOANCHARGE_CHECKER','LOANCHARGE','DELETE',0),(186,'portfolio','WAIVE_LOANCHARGE','LOANCHARGE','WAIVE',0),(187,'portfolio','WAIVE_LOANCHARGE_CHECKER','LOANCHARGE','WAIVE',0),(188,'portfolio','READ_SAVINGSACCOUNT','SAVINGSACCOUNT','READ',0),(189,'portfolio','CREATE_SAVINGSACCOUNT','SAVINGSACCOUNT','CREATE',0),(190,'portfolio','CREATE_SAVINGSACCOUNT_CHECKER','SAVINGSACCOUNT','CREATE',0),(191,'portfolio','UPDATE_SAVINGSACCOUNT','SAVINGSACCOUNT','UPDATE',0),(192,'portfolio','UPDATE_SAVINGSACCOUNT_CHECKER','SAVINGSACCOUNT','UPDATE',0),(193,'portfolio','DELETE_SAVINGSACCOUNT','SAVINGSACCOUNT','DELETE',0),(194,'portfolio','DELETE_SAVINGSACCOUNT_CHECKER','SAVINGSACCOUNT','DELETE',0),(195,'portfolio','READ_GUARANTOR','GUARANTOR','READ',0),(196,'portfolio','CREATE_GUARANTOR','GUARANTOR','CREATE',0),(197,'portfolio','CREATE_GUARANTOR_CHECKER','GUARANTOR','CREATE',0),(198,'portfolio','UPDATE_GUARANTOR','GUARANTOR','UPDATE',0),(199,'portfolio','UPDATE_GUARANTOR_CHECKER','GUARANTOR','UPDATE',0),(200,'portfolio','DELETE_GUARANTOR','GUARANTOR','DELETE',0),(201,'portfolio','DELETE_GUARANTOR_CHECKER','GUARANTOR','DELETE',0),(202,'transaction_loan','APPROVE_LOAN','LOAN','APPROVE',0),(203,'transaction_loan','APPROVEINPAST_LOAN','LOAN','APPROVEINPAST',0),(204,'transaction_loan','REJECT_LOAN','LOAN','REJECT',0),(205,'transaction_loan','REJECTINPAST_LOAN','LOAN','REJECTINPAST',0),(206,'transaction_loan','WITHDRAW_LOAN','LOAN','WITHDRAW',0),(207,'transaction_loan','WITHDRAWINPAST_LOAN','LOAN','WITHDRAWINPAST',0),(208,'transaction_loan','APPROVALUNDO_LOAN','LOAN','APPROVALUNDO',0),(209,'transaction_loan','DISBURSE_LOAN','LOAN','DISBURSE',0),(210,'transaction_loan','DISBURSEINPAST_LOAN','LOAN','DISBURSEINPAST',0),(211,'transaction_loan','DISBURSALUNDO_LOAN','LOAN','DISBURSALUNDO',0),(212,'transaction_loan','REPAYMENT_LOAN','LOAN','REPAYMENT',0),(213,'transaction_loan','REPAYMENTINPAST_LOAN','LOAN','REPAYMENTINPAST',0),(214,'transaction_loan','ADJUST_LOAN','LOAN','ADJUST',0),(215,'transaction_loan','WAIVEINTERESTPORTION_LOAN','LOAN','WAIVEINTERESTPORTION',0),(216,'transaction_loan','WRITEOFF_LOAN','LOAN','WRITEOFF',0),(217,'transaction_loan','CLOSE_LOAN','LOAN','CLOSE',0),(218,'transaction_loan','CLOSEASRESCHEDULED_LOAN','LOAN','CLOSEASRESCHEDULED',0),(219,'transaction_loan','UPDATELOANOFFICER_LOAN','LOAN','UPDATELOANOFFICER',0),(220,'transaction_loan','UPDATELOANOFFICER_LOAN_CHECKER','LOAN','UPDATELOANOFFICER',0),(221,'transaction_loan','REMOVELOANOFFICER_LOAN','LOAN','REMOVELOANOFFICER',0),(222,'transaction_loan','REMOVELOANOFFICER_LOAN_CHECKER','LOAN','REMOVELOANOFFICER',0),(223,'transaction_loan','BULKREASSIGN_LOAN','LOAN','BULKREASSIGN',0),(224,'transaction_loan','BULKREASSIGN_LOAN_CHECKER','LOAN','BULKREASSIGN',0),(225,'transaction_loan','APPROVE_LOAN_CHECKER','LOAN','APPROVE',0),(226,'transaction_loan','APPROVEINPAST_LOAN_CHECKER','LOAN','APPROVEINPAST',0),(227,'transaction_loan','REJECT_LOAN_CHECKER','LOAN','REJECT',0),(228,'transaction_loan','REJECTINPAST_LOAN_CHECKER','LOAN','REJECTINPAST',0),(229,'transaction_loan','WITHDRAW_LOAN_CHECKER','LOAN','WITHDRAW',0),(230,'transaction_loan','WITHDRAWINPAST_LOAN_CHECKER','LOAN','WITHDRAWINPAST',0),(231,'transaction_loan','APPROVALUNDO_LOAN_CHECKER','LOAN','APPROVALUNDO',0),(232,'transaction_loan','DISBURSE_LOAN_CHECKER','LOAN','DISBURSE',0),(233,'transaction_loan','DISBURSEINPAST_LOAN_CHECKER','LOAN','DISBURSEINPAST',0),(234,'transaction_loan','DISBURSALUNDO_LOAN_CHECKER','LOAN','DISBURSALUNDO',0),(235,'transaction_loan','REPAYMENT_LOAN_CHECKER','LOAN','REPAYMENT',0),(236,'transaction_loan','REPAYMENTINPAST_LOAN_CHECKER','LOAN','REPAYMENTINPAST',0),(237,'transaction_loan','ADJUST_LOAN_CHECKER','LOAN','ADJUST',0),(238,'transaction_loan','WAIVEINTERESTPORTION_LOAN_CHECKER','LOAN','WAIVEINTERESTPORTION',0),(239,'transaction_loan','WRITEOFF_LOAN_CHECKER','LOAN','WRITEOFF',0),(240,'transaction_loan','CLOSE_LOAN_CHECKER','LOAN','CLOSE',0),(241,'transaction_loan','CLOSEASRESCHEDULED_LOAN_CHECKER','LOAN','CLOSEASRESCHEDULED',0),(242,'transaction_savings','DEPOSIT_SAVINGSACCOUNT','SAVINGSACCOUNT','DEPOSIT',0),(243,'transaction_savings','DEPOSIT_SAVINGSACCOUNT_CHECKER','SAVINGSACCOUNT','DEPOSIT',0),(244,'transaction_savings','WITHDRAWAL_SAVINGSACCOUNT','SAVINGSACCOUNT','WITHDRAWAL',0),(245,'transaction_savings','WITHDRAWAL_SAVINGSACCOUNT_CHECKER','SAVINGSACCOUNT','WITHDRAWAL',0),(246,'accounting','CREATE_GLACCOUNT','GLACCOUNT','CREATE',0),(247,'accounting','UPDATE_GLACCOUNT','GLACCOUNT','UPDATE',0),(248,'accounting','DELETE_GLACCOUNT','GLACCOUNT','DELETE',0),(249,'accounting','CREATE_GLCLOSURE','GLCLOSURE','CREATE',0),(250,'accounting','UPDATE_GLCLOSURE','GLCLOSURE','UPDATE',0),(251,'accounting','DELETE_GLCLOSURE','GLCLOSURE','DELETE',0),(252,'accounting','CREATE_JOURNALENTRY','JOURNALENTRY','CREATE',0),(253,'accounting','REVERSE_JOURNALENTRY','JOURNALENTRY','REVERSE',0),(254,'report','READ_Active Loans - Details','Active Loans - Details','READ',0),(255,'report','READ_Active Loans - Summary','Active Loans - Summary','READ',0),(256,'report','READ_Active Loans by Disbursal Period','Active Loans by Disbursal Period','READ',0),(257,'report','READ_Active Loans in last installment','Active Loans in last installment','READ',0),(258,'report','READ_Active Loans in last installment Summary','Active Loans in last installment Summary','READ',0),(259,'report','READ_Active Loans Passed Final Maturity','Active Loans Passed Final Maturity','READ',0),(260,'report','READ_Active Loans Passed Final Maturity Summary','Active Loans Passed Final Maturity Summary','READ',0),(261,'report','READ_Aging Detail','Aging Detail','READ',0),(262,'report','READ_Aging Summary (Arrears in Months)','Aging Summary (Arrears in Months)','READ',0),(263,'report','READ_Aging Summary (Arrears in Weeks)','Aging Summary (Arrears in Weeks)','READ',0),(264,'report','READ_Balance Sheet','Balance Sheet','READ',0),(265,'report','READ_Branch Expected Cash Flow','Branch Expected Cash Flow','READ',0),(266,'report','READ_Client Listing','Client Listing','READ',0),(267,'report','READ_Client Loans Listing','Client Loans Listing','READ',0),(268,'report','READ_Expected Payments By Date - Basic','Expected Payments By Date - Basic','READ',0),(269,'report','READ_Expected Payments By Date - Formatted','Expected Payments By Date - Formatted','READ',0),(270,'report','READ_Funds Disbursed Between Dates Summary','Funds Disbursed Between Dates Summary','READ',0),(271,'report','READ_Funds Disbursed Between Dates Summary by Office','Funds Disbursed Between Dates Summary by Office','READ',0),(272,'report','READ_Income Statement','Income Statement','READ',0),(273,'report','READ_Loan Account Schedule','Loan Account Schedule','READ',0),(274,'report','READ_Loans Awaiting Disbursal','Loans Awaiting Disbursal','READ',0),(275,'report','READ_Loans Awaiting Disbursal Summary','Loans Awaiting Disbursal Summary','READ',0),(276,'report','READ_Loans Awaiting Disbursal Summary by Month','Loans Awaiting Disbursal Summary by Month','READ',0),(277,'report','READ_Loans Pending Approval','Loans Pending Approval','READ',0),(278,'report','READ_Obligation Met Loans Details','Obligation Met Loans Details','READ',0),(279,'report','READ_Obligation Met Loans Summary','Obligation Met Loans Summary','READ',0),(280,'report','READ_Portfolio at Risk','Portfolio at Risk','READ',0),(281,'report','READ_Portfolio at Risk by Branch','Portfolio at Risk by Branch','READ',0),(282,'report','READ_Rescheduled Loans','Rescheduled Loans','READ',0),(283,'report','READ_Trial Balance','Trial Balance','READ',0),(284,'report','READ_Written-Off Loans','Written-Off Loans','READ',0),(285,'datatable','CREATE_client additional data','client additional data','CREATE',1),(286,'datatable','CREATE_impact measurement','impact measurement','CREATE',1),(287,'datatable','CREATE_loan additional data','loan additional data','CREATE',1),(288,'datatable','READ_client additional data','client additional data','READ',1),(289,'datatable','READ_impact measurement','impact measurement','READ',1),(290,'datatable','READ_loan additional data','loan additional data','READ',1),(291,'datatable','UPDATE_client additional data','client additional data','UPDATE',1),(292,'datatable','UPDATE_impact measurement','impact measurement','UPDATE',1),(293,'datatable','UPDATE_loan additional data','loan additional data','UPDATE',1),(294,'datatable','DELETE_client additional data','client additional data','DELETE',1),(295,'datatable','DELETE_impact measurement','impact measurement','DELETE',1),(296,'datatable','DELETE_loan additional data','loan additional data','DELETE',1);
+INSERT INTO `m_permission` VALUES (1,'special','ALL_FUNCTIONS',NULL,NULL,0),(2,'special','ALL_FUNCTIONS_READ',NULL,NULL,0),(3,'special','CHECKER_SUPER_USER',NULL,NULL,0),(4,'special','REPORTING_SUPER_USER',NULL,NULL,0),(5,'authorisation','READ_PERMISSION','PERMISSION','READ',0),(6,'authorisation','PERMISSIONS_ROLE','ROLE','PERMISSIONS',0),(7,'authorisation','CREATE_ROLE','ROLE','CREATE',0),(8,'authorisation','CREATE_ROLE_CHECKER','ROLE','CREATE',0),(9,'authorisation','READ_ROLE','ROLE','READ',0),(10,'authorisation','UPDATE_ROLE','ROLE','UPDATE',0),(11,'authorisation','UPDATE_ROLE_CHECKER','ROLE','UPDATE',0),(12,'authorisation','DELETE_ROLE','ROLE','DELETE',0),(13,'authorisation','DELETE_ROLE_CHECKER','ROLE','DELETE',0),(14,'authorisation','CREATE_USER','USER','CREATE',0),(15,'authorisation','CREATE_USER_CHECKER','USER','CREATE',0),(16,'authorisation','READ_USER','USER','READ',0),(17,'authorisation','UPDATE_USER','USER','UPDATE',0),(18,'authorisation','UPDATE_USER_CHECKER','USER','UPDATE',0),(19,'authorisation','DELETE_USER','USER','DELETE',0),(20,'authorisation','DELETE_USER_CHECKER','USER','DELETE',0),(21,'configuration','READ_CONFIGURATION','CONFIGURATION','READ',0),(22,'configuration','UPDATE_CONFIGURATION','CONFIGURATION','UPDATE',0),(23,'configuration','UPDATE_CONFIGURATION_CHECKER','CONFIGURATION','UPDATE',0),(24,'configuration','READ_CODE','CODE','READ',0),(25,'configuration','CREATE_CODE','CODE','CREATE',0),(26,'configuration','CREATE_CODE_CHECKER','CODE','CREATE',0),(27,'configuration','UPDATE_CODE','CODE','UPDATE',0),(28,'configuration','UPDATE_CODE_CHECKER','CODE','UPDATE',0),(29,'configuration','DELETE_CODE','CODE','DELETE',0),(30,'configuration','DELETE_CODE_CHECKER','CODE','DELETE',0),(31,'configuration','READ_CODEVALUE','CODEVALUE','READ',0),(32,'configuration','CREATE_CODEVALUE','CODEVALUE','CREATE',0),(33,'configuration','CREATE_CODEVALUE_CHECKER','CODEVALUE','CREATE',0),(34,'configuration','UPDATE_CODEVALUE','CODEVALUE','UPDATE',0),(35,'configuration','UPDATE_CODEVALUE_CHECKER','CODEVALUE','UPDATE',0),(36,'configuration','DELETE_CODEVALUE','CODEVALUE','DELETE',0),(37,'configuration','DELETE_CODEVALUE_CHECKER','CODEVALUE','DELETE',0),(38,'configuration','READ_CURRENCY','CURRENCY','READ',0),(39,'configuration','UPDATE_CURRENCY','CURRENCY','UPDATE',0),(40,'configuration','UPDATE_CURRENCY_CHECKER','CURRENCY','UPDATE',0),(41,'configuration','UPDATE_PERMISSION','PERMISSION','UPDATE',0),(42,'configuration','UPDATE_PERMISSION_CHECKER','PERMISSION','UPDATE',0),(43,'configuration','READ_DATATABLE','DATATABLE','READ',0),(44,'configuration','REGISTER_DATATABLE','DATATABLE','REGISTER',0),(45,'configuration','REGISTER_DATATABLE_CHECKER','DATATABLE','REGISTER',0),(46,'configuration','DEREGISTER_DATATABLE','DATATABLE','DEREGISTER',0),(47,'configuration','DEREGISTER_DATATABLE_CHECKER','DATATABLE','DEREGISTER',0),(48,'configuration','READ_AUDIT','AUDIT','READ',0),(49,'configuration','CREATE_CALENDAR','CALENDAR','CREATE',0),(50,'configuration','READ_CALENDAR','CALENDAR','READ',0),(51,'configuration','UPDATE_CALENDAR','CALENDAR','UPDATE',0),(52,'configuration','DELETE_CALENDAR','CALENDAR','DELETE',0),(53,'configuration','CREATE_CALENDAR_CHECKER','CALENDAR','CREATE',0),(54,'configuration','UPDATE_CALENDAR_CHECKER','CALENDAR','UPDATE',0),(55,'configuration','DELETE_CALENDAR_CHECKER','CALENDAR','DELETE',0),(57,'organisation','READ_CHARGE','CHARGE','READ',0),(58,'organisation','CREATE_CHARGE','CHARGE','CREATE',0),(59,'organisation','CREATE_CHARGE_CHECKER','CHARGE','CREATE',0),(60,'organisation','UPDATE_CHARGE','CHARGE','UPDATE',0),(61,'organisation','UPDATE_CHARGE_CHECKER','CHARGE','UPDATE',0),(62,'organisation','DELETE_CHARGE','CHARGE','DELETE',0),(63,'organisation','DELETE_CHARGE_CHECKER','CHARGE','DELETE',0),(64,'organisation','READ_FUND','FUND','READ',0),(65,'organisation','CREATE_FUND','FUND','CREATE',0),(66,'organisation','CREATE_FUND_CHECKER','FUND','CREATE',0),(67,'organisation','UPDATE_FUND','FUND','UPDATE',0),(68,'organisation','UPDATE_FUND_CHECKER','FUND','UPDATE',0),(69,'organisation','DELETE_FUND','FUND','DELETE',0),(70,'organisation','DELETE_FUND_CHECKER','FUND','DELETE',0),(71,'organisation','READ_LOANPRODUCT','LOANPRODUCT','READ',0),(72,'organisation','CREATE_LOANPRODUCT','LOANPRODUCT','CREATE',0),(73,'organisation','CREATE_LOANPRODUCT_CHECKER','LOANPRODUCT','CREATE',0),(74,'organisation','UPDATE_LOANPRODUCT','LOANPRODUCT','UPDATE',0),(75,'organisation','UPDATE_LOANPRODUCT_CHECKER','LOANPRODUCT','UPDATE',0),(76,'organisation','DELETE_LOANPRODUCT','LOANPRODUCT','DELETE',0),(77,'organisation','DELETE_LOANPRODUCT_CHECKER','LOANPRODUCT','DELETE',0),(78,'organisation','READ_OFFICE','OFFICE','READ',0),(79,'organisation','CREATE_OFFICE','OFFICE','CREATE',0),(80,'organisation','CREATE_OFFICE_CHECKER','OFFICE','CREATE',0),(81,'organisation','UPDATE_OFFICE','OFFICE','UPDATE',0),(82,'organisation','UPDATE_OFFICE_CHECKER','OFFICE','UPDATE',0),(83,'organisation','READ_OFFICETRANSACTION','OFFICETRANSACTION','READ',0),(84,'organisation','DELETE_OFFICE_CHECKER','OFFICE','DELETE',0),(85,'organisation','CREATE_OFFICETRANSACTION','OFFICETRANSACTION','CREATE',0),(86,'organisation','CREATE_OFFICETRANSACTION_CHECKER','OFFICETRANSACTION','CREATE',0),(87,'organisation','DELETE_OFFICETRANSACTION','OFFICETRANSACTION','DELETE',0),(88,'organisation','DELETE_OFFICETRANSACTION_CHECKER','OFFICETRANSACTION','DELETE',0),(89,'organisation','READ_STAFF','STAFF','READ',0),(90,'organisation','CREATE_STAFF','STAFF','CREATE',0),(91,'organisation','CREATE_STAFF_CHECKER','STAFF','CREATE',0),(92,'organisation','UPDATE_STAFF','STAFF','UPDATE',0),(93,'organisation','UPDATE_STAFF_CHECKER','STAFF','UPDATE',0),(94,'organisation','DELETE_STAFF','STAFF','DELETE',0),(95,'organisation','DELETE_STAFF_CHECKER','STAFF','DELETE',0),(96,'organisation','READ_SAVINGSPRODUCT','SAVINGSPRODUCT','READ',0),(97,'organisation','CREATE_SAVINGSPRODUCT','SAVINGSPRODUCT','CREATE',0),(98,'organisation','CREATE_SAVINGSPRODUCT_CHECKER','SAVINGSPRODUCT','CREATE',0),(99,'organisation','UPDATE_SAVINGSPRODUCT','SAVINGSPRODUCT','UPDATE',0),(100,'organisation','UPDATE_SAVINGSPRODUCT_CHECKER','SAVINGSPRODUCT','UPDATE',0),(101,'organisation','DELETE_SAVINGSPRODUCT','SAVINGSPRODUCT','DELETE',0),(102,'organisation','DELETE_SAVINGSPRODUCT_CHECKER','SAVINGSPRODUCT','DELETE',0),(103,'portfolio','READ_LOAN','LOAN','READ',0),(104,'portfolio','CREATE_LOAN','LOAN','CREATE',0),(105,'portfolio','CREATE_LOAN_CHECKER','LOAN','CREATE',0),(106,'portfolio','UPDATE_LOAN','LOAN','UPDATE',0),(107,'portfolio','UPDATE_LOAN_CHECKER','LOAN','UPDATE',0),(108,'portfolio','DELETE_LOAN','LOAN','DELETE',0),(109,'portfolio','DELETE_LOAN_CHECKER','LOAN','DELETE',0),(110,'portfolio','READ_CLIENT','CLIENT','READ',0),(111,'portfolio','CREATE_CLIENT','CLIENT','CREATE',0),(112,'portfolio','CREATE_CLIENT_CHECKER','CLIENT','CREATE',0),(113,'portfolio','UPDATE_CLIENT','CLIENT','UPDATE',0),(114,'portfolio','UPDATE_CLIENT_CHECKER','CLIENT','UPDATE',0),(115,'portfolio','DELETE_CLIENT','CLIENT','DELETE',0),(116,'portfolio','DELETE_CLIENT_CHECKER','CLIENT','DELETE',0),(117,'portfolio','READ_CLIENTIMAGE','CLIENTIMAGE','READ',0),(118,'portfolio','CREATE_CLIENTIMAGE','CLIENTIMAGE','CREATE',0),(119,'portfolio','CREATE_CLIENTIMAGE_CHECKER','CLIENTIMAGE','CREATE',0),(120,'portfolio','DELETE_CLIENTIMAGE','CLIENTIMAGE','DELETE',0),(121,'portfolio','DELETE_CLIENTIMAGE_CHECKER','CLIENTIMAGE','DELETE',0),(122,'portfolio','READ_CLIENTNOTE','CLIENTNOTE','READ',0),(123,'portfolio','CREATE_CLIENTNOTE','CLIENTNOTE','CREATE',0),(124,'portfolio','CREATE_CLIENTNOTE_CHECKER','CLIENTNOTE','CREATE',0),(125,'portfolio','UPDATE_CLIENTNOTE','CLIENTNOTE','UPDATE',0),(126,'portfolio','UPDATE_CLIENTNOTE_CHECKER','CLIENTNOTE','UPDATE',0),(127,'portfolio','DELETE_CLIENTNOTE','CLIENTNOTE','DELETE',0),(128,'portfolio','DELETE_CLIENTNOTE_CHECKER','CLIENTNOTE','DELETE',0),(129,'portfolio','READ_GROUPNOTE','GROUPNOTE','READ',0),(130,'portfolio','CREATE_GROUPNOTE','GROUPNOTE','CREATE',0),(131,'portfolio','UPDATE_GROUPNOTE','GROUPNOTE','UPDATE',0),(132,'portfolio','DELETE_GROUPNOTE','GROUPNOTE','DELETE',0),(133,'portfolio','CREATE_GROUPNOTE_CHECKER','GROUPNOTE','CREATE',0),(134,'portfolio','UPDATE_GROUPNOTE_CHECKER','GROUPNOTE','UPDATE',0),(135,'portfolio','DELETE_GROUPNOTE_CHECKER','GROUPNOTE','DELETE',0),(136,'portfolio','READ_LOANNOTE','LOANNOTE','READ',0),(137,'portfolio','CREATE_LOANNOTE','LOANNOTE','CREATE',0),(138,'portfolio','UPDATE_LOANNOTE','LOANNOTE','UPDATE',0),(139,'portfolio','DELETE_LOANNOTE','LOANNOTE','DELETE',0),(140,'portfolio','CREATE_LOANNOTE_CHECKER','LOANNOTE','CREATE',0),(141,'portfolio','UPDATE_LOANNOTE_CHECKER','LOANNOTE','UPDATE',0),(142,'portfolio','DELETE_LOANNOTE_CHECKER','LOANNOTE','DELETE',0),(143,'portfolio','READ_LOANTRANSACTIONNOTE','LOANTRANSACTIONNOTE','READ',0),(144,'portfolio','CREATE_LOANTRANSACTIONNOTE','LOANTRANSACTIONNOTE','CREATE',0),(145,'portfolio','UPDATE_LOANTRANSACTIONNOTE','LOANTRANSACTIONNOTE','UPDATE',0),(146,'portfolio','DELETE_LOANTRANSACTIONNOTE','LOANTRANSACTIONNOTE','DELETE',0),(147,'portfolio','CREATE_LOANTRANSACTIONNOTE_CHECKER','LOANTRANSACTIONNOTE','CREATE',0),(148,'portfolio','UPDATE_LOANTRANSACTIONNOTE_CHECKER','LOANTRANSACTIONNOTE','UPDATE',0),(149,'portfolio','DELETE_LOANTRANSACTIONNOTE_CHECKER','LOANTRANSACTIONNOTE','DELETE',0),(150,'portfolio','READ_SAVINGNOTE','SAVINGNOTE','READ',0),(151,'portfolio','CREATE_SAVINGNOTE','SAVINGNOTE','CREATE',0),(152,'portfolio','UPDATE_SAVINGNOTE','SAVINGNOTE','UPDATE',0),(153,'portfolio','DELETE_SAVINGNOTE','SAVINGNOTE','DELETE',0),(154,'portfolio','CREATE_SAVINGNOTE_CHECKER','SAVINGNOTE','CREATE',0),(155,'portfolio','UPDATE_SAVINGNOTE_CHECKER','SAVINGNOTE','UPDATE',0),(156,'portfolio','DELETE_SAVINGNOTE_CHECKER','SAVINGNOTE','DELETE',0),(157,'portfolio','READ_CLIENTIDENTIFIER','CLIENTIDENTIFIER','READ',0),(158,'portfolio','CREATE_CLIENTIDENTIFIER','CLIENTIDENTIFIER','CREATE',0),(159,'portfolio','CREATE_CLIENTIDENTIFIER_CHECKER','CLIENTIDENTIFIER','CREATE',0),(160,'portfolio','UPDATE_CLIENTIDENTIFIER','CLIENTIDENTIFIER','UPDATE',0),(161,'portfolio','UPDATE_CLIENTIDENTIFIER_CHECKER','CLIENTIDENTIFIER','UPDATE',0),(162,'portfolio','DELETE_CLIENTIDENTIFIER','CLIENTIDENTIFIER','DELETE',0),(163,'portfolio','DELETE_CLIENTIDENTIFIER_CHECKER','CLIENTIDENTIFIER','DELETE',0),(164,'portfolio','READ_DOCUMENT','DOCUMENT','READ',0),(165,'portfolio','CREATE_DOCUMENT','DOCUMENT','CREATE',0),(166,'portfolio','CREATE_DOCUMENT_CHECKER','DOCUMENT','CREATE',0),(167,'portfolio','UPDATE_DOCUMENT','DOCUMENT','UPDATE',0),(168,'portfolio','UPDATE_DOCUMENT_CHECKER','DOCUMENT','UPDATE',0),(169,'portfolio','DELETE_DOCUMENT','DOCUMENT','DELETE',0),(170,'portfolio','DELETE_DOCUMENT_CHECKER','DOCUMENT','DELETE',0),(171,'portfolio','READ_GROUP','GROUP','READ',0),(172,'portfolio','CREATE_GROUP','GROUP','CREATE',0),(173,'portfolio','CREATE_GROUP_CHECKER','GROUP','CREATE',0),(174,'portfolio','UPDATE_GROUP','GROUP','UPDATE',0),(175,'portfolio','UPDATE_GROUP_CHECKER','GROUP','UPDATE',0),(176,'portfolio','DELETE_GROUP','GROUP','DELETE',0),(177,'portfolio','DELETE_GROUP_CHECKER','GROUP','DELETE',0),(178,'portfolio','UNASSIGNSTAFF_GROUP','GROUP','UNASSIGNSTAFF',0),(179,'portfolio','UNASSIGNSTAFF_GROUP_CHECKER','GROUP','UNASSIGNSTAFF',0),(180,'portfolio','CREATE_LOANCHARGE','LOANCHARGE','CREATE',0),(181,'portfolio','CREATE_LOANCHARGE_CHECKER','LOANCHARGE','CREATE',0),(182,'portfolio','UPDATE_LOANCHARGE','LOANCHARGE','UPDATE',0),(183,'portfolio','UPDATE_LOANCHARGE_CHECKER','LOANCHARGE','UPDATE',0),(184,'portfolio','DELETE_LOANCHARGE','LOANCHARGE','DELETE',0),(185,'portfolio','DELETE_LOANCHARGE_CHECKER','LOANCHARGE','DELETE',0),(186,'portfolio','WAIVE_LOANCHARGE','LOANCHARGE','WAIVE',0),(187,'portfolio','WAIVE_LOANCHARGE_CHECKER','LOANCHARGE','WAIVE',0),(188,'portfolio','READ_SAVINGSACCOUNT','SAVINGSACCOUNT','READ',0),(189,'portfolio','CREATE_SAVINGSACCOUNT','SAVINGSACCOUNT','CREATE',0),(190,'portfolio','CREATE_SAVINGSACCOUNT_CHECKER','SAVINGSACCOUNT','CREATE',0),(191,'portfolio','UPDATE_SAVINGSACCOUNT','SAVINGSACCOUNT','UPDATE',0),(192,'portfolio','UPDATE_SAVINGSACCOUNT_CHECKER','SAVINGSACCOUNT','UPDATE',0),(193,'portfolio','DELETE_SAVINGSACCOUNT','SAVINGSACCOUNT','DELETE',0),(194,'portfolio','DELETE_SAVINGSACCOUNT_CHECKER','SAVINGSACCOUNT','DELETE',0),(195,'portfolio','READ_GUARANTOR','GUARANTOR','READ',0),(196,'portfolio','CREATE_GUARANTOR','GUARANTOR','CREATE',0),(197,'portfolio','CREATE_GUARANTOR_CHECKER','GUARANTOR','CREATE',0),(198,'portfolio','UPDATE_GUARANTOR','GUARANTOR','UPDATE',0),(199,'portfolio','UPDATE_GUARANTOR_CHECKER','GUARANTOR','UPDATE',0),(200,'portfolio','DELETE_GUARANTOR','GUARANTOR','DELETE',0),(201,'portfolio','DELETE_GUARANTOR_CHECKER','GUARANTOR','DELETE',0),(202,'portfolio','READ_COLLATERAL','COLLATERAL','READ',0),(203,'portfolio','CREATE_COLLATERAL','COLLATERAL','CREATE',0),(204,'portfolio','UPDATE_COLLATERAL','COLLATERAL','UPDATE',0),(205,'portfolio','DELETE_COLLATERAL','COLLATERAL','DELETE',0),(206,'portfolio','CREATE_COLLATERAL_CHECKER','COLLATERAL','CREATE',0),(207,'portfolio','UPDATE_COLLATERAL_CHECKER','COLLATERAL','UPDATE',0),(208,'portfolio','DELETE_COLLATERAL_CHECKER','COLLATERAL','DELETE',0),(209,'transaction_loan','APPROVE_LOAN','LOAN','APPROVE',0),(210,'transaction_loan','APPROVEINPAST_LOAN','LOAN','APPROVEINPAST',0),(211,'transaction_loan','REJECT_LOAN','LOAN','REJECT',0),(212,'transaction_loan','REJECTINPAST_LOAN','LOAN','REJECTINPAST',0),(213,'transaction_loan','WITHDRAW_LOAN','LOAN','WITHDRAW',0),(214,'transaction_loan','WITHDRAWINPAST_LOAN','LOAN','WITHDRAWINPAST',0),(215,'transaction_loan','APPROVALUNDO_LOAN','LOAN','APPROVALUNDO',0),(216,'transaction_loan','DISBURSE_LOAN','LOAN','DISBURSE',0),(217,'transaction_loan','DISBURSEINPAST_LOAN','LOAN','DISBURSEINPAST',0),(218,'transaction_loan','DISBURSALUNDO_LOAN','LOAN','DISBURSALUNDO',0),(219,'transaction_loan','REPAYMENT_LOAN','LOAN','REPAYMENT',0),(220,'transaction_loan','REPAYMENTINPAST_LOAN','LOAN','REPAYMENTINPAST',0),(221,'transaction_loan','ADJUST_LOAN','LOAN','ADJUST',0),(222,'transaction_loan','WAIVEINTERESTPORTION_LOAN','LOAN','WAIVEINTERESTPORTION',0),(223,'transaction_loan','WRITEOFF_LOAN','LOAN','WRITEOFF',0),(224,'transaction_loan','CLOSE_LOAN','LOAN','CLOSE',0),(225,'transaction_loan','CLOSEASRESCHEDULED_LOAN','LOAN','CLOSEASRESCHEDULED',0),(226,'transaction_loan','UPDATELOANOFFICER_LOAN','LOAN','UPDATELOANOFFICER',0),(227,'transaction_loan','UPDATELOANOFFICER_LOAN_CHECKER','LOAN','UPDATELOANOFFICER',0),(228,'transaction_loan','REMOVELOANOFFICER_LOAN','LOAN','REMOVELOANOFFICER',0),(229,'transaction_loan','REMOVELOANOFFICER_LOAN_CHECKER','LOAN','REMOVELOANOFFICER',0),(230,'transaction_loan','BULKREASSIGN_LOAN','LOAN','BULKREASSIGN',0),(231,'transaction_loan','BULKREASSIGN_LOAN_CHECKER','LOAN','BULKREASSIGN',0),(232,'transaction_loan','APPROVE_LOAN_CHECKER','LOAN','APPROVE',0),(233,'transaction_loan','APPROVEINPAST_LOAN_CHECKER','LOAN','APPROVEINPAST',0),(234,'transaction_loan','REJECT_LOAN_CHECKER','LOAN','REJECT',0),(235,'transaction_loan','REJECTINPAST_LOAN_CHECKER','LOAN','REJECTINPAST',0),(236,'transaction_loan','WITHDRAW_LOAN_CHECKER','LOAN','WITHDRAW',0),(237,'transaction_loan','WITHDRAWINPAST_LOAN_CHECKER','LOAN','WITHDRAWINPAST',0),(238,'transaction_loan','APPROVALUNDO_LOAN_CHECKER','LOAN','APPROVALUNDO',0),(239,'transaction_loan','DISBURSE_LOAN_CHECKER','LOAN','DISBURSE',0),(240,'transaction_loan','DISBURSEINPAST_LOAN_CHECKER','LOAN','DISBURSEINPAST',0),(241,'transaction_loan','DISBURSALUNDO_LOAN_CHECKER','LOAN','DISBURSALUNDO',0),(242,'transaction_loan','REPAYMENT_LOAN_CHECKER','LOAN','REPAYMENT',0),(243,'transaction_loan','REPAYMENTINPAST_LOAN_CHECKER','LOAN','REPAYMENTINPAST',0),(244,'transaction_loan','ADJUST_LOAN_CHECKER','LOAN','ADJUST',0),(245,'transaction_loan','WAIVEINTERESTPORTION_LOAN_CHECKER','LOAN','WAIVEINTERESTPORTION',0),(246,'transaction_loan','WRITEOFF_LOAN_CHECKER','LOAN','WRITEOFF',0),(247,'transaction_loan','CLOSE_LOAN_CHECKER','LOAN','CLOSE',0),(248,'transaction_loan','CLOSEASRESCHEDULED_LOAN_CHECKER','LOAN','CLOSEASRESCHEDULED',0),(249,'transaction_savings','DEPOSIT_SAVINGSACCOUNT','SAVINGSACCOUNT','DEPOSIT',0),(250,'transaction_savings','DEPOSIT_SAVINGSACCOUNT_CHECKER','SAVINGSACCOUNT','DEPOSIT',0),(251,'transaction_savings','WITHDRAWAL_SAVINGSACCOUNT','SAVINGSACCOUNT','WITHDRAWAL',0),(252,'transaction_savings','WITHDRAWAL_SAVINGSACCOUNT_CHECKER','SAVINGSACCOUNT','WITHDRAWAL',0),(253,'transaction_savings','ACTIVATE_SAVINGSACCOUNT','SAVINGSACCOUNT','ACTIVATE',0),(254,'transaction_savings','ACTIVATE_SAVINGSACCOUNT_CHECKER','SAVINGSACCOUNT','ACTIVATE',0),(255,'transaction_savings','CALCULATEINTEREST_SAVINGSACCOUNT','SAVINGSACCOUNT','CALCULATEINTEREST',0),(256,'transaction_savings','CALCULATEINTEREST_SAVINGSACCOUNT_CHECKER','SAVINGSACCOUNT','CALCULATEINTEREST',0),(257,'accounting','CREATE_GLACCOUNT','GLACCOUNT','CREATE',0),(258,'accounting','UPDATE_GLACCOUNT','GLACCOUNT','UPDATE',0),(259,'accounting','DELETE_GLACCOUNT','GLACCOUNT','DELETE',0),(260,'accounting','CREATE_GLCLOSURE','GLCLOSURE','CREATE',0),(261,'accounting','UPDATE_GLCLOSURE','GLCLOSURE','UPDATE',0),(262,'accounting','DELETE_GLCLOSURE','GLCLOSURE','DELETE',0),(263,'accounting','CREATE_JOURNALENTRY','JOURNALENTRY','CREATE',0),(264,'accounting','REVERSE_JOURNALENTRY','JOURNALENTRY','REVERSE',0),(265,'report','READ_Active Loans - Details','Active Loans - Details','READ',0),(266,'report','READ_Active Loans - Summary','Active Loans - Summary','READ',0),(267,'report','READ_Active Loans by Disbursal Period','Active Loans by Disbursal Period','READ',0),(268,'report','READ_Active Loans in last installment','Active Loans in last installment','READ',0),(269,'report','READ_Active Loans in last installment Summary','Active Loans in last installment Summary','READ',0),(270,'report','READ_Active Loans Passed Final Maturity','Active Loans Passed Final Maturity','READ',0),(271,'report','READ_Active Loans Passed Final Maturity Summary','Active Loans Passed Final Maturity Summary','READ',0),(272,'report','READ_Aging Detail','Aging Detail','READ',0),(273,'report','READ_Aging Summary (Arrears in Months)','Aging Summary (Arrears in Months)','READ',0),(274,'report','READ_Aging Summary (Arrears in Weeks)','Aging Summary (Arrears in Weeks)','READ',0),(275,'report','READ_Balance Sheet','Balance Sheet','READ',0),(276,'report','READ_Branch Expected Cash Flow','Branch Expected Cash Flow','READ',0),(277,'report','READ_Client Listing','Client Listing','READ',0),(278,'report','READ_Client Loans Listing','Client Loans Listing','READ',0),(279,'report','READ_Expected Payments By Date - Basic','Expected Payments By Date - Basic','READ',0),(280,'report','READ_Expected Payments By Date - Formatted','Expected Payments By Date - Formatted','READ',0),(281,'report','READ_Funds Disbursed Between Dates Summary','Funds Disbursed Between Dates Summary','READ',0),(282,'report','READ_Funds Disbursed Between Dates Summary by Office','Funds Disbursed Between Dates Summary by Office','READ',0),(283,'report','READ_Income Statement','Income Statement','READ',0),(284,'report','READ_Loan Account Schedule','Loan Account Schedule','READ',0),(285,'report','READ_Loans Awaiting Disbursal','Loans Awaiting Disbursal','READ',0),(286,'report','READ_Loans Awaiting Disbursal Summary','Loans Awaiting Disbursal Summary','READ',0),(287,'report','READ_Loans Awaiting Disbursal Summary by Month','Loans Awaiting Disbursal Summary by Month','READ',0),(288,'report','READ_Loans Pending Approval','Loans Pending Approval','READ',0),(289,'report','READ_Obligation Met Loans Details','Obligation Met Loans Details','READ',0),(290,'report','READ_Obligation Met Loans Summary','Obligation Met Loans Summary','READ',0),(291,'report','READ_Portfolio at Risk','Portfolio at Risk','READ',0),(292,'report','READ_Portfolio at Risk by Branch','Portfolio at Risk by Branch','READ',0),(293,'report','READ_Rescheduled Loans','Rescheduled Loans','READ',0),(294,'report','READ_Trial Balance','Trial Balance','READ',0),(295,'report','READ_Written-Off Loans','Written-Off Loans','READ',0),(296,'datatable','CREATE_client additional data','client additional data','CREATE',1),(297,'datatable','CREATE_impact measurement','impact measurement','CREATE',1),(298,'datatable','CREATE_loan additional data','loan additional data','CREATE',1),(299,'datatable','READ_client additional data','client additional data','READ',1),(300,'datatable','READ_impact measurement','impact measurement','READ',1),(301,'datatable','READ_loan additional data','loan additional data','READ',1),(302,'datatable','UPDATE_client additional data','client additional data','UPDATE',1),(303,'datatable','UPDATE_impact measurement','impact measurement','UPDATE',1),(304,'datatable','UPDATE_loan additional data','loan additional data','UPDATE',1),(305,'datatable','DELETE_client additional data','client additional data','DELETE',1),(306,'datatable','DELETE_impact measurement','impact measurement','DELETE',1),(307,'datatable','DELETE_loan additional data','loan additional data','DELETE',1);
 /*!40000 ALTER TABLE `m_permission` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1333,6 +1347,7 @@ CREATE TABLE `m_portfolio_command_source` (
   `group_id` bigint(20) DEFAULT NULL,
   `client_id` bigint(20) DEFAULT NULL,
   `loan_id` bigint(20) DEFAULT NULL,
+  `savings_account_id` bigint(20) DEFAULT NULL,
   `api_get_url` varchar(100) NOT NULL,
   `resource_id` bigint(20) DEFAULT NULL,
   `subresource_id` bigint(20) DEFAULT NULL,
@@ -1356,7 +1371,7 @@ CREATE TABLE `m_portfolio_command_source` (
   KEY `loan_id` (`office_id`),
   CONSTRAINT `FK_m_checker_m_appuser` FOREIGN KEY (`checker_id`) REFERENCES `m_appuser` (`id`),
   CONSTRAINT `FK_m_maker_m_appuser` FOREIGN KEY (`maker_id`) REFERENCES `m_appuser` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1365,6 +1380,7 @@ CREATE TABLE `m_portfolio_command_source` (
 
 LOCK TABLES `m_portfolio_command_source` WRITE;
 /*!40000 ALTER TABLE `m_portfolio_command_source` DISABLE KEYS */;
+INSERT INTO `m_portfolio_command_source` VALUES (1,'CREATE','CLIENT',2,NULL,1,NULL,NULL,'/clients/template',1,NULL,'{\"officeId\":\"2\",\"firstname\":\"Test\",\"middlename\":\"\",\"lastname\":\"One\",\"fullname\":\"\",\"externalId\":\"\",\"dateFormat\":\"yyyy-MM-dd\",\"locale\":\"en\",\"joinedDate\":\"2011-02-01\"}',1,'2013-04-05 12:38:05',NULL,NULL,1),(2,'CREATE','LOAN',2,NULL,1,1,NULL,'/loans',1,NULL,'{\"clientId\":\"1\",\"dateFormat\":\"yyyy-MM-dd\",\"locale\":\"en\",\"productId\":\"1\",\"loanOfficerId\":\"2\",\"submittedOnDate\":\"2011-04-01\",\"loanPurposeId\":\"25\",\"principal\":\"1,000,000.00\",\"loanTermFrequency\":\"12\",\"loanTermFrequencyType\":\"2\",\"numberOfRepayments\":\"12\",\"repaymentEvery\":\"1\",\"repaymentFrequencyType\":\"2\",\"interestRatePerPeriod\":\"24\",\"interestRateFrequencyType\":\"3\",\"expectedDisbursementDate\":\"2011-04-01\",\"amortizationType\":\"1\",\"interestType\":\"1\",\"interestCalculationPeriodType\":\"1\",\"inArrearsTolerance\":\"\",\"transactionProcessingStrategyId\":\"2\",\"repaymentsStartingFromDate\":\"\",\"interestChargedFromDate\":\"\",\"charges\":[{\"chargeId\":\"1\",\"amount\":\"1,500\",\"dueDate\":\"2011-05-01\"},{\"chargeId\":\"1\",\"amount\":\"1,500\",\"dueDate\":\"2011-06-01\"},{\"chargeId\":\"1\",\"amount\":\"1,500\",\"dueDate\":\"2011-07-01\"},{\"chargeId\":\"1\",\"amount\":\"1,500\",\"dueDate\":\"2011-08-01\"},{\"chargeId\":\"1\",\"amount\":\"1,500\",\"dueDate\":\"2011-09-01\"},{\"chargeId\":\"1\",\"amount\":\"1,500\",\"dueDate\":\"2011-10-01\"},{\"chargeId\":\"1\",\"amount\":\"1,500\",\"dueDate\":\"2011-11-01\"},{\"chargeId\":\"1\",\"amount\":\"1,500\",\"dueDate\":\"2011-12-01\"},{\"chargeId\":\"1\",\"amount\":\"1,500\",\"dueDate\":\"2012-01-01\"},{\"chargeId\":\"1\",\"amount\":\"1,500\",\"dueDate\":\"2012-02-01\"},{\"chargeId\":\"1\",\"amount\":\"1,500\",\"dueDate\":\"2012-03-01\"},{\"chargeId\":\"1\",\"amount\":\"1,500\",\"dueDate\":\"2012-04-01\"}],\"collateral\":[{\"id\":\"\",\"type\":\"23\",\"description\":\" small description.\",\"value\":\"\"}]}',1,'2013-04-05 12:41:57',NULL,NULL,1),(3,'APPROVE','LOAN',2,NULL,1,1,NULL,'/loans/1',1,NULL,'{\"status\":{\"id\":200,\"code\":\"loanStatusType.approved\",\"value\":\"Approved\",\"pendingApproval\":false,\"waitingForDisbursal\":true,\"active\":false,\"closedObligationsMet\":false,\"closedWrittenOff\":false,\"closedRescheduled\":false,\"closed\":false,\"overpaid\":false},\"locale\":\"en\",\"dateFormat\":\"yyyy-MM-dd\",\"approvedOnDate\":\"2011-04-01\"}',1,'2013-04-05 12:42:09',NULL,NULL,1);
 /*!40000 ALTER TABLE `m_portfolio_command_source` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1380,6 +1396,8 @@ CREATE TABLE `m_product_loan` (
   `currency_code` varchar(3) NOT NULL,
   `currency_digits` smallint(5) NOT NULL,
   `principal_amount` decimal(19,6) NOT NULL,
+  `min_principal_amount` decimal(19,6) NOT NULL,
+  `max_principal_amount` decimal(19,6) NOT NULL,
   `arrearstolerance_amount` decimal(19,6) DEFAULT NULL,
   `name` varchar(100) NOT NULL,
   `description` varchar(500) DEFAULT NULL,
@@ -1401,7 +1419,7 @@ CREATE TABLE `m_product_loan` (
   KEY `FK_ltp_strategy` (`loan_transaction_strategy_id`),
   CONSTRAINT `FKA6A8A7D77240145` FOREIGN KEY (`fund_id`) REFERENCES `m_fund` (`id`),
   CONSTRAINT `FK_ltp_strategy` FOREIGN KEY (`loan_transaction_strategy_id`) REFERENCES `ref_loan_transaction_processing_strategy` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1410,6 +1428,7 @@ CREATE TABLE `m_product_loan` (
 
 LOCK TABLES `m_product_loan` WRITE;
 /*!40000 ALTER TABLE `m_product_loan` DISABLE KEYS */;
+INSERT INTO `m_product_loan` VALUES (1,'UGX',2,'1000000.000000','0.000000','1000000000000.000000',NULL,'Kampala Product (with cash accounting)','Typical Kampala loan product with cash accounting enabled for testing.',NULL,'24.000000',3,'24.000000',1,1,1,2,12,1,2,2);
 /*!40000 ALTER TABLE `m_product_loan` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1507,16 +1526,21 @@ CREATE TABLE `m_savings_account` (
   `client_id` bigint(20) DEFAULT NULL,
   `group_id` bigint(20) DEFAULT NULL,
   `product_id` bigint(20) DEFAULT NULL,
+  `status_enum` smallint(5) NOT NULL DEFAULT '300',
+  `activation_date` date DEFAULT NULL,
   `currency_code` varchar(3) NOT NULL,
   `currency_digits` smallint(5) NOT NULL,
-  `nominal_interest_rate_per_period` decimal(19,6) NOT NULL,
-  `nominal_interest_rate_period_frequency_enum` smallint(5) NOT NULL,
-  `annual_nominal_interest_rate` decimal(19,6) NOT NULL,
+  `nominal_annual_interest_rate` decimal(19,6) NOT NULL,
+  `interest_compounding_period_enum` smallint(5) NOT NULL,
+  `interest_calculation_type_enum` smallint(5) NOT NULL,
+  `interest_calculation_days_in_year_type_enum` smallint(5) NOT NULL,
   `min_required_opening_balance` decimal(19,6) DEFAULT NULL,
   `lockin_period_frequency` decimal(19,6) DEFAULT NULL,
   `lockin_period_frequency_enum` smallint(5) DEFAULT NULL,
+  `lockedin_until_date_derived` date DEFAULT NULL,
   `total_deposits_derived` decimal(19,6) DEFAULT NULL,
   `total_withdrawals_derived` decimal(19,6) DEFAULT NULL,
+  `total_interest_earned_derived` decimal(19,6) DEFAULT NULL,
   `total_interest_posted_derived` decimal(19,6) DEFAULT NULL,
   `account_balance_derived` decimal(19,6) NOT NULL DEFAULT '0.000000',
   PRIMARY KEY (`id`),
@@ -1554,6 +1578,10 @@ CREATE TABLE `m_savings_account_transaction` (
   `transaction_date` date NOT NULL,
   `amount` decimal(19,6) NOT NULL,
   `is_reversed` tinyint(1) NOT NULL,
+  `running_balance_derived` decimal(19,6) DEFAULT NULL,
+  `balance_number_of_days_derived` int(11) DEFAULT NULL,
+  `balance_end_date_derived` date DEFAULT NULL,
+  `cumulative_balance_derived` decimal(19,6) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `FKSAT0000000001` (`savings_account_id`),
   CONSTRAINT `FKSAT0000000001` FOREIGN KEY (`savings_account_id`) REFERENCES `m_savings_account` (`id`)
@@ -1582,8 +1610,10 @@ CREATE TABLE `m_savings_product` (
   `description` varchar(500) NOT NULL,
   `currency_code` varchar(3) NOT NULL,
   `currency_digits` smallint(5) NOT NULL,
-  `nominal_interest_rate_per_period` decimal(19,6) NOT NULL,
-  `nominal_interest_rate_period_frequency_enum` smallint(5) NOT NULL,
+  `nominal_annual_interest_rate` decimal(19,6) NOT NULL,
+  `interest_compounding_period_enum` smallint(5) NOT NULL,
+  `interest_calculation_type_enum` smallint(5) NOT NULL,
+  `interest_calculation_days_in_year_type_enum` smallint(5) NOT NULL,
   `min_required_opening_balance` decimal(19,6) DEFAULT NULL,
   `lockin_period_frequency` decimal(19,6) DEFAULT NULL,
   `lockin_period_frequency_enum` smallint(5) DEFAULT NULL,
@@ -1619,7 +1649,7 @@ CREATE TABLE `m_staff` (
   UNIQUE KEY `display_name` (`display_name`),
   KEY `FK_m_staff_m_office` (`office_id`),
   CONSTRAINT `FK_m_staff_m_office` FOREIGN KEY (`office_id`) REFERENCES `m_office` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1628,6 +1658,7 @@ CREATE TABLE `m_staff` (
 
 LOCK TABLES `m_staff` WRITE;
 /*!40000 ALTER TABLE `m_staff` DISABLE KEYS */;
+INSERT INTO `m_staff` VALUES (1,1,1,'CEDA HO','LoanOfficer','LoanOfficer, CEDA HO'),(2,1,2,'Kampala','LoanOfficer','LoanOfficer, Kampala');
 /*!40000 ALTER TABLE `m_staff` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1655,7 +1686,7 @@ CREATE TABLE `r_enum_value` (
 
 LOCK TABLES `r_enum_value` WRITE;
 /*!40000 ALTER TABLE `r_enum_value` DISABLE KEYS */;
-INSERT INTO `r_enum_value` VALUES ('amortization_method_enum',0,'Equal principle payments','Equal principle payments'),('amortization_method_enum',1,'Equal installments','Equal installments'),('interest_calculated_in_period_enum',0,'Daily','Daily'),('interest_calculated_in_period_enum',1,'Same as repayment period','Same as repayment period'),('interest_method_enum',0,'Declining Balance','Declining Balance'),('interest_method_enum',1,'Flat','Flat'),('interest_period_frequency_enum',2,'Per month','Per month'),('interest_period_frequency_enum',3,'Per year','Per year'),('loan_status_id',100,'Submitted and awaiting approval','Submitted and awaiting approval'),('loan_status_id',200,'Approved','Approved'),('loan_status_id',300,'Active','Active'),('loan_status_id',400,'Withdrawn by client','Withdrawn by client'),('loan_status_id',500,'Rejected','Rejected'),('loan_status_id',600,'Closed','Closed'),('loan_status_id',601,'Written-Off','Written-Off'),('loan_status_id',602,'Rescheduled','Rescheduled'),('loan_status_id',700,'Overpaid','Overpaid'),('loan_transaction_strategy_id',1,'mifos-standard-strategy','Mifos style'),('loan_transaction_strategy_id',2,'heavensfamily-strategy','Heavensfamily'),('loan_transaction_strategy_id',3,'creocore-strategy','Creocore'),('loan_transaction_strategy_id',4,'rbi-india-strategy','RBI (India)'),('processing_result_enum',0,'invalid','Invalid'),('processing_result_enum',1,'processed','Processed'),('processing_result_enum',2,'awaiting.approval','Awaiting Approval'),('processing_result_enum',3,'rejected','Rejected'),('repayment_period_frequency_enum',0,'Days','Days'),('repayment_period_frequency_enum',1,'Weeks','Weeks'),('repayment_period_frequency_enum',2,'Months','Months'),('term_period_frequency_enum',0,'Days','Days'),('term_period_frequency_enum',1,'Weeks','Weeks'),('term_period_frequency_enum',2,'Months','Months'),('term_period_frequency_enum',3,'Years','Years'),('transaction_type_enum',1,'Disbursement','Disbursement'),('transaction_type_enum',2,'Repayment','Repayment'),('transaction_type_enum',3,'Contra','Contra'),('transaction_type_enum',4,'Waive Interest','Waive Interest'),('transaction_type_enum',5,'Repayment At Disbursement','Repayment At Disbursement'),('transaction_type_enum',6,'Write-Off','Write-Off'),('transaction_type_enum',8,'Recovery Repayment','Recovery Repayment'),('transaction_type_enum',9,'Waive Charges','Waive Charges');
+INSERT INTO `r_enum_value` VALUES ('amortization_method_enum',0,'Equal principle payments','Equal principle payments'),('amortization_method_enum',1,'Equal installments','Equal installments'),('interest_calculated_in_period_enum',0,'Daily','Daily'),('interest_calculated_in_period_enum',1,'Same as repayment period','Same as repayment period'),('interest_method_enum',0,'Declining Balance','Declining Balance'),('interest_method_enum',1,'Flat','Flat'),('interest_period_frequency_enum',2,'Per month','Per month'),('interest_period_frequency_enum',3,'Per year','Per year'),('loan_status_id',100,'Submitted and awaiting approval','Submitted and awaiting approval'),('loan_status_id',200,'Approved','Approved'),('loan_status_id',300,'Active','Active'),('loan_status_id',400,'Withdrawn by client','Withdrawn by client'),('loan_status_id',500,'Rejected','Rejected'),('loan_status_id',600,'Closed','Closed'),('loan_status_id',601,'Written-Off','Written-Off'),('loan_status_id',602,'Rescheduled','Rescheduled'),('loan_status_id',700,'Overpaid','Overpaid'),('loan_transaction_strategy_id',1,'mifos-standard-strategy','Mifos style'),('loan_transaction_strategy_id',2,'heavensfamily-strategy','Heavensfamily'),('loan_transaction_strategy_id',3,'creocore-strategy','Creocore'),('loan_transaction_strategy_id',4,'rbi-india-strategy','RBI (India)'),('processing_result_enum',0,'invalid','Invalid'),('processing_result_enum',1,'processed','Processed'),('processing_result_enum',2,'awaiting.approval','Awaiting Approval'),('processing_result_enum',3,'rejected','Rejected'),('repayment_period_frequency_enum',0,'Days','Days'),('repayment_period_frequency_enum',1,'Weeks','Weeks'),('repayment_period_frequency_enum',2,'Months','Months'),('term_period_frequency_enum',0,'Days','Days'),('term_period_frequency_enum',1,'Weeks','Weeks'),('term_period_frequency_enum',2,'Months','Months'),('term_period_frequency_enum',3,'Years','Years'),('transaction_type_enum',1,'Disbursement','Disbursement'),('transaction_type_enum',2,'Repayment','Repayment'),('transaction_type_enum',3,'Contra','Contra'),('transaction_type_enum',4,'Waive Interest','Waive Interest'),('transaction_type_enum',5,'Repayment At Disbursement','Repayment At Disbursement'),('transaction_type_enum',6,'Write-Off','Write-Off'),('transaction_type_enum',7,'Marked for Rescheduling','Marked for Rescheduling'),('transaction_type_enum',8,'Recovery Repayment','Recovery Repayment'),('transaction_type_enum',9,'Waive Charges','Waive Charges'),('transaction_type_enum',10,'Apply Charges','Apply Charges'),('transaction_type_enum',11,'Apply Interest','Apply Interest');
 /*!40000 ALTER TABLE `r_enum_value` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1709,6 +1740,42 @@ CREATE TABLE `rpt_sequence` (
 LOCK TABLES `rpt_sequence` WRITE;
 /*!40000 ALTER TABLE `rpt_sequence` DISABLE KEYS */;
 /*!40000 ALTER TABLE `rpt_sequence` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `schema_version`
+--
+
+DROP TABLE IF EXISTS `schema_version`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `schema_version` (
+  `version_rank` int(11) NOT NULL,
+  `installed_rank` int(11) NOT NULL,
+  `version` varchar(50) NOT NULL,
+  `description` varchar(200) NOT NULL,
+  `type` varchar(20) NOT NULL,
+  `script` varchar(1000) NOT NULL,
+  `checksum` int(11) DEFAULT NULL,
+  `installed_by` varchar(100) NOT NULL,
+  `installed_on` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `execution_time` int(11) NOT NULL,
+  `success` tinyint(1) NOT NULL,
+  PRIMARY KEY (`version`),
+  KEY `schema_version_vr_idx` (`version_rank`),
+  KEY `schema_version_ir_idx` (`installed_rank`),
+  KEY `schema_version_s_idx` (`success`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `schema_version`
+--
+
+LOCK TABLES `schema_version` WRITE;
+/*!40000 ALTER TABLE `schema_version` DISABLE KEYS */;
+INSERT INTO `schema_version` VALUES (1,1,'1','mifosplatform-core-ddl-latest','SQL','V1__mifosplatform-core-ddl-latest.sql',-1957145051,'root','2013-04-05 11:23:24',365,1),(2,2,'2','mifosx-base-reference-data-utf8','SQL','V2__mifosx-base-reference-data-utf8.sql',1316484475,'root','2013-04-05 11:23:24',26,1),(3,3,'3','mifosx-permissions-and-authorisation-utf8','SQL','V3__mifosx-permissions-and-authorisation-utf8.sql',1922951887,'root','2013-04-05 11:23:24',26,1),(4,4,'4','mifosx-core-reports-utf8','SQL','V4__mifosx-core-reports-utf8.sql',-934709187,'root','2013-04-05 11:23:24',52,1),(5,5,'5','update-savings-product-and-account-tables','SQL','V5__update-savings-product-and-account-tables.sql',1171300485,'root','2013-04-05 11:23:24',22,1),(6,6,'6','add min max principal column to loan','SQL','V6__add_min_max_principal_column_to_loan.sql',21414779,'root','2013-04-05 11:23:24',25,1),(7,7,'7','remove read makerchecker permission','SQL','V7__remove_read_makerchecker_permission.sql',-335430825,'root','2013-04-05 11:23:24',3,1),(8,8,'8','deposit-transaction-permissions-if-they-exist','SQL','V8__deposit-transaction-permissions-if-they-exist.sql',-1507997551,'root','2013-04-05 11:23:24',2,1);
+/*!40000 ALTER TABLE `schema_version` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -1839,4 +1906,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2013-03-22 10:17:19
+-- Dump completed on 2013-04-05 12:42:54

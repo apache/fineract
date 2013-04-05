@@ -77,6 +77,8 @@ INSERT INTO `m_product_loan`
 `currency_code`,
 `currency_digits`,
 `principal_amount`,
+`min_principal_amount`,
+`max_principal_amount`,
 `arrearstolerance_amount`,
 `name`,
 `description`,
@@ -93,7 +95,7 @@ INSERT INTO `m_product_loan`
 `accounting_type`,
 `loan_transaction_strategy_id`)
 VALUES
-('UGX', 2, 1000000.000000, null , 'Kampala Product (with cash accounting)', 
+('UGX', 2, 1000000.000000, 0, 1000000000000.000000, null , 'Kampala Product (with cash accounting)', 
 'Typical Kampala loan product with cash accounting enabled for testing.', null , 
 24.000000, 3, 24.000000, 1, 1, 1, 2, 12, 1, 2, 2);
 
