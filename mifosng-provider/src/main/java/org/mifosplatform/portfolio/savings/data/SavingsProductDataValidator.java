@@ -8,6 +8,7 @@ import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.digits
 import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.interestCalculationDaysInYearTypeParamName;
 import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.interestCalculationTypeParamName;
 import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.interestCompoundingPeriodTypeParamName;
+import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.interestPostingPeriodTypeParamName;
 import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.lockinPeriodFrequencyParamName;
 import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.lockinPeriodFrequencyTypeParamName;
 import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.minRequiredOpeningBalanceParamName;
@@ -66,21 +67,27 @@ public class SavingsProductDataValidator {
         final Integer digitsAfterDecimal = fromApiJsonHelper.extractIntegerSansLocaleNamed(digitsAfterDecimalParamName, element);
         baseDataValidator.reset().parameter(digitsAfterDecimalParamName).value(digitsAfterDecimal).notNull().inMinMaxRange(0, 6);
 
-        final BigDecimal interestRate = fromApiJsonHelper.extractBigDecimalWithLocaleNamed(nominalAnnualInterestRateParamName, element);
-        baseDataValidator.reset().parameter(nominalAnnualInterestRateParamName).value(interestRate).notNull().zeroOrPositiveAmount();
+        final BigDecimal nominalAnnualInterestRate = fromApiJsonHelper.extractBigDecimalWithLocaleNamed(nominalAnnualInterestRateParamName, element);
+        baseDataValidator.reset().parameter(nominalAnnualInterestRateParamName).value(nominalAnnualInterestRate).notNull().zeroOrPositiveAmount();
 
         final Integer interestCompoundingPeriodType = fromApiJsonHelper.extractIntegerSansLocaleNamed(
                 interestCompoundingPeriodTypeParamName, element);
         baseDataValidator.reset().parameter(interestCompoundingPeriodTypeParamName).value(interestCompoundingPeriodType).notNull()
-                .inMinMaxRange(1, 8);
+                .isOneOfTheseValues(new Object[] { 1, 2, 3, 4, 5, 6, 7, 8 });
+
+        final Integer interestPostingPeriodType = fromApiJsonHelper.extractIntegerSansLocaleNamed(interestPostingPeriodTypeParamName,
+                element);
+        baseDataValidator.reset().parameter(interestPostingPeriodTypeParamName).value(interestPostingPeriodType).notNull()
+                .isOneOfTheseValues(new Object[] { 4, 5, 6, 7 });
 
         final Integer interestCalculationType = fromApiJsonHelper.extractIntegerSansLocaleNamed(interestCalculationTypeParamName, element);
-        baseDataValidator.reset().parameter(interestCalculationTypeParamName).value(interestCalculationType).notNull().inMinMaxRange(1, 2);
+        baseDataValidator.reset().parameter(interestCalculationTypeParamName).value(interestCalculationType).notNull()
+                .isOneOfTheseValues(new Object[] { 1, 2 });
 
         final Integer interestCalculationDaysInYearType = fromApiJsonHelper.extractIntegerSansLocaleNamed(
                 interestCalculationDaysInYearTypeParamName, element);
         baseDataValidator.reset().parameter(interestCalculationDaysInYearTypeParamName).value(interestCalculationDaysInYearType).notNull()
-                .inOfTheseValues(360, 365);
+                .isOneOfTheseValues(360, 365);
 
         if (this.fromApiJsonHelper.parameterExists(minRequiredOpeningBalanceParamName, element)) {
             final BigDecimal minOpeningBalance = fromApiJsonHelper.extractBigDecimalWithLocaleNamed(minRequiredOpeningBalanceParamName,
@@ -172,7 +179,7 @@ public class SavingsProductDataValidator {
             final Integer interestCalculationDaysInYearType = fromApiJsonHelper.extractIntegerSansLocaleNamed(
                     interestCalculationDaysInYearTypeParamName, element);
             baseDataValidator.reset().parameter(interestCalculationDaysInYearTypeParamName).value(interestCalculationDaysInYearType)
-                    .notNull().inOfTheseValues(360, 365);
+                    .notNull().isOneOfTheseValues(360, 365);
         }
 
         if (this.fromApiJsonHelper.parameterExists(lockinPeriodFrequencyParamName, element)) {

@@ -32,8 +32,8 @@ public class SavingsApiConstants {
     public static final String currencyCodeParamName = "currencyCode";
     public static final String digitsAfterDecimalParamName = "digitsAfterDecimal";
     public static final String nominalAnnualInterestRateParamName = "nominalAnnualInterestRate";
-
     public static final String interestCompoundingPeriodTypeParamName = "interestCompoundingPeriodType";
+    public static final String interestPostingPeriodTypeParamName = "interestPostingPeriodType";
     public static final String interestCalculationTypeParamName = "interestCalculationType";
     public static final String interestCalculationDaysInYearTypeParamName = "interestCalculationDaysInYearType";
     public static final String minRequiredOpeningBalanceParamName = "minRequiredOpeningBalance";
@@ -46,8 +46,9 @@ public class SavingsApiConstants {
 
     public static final Set<String> SAVINGS_PRODUCT_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(localeParamName,
             nameParamName, descriptionParamName, currencyCodeParamName, digitsAfterDecimalParamName, nominalAnnualInterestRateParamName,
-            interestCompoundingPeriodTypeParamName, interestCalculationTypeParamName, interestCalculationDaysInYearTypeParamName,
-            minRequiredOpeningBalanceParamName, lockinPeriodFrequencyParamName, lockinPeriodFrequencyTypeParamName));
+            interestCompoundingPeriodTypeParamName, interestPostingPeriodTypeParamName, interestCalculationTypeParamName,
+            interestCalculationDaysInYearTypeParamName, minRequiredOpeningBalanceParamName, lockinPeriodFrequencyParamName,
+            lockinPeriodFrequencyTypeParamName));
 
     /**
      * These parameters will match the class level parameters of
@@ -56,15 +57,17 @@ public class SavingsApiConstants {
      */
     public static final Set<String> SAVINGS_PRODUCT_RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(idParamName,
             nameParamName, descriptionParamName, "currency", digitsAfterDecimalParamName, nominalAnnualInterestRateParamName,
-            interestCompoundingPeriodTypeParamName, interestCalculationTypeParamName, interestCalculationDaysInYearTypeParamName,
-            minRequiredOpeningBalanceParamName, lockinPeriodFrequencyParamName, lockinPeriodFrequencyTypeParamName, "currencyOptions",
-            "interestRatePeriodFrequencyTypeOptions", "lockinPeriodFrequencyTypeOptions"));
+            interestCompoundingPeriodTypeParamName, interestPostingPeriodTypeParamName, interestCalculationTypeParamName,
+            interestCalculationDaysInYearTypeParamName, minRequiredOpeningBalanceParamName, lockinPeriodFrequencyParamName,
+            lockinPeriodFrequencyTypeParamName, "currencyOptions", "interestCompoundingPeriodTypeOptions",
+            "interestPostingPeriodTypeOptions", "interestCalculationTypeOptions", "interestCalculationDaysInYearTypeOptions",
+            "lockinPeriodFrequencyTypeOptions"));
 
     public static final Set<String> SAVINGS_ACCOUNT_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(localeParamName,
             dateFormatParamName, accountNoParamName, externalIdParamName, clientIdParamName, groupIdParamName, productIdParamName,
             activeParamName, activationDateParamName, nominalAnnualInterestRateParamName, interestCompoundingPeriodTypeParamName,
-            interestCalculationTypeParamName, interestCalculationDaysInYearTypeParamName, minRequiredOpeningBalanceParamName,
-            lockinPeriodFrequencyParamName, lockinPeriodFrequencyTypeParamName));
+            interestPostingPeriodTypeParamName, interestCalculationTypeParamName, interestCalculationDaysInYearTypeParamName,
+            minRequiredOpeningBalanceParamName, lockinPeriodFrequencyParamName, lockinPeriodFrequencyTypeParamName));
 
     /**
      * These parameters will match the class level parameters of
@@ -74,10 +77,10 @@ public class SavingsApiConstants {
     public static final Set<String> SAVINGS_ACCOUNT_RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(idParamName,
             accountNoParamName, externalIdParamName, statusParamName, activationDateParamName, clientIdParamName, "clientName",
             groupIdParamName, "groupName", "savingsProductId", "savingsProductName", "currency", nominalAnnualInterestRateParamName,
-            interestCompoundingPeriodTypeParamName, interestCalculationTypeParamName,
-            interestCalculationDaysInYearTypeParamName, minRequiredOpeningBalanceParamName, lockinPeriodFrequencyParamName,
-            lockinPeriodFrequencyTypeParamName, "summary", "transactions", "productOptions", "interestRatePeriodFrequencyTypeOptions",
-            "lockinPeriodFrequencyTypeOptions"));
+            interestCompoundingPeriodTypeParamName, interestCalculationTypeParamName, interestCalculationDaysInYearTypeParamName,
+            minRequiredOpeningBalanceParamName, lockinPeriodFrequencyParamName, lockinPeriodFrequencyTypeParamName, "summary",
+            "transactions", "productOptions", "interestCompoundingPeriodTypeOptions", "interestPostingPeriodTypeOptions",
+            "interestCalculationTypeOptions", "interestCalculationDaysInYearTypeOptions", "lockinPeriodFrequencyTypeOptions"));
 
     public static final Set<String> SAVINGS_ACCOUNT_TRANSACTION_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(
             localeParamName, dateFormatParamName, transactionDateParamName, transactionAmountParamName));

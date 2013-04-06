@@ -8,6 +8,7 @@ import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.portfolio.savings.domain.SavingsCompoundingInterestPeriodType;
 import org.mifosplatform.portfolio.savings.domain.SavingsInterestCalculationDaysInYearType;
 import org.mifosplatform.portfolio.savings.domain.SavingsInterestCalculationType;
+import org.mifosplatform.portfolio.savings.domain.SavingsInterestPostingPeriodType;
 import org.mifosplatform.portfolio.savings.domain.SavingsPeriodFrequencyType;
 import org.springframework.stereotype.Service;
 
@@ -37,6 +38,18 @@ public class SavingsDropdownReadPlatformServiceImpl implements SavingsDropdownRe
                 SavingsEnumerations.compoundingInterestPeriodType(SavingsCompoundingInterestPeriodType.BI_ANNUAL), //
                 SavingsEnumerations.compoundingInterestPeriodType(SavingsCompoundingInterestPeriodType.ANNUAL), //
                 SavingsEnumerations.compoundingInterestPeriodType(SavingsCompoundingInterestPeriodType.NO_COMPOUNDING_SIMPLE_INTEREST) //
+                );
+
+        return allowedOptions;
+    }
+
+    @Override
+    public Collection<EnumOptionData> retrieveInterestPostingPeriodTypeOptions() {
+        List<EnumOptionData> allowedOptions = Arrays.asList( //
+                SavingsEnumerations.interestPostingPeriodType(SavingsInterestPostingPeriodType.MONTHLY), //
+                SavingsEnumerations.interestPostingPeriodType(SavingsInterestPostingPeriodType.QUATERLY), //
+                SavingsEnumerations.interestPostingPeriodType(SavingsInterestPostingPeriodType.BI_ANNUAL), //
+                SavingsEnumerations.interestPostingPeriodType(SavingsInterestPostingPeriodType.ANNUAL) //
                 );
 
         return allowedOptions;

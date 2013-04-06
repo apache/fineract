@@ -33,22 +33,25 @@ import org.springframework.stereotype.Component;
 public class UnrecognizedQueryParamExceptionMapper implements ExceptionMapper<UnrecognizedQueryParamException> {
 
     @Override
-    public Response toResponse(UnrecognizedQueryParamException exception) {
+    public Response toResponse(final UnrecognizedQueryParamException exception) {
 
-        String parameterName = exception.getQueryParamKey();
-        String parameterValue = exception.getQueryParamValue();
+        final String parameterName = exception.getQueryParamKey();
+        final String parameterValue = exception.getQueryParamValue();
 
-        StringBuilder validationErrorCode = new StringBuilder("error.msg.query.parameter.value.unsupported");
-        StringBuilder defaultEnglishMessage = new StringBuilder("The query parameter ").append(parameterName)
-                .append(" has an unsupported value of: ").append(parameterValue);
-        ApiParameterError error = ApiParameterError.parameterError(validationErrorCode.toString(), defaultEnglishMessage.toString(),
-                parameterName, parameterName, parameterValue);
+        final StringBuilder validationErrorCode = new StringBuilder("error.msg.query.parameter.value.unsupported");
+        final StringBuilder defaultEnglishMessage = new StringBuilder("The query parameter ") //
+                .append(parameterName) //
+                .append(" has an unsupported value of: ") //
+                .append(parameterValue);
 
-        List<ApiParameterError> errors = new ArrayList<ApiParameterError>();
+        final ApiParameterError error = ApiParameterError.parameterError(validationErrorCode.toString(), defaultEnglishMessage.toString(),
+                parameterName, parameterName, parameterValue, exception.getSupportedParams());
+
+        final List<ApiParameterError> errors = new ArrayList<ApiParameterError>();
         errors.add(error);
 
-        ApiGlobalErrorResponse invalidParameterError = ApiGlobalErrorResponse.badClientRequest("validation.msg.validation.errors.exist",
-                "Validation errors exist.", errors);
+        final ApiGlobalErrorResponse invalidParameterError = ApiGlobalErrorResponse.badClientRequest(
+                "validation.msg.validation.errors.exist", "Validation errors exist.", errors);
 
         return Response.status(Status.BAD_REQUEST).entity(invalidParameterError).type(MediaType.APPLICATION_JSON).build();
     }

@@ -11,6 +11,7 @@ import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.digits
 import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.interestCalculationDaysInYearTypeParamName;
 import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.interestCalculationTypeParamName;
 import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.interestCompoundingPeriodTypeParamName;
+import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.interestPostingPeriodTypeParamName;
 import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.localeParamName;
 import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.lockinPeriodFrequencyParamName;
 import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.lockinPeriodFrequencyTypeParamName;
@@ -53,10 +54,17 @@ public class SavingsProduct extends AbstractPersistable<Long> {
      * The interest period is the span of time at the end of which savings in a
      * client’s account earn interest.
      * 
-     * A value from the {@link SavingsCompoundingInterestPeriodType} enumeration.
+     * A value from the {@link SavingsCompoundingInterestPeriodType}
+     * enumeration.
      */
     @Column(name = "interest_compounding_period_enum", nullable = false)
     private Integer interestCompoundingPeriodType;
+
+    /**
+     * A value from the {@link SavingsInterestPostingPeriodType} enumeration.
+     */
+    @Column(name = "interest_posting_period_enum", nullable = false)
+    private Integer interestPostingPeriodType;
 
     /**
      * A value from the {@link SavingsInterestCalculationType} enumeration.
@@ -71,23 +79,24 @@ public class SavingsProduct extends AbstractPersistable<Long> {
     @Column(name = "interest_calculation_days_in_year_type_enum", nullable = false)
     private Integer interestCalculationDaysInYearType;
 
-    @Column(name = "min_required_opening_balance", scale = 6, precision = 19, nullable = false)
+    @Column(name = "min_required_opening_balance", scale = 6, precision = 19, nullable = true)
     private BigDecimal minRequiredOpeningBalance;
 
-    @Column(name = "lockin_period_frequency", nullable = false)
+    @Column(name = "lockin_period_frequency", nullable = true)
     private Integer lockinPeriodFrequency;
 
-    @Column(name = "lockin_period_frequency_enum", nullable = false)
+    @Column(name = "lockin_period_frequency_enum", nullable = true)
     private Integer lockinPeriodFrequencyType;
 
     public static SavingsProduct createNew(final String name, final String description, final MonetaryCurrency currency,
-            final BigDecimal interestRate, final SavingsCompoundingInterestPeriodType interestPeriodType,
-            final SavingsInterestCalculationType interestCalculationType,
+            final BigDecimal interestRate, final SavingsCompoundingInterestPeriodType interestCompoundingPeriodType,
+            final SavingsInterestPostingPeriodType interestPostingPeriodType, final SavingsInterestCalculationType interestCalculationType,
             final SavingsInterestCalculationDaysInYearType interestCalculationDaysInYearType, final BigDecimal minRequiredOpeningBalance,
             final Integer lockinPeriodFrequency, final SavingsPeriodFrequencyType lockinPeriodFrequencyType) {
 
-        return new SavingsProduct(name, description, currency, interestRate, interestPeriodType, interestCalculationType,
-                interestCalculationDaysInYearType, minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType);
+        return new SavingsProduct(name, description, currency, interestRate, interestCompoundingPeriodType, interestPostingPeriodType,
+                interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance, lockinPeriodFrequency,
+                lockinPeriodFrequencyType);
     }
 
     protected SavingsProduct() {
@@ -96,7 +105,8 @@ public class SavingsProduct extends AbstractPersistable<Long> {
     }
 
     private SavingsProduct(final String name, final String description, final MonetaryCurrency currency, final BigDecimal interestRate,
-            final SavingsCompoundingInterestPeriodType interestPeriodType, final SavingsInterestCalculationType interestCalculationType,
+            final SavingsCompoundingInterestPeriodType interestCompoundingPeriodType,
+            final SavingsInterestPostingPeriodType interestPostingPeriodType, final SavingsInterestCalculationType interestCalculationType,
             final SavingsInterestCalculationDaysInYearType interestCalculationDaysInYearType, final BigDecimal minRequiredOpeningBalance,
             final Integer lockinPeriodFrequency, final SavingsPeriodFrequencyType lockinPeriodFrequencyType) {
 
@@ -105,7 +115,8 @@ public class SavingsProduct extends AbstractPersistable<Long> {
 
         this.currency = currency;
         this.nominalAnnualInterestRate = interestRate;
-        this.interestCompoundingPeriodType = interestPeriodType.getValue();
+        this.interestCompoundingPeriodType = interestCompoundingPeriodType.getValue();
+        this.interestPostingPeriodType = interestPostingPeriodType.getValue();
         this.interestCalculationType = interestCalculationType.getValue();
         this.interestCalculationDaysInYearType = interestCalculationDaysInYearType.getValue();
 
@@ -125,8 +136,24 @@ public class SavingsProduct extends AbstractPersistable<Long> {
         return this.currency.copy();
     }
 
-    public BigDecimal interestRate() {
+    public BigDecimal nominalAnnualInterestRate() {
         return Money.of(this.currency, this.nominalAnnualInterestRate).getAmount();
+    }
+
+    public SavingsCompoundingInterestPeriodType interestCompoundingPeriodType() {
+        return SavingsCompoundingInterestPeriodType.fromInt(this.interestCompoundingPeriodType);
+    }
+
+    public SavingsInterestPostingPeriodType interestPostingPeriodType() {
+        return SavingsInterestPostingPeriodType.fromInt(this.interestPostingPeriodType);
+    }
+
+    public SavingsInterestCalculationType interestCalculationType() {
+        return SavingsInterestCalculationType.fromInt(this.interestCalculationType);
+    }
+
+    public SavingsInterestCalculationDaysInYearType interestCalculationDaysInYearType() {
+        return SavingsInterestCalculationDaysInYearType.fromInt(this.interestCalculationDaysInYearType);
     }
 
     public BigDecimal minRequiredOpeningBalance() {
@@ -191,6 +218,12 @@ public class SavingsProduct extends AbstractPersistable<Long> {
             final Integer newValue = command.integerValueOfParameterNamed(interestCompoundingPeriodTypeParamName);
             actualChanges.put(interestCompoundingPeriodTypeParamName, newValue);
             this.interestCompoundingPeriodType = SavingsCompoundingInterestPeriodType.fromInt(newValue).getValue();
+        }
+
+        if (command.isChangeInIntegerParameterNamed(interestPostingPeriodTypeParamName, this.interestPostingPeriodType)) {
+            final Integer newValue = command.integerValueOfParameterNamed(interestPostingPeriodTypeParamName);
+            actualChanges.put(interestPostingPeriodTypeParamName, newValue);
+            this.interestPostingPeriodType = SavingsInterestPostingPeriodType.fromInt(newValue).getValue();
         }
 
         if (command.isChangeInIntegerParameterNamed(interestCalculationTypeParamName, this.interestCalculationType)) {

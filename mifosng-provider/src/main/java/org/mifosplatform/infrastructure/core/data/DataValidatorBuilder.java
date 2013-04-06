@@ -192,7 +192,7 @@ public class DataValidatorBuilder {
         return this;
     }
 
-    public DataValidatorBuilder inOfTheseValues(final Object... values) {
+    public DataValidatorBuilder isOneOfTheseValues(final Object... values) {
         if (value == null && ignoreNullValue) { return this; }
 
         if (value != null) {

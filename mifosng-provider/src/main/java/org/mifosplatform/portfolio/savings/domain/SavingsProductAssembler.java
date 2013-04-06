@@ -6,6 +6,7 @@ import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.digits
 import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.interestCalculationDaysInYearTypeParamName;
 import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.interestCalculationTypeParamName;
 import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.interestCompoundingPeriodTypeParamName;
+import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.interestPostingPeriodTypeParamName;
 import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.lockinPeriodFrequencyParamName;
 import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.lockinPeriodFrequencyTypeParamName;
 import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.minRequiredOpeningBalanceParamName;
@@ -32,10 +33,16 @@ public class SavingsProductAssembler {
 
         final BigDecimal interestRate = command.bigDecimalValueOfParameterNamed(nominalAnnualInterestRateParamName);
 
-        SavingsCompoundingInterestPeriodType interestPeriodType = null;
+        SavingsCompoundingInterestPeriodType interestCompoundingPeriodType = null;
         final Integer interestPeriodTypeValue = command.integerValueOfParameterNamed(interestCompoundingPeriodTypeParamName);
         if (interestPeriodTypeValue != null) {
-            interestPeriodType = SavingsCompoundingInterestPeriodType.fromInt(interestPeriodTypeValue);
+            interestCompoundingPeriodType = SavingsCompoundingInterestPeriodType.fromInt(interestPeriodTypeValue);
+        }
+
+        SavingsInterestPostingPeriodType interestPostingPeriodType = null;
+        final Integer interestPostingPeriodTypeValue = command.integerValueOfParameterNamed(interestPostingPeriodTypeParamName);
+        if (interestPostingPeriodTypeValue != null) {
+            interestPostingPeriodType = SavingsInterestPostingPeriodType.fromInt(interestPostingPeriodTypeValue);
         }
 
         SavingsInterestCalculationType interestCalculationType = null;
@@ -60,7 +67,8 @@ public class SavingsProductAssembler {
             lockinPeriodFrequencyType = SavingsPeriodFrequencyType.fromInt(lockinPeriodFrequencyTypeValue);
         }
 
-        return SavingsProduct.createNew(name, description, currency, interestRate, interestPeriodType, interestCalculationType,
+        return SavingsProduct.createNew(name, description, currency, interestRate, interestCompoundingPeriodType,
+                interestPostingPeriodType, interestCalculationType,
                 interestCalculationDaysInYearType, minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType);
     }
 }

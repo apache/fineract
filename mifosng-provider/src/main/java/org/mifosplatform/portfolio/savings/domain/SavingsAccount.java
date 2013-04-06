@@ -95,6 +95,12 @@ public class SavingsAccount extends AbstractPersistable<Long> {
     private Integer interestCompoundingPeriodType;
 
     /**
+     * A value from the {@link SavingsInterestPostingPeriodType} enumeration.
+     */
+    @Column(name = "interest_posting_period_enum", nullable = false)
+    private Integer interestPostingPeriodType;
+
+    /**
      * A value from the {@link SavingsInterestCalculationType} enumeration.
      */
     @Column(name = "interest_calculation_type_enum", nullable = false)
@@ -107,13 +113,13 @@ public class SavingsAccount extends AbstractPersistable<Long> {
     @Column(name = "interest_calculation_days_in_year_type_enum", nullable = false)
     private Integer interestCalculationDaysInYearType;
 
-    @Column(name = "min_required_opening_balance", scale = 6, precision = 19, nullable = false)
+    @Column(name = "min_required_opening_balance", scale = 6, precision = 19, nullable = true)
     private BigDecimal minRequiredOpeningBalance;
 
-    @Column(name = "lockin_period_frequency", nullable = false)
+    @Column(name = "lockin_period_frequency", nullable = true)
     private Integer lockinPeriodFrequency;
 
-    @Column(name = "lockin_period_frequency_enum", nullable = false)
+    @Column(name = "lockin_period_frequency_enum", nullable = true)
     private Integer lockinPeriodFrequencyType;
 
     /**
@@ -144,20 +150,22 @@ public class SavingsAccount extends AbstractPersistable<Long> {
 
     public static SavingsAccount createNewAccount(final Client client, final Group group, final SavingsProduct product,
             final String accountNo, final String externalId, final BigDecimal interestRate,
-            final SavingsCompoundingInterestPeriodType interestPeriodType, final SavingsInterestCalculationType interestCalculationType,
+            final SavingsCompoundingInterestPeriodType interestCompoundingPeriodType,
+            final SavingsInterestPostingPeriodType interestPostingPeriodType, final SavingsInterestCalculationType interestCalculationType,
             final SavingsInterestCalculationDaysInYearType interestCalculationDaysInYearType, final BigDecimal minRequiredOpeningBalance,
             final Integer lockinPeriodFrequency, final SavingsPeriodFrequencyType lockinPeriodFrequencyType) {
 
         final SavingsAccountStatusType status = SavingsAccountStatusType.UNACTIVATED;
         final LocalDate activationDate = null;
-        return new SavingsAccount(client, group, product, accountNo, externalId, status, activationDate, interestRate, interestPeriodType,
-                interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance, lockinPeriodFrequency,
-                lockinPeriodFrequencyType);
+        return new SavingsAccount(client, group, product, accountNo, externalId, status, activationDate, interestRate,
+                interestCompoundingPeriodType, interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType,
+                minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType);
     }
 
     private SavingsAccount(final Client client, final Group group, final SavingsProduct product, final String accountNo,
-            final String externalId, final SavingsAccountStatusType status, final LocalDate activationDate, final BigDecimal interestRate,
-            final SavingsCompoundingInterestPeriodType interestPeriodType, final SavingsInterestCalculationType interestCalculationType,
+            final String externalId, final SavingsAccountStatusType status, final LocalDate activationDate, final BigDecimal nominalAnnualInterestRate,
+            final SavingsCompoundingInterestPeriodType interestCompoundingPeriodType,
+            final SavingsInterestPostingPeriodType interestPostingPeriodType, final SavingsInterestCalculationType interestCalculationType,
             final SavingsInterestCalculationDaysInYearType interestCalculationDaysInYearType, final BigDecimal minRequiredOpeningBalance,
             final Integer lockinPeriodFrequency, final SavingsPeriodFrequencyType lockinPeriodFrequencyType) {
         this.client = client;
@@ -175,8 +183,9 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         if (activationDate != null) {
             this.activationDate = activationDate.toDate();
         }
-        this.nominalAnnualInterestRate = interestRate;
-        this.interestCompoundingPeriodType = interestPeriodType.getValue();
+        this.nominalAnnualInterestRate = nominalAnnualInterestRate;
+        this.interestCompoundingPeriodType = interestCompoundingPeriodType.getValue();
+        this.interestPostingPeriodType = interestPostingPeriodType.getValue();
         this.interestCalculationType = interestCalculationType.getValue();
         this.interestCalculationDaysInYearType = interestCalculationDaysInYearType.getValue();
         this.minRequiredOpeningBalance = minRequiredOpeningBalance;
@@ -266,13 +275,47 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         return lockedInUntilLocalDate;
     }
 
+    public void postInterest(final LocalDate interestPostingUpToDate) {
+
+        final SavingsInterestPostingPeriodType postingPeriodType = SavingsInterestPostingPeriodType.fromInt(this.interestPostingPeriodType);
+        List<LocalDate> postingLocalDates = determineInterestPostingDates(getActivationLocalDate(), interestPostingUpToDate,
+                postingPeriodType);
+
+        List<InterestCompoundingPeriodSummary> compoundingPeriods = calculateInterest(interestPostingUpToDate);
+
+        //
+        for (InterestCompoundingPeriodSummary interestCompoundingPeriodSummary : compoundingPeriods) {
+
+        }
+    }
+
+    private List<LocalDate> determineInterestPostingDates(final LocalDate activationLocalDate, final LocalDate interestPostingUpToDate,
+            final SavingsInterestPostingPeriodType postingPeriodType) {
+
+        List<LocalDate> postingDates = new ArrayList<LocalDate>();
+
+        LocalDate periodStartDate = activationLocalDate;
+        LocalDate periodEndDate = periodStartDate;
+
+        while (!periodStartDate.isAfter(interestPostingUpToDate) && !periodEndDate.isAfter(interestPostingUpToDate)) {
+
+            final LocalDate interestPostingLocalDate = determineInterestPostingPeriodEndDateFrom(periodStartDate, postingPeriodType);
+            postingDates.add(interestPostingLocalDate);
+
+            periodEndDate = interestPostingLocalDate;
+            periodStartDate = interestPostingLocalDate;
+        }
+
+        return postingDates;
+    }
+
     /**
      * All interest calculation based on END-OF-DAY-BALANCE.
      * 
      * Interest calculation is performed on-the-fly over all account
      * transactions.
      */
-    public void calculateInterest(final LocalDate interestCalculationEndDate) {
+    public List<InterestCompoundingPeriodSummary> calculateInterest(final LocalDate interestCalculationUpToDate) {
 
         // no openingBalance concept supported yet but probably will to allow
         // for migrations.
@@ -287,7 +330,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         final SavingsCompoundingInterestPeriodType compoundingPeriodType = SavingsCompoundingInterestPeriodType
                 .fromInt(this.interestCompoundingPeriodType);
         final List<LocalDateInterval> interestCompoundingPeriods = determineInterestCompoundingPeriods(getActivationLocalDate(),
-                interestCalculationEndDate, compoundingPeriodType);
+                interestCalculationUpToDate, compoundingPeriodType);
 
         // determine opening balance, daily interest rate to apply, interest
         // due, interest to compound for each period
@@ -295,6 +338,8 @@ public class SavingsAccount extends AbstractPersistable<Long> {
                 openingAccountBalance, this.nominalAnnualInterestRate, daysInYearType, interestCompoundingPeriods);
 
         this.summary.updateFromInterestPeriodSummaries(currency, compoundingPeriods);
+
+        return compoundingPeriods;
     }
 
     private List<InterestCompoundingPeriodSummary> determineInterestCompoundingPeriodSummaries(final Money openingAccountBalance,
@@ -384,6 +429,55 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         }
 
         return interestPeriods;
+    }
+
+    private LocalDate determineInterestPostingPeriodEndDateFrom(final LocalDate periodStartDate,
+            final SavingsInterestPostingPeriodType interestPostingPeriodType) {
+
+        LocalDate periodEndDate = DateUtils.getLocalDateOfTenant();
+
+        switch (interestPostingPeriodType) {
+            case INVALID:
+            break;
+            case MONTHLY:
+                // produce period end date on last day of current month
+                periodEndDate = periodStartDate.dayOfMonth().withMaximumValue();
+            break;
+            case QUATERLY:
+                // jan 1st to mar 31st, 1st apr to jun 30, jul 1st to sept 30,
+                // oct 1st to dec 31
+                int year = periodStartDate.getYearOfEra();
+                int monthofYear = periodStartDate.getMonthOfYear();
+                if (monthofYear <= 3) {
+                    periodEndDate = new DateTime().withDate(year, 3, 31).toLocalDate();
+                } else if (monthofYear <= 6) {
+                    periodEndDate = new DateTime().withDate(year, 6, 30).toLocalDate();
+                } else if (monthofYear <= 9) {
+                    periodEndDate = new DateTime().withDate(year, 9, 30).toLocalDate();
+                } else if (monthofYear <= 12) {
+                    periodEndDate = new DateTime().withDate(year, 12, 31).toLocalDate();
+                }
+            break;
+            case BI_ANNUAL:
+                // jan 1st to 30, jul 1st to dec 31
+                year = periodStartDate.getYearOfEra();
+                monthofYear = periodStartDate.getMonthOfYear();
+                if (monthofYear <= 6) {
+                    periodEndDate = new DateTime().withDate(year, 6, 30).toLocalDate();
+                } else if (monthofYear <= 12) {
+                    periodEndDate = new DateTime().withDate(year, 12, 31).toLocalDate();
+                }
+            break;
+            case ANNUAL:
+                periodEndDate = periodStartDate.monthOfYear().withMaximumValue();
+                periodEndDate = periodStartDate.dayOfMonth().withMaximumValue();
+            break;
+        }
+
+        // interest posting always occurs on next day after the period end date.
+        periodEndDate = periodEndDate.plusDays(1);
+
+        return periodEndDate;
     }
 
     private LocalDate determineInterestPeriodEndDateFrom(final LocalDate periodStartDate,

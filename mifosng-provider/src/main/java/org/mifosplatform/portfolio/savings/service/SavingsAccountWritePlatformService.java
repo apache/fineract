@@ -23,4 +23,6 @@ public interface SavingsAccountWritePlatformService {
     CommandProcessingResult withdrawal(Long savingsId, JsonCommand command);
 
     CommandProcessingResult calculateInterest(Long savingsId, JsonCommand command);
+
+    CommandProcessingResult postInterest(Long savingsId, JsonCommand command);
 }

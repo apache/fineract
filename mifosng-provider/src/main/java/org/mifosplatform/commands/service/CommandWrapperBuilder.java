@@ -717,8 +717,17 @@ public class CommandWrapperBuilder {
         this.actionName = "CALCULATEINTEREST";
         this.entityName = "SAVINGSACCOUNT";
         this.savingsId = accountId;
-        this.entityId = null;
+        this.entityId = accountId;
         this.href = "/savingsaccounts/" + accountId + "?command=calculateInterest";
+        return this;
+    }
+
+    public CommandWrapperBuilder savingsAccountInterestPosting(final Long accountId) {
+        this.actionName = "POSTINTEREST";
+        this.entityName = "SAVINGSACCOUNT";
+        this.savingsId = accountId;
+        this.entityId = accountId;
+        this.href = "/savingsaccounts/" + accountId + "?command=postInterest";
         return this;
     }
 

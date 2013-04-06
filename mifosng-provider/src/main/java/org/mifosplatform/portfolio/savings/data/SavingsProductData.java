@@ -22,6 +22,7 @@ public class SavingsProductData {
     private final CurrencyData currency;
     private final BigDecimal nominalAnnualInterestRate;
     private final EnumOptionData interestCompoundingPeriodType;
+    private final EnumOptionData interestPostingPeriodType;
     private final EnumOptionData interestCalculationType;
     private final EnumOptionData interestCalculationDaysInYearType;
     private final BigDecimal minRequiredOpeningBalance;
@@ -34,6 +35,8 @@ public class SavingsProductData {
     @SuppressWarnings("unused")
     private final Collection<EnumOptionData> interestCompoundingPeriodTypeOptions;
     @SuppressWarnings("unused")
+    private final Collection<EnumOptionData> interestPostingPeriodTypeOptions;
+    @SuppressWarnings("unused")
     private final Collection<EnumOptionData> interestCalculationTypeOptions;
     @SuppressWarnings("unused")
     private final Collection<EnumOptionData> interestCalculationDaysInYearTypeOptions;
@@ -41,8 +44,10 @@ public class SavingsProductData {
     private final Collection<EnumOptionData> lockinPeriodFrequencyTypeOptions;
 
     public static SavingsProductData template(final CurrencyData currency, final EnumOptionData interestCompoundingPeriodType,
-            final EnumOptionData interestCalculationType, final EnumOptionData interestCalculationDaysInYearType,
-            final Collection<CurrencyData> currencyOptions, final Collection<EnumOptionData> interestPeriodTypeOptions,
+            final EnumOptionData interestPostingPeriodType, final EnumOptionData interestCalculationType,
+            final EnumOptionData interestCalculationDaysInYearType, final Collection<CurrencyData> currencyOptions,
+            final Collection<EnumOptionData> interestCompoundingPeriodTypeOptions,
+            final Collection<EnumOptionData> interestPostingPeriodTypeOptions,
             final Collection<EnumOptionData> interestCalculationTypeOptions,
             final Collection<EnumOptionData> interestCalculationDaysInYearTypeOptions,
             final Collection<EnumOptionData> lockinPeriodFrequencyTypeOptions) {
@@ -56,9 +61,10 @@ public class SavingsProductData {
         final EnumOptionData lockinPeriodFrequencyType = null;
 
         return new SavingsProductData(id, name, description, currency, nominalAnnualInterestRate, interestCompoundingPeriodType,
-                interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance, lockinPeriodFrequency,
-                lockinPeriodFrequencyType, currencyOptions, interestPeriodTypeOptions, interestCalculationTypeOptions,
-                interestCalculationDaysInYearTypeOptions, lockinPeriodFrequencyTypeOptions);
+                interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance,
+                lockinPeriodFrequency, lockinPeriodFrequencyType, currencyOptions, interestCompoundingPeriodTypeOptions,
+                interestPostingPeriodTypeOptions, interestCalculationTypeOptions, interestCalculationDaysInYearTypeOptions,
+                lockinPeriodFrequencyTypeOptions);
     }
 
     /**
@@ -66,33 +72,39 @@ public class SavingsProductData {
      * {@link SavingsProductData} data with further template data for dropdowns.
      */
     public static SavingsProductData withTemplate(final SavingsProductData existingProduct, final Collection<CurrencyData> currencyOptions,
-            final Collection<EnumOptionData> interestPeriodTypeOptions, final Collection<EnumOptionData> interestCalculationTypeOptions,
+            final Collection<EnumOptionData> interestCompoundingPeriodTypeOptions,
+            final Collection<EnumOptionData> interestPostingPeriodTypeOptions,
+            final Collection<EnumOptionData> interestCalculationTypeOptions,
             final Collection<EnumOptionData> interestCalculationDaysInYearTypeOptions,
             final Collection<EnumOptionData> lockinPeriodFrequencyTypeOptions) {
 
         return new SavingsProductData(existingProduct.id, existingProduct.name, existingProduct.description, existingProduct.currency,
                 existingProduct.nominalAnnualInterestRate, existingProduct.interestCompoundingPeriodType,
-                existingProduct.interestCalculationType, existingProduct.interestCalculationDaysInYearType,
-                existingProduct.minRequiredOpeningBalance, existingProduct.lockinPeriodFrequency,
-                existingProduct.lockinPeriodFrequencyType, currencyOptions, interestPeriodTypeOptions, interestCalculationTypeOptions,
+                existingProduct.interestPostingPeriodType, existingProduct.interestCalculationType,
+                existingProduct.interestCalculationDaysInYearType, existingProduct.minRequiredOpeningBalance,
+                existingProduct.lockinPeriodFrequency, existingProduct.lockinPeriodFrequencyType, currencyOptions,
+                interestCompoundingPeriodTypeOptions, interestPostingPeriodTypeOptions, interestCalculationTypeOptions,
                 interestCalculationDaysInYearTypeOptions, lockinPeriodFrequencyTypeOptions);
     }
 
     public static SavingsProductData instance(final Long id, final String name, final String description, final CurrencyData currency,
             final BigDecimal nominalAnnualInterestRate, final EnumOptionData interestCompoundingPeriodType,
-            final EnumOptionData interestCalculationType, final EnumOptionData interestCalculationDaysInYearType,
-            final BigDecimal minRequiredOpeningBalance, final Integer lockinPeriodFrequency, final EnumOptionData lockinPeriodFrequencyType) {
+            final EnumOptionData interestPostingPeriodType, final EnumOptionData interestCalculationType,
+            final EnumOptionData interestCalculationDaysInYearType, final BigDecimal minRequiredOpeningBalance,
+            final Integer lockinPeriodFrequency, final EnumOptionData lockinPeriodFrequencyType) {
 
         final Collection<CurrencyData> currencyOptions = null;
-        final Collection<EnumOptionData> interestPeriodTypeOptions = null;
+        final Collection<EnumOptionData> interestCompoundingPeriodTypeOptions = null;
+        final Collection<EnumOptionData> interestPostingPeriodTypeOptions = null;
         final Collection<EnumOptionData> interestCalculationTypeOptions = null;
         final Collection<EnumOptionData> interestCalculationDaysInYearTypeOptions = null;
         final Collection<EnumOptionData> lockinPeriodFrequencyTypeOptions = null;
 
         return new SavingsProductData(id, name, description, currency, nominalAnnualInterestRate, interestCompoundingPeriodType,
-                interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance, lockinPeriodFrequency,
-                lockinPeriodFrequencyType, currencyOptions, interestPeriodTypeOptions, interestCalculationTypeOptions,
-                interestCalculationDaysInYearTypeOptions, lockinPeriodFrequencyTypeOptions);
+                interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance,
+                lockinPeriodFrequency, lockinPeriodFrequencyType, currencyOptions, interestCompoundingPeriodTypeOptions,
+                interestPostingPeriodTypeOptions, interestCalculationTypeOptions, interestCalculationDaysInYearTypeOptions,
+                lockinPeriodFrequencyTypeOptions);
     }
 
     public static SavingsProductData lookup(final Long id, final String name) {
@@ -101,6 +113,7 @@ public class SavingsProductData {
         final String description = null;
         final BigDecimal nominalAnnualInterestRate = null;
         final EnumOptionData interestCompoundingPeriodType = null;
+        final EnumOptionData interestPostingPeriodType = null;
         final EnumOptionData interestCalculationType = null;
         final EnumOptionData interestCalculationDaysInYearType = null;
         final BigDecimal minRequiredOpeningBalance = null;
@@ -108,23 +121,27 @@ public class SavingsProductData {
         final EnumOptionData lockinPeriodFrequencyType = null;
 
         final Collection<CurrencyData> currencyOptions = null;
-        final Collection<EnumOptionData> interestPeriodTypeOptions = null;
+        final Collection<EnumOptionData> interestCompoundingPeriodTypeOptions = null;
+        final Collection<EnumOptionData> interestPostingPeriodTypeOptions = null;
         final Collection<EnumOptionData> interestCalculationTypeOptions = null;
         final Collection<EnumOptionData> interestCalculationDaysInYearTypeOptions = null;
         final Collection<EnumOptionData> lockinPeriodFrequencyTypeOptions = null;
 
         return new SavingsProductData(id, name, description, currency, nominalAnnualInterestRate, interestCompoundingPeriodType,
-                interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance, lockinPeriodFrequency,
-                lockinPeriodFrequencyType, currencyOptions, interestPeriodTypeOptions, interestCalculationTypeOptions,
-                interestCalculationDaysInYearTypeOptions, lockinPeriodFrequencyTypeOptions);
+                interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance,
+                lockinPeriodFrequency, lockinPeriodFrequencyType, currencyOptions, interestCompoundingPeriodTypeOptions,
+                interestPostingPeriodTypeOptions, interestCalculationTypeOptions, interestCalculationDaysInYearTypeOptions,
+                lockinPeriodFrequencyTypeOptions);
     }
 
     private SavingsProductData(final Long id, final String name, final String description, final CurrencyData currency,
             final BigDecimal nominalAnnualInterestRate, final EnumOptionData interestCompoundingPeriodType,
-            final EnumOptionData interestCalculationType, final EnumOptionData interestCalculationDaysInYearType,
-            final BigDecimal minRequiredOpeningBalance, final Integer lockinPeriodFrequency,
-            final EnumOptionData lockinPeriodFrequencyType, final Collection<CurrencyData> currencyOptions,
-            final Collection<EnumOptionData> interestPeriodTypeOptions, final Collection<EnumOptionData> interestCalculationTypeOptions,
+            final EnumOptionData interestPostingPeriodType, final EnumOptionData interestCalculationType,
+            final EnumOptionData interestCalculationDaysInYearType, final BigDecimal minRequiredOpeningBalance,
+            final Integer lockinPeriodFrequency, final EnumOptionData lockinPeriodFrequencyType,
+            final Collection<CurrencyData> currencyOptions, final Collection<EnumOptionData> interestCompoundingPeriodTypeOptions,
+            final Collection<EnumOptionData> interestPostingPeriodTypeOptions,
+            final Collection<EnumOptionData> interestCalculationTypeOptions,
             final Collection<EnumOptionData> interestCalculationDaysInYearTypeOptions,
             final Collection<EnumOptionData> lockinPeriodFrequencyTypeOptions) {
         this.id = id;
@@ -133,6 +150,7 @@ public class SavingsProductData {
         this.currency = currency;
         this.nominalAnnualInterestRate = nominalAnnualInterestRate;
         this.interestCompoundingPeriodType = interestCompoundingPeriodType;
+        this.interestPostingPeriodType = interestPostingPeriodType;
         this.interestCalculationType = interestCalculationType;
         this.interestCalculationDaysInYearType = interestCalculationDaysInYearType;
         this.minRequiredOpeningBalance = minRequiredOpeningBalance;
@@ -140,7 +158,8 @@ public class SavingsProductData {
         this.lockinPeriodFrequencyType = lockinPeriodFrequencyType;
 
         this.currencyOptions = currencyOptions;
-        this.interestCompoundingPeriodTypeOptions = interestPeriodTypeOptions;
+        this.interestCompoundingPeriodTypeOptions = interestCompoundingPeriodTypeOptions;
+        this.interestPostingPeriodTypeOptions = interestPostingPeriodTypeOptions;
         this.interestCalculationTypeOptions = interestCalculationTypeOptions;
         this.interestCalculationDaysInYearTypeOptions = interestCalculationDaysInYearTypeOptions;
         this.lockinPeriodFrequencyTypeOptions = lockinPeriodFrequencyTypeOptions;

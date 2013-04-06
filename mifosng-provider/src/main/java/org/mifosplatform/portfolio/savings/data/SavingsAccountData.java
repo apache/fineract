@@ -15,7 +15,6 @@ import org.mifosplatform.organisation.monetary.data.CurrencyData;
 /**
  * Immutable data object representing a savings account.
  */
-@SuppressWarnings("unused")
 public class SavingsAccountData {
 
     private final Long id;
@@ -32,6 +31,7 @@ public class SavingsAccountData {
     private final CurrencyData currency;
     private final BigDecimal nominalAnnualInterestRate;
     private final EnumOptionData interestCompoundingPeriodType;
+    private final EnumOptionData interestPostingPeriodType;
     private final EnumOptionData interestCalculationType;
     private final EnumOptionData interestCalculationDaysInYearType;
     private final BigDecimal minRequiredOpeningBalance;
@@ -40,39 +40,49 @@ public class SavingsAccountData {
 
     // associations
     private final SavingsAccountSummaryData summary;
+    @SuppressWarnings("unused")
     private final Collection<SavingsAccountTransactionData> transactions;
 
     // template
+    @SuppressWarnings("unused")
     private final Collection<SavingsProductData> productOptions;
+    @SuppressWarnings("unused")
     private final Collection<EnumOptionData> interestCompoundingPeriodTypeOptions;
+    @SuppressWarnings("unused")
+    private final Collection<EnumOptionData> interestPostingPeriodTypeOptions;
+    @SuppressWarnings("unused")
     private final Collection<EnumOptionData> interestCalculationTypeOptions;
+    @SuppressWarnings("unused")
     private final Collection<EnumOptionData> interestCalculationDaysInYearTypeOptions;
+    @SuppressWarnings("unused")
     private final Collection<EnumOptionData> lockinPeriodFrequencyTypeOptions;
 
     public static SavingsAccountData instance(final Long id, final String accountNo, final String externalId,
             final SavingsAccountStatusEnumData status, final LocalDate activationDate, final Long groupId, final String groupName,
             final Long clientId, final String clientName, final Long productId, final String productName, final CurrencyData currency,
             final BigDecimal interestRate, final EnumOptionData interestCompoundingPeriodType,
-            final EnumOptionData interestCalculationType, final EnumOptionData interestCalculationDaysInYearType,
-            final BigDecimal minRequiredOpeningBalance, final Integer lockinPeriodFrequency,
-            final EnumOptionData lockinPeriodFrequencyType, final SavingsAccountSummaryData summary) {
+            final EnumOptionData interestPostingPeriodType, final EnumOptionData interestCalculationType,
+            final EnumOptionData interestCalculationDaysInYearType, final BigDecimal minRequiredOpeningBalance,
+            final Integer lockinPeriodFrequency, final EnumOptionData lockinPeriodFrequencyType, final SavingsAccountSummaryData summary) {
 
         final Collection<SavingsProductData> productOptions = null;
         final Collection<EnumOptionData> interestCompoundingPeriodTypeOptions = null;
+        final Collection<EnumOptionData> interestPostingPeriodTypeOptions = null;
         final Collection<EnumOptionData> interestCalculationTypeOptions = null;
         final Collection<EnumOptionData> interestCalculationDaysInYearTypeOptions = null;
         final Collection<EnumOptionData> lockinPeriodFrequencyTypeOptions = null;
         final Collection<SavingsAccountTransactionData> transactions = null;
 
         return new SavingsAccountData(id, accountNo, externalId, status, activationDate, groupId, groupName, clientId, clientName,
-                productId, productName, currency, interestRate, interestCompoundingPeriodType, interestCalculationType,
-                interestCalculationDaysInYearType, minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType, summary,
-                productOptions, interestCompoundingPeriodTypeOptions, interestCalculationTypeOptions,
-                interestCalculationDaysInYearTypeOptions, lockinPeriodFrequencyTypeOptions, transactions);
+                productId, productName, currency, interestRate, interestCompoundingPeriodType, interestPostingPeriodType,
+                interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance, lockinPeriodFrequency,
+                lockinPeriodFrequencyType, summary, productOptions, interestCompoundingPeriodTypeOptions, interestPostingPeriodTypeOptions,
+                interestCalculationTypeOptions, interestCalculationDaysInYearTypeOptions, lockinPeriodFrequencyTypeOptions, transactions);
     }
 
     public static SavingsAccountData withTemplateOptions(final SavingsAccountData account,
             final Collection<SavingsProductData> productOptions, final Collection<EnumOptionData> interestCompoundingPeriodTypeOptions,
+            final Collection<EnumOptionData> interestPostingPeriodTypeOptions,
             final Collection<EnumOptionData> interestCalculationTypeOptions,
             final Collection<EnumOptionData> interestCalculationDaysInYearTypeOptions,
             final Collection<EnumOptionData> lockinPeriodFrequencyTypeOptions, final Collection<SavingsAccountTransactionData> transactions) {
@@ -80,10 +90,10 @@ public class SavingsAccountData {
         return new SavingsAccountData(account.id, account.accountNo, account.externalId, account.status, account.activationDate,
                 account.groupId, account.groupName, account.clientId, account.clientName, account.savingsProductId,
                 account.savingsProductName, account.currency, account.nominalAnnualInterestRate, account.interestCompoundingPeriodType,
-                account.interestCalculationType, account.interestCalculationDaysInYearType, account.minRequiredOpeningBalance,
-                account.lockinPeriodFrequency, account.lockinPeriodFrequencyType, account.summary, productOptions,
-                interestCompoundingPeriodTypeOptions, interestCalculationTypeOptions, interestCalculationDaysInYearTypeOptions,
-                lockinPeriodFrequencyTypeOptions, transactions);
+                account.interestPostingPeriodType, account.interestCalculationType, account.interestCalculationDaysInYearType,
+                account.minRequiredOpeningBalance, account.lockinPeriodFrequency, account.lockinPeriodFrequencyType, account.summary,
+                productOptions, interestCompoundingPeriodTypeOptions, interestPostingPeriodTypeOptions, interestCalculationTypeOptions,
+                interestCalculationDaysInYearTypeOptions, lockinPeriodFrequencyTypeOptions, transactions);
     }
 
     public static SavingsAccountData withClientTemplate(final Long clientId, final String clientName, final Long groupId,
@@ -99,6 +109,7 @@ public class SavingsAccountData {
         final CurrencyData currency = null;
         final BigDecimal nominalAnnualInterestRate = null;
         final EnumOptionData interestPeriodType = null;
+        final EnumOptionData interestPostingPeriodType = null;
         final EnumOptionData interestCalculationType = null;
         final EnumOptionData interestCalculationDaysInYearType = null;
         final BigDecimal minRequiredOpeningBalance = null;
@@ -106,27 +117,29 @@ public class SavingsAccountData {
         final EnumOptionData lockinPeriodFrequencyType = null;
         final SavingsAccountSummaryData summary = null;
         final Collection<SavingsProductData> productOptions = null;
-        final Collection<CurrencyData> currencyOptions = null;
         final Collection<EnumOptionData> interestCompoundingPeriodTypeOptions = null;
+        final Collection<EnumOptionData> interestPostingPeriodTypeOptions = null;
         final Collection<EnumOptionData> interestCalculationTypeOptions = null;
         final Collection<EnumOptionData> interestCalculationDaysInYearTypeOptions = null;
         final Collection<EnumOptionData> lockinPeriodFrequencyTypeOptions = null;
         final Collection<SavingsAccountTransactionData> transactions = null;
 
         return new SavingsAccountData(id, accountNo, externalId, status, activationDate, groupId, groupName, clientId, clientName,
-                productId, productName, currency, nominalAnnualInterestRate, interestPeriodType, interestCalculationType,
-                interestCalculationDaysInYearType, minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType, summary,
-                productOptions, interestCompoundingPeriodTypeOptions, interestCalculationTypeOptions,
-                interestCalculationDaysInYearTypeOptions, lockinPeriodFrequencyTypeOptions, transactions);
+                productId, productName, currency, nominalAnnualInterestRate, interestPeriodType, interestPostingPeriodType,
+                interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance, lockinPeriodFrequency,
+                lockinPeriodFrequencyType, summary, productOptions, interestCompoundingPeriodTypeOptions, interestPostingPeriodTypeOptions,
+                interestCalculationTypeOptions, interestCalculationDaysInYearTypeOptions, lockinPeriodFrequencyTypeOptions, transactions);
     }
 
     private SavingsAccountData(final Long id, final String accountNo, final String externalId, final SavingsAccountStatusEnumData status,
             final LocalDate activationDate, final Long groupId, final String groupName, final Long clientId, final String clientName,
             final Long productId, final String productName, final CurrencyData currency, final BigDecimal nominalAnnualInterestRate,
-            final EnumOptionData interestPeriodType, final EnumOptionData interestCalculationType,
-            final EnumOptionData interestCalculationDaysInYearType, final BigDecimal minRequiredOpeningBalance,
-            final Integer lockinPeriodFrequency, final EnumOptionData lockinPeriodFrequencyType, final SavingsAccountSummaryData summary,
+            final EnumOptionData interestPeriodType, final EnumOptionData interestPostingPeriodType,
+            final EnumOptionData interestCalculationType, final EnumOptionData interestCalculationDaysInYearType,
+            final BigDecimal minRequiredOpeningBalance, final Integer lockinPeriodFrequency,
+            final EnumOptionData lockinPeriodFrequencyType, final SavingsAccountSummaryData summary,
             final Collection<SavingsProductData> productOptions, final Collection<EnumOptionData> interestCompoundingPeriodTypeOptions,
+            final Collection<EnumOptionData> interestPostingPeriodTypeOptions,
             final Collection<EnumOptionData> interestCalculationTypeOptions,
             final Collection<EnumOptionData> interestCalculationDaysInYearTypeOptions,
             final Collection<EnumOptionData> lockinPeriodFrequencyTypeOptions, final Collection<SavingsAccountTransactionData> transactions) {
@@ -144,6 +157,7 @@ public class SavingsAccountData {
         this.currency = currency;
         this.nominalAnnualInterestRate = nominalAnnualInterestRate;
         this.interestCompoundingPeriodType = interestPeriodType;
+        this.interestPostingPeriodType = interestPostingPeriodType;
         this.interestCalculationType = interestCalculationType;
         this.interestCalculationDaysInYearType = interestCalculationDaysInYearType;
         this.minRequiredOpeningBalance = minRequiredOpeningBalance;
@@ -153,6 +167,7 @@ public class SavingsAccountData {
 
         this.productOptions = productOptions;
         this.interestCompoundingPeriodTypeOptions = interestCompoundingPeriodTypeOptions;
+        this.interestPostingPeriodTypeOptions = interestPostingPeriodTypeOptions;
         this.interestCalculationTypeOptions = interestCalculationTypeOptions;
         this.interestCalculationDaysInYearTypeOptions = interestCalculationDaysInYearTypeOptions;
         this.lockinPeriodFrequencyTypeOptions = lockinPeriodFrequencyTypeOptions;

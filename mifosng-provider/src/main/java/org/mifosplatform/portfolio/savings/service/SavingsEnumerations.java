@@ -13,6 +13,7 @@ import org.mifosplatform.portfolio.savings.domain.SavingsAccountTransactionType;
 import org.mifosplatform.portfolio.savings.domain.SavingsCompoundingInterestPeriodType;
 import org.mifosplatform.portfolio.savings.domain.SavingsInterestCalculationDaysInYearType;
 import org.mifosplatform.portfolio.savings.domain.SavingsInterestCalculationType;
+import org.mifosplatform.portfolio.savings.domain.SavingsInterestPostingPeriodType;
 import org.mifosplatform.portfolio.savings.domain.SavingsPeriodFrequencyType;
 
 public class SavingsEnumerations {
@@ -106,6 +107,40 @@ public class SavingsEnumerations {
                         SavingsAccountStatusType.CLOSED.getCode(), "Closed", type.isUnactivated(), type.isActive(), type.isClosed());
             break;
         }
+        return optionData;
+    }
+
+    public static EnumOptionData interestPostingPeriodType(final Integer type) {
+        return interestPostingPeriodType(SavingsInterestPostingPeriodType.fromInt(type));
+    }
+
+    public static EnumOptionData interestPostingPeriodType(final SavingsInterestPostingPeriodType type) {
+
+        final String codePrefix = "savings.interest.posting.period.";
+        EnumOptionData optionData = new EnumOptionData(SavingsInterestPostingPeriodType.INVALID.getValue().longValue(),
+                SavingsInterestPostingPeriodType.INVALID.getCode(), "Invalid");
+
+        switch (type) {
+            case INVALID:
+            break;
+            case MONTHLY:
+                optionData = new EnumOptionData(SavingsInterestPostingPeriodType.MONTHLY.getValue().longValue(), codePrefix
+                        + SavingsInterestPostingPeriodType.MONTHLY.getCode(), "Monthly");
+            break;
+            case QUATERLY:
+                optionData = new EnumOptionData(SavingsInterestPostingPeriodType.QUATERLY.getValue().longValue(), codePrefix
+                        + SavingsInterestPostingPeriodType.QUATERLY.getCode(), "Quarterly");
+            break;
+            case BI_ANNUAL:
+                optionData = new EnumOptionData(SavingsInterestPostingPeriodType.BI_ANNUAL.getValue().longValue(), codePrefix
+                        + SavingsInterestPostingPeriodType.BI_ANNUAL.getCode(), "Semi-Annual");
+            break;
+            case ANNUAL:
+                optionData = new EnumOptionData(SavingsInterestPostingPeriodType.ANNUAL.getValue().longValue(), codePrefix
+                        + SavingsInterestPostingPeriodType.ANNUAL.getCode(), "Annually");
+            break;
+        }
+
         return optionData;
     }
 

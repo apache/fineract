@@ -35,6 +35,7 @@ import org.mifosplatform.portfolio.savings.data.SavingsProductData;
 import org.mifosplatform.portfolio.savings.domain.SavingsCompoundingInterestPeriodType;
 import org.mifosplatform.portfolio.savings.domain.SavingsInterestCalculationDaysInYearType;
 import org.mifosplatform.portfolio.savings.domain.SavingsInterestCalculationType;
+import org.mifosplatform.portfolio.savings.domain.SavingsInterestPostingPeriodType;
 import org.mifosplatform.portfolio.savings.service.SavingsDropdownReadPlatformService;
 import org.mifosplatform.portfolio.savings.service.SavingsEnumerations;
 import org.mifosplatform.portfolio.savings.service.SavingsProductReadPlatformService;
@@ -146,8 +147,11 @@ public class SavingsProductsApiResource {
 
     private SavingsProductData handleTemplateRelatedData(final SavingsProductData savingsProduct) {
 
-        final EnumOptionData interestPeriodType = SavingsEnumerations
+        final EnumOptionData interestCompoundingPeriodType = SavingsEnumerations
                 .compoundingInterestPeriodType(SavingsCompoundingInterestPeriodType.DAILY);
+
+        final EnumOptionData interestPostingPeriodType = SavingsEnumerations
+                .interestPostingPeriodType(SavingsInterestPostingPeriodType.MONTHLY);
 
         final EnumOptionData interestCalculationType = SavingsEnumerations
                 .interestCalculationType(SavingsInterestCalculationType.DAILY_BALANCE);
@@ -161,8 +165,11 @@ public class SavingsProductsApiResource {
             currency = new ArrayList<CurrencyData>(currencyOptions).get(0);
         }
 
-        final Collection<EnumOptionData> interestPeriodTypeOptions = this.dropdownReadPlatformService
+        final Collection<EnumOptionData> interestCompoundingPeriodTypeOptions = this.dropdownReadPlatformService
                 .retrieveCompoundingInterestPeriodTypeOptions();
+
+        final Collection<EnumOptionData> interestPostingPeriodTypeOptions = this.dropdownReadPlatformService
+                .retrieveInterestPostingPeriodTypeOptions();
 
         final Collection<EnumOptionData> interestCalculationTypeOptions = this.dropdownReadPlatformService
                 .retrieveInterestCalculationTypeOptions();
@@ -175,12 +182,14 @@ public class SavingsProductsApiResource {
 
         SavingsProductData savingsProductToReturn = null;
         if (savingsProduct != null) {
-            savingsProductToReturn = SavingsProductData.withTemplate(savingsProduct, currencyOptions, interestPeriodTypeOptions,
-                    interestCalculationTypeOptions, interestCalculationDaysInYearTypeOptions, lockinPeriodFrequencyTypeOptions);
+            savingsProductToReturn = SavingsProductData.withTemplate(savingsProduct, currencyOptions, interestCompoundingPeriodTypeOptions,
+                    interestPostingPeriodTypeOptions, interestCalculationTypeOptions, interestCalculationDaysInYearTypeOptions,
+                    lockinPeriodFrequencyTypeOptions);
         } else {
-            savingsProductToReturn = SavingsProductData.template(currency, interestPeriodType, interestCalculationType,
-                    interestCalculationDaysInYearType, currencyOptions, interestPeriodTypeOptions, interestCalculationTypeOptions,
-                    interestCalculationDaysInYearTypeOptions, lockinPeriodFrequencyTypeOptions);
+            savingsProductToReturn = SavingsProductData.template(currency, interestCompoundingPeriodType, interestPostingPeriodType,
+                    interestCalculationType, interestCalculationDaysInYearType, currencyOptions, interestCompoundingPeriodTypeOptions,
+                    interestPostingPeriodTypeOptions, interestCalculationTypeOptions, interestCalculationDaysInYearTypeOptions,
+                    lockinPeriodFrequencyTypeOptions);
         }
 
         return savingsProductToReturn;

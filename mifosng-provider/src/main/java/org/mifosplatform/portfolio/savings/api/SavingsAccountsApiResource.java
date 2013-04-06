@@ -141,6 +141,7 @@ public class SavingsAccountsApiResource {
         Collection<SavingsAccountTransactionData> transactions = null;
         Collection<SavingsProductData> productOptions = null;
         Collection<EnumOptionData> interestCompoundingPeriodTypeOptions = null;
+        Collection<EnumOptionData> interestCompoundingPostingTypeOptions = null;
         Collection<EnumOptionData> interestCalculationTypeOptions = null;
         Collection<EnumOptionData> interestCalculationDaysInYearTypeOptions = null;
         Collection<EnumOptionData> lockinPeriodFrequencyTypeOptions = null;
@@ -166,12 +167,14 @@ public class SavingsAccountsApiResource {
         if (settings.isTemplate()) {
             productOptions = this.savingsProductReadPlatformService.retrieveAllForLookup();
             interestCompoundingPeriodTypeOptions = this.dropdownReadPlatformService.retrieveCompoundingInterestPeriodTypeOptions();
+            interestCompoundingPostingTypeOptions = this.dropdownReadPlatformService.retrieveInterestPostingPeriodTypeOptions();
             interestCalculationTypeOptions = this.dropdownReadPlatformService.retrieveInterestCalculationTypeOptions();
             lockinPeriodFrequencyTypeOptions = this.dropdownReadPlatformService.retrieveLockinPeriodFrequencyTypeOptions();
         }
 
         return SavingsAccountData.withTemplateOptions(savingsAccount, productOptions, interestCompoundingPeriodTypeOptions,
-                interestCalculationTypeOptions, interestCalculationDaysInYearTypeOptions, lockinPeriodFrequencyTypeOptions, transactions);
+                interestCompoundingPostingTypeOptions, interestCalculationTypeOptions, interestCalculationDaysInYearTypeOptions,
+                lockinPeriodFrequencyTypeOptions, transactions);
     }
 
     @PUT
@@ -204,11 +207,15 @@ public class SavingsAccountsApiResource {
         } else if (is(commandParam, "calculateInterest")) {
             final CommandWrapper commandRequest = builder.savingsAccountInterestCalculation(accountId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        } else if (is(commandParam, "postInterest")) {
+            final CommandWrapper commandRequest = builder.savingsAccountInterestPosting(accountId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         }
 
         if (result == null) {
-            // FIXME - KW - handle blank command param use case
-            throw new UnrecognizedQueryParamException("command", commandParam);
+            //
+            throw new UnrecognizedQueryParamException("command", commandParam, new Object[] { "activate", "calculateInterest",
+                    "postInterest" });
         }
 
         return this.toApiJsonSerializer.serialize(result);

@@ -19,6 +19,7 @@ import org.mifosplatform.portfolio.savings.data.SavingsProductData;
 import org.mifosplatform.portfolio.savings.domain.SavingsCompoundingInterestPeriodType;
 import org.mifosplatform.portfolio.savings.domain.SavingsInterestCalculationDaysInYearType;
 import org.mifosplatform.portfolio.savings.domain.SavingsInterestCalculationType;
+import org.mifosplatform.portfolio.savings.domain.SavingsInterestPostingPeriodType;
 import org.mifosplatform.portfolio.savings.domain.SavingsPeriodFrequencyType;
 import org.mifosplatform.portfolio.savings.exception.SavingsProductNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -82,6 +83,7 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
             sqlBuilder.append("curr.display_symbol as currencyDisplaySymbol, ");
             sqlBuilder.append("sp.nominal_annual_interest_rate as nominalAnnualInterestRate, ");
             sqlBuilder.append("sp.interest_compounding_period_enum as compoundingInterestPeriodType, ");
+            sqlBuilder.append("sp.interest_posting_period_enum as interestPostingPeriodType, ");
             sqlBuilder.append("sp.interest_calculation_type_enum as interestCalculationType, ");
             sqlBuilder.append("sp.interest_calculation_days_in_year_type_enum as interestCalculationDaysInYearType, ");
             sqlBuilder.append("sp.min_required_opening_balance as minRequiredOpeningBalance, ");
@@ -118,6 +120,10 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
                     .compoundingInterestPeriodType(SavingsCompoundingInterestPeriodType.fromInt(JdbcSupport.getInteger(rs,
                             "compoundingInterestPeriodType")));
 
+            SavingsInterestPostingPeriodType interestPostingPeriod = SavingsInterestPostingPeriodType.fromInt(JdbcSupport.getInteger(rs,
+                    "interestPostingPeriodType"));
+            EnumOptionData interestPostingPeriodType = SavingsEnumerations.interestPostingPeriodType(interestPostingPeriod);
+
             EnumOptionData interestCalculationType = SavingsEnumerations.interestCalculationType(SavingsInterestCalculationType
                     .fromInt(JdbcSupport.getInteger(rs, "interestCalculationType")));
 
@@ -140,8 +146,8 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
             }
 
             return SavingsProductData.instance(id, name, description, currency, nominalAnnualInterestRate, compoundingInterestPeriodType,
-                    interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance, lockinPeriodFrequency,
-                    lockinPeriodFrequencyType);
+                    interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance,
+                    lockinPeriodFrequency, lockinPeriodFrequencyType);
         }
     }
 
