@@ -6,8 +6,8 @@ See VERSIONING (https://github.com/openMF/mifosx/blob/master/VERSIONING.md) for 
 Releases
 ===============
 
-05 April 2013 - 0.11.1.beta
-05 April 2013 - 0.11.0.beta
+ - 05 April 2013 - 0.11.1.beta
+ - 05 April 2013 - 0.11.0.beta
 
 0.11.1.beta
 ==========
