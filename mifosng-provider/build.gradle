@@ -323,7 +323,7 @@ task migrateTenantDB<<{
 	
     flyway.url= "jdbc:mysql://localhost:3306/$tenantDbName"
     flyway.locations= [
-	    "filesystem:../mifosng-db/migrations/core_db",
+	    "filesystem:mifosng-db/migrations/core_db",
     ]
 
     flywayMigrate.execute()
@@ -339,7 +339,7 @@ task showTenantDBInfo<<{
 	
     flyway.url= "jdbc:mysql://localhost:3306/$tenantDbName"
     flyway.locations= [
-            "filesystem:../mifosng-db/migrations/core_db",
+            "filesystem:.mifosng-db/migrations/core_db",
     ]
     flywayInfo.execute()
 }
@@ -355,7 +355,7 @@ task migrateTenantListDB<<{
 	
     flyway.url= "jdbc:mysql://localhost:3306/$tenantsDbName"
     flyway.locations= [
-            "filesystem:../mifosng-db/migrations/list_db",
+            "filesystem:mifosng-db/migrations/list_db",
     ]
 
     flywayMigrate.execute()
@@ -371,7 +371,7 @@ task showTenantListDBInfo<<{
     
     flyway.url= "jdbc:mysql://localhost:3306/$tenantsDbName"
     flyway.locations= [
-    	"filesystem:../mifosng-db/migrations/list_db",
+    	"filesystem:mifosng-db/migrations/list_db",
     ]
     flywayInfo.execute()
 }
