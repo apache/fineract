@@ -9446,7 +9446,7 @@ Request Body:
 						<dd>Specifies the order in which data is returned.</dd>
 						<dt>genericResultSet</dt>
 						<dd>
-							<span>optional</span>
+							<span>optional, defaults to false</span>
 						</dd>
 						<dd>If 'true' an optimised JSON format is returned suitable for tabular display of data.
 							This format is used by the default data tables UI functionality.</dd>
@@ -11041,6 +11041,12 @@ GET https://DomainName/api/v1/reports
 							specific report and how it has been configured. R_officeId is an
 							example parameter name.</dd>
 						<dd>Note: the prefix R_ stands for Reporting</dd>
+						<dt>genericResultSet</dt>
+						<dd>
+							<span>optional, defaults to true</span>
+						</dd>
+						<dd>If 'true' an optimised JSON format is returned suitable for tabular display of data.
+						<dd>If 'false' a simple JSON format is returned.
 						<dt>parameterType</dt>
 						<dd>
 							optional, <span>The only valid value is 'true'. If any
