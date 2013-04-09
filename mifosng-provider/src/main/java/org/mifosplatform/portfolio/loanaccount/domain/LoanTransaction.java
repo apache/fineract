@@ -24,6 +24,7 @@ import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.organisation.monetary.domain.Money;
 import org.mifosplatform.portfolio.loanaccount.data.LoanTransactionData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanTransactionEnumData;
+import org.mifosplatform.portfolio.loanaccount.data.PaymentDetailData;
 import org.mifosplatform.portfolio.loanproduct.service.LoanEnumerations;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
@@ -38,6 +39,10 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
     @ManyToOne(optional = false)
     @JoinColumn(name = "loan_id", nullable = false)
     private Loan loan;
+
+    @ManyToOne(optional = true)
+    @JoinColumn(name = "payment_detail_id", nullable = true)
+    private PaymentDetail paymentDetail;
 
     @Column(name = "transaction_type_enum", nullable = false)
     private final Integer typeOf;
@@ -70,16 +75,16 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
         this.typeOf = null;
     }
 
-    public static LoanTransaction disbursement(final Money amount, final LocalDate disbursementDate) {
-        return new LoanTransaction(null, LoanTransactionType.DISBURSEMENT, amount.getAmount(), disbursementDate);
+    public static LoanTransaction disbursement(final Money amount, final PaymentDetail paymentDetail, final LocalDate disbursementDate) {
+        return new LoanTransaction(null, LoanTransactionType.DISBURSEMENT, paymentDetail, amount.getAmount(), disbursementDate);
     }
 
-    public static LoanTransaction repayment(final Money amount, final LocalDate paymentDate) {
-        return new LoanTransaction(null, LoanTransactionType.REPAYMENT, amount.getAmount(), paymentDate);
+    public static LoanTransaction repayment(final Money amount, final PaymentDetail paymentDetail, final LocalDate paymentDate) {
+        return new LoanTransaction(null, LoanTransactionType.REPAYMENT, paymentDetail, amount.getAmount(), paymentDate);
     }
 
-    public static LoanTransaction repaymentAtDisbursement(final Money amount, final LocalDate paymentDate) {
-        return new LoanTransaction(null, LoanTransactionType.REPAYMENT_AT_DISBURSEMENT, amount.getAmount(), paymentDate);
+    public static LoanTransaction repaymentAtDisbursement(final Money amount, final PaymentDetail paymentDetail, final LocalDate paymentDate) {
+        return new LoanTransaction(null, LoanTransactionType.REPAYMENT_AT_DISBURSEMENT, paymentDetail, amount.getAmount(), paymentDate);
     }
 
     public static LoanTransaction waiver(final Loan loan, final Money waived, final LocalDate waiveDate) {
@@ -142,6 +147,15 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
     private LoanTransaction(final Loan loan, final LoanTransactionType type, final BigDecimal amount, final LocalDate date) {
         this.loan = loan;
         this.typeOf = type.getValue();
+        this.amount = amount;
+        this.dateOf = date.toDateMidnight().toDate();
+    }
+
+    private LoanTransaction(final Loan loan, final LoanTransactionType type, final PaymentDetail paymentDetail, final BigDecimal amount,
+            final LocalDate date) {
+        this.loan = loan;
+        this.typeOf = type.getValue();
+        this.paymentDetail = paymentDetail;
         this.amount = amount;
         this.dateOf = date.toDateMidnight().toDate();
     }
@@ -315,7 +329,11 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
 
     public LoanTransactionData toData(final CurrencyData currencyData) {
         final LoanTransactionEnumData transactionType = LoanEnumerations.transactionType(this.typeOf);
-        return new LoanTransactionData(this.getId(), transactionType, currencyData, getTransactionDate(), this.amount,
+        PaymentDetailData paymentDetailData = null;
+        if (this.paymentDetail != null) {
+            paymentDetailData = paymentDetail.toData();
+        }
+        return new LoanTransactionData(this.getId(), transactionType, paymentDetailData, currencyData, getTransactionDate(), this.amount,
                 this.principalPortion, this.interestPortion, this.feeChargesPortion, this.penaltyChargesPortion);
     }
 

@@ -24,6 +24,8 @@ public class LoanTransactionData {
 
     @SuppressWarnings("unused")
     private final CurrencyData currency;
+    @SuppressWarnings("unused")
+    private final PaymentDetailData paymentDetailData;
 
     @SuppressWarnings("unused")
     private final BigDecimal amount;
@@ -36,11 +38,12 @@ public class LoanTransactionData {
     @SuppressWarnings("unused")
     private final BigDecimal penaltyChargesPortion;
 
-    public LoanTransactionData(final Long id, final LoanTransactionEnumData transactionType, final CurrencyData currency,
-            final LocalDate date, final BigDecimal amount, final BigDecimal principalPortion, final BigDecimal interestPortion,
-            final BigDecimal feeChargesPortion, final BigDecimal penaltyChargesPortion) {
+    public LoanTransactionData(final Long id, final LoanTransactionEnumData transactionType, final PaymentDetailData paymentDetailData,
+            final CurrencyData currency, final LocalDate date, final BigDecimal amount, final BigDecimal principalPortion,
+            final BigDecimal interestPortion, final BigDecimal feeChargesPortion, final BigDecimal penaltyChargesPortion) {
         this.id = id;
         this.type = transactionType;
+        this.paymentDetailData = paymentDetailData;
         this.currency = currency;
         this.date = date;
         this.amount = amount;

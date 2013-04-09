@@ -46,6 +46,17 @@ public class LoanTransactionEnumData {
         return this.id;
     }
 
+    /**
+     * Returns true if the transaction involves either a payment (disbursement)
+     * or a receipt (repayments, repayments during disbursement etc)
+     * 
+     * @return
+     */
+    public boolean isPaymentOrReceipt() {
+        if (isDisbursement() || isRepayment() || isRepaymentAtDisbursement() || isRecoveryRepayment()) { return true; }
+        return false;
+    }
+
     public boolean isDisbursement() {
         return this.disbursement;
     }

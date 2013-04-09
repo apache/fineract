@@ -21,6 +21,7 @@ import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
 import org.mifosplatform.infrastructure.core.exception.InvalidJsonException;
 import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
+import org.mifosplatform.portfolio.loanaccount.domain.PaymentType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -47,7 +48,7 @@ public final class LoanEventApiJsonValidator {
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         final Set<String> disbursementParameters = new HashSet<String>(Arrays.asList("actualDisbursementDate", "note", "locale",
-                "dateFormat"));
+                "dateFormat", "paymentTypeId", "accountNumber", "checkNumber", "routingCode", "receiptNumber", "bankNumber"));
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, disbursementParameters);
@@ -62,6 +63,8 @@ public final class LoanEventApiJsonValidator {
         final String note = fromApiJsonHelper.extractStringNamed("note", element);
         baseDataValidator.reset().parameter("note").value(note).notExceedingLengthOf(1000);
 
+        validatePaymentDetails(baseDataValidator, element);
+
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
@@ -69,11 +72,11 @@ public final class LoanEventApiJsonValidator {
 
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
-        final Set<String> disbursementParameters = new HashSet<String>(Arrays.asList("transactionDate", "transactionAmount", "note",
-                "locale", "dateFormat"));
+        final Set<String> transactionParameters = new HashSet<String>(Arrays.asList("transactionDate", "transactionAmount", "note",
+                "locale", "dateFormat", "paymentTypeId", "accountNumber", "checkNumber", "routingCode", "receiptNumber", "bankNumber"));
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, disbursementParameters);
+        fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, transactionParameters);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan.transaction");
@@ -88,7 +91,26 @@ public final class LoanEventApiJsonValidator {
         final String note = fromApiJsonHelper.extractStringNamed("note", element);
         baseDataValidator.reset().parameter("note").value(note).notExceedingLengthOf(1000);
 
+        validatePaymentDetails(baseDataValidator, element);
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
+    }
+
+    /**
+     * @param baseDataValidator
+     * @param element
+     */
+    private void validatePaymentDetails(final DataValidatorBuilder baseDataValidator, final JsonElement element) {
+        // Validate all string payment detail fields for max length
+        final Integer paymentTypeId = fromApiJsonHelper.extractIntegerWithLocaleNamed("paymentTypeId", element);
+        baseDataValidator.reset().parameter("paymentTypeId").value(paymentTypeId)
+                .inMinMaxRange(PaymentType.getMinValue(), PaymentType.getMaxValue());
+        final Set<String> paymentDetailParameters = new HashSet<String>(Arrays.asList("accountNumber", "checkNumber", "routingCode",
+                "receiptNumber", "bankNumber"));
+        for (String paymentDetailParameterName : paymentDetailParameters) {
+            final String paymentDetailParameterValue = fromApiJsonHelper.extractStringNamed(paymentDetailParameterName, element);
+            baseDataValidator.reset().parameter(paymentDetailParameterName).value(paymentDetailParameterValue).ignoreIfNull()
+                    .notExceedingLengthOf(50);
+        }
     }
 
     public void validateTransactionWithNoAmount(final String json) {

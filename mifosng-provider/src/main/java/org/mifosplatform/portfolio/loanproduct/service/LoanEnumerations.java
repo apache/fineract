@@ -10,6 +10,7 @@ import org.mifosplatform.portfolio.loanaccount.data.LoanStatusEnumData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanTransactionEnumData;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanStatus;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanTransactionType;
+import org.mifosplatform.portfolio.loanaccount.domain.PaymentType;
 import org.mifosplatform.portfolio.loanproduct.domain.AccountingRuleType;
 import org.mifosplatform.portfolio.loanproduct.domain.AmortizationMethod;
 import org.mifosplatform.portfolio.loanproduct.domain.InterestCalculationPeriodMethod;
@@ -195,6 +196,13 @@ public class LoanEnumerations {
             break;
         }
         return optionData;
+    }
+
+    public static EnumOptionData paymentType(final Integer id) {
+        PaymentType paymentType = PaymentType.fromInt(id);
+        EnumOptionData enumOptionData = new EnumOptionData(paymentType.getValue().longValue(), paymentType.getCode(), paymentType
+                .getValue().toString());
+        return enumOptionData;
     }
 
     public static LoanTransactionEnumData transactionType(final Integer id) {
