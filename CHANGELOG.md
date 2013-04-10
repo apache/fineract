@@ -6,8 +6,16 @@ See VERSIONING (https://github.com/openMF/mifosx/blob/master/VERSIONING.md) for 
 Releases
 ===============
 
- 1. 05 April 2013 - 0.11.1.beta
- 1. 05 April 2013 - 0.11.0.beta
+1. 10 April 2013 - 0.11.2.beta
+1. 05 April 2013 - 0.11.1.beta
+1. 05 April 2013 - 0.11.0.beta
+
+0.11.2.beta
+==========
+Bug Release.
+  - https://mifosforge.jira.com/browse/MIFOSX-292 - Retrieving an existing loan product does not return the correct value for decimalPlaces
+  - https://mifosforge.jira.com/browse/MIFOSX-293 - Calculating the Loan Schedule does not use the correct value for decimalPlaces
+  - https://mifosforge.jira.com/browse/MIFOSX-294 - Updating loan products min/max principal details incorrectly results in error message relating to interestRatePerPeriod
 
 0.11.1.beta
 ==========
