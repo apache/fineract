@@ -37,8 +37,8 @@ public class LoanProductData {
     // terms
     private final CurrencyData currency;
     private final BigDecimal principal;
-    private BigDecimal minPrincipal;
-    private BigDecimal maxPrincipal;
+    private final BigDecimal minPrincipal;
+    private final BigDecimal maxPrincipal;
     private final Integer numberOfRepayments;
     private final Integer minNumberOfRepayments;
     private final Integer maxNumberOfRepayments;
@@ -109,12 +109,13 @@ public class LoanProductData {
         final Collection<ChargeData> charges = null;
         final EnumOptionData accountingType = null;
 
-        return new LoanProductData(id, name, description, currency, principal, minPrincipal, maxPrincipal, tolerance, numberOfRepayments, minNumberOfRepayments, maxNumberOfRepayments, repaymentEvery,
-                interestRatePerPeriod, minInterestRatePerPeriod, maxInterestRatePerPeriod, annualInterestRate, repaymentFrequencyType, interestRateFrequencyType, amortizationType,
+        return new LoanProductData(id, name, description, currency, principal, minPrincipal, maxPrincipal, tolerance, numberOfRepayments,
+                minNumberOfRepayments, maxNumberOfRepayments, repaymentEvery, interestRatePerPeriod, minInterestRatePerPeriod,
+                maxInterestRatePerPeriod, annualInterestRate, repaymentFrequencyType, interestRateFrequencyType, amortizationType,
                 interestType, interestCalculationPeriodType, fundId, fundName, transactionProcessingStrategyId,
                 transactionProcessingStrategyName, charges, accountingType);
     }
-    
+
     public static LoanProductData lookupWithCurrency(final Long id, final String name, final CurrencyData currency) {
         final String description = null;
         final BigDecimal principal = null;
@@ -141,17 +142,18 @@ public class LoanProductData {
         final Collection<ChargeData> charges = null;
         final EnumOptionData accountingType = null;
 
-        return new LoanProductData(id, name, description, currency, principal, minPrincipal, maxPrincipal, tolerance, numberOfRepayments, minNumberOfRepayments, maxNumberOfRepayments, repaymentEvery,
-                interestRatePerPeriod, minInterestRatePerPeriod, maxInterestRatePerPeriod, annualInterestRate, repaymentFrequencyType, interestRateFrequencyType, amortizationType,
+        return new LoanProductData(id, name, description, currency, principal, minPrincipal, maxPrincipal, tolerance, numberOfRepayments,
+                minNumberOfRepayments, maxNumberOfRepayments, repaymentEvery, interestRatePerPeriod, minInterestRatePerPeriod,
+                maxInterestRatePerPeriod, annualInterestRate, repaymentFrequencyType, interestRateFrequencyType, amortizationType,
                 interestType, interestCalculationPeriodType, fundId, fundName, transactionProcessingStrategyId,
                 transactionProcessingStrategyName, charges, accountingType);
-    }    
+    }
 
     public static LoanProductData sensibleDefaultsForNewLoanProductCreation() {
         final Long id = null;
         final String name = null;
         final String description = null;
-        final CurrencyData currency = CurrencyData.blank();
+        final CurrencyData currency = null;
         final BigDecimal principal = null;
         final BigDecimal minPrincipal = null;
         final BigDecimal maxPrincipal = null;
@@ -202,11 +204,19 @@ public class LoanProductData {
             final EnumOptionData interestCalculationPeriodType, final Long fundId, final String fundName,
             final Long transactionProcessingStrategyId, final String transactionProcessingStrategyName,
             final Collection<ChargeData> charges, final EnumOptionData accountingType) {
-        
+
         this.id = id;
         this.name = name;
         this.description = description;
-        this.currency = currency;
+        if (currency == null) {
+            if (this.currencyOptions != null && this.currencyOptions.size() == 1) {
+                this.currency = new ArrayList<CurrencyData>(this.currencyOptions).get(0);
+            } else {
+                this.currency = CurrencyData.blank();
+            }
+        } else {
+            this.currency = currency;
+        }
         this.principal = principal;
         this.minPrincipal = minPrincipal;
         this.maxPrincipal = maxPrincipal;
@@ -282,17 +292,13 @@ public class LoanProductData {
 
         this.chargeOptions = chargeOptions;
         this.currencyOptions = currencyOptions;
-        if (this.currencyOptions != null && this.currencyOptions.size() == 1) {
-            this.currency = new ArrayList<CurrencyData>(this.currencyOptions).get(0);
-        } else {
-            this.currency = productData.currency;
-        }
+        this.currency = productData.currency;
         this.fundOptions = fundOptions;
         this.transactionProcessingStrategyOptions = transactionStrategyOptions;
         if (this.transactionProcessingStrategyOptions != null && this.transactionProcessingStrategyOptions.size() == 1) {
             final List<TransactionProcessingStrategyData> listOfOptions = new ArrayList<TransactionProcessingStrategyData>(
                     this.transactionProcessingStrategyOptions);
-            
+
             this.transactionProcessingStrategyId = listOfOptions.get(0).id();
             this.transactionProcessingStrategyName = listOfOptions.get(0).name();
         } else {
@@ -379,7 +385,7 @@ public class LoanProductData {
     public BigDecimal getMinPrincipal() {
         return this.minPrincipal;
     }
-    
+
     public BigDecimal getMaxPrincipal() {
         return this.maxPrincipal;
     }
@@ -451,8 +457,9 @@ public class LoanProductData {
     public Collection<ChargeData> getChargeOptions() {
         return chargeOptions;
     }
+
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         LoanProductData loanProductData = (LoanProductData) obj;
         return loanProductData.id.equals(this.id);
     }
