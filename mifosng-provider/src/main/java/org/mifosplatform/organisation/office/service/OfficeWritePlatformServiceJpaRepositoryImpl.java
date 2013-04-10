@@ -14,10 +14,9 @@ import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityExce
 import org.mifosplatform.infrastructure.security.exception.NoAuthorizationException;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.monetary.domain.ApplicationCurrency;
-import org.mifosplatform.organisation.monetary.domain.ApplicationCurrencyRepository;
+import org.mifosplatform.organisation.monetary.domain.ApplicationCurrencyRepositoryWrapper;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.organisation.monetary.domain.Money;
-import org.mifosplatform.organisation.monetary.exception.CurrencyNotFoundException;
 import org.mifosplatform.organisation.office.domain.Office;
 import org.mifosplatform.organisation.office.domain.OfficeRepository;
 import org.mifosplatform.organisation.office.domain.OfficeTransaction;
@@ -43,14 +42,14 @@ public class OfficeWritePlatformServiceJpaRepositoryImpl implements OfficeWriteP
     private final OfficeTransactionCommandFromApiJsonDeserializer moneyTransferCommandFromApiJsonDeserializer;
     private final OfficeRepository officeRepository;
     private final OfficeTransactionRepository officeTransactionRepository;
-    private final ApplicationCurrencyRepository applicationCurrencyRepository;
+    private final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepository;
 
     @Autowired
     public OfficeWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
             final OfficeCommandFromApiJsonDeserializer fromApiJsonDeserializer,
             final OfficeTransactionCommandFromApiJsonDeserializer moneyTransferCommandFromApiJsonDeserializer,
             final OfficeRepository officeRepository, final OfficeTransactionRepository officeMonetaryTransferRepository,
-            final ApplicationCurrencyRepository applicationCurrencyRepository) {
+            final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepository) {
         this.context = context;
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
         this.moneyTransferCommandFromApiJsonDeserializer = moneyTransferCommandFromApiJsonDeserializer;
@@ -158,8 +157,7 @@ public class OfficeWritePlatformServiceJpaRepositoryImpl implements OfficeWriteP
         if (fromOffice == null && toOffice == null) { throw new OfficeNotFoundException(toOfficeId); }
 
         final String currencyCode = command.stringValueOfParameterNamed("currencyCode");
-        final ApplicationCurrency appCurrency = this.applicationCurrencyRepository.findOneByCode(currencyCode);
-        if (appCurrency == null) { throw new CurrencyNotFoundException(currencyCode); }
+        final ApplicationCurrency appCurrency = this.applicationCurrencyRepository.findOneWithNotFoundDetection(currencyCode);
 
         final MonetaryCurrency currency = new MonetaryCurrency(appCurrency.getCode(), appCurrency.getDecimalPlaces());
         final Money amount = Money.of(currency, command.bigDecimalValueOfParameterNamed("transactionAmount"));
@@ -177,7 +175,7 @@ public class OfficeWritePlatformServiceJpaRepositoryImpl implements OfficeWriteP
 
     @Transactional
     @Override
-    public CommandProcessingResult deleteOfficeTransaction(final Long transactionId, JsonCommand command) {
+    public CommandProcessingResult deleteOfficeTransaction(final Long transactionId, final JsonCommand command) {
 
         context.authenticatedUser();
 
@@ -193,7 +191,7 @@ public class OfficeWritePlatformServiceJpaRepositoryImpl implements OfficeWriteP
      * Guaranteed to throw an exception no matter what the data integrity issue
      * is.
      */
-    private void handleOfficeDataIntegrityIssues(final JsonCommand command, DataIntegrityViolationException dve) {
+    private void handleOfficeDataIntegrityIssues(final JsonCommand command, final DataIntegrityViolationException dve) {
 
         Throwable realCause = dve.getMostSpecificCause();
         if (realCause.getMessage().contains("externalid_org")) {

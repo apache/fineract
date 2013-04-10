@@ -17,8 +17,7 @@ import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.monetary.domain.ApplicationCurrency;
-import org.mifosplatform.organisation.monetary.domain.ApplicationCurrencyRepository;
-import org.mifosplatform.organisation.monetary.exception.CurrencyNotFoundException;
+import org.mifosplatform.organisation.monetary.domain.ApplicationCurrencyRepositoryWrapper;
 import org.mifosplatform.organisation.monetary.serialization.CurrencyCommandFromApiJsonDeserializer;
 import org.mifosplatform.organisation.office.domain.OrganisationCurrency;
 import org.mifosplatform.organisation.office.domain.OrganisationCurrencyRepository;
@@ -30,14 +29,14 @@ import org.springframework.transaction.annotation.Transactional;
 public class CurrencyWritePlatformServiceJpaRepositoryImpl implements CurrencyWritePlatformService {
 
     private final PlatformSecurityContext context;
-    private final ApplicationCurrencyRepository applicationCurrencyRepository;
+    private final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepository;
     private final OrganisationCurrencyRepository organisationCurrencyRepository;
     private final CurrencyCommandFromApiJsonDeserializer fromApiJsonDeserializer;
 
     @Autowired
     public CurrencyWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
             final CurrencyCommandFromApiJsonDeserializer fromApiJsonDeserializer,
-            final ApplicationCurrencyRepository applicationCurrencyRepository,
+            final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepository,
             final OrganisationCurrencyRepository organisationCurrencyRepository) {
         this.context = context;
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
@@ -60,11 +59,9 @@ public class CurrencyWritePlatformServiceJpaRepositoryImpl implements CurrencyWr
         final Set<OrganisationCurrency> allowedCurrencies = new HashSet<OrganisationCurrency>();
         for (final String currencyCode : currencies) {
 
-            final ApplicationCurrency currency = this.applicationCurrencyRepository.findOneByCode(currencyCode);
-            if (currency == null) { throw new CurrencyNotFoundException(currencyCode); }
+            final ApplicationCurrency currency = this.applicationCurrencyRepository.findOneWithNotFoundDetection(currencyCode);
 
-            final OrganisationCurrency allowedCurrency = new OrganisationCurrency(currency.getCode(), currency.getName(),
-                    currency.getDecimalPlaces(), currency.getNameCode(), currency.getDisplaySymbol());
+            final OrganisationCurrency allowedCurrency = currency.toOrganisationCurrency();
 
             allowedCurrencyCodes.add(currencyCode);
             allowedCurrencies.add(allowedCurrency);
