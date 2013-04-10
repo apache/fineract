@@ -13,7 +13,7 @@ Version
 
 The mifosx platform is currently still in BETA. That means its likely that there will be changes to the Platform API so any use or development against is at your own risk.
 
-Latest release: <a target="_blank" href="https://github.com/openMF/mifosx/tree/mifosplatform-0.11.1.beta" title="mifosplatform-0.11.1.beta">mifosplatform-0.11.1.beta</a>
+Latest release: <a target="_blank" href="https://github.com/openMF/mifosx/tree/mifosplatform-0.11.2.beta" title="mifosplatform-0.11.2.beta">mifosplatform-0.11.2.beta</a>
 
 License
 =============
@@ -29,7 +29,7 @@ Mifos Platform API
 Online Client Application Demos
 =============================
 
-<a target="_blank" href="https://demo.openmf.org" title="Client apps: Individual Lending">Individual Lending App</a>
+<a target="_blank" href="https://demo.openmf.org" title="Reference Client App">Reference Client App</a>
 
 
 Developers
