@@ -20,6 +20,7 @@ import org.mifosplatform.portfolio.collectionsheet.data.JLGCollectionSheetData;
 import org.mifosplatform.portfolio.collectionsheet.data.JLGCollectionSheetFlatData;
 import org.mifosplatform.portfolio.collectionsheet.data.LoanDueData;
 import org.mifosplatform.portfolio.group.data.GroupData;
+import org.mifosplatform.portfolio.group.data.GroupTypes;
 import org.mifosplatform.portfolio.group.exception.GroupNotFoundException;
 import org.mifosplatform.portfolio.group.service.GroupReadPlatformServiceImpl;
 import org.mifosplatform.portfolio.loanproduct.data.LoanProductData;
@@ -53,7 +54,7 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
         final String hierarchy = currentUser.getOffice().getHierarchy();
         final String officeHierarchy = hierarchy + "%";
 
-        final GroupData groupData = this.groupReadPlatformServiceImpl.retrieveGroup(groupId);
+        final GroupData groupData = this.groupReadPlatformServiceImpl.retrieveGroup(groupId , GroupTypes.CENTER.getId());
         if (groupData == null) { throw new GroupNotFoundException(groupId); }
 
         final String groupHierarchy = groupData.getHierarchy() + "%";

@@ -20,6 +20,7 @@ import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.mifosplatform.portfolio.client.data.ClientData;
 import org.mifosplatform.portfolio.client.service.ClientReadPlatformService;
 import org.mifosplatform.portfolio.group.data.GroupData;
+import org.mifosplatform.portfolio.group.data.GroupTypes;
 import org.mifosplatform.portfolio.group.service.GroupReadPlatformService;
 import org.mifosplatform.portfolio.savings.data.SavingsAccountData;
 import org.mifosplatform.portfolio.savings.data.SavingsAccountStatusEnumData;
@@ -212,7 +213,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
 
         GroupData group = null;
         if (groupId != null) {
-            group = this.groupReadPlatformService.retrieveGroup(groupId);
+            group = this.groupReadPlatformService.retrieveGroup(groupId , GroupTypes.GROUP.getId());
         }
 
         final Collection<SavingsProductData> productOptions = this.savingsProductReadPlatformService.retrieveAllForLookup();

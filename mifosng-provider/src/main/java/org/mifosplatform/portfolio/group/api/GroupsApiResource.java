@@ -35,6 +35,7 @@ import org.mifosplatform.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.portfolio.group.data.GroupAccountSummaryCollectionData;
 import org.mifosplatform.portfolio.group.data.GroupData;
+import org.mifosplatform.portfolio.group.data.GroupTypes;
 import org.mifosplatform.portfolio.group.service.GroupReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -59,7 +60,7 @@ public class GroupsApiResource {
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     
-    private static final Long LEVEL_ID = (long) 2;
+    private static final Long LEVEL_ID = GroupTypes.GROUP.getId();
 
     @Autowired
     public GroupsApiResource(final PlatformSecurityContext context, final GroupReadPlatformService groupReadPlatformService,
@@ -80,11 +81,11 @@ public class GroupsApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveAllGroups(@Context final UriInfo uriInfo, @QueryParam("sqlSearch") final String sqlSearch,
             @QueryParam("officeId") final Long officeId, @QueryParam("externalId") final String externalId,
-            @QueryParam("name") final String name) {
+            @QueryParam("name") final String name , @QueryParam("underHierarchy") final String hierarchy) {
 
         this.context.authenticatedUser().validateHasReadPermission("GROUP");
 
-        final String extraCriteria = getGroupExtraCriteria(sqlSearch, officeId, externalId, name , LEVEL_ID);
+        final String extraCriteria = getGroupExtraCriteria(sqlSearch, officeId, externalId, name , LEVEL_ID , hierarchy);
         final Collection<GroupData> groups = this.groupReadPlatformService.retrieveAllGroups(extraCriteria);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
@@ -100,7 +101,7 @@ public class GroupsApiResource {
         this.context.authenticatedUser().validateHasReadPermission("GROUP");
 
         final boolean template = ApiParameterHelper.template(uriInfo.getQueryParameters());
-        final GroupData group = this.groupReadPlatformService.retrieveGroupDetails(groupId, template);
+        final GroupData group = this.groupReadPlatformService.retrieveGroupDetails(groupId, LEVEL_ID, template);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serialize(settings, group, GROUP_DATA_PARAMETERS);
@@ -208,10 +209,10 @@ public class GroupsApiResource {
     // clause is ambiguous
     // caused by the same name of columns in m_office and m_group tables
     private String getGroupExtraCriteria(String sqlSearch, final Long officeId, final String externalId, final String name,
-            final Long levelId) {
+            final Long levelId , final String hierarchy) {
 
         String extraCriteria = "";
-
+        
         if (sqlSearch != null) {
             sqlSearch = sqlSearch.replaceAll(" name ", " g.name ");
             sqlSearch = sqlSearch.replaceAll("name ", "g.name ");
@@ -234,6 +235,11 @@ public class GroupsApiResource {
             extraCriteria += " and g.name like " + ApiParameterHelper.sqlEncodeString(name + "%");
         }
 
+
+        if (hierarchy != null) {
+            extraCriteria += " and o.hierarchy like " + ApiParameterHelper.sqlEncodeString(hierarchy + "%");
+        }
+        
         if (StringUtils.isNotBlank(extraCriteria)) {
             extraCriteria = extraCriteria.substring(4);
         }

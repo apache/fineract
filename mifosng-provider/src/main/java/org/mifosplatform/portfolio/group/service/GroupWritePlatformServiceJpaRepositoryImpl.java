@@ -72,9 +72,9 @@ public class GroupWritePlatformServiceJpaRepositoryImpl implements GroupWritePla
 
     @Transactional
     @Override
-    public CommandProcessingResult createGroup(final JsonCommand command) {
+    public CommandProcessingResult createGroup(final Long parentId , final Long levelId , final JsonCommand command) {
         
-        GroupLevel groupLevel = null;
+        GroupLevel groupLevel = this.groupLevelRepository.findOne(levelId);
         try {
             this.context.authenticatedUser();
 
@@ -83,33 +83,16 @@ public class GroupWritePlatformServiceJpaRepositoryImpl implements GroupWritePla
             final String name = command.stringValueOfParameterNamed("name");
             final String externalId = command.stringValueOfParameterNamed("externalId");
 
-            final Long parentId = command.longValueOfParameterNamed("parentId");
-
             Long officeId = null;
 
             Group parentGroup = null;
 
             if (parentId == null) {
-                /*
-                 * Scenario: Creating parent group [group with highest level]
-                 * In-case of Centre/Groups, parent group with highest level is
-                 * Centre. In-case of Federation/Cluster/SHG, parent group with
-                 * highest level is Federation. In-case of
-                 * Village/Centre/Groups, parent group with highest level is
-                 * Village.
-                 */
-
                 officeId = command.longValueOfParameterNamed("officeId");
-                groupLevel = this.groupLevelRepository.findBySuperParent(true);
-
             } else {
-
                 parentGroup = this.groupRepository.findOne(parentId);
                 if (parentGroup == null || parentGroup.isDeleted()) { throw new GroupNotFoundException(parentId); }
-
                 officeId = parentGroup.getOfficeId();
-                groupLevel = this.groupLevelRepository.findByParentId(parentGroup.getGroupLevel().getId());
-
             }
 
             final Office groupOffice = this.officeRepository.findOne(officeId);

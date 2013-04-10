@@ -40,7 +40,7 @@ public final class GroupCommandFromApiJsonDeserializer extends AbstractFromApiJs
      * The parameters supported for this command.
      */
     private final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("id", "externalId", "name", "officeId", "staffId",
-            "parentId", "clientMembers", "childGroups"));
+            "centerId", "clientMembers", "childGroups"));
 
     private final FromJsonHelper fromApiJsonHelper;
 
@@ -98,10 +98,10 @@ public final class GroupCommandFromApiJsonDeserializer extends AbstractFromApiJs
          * Either OfficeId or ParentId is mandatory to have value
          */
 
-        final String parentIdParameterName = "parentId";
-        if (this.fromApiJsonHelper.parameterExists(parentIdParameterName, element)) {
-            final Long parentId = this.fromApiJsonHelper.extractLongNamed(parentIdParameterName, element);
-            baseDataValidator.reset().parameter(parentIdParameterName).value(parentId).notNull().integerGreaterThanZero();
+        final String centerIdParameterName = "centerId";
+        if (this.fromApiJsonHelper.parameterExists(centerIdParameterName, element)) {
+            final Long centerId = this.fromApiJsonHelper.extractLongNamed(centerIdParameterName, element);
+            baseDataValidator.reset().parameter(centerIdParameterName).value(centerId).notNull().integerGreaterThanZero();
         }else{
             final String officeIdParameterName = "officeId";
             final Long officeId = this.fromApiJsonHelper.extractLongNamed(officeIdParameterName, element);

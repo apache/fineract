@@ -20,7 +20,7 @@ public interface GroupReadPlatformService {
 
     Collection<GroupData> retrieveAllGroups(String extraCriteria);
 
-    GroupData retrieveGroup(Long groupId);
+	GroupData retrieveGroup(Long groupId, Long levelId);
 
     GroupData retrieveNewGroupDetails(Long officeId, Long levelId);
 
@@ -36,7 +36,7 @@ public interface GroupReadPlatformService {
 
     Collection<StaffData> retrieveStaffsbyOfficeId(Long officeId);
 
-    GroupData retrieveGroupDetails(Long groupId, boolean template);
+	GroupData retrieveGroupDetails(Long groupId, Long levelId, boolean template);
 
     Collection<GroupLookup> retrieveChildGroupsbyGroupId(Long groupId);
 
@@ -51,4 +51,5 @@ public interface GroupReadPlatformService {
     StaffData retrieveStaffsbyId(Long staffId);
     
     Long getLevelIdByGroupId(final Long groupId);
+
 }

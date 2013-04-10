@@ -8,20 +8,18 @@ package org.mifosplatform.portfolio.group.handler;
 import org.mifosplatform.commands.handler.NewCommandSourceHandler;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
-import org.mifosplatform.portfolio.group.data.GroupTypes;
 import org.mifosplatform.portfolio.group.service.GroupWritePlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class CreateGroupCommandHandler implements NewCommandSourceHandler {
+public class UpdateCenterCommandHandler implements NewCommandSourceHandler {
 
     private final GroupWritePlatformService groupWritePlatformService;
-    private static final Long LEVEL_ID = GroupTypes.GROUP.getId();;
 
     @Autowired
-    public CreateGroupCommandHandler(final GroupWritePlatformService groupWritePlatformService) {
+    public UpdateCenterCommandHandler(final GroupWritePlatformService groupWritePlatformService) {
         this.groupWritePlatformService = groupWritePlatformService;
     }
 
@@ -29,7 +27,6 @@ public class CreateGroupCommandHandler implements NewCommandSourceHandler {
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
 
-        final Long centerId = command.longValueOfParameterNamed("centerId");
-        return this.groupWritePlatformService.createGroup(centerId , LEVEL_ID , command);
+        return this.groupWritePlatformService.updateGroup(command.entityId(), command);
     }
 }

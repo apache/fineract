@@ -853,4 +853,27 @@ public class CommandWrapperBuilder {
         this.href = "/groups/" + groupId + "/collectionsheet";
         return this;
     }
+
+	public CommandWrapperBuilder createCenter() {
+        this.actionName = "CREATE";
+        this.entityName = "CENTER";
+        this.href = "/centers/template";
+        return this;
+	}
+
+	public CommandWrapperBuilder updateCenter(Long centerId) {
+        this.actionName = "UPDATE";
+        this.entityName = "CENTER";
+        this.entityId = centerId;
+        this.href = "/centers/" + centerId;
+        return this;
+	}
+
+	public CommandWrapperBuilder deleteCenter(Long centerId) {
+        this.actionName = "DELETE";
+        this.entityName = "CENTER";
+        this.entityId = centerId;
+        this.href = "/centers/" + centerId;
+        return this;
+	}
 }

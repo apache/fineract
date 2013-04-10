@@ -476,4 +476,8 @@ public class CommandWrapper {
         return this.entityName.equals("COLLECTIONSHEET");
     }
 
+    public boolean isCenterResource() {
+        return this.entityName.equalsIgnoreCase("CENTER");
+    }
+
 }

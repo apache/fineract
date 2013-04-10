@@ -35,20 +35,21 @@ import org.mifosplatform.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.portfolio.group.data.GroupAccountSummaryCollectionData;
 import org.mifosplatform.portfolio.group.data.GroupData;
+import org.mifosplatform.portfolio.group.data.GroupTypes;
 import org.mifosplatform.portfolio.group.service.GroupReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-@Path("/groups")
+@Path("/centers")
 @Component
 @Scope("singleton")
-public class CenterApiResource {
+public class CentersApiResource {
 
     /*
      * GROUP_DATA_PARAMETERS is used by ToApiJsonSerializer<E>, make sure E's properties and E_PARAMETERS are in same 
      */
-    private static final Set<String> GROUP_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "name", "externalId", "officeId",
+    private static final Set<String> CENTER_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "name", "externalId", "officeId",
             "officeName", "staffId", "staffName", "parentId", "parentName", "hierarchy", "groupSummaryData", "groupLevelData",
             "clientMembers", "allowedClients", "allowedOffices", "allowedParentGroups", "allowedStaffs", "childGroups"));
     
@@ -58,9 +59,11 @@ public class CenterApiResource {
     private final ToApiJsonSerializer<GroupAccountSummaryCollectionData> groupSummaryToApiJsonSerializer;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
+    
+    private static final Long LEVEL_ID = GroupTypes.CENTER.getId();
 
     @Autowired
-    public CenterApiResource(final PlatformSecurityContext context, final GroupReadPlatformService groupReadPlatformService,
+    public CentersApiResource(final PlatformSecurityContext context, final GroupReadPlatformService groupReadPlatformService,
             final ToApiJsonSerializer<GroupData> toApiJsonSerializer,
             final ToApiJsonSerializer<GroupAccountSummaryCollectionData> groupSummaryToApiJsonSerializer,
             final ApiRequestParameterHelper apiRequestParameterHelper,
@@ -76,80 +79,62 @@ public class CenterApiResource {
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveAllGroups(@Context final UriInfo uriInfo, @QueryParam("sqlSearch") final String sqlSearch,
+    public String retrieveAllCenters(@Context final UriInfo uriInfo, @QueryParam("sqlSearch") final String sqlSearch,
             @QueryParam("officeId") final Long officeId, @QueryParam("externalId") final String externalId,
-            @QueryParam("name") final String name, @QueryParam("underHierarchy") final String hierarchy,
-            @QueryParam("levelId") final Long levelId) {
+            @QueryParam("name") final String name , @QueryParam("underHierarchy") final String hierarchy) {
 
-        this.context.authenticatedUser().validateHasReadPermission("GROUP");
+        this.context.authenticatedUser().validateHasReadPermission("CENTER");
 
-        final String extraCriteria = getGroupExtraCriteria(sqlSearch, officeId, externalId, name, hierarchy, levelId);
-        final Collection<GroupData> groups = this.groupReadPlatformService.retrieveAllGroups(extraCriteria);
+        
+        final String extraCriteria = getCenterExtraCriteria(sqlSearch, officeId, externalId, name , LEVEL_ID , hierarchy);
+        final Collection<GroupData> centers = this.groupReadPlatformService.retrieveAllGroups(extraCriteria);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, groups, GROUP_DATA_PARAMETERS);
+        return this.toApiJsonSerializer.serialize(settings, centers, CENTER_DATA_PARAMETERS);
     }
 
     @GET
-    @Path("{groupId}")
+    @Path("{centerId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveGroupData(@Context final UriInfo uriInfo, @PathParam("groupId") final Long groupId) {
+    public String retrieveCenterData(@Context final UriInfo uriInfo, @PathParam("centerId") final Long centerId) {
 
-        this.context.authenticatedUser().validateHasReadPermission("GROUP");
+        this.context.authenticatedUser().validateHasReadPermission("CENTER");
 
         final boolean template = ApiParameterHelper.template(uriInfo.getQueryParameters());
-        final GroupData group = this.groupReadPlatformService.retrieveGroupDetails(groupId, template);
+        final GroupData group = this.groupReadPlatformService.retrieveGroupDetails(centerId, LEVEL_ID, template);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, group, GROUP_DATA_PARAMETERS);
+        return this.toApiJsonSerializer.serialize(settings, group, CENTER_DATA_PARAMETERS);
     }
 
     @GET
     @Path("template")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String newGroupDetails(@Context final UriInfo uriInfo, @QueryParam("officeId") final Long officeId,
-            @QueryParam("levelId") final Long levelId, @QueryParam("parentGroupId") final Long parentGroupId) {
+    public String newGroupDetails(@Context final UriInfo uriInfo, @QueryParam("officeId") final Long officeId) {
 
-        this.context.authenticatedUser().validateHasReadPermission("GROUP");
+        this.context.authenticatedUser().validateHasReadPermission("CENTER");
 
-        GroupData groupTemplateData = null;
-        if (levelId != null && parentGroupId != null) {
-            groupTemplateData = this.groupReadPlatformService.retrieveNewChildGroupDetails(officeId, levelId, parentGroupId);
-        } else if (officeId != null && levelId != null) {
-            groupTemplateData = this.groupReadPlatformService.retrieveNewGroupDetails(officeId, levelId);
-        } else if (levelId != null) {
-            groupTemplateData = this.groupReadPlatformService.retrieveNewGroupDetails(this.context.authenticatedUser().getOffice().getId(),
-                    levelId);
+        GroupData centerTemplateData = null;
+        if (officeId != null) {
+        	centerTemplateData = this.groupReadPlatformService.retrieveNewGroupDetails(officeId, LEVEL_ID);
+        } else {
+        	centerTemplateData = this.groupReadPlatformService.retrieveNewGroupDetails(this.context.authenticatedUser().getOffice().getId(),
+            		LEVEL_ID);
         }
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, groupTemplateData, GROUP_DATA_PARAMETERS);
+        return this.toApiJsonSerializer.serialize(settings, centerTemplateData, CENTER_DATA_PARAMETERS);
     }
 
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String createGroup(final String apiRequestBodyAsJson) {
+    public String createCenter(final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
-                .createGroup() //
-                .withJson(apiRequestBodyAsJson) //
-                .build(); //
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-        return this.toApiJsonSerializer.serialize(result);
-
-    }
-
-    @POST
-    @Path("{groupId}/command/unassign_staff")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    public String unassignLoanOfficer(@PathParam("groupId") final Long groupId, final String apiRequestBodyAsJson) {
-
-        final CommandWrapper commandRequest = new CommandWrapperBuilder() //
-                .unassignStaff(groupId) //
+                .createCenter() //
                 .withJson(apiRequestBodyAsJson) //
                 .build(); //
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
@@ -158,13 +143,13 @@ public class CenterApiResource {
     }
 
     @PUT
-    @Path("{groupId}")
+    @Path("{centerId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String updateGroup(@PathParam("groupId") final Long groupId, final String apiRequestBodyAsJson) {
+    public String updateGroup(@PathParam("centerId") final Long centerId, final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
-                .updateGroup(groupId) //
+                .updateCenter(centerId) //
                 .withJson(apiRequestBodyAsJson) //
                 .build(); //
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
@@ -172,13 +157,13 @@ public class CenterApiResource {
     }
 
     @DELETE
-    @Path("{groupId}")
+    @Path("{centerId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String deleteGroup(@PathParam("groupId") final Long groupId) {
+    public String deleteGroup(@PathParam("centerId") final Long centerId) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
-                .deleteGroup(groupId) //
+                .deleteCenter(centerId) //
                 .build(); //
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         return this.toApiJsonSerializer.serialize(result);
@@ -206,10 +191,9 @@ public class CenterApiResource {
     // 'g.' preffix because of ERROR 1052 (23000): Column 'column_name' in where
     // clause is ambiguous
     // caused by the same name of columns in m_office and m_group tables
-    private String getGroupExtraCriteria(String sqlSearch, final Long officeId, final String externalId, final String name,
-            final String hierarchy, final Long levelId) {
+    private String getCenterExtraCriteria(String sqlSearch, final Long officeId, final String externalId, final String name , final Long levelId ,final String hierarchy) {
 
-        String extraCriteria = "";
+        String extraCriteria = " and g.level_id = " + LEVEL_ID + " ";
 
         if (sqlSearch != null) {
             sqlSearch = sqlSearch.replaceAll(" name ", " g.name ");
@@ -233,10 +217,11 @@ public class CenterApiResource {
             extraCriteria += " and g.name like " + ApiParameterHelper.sqlEncodeString(name + "%");
         }
 
+
         if (hierarchy != null) {
             extraCriteria += " and o.hierarchy like " + ApiParameterHelper.sqlEncodeString(hierarchy + "%");
         }
-
+        
         if (StringUtils.isNotBlank(extraCriteria)) {
             extraCriteria = extraCriteria.substring(4);
         }

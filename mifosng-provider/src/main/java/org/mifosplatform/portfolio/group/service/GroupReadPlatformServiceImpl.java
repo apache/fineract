@@ -72,7 +72,7 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
 
         final GroupDataMapper rm = new GroupDataMapper();
 
-        String sql = "select " + rm.groupSchema() + " where o.hierarchy like ? and g.is_deleted=0";
+        String sql = "select " + rm.groupSchema() + " where o.hierarchy like ? and g.is_deleted=0 ";
         
         if (StringUtils.isNotBlank(extraCriteria)) {
             sql += " and (" + extraCriteria + ")";
@@ -84,14 +84,14 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
     }
 
     @Override
-    public GroupData retrieveGroup(final Long groupId) {
+    public GroupData retrieveGroup(final Long groupId , final Long levelId) {
 
         try {
             this.context.authenticatedUser();
 
             final GroupDataMapper rm = new GroupDataMapper();
 
-            final String sql = "select " + rm.groupSchema() + " where g.id = ? and g.is_deleted=0";
+            final String sql = "select " + rm.groupSchema() + " where g.id = ? and g.is_deleted=0 and g.level_id = " + levelId;
 
             return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { groupId });
         } catch (final EmptyResultDataAccessException e) {
@@ -207,9 +207,9 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
     }
 
     @Override
-    public GroupData retrieveGroupDetails(final Long groupId, final boolean template) {
+    public GroupData retrieveGroupDetails(final Long groupId, final Long levelId , final boolean template) {
 
-        GroupData group = retrieveGroup(groupId);
+        GroupData group = retrieveGroup(groupId, levelId);
         final Collection<ClientLookup> clientMembers = retrieveClientMembers(groupId);
         Collection<ClientLookup> availableClients = null;
         Collection<OfficeData> allowedOffices = null;
@@ -467,7 +467,7 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
             this.context.authenticatedUser();
 
             // Check if group exists
-            retrieveGroup(groupId);
+            //retrieveGroup(groupId);
 
             final List<GroupAccountSummaryData> pendingApprovalLoans = new ArrayList<GroupAccountSummaryData>();
             final List<GroupAccountSummaryData> awaitingDisbursalLoans = new ArrayList<GroupAccountSummaryData>();
@@ -534,7 +534,7 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
         this.context.authenticatedUser();
 
         // Check if group exists
-        retrieveGroup(groupId);
+        //retrieveGroup(groupId);
 
         final GroupLoanAccountSummaryDataMapper rm = new GroupLoanAccountSummaryDataMapper();
 
