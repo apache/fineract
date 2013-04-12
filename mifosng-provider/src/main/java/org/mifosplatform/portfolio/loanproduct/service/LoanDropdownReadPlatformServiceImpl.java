@@ -20,6 +20,7 @@ import java.util.List;
 
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanTransactionProcessingStrategyRepository;
+import org.mifosplatform.portfolio.loanaccount.domain.PaymentType;
 import org.mifosplatform.portfolio.loanproduct.data.TransactionProcessingStrategyData;
 import org.mifosplatform.portfolio.loanproduct.domain.AccountingRuleType;
 import org.mifosplatform.portfolio.loanproduct.domain.AmortizationMethod;
@@ -33,88 +34,85 @@ import org.springframework.stereotype.Service;
 @Service
 public class LoanDropdownReadPlatformServiceImpl implements LoanDropdownReadPlatformService {
 
-	private final LoanTransactionProcessingStrategyRepository loanTransactionProcessingStrategyRepository;
+    private final LoanTransactionProcessingStrategyRepository loanTransactionProcessingStrategyRepository;
 
-	@Autowired
-	public LoanDropdownReadPlatformServiceImpl(final LoanTransactionProcessingStrategyRepository loanTransactionProcessingStrategyRepository) {
-		this.loanTransactionProcessingStrategyRepository = loanTransactionProcessingStrategyRepository;
-	}
-	
-	@Override
-	public List<EnumOptionData> retrieveLoanAmortizationTypeOptions() {
+    @Autowired
+    public LoanDropdownReadPlatformServiceImpl(final LoanTransactionProcessingStrategyRepository loanTransactionProcessingStrategyRepository) {
+        this.loanTransactionProcessingStrategyRepository = loanTransactionProcessingStrategyRepository;
+    }
 
-		List<EnumOptionData> allowedAmortizationMethods = Arrays.asList(
-				amortizationType(AmortizationMethod.EQUAL_INSTALLMENTS),
-				amortizationType(AmortizationMethod.EQUAL_PRINCIPAL));
+    @Override
+    public List<EnumOptionData> retrieveLoanAmortizationTypeOptions() {
 
-		return allowedAmortizationMethods;
-	}
+        List<EnumOptionData> allowedAmortizationMethods = Arrays.asList(amortizationType(AmortizationMethod.EQUAL_INSTALLMENTS),
+                amortizationType(AmortizationMethod.EQUAL_PRINCIPAL));
 
-	@Override
-	public List<EnumOptionData> retrieveLoanInterestTypeOptions() {
-		List<EnumOptionData> allowedRepaymentScheduleCalculationMethods = Arrays
-				.asList(interestType(InterestMethod.FLAT),
-						interestType(InterestMethod.DECLINING_BALANCE));
+        return allowedAmortizationMethods;
+    }
 
-		return allowedRepaymentScheduleCalculationMethods;
-	}
+    @Override
+    public List<EnumOptionData> retrieveLoanInterestTypeOptions() {
+        List<EnumOptionData> allowedRepaymentScheduleCalculationMethods = Arrays.asList(interestType(InterestMethod.FLAT),
+                interestType(InterestMethod.DECLINING_BALANCE));
 
-	@Override
-	public List<EnumOptionData> retrieveLoanInterestRateCalculatedInPeriodOptions() {
+        return allowedRepaymentScheduleCalculationMethods;
+    }
 
-		List<EnumOptionData> allowedOptions = Arrays
-				.asList(interestCalculationPeriodType(InterestCalculationPeriodMethod.DAILY),
-						interestCalculationPeriodType(InterestCalculationPeriodMethod.SAME_AS_REPAYMENT_PERIOD));
+    @Override
+    public List<EnumOptionData> retrieveLoanInterestRateCalculatedInPeriodOptions() {
 
-		return allowedOptions;
-	}
-	
-	@Override
-	public List<EnumOptionData> retrieveLoanTermFrequencyTypeOptions() {
-		List<EnumOptionData> loanTermFrequencyOptions = Arrays.asList(
-				loanTermFrequencyType(PeriodFrequencyType.DAYS),
-				loanTermFrequencyType(PeriodFrequencyType.WEEKS),
-				loanTermFrequencyType(PeriodFrequencyType.MONTHS),
-				loanTermFrequencyType(PeriodFrequencyType.YEARS));
-		return loanTermFrequencyOptions;
-	}
+        List<EnumOptionData> allowedOptions = Arrays.asList(interestCalculationPeriodType(InterestCalculationPeriodMethod.DAILY),
+                interestCalculationPeriodType(InterestCalculationPeriodMethod.SAME_AS_REPAYMENT_PERIOD));
 
-	@Override
-	public List<EnumOptionData> retrieveRepaymentFrequencyTypeOptions() {
+        return allowedOptions;
+    }
 
-		List<EnumOptionData> repaymentFrequencyOptions = Arrays.asList(
-				repaymentFrequencyType(PeriodFrequencyType.DAYS),
-				repaymentFrequencyType(PeriodFrequencyType.WEEKS),
-				repaymentFrequencyType(PeriodFrequencyType.MONTHS));
-		return repaymentFrequencyOptions;
-	}
+    @Override
+    public List<EnumOptionData> retrieveLoanTermFrequencyTypeOptions() {
+        List<EnumOptionData> loanTermFrequencyOptions = Arrays.asList(loanTermFrequencyType(PeriodFrequencyType.DAYS),
+                loanTermFrequencyType(PeriodFrequencyType.WEEKS), loanTermFrequencyType(PeriodFrequencyType.MONTHS),
+                loanTermFrequencyType(PeriodFrequencyType.YEARS));
+        return loanTermFrequencyOptions;
+    }
 
-	@Override
-	public List<EnumOptionData> retrieveInterestRateFrequencyTypeOptions() {
-		// support for monthly and annual percentage rate (MPR) and (APR)
-		List<EnumOptionData> interestRateFrequencyTypeOptions = Arrays.asList(
-				interestRateFrequencyType(PeriodFrequencyType.MONTHS),
-				interestRateFrequencyType(PeriodFrequencyType.YEARS));
-		return interestRateFrequencyTypeOptions;
-	}
+    @Override
+    public List<EnumOptionData> retrieveRepaymentFrequencyTypeOptions() {
 
-	@Override
-	public Collection<TransactionProcessingStrategyData> retreiveTransactionProcessingStrategies() {
-		
-		Collection<TransactionProcessingStrategyData> strategyOptions = new ArrayList<TransactionProcessingStrategyData>();
-		
-		List<LoanTransactionProcessingStrategy> strategies = this.loanTransactionProcessingStrategyRepository.findAll();
-		for (LoanTransactionProcessingStrategy strategy : strategies) {
-			strategyOptions.add(strategy.toData());
-		}
-		
-		return strategyOptions;
-	}
+        List<EnumOptionData> repaymentFrequencyOptions = Arrays.asList(repaymentFrequencyType(PeriodFrequencyType.DAYS),
+                repaymentFrequencyType(PeriodFrequencyType.WEEKS), repaymentFrequencyType(PeriodFrequencyType.MONTHS));
+        return repaymentFrequencyOptions;
+    }
+
+    @Override
+    public List<EnumOptionData> retrieveInterestRateFrequencyTypeOptions() {
+        // support for monthly and annual percentage rate (MPR) and (APR)
+        List<EnumOptionData> interestRateFrequencyTypeOptions = Arrays.asList(interestRateFrequencyType(PeriodFrequencyType.MONTHS),
+                interestRateFrequencyType(PeriodFrequencyType.YEARS));
+        return interestRateFrequencyTypeOptions;
+    }
+
+    @Override
+    public Collection<TransactionProcessingStrategyData> retreiveTransactionProcessingStrategies() {
+
+        Collection<TransactionProcessingStrategyData> strategyOptions = new ArrayList<TransactionProcessingStrategyData>();
+
+        List<LoanTransactionProcessingStrategy> strategies = this.loanTransactionProcessingStrategyRepository.findAll();
+        for (LoanTransactionProcessingStrategy strategy : strategies) {
+            strategyOptions.add(strategy.toData());
+        }
+
+        return strategyOptions;
+    }
 
     @Override
     public List<EnumOptionData> retrieveAccountingRuleTypeOptions() {
         List<EnumOptionData> accountingRuleTypeOptions = Arrays.asList(accountingRuleType(AccountingRuleType.NONE),
-                accountingRuleType(AccountingRuleType.CASH_BASED),accountingRuleType(AccountingRuleType.ACCRUAL_BASED));
+                accountingRuleType(AccountingRuleType.CASH_BASED), accountingRuleType(AccountingRuleType.ACCRUAL_BASED));
         return accountingRuleTypeOptions;
+    }
+
+    @Override
+    public List<EnumOptionData> retrievePaymentTypeOptions() {
+        return LoanEnumerations.paymentTypes(PaymentType.values());
     }
 }

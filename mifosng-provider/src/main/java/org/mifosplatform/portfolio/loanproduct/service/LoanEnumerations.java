@@ -5,6 +5,9 @@
  */
 package org.mifosplatform.portfolio.loanproduct.service;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanStatusEnumData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanTransactionEnumData;
@@ -195,6 +198,20 @@ public class LoanEnumerations {
                         InterestCalculationPeriodMethod.INVALID.getCode(), "Invalid");
             break;
         }
+        return optionData;
+    }
+
+    public static List<EnumOptionData> paymentTypes(final PaymentType[] paymentTypes) {
+        final List<EnumOptionData> optionDatas = new ArrayList<EnumOptionData>();
+        for (final PaymentType paymentType : paymentTypes) {
+            optionDatas.add(paymentType(paymentType));
+        }
+        return optionDatas;
+    }
+
+    public static EnumOptionData paymentType(final PaymentType paymentType) {
+        final EnumOptionData optionData = new EnumOptionData(paymentType.getValue().longValue(), paymentType.getCode(),
+                paymentType.toString());
         return optionData;
     }
 

@@ -13,19 +13,21 @@ import org.mifosplatform.portfolio.loanproduct.data.TransactionProcessingStrateg
 
 public interface LoanDropdownReadPlatformService {
 
-	List<EnumOptionData> retrieveLoanAmortizationTypeOptions();
+    List<EnumOptionData> retrieveLoanAmortizationTypeOptions();
 
-	List<EnumOptionData> retrieveLoanInterestTypeOptions();
-	
-	List<EnumOptionData> retrieveLoanInterestRateCalculatedInPeriodOptions();
+    List<EnumOptionData> retrieveLoanInterestTypeOptions();
 
-	List<EnumOptionData> retrieveLoanTermFrequencyTypeOptions();
-	
-	List<EnumOptionData> retrieveRepaymentFrequencyTypeOptions();
+    List<EnumOptionData> retrieveLoanInterestRateCalculatedInPeriodOptions();
 
-	List<EnumOptionData> retrieveInterestRateFrequencyTypeOptions();
+    List<EnumOptionData> retrieveLoanTermFrequencyTypeOptions();
 
-	Collection<TransactionProcessingStrategyData> retreiveTransactionProcessingStrategies();
-	
-	List<EnumOptionData> retrieveAccountingRuleTypeOptions();
+    List<EnumOptionData> retrieveRepaymentFrequencyTypeOptions();
+
+    List<EnumOptionData> retrieveInterestRateFrequencyTypeOptions();
+
+    Collection<TransactionProcessingStrategyData> retreiveTransactionProcessingStrategies();
+
+    List<EnumOptionData> retrieveAccountingRuleTypeOptions();
+
+    List<EnumOptionData> retrievePaymentTypeOptions();
 }

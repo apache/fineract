@@ -6,8 +6,10 @@
 package org.mifosplatform.portfolio.loanaccount.data;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 import org.joda.time.LocalDate;
+import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
 
 /**
@@ -15,32 +17,42 @@ import org.mifosplatform.organisation.monetary.data.CurrencyData;
  */
 public class LoanTransactionData {
 
-    @SuppressWarnings("unused")
     private final Long id;
 
     private final LoanTransactionEnumData type;
 
     private final LocalDate date;
 
-    @SuppressWarnings("unused")
     private final CurrencyData currency;
-    @SuppressWarnings("unused")
     private final PaymentDetailData paymentDetailData;
 
-    @SuppressWarnings("unused")
     private final BigDecimal amount;
-    @SuppressWarnings("unused")
     private final BigDecimal principalPortion;
-    @SuppressWarnings("unused")
     private final BigDecimal interestPortion;
-    @SuppressWarnings("unused")
     private final BigDecimal feeChargesPortion;
-    @SuppressWarnings("unused")
     private final BigDecimal penaltyChargesPortion;
+
+    // templates
+    final List<EnumOptionData> paymentTypeOptions;
+
+    public static LoanTransactionData templateOnTop(LoanTransactionData loanTransactionData, List<EnumOptionData> paymentTypeOptions) {
+        return new LoanTransactionData(loanTransactionData.id, loanTransactionData.type, loanTransactionData.paymentDetailData,
+                loanTransactionData.currency, loanTransactionData.date, loanTransactionData.amount, loanTransactionData.principalPortion,
+                loanTransactionData.interestPortion, loanTransactionData.feeChargesPortion, loanTransactionData.penaltyChargesPortion,
+                paymentTypeOptions);
+    }
 
     public LoanTransactionData(final Long id, final LoanTransactionEnumData transactionType, final PaymentDetailData paymentDetailData,
             final CurrencyData currency, final LocalDate date, final BigDecimal amount, final BigDecimal principalPortion,
             final BigDecimal interestPortion, final BigDecimal feeChargesPortion, final BigDecimal penaltyChargesPortion) {
+        this(id, transactionType, paymentDetailData, currency, date, amount, principalPortion, interestPortion, feeChargesPortion,
+                penaltyChargesPortion, null);
+    }
+
+    public LoanTransactionData(final Long id, final LoanTransactionEnumData transactionType, final PaymentDetailData paymentDetailData,
+            final CurrencyData currency, final LocalDate date, final BigDecimal amount, final BigDecimal principalPortion,
+            final BigDecimal interestPortion, final BigDecimal feeChargesPortion, final BigDecimal penaltyChargesPortion,
+            final List<EnumOptionData> paymentTypeOptions) {
         this.id = id;
         this.type = transactionType;
         this.paymentDetailData = paymentDetailData;
@@ -51,6 +63,7 @@ public class LoanTransactionData {
         this.interestPortion = interestPortion;
         this.feeChargesPortion = feeChargesPortion;
         this.penaltyChargesPortion = penaltyChargesPortion;
+        this.paymentTypeOptions = paymentTypeOptions;
     }
 
     public LocalDate dateOf() {
