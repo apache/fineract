@@ -1,7 +1,9 @@
 package org.mifosplatform.portfolio.collectionsheet.api;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.ws.rs.Consumes;
@@ -15,12 +17,16 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
+import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
 import org.mifosplatform.commands.domain.CommandWrapper;
 import org.mifosplatform.commands.service.CommandWrapperBuilder;
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.mifosplatform.infrastructure.core.api.ApiRequestParameterHelper;
+import org.mifosplatform.infrastructure.core.data.ApiParameterError;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
+import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
+import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.mifosplatform.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.mifosplatform.infrastructure.core.service.DateUtils;
@@ -46,7 +52,7 @@ public class CollectionSheetApiResource {
     /*
      * dueDate format is ISO 8601 Calendar Date (YYYYMMDD)
      */
-    private final String datePattern = "YYYYMMDD";
+    private final String datePattern = "yyyyMMdd";
     private final PlatformSecurityContext context;
     private final CollectionSheetReadPlatformService collectionSheetReadPlatformService;
     private final ToApiJsonSerializer<JLGCollectionSheetData> toApiJsonSerializer;
@@ -72,13 +78,37 @@ public class CollectionSheetApiResource {
             @QueryParam("dueDate") final String dueDate) {
 
         this.context.authenticatedUser().validateHasReadPermission("COLLECTIONSHEET");
-        final LocalDate localDate = DateUtils.parseLocalDate(dueDate, this.datePattern);
+        
+        validateRequest(groupId, dueDate);
+        
+        LocalDate localDate = null;
+        if(StringUtils.isBlank(dueDate)){
+            localDate = DateUtils.getLocalDateOfTenant();
+        }else{
+            localDate = DateUtils.parseLocalDate(dueDate, datePattern);
+        }
+        
+        
         final JLGCollectionSheetData collectionSheet = this.collectionSheetReadPlatformService.retriveCollectionSheet(localDate, groupId);
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serialize(settings, collectionSheet, this.COLLECTIONSHEET_DATA_PARAMETERS);
 
     }
     
+    private void validateRequest(Long groupId, String dueDate) {
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("collectionsheet");
+
+        baseDataValidator.reset().parameter("groupId").value(groupId).notBlank().longGreaterThanZero();
+
+        baseDataValidator.reset().parameter("dueDate").value(dueDate).notBlank();
+        
+        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
+                "Validation errors exist.", dataValidationErrors); }
+
+    }
+
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })

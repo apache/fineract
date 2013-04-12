@@ -156,13 +156,13 @@ public class CalendarCommandFromApiJsonDeserializer extends AbstractFromApiJsonD
         if (this.fromApiJsonHelper.parameterExists(CALENDAR_SUPPORTED_PARAMETERS.FIRST_REMINDER.getValue(), element)) {
             final Integer firstReminder = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(
                     CALENDAR_SUPPORTED_PARAMETERS.FIRST_REMINDER.getValue(), element);
-            baseDataValidator.reset().parameter(CALENDAR_SUPPORTED_PARAMETERS.FIRST_REMINDER.getValue()).value(firstReminder).notNull();
+            baseDataValidator.reset().parameter(CALENDAR_SUPPORTED_PARAMETERS.FIRST_REMINDER.getValue()).value(firstReminder).ignoreIfNull().integerGreaterThanZero();
         }
 
         if (this.fromApiJsonHelper.parameterExists(CALENDAR_SUPPORTED_PARAMETERS.SECOND_REMINDER.getValue(), element)) {
             final Integer secondReminder = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(
                     CALENDAR_SUPPORTED_PARAMETERS.SECOND_REMINDER.getValue(), element);
-            baseDataValidator.reset().parameter(CALENDAR_SUPPORTED_PARAMETERS.SECOND_REMINDER.getValue()).value(secondReminder).notNull();
+            baseDataValidator.reset().parameter(CALENDAR_SUPPORTED_PARAMETERS.SECOND_REMINDER.getValue()).value(secondReminder).ignoreIfNull().integerGreaterThanZero();
         }
 
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",

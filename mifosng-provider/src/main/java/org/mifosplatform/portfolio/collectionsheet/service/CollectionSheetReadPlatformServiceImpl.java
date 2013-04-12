@@ -3,6 +3,8 @@ package org.mifosplatform.portfolio.collectionsheet.service;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -145,15 +147,15 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
             // FIXME Need to check last loan is added under previous
             // client/group or new client / previous group or new client / new
             // group
-            
-            final ClientLoansData lastClientLoansData = corrCollectioSheetFlatData.getClientLoansData();
-            lastClientLoansData.setLoans(loanDueDatas);
-            clientLoansDatas.add(lastClientLoansData);
-
-            final JLGClientsData jlgClientsData = corrCollectioSheetFlatData.getJLGClientsData();
-            jlgClientsData.setClients(clientLoansDatas);
-
-            jlgClientsDatas.add(jlgClientsData);
+            if(corrCollectioSheetFlatData != null){
+                final ClientLoansData lastClientLoansData = corrCollectioSheetFlatData.getClientLoansData();
+                lastClientLoansData.setLoans(loanDueDatas);
+                clientLoansDatas.add(lastClientLoansData);
+                
+                final JLGClientsData jlgClientsData = corrCollectioSheetFlatData.getJLGClientsData();
+                jlgClientsData.setClients(clientLoansDatas);
+                jlgClientsDatas.add(jlgClientsData);
+            }
 
             jlgCollectionSheetData = new JLGCollectionSheetData(dueDate, loanProducts, jlgClientsDatas);
         }
@@ -167,9 +169,10 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
 
         final JLGCollectionSheetFaltDataMapper mapper = new JLGCollectionSheetFaltDataMapper();
         final String sql = mapper.collectionSheetSchema();
-
+        final DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+        final String dueDateStr = df.format(dueDate.toDate());
         final SqlParameterSource namedParameters = new MapSqlParameterSource().addValue("hierarchy", groupHierarchy)
-                .addValue("dueDate", dueDate).addValue("officeHierarchy", officeHierarchy);
+                .addValue("dueDate", dueDateStr).addValue("officeHierarchy", officeHierarchy);
         return this.namedParameterjdbcTemplate.query(sql, namedParameters, mapper);
     }
 
