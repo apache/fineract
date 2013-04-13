@@ -1988,7 +1988,7 @@ public class Loan extends AbstractPersistable<Long> {
         return date;
     }
 
-    private LocalDate getExpectedDisbursedOnLocalDate() {
+    public LocalDate getExpectedDisbursedOnLocalDate() {
         LocalDate expectedDisbursementDate = null;
         if (this.expectedDisbursementDate != null) {
             expectedDisbursementDate = new LocalDate(this.expectedDisbursementDate);

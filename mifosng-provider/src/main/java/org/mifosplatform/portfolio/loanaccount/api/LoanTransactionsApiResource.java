@@ -91,6 +91,8 @@ public class LoanTransactionsApiResource {
             transactionData = this.loanReadPlatformService.retrieveNewClosureDetails();
         } else if (is(commandParam, "close")) {
             transactionData = this.loanReadPlatformService.retrieveNewClosureDetails();
+        } else if (is(commandParam, "disburse")) {
+            transactionData = this.loanReadPlatformService.retrieveDisbursalTemplate(loanId);
         } else {
             throw new UnrecognizedQueryParamException("command", commandParam);
         }

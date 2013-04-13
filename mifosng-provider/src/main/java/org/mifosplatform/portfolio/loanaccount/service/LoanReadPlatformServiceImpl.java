@@ -254,6 +254,16 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
     }
 
     @Override
+    public LoanTransactionData retrieveDisbursalTemplate(final Long loanId) {
+        final Loan loan = this.loanRepository.findOne(loanId);
+        if (loan == null) { throw new LoanNotFoundException(loanId); }
+        final LoanTransactionEnumData transactionType = LoanEnumerations.transactionType(LoanTransactionType.DISBURSEMENT);
+        final List<EnumOptionData> paymentOptions = loanDropdownReadPlatformService.retrievePaymentTypeOptions();
+        return new LoanTransactionData(null, transactionType, null, null, loan.getExpectedDisbursedOnLocalDate(), null, null, null, null,
+                null, paymentOptions);
+    }
+
+    @Override
     public LoanTransactionData retrieveLoanTransaction(final Long loanId, final Long transactionId) {
 
         context.authenticatedUser();
@@ -740,4 +750,5 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     interestPortion, feeChargesPortion, penaltyChargesPortion);
         }
     }
+
 }
