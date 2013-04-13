@@ -40,7 +40,7 @@ public final class LoanApplicationCommandFromApiJsonHelper {
      */
     final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("dateFormat", "locale", "id", "clientId", "groupId",
             "productId", "principal", "loanTermFrequency", "loanTermFrequencyType", "numberOfRepayments", "repaymentEvery",
-            "repaymentFrequencyType", "interestRatePerPeriod", "interestRateFrequencyType", "amortizationType", "interestType",
+            "repaymentFrequencyType", "interestRatePerPeriod", "amortizationType", "interestType",
             "interestCalculationPeriodType", "expectedDisbursementDate", "repaymentsStartingFromDate", "interestChargedFromDate",
             "submittedOnDate", "submittedOnNote", //
             "accountNo", "externalId", "fundId", "loanOfficerId", // optional
@@ -145,12 +145,6 @@ public final class LoanApplicationCommandFromApiJsonHelper {
         final BigDecimal interestRatePerPeriod = fromApiJsonHelper.extractBigDecimalWithLocaleNamed(interestRatePerPeriodParameterName,
                 element);
         baseDataValidator.reset().parameter(interestRatePerPeriodParameterName).value(interestRatePerPeriod).notNull().positiveAmount();
-
-        final String interestRateFrequencyTypeParameterName = "interestRateFrequencyType";
-        final Integer interestRateFrequencyType = fromApiJsonHelper.extractIntegerSansLocaleNamed(interestRateFrequencyTypeParameterName,
-                element);
-        baseDataValidator.reset().parameter(interestRateFrequencyTypeParameterName).value(interestRateFrequencyType).notNull()
-                .inMinMaxRange(0, 3);
 
         final String interestTypeParameterName = "interestType";
         final Integer interestType = fromApiJsonHelper.extractIntegerSansLocaleNamed(interestTypeParameterName, element);
@@ -418,15 +412,6 @@ public final class LoanApplicationCommandFromApiJsonHelper {
             final BigDecimal interestRatePerPeriod = fromApiJsonHelper.extractBigDecimalWithLocaleNamed(interestRatePerPeriodParameterName,
                     element);
             baseDataValidator.reset().parameter(interestRatePerPeriodParameterName).value(interestRatePerPeriod).notNull().positiveAmount();
-        }
-
-        final String interestRateFrequencyTypeParameterName = "interestRateFrequencyType";
-        if (fromApiJsonHelper.parameterExists(interestRateFrequencyTypeParameterName, element)) {
-            atLeastOneParameterPassedForUpdate = true;
-            final Integer interestRateFrequencyType = fromApiJsonHelper.extractIntegerWithLocaleNamed(
-                    interestRateFrequencyTypeParameterName, element);
-            baseDataValidator.reset().parameter(interestRateFrequencyTypeParameterName).value(interestRateFrequencyType).notNull()
-                    .inMinMaxRange(0, 3);
         }
 
         final String interestTypeParameterName = "interestType";

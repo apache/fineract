@@ -74,13 +74,16 @@ public class LoanScheduleAssembler {
 
         final BigDecimal principal = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("principal", element);
         final BigDecimal interestRatePerPeriod = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("interestRatePerPeriod", element);
-        final Integer interestRateFrequencyType = fromApiJsonHelper.extractIntegerWithLocaleNamed("interestRateFrequencyType", element);
+        //final Integer interestRateFrequencyType = fromApiJsonHelper.extractIntegerWithLocaleNamed("interestRateFrequencyType", element);
         final Integer interestType = fromApiJsonHelper.extractIntegerWithLocaleNamed("interestType", element);
         final Integer interestCalculationPeriodType = fromApiJsonHelper.extractIntegerWithLocaleNamed("interestCalculationPeriodType",
                 element);
 
         final InterestMethod interestMethod = InterestMethod.fromInt(interestType);
-        final PeriodFrequencyType interestRatePeriodFrequencyType = PeriodFrequencyType.fromInt(interestRateFrequencyType);
+        //final PeriodFrequencyType interestRatePeriodFrequencyType = PeriodFrequencyType.fromInt(interestRateFrequencyType);
+        
+        // PeriodFrequencyType is copied from Loan Product
+        final PeriodFrequencyType interestRatePeriodFrequencyType = loanProduct.loanProductRelatedDetail().getInterestPeriodFrequencyType();
         final InterestCalculationPeriodMethod interestCalculationPeriodMethod = InterestCalculationPeriodMethod
                 .fromInt(interestCalculationPeriodType);
 
