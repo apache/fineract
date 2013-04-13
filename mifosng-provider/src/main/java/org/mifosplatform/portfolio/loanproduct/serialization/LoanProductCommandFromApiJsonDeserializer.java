@@ -23,7 +23,7 @@ import org.mifosplatform.infrastructure.core.exception.InvalidJsonException;
 import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.portfolio.loanproduct.domain.AccountingRuleType;
-import org.mifosplatform.portfolio.loanproduct.domain.LoanProductRelatedDetail;
+import org.mifosplatform.portfolio.loanproduct.domain.LoanProduct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -261,7 +261,7 @@ public final class LoanProductCommandFromApiJsonDeserializer {
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
-    public void validateForUpdate(final String json) {
+    public void validateForUpdate(final String json, final LoanProduct loanProduct) {
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
@@ -445,23 +445,21 @@ public final class LoanProductCommandFromApiJsonDeserializer {
         baseDataValidator.reset().parameter(LOAN_PRODUCT_ACCOUNTING_PARAMS.PENALTIES_RECEIVABLE.getValue())
                 .value(receivablePenaltyAccountId).ignoreIfNull().integerGreaterThanZero();
 
+        validateMinMaxConstraints(element, baseDataValidator, loanProduct);
+        
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
-    public void validateMinMaxConstraints(final JsonElement element, final LoanProductRelatedDetail loanProductRelatedDetail, final String resource){
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource(resource);
+    public void validateMinMaxConstraints(final JsonElement element, final DataValidatorBuilder baseDataValidator, final LoanProduct loanProduct){
         
-        validatePrincipalMinMaxConstraint(element, loanProductRelatedDetail, baseDataValidator);
+        validatePrincipalMinMaxConstraint(element, loanProduct, baseDataValidator);
         
-        validateNumberOfRepaymentsMinMaxConstraint(element, loanProductRelatedDetail, baseDataValidator);
+        validateNumberOfRepaymentsMinMaxConstraint(element, loanProduct, baseDataValidator);
         
-        validateNominalInterestRatePerPeriodMinMaxConstraint(element, loanProductRelatedDetail, baseDataValidator);
-
-        throwExceptionIfValidationWarningsExist(dataValidationErrors);
+        validateNominalInterestRatePerPeriodMinMaxConstraint(element, loanProduct, baseDataValidator);
     }
     
-    private void validatePrincipalMinMaxConstraint(final JsonElement element, final LoanProductRelatedDetail loanProductRelatedDetail, final DataValidatorBuilder baseDataValidator) {
+    private void validatePrincipalMinMaxConstraint(final JsonElement element, final LoanProduct loanProduct, final DataValidatorBuilder baseDataValidator) {
 
         boolean principalUpdated = false;
         boolean minPrincipalUpdated = false;
@@ -472,7 +470,7 @@ public final class LoanProductCommandFromApiJsonDeserializer {
             principalAmount = fromApiJsonHelper.extractBigDecimalWithLocaleNamed(principalParameterName, element);
             principalUpdated = true;
         }else{
-            principalAmount = loanProductRelatedDetail.getPrincipal().getAmount();
+            principalAmount = loanProduct.getPrincipalAmount().getAmount();
         }
         
         String minPrincipalParameterName = "minPrincipal";
@@ -481,7 +479,7 @@ public final class LoanProductCommandFromApiJsonDeserializer {
             minPrincipalAmount = fromApiJsonHelper.extractBigDecimalWithLocaleNamed(minPrincipalParameterName, element);
             minPrincipalUpdated = true;
         }else{
-            minPrincipalAmount = loanProductRelatedDetail.getMinPrincipal().getAmount();
+            minPrincipalAmount = loanProduct.getMinPrincipalAmount().getAmount();
         }
         
         String maxPrincipalParameterName = "maxPrincipal";
@@ -490,7 +488,7 @@ public final class LoanProductCommandFromApiJsonDeserializer {
             maxPrincipalAmount = fromApiJsonHelper.extractBigDecimalWithLocaleNamed(maxPrincipalParameterName, element);
             maxPrincipalUpdated = true;
         }else{
-            maxPrincipalAmount = loanProductRelatedDetail.getMaxPrincipal().getAmount();
+            maxPrincipalAmount = loanProduct.getMaxPrincipalAmount().getAmount();
         }
         
         if(minPrincipalUpdated){
@@ -515,7 +513,7 @@ public final class LoanProductCommandFromApiJsonDeserializer {
         }
     }
     
-    private void validateNumberOfRepaymentsMinMaxConstraint(final JsonElement element, final LoanProductRelatedDetail loanProductRelatedDetail, final DataValidatorBuilder baseDataValidator) {
+    private void validateNumberOfRepaymentsMinMaxConstraint(final JsonElement element, final LoanProduct loanProduct, final DataValidatorBuilder baseDataValidator) {
         boolean numberOfRepaymentsUpdated = false;
         boolean minNumberOfRepaymentsUpdated = false;
         boolean maxNumberOfRepaymentsUpdated = false;
@@ -526,7 +524,7 @@ public final class LoanProductCommandFromApiJsonDeserializer {
             numberOfRepayments = fromApiJsonHelper.extractIntegerWithLocaleNamed(numberOfRepaymentsParameterName, element);
             numberOfRepaymentsUpdated = true;
         }else{
-            numberOfRepayments = loanProductRelatedDetail.getNumberOfRepayments();
+            numberOfRepayments = loanProduct.getNumberOfRepayments();
         }
         
         String minNumberOfRepaymentsParameterName = "minNumberOfRepayments";
@@ -535,7 +533,7 @@ public final class LoanProductCommandFromApiJsonDeserializer {
             minNumberOfRepayments = fromApiJsonHelper.extractIntegerWithLocaleNamed(minNumberOfRepaymentsParameterName, element);
             minNumberOfRepaymentsUpdated = true;
         }else{
-            minNumberOfRepayments = loanProductRelatedDetail.getMinNumberOfRepayments();
+            minNumberOfRepayments = loanProduct.getMinNumberOfRepayments();
         }
         
         String maxNumberOfRepaymentsParameterName = "maxNumberOfRepayments";
@@ -544,7 +542,7 @@ public final class LoanProductCommandFromApiJsonDeserializer {
             maxNumberOfRepayments = fromApiJsonHelper.extractIntegerWithLocaleNamed(maxNumberOfRepaymentsParameterName, element);
             maxNumberOfRepaymentsUpdated = true;
         }else{
-            maxNumberOfRepayments = loanProductRelatedDetail.getMaxNumberOfRepayments();
+            maxNumberOfRepayments = loanProduct.getMaxNumberOfRepayments();
         }
         
         if(minNumberOfRepaymentsUpdated){
@@ -568,7 +566,7 @@ public final class LoanProductCommandFromApiJsonDeserializer {
         }
     }
 
-    private void validateNominalInterestRatePerPeriodMinMaxConstraint(final JsonElement element, final LoanProductRelatedDetail loanProductRelatedDetail, final DataValidatorBuilder baseDataValidator) {
+    private void validateNominalInterestRatePerPeriodMinMaxConstraint(final JsonElement element, final LoanProduct loanProduct, final DataValidatorBuilder baseDataValidator) {
 
         boolean iRPUpdated = false;
         boolean minIRPUpdated = false;
@@ -580,7 +578,7 @@ public final class LoanProductCommandFromApiJsonDeserializer {
             interestRatePerPeriod = fromApiJsonHelper.extractBigDecimalWithLocaleNamed(interestRatePerPeriodParameterName, element);
             iRPUpdated = true;
         }else{
-            interestRatePerPeriod = loanProductRelatedDetail.getNominalInterestRatePerPeriod();
+            interestRatePerPeriod = loanProduct.getNominalInterestRatePerPeriod();
         }
         
         String minInterestRatePerPeriodParameterName = "minInterestRatePerPeriod";
@@ -589,7 +587,7 @@ public final class LoanProductCommandFromApiJsonDeserializer {
             minInterestRatePerPeriod = fromApiJsonHelper.extractBigDecimalWithLocaleNamed(minInterestRatePerPeriodParameterName, element);
             minIRPUpdated = true;
         }else{
-            minInterestRatePerPeriod = loanProductRelatedDetail.getMinNominalInterestRatePerPeriod();
+            minInterestRatePerPeriod = loanProduct.getMinNominalInterestRatePerPeriod();
         }
 
         String maxInterestRatePerPeriodParameterName = "maxInterestRatePerPeriod";
@@ -598,7 +596,7 @@ public final class LoanProductCommandFromApiJsonDeserializer {
             maxInterestRatePerPeriod = fromApiJsonHelper.extractBigDecimalWithLocaleNamed(maxInterestRatePerPeriodParameterName, element);
             maxIRPUpdated = true;
         }else{
-            maxInterestRatePerPeriod = loanProductRelatedDetail.getMaxNominalInterestRatePerPeriod();
+            maxInterestRatePerPeriod = loanProduct.getMaxNominalInterestRatePerPeriod();
         }
 
         if(minIRPUpdated){

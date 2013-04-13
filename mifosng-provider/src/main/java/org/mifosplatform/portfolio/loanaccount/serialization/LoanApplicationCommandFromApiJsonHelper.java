@@ -23,6 +23,7 @@ import org.mifosplatform.infrastructure.core.exception.InvalidJsonException;
 import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanProduct;
+import org.mifosplatform.portfolio.loanproduct.serialization.LoanProductCommandFromApiJsonDeserializer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -49,13 +50,16 @@ public final class LoanApplicationCommandFromApiJsonHelper {
     ));
 
     private final FromJsonHelper fromApiJsonHelper;
+    
+    private final LoanProductCommandFromApiJsonDeserializer loanProductCommandFromApiJsonDeserializer;
 
     @Autowired
-    public LoanApplicationCommandFromApiJsonHelper(final FromJsonHelper fromApiJsonHelper) {
+    public LoanApplicationCommandFromApiJsonHelper(final FromJsonHelper fromApiJsonHelper, final LoanProductCommandFromApiJsonDeserializer loanProductCommandFromApiJsonDeserializer) {
         this.fromApiJsonHelper = fromApiJsonHelper;
+        this.loanProductCommandFromApiJsonDeserializer = loanProductCommandFromApiJsonDeserializer;
     }
 
-    public void validateForCreate(final String json) {
+    public void validateForCreate(final String json, final LoanProduct loanProduct) {
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
@@ -281,6 +285,8 @@ public final class LoanApplicationCommandFromApiJsonHelper {
             }
         }
 
+        loanProductCommandFromApiJsonDeserializer.validateMinMaxConstraints(element, baseDataValidator, loanProduct);
+        
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
                 "Validation errors exist.", dataValidationErrors); }
     }
@@ -593,19 +599,11 @@ public final class LoanApplicationCommandFromApiJsonHelper {
                 "Validation errors exist.", dataValidationErrors); }
     }
     
-    public void validateMinMaxConstraintValues(final JsonElement element, final LoanProduct loanProduct){
-
+    public void validateMinMaxConstraintsForModification(final String json, final LoanProduct loanProduct) {
+        final JsonElement element = fromApiJsonHelper.parse(json);
         final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan");
-        
-        final BigDecimal minPrincipal = loanProduct.getMinPrincipalAmount().getAmount();
-        final BigDecimal maxPrincipal = loanProduct.getMaxPrincipalAmount().getAmount();
-        final String principalParameterName = "principal";
-
-        if (fromApiJsonHelper.parameterExists(principalParameterName, element)) {
-            final BigDecimal principal = fromApiJsonHelper.extractBigDecimalWithLocaleNamed(principalParameterName, element);
-            baseDataValidator.reset().parameter(principalParameterName).value(principal).notNull().positiveAmount().inMinAndMaxAmountRange(minPrincipal, maxPrincipal);
-        }
+        this.loanProductCommandFromApiJsonDeserializer.validateMinMaxConstraints(element, baseDataValidator, loanProduct);
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
                 "Validation errors exist.", dataValidationErrors); }
     }

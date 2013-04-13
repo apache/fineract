@@ -668,6 +668,10 @@ public class Loan extends AbstractPersistable<Long> {
         return this.client;
     }
 
+    public LoanProduct loanProduct(){
+        return this.loanProduct;
+    }
+    
     public LoanProductRelatedDetail repaymentScheduleDetail() {
         return this.loanRepaymentScheduleDetail;
     }
@@ -1318,12 +1322,8 @@ public class Loan extends AbstractPersistable<Long> {
         final LoanScheduleGenerator loanScheduleGenerator = new DefaultLoanScheduleGeneratorFactory().create(interestMethod);
 
         final BigDecimal principal = this.loanRepaymentScheduleDetail.getPrincipal().getAmount();
-        final BigDecimal minPrincipal = this.loanRepaymentScheduleDetail.getMinPrincipal().getAmount();
-        final BigDecimal maxPrincipal = this.loanRepaymentScheduleDetail.getMaxPrincipal().getAmount();
         final BigDecimal inArrearsTolerance = this.loanRepaymentScheduleDetail.getInArrearsTolerance().getAmount();
         final BigDecimal interestRatePerPeriod = this.loanRepaymentScheduleDetail.getNominalInterestRatePerPeriod();
-        final BigDecimal minInterestRatePerPeriod = this.loanRepaymentScheduleDetail.getMinNominalInterestRatePerPeriod();
-        final BigDecimal maxInterestRatePerPeriod = this.loanRepaymentScheduleDetail.getMaxNominalInterestRatePerPeriod();
         final PeriodFrequencyType interestRatePeriodFrequencyType = this.loanRepaymentScheduleDetail.getInterestPeriodFrequencyType();
         final BigDecimal defaultAnnualNominalInterestRate = this.loanRepaymentScheduleDetail.getAnnualNominalInterestRate();
 
@@ -1332,18 +1332,15 @@ public class Loan extends AbstractPersistable<Long> {
         final Integer repaymentEvery = this.loanRepaymentScheduleDetail.getRepayEvery();
         final PeriodFrequencyType repaymentPeriodFrequencyType = this.loanRepaymentScheduleDetail.getRepaymentPeriodFrequencyType();
         final Integer numberOfRepayments = this.loanRepaymentScheduleDetail.getNumberOfRepayments();
-        final Integer minNumberOfRepayments = this.loanRepaymentScheduleDetail.getMinNumberOfRepayments();
-        final Integer maxNumberOfRepayments = this.loanRepaymentScheduleDetail.getMaxNumberOfRepayments();
         final AmortizationMethod amortizationMethod = this.loanRepaymentScheduleDetail.getAmortizationMethod();
         final Integer loanTermFrequency = this.termFrequency;
         final PeriodFrequencyType loanTermPeriodFrequencyType = PeriodFrequencyType.fromInt(this.termPeriodFrequencyType);
 
-        final LoanSchedule loanSchedule = new LoanSchedule(loanScheduleGenerator, applicationCurrency, principal, minPrincipal,
-                maxPrincipal, interestRatePerPeriod, minInterestRatePerPeriod, maxInterestRatePerPeriod, interestRatePeriodFrequencyType,
-                defaultAnnualNominalInterestRate, interestMethod, interestCalculationPeriodMethod, repaymentEvery,
-                repaymentPeriodFrequencyType, numberOfRepayments, minNumberOfRepayments, maxNumberOfRepayments, amortizationMethod,
-                loanTermFrequency, loanTermPeriodFrequencyType, setOfLoanCharges(), this.getDisbursementDate(),
-                this.getExpectedFirstRepaymentOnDate(), this.getInterestChargedFromDate(), inArrearsTolerance);
+        final LoanSchedule loanSchedule = new LoanSchedule(loanScheduleGenerator, applicationCurrency, principal, interestRatePerPeriod,
+                interestRatePeriodFrequencyType, defaultAnnualNominalInterestRate, interestMethod, interestCalculationPeriodMethod,
+                repaymentEvery, repaymentPeriodFrequencyType, numberOfRepayments, amortizationMethod, loanTermFrequency,
+                loanTermPeriodFrequencyType, setOfLoanCharges(), this.getDisbursementDate(), this.getExpectedFirstRepaymentOnDate(),
+                this.getInterestChargedFromDate(), inArrearsTolerance);
 
         final LoanScheduleData generatedData = loanSchedule.generate();
 

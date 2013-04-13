@@ -21,13 +21,9 @@ public class LoanProductRelatedDetailTestHelper {
 
         MonetaryCurrency currency = new MonetaryCurrencyBuilder().withCode("USD").withDigitsAfterDecimal(2).build();
         BigDecimal defaultPrincipal = BigDecimal.valueOf(Double.valueOf("200000"));
-        BigDecimal defaultMinPrincipal = BigDecimal.valueOf(Double.valueOf("100000"));
-        BigDecimal defaultMaxPrincipal = BigDecimal.valueOf(Double.valueOf("250000"));
 
         // 2% per month, 24% per year
         BigDecimal defaultNominalInterestRatePerPeriod = BigDecimal.valueOf(Double.valueOf("2"));
-        BigDecimal defaultMinNominalInterestRatePerPeriod = BigDecimal.valueOf(Double.valueOf("1"));
-        BigDecimal defaultMaxNominalInterestRatePerPeriod = BigDecimal.valueOf(Double.valueOf("10"));
         PeriodFrequencyType interestPeriodFrequencyType = PeriodFrequencyType.MONTHS;
         BigDecimal defaultAnnualNominalInterestRate = BigDecimal.valueOf(Double.valueOf("24"));
 
@@ -37,29 +33,21 @@ public class LoanProductRelatedDetailTestHelper {
         PeriodFrequencyType repaymentFrequencyType = PeriodFrequencyType.MONTHS;
 
         Integer defaultNumberOfRepayments = Integer.valueOf(4);
-        Integer defaultMinNumberOfRepayments = Integer.valueOf(2);
-        Integer defaultMaxNumberOfRepayments = Integer.valueOf(6);
         AmortizationMethod amortizationMethod = AmortizationMethod.EQUAL_PRINCIPAL;
 
         BigDecimal inArrearsTolerance = BigDecimal.ZERO;
 
-        return createLoanProductRelatedDetail(currency, defaultPrincipal, defaultMinPrincipal, defaultMaxPrincipal,
-                defaultNominalInterestRatePerPeriod, defaultMinNominalInterestRatePerPeriod, defaultMaxNominalInterestRatePerPeriod,
-                interestPeriodFrequencyType, defaultAnnualNominalInterestRate, interestMethod, interestCalculationPeriodMethod, repayEvery,
-                repaymentFrequencyType, defaultNumberOfRepayments, defaultMinNumberOfRepayments, defaultMaxNumberOfRepayments,
-                amortizationMethod, inArrearsTolerance);
+        return createLoanProductRelatedDetail(currency, defaultPrincipal, defaultNominalInterestRatePerPeriod, interestPeriodFrequencyType,
+                defaultAnnualNominalInterestRate, interestMethod, interestCalculationPeriodMethod, repayEvery, repaymentFrequencyType,
+                defaultNumberOfRepayments, amortizationMethod, inArrearsTolerance);
     }
 
     public static LoanProductRelatedDetail createSettingsForEqualInstallmentAmortizationQuarterly() {
         MonetaryCurrency currency = new MonetaryCurrencyBuilder().withCode("USD").withDigitsAfterDecimal(2).build();
         BigDecimal defaultPrincipal = BigDecimal.valueOf(Double.valueOf("200000"));
-        BigDecimal defaultMinPrincipal = BigDecimal.valueOf(Double.valueOf("100000"));
-        BigDecimal defaultMaxPrincipal = BigDecimal.valueOf(Double.valueOf("250000"));
 
         // 2% per month, 24% per year
         BigDecimal defaultNominalInterestRatePerPeriod = BigDecimal.valueOf(Double.valueOf("2"));
-        BigDecimal defaultMinNominalInterestRatePerPeriod = BigDecimal.valueOf(Double.valueOf("2"));
-        BigDecimal defaultMaxNominalInterestRatePerPeriod = BigDecimal.valueOf(Double.valueOf("2"));
         PeriodFrequencyType interestPeriodFrequencyType = PeriodFrequencyType.MONTHS;
         BigDecimal defaultAnnualNominalInterestRate = BigDecimal.valueOf(Double.valueOf("24"));
 
@@ -69,30 +57,22 @@ public class LoanProductRelatedDetailTestHelper {
         PeriodFrequencyType repaymentFrequencyType = PeriodFrequencyType.MONTHS;
 
         Integer defaultNumberOfRepayments = Integer.valueOf(4);
-        Integer defaultMinNumberOfRepayments = Integer.valueOf(4);
-        Integer defaultMaxNumberOfRepayments = Integer.valueOf(4);
         AmortizationMethod amortizationMethod = AmortizationMethod.EQUAL_INSTALLMENTS;
 
         BigDecimal inArrearsTolerance = BigDecimal.ZERO;
 
-        return createLoanProductRelatedDetail(currency, defaultPrincipal, defaultMinPrincipal, defaultMaxPrincipal,
-                defaultNominalInterestRatePerPeriod, defaultMinNominalInterestRatePerPeriod, defaultMaxNominalInterestRatePerPeriod,
-                interestPeriodFrequencyType, defaultAnnualNominalInterestRate, interestMethod, interestCalculationPeriodMethod, repayEvery,
-                repaymentFrequencyType, defaultNumberOfRepayments, defaultMinNumberOfRepayments, defaultMaxNumberOfRepayments,
-                amortizationMethod, inArrearsTolerance);
+        return createLoanProductRelatedDetail(currency, defaultPrincipal, defaultNominalInterestRatePerPeriod, interestPeriodFrequencyType,
+                defaultAnnualNominalInterestRate, interestMethod, interestCalculationPeriodMethod, repayEvery, repaymentFrequencyType,
+                defaultNumberOfRepayments, amortizationMethod, inArrearsTolerance);
     }
 
     public static LoanProductRelatedDetail createSettingsForFlatQuarterly(final AmortizationMethod amortizationMethod) {
 
         MonetaryCurrency currency = new MonetaryCurrencyBuilder().withCode("USD").withDigitsAfterDecimal(2).build();
         BigDecimal defaultPrincipal = BigDecimal.valueOf(Double.valueOf("200000"));
-        BigDecimal defaultMinPrincipal = BigDecimal.valueOf(Double.valueOf("200000"));
-        BigDecimal defaultMaxPrincipal = BigDecimal.valueOf(Double.valueOf("200000"));
-
+        
         // 2% per month, 24% per year
         BigDecimal defaultNominalInterestRatePerPeriod = BigDecimal.valueOf(Double.valueOf("2"));
-        BigDecimal defaultMinNominalInterestRatePerPeriod = BigDecimal.valueOf(Double.valueOf("2"));
-        BigDecimal defaultMaxNominalInterestRatePerPeriod = BigDecimal.valueOf(Double.valueOf("2"));
         PeriodFrequencyType interestPeriodFrequencyType = PeriodFrequencyType.MONTHS;
         BigDecimal defaultAnnualNominalInterestRate = BigDecimal.valueOf(Double.valueOf("24"));
 
@@ -102,29 +82,21 @@ public class LoanProductRelatedDetailTestHelper {
         PeriodFrequencyType repaymentFrequencyType = PeriodFrequencyType.MONTHS;
 
         Integer defaultNumberOfRepayments = Integer.valueOf(4);
-        Integer defaultMinNumberOfRepayments = Integer.valueOf(4);
-        Integer defaultMaxNumberOfRepayments = Integer.valueOf(4);
 
         BigDecimal inArrearsTolerance = BigDecimal.ZERO;
 
-        return createLoanProductRelatedDetail(currency, defaultPrincipal, defaultMinPrincipal, defaultMaxPrincipal,
-                defaultNominalInterestRatePerPeriod, defaultMinNominalInterestRatePerPeriod, defaultMaxNominalInterestRatePerPeriod,
-                interestPeriodFrequencyType, defaultAnnualNominalInterestRate, interestMethod, interestCalculationPeriodMethod, repayEvery,
-                repaymentFrequencyType, defaultNumberOfRepayments, defaultMinNumberOfRepayments, defaultMaxNumberOfRepayments,
-                amortizationMethod, inArrearsTolerance);
+        return createLoanProductRelatedDetail(currency, defaultPrincipal, defaultNominalInterestRatePerPeriod, interestPeriodFrequencyType,
+                defaultAnnualNominalInterestRate, interestMethod, interestCalculationPeriodMethod, repayEvery, repaymentFrequencyType,
+                defaultNumberOfRepayments, amortizationMethod, inArrearsTolerance);
     }
 
     public static LoanProductRelatedDetail createSettingsForIrregularFlatEveryFourMonths() {
 
         MonetaryCurrency currency = new MonetaryCurrencyBuilder().withCode("KSH").withDigitsAfterDecimal(0).build();
         BigDecimal defaultPrincipal = BigDecimal.valueOf(Double.valueOf("15000"));
-        BigDecimal defaultMinPrincipal = BigDecimal.valueOf(Double.valueOf("15000"));
-        BigDecimal defaultMaxPrincipal = BigDecimal.valueOf(Double.valueOf("15000"));
 
         // 2% per month, 24% per year
         BigDecimal defaultNominalInterestRatePerPeriod = BigDecimal.valueOf(Double.valueOf("2"));
-        BigDecimal defaultMinNominalInterestRatePerPeriod = BigDecimal.valueOf(Double.valueOf("2"));
-        BigDecimal defaultMaxNominalInterestRatePerPeriod = BigDecimal.valueOf(Double.valueOf("4"));
         PeriodFrequencyType interestPeriodFrequencyType = PeriodFrequencyType.MONTHS;
         BigDecimal defaultAnnualNominalInterestRate = BigDecimal.valueOf(Double.valueOf("24"));
 
@@ -134,31 +106,25 @@ public class LoanProductRelatedDetailTestHelper {
         PeriodFrequencyType repaymentFrequencyType = PeriodFrequencyType.MONTHS;
 
         Integer defaultNumberOfRepayments = Integer.valueOf(2);
-        Integer defaultMinNumberOfRepayments = Integer.valueOf(2);
-        Integer defaultMaxNumberOfRepayments = Integer.valueOf(2);
 
         BigDecimal inArrearsTolerance = BigDecimal.ZERO;
 
         AmortizationMethod amortizationMethod = AmortizationMethod.EQUAL_PRINCIPAL;
 
-        return createLoanProductRelatedDetail(currency, defaultPrincipal, defaultMinPrincipal, defaultMaxPrincipal,
-                defaultNominalInterestRatePerPeriod, defaultMinNominalInterestRatePerPeriod, defaultMaxNominalInterestRatePerPeriod, interestPeriodFrequencyType, defaultAnnualNominalInterestRate, interestMethod,
-                interestCalculationPeriodMethod, repayEvery, repaymentFrequencyType, defaultNumberOfRepayments, defaultMinNumberOfRepayments, defaultMaxNumberOfRepayments, amortizationMethod,
-                inArrearsTolerance);
+        return createLoanProductRelatedDetail(currency, defaultPrincipal, defaultNominalInterestRatePerPeriod, interestPeriodFrequencyType,
+                defaultAnnualNominalInterestRate, interestMethod, interestCalculationPeriodMethod, repayEvery, repaymentFrequencyType,
+                defaultNumberOfRepayments, amortizationMethod, inArrearsTolerance);
     }
 
     private static LoanProductRelatedDetail createLoanProductRelatedDetail(MonetaryCurrency currency, BigDecimal defaultPrincipal,
-            BigDecimal defaultMinPrincipal, BigDecimal defaultMaxPrincipal, BigDecimal defaultNominalInterestRatePerPeriod,
-            BigDecimal defaultMinNominalInterestRatePerPeriod, BigDecimal defaultMaxNominalInterestRatePerPeriod,
-            PeriodFrequencyType interestPeriodFrequencyType, BigDecimal defaultAnnualNominalInterestRate, InterestMethod interestMethod,
+            BigDecimal defaultNominalInterestRatePerPeriod, PeriodFrequencyType interestPeriodFrequencyType,
+            BigDecimal defaultAnnualNominalInterestRate, InterestMethod interestMethod,
             InterestCalculationPeriodMethod interestCalculationPeriodMethod, Integer repayEvery,
-            PeriodFrequencyType repaymentFrequencyType, Integer defaultNumberOfRepayments, Integer defaultMinNumberOfRepayments,
-            Integer defaultMaxNumberOfRepayments, AmortizationMethod amortizationMethod, BigDecimal inArrearsTolerance) {
+            PeriodFrequencyType repaymentFrequencyType, Integer defaultNumberOfRepayments, AmortizationMethod amortizationMethod,
+            BigDecimal inArrearsTolerance) {
 
-        return new LoanProductRelatedDetail(currency, defaultPrincipal, defaultMinPrincipal, defaultMaxPrincipal,
-                defaultNominalInterestRatePerPeriod, defaultMinNominalInterestRatePerPeriod, defaultMaxNominalInterestRatePerPeriod,
-                interestPeriodFrequencyType, defaultAnnualNominalInterestRate, interestMethod, interestCalculationPeriodMethod, repayEvery,
-                repaymentFrequencyType, defaultNumberOfRepayments, defaultMinNumberOfRepayments, defaultMaxNumberOfRepayments,
-                amortizationMethod, inArrearsTolerance);
+        return new LoanProductRelatedDetail(currency, defaultPrincipal, defaultNominalInterestRatePerPeriod, interestPeriodFrequencyType,
+                defaultAnnualNominalInterestRate, interestMethod, interestCalculationPeriodMethod, repayEvery, repaymentFrequencyType,
+                defaultNumberOfRepayments, amortizationMethod, inArrearsTolerance);
     }
 }

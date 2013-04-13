@@ -57,7 +57,6 @@ import org.mifosplatform.portfolio.loanproduct.domain.LoanProduct;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanProductRepository;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanTransactionProcessingStrategy;
 import org.mifosplatform.portfolio.loanproduct.exception.LoanProductNotFoundException;
-import org.mifosplatform.portfolio.loanproduct.serialization.LoanProductCommandFromApiJsonDeserializer;
 import org.mifosplatform.portfolio.note.domain.Note;
 import org.mifosplatform.portfolio.note.domain.NoteRepository;
 import org.mifosplatform.useradministration.domain.AppUser;
@@ -93,7 +92,6 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
     private final LoanRepaymentScheduleTransactionProcessorFactory loanRepaymentScheduleTransactionProcessorFactory;
     private final CalendarRepository calendarRepository;
     private final CalendarInstanceRepository calendarInstanceRepository;
-    private final LoanProductCommandFromApiJsonDeserializer loanProductCommandFromApiJsonDeserializer;
 
     @Autowired
     public LoanApplicationWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final FromJsonHelper fromJsonHelper,
@@ -105,8 +103,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             final LoanProductRepository loanProductRepository, final AccountNumberGeneratorFactory accountIdentifierGeneratorFactory,
             final LoanSummaryWrapper loanSummaryWrapper,
             final LoanRepaymentScheduleTransactionProcessorFactory loanRepaymentScheduleTransactionProcessorFactory,
-            final CalendarRepository calendarRepository, final CalendarInstanceRepository calendarInstanceRepository,
-            final LoanProductCommandFromApiJsonDeserializer loanProductCommandFromApiJsonDeserializer) {
+            final CalendarRepository calendarRepository, final CalendarInstanceRepository calendarInstanceRepository) {
      this.context = context;
         this.fromJsonHelper = fromJsonHelper;
         this.loanApplicationTransitionApiJsonValidator = loanApplicationTransitionApiJsonValidator;
@@ -125,7 +122,6 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         this.loanRepaymentScheduleTransactionProcessorFactory = loanRepaymentScheduleTransactionProcessorFactory;
         this.calendarRepository = calendarRepository;
         this.calendarInstanceRepository = calendarInstanceRepository;
-        this.loanProductCommandFromApiJsonDeserializer = loanProductCommandFromApiJsonDeserializer;
     }
 
     private LoanLifecycleStateMachine defaultLoanLifecycleStateMachine() {
@@ -139,8 +135,12 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
 
         AppUser currentUser = context.authenticatedUser();
 
-        this.fromApiJsonDeserializer.validateForCreate(command.json());
+        final Long productId = fromJsonHelper.extractLongNamed("productId", command.parsedJson());
+        
+        final LoanProduct loanProduct = this.loanProductRepository.findOne(productId);
+        if (loanProduct == null) { throw new LoanProductNotFoundException(productId); }
 
+        this.fromApiJsonDeserializer.validateForCreate(command.json(), loanProduct);
 
         //validate dates against calendar recurring dates 
         //get calendar
@@ -203,7 +203,6 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             }
             
             final Loan existingLoanApplication = retrieveLoanBy(loanId);
-            this.loanProductCommandFromApiJsonDeserializer.validateMinMaxConstraints(command.parsedJson(), existingLoanApplication.repaymentScheduleDetail(), "loan");
 
             if (!existingLoanApplication.isSubmittedAndPendingApproval()) { throw new LoanApplicationNotInSubmittedAndPendingApprovalStateCannotBeModified(
                     loanId); }
@@ -232,6 +231,9 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
 
                 existingLoanApplication.updateLoanProduct(loanProduct);
             }
+            
+            //validate min and maximum constraints
+            this.fromApiJsonDeserializer.validateMinMaxConstraintsForModification(command.json(), existingLoanApplication.loanProduct());
 
             final String fundIdParamName = "fundId";
             if (changes.containsKey(fundIdParamName)) {

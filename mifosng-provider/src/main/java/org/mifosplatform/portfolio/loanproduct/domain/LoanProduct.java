@@ -65,6 +65,9 @@ public class LoanProduct extends AbstractPersistable<Long> {
 
     @Embedded
     private final LoanProductRelatedDetail loanProductRelatedDetail;
+    
+    @Embedded
+    private LoanProductMinMaxConstraints loanProductMinMaxConstraints;
 
     @Column(name = "accounting_type", nullable = false)
     private Integer accountingRule;
@@ -110,6 +113,7 @@ public class LoanProduct extends AbstractPersistable<Long> {
 
     protected LoanProduct() {
         this.loanProductRelatedDetail = null;
+        this.loanProductMinMaxConstraints = null;
     }
 
     public LoanProduct(final Fund fund, final LoanTransactionProcessingStrategy transactionProcessingStrategy, final String name,
@@ -136,12 +140,14 @@ public class LoanProduct extends AbstractPersistable<Long> {
             this.charges = charges;
         }
 
-        this.loanProductRelatedDetail = new LoanProductRelatedDetail(currency, defaultPrincipal, defaultMinPrincipal, defaultMaxPrincipal,
-                defaultNominalInterestRatePerPeriod, defaultMinNominalInterestRatePerPeriod, defaultMaxNominalInterestRatePerPeriod,
+        this.loanProductRelatedDetail = new LoanProductRelatedDetail(currency, defaultPrincipal, defaultNominalInterestRatePerPeriod,
                 interestPeriodFrequencyType, defaultAnnualNominalInterestRate, interestMethod, interestCalculationPeriodMethod, repayEvery,
-                repaymentFrequencyType, defaultNumberOfInstallments, defaultMinNumberOfInstallments, defaultMaxNumberOfInstallments,
-                amortizationMethod, inArrearsTolerance);
+                repaymentFrequencyType, defaultNumberOfInstallments, amortizationMethod, inArrearsTolerance);
 
+        this.loanProductMinMaxConstraints = new LoanProductMinMaxConstraints(defaultMinPrincipal, defaultMaxPrincipal,
+                defaultMinNominalInterestRatePerPeriod, defaultMaxNominalInterestRatePerPeriod, defaultMinNumberOfInstallments,
+                defaultMaxNumberOfInstallments);
+        
         if (accountingRuleType != null) {
             this.accountingRule = accountingRuleType.getValue();
         }
@@ -179,6 +185,7 @@ public class LoanProduct extends AbstractPersistable<Long> {
     public Map<String, Object> update(final JsonCommand command, final AprCalculator aprCalculator) {
 
         final Map<String, Object> actualChanges = this.loanProductRelatedDetail.update(command, aprCalculator);
+        actualChanges.putAll(this.loanProductMinMaxConstraints().update(command));
 
         final String accountingTypeParamName = "accountingRule";
         if (command.isChangeInIntegerParameterNamed(accountingTypeParamName, this.accountingRule)) {
@@ -246,11 +253,11 @@ public class LoanProduct extends AbstractPersistable<Long> {
     }
     
     public Money getMinPrincipalAmount(){
-        return this.loanProductRelatedDetail.getMinPrincipal();
+        return Money.of(this.loanProductRelatedDetail.getCurrency(), this.loanProductMinMaxConstraints().getMinPrincipal());
     }
     
     public Money getMaxPrincipalAmount(){
-        return this.loanProductRelatedDetail.getMaxPrincipal();
+        return Money.of(this.loanProductRelatedDetail.getCurrency(), this.loanProductMinMaxConstraints().getMaxPrincipal());
     }
     
     public BigDecimal getNominalInterestRatePerPeriod() {
@@ -258,26 +265,34 @@ public class LoanProduct extends AbstractPersistable<Long> {
     }
     
     public BigDecimal getMinNominalInterestRatePerPeriod() {
-        return this.loanProductRelatedDetail.getMinNominalInterestRatePerPeriod();
+        return this.loanProductMinMaxConstraints().getMinNominalInterestRatePerPeriod();
     }
     
     public BigDecimal getMaxNominalInterestRatePerPeriod(){
-        return this.loanProductRelatedDetail.getMaxNominalInterestRatePerPeriod();
+        return this.loanProductMinMaxConstraints().getMaxNominalInterestRatePerPeriod();
     }
     
     public Integer getNumberOfRepayments(){
-        return this.loanProductRelatedDetail.getNumberOfRepayments();
+        return this.loanProductRelatedDetail().getNumberOfRepayments();
     }
     
     public Integer getMinNumberOfRepayments() {
-        return this.loanProductRelatedDetail.getMinNumberOfRepayments();
+        return this.loanProductMinMaxConstraints().getMinNumberOfRepayments();
     }
 
     public Integer getMaxNumberOfRepayments() {
-        return this.loanProductRelatedDetail.getMaxNumberOfRepayments();
+        return this.loanProductMinMaxConstraints().getMaxNumberOfRepayments();
     }
     
     public LoanProductRelatedDetail loanProductRelatedDetail(){
         return this.loanProductRelatedDetail;
+    }
+    
+    public LoanProductMinMaxConstraints loanProductMinMaxConstraints() {
+        //If all min and max fields are null then loanProductMinMaxConstraints initialising to null
+        //Reset LoanProductMinMaxConstraints with null values.
+        this.loanProductMinMaxConstraints = (this.loanProductMinMaxConstraints == null) ? new LoanProductMinMaxConstraints(null, null, null, null, null, null)
+                : this.loanProductMinMaxConstraints;
+        return loanProductMinMaxConstraints;
     }
 }

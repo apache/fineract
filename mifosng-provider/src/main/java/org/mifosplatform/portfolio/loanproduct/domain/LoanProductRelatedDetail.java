@@ -34,20 +34,8 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
     @Column(name = "principal_amount", scale = 6, precision = 19, nullable = false)
     private BigDecimal principal;
     
-    @Column(name = "min_principal_amount", scale = 6, precision = 19, nullable = true)
-    private BigDecimal minPrincipal;
-    
-    @Column(name = "max_principal_amount", scale = 6, precision = 19, nullable = true)
-    private BigDecimal maxPrincipal;
-
     @Column(name = "nominal_interest_rate_per_period", scale = 6, precision = 19, nullable = false)
     private BigDecimal nominalInterestRatePerPeriod;
-    
-    @Column(name = "min_nominal_interest_rate_per_period", scale = 6, precision = 19, nullable = true)
-    private BigDecimal minNominalInterestRatePerPeriod;
-    
-    @Column(name = "max_nominal_interest_rate_per_period", scale = 6, precision = 19, nullable = true)
-    private BigDecimal maxNominalInterestRatePerPeriod;
 
     // FIXME - move away form JPA ordinal use for enums using just integer -
     // requires sql patch for existing users of software.
@@ -81,12 +69,6 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
 
     @Column(name = "number_of_repayments", nullable = false)
     private Integer numberOfRepayments;
-
-    @Column(name = "min_number_of_repayments", nullable = true)
-    private Integer minNumberOfRepayments;
-    
-    @Column(name = "max_number_of_repayments", nullable = true)
-    private Integer maxNumberOfRepayments;
     
     // FIXME - move away form JPA ordinal use for enums using just integer -
     // requires sql patch for existing users of software.
@@ -98,18 +80,15 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
     private BigDecimal inArrearsTolerance;
 
     public static LoanProductRelatedDetail createFrom(final MonetaryCurrency currency, final BigDecimal principal,
-            final BigDecimal minPrincipal, final BigDecimal maxPrincipal, final BigDecimal nominalInterestRatePerPeriod,
-            final BigDecimal minNominalInterestRatePerPeriod, final BigDecimal maxNominalInterestRatePerPeriod,
-            final PeriodFrequencyType interestRatePeriodFrequencyType, final BigDecimal nominalAnnualInterestRate,
-            final InterestMethod interestMethod, final InterestCalculationPeriodMethod interestCalculationPeriodMethod,
-            final Integer repaymentEvery, final PeriodFrequencyType repaymentPeriodFrequencyType, final Integer numberOfRepayments,
-            final Integer minNumberOfRepayments, final Integer maxNumberOfRepayments, final AmortizationMethod amortizationMethod,
-            final BigDecimal inArrearsTolerance) {
+            final BigDecimal nominalInterestRatePerPeriod, final PeriodFrequencyType interestRatePeriodFrequencyType,
+            final BigDecimal nominalAnnualInterestRate, final InterestMethod interestMethod,
+            final InterestCalculationPeriodMethod interestCalculationPeriodMethod, final Integer repaymentEvery,
+            final PeriodFrequencyType repaymentPeriodFrequencyType, final Integer numberOfRepayments,
+            final AmortizationMethod amortizationMethod, final BigDecimal inArrearsTolerance) {
 
-        return new LoanProductRelatedDetail(currency, principal, minPrincipal, maxPrincipal, nominalInterestRatePerPeriod,
-                minNominalInterestRatePerPeriod, maxNominalInterestRatePerPeriod, interestRatePeriodFrequencyType,
+        return new LoanProductRelatedDetail(currency, principal, nominalInterestRatePerPeriod, interestRatePeriodFrequencyType,
                 nominalAnnualInterestRate, interestMethod, interestCalculationPeriodMethod, repaymentEvery, repaymentPeriodFrequencyType,
-                numberOfRepayments, minNumberOfRepayments, maxNumberOfRepayments, amortizationMethod, inArrearsTolerance);
+                numberOfRepayments, amortizationMethod, inArrearsTolerance);
     }
 
     protected LoanProductRelatedDetail() {
@@ -117,21 +96,14 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
     }
 
     public LoanProductRelatedDetail(final MonetaryCurrency currency, final BigDecimal defaultPrincipal,
-            final BigDecimal defaultMinPrincipal, final BigDecimal defaultMaxPrincipal,
-            final BigDecimal defaultNominalInterestRatePerPeriod, final BigDecimal defaultMinNominalInterestRatePerPeriod,
-            final BigDecimal defaultMaxNominalInterestRatePerPeriod, final PeriodFrequencyType interestPeriodFrequencyType,
+            final BigDecimal defaultNominalInterestRatePerPeriod,final PeriodFrequencyType interestPeriodFrequencyType,
             final BigDecimal defaultAnnualNominalInterestRate, final InterestMethod interestMethod,
             final InterestCalculationPeriodMethod interestCalculationPeriodMethod, final Integer repayEvery,
             final PeriodFrequencyType repaymentFrequencyType, final Integer defaultNumberOfRepayments,
-            final Integer defaultMinNumberOfRepayments, final Integer defaultMaxNumberOfRepayments,
             final AmortizationMethod amortizationMethod, final BigDecimal inArrearsTolerance) {
         this.currency = currency;
         this.principal = defaultPrincipal;
-        this.minPrincipal = defaultMinPrincipal;
-        this.maxPrincipal = defaultMaxPrincipal;
         this.nominalInterestRatePerPeriod = defaultNominalInterestRatePerPeriod;
-        this.minNominalInterestRatePerPeriod = defaultMinNominalInterestRatePerPeriod;
-        this.maxNominalInterestRatePerPeriod = defaultMaxNominalInterestRatePerPeriod;
         this.interestPeriodFrequencyType = interestPeriodFrequencyType;
         this.annualNominalInterestRate = defaultAnnualNominalInterestRate;
         this.interestMethod = interestMethod;
@@ -139,8 +111,6 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
         this.repayEvery = repayEvery;
         this.repaymentPeriodFrequencyType = repaymentFrequencyType;
         this.numberOfRepayments = defaultNumberOfRepayments;
-        this.minNumberOfRepayments = defaultMinNumberOfRepayments;
-        this.maxNumberOfRepayments = defaultMaxNumberOfRepayments;
         this.amortizationMethod = amortizationMethod;
         if (inArrearsTolerance != null && BigDecimal.ZERO.compareTo(inArrearsTolerance) == 0) {
             this.inArrearsTolerance = null;
@@ -156,14 +126,6 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
     public Money getPrincipal() {
         return Money.of(this.currency, this.principal);
     }
-
-    public Money getMinPrincipal() {
-        return Money.of(this.currency, this.minPrincipal);
-    }
-    
-    public Money getMaxPrincipal() {
-        return Money.of(this.currency, this.maxPrincipal);
-    }
     
     public Money getInArrearsTolerance() {
         return Money.of(this.currency, this.inArrearsTolerance);
@@ -172,17 +134,7 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
     public BigDecimal getNominalInterestRatePerPeriod() {
         return BigDecimal.valueOf(Double.valueOf(this.nominalInterestRatePerPeriod.stripTrailingZeros().toString()));
     }
-    
-    public BigDecimal getMinNominalInterestRatePerPeriod() {
-        return this.minNominalInterestRatePerPeriod == null ? null : BigDecimal.valueOf(Double.valueOf(this.minNominalInterestRatePerPeriod
-                .stripTrailingZeros().toString()));
-    }
 
-    public BigDecimal getMaxNominalInterestRatePerPeriod() {
-        return this.maxNominalInterestRatePerPeriod == null ? null : BigDecimal.valueOf(Double.valueOf(this.maxNominalInterestRatePerPeriod
-                .stripTrailingZeros().toString()));
-    }
-    
     public PeriodFrequencyType getInterestPeriodFrequencyType() {
         return interestPeriodFrequencyType;
     }
@@ -212,14 +164,6 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
     @Override
     public Integer getNumberOfRepayments() {
         return numberOfRepayments;
-    }
-    
-    public Integer getMinNumberOfRepayments() {
-        return minNumberOfRepayments;
-    }
-
-    public Integer getMaxNumberOfRepayments() {
-        return maxNumberOfRepayments;
     }
     
     public AmortizationMethod getAmortizationMethod() {
@@ -264,22 +208,6 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
 
         final String localeAsInput = command.locale();
 
-        final String minPrincipalParamName = "minPrincipal";
-        if (command.isChangeInBigDecimalParameterNamedWithNullCheck(minPrincipalParamName, this.minPrincipal)) {
-            final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(minPrincipalParamName);
-            actualChanges.put(minPrincipalParamName, newValue);
-            actualChanges.put("locale", localeAsInput);
-            this.minPrincipal = newValue;
-        }
-
-        final String maxPrincipalParamName = "maxPrincipal";
-        if (command.isChangeInBigDecimalParameterNamedWithNullCheck(maxPrincipalParamName, this.maxPrincipal)) {
-            final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(maxPrincipalParamName);
-            actualChanges.put(maxPrincipalParamName, newValue);
-            actualChanges.put("locale", localeAsInput);
-            this.maxPrincipal = newValue;
-        }
-        
         final String principalParamName = "principal";
         if (command.isChangeInBigDecimalParameterNamed(principalParamName, this.principal)) {
             final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(principalParamName);
@@ -302,22 +230,6 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
             actualChanges.put(repaymentFrequencyTypeParamName, newValue);
             actualChanges.put("locale", localeAsInput);
             this.repaymentPeriodFrequencyType = PeriodFrequencyType.fromInt(newValue);
-        }
-
-        final String minNumberOfRepaymentsParamName = "minNumberOfRepayments";
-        if (command.isChangeInIntegerParameterNamed(minNumberOfRepaymentsParamName, this.minNumberOfRepayments)) {
-            final Integer newValue = command.integerValueOfParameterNamed(minNumberOfRepaymentsParamName);
-            actualChanges.put(minNumberOfRepaymentsParamName, newValue);
-            actualChanges.put("locale", localeAsInput);
-            this.minNumberOfRepayments = newValue;
-        }
-        
-        final String maxNumberOfRepaymentsParamName = "maxNumberOfRepayments";
-        if (command.isChangeInIntegerParameterNamed(maxNumberOfRepaymentsParamName, this.maxNumberOfRepayments)) {
-            final Integer newValue = command.integerValueOfParameterNamed(maxNumberOfRepaymentsParamName);
-            actualChanges.put(maxNumberOfRepaymentsParamName, newValue);
-            actualChanges.put("locale", localeAsInput);
-            this.maxNumberOfRepayments = newValue;
         }
         
         final String numberOfRepaymentsParamName = "numberOfRepayments";
@@ -342,22 +254,6 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
             actualChanges.put(inArrearsToleranceParamName, newValue);
             actualChanges.put("locale", localeAsInput);
             this.inArrearsTolerance = newValue;
-        }
-
-        final String minInterestRatePerPeriodParamName = "minInterestRatePerPeriod";
-        if (command.isChangeInBigDecimalParameterNamedWithNullCheck(minInterestRatePerPeriodParamName, this.minNominalInterestRatePerPeriod)) {
-            final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(minInterestRatePerPeriodParamName);
-            actualChanges.put(minInterestRatePerPeriodParamName, newValue);
-            actualChanges.put("locale", localeAsInput);
-            this.minNominalInterestRatePerPeriod = newValue;
-        }
-        
-        final String maxInterestRatePerPeriodParamName = "maxInterestRatePerPeriod";
-        if (command.isChangeInBigDecimalParameterNamedWithNullCheck(maxInterestRatePerPeriodParamName, this.maxNominalInterestRatePerPeriod)) {
-            final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(maxInterestRatePerPeriodParamName);
-            actualChanges.put(maxInterestRatePerPeriodParamName, newValue);
-            actualChanges.put("locale", localeAsInput);
-            this.maxNominalInterestRatePerPeriod = newValue;
         }
         
         final String interestRatePerPeriodParamName = "interestRatePerPeriod";

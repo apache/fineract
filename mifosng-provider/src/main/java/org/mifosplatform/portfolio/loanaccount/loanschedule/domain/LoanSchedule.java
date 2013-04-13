@@ -27,11 +27,7 @@ public final class LoanSchedule {
     private final LoanScheduleGenerator loanScheduleGenerator;
     private final ApplicationCurrency applicationCurrency;
     private final BigDecimal principal;
-    private final BigDecimal minPrincipal;
-    private final BigDecimal maxPrincipal;
     private final BigDecimal nominalInterestRatePerPeriod;
-    private final BigDecimal minNominalInterestRatePerPeriod;
-    private final BigDecimal maxNominalInterestRatePerPeriod;
     private final PeriodFrequencyType interestRatePeriodFrequencyType;
     private final BigDecimal nominalAnnualInterestRate;
     private final InterestMethod interestMethod;
@@ -39,8 +35,6 @@ public final class LoanSchedule {
     private final Integer repaymentEvery;
     private final PeriodFrequencyType repaymentPeriodFrequencyType;
     private final Integer numberOfRepayments;
-    private final Integer minNumberOfRepayments;
-    private final Integer maxNumberOfRepayments;
     private final AmortizationMethod amortizationMethod;
     private final Integer loanTermFrequency;
     private final PeriodFrequencyType loanTermPeriodFrequencyType;
@@ -52,22 +46,17 @@ public final class LoanSchedule {
     private final Set<LoanCharge> loanCharges;
 
     public LoanSchedule(final LoanScheduleGenerator loanScheduleGenerator, final ApplicationCurrency applicationCurrency,
-            final BigDecimal principal, final BigDecimal minPrincipal, final BigDecimal maxPrincipal,
-            final BigDecimal nominalInterestRatePerPeriod, final BigDecimal minNominalInterestRatePerPeriod, final BigDecimal maxNominalInterestRatePerPeriod, final PeriodFrequencyType interestRatePeriodFrequencyType,
-            final BigDecimal nominalAnnualInterestRate, final InterestMethod interestMethod,
-            final InterestCalculationPeriodMethod interestCalculationPeriodMethod, final Integer repaymentEvery,
-            final PeriodFrequencyType repaymentPeriodFrequencyType, final Integer numberOfRepayments, final Integer minNumberOfRepayments, final Integer maxNumberOfRepayments,
+            final BigDecimal principal, final BigDecimal nominalInterestRatePerPeriod,
+            final PeriodFrequencyType interestRatePeriodFrequencyType, final BigDecimal nominalAnnualInterestRate,
+            final InterestMethod interestMethod, final InterestCalculationPeriodMethod interestCalculationPeriodMethod,
+            final Integer repaymentEvery, final PeriodFrequencyType repaymentPeriodFrequencyType, final Integer numberOfRepayments,
             final AmortizationMethod amortizationMethod, final Integer loanTermFrequency,
             final PeriodFrequencyType loanTermPeriodFrequencyType, final Set<LoanCharge> loanCharges, final LocalDate disbursementDate,
             final LocalDate repaymentStartFromDate, final LocalDate interestChargedFromDate, final BigDecimal inArrearsTolerance) {
         this.loanScheduleGenerator = loanScheduleGenerator;
         this.applicationCurrency = applicationCurrency;
         this.principal = principal;
-        this.minPrincipal = minPrincipal;
-        this.maxPrincipal = maxPrincipal;
         this.nominalInterestRatePerPeriod = nominalInterestRatePerPeriod;
-        this.minNominalInterestRatePerPeriod = minNominalInterestRatePerPeriod;
-        this.maxNominalInterestRatePerPeriod = maxNominalInterestRatePerPeriod;
         this.interestRatePeriodFrequencyType = interestRatePeriodFrequencyType;
         this.nominalAnnualInterestRate = nominalAnnualInterestRate;
         this.interestMethod = interestMethod;
@@ -75,8 +64,6 @@ public final class LoanSchedule {
         this.repaymentEvery = repaymentEvery;
         this.repaymentPeriodFrequencyType = repaymentPeriodFrequencyType;
         this.numberOfRepayments = numberOfRepayments;
-        this.minNumberOfRepayments = minNumberOfRepayments;
-        this.maxNumberOfRepayments = maxNumberOfRepayments;
         this.amortizationMethod = amortizationMethod;
         this.loanTermFrequency = loanTermFrequency;
         this.loanTermPeriodFrequencyType = loanTermPeriodFrequencyType;
@@ -95,9 +82,9 @@ public final class LoanSchedule {
     public LoanProductRelatedDetail loanProductRelatedDetail() {
         final MonetaryCurrency currency = new MonetaryCurrency(applicationCurrency.getCode(), applicationCurrency.getDecimalPlaces());
 
-        return LoanProductRelatedDetail.createFrom(currency, principal, minPrincipal, maxPrincipal, nominalInterestRatePerPeriod, minNominalInterestRatePerPeriod, maxNominalInterestRatePerPeriod,
-                interestRatePeriodFrequencyType, nominalAnnualInterestRate, interestMethod, interestCalculationPeriodMethod,
-                repaymentEvery, repaymentPeriodFrequencyType, numberOfRepayments, minNumberOfRepayments, maxNumberOfRepayments, amortizationMethod, this.inArrearsTolerance);
+        return LoanProductRelatedDetail.createFrom(currency, principal, nominalInterestRatePerPeriod, interestRatePeriodFrequencyType,
+                nominalAnnualInterestRate, interestMethod, interestCalculationPeriodMethod, repaymentEvery, repaymentPeriodFrequencyType,
+                numberOfRepayments, amortizationMethod, this.inArrearsTolerance);
     }
 
     public Integer getLoanTermFrequency() {
