@@ -10254,19 +10254,6 @@ No Request Body:
 			<div class="method-section">
 				<div class="method-description">
 					<h3>Reports</h3>
-					<p>The reports resource allows you to run and receive output
-						from pre-defined Mifos X reports. The default output is a JSON
-						formatted "Generic Resultset". The Generic Resultset contains
-						Column Heading as well as Data information. However, you can
-						export to CSV format by simply adding "&exportCSV=true" to the end
-						of your URL.</p>
-					<p>If Pentaho reports have been pre-defined, they can also be
-						run through this resource. Pentaho reports can return HTML, PDF or
-						CSV formats.</p>
-					<p>The Mifos X Individual Lending client application uses a
-						JQuery plugin called stretchyreporting which, itself, uses this
-						reports resource to provide a pretty flexible reporting User
-						Interface (UI).</p>
 				</div>
 			</div>
 
@@ -10276,753 +10263,67 @@ No Request Body:
 			<div class="method-section">
 				<div class="method-description">
 					<h4>List Reports</h4>
-					<p>Lists all reports and their parameters. If a report has more
-						than one parameter it will be listed the same number of times as
-						it has parameters.</p>
+					<p>Lists all reports and their parameters. </p>
 
-					<h5>Arguments</h5>
-					<dl class="argument-list">
-						<dt>exportCSV</dt>
-						<dd>
-							optional, <span>The only valid value is 'true'. If any
-								other value is provided the argument will be ignored</span>
-						</dd>
-						<dd>Output will be delivered as a CSV file instead of JSON.</dd>
-					</dl>
-					<p>Example Requests:</p>
+					<p>Example Request:</p>
 					<div class=apiClick>reports</div>
-					<br>
-					<br>
-					<div class=apiClick>reports?exportCSV=true</div>
 				</div>
 				<div class="method-example">
 					<code class="method-declaration">
 GET https://DomainName/api/v1/reports
 					</code>
 					<code class="method-response">
-{
-    "columnHeaders": [
-        {
-            "columnName": "report_id",
-            "columnType": "INT",
-            "isColumnNullable": false,
-            "isColumnPrimaryKey": false,
-            "columnValues": []
-        },
-        {
-            "columnName": "report_name",
-            "columnType": "VARCHAR",
-            "isColumnNullable": false,
-            "isColumnPrimaryKey": false,
-            "columnValues": []
-        },
-        {
-            "columnName": "report_type",
-            "columnType": "VARCHAR",
-            "isColumnNullable": false,
-            "isColumnPrimaryKey": false,
-            "columnValues": []
-        },
-        {
-            "columnName": "report_subtype",
-            "columnType": "VARCHAR",
-            "isColumnNullable": false,
-            "isColumnPrimaryKey": false,
-            "columnValues": []
-        },
-        {
-            "columnName": "report_category",
-            "columnType": "VARCHAR",
-            "isColumnNullable": false,
-            "isColumnPrimaryKey": false,
-            "columnValues": []
-        },
-        {
-            "columnName": "parameter_id",
-            "columnType": "INT",
-            "isColumnNullable": false,
-            "isColumnPrimaryKey": false,
-            "columnValues": []
-        },
-        {
-            "columnName": "report_parameter_name",
-            "columnType": "VARCHAR",
-            "isColumnNullable": false,
-            "isColumnPrimaryKey": false,
-            "columnValues": []
-        },
-        {
-            "columnName": "parameter_name",
-            "columnType": "VARCHAR",
-            "isColumnNullable": false,
-            "isColumnPrimaryKey": false,
-            "columnValues": []
-        }
-    ],
-    "data": [
-        {
-            "row": [
-                "10",
-                "Active Loans Portfolio Status",
-                "Table",
-                null,
-                "Loan",
-                "5",
-                null,
-                "OfficeIdSelectOne"
-            ]
-        },
-        {
-            "row": [
-                "10",
-                "Active Loans Portfolio Status",
-                "Table",
-                null,
-                "Loan",
-                "6",
-                null,
-                "loanOfficerIdSelectAll"
-            ]
-        },
-        {
-            "row": [
-                "10",
-                "Active Loans Portfolio Status",
-                "Table",
-                null,
-                "Loan",
-                "10",
-                null,
-                "currencyIdSelectAll"
-            ]
-        },
-        {
-            "row": [
-                "10",
-                "Active Loans Portfolio Status",
-                "Table",
-                null,
-                "Loan",
-                "20",
-                null,
-                "fundIdSelectAll"
-            ]
-        },
-        {
-            "row": [
-                "10",
-                "Active Loans Portfolio Status",
-                "Table",
-                null,
-                "Loan",
-                "25",
-                null,
-                "loanProductIdSelectAll"
-            ]
-        },
-        {
-            "row": [
-                "11",
-                "Active Loans Summary per Branch",
-                "Table",
-                null,
-                "Loan Portfolio",
-                "5",
-                null,
-                "OfficeIdSelectOne"
-            ]
-        },
-        {
-            "row": [
-                "11",
-                "Active Loans Summary per Branch",
-                "Table",
-                null,
-                "Loan Portfolio",
-                "10",
-                null,
-                "currencyIdSelectAll"
-            ]
-        },
-        {
-            "row": [
-                "48",
-                "Balance Sheet",
-                "Pentaho",
-                null,
-                "Accounting",
-                "5",
-                "branch",
-                "OfficeIdSelectOne"
-            ]
-        },
-        {
-            "row": [
-                "48",
-                "Balance Sheet",
-                "Pentaho",
-                null,
-                "Accounting",
-                "41",
-                "date",
-                "endDateSelect"
-            ]
-        },
-        {
-            "row": [
-                "1",
-                "Client Listing",
-                "Table",
-                null,
-                "Client",
-                "5",
-                null,
-                "OfficeIdSelectOne"
-            ]
-        },
-        {
-            "row": [
-                "2",
-                "Client Loans Listing",
-                "Table",
-                null,
-                "Client",
-                "5",
-                null,
-                "OfficeIdSelectOne"
-            ]
-        },
-        {
-            "row": [
-                "2",
-                "Client Loans Listing",
-                "Table",
-                null,
-                "Client",
-                "6",
-                null,
-                "loanOfficerIdSelectAll"
-            ]
-        },
-        {
-            "row": [
-                "2",
-                "Client Loans Listing",
-                "Table",
-                null,
-                "Client",
-                "10",
-                null,
-                "currencyIdSelectAll"
-            ]
-        },
-        {
-            "row": [
-                "2",
-                "Client Loans Listing",
-                "Table",
-                null,
-                "Client",
-                "20",
-                null,
-                "fundIdSelectAll"
-            ]
-        },
-        {
-            "row": [
-                "2",
-                "Client Loans Listing",
-                "Table",
-                null,
-                "Client",
-                "25",
-                null,
-                "loanProductIdSelectAll"
-            ]
-        },
-        {
-            "row": [
-                "20",
-                "Funds Disbursed Between Dates Summary",
-                "Table",
-                null,
-                "Fund",
-                "10",
-                null,
-                "currencyIdSelectAll"
-            ]
-        },
-        {
-            "row": [
-                "20",
-                "Funds Disbursed Between Dates Summary",
-                "Table",
-                null,
-                "Fund",
-                "20",
-                null,
-                "fundIdSelectAll"
-            ]
-        },
-        {
-            "row": [
-                "20",
-                "Funds Disbursed Between Dates Summary",
-                "Table",
-                null,
-                "Fund",
-                "40",
-                null,
-                "startDateSelect"
-            ]
-        },
-        {
-            "row": [
-                "20",
-                "Funds Disbursed Between Dates Summary",
-                "Table",
-                null,
-                "Fund",
-                "41",
-                null,
-                "endDateSelect"
-            ]
-        },
-        {
-            "row": [
-                "21",
-                "Funds Disbursed Between Dates Summary by Office",
-                "Table",
-                null,
-                "Fund",
-                "5",
-                null,
-                "OfficeIdSelectOne"
-            ]
-        },
-        {
-            "row": [
-                "21",
-                "Funds Disbursed Between Dates Summary by Office",
-                "Table",
-                null,
-                "Fund",
-                "10",
-                null,
-                "currencyIdSelectAll"
-            ]
-        },
-        {
-            "row": [
-                "21",
-                "Funds Disbursed Between Dates Summary by Office",
-                "Table",
-                null,
-                "Fund",
-                "20",
-                null,
-                "fundIdSelectAll"
-            ]
-        },
-        {
-            "row": [
-                "21",
-                "Funds Disbursed Between Dates Summary by Office",
-                "Table",
-                null,
-                "Fund",
-                "40",
-                null,
-                "startDateSelect"
-            ]
-        },
-        {
-            "row": [
-                "21",
-                "Funds Disbursed Between Dates Summary by Office",
-                "Table",
-                null,
-                "Fund",
-                "41",
-                null,
-                "endDateSelect"
-            ]
-        },
-        {
-            "row": [
-                "49",
-                "Income Statement",
-                "Pentaho",
-                null,
-                "Accounting",
-                "5",
-                "branch",
-                "OfficeIdSelectOne"
-            ]
-        },
-        {
-            "row": [
-                "49",
-                "Income Statement",
-                "Pentaho",
-                null,
-                "Accounting",
-                "40",
-                "fromDate",
-                "startDateSelect"
-            ]
-        },
-        {
-            "row": [
-                "49",
-                "Income Statement",
-                "Pentaho",
-                null,
-                "Accounting",
-                "41",
-                "toDate",
-                "endDateSelect"
-            ]
-        },
-        {
-            "row": [
-                "5",
-                "Loans Awaiting Disbursal",
-                "Table",
-                null,
-                "Loan Portfolio",
-                "5",
-                null,
-                "OfficeIdSelectOne"
-            ]
-        },
-        {
-            "row": [
-                "5",
-                "Loans Awaiting Disbursal",
-                "Table",
-                null,
-                "Loan Portfolio",
-                "6",
-                null,
-                "loanOfficerIdSelectAll"
-            ]
-        },
-        {
-            "row": [
-                "5",
-                "Loans Awaiting Disbursal",
-                "Table",
-                null,
-                "Loan Portfolio",
-                "10",
-                null,
-                "currencyIdSelectAll"
-            ]
-        },
-        {
-            "row": [
-                "5",
-                "Loans Awaiting Disbursal",
-                "Table",
-                null,
-                "Loan Portfolio",
-                "20",
-                null,
-                "fundIdSelectAll"
-            ]
-        },
-        {
-            "row": [
-                "5",
-                "Loans Awaiting Disbursal",
-                "Table",
-                null,
-                "Loan Portfolio",
-                "25",
-                null,
-                "loanProductIdSelectAll"
-            ]
-        },
-        {
-            "row": [
-                "6",
-                "Loans Awaiting Disbursal Summary",
-                "Table",
-                null,
-                "Loan Portfolio",
-                "5",
-                null,
-                "OfficeIdSelectOne"
-            ]
-        },
-        {
-            "row": [
-                "6",
-                "Loans Awaiting Disbursal Summary",
-                "Table",
-                null,
-                "Loan Portfolio",
-                "6",
-                null,
-                "loanOfficerIdSelectAll"
-            ]
-        },
-        {
-            "row": [
-                "6",
-                "Loans Awaiting Disbursal Summary",
-                "Table",
-                null,
-                "Loan Portfolio",
-                "10",
-                null,
-                "currencyIdSelectAll"
-            ]
-        },
-        {
-            "row": [
-                "6",
-                "Loans Awaiting Disbursal Summary",
-                "Table",
-                null,
-                "Loan Portfolio",
-                "20",
-                null,
-                "fundIdSelectAll"
-            ]
-        },
-        {
-            "row": [
-                "6",
-                "Loans Awaiting Disbursal Summary",
-                "Table",
-                null,
-                "Loan Portfolio",
-                "25",
-                null,
-                "loanProductIdSelectAll"
-            ]
-        },
-        {
-            "row": [
-                "7",
-                "Loans Awaiting Disbursal Summary by Month",
-                "Table",
-                null,
-                "Loan Portfolio",
-                "5",
-                null,
-                "OfficeIdSelectOne"
-            ]
-        },
-        {
-            "row": [
-                "7",
-                "Loans Awaiting Disbursal Summary by Month",
-                "Table",
-                null,
-                "Loan Portfolio",
-                "6",
-                null,
-                "loanOfficerIdSelectAll"
-            ]
-        },
-        {
-            "row": [
-                "7",
-                "Loans Awaiting Disbursal Summary by Month",
-                "Table",
-                null,
-                "Loan Portfolio",
-                "10",
-                null,
-                "currencyIdSelectAll"
-            ]
-        },
-        {
-            "row": [
-                "7",
-                "Loans Awaiting Disbursal Summary by Month",
-                "Table",
-                null,
-                "Loan Portfolio",
-                "20",
-                null,
-                "fundIdSelectAll"
-            ]
-        },
-        {
-            "row": [
-                "7",
-                "Loans Awaiting Disbursal Summary by Month",
-                "Table",
-                null,
-                "Loan Portfolio",
-                "25",
-                null,
-                "loanProductIdSelectAll"
-            ]
-        },
-        {
-            "row": [
-                "15",
-                "Portfolio at Risk",
-                "Table",
-                null,
-                "Loan Portfolio",
-                "5",
-                null,
-                "OfficeIdSelectOne"
-            ]
-        },
-        {
-            "row": [
-                "15",
-                "Portfolio at Risk",
-                "Table",
-                null,
-                "Loan Portfolio",
-                "6",
-                null,
-                "loanOfficerIdSelectAll"
-            ]
-        },
-        {
-            "row": [
-                "15",
-                "Portfolio at Risk",
-                "Table",
-                null,
-                "Loan Portfolio",
-                "10",
-                null,
-                "currencyIdSelectAll"
-            ]
-        },
-        {
-            "row": [
-                "15",
-                "Portfolio at Risk",
-                "Table",
-                null,
-                "Loan Portfolio",
-                "20",
-                null,
-                "fundIdSelectAll"
-            ]
-        },
-        {
-            "row": [
-                "15",
-                "Portfolio at Risk",
-                "Table",
-                null,
-                "Loan Portfolio",
-                "25",
-                null,
-                "loanProductIdSelectAll"
-            ]
-        },
-        {
-            "row": [
-                "16",
-                "Portfolio at Risk by Branch",
-                "Table",
-                null,
-                "Loan Portfolio",
-                "5",
-                null,
-                "OfficeIdSelectOne"
-            ]
-        },
-        {
-            "row": [
-                "16",
-                "Portfolio at Risk by Branch",
-                "Table",
-                null,
-                "Loan Portfolio",
-                "6",
-                null,
-                "loanOfficerIdSelectAll"
-            ]
-        },
-        {
-            "row": [
-                "16",
-                "Portfolio at Risk by Branch",
-                "Table",
-                null,
-                "Loan Portfolio",
-                "10",
-                null,
-                "currencyIdSelectAll"
-            ]
-        },
-        {
-            "row": [
-                "16",
-                "Portfolio at Risk by Branch",
-                "Table",
-                null,
-                "Loan Portfolio",
-                "20",
-                null,
-                "fundIdSelectAll"
-            ]
-        },
-        {
-            "row": [
-                "16",
-                "Portfolio at Risk by Branch",
-                "Table",
-                null,
-                "Loan Portfolio",
-                "25",
-                null,
-                "loanProductIdSelectAll"
-            ]
-        },
-        {
-            "row": [
-                "50",
-                "Trial Balance",
-                "Pentaho",
-                null,
-                "Accounting",
-                "5",
-                "branch",
-                "OfficeIdSelectOne"
-            ]
-        },
-        {
-            "row": [
-                "50",
-                "Trial Balance",
-                "Pentaho",
-                null,
-                "Accounting",
-                "40",
-                "fromDate",
-                "startDateSelect"
-            ]
-        },
-        {
-            "row": [
-                "50",
-                "Trial Balance",
-                "Pentaho",
-                null,
-                "Accounting",
-                "41",
-                "toDate",
-                "endDateSelect"
-            ]
-        }
+[
+  {
+    "reportId": 1,
+    "reportName": "Client Listing",
+    "reportType": "Table",
+    "reportCategory": "Client",
+    "coreReport": true,
+    "useReport": true,
+    "reportParameters": [
+      {
+        "reportParameterId": 5,
+        "parameterName": "OfficeIdSelectOne"
+      }
     ]
-}
-					</code>
+  },
+  {
+    "reportId": 2,
+    "reportName": "Client Loans Listing",
+    "reportType": "Table",
+    "reportCategory": "Client",
+    "coreReport": true,
+    "useReport": true,
+    "reportParameters": [
+      {
+        "reportParameterId": 5,
+        "parameterName": "OfficeIdSelectOne"
+      },
+      {
+        "reportParameterId": 6,
+        "parameterName": "loanOfficerIdSelectAll"
+      },
+      {
+        "reportParameterId": 10,
+        "parameterName": "currencyIdSelectAll"
+      },
+      {
+        "reportParameterId": 20,
+        "parameterName": "fundIdSelectAll"
+      },
+      {
+        "reportParameterId": 25,
+        "parameterName": "loanProductIdSelectAll"
+      },
+      {
+        "reportParameterId": 26,
+        "parameterName": "loanPurposeIdSelectAll"
+      }
+    ]
+  },...
+  ]
+  </code>
 				</div>
 			</div>
 
@@ -11030,7 +10331,20 @@ GET https://DomainName/api/v1/reports
 			<div class="method-section">
 				<div class="method-description">
 					<h4>Running a Report</h4>
-					<p>Runs a report and returns the report output.</p>
+					<p>This resource allows you to run and receive output from pre-defined Mifos X reports. </p>
+                                        <p>Reports can also be used to provide data for searching and workflow functionality.</p>
+                                        <p>
+                                                The default output is a JSON formatted "Generic Resultset". The Generic Resultset contains
+						Column Heading as well as Data information. However, you can
+						export to CSV format by simply adding "&exportCSV=true" to the end
+						of your URL.</p>
+					<p>If Pentaho reports have been pre-defined, they can also be
+						run through this resource. Pentaho reports can return HTML, PDF or
+						CSV formats.</p>
+					<p>The Mifos X reference application uses a
+						JQuery plugin called stretchyreporting which, itself, uses this
+						reports resource to provide a pretty flexible reporting User
+						Interface (UI).</p>
 					<h5>Arguments</h5>
 					<dl class="argument-list">
 						<dt>R_'parameter names' ...</dt>

@@ -6,6 +6,7 @@
 package org.mifosplatform.infrastructure.dataqueries.api;
 
 import java.io.File;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -26,6 +27,7 @@ import javax.ws.rs.core.UriInfo;
 import org.mifosplatform.infrastructure.core.api.ApiParameterHelper;
 import org.mifosplatform.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.mifosplatform.infrastructure.dataqueries.data.GenericResultsetData;
+import org.mifosplatform.infrastructure.dataqueries.data.ReportData;
 import org.mifosplatform.infrastructure.dataqueries.service.GenericDataService;
 import org.mifosplatform.infrastructure.dataqueries.service.ReadReportingService;
 import org.mifosplatform.infrastructure.security.exception.NoAuthorizationException;
@@ -56,32 +58,16 @@ public class ReportsApiResource {
 
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON, "application/x-msdownload" })
+    @Produces({ MediaType.APPLICATION_JSON })
     public Response retrieveReportList(@Context final UriInfo uriInfo) {
 
-        Map<String, String> extractedQueryParams = new HashMap<String, String>();
 
         boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
-        boolean exportCsv = ApiParameterHelper.exportCsv(uriInfo.getQueryParameters());
 
-        boolean exportPdf = ApiParameterHelper.exportPdf(uriInfo.getQueryParameters());
+        final Collection<ReportData> result = this.readExtraDataAndReportingService.retrieveReportList();
+        final String json = this.toApiJsonSerializer.serializePretty(prettyPrint, result);
 
-        if (exportPdf) {
-            String result = this.readExtraDataAndReportingService.retrieveReportPDF(".", ".", extractedQueryParams);
-            return Response.ok().entity(result).header("Content-Disposition", "attachment;filename=ReportList.pdf").build();
-        }
-
-        if (!exportCsv) {
-            GenericResultsetData result = this.readExtraDataAndReportingService.retrieveGenericResultset(".", ".", extractedQueryParams);
-
-            final String json = this.toApiJsonSerializer.serializePretty(prettyPrint, result);
-
-            return Response.ok().entity(json).build();
-        }
-
-        StreamingOutput result = this.readExtraDataAndReportingService.retrieveReportCSV(".", ".", extractedQueryParams);
-
-        return Response.ok().entity(result).header("Content-Disposition", "attachment;filename=ReportList.csv").build();
+        return Response.ok().entity(json).build();
     }
 
     @GET
