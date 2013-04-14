@@ -19,8 +19,7 @@ import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.mifosplatform.portfolio.client.data.ClientData;
 import org.mifosplatform.portfolio.client.service.ClientReadPlatformService;
-import org.mifosplatform.portfolio.group.data.GroupData;
-import org.mifosplatform.portfolio.group.data.GroupTypes;
+import org.mifosplatform.portfolio.group.data.GroupGeneralData;
 import org.mifosplatform.portfolio.group.service.GroupReadPlatformService;
 import org.mifosplatform.portfolio.savings.data.SavingsAccountData;
 import org.mifosplatform.portfolio.savings.data.SavingsAccountStatusEnumData;
@@ -211,9 +210,9 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             client = this.clientReadPlatformService.retrieveIndividualClient(clientId);
         }
 
-        GroupData group = null;
+        GroupGeneralData group = null;
         if (groupId != null) {
-            group = this.groupReadPlatformService.retrieveGroup(groupId , GroupTypes.GROUP.getId());
+            group = this.groupReadPlatformService.retrieveOne(groupId);
         }
 
         final Collection<SavingsProductData> productOptions = this.savingsProductReadPlatformService.retrieveAllForLookup();
@@ -385,11 +384,11 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
     private static final class SavingAccountTemplateMapper implements RowMapper<SavingsAccountData> {
 
         private final ClientData client;
-        private final GroupData group;
+        private final GroupGeneralData group;
 
         private final String schemaSql;
 
-        public SavingAccountTemplateMapper(final ClientData client, final GroupData group) {
+        public SavingAccountTemplateMapper(final ClientData client, final GroupGeneralData group) {
             this.client = client;
             this.group = group;
 
@@ -432,8 +431,9 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
 
             final BigDecimal nominalAnnualIterestRate = rs.getBigDecimal("nominalAnnualIterestRate");
 
-            EnumOptionData interestCompoundingPeriodType = SavingsEnumerations.compoundingInterestPeriodType(SavingsCompoundingInterestPeriodType
-                    .fromInt(JdbcSupport.getInteger(rs, "interestCompoundingPeriodType")));
+            EnumOptionData interestCompoundingPeriodType = SavingsEnumerations
+                    .compoundingInterestPeriodType(SavingsCompoundingInterestPeriodType.fromInt(JdbcSupport.getInteger(rs,
+                            "interestCompoundingPeriodType")));
 
             final EnumOptionData interestPostingPeriodType = SavingsEnumerations.interestPostingPeriodType(SavingsInterestPostingPeriodType
                     .fromInt(JdbcSupport.getInteger(rs, "interestPostingPeriodType")));

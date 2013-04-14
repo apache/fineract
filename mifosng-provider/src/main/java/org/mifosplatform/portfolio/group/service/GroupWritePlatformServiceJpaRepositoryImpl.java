@@ -42,6 +42,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
+
 import com.google.common.collect.Sets;
 
 @Service
@@ -72,8 +73,8 @@ public class GroupWritePlatformServiceJpaRepositoryImpl implements GroupWritePla
 
     @Transactional
     @Override
-    public CommandProcessingResult createGroup(final Long parentId , final Long levelId , final JsonCommand command) {
-        
+    public CommandProcessingResult createGroup(final Long parentId, final Long levelId, final JsonCommand command) {
+
         GroupLevel groupLevel = this.groupLevelRepository.findOne(levelId);
         try {
             this.context.authenticatedUser();
@@ -137,17 +138,17 @@ public class GroupWritePlatformServiceJpaRepositoryImpl implements GroupWritePla
                     .build();
 
         } catch (final DataIntegrityViolationException dve) {
-            handleGroupDataIntegrityIssues(command, dve , groupLevel );
+            handleGroupDataIntegrityIssues(command, dve, groupLevel);
             return new CommandProcessingResult(Long.valueOf(-1));
         }
     }
 
     @Transactional
     @Override
-    public CommandProcessingResult updateGroup(final Long grouptId, final JsonCommand command) {
+    public CommandProcessingResult updateGroup(final Long groupId, final JsonCommand command) {
 
         GroupLevel groupLevel = null;
-        
+
         try {
             this.context.authenticatedUser();
 
@@ -155,8 +156,8 @@ public class GroupWritePlatformServiceJpaRepositoryImpl implements GroupWritePla
 
             this.fromApiJsonDeserializer.validateForUpdate(command.json());
 
-            final Group groupForUpdate = this.groupRepository.findOne(grouptId);
-            if (groupForUpdate == null || groupForUpdate.isDeleted()) { throw new GroupNotFoundException(grouptId); }
+            final Group groupForUpdate = this.groupRepository.findOne(groupId);
+            if (groupForUpdate == null || groupForUpdate.isDeleted()) { throw new GroupNotFoundException(groupId); }
 
             final Long officeId = groupForUpdate.getOfficeId();
 
@@ -184,9 +185,9 @@ public class GroupWritePlatformServiceJpaRepositoryImpl implements GroupWritePla
             if (command.isChangeInLongParameterNamed(staffIdParamName, presentStaffId)) {
                 final Long newValue = command.longValueOfParameterNamed(staffIdParamName);
                 actualChanges.put(staffIdParamName, newValue);
-                
+
                 Staff newStaff = null;
-                if(newValue != null){
+                if (newValue != null) {
                     newStaff = this.staffRepository.findByOffice(newValue, officeId);
                     if (newStaff == null) { throw new StaffNotFoundException(newValue); }
                 }
@@ -235,12 +236,13 @@ public class GroupWritePlatformServiceJpaRepositoryImpl implements GroupWritePla
                             throw new InvalidGroupLevelException("add", "invalid.level", errorMessage);
                         }
                     }
-                    
+
                     groupForUpdate.setParent(newParentGroup);
-                    
-                    // Parent has changed, re-generate 'Hierarchy' as parent is changed   
+
+                    // Parent has changed, re-generate 'Hierarchy' as parent is
+                    // changed
                     groupForUpdate.generateHierarchy();
-                    
+
                 }
             }
 
@@ -248,7 +250,7 @@ public class GroupWritePlatformServiceJpaRepositoryImpl implements GroupWritePla
             final String clientMembersParamName = "clientMembers";
 
             if (!clientMembers.equals(groupForUpdate.getClientMembers())) {
-                Set<Client> diffClients = Sets.symmetricDifference(clientMembers, groupForUpdate.getClientMembers());  
+                Set<Client> diffClients = Sets.symmetricDifference(clientMembers, groupForUpdate.getClientMembers());
                 final String[] diffClientsIds = getClientIds(diffClients);
                 actualChanges.put(clientMembersParamName, diffClientsIds);
                 groupForUpdate.setClientMembers(clientMembers);
@@ -265,7 +267,7 @@ public class GroupWritePlatformServiceJpaRepositoryImpl implements GroupWritePla
                     .build();
 
         } catch (final DataIntegrityViolationException dve) {
-            handleGroupDataIntegrityIssues(command, dve , groupLevel);
+            handleGroupDataIntegrityIssues(command, dve, groupLevel);
             return new CommandProcessingResult(Long.valueOf(-1));
         }
     }
@@ -305,18 +307,28 @@ public class GroupWritePlatformServiceJpaRepositoryImpl implements GroupWritePla
 
     }
 
+    /**
+     * Switched delete to hard delete of group. Will use 'status' when is added
+     * to determine if group can be deleted or not along with contraints on
+     * database i.e. cant delete group with any loans/savings accounts.
+     */
     @Transactional
     @Override
     public CommandProcessingResult deleteGroup(final Long groupId) {
 
         this.context.authenticatedUser();
 
-        // TODO add logic to check any active group loans are preset
-
         final Group groupForDelete = this.groupRepository.findOne(groupId);
-        if (groupForDelete == null || groupForDelete.isDeleted()) { throw new GroupNotFoundException(groupId); }
-        groupForDelete.delete();
-        this.groupRepository.save(groupForDelete);
+        if (groupForDelete == null) { throw new GroupNotFoundException(groupId); }
+
+        // groupForDelete.delete();
+        // this.groupRepository.save(groupForDelete);
+
+        // List<Note> relatedNotes =
+        // this.noteRepository.findByLoanId(loan.getId());
+        // this.noteRepository.deleteInBatch(relatedNotes);
+
+        this.groupRepository.delete(groupId);
 
         return new CommandProcessingResultBuilder() //
                 .withOfficeId(groupForDelete.getId()) //
@@ -371,8 +383,8 @@ public class GroupWritePlatformServiceJpaRepositoryImpl implements GroupWritePla
 
         String[] clientIds = new String[clients.size()];
         Iterator<Client> it = clients.iterator();
-        for (int i = 0; it.hasNext(); i++) {	
-        	clientIds[i] = it.next().getId().toString();
+        for (int i = 0; it.hasNext(); i++) {
+            clientIds[i] = it.next().getId().toString();
         }
         return clientIds;
     }
@@ -381,7 +393,8 @@ public class GroupWritePlatformServiceJpaRepositoryImpl implements GroupWritePla
      * Guaranteed to throw an exception no matter what the data integrity issue
      * is.
      */
-    private void handleGroupDataIntegrityIssues(final JsonCommand command, final DataIntegrityViolationException dve, GroupLevel groupLevel) {
+    private void handleGroupDataIntegrityIssues(final JsonCommand command, final DataIntegrityViolationException dve,
+            final GroupLevel groupLevel) {
 
         final Throwable realCause = dve.getMostSpecificCause();
         String errorMessageForUser = null;
@@ -389,18 +402,16 @@ public class GroupWritePlatformServiceJpaRepositoryImpl implements GroupWritePla
 
         if (realCause.getMessage().contains("external_id")) {
 
-            errorMessageForUser = groupLevel.getLevelName() + " with externalId {0} already exists";
+            final String externalId = command.stringValueOfParameterNamed("externalId");
+            errorMessageForUser = groupLevel.getLevelName() + " with externalId `" + externalId + "` already exists.";
             errorMessageForMachine = "error.msg." + groupLevel.getLevelName().toLowerCase() + ".duplicate.externalId";
-            throw new PlatformDataIntegrityException(errorMessageForMachine, errorMessageForUser, "externalId",
-                    command.stringValueOfParameterNamed("externalId"));
-
+            throw new PlatformDataIntegrityException(errorMessageForMachine, errorMessageForUser, "externalId", externalId);
         } else if (realCause.getMessage().contains("name")) {
 
-            errorMessageForUser = groupLevel.getLevelName() + " with name {0} already exists";
+            final String name = command.stringValueOfParameterNamed("name");
+            errorMessageForUser = groupLevel.getLevelName() + " with name `" + name + "` already exists.";
             errorMessageForMachine = "error.msg." + groupLevel.getLevelName().toLowerCase() + ".duplicate.name";
-            throw new PlatformDataIntegrityException(errorMessageForMachine, errorMessageForUser, "name",
-                    command.stringValueOfParameterNamed("name"));
-
+            throw new PlatformDataIntegrityException(errorMessageForMachine, errorMessageForUser, "name", name);
         }
 
         logger.error(dve.getMessage(), dve);

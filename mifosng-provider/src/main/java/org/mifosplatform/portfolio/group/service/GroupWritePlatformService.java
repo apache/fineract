@@ -10,10 +10,9 @@ import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 
 public interface GroupWritePlatformService {
 
-	CommandProcessingResult createGroup(Long parentId, Long levelId,
-			JsonCommand command);
+    CommandProcessingResult createGroup(Long parentId, Long levelId, JsonCommand command);
 
-    CommandProcessingResult updateGroup(Long grouptId, JsonCommand command);
+    CommandProcessingResult updateGroup(Long groupId, JsonCommand command);
 
     CommandProcessingResult deleteGroup(Long groupId);
 

@@ -26,8 +26,7 @@ import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.organisation.monetary.domain.Money;
 import org.mifosplatform.portfolio.client.data.ClientData;
 import org.mifosplatform.portfolio.client.service.ClientReadPlatformService;
-import org.mifosplatform.portfolio.group.data.GroupData;
-import org.mifosplatform.portfolio.group.data.GroupTypes;
+import org.mifosplatform.portfolio.group.data.GroupGeneralData;
 import org.mifosplatform.portfolio.group.service.GroupReadPlatformService;
 import org.mifosplatform.portfolio.loanaccount.data.DisbursementData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanAccountData;
@@ -167,7 +166,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
         context.authenticatedUser();
 
-        final GroupData groupAccount = this.groupReadPlatformService.retrieveGroupDetails(groupId, GroupTypes.GROUP.getId(), false);
+        final GroupGeneralData groupAccount = this.groupReadPlatformService.retrieveOne(groupId);
         final LocalDate expectedDisbursementDate = DateUtils.getLocalDateOfTenant();
         LoanAccountData loanDetails = LoanAccountData.groupDefaults(groupAccount, expectedDisbursementDate);
 
@@ -184,7 +183,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
         context.authenticatedUser();
 
-        final GroupData groupAccount = this.groupReadPlatformService.retrieveGroup(groupId, GroupTypes.GROUP.getId());
+        final GroupGeneralData groupAccount = this.groupReadPlatformService.retrieveOne(groupId);
         final LocalDate expectedDisbursementDate = DateUtils.getLocalDateOfTenant();
         LoanAccountData loanDetails = LoanAccountData.groupDefaults(groupAccount, expectedDisbursementDate);
 
@@ -525,11 +524,10 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                         totalWaived, totalWrittenOff, totalOutstanding, totalOverdue, overdueSinceDate);
             }
 
-            GroupData groupData = null;
-
+            GroupGeneralData groupData = null;
             if (groupId != null) {
-
-                groupData = new GroupData(groupId, groupName, groupExternalId, groupOfficeId, groupStaffId, groupParentId, groupHierarchy);
+                groupData = GroupGeneralData.instance(groupId, groupName, groupExternalId, groupOfficeId, null, groupParentId, null,
+                        groupStaffId, null, groupHierarchy);
             }
 
             return LoanAccountData.basicLoanDetails(id, accountNo, status, externalId, clientId, clientName, clientOfficeId, groupData,

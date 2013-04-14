@@ -20,7 +20,7 @@ public class StaffData {
     private final String displayName;
     private final Long officeId;
     private final String officeName;
-    private final boolean isLoanOfficer;
+    private final Boolean isLoanOfficer;
 
     @SuppressWarnings("unused")
     private final Collection<OfficeData> allowedOffices;
@@ -30,13 +30,17 @@ public class StaffData {
                 staff.isLoanOfficer, allowedOffices);
     }
 
+    public static StaffData lookup(final Long id, final String displayName) {
+        return new StaffData(id, null, null, displayName, null, null, null, null);
+    }
+
     public static StaffData instance(final Long id, final String firstname, final String lastname, final String displayName,
-            final Long officeId, final String officeName, final boolean isLoanOfficer) {
+            final Long officeId, final String officeName, final Boolean isLoanOfficer) {
         return new StaffData(id, firstname, lastname, displayName, officeId, officeName, isLoanOfficer, null);
     }
 
     private StaffData(final Long id, final String firstname, final String lastname, final String displayName, final Long officeId,
-            final String officeName, final boolean isLoanOfficer, final Collection<OfficeData> allowedOffices) {
+            final String officeName, final Boolean isLoanOfficer, final Collection<OfficeData> allowedOffices) {
         this.id = id;
         this.firstname = firstname;
         this.lastname = lastname;
@@ -47,40 +51,23 @@ public class StaffData {
         this.allowedOffices = allowedOffices;
     }
 
-    
     public Long getId() {
         return this.id;
     }
 
-    
-    public String getFirstname() {
-        return this.firstname;
-    }
-
-    
-    public String getLastname() {
-        return this.lastname;
-    }
-
-    
     public String getDisplayName() {
         return this.displayName;
     }
 
-    
-    public Long getOfficeId() {
-        return this.officeId;
+    public String getFirstname() {
+        return this.firstname;
     }
 
-    
+    public String getLastname() {
+        return this.lastname;
+    }
+
     public String getOfficeName() {
         return this.officeName;
     }
-
-    
-    public boolean isLoanOfficer() {
-        return this.isLoanOfficer;
-    }
-    
-    
 }

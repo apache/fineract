@@ -10,7 +10,6 @@ import java.util.Collection;
 import org.mifosplatform.portfolio.client.data.ClientAccountSummaryCollectionData;
 import org.mifosplatform.portfolio.client.data.ClientAccountSummaryData;
 import org.mifosplatform.portfolio.client.data.ClientData;
-import org.mifosplatform.portfolio.client.data.ClientLookup;
 
 public interface ClientReadPlatformService {
 
@@ -20,9 +19,9 @@ public interface ClientReadPlatformService {
 
     ClientData retrieveNewClientDetails();
 
-    Collection<ClientLookup> retrieveAllIndividualClientsForLookup(String extraCriteria);
+    Collection<ClientData> retrieveAllIndividualClientsForLookup(String extraCriteria);
 
-    Collection<ClientLookup> retrieveAllIndividualClientsForLookupByOfficeId(Long officeId);
+    Collection<ClientData> retrieveAllIndividualClientsForLookupByOfficeId(Long officeId);
 
     ClientAccountSummaryCollectionData retrieveClientAccountDetails(Long clientId);
 
@@ -30,4 +29,5 @@ public interface ClientReadPlatformService {
 
     ClientData retrieveClientByIdentifier(Long identifierTypeId, String identifierKey);
 
+    Collection<ClientData> retrieveClientMembersOfGroup(Long groupId);
 }

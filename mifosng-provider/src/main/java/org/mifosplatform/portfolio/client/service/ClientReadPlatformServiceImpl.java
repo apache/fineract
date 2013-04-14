@@ -21,9 +21,8 @@ import org.mifosplatform.organisation.office.service.OfficeReadPlatformService;
 import org.mifosplatform.portfolio.client.data.ClientAccountSummaryCollectionData;
 import org.mifosplatform.portfolio.client.data.ClientAccountSummaryData;
 import org.mifosplatform.portfolio.client.data.ClientData;
-import org.mifosplatform.portfolio.client.data.ClientLookup;
 import org.mifosplatform.portfolio.client.exception.ClientNotFoundException;
-import org.mifosplatform.portfolio.group.data.GroupLookup;
+import org.mifosplatform.portfolio.group.data.GroupGeneralData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanStatusEnumData;
 import org.mifosplatform.portfolio.loanproduct.service.LoanEnumerations;
 import org.mifosplatform.useradministration.domain.AppUser;
@@ -39,6 +38,8 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
     private final JdbcTemplate jdbcTemplate;
     private final PlatformSecurityContext context;
     private final OfficeReadPlatformService officeReadPlatformService;
+    private final ClientLookupMapper lookupMapper = new ClientLookupMapper();
+    private final ClientMembersOfGroupMapper membersOfGroupMapper = new ClientMembersOfGroupMapper();
 
     @Autowired
     public ClientReadPlatformServiceImpl(final PlatformSecurityContext context, final TenantAwareRoutingDataSource dataSource,
@@ -70,7 +71,6 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
     public ClientData retrieveIndividualClient(final Long clientId) {
 
         try {
-
             AppUser currentUser = context.authenticatedUser();
             String hierarchy = currentUser.getOffice().getHierarchy();
             String hierarchySearchString = hierarchy + "%";
@@ -81,7 +81,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
             ParentGroupsMapper cgrm = new ParentGroupsMapper();
             String cgSql = "select " + cgrm.parentGroupsSchema();
-            Collection<GroupLookup> parentGroups = this.jdbcTemplate.query(cgSql, cgrm, new Object[] { clientId }); 
+            Collection<GroupGeneralData> parentGroups = this.jdbcTemplate.query(cgSql, cgrm, new Object[] { clientId });
             
             return ClientData.setParentGroups(clientData , parentGroups);
             
@@ -91,30 +91,23 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
     }
 
     @Override
-    public Collection<ClientLookup> retrieveAllIndividualClientsForLookup(final String extraCriteria) {
+    public Collection<ClientData> retrieveAllIndividualClientsForLookup(final String extraCriteria) {
 
-        this.context.authenticatedUser();
-
-        ClientLookupMapper rm = new ClientLookupMapper();
-
-        String sql = "select " + rm.clientLookupSchema();
+        String sql = "select " + this.lookupMapper.schema();
 
         if (StringUtils.isNotBlank(extraCriteria)) {
             sql += " and (" + extraCriteria + ")";
         }
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] {});
+        return this.jdbcTemplate.query(sql, this.lookupMapper, new Object[] {});
     }
 
     @Override
-    public Collection<ClientLookup> retrieveAllIndividualClientsForLookupByOfficeId(final Long officeId) {
-        this.context.authenticatedUser();
+    public Collection<ClientData> retrieveAllIndividualClientsForLookupByOfficeId(final Long officeId) {
 
-        ClientLookupMapper rm = new ClientLookupMapper();
+        final String sql = "select " + this.lookupMapper.schema() + " and c.office_id = ?";
 
-        String sql = "select " + rm.clientLookupSchema() + " and c.office_id = " + officeId;
-
-        return this.jdbcTemplate.query(sql, rm, new Object[] {});
+        return this.jdbcTemplate.query(sql, this.lookupMapper, new Object[] { officeId });
     }
 
     @Override
@@ -126,6 +119,63 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         final Long officeId = currentUser.getOffice().getId();
 
         return ClientData.template(officeId, new LocalDate(), offices);
+    }
+
+    @Override
+    public Collection<ClientData> retrieveClientMembersOfGroup(final Long groupId) {
+
+        final AppUser currentUser = context.authenticatedUser();
+        final String hierarchy = currentUser.getOffice().getHierarchy();
+        final String hierarchySearchString = hierarchy + "%";
+
+        final String sql = "select " + this.membersOfGroupMapper.schema()
+                + " where o.hierarchy like ? and pgc.group_id = ? and c.is_deleted=0";
+
+        return this.jdbcTemplate.query(sql, this.membersOfGroupMapper, new Object[] { hierarchySearchString, groupId });
+    }
+
+    private static final class ClientMembersOfGroupMapper implements RowMapper<ClientData> {
+
+        private final String schema;
+
+        public ClientMembersOfGroupMapper() {
+            final StringBuilder sqlBuilder = new StringBuilder(200);
+            
+            sqlBuilder.append("c.id as id, c.account_no as accountNo, c.external_id as externalId, ");
+            sqlBuilder.append("c.office_id as officeId, o.name as officeName, ");
+            sqlBuilder.append("c.firstname as firstname, c.middlename as middlename, c.lastname as lastname, ");
+            sqlBuilder.append("c.fullname as fullname, c.display_name as displayName, ");
+            sqlBuilder.append("c.joined_date as joinedDate, c.image_key as imagekey ");
+            sqlBuilder.append("from m_client c ");
+            sqlBuilder.append("join m_office o on o.id = c.office_id ");
+            sqlBuilder.append("join m_group_client pgc on pgc.client_id = c.id");
+            
+            this.schema = sqlBuilder.toString();
+        }
+
+        public String schema() {
+            return this.schema;
+        }
+
+        @Override
+        public ClientData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+
+            final String accountNo = rs.getString("accountNo");
+            final Long officeId = JdbcSupport.getLong(rs, "officeId");
+            final Long id = JdbcSupport.getLong(rs, "id");
+            final String firstname = rs.getString("firstname");
+            final String middlename = rs.getString("middlename");
+            final String lastname = rs.getString("lastname");
+            final String fullname = rs.getString("fullname");
+            final String displayName = rs.getString("displayName");
+            final String externalId = rs.getString("externalId");
+            final LocalDate joinedDate = JdbcSupport.getLocalDate(rs, "joinedDate");
+            final String imageKey = rs.getString("imageKey");
+            final String officeName = rs.getString("officeName");
+
+            return new ClientData(accountNo, officeId, officeName, id, firstname, middlename, lastname, fullname, displayName, externalId,
+                    joinedDate, imageKey, null, null, null, null);
+        }
     }
 
     private static final class ClientMapper implements RowMapper<ClientData> {
@@ -160,7 +210,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
     }
 
-    private static final class ParentGroupsMapper implements RowMapper<GroupLookup> {
+    private static final class ParentGroupsMapper implements RowMapper<GroupGeneralData> {
 
         public String parentGroupsSchema() {
             return "gp.id As groupId , gp.name As groupName from m_client cl JOIN m_group_client gc ON cl.id = gc.client_id "
@@ -168,31 +218,44 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
        }
 
         @Override
-        public GroupLookup mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+        public GroupGeneralData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
 
             final Long groupId = JdbcSupport.getLong(rs, "groupId");
             final String groupName = rs.getString("groupName");
 
-            return new GroupLookup(groupId, groupName);
+            return GroupGeneralData.lookup(groupId, groupName);
         }
-
     }
 
-    private static final class ClientLookupMapper implements RowMapper<ClientLookup> {
+    private static final class ClientLookupMapper implements RowMapper<ClientData> {
 
-        public String clientLookupSchema() {
-            return "c.id as id, c.display_name as displayName, " + "c.office_id as officeId, o.name as officeName "
-                    + "from m_client c join m_office o on o.id = c.office_id where c.is_deleted=0 ";
+        private final String schema;
+
+        public ClientLookupMapper() {
+            StringBuilder builder = new StringBuilder(200);
+
+            builder.append("c.id as id, c.display_name as displayName, ");
+            builder.append("c.office_id as officeId, o.name as officeName ");
+            builder.append("from m_client c ");
+            builder.append("join m_office o on o.id = c.office_id ");
+            builder.append("where c.is_deleted=0");
+
+            this.schema = builder.toString();
+        }
+
+        public String schema() {
+            return this.schema;
         }
 
         @Override
-        public ClientLookup mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
-            Long id = rs.getLong("id");
-            String displayName = rs.getString("displayName");
-            Long officeId = rs.getLong("officeId");
-            String officeName = rs.getString("officeName");
+        public ClientData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
 
-            return ClientLookup.template(id, displayName, officeId, officeName);
+            final Long id = rs.getLong("id");
+            final String displayName = rs.getString("displayName");
+            final Long officeId = rs.getLong("officeId");
+            final String officeName = rs.getString("officeName");
+
+            return ClientData.lookup(id, displayName, officeId, officeName);
         }
     }
 

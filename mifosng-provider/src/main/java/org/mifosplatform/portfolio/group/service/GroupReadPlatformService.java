@@ -9,36 +9,27 @@ import java.util.Collection;
 
 import org.mifosplatform.organisation.monetary.data.MoneyData;
 import org.mifosplatform.organisation.staff.data.StaffData;
-import org.mifosplatform.portfolio.client.data.ClientLookup;
 import org.mifosplatform.portfolio.group.data.GroupAccountSummaryCollectionData;
 import org.mifosplatform.portfolio.group.data.GroupAccountSummaryData;
-import org.mifosplatform.portfolio.group.data.GroupData;
+import org.mifosplatform.portfolio.group.data.GroupGeneralData;
 import org.mifosplatform.portfolio.group.data.GroupLevelData;
-import org.mifosplatform.portfolio.group.data.GroupLookup;
 
 public interface GroupReadPlatformService {
 
-    Collection<GroupData> retrieveAllGroups(String extraCriteria);
+    GroupGeneralData retrieveTemplate(Long officeId, boolean isCenterGroup);
 
-	GroupData retrieveGroup(Long groupId, Long levelId);
+    Collection<GroupGeneralData> retrieveAll(SearchParameters searchCriteria);
 
-    GroupData retrieveNewGroupDetails(Long officeId, Long levelId);
+    GroupGeneralData retrieveOne(Long groupId);
 
-    Collection<ClientLookup> retrieveClientMembers(Long groupId);
-
+    //
     GroupAccountSummaryCollectionData retrieveGroupAccountDetails(Long groupId);
 
     Collection<GroupAccountSummaryData> retrieveGroupLoanAccountsByLoanOfficerId(Long groupId, Long loanOfficerId);
 
-    Collection<GroupLookup> retrieveAllGroupsbyOfficeIdAndLevelId(Long officeId, Long levelId);
-
     GroupLevelData retrieveGroupLevelDetails(Long levelId);
 
     Collection<StaffData> retrieveStaffsbyOfficeId(Long officeId);
-
-	GroupData retrieveGroupDetails(Long groupId, Long levelId, boolean template);
-
-    Collection<GroupLookup> retrieveChildGroupsbyGroupId(Long groupId);
 
     Long retrieveTotalNoOfChildGroups(Long groupId);
 
@@ -46,10 +37,7 @@ public interface GroupReadPlatformService {
 
     Collection<MoneyData> retrieveGroupLoanPortfolio(String hierarchy);
 
-    GroupData retrieveNewChildGroupDetails(Long officeId, Long levelId, Long parentGroupId);
-
     StaffData retrieveStaffsbyId(Long staffId);
-    
-    Long getLevelIdByGroupId(final Long groupId);
 
+    Long getLevelIdByGroupId(final Long groupId);
 }

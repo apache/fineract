@@ -228,7 +228,7 @@
 				</div>
 			</div>
 			<div class="flybar-nav">
-				<h2 class="flybar-button">Group</h2>
+				<h2 class="flybar-button">Groupings</h2>
 				<div id="toc-menu-group" class="flybar-menu">
 					<div class="tocMatrix">
 						<table class=matrixHeading>
@@ -275,6 +275,22 @@
 									</table></td>
 							</tr>
 							<tr class="alt">
+								<td><a href="#centers">Center</a></td>
+								<td>centers</td>
+								<td><a href="#centers_create">Create a Center</a></td>
+								<td><a href="#centers_list">List Centers</a></td>
+								<td></td>
+								<td><a href="#centers_delete">Delete a Center</a></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>centers/{centerId}</td>
+								<td></td>
+								<td><a href="#centers_retrieve">Retrieve a Center</a></td>
+								<td><a href="#centers_update">Update a Center</a></td>
+								<td></td>
+							</tr>
+							<tr class="alt">
 								<td><a href="#groups">Group</a></td>
 								<td>groups</td>
 								<td><a href="#groups_create">Create a Group</a></td>
@@ -290,35 +306,12 @@
 								<td><a href="#groups_update">Update a Group</a></td>
 								<td></td>
 							</tr>
-							<tr class="alt">
-								<td></td>
-								<td>groups/{group}/loans</td>
-								<td></td>
-								<td><a href="#groups_loansummary">Retrieve a Group's
-										Loan Account Summary</a></td>
-								<td></td>
-								<td></td>
-							</tr>
-							<tr>
-								<td></td>
-								<td>groups/{group}/command/assign_loanofficer</td>
-								<td><a href="#groups_assignlo">Assign a Loan Officer</a></td>
-								<td></td>
-								<td></td>
-								<td></td>
-							</tr>
-							<tr class="alt">
-								<td></td>
-								<td>groups/{group}/command/unassign_loanofficer</td>
-								<td><a href="#groups_unassign_lo">Unassign a Loan Officer</a></td>
-								<td></a></td>
-								<td></td>
-								<td></td>
-							</tr>
 						</table>
 					</div>
 				</div>
 			</div>
+
+
 			<div class="flybar-nav">
 				<h2 class="flybar-button">Loan</h2>
 				<div id="toc-menu-loan" class="flybar-menu">
@@ -1316,6 +1309,14 @@
 											<td><div class=matrixHeadingCommands>read</div></td>
 										</tr>
 									</table></td>
+							</tr>
+							<tr class="alt">
+								<td>centers/template</td>
+								<td><a href="#centers_template">Retrieve Center Template</a></td>
+							</tr>
+							<tr>
+								<td>groups/template</td>
+								<td><a href="#groups_template">Retrieve Group Template</a></td>
 							</tr>
 							<tr class="alt">
 								<td>clients/template</td>
@@ -2579,54 +2580,460 @@ No Request Body:
 				</div>
 			</div>
 
+			<!-- Start of Administrative Units API-->
+			<a id="centers" name="centers" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h3>Centers</h3>
+					<p><b>Centers</b> along with <b>Groups</b> are used to provided a distinctive banking distribution channel used in microfinance. Its common in areas such as India to use Centers and Group administrative units in <b>grameen style lending</b>. Typically groups will contain one to five people and centers themselves will be made of anywhere between 2-7 groups.
+					</p>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Field Descriptions</div></td>
+						</tr>
+						<tr class=alt>
+							<td>name</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Name given to the Center.</td>
+						</tr>
+						<tr class=alt>
+							<td>officeId</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>The officeId of the office/branch this center is administrated through.</td>
+						</tr>
+						<tr class=alt>
+							<td>staffId</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>The staffId of the staff member dealing with this center. The staff member is not specifically the loan officer.</td>
+						</tr>
+						<tr class=alt>
+							<td>externalId</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>A place to put an external reference for this center e.g. The ID another system uses. If provided, it must be unique.
+							</td>
+						</tr>
+					</table>
+				</div>
+			</div>
+
+			<a id="centers_template" name="centers_template" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Retrieve a Center Template</h4>
+					<p>Example Requests:</p>
+					<div class=apiClick>centers/template</div>
+					<br/>
+					<div class=apiClick>centers/template?officeId=2</div>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+GET https://DomainName/mifosng-provider/api/v1/centers/template
+					</code>
+					<code class="method-response">
+{
+  "officeOptions": [
+    {
+      "id": 1,
+      "name": "Head Office",
+      "nameDecorated": "Head Office"
+    },
+    {
+      "id": 2,
+      "name": "Suboffice",
+      "nameDecorated": "....Suboffice"
+    }
+  ],
+  "staffOptions": [
+    {
+      "id": 1,
+      "displayName": "LoanOfficer, HeadOffice"
+    },
+    {
+      "id": 2,
+      "displayName": "NonLoanOfficer, HeadOffice"
+    }
+  ]
+}
+					</code>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+GET https://DomainName/mifosng-provider/api/v1/centers/template?officeId=2
+					</code>
+					<code class="method-response">
+{
+  "officeId": 2,
+  "officeOptions": [
+    {
+      "id": 1,
+      "name": "Head Office",
+      "nameDecorated": "Head Office"
+    },
+    {
+      "id": 2,
+      "name": "Suboffice",
+      "nameDecorated": "....Suboffice"
+    }
+  ],
+  "staffOptions": [
+    {
+      "id": 3,
+      "displayName": "LoanOfficer, Suboffice"
+    },
+    {
+      "id": 4,
+      "displayName": "NonLoanOfficer, Suboffice"
+    }
+  ]
+}
+					</code>
+				</div>
+			</div>
+
+			<a id="centers_create" name="centers_create" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Create a Center</h4>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Mandatory Fields</div></td>
+						</tr>
+						<tr class=alt>
+							<td>name, officeId</td>
+						</tr>
+					</table>
+					<br/>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Optional Fields</div></td>
+						</tr>
+						<tr class=alt>
+							<td>externalId, staffId</td>
+						</tr>
+					</table>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+POST https://DomainName/mifosng-provider/api/v1/centers
+					</code>
+					<code class="method-request">
+POST centers
+Content-Type: application/json Request Body:
+{
+	"name": "apicenter",
+	"officeId": 2
+}
+					</code>
+					<code class="method-response">
+{
+	"officeId": 2,
+  	"groupId": 4,
+  	"resourceId": 4
+}
+					</code>
+				</div>
+			</div>
+
+			<a id="centers_update" name="centers_update" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Update a Center</h4>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+PUT https://DomainName/mifosng-provider/api/v1/centers/{centerId}
+						</code>
+					<code class="method-request">
+PUT centers/4
+Content-Type: application/json 
+Request Body:
+{
+	"name": "apicenter(updated)"
+}
+					</code>
+					<code class="method-response">
+{
+  "officeId": 4,
+  "groupId": 2,
+  "resourceId": 4,
+  "changes": {
+    "name": "apicenter(updated)"
+  }
+}
+					</code>
+				</div>
+			</div>
+			
+			<a id="centers_delete" name="centers_delete" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Delete a Center</h4>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+POST https://DomainName/mifosng-provider/api/v1/centers/{centerId}
+						</code>
+					<code class="method-request">
+DELETE centers/1
+					</code>
+					<code class="method-response">
+{
+	"resourceId":1,
+	"changes":{}
+}
+					</code>
+				</div>
+			</div>
+
+			<a id="centers_list" name="centers_list" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>List Centers</h4>
+					<p>Example Requests:</p>
+					<div class=apiClick>centers</div>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+GET https://DomainName/mifosng-provider/api/v1/centers
+					</code>
+					<code class="method-response">
+[
+  {
+    "id": 1,
+    "name": "Center 001",
+    "externalId": "001",
+    "officeId": 1,
+    "officeName": "Head Office",
+    "hierarchy": ".1."
+  },
+  {
+    "id": 3,
+    "name": "Suboffice Center",
+    "externalId": "002",
+    "officeId": 2,
+    "officeName": "Suboffice",
+    "hierarchy": ".3."
+  }
+]
+					</code>
+				</div>
+			</div>
+
+			<a id="centers_retrieve" name="centers_retrieve" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Retrieve a Center</h4>
+					<p>Example Requests:</p>
+					<div class=apiClick>centers/1</div>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+GET https://DomainName/mifosng-provider/api/v1/centers/1
+					</code>
+					<code class="method-response">
+{
+  "id": 1,
+  "name": "Center 001",
+  "externalId": "001",
+  "officeId": 1,
+  "officeName": "Head Office",
+  "hierarchy": ".1."
+}
+					</code>
+				</div>
+			</div>
+			<!-- End of Centers API-->
 
 			<!-- start of Groups api docs -->
 			<a id="groups" name="groups" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
 					<h3>Groups</h3>
-					<p>Groups are collection of clients for specific purpose (JLG,SHG, Program etc) </p>
+					<p><b>Groups</b> are used to provide a distinctive banking distribution channel used in microfinance throughout the world. The Group is an administrative unit. It can contain as few as 5 people or as many as 40 depending on how its used.</p>
+
+					<p>Different styles of group lending - Joint-Liability Group, Grameen Model (Center-Group), Self-Help Groups, Village/Communal Banks)</p>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
 							<td><div class="mifosXHeading2">Field Descriptions</div></td>
 						</tr>
 						<tr class=alt>
-							<td>office_id</td>
-						</tr>
-						<tr>
-							<td class=fielddesc>It stores the officeid of office, to this officer Group belongs.</td>
-						</tr>
-						<tr class=alt>
-							<td>loan_officer_id</td>
-						</tr>
-						<tr>
-							<td class=fielddesc>Id of the officer who manages this group.</td>
-						</tr>
-						<tr class=alt>
 							<td>name</td>
 						</tr>
 						<tr>
-							<td class=fielddesc>Human friendly identity of the Group (Name given to the group).</td>
+							<td class=fielddesc>Name given to the Group.</td>
+						</tr>
+						<tr class=alt>
+							<td>officeId</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>The officeId of the office/branch this group is administrated through.</td>
+						</tr>
+						<tr class=alt>
+							<td>staffId</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>The staffId of the staff member dealing with this group. The staff member is not specifically the loan officer.</td>
 						</tr>
 						<tr class=alt>
 							<td>externalId</td>
 						</tr>
 						<tr>
-							<td class=fielddesc>A place to put an external reference for
-								this group e.g. The ID another system uses.<br> If
-								provided, it must be unique.
+							<td class=fielddesc>A place to put an external reference for this group e.g. The ID another system uses. If provided, it must be unique.
 							</td>
 						</tr>
-												<tr class=alt>
-						<td>is_deleted</td>
+						<tr class=alt>
+							<td>clientMembers</td>
 						</tr>
 						<tr>
-							<td class=fielddesc>Indicator for active or archived groups.
-							</td>
+							<td class=fielddesc>The individual client members that make up the group.</td>
 						</tr>
 					</table>
 				</div>
 			</div>
+
+			<a id="groups_template" name="groups_template" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Retrieve Group Template</h4>
+					<p>Example Requests:</p>
+					<div class=apiClick>groups/template?centerId=1</div>
+					<br/>
+					<div class=apiClick>groups/template?officeId=2</div>
+					<br/>
+					<div class=apiClick>groups/template</div>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+GET https://DomainName/mifosng-provider/api/v1/groups/template
+					</code>
+					<code class="method-response">
+{
+  "officeId": 1,
+  "officeOptions": [
+    {
+      "id": 1,
+      "name": "Head Office",
+      "nameDecorated": "Head Office"
+    },
+    {
+      "id": 2,
+      "name": "Suboffice",
+      "nameDecorated": "....Suboffice"
+    }
+  ],
+  "staffOptions": [
+    {
+      "id": 1,
+      "displayName": "LoanOfficer, HeadOffice"
+    },
+    {
+      "id": 2,
+      "displayName": "NonLoanOfficer, HeadOffice"
+    }
+  ],
+   "clientOptions": [
+    {
+      "id": 1,
+      "displayName": "Test one",
+      "officeId": 1,
+      "officeName": "Head Office"
+    }
+  ]
+}
+					</code>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+GET https://DomainName/mifosng-provider/api/v1/groups/template?officeId=2
+					</code>
+					<code class="method-response">
+{
+  "officeId": 2,
+  "officeOptions": [
+    {
+      "id": 1,
+      "name": "Head Office",
+      "nameDecorated": "Head Office"
+    },
+    {
+      "id": 2,
+      "name": "Suboffice",
+      "nameDecorated": "....Suboffice"
+    }
+  ],
+  "staffOptions": [
+    {
+      "id": 3,
+      "displayName": "LoanOfficer, Suboffice"
+    },
+    {
+      "id": 4,
+      "displayName": "NonLoanOfficer, Suboffice"
+    }
+  ]
+}
+					</code>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+GET https://DomainName/mifosng-provider/api/v1/groups/template?centerId=1
+					</code>
+					<code class="method-response">
+{
+  "officeId": 1,
+  "centerId": 1,
+  "centerName": "Center 001",
+  "centerOptions": [
+    {
+      "id": 1,
+      "name": "Center 001",
+      "externalId": "001",
+      "officeId": 1,
+      "officeName": "Head Office",
+      "hierarchy": ".1."
+    }
+  ],
+  "officeOptions": [
+    {
+      "id": 1,
+      "name": "Head Office",
+      "nameDecorated": "Head Office",
+      "externalId": "1",
+      "openingDate": [
+        2009,
+        1,
+        1
+      ],
+      "hierarchy": "."
+    }
+  ],
+  "staffOptions": [
+    {
+      "id": 1,
+      "displayName": "LoanOfficer, HeadOffice"
+    },
+    {
+      "id": 2,
+      "displayName": "NonLoanOfficer, HeadOffice"
+    }
+  ],
+   "clientOptions": [
+    {
+      "id": 1,
+      "displayName": "Test one",
+      "officeId": 1,
+      "officeName": "Head Office"
+    }
+  ]
+}
+					</code>
+				</div>
+			</div>
+
 			<a id="groups_create" name="groups_create" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
@@ -2636,32 +3043,51 @@ No Request Body:
 							<td><div class="mifosXHeading2">Mandatory Fields</div></td>
 						</tr>
 						<tr class=alt>
-							<td>name<br>
-								officeId<br>
-								clients
-							</td>
+							<td>name,officeId</td>
+						</tr>
+					</table>
+					<br/>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Optional Fields</div></td>
+						</tr>
+						<tr class=alt>
+							<td>externalId,staffId,clientMembers</td>
 						</tr>
 					</table>
 				</div>
 				<div class="method-example">
 					<code class="method-declaration">
-						POST https://DomainName/mifosng-provider/api/v1/groups
+POST https://DomainName/mifosng-provider/api/v1/groups
 					</code>
 					<code class="method-request">
-						POST groups
-						Content-Type: application/json Request Body:
-						{
-						"officeId":"1",
-						"name":"TA Group",
-						"externalId":"",
-						"clientMembers":["82","83","84"]
-						}
+POST groups
+Content-Type: application/json Request Body:
+{
+"officeId":"1",
+"name":"TA Group"
+}
+					</code>
+					<code class="method-request">
+POST groups
+Content-Type: application/json Request Body:
+{
+"officeId":"1",
+"name":"TA Group"
+"externalId": "000-1A",
+"clientMembers": ["1"]
+}
 					</code>
 					<code class="method-response">
-						{"resourceId":24,"changes":{}}
+{
+  "officeId": 2,
+  "groupId": 5,
+  "resourceId": 5
+}
 					</code>
 				</div>
 			</div>
+
 			<a id="groups_list" name="groups_list" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
@@ -2674,114 +3100,115 @@ No Request Body:
 GET https://DomainName/mifosng-provider/api/v1/groups
 					</code>
 					<code class="method-response">
-[{
-    "id": 1,
-    "name": "GWT_2",
-    "externalId": "GWT_EX_ID_2",
-    "officeId": 7,
-    "officeName": "Z2"
-}, {
-    "id": 2,
-    "name": "group22",
-    "externalId": "11234",
+[
+  {
+    "id": 10,
+    "name": "GroupU(Suboffice)",
+    "officeId": 2,
+    "officeName": "Suboffice",
+    "centerId": 4,
+    "centerName": "apicenter(updated)",
+    "hierarchy": ""
+  },
+  {
+    "id": 8,
+    "name": "AnothergroupUI",
     "officeId": 1,
-    "officeName": "Head Office"
-}, {
-    "id": 3,
-    "name": "PlusOne",
-    "officeId": 22,
-    "officeName": "North Point Office"
-}]
+    "officeName": "Head Office",
+    "centerId": 1,
+    "centerName": "Center 001",
+    "hierarchy": ""
+  },
+  {
+    "id": 7,
+    "name": "NewGroupUI",
+    "externalId": "0011",
+    "officeId": 1,
+    "officeName": "Head Office",
+    "centerId": 1,
+    "centerName": "Center 001",
+    "staffId": 1,
+    "staffName": "LoanOfficer, HeadOffice",
+    "hierarchy": ""
+  },
+  {
+    "id": 9,
+    "name": "GroupUCenter",
+    "officeId": 1,
+    "officeName": "Head Office",
+    "centerId": 1,
+    "centerName": "Center 001",
+    "staffId": 1,
+    "staffName": "LoanOfficer, HeadOffice",
+    "hierarchy": ""
+  },
+  {
+    "id": 2,
+    "name": "Group 001-A",
+    "officeId": 1,
+    "officeName": "Head Office",
+    "centerId": 1,
+    "centerName": "Center 001",
+    "hierarchy": ""
+  },
+  {
+    "id": 11,
+    "name": "Test(no parents)",
+    "officeId": 1,
+    "officeName": "Head Office",
+    "hierarchy": ".11."
+  },
+  {
+    "id": 12,
+    "name": "SubofficeGroup(no parents)",
+    "officeId": 2,
+    "officeName": "Suboffice",
+    "hierarchy": ".12."
+  }
+]
 					</code>
 				</div>
 			</div>
-			<a id="groups_retrieve" name="groups_retrieve"
-				class="old-syle-anchor">&nbsp;</a>
+
+			<a id="groups_retrieve" name="groups_retrieve" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
 					<h4>Retrieve a Group</h4>
 					<p>Example Requests:</p>
-					<div class=apiClick>groups/10</div>
+					<div class=apiClick>groups/12</div>
 				</div>
 				<div class="method-example">
 					<code class="method-declaration">
-GET https://DomainName/mifosng-provider/api/v1/groups/10
+GET https://DomainName/mifosng-provider/api/v1/groups/12
 					</code>
 					<code class="method-response">
 {
-    "id": 10,
-    "name": "test123",
-    "externalId": "tejjjst",
-    "officeId": 1,
-    "officeName": "Head Office",
-    "clientMembers": [{
-        "id": 1,
-        "displayName": "Willie O\u0027Meara"
-    }]
+  "id": 12,
+  "name": "SubofficeGroup(no parents)",
+  "officeId": 2,
+  "officeName": "Suboffice",
+  "hierarchy": ".12.",
+  "clientMembers": [
+    {
+      "id": 2,
+      "accountNo": "000000002",
+      "firstname": "Another",
+      "lastname": "client",
+      "displayName": "Another client",
+      "officeId": 2,
+      "officeName": "Suboffice",
+      "joinedDate": [
+        2012,
+        4,
+        14
+      ]
+    }
+  ]
 }
 					</code>
 				</div>
 			</div>
-			<a id="groups_loansummary" name="groups_loansummary"
-				class="old-syle-anchor">&nbsp;</a>
-			<div class="method-section">
-				<div class="method-description">
-					<h4>Retrieve a Groups's Loan Account Summary</h4>
-					<p>
-						An example of how a loan portfolio summary can be provided. This
-						one contains quite a bit of redundant data (like the counts) 
-					</p>
-					<p>Example Requests:</p>
-					<div class=apiClick>groups/7/loans</div>
-				</div>
-				<div class="method-example">
-					<code class="method-declaration">
-GET https://DomainName/mifosng-provider/api/v1/groups/7/loans
-					</code>
-					<code class="method-response">
-{
-    "anyLoanCount": 1,
-    "pendingApprovalLoanCount": 0,
-    "pendingApprovalLoans": [],
-    "awaitingDisbursalLoanCount": 0,
-    "awaitingDisbursalLoans": [],
-    "activeLoanCount": 1,
-    "openLoans": [{
-        "id": 79,
-        "productId": 1,
-        "productName": "1-PORetailLoan",
-        "accountStatusId": 300
-    }],
-    "closedLoanCount": 0,
-    "closedLoans": [],
-    "anyIndividualLoanCount": 3,
-    "pendingApprovalIndividualLoanCount": 0,
-    "pendingApprovalIndividualLoans": [],
-    "awaitingDisbursalIndividualLoanCount": 0,
-    "awaitingDisbursalIndividualLoans": [],
-    "activeIndividualLoanCount": 3,
-    "openIndividualLoans": [{
-        "id": 80,
-        "productId": 17,
-        "productName": "17-Intrasoft Business Loan",
-        "accountStatusId": 300
-    }, {
-        "id": 81,
-        "productId": 1,
-        "productName": "1-PORetailLoan",
-        "accountStatusId": 300
-    }, {
-        "id": 82,
-        "productId": 13,
-        "productName": "13-A Flat Loan",
-        "accountStatusId": 300
-    }],
-    "closedIndividualLoanCount": 0,
-    "closedIndividualLoans": []
-}
-					</code>
-				</div>
-			</div>
+
 			<a id="groups_update" name="groups_update" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
@@ -2792,75 +3219,27 @@ GET https://DomainName/mifosng-provider/api/v1/groups/7/loans
 PUT https://DomainName/mifosng-provider/api/v1/groups/{groupid}
 						</code>
 					<code class="method-request">
-PUT groups/7 
+PUT groups/5
 Content-Type: application/json 
 Request Body:
 {
-    "officeId": "26",
-    "name": "Laxmi SSG U",
-    "externalId": "Unq 2--124",
-    "clientMembers": ["91", "93", "94"]
+	"name": "apigroup(changed)"
 }
 					</code>
 					<code class="method-response">
 {
-	"resourceId":7,
-	"changes":{}
+  "officeId": 5,
+  "groupId": 2,
+  "resourceId": 5,
+  "changes": {
+    "name": "apigroup(changed)"
+  }
 }
 					</code>
 				</div>
 			</div>
-			<a id="groups_assignlo" name="groups_assignlo" class="old-syle-anchor">&nbsp;</a>
-			<div class="method-section">
-				<div class="method-description">
-					<h4>Assign a Loan Officer to Group</h4>
-				</div>
-				<div class="method-example">
-					<code class="method-declaration">
-POST https://DomainName/mifosng-provider/api/v1/groups/{groupid}/command/assign_loanofficer
-						</code>
-					<code class="method-request">
-POST groups/20/command/assign_loanofficer 
-Content-Type: application/json 
-Request Body:
-{
-{"loanOfficerId":"1"}
-}
-					</code>
-					<code class="method-response">
-{
-	"resourceId":20,
-	"changes":{}
-}
-					</code>
-				</div>
-			</div>
-			<a id="groups_unassign_lo" name="groups_unassign_lo" class="old-syle-anchor">&nbsp;</a>
-			<div class="method-section">
-				<div class="method-description">
-					<h4>Unassign a loan officer to a Group</h4>
-				</div>
-				<div class="method-example">
-					<code class="method-declaration">
-POST https://DomainName/mifosng-provider/api/v1/groups/{groupid}/command/assign_loanofficer
-						</code>
-					<code class="method-request">
-POST groups/20/command/unassign_loanofficer 
-Content-Type: application/json 
-Request Body:
-{
-{"loanOfficerId":"1"}
-}
-					</code>
-					<code class="method-response">
-{
-	"resourceId":20,
-	"changes":{}
-}
-					</code>
-				</div>
-			</div>
-						<a id="groups_delete" name="groups_delete" class="old-syle-anchor">&nbsp;</a>
+
+			<a id="groups_delete" name="groups_delete" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
 					<h4>Delete a Group</h4>
@@ -2870,12 +3249,13 @@ Request Body:
 POST https://DomainName/mifosng-provider/api/v1/groups/{groupid}
 						</code>
 					<code class="method-request">
-DELETE groups/7
+DELETE groups/5
 					</code>
 					<code class="method-response">
 {
-	"resourceId":7,
-	"changes":{}
+  "officeId": 5,
+  "groupId": 2,
+  "resourceId": 5
 }
 					</code>
 				</div>
@@ -12385,6 +12765,40 @@ GET https://DomainName/api/v1/search?query=000000111
 					</td>
 					<td></td>
 				</tr>
+				<!-- centers groups -->
+				<tr class="alt">
+					<td><a href="#centers">Center</a></td>
+					<td>centers</td>
+					<td><a href="#centers_create">Create a Center</a></td>
+					<td><a href="#centers_list">List Centers</a></td>
+					<td></td>
+					<td><a href="#centers_delete">Delete a Center</a></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>centers/{centerId}</td>
+					<td></td>
+					<td><a href="#centers_retrieve">Retrieve a Center</a></td>
+					<td><a href="#centers_update">Update a Center</a></td>
+					<td></td>
+				</tr>
+				<tr class="alt">
+					<td><a href="#groups">Group</a></td>
+					<td>groups</td>
+					<td><a href="#groups_create">Create a Group</a></td>
+					<td><a href="#groups_list">List Groups</a></td>
+					<td></td>
+					<td><a href="#groups_delete">Delete a Group</a></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>groups/{group}</td>
+					<td></td>
+					<td><a href="#groups_retrieve">Retrieve a Group</a></td>
+					<td><a href="#groups_update">Update a Group</a></td>
+					<td></td>
+				</tr>
+				<!-- end of centers, groups api -->
 				<!-- loans api full matrix-->
 				<tr class="alt">
 					<td><a href="#loanproducts">Loan Product</a></td>

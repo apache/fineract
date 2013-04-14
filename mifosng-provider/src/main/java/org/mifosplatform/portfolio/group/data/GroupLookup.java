@@ -8,6 +8,7 @@ package org.mifosplatform.portfolio.group.data;
 /**
  * Immutable data object representing groups.
  */
+@Deprecated
 public class GroupLookup {
 
     private final Long id;

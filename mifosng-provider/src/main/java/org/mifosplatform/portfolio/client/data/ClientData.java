@@ -9,14 +9,17 @@ import java.util.Collection;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.builder.CompareToBuilder;
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.joda.time.LocalDate;
 import org.mifosplatform.organisation.office.data.OfficeLookup;
-import org.mifosplatform.portfolio.group.data.GroupLookup;
+import org.mifosplatform.portfolio.group.data.GroupGeneralData;
 
 /**
  * Immutable data object representing client data.
  */
-final public class ClientData {
+final public class ClientData implements Comparable<ClientData> {
 
     private final Long id;
     private final String accountNo;
@@ -32,9 +35,12 @@ final public class ClientData {
     private final String imageKey;
     @SuppressWarnings("unused")
     private final Boolean imagePresent;
-    private final Collection<GroupLookup> parentGroups;
-    private final List<OfficeLookup> allowedOffices;
 
+    // associations
+    private final Collection<GroupGeneralData> parentGroups;
+
+    // template
+    private final List<OfficeLookup> allowedOffices;
     private final ClientData currentChange;
     private final Collection<ClientData> allChanges;
 
@@ -46,7 +52,8 @@ final public class ClientData {
                 joiningDate, null, null, null, null, null);
     }
 
-    public static ClientData integrateChanges(final ClientData clientData, ClientData currentChange, final Collection<ClientData> allChanges) {
+    public static ClientData integrateChanges(final ClientData clientData, final ClientData currentChange,
+            final Collection<ClientData> allChanges) {
         return new ClientData(clientData.accountNo, clientData.officeId, clientData.officeName, clientData.id, clientData.firstname,
                 clientData.middlename, clientData.lastname, clientData.fullname, clientData.displayName, clientData.externalId,
                 clientData.joinedDate, clientData.imageKey, clientData.allowedOffices, currentChange, allChanges, clientData.parentGroups);
@@ -65,7 +72,7 @@ final public class ClientData {
                 clientData.parentGroups);
     }
 
-    public static ClientData setParentGroups(final ClientData clientData, final Collection<GroupLookup> parentGroups) {
+    public static ClientData setParentGroups(final ClientData clientData, final Collection<GroupGeneralData> parentGroups) {
         return new ClientData(clientData.accountNo, clientData.officeId, clientData.officeName, clientData.id, clientData.firstname,
                 clientData.middlename, clientData.lastname, clientData.fullname, clientData.displayName, clientData.externalId,
                 clientData.joinedDate, clientData.imageKey, clientData.allowedOffices, clientData.currentChange, clientData.allChanges,
@@ -80,10 +87,14 @@ final public class ClientData {
                 null, null, null, null, null, null);
     }
 
+    public static ClientData lookup(final Long id, final String displayName, final Long officeId, final String officeName) {
+        return new ClientData(null, officeId, officeName, id, null, null, null, null, displayName, null, null, null, null, null, null, null);
+    }
+
     public ClientData(final String accountNo, final Long officeId, final String officeName, final Long id, final String firstname,
             final String middlename, final String lastname, final String fullname, final String displayName, final String externalId,
             final LocalDate joinedDate, final String imageKey, final List<OfficeLookup> allowedOffices, final ClientData currentChange,
-            final Collection<ClientData> allChanges, final Collection<GroupLookup> parentGroups) {
+            final Collection<ClientData> allChanges, final Collection<GroupGeneralData> parentGroups) {
         this.accountNo = accountNo;
         this.officeId = officeId;
         this.officeName = officeName;
@@ -105,6 +116,35 @@ final public class ClientData {
         this.currentChange = currentChange;
         this.allChanges = allChanges;
         this.parentGroups = parentGroups;
+    }
+
+    @Override
+    public int compareTo(final ClientData obj) {
+        if (obj == null) { return -1; }
+        return new CompareToBuilder() //
+                .append(this.id, obj.id) //
+                .append(this.displayName, obj.displayName) //
+                .toComparison();
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        if (obj == null) { return false; }
+        if (obj == this) { return true; }
+        if (obj.getClass() != getClass()) { return false; }
+        ClientData rhs = (ClientData) obj;
+        return new EqualsBuilder() //
+                .append(this.id, rhs.id) //
+                .append(this.displayName, rhs.displayName) //
+                .isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37) //
+                .append(this.id) //
+                .append(this.displayName) //
+                .toHashCode();
     }
 
     public String displayName() {
@@ -162,5 +202,4 @@ final public class ClientData {
     public LocalDate getJoinedDate() {
         return this.joinedDate;
     }
-
 }

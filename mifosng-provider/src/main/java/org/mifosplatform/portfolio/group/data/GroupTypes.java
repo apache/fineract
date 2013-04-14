@@ -68,5 +68,4 @@ public enum GroupTypes {
     public String getValue() {
         return this.value;
     }
-
 }
