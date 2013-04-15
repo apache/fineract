@@ -100,12 +100,6 @@ public final class CalculateLoanScheduleQueryFromApiJsonHelper {
                 element);
         baseDataValidator.reset().parameter(interestRatePerPeriodParameterName).value(interestRatePerPeriod).notNull().positiveAmount();
 
-        final String interestRateFrequencyTypeParameterName = "interestRateFrequencyType";
-        final Integer interestRateFrequencyType = fromApiJsonHelper.extractIntegerWithLocaleNamed(interestRateFrequencyTypeParameterName,
-                element);
-        baseDataValidator.reset().parameter(interestRateFrequencyTypeParameterName).value(interestRateFrequencyType).notNull()
-                .inMinMaxRange(0, 3);
-
         final String interestTypeParameterName = "interestType";
         final Integer interestType = fromApiJsonHelper.extractIntegerWithLocaleNamed(interestTypeParameterName, element);
         baseDataValidator.reset().parameter(interestTypeParameterName).value(interestType).notNull().inMinMaxRange(0, 1);
