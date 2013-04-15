@@ -8,15 +8,15 @@ package org.mifosplatform.infrastructure.dataqueries.data;
 final public class ReportParameterData {
 
 	@SuppressWarnings("unused")
-	private final Long reportParameterId;
+	private final Long id;
 	@SuppressWarnings("unused")
 	private final String reportParameterName;
 	@SuppressWarnings("unused")
 	private final String parameterName;
 
-	public ReportParameterData(final Long reportParameterId,
+	public ReportParameterData(final Long id,
 			final String reportParameterName, final String parameterName) {
-		this.reportParameterId = reportParameterId;
+		this.id = id;
 		this.reportParameterName = reportParameterName;
 		this.parameterName = parameterName;
 	}

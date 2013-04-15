@@ -529,6 +529,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
 		String reportType = null;
 		String reportSubType = null;
 		String reportCategory = null;
+		String description = null;
 		Boolean coreReport = null;
 		Boolean useReport = null;
 		String reportSql = null;
@@ -552,7 +553,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
 					// write report entry
 					reportList
 							.add(new ReportData(reportId, reportName,
-									reportType, reportSubType, reportCategory,
+									reportType, reportSubType, reportCategory, description,
 									reportSql, coreReport, useReport,
 									reportParameters));
 				}
@@ -564,6 +565,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
 				reportType = rpJoin.getReportType();
 				reportSubType = rpJoin.getReportSubType();
 				reportCategory = rpJoin.getReportCategory();
+				description = rpJoin.getDescription();
 				reportSql = rpJoin.getReportSql();
 				coreReport = rpJoin.getCoreReport();
 				useReport = rpJoin.getUseReport();
@@ -583,7 +585,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
 		}
 		// write last report
 		reportList.add(new ReportData(reportId, reportName, reportType,
-				reportSubType, reportCategory, reportSql, coreReport,
+				reportSubType, reportCategory, description, reportSql, coreReport,
 				useReport, reportParameters));
 
 		return reportList;
@@ -594,16 +596,16 @@ public class ReadReportingServiceImpl implements ReadReportingService {
 
 		public String schema(boolean includeSql, Long userId) {
 
-			String sql = "select r.report_id as reportId, r.report_name as reportName, r.report_type as reportType, "
-					+ " r.report_subtype as reportSubType, r.report_category as reportCategory, r.core_report as coreReport, r.use_report as useReport, "
+			String sql = "select r.id as reportId, r.report_name as reportName, r.report_type as reportType, "
+					+ " r.report_subtype as reportSubType, r.report_category as reportCategory, r.description, r.core_report as coreReport, r.use_report as useReport, "
 					+ " rp.parameter_id as reportParameterId, rp.report_parameter_name as reportParameterName, p.parameter_name as parameterName";
 
 			if (includeSql)
 				sql += ", r.report_sql as reportSql ";
 
 			sql += " from stretchy_report r"
-					+ " left join stretchy_report_parameter rp on rp.report_id = r.report_id"
-					+ " left join stretchy_parameter p on p.parameter_id = rp.parameter_id"
+					+ " left join stretchy_report_parameter rp on rp.report_id = r.id"
+					+ " left join stretchy_parameter p on p.id = rp.parameter_id"
 					+ " where exists"
 					+ " (select 'f'"
 					+ " from m_appuser_role ur "
@@ -613,7 +615,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
 					+ " where ur.appuser_id = "
 					+ userId
 					+ " and (p.code in ('ALL_FUNCTIONS', 'ALL_FUNCTIONS_READ') or p.code = concat('READ_', r.report_name))) "
-					+ " order by r.report_id, rp.parameter_id";
+					+ " order by r.id, rp.parameter_id";
 
 			return sql;
 		}
@@ -628,6 +630,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
 			final String reportType = rs.getString("reportType");
 			final String reportSubType = rs.getString("reportSubType");
 			final String reportCategory = rs.getString("reportCategory");
+			final String description = rs.getString("description");
 			final Boolean coreReport = rs.getBoolean("coreReport");
 			final Boolean useReport = rs.getBoolean("useReport");
 
@@ -646,7 +649,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
 			final String parameterName = rs.getString("parameterName");
 
 			return new ReportParameterJoinData(reportId, reportName,
-					reportType, reportSubType, reportCategory, reportSql,
+					reportType, reportSubType, reportCategory, description, reportSql,
 					coreReport, useReport, reportParameterId,
 					reportParameterName, parameterName);
 		}

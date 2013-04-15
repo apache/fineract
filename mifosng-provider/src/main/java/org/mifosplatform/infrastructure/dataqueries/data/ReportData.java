@@ -10,7 +10,7 @@ import java.util.Collection;
 final public class ReportData {
 
 	@SuppressWarnings("unused")
-	private final Long reportId;
+	private final Long id;
 	@SuppressWarnings("unused")
 	private final String reportName;
 	@SuppressWarnings("unused")
@@ -20,6 +20,8 @@ final public class ReportData {
 	@SuppressWarnings("unused")
 	private final String reportCategory;
 	@SuppressWarnings("unused")
+	private final String description;
+	@SuppressWarnings("unused")
 	private final String reportSql;
 	@SuppressWarnings("unused")
 	private final Boolean coreReport;
@@ -28,20 +30,21 @@ final public class ReportData {
 	@SuppressWarnings("unused")
 	private final Collection<ReportParameterData> reportParameters;
 
-	public ReportData(final Long reportId, final String reportName,
+	public ReportData(final Long id, final String reportName,
 			final String reportType, final String reportSubType,
-			final String reportCategory, final String reportSql,
+			final String reportCategory, final String description, final String reportSql,
 			final Boolean coreReport, final Boolean useReport,
 			final Collection<ReportParameterData> reportParameters) {
-		this.reportId = reportId;
+		this.id = id;
 		this.reportName = reportName;
 		this.reportType = reportType;
 		this.reportSubType = reportSubType;
 		this.reportCategory = reportCategory;
+		this.description = description;
 		this.reportParameters = reportParameters;
 		this.reportSql = reportSql;
 		this.coreReport = coreReport;
 		this.useReport = useReport;
 	}
-
+	
 }

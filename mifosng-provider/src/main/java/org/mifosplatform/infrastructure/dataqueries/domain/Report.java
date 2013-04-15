@@ -5,123 +5,150 @@
  */
 package org.mifosplatform.infrastructure.dataqueries.domain;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import org.apache.commons.lang.StringUtils;
+import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
 @Table(name = "stretchy_report", uniqueConstraints = { @UniqueConstraint(columnNames = { "report_name" }, name = "unq_report_name") })
 public class Report extends AbstractPersistable<Long> {
 
-@Column(name = "report_name", nullable = false, unique = true)
-private String reportName;
+	@Column(name = "report_name", nullable = false, unique = true)
+	private String reportName;
 
-@Column(name = "report_type", nullable = false)
-private String reportType;
+	@Column(name = "report_type", nullable = false)
+	private String reportType;
 
-@Column(name = "report_subtype")
-private String reportSubType;
+	@Column(name = "report_subtype")
+	private String reportSubType;
 
-@Column(name = "report_category")
-private String reportCategory;
+	@Column(name = "report_category")
+	private String reportCategory;
 
-@Column(name = "description")
-private String description;
+	@Column(name = "description")
+	private String description;
 
-@Column(name = "core_report", nullable = false)
-private boolean core_Report;
+	@Column(name = "core_report", nullable = false)
+	private boolean coreReport;
 
-//only defines if report should appear in reference app UI List
-@Column(name = "use_report", nullable = false)
-private boolean useReport;
+	// only defines if report should appear in reference app UI List
+	@Column(name = "use_report", nullable = false)
+	private boolean useReport;
 
-@Column(name = "report_sql")
-private String reportSql;
+	@Column(name = "report_sql")
+	private String reportSql;
 
-/*
-    @ManyToMany
-    @JoinTable(name = "stretchy_report_parameter", joinColumns = @JoinColumn(name = "reportn_id"), inverseJoinColumns = @JoinColumn(name = "parameter_id"))
-    private List<Charge> charges;
-*/
+	/*
+	 * @ManyToMany
+	 * 
+	 * @JoinTable(name = "stretchy_report_parameter", joinColumns =
+	 * @JoinColumn(name = "reportn_id"), inverseJoinColumns = @JoinColumn(name =
+	 * "parameter_id")) private List<Charge> charges;
+	 */
 
+	public static Report fromJson(final JsonCommand command) {
 
-    public Report(final String reportName, final String reportType, final String reportSubType, final String reportCategory, final String description,
-    		final boolean core_Report, final boolean useReport, final String reportSql) {
-    	this.reportName = reportName;
-    	this.reportType = reportType;
-    	this.reportSubType = reportSubType;
-    	this.reportCategory = reportCategory;
-    	this.description = description;
-    	this.core_Report = core_Report;
-    	this.useReport = useReport;
-    	this.reportSql = reportSql;
-    }
+		final String reportName = command
+				.stringValueOfParameterNamed("reportName");
+		final String reportType = command
+				.stringValueOfParameterNamed("reportType");
+		final String reportSubType = command
+				.stringValueOfParameterNamed("reportSubType");
+		final String reportCategory = command
+				.stringValueOfParameterNamed("reportCategory");
+		final String description = command
+				.stringValueOfParameterNamed("description");
+		final boolean coreReport = command
+				.booleanPrimitiveValueOfParameterNamed("coreReport");
+		final boolean useReport = command
+				.booleanPrimitiveValueOfParameterNamed("useReport");
+		final String reportSql = command
+				.stringValueOfParameterNamed("reportSql");
 
-	public String getReportName() {
-		return reportName;
+		return new Report(reportName, reportType, reportSubType,
+				reportCategory, description, coreReport, useReport, reportSql);
 	}
 
-	public void setReportName(String reportName) {
+	protected Report() {
+		//
+	}
+
+	public Report(final String reportName, final String reportType,
+			final String reportSubType, final String reportCategory,
+			final String description, final boolean coreReport,
+			final boolean useReport, final String reportSql) {
 		this.reportName = reportName;
-	}
-
-	public String getReportType() {
-		return reportType;
-	}
-
-	public void setReportType(String reportType) {
 		this.reportType = reportType;
-	}
-
-	public String getReportSubType() {
-		return reportSubType;
-	}
-
-	public void setReportSubType(String reportSubType) {
 		this.reportSubType = reportSubType;
-	}
-
-	public String getReportCategory() {
-		return reportCategory;
-	}
-
-	public void setReportCategory(String reportCategory) {
 		this.reportCategory = reportCategory;
-	}
-
-	public String getDescription() {
-		return description;
-	}
-
-	public void setDescription(String description) {
 		this.description = description;
-	}
-
-	public boolean isCore_Report() {
-		return core_Report;
-	}
-
-	public void setCore_Report(boolean core_Report) {
-		this.core_Report = core_Report;
-	}
-
-	public boolean isUseReport() {
-		return useReport;
-	}
-
-	public void setUseReport(boolean useReport) {
+		this.coreReport = coreReport;
 		this.useReport = useReport;
-	}
-
-	public String getReportSql() {
-		return reportSql;
-	}
-
-	public void setReportSql(String reportSql) {
 		this.reportSql = reportSql;
 	}
 
+    public Map<String, Object> update(final JsonCommand command) {
+
+        final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(8);
+
+        String paramName = "reportName";
+        if (command.isChangeInStringParameterNamed(paramName, this.reportName)) {
+            final String newValue = command.stringValueOfParameterNamed(paramName);
+            actualChanges.put(paramName, newValue);
+            this.reportName = StringUtils.defaultIfEmpty(newValue, null);
+        }
+        paramName = "reportType";
+        if (command.isChangeInStringParameterNamed(paramName, this.reportType)) {
+            final String newValue = command.stringValueOfParameterNamed(paramName);
+            actualChanges.put(paramName, newValue);
+            this.reportType = StringUtils.defaultIfEmpty(newValue, null);
+        }
+        paramName = "reportSubType";
+        if (command.isChangeInStringParameterNamed(paramName, this.reportSubType)) {
+            final String newValue = command.stringValueOfParameterNamed(paramName);
+            actualChanges.put(paramName, newValue);
+            this.reportSubType = StringUtils.defaultIfEmpty(newValue, null);
+        }
+        paramName = "reportCategory";
+        if (command.isChangeInStringParameterNamed(paramName, this.reportCategory)) {
+            final String newValue = command.stringValueOfParameterNamed(paramName);
+            actualChanges.put(paramName, newValue);
+            this.reportCategory = StringUtils.defaultIfEmpty(newValue, null);
+        }
+        paramName = "description";
+        if (command.isChangeInStringParameterNamed(paramName, this.description)) {
+            final String newValue = command.stringValueOfParameterNamed(paramName);
+            actualChanges.put(paramName, newValue);
+            this.description = StringUtils.defaultIfEmpty(newValue, null);
+        }
+        paramName = "coreReport";
+        if (command.isChangeInBooleanParameterNamed(paramName, this.coreReport)) {
+            final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(paramName);
+            actualChanges.put(paramName, newValue);
+            this.coreReport = newValue;
+        }
+        paramName = "useReport";
+        if (command.isChangeInBooleanParameterNamed(paramName, this.useReport)) {
+            final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(paramName);
+            actualChanges.put(paramName, newValue);
+            this.useReport = newValue;
+        }
+        paramName = "reportSql";
+        if (command.isChangeInStringParameterNamed(paramName, this.reportSql)) {
+            final String newValue = command.stringValueOfParameterNamed(paramName);
+            actualChanges.put(paramName, newValue);
+            this.reportSql = StringUtils.defaultIfEmpty(newValue, null);
+        }
+
+        return actualChanges;
+    }
+    
 }

@@ -10655,49 +10655,51 @@ GET https://DomainName/api/v1/reports
 					<code class="method-response">
 [
   {
-    "reportId": 1,
+    "id": 1,
     "reportName": "Client Listing",
     "reportType": "Table",
     "reportCategory": "Client",
+    "description": "Individual Client Report\r\n\r\nLists the small number of defined fields on the client table.  Would expect to copy this \n\nreport and add any \u0027one to one\u0027 additional data for specific tenant needs.\r\n\r\nCan be run for any size MFI but you\u0027d expect it only to be run within a branch for \n\nlarger ones.  Depending on how many columns are displayed, there is probably is a limit of about 20/50k clients returned for html display (export to excel doesn\u0027t \n\nhave that client browser/memory impact).",
     "coreReport": true,
     "useReport": true,
     "reportParameters": [
       {
-        "reportParameterId": 5,
+        "id": 5,
         "parameterName": "OfficeIdSelectOne"
       }
     ]
   },
   {
-    "reportId": 2,
+    "id": 2,
     "reportName": "Client Loans Listing",
     "reportType": "Table",
     "reportCategory": "Client",
+    "description": "Individual Client Report\r\n\r\nPretty \n\nwide report that lists the basic details of client loans.  \r\n\r\nCan be run for any size MFI but you\u0027d expect it only to be run within a branch for larger ones.  \n\nThere is probably is a limit of about 20/50k clients returned for html display (export to excel doesn\u0027t have that client browser/memory impact).",
     "coreReport": true,
     "useReport": true,
     "reportParameters": [
       {
-        "reportParameterId": 5,
+        "id": 5,
         "parameterName": "OfficeIdSelectOne"
       },
       {
-        "reportParameterId": 6,
+        "id": 6,
         "parameterName": "loanOfficerIdSelectAll"
       },
       {
-        "reportParameterId": 10,
+        "id": 10,
         "parameterName": "currencyIdSelectAll"
       },
       {
-        "reportParameterId": 20,
+        "id": 20,
         "parameterName": "fundIdSelectAll"
       },
       {
-        "reportParameterId": 25,
+        "id": 25,
         "parameterName": "loanProductIdSelectAll"
       },
       {
-        "reportParameterId": 26,
+        "id": 26,
         "parameterName": "loanPurposeIdSelectAll"
       }
     ]

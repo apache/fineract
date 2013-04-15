@@ -199,6 +199,14 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    public CommandWrapperBuilder createReport() {
+        this.actionName = "CREATE";
+        this.entityName = "REPORT";
+        this.entityId = null;
+        this.href = "/reports/template";
+        return this;
+    }
+    
     public CommandWrapperBuilder updateCurrencies() {
         this.actionName = "UPDATE";
         this.entityName = "CURRENCY";

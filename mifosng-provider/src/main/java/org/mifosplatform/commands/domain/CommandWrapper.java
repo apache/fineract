@@ -479,5 +479,9 @@ public class CommandWrapper {
     public boolean isCenterResource() {
         return this.entityName.equalsIgnoreCase("CENTER");
     }
+    
+    public boolean isReportResource() {
+        return this.entityName.equalsIgnoreCase("REPORT");
+    }
 
 }
