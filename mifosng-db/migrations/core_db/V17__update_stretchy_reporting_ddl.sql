@@ -68,7 +68,7 @@ ALTER TABLE `stretchy_parameter_tmp`
   ON DELETE RESTRICT ON UPDATE RESTRICT,
   ADD INDEX `fk_stretchy_parameter_001_idx` (`parent_id` ASC);
 
-
+SET foreign_key_checks = 0;
 ALTER TABLE `stretchy_report_parameter_tmp` 
   ADD CONSTRAINT `fk_report_parameter_001` FOREIGN KEY (`report_id` )
   REFERENCES `stretchy_report_tmp` (`id` ) ON DELETE CASCADE ON UPDATE RESTRICT, 
@@ -78,7 +78,7 @@ ALTER TABLE `stretchy_report_parameter_tmp`
 
   ADD INDEX `fk_report_parameter_001_idx` (`report_id` ASC),
   ADD INDEX `fk_report_parameter_002_idx` (`parameter_id` ASC) ;
-
+SET foreign_key_checks = 1;
 
 drop table stretchy_report_parameter;
 drop table stretchy_report;
