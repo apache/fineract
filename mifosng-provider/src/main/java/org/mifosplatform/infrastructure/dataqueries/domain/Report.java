@@ -66,15 +66,13 @@ public class Report extends AbstractPersistable<Long> {
 				.stringValueOfParameterNamed("reportCategory");
 		final String description = command
 				.stringValueOfParameterNamed("description");
-		final boolean coreReport = command
-				.booleanPrimitiveValueOfParameterNamed("coreReport");
 		final boolean useReport = command
 				.booleanPrimitiveValueOfParameterNamed("useReport");
 		final String reportSql = command
 				.stringValueOfParameterNamed("reportSql");
 
 		return new Report(reportName, reportType, reportSubType,
-				reportCategory, description, coreReport, useReport, reportSql);
+				reportCategory, description, useReport, reportSql);
 	}
 
 	protected Report() {
@@ -83,14 +81,14 @@ public class Report extends AbstractPersistable<Long> {
 
 	public Report(final String reportName, final String reportType,
 			final String reportSubType, final String reportCategory,
-			final String description, final boolean coreReport,
+			final String description, 
 			final boolean useReport, final String reportSql) {
 		this.reportName = reportName;
 		this.reportType = reportType;
 		this.reportSubType = reportSubType;
 		this.reportCategory = reportCategory;
 		this.description = description;
-		this.coreReport = coreReport;
+		this.coreReport = false;
 		this.useReport = useReport;
 		this.reportSql = reportSql;
 	}
@@ -100,7 +98,7 @@ public class Report extends AbstractPersistable<Long> {
         final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(8);
 
         String paramName = "reportName";
-        if (command.isChangeInStringParameterNamed(paramName, this.reportName)) {
+        if (command.isChangeInStringParameterNamed(paramName, this.reportName)) {  		
             final String newValue = command.stringValueOfParameterNamed(paramName);
             actualChanges.put(paramName, newValue);
             this.reportName = StringUtils.defaultIfEmpty(newValue, null);
@@ -129,12 +127,6 @@ public class Report extends AbstractPersistable<Long> {
             actualChanges.put(paramName, newValue);
             this.description = StringUtils.defaultIfEmpty(newValue, null);
         }
-        paramName = "coreReport";
-        if (command.isChangeInBooleanParameterNamed(paramName, this.coreReport)) {
-            final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(paramName);
-            actualChanges.put(paramName, newValue);
-            this.coreReport = newValue;
-        }
         paramName = "useReport";
         if (command.isChangeInBooleanParameterNamed(paramName, this.useReport)) {
             final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(paramName);
@@ -150,5 +142,9 @@ public class Report extends AbstractPersistable<Long> {
 
         return actualChanges;
     }
+
+	public boolean isCoreReport() {
+		return coreReport;
+	}  
     
 }

@@ -207,6 +207,22 @@ public class CommandWrapperBuilder {
         return this;
     }
     
+    public CommandWrapperBuilder updateReport(final Long id) {
+        this.actionName = "UPDATE";
+        this.entityName = "REPORT";
+        this.entityId = id;
+        this.href = "/reports/" + id;
+        return this;
+    }
+    
+    public CommandWrapperBuilder deleteReport(final Long id) {
+        this.actionName = "DELETE";
+        this.entityName = "REPORT";
+        this.entityId = id;
+        this.href = "/reports/" + id;
+        return this;
+    }
+    
     public CommandWrapperBuilder updateCurrencies() {
         this.actionName = "UPDATE";
         this.entityName = "CURRENCY";

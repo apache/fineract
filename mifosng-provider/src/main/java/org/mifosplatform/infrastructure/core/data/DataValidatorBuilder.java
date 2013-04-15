@@ -357,6 +357,37 @@ public class DataValidatorBuilder {
         return this;
     }
 
+    public DataValidatorBuilder mustBeBlankWhenParameterProvidedIs(final String parameterName, final Object parameterValue) {
+        if (value == null && ignoreNullValue) { return this; }
+
+        if (value == null && parameterValue != null) { return this; }
+
+        if (value != null && StringUtils.isBlank(value.toString()) && parameterValue != null
+                && StringUtils.isNotBlank(parameterValue.toString())) { return this; }
+
+        StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append(resource).append(".").append(parameter)
+                .append(".cannot.also.be.provided.when.").append(parameterName).append(".is.").append(parameterValue);
+        StringBuilder defaultEnglishMessage = new StringBuilder("The parameter ").append(parameter)
+                .append(" cannot also be provided when ").append(parameterName).append(" is ").append(parameterValue);
+        ApiParameterError error = ApiParameterError.parameterError(validationErrorCode.toString(), defaultEnglishMessage.toString(),
+                parameter, value, parameterName, parameterValue);
+        dataValidationErrors.add(error);
+        return this;
+    }
+    
+    public DataValidatorBuilder cantBeBlankWhenParameterProvidedIs(final String parameterName, final Object parameterValue) {
+        if (value != null) { return this; }
+
+        StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append(resource).append(".").append(parameter)
+                .append(".must.be.provided.when.").append(parameterName).append(".is.").append(parameterValue);
+        StringBuilder defaultEnglishMessage = new StringBuilder("The parameter ").append(parameter)
+                .append(" must be provided when ").append(parameterName).append(" is ").append(parameterValue);
+        ApiParameterError error = ApiParameterError.parameterError(validationErrorCode.toString(), defaultEnglishMessage.toString(),
+                parameter, value, parameterName, parameterValue);
+        dataValidationErrors.add(error);
+        return this;
+    }
+
     public DataValidatorBuilder comapareMinimumAndMaximumAmounts(final BigDecimal minimumBalance, final BigDecimal maximumBalance) {
         if (minimumBalance != null && maximumBalance != null)
             if (maximumBalance.compareTo(minimumBalance) == -1) {

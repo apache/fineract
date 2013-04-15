@@ -51,7 +51,7 @@ public class ReportWritePlatformServiceImpl implements
 		try {
 			context.authenticatedUser();
 
-			this.fromApiJsonDeserializer.validateForCreate(command.json());
+			this.fromApiJsonDeserializer.validate_for_create(command.json());
 
 			final Report report = Report.fromJson(command);
 
@@ -74,7 +74,7 @@ public class ReportWritePlatformServiceImpl implements
 		try {
 			context.authenticatedUser();
 
-			this.fromApiJsonDeserializer.validateForUpdate(command.json());
+			this.fromApiJsonDeserializer.validate_for_update(command.json());
 
 			final Report report = this.reportRepository.findOne(reportId);
 			if (report == null) {
@@ -83,6 +83,16 @@ public class ReportWritePlatformServiceImpl implements
 
 			final Map<String, Object> changes = report.update(command);
 			if (!changes.isEmpty()) {
+				if (report.isCoreReport()) {
+					for (final String key : changes.keySet()) {
+						if (!(key.equals("useReport"))) {
+							throw new PlatformDataIntegrityException(
+									"error.msg.only.use.report.can.be.updated.for.core.report",
+									"Only the Use Report field can be updated for Core Reports",
+									key);
+						}
+					}
+				}
 				this.reportRepository.saveAndFlush(report);
 			}
 
@@ -102,6 +112,12 @@ public class ReportWritePlatformServiceImpl implements
 		final Report report = this.reportRepository.findOne(reportId);
 		if (report == null) {
 			throw new ReportNotFoundException(reportId);
+		}
+
+		if (report.isCoreReport()) {
+			throw new PlatformDataIntegrityException(
+					"error.msg.cant.delete.core.report",
+					"Core Reports Can't be Deleted", "");
 		}
 
 		this.reportRepository.delete(report);
