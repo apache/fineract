@@ -9,9 +9,9 @@ import java.util.HashMap;
 import org.junit.Before;
 import org.junit.Test;
 import org.mifosplatform.integrationtests.common.ClientHelper;
-import org.mifosplatform.integrationtests.common.LoanApplicationTestBuilder;
-import org.mifosplatform.integrationtests.common.LoanProductTestBuilder;
-import org.mifosplatform.integrationtests.common.LoanTransactionHelper;
+import org.mifosplatform.integrationtests.common.loans.LoanApplicationTestBuilder;
+import org.mifosplatform.integrationtests.common.loans.LoanProductTestBuilder;
+import org.mifosplatform.integrationtests.common.loans.LoanTransactionHelper;
 import org.mifosplatform.integrationtests.common.Utils;
 
 import com.jayway.restassured.builder.RequestSpecBuilder;
@@ -27,9 +27,9 @@ import com.jayway.restassured.specification.ResponseSpecification;
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public class ClientLoanIntegrationTest {
 
-    ResponseSpecification responseSpec;
-    RequestSpecification requestSpec;
-
+    private ResponseSpecification responseSpec;
+    private RequestSpecification requestSpec;
+    private LoanTransactionHelper loanTransactionHelper;
     @Before
     public void setup() {
         Utils.initializeRESTAssured();
@@ -40,13 +40,13 @@ public class ClientLoanIntegrationTest {
 
     @Test
     public void checkClientLoanCreateAndDisburseFlow() {
+        loanTransactionHelper = new LoanTransactionHelper(requestSpec,responseSpec);
+
         Integer clientID = ClientHelper.createClient(requestSpec, responseSpec);
         ClientHelper.verifyClientCreatedOnServer(requestSpec, responseSpec, clientID);
-
         Integer loanProductID = createLoanProduct();
         Integer loanID = applyForLoanApplication(clientID, loanProductID);
-
-        ArrayList<HashMap> loanSchedule = LoanTransactionHelper.getLoanRepaymentSchedule(requestSpec, responseSpec, loanID);
+        ArrayList<HashMap> loanSchedule = loanTransactionHelper.getLoanRepaymentSchedule(requestSpec, responseSpec, loanID);
         verifyLoanRepaymentSchedule(loanSchedule);
 
     }
@@ -57,18 +57,18 @@ public class ClientLoanIntegrationTest {
                 .withRepaymentAfterEvery("1").withRepaymentTypeAsMonth().withinterestRatePerPeriod("2")
                 .withInterestRateFrequencyTypeAsMonths().withAmortizationTypeAsEqualInstallments().withInterestTypeAsDecliningBalance()
                 .withinterestRatePerPeriod("1").build();
-        return LoanTransactionHelper.getLoanProductId(requestSpec, responseSpec, loanProductJSON);
+        return loanTransactionHelper.getLoanProductId(loanProductJSON);
     }
 
     private Integer applyForLoanApplication(final Integer clientID, final Integer loanProductID) {
         System.out.println("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
         String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal("12,000.00").withLoanTermFrequency("4")
                 .withLoanTermFrequencyAsMonths().withNumberOfRepayments("4").withRepaymentEveryAfter("1")
-                .withRepaymentFrequencyTypeAsMonths().withInterestRatePerPeriod("2").withInterestRateFrequencyTypeAsMonths()
+                .withRepaymentFrequencyTypeAsMonths().withInterestRatePerPeriod("2")
                 .withAmortizationTypeAsEqualInstallments().withInterestTypeAsDecliningBalance()
                 .withInterestCalculationPeriodTypeSameAsRepaymentPeriod().withExpectedDisbursementDate("20 September 2011")
                 .withSubmittedOnDate("20 September 2011").build(clientID.toString(), loanProductID.toString());
-        return LoanTransactionHelper.getLoanId(requestSpec, responseSpec, loanApplicationJSON);
+        return loanTransactionHelper.getLoanId(loanApplicationJSON);
     }
 
     private void verifyLoanRepaymentSchedule(final ArrayList<HashMap> loanSchedule) {

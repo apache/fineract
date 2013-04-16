@@ -1,7 +1,6 @@
 package org.mifosplatform.integrationtests.common;
 
 import java.util.HashMap;
-import java.util.Random;
 
 
 import com.google.gson.Gson;
@@ -45,20 +44,11 @@ public class ClientHelper {
         assertEquals("ERROR IN CREATING THE CLIENT",generatedClientID, responseClientID);
     }
 
-    private static String randomStringGenerator(final String prefix, final int len, final String sourceSetString) {
-        int lengthOfSource = sourceSetString.length();
-        Random rnd = new Random();
-        StringBuilder sb = new StringBuilder(len);
-        for (int i = 0; i < len; i++)
-            sb.append((sourceSetString).charAt(rnd.nextInt(lengthOfSource)));
-        return (prefix + (sb.toString()));
-    }
-
     public static String randomNameGenerator(final String prefix, final int lenOfRandomSuffix) {
-        return randomStringGenerator(prefix, lenOfRandomSuffix, "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+        return Utils.randomStringGenerator(prefix, lenOfRandomSuffix);
     }
 
     private static String randomIDGenerator(final String prefix, final int lenOfRandomSuffix) {
-        return randomStringGenerator(prefix, lenOfRandomSuffix, "ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+        return Utils.randomStringGenerator(prefix, lenOfRandomSuffix, "ABCDEFGHIJKLMNOPQRSTUVWXYZ");
     }
 }

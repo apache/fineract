@@ -1,4 +1,4 @@
-package org.mifosplatform.integrationtests.common;
+package org.mifosplatform.integrationtests.common.loans;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -7,6 +7,7 @@ import java.util.HashMap;
 
 import com.jayway.restassured.specification.RequestSpecification;
 import com.jayway.restassured.specification.ResponseSpecification;
+import org.mifosplatform.integrationtests.common.Utils;
 
 @SuppressWarnings("rawtypes")
 public class LoanStatusChecker {
@@ -27,12 +28,12 @@ public class LoanStatusChecker {
         assertTrue(getStatus(loanStatusHashMap, "active"));
     }
 
-    public static void verifyLoanNeedsApproval(final HashMap loanStatusHashMap) {
-        assertTrue(getStatus(loanStatusHashMap, "pendingApproval"));
-    }
-
     public static void verifyLoanAccountIsClosed(final HashMap loanStatusHashMap) {
         assertTrue(getStatus(loanStatusHashMap, "closed"));
+    }
+
+    public  static void verifyLoanAccountIsNotActive(final HashMap loanStatusHashMap) {
+        assertFalse(getStatus(loanStatusHashMap, "active"));
     }
 
     public static HashMap getStatusOfLoan(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,

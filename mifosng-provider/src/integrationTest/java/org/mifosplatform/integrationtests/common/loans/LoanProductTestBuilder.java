@@ -1,8 +1,11 @@
-package org.mifosplatform.integrationtests.common;
+package org.mifosplatform.integrationtests.common.loans;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import com.google.gson.Gson;
+import org.mifosplatform.integrationtests.common.ClientHelper;
+import org.mifosplatform.integrationtests.common.accounting.Account;
 
 public class LoanProductTestBuilder {
     private static final String LOCALE = "en_GB";
@@ -28,9 +31,9 @@ public class LoanProductTestBuilder {
 
     private String nameOfLoanProduct = ClientHelper.randomNameGenerator("LOAN_PRODUCT_", 6);
     private String principal = "10000.00";
-    private String numberOfRepayments = "0";
-    private String repaymentFrequency = WEEK;
-    private String repaymentPeriod = "0";
+    private String numberOfRepayments = "5";
+    private String repaymentFrequency = MONTHS;
+    private String repaymentPeriod = "1";
     private String interestRatePerPeriod= "2";
     private String interestRateFrequencyType = MONTHS;
     private String interestType = FLAT_BALANCE;
@@ -42,7 +45,7 @@ public class LoanProductTestBuilder {
     private String amortizationType= EQUAL_INSTALLMENTS;
     private String minPrincipal = "1000.00";
     private String maxPrincipal = "100000.00";
-
+    private Account[] accountList = null;
 
     public String build() {
         HashMap<String, String> map = new HashMap<String, String>();
@@ -65,8 +68,15 @@ public class LoanProductTestBuilder {
         map.put("accountingRule", accountingRule);
         map.put("minPrincipal",minPrincipal);
         map.put("maxPrincipal",maxPrincipal);
+
+        if(accountingRule.equals(ACCRUAL_BASED)){
+            map.putAll(getAccountMappingForAccrualBased());
+        }else if(accountingRule.equals(CASH_BASED)){
+            map.putAll(getAccountMappingForCashBased());
+        }
         return new Gson().toJson(map);
     }
+
 
     public LoanProductTestBuilder withMinPrincipal(final String minPrincipal){
         this.minPrincipal=minPrincipal;
@@ -167,14 +177,67 @@ public class LoanProductTestBuilder {
         return this;
     }
 
-    public LoanProductTestBuilder withAccountingRuleAsCashBased (){
+    public LoanProductTestBuilder withAccountingRuleAsCashBased (Account [] account_list){
         this.accountingRule= CASH_BASED;
+        this.accountList = account_list;
         return this;
     }
 
-    public LoanProductTestBuilder withAccountingRuleAsAccrualBased (){
+    public LoanProductTestBuilder withAccountingRuleAsAccrualBased (Account[] account_list){
         this.accountingRule= ACCRUAL_BASED;
+        this.accountList = account_list;
         return this;
+    }
+
+    private Map<String,String> getAccountMappingForCashBased() {
+        Map<String,String> map = new HashMap<String, String>();
+        for (int i=0;i<this.accountList.length;i++)
+        {
+            if(accountList[i].getAccountType().equals(Account.AccountType.ASSET)){
+                String ID = accountList[i].getAccountID().toString();
+                map.put("fundSourceAccountId",ID);
+                map.put("loanPortfolioAccountId",ID);
+            }
+            if(accountList[i].getAccountType().equals(Account.AccountType.INCOME)){
+                String ID = accountList[i].getAccountID().toString();
+                map.put("interestOnLoanAccountId",ID);
+                map.put("incomeFromFeeAccountId",ID);
+                map.put("incomeFromPenaltyAccountId",ID);
+            }
+            if(accountList[i].getAccountType().equals(Account.AccountType.EXPENSE)){
+                String ID = accountList[i].getAccountID().toString();
+                map.put("writeOffAccountId",ID);
+            }
+        }
+        return map;
+    }
+
+    private Map<String, String> getAccountMappingForAccrualBased() {
+        Map<String,String> map = new HashMap<String, String>();
+        for (int i=0;i<this.accountList.length;i++)
+        {
+            if(accountList[i].getAccountType().equals(Account.AccountType.ASSET)){
+                String ID = accountList[i].getAccountID().toString();
+                map.put("fundSourceAccountId",ID);
+                map.put("loanPortfolioAccountId",ID);
+                map.put("receivableInterestAccountId",ID);
+                map.put("receivableFeeAccountId",ID);
+                map.put("receivablePenaltyAccountId",ID);
+
+            }
+            if(accountList[i].getAccountType().equals(Account.AccountType.INCOME)){
+                String ID = accountList[i].getAccountID().toString();
+                map.put("interestOnLoanAccountId",ID);
+                map.put("incomeFromFeeAccountId",ID);
+                map.put("incomeFromPenaltyAccountId",ID);
+            }
+            if(accountList[i].getAccountType().equals(Account.AccountType.EXPENSE)){
+                String ID = accountList[i].getAccountID().toString();
+                map.put("writeOffAccountId",ID);
+            }
+        }
+
+        return map;
     }
 
 }

@@ -1,4 +1,4 @@
-package org.mifosplatform.integrationtests.common;
+package org.mifosplatform.integrationtests.common.loans;
 
 import java.util.HashMap;
 
@@ -19,20 +19,18 @@ public class LoanApplicationTestBuilder {
 
     private String principal = "10,000";
     private String loanTermFrequency = "";
-    // FIXME - unused variable?
     private String loanTermFrequencyType = "";
     private String numberOfRepayment = "0";
     private String repaymentPeriod = "0";
     private String repaymentFrequencyType = "";
 
     private String interestRate = "2";
-    private String interestRateFrequencyType = "0";
-    private String interestType = "";
-    private String amortizationType = "";
+    private String interestType = FLAT_BALANCE;
+    private String amortizationType = EQUAL_PRINCIPLE_PAYMENTS;
     private String interestCalculationPeriodType = CALCULATION_PERIOD_SAME_AS_REPAYMENT_PERIOD;
     private final String transactionProcessingID = MIFOS_STANDARD_STRATEGY;
     private String expectedDisbursmentDate = "";
-    private String submittedOndate = "";
+    private String submittedOnDate = "";
 
     public String build(final String clientID, final String loanProductId) {
 
@@ -43,19 +41,17 @@ public class LoanApplicationTestBuilder {
         map.put("productId", loanProductId);
         map.put("principal", principal);
         map.put("loanTermFrequency", loanTermFrequency);
-        map.put("loanTermFrequencyType", "2"); // FIXME - Should this be using
-                                               // loanTermFrequencyType value?
+        map.put("loanTermFrequencyType", loanTermFrequencyType); // FIXME - Should this be using
         map.put("numberOfRepayments", numberOfRepayment);
         map.put("repaymentEvery", repaymentPeriod);
         map.put("repaymentFrequencyType", repaymentFrequencyType);
-        map.put("interestRateFrequencyType", interestRateFrequencyType);
         map.put("interestRatePerPeriod", interestRate);
         map.put("amortizationType", amortizationType);
         map.put("interestType", interestType);
         map.put("interestCalculationPeriodType", interestCalculationPeriodType);
         map.put("transactionProcessingStrategyId", transactionProcessingID);
         map.put("expectedDisbursementDate", expectedDisbursmentDate);
-        map.put("submittedOnDate", submittedOndate);
+        map.put("submittedOnDate", submittedOnDate);
         return new Gson().toJson(map);
     }
 
@@ -119,16 +115,6 @@ public class LoanApplicationTestBuilder {
         return this;
     }
 
-    public LoanApplicationTestBuilder withInterestRateFrequencyTypeAsMonths() {
-        this.interestRateFrequencyType = MONTHS;
-        return this;
-    }
-
-    public LoanApplicationTestBuilder withInterestRateFrequencyTypeAsYears() {
-        this.interestRateFrequencyType = YEARS;
-        return this;
-    }
-
     public LoanApplicationTestBuilder withInterestTypeAsFlatBalance() {
         this.interestType = FLAT_BALANCE;
         return this;
@@ -165,7 +151,9 @@ public class LoanApplicationTestBuilder {
     }
 
     public LoanApplicationTestBuilder withSubmittedOnDate(final String loanApplicationSubmittedDate) {
-        this.submittedOndate = loanApplicationSubmittedDate;
+        this.submittedOnDate = loanApplicationSubmittedDate;
         return this;
     }
+
+
 }
