@@ -13,13 +13,13 @@ import org.springframework.security.access.prepost.PreAuthorize;
 
 public interface DocumentWritePlatformService {
 
-    @PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'CREATE_m_guarantor_external')")
+    @PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'CREATE_DOCUMENT')")
     Long createDocument(DocumentCommand documentCommand, InputStream inputStream);
 
-    @PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'UPDATE_m_guarantor_external')")
+    @PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'UPDATE_DOCUMENT')")
     CommandProcessingResult updateDocument(DocumentCommand documentCommand, InputStream inputStream);
 
-    @PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'DELETE_m_guarantor_external')")
+    @PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'DELETE_DOCUMENT')")
     CommandProcessingResult deleteDocument(DocumentCommand documentCommand);
 
 }
