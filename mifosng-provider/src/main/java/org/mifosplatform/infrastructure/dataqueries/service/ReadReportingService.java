@@ -31,4 +31,6 @@ public interface ReadReportingService {
 	String getReportType(String reportName);
 
 	Collection<ReportData> retrieveReportList();
+
+	ReportData retrieveReport(final Long id);
 }

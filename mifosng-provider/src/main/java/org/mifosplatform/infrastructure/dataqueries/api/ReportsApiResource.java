@@ -99,6 +99,25 @@ public class ReportsApiResource {
 				RESPONSE_DATA_PARAMETERS);
 	}
 
+	@GET
+	@Path("wip/{id}")
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public String retrieveReport(@PathParam("id") final Long id,
+			@Context final UriInfo uriInfo) {
+
+		context.authenticatedUser().validateHasReadPermission(
+				resourceNameForPermissions);
+
+		final ReportData result = this.readExtraDataAndReportingService
+				.retrieveReport(id);
+
+		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper
+				.process(uriInfo.getQueryParameters());
+		return this.toApiJsonSerializer.serialize(settings, result,
+				RESPONSE_DATA_PARAMETERS);
+	}
+
 	@POST
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
@@ -114,10 +133,11 @@ public class ReportsApiResource {
 	}
 
 	@PUT
-    @Path("{id}")
+	@Path("{id}")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
-	public String updateReport(@PathParam("id") final Long id, final String apiRequestBodyAsJson) {
+	public String updateReport(@PathParam("id") final Long id,
+			final String apiRequestBodyAsJson) {
 
 		final CommandWrapper commandRequest = new CommandWrapperBuilder()
 				.updateReport(id).withJson(apiRequestBodyAsJson).build();
@@ -127,9 +147,9 @@ public class ReportsApiResource {
 
 		return this.toApiJsonSerializer.serialize(result);
 	}
-	
+
 	@DELETE
-    @Path("{id}")
+	@Path("{id}")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
 	public String deleteReport(@PathParam("id") final Long id) {
@@ -148,7 +168,7 @@ public class ReportsApiResource {
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON, "application/x-msdownload",
 			"application/vnd.ms-excel", "application/pdf", "text/html" })
-	public Response retrieveReport(
+	public Response runReport(
 			@PathParam("reportName") final String reportName,
 			@Context final UriInfo uriInfo) {
 

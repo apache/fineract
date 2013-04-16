@@ -509,11 +509,25 @@ public class ReadReportingServiceImpl implements ReadReportingService {
 	}
 
 	@Override
+	public ReportData retrieveReport(Long id) {
+		Collection<ReportData> reports = retrieveReports(id);
+
+		for (ReportData report : reports) {
+			return report;
+		}
+		return null;
+	}
+
+	@Override
 	public Collection<ReportData> retrieveReportList() {
+		return retrieveReports(null);
+	}
+
+	private Collection<ReportData> retrieveReports(final Long id) {
 
 		ReportParameterJoinMapper rm = new ReportParameterJoinMapper();
 
-		String sql = rm.schema(false, context.authenticatedUser().getId());
+		String sql = rm.schema(context.authenticatedUser().getId(), id);
 
 		Collection<ReportParameterJoinData> rpJoins = this.jdbcTemplate.query(
 				sql, rm, new Object[] {});
@@ -546,16 +560,13 @@ public class ReadReportingServiceImpl implements ReadReportingService {
 
 			} else {
 				if (firstReport) {
-					firstReport = false;					
-				}
-				else
-				{
+					firstReport = false;
+				} else {
 					// write report entry
-					reportList
-							.add(new ReportData(reportId, reportName,
-									reportType, reportSubType, reportCategory, description,
-									reportSql, coreReport, useReport,
-									reportParameters));
+					reportList.add(new ReportData(reportId, reportName,
+							reportType, reportSubType, reportCategory,
+							description, reportSql, coreReport, useReport,
+							reportParameters));
 				}
 
 				prevReportId = rpJoin.getReportId();
@@ -585,8 +596,8 @@ public class ReadReportingServiceImpl implements ReadReportingService {
 		}
 		// write last report
 		reportList.add(new ReportData(reportId, reportName, reportType,
-				reportSubType, reportCategory, description, reportSql, coreReport,
-				useReport, reportParameters));
+				reportSubType, reportCategory, description, reportSql,
+				coreReport, useReport, reportParameters));
 
 		return reportList;
 	}
@@ -594,13 +605,13 @@ public class ReadReportingServiceImpl implements ReadReportingService {
 	private static final class ReportParameterJoinMapper implements
 			RowMapper<ReportParameterJoinData> {
 
-		public String schema(boolean includeSql, Long userId) {
+		public String schema(Long userId, Long reportId) {
 
 			String sql = "select r.id as reportId, r.report_name as reportName, r.report_type as reportType, "
 					+ " r.report_subtype as reportSubType, r.report_category as reportCategory, r.description, r.core_report as coreReport, r.use_report as useReport, "
 					+ " rp.parameter_id as reportParameterId, rp.report_parameter_name as reportParameterName, p.parameter_name as parameterName";
 
-			if (includeSql)
+			if (reportId != null)
 				sql += ", r.report_sql as reportSql ";
 
 			sql += " from stretchy_report r"
@@ -614,8 +625,11 @@ public class ReadReportingServiceImpl implements ReadReportingService {
 					+ " left join m_permission p on p.id = rp.permission_id"
 					+ " where ur.appuser_id = "
 					+ userId
-					+ " and (p.code in ('ALL_FUNCTIONS', 'ALL_FUNCTIONS_READ') or p.code = concat('READ_', r.report_name))) "
-					+ " order by r.id, rp.parameter_id";
+					+ " and (p.code in ('ALL_FUNCTIONS', 'ALL_FUNCTIONS_READ') or p.code = concat('READ_', r.report_name))) ";
+			if (reportId != null)
+				sql += " and r.id = " + reportId;
+			else
+				sql += " order by r.id, rp.parameter_id";
 
 			return sql;
 		}
@@ -649,8 +663,8 @@ public class ReadReportingServiceImpl implements ReadReportingService {
 			final String parameterName = rs.getString("parameterName");
 
 			return new ReportParameterJoinData(reportId, reportName,
-					reportType, reportSubType, reportCategory, description, reportSql,
-					coreReport, useReport, reportParameterId,
+					reportType, reportSubType, reportCategory, description,
+					reportSql, coreReport, useReport, reportParameterId,
 					reportParameterName, parameterName);
 		}
 
