@@ -504,13 +504,13 @@ public class ReadReportingServiceImpl implements ReadReportingService {
 
 		ReportParameterJoinMapper rm = new ReportParameterJoinMapper();
 
-		String sql = rm.schema(context.authenticatedUser().getId(), id);
+		String sql = rm.schema(id);
 
 		Collection<ReportParameterJoinData> rpJoins = this.jdbcTemplate.query(
 				sql, rm, new Object[] {});
 
 		Collection<ReportData> reportList = new ArrayList<ReportData>();
-		if (rpJoins == null)
+		if (rpJoins == null || rpJoins.size() == 0)
 			return reportList;
 
 		Collection<ReportParameterData> reportParameters = null;
@@ -582,7 +582,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
 	private static final class ReportParameterJoinMapper implements
 			RowMapper<ReportParameterJoinData> {
 
-		public String schema(Long userId, Long reportId) {
+		public String schema(Long reportId) {
 
 			String sql = "select r.id as reportId, r.report_name as reportName, r.report_type as reportType, "
 					+ " r.report_subtype as reportSubType, r.report_category as reportCategory, r.description, r.core_report as coreReport, r.use_report as useReport, "
@@ -593,22 +593,26 @@ public class ReadReportingServiceImpl implements ReadReportingService {
 
 			sql += " from stretchy_report r"
 					+ " left join stretchy_report_parameter rp on rp.report_id = r.id"
-					+ " left join stretchy_parameter p on p.id = rp.parameter_id"
-					+ " where exists"
-					+ " (select 'f'"
-					+ " from m_appuser_role ur "
-					+ " join m_role r on r.id = ur.role_id"
-					+ " left join m_role_permission rp on rp.role_id = r.id"
-					+ " left join m_permission p on p.id = rp.permission_id"
-					+ " where ur.appuser_id = "
-					+ userId
-					+ " and (p.code in ('ALL_FUNCTIONS', 'ALL_FUNCTIONS_READ') or p.code = concat('READ_', r.report_name))) ";
+					+ " left join stretchy_parameter p on p.id = rp.parameter_id";
 			if (reportId != null)
-				sql += " and r.id = " + reportId;
+				sql += " where r.id = " + reportId;
 			else
 				sql += " order by r.id, rp.parameter_id";
 
 			return sql;
+			
+/* used to only return reports that the use can run as done in report UI but not necessary as there is a read_report permission 
+ * which should give user access to look all reports
+			+ " where exists"
+			+ " (select 'f'"
+			+ " from m_appuser_role ur "
+			+ " join m_role r on r.id = ur.role_id"
+			+ " left join m_role_permission rp on rp.role_id = r.id"
+			+ " left join m_permission p on p.id = rp.permission_id"
+			+ " where ur.appuser_id = "
+			+ userId
+			+ " and (p.code in ('ALL_FUNCTIONS', 'ALL_FUNCTIONS_READ') or p.code = concat('READ_', r.report_name))) ";
+			*/
 		}
 
 		@Override
