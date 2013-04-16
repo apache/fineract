@@ -21,4 +21,6 @@ public interface CenterReadPlatformService {
     Collection<CenterData> retrieveAll(SearchParameters searchCriteria);
 
     GroupGeneralData retrieveCenterGroupTemplate(Long centerId);
+    
+    Collection<GroupGeneralData> retriveAssociatedGroups(Long centerId);
 }

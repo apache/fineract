@@ -109,13 +109,20 @@ public class CentersApiResource {
     public String retrieveOne(@Context final UriInfo uriInfo, @PathParam("centerId") final Long centerId) {
 
         this.context.authenticatedUser().validateHasReadPermission(GroupingTypesApiConstants.CENTER_RESOURCE_NAME);
-
+        final Set<String> associationParameters = ApiParameterHelper.extractAssociationsForResponseIfProvided(uriInfo.getQueryParameters());
+        
         CenterData center = this.centerReadPlatformService.retrieveOne(centerId);
 
         final boolean template = ApiParameterHelper.template(uriInfo.getQueryParameters());
         if (template) {
             final CenterData templateCenter = this.centerReadPlatformService.retrieveTemplate(center.officeId());
             center = CenterData.withTemplate(templateCenter, center);
+        }
+        
+        if (!associationParameters.isEmpty()) {
+            if (associationParameters.contains("groups")) {
+                center = CenterData.setGroups(center, this.centerReadPlatformService.retriveAssociatedGroups(centerId));
+            }
         }
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());

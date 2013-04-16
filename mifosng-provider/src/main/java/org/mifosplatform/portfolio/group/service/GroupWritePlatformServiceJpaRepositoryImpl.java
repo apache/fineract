@@ -115,13 +115,14 @@ public class GroupWritePlatformServiceJpaRepositoryImpl implements GroupWritePla
                 clientMembers = assembleSetOfClients(officeId, command);
             }
 
-            Set<Group> childGroups = null;
+          //TODO -AA: Not sure about children are added at the time of group creation
+            /*Set<Group> childGroups = null;
             if (groupLevel.isRecursable()) {
                 childGroups = assembleSetOfChildGroups(officeId, command);
-            }
+            }*/
 
             final Group newGroup = Group
-                    .newGroup(groupOffice, staff, parentGroup, groupLevel, name, externalId, clientMembers, childGroups);
+                    .newGroup(groupOffice, staff, parentGroup, groupLevel, name, externalId, clientMembers, null);
 
             // pre-save to generate id for use in group hierarchy
             this.groupRepository.save(newGroup);
@@ -261,7 +262,8 @@ public class GroupWritePlatformServiceJpaRepositoryImpl implements GroupWritePla
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //
                     .withOfficeId(groupForUpdate.getId()) //
-                    .withGroupId(groupForUpdate.getOfficeId()) //
+                    //apart from group context group id does not make much sense
+                    .withGroupId(groupForUpdate.getId()) 
                     .withEntityId(groupForUpdate.getId()) //
                     .with(actualChanges) //
                     .build();
@@ -358,7 +360,7 @@ public class GroupWritePlatformServiceJpaRepositoryImpl implements GroupWritePla
         return clientMembers;
     }
 
-    private Set<Group> assembleSetOfChildGroups(final Long officeId, final JsonCommand command) {
+    /*private Set<Group> assembleSetOfChildGroups(final Long officeId, final JsonCommand command) {
 
         final Set<Group> childGroups = new HashSet<Group>();
         final String[] childGroupsArray = command.arrayValueOfParameterNamed("childGroups");
@@ -377,7 +379,7 @@ public class GroupWritePlatformServiceJpaRepositoryImpl implements GroupWritePla
         }
 
         return childGroups;
-    }
+    }*/
 
     private String[] getClientIds(final Set<Client> clients) {
 

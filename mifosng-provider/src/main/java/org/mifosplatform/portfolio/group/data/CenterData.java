@@ -34,12 +34,12 @@ public class CenterData {
 
     public static CenterData template(final Long officeId, final Collection<OfficeData> officeOptions,
             final Collection<StaffData> staffOptions) {
-        return new CenterData(null, null, null, officeId, null, null, null, null, officeOptions, staffOptions);
+        return new CenterData(null, null, null, officeId, null, null, null, null, officeOptions, staffOptions, null);
     }
 
     public static CenterData withTemplate(final CenterData templateCenter, final CenterData center) {
         return new CenterData(center.id, center.name, center.externalId, center.officeId, center.officeName, center.staffId,
-                center.staffName, center.hierarchy, templateCenter.officeOptions, templateCenter.staffOptions);
+                center.staffName, center.hierarchy, templateCenter.officeOptions, templateCenter.staffOptions, null);
     }
 
     public static CenterData instance(final Long id, final String name, final String externalId, final Long officeId,
@@ -48,12 +48,16 @@ public class CenterData {
         final Collection<OfficeData> officeOptions = null;
         final Collection<StaffData> staffOptions = null;
 
-        return new CenterData(id, name, externalId, officeId, officeName, staffId, staffName, hierarchy, officeOptions, staffOptions);
+        return new CenterData(id, name, externalId, officeId, officeName, staffId, staffName, hierarchy, officeOptions, staffOptions, null);
+    }
+    
+    public static CenterData setGroups(final CenterData centerData, final Collection<GroupGeneralData> groups){
+        return new CenterData(centerData.id, centerData.name, centerData.externalId, centerData.officeId, centerData.officeName, centerData.staffId, centerData.staffName, centerData.hierarchy, centerData.officeOptions, centerData.staffOptions, groups);
     }
 
     private CenterData(final Long id, final String name, final String externalId, final Long officeId, final String officeName,
             final Long staffId, final String staffName, final String hierarchy, final Collection<OfficeData> officeOptions,
-            final Collection<StaffData> staffOptions) {
+            final Collection<StaffData> staffOptions, final Collection<GroupGeneralData> groups) {
         this.id = id;
         this.name = name;
         this.externalId = externalId;
@@ -65,7 +69,7 @@ public class CenterData {
 
         this.officeOptions = officeOptions;
         this.staffOptions = staffOptions;
-        this.groups = null;
+        this.groups = groups;
     }
 
     public Long officeId() {

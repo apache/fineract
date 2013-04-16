@@ -42,6 +42,7 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
     private final OfficeReadPlatformService officeReadPlatformService;
     private final StaffReadPlatformService staffReadPlatformService;
     private final CenterDataMapper centerMapper = new CenterDataMapper();
+    private final GroupDataMapper groupDataMapper = new GroupDataMapper();
 
     @Autowired
     public CenterReadPlatformServiceImpl(final PlatformSecurityContext context, final TenantAwareRoutingDataSource dataSource,
@@ -94,23 +95,22 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
 
         return extraCriteria;
     }
-
+    
+    private static final String sqlQuery = "g.id as id, g.external_id as externalId, g.name as name, " +
+    		"g.office_id as officeId, o.name as officeName, " +
+    		"g.staff_id as staffId, s.display_name as staffName, " +
+    		"g.hierarchy as hierarchy " +
+    		"from m_group g " +
+    		"join m_office o on o.id = g.office_id " +
+    		"left join m_staff s on s.id = g.staff_id ";
+    
     private static final class CenterDataMapper implements RowMapper<CenterData> {
 
         private final String schemaSql;
 
         public CenterDataMapper() {
-            final StringBuilder sqlBuilder = new StringBuilder(400);
-
-            sqlBuilder.append("g.id as id, g.external_id as externalId, g.name as name, ");
-            sqlBuilder.append("g.office_id as officeId, o.name as officeName, ");
-            sqlBuilder.append("g.staff_id as staffId, s.display_name as staffName, ");
-            sqlBuilder.append("g.hierarchy as hierarchy ");
-            sqlBuilder.append("from m_group g ");
-            sqlBuilder.append("join m_office o on o.id = g.office_id ");
-            sqlBuilder.append("left join m_staff s on s.id = g.staff_id ");
-
-            this.schemaSql = sqlBuilder.toString();
+            
+            this.schemaSql = sqlQuery;
         }
 
         public String schema() {
@@ -133,6 +133,35 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
         }
     }
 
+    private static final class GroupDataMapper implements RowMapper<GroupGeneralData> {
+
+        private final String schemaSql;
+
+        public GroupDataMapper() {
+            
+            this.schemaSql = sqlQuery;
+        }
+
+        public String schema() {
+            return this.schemaSql;
+        }
+
+        @Override
+        public GroupGeneralData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+
+            final Long id = rs.getLong("id");
+            final String name = rs.getString("name");
+            final String externalId = rs.getString("externalId");
+            final Long officeId = rs.getLong("officeId");
+            final String officeName = rs.getString("officeName");
+            final Long staffId = JdbcSupport.getLong(rs, "staffId");
+            final String staffName = rs.getString("staffName");
+            final String hierarchy = rs.getString("hierarchy");
+
+            return GroupGeneralData.instance(id, name, externalId, officeId, officeName, null, null, staffId, staffName, hierarchy);
+        }
+    }
+    
     @Override
     public Collection<CenterData> retrieveAll(final SearchParameters searchCriteria) {
 
@@ -231,4 +260,10 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
         return GroupGeneralData.template(centerOfficeId, center.getId(), center.getName(), staffId, staffName, centerOptions,
                 officeOptions, staffOptions, clientOptions);
     }
+
+    @Override
+    public Collection<GroupGeneralData> retriveAssociatedGroups(Long centerId) {
+            String sql = "select " + this.groupDataMapper.schema() + " where g.parent_id = ? ";
+            return this.jdbcTemplate.query(sql, groupDataMapper, new Object[] { centerId });
+    }    
 }
