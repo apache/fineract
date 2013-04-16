@@ -6,9 +6,15 @@ See VERSIONING (https://github.com/openMF/mifosx/blob/master/VERSIONING.md) for 
 Releases
 ===============
 
+1. 17 April 2013 - 0.11.3.beta
 1. 10 April 2013 - 0.11.2.beta
 1. 05 April 2013 - 0.11.1.beta
 1. 05 April 2013 - 0.11.0.beta
+
+0.11.3.beta
+==========
+Bug Release.
+[MIFOSX-299] - Only super users are able to update client and loan documents
 
 0.11.2.beta
 ==========
