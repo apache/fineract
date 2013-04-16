@@ -185,30 +185,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
 		long startTime = System.currentTimeMillis();
 		logger.info("STARTING REPORT: " + name + "   Type: " + type);
 
-		String sql;
-		if (name.equals(".")) {
-			// this is to support api /reports - which isn't an important
-			// call. It isn't used in the default reporting UI. But there is a
-			// need to provide an api that does bring back 'permitted' reports
-			// PERMITTED REPORTS SQL
-			sql = "select r.report_id, r.report_name, r.report_type, r.report_subtype, r.report_category,"
-					+ " rp.parameter_id, rp.report_parameter_name, p.parameter_name"
-					+ " from stretchy_report r"
-					+ " left join stretchy_report_parameter rp on rp.report_id = r.report_id"
-					+ " left join stretchy_parameter p on p.parameter_id = rp.parameter_id"
-					+ " where exists"
-					+ " (select 'f'"
-					+ " from m_appuser_role ur "
-					+ " join m_role r on r.id = ur.role_id"
-					+ " left join m_role_permission rp on rp.role_id = r.id"
-					+ " left join m_permission p on p.id = rp.permission_id"
-					+ " where ur.appuser_id = "
-					+ context.authenticatedUser().getId()
-					+ " and (p.code in ('ALL_FUNCTIONS', 'ALL_FUNCTIONS_READ') or p.code = concat('READ_', r.report_name))) "
-					+ " order by r.report_name, rp.parameter_id";
-		} else {
-			sql = getSQLtoRun(name, type, queryParams);
-		}
+		String sql = getSQLtoRun(name, type, queryParams);
 
 		GenericResultsetData result = genericDataService
 				.fillGenericResultSet(sql);

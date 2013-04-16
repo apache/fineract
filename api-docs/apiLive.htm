@@ -1271,14 +1271,22 @@
 							<tr>
 								<td><a href="#reports">Report</a></td>
 								<td>reports</td>
-								<td></td>
+								<td><a href="#reports_create">Create a Report</a></td>
 								<td><a href="#reports_list">List Reports</a></td>
 								<td></td>
 								<td></td>
 							</tr>
 							<tr class="alt">
 								<td></td>
-								<td>reports/{reportName}</td>
+								<td>reports/{id}</td>
+								<td></td>
+								<td><a href="#reports_retrieve">Retrieve a Report</a></td>
+								<td><a href="#reports_update">Update a Report</a></td>
+								<td><a href="#reports_delete">Delete a Report</a></td>
+							</tr>
+							<tr>
+								<td><a href="#runreports">Run Report</a></td>
+								<td>runreports/{reportName}</td>
 								<td></td>
 								<td><a href="#report_run">Run a Report</a></td>
 								<td></td>
@@ -8045,6 +8053,13 @@ Content-Type: application/json
 
 
 			<!-- Fund starts here -->
+			<a id="funds" name="funds" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h3>Funds</h3>
+                                </div>
+                        </div>
+                                        
 			<a id="funds_create" name="funds_create" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
@@ -10634,10 +10649,63 @@ No Request Body:
 			<div class="method-section">
 				<div class="method-description">
 					<h3>Reports</h3>
+                                        <p>
+                                        Non-core reports can be added, updated and deleted.
+                                        </p>
+                                        <p>
+                                        Core reports (supplied at installation/upgrade time) can only have their "useReport" updated.
+                                        "useReport" is used, for example, in the reference UI report page to 'show'/'not show' reports.
+                                        Reports that have useReport set to false can still be run.
+                                        Reports only used for workflow purposes are examples of reports that would have their useReport set to false.
+                                        </p>
+                                        <p>
+                                        Placeholders can be put in the reportSql to act as parameters.  They have the format ${paramName}.
+                                        The runreports api will translate the value of any query parameter beginning R_ with the equivalent placeholder.<br>
+                                        e.g. query parameter R_myName=john will replace ${myName} with john
+                                        </p>
+                                        <p>
+                                        There is a special 'automatic' placeholder ${currentUserHierarchy} - if this is included in reportSql
+                                        it gets replaced by the requesting users' office hierarchy value.  This enables data scoping.<br>
+                                        Usage example "where o.hierarchy like CONCAT('${currentUserHierarchy}', '%')"
+                                        </p>
+                                        <p>
+                                        Note: <br>
+                                        The reports api allows parameters (not just placeholders in reportSql) to be associated with reports.
+                                        These associated parameters are only required to allow the reference UI reporting functionality implement
+                                        user-friendly parameter input.                                        
+                                        </p>
 				</div>
 			</div>
 
-
+			<a id="reports_create" name="reports_create" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Create a Report</h4>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+POST https://DomainName/api/v1/reports
+					</code>
+					<code class="method-request">
+POST reports
+Content-Type: application/json 
+Request Body: 
+{
+    reportName: "myReport",
+    reportType: "Table",
+    reportCategory: "My Category",
+    description: "sample non-core report",
+    reportSql: "select 'hello'",
+    useReport: false
+}
+					</code>
+					<code class="method-response">
+{ 
+	"resourceId": 100
+} 
+					</code>
+				</div>
+			</div>
 
 			<a id="reports_list" name="reports_list" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
@@ -10709,6 +10777,106 @@ GET https://DomainName/api/v1/reports
 				</div>
 			</div>
 
+
+			<a id="reports_retrieve" name="reports_retrieve" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Retrieve a Report</h4>
+					<p>Example Requests:</p>
+					<div class=apiClick>reports/1</div>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+GET https://DomainName/api/v1/reports/{id}
+					</code>
+					<code class="method-response">
+{
+  "id": 1,
+  "reportName": "Client Listing",
+  "reportType": "Table",
+  "reportCategory": "Client",
+  "description": "Individual Client Report\r\n\r\nLists the small number of defined fields on the client table.  Would expect to copy this \n\nreport and add any \u0027one to one\u0027 additional data for specific tenant needs.\r\n\r\nCan be run for any size MFI but you\u0027d expect it only to be run within a branch for \n\nlarger ones.  Depending on how many columns are displayed, there is probably is a limit of about 20/50k clients returned for html display (export to excel doesn\u0027t \n\nhave that client browser/memory impact).",
+  "reportSql": "select \r\nconcat(repeat(\"..\",   \r\n   ((LENGTH(ounder.`hierarchy`) - LENGTH(REPLACE(ounder.`hierarchy`, \u0027.\u0027, \u0027\u0027)) - 1))), ounder.`name`) as \"Office/Branch\",\r\n c.account_no as \"Client Account No.\",  \r\nc.display_name as \"Name\",  \n\nc.joined_date as \"Joined\", c.external_id as \"External Id\"\r\nfrom m_office o \r\njoin m_office ounder on ounder.hierarchy like concat(o.hierarchy, \u0027%\u0027)\r\nand \n\nounder.hierarchy like concat(\u0027${currentUserHierarchy}\u0027, \u0027%\u0027)\r\njoin m_client c on c.office_id \u003d ounder.id\r\nwhere o.id \u003d ${officeId}\r\nand c.is_deleted\u003d0\r\n\n\norder by ounder.hierarchy, c.account_no",
+  "coreReport": true,
+  "useReport": true,
+  "reportParameters": [
+    {
+      "id": 5,
+      "parameterName": "OfficeIdSelectOne"
+    }
+  ]
+}
+					</code>
+				</div>
+			</div>
+
+			<a id="reports_update" name="reports_update" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Update a Report</h4>
+                                        <p>
+                                        Only the useReport value can be updated for core reports.
+                                        </p>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+PUT https://DomainName/api/v1/reports/{id}
+					</code>
+					<code class="method-request">
+PUT reports/100
+Content-Type: application/json 
+Request Body: 
+{
+    reportCategory: "My Category updated",
+    useReport: true
+}
+					</code>
+					<code class="method-response">
+{
+  "resourceId": 100,
+  "changes": {
+    "reportCategory": "My Category updated",
+    "useReport": true
+  }
+}
+					</code>
+				</div>
+			</div>
+
+
+			<a id="reports_delete" name="reports_delete" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Delete a Report</h4>
+                                        <p>
+                                        Only non-core reports can be deleted.
+                                        </p>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+DELETE https://DomainName/api/v1/reports/{id}
+					</code>
+					<code class="method-request">
+DELETE reports/100
+Content-Type: application/json 
+Request Body: 
+{}
+					</code>
+					<code class="method-response">
+{
+  "resourceId": 100
+}
+					</code>
+				</div>
+			</div>
+
+			<!-- start of runreports api docs -->
+			<a id="runreports" name="runreports" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h3>Run Reports</h3>
+				</div>
+			</div>
 			<a id="report_run" name="report_run" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
@@ -10767,36 +10935,32 @@ GET https://DomainName/api/v1/reports
 						<dd>Only applies to Pentaho reports.</dd>
 					</dl>
 					<p>Example Requests:</p>
-					<div class=apiClick>reports/Client%20Listing?R_officeId=1</div>
+					<div class=apiClick>runreports/Client%20Listing?R_officeId=1</div>
 					<br>
 					<br>
-					<div class=apiClick>reports/Client%20Listing?R_officeId=1&exportCSV=true</div>
+					<div class=apiClick>runreports/Client%20Listing?R_officeId=1&exportCSV=true</div>
 					<br>
 					<br>
-					<div class=apiClick>reports/selectOfficeId?R_officeId=1&ampparameterType=true</div>
+					<div class=apiClick>runreports/OfficeIdSelectOne?R_officeId=1&ampparameterType=true</div>
 					<br>
 					<br>
-					<div class=apiClick>reports/selectOfficeId?R_officeId=1&ampparameterType=true&exportCSV=true</div>
+					<div class=apiClick>runreports/OfficeIdSelectOne?R_officeId=1&ampparameterType=true&exportCSV=true</div>
 					<br>
 					<br>
-					<div class=apiClick>reports/Client Listing
-						(Pentaho)?output-type=HTML&R_officeId=1</div>
+					<div class=apiClick>runreports/Expected%20Payments%20By%20Date%20-%20Formatted?R_endDate=2013-04-30&R_loanOfficerId=-1&R_officeId=1&R_startDate=2013-04-16&output-type=HTML&R_officeId=1</div>
 					<br>
 					<br>
-					<div class=apiClick>reports/Client Listing
-						(Pentaho)?output-type=XLS&R_officeId=1</div>
+					<div class=apiClick>runreports/Expected%20Payments%20By%20Date%20-%20Formatted?R_endDate=2013-04-30&R_loanOfficerId=-1&R_officeId=1&R_startDate=2013-04-16&output-type=XLS&R_officeId=1</div>
 					<br>
 					<br>
-					<div class=apiClick>reports/Client Listing
-						(Pentaho)?output-type=CSV&R_officeId=1</div>
+					<div class=apiClick>runreports/Expected%20Payments%20By%20Date%20-%20Formatted?R_endDate=2013-04-30&R_loanOfficerId=-1&R_officeId=1&R_startDate=2013-04-16&output-type=CSV&R_officeId=1</div>
 					<br>
 					<br>
-					<div class=apiClick>reports/Client Listing
-						(Pentaho)?output-type=PDF&R_officeId=1</div>
+					<div class=apiClick>runreports/Expected%20Payments%20By%20Date%20-%20Formatted?R_endDate=2013-04-30&R_loanOfficerId=-1&R_officeId=1&R_startDate=2013-04-16&output-type=PDF&R_officeId=1</div>
 				</div>
 				<div class="method-example">
 					<code class="method-declaration">
-GET https://DomainName/api/v1/reports/{reportName}
+GET https://DomainName/api/v1/runreports/{reportName}
 					</code>
 					<code class="method-response">
 {
@@ -13356,23 +13520,31 @@ GET https://DomainName/api/v1/search?query=000000111
 					<td></td>
 					<td></td>
 				</tr>
-				<tr>
-					<td><a href="#reports">Report</a></td>
-					<td>reports</td>
-					<td></td>
-					<td><a href="#reports_list">List Reports</a></td>
-					<td></td>
-					<td></td>
-				</tr>
+                                <tr>
+                                        <td><a href="#reports">Report</a></td>
+                                        <td>reports</td>
+                                        <td><a href="#reports_create">Create a Report</a></td>
+                                        <td><a href="#reports_list">List Reports</a></td>
+                                        <td></td>
+                                        <td></td>
+                                </tr>
+                                <tr class="alt">
+                                        <td></td>
+                                        <td>reports/{id}</td>
+                                        <td></td>
+                                        <td><a href="#reports_retrieve">Retrieve a Report</a></td>
+                                        <td><a href="#reports_update">Update a Report</a></td>
+                                        <td><a href="#reports_delete">Delete a Report</a></td>
+                                </tr>
+                                <tr>
+                                        <td><a href="#runreports">Run Report</a></td>
+                                        <td>runreports/{reportName}</td>
+                                        <td></td>
+                                        <td><a href="#report_run">Run a Report</a></td>
+                                        <td></td>
+                                        <td></td>
+                                </tr>
 				<tr class="alt">
-					<td></td>
-					<td>reports/{reportName}</td>
-					<td></td>
-					<td><a href="#report_run">Run a Report</a></td>
-					<td></td>
-					<td></td>
-				</tr>
-				<tr>
 					<td><a href="#authentication">Authentication</a></td>
 					<td>authentication</td>
 					<td><a href="#authenticate_request">Verify Authentication</a></td>
@@ -13380,7 +13552,7 @@ GET https://DomainName/api/v1/search?query=000000111
 					<td></td>
 					<td></td>
 				</tr>
-				<tr class="alt">
+				<tr>
 					<td><a href="#users">User</a></td>
 					<td>users</td>
 					<td><a href="#users_create">Create a User</a></td>
@@ -13388,7 +13560,7 @@ GET https://DomainName/api/v1/search?query=000000111
 					<td></td>
 					<td></td>
 				</tr>
-				<tr>
+				<tr class="alt">
 					<td></td>
 					<td>users/{userId}</td>
 					<td></td>
@@ -13396,7 +13568,7 @@ GET https://DomainName/api/v1/search?query=000000111
 					<td><a href="#users_update">Update a User</a></td>
 					<td><a href="#users_delete">Delete a User</a></td>
 				</tr>
-				<tr class="alt">
+				<tr>
 					<td><a href="#roles">Role</a></td>
 					<td>roles</td>
 					<td><a href="#roles_create">Create a New Role</a></td>
@@ -13404,7 +13576,7 @@ GET https://DomainName/api/v1/search?query=000000111
 					<td></td>
 					<td></td>
 				</tr>
-				<tr>
+				<tr class="alt">
 					<td></td>
 					<td>roles/{roleId}</td>
 					<td></td>
@@ -13412,7 +13584,7 @@ GET https://DomainName/api/v1/search?query=000000111
 					<td><a href="#roles_update">Update a Role</a></td>
 					<td></td>
 				</tr>
-				<tr class="alt">
+				<tr>
 					<td></td>
 					<td>roles/{roleId}/permissions</td>
 					<td></td>
@@ -13422,7 +13594,7 @@ GET https://DomainName/api/v1/search?query=000000111
 							Permissions</a></td>
 					<td></td>
 				</tr>
-				<tr>
+				<tr class="alt">
 					<td><a href="#permissions">Permission</a></td>
 					<td>permissions</td>
 					<td></td>
