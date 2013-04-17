@@ -599,4 +599,8 @@ public class LoanAccountData {
     public Collection<LoanChargeData> charges() {
         return this.charges;
     }
+    
+    public Long groupOfficeId(){
+        return group == null? null : group.officeId();
+    }
 }

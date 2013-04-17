@@ -57,6 +57,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 @Service
 public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
@@ -183,7 +184,13 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
         context.authenticatedUser();
 
-        final GroupGeneralData groupAccount = this.groupReadPlatformService.retrieveOne(groupId);
+        GroupGeneralData groupAccount = this.groupReadPlatformService.retrieveOne(groupId);
+        //get group associations
+        Collection<ClientData> membersOfGroup = this.clientReadPlatformService.retrieveClientMembersOfGroup(groupId);
+        if (!CollectionUtils.isEmpty(membersOfGroup)) {
+            groupAccount = GroupGeneralData.withAssocations(groupAccount, membersOfGroup);
+        }
+        
         final LocalDate expectedDisbursementDate = DateUtils.getLocalDateOfTenant();
         LoanAccountData loanDetails = LoanAccountData.groupDefaults(groupAccount, expectedDisbursementDate);
 

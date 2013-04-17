@@ -27,6 +27,9 @@ public class GroupingTypesApiConstants {
     public static final String hierarchyParamName = "hierarchy";
     public static final String officeNameParamName = "officeName";
     public static final String staffNameParamName = "staffName";
+    public static final String officeOptionsParamName = "officeOptions";
+    public static final String staffOptionsParamName = "staffOptions";
+    public static final String clientOptionsParamName = "clientOptions";
 
     public static final Set<String> CENTER_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(localeParamName,
             dateFormatParamName, nameParamName, externalIdParamName, officeIdParamName, staffIdParamName));
@@ -42,9 +45,9 @@ public class GroupingTypesApiConstants {
 
     public static final Set<String> CENTER_GROUP_RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(idParamName, nameParamName,
             externalIdParamName, officeIdParamName, officeNameParamName, staffIdParamName, staffNameParamName, hierarchyParamName,
-            "officeOptions", "staffOptions"));
+            officeOptionsParamName, staffOptionsParamName,clientOptionsParamName));
 
     public static final Set<String> GROUP_RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(idParamName, nameParamName,
             externalIdParamName, officeIdParamName, officeNameParamName, "parentId", "parentName", staffIdParamName, staffNameParamName,
-            hierarchyParamName, "officeOptions", "staffOptions", "clientOptions"));
+            hierarchyParamName, officeOptionsParamName, staffOptionsParamName,clientOptionsParamName));
 }

@@ -230,8 +230,8 @@ public class LoansApiResource {
             
             final Collection<LoanChargeData> charges = loanBasicDetails.charges();
             if (productId != null) {
-                final Long officeId = loanBasicDetails.officeId();
-                allowedLoanOfficers = this.staffReadPlatformService.retrieveAllLoanOfficersByOffice(officeId);
+                final Long officeId = loanBasicDetails.groupOfficeId();
+                if(officeId != null) allowedLoanOfficers = this.staffReadPlatformService.retrieveAllLoanOfficersByOffice(officeId);
             }
 
             newLoanAccount = LoanAccountData.associationsAndTemplate(loanBasicDetails, repaymentSchedule, loanRepayments, charges,
