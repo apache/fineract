@@ -8,7 +8,8 @@ Build Status
 
 [![Build Status](https://travis-ci.org/openMF/mifosx.png?branch=master)](https://travis-ci.org/openMF/mifosx)
 
-[Jenkins@CloudBees Unit + Integration Tests] (https://openmf.ci.cloudbees.com/job/MIFOSX%20INTEGRATION%20TEST/)
+<a target="_blank" href="https://openmf.ci.cloudbees.com/job/MIFOSX%20INTEGRATION%20TEST/" 
+title="Jenkins@CloudBees">Jenkins@CloudBees Unit + Integration Tests</a>
 
 Version
 ==========
