@@ -176,6 +176,14 @@
 								<td></td>
 								<td><a href="#clients_retrieve">Retrieve a Client</a></td>
 								<td><a href="#clients_update">Update a Client</a></td>
+								<td><a href="#clients_delete">Delete a Client</a></td>
+							</tr>
+							<tr class="alt">
+								<td></td>
+								<td>clients/{clientId}?command=activate</td>
+								<td><a href="#clients_activate">Activate a Client</a></td>
+								<td></td>
+								<td></td>
 								<td></td>
 							</tr>
 							<tr class="alt">
@@ -1697,8 +1705,8 @@ function executeAjaxRequest(url, verbType, jsonData, basicAuthKey, successFuncti
 			<div class="method-section">
 				<div class="method-description">
 					<h3>Clients</h3>
-					<p>Clients are people and businesses that have applied (or may
-						apply) to an MFI for loans.</p>
+					<p>Clients are people and businesses that have applied (or may apply) to an MFI for loans.</p>
+					<p>Clients can be created in <b>Pending</b> state (as opposed to <b>Active</b> state) if global configuration for <i>allow-pending-client-status</i> is enabled.</p>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
 							<td><div class="mifosXHeading2">Field Descriptions</div></td>
@@ -1711,6 +1719,29 @@ function executeAjaxRequest(url, verbType, jsonData, basicAuthKey, successFuncti
 								value is set as account no. for client account, otherwise an
 								auto generated account no. is put in place based on the
 								configured strategy.</td>
+						</tr>
+						<tr class=alt>
+							<td>externalId</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>A place to put an external reference for
+								this client e.g. The ID another system uses.<br> If
+								provided, it must be unique.
+							</td>
+						</tr>
+						<tr class=alt>
+							<td>active</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Indicates whether this client is to be created as <b>active</b> client. If active=true, then <b>activationDate</b> must be provided. If active=false, then the client is created as <b>pending</b> but this must be allowed through configuration.
+							</td>
+						</tr>
+						<tr class=alt>
+							<td>activationDate</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>The date on which the client became <b>active</b>.
+							</td>
 						</tr>
 						<tr class=alt>
 							<td>firstname</td>
@@ -1741,63 +1772,11 @@ function executeAjaxRequest(url, verbType, jsonData, basicAuthKey, successFuncti
 								business that doesnt suit the firstname,middlename,lastname
 								structure.</td>
 						</tr>
-						<tr class=alt>
-							<td>externalId</td>
-						</tr>
-						<tr>
-							<td class=fielddesc>A place to put an external reference for
-								this client e.g. The ID another system uses.<br> If
-								provided, it must be unique.
-							</td>
-						</tr>
 					</table>
 				</div>
 			</div>
 
-			<a id="client_list" name="clients_list" class="old-syle-anchor">&nbsp;</a>
-			<div class="method-section">
-				<div class="method-description">
-					<h4>List Clients</h4>
-					<p>Example Requests:</p>
-					<div class=apiClick>clients</div>
-					<br>
-					<br>
-					<div class=apiClick>clients?fields=displayName,officeName,joinedDate</div>
-				</div>
-				<div class="method-example">
-					<code class="method-declaration">
-GET https://DomainName/api/v1/clients
-					</code>
-					<code class="method-response">
-[
-    {
-        "id": 2,
-        "accountNo": "000000002",
-        "externalId": "one/78",
-        "fullname": "New Business to Create",
-        "displayName": "New Business to Create",
-        "officeId": 1,
-        "officeName": "Head Office",
-        "joinedDate": [2006,6,13]
-    },
-    {
-        "id": 1,
-        "accountNo": "000000001",
-        "externalId": "786YYH7",
-        "firstname": "Petra",
-        "lastname": "Yton",
-        "displayName": "Petra Yton",
-        "officeId": 1,
-        "officeName": "Head Office",
-        "joinedDate": [2009,3,4]
-    }
-]
-					</code>
-				</div>
-			</div>
-
-			<a id="clients_template" name="clients_template"
-				class="old-syle-anchor">&nbsp;</a>
+			<a id="clients_template" name="clients_template" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
 					<h4>Retrieve Client Details Template</h4>
@@ -1819,58 +1798,20 @@ GET https://DomainName/api/v1/clients/template
 					</code>
 					<code class="method-response">
 {
-    "officeId": 1,
-    "joinedDate": [
-        2013,
-        2,
-        5
-    ],
-    "allowedOffices": [
-        {
-            "id": 1,
-            "name": "Head Office",
-            "nameDecorated": "Head Office"
-        }
-    ]
-}
-					</code>
-				</div>
-			</div>
-
-
-			<a id="clients_retrieve" name="clients_retrieve"
-				class="old-syle-anchor">&nbsp;</a>
-			<div class="method-section">
-				<div class="method-description">
-					<h4>Retrieve a Client</h4>
-					<p>Example Requests:</p>
-					<div class=apiClick>clients/1</div>
-					<br>
-					<br>
-					<div class=apiClick>clients/1?template=true</div>
-					<br>
-					<br>
-					<div class=apiClick>clients/1?fields=id,displayName,officeName</div>
-				</div>
-				<div class="method-example">
-					<code class="method-declaration">
-GET https://DomainName/api/v1/clients/{clientId}
-					</code>
-					<code class="method-response">
-{
-    "id": 1,
-    "accountNo": "000000001",
-    "externalId": "786YYH7",
-    "firstname": "Petra",
-    "lastname": "Yton",
-    "displayName": "Petra Yton",
-    "officeId": 1,
-    "officeName": "Head Office",
-    "joinedDate": [
-        2009,
-        3,
-        4
-    ]
+  "activationDate": [
+    2013,
+    4,
+    17
+  ],
+  "officeId": 1,
+  "clientPendingApprovalAllowed": false,
+  "officeOptions": [
+    {
+      "id": 1,
+      "name": "Head Office",
+      "nameDecorated": "Head Office"
+    }
+  ]
 }
 					</code>
 				</div>
@@ -1891,9 +1832,17 @@ GET https://DomainName/api/v1/clients/{clientId}
 							<td><div class="mifosXHeading2">Mandatory Fields</div></td>
 						</tr>
 						<tr class=alt>
-							<td>firstname and lastname OR fullname<br>, joinedDate,
-								officeId
+							<td>firstname and lastname OR fullname,<br> officeId,<br> active=true and activationDate OR active=false,<br>
 							</td>
+						</tr>
+					</table>
+						<br />
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Optional Fields</div></td>
+						</tr>
+						<tr class=alt>
+							<td>groupId, externalId, accountNo</td>
 						</tr>
 					</table>
 				</div>
@@ -1904,14 +1853,15 @@ POST https://DomainName/api/v1/clients
 					<code class="method-request">
 POST clients
 Content-Type: application/json Request Body:
-{
-    "officeId": 1,
-    "firstname": "Petra",
-    "lastname": "Yton",
-    "externalId": "786YYH7",
-    "dateFormat": "dd MMMM yyyy",
-    "locale": "en",
-    "joinedDate": "04 March 2009"
+{ 
+	"officeId": 1, 
+	"firstname": "Petra", 
+	"lastname": "Yton", 
+	"externalId": "786YYH7", 
+	"dateFormat": "dd MMMM yyyy", 
+	"locale": "en", 
+	"active": true,
+	"activationDate": "04 March 2009"
 } 
 					</code>
 					<code class="method-response">
@@ -1926,22 +1876,157 @@ Content-Type: application/json Request Body:
 					<code class="method-request">
 POST clients
 Content-Type: application/json 
-Request Body: 
-{
-    "officeId": 1,
-    "fullname": "New Business to Create",
-    "externalId": "one/78",
-    "dateFormat": "dd MMMM yyyy",
-    "locale": "en",
-    "joinedDate": "13 June 2006"
+Request Body:
+{ 
+	"officeId": 1, 
+	"fullname": "Client of group",
+	"groupId": 1,
+	"dateFormat": "dd MMMM yyyy", 
+	"locale": "en", 
+	"active": true,
+	"activationDate": "04 March 2009"
 }
 					</code>
 					<code class="method-response">
 {
-    "officeId": 1,
-    "clientId": 2,
-    "resourceId": 2
+  "officeId": 1,
+  "groupId": 1,
+  "clientId": 2,
+  "resourceId": 2
 }
+					</code>
+				</div>
+			</div>
+
+	<a id="clients_activate" name="clients_activate" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Activate a Client</h2>
+	        <p>Clients can be created in a <i>Pending</i> state if configuration is enabled. This API exists to enable client activation (for when a client becomes approved member of microfinance institue.</p>
+	        <p>If the client happens to be alrady active this API will result in an error.</p>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">POST https://Domain Name/api/v1/clients/{clientId}?command=activate</code>
+	        <code class="method-request">POST clients/1?command=activate
+Content-Type: application/json
+Request Body:
+{
+  "locale": "en",
+  "dateFormat": "dd MMMM yyyy",
+  "activationDate": "01 March 2011"
+}
+			</code>
+	        <code class="method-response">
+{
+  "officeId": 1,
+  "clientId": 1,
+  "resourceId": 1
+}
+	        </code>
+	    </div>
+	</div>
+
+			<a id="clients_retrieve" name="clients_retrieve" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Retrieve a Client</h4>
+					<p>Example Requests:</p>
+					<div class=apiClick>clients/1</div>
+					<br>
+					<br>
+					<div class=apiClick>clients/1?template=true</div>
+					<br>
+					<br>
+					<div class=apiClick>clients/1?fields=id,displayName,officeName</div>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+GET https://DomainName/api/v1/clients/{clientId}
+					</code>
+					<code class="method-response">
+{
+  "id": 2,
+  "accountNo": "000000002",
+  "status": {
+    "id": 300,
+    "code": "clientStatusType.active",
+    "value": "Active"
+  },
+  "activationDate": [
+    2009,
+    3,
+    4
+  ],
+  "fullname": "Client of group",
+  "displayName": "Client of group",
+  "officeId": 1,
+  "officeName": "Head Office",
+  "groups": [
+    {
+      "id": 1,
+      "name": "Example Group"
+    }
+  ]
+}
+					</code>
+				</div>
+			</div>
+
+			<a id="client_list" name="clients_list" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>List Clients</h4>
+					<p>Example Requests:</p>
+					<div class=apiClick>clients</div>
+					<br>
+					<br>
+					<div class=apiClick>clients?fields=displayName,officeName,joinedDate</div>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+GET https://DomainName/api/v1/clients
+					</code>
+					<code class="method-response">
+[
+  {
+    "id": 2,
+    "accountNo": "000000002",
+    "status": {
+      "id": 300,
+      "code": "clientStatusType.active",
+      "value": "Active"
+    },
+    "activationDate": [
+      2009,
+      3,
+      4
+    ],
+    "fullname": "Client of group",
+    "displayName": "Client of group",
+    "officeId": 1,
+    "officeName": "Head Office"
+  },
+  {
+    "id": 1,
+    "accountNo": "000000001",
+    "externalId": "786YYH7",
+    "status": {
+      "id": 300,
+      "code": "clientStatusType.active",
+      "value": "Active"
+    },
+    "activationDate": [
+      2009,
+      3,
+      4
+    ],
+    "firstname": "Petra",
+    "lastname": "Yton",
+    "displayName": "Petra Yton",
+    "officeId": 1,
+    "officeName": "Head Office"
+  }
+]
 					</code>
 				</div>
 			</div>
@@ -1950,6 +2035,7 @@ Request Body:
 			<div class="method-section">
 				<div class="method-description">
 					<h4>Update a Client</h4>
+					<p>You can update any attribute of a client except for its association with <i>groups</i>. The relationship between a client and a group must be removed through the <b>Groups</b> API.</p>
 				</div>
 				<div class="method-example">
 					<code class="method-declaration">
@@ -1960,10 +2046,7 @@ PUT clients/1
 Content-Type: application/json 
 Request Body:
 {
-    "externalId": "786444UUUYYH7",
-    "dateFormat": "dd MMMM yyyy",
-    "locale": "en",
-    "joinedDate": "09 June 2006"
+    "externalId": "786444UUUYYH7"
 }
 					</code>
 					<code class="method-response">
@@ -1972,18 +2055,41 @@ Request Body:
     "clientId": 1,
     "resourceId": 1,
     "changes": {
-        "externalId": "786444UUUYYH7",
-        "joinedDate": "09 June 2006",
-        "dateFormat": "dd MMMM yyyy",
-        "locale": "en"
+        "externalId": "786444UUUYYH7"
     }
 }
 					</code>
 				</div>
 			</div>
 
-			<a id="clients_loansummary" name="clients_loansummary"
-				class="old-syle-anchor">&nbsp;</a>
+			<a id="clients_delete" name="clients_delete" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Delete a Client</h4>
+					<p>If a client is in <i>Pending</i> state you are allowed to <b>Delete</b> it. The delete is a 'hard delete' and cannot be recovered from. Once clients become active or have loans or savings associated with it, you cannot delete the client but you may <b>Close</b> the client if they have died or exited the program.</p>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+DELETE https://DomainName/api/v1/clients/{clientId}
+						</code>
+					<code class="method-request">
+DELETE clients/3
+Content-Type: application/json 
+Request Body:
+{
+}
+					</code>
+					<code class="method-response">
+{
+  "officeId": 1,
+  "clientId": 3,
+  "resourceId": 3
+}
+					</code>
+				</div>
+			</div>
+
+			<a id="clients_loansummary" name="clients_loansummary" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
 					<h4>Retrieve a Client's Loan Account Summary</h4>
@@ -7066,13 +7172,16 @@ Request Body:
 			<div class="method-section">
 				<div class="method-description">
 					<h3>Global Configuration</h3>
-					<p>Global configuration related to set of supported
-						enable/disable configurations e.g. maker-checker.</p>
+					<p>Global configuration related to set of supported enable/disable configurations:</p>
+					<ol>
+						<li><b>maker-checker</b> - defaults to false - if true turns on maker-checker functionality</li>
+						<li><b>allow-pending-client-status</b> - defaults to false - if true allows clients to be created in 'Pending' state</li>
+						<li><b>allow-pending-group-status</b> - defaults to false - if true allows groups to be created in 'Pending' state</li>
+					</ol>
 				</div>
 			</div>
 
-			<a id="configs_globalconfig_retrieve"
-				name="configs_globalconfig_retrieve" class="old-syle-anchor">&nbsp;</a>
+			<a id="configs_globalconfig_retrieve" name="configs_globalconfig_retrieve" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
 					<h4>Retrieve Global Configuration</h4>
@@ -7086,12 +7195,20 @@ GET https://DomainName/api/v1/configurations
 					</code>
 					<code class="method-response">
 {
-    "globalConfiguration": [
-        {
-            "name": "maker-checker",
-            "enabled": false
-        }
-    ]
+  "globalConfiguration": [
+    {
+      "name": "maker-checker",
+      "enabled": false
+    },
+    {
+      "name": "allow-pending-client-status",
+      "enabled": false
+    },
+    {
+      "name": "allow-pending-group-status",
+      "enabled": false
+    }
+  ]
 }
 					</code>
 				</div>
@@ -7105,14 +7222,22 @@ GET https://DomainName/api/v1/configurations
 				</div>
 				<div class="method-example">
 					<code class="method-declaration">
-PUT https://DomainName/api/v1/configurations?maker-checker=false
+PUT https://DomainName/api/v1/configurations?allow-pending-client-status=false
 					</code>
 					<code class="method-request">
 PUT configurations
 Content-Type: application/json 
 Request Body: { }
 					</code>
-					<code class="method-response">{ "changes": {} } </code>
+					<code class="method-response">
+{
+  "changes": {
+    "globalConfiguration": {
+      "allow-pending-client-status": false
+    }
+  }
+}
+					</code>
 				</div>
 			</div>
 
@@ -12884,6 +13009,14 @@ GET https://DomainName/api/v1/search?query=000000111
 					<td></td>
 					<td><a href="#clients_retrieve">Retrieve a Client</a></td>
 					<td><a href="#clients_update">Update a Client</a></td>
+					<td><a href="#clients_delete">Delete a Client</a></td>
+				</tr>
+				<tr class="alt">
+					<td></td>
+					<td>clients/{clientId}?command=activate</td>
+					<td><a href="#clients_activate">Activate a Client</a></td>
+					<td></td>
+					<td></td>
 					<td></td>
 				</tr>
 				<tr class="alt">

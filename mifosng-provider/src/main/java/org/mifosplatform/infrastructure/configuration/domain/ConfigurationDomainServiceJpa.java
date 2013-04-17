@@ -39,4 +39,13 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
 
         return thisTask.hasMakerCheckerEnabled() && property.isEnabled();
     }
+
+    @Override
+    public boolean isClientPendingApprovalAllowedEnabled() {
+        final String propertyKey = "allow-pending-client-status";
+        final GlobalConfigurationProperty property = this.globalConfigurationRepository.findOneByName(propertyKey);
+        if (property == null) { throw new GlobalConfigurationPropertyNotFoundException(propertyKey); }
+
+        return property.isEnabled();
+    }
 }

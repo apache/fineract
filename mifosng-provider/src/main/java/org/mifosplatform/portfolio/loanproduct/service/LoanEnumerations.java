@@ -147,7 +147,7 @@ public class LoanEnumerations {
             break;
             case EQUAL_PRINCIPAL:
                 optionData = new EnumOptionData(AmortizationMethod.EQUAL_PRINCIPAL.getValue().longValue(),
-                        AmortizationMethod.EQUAL_PRINCIPAL.getCode(), "Equal principle payments");
+                        AmortizationMethod.EQUAL_PRINCIPAL.getCode(), "Equal principal payments");
             break;
             default:
                 optionData = new EnumOptionData(AmortizationMethod.INVALID.getValue().longValue(), AmortizationMethod.INVALID.getCode(),

@@ -67,24 +67,24 @@ public class GuarantorData {
                 allowedClientRelationshipTypes);
     }
 
-    public static GuarantorData mergeClientData(ClientData clientData, GuarantorData guarantorData) {
+    public static GuarantorData mergeClientData(final ClientData clientData, final GuarantorData guarantorData) {
         return new GuarantorData(guarantorData.id, guarantorData.loanId, guarantorData.clientRelationshipType, guarantorData.entityId,
                 guarantorData.guarantorType, clientData.getFirstname(), clientData.getLastname(), null, null, null, null, null, null, null,
-                null, null, null, clientData.getOfficeName(), clientData.getJoinedDate(), clientData.getExternalId(), null,
+                null, null, null, clientData.officeName(), clientData.getActivationDate(), clientData.getExternalId(), null,
                 guarantorData.allowedClientRelationshipTypes);
     }
 
-    public static GuarantorData mergeStaffData(StaffData staffData, GuarantorData guarantorData) {
+    public static GuarantorData mergeStaffData(final StaffData staffData, final GuarantorData guarantorData) {
         return new GuarantorData(guarantorData.id, guarantorData.loanId, guarantorData.clientRelationshipType, guarantorData.entityId,
                 guarantorData.guarantorType, staffData.getFirstname(), staffData.getLastname(), null, null, null, null, null, null, null,
                 null, null, null, staffData.getOfficeName(), null, null, null, guarantorData.allowedClientRelationshipTypes);
     }
 
-    public GuarantorData(Long id, Long loanId, final CodeValueData clientRelationshipType, Long entityId, EnumOptionData guarantorType,
-            String firstname, String lastname, LocalDate dob, String addressLine1, String addressLine2, String city, String state,
-            String zip, String country, String mobileNumber, String housePhoneNumber, String comment, String officeName,
-            LocalDate joinedDate, String externalId, List<EnumOptionData> guarantorTypeOptions,
-            Collection<CodeValueData> allowedClientRelationshipTypes) {
+    public GuarantorData(final Long id, final Long loanId, final CodeValueData clientRelationshipType, final Long entityId, final EnumOptionData guarantorType,
+            final String firstname, final String lastname, final LocalDate dob, final String addressLine1, final String addressLine2, final String city, final String state,
+            final String zip, final String country, final String mobileNumber, final String housePhoneNumber, final String comment, final String officeName,
+            final LocalDate joinedDate, final String externalId, final List<EnumOptionData> guarantorTypeOptions,
+            final Collection<CodeValueData> allowedClientRelationshipTypes) {
         this.id = id;
         this.loanId = loanId;
         this.clientRelationshipType = clientRelationshipType;

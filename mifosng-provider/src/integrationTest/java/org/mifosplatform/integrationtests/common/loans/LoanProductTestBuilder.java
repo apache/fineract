@@ -16,7 +16,7 @@ public class LoanProductTestBuilder {
     private static final String MONTHS = "2";
     private static final String YEARS = "3";
     private static final String CALCULATION_PERIOD_SAME_AS_REPAYMENT_PERIOD="1";
-    private static final String EQUAL_PRINCIPLE_PAYMENTS="0";
+    private static final String EQUAL_PRINCIPAL_PAYMENTS="0";
     private static final String EQUAL_INSTALLMENTS="1";
     private static final String DECLINING_BALANCE="0";
     private static final String FLAT_BALANCE="1";
@@ -137,8 +137,8 @@ public class LoanProductTestBuilder {
         return this;
     }
 
-    public LoanProductTestBuilder withAmortizationTypeAsEqualPrinciplePayment(){
-        this.amortizationType = EQUAL_PRINCIPLE_PAYMENTS;
+    public LoanProductTestBuilder withAmortizationTypeAsEqualPrincipalPayment(){
+        this.amortizationType = EQUAL_PRINCIPAL_PAYMENTS;
         return this;
     }
 

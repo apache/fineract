@@ -13,7 +13,8 @@ import org.apache.commons.lang.builder.CompareToBuilder;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.joda.time.LocalDate;
-import org.mifosplatform.organisation.office.data.OfficeLookup;
+import org.mifosplatform.infrastructure.core.data.EnumOptionData;
+import org.mifosplatform.organisation.office.data.OfficeData;
 import org.mifosplatform.portfolio.group.data.GroupGeneralData;
 
 /**
@@ -24,78 +25,70 @@ final public class ClientData implements Comparable<ClientData> {
     private final Long id;
     private final String accountNo;
     private final String externalId;
+
+    private final EnumOptionData status;
+    private final LocalDate activationDate;
+
     private final String firstname;
     private final String middlename;
     private final String lastname;
     private final String fullname;
     private final String displayName;
+
     private final Long officeId;
     private final String officeName;
-    private final LocalDate joinedDate;
+
     private final String imageKey;
     @SuppressWarnings("unused")
     private final Boolean imagePresent;
 
+    private final Boolean clientPendingApprovalAllowed;
+
     // associations
-    private final Collection<GroupGeneralData> parentGroups;
+    private final Collection<GroupGeneralData> groups;
 
     // template
-    private final List<OfficeLookup> allowedOffices;
-    private final ClientData currentChange;
-    private final Collection<ClientData> allChanges;
+    private final Collection<OfficeData> officeOptions;
 
-    public static ClientData dataChangeInstance(final Long id, final Long officeId, final String externalId, final String firstname,
-            final String middlename, final String lastname, final String fullname, final LocalDate joiningDate) {
-
-        String localDisplayName = null;
-        return new ClientData(null, officeId, null, id, firstname, middlename, lastname, fullname, localDisplayName, externalId,
-                joiningDate, null, null, null, null, null);
+    public static ClientData template(final Long officeId, final LocalDate joinedDate, final Boolean clientPendingApprovalAllowed,
+            final Collection<OfficeData> allowedOffices) {
+        return new ClientData(null, null, officeId, null, null, null, null, null, null, null, null, joinedDate, null,
+                clientPendingApprovalAllowed, allowedOffices, null);
     }
 
-    public static ClientData integrateChanges(final ClientData clientData, final ClientData currentChange,
-            final Collection<ClientData> allChanges) {
-        return new ClientData(clientData.accountNo, clientData.officeId, clientData.officeName, clientData.id, clientData.firstname,
-                clientData.middlename, clientData.lastname, clientData.fullname, clientData.displayName, clientData.externalId,
-                clientData.joinedDate, clientData.imageKey, clientData.allowedOffices, currentChange, allChanges, clientData.parentGroups);
-    }
+    public static ClientData templateOnTop(final ClientData clientData, final List<OfficeData> allowedOffices) {
 
-    public static ClientData template(final Long officeId, final LocalDate joinedDate, final List<OfficeLookup> allowedOffices) {
-        return new ClientData(null, officeId, null, null, null, null, null, null, null, null, joinedDate, null, allowedOffices, null, null,
-                null);
-    }
-
-    public static ClientData templateOnTop(final ClientData clientData, final List<OfficeLookup> allowedOffices) {
-
-        return new ClientData(clientData.accountNo, clientData.officeId, clientData.officeName, clientData.id, clientData.firstname,
-                clientData.middlename, clientData.lastname, clientData.fullname, clientData.displayName, clientData.externalId,
-                clientData.joinedDate, clientData.imageKey, allowedOffices, clientData.currentChange, clientData.allChanges,
-                clientData.parentGroups);
+        return new ClientData(clientData.accountNo, clientData.status, clientData.officeId, clientData.officeName, clientData.id,
+                clientData.firstname, clientData.middlename, clientData.lastname, clientData.fullname, clientData.displayName,
+                clientData.externalId, clientData.activationDate, clientData.imageKey, clientData.clientPendingApprovalAllowed,
+                allowedOffices, clientData.groups);
     }
 
     public static ClientData setParentGroups(final ClientData clientData, final Collection<GroupGeneralData> parentGroups) {
-        return new ClientData(clientData.accountNo, clientData.officeId, clientData.officeName, clientData.id, clientData.firstname,
-                clientData.middlename, clientData.lastname, clientData.fullname, clientData.displayName, clientData.externalId,
-                clientData.joinedDate, clientData.imageKey, clientData.allowedOffices, clientData.currentChange, clientData.allChanges,
-                parentGroups);
+        return new ClientData(clientData.accountNo, clientData.status, clientData.officeId, clientData.officeName, clientData.id,
+                clientData.firstname, clientData.middlename, clientData.lastname, clientData.fullname, clientData.displayName,
+                clientData.externalId, clientData.activationDate, clientData.imageKey, clientData.clientPendingApprovalAllowed,
+                clientData.officeOptions, parentGroups);
     }
 
-    public static ClientData clientIdentifier(final Long id, final String accountIdentifier, final String firstname,
+    public static ClientData clientIdentifier(final Long id, final String accountNo, final EnumOptionData status, final String firstname,
             final String middlename, final String lastname, final String fullname, final String displayName, final Long officeId,
             final String officeName) {
 
-        return new ClientData(accountIdentifier, officeId, officeName, id, firstname, middlename, lastname, fullname, displayName, null,
-                null, null, null, null, null, null);
+        return new ClientData(accountNo, status, officeId, officeName, id, firstname, middlename, lastname, fullname, displayName, null,
+                null, null, null, null, null);
     }
 
     public static ClientData lookup(final Long id, final String displayName, final Long officeId, final String officeName) {
-        return new ClientData(null, officeId, officeName, id, null, null, null, null, displayName, null, null, null, null, null, null, null);
+        return new ClientData(null, null, officeId, officeName, id, null, null, null, null, displayName, null, null, null, null, null, null);
     }
 
-    public ClientData(final String accountNo, final Long officeId, final String officeName, final Long id, final String firstname,
-            final String middlename, final String lastname, final String fullname, final String displayName, final String externalId,
-            final LocalDate joinedDate, final String imageKey, final List<OfficeLookup> allowedOffices, final ClientData currentChange,
-            final Collection<ClientData> allChanges, final Collection<GroupGeneralData> parentGroups) {
+    public ClientData(final String accountNo, final EnumOptionData status, final Long officeId, final String officeName, final Long id,
+            final String firstname, final String middlename, final String lastname, final String fullname, final String displayName,
+            final String externalId, final LocalDate activationDate, final String imageKey, final Boolean clientPendingApprovalAllowed,
+            final Collection<OfficeData> allowedOffices, final Collection<GroupGeneralData> groups) {
         this.accountNo = accountNo;
+        this.status = status;
         this.officeId = officeId;
         this.officeName = officeName;
         this.id = id;
@@ -105,17 +98,49 @@ final public class ClientData implements Comparable<ClientData> {
         this.fullname = StringUtils.defaultIfEmpty(fullname, null);
         this.displayName = StringUtils.defaultIfEmpty(displayName, null);
         this.externalId = StringUtils.defaultIfEmpty(externalId, null);
-        this.joinedDate = joinedDate;
+        this.activationDate = activationDate;
         this.imageKey = imageKey;
         if (imageKey != null) {
             this.imagePresent = Boolean.TRUE;
         } else {
             this.imagePresent = null;
         }
-        this.allowedOffices = allowedOffices;
-        this.currentChange = currentChange;
-        this.allChanges = allChanges;
-        this.parentGroups = parentGroups;
+
+        this.clientPendingApprovalAllowed = clientPendingApprovalAllowed;
+
+        // associations
+        this.groups = groups;
+
+        // template
+        this.officeOptions = allowedOffices;
+    }
+
+    public Long id() {
+        return this.id;
+    }
+
+    public String displayName() {
+        return this.displayName;
+    }
+
+    public Long officeId() {
+        return this.officeId;
+    }
+
+    public String officeName() {
+        return this.officeName;
+    }
+
+    public String imageKey() {
+        return this.imageKey;
+    }
+
+    public boolean imageKeyDoesNotExist() {
+        return !imageKeyExists();
+    }
+
+    private boolean imageKeyExists() {
+        return StringUtils.isNotBlank(this.imageKey);
     }
 
     @Override
@@ -147,38 +172,7 @@ final public class ClientData implements Comparable<ClientData> {
                 .toHashCode();
     }
 
-    public String displayName() {
-        return this.displayName;
-    }
-
-    public String officeName() {
-        return this.officeName;
-    }
-
-    private boolean imageKeyExists() {
-        return StringUtils.isNotBlank(this.imageKey);
-    }
-
-    public boolean imageKeyDoesNotExist() {
-        return !imageKeyExists();
-    }
-
-    public String imageKey() {
-        return this.imageKey;
-    }
-
-    public Long id() {
-        return this.id;
-    }
-
-    public Long officeId() {
-        return this.officeId;
-    }
-
-    public ClientData currentChange() {
-        return this.currentChange;
-    }
-
+    // TODO - kw - look into removing usage of the getters below
     public String getExternalId() {
         return this.externalId;
     }
@@ -191,15 +185,7 @@ final public class ClientData implements Comparable<ClientData> {
         return this.lastname;
     }
 
-    public Long getOfficeId() {
-        return this.officeId;
-    }
-
-    public String getOfficeName() {
-        return this.officeName;
-    }
-
-    public LocalDate getJoinedDate() {
-        return this.joinedDate;
+    public LocalDate getActivationDate() {
+        return this.activationDate;
     }
 }

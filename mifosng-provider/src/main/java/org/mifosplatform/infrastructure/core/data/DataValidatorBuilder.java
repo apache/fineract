@@ -75,6 +75,15 @@ public class DataValidatorBuilder {
         return this;
     }
 
+    public void failWithCode(final String errorCode) {
+        StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append(resource).append(".").append(this.parameter)
+                .append(errorCode);
+        StringBuilder defaultEnglishMessage = new StringBuilder("Failed data validation due to: ").append(errorCode).append(".");
+        ApiParameterError error = ApiParameterError.parameterError(validationErrorCode.toString(), defaultEnglishMessage.toString(),
+                this.parameter, this.value);
+        dataValidationErrors.add(error);
+    }
+
     public DataValidatorBuilder equalToParameter(final String linkedParameterName, final Object linkedValue) {
         if (value == null && linkedValue == null && ignoreNullValue) { return this; }
 
@@ -523,5 +532,5 @@ public class DataValidatorBuilder {
             }
         }
         return this;
-    }    
+    }
 }

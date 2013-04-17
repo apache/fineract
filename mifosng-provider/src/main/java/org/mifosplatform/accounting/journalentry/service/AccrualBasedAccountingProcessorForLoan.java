@@ -22,7 +22,7 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
     }
 
     @Override
-    public void createJournalEntriesForLoan(LoanDTO loanDTO) {
+    public void createJournalEntriesForLoan(final LoanDTO loanDTO) {
         final GLClosure latestGLClosure = this.helper.getLatestClosureByBranch(loanDTO.getOfficeId());
         final Office office = this.helper.getOfficeById(loanDTO.getOfficeId());
         for (final LoanTransactionDTO loanTransactionDTO : loanDTO.getNewLoanTransactions()) {
@@ -175,7 +175,7 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
 
         BigDecimal totalDebitAmount = new BigDecimal(0);
 
-        // handle principle payment or writeOff (and reversals)
+        // handle principal payment or writeOff (and reversals)
         if (principalAmount != null && !(principalAmount.compareTo(BigDecimal.ZERO) == 0)) {
             totalDebitAmount = totalDebitAmount.add(principalAmount);
             helper.createCreditJournalEntryOrReversalForLoan(office, ACCRUAL_ACCOUNTS_FOR_LOAN.LOAN_PORTFOLIO, loanProductId, loanId,

@@ -59,7 +59,7 @@ public class RoleReadPlatformServiceImpl implements RoleReadPlatformService {
             final String name = rs.getString("name");
             final String description = rs.getString("description");
 
-            return new RoleData(id, name, description, null);
+            return new RoleData(id, name, description);
         }
 
         public String schema() {

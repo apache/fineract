@@ -1,29 +1,28 @@
 package org.mifosplatform.integrationtests;
 
 
-import com.jayway.restassured.builder.RequestSpecBuilder;
-import com.jayway.restassured.builder.ResponseSpecBuilder;
-import com.jayway.restassured.http.ContentType;
-import com.jayway.restassured.specification.RequestSpecification;
-import com.jayway.restassured.specification.ResponseSpecification;
+import java.util.HashMap;
+
 import org.junit.Before;
-
-
 import org.junit.Test;
-import org.mifosplatform.integrationtests.common.*;
+import org.mifosplatform.integrationtests.common.ClientHelper;
+import org.mifosplatform.integrationtests.common.Utils;
 import org.mifosplatform.integrationtests.common.accounting.Account;
-import org.mifosplatform.integrationtests.common.accounting.JournalEntry;
 import org.mifosplatform.integrationtests.common.accounting.AccountHelper;
+import org.mifosplatform.integrationtests.common.accounting.JournalEntry;
 import org.mifosplatform.integrationtests.common.accounting.JournalEntryHelper;
 import org.mifosplatform.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.mifosplatform.integrationtests.common.loans.LoanProductTestBuilder;
 import org.mifosplatform.integrationtests.common.loans.LoanStatusChecker;
 import org.mifosplatform.integrationtests.common.loans.LoanTransactionHelper;
 
-import java.util.HashMap;
+import com.jayway.restassured.builder.RequestSpecBuilder;
+import com.jayway.restassured.builder.ResponseSpecBuilder;
+import com.jayway.restassured.http.ContentType;
+import com.jayway.restassured.specification.RequestSpecification;
+import com.jayway.restassured.specification.ResponseSpecification;
 
-import static org.junit.Assert.assertThat;
-
+@SuppressWarnings("rawtypes")
 public class AccountingScenario {
     private RequestSpecification requestSpec;
     private ResponseSpecification responseSpec;
@@ -170,12 +169,12 @@ public class AccountingScenario {
         System.out.println("Repayment 5 Done  ......");
     }
 
-    private Integer createLoanProduct(Account ... accounts) {
+    private Integer createLoanProduct(final Account ... accounts) {
         System.out.println("------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
         String loanProductJSON = new LoanProductTestBuilder().withPrincipal(LP_PRINCIPAL.toString()).withRepaymentTypeAsMonth()
                 .withRepaymentAfterEvery(LP_REPAYMENT_PERIOD).withNumberOfRepayments(LP_REPAYMENTS).withRepaymentTypeAsMonth()
                 .withinterestRatePerPeriod(LP_INTEREST_RATE).withInterestRateFrequencyTypeAsMonths()
-                .withAmortizationTypeAsEqualPrinciplePayment().withInterestTypeAsFlat()
+                .withAmortizationTypeAsEqualPrincipalPayment().withInterestTypeAsFlat()
                 .withAccountingRuleAsAccrualBased(accounts)
                 .build();
         return loanTransactionHelper.getLoanProductId(loanProductJSON);

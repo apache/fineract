@@ -9,4 +9,5 @@ public interface ConfigurationDomainService {
 
     boolean isMakerCheckerEnabledForTask(String taskPermissionCode);
 
+    boolean isClientPendingApprovalAllowedEnabled();
 }

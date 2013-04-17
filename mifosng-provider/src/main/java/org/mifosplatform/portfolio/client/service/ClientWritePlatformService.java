@@ -18,6 +18,8 @@ public interface ClientWritePlatformService {
 
     CommandProcessingResult updateClient(Long clientId, JsonCommand command);
 
+    CommandProcessingResult activateClient(Long clientId, JsonCommand command);
+
     CommandProcessingResult deleteClient(Long clientId);
 
     @PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'CREATE_CLIENTIMAGE')")
@@ -28,5 +30,4 @@ public interface ClientWritePlatformService {
 
     @PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'DELETE_CLIENTIMAGE')")
     CommandProcessingResult deleteClientImage(Long clientId);
-
 }

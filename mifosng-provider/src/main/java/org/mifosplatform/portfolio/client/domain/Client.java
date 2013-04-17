@@ -27,18 +27,21 @@ import javax.persistence.UniqueConstraint;
 
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
+import org.joda.time.format.DateTimeFormatter;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.ApiParameterError;
 import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
 import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.security.service.RandomPasswordGenerator;
 import org.mifosplatform.organisation.office.domain.Office;
+import org.mifosplatform.portfolio.client.api.ClientApiConstants;
 import org.mifosplatform.portfolio.group.domain.Group;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
 @Table(name = "m_client", uniqueConstraints = { @UniqueConstraint(columnNames = { "account_no" }, name = "account_no_UNIQUE") })
-public class Client extends AbstractPersistable<Long> {
+public final class Client extends AbstractPersistable<Long> {
 
     @Column(name = "account_no", length = 20, unique = true, nullable = false)
     private String accountNumber;
@@ -46,6 +49,12 @@ public class Client extends AbstractPersistable<Long> {
     @ManyToOne
     @JoinColumn(name = "office_id", nullable = false)
     private Office office;
+
+    /**
+     * A value from {@link ClientStatus}.
+     */
+    @Column(name = "status_enum", nullable = false)
+    private Integer status;
 
     @Column(name = "firstname", length = 50)
     private String firstname;
@@ -60,61 +69,80 @@ public class Client extends AbstractPersistable<Long> {
     private String fullname;
 
     @SuppressWarnings("unused")
-    @Column(name = "display_name", length = 100)
+    @Column(name = "display_name", length = 100, nullable = false)
     private String displayName;
 
-    @Column(name = "joined_date")
+    @Column(name = "activation_date", nullable = true)
     @Temporal(TemporalType.DATE)
-    private Date joinedDate;
+    private Date activationDate;
 
-    @Column(name = "external_id", length = 100, unique = true)
+    @Column(name = "external_id", length = 100, nullable = true, unique = true)
     private String externalId;
 
     @Column(name = "is_deleted", nullable = false)
     private boolean deleted = false;
 
-    @Column(name = "image_key", length = 500)
+    @Column(name = "image_key", length = 500, nullable = true)
     private String imageKey;
 
     @ManyToMany
     @JoinTable(name = "m_group_client", joinColumns = @JoinColumn(name = "client_id"), inverseJoinColumns = @JoinColumn(name = "group_id"))
-    private Set<Group> parentGroups;
+    private Set<Group> groups;
 
     @Transient
     private boolean accountNumberRequiresAutoGeneration = false;
 
-    public static Client fromJson(final Office clientOffice, final Group clientParentGroup, final JsonCommand command) {
+    public static Client createNew(final Office clientOffice, final Group clientParentGroup, final JsonCommand command,
+            final boolean isPendingStateAllowed) {
 
-        final String accountNo = command.stringValueOfParameterNamed("accountNo");
-        final String firstname = command.stringValueOfParameterNamed("firstname");
-        final String middlename = command.stringValueOfParameterNamed("middlename");
-        final String lastname = command.stringValueOfParameterNamed("lastname");
-        final String fullname = command.stringValueOfParameterNamed("fullname");
-        final LocalDate joiningDate = command.localDateValueOfParameterNamed("joinedDate");
-        final String externalId = command.stringValueOfParameterNamed("externalId");
+        final String accountNo = command.stringValueOfParameterNamed(ClientApiConstants.accountNoParamName);
+        final String externalId = command.stringValueOfParameterNamed(ClientApiConstants.externalIdParamName);
 
-        return new Client(clientOffice, clientParentGroup, accountNo, firstname, middlename, lastname, fullname, joiningDate, externalId);
+        final String firstname = command.stringValueOfParameterNamed(ClientApiConstants.firstnameParamName);
+        final String middlename = command.stringValueOfParameterNamed(ClientApiConstants.middlenameParamName);
+        final String lastname = command.stringValueOfParameterNamed(ClientApiConstants.lastnameParamName);
+        final String fullname = command.stringValueOfParameterNamed(ClientApiConstants.fullnameParamName);
+
+        ClientStatus status = ClientStatus.ACTIVE;
+        boolean active = true;
+        if (isPendingStateAllowed && command.hasParameter("active")) {
+            active = command.booleanPrimitiveValueOfParameterNamed(ClientApiConstants.activeParamName);
+        }
+
+        LocalDate activationDate = null;
+        if (active) {
+            activationDate = command.localDateValueOfParameterNamed(ClientApiConstants.activationDateParamName);
+        } else {
+            status = ClientStatus.PENDING;
+        }
+
+        return new Client(status, clientOffice, clientParentGroup, accountNo, firstname, middlename, lastname, fullname, activationDate,
+                externalId);
     }
 
     protected Client() {
-
+        //
     }
 
-    private Client(final Office office, final Group clientParentGroup, final String accountNo, final String firstname,
-            final String middlename, final String lastname, final String fullname, final LocalDate openingDate, final String externalId) {
+    private Client(final ClientStatus status, final Office office, final Group clientParentGroup, final String accountNo,
+            final String firstname, final String middlename, final String lastname, final String fullname, final LocalDate activationDate,
+            final String externalId) {
         if (StringUtils.isBlank(accountNo)) {
             this.accountNumber = new RandomPasswordGenerator(19).generate();
             this.accountNumberRequiresAutoGeneration = true;
         } else {
             this.accountNumber = accountNo;
         }
+        this.status = status.getValue();
         this.office = office;
         if (StringUtils.isNotBlank(externalId)) {
             this.externalId = externalId.trim();
         } else {
             this.externalId = null;
         }
-        this.joinedDate = openingDate.toDateMidnight().toDate();
+        if (activationDate != null) {
+            this.activationDate = activationDate.toDateMidnight().toDate();
+        }
         if (StringUtils.isNotBlank(firstname)) {
             this.firstname = firstname.trim();
         } else {
@@ -140,8 +168,8 @@ public class Client extends AbstractPersistable<Long> {
         }
 
         if (clientParentGroup != null) {
-            this.parentGroups = new HashSet<Group>();
-            this.parentGroups.add(clientParentGroup);
+            this.groups = new HashSet<Group>();
+            this.groups.add(clientParentGroup);
         }
 
         deriveDisplayName();
@@ -173,9 +201,64 @@ public class Client extends AbstractPersistable<Long> {
         this.accountNumberRequiresAutoGeneration = false;
     }
 
+    public void activate(final DateTimeFormatter formatter, final LocalDate activationLocalDate) {
+        if (isActive()) {
+            final String defaultUserMessage = "Cannot activate client. Client is already active.";
+            final ApiParameterError error = ApiParameterError.parameterError("error.msg.clients.already.active", defaultUserMessage,
+                    "activationDate", activationLocalDate.toString(formatter));
+
+            final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+            dataValidationErrors.add(error);
+
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
+
+        if (isDateInTheFuture(activationLocalDate)) {
+
+            final String defaultUserMessage = "Activation date cannot be in the future.";
+            final ApiParameterError error = ApiParameterError.parameterError("error.msg.clients.activationDate.in.the.future",
+                    defaultUserMessage, "activationDate", activationLocalDate);
+
+            final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+            dataValidationErrors.add(error);
+
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
+
+        this.activationDate = activationLocalDate.toDate();
+        this.status = ClientStatus.ACTIVE.getValue();
+    }
+
+    public boolean isNotActive() {
+        return !isActive();
+    }
+
+    public boolean isActive() {
+        return ClientStatus.fromInt(this.status).isActive();
+    }
+
+    public boolean isNotPending() {
+        return !isPending();
+    }
+
+    public boolean isPending() {
+        return ClientStatus.fromInt(this.status).isPending();
+    }
+
+    private boolean isDateInTheFuture(final LocalDate localDate) {
+        return localDate.isAfter(DateUtils.getLocalDateOfTenant());
+    }
+
     public Map<String, Object> update(final JsonCommand command) {
 
         final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(9);
+
+        final String statusEnumParamName = "status";
+        if (command.isChangeInIntegerParameterNamed(statusEnumParamName, this.status)) {
+            final Integer newValue = command.integerValueOfParameterNamed(statusEnumParamName);
+            actualChanges.put(statusEnumParamName, ClientEnumerations.status(newValue));
+            this.status = ClientStatus.fromInt(newValue).getValue();
+        }
 
         final String accountNoParamName = "accountNo";
         if (command.isChangeInStringParameterNamed(accountNoParamName, this.accountNumber)) {
@@ -238,7 +321,7 @@ public class Client extends AbstractPersistable<Long> {
             actualChanges.put("locale", localeAsInput);
 
             final LocalDate newValue = command.localDateValueOfParameterNamed(joiningDateParamName);
-            this.joinedDate = newValue.toDate();
+            this.activationDate = newValue.toDate();
         }
 
         deriveDisplayName();
@@ -297,8 +380,8 @@ public class Client extends AbstractPersistable<Long> {
 
     private LocalDate getJoiningLocalDate() {
         LocalDate joiningLocalDate = null;
-        if (this.joinedDate != null) {
-            joiningLocalDate = LocalDate.fromDateFields(this.joinedDate);
+        if (this.activationDate != null) {
+            joiningLocalDate = LocalDate.fromDateFields(this.activationDate);
         }
         return joiningLocalDate;
     }
@@ -335,7 +418,7 @@ public class Client extends AbstractPersistable<Long> {
     }
 
     public Date getJoiningDate() {
-        return joinedDate;
+        return activationDate;
     }
 
     public String getExternalId() {

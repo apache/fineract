@@ -1,17 +1,15 @@
 package org.mifosplatform.integrationtests;
 
-//import static org.junit.Assert.assertEquals;
-
 import java.util.HashMap;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.mifosplatform.integrationtests.common.ClientHelper;
+import org.mifosplatform.integrationtests.common.Utils;
 import org.mifosplatform.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.mifosplatform.integrationtests.common.loans.LoanProductTestBuilder;
 import org.mifosplatform.integrationtests.common.loans.LoanStatusChecker;
 import org.mifosplatform.integrationtests.common.loans.LoanTransactionHelper;
-import org.mifosplatform.integrationtests.common.Utils;
 
 import com.jayway.restassured.builder.RequestSpecBuilder;
 import com.jayway.restassured.builder.ResponseSpecBuilder;
@@ -19,13 +17,11 @@ import com.jayway.restassured.http.ContentType;
 import com.jayway.restassured.specification.RequestSpecification;
 import com.jayway.restassured.specification.ResponseSpecification;
 
-import static org.junit.Assert.assertEquals;
-
 /**
 * Client Loan Integration Test for checking Loan Disbursement with Waive
 * Interest and Write-Off.
 */
-@SuppressWarnings({ "rawtypes", "unchecked" })
+@SuppressWarnings({ "rawtypes" })
 public class LoanWithWaiveInterestAndWriteOffIntegrationTest {
 
     private ResponseSpecification responseSpec;
@@ -120,7 +116,8 @@ public class LoanWithWaiveInterestAndWriteOffIntegrationTest {
         String loanProductJSON = new LoanProductTestBuilder().withPrincipal(LP_PRINCIPAL).withRepaymentTypeAsMonth()
                 .withRepaymentAfterEvery(LP_REPAYMENT_PERIOD).withNumberOfRepayments(LP_REPAYMENTS).withRepaymentTypeAsMonth()
                 .withinterestRatePerPeriod(LP_INTEREST_RATE).withInterestRateFrequencyTypeAsMonths()
-                .withAmortizationTypeAsEqualPrinciplePayment().withInterestTypeAsFlat().build();
+                .withAmortizationTypeAsEqualPrincipalPayment().withInterestTypeAsFlat().build();
+
         return loanTransactionHelper.getLoanProductId(loanProductJSON);
     }
 

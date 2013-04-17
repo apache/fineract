@@ -10,6 +10,7 @@ import org.joda.time.LocalDate;
 /**
  * Immutable data object representing maker-checker entry
  */
+@Deprecated
 final public class CommandSourceData {
 
     @SuppressWarnings("unused")
@@ -22,7 +23,7 @@ final public class CommandSourceData {
     private final Long entityId;
     @SuppressWarnings("unused")
     private final String entityHref;
-    private String commandJson;
+    private final String commandJson;
     @SuppressWarnings("unused")
     private final LocalDate madeOnDate;
 

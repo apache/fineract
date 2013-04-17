@@ -261,6 +261,10 @@ public class CommandWrapper {
         return this.entityName.equalsIgnoreCase("CLIENT");
     }
 
+    public boolean isClientActivation() {
+        return this.actionName.equalsIgnoreCase("ACTIVATE") && this.entityName.equalsIgnoreCase("CLIENT");
+    }
+
     public boolean isClientIdentifierResource() {
         return this.entityName.equals("CLIENTIDENTIFIER");
     }
@@ -483,5 +487,4 @@ public class CommandWrapper {
     public boolean isReportResource() {
         return this.entityName.equalsIgnoreCase("REPORT");
     }
-
 }

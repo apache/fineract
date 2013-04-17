@@ -1,20 +1,21 @@
 package org.mifosplatform.integrationtests.common.loans;
 
+import static org.junit.Assert.assertEquals;
+
 import java.util.ArrayList;
 import java.util.HashMap;
+
+import org.mifosplatform.integrationtests.common.Utils;
 
 import com.google.gson.Gson;
 import com.jayway.restassured.specification.RequestSpecification;
 import com.jayway.restassured.specification.ResponseSpecification;
-import org.mifosplatform.integrationtests.common.Utils;
-
-import static org.junit.Assert.assertEquals;
 
 @SuppressWarnings("rawtypes")
 public class LoanTransactionHelper {
 
-    private RequestSpecification requestSpec;
-    private ResponseSpecification responseSpec;
+    private final RequestSpecification requestSpec;
+    private final ResponseSpecification responseSpec;
 
     private static final String CREATE_LOAN_PRODUCT_URL = "/mifosng-provider/api/v1/loanproducts?tenantIdentifier=default";
     private static final String APPLY_LOAN_URL = "/mifosng-provider/api/v1/loans?tenantIdentifier=default";
@@ -28,7 +29,7 @@ public class LoanTransactionHelper {
     private static final String WITHDRAW_LOAN_APPLICATION_COMMAND = "withdrawnByApplicant";
 
 
-    public LoanTransactionHelper(RequestSpecification requestSpec,ResponseSpecification responseSpec){
+    public LoanTransactionHelper(final RequestSpecification requestSpec,final ResponseSpecification responseSpec){
         this.requestSpec  = requestSpec;
         this.responseSpec = responseSpec;
     }
@@ -182,6 +183,7 @@ public class LoanTransactionHelper {
         return (HashMap) response.get("status");
     }
 
+    @SuppressWarnings("unchecked")
     public void verifyRepaymentScheduleEntryFor(final int repaymentNumber, final float expectedPrincipalOutstanding, final Integer loanID) {
         System.out.println("---------------------------GETTING LOAN REPAYMENT SCHEDULE--------------------------------");
         ArrayList<HashMap> repaymentPeriods = getLoanRepaymentSchedule(requestSpec, responseSpec, loanID);

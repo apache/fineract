@@ -35,12 +35,10 @@ public class ApiRequestParameterHelper {
         }
         final boolean prettyPrint = ApiParameterHelper.prettyPrint(queryParameters);
         final boolean template = ApiParameterHelper.template(queryParameters);
-        final Long commandId = ApiParameterHelper.commandId(queryParameters);
         final boolean makerCheckerable = ApiParameterHelper.makerCheckerable(queryParameters);
         final boolean includeJson = ApiParameterHelper.includeJson(queryParameters);
 
-        return ApiRequestJsonSerializationSettings
-                .from(prettyPrint, responseParameters, template, commandId, makerCheckerable, includeJson);
+        return ApiRequestJsonSerializationSettings.from(prettyPrint, responseParameters, template, makerCheckerable, includeJson);
     }
 
     public ApiRequestJsonSerializationSettings process(final MultivaluedMap<String, String> queryParameters) {
@@ -48,11 +46,9 @@ public class ApiRequestParameterHelper {
         final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(queryParameters);
         final boolean prettyPrint = ApiParameterHelper.prettyPrint(queryParameters);
         final boolean template = ApiParameterHelper.template(queryParameters);
-        final Long commandId = ApiParameterHelper.commandId(queryParameters);
         final boolean makerCheckerable = ApiParameterHelper.makerCheckerable(queryParameters);
         final boolean includeJson = ApiParameterHelper.includeJson(queryParameters);
 
-        return ApiRequestJsonSerializationSettings
-                .from(prettyPrint, responseParameters, template, commandId, makerCheckerable, includeJson);
+        return ApiRequestJsonSerializationSettings.from(prettyPrint, responseParameters, template, makerCheckerable, includeJson);
     }
 }

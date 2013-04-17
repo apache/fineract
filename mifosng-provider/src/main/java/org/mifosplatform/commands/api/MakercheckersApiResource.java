@@ -25,7 +25,6 @@ import javax.ws.rs.core.UriInfo;
 import org.apache.commons.lang.StringUtils;
 import org.mifosplatform.commands.data.AuditData;
 import org.mifosplatform.commands.data.AuditSearchData;
-import org.mifosplatform.commands.data.CommandSourceData;
 import org.mifosplatform.commands.service.AuditReadPlatformService;
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.mifosplatform.infrastructure.core.api.ApiParameterHelper;
@@ -43,183 +42,146 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class MakercheckersApiResource {
 
-	private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<String>(
-			Arrays.asList("id", "actionName", "entityName", "resourceId",
-					"subresourceId", "maker", "madeOnDate", "checker",
-					"checkedOnDate", "processingResult", "commandAsJson",
-					"officeName", "groupLevelName", "groupName", "clientName",
-					"loanAccountNo", "savingsAccountNo"));
-	
-	//Next line removed because read permissions checks part of read services
-	//private final String resourceNameForPermissions = "MAKERCHECKER";
+    private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "actionName", "entityName", "resourceId",
+            "subresourceId", "maker", "madeOnDate", "checker", "checkedOnDate", "processingResult", "commandAsJson", "officeName",
+            "groupLevelName", "groupName", "clientName", "loanAccountNo", "savingsAccountNo"));
 
-	private final AuditReadPlatformService readPlatformService;
-	private final DefaultToApiJsonSerializer<CommandSourceData> toApiJsonSerializer;
-	private final DefaultToApiJsonSerializer<AuditData> toApiJsonSerializerAudit;
-	private final DefaultToApiJsonSerializer<AuditSearchData> toApiJsonSerializerSearchTemplate;
-	private final ApiRequestParameterHelper apiRequestParameterHelper;
-	private final PortfolioCommandSourceWritePlatformService writePlatformService;
+    private final AuditReadPlatformService readPlatformService;
+    private final DefaultToApiJsonSerializer<AuditData> toApiJsonSerializerAudit;
+    private final DefaultToApiJsonSerializer<AuditSearchData> toApiJsonSerializerSearchTemplate;
+    private final ApiRequestParameterHelper apiRequestParameterHelper;
+    private final PortfolioCommandSourceWritePlatformService writePlatformService;
 
-	@Autowired
-	public MakercheckersApiResource(
-			final AuditReadPlatformService readPlatformService,
-			final DefaultToApiJsonSerializer<CommandSourceData> toApiJsonSerializer,
-			final DefaultToApiJsonSerializer<AuditData> toApiJsonSerializerAudit,
-			final DefaultToApiJsonSerializer<AuditSearchData> toApiJsonSerializerSearchTemplate,
-			final ApiRequestParameterHelper apiRequestParameterHelper,
-			final PortfolioCommandSourceWritePlatformService writePlatformService) {
-		this.readPlatformService = readPlatformService;
-		this.toApiJsonSerializer = toApiJsonSerializer;
-		this.apiRequestParameterHelper = apiRequestParameterHelper;
-		this.toApiJsonSerializerAudit = toApiJsonSerializerAudit;
-		this.toApiJsonSerializerSearchTemplate = toApiJsonSerializerSearchTemplate;
-		this.writePlatformService = writePlatformService;
-	}
+    @Autowired
+    public MakercheckersApiResource(final AuditReadPlatformService readPlatformService,
+            final DefaultToApiJsonSerializer<AuditData> toApiJsonSerializerAudit,
+            final DefaultToApiJsonSerializer<AuditSearchData> toApiJsonSerializerSearchTemplate,
+            final ApiRequestParameterHelper apiRequestParameterHelper, final PortfolioCommandSourceWritePlatformService writePlatformService) {
+        this.readPlatformService = readPlatformService;
+        this.apiRequestParameterHelper = apiRequestParameterHelper;
+        this.toApiJsonSerializerAudit = toApiJsonSerializerAudit;
+        this.toApiJsonSerializerSearchTemplate = toApiJsonSerializerSearchTemplate;
+        this.writePlatformService = writePlatformService;
+    }
 
-	@GET
-	@Consumes({ MediaType.APPLICATION_JSON })
-	@Produces({ MediaType.APPLICATION_JSON })
-	public String retrieveCommands(@Context final UriInfo uriInfo,
-			@QueryParam("actionName") final String actionName,
-			@QueryParam("entityName") final String entityName,
-			@QueryParam("resourceId") final Long resourceId,
-			@QueryParam("makerId") final Long makerId,
-			@QueryParam("makerDateTimeFrom") final String makerDateTimeFrom,
-			@QueryParam("makerDateTimeTo") final String makerDateTimeTo,
-			@QueryParam("officeId") final Integer officeId,
-			@QueryParam("groupId") final Integer groupId,
-			@QueryParam("clientId") final Integer clientId,
-			@QueryParam("loanid") final Integer loanId,
-			@QueryParam("savingsAccountId") final Integer savingsAccountId) {
+    @GET
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String retrieveCommands(@Context final UriInfo uriInfo, @QueryParam("actionName") final String actionName,
+            @QueryParam("entityName") final String entityName, @QueryParam("resourceId") final Long resourceId,
+            @QueryParam("makerId") final Long makerId, @QueryParam("makerDateTimeFrom") final String makerDateTimeFrom,
+            @QueryParam("makerDateTimeTo") final String makerDateTimeTo, @QueryParam("officeId") final Integer officeId,
+            @QueryParam("groupId") final Integer groupId, @QueryParam("clientId") final Integer clientId,
+            @QueryParam("loanid") final Integer loanId, @QueryParam("savingsAccountId") final Integer savingsAccountId) {
 
-		final String extraCriteria = getExtraCriteria(actionName, entityName,
-				resourceId, makerId, makerDateTimeFrom, makerDateTimeTo,
-				officeId, groupId, clientId, loanId, savingsAccountId);
+        final String extraCriteria = getExtraCriteria(actionName, entityName, resourceId, makerId, makerDateTimeFrom, makerDateTimeTo,
+                officeId, groupId, clientId, loanId, savingsAccountId);
 
-		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper
-				.process(uriInfo.getQueryParameters());
+        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 
-		final Collection<AuditData> entries = this.readPlatformService
-				.retrieveAllEntriesToBeChecked(extraCriteria,
-						settings.isIncludeJson());
+        final Collection<AuditData> entries = this.readPlatformService.retrieveAllEntriesToBeChecked(extraCriteria,
+                settings.isIncludeJson());
 
-		return this.toApiJsonSerializerAudit.serialize(settings, entries,
-				RESPONSE_DATA_PARAMETERS);
-	}
+        return this.toApiJsonSerializerAudit.serialize(settings, entries, RESPONSE_DATA_PARAMETERS);
+    }
 
-	@GET
-	@Path("/searchtemplate")
-	@Consumes({ MediaType.APPLICATION_JSON })
-	@Produces({ MediaType.APPLICATION_JSON })
-	public String retrieveAuditSearchTemplate(@Context final UriInfo uriInfo) {
+    @GET
+    @Path("/searchtemplate")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String retrieveAuditSearchTemplate(@Context final UriInfo uriInfo) {
 
-		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper
-				.process(uriInfo.getQueryParameters());
+        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 
-		final AuditSearchData auditSearchData = this.readPlatformService
-				.retrieveSearchTemplate("makerchecker");
+        final AuditSearchData auditSearchData = this.readPlatformService.retrieveSearchTemplate("makerchecker");
 
-		final Set<String> RESPONSE_DATA_PARAMETERS_SEARCH_TEMPLATE = new HashSet<String>(
-				Arrays.asList("appUsers", "actionNames", "entityNames"));
+        final Set<String> RESPONSE_DATA_PARAMETERS_SEARCH_TEMPLATE = new HashSet<String>(Arrays.asList("appUsers", "actionNames",
+                "entityNames"));
 
-		return this.toApiJsonSerializerSearchTemplate.serialize(settings,
-				auditSearchData, RESPONSE_DATA_PARAMETERS_SEARCH_TEMPLATE);
-	}
+        return this.toApiJsonSerializerSearchTemplate.serialize(settings, auditSearchData, RESPONSE_DATA_PARAMETERS_SEARCH_TEMPLATE);
+    }
 
-	@POST
-	@Path("{auditId}")
-	@Consumes({ MediaType.APPLICATION_JSON })
-	@Produces({ MediaType.APPLICATION_JSON })
-	public String approveMakerCheckerEntry(
-			@PathParam("auditId") final Long auditId,
-			@QueryParam("command") final String commandParam) {
+    @POST
+    @Path("{auditId}")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String approveMakerCheckerEntry(@PathParam("auditId") final Long auditId, @QueryParam("command") final String commandParam) {
 
-		CommandProcessingResult result = null;
-		if (is(commandParam, "approve")) {
-			result = this.writePlatformService.approveEntry(auditId);
-		} else {
-			throw new UnrecognizedQueryParamException("command", commandParam);
-		}
+        CommandProcessingResult result = null;
+        if (is(commandParam, "approve")) {
+            result = this.writePlatformService.approveEntry(auditId);
+        } else {
+            throw new UnrecognizedQueryParamException("command", commandParam);
+        }
 
-		return this.toApiJsonSerializer.serialize(result);
-	}
+        return this.toApiJsonSerializerAudit.serialize(result);
+    }
 
-	private boolean is(final String commandParam, final String commandValue) {
-		return StringUtils.isNotBlank(commandParam)
-				&& commandParam.trim().equalsIgnoreCase(commandValue);
-	}
+    private boolean is(final String commandParam, final String commandValue) {
+        return StringUtils.isNotBlank(commandParam) && commandParam.trim().equalsIgnoreCase(commandValue);
+    }
 
-	@DELETE
-	@Path("{auditId}")
-	@Consumes({ MediaType.APPLICATION_JSON })
-	@Produces({ MediaType.APPLICATION_JSON })
-	public String deleteMakerCheckerEntry(
-			@PathParam("auditId") final Long auditId) {
+    @DELETE
+    @Path("{auditId}")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String deleteMakerCheckerEntry(@PathParam("auditId") final Long auditId) {
 
-		final Long id = this.writePlatformService.deleteEntry(auditId);
+        final Long id = this.writePlatformService.deleteEntry(auditId);
 
-		return this.toApiJsonSerializer.serialize(CommandProcessingResult
-				.commandOnlyResult(id));
-	}
+        return this.toApiJsonSerializerAudit.serialize(CommandProcessingResult.commandOnlyResult(id));
+    }
 
-	private String getExtraCriteria(final String actionName,
-			final String entityName, final Long resourceId, final Long makerId,
-			final String makerDateTimeFrom, final String makerDateTimeTo,
-			final Integer officeId, final Integer groupId,
-			final Integer clientId, final Integer loanId,
-			final Integer savingsAccountId) {
+    private String getExtraCriteria(final String actionName, final String entityName, final Long resourceId, final Long makerId,
+            final String makerDateTimeFrom, final String makerDateTimeTo, final Integer officeId, final Integer groupId,
+            final Integer clientId, final Integer loanId, final Integer savingsAccountId) {
 
-		String extraCriteria = "";
+        String extraCriteria = "";
 
-		if (actionName != null) {
-			extraCriteria += " and aud.action_name = "
-					+ ApiParameterHelper.sqlEncodeString(actionName);
-		}
-		if (entityName != null) {
-			extraCriteria += " and aud.entity_name like "
-					+ ApiParameterHelper.sqlEncodeString(entityName + "%");
-		}
+        if (actionName != null) {
+            extraCriteria += " and aud.action_name = " + ApiParameterHelper.sqlEncodeString(actionName);
+        }
+        if (entityName != null) {
+            extraCriteria += " and aud.entity_name like " + ApiParameterHelper.sqlEncodeString(entityName + "%");
+        }
 
-		if (resourceId != null) {
-			extraCriteria += " and aud.resource_id = " + resourceId;
-		}
-		if (makerId != null) {
-			extraCriteria += " and aud.maker_id = " + makerId;
-		}
-		if (makerDateTimeFrom != null) {
-			extraCriteria += " and aud.made_on_date >= "
-					+ ApiParameterHelper.sqlEncodeString(makerDateTimeFrom);
-		}
-		if (makerDateTimeTo != null) {
-			extraCriteria += " and aud.made_on_date <= "
-					+ ApiParameterHelper.sqlEncodeString(makerDateTimeTo);
-		}
+        if (resourceId != null) {
+            extraCriteria += " and aud.resource_id = " + resourceId;
+        }
+        if (makerId != null) {
+            extraCriteria += " and aud.maker_id = " + makerId;
+        }
+        if (makerDateTimeFrom != null) {
+            extraCriteria += " and aud.made_on_date >= " + ApiParameterHelper.sqlEncodeString(makerDateTimeFrom);
+        }
+        if (makerDateTimeTo != null) {
+            extraCriteria += " and aud.made_on_date <= " + ApiParameterHelper.sqlEncodeString(makerDateTimeTo);
+        }
 
-		if (officeId != null) {
-			extraCriteria += " and aud.office_id = " + officeId;
-		}
+        if (officeId != null) {
+            extraCriteria += " and aud.office_id = " + officeId;
+        }
 
-		if (groupId != null) {
-			extraCriteria += " and aud.group_id = " + groupId;
-		}
+        if (groupId != null) {
+            extraCriteria += " and aud.group_id = " + groupId;
+        }
 
-		if (clientId != null) {
-			extraCriteria += " and aud.client_id = " + clientId;
-		}
+        if (clientId != null) {
+            extraCriteria += " and aud.client_id = " + clientId;
+        }
 
-		if (loanId != null) {
-			extraCriteria += " and aud.loan_id = " + loanId;
-		}
+        if (loanId != null) {
+            extraCriteria += " and aud.loan_id = " + loanId;
+        }
 
-		if (savingsAccountId != null) {
-			extraCriteria += " and aud.savings_account_id = "
-					+ savingsAccountId;
-		}
+        if (savingsAccountId != null) {
+            extraCriteria += " and aud.savings_account_id = " + savingsAccountId;
+        }
 
-		if (StringUtils.isNotBlank(extraCriteria)) {
-			extraCriteria = extraCriteria.substring(4);
-		}
+        if (StringUtils.isNotBlank(extraCriteria)) {
+            extraCriteria = extraCriteria.substring(4);
+        }
 
-		return extraCriteria;
-	}
+        return extraCriteria;
+    }
 }

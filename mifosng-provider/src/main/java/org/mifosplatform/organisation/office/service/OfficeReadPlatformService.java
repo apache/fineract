@@ -21,6 +21,7 @@ public interface OfficeReadPlatformService {
      * Deprecated so cane eventually remove need for OfficeLookup type - so use
      * retrieveAllOfficesForDropdown instead.
      */
+    @Deprecated
     Collection<OfficeLookup> retrieveAllOfficesForLookup();
 
     OfficeData retrieveOffice(Long officeId);

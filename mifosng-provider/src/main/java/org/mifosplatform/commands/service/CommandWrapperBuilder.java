@@ -206,7 +206,7 @@ public class CommandWrapperBuilder {
         this.href = "/reports/template";
         return this;
     }
-    
+
     public CommandWrapperBuilder updateReport(final Long id) {
         this.actionName = "UPDATE";
         this.entityName = "REPORT";
@@ -214,7 +214,7 @@ public class CommandWrapperBuilder {
         this.href = "/reports/" + id;
         return this;
     }
-    
+
     public CommandWrapperBuilder deleteReport(final Long id) {
         this.actionName = "DELETE";
         this.entityName = "REPORT";
@@ -222,7 +222,7 @@ public class CommandWrapperBuilder {
         this.href = "/reports/" + id;
         return this;
     }
-    
+
     public CommandWrapperBuilder updateCurrencies() {
         this.actionName = "UPDATE";
         this.entityName = "CURRENCY";
@@ -328,10 +328,20 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    public CommandWrapperBuilder activateClient(final Long clientId) {
+        this.actionName = "ACTIVATE";
+        this.entityName = "CLIENT";
+        this.entityId = clientId;
+        this.clientId = clientId;
+        this.href = "/clients/" + clientId + "?command=activate&template=true";
+        return this;
+    }
+
     public CommandWrapperBuilder updateClient(final Long clientId) {
         this.actionName = "UPDATE";
         this.entityName = "CLIENT";
         this.entityId = clientId;
+        this.clientId = clientId;
         this.href = "/clients/" + clientId;
         return this;
     }
@@ -340,6 +350,7 @@ public class CommandWrapperBuilder {
         this.actionName = "DELETE";
         this.entityName = "CLIENT";
         this.entityId = clientId;
+        this.clientId = clientId;
         this.href = "/clients/" + clientId;
         this.json = "{}";
         return this;
@@ -868,7 +879,7 @@ public class CommandWrapperBuilder {
         this.loanId = loanId;
         this.href = "/loans/" + loanId + "/collaterals/" + collateralId;
         return this;
-    }    
+    }
 
     public CommandWrapperBuilder updateCollectionSheet(final Long groupId) {
         this.actionName = "UPDATE";
@@ -878,26 +889,26 @@ public class CommandWrapperBuilder {
         return this;
     }
 
-	public CommandWrapperBuilder createCenter() {
+    public CommandWrapperBuilder createCenter() {
         this.actionName = "CREATE";
         this.entityName = "CENTER";
         this.href = "/centers/template";
         return this;
-	}
+    }
 
-	public CommandWrapperBuilder updateCenter(Long centerId) {
+    public CommandWrapperBuilder updateCenter(final Long centerId) {
         this.actionName = "UPDATE";
         this.entityName = "CENTER";
         this.entityId = centerId;
         this.href = "/centers/" + centerId;
         return this;
-	}
+    }
 
-	public CommandWrapperBuilder deleteCenter(Long centerId) {
+    public CommandWrapperBuilder deleteCenter(final Long centerId) {
         this.actionName = "DELETE";
         this.entityName = "CENTER";
         this.entityId = centerId;
         this.href = "/centers/" + centerId;
         return this;
-	}
+    }
 }

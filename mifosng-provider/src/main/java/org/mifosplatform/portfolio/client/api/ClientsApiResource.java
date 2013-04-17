@@ -26,24 +26,21 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.commons.lang.StringUtils;
-import org.mifosplatform.commands.data.CommandSourceData;
 import org.mifosplatform.commands.domain.CommandWrapper;
 import org.mifosplatform.commands.service.CommandWrapperBuilder;
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
-import org.mifosplatform.commands.service.PortfolioCommandsReadPlatformService;
-import org.mifosplatform.infrastructure.core.api.ApiParameterHelper;
 import org.mifosplatform.infrastructure.core.api.ApiRequestParameterHelper;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
+import org.mifosplatform.infrastructure.core.exception.UnrecognizedQueryParamException;
 import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.mifosplatform.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
-import org.mifosplatform.organisation.office.data.OfficeLookup;
+import org.mifosplatform.organisation.office.data.OfficeData;
 import org.mifosplatform.organisation.office.service.OfficeReadPlatformService;
-import org.mifosplatform.portfolio.client.command.ClientCommand;
 import org.mifosplatform.portfolio.client.data.ClientAccountSummaryCollectionData;
 import org.mifosplatform.portfolio.client.data.ClientData;
-import org.mifosplatform.portfolio.client.serialization.ClientCommandFromApiJsonDeserializer;
 import org.mifosplatform.portfolio.client.service.ClientReadPlatformService;
+import org.mifosplatform.portfolio.group.service.SearchParameters;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -53,185 +50,84 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class ClientsApiResource {
 
-    private final Set<String> CLIENT_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "accountNo", "externalId", "firstname",
-            "middlename", "lastname", "fullname", "displayName", "officeId", "officeName", "joinedDate", "imageKey", "imagePresent",
-            "parentGroups", "allowedOffices", "currentChange", "allChanges"));
-
     private final PlatformSecurityContext context;
     private final ClientReadPlatformService clientReadPlatformService;
     private final OfficeReadPlatformService officeReadPlatformService;
     private final ToApiJsonSerializer<ClientData> toApiJsonSerializer;
     private final ToApiJsonSerializer<ClientAccountSummaryCollectionData> clientAccountSummaryToApiJsonSerializer;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
-    private final PortfolioCommandsReadPlatformService commandSourceReadPlatformService;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
-    private final ClientCommandFromApiJsonDeserializer clientCommandFromApiJsonDeserializer;
 
     @Autowired
     public ClientsApiResource(final PlatformSecurityContext context, final ClientReadPlatformService readPlatformService,
             final OfficeReadPlatformService officeReadPlatformService, final ToApiJsonSerializer<ClientData> toApiJsonSerializer,
-            final ClientCommandFromApiJsonDeserializer clientCommandFromApiJsonDeserializer,
             final ToApiJsonSerializer<ClientAccountSummaryCollectionData> clientAccountSummaryToApiJsonSerializer,
             final ApiRequestParameterHelper apiRequestParameterHelper,
-            final PortfolioCommandsReadPlatformService commandsReadPlatformService,
             final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
         this.context = context;
         this.clientReadPlatformService = readPlatformService;
         this.officeReadPlatformService = officeReadPlatformService;
         this.toApiJsonSerializer = toApiJsonSerializer;
-        this.clientCommandFromApiJsonDeserializer = clientCommandFromApiJsonDeserializer;
         this.clientAccountSummaryToApiJsonSerializer = clientAccountSummaryToApiJsonSerializer;
         this.apiRequestParameterHelper = apiRequestParameterHelper;
-        this.commandSourceReadPlatformService = commandsReadPlatformService;
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
-    }
-
-    @GET
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveAllIndividualClients(@Context final UriInfo uriInfo, @QueryParam("sqlSearch") final String sqlSearch,
-            @QueryParam("officeId") final Long officeId, @QueryParam("externalId") final String externalId,
-            @QueryParam("displayName") final String displayName, @QueryParam("firstName") final String firstName,
-            @QueryParam("lastName") final String lastName, @QueryParam("underHierarchy") final String hierarchy) {
-
-        context.authenticatedUser().validateHasReadPermission("CLIENT");
-
-        // FIXME - kw - rather than exposing SQL through the api can we not just
-        // pass parameter we want to search by and build up sql like is done for
-        // other parameters?
-        final String extraCriteria = buildSqlStringFromClientCriteria(sqlSearch, officeId, externalId, displayName, firstName, lastName,
-                hierarchy);
-
-        final Collection<ClientData> clients = this.clientReadPlatformService.retrieveAllIndividualClients(extraCriteria);
-
-        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, clients, CLIENT_DATA_PARAMETERS);
-    }
-
-    private String buildSqlStringFromClientCriteria(final String sqlSearch, final Long officeId, final String externalId,
-            final String displayName, final String firstName, final String lastName, final String hierarchy) {
-
-        String extraCriteria = "";
-
-        if (sqlSearch != null) {
-            extraCriteria = " and (" + sqlSearch + ")";
-        }
-
-        if (officeId != null) {
-            extraCriteria += " and office_id = " + officeId;
-        }
-
-        if (externalId != null) {
-            extraCriteria += " and external_id like " + ApiParameterHelper.sqlEncodeString(externalId);
-        }
-
-        if (displayName != null) {
-            extraCriteria += " and concat(ifnull(firstname, ''), if(firstname > '',' ', '') , ifnull(lastname, '')) like "
-                    + ApiParameterHelper.sqlEncodeString(displayName);
-        }
-
-        if (firstName != null) {
-            extraCriteria += " and firstname like " + ApiParameterHelper.sqlEncodeString(firstName);
-        }
-
-        if (lastName != null) {
-            extraCriteria += " and lastname like " + ApiParameterHelper.sqlEncodeString(lastName);
-        }
-
-        if (hierarchy != null) {
-            extraCriteria += " and o.hierarchy like " + ApiParameterHelper.sqlEncodeString(hierarchy + "%");
-        }
-
-        if (StringUtils.isNotBlank(extraCriteria)) {
-            extraCriteria = extraCriteria.substring(4);
-        }
-
-        return extraCriteria;
-    }
-
-    @GET
-    @Path("{clientId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveClient(@PathParam("clientId") final Long clientId, @Context final UriInfo uriInfo) {
-
-        context.authenticatedUser().validateHasReadPermission("CLIENT");
-
-        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-
-        ClientData clientData = this.clientReadPlatformService.retrieveIndividualClient(clientId);
-        if (settings.isTemplate()) {
-            // FIXME - KW - no need for special OfficeLookup object, just use
-            // OfficeData and only populate with id, name, nameDecorated
-            final List<OfficeLookup> allowedOffices = new ArrayList<OfficeLookup>(officeReadPlatformService.retrieveAllOfficesForLookup());
-            clientData = ClientData.templateOnTop(clientData, allowedOffices);
-        }
-        if (settings.isCommandIdPassed()) {
-            clientData = handleRequestToIntegrateProposedChangesFromCommand(clientId, settings.getCommandId(), clientData);
-        }
-
-        // pick up possibility of changes by default - might push down a layer
-        // into the retrieve client method
-        final Collection<ClientData> dataChanges = retrieveAllUnprocessedDataChanges(clientId);
-        clientData = ClientData.integrateChanges(clientData, clientData.currentChange(), dataChanges);
-
-        return this.toApiJsonSerializer.serialize(settings, clientData, CLIENT_DATA_PARAMETERS);
-    }
-
-    private ClientData handleRequestToIntegrateProposedChangesFromCommand(final Long clientId, final Long commandId,
-            final ClientData clientData) {
-        final CommandSourceData entry = this.commandSourceReadPlatformService.retrieveById(commandId);
-
-        final ClientCommand command = this.clientCommandFromApiJsonDeserializer.commandFromApiJson(entry.json());
-        final ClientData currentChange = ClientData.dataChangeInstance(clientId, command.getOfficeId(), command.getExternalId(),
-                command.getFirstname(), command.getMiddlename(), command.getLastname(), command.getFullname(), command.getJoiningDate());
-
-        final Collection<ClientData> dataChanges = null; // retrieveAllUnprocessedDataChanges(clientId);
-        return ClientData.integrateChanges(clientData, currentChange, dataChanges);
-    }
-
-    private Collection<ClientData> retrieveAllUnprocessedDataChanges(final Long clientId) {
-        Collection<ClientData> dataChanges = new ArrayList<ClientData>();
-
-        Collection<CommandSourceData> unprocessedChanges = this.commandSourceReadPlatformService.retrieveUnprocessChangesByEntityNameAndId(
-                "CLIENT", clientId);
-        for (CommandSourceData commandSourceData : unprocessedChanges) {
-            final ClientCommand command = this.clientCommandFromApiJsonDeserializer.commandFromApiJson(commandSourceData.json());
-            final ClientData change = ClientData
-                    .dataChangeInstance(clientId, command.getOfficeId(), command.getExternalId(), command.getFirstname(),
-                            command.getMiddlename(), command.getLastname(), command.getFullname(), command.getJoiningDate());
-            dataChanges.add(change);
-        }
-
-        if (dataChanges.isEmpty()) {
-            dataChanges = null;
-        }
-
-        return dataChanges;
     }
 
     @GET
     @Path("template")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String newClientDetails(@Context final UriInfo uriInfo) {
+    public String retrieveTemplate(@Context final UriInfo uriInfo) {
 
-        context.authenticatedUser().validateHasReadPermission("CLIENT");
+        context.authenticatedUser().validateHasReadPermission(ClientApiConstants.CLIENT_RESOURCE_NAME);
+
+        final ClientData clientData = this.clientReadPlatformService.retrieveTemplate();
+
+        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        return this.toApiJsonSerializer.serialize(settings, clientData, ClientApiConstants.CLIENT_RESPONSE_DATA_PARAMETERS);
+    }
+
+    @GET
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String retrieveAll(@Context final UriInfo uriInfo, @QueryParam("sqlSearch") final String sqlSearch,
+            @QueryParam("officeId") final Long officeId, @QueryParam("externalId") final String externalId,
+            @QueryParam("displayName") final String displayName, @QueryParam("firstName") final String firstname,
+            @QueryParam("lastName") final String lastname, @QueryParam("underHierarchy") final String hierarchy) {
+
+        context.authenticatedUser().validateHasReadPermission(ClientApiConstants.CLIENT_RESOURCE_NAME);
+
+        final SearchParameters searchParameters = SearchParameters.forClients(sqlSearch, officeId, externalId, displayName, firstname,
+                lastname, hierarchy);
+        final Collection<ClientData> clients = this.clientReadPlatformService.retrieveAll(searchParameters);
+
+        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        return this.toApiJsonSerializer.serialize(settings, clients, ClientApiConstants.CLIENT_RESPONSE_DATA_PARAMETERS);
+    }
+
+    @GET
+    @Path("{clientId}")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String retrieveOne(@PathParam("clientId") final Long clientId, @Context final UriInfo uriInfo) {
+
+        context.authenticatedUser().validateHasReadPermission(ClientApiConstants.CLIENT_RESOURCE_NAME);
 
         final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 
-        ClientData clientData = this.clientReadPlatformService.retrieveNewClientDetails();
-        if (settings.isCommandIdPassed()) {
-            clientData = handleRequestToIntegrateProposedChangesFromCommand(null, settings.getCommandId(), clientData);
+        ClientData clientData = this.clientReadPlatformService.retrieveOne(clientId);
+        if (settings.isTemplate()) {
+            final List<OfficeData> allowedOffices = new ArrayList<OfficeData>(officeReadPlatformService.retrieveAllOfficesForDropdown());
+            clientData = ClientData.templateOnTop(clientData, allowedOffices);
         }
 
-        return this.toApiJsonSerializer.serialize(settings, clientData, CLIENT_DATA_PARAMETERS);
+        return this.toApiJsonSerializer.serialize(settings, clientData, ClientApiConstants.CLIENT_RESPONSE_DATA_PARAMETERS);
     }
 
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String createClient(final String apiRequestBodyAsJson) {
+    public String create(final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
                 .createClient() //
@@ -247,7 +143,7 @@ public class ClientsApiResource {
     @Path("{clientId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String updateClient(@PathParam("clientId") final Long clientId, final String apiRequestBodyAsJson) {
+    public String update(@PathParam("clientId") final Long clientId, final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
                 .updateClient(clientId) //
@@ -263,7 +159,7 @@ public class ClientsApiResource {
     @Path("{clientId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String deleteClient(@PathParam("clientId") final Long clientId) {
+    public String delete(@PathParam("clientId") final Long clientId) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
                 .deleteClient(clientId) //
@@ -274,26 +170,49 @@ public class ClientsApiResource {
         return this.toApiJsonSerializer.serialize(result);
     }
 
+    @POST
+    @Path("{clientId}")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String activate(@PathParam("clientId") final Long clientId, @QueryParam("command") final String commandParam,
+            final String apiRequestBodyAsJson) {
+
+        final CommandWrapperBuilder builder = new CommandWrapperBuilder().withJson(apiRequestBodyAsJson);
+
+        CommandProcessingResult result = null;
+        if (is(commandParam, "activate")) {
+            final CommandWrapper commandRequest = builder.activateClient(clientId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        }
+
+        if (result == null) {
+            //
+            throw new UnrecognizedQueryParamException("command", commandParam, new Object[] { "activate" });
+        }
+
+        return this.toApiJsonSerializer.serialize(result);
+    }
+
+    private boolean is(final String commandParam, final String commandValue) {
+        return StringUtils.isNotBlank(commandParam) && commandParam.trim().equalsIgnoreCase(commandValue);
+    }
+
     @GET
     @Path("{clientId}/loans")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveClientAccounts(@PathParam("clientId") final Long clientId, @Context final UriInfo uriInfo) {
+    public String retrieveAssociatedAccounts(@PathParam("clientId") final Long clientId, @Context final UriInfo uriInfo) {
 
-        context.authenticatedUser().validateHasReadPermission("CLIENT");
+        context.authenticatedUser().validateHasReadPermission(ClientApiConstants.CLIENT_RESOURCE_NAME);
 
         final ClientAccountSummaryCollectionData clientAccount = this.clientReadPlatformService.retrieveClientAccountDetails(clientId);
 
         final Set<String> CLIENT_ACCOUNTS_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("pendingApprovalLoans",
                 "awaitingDisbursalLoans", "openLoans", "closedLoans", "anyLoanCount", "pendingApprovalLoanCount",
-                "awaitingDisbursalLoanCount", "activeLoanCount", "closedLoanCount", "pendingApprovalDepositAccountsCount",
-                "pendingApprovalDepositAccounts", "approvedDepositAccountsCount", "approvedDepositAccounts",
-                "withdrawnByClientDepositAccountsCount", "withdrawnByClientDepositAccounts", "closedDepositAccountsCount",
-                "closedDepositAccounts", "maturedDepositAccountsCount", "maturedDepositAccounts", "rejectedDepositAccountsCount",
-                "rejectedDepositAccounts", "preclosedDepositAccountsCount", "preclosedDepositAccounts",
-                "pendingApprovalSavingAccountsCount", "pendingApprovalSavingAccounts", "approvedSavingAccountsCount",
-                "approvedSavingAccounts", "withdrawnByClientSavingAccountsCount", "withdrawnByClientSavingAccounts",
-                "rejectedSavingAccountsCount", "rejectedSavingAccounts", "closedSavingAccountsCount", "closedSavingAccounts"));
+                "awaitingDisbursalLoanCount", "activeLoanCount", "closedLoanCount", "pendingApprovalSavingAccountsCount",
+                "pendingApprovalSavingAccounts", "approvedSavingAccountsCount", "approvedSavingAccounts",
+                "withdrawnByClientSavingAccountsCount", "withdrawnByClientSavingAccounts", "rejectedSavingAccountsCount",
+                "rejectedSavingAccounts", "closedSavingAccountsCount", "closedSavingAccounts"));
 
         final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.clientAccountSummaryToApiJsonSerializer.serialize(settings, clientAccount, CLIENT_ACCOUNTS_DATA_PARAMETERS);

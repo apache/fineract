@@ -8,13 +8,14 @@ package org.mifosplatform.organisation.office.data;
 /**
  * Immutable data object used for office lookups (will remove eventually and just use {@link OfficeData}.
  */
+@Deprecated
 public class OfficeLookup {
 
-    private Long id;
+    private final Long id;
     @SuppressWarnings("unused")
-    private String name;
+    private final String name;
     @SuppressWarnings("unused")
-    private String nameDecorated;
+    private final String nameDecorated;
 
     public OfficeLookup(final Long id, final String name, final String nameDecorated) {
         this.id = id;

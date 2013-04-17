@@ -127,7 +127,7 @@ public class GuarantorReadPlatformServiceImpl implements GuarantorReadPlatformSe
      */
     private GuarantorData mergeDetailsForClientOrStaffGuarantor(GuarantorData guarantorData) {
         if (guarantorData.isExistingClient()) {
-            ClientData clientData = clientReadPlatformService.retrieveIndividualClient(guarantorData.getEntityId());
+            ClientData clientData = clientReadPlatformService.retrieveOne(guarantorData.getEntityId());
             return GuarantorData.mergeClientData(clientData, guarantorData);
         } else if (guarantorData.isStaffMember()) {
             StaffData staffData = staffReadPlatformService.retrieveStaff(guarantorData.getEntityId());

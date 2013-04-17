@@ -84,7 +84,7 @@ public class GuarantorWritePlatformServiceJpaRepositoryIImpl implements Guaranto
             return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withOfficeId(guarantor.getOfficeId())
                     .withEntityId(guarantor.getId()).withLoanId(loanId).build();
         } catch (DataIntegrityViolationException dve) {
-            handleGuarantorDataIntegrityIssues(command, dve);
+            handleGuarantorDataIntegrityIssues(dve);
             return CommandProcessingResult.empty();
         }
     }
@@ -124,7 +124,7 @@ public class GuarantorWritePlatformServiceJpaRepositoryIImpl implements Guaranto
             return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withOfficeId(guarantorForUpdate.getOfficeId())
                     .withEntityId(guarantorForUpdate.getId()).withOfficeId(guarantorForUpdate.getLoanId()).with(changesOnly).build();
         } catch (DataIntegrityViolationException dve) {
-            handleGuarantorDataIntegrityIssues(command, dve);
+            handleGuarantorDataIntegrityIssues(dve);
             return CommandProcessingResult.empty();
         }
     }
@@ -142,32 +142,22 @@ public class GuarantorWritePlatformServiceJpaRepositoryIImpl implements Guaranto
                 .withOfficeId(guarantorForDelete.getOfficeId()).build();
     }
 
-    /**
-     * @param loanId
-     * @param loan
-     * @param guarantor
-     */
-    private void validateGuarantorBusinessRules(Guarantor guarantor) {
+    private void validateGuarantorBusinessRules(final Guarantor guarantor) {
         // validate guarantor conditions
         if (guarantor.isExistingCustomer()) {
             // check client exists
             clientRepositoryWrapper.findOneWithNotFoundDetection(guarantor.getEntityId());
             // validate that the client is not set as a self guarantor
-            if (guarantor.getClientId().equals(guarantor.getEntityId())) { throw new InvalidGuarantorException(guarantor.getEntityId(),
-                    guarantor.getLoanId()); }
+            if (guarantor.getClientId().equals(guarantor.getEntityId())) {
+                //
+                throw new InvalidGuarantorException(guarantor.getEntityId(), guarantor.getLoanId());
+            }
         } else if (guarantor.isExistingEmployee()) {
             staffRepositoryWrapper.findOneWithNotFoundDetection(guarantor.getEntityId());
         }
     }
 
-    /**
-     * Throws an exception for any data Integrity issue
-     * 
-     * @param command
-     * @param dve
-     */
-    @SuppressWarnings("unused")
-    private void handleGuarantorDataIntegrityIssues(final JsonCommand command, DataIntegrityViolationException dve) {
+    private void handleGuarantorDataIntegrityIssues(final DataIntegrityViolationException dve) {
         Throwable realCause = dve.getMostSpecificCause();
         logger.error(dve.getMessage(), dve);
         throw new PlatformDataIntegrityException("error.msg.guarantor.unknown.data.integrity.issue",

@@ -148,7 +148,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
         context.authenticatedUser();
 
-        final ClientData clientAccount = this.clientReadPlatformService.retrieveIndividualClient(clientId);
+        final ClientData clientAccount = this.clientReadPlatformService.retrieveOne(clientId);
         final LocalDate expectedDisbursementDate = DateUtils.getLocalDateOfTenant();
         LoanAccountData loanTemplateDetails = LoanAccountData.clientDefaults(clientAccount.id(), clientAccount.displayName(),
                 clientAccount.officeId(), expectedDisbursementDate);
@@ -666,14 +666,14 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                 if (fromDate == null) {
                     fromDate = this.lastDueDate;
                 }
-                final BigDecimal outstandingPrincipleBalanceOfLoan = outstandingLoanPrincipalBalance.subtract(principalDue);
+                final BigDecimal outstandingPrincipalBalanceOfLoan = outstandingLoanPrincipalBalance.subtract(principalDue);
 
                 // update based on current period values
                 this.lastDueDate = dueDate;
                 outstandingLoanPrincipalBalance = outstandingLoanPrincipalBalance.subtract(principalDue);
 
                 final LoanSchedulePeriodData periodData = LoanSchedulePeriodData.repaymentPeriodWithPayments(loanId, period, fromDate,
-                        dueDate, principalDue, principalPaid, principalWrittenOff, principalOutstanding, outstandingPrincipleBalanceOfLoan,
+                        dueDate, principalDue, principalPaid, principalWrittenOff, principalOutstanding, outstandingPrincipalBalanceOfLoan,
                         interestExpectedDue, interestPaid, interestWaived, interestWrittenOff, interestOutstanding, feeChargesExpectedDue,
                         feeChargesPaid, feeChargesWaived, feeChargesWrittenOff, feeChargesOutstanding, penaltyChargesExpectedDue,
                         penaltyChargesPaid, penaltyChargesWaived, penaltyChargesWrittenOff, penaltyChargesOutstanding, totalDueForPeriod,

@@ -12,7 +12,7 @@ import org.mifosplatform.infrastructure.core.exception.AbstractPlatformResourceN
  */
 public class ClientNotFoundException extends AbstractPlatformResourceNotFoundException {
 
-	public ClientNotFoundException(Long id) {
-		super("error.msg.client.id.invalid", "Client with identifier " + id + " does not exist", id);
-	}
+    public ClientNotFoundException(final Long id) {
+        super("error.msg.client.id.invalid", "Client with identifier " + id + " does not exist", id);
+    }
 }

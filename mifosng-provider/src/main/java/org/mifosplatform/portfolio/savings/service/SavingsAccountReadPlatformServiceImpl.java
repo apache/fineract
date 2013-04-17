@@ -207,7 +207,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
 
         ClientData client = null;
         if (clientId != null) {
-            client = this.clientReadPlatformService.retrieveIndividualClient(clientId);
+            client = this.clientReadPlatformService.retrieveOne(clientId);
         }
 
         GroupGeneralData group = null;

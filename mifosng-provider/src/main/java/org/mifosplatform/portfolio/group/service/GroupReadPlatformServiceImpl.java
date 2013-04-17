@@ -82,7 +82,7 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
         }
 
         Collection<ClientData> clientOptions = this.clientReadPlatformService
-                .retrieveAllIndividualClientsForLookupByOfficeId(defaultOfficeId);
+                .retrieveAllForLookupByOfficeId(defaultOfficeId);
         if (CollectionUtils.isEmpty(clientOptions)) {
             clientOptions = null;
         }

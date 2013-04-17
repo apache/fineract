@@ -10,18 +10,19 @@ import java.util.Collection;
 import org.mifosplatform.portfolio.client.data.ClientAccountSummaryCollectionData;
 import org.mifosplatform.portfolio.client.data.ClientAccountSummaryData;
 import org.mifosplatform.portfolio.client.data.ClientData;
+import org.mifosplatform.portfolio.group.service.SearchParameters;
 
 public interface ClientReadPlatformService {
 
-    Collection<ClientData> retrieveAllIndividualClients(String extraCriteria);
+    ClientData retrieveTemplate();
 
-    ClientData retrieveIndividualClient(Long clientId);
+    Collection<ClientData> retrieveAll(SearchParameters searchParameters);
 
-    ClientData retrieveNewClientDetails();
+    ClientData retrieveOne(Long clientId);
 
-    Collection<ClientData> retrieveAllIndividualClientsForLookup(String extraCriteria);
+    Collection<ClientData> retrieveAllForLookup(String extraCriteria);
 
-    Collection<ClientData> retrieveAllIndividualClientsForLookupByOfficeId(Long officeId);
+    Collection<ClientData> retrieveAllForLookupByOfficeId(Long officeId);
 
     ClientAccountSummaryCollectionData retrieveClientAccountDetails(Long clientId);
 

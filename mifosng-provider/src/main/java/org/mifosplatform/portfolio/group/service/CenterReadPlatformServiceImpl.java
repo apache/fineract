@@ -252,7 +252,7 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
         }
 
         Collection<ClientData> clientOptions = this.clientReadPlatformService
-                .retrieveAllIndividualClientsForLookupByOfficeId(centerOfficeId);
+                .retrieveAllForLookupByOfficeId(centerOfficeId);
         if (CollectionUtils.isEmpty(clientOptions)) {
             clientOptions = null;
         }

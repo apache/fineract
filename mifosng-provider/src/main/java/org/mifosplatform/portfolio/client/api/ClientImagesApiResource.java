@@ -111,7 +111,7 @@ public class ClientImagesApiResource {
 
         context.authenticatedUser().validateHasReadPermission("CLIENTIMAGE");
 
-        final ClientData clientData = this.clientReadPlatformService.retrieveIndividualClient(clientId);
+        final ClientData clientData = this.clientReadPlatformService.retrieveOne(clientId);
 
         if (clientData.imageKeyDoesNotExist()) { throw new ImageNotFoundException("clients", clientId); }
 
@@ -134,7 +134,7 @@ public class ClientImagesApiResource {
     public Response downloadClientImage(@PathParam("clientId") final Long clientId) {
 
         context.authenticatedUser().validateHasReadPermission("CLIENTIMAGE");
-        final ClientData clientData = this.clientReadPlatformService.retrieveIndividualClient(clientId);
+        final ClientData clientData = this.clientReadPlatformService.retrieveOne(clientId);
 
         if (clientData.imageKeyDoesNotExist()) { throw new ImageNotFoundException("clients", clientId); }
 

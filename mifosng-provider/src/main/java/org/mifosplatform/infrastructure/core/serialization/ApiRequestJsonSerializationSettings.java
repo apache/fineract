@@ -16,28 +16,25 @@ public class ApiRequestJsonSerializationSettings {
     private final boolean prettyPrint;
     private final Set<String> parametersForPartialResponse;
     private final boolean template;
-    private final Long commandId;
     private final boolean makerCheckerable;
     private final boolean includeJson;
 
     public ApiRequestJsonSerializationSettings(final boolean prettyPrint, final Set<String> parametersForPartialResponse,
-            final boolean template, final Long commandId, final boolean makerCheckerable, final boolean includeJson) {
+            final boolean template, final boolean makerCheckerable, final boolean includeJson) {
         this.prettyPrint = prettyPrint;
         this.parametersForPartialResponse = parametersForPartialResponse;
         this.template = template;
-        this.commandId = commandId;
         this.makerCheckerable = makerCheckerable;
         this.includeJson = includeJson;
     }
 
     public static ApiRequestJsonSerializationSettings from(final boolean prettyPrint, final Set<String> parametersForPartialResponse,
-            final boolean template, final Long commandId, final boolean makerCheckerable, final boolean includeJson) {
+            final boolean template, final boolean makerCheckerable, final boolean includeJson) {
 
         // FIXME - KW - rather than always creating new objects for this could
         // just send by common ones like, prettyprint=false, empty response
         // parameters
-        return new ApiRequestJsonSerializationSettings(prettyPrint, parametersForPartialResponse, template, commandId, makerCheckerable,
-                includeJson);
+        return new ApiRequestJsonSerializationSettings(prettyPrint, parametersForPartialResponse, template, makerCheckerable, includeJson);
     }
 
     public boolean isPrettyPrint() {
@@ -56,19 +53,11 @@ public class ApiRequestJsonSerializationSettings {
         return this.includeJson;
     }
 
-    public Long getCommandId() {
-        return this.commandId;
-    }
-
     public Set<String> getParametersForPartialResponse() {
         return this.parametersForPartialResponse;
     }
 
     public boolean isPartialResponseRequired() {
         return !this.parametersForPartialResponse.isEmpty();
-    }
-
-    public boolean isCommandIdPassed() {
-        return this.commandId != null;
     }
 }
