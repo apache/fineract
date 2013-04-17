@@ -23,7 +23,7 @@ import com.jayway.restassured.specification.RequestSpecification;
 import com.jayway.restassured.specification.ResponseSpecification;
 
 @SuppressWarnings("rawtypes")
-public class AccountingScenario {
+public class AccountingScenarioIntegrationTest {
     private RequestSpecification requestSpec;
     private ResponseSpecification responseSpec;
 

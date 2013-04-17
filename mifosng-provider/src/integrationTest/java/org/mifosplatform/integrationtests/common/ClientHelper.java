@@ -1,13 +1,12 @@
 package org.mifosplatform.integrationtests.common;
 
-import java.util.HashMap;
+import static org.junit.Assert.assertEquals;
 
+import java.util.HashMap;
 
 import com.google.gson.Gson;
 import com.jayway.restassured.specification.RequestSpecification;
 import com.jayway.restassured.specification.ResponseSpecification;
-
-import static org.junit.Assert.assertEquals;
 
 public class ClientHelper {
 
@@ -18,9 +17,9 @@ public class ClientHelper {
     }
 
     public static Integer createClient(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
-            final String dateOfJoining) {
+            final String activationDate) {
         System.out.println("---------------------------------CREATING A CLIENT---------------------------------------------");
-        return Utils.performServerPost(requestSpec, responseSpec, CREATE_CLIENT_URL, getTestClientAsJSON(dateOfJoining), "clientId");
+        return Utils.performServerPost(requestSpec, responseSpec, CREATE_CLIENT_URL, getTestClientAsJSON(activationDate), "clientId");
     }
 
     public static String getTestClientAsJSON(final String dateOfJoining) {
@@ -31,7 +30,8 @@ public class ClientHelper {
         map.put("externalId", randomIDGenerator("ID_", 7));
         map.put("dateFormat", "dd MMMM yyyy");
         map.put("locale", "en");
-        map.put("joinedDate", dateOfJoining);
+        map.put("active", "true");
+        map.put("activationDate", dateOfJoining);
         System.out.println("map : " + map);
         return new Gson().toJson(map);
     }

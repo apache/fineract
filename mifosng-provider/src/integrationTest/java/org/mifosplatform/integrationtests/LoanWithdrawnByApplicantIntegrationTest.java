@@ -18,7 +18,7 @@ import com.jayway.restassured.specification.RequestSpecification;
 import com.jayway.restassured.specification.ResponseSpecification;
 
 @SuppressWarnings("rawtypes")
-public class LoanWithdrawnByApplicant {
+public class LoanWithdrawnByApplicantIntegrationTest {
 
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
