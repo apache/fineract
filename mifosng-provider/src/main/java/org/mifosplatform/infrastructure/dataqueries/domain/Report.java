@@ -243,4 +243,9 @@ public class Report extends AbstractPersistable<Long> {
 					"Validation errors exist.", dataValidationErrors);
 		}
 	}
+
+	public String getReportName() {
+		return reportName;
+	}
+	
 }

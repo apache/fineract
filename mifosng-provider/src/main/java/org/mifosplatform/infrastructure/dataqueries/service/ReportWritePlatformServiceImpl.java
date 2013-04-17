@@ -16,6 +16,9 @@ import org.mifosplatform.infrastructure.dataqueries.domain.ReportRepository;
 import org.mifosplatform.infrastructure.dataqueries.exception.ReportNotFoundException;
 import org.mifosplatform.infrastructure.dataqueries.serialization.ReportCommandFromApiJsonDeserializer;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
+import org.mifosplatform.useradministration.domain.Permission;
+import org.mifosplatform.useradministration.domain.PermissionRepository;
+import org.mifosplatform.useradministration.exception.PermissionNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,15 +36,18 @@ public class ReportWritePlatformServiceImpl implements
 	private final PlatformSecurityContext context;
 	private final ReportCommandFromApiJsonDeserializer fromApiJsonDeserializer;
 	private final ReportRepository reportRepository;
+	private final PermissionRepository permissionRepository;
 
 	@Autowired
 	public ReportWritePlatformServiceImpl(
 			final PlatformSecurityContext context,
 			final ReportCommandFromApiJsonDeserializer fromApiJsonDeserializer,
-			final ReportRepository reportRepository) {
+			final ReportRepository reportRepository,
+			final PermissionRepository permissionRepository) {
 		this.context = context;
 		this.fromApiJsonDeserializer = fromApiJsonDeserializer;
 		this.reportRepository = reportRepository;
+		this.permissionRepository = permissionRepository;
 	}
 
 	@Transactional
@@ -54,8 +60,10 @@ public class ReportWritePlatformServiceImpl implements
 			this.fromApiJsonDeserializer.validate(command.json());
 
 			final Report report = Report.fromJson(command);
-
+			final Permission permission = new Permission("report",
+					report.getReportName(), "READ");
 			this.reportRepository.save(report);
+			this.permissionRepository.save(permission);
 
 			return new CommandProcessingResultBuilder()
 					.withCommandId(command.commandId())
@@ -109,8 +117,15 @@ public class ReportWritePlatformServiceImpl implements
 					"error.msg.cant.delete.core.report",
 					"Core Reports Can't be Deleted", "");
 		}
+		
+
+		final Permission permission = this.permissionRepository.findOneByCode("READ" + "_" + report.getReportName());
+		if (permission == null) {
+			throw new PermissionNotFoundException("READ" + "_" + report.getReportName());
+		}
 
 		this.reportRepository.delete(report);
+		this.permissionRepository.delete(permission);
 
 		return new CommandProcessingResultBuilder().withEntityId(reportId)
 				.build();
