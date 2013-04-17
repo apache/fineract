@@ -123,17 +123,33 @@ public class DepositAccountCommand {
 	public boolean isNoFieldChanged() {
 		return this.modifiedParameters.isEmpty();
 	}
+	
+	public boolean isExternalIdChanged(){
+		return this.modifiedParameters.contains("externalId");
+	}
+	
+	public boolean isDepositAmountChanged(){
+		return this.modifiedParameters.contains("deposit");
+	}
 
 	public boolean isTenureInMonthsChanged() {
 		return this.modifiedParameters.contains("tenureInMonths");
 	}
 	
 	public boolean isMaturityActualInterestRateChanged() {
-		return this.modifiedParameters.contains("interestRate");
+		return this.modifiedParameters.contains("maturityInterestRate");
 	}
 	
 	public boolean isPreClosureInterestRateChanged(){
 		return this.modifiedParameters.contains("preClosureInterestRate");
+	}
+	
+	public boolean isCompoundingInterestEveryChanged(){
+		return this.modifiedParameters.contains("interestCompoundedEvery");
+	}
+	
+	public boolean isInterestCompoundedEveryPeriodTypeChaged(){
+		return this.modifiedParameters.contains("interestCompoundedEveryPeriodType");
 	}
 	
 	public boolean isRenewalAllowedChanged() {
@@ -150,5 +166,9 @@ public class DepositAccountCommand {
 	
 	public boolean isInterestCompoundingAllowedChanged(){
 		return this.modifiedParameters.contains("interestCompoundingAllowed");
+	}
+
+	public boolean isCommencementDateChanged() {
+		return this.modifiedParameters.contains("commencementDate");
 	}
 }

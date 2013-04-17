@@ -98,10 +98,10 @@ public class DepositProductData {
 		this.currencyCode=null;
 		this.digitsAfterDecimal=Integer.valueOf(0);
 		this.minimumBalance=BigDecimal.ZERO;
-		this.maximumBalance=null;
+		this.maximumBalance=BigDecimal.ZERO;
 		
 		this.tenureInMonths=Integer.valueOf(0);
-		this.maturityDefaultInterestRate = null;
+		this.maturityDefaultInterestRate = BigDecimal.ZERO;
 		this.maturityMinInterestRate=BigDecimal.ZERO;
 		this.maturityMaxInterestRate=BigDecimal.ZERO;
 		this.interestCompoundedEvery = Integer.valueOf(1);

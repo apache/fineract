@@ -293,7 +293,7 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 			throw new DepositAccountNotFoundException(command.getAccountId());
 		}
 		
-		if(new LocalDate().isBefore(account.maturesOnDate())){
+		if(command.getMaturesOnDate().isBefore(account.maturesOnDate())){
 			this.depositAccountAssembler.adjustTotalAmountForPreclosureInterest(account);
 		}
 		account.withdrawDepositAccountMoney(defaultDepositLifecycleStateMachine());
@@ -385,5 +385,33 @@ public class DepositAccountWritePlatformServiceJpaRepositoryImpl implements Depo
 		}
 
 		throw new DepositAccountReopenException(account.getMaturityDate());
+	}
+
+	@Override
+	public EntityIdentifier updateDepositAccount(DepositAccountCommand command) {
+		
+		try {
+			this.context.authenticatedUser();
+			
+			DepositAccountCommandValidator validator = new DepositAccountCommandValidator(command);
+			validator.validateForUpdate();
+			
+			DepositAccount account = this.depositAccountRepository.findOne(command.getId());
+			if (account == null || account.isDeleted()) {
+				throw new DepositAccountNotFoundException(command.getId());
+			}
+			if(account.getDepositStatus() == 100)
+				this.depositAccountAssembler.assembleUpdatedDepositAccount(account,command);
+			else if(account.getDepositStatus() == 300)
+				this.depositAccountAssembler.updateApprovedDepositAccount(account,command);
+			this.depositAccountRepository.save(account);
+			
+			return new EntityIdentifier(account.getId());
+		} catch (DataIntegrityViolationException dve) {
+			 handleDataIntegrityIssues(command, dve);
+			 return new EntityIdentifier(Long.valueOf(-1));
+		}
+	
+		
 	}
 }

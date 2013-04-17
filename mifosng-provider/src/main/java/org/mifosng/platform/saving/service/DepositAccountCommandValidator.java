@@ -27,7 +27,7 @@ public class DepositAccountCommandValidator {
 		baseDataValidator.reset().parameter("productId").value(command.getProductId()).ignoreIfNull().notNull();
 		baseDataValidator.reset().parameter("externalId").value(command.getExternalId()).ignoreIfNull().notExceedingLengthOf(100);
 		
-		baseDataValidator.reset().parameter("depositAmount").value(command.getDepositAmount()).ignoreIfNull().notNull().integerGreaterThanZero();
+		baseDataValidator.reset().parameter("deposit").value(command.getDepositAmount()).ignoreIfNull().notNull().zeroOrPositiveAmount();
 		baseDataValidator.reset().parameter("maturityInterestRate").value(command.getMaturityInterestRate()).ignoreIfNull().notNull().zeroOrPositiveAmount();
 		baseDataValidator.reset().parameter("tenureInMonths").value(command.getTenureInMonths()).ignoreIfNull().notNull().integerGreaterThanZero();
 		

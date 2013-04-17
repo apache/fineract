@@ -40,4 +40,7 @@ public interface DepositAccountWritePlatformService {
 
 	@PreAuthorize(value = "hasRole('ORGANISATION_ADMINISTRATION_SUPER_USER_ROLE')")
 	EntityIdentifier renewDepositAccount(DepositAccountCommand command);
+	
+	@PreAuthorize(value = "hasRole('ORGANISATION_ADMINISTRATION_SUPER_USER_ROLE')")
+	EntityIdentifier updateDepositAccount(DepositAccountCommand command);
 	}

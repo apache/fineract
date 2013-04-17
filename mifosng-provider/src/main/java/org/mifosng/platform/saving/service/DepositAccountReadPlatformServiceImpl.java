@@ -234,7 +234,12 @@ public class DepositAccountReadPlatformServiceImpl implements DepositAccountRead
 	public DepositPermissionData retrieveDepositAccountsPermissions(DepositAccountData depositAccountData) {
 		boolean pendingApproval = (depositAccountData.getStatus().getId().equals(100L));
 		boolean undoApprovalAllowed = (depositAccountData.getStatus().getId().equals(300L));
-		boolean renewelAllowed = depositAccountData.isRenewalAllowed()&&(new LocalDate().isAfter(depositAccountData.getMaturedOn())||depositAccountData.getMaturedOn().isEqual(new LocalDate()));
+		boolean renewelAllowed = false;
+		if(depositAccountData.getMaturedOn()!=null){
+			if(new LocalDate().isAfter(depositAccountData.getMaturedOn())||depositAccountData.getMaturedOn().isEqual(new LocalDate())){
+				renewelAllowed = depositAccountData.isRenewalAllowed();
+			}
+		}
 		boolean rejectAllowed = pendingApproval;
 		boolean withdrawnByApplicantAllowed = pendingApproval;
 		boolean interestWithdrawAllowed = depositAccountData.isInterestWithdrawable();

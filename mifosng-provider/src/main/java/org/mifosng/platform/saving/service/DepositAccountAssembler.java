@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
 
+import org.joda.time.LocalDate;
 import org.mifosng.platform.api.commands.DepositAccountCommand;
 import org.mifosng.platform.client.domain.Client;
 import org.mifosng.platform.client.domain.ClientRepository;
@@ -200,5 +201,97 @@ public class DepositAccountAssembler {
 
 	public void adjustTotalAmountForPreclosureInterest(DepositAccount account) {
 		account.adjustTotalAmountForPreclosureInterest(account,this.fixedTermDepositInterestCalculator);
+	}
+
+	public void assembleUpdatedDepositAccount(DepositAccount account,DepositAccountCommand command) {
+		
+		DepositProduct product = account.product();
+		if(command.getProductId() != null){
+			 product = this.depositProductRepository.findOne(command.getProductId());
+				if (product == null || product.isDeleted()) {
+					throw new DepositProductNotFoundException(command.getProductId());
+				} 
+		}
+		
+		String externalId = account.getExternalId();
+		if(command.isExternalIdChanged()){
+			externalId = command.getExternalId();
+		}
+		
+		LocalDate commencementDate = account.getProjectedCommencementDate();
+		if(command.isCommencementDateChanged()){
+			commencementDate = new LocalDate(command.getCommencementDate());
+		}
+		
+		Money deposit = account.getDeposit();
+		if(command.isDepositAmountChanged()){
+			deposit = Money.of(product.getCurrency(), command.getDepositAmount());
+		}
+		
+		Integer tenureInMonths = account.getTenureInMonths();
+		if(command.isTenureInMonthsChanged()){
+			tenureInMonths =command.getTenureInMonths();
+		}
+		
+		BigDecimal maturityInterestRate = account.getInterestRate();
+		if(command.isMaturityActualInterestRateChanged()){
+			maturityInterestRate = command.getMaturityInterestRate();
+		}
+		
+		BigDecimal preClosureInterestRate = account.getPreClosureInterestRate();
+		if(command.isPreClosureInterestRateChanged()){
+			preClosureInterestRate = command.getPreClosureInterestRate();
+		}
+		
+		if(product.getMaturityMinInterestRate().compareTo(preClosureInterestRate)==-1){
+			throw new DepositAccounDataValidationtException(preClosureInterestRate, product.getMaturityMinInterestRate());
+		}
+		
+		Integer compoundingInterestEvery = account.getInterestCompoundedEvery();
+		if(command.isCompoundingInterestEveryChanged()){
+			compoundingInterestEvery = command.getInterestCompoundedEvery();
+		}
+		
+		PeriodFrequencyType compoundingInterestFrequency = account.getInterestCompoundedFrequencyType();
+		if(command.getInterestCompoundedEveryPeriodType() !=null){
+			compoundingInterestFrequency = PeriodFrequencyType.fromInt(command.getInterestCompoundedEveryPeriodType());
+		}
+		
+		boolean renewalAllowed = account.isRenewalAllowed();
+		if(command.isRenewalAllowedChanged()){
+			renewalAllowed = command.isRenewalAllowed();
+		}
+		
+		boolean preClosureAllowed = account.isPreClosureAllowed();
+		if(command.isPreClosureAllowedChanged()){
+			preClosureAllowed =  command.isPreClosureAllowed();
+		}
+		
+		boolean isInterestWithdrawable = account.isInterestWithdrawable();
+		if(command.isInterestWithdrawableChanged()){
+			isInterestWithdrawable = command.isInterestWithdrawable();
+		}
+		
+		boolean isInterestCompoundingAllowed = account.isInterestCompoundingAllowed();
+		if(command.isInterestCompoundingAllowedChanged()){
+			isInterestCompoundingAllowed = command.isInterestCompoundingAllowed();
+		}
+		account.update(product,externalId,commencementDate,deposit,tenureInMonths,maturityInterestRate,preClosureInterestRate,compoundingInterestEvery,compoundingInterestFrequency,renewalAllowed,
+				preClosureAllowed,isInterestWithdrawable,isInterestCompoundingAllowed,this.fixedTermDepositInterestCalculator,defaultDepositLifecycleStateMachine());
+	}
+
+	public void updateApprovedDepositAccount(DepositAccount account, DepositAccountCommand command) {
+		
+		boolean renewalAllowed = account.isRenewalAllowed();
+		if(command.isRenewalAllowedChanged()){
+			renewalAllowed = command.isRenewalAllowed();
+		}
+		
+		boolean isInterestWithdrawable = account.isInterestWithdrawable();
+		if(command.isInterestWithdrawableChanged()){
+			isInterestWithdrawable = command.isInterestWithdrawable();
+		}
+		account.update(renewalAllowed,isInterestWithdrawable);
+		
 	}
 }

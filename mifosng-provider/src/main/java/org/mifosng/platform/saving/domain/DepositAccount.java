@@ -44,7 +44,7 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long>  {
 
 	@ManyToOne
 	@JoinColumn(name = "product_id")
-	private final DepositProduct product;
+	private DepositProduct product;
 	
 	@Column(name = "external_id")
 	private String externalId;
@@ -266,9 +266,15 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long>  {
 			this.tenureInMonths = command.getTenureInMonths();
 		}
 		
+		if(command.getMaturityInterestRate() != null){
+			this.interestRate = command.getMaturityInterestRate();
+		}
+		this.product.validateInterestRateInRange(this.interestRate);
+		
 		if (command.getDepositAmount() != null) {
 			this.depositAmount = command.getDepositAmount();
 		}
+		this.product.validateDepositInRange(this.depositAmount);
 		
 		if (command.getInterestCompoundedEveryPeriodType() != null) {
 			this.interestCompoundedFrequencyType = PeriodFrequencyType.fromInt(command.getInterestCompoundedEveryPeriodType()).getValue();
@@ -418,6 +424,8 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long>  {
 		this.depositStatus = statusEnum.getValue();
 
 		this.actualCommencementDate = null;
+		this.projectedInterestAccruedOnMaturity=this.interestAccrued;
+		this.projectedTotalOnMaturity = this.depositAmount.add(this.projectedInterestAccruedOnMaturity);
 		this.maturesOnDate = getProjectedCommencementDate().plusMonths(this.tenureInMonths).toDate();
 		this.total=null;
 		this.interestAccrued=null;
@@ -579,5 +587,55 @@ public class DepositAccount extends AbstractAuditableCustom<AppUser, Long>  {
 		this.depositaccountTransactions.add(depositaccountTransaction);
 			
 		this.closedOnDate = new LocalDate().toDate();
+	}
+
+	public void update(final DepositProduct product, final String externalId, 
+			final LocalDate commencementDate, final Money deposit,
+			final Integer tenureInMonths, final BigDecimal maturityInterestRate,
+			final BigDecimal preClosureInterestRate, final Integer interestCompoundedEvery,
+			final PeriodFrequencyType compoundingInterestFrequency,
+			final boolean renewalAllowed, final boolean preClosureAllowed,
+			final boolean isInterestWithdrawable, final boolean isInterestCompoundingAllowed,
+			final FixedTermDepositInterestCalculator fixedTermDepositInterestCalculator, 
+			final DepositLifecycleStateMachine depositLifecycleStateMachine) {
+		
+		Money futureValueOnMaturity =null;
+
+		if (isInterestCompoundingAllowed) {
+			futureValueOnMaturity = fixedTermDepositInterestCalculator.calculateInterestOnMaturityFor(deposit, tenureInMonths,
+							maturityInterestRate, interestCompoundedEvery,
+							compoundingInterestFrequency);
+		} else {
+			futureValueOnMaturity = fixedTermDepositInterestCalculator.calculateInterestOnMaturityForSimpleInterest(deposit,
+							tenureInMonths, maturityInterestRate,
+							interestCompoundedEvery,
+							compoundingInterestFrequency);
+		}
+		
+		setExternalId(externalId);
+		if (commencementDate != null) {
+			this.projectedCommencementDate = commencementDate.toDate();
+			this.maturesOnDate = commencementDate.plusMonths(this.tenureInMonths).toDate();
+		}
+		this.product = product;
+		this.depositAmount = deposit.getAmount();
+		this.tenureInMonths = tenureInMonths;
+		this.interestRate = maturityInterestRate;
+		this.product.validateInterestRateInRange(maturityInterestRate);
+		this.preClosureInterestRate=preClosureInterestRate;
+		this.interestCompoundedEvery=interestCompoundedEvery;
+		this.interestCompoundedFrequencyType=compoundingInterestFrequency.getValue();
+		this.renewalAllowed=renewalAllowed;
+		this.preClosureAllowed=preClosureAllowed;
+		this.isInterestWithdrawable=isInterestWithdrawable;
+		this.interestCompoundingAllowed=isInterestCompoundingAllowed;
+		this.projectedInterestAccruedOnMaturity = futureValueOnMaturity.minus(deposit).getAmount();
+		this.projectedTotalOnMaturity = futureValueOnMaturity.getAmount();
+		
+	}
+
+	public void update(final boolean renewalAllowed, final boolean isInterestWithdrawable) {
+		this.renewalAllowed=renewalAllowed;
+		this.isInterestWithdrawable=isInterestWithdrawable;
 	}
 }

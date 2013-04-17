@@ -10,17 +10,20 @@ public class DepositStateTransitionApprovalCommand {
 	private final Long productId;
 	private final LocalDate eventDate;
 	private final BigDecimal depositAmount;
+	private final BigDecimal maturityInterestRate;
 	private final Integer tenureInMonths;
 	private final Integer interestCompoundedEveryPeriodType;
 	private final Integer interestCompoundedEvery;
 	
 	private final String note;
 
-	public DepositStateTransitionApprovalCommand(Long resourceIdentifier, Long productId, LocalDate eventDate, Integer tenureInMonths, BigDecimal depositAmount, Integer interestCompoundedEveryPeriodType, Integer interestCompoundedEvery, String note) {
+	public DepositStateTransitionApprovalCommand(final Long resourceIdentifier,final Long productId,final LocalDate eventDate,final Integer tenureInMonths,
+			final BigDecimal depositAmount,final Integer interestCompoundedEveryPeriodType,final Integer interestCompoundedEvery,final String note,final BigDecimal maturityInterestRate) {
 		
 		this.accountId=resourceIdentifier;
 		this.eventDate=eventDate;
 		this.depositAmount=depositAmount;
+		this.maturityInterestRate=maturityInterestRate;
 		this.tenureInMonths=tenureInMonths;
 		this.interestCompoundedEveryPeriodType=interestCompoundedEveryPeriodType;
 		this.productId=productId;
@@ -40,6 +43,10 @@ public class DepositStateTransitionApprovalCommand {
 
 	public BigDecimal getDepositAmount() {
 		return depositAmount;
+	}
+
+	public BigDecimal getMaturityInterestRate() {
+		return maturityInterestRate;
 	}
 
 	public Integer getTenureInMonths() {

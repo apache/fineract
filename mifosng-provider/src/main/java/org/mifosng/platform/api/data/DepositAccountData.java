@@ -259,8 +259,8 @@ public class DepositAccountData {
 		this.interestPaid =interestPaid;
 		this.isInterestWithdrawable=isInterestWithdrawable;
 		this.interestCompoundingAllowed = interestCompoundingAllowed;
-		this.availableInterestForWithdrawal =  new BigDecimal(0);
-		this.availableWithdrawalAmount = new BigDecimal(0);
+		this.availableInterestForWithdrawal = BigDecimal.ZERO;
+		this.availableWithdrawalAmount = BigDecimal.ZERO;
 	}
 	
 	public DepositAccountData(
@@ -313,8 +313,8 @@ public class DepositAccountData {
 		this.interestPaid=null;
 		this.isInterestWithdrawable=false;
 		this.interestCompoundingAllowed=interestCompoundingAllowed;
-		this.availableInterestForWithdrawal= new BigDecimal(0);
-		this.availableWithdrawalAmount = new BigDecimal(0);
+		this.availableInterestForWithdrawal= BigDecimal.ZERO;
+		this.availableWithdrawalAmount = BigDecimal.ZERO;
 	}
 
 	public Long getId() {

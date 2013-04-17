@@ -1371,7 +1371,7 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 		Type typeOfMap = new TypeToken<Map<String, String>>(){}.getType();
 	    Map<String, String> requestMap = gsonConverter.fromJson(json, typeOfMap);
 	    
-	    Set<String> supportedParams = new HashSet<String>(Arrays.asList("locale","commencementDate", "locale", "dateFormat", "tenureInMonths", "deposit", "interestCompoundedEveryPeriodType", "productId","interestCompoundedEvery","note"));
+	    Set<String> supportedParams = new HashSet<String>(Arrays.asList("locale","commencementDate", "locale", "dateFormat", "tenureInMonths", "deposit", "interestCompoundedEveryPeriodType", "productId","interestCompoundedEvery","note","maturityInterestRate"));
 	    
 	    checkForUnsupportedParameters(requestMap, supportedParams);
 	    
@@ -1379,13 +1379,14 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 	    
 	    LocalDate commencementDate = extractLocalDateParameter("commencementDate", requestMap, modifiedParameters);
 	    BigDecimal deposit=extractBigDecimalParameter("deposit", requestMap, modifiedParameters);
+	    BigDecimal maturityInterestRate=extractBigDecimalParameter("maturityInterestRate", requestMap, modifiedParameters);
 		Integer tenureInMonths = extractIntegerParameter("tenureInMonths", requestMap, modifiedParameters);
 	    Integer interestCompoundedEveryPeriodType = extractIntegerParameter("interestCompoundedEveryPeriodType", requestMap, modifiedParameters);
 	    Integer interestCompoundedEvery = extractIntegerParameter("interestCompoundedEvery", requestMap, modifiedParameters);
 	    Long productId = extractLongParameter("productId", requestMap, modifiedParameters);
 	    String note = extractStringParameter("note", requestMap, modifiedParameters);
 	    
-		return new DepositStateTransitionApprovalCommand(resourceIdentifier, productId, commencementDate, tenureInMonths, deposit, interestCompoundedEveryPeriodType,interestCompoundedEvery, note);
+		return new DepositStateTransitionApprovalCommand(resourceIdentifier, productId, commencementDate, tenureInMonths, deposit, interestCompoundedEveryPeriodType,interestCompoundedEvery, note,maturityInterestRate);
 	}
 
 	@Override
@@ -1398,15 +1399,16 @@ public class ApiDataConversionServiceImpl implements ApiDataConversionService {
 		Type typeOfMap = new TypeToken<Map<String, String>>(){}.getType();
 	    Map<String, String> requestMap = gsonConverter.fromJson(json, typeOfMap);
 	    
-	    Set<String> supportedParams = new HashSet<String>(Arrays.asList("note","locale"));
+	    Set<String> supportedParams = new HashSet<String>(Arrays.asList("note","locale","maturesOnDate", "dateFormat"));
 	    
 	    checkForUnsupportedParameters(requestMap, supportedParams);
 	    
 	    Set<String> modifiedParameters = new HashSet<String>();
 	    
 	    String note = extractStringParameter("note", requestMap, modifiedParameters);
+	    LocalDate maturesOnDate = extractLocalDateParameter("maturesOnDate", requestMap, modifiedParameters);
 	    
-		return new DepositAccountWithdrawalCommand(resourceIdentifier,note);
+		return new DepositAccountWithdrawalCommand(resourceIdentifier,note,maturesOnDate);
 	}
 
 	@Override
