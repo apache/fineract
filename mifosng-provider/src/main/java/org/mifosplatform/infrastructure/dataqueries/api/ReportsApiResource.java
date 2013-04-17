@@ -99,6 +99,28 @@ public class ReportsApiResource {
 
 		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper
 				.process(uriInfo.getQueryParameters());
+
+		if (settings.isTemplate()) {
+			result.appendedTemplate();
+		}
+		return this.toApiJsonSerializer.serialize(settings, result,
+				RESPONSE_DATA_PARAMETERS);
+	}
+
+	@GET
+	@Path("template")
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public String retrieveOfficeTemplate(@Context final UriInfo uriInfo) {
+
+		context.authenticatedUser().validateHasReadPermission(
+				resourceNameForPermissions);
+
+		ReportData result = new ReportData();
+		result.appendedTemplate();
+
+		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper
+				.process(uriInfo.getQueryParameters());
 		return this.toApiJsonSerializer.serialize(settings, result,
 				RESPONSE_DATA_PARAMETERS);
 	}
