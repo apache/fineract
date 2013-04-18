@@ -201,7 +201,7 @@ public class Report extends AbstractPersistable<Long> {
 		baseDataValidator.reset().parameter("reportSubType")
 				.value(this.reportSubType).notExceedingLengthOf(20);
 
-		if (this.reportType.equals("Chart")) {
+		if (this.reportType != null && this.reportType.equals("Chart")) {
 			baseDataValidator
 					.reset()
 					.parameter("reportSubType")
