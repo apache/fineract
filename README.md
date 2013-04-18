@@ -6,10 +6,18 @@ The next evolution of mifos focussing being faster, lighter and cheaper to chang
 Build Status
 ============
 
-[![Build Status](https://travis-ci.org/openMF/mifosx.png?branch=master)](https://travis-ci.org/openMF/mifosx)
+Travis
 
-<a target="_blank" href="https://openmf.ci.cloudbees.com/job/MIFOSX%20INTEGRATION%20TEST/" 
-title="Jenkins@CloudBees">Jenkins@CloudBees Unit + Integration Tests</a>
+[![Build
+Status](https://travis-ci.org/openMF/mifosx.png?branch=master)](https://travis-ci.org/openMF/mifosx)
+
+Cloudbees Jenkins
+
+[![Build
+Status](https://openmf.ci.cloudbees.com/job/MIFOSX%20INTEGRATION%20TEST/badge/icon)](https://openmf.ci.cloudbees.com/job/MIFOSX%20INTEGRATION%20TEST/)
+
+<a target="_blank" href="https://openmf.ci.cloudbees.com/job/MIFOSX%20INTEGRATION%20TEST/"  title="Jenkins@CloudBees">Jenkins@CloudBees Unit + Integration Tests</a>
+
 
 Version
 ==========
