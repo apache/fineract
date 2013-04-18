@@ -124,12 +124,19 @@ public class GroupsApiResource {
     public String retrieveOne(@Context final UriInfo uriInfo, @PathParam("groupId") final Long groupId) {
 
         this.context.authenticatedUser().validateHasReadPermission(GroupingTypesApiConstants.GROUP_RESOURCE_NAME);
+        final Set<String> associationParameters = ApiParameterHelper.extractAssociationsForResponseIfProvided(uriInfo.getQueryParameters());
 
         GroupGeneralData group = this.groupReadPlatformService.retrieveOne(groupId);
         
-        Collection<ClientData> membersOfGroup = this.clientReadPlatformService.retrieveClientMembersOfGroup(groupId);
-        if (CollectionUtils.isEmpty(membersOfGroup)) {
-            membersOfGroup = null;
+        // associations
+        Collection<ClientData> membersOfGroup = null;
+        if (!associationParameters.isEmpty()) {
+            if (associationParameters.contains("clientMembers")) {
+                membersOfGroup = this.clientReadPlatformService.retrieveClientMembersOfGroup(groupId);
+                if (CollectionUtils.isEmpty(membersOfGroup)) {
+                    membersOfGroup = null;
+                }
+            }
         }
         
         final boolean template = ApiParameterHelper.template(uriInfo.getQueryParameters());

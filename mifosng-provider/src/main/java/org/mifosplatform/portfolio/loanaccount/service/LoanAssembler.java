@@ -139,7 +139,7 @@ public class LoanAssembler {
 
         if (groupId != null) {
             group = this.groupRepository.findOne(groupId);
-            if (group == null || group.isDeleted()) { throw new GroupNotFoundException(groupId); }
+            if (group == null) { throw new GroupNotFoundException(groupId); }
 
             loanApplication = Loan.newGroupLoanApplication(accountNo, group, loanProduct, fund, loanOfficer,
                     loanTransactionProcessingStrategy, loanSchedule, loanCharges);

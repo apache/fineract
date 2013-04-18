@@ -22,5 +22,5 @@ public interface CenterReadPlatformService {
 
     GroupGeneralData retrieveCenterGroupTemplate(Long centerId);
     
-    Collection<GroupGeneralData> retriveAssociatedGroups(Long centerId);
+    Collection<GroupGeneralData> retrieveAssociatedGroups(Long centerId);
 }

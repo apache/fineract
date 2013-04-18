@@ -120,8 +120,8 @@ public class CentersApiResource {
         }
         
         if (!associationParameters.isEmpty()) {
-            if (associationParameters.contains("groups")) {
-                center = CenterData.setGroups(center, this.centerReadPlatformService.retriveAssociatedGroups(centerId));
+            if (associationParameters.contains("groupMembers")) {
+                center = CenterData.setGroups(center, this.centerReadPlatformService.retrieveAssociatedGroups(centerId));
             }
         }
 

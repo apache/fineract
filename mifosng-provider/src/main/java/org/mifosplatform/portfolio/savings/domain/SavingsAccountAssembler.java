@@ -84,7 +84,7 @@ public class SavingsAccountAssembler {
 
         if (groupId != null) {
             group = this.groupRepository.findOne(groupId);
-            if (group == null || group.isDeleted()) { throw new GroupNotFoundException(groupId); }
+            if (group == null) { throw new GroupNotFoundException(groupId); }
         }
 
         BigDecimal interestRate = null;

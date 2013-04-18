@@ -1,19 +1,19 @@
-package org.mifosplatform.portfolio.group.data;
+package org.mifosplatform.portfolio.group.domain;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public enum GroupTypes {
 
-    CENTER(new Long(1), "groupTypes.center", "center"), //
-    GROUP(new Long(2), "groupTypes.group", "group"), //
-    INVALID(new Long(99), "lendingStrategy.invalid", "invalid");
+    INVALID(0l, "lendingStrategy.invalid", "invalid"), //
+    CENTER(1l, "groupTypes.center", "center"), //
+    GROUP(2l, "groupTypes.group", "group"); //
 
     private Long id;
     private String code;
     private String value;
 
-    GroupTypes(final Long id, final String code, final String value) {
+    private GroupTypes(final Long id, final String code, final String value) {
         this.id = id;
         this.code = code;
         this.value = value;

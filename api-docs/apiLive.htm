@@ -288,7 +288,7 @@
 								<td><a href="#centers_create">Create a Center</a></td>
 								<td><a href="#centers_list">List Centers</a></td>
 								<td></td>
-								<td><a href="#centers_delete">Delete a Center</a></td>
+								<td></td>
 							</tr>
 							<tr>
 								<td></td>
@@ -296,7 +296,7 @@
 								<td></td>
 								<td><a href="#centers_retrieve">Retrieve a Center</a></td>
 								<td><a href="#centers_update">Update a Center</a></td>
-								<td></td>
+								<td><a href="#centers_delete">Delete a Center</a></td>
 							</tr>
 							<tr class="alt">
 								<td><a href="#groups">Group</a></td>
@@ -304,7 +304,7 @@
 								<td><a href="#groups_create">Create a Group</a></td>
 								<td><a href="#groups_list">List Groups</a></td>
 								<td></td>
-								<td><a href="#groups_delete">Delete a Group</a></td>
+								<td></td>
 							</tr>
 							<tr>
 								<td></td>
@@ -312,7 +312,7 @@
 								<td></td>
 								<td><a href="#groups_retrieve">Retrieve a Group</a></td>
 								<td><a href="#groups_update">Update a Group</a></td>
-								<td></td>
+								<td><a href="#groups_delete">Delete a Group</a></td>
 							</tr>
 						</table>
 					</div>
@@ -2706,10 +2706,31 @@ No Request Body:
 							<td><div class="mifosXHeading2">Field Descriptions</div></td>
 						</tr>
 						<tr class=alt>
+							<td>externalId</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>A place to put an external reference for this center e.g. The ID another system uses. If provided, it must be unique.
+							</td>
+						</tr>
+						<tr class=alt>
 							<td>name</td>
 						</tr>
 						<tr>
 							<td class=fielddesc>Name given to the Center.</td>
+						</tr>
+						<tr class=alt>
+							<td>active</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Indicates whether this center is to be created as <b>active</b>. If active=true, then <b>activationDate</b> must be provided. If active=false, then the center is created as <b>pending</b>.
+							</td>
+						</tr>
+						<tr class=alt>
+							<td>activationDate</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>The date on which the center became <b>active</b>.
+							</td>
 						</tr>
 						<tr class=alt>
 							<td>officeId</td>
@@ -2724,11 +2745,10 @@ No Request Body:
 							<td class=fielddesc>The staffId of the staff member dealing with this center. The staff member is not specifically the loan officer.</td>
 						</tr>
 						<tr class=alt>
-							<td>externalId</td>
+							<td>groupMembers</td>
 						</tr>
 						<tr>
-							<td class=fielddesc>A place to put an external reference for this center e.g. The ID another system uses. If provided, it must be unique.
-							</td>
+							<td class=fielddesc>The array of groupIds to indicate what groups are part of this center.</td>
 						</tr>
 					</table>
 				</div>
@@ -2749,6 +2769,13 @@ GET https://DomainName/mifosng-provider/api/v1/centers/template
 					</code>
 					<code class="method-response">
 {
+  "active": false,
+  "activationDate": [
+    2013,
+    4,
+    18
+  ],
+  "officeId": 1,
   "officeOptions": [
     {
       "id": 1,
@@ -2757,18 +2784,31 @@ GET https://DomainName/mifosng-provider/api/v1/centers/template
     },
     {
       "id": 2,
-      "name": "Suboffice",
-      "nameDecorated": "....Suboffice"
+      "name": "Branch Office 1",
+      "nameDecorated": "....Branch Office 1"
     }
   ],
   "staffOptions": [
     {
       "id": 1,
-      "displayName": "LoanOfficer, HeadOffice"
+      "displayName": "C, Mike"
+    }
+  ],
+  "groupMembersOptions": [
+    {
+      "id": 1,
+      "name": "First Group",
+      "externalId": "000-1A",
+      "officeId": 1,
+      "officeName": "Head Office",
+      "hierarchy": ".1."
     },
     {
       "id": 2,
-      "displayName": "NonLoanOfficer, HeadOffice"
+      "name": "Pending Group",
+      "officeId": 1,
+      "officeName": "Head Office",
+      "hierarchy": ".2."
     }
   ]
 }
@@ -2780,6 +2820,12 @@ GET https://DomainName/mifosng-provider/api/v1/centers/template?officeId=2
 					</code>
 					<code class="method-response">
 {
+  "active": false,
+  "activationDate": [
+    2013,
+    4,
+    18
+  ],
   "officeId": 2,
   "officeOptions": [
     {
@@ -2789,18 +2835,18 @@ GET https://DomainName/mifosng-provider/api/v1/centers/template?officeId=2
     },
     {
       "id": 2,
-      "name": "Suboffice",
-      "nameDecorated": "....Suboffice"
+      "name": "Branch Office 1",
+      "nameDecorated": "....Branch Office 1"
     }
   ],
   "staffOptions": [
     {
-      "id": 3,
-      "displayName": "LoanOfficer, Suboffice"
+      "id": 2,
+      "displayName": "D, Mary"
     },
     {
-      "id": 4,
-      "displayName": "NonLoanOfficer, Suboffice"
+      "id": 3,
+      "displayName": "P, Paul"
     }
   ]
 }
@@ -2817,7 +2863,7 @@ GET https://DomainName/mifosng-provider/api/v1/centers/template?officeId=2
 							<td><div class="mifosXHeading2">Mandatory Fields</div></td>
 						</tr>
 						<tr class=alt>
-							<td>name, officeId</td>
+							<td>name, officeId, active, activationDate (if active=true)</td>
 						</tr>
 					</table>
 					<br/>
@@ -2826,11 +2872,12 @@ GET https://DomainName/mifosng-provider/api/v1/centers/template?officeId=2
 							<td><div class="mifosXHeading2">Optional Fields</div></td>
 						</tr>
 						<tr class=alt>
-							<td>externalId, staffId</td>
+							<td>externalId, staffId, groupMembers</td>
 						</tr>
 					</table>
 				</div>
 				<div class="method-example">
+					<p>Creater a center as pending with no association to groupMembers.</p>
 					<code class="method-declaration">
 POST https://DomainName/mifosng-provider/api/v1/centers
 					</code>
@@ -2838,15 +2885,43 @@ POST https://DomainName/mifosng-provider/api/v1/centers
 POST centers
 Content-Type: application/json Request Body:
 {
-	"name": "apicenter",
-	"officeId": 2
+ 	"name": "First Center (No groups)", 
+ 	"officeId": 1, 
+ 	"active": false
 }
 					</code>
 					<code class="method-response">
 {
-	"officeId": 2,
-  	"groupId": 4,
-  	"resourceId": 4
+  "officeId": 1,
+  "groupId": 8,
+  "resourceId": 8
+}
+					</code>
+				</div>
+
+				<div class="method-example">
+					<p>Creater a center as active with no association to groupMembers.</p>
+					<code class="method-declaration">
+POST https://DomainName/mifosng-provider/api/v1/centers
+					</code>
+					<code class="method-request">
+POST centers
+Content-Type: application/json Request Body:
+{
+	"name": "centerwithgroup",
+	"officeId": 1,
+	"groupMembers": ["7"],
+	"locale": "en",
+	"dateFormat": "dd MMMM yyyy",
+	"active": true,
+	"activationDate": "01 March 2011"
+}
+					</code>
+					<code class="method-response">
+{
+  "officeId": 1,
+  "groupId": 9,
+  "resourceId": 9
 }
 					</code>
 				</div>
@@ -2862,20 +2937,20 @@ Content-Type: application/json Request Body:
 PUT https://DomainName/mifosng-provider/api/v1/centers/{centerId}
 						</code>
 					<code class="method-request">
-PUT centers/4
+PUT centers/8
 Content-Type: application/json 
 Request Body:
 {
-	"name": "apicenter(updated)"
+	"name": "First Center (No groups)",
 }
 					</code>
 					<code class="method-response">
 {
-  "officeId": 4,
-  "groupId": 2,
-  "resourceId": 4,
+  "officeId": 8,
+  "groupId": 8,
+  "resourceId": 8,
   "changes": {
-    "name": "apicenter(updated)"
+    "name": "First Center (No groups) - modified"
   }
 }
 					</code>
@@ -2886,13 +2961,14 @@ Request Body:
 			<div class="method-section">
 				<div class="method-description">
 					<h4>Delete a Center</h4>
+					<p>A center can be delete if it is in <i>pending</i> state and has nothing associated with it - groups, loans, savings etc</p>
 				</div>
 				<div class="method-example">
 					<code class="method-declaration">
 POST https://DomainName/mifosng-provider/api/v1/centers/{centerId}
 						</code>
 					<code class="method-request">
-DELETE centers/1
+DELETE centers/8
 					</code>
 					<code class="method-response">
 {
@@ -2903,7 +2979,74 @@ DELETE centers/1
 				</div>
 			</div>
 
-			<a id="centers_list" name="centers_list" class="old-syle-anchor">&nbsp;</a>
+			<a id="centers_retrieve" name="centers_retrieve" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Retrieve a Center</h4>
+					<p>Example Requests:</p>
+					<div class=apiClick>centers/1</div>
+					<br/>
+					<div class=apiClick>centers/1?associations=groupMembers</div>
+				</div>
+				<div class="method-example">
+					<p>Retrieve an existing center with no groups information.</p>
+					<code class="method-declaration">
+GET https://DomainName/mifosng-provider/api/v1/centers/8
+					</code>
+					<code class="method-response">
+{
+  "id": 8,
+  "status": {
+    "id": 100,
+    "code": "groupingStatusType.pending",
+    "value": "Pending"
+  },
+  "active": false,
+  "name": "First Center (No groups)",
+  "officeId": 1,
+  "officeName": "Head Office",
+  "hierarchy": ".8."
+}
+					</code>
+				</div>
+				<div class="method-example">
+					<p>Retrieve an existing center with no groups information.</p>
+					<code class="method-declaration">
+GET https://DomainName/mifosng-provider/api/v1/centers/9?associations=groupMembers
+					</code>
+					<code class="method-response">
+{
+  "id": 9,
+  "status": {
+    "id": 300,
+    "code": "groupingStatusType.active",
+    "value": "Active"
+  },
+  "active": true,
+  "activationDate": [
+    2011,
+    3,
+    1
+  ],
+  "name": "centerwithgroup",
+  "officeId": 1,
+  "officeName": "Head Office",
+  "hierarchy": ".9.",
+  "groupMembers": [
+    {
+      "id": 7,
+      "name": "Othergroup",
+      "officeId": 1,
+      "officeName": "Head Office",
+      "hierarchy": ".7."
+    }
+  ]
+}
+					</code>
+				</div>
+			</div>
+
+						<a id="centers_list" name="centers_list" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
 					<h4>List Centers</h4>
@@ -2917,46 +3060,37 @@ GET https://DomainName/mifosng-provider/api/v1/centers
 					<code class="method-response">
 [
   {
-    "id": 1,
-    "name": "Center 001",
-    "externalId": "001",
+    "id": 8,
+    "status": {
+      "id": 100,
+      "code": "groupingStatusType.pending",
+      "value": "Pending"
+    },
+    "active": false,
+    "name": "First Center (No groups)",
     "officeId": 1,
     "officeName": "Head Office",
-    "hierarchy": ".1."
+    "hierarchy": ".8."
   },
   {
-    "id": 3,
-    "name": "Suboffice Center",
-    "externalId": "002",
-    "officeId": 2,
-    "officeName": "Suboffice",
-    "hierarchy": ".3."
+    "id": 9,
+    "status": {
+      "id": 300,
+      "code": "groupingStatusType.active",
+      "value": "Active"
+    },
+    "active": true,
+    "activationDate": [
+      2011,
+      3,
+      1
+    ],
+    "name": "centerwithgroup",
+    "officeId": 1,
+    "officeName": "Head Office",
+    "hierarchy": ".9."
   }
 ]
-					</code>
-				</div>
-			</div>
-
-			<a id="centers_retrieve" name="centers_retrieve" class="old-syle-anchor">&nbsp;</a>
-			<div class="method-section">
-				<div class="method-description">
-					<h4>Retrieve a Center</h4>
-					<p>Example Requests:</p>
-					<div class=apiClick>centers/1</div>
-				</div>
-				<div class="method-example">
-					<code class="method-declaration">
-GET https://DomainName/mifosng-provider/api/v1/centers/1
-					</code>
-					<code class="method-response">
-{
-  "id": 1,
-  "name": "Center 001",
-  "externalId": "001",
-  "officeId": 1,
-  "officeName": "Head Office",
-  "hierarchy": ".1."
-}
 					</code>
 				</div>
 			</div>
@@ -2981,18 +3115,6 @@ GET https://DomainName/mifosng-provider/api/v1/centers/1
 							<td class=fielddesc>Name given to the Group.</td>
 						</tr>
 						<tr class=alt>
-							<td>officeId</td>
-						</tr>
-						<tr>
-							<td class=fielddesc>The officeId of the office/branch this group is administrated through.</td>
-						</tr>
-						<tr class=alt>
-							<td>staffId</td>
-						</tr>
-						<tr>
-							<td class=fielddesc>The staffId of the staff member dealing with this group. The staff member is not specifically the loan officer.</td>
-						</tr>
-						<tr class=alt>
 							<td>externalId</td>
 						</tr>
 						<tr>
@@ -3000,10 +3122,36 @@ GET https://DomainName/mifosng-provider/api/v1/centers/1
 							</td>
 						</tr>
 						<tr class=alt>
+							<td>officeId</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>The officeId of the office/branch this group is administrated through.</td>
+						</tr>
+						<tr class=alt>
+							<td>active</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Indicates whether this group is to be created as <b>active</b>. If active=true, then <b>activationDate</b> must be provided. If active=false, then the group is created as <b>pending</b>.
+							</td>
+						</tr>
+						<tr class=alt>
+							<td>activationDate</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>The date on which the group became <b>active</b>.
+							</td>
+						</tr>
+						<tr class=alt>
+							<td>staffId</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>The staffId of the staff member dealing with this group. The staff member is not specifically the loan officer. The staff member must be assigned to the same office as this group.</td>
+						</tr>
+						<tr class=alt>
 							<td>clientMembers</td>
 						</tr>
 						<tr>
-							<td class=fielddesc>The individual client members that make up the group.</td>
+							<td class=fielddesc>The individual client members that make up the group. The clients must be assigned to the same office as this group.</td>
 						</tr>
 					</table>
 				</div>
@@ -3014,13 +3162,16 @@ GET https://DomainName/mifosng-provider/api/v1/centers/1
 				<div class="method-description">
 					<h4>Retrieve Group Template</h4>
 					<p>Example Requests:</p>
-					<div class=apiClick>groups/template?centerId=1</div>
+					<div class=apiClick>groups/template</div>
 					<br/>
 					<div class=apiClick>groups/template?officeId=2</div>
 					<br/>
-					<div class=apiClick>groups/template</div>
+					<div class=apiClick>groups/template?centerId=1</div>
+					<br/>
+					
 				</div>
 				<div class="method-example">
+					<p>Template to create a standard group</p>
 					<code class="method-declaration">
 GET https://DomainName/mifosng-provider/api/v1/groups/template
 					</code>
@@ -3035,24 +3186,26 @@ GET https://DomainName/mifosng-provider/api/v1/groups/template
     },
     {
       "id": 2,
-      "name": "Suboffice",
-      "nameDecorated": "....Suboffice"
+      "name": "Branch Office 1",
+      "nameDecorated": "....Branch Office 1"
     }
   ],
   "staffOptions": [
     {
       "id": 1,
-      "displayName": "LoanOfficer, HeadOffice"
+      "displayName": "C, Mike"
+    }
+  ],
+  "clientOptions": [
+    {
+      "id": 1,
+      "displayName": "Petra Yton",
+      "officeId": 1,
+      "officeName": "Head Office"
     },
     {
       "id": 2,
-      "displayName": "NonLoanOfficer, HeadOffice"
-    }
-  ],
-   "clientOptions": [
-    {
-      "id": 1,
-      "displayName": "Test one",
+      "displayName": "Small shop business",
       "officeId": 1,
       "officeName": "Head Office"
     }
@@ -3061,6 +3214,7 @@ GET https://DomainName/mifosng-provider/api/v1/groups/template
 					</code>
 				</div>
 				<div class="method-example">
+					<p>Template to create a standard group with specific office known. This will return only staffOptions and clientMembersOptions relevant for the chosen office.</p>
 					<code class="method-declaration">
 GET https://DomainName/mifosng-provider/api/v1/groups/template?officeId=2
 					</code>
@@ -3075,75 +3229,30 @@ GET https://DomainName/mifosng-provider/api/v1/groups/template?officeId=2
     },
     {
       "id": 2,
-      "name": "Suboffice",
-      "nameDecorated": "....Suboffice"
+      "name": "Branch Office 1",
+      "nameDecorated": "....Branch Office 1"
     }
   ],
   "staffOptions": [
     {
-      "id": 3,
-      "displayName": "LoanOfficer, Suboffice"
+      "id": 2,
+      "displayName": "D, Mary"
     },
     {
-      "id": 4,
-      "displayName": "NonLoanOfficer, Suboffice"
+      "id": 3,
+      "displayName": "P, Paul"
     }
   ]
 }
 					</code>
 				</div>
 				<div class="method-example">
+					<p>Template to create a group for an existing center. As an existing center will be assigned to an office, this will return only staffOptions and clientMembersOptions relevant for the chosen center/office.</p>
 					<code class="method-declaration">
 GET https://DomainName/mifosng-provider/api/v1/groups/template?centerId=1
 					</code>
 					<code class="method-response">
-{
-  "officeId": 1,
-  "centerId": 1,
-  "centerName": "Center 001",
-  "centerOptions": [
-    {
-      "id": 1,
-      "name": "Center 001",
-      "externalId": "001",
-      "officeId": 1,
-      "officeName": "Head Office",
-      "hierarchy": ".1."
-    }
-  ],
-  "officeOptions": [
-    {
-      "id": 1,
-      "name": "Head Office",
-      "nameDecorated": "Head Office",
-      "externalId": "1",
-      "openingDate": [
-        2009,
-        1,
-        1
-      ],
-      "hierarchy": "."
-    }
-  ],
-  "staffOptions": [
-    {
-      "id": 1,
-      "displayName": "LoanOfficer, HeadOffice"
-    },
-    {
-      "id": 2,
-      "displayName": "NonLoanOfficer, HeadOffice"
-    }
-  ],
-   "clientOptions": [
-    {
-      "id": 1,
-      "displayName": "Test one",
-      "officeId": 1,
-      "officeName": "Head Office"
-    }
-  ]
-}
+
 					</code>
 				</div>
 			</div>
@@ -3157,7 +3266,7 @@ GET https://DomainName/mifosng-provider/api/v1/groups/template?centerId=1
 							<td><div class="mifosXHeading2">Mandatory Fields</div></td>
 						</tr>
 						<tr class=alt>
-							<td>name,officeId</td>
+							<td>name, officeId, active, activationDate (if active=true)</td>
 						</tr>
 					</table>
 					<br/>
@@ -3178,25 +3287,150 @@ POST https://DomainName/mifosng-provider/api/v1/groups
 POST groups
 Content-Type: application/json Request Body:
 {
-"officeId":"1",
-"name":"TA Group"
+	"officeId":"1",
+	"name":"Pending Group",
+	"active": false 
+}
+					</code>
+					<code class="method-response">
+{
+  "officeId": 1,
+  "groupId": 2,
+  "resourceId": 2
 }
 					</code>
 					<code class="method-request">
 POST groups
 Content-Type: application/json Request Body:
 {
-"officeId":"1",
-"name":"TA Group"
-"externalId": "000-1A",
-"clientMembers": ["1"]
+	"officeId":"1", 
+	"name":"First Group",
+	"externalId": "000-1A", 
+	"clientMembers": ["1"],
+	"dateFormat": "dd MMMM yyyy", 
+	"locale": "en", 
+	"active": true, 
+	"activationDate": "04 March 2009"
 }
 					</code>
 					<code class="method-response">
 {
-  "officeId": 2,
-  "groupId": 5,
-  "resourceId": 5
+  "officeId": 1,
+  "groupId": 1,
+  "resourceId": 1
+}
+					</code>
+				</div>
+			</div>
+
+			<a id="groups_retrieve" name="groups_retrieve" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Retrieve a Group</h4>
+					<p>Example Requests:</p>
+					<div class=apiClick>groups/1</div>
+					<br/>
+					<div class=apiClick>groups/1?associations=clientMembers</div>
+				</div>
+				<div class="method-example">
+					<p>Group with no clientMembers information requested.</p>
+					<code class="method-declaration">
+GET https://DomainName/mifosng-provider/api/v1/groups/1
+					</code>
+					<code class="method-response">
+{
+  "id": 1,
+  "name": "First Group",
+  "externalId": "000-1A",
+  "officeId": 1,
+  "officeName": "Head Office",
+  "hierarchy": ".1."
+}
+					</code>
+				</div>
+				<div class="method-example">
+					<p>Group with clientMembers.</p>
+					<code class="method-declaration">
+GET https://DomainName/mifosng-provider/api/v1/groups/1?associations=clientMembers
+					</code>
+					<code class="method-response">
+{
+  "id": 1,
+  "name": "First Group",
+  "externalId": "000-1A",
+  "officeId": 1,
+  "officeName": "Head Office",
+  "hierarchy": ".1.",
+  "clientMembers": [
+    {
+      "id": 1,
+      "accountNo": "000000001",
+      "externalId": "786YYH7",
+      "activationDate": [
+        2009,
+        3,
+        4
+      ],
+      "firstname": "Petra",
+      "lastname": "Yton",
+      "displayName": "Petra Yton",
+      "officeId": 1,
+      "officeName": "Head Office"
+    }
+  ]
+}
+					</code>
+				</div>
+			</div>
+
+			<a id="groups_update" name="groups_update" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Update a Group</h4>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+PUT https://DomainName/mifosng-provider/api/v1/groups/{groupid}
+						</code>
+					<code class="method-request">
+PUT groups/1
+Content-Type: application/json 
+Request Body:
+{
+	"name": "First Group (changed)"
+}
+					</code>
+					<code class="method-response">
+{
+  "officeId": 1,
+  "groupId": 1,
+  "resourceId": 1,
+  "changes": {
+    "name": "First Group (changed)"
+  }
+}
+					</code>
+				</div>
+			</div>
+
+			<a id="groups_delete" name="groups_delete" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Delete a Group</h4>
+					<p>A group can be deleted if it is in <i>pending</i> state and has nothing associated with it - groups, loans, savings etc</p>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+POST https://DomainName/mifosng-provider/api/v1/groups/{groupid}
+						</code>
+					<code class="method-request">
+DELETE groups/2
+					</code>
+					<code class="method-response">
+{
+  "officeId": 1,
+  "groupId": 2,
+  "resourceId": 2
 }
 					</code>
 				</div>
@@ -3216,161 +3450,21 @@ GET https://DomainName/mifosng-provider/api/v1/groups
 					<code class="method-response">
 [
   {
-    "id": 10,
-    "name": "GroupU(Suboffice)",
-    "officeId": 2,
-    "officeName": "Suboffice",
-    "centerId": 4,
-    "centerName": "apicenter(updated)",
-    "hierarchy": ""
-  },
-  {
-    "id": 8,
-    "name": "AnothergroupUI",
+    "id": 1,
+    "name": "First Group (changed)",
+    "externalId": "000-1A",
     "officeId": 1,
     "officeName": "Head Office",
-    "centerId": 1,
-    "centerName": "Center 001",
-    "hierarchy": ""
-  },
-  {
-    "id": 7,
-    "name": "NewGroupUI",
-    "externalId": "0011",
-    "officeId": 1,
-    "officeName": "Head Office",
-    "centerId": 1,
-    "centerName": "Center 001",
-    "staffId": 1,
-    "staffName": "LoanOfficer, HeadOffice",
-    "hierarchy": ""
-  },
-  {
-    "id": 9,
-    "name": "GroupUCenter",
-    "officeId": 1,
-    "officeName": "Head Office",
-    "centerId": 1,
-    "centerName": "Center 001",
-    "staffId": 1,
-    "staffName": "LoanOfficer, HeadOffice",
-    "hierarchy": ""
+    "hierarchy": ".1."
   },
   {
     "id": 2,
-    "name": "Group 001-A",
+    "name": "Pending Group",
     "officeId": 1,
     "officeName": "Head Office",
-    "centerId": 1,
-    "centerName": "Center 001",
-    "hierarchy": ""
-  },
-  {
-    "id": 11,
-    "name": "Test(no parents)",
-    "officeId": 1,
-    "officeName": "Head Office",
-    "hierarchy": ".11."
-  },
-  {
-    "id": 12,
-    "name": "SubofficeGroup(no parents)",
-    "officeId": 2,
-    "officeName": "Suboffice",
-    "hierarchy": ".12."
+    "hierarchy": ".2."
   }
 ]
-					</code>
-				</div>
-			</div>
-
-			<a id="groups_retrieve" name="groups_retrieve" class="old-syle-anchor">&nbsp;</a>
-			<div class="method-section">
-				<div class="method-description">
-					<h4>Retrieve a Group</h4>
-					<p>Example Requests:</p>
-					<div class=apiClick>groups/12</div>
-				</div>
-				<div class="method-example">
-					<code class="method-declaration">
-GET https://DomainName/mifosng-provider/api/v1/groups/12
-					</code>
-					<code class="method-response">
-{
-  "id": 12,
-  "name": "SubofficeGroup(no parents)",
-  "officeId": 2,
-  "officeName": "Suboffice",
-  "hierarchy": ".12.",
-  "clientMembers": [
-    {
-      "id": 2,
-      "accountNo": "000000002",
-      "firstname": "Another",
-      "lastname": "client",
-      "displayName": "Another client",
-      "officeId": 2,
-      "officeName": "Suboffice",
-      "joinedDate": [
-        2012,
-        4,
-        14
-      ]
-    }
-  ]
-}
-					</code>
-				</div>
-			</div>
-
-			<a id="groups_update" name="groups_update" class="old-syle-anchor">&nbsp;</a>
-			<div class="method-section">
-				<div class="method-description">
-					<h4>Update a Group</h4>
-				</div>
-				<div class="method-example">
-					<code class="method-declaration">
-PUT https://DomainName/mifosng-provider/api/v1/groups/{groupid}
-						</code>
-					<code class="method-request">
-PUT groups/5
-Content-Type: application/json 
-Request Body:
-{
-	"name": "apigroup(changed)"
-}
-					</code>
-					<code class="method-response">
-{
-  "officeId": 5,
-  "groupId": 2,
-  "resourceId": 5,
-  "changes": {
-    "name": "apigroup(changed)"
-  }
-}
-					</code>
-				</div>
-			</div>
-
-			<a id="groups_delete" name="groups_delete" class="old-syle-anchor">&nbsp;</a>
-			<div class="method-section">
-				<div class="method-description">
-					<h4>Delete a Group</h4>
-				</div>
-				<div class="method-example">
-					<code class="method-declaration">
-POST https://DomainName/mifosng-provider/api/v1/groups/{groupid}
-						</code>
-					<code class="method-request">
-DELETE groups/5
-					</code>
-					<code class="method-response">
-{
-  "officeId": 5,
-  "groupId": 2,
-  "resourceId": 5
-}
 					</code>
 				</div>
 			</div>
@@ -13069,7 +13163,7 @@ GET https://DomainName/api/v1/search?query=000000111
 					<td><a href="#centers_create">Create a Center</a></td>
 					<td><a href="#centers_list">List Centers</a></td>
 					<td></td>
-					<td><a href="#centers_delete">Delete a Center</a></td>
+					<td></td>
 				</tr>
 				<tr>
 					<td></td>
@@ -13077,7 +13171,7 @@ GET https://DomainName/api/v1/search?query=000000111
 					<td></td>
 					<td><a href="#centers_retrieve">Retrieve a Center</a></td>
 					<td><a href="#centers_update">Update a Center</a></td>
-					<td></td>
+					<td><a href="#centers_delete">Delete a Center</a></td>
 				</tr>
 				<tr class="alt">
 					<td><a href="#groups">Group</a></td>
@@ -13085,7 +13179,7 @@ GET https://DomainName/api/v1/search?query=000000111
 					<td><a href="#groups_create">Create a Group</a></td>
 					<td><a href="#groups_list">List Groups</a></td>
 					<td></td>
-					<td><a href="#groups_delete">Delete a Group</a></td>
+					<td></td>
 				</tr>
 				<tr>
 					<td></td>
@@ -13093,7 +13187,7 @@ GET https://DomainName/api/v1/search?query=000000111
 					<td></td>
 					<td><a href="#groups_retrieve">Retrieve a Group</a></td>
 					<td><a href="#groups_update">Update a Group</a></td>
-					<td></td>
+					<td><a href="#groups_delete">Delete a Group</a></td>
 				</tr>
 				<!-- end of centers, groups api -->
 				<!-- loans api full matrix-->

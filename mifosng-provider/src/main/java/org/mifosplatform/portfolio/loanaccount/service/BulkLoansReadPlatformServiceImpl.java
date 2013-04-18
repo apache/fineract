@@ -96,7 +96,8 @@ public class BulkLoansReadPlatformServiceImpl implements BulkLoansReadPlatformSe
     private static final class StaffGroupMapper implements RowMapper<StaffAccountSummaryCollectionData.GroupSummary> {
 
         public String schema() {
-            return " g.id as id, g.name as name from m_group g" + " join m_loan l on g.id = l.group_id where l.loan_officer_id = ? ";
+            return " g.id as id, g.display_name as name from m_group g"
+                    + " join m_loan l on g.id = l.group_id where l.loan_officer_id = ? ";
         }
 
         @Override

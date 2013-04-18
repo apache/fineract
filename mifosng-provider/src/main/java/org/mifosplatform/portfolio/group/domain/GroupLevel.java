@@ -74,5 +74,4 @@ public class GroupLevel extends AbstractPersistable<Long> {
     public boolean isIdentifiedByParentId(final Long parentLevelId) {
         return this.parentId.equals(parentLevelId);
     }
-
 }

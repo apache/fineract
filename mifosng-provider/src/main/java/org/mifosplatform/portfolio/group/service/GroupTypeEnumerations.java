@@ -6,7 +6,7 @@
 package org.mifosplatform.portfolio.group.service;
 
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
-import org.mifosplatform.portfolio.group.data.GroupTypes;
+import org.mifosplatform.portfolio.group.domain.GroupTypes;
 
 public class GroupTypeEnumerations {
 

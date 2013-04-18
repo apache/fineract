@@ -84,18 +84,15 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 
         final Client client = this.clientRepository.findOneWithNotFoundDetection(clientId);
 
-        final Long officeId = client.getOffice().getId();
-
         if (client.isNotPending()) { throw new ClientMustBePendingToBeDeletedException(clientId); }
 
         List<Note> relatedNotes = this.noteRepository.findByClientId(clientId);
         this.noteRepository.deleteInBatch(relatedNotes);
 
-        // client.delete();
         this.clientRepository.delete(client);
 
         return new CommandProcessingResultBuilder() //
-                .withOfficeId(officeId) //
+                .withOfficeId(client.officeId()) //
                 .withClientId(clientId) //
                 .withEntityId(clientId) //
                 .build();

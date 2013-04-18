@@ -22,6 +22,13 @@ public class GroupingTypesApiConstants {
     public static final String externalIdParamName = "externalId";
     public static final String officeIdParamName = "officeId";
     public static final String staffIdParamName = "staffId";
+    public static final String activeParamName = "active";
+    public static final String activationDateParamName = "activationDate";
+    public static final String groupMembersParamName = "groupMembers";
+
+    // group parameters
+    public static final String centerIdParamName = "centerId";
+    public static final String clientMembersParamName = "clientMembers";
 
     // response parameters
     public static final String hierarchyParamName = "hierarchy";
@@ -32,7 +39,12 @@ public class GroupingTypesApiConstants {
     public static final String clientOptionsParamName = "clientOptions";
 
     public static final Set<String> CENTER_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(localeParamName,
-            dateFormatParamName, nameParamName, externalIdParamName, officeIdParamName, staffIdParamName));
+            dateFormatParamName, idParamName, nameParamName, externalIdParamName, officeIdParamName, staffIdParamName, activeParamName,
+            activationDateParamName, groupMembersParamName));
+
+    public static final Set<String> GROUP_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(localeParamName, dateFormatParamName,
+            idParamName, nameParamName, externalIdParamName, centerIdParamName, officeIdParamName, staffIdParamName, activeParamName,
+            activationDateParamName, clientMembersParamName));
 
     /**
      * These parameters will match the class level parameters of

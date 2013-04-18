@@ -5,6 +5,7 @@
  */
 package org.mifosplatform.portfolio.group.domain;
 
+import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -19,8 +20,11 @@ import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 
 import org.apache.commons.lang.StringUtils;
+import org.joda.time.LocalDate;
 import org.mifosplatform.organisation.office.domain.Office;
 import org.mifosplatform.organisation.staff.domain.Staff;
 import org.mifosplatform.portfolio.client.domain.Client;
@@ -28,15 +32,20 @@ import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
 @Table(name = "m_group")
-public class Group extends AbstractPersistable<Long> {
+public final class Group extends AbstractPersistable<Long> {
 
-    @OneToMany(fetch = FetchType.EAGER)
-    @JoinColumn(name = "parent_id")
-    private final List<Group> children = new LinkedList<Group>();
+    @Column(name = "external_id", length = 100, unique = true)
+    private String externalId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "parent_id")
-    private Group parent;
+    /**
+     * A value from {@link GroupingTypeStatus}.
+     */
+    @Column(name = "status_enum", nullable = false)
+    private Integer status;
+
+    @Column(name = "activation_date", nullable = true)
+    @Temporal(TemporalType.DATE)
+    private Date activationDate;
 
     @ManyToOne
     @JoinColumn(name = "office_id", nullable = false)
@@ -46,21 +55,27 @@ public class Group extends AbstractPersistable<Long> {
     @JoinColumn(name = "staff_id", nullable = true)
     private Staff staff;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parent_id")
+    private Group parent;
+
+    /*
+     * TODO - kw - it might be possible to just move this to be a java enum type
+     * rather than 'levels' table.
+     */
     @ManyToOne
     @JoinColumn(name = "level_id", nullable = false)
     private GroupLevel groupLevel;
 
+    @Column(name = "display_name", length = 100, unique = true)
+    private String name;
+
     @Column(name = "hierarchy", length = 100)
     private String hierarchy;
 
-    @Column(name = "name", length = 100, unique = true)
-    private String name;
-
-    @Column(name = "external_id", length = 100, unique = true)
-    private String externalId;
-
-    @Column(name = "is_deleted", nullable = false)
-    private boolean deleted = false;
+    @OneToMany(fetch = FetchType.EAGER)
+    @JoinColumn(name = "parent_id")
+    private final List<Group> groupMembers = new LinkedList<Group>();
 
     @ManyToMany
     @JoinTable(name = "m_group_client", joinColumns = @JoinColumn(name = "group_id"), inverseJoinColumns = @JoinColumn(name = "client_id"))
@@ -73,12 +88,20 @@ public class Group extends AbstractPersistable<Long> {
     }
 
     public static Group newGroup(final Office office, final Staff staff, final Group parent, final GroupLevel groupLevel,
-            final String name, final String externalId, final Set<Client> clientMembers, final Set<Group> childGroups) {
-        return new Group(office, staff, parent, groupLevel, name, externalId, clientMembers, childGroups);
+            final String name, final String externalId, final boolean active, final LocalDate activationDate,
+            final Set<Client> clientMembers, final Set<Group> groupMembers) {
+
+        GroupingTypeStatus status = GroupingTypeStatus.PENDING;
+        if (active) {
+            status = GroupingTypeStatus.ACTIVE;
+        }
+
+        return new Group(office, staff, parent, groupLevel, name, externalId, status, activationDate, clientMembers, groupMembers);
     }
 
     public Group(final Office office, final Staff staff, final Group parent, final GroupLevel groupLevel, final String name,
-            final String externalId, final Set<Client> clientMembers, final Set<Group> childGroups) {
+            final String externalId, final GroupingTypeStatus status, final LocalDate activationDate, final Set<Client> clientMembers,
+            final Set<Group> groupMembers) {
         this.office = office;
         this.staff = staff;
         this.groupLevel = groupLevel;
@@ -86,6 +109,11 @@ public class Group extends AbstractPersistable<Long> {
 
         if (parent != null) {
             this.parent.addChild(this);
+        }
+
+        this.status = status.getValue();
+        if (activationDate != null) {
+            this.activationDate = activationDate.toDate();
         }
 
         if (StringUtils.isNotBlank(name)) {
@@ -101,13 +129,21 @@ public class Group extends AbstractPersistable<Long> {
         if (clientMembers != null) {
             this.clientMembers = clientMembers;
         }
-        if (childGroups != null) {
-            this.children.addAll(childGroups);
+        if (groupMembers != null) {
+            this.groupMembers.addAll(groupMembers);
         }
     }
 
+    public boolean isNotPending() {
+        return !isPending();
+    }
+
+    public boolean isPending() {
+        return GroupingTypeStatus.fromInt(this.status).isPending();
+    }
+
     private void addChild(final Group group) {
-        this.children.add(group);
+        this.groupMembers.add(group);
     }
 
     public Long getOfficeId() {
@@ -180,22 +216,6 @@ public class Group extends AbstractPersistable<Long> {
 
     public boolean hasClientAsMember(final Client client) {
         return this.clientMembers.contains(client);
-    }
-
-    /**
-     * Delete is a <i>soft delete</i>. Updates flag on group so it wont appear
-     * in query/report results.
-     * 
-     * Any fields with unique constraints and prepended with id of record.
-     */
-    public void delete() {
-        this.deleted = true;
-        this.externalId = getId() + "_" + this.externalId;
-        this.name = getId() + "_" + this.name;
-    }
-
-    public boolean isDeleted() {
-        return this.deleted;
     }
 
     public void generateHierarchy() {

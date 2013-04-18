@@ -173,7 +173,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
                     final Long groupId = command.longValueOfParameterNamed(SavingsApiConstants.groupIdParamName);
                     if (groupId != null) {
                         final Group group = this.groupRepository.findOne(groupId);
-                        if (group == null || group.isDeleted()) { throw new GroupNotFoundException(groupId); }
+                        if (group == null) { throw new GroupNotFoundException(groupId); }
                         account.update(group);
                     } else {
                         final Group group = null;

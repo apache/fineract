@@ -8,14 +8,17 @@ package org.mifosplatform.portfolio.group.service;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 
-public interface GroupWritePlatformService {
+public interface GroupingTypesWritePlatformService {
 
-    CommandProcessingResult createGroup(Long parentId, Long levelId, JsonCommand command);
+    CommandProcessingResult createCenter(JsonCommand command);
+
+    CommandProcessingResult updateCenter(Long entityId, JsonCommand command);
+
+    CommandProcessingResult createGroup(Long centerId, JsonCommand command);
 
     CommandProcessingResult updateGroup(Long groupId, JsonCommand command);
 
     CommandProcessingResult deleteGroup(Long groupId);
 
     CommandProcessingResult unassignStaff(Long grouptId, JsonCommand command);
-
 }

@@ -171,7 +171,7 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
 
         public String collectionSheetSchema() {
 
-            return "SELECT  gp.name As groupName, "
+            return "SELECT gp.display_name As groupName, "
                     + "gp.id As groupId, "
                     + "cl.display_name As clientName, "
                     + "sf.id As staffId, "

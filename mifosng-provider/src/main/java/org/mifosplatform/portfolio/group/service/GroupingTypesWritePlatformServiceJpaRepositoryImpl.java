@@ -8,10 +8,12 @@ package org.mifosplatform.portfolio.group.service;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
+import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
@@ -27,14 +29,19 @@ import org.mifosplatform.organisation.staff.exception.StaffNotFoundException;
 import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.client.domain.ClientRepository;
 import org.mifosplatform.portfolio.client.exception.ClientNotFoundException;
+import org.mifosplatform.portfolio.group.api.GroupingTypesApiConstants;
 import org.mifosplatform.portfolio.group.domain.Group;
 import org.mifosplatform.portfolio.group.domain.GroupLevel;
 import org.mifosplatform.portfolio.group.domain.GroupLevelRepository;
 import org.mifosplatform.portfolio.group.domain.GroupRepository;
+import org.mifosplatform.portfolio.group.domain.GroupTypes;
 import org.mifosplatform.portfolio.group.exception.GroupHasNoStaffException;
+import org.mifosplatform.portfolio.group.exception.GroupMustBePendingToBeDeletedException;
 import org.mifosplatform.portfolio.group.exception.GroupNotFoundException;
 import org.mifosplatform.portfolio.group.exception.InvalidGroupLevelException;
-import org.mifosplatform.portfolio.group.serialization.GroupCommandFromApiJsonDeserializer;
+import org.mifosplatform.portfolio.group.serialization.GroupingTypesDataValidator;
+import org.mifosplatform.portfolio.note.domain.Note;
+import org.mifosplatform.portfolio.note.domain.NoteRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,53 +53,47 @@ import org.springframework.util.ObjectUtils;
 import com.google.common.collect.Sets;
 
 @Service
-public class GroupWritePlatformServiceJpaRepositoryImpl implements GroupWritePlatformService {
+public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements GroupingTypesWritePlatformService {
 
-    private final static Logger logger = LoggerFactory.getLogger(GroupWritePlatformServiceJpaRepositoryImpl.class);
+    private final static Logger logger = LoggerFactory.getLogger(GroupingTypesWritePlatformServiceJpaRepositoryImpl.class);
 
     private final PlatformSecurityContext context;
     private final GroupRepository groupRepository;
     private final ClientRepository clientRepository;
     private final OfficeRepository officeRepository;
     private final StaffRepository staffRepository;
+    private final NoteRepository noteRepository;
     private final GroupLevelRepository groupLevelRepository;
-    private final GroupCommandFromApiJsonDeserializer fromApiJsonDeserializer;
+    private final GroupingTypesDataValidator fromApiJsonDeserializer;
 
     @Autowired
-    public GroupWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final GroupRepository groupRepository,
+    public GroupingTypesWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final GroupRepository groupRepository,
             final ClientRepository clientRepository, final OfficeRepository officeRepository, final StaffRepository staffRepository,
-            final GroupLevelRepository groupLevelRepository, final GroupCommandFromApiJsonDeserializer fromApiJsonDeserializer) {
+            final NoteRepository noteRepository,
+            final GroupLevelRepository groupLevelRepository, final GroupingTypesDataValidator fromApiJsonDeserializer) {
         this.context = context;
         this.groupRepository = groupRepository;
         this.clientRepository = clientRepository;
         this.officeRepository = officeRepository;
         this.staffRepository = staffRepository;
+        this.noteRepository = noteRepository;
         this.groupLevelRepository = groupLevelRepository;
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
     }
 
-    @Transactional
-    @Override
-    public CommandProcessingResult createGroup(final Long parentId, final Long levelId, final JsonCommand command) {
-
-        GroupLevel groupLevel = this.groupLevelRepository.findOne(levelId);
+    private CommandProcessingResult createGroupingType(final JsonCommand command, final GroupTypes groupingType, final Long centerId) {
         try {
-            this.context.authenticatedUser();
-
-            this.fromApiJsonDeserializer.validateForCreate(command.json());
-
-            final String name = command.stringValueOfParameterNamed("name");
-            final String externalId = command.stringValueOfParameterNamed("externalId");
+            final String name = command.stringValueOfParameterNamed(GroupingTypesApiConstants.nameParamName);
+            final String externalId = command.stringValueOfParameterNamed(GroupingTypesApiConstants.externalIdParamName);
 
             Long officeId = null;
-
             Group parentGroup = null;
 
-            if (parentId == null) {
-                officeId = command.longValueOfParameterNamed("officeId");
+            if (centerId == null) {
+                officeId = command.longValueOfParameterNamed(GroupingTypesApiConstants.officeIdParamName);
             } else {
-                parentGroup = this.groupRepository.findOne(parentId);
-                if (parentGroup == null || parentGroup.isDeleted()) { throw new GroupNotFoundException(parentId); }
+                parentGroup = this.groupRepository.findOne(centerId);
+                if (parentGroup == null) { throw new GroupNotFoundException(centerId); }
                 officeId = parentGroup.getOfficeId();
             }
 
@@ -100,29 +101,21 @@ public class GroupWritePlatformServiceJpaRepositoryImpl implements GroupWritePla
             if (groupOffice == null) { throw new OfficeNotFoundException(officeId); }
 
             Staff staff = null;
-            final Long staffId = command.longValueOfParameterNamed("staffId");
-
-            /**
-             * Validate the staff is present in the given office or not
-             */
+            final Long staffId = command.longValueOfParameterNamed(GroupingTypesApiConstants.staffIdParamName);
             if (staffId != null) {
                 staff = this.staffRepository.findByOffice(staffId, officeId);
                 if (staff == null) { throw new StaffNotFoundException(staffId); }
             }
 
-            Set<Client> clientMembers = null;
-            if (groupLevel.canHaveClients()) {
-                clientMembers = assembleSetOfClients(officeId, command);
-            }
+            final Set<Client> clientMembers = assembleSetOfClients(officeId, command);
 
-          //TODO -AA: Not sure about children are added at the time of group creation
-            /*Set<Group> childGroups = null;
-            if (groupLevel.isRecursable()) {
-                childGroups = assembleSetOfChildGroups(officeId, command);
-            }*/
+            final Set<Group> groupMembers = assembleSetOfChildGroups(officeId, command);
 
-            final Group newGroup = Group
-                    .newGroup(groupOffice, staff, parentGroup, groupLevel, name, externalId, clientMembers, null);
+            final boolean active = command.booleanPrimitiveValueOfParameterNamed(GroupingTypesApiConstants.activeParamName);
+            final LocalDate activationDate = command.localDateValueOfParameterNamed(GroupingTypesApiConstants.activationDateParamName);
+            GroupLevel groupLevel = this.groupLevelRepository.findOne(groupingType.getId());
+            final Group newGroup = Group.newGroup(groupOffice, staff, parentGroup, groupLevel, name, externalId, active, activationDate,
+                    clientMembers, groupMembers);
 
             // pre-save to generate id for use in group hierarchy
             this.groupRepository.save(newGroup);
@@ -139,40 +132,71 @@ public class GroupWritePlatformServiceJpaRepositoryImpl implements GroupWritePla
                     .build();
 
         } catch (final DataIntegrityViolationException dve) {
-            handleGroupDataIntegrityIssues(command, dve, groupLevel);
-            return new CommandProcessingResult(Long.valueOf(-1));
+            handleGroupDataIntegrityIssues(command, dve, groupingType);
+            return CommandProcessingResult.empty();
         }
+    }
+
+    @Transactional
+    @Override
+    public CommandProcessingResult createCenter(final JsonCommand command) {
+
+        this.fromApiJsonDeserializer.validateForCreateCenter(command);
+
+        final Long centerId = null;
+        return createGroupingType(command, GroupTypes.CENTER, centerId);
+    }
+
+    @Transactional
+    @Override
+    public CommandProcessingResult createGroup(final Long centerId, final JsonCommand command) {
+
+        if (centerId != null) {
+            this.fromApiJsonDeserializer.validateForCreateCenterGroup(command);
+        } else {
+            this.fromApiJsonDeserializer.validateForCreateGroup(command);
+        }
+
+        return createGroupingType(command, GroupTypes.GROUP, centerId);
+    }
+
+    @Transactional
+    @Override
+    public CommandProcessingResult updateCenter(final Long centerId, final JsonCommand command) {
+
+        this.fromApiJsonDeserializer.validateForUpdateCenter(command);
+
+        return updateGroupingType(centerId, command, GroupTypes.CENTER);
     }
 
     @Transactional
     @Override
     public CommandProcessingResult updateGroup(final Long groupId, final JsonCommand command) {
 
-        GroupLevel groupLevel = null;
+        this.fromApiJsonDeserializer.validateForUpdateGroup(command);
+
+        return updateGroupingType(groupId, command, GroupTypes.GROUP);
+    }
+
+    private CommandProcessingResult updateGroupingType(final Long groupId, final JsonCommand command, final GroupTypes groupingType) {
 
         try {
-            this.context.authenticatedUser();
-
             final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(9);
 
-            this.fromApiJsonDeserializer.validateForUpdate(command.json());
-
             final Group groupForUpdate = this.groupRepository.findOne(groupId);
-            if (groupForUpdate == null || groupForUpdate.isDeleted()) { throw new GroupNotFoundException(groupId); }
+            if (groupForUpdate == null) { throw new GroupNotFoundException(groupId); }
 
             final Long officeId = groupForUpdate.getOfficeId();
 
-            final String nameParamName = "name";
-            if (command.isChangeInStringParameterNamed(nameParamName, groupForUpdate.getName())) {
-                final String newValue = command.stringValueOfParameterNamed(nameParamName);
-                actualChanges.put(nameParamName, newValue);
+            if (command.isChangeInStringParameterNamed(GroupingTypesApiConstants.nameParamName, groupForUpdate.getName())) {
+                final String newValue = command.stringValueOfParameterNamed(GroupingTypesApiConstants.nameParamName);
+                actualChanges.put(GroupingTypesApiConstants.nameParamName, newValue);
                 groupForUpdate.setName(StringUtils.defaultIfEmpty(newValue, null));
             }
 
-            final String externalIdParamName = "externalId";
-            if (command.isChangeInStringParameterNamed(externalIdParamName, groupForUpdate.getExternalId())) {
-                final String newValue = command.stringValueOfParameterNamed(externalIdParamName);
-                actualChanges.put(externalIdParamName, newValue);
+            if (command.isChangeInStringParameterNamed(GroupingTypesApiConstants.externalIdParamName, groupForUpdate.getExternalId())) {
+                final String newValue = command.stringValueOfParameterNamed(GroupingTypesApiConstants.externalIdParamName);
+                actualChanges.put(GroupingTypesApiConstants.externalIdParamName, newValue);
                 groupForUpdate.setExternalId(StringUtils.defaultIfEmpty(newValue, null));
             }
 
@@ -182,10 +206,9 @@ public class GroupWritePlatformServiceJpaRepositoryImpl implements GroupWritePla
                 presentStaffId = presentStaff.getId();
             }
 
-            final String staffIdParamName = "staffId";
-            if (command.isChangeInLongParameterNamed(staffIdParamName, presentStaffId)) {
-                final Long newValue = command.longValueOfParameterNamed(staffIdParamName);
-                actualChanges.put(staffIdParamName, newValue);
+            if (command.isChangeInLongParameterNamed(GroupingTypesApiConstants.staffIdParamName, presentStaffId)) {
+                final Long newValue = command.longValueOfParameterNamed(GroupingTypesApiConstants.staffIdParamName);
+                actualChanges.put(GroupingTypesApiConstants.staffIdParamName, newValue);
 
                 Staff newStaff = null;
                 if (newValue != null) {
@@ -195,7 +218,7 @@ public class GroupWritePlatformServiceJpaRepositoryImpl implements GroupWritePla
                 groupForUpdate.setStaff(newStaff);
             }
 
-            groupLevel = this.groupLevelRepository.findOne(groupForUpdate.getGroupLevel().getId());
+            GroupLevel groupLevel = this.groupLevelRepository.findOne(groupForUpdate.getGroupLevel().getId());
 
             /*
              * Ignoring parentId param, if group for update is super parent.
@@ -204,7 +227,6 @@ public class GroupWritePlatformServiceJpaRepositoryImpl implements GroupWritePla
              */
             if (!groupLevel.isSuperParent()) {
 
-                final String parentIdParamName = "parentId";
                 Long parentId = null;
                 final Group presentParentGroup = groupForUpdate.getParent();
 
@@ -212,14 +234,14 @@ public class GroupWritePlatformServiceJpaRepositoryImpl implements GroupWritePla
                     parentId = presentParentGroup.getId();
                 }
 
-                if (command.isChangeInLongParameterNamed(parentIdParamName, parentId)) {
+                if (command.isChangeInLongParameterNamed(GroupingTypesApiConstants.centerIdParamName, parentId)) {
 
-                    final Long newValue = command.longValueOfParameterNamed(parentIdParamName);
-                    actualChanges.put(parentIdParamName, newValue);
+                    final Long newValue = command.longValueOfParameterNamed(GroupingTypesApiConstants.centerIdParamName);
+                    actualChanges.put(GroupingTypesApiConstants.centerIdParamName, newValue);
                     Group newParentGroup = null;
                     if (newValue != null) {
                         newParentGroup = this.groupRepository.findOne(newValue);
-                        if (newParentGroup == null || newParentGroup.isDeleted()) { throw new StaffNotFoundException(newValue); }
+                        if (newParentGroup == null) { throw new StaffNotFoundException(newValue); }
 
                         if (!newParentGroup.isOfficeIdentifiedBy(officeId)) {
                             final String errorMessage = "Group and parent group must have the same office";
@@ -248,12 +270,11 @@ public class GroupWritePlatformServiceJpaRepositoryImpl implements GroupWritePla
             }
 
             final Set<Client> clientMembers = assembleSetOfClients(officeId, command);
-            final String clientMembersParamName = "clientMembers";
 
             if (!clientMembers.equals(groupForUpdate.getClientMembers())) {
                 Set<Client> diffClients = Sets.symmetricDifference(clientMembers, groupForUpdate.getClientMembers());
                 final String[] diffClientsIds = getClientIds(diffClients);
-                actualChanges.put(clientMembersParamName, diffClientsIds);
+                actualChanges.put(GroupingTypesApiConstants.clientMembersParamName, diffClientsIds);
                 groupForUpdate.setClientMembers(clientMembers);
             }
 
@@ -262,15 +283,14 @@ public class GroupWritePlatformServiceJpaRepositoryImpl implements GroupWritePla
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //
                     .withOfficeId(groupForUpdate.getId()) //
-                    //apart from group context group id does not make much sense
-                    .withGroupId(groupForUpdate.getId()) 
+                    .withGroupId(groupForUpdate.getId()) //
                     .withEntityId(groupForUpdate.getId()) //
                     .with(actualChanges) //
                     .build();
 
         } catch (final DataIntegrityViolationException dve) {
-            handleGroupDataIntegrityIssues(command, dve, groupLevel);
-            return new CommandProcessingResult(Long.valueOf(-1));
+            handleGroupDataIntegrityIssues(command, dve, groupingType);
+            return CommandProcessingResult.empty();
         }
     }
 
@@ -285,7 +305,7 @@ public class GroupWritePlatformServiceJpaRepositoryImpl implements GroupWritePla
         this.fromApiJsonDeserializer.validateForUnassignStaff(command.json());
 
         final Group groupForUpdate = this.groupRepository.findOne(grouptId);
-        if (groupForUpdate == null || groupForUpdate.isDeleted()) { throw new GroupNotFoundException(grouptId); }
+        if (groupForUpdate == null) { throw new GroupNotFoundException(grouptId); }
 
         final Staff presentStaff = groupForUpdate.getStaff();
         Long presentStaffId = null;
@@ -309,26 +329,17 @@ public class GroupWritePlatformServiceJpaRepositoryImpl implements GroupWritePla
 
     }
 
-    /**
-     * Switched delete to hard delete of group. Will use 'status' when is added
-     * to determine if group can be deleted or not along with contraints on
-     * database i.e. cant delete group with any loans/savings accounts.
-     */
     @Transactional
     @Override
     public CommandProcessingResult deleteGroup(final Long groupId) {
 
-        this.context.authenticatedUser();
-
         final Group groupForDelete = this.groupRepository.findOne(groupId);
         if (groupForDelete == null) { throw new GroupNotFoundException(groupId); }
 
-        // groupForDelete.delete();
-        // this.groupRepository.save(groupForDelete);
+        if (groupForDelete.isNotPending()) { throw new GroupMustBePendingToBeDeletedException(groupId); }
 
-        // List<Note> relatedNotes =
-        // this.noteRepository.findByLoanId(loan.getId());
-        // this.noteRepository.deleteInBatch(relatedNotes);
+        final List<Note> relatedNotes = this.noteRepository.findByGroupId(groupId);
+        this.noteRepository.deleteInBatch(relatedNotes);
 
         this.groupRepository.delete(groupId);
 
@@ -342,7 +353,7 @@ public class GroupWritePlatformServiceJpaRepositoryImpl implements GroupWritePla
     private Set<Client> assembleSetOfClients(final Long officeId, final JsonCommand command) {
 
         final Set<Client> clientMembers = new HashSet<Client>();
-        final String[] clientMembersArray = command.arrayValueOfParameterNamed("clientMembers");
+        final String[] clientMembersArray = command.arrayValueOfParameterNamed(GroupingTypesApiConstants.clientMembersParamName);
 
         if (!ObjectUtils.isEmpty(clientMembersArray)) {
             for (final String clientId : clientMembersArray) {
@@ -360,16 +371,16 @@ public class GroupWritePlatformServiceJpaRepositoryImpl implements GroupWritePla
         return clientMembers;
     }
 
-    /*private Set<Group> assembleSetOfChildGroups(final Long officeId, final JsonCommand command) {
+    private Set<Group> assembleSetOfChildGroups(final Long officeId, final JsonCommand command) {
 
         final Set<Group> childGroups = new HashSet<Group>();
-        final String[] childGroupsArray = command.arrayValueOfParameterNamed("childGroups");
+        final String[] childGroupsArray = command.arrayValueOfParameterNamed(GroupingTypesApiConstants.groupMembersParamName);
 
         if (!ObjectUtils.isEmpty(childGroupsArray)) {
             for (final String groupId : childGroupsArray) {
                 final Long id = Long.valueOf(groupId);
                 final Group group = this.groupRepository.findOne(id);
-                if (group == null || group.isDeleted()) { throw new GroupNotFoundException(id); }
+                if (group == null) { throw new GroupNotFoundException(id); }
                 if (!group.isOfficeIdentifiedBy(officeId)) {
                     final String errorMessage = "Group and child groups must have the same office.";
                     throw new InvalidOfficeException("group", "attach.to.parent.group", errorMessage);
@@ -379,7 +390,7 @@ public class GroupWritePlatformServiceJpaRepositoryImpl implements GroupWritePla
         }
 
         return childGroups;
-    }*/
+    }
 
     private String[] getClientIds(final Set<Client> clients) {
 
@@ -396,7 +407,19 @@ public class GroupWritePlatformServiceJpaRepositoryImpl implements GroupWritePla
      * is.
      */
     private void handleGroupDataIntegrityIssues(final JsonCommand command, final DataIntegrityViolationException dve,
-            final GroupLevel groupLevel) {
+            final GroupTypes groupLevel) {
+
+        String levelName = "Invalid";
+        switch (groupLevel) {
+            case CENTER:
+                levelName = "Center";
+            break;
+            case GROUP:
+                levelName = "Group";
+            break;
+            case INVALID:
+            break;
+        }
 
         final Throwable realCause = dve.getMostSpecificCause();
         String errorMessageForUser = null;
@@ -404,16 +427,18 @@ public class GroupWritePlatformServiceJpaRepositoryImpl implements GroupWritePla
 
         if (realCause.getMessage().contains("external_id")) {
 
-            final String externalId = command.stringValueOfParameterNamed("externalId");
-            errorMessageForUser = groupLevel.getLevelName() + " with externalId `" + externalId + "` already exists.";
-            errorMessageForMachine = "error.msg." + groupLevel.getLevelName().toLowerCase() + ".duplicate.externalId";
-            throw new PlatformDataIntegrityException(errorMessageForMachine, errorMessageForUser, "externalId", externalId);
+            final String externalId = command.stringValueOfParameterNamed(GroupingTypesApiConstants.externalIdParamName);
+            errorMessageForUser = levelName + " with externalId `" + externalId + "` already exists.";
+            errorMessageForMachine = "error.msg." + levelName.toLowerCase() + ".duplicate.externalId";
+            throw new PlatformDataIntegrityException(errorMessageForMachine, errorMessageForUser,
+                    GroupingTypesApiConstants.externalIdParamName, externalId);
         } else if (realCause.getMessage().contains("name")) {
 
-            final String name = command.stringValueOfParameterNamed("name");
-            errorMessageForUser = groupLevel.getLevelName() + " with name `" + name + "` already exists.";
-            errorMessageForMachine = "error.msg." + groupLevel.getLevelName().toLowerCase() + ".duplicate.name";
-            throw new PlatformDataIntegrityException(errorMessageForMachine, errorMessageForUser, "name", name);
+            final String name = command.stringValueOfParameterNamed(GroupingTypesApiConstants.nameParamName);
+            errorMessageForUser = levelName + " with name `" + name + "` already exists.";
+            errorMessageForMachine = "error.msg." + levelName.toLowerCase() + ".duplicate.name";
+            throw new PlatformDataIntegrityException(errorMessageForMachine, errorMessageForUser, GroupingTypesApiConstants.nameParamName,
+                    name);
         }
 
         logger.error(dve.getMessage(), dve);

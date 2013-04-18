@@ -8,7 +8,7 @@ package org.mifosplatform.portfolio.group.handler;
 import org.mifosplatform.commands.handler.NewCommandSourceHandler;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
-import org.mifosplatform.portfolio.group.service.GroupWritePlatformService;
+import org.mifosplatform.portfolio.group.service.GroupingTypesWritePlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,10 +16,10 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class UnassignStaffCommandHandler implements NewCommandSourceHandler {
 
-    private final GroupWritePlatformService groupWritePlatformService;
+    private final GroupingTypesWritePlatformService groupWritePlatformService;
 
     @Autowired
-    public UnassignStaffCommandHandler(final GroupWritePlatformService groupWritePlatformService) {
+    public UnassignStaffCommandHandler(final GroupingTypesWritePlatformService groupWritePlatformService) {
         this.groupWritePlatformService = groupWritePlatformService;
     }
 

@@ -29,7 +29,7 @@ public class SearchReadPlatformServiceImpl implements SearchReadPlatformService 
     }
 
     @Override
-    public Collection<SearchData> retriveMatchingData(SearchConditions searchConditions) {
+    public Collection<SearchData> retriveMatchingData(final SearchConditions searchConditions) {
         AppUser currentUser = context.authenticatedUser();
         String hierarchy = currentUser.getOffice().getHierarchy();
 
@@ -45,7 +45,7 @@ public class SearchReadPlatformServiceImpl implements SearchReadPlatformService 
 
     private static final class SearchMapper implements RowMapper<SearchData> {
 
-        public String searchSchema(SearchConditions searchConditions) {
+        public String searchSchema(final SearchConditions searchConditions) {
 
             String union = " union all ";
             String clientExactMatchSql = " (select 'CLIENT' as entityType, c.id as entityId, c.display_name as entityName, c.external_id as entityExternalId, c.account_no as entityAccountNo "
@@ -76,13 +76,13 @@ public class SearchReadPlatformServiceImpl implements SearchReadPlatformService 
                     + " from m_client_identifier ci join m_client c on ci.client_id=c.id join m_office o on o.id = c.office_id "
                     + " where o.hierarchy like :hierarchy and ci.document_key like :partialSearch and ci.document_key not like :search) ";
 
-            String groupExactMatchSql = " (select 'GROUP' as entityType, g.id as entityId, g.name as entityName, g.external_id as entityExternalId, NULL as entityAccountNo "
+            String groupExactMatchSql = " (select 'GROUP' as entityType, g.id as entityId, g.display_name as entityName, g.external_id as entityExternalId, NULL as entityAccountNo "
                     + " , g.office_id as parentId, o.name as parentName "
-                    + " from m_group g join m_office o on o.id = g.office_id where o.hierarchy like :hierarchy and g.name like :search) ";
+                    + " from m_group g join m_office o on o.id = g.office_id where o.hierarchy like :hierarchy and g.display_name like :search) ";
 
-            String groupMatchSql = " (select 'GROUP' as entityType, g.id as entityId, g.name as entityName, g.external_id as entityExternalId, NULL as entityAccountNo "
+            String groupMatchSql = " (select 'GROUP' as entityType, g.id as entityId, g.display_name as entityName, g.external_id as entityExternalId, NULL as entityAccountNo "
                     + " , g.office_id as parentId, o.name as parentName "
-                    + " from m_group g join m_office o on o.id = g.office_id where o.hierarchy like :hierarchy and g.name like :partialSearch and g.name not like :search) ";
+                    + " from m_group g join m_office o on o.id = g.office_id where o.hierarchy like :hierarchy and g.display_name like :partialSearch and g.display_name not like :search) ";
 
             StringBuffer sql = new StringBuffer();
 
@@ -127,7 +127,7 @@ public class SearchReadPlatformServiceImpl implements SearchReadPlatformService 
         }
 
         @Override
-        public SearchData mapRow(ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+        public SearchData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
             final Long entityId = JdbcSupport.getLong(rs, "entityId");
             final String entityAccountNo = rs.getString("entityAccountNo");
             final String entityExternalId = rs.getString("entityExternalId");

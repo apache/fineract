@@ -56,6 +56,10 @@ public final class Client extends AbstractPersistable<Long> {
     @Column(name = "status_enum", nullable = false)
     private Integer status;
 
+    @Column(name = "activation_date", nullable = true)
+    @Temporal(TemporalType.DATE)
+    private Date activationDate;
+
     @Column(name = "firstname", length = 50)
     private String firstname;
 
@@ -71,10 +75,6 @@ public final class Client extends AbstractPersistable<Long> {
     @SuppressWarnings("unused")
     @Column(name = "display_name", length = 100, nullable = false)
     private String displayName;
-
-    @Column(name = "activation_date", nullable = true)
-    @Temporal(TemporalType.DATE)
-    private Date activationDate;
 
     @Column(name = "external_id", length = 100, nullable = true, unique = true)
     private String externalId;

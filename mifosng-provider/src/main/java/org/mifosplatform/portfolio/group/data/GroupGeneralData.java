@@ -76,7 +76,7 @@ public class GroupGeneralData {
     }
 
     public static GroupGeneralData instance(final Long id, final String name, final String externalId, final Long officeId,
-            final String officeName, final Long parentId, final String parentName, final Long staffId, final String staffName,
+            final String officeName, final Long centerId, final String centerName, final Long staffId, final String staffName,
             final String hierarchy) {
 
         final Collection<ClientData> clientMembers = null;
@@ -85,12 +85,12 @@ public class GroupGeneralData {
         final Collection<StaffData> staffOptions = null;
         final Collection<ClientData> clientOptions = null;
 
-        return new GroupGeneralData(id, name, externalId, officeId, officeName, parentId, parentName, staffId, staffName, hierarchy,
+        return new GroupGeneralData(id, name, externalId, officeId, officeName, centerId, centerName, staffId, staffName, hierarchy,
                 clientMembers, centerOptions, officeOptions, staffOptions, clientOptions);
     }
 
     private GroupGeneralData(final Long id, final String name, final String externalId, final Long officeId, final String officeName,
-            final Long parentId, final String parentName, final Long staffId, final String staffName, final String hierarchy,
+            final Long centerId, final String centerName, final Long staffId, final String staffName, final String hierarchy,
             final Collection<ClientData> clientMembers, final Collection<CenterData> centerOptions,
             final Collection<OfficeData> officeOptions, final Collection<StaffData> staffOptions, final Collection<ClientData> clientOptions) {
         this.id = id;
@@ -98,8 +98,8 @@ public class GroupGeneralData {
         this.externalId = externalId;
         this.officeId = officeId;
         this.officeName = officeName;
-        this.centerId = parentId;
-        this.centerName = parentName;
+        this.centerId = centerId;
+        this.centerName = centerName;
         this.staffId = staffId;
         this.staffName = staffName;
         this.hierarchy = hierarchy;

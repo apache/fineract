@@ -7,12 +7,9 @@ package org.mifosplatform.portfolio.group.service;
 
 import java.util.Collection;
 
-import org.mifosplatform.organisation.monetary.data.MoneyData;
-import org.mifosplatform.organisation.staff.data.StaffData;
 import org.mifosplatform.portfolio.group.data.GroupAccountSummaryCollectionData;
 import org.mifosplatform.portfolio.group.data.GroupAccountSummaryData;
 import org.mifosplatform.portfolio.group.data.GroupGeneralData;
-import org.mifosplatform.portfolio.group.data.GroupLevelData;
 
 public interface GroupReadPlatformService {
 
@@ -26,18 +23,4 @@ public interface GroupReadPlatformService {
     GroupAccountSummaryCollectionData retrieveGroupAccountDetails(Long groupId);
 
     Collection<GroupAccountSummaryData> retrieveGroupLoanAccountsByLoanOfficerId(Long groupId, Long loanOfficerId);
-
-    GroupLevelData retrieveGroupLevelDetails(Long levelId);
-
-    Collection<StaffData> retrieveStaffsbyOfficeId(Long officeId);
-
-    Long retrieveTotalNoOfChildGroups(Long groupId);
-
-    Long retrieveTotalClients(String hierarchy);
-
-    Collection<MoneyData> retrieveGroupLoanPortfolio(String hierarchy);
-
-    StaffData retrieveStaffsbyId(Long staffId);
-
-    Long getLevelIdByGroupId(final Long groupId);
 }

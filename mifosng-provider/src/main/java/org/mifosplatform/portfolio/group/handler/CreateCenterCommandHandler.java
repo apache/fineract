@@ -8,7 +8,7 @@ package org.mifosplatform.portfolio.group.handler;
 import org.mifosplatform.commands.handler.NewCommandSourceHandler;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
-import org.mifosplatform.portfolio.group.service.GroupWritePlatformService;
+import org.mifosplatform.portfolio.group.service.GroupingTypesWritePlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,17 +16,16 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class CreateCenterCommandHandler implements NewCommandSourceHandler {
 
-    private final GroupWritePlatformService groupWritePlatformService;
-    private static final Long LEVEL_ID = (long) 1;
+    private final GroupingTypesWritePlatformService groupWritePlatformService;
 
     @Autowired
-    public CreateCenterCommandHandler(final GroupWritePlatformService groupWritePlatformService) {
+    public CreateCenterCommandHandler(final GroupingTypesWritePlatformService groupWritePlatformService) {
         this.groupWritePlatformService = groupWritePlatformService;
     }
 
     @Transactional
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.groupWritePlatformService.createGroup(null , LEVEL_ID , command);
+        return this.groupWritePlatformService.createCenter(command);
     }
 }
