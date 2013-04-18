@@ -194,27 +194,35 @@ public class Report extends AbstractPersistable<Long> {
 				.parameter("reportType")
 				.value(this.reportType)
 				.notBlank()
-				.notExceedingLengthOf(20)
 				.isOneOfTheseValues(
 						new Object[] { "Table", "Pentaho", "Chart" });
 
 		baseDataValidator.reset().parameter("reportSubType")
 				.value(this.reportSubType).notExceedingLengthOf(20);
 
-		if (this.reportType != null && this.reportType.equals("Chart")) {
-			baseDataValidator
-					.reset()
-					.parameter("reportSubType")
-					.value(this.reportSubType)
-					.cantBeBlankWhenParameterProvidedIs("reportType",
-							this.reportType)
-					.isOneOfTheseValues(new Object[] { "Bar", "Pie" });
+		if (StringUtils.isNotBlank(this.reportType)) {
+			if (this.reportType.equals("Chart")) {
+				baseDataValidator
+						.reset()
+						.parameter("reportSubType")
+						.value(this.reportSubType)
+						.cantBeBlankWhenParameterProvidedIs("reportType",
+								this.reportType)
+						.isOneOfTheseValues(new Object[] { "Bar", "Pie" });
+			} else {
+				baseDataValidator
+						.reset()
+						.parameter("reportSubType")
+						.value(this.reportSubType)
+						.mustBeBlankWhenParameterProvidedIs("reportType",
+								this.reportType);
+			}
 		}
 
-		baseDataValidator.reset().parameter("reportCategory").value(this.reportCategory)
-				.notExceedingLengthOf(45);
+		baseDataValidator.reset().parameter("reportCategory")
+				.value(this.reportCategory).notExceedingLengthOf(45);
 
-		if (this.reportType != null) {
+		if (StringUtils.isNotBlank(this.reportType)) {
 			if ((this.reportType.equals("Table"))
 					|| (this.reportType.equals("Chart"))) {
 				baseDataValidator
@@ -247,5 +255,5 @@ public class Report extends AbstractPersistable<Long> {
 	public String getReportName() {
 		return reportName;
 	}
-	
+
 }
