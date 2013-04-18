@@ -16,7 +16,6 @@ import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
-import org.mifosplatform.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
@@ -60,14 +59,12 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
     private final GroupRepository groupRepository;
     private final ClientDataValidator fromApiJsonDeserializer;
     private final AccountNumberGeneratorFactory accountIdentifierGeneratorFactory;
-    private final ConfigurationDomainService configurationDomainService;
 
     @Autowired
     public ClientWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
             final ClientRepositoryWrapper clientRepository, final OfficeRepository officeRepository, final NoteRepository noteRepository,
-            final ClientDataValidator fromApiJsonDeserializer,
-            final AccountNumberGeneratorFactory accountIdentifierGeneratorFactory, final GroupRepository groupRepository,
-            final ConfigurationDomainService configurationDomainService) {
+            final ClientDataValidator fromApiJsonDeserializer, final AccountNumberGeneratorFactory accountIdentifierGeneratorFactory,
+            final GroupRepository groupRepository) {
         this.context = context;
         this.clientRepository = clientRepository;
         this.officeRepository = officeRepository;
@@ -75,7 +72,6 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
         this.accountIdentifierGeneratorFactory = accountIdentifierGeneratorFactory;
         this.groupRepository = groupRepository;
-        this.configurationDomainService = configurationDomainService;
     }
 
     @Transactional
@@ -128,8 +124,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
         try {
             context.authenticatedUser();
 
-            final boolean isPendingApprovalEnabled = this.configurationDomainService.isClientPendingApprovalAllowedEnabled();
-            this.fromApiJsonDeserializer.validateForCreate(command.json(), isPendingApprovalEnabled);
+            this.fromApiJsonDeserializer.validateForCreate(command.json());
 
             final Long officeId = command.longValueOfParameterNamed(ClientApiConstants.officeIdParamName);
 
@@ -144,7 +139,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                 if (clientParentGroup == null) { throw new GroupNotFoundException(groupId); }
             }
 
-            final Client newClient = Client.createNew(clientOffice, clientParentGroup, command, isPendingApprovalEnabled);
+            final Client newClient = Client.createNew(clientOffice, clientParentGroup, command);
 
             this.clientRepository.save(newClient);
 
@@ -175,15 +170,14 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
         try {
             context.authenticatedUser();
 
-            final boolean isPendingApprovalEnabled = this.configurationDomainService.isClientPendingApprovalAllowedEnabled();
-            this.fromApiJsonDeserializer.validateForUpdate(command.json(), isPendingApprovalEnabled);
+            this.fromApiJsonDeserializer.validateForUpdate(command.json());
 
             final Client clientForUpdate = this.clientRepository.findOneWithNotFoundDetection(clientId);
 
             final Map<String, Object> changes = clientForUpdate.update(command);
 
-            if (changes.containsKey("officeId")) {
-                final Long officeId = (Long) changes.get("officeId");
+            if (changes.containsKey(ClientApiConstants.officeIdParamName)) {
+                final Long officeId = (Long) changes.get(ClientApiConstants.officeIdParamName);
                 final Office newOffice = this.officeRepository.findOne(officeId);
                 if (newOffice == null) { throw new OfficeNotFoundException(officeId); }
 
@@ -203,7 +197,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                     .build();
         } catch (DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(command, dve);
-            return new CommandProcessingResult(Long.valueOf(-1));
+            return CommandProcessingResult.empty();
         }
     }
 
@@ -231,7 +225,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                     .build();
         } catch (DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(command, dve);
-            return new CommandProcessingResult(Long.valueOf(-1));
+            return CommandProcessingResult.empty();
         }
     }
 
@@ -280,7 +274,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
     }
 
     private String setupForClientImageUpdate(final Long clientId, final Client client) {
-        if (client == null || client.isDeleted()) { throw new ClientNotFoundException(clientId); }
+        if (client == null) { throw new ClientNotFoundException(clientId); }
 
         final String imageUploadLocation = FileUtils.generateClientImageParentDirectory(clientId);
         // delete previous image from the file system

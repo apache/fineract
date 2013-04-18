@@ -25,6 +25,7 @@ import org.mifosplatform.organisation.monetary.domain.ApplicationCurrencyReposit
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.organisation.monetary.domain.Money;
 import org.mifosplatform.portfolio.client.data.ClientData;
+import org.mifosplatform.portfolio.client.domain.ClientEnumerations;
 import org.mifosplatform.portfolio.client.service.ClientReadPlatformService;
 import org.mifosplatform.portfolio.group.data.GroupGeneralData;
 import org.mifosplatform.portfolio.group.service.GroupReadPlatformService;
@@ -185,12 +186,12 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         context.authenticatedUser();
 
         GroupGeneralData groupAccount = this.groupReadPlatformService.retrieveOne(groupId);
-        //get group associations
+        // get group associations
         Collection<ClientData> membersOfGroup = this.clientReadPlatformService.retrieveClientMembersOfGroup(groupId);
         if (!CollectionUtils.isEmpty(membersOfGroup)) {
             groupAccount = GroupGeneralData.withAssocations(groupAccount, membersOfGroup);
         }
-        
+
         final LocalDate expectedDisbursementDate = DateUtils.getLocalDateOfTenant();
         LoanAccountData loanDetails = LoanAccountData.groupDefaults(groupAccount, expectedDisbursementDate);
 
@@ -296,7 +297,10 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     + " l.loanpurpose_cv_id as loanPurposeId, cv.code_value as loanPurposeName,"
                     + " lp.id as loanProductId, lp.name as loanProductName, lp.description as loanProductDescription,"
                     + " c.id as clientId, c.display_name as clientName, c.office_id as clientOfficeId,"
-                    + " g.id as groupId, g.display_name as groupName, g.office_id as groupOfficeId, g.staff_id As groupStaffId , g.parent_id as groupParentId , g.hierarchy As groupHierarchy , g.external_id As groupExternalId , "
+                    + " g.id as groupId, g.display_name as groupName,"
+                    + " g.office_id as groupOfficeId, g.staff_id As groupStaffId , g.parent_id as groupParentId, "
+                    + " g.hierarchy As groupHierarchy , g.external_id As groupExternalId, "
+                    + " g.status_enum as statusEnum, g.activation_date as activationDate, "
                     + " l.submittedon_date as submittedOnDate, sbu.username as submittedByUsername, sbu.firstname as submittedByFirstname, sbu.lastname as submittedByLastname,"
                     + " l.rejectedon_date as rejectedOnDate, rbu.username as rejectedByUsername, rbu.firstname as rejectedByFirstname, rbu.lastname as rejectedByLastname,"
                     + " l.withdrawnon_date as withdrawnOnDate, wbu.username as withdrawnByUsername, wbu.firstname as withdrawnByFirstname, wbu.lastname as withdrawnByLastname,"
@@ -533,8 +537,11 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
             GroupGeneralData groupData = null;
             if (groupId != null) {
-                groupData = GroupGeneralData.instance(groupId, groupName, groupExternalId, groupOfficeId, null, groupParentId, null,
-                        groupStaffId, null, groupHierarchy);
+                final Integer groupStatusEnum = JdbcSupport.getInteger(rs, "statusEnum");
+                final EnumOptionData groupStatus = ClientEnumerations.status(groupStatusEnum);
+                final LocalDate activationDate = JdbcSupport.getLocalDate(rs, "activationDate");
+                groupData = GroupGeneralData.instance(groupId, groupName, groupExternalId, groupStatus, activationDate, groupOfficeId,
+                        null, groupParentId, null, groupStaffId, null, groupHierarchy);
             }
 
             return LoanAccountData.basicLoanDetails(id, accountNo, status, externalId, clientId, clientName, clientOfficeId, groupData,

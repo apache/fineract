@@ -27,6 +27,8 @@ final public class ClientData implements Comparable<ClientData> {
     private final String externalId;
 
     private final EnumOptionData status;
+    @SuppressWarnings("unused")
+    private final Boolean active;
     private final LocalDate activationDate;
 
     private final String firstname;
@@ -42,33 +44,27 @@ final public class ClientData implements Comparable<ClientData> {
     @SuppressWarnings("unused")
     private final Boolean imagePresent;
 
-    private final Boolean clientPendingApprovalAllowed;
-
     // associations
     private final Collection<GroupGeneralData> groups;
 
     // template
     private final Collection<OfficeData> officeOptions;
 
-    public static ClientData template(final Long officeId, final LocalDate joinedDate, final Boolean clientPendingApprovalAllowed,
-            final Collection<OfficeData> allowedOffices) {
-        return new ClientData(null, null, officeId, null, null, null, null, null, null, null, null, joinedDate, null,
-                clientPendingApprovalAllowed, allowedOffices, null);
+    public static ClientData template(final Long officeId, final LocalDate joinedDate, final Collection<OfficeData> officeOptions) {
+        return new ClientData(null, null, officeId, null, null, null, null, null, null, null, null, joinedDate, null, officeOptions, null);
     }
 
     public static ClientData templateOnTop(final ClientData clientData, final List<OfficeData> allowedOffices) {
 
         return new ClientData(clientData.accountNo, clientData.status, clientData.officeId, clientData.officeName, clientData.id,
                 clientData.firstname, clientData.middlename, clientData.lastname, clientData.fullname, clientData.displayName,
-                clientData.externalId, clientData.activationDate, clientData.imageKey, clientData.clientPendingApprovalAllowed,
-                allowedOffices, clientData.groups);
+                clientData.externalId, clientData.activationDate, clientData.imageKey, allowedOffices, clientData.groups);
     }
 
     public static ClientData setParentGroups(final ClientData clientData, final Collection<GroupGeneralData> parentGroups) {
         return new ClientData(clientData.accountNo, clientData.status, clientData.officeId, clientData.officeName, clientData.id,
                 clientData.firstname, clientData.middlename, clientData.lastname, clientData.fullname, clientData.displayName,
-                clientData.externalId, clientData.activationDate, clientData.imageKey, clientData.clientPendingApprovalAllowed,
-                clientData.officeOptions, parentGroups);
+                clientData.externalId, clientData.activationDate, clientData.imageKey, clientData.officeOptions, parentGroups);
     }
 
     public static ClientData clientIdentifier(final Long id, final String accountNo, final EnumOptionData status, final String firstname,
@@ -76,19 +72,31 @@ final public class ClientData implements Comparable<ClientData> {
             final String officeName) {
 
         return new ClientData(accountNo, status, officeId, officeName, id, firstname, middlename, lastname, fullname, displayName, null,
-                null, null, null, null, null);
+                null, null, null, null);
     }
 
     public static ClientData lookup(final Long id, final String displayName, final Long officeId, final String officeName) {
-        return new ClientData(null, null, officeId, officeName, id, null, null, null, null, displayName, null, null, null, null, null, null);
+        return new ClientData(null, null, officeId, officeName, id, null, null, null, null, displayName, null, null, null, null, null);
     }
 
-    public ClientData(final String accountNo, final EnumOptionData status, final Long officeId, final String officeName, final Long id,
+    public static ClientData instance(final String accountNo, final EnumOptionData status, final Long officeId, final String officeName,
+            final Long id, final String firstname, final String middlename, final String lastname, final String fullname,
+            final String displayName, final String externalId, final LocalDate activationDate, final String imageKey) {
+        return new ClientData(accountNo, status, officeId, officeName, id, firstname, middlename, lastname, fullname, displayName,
+                externalId, activationDate, imageKey, null, null);
+    }
+
+    private ClientData(final String accountNo, final EnumOptionData status, final Long officeId, final String officeName, final Long id,
             final String firstname, final String middlename, final String lastname, final String fullname, final String displayName,
-            final String externalId, final LocalDate activationDate, final String imageKey, final Boolean clientPendingApprovalAllowed,
-            final Collection<OfficeData> allowedOffices, final Collection<GroupGeneralData> groups) {
+            final String externalId, final LocalDate activationDate, final String imageKey, final Collection<OfficeData> allowedOffices,
+            final Collection<GroupGeneralData> groups) {
         this.accountNo = accountNo;
         this.status = status;
+        if (status != null) {
+            active = status.getId().equals(300L);
+        } else {
+            active = null;
+        }
         this.officeId = officeId;
         this.officeName = officeName;
         this.id = id;
@@ -105,8 +113,6 @@ final public class ClientData implements Comparable<ClientData> {
         } else {
             this.imagePresent = null;
         }
-
-        this.clientPendingApprovalAllowed = clientPendingApprovalAllowed;
 
         // associations
         this.groups = groups;

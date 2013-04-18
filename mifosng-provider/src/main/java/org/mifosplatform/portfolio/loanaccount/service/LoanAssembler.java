@@ -20,8 +20,7 @@ import org.mifosplatform.organisation.staff.domain.StaffRepository;
 import org.mifosplatform.organisation.staff.exception.StaffNotFoundException;
 import org.mifosplatform.organisation.staff.exception.StaffRoleException;
 import org.mifosplatform.portfolio.client.domain.Client;
-import org.mifosplatform.portfolio.client.domain.ClientRepository;
-import org.mifosplatform.portfolio.client.exception.ClientNotFoundException;
+import org.mifosplatform.portfolio.client.domain.ClientRepositoryWrapper;
 import org.mifosplatform.portfolio.collateral.domain.LoanCollateral;
 import org.mifosplatform.portfolio.collateral.service.CollateralAssembler;
 import org.mifosplatform.portfolio.fund.domain.Fund;
@@ -56,7 +55,7 @@ import com.google.gson.JsonElement;
 public class LoanAssembler {
 
     private final LoanProductRepository loanProductRepository;
-    private final ClientRepository clientRepository;
+    private final ClientRepositoryWrapper clientRepository;
     private final GroupRepository groupRepository;
     private final FundRepository fundRepository;
     private final LoanTransactionProcessingStrategyRepository loanTransactionProcessingStrategyRepository;
@@ -71,7 +70,7 @@ public class LoanAssembler {
 
     @Autowired
     public LoanAssembler(final FromJsonHelper fromApiJsonHelper, final LoanProductRepository loanProductRepository,
-            final ClientRepository clientRepository, final GroupRepository groupRepository, final FundRepository fundRepository,
+            final ClientRepositoryWrapper clientRepository, final GroupRepository groupRepository, final FundRepository fundRepository,
             final LoanTransactionProcessingStrategyRepository loanTransactionProcessingStrategyRepository,
             final StaffRepository staffRepository, final CodeValueRepositoryWrapper codeValueRepository,
             final LoanScheduleAssembler loanScheduleAssembler, final LoanChargeAssembler loanChargeAssembler,
@@ -112,7 +111,7 @@ public class LoanAssembler {
 
         final LoanProduct loanProduct = this.loanProductRepository.findOne(productId);
         if (loanProduct == null) { throw new LoanProductNotFoundException(productId); }
-        
+
         final Fund fund = findFundByIdIfProvided(fundId);
         final Staff loanOfficer = findLoanOfficerByIdIfProvided(loanOfficerId);
         final LoanTransactionProcessingStrategy loanTransactionProcessingStrategy = findStrategyByIdIfProvided(transactionProcessingStrategyId);
@@ -130,8 +129,7 @@ public class LoanAssembler {
         Client client = null;
         Group group = null;
         if (clientId != null) {
-            client = this.clientRepository.findOne(clientId);
-            if (client == null || client.isDeleted()) { throw new ClientNotFoundException(clientId); }
+            client = this.clientRepository.findOneWithNotFoundDetection(clientId);
 
             loanApplication = Loan.newIndividualLoanApplication(accountNo, client, loanProduct, fund, loanOfficer, loanPurpose,
                     loanTransactionProcessingStrategy, loanSchedule, loanCharges, collateral);

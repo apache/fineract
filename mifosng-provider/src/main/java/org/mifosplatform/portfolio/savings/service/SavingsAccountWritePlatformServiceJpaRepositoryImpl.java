@@ -22,8 +22,7 @@ import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext
 import org.mifosplatform.portfolio.client.domain.AccountNumberGenerator;
 import org.mifosplatform.portfolio.client.domain.AccountNumberGeneratorFactory;
 import org.mifosplatform.portfolio.client.domain.Client;
-import org.mifosplatform.portfolio.client.domain.ClientRepository;
-import org.mifosplatform.portfolio.client.exception.ClientNotFoundException;
+import org.mifosplatform.portfolio.client.domain.ClientRepositoryWrapper;
 import org.mifosplatform.portfolio.group.domain.Group;
 import org.mifosplatform.portfolio.group.domain.GroupRepository;
 import org.mifosplatform.portfolio.group.exception.GroupNotFoundException;
@@ -57,7 +56,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
     private final SavingsAccountDataValidator savingsAccountDataValidator;
     private final SavingsAccountTransactionDataValidator savingsAccountTransactionDataValidator;
     private final AccountNumberGeneratorFactory accountIdentifierGeneratorFactory;
-    private final ClientRepository clientRepository;
+    private final ClientRepositoryWrapper clientRepository;
     private final GroupRepository groupRepository;
     private final SavingsProductRepository savingsProductRepository;
 
@@ -67,7 +66,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
             final SavingsAccountTransactionRepository savingsAccountTransactionRepository,
             final SavingsAccountAssembler savingAccountAssembler, final SavingsAccountDataValidator savingsAccountDataValidator,
             final SavingsAccountTransactionDataValidator savingsAccountTransactionDataValidator,
-            final AccountNumberGeneratorFactory accountIdentifierGeneratorFactory, final ClientRepository clientRepository,
+            final AccountNumberGeneratorFactory accountIdentifierGeneratorFactory, final ClientRepositoryWrapper clientRepository,
             final GroupRepository groupRepository, final SavingsProductRepository savingsProductRepository) {
         this.context = context;
         this.savingAccountRepository = savingAccountRepository;
@@ -160,8 +159,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
                 if (changes.containsKey(SavingsApiConstants.clientIdParamName)) {
                     final Long clientId = command.longValueOfParameterNamed(SavingsApiConstants.clientIdParamName);
                     if (clientId != null) {
-                        final Client client = this.clientRepository.findOne(clientId);
-                        if (client == null || client.isDeleted()) { throw new ClientNotFoundException(clientId); }
+                        final Client client = this.clientRepository.findOneWithNotFoundDetection(clientId);
                         account.update(client);
                     } else {
                         final Client client = null;

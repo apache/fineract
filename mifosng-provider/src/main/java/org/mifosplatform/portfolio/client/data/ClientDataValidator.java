@@ -37,7 +37,7 @@ public final class ClientDataValidator {
         this.fromApiJsonHelper = fromApiJsonHelper;
     }
 
-    public void validateForCreate(final String json, final boolean isPendingApprovalEnabled) {
+    public void validateForCreate(final String json) {
 
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
@@ -74,10 +74,6 @@ public final class ClientDataValidator {
             if (active.booleanValue()) {
                 final LocalDate joinedDate = fromApiJsonHelper.extractLocalDateNamed(ClientApiConstants.activationDateParamName, element);
                 baseDataValidator.reset().parameter(ClientApiConstants.activationDateParamName).value(joinedDate).notNull();
-            } else {
-                if (!isPendingApprovalEnabled) {
-                    baseDataValidator.reset().parameter(ClientApiConstants.activeParamName).failWithCode(".pending.status.not.allowed");
-                }
             }
         } else {
             baseDataValidator.reset().parameter(ClientApiConstants.activeParamName).value(active).trueOrFalseRequired(false);
@@ -86,7 +82,7 @@ public final class ClientDataValidator {
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
-    public void validateForUpdate(final String json, final boolean isPendingApprovalEnabled) {
+    public void validateForUpdate(final String json) {
 
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
@@ -139,13 +135,7 @@ public final class ClientDataValidator {
             if (active.booleanValue()) {
                 final LocalDate joinedDate = fromApiJsonHelper.extractLocalDateNamed(ClientApiConstants.activationDateParamName, element);
                 baseDataValidator.reset().parameter(ClientApiConstants.activationDateParamName).value(joinedDate).notNull();
-            } else {
-                if (!isPendingApprovalEnabled) {
-                    baseDataValidator.reset().parameter(ClientApiConstants.activeParamName).failWithCode(".pending.status.not.allowed");
-                }
             }
-        } else {
-            baseDataValidator.reset().parameter(ClientApiConstants.activeParamName).value(active).trueOrFalseRequired(false);
         }
 
         if (!atLeastOneParameterPassedForUpdate) {
@@ -179,8 +169,7 @@ public final class ClientDataValidator {
     private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
         if (!dataValidationErrors.isEmpty()) {
             //
-            throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
-                    dataValidationErrors);
+            throw new PlatformApiDataValidationException(dataValidationErrors);
         }
     }
 }

@@ -19,9 +19,8 @@ import org.mifosplatform.portfolio.client.command.ClientIdentifierCommand;
 import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.client.domain.ClientIdentifier;
 import org.mifosplatform.portfolio.client.domain.ClientIdentifierRepository;
-import org.mifosplatform.portfolio.client.domain.ClientRepository;
+import org.mifosplatform.portfolio.client.domain.ClientRepositoryWrapper;
 import org.mifosplatform.portfolio.client.exception.ClientIdentifierNotFoundException;
-import org.mifosplatform.portfolio.client.exception.ClientNotFoundException;
 import org.mifosplatform.portfolio.client.exception.DuplicateClientIdentifierException;
 import org.mifosplatform.portfolio.client.serialization.ClientIdentifierCommandFromApiJsonDeserializer;
 import org.slf4j.Logger;
@@ -37,14 +36,14 @@ public class ClientIdentifierWritePlatformServiceJpaRepositoryImpl implements Cl
     private final static Logger logger = LoggerFactory.getLogger(ClientIdentifierWritePlatformServiceJpaRepositoryImpl.class);
 
     private final PlatformSecurityContext context;
-    private final ClientRepository clientRepository;
+    private final ClientRepositoryWrapper clientRepository;
     private final ClientIdentifierRepository clientIdentifierRepository;
     private final CodeValueRepositoryWrapper codeValueRepository;
     private final ClientIdentifierCommandFromApiJsonDeserializer clientIdentifierCommandFromApiJsonDeserializer;
 
     @Autowired
     public ClientIdentifierWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
-            final ClientRepository clientRepository, final ClientIdentifierRepository clientIdentifierRepository,
+            final ClientRepositoryWrapper clientRepository, final ClientIdentifierRepository clientIdentifierRepository,
             final CodeValueRepositoryWrapper codeValueRepository,
             final ClientIdentifierCommandFromApiJsonDeserializer clientIdentifierCommandFromApiJsonDeserializer) {
         this.context = context;
@@ -67,8 +66,7 @@ public class ClientIdentifierWritePlatformServiceJpaRepositoryImpl implements Cl
         String documentTypeLabel = null;
         Long documentTypeId = null;
         try {
-            final Client client = this.clientRepository.findOne(clientId);
-            if (client == null || client.isDeleted()) { throw new ClientNotFoundException(clientId); }
+            final Client client = this.clientRepository.findOneWithNotFoundDetection(clientId);
 
             final CodeValue documentType = this.codeValueRepository.findOneWithNotFoundDetection(clientIdentifierCommand
                     .getDocumentTypeId());
@@ -106,6 +104,7 @@ public class ClientIdentifierWritePlatformServiceJpaRepositoryImpl implements Cl
         try {
             CodeValue documentType = null;
 
+            final Client client = this.clientRepository.findOneWithNotFoundDetection(clientId);
             final ClientIdentifier clientIdentifierForUpdate = this.clientIdentifierRepository.findOne(identifierId);
             if (clientIdentifierForUpdate == null) { throw new ClientIdentifierNotFoundException(identifierId); }
 
@@ -135,10 +134,9 @@ public class ClientIdentifierWritePlatformServiceJpaRepositoryImpl implements Cl
                 this.clientIdentifierRepository.saveAndFlush(clientIdentifierForUpdate);
             }
 
-            final Client client = this.clientRepository.findOne(clientId);
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //
-                    .withOfficeId(client.getOffice().getId()) //
+                    .withOfficeId(client.officeId()) //
                     .withClientId(clientId) //
                     .withEntityId(identifierId) //
                     .with(changes) //
@@ -152,13 +150,19 @@ public class ClientIdentifierWritePlatformServiceJpaRepositoryImpl implements Cl
     @Transactional
     @Override
     public CommandProcessingResult deleteClientIdentifier(final Long clientId, final Long identifierId, final Long commandId) {
+
+        final Client client = this.clientRepository.findOneWithNotFoundDetection(clientId);
+
         final ClientIdentifier clientIdentifier = this.clientIdentifierRepository.findOne(identifierId);
         if (clientIdentifier == null) { throw new ClientIdentifierNotFoundException(identifierId); }
         this.clientIdentifierRepository.delete(clientIdentifier);
 
-        final Client client = this.clientRepository.findOne(clientId);
-        return new CommandProcessingResultBuilder().withCommandId(commandId).withOfficeId(client.getOffice().getId())
-                .withClientId(clientId).withEntityId(identifierId).build();
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(commandId) //
+                .withOfficeId(client.officeId()) //
+                .withClientId(clientId) //
+                .withEntityId(identifierId) //
+                .build();
     }
 
     private void handleClientIdentifierDataIntegrityViolation(final String documentTypeLabel, final Long documentTypeId,
@@ -177,5 +181,4 @@ public class ClientIdentifierWritePlatformServiceJpaRepositoryImpl implements Cl
     private void logAsErrorUnexpectedDataIntegrityException(final DataIntegrityViolationException dve) {
         logger.error(dve.getMessage(), dve);
     }
-
 }

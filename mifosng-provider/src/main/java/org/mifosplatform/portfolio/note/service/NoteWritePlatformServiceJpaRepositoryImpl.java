@@ -11,7 +11,7 @@ import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.mifosplatform.portfolio.client.domain.Client;
-import org.mifosplatform.portfolio.client.domain.ClientRepository;
+import org.mifosplatform.portfolio.client.domain.ClientRepositoryWrapper;
 import org.mifosplatform.portfolio.client.exception.ClientNotFoundException;
 import org.mifosplatform.portfolio.group.domain.Group;
 import org.mifosplatform.portfolio.group.domain.GroupRepository;
@@ -35,7 +35,7 @@ import org.springframework.stereotype.Service;
 public class NoteWritePlatformServiceJpaRepositoryImpl implements NoteWritePlatformService {
 
     private final NoteRepository noteRepository;
-    private final ClientRepository clientRepository;
+    private final ClientRepositoryWrapper clientRepository;
     private final GroupRepository groupRepository;
     // private final SavingAccountRepository savingAccountRepository;
     private final LoanRepository loanRepository;
@@ -43,15 +43,12 @@ public class NoteWritePlatformServiceJpaRepositoryImpl implements NoteWritePlatf
     private final NoteCommandFromApiJsonDeserializer fromApiJsonDeserializer;
 
     @Autowired
-    public NoteWritePlatformServiceJpaRepositoryImpl(final NoteRepository noteRepository, final ClientRepository clientRepository,
-            final GroupRepository groupRepository,
-            // final SavingAccountRepository savingAccountRepository,
-            final LoanRepository loanRepository, final LoanTransactionRepository loanTransactionRepository,
-            final NoteCommandFromApiJsonDeserializer fromApiJsonDeserializer) {
+    public NoteWritePlatformServiceJpaRepositoryImpl(final NoteRepository noteRepository, final ClientRepositoryWrapper clientRepository,
+            final GroupRepository groupRepository, final LoanRepository loanRepository,
+            final LoanTransactionRepository loanTransactionRepository, final NoteCommandFromApiJsonDeserializer fromApiJsonDeserializer) {
         this.noteRepository = noteRepository;
         this.clientRepository = clientRepository;
         this.groupRepository = groupRepository;
-        // this.savingAccountRepository = savingAccountRepository;
         this.loanRepository = loanRepository;
         this.loanTransactionRepository = loanTransactionRepository;
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
@@ -61,7 +58,7 @@ public class NoteWritePlatformServiceJpaRepositoryImpl implements NoteWritePlatf
 
         final Long resourceId = command.getSupportedEntityId();
 
-        final Client client = this.clientRepository.findOne(resourceId);
+        final Client client = this.clientRepository.findOneWithNotFoundDetection(resourceId);
         if (client == null) { throw new ClientNotFoundException(resourceId); }
         final Note newNote = Note.clientNoteFromJson(client, command);
 
@@ -87,7 +84,9 @@ public class NoteWritePlatformServiceJpaRepositoryImpl implements NoteWritePlatf
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
                 .withEntityId(newNote.getId()) //
-                .withClientId(group.getId()).withOfficeId(group.getOfficeId()).build();
+                .withClientId(group.getId()) //
+                .withOfficeId(group.officeId()) //
+                .build();
     }
 
     private CommandProcessingResult createLoanNote(final JsonCommand command) {
@@ -105,12 +104,10 @@ public class NoteWritePlatformServiceJpaRepositoryImpl implements NoteWritePlatf
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
                 .withEntityId(newNote.getId()) //
-                .withClientId(loan.getClientId()).withOfficeId(loan.getOfficeId()).withLoanId(loan.getId()).withGroupId(loan.getGroupId())// Loan
-                                                                                                                                          // can
-                                                                                                                                          // be
-                                                                                                                                          // associated
-                                                                                                                                          // to
-                                                                                                                                          // group
+                .withClientId(loan.getClientId()) //
+                .withOfficeId(loan.getOfficeId()) //
+                .withLoanId(loan.getId()) //
+                .withGroupId(loan.getGroupId()) //
                 .build();
     }
 
@@ -196,8 +193,7 @@ public class NoteWritePlatformServiceJpaRepositoryImpl implements NoteWritePlatf
 
         final NoteType type = NoteType.fromApiUrl(resourceUrl);
 
-        final Client client = this.clientRepository.findOne(resourceId);
-        if (client == null) { throw new ClientNotFoundException(resourceId); }
+        final Client client = this.clientRepository.findOneWithNotFoundDetection(resourceId);
 
         final Note noteForUpdate = this.noteRepository.findByClientIdAndId(resourceId, noteId);
         if (noteForUpdate == null) { throw new NoteNotFoundException(noteId, resourceId, type.name().toLowerCase()); }
@@ -238,7 +234,9 @@ public class NoteWritePlatformServiceJpaRepositoryImpl implements NoteWritePlatf
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
                 .withEntityId(noteForUpdate.getId()) //
-                .withGroupId(group.getId()).withOfficeId(group.getOfficeId()).with(changes).build();
+                .withGroupId(group.getId()) //
+                .withOfficeId(group.officeId()) //
+                .with(changes).build();
     }
 
     private CommandProcessingResult updateLoanNote(final JsonCommand command) {
@@ -393,11 +391,12 @@ public class NoteWritePlatformServiceJpaRepositoryImpl implements NoteWritePlatf
                 noteForUpdate = this.noteRepository.findByLoanTransactionIdAndId(resourceId, noteId);
             }
             break;
-        // case SAVING_ACCOUNT: {
-        // noteForUpdate =
-        // this.noteRepository.findBySavingAccountIdAndId(resourceId, noteId);
-        // }
-        // break;
+            // case SAVING_ACCOUNT: {
+            // noteForUpdate =
+            // this.noteRepository.findBySavingAccountIdAndId(resourceId,
+            // noteId);
+            // }
+            // break;
             case SAVING_ACCOUNT:
             break;
         }

@@ -121,9 +121,7 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
 
         final LoanChargeMapper rm = new LoanChargeMapper();
 
-        // TODO - KW - check to see if its important that 'c.is_deleted=0' is
-        // required here?
-        final String sql = "select " + rm.schema() + " where c.is_deleted=0 and lc.loan_id=? "
+        final String sql = "select " + rm.schema() + " where lc.loan_id=? "
                 + " order by lc.charge_time_enum ASC, lc.due_for_collection_as_of_date ASC, lc.is_penalty ASC";
 
         return this.jdbcTemplate.query(sql, rm, new Object[] { loanId });

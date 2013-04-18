@@ -20,10 +20,8 @@ import org.mifosplatform.infrastructure.core.data.ApiParameterError;
 import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
 import org.mifosplatform.infrastructure.core.exception.InvalidJsonException;
 import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
-import org.mifosplatform.infrastructure.core.serialization.FromApiJsonDeserializer;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.portfolio.client.api.ClientApiConstants;
-import org.mifosplatform.portfolio.client.command.ClientCommand;
 import org.mifosplatform.portfolio.group.api.GroupingTypesApiConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -31,10 +29,6 @@ import org.springframework.stereotype.Component;
 import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
 
-/**
- * Implementation of {@link FromApiJsonDeserializer} for {@link ClientCommand} 
- * 's.
- */
 @Component
 public final class GroupingTypesDataValidator {
 
@@ -48,8 +42,7 @@ public final class GroupingTypesDataValidator {
     private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
         if (!dataValidationErrors.isEmpty()) {
             //
-            throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
-                    dataValidationErrors);
+            throw new PlatformApiDataValidationException(dataValidationErrors);
         }
     }
 
@@ -311,46 +304,24 @@ public final class GroupingTypesDataValidator {
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
-    @Deprecated
-    public void validateForUpdate(final String json) {
+    public void validateForActivation(final JsonCommand command, final String resourceName) {
+        final String json = command.json();
 
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-
-        /*
-         * Office updated is not supported
-         */
-        final Set<String> supportedParametersForupdate = new HashSet<String>(Arrays.asList("id", "externalId", "name", "staffId",
-                "parentId", "clientMembers", "childGroups"));
-
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, supportedParametersForupdate);
-        final JsonElement element = this.fromApiJsonHelper.parse(json);
+        fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, GroupingTypesApiConstants.ACTIVATION_REQUEST_DATA_PARAMETERS);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource(resourceName);
 
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("group");
+        final JsonElement element = command.parsedJson();
 
-        final String externalIdParameterName = "externalId";
-        if (this.fromApiJsonHelper.parameterExists(externalIdParameterName, element)) {
-            final String externalId = this.fromApiJsonHelper.extractStringNamed(externalIdParameterName, element);
-            baseDataValidator.reset().parameter(externalIdParameterName).value(externalId).ignoreIfNull().notExceedingLengthOf(100);
-        }
+        final LocalDate activationDate = fromApiJsonHelper
+                .extractLocalDateNamed(GroupingTypesApiConstants.activationDateParamName, element);
+        baseDataValidator.reset().parameter(GroupingTypesApiConstants.activationDateParamName).value(activationDate).notNull();
 
-        final String parentIdParameterName = "parentId";
-        if (this.fromApiJsonHelper.parameterExists(parentIdParameterName, element)) {
-            final Long parentId = this.fromApiJsonHelper.extractLongNamed(parentIdParameterName, element);
-            baseDataValidator.reset().parameter(parentIdParameterName).value(parentId).ignoreIfNull().integerGreaterThanZero();
-        }
-
-        final String staffIdParameterName = "staffId";
-        if (this.fromApiJsonHelper.parameterExists(staffIdParameterName, element)) {
-            final Long staffId = this.fromApiJsonHelper.extractLongNamed(staffIdParameterName, element);
-            baseDataValidator.reset().parameter(staffIdParameterName).value(staffId).ignoreIfNull().integerGreaterThanZero();
-        }
-
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
-                "Validation errors exist.", dataValidationErrors); }
+        throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
     public void validateForUnassignStaff(final String json) {
@@ -371,7 +342,6 @@ public final class GroupingTypesDataValidator {
         final Long staffId = this.fromApiJsonHelper.extractLongNamed(staffIdParameterName, element);
         baseDataValidator.reset().parameter(staffIdParameterName).value(staffId).notNull().integerGreaterThanZero();
 
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
-                "Validation errors exist.", dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
     }
 }

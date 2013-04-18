@@ -12,7 +12,6 @@ import java.util.Collection;
 
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
-import org.mifosplatform.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.mifosplatform.infrastructure.core.api.ApiParameterHelper;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
@@ -23,6 +22,7 @@ import org.mifosplatform.organisation.office.service.OfficeReadPlatformService;
 import org.mifosplatform.organisation.staff.data.StaffData;
 import org.mifosplatform.organisation.staff.service.StaffReadPlatformService;
 import org.mifosplatform.portfolio.client.data.ClientData;
+import org.mifosplatform.portfolio.client.domain.ClientEnumerations;
 import org.mifosplatform.portfolio.client.service.ClientReadPlatformService;
 import org.mifosplatform.portfolio.group.data.CenterData;
 import org.mifosplatform.portfolio.group.data.GroupGeneralData;
@@ -45,7 +45,6 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
     private final ClientReadPlatformService clientReadPlatformService;
     private final OfficeReadPlatformService officeReadPlatformService;
     private final StaffReadPlatformService staffReadPlatformService;
-    private final ConfigurationDomainService configurationDomainService;
 
     // data mappers
     private final AllGroupTypesDataMapper allGroupTypesDataMapper = new AllGroupTypesDataMapper();
@@ -56,10 +55,9 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
 
     @Autowired
     public CenterReadPlatformServiceImpl(final PlatformSecurityContext context, final TenantAwareRoutingDataSource dataSource,
-            final ConfigurationDomainService configurationDomainService, final ClientReadPlatformService clientReadPlatformService,
-            final OfficeReadPlatformService officeReadPlatformService, final StaffReadPlatformService staffReadPlatformService) {
+            final ClientReadPlatformService clientReadPlatformService, final OfficeReadPlatformService officeReadPlatformService,
+            final StaffReadPlatformService staffReadPlatformService) {
         this.context = context;
-        this.configurationDomainService = configurationDomainService;
         this.clientReadPlatformService = clientReadPlatformService;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.officeReadPlatformService = officeReadPlatformService;
@@ -113,8 +111,7 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
             + "g.status_enum as statusEnum, g.activation_date as activationDate, " //
             + "g.hierarchy as hierarchy " //
             + "from m_group g " //
-            + "join m_office o on o.id = g.office_id "
-            + "left join m_staff s on s.id = g.staff_id ";
+            + "join m_office o on o.id = g.office_id " + "left join m_staff s on s.id = g.staff_id ";
 
     private static final class CenterDataMapper implements RowMapper<CenterData> {
 
@@ -167,13 +164,19 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
             final Long id = rs.getLong("id");
             final String name = rs.getString("name");
             final String externalId = rs.getString("externalId");
+
+            final Integer statusEnum = JdbcSupport.getInteger(rs, "statusEnum");
+            final EnumOptionData status = ClientEnumerations.status(statusEnum);
+            final LocalDate activationDate = JdbcSupport.getLocalDate(rs, "activationDate");
+
             final Long officeId = rs.getLong("officeId");
             final String officeName = rs.getString("officeName");
             final Long staffId = JdbcSupport.getLong(rs, "staffId");
             final String staffName = rs.getString("staffName");
             final String hierarchy = rs.getString("hierarchy");
 
-            return GroupGeneralData.instance(id, name, externalId, officeId, officeName, null, null, staffId, staffName, hierarchy);
+            return GroupGeneralData.instance(id, name, externalId, status, activationDate, officeId, officeName, null, null, staffId,
+                    staffName, hierarchy);
         }
     }
 

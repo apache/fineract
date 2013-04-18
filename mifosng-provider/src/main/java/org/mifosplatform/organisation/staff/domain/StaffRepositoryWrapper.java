@@ -6,13 +6,12 @@
 package org.mifosplatform.organisation.staff.domain;
 
 import org.mifosplatform.organisation.staff.exception.StaffNotFoundException;
-import org.mifosplatform.portfolio.client.domain.ClientRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
  * <p>
- * Wrapper for {@link ClientRepository} that adds NULL checking and Error
+ * Wrapper for {@link StaffRepository} that adds NULL checking and Error
  * handling capabilities
  * </p>
  */
@@ -32,4 +31,9 @@ public class StaffRepositoryWrapper {
         return staff;
     }
 
+    public Staff findByOfficeWithNotFoundDetection(final Long staffId, final Long officeId) {
+        final Staff staff = this.repository.findByOffice(staffId, officeId);
+        if (staff == null) { throw new StaffNotFoundException(staffId); }
+        return staff;
+    }
 }

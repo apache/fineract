@@ -13,7 +13,6 @@ import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
-import org.mifosplatform.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.mifosplatform.infrastructure.core.api.ApiParameterHelper;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
@@ -42,7 +41,6 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
     private final JdbcTemplate jdbcTemplate;
     private final PlatformSecurityContext context;
-    private final ConfigurationDomainService configurationDomainService;
     private final OfficeReadPlatformService officeReadPlatformService;
 
     // data mappers
@@ -53,9 +51,8 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
     @Autowired
     public ClientReadPlatformServiceImpl(final PlatformSecurityContext context, final TenantAwareRoutingDataSource dataSource,
-            final ConfigurationDomainService configurationDomainService, final OfficeReadPlatformService officeReadPlatformService) {
+            final OfficeReadPlatformService officeReadPlatformService) {
         this.context = context;
-        this.configurationDomainService = configurationDomainService;
         this.officeReadPlatformService = officeReadPlatformService;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
     }
@@ -67,11 +64,9 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
         final Collection<OfficeData> offices = officeReadPlatformService.retrieveAllOfficesForDropdown();
 
-        final boolean clientPendingApprovalAllowed = this.configurationDomainService.isClientPendingApprovalAllowedEnabled();
-
         final Long officeId = currentUser.getOffice().getId();
 
-        return ClientData.template(officeId, new LocalDate(), clientPendingApprovalAllowed, offices);
+        return ClientData.template(officeId, new LocalDate(), offices);
     }
 
     @Override
@@ -81,19 +76,19 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         final String hierarchy = currentUser.getOffice().getHierarchy();
         final String hierarchySearchString = hierarchy + "%";
 
-        String sql = "select " + this.clientMapper.schema() + " where o.hierarchy like ? and c.is_deleted=0";
+        String sql = "select " + this.clientMapper.schema() + " where o.hierarchy like ?";
 
         final String extraCriteria = buildSqlStringFromClientCriteria(searchParameters);
-        
+
         if (StringUtils.isNotBlank(extraCriteria)) sql += " and (" + extraCriteria + ")";
 
         sql += " order by c.display_name ASC, c.account_no ASC";
 
         return this.jdbcTemplate.query(sql, clientMapper, new Object[] { hierarchySearchString });
     }
-    
+
     private String buildSqlStringFromClientCriteria(final SearchParameters searchParameters) {
-            
+
         final String sqlSearch = searchParameters.getSqlSearch();
         final Long officeId = searchParameters.getOfficeId();
         final String externalId = searchParameters.getExternalId();
@@ -147,13 +142,14 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             String hierarchy = currentUser.getOffice().getHierarchy();
             String hierarchySearchString = hierarchy + "%";
 
-            String sql = "select " + this.clientMapper.schema() + " where o.hierarchy like ? and c.is_deleted=0 and c.id = ?";
+            String sql = "select " + this.clientMapper.schema() + " where o.hierarchy like ? and c.id = ?";
             ClientData clientData = this.jdbcTemplate.queryForObject(sql, this.clientMapper,
                     new Object[] { hierarchySearchString, clientId });
 
             String clientGroupsSql = "select " + this.clientGroupsMapper.parentGroupsSchema();
 
-            Collection<GroupGeneralData> parentGroups = this.jdbcTemplate.query(clientGroupsSql, this.clientGroupsMapper, new Object[] { clientId });
+            Collection<GroupGeneralData> parentGroups = this.jdbcTemplate.query(clientGroupsSql, this.clientGroupsMapper,
+                    new Object[] { clientId });
             return ClientData.setParentGroups(clientData, parentGroups);
         } catch (EmptyResultDataAccessException e) {
             throw new ClientNotFoundException(clientId);
@@ -188,7 +184,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         final String hierarchySearchString = hierarchy + "%";
 
         final String sql = "select " + this.membersOfGroupMapper.schema()
-                + " where o.hierarchy like ? and pgc.group_id = ? and c.is_deleted=0";
+ + " where o.hierarchy like ? and pgc.group_id = ?";
 
         return this.jdbcTemplate.query(sql, this.membersOfGroupMapper, new Object[] { hierarchySearchString, groupId });
     }
@@ -235,8 +231,8 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             final String imageKey = rs.getString("imageKey");
             final String officeName = rs.getString("officeName");
 
-            return new ClientData(accountNo, status, officeId, officeName, id, firstname, middlename, lastname, fullname, displayName,
-                    externalId, activationDate, imageKey, null, null, null);
+            return ClientData.instance(accountNo, status, officeId, officeName, id, firstname, middlename, lastname, fullname, displayName,
+                    externalId, activationDate, imageKey);
         }
     }
 
@@ -283,8 +279,8 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             final String imageKey = rs.getString("imageKey");
             final String officeName = rs.getString("officeName");
 
-            return new ClientData(accountNo, status, officeId, officeName, id, firstname, middlename, lastname, fullname, displayName,
-                    externalId, activationDate, imageKey, null, null, null);
+            return ClientData.instance(accountNo, status, officeId, officeName, id, firstname, middlename, lastname, fullname, displayName,
+                    externalId, activationDate, imageKey);
         }
 
     }
@@ -317,7 +313,6 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             builder.append("c.office_id as officeId, o.name as officeName ");
             builder.append("from m_client c ");
             builder.append("join m_office o on o.id = c.office_id ");
-            builder.append("where c.is_deleted=0");
 
             this.schema = builder.toString();
         }

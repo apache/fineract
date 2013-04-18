@@ -398,6 +398,8 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
                 handler = applicationContext.getBean("unassignStaffCommandHandler", NewCommandSourceHandler.class);
             } else if (wrapper.isDelete()) {
                 handler = applicationContext.getBean("deleteGroupCommandHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isGroupActivation()) {
+                handler = applicationContext.getBean("activateGroupCommandHandler", NewCommandSourceHandler.class);
             } else {
                 throw new UnsupportedCommandException(wrapper.commandName());
             }
@@ -408,6 +410,8 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
                 handler = applicationContext.getBean("updateCenterCommandHandler", NewCommandSourceHandler.class);
             } else if (wrapper.isDelete()) {
                 handler = applicationContext.getBean("deleteCenterCommandHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isCenterActivation()) {
+                handler = applicationContext.getBean("activateCenterCommandHandler", NewCommandSourceHandler.class);
             } else {
                 throw new UnsupportedCommandException(wrapper.commandName());
             }

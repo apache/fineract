@@ -1706,7 +1706,7 @@ function executeAjaxRequest(url, verbType, jsonData, basicAuthKey, successFuncti
 				<div class="method-description">
 					<h3>Clients</h3>
 					<p>Clients are people and businesses that have applied (or may apply) to an MFI for loans.</p>
-					<p>Clients can be created in <b>Pending</b> state (as opposed to <b>Active</b> state) if global configuration for <i>allow-pending-client-status</i> is enabled.</p>
+					<p>Clients can be created in <b>Pending</b> or straight into <b>Active</b> state.</p>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
 							<td><div class="mifosXHeading2">Field Descriptions</div></td>
@@ -1733,7 +1733,7 @@ function executeAjaxRequest(url, verbType, jsonData, basicAuthKey, successFuncti
 							<td>active</td>
 						</tr>
 						<tr>
-							<td class=fielddesc>Indicates whether this client is to be created as <b>active</b> client. If active=true, then <b>activationDate</b> must be provided. If active=false, then the client is created as <b>pending</b> but this must be allowed through configuration.
+							<td class=fielddesc>Indicates whether this client is to be created as <b>active</b> client. If active=true, then <b>activationDate</b> must be provided. If active=false, then the client is created as <b>pending</b>.
 							</td>
 						</tr>
 						<tr class=alt>
@@ -1804,7 +1804,6 @@ GET https://DomainName/api/v1/clients/template
     17
   ],
   "officeId": 1,
-  "clientPendingApprovalAllowed": false,
   "officeOptions": [
     {
       "id": 1,
@@ -2946,7 +2945,7 @@ Request Body:
 					</code>
 					<code class="method-response">
 {
-  "officeId": 8,
+  "officeId": 1,
   "groupId": 8,
   "resourceId": 8,
   "changes": {
@@ -7267,8 +7266,6 @@ Request Body:
 					<p>Global configuration related to set of supported enable/disable configurations:</p>
 					<ol>
 						<li><b>maker-checker</b> - defaults to false - if true turns on maker-checker functionality</li>
-						<li><b>allow-pending-client-status</b> - defaults to false - if true allows clients to be created in 'Pending' state</li>
-						<li><b>allow-pending-group-status</b> - defaults to false - if true allows groups to be created in 'Pending' state</li>
 					</ol>
 				</div>
 			</div>
@@ -7291,14 +7288,6 @@ GET https://DomainName/api/v1/configurations
     {
       "name": "maker-checker",
       "enabled": false
-    },
-    {
-      "name": "allow-pending-client-status",
-      "enabled": false
-    },
-    {
-      "name": "allow-pending-group-status",
-      "enabled": false
     }
   ]
 }
@@ -7314,7 +7303,7 @@ GET https://DomainName/api/v1/configurations
 				</div>
 				<div class="method-example">
 					<code class="method-declaration">
-PUT https://DomainName/api/v1/configurations?allow-pending-client-status=false
+PUT https://DomainName/api/v1/configurations?maker-checker=false
 					</code>
 					<code class="method-request">
 PUT configurations
@@ -7325,7 +7314,7 @@ Request Body: { }
 {
   "changes": {
     "globalConfiguration": {
-      "allow-pending-client-status": false
+      "maker-checker": false
     }
   }
 }

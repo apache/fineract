@@ -5,10 +5,15 @@
  */
 package org.mifosplatform.portfolio.group.domain;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.persistence.Column;
@@ -25,10 +30,18 @@ import javax.persistence.TemporalType;
 
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
+import org.joda.time.format.DateTimeFormatter;
+import org.mifosplatform.infrastructure.core.api.JsonCommand;
+import org.mifosplatform.infrastructure.core.data.ApiParameterError;
+import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.organisation.office.domain.Office;
 import org.mifosplatform.organisation.staff.domain.Staff;
 import org.mifosplatform.portfolio.client.domain.Client;
+import org.mifosplatform.portfolio.group.api.GroupingTypesApiConstants;
 import org.springframework.data.jpa.domain.AbstractPersistable;
+
+import com.google.common.collect.Sets;
 
 @Entity
 @Table(name = "m_group")
@@ -134,6 +147,46 @@ public final class Group extends AbstractPersistable<Long> {
         }
     }
 
+    public void activate(final DateTimeFormatter formatter, final LocalDate activationLocalDate) {
+        if (isActive()) {
+            final String defaultUserMessage = "Cannot activate group. Group is already active.";
+            final ApiParameterError error = ApiParameterError.parameterError("error.msg.group.already.active", defaultUserMessage,
+                    "activationDate", activationLocalDate.toString(formatter));
+
+            final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+            dataValidationErrors.add(error);
+
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
+
+        if (isDateInTheFuture(activationLocalDate)) {
+
+            final String defaultUserMessage = "Activation date cannot be in the future.";
+            final ApiParameterError error = ApiParameterError.parameterError("error.msg.group.activationDate.in.the.future",
+                    defaultUserMessage, "activationDate", activationLocalDate);
+
+            final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+            dataValidationErrors.add(error);
+
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
+
+        this.activationDate = activationLocalDate.toDate();
+        this.status = GroupingTypeStatus.ACTIVE.getValue();
+    }
+
+    public boolean isNotActive() {
+        return !isActive();
+    }
+
+    public boolean isActive() {
+        return GroupingTypeStatus.fromInt(this.status).isActive();
+    }
+
+    private boolean isDateInTheFuture(final LocalDate localDate) {
+        return localDate.isAfter(DateUtils.getLocalDateOfTenant());
+    }
+
     public boolean isNotPending() {
         return !isPending();
     }
@@ -142,72 +195,59 @@ public final class Group extends AbstractPersistable<Long> {
         return GroupingTypeStatus.fromInt(this.status).isPending();
     }
 
-    private void addChild(final Group group) {
-        this.groupMembers.add(group);
+    public Map<String, Object> update(final JsonCommand command) {
+        final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(9);
+
+        if (command.isChangeInIntegerParameterNamed(GroupingTypesApiConstants.statusParamName, this.status)) {
+            final Integer newValue = command.integerValueOfParameterNamed(GroupingTypesApiConstants.statusParamName);
+            actualChanges.put(GroupingTypesApiConstants.statusParamName, GroupingTypeEnumerations.status(newValue));
+            this.status = GroupingTypeStatus.fromInt(newValue).getValue();
+        }
+
+        if (command.isChangeInStringParameterNamed(GroupingTypesApiConstants.externalIdParamName, this.externalId)) {
+            final String newValue = command.stringValueOfParameterNamed(GroupingTypesApiConstants.externalIdParamName);
+            actualChanges.put(GroupingTypesApiConstants.externalIdParamName, newValue);
+            this.externalId = StringUtils.defaultIfEmpty(newValue, null);
+        }
+
+        if (command.isChangeInLongParameterNamed(GroupingTypesApiConstants.officeIdParamName, this.office.getId())) {
+            final Long newValue = command.longValueOfParameterNamed(GroupingTypesApiConstants.officeIdParamName);
+            actualChanges.put(GroupingTypesApiConstants.officeIdParamName, newValue);
+        }
+
+        if (command.isChangeInLongParameterNamed(GroupingTypesApiConstants.staffIdParamName, staffId())) {
+            final Long newValue = command.longValueOfParameterNamed(GroupingTypesApiConstants.staffIdParamName);
+            actualChanges.put(GroupingTypesApiConstants.staffIdParamName, newValue);
+        }
+
+        if (command.isChangeInStringParameterNamed(GroupingTypesApiConstants.nameParamName, this.name)) {
+            final String newValue = command.stringValueOfParameterNamed(GroupingTypesApiConstants.nameParamName);
+            actualChanges.put(GroupingTypesApiConstants.nameParamName, newValue);
+            this.name = StringUtils.defaultIfEmpty(newValue, null);
+        }
+
+        final String dateFormatAsInput = command.dateFormat();
+        final String localeAsInput = command.locale();
+
+        if (command.isChangeInLocalDateParameterNamed(GroupingTypesApiConstants.activationDateParamName, getActivationLocalDate())) {
+            final String valueAsInput = command.stringValueOfParameterNamed(GroupingTypesApiConstants.activationDateParamName);
+            actualChanges.put(GroupingTypesApiConstants.activationDateParamName, valueAsInput);
+            actualChanges.put(GroupingTypesApiConstants.dateFormatParamName, dateFormatAsInput);
+            actualChanges.put(GroupingTypesApiConstants.localeParamName, localeAsInput);
+
+            final LocalDate newValue = command.localDateValueOfParameterNamed(GroupingTypesApiConstants.activationDateParamName);
+            this.activationDate = newValue.toDate();
+        }
+
+        return actualChanges;
     }
 
-    public Long getOfficeId() {
-        return this.office.getId();
-    }
-
-    public Staff getStaff() {
-        return this.staff;
-    }
-
-    public void setStaff(final Staff staff) {
-        this.staff = staff;
-    }
-
-    public Long getStaffId() {
-        return this.staff.getId();
-    }
-
-    public GroupLevel getGroupLevel() {
-        return this.groupLevel;
-    }
-
-    public String getExternalId() {
-        return this.externalId;
-    }
-
-    public String getName() {
-        return this.name;
-    }
-
-    public Set<Client> getClientMembers() {
-        return this.clientMembers;
-    }
-
-    public Group getParent() {
-        return this.parent;
-    }
-
-    public void setParent(final Group parent) {
-        this.parent = parent;
-    }
-
-    public void setClientMembers(final Set<Client> clientMembers) {
-        this.clientMembers = clientMembers;
-    }
-
-    public void setName(final String name) {
-        this.name = name;
-    }
-
-    public void setExternalId(final String externalId) {
-        this.externalId = externalId;
-    }
-
-    public void setLevelId(final GroupLevel groupLevel) {
-        this.groupLevel = groupLevel;
-    }
-
-    public void assigStaff(final Staff newStaff) {
-        this.staff = newStaff;
-    }
-
-    public void unassigStaff() {
-        this.staff = null;
+    private LocalDate getActivationLocalDate() {
+        LocalDate activationLocalDate = null;
+        if (this.activationDate != null) {
+            activationLocalDate = new LocalDate(this.activationDate);
+        }
+        return activationLocalDate;
     }
 
     public void addClientMember(final Client member) {
@@ -219,7 +259,6 @@ public final class Group extends AbstractPersistable<Long> {
     }
 
     public void generateHierarchy() {
-
         if (this.parent != null) {
             this.hierarchy = this.parent.hierarchyOf(getId());
         } else {
@@ -237,5 +276,69 @@ public final class Group extends AbstractPersistable<Long> {
 
     public Long officeId() {
         return this.office.getId();
+    }
+
+    private Long staffId() {
+        Long staffId = null;
+        if (this.staff != null) {
+            staffId = this.staff.getId();
+        }
+        return staffId;
+    }
+
+    private void addChild(final Group group) {
+        this.groupMembers.add(group);
+    }
+
+    public void updateStaff(final Staff staff) {
+        this.staff = staff;
+    }
+
+    public void unassignStaff() {
+        this.staff = null;
+    }
+
+    public List<String> updateClientMembersIfDifferent(final Set<Client> clientMembersSet) {
+        List<String> differences = new ArrayList<String>();
+        if (!clientMembersSet.equals(this.clientMembers)) {
+            Set<Client> diffClients = Sets.symmetricDifference(clientMembersSet, this.clientMembers);
+            String[] diffClientsIds = getClientIds(diffClients);
+            if (diffClientsIds != null) {
+                differences = Arrays.asList(diffClientsIds);
+            }
+            this.clientMembers = clientMembersSet;
+        }
+
+        return differences;
+    }
+
+    private String[] getClientIds(final Set<Client> clients) {
+        String[] clientIds = new String[clients.size()];
+        Iterator<Client> it = clients.iterator();
+        for (int i = 0; it.hasNext(); i++) {
+            clientIds[i] = it.next().getId().toString();
+        }
+        return clientIds;
+    }
+
+    // TODO - kw - look into removing usage of these getters/setters
+    public GroupLevel getGroupLevel() {
+        return this.groupLevel;
+    }
+
+    public Staff getStaff() {
+        return this.staff;
+    }
+
+    public void setStaff(final Staff staff) {
+        this.staff = staff;
+    }
+
+    public Group getParent() {
+        return this.parent;
+    }
+
+    public void setParent(final Group parent) {
+        this.parent = parent;
     }
 }

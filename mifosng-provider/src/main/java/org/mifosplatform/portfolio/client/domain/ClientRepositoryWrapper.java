@@ -27,7 +27,7 @@ public class ClientRepositoryWrapper {
 
     public Client findOneWithNotFoundDetection(final Long id) {
         final Client client = this.repository.findOne(id);
-        if (client == null || client.isDeleted()) { throw new ClientNotFoundException(id); }
+        if (client == null) { throw new ClientNotFoundException(id); }
         return client;
     }
 

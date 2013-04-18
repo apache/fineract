@@ -265,6 +265,14 @@ public class CommandWrapper {
         return this.actionName.equalsIgnoreCase("ACTIVATE") && this.entityName.equalsIgnoreCase("CLIENT");
     }
 
+    public boolean isGroupActivation() {
+        return this.actionName.equalsIgnoreCase("ACTIVATE") && this.entityName.equalsIgnoreCase("GROUP");
+    }
+
+    public boolean isCenterActivation() {
+        return this.actionName.equalsIgnoreCase("ACTIVATE") && this.entityName.equalsIgnoreCase("CENTER");
+    }
+
     public boolean isClientIdentifierResource() {
         return this.entityName.equals("CLIENTIDENTIFIER");
     }
@@ -483,7 +491,7 @@ public class CommandWrapper {
     public boolean isCenterResource() {
         return this.entityName.equalsIgnoreCase("CENTER");
     }
-    
+
     public boolean isReportResource() {
         return this.entityName.equalsIgnoreCase("REPORT");
     }
