@@ -449,6 +449,20 @@ public class LoanAccountData {
                 loanCollateralOptions);
     }
 
+    public static LoanAccountData associateGroup(final LoanAccountData acc, final GroupGeneralData group) {
+        return new LoanAccountData(acc.id, acc.accountNo, acc.status, acc.externalId, acc.clientId, acc.clientName, acc.clientOfficeId,
+                group, acc.loanProductId, acc.loanProductName, acc.loanProductDescription, acc.fundId, acc.fundName, acc.loanPurposeId,
+                acc.loanPurposeName, acc.loanOfficerId, acc.loanOfficerName, acc.currency, acc.principal, acc.inArrearsTolerance,
+                acc.termFrequency, acc.termPeriodFrequencyType, acc.numberOfRepayments, acc.repaymentEvery, acc.repaymentFrequencyType,
+                acc.transactionProcessingStrategyId, acc.amortizationType, acc.interestRatePerPeriod, acc.interestRateFrequencyType,
+                acc.annualInterestRate, acc.interestType, acc.interestCalculationPeriodType, acc.expectedFirstRepaymentOnDate,
+                acc.interestChargedFromDate, acc.timeline, acc.summary, acc.feeChargesAtDisbursementCharged, acc.repaymentSchedule,
+                acc.transactions, acc.charges, acc.collateral, acc.guarantors, acc.productOptions, acc.termFrequencyTypeOptions, acc.repaymentFrequencyTypeOptions,
+                acc.transactionProcessingStrategyOptions, acc.interestRateFrequencyTypeOptions, acc.amortizationTypeOptions, acc.interestTypeOptions,
+                acc.interestCalculationPeriodTypeOptions, acc.fundOptions, acc.chargeOptions, null, acc.loanOfficerOptions, acc.loanPurposeOptions,
+                acc.loanCollateralOptions);
+    }
+    
     private LoanAccountData(
             final Long id, //
             final String accountNo, //

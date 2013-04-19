@@ -306,6 +306,10 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                         calendarInstance.updateCalendar(calendar);
                         this.calendarInstanceRepository.saveAndFlush(calendarInstance);
                     }
+                }else{
+                    //attaching new calendar
+                    CalendarInstance calendarInstance = new CalendarInstance(calendar, existingLoanApplication.getId(), CalendarEntityType.LOANS.getValue());
+                    this.calendarInstanceRepository.save(calendarInstance);
                 }
 
             } else if (ciList != null && !ciList.isEmpty()) {

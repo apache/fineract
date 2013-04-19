@@ -49,6 +49,8 @@ import org.mifosplatform.portfolio.collateral.data.CollateralData;
 import org.mifosplatform.portfolio.collateral.service.CollateralReadPlatformService;
 import org.mifosplatform.portfolio.fund.data.FundData;
 import org.mifosplatform.portfolio.fund.service.FundReadPlatformService;
+import org.mifosplatform.portfolio.group.data.GroupGeneralData;
+import org.mifosplatform.portfolio.group.service.GroupReadPlatformService;
 import org.mifosplatform.portfolio.loanaccount.data.LoanAccountData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanChargeData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanTransactionData;
@@ -103,6 +105,7 @@ public class LoansApiResource {
     private final StaffReadPlatformService staffReadPlatformService;
     private final GuarantorReadPlatformService guarantorReadPlatformService;
     private final CodeValueReadPlatformService codeValueReadPlatformService;
+    private final GroupReadPlatformService groupReadPlatformService;
     private final DefaultToApiJsonSerializer<LoanAccountData> toApiJsonSerializer;
     private final DefaultToApiJsonSerializer<LoanScheduleData> loanScheduleToApiJsonSerializer;
     private final DefaultToApiJsonSerializer<BulkTransferLoanOfficerData> loanOfficeTransferToApiJsonSerializer;
@@ -119,6 +122,7 @@ public class LoansApiResource {
             final LoanScheduleCalculationPlatformService calculationPlatformService,
             final StaffReadPlatformService staffReadPlatformService, final GuarantorReadPlatformService guarantorReadPlatformService,
             final CodeValueReadPlatformService codeValueReadPlatformService,
+            final GroupReadPlatformService groupReadPlatformService,
             final DefaultToApiJsonSerializer<LoanAccountData> toApiJsonSerializer,
             final DefaultToApiJsonSerializer<LoanScheduleData> loanScheduleToApiJsonSerializer,
             final DefaultToApiJsonSerializer<BulkTransferLoanOfficerData> loanOfficeTransferToApiJsonSerializer,
@@ -136,6 +140,7 @@ public class LoansApiResource {
         this.staffReadPlatformService = staffReadPlatformService;
         this.guarantorReadPlatformService = guarantorReadPlatformService;
         this.codeValueReadPlatformService = codeValueReadPlatformService;
+        this.groupReadPlatformService = groupReadPlatformService;
         this.toApiJsonSerializer = toApiJsonSerializer;
         this.loanScheduleToApiJsonSerializer = loanScheduleToApiJsonSerializer;
         this.loanOfficeTransferToApiJsonSerializer = loanOfficeTransferToApiJsonSerializer;
@@ -197,7 +202,7 @@ public class LoansApiResource {
 
         LoanAccountData newLoanAccount = null;
         if (clientId != null) {
-            final LoanAccountData loanBasicDetails = this.loanReadPlatformService.retrieveTemplateWithClientAndProductDetails(clientId,
+            LoanAccountData loanBasicDetails = this.loanReadPlatformService.retrieveTemplateWithClientAndProductDetails(clientId,
                     productId);
             final Collection<LoanChargeData> charges = loanBasicDetails.charges();
             
@@ -206,6 +211,13 @@ public class LoansApiResource {
                 allowedLoanOfficers = this.staffReadPlatformService.retrieveAllLoanOfficersByOffice(officeId);
             }
 
+            //If JLG loan then attach group
+            if(groupId != null){
+                final GroupGeneralData group = this.groupReadPlatformService.retrieveOne(groupId);
+                loanBasicDetails = LoanAccountData.associateGroup(loanBasicDetails, group);
+            }
+            
+            
             newLoanAccount = LoanAccountData.associationsAndTemplate(loanBasicDetails, repaymentSchedule, loanRepayments, charges,
                     collateral, guarantors, productOptions, loanTermFrequencyTypeOptions, repaymentFrequencyTypeOptions,
                     repaymentStrategyOptions, interestRateFrequencyTypeOptions, amortizationTypeOptions, interestTypeOptions,
