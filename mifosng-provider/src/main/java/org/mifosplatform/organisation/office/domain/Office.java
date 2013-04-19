@@ -217,4 +217,8 @@ public class Office extends AbstractPersistable<Long> {
 
         return match;
     }
+    
+    public boolean isBefore(final Date baseDate) {
+          return this.openingDate.before(baseDate);
+    }
 }
