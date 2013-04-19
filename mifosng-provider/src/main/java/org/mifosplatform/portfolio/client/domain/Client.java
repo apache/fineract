@@ -356,19 +356,18 @@ public final class Client extends AbstractPersistable<Long> {
             baseDataValidator.reset().parameter("middlename").value(this.middlename).ignoreIfNull().notExceedingLengthOf(50);
             baseDataValidator.reset().parameter("lastname").value(this.lastname).notBlank().notExceedingLengthOf(50);
         }
-        
-        if(this.activationDate!=null)
-        {
-            if(!office.isBefore(this.activationDate)){
-                final String defaultUserMessage = "Client activation date cannot be a date before the Office activation date";
-                final ApiParameterError error = ApiParameterError.parameterError("error.msg.clients.activationDate.cannot.be.before.Office.activatoin.date",
-                        defaultUserMessage, "activationDate", this.activationDate);
+
+        if (this.activationDate != null) {
+            if (office.isOpeningDateAfter(getActivationLocalDate())) {
+                final String defaultUserMessage = "Client activation date cannot be a date before the office opening date.";
+                final ApiParameterError error = ApiParameterError.parameterError(
+                        "error.msg.clients.activationDate.cannot.be.before.office.activation.date", defaultUserMessage, "activationDate",
+                        getActivationLocalDate());
                 dataValidationErrors.add(error);
             }
-               
+
         }
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
-                "Validation errors exist.", dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
     }
 
     private void deriveDisplayName() {

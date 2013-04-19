@@ -141,6 +141,14 @@ public class Office extends AbstractPersistable<Long> {
         return actualChanges;
     }
 
+    public boolean isOpeningDateBefore(final LocalDate baseDate) {
+        return getOpeningLocalDate().isBefore(baseDate);
+    }
+
+    public boolean isOpeningDateAfter(final LocalDate activationLocalDate) {
+        return getOpeningLocalDate().isAfter(activationLocalDate);
+    }
+
     private LocalDate getOpeningLocalDate() {
         LocalDate openingLocalDate = null;
         if (this.openingDate != null) {
@@ -216,9 +224,5 @@ public class Office extends AbstractPersistable<Long> {
         }
 
         return match;
-    }
-    
-    public boolean isBefore(final Date baseDate) {
-          return this.openingDate.before(baseDate);
     }
 }
