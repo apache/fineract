@@ -299,6 +299,14 @@
 								<td><a href="#centers_delete">Delete a Center</a></td>
 							</tr>
 							<tr class="alt">
+								<td></td>
+								<td>centers/{centerId}?command=activate</td>
+								<td><a href="#centers_activate">Activate a Center</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
 								<td><a href="#groups">Group</a></td>
 								<td>groups</td>
 								<td><a href="#groups_create">Create a Group</a></td>
@@ -306,13 +314,21 @@
 								<td></td>
 								<td></td>
 							</tr>
-							<tr>
+							<tr class="alt">
 								<td></td>
 								<td>groups/{group}</td>
 								<td></td>
 								<td><a href="#groups_retrieve">Retrieve a Group</a></td>
 								<td><a href="#groups_update">Update a Group</a></td>
 								<td><a href="#groups_delete">Delete a Group</a></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>groups/{groupId}?command=activate</td>
+								<td><a href="#groups_activate">Activate a Group</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
 							</tr>
 						</table>
 					</div>
@@ -1901,7 +1917,7 @@ Request Body:
 	<div class="method-section">
 	    <div class="method-description">
 	        <h2>Activate a Client</h2>
-	        <p>Clients can be created in a <i>Pending</i> state if configuration is enabled. This API exists to enable client activation (for when a client becomes approved member of microfinance institue.</p>
+	        <p>Clients can be created in a <i>Pending</i> state. This API exists to enable client activation (for when a client becomes approved member of microfinance institue).</p>
 	        <p>If the client happens to be alrady active this API will result in an error.</p>
 	    </div>
 	    <div class="method-example">
@@ -2926,6 +2942,34 @@ Content-Type: application/json Request Body:
 				</div>
 			</div>
 
+	<a id="centers_activate" name="centers_activate" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Activate a Center</h2>
+	        <p>Centers can be created in a <i>Pending</i> state. This API exists to enable center activation.</p>
+	        <p>If the center happens to be already active this API will result in an error.</p>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">POST https://Domain Name/api/v1/centers/{centerId}?command=activate</code>
+	        <code class="method-request">POST centers/1?command=activate
+Content-Type: application/json
+Request Body:
+{
+  "locale": "en",
+  "dateFormat": "dd MMMM yyyy",
+  "activationDate": "01 March 2011"
+}
+			</code>
+	        <code class="method-response">
+{
+  "officeId": 1,
+  "groupId": 1,
+  "resourceId": 1
+}
+	        </code>
+	    </div>
+	</div>
+
 			<a id="centers_update" name="centers_update" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
@@ -3321,6 +3365,34 @@ Content-Type: application/json Request Body:
 					</code>
 				</div>
 			</div>
+
+	<a id="groups_activate" name="groups_activate" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Activate a Group</h2>
+	        <p>Groups can be created in a <i>Pending</i> state. This API exists to enable group activation.</p>
+	        <p>If the group happens to be already active this API will result in an error.</p>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">POST https://Domain Name/api/v1/groups/{groupId}?command=activate</code>
+	        <code class="method-request">POST groups/1?command=activate
+Content-Type: application/json
+Request Body:
+{
+  "locale": "en",
+  "dateFormat": "dd MMMM yyyy",
+  "activationDate": "01 March 2011"
+}
+			</code>
+	        <code class="method-response">
+{
+  "officeId": 1,
+  "groupId": 1,
+  "resourceId": 1
+}
+	        </code>
+	    </div>
+	</div>
 
 			<a id="groups_retrieve" name="groups_retrieve" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
@@ -13163,6 +13235,14 @@ GET https://DomainName/api/v1/search?query=000000111
 					<td><a href="#centers_delete">Delete a Center</a></td>
 				</tr>
 				<tr class="alt">
+					<td></td>
+					<td>centers/{centerId}?command=activate</td>
+					<td><a href="#centers_activate">Activate a Center</a></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
 					<td><a href="#groups">Group</a></td>
 					<td>groups</td>
 					<td><a href="#groups_create">Create a Group</a></td>
@@ -13170,13 +13250,21 @@ GET https://DomainName/api/v1/search?query=000000111
 					<td></td>
 					<td></td>
 				</tr>
-				<tr>
+				<tr class="alt">
 					<td></td>
 					<td>groups/{group}</td>
 					<td></td>
 					<td><a href="#groups_retrieve">Retrieve a Group</a></td>
 					<td><a href="#groups_update">Update a Group</a></td>
 					<td><a href="#groups_delete">Delete a Group</a></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>groups/{groupId}?command=activate</td>
+					<td><a href="#groups_activate">Activate a Group</a></td>
+					<td></td>
+					<td></td>
+					<td></td>
 				</tr>
 				<!-- end of centers, groups api -->
 				<!-- loans api full matrix-->

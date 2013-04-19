@@ -28,18 +28,18 @@ public class UpdateOneToManyDatatableEntryCommandHandler implements NewCommandSo
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
 
-        final CommandProcessingResult commandProcessingResult = this.writePlatformService.updateDatatableEntryOneToMany(command.entityName(),
-                command.entityId(), command.subentityId(), command);
+        final CommandProcessingResult commandProcessingResult = this.writePlatformService.updateDatatableEntryOneToMany(
+                command.entityName(), command.entityId(), command.subentityId(), command);
 
         return new CommandProcessingResultBuilder() //
-        .withCommandId(command.commandId()) //
-        .withEntityId(command.entityId()) //
-		.withOfficeId(commandProcessingResult.getOfficeId()) //
-		.withGroupId(commandProcessingResult.getGroupId()) //
-		.withClientId(commandProcessingResult.getClientId()) //
-		.withSavingsId(commandProcessingResult.getSavingsId()) //
-		.withLoanId(commandProcessingResult.getLoanId()) //        
-		.with(commandProcessingResult.getChanges()) //
-        .build();
+                .withCommandId(command.commandId()) //
+                .withEntityId(command.entityId()) //
+                .withOfficeId(commandProcessingResult.getOfficeId()) //
+                .withGroupId(commandProcessingResult.getGroupId()) //
+                .withClientId(commandProcessingResult.getClientId()) //
+                .withSavingsId(commandProcessingResult.getSavingsId()) //
+                .withLoanId(commandProcessingResult.getLoanId()) //
+                .with(commandProcessingResult.getChanges()) //
+                .build();
     }
 }

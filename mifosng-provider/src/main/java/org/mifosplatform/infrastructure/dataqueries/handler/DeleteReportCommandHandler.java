@@ -17,23 +17,22 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class DeleteReportCommandHandler implements NewCommandSourceHandler {
 
-	private final ReportWritePlatformService writePlatformService;
+    private final ReportWritePlatformService writePlatformService;
 
-	@Autowired
-	public DeleteReportCommandHandler(
-			final ReportWritePlatformService writePlatformService) {
-		this.writePlatformService = writePlatformService;
-	}
+    @Autowired
+    public DeleteReportCommandHandler(final ReportWritePlatformService writePlatformService) {
+        this.writePlatformService = writePlatformService;
+    }
 
-	@Transactional
-	@Override
-	public CommandProcessingResult processCommand(final JsonCommand command) {
+    @Transactional
+    @Override
+    public CommandProcessingResult processCommand(final JsonCommand command) {
 
-		this.writePlatformService.deleteReport(command.entityId());
+        this.writePlatformService.deleteReport(command.entityId());
 
-		return new CommandProcessingResultBuilder() //
-				.withCommandId(command.commandId()) //
-				.withEntityId(command.entityId()) //
-				.build();
-	}
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(command.commandId()) //
+                .withEntityId(command.entityId()) //
+                .build();
+    }
 }

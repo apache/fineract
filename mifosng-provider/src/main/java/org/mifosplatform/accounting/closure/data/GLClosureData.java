@@ -6,10 +6,10 @@
 package org.mifosplatform.accounting.closure.data;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 
 import org.joda.time.LocalDate;
-import org.mifosplatform.organisation.office.data.OfficeLookup;
+import org.mifosplatform.organisation.office.data.OfficeData;
 
 /**
  * Immutable object representing a General Ledger Account
@@ -44,7 +44,7 @@ public class GLClosureData {
     @SuppressWarnings("unused")
     private final String comments;
 
-    private List<OfficeLookup> allowedOffices = new ArrayList<OfficeLookup>();
+    private Collection<OfficeData> allowedOffices = new ArrayList<OfficeData>();
 
     public GLClosureData(final Long id, final Long officeId, final String officeName, final LocalDate closingDate, final boolean deleted,
             final LocalDate createdDate, final LocalDate lastUpdatedDate, final Long createdByUserId, final String createdByUsername,
@@ -64,11 +64,11 @@ public class GLClosureData {
         this.allowedOffices = null;
     }
 
-    public List<OfficeLookup> getAllowedOffices() {
+    public final Collection<OfficeData> getAllowedOffices() {
         return this.allowedOffices;
     }
 
-    public void setAllowedOffices(final List<OfficeLookup> allowedOffices) {
+    public void setAllowedOffices(final Collection<OfficeData> allowedOffices) {
         this.allowedOffices = allowedOffices;
     }
 

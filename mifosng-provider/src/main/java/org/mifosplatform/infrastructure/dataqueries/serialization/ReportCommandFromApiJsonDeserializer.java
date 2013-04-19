@@ -22,30 +22,24 @@ import com.google.gson.reflect.TypeToken;
 @Component
 public final class ReportCommandFromApiJsonDeserializer {
 
-	/**
-	 * The parameters supported for this command.
-	 */
-	private final Set<String> supportedParameters = new HashSet<String>(
-			Arrays.asList("reportName", "reportType", "reportSubType",
-					"reportCategory", "description", "reportSql", "useReport"));
+    /**
+     * The parameters supported for this command.
+     */
+    private final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("reportName", "reportType", "reportSubType",
+            "reportCategory", "description", "reportSql", "useReport"));
 
-	private final FromJsonHelper fromApiJsonHelper;
+    private final FromJsonHelper fromApiJsonHelper;
 
-	@Autowired
-	public ReportCommandFromApiJsonDeserializer(
-			final FromJsonHelper fromApiJsonHelper) {
-		this.fromApiJsonHelper = fromApiJsonHelper;
-	}
+    @Autowired
+    public ReportCommandFromApiJsonDeserializer(final FromJsonHelper fromApiJsonHelper) {
+        this.fromApiJsonHelper = fromApiJsonHelper;
+    }
 
-	public void validate(final String json) {
-		if (StringUtils.isBlank(json)) {
-			throw new InvalidJsonException();
-		}
+    public void validate(final String json) {
+        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
-		final Type typeOfMap = new TypeToken<Map<String, Object>>() {
-		}.getType();
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
 
-		fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,
-				supportedParameters);
-	}
+        fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, supportedParameters);
+    }
 }

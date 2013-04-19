@@ -7,7 +7,6 @@ package org.mifosplatform.infrastructure.dataqueries.data;
 
 import java.util.List;
 
-
 /**
  * Immutable data object for generic resultset data.
  */

@@ -18,7 +18,6 @@ import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.mifosplatform.organisation.monetary.service.CurrencyReadPlatformService;
 import org.mifosplatform.organisation.office.data.OfficeData;
-import org.mifosplatform.organisation.office.data.OfficeLookup;
 import org.mifosplatform.organisation.office.data.OfficeTransactionData;
 import org.mifosplatform.organisation.office.exception.OfficeNotFoundException;
 import org.mifosplatform.useradministration.domain.AppUser;
@@ -86,23 +85,6 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
         }
     }
 
-    private static final class OfficeLookupMapper implements RowMapper<OfficeLookup> {
-
-        public String officeLookupSchema() {
-            return " o.id as id, " + nameDecoratedBaseOnHierarchy + " as nameDecorated, o.name as name from m_office o ";
-        }
-
-        @Override
-        public OfficeLookup mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
-
-            Long id = rs.getLong("id");
-            String name = rs.getString("name");
-            String nameDecorated = rs.getString("nameDecorated");
-
-            return new OfficeLookup(id, name, nameDecorated);
-        }
-    }
-
     private static final class OfficeTransactionMapper implements RowMapper<OfficeTransactionData> {
 
         public String schema() {
@@ -137,8 +119,8 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
             BigDecimal transactionAmount = rs.getBigDecimal("transactionAmount");
             String description = rs.getString("description");
 
-            return OfficeTransactionData.instance(id, transactionDate, fromOfficeId, fromOfficeName, toOfficeId, toOfficeName, currencyData,
-                    transactionAmount, description);
+            return OfficeTransactionData.instance(id, transactionDate, fromOfficeId, fromOfficeName, toOfficeId, toOfficeName,
+                    currencyData, transactionAmount, description);
         }
     }
 
@@ -165,19 +147,6 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
 
         final OfficeDropdownMapper rm = new OfficeDropdownMapper();
         final String sql = "select " + rm.schema() + "where o.hierarchy like ? order by o.hierarchy";
-
-        return this.jdbcTemplate.query(sql, rm, new Object[] { hierarchySearchString });
-    }
-
-    @Override
-    public Collection<OfficeLookup> retrieveAllOfficesForLookup() {
-        AppUser currentUser = context.authenticatedUser();
-
-        String hierarchy = currentUser.getOffice().getHierarchy();
-        String hierarchySearchString = hierarchy + "%";
-
-        OfficeLookupMapper rm = new OfficeLookupMapper();
-        String sql = "select " + rm.officeLookupSchema() + "where o.hierarchy like ? order by o.hierarchy";
 
         return this.jdbcTemplate.query(sql, rm, new Object[] { hierarchySearchString });
     }

@@ -12,5 +12,4 @@ public class DatatableSystemErrorException extends AbstractPlatformDomainRuleExc
     public DatatableSystemErrorException(final String msg) {
         super("error.msg.datatable.system.error", msg, msg);
     }
-
 }

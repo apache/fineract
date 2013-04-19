@@ -8,7 +8,7 @@ package org.mifosplatform.infrastructure.dataqueries.exception;
 import org.mifosplatform.infrastructure.core.exception.AbstractPlatformResourceNotFoundException;
 
 /**
- * A {@link RuntimeException} thrown when client resources are not found.
+ * A {@link RuntimeException} thrown when datatable resources are not found.
  */
 public class DatatableNotFoundException extends AbstractPlatformResourceNotFoundException {
 
