@@ -79,7 +79,7 @@ public class ClientIdentifierWritePlatformServiceJpaRepositoryImpl implements Cl
 
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //
-                    .withOfficeId(client.getOffice().getId()) //
+                    .withOfficeId(client.officeId()) //
                     .withClientId(clientId) //
                     .withEntityId(clientIdentifier.getId()) //
                     .build();

@@ -24,7 +24,6 @@ public class ClientApiConstants {
     public static final String lastnameParamName = "lastname";
     public static final String fullnameParamName = "fullname";
     public static final String officeIdParamName = "officeId";
-    public static final String staffIdParamName = "staffId";
     public static final String activeParamName = "active";
     public static final String activationDateParamName = "activationDate";
 
@@ -33,20 +32,22 @@ public class ClientApiConstants {
     public static final String hierarchyParamName = "hierarchy";
     public static final String displayNameParamName = "displayName";
     public static final String officeNameParamName = "officeName";
-    public static final String staffNameParamName = "staffName";
     public static final String imageKeyParamName = "imageKey";
     public static final String imagePresentParamName = "imagePresent";
 
     // associations related part of response
-    public static final String parentGroupsParamName = "groups";
+    public static final String groupsParamName = "groups";
 
     // template related part of response
     public static final String officeOptionsParamName = "officeOptions";
-    public static final String staffOptionsParamName = "staffOptions";
 
-    public static final Set<String> CLIENT_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(localeParamName,
+    public static final Set<String> CLIENT_CREATE_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(localeParamName,
             dateFormatParamName, groupIdParamName, accountNoParamName, externalIdParamName, firstnameParamName, middlenameParamName,
-            lastnameParamName, fullnameParamName, officeIdParamName, staffIdParamName, activeParamName, activationDateParamName));
+            lastnameParamName, fullnameParamName, officeIdParamName, activeParamName, activationDateParamName));
+
+    public static final Set<String> CLIENT_UPDATE_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(localeParamName,
+            dateFormatParamName, accountNoParamName, externalIdParamName, firstnameParamName, middlenameParamName,
+            lastnameParamName, fullnameParamName, activeParamName, activationDateParamName));
 
     /**
      * These parameters will match the class level parameters of
@@ -54,9 +55,9 @@ public class ClientApiConstants {
      * match those of request parameters.
      */
     public static final Set<String> CLIENT_RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(idParamName, accountNoParamName,
-            externalIdParamName, statusParamName, firstnameParamName, middlenameParamName, lastnameParamName, fullnameParamName,
-            displayNameParamName, officeIdParamName, officeNameParamName, staffIdParamName, staffNameParamName, hierarchyParamName,
-            officeOptionsParamName, staffOptionsParamName));
+            externalIdParamName, statusParamName, activeParamName, activationDateParamName, firstnameParamName, middlenameParamName,
+            lastnameParamName, fullnameParamName, displayNameParamName, officeIdParamName, officeNameParamName, hierarchyParamName,
+            imageKeyParamName, imagePresentParamName, groupsParamName, officeOptionsParamName));
 
     public static final Set<String> ACTIVATION_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(localeParamName,
             dateFormatParamName, activationDateParamName));

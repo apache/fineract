@@ -2050,7 +2050,9 @@ GET https://DomainName/api/v1/clients
 			<div class="method-section">
 				<div class="method-description">
 					<h4>Update a Client</h4>
-					<p>You can update any attribute of a client except for its association with <i>groups</i>. The relationship between a client and a group must be removed through the <b>Groups</b> API.</p>
+					<p><b>Note:</b>You can update any of the basic attributes of a client using this API but not its associations.</p>
+					<p>Chaning the relationship between a client and its office is not supported through this API. An API specific to handling <b>transfers</b> of clients between offices will be introduced for this.</p>
+					<p>The relationship between a client and a group must be removed through the <b>Groups</b> API.</p>
 				</div>
 				<div class="method-example">
 					<code class="method-declaration">

@@ -67,7 +67,9 @@ public class NoteWritePlatformServiceJpaRepositoryImpl implements NoteWritePlatf
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
                 .withEntityId(newNote.getId()) //
-                .withClientId(client.getId()).withOfficeId(client.getOffice().getId()).build();
+                .withClientId(client.getId()) //
+                .withOfficeId(client.officeId()) //
+                .build();
 
     }
 
@@ -207,8 +209,10 @@ public class NoteWritePlatformServiceJpaRepositoryImpl implements NoteWritePlatf
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
                 .withEntityId(noteForUpdate.getId()) //
-                .withClientId(client.getId()).withOfficeId(client.getOffice().getId()).with(changes).build();
-
+                .withClientId(client.getId()) //
+                .withOfficeId(client.officeId()) //
+                .with(changes) //
+                .build();
     }
 
     private CommandProcessingResult updateGroupNote(final JsonCommand command) {

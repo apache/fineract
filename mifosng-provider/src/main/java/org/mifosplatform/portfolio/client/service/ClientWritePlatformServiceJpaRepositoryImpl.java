@@ -176,14 +176,6 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 
             final Map<String, Object> changes = clientForUpdate.update(command);
 
-            if (changes.containsKey(ClientApiConstants.officeIdParamName)) {
-                final Long officeId = (Long) changes.get(ClientApiConstants.officeIdParamName);
-                final Office newOffice = this.officeRepository.findOne(officeId);
-                if (newOffice == null) { throw new OfficeNotFoundException(officeId); }
-
-                clientForUpdate.changeOffice(newOffice);
-            }
-
             if (!changes.isEmpty()) {
                 this.clientRepository.saveAndFlush(clientForUpdate);
             }
@@ -252,8 +244,8 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
         final Client client = this.clientRepository.findOneWithNotFoundDetection(clientId);
 
         // delete image from the file system
-        if (StringUtils.isNotEmpty(client.getImageKey())) {
-            FileUtils.deleteClientImage(clientId, client.getImageKey());
+        if (StringUtils.isNotEmpty(client.imageKey())) {
+            FileUtils.deleteClientImage(clientId, client.imageKey());
         }
         return updateClientImage(clientId, client, null);
     }
@@ -278,8 +270,8 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 
         final String imageUploadLocation = FileUtils.generateClientImageParentDirectory(clientId);
         // delete previous image from the file system
-        if (StringUtils.isNotEmpty(client.getImageKey())) {
-            FileUtils.deleteClientImage(clientId, client.getImageKey());
+        if (StringUtils.isNotEmpty(client.imageKey())) {
+            FileUtils.deleteClientImage(clientId, client.imageKey());
         }
 
         /** Recursively create the directory if it does not exist **/
@@ -290,7 +282,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
     }
 
     private CommandProcessingResult updateClientImage(final Long clientId, final Client client, final String imageLocation) {
-        client.setImageKey(imageLocation);
+        client.updateImageKey(imageLocation);
         this.clientRepository.save(client);
 
         return new CommandProcessingResult(clientId);

@@ -187,29 +187,6 @@ public final class Client extends AbstractPersistable<Long> {
         return getId().equals(clientId);
     }
 
-    public void changeOffice(final Office newOffice) {
-        if (isNotAMemberOfAGroup()) {
-            this.office = newOffice;
-        } else {
-            cannotUpdateOfficeOfClientThatBelongsInGroupException(newOffice);
-        }
-    }
-
-    private boolean isNotAMemberOfAGroup() {
-        return this.groups == null || this.groups.isEmpty();
-    }
-
-    private void cannotUpdateOfficeOfClientThatBelongsInGroupException(final Office newOffice) {
-        final String defaultUserMessage = "Cannot update office of client that is member of a group.";
-        final ApiParameterError error = ApiParameterError.parameterError("error.msg.client.member.of.group.and.cannot.update.office",
-                defaultUserMessage, ClientApiConstants.officeIdParamName, newOffice.getId(), newOffice.getName());
-
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
-        dataValidationErrors.add(error);
-
-        throw new PlatformApiDataValidationException(dataValidationErrors);
-    }
-
     public void updateAccountNo(final String accountIdentifier) {
         this.accountNumber = accountIdentifier;
         this.accountNumberRequiresAutoGeneration = false;
@@ -219,7 +196,7 @@ public final class Client extends AbstractPersistable<Long> {
         if (isActive()) {
             final String defaultUserMessage = "Cannot activate client. Client is already active.";
             final ApiParameterError error = ApiParameterError.parameterError("error.msg.clients.already.active", defaultUserMessage,
-                    "activationDate", activationLocalDate.toString(formatter));
+                    ClientApiConstants.activationDateParamName, activationLocalDate.toString(formatter));
 
             final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
             dataValidationErrors.add(error);
@@ -231,7 +208,7 @@ public final class Client extends AbstractPersistable<Long> {
 
             final String defaultUserMessage = "Activation date cannot be in the future.";
             final ApiParameterError error = ApiParameterError.parameterError("error.msg.clients.activationDate.in.the.future",
-                    defaultUserMessage, "activationDate", activationLocalDate);
+                    defaultUserMessage, ClientApiConstants.activationDateParamName, activationLocalDate);
 
             final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
             dataValidationErrors.add(error);
@@ -285,11 +262,6 @@ public final class Client extends AbstractPersistable<Long> {
             this.externalId = StringUtils.defaultIfEmpty(newValue, null);
         }
 
-        if (command.isChangeInLongParameterNamed(ClientApiConstants.officeIdParamName, this.office.getId())) {
-            final Long newValue = command.longValueOfParameterNamed(ClientApiConstants.officeIdParamName);
-            actualChanges.put(ClientApiConstants.officeIdParamName, newValue);
-        }
-
         if (command.isChangeInStringParameterNamed(ClientApiConstants.firstnameParamName, this.firstname)) {
             final String newValue = command.stringValueOfParameterNamed(ClientApiConstants.firstnameParamName);
             actualChanges.put(ClientApiConstants.firstnameParamName, newValue);
@@ -341,32 +313,35 @@ public final class Client extends AbstractPersistable<Long> {
 
         if (StringUtils.isNotBlank(this.fullname)) {
 
-            baseDataValidator.reset().parameter("firstname").value(this.firstname)
-                    .mustBeBlankWhenParameterProvided("fullname", this.fullname);
+            baseDataValidator.reset().parameter(ClientApiConstants.firstnameParamName).value(this.firstname)
+                    .mustBeBlankWhenParameterProvided(ClientApiConstants.fullnameParamName, this.fullname);
 
-            baseDataValidator.reset().parameter("middlename").value(this.middlename)
-                    .mustBeBlankWhenParameterProvided("fullname", this.fullname);
+            baseDataValidator.reset().parameter(ClientApiConstants.middlenameParamName).value(this.middlename)
+                    .mustBeBlankWhenParameterProvided(ClientApiConstants.fullnameParamName, this.fullname);
 
-            baseDataValidator.reset().parameter("lastname").value(this.lastname)
-                    .mustBeBlankWhenParameterProvided("fullname", this.fullname);
+            baseDataValidator.reset().parameter(ClientApiConstants.lastnameParamName).value(this.lastname)
+                    .mustBeBlankWhenParameterProvided(ClientApiConstants.fullnameParamName, this.fullname);
         }
 
         if (StringUtils.isBlank(this.fullname)) {
-            baseDataValidator.reset().parameter("firstname").value(this.firstname).notBlank().notExceedingLengthOf(50);
-            baseDataValidator.reset().parameter("middlename").value(this.middlename).ignoreIfNull().notExceedingLengthOf(50);
-            baseDataValidator.reset().parameter("lastname").value(this.lastname).notBlank().notExceedingLengthOf(50);
+            baseDataValidator.reset().parameter(ClientApiConstants.firstnameParamName).value(this.firstname).notBlank()
+                    .notExceedingLengthOf(50);
+            baseDataValidator.reset().parameter(ClientApiConstants.middlenameParamName).value(this.middlename).ignoreIfNull()
+                    .notExceedingLengthOf(50);
+            baseDataValidator.reset().parameter(ClientApiConstants.lastnameParamName).value(this.lastname).notBlank()
+                    .notExceedingLengthOf(50);
         }
 
         if (this.activationDate != null) {
             if (office.isOpeningDateAfter(getActivationLocalDate())) {
                 final String defaultUserMessage = "Client activation date cannot be a date before the office opening date.";
                 final ApiParameterError error = ApiParameterError.parameterError(
-                        "error.msg.clients.activationDate.cannot.be.before.office.activation.date", defaultUserMessage, "activationDate",
-                        getActivationLocalDate());
+                        "error.msg.clients.activationDate.cannot.be.before.office.activation.date", defaultUserMessage,
+                        ClientApiConstants.activationDateParamName, getActivationLocalDate());
                 dataValidationErrors.add(error);
             }
-
         }
+
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
     }
 
@@ -404,31 +379,11 @@ public final class Client extends AbstractPersistable<Long> {
         return this.office.identifiedBy(officeId);
     }
 
-    public Office getOffice() {
-        return office;
-    }
-
-    public String getFirstName() {
-        return firstname;
-    }
-
-    public String getLastName() {
-        return lastname;
-    }
-
-    public Date getJoiningDate() {
-        return activationDate;
-    }
-
-    public String getExternalId() {
-        return externalId;
-    }
-
-    public String getImageKey() {
+    public String imageKey() {
         return imageKey;
     }
 
-    public void setImageKey(final String imageKey) {
+    public void updateImageKey(final String imageKey) {
         this.imageKey = imageKey;
     }
 

@@ -42,7 +42,7 @@ public final class ClientDataValidator {
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, ClientApiConstants.CLIENT_REQUEST_DATA_PARAMETERS);
+        fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, ClientApiConstants.CLIENT_CREATE_REQUEST_DATA_PARAMETERS);
         final JsonElement element = fromApiJsonHelper.parse(json);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
@@ -87,7 +87,7 @@ public final class ClientDataValidator {
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, ClientApiConstants.CLIENT_REQUEST_DATA_PARAMETERS);
+        fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, ClientApiConstants.CLIENT_UPDATE_REQUEST_DATA_PARAMETERS);
         final JsonElement element = fromApiJsonHelper.parse(json);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
@@ -122,12 +122,6 @@ public final class ClientDataValidator {
 
         if (fromApiJsonHelper.parameterExists(ClientApiConstants.firstnameParamName, element)) {
             atLeastOneParameterPassedForUpdate = true;
-        }
-
-        if (fromApiJsonHelper.parameterExists(ClientApiConstants.officeIdParamName, element)) {
-            atLeastOneParameterPassedForUpdate = true;
-            final Long officeId = fromApiJsonHelper.extractLongNamed(ClientApiConstants.officeIdParamName, element);
-            baseDataValidator.reset().parameter(ClientApiConstants.officeIdParamName).value(officeId).notNull().integerGreaterThanZero();
         }
 
         final Boolean active = fromApiJsonHelper.extractBooleanNamed(ClientApiConstants.activeParamName, element);
