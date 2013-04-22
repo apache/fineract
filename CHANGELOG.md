@@ -17,6 +17,10 @@ Releases
 
 Focus on stabalising API and functionality around centers, groups and clients. Contains breaking changes in this API from the 0.11.x releases.
 
+Note: known issue with existing set of reports provided out of box. Due to changes in client database 
+columns for is_deleted (removed), joining_date (changed to activation_date) some of the reports do not work correctly at present. 
+We will provide patches to update these.
+
 Bugs
   - [MIFOSX-262] - You can add a client to an office prior to the opening date of the office
 
