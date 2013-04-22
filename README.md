@@ -24,7 +24,7 @@ Version
 
 The mifosx platform is currently still in BETA. That means its likely that there will be changes to the Platform API so any use or development against is at your own risk.
 
-Latest stable release: <a target="_blank" href="https://github.com/openMF/mifosx/tree/mifosplatform-0.11.3.beta" title="mifosplatform-0.11.3.beta">mifosplatform-0.11.3.beta</a>
+Latest stable release: <a target="_blank" href="https://github.com/openMF/mifosx/tree/mifosplatform-0.12.0.beta" title="mifosplatform-0.12.0.beta">mifosplatform-0.12.0.beta</a>
 
 License
 =============
