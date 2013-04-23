@@ -8,6 +8,7 @@ package org.mifosplatform.portfolio.loanaccount.service;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,6 +25,12 @@ import org.mifosplatform.organisation.monetary.domain.ApplicationCurrencyReposit
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.organisation.monetary.domain.Money;
 import org.mifosplatform.organisation.staff.domain.Staff;
+import org.mifosplatform.portfolio.calendar.domain.Calendar;
+import org.mifosplatform.portfolio.calendar.domain.CalendarEntityType;
+import org.mifosplatform.portfolio.calendar.domain.CalendarInstance;
+import org.mifosplatform.portfolio.calendar.domain.CalendarInstanceRepository;
+import org.mifosplatform.portfolio.calendar.exception.NotValidRecurringDateException;
+import org.mifosplatform.portfolio.calendar.service.CalendarHelper;
 import org.mifosplatform.portfolio.charge.domain.Charge;
 import org.mifosplatform.portfolio.charge.domain.ChargeRepositoryWrapper;
 import org.mifosplatform.portfolio.charge.exception.LoanChargeCannotBeDeletedException;
@@ -52,6 +59,7 @@ import org.mifosplatform.portfolio.loanaccount.domain.LoanTransaction;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.mifosplatform.portfolio.loanaccount.domain.PaymentDetail;
 import org.mifosplatform.portfolio.loanaccount.domain.PaymentDetailRepository;
+import org.mifosplatform.portfolio.loanaccount.exception.LoanApplicationDateException;
 import org.mifosplatform.portfolio.loanaccount.exception.LoanNotFoundException;
 import org.mifosplatform.portfolio.loanaccount.exception.LoanOfficerAssignmentException;
 import org.mifosplatform.portfolio.loanaccount.exception.LoanOfficerUnassignmentException;
@@ -65,6 +73,7 @@ import org.mifosplatform.useradministration.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 @Service
 public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatformService {
@@ -83,6 +92,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     private final LoanSummaryWrapper loanSummaryWrapper;
     private final LoanRepaymentScheduleTransactionProcessorFactory loanRepaymentScheduleTransactionProcessorFactory;
     private final PaymentDetailRepository paymentDetailRepository;
+    private final CalendarInstanceRepository calendarInstanceRepository;
 
     @Autowired
     public LoanWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
@@ -93,7 +103,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             final LoanChargeRepository loanChargeRepository, final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepository,
             final JournalEntryWritePlatformService journalEntryWritePlatformService, final LoanSummaryWrapper loanSummaryWrapper,
             final LoanRepaymentScheduleTransactionProcessorFactory loanRepaymentScheduleTransactionProcessorFactory,
-            final PaymentDetailRepository paymentDetailRepository) {
+            final PaymentDetailRepository paymentDetailRepository, final CalendarInstanceRepository calendarInstanceRepository) {
         this.context = context;
         this.loanEventApiJsonValidator = loanEventApiJsonValidator;
         this.loanAssembler = loanAssembler;
@@ -108,6 +118,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         this.loanSummaryWrapper = loanSummaryWrapper;
         this.loanRepaymentScheduleTransactionProcessorFactory = loanRepaymentScheduleTransactionProcessorFactory;
         this.paymentDetailRepository = paymentDetailRepository;
+        this.calendarInstanceRepository = calendarInstanceRepository;
     }
 
     private LoanLifecycleStateMachine defaultLoanLifecycleStateMachine() {
@@ -124,6 +135,11 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         this.loanEventApiJsonValidator.validateDisbursement(command.json());
 
         final Loan loan = retrieveLoanBy(loanId);
+        
+        //validate actual disbursement date against meeting date
+        Collection<CalendarInstance> calendarInstances = this.calendarInstanceRepository.findByEntityIdAndEntityTypeId(loan.getId(), CalendarEntityType.LOANS.getValue());
+        validateDisbursementDate(command.localDateValueOfParameterNamed("actualDisbursementDate"), calendarInstances);
+        
         final MonetaryCurrency currency = loan.getCurrency();
         final ApplicationCurrency applicationCurrency = this.applicationCurrencyRepository.findOneWithNotFoundDetection(currency);
 
@@ -160,6 +176,35 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 .withLoanId(loanId) //
                 .with(changes) //
                 .build();
+    }
+
+    private void validateDisbursementDate(LocalDate disbursementDate, Collection<CalendarInstance> calendarInstances) {
+        if (!CollectionUtils.isEmpty(calendarInstances)) {
+            Calendar calendar = null;
+            for (CalendarInstance calendarInstance : calendarInstances) {
+                calendar = calendarInstance.getCalendar();
+                break;
+            }
+            if (calendar != null && disbursementDate != null) {
+
+                // Actual disbursement date cannot be before Meeting start
+                // date
+                if (disbursementDate.isBefore(calendar.getStartDateLocalDate())) {
+                    final String errorMessage = "Actual disbursement date '" + disbursementDate.toString()
+                            + "' cannot be before meeting start date '" + calendar.getStartDate().toString() + "' ";
+                    throw new LoanApplicationDateException("actual.disbursement.date.cannot.be.before.meeting.start.date", errorMessage, disbursementDate.toString(),
+                            calendar.getStartDate());
+                }
+
+                // Disbursement date should fall on a meeting date
+                if (!CalendarHelper.isValidRedurringDate(calendar.getRecurrence(), calendar.getStartDateLocalDate(), disbursementDate)) {
+                    final String errorMessage = "Expected disbursement date '" + disbursementDate.toString() + "' does not fall on a meeting date.";
+                    throw new NotValidRecurringDateException("loan.actual.disbursement.date", errorMessage, disbursementDate.toString(),
+                            calendar.getTitle());
+                }
+
+            }
+        }
     }
 
     @Transactional

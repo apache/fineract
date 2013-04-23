@@ -64,7 +64,7 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
             final String recurrence = rs.getString("recurrence");
             final Integer remindById = rs.getInt("remindById");
             EnumOptionData remindBy = null;
-            if(remindById != null) remindBy = CalendarEnumerations.calendarRemindBy(remindById);
+            if(remindById != null && remindById != 0) remindBy = CalendarEnumerations.calendarRemindBy(remindById);
             final Integer firstReminder = rs.getInt("firstReminder");
             final Integer secondReminder = rs.getInt("secondReminder");
             final String humanReadable = CalendarHelper.getRRuleReadable(startDate, recurrence);
@@ -111,8 +111,8 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
         String parentHeirarchyCondition = getParentHierarchyCondition(ceType);
         final String sql = rm.schema() + " " + parentHeirarchyCondition        		
                 + " and ci.entity_type_enum = ? order by c.start_date ";
-        
-        return this.jdbcTemplate.query(sql, rm, new Object[] { entityId, CalendarEntityType.GROUPS.getValue() });
+        //FIXME :AA center is the parent entity of group, change this code to support more parent entity types.
+        return this.jdbcTemplate.query(sql, rm, new Object[] { entityId, CalendarEntityType.CENTERS.getValue() });
     }
 
     @Override

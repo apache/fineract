@@ -1,6 +1,8 @@
 package org.mifosplatform.portfolio.calendar.service;
 
+import java.text.DateFormat;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -52,8 +54,15 @@ public class CalendarHelper {
         final Recur recur = CalendarHelper.getICalRecur(recurringRule);
 
         if (recur == null) { return null; }
-
-        final Date seed = new Date(seedDate.toDate());
+        final DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+        final String seedDateStr = df.format(seedDate.toDateTimeAtStartOfDay().toDate()); 
+        Date seed = null;
+        try {
+            seed = new Date(seedDateStr, "yyyy-MM-dd");
+        } catch (ParseException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
         final DateTime periodStart = new DateTime(periodStartDate.toDate());
         final DateTime periodEnd = new DateTime(periodEndDate.toDate());
 
@@ -135,7 +144,7 @@ public class CalendarHelper {
             for (@SuppressWarnings("rawtypes")
             final Iterator iterator = weekDayList.iterator(); iterator.hasNext();) {
                 final WeekDay weekDay = (WeekDay) iterator.next();
-                humanReadable += weekDay.getDay();
+                humanReadable += DayNameEnum.from(weekDay.getDay()).getValue();
             }
 
         } else if (recur.getFrequency().equals(Recur.MONTHLY)) {
@@ -174,5 +183,25 @@ public class CalendarHelper {
         
         final Collection<LocalDate> recurDate = getRecurringDates(recurringRule, seedDate, date, date.plusDays(1), 1);
         return (recurDate == null || recurDate.isEmpty()) ? false : true;
+    }
+    
+    public static enum DayNameEnum{
+        MO("Monday"),TU("Tuesday"),WE("Wednesday"),TH("Thursday"),FR("Friday"),SA("Saturday"),SU("Sunday");
+        private final String value;
+        
+        private DayNameEnum(String value){
+            this.value = value;
+        }
+        
+        public String getValue(){
+            return this.value;
+        }
+        
+        public static DayNameEnum from(String code){
+            for (DayNameEnum dayName : DayNameEnum.values()){
+                if(dayName.toString().equals(code)) return dayName;
+            }
+            return DayNameEnum.MO;//Default it to Monday
+        }
     }
 }

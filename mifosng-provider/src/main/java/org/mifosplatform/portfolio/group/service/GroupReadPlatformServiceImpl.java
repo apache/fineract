@@ -264,8 +264,8 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
         public String loanAccountSummarySchema() {
 
             final StringBuilder accountsSummary = new StringBuilder("l.id as id, l.external_id as externalId,");
-            accountsSummary.append("l.product_id as productId, lp.name as productName,").append("l.loan_status_id as statusId ")
-                    .append("from m_loan l ").append("LEFT JOIN m_product_loan AS lp ON lp.id = l.product_id ");
+            accountsSummary.append("l.product_id as productId, lp.name as productName,").append("l.loan_status_id as statusId, ")
+                    .append("l.account_no as accountNo ").append("from m_loan l ").append("LEFT JOIN m_product_loan AS lp ON lp.id = l.product_id ");
 
             return accountsSummary.toString();
         }
@@ -278,8 +278,8 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
             final Long productId = JdbcSupport.getLong(rs, "productId");
             final String loanProductName = rs.getString("productName");
             final Integer loanStatusId = JdbcSupport.getInteger(rs, "statusId");
-
-            return new GroupAccountSummaryData(id, externalId, productId, loanProductName, loanStatusId);
+            final String accountNo = rs.getString("accountNo");
+            return new GroupAccountSummaryData(id, externalId, productId, loanProductName, loanStatusId, accountNo);
         }
     }
 }

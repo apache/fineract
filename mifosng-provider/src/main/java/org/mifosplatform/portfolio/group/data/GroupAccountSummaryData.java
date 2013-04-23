@@ -15,14 +15,16 @@ public class GroupAccountSummaryData {
     private final Long productId;
     private final String productName;
     private final Integer accountStatusId;
+    private final String accountNo;
 
     public GroupAccountSummaryData(final Long id, final String externalId, final Long productId, final String productName,
-            final Integer accountStatusId) {
+            final Integer accountStatusId, final String accountNo) {
         this.id = id;
         this.externalId = externalId;
         this.productId = productId;
         this.productName = productName;
         this.accountStatusId = accountStatusId;
+        this.accountNo = accountNo;
     }
 
     public Long getId() {
