@@ -3,12 +3,12 @@ package org.mifosplatform.portfolio.savings.domain;
 import java.math.BigDecimal;
 import java.math.MathContext;
 
+import org.joda.time.LocalDate;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.organisation.monetary.domain.Money;
 
 public class InterestCompoundingPeriodSummary {
 
-    @SuppressWarnings("unused")
     private final LocalDateInterval periodInterval;
     @SuppressWarnings("unused")
     private final BigDecimal openingBalance;
@@ -49,5 +49,9 @@ public class InterestCompoundingPeriodSummary {
 
     public BigDecimal interestUnrounded() {
         return this.interestEarnedUnrounded;
+    }
+
+    public boolean fallsBefore(final LocalDate dateToCheck) {
+        return this.periodInterval.fallsBefore(dateToCheck);
     }
 }

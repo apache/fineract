@@ -3,24 +3,25 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this file,
  * You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-package org.mifosplatform.portfolio.loanaccount.domain;
+package org.mifosplatform.portfolio.savings.domain;
 
 import java.util.Comparator;
 
 /**
- * Sort loan transactions by transaction date and transaction type placing
+ * Sort savings account transactions by transaction date and transaction type
+ * placing
  */
-public class LoanTransactionComparator implements Comparator<LoanTransaction> {
+public class SavingsAccountTransactionComparator implements Comparator<SavingsAccountTransaction> {
 
     @Override
-    public int compare(final LoanTransaction o1, final LoanTransaction o2) {
+    public int compare(final SavingsAccountTransaction o1, final SavingsAccountTransaction o2) {
         int compareResult = 0;
-        final int comparsion = o1.getTransactionDate().compareTo(o2.getTransactionDate());
+        final int comparsion = o1.transactionLocalDate().compareTo(o2.transactionLocalDate());
         if (comparsion == 0) {
             // equal transaction dates
-            if (o1.isWaiver() && o2.isNotWaiver()) {
+            if (o1.isInterestPosting() && !o2.isInterestPosting()) {
                 compareResult = -1;
-            } else if (o1.isNotWaiver() && o2.isWaiver()) {
+            } else if (!o1.isInterestPosting() && o2.isInterestPosting()) {
                 compareResult = 1;
             } else {
                 compareResult = 0;
@@ -31,5 +32,4 @@ public class LoanTransactionComparator implements Comparator<LoanTransaction> {
 
         return compareResult;
     }
-
 }

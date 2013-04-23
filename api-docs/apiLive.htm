@@ -9629,7 +9629,7 @@ Request Body:
 	    <div class="method-description">
 	        <h2>Calculate Interest on Savings Account</h2>
 	        <p>
-	        	Calculates interest earned on a savings account based on todays date. It does not attempt to <b>post or credit</b> the interest on the account. That is responsibility of another API that will be called by overnight process.
+	        	Calculates interest earned on a savings account based on todays date. It does not attempt to <b>post or credit</b> the interest on the account. That is responsibility of the <a href="#savingsaccounts_post_interest" >Post Interest API</a> that will likely be called by overnight process.
 	        </p>
 	    </div>
 	    <div class="method-example">
@@ -9651,10 +9651,37 @@ Request Body:
 	    </div>
 	</div>
 
+	<a id="savingsaccounts_post_interest" name="savingsaccounts_post_interest" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Post Interest on Savings Account</h2>
+	        <p>
+	        	Calculates and Posts interest earned on a savings account based on todays date and whether an interest posting or crediting event is due.
+	        </p>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">POST https://Domain Name/api/v1/savingsaccounts/{savingsId}?command=postInterest</code>
+	        <code class="method-request">POST savingsaccount/1?command=postInterest
+Content-Type: application/json
+Request Body:
+{
+}
+			</code>
+	        <code class="method-response">
+{
+  "officeId": 1,
+  "clientId": 1,
+  "savingsId": 1,
+  "resourceId": 1
+}
+	        </code>
+	    </div>
+	</div>
+
 	<a id="savingsaccounts_list" name="savingsaccounts_list" class="old-syle-anchor">&nbsp;</a>
     <div class="method-section">
         <div class="method-description">
-            <h4>List Savings Accounts</h4>
+            <h2>List Savings Accounts</h2>
             <p>Example Requests:</p> 
             <div class=apiClick>savingsaccounts</div>
             <br><br>
@@ -13494,6 +13521,14 @@ GET https://DomainName/api/v1/search?query=000000111
 					<td></td>
 					<td>savingsaccounts/{accountId}?command=calculateInterest</td>
 					<td><a href="#savingsaccounts_calculate_interest">Calculate Interest on a Savings Account</a></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>savingsaccounts/{accountId}?command=postInterest</td>
+					<td><a href="#savingsaccounts_post_interest">Post Interest on a Savings Account</a></td>
 					<td></td>
 					<td></td>
 					<td></td>

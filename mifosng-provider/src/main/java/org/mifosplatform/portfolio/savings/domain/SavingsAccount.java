@@ -10,6 +10,7 @@ import java.math.MathContext;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -46,12 +47,16 @@ import org.mifosplatform.portfolio.group.domain.Group;
 import org.mifosplatform.portfolio.loanproduct.domain.PeriodFrequencyType;
 import org.mifosplatform.portfolio.savings.api.SavingsApiConstants;
 import org.mifosplatform.portfolio.savings.exception.InsufficientAccountBalanceException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
 @Table(name = "m_savings_account", uniqueConstraints = { @UniqueConstraint(columnNames = { "account_no" }, name = "sa_account_no_UNIQUE"),
         @UniqueConstraint(columnNames = { "external_id" }, name = "sa_external_id_UNIQUE") })
 public class SavingsAccount extends AbstractPersistable<Long> {
+
+    private final static Logger logger = LoggerFactory.getLogger(SavingsAccount.class);
 
     @Column(name = "account_no", length = 20, unique = true, nullable = false)
     private String accountNumber;
@@ -123,7 +128,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
     private Integer lockinPeriodFrequencyType;
 
     /**
-     * When account is becomes <code>active</code> this field is derived if
+     * When account becomes <code>active</code> this field is derived if
      * <code>lockinPeriodFrequency</code> and
      * <code>lockinPeriodFrequencyType</code> details are present.
      */
@@ -163,8 +168,8 @@ public class SavingsAccount extends AbstractPersistable<Long> {
     }
 
     private SavingsAccount(final Client client, final Group group, final SavingsProduct product, final String accountNo,
-            final String externalId, final SavingsAccountStatusType status, final LocalDate activationDate, final BigDecimal nominalAnnualInterestRate,
-            final SavingsCompoundingInterestPeriodType interestCompoundingPeriodType,
+            final String externalId, final SavingsAccountStatusType status, final LocalDate activationDate,
+            final BigDecimal nominalAnnualInterestRate, final SavingsCompoundingInterestPeriodType interestCompoundingPeriodType,
             final SavingsInterestPostingPeriodType interestPostingPeriodType, final SavingsInterestCalculationType interestCalculationType,
             final SavingsInterestCalculationDaysInYearType interestCalculationDaysInYearType, final BigDecimal minRequiredOpeningBalance,
             final Integer lockinPeriodFrequency, final SavingsPeriodFrequencyType lockinPeriodFrequencyType) {
@@ -278,15 +283,80 @@ public class SavingsAccount extends AbstractPersistable<Long> {
     public void postInterest(final LocalDate interestPostingUpToDate) {
 
         final SavingsInterestPostingPeriodType postingPeriodType = SavingsInterestPostingPeriodType.fromInt(this.interestPostingPeriodType);
-        List<LocalDate> postingLocalDates = determineInterestPostingDates(getActivationLocalDate(), interestPostingUpToDate,
+        final List<LocalDate> postingLocalDates = determineInterestPostingDates(getActivationLocalDate(), interestPostingUpToDate,
                 postingPeriodType);
 
-        List<InterestCompoundingPeriodSummary> compoundingPeriods = calculateInterest(interestPostingUpToDate);
+        final List<InterestCompoundingPeriodSummary> compoundingPeriods = calculateInterest(interestPostingUpToDate);
 
-        //
-        for (InterestCompoundingPeriodSummary interestCompoundingPeriodSummary : compoundingPeriods) {
+        Money interestPostedToDate = Money.zero(this.currency);
 
+        boolean recalucateDailyBalanceDetails = false;
+        for (LocalDate postingDate : postingLocalDates) {
+            Money interestEarnedToBePostedForPeriod = findInterestEarnedToBePostedOn(interestPostedToDate, postingDate, compoundingPeriods);
+
+            interestPostedToDate = interestPostedToDate.plus(interestEarnedToBePostedForPeriod);
+
+            SavingsAccountTransaction postingTransaction = findInterestPostingTransactionFor(postingDate);
+            if (postingTransaction == null) {
+                final SavingsAccountTransaction newPostingTransaction = SavingsAccountTransaction.interestPosting(this, postingDate,
+                        interestEarnedToBePostedForPeriod);
+                this.transactions.add(newPostingTransaction);
+                recalucateDailyBalanceDetails = true;
+            } else {
+                boolean correctionRequired = postingTransaction.hasNotAmount(interestEarnedToBePostedForPeriod);
+                if (correctionRequired) {
+                    postingTransaction.reverse();
+                    final SavingsAccountTransaction newPostingTransaction = SavingsAccountTransaction.interestPosting(this, postingDate,
+                            interestEarnedToBePostedForPeriod);
+                    this.transactions.add(newPostingTransaction);
+                    recalucateDailyBalanceDetails = true;
+                }
+            }
         }
+        
+        if (recalucateDailyBalanceDetails) {
+            // no openingBalance concept supported yet but probably will to
+            // allow
+            // for migrations.
+            final Money openingAccountBalance = Money.zero(this.currency);
+
+            // update existing transactions so derived balance fields are
+            // correct.
+            recalculateDailyBalances(openingAccountBalance);
+        }
+
+        this.summary.updateSummary(this.currency, this.savingsAccountTransactionSummaryWrapper, this.transactions);
+    }
+
+    private SavingsAccountTransaction findInterestPostingTransactionFor(final LocalDate postingDate) {
+
+        SavingsAccountTransaction postingTransation = null;
+
+        for (SavingsAccountTransaction transaction : this.transactions) {
+            if (transaction.isInterestPosting() && transaction.occursOn(postingDate)) {
+                postingTransation = transaction;
+                break;
+            }
+        }
+
+        return postingTransation;
+    }
+
+    private Money findInterestEarnedToBePostedOn(final Money interestPostedToDate, final LocalDate postingDate,
+            final List<InterestCompoundingPeriodSummary> compoundingPeriods) {
+
+        Money interestToBePosted = Money.zero(this.currency);
+
+        BigDecimal lastRelevantInterest = BigDecimal.ZERO;
+        for (InterestCompoundingPeriodSummary interestCompoundingPeriodSummary : compoundingPeriods) {
+            if (interestCompoundingPeriodSummary.fallsBefore(postingDate)) {
+                interestToBePosted = Money.of(this.currency, interestCompoundingPeriodSummary.compoundedInterest());
+                lastRelevantInterest = interestCompoundingPeriodSummary.compoundedInterest();
+            }
+        }
+        logger.info("Interest is: " + lastRelevantInterest + " :>> ");
+
+        return interestToBePosted.minus(interestPostedToDate);
     }
 
     private List<LocalDate> determineInterestPostingDates(final LocalDate activationLocalDate, final LocalDate interestPostingUpToDate,
@@ -300,7 +370,9 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         while (!periodStartDate.isAfter(interestPostingUpToDate) && !periodEndDate.isAfter(interestPostingUpToDate)) {
 
             final LocalDate interestPostingLocalDate = determineInterestPostingPeriodEndDateFrom(periodStartDate, postingPeriodType);
-            postingDates.add(interestPostingLocalDate);
+            if (!interestPostingLocalDate.isAfter(DateUtils.getLocalDateOfTenant())) {
+                postingDates.add(interestPostingLocalDate);
+            }
 
             periodEndDate = interestPostingLocalDate;
             periodStartDate = interestPostingLocalDate;
@@ -558,11 +630,25 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         return periodsInOneYear;
     }
 
+    private List<SavingsAccountTransaction> retreiveListOfTransactions() {
+        List<SavingsAccountTransaction> listOfTransactionsSorted = new ArrayList<SavingsAccountTransaction>();
+        for (SavingsAccountTransaction transaction : this.transactions) {
+            listOfTransactionsSorted.add(transaction);
+        }
+
+        SavingsAccountTransactionComparator transactionComparator = new SavingsAccountTransactionComparator();
+        Collections.sort(listOfTransactionsSorted, transactionComparator);
+
+        return listOfTransactionsSorted;
+    }
+
     private void recalculateDailyBalances(final Money openingAccountBalance) {
 
         Money runningBalance = openingAccountBalance.copy();
-        for (SavingsAccountTransaction transaction : this.transactions) {
 
+        List<SavingsAccountTransaction> accountTransactionsSorted = retreiveListOfTransactions();
+
+        for (SavingsAccountTransaction transaction : accountTransactionsSorted) {
             if (transaction.isReversed()) {
                 transaction.zeroBalanceFields();
             } else {
@@ -582,13 +668,13 @@ public class SavingsAccount extends AbstractPersistable<Long> {
 
         // loop over transactions in reverse
         LocalDate endOfBalanceDate = DateUtils.getLocalDateOfTenant();
-        for (int i = this.transactions.size() - 1; i >= 0; i--) {
-            SavingsAccountTransaction transaction = this.transactions.get(i);
+        for (int i = accountTransactionsSorted.size() - 1; i >= 0; i--) {
+            SavingsAccountTransaction transaction = accountTransactionsSorted.get(i);
             transaction.updateCumulativeBalanceAndDates(this.currency, endOfBalanceDate);
 
             // this transactions transaction date is end of balance date for
             // previous transaction.
-            endOfBalanceDate = transaction.localDate().minusDays(1);
+            endOfBalanceDate = transaction.transactionLocalDate().minusDays(1);
         }
     }
 

@@ -40,4 +40,8 @@ public class LocalDateInterval {
     private boolean isBetweenInclusive(final LocalDate start, final LocalDate end, final LocalDate target) {
         return !target.isBefore(start) && !target.isAfter(end);
     }
+
+    public boolean fallsBefore(final LocalDate dateToCheck) {
+        return this.endDate.isBefore(dateToCheck);
+    }
 }
