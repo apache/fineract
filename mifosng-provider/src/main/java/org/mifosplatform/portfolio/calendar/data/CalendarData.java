@@ -35,6 +35,7 @@ public class CalendarData {
     private final Integer firstReminder;
     private final Integer secondReminder;
     private final Collection<LocalDate> recurringDates;
+    private final Collection<LocalDate> nextTenRecurringDates;
     private final String humanReadable;
 
     private final LocalDate createdDate;
@@ -74,6 +75,7 @@ public class CalendarData {
         this.calendarTypeOptions = null;
         this.remindByOptions = null;
         this.recurringDates = null;
+        this.nextTenRecurringDates = null;
         this.humanReadable = humanReadable;
 
         this.createdDate = createdDate;
@@ -105,6 +107,7 @@ public class CalendarData {
         this.calendarTypeOptions = calendarTypeOptions;
         this.remindByOptions = remindByOptions;
         this.recurringDates = calendarData.recurringDates;
+        this.nextTenRecurringDates = calendarData.nextTenRecurringDates;
         this.humanReadable = calendarData.humanReadable;
         this.createdDate = calendarData.createdDate;
         this.lastUpdatedDate = calendarData.lastUpdatedDate;
@@ -114,7 +117,7 @@ public class CalendarData {
         this.lastUpdatedByUsername = calendarData.lastUpdatedByUsername;
     }
 
-    public CalendarData(final CalendarData calendarData, final Collection<LocalDate> recurringDates) {
+    public CalendarData(final CalendarData calendarData, final Collection<LocalDate> recurringDates, final Collection<LocalDate> nextTenRecurringDates) {
         this.id = calendarData.id;
         this.entityId = calendarData.entityId;
         this.entityType = calendarData.entityType;
@@ -134,6 +137,7 @@ public class CalendarData {
         this.calendarTypeOptions = null;
         this.remindByOptions = null;
         this.recurringDates = recurringDates;
+        this.nextTenRecurringDates = nextTenRecurringDates;
         this.humanReadable = calendarData.humanReadable;
         this.createdDate = calendarData.createdDate;
         this.lastUpdatedDate = calendarData.lastUpdatedDate;

@@ -34,6 +34,7 @@ import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.portfolio.calendar.data.CalendarData;
 import org.mifosplatform.portfolio.calendar.domain.Calendar;
@@ -56,7 +57,7 @@ public class CalendarsApiResource {
     private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "entityId", "entityType", "title",
             "description", "location", "startDate", "endDate", "duration", "type", "repeating", "recurrence", "remindBy", "firstReminder",
             "secondReminder", "humanReadable", "createdDate", "lastUpdatedDate", "createdByUserId", "createdByUsername",
-            "lastUpdatedByUserId", "lastUpdatedByUsername", "recurringDates"));
+            "lastUpdatedByUserId", "lastUpdatedByUsername", "recurringDates","nextTenRecurringDates"));
     private final String resourceNameForPermissions = "CALENDAR";
 
     private final PlatformSecurityContext context;
@@ -197,9 +198,21 @@ public class CalendarsApiResource {
 
     private CalendarData handleRecurringDate(final CalendarData calendarData){
         if(!calendarData.isRepeating()) return calendarData;
-
-        final Collection<LocalDate> recurringDates = CalendarHelper.getRecurringDates(calendarData.getRecurrence(), calendarData.getStartDate(), calendarData.getEndDate());
-        return new CalendarData(calendarData, recurringDates);
+        final String rrule = calendarData.getRecurrence();
+        final LocalDate currentDate = DateUtils.getLocalDateOfTenant();
+        LocalDate seedDate = calendarData.getStartDate();
+        LocalDate endDate = calendarData.getEndDate();
+        if(seedDate.isBefore(currentDate.minusYears(1))){
+            seedDate = currentDate.minusYears(1);
+        }
+        
+        if(endDate == null || endDate.isAfter(currentDate.plusYears(1))){
+            endDate = currentDate.plusYears(1);
+        }
+        
+        final Collection<LocalDate> recurringDates = CalendarHelper.getRecurringDates(rrule, seedDate, seedDate, endDate, -1);
+        final Collection<LocalDate> nextTenRecurringDates = CalendarHelper.getRecurringDates(rrule, seedDate, endDate);
+        return new CalendarData(calendarData, recurringDates, nextTenRecurringDates);
     }
 
     private Collection<CalendarData> handleRecurringDates(final Collection<CalendarData> calendarsData) {
