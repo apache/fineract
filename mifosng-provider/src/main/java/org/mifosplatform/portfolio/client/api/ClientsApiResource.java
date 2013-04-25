@@ -130,10 +130,10 @@ public class ClientsApiResource {
     @Path("/paginated")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveOnePaginated(@QueryParam("pageNo") final int pageNo, @QueryParam("pageSize") final int pageSize,
+    public String retrievePaginated(@QueryParam("pageNo") final int pageNo, @QueryParam("pageSize") final int pageSize,
             @Context final UriInfo uriInfo) throws SQLException {
         context.authenticatedUser().validateHasReadPermission(ClientApiConstants.CLIENT_RESOURCE_NAME);
-        Page<ClientData> clientData = this.clientReadPlatformService.retrieveOnePaginated(pageNo, pageSize);
+        Page<ClientData> clientData = this.clientReadPlatformService.retrievePaginated(pageNo, pageSize);
         return clientData.toString();
     }
 

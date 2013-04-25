@@ -91,7 +91,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
     }
 
     @Override
-    public Page<ClientData> retrieveOnePaginated(final int pageNo, final int pageSize) {
+    public Page<ClientData> retrievePaginated(final int pageNo, final int pageSize) {
         PaginationHelper<ClientData> ph = new PaginationHelper<ClientData>();
         return ph.fetchPage(jdbcTemplate, "SELECT count(*) FROM m_client ORDER BY firstname", "SELECT * FROM m_client ORDER BY firstname",
                 null, pageNo, pageSize, new ParameterizedRowMapper<ClientData>() {
