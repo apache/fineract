@@ -5,6 +5,7 @@
  */
 package org.mifosplatform.portfolio.client.api;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -41,6 +42,7 @@ import org.mifosplatform.portfolio.client.data.ClientAccountSummaryCollectionDat
 import org.mifosplatform.portfolio.client.data.ClientData;
 import org.mifosplatform.portfolio.client.service.ClientReadPlatformService;
 import org.mifosplatform.portfolio.group.service.SearchParameters;
+import org.mifosplatform.portfolio.pagination.Page;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -122,6 +124,17 @@ public class ClientsApiResource {
         }
 
         return this.toApiJsonSerializer.serialize(settings, clientData, ClientApiConstants.CLIENT_RESPONSE_DATA_PARAMETERS);
+    }
+    
+    @GET
+    @Path("/paginated")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String retrieveOnePaginated(@QueryParam("pageNo") final int pageNo, @QueryParam("pageSize") final int pageSize,
+            @Context final UriInfo uriInfo) throws SQLException {
+        context.authenticatedUser().validateHasReadPermission(ClientApiConstants.CLIENT_RESOURCE_NAME);
+        Page<ClientData> clientData = this.clientReadPlatformService.retrieveOnePaginated(pageNo, pageSize);
+        return clientData.toString();
     }
 
     @POST

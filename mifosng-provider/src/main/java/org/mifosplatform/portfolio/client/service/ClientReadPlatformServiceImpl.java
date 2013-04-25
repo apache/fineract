@@ -29,11 +29,14 @@ import org.mifosplatform.portfolio.group.data.GroupGeneralData;
 import org.mifosplatform.portfolio.group.service.SearchParameters;
 import org.mifosplatform.portfolio.loanaccount.data.LoanStatusEnumData;
 import org.mifosplatform.portfolio.loanproduct.service.LoanEnumerations;
+import org.mifosplatform.portfolio.pagination.Page;
+import org.mifosplatform.portfolio.pagination.PaginationHelper;
 import org.mifosplatform.useradministration.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.simple.ParameterizedRowMapper;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -87,6 +90,35 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         return this.jdbcTemplate.query(sql, clientMapper, new Object[] { hierarchySearchString });
     }
 
+    @Override
+    public Page<ClientData> retrieveOnePaginated(final int pageNo, final int pageSize) {
+        PaginationHelper<ClientData> ph = new PaginationHelper<ClientData>();
+        return ph.fetchPage(jdbcTemplate, "SELECT count(*) FROM m_client ORDER BY firstname", "SELECT * FROM m_client ORDER BY firstname",
+                null, pageNo, pageSize, new ParameterizedRowMapper<ClientData>() {
+
+                    @Override
+                    public ClientData mapRow(ResultSet rs, int rowNum) throws SQLException {
+                        final String accountNo = rs.getString("account_no");
+                        final EnumOptionData status = null;
+                        final Long officeId = JdbcSupport.getLong(rs, "office_id");
+                        final Long id = JdbcSupport.getLong(rs, "id");
+                        final String firstname = rs.getString("firstname");
+                        final String middlename = rs.getString("middlename");
+                        final String lastname = rs.getString("lastname");
+                        final String fullname = rs.getString("fullname");
+                        final String displayName = rs.getString("display_name");
+                        final String externalId = rs.getString("external_Id");
+                        final LocalDate activationDate = JdbcSupport.getLocalDate(rs, "activation_date");
+                        final String imageKey = rs.getString("image_key");
+                        final String officeName = null;
+
+                        return ClientData.instance(accountNo, status, officeId, officeName, id, firstname, middlename, lastname, fullname,
+                                displayName, externalId, activationDate, imageKey);
+                    }
+                });
+
+    }
+    
     private String buildSqlStringFromClientCriteria(final SearchParameters searchParameters) {
 
         final String sqlSearch = searchParameters.getSqlSearch();

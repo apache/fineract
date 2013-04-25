@@ -11,12 +11,15 @@ import org.mifosplatform.portfolio.client.data.ClientAccountSummaryCollectionDat
 import org.mifosplatform.portfolio.client.data.ClientAccountSummaryData;
 import org.mifosplatform.portfolio.client.data.ClientData;
 import org.mifosplatform.portfolio.group.service.SearchParameters;
+import org.mifosplatform.portfolio.pagination.Page;
 
 public interface ClientReadPlatformService {
 
     ClientData retrieveTemplate();
 
     Collection<ClientData> retrieveAll(SearchParameters searchParameters);
+    
+    Page<ClientData> retrieveOnePaginated(int pageNo, int pageSize);
 
     ClientData retrieveOne(Long clientId);
 
