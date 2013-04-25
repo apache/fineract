@@ -5,13 +5,11 @@
  */
 package org.mifosplatform.infrastructure.documentmanagement.service;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
-import org.mifosplatform.infrastructure.core.service.FileUtils;
+import org.mifosplatform.infrastructure.core.service.DocumentStore;
+import org.mifosplatform.infrastructure.core.service.DocumentStoreFactory;
+import org.mifosplatform.infrastructure.core.service.DocumentStoreType;
 import org.mifosplatform.infrastructure.documentmanagement.command.DocumentCommand;
 import org.mifosplatform.infrastructure.documentmanagement.command.DocumentCommandValidator;
 import org.mifosplatform.infrastructure.documentmanagement.domain.Document;
@@ -27,6 +25,8 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.InputStream;
+
 @Service
 public class DocumentWritePlatformServiceJpaRepositoryImpl implements DocumentWritePlatformService {
 
@@ -34,11 +34,14 @@ public class DocumentWritePlatformServiceJpaRepositoryImpl implements DocumentWr
 
     private final PlatformSecurityContext context;
     private final DocumentRepository documentRepository;
+    private final DocumentStoreFactory documentStoreFactory;
 
     @Autowired
-    public DocumentWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final DocumentRepository documentRepository) {
+    public DocumentWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final DocumentRepository documentRepository,
+                                                         final DocumentStoreFactory documentStoreFactory) {
         this.context = context;
         this.documentRepository = documentRepository;
+        this.documentStoreFactory = documentStoreFactory;
     }
 
     @Transactional
@@ -53,19 +56,13 @@ public class DocumentWritePlatformServiceJpaRepositoryImpl implements DocumentWr
 
             validator.validateForCreate();
 
-            final String fileUploadLocation = FileUtils.generateFileParentDirectory(documentCommand.getParentEntityType(),
-                    documentCommand.getParentEntityId());
+            DocumentStore documentStore = this.documentStoreFactory.getInstanceFromConfiguration();
 
-            /** Recursively create the directory if it does not exist **/
-            if (!new File(fileUploadLocation).isDirectory()) {
-                new File(fileUploadLocation).mkdirs();
-            }
-
-            final String fileLocation = FileUtils.saveToFileSystem(inputStream, fileUploadLocation, documentCommand.getFileName());
+            final String fileLocation = documentStore.saveDocument(inputStream, documentCommand);
 
             final Document document = Document.createNew(documentCommand.getParentEntityType(), documentCommand.getParentEntityId(),
                     documentCommand.getName(), documentCommand.getFileName(), documentCommand.getSize(), documentCommand.getType(),
-                    documentCommand.getDescription(), fileLocation);
+                    documentCommand.getDescription(), fileLocation, documentStore.getType());
 
             this.documentRepository.save(document);
 
@@ -74,8 +71,8 @@ public class DocumentWritePlatformServiceJpaRepositoryImpl implements DocumentWr
             logger.error(dve.getMessage(), dve);
             throw new PlatformDataIntegrityException("error.msg.document.unknown.data.integrity.issue",
                     "Unknown data integrity issue with resource.");
-        } catch (final IOException ioe) {
-            logger.error(ioe.getMessage(), ioe);
+        } catch (final DocumentManagementException dme) {
+            logger.error(dme.getMessage(), dme);
             throw new DocumentManagementException(documentCommand.getName());
         }
     }
@@ -92,30 +89,21 @@ public class DocumentWritePlatformServiceJpaRepositoryImpl implements DocumentWr
             // TODO check if entity id is valid and within data scope for the
             // user
             final Document documentForUpdate = this.documentRepository.findOne(documentCommand.getId());
+            DocumentStoreType documentStoreType = documentForUpdate.storageType();
             if (documentForUpdate == null) { throw new DocumentNotFoundException(documentCommand.getParentEntityType(),
                     documentCommand.getParentEntityId(), documentCommand.getId()); }
             oldLocation = documentForUpdate.getLocation();
-            // if a new file is also passed in
             if (inputStream != null && documentCommand.isFileNameChanged()) {
-                final String fileUploadLocation = FileUtils.generateFileParentDirectory(documentCommand.getParentEntityType(),
-                        documentCommand.getParentEntityId());
-
-                /** Recursively create the directory if it does not exist **/
-                if (!new File(fileUploadLocation).isDirectory()) {
-                    new File(fileUploadLocation).mkdirs();
-                }
-
-                // TODO provide switch to toggle between file system appender
-                // and Amazon S3 appender
-                final String fileLocation = FileUtils.saveToFileSystem(inputStream, fileUploadLocation, documentCommand.getFileName());
-                documentCommand.setLocation(fileLocation);
+                DocumentStore instanceFromConfiguration = this.documentStoreFactory.getInstanceFromConfiguration();
+                documentCommand.setLocation(instanceFromConfiguration.saveDocument(inputStream, documentCommand));
+                documentCommand.setStorageType(instanceFromConfiguration.getType());
             }
 
             documentForUpdate.update(documentCommand);
 
             if (inputStream != null && documentCommand.isFileNameChanged()) {
-                // delete previous file
-                deleteFile(documentCommand.getName(), oldLocation);
+                DocumentStore documentStore = this.documentStoreFactory.getInstanceFromStorageType(documentStoreType);
+                documentStore.deleteDocument(documentCommand.getName(), oldLocation);
             }
 
             this.documentRepository.saveAndFlush(documentForUpdate);
@@ -125,8 +113,8 @@ public class DocumentWritePlatformServiceJpaRepositoryImpl implements DocumentWr
             logger.error(dve.getMessage(), dve);
             throw new PlatformDataIntegrityException("error.msg.document.unknown.data.integrity.issue",
                     "Unknown data integrity issue with resource.");
-        } catch (final IOException ioe) {
-            logger.error(ioe.getMessage(), ioe);
+        } catch (final DocumentManagementException dme) {
+            logger.error(dme.getMessage(), dme);
             throw new DocumentManagementException(documentCommand.getName());
         }
     }
@@ -139,18 +127,13 @@ public class DocumentWritePlatformServiceJpaRepositoryImpl implements DocumentWr
         validateParentEntityType(documentCommand);
         // TODO: Check document is present under this entity Id
         final Document document = this.documentRepository.findOne(documentCommand.getId());
+        DocumentStore documentStore = this.documentStoreFactory.getInstanceFromStorageType(document.storageType());
         if (document == null) { throw new DocumentNotFoundException(documentCommand.getParentEntityType(),
                 documentCommand.getParentEntityId(), documentCommand.getId()); }
 
         this.documentRepository.delete(document);
-        deleteFile(document.getName(), document.getLocation());
+        documentStore.deleteDocument(document.getName(), document.getLocation());
         return new CommandProcessingResult(document.getId());
-    }
-
-    private void deleteFile(final String documentName, final String location) {
-        final File fileToBeDeleted = new File(location);
-        final boolean fileDeleted = fileToBeDeleted.delete();
-        if (!fileDeleted) { throw new DocumentManagementException(documentName); }
     }
 
     private void validateParentEntityType(final DocumentCommand documentCommand) {

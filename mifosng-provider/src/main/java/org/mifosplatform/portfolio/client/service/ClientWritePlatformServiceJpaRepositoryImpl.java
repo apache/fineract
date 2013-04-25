@@ -5,13 +5,6 @@
  */
 package org.mifosplatform.portfolio.client.service;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
@@ -21,7 +14,8 @@ import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.mifosplatform.infrastructure.core.domain.Base64EncodedImage;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
-import org.mifosplatform.infrastructure.core.service.FileUtils;
+import org.mifosplatform.infrastructure.core.service.DocumentStore;
+import org.mifosplatform.infrastructure.core.service.DocumentStoreFactory;
 import org.mifosplatform.infrastructure.documentmanagement.exception.DocumentManagementException;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.office.domain.Office;
@@ -29,10 +23,7 @@ import org.mifosplatform.organisation.office.domain.OfficeRepository;
 import org.mifosplatform.organisation.office.exception.OfficeNotFoundException;
 import org.mifosplatform.portfolio.client.api.ClientApiConstants;
 import org.mifosplatform.portfolio.client.data.ClientDataValidator;
-import org.mifosplatform.portfolio.client.domain.AccountNumberGenerator;
-import org.mifosplatform.portfolio.client.domain.AccountNumberGeneratorFactory;
-import org.mifosplatform.portfolio.client.domain.Client;
-import org.mifosplatform.portfolio.client.domain.ClientRepositoryWrapper;
+import org.mifosplatform.portfolio.client.domain.*;
 import org.mifosplatform.portfolio.client.exception.ClientMustBePendingToBeDeletedException;
 import org.mifosplatform.portfolio.client.exception.ClientNotFoundException;
 import org.mifosplatform.portfolio.group.domain.Group;
@@ -47,6 +38,11 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.InputStream;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+
 @Service
 public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWritePlatformService {
 
@@ -59,12 +55,14 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
     private final GroupRepository groupRepository;
     private final ClientDataValidator fromApiJsonDeserializer;
     private final AccountNumberGeneratorFactory accountIdentifierGeneratorFactory;
+    private final DocumentStoreFactory documentStoreFactory;
+    private final ImageRepository imageRepository;
 
     @Autowired
     public ClientWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
-            final ClientRepositoryWrapper clientRepository, final OfficeRepository officeRepository, final NoteRepository noteRepository,
-            final ClientDataValidator fromApiJsonDeserializer, final AccountNumberGeneratorFactory accountIdentifierGeneratorFactory,
-            final GroupRepository groupRepository) {
+                                                       final ClientRepositoryWrapper clientRepository, final OfficeRepository officeRepository, final NoteRepository noteRepository,
+                                                       final ClientDataValidator fromApiJsonDeserializer, final AccountNumberGeneratorFactory accountIdentifierGeneratorFactory,
+                                                       final GroupRepository groupRepository, DocumentStoreFactory documentStoreFactory, ImageRepository imageRepository) {
         this.context = context;
         this.clientRepository = clientRepository;
         this.officeRepository = officeRepository;
@@ -72,6 +70,8 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
         this.accountIdentifierGeneratorFactory = accountIdentifierGeneratorFactory;
         this.groupRepository = groupRepository;
+        this.documentStoreFactory = documentStoreFactory;
+        this.imageRepository = imageRepository;
     }
 
     @Transactional
@@ -223,16 +223,16 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 
     @Transactional
     @Override
-    public CommandProcessingResult saveOrUpdateClientImage(final Long clientId, final String imageName, final InputStream inputStream) {
+    public CommandProcessingResult saveOrUpdateClientImage(final Long clientId, final String imageName, final InputStream inputStream, Long fileSize) {
         try {
             final Client client = this.clientRepository.findOneWithNotFoundDetection(clientId);
-            String imageUploadLocation = setupForClientImageUpdate(clientId, client);
+            deletePreviousClientImage(clientId, client);
 
-            String imageLocation = FileUtils.saveToFileSystem(inputStream, imageUploadLocation, imageName);
-
-            return updateClientImage(clientId, client, imageLocation);
-        } catch (IOException ioe) {
-            logger.error(ioe.getMessage(), ioe);
+            DocumentStore documentStore = this.documentStoreFactory.getInstanceFromConfiguration();
+            String imageLocation = documentStore.saveImage(inputStream, clientId, imageName, fileSize);
+            return updateClientImage(clientId, client, imageLocation, documentStore.getType().getValue());
+        } catch (DocumentManagementException dme) {
+            logger.error(dme.getMessage(), dme);
             throw new DocumentManagementException(imageName);
         }
     }
@@ -243,48 +243,52 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 
         final Client client = this.clientRepository.findOneWithNotFoundDetection(clientId);
 
+        Image image = imageRepository.findOneByClient(client);
+        String imageKey = image.getKey();
         // delete image from the file system
-        if (StringUtils.isNotEmpty(client.imageKey())) {
-            FileUtils.deleteClientImage(clientId, client.imageKey());
+        if (StringUtils.isNotEmpty((imageKey))) {
+            DocumentStore documentStore = this.documentStoreFactory.getInstanceFromConfiguration();
+            documentStore.deleteImage(clientId, imageKey);
+            this.imageRepository.delete(image);
         }
-        return updateClientImage(clientId, client, null);
+
+        return new CommandProcessingResult(clientId) ;
     }
 
     @Override
     public CommandProcessingResult saveOrUpdateClientImage(final Long clientId, final Base64EncodedImage encodedImage) {
         try {
             final Client client = this.clientRepository.findOneWithNotFoundDetection(clientId);
-            final String imageUploadLocation = setupForClientImageUpdate(clientId, client);
+            deletePreviousClientImage(clientId, client);
 
-            final String imageLocation = FileUtils.saveToFileSystem(encodedImage, imageUploadLocation, "image");
+            DocumentStore documentStore = this.documentStoreFactory.getInstanceFromConfiguration();
+            final String imageLocation = documentStore.saveImage(encodedImage, clientId, "image");
 
-            return updateClientImage(clientId, client, imageLocation);
-        } catch (IOException ioe) {
-            logger.error(ioe.getMessage(), ioe);
+            return updateClientImage(clientId, client, imageLocation, documentStore.getType().getValue());
+        } catch (DocumentManagementException dme) {
+            logger.error(dme.getMessage(), dme);
             throw new DocumentManagementException("image");
         }
     }
 
-    private String setupForClientImageUpdate(final Long clientId, final Client client) {
+    private void deletePreviousClientImage(final Long clientId, final Client client) {
         if (client == null) { throw new ClientNotFoundException(clientId); }
 
-        final String imageUploadLocation = FileUtils.generateClientImageParentDirectory(clientId);
-        // delete previous image from the file system
-        if (StringUtils.isNotEmpty(client.imageKey())) {
-            FileUtils.deleteClientImage(clientId, client.imageKey());
+        Image image = imageRepository.findOneByClient(client);
+        if (image != null){
+            this.documentStoreFactory.getInstanceFromConfiguration().deleteImage(clientId, image.getKey());
         }
-
-        /** Recursively create the directory if it does not exist **/
-        if (!new File(imageUploadLocation).isDirectory()) {
-            new File(imageUploadLocation).mkdirs();
-        }
-        return imageUploadLocation;
     }
 
-    private CommandProcessingResult updateClientImage(final Long clientId, final Client client, final String imageLocation) {
-        client.updateImageKey(imageLocation);
-        this.clientRepository.save(client);
+    private CommandProcessingResult updateClientImage(final Long clientId, final Client client, final String imageLocation, final String documentStoreType) {
+        Image image = imageRepository.findOneByClient(client);
+        if(image == null){
+            image = new Image(client);
+        }
+        image.updateKey(imageLocation);
+        image.updateStorageType(documentStoreType);
 
+        this.imageRepository.save(image);
         return new CommandProcessingResult(clientId);
     }
 

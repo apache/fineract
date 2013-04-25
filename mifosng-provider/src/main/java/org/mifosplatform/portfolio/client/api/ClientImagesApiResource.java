@@ -5,44 +5,31 @@
  */
 package org.mifosplatform.portfolio.client.api;
 
-import java.io.File;
-import java.io.InputStream;
-
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
-
+import com.lowagie.text.pdf.codec.Base64;
+import com.sun.jersey.core.header.FormDataContentDisposition;
+import com.sun.jersey.multipart.FormDataBodyPart;
+import com.sun.jersey.multipart.FormDataParam;
 import org.apache.commons.lang.StringUtils;
-import org.mifosplatform.infrastructure.core.api.ApiConstants;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.domain.Base64EncodedImage;
 import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
-import org.mifosplatform.infrastructure.core.service.FileUtils;
-import org.mifosplatform.infrastructure.core.service.FileUtils.IMAGE_DATA_URI_SUFFIX;
-import org.mifosplatform.infrastructure.core.service.FileUtils.IMAGE_FILE_EXTENSION;
-import org.mifosplatform.infrastructure.core.service.FileUtils.IMAGE_MIME_TYPE;
+import org.mifosplatform.infrastructure.core.service.ImageUtils;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.portfolio.client.data.ClientData;
 import org.mifosplatform.portfolio.client.exception.ImageNotFoundException;
 import org.mifosplatform.portfolio.client.service.ClientReadPlatformService;
 import org.mifosplatform.portfolio.client.service.ClientWritePlatformService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.lowagie.text.pdf.codec.Base64;
-import com.sun.jersey.core.header.FormDataContentDisposition;
-import com.sun.jersey.multipart.FormDataBodyPart;
-import com.sun.jersey.multipart.FormDataParam;
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
+import java.io.InputStream;
 
 @Path("/clients/{clientId}/images")
 @Component
@@ -53,10 +40,11 @@ public class ClientImagesApiResource {
     private final ClientReadPlatformService clientReadPlatformService;
     private final ClientWritePlatformService clientWritePlatformService;
     private final DefaultToApiJsonSerializer<ClientData> toApiJsonSerializer;
+    private final static Logger logger = LoggerFactory.getLogger(ClientImagesApiResource.class);
 
     @Autowired
     public ClientImagesApiResource(final PlatformSecurityContext context, final ClientReadPlatformService readPlatformService,
-            final ClientWritePlatformService clientWritePlatformService, final DefaultToApiJsonSerializer<ClientData> toApiJsonSerializer) {
+                                   final ClientWritePlatformService clientWritePlatformService, final DefaultToApiJsonSerializer<ClientData> toApiJsonSerializer) {
         this.context = context;
         this.clientReadPlatformService = readPlatformService;
         this.clientWritePlatformService = clientWritePlatformService;
@@ -76,12 +64,11 @@ public class ClientImagesApiResource {
         // TODO: vishwas might need more advances validation (like reading magic
         // number) for handling malicious clients
         // and clients not setting mime type
-        FileUtils.validateClientImageNotEmpty(fileDetails.getFileName());
-        FileUtils.validateImageMimeType(bodyPart.getMediaType().toString());
-        FileUtils.validateFileSizeWithinPermissibleRange(fileSize, fileDetails.getFileName(), ApiConstants.MAX_FILE_UPLOAD_SIZE_IN_MB);
+        ImageUtils.validateClientImageNotEmpty(fileDetails.getFileName());
+        ImageUtils.validateImageMimeType(bodyPart.getMediaType().toString());
 
         final CommandProcessingResult result = this.clientWritePlatformService.saveOrUpdateClientImage(clientId, fileDetails.getFileName(),
-                inputStream);
+                inputStream, fileSize);
 
         return this.toApiJsonSerializer.serialize(result);
     }
@@ -94,7 +81,7 @@ public class ClientImagesApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String addNewClientImage(@PathParam("clientId") final Long clientId, final String jsonRequestBody) {
 
-        final Base64EncodedImage base64EncodedImage = FileUtils.extractImageFromDataURL(jsonRequestBody);
+        final Base64EncodedImage base64EncodedImage = ImageUtils.extractImageFromDataURL(jsonRequestBody);
 
         final CommandProcessingResult result = this.clientWritePlatformService.saveOrUpdateClientImage(clientId, base64EncodedImage);
 
@@ -116,15 +103,14 @@ public class ClientImagesApiResource {
         if (clientData.imageKeyDoesNotExist()) { throw new ImageNotFoundException("clients", clientId); }
 
         // TODO: Need a better way of determining image type
-        String imageDataURISuffix = IMAGE_DATA_URI_SUFFIX.JPEG.getValue();
-        if (StringUtils.endsWith(clientData.imageKey(), IMAGE_FILE_EXTENSION.GIF.getValue())) {
-            imageDataURISuffix = IMAGE_DATA_URI_SUFFIX.GIF.getValue();
-        } else if (StringUtils.endsWith(clientData.imageKey(), IMAGE_FILE_EXTENSION.PNG.getValue())) {
-            imageDataURISuffix = IMAGE_DATA_URI_SUFFIX.PNG.getValue();
+        String imageDataURISuffix = ImageUtils.IMAGE_DATA_URI_SUFFIX.JPEG.getValue();
+        if (StringUtils.endsWith(clientData.imageKey(), ImageUtils.IMAGE_FILE_EXTENSION.GIF.getValue())) {
+            imageDataURISuffix = ImageUtils.IMAGE_DATA_URI_SUFFIX.GIF.getValue();
+        } else if (StringUtils.endsWith(clientData.imageKey(), ImageUtils.IMAGE_FILE_EXTENSION.PNG.getValue())) {
+            imageDataURISuffix = ImageUtils.IMAGE_DATA_URI_SUFFIX.PNG.getValue();
         }
 
-        String clientImageAsBase64Text = imageDataURISuffix + Base64.encodeFromFile(clientData.imageKey());
-
+        String clientImageAsBase64Text = imageDataURISuffix + Base64.encodeBytes(clientData.image());
         return clientImageAsBase64Text;
     }
 
@@ -138,22 +124,12 @@ public class ClientImagesApiResource {
 
         if (clientData.imageKeyDoesNotExist()) { throw new ImageNotFoundException("clients", clientId); }
 
-        File image = new File(clientData.imageKey());
-        String imageName = image.getName();
-        ResponseBuilder response = Response.ok(image);
-        response.header("Content-Disposition", "attachment; filename=\"" + imageName + "\"");
+        ResponseBuilder response = Response.ok(clientData.image());
+        response.header("Content-Disposition", "attachment; filename=\"" + clientData.imageName() + "\"");
 
         // TODO: Need a better way of determining image type
 
-        // determine image type
-        String contentType = IMAGE_MIME_TYPE.JPEG.getValue();
-        if (StringUtils.endsWith(imageName, IMAGE_FILE_EXTENSION.GIF.getValue())) {
-            contentType = IMAGE_MIME_TYPE.GIF.getValue();
-        } else if (StringUtils.endsWith(imageName, IMAGE_FILE_EXTENSION.PNG.getValue())) {
-            contentType = IMAGE_MIME_TYPE.PNG.getValue();
-        }
-
-        response.header("Content-Type", contentType);
+        response.header("Content-Type", clientData.imageContentType());
         return response.build();
     }
 

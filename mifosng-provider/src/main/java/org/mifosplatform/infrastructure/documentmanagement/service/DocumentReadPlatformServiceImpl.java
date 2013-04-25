@@ -5,13 +5,12 @@
  */
 package org.mifosplatform.infrastructure.documentmanagement.service;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.Collection;
-
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
+import org.mifosplatform.infrastructure.core.service.DocumentStore;
+import org.mifosplatform.infrastructure.core.service.DocumentStoreFactory;
 import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
 import org.mifosplatform.infrastructure.documentmanagement.data.DocumentData;
+import org.mifosplatform.infrastructure.documentmanagement.data.FileData;
 import org.mifosplatform.infrastructure.documentmanagement.exception.DocumentNotFoundException;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,16 +19,23 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Collection;
+
 @Service
 public class DocumentReadPlatformServiceImpl implements DocumentReadPlatformService {
 
     private final JdbcTemplate jdbcTemplate;
     private final PlatformSecurityContext context;
+    private final DocumentStoreFactory documentStoreFactory;
 
     @Autowired
-    public DocumentReadPlatformServiceImpl(final PlatformSecurityContext context, final TenantAwareRoutingDataSource dataSource) {
+    public DocumentReadPlatformServiceImpl(final PlatformSecurityContext context, final TenantAwareRoutingDataSource dataSource,
+                                           final DocumentStoreFactory documentStoreFactory) {
         this.context = context;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.documentStoreFactory = documentStoreFactory;
     }
 
     @Override
@@ -46,17 +52,22 @@ public class DocumentReadPlatformServiceImpl implements DocumentReadPlatformServ
     }
 
     @Override
-    public DocumentData retrieveDocument(final String entityType, final Long entityId, final Long documentId) {
-
+    public FileData retrieveDocumentAsFile(final String entityType, final Long entityId, final Long documentId) {
         try {
-            this.context.authenticatedUser();
+            DocumentData documentData = getDocumentData(entityType, entityId, documentId);
+            DocumentStore instanceForRead = documentStoreFactory.getInstanceFromStorageType(documentData.storeType());
+            return instanceForRead.retrieveDocument(documentData);
+        } catch (final EmptyResultDataAccessException e) {
+            throw new DocumentNotFoundException(entityType, entityId, documentId);
+        } catch (final DocumentNotFoundException d) {
+            throw d;
+        }
+    }
 
-            // TODO verify if the entities are valid and a
-            // user has data
-            // scope for the particular entities
-            final DocumentMapper mapper = new DocumentMapper(false);
-            final String sql = "select " + mapper.schema() + " and d.id=? ";
-            return this.jdbcTemplate.queryForObject(sql, mapper, new Object[] { entityType, entityId, documentId });
+    @Override
+    public DocumentData retrieveDocument(String entityType, Long entityId, Long documentId) {
+        try {
+            return getDocumentData(entityType, entityId, documentId);
         } catch (final EmptyResultDataAccessException e) {
             throw new DocumentNotFoundException(entityType, entityId, documentId);
         }
@@ -73,7 +84,8 @@ public class DocumentReadPlatformServiceImpl implements DocumentReadPlatformServ
         public String schema() {
             return "d.id as id, d.parent_entity_type as parentEntityType, d.parent_entity_id as parentEntityId, d.name as name, "
                     + " d.file_name as fileName, d.size as fileSize, d.type as fileType, "
-                    + " d.description as description, d.location as location"
+                    + " d.description as description, d.location as location,"
+                    + " d.storage_type as storageType"
                     + " from m_document d where d.parent_entity_type=? and d.parent_entity_id=?";
         }
 
@@ -92,8 +104,21 @@ public class DocumentReadPlatformServiceImpl implements DocumentReadPlatformServ
             if (!this.hideLocation) {
                 location = rs.getString("location");
             }
+            final String storageType = rs.getString("storageType");
 
-            return new DocumentData(id, parentEntityType, parentEntityId, name, fileName, fileSize, fileType, description, location);
+            return new DocumentData(id, parentEntityType, parentEntityId, name, fileName, fileSize, fileType, description, location, storageType);
         }
+    }
+
+
+    private DocumentData getDocumentData(String entityType, Long entityId, Long documentId) {
+        this.context.authenticatedUser();
+
+        // TODO verify if the entities are valid and a
+        // user has data
+        // scope for the particular entities
+        final DocumentMapper mapper = new DocumentMapper(false);
+        final String sql = "select " + mapper.schema() + " and d.id=? ";
+        return this.jdbcTemplate.queryForObject(sql, mapper, new Object[]{entityType, entityId, documentId});
     }
 }

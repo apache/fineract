@@ -5,6 +5,8 @@
  */
 package org.mifosplatform.infrastructure.documentmanagement.command;
 
+import org.mifosplatform.infrastructure.core.service.DocumentStoreType;
+
 import java.util.Set;
 
 /**
@@ -24,6 +26,7 @@ public class DocumentCommand {
     private String location;
 
     private final Set<String> modifiedParameters;
+    private DocumentStoreType storageType;
 
     public DocumentCommand(final Set<String> modifiedParameters, final Long id, final String parentEntityType, final Long parentEntityId,
             final String name, final String fileName, final Long size, final String type, final String description, final String location) {
@@ -119,4 +122,11 @@ public class DocumentCommand {
         return this.modifiedParameters.contains("location");
     }
 
+    public void setStorageType(DocumentStoreType storageType) {
+        this.storageType = storageType;
+    }
+
+    public String getStorageType(){
+        return storageType.getValue();
+    }
 }

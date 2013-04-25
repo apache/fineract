@@ -5,13 +5,17 @@
  */
 package org.mifosplatform.infrastructure.documentmanagement.service;
 
-import java.util.Collection;
-
 import org.mifosplatform.infrastructure.documentmanagement.data.DocumentData;
+import org.mifosplatform.infrastructure.documentmanagement.data.FileData;
+
+import java.util.Collection;
 
 public interface DocumentReadPlatformService {
 
     Collection<DocumentData> retrieveAllDocuments(String entityType, Long entityId);
 
+    FileData retrieveDocumentAsFile(String entityType, Long entityId, Long documentId);
+
     DocumentData retrieveDocument(String entityType, Long entityId, Long documentId);
+
 }

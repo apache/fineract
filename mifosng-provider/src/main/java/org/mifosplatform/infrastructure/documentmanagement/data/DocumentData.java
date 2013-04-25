@@ -5,6 +5,9 @@
  */
 package org.mifosplatform.infrastructure.documentmanagement.data;
 
+import org.mifosplatform.infrastructure.core.service.DocumentStore;
+import org.mifosplatform.infrastructure.core.service.DocumentStoreType;
+
 /**
  * Immutable data object represent document being managed on platform.
  */
@@ -26,8 +29,10 @@ public class DocumentData {
     private final String description;
     private String location;
 
+    private String storageType;
+
     public DocumentData(final Long id, final String parentEntityType, final Long parentEntityId, final String name, final String fileName,
-            final Long size, final String type, final String description, final String location) {
+                        final Long size, final String type, final String description, final String location, String storageType) {
         this.id = id;
         this.parentEntityType = parentEntityType;
         this.parentEntityId = parentEntityId;
@@ -37,6 +42,7 @@ public class DocumentData {
         this.type = type;
         this.description = description;
         this.location = location;
+        this.storageType = storageType;
     }
 
     public String contentType() {
@@ -53,6 +59,22 @@ public class DocumentData {
 
     public void setLocation(final String location) {
         this.location = location;
+    }
+
+    public DocumentStoreType storeType(){
+        return DocumentStore.getDocumentStoreType(storageType);
+    }
+
+    public String getParentEntityType(){
+        return this.parentEntityType;
+    }
+
+    public Long getParentEntityId(){
+        return this.parentEntityId;
+    }
+
+    public Long getId(){
+        return this.id;
     }
 
 }
