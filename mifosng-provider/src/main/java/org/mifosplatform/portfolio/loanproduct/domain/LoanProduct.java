@@ -45,254 +45,335 @@ import com.google.gson.JsonArray;
 @Table(name = "m_product_loan", uniqueConstraints = { @UniqueConstraint(columnNames = { "name" }, name = "unq_name") })
 public class LoanProduct extends AbstractPersistable<Long> {
 
-    @ManyToOne
-    @JoinColumn(name = "fund_id", nullable = true)
-    private Fund fund;
+	@ManyToOne
+	@JoinColumn(name = "fund_id", nullable = true)
+	private Fund fund;
 
-    @ManyToOne
-    @JoinColumn(name = "loan_transaction_strategy_id", nullable = true)
-    private LoanTransactionProcessingStrategy transactionProcessingStrategy;
+	@ManyToOne
+	@JoinColumn(name = "loan_transaction_strategy_id", nullable = true)
+	private LoanTransactionProcessingStrategy transactionProcessingStrategy;
 
-    @Column(name = "name", nullable = false, unique = true)
-    private String name;
+	@Column(name = "name", nullable = false, unique = true)
+	private String name;
 
-    @Column(name = "description")
-    private String description;
+	@Column(name = "description")
+	private String description;
 
-    @ManyToMany
-    @JoinTable(name = "m_product_loan_charge", joinColumns = @JoinColumn(name = "product_loan_id"), inverseJoinColumns = @JoinColumn(name = "charge_id"))
-    private List<Charge> charges;
+	@ManyToMany
+	@JoinTable(name = "m_product_loan_charge", joinColumns = @JoinColumn(name = "product_loan_id"), inverseJoinColumns = @JoinColumn(name = "charge_id"))
+	private List<Charge> charges;
 
-    @Embedded
-    private final LoanProductRelatedDetail loanProductRelatedDetail;
-    
-    @Embedded
-    private LoanProductMinMaxConstraints loanProductMinMaxConstraints;
+	@Embedded
+	private final LoanProductRelatedDetail loanProductRelatedDetail;
 
-    @Column(name = "accounting_type", nullable = false)
-    private Integer accountingRule;
+	@Embedded
+	private LoanProductMinMaxConstraints loanProductMinMaxConstraints;
 
-    public static LoanProduct assembleFromJson(final Fund fund, final LoanTransactionProcessingStrategy loanTransactionProcessingStrategy,
-            final List<Charge> productCharges, final JsonCommand command, final AprCalculator aprCalculator) {
+	@Column(name = "accounting_type", nullable = false)
+	private Integer accountingRule;
 
-        final String name = command.stringValueOfParameterNamed("name");
-        final String description = command.stringValueOfParameterNamed("description");
-        final String currencyCode = command.stringValueOfParameterNamed("currencyCode");
-        final Integer digitsAfterDecimal = command.integerValueOfParameterNamed("digitsAfterDecimal");
+	public static LoanProduct assembleFromJson(
+			final Fund fund,
+			final LoanTransactionProcessingStrategy loanTransactionProcessingStrategy,
+			final List<Charge> productCharges, final JsonCommand command,
+			final AprCalculator aprCalculator) {
 
-        final MonetaryCurrency currency = new MonetaryCurrency(currencyCode, digitsAfterDecimal);
-        final BigDecimal principal = command.bigDecimalValueOfParameterNamed("principal");
-        final BigDecimal minPrincipal = command.bigDecimalValueOfParameterNamed("minPrincipal");
-        final BigDecimal maxPrincipal = command.bigDecimalValueOfParameterNamed("maxPrincipal");
+		final String name = command.stringValueOfParameterNamed("name");
+		final String description = command
+				.stringValueOfParameterNamed("description");
+		final String currencyCode = command
+				.stringValueOfParameterNamed("currencyCode");
+		final Integer digitsAfterDecimal = command
+				.integerValueOfParameterNamed("digitsAfterDecimal");
 
-        final InterestMethod interestMethod = InterestMethod.fromInt(command.integerValueOfParameterNamed("interestType"));
-        final InterestCalculationPeriodMethod interestCalculationPeriodMethod = InterestCalculationPeriodMethod.fromInt(command
-                .integerValueOfParameterNamed("interestCalculationPeriodType"));
-        final AmortizationMethod amortizationMethod = AmortizationMethod.fromInt(command.integerValueOfParameterNamed("amortizationType"));
-        final PeriodFrequencyType repaymentFrequencyType = PeriodFrequencyType.fromInt(command
-                .integerValueOfParameterNamed("repaymentFrequencyType"));
-        final PeriodFrequencyType interestFrequencyType = PeriodFrequencyType.fromInt(command
-                .integerValueOfParameterNamed("interestRateFrequencyType"));
-        final BigDecimal interestRatePerPeriod = command.bigDecimalValueOfParameterNamed("interestRatePerPeriod");
-        final BigDecimal minInterestRatePerPeriod = command.bigDecimalValueOfParameterNamed("minInterestRatePerPeriod");
-        final BigDecimal maxInterestRatePerPeriod = command.bigDecimalValueOfParameterNamed("maxInterestRatePerPeriod");
-        final BigDecimal annualInterestRate = aprCalculator.calculateFrom(interestFrequencyType, interestRatePerPeriod);
+		final MonetaryCurrency currency = new MonetaryCurrency(currencyCode,
+				digitsAfterDecimal);
+		final BigDecimal principal = command
+				.bigDecimalValueOfParameterNamed("principal");
+		final BigDecimal minPrincipal = command
+				.bigDecimalValueOfParameterNamed("minPrincipal");
+		final BigDecimal maxPrincipal = command
+				.bigDecimalValueOfParameterNamed("maxPrincipal");
 
-        final Integer repaymentEvery = command.integerValueOfParameterNamed("repaymentEvery");
-        final Integer numberOfRepayments = command.integerValueOfParameterNamed("numberOfRepayments");
-        final Integer minNumberOfRepayments = command.integerValueOfParameterNamed("minNumberOfRepayments");
-        final Integer maxNumberOfRepayments = command.integerValueOfParameterNamed("maxNumberOfRepayments");
-        final BigDecimal inArrearsTolerance = command.bigDecimalValueOfParameterNamed("inArrearsTolerance");
-        final AccountingRuleType accountingRuleType = AccountingRuleType.fromInt(command.integerValueOfParameterNamed("accountingRule"));
+		final InterestMethod interestMethod = InterestMethod.fromInt(command
+				.integerValueOfParameterNamed("interestType"));
+		final InterestCalculationPeriodMethod interestCalculationPeriodMethod = InterestCalculationPeriodMethod
+				.fromInt(command
+						.integerValueOfParameterNamed("interestCalculationPeriodType"));
+		final AmortizationMethod amortizationMethod = AmortizationMethod
+				.fromInt(command
+						.integerValueOfParameterNamed("amortizationType"));
+		final PeriodFrequencyType repaymentFrequencyType = PeriodFrequencyType
+				.fromInt(command
+						.integerValueOfParameterNamed("repaymentFrequencyType"));
+		final PeriodFrequencyType interestFrequencyType = PeriodFrequencyType
+				.fromInt(command
+						.integerValueOfParameterNamed("interestRateFrequencyType"));
+		final BigDecimal interestRatePerPeriod = command
+				.bigDecimalValueOfParameterNamed("interestRatePerPeriod");
+		final BigDecimal minInterestRatePerPeriod = command
+				.bigDecimalValueOfParameterNamed("minInterestRatePerPeriod");
+		final BigDecimal maxInterestRatePerPeriod = command
+				.bigDecimalValueOfParameterNamed("maxInterestRatePerPeriod");
+		final BigDecimal annualInterestRate = aprCalculator.calculateFrom(
+				interestFrequencyType, interestRatePerPeriod);
 
-        return new LoanProduct(fund, loanTransactionProcessingStrategy, name, description, currency, principal, minPrincipal, maxPrincipal,
-                interestRatePerPeriod, minInterestRatePerPeriod, maxInterestRatePerPeriod, interestFrequencyType, annualInterestRate, interestMethod, interestCalculationPeriodMethod,
-                repaymentEvery, repaymentFrequencyType, numberOfRepayments, minNumberOfRepayments, maxNumberOfRepayments, amortizationMethod, inArrearsTolerance, productCharges,
-                accountingRuleType);
-    }
+		final Integer repaymentEvery = command
+				.integerValueOfParameterNamed("repaymentEvery");
+		final Integer numberOfRepayments = command
+				.integerValueOfParameterNamed("numberOfRepayments");
+		final Integer minNumberOfRepayments = command
+				.integerValueOfParameterNamed("minNumberOfRepayments");
+		final Integer maxNumberOfRepayments = command
+				.integerValueOfParameterNamed("maxNumberOfRepayments");
+		final BigDecimal inArrearsTolerance = command
+				.bigDecimalValueOfParameterNamed("inArrearsTolerance");
+		final AccountingRuleType accountingRuleType = AccountingRuleType
+				.fromInt(command.integerValueOfParameterNamed("accountingRule"));
 
-    protected LoanProduct() {
-        this.loanProductRelatedDetail = null;
-        this.loanProductMinMaxConstraints = null;
-    }
+		return new LoanProduct(fund, loanTransactionProcessingStrategy, name,
+				description, currency, principal, minPrincipal, maxPrincipal,
+				interestRatePerPeriod, minInterestRatePerPeriod,
+				maxInterestRatePerPeriod, interestFrequencyType,
+				annualInterestRate, interestMethod,
+				interestCalculationPeriodMethod, repaymentEvery,
+				repaymentFrequencyType, numberOfRepayments,
+				minNumberOfRepayments, maxNumberOfRepayments,
+				amortizationMethod, inArrearsTolerance, productCharges,
+				accountingRuleType);
+	}
 
-    public LoanProduct(final Fund fund, final LoanTransactionProcessingStrategy transactionProcessingStrategy, final String name,
-            final String description, final MonetaryCurrency currency, final BigDecimal defaultPrincipal,
-            final BigDecimal defaultMinPrincipal, final BigDecimal defaultMaxPrincipal,
-            final BigDecimal defaultNominalInterestRatePerPeriod, final BigDecimal defaultMinNominalInterestRatePerPeriod,
-            final BigDecimal defaultMaxNominalInterestRatePerPeriod, final PeriodFrequencyType interestPeriodFrequencyType,
-            final BigDecimal defaultAnnualNominalInterestRate, final InterestMethod interestMethod,
-            final InterestCalculationPeriodMethod interestCalculationPeriodMethod, final Integer repayEvery,
-            final PeriodFrequencyType repaymentFrequencyType, final Integer defaultNumberOfInstallments,
-            final Integer defaultMinNumberOfInstallments, final Integer defaultMaxNumberOfInstallments,
-            final AmortizationMethod amortizationMethod, final BigDecimal inArrearsTolerance, final List<Charge> charges,
-            final AccountingRuleType accountingRuleType) {
-        this.fund = fund;
-        this.transactionProcessingStrategy = transactionProcessingStrategy;
-        this.name = name.trim();
-        if (StringUtils.isNotBlank(description)) {
-            this.description = description.trim();
-        } else {
-            this.description = null;
-        }
+	protected LoanProduct() {
+		this.loanProductRelatedDetail = null;
+		this.loanProductMinMaxConstraints = null;
+	}
 
-        if (charges != null) {
-            this.charges = charges;
-        }
+	public LoanProduct(
+			final Fund fund,
+			final LoanTransactionProcessingStrategy transactionProcessingStrategy,
+			final String name,
+			final String description,
+			final MonetaryCurrency currency,
+			final BigDecimal defaultPrincipal,
+			final BigDecimal defaultMinPrincipal,
+			final BigDecimal defaultMaxPrincipal,
+			final BigDecimal defaultNominalInterestRatePerPeriod,
+			final BigDecimal defaultMinNominalInterestRatePerPeriod,
+			final BigDecimal defaultMaxNominalInterestRatePerPeriod,
+			final PeriodFrequencyType interestPeriodFrequencyType,
+			final BigDecimal defaultAnnualNominalInterestRate,
+			final InterestMethod interestMethod,
+			final InterestCalculationPeriodMethod interestCalculationPeriodMethod,
+			final Integer repayEvery,
+			final PeriodFrequencyType repaymentFrequencyType,
+			final Integer defaultNumberOfInstallments,
+			final Integer defaultMinNumberOfInstallments,
+			final Integer defaultMaxNumberOfInstallments,
+			final AmortizationMethod amortizationMethod,
+			final BigDecimal inArrearsTolerance, final List<Charge> charges,
+			final AccountingRuleType accountingRuleType) {
+		this.fund = fund;
+		this.transactionProcessingStrategy = transactionProcessingStrategy;
+		this.name = name.trim();
+		if (StringUtils.isNotBlank(description)) {
+			this.description = description.trim();
+		} else {
+			this.description = null;
+		}
 
-        this.loanProductRelatedDetail = new LoanProductRelatedDetail(currency, defaultPrincipal, defaultNominalInterestRatePerPeriod,
-                interestPeriodFrequencyType, defaultAnnualNominalInterestRate, interestMethod, interestCalculationPeriodMethod, repayEvery,
-                repaymentFrequencyType, defaultNumberOfInstallments, amortizationMethod, inArrearsTolerance);
+		if (charges != null) {
+			this.charges = charges;
+		}
 
-        this.loanProductMinMaxConstraints = new LoanProductMinMaxConstraints(defaultMinPrincipal, defaultMaxPrincipal,
-                defaultMinNominalInterestRatePerPeriod, defaultMaxNominalInterestRatePerPeriod, defaultMinNumberOfInstallments,
-                defaultMaxNumberOfInstallments);
-        
-        if (accountingRuleType != null) {
-            this.accountingRule = accountingRuleType.getValue();
-        }
-    }
+		this.loanProductRelatedDetail = new LoanProductRelatedDetail(currency,
+				defaultPrincipal, defaultNominalInterestRatePerPeriod,
+				interestPeriodFrequencyType, defaultAnnualNominalInterestRate,
+				interestMethod, interestCalculationPeriodMethod, repayEvery,
+				repaymentFrequencyType, defaultNumberOfInstallments,
+				amortizationMethod, inArrearsTolerance);
 
-    public MonetaryCurrency getCurrency() {
-        return this.loanProductRelatedDetail.getCurrency();
-    }
+		this.loanProductMinMaxConstraints = new LoanProductMinMaxConstraints(
+				defaultMinPrincipal, defaultMaxPrincipal,
+				defaultMinNominalInterestRatePerPeriod,
+				defaultMaxNominalInterestRatePerPeriod,
+				defaultMinNumberOfInstallments, defaultMaxNumberOfInstallments);
 
-    public void update(final Fund fund) {
-        this.fund = fund;
-    }
+		if (accountingRuleType != null) {
+			this.accountingRule = accountingRuleType.getValue();
+		}
+	}
 
-    public void update(final LoanTransactionProcessingStrategy strategy) {
-        this.transactionProcessingStrategy = strategy;
-    }
+	public MonetaryCurrency getCurrency() {
+		return this.loanProductRelatedDetail.getCurrency();
+	}
 
-    public boolean update(final List<Charge> newProductCharges) {
-        boolean updated = false;
-        if (this.charges != null) {
-            final Set<Charge> setOfCharges = new HashSet<Charge>(this.charges);
+	public void update(final Fund fund) {
+		this.fund = fund;
+	}
 
-            updated = setOfCharges.addAll(newProductCharges);
-            if (updated) {
-                this.charges = newProductCharges;
-            }
-        }
-        return updated;
-    }
+	public void update(final LoanTransactionProcessingStrategy strategy) {
+		this.transactionProcessingStrategy = strategy;
+	}
 
-    public Integer getAccountingType() {
-        return this.accountingRule;
-    }
+	public boolean update(final List<Charge> newProductCharges) {
+		if (newProductCharges == null)
+			return false;
 
-    public Map<String, Object> update(final JsonCommand command, final AprCalculator aprCalculator) {
+		boolean updated = false;
+		if (this.charges != null) {
+			final Set<Charge> currentSetOfCharges = new HashSet<Charge>(
+					this.charges);
+			final Set<Charge> newSetOfCharges = new HashSet<Charge>(
+					newProductCharges);
 
-        final Map<String, Object> actualChanges = this.loanProductRelatedDetail.update(command, aprCalculator);
-        actualChanges.putAll(this.loanProductMinMaxConstraints().update(command));
+			if (!(currentSetOfCharges.equals(newSetOfCharges))) {
+				updated = true;
+				this.charges = newProductCharges;
+			} 
+		} else {
+			updated = true;
+			this.charges = newProductCharges;
+		}
+		return updated;
+	}
 
-        final String accountingTypeParamName = "accountingRule";
-        if (command.isChangeInIntegerParameterNamed(accountingTypeParamName, this.accountingRule)) {
-            final Integer newValue = command.integerValueOfParameterNamed(accountingTypeParamName);
-            actualChanges.put(accountingTypeParamName, newValue);
-            this.accountingRule = newValue;
-        }
+	public Integer getAccountingType() {
+		return this.accountingRule;
+	}
 
-        final String nameParamName = "name";
-        if (command.isChangeInStringParameterNamed(nameParamName, this.name)) {
-            final String newValue = command.stringValueOfParameterNamed(nameParamName);
-            actualChanges.put(nameParamName, newValue);
-            this.name = newValue;
-        }
+	public Map<String, Object> update(final JsonCommand command,
+			final AprCalculator aprCalculator) {
 
-        final String descriptionParamName = "description";
-        if (command.isChangeInStringParameterNamed(descriptionParamName, this.description)) {
-            final String newValue = command.stringValueOfParameterNamed(descriptionParamName);
-            actualChanges.put(descriptionParamName, newValue);
-            this.description = newValue;
-        }
+		final Map<String, Object> actualChanges = this.loanProductRelatedDetail
+				.update(command, aprCalculator);
+		actualChanges.putAll(this.loanProductMinMaxConstraints()
+				.update(command));
 
-        Long existingFundId = null;
-        if (this.fund != null) {
-            existingFundId = this.fund.getId();
-        }
-        final String fundIdParamName = "fundId";
-        if (command.isChangeInLongParameterNamed(fundIdParamName, existingFundId)) {
-            final Long newValue = command.longValueOfParameterNamed(fundIdParamName);
-            actualChanges.put(fundIdParamName, newValue);
-        }
+		final String accountingTypeParamName = "accountingRule";
+		if (command.isChangeInIntegerParameterNamed(accountingTypeParamName,
+				this.accountingRule)) {
+			final Integer newValue = command
+					.integerValueOfParameterNamed(accountingTypeParamName);
+			actualChanges.put(accountingTypeParamName, newValue);
+			this.accountingRule = newValue;
+		}
 
-        Long existingStrategyId = null;
-        if (this.transactionProcessingStrategy != null) {
-            existingStrategyId = this.transactionProcessingStrategy.getId();
-        }
-        final String transactionProcessingStrategyParamName = "transactionProcessingStrategyId";
-        if (command.isChangeInLongParameterNamed(transactionProcessingStrategyParamName, existingStrategyId)) {
-            final Long newValue = command.longValueOfParameterNamed(transactionProcessingStrategyParamName);
-            actualChanges.put(transactionProcessingStrategyParamName, newValue);
-        }
+		final String nameParamName = "name";
+		if (command.isChangeInStringParameterNamed(nameParamName, this.name)) {
+			final String newValue = command
+					.stringValueOfParameterNamed(nameParamName);
+			actualChanges.put(nameParamName, newValue);
+			this.name = newValue;
+		}
 
-        final String chargesParamName = "charges";
-        if (command.hasParameter(chargesParamName)) {
-            JsonArray jsonArray = command.arrayOfParameterNamed(chargesParamName);
-            if (jsonArray != null) {
+		final String descriptionParamName = "description";
+		if (command.isChangeInStringParameterNamed(descriptionParamName,
+				this.description)) {
+			final String newValue = command
+					.stringValueOfParameterNamed(descriptionParamName);
+			actualChanges.put(descriptionParamName, newValue);
+			this.description = newValue;
+		}
 
-            }
-            actualChanges.put(chargesParamName, command.jsonFragment(chargesParamName));
-        }
+		Long existingFundId = null;
+		if (this.fund != null) {
+			existingFundId = this.fund.getId();
+		}
+		final String fundIdParamName = "fundId";
+		if (command.isChangeInLongParameterNamed(fundIdParamName,
+				existingFundId)) {
+			final Long newValue = command
+					.longValueOfParameterNamed(fundIdParamName);
+			actualChanges.put(fundIdParamName, newValue);
+		}
 
-        return actualChanges;
-    }
+		Long existingStrategyId = null;
+		if (this.transactionProcessingStrategy != null) {
+			existingStrategyId = this.transactionProcessingStrategy.getId();
+		}
+		final String transactionProcessingStrategyParamName = "transactionProcessingStrategyId";
+		if (command.isChangeInLongParameterNamed(
+				transactionProcessingStrategyParamName, existingStrategyId)) {
+			final Long newValue = command
+					.longValueOfParameterNamed(transactionProcessingStrategyParamName);
+			actualChanges.put(transactionProcessingStrategyParamName, newValue);
+		}
 
-    public boolean isCashBasedAccountingEnabled() {
-        return AccountingRuleType.CASH_BASED.getValue().equals(this.accountingRule);
-    }
+		final String chargesParamName = "charges";
+		if (command.hasParameter(chargesParamName)) {
+			JsonArray jsonArray = command
+					.arrayOfParameterNamed(chargesParamName);
+			if (jsonArray != null) {
 
-    public boolean isAccrualBasedAccountingEnabled() {
-        return AccountingRuleType.ACCRUAL_BASED.getValue().equals(this.accountingRule);
-    }
-    
-    public Money getPrincipalAmount(){
-        return this.loanProductRelatedDetail.getPrincipal();
-    }
-    
-    public Money getMinPrincipalAmount(){
-        return Money.of(this.loanProductRelatedDetail.getCurrency(), this.loanProductMinMaxConstraints().getMinPrincipal());
-    }
-    
-    public Money getMaxPrincipalAmount(){
-        return Money.of(this.loanProductRelatedDetail.getCurrency(), this.loanProductMinMaxConstraints().getMaxPrincipal());
-    }
-    
-    public BigDecimal getNominalInterestRatePerPeriod() {
-        return this.loanProductRelatedDetail.getNominalInterestRatePerPeriod();
-    }
-    
-    public BigDecimal getMinNominalInterestRatePerPeriod() {
-        return this.loanProductMinMaxConstraints().getMinNominalInterestRatePerPeriod();
-    }
-    
-    public BigDecimal getMaxNominalInterestRatePerPeriod(){
-        return this.loanProductMinMaxConstraints().getMaxNominalInterestRatePerPeriod();
-    }
-    
-    public Integer getNumberOfRepayments(){
-        return this.loanProductRelatedDetail().getNumberOfRepayments();
-    }
-    
-    public Integer getMinNumberOfRepayments() {
-        return this.loanProductMinMaxConstraints().getMinNumberOfRepayments();
-    }
+			}
+			actualChanges.put(chargesParamName,
+					command.jsonFragment(chargesParamName));
+		}
 
-    public Integer getMaxNumberOfRepayments() {
-        return this.loanProductMinMaxConstraints().getMaxNumberOfRepayments();
-    }
-    
-    public LoanProductRelatedDetail loanProductRelatedDetail(){
-        return this.loanProductRelatedDetail;
-    }
-    
-    public LoanProductMinMaxConstraints loanProductMinMaxConstraints() {
-        //If all min and max fields are null then loanProductMinMaxConstraints initialising to null
-        //Reset LoanProductMinMaxConstraints with null values.
-        this.loanProductMinMaxConstraints = (this.loanProductMinMaxConstraints == null) ? new LoanProductMinMaxConstraints(null, null, null, null, null, null)
-                : this.loanProductMinMaxConstraints;
-        return loanProductMinMaxConstraints;
-    }
+		return actualChanges;
+	}
+
+	public boolean isCashBasedAccountingEnabled() {
+		return AccountingRuleType.CASH_BASED.getValue().equals(
+				this.accountingRule);
+	}
+
+	public boolean isAccrualBasedAccountingEnabled() {
+		return AccountingRuleType.ACCRUAL_BASED.getValue().equals(
+				this.accountingRule);
+	}
+
+	public Money getPrincipalAmount() {
+		return this.loanProductRelatedDetail.getPrincipal();
+	}
+
+	public Money getMinPrincipalAmount() {
+		return Money.of(this.loanProductRelatedDetail.getCurrency(), this
+				.loanProductMinMaxConstraints().getMinPrincipal());
+	}
+
+	public Money getMaxPrincipalAmount() {
+		return Money.of(this.loanProductRelatedDetail.getCurrency(), this
+				.loanProductMinMaxConstraints().getMaxPrincipal());
+	}
+
+	public BigDecimal getNominalInterestRatePerPeriod() {
+		return this.loanProductRelatedDetail.getNominalInterestRatePerPeriod();
+	}
+
+	public BigDecimal getMinNominalInterestRatePerPeriod() {
+		return this.loanProductMinMaxConstraints()
+				.getMinNominalInterestRatePerPeriod();
+	}
+
+	public BigDecimal getMaxNominalInterestRatePerPeriod() {
+		return this.loanProductMinMaxConstraints()
+				.getMaxNominalInterestRatePerPeriod();
+	}
+
+	public Integer getNumberOfRepayments() {
+		return this.loanProductRelatedDetail().getNumberOfRepayments();
+	}
+
+	public Integer getMinNumberOfRepayments() {
+		return this.loanProductMinMaxConstraints().getMinNumberOfRepayments();
+	}
+
+	public Integer getMaxNumberOfRepayments() {
+		return this.loanProductMinMaxConstraints().getMaxNumberOfRepayments();
+	}
+
+	public LoanProductRelatedDetail loanProductRelatedDetail() {
+		return this.loanProductRelatedDetail;
+	}
+
+	public LoanProductMinMaxConstraints loanProductMinMaxConstraints() {
+		// If all min and max fields are null then loanProductMinMaxConstraints
+		// initialising to null
+		// Reset LoanProductMinMaxConstraints with null values.
+		this.loanProductMinMaxConstraints = (this.loanProductMinMaxConstraints == null) ? new LoanProductMinMaxConstraints(
+				null, null, null, null, null, null)
+				: this.loanProductMinMaxConstraints;
+		return loanProductMinMaxConstraints;
+	}
 }
