@@ -72,8 +72,6 @@ public class SavingsProductWritePlatformServiceJpaRepositoryImpl implements Savi
     public CommandProcessingResult create(final JsonCommand command) {
 
         try {
-            this.context.authenticatedUser();
-
             this.fromApiJsonDataValidator.validateForCreate(command.json());
 
             final SavingsProduct product = this.savingsProductAssembler.assemble(command);

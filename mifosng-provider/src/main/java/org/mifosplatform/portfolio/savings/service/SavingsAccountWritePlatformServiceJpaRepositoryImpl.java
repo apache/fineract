@@ -137,7 +137,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
                     .build();
         } catch (DataAccessException dve) {
             handleDataIntegrityIssues(command, dve);
-            return new CommandProcessingResult(Long.valueOf(-1));
+            return CommandProcessingResult.empty();
         }
     }
 

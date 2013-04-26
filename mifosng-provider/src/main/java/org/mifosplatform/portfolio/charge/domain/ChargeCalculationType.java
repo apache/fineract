@@ -16,7 +16,7 @@ public enum ChargeCalculationType {
     private final Integer value;
     private final String code;
 
-    private ChargeCalculationType(Integer value, String code) {
+    private ChargeCalculationType(final Integer value, final String code) {
         this.value = value;
         this.code = code;
     }
@@ -43,9 +43,6 @@ public enum ChargeCalculationType {
             break;
             case 4:
                 chargeCalculationType = PERCENT_OF_INTEREST;
-            break;
-            default:
-                chargeCalculationType = INVALID;
             break;
         }
         return chargeCalculationType;

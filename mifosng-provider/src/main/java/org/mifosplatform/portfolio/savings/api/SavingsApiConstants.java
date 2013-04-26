@@ -39,6 +39,8 @@ public class SavingsApiConstants {
     public static final String minRequiredOpeningBalanceParamName = "minRequiredOpeningBalance";
     public static final String lockinPeriodFrequencyParamName = "lockinPeriodFrequency";
     public static final String lockinPeriodFrequencyTypeParamName = "lockinPeriodFrequencyType";
+    public static final String withdrawalFeeAmountParamName = "withdrawalFeeAmount";
+    public static final String withdrawalFeeTypeParamName = "withdrawalFeeType";
 
     // transaction parameters
     public static final String transactionDateParamName = "transactionDate";
@@ -48,7 +50,7 @@ public class SavingsApiConstants {
             nameParamName, descriptionParamName, currencyCodeParamName, digitsAfterDecimalParamName, nominalAnnualInterestRateParamName,
             interestCompoundingPeriodTypeParamName, interestPostingPeriodTypeParamName, interestCalculationTypeParamName,
             interestCalculationDaysInYearTypeParamName, minRequiredOpeningBalanceParamName, lockinPeriodFrequencyParamName,
-            lockinPeriodFrequencyTypeParamName));
+            lockinPeriodFrequencyTypeParamName, withdrawalFeeAmountParamName, withdrawalFeeTypeParamName));
 
     /**
      * These parameters will match the class level parameters of
@@ -59,15 +61,16 @@ public class SavingsApiConstants {
             nameParamName, descriptionParamName, "currency", digitsAfterDecimalParamName, nominalAnnualInterestRateParamName,
             interestCompoundingPeriodTypeParamName, interestPostingPeriodTypeParamName, interestCalculationTypeParamName,
             interestCalculationDaysInYearTypeParamName, minRequiredOpeningBalanceParamName, lockinPeriodFrequencyParamName,
-            lockinPeriodFrequencyTypeParamName, "currencyOptions", "interestCompoundingPeriodTypeOptions",
-            "interestPostingPeriodTypeOptions", "interestCalculationTypeOptions", "interestCalculationDaysInYearTypeOptions",
-            "lockinPeriodFrequencyTypeOptions"));
+            lockinPeriodFrequencyTypeParamName, withdrawalFeeAmountParamName, withdrawalFeeTypeParamName, "currencyOptions",
+            "interestCompoundingPeriodTypeOptions", "interestPostingPeriodTypeOptions", "interestCalculationTypeOptions",
+            "interestCalculationDaysInYearTypeOptions", "lockinPeriodFrequencyTypeOptions", "withdrawalFeeTypeOptions"));
 
     public static final Set<String> SAVINGS_ACCOUNT_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(localeParamName,
             dateFormatParamName, accountNoParamName, externalIdParamName, clientIdParamName, groupIdParamName, productIdParamName,
             activeParamName, activationDateParamName, nominalAnnualInterestRateParamName, interestCompoundingPeriodTypeParamName,
             interestPostingPeriodTypeParamName, interestCalculationTypeParamName, interestCalculationDaysInYearTypeParamName,
-            minRequiredOpeningBalanceParamName, lockinPeriodFrequencyParamName, lockinPeriodFrequencyTypeParamName));
+            minRequiredOpeningBalanceParamName, lockinPeriodFrequencyParamName, lockinPeriodFrequencyTypeParamName,
+            withdrawalFeeAmountParamName, withdrawalFeeTypeParamName));
 
     /**
      * These parameters will match the class level parameters of
@@ -78,9 +81,10 @@ public class SavingsApiConstants {
             accountNoParamName, externalIdParamName, statusParamName, activationDateParamName, clientIdParamName, "clientName",
             groupIdParamName, "groupName", "savingsProductId", "savingsProductName", "currency", nominalAnnualInterestRateParamName,
             interestCompoundingPeriodTypeParamName, interestCalculationTypeParamName, interestCalculationDaysInYearTypeParamName,
-            minRequiredOpeningBalanceParamName, lockinPeriodFrequencyParamName, lockinPeriodFrequencyTypeParamName, "summary",
-            "transactions", "productOptions", "interestCompoundingPeriodTypeOptions", "interestPostingPeriodTypeOptions",
-            "interestCalculationTypeOptions", "interestCalculationDaysInYearTypeOptions", "lockinPeriodFrequencyTypeOptions"));
+            minRequiredOpeningBalanceParamName, lockinPeriodFrequencyParamName, lockinPeriodFrequencyTypeParamName,
+            withdrawalFeeAmountParamName, withdrawalFeeTypeParamName, "summary", "transactions", "productOptions",
+            "interestCompoundingPeriodTypeOptions", "interestPostingPeriodTypeOptions", "interestCalculationTypeOptions",
+            "interestCalculationDaysInYearTypeOptions", "lockinPeriodFrequencyTypeOptions", "withdrawalFeeTypeOptions"));
 
     public static final Set<String> SAVINGS_ACCOUNT_TRANSACTION_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(
             localeParamName, dateFormatParamName, transactionDateParamName, transactionAmountParamName));

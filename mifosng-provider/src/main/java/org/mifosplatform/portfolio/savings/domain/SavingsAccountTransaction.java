@@ -82,6 +82,12 @@ public final class SavingsAccountTransaction extends AbstractPersistable<Long> {
                 isReversed);
     }
 
+    public static SavingsAccountTransaction fee(final SavingsAccount savingsAccount, final LocalDate date, final Money amount) {
+        final boolean isReversed = false;
+        return new SavingsAccountTransaction(savingsAccount, SavingsAccountTransactionType.WITHDRAWAL_FEE.getValue(), date, amount,
+                isReversed);
+    }
+
     private SavingsAccountTransaction(final SavingsAccount savingsAccount, final Integer typeOf, final LocalDate transactionLocalDate,
             final Money amount, final boolean isReversed) {
         this.savingsAccount = savingsAccount;
@@ -113,6 +119,10 @@ public final class SavingsAccountTransaction extends AbstractPersistable<Long> {
 
     public boolean isInterestPosting() {
         return SavingsAccountTransactionType.fromInt(this.typeOf).isInterestPosting() && isNotReversed();
+    }
+
+    public boolean isWithdrawalFee() {
+        return SavingsAccountTransactionType.fromInt(this.typeOf).isWithdrawalFee() && isNotReversed();
     }
 
     public boolean isNotReversed() {

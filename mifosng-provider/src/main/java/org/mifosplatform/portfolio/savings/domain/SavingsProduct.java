@@ -18,6 +18,8 @@ import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.lockin
 import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.minRequiredOpeningBalanceParamName;
 import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.nameParamName;
 import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.nominalAnnualInterestRateParamName;
+import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.withdrawalFeeAmountParamName;
+import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.withdrawalFeeTypeParamName;
 
 import java.math.BigDecimal;
 import java.util.LinkedHashMap;
@@ -29,9 +31,9 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
+import org.mifosplatform.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.organisation.monetary.domain.Money;
-import org.mifosplatform.portfolio.savings.exception.InvalidSavingsProductSettingsException;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
@@ -88,15 +90,22 @@ public class SavingsProduct extends AbstractPersistable<Long> {
     @Column(name = "lockin_period_frequency_enum", nullable = true)
     private Integer lockinPeriodFrequencyType;
 
+    @Column(name = "withdrawal_fee_amount", scale = 6, precision = 19, nullable = true)
+    private BigDecimal withdrawalFeeAmount;
+
+    @Column(name = "withdrawal_fee_type_enum", nullable = true)
+    private Integer withdrawalFeeType;
+
     public static SavingsProduct createNew(final String name, final String description, final MonetaryCurrency currency,
             final BigDecimal interestRate, final SavingsCompoundingInterestPeriodType interestCompoundingPeriodType,
             final SavingsInterestPostingPeriodType interestPostingPeriodType, final SavingsInterestCalculationType interestCalculationType,
             final SavingsInterestCalculationDaysInYearType interestCalculationDaysInYearType, final BigDecimal minRequiredOpeningBalance,
-            final Integer lockinPeriodFrequency, final SavingsPeriodFrequencyType lockinPeriodFrequencyType) {
+            final Integer lockinPeriodFrequency, final SavingsPeriodFrequencyType lockinPeriodFrequencyType,
+            final BigDecimal withdrawalFeeAmount, final SavingsWithdrawalFeesType withdrawalFeeType) {
 
         return new SavingsProduct(name, description, currency, interestRate, interestCompoundingPeriodType, interestPostingPeriodType,
                 interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance, lockinPeriodFrequency,
-                lockinPeriodFrequencyType);
+                lockinPeriodFrequencyType, withdrawalFeeAmount, withdrawalFeeType);
     }
 
     protected SavingsProduct() {
@@ -108,7 +117,8 @@ public class SavingsProduct extends AbstractPersistable<Long> {
             final SavingsCompoundingInterestPeriodType interestCompoundingPeriodType,
             final SavingsInterestPostingPeriodType interestPostingPeriodType, final SavingsInterestCalculationType interestCalculationType,
             final SavingsInterestCalculationDaysInYearType interestCalculationDaysInYearType, final BigDecimal minRequiredOpeningBalance,
-            final Integer lockinPeriodFrequency, final SavingsPeriodFrequencyType lockinPeriodFrequencyType) {
+            final Integer lockinPeriodFrequency, final SavingsPeriodFrequencyType lockinPeriodFrequencyType,
+            final BigDecimal withdrawalFeeAmount, final SavingsWithdrawalFeesType withdrawalFeeType) {
 
         this.name = name;
         this.description = description;
@@ -129,7 +139,13 @@ public class SavingsProduct extends AbstractPersistable<Long> {
             this.lockinPeriodFrequencyType = lockinPeriodFrequencyType.getValue();
         }
 
+        this.withdrawalFeeAmount = withdrawalFeeAmount;
+        if (withdrawalFeeType != null) {
+            this.withdrawalFeeType = withdrawalFeeType.getValue();
+        }
+
         validateLockinDetails();
+        validateWithdrawalFeeDetails();
     }
 
     public MonetaryCurrency currency() {
@@ -168,6 +184,18 @@ public class SavingsProduct extends AbstractPersistable<Long> {
         SavingsPeriodFrequencyType type = null;
         if (this.lockinPeriodFrequencyType != null) {
             type = SavingsPeriodFrequencyType.fromInt(this.lockinPeriodFrequencyType);
+        }
+        return type;
+    }
+
+    public BigDecimal withdrawalFeeAmount() {
+        return this.withdrawalFeeAmount;
+    }
+
+    public SavingsWithdrawalFeesType withdrawalFeeType() {
+        SavingsWithdrawalFeesType type = null;
+        if (this.withdrawalFeeType != null) {
+            type = SavingsWithdrawalFeesType.fromInt(this.withdrawalFeeType);
         }
         return type;
     }
@@ -258,16 +286,43 @@ public class SavingsProduct extends AbstractPersistable<Long> {
             this.lockinPeriodFrequencyType = SavingsPeriodFrequencyType.fromInt(newValue).getValue();
         }
 
+        if (command.isChangeInBigDecimalParameterNamed(withdrawalFeeAmountParamName, this.withdrawalFeeAmount)) {
+            final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(withdrawalFeeAmountParamName);
+            actualChanges.put(withdrawalFeeAmountParamName, newValue);
+            actualChanges.put(localeParamName, localeAsInput);
+            this.withdrawalFeeAmount = newValue;
+        }
+
+        if (command.isChangeInIntegerParameterNamed(withdrawalFeeTypeParamName, this.withdrawalFeeType)) {
+            final Integer newValue = command.integerValueOfParameterNamed(withdrawalFeeTypeParamName);
+            actualChanges.put(withdrawalFeeTypeParamName, newValue);
+            this.withdrawalFeeType = SavingsWithdrawalFeesType.fromInt(newValue).getValue();
+        }
+
         validateLockinDetails();
+        validateWithdrawalFeeDetails();
 
         return actualChanges;
     }
 
+    private void validateWithdrawalFeeDetails() {
+        if (isInvalidConfigurationOfWithdrawalFeeSettings()) {
+            Object[] defaultUserMessageArgs = new Object[] { withdrawalFeeAmountParamName };
+            throw new GeneralPlatformDomainRuleException("error.msg.product.savings.invalid.withdrawalfee.settings",
+                    "Invalid configuration of withdrawal fee settings.", defaultUserMessageArgs);
+        }
+    }
+
+    private boolean isInvalidConfigurationOfWithdrawalFeeSettings() {
+        return (this.withdrawalFeeAmount == null && this.withdrawalFeeType != null)
+                || (this.withdrawalFeeType == null && this.withdrawalFeeAmount != null);
+    }
+
     private void validateLockinDetails() {
         if (isInvalidConfigurationOfLockinSettings()) {
-            //
-            throw new InvalidSavingsProductSettingsException("error.msg.product.savings.invalid.lockin.settings",
-                    "Invalid configuration of lock in settings.", lockinPeriodFrequencyParamName);
+            Object[] defaultUserMessageArgs = new Object[] { lockinPeriodFrequencyParamName };
+            throw new GeneralPlatformDomainRuleException("error.msg.product.savings.invalid.lockin.settings",
+                    "Invalid configuration of lock in settings.", defaultUserMessageArgs);
         }
     }
 

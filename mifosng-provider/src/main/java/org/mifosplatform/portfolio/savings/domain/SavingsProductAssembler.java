@@ -12,6 +12,8 @@ import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.lockin
 import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.minRequiredOpeningBalanceParamName;
 import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.nameParamName;
 import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.nominalAnnualInterestRateParamName;
+import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.withdrawalFeeAmountParamName;
+import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.withdrawalFeeTypeParamName;
 
 import java.math.BigDecimal;
 
@@ -67,8 +69,15 @@ public class SavingsProductAssembler {
             lockinPeriodFrequencyType = SavingsPeriodFrequencyType.fromInt(lockinPeriodFrequencyTypeValue);
         }
 
+        final BigDecimal withdrawalFeeAmount = command.bigDecimalValueOfParameterNamed(withdrawalFeeAmountParamName);
+        SavingsWithdrawalFeesType withdrawalFeeType = null;
+        final Integer withdrawalFeeTypeValue = command.integerValueOfParameterNamed(withdrawalFeeTypeParamName);
+        if (withdrawalFeeTypeValue != null) {
+            withdrawalFeeType = SavingsWithdrawalFeesType.fromInt(withdrawalFeeTypeValue);
+        }
+
         return SavingsProduct.createNew(name, description, currency, interestRate, interestCompoundingPeriodType,
-                interestPostingPeriodType, interestCalculationType,
-                interestCalculationDaysInYearType, minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType);
+                interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance,
+                lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeAmount, withdrawalFeeType);
     }
 }

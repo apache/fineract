@@ -145,6 +145,7 @@ public class SavingsAccountsApiResource {
         Collection<EnumOptionData> interestCalculationTypeOptions = null;
         Collection<EnumOptionData> interestCalculationDaysInYearTypeOptions = null;
         Collection<EnumOptionData> lockinPeriodFrequencyTypeOptions = null;
+        Collection<EnumOptionData> withdrawalFeeTypeOptions = null;
 
         final Set<String> associationParameters = ApiParameterHelper.extractAssociationsForResponseIfProvided(uriInfo.getQueryParameters());
         if (!associationParameters.isEmpty()) {
@@ -170,11 +171,12 @@ public class SavingsAccountsApiResource {
             interestCompoundingPostingTypeOptions = this.dropdownReadPlatformService.retrieveInterestPostingPeriodTypeOptions();
             interestCalculationTypeOptions = this.dropdownReadPlatformService.retrieveInterestCalculationTypeOptions();
             lockinPeriodFrequencyTypeOptions = this.dropdownReadPlatformService.retrieveLockinPeriodFrequencyTypeOptions();
+            withdrawalFeeTypeOptions = this.dropdownReadPlatformService.retrievewithdrawalFeeTypeOptions();
         }
 
         return SavingsAccountData.withTemplateOptions(savingsAccount, productOptions, interestCompoundingPeriodTypeOptions,
                 interestCompoundingPostingTypeOptions, interestCalculationTypeOptions, interestCalculationDaysInYearTypeOptions,
-                lockinPeriodFrequencyTypeOptions, transactions);
+                lockinPeriodFrequencyTypeOptions, withdrawalFeeTypeOptions, transactions);
     }
 
     @PUT

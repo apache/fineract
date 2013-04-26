@@ -14,6 +14,8 @@ import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.lockin
 import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.minRequiredOpeningBalanceParamName;
 import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.nameParamName;
 import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.nominalAnnualInterestRateParamName;
+import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.withdrawalFeeAmountParamName;
+import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.withdrawalFeeTypeParamName;
 
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
@@ -67,8 +69,10 @@ public class SavingsProductDataValidator {
         final Integer digitsAfterDecimal = fromApiJsonHelper.extractIntegerSansLocaleNamed(digitsAfterDecimalParamName, element);
         baseDataValidator.reset().parameter(digitsAfterDecimalParamName).value(digitsAfterDecimal).notNull().inMinMaxRange(0, 6);
 
-        final BigDecimal nominalAnnualInterestRate = fromApiJsonHelper.extractBigDecimalWithLocaleNamed(nominalAnnualInterestRateParamName, element);
-        baseDataValidator.reset().parameter(nominalAnnualInterestRateParamName).value(nominalAnnualInterestRate).notNull().zeroOrPositiveAmount();
+        final BigDecimal nominalAnnualInterestRate = fromApiJsonHelper.extractBigDecimalWithLocaleNamed(nominalAnnualInterestRateParamName,
+                element);
+        baseDataValidator.reset().parameter(nominalAnnualInterestRateParamName).value(nominalAnnualInterestRate).notNull()
+                .zeroOrPositiveAmount();
 
         final Integer interestCompoundingPeriodType = fromApiJsonHelper.extractIntegerSansLocaleNamed(
                 interestCompoundingPeriodTypeParamName, element);
@@ -118,6 +122,17 @@ public class SavingsProductDataValidator {
                 final Integer lockinPeriodFrequency = fromApiJsonHelper.extractIntegerWithLocaleNamed(lockinPeriodFrequencyParamName,
                         element);
                 baseDataValidator.reset().parameter(lockinPeriodFrequencyParamName).value(lockinPeriodFrequency).notNull().positiveAmount();
+            }
+        }
+
+        if (this.fromApiJsonHelper.parameterExists(withdrawalFeeTypeParamName, element)) {
+            final Integer withdrawalFeeType = fromApiJsonHelper.extractIntegerSansLocaleNamed(withdrawalFeeTypeParamName, element);
+            baseDataValidator.reset().parameter(withdrawalFeeTypeParamName).value(withdrawalFeeType).isOneOfTheseValues(1, 2);
+
+            if (withdrawalFeeType != null) {
+                final BigDecimal withdrawalFeeAmount = fromApiJsonHelper.extractBigDecimalWithLocaleNamed(withdrawalFeeAmountParamName,
+                        element);
+                baseDataValidator.reset().parameter(withdrawalFeeAmountParamName).value(withdrawalFeeAmount).notNull().positiveAmount();
             }
         }
 
@@ -195,14 +210,22 @@ public class SavingsProductDataValidator {
             baseDataValidator.reset().parameter(lockinPeriodFrequencyTypeParamName).value(lockinPeriodFrequencyType).inMinMaxRange(1, 3);
         }
 
+        if (this.fromApiJsonHelper.parameterExists(withdrawalFeeAmountParamName, element)) {
+            final BigDecimal withdrawalFeeAmount = fromApiJsonHelper
+                    .extractBigDecimalWithLocaleNamed(withdrawalFeeAmountParamName, element);
+            baseDataValidator.reset().parameter(withdrawalFeeAmountParamName).value(withdrawalFeeAmount).ignoreIfNull().positiveAmount();
+        }
+
+        if (this.fromApiJsonHelper.parameterExists(withdrawalFeeTypeParamName, element)) {
+            final Integer withdrawalFeeType = fromApiJsonHelper.extractIntegerSansLocaleNamed(withdrawalFeeTypeParamName, element);
+            baseDataValidator.reset().parameter(withdrawalFeeTypeParamName).value(withdrawalFeeType).ignoreIfNull()
+                    .isOneOfTheseValues(1, 2);
+        }
+
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
     private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
-        if (!dataValidationErrors.isEmpty()) {
-            //
-            throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
-                    dataValidationErrors);
-        }
+        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
     }
 }

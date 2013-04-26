@@ -136,6 +136,12 @@ public class SavingsAccount extends AbstractPersistable<Long> {
     @Column(name = "lockedin_until_date_derived", nullable = true)
     private Date lockedInUntilDate;
 
+    @Column(name = "withdrawal_fee_amount", scale = 6, precision = 19, nullable = true)
+    private BigDecimal withdrawalFeeAmount;
+
+    @Column(name = "withdrawal_fee_type_enum", nullable = true)
+    private Integer withdrawalFeeType;
+
     @Embedded
     private SavingsAccountSummary summary;
 
@@ -158,13 +164,14 @@ public class SavingsAccount extends AbstractPersistable<Long> {
             final SavingsCompoundingInterestPeriodType interestCompoundingPeriodType,
             final SavingsInterestPostingPeriodType interestPostingPeriodType, final SavingsInterestCalculationType interestCalculationType,
             final SavingsInterestCalculationDaysInYearType interestCalculationDaysInYearType, final BigDecimal minRequiredOpeningBalance,
-            final Integer lockinPeriodFrequency, final SavingsPeriodFrequencyType lockinPeriodFrequencyType) {
+            final Integer lockinPeriodFrequency, final SavingsPeriodFrequencyType lockinPeriodFrequencyType,
+            final BigDecimal withdrawalFeeAmount, final SavingsWithdrawalFeesType withdrawalFeeType) {
 
         final SavingsAccountStatusType status = SavingsAccountStatusType.UNACTIVATED;
         final LocalDate activationDate = null;
         return new SavingsAccount(client, group, product, accountNo, externalId, status, activationDate, interestRate,
                 interestCompoundingPeriodType, interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType,
-                minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType);
+                minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeAmount, withdrawalFeeType);
     }
 
     private SavingsAccount(final Client client, final Group group, final SavingsProduct product, final String accountNo,
@@ -172,7 +179,8 @@ public class SavingsAccount extends AbstractPersistable<Long> {
             final BigDecimal nominalAnnualInterestRate, final SavingsCompoundingInterestPeriodType interestCompoundingPeriodType,
             final SavingsInterestPostingPeriodType interestPostingPeriodType, final SavingsInterestCalculationType interestCalculationType,
             final SavingsInterestCalculationDaysInYearType interestCalculationDaysInYearType, final BigDecimal minRequiredOpeningBalance,
-            final Integer lockinPeriodFrequency, final SavingsPeriodFrequencyType lockinPeriodFrequencyType) {
+            final Integer lockinPeriodFrequency, final SavingsPeriodFrequencyType lockinPeriodFrequencyType,
+            final BigDecimal withdrawalFeeAmount, final SavingsWithdrawalFeesType withdrawalFeeType) {
         this.client = client;
         this.group = group;
         this.product = product;
@@ -197,6 +205,10 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         this.lockinPeriodFrequency = lockinPeriodFrequency;
         if (lockinPeriodFrequencyType != null) {
             this.lockinPeriodFrequencyType = lockinPeriodFrequencyType.getValue();
+        }
+        this.withdrawalFeeAmount = withdrawalFeeAmount;
+        if (withdrawalFeeType != null) {
+            this.withdrawalFeeType = withdrawalFeeType.getValue();
         }
         this.summary = new SavingsAccountSummary();
     }
@@ -313,7 +325,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
                 }
             }
         }
-        
+
         if (recalucateDailyBalanceDetails) {
             // no openingBalance concept supported yet but probably will to
             // allow
@@ -410,6 +422,8 @@ public class SavingsAccount extends AbstractPersistable<Long> {
                 openingAccountBalance, this.nominalAnnualInterestRate, daysInYearType, interestCompoundingPeriods);
 
         this.summary.updateFromInterestPeriodSummaries(currency, compoundingPeriods);
+
+        this.summary.updateSummary(this.currency, this.savingsAccountTransactionSummaryWrapper, this.transactions);
 
         return compoundingPeriods;
     }
@@ -788,15 +802,37 @@ public class SavingsAccount extends AbstractPersistable<Long> {
             throw new PlatformApiDataValidationException(dataValidationErrors);
         }
 
-        final Money amount = Money.of(this.currency, transactionAmount);
+        final Money transactionAmountMoney = Money.of(this.currency, transactionAmount);
 
-        if (isNotEnoughFundsToWithdraw(amount)) {
+        if (isNotEnoughFundsToWithdraw(transactionAmountMoney)) {
             //
             throw new InsufficientAccountBalanceException("transactionAmount", getAccountBalance(), transactionAmount);
         }
 
-        final SavingsAccountTransaction transaction = SavingsAccountTransaction.withdrawal(this, transactionDate, amount);
+        final SavingsAccountTransaction transaction = SavingsAccountTransaction.withdrawal(this, transactionDate, transactionAmountMoney);
         this.transactions.add(transaction);
+
+        if (isAutomaticWithdrawalFee()) {
+
+            SavingsAccountTransaction withdrawalFeeTransaction = null;
+            Money feeAmount = null;
+            switch (SavingsWithdrawalFeesType.fromInt(this.withdrawalFeeType)) {
+                case INVALID:
+                break;
+                case FLAT:
+                    feeAmount = Money.of(this.currency, this.withdrawalFeeAmount);
+                    withdrawalFeeTransaction = SavingsAccountTransaction.fee(this, transactionDate, feeAmount);
+                    this.transactions.add(withdrawalFeeTransaction);
+                break;
+                case PERCENT_OF_AMOUNT:
+                    final BigDecimal feeAmountDecimal = transactionAmount.multiply(this.withdrawalFeeAmount).divide(
+                            BigDecimal.valueOf(100l));
+                    feeAmount = Money.of(this.currency, feeAmountDecimal);
+                    withdrawalFeeTransaction = SavingsAccountTransaction.fee(this, transactionDate, feeAmount);
+                    this.transactions.add(withdrawalFeeTransaction);
+                break;
+            }
+        }
 
         this.summary.updateSummary(this.currency, this.savingsAccountTransactionSummaryWrapper, this.transactions);
 
@@ -804,6 +840,10 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         calculateInterest(today);
 
         return transaction;
+    }
+
+    private boolean isAutomaticWithdrawalFee() {
+        return this.withdrawalFeeType != null;
     }
 
     private boolean isAccountLocked(final LocalDate transactionDate) {

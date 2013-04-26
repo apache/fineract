@@ -15,6 +15,7 @@ import org.mifosplatform.portfolio.savings.domain.SavingsInterestCalculationDays
 import org.mifosplatform.portfolio.savings.domain.SavingsInterestCalculationType;
 import org.mifosplatform.portfolio.savings.domain.SavingsInterestPostingPeriodType;
 import org.mifosplatform.portfolio.savings.domain.SavingsPeriodFrequencyType;
+import org.mifosplatform.portfolio.savings.domain.SavingsWithdrawalFeesType;
 
 public class SavingsEnumerations {
 
@@ -74,6 +75,11 @@ public class SavingsEnumerations {
             case INTEREST_POSTING:
                 optionData = new SavingsAccountTransactionEnumData(SavingsAccountTransactionType.INTEREST_POSTING.getValue().longValue(),
                         SavingsAccountTransactionType.INTEREST_POSTING.getCode(), "Interest posting");
+            break;
+            case WITHDRAWAL_FEE:
+                optionData = new SavingsAccountTransactionEnumData(SavingsAccountTransactionType.WITHDRAWAL_FEE.getValue().longValue(),
+                        SavingsAccountTransactionType.WITHDRAWAL_FEE.getCode(), "Withdrawal fee");
+
             break;
         }
         return optionData;
@@ -144,7 +150,7 @@ public class SavingsEnumerations {
         return optionData;
     }
 
-    public static EnumOptionData interestPeriodType(final Integer type) {
+    public static EnumOptionData compoundingInterestPeriodType(final Integer type) {
         return compoundingInterestPeriodType(SavingsCompoundingInterestPeriodType.fromInt(type));
     }
 
@@ -238,6 +244,30 @@ public class SavingsEnumerations {
             case DAYS_365:
                 optionData = new EnumOptionData(SavingsInterestCalculationDaysInYearType.DAYS_365.getValue().longValue(),
                         SavingsInterestCalculationDaysInYearType.DAYS_365.getCode(), "365 Days");
+            break;
+        }
+
+        return optionData;
+    }
+
+    public static EnumOptionData withdrawalFeeType(final Integer type) {
+        return withdrawalFeeType(SavingsWithdrawalFeesType.fromInt(type));
+    }
+
+    public static EnumOptionData withdrawalFeeType(final SavingsWithdrawalFeesType type) {
+        EnumOptionData optionData = new EnumOptionData(SavingsWithdrawalFeesType.INVALID.getValue().longValue(),
+                SavingsWithdrawalFeesType.INVALID.getCode(), "Invalid");
+
+        switch (type) {
+            case INVALID:
+            break;
+            case FLAT:
+                optionData = new EnumOptionData(SavingsWithdrawalFeesType.FLAT.getValue().longValue(),
+                        SavingsWithdrawalFeesType.FLAT.getCode(), "Flat");
+            break;
+            case PERCENT_OF_AMOUNT:
+                optionData = new EnumOptionData(SavingsWithdrawalFeesType.PERCENT_OF_AMOUNT.getValue().longValue(),
+                        SavingsWithdrawalFeesType.PERCENT_OF_AMOUNT.getCode(), "% of Amount");
             break;
         }
 

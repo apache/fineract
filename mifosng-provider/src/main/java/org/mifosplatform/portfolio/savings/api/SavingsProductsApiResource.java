@@ -180,16 +180,18 @@ public class SavingsProductsApiResource {
         final Collection<EnumOptionData> lockinPeriodFrequencyTypeOptions = this.dropdownReadPlatformService
                 .retrieveLockinPeriodFrequencyTypeOptions();
 
+        final Collection<EnumOptionData> withdrawalFeeTypeOptions = this.dropdownReadPlatformService.retrievewithdrawalFeeTypeOptions();
+
         SavingsProductData savingsProductToReturn = null;
         if (savingsProduct != null) {
             savingsProductToReturn = SavingsProductData.withTemplate(savingsProduct, currencyOptions, interestCompoundingPeriodTypeOptions,
                     interestPostingPeriodTypeOptions, interestCalculationTypeOptions, interestCalculationDaysInYearTypeOptions,
-                    lockinPeriodFrequencyTypeOptions);
+                    lockinPeriodFrequencyTypeOptions, withdrawalFeeTypeOptions);
         } else {
             savingsProductToReturn = SavingsProductData.template(currency, interestCompoundingPeriodType, interestPostingPeriodType,
                     interestCalculationType, interestCalculationDaysInYearType, currencyOptions, interestCompoundingPeriodTypeOptions,
                     interestPostingPeriodTypeOptions, interestCalculationTypeOptions, interestCalculationDaysInYearTypeOptions,
-                    lockinPeriodFrequencyTypeOptions);
+                    lockinPeriodFrequencyTypeOptions, withdrawalFeeTypeOptions);
         }
 
         return savingsProductToReturn;

@@ -15,6 +15,8 @@ import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.lockin
 import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.minRequiredOpeningBalanceParamName;
 import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.nominalAnnualInterestRateParamName;
 import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.productIdParamName;
+import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.withdrawalFeeAmountParamName;
+import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.withdrawalFeeTypeParamName;
 
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
@@ -159,6 +161,18 @@ public class SavingsAccountDataValidator {
             }
         }
 
+        if (this.fromApiJsonHelper.parameterExists(withdrawalFeeAmountParamName, element)) {
+
+            final BigDecimal withdrawalFeeAmount = fromApiJsonHelper
+                    .extractBigDecimalWithLocaleNamed(withdrawalFeeAmountParamName, element);
+            baseDataValidator.reset().parameter(withdrawalFeeAmountParamName).value(withdrawalFeeAmount).positiveAmount();
+        }
+
+        if (this.fromApiJsonHelper.parameterExists(withdrawalFeeTypeParamName, element)) {
+            final Integer withdrawalFeeType = fromApiJsonHelper.extractIntegerSansLocaleNamed(withdrawalFeeTypeParamName, element);
+            baseDataValidator.reset().parameter(withdrawalFeeTypeParamName).value(withdrawalFeeType).isOneOfTheseValues(1, 2);
+        }
+
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
@@ -288,6 +302,18 @@ public class SavingsAccountDataValidator {
                         element);
                 baseDataValidator.reset().parameter(lockinPeriodFrequencyParamName).value(lockinPeriodFrequency).notNull().positiveAmount();
             }
+        }
+
+        if (this.fromApiJsonHelper.parameterExists(withdrawalFeeAmountParamName, element)) {
+
+            final BigDecimal withdrawalFeeAmount = fromApiJsonHelper
+                    .extractBigDecimalWithLocaleNamed(withdrawalFeeAmountParamName, element);
+            baseDataValidator.reset().parameter(withdrawalFeeAmountParamName).value(withdrawalFeeAmount).notNull().positiveAmount();
+        }
+
+        if (this.fromApiJsonHelper.parameterExists(withdrawalFeeTypeParamName, element)) {
+            final Integer withdrawalFeeType = fromApiJsonHelper.extractIntegerSansLocaleNamed(withdrawalFeeTypeParamName, element);
+            baseDataValidator.reset().parameter(withdrawalFeeTypeParamName).value(withdrawalFeeType).isOneOfTheseValues(1, 2);
         }
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);

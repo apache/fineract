@@ -10,10 +10,21 @@ import org.mifosplatform.portfolio.savings.domain.SavingsInterestCalculationDays
 import org.mifosplatform.portfolio.savings.domain.SavingsInterestCalculationType;
 import org.mifosplatform.portfolio.savings.domain.SavingsInterestPostingPeriodType;
 import org.mifosplatform.portfolio.savings.domain.SavingsPeriodFrequencyType;
+import org.mifosplatform.portfolio.savings.domain.SavingsWithdrawalFeesType;
 import org.springframework.stereotype.Service;
 
 @Service
 public class SavingsDropdownReadPlatformServiceImpl implements SavingsDropdownReadPlatformService {
+
+    @Override
+    public Collection<EnumOptionData> retrievewithdrawalFeeTypeOptions() {
+        List<EnumOptionData> allowedOptions = Arrays.asList( //
+                SavingsEnumerations.withdrawalFeeType(SavingsWithdrawalFeesType.FLAT), //
+                SavingsEnumerations.withdrawalFeeType(SavingsWithdrawalFeesType.PERCENT_OF_AMOUNT) //
+                );
+
+        return allowedOptions;
+    }
 
     @Override
     public List<EnumOptionData> retrieveLockinPeriodFrequencyTypeOptions() {

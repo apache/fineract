@@ -15,4 +15,6 @@ public interface SavingsDropdownReadPlatformService {
     Collection<EnumOptionData> retrieveInterestCalculationTypeOptions();
 
     Collection<EnumOptionData> retrieveInterestCalculationDaysInYearTypeOptions();
+
+    Collection<EnumOptionData> retrievewithdrawalFeeTypeOptions();
 }

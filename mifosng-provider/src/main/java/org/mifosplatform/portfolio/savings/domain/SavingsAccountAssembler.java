@@ -15,6 +15,8 @@ import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.lockin
 import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.lockinPeriodFrequencyTypeParamName;
 import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.minRequiredOpeningBalanceParamName;
 import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.nominalAnnualInterestRateParamName;
+import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.withdrawalFeeAmountParamName;
+import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.withdrawalFeeTypeParamName;
 
 import java.math.BigDecimal;
 import java.util.Locale;
@@ -153,9 +155,27 @@ public class SavingsAccountAssembler {
             lockinPeriodFrequencyType = product.lockinPeriodFrequencyType();
         }
 
+        BigDecimal withdrawalFeeAmount = null;
+        if (command.parameterExists(withdrawalFeeAmountParamName)) {
+            withdrawalFeeAmount = command.bigDecimalValueOfParameterNamed(withdrawalFeeAmountParamName);
+        } else {
+            withdrawalFeeAmount = product.withdrawalFeeAmount();
+        }
+        
+        SavingsWithdrawalFeesType withdrawalFeeType = null;
+        if (command.parameterExists(withdrawalFeeAmountParamName)) {
+            final Integer withdrawalFeeTypeValue = command.integerValueOfParameterNamed(withdrawalFeeTypeParamName);
+            if (withdrawalFeeTypeValue != null) {
+                withdrawalFeeType = SavingsWithdrawalFeesType.fromInt(withdrawalFeeTypeValue);
+            }
+        } else {
+            withdrawalFeeType = product.withdrawalFeeType();
+        }
+
+
         final SavingsAccount account = SavingsAccount.createNewAccount(client, group, product, accountNo, externalId, interestRate,
                 interestCompoundingPeriodType, interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType,
-                minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType);
+                minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeAmount, withdrawalFeeType);
         account.setHelpers(this.savingsAccountTransactionSummaryWrapper);
 
         if (active) {
