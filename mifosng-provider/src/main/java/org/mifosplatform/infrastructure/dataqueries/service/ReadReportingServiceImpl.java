@@ -499,6 +499,17 @@ public class ReadReportingServiceImpl implements ReadReportingService {
         return reportList;
     }
 
+
+	@Override
+	public Collection<ReportParameterData> getAllowedParameters() {
+		
+        ReportParameterMapper rm = new ReportParameterMapper();
+        String sql = rm.schema();
+        Collection<ReportParameterData> parameters = this.jdbcTemplate.query(sql, rm, new Object[] {});
+        return parameters;
+	}
+	
+	
     private static final class ReportParameterJoinMapper implements RowMapper<ReportParameterJoinData> {
 
         public String schema(final Long reportId) {
@@ -560,4 +571,23 @@ public class ReadReportingServiceImpl implements ReadReportingService {
                     coreReport, useReport, reportParameterId, reportParameterName, parameterName);
         }
     }
+
+    private static final class ReportParameterMapper implements RowMapper<ReportParameterData> {
+
+        public String schema() {
+
+            return "select p.id as id, p.parameter_name as parameterName from stretchy_parameter p where ifnull(p.special,'') != 'Y' order by p.id";
+
+        }
+
+        @Override
+        public ReportParameterData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+
+            final Long id = rs.getLong("id");
+            final String parameterName = rs.getString("parameterName");
+
+            return new ReportParameterData(id, null, parameterName);
+        }
+    }
+
 }

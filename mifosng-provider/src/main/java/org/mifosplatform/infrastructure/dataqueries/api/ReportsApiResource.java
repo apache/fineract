@@ -49,19 +49,19 @@ public class ReportsApiResource {
 	private final String resourceNameForPermissions = "REPORT";
 	private final PlatformSecurityContext context;
 	private final ToApiJsonSerializer<ReportData> toApiJsonSerializer;
-	private final ReadReportingService readExtraDataAndReportingService;
+	private final ReadReportingService readReportingService;
 	private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 	private final ApiRequestParameterHelper apiRequestParameterHelper;
 
 	@Autowired
 	public ReportsApiResource(
 			final PlatformSecurityContext context,
-			final ReadReportingService readExtraDataAndReportingService,
+			final ReadReportingService readReportingService,
 			final ToApiJsonSerializer<ReportData> toApiJsonSerializer,
 			PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
 			final ApiRequestParameterHelper apiRequestParameterHelper) {
 		this.context = context;
-		this.readExtraDataAndReportingService = readExtraDataAndReportingService;
+		this.readReportingService = readReportingService;
 		this.toApiJsonSerializer = toApiJsonSerializer;
 		this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
 		this.apiRequestParameterHelper = apiRequestParameterHelper;
@@ -75,7 +75,7 @@ public class ReportsApiResource {
 		context.authenticatedUser().validateHasReadPermission(
 				resourceNameForPermissions);
 
-		final Collection<ReportData> result = this.readExtraDataAndReportingService
+		final Collection<ReportData> result = this.readReportingService
 				.retrieveReportList();
 
 		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper
@@ -94,14 +94,15 @@ public class ReportsApiResource {
 		context.authenticatedUser().validateHasReadPermission(
 				resourceNameForPermissions);
 
-		final ReportData result = this.readExtraDataAndReportingService
+		final ReportData result = this.readReportingService
 				.retrieveReport(id);
 
 		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper
 				.process(uriInfo.getQueryParameters());
 
 		if (settings.isTemplate()) {
-			result.appendedTemplate();
+			result.appendedTemplate(this.readReportingService
+					.getAllowedParameters());
 		}
 		return this.toApiJsonSerializer.serialize(settings, result,
 				RESPONSE_DATA_PARAMETERS);
@@ -117,7 +118,8 @@ public class ReportsApiResource {
 				resourceNameForPermissions);
 
 		ReportData result = new ReportData();
-		result.appendedTemplate();
+		result.appendedTemplate(this.readReportingService
+				.getAllowedParameters());
 
 		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper
 				.process(uriInfo.getQueryParameters());

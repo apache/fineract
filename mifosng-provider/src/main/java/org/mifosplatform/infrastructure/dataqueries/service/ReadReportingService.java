@@ -13,20 +13,27 @@ import javax.ws.rs.core.StreamingOutput;
 
 import org.mifosplatform.infrastructure.dataqueries.data.GenericResultsetData;
 import org.mifosplatform.infrastructure.dataqueries.data.ReportData;
+import org.mifosplatform.infrastructure.dataqueries.data.ReportParameterData;
 
 public interface ReadReportingService {
 
-    StreamingOutput retrieveReportCSV(String name, String type, Map<String, String> extractedQueryParams);
+	StreamingOutput retrieveReportCSV(String name, String type,
+			Map<String, String> extractedQueryParams);
 
-    GenericResultsetData retrieveGenericResultset(String name, String type, Map<String, String> extractedQueryParams);
+	GenericResultsetData retrieveGenericResultset(String name, String type,
+			Map<String, String> extractedQueryParams);
 
-    Response processPentahoRequest(String reportName, String outputType, Map<String, String> queryParams);
+	Response processPentahoRequest(String reportName, String outputType,
+			Map<String, String> queryParams);
 
-    String retrieveReportPDF(String name, String type, Map<String, String> extractedQueryParams);
+	String retrieveReportPDF(String name, String type,
+			Map<String, String> extractedQueryParams);
 
-    String getReportType(String reportName);
+	String getReportType(String reportName);
 
-    Collection<ReportData> retrieveReportList();
+	Collection<ReportData> retrieveReportList();
 
-    ReportData retrieveReport(final Long id);
+	Collection<ReportParameterData> getAllowedParameters();
+
+	ReportData retrieveReport(final Long id);
 }
