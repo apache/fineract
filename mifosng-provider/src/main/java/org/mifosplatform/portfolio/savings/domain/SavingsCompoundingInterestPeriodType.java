@@ -8,7 +8,7 @@ package org.mifosplatform.portfolio.savings.domain;
 /**
  * <p>
  * The compounding interest period is the span of time at the end of which
- * savings in a client’s account earn interest.
+ * savings in a client's account earn interest.
  * </p>
  */
 public enum SavingsCompoundingInterestPeriodType {

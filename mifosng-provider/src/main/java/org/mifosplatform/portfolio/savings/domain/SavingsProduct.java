@@ -54,8 +54,8 @@ public class SavingsProduct extends AbstractPersistable<Long> {
 
     /**
      * The interest period is the span of time at the end of which savings in a
-     * client’s account earn interest.
-     * 
+     * client's account earn interest.
+     *
      * A value from the {@link SavingsCompoundingInterestPeriodType}
      * enumeration.
      */

@@ -7,7 +7,7 @@ package org.mifosplatform.portfolio.savings.domain;
 
 /**
  * The interest posting period is the span of time at the end of which savings
- * earned but not yet credited/posted in a client’s account is credited/posted.
+ * earned but not yet credited/posted in a client's account is credited/posted.
  */
 public enum SavingsInterestPostingPeriodType {
 
