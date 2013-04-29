@@ -36,12 +36,12 @@ public final class CalculateLoanScheduleQueryFromApiJsonHelper {
     /**
      * The parameters supported for this command.
      */
-    final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("id", "clientId", "groupId", "loanType", "calendarId", "productId", "accountNo",
-            "externalId", "fundId", "loanOfficerId", "loanPurposeId", "transactionProcessingStrategyId", "principal", "inArrearsTolerance",
-            "interestRatePerPeriod", "repaymentEvery", "numberOfRepayments", "loanTermFrequency", "loanTermFrequencyType",
-            "repaymentFrequencyType", "interestRateFrequencyType", "amortizationType", "interestType", "interestCalculationPeriodType",
-            "expectedDisbursementDate", "repaymentsStartingFromDate", "interestChargedFromDate", "submittedOnDate", "submittedOnNote",
-            "locale", "dateFormat", "charges", "collateral"));
+    final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("id", "clientId", "groupId", "loanType", "calendarId",
+            "productId", "accountNo", "externalId", "fundId", "loanOfficerId", "loanPurposeId", "transactionProcessingStrategyId",
+            "principal", "inArrearsTolerance", "interestRatePerPeriod", "repaymentEvery", "numberOfRepayments", "loanTermFrequency",
+            "loanTermFrequencyType", "repaymentFrequencyType", "interestRateFrequencyType", "amortizationType", "interestType",
+            "interestCalculationPeriodType", "expectedDisbursementDate", "repaymentsStartingFromDate", "interestChargedFromDate",
+            "submittedOnDate", "submittedOnNote", "locale", "dateFormat", "charges", "collateral"));
 
     private final FromJsonHelper fromApiJsonHelper;
 
@@ -98,7 +98,8 @@ public final class CalculateLoanScheduleQueryFromApiJsonHelper {
         final String interestRatePerPeriodParameterName = "interestRatePerPeriod";
         final BigDecimal interestRatePerPeriod = fromApiJsonHelper.extractBigDecimalWithLocaleNamed(interestRatePerPeriodParameterName,
                 element);
-        baseDataValidator.reset().parameter(interestRatePerPeriodParameterName).value(interestRatePerPeriod).notNull().positiveAmount();
+        baseDataValidator.reset().parameter(interestRatePerPeriodParameterName).value(interestRatePerPeriod).notNull()
+                .zeroOrPositiveAmount();
 
         final String interestTypeParameterName = "interestType";
         final Integer interestType = fromApiJsonHelper.extractIntegerWithLocaleNamed(interestTypeParameterName, element);

@@ -82,20 +82,20 @@ public final class LoanProductCommandFromApiJsonDeserializer {
 
         final Integer digitsAfterDecimal = fromApiJsonHelper.extractIntegerNamed("digitsAfterDecimal", element, Locale.getDefault());
         baseDataValidator.reset().parameter("digitsAfterDecimal").value(digitsAfterDecimal).notNull().inMinMaxRange(0, 6);
-        
+
         final BigDecimal principal = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("principal", element);
         baseDataValidator.reset().parameter("principal").value(principal).notNull().positiveAmount();
 
         String minPrincipalParameterName = "minPrincipal";
-        BigDecimal minPrincipalAmount = null;  
-        if(fromApiJsonHelper.parameterExists(minPrincipalParameterName, element)){
+        BigDecimal minPrincipalAmount = null;
+        if (fromApiJsonHelper.parameterExists(minPrincipalParameterName, element)) {
             minPrincipalAmount = fromApiJsonHelper.extractBigDecimalWithLocaleNamed(minPrincipalParameterName, element);
             baseDataValidator.reset().parameter(minPrincipalParameterName).value(minPrincipalAmount).ignoreIfNull().positiveAmount();
         }
 
         String maxPrincipalParameterName = "maxPrincipal";
-        BigDecimal maxPrincipalAmount = null;  
-        if(fromApiJsonHelper.parameterExists(maxPrincipalParameterName, element)){
+        BigDecimal maxPrincipalAmount = null;
+        if (fromApiJsonHelper.parameterExists(maxPrincipalParameterName, element)) {
             maxPrincipalAmount = fromApiJsonHelper.extractBigDecimalWithLocaleNamed(maxPrincipalParameterName, element);
             baseDataValidator.reset().parameter(maxPrincipalParameterName).value(maxPrincipalAmount).ignoreIfNull().positiveAmount();
         }
@@ -103,83 +103,95 @@ public final class LoanProductCommandFromApiJsonDeserializer {
         if (maxPrincipalAmount != null && maxPrincipalAmount.compareTo(BigDecimal.ZERO) != -1) {
             if (minPrincipalAmount != null && minPrincipalAmount.compareTo(BigDecimal.ZERO) != -1) {
                 baseDataValidator.reset().parameter(maxPrincipalParameterName).value(maxPrincipalAmount).notLessThanMin(minPrincipalAmount);
-                if(minPrincipalAmount.compareTo(maxPrincipalAmount) <= 0){
-                    baseDataValidator.reset().parameter("principal").value(principal).inMinAndMaxAmountRange(minPrincipalAmount, maxPrincipalAmount);
+                if (minPrincipalAmount.compareTo(maxPrincipalAmount) <= 0) {
+                    baseDataValidator.reset().parameter("principal").value(principal)
+                            .inMinAndMaxAmountRange(minPrincipalAmount, maxPrincipalAmount);
                 }
-            }else{
+            } else {
                 baseDataValidator.reset().parameter("principal").value(principal).notGreaterThanMax(maxPrincipalAmount);
             }
-        }else if (minPrincipalAmount != null && minPrincipalAmount.compareTo(BigDecimal.ZERO) != -1) {
+        } else if (minPrincipalAmount != null && minPrincipalAmount.compareTo(BigDecimal.ZERO) != -1) {
             baseDataValidator.reset().parameter("principal").value(principal).notLessThanMin(minPrincipalAmount);
         }
-        
+
         final Integer numberOfRepayments = fromApiJsonHelper.extractIntegerWithLocaleNamed("numberOfRepayments", element);
         baseDataValidator.reset().parameter("numberOfRepayments").value(numberOfRepayments).notNull().integerGreaterThanZero();
 
         String minNumberOfRepaymentsParameterName = "minNumberOfRepayments";
         Integer minNumberOfRepayments = null;
-        if(fromApiJsonHelper.parameterExists(minNumberOfRepaymentsParameterName, element)){
+        if (fromApiJsonHelper.parameterExists(minNumberOfRepaymentsParameterName, element)) {
             minNumberOfRepayments = fromApiJsonHelper.extractIntegerWithLocaleNamed(minNumberOfRepaymentsParameterName, element);
-            baseDataValidator.reset().parameter(minNumberOfRepaymentsParameterName).value(minNumberOfRepayments).ignoreIfNull().integerGreaterThanZero();
-        }
-        
-        String maxNumberOfRepaymentsParameterName = "maxNumberOfRepayments";
-        Integer maxNumberOfRepayments = null;
-        if(fromApiJsonHelper.parameterExists(maxNumberOfRepaymentsParameterName, element)){
-            maxNumberOfRepayments = fromApiJsonHelper.extractIntegerWithLocaleNamed(maxNumberOfRepaymentsParameterName, element);
-            baseDataValidator.reset().parameter(maxNumberOfRepaymentsParameterName).value(maxNumberOfRepayments).ignoreIfNull().integerGreaterThanZero();
+            baseDataValidator.reset().parameter(minNumberOfRepaymentsParameterName).value(minNumberOfRepayments).ignoreIfNull()
+                    .integerGreaterThanZero();
         }
 
-        if(maxNumberOfRepayments != null && maxNumberOfRepayments.compareTo(0) == 1){
-            if(minNumberOfRepayments != null && minNumberOfRepayments.compareTo(0) == 1){
-                baseDataValidator.reset().parameter(maxNumberOfRepaymentsParameterName).value(maxNumberOfRepayments).notLessThanMin(minNumberOfRepayments);
-                if(minNumberOfRepayments.compareTo(maxNumberOfRepayments) <= 0){
-                    baseDataValidator.reset().parameter("numberOfRepayments").value(numberOfRepayments).inMinMaxRange(minNumberOfRepayments, maxNumberOfRepayments);
+        String maxNumberOfRepaymentsParameterName = "maxNumberOfRepayments";
+        Integer maxNumberOfRepayments = null;
+        if (fromApiJsonHelper.parameterExists(maxNumberOfRepaymentsParameterName, element)) {
+            maxNumberOfRepayments = fromApiJsonHelper.extractIntegerWithLocaleNamed(maxNumberOfRepaymentsParameterName, element);
+            baseDataValidator.reset().parameter(maxNumberOfRepaymentsParameterName).value(maxNumberOfRepayments).ignoreIfNull()
+                    .integerGreaterThanZero();
+        }
+
+        if (maxNumberOfRepayments != null && maxNumberOfRepayments.compareTo(0) == 1) {
+            if (minNumberOfRepayments != null && minNumberOfRepayments.compareTo(0) == 1) {
+                baseDataValidator.reset().parameter(maxNumberOfRepaymentsParameterName).value(maxNumberOfRepayments)
+                        .notLessThanMin(minNumberOfRepayments);
+                if (minNumberOfRepayments.compareTo(maxNumberOfRepayments) <= 0) {
+                    baseDataValidator.reset().parameter("numberOfRepayments").value(numberOfRepayments)
+                            .inMinMaxRange(minNumberOfRepayments, maxNumberOfRepayments);
                 }
-            }else{
-                baseDataValidator.reset().parameter("numberOfRepayments").value(numberOfRepayments).notGreaterThanMax(maxNumberOfRepayments);
+            } else {
+                baseDataValidator.reset().parameter("numberOfRepayments").value(numberOfRepayments)
+                        .notGreaterThanMax(maxNumberOfRepayments);
             }
-        }else if(minNumberOfRepayments != null && minNumberOfRepayments.compareTo(0) == 1){
+        } else if (minNumberOfRepayments != null && minNumberOfRepayments.compareTo(0) == 1) {
             baseDataValidator.reset().parameter("numberOfRepayments").value(numberOfRepayments).notLessThanMin(minNumberOfRepayments);
         }
-        
+
         final Integer repaymentEvery = fromApiJsonHelper.extractIntegerWithLocaleNamed("repaymentEvery", element);
         baseDataValidator.reset().parameter("repaymentEvery").value(repaymentEvery).notNull().integerGreaterThanZero();
 
         final Integer repaymentFrequencyType = fromApiJsonHelper
                 .extractIntegerNamed("repaymentFrequencyType", element, Locale.getDefault());
         baseDataValidator.reset().parameter("repaymentFrequencyType").value(repaymentFrequencyType).notNull().inMinMaxRange(0, 3);
-                
+
         final BigDecimal interestRatePerPeriod = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("interestRatePerPeriod", element);
         baseDataValidator.reset().parameter("interestRatePerPeriod").value(interestRatePerPeriod).notNull().zeroOrPositiveAmount();
 
         String minInterestRatePerPeriodParameterName = "minInterestRatePerPeriod";
         BigDecimal minInterestRatePerPeriod = null;
-        if(fromApiJsonHelper.parameterExists(minInterestRatePerPeriodParameterName, element)){
+        if (fromApiJsonHelper.parameterExists(minInterestRatePerPeriodParameterName, element)) {
             minInterestRatePerPeriod = fromApiJsonHelper.extractBigDecimalWithLocaleNamed(minInterestRatePerPeriodParameterName, element);
-            baseDataValidator.reset().parameter(minInterestRatePerPeriodParameterName).value(minInterestRatePerPeriod).ignoreIfNull().zeroOrPositiveAmount();
-        }
-        
-        String maxInterestRatePerPeriodParameterName = "maxInterestRatePerPeriod";
-        BigDecimal maxInterestRatePerPeriod = null;
-        if(fromApiJsonHelper.parameterExists(maxInterestRatePerPeriodParameterName, element)){
-            maxInterestRatePerPeriod = fromApiJsonHelper.extractBigDecimalWithLocaleNamed(maxInterestRatePerPeriodParameterName, element);
-            baseDataValidator.reset().parameter(maxInterestRatePerPeriodParameterName).value(maxInterestRatePerPeriod).ignoreIfNull().zeroOrPositiveAmount();
+            baseDataValidator.reset().parameter(minInterestRatePerPeriodParameterName).value(minInterestRatePerPeriod).ignoreIfNull()
+                    .zeroOrPositiveAmount();
         }
 
-        if(maxInterestRatePerPeriod != null && maxInterestRatePerPeriod.compareTo(BigDecimal.ZERO) != -1){
-            if(minInterestRatePerPeriod != null && minInterestRatePerPeriod.compareTo(BigDecimal.ZERO) != -1){
-                baseDataValidator.reset().parameter(maxInterestRatePerPeriodParameterName).value(maxInterestRatePerPeriod).notLessThanMin(minInterestRatePerPeriod);
-                if(minInterestRatePerPeriod.compareTo(maxInterestRatePerPeriod) <= 0){
-                    baseDataValidator.reset().parameter("interestRatePerPeriod").value(interestRatePerPeriod).inMinAndMaxAmountRange(minInterestRatePerPeriod, maxInterestRatePerPeriod);
-                }
-            }else{
-                baseDataValidator.reset().parameter("interestRatePerPeriod").value(interestRatePerPeriod).notGreaterThanMax(maxInterestRatePerPeriod);
-            }
-        }else if(minInterestRatePerPeriod != null && minInterestRatePerPeriod.compareTo(BigDecimal.ZERO) != -1){
-            baseDataValidator.reset().parameter("interestRatePerPeriod").value(interestRatePerPeriod).notLessThanMin(minInterestRatePerPeriod);
+        String maxInterestRatePerPeriodParameterName = "maxInterestRatePerPeriod";
+        BigDecimal maxInterestRatePerPeriod = null;
+        if (fromApiJsonHelper.parameterExists(maxInterestRatePerPeriodParameterName, element)) {
+            maxInterestRatePerPeriod = fromApiJsonHelper.extractBigDecimalWithLocaleNamed(maxInterestRatePerPeriodParameterName, element);
+            baseDataValidator.reset().parameter(maxInterestRatePerPeriodParameterName).value(maxInterestRatePerPeriod).ignoreIfNull()
+                    .zeroOrPositiveAmount();
         }
-        
+
+        if (maxInterestRatePerPeriod != null && maxInterestRatePerPeriod.compareTo(BigDecimal.ZERO) != -1) {
+            if (minInterestRatePerPeriod != null && minInterestRatePerPeriod.compareTo(BigDecimal.ZERO) != -1) {
+                baseDataValidator.reset().parameter(maxInterestRatePerPeriodParameterName).value(maxInterestRatePerPeriod)
+                        .notLessThanMin(minInterestRatePerPeriod);
+                if (minInterestRatePerPeriod.compareTo(maxInterestRatePerPeriod) <= 0) {
+                    baseDataValidator.reset().parameter("interestRatePerPeriod").value(interestRatePerPeriod)
+                            .inMinAndMaxAmountRange(minInterestRatePerPeriod, maxInterestRatePerPeriod);
+                }
+            } else {
+                baseDataValidator.reset().parameter("interestRatePerPeriod").value(interestRatePerPeriod)
+                        .notGreaterThanMax(maxInterestRatePerPeriod);
+            }
+        } else if (minInterestRatePerPeriod != null && minInterestRatePerPeriod.compareTo(BigDecimal.ZERO) != -1) {
+            baseDataValidator.reset().parameter("interestRatePerPeriod").value(interestRatePerPeriod)
+                    .notLessThanMin(minInterestRatePerPeriod);
+        }
+
         final Integer interestRateFrequencyType = fromApiJsonHelper.extractIntegerNamed("interestRateFrequencyType", element,
                 Locale.getDefault());
         baseDataValidator.reset().parameter("interestRateFrequencyType").value(interestRateFrequencyType).notNull().inMinMaxRange(0, 3);
@@ -295,17 +307,17 @@ public final class LoanProductCommandFromApiJsonDeserializer {
             final Integer digitsAfterDecimal = fromApiJsonHelper.extractIntegerNamed("digitsAfterDecimal", element, Locale.getDefault());
             baseDataValidator.reset().parameter("digitsAfterDecimal").value(digitsAfterDecimal).notNull().inMinMaxRange(0, 6);
         }
-        
+
         String minPrincipalParameterName = "minPrincipal";
-        BigDecimal minPrincipalAmount = null;  
-        if(fromApiJsonHelper.parameterExists(minPrincipalParameterName, element)){
+        BigDecimal minPrincipalAmount = null;
+        if (fromApiJsonHelper.parameterExists(minPrincipalParameterName, element)) {
             minPrincipalAmount = fromApiJsonHelper.extractBigDecimalWithLocaleNamed(minPrincipalParameterName, element);
             baseDataValidator.reset().parameter(minPrincipalParameterName).value(minPrincipalAmount).ignoreIfNull().positiveAmount();
         }
-        
+
         String maxPrincipalParameterName = "maxPrincipal";
-        BigDecimal maxPrincipalAmount = null;  
-        if(fromApiJsonHelper.parameterExists(maxPrincipalParameterName, element)){
+        BigDecimal maxPrincipalAmount = null;
+        if (fromApiJsonHelper.parameterExists(maxPrincipalParameterName, element)) {
             maxPrincipalAmount = fromApiJsonHelper.extractBigDecimalWithLocaleNamed(maxPrincipalParameterName, element);
             baseDataValidator.reset().parameter(maxPrincipalParameterName).value(maxPrincipalAmount).ignoreIfNull().positiveAmount();
         }
@@ -324,35 +336,39 @@ public final class LoanProductCommandFromApiJsonDeserializer {
         BigDecimal minInterestRatePerPeriod = null;
         if (fromApiJsonHelper.parameterExists(minInterestRatePerPeriodParameterName, element)) {
             minInterestRatePerPeriod = fromApiJsonHelper.extractBigDecimalWithLocaleNamed(minInterestRatePerPeriodParameterName, element);
-            baseDataValidator.reset().parameter(minInterestRatePerPeriodParameterName).value(minInterestRatePerPeriod).ignoreIfNull().zeroOrPositiveAmount();
+            baseDataValidator.reset().parameter(minInterestRatePerPeriodParameterName).value(minInterestRatePerPeriod).ignoreIfNull()
+                    .zeroOrPositiveAmount();
         }
 
         String maxInterestRatePerPeriodParameterName = "maxInterestRatePerPeriod";
         BigDecimal maxInterestRatePerPeriod = null;
         if (fromApiJsonHelper.parameterExists(maxInterestRatePerPeriodParameterName, element)) {
             maxInterestRatePerPeriod = fromApiJsonHelper.extractBigDecimalWithLocaleNamed(maxInterestRatePerPeriodParameterName, element);
-            baseDataValidator.reset().parameter(maxInterestRatePerPeriodParameterName).value(maxInterestRatePerPeriod).ignoreIfNull().zeroOrPositiveAmount();
+            baseDataValidator.reset().parameter(maxInterestRatePerPeriodParameterName).value(maxInterestRatePerPeriod).ignoreIfNull()
+                    .zeroOrPositiveAmount();
         }
-        
+
         if (fromApiJsonHelper.parameterExists("interestRatePerPeriod", element)) {
             final BigDecimal interestRatePerPeriod = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("interestRatePerPeriod", element);
-            baseDataValidator.reset().parameter("interestRatePerPeriod").value(interestRatePerPeriod).notNull().positiveAmount();
+            baseDataValidator.reset().parameter("interestRatePerPeriod").value(interestRatePerPeriod).notNull().zeroOrPositiveAmount();
         }
 
         String minNumberOfRepaymentsParameterName = "minNumberOfRepayments";
         Integer minNumberOfRepayments = null;
         if (fromApiJsonHelper.parameterExists(minNumberOfRepaymentsParameterName, element)) {
             minNumberOfRepayments = fromApiJsonHelper.extractIntegerWithLocaleNamed(minNumberOfRepaymentsParameterName, element);
-            baseDataValidator.reset().parameter(minNumberOfRepaymentsParameterName).value(minNumberOfRepayments).ignoreIfNull().integerGreaterThanZero();
+            baseDataValidator.reset().parameter(minNumberOfRepaymentsParameterName).value(minNumberOfRepayments).ignoreIfNull()
+                    .integerGreaterThanZero();
         }
-        
+
         String maxNumberOfRepaymentsParameterName = "maxNumberOfRepayments";
         Integer maxNumberOfRepayments = null;
         if (fromApiJsonHelper.parameterExists(maxNumberOfRepaymentsParameterName, element)) {
             maxNumberOfRepayments = fromApiJsonHelper.extractIntegerWithLocaleNamed(maxNumberOfRepaymentsParameterName, element);
-            baseDataValidator.reset().parameter(maxNumberOfRepaymentsParameterName).value(maxNumberOfRepayments).ignoreIfNull().integerGreaterThanZero();
+            baseDataValidator.reset().parameter(maxNumberOfRepaymentsParameterName).value(maxNumberOfRepayments).ignoreIfNull()
+                    .integerGreaterThanZero();
         }
-        
+
         if (fromApiJsonHelper.parameterExists("numberOfRepayments", element)) {
             final Integer numberOfRepayments = fromApiJsonHelper.extractIntegerWithLocaleNamed("numberOfRepayments", element);
             baseDataValidator.reset().parameter("numberOfRepayments").value(numberOfRepayments).notNull().integerGreaterThanZero();
@@ -446,20 +462,22 @@ public final class LoanProductCommandFromApiJsonDeserializer {
                 .value(receivablePenaltyAccountId).ignoreIfNull().integerGreaterThanZero();
 
         validateMinMaxConstraints(element, baseDataValidator, loanProduct);
-        
+
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
-    public void validateMinMaxConstraints(final JsonElement element, final DataValidatorBuilder baseDataValidator, final LoanProduct loanProduct){
-        
+    public void validateMinMaxConstraints(final JsonElement element, final DataValidatorBuilder baseDataValidator,
+            final LoanProduct loanProduct) {
+
         validatePrincipalMinMaxConstraint(element, loanProduct, baseDataValidator);
-        
+
         validateNumberOfRepaymentsMinMaxConstraint(element, loanProduct, baseDataValidator);
-        
+
         validateNominalInterestRatePerPeriodMinMaxConstraint(element, loanProduct, baseDataValidator);
     }
-    
-    private void validatePrincipalMinMaxConstraint(final JsonElement element, final LoanProduct loanProduct, final DataValidatorBuilder baseDataValidator) {
+
+    private void validatePrincipalMinMaxConstraint(final JsonElement element, final LoanProduct loanProduct,
+            final DataValidatorBuilder baseDataValidator) {
 
         boolean principalUpdated = false;
         boolean minPrincipalUpdated = false;
@@ -469,124 +487,134 @@ public final class LoanProductCommandFromApiJsonDeserializer {
         if (fromApiJsonHelper.parameterExists(principalParameterName, element)) {
             principalAmount = fromApiJsonHelper.extractBigDecimalWithLocaleNamed(principalParameterName, element);
             principalUpdated = true;
-        }else{
+        } else {
             principalAmount = loanProduct.getPrincipalAmount().getAmount();
         }
-        
+
         String minPrincipalParameterName = "minPrincipal";
-        BigDecimal minPrincipalAmount = null;  
-        if(fromApiJsonHelper.parameterExists(minPrincipalParameterName, element)){
+        BigDecimal minPrincipalAmount = null;
+        if (fromApiJsonHelper.parameterExists(minPrincipalParameterName, element)) {
             minPrincipalAmount = fromApiJsonHelper.extractBigDecimalWithLocaleNamed(minPrincipalParameterName, element);
             minPrincipalUpdated = true;
-        }else{
+        } else {
             minPrincipalAmount = loanProduct.getMinPrincipalAmount().getAmount();
         }
-        
+
         String maxPrincipalParameterName = "maxPrincipal";
-        BigDecimal maxPrincipalAmount = null;  
-        if(fromApiJsonHelper.parameterExists(maxPrincipalParameterName, element)){
+        BigDecimal maxPrincipalAmount = null;
+        if (fromApiJsonHelper.parameterExists(maxPrincipalParameterName, element)) {
             maxPrincipalAmount = fromApiJsonHelper.extractBigDecimalWithLocaleNamed(maxPrincipalParameterName, element);
             maxPrincipalUpdated = true;
-        }else{
+        } else {
             maxPrincipalAmount = loanProduct.getMaxPrincipalAmount().getAmount();
         }
-        
-        if(minPrincipalUpdated){
+
+        if (minPrincipalUpdated) {
             baseDataValidator.reset().parameter(minPrincipalParameterName).value(minPrincipalAmount).notGreaterThanMax(maxPrincipalAmount);
         }
 
-        if(maxPrincipalUpdated){
+        if (maxPrincipalUpdated) {
             baseDataValidator.reset().parameter(maxPrincipalParameterName).value(maxPrincipalAmount).notLessThanMin(minPrincipalAmount);
         }
 
-        if((principalUpdated || minPrincipalUpdated || maxPrincipalUpdated)){
-            
-            if((minPrincipalAmount != null && minPrincipalAmount.compareTo(BigDecimal.ZERO) == 1) && (maxPrincipalAmount != null && maxPrincipalAmount.compareTo(BigDecimal.ZERO) == 1)){
-                baseDataValidator.reset().parameter(principalParameterName).value(principalAmount).inMinAndMaxAmountRange(minPrincipalAmount, maxPrincipalAmount);
-            }else{
-                if(minPrincipalAmount != null && minPrincipalAmount.compareTo(BigDecimal.ZERO) == 1){
+        if ((principalUpdated || minPrincipalUpdated || maxPrincipalUpdated)) {
+
+            if ((minPrincipalAmount != null && minPrincipalAmount.compareTo(BigDecimal.ZERO) == 1)
+                    && (maxPrincipalAmount != null && maxPrincipalAmount.compareTo(BigDecimal.ZERO) == 1)) {
+                baseDataValidator.reset().parameter(principalParameterName).value(principalAmount)
+                        .inMinAndMaxAmountRange(minPrincipalAmount, maxPrincipalAmount);
+            } else {
+                if (minPrincipalAmount != null && minPrincipalAmount.compareTo(BigDecimal.ZERO) == 1) {
                     baseDataValidator.reset().parameter(principalParameterName).value(principalAmount).notLessThanMin(minPrincipalAmount);
-                }else if(maxPrincipalAmount != null && maxPrincipalAmount.compareTo(BigDecimal.ZERO) == 1){
-                    baseDataValidator.reset().parameter(principalParameterName).value(principalAmount).notGreaterThanMax(maxPrincipalAmount);
+                } else if (maxPrincipalAmount != null && maxPrincipalAmount.compareTo(BigDecimal.ZERO) == 1) {
+                    baseDataValidator.reset().parameter(principalParameterName).value(principalAmount)
+                            .notGreaterThanMax(maxPrincipalAmount);
                 }
             }
         }
     }
-    
-    private void validateNumberOfRepaymentsMinMaxConstraint(final JsonElement element, final LoanProduct loanProduct, final DataValidatorBuilder baseDataValidator) {
+
+    private void validateNumberOfRepaymentsMinMaxConstraint(final JsonElement element, final LoanProduct loanProduct,
+            final DataValidatorBuilder baseDataValidator) {
         boolean numberOfRepaymentsUpdated = false;
         boolean minNumberOfRepaymentsUpdated = false;
         boolean maxNumberOfRepaymentsUpdated = false;
-        
+
         String numberOfRepaymentsParameterName = "numberOfRepayments";
         Integer numberOfRepayments = null;
         if (fromApiJsonHelper.parameterExists(numberOfRepaymentsParameterName, element)) {
             numberOfRepayments = fromApiJsonHelper.extractIntegerWithLocaleNamed(numberOfRepaymentsParameterName, element);
             numberOfRepaymentsUpdated = true;
-        }else{
+        } else {
             numberOfRepayments = loanProduct.getNumberOfRepayments();
         }
-        
+
         String minNumberOfRepaymentsParameterName = "minNumberOfRepayments";
         Integer minNumberOfRepayments = null;
         if (fromApiJsonHelper.parameterExists(minNumberOfRepaymentsParameterName, element)) {
             minNumberOfRepayments = fromApiJsonHelper.extractIntegerWithLocaleNamed(minNumberOfRepaymentsParameterName, element);
             minNumberOfRepaymentsUpdated = true;
-        }else{
+        } else {
             minNumberOfRepayments = loanProduct.getMinNumberOfRepayments();
         }
-        
+
         String maxNumberOfRepaymentsParameterName = "maxNumberOfRepayments";
         Integer maxNumberOfRepayments = null;
         if (fromApiJsonHelper.parameterExists(maxNumberOfRepaymentsParameterName, element)) {
             maxNumberOfRepayments = fromApiJsonHelper.extractIntegerWithLocaleNamed(maxNumberOfRepaymentsParameterName, element);
             maxNumberOfRepaymentsUpdated = true;
-        }else{
+        } else {
             maxNumberOfRepayments = loanProduct.getMaxNumberOfRepayments();
         }
-        
-        if(minNumberOfRepaymentsUpdated){
-            baseDataValidator.reset().parameter(minNumberOfRepaymentsParameterName).value(minNumberOfRepayments).ignoreIfNull().notGreaterThanMax(maxNumberOfRepayments);
+
+        if (minNumberOfRepaymentsUpdated) {
+            baseDataValidator.reset().parameter(minNumberOfRepaymentsParameterName).value(minNumberOfRepayments).ignoreIfNull()
+                    .notGreaterThanMax(maxNumberOfRepayments);
         }
 
-        if(maxNumberOfRepaymentsUpdated){
-            baseDataValidator.reset().parameter(maxNumberOfRepaymentsParameterName).value(maxNumberOfRepayments).notLessThanMin(minNumberOfRepayments);
+        if (maxNumberOfRepaymentsUpdated) {
+            baseDataValidator.reset().parameter(maxNumberOfRepaymentsParameterName).value(maxNumberOfRepayments)
+                    .notLessThanMin(minNumberOfRepayments);
         }
-        
-        if(numberOfRepaymentsUpdated || minNumberOfRepaymentsUpdated || maxNumberOfRepaymentsUpdated){
-            if(maxNumberOfRepayments != null && maxNumberOfRepayments.compareTo(0) == 1){
-                if(minNumberOfRepayments != null && minNumberOfRepayments.compareTo(0) == 1){
-                    baseDataValidator.reset().parameter(numberOfRepaymentsParameterName).value(numberOfRepayments).inMinMaxRange(minNumberOfRepayments, maxNumberOfRepayments);
-                }else{
-                    baseDataValidator.reset().parameter(numberOfRepaymentsParameterName).value(numberOfRepayments).notGreaterThanMax(maxNumberOfRepayments);
+
+        if (numberOfRepaymentsUpdated || minNumberOfRepaymentsUpdated || maxNumberOfRepaymentsUpdated) {
+            if (maxNumberOfRepayments != null && maxNumberOfRepayments.compareTo(0) == 1) {
+                if (minNumberOfRepayments != null && minNumberOfRepayments.compareTo(0) == 1) {
+                    baseDataValidator.reset().parameter(numberOfRepaymentsParameterName).value(numberOfRepayments)
+                            .inMinMaxRange(minNumberOfRepayments, maxNumberOfRepayments);
+                } else {
+                    baseDataValidator.reset().parameter(numberOfRepaymentsParameterName).value(numberOfRepayments)
+                            .notGreaterThanMax(maxNumberOfRepayments);
                 }
-            }else if(minNumberOfRepayments != null && minNumberOfRepayments.compareTo(0) == 1){
-                baseDataValidator.reset().parameter(numberOfRepaymentsParameterName).value(numberOfRepayments).notLessThanMin(minNumberOfRepayments);
+            } else if (minNumberOfRepayments != null && minNumberOfRepayments.compareTo(0) == 1) {
+                baseDataValidator.reset().parameter(numberOfRepaymentsParameterName).value(numberOfRepayments)
+                        .notLessThanMin(minNumberOfRepayments);
             }
         }
     }
 
-    private void validateNominalInterestRatePerPeriodMinMaxConstraint(final JsonElement element, final LoanProduct loanProduct, final DataValidatorBuilder baseDataValidator) {
+    private void validateNominalInterestRatePerPeriodMinMaxConstraint(final JsonElement element, final LoanProduct loanProduct,
+            final DataValidatorBuilder baseDataValidator) {
 
         boolean iRPUpdated = false;
         boolean minIRPUpdated = false;
         boolean maxIRPUpdated = false;
         String interestRatePerPeriodParameterName = "interestRatePerPeriod";
         BigDecimal interestRatePerPeriod = null;
-        
+
         if (fromApiJsonHelper.parameterExists(interestRatePerPeriodParameterName, element)) {
             interestRatePerPeriod = fromApiJsonHelper.extractBigDecimalWithLocaleNamed(interestRatePerPeriodParameterName, element);
             iRPUpdated = true;
-        }else{
+        } else {
             interestRatePerPeriod = loanProduct.getNominalInterestRatePerPeriod();
         }
-        
+
         String minInterestRatePerPeriodParameterName = "minInterestRatePerPeriod";
         BigDecimal minInterestRatePerPeriod = null;
         if (fromApiJsonHelper.parameterExists(minInterestRatePerPeriodParameterName, element)) {
             minInterestRatePerPeriod = fromApiJsonHelper.extractBigDecimalWithLocaleNamed(minInterestRatePerPeriodParameterName, element);
             minIRPUpdated = true;
-        }else{
+        } else {
             minInterestRatePerPeriod = loanProduct.getMinNominalInterestRatePerPeriod();
         }
 
@@ -595,31 +623,36 @@ public final class LoanProductCommandFromApiJsonDeserializer {
         if (fromApiJsonHelper.parameterExists(maxInterestRatePerPeriodParameterName, element)) {
             maxInterestRatePerPeriod = fromApiJsonHelper.extractBigDecimalWithLocaleNamed(maxInterestRatePerPeriodParameterName, element);
             maxIRPUpdated = true;
-        }else{
+        } else {
             maxInterestRatePerPeriod = loanProduct.getMaxNominalInterestRatePerPeriod();
         }
 
-        if(minIRPUpdated){
-            baseDataValidator.reset().parameter(minInterestRatePerPeriodParameterName).value(minInterestRatePerPeriod).ignoreIfNull().notGreaterThanMax(maxInterestRatePerPeriod);
-        }
-        
-        if(maxIRPUpdated){
-            baseDataValidator.reset().parameter(maxInterestRatePerPeriodParameterName).value(maxInterestRatePerPeriod).ignoreIfNull().notLessThanMin(minInterestRatePerPeriod);
+        if (minIRPUpdated) {
+            baseDataValidator.reset().parameter(minInterestRatePerPeriodParameterName).value(minInterestRatePerPeriod).ignoreIfNull()
+                    .notGreaterThanMax(maxInterestRatePerPeriod);
         }
 
-        if(iRPUpdated || minIRPUpdated || maxIRPUpdated){
-            if(maxInterestRatePerPeriod != null){
-                if(minInterestRatePerPeriod != null){
-                    baseDataValidator.reset().parameter(interestRatePerPeriodParameterName).value(interestRatePerPeriod).inMinAndMaxAmountRange(minInterestRatePerPeriod, maxInterestRatePerPeriod);
-                }else{
-                    baseDataValidator.reset().parameter(interestRatePerPeriodParameterName).value(interestRatePerPeriod).notGreaterThanMax(maxInterestRatePerPeriod);
+        if (maxIRPUpdated) {
+            baseDataValidator.reset().parameter(maxInterestRatePerPeriodParameterName).value(maxInterestRatePerPeriod).ignoreIfNull()
+                    .notLessThanMin(minInterestRatePerPeriod);
+        }
+
+        if (iRPUpdated || minIRPUpdated || maxIRPUpdated) {
+            if (maxInterestRatePerPeriod != null) {
+                if (minInterestRatePerPeriod != null) {
+                    baseDataValidator.reset().parameter(interestRatePerPeriodParameterName).value(interestRatePerPeriod)
+                            .inMinAndMaxAmountRange(minInterestRatePerPeriod, maxInterestRatePerPeriod);
+                } else {
+                    baseDataValidator.reset().parameter(interestRatePerPeriodParameterName).value(interestRatePerPeriod)
+                            .notGreaterThanMax(maxInterestRatePerPeriod);
                 }
-            }else if(minInterestRatePerPeriod != null){
-                baseDataValidator.reset().parameter(interestRatePerPeriodParameterName).value(interestRatePerPeriod).notLessThanMin(minInterestRatePerPeriod);
+            } else if (minInterestRatePerPeriod != null) {
+                baseDataValidator.reset().parameter(interestRatePerPeriodParameterName).value(interestRatePerPeriod)
+                        .notLessThanMin(minInterestRatePerPeriod);
             }
         }
     }
-    
+
     private boolean isCashBasedAccounting(final Integer accountingRuleType) {
         return AccountingRuleType.CASH_BASED.getValue().equals(accountingRuleType);
     }

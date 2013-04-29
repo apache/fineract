@@ -232,7 +232,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             }
 
             // validate min and maximum constraints
-            this.fromApiJsonDeserializer.validateMinMaxConstraintsForModification(command.json(), existingLoanApplication.loanProduct());
+            this.fromApiJsonDeserializer.validateForModify(command.json());
 
             final String fundIdParamName = "fundId";
             if (changes.containsKey(fundIdParamName)) {
@@ -306,9 +306,10 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                         calendarInstance.updateCalendar(calendar);
                         this.calendarInstanceRepository.saveAndFlush(calendarInstance);
                     }
-                }else{
-                    //attaching new calendar
-                    CalendarInstance calendarInstance = new CalendarInstance(calendar, existingLoanApplication.getId(), CalendarEntityType.LOANS.getValue());
+                } else {
+                    // attaching new calendar
+                    CalendarInstance calendarInstance = new CalendarInstance(calendar, existingLoanApplication.getId(),
+                            CalendarEntityType.LOANS.getValue());
                     this.calendarInstanceRepository.save(calendarInstance);
                 }
 
