@@ -36,6 +36,7 @@ public class AccountingScenarioIntegrationTest {
     private final String EXPECTED_DISBURSAL_DATE="04 March 2011";
     private final String LOAN_APPLICATION_SUBMISSION_DATE= "3 March 2011";
     private final String LOAN_TERM_FREQUENCY= "10";
+    private final String INDIVIDUAL_LOAN = "individual";
 
     private final String REPAYMENT_DATE[]={"","04 May 2011","04 July 2011","04 September 2011","04 November 2011","04 January 2012"};
     private final Float REPAYMENT_AMOUNT [] = {.0f,2200.0f,3000.0f,900.0f,2000.0f,2500.0f};
@@ -187,6 +188,7 @@ public class AccountingScenarioIntegrationTest {
                 .withRepaymentFrequencyTypeAsMonths().withInterestRatePerPeriod(LP_INTEREST_RATE).withInterestTypeAsFlatBalance()
                 .withAmortizationTypeAsEqualPrincipalPayments().withInterestCalculationPeriodTypeSameAsRepaymentPeriod()
                 .withExpectedDisbursementDate(EXPECTED_DISBURSAL_DATE).withSubmittedOnDate(LOAN_APPLICATION_SUBMISSION_DATE)
+                .withLoanType(INDIVIDUAL_LOAN)
                 .build(clientID.toString(), loanProductID.toString());
         return loanTransactionHelper.getLoanId(loanApplicationJSON);
     }

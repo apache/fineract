@@ -20,4 +20,10 @@ public interface CalendarReadPlatformService {
     Collection<CalendarData> retrieveAllCalendars();
 
     CalendarData retrieveNewCalendarDetails();
+    
+    CalendarData generateRecurringDate(final CalendarData calendarData);
+    
+    Collection<CalendarData> generateRecurringDates(final Collection<CalendarData> calendarsData);
+    
+    CalendarData retrieveLoanCalendar(final Long loanId);
 }

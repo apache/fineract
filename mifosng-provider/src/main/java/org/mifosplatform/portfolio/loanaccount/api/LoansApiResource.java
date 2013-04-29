@@ -43,6 +43,8 @@ import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext
 import org.mifosplatform.organisation.staff.data.BulkTransferLoanOfficerData;
 import org.mifosplatform.organisation.staff.data.StaffData;
 import org.mifosplatform.organisation.staff.service.StaffReadPlatformService;
+import org.mifosplatform.portfolio.calendar.data.CalendarData;
+import org.mifosplatform.portfolio.calendar.service.CalendarReadPlatformService;
 import org.mifosplatform.portfolio.charge.data.ChargeData;
 import org.mifosplatform.portfolio.charge.service.ChargeReadPlatformService;
 import org.mifosplatform.portfolio.collateral.data.CollateralData;
@@ -55,6 +57,8 @@ import org.mifosplatform.portfolio.loanaccount.data.LoanAccountData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanChargeData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanTransactionData;
 import org.mifosplatform.portfolio.loanaccount.data.RepaymentScheduleRelatedLoanData;
+import org.mifosplatform.portfolio.loanaccount.exception.LoanTemplateTypeRequiredException;
+import org.mifosplatform.portfolio.loanaccount.exception.NotSupportedLoanTemplateTypeException;
 import org.mifosplatform.portfolio.loanaccount.guarantor.data.GuarantorData;
 import org.mifosplatform.portfolio.loanaccount.guarantor.service.GuarantorReadPlatformService;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.data.LoanScheduleData;
@@ -63,8 +67,6 @@ import org.mifosplatform.portfolio.loanaccount.service.LoanChargeReadPlatformSer
 import org.mifosplatform.portfolio.loanaccount.service.LoanReadPlatformService;
 import org.mifosplatform.portfolio.loanproduct.data.LoanProductData;
 import org.mifosplatform.portfolio.loanproduct.data.TransactionProcessingStrategyData;
-import org.mifosplatform.portfolio.loanproduct.domain.LendingStrategy;
-import org.mifosplatform.portfolio.loanproduct.exception.InvalidLendingStrategy;
 import org.mifosplatform.portfolio.loanproduct.service.LoanDropdownReadPlatformService;
 import org.mifosplatform.portfolio.loanproduct.service.LoanProductReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -85,11 +87,11 @@ public class LoansApiResource {
             "termPeriodFrequencyType", "numberOfRepayments", "repaymentEvery", "interestRatePerPeriod", "annualInterestRate",
             "repaymentFrequencyType", "transactionProcessingStrategyId", "interestRateFrequencyType", "amortizationType", "interestType",
             "interestCalculationPeriodType", "expectedFirstRepaymentOnDate", "interestChargedFromDate", "timeline",
-            "totalFeeChargesAtDisbursement", "summary", "repaymentSchedule", "transactions", "charges", "collateral", "guarantors",
+            "totalFeeChargesAtDisbursement", "summary", "repaymentSchedule", "transactions", "charges", "collateral", "guarantors","meeting",
             "productOptions", "amortizationTypeOptions", "interestTypeOptions", "interestCalculationPeriodTypeOptions",
             "repaymentFrequencyTypeOptions", "termFrequencyTypeOptions", "interestRateFrequencyTypeOptions", "fundOptions",
             "repaymentStrategyOptions", "chargeOptions", "loanOfficerOptions", "loanPurposeOptions", "loanCollateralOptions",
-            "chargeTemplate"));
+            "chargeTemplate","calendarOptions"));
 
     private final String resourceNameForPermissions = "LOAN";
 
@@ -112,6 +114,7 @@ public class LoansApiResource {
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final FromJsonHelper fromJsonHelper;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
+    private final CalendarReadPlatformService calendarReadPlatformService;
 
     @Autowired
     public LoansApiResource(final PlatformSecurityContext context, final LoanReadPlatformService loanReadPlatformService,
@@ -127,7 +130,8 @@ public class LoansApiResource {
             final DefaultToApiJsonSerializer<LoanScheduleData> loanScheduleToApiJsonSerializer,
             final DefaultToApiJsonSerializer<BulkTransferLoanOfficerData> loanOfficeTransferToApiJsonSerializer,
             final ApiRequestParameterHelper apiRequestParameterHelper, final FromJsonHelper fromJsonHelper,
-            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
+            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
+            final CalendarReadPlatformService calendarReadPlatformService) {
         this.context = context;
         this.loanReadPlatformService = loanReadPlatformService;
         this.loanProductReadPlatformService = loanProductReadPlatformService;
@@ -147,6 +151,7 @@ public class LoansApiResource {
         this.apiRequestParameterHelper = apiRequestParameterHelper;
         this.fromJsonHelper = fromJsonHelper;
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
+        this.calendarReadPlatformService = calendarReadPlatformService;
     }
 
     @GET
@@ -154,108 +159,71 @@ public class LoansApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String template(@QueryParam("clientId") final Long clientId, @QueryParam("groupId") final Long groupId,
-            @QueryParam("productId") final Long productId, @QueryParam("lendingStrategy") final Integer lendingStrategy, @Context final UriInfo uriInfo) {
+            @QueryParam("productId") final Long productId, @QueryParam("templateType") final String templateType, @Context final UriInfo uriInfo) {
 
         context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
 
         // template
         final Collection<LoanProductData> productOptions = this.loanProductReadPlatformService.retrieveAllLoanProductsForLookup();
 
-        // associations
-        final LoanScheduleData repaymentSchedule = null;
-        final Collection<LoanTransactionData> loanRepayments = null;
-        final Collection<CollateralData> collateral = null;
-        final Collection<GuarantorData> guarantors = null;
-
         // options
-        Collection<EnumOptionData> loanTermFrequencyTypeOptions = null;
-        Collection<EnumOptionData> repaymentFrequencyTypeOptions = null;
-        Collection<EnumOptionData> interestRateFrequencyTypeOptions = null;
-        Collection<EnumOptionData> amortizationTypeOptions = null;
-        Collection<EnumOptionData> interestTypeOptions = null;
-        Collection<EnumOptionData> interestCalculationPeriodTypeOptions = null;
-        Collection<FundData> fundOptions = null;
-        Collection<TransactionProcessingStrategyData> repaymentStrategyOptions = null;
         Collection<StaffData> allowedLoanOfficers = null;
-        Collection<CodeValueData> loanPurposeOptions = null;
         Collection<CodeValueData> loanCollateralOptions = null;
-        Collection<ChargeData> chargeOptions = null;
-        ChargeData chargeTemplate = null;
-
-        if (productId != null) {
-            loanTermFrequencyTypeOptions = dropdownReadPlatformService.retrieveLoanTermFrequencyTypeOptions();
-            repaymentFrequencyTypeOptions = dropdownReadPlatformService.retrieveRepaymentFrequencyTypeOptions();
-            interestRateFrequencyTypeOptions = dropdownReadPlatformService.retrieveInterestRateFrequencyTypeOptions();
-
-            amortizationTypeOptions = dropdownReadPlatformService.retrieveLoanAmortizationTypeOptions();
-            interestTypeOptions = dropdownReadPlatformService.retrieveLoanInterestTypeOptions();
-            interestCalculationPeriodTypeOptions = dropdownReadPlatformService.retrieveLoanInterestRateCalculatedInPeriodOptions();
-
-            fundOptions = this.fundReadPlatformService.retrieveAllFunds();
-            repaymentStrategyOptions = this.dropdownReadPlatformService.retreiveTransactionProcessingStrategies();
-            loanPurposeOptions = this.codeValueReadPlatformService.retrieveCodeValuesByCode("LoanPurpose");
-            loanCollateralOptions = this.codeValueReadPlatformService.retrieveCodeValuesByCode("LoanCollateral");
-
-            final boolean feeChargesOnly = false;
-            chargeOptions = this.chargeReadPlatformService.retrieveLoanApplicableCharges(feeChargesOnly);
-        }
-
+        Collection<CalendarData> calendarOptions = null;
         LoanAccountData newLoanAccount = null;
-        if (clientId != null) {
-            LoanAccountData loanBasicDetails = this.loanReadPlatformService.retrieveTemplateWithClientAndProductDetails(clientId,
-                    productId);
-            final Collection<LoanChargeData> charges = loanBasicDetails.charges();
-            
-            if (productId != null) {
-                final Long officeId = loanBasicDetails.officeId();
-                allowedLoanOfficers = this.staffReadPlatformService.retrieveAllLoanOfficersByOffice(officeId);
-            }
-
-            //If JLG loan then attach group
-            if(groupId != null){
-                final GroupGeneralData group = this.groupReadPlatformService.retrieveOne(groupId);
-                loanBasicDetails = LoanAccountData.associateGroup(loanBasicDetails, group);
-            }
-            
-            
-            newLoanAccount = LoanAccountData.associationsAndTemplate(loanBasicDetails, repaymentSchedule, loanRepayments, charges,
-                    collateral, guarantors, productOptions, loanTermFrequencyTypeOptions, repaymentFrequencyTypeOptions,
-                    repaymentStrategyOptions, interestRateFrequencyTypeOptions, amortizationTypeOptions, interestTypeOptions,
-                    interestCalculationPeriodTypeOptions, fundOptions, chargeOptions, chargeTemplate, allowedLoanOfficers,
-                    loanPurposeOptions, loanCollateralOptions);
-
-        } else if (groupId != null ) {
-
-            LoanAccountData loanBasicDetails = null;
-            
-            if (LendingStrategy.JOINT_LIABILITY_LOAN.getId().equals(lendingStrategy)){
-                loanBasicDetails = this.loanReadPlatformService.retrieveTemplateWithCompleteGroupAndProductDetails(groupId,
-                        productId);
-            }
-            else if( LendingStrategy.GROUP_LOAN.getId().equals(lendingStrategy)){
-                loanBasicDetails = this.loanReadPlatformService.retrieveTemplateWithGroupAndProductDetails(groupId,
-                        productId);
-            }else{
-                throw new InvalidLendingStrategy(lendingStrategy);
-            }
-            
-            
-            final Collection<LoanChargeData> charges = loanBasicDetails.charges();
-            if (productId != null) {
-                final Long officeId = loanBasicDetails.groupOfficeId();
-                if(officeId != null) allowedLoanOfficers = this.staffReadPlatformService.retrieveAllLoanOfficersByOffice(officeId);
-            }
-
-            newLoanAccount = LoanAccountData.associationsAndTemplate(loanBasicDetails, repaymentSchedule, loanRepayments, charges,
-                    collateral, guarantors, productOptions, loanTermFrequencyTypeOptions, repaymentFrequencyTypeOptions,
-                    repaymentStrategyOptions, interestRateFrequencyTypeOptions, amortizationTypeOptions, interestTypeOptions,
-                    interestCalculationPeriodTypeOptions, fundOptions, chargeOptions, chargeTemplate, allowedLoanOfficers,
-                    loanPurposeOptions, loanCollateralOptions);
+        Long officeId = null;
+        
+        if (productId != null) {
+            newLoanAccount = this.loanReadPlatformService.retrieveLoanProductDetailsTemplate(productId);
         }
-        else {
+ 
+        if(templateType == null){
+            final String errorMsg = "Loan template type must be provided";
+            throw new LoanTemplateTypeRequiredException(errorMsg);
+        }else if (templateType.equals("collateral")) {
             newLoanAccount = LoanAccountData.collateralTemplate(loanCollateralOptions);
-        }
+        } else {
+            //for JLG loan both client and group details are required
+            if (templateType.equals("individual") || templateType.equals("jlg")) {
 
+                LoanAccountData loanAccountClientDetails = this.loanReadPlatformService.retrieveClientDetailsTemplate(clientId);
+
+                officeId = loanAccountClientDetails.officeId();
+                
+                newLoanAccount = (newLoanAccount == null) ? loanAccountClientDetails : LoanAccountData.populateClientDefaults(
+                        newLoanAccount, loanAccountClientDetails);
+
+                // if it's JLG loan add group details
+                if (templateType.equals("jlg")) {
+                    final GroupGeneralData group = this.groupReadPlatformService.retrieveOne(groupId);
+                    newLoanAccount = LoanAccountData.associateGroup(newLoanAccount, group);
+                    calendarOptions = this.loanReadPlatformService.retrieveCalendars(groupId);
+                }
+
+            } else if (templateType.equals("group")) {
+
+                final LoanAccountData loanAccountGroupData = this.loanReadPlatformService.retrieveGroupDetailsTemplate(groupId);
+                officeId = loanAccountGroupData.groupOfficeId();
+                calendarOptions = this.loanReadPlatformService.retrieveCalendars(groupId);
+                newLoanAccount = (newLoanAccount == null) ? loanAccountGroupData : LoanAccountData.populateGroupDefaults(newLoanAccount,
+                        loanAccountGroupData);
+
+            } else if (templateType.equals("jlgbulk")) {
+                //get group details along with members in that group
+                final LoanAccountData loanAccountGroupData = this.loanReadPlatformService.retrieveGroupAndMembersDetailsTemplate(groupId);
+                officeId = loanAccountGroupData.groupOfficeId();
+                calendarOptions = this.loanReadPlatformService.retrieveCalendars(groupId);
+                newLoanAccount = (newLoanAccount == null) ? loanAccountGroupData : LoanAccountData.populateGroupDefaults(newLoanAccount,
+                        loanAccountGroupData);
+            } else {
+                final String errorMsg = "Loan template type '" + templateType + "' is not supported";
+                throw new NotSupportedLoanTemplateTypeException(errorMsg, templateType);
+            }
+
+            if (officeId != null) allowedLoanOfficers = this.staffReadPlatformService.retrieveAllLoanOfficersByOffice(officeId);
+            // add product options, allowed loan officers and calendar options (calendar options will be null in individual loan)
+            newLoanAccount = LoanAccountData.associationsAndTemplate(newLoanAccount, productOptions, allowedLoanOfficers, calendarOptions);
+        }
         final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serialize(settings, newLoanAccount, LOAN_DATA_PARAMETERS);
     }
@@ -275,7 +243,8 @@ public class LoansApiResource {
         Collection<LoanChargeData> charges = null;
         Collection<GuarantorData> guarantors = null;
         Collection<CollateralData> collateral = null;
-
+        CalendarData meeting = null;
+        
         final Set<String> mandatoryResponseParameters = new HashSet<String>();
         final Set<String> associationParameters = ApiParameterHelper.extractAssociationsForResponseIfProvided(uriInfo.getQueryParameters());
         if (!associationParameters.isEmpty()) {
@@ -322,6 +291,11 @@ public class LoansApiResource {
                     collateral = null;
                 }
             }
+            
+            if (associationParameters.contains("meeting")) {
+                mandatoryResponseParameters.add("meeting");
+                meeting = this.calendarReadPlatformService.retrieveLoanCalendar(loanId);
+            }
         }
 
         Collection<LoanProductData> productOptions = null;
@@ -338,6 +312,7 @@ public class LoansApiResource {
         ChargeData chargeTemplate = null;
         Collection<CodeValueData> loanPurposeOptions = null;
         Collection<CodeValueData> loanCollateralOptions = null;
+        Collection<CalendarData> calendarOptions = null;
 
         final boolean template = ApiParameterHelper.template(uriInfo.getQueryParameters());
         if (template) {
@@ -355,16 +330,27 @@ public class LoansApiResource {
             final boolean feeChargesOnly = false;
             chargeOptions = this.chargeReadPlatformService.retrieveLoanApplicableCharges(feeChargesOnly);
             chargeTemplate = this.loanChargeReadPlatformService.retrieveLoanChargeTemplate();
-            allowedLoanOfficers = this.staffReadPlatformService.retrieveAllLoanOfficersByOffice(loanBasicDetails.officeId());
+            
+            if(loanBasicDetails.officeId() != null){
+                allowedLoanOfficers = this.staffReadPlatformService.retrieveAllLoanOfficersByOffice(loanBasicDetails.officeId());
+            }else if(loanBasicDetails.groupOfficeId() != null){
+                allowedLoanOfficers = this.staffReadPlatformService.retrieveAllLoanOfficersByOffice(loanBasicDetails.groupOfficeId());
+            }
+            
             loanPurposeOptions = this.codeValueReadPlatformService.retrieveCodeValuesByCode("LoanPurpose");
             loanCollateralOptions = this.codeValueReadPlatformService.retrieveCodeValuesByCode("LoanCollateral");
+            
+            if(loanBasicDetails.groupId() != null){
+                calendarOptions = this.loanReadPlatformService.retrieveCalendars(loanBasicDetails.groupId());
+            }
+            
         }
 
         final LoanAccountData loanAccount = LoanAccountData.associationsAndTemplate(loanBasicDetails, repaymentSchedule, loanRepayments,
-                charges, collateral, guarantors, productOptions, loanTermFrequencyTypeOptions, repaymentFrequencyTypeOptions,
+                charges, collateral, guarantors, meeting, productOptions, loanTermFrequencyTypeOptions, repaymentFrequencyTypeOptions,
                 repaymentStrategyOptions, interestRateFrequencyTypeOptions, amortizationTypeOptions, interestTypeOptions,
                 interestCalculationPeriodTypeOptions, fundOptions, chargeOptions, chargeTemplate, allowedLoanOfficers, loanPurposeOptions,
-                loanCollateralOptions);
+                loanCollateralOptions, calendarOptions);
 
         final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters(),
                 mandatoryResponseParameters);

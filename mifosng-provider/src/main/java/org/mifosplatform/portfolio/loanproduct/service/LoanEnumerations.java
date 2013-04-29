@@ -13,6 +13,7 @@ import org.mifosplatform.portfolio.loanaccount.data.LoanStatusEnumData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanTransactionEnumData;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanStatus;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanTransactionType;
+import org.mifosplatform.portfolio.loanaccount.domain.LoanType;
 import org.mifosplatform.portfolio.loanaccount.domain.PaymentType;
 import org.mifosplatform.portfolio.loanproduct.domain.AccountingRuleType;
 import org.mifosplatform.portfolio.loanproduct.domain.AmortizationMethod;
@@ -335,6 +336,34 @@ public class LoanEnumerations {
 
     public static EnumOptionData accountingRuleType(final AccountingRuleType type) {
         EnumOptionData optionData = new EnumOptionData(type.getValue().longValue(), type.getCode(), type.toString());
+        return optionData;
+    }
+    
+    public static EnumOptionData loanType(final Integer loanTypeId) {
+        return loanType(LoanType.fromInt(loanTypeId));
+    }
+    
+    public static EnumOptionData loanType(final String name) {
+        return loanType(LoanType.fromName(name));
+    }
+
+    public static EnumOptionData loanType(final LoanType type) {
+        EnumOptionData optionData = new EnumOptionData(LoanType.INVALID.getValue().longValue(), LoanType.INVALID.getCode(), "Invalid");
+        switch (type) {
+            case INVALID:
+                optionData = new EnumOptionData(LoanType.INVALID.getValue().longValue(), LoanType.INVALID.getCode(), "Invalid");
+            break;
+            case INDIVIDUAL:
+                optionData = new EnumOptionData(LoanType.INDIVIDUAL.getValue().longValue(), LoanType.INDIVIDUAL.getCode(), "Individual");
+            break;
+            case GROUP:
+                optionData = new EnumOptionData(LoanType.GROUP.getValue().longValue(), LoanType.GROUP.getCode(), "Group");
+            break;
+            case JLG:
+                optionData = new EnumOptionData(LoanType.JLG.getValue().longValue(), LoanType.JLG.getCode(), "JLG");
+            break;
+        }
+
         return optionData;
     }
 }

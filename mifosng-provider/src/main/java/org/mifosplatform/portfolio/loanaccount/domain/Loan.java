@@ -97,6 +97,10 @@ public class Loan extends AbstractPersistable<Long> {
     @JoinColumn(name = "group_id", nullable = true)
     private Group group;
 
+    @SuppressWarnings("unused")
+    @Column(name = "loan_type_enum", nullable = false)
+    private Integer loanType;
+    
     @ManyToOne
     @JoinColumn(name = "product_id", nullable = false)
     private LoanProduct loanProduct;
@@ -259,28 +263,18 @@ public class Loan extends AbstractPersistable<Long> {
     @Transient
     private LoanSummaryWrapper loanSummaryWrapper;
 
-    public static Loan newIndividualLoanApplication(final String accountNo, final Client client, final LoanProduct loanProduct,
+    public static Loan newIndividualLoanApplication(final String accountNo, final Client client, final Integer loanType, final LoanProduct loanProduct,
             final Fund fund, final Staff officer, final CodeValue loanPurpose,
             final LoanTransactionProcessingStrategy transactionProcessingStrategy, final LoanSchedule loanSchedule,
             final Set<LoanCharge> loanCharges, final Set<LoanCollateral> collateral) {
         final LoanStatus status = null;
+        final Group group = null;
         LoanProductRelatedDetail loanRepaymentScheduleDetail = loanSchedule.loanProductRelatedDetail();
-        return new Loan(accountNo, client, null, fund, officer, loanPurpose, transactionProcessingStrategy, loanProduct,
+        return new Loan(accountNo, client, group, loanType, fund, officer, loanPurpose, transactionProcessingStrategy, loanProduct,
                 loanRepaymentScheduleDetail, status, loanCharges, collateral);
     }
 
-    public static Loan newGroupLoanApplication(final String accountNo, final Group group, final LoanProduct loanProduct, final Fund fund,
-            final Staff officer, final LoanTransactionProcessingStrategy transactionProcessingStrategy, final LoanSchedule loanSchedule,
-            final Set<LoanCharge> loanCharges) {
-        final LoanStatus status = null;
-        final LoanProductRelatedDetail loanRepaymentScheduleDetail = loanSchedule.loanProductRelatedDetail();
-        final CodeValue loanPurpose = null;
-        final Set<LoanCollateral> collateral = null;
-        return new Loan(accountNo, null, group, fund, officer, loanPurpose, transactionProcessingStrategy, loanProduct,
-                loanRepaymentScheduleDetail, status, loanCharges, collateral);
-    }
-
-    public static Loan newIndividualLoanApplicationFromGroup(final String accountNo, final Client client, final Group group,
+    public static Loan newGroupLoanApplication(final String accountNo, final Group group, final Integer loanType,
             final LoanProduct loanProduct, final Fund fund, final Staff officer,
             final LoanTransactionProcessingStrategy transactionProcessingStrategy, final LoanSchedule loanSchedule,
             final Set<LoanCharge> loanCharges) {
@@ -288,7 +282,20 @@ public class Loan extends AbstractPersistable<Long> {
         final LoanProductRelatedDetail loanRepaymentScheduleDetail = loanSchedule.loanProductRelatedDetail();
         final CodeValue loanPurpose = null;
         final Set<LoanCollateral> collateral = null;
-        return new Loan(accountNo, client, group, fund, officer, loanPurpose, transactionProcessingStrategy, loanProduct,
+        final Client client = null;
+        return new Loan(accountNo, client, group, loanType, fund, officer, loanPurpose, transactionProcessingStrategy, loanProduct,
+                loanRepaymentScheduleDetail, status, loanCharges, collateral);
+    }
+
+    public static Loan newIndividualLoanApplicationFromGroup(final String accountNo, final Client client, final Group group,
+            final Integer loanType, final LoanProduct loanProduct, final Fund fund, final Staff officer,
+            final LoanTransactionProcessingStrategy transactionProcessingStrategy, final LoanSchedule loanSchedule,
+            final Set<LoanCharge> loanCharges) {
+        final LoanStatus status = null;
+        final LoanProductRelatedDetail loanRepaymentScheduleDetail = loanSchedule.loanProductRelatedDetail();
+        final CodeValue loanPurpose = null;
+        final Set<LoanCollateral> collateral = null;
+        return new Loan(accountNo, client, group, loanType, fund, officer, loanPurpose, transactionProcessingStrategy, loanProduct,
                 loanRepaymentScheduleDetail, status, loanCharges, collateral);
     }
 
@@ -296,7 +303,7 @@ public class Loan extends AbstractPersistable<Long> {
         //
     }
 
-    private Loan(final String accountNo, final Client client, final Group group, final Fund fund, final Staff loanOfficer,
+    private Loan(final String accountNo, final Client client, final Group group, final Integer loanType, final Fund fund, final Staff loanOfficer,
             final CodeValue loanPurpose, final LoanTransactionProcessingStrategy transactionProcessingStrategy,
             final LoanProduct loanProduct, final LoanProductRelatedDetail loanRepaymentScheduleDetail, final LoanStatus loanStatus,
             final Set<LoanCharge> loanCharges, final Set<LoanCollateral> collateral) {
@@ -308,6 +315,7 @@ public class Loan extends AbstractPersistable<Long> {
         }
         this.client = client;
         this.group = group;
+        this.loanType = loanType;
         this.fund = fund;
         this.loanOfficer = loanOfficer;
         this.loanPurpose = loanPurpose;
@@ -813,15 +821,31 @@ public class Loan extends AbstractPersistable<Long> {
             this.externalId = StringUtils.defaultIfEmpty(newValue, null);
         }
 
+        //add clientId, groupId and loanType changes to actual changes
+        //FIXME: AA - We may require separate api command to move loan from one client to another
         final String clientIdParamName = "clientId";
-        // FIXME AA : Client is null for group loans. Group loan modifications
-        // require group validation.
-        if (this.client != null) {
-            if (command.isChangeInLongParameterNamed(clientIdParamName, this.client.getId())) {
-                final Long newValue = command.longValueOfParameterNamed(clientIdParamName);
-                actualChanges.put(clientIdParamName, newValue);
-            }
+        final Long clientId = this.client == null ? null : this.client.getId();
+        if (command.isChangeInLongParameterNamed(clientIdParamName, clientId)) {
+            final Long newValue = command.longValueOfParameterNamed(clientIdParamName);
+            actualChanges.put(clientIdParamName, newValue);
         }
+        
+        //FIXME: AA - We may require separate api command to move loan from one group to another 
+        final String groupIdParamName = "groupId";
+        final Long groupId = this.group == null ? null : this.group.getId();
+        if (command.isChangeInLongParameterNamed(clientIdParamName, groupId)) {
+            final Long newValue = command.longValueOfParameterNamed(groupIdParamName);
+            actualChanges.put(groupIdParamName, newValue);
+        }
+        
+        //Do not support loan type modification
+        /*final String loanTypeParamName = "loanType";
+        final String loanTypeStr = LoanType.fromInt(this.loanType).getName();
+        if (command.isChangeInStringParameterNamed(loanTypeParamName, loanTypeStr)) {
+            final String newValue = command.stringValueOfParameterNamed(loanTypeParamName);
+            actualChanges.put(loanTypeParamName, newValue);
+            this.loanType = LoanType.fromName(newValue).getValue();
+        }*/
 
         final String productIdParamName = "productId";
         if (command.isChangeInLongParameterNamed(productIdParamName, this.loanProduct.getId())) {
@@ -959,7 +983,7 @@ public class Loan extends AbstractPersistable<Long> {
                 actualChanges.put(collateralParamName, listOfLoanCollateralData(possiblyModifedLoanCollateralItems));
             }
         }
-
+        
         return actualChanges;
     }
 

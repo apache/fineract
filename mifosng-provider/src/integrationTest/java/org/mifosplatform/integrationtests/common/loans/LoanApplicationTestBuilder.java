@@ -31,6 +31,7 @@ public class LoanApplicationTestBuilder {
     private final String transactionProcessingID = MIFOS_STANDARD_STRATEGY;
     private String expectedDisbursmentDate = "";
     private String submittedOnDate = "";
+    private String loanType = "individual"; //default it to individual
 
     public String build(final String clientID, final String loanProductId) {
 
@@ -52,6 +53,7 @@ public class LoanApplicationTestBuilder {
         map.put("transactionProcessingStrategyId", transactionProcessingID);
         map.put("expectedDisbursementDate", expectedDisbursmentDate);
         map.put("submittedOnDate", submittedOnDate);
+        map.put("loanType", "individual");
         return new Gson().toJson(map);
     }
 
@@ -155,5 +157,9 @@ public class LoanApplicationTestBuilder {
         return this;
     }
 
+    public LoanApplicationTestBuilder withLoanType(final String loanType){
+        this.loanType = loanType;
+        return this;
+    }
 
 }

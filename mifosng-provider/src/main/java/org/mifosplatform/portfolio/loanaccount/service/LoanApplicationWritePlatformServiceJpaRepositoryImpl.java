@@ -136,7 +136,6 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         AppUser currentUser = context.authenticatedUser();
 
         final Long productId = fromJsonHelper.extractLongNamed("productId", command.parsedJson());
-
         final LoanProduct loanProduct = this.loanProductRepository.findOne(productId);
         if (loanProduct == null) { throw new LoanProductNotFoundException(productId); }
 

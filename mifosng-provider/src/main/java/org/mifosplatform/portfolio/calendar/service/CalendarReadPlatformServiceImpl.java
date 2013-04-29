@@ -7,11 +7,13 @@ package org.mifosplatform.portfolio.calendar.service;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collection;
 
 import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
 import org.mifosplatform.portfolio.calendar.data.CalendarData;
 import org.mifosplatform.portfolio.calendar.domain.CalendarEntityType;
@@ -21,6 +23,7 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 @Service
 public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformService {
@@ -130,6 +133,56 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
         return CalendarData.sensibleDefaultsForNewCalendarCreation();
     }
     
+    @Override
+    public CalendarData generateRecurringDate(CalendarData calendarData) {
+        if(!calendarData.isRepeating()) return calendarData;
+        final String rrule = calendarData.getRecurrence();
+        final LocalDate currentDate = DateUtils.getLocalDateOfTenant();
+        LocalDate seedDate = calendarData.getStartDate();
+        LocalDate endDate = calendarData.getEndDate();
+        LocalDate startDate = calendarData.getStartDate();
+        if(seedDate.isBefore(currentDate.minusYears(1))){
+            startDate = currentDate.minusYears(1);
+        }
+        
+        if(endDate == null || endDate.isAfter(currentDate.plusYears(1))){
+            endDate = currentDate.plusYears(1);
+        }
+        
+        final Collection<LocalDate> recurringDates = CalendarHelper.getRecurringDates(rrule, seedDate, startDate, endDate, -1);
+        final Collection<LocalDate> nextTenRecurringDates = CalendarHelper.getRecurringDates(rrule, seedDate, endDate);
+        return new CalendarData(calendarData, recurringDates, nextTenRecurringDates);
+    }
+
+    @Override
+    public Collection<CalendarData> generateRecurringDates(Collection<CalendarData> calendarsData) {
+        Collection<CalendarData> recuCalendarsData = new ArrayList<CalendarData>();
+
+        for (CalendarData calendarData : calendarsData) {
+            recuCalendarsData.add(generateRecurringDate(calendarData));
+        }
+
+        return recuCalendarsData;
+    }
+    
+    @Override
+    public CalendarData retrieveLoanCalendar(Long loanId) {
+        final CalendarDataMapper rm = new CalendarDataMapper();
+
+        final String sql = rm.schema() + " and ci.entity_id = ? and ci.entity_type_enum = ? order by c.start_date ";
+        CalendarData calendarData = null;
+        final Collection<CalendarData> calendars = this.jdbcTemplate.query(sql, rm, new Object[] { loanId, CalendarEntityType.LOANS.getValue() });
+        
+        if(!CollectionUtils.isEmpty(calendars)){
+            for (CalendarData calendar : calendars) {
+                calendarData = calendar;
+                break;//Loans are associated with only one calendar
+            } 
+        }
+        
+        return calendarData;
+    }
+
     public static String getParentHierarchyCondition(final CalendarEntityType calendarEntityType) {
         String conditionSql = "";
         

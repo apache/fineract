@@ -24,7 +24,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
-import org.joda.time.LocalDate;
 import org.mifosplatform.commands.domain.CommandWrapper;
 import org.mifosplatform.commands.service.CommandWrapperBuilder;
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -34,14 +33,12 @@ import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
-import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.portfolio.calendar.data.CalendarData;
 import org.mifosplatform.portfolio.calendar.domain.Calendar;
 import org.mifosplatform.portfolio.calendar.domain.CalendarEntityType;
 import org.mifosplatform.portfolio.calendar.service.CalendarDropdownReadPlatformService;
 import org.mifosplatform.portfolio.calendar.service.CalendarReadPlatformService;
-import org.mifosplatform.portfolio.calendar.service.CalendarHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -92,7 +89,7 @@ public class CalendarsApiResource {
         CalendarData calendarData = this.readPlatformService.retrieveCalendar(calendarId, entityId, entityTypeId);
 
         // Include recurring date details
-        calendarData = handleRecurringDate(calendarData);
+        calendarData = this.readPlatformService.generateRecurringDate(calendarData);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         if (settings.isTemplate()) {
@@ -124,7 +121,7 @@ public class CalendarsApiResource {
                 CalendarEntityType.valueOf(entityType.toUpperCase()).getValue()));
 
         // Add recurring dates
-        calendarsData = handleRecurringDates(calendarsData);
+        calendarsData = this.readPlatformService.generateRecurringDates(calendarsData);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serialize(settings, calendarsData, this.RESPONSE_DATA_PARAMETERS);
@@ -194,34 +191,5 @@ public class CalendarsApiResource {
         final List<EnumOptionData> calendarTypeOptions = this.dropdownReadPlatformService.retrieveCalendarTypeOptions();
         final List<EnumOptionData> remindByOptions = this.dropdownReadPlatformService.retrieveCalendarRemindByOptions();
         return new CalendarData(calendarData, entityTypeOptions, calendarTypeOptions, remindByOptions);
-    }
-
-    private CalendarData handleRecurringDate(final CalendarData calendarData){
-        if(!calendarData.isRepeating()) return calendarData;
-        final String rrule = calendarData.getRecurrence();
-        final LocalDate currentDate = DateUtils.getLocalDateOfTenant();
-        LocalDate seedDate = calendarData.getStartDate();
-        LocalDate endDate = calendarData.getEndDate();
-        if(seedDate.isBefore(currentDate.minusYears(1))){
-            seedDate = currentDate.minusYears(1);
-        }
-        
-        if(endDate == null || endDate.isAfter(currentDate.plusYears(1))){
-            endDate = currentDate.plusYears(1);
-        }
-        
-        final Collection<LocalDate> recurringDates = CalendarHelper.getRecurringDates(rrule, seedDate, seedDate, endDate, -1);
-        final Collection<LocalDate> nextTenRecurringDates = CalendarHelper.getRecurringDates(rrule, seedDate, endDate);
-        return new CalendarData(calendarData, recurringDates, nextTenRecurringDates);
-    }
-
-    private Collection<CalendarData> handleRecurringDates(final Collection<CalendarData> calendarsData) {
-        Collection<CalendarData> recuCalendarsData = new ArrayList<CalendarData>();
-
-        for (CalendarData calendarData : calendarsData) {
-            recuCalendarsData.add(handleRecurringDate(calendarData));
-        }
-
-        return recuCalendarsData;
     }
 }

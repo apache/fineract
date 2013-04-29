@@ -7,6 +7,7 @@ package org.mifosplatform.portfolio.loanaccount.service;
 
 import java.util.Collection;
 
+import org.mifosplatform.portfolio.calendar.data.CalendarData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanAccountData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanTransactionData;
 import org.mifosplatform.portfolio.loanaccount.data.RepaymentScheduleRelatedLoanData;
@@ -35,4 +36,14 @@ public interface LoanReadPlatformService {
     LoanTransactionData retrieveDisbursalTemplate(Long loanId);
 
     LoanAccountData retrieveTemplateWithCompleteGroupAndProductDetails(Long groupId, Long productId);
+    
+    LoanAccountData retrieveLoanProductDetailsTemplate(Long productId);
+    
+    LoanAccountData retrieveClientDetailsTemplate(Long clientId);
+    
+    LoanAccountData retrieveGroupDetailsTemplate(Long groupId);
+    
+    LoanAccountData retrieveGroupAndMembersDetailsTemplate(Long groupId);
+
+    Collection<CalendarData> retrieveCalendars(Long groupId);
 }
