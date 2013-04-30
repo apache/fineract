@@ -8,15 +8,11 @@ import com.google.gson.Gson;
 public class Page<E> {
 
     private int pageNumber;
-    private int pagesAvailable;
+    private int totalFilteredRecords;
     private List<E> pageItems = new ArrayList<E>();
 
     public void setPageNumber(int pageNumber) {
         this.pageNumber = pageNumber;
-    }
-
-    public void setPagesAvailable(int pagesAvailable) {
-        this.pagesAvailable = pagesAvailable;
     }
 
     public void setPageItems(List<E> pageItems) {
@@ -26,9 +22,14 @@ public class Page<E> {
     public int getPageNumber() {
         return pageNumber;
     }
+  
+    public int getTotalFilteredRecords() {
+        return this.totalFilteredRecords;
+    }
 
-    public int getPagesAvailable() {
-        return pagesAvailable;
+    
+    public void setTotalFilteredRecords(int totalFilteredRecords) {
+        this.totalFilteredRecords = totalFilteredRecords;
     }
 
     public List<E> getPageItems() {

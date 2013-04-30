@@ -36,7 +36,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.core.simple.ParameterizedRowMapper;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -91,32 +90,30 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
     }
 
     @Override
-    public Page<ClientData> retrievePaginated(final int pageNo, final int pageSize) {
+    public Page<ClientData> retrieveAllPaginatedAndSorted(final SearchParameters searchParameters, final int offset, final int limit,
+            final String orderby, final String sortOrder) {
+
+        final AppUser currentUser = context.authenticatedUser();
+        final String hierarchy = currentUser.getOffice().getHierarchy();
+        final String hierarchySearchString = hierarchy + "%";
+
+        String sql = "select SQL_CALC_FOUND_ROWS " + this.clientMapper.schema() + " where o.hierarchy like ?";
+
+        final String extraCriteria = buildSqlStringFromClientCriteria(searchParameters);
+
+        if (StringUtils.isNotBlank(extraCriteria)) sql += " and (" + extraCriteria + ")";
+
+        if (orderby != null && sortOrder != null) {
+            if (!orderby.equalsIgnoreCase("") && !sortOrder.equalsIgnoreCase("")) {
+                sql += " order by " + orderby + " " + sortOrder;
+            }
+        } else
+            sql += " order by c.display_name ASC, c.account_no ASC";
+
         PaginationHelper<ClientData> ph = new PaginationHelper<ClientData>();
-        return ph.fetchPage(jdbcTemplate, "SELECT count(*) FROM m_client ORDER BY firstname", "SELECT * FROM m_client ORDER BY firstname",
-                null, pageNo, pageSize, new ParameterizedRowMapper<ClientData>() {
-
-                    @Override
-                    public ClientData mapRow(ResultSet rs, int rowNum) throws SQLException {
-                        final String accountNo = rs.getString("account_no");
-                        final EnumOptionData status = null;
-                        final Long officeId = JdbcSupport.getLong(rs, "office_id");
-                        final Long id = JdbcSupport.getLong(rs, "id");
-                        final String firstname = rs.getString("firstname");
-                        final String middlename = rs.getString("middlename");
-                        final String lastname = rs.getString("lastname");
-                        final String fullname = rs.getString("fullname");
-                        final String displayName = rs.getString("display_name");
-                        final String externalId = rs.getString("external_Id");
-                        final LocalDate activationDate = JdbcSupport.getLocalDate(rs, "activation_date");
-                        final String imageKey = rs.getString("image_key");
-                        final String officeName = null;
-
-                        return ClientData.instance(accountNo, status, officeId, officeName, id, firstname, middlename, lastname, fullname,
-                                displayName, externalId, activationDate, imageKey);
-                    }
-                });
-
+        String sqlCountRows = "SELECT FOUND_ROWS()";
+        String sqlFetchRows = sql + " LIMIT " + limit + " OFFSET " + offset;
+        return ph.fetchPage(jdbcTemplate, sqlCountRows, sqlFetchRows, new Object[] { hierarchySearchString }, offset, limit, clientMapper);
     }
     
     private String buildSqlStringFromClientCriteria(final SearchParameters searchParameters) {

@@ -19,7 +19,7 @@ public interface ClientReadPlatformService {
 
     Collection<ClientData> retrieveAll(SearchParameters searchParameters);
     
-    Page<ClientData> retrievePaginated(int pageNo, int pageSize);
+    Page<ClientData> retrieveAllPaginatedAndSorted(SearchParameters searchParameters, int pageNo, int pageSize, String sortBy, String sortOrder);
 
     ClientData retrieveOne(Long clientId);
 

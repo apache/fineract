@@ -15,6 +15,7 @@ import java.util.Set;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -127,14 +128,41 @@ public class ClientsApiResource {
     }
     
     @GET
+    @Path("/paginatedandsorted")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String retrieveAllPaginatedAndSorted(@Context final UriInfo uriInfo, @QueryParam("sqlSearch") final String sqlSearch,
+            @QueryParam("officeId") final Long officeId, @QueryParam("externalId") final String externalId,
+            @QueryParam("displayName") final String displayName, @QueryParam("firstName") final String firstname,
+            @QueryParam("lastName") final String lastname, @QueryParam("underHierarchy") final String hierarchy,
+            @DefaultValue("0") @QueryParam("offset") final int offset, @DefaultValue("200") @QueryParam("limit") final int limit,
+            @QueryParam("orderBy") final String orderBy, @QueryParam("sortOrder") final String sortOrder) throws SQLException {
+        
+        context.authenticatedUser().validateHasReadPermission(ClientApiConstants.CLIENT_RESOURCE_NAME);
+        
+        final SearchParameters searchParameters = SearchParameters.forClients(sqlSearch, officeId, externalId, displayName, firstname,
+                lastname, hierarchy);
+        Page<ClientData> clientData = this.clientReadPlatformService.retrieveAllPaginatedAndSorted(searchParameters, offset, limit, orderBy, sortOrder);
+        return this.toApiJsonSerializer.serialize(clientData);
+    }
+
+  
+    @GET
     @Path("/paginated")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String retrievePaginated(@QueryParam("pageNo") final int pageNo, @QueryParam("pageSize") final int pageSize,
-            @Context final UriInfo uriInfo) throws SQLException {
+    public String retrieveAllPaginated(@Context final UriInfo uriInfo, @QueryParam("sqlSearch") final String sqlSearch,
+            @QueryParam("officeId") final Long officeId, @QueryParam("externalId") final String externalId,
+            @QueryParam("displayName") final String displayName, @QueryParam("firstName") final String firstname,
+            @QueryParam("lastName") final String lastname, @QueryParam("underHierarchy") final String hierarchy,
+            @DefaultValue("0") @QueryParam("offset") final int offset, @DefaultValue("200") @QueryParam("limit") final int limit)
+            throws SQLException {
         context.authenticatedUser().validateHasReadPermission(ClientApiConstants.CLIENT_RESOURCE_NAME);
-        Page<ClientData> clientData = this.clientReadPlatformService.retrievePaginated(pageNo, pageSize);
-        return clientData.toString();
+        
+        final SearchParameters searchParameters = SearchParameters.forClients(sqlSearch, officeId, externalId, displayName, firstname,
+                lastname, hierarchy);
+        Page<ClientData> clientData = this.clientReadPlatformService.retrieveAllPaginatedAndSorted(searchParameters, offset, limit, null, null);
+        return this.toApiJsonSerializer.serialize(clientData);
     }
 
     @POST
