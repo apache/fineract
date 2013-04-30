@@ -166,6 +166,11 @@ public class GLAccountReadPlatformServiceImpl implements GLAccountReadPlatformSe
         return retrieveAllGLAccounts(accountType.getValue(), null, GLAccountUsage.DETAIL.getValue(), null, false);
     }
 
+    @Override
+    public List<GLAccountData> retrieveAllEnabledDetailGLAccounts() {
+        return retrieveAllGLAccounts(null, null, GLAccountUsage.DETAIL.getValue(), null, false);
+    }
+
     private static boolean checkValidGLAccountType(final int type) {
         for (final GLAccountType accountType : GLAccountType.values()) {
             if (accountType.getValue().equals(type)) { return true; }

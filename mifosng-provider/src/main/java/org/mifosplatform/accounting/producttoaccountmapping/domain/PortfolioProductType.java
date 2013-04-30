@@ -44,4 +44,12 @@ public enum PortfolioProductType {
         return type;
     }
 
+    public boolean isSavingProduct() {
+        return this.value.equals(PortfolioProductType.SAVING.getValue());
+    }
+
+    public boolean isLoanProduct() {
+        return this.value.equals(PortfolioProductType.LOAN.getValue());
+    }
+
 }

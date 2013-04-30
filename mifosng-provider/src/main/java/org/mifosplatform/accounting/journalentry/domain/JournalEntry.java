@@ -56,7 +56,7 @@ public class JournalEntry extends AbstractAuditableCustom<AppUser, Long> {
     @Temporal(TemporalType.DATE)
     private Date transactionDate;
 
-    @Column(name = "type_enum", nullable = false, length = 50)
+    @Column(name = "type_enum", nullable = false)
     private Integer type;
 
     @Column(name = "amount", scale = 6, precision = 19, nullable = false)

@@ -44,10 +44,6 @@ public class GLClosure extends AbstractAuditableCustom<AppUser, Long> {
     @Column(name = "comments", nullable = true, length = 500)
     private String comments;
 
-    public static GLClosure createNew(final Office office, final Date closingDate, final String comments) {
-        return new GLClosure(office, closingDate, comments);
-    }
-
     protected GLClosure() {
         //
     }

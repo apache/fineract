@@ -932,4 +932,28 @@ public class CommandWrapperBuilder {
         this.href = "/centers/" + centerId + "?command=activate";
         return this;
     }
+
+    public CommandWrapperBuilder createAccountingRule() {
+        this.actionName = "CREATE";
+        this.entityName = "ACCOUNTINGRULE";
+        this.entityId = null;
+        this.href = "/accountingrules/template";
+        return this;
+    }
+
+    public CommandWrapperBuilder updateAccountingRule(final Long accountingRuleId) {
+        this.actionName = "UPDATE";
+        this.entityName = "ACCOUNTINGRULE";
+        this.entityId = accountingRuleId;
+        this.href = "/accountingrules/" + accountingRuleId;
+        return this;
+    }
+
+    public CommandWrapperBuilder deleteAccountingRule(final Long accountingRuleId) {
+        this.actionName = "DELETE";
+        this.entityName = "ACCOUNTINGRULE";
+        this.entityId = accountingRuleId;
+        this.href = "/accountingrules/" + accountingRuleId;
+        return this;
+    }
 }

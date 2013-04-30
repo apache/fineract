@@ -53,6 +53,22 @@ public class ChargeData implements Comparable<ChargeData> {
                 null, null, null);
     }
 
+    public static ChargeData lookup(final Long id, final String name, final boolean isPenalty) {
+        BigDecimal amount = null;
+        CurrencyData currency = null;
+        EnumOptionData chargeTimeType = null;
+        EnumOptionData chargeAppliesTo = null;
+        EnumOptionData chargeCalculationType = null;
+        Boolean penalty = isPenalty;
+        Boolean active = false;
+        Collection<CurrencyData> currencyOptions = null;
+        List<EnumOptionData> chargeCalculationTypeOptions = null;
+        List<EnumOptionData> chargeAppliesToOptions = null;
+        List<EnumOptionData> chargeTimeTypeOptions = null;
+        return new ChargeData(id, name, amount, currency, chargeTimeType, chargeAppliesTo, chargeCalculationType, penalty, active,
+                currencyOptions, chargeCalculationTypeOptions, chargeAppliesToOptions, chargeTimeTypeOptions);
+    }
+
     private ChargeData(final Long id, final String name, final BigDecimal amount, final CurrencyData currency,
             final EnumOptionData chargeTimeType, final EnumOptionData chargeAppliesTo, final EnumOptionData chargeCalculationType,
             final boolean penalty, final boolean active, final Collection<CurrencyData> currencyOptions,

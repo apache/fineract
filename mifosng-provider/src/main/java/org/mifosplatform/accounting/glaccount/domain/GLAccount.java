@@ -59,11 +59,6 @@ public class GLAccount extends AbstractPersistable<Long> {
     @Column(name = "description", nullable = true, length = 500)
     private String description;
 
-    public static GLAccount createNew(final GLAccount parent, final String name, final String glCode, final boolean disabled,
-            final boolean manualEntriesAllowed, final Integer type, final Integer usage, final String description) {
-        return new GLAccount(parent, name, glCode, disabled, manualEntriesAllowed, type, usage, description);
-    }
-
     protected GLAccount() {
         //
     }
