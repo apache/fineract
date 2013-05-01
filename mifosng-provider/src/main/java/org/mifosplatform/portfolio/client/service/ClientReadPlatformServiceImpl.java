@@ -112,8 +112,9 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
         PaginationHelper<ClientData> ph = new PaginationHelper<ClientData>();
         String sqlCountRows = "SELECT FOUND_ROWS()";
-        String sqlFetchRows = sql + " LIMIT " + limit + " OFFSET " + offset;
-        return ph.fetchPage(jdbcTemplate, sqlCountRows, sqlFetchRows, new Object[] { hierarchySearchString }, offset, limit, clientMapper);
+        String sqlFetchRows = sql;
+        if (limit != 0) sqlFetchRows = sql + " LIMIT " + limit + " OFFSET " + offset;
+        return ph.fetchPage(jdbcTemplate, sqlCountRows, sqlFetchRows, new Object[] { hierarchySearchString }, clientMapper);
     }
     
     private String buildSqlStringFromClientCriteria(final SearchParameters searchParameters) {
