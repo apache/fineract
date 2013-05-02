@@ -10,6 +10,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 
+import org.joda.time.MonthDay;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
 import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
@@ -85,7 +86,10 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
             sqlBuilder.append("sp.lockin_period_frequency as lockinPeriodFrequency,");
             sqlBuilder.append("sp.lockin_period_frequency_enum as lockinPeriodFrequencyType, ");
             sqlBuilder.append("sp.withdrawal_fee_amount as withdrawalFeeAmount,");
-            sqlBuilder.append("sp.withdrawal_fee_type_enum as withdrawalFeeTypeEnum ");
+            sqlBuilder.append("sp.withdrawal_fee_type_enum as withdrawalFeeTypeEnum, ");
+            sqlBuilder.append("sp.annual_fee_amount as annualFeeAmount,");
+            sqlBuilder.append("sp.annual_fee_on_month as annualFeeOnMonth, ");
+            sqlBuilder.append("sp.annual_fee_on_day as annualFeeOnDay ");
             sqlBuilder.append("from m_savings_product sp ");
             sqlBuilder.append("join m_currency curr on curr.code = sp.currency_code ");
 
@@ -147,9 +151,19 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
                 withdrawalFeeType = SavingsEnumerations.withdrawalFeeType(withdrawalFeeTypeValue);
             }
 
+            final BigDecimal annualFeeAmount = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "annualFeeAmount");
+
+            MonthDay annualFeeOnMonthDay = null;
+            final Integer annualFeeOnMonth = JdbcSupport.getInteger(rs, "annualFeeOnMonth");
+            final Integer annualFeeOnDay = JdbcSupport.getInteger(rs, "annualFeeOnDay");
+            if (annualFeeAmount != null && annualFeeOnDay != null) {
+                annualFeeOnMonthDay = new MonthDay(annualFeeOnMonth, annualFeeOnDay);
+            }
+
             return SavingsProductData.instance(id, name, description, currency, nominalAnnualInterestRate, compoundingInterestPeriodType,
                     interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance,
-                    lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeAmount, withdrawalFeeType);
+                    lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeAmount, withdrawalFeeType, annualFeeAmount,
+                    annualFeeOnMonthDay);
         }
     }
 

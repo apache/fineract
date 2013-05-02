@@ -7,6 +7,8 @@ package org.mifosplatform.portfolio.savings.domain;
 
 import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.activationDateParamName;
 import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.activeParamName;
+import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.annualFeeAmountParamName;
+import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.annualFeeOnMonthDayParamName;
 import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.interestCalculationDaysInYearTypeParamName;
 import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.interestCalculationTypeParamName;
 import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.interestCompoundingPeriodTypeParamName;
@@ -22,6 +24,7 @@ import java.math.BigDecimal;
 import java.util.Locale;
 
 import org.joda.time.LocalDate;
+import org.joda.time.MonthDay;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
@@ -161,7 +164,7 @@ public class SavingsAccountAssembler {
         } else {
             withdrawalFeeAmount = product.withdrawalFeeAmount();
         }
-        
+
         SavingsWithdrawalFeesType withdrawalFeeType = null;
         if (command.parameterExists(withdrawalFeeAmountParamName)) {
             final Integer withdrawalFeeTypeValue = command.integerValueOfParameterNamed(withdrawalFeeTypeParamName);
@@ -172,10 +175,24 @@ public class SavingsAccountAssembler {
             withdrawalFeeType = product.withdrawalFeeType();
         }
 
+        BigDecimal annualFeeAmount = null;
+        if (command.parameterExists(annualFeeAmountParamName)) {
+            annualFeeAmount = command.bigDecimalValueOfParameterNamed(annualFeeAmountParamName);
+        } else {
+            annualFeeAmount = product.annualFeeAmount();
+        }
+
+        MonthDay monthDayOfAnnualFee = null;
+        if (command.parameterExists(annualFeeOnMonthDayParamName)) {
+            monthDayOfAnnualFee = command.extractMonthDayNamed(annualFeeOnMonthDayParamName);
+        } else {
+            monthDayOfAnnualFee = product.monthDayOfAnnualFee();
+        }
 
         final SavingsAccount account = SavingsAccount.createNewAccount(client, group, product, accountNo, externalId, interestRate,
                 interestCompoundingPeriodType, interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType,
-                minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeAmount, withdrawalFeeType);
+                minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeAmount, withdrawalFeeType,
+                annualFeeAmount, monthDayOfAnnualFee);
         account.setHelpers(this.savingsAccountTransactionSummaryWrapper);
 
         if (active) {

@@ -7,8 +7,10 @@ package org.mifosplatform.infrastructure.core.serialization;
 
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
+import org.joda.time.MonthDay;
 import org.mifosplatform.infrastructure.core.api.JodaDateTimeAdapter;
 import org.mifosplatform.infrastructure.core.api.JodaLocalDateAdapter;
+import org.mifosplatform.infrastructure.core.api.JodaMonthDayAdapter;
 import org.springframework.stereotype.Component;
 
 import com.google.gson.Gson;
@@ -28,6 +30,7 @@ public final class ExcludeNothingWithPrettyPrintingOffJsonSerializerGoogleGson {
         GsonBuilder builder = new GsonBuilder();
         builder.registerTypeAdapter(LocalDate.class, new JodaLocalDateAdapter());
         builder.registerTypeAdapter(DateTime.class, new JodaDateTimeAdapter());
+        builder.registerTypeAdapter(MonthDay.class, new JodaMonthDayAdapter());
         
         this.gson = builder.create();
     }

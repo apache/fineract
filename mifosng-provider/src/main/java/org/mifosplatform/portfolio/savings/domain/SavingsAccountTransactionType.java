@@ -15,7 +15,8 @@ public enum SavingsAccountTransactionType {
     DEPOSIT(1, "savingsAccountTransactionType.deposit"), //
     WITHDRAWAL(2, "savingsAccountTransactionType.withdrawal"), //
     INTEREST_POSTING(3, "savingsAccountTransactionType.interestPosting"), //
-    WITHDRAWAL_FEE(4, "savingsAccountTransactionType.withdrawalFee");
+    WITHDRAWAL_FEE(4, "savingsAccountTransactionType.withdrawalFee"), //
+    ANNUAL_FEE(5, "savingsAccountTransactionType.annualFee");
 
     private final Integer value;
     private final String code;
@@ -51,6 +52,9 @@ public enum SavingsAccountTransactionType {
             case 4:
                 loanTransactionType = SavingsAccountTransactionType.WITHDRAWAL_FEE;
             break;
+            case 5:
+                loanTransactionType = SavingsAccountTransactionType.ANNUAL_FEE;
+            break;
         }
         return loanTransactionType;
     }
@@ -69,5 +73,9 @@ public enum SavingsAccountTransactionType {
 
     public boolean isWithdrawalFee() {
         return this.value.equals(SavingsAccountTransactionType.WITHDRAWAL_FEE.getValue());
+    }
+
+    public boolean isAnnualFee() {
+        return this.value.equals(SavingsAccountTransactionType.ANNUAL_FEE.getValue());
     }
 }

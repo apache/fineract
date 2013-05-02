@@ -13,6 +13,7 @@ import java.util.Locale;
 import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
+import org.joda.time.MonthDay;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.infrastructure.security.domain.BasicPasswordEncodablePlatformUser;
 import org.mifosplatform.infrastructure.security.domain.PlatformUser;
@@ -259,6 +260,10 @@ public final class JsonCommand {
 
     public LocalDate localDateValueOfParameterNamed(final String parameterName) {
         return this.fromApiJsonHelper.extractLocalDateNamed(parameterName, parsedCommand);
+    }
+
+    public MonthDay extractMonthDayNamed(final String parameterName) {
+        return this.fromApiJsonHelper.extractMonthDayNamed(parameterName, parsedCommand);
     }
 
     public Date DateValueOfParameterNamed(final String parameterName) {

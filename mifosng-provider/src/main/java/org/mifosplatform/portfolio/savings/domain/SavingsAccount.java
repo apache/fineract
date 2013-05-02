@@ -5,6 +5,12 @@
  */
 package org.mifosplatform.portfolio.savings.domain;
 
+import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.annualFeeAmountParamName;
+import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.annualFeeOnMonthDayParamName;
+import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.localeParamName;
+import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.withdrawalFeeAmountParamName;
+import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.withdrawalFeeTypeParamName;
+
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
@@ -34,6 +40,7 @@ import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
+import org.joda.time.MonthDay;
 import org.joda.time.format.DateTimeFormatter;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.ApiParameterError;
@@ -142,6 +149,19 @@ public class SavingsAccount extends AbstractPersistable<Long> {
     @Column(name = "withdrawal_fee_type_enum", nullable = true)
     private Integer withdrawalFeeType;
 
+    @Column(name = "annual_fee_amount", scale = 6, precision = 19, nullable = true)
+    private BigDecimal annualFeeAmount;
+
+    @Column(name = "annual_fee_on_month", nullable = true)
+    private Integer annualFeeOnMonth;
+
+    @Column(name = "annual_fee_on_day", nullable = true)
+    private Integer annualFeeOnDay;
+
+    @Temporal(TemporalType.DATE)
+    @Column(name = "annual_fee_next_due_date", nullable = true)
+    private Date annualFeeNextDueDate;
+
     @Embedded
     private SavingsAccountSummary summary;
 
@@ -165,13 +185,15 @@ public class SavingsAccount extends AbstractPersistable<Long> {
             final SavingsInterestPostingPeriodType interestPostingPeriodType, final SavingsInterestCalculationType interestCalculationType,
             final SavingsInterestCalculationDaysInYearType interestCalculationDaysInYearType, final BigDecimal minRequiredOpeningBalance,
             final Integer lockinPeriodFrequency, final SavingsPeriodFrequencyType lockinPeriodFrequencyType,
-            final BigDecimal withdrawalFeeAmount, final SavingsWithdrawalFeesType withdrawalFeeType) {
+            final BigDecimal withdrawalFeeAmount, final SavingsWithdrawalFeesType withdrawalFeeType, final BigDecimal annualFeeAmount,
+            final MonthDay annualFeeOnMonthDay) {
 
         final SavingsAccountStatusType status = SavingsAccountStatusType.UNACTIVATED;
         final LocalDate activationDate = null;
         return new SavingsAccount(client, group, product, accountNo, externalId, status, activationDate, interestRate,
                 interestCompoundingPeriodType, interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType,
-                minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeAmount, withdrawalFeeType);
+                minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeAmount, withdrawalFeeType,
+                annualFeeAmount, annualFeeOnMonthDay);
     }
 
     private SavingsAccount(final Client client, final Group group, final SavingsProduct product, final String accountNo,
@@ -180,7 +202,8 @@ public class SavingsAccount extends AbstractPersistable<Long> {
             final SavingsInterestPostingPeriodType interestPostingPeriodType, final SavingsInterestCalculationType interestCalculationType,
             final SavingsInterestCalculationDaysInYearType interestCalculationDaysInYearType, final BigDecimal minRequiredOpeningBalance,
             final Integer lockinPeriodFrequency, final SavingsPeriodFrequencyType lockinPeriodFrequencyType,
-            final BigDecimal withdrawalFeeAmount, final SavingsWithdrawalFeesType withdrawalFeeType) {
+            final BigDecimal withdrawalFeeAmount, final SavingsWithdrawalFeesType withdrawalFeeType, final BigDecimal annualFeeAmount,
+            final MonthDay annualFeeOnMonthDay) {
         this.client = client;
         this.group = group;
         this.product = product;
@@ -210,7 +233,25 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         if (withdrawalFeeType != null) {
             this.withdrawalFeeType = withdrawalFeeType.getValue();
         }
+
+        this.annualFeeAmount = annualFeeAmount;
+        if (annualFeeOnMonthDay != null) {
+            this.annualFeeOnMonth = annualFeeOnMonthDay.getMonthOfYear();
+            this.annualFeeOnDay = annualFeeOnMonthDay.getDayOfMonth();
+
+            updateAnnualFeeNextDueDate();
+        }
+
         this.summary = new SavingsAccountSummary();
+    }
+
+    private void updateAnnualFeeNextDueDate() {
+        LocalDate nextDueLocalDate = new LocalDate().withMonthOfYear(this.annualFeeOnMonth).withDayOfMonth(this.annualFeeOnDay);
+        if (nextDueLocalDate.isBefore(DateUtils.getLocalDateOfTenant())) {
+            nextDueLocalDate = nextDueLocalDate.plusYears(1);
+        }
+
+        this.annualFeeNextDueDate = nextDueLocalDate.toDate();
     }
 
     /**
@@ -834,12 +875,81 @@ public class SavingsAccount extends AbstractPersistable<Long> {
             }
         }
 
+        final Money annualFee = Money.of(this.currency, this.annualFeeAmount);
+        SavingsAccountTransaction annualFeeTransaction = SavingsAccountTransaction.annualFee(this, transactionDate, annualFee);
+        this.transactions.add(annualFeeTransaction);
+
         this.summary.updateSummary(this.currency, this.savingsAccountTransactionSummaryWrapper, this.transactions);
 
         final LocalDate today = DateUtils.getLocalDateOfTenant();
         calculateInterest(today);
 
         return transaction;
+    }
+
+    public SavingsAccountTransaction addAnnualFee(final DateTimeFormatter formatter, final LocalDate transactionDate) {
+
+        if (isNotActive()) {
+
+            final String defaultUserMessage = "Transaction is not allowed. Account is not active.";
+            final ApiParameterError error = ApiParameterError.parameterError("error.msg.savingsaccount.transaction.account.is.not.active",
+                    defaultUserMessage, "transactionDate", transactionDate.toString(formatter));
+
+            final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+            dataValidationErrors.add(error);
+
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
+
+        if (isDateInTheFuture(transactionDate)) {
+            final String defaultUserMessage = "Transaction date cannot be in the future.";
+            final ApiParameterError error = ApiParameterError.parameterError("error.msg.savingsaccount.transaction.in.the.future",
+                    defaultUserMessage, "transactionDate", transactionDate.toString(formatter));
+
+            final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+            dataValidationErrors.add(error);
+
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
+
+        if (transactionDate.isBefore(getActivationLocalDate())) {
+            final Object[] defaultUserArgs = Arrays.asList(transactionDate.toString(formatter),
+                    getActivationLocalDate().toString(formatter)).toArray();
+            final String defaultUserMessage = "Transaction date cannot be before accounts activation date.";
+            final ApiParameterError error = ApiParameterError.parameterError("error.msg.savingsaccount.transaction.before.activation.date",
+                    defaultUserMessage, "transactionDate", defaultUserArgs);
+
+            final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+            dataValidationErrors.add(error);
+
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
+
+        if (isAccountLocked(transactionDate)) {
+            final String defaultUserMessage = "Withdrawal is not allowed. No withdrawals are allowed until after "
+                    + getLockedInUntilLocalDate().toString(formatter);
+            final ApiParameterError error = ApiParameterError.parameterError(
+                    "error.msg.savingsaccount.transaction.withdrawals.blocked.during.lockin.period", defaultUserMessage, "transactionDate",
+                    transactionDate.toString(formatter), getLockedInUntilLocalDate().toString(formatter));
+
+            final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+            dataValidationErrors.add(error);
+
+            throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
+
+        final Money annualFee = Money.of(this.currency, this.annualFeeAmount);
+        SavingsAccountTransaction annualFeeTransaction = SavingsAccountTransaction.annualFee(this, transactionDate, annualFee);
+        this.transactions.add(annualFeeTransaction);
+
+        this.summary.updateSummary(this.currency, this.savingsAccountTransactionSummaryWrapper, this.transactions);
+
+        final LocalDate today = DateUtils.getLocalDateOfTenant();
+        calculateInterest(today);
+
+        updateAnnualFeeNextDueDate();
+
+        return annualFeeTransaction;
     }
 
     private boolean isAutomaticWithdrawalFee() {
@@ -941,6 +1051,48 @@ public class SavingsAccount extends AbstractPersistable<Long> {
             } else {
                 this.lockinPeriodFrequencyType = null;
             }
+        }
+
+        if (command.isChangeInBigDecimalParameterNamed(withdrawalFeeAmountParamName, this.withdrawalFeeAmount)) {
+            final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(withdrawalFeeAmountParamName);
+            actualChanges.put(withdrawalFeeAmountParamName, newValue);
+            actualChanges.put(localeParamName, localeAsInput);
+            this.withdrawalFeeAmount = newValue;
+        }
+
+        if (command.isChangeInIntegerParameterNamed(withdrawalFeeTypeParamName, this.withdrawalFeeType)) {
+            final Integer newValue = command.integerValueOfParameterNamed(withdrawalFeeTypeParamName);
+            actualChanges.put(withdrawalFeeTypeParamName, newValue);
+            this.withdrawalFeeType = SavingsWithdrawalFeesType.fromInt(newValue).getValue();
+        }
+
+        if (command.isChangeInBigDecimalParameterNamed(annualFeeAmountParamName, this.annualFeeAmount)) {
+            final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(annualFeeAmountParamName);
+            actualChanges.put(annualFeeAmountParamName, newValue);
+            actualChanges.put(localeParamName, localeAsInput);
+            this.annualFeeAmount = newValue;
+        }
+
+        if (command.isChangeInIntegerParameterNamed(annualFeeOnMonthDayParamName, this.annualFeeOnDay)) {
+            final MonthDay monthDay = command.extractMonthDayNamed(annualFeeOnMonthDayParamName);
+            final String actualValueEntered = command.stringValueOfParameterNamed(annualFeeOnMonthDayParamName);
+            final Integer newValue = monthDay.getDayOfMonth();
+            actualChanges.put(annualFeeOnMonthDayParamName, actualValueEntered);
+            actualChanges.put(localeParamName, localeAsInput);
+            this.annualFeeOnDay = newValue;
+
+            updateAnnualFeeNextDueDate();
+        }
+
+        if (command.isChangeInIntegerParameterNamed(annualFeeOnMonthDayParamName, this.annualFeeOnMonth)) {
+            final MonthDay monthDay = command.extractMonthDayNamed(annualFeeOnMonthDayParamName);
+            final String actualValueEntered = command.stringValueOfParameterNamed(annualFeeOnMonthDayParamName);
+            final Integer newValue = monthDay.getMonthOfYear();
+            actualChanges.put(annualFeeOnMonthDayParamName, actualValueEntered);
+            actualChanges.put(localeParamName, localeAsInput);
+            this.annualFeeOnMonth = newValue;
+
+            updateAnnualFeeNextDueDate();
         }
     }
 

@@ -11,6 +11,7 @@ import java.sql.SQLException;
 import java.util.Collection;
 
 import org.joda.time.LocalDate;
+import org.joda.time.MonthDay;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
 import org.mifosplatform.infrastructure.core.service.DateUtils;
@@ -114,9 +115,14 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             sqlBuilder.append("sa.lockin_period_frequency_enum as lockinPeriodFrequencyType, ");
             sqlBuilder.append("sa.withdrawal_fee_amount as withdrawalFeeAmount,");
             sqlBuilder.append("sa.withdrawal_fee_type_enum as withdrawalFeeTypeEnum, ");
+            sqlBuilder.append("sa.annual_fee_amount as annualFeeAmount,");
+            sqlBuilder.append("sa.annual_fee_on_month as annualFeeOnMonth, ");
+            sqlBuilder.append("sa.annual_fee_on_day as annualFeeOnDay, ");
+            sqlBuilder.append("sa.annual_fee_next_due_date as annualFeeNextDueDate, ");
             sqlBuilder.append("sa.total_deposits_derived as totalDeposits, ");
             sqlBuilder.append("sa.total_withdrawals_derived as totalWithdrawals, ");
             sqlBuilder.append("sa.total_withdrawal_fees_derived as totalWithdrawalFees, ");
+            sqlBuilder.append("sa.total_annual_fees_derived as totalAnnualFees, ");
             sqlBuilder.append("sa.total_interest_earned_derived as totalInterestEarned, ");
             sqlBuilder.append("sa.total_interest_posted_derived as totalInterestPosted, ");
             sqlBuilder.append("sa.account_balance_derived as accountBalance ");
@@ -195,21 +201,34 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
                 withdrawalFeeType = SavingsEnumerations.withdrawalFeeType(withdrawalFeeTypeValue);
             }
 
+            final BigDecimal annualFeeAmount = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "annualFeeAmount");
+
+            MonthDay annualFeeOnMonthDay = null;
+            final Integer annualFeeOnMonth = JdbcSupport.getInteger(rs, "annualFeeOnMonth");
+            final Integer annualFeeOnDay = JdbcSupport.getInteger(rs, "annualFeeOnDay");
+            if (annualFeeAmount != null && annualFeeOnDay != null) {
+                annualFeeOnMonthDay = new MonthDay(annualFeeOnMonth, annualFeeOnDay);
+            }
+
+            final LocalDate annualFeeNextDueDate = JdbcSupport.getLocalDate(rs, "annualFeeNextDueDate");
+
             final BigDecimal totalDeposits = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "totalDeposits");
             final BigDecimal totalWithdrawals = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "totalWithdrawals");
             final BigDecimal totalWithdrawalFees = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "totalWithdrawalFees");
+            final BigDecimal totalAnnualFees = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "totalAnnualFees");
 
             final BigDecimal totalInterestEarned = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "totalInterestEarned");
             final BigDecimal totalInterestPosted = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "totalInterestPosted");
             final BigDecimal accountBalance = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "accountBalance");
 
             final SavingsAccountSummaryData summary = new SavingsAccountSummaryData(currency, totalDeposits, totalWithdrawals,
-                    totalWithdrawalFees, totalInterestEarned, totalInterestPosted, accountBalance);
+                    totalWithdrawalFees, totalAnnualFees, totalInterestEarned, totalInterestPosted, accountBalance);
 
             return SavingsAccountData.instance(id, accountNo, externalId, status, activationDate, groupId, groupName, clientId, clientName,
                     productId, productName, currency, nominalAnnualInterestRate, interestCompoundingPeriodType, interestPostingPeriodType,
                     interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance, lockinPeriodFrequency,
-                    lockinPeriodFrequencyType, withdrawalFeeAmount, withdrawalFeeType, summary);
+                    lockinPeriodFrequencyType, withdrawalFeeAmount, withdrawalFeeType, annualFeeAmount, annualFeeOnMonthDay,
+                    annualFeeNextDueDate, summary);
         }
     }
 
@@ -425,7 +444,10 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             sqlBuilder.append("sp.lockin_period_frequency as lockinPeriodFrequency,");
             sqlBuilder.append("sp.lockin_period_frequency_enum as lockinPeriodFrequencyType, ");
             sqlBuilder.append("sp.withdrawal_fee_amount as withdrawalFeeAmount,");
-            sqlBuilder.append("sp.withdrawal_fee_type_enum as withdrawalFeeTypeEnum ");
+            sqlBuilder.append("sp.withdrawal_fee_type_enum as withdrawalFeeTypeEnum, ");
+            sqlBuilder.append("sp.annual_fee_amount as annualFeeAmount,");
+            sqlBuilder.append("sp.annual_fee_on_month as annualFeeOnMonth, ");
+            sqlBuilder.append("sp.annual_fee_on_day as annualFeeOnDay ");
             sqlBuilder.append("from m_savings_product sp ");
             sqlBuilder.append("join m_currency curr on curr.code = sp.currency_code ");
 
@@ -484,6 +506,15 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
                 withdrawalFeeType = SavingsEnumerations.withdrawalFeeType(withdrawalFeeTypeValue);
             }
 
+            final BigDecimal annualFeeAmount = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "annualFeeAmount");
+
+            MonthDay annualFeeOnMonthDay = null;
+            final Integer annualFeeOnMonth = JdbcSupport.getInteger(rs, "annualFeeOnMonth");
+            final Integer annualFeeOnDay = JdbcSupport.getInteger(rs, "annualFeeOnDay");
+            if (annualFeeAmount != null && annualFeeOnDay != null) {
+                annualFeeOnMonthDay = new MonthDay(annualFeeOnMonth, annualFeeOnDay);
+            }
+
             Long clientId = null;
             String clientName = null;
             if (client != null) {
@@ -500,11 +531,14 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
 
             final SavingsAccountStatusEnumData status = null;
             final LocalDate activationDate = null;
+            final LocalDate annualFeeNextDueDate = null;
             final SavingsAccountSummaryData summary = null;
+
             return SavingsAccountData.instance(null, null, null, status, activationDate, groupId, groupName, clientId, clientName,
                     productId, productName, currency, nominalAnnualIterestRate, interestCompoundingPeriodType, interestPostingPeriodType,
                     interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance, lockinPeriodFrequency,
-                    lockinPeriodFrequencyType, withdrawalFeeAmount, withdrawalFeeType, summary);
+                    lockinPeriodFrequencyType, withdrawalFeeAmount, withdrawalFeeType, annualFeeAmount, annualFeeOnMonthDay,
+                    annualFeeNextDueDate, summary);
         }
     }
 }

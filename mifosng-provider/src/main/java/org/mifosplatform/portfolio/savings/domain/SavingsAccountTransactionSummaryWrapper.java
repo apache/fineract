@@ -53,4 +53,14 @@ public final class SavingsAccountTransactionSummaryWrapper {
         }
         return total.getAmountDefaultedToNullIfZero();
     }
+
+    public BigDecimal calculateTotalAnnualFees(final MonetaryCurrency currency, final List<SavingsAccountTransaction> transactions) {
+        Money total = Money.zero(currency);
+        for (SavingsAccountTransaction transaction : transactions) {
+            if (transaction.isAnnualFee() && transaction.isNotReversed()) {
+                total = total.plus(transaction.getAmount(currency));
+            }
+        }
+        return total.getAmountDefaultedToNullIfZero();
+    }
 }

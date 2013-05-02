@@ -5,6 +5,8 @@
  */
 package org.mifosplatform.portfolio.savings.domain;
 
+import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.annualFeeAmountParamName;
+import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.annualFeeOnMonthDayParamName;
 import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.currencyCodeParamName;
 import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.descriptionParamName;
 import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.digitsAfterDecimalParamName;
@@ -30,6 +32,7 @@ import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
+import org.joda.time.MonthDay;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
@@ -55,7 +58,7 @@ public class SavingsProduct extends AbstractPersistable<Long> {
     /**
      * The interest period is the span of time at the end of which savings in a
      * client's account earn interest.
-     *
+     * 
      * A value from the {@link SavingsCompoundingInterestPeriodType}
      * enumeration.
      */
@@ -96,16 +99,26 @@ public class SavingsProduct extends AbstractPersistable<Long> {
     @Column(name = "withdrawal_fee_type_enum", nullable = true)
     private Integer withdrawalFeeType;
 
+    @Column(name = "annual_fee_amount", scale = 6, precision = 19, nullable = true)
+    private BigDecimal annualFeeAmount;
+
+    @Column(name = "annual_fee_on_month", nullable = true)
+    private Integer annualFeeOnMonth;
+
+    @Column(name = "annual_fee_on_day", nullable = true)
+    private Integer annualFeeOnDay;
+
     public static SavingsProduct createNew(final String name, final String description, final MonetaryCurrency currency,
             final BigDecimal interestRate, final SavingsCompoundingInterestPeriodType interestCompoundingPeriodType,
             final SavingsInterestPostingPeriodType interestPostingPeriodType, final SavingsInterestCalculationType interestCalculationType,
             final SavingsInterestCalculationDaysInYearType interestCalculationDaysInYearType, final BigDecimal minRequiredOpeningBalance,
             final Integer lockinPeriodFrequency, final SavingsPeriodFrequencyType lockinPeriodFrequencyType,
-            final BigDecimal withdrawalFeeAmount, final SavingsWithdrawalFeesType withdrawalFeeType) {
+            final BigDecimal withdrawalFeeAmount, final SavingsWithdrawalFeesType withdrawalFeeType, final BigDecimal annualFeeAmount,
+            final MonthDay annualFeeOnMonthDay) {
 
         return new SavingsProduct(name, description, currency, interestRate, interestCompoundingPeriodType, interestPostingPeriodType,
                 interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance, lockinPeriodFrequency,
-                lockinPeriodFrequencyType, withdrawalFeeAmount, withdrawalFeeType);
+                lockinPeriodFrequencyType, withdrawalFeeAmount, withdrawalFeeType, annualFeeAmount, annualFeeOnMonthDay);
     }
 
     protected SavingsProduct() {
@@ -118,7 +131,8 @@ public class SavingsProduct extends AbstractPersistable<Long> {
             final SavingsInterestPostingPeriodType interestPostingPeriodType, final SavingsInterestCalculationType interestCalculationType,
             final SavingsInterestCalculationDaysInYearType interestCalculationDaysInYearType, final BigDecimal minRequiredOpeningBalance,
             final Integer lockinPeriodFrequency, final SavingsPeriodFrequencyType lockinPeriodFrequencyType,
-            final BigDecimal withdrawalFeeAmount, final SavingsWithdrawalFeesType withdrawalFeeType) {
+            final BigDecimal withdrawalFeeAmount, final SavingsWithdrawalFeesType withdrawalFeeType, final BigDecimal annualFeeAmount,
+            final MonthDay annualFeeOnMonthDay) {
 
         this.name = name;
         this.description = description;
@@ -143,9 +157,15 @@ public class SavingsProduct extends AbstractPersistable<Long> {
         if (withdrawalFeeType != null) {
             this.withdrawalFeeType = withdrawalFeeType.getValue();
         }
+        this.annualFeeAmount = annualFeeAmount;
+        if (annualFeeOnMonthDay != null) {
+            this.annualFeeOnMonth = annualFeeOnMonthDay.getMonthOfYear();
+            this.annualFeeOnDay = annualFeeOnMonthDay.getDayOfMonth();
+        }
 
         validateLockinDetails();
         validateWithdrawalFeeDetails();
+        validateAnnualFeeDetails();
     }
 
     public MonetaryCurrency currency() {
@@ -198,6 +218,18 @@ public class SavingsProduct extends AbstractPersistable<Long> {
             type = SavingsWithdrawalFeesType.fromInt(this.withdrawalFeeType);
         }
         return type;
+    }
+
+    public BigDecimal annualFeeAmount() {
+        return this.annualFeeAmount;
+    }
+
+    public MonthDay monthDayOfAnnualFee() {
+        MonthDay monthDay = null;
+        if (this.annualFeeOnMonth != null && this.annualFeeOnDay != null) {
+            monthDay = new MonthDay(this.annualFeeOnMonth, this.annualFeeOnDay);
+        }
+        return monthDay;
     }
 
     public Map<String, Object> update(final JsonCommand command) {
@@ -299,10 +331,49 @@ public class SavingsProduct extends AbstractPersistable<Long> {
             this.withdrawalFeeType = SavingsWithdrawalFeesType.fromInt(newValue).getValue();
         }
 
+        if (command.isChangeInBigDecimalParameterNamed(annualFeeAmountParamName, this.annualFeeAmount)) {
+            final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(annualFeeAmountParamName);
+            actualChanges.put(annualFeeAmountParamName, newValue);
+            actualChanges.put(localeParamName, localeAsInput);
+            this.annualFeeAmount = newValue;
+        }
+
+        if (command.isChangeInIntegerParameterNamed(annualFeeOnMonthDayParamName, this.annualFeeOnDay)) {
+            final MonthDay monthDay = command.extractMonthDayNamed(annualFeeOnMonthDayParamName);
+            final String actualValueEntered = command.stringValueOfParameterNamed(annualFeeOnMonthDayParamName);
+            final Integer newValue = monthDay.getDayOfMonth();
+            actualChanges.put(annualFeeOnMonthDayParamName, actualValueEntered);
+            actualChanges.put(localeParamName, localeAsInput);
+            this.annualFeeOnDay = newValue;
+        }
+
+        if (command.isChangeInIntegerParameterNamed(annualFeeOnMonthDayParamName, this.annualFeeOnMonth)) {
+            final MonthDay monthDay = command.extractMonthDayNamed(annualFeeOnMonthDayParamName);
+            final String actualValueEntered = command.stringValueOfParameterNamed(annualFeeOnMonthDayParamName);
+            final Integer newValue = monthDay.getMonthOfYear();
+            actualChanges.put(annualFeeOnMonthDayParamName, actualValueEntered);
+            actualChanges.put(localeParamName, localeAsInput);
+            this.annualFeeOnMonth = newValue;
+        }
+
         validateLockinDetails();
         validateWithdrawalFeeDetails();
+        validateAnnualFeeDetails();
 
         return actualChanges;
+    }
+
+    private void validateAnnualFeeDetails() {
+        if (isInvalidConfigurationOfAnnualFeeSettings()) {
+            Object[] defaultUserMessageArgs = new Object[] { annualFeeAmountParamName };
+            throw new GeneralPlatformDomainRuleException("error.msg.product.savings.invalid.annualfee.settings",
+                    "Invalid configuration of annual fee settings.", defaultUserMessageArgs);
+        }
+    }
+
+    private boolean isInvalidConfigurationOfAnnualFeeSettings() {
+        return (this.annualFeeAmount == null && (this.annualFeeOnDay != null || this.annualFeeOnMonth != null))
+                || ((this.annualFeeOnDay == null || this.annualFeeOnMonth == null) && this.annualFeeAmount != null);
     }
 
     private void validateWithdrawalFeeDetails() {

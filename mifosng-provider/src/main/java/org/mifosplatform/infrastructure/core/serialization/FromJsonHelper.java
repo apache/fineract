@@ -16,6 +16,7 @@ import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
+import org.joda.time.MonthDay;
 import org.mifosplatform.infrastructure.core.exception.InvalidJsonException;
 import org.mifosplatform.infrastructure.core.exception.UnsupportedParameterException;
 import org.springframework.stereotype.Component;
@@ -112,6 +113,10 @@ public class FromJsonHelper {
 
     public Boolean extractBooleanNamed(final String parameterName, final JsonElement element, final Set<String> parametersPassedInRequest) {
         return helperDelegator.extractBooleanNamed(parameterName, element, parametersPassedInRequest);
+    }
+
+    public MonthDay extractMonthDayNamed(final String parameterName, final JsonElement element) {
+        return helperDelegator.extractMonthDayNamed(parameterName, element);
     }
 
     public LocalDate extractLocalDateNamed(final String parameterName, final JsonElement element) {

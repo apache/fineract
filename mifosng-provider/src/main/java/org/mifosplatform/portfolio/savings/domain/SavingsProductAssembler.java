@@ -1,5 +1,7 @@
 package org.mifosplatform.portfolio.savings.domain;
 
+import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.annualFeeAmountParamName;
+import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.annualFeeOnMonthDayParamName;
 import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.currencyCodeParamName;
 import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.descriptionParamName;
 import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.digitsAfterDecimalParamName;
@@ -17,6 +19,7 @@ import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.withdr
 
 import java.math.BigDecimal;
 
+import org.joda.time.MonthDay;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.springframework.stereotype.Component;
@@ -76,8 +79,12 @@ public class SavingsProductAssembler {
             withdrawalFeeType = SavingsWithdrawalFeesType.fromInt(withdrawalFeeTypeValue);
         }
 
+        final BigDecimal annualFeeAmount = command.bigDecimalValueOfParameterNamed(annualFeeAmountParamName);
+        final MonthDay monthDayOfAnnualFee = command.extractMonthDayNamed(annualFeeOnMonthDayParamName);
+
         return SavingsProduct.createNew(name, description, currency, interestRate, interestCompoundingPeriodType,
                 interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance,
-                lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeAmount, withdrawalFeeType);
+                lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeAmount, withdrawalFeeType, annualFeeAmount,
+                monthDayOfAnnualFee);
     }
 }

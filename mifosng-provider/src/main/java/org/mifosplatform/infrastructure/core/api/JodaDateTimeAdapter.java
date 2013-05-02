@@ -22,7 +22,7 @@ public class JodaDateTimeAdapter implements JsonSerializer<DateTime> {
 
     @SuppressWarnings("unused")
     @Override
-    public JsonElement serialize(DateTime src, Type typeOfSrc, JsonSerializationContext context) {
+    public JsonElement serialize(final DateTime src, final Type typeOfSrc, final JsonSerializationContext context) {
 
         JsonElement element = null;
         if (src != null) {

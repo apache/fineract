@@ -18,7 +18,9 @@ import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
+import org.joda.time.MonthDay;
 import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.mifosplatform.infrastructure.core.data.ApiParameterError;
 import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.springframework.format.number.NumberFormatter;
@@ -181,6 +183,20 @@ public class JsonParserHelper {
         return value;
     }
 
+    public String extractMonthDayFormatParameter(final JsonObject element) {
+        String value = null;
+        if (element.isJsonObject()) {
+            JsonObject object = element.getAsJsonObject();
+
+            final String monthDayFormatParameter = "monthDayFormat";
+            if (object.has(monthDayFormatParameter) && object.get(monthDayFormatParameter).isJsonPrimitive()) {
+                final JsonPrimitive primitive = object.get(monthDayFormatParameter).getAsJsonPrimitive();
+                value = primitive.getAsString();
+            }
+        }
+        return value;
+    }
+
     public Locale extractLocaleParameter(final JsonObject element) {
         Locale clientApplicationLocale = null;
         if (element.isJsonObject()) {
@@ -246,6 +262,40 @@ public class JsonParserHelper {
                 Integer day = dateArray.get(2).getAsInt();
 
                 value = new LocalDate().withYearOfEra(year).withMonthOfYear(month).withDayOfMonth(day);
+            }
+
+        }
+        return value;
+    }
+
+    public MonthDay extractMonthDayNamed(final String parameterName, final JsonElement element) {
+
+        MonthDay value = null;
+
+        if (element.isJsonObject()) {
+            JsonObject object = element.getAsJsonObject();
+
+            final String monthDayFormat = extractMonthDayFormatParameter(object);
+            final Locale clientApplicationLocale = extractLocaleParameter(object);
+            value = extractMonthDayNamed(parameterName, object, monthDayFormat, clientApplicationLocale);
+        }
+        return value;
+    }
+
+    public MonthDay extractMonthDayNamed(final String parameterName, final JsonObject element, final String dateFormat,
+            final Locale clientApplicationLocale) {
+        MonthDay value = null;
+        if (element.isJsonObject()) {
+            JsonObject object = element.getAsJsonObject();
+
+            if (object.has(parameterName) && object.get(parameterName).isJsonPrimitive()) {
+
+                final JsonPrimitive primitive = object.get(parameterName).getAsJsonPrimitive();
+                final String valueAsString = primitive.getAsString();
+                if (StringUtils.isNotBlank(valueAsString)) {
+                    DateTimeFormatter formatter = DateTimeFormat.forPattern(dateFormat).withLocale(clientApplicationLocale);
+                    value = MonthDay.parse(valueAsString.toLowerCase(clientApplicationLocale), formatter);
+                }
             }
 
         }
