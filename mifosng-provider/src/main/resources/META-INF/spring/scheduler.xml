@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="cronQuartzJobA" class="org.mifosplatform.scheduledjobs.JobA"/>
+
+    <bean id="cronQuartzJobB" class="org.mifosplatform.scheduledjobs.JobB"/>
+
+    <bean id="jobADetail" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+        <property name="group" value="mifosJobs" />
+        <property name="targetObject" ref="cronQuartzJobA" />
+        <property name="targetMethod" value="execute" />
+        <property name="concurrent" value="false" />
+    </bean>
+    <bean id="jobBDetail" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+        <property name="group" value="mifosJobs" />
+        <property name="targetObject" ref="cronQuartzJobB" />
+        <property name="targetMethod" value="execute" />
+        <property name="concurrent" value="false" />
+    </bean>
+
+
+    <bean id="cronTriggerA" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+
+        <property name="jobDetail" ref="jobADetail" />
+        <property name="cronExpression" value="59 59 23 * * ?" />
+    </bean>
+    <bean id="cronTriggerB" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+
+        <property name="jobDetail" ref="jobBDetail" />
+        <property name="cronExpression" value="59 59 23 * * ?" />
+    </bean>
+
+    <bean name="schedulerFactory" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+
+        <property name="triggers">
+            <list>
+                <ref bean="cronTriggerA" />
+                <ref bean="cronTriggerB" />
+            </list>
+        </property>
+
+    </bean>
+
+</beans>

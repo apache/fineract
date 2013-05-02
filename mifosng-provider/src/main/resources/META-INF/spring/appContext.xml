@@ -49,4 +49,6 @@
     <import resource="infrastructure.xml" />
 		
 	<import resource="securityContext.xml" />
+
+    <import resource="scheduler.xml"/>
 </beans>
