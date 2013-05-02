@@ -28,6 +28,7 @@
 										  org.mifosplatform.commands.*,
 										  org.mifosplatform.audit.*,
 										  org.mifosplatform.infrastructure.*,
+										  org.mifosplatform.scheduledjobs.*,
 										  org.mifosplatform.organisation.*, 
 										  org.mifosplatform.portfolio.loanaccount.*,
 										  org.mifosplatform.portfolio.savingsaccount.*,
