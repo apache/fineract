@@ -236,7 +236,7 @@ public class AccountingProcessorHelper {
             final String transactionId, final Date transactionDate, final BigDecimal amount) {
         final boolean manualEntry = false;
         final JournalEntry journalEntry = JournalEntry.createNew(office, account, transactionId, manualEntry, transactionDate,
-                JournalEntryType.CREDIT, amount, null, PortfolioProductType.LOAN.getValue(), loanId);
+                JournalEntryType.CREDIT, amount, null, PortfolioProductType.LOAN.getValue(), loanId, null);
         this.glJournalEntryRepository.saveAndFlush(journalEntry);
     }
 
@@ -244,7 +244,7 @@ public class AccountingProcessorHelper {
             final String transactionId, final Date transactionDate, final BigDecimal amount) {
         final boolean manualEntry = false;
         final JournalEntry journalEntry = JournalEntry.createNew(office, account, transactionId, manualEntry, transactionDate,
-                JournalEntryType.DEBIT, amount, null, PortfolioProductType.LOAN.getValue(), loanId);
+                JournalEntryType.DEBIT, amount, null, PortfolioProductType.LOAN.getValue(), loanId, null);
         this.glJournalEntryRepository.saveAndFlush(journalEntry);
     }
 

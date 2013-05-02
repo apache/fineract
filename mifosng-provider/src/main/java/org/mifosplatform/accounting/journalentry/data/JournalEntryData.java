@@ -56,12 +56,14 @@ public class JournalEntryData {
     private final String comments;
     @SuppressWarnings("unused")
     private final Boolean reversed;
+    @SuppressWarnings("unused")
+    private final String referenceNumber;
 
     public JournalEntryData(final Long id, final Long officeId, final String officeName, final String glAccountName,
             final Long glAccountId, final String glAccountCode, final EnumOptionData glAccountClassification,
             final LocalDate transactionDate, final EnumOptionData entryType, final BigDecimal amount, final String transactionId,
             final Boolean manualEntry, final EnumOptionData entityType, final Long entityId, final Long createdByUserId,
-            final LocalDate createdDate, final String createdByUserName, final String comments, final Boolean reversed) {
+            final LocalDate createdDate, final String createdByUserName, final String comments, final Boolean reversed, final String referenceNumber) {
         this.id = id;
         this.officeId = officeId;
         this.officeName = officeName;
@@ -81,6 +83,7 @@ public class JournalEntryData {
         this.createdByUserName = createdByUserName;
         this.comments = comments;
         this.reversed = reversed;
+        this.referenceNumber = referenceNumber;
     }
 
 }

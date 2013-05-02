@@ -73,12 +73,15 @@ public class JournalEntry extends AbstractAuditableCustom<AppUser, Long> {
     @SuppressWarnings("unused")
     @Column(name = "entity_id")
     private Long entityId;
+    
+    @Column(name = "ref_num")
+    private String referenceNumber;
 
     public static JournalEntry createNew(final Office office, final GLAccount glAccount, final String transactionId,
             final boolean manualEntry, final Date transactionDate, final JournalEntryType journalEntryType, final BigDecimal amount,
-            final String description, final Integer entityType, final Long entityId) {
+            final String description, final Integer entityType, final Long entityId, final String referenceNumber) {
         return new JournalEntry(office, glAccount, transactionId, manualEntry, transactionDate, journalEntryType.getValue(), amount,
-                description, entityType, entityId);
+                description, entityType, entityId, referenceNumber);
     }
 
     protected JournalEntry() {
@@ -87,7 +90,7 @@ public class JournalEntry extends AbstractAuditableCustom<AppUser, Long> {
 
     public JournalEntry(final Office office, final GLAccount glAccount, final String transactionId, final boolean manualEntry,
             final Date transactionDate, final Integer type, final BigDecimal amount, final String description, final Integer entityType,
-            final Long entityId) {
+            final Long entityId, final String referenceNumber) {
         this.office = office;
         this.glAccount = glAccount;
         this.reversalJournalEntry = null;
@@ -100,6 +103,8 @@ public class JournalEntry extends AbstractAuditableCustom<AppUser, Long> {
         this.description = StringUtils.defaultIfEmpty(description, null);
         this.entityType = entityType;
         this.entityId = entityId;
+        this.referenceNumber = referenceNumber;
+        
     }
 
     public boolean isDebitEntry() {
@@ -133,5 +138,9 @@ public class JournalEntry extends AbstractAuditableCustom<AppUser, Long> {
     public void setReversed(final boolean reversed) {
         this.reversed = reversed;
     }
+
+	public String getReferenceNumber() {
+		return this.referenceNumber;
+	}
 
 }

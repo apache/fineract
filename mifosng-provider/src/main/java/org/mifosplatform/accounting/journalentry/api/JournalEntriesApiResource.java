@@ -45,7 +45,8 @@ public class JournalEntriesApiResource {
 
     private static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "officeId", "officeName",
             "glAccountName", "glAccountId", "glAccountCode", "glAccountType", "transactionDate", "entryType", "amount", "transactionId",
-            "manualEntry", "entityType", "entityId", "createdByUserId", "createdDate", "createdByUserName", "comments", "reversed"));
+            "manualEntry", "entityType", "entityId", "createdByUserId", "createdDate", "createdByUserName", "comments", "reversed",
+            "referenceNumber"));
 
     private final String resourceNameForPermission = "JOURNALENTRY";
 
@@ -74,7 +75,7 @@ public class JournalEntriesApiResource {
     public String retrieveAllJournalEntries(@Context final UriInfo uriInfo, @QueryParam("officeId") final Long officeId,
             @QueryParam("glAccountId") final Long glAccountId, @QueryParam("manualEntriesOnly") final Boolean onlyManualEntries,
             @QueryParam("fromDate") final DateParam fromDateParam, @QueryParam("toDate") final DateParam toDateParam,
-            @QueryParam("transactionId") final String transactionId) {
+            @QueryParam("transactionId") final String transactionId ) {
 
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermission);
 

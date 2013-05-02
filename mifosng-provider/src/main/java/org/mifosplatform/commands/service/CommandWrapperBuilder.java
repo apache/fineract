@@ -28,7 +28,7 @@ public class CommandWrapperBuilder {
     public CommandWrapper build() {
         return new CommandWrapper(this.officeId, this.groupId, this.clientId, this.loanId, this.savingsId, this.actionName,
                 this.entityName, this.entityId, this.subentityId, this.codeId, this.supportedEntityType, this.supportedEntityId, this.href,
-                this.json, this.transactionId);
+                this.json, this.transactionId );
     }
 
     public CommandWrapperBuilder withLoanId(final Long withLoanId) {

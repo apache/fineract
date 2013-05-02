@@ -42,7 +42,7 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
         public String schema() {
             return " journalEntry.id as journalEntryId, glAccount.classification_enum as classification ,"
                     + " glAccount.name as glAccountName, glAccount.gl_code as glCode, journalEntry.account_id as glAccountId,"
-                    + " journalEntry.office_id as officeId, office.name as officeName, "
+                    + " journalEntry.office_id as officeId, office.name as officeName, journalEntry.ref_num as referenceNumber, "
                     + " journalEntry.manual_entry as manualEntry,journalEntry.entry_date as transactionDate, "
                     + " journalEntry.type_enum as entryType,journalEntry.amount as amount, journalEntry.transaction_id as transactionId,"
                     + " journalEntry.entity_type_enum as entityType, journalEntry.entity_id as entityId, creatingUser.id as createdByUserId, "
@@ -82,10 +82,11 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
             final String createdByUserName = rs.getString("createdByUserName");
             final String comments = rs.getString("comments");
             final Boolean reversed = rs.getBoolean("reversed");
+            final String referenceNumber = rs.getString("referenceNumber");
 
             return new JournalEntryData(journalEntryId, officeId, officeName, glAccountName, glAccountId, glCode, accountType,
                     transactionDate, entryType, amount, transactionId, manualEntry, entityType, entityId, createdByUserId, createdDate,
-                    createdByUserName, comments, reversed);
+                    createdByUserName, comments, reversed, referenceNumber);
         }
     }
 
