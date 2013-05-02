@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 <head>
 <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
@@ -3725,6 +3725,20 @@ GET https://DomainName/mifosng-provider/api/v1/groups
 								</ol>
 							</td>
 						</tr>
+						<tr class=alt>
+							<td>loanType</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>To represent different type of loans.<br>
+								At present there are three type of loans are supported.
+								<br>Available loan types:
+								<ol>
+									<li>id=1, code=individual, description: Loan given to individual member</li>
+									<li>id=2, code=group, description: Loan given to group as a whole</li>
+									<li>id=3, code=jlg, description: Joint liability group loan given to members in a group  on individual basis. JLG loan can be given to one or more members in a group.</li>
+								</ol>
+							</td>
+						</tr>
 					</table>
 				</div>
 			</div>
@@ -3744,6 +3758,26 @@ GET https://DomainName/mifosng-provider/api/v1/groups
 					</p>
 					<h5>Arguments</h5>
 					<dl class="argument-list">
+						<dt>templateType</dt>
+						<dd>
+							String <span>mandatory</span>, allowed values are <span>individual, group, jlg, jlgbulk</span>
+						</dd>
+						<dd>
+							<br>templateType value decides the required template data for creating a new loan application.
+
+						</dd>
+						<dd>
+							<br><b>'individual':</b> Loan template data for creating individual loans.
+						</dd>
+						<dd>
+							<b>'group':</b> Loan template data for creating a group loan (loan given to group as a whole).
+						</dd>
+						<dd>
+							<b>'jlg':</b> Loan template data for creating a Joint liability group loan for a client.
+						</dd>
+						<dd>
+							<b>'jlgbulk':</b> Loan template data for creating a Joint liability group loan for multiple clients at a time in a group.
+						</dd>
 						<dt>clientId</dt>
 						<dd>
 							Integer <span>mandatory</span>
@@ -4410,7 +4444,7 @@ Request Body:
 								repaymentFrequencyType, interestRatePerPeriod,
 								amortizationType, interestType,
 								interestCalculationPeriodType, transactionProcessingStrategyId,
-								expectedDisbursementDate, submittedOnDate</td>
+								expectedDisbursementDate, submittedOnDate, loanType</td>
 						</tr>
 					</table>
 				</div>
@@ -4439,7 +4473,8 @@ Request Body:
     "interestCalculationPeriodType": 1,
     "transactionProcessingStrategyId": 1,
     "expectedDisbursementDate": "20 September 2011",
-    "submittedOnDate": "20 September 2011"
+    "submittedOnDate": "20 September 2011",
+    "loanType": "individual"
 }
 					</code>
 					<code class="method-response">
