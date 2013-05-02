@@ -16,6 +16,8 @@ import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.api.ApiParameterHelper;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
+import org.mifosplatform.infrastructure.core.service.Page;
+import org.mifosplatform.infrastructure.core.service.PaginationHelper;
 import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.office.data.OfficeData;
@@ -29,8 +31,6 @@ import org.mifosplatform.portfolio.group.data.GroupGeneralData;
 import org.mifosplatform.portfolio.group.service.SearchParameters;
 import org.mifosplatform.portfolio.loanaccount.data.LoanStatusEnumData;
 import org.mifosplatform.portfolio.loanproduct.service.LoanEnumerations;
-import org.mifosplatform.portfolio.pagination.Page;
-import org.mifosplatform.portfolio.pagination.PaginationHelper;
 import org.mifosplatform.useradministration.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -46,6 +46,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
     private final OfficeReadPlatformService officeReadPlatformService;
 
     // data mappers
+    private final PaginationHelper<ClientData> paginationHelper = new PaginationHelper<ClientData>();
     private final ClientMapper clientMapper = new ClientMapper();
     private final ClientLookupMapper lookupMapper = new ClientLookupMapper();
     private final ClientMembersOfGroupMapper membersOfGroupMapper = new ClientMembersOfGroupMapper();
@@ -72,49 +73,41 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
     }
 
     @Override
-    public Collection<ClientData> retrieveAll(final SearchParameters searchParameters) {
+    public Page<ClientData> retrieveAll(final SearchParameters searchParameters) {
 
         final AppUser currentUser = context.authenticatedUser();
         final String hierarchy = currentUser.getOffice().getHierarchy();
         final String hierarchySearchString = hierarchy + "%";
 
-        String sql = "select " + this.clientMapper.schema() + " where o.hierarchy like ?";
+        StringBuilder sqlBuilder = new StringBuilder(200);
+        sqlBuilder.append("select SQL_CALC_FOUND_ROWS ");
+        sqlBuilder.append(this.clientMapper.schema());
+        sqlBuilder.append(" where o.hierarchy like ?");
 
         final String extraCriteria = buildSqlStringFromClientCriteria(searchParameters);
 
-        if (StringUtils.isNotBlank(extraCriteria)) sql += " and (" + extraCriteria + ")";
+        if (StringUtils.isNotBlank(extraCriteria)) {
+            sqlBuilder.append(" and (").append(extraCriteria).append(")");
+        }
 
-        sql += " order by c.display_name ASC, c.account_no ASC";
+        // DONT order by default - just use database natural ordering so doesnt
+        // have to scan entire database table.
+        // sql += " order by c.display_name ASC, c.account_no ASC";
+        if (searchParameters.isOrderByRequested()) {
+            sqlBuilder.append(" order by ").append(searchParameters.getOrderBy()).append(' ').append(searchParameters.getSortOrder());
+        }
 
-        return this.jdbcTemplate.query(sql, clientMapper, new Object[] { hierarchySearchString });
-    }
+        if (searchParameters.isLimited()) {
+            sqlBuilder.append(" limit ").append(searchParameters.getLimit());
+        }
 
-    @Override
-    public Page<ClientData> retrieveAllPaginatedAndSorted(final SearchParameters searchParameters, final int offset, final int limit,
-            final String orderby, final String sortOrder) {
+        if (searchParameters.isOffset()) {
+            sqlBuilder.append(" offset ").append(searchParameters.getOffset());
+        }
 
-        final AppUser currentUser = context.authenticatedUser();
-        final String hierarchy = currentUser.getOffice().getHierarchy();
-        final String hierarchySearchString = hierarchy + "%";
-
-        String sql = "select SQL_CALC_FOUND_ROWS " + this.clientMapper.schema() + " where o.hierarchy like ?";
-
-        final String extraCriteria = buildSqlStringFromClientCriteria(searchParameters);
-
-        if (StringUtils.isNotBlank(extraCriteria)) sql += " and (" + extraCriteria + ")";
-
-        if (orderby != null && sortOrder != null) {
-            if (!orderby.equalsIgnoreCase("") && !sortOrder.equalsIgnoreCase("")) {
-                sql += " order by " + orderby + " " + sortOrder;
-            }
-        } else
-            sql += " order by c.display_name ASC, c.account_no ASC";
-
-        PaginationHelper<ClientData> ph = new PaginationHelper<ClientData>();
-        String sqlCountRows = "SELECT FOUND_ROWS()";
-        String sqlFetchRows = sql;
-        if (limit != 0) sqlFetchRows = sql + " LIMIT " + limit + " OFFSET " + offset;
-        return ph.fetchPage(jdbcTemplate, sqlCountRows, sqlFetchRows, new Object[] { hierarchySearchString }, clientMapper);
+        final String sqlCountRows = "SELECT FOUND_ROWS()";
+        return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlCountRows, sqlBuilder.toString(),
+                new Object[] { hierarchySearchString }, this.clientMapper);
     }
     
     private String buildSqlStringFromClientCriteria(final SearchParameters searchParameters) {

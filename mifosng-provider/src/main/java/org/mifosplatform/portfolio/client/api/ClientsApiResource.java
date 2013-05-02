@@ -33,6 +33,7 @@ import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.exception.UnrecognizedQueryParamException;
 import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.mifosplatform.infrastructure.core.serialization.ToApiJsonSerializer;
+import org.mifosplatform.infrastructure.core.service.Page;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.office.data.OfficeData;
 import org.mifosplatform.organisation.office.service.OfficeReadPlatformService;
@@ -40,7 +41,6 @@ import org.mifosplatform.portfolio.client.data.ClientAccountSummaryCollectionDat
 import org.mifosplatform.portfolio.client.data.ClientData;
 import org.mifosplatform.portfolio.client.service.ClientReadPlatformService;
 import org.mifosplatform.portfolio.group.service.SearchParameters;
-import org.mifosplatform.portfolio.pagination.Page;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -90,18 +90,19 @@ public class ClientsApiResource {
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveAllPaginatedAndSorted(@QueryParam("sqlSearch") final String sqlSearch,
-            @QueryParam("officeId") final Long officeId, @QueryParam("externalId") final String externalId,
-            @QueryParam("displayName") final String displayName, @QueryParam("firstName") final String firstname,
-            @QueryParam("lastName") final String lastname, @QueryParam("underHierarchy") final String hierarchy,
-            @QueryParam("offset") final int offset, @QueryParam("limit") final int limit, @QueryParam("orderBy") final String orderBy,
+    public String retrieveAll(@QueryParam("sqlSearch") final String sqlSearch, @QueryParam("officeId") final Long officeId,
+            @QueryParam("externalId") final String externalId, @QueryParam("displayName") final String displayName,
+            @QueryParam("firstName") final String firstname, @QueryParam("lastName") final String lastname,
+            @QueryParam("underHierarchy") final String hierarchy, @QueryParam("offset") final Integer offset,
+            @QueryParam("limit") final Integer limit, @QueryParam("orderBy") final String orderBy,
             @QueryParam("sortOrder") final String sortOrder) {
+
         context.authenticatedUser().validateHasReadPermission(ClientApiConstants.CLIENT_RESOURCE_NAME);
 
         final SearchParameters searchParameters = SearchParameters.forClients(sqlSearch, officeId, externalId, displayName, firstname,
-                lastname, hierarchy);
-        Page<ClientData> clientData = this.clientReadPlatformService.retrieveAllPaginatedAndSorted(searchParameters, offset, limit,
-                orderBy, sortOrder);
+                lastname, hierarchy, offset, limit, orderBy, sortOrder);
+
+        final Page<ClientData> clientData = this.clientReadPlatformService.retrieveAll(searchParameters);
         return this.toApiJsonSerializer.serialize(clientData);
     }
 
@@ -123,7 +124,7 @@ public class ClientsApiResource {
 
         return this.toApiJsonSerializer.serialize(settings, clientData, ClientApiConstants.CLIENT_RESPONSE_DATA_PARAMETERS);
     }
-     
+
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
