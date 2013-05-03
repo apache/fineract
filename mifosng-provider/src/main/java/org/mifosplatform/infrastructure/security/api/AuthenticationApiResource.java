@@ -7,6 +7,7 @@ package org.mifosplatform.infrastructure.security.api;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Set;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
@@ -19,7 +20,7 @@ import org.mifosplatform.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.mifosplatform.infrastructure.security.data.AuthenticatedUserData;
 import org.mifosplatform.useradministration.data.RoleData;
 import org.mifosplatform.useradministration.domain.AppUser;
-import org.mifosplatform.useradministration.service.RoleReadPlatformService;
+import org.mifosplatform.useradministration.domain.Role;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Scope;
@@ -38,15 +39,13 @@ public class AuthenticationApiResource {
 
     private final DaoAuthenticationProvider customAuthenticationProvider;
     private final ToApiJsonSerializer<AuthenticatedUserData> apiJsonSerializerService;
-    private final RoleReadPlatformService roleReadPlatformService;
 
     @Autowired
     public AuthenticationApiResource(
             @Qualifier("customAuthenticationProvider") final DaoAuthenticationProvider customAuthenticationProvider,
-            final ToApiJsonSerializer<AuthenticatedUserData> apiJsonSerializerService, final RoleReadPlatformService roleReadPlatformService) {
+            final ToApiJsonSerializer<AuthenticatedUserData> apiJsonSerializerService) {
         this.customAuthenticationProvider = customAuthenticationProvider;
         this.apiJsonSerializerService = apiJsonSerializerService;
-        this.roleReadPlatformService = roleReadPlatformService;
     }
 
     @POST
@@ -68,7 +67,11 @@ public class AuthenticationApiResource {
             AppUser principal = (AppUser) authenticationCheck.getPrincipal();
             byte[] base64EncodedAuthenticationKey = Base64.encode(username + ":" + password);
 
-            Collection<RoleData> roles = this.roleReadPlatformService.retrieveAll();
+            Collection<RoleData> roles = new ArrayList<RoleData>();
+            Set<Role> userRoles = principal.getRoles();
+            for (Role role : userRoles) {
+                roles.add(role.toData());
+            }
 
             authenticatedUserData = new AuthenticatedUserData(username, roles, permissions, principal.getId(), new String(
                     base64EncodedAuthenticationKey));
