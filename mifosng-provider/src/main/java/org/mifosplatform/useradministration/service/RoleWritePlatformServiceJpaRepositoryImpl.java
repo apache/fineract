@@ -22,7 +22,6 @@ import org.mifosplatform.useradministration.domain.RoleRepository;
 import org.mifosplatform.useradministration.exception.PermissionNotFoundException;
 import org.mifosplatform.useradministration.exception.RoleNotFoundException;
 import org.mifosplatform.useradministration.serialization.PermissionsCommandFromApiJsonDeserializer;
-import org.mifosplatform.useradministration.serialization.RoleCommandValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,12 +36,12 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
     private final PlatformSecurityContext context;
     private final RoleRepository roleRepository;
     private final PermissionRepository permissionRepository;
-    private final RoleCommandValidator roleCommandFromApiJsonDeserializer;
+    private final RoleDataValidator roleCommandFromApiJsonDeserializer;
     private final PermissionsCommandFromApiJsonDeserializer permissionsFromApiJsonDeserializer;
 
     @Autowired
     public RoleWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final RoleRepository roleRepository,
-            final PermissionRepository permissionRepository, final RoleCommandValidator roleCommandFromApiJsonDeserializer,
+            final PermissionRepository permissionRepository, final RoleDataValidator roleCommandFromApiJsonDeserializer,
             final PermissionsCommandFromApiJsonDeserializer fromApiJsonDeserializer) {
         this.context = context;
         this.roleRepository = roleRepository;

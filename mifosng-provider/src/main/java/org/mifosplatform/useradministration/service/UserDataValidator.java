@@ -3,7 +3,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this file,
  * You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-package org.mifosplatform.useradministration.serialization;
+package org.mifosplatform.useradministration.service;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -14,7 +14,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
-import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.ApiParameterError;
 import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
 import org.mifosplatform.infrastructure.core.exception.InvalidJsonException;
@@ -26,11 +25,8 @@ import org.springframework.stereotype.Component;
 import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
 
-/**
- * Implementation for deserializing users {@link JsonCommand} for validation.
- */
 @Component
-public final class UserCommandFromApiJsonDeserializerHelper {
+public final class UserDataValidator {
 
     /**
      * The parameters supported for this command.
@@ -41,7 +37,7 @@ public final class UserCommandFromApiJsonDeserializerHelper {
     private final FromJsonHelper fromApiJsonHelper;
 
     @Autowired
-    public UserCommandFromApiJsonDeserializerHelper(final FromJsonHelper fromApiJsonHelper) {
+    public UserDataValidator(final FromJsonHelper fromApiJsonHelper) {
         this.fromApiJsonHelper = fromApiJsonHelper;
     }
 
@@ -78,8 +74,7 @@ public final class UserCommandFromApiJsonDeserializerHelper {
     }
 
     private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
-                "Validation errors exist.", dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
     }
 
     public void validateForUpdate(final String json) {

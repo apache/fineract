@@ -30,7 +30,6 @@ import org.mifosplatform.useradministration.domain.RoleRepository;
 import org.mifosplatform.useradministration.domain.UserDomainService;
 import org.mifosplatform.useradministration.exception.RoleNotFoundException;
 import org.mifosplatform.useradministration.exception.UserNotFoundException;
-import org.mifosplatform.useradministration.serialization.UserCommandFromApiJsonDeserializerHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,12 +49,12 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
     private final AppUserRepository appUserRepository;
     private final OfficeRepository officeRepository;
     private final RoleRepository roleRepository;
-    private final UserCommandFromApiJsonDeserializerHelper fromApiJsonDeserializer;
+    private final UserDataValidator fromApiJsonDeserializer;
 
     @Autowired
     public AppUserWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final AppUserRepository appUserRepository,
             final UserDomainService userDomainService, final OfficeRepository officeRepository, final RoleRepository roleRepository,
-            final PlatformPasswordEncoder platformPasswordEncoder, final UserCommandFromApiJsonDeserializerHelper fromApiJsonDeserializer) {
+            final PlatformPasswordEncoder platformPasswordEncoder, final UserDataValidator fromApiJsonDeserializer) {
         this.context = context;
         this.appUserRepository = appUserRepository;
         this.userDomainService = userDomainService;

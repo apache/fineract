@@ -1346,17 +1346,6 @@
 										</tr>
 									</table></td>
 							</tr>
-							<!-- disabled API for release 1.0.0 as its beta -->
-							<!--
-							<tr class="alt">
-								<td>centers/template</td>
-								<td><a href="#centers_template">Retrieve Center Template</a></td>
-							</tr>
-							<tr>
-								<td>groups/template</td>
-								<td><a href="#groups_template">Retrieve Group Template</a></td>
-							</tr>
-							-->
 							<tr class="alt">
 								<td>clients/template</td>
 								<td><a href="#clients_template">Retrieve Client Template</a></td>
@@ -1373,21 +1362,6 @@
 								<td>loans/{loanId}/transactions/template</td>
 								<td><a href="#loans_repaymenttemplate_etc">Retrieve Loan Transaction Template</a></td>
 							</tr>
-							<!-- disabled API for release 1.0.0 as its beta -->
-							<!--
-							<tr class="alt">
-								<td>savingproducts/template</td>
-								<td><a href="#savingsproducts_template">Retrieve Savings Product Template</a></td>
-							</tr>
-							<tr >
-								<td>savingsaccounts/template?clientId={clientId}</td>
-								<td><a href="#savingsaccounts_template">Retrieve Savings Account Template</a></td>
-							</tr>
-                            <tr class="alt">
-                                <td>savingsaccounts/{accountId}/transactions/template</td>
-                                <td><a href="#savingsaccounts_transactions_template">Retrieve Savings Account Transaction Template</a></td>
-                            </tr>
-                            -->
 							<tr>
 								<td>offices/template</td>
 								<td><a href="#offices_template">Retrieve Office Template</a></td>
@@ -1396,18 +1370,18 @@
 								<td>users/template</td>
 								<td><a href="#users_template">Retrieve User Template</a></td>
 							</tr>
-                                                        <tr>
-                                                                <td>audits/searchtemplate</td>
-                                                                <td><a href="#audits_searchtemplate">Retrieve Audit Search Template</a></td>
-                                                        </tr>
-                                                        <tr class="alt">
-                                                                <td>makercheckers/searchtemplate</td>
-                                                                <td><a href="#makercheckers_searchtemplate">Retrieve Maker Checker Search Template</a></td>
-                                                        </tr>
-                                                        <tr>
-                                                                <td>reports/template</td>
-                                                                <td><a href="#reports_template">Retrieve Report Template</a></td>
-                                                        </tr>
+	                        <tr>
+	                                <td>audits/searchtemplate</td>
+	                                <td><a href="#audits_searchtemplate">Retrieve Audit Search Template</a></td>
+	                        </tr>
+	                        <tr class="alt">
+	                                <td>makercheckers/searchtemplate</td>
+	                                <td><a href="#makercheckers_searchtemplate">Retrieve Maker Checker Search Template</a></td>
+	                        </tr>
+	                        <tr>
+                                <td>reports/template</td>
+                                <td><a href="#reports_template">Retrieve Report Template</a></td>
+	                        </tr>
 						</table>
 					</div>
 				</div>
@@ -13590,6 +13564,102 @@ GET https://DomainName/api/v1/search?query=000000111
 					<td><a href="#collaterals_delete">Delete a Collateral</a></td>
 				</tr>
 				<tr class="alt">
+					<td><a href="#glaccounts">General Ledger Account</a></td>
+					<td>glaccounts</td>
+					<td><a href="#glaccounts_create">Create a New Ledger Account</a></td>
+					<td><a href="#glaccounts_list">List Ledger Accounts</a></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>glaccounts/{glaccountId}</td>
+					<td></td>
+					<td><a href="#glaccounts_retrieve">Retrieve a Ledger Account</a></td>
+					<td><a href="#glaccounts_update">Update a Ledger Account</a></td>
+					<td><a href="#glaccounts_delete">Delete a Ledger Account</a></td>
+				</tr>
+				<tr class="alt">
+					<td><a href="#glclosures">Accounting Closure</a></td>
+					<td>glclosures</td>
+					<td><a href="#glclosures_create">Create an Accounting Closure</a></td>
+					<td><a href="#glclosures_list">List Accounting Closures</a></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>glclosures/{glclosureId}</td>
+					<td></td>
+					<td><a href="#glclosures_retrieve">Retrieve an Accounting Closure</a></td>
+					<td><a href="#glclosures_update">Update an Accounting Closure</a></td>
+					<td><a href="#glclosures_delete">Delete an Accounting Closure</a></td>
+				</tr>
+				<tr class="alt">
+					<td><a href="#journalentries">Journal Entries</a></td>
+					<td>journalentries</td>
+					<td><a href="#journalentries_create">Create Journal Entries</a></td>
+					<td><a href="#journalentries_list">List Journal Entries</a></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>journalentries/{entryId}</td>
+					<td></td>
+					<td><a href="#journalentries_retrieve">Retrieve a single Entry</a></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr class="alt">
+					<td></td>
+					<td>journalentries/{transactionId}/reversal</td>
+					<td><a href="#journalentries_reverse">Reverse Journal Entries</a></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+                <tr>
+                    <td><a href="#reports">Report</a></td>
+                    <td>reports</td>
+                    <td><a href="#reports_create">Create a Report</a></td>
+                    <td><a href="#reports_list">List Reports</a></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+				<tr class="alt">
+					<td></td>
+					<td>reports/template</td>
+					<td></td>
+					<td><a href="#reports_template">Retrieve Report Template</a></td>
+					<td></td>
+					<td></td>
+				</tr>
+                <tr>
+                    <td></td>
+                    <td>reports/{id}</td>
+                    <td></td>
+                    <td><a href="#reports_retrieve">Retrieve a Report</a></td>
+                    <td><a href="#reports_update">Update a Report</a></td>
+                    <td><a href="#reports_delete">Delete a Report</a></td>
+                </tr>
+                <tr class="alt">
+                    <td><a href="#runreports">Run Report</a></td>
+                    <td>runreports/{reportName}</td>
+                    <td></td>
+                    <td><a href="#report_run">Run a Report</a></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+					<td><a href="#search">Search</a></td>
+					<td>search</td>
+					<td></td>
+					<td><a href="#search_resource">Search Resources</td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr class="alt">
 					<td><a href="#offices">Office</a></td>
 					<td>offices</td>
 					<td><a href="#offices_create">Create an Office</a></td>
@@ -13623,104 +13693,6 @@ GET https://DomainName/api/v1/search?query=000000111
 							Configuration</a></td>
 					<td></td>
 				</tr>
-				<tr>
-					<td><a href="#configs_global">Global Configuration</a></td>
-					<td>configurations</td>
-					<td></td>
-					<td><a href="#configs_globalconfig_retrieve">Retrieve
-							Global Configuration</a></td>
-					<td><a href="#configs_globalconfig_update">Update Global
-							Configuration</a></td>
-					<td></td>
-				</tr>
-				<tr class="alt">
-					<td><a href="#configs_codes">Codes</a></td>
-					<td>codes</td>
-					<td><a href="#configs_codes_create">Create a Code</a></td>
-					<td><a href="#configs_codes_retrieve">List Codes</a></td>
-					<td></td>
-					<td></td>
-				</tr>
-				<tr>
-					<td></td>
-					<td>codes/{codeId}</td>
-					<td></td>
-					<td><a href="#configs_code_retrieve">Retrieve a Code</a></td>
-					<td><a href="#configs_code_update">Update a Code</a></td>
-					<td><a href="#configs_code_delete">Delete a Code</a></td>
-				</tr>
-				<tr class="alt">
-					<td><a href="#configs_codes_codevalues">Code Values</a></td>
-					<td>codes/{codeId}/codevalues</td>
-					<td><a href="#configs_codes_codevalues_create">Create a Code Value</a></td>
-					<td><a href="#configs_codes_codevalues_list">List Code Values</a></td>
-					<td></td>
-					<td></td>
-				</tr>
-				<tr >
-					<td></td>
-					<td>codes/{codeId}/codevalues/{codevalueId}</td>
-					<td></td>
-					<td><a href="#configs_codes_codevalues_retrieve">Retrieve a Code Value</a></td>
-					<td><a href="#configs_codes_codevalues_update">Update a Code Value</a></td>
-					<td><a href="#configs_codes_codevalues_delete">Delete a Code Value</a></td>
-				</tr>
-                <tr>
-                    <td><a href="#audits">Audits</a></td>
-                    <td>audits</td>
-                    <td></td>
-                    <td><a href="#audits_list">List Audits</a></td>
-                    <td></td>
-                    <td></td>
-                </tr>
-				<tr>
-					<td></td>
-					<td>audits/searchtemplate</td>
-					<td></td>
-					<td><a href="#audits_searchtemplate">Retrieve Audit Search Template</a></td>
-					<td></td>
-					<td></td>
-				</tr>
-                <tr class="alt">
-                    <td></td>
-                    <td>audits/{auditId}</td>
-                    <td></td>
-                    <td><a href="#audits_retrieve">Retrieve an Audit Entry</a></td>
-                    <td></td>
-                    <td></td>
-                </tr>
-                <tr>
-                    <td><a href="#makercheckers">Makercheckers</a></td>
-                    <td>makercheckers</td>
-                    <td></td>
-                    <td><a href="#makercheckers_list">List Maker Checker Entries</a></td>
-                    <td></td>
-                    <td></td>
-                </tr>
-				<tr class="alt">
-					<td></td>
-					<td>makercheckers/searchtemplate</td>
-					<td></td>
-					<td><a href="#makercheckers_searchtemplate">Retrieve Maker Checker Search Template</a></td>
-					<td></td>
-					<td></td>
-				</tr>
-                <tr class="alt">
-                    <td></td>
-                    <td>makercheckers/{auditId}</td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td><a href="#makercheckers_delete">Delete Maker Checker Entry</a></td>
-                </tr>
-                <tr>
-                    <td></td>
-                    <td>makercheckers/{auditId}?command=approve</td>
-                    <td><a href="#makercheckers_approve">Approve Maker Checker Entry</a></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                </tr>
 				<tr class="alt">
 					<td><a href="#funds">Funds</a></td>
 					<td>funds</td>
@@ -13842,7 +13814,7 @@ GET https://DomainName/api/v1/search?query=000000111
 					<td></td>
 					<td></td>
 				</tr>
-				<tr class="alt">
+				<tr>
 					<td><a href="#notes">Notes</a></td>
 					<td>{resource}/{resourceId}/notes</td>
 					<td><a href="#resources_addnote">Add a Resource Note</td>
@@ -13850,7 +13822,7 @@ GET https://DomainName/api/v1/search?query=000000111
 					<td></td>
 					<td></td>
 				</tr>
-				<tr>
+				<tr class="alt">
 					<td></td>
 					<td>{resource}/{resourceId}/notes/{noteId}</td>
 					<td></td>
@@ -13860,102 +13832,6 @@ GET https://DomainName/api/v1/search?query=000000111
 					<td><a href="#resources_deletenote">Delete a Resource Note</a></td>
 				</tr>
 				<tr>
-					<td><a href="#search">Search</a></td>
-					<td>search</td>
-					<td></td>
-					<td><a href="#search_resource">Search Resources</td>
-					<td></td>
-					<td></td>
-				</tr>
-				<tr class="alt">
-					<td><a href="#glaccounts">General Ledger Account</a></td>
-					<td>glaccounts</td>
-					<td><a href="#glaccounts_create">Create a New Ledger Account</a></td>
-					<td><a href="#glaccounts_list">List Ledger Accounts</a></td>
-					<td></td>
-					<td></td>
-				</tr>
-				<tr>
-					<td></td>
-					<td>glaccounts/{glaccountId}</td>
-					<td></td>
-					<td><a href="#glaccounts_retrieve">Retrieve a Ledger Account</a></td>
-					<td><a href="#glaccounts_update">Update a Ledger Account</a></td>
-					<td><a href="#glaccounts_delete">Delete a Ledger Account</a></td>
-				</tr>
-				<tr class="alt">
-					<td><a href="#glclosures">Accounting Closure</a></td>
-					<td>glclosures</td>
-					<td><a href="#glclosures_create">Create an Accounting Closure</a></td>
-					<td><a href="#glclosures_list">List Accounting Closures</a></td>
-					<td></td>
-					<td></td>
-				</tr>
-				<tr>
-					<td></td>
-					<td>glclosures/{glclosureId}</td>
-					<td></td>
-					<td><a href="#glclosures_retrieve">Retrieve an Accounting Closure</a></td>
-					<td><a href="#glclosures_update">Update an Accounting Closure</a></td>
-					<td><a href="#glclosures_delete">Delete an Accounting Closure</a></td>
-				</tr>
-				<tr class="alt">
-					<td><a href="#journalentries">Journal Entries</a></td>
-					<td>journalentries</td>
-					<td><a href="#journalentries_create">Create Journal Entries</a></td>
-					<td><a href="#journalentries_list">List Journal Entries</a></td>
-					<td></td>
-					<td></td>
-				</tr>
-				<tr>
-					<td></td>
-					<td>journalentries/{entryId}</td>
-					<td></td>
-					<td><a href="#journalentries_retrieve">Retrieve a single Entry</a></td>
-					<td></td>
-					<td></td>
-				</tr>
-				<tr class="alt">
-					<td></td>
-					<td>journalentries/{transactionId}/reversal</td>
-					<td><a href="#journalentries_reverse">Reverse Journal Entries</a></td>
-					<td></td>
-					<td></td>
-					<td></td>
-				</tr>
-                <tr>
-                    <td><a href="#reports">Report</a></td>
-                    <td>reports</td>
-                    <td><a href="#reports_create">Create a Report</a></td>
-                    <td><a href="#reports_list">List Reports</a></td>
-                    <td></td>
-                    <td></td>
-                </tr>
-				<tr>
-					<td></td>
-					<td>reports/template</td>
-					<td></td>
-					<td><a href="#reports_template">Retrieve Report Template</a></td>
-					<td></td>
-					<td></td>
-				</tr>
-                <tr class="alt">
-                    <td></td>
-                    <td>reports/{id}</td>
-                    <td></td>
-                    <td><a href="#reports_retrieve">Retrieve a Report</a></td>
-                    <td><a href="#reports_update">Update a Report</a></td>
-                    <td><a href="#reports_delete">Delete a Report</a></td>
-                </tr>
-                <tr>
-                    <td><a href="#runreports">Run Report</a></td>
-                    <td>runreports/{reportName}</td>
-                    <td></td>
-                    <td><a href="#report_run">Run a Report</a></td>
-                    <td></td>
-                    <td></td>
-                </tr>
-				<tr class="alt">
 					<td><a href="#authentication">Authentication</a></td>
 					<td>authentication</td>
 					<td><a href="#authenticate_request">Verify Authentication</a></td>
@@ -13963,7 +13839,7 @@ GET https://DomainName/api/v1/search?query=000000111
 					<td></td>
 					<td></td>
 				</tr>
-				<tr>
+				<tr class="alt">
 					<td><a href="#users">User</a></td>
 					<td>users</td>
 					<td><a href="#users_create">Create a User</a></td>
@@ -13971,7 +13847,7 @@ GET https://DomainName/api/v1/search?query=000000111
 					<td></td>
 					<td></td>
 				</tr>
-				<tr class="alt">
+				<tr>
 					<td></td>
 					<td>users/template</td>
 					<td></td>
@@ -14020,7 +13896,103 @@ GET https://DomainName/api/v1/search?query=000000111
 					<td><a href="#permissions_list">List Application Permissions</a></td>
 					<td><a href="#permissions_update">Enable/Disable Permissions for Maker Checker</a></td>
 					<td></td>
-				</tr>				
+				</tr>
+				<tr>
+					<td><a href="#configs_global">Global Configuration</a></td>
+					<td>configurations</td>
+					<td></td>
+					<td><a href="#configs_globalconfig_retrieve">Retrieve Global Configuration</a></td>
+					<td><a href="#configs_globalconfig_update">Update Global Configuration</a></td>
+					<td></td>
+				</tr>
+				<tr class="alt">
+					<td><a href="#configs_codes">Codes</a></td>
+					<td>codes</td>
+					<td><a href="#configs_codes_create">Create a Code</a></td>
+					<td><a href="#configs_codes_retrieve">List Codes</a></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>codes/{codeId}</td>
+					<td></td>
+					<td><a href="#configs_code_retrieve">Retrieve a Code</a></td>
+					<td><a href="#configs_code_update">Update a Code</a></td>
+					<td><a href="#configs_code_delete">Delete a Code</a></td>
+				</tr>
+				<tr class="alt">
+					<td><a href="#configs_codes_codevalues">Code Values</a></td>
+					<td>codes/{codeId}/codevalues</td>
+					<td><a href="#configs_codes_codevalues_create">Create a Code Value</a></td>
+					<td><a href="#configs_codes_codevalues_list">List Code Values</a></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr >
+					<td></td>
+					<td>codes/{codeId}/codevalues/{codevalueId}</td>
+					<td></td>
+					<td><a href="#configs_codes_codevalues_retrieve">Retrieve a Code Value</a></td>
+					<td><a href="#configs_codes_codevalues_update">Update a Code Value</a></td>
+					<td><a href="#configs_codes_codevalues_delete">Delete a Code Value</a></td>
+				</tr>
+                <tr>
+                    <td><a href="#audits">Audits</a></td>
+                    <td>audits</td>
+                    <td></td>
+                    <td><a href="#audits_list">List Audits</a></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+				<tr>
+					<td></td>
+					<td>audits/searchtemplate</td>
+					<td></td>
+					<td><a href="#audits_searchtemplate">Retrieve Audit Search Template</a></td>
+					<td></td>
+					<td></td>
+				</tr>
+                <tr class="alt">
+                    <td></td>
+                    <td>audits/{auditId}</td>
+                    <td></td>
+                    <td><a href="#audits_retrieve">Retrieve an Audit Entry</a></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td><a href="#makercheckers">Makercheckers</a></td>
+                    <td>makercheckers</td>
+                    <td></td>
+                    <td><a href="#makercheckers_list">List Maker Checker Entries</a></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+				<tr class="alt">
+					<td></td>
+					<td>makercheckers/searchtemplate</td>
+					<td></td>
+					<td><a href="#makercheckers_searchtemplate">Retrieve Maker Checker Search Template</a></td>
+					<td></td>
+					<td></td>
+				</tr>
+                <tr class="alt">
+                    <td></td>
+                    <td>makercheckers/{auditId}</td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td><a href="#makercheckers_delete">Delete Maker Checker Entry</a></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>makercheckers/{auditId}?command=approve</td>
+                    <td><a href="#makercheckers_approve">Approve Maker Checker Entry</a></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>				
 			</table>
 		</div>
 

@@ -3,7 +3,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this file,
  * You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-package org.mifosplatform.useradministration.serialization;
+package org.mifosplatform.useradministration.service;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -26,7 +26,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
 
 @Component
-public final class RoleCommandValidator {
+public final class RoleDataValidator {
 
     /**
      * The parameters supported for this command.
@@ -36,7 +36,7 @@ public final class RoleCommandValidator {
     private final FromJsonHelper fromApiJsonHelper;
 
     @Autowired
-    public RoleCommandValidator(final FromJsonHelper fromApiJsonHelper) {
+    public RoleDataValidator(final FromJsonHelper fromApiJsonHelper) {
         this.fromApiJsonHelper = fromApiJsonHelper;
     }
 
@@ -85,10 +85,6 @@ public final class RoleCommandValidator {
     }
 
     private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
-        if (!dataValidationErrors.isEmpty()) {
-            //
-            throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
-                    dataValidationErrors);
-        }
+        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
     }
 }
