@@ -56,7 +56,11 @@ public final class SearchParameters {
     }
 
     public boolean isOrderByRequested() {
-        return StringUtils.isNotBlank(this.orderBy) && StringUtils.isNotBlank(this.sortOrder);
+        return StringUtils.isNotBlank(this.orderBy);
+    }
+
+    public boolean isSortOrderProvided() {
+        return StringUtils.isNotBlank(this.sortOrder);
     }
 
     public String getSqlSearch() {

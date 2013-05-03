@@ -1908,7 +1908,7 @@ Request Body:
 	<a id="clients_activate" name="clients_activate" class="old-syle-anchor">&nbsp;</a>
 	<div class="method-section">
 	    <div class="method-description">
-	        <h2>Activate a Client</h2>
+	        <h4>Activate a Client</h4>
 	        <p>Clients can be created in a <i>Pending</i> state. This API exists to enable client activation (for when a client becomes approved member of microfinance institue).</p>
 	        <p>If the client happens to be alrady active this API will result in an error.</p>
 	    </div>
@@ -1983,6 +1983,74 @@ GET https://DomainName/api/v1/clients/{clientId}
 			<div class="method-section">
 				<div class="method-description">
 					<h4>List Clients</h4>
+					<p>The <i>list</i> capability of clients can support <b>pagination</b> and <b>sorting</b>.</p>
+					<h5>Optional Arguments</h5>
+					<dl class="argument-list">
+						<dt>offset</dt>
+						<dd>
+							Integer <span>optional</span>, defaults to 0
+						</dd>
+						<dd>Indicates from what result to start from.</dd>
+						
+						<dt>limit</dt>
+						<dd>
+							Integer <span>optional</span>, defaults to 200
+						</dd>
+						<dd>Restricts the size of results returned.</dd>
+
+						<dt>orderBy</dt>
+						<dd>
+							String <span>optional</span>, one of <span>displayName, accountNo, officeId, officeName</span>
+						</dd>
+						<dd>Orders the results by the field indicated.</dd>
+
+						<dt>sortBy</dt>
+						<dd>
+							String <span>optional</span>, one of <span>ASC, DESC</span>
+						</dd>
+						<dd>Indicates what way to order results if <i>orderBy</i> is used.</dd>
+
+						<dt>officeId</dt>
+						<dd>
+							Integer <span>optional</span> 
+						</dd>
+						<dd>Provides ability to restrict list of clients returned based on the office there associated with.</dd>
+						<dt>underHierarchy</dt>
+						<dd>
+							String <span>optional</span>
+						</dd>
+						<dd>Use the office hierarchy string to return all clients under a given hierarchy.</dd>
+
+						<dt>displayName</dt>
+						<dd>
+							String <span>optional</span>
+						</dd>
+						<dd>Use displayName of clients to restrict results.</dd>
+
+						<dt>firstName</dt>
+						<dd>
+							String <span>optional</span>
+						</dd>
+						<dd>Use firstName of clients to restrict results.</dd>
+
+						<dt>lastName</dt>
+						<dd>
+							String <span>optional</span>
+						</dd>
+						<dd>Use lastName of clients to restrict results.</dd>
+
+						<dt>externalId</dt>
+						<dd>
+							String <span>optional</span>
+						</dd>
+						<dd>Use externalId of clients to restrict results.</dd>
+
+						<dt>sqlSearch</dt>
+						<dd>
+							String <span>optional</span>
+						</dd>
+						<dd>Use an sql fragment valid for the underlying client schema to filter results. e.g. display_name like %K%</dd>				
+					</dl>
 					<p>Example Requests:</p>
 					<div class=apiClick>clients</div>
 					<br>
@@ -1994,46 +2062,44 @@ GET https://DomainName/api/v1/clients/{clientId}
 GET https://DomainName/api/v1/clients
 					</code>
 					<code class="method-response">
-[
-  {
-    "id": 2,
-    "accountNo": "000000002",
-    "status": {
-      "id": 300,
-      "code": "clientStatusType.active",
-      "value": "Active"
+{
+  "totalFilteredRecords": 2,
+  "pageItems": [
+    {
+      "id": 1,
+      "accountNo": "000000001",
+      "status": {
+        "id": 300,
+        "code": "clientStatusType.active",
+        "value": "Active"
+      },
+      "active": true,
+      "activationDate": [
+        2013,
+        3,
+        1
+      ],
+      "fullname": "Small shop",
+      "displayName": "Small shop",
+      "officeId": 1,
+      "officeName": "Head Office"
     },
-    "activationDate": [
-      2009,
-      3,
-      4
-    ],
-    "fullname": "Client of group",
-    "displayName": "Client of group",
-    "officeId": 1,
-    "officeName": "Head Office"
-  },
-  {
-    "id": 1,
-    "accountNo": "000000001",
-    "externalId": "786YYH7",
-    "status": {
-      "id": 300,
-      "code": "clientStatusType.active",
-      "value": "Active"
-    },
-    "activationDate": [
-      2009,
-      3,
-      4
-    ],
-    "firstname": "Petra",
-    "lastname": "Yton",
-    "displayName": "Petra Yton",
-    "officeId": 1,
-    "officeName": "Head Office"
-  }
-]
+    {
+      "id": 2,
+      "accountNo": "000000002",
+      "status": {
+        "id": 100,
+        "code": "clientStatusType.pending",
+        "value": "Pending"
+      },
+      "active": false,
+      "fullname": "Home Farm Produce",
+      "displayName": "Home Farm Produce",
+      "officeId": 1,
+      "officeName": "Head Office"
+    }
+  ]
+}
 					</code>
 				</div>
 			</div>

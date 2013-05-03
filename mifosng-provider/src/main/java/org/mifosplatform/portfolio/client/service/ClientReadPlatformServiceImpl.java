@@ -94,7 +94,11 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         // have to scan entire database table.
         // sql += " order by c.display_name ASC, c.account_no ASC";
         if (searchParameters.isOrderByRequested()) {
-            sqlBuilder.append(" order by ").append(searchParameters.getOrderBy()).append(' ').append(searchParameters.getSortOrder());
+            sqlBuilder.append(" order by ").append(searchParameters.getOrderBy());
+            
+            if (searchParameters.isSortOrderProvided()) {
+                sqlBuilder.append(' ').append(searchParameters.getSortOrder());
+            }
         }
 
         if (searchParameters.isLimited()) {
@@ -130,7 +134,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         }
 
         if (externalId != null) {
-            extraCriteria += " and external_id like " + ApiParameterHelper.sqlEncodeString(externalId);
+            extraCriteria += " and c.external_id like " + ApiParameterHelper.sqlEncodeString(externalId);
         }
 
         if (displayName != null) {
