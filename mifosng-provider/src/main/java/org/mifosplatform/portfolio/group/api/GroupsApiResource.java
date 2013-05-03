@@ -33,6 +33,7 @@ import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.exception.UnrecognizedQueryParamException;
 import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.mifosplatform.infrastructure.core.serialization.ToApiJsonSerializer;
+import org.mifosplatform.infrastructure.core.service.Page;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.portfolio.client.data.ClientData;
 import org.mifosplatform.portfolio.client.service.ClientReadPlatformService;
@@ -106,17 +107,18 @@ public class GroupsApiResource {
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveAll(@Context final UriInfo uriInfo, @QueryParam("sqlSearch") final String sqlSearch,
+    public String retrieveAll(@QueryParam("sqlSearch") final String sqlSearch,
             @QueryParam("officeId") final Long officeId, @QueryParam("externalId") final String externalId,
-            @QueryParam("name") final String name, @QueryParam("underHierarchy") final String hierarchy) {
+            @QueryParam("name") final String name, @QueryParam("underHierarchy") final String hierarchy,
+            @QueryParam("offset") final Integer offset, @QueryParam("limit") final Integer limit,
+            @QueryParam("orderBy") final String orderBy, @QueryParam("sortOrder") final String sortOrder) {
 
         this.context.authenticatedUser().validateHasReadPermission(GroupingTypesApiConstants.GROUP_RESOURCE_NAME);
 
-        final SearchParameters searchCriteria = SearchParameters.from(sqlSearch, officeId, externalId, name, hierarchy);
-        final Collection<GroupGeneralData> groups = this.groupReadPlatformService.retrieveAll(searchCriteria);
-
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.groupGeneralApiJsonSerializer.serialize(settings, groups, GroupingTypesApiConstants.GROUP_RESPONSE_DATA_PARAMETERS);
+        final SearchParameters searchParameters = SearchParameters.forGroups(sqlSearch, officeId, externalId, name, hierarchy, offset,
+                limit, orderBy, sortOrder);
+        final Page<GroupGeneralData> groups = this.groupReadPlatformService.retrieveAll(searchParameters);
+        return this.groupGeneralApiJsonSerializer.serialize(groups);
     }
 
     @GET

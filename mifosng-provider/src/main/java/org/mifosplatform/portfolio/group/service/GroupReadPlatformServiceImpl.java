@@ -14,6 +14,8 @@ import java.util.List;
 import org.apache.commons.lang.StringUtils;
 import org.mifosplatform.infrastructure.core.api.ApiParameterHelper;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
+import org.mifosplatform.infrastructure.core.service.Page;
+import org.mifosplatform.infrastructure.core.service.PaginationHelper;
 import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.office.data.OfficeData;
@@ -48,6 +50,7 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
     private final CenterReadPlatformService centerReadPlatformService;
 
     private final AllGroupTypesDataMapper allGroupTypesDataMapper = new AllGroupTypesDataMapper();
+    private final PaginationHelper<GroupGeneralData> paginationHelper = new PaginationHelper<GroupGeneralData>();
 
     @Autowired
     public GroupReadPlatformServiceImpl(final PlatformSecurityContext context, final TenantAwareRoutingDataSource dataSource,
@@ -100,22 +103,38 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
     }
 
     @Override
-    public Collection<GroupGeneralData> retrieveAll(final SearchParameters searchCriteria) {
+    public Page<GroupGeneralData> retrieveAll(final SearchParameters searchParameters) {
 
         final AppUser currentUser = context.authenticatedUser();
         final String hierarchy = currentUser.getOffice().getHierarchy();
         final String hierarchySearchString = hierarchy + "%";
 
-        String sql = "select " + this.allGroupTypesDataMapper.schema() + " where o.hierarchy like ?";
+        StringBuilder sqlBuilder = new StringBuilder(200);
+        sqlBuilder.append("select SQL_CALC_FOUND_ROWS ");
+        sqlBuilder.append(this.allGroupTypesDataMapper.schema());
+        sqlBuilder.append(" where o.hierarchy like ?");
 
-        final String extraCriteria = getGroupExtraCriteria(searchCriteria);
+        final String extraCriteria = getGroupExtraCriteria(searchParameters);
+
         if (StringUtils.isNotBlank(extraCriteria)) {
-            sql += " and (" + extraCriteria + ")";
+            sqlBuilder.append(" and (").append(extraCriteria).append(")");
         }
 
-        sql += " order by g.hierarchy";
+        if (searchParameters.isOrderByRequested()) {
+            sqlBuilder.append(" order by ").append(searchParameters.getOrderBy()).append(' ').append(searchParameters.getSortOrder());
+        }
 
-        return this.jdbcTemplate.query(sql, this.allGroupTypesDataMapper, new Object[] { hierarchySearchString });
+        if (searchParameters.isLimited()) {
+            sqlBuilder.append(" limit ").append(searchParameters.getLimit());
+        }
+
+        if (searchParameters.isOffset()) {
+            sqlBuilder.append(" offset ").append(searchParameters.getOffset());
+        }
+
+        final String sqlCountRows = "SELECT FOUND_ROWS()";
+        return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlCountRows, sqlBuilder.toString(),
+                new Object[] { hierarchySearchString }, this.allGroupTypesDataMapper);
     }
 
     // 'g.' preffix because of ERROR 1052 (23000): Column 'column_name' in where

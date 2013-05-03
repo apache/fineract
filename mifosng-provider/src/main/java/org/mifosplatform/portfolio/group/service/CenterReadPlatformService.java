@@ -7,6 +7,7 @@ package org.mifosplatform.portfolio.group.service;
 
 import java.util.Collection;
 
+import org.mifosplatform.infrastructure.core.service.Page;
 import org.mifosplatform.portfolio.group.data.CenterData;
 import org.mifosplatform.portfolio.group.data.GroupGeneralData;
 
@@ -18,7 +19,7 @@ public interface CenterReadPlatformService {
 
     Collection<CenterData> retrieveAllForDropdown(Long officeId);
 
-    Collection<CenterData> retrieveAll(SearchParameters searchCriteria);
+    Page<CenterData> retrieveAll(SearchParameters searchParameters);
 
     GroupGeneralData retrieveCenterGroupTemplate(Long centerId);
     

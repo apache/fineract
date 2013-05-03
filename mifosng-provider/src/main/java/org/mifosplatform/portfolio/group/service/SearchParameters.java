@@ -30,12 +30,19 @@ public final class SearchParameters {
             final String displayName, final String firstname, final String lastname, final String hierarchy, final Integer offset,
             final Integer limit, final String orderBy, final String sortOrder) {
 
-        Integer maxLimitAllowed = 200;
-        if (limit != null && limit < maxLimitAllowed && limit > 0) {
-            maxLimitAllowed = limit;
-        }
-
+        Integer maxLimitAllowed =  getCheckedLimit(200, limit);
+     
         return new SearchParameters(sqlSearch, officeId, externalId, displayName, hierarchy, firstname, lastname, offset, maxLimitAllowed,
+                orderBy, sortOrder);
+    }
+    
+    public static SearchParameters forGroups(final String sqlSearch, final Long officeId, final String externalId,
+            final String name, final String hierarchy, final Integer offset,
+            final Integer limit, final String orderBy, final String sortOrder) {
+
+        Integer maxLimitAllowed = getCheckedLimit(200, limit);       
+
+        return new SearchParameters(sqlSearch, officeId, externalId, name, hierarchy, null, null, offset, maxLimitAllowed,
                 orderBy, sortOrder);
     }
 
@@ -61,6 +68,14 @@ public final class SearchParameters {
 
     public boolean isSortOrderProvided() {
         return StringUtils.isNotBlank(this.sortOrder);
+    }
+    
+    public static Integer getCheckedLimit(Integer maxLimitAllowed, Integer limit)
+    {
+        if (limit != null && limit < maxLimitAllowed && limit > 0) {
+            maxLimitAllowed = limit;
+        }
+        return maxLimitAllowed;        
     }
 
     public String getSqlSearch() {
