@@ -1394,16 +1394,16 @@ public class Loan extends AbstractPersistable<Long> {
         }
 
         if (disbursedOn.isAfter(new LocalDate())) {
-            final String errorMessage = "The date on which a loan is disbursed cannot be in the future.";
+            final String errorMessage = "The date on which a loan with identifier : " + this.accountNumber + " is disbursed cannot be in the future.";
             throw new InvalidLoanStateTransitionException("disbursal", "cannot.be.a.future.date", errorMessage, disbursedOn);
         }
 
         LocalDate firstRepaymentDueDate = this.repaymentScheduleInstallments.get(0).getDueDate();
         if (disbursedOn.isAfter(firstRepaymentDueDate)) {
-            final String errorMessage = "The date on which a loan is disbursed cannot be after the first expected repayment date: "
+            final String errorMessage = "The date on which a loan with identifier : " + this.accountNumber + " is disbursed cannot be after the first expected repayment date: "
                     + firstRepaymentDueDate.toString();
             throw new InvalidLoanStateTransitionException("disbursal", "cannot.be.after.first.repayment.due.date", errorMessage,
-                    disbursedOn, firstRepaymentDueDate);
+                    this.accountNumber, disbursedOn, firstRepaymentDueDate);
         }
 
         return disbursementTransaction;

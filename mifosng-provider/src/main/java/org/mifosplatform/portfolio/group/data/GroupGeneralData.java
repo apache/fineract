@@ -147,4 +147,9 @@ public class GroupGeneralData {
     public Long officeId() {
         return this.officeId;
     }
+    
+    public String getHierarchy() {
+        return this.hierarchy;
+    }
+     
 }

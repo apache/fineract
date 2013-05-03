@@ -484,6 +484,10 @@ public class CommandWrapper {
     public boolean isGroupResource() {
         return this.entityName.equalsIgnoreCase("GROUP");
     }
+    
+    public boolean isSaveGroupCollectionSheet(){
+        return this.entityName.equalsIgnoreCase("GROUP") && this.actionName.equalsIgnoreCase("SAVECOLLECTIONSHEET");
+    }
 
     public boolean isCollectionSheetResource() {
         return this.entityName.equals("COLLECTIONSHEET");
@@ -493,6 +497,10 @@ public class CommandWrapper {
         return this.entityName.equalsIgnoreCase("CENTER");
     }
 
+    public boolean isSaveCenterCollectionSheet(){
+        return this.entityName.equalsIgnoreCase("CENTER") && this.actionName.equalsIgnoreCase("SAVECOLLECTIONSHEET");
+    }
+    
     public boolean isReportResource() {
         return this.entityName.equalsIgnoreCase("REPORT");
     }

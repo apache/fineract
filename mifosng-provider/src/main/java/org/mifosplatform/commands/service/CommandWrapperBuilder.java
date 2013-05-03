@@ -847,7 +847,16 @@ public class CommandWrapperBuilder {
         this.href = "/groups/" + groupId + "?command=activate";
         return this;
     }
-
+    
+    public CommandWrapperBuilder saveGroupCollectionSheet(final Long groupId) {
+        this.actionName = "SAVECOLLECTIONSHEET";
+        this.entityName = "GROUP";
+        this.entityId = groupId;
+        this.groupId = groupId;
+        this.href = "/groups/" + groupId + "?command=saveCollectionSheet";
+        return this;
+    }
+    
     public CommandWrapperBuilder deleteGroup(final Long groupId) {
         this.actionName = "DELETE";
         this.entityName = "GROUP";
@@ -948,6 +957,14 @@ public class CommandWrapperBuilder {
         this.entityId = centerId;
         this.groupId = centerId;
         this.href = "/centers/" + centerId + "?command=activate";
+        return this;
+    }
+
+    public CommandWrapperBuilder saveCenterCollectionSheet(final Long centerId) {
+        this.actionName = "SAVECOLLECTIONSHEET";
+        this.entityName = "CENTER";
+        this.entityId = centerId;
+        this.href = "/centers/" + centerId + "?command=saveCollectionSheet";
         return this;
     }
 
