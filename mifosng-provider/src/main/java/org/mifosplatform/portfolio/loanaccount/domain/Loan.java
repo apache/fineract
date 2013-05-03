@@ -475,7 +475,7 @@ public class Loan extends AbstractPersistable<Long> {
 
             // if loan charge is to be applied on a future date, the loan
             // transaction would show todays date as applied date
-            if (currentDate.isBefore(transactionDate)) {
+            if (transactionDate == null || currentDate.isBefore(transactionDate)) {
                 transactionDate = currentDate;
             }
         }
