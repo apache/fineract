@@ -160,12 +160,11 @@ body {
     height: 30px;
     position: absolute;
     top: 10px;
-    left: 20px;
+    left: 10px;
     font-weight: bold;
     color: black;
     font-size: 16px;
     text-decoration: none;
-
 }
 
 .flybar-button {
@@ -184,7 +183,7 @@ body {
 .flybar-nav {
     display: block;
     float: left;
-    width: 80px;
+    width: 90px;
     position: relative;
 }
 

@@ -2,8 +2,7 @@
 <html>
 <head>
 <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
-<link rel="stylesheet" href="apidocs.css" type="text/css" media="screen"
-	title="Mifos X API Docs" charset="utf-8" />
+<link rel="stylesheet" href="apidocs.css" type="text/css" media="screen" title="Mifos X API Docs" charset="utf-8" />
 <script type="text/javascript" src="jquery-1.7.min.js"></script>
 <title>Mifos X API Documentation</title>
 
@@ -91,7 +90,7 @@
 <body>
 	<div id="page-wrapper">
 		<div id="flybar">
-			<div id=nav-logo>API MENU</div>
+			<div id="nav-logo">1.0.0.RELEASE API</div>
 			<div class="flybar-nav">
 				<h2 class="flybar-button">Overview</h2>
 				<div class="flybar-menu-overview">
@@ -101,15 +100,13 @@
 								<li><a href="#top">Mifos X API Documentation</a></li>
 								<li><a href="#interact">Try The API From Your Browser</a></li>
 								<li><a href="#genopts">Generic Options</a></li>
-								<li><a href="#creates_and_updates">Creating and
-										Updating</a></li>
-								<li><a href="#dates_and_numbers">Updating Dates and
-										Numbers</a></li>
+								<li><a href="#creates_and_updates">Creating and Updating</a></li>
+								<li><a href="#dates_and_numbers">Updating Dates and Numbers</a></li>
 								<li><a href="#field_descriptions">Field Descriptions</a></li>
-								<li><a href="#authentication_overview">Authentication
-										Overview</a></li>
+								<li><a href="#authentication_overview">Authentication Overview</a></li>
 								<li><a href="#errors">Errors</a></li>
 								<li><a href="#fullapi_matrix">Full API Matrix</a></li>
+								<li><a href="#betaapi_matrix">Beta API Matrix</a></li>
 							</ul>
 						</div>
 					</div>
@@ -235,6 +232,8 @@
 					</div>
 				</div>
 			</div>
+			<!-- disabled Groupings API for release 1.0.0 as its beta -->
+			<!--
 			<div class="flybar-nav">
 				<h2 class="flybar-button">Groupings</h2>
 				<div id="toc-menu-group" class="flybar-menu">
@@ -334,7 +333,7 @@
 					</div>
 				</div>
 			</div>
-
+			-->
 
 			<div class="flybar-nav">
 				<h2 class="flybar-button">Loan</h2>
@@ -551,6 +550,9 @@
 					</div>
 				</div>
 			</div>
+
+			<!-- disabled Groupings API for release 1.0.0 as its beta -->
+			<!--
 			<div class="flybar-nav">
 				<h2 class="flybar-button">Savings</h2>
 				<div id="toc-menu-savings" class="flybar-menu">
@@ -602,6 +604,8 @@
 					</div>
 				</div>
 			</div>
+			-->
+
 			<div class="flybar-nav">
 				<h2 class="flybar-button">Accounting</h2>
 				<div id="toc-menu-accounting" class="flybar-menu">
@@ -1342,6 +1346,8 @@
 										</tr>
 									</table></td>
 							</tr>
+							<!-- disabled API for release 1.0.0 as its beta -->
+							<!--
 							<tr class="alt">
 								<td>centers/template</td>
 								<td><a href="#centers_template">Retrieve Center Template</a></td>
@@ -1350,6 +1356,7 @@
 								<td>groups/template</td>
 								<td><a href="#groups_template">Retrieve Group Template</a></td>
 							</tr>
+							-->
 							<tr class="alt">
 								<td>clients/template</td>
 								<td><a href="#clients_template">Retrieve Client Template</a></td>
@@ -1366,6 +1373,8 @@
 								<td>loans/{loanId}/transactions/template</td>
 								<td><a href="#loans_repaymenttemplate_etc">Retrieve Loan Transaction Template</a></td>
 							</tr>
+							<!-- disabled API for release 1.0.0 as its beta -->
+							<!--
 							<tr class="alt">
 								<td>savingproducts/template</td>
 								<td><a href="#savingsproducts_template">Retrieve Savings Product Template</a></td>
@@ -1374,10 +1383,11 @@
 								<td>savingsaccounts/template?clientId={clientId}</td>
 								<td><a href="#savingsaccounts_template">Retrieve Savings Account Template</a></td>
 							</tr>
-                                                        <tr class="alt">
-                                                                <td>savingsaccounts/{accountId}/transactions/template</td>
-                                                                <td><a href="#savingsaccounts_transactions_template">Retrieve Savings Account Transaction Template</a></td>
-                                                        </tr>
+                            <tr class="alt">
+                                <td>savingsaccounts/{accountId}/transactions/template</td>
+                                <td><a href="#savingsaccounts_transactions_template">Retrieve Savings Account Transaction Template</a></td>
+                            </tr>
+                            -->
 							<tr>
 								<td>offices/template</td>
 								<td><a href="#offices_template">Retrieve Office Template</a></td>
@@ -13309,6 +13319,14 @@ GET https://DomainName/api/v1/search?query=000000111
 				</tr>
 				<tr>
 					<td></td>
+					<td>clients/template</td>
+					<td></td>
+					<td><a href="#clients_template">Retrieve Client Template</a></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
 					<td>clients/{clientId}</td>
 					<td></td>
 					<td><a href="#clients_retrieve">Retrieve a Client</a></td>
@@ -13368,57 +13386,6 @@ GET https://DomainName/api/v1/search?query=000000111
 					</td>
 					<td></td>
 				</tr>
-				<!-- centers groups -->
-				<tr class="alt">
-					<td><a href="#centers">Center</a></td>
-					<td>centers</td>
-					<td><a href="#centers_create">Create a Center</a></td>
-					<td><a href="#centers_list">List Centers</a></td>
-					<td></td>
-					<td></td>
-				</tr>
-				<tr>
-					<td></td>
-					<td>centers/{centerId}</td>
-					<td></td>
-					<td><a href="#centers_retrieve">Retrieve a Center</a></td>
-					<td><a href="#centers_update">Update a Center</a></td>
-					<td><a href="#centers_delete">Delete a Center</a></td>
-				</tr>
-				<tr class="alt">
-					<td></td>
-					<td>centers/{centerId}?command=activate</td>
-					<td><a href="#centers_activate">Activate a Center</a></td>
-					<td></td>
-					<td></td>
-					<td></td>
-				</tr>
-				<tr>
-					<td><a href="#groups">Group</a></td>
-					<td>groups</td>
-					<td><a href="#groups_create">Create a Group</a></td>
-					<td><a href="#groups_list">List Groups</a></td>
-					<td></td>
-					<td></td>
-				</tr>
-				<tr class="alt">
-					<td></td>
-					<td>groups/{group}</td>
-					<td></td>
-					<td><a href="#groups_retrieve">Retrieve a Group</a></td>
-					<td><a href="#groups_update">Update a Group</a></td>
-					<td><a href="#groups_delete">Delete a Group</a></td>
-				</tr>
-				<tr>
-					<td></td>
-					<td>groups/{groupId}?command=activate</td>
-					<td><a href="#groups_activate">Activate a Group</a></td>
-					<td></td>
-					<td></td>
-					<td></td>
-				</tr>
-				<!-- end of centers, groups api -->
-				<!-- loans api full matrix-->
 				<tr class="alt">
 					<td><a href="#loanproducts">Loan Product</a></td>
 					<td>loanproducts</td>
@@ -13427,12 +13394,19 @@ GET https://DomainName/api/v1/search?query=000000111
 					<td></td>
 					<td></td>
 				</tr>
+				<tr class="alt">
+					<td></td>
+					<td>loanproducts/template</td>
+					<td></td>
+					<td><a href="#loanproducts_template">Retrieve Loan Product Template</a></td>
+					<td></td>
+					<td></td>
+				</tr>
 				<tr>
 					<td></td>
 					<td>loanproducts/{productId}</td>
 					<td></td>
-					<td><a href="#loanproducts_retrieve">Retrieve a Loan
-							Product</a></td>
+					<td><a href="#loanproducts_retrieve">Retrieve a Loan Product</a></td>
 					<td><a href="#loanproducts_update">Update a Loan Product</a></td>
 					<td></td>
 				</tr>
@@ -13449,6 +13423,14 @@ GET https://DomainName/api/v1/search?query=000000111
 					<td>loans</td>
 					<td><a href="#loans_create">Submit a new Loan Application</a></td>
 					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr class="alt">
+					<td></td>
+					<td>loans/template?clientId={clientId}</td>
+					<td></td>
+					<td><a href="#loans_template">Retrieve Loan Template</a></td>
 					<td></td>
 					<td></td>
 				</tr>
@@ -13505,6 +13487,14 @@ GET https://DomainName/api/v1/search?query=000000111
 					<td>loans/{loanId}?command=undoDisbursal</td>
 					<td><a href="#loans_disburse_undo">Undo Loan Application Disbursal</a></td>
 					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr class="alt">
+					<td></td>
+					<td>loans/{loanId}/transactions/template</td>
+					<td></td>
+					<td><a href="#loans_repaymenttemplate_etc">Retrieve Loan Transaction Template</a></td>
 					<td></td>
 					<td></td>
 				</tr>
@@ -13600,82 +13590,18 @@ GET https://DomainName/api/v1/search?query=000000111
 					<td><a href="#collaterals_delete">Delete a Collateral</a></td>
 				</tr>
 				<tr class="alt">
-					<td><a href="#savingsproducts">Savings Product</a></td>
-					<td>savingsproducts</td>
-					<td><a href="#savingsproducts_create">Create a Savings product</a></td>
-					<td><a href="#savingsproducts_list">List Savings products</a></td>
-					<td></td>
-					<td></td>
-				</tr>
-				<tr>
-					<td></td>
-					<td>savingsproducts/{productId}</td>
-					<td></td>
-					<td><a href="#savingsproducts_retrieve">Retrieve a Savings product</a></td>
-					<td><a href="#savingsproducts_update">Update a Savings product</a></td>
-					<td><a href="#savingsproducts_delete">Delete a Savings product</a></td>
-				</tr>
-				<tr class="alt">
-					<td><a href="#savingsaccounts">Savings Accounts</a></td>
-					<td>savingsaccounts</td>
-					<td><a href="#savingsaccounts_create">Create new Savings Account</a></td>
-					<td><a href="#savingsaccounts_list">List Savings Accounts</a></td>
-					<td></td>
-					<td></td>
-				</tr>
-				<tr>
-					<td></td>
-					<td>savingsaccounts/{accountId}</td>
-					<td></td>
-					<td><a href="#savingsaccounts_retrieve">Retrieve a Savings Account</a></td>
-					<td><a href="#savingsaccounts_update">Update a Savings Account</a></td>
-					<td><a href="#savingsaccounts_delete">Delete a Savings Account</a></td>
-				</tr>
-				<tr class="alt">
-					<td></td>
-					<td>savingsaccounts/{accountId}?command=activate</td>
-					<td><a href="#savingsaccounts_activate">Activate a Savings Account</a></td>
-					<td></td>
-					<td></td>
-					<td></td>
-				</tr>
-				<tr>
-					<td></td>
-					<td>savingsaccounts/{accountId}?command=calculateInterest</td>
-					<td><a href="#savingsaccounts_calculate_interest">Calculate Interest on a Savings Account</a></td>
-					<td></td>
-					<td></td>
-					<td></td>
-				</tr>
-				<tr>
-					<td></td>
-					<td>savingsaccounts/{accountId}?command=postInterest</td>
-					<td><a href="#savingsaccounts_post_interest">Post Interest on a Savings Account</a></td>
-					<td></td>
-					<td></td>
-					<td></td>
-				</tr>
-				<tr class="alt">
-					<td><a href="#savingsaccounts_transactions">Savings Transactions</a></td>
-					<td>savingsaccounts/{accountId}/transactions?command=deposit</td>
-					<td><a href="#savingsaccounts_deposit">Make a Deposit</a></td>
-					<td></td>
-					<td></td>
-					<td></td>
-				</tr>
-				<tr>
-					<td></td>
-					<td>savingsaccounts/{accountId}/transactions?command=withdrawal</td>
-					<td><a href="#savingsaccounts_withdrawal">Make a Withdrawal</a></td>
-					<td></td>
-					<td></td>
-					<td></td>
-				</tr>
-				<tr class="alt">
 					<td><a href="#offices">Office</a></td>
 					<td>offices</td>
 					<td><a href="#offices_create">Create an Office</a></td>
 					<td><a href="#offices_list">List Offices</a></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>offices/template</td>
+					<td></td>
+					<td><a href="#offices_template">Retrieve Office Template</a></td>
 					<td></td>
 					<td></td>
 				</tr>
@@ -13739,46 +13665,62 @@ GET https://DomainName/api/v1/search?query=000000111
 					<td><a href="#configs_codes_codevalues_update">Update a Code Value</a></td>
 					<td><a href="#configs_codes_codevalues_delete">Delete a Code Value</a></td>
 				</tr>
-                                <tr>
-                                        <td><a href="#audits">Audits</a></td>
-                                        <td>audits</td>
-                                        <td></td>
-                                        <td><a href="#audits_list">List Audits</a></td>
-                                        <td></td>
-                                        <td></td>
-                                </tr>
-                                <tr class="alt">
-                                        <td></td>
-                                        <td>audits/{auditId}</td>
-                                        <td></td>
-                                        <td><a href="#audits_retrieve">Retrieve an Audit Entry</a></td>
-                                        <td></td>
-                                        <td></td>
-                                </tr>
-                                <tr>
-                                        <td><a href="#makercheckers">Makercheckers</a></td>
-                                        <td>makercheckers</td>
-                                        <td></td>
-                                        <td><a href="#makercheckers_list">List Maker Checker Entries</a></td>
-                                        <td></td>
-                                        <td></td>
-                                </tr>
-                                <tr class="alt">
-                                        <td></td>
-                                        <td>makercheckers/{auditId}</td>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                        <td><a href="#makercheckers_delete">Delete Maker Checker Entry</a></td>
-                                </tr>
-                                <tr>
-                                        <td></td>
-                                        <td>makercheckers/{auditId}?command=approve</td>
-                                        <td><a href="#makercheckers_approve">Approve Maker Checker Entry</a></td>
-                                        <td></td>
-                                        <td></td>
-                                        <td></td>
-                                </tr>
+                <tr>
+                    <td><a href="#audits">Audits</a></td>
+                    <td>audits</td>
+                    <td></td>
+                    <td><a href="#audits_list">List Audits</a></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+				<tr>
+					<td></td>
+					<td>audits/searchtemplate</td>
+					<td></td>
+					<td><a href="#audits_searchtemplate">Retrieve Audit Search Template</a></td>
+					<td></td>
+					<td></td>
+				</tr>
+                <tr class="alt">
+                    <td></td>
+                    <td>audits/{auditId}</td>
+                    <td></td>
+                    <td><a href="#audits_retrieve">Retrieve an Audit Entry</a></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td><a href="#makercheckers">Makercheckers</a></td>
+                    <td>makercheckers</td>
+                    <td></td>
+                    <td><a href="#makercheckers_list">List Maker Checker Entries</a></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+				<tr class="alt">
+					<td></td>
+					<td>makercheckers/searchtemplate</td>
+					<td></td>
+					<td><a href="#makercheckers_searchtemplate">Retrieve Maker Checker Search Template</a></td>
+					<td></td>
+					<td></td>
+				</tr>
+                <tr class="alt">
+                    <td></td>
+                    <td>makercheckers/{auditId}</td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td><a href="#makercheckers_delete">Delete Maker Checker Entry</a></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>makercheckers/{auditId}?command=approve</td>
+                    <td><a href="#makercheckers_approve">Approve Maker Checker Entry</a></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
 				<tr class="alt">
 					<td><a href="#funds">Funds</a></td>
 					<td>funds</td>
@@ -13981,30 +13923,38 @@ GET https://DomainName/api/v1/search?query=000000111
 					<td></td>
 					<td></td>
 				</tr>
-                                <tr>
-                                        <td><a href="#reports">Report</a></td>
-                                        <td>reports</td>
-                                        <td><a href="#reports_create">Create a Report</a></td>
-                                        <td><a href="#reports_list">List Reports</a></td>
-                                        <td></td>
-                                        <td></td>
-                                </tr>
-                                <tr class="alt">
-                                        <td></td>
-                                        <td>reports/{id}</td>
-                                        <td></td>
-                                        <td><a href="#reports_retrieve">Retrieve a Report</a></td>
-                                        <td><a href="#reports_update">Update a Report</a></td>
-                                        <td><a href="#reports_delete">Delete a Report</a></td>
-                                </tr>
-                                <tr>
-                                        <td><a href="#runreports">Run Report</a></td>
-                                        <td>runreports/{reportName}</td>
-                                        <td></td>
-                                        <td><a href="#report_run">Run a Report</a></td>
-                                        <td></td>
-                                        <td></td>
-                                </tr>
+                <tr>
+                    <td><a href="#reports">Report</a></td>
+                    <td>reports</td>
+                    <td><a href="#reports_create">Create a Report</a></td>
+                    <td><a href="#reports_list">List Reports</a></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+				<tr>
+					<td></td>
+					<td>reports/template</td>
+					<td></td>
+					<td><a href="#reports_template">Retrieve Report Template</a></td>
+					<td></td>
+					<td></td>
+				</tr>
+                <tr class="alt">
+                    <td></td>
+                    <td>reports/{id}</td>
+                    <td></td>
+                    <td><a href="#reports_retrieve">Retrieve a Report</a></td>
+                    <td><a href="#reports_update">Update a Report</a></td>
+                    <td><a href="#reports_delete">Delete a Report</a></td>
+                </tr>
+                <tr>
+                    <td><a href="#runreports">Run Report</a></td>
+                    <td>runreports/{reportName}</td>
+                    <td></td>
+                    <td><a href="#report_run">Run a Report</a></td>
+                    <td></td>
+                    <td></td>
+                </tr>
 				<tr class="alt">
 					<td><a href="#authentication">Authentication</a></td>
 					<td>authentication</td>
@@ -14018,6 +13968,14 @@ GET https://DomainName/api/v1/search?query=000000111
 					<td>users</td>
 					<td><a href="#users_create">Create a User</a></td>
 					<td><a href="#users_list">List Users</a></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr class="alt">
+					<td></td>
+					<td>users/template</td>
+					<td></td>
+					<td><a href="#users_template">Retrieve User Template</a></td>
 					<td></td>
 					<td></td>
 				</tr>
@@ -14064,16 +14022,32 @@ GET https://DomainName/api/v1/search?query=000000111
 					<td></td>
 				</tr>				
 			</table>
-			<br>
+		</div>
+
+	<a id="betaapi_matrix" name="betaapi_matrix" class="old-syle-anchor">&nbsp;</a>
+	<div class=fullMatrixOuter>
+		<table width="80%">
+			<tr>
+				<td><h3>Beta API Matrix</h3></td>
+			</tr>
+		</table>
 			<table class=matrixHeading>
 				<tr class="matrixHeadingBG">
-					<td valign="top"><div class="matrixHeadingVerbs">
+					<td colspan=2 valign="top"><div class="matrixHeadingVerbs">
 							<table>
 								<tr>
-									<td>TEMPLATE RESOURCES</td>
+									<td>RESOURCES</td>
 								</tr>
 							</table>
 						</div></td>
+					<td><table>
+							<tr>
+								<td><div class="matrixHeadingVerbs">POST</div></td>
+							</tr>
+							<tr>
+								<td><div class=matrixHeadingCommands>create/complex update</div></td>
+							</tr>
+						</table></td>
 					<td><table>
 							<tr>
 								<td><div class="matrixHeadingVerbs">GET</div></td>
@@ -14082,66 +14056,188 @@ GET https://DomainName/api/v1/search?query=000000111
 								<td><div class=matrixHeadingCommands>read</div></td>
 							</tr>
 						</table></td>
+					<td><table>
+							<tr>
+								<td><div class="matrixHeadingVerbs">PUT</div></td>
+							</tr>
+							<tr>
+								<td><div class=matrixHeadingCommands>update</div></td>
+							</tr>
+						</table></td>
+					<td><table>
+							<tr>
+								<td><div class="matrixHeadingVerbs">DELETE</div></td>
+							</tr>
+							<tr>
+								<td><div class=matrixHeadingCommands>delete</div></td>
+							</tr>
+						</table>
+					</td>
 				</tr>
-                                <tr class="alt">
-                                        <td>centers/template</td>
-                                        <td><a href="#centers_template">Retrieve Center Template</a></td>
-                                </tr>
-                                <tr>
-                                        <td>groups/template</td>
-                                        <td><a href="#groups_template">Retrieve Group Template</a></td>
-                                </tr>
 				<tr class="alt">
-					<td>clients/template</td>
-					<td><a href="#clients_template">Retrieve Client Template</a></td>
+					<td><a href="#centers">Center</a></td>
+					<td>centers</td>
+					<td><a href="#centers_create">Create a Center</a></td>
+					<td><a href="#centers_list">List Centers</a></td>
+					<td></td>
+					<td></td>
 				</tr>
 				<tr>
-					<td>loanproducts/template</td>
-					<td><a href="#loanproducts_template">Retrieve Loan Product Template</a></td>
-				</tr>
+					<td></td>
+                    <td>centers/template</td>
+                    <td></td>
+                    <td><a href="#centers_template">Retrieve Center Template</a></td>
+                    <td></td>
+					<td></td>
+                </tr>
 				<tr class="alt">
-					<td>loans/template?clientId={clientId}</td>
-					<td><a href="#loans_template">Retrieve Loan Template</a></td>
+					<td></td>
+					<td>centers/{centerId}</td>
+					<td></td>
+					<td><a href="#centers_retrieve">Retrieve a Center</a></td>
+					<td><a href="#centers_update">Update a Center</a></td>
+					<td><a href="#centers_delete">Delete a Center</a></td>
 				</tr>
 				<tr>
-					<td>loans/{loanId}/transactions/template</td>
-					<td><a href="#loans_repaymenttemplate_etc">Retrieve Loan Transaction Template</a></td>
+					<td></td>
+					<td>centers/{centerId}?command=activate</td>
+					<td><a href="#centers_activate">Activate a Center</a></td>
+					<td></td>
+					<td></td>
+					<td></td>
 				</tr>
 				<tr class="alt">
+					<td><a href="#groups">Group</a></td>
+					<td>groups</td>
+					<td><a href="#groups_create">Create a Group</a></td>
+					<td><a href="#groups_list">List Groups</a></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
+                    <td>groups/template</td>
+                    <td></td>
+                    <td><a href="#groups_template">Retrieve Group Template</a></td>
+                    <td></td>
+					<td></td>
+                </tr>
+				<tr class="alt">
+					<td></td>
+					<td>groups/{groupId}</td>
+					<td></td>
+					<td><a href="#groups_retrieve">Retrieve a Group</a></td>
+					<td><a href="#groups_update">Update a Group</a></td>
+					<td><a href="#groups_delete">Delete a Group</a></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>groups/{groupId}?command=activate</td>
+					<td><a href="#groups_activate">Activate a Group</a></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr class="alt">
+					<td><a href="#savingsproducts">Savings Product</a></td>
+					<td>savingsproducts</td>
+					<td><a href="#savingsproducts_create">Create a Savings product</a></td>
+					<td><a href="#savingsproducts_list">List Savings products</a></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
 					<td>savingproducts/template</td>
+					<td></td>
 					<td><a href="#savingsproducts_template">Retrieve Savings Product Template</a></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr class="alt">
+					<td></td>
+					<td>savingsproducts/{productId}</td>
+					<td></td>
+					<td><a href="#savingsproducts_retrieve">Retrieve a Savings product</a></td>
+					<td><a href="#savingsproducts_update">Update a Savings product</a></td>
+					<td><a href="#savingsproducts_delete">Delete a Savings product</a></td>
 				</tr>
 				<tr>
+					<td><a href="#savingsaccounts">Savings Accounts</a></td>
+					<td>savingsaccounts</td>
+					<td><a href="#savingsaccounts_create">Create new Savings Account</a></td>
+					<td><a href="#savingsaccounts_list">List Savings Accounts</a></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr class="alt">
+					<td></td>
 					<td>savingsaccounts/template?clientId={clientId}</td>
+					<td></td>
 					<td><a href="#savingsaccounts_template">Retrieve Savings Account Template</a></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>savingsaccounts/{accountId}</td>
+					<td></td>
+					<td><a href="#savingsaccounts_retrieve">Retrieve a Savings Account</a></td>
+					<td><a href="#savingsaccounts_update">Update a Savings Account</a></td>
+					<td><a href="#savingsaccounts_delete">Delete a Savings Account</a></td>
 				</tr>
 				<tr class="alt">
+					<td></td>
+					<td>savingsaccounts/{accountId}?command=activate</td>
+					<td><a href="#savingsaccounts_activate">Activate a Savings Account</a></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>savingsaccounts/{accountId}?command=calculateInterest</td>
+					<td><a href="#savingsaccounts_calculate_interest">Calculate Interest on a Savings Account</a></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr class="alt">
+					<td></td>
+					<td>savingsaccounts/{accountId}?command=postInterest</td>
+					<td><a href="#savingsaccounts_post_interest">Post Interest on a Savings Account</a></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
 					<td>savingsaccounts/{accountId}/transactions/template</td>
+					<td></td>
 					<td><a href="#savingsaccounts_transactions_template">Retrieve Savings Account Transaction Template</a></td>
-				</tr>
-				<tr>
-					<td>offices/template</td>
-					<td><a href="#offices_template">Retrieve Office Template</a></td>
+					<td></td>
+					<td></td>
 				</tr>
 				<tr class="alt">
-					<td>users/template</td>
-					<td><a href="#users_template">Retrieve User Template</a></td>
+					<td><a href="#savingsaccounts_transactions">Savings Transactions</a></td>
+					<td>savingsaccounts/{accountId}/transactions?command=deposit</td>
+					<td><a href="#savingsaccounts_deposit">Make a Deposit</a></td>
+					<td></td>
+					<td></td>
+					<td></td>
 				</tr>
 				<tr>
-					<td>audits/searchtemplate</td>
-					<td><a href="#audits_searchtemplate">Retrieve Audit Search Template</a></td>
-				</tr>
-				<tr class="alt">
-					<td>makercheckers/searchtemplate</td>
-					<td><a href="#makercheckers_searchtemplate">Retrieve Maker Checker Search Template</a></td>
-				</tr>
-				<tr>
-					<td>reports/template</td>
-					<td><a href="#reports_template">Retrieve Report Template</a></td>
-				</tr>
+					<td></td>
+					<td>savingsaccounts/{accountId}/transactions?command=withdrawal</td>
+					<td><a href="#savingsaccounts_withdrawal">Make a Withdrawal</a></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>	
 			</table>
 		</div>
 	</div>
+
 	<script>
 		$(document).ready(function() {
 
