@@ -193,7 +193,7 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
 
         StringBuilder sqlBuilder = new StringBuilder(200);
         sqlBuilder.append("select SQL_CALC_FOUND_ROWS ");
-        sqlBuilder.append(this.allGroupTypesDataMapper.schema());
+        sqlBuilder.append(this.centerMapper.schema());
         sqlBuilder.append(" where o.hierarchy like ?");
 
         final String extraCriteria = getCenterExtraCriteria(searchParameters);
