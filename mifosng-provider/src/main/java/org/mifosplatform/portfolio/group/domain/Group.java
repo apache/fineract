@@ -39,6 +39,8 @@ import org.mifosplatform.organisation.office.domain.Office;
 import org.mifosplatform.organisation.staff.domain.Staff;
 import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.group.api.GroupingTypesApiConstants;
+import org.mifosplatform.portfolio.group.exception.ClientExistInGroupException;
+import org.mifosplatform.portfolio.group.exception.ClientNotInGroupException;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
 import com.google.common.collect.Sets;
@@ -312,6 +314,33 @@ public final class Group extends AbstractPersistable<Long> {
         return differences;
     }
 
+    public List<String> associateClients(final Set<Client> clientMembersSet) {
+        List<String> differences = new ArrayList<String>();
+        for (Client client : clientMembersSet) {
+            if(this.hasClientAsMember(client)){
+                throw new ClientExistInGroupException(client.getId(), this.getId());
+            }
+            this.clientMembers.add(client);
+            differences.add(client.getId().toString());
+        }
+
+        return differences;
+    }
+    
+    public List<String> disassociateClients(final Set<Client> clientMembersSet) {
+        List<String> differences = new ArrayList<String>();
+        for (Client client : clientMembersSet) {
+            if(this.hasClientAsMember(client)){
+                this.clientMembers.remove(client);
+                differences.add(client.getId().toString());
+            }else{
+                throw new ClientNotInGroupException(client.getId(), this.getId());
+            }            
+        }
+
+        return differences;
+    } 
+    
     private String[] getClientIds(final Set<Client> clients) {
         String[] clientIds = new String[clients.size()];
         Iterator<Client> it = clients.iterator();

@@ -89,11 +89,11 @@ public class Loan extends AbstractPersistable<Long> {
     @Column(name = "external_id")
     private String externalId;
 
-    @ManyToOne(optional = true)
+    @ManyToOne
     @JoinColumn(name = "client_id", nullable = true)
     private Client client;
 
-    @ManyToOne(optional = true)
+    @ManyToOne
     @JoinColumn(name = "group_id", nullable = true)
     private Group group;
 
@@ -300,7 +300,7 @@ public class Loan extends AbstractPersistable<Long> {
     }
 
     protected Loan() {
-        //
+        this.client = null;
     }
 
     private Loan(final String accountNo, final Client client, final Group group, final Integer loanType, final Fund fund, final Staff loanOfficer,

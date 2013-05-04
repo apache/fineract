@@ -400,6 +400,10 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
                 handler = applicationContext.getBean("deleteGroupCommandHandler", NewCommandSourceHandler.class);
             } else if (wrapper.isGroupActivation()) {
                 handler = applicationContext.getBean("activateGroupCommandHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isAssociateClients()) {
+                handler = applicationContext.getBean("associateClientsToGroupCommandHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isDisassociateClients()) {
+                handler = applicationContext.getBean("disassociateClientsFromGroupCommandHandler", NewCommandSourceHandler.class);
             } else {
                 throw new UnsupportedCommandException(wrapper.commandName());
             }
