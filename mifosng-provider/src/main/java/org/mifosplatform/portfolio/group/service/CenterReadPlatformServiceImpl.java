@@ -73,13 +73,13 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
     // caused by the same name of columns in m_office and m_group tables
     private String getCenterExtraCriteria(final SearchParameters searchCriteria) {
 
-        String extraCriteria = " and g.level_id = " + GroupTypes.CENTER.getId() + " ";
+        String extraCriteria = " and g.level_id = " + GroupTypes.CENTER.getId();
 
         String sqlQueryCriteria = searchCriteria.getSqlSearch();
         if (StringUtils.isNotBlank(sqlQueryCriteria)) {
             sqlQueryCriteria = sqlQueryCriteria.replaceAll(" display_name ", " g.display_name ");
             sqlQueryCriteria = sqlQueryCriteria.replaceAll("display_name ", "g.display_name ");
-            extraCriteria = " and (" + sqlQueryCriteria + ")";
+            extraCriteria += " and (" + sqlQueryCriteria + ")";
         }
 
         final Long officeId = searchCriteria.getOfficeId();
