@@ -10,12 +10,9 @@ import org.mifosplatform.infrastructure.core.exception.AbstractPlatformResourceN
 /**
  * A {@link RuntimeException} thrown when report resources are not found.
  */
-public class ReportNotFoundException extends AbstractPlatformResourceNotFoundException {
+public class ReportParameterNotFoundException extends AbstractPlatformResourceNotFoundException {
 
-    public ReportNotFoundException(final String reportSql) {
-        super("error.msg.report.name.not.found", "Reporting meta-data entry not found.", "Input sql: " + reportSql);
-    }
-    public ReportNotFoundException(final Long id) {
+    public ReportParameterNotFoundException(final Long id) {
         super("error.msg.report.parameter.id.invalid", "Report Parameter with identifier " + id + " does not exist", id);
     }
 }

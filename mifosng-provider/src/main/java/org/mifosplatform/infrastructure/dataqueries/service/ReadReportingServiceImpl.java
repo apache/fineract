@@ -457,7 +457,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
                 if (reportParameters == null) {
                     reportParameters = new ArrayList<ReportParameterData>();
                 }
-                reportParameters.add(new ReportParameterData(rpJoin.getReportParameterId(), rpJoin.getReportParameterName(), rpJoin
+                reportParameters.add(new ReportParameterData(rpJoin.getReportParameterId(), rpJoin.getParameterId(), rpJoin.getReportParameterName(), rpJoin
                         .getParameterName()));
 
             } else {
@@ -484,7 +484,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
                 if (rpJoin.getReportParameterId() != null) {
                     // report has at least one parameter
                     reportParameters = new ArrayList<ReportParameterData>();
-                    reportParameters.add(new ReportParameterData(rpJoin.getReportParameterId(), rpJoin.getReportParameterName(), rpJoin
+                    reportParameters.add(new ReportParameterData(rpJoin.getReportParameterId(),rpJoin.getParameterId(), rpJoin.getReportParameterName(), rpJoin
                             .getParameterName()));
                 } else {
                     reportParameters = null;
@@ -516,7 +516,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
 
             String sql = "select r.id as reportId, r.report_name as reportName, r.report_type as reportType, "
                     + " r.report_subtype as reportSubType, r.report_category as reportCategory, r.description, r.core_report as coreReport, r.use_report as useReport, "
-                    + " rp.parameter_id as reportParameterId, rp.report_parameter_name as reportParameterName, p.parameter_name as parameterName";
+                    + " rp.id as reportParameterId, rp.parameter_id as parameterId, rp.report_parameter_name as reportParameterName, p.parameter_name as parameterName";
 
             if (reportId != null) sql += ", r.report_sql as reportSql ";
 
@@ -564,11 +564,12 @@ public class ReadReportingServiceImpl implements ReadReportingService {
             }
 
             final Long reportParameterId = JdbcSupport.getLong(rs, "reportParameterId");
+            final Long parameterId = JdbcSupport.getLong(rs, "parameterId");
             final String reportParameterName = rs.getString("reportParameterName");
             final String parameterName = rs.getString("parameterName");
 
             return new ReportParameterJoinData(reportId, reportName, reportType, reportSubType, reportCategory, description, reportSql,
-                    coreReport, useReport, reportParameterId, reportParameterName, parameterName);
+                    coreReport, useReport, reportParameterId, parameterId, reportParameterName, parameterName);
         }
     }
 
@@ -586,7 +587,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
             final Long id = rs.getLong("id");
             final String parameterName = rs.getString("parameterName");
 
-            return new ReportParameterData(id, null, parameterName);
+            return new ReportParameterData(id, null, null, parameterName);
         }
     }
 

@@ -11,14 +11,17 @@ final public class ReportParameterData {
 	@SuppressWarnings("unused")
 	private final Long id;
 	@SuppressWarnings("unused")
-	private final String reportParameterName;
+	private final Long parameterId;
 	@SuppressWarnings("unused")
 	private final String parameterName;
+	@SuppressWarnings("unused")
+	private final String reportParameterName;
 
-	public ReportParameterData(final Long id, final String reportParameterName,
-			final String parameterName) {
+	public ReportParameterData(final Long id, final Long parameterId,
+			final String reportParameterName, final String parameterName) {
 		this.id = id;
-		this.reportParameterName = reportParameterName;
+		this.parameterId = parameterId;
 		this.parameterName = parameterName;
+		this.reportParameterName = reportParameterName;
 	}
 }

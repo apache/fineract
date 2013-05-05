@@ -26,7 +26,7 @@ public final class ReportCommandFromApiJsonDeserializer {
      * The parameters supported for this command.
      */
     private final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("reportName", "reportType", "reportSubType",
-            "reportCategory", "description", "reportSql", "useReport"));
+            "reportCategory", "description", "reportSql", "useReport", "reportParameters"));
 
     private final FromJsonHelper fromApiJsonHelper;
 

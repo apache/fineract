@@ -5,15 +5,21 @@
  */
 package org.mifosplatform.infrastructure.dataqueries.service;
 
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.mifosplatform.infrastructure.dataqueries.domain.Report;
+import org.mifosplatform.infrastructure.dataqueries.domain.ReportParameter;
+import org.mifosplatform.infrastructure.dataqueries.domain.ReportParameterRepository;
+import org.mifosplatform.infrastructure.dataqueries.domain.ReportParameterUsage;
 import org.mifosplatform.infrastructure.dataqueries.domain.ReportRepository;
 import org.mifosplatform.infrastructure.dataqueries.exception.ReportNotFoundException;
+import org.mifosplatform.infrastructure.dataqueries.exception.ReportParameterNotFoundException;
 import org.mifosplatform.infrastructure.dataqueries.serialization.ReportCommandFromApiJsonDeserializer;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.useradministration.domain.Permission;
@@ -26,6 +32,9 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+
 @Service
 public class ReportWritePlatformServiceImpl implements
 		ReportWritePlatformService {
@@ -35,18 +44,21 @@ public class ReportWritePlatformServiceImpl implements
 
 	private final PlatformSecurityContext context;
 	private final ReportCommandFromApiJsonDeserializer fromApiJsonDeserializer;
-	private final ReportRepository reportRepository;
 	private final PermissionRepository permissionRepository;
+	private final ReportRepository reportRepository;
+	private final ReportParameterRepository reportParameterRepository;
 
 	@Autowired
 	public ReportWritePlatformServiceImpl(
 			final PlatformSecurityContext context,
 			final ReportCommandFromApiJsonDeserializer fromApiJsonDeserializer,
 			final ReportRepository reportRepository,
+			final ReportParameterRepository reportParameterRepository,
 			final PermissionRepository permissionRepository) {
 		this.context = context;
 		this.fromApiJsonDeserializer = fromApiJsonDeserializer;
 		this.reportRepository = reportRepository;
+		this.reportParameterRepository = reportParameterRepository;
 		this.permissionRepository = permissionRepository;
 	}
 
@@ -59,7 +71,11 @@ public class ReportWritePlatformServiceImpl implements
 
 			this.fromApiJsonDeserializer.validate(command.json());
 
-			final Report report = Report.fromJson(command);
+	        final Set<ReportParameterUsage> reportParameterUsages = assembleSetOfReportParameterUsages(command);
+			final Report report = Report.fromJson(reportParameterUsages, command);
+            for (ReportParameterUsage rpu : reportParameterUsages) {
+            		rpu.setReport(report);
+            }
 			final Permission permission = new Permission("report",
 					report.getReportName(), "READ");
 			this.reportRepository.save(report);
@@ -153,4 +169,36 @@ public class ReportWritePlatformServiceImpl implements
 				"Unknown data integrity issue with resource: "
 						+ realCause.getMessage());
 	}
+
+    private Set<ReportParameterUsage> assembleSetOfReportParameterUsages(final JsonCommand command) {
+
+        final Set<ReportParameterUsage> reportParameterUsages = new HashSet<ReportParameterUsage>();
+
+
+        if (command.parameterExists("reportParameters")) {
+            JsonArray reportParametersArray = command.arrayOfParameterNamed("reportParameters");
+            if (reportParametersArray != null) {
+                for (int i = 0; i < reportParametersArray.size(); i++) {
+
+                    final JsonObject jsonObject = reportParametersArray.get(i).getAsJsonObject();
+                    if (jsonObject.has("id")) {
+                        Long id = null;
+                        final String idStr = jsonObject.get("id").getAsString();
+                        if (!(idStr.equals(""))) id = Long.parseLong(idStr);
+                        
+                        final Long parameterId = jsonObject.get("parameterId").getAsLong();
+                        final ReportParameter parameter = this.reportParameterRepository.findOne(parameterId);
+            			if (parameter == null) {
+            				throw new ReportParameterNotFoundException(parameterId);
+            			}                       
+                        final String reportParameterName = jsonObject.get("reportParameterName").getAsString();
+                        reportParameterUsages.add(new ReportParameterUsage(null, parameter, reportParameterName));
+                    }
+                }
+            }
+        }
+
+        return reportParameterUsages;
+    }
+	
 }
