@@ -46,7 +46,7 @@ public class JournalEntryHelper {
 
     private void checkJournalEntry(final Account account, final String date, final JournalEntry... accountEntries){
         String url = createURLForGettingAccountEntries(account,date);
-        ArrayList<HashMap> response = Utils.performServerGet(requestSpec, responseSpec, url, "");
+        ArrayList<HashMap> response = Utils.performServerGet(requestSpec, responseSpec, url, "pageItems");
         for (int i = 0; i < accountEntries.length; i++) {
             assertThat(getEntryValueFromJournalEntry(response, i), equalTo(accountEntries[i].getTransactionType()));
             assertThat(getTransactionAmountFromJournalEntry(response, i), equalTo(accountEntries[i].getTransactionAmount()));
@@ -55,7 +55,7 @@ public class JournalEntryHelper {
 
     private String createURLForGettingAccountEntries (final Account account,final String date){
         return new String ("/mifosng-provider/api/v1/journalentries?glAccountId=" + account.getAccountID() + "&type=" +account.getAccountType()
-                            + "&fromDate=" + date + "&toDate=" + date + "&tenantIdentifier=default");
+                            + "&fromDate=" + date + "&toDate=" + date + "&tenantIdentifier=default"+"&orderBy=id&sortOrder=desc");
     }
 
 }
