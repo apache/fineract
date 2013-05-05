@@ -12,14 +12,16 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
 import org.mifosplatform.accounting.common.AccountingEnumerations;
 import org.mifosplatform.accounting.journalentry.data.JournalEntryData;
 import org.mifosplatform.accounting.journalentry.exception.JournalEntriesNotFoundException;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
+import org.mifosplatform.infrastructure.core.service.Page;
+import org.mifosplatform.infrastructure.core.service.PaginationHelper;
 import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -31,6 +33,9 @@ import org.springframework.stereotype.Service;
 public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlatformService {
 
     private final JdbcTemplate jdbcTemplate;
+    
+    private final GLJournalEntryMapper journalEntryMapper = new GLJournalEntryMapper();
+    private final PaginationHelper<JournalEntryData> paginationHelper = new PaginationHelper<JournalEntryData>();
 
     @Autowired
     public JournalEntryReadPlatformServiceImpl(final TenantAwareRoutingDataSource dataSource) {
@@ -40,8 +45,8 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
     private static final class GLJournalEntryMapper implements RowMapper<JournalEntryData> {
 
         public String schema() {
-            return " journalEntry.id as journalEntryId, glAccount.classification_enum as classification ,"
-                    + " glAccount.name as glAccountName, glAccount.gl_code as glCode, journalEntry.account_id as glAccountId,"
+            return " journalEntry.id as id, glAccount.classification_enum as classification ,"
+                    + " glAccount.name as glAccountName, glAccount.gl_code as glAccountCode, journalEntry.account_id as glAccountId,"
                     + " journalEntry.office_id as officeId, office.name as officeName, journalEntry.ref_num as referenceNumber, "
                     + " journalEntry.manual_entry as manualEntry,journalEntry.entry_date as transactionDate, "
                     + " journalEntry.type_enum as entryType,journalEntry.amount as amount, journalEntry.transaction_id as transactionId,"
@@ -56,10 +61,10 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
         @Override
         public JournalEntryData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
 
-            final Long journalEntryId = rs.getLong("journalEntryId");
+            final Long id = rs.getLong("id");
             final Long officeId = rs.getLong("officeId");
             final String officeName = rs.getString("officeName");
-            final String glCode = rs.getString("glCode");
+            final String glCode = rs.getString("glAccountCode");
             final String glAccountName = rs.getString("glAccountName");
             final Long glAccountId = rs.getLong("glAccountId");
             final int accountTypeId = JdbcSupport.getInteger(rs, "classification");
@@ -84,29 +89,38 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
             final Boolean reversed = rs.getBoolean("reversed");
             final String referenceNumber = rs.getString("referenceNumber");
 
-            return new JournalEntryData(journalEntryId, officeId, officeName, glAccountName, glAccountId, glCode, accountType,
+            return new JournalEntryData(id, officeId, officeName, glAccountName, glAccountId, glCode, accountType,
                     transactionDate, entryType, amount, transactionId, manualEntry, entityType, entityId, createdByUserId, createdDate,
                     createdByUserName, comments, reversed, referenceNumber);
         }
     }
 
     @Override
-    public List<JournalEntryData> retrieveAllGLJournalEntries(final Long officeId, final Long glAccountId, final Boolean onlyManualEntries,
-            final Date fromDate, final Date toDate) {
-        final GLJournalEntryMapper rm = new GLJournalEntryMapper();
+    public Page<JournalEntryData> retrieveAll(final Long officeId, final Long glAccountId, final Boolean onlyManualEntries,
+            final Date fromDate, final Date toDate, final Integer offset, final Integer limit, final String orderBy,
+            final String sortOrder, final String transactionId) {
 
-        String sql = "select " + rm.schema();
-        final Object[] objectArray = new Object[4];
+        StringBuilder sqlBuilder = new StringBuilder(200);
+        sqlBuilder.append("select SQL_CALC_FOUND_ROWS ");
+        sqlBuilder.append(journalEntryMapper.schema());
+
+        final Object[] objectArray = new Object[5];
         int arrayPos = 0;
 
+        if (StringUtils.isNotBlank(transactionId)) {
+            sqlBuilder.append(" and journalEntry.transaction_id = ?");
+            objectArray[arrayPos] = transactionId;
+            arrayPos = arrayPos + 1;
+        }
+
         if (officeId != null && officeId != 0) {
-            sql += " and journalEntry.office_id = ?";
+            sqlBuilder.append(" and journalEntry.office_id = ?");
             objectArray[arrayPos] = officeId;
             arrayPos = arrayPos + 1;
         }
 
         if (glAccountId != null && glAccountId != 0) {
-            sql += " and journalEntry.account_id = ?";
+            sqlBuilder.append(" and journalEntry.account_id = ?");
             objectArray[arrayPos] = glAccountId;
             arrayPos = arrayPos + 1;
         }
@@ -116,7 +130,7 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
             String fromDateString = null;
             String toDateString = null;
             if (fromDate != null && toDate != null) {
-                sql += " and journalEntry.entry_date between ? and ? ";
+                sqlBuilder.append(" and journalEntry.entry_date between ? and ? ");
                 fromDateString = df.format(fromDate);
                 toDateString = df.format(toDate);
                 objectArray[arrayPos] = fromDateString;
@@ -124,12 +138,12 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
                 objectArray[arrayPos] = toDateString;
                 arrayPos = arrayPos + 1;
             } else if (fromDate != null) {
-                sql += " and journalEntry.entry_date >= ? ";
+                sqlBuilder.append(" and journalEntry.entry_date >= ? ");
                 fromDateString = df.format(fromDate);
                 objectArray[arrayPos] = fromDateString;
                 arrayPos = arrayPos + 1;
             } else if (toDate != null) {
-                sql += " and journalEntry.entry_date <= ? ";
+                sqlBuilder.append(" and journalEntry.entry_date <= ? ");
                 toDateString = df.format(toDate);
                 objectArray[arrayPos] = toDateString;
                 arrayPos = arrayPos + 1;
@@ -138,14 +152,33 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
 
         if (onlyManualEntries != null) {
             if (onlyManualEntries) {
-                sql += " and journalEntry.manual_entry = 1";
+                sqlBuilder.append(" and journalEntry.manual_entry = 1");
             }
         }
 
-        sql += " order by journalEntry.entry_date desc,journalEntry.id desc";
+        if (StringUtils.isNotBlank(orderBy)) {
+            sqlBuilder.append(" order by ").append(orderBy);
+            if (StringUtils.isNotBlank(sortOrder)) {
+                sqlBuilder.append(' ').append(sortOrder);
+            }
+        }
+
+        if (limit != null && limit > 0) {
+            Integer maxLimitAllowed = 200;
+            if (limit < maxLimitAllowed) {
+                maxLimitAllowed = limit;
+            }
+            sqlBuilder.append(" limit ").append(maxLimitAllowed);
+        }
+
+        if (offset != null) {
+            sqlBuilder.append(" offset ").append(offset);
+        }
 
         final Object[] finalObjectArray = Arrays.copyOf(objectArray, arrayPos);
-        return this.jdbcTemplate.query(sql, rm, finalObjectArray);
+        final String sqlCountRows = "SELECT FOUND_ROWS()";
+        return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlCountRows, sqlBuilder.toString(), finalObjectArray,
+                this.journalEntryMapper);
     }
 
     @Override
@@ -160,21 +193,6 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
             return glJournalEntryData;
         } catch (final EmptyResultDataAccessException e) {
             throw new JournalEntriesNotFoundException(glJournalEntryId);
-        }
-    }
-
-    @Override
-    public List<JournalEntryData> retrieveRelatedJournalEntries(final String transactionId) {
-        try {
-
-            final GLJournalEntryMapper rm = new GLJournalEntryMapper();
-            final String sql = "select " + rm.schema() + " and journalEntry.transaction_id = ?";
-
-            final List<JournalEntryData> journalEntryDatas = this.jdbcTemplate.query(sql, rm, new Object[] { transactionId });
-
-            return journalEntryDatas;
-        } catch (final EmptyResultDataAccessException e) {
-            throw new JournalEntriesNotFoundException(transactionId);
         }
     }
 

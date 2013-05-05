@@ -6,17 +6,15 @@
 package org.mifosplatform.accounting.journalentry.service;
 
 import java.util.Date;
-import java.util.List;
 
 import org.mifosplatform.accounting.journalentry.data.JournalEntryData;
+import org.mifosplatform.infrastructure.core.service.Page;
 
 public interface JournalEntryReadPlatformService {
 
-    List<JournalEntryData> retrieveAllGLJournalEntries(Long officeId, Long glAccountId, Boolean onlyManualEntries, Date fromDate,
-            Date toDate);
-
-    List<JournalEntryData> retrieveRelatedJournalEntries(String transactionId);
-
     JournalEntryData retrieveGLJournalEntryById(long glJournalEntryId);
+
+    Page<JournalEntryData> retrieveAll(Long officeId, Long glAccountId, Boolean onlyManualEntries, Date fromDate, Date toDate,
+            Integer offset, Integer limit, String orderBy, String sortOrder, String transactionId);
 
 }
