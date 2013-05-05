@@ -498,4 +498,12 @@ public class CommandWrapper {
     public boolean isReportResource() {
         return this.entityName.equalsIgnoreCase("REPORT");
     }
+    
+    public boolean isAssociateClients(){
+        return this.actionName.equalsIgnoreCase("ASSOCIATECLIENTS");
+    }
+    
+    public boolean isDisassociateClients(){
+        return this.actionName.equalsIgnoreCase("DISASSOCIATECLIENTS");
+    }
 }

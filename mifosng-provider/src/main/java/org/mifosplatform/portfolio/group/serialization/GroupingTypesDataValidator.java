@@ -344,4 +344,44 @@ public final class GroupingTypesDataValidator {
 
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
     }
+    
+    public void validateForAssociateClients(final String json){
+
+        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+
+        final Set<String> supportedParameters = new HashSet<String>(Arrays.asList(GroupingTypesApiConstants.clientMembersParamName));
+
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, supportedParameters);
+        final JsonElement element = this.fromApiJsonHelper.parse(json);
+
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("group");
+        final String[] clients = fromApiJsonHelper.extractArrayNamed(GroupingTypesApiConstants.clientMembersParamName, element);
+        baseDataValidator.reset().parameter(GroupingTypesApiConstants.clientMembersParamName).value(clients).arrayNotEmpty();
+        
+        throwExceptionIfValidationWarningsExist(dataValidationErrors);
+    }
+    
+    public void validateForDisassociateClients(final String json){
+
+        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+
+        final Set<String> supportedParameters = new HashSet<String>(Arrays.asList(GroupingTypesApiConstants.clientMembersParamName));
+
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, supportedParameters);
+        final JsonElement element = this.fromApiJsonHelper.parse(json);
+
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("group");
+        final String[] clients = fromApiJsonHelper.extractArrayNamed(GroupingTypesApiConstants.clientMembersParamName, element);
+        baseDataValidator.reset().parameter(GroupingTypesApiConstants.clientMembersParamName).value(clients).arrayNotEmpty();
+        
+        throwExceptionIfValidationWarningsExist(dataValidationErrors);
+    }
 }

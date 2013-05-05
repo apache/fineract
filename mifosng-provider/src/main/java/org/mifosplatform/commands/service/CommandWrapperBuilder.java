@@ -857,6 +857,24 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    public CommandWrapperBuilder associateClientsToGroup(final Long groupId) {
+        this.actionName = "ASSOCIATECLIENTS";
+        this.entityName = "GROUP";
+        this.entityId = groupId;
+        this.groupId = groupId;
+        this.href = "/groups/" + groupId + "?command=associateClients";
+        return this;
+    }
+    
+    public CommandWrapperBuilder disassociateClientsFromGroup(final Long groupId) {
+        this.actionName = "DISASSOCIATECLIENTS";
+        this.entityName = "GROUP";
+        this.entityId = groupId;
+        this.groupId = groupId;
+        this.href = "/groups/" + groupId + "?command=disassociateClients";
+        return this;
+    }
+    
     public CommandWrapperBuilder unassignStaff(final Long groupId) {
         this.actionName = "UNASSIGNSTAFF";
         this.entityName = "GROUP";

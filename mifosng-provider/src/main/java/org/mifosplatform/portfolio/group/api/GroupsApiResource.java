@@ -223,6 +223,12 @@ public class GroupsApiResource {
         if (is(commandParam, "activate")) {
             final CommandWrapper commandRequest = builder.activateGroup(groupId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        }else if (is(commandParam, "associateClients")) {
+            final CommandWrapper commandRequest = builder.associateClientsToGroup(groupId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        }else if (is(commandParam, "disassociateClients")) {
+            final CommandWrapper commandRequest = builder.disassociateClientsFromGroup(groupId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         }
 
         if (result == null) {
