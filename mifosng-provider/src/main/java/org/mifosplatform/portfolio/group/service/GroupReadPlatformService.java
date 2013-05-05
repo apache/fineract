@@ -7,6 +7,7 @@ package org.mifosplatform.portfolio.group.service;
 
 import java.util.Collection;
 
+import org.mifosplatform.infrastructure.core.service.Page;
 import org.mifosplatform.portfolio.group.data.GroupAccountSummaryCollectionData;
 import org.mifosplatform.portfolio.group.data.GroupAccountSummaryData;
 import org.mifosplatform.portfolio.group.data.GroupGeneralData;
@@ -15,7 +16,7 @@ public interface GroupReadPlatformService {
 
     GroupGeneralData retrieveTemplate(Long officeId, boolean isCenterGroup);
 
-    Collection<GroupGeneralData> retrieveAll(SearchParameters searchCriteria);
+    Page<GroupGeneralData> retrieveAll(SearchParameters searchParameters);
 
     GroupGeneralData retrieveOne(Long groupId);
 
