@@ -8,7 +8,6 @@ package org.mifosplatform.accounting.journalentry.api;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import javax.ws.rs.Consumes;
@@ -33,6 +32,7 @@ import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.exception.UnrecognizedQueryParamException;
 import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
+import org.mifosplatform.infrastructure.core.service.Page;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -72,15 +72,16 @@ public class JournalEntriesApiResource {
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveAllJournalEntries(@Context final UriInfo uriInfo, @QueryParam("officeId") final Long officeId,
-            @QueryParam("glAccountId") final Long glAccountId, @QueryParam("manualEntriesOnly") final Boolean onlyManualEntries,
-            @QueryParam("fromDate") final DateParam fromDateParam, @QueryParam("toDate") final DateParam toDateParam,
-            @QueryParam("transactionId") final String transactionId ) {
+    public String retrieveAll(@QueryParam("officeId") final Long officeId, @QueryParam("glAccountId") final Long glAccountId,
+            @QueryParam("manualEntriesOnly") final Boolean onlyManualEntries, @QueryParam("fromDate") final DateParam fromDateParam,
+            @QueryParam("toDate") final DateParam toDateParam, @QueryParam("transactionId") final String transactionId,
+            @QueryParam("offset") final Integer offset, @QueryParam("limit") final Integer limit,
+            @QueryParam("orderBy") final String orderBy, @QueryParam("sortOrder") final String sortOrder) {
 
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermission);
 
-        List<JournalEntryData> glJournalEntryDatas = null;
-        // get dates from date params
+        Page<JournalEntryData> glJournalEntries = null;
+
         Date fromDate = null;
         if (fromDateParam != null) {
             fromDate = fromDateParam.getDate();
@@ -89,17 +90,11 @@ public class JournalEntriesApiResource {
         if (toDateParam != null) {
             toDate = toDateParam.getDate();
         }
-        if (StringUtils.isBlank(transactionId)) {
-            glJournalEntryDatas = this.journalEntryReadPlatformService.retrieveAllGLJournalEntries(officeId, glAccountId,
-                    onlyManualEntries, fromDate, toDate);
-        } else {
-            glJournalEntryDatas = this.journalEntryReadPlatformService.retrieveRelatedJournalEntries(transactionId);
-        }
-
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.apiJsonSerializerService.serialize(settings, glJournalEntryDatas, RESPONSE_DATA_PARAMETERS);
+        glJournalEntries = this.journalEntryReadPlatformService.retrieveAll(officeId, glAccountId, onlyManualEntries, fromDate, toDate,
+                offset, limit, orderBy, sortOrder, transactionId);
+        return this.apiJsonSerializerService.serialize(glJournalEntries);
     }
-
+    
     @GET
     @Path("{journalEntryId}")
     @Consumes({ MediaType.APPLICATION_JSON })
