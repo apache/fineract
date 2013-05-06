@@ -66,4 +66,24 @@ public enum GLAccountType {
         return name().toString();
     }
 
+	public boolean isAssetType() {
+		return this.value.equals(GLAccountType.ASSET.getValue());
+	}
+
+	public boolean isLiabilityType() {
+		return this.value.equals(GLAccountType.LIABILITY.getValue());
+	}
+
+	public boolean isEquityType() {
+		return this.value.equals(GLAccountType.EQUITY.getValue());
+	}
+
+	public boolean isIncomeType() {
+		return this.value.equals(GLAccountType.INCOME.getValue());
+	}
+
+	public boolean isExpenseType() {
+		return this.value.equals(GLAccountType.EXPENSE.getValue());
+	}
+
 }

@@ -8,10 +8,12 @@ package org.mifosplatform.accounting.glaccount.service;
 import java.util.List;
 import java.util.Map;
 
+import org.mifosplatform.accounting.common.AccountingConstants;
 import org.mifosplatform.accounting.glaccount.api.GLAccountJsonInputParams;
 import org.mifosplatform.accounting.glaccount.command.GLAccountCommand;
 import org.mifosplatform.accounting.glaccount.domain.GLAccount;
 import org.mifosplatform.accounting.glaccount.domain.GLAccountRepository;
+import org.mifosplatform.accounting.glaccount.domain.GLAccountType;
 import org.mifosplatform.accounting.glaccount.exception.GLAccountDuplicateException;
 import org.mifosplatform.accounting.glaccount.exception.GLAccountInvalidDeleteException;
 import org.mifosplatform.accounting.glaccount.exception.GLAccountInvalidDeleteException.GL_ACCOUNT_INVALID_DELETE_REASON;
@@ -22,6 +24,8 @@ import org.mifosplatform.accounting.glaccount.exception.GLAccountNotFoundExcepti
 import org.mifosplatform.accounting.glaccount.serialization.GLAccountCommandFromApiJsonDeserializer;
 import org.mifosplatform.accounting.journalentry.domain.JournalEntry;
 import org.mifosplatform.accounting.journalentry.domain.JournalEntryRepository;
+import org.mifosplatform.infrastructure.codes.domain.CodeValue;
+import org.mifosplatform.infrastructure.codes.domain.CodeValueRepositoryWrapper;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
@@ -41,13 +45,16 @@ public class GLAccountWritePlatformServiceJpaRepositoryImpl implements GLAccount
     private final GLAccountRepository glAccountRepository;
     private final JournalEntryRepository glJournalEntryRepository;
     private final GLAccountCommandFromApiJsonDeserializer fromApiJsonDeserializer;
+    private final CodeValueRepositoryWrapper codeValueRepositoryWrapper;
 
     @Autowired
     public GLAccountWritePlatformServiceJpaRepositoryImpl(final GLAccountRepository glAccountRepository,
-            final JournalEntryRepository glJournalEntryRepository, final GLAccountCommandFromApiJsonDeserializer fromApiJsonDeserializer) {
+            final JournalEntryRepository glJournalEntryRepository, final GLAccountCommandFromApiJsonDeserializer fromApiJsonDeserializer,
+            final CodeValueRepositoryWrapper codeValueRepositoryWrapper) {
         this.glAccountRepository = glAccountRepository;
         this.glJournalEntryRepository = glJournalEntryRepository;
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
+        this.codeValueRepositoryWrapper = codeValueRepositoryWrapper;
     }
 
     @Transactional
@@ -63,9 +70,41 @@ public class GLAccountWritePlatformServiceJpaRepositoryImpl implements GLAccount
             if (parentId != null) {
                 parentGLAccount = validateParentGLAccount(parentId);
             }
-            final GLAccount glAccount = GLAccount.fromJson(parentGLAccount, command);
+            
+            CodeValue glAccountTagType = null;
+            Long tagId = command.longValueOfParameterNamed(GLAccountJsonInputParams.TAGID.getValue());
+            Long type = command.longValueOfParameterNamed(GLAccountJsonInputParams.TYPE.getValue());
+            GLAccountType accountType = GLAccountType.fromInt(type.intValue());
+            if (accountType == null) {
+            	// TODO:generate an appropriate exception type.
+				throw new RuntimeException("Invalid GLAccount Type");
+			}
+
+        	if (accountType.isAssetType()) {
+        		glAccountTagType = this.codeValueRepositoryWrapper.findOneByCodeNameAndIdWithNotFoundDetection(
+        				AccountingConstants.ASSESTS_TAG_OPTION_CODE_NAME, tagId);
+			} else if (accountType.isLiabilityType()) {
+				glAccountTagType = this.codeValueRepositoryWrapper.findOneByCodeNameAndIdWithNotFoundDetection(
+        				AccountingConstants.LIABILITIES_TAG_OPTION_CODE_NAME, tagId);
+			} else if (accountType.isEquityType()) {
+				glAccountTagType = this.codeValueRepositoryWrapper.findOneByCodeNameAndIdWithNotFoundDetection(
+        				AccountingConstants.EQUITY_TAG_OPTION_CODE_NAME, tagId);
+			} else if (accountType.isIncomeType()) {
+				glAccountTagType = this.codeValueRepositoryWrapper.findOneByCodeNameAndIdWithNotFoundDetection(
+        				AccountingConstants.INCOME_TAG_OPTION_CODE_NAME, tagId);
+			} else if (accountType.isExpenseType()) {
+				glAccountTagType = this.codeValueRepositoryWrapper.findOneByCodeNameAndIdWithNotFoundDetection(
+        				AccountingConstants.EXPENSES_TAG_OPTION_CODE_NAME, tagId);
+			} 
+            	
+            
+            final GLAccount glAccount = GLAccount.fromJson(parentGLAccount, command, glAccountTagType);
 
             this.glAccountRepository.saveAndFlush(glAccount);
+            
+            glAccount.generateHierarchy();
+            
+            this.glAccountRepository.save(glAccount);
 
             return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(glAccount.getId()).build();
         } catch (final DataIntegrityViolationException dve) {
@@ -147,7 +186,7 @@ public class GLAccountWritePlatformServiceJpaRepositoryImpl implements GLAccount
         parentGLAccount = this.glAccountRepository.findOne(parentAccountId);
         if (parentGLAccount == null) { throw new GLAccountNotFoundException(parentAccountId); }
         // ensure parent is not a detail account
-        if (parentGLAccount.isHeaderAccount()) { throw new GLAccountInvalidParentException(parentAccountId); }
+        if (parentGLAccount.isDetailAccount()) { throw new GLAccountInvalidParentException(parentAccountId); }
         return parentGLAccount;
     }
 

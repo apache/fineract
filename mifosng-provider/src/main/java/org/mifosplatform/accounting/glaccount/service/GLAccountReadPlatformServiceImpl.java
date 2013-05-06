@@ -17,6 +17,7 @@ import org.mifosplatform.accounting.glaccount.domain.GLAccountType;
 import org.mifosplatform.accounting.glaccount.domain.GLAccountUsage;
 import org.mifosplatform.accounting.glaccount.exception.GLAccountInvalidClassificationException;
 import org.mifosplatform.accounting.glaccount.exception.GLAccountNotFoundException;
+import org.mifosplatform.infrastructure.codes.data.CodeValueData;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
 import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
@@ -30,6 +31,7 @@ import org.springframework.stereotype.Service;
 public class GLAccountReadPlatformServiceImpl implements GLAccountReadPlatformService {
 
     private final JdbcTemplate jdbcTemplate;
+    private final static String nameDecoratedBaseOnHierarchy = "concat(substring('........................................', 1, ((LENGTH(hierarchy) - LENGTH(REPLACE(hierarchy, '.', '')) - 1) * 4)), name)";
 
     @Autowired
     public GLAccountReadPlatformServiceImpl(final TenantAwareRoutingDataSource dataSource) {
@@ -39,9 +41,9 @@ public class GLAccountReadPlatformServiceImpl implements GLAccountReadPlatformSe
     private static final class GLAccountMapper implements RowMapper<GLAccountData> {
 
         public String schema() {
-            return " id as id, name as name, parent_id as parentId, gl_code as glCode, disabled as disabled, manual_journal_entries_allowed as manualEntriesAllowed, "
-                    + "classification_enum as classification, account_usage as accountUsage, description as description "
-                    + "from acc_gl_account";
+            return " gl.id as id, name as name, parent_id as parentId, gl_code as glCode, disabled as disabled, manual_journal_entries_allowed as manualEntriesAllowed, "
+                    + "classification_enum as classification, account_usage as accountUsage, description as description, "+nameDecoratedBaseOnHierarchy +"as nameDecorated, "
+                    + "cv.id as codeId, cv.code_value as codeValue from acc_gl_account gl left join m_code_value cv on tag_id=cv.id";
         }
 
         @Override
@@ -58,8 +60,11 @@ public class GLAccountReadPlatformServiceImpl implements GLAccountReadPlatformSe
             final int usageId = JdbcSupport.getInteger(rs, "accountUsage");
             final EnumOptionData usage = AccountingEnumerations.gLAccountUsage(usageId);
             final String description = rs.getString("description");
-
-            return new GLAccountData(id, name, parentId, glCode, disabled, manualEntriesAllowed, accountType, usage, description);
+            final String nameDecorated = rs.getString("nameDecorated");
+            final Long codeId = rs.getLong("codeId");
+            final String codeValue = rs.getString("codeValue");
+            CodeValueData tagId = CodeValueData.instance(codeId, codeValue);
+            return new GLAccountData(id, name, parentId, glCode, disabled, manualEntriesAllowed, accountType, usage, description, nameDecorated, tagId);
         }
     }
 
@@ -151,7 +156,7 @@ public class GLAccountReadPlatformServiceImpl implements GLAccountReadPlatformSe
         try {
 
             final GLAccountMapper rm = new GLAccountMapper();
-            final String sql = "select " + rm.schema() + " where id = ?";
+            final String sql = "select " + rm.schema() + " where gl.id = ?";
 
             final GLAccountData glAccountData = this.jdbcTemplate.queryForObject(sql, rm, new Object[] { glAccountId });
 
@@ -189,5 +194,10 @@ public class GLAccountReadPlatformServiceImpl implements GLAccountReadPlatformSe
     public GLAccountData retrieveNewGLAccountDetails() {
         return GLAccountData.sensibleDefaultsForNewGLAccountCreation();
     }
+
+	@Override
+	public List<GLAccountData> retrieveAllEnabledHeaderGLAccounts(GLAccountType accountType) {
+		return retrieveAllGLAccounts(accountType.getValue(), null, GLAccountUsage.HEADER.getValue(), null, false);
+	}
 
 }

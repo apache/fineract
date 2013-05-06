@@ -30,9 +30,10 @@ public class GLAccountCommand {
     private final Integer usage;
     private final Integer type;
     private final String description;
+    private final Long tagId;
 
     public GLAccountCommand(final Long id, final String name, final Long parentId, final String glCode, final Boolean disabled,
-            final Boolean manualEntriesAllowed, final Integer type, final Integer usage, final String description) {
+            final Boolean manualEntriesAllowed, final Integer type, final Integer usage, final String description, final Long tagId) {
         this.id = id;
         this.name = name;
         this.parentId = parentId;
@@ -42,6 +43,7 @@ public class GLAccountCommand {
         this.type = type;
         this.usage = usage;
         this.description = description;
+        this.tagId = tagId;
     }
 
     public void validateForCreate() {
@@ -69,6 +71,8 @@ public class GLAccountCommand {
 
         baseDataValidator.reset().parameter(GLAccountJsonInputParams.MANUAL_ENTRIES_ALLOWED.getValue()).value(this.manualEntriesAllowed)
                 .notBlank();
+        
+        baseDataValidator.reset().parameter(GLAccountJsonInputParams.TAGID.getValue()).value(this.tagId).ignoreIfNull().longGreaterThanZero();
 
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
                 "Validation errors exist.", dataValidationErrors); }
@@ -102,6 +106,7 @@ public class GLAccountCommand {
 
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
                 "Validation errors exist.", dataValidationErrors); }
+        baseDataValidator.reset().parameter(GLAccountJsonInputParams.TAGID.getValue()).value(this.tagId).ignoreIfNull().longGreaterThanZero();
     }
 
     public boolean isHeaderAccount() {
