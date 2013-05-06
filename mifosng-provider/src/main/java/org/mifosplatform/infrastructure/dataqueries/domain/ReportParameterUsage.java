@@ -16,7 +16,7 @@ import org.springframework.data.jpa.domain.AbstractPersistable;
 @Entity
 @Table(name = "stretchy_report_parameter")
 public class ReportParameterUsage extends AbstractPersistable<Long> {
-
+    
 	@SuppressWarnings("unused")
 	@ManyToOne(optional = false)
 	@JoinColumn(name = "report_id", nullable = false)

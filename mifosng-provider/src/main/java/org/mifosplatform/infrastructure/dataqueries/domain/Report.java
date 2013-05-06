@@ -6,6 +6,7 @@
 package org.mifosplatform.infrastructure.dataqueries.domain;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -58,13 +59,12 @@ public class Report extends AbstractPersistable<Long> {
 
 	@Column(name = "report_sql")
 	private String reportSql;
-
+	
 	@LazyCollection(LazyCollectionOption.FALSE)
-	@OneToMany(cascade = CascadeType.ALL, mappedBy = "report")
-	private Set<ReportParameterUsage> reportParameterUsages = null;
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "report", orphanRemoval = true)
+	private Set<ReportParameterUsage> reportParameterUsages = new HashSet<ReportParameterUsage>();
 
 	public static Report fromJson(
-			final Set<ReportParameterUsage> reportParameterUsages,
 			final JsonCommand command) {
 
 		String reportName = null;
@@ -94,8 +94,7 @@ public class Report extends AbstractPersistable<Long> {
 			reportSql = command.stringValueOfParameterNamed("reportSql");
 
 		return new Report(reportName, reportType, reportSubType,
-				reportCategory, description, useReport, reportSql,
-				reportParameterUsages);
+				reportCategory, description, useReport, reportSql);
 	}
 
 	protected Report() {
@@ -105,8 +104,7 @@ public class Report extends AbstractPersistable<Long> {
 	public Report(final String reportName, final String reportType,
 			final String reportSubType, final String reportCategory,
 			final String description, final boolean useReport,
-			final String reportSql,
-			final Set<ReportParameterUsage> reportParameterUsages) {
+			final String reportSql) {
 		this.reportName = reportName;
 		this.reportType = reportType;
 		this.reportSubType = reportSubType;
@@ -115,7 +113,6 @@ public class Report extends AbstractPersistable<Long> {
 		this.coreReport = false;
 		this.useReport = useReport;
 		this.reportSql = reportSql;
-		this.reportParameterUsages = reportParameterUsages;
 		validate();
 	}
 
@@ -286,6 +283,11 @@ public class Report extends AbstractPersistable<Long> {
 		return reportParameterUsages;
 	}
 
+	public void setReportParameterUsages(
+			Set<ReportParameterUsage> reportParameterUsages) {
+		this.reportParameterUsages = reportParameterUsages;
+	}
+
 	public boolean update(
 			final Set<ReportParameterUsage> newReportParameterUsages) {
 		if (newReportParameterUsages == null)
@@ -296,7 +298,9 @@ public class Report extends AbstractPersistable<Long> {
 
 			if (!(this.reportParameterUsages.equals(newReportParameterUsages))) {
 				updated = true;
-				this.reportParameterUsages = newReportParameterUsages;
+				this.reportParameterUsages.clear();
+				
+				this.reportParameterUsages.addAll(newReportParameterUsages);
 			}
 		} else {
 			updated = true;

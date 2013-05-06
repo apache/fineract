@@ -71,19 +71,16 @@ public class ReportWritePlatformServiceImpl implements
 
 			this.fromApiJsonDeserializer.validate(command.json());
 
+			final Report report = Report.fromJson(command);
 			final Set<ReportParameterUsage> reportParameterUsages = assembleSetOfReportParameterUsages(
-					null, command);
-			final Report report = Report.fromJson(reportParameterUsages,
-					command);
+					report, command);
 			if (reportParameterUsages != null) {
-				for (ReportParameterUsage rpu : reportParameterUsages) {
-					rpu.setReport(report);
-				}
+				report.setReportParameterUsages(reportParameterUsages);
 			}
+			this.reportRepository.save(report);
 
 			final Permission permission = new Permission("report",
 					report.getReportName(), "READ");
-			this.reportRepository.save(report);
 			this.permissionRepository.save(permission);
 
 			return new CommandProcessingResultBuilder()
@@ -188,6 +185,10 @@ public class ReportWritePlatformServiceImpl implements
 
 	private Set<ReportParameterUsage> assembleSetOfReportParameterUsages(
 			final Report report, final JsonCommand command) {
+		if (report == null) {
+			throw new PlatformDataIntegrityException("system.error",
+					"report parameter is null; ");
+		}
 
 		if (command.parameterExists("reportParameters")) {
 			Set<ReportParameterUsage> reportParameterUsages = new HashSet<ReportParameterUsage>();
@@ -223,36 +224,32 @@ public class ReportWritePlatformServiceImpl implements
 					}
 
 					ReportParameterUsage reportParameterUsage = null;
-					if (report == null) {
+					if (jsonObject.has("id")) {
+						final String idStr = jsonObject.get("id").getAsString();
+						if (!(idStr.equals("")))
+							id = Long.parseLong(idStr);
+					}
+					
+					if (id == null) {
 						reportParameterUsage = new ReportParameterUsage(report,
 								parameter, reportParameterName);
 					} else {
-						if (jsonObject.has("id")) {
-							final String idStr = jsonObject.get("id")
-									.getAsString();
-							if (!(idStr.equals("")))
-								id = Long.parseLong(idStr);
-						}
-						if (id == null) {
-							reportParameterUsage = new ReportParameterUsage(
-									report, parameter, reportParameterName);
-						} else {
-							reportParameterUsage = rpuById(report, id);
+						reportParameterUsage = rpuById(report, id);
 
-							if (reportParameterUsage == null) {
-								throw new PlatformDataIntegrityException(
-										"error.msg.supplied.parameter.id.doesnt.exist",
-										"Supplied parameterId column doesn't Exist",
-										id);
+						if (reportParameterUsage == null) {
+							throw new PlatformDataIntegrityException(
+									"error.msg.supplied.parameter.id.doesnt.exist",
+									"Supplied parameterId column doesn't Exist",
+									id);
+						} 
+
+						if (parameter != null)
+							reportParameterUsage.setParameter(parameter);
+
+						if (reportParameterName != null) {
+							reportParameterUsage
+									.setReportParameterName(reportParameterName);
 							}
-
-							if (parameter != null)
-								reportParameterUsage.setParameter(parameter);
-
-							if (reportParameterName != null)
-								reportParameterUsage
-										.setReportParameterName(reportParameterName);
-						}
 					}
 
 					reportParameterUsages.add(reportParameterUsage);
