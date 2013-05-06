@@ -28,6 +28,8 @@ import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidation
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
+import com.google.gson.JsonArray;
+
 @Entity
 @Table(name = "stretchy_report", uniqueConstraints = { @UniqueConstraint(columnNames = { "report_name" }, name = "unq_report_name") })
 public class Report extends AbstractPersistable<Long> {
@@ -58,7 +60,7 @@ public class Report extends AbstractPersistable<Long> {
 	private String reportSql;
 
 	@LazyCollection(LazyCollectionOption.FALSE)
-	@OneToMany(cascade = CascadeType.ALL, mappedBy = "report", orphanRemoval = true)
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "report")
 	private Set<ReportParameterUsage> reportParameterUsages = null;
 
 	public static Report fromJson(
@@ -174,6 +176,14 @@ public class Report extends AbstractPersistable<Long> {
 			this.reportSql = StringUtils.defaultIfEmpty(newValue, null);
 		}
 
+        final String reportParametersParamName = "reportParameters";
+        if (command.hasParameter(reportParametersParamName)) {
+            JsonArray jsonArray = command.arrayOfParameterNamed(reportParametersParamName);
+            if (jsonArray != null) {
+                actualChanges.put(reportParametersParamName, command.jsonFragment(reportParametersParamName));
+            }
+        }
+        
 		validate();
 
 		if (!actualChanges.isEmpty()) {
@@ -272,4 +282,26 @@ public class Report extends AbstractPersistable<Long> {
 		return reportName;
 	}
 
+	public Set<ReportParameterUsage> getReportParameterUsages() {
+		return reportParameterUsages;
+	}
+
+	public boolean update(
+			final Set<ReportParameterUsage> newReportParameterUsages) {
+		if (newReportParameterUsages == null)
+			return false;
+
+		boolean updated = false;
+		if (this.reportParameterUsages != null) {
+
+			if (!(this.reportParameterUsages.equals(newReportParameterUsages))) {
+				updated = true;
+				this.reportParameterUsages = newReportParameterUsages;
+			}
+		} else {
+			updated = true;
+			this.reportParameterUsages = newReportParameterUsages;
+		}
+		return updated;
+	}
 }

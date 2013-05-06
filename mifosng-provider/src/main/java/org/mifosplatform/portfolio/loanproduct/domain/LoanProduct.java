@@ -238,9 +238,8 @@ public class LoanProduct extends AbstractPersistable<Long> {
         if (command.hasParameter(chargesParamName)) {
             JsonArray jsonArray = command.arrayOfParameterNamed(chargesParamName);
             if (jsonArray != null) {
-
+                actualChanges.put(chargesParamName, command.jsonFragment(chargesParamName));
             }
-            actualChanges.put(chargesParamName, command.jsonFragment(chargesParamName));
         }
 
         return actualChanges;

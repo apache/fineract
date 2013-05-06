@@ -71,11 +71,16 @@ public class ReportWritePlatformServiceImpl implements
 
 			this.fromApiJsonDeserializer.validate(command.json());
 
-	        final Set<ReportParameterUsage> reportParameterUsages = assembleSetOfReportParameterUsages(command);
-			final Report report = Report.fromJson(reportParameterUsages, command);
-            for (ReportParameterUsage rpu : reportParameterUsages) {
-            		rpu.setReport(report);
-            }
+			final Set<ReportParameterUsage> reportParameterUsages = assembleSetOfReportParameterUsages(
+					null, command);
+			final Report report = Report.fromJson(reportParameterUsages,
+					command);
+			if (reportParameterUsages != null) {
+				for (ReportParameterUsage rpu : reportParameterUsages) {
+					rpu.setReport(report);
+				}
+			}
+
 			final Permission permission = new Permission("report",
 					report.getReportName(), "READ");
 			this.reportRepository.save(report);
@@ -106,6 +111,16 @@ public class ReportWritePlatformServiceImpl implements
 			}
 
 			final Map<String, Object> changes = report.update(command);
+
+			if (changes.containsKey("reportParameters")) {
+				final Set<ReportParameterUsage> reportParameterUsages = assembleSetOfReportParameterUsages(
+						report, command);
+				boolean updated = report.update(reportParameterUsages);
+				if (!updated) {
+					changes.remove("reportParameters");
+				}
+			}
+
 			if (!changes.isEmpty()) {
 				this.reportRepository.saveAndFlush(report);
 			}
@@ -133,11 +148,12 @@ public class ReportWritePlatformServiceImpl implements
 					"error.msg.cant.delete.core.report",
 					"Core Reports Can't be Deleted", "");
 		}
-		
 
-		final Permission permission = this.permissionRepository.findOneByCode("READ" + "_" + report.getReportName());
+		final Permission permission = this.permissionRepository
+				.findOneByCode("READ" + "_" + report.getReportName());
 		if (permission == null) {
-			throw new PermissionNotFoundException("READ" + "_" + report.getReportName());
+			throw new PermissionNotFoundException("READ" + "_"
+					+ report.getReportName());
 		}
 
 		this.reportRepository.delete(report);
@@ -170,35 +186,92 @@ public class ReportWritePlatformServiceImpl implements
 						+ realCause.getMessage());
 	}
 
-    private Set<ReportParameterUsage> assembleSetOfReportParameterUsages(final JsonCommand command) {
+	private Set<ReportParameterUsage> assembleSetOfReportParameterUsages(
+			final Report report, final JsonCommand command) {
 
-        final Set<ReportParameterUsage> reportParameterUsages = new HashSet<ReportParameterUsage>();
+		if (command.parameterExists("reportParameters")) {
+			Set<ReportParameterUsage> reportParameterUsages = new HashSet<ReportParameterUsage>();
+			JsonArray reportParametersArray = command
+					.arrayOfParameterNamed("reportParameters");
+			if (reportParametersArray != null) {
+				for (int i = 0; i < reportParametersArray.size(); i++) {
 
+					final JsonObject jsonObject = reportParametersArray.get(i)
+							.getAsJsonObject();
+					Long id = null;
+					ReportParameter parameter = null;
+					String reportParameterName = null;
 
-        if (command.parameterExists("reportParameters")) {
-            JsonArray reportParametersArray = command.arrayOfParameterNamed("reportParameters");
-            if (reportParametersArray != null) {
-                for (int i = 0; i < reportParametersArray.size(); i++) {
+					if (jsonObject.has("parameterId")) {
+						final Long parameterId = jsonObject.get("parameterId")
+								.getAsLong();
+						parameter = this.reportParameterRepository
+								.findOne(parameterId);
+						if (parameter == null) {
+							throw new ReportParameterNotFoundException(
+									parameterId);
+						}
+					} else {
+						throw new PlatformDataIntegrityException(
+								"error.msg.parameter.id.mandatory.in.report.parameter",
+								"parameterId column is mandatory in Report Parameter Entry");
+					}
 
-                    final JsonObject jsonObject = reportParametersArray.get(i).getAsJsonObject();
-                    if (jsonObject.has("id")) {
-                        Long id = null;
-                        final String idStr = jsonObject.get("id").getAsString();
-                        if (!(idStr.equals(""))) id = Long.parseLong(idStr);
-                        
-                        final Long parameterId = jsonObject.get("parameterId").getAsLong();
-                        final ReportParameter parameter = this.reportParameterRepository.findOne(parameterId);
-            			if (parameter == null) {
-            				throw new ReportParameterNotFoundException(parameterId);
-            			}                       
-                        final String reportParameterName = jsonObject.get("reportParameterName").getAsString();
-                        reportParameterUsages.add(new ReportParameterUsage(null, parameter, reportParameterName));
-                    }
-                }
-            }
-        }
+					if (jsonObject.has("reportParameterName")) {
+						reportParameterName = jsonObject.get(
+								"reportParameterName").getAsString();
+					}
 
-        return reportParameterUsages;
-    }
-	
+					ReportParameterUsage reportParameterUsage = null;
+					if (report == null) {
+						reportParameterUsage = new ReportParameterUsage(report,
+								parameter, reportParameterName);
+					} else {
+						if (jsonObject.has("id")) {
+							final String idStr = jsonObject.get("id")
+									.getAsString();
+							if (!(idStr.equals("")))
+								id = Long.parseLong(idStr);
+						}
+						if (id == null) {
+							reportParameterUsage = new ReportParameterUsage(
+									report, parameter, reportParameterName);
+						} else {
+							reportParameterUsage = rpuById(report, id);
+
+							if (reportParameterUsage == null) {
+								throw new PlatformDataIntegrityException(
+										"error.msg.supplied.parameter.id.doesnt.exist",
+										"Supplied parameterId column doesn't Exist",
+										id);
+							}
+
+							if (parameter != null)
+								reportParameterUsage.setParameter(parameter);
+
+							if (reportParameterName != null)
+								reportParameterUsage
+										.setReportParameterName(reportParameterName);
+						}
+					}
+
+					reportParameterUsages.add(reportParameterUsage);
+				}
+				return reportParameterUsages;
+			} else
+				return null;
+		} else
+			return null;
+	}
+
+	private ReportParameterUsage rpuById(final Report report, final Long id) {
+
+		for (ReportParameterUsage rpu : report.getReportParameterUsages()) {
+			if (rpu.getId().equals(id))
+				return rpu;
+		}
+
+		return null;
+
+	}
 }

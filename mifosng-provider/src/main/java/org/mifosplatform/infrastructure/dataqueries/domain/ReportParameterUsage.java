@@ -45,5 +45,13 @@ public class ReportParameterUsage extends AbstractPersistable<Long> {
 	public void setReport(Report report) {
 		this.report = report;
 	}
+
+	public void setParameter(ReportParameter parameter) {
+		this.parameter = parameter;
+	}
+
+	public void setReportParameterName(String reportParameterName) {
+		this.reportParameterName = reportParameterName;
+	}
 	
 }
