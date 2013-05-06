@@ -22,7 +22,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'org.gradle.api.plugins:gradle-tomcat-plugin:0.9.7'
+        classpath 'org.gradle.api.plugins:gradle-tomcat-plugin:0.9.8'
   	}
 }
 
@@ -84,7 +84,7 @@ configurations {
 }
 
 dependencies {
-        def tomcatVersion = '7.0.37'
+        def tomcatVersion = '7.0.39'
 	    tomcat "org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}",
 	           "org.apache.tomcat.embed:tomcat-embed-logging-juli:${tomcatVersion}"
 	    tomcat("org.apache.tomcat.embed:tomcat-embed-jasper:${tomcatVersion}") {
@@ -134,7 +134,7 @@ dependencies {
 	            [group: 'ch.qos.logback', name: 'logback-classic', version: '1.0.9'],
 
 	            [group: 'mysql', name: 'mysql-connector-java', version: '5.1.22'],
-	            [group: 'org.apache.tomcat', name: 'tomcat-jdbc', version: '7.0.34'],
+	            [group: 'org.apache.tomcat', name: 'tomcat-jdbc', version: '7.0.39'],
 
 	            [group: 'pentaho-reporting-engine', name: 'pentaho-reporting-engine-classic-core', version: '3.9.1.1'],
 	            [group: 'pentaho-reporting-engine', name: 'pentaho-reporting-engine-classic-extensions', version: '3.9.1-GA'],
@@ -173,6 +173,10 @@ dependencies {
 task dist(type:Zip){
 	baseName= 'mifosplatform'
 	version = qualifyVersionIfNecessary(releaseVersion)
+	from('../') {
+		fileMode = 0755
+		include '*.md'
+	}
 	from('src/main/pentahoReports/') {
         fileMode = 0755
         include '*'
@@ -183,8 +187,8 @@ task dist(type:Zip){
         include '*'
         into('api-docs')
     }
-    from jar.outputs.files
     from war.outputs.files
+    into('mifosplatform' + version)
 }
 
 task deployPentahoReports() {
