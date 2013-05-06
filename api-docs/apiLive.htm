@@ -232,108 +232,6 @@
 					</div>
 				</div>
 			</div>
-			<!-- disabled Groupings API for release 1.0.0 as its beta -->
-			<!--
-			<div class="flybar-nav">
-				<h2 class="flybar-button">Groupings</h2>
-				<div id="toc-menu-group" class="flybar-menu">
-					<div class="tocMatrix">
-						<table class=matrixHeading>
-							<tr class="matrixHeadingBG">
-								<td colspan=2 valign="top"><div class="matrixHeadingVerbs">
-										<table>
-											<tr>
-												<td>RESOURCES</td>
-											</tr>
-										</table>
-									</div></td>
-								<td><table>
-										<tr>
-											<td><div class="matrixHeadingVerbs">POST</div></td>
-										</tr>
-										<tr>
-											<td><div class=matrixHeadingCommands>create/complex
-													update</div></td>
-										</tr>
-									</table></td>
-								<td><table>
-										<tr>
-											<td><div class="matrixHeadingVerbs">GET</div></td>
-										</tr>
-										<tr>
-											<td><div class=matrixHeadingCommands>read</div></td>
-										</tr>
-									</table></td>
-								<td><table>
-										<tr>
-											<td><div class="matrixHeadingVerbs">PUT</div></td>
-										</tr>
-										<tr>
-											<td><div class=matrixHeadingCommands>update</div></td>
-										</tr>
-									</table></td>
-								<td><table>
-										<tr>
-											<td><div class="matrixHeadingVerbs">DELETE</div></td>
-										</tr>
-										<tr>
-											<td><div class=matrixHeadingCommands>delete</div></td>
-										</tr>
-									</table></td>
-							</tr>
-							<tr class="alt">
-								<td><a href="#centers">Center</a></td>
-								<td>centers</td>
-								<td><a href="#centers_create">Create a Center</a></td>
-								<td><a href="#centers_list">List Centers</a></td>
-								<td></td>
-								<td></td>
-							</tr>
-							<tr>
-								<td></td>
-								<td>centers/{centerId}</td>
-								<td></td>
-								<td><a href="#centers_retrieve">Retrieve a Center</a></td>
-								<td><a href="#centers_update">Update a Center</a></td>
-								<td><a href="#centers_delete">Delete a Center</a></td>
-							</tr>
-							<tr class="alt">
-								<td></td>
-								<td>centers/{centerId}?command=activate</td>
-								<td><a href="#centers_activate">Activate a Center</a></td>
-								<td></td>
-								<td></td>
-								<td></td>
-							</tr>
-							<tr>
-								<td><a href="#groups">Group</a></td>
-								<td>groups</td>
-								<td><a href="#groups_create">Create a Group</a></td>
-								<td><a href="#groups_list">List Groups</a></td>
-								<td></td>
-								<td></td>
-							</tr>
-							<tr class="alt">
-								<td></td>
-								<td>groups/{group}</td>
-								<td></td>
-								<td><a href="#groups_retrieve">Retrieve a Group</a></td>
-								<td><a href="#groups_update">Update a Group</a></td>
-								<td><a href="#groups_delete">Delete a Group</a></td>
-							</tr>
-							<tr>
-								<td></td>
-								<td>groups/{groupId}?command=activate</td>
-								<td><a href="#groups_activate">Activate a Group</a></td>
-								<td></td>
-								<td></td>
-								<td></td>
-							</tr>
-						</table>
-					</div>
-				</div>
-			</div>
-			-->
 
 			<div class="flybar-nav">
 				<h2 class="flybar-button">Loan</h2>
@@ -3152,51 +3050,111 @@ GET https://DomainName/mifosng-provider/api/v1/centers/9?associations=groupMembe
 				</div>
 			</div>
 
-						<a id="centers_list" name="centers_list" class="old-syle-anchor">&nbsp;</a>
+		<a id="centers_list" name="centers_list" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
 					<h4>List Centers</h4>
+					<p>The <i>list</i> capability of centers can support <b>pagination</b> and <b>sorting</b>.</p>
+					<h5>Optional Arguments</h5>
+					<dl class="argument-list">
+						<dt>offset</dt>
+						<dd>
+							Integer <span>optional</span>, defaults to 0
+						</dd>
+						<dd>Indicates from what result to start from.</dd>
+						
+						<dt>limit</dt>
+						<dd>
+							Integer <span>optional</span>, defaults to 200
+						</dd>
+						<dd>Restricts the size of results returned.</dd>
+
+						<dt>orderBy</dt>
+						<dd>
+							String <span>optional</span>, one of <span>displayName, accountNo, officeId, officeName</span>
+						</dd>
+						<dd>Orders the results by the field indicated.</dd>
+
+						<dt>sortBy</dt>
+						<dd>
+							String <span>optional</span>, one of <span>ASC, DESC</span>
+						</dd>
+						<dd>Indicates what way to order results if <i>orderBy</i> is used.</dd>
+
+						<dt>officeId</dt>
+						<dd>
+							Integer <span>optional</span> 
+						</dd>
+						<dd>Provides ability to restrict list of centers returned based on the office there associated with.</dd>
+						<dt>underHierarchy</dt>
+						<dd>
+							String <span>optional</span>
+						</dd>
+						<dd>Use the office hierarchy string to return all centers under a given hierarchy.</dd>
+
+						<dt>name</dt>
+						<dd>
+							String <span>optional</span>
+						</dd>
+						<dd>Use name of centers to restrict results.</dd>
+
+						<dt>externalId</dt>
+						<dd>
+							String <span>optional</span>
+						</dd>
+						<dd>Use externalId of center to restrict results.</dd>
+
+						<dt>sqlSearch</dt>
+						<dd>
+							String <span>optional</span>
+						</dd>
+						<dd>Use an sql fragment valid for the underlying center schema to filter results. e.g. display_name like %K%</dd>				
+					</dl>
 					<p>Example Requests:</p>
 					<div class=apiClick>centers</div>
+					<br>
+					<div class=apiClick>centers?fields=name,officeName,joinedDate</div>
+					<br>
+					<div class=apiClick>centers?offset=10&limit=50</div>
+					<br>
+					<div class=apiClick>centers?orderBy=name,sortOrder=DESC</div>
 				</div>
 				<div class="method-example">
 					<code class="method-declaration">
 GET https://DomainName/mifosng-provider/api/v1/centers
 					</code>
 					<code class="method-response">
-[
-  {
-    "id": 8,
-    "status": {
-      "id": 100,
-      "code": "groupingStatusType.pending",
-      "value": "Pending"
+{
+  "totalFilteredRecords": 2,
+  "pageItems": [
+    {
+      "id": 2,
+      "status": {
+        "id": 100,
+        "code": "groupingStatusType.pending",
+        "value": "Pending"
+      },
+      "active": false,
+      "name": "Center 1",
+      "officeId": 1,
+      "officeName": "Head Office",
+      "hierarchy": ".2."
     },
-    "active": false,
-    "name": "First Center (No groups)",
-    "officeId": 1,
-    "officeName": "Head Office",
-    "hierarchy": ".8."
-  },
-  {
-    "id": 9,
-    "status": {
-      "id": 300,
-      "code": "groupingStatusType.active",
-      "value": "Active"
-    },
-    "active": true,
-    "activationDate": [
-      2011,
-      3,
-      1
-    ],
-    "name": "centerwithgroup",
-    "officeId": 1,
-    "officeName": "Head Office",
-    "hierarchy": ".9."
-  }
-]
+    {
+      "id": 3,
+      "status": {
+        "id": 100,
+        "code": "groupingStatusType.pending",
+        "value": "Pending"
+      },
+      "active": false,
+      "name": "Center 2",
+      "officeId": 1,
+      "officeName": "Head Office",
+      "hierarchy": ".3."
+    }
+  ]
+}
 					</code>
 				</div>
 			</div>
@@ -3574,31 +3532,94 @@ DELETE groups/2
 			<div class="method-section">
 				<div class="method-description">
 					<h4>List Groups</h4>
+					<p>The <i>list</i> capability of groups can support <b>pagination</b> and <b>sorting</b>.</p>
+					<h5>Optional Arguments</h5>
+					<dl class="argument-list">
+						<dt>offset</dt>
+						<dd>
+							Integer <span>optional</span>, defaults to 0
+						</dd>
+						<dd>Indicates from what result to start from.</dd>
+						
+						<dt>limit</dt>
+						<dd>
+							Integer <span>optional</span>, defaults to 200
+						</dd>
+						<dd>Restricts the size of results returned.</dd>
+
+						<dt>orderBy</dt>
+						<dd>
+							String <span>optional</span>, one of <span>displayName, accountNo, officeId, officeName</span>
+						</dd>
+						<dd>Orders the results by the field indicated.</dd>
+
+						<dt>sortBy</dt>
+						<dd>
+							String <span>optional</span>, one of <span>ASC, DESC</span>
+						</dd>
+						<dd>Indicates what way to order results if <i>orderBy</i> is used.</dd>
+
+						<dt>officeId</dt>
+						<dd>
+							Integer <span>optional</span> 
+						</dd>
+						<dd>Provides ability to restrict list of groups returned based on the office there associated with.</dd>
+						<dt>underHierarchy</dt>
+						<dd>
+							String <span>optional</span>
+						</dd>
+						<dd>Use the office hierarchy string to return all groups under a given hierarchy.</dd>
+
+						<dt>name</dt>
+						<dd>
+							String <span>optional</span>
+						</dd>
+						<dd>Use name of groups to restrict results.</dd>
+
+						<dt>externalId</dt>
+						<dd>
+							String <span>optional</span>
+						</dd>
+						<dd>Use externalId of groups to restrict results.</dd>
+
+						<dt>sqlSearch</dt>
+						<dd>
+							String <span>optional</span>
+						</dd>
+						<dd>Use an sql fragment valid for the underlying group schema to filter results. e.g. display_name like %K%</dd>				
+					</dl>
 					<p>Example Requests:</p>
 					<div class=apiClick>groups</div>
+					<br>
+					<div class=apiClick>groups?fields=name,officeName,joinedDate</div>
+					<br>
+					<div class=apiClick>groups?offset=10&limit=50</div>
+					<br>
+					<div class=apiClick>groups?orderBy=name,sortOrder=DESC</div>
 				</div>
 				<div class="method-example">
 					<code class="method-declaration">
 GET https://DomainName/mifosng-provider/api/v1/groups
 					</code>
 					<code class="method-response">
-[
-  {
-    "id": 1,
-    "name": "First Group (changed)",
-    "externalId": "000-1A",
-    "officeId": 1,
-    "officeName": "Head Office",
-    "hierarchy": ".1."
-  },
-  {
-    "id": 2,
-    "name": "Pending Group",
-    "officeId": 1,
-    "officeName": "Head Office",
-    "hierarchy": ".2."
-  }
-]
+{
+  "totalFilteredRecords": 2,
+  "pageItems": [
+    {
+      "id": 4,
+      "name": "AnotherGroup",
+      "status": {
+        "id": 100,
+        "code": "clientStatusType.pending",
+        "value": "Pending"
+      },
+      "active": false,
+      "officeId": 1,
+      "officeName": "Head Office",
+      "hierarchy": ".4."
+    }
+  ]
+}
 					</code>
 				</div>
 			</div>
@@ -12867,13 +12888,40 @@ No Request Body:
             <div class="method-section">
                 <div class="method-description">
                     <h4>List Journal Entries</h4>
-                    <h5>Arguments</h5>
-                    <dl class="argument-list">
-                        <dt>officeId</dt>
-                        <dd>
-                            Integer <span>optional</span>
-                        </dd>
-                        <dt>glAccountId</dt>
+                    <p>The <i>list</i> capability of journal entries can support <b>pagination</b> and <b>sorting</b>.</p>
+					<h5>Optional Arguments</h5>
+					<dl class="argument-list">
+						<dt>offset</dt>
+						<dd>
+							Integer <span>optional</span>, defaults to 0
+						</dd>
+						<dd>Indicates from what result to start from.</dd>
+						
+						<dt>limit</dt>
+						<dd>
+							Integer <span>optional</span>, defaults to 200
+						</dd>
+						<dd>Restricts the size of results returned.</dd>
+
+						<dt>orderBy</dt>
+						<dd>
+							String <span>optional</span>, one of <span>displayName, accountNo, officeId, officeName</span>
+						</dd>
+						<dd>Orders the results by the field indicated.</dd>
+
+						<dt>sortBy</dt>
+						<dd>
+							String <span>optional</span>, one of <span>ASC, DESC</span>
+						</dd>
+						<dd>Indicates what way to order results if <i>orderBy</i> is used.</dd>
+
+						<dt>officeId</dt>
+						<dd>
+							Integer <span>optional</span> 
+						</dd>
+						<dd>Provides ability to restrict list of centers returned based on the office there associated with.</dd>
+						
+						<dt>glAccountId</dt>
                         <dd>
                             Integer <span>optional</span>
                         </dd>
@@ -12905,89 +12953,111 @@ No Request Body:
                         <dt>transactionId</dt>
                         <dd>
                             String <span>optional</span>
-                        </dd>
-                    </dl>
-                    <p>Example Requests:</p>
-                    <div class=apiClick>journalentries?transactionId=PB37X8Y21EQUY4S</div>
-                    <br>
+                        </dd>				
+					</dl>
+					<p>Example Requests:</p>
+					<div class=apiClick>journalentries</div>
+					<br>
+					<div class=apiClick>journalentries?transactionId=PB37X8Y21EQUY4S</div>
                     <br>
                     <div class=apiClick>journalentries?officeId=1&glAccountId=17&manualEntriesOnly=true&fromDate=2012-01-01&toDate=2013-01-01</div>
+                    <br>
+					<div class=apiClick>journalentries?fields=officeName,glAccountName,transactionDate</div>
+					<br>
+					<div class=apiClick>journalentries?offset=10&limit=50</div>
+					<br>
+					<div class=apiClick>journalentries?orderBy=transactionId,sortOrder=DESC</div>
                 </div>
                 <div class="method-example">
                     <code class="method-declaration">
 GET https://DomainName/api/v1/journalentries?transactionId=PB37X8Y21EQUY4S
                     </code>
                     <code class="method-response">
-[
+{
+  "totalFilteredRecords": 24,
+  "pageItems": [
     {
-        "id": 81,
-        "officeId": 1,
-        "officeName": "Head Office",
-        "glAccountName": "Something totally else",
-        "glAccountId": 17,
-        "glAccountCode": "340098",
-        "glAccountType": {
-            "id": 3,
-            "code": "accountType.equity",
-            "value": "EQUITY"
-        },
-        "transactionDate": [
-            2012,
-            12,
-            12
-        ],
-        "entryType": {
-            "id": 2,
-            "code": "journalEntrytType.debit",
-            "value": "DEBIT"
-        },
-        "amount": 120,
-        "transactionId": "PB37X8Y21EQUY4S",
-        "manualEntry": true,
-        "createdByUserId": 1,
-        "createdDate": [
-            2012,
-            12,
-            13
-        ],
-        "createdByUserName": "mifos",
-        "reversed": true
+      "id": 1,
+      "officeId": 1,
+      "officeName": "Head Office",
+      "glAccountName": "ACCOUNT_NAME_WTYRB",
+      "glAccountId": 98,
+      "glAccountCode": "ASSET_C01367768735188",
+      "glAccountType": {
+        "id": 1,
+        "code": "accountType.asset",
+        "value": "ASSET"
+      },
+      "transactionDate": [
+        2011,
+        3,
+        4
+      ],
+      "entryType": {
+        "id": 2,
+        "code": "journalEntrytType.debit",
+        "value": "DEBIT"
+      },
+      "amount": 10000,
+      "transactionId": "33",
+      "manualEntry": false,
+      "entityType": {
+        "id": 1,
+        "code": "productType.loan",
+        "value": "LOAN"
+      },
+      "entityId": 7,
+      "createdByUserId": 1,
+      "createdDate": [
+        2013,
+        5,
+        5
+      ],
+      "createdByUserName": "mifos",
+      "reversed": false
     },
     {
-        "id": 82,
-        "officeId": 1,
-        "officeName": "Head Office",
-        "glAccountName": "Something else",
-        "glAccountId": 19,
-        "glAccountCode": "560050",
-        "glAccountType": {
-            "id": 3,
-            "code": "accountType.equity",
-            "value": "EQUITY"
-        },
-        "transactionDate": [
-            2012,
-            12,
-            12
-        ],
-        "entryType": {
-            "id": 1,
-            "code": "journalEntryType.credit",
-            "value": "CREDIT"
-        },
-        "amount": 120,
-        "transactionId": "PB37X8Y21EQUY4S",
-        "manualEntry": true,
-        "createdByUserId": 1,
-        "createdDate": [
-            2012,
-            12,
-            13
-        ],
-        "createdByUserName": "mifos",
-        "reversed": true
+      "id": 2,
+      "officeId": 1,
+      "officeName": "Head Office",
+      "glAccountName": "ACCOUNT_NAME_WTYRB",
+      "glAccountId": 98,
+      "glAccountCode": "ASSET_C01367768735188",
+      "glAccountType": {
+        "id": 1,
+        "code": "accountType.asset",
+        "value": "ASSET"
+      },
+      "transactionDate": [
+        2011,
+        3,
+        4
+      ],
+      "entryType": {
+        "id": 1,
+        "code": "journalEntryType.credit",
+        "value": "CREDIT"
+      },
+      "amount": 10000,
+      "transactionId": "33",
+      "manualEntry": false,
+      "entityType": {
+        "id": 1,
+        "code": "productType.loan",
+        "value": "LOAN"
+      },
+      "entityId": 7,
+      "createdByUserId": 1,
+      "createdDate": [
+        2013,
+        5,
+        5
+      ],
+      "createdByUserName": "mifos",
+      "reversed": false
     }
-]
+  ]
+}
                     </code>
                 </div>
             </div>
