@@ -223,33 +223,28 @@ public class ReportWritePlatformServiceImpl implements
 								"reportParameterName").getAsString();
 					}
 
-					ReportParameterUsage reportParameterUsage = null;
 					if (jsonObject.has("id")) {
 						final String idStr = jsonObject.get("id").getAsString();
 						if (!(idStr.equals("")))
 							id = Long.parseLong(idStr);
 					}
-					
+
+					ReportParameterUsage reportParameterUsage = null;
 					if (id == null) {
 						reportParameterUsage = new ReportParameterUsage(report,
 								parameter, reportParameterName);
 					} else {
-						reportParameterUsage = rpuById(report, id);
+						ReportParameterUsage currentReportParameterUsage = rpuById(
+								report, id);
 
-						if (reportParameterUsage == null) {
-							throw new PlatformDataIntegrityException(
-									"error.msg.supplied.parameter.id.doesnt.exist",
-									"Supplied parameterId column doesn't Exist",
-									id);
-						} 
-
-						if (parameter != null)
-							reportParameterUsage.setParameter(parameter);
-
-						if (reportParameterName != null) {
-							reportParameterUsage
-									.setReportParameterName(reportParameterName);
-							}
+						if (existingEntryChanged(currentReportParameterUsage,
+								parameter.getId(), reportParameterName)) {
+							reportParameterUsage = new ReportParameterUsage(
+									currentReportParameterUsage, report,
+									parameter, reportParameterName);
+						} else {
+							reportParameterUsage = currentReportParameterUsage;
+						}
 					}
 
 					reportParameterUsages.add(reportParameterUsage);
@@ -261,6 +256,25 @@ public class ReportWritePlatformServiceImpl implements
 			return null;
 	}
 
+	private boolean existingEntryChanged(
+			final ReportParameterUsage currentReportParameterUsage,
+			final Long parameterId, final String reportParameterName) {
+
+		if (!(currentReportParameterUsage.getParameter().getId()
+				.equals(parameterId)))
+			return true;
+
+		if ((reportParameterName == null)
+				&& (currentReportParameterUsage.getReportParameterName() == null))
+			return false;
+
+		if (!(currentReportParameterUsage.getReportParameterName()
+				.equals(reportParameterName)))
+			return true;
+
+		return false;
+	}
+
 	private ReportParameterUsage rpuById(final Report report, final Long id) {
 
 		for (ReportParameterUsage rpu : report.getReportParameterUsages()) {
@@ -268,7 +282,8 @@ public class ReportWritePlatformServiceImpl implements
 				return rpu;
 		}
 
-		return null;
-
+		throw new PlatformDataIntegrityException(
+				"error.msg.supplied.parameter.id.doesnt.exist",
+				"Supplied parameterId column doesn't Exist", id);
 	}
 }

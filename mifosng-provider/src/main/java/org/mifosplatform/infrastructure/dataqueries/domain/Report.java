@@ -6,6 +6,7 @@
 package org.mifosplatform.infrastructure.dataqueries.domain;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -59,13 +60,12 @@ public class Report extends AbstractPersistable<Long> {
 
 	@Column(name = "report_sql")
 	private String reportSql;
-	
+
 	@LazyCollection(LazyCollectionOption.FALSE)
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "report", orphanRemoval = true)
 	private Set<ReportParameterUsage> reportParameterUsages = new HashSet<ReportParameterUsage>();
 
-	public static Report fromJson(
-			final JsonCommand command) {
+	public static Report fromJson(final JsonCommand command) {
 
 		String reportName = null;
 		String reportType = null;
@@ -173,14 +173,16 @@ public class Report extends AbstractPersistable<Long> {
 			this.reportSql = StringUtils.defaultIfEmpty(newValue, null);
 		}
 
-        final String reportParametersParamName = "reportParameters";
-        if (command.hasParameter(reportParametersParamName)) {
-            JsonArray jsonArray = command.arrayOfParameterNamed(reportParametersParamName);
-            if (jsonArray != null) {
-                actualChanges.put(reportParametersParamName, command.jsonFragment(reportParametersParamName));
-            }
-        }
-        
+		final String reportParametersParamName = "reportParameters";
+		if (command.hasParameter(reportParametersParamName)) {
+			JsonArray jsonArray = command
+					.arrayOfParameterNamed(reportParametersParamName);
+			if (jsonArray != null) {
+				actualChanges.put(reportParametersParamName,
+						command.jsonFragment(reportParametersParamName));
+			}
+		}
+
 		validate();
 
 		if (!actualChanges.isEmpty()) {
@@ -294,18 +296,61 @@ public class Report extends AbstractPersistable<Long> {
 			return false;
 
 		boolean updated = false;
-		if (this.reportParameterUsages != null) {
 
-			if (!(this.reportParameterUsages.equals(newReportParameterUsages))) {
-				updated = true;
-				this.reportParameterUsages.clear();
-				
-				this.reportParameterUsages.addAll(newReportParameterUsages);
-			}
-		} else {
+		if (changeInReportParameters(newReportParameterUsages)) {
 			updated = true;
-			this.reportParameterUsages = newReportParameterUsages;
+			this.reportParameterUsages.clear();
+			this.reportParameterUsages.addAll(newReportParameterUsages);
 		}
 		return updated;
 	}
+
+	private boolean changeInReportParameters(
+			Set<ReportParameterUsage> newReportParameterUsages) {
+		
+		if (!(this.reportParameterUsages.equals(newReportParameterUsages))) return true;		
+
+		Map<Long, ReportParameterUsage> currentRPUs = new HashMap<Long, ReportParameterUsage>();
+		for (ReportParameterUsage rpu : this.reportParameterUsages) {
+			currentRPUs.put(rpu.getId(), rpu);
+		}
+		
+		Map<Long, ReportParameterUsage> newRPUs = new HashMap<Long, ReportParameterUsage>();
+		for (ReportParameterUsage rpu : newReportParameterUsages) {
+			newRPUs.put(rpu.getId(), rpu);
+		}
+
+		ReportParameterUsage currentRPU = null;
+		ReportParameterUsage newRPU = null;
+        for (Long key : currentRPUs.keySet()) {
+        	currentRPU = currentRPUs.get(key);
+        	newRPU = newRPUs.get(key);
+
+    		if (existingEntryChanged(currentRPU, newRPU)) return true;
+        }
+		
+		
+		
+		return false;
+	}
+	
+
+	private boolean existingEntryChanged(
+			final ReportParameterUsage currentRPU, final ReportParameterUsage newRPU) {
+
+		if (!(currentRPU.getParameter().getId()
+				.equals(newRPU.getParameter().getId())))
+			return true;
+
+		if ((currentRPU.getReportParameterName() == null)
+				&& (newRPU.getReportParameterName() == null))
+			return false;
+
+		if (!(currentRPU.getReportParameterName()
+				.equals(newRPU.getReportParameterName())))
+			return true;
+
+		return false;
+	}
+	
 }

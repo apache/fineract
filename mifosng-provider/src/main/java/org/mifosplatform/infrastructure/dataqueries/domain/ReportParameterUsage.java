@@ -41,6 +41,14 @@ public class ReportParameterUsage extends AbstractPersistable<Long> {
 		this.parameter = parameter;
 		this.reportParameterName = reportParameterName;
 	}
+	
+	public ReportParameterUsage(final ReportParameterUsage currentReportParameterUsage, final Report report,
+			final ReportParameter parameter, final String reportParameterName) {
+		this.setId(currentReportParameterUsage.getId());
+		this.report = report;
+		this.parameter = parameter;
+		this.reportParameterName = reportParameterName;
+	}
 
 	public void setReport(Report report) {
 		this.report = report;
@@ -48,6 +56,14 @@ public class ReportParameterUsage extends AbstractPersistable<Long> {
 
 	public void setParameter(ReportParameter parameter) {
 		this.parameter = parameter;
+	}
+
+	public ReportParameter getParameter() {
+		return parameter;
+	}
+
+	public String getReportParameterName() {
+		return reportParameterName;
 	}
 
 	public void setReportParameterName(String reportParameterName) {
