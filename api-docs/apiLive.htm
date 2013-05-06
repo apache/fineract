@@ -3786,9 +3786,9 @@ GET https://DomainName/mifosng-provider/api/v1/groups
 								At present there are three type of loans are supported.
 								<br>Available loan types:
 								<ol>
-									<li>id=1, code=individual, description: Loan given to individual member</li>
-									<li>id=2, code=group, description: Loan given to group as a whole</li>
-									<li>id=3, code=jlg, description: Joint liability group loan given to members in a group  on individual basis. JLG loan can be given to one or more members in a group.</li>
+									<li><b>individual</b>: Loan given to individual member</li>
+									<li><b>group</b>: Loan given to group as a whole</li>
+									<li><b>jlg</b>: Joint liability group loan given to members in a group  on individual basis. JLG loan can be given to one or more members in a group.</li>
 								</ol>
 							</td>
 						</tr>
@@ -3843,14 +3843,14 @@ GET https://DomainName/mifosng-provider/api/v1/groups
 							fields are returned.</dd>
 					</dl>
 					<p>Example Requests:</p>
-					<div class=apiClick>loans/template?clientId=1</div>
+					<div class=apiClick>loans/template?templateType=individual&clientId=1</div>
 					<br>
 					<br>
-					<div class=apiClick>loans/template?clientId=1&productId=1</div>
+					<div class=apiClick>loans/template?templateType=individual&clientId=1&productId=1</div>
 				</div>
 				<div class="method-example">
 					<code class="method-declaration">
-GET https://DomainName/api/v1/loans/template?clientId=1
+GET https://DomainName/api/v1/loans/template?templateType=individual&clientId=1
 					</code>
 					<code class="method-response">
 {
@@ -3873,7 +3873,7 @@ GET https://DomainName/api/v1/loans/template?clientId=1
 }
 					</code>
 					<code class="method-declaration">
-GET https://DomainName/api/v1/loans/template?clientId=1&productId=1
+GET https://DomainName/api/v1/loans/template?templateType=individual&clientId=1&productId=1
 					</code>
 					<code class="method-response">
 {
@@ -4123,8 +4123,7 @@ GET https://DomainName/api/v1/loans/template?clientId=1&productId=1
 				<div class="method-description">
 					<h4>Retrieve a Loan</h4>
 					<p>
-						<b>Note:</b> template=true parameter doesn't apply to this
-						resource.
+						<b>Note:</b> template=true parameter doesn't apply to this resource.
 					</p>
 					<h5>Arguments</h5>
 					<dl class="argument-list">
@@ -4200,6 +4199,11 @@ GET https://DomainName/api/v1/loans/{loanId}
   "loanPurposeName": "option.HousingImprovement",
   "loanOfficerId": 2,
   "loanOfficerName": "LoanOfficer, Kampala",
+  "loanType": {
+    "id": 1,
+    "code": "loanType.individual",
+    "value": "Individual"
+  },
   "currency": {
     "code": "UGX",
     "name": "Uganda Shilling",
@@ -4493,7 +4497,7 @@ Request Body:
 						</tr>
 						<tr class=alt>
 							<td>clientId, productId, principal, loanTermFrequency,
-								loanTermFrequencyType, numberOfRepayments, repaymentEvery,
+								loanTermFrequencyType, loanType, numberOfRepayments, repaymentEvery,
 								repaymentFrequencyType, interestRatePerPeriod,
 								amortizationType, interestType,
 								interestCalculationPeriodType, transactionProcessingStrategyId,
@@ -4517,6 +4521,7 @@ Request Body:
     "principal": "100,000.00",
     "loanTermFrequency": 12,
     "loanTermFrequencyType": 2,
+    "loanType": "individual"
     "numberOfRepayments": 12,
     "repaymentEvery": 1,
     "repaymentFrequencyType": 2,
