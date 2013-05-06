@@ -44,13 +44,16 @@ public class TomcatJdbcDataSourcePerTenantService implements DataSourcePerTenant
 
         MifosPlatformTenant tenant = ThreadLocalContextUtil.getTenant();
         if (tenant != null) {
-            // if tenant information available switch to appropriate datasource
-            // for that tenant.
-            if (this.tenantToDataSourceMap.containsKey(tenant.getId())) {
-                tenantDataSource = this.tenantToDataSourceMap.get(tenant.getId());
-            } else {
-                tenantDataSource = createNewDataSourceFor(tenant);
-                this.tenantToDataSourceMap.put(tenant.getId(), tenantDataSource);
+            synchronized(this.tenantToDataSourceMap)
+            {
+                // if tenant information available switch to appropriate datasource
+                // for that tenant.
+                if (this.tenantToDataSourceMap.containsKey(tenant.getId())) {
+                    tenantDataSource = this.tenantToDataSourceMap.get(tenant.getId());
+                } else {
+                    tenantDataSource = createNewDataSourceFor(tenant);
+                    this.tenantToDataSourceMap.put(tenant.getId(), tenantDataSource);
+                }
             }
         }
 
