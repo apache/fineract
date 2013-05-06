@@ -108,7 +108,13 @@ public class ChargeData implements Comparable<ChargeData> {
     }
 
     public LoanChargeData toLoanChargeData() {
-        return LoanChargeData.newLoanChargeDetails(this.id, this.name, this.currency, this.amount, this.chargeTimeType,
+
+        BigDecimal percentage = null;
+        if (this.chargeCalculationType.getId() == 2) {
+            percentage = this.amount;
+        }
+
+        return LoanChargeData.newLoanChargeDetails(this.id, this.name, this.currency, this.amount, percentage, this.chargeTimeType,
                 this.chargeCalculationType, this.penalty);
     }
 }

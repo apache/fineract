@@ -833,19 +833,10 @@ public class Loan extends AbstractPersistable<Long> {
         //FIXME: AA - We may require separate api command to move loan from one group to another 
         final String groupIdParamName = "groupId";
         final Long groupId = this.group == null ? null : this.group.getId();
-        if (command.isChangeInLongParameterNamed(clientIdParamName, groupId)) {
+        if (command.isChangeInLongParameterNamed(groupIdParamName, groupId)) {
             final Long newValue = command.longValueOfParameterNamed(groupIdParamName);
             actualChanges.put(groupIdParamName, newValue);
         }
-        
-        //Do not support loan type modification
-        /*final String loanTypeParamName = "loanType";
-        final String loanTypeStr = LoanType.fromInt(this.loanType).getName();
-        if (command.isChangeInStringParameterNamed(loanTypeParamName, loanTypeStr)) {
-            final String newValue = command.stringValueOfParameterNamed(loanTypeParamName);
-            actualChanges.put(loanTypeParamName, newValue);
-            this.loanType = LoanType.fromName(newValue).getValue();
-        }*/
 
         final String productIdParamName = "productId";
         if (command.isChangeInLongParameterNamed(productIdParamName, this.loanProduct.getId())) {
@@ -912,7 +903,6 @@ public class Loan extends AbstractPersistable<Long> {
             final LocalDate newValue = command.localDateValueOfParameterNamed(expectedDisbursementDateParamName);
             this.expectedDisbursementDate = newValue.toDate();
             removeFirstDisbursementTransaction();
-            disburse(getExpectedDisbursedOnLocalDate());
         }
 
         final String repaymentsStartingFromDateParamName = "repaymentsStartingFromDate";
@@ -1250,18 +1240,6 @@ public class Loan extends AbstractPersistable<Long> {
         }
 
         return actualChanges;
-    }
-
-    private void disburse(final LocalDate expectedDisbursedOnLocalDate) {
-        this.actualDisbursementDate = expectedDisbursedOnLocalDate.toDate();
-        updateLoanScheduleDependentDerivedFields();
-        /****
-         * Vishwas TODO: Re-factor to skip unnecessary creation of Disbursement
-         * and fees applied transactions (though they are not persisted) on
-         * modifications to loan application modification
-         *****/
-        PaymentDetail paymentDetail = null;
-        handleDisbursementTransaction(paymentDetail, expectedDisbursedOnLocalDate);
     }
 
     private Collection<Long> findExistingTransactionIds() {
@@ -1988,7 +1966,7 @@ public class Loan extends AbstractPersistable<Long> {
     private boolean hasDisbursementTransaction() {
         boolean hasRepaymentTransaction = false;
         for (LoanTransaction loanTransaction : this.loanTransactions) {
-            if (loanTransaction.isDisbursement()) {
+            if (loanTransaction.isDisbursement() && loanTransaction.isNotReversed()) {
                 hasRepaymentTransaction = true;
                 break;
             }
