@@ -32,7 +32,6 @@ public final class AuditData {
     private final DateTime checkedOnDate;
     @SuppressWarnings("unused")
     private final String processingResult;
-    @SuppressWarnings("unused")
     private String commandAsJson;
     @SuppressWarnings("unused")
     private final String officeName;
