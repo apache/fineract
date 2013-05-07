@@ -14,7 +14,7 @@
   </appender>
 
   <appender name="FILE" class="ch.qos.logback.core.FileAppender">
-    <file>${catalina.home}/logs/mifos-platform.log</file>
+    <file>${catalina.base}/logs/mifos-platform.log</file>
     <append>true</append>
     <!-- encoders are assigned the type
          ch.qos.logback.classic.encoder.PatternLayoutEncoder by default -->
