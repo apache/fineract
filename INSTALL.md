@@ -42,7 +42,6 @@ The two ways to get up and running with mifos platform is:
  - Owner: 476083131096
  - Source: 476083131096/Mifos Platform 1.0.0.RELEASE Public AMI
  - Architecture: Ubuntu12.04 LTS x86_64
-
  - Built starting from Ubuntu AMI ami-35acbb41
  - Java 1.6_45 32 bit JVM
  - Tomcat 7.0.39 (with SSL configured for self-signed certificate)
