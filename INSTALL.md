@@ -49,8 +49,24 @@ Launch instance <a target="_blank" href="https://console.aws.amazon.com/ec2/home
   exit
   ```
 
-  Step two: 
+  Step two: populate mifosplatform-tenants database using ```database/mifospltaform-tenants-first-time-install.sql```
+  ```
+  mysql -uroot -pmysql mifosplatform-tenants < database/mifospltaform-tenants-first-time-install.sql
+  ```
+  
+  Step three: create mifostenant-default database
+  ```
+  mysql -uroot -pmysql
+  create database `mifostenant-default`;
+  exit
+  ```
 
+#### 2.2.2 Upgrade existing database(s)
+
+  Any *tenant* databases will be upgraded automatically when the application starts if the *auto_update* field of the *tenants* database table is enabled(=1). This is the default setting.
+  
+  Upgrading your database in this way is the recomended way as it will upgrade any *tenants* setup in the *mifosplatform-tenants* database but can be disabled by setting the *auto_update* field of the tenant to zero.
+  
 ### 2.3 Tomcat 7 Setup
 
 ### 2.4 Release Artifacts
