@@ -36,7 +36,12 @@ Launch instance <a target="_blank" href="https://console.aws.amazon.com/ec2/home
 
  - Mifos X Public AMI 1.0.0.RELEASE
  - Base Ubuntu AMI ami-35acbb41
- - Ubuntu12.04 LTS, tomcat7.0.21 (with SSL),MySql 5.1.62, Java 1.6_30, Mifos X Platform
+ - Ubuntu12.04 LTS 64 bit arch
+ - Java 1.6_45 32 bit JVM
+ - Tomcat 7.0.39 (with SSL configured for self-signed certificate)
+ - MySql 5.5.31
+ - Mifos Platform 1.0.0.RELEASE
+ - Mifos Reference App 1.0.0.RELEASE
 
 ## 2. Manual Installation
 
