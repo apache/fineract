@@ -12,6 +12,7 @@ The release artifact (.zip file) has the following structure:
   + api-docs ... folder contains html based documentation on the platform API for this release
   + database ... folder contains database setup and upgrade scripts required for installation
   + pentahoReports ... folder contains any out-of-the-box reports provided through pentaho
+  + apps ... folder contains apps like reference app that speak to the platform
   |
   -- CHANGELOG.MD ... file documents changelog of project up to this release
   -- CONTRIBUTORS.MD ... file provides details on contributors to project
@@ -195,7 +196,7 @@ Launch instance <a target="_blank" href="https://console.aws.amazon.com/ec2/home
   - mifosng-provider.war
   
   Drop the following from the release artifact into [TOMCAT_HOME]/webapps/ROOT folder:
-  - The entire IndividualLendingGeneralJavaScript folder
+  - The entire ```apps/IndividualLendingGeneralJavaScript``` folder
   - The entire api-docs folder
 
 #### 2.3.7 Startup tomcat
@@ -203,6 +204,3 @@ Launch instance <a target="_blank" href="https://console.aws.amazon.com/ec2/home
   - Platform application should be available @ https://[server ip address]:8443/mifosng-provider/api/v1/offices?tenantIdentifier=default&pretty=true
   - Reference application should be available @ https://[server ip address]:8443/IndividualLendingGeneralJavaScript/IndivLendHome.html?baseApiUrl=https://[server ip address]:8443/mifosng-provider/api/v1/
   - API docs should be available @ https://[server ip address]:8443/api-docs/apiLive.htm
-
-
-  
