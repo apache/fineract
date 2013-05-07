@@ -3415,6 +3415,61 @@ Request Body:
 	    </div>
 	</div>
 
+	<a id="groups_associate_clients" name="groups_associate_clients" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Associate Clients</h2>
+	        <p>This API allows to associate existing clients to a group.</p>
+	        <p>The clients are listed from the office to which the group is associated.</p>
+	        <p>If client(s) is already associated with group then API will result in an error.</p>
+	    </div>
+
+	    <div class="method-example">
+	        <code class="method-declaration">POST https://Domain Name/api/v1/groups/{groupId}?command=associateClients</code>
+	        <code class="method-request">POST groups/1?command=associateClients
+Content-Type: application/json
+Request Body:
+{
+  "clientMembers":[1,2]
+}
+			</code>
+	        <code class="method-response">
+{
+  "officeId": 1,
+  "groupId": 1,
+  "resourceId": 1,
+  "clientMembers": [1,2]
+}
+	        </code>
+	    </div>
+	</div>
+	<a id="groups_disassociate_clients" name="groups_disassociate_clients" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Disassociate Clients</h2>
+	        <p>This API allows to disassociate clients from a group.</p>
+	        <p>Disassociating a client with group loans results in an error.</p>
+	    </div>
+
+	    <div class="method-example">
+	        <code class="method-declaration">POST https://Domain Name/api/v1/groups/{groupId}?command=disassociateClients</code>
+	        <code class="method-request">POST groups/1?command=disassociateClients
+Content-Type: application/json
+Request Body:
+{
+  "clientMembers":[1,2]
+}
+			</code>
+	        <code class="method-response">
+{
+  "officeId": 1,
+  "groupId": 1,
+  "resourceId": 1,
+  "clientMembers": [1,2]
+}
+	        </code>
+	    </div>
+	</div>
 			<a id="groups_retrieve" name="groups_retrieve" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
@@ -14266,6 +14321,22 @@ GET https://DomainName/api/v1/search?query=000000111
 					<td></td>
 					<td>groups/{groupId}?command=activate</td>
 					<td><a href="#groups_activate">Activate a Group</a></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>groups/{groupId}?command=associateClients</td>
+					<td><a href="#groups_associate_clients">Associate Clients</a></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>groups/{groupId}?command=disassociateClients</td>
+					<td><a href="#groups_disassociate_clients">Disassociate Clients</a></td>
 					<td></td>
 					<td></td>
 					<td></td>
