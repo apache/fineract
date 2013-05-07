@@ -187,25 +187,35 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
         if (commandAsJsonMap.containsKey("officeId")) {
         	
         	Object officeIdObj = commandAsJsonMap.get("officeId");
-        	if (officeIdObj instanceof Double) {
-        		Integer officeId = ((Double) officeIdObj).intValue();
+        	Integer officeId = -1;
+        	if (officeIdObj instanceof Integer) {
+        		officeId = (Integer)officeIdObj;
+        	} else if (officeIdObj instanceof Double) {
+        		officeId = ((Double) officeIdObj).intValue();
+        	}
+        	if (officeId > -1) {
         		sql = " SELECT name FROM m_office WHERE id = " + officeId;
             	String officeName = this.jdbcTemplate.queryForObject(sql, String.class);
             	String regex = "\"officeId\":\\s\\d+";
             	commandAsJson = commandAsJson.replaceAll(regex, "\"officeName\": \""+officeName+"\"");
-        	}	
+        	}
         }
         
         if (commandAsJsonMap.containsKey("clientId")) {
         	
         	Object clientIdObj = commandAsJsonMap.get("clientId");
-        	if (clientIdObj instanceof Double) {
-        		Integer officeId = ((Double) clientIdObj).intValue();
-        		sql = " SELECT display_name FROM m_client WHERE id = " + officeId;
+        	Integer clientId = -1;
+        	if (clientIdObj instanceof Integer) {
+        		clientId = (Integer)clientIdObj;
+        	} else if (clientIdObj instanceof Double) {
+        		clientId = ((Double) clientIdObj).intValue();
+        	}
+        	if (clientId > -1) {
+        		sql = " SELECT display_name FROM m_client WHERE id = " + clientId;
             	String clientName = this.jdbcTemplate.queryForObject(sql, String.class);
             	String regex = "\"clientId\":\\s\\d+";
             	commandAsJson = commandAsJson.replaceAll(regex, "\"clientName\": \""+clientName+"\"");
-        	}	
+        	}
         }
         auditResult.setCommandAsJson(commandAsJson);
         
