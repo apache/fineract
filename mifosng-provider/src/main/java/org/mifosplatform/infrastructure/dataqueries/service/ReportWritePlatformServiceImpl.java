@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang.StringUtils;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
@@ -17,6 +18,7 @@ import org.mifosplatform.infrastructure.dataqueries.domain.Report;
 import org.mifosplatform.infrastructure.dataqueries.domain.ReportParameter;
 import org.mifosplatform.infrastructure.dataqueries.domain.ReportParameterRepository;
 import org.mifosplatform.infrastructure.dataqueries.domain.ReportParameterUsage;
+import org.mifosplatform.infrastructure.dataqueries.domain.ReportParameterUsageRepository;
 import org.mifosplatform.infrastructure.dataqueries.domain.ReportRepository;
 import org.mifosplatform.infrastructure.dataqueries.exception.ReportNotFoundException;
 import org.mifosplatform.infrastructure.dataqueries.exception.ReportParameterNotFoundException;
@@ -36,254 +38,204 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 @Service
-public class ReportWritePlatformServiceImpl implements
-		ReportWritePlatformService {
+public class ReportWritePlatformServiceImpl implements ReportWritePlatformService {
 
-	private final static Logger logger = LoggerFactory
-			.getLogger(ReportWritePlatformServiceImpl.class);
+    private final static Logger logger = LoggerFactory.getLogger(ReportWritePlatformServiceImpl.class);
 
-	private final PlatformSecurityContext context;
-	private final ReportCommandFromApiJsonDeserializer fromApiJsonDeserializer;
-	private final PermissionRepository permissionRepository;
-	private final ReportRepository reportRepository;
-	private final ReportParameterRepository reportParameterRepository;
+    private final PlatformSecurityContext context;
+    private final ReportCommandFromApiJsonDeserializer fromApiJsonDeserializer;
+    private final ReportRepository reportRepository;
+    private final ReportParameterUsageRepository reportParameterUsageRepository;
+    private final ReportParameterRepository reportParameterRepository;
+    private final PermissionRepository permissionRepository;
 
-	@Autowired
-	public ReportWritePlatformServiceImpl(
-			final PlatformSecurityContext context,
-			final ReportCommandFromApiJsonDeserializer fromApiJsonDeserializer,
-			final ReportRepository reportRepository,
-			final ReportParameterRepository reportParameterRepository,
-			final PermissionRepository permissionRepository) {
-		this.context = context;
-		this.fromApiJsonDeserializer = fromApiJsonDeserializer;
-		this.reportRepository = reportRepository;
-		this.reportParameterRepository = reportParameterRepository;
-		this.permissionRepository = permissionRepository;
-	}
+    @Autowired
+    public ReportWritePlatformServiceImpl(final PlatformSecurityContext context,
+            final ReportCommandFromApiJsonDeserializer fromApiJsonDeserializer, final ReportRepository reportRepository,
+            final ReportParameterRepository reportParameterRepository, final ReportParameterUsageRepository reportParameterUsageRepository,
+            final PermissionRepository permissionRepository) {
+        this.context = context;
+        this.fromApiJsonDeserializer = fromApiJsonDeserializer;
+        this.reportRepository = reportRepository;
+        this.reportParameterRepository = reportParameterRepository;
+        this.reportParameterUsageRepository = reportParameterUsageRepository;
+        this.permissionRepository = permissionRepository;
+    }
 
-	@Transactional
-	@Override
-	public CommandProcessingResult createReport(final JsonCommand command) {
+    @Transactional
+    @Override
+    public CommandProcessingResult createReport(final JsonCommand command) {
 
-		try {
-			context.authenticatedUser();
+        try {
+            context.authenticatedUser();
 
-			this.fromApiJsonDeserializer.validate(command.json());
+            this.fromApiJsonDeserializer.validate(command.json());
 
-			final Report report = Report.fromJson(command);
-			final Set<ReportParameterUsage> reportParameterUsages = assembleSetOfReportParameterUsages(
-					report, command);
-			if (reportParameterUsages != null) {
-				report.setReportParameterUsages(reportParameterUsages);
-			}
-			this.reportRepository.save(report);
+            final Report report = Report.fromJson(command);
+            final Set<ReportParameterUsage> reportParameterUsages = assembleSetOfReportParameterUsages(report, command);
+            report.update(reportParameterUsages);
 
-			final Permission permission = new Permission("report",
-					report.getReportName(), "READ");
-			this.permissionRepository.save(permission);
+            this.reportRepository.save(report);
 
-			return new CommandProcessingResultBuilder()
-					.withCommandId(command.commandId())
-					.withEntityId(report.getId()).build();
-		} catch (DataIntegrityViolationException dve) {
-			handleReportDataIntegrityIssues(command, dve);
-			return CommandProcessingResult.empty();
-		}
-	}
+            final Permission permission = new Permission("report", report.getReportName(), "READ");
+            this.permissionRepository.save(permission);
 
-	@Transactional
-	@Override
-	public CommandProcessingResult updateReport(final Long reportId,
-			final JsonCommand command) {
+            return new CommandProcessingResultBuilder() //
+                    .withCommandId(command.commandId()) //
+                    .withEntityId(report.getId()) //
+                    .build();
+        } catch (DataIntegrityViolationException dve) {
+            handleReportDataIntegrityIssues(command, dve);
+            return CommandProcessingResult.empty();
+        }
+    }
 
-		try {
-			context.authenticatedUser();
+    @Transactional
+    @Override
+    public CommandProcessingResult updateReport(final Long reportId, final JsonCommand command) {
 
-			this.fromApiJsonDeserializer.validate(command.json());
+        try {
+            context.authenticatedUser();
 
-			final Report report = this.reportRepository.findOne(reportId);
-			if (report == null) {
-				throw new ReportNotFoundException(reportId);
-			}
+            this.fromApiJsonDeserializer.validate(command.json());
 
-			final Map<String, Object> changes = report.update(command);
+            final Report report = this.reportRepository.findOne(reportId);
+            if (report == null) { throw new ReportNotFoundException(reportId); }
 
-			if (changes.containsKey("reportParameters")) {
-				final Set<ReportParameterUsage> reportParameterUsages = assembleSetOfReportParameterUsages(
-						report, command);
-				boolean updated = report.update(reportParameterUsages);
-				if (!updated) {
-					changes.remove("reportParameters");
-				}
-			}
+            final Map<String, Object> changes = report.update(command);
 
-			if (!changes.isEmpty()) {
-				this.reportRepository.saveAndFlush(report);
-			}
+            if (changes.containsKey("reportParameters")) {
+                final Set<ReportParameterUsage> reportParameterUsages = assembleSetOfReportParameterUsages(report, command);
+                boolean updated = report.update(reportParameterUsages);
+                if (!updated) {
+                    changes.remove("reportParameters");
+                }
+            }
 
-			return new CommandProcessingResultBuilder()
-					.withCommandId(command.commandId())
-					.withEntityId(report.getId()).with(changes).build();
-		} catch (DataIntegrityViolationException dve) {
-			handleReportDataIntegrityIssues(command, dve);
-			return CommandProcessingResult.empty();
-		}
-	}
+            if (!changes.isEmpty()) {
+                this.reportRepository.saveAndFlush(report);
+            }
 
-	@Transactional
-	@Override
-	public CommandProcessingResult deleteReport(final Long reportId) {
+            return new CommandProcessingResultBuilder() //
+                    .withCommandId(command.commandId()) //
+                    .withEntityId(report.getId()) //
+                    .with(changes) //
+                    .build();
+        } catch (DataIntegrityViolationException dve) {
+            handleReportDataIntegrityIssues(command, dve);
+            return CommandProcessingResult.empty();
+        }
+    }
 
-		final Report report = this.reportRepository.findOne(reportId);
-		if (report == null) {
-			throw new ReportNotFoundException(reportId);
-		}
+    @Transactional
+    @Override
+    public CommandProcessingResult deleteReport(final Long reportId) {
 
-		if (report.isCoreReport()) {
-			throw new PlatformDataIntegrityException(
-					"error.msg.cant.delete.core.report",
-					"Core Reports Can't be Deleted", "");
-		}
+        final Report report = this.reportRepository.findOne(reportId);
+        if (report == null) { throw new ReportNotFoundException(reportId); }
 
-		final Permission permission = this.permissionRepository
-				.findOneByCode("READ" + "_" + report.getReportName());
-		if (permission == null) {
-			throw new PermissionNotFoundException("READ" + "_"
-					+ report.getReportName());
-		}
+        if (report.isCoreReport()) {
+            //
+            throw new PlatformDataIntegrityException("error.msg.cant.delete.core.report", "Core Reports Can't be Deleted", "");
+        }
 
-		this.reportRepository.delete(report);
-		this.permissionRepository.delete(permission);
+        final Permission permission = this.permissionRepository.findOneByCode("READ" + "_" + report.getReportName());
+        if (permission == null) { throw new PermissionNotFoundException("READ" + "_" + report.getReportName()); }
 
-		return new CommandProcessingResultBuilder().withEntityId(reportId)
-				.build();
-	}
+        this.reportRepository.delete(report);
+        this.permissionRepository.delete(permission);
 
-	/*
-	 * Guaranteed to throw an exception no matter what the data integrity issue
-	 * is.
-	 */
-	private void handleReportDataIntegrityIssues(final JsonCommand command,
-			DataIntegrityViolationException dve) {
+        return new CommandProcessingResultBuilder() //
+                .withEntityId(reportId) //
+                .build();
+    }
 
-		Throwable realCause = dve.getMostSpecificCause();
-		if (realCause.getMessage().contains("unq_report_name")) {
-			final String name = command
-					.stringValueOfParameterNamed("reportName");
-			throw new PlatformDataIntegrityException(
-					"error.msg.report.duplicate.name", "A report with name '"
-							+ name + "' already exists", "name", name);
-		}
+    /*
+     * Guaranteed to throw an exception no matter what the data integrity issue
+     * is.
+     */
+    private void handleReportDataIntegrityIssues(final JsonCommand command, final DataIntegrityViolationException dve) {
 
-		logger.error(dve.getMessage(), dve);
-		throw new PlatformDataIntegrityException(
-				"error.msg.report.unknown.data.integrity.issue",
-				"Unknown data integrity issue with resource: "
-						+ realCause.getMessage());
-	}
+        Throwable realCause = dve.getMostSpecificCause();
+        if (realCause.getMessage().contains("unq_report_name")) {
+            final String name = command.stringValueOfParameterNamed("reportName");
+            throw new PlatformDataIntegrityException("error.msg.report.duplicate.name", "A report with name '" + name + "' already exists",
+                    "name", name);
+        }
 
-	private Set<ReportParameterUsage> assembleSetOfReportParameterUsages(
-			final Report report, final JsonCommand command) {
-		if (report == null) {
-			throw new PlatformDataIntegrityException("system.error",
-					"report parameter is null; ");
-		}
+        logger.error(dve.getMessage(), dve);
+        throw new PlatformDataIntegrityException("error.msg.report.unknown.data.integrity.issue",
+                "Unknown data integrity issue with resource: " + realCause.getMessage());
+    }
 
-		if (command.parameterExists("reportParameters")) {
-			Set<ReportParameterUsage> reportParameterUsages = new HashSet<ReportParameterUsage>();
-			JsonArray reportParametersArray = command
-					.arrayOfParameterNamed("reportParameters");
-			if (reportParametersArray != null) {
-				for (int i = 0; i < reportParametersArray.size(); i++) {
+    private Set<ReportParameterUsage> assembleSetOfReportParameterUsages(final Report report, final JsonCommand command) {
 
-					final JsonObject jsonObject = reportParametersArray.get(i)
-							.getAsJsonObject();
-					Long id = null;
-					ReportParameter parameter = null;
-					String reportParameterName = null;
+        Set<ReportParameterUsage> reportParameterUsages = null;
 
-					if (jsonObject.has("parameterId")) {
-						final Long parameterId = jsonObject.get("parameterId")
-								.getAsLong();
-						parameter = this.reportParameterRepository
-								.findOne(parameterId);
-						if (parameter == null) {
-							throw new ReportParameterNotFoundException(
-									parameterId);
-						}
-					} else {
-						throw new PlatformDataIntegrityException(
-								"error.msg.parameter.id.mandatory.in.report.parameter",
-								"parameterId column is mandatory in Report Parameter Entry");
-					}
+        if (command.parameterExists("reportParameters")) {
+            JsonArray reportParametersArray = command.arrayOfParameterNamed("reportParameters");
+            if (reportParametersArray != null) {
 
-					if (jsonObject.has("reportParameterName")) {
-						reportParameterName = jsonObject.get(
-								"reportParameterName").getAsString();
-					}
+                reportParameterUsages = new HashSet<ReportParameterUsage>();
 
-					if (jsonObject.has("id")) {
-						final String idStr = jsonObject.get("id").getAsString();
-						if (!(idStr.equals("")))
-							id = Long.parseLong(idStr);
-					}
+                for (int i = 0; i < reportParametersArray.size(); i++) {
 
-					ReportParameterUsage reportParameterUsage = null;
-					if (id == null) {
-						reportParameterUsage = new ReportParameterUsage(report,
-								parameter, reportParameterName);
-					} else {
-						ReportParameterUsage currentReportParameterUsage = rpuById(
-								report, id);
+                    final JsonObject jsonObject = reportParametersArray.get(i).getAsJsonObject();
 
-						if (existingEntryChanged(currentReportParameterUsage,
-								parameter.getId(), reportParameterName)) {
-							reportParameterUsage = new ReportParameterUsage(
-									currentReportParameterUsage, report,
-									parameter, reportParameterName);
-						} else {
-							reportParameterUsage = currentReportParameterUsage;
-						}
-					}
+                    Long id = null;
+                    ReportParameterUsage reportParameterUsageItem = null;
+                    ReportParameter reportParameter = null;
+                    String reportParameterName = null;
 
-					reportParameterUsages.add(reportParameterUsage);
-				}
-				return reportParameterUsages;
-			} else
-				return null;
-		} else
-			return null;
-	}
+                    if (jsonObject.has("id")) {
+                        final String idStr = jsonObject.get("id").getAsString();
+                        if (StringUtils.isNotBlank(idStr)) {
+                            id = Long.parseLong(idStr);
+                        }
+                    }
 
-	private boolean existingEntryChanged(
-			final ReportParameterUsage currentReportParameterUsage,
-			final Long parameterId, final String reportParameterName) {
+                    if (id != null) {
+                        // existing report parameter usage
+                        reportParameterUsageItem = this.reportParameterUsageRepository.findOne(id);
+                        if (reportParameterUsageItem == null) { throw new ReportParameterNotFoundException(id); }
 
-		if (!(currentReportParameterUsage.getParameter().getId()
-				.equals(parameterId)))
-			return true;
+                        // check parameter
+                        if (jsonObject.has("parameterId")) {
+                            final Long parameterId = jsonObject.get("parameterId").getAsLong();
+                            reportParameter = this.reportParameterRepository.findOne(parameterId);
+                            if (reportParameter == null || !reportParameterUsageItem.hasParameterIdOf(parameterId)) {
+                                //
+                                throw new ReportParameterNotFoundException(parameterId);
+                            }
+                        }
 
-		if ((reportParameterName == null)
-				&& (currentReportParameterUsage.getReportParameterName() == null))
-			return false;
+                        if (jsonObject.has("reportParameterName")) {
+                            reportParameterName = jsonObject.get("reportParameterName").getAsString();
+                            reportParameterUsageItem.updateParameterName(reportParameterName);
+                        }
+                    } else {
+                        // new report parameter usage
+                        if (jsonObject.has("parameterId")) {
+                            final Long parameterId = jsonObject.get("parameterId").getAsLong();
+                            reportParameter = this.reportParameterRepository.findOne(parameterId);
+                            if (reportParameter == null) { throw new ReportParameterNotFoundException(parameterId); }
+                        } else {
+                            throw new PlatformDataIntegrityException("error.msg.parameter.id.mandatory.in.report.parameter",
+                                    "parameterId column is mandatory in Report Parameter Entry");
+                        }
 
-		if (!(currentReportParameterUsage.getReportParameterName()
-				.equals(reportParameterName)))
-			return true;
+                        if (jsonObject.has("reportParameterName")) {
+                            reportParameterName = jsonObject.get("reportParameterName").getAsString();
+                        }
 
-		return false;
-	}
+                        reportParameterUsageItem = new ReportParameterUsage(report, reportParameter, reportParameterName);
+                    }
 
-	private ReportParameterUsage rpuById(final Report report, final Long id) {
+                    reportParameterUsages.add(reportParameterUsageItem);
+                }
+            }
+        }
 
-		for (ReportParameterUsage rpu : report.getReportParameterUsages()) {
-			if (rpu.getId().equals(id))
-				return rpu;
-		}
-
-		throw new PlatformDataIntegrityException(
-				"error.msg.supplied.parameter.id.doesnt.exist",
-				"Supplied parameterId column doesn't Exist", id);
-	}
+        return reportParameterUsages;
+    }
 }

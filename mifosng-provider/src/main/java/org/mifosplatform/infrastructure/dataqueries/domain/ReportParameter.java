@@ -14,8 +14,11 @@ import org.springframework.data.jpa.domain.AbstractPersistable;
 @Table(name = "stretchy_parameter")
 public class ReportParameter extends AbstractPersistable<Long> {
 
-	protected ReportParameter() {
-		//
-	}
+    protected ReportParameter() {
+        //
+    }
 
+    public boolean hasIdOf(final Long id) {
+        return getId().equals(id);
+    }
 }

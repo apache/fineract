@@ -11,63 +11,68 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import org.apache.commons.lang.builder.EqualsBuilder;
+import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
 @Table(name = "stretchy_report_parameter")
-public class ReportParameterUsage extends AbstractPersistable<Long> {
-    
-	@SuppressWarnings("unused")
-	@ManyToOne(optional = false)
-	@JoinColumn(name = "report_id", nullable = false)
-	private Report report;
+public final class ReportParameterUsage extends AbstractPersistable<Long> {
 
-	@SuppressWarnings("unused")
-	@ManyToOne(optional = false)
-	@JoinColumn(name = "parameter_id", nullable = false)
-	private ReportParameter parameter;
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "report_id", nullable = false)
+    private Report report;
 
-	@SuppressWarnings("unused")
-	@Column(name = "report_parameter_name")
-	private String reportParameterName;
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "parameter_id", nullable = false)
+    private ReportParameter parameter;
 
-	protected ReportParameterUsage() {
-		//
-	}
+    @Column(name = "report_parameter_name")
+    private String reportParameterName;
 
-	public ReportParameterUsage(final Report report,
-			final ReportParameter parameter, final String reportParameterName) {
-		this.report = report;
-		this.parameter = parameter;
-		this.reportParameterName = reportParameterName;
-	}
-	
-	public ReportParameterUsage(final ReportParameterUsage currentReportParameterUsage, final Report report,
-			final ReportParameter parameter, final String reportParameterName) {
-		this.setId(currentReportParameterUsage.getId());
-		this.report = report;
-		this.parameter = parameter;
-		this.reportParameterName = reportParameterName;
-	}
+    protected ReportParameterUsage() {
+        //
+    }
 
-	public void setReport(Report report) {
-		this.report = report;
-	}
+    public ReportParameterUsage(final Report report, final ReportParameter parameter, final String reportParameterName) {
+        this.report = report;
+        this.parameter = parameter;
+        this.reportParameterName = reportParameterName;
+    }
 
-	public void setParameter(ReportParameter parameter) {
-		this.parameter = parameter;
-	}
+    @Override
+    public boolean equals(final Object obj) {
+        if (obj == null) { return false; }
+        if (obj == this) { return true; }
+        if (obj.getClass() != getClass()) { return false; }
+        ReportParameterUsage rhs = (ReportParameterUsage) obj;
+        return new EqualsBuilder().appendSuper(super.equals(obj)) //
+                .append(this.getId(), rhs.getId()) //
+                .append(this.report.getId(), rhs.report.getId()) //
+                .append(this.parameter.getId(), rhs.parameter.getId()) //
+                .append(this.reportParameterName, rhs.reportParameterName) //
+                .isEquals();
+    }
 
-	public ReportParameter getParameter() {
-		return parameter;
-	}
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(3, 5) //
+                .append(this.getId()) //
+                .append(this.report.getId()) //
+                .append(this.parameter.getId()) //
+                .append(this.reportParameterName) //
+                .toHashCode();
+    }
 
-	public String getReportParameterName() {
-		return reportParameterName;
-	}
+    public boolean hasIdOf(final Long id) {
+        return getId().equals(id);
+    }
 
-	public void setReportParameterName(String reportParameterName) {
-		this.reportParameterName = reportParameterName;
-	}
-	
+    public boolean hasParameterIdOf(final Long parameterId) {
+        return this.parameter != null && this.parameter.hasIdOf(parameterId);
+    }
+
+    public void updateParameterName(final String parameterName) {
+        this.reportParameterName = parameterName;
+    }
 }

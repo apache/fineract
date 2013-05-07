@@ -13,6 +13,6 @@ public interface ReportWritePlatformService {
     CommandProcessingResult createReport(JsonCommand command);
 
     CommandProcessingResult updateReport(Long reportId, JsonCommand command);
-    
+
     CommandProcessingResult deleteReport(Long reportId);
 }
