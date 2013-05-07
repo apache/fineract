@@ -6,11 +6,55 @@ See VERSIONING (https://github.com/openMF/mifosx/blob/master/VERSIONING.md) for 
 Releases
 ===============
 
+1. 07 May 2013 - 1.0.0.RELEASE
+1. 30 April 2013 - 0.12.1.beta
+2. 30 April 2013 - 0.11.4.beta
 1. 22 April 2013 - 0.12.0.beta
 1. 17 April 2013 - 0.11.3.beta
 1. 10 April 2013 - 0.11.2.beta
 1. 05 April 2013 - 0.11.1.beta
 1. 05 April 2013 - 0.11.0.beta
+
+1.0.0.RELEASE
+=============
+
+The first community sanctioned public release of new mifos platform project ('Mifos X').
+
+Scope of release:
+
+In addition to items mentioned below see 1.0.0.RELEASE on JIRA: https://mifosforge.jira.com/browse/MIFOSX/fixforversion/11833 for full details of issues addressed in release.
+
+Operational Functionality:
+ - Client Loan Portfolio Management
+ - Cash-based Accounting
+ - Audit of all changes
+ - Reporting (about 30 Reports)
+ - Comprehensive and flexible ability to configure (on request) MFI specific additional client and loan data.
+
+Organisational Functionality:
+ - Currency, Funds, Offices, Staff/Loan Officers
+ - Loan Products
+   - support for declining balance or flat interest methods
+   - Ability to configure mfi customised repayment processing
+ - Charges
+  - Fees & Penalties
+
+User Admin Functionality:
+ - Users, Roles, Permissions
+ - 4-eye principle / Maker-Checker
+
+0.12.1.beta
+==========
+
+Bug Release
+ - MIFOSX-311 - Zero % loan products or loan applications are not allowed due to validation checks
+
+0.11.4.beta
+==========
+Back ported bug fixes in 0.12.1 to 0.11.x series for production installation.
+
+Bug Release
+ - MIFOSX-311 - Zero % loan products or loan applications are not allowed due to validation checks
 
 0.12.0.beta
 ==========
