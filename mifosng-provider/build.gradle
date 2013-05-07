@@ -187,6 +187,16 @@ task dist(type:Zip){
         include '*'
         into('api-docs')
     }
+    from('../mifosng-db/') {
+        fileMode = 0755
+        include '*.sql'
+        into('database')
+    }
+    from('../mifosng-db/migrations') {
+        fileMode = 0755
+        include '**/*'
+        into('database/migrations')
+    }
     from war.outputs.files
     into('mifosplatform' + version)
 }
