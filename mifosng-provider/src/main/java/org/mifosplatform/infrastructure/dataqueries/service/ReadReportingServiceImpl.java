@@ -12,6 +12,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.sql.Connection;
 import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -333,7 +334,16 @@ public class ReadReportingServiceImpl implements ReadReportingService {
             // passed as parameters to allow multitenant penaho reporting
             // and
             // data scoping
-            String tenantdb = dataSource.getConnection().getCatalog();
+            Connection connection = dataSource.getConnection();
+            String tenantdb;
+            try
+            {
+                tenantdb = connection.getCatalog();
+            }
+            finally
+            {
+                connection.close();
+            }
             String userhierarchy = currentUser.getOffice().getHierarchy();
             logger.info("db name:" + tenantdb + "      userhierarchy:" + userhierarchy);
             rptParamValues.put("tenantdb", tenantdb);
