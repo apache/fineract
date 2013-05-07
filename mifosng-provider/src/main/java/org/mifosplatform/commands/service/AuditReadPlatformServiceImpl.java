@@ -8,7 +8,9 @@ package org.mifosplatform.commands.service;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
@@ -28,6 +30,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
+
+import com.google.gson.Gson;
 
 @Service
 public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
@@ -162,7 +166,8 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
         return this.jdbcTemplate.query(sql, rm, new Object[] {});
     }
 
-    @Override
+    @SuppressWarnings("unchecked")
+	@Override
     public AuditData retrieveAuditEntry(final Long auditId) {
 
         AppUser currentUser = context.authenticatedUser();
@@ -170,10 +175,41 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
 
         final AuditMapper rm = new AuditMapper();
 
+        
         String sql = "select " + rm.schema(true, hierarchy);
         sql += " where aud.id = " + auditId;
 
-        return this.jdbcTemplate.queryForObject(sql, rm, new Object[] {});
+        AuditData auditResult = this.jdbcTemplate.queryForObject(sql, rm, new Object[] {});
+        
+        String commandAsJson = auditResult.getCommandAsJson();
+        Map<String,Object> commandAsJsonMap = new HashMap<String,Object>();
+        commandAsJsonMap = new Gson().fromJson(commandAsJson, commandAsJsonMap.getClass());
+        if (commandAsJsonMap.containsKey("officeId")) {
+        	
+        	Object officeIdObj = commandAsJsonMap.get("officeId");
+        	if (officeIdObj instanceof Double) {
+        		Integer officeId = ((Double) officeIdObj).intValue();
+        		sql = " SELECT name FROM m_office WHERE id = " + officeId;
+            	String officeName = this.jdbcTemplate.queryForObject(sql, String.class);
+            	String regex = "\"officeId\":\\s\\d+";
+            	commandAsJson = commandAsJson.replaceAll(regex, "\"officeName\": \""+officeName+"\"");
+        	}	
+        }
+        
+        if (commandAsJsonMap.containsKey("clientId")) {
+        	
+        	Object clientIdObj = commandAsJsonMap.get("clientId");
+        	if (clientIdObj instanceof Double) {
+        		Integer officeId = ((Double) clientIdObj).intValue();
+        		sql = " SELECT display_name FROM m_client WHERE id = " + officeId;
+            	String clientName = this.jdbcTemplate.queryForObject(sql, String.class);
+            	String regex = "\"clientId\":\\s\\d+";
+            	commandAsJson = commandAsJson.replaceAll(regex, "\"clientName\": \""+clientName+"\"");
+        	}	
+        }
+        auditResult.setCommandAsJson(commandAsJson);
+        
+        return auditResult;
     }
 
     @Override
@@ -262,4 +298,5 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
                     + " order by enum_id";
         }
     }
+    
 }

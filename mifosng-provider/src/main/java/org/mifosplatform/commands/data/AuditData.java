@@ -33,7 +33,7 @@ public final class AuditData {
 	@SuppressWarnings("unused")
 	private final String processingResult;
 	@SuppressWarnings("unused")
-	private final String commandAsJson;
+	private String commandAsJson;
 	@SuppressWarnings("unused")
 	private final String officeName;
 	@SuppressWarnings("unused")
@@ -74,5 +74,13 @@ public final class AuditData {
 		this.clientName = clientName;
 		this.loanAccountNo = loanAccountNo;
 		this.savingsAccountNo = savingsAccountNo;
+	}
+
+	public void setCommandAsJson(String commandAsJson) {
+		this.commandAsJson = commandAsJson;
+	}
+
+	public String getCommandAsJson() {
+		return this.commandAsJson;
 	}
 }
