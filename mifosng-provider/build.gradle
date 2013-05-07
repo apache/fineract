@@ -133,7 +133,7 @@ dependencies {
 	            [group: 'ch.qos.logback', name: 'logback-core', version: '1.0.9'],
 	            [group: 'ch.qos.logback', name: 'logback-classic', version: '1.0.9'],
 
-	            [group: 'mysql', name: 'mysql-connector-java', version: '5.1.22'],
+	            [group: 'mysql', name: 'mysql-connector-java', version: '5.1.25'],
 	            [group: 'org.apache.tomcat', name: 'tomcat-jdbc', version: '7.0.39'],
 
 	            [group: 'pentaho-reporting-engine', name: 'pentaho-reporting-engine-classic-core', version: '3.9.1.1'],
@@ -177,6 +177,11 @@ task dist(type:Zip){
 		fileMode = 0755
 		include '*.md'
 	}
+	from('../apps') {
+		fileMode = 0755
+		include '*.md'
+		into('apps')
+	}
 	from('src/main/pentahoReports/') {
         fileMode = 0755
         include '*'
@@ -197,8 +202,9 @@ task dist(type:Zip){
         include '**/*'
         into('database/migrations')
     }
+    
     from war.outputs.files
-    into('mifosplatform' + version)
+    into(baseName + '-' + version)
 }
 
 task deployPentahoReports() {
