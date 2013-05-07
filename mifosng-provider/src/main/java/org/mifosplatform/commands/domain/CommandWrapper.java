@@ -54,13 +54,12 @@ public class CommandWrapper {
         this.href = resourceGetUrl;
         this.json = null;
         this.transactionId = null;
-        
+
     }
 
     public CommandWrapper(final Long officeId, final Long groupId, final Long clientId, final Long loanId, final Long savingsId,
             final String actionName, final String entityName, final Long entityId, final Long subentityId, final Long codeId,
-            final String supportedEntityType, final Long supportedEntityId, final String href, final String json, final String transactionId
-   ) {
+            final String supportedEntityType, final Long supportedEntityId, final String href, final String json, final String transactionId) {
         this.commandId = null;
         this.officeId = officeId;
         this.groupId = groupId;
@@ -78,7 +77,7 @@ public class CommandWrapper {
         this.href = href;
         this.json = json;
         this.transactionId = transactionId;
-        
+
     }
 
     public Long commandId() {
@@ -128,8 +127,7 @@ public class CommandWrapper {
     public String getTransactionId() {
         return this.transactionId;
     }
-    
-   
+
     public String getEntityName() {
         return this.entityName;
     }
@@ -498,12 +496,12 @@ public class CommandWrapper {
     public boolean isReportResource() {
         return this.entityName.equalsIgnoreCase("REPORT");
     }
-    
-    public boolean isAssociateClients(){
+
+    public boolean isAssociateClients() {
         return this.actionName.equalsIgnoreCase("ASSOCIATECLIENTS");
     }
-    
-    public boolean isDisassociateClients(){
+
+    public boolean isDisassociateClients() {
         return this.actionName.equalsIgnoreCase("DISASSOCIATECLIENTS");
     }
 }

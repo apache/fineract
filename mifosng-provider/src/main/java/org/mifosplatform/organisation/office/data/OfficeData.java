@@ -55,4 +55,8 @@ public class OfficeData {
     public boolean hasIdentifyOf(final Long officeId) {
         return this.id.equals(officeId);
     }
+
+    public String name() {
+        return this.name;
+    }
 }

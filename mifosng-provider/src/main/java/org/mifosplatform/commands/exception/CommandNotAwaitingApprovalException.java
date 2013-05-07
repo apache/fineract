@@ -12,7 +12,7 @@ import org.mifosplatform.infrastructure.core.exception.AbstractPlatformResourceN
  */
 public class CommandNotAwaitingApprovalException extends AbstractPlatformResourceNotFoundException {
 
-	public CommandNotAwaitingApprovalException(Long id) {
-		super("error.msg.command.id.not.awaiting.approval", "Audit with identifier " + id + " is Not Awaiting Approval", id);
-	}
+    public CommandNotAwaitingApprovalException(final Long id) {
+        super("error.msg.command.id.not.awaiting.approval", "Audit with identifier " + id + " is Not Awaiting Approval", id);
+    }
 }

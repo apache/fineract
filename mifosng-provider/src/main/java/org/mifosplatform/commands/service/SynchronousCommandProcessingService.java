@@ -97,9 +97,9 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
 
         commandSourceResult.markAsAwaitingApproval();
         commandSourceRepository.save(commandSourceResult);
-        
-        return new CommandProcessingResultBuilder().withCommandId(commandSourceResult.getId()).withEntityId(commandSourceResult.getResourceId())
-                .build();
+
+        return new CommandProcessingResultBuilder().withCommandId(commandSourceResult.getId())
+                .withEntityId(commandSourceResult.getResourceId()).build();
     }
 
     private NewCommandSourceHandler findCommandHandler(final CommandWrapper wrapper) {

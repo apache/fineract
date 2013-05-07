@@ -12,9 +12,8 @@ import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 
 public interface CommandProcessingService {
 
-	CommandProcessingResult processAndLogCommand(CommandWrapper wrapper,
-			JsonCommand command, boolean isApprovedByChecker);
+    CommandProcessingResult processAndLogCommand(CommandWrapper wrapper, JsonCommand command, boolean isApprovedByChecker);
 
-	CommandProcessingResult logCommand(CommandSource commandSourceResult);
+    CommandProcessingResult logCommand(CommandSource commandSourceResult);
 
 }

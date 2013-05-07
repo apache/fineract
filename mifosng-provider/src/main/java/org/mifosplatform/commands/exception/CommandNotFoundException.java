@@ -12,7 +12,7 @@ import org.mifosplatform.infrastructure.core.exception.AbstractPlatformResourceN
  */
 public class CommandNotFoundException extends AbstractPlatformResourceNotFoundException {
 
-	public CommandNotFoundException(Long id) {
-		super("error.msg.command.id.invalid", "Audit with identifier " + id + " does not exist", id);
-	}
+    public CommandNotFoundException(final Long id) {
+        super("error.msg.command.id.invalid", "Audit with identifier " + id + " does not exist", id);
+    }
 }

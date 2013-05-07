@@ -48,12 +48,20 @@ public class FromJsonHelper {
         return this.gsonConverter.fromJson(json, typeOfMap);
     }
 
+    public Map<String, Object> extractObjectMap(final Type typeOfMap, final String json) {
+        return this.gsonConverter.fromJson(json, typeOfMap);
+    }
+
     public <T> T fromJson(final String json, final Class<T> classOfT) {
         return this.gsonConverter.fromJson(json, classOfT);
     }
 
     public String toJson(final JsonElement jsonElement) {
         return this.gsonConverter.toJson(jsonElement);
+    }
+
+    public String toJson(final Object object) {
+        return this.gsonConverter.toJson(object);
     }
 
     public void checkForUnsupportedParameters(final Type typeOfMap, final String json, final Set<String> supportedParams) {

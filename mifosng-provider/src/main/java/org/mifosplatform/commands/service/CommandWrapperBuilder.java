@@ -28,7 +28,7 @@ public class CommandWrapperBuilder {
     public CommandWrapper build() {
         return new CommandWrapper(this.officeId, this.groupId, this.clientId, this.loanId, this.savingsId, this.actionName,
                 this.entityName, this.entityId, this.subentityId, this.codeId, this.supportedEntityType, this.supportedEntityId, this.href,
-                this.json, this.transactionId );
+                this.json, this.transactionId);
     }
 
     public CommandWrapperBuilder withLoanId(final Long withLoanId) {
@@ -865,7 +865,7 @@ public class CommandWrapperBuilder {
         this.href = "/groups/" + groupId + "?command=associateClients";
         return this;
     }
-    
+
     public CommandWrapperBuilder disassociateClientsFromGroup(final Long groupId) {
         this.actionName = "DISASSOCIATECLIENTS";
         this.entityName = "GROUP";
@@ -874,7 +874,7 @@ public class CommandWrapperBuilder {
         this.href = "/groups/" + groupId + "?command=disassociateClients";
         return this;
     }
-    
+
     public CommandWrapperBuilder unassignStaff(final Long groupId) {
         this.actionName = "UNASSIGNSTAFF";
         this.entityName = "GROUP";

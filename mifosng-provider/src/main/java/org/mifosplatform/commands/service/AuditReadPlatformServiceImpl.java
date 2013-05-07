@@ -5,10 +5,10 @@
  */
 package org.mifosplatform.commands.service;
 
+import java.lang.reflect.Type;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -19,8 +19,13 @@ import org.mifosplatform.commands.data.AuditSearchData;
 import org.mifosplatform.commands.data.ProcessingResultLookup;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
+import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
+import org.mifosplatform.organisation.office.data.OfficeData;
+import org.mifosplatform.organisation.office.service.OfficeReadPlatformService;
+import org.mifosplatform.portfolio.client.data.ClientData;
+import org.mifosplatform.portfolio.client.service.ClientReadPlatformService;
 import org.mifosplatform.useradministration.data.AppUserData;
 import org.mifosplatform.useradministration.domain.AppUser;
 import org.mifosplatform.useradministration.service.AppUserReadPlatformService;
@@ -31,22 +36,30 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
-import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 @Service
 public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
 
     private final static Logger logger = LoggerFactory.getLogger(AuditReadPlatformServiceImpl.class);
+
     private final JdbcTemplate jdbcTemplate;
     private final PlatformSecurityContext context;
+    private final FromJsonHelper fromApiJsonHelper;
     private final AppUserReadPlatformService appUserReadPlatformService;
+    private final OfficeReadPlatformService officeReadPlatformService;
+    private final ClientReadPlatformService clientReadPlatformService;
 
     @Autowired
     public AuditReadPlatformServiceImpl(final PlatformSecurityContext context, final TenantAwareRoutingDataSource dataSource,
-            final AppUserReadPlatformService appUserReadPlatformService) {
+            final FromJsonHelper fromApiJsonHelper, final AppUserReadPlatformService appUserReadPlatformService,
+            final OfficeReadPlatformService officeReadPlatformService, final ClientReadPlatformService clientReadPlatformService) {
         this.context = context;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.fromApiJsonHelper = fromApiJsonHelper;
         this.appUserReadPlatformService = appUserReadPlatformService;
+        this.officeReadPlatformService = officeReadPlatformService;
+        this.clientReadPlatformService = clientReadPlatformService;
     }
 
     private static final class AuditMapper implements RowMapper<AuditData> {
@@ -166,8 +179,7 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
         return this.jdbcTemplate.query(sql, rm, new Object[] {});
     }
 
-    @SuppressWarnings("unchecked")
-	@Override
+    @Override
     public AuditData retrieveAuditEntry(final Long auditId) {
 
         AppUser currentUser = context.authenticatedUser();
@@ -175,50 +187,47 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
 
         final AuditMapper rm = new AuditMapper();
 
-        
         String sql = "select " + rm.schema(true, hierarchy);
         sql += " where aud.id = " + auditId;
 
         AuditData auditResult = this.jdbcTemplate.queryForObject(sql, rm, new Object[] {});
-        
-        String commandAsJson = auditResult.getCommandAsJson();
-        Map<String,Object> commandAsJsonMap = new HashMap<String,Object>();
-        commandAsJsonMap = new Gson().fromJson(commandAsJson, commandAsJsonMap.getClass());
+
+        String auditAsJson = auditResult.getCommandAsJson();
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        final Map<String, Object> commandAsJsonMap = this.fromApiJsonHelper.extractObjectMap(typeOfMap, auditAsJson);
+
         if (commandAsJsonMap.containsKey("officeId")) {
-        	
-        	Object officeIdObj = commandAsJsonMap.get("officeId");
-        	Integer officeId = -1;
-        	if (officeIdObj instanceof Integer) {
-        		officeId = (Integer)officeIdObj;
-        	} else if (officeIdObj instanceof Double) {
-        		officeId = ((Double) officeIdObj).intValue();
-        	}
-        	if (officeId > -1) {
-        		sql = " SELECT name FROM m_office WHERE id = " + officeId;
-            	String officeName = this.jdbcTemplate.queryForObject(sql, String.class);
-            	String regex = "\"officeId\":\\s\\d+";
-            	commandAsJson = commandAsJson.replaceAll(regex, "\"officeName\": \""+officeName+"\"");
-        	}
+
+            final Object officeIdObj = commandAsJsonMap.get("officeId");
+            if (officeIdObj != null && StringUtils.isNotBlank(officeIdObj.toString())) {
+                final Long officeId = Long.valueOf(officeIdObj.toString());
+
+                OfficeData office = this.officeReadPlatformService.retrieveOffice(officeId);
+
+                commandAsJsonMap.remove("officeId");
+                commandAsJsonMap.put("officeName", office.name());
+
+                auditAsJson = this.fromApiJsonHelper.toJson(commandAsJsonMap);
+            }
         }
-        
+
         if (commandAsJsonMap.containsKey("clientId")) {
-        	
-        	Object clientIdObj = commandAsJsonMap.get("clientId");
-        	Integer clientId = -1;
-        	if (clientIdObj instanceof Integer) {
-        		clientId = (Integer)clientIdObj;
-        	} else if (clientIdObj instanceof Double) {
-        		clientId = ((Double) clientIdObj).intValue();
-        	}
-        	if (clientId > -1) {
-        		sql = " SELECT display_name FROM m_client WHERE id = " + clientId;
-            	String clientName = this.jdbcTemplate.queryForObject(sql, String.class);
-            	String regex = "\"clientId\":\\s\\d+";
-            	commandAsJson = commandAsJson.replaceAll(regex, "\"clientName\": \""+clientName+"\"");
-        	}
+
+            final Object clientIdObj = commandAsJsonMap.get("clientId");
+            if (clientIdObj != null && StringUtils.isNotBlank(clientIdObj.toString())) {
+                final Long clientId = Long.valueOf(clientIdObj.toString());
+
+                ClientData client = this.clientReadPlatformService.retrieveOne(clientId);
+
+                commandAsJsonMap.remove("clientId");
+                commandAsJsonMap.put("clientName", client.displayName());
+
+                auditAsJson = this.fromApiJsonHelper.toJson(commandAsJsonMap);
+            }
         }
-        auditResult.setCommandAsJson(commandAsJson);
-        
+
+        auditResult.setCommandAsJson(auditAsJson);
+
         return auditResult;
     }
 
@@ -308,5 +317,5 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
                     + " order by enum_id";
         }
     }
-    
+
 }
