@@ -22,9 +22,11 @@ Status](https://openmf.ci.cloudbees.com/job/MIFOSX%20INTEGRATION%20TEST/badge/ic
 Version
 ==========
 
-The mifosx platform is currently still in BETA. That means its likely that there will be changes to the Platform API so any use or development against is at your own risk.
+The mifos-platform (project named 'Mifos X') has reached <b>public release version</b>. 
 
-Latest stable release: <a target="_blank" href="https://github.com/openMF/mifosx/tree/mifosplatform-0.12.0.beta" title="mifosplatform-0.12.0.beta">mifosplatform-0.12.0.beta</a>
+That means there is a published and stable API. This API is documented in the api-docs under <b>Full API Matrix</b>.
+
+Latest stable release: <a target="_blank" href="https://github.com/openMF/mifosx/tree/mifosplatform-1.0.0" title="mifosplatform-1.0.0">mifosplatform-1.0.0</a>
 
 License
 =============
@@ -37,11 +39,10 @@ Mifos Platform API
 <a target="_blank" href="https://demo.openmf.org/api-docs/apiLive.htm" title="mifos platform api beta 1">API Documentation (Demo Server)</a>
 
 
-Online Client Application Demos
+Online Demos
 =============================
 
 <a target="_blank" href="https://demo.openmf.org" title="Reference Client App">Reference Client App</a>
-
 
 Developers
 ==========
@@ -70,7 +71,10 @@ Launch instance <a target="_blank" href="https://console.aws.amazon.com/ec2/home
 Roadmap
 ==============
 
-- http://goo.gl/IXS9Q
+<a target="_blank" href="http://goo.gl/IXS9Q" title="Community Roadmap (High Level)">Community Roadmap (High Level)</a>
+
+<a target="_blank" href="https://mifosforge.jira.com/browse/MIFOSX#selectedTab=com.atlassian.jira.plugin.system.project%3Aroadmap-panel" 
+   title="Project Release Roadmap on JIRA (Detailed View)">Project Release Roadmap on JIRA (Detailed View)</a>
 
 Video Demonstration
 ===============
