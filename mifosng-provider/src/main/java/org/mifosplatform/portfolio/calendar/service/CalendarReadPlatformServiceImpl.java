@@ -106,7 +106,7 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
         // string sql is the sql statement that will be executed by jdbc.
         String sql="";
         // if calendarType options are not given by user then return all calendars.
-        if(calendarTypeOptions.isEmpty()) {
+        if(calendarTypeOptions.isEmpty() || calendarTypeOptions == null) {
             sql = rm.schema() + " and ci.entity_id = ? and ci.entity_type_enum = ? order by c.start_date ";
             result =  this.jdbcTemplate.query(sql, rm, new Object[] { entityId, entityTypeId });
         } else if(!calendarTypeOptions.isEmpty()){
@@ -127,7 +127,7 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
         String parentHeirarchyCondition = getParentHierarchyCondition(ceType);
 
         //FIXME :AA center is the parent entity of group, change this code to support more parent entity types.
-        if(calendarTypeOptions.isEmpty()){
+        if(calendarTypeOptions.isEmpty() || calendarTypeOptions == null){
             sql = rm.schema() + " " + parentHeirarchyCondition + " and ci.entity_type_enum = ? order by c.start_date ";
             result = this.jdbcTemplate.query(sql, rm, new Object[] { entityId, CalendarEntityType.CENTERS.getValue() });
         } else {
