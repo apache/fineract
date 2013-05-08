@@ -36,7 +36,9 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
-import com.google.gson.reflect.TypeToken;
+import com.google.common.reflect.TypeToken;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 
 @Service
 public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
@@ -182,51 +184,54 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
     @Override
     public AuditData retrieveAuditEntry(final Long auditId) {
 
-        AppUser currentUser = context.authenticatedUser();
-        String hierarchy = currentUser.getOffice().getHierarchy();
+        final AppUser currentUser = context.authenticatedUser();
+        final String hierarchy = currentUser.getOffice().getHierarchy();
 
         final AuditMapper rm = new AuditMapper();
 
-        String sql = "select " + rm.schema(true, hierarchy);
-        sql += " where aud.id = " + auditId;
+        final String sql = "select " + rm.schema(true, hierarchy) + " where aud.id = " + auditId;
 
-        AuditData auditResult = this.jdbcTemplate.queryForObject(sql, rm, new Object[] {});
+        final AuditData auditResult = this.jdbcTemplate.queryForObject(sql, rm, new Object[] {});
 
-        String auditAsJson = auditResult.getCommandAsJson();
+        return replaceIdsOnAuditData(auditResult);
+    }
+
+    private AuditData replaceIdsOnAuditData(final AuditData auditResult) {
+
+        final String auditAsJson = auditResult.getCommandAsJson();
+
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+
         final Map<String, Object> commandAsJsonMap = this.fromApiJsonHelper.extractObjectMap(typeOfMap, auditAsJson);
+        final JsonElement auditJsonFragment = this.fromApiJsonHelper.parse(auditAsJson);
+        final JsonObject auditObject = auditJsonFragment.getAsJsonObject();
 
         if (commandAsJsonMap.containsKey("officeId")) {
+            commandAsJsonMap.remove("officeId");
 
-            final Object officeIdObj = commandAsJsonMap.get("officeId");
-            if (officeIdObj != null && StringUtils.isNotBlank(officeIdObj.toString())) {
-                final Long officeId = Long.valueOf(officeIdObj.toString());
-
+            final Long officeId = auditObject.get("officeId").getAsLong();
+            if (officeId != null) {
                 OfficeData office = this.officeReadPlatformService.retrieveOffice(officeId);
-
-                commandAsJsonMap.remove("officeId");
                 commandAsJsonMap.put("officeName", office.name());
-
-                auditAsJson = this.fromApiJsonHelper.toJson(commandAsJsonMap);
+            } else {
+                commandAsJsonMap.put("officeName", "");
             }
         }
 
         if (commandAsJsonMap.containsKey("clientId")) {
+            commandAsJsonMap.remove("clientId");
 
-            final Object clientIdObj = commandAsJsonMap.get("clientId");
-            if (clientIdObj != null && StringUtils.isNotBlank(clientIdObj.toString())) {
-                final Long clientId = Long.valueOf(clientIdObj.toString());
-
+            final Long clientId = auditObject.get("officeId").getAsLong();
+            if (clientId != null) {
                 ClientData client = this.clientReadPlatformService.retrieveOne(clientId);
-
-                commandAsJsonMap.remove("clientId");
                 commandAsJsonMap.put("clientName", client.displayName());
-
-                auditAsJson = this.fromApiJsonHelper.toJson(commandAsJsonMap);
+            } else {
+                commandAsJsonMap.put("clientName", "");
             }
         }
 
-        auditResult.setCommandAsJson(auditAsJson);
+        final String newAuditAsJson = this.fromApiJsonHelper.toJson(commandAsJsonMap);
+        auditResult.setCommandAsJson(newAuditAsJson);
 
         return auditResult;
     }
