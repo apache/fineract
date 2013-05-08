@@ -23,6 +23,40 @@ import org.mifosplatform.portfolio.loanproduct.domain.PeriodFrequencyType;
 
 public class LoanEnumerations {
 
+    public static final String LOAN_TERM_FREQUENCY_TYPE = "loanTermFrequencyType";
+    public static final String TERM_FREQUENCY_TYPE = "termFrequencyType";
+    public static final String REPAYMENT_FREQUENCY_TYPE = "repaymentFrequencyType";
+    public static final String INTEREST_RATE_FREQUENCY_TYPE = "interestRateFrequencyType";
+    public static final String AMORTIZATION_TYPE = "amortizationType";
+    public static final String INTEREST_TYPE = "interestType";
+    public static final String INTEREST_CALCULATION_PERIOD_TYPE = "interestCalculationPeriodType";
+    public static final String PAYMENT_TYPE = "paymentType";
+    public static final String ACCOUNTING_RULE_TYPE = "accountingRuleType";
+    public static final String LOAN_TYPE = "loanType";
+
+    public static EnumOptionData loanEnumueration(final String typeName, final int id) {
+        if (typeName.equals(LOAN_TERM_FREQUENCY_TYPE)) {
+            return loanTermFrequencyType(id);
+        } else if (typeName.equals(TERM_FREQUENCY_TYPE)) {
+            return termFrequencyType(id);
+        } else if (typeName.equals(REPAYMENT_FREQUENCY_TYPE)) {
+            return repaymentFrequencyType(id);
+        } else if (typeName.equals(INTEREST_RATE_FREQUENCY_TYPE)) {
+            return interestRateFrequencyType(id);
+        } else if (typeName.equals(AMORTIZATION_TYPE)) {
+            return amortizationType(id);
+        } else if (typeName.equals(INTEREST_TYPE)) {
+            return interestType(id);
+        } else if (typeName.equals(INTEREST_CALCULATION_PERIOD_TYPE)) {
+            return interestCalculationPeriodType(id);
+        } else if (typeName.equals(PAYMENT_TYPE)) {
+            return paymentType(id);
+        } else if (typeName.equals(ACCOUNTING_RULE_TYPE)) {
+            return accountingRuleType(id);
+        } else if (typeName.equals(LOAN_TYPE)) { return loanType(id); }
+        return null;
+    }
+
     public static EnumOptionData loanTermFrequencyType(final int id) {
         return loanTermFrequencyType(PeriodFrequencyType.fromInt(id));
     }
@@ -338,11 +372,11 @@ public class LoanEnumerations {
         EnumOptionData optionData = new EnumOptionData(type.getValue().longValue(), type.getCode(), type.toString());
         return optionData;
     }
-    
+
     public static EnumOptionData loanType(final Integer loanTypeId) {
         return loanType(LoanType.fromInt(loanTypeId));
     }
-    
+
     public static EnumOptionData loanType(final String name) {
         return loanType(LoanType.fromName(name));
     }

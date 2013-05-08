@@ -26,4 +26,8 @@ public class EnumOptionData {
     public Long getId() {
         return id;
     }
+
+	public String getCode() {
+		return this.code;
+	}
 }

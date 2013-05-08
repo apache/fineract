@@ -24,8 +24,13 @@ import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSourc
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.office.data.OfficeData;
 import org.mifosplatform.organisation.office.service.OfficeReadPlatformService;
+import org.mifosplatform.organisation.staff.data.StaffData;
+import org.mifosplatform.organisation.staff.service.StaffReadPlatformService;
 import org.mifosplatform.portfolio.client.data.ClientData;
 import org.mifosplatform.portfolio.client.service.ClientReadPlatformService;
+import org.mifosplatform.portfolio.loanproduct.data.LoanProductData;
+import org.mifosplatform.portfolio.loanproduct.service.LoanEnumerations;
+import org.mifosplatform.portfolio.loanproduct.service.LoanProductReadPlatformService;
 import org.mifosplatform.useradministration.data.AppUserData;
 import org.mifosplatform.useradministration.domain.AppUser;
 import org.mifosplatform.useradministration.service.AppUserReadPlatformService;
@@ -51,17 +56,22 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
     private final AppUserReadPlatformService appUserReadPlatformService;
     private final OfficeReadPlatformService officeReadPlatformService;
     private final ClientReadPlatformService clientReadPlatformService;
+    private final LoanProductReadPlatformService loanProductReadPlatformService;
+    private final StaffReadPlatformService staffReadPlatformService;
 
     @Autowired
     public AuditReadPlatformServiceImpl(final PlatformSecurityContext context, final TenantAwareRoutingDataSource dataSource,
             final FromJsonHelper fromApiJsonHelper, final AppUserReadPlatformService appUserReadPlatformService,
-            final OfficeReadPlatformService officeReadPlatformService, final ClientReadPlatformService clientReadPlatformService) {
+            final OfficeReadPlatformService officeReadPlatformService, final ClientReadPlatformService clientReadPlatformService,
+            final LoanProductReadPlatformService loanProductReadPlatformService, final StaffReadPlatformService staffReadPlatformService) {
         this.context = context;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.fromApiJsonHelper = fromApiJsonHelper;
         this.appUserReadPlatformService = appUserReadPlatformService;
         this.officeReadPlatformService = officeReadPlatformService;
         this.clientReadPlatformService = clientReadPlatformService;
+        this.loanProductReadPlatformService = loanProductReadPlatformService;
+        this.staffReadPlatformService = staffReadPlatformService;
     }
 
     private static final class AuditMapper implements RowMapper<AuditData> {
@@ -209,8 +219,10 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
         if (commandAsJsonMap.containsKey("officeId")) {
             commandAsJsonMap.remove("officeId");
 
-            final Long officeId = auditObject.get("officeId").getAsLong();
-            if (officeId != null) {
+            Long officeId = null;
+            String officeIdStr = auditObject.get("officeId").getAsString();
+            if (StringUtils.isNotBlank(officeIdStr)) {
+                officeId = Long.valueOf(officeIdStr);
                 OfficeData office = this.officeReadPlatformService.retrieveOffice(officeId);
                 commandAsJsonMap.put("officeName", office.name());
             } else {
@@ -221,12 +233,59 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
         if (commandAsJsonMap.containsKey("clientId")) {
             commandAsJsonMap.remove("clientId");
 
-            final Long clientId = auditObject.get("officeId").getAsLong();
-            if (clientId != null) {
+            Long clientId = null;
+            String clientIdStr = auditObject.get("clientId").getAsString();
+            if (StringUtils.isNotBlank(clientIdStr)) {
+                clientId = Long.valueOf(clientIdStr);
                 ClientData client = this.clientReadPlatformService.retrieveOne(clientId);
                 commandAsJsonMap.put("clientName", client.displayName());
             } else {
                 commandAsJsonMap.put("clientName", "");
+            }
+        }
+
+        if (commandAsJsonMap.containsKey("productId")) {
+            commandAsJsonMap.remove("productId");
+
+            Long productId = null;
+            String productIdStr = auditObject.get("productId").getAsString();
+            if (StringUtils.isNotBlank(productIdStr)) {
+                productId = Long.valueOf(productIdStr);
+                LoanProductData loanProduct = this.loanProductReadPlatformService.retrieveLoanProduct(productId);
+                commandAsJsonMap.put("productName", loanProduct.getName());
+            } else {
+                commandAsJsonMap.put("productName", "");
+            }
+        }
+
+        if (commandAsJsonMap.containsKey("loanOfficerId")) {
+            commandAsJsonMap.remove("loanOfficerId");
+
+            Long loanOfficerId = null;
+            String loanOfficerIdStr = auditObject.get("loanOfficerId").getAsString();
+            if (StringUtils.isNotBlank(loanOfficerIdStr)) {
+                loanOfficerId = Long.valueOf(loanOfficerIdStr);
+                StaffData officer = this.staffReadPlatformService.retrieveStaff(loanOfficerId);
+                commandAsJsonMap.put("loanOfficerName", officer.getDisplayName());
+            } else {
+                commandAsJsonMap.put("loanOfficerName", "");
+            }
+        }
+
+        final String[] enumTypes = { "loanTermFrequencyType", "repaymentFrequencyType", "amortizationType", "interestType",
+                "interestCalculationPeriodType", "interestRateFrequencyType" };
+
+        for (String typeName : enumTypes) {
+            if (commandAsJsonMap.containsKey(typeName)) {
+                commandAsJsonMap.remove(typeName);
+
+                final Integer enumTypeId = auditObject.get(typeName).getAsInt();
+                if (enumTypeId != null) {
+                    final String code = LoanEnumerations.loanEnumueration(typeName, enumTypeId).getCode();
+                    if (code != null) {
+                        commandAsJsonMap.put(typeName, code);
+                    }
+                }
             }
         }
 
