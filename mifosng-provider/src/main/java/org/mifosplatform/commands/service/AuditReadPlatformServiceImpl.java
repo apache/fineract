@@ -221,7 +221,7 @@ public class AuditReadPlatformServiceImpl implements AuditReadPlatformService {
         if (commandAsJsonMap.containsKey("clientId")) {
             commandAsJsonMap.remove("clientId");
 
-            final Long clientId = auditObject.get("officeId").getAsLong();
+            final Long clientId = auditObject.get("clientId").getAsLong();
             if (clientId != null) {
                 ClientData client = this.clientReadPlatformService.retrieveOne(clientId);
                 commandAsJsonMap.put("clientName", client.displayName());
