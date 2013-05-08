@@ -5,25 +5,6 @@
  */
 package org.mifosplatform.portfolio.calendar.api;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.UriInfo;
-
 import org.mifosplatform.commands.domain.CommandWrapper;
 import org.mifosplatform.commands.service.CommandWrapperBuilder;
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -37,11 +18,19 @@ import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext
 import org.mifosplatform.portfolio.calendar.data.CalendarData;
 import org.mifosplatform.portfolio.calendar.domain.Calendar;
 import org.mifosplatform.portfolio.calendar.domain.CalendarEntityType;
+import org.mifosplatform.portfolio.calendar.domain.CalendarType;
 import org.mifosplatform.portfolio.calendar.service.CalendarDropdownReadPlatformService;
+import org.mifosplatform.portfolio.calendar.service.CalendarEnumerations;
 import org.mifosplatform.portfolio.calendar.service.CalendarReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+
+import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.UriInfo;
+import java.util.*;
 
 @Path("/{entityType}/{entityId}/calendars")
 @Component
@@ -102,23 +91,24 @@ public class CalendarsApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveCalendarsByEntity(@PathParam("entityType") final String entityType, @PathParam("entityId") final Long entityId,
-            @Context final UriInfo uriInfo) {
+                                            @Context final UriInfo uriInfo, @QueryParam("calendarType") String calendarType) {
 
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
 
         final Set<String> associationParameters = ApiParameterHelper.extractAssociationsForResponseIfProvided(uriInfo.getQueryParameters());
 
         Collection<CalendarData> calendarsData = new ArrayList<CalendarData>();
+        List<EnumOptionData>  calendarTypeOptions = createEnumOptionDataListFromQueryParameter(calendarType);
 
         if (!associationParameters.isEmpty()) {
             if (associationParameters.contains("parentCalendars")) {
                 calendarsData.addAll(this.readPlatformService.retrieveParentCalendarsByEntity(entityId,
-                        CalendarEntityType.valueOf(entityType.toUpperCase()).getValue()));
+                        CalendarEntityType.valueOf(entityType.toUpperCase()).getValue(),calendarTypeOptions));
             }
         }
 
         calendarsData.addAll(this.readPlatformService.retrieveCalendarsByEntity(entityId,
-                CalendarEntityType.valueOf(entityType.toUpperCase()).getValue()));
+                CalendarEntityType.valueOf(entityType.toUpperCase()).getValue(),calendarTypeOptions));
 
         // Add recurring dates
         calendarsData = this.readPlatformService.generateRecurringDates(calendarsData);
@@ -192,4 +182,29 @@ public class CalendarsApiResource {
         final List<EnumOptionData> remindByOptions = this.dropdownReadPlatformService.retrieveCalendarRemindByOptions();
         return new CalendarData(calendarData, entityTypeOptions, calendarTypeOptions, remindByOptions);
     }
+
+
+    public List<EnumOptionData> createEnumOptionDataListFromQueryParameter(String calendarTypeQuery) {
+        List<EnumOptionData> calendarTypeOptions = null;
+        // creating a list of calendar type options from the comma separated query parameter.
+        List<String> calendarTypeOptionsInQuery = new ArrayList<String>();
+        StringTokenizer st = new StringTokenizer(calendarTypeQuery, ",");
+        while (st.hasMoreElements()) {
+            calendarTypeOptionsInQuery.add(st.nextElement().toString());
+        }
+
+        for(String calType : calendarTypeOptionsInQuery){
+            if(calType.equalsIgnoreCase("collection")) {
+                calendarTypeOptions.add(CalendarEnumerations.calendarType(CalendarType.COLLECTION));
+            } else if(calType.equalsIgnoreCase("training")) {
+                calendarTypeOptions.add(CalendarEnumerations.calendarType(CalendarType.TRAINING));
+            }  else if(calType.equalsIgnoreCase("audit")) {
+                calendarTypeOptions.add(CalendarEnumerations.calendarType(CalendarType.AUDIT));
+            }  else if(calType.equalsIgnoreCase("general")) {
+                calendarTypeOptions.add(CalendarEnumerations.calendarType(CalendarType.GENERAL));
+            }
+        }
+        return calendarTypeOptions;
+    }
+
 }
