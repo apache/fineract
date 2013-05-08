@@ -6,6 +6,7 @@ See VERSIONING (https://github.com/openMF/mifosx/blob/master/VERSIONING.md) for 
 Releases
 ===============
 
+1. 08 May 2013 - 1.0.1.RELEASE
 1. 07 May 2013 - 1.0.0.RELEASE
 1. 30 April 2013 - 0.12.1.beta
 2. 30 April 2013 - 0.11.4.beta
@@ -14,6 +15,11 @@ Releases
 1. 10 April 2013 - 0.11.2.beta
 1. 05 April 2013 - 0.11.1.beta
 1. 05 April 2013 - 0.11.0.beta
+
+1.0.1.RELEASE
+=============
+Bug Release
+ - MIFOSX-343 - When viewing Audit details, integer values (rather than string values) for officeId and clientId cause exception
 
 1.0.0.RELEASE
 =============
