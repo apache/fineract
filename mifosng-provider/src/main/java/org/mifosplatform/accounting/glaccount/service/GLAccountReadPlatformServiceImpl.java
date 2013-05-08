@@ -186,8 +186,8 @@ public class GLAccountReadPlatformServiceImpl implements GLAccountReadPlatformSe
     }
 
     @Override
-    public GLAccountData retrieveNewGLAccountDetails() {
-        return GLAccountData.sensibleDefaultsForNewGLAccountCreation();
+    public GLAccountData retrieveNewGLAccountDetails(final Integer type) {
+        return GLAccountData.sensibleDefaultsForNewGLAccountCreation(type);
     }
 
 }

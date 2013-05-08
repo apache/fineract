@@ -64,14 +64,18 @@ public class GLAccountData {
         this.usageOptions = usageOptions;
     }
 
-    public static GLAccountData sensibleDefaultsForNewGLAccountCreation() {
+    public static GLAccountData sensibleDefaultsForNewGLAccountCreation(final Integer GLAccType) {
         final Long id = null;
         final String name = null;
         final Long parentId = null;
         final String glCode = null;
         final boolean disabled = false;
         final boolean manualEntriesAllowed = true;
-        final EnumOptionData type = AccountingEnumerations.gLAccountType(GLAccountType.ASSET);
+        final EnumOptionData type;
+        if(GLAccType!=0)
+            type = AccountingEnumerations.gLAccountType(GLAccType);
+          else 
+            type = AccountingEnumerations.gLAccountType(GLAccountType.ASSET);
         final EnumOptionData usage = AccountingEnumerations.gLAccountUsage(GLAccountUsage.DETAIL);
         final String description = null;
         return new GLAccountData(id, name, parentId, glCode, disabled, manualEntriesAllowed, type, usage, description);
