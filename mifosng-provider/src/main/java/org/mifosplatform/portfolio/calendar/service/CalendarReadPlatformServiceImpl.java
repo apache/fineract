@@ -9,6 +9,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
@@ -84,7 +85,7 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
     }
 
     @Override
-    public CalendarData retrieveCalendar(final Long calendarId, Long entityId, Integer entityTypeId) {
+    public CalendarData retrieveCalendar(final Long calendarId, final Long entityId, final Integer entityTypeId) {
 
         try {
             final CalendarDataMapper rm = new CalendarDataMapper();
@@ -98,24 +99,43 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
     }
 
     @Override
-    public Collection<CalendarData> retrieveCalendarsByEntity(final Long entityId, final Integer entityTypeId) {
+    public Collection<CalendarData> retrieveCalendarsByEntity(final Long entityId, final Integer entityTypeId, final List<EnumOptionData> calendarTypeOptions) {
         final CalendarDataMapper rm = new CalendarDataMapper();
 
-        final String sql = rm.schema() + " and ci.entity_id = ? and ci.entity_type_enum = ? order by c.start_date ";
+        Collection<CalendarData> result=null;
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] { entityId, entityTypeId });
+        String sql="";
+
+        if (calendarTypeOptions == null || calendarTypeOptions.isEmpty()) {
+            sql = rm.schema() + " and ci.entity_id = ? and ci.entity_type_enum = ? order by c.start_date ";
+            result =  this.jdbcTemplate.query(sql, rm, new Object[] { entityId, entityTypeId });
+        } else if(!calendarTypeOptions.isEmpty()){
+            String sqlCalendarTypeOptions = createSqlValuesInString(calendarTypeOptions);
+            sql = rm.schema() + " and ci.entity_id = ? and ci.entity_type_enum = ? and c.calendar_type_enum in (?) order by c.start_date ";
+            result = this.jdbcTemplate.query(sql,rm, new Object[] {entityId, entityTypeId, sqlCalendarTypeOptions});
+        }
+        return result;
     }
-    
+
     @Override
-    public Collection<CalendarData> retrieveParentCalendarsByEntity(Long entityId, Integer entityTypeId) {
-        
+    public Collection<CalendarData> retrieveParentCalendarsByEntity( final Long entityId, final Integer entityTypeId, final List<EnumOptionData> calendarTypeOptions ) {
+
         final CalendarDataMapper rm = new CalendarDataMapper();
+        Collection<CalendarData> result=null;
+        String sql="";
         CalendarEntityType ceType = CalendarEntityType.fromInt(entityTypeId);
         String parentHeirarchyCondition = getParentHierarchyCondition(ceType);
-        final String sql = rm.schema() + " " + parentHeirarchyCondition        		
-                + " and ci.entity_type_enum = ? order by c.start_date ";
+
         //FIXME :AA center is the parent entity of group, change this code to support more parent entity types.
-        return this.jdbcTemplate.query(sql, rm, new Object[] { entityId, CalendarEntityType.CENTERS.getValue() });
+        if (calendarTypeOptions == null || calendarTypeOptions.isEmpty()) {
+            sql = rm.schema() + " " + parentHeirarchyCondition + " and ci.entity_type_enum = ? order by c.start_date ";
+            result = this.jdbcTemplate.query(sql, rm, new Object[] { entityId, CalendarEntityType.CENTERS.getValue() });
+        } else {
+            String sqlCalendarTypeOptions = createSqlValuesInString(calendarTypeOptions);
+            sql = rm.schema() + " " + parentHeirarchyCondition + " and ci.entity_type_enum = ? and c.calendar_type_enum in ? order by c.start_date ";
+            result = this.jdbcTemplate.query(sql,rm, new Object[] {entityId, entityTypeId, sqlCalendarTypeOptions});
+        }
+        return result;
     }
 
     @Override
@@ -134,7 +154,7 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
     }
     
     @Override
-    public CalendarData generateRecurringDate(CalendarData calendarData) {
+    public CalendarData generateRecurringDate(final CalendarData calendarData) {
         if(!calendarData.isRepeating()) return calendarData;
         final String rrule = calendarData.getRecurrence();
         final LocalDate currentDate = DateUtils.getLocalDateOfTenant();
@@ -155,7 +175,7 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
     }
 
     @Override
-    public Collection<CalendarData> generateRecurringDates(Collection<CalendarData> calendarsData) {
+    public Collection<CalendarData> generateRecurringDates(final Collection<CalendarData> calendarsData) {
         Collection<CalendarData> recuCalendarsData = new ArrayList<CalendarData>();
 
         for (CalendarData calendarData : calendarsData) {
@@ -166,7 +186,7 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
     }
     
     @Override
-    public CalendarData retrieveLoanCalendar(Long loanId) {
+    public CalendarData retrieveLoanCalendar(final Long loanId) {
         final CalendarDataMapper rm = new CalendarDataMapper();
 
         final String sql = rm.schema() + " and ci.entity_id = ? and ci.entity_type_enum = ? order by c.start_date ";
@@ -210,4 +230,20 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
         return conditionSql;
     }
 
+    /**
+     * This method takes the List of calendarType options given in the request and creates a string to be used in the sql statement.
+     * for ex. (1,2,3,4)
+     * @param calendarTypeOptions
+     * @return
+     */
+    public String createSqlValuesInString(final List<EnumOptionData> calendarTypeOptions){
+        int size = calendarTypeOptions.size();
+        String sqlCalendarTypeOptions = "(" + calendarTypeOptions.get(0).getId().toString();
+        for(int i=1;i<size;i++) {
+            sqlCalendarTypeOptions += "," + calendarTypeOptions.get(i).getId().toString();
+        }
+        sqlCalendarTypeOptions += ")";
+
+        return sqlCalendarTypeOptions;
+    }
 }

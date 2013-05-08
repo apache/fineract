@@ -10,11 +10,11 @@ package org.mifosplatform.infrastructure.core.data;
  * Immutable data object representing generic enumeration value.
  * </p>
  */
-@SuppressWarnings("unused")
 public class EnumOptionData {
 
     private final Long id;
     private final String code;
+    @SuppressWarnings("unused")
     private final String value;
 
     public EnumOptionData(final Long id, final String code, final String value) {
@@ -27,7 +27,7 @@ public class EnumOptionData {
         return id;
     }
 
-	public String getCode() {
-		return this.code;
-	}
+    public String getCode() {
+        return code;
+    }
 }

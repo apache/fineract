@@ -5,17 +5,19 @@
  */
 package org.mifosplatform.portfolio.calendar.service;
 
-import java.util.Collection;
-
+import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.portfolio.calendar.data.CalendarData;
+
+import java.util.Collection;
+import java.util.List;
 
 public interface CalendarReadPlatformService {
 
     CalendarData retrieveCalendar(final Long calendarId, Long entityId, Integer entityTypeId);
 
-    Collection<CalendarData> retrieveCalendarsByEntity(final Long entityId, final Integer entityTypeId);
+    Collection<CalendarData> retrieveCalendarsByEntity(final Long entityId, final Integer entityTypeId, List<EnumOptionData> calendarTypeOptions);
     
-    Collection<CalendarData> retrieveParentCalendarsByEntity(final Long entityId, final Integer entityTypeId);
+    Collection<CalendarData> retrieveParentCalendarsByEntity(final Long entityId, final Integer entityTypeId, List<EnumOptionData> calendarTypeOptions);
 
     Collection<CalendarData> retrieveAllCalendars();
 

@@ -101,7 +101,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             final LoanProductReadPlatformService loanProductReadPlatformService, final ClientReadPlatformService clientReadPlatformService,
             final GroupReadPlatformService groupReadPlatformService, final LoanDropdownReadPlatformService loanDropdownReadPlatformService,
             final FundReadPlatformService fundReadPlatformService, final ChargeReadPlatformService chargeReadPlatformService,
-            final CodeValueReadPlatformService codeValueReadPlatformService, final TenantAwareRoutingDataSource dataSource, final CalendarReadPlatformService calendarReadPlatformService) {
+            final CodeValueReadPlatformService codeValueReadPlatformService, final TenantAwareRoutingDataSource dataSource,
+            final CalendarReadPlatformService calendarReadPlatformService) {
         this.context = context;
         this.loanRepository = loanRepository;
         this.loanTransactionRepository = loanTransactionRepository;
@@ -220,7 +221,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlCountRows, sqlBuilder.toString(), finalObjectArray,
                 this.loaanLoanMapper);
     }
-    
+
     @Override
     public LoanAccountData retrieveTemplateWithClientAndProductDetails(final Long clientId, final Long productId) {
 
@@ -471,7 +472,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
             final Integer loanTypeId = JdbcSupport.getInteger(rs, "loanType");
             final EnumOptionData loanType = LoanEnumerations.loanType(loanTypeId);
-            
+
             final Long fundId = JdbcSupport.getLong(rs, "fundId");
             final String fundName = rs.getString("fundName");
 
@@ -843,31 +844,37 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
     }
 
     @Override
-    public LoanAccountData retrieveLoanProductDetailsTemplate(Long productId) {
-        
+    public LoanAccountData retrieveLoanProductDetailsTemplate(final Long productId) {
+
         context.authenticatedUser();
-        
+
         final LoanProductData loanProduct = this.loanProductReadPlatformService.retrieveLoanProduct(productId);
-        final Collection<EnumOptionData> loanTermFrequencyTypeOptions = loanDropdownReadPlatformService.retrieveLoanTermFrequencyTypeOptions();
-        final Collection<EnumOptionData> repaymentFrequencyTypeOptions = loanDropdownReadPlatformService.retrieveRepaymentFrequencyTypeOptions();
-        final Collection<EnumOptionData> interestRateFrequencyTypeOptions = loanDropdownReadPlatformService.retrieveInterestRateFrequencyTypeOptions();
+        final Collection<EnumOptionData> loanTermFrequencyTypeOptions = loanDropdownReadPlatformService
+                .retrieveLoanTermFrequencyTypeOptions();
+        final Collection<EnumOptionData> repaymentFrequencyTypeOptions = loanDropdownReadPlatformService
+                .retrieveRepaymentFrequencyTypeOptions();
+        final Collection<EnumOptionData> interestRateFrequencyTypeOptions = loanDropdownReadPlatformService
+                .retrieveInterestRateFrequencyTypeOptions();
         final Collection<EnumOptionData> amortizationTypeOptions = loanDropdownReadPlatformService.retrieveLoanAmortizationTypeOptions();
         final Collection<EnumOptionData> interestTypeOptions = loanDropdownReadPlatformService.retrieveLoanInterestTypeOptions();
-        final Collection<EnumOptionData> interestCalculationPeriodTypeOptions = loanDropdownReadPlatformService.retrieveLoanInterestRateCalculatedInPeriodOptions();
+        final Collection<EnumOptionData> interestCalculationPeriodTypeOptions = loanDropdownReadPlatformService
+                .retrieveLoanInterestRateCalculatedInPeriodOptions();
         final Collection<FundData> fundOptions = this.fundReadPlatformService.retrieveAllFunds();
-        final Collection<TransactionProcessingStrategyData> repaymentStrategyOptions = this.loanDropdownReadPlatformService.retreiveTransactionProcessingStrategies();
+        final Collection<TransactionProcessingStrategyData> repaymentStrategyOptions = this.loanDropdownReadPlatformService
+                .retreiveTransactionProcessingStrategies();
         final Collection<CodeValueData> loanPurposeOptions = this.codeValueReadPlatformService.retrieveCodeValuesByCode("LoanPurpose");
-        final Collection<CodeValueData> loanCollateralOptions = this.codeValueReadPlatformService.retrieveCodeValuesByCode("LoanCollateral");
+        final Collection<CodeValueData> loanCollateralOptions = this.codeValueReadPlatformService
+                .retrieveCodeValuesByCode("LoanCollateral");
         final boolean feeChargesOnly = false;
         final Collection<ChargeData> chargeOptions = this.chargeReadPlatformService.retrieveLoanApplicableCharges(feeChargesOnly);
- 
+
         return LoanAccountData.loanProductWithTemplateDefaults(loanProduct, loanTermFrequencyTypeOptions, repaymentFrequencyTypeOptions,
                 repaymentStrategyOptions, interestRateFrequencyTypeOptions, amortizationTypeOptions, interestTypeOptions,
                 interestCalculationPeriodTypeOptions, fundOptions, chargeOptions, loanPurposeOptions, loanCollateralOptions);
     }
 
     @Override
-    public LoanAccountData retrieveClientDetailsTemplate(Long clientId) {
+    public LoanAccountData retrieveClientDetailsTemplate(final Long clientId) {
 
         context.authenticatedUser();
 
@@ -879,7 +886,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
     }
 
     @Override
-    public LoanAccountData retrieveGroupDetailsTemplate(Long groupId) {
+    public LoanAccountData retrieveGroupDetailsTemplate(final Long groupId) {
         context.authenticatedUser();
         final GroupGeneralData groupAccount = this.groupReadPlatformService.retrieveOne(groupId);
         final LocalDate expectedDisbursementDate = DateUtils.getLocalDateOfTenant();
@@ -887,27 +894,28 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
     }
 
     @Override
-    public LoanAccountData retrieveGroupAndMembersDetailsTemplate(Long groupId) {
+    public LoanAccountData retrieveGroupAndMembersDetailsTemplate(final Long groupId) {
         GroupGeneralData groupAccount = this.groupReadPlatformService.retrieveOne(groupId);
         final LocalDate expectedDisbursementDate = DateUtils.getLocalDateOfTenant();
- 
-     // get group associations
+
+        // get group associations
         Collection<ClientData> membersOfGroup = this.clientReadPlatformService.retrieveClientMembersOfGroup(groupId);
         if (!CollectionUtils.isEmpty(membersOfGroup)) {
             groupAccount = GroupGeneralData.withAssocations(groupAccount, membersOfGroup);
         }
-        
+
         return LoanAccountData.groupDefaults(groupAccount, expectedDisbursementDate);
     }
 
     @Override
-    public Collection<CalendarData> retrieveCalendars(Long groupId) {
+    public Collection<CalendarData> retrieveCalendars(final Long groupId) {
         Collection<CalendarData> calendarsData = new ArrayList<CalendarData>();
-        calendarsData.addAll(this.calendarReadPlatformService.retrieveParentCalendarsByEntity(groupId,CalendarEntityType.GROUPS.getValue()));
-        calendarsData.addAll(this.calendarReadPlatformService.retrieveCalendarsByEntity(groupId,CalendarEntityType.GROUPS.getValue()));
+        calendarsData.addAll(this.calendarReadPlatformService.retrieveParentCalendarsByEntity(groupId,
+                CalendarEntityType.GROUPS.getValue(), null));
+        calendarsData
+                .addAll(this.calendarReadPlatformService.retrieveCalendarsByEntity(groupId, CalendarEntityType.GROUPS.getValue(), null));
         calendarsData = this.calendarReadPlatformService.generateRecurringDates(calendarsData);
         return calendarsData;
     }
 
-    
 }
