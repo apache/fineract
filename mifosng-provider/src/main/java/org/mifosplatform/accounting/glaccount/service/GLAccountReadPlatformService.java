@@ -22,4 +22,6 @@ public interface GLAccountReadPlatformService {
     List<GLAccountData> retrieveAllEnabledDetailGLAccounts(GLAccountType accountType);
 
     GLAccountData retrieveNewGLAccountDetails();
+    
+    List<GLAccountData> retrieveAllEnabledHeaderGLAccounts(GLAccountType accountType);
 }

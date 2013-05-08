@@ -5,11 +5,13 @@
  */
 package org.mifosplatform.accounting.glaccount.data;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.mifosplatform.accounting.common.AccountingEnumerations;
 import org.mifosplatform.accounting.glaccount.domain.GLAccountType;
 import org.mifosplatform.accounting.glaccount.domain.GLAccountUsage;
+import org.mifosplatform.infrastructure.codes.data.CodeValueData;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 
 /**
@@ -29,13 +31,26 @@ public class GLAccountData {
     private final EnumOptionData type;
     private final EnumOptionData usage;
     private final String description;
+    private final String nameDecorated;
+    private final CodeValueData tagId;
 
     // templates
     final List<EnumOptionData> accountTypeOptions;
     final List<EnumOptionData> usageOptions;
+    final List<GLAccountData> assetHeaderAccountOptions;
+    final List<GLAccountData> liabilityHeaderAccountOptions;
+    final List<GLAccountData> equityHeaderAccountOptions;
+    final List<GLAccountData> incomeHeaderAccountOptions;
+    final List<GLAccountData> expenseHeaderAccountOptions;
+    final Collection<CodeValueData> allowedAssetsTagOptions;
+    final Collection<CodeValueData> allowedLiabilitiesTagOptions;
+    final Collection<CodeValueData> allowedEquityTagOptions;
+    final Collection<CodeValueData> allowedIncomeTagOptions;
+    final Collection<CodeValueData> allowedExpensesTagOptions;
 
     public GLAccountData(final Long id, final String name, final Long parentId, final String glCode, final boolean disabled,
-            final boolean manualEntriesAllowed, final EnumOptionData type, final EnumOptionData usage, final String description) {
+            final boolean manualEntriesAllowed, final EnumOptionData type, final EnumOptionData usage, final String description,
+            final String nameDecorated, final CodeValueData tagId) {
         this.id = id;
         this.name = name;
         this.parentId = parentId;
@@ -45,12 +60,29 @@ public class GLAccountData {
         this.type = type;
         this.usage = usage;
         this.description = description;
+        this.nameDecorated = nameDecorated;
+        this.tagId = tagId;
         this.accountTypeOptions = null;
         this.usageOptions = null;
+        this.assetHeaderAccountOptions = null;
+        this.liabilityHeaderAccountOptions = null;
+        this.equityHeaderAccountOptions = null;
+        this.incomeHeaderAccountOptions = null;
+        this.expenseHeaderAccountOptions = null;
+        this.allowedAssetsTagOptions = null;
+        this.allowedLiabilitiesTagOptions = null;
+        this.allowedEquityTagOptions=null;
+        this.allowedIncomeTagOptions=null;
+        this.allowedExpensesTagOptions=null;
     }
 
     public GLAccountData(final GLAccountData accountData, final List<EnumOptionData> accountTypeOptions,
-            final List<EnumOptionData> usageOptions) {
+            final List<EnumOptionData> usageOptions, final List<GLAccountData> assetHeaderAccountOptions,
+            final List<GLAccountData> liabilityHeaderAccountOptions, final List<GLAccountData> equityHeaderAccountOptions,
+            final List<GLAccountData> incomeHeaderAccountOptions, final List<GLAccountData> expenseHeaderAccountOptions, 
+            final Collection<CodeValueData> allowedAssetsTagOptions, final Collection<CodeValueData> allowedLiabilitiesTagOptions, 
+            final Collection<CodeValueData> allowedEquityTagOptions, final Collection<CodeValueData> allowedIncomeTagOptions, 
+            final Collection<CodeValueData> allowedExpensesTagOptions) {
         this.id = accountData.id;
         this.name = accountData.name;
         this.parentId = accountData.parentId;
@@ -60,8 +92,20 @@ public class GLAccountData {
         this.type = accountData.type;
         this.usage = accountData.usage;
         this.description = accountData.description;
+        this.nameDecorated = accountData.nameDecorated;
+        this.tagId = accountData.tagId;
         this.accountTypeOptions = accountTypeOptions;
         this.usageOptions = usageOptions;
+        this.assetHeaderAccountOptions = assetHeaderAccountOptions;
+        this.liabilityHeaderAccountOptions = liabilityHeaderAccountOptions;
+        this.equityHeaderAccountOptions = equityHeaderAccountOptions;
+        this.incomeHeaderAccountOptions = incomeHeaderAccountOptions;
+        this.expenseHeaderAccountOptions = expenseHeaderAccountOptions;
+        this.allowedAssetsTagOptions = allowedAssetsTagOptions;
+        this.allowedLiabilitiesTagOptions = allowedLiabilitiesTagOptions;
+        this.allowedEquityTagOptions = allowedEquityTagOptions;
+        this.allowedIncomeTagOptions = allowedIncomeTagOptions;
+        this.allowedExpensesTagOptions = allowedExpensesTagOptions;
     }
 
     public static GLAccountData sensibleDefaultsForNewGLAccountCreation() {
@@ -74,6 +118,9 @@ public class GLAccountData {
         final EnumOptionData type = AccountingEnumerations.gLAccountType(GLAccountType.ASSET);
         final EnumOptionData usage = AccountingEnumerations.gLAccountUsage(GLAccountUsage.DETAIL);
         final String description = null;
-        return new GLAccountData(id, name, parentId, glCode, disabled, manualEntriesAllowed, type, usage, description);
+        final String nameDecorated = null;
+        final CodeValueData tagId = null;
+        return new GLAccountData(id, name, parentId, glCode, disabled, manualEntriesAllowed, type, usage, description, nameDecorated, tagId);
     }
+
 }

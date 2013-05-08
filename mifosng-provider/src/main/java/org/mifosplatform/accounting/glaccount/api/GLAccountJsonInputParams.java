@@ -13,7 +13,7 @@ import java.util.Set;
  ***/
 public enum GLAccountJsonInputParams {
     ID("id"), NAME("name"), PARENT_ID("parentId"), GL_CODE("glCode"), DISABLED("disabled"), MANUAL_ENTRIES_ALLOWED("manualEntriesAllowed"), TYPE(
-            "type"), USAGE("usage"), DESCRIPTION("description");
+            "type"), USAGE("usage"), DESCRIPTION("description"), TAGID("tagId");
 
     private final String value;
 

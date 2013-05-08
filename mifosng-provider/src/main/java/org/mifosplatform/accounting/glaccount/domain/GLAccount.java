@@ -22,6 +22,7 @@ import javax.persistence.UniqueConstraint;
 import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
 import org.mifosplatform.accounting.glaccount.api.GLAccountJsonInputParams;
+import org.mifosplatform.infrastructure.codes.domain.CodeValue;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
@@ -29,10 +30,12 @@ import org.springframework.data.jpa.domain.AbstractPersistable;
 @Table(name = "acc_gl_account", uniqueConstraints = { @UniqueConstraint(columnNames = { "gl_code" }, name = "acc_gl_code") })
 public class GLAccount extends AbstractPersistable<Long> {
 
-    @SuppressWarnings("unused")
-    @ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id")
     private GLAccount parent;
+    
+    @Column(name = "hierarchy", nullable = true, length = 50)
+    private String hierarchy;
 
     @OneToMany(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id")
@@ -58,13 +61,18 @@ public class GLAccount extends AbstractPersistable<Long> {
 
     @Column(name = "description", nullable = true, length = 500)
     private String description;
+    
+    @SuppressWarnings("unused")
+	@ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "tag_id")
+    private CodeValue tagId;
 
     protected GLAccount() {
         //
     }
 
     private GLAccount(final GLAccount parent, final String name, final String glCode, final boolean disabled,
-            final boolean manualEntriesAllowed, final Integer type, final Integer usage, final String description) {
+            final boolean manualEntriesAllowed, final Integer type, final Integer usage, final String description, final CodeValue tagId) {
         this.name = StringUtils.defaultIfEmpty(name, null);
         this.glCode = StringUtils.defaultIfEmpty(glCode, null);
         this.disabled = BooleanUtils.toBooleanDefaultIfNull(disabled, false);
@@ -73,9 +81,10 @@ public class GLAccount extends AbstractPersistable<Long> {
         this.type = type;
         this.description = StringUtils.defaultIfEmpty(description, null);
         this.parent = parent;
+        this.tagId = tagId;
     }
 
-    public static GLAccount fromJson(final GLAccount parent, final JsonCommand command) {
+    public static GLAccount fromJson(final GLAccount parent, final JsonCommand command, CodeValue glAccountTagType) {
         final String name = command.stringValueOfParameterNamed(GLAccountJsonInputParams.NAME.getValue());
         final String glCode = command.stringValueOfParameterNamed(GLAccountJsonInputParams.GL_CODE.getValue());
         final boolean disabled = command.booleanPrimitiveValueOfParameterNamed(GLAccountJsonInputParams.DISABLED.getValue());
@@ -84,7 +93,7 @@ public class GLAccount extends AbstractPersistable<Long> {
         final Integer usage = command.integerValueSansLocaleOfParameterNamed(GLAccountJsonInputParams.USAGE.getValue());
         final Integer type = command.integerValueSansLocaleOfParameterNamed(GLAccountJsonInputParams.TYPE.getValue());
         final String description = command.stringValueOfParameterNamed(GLAccountJsonInputParams.DESCRIPTION.getValue());
-        return new GLAccount(parent, name, glCode, disabled, manualEntriesAllowed, type, usage, description);
+        return new GLAccount(parent, name, glCode, disabled, manualEntriesAllowed, type, usage, description, glAccountTagType);
     }
 
     public Map<String, Object> update(final JsonCommand command) {
@@ -198,5 +207,21 @@ public class GLAccount extends AbstractPersistable<Long> {
     public Integer getType() {
         return this.type;
     }
+    
+    public void generateHierarchy() {
 
+        if (parent != null) {
+            this.hierarchy = this.parent.hierarchyOf(this.getId());
+        } else {
+            this.hierarchy = ".";
+        }
+    }
+    
+    private String hierarchyOf(final Long id) {
+        return this.hierarchy + id.toString() + ".";
+    }
+
+	public boolean isDetailAccount() {
+		return GLAccountUsage.DETAIL.getValue().equals(this.usage);
+	}
 }
