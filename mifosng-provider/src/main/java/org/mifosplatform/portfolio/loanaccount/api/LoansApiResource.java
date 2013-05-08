@@ -39,6 +39,7 @@ import org.mifosplatform.infrastructure.core.exception.UnrecognizedQueryParamExc
 import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
+import org.mifosplatform.infrastructure.core.service.Page;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.staff.data.BulkTransferLoanOfficerData;
 import org.mifosplatform.organisation.staff.data.StaffData;
@@ -357,6 +358,20 @@ public class LoansApiResource {
         return this.toApiJsonSerializer.serialize(settings, loanAccount, LOAN_DATA_PARAMETERS);
     }
 
+    @GET
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String retrieveAll(@QueryParam("sqlSearch") final String sqlSearch, @QueryParam("externalId") final String externalId,
+            @QueryParam("underHierarchy") final String hierarchy, @QueryParam("offset") final Integer offset,
+            @QueryParam("limit") final Integer limit, @QueryParam("orderBy") final String orderBy,
+            @QueryParam("sortOrder") final String sortOrder) {
+
+        context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
+        final Page<LoanAccountData> loanBasicDetails = this.loanReadPlatformService.retrieveAll(sqlSearch, externalId, offset, limit,
+                orderBy, sortOrder);
+        return this.toApiJsonSerializer.serialize(loanBasicDetails);
+    }
+    
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
