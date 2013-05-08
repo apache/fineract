@@ -9,9 +9,11 @@ import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.joda.time.Days;
 import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.codes.data.CodeValueData;
@@ -19,6 +21,8 @@ import org.mifosplatform.infrastructure.codes.service.CodeValueReadPlatformServi
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
 import org.mifosplatform.infrastructure.core.service.DateUtils;
+import org.mifosplatform.infrastructure.core.service.Page;
+import org.mifosplatform.infrastructure.core.service.PaginationHelper;
 import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
@@ -87,6 +91,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
     private final CodeValueReadPlatformService codeValueReadPlatformService;
     private final CalendarReadPlatformService calendarReadPlatformService;
 
+    private final PaginationHelper<LoanAccountData> paginationHelper = new PaginationHelper<LoanAccountData>();
+    private final LoanMapper loaanLoanMapper = new LoanMapper();
 
     @Autowired
     public LoanReadPlatformServiceImpl(final PlatformSecurityContext context, final LoanRepository loanRepository,
@@ -165,6 +171,56 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         }
     }
 
+    @Override
+    public Page<LoanAccountData> retrieveAll(final String sqlSearch, final String externalId, final Integer offset, final Integer limit,
+            final String orderBy, final String sortOrder) {
+
+        StringBuilder sqlBuilder = new StringBuilder(200);
+        sqlBuilder.append("select SQL_CALC_FOUND_ROWS ");
+        sqlBuilder.append(loaanLoanMapper.loanSchema());
+
+        final Object[] objectArray = new Object[1];
+        int arrayPos = 0;
+
+        String sqlQueryCriteria = sqlSearch;
+        if (StringUtils.isNotBlank(sqlQueryCriteria)) {
+            sqlQueryCriteria = sqlQueryCriteria.replaceAll("accountNo", "l.account_no");
+            sqlBuilder.append(" where (").append(sqlQueryCriteria).append(")");
+        }
+
+        if (StringUtils.isNotBlank(externalId)) {
+            sqlBuilder.append(" and l.external_id = ?");
+            objectArray[arrayPos] = externalId;
+            arrayPos = arrayPos + 1;
+        }
+
+        if (StringUtils.isNotBlank(orderBy)) {
+            sqlBuilder.append(" order by ").append(orderBy);
+            if (StringUtils.isNotBlank(sortOrder)) {
+                sqlBuilder.append(' ').append(sortOrder);
+            }
+        }
+
+        if (limit != null && limit > 0) {
+            Integer maxLimitAllowed = 200;
+            if (limit < maxLimitAllowed) {
+                maxLimitAllowed = limit;
+            }
+            sqlBuilder.append(" limit ").append(maxLimitAllowed);
+            if (offset != null) {
+                sqlBuilder.append(" offset ").append(offset);
+            }
+        } else if (limit != null && limit == -1) {
+            ;
+        } else
+            sqlBuilder.append(" limit ").append(200);
+
+        final Object[] finalObjectArray = Arrays.copyOf(objectArray, arrayPos);
+        final String sqlCountRows = "SELECT FOUND_ROWS()";
+        return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlCountRows, sqlBuilder.toString(), finalObjectArray,
+                this.loaanLoanMapper);
+    }
+    
     @Override
     public LoanAccountData retrieveTemplateWithClientAndProductDetails(final Long clientId, final Long productId) {
 
