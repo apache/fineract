@@ -42,7 +42,9 @@ public class GLAccountReadPlatformServiceImpl implements GLAccountReadPlatformSe
 
         public String schema() {
             return " gl.id as id, name as name, parent_id as parentId, gl_code as glCode, disabled as disabled, manual_journal_entries_allowed as manualEntriesAllowed, "
-                    + "classification_enum as classification, account_usage as accountUsage, description as description, "+nameDecoratedBaseOnHierarchy +"as nameDecorated, "
+                    + "classification_enum as classification, account_usage as accountUsage, description as description, "
+                    + nameDecoratedBaseOnHierarchy
+                    + "as nameDecorated, "
                     + "cv.id as codeId, cv.code_value as codeValue from acc_gl_account gl left join m_code_value cv on tag_id=cv.id";
         }
 
@@ -64,7 +66,8 @@ public class GLAccountReadPlatformServiceImpl implements GLAccountReadPlatformSe
             final Long codeId = rs.getLong("codeId");
             final String codeValue = rs.getString("codeValue");
             CodeValueData tagId = CodeValueData.instance(codeId, codeValue);
-            return new GLAccountData(id, name, parentId, glCode, disabled, manualEntriesAllowed, accountType, usage, description, nameDecorated, tagId);
+            return new GLAccountData(id, name, parentId, glCode, disabled, manualEntriesAllowed, accountType, usage, description,
+                    nameDecorated, tagId);
         }
     }
 
@@ -191,13 +194,12 @@ public class GLAccountReadPlatformServiceImpl implements GLAccountReadPlatformSe
     }
 
     @Override
-    public GLAccountData retrieveNewGLAccountDetails() {
-        return GLAccountData.sensibleDefaultsForNewGLAccountCreation();
+    public GLAccountData retrieveNewGLAccountDetails(final Integer type) {
+        return GLAccountData.sensibleDefaultsForNewGLAccountCreation(type);
     }
 
-	@Override
-	public List<GLAccountData> retrieveAllEnabledHeaderGLAccounts(GLAccountType accountType) {
-		return retrieveAllGLAccounts(accountType.getValue(), null, GLAccountUsage.HEADER.getValue(), null, false);
-	}
-
+    @Override
+    public List<GLAccountData> retrieveAllEnabledHeaderGLAccounts(final GLAccountType accountType) {
+        return retrieveAllGLAccounts(accountType.getValue(), null, GLAccountUsage.HEADER.getValue(), null, false);
+    }
 }

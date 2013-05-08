@@ -82,11 +82,11 @@ public class GLAccountsApiResource {
     @Path("template")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveNewAccountDetails(@Context final UriInfo uriInfo) {
+    public String retrieveNewAccountDetails(@Context final UriInfo uriInfo,  @QueryParam("type") final Integer type) {
 
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermission);
 
-        GLAccountData glAccountData = this.glAccountReadPlatformService.retrieveNewGLAccountDetails();
+        GLAccountData glAccountData = this.glAccountReadPlatformService.retrieveNewGLAccountDetails(type);
         glAccountData = handleTemplate(glAccountData);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
