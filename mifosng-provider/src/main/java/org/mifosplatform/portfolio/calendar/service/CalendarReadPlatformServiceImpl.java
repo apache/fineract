@@ -111,7 +111,7 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
             result =  this.jdbcTemplate.query(sql, rm, new Object[] { entityId, entityTypeId });
         } else if(!calendarTypeOptions.isEmpty()){
             String sqlCalendarTypeOptions = createSqlValuesInString(calendarTypeOptions);
-            sql = rm.schema() + " and ci.entity_id = ? and ci.entity_type_enum = ? and c.calendar_type_enum in ? order by c.start_date ";
+            sql = rm.schema() + " and ci.entity_id = ? and ci.entity_type_enum = ? and c.calendar_type_enum in (?) order by c.start_date ";
             result = this.jdbcTemplate.query(sql,rm, new Object[] {entityId, entityTypeId, sqlCalendarTypeOptions});
         }
         return result;

@@ -91,14 +91,16 @@ public class CalendarsApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveCalendarsByEntity(@PathParam("entityType") final String entityType, @PathParam("entityId") final Long entityId,
-                                            @Context final UriInfo uriInfo, @QueryParam("calendarType") String calendarType) {
+                                            @Context final UriInfo uriInfo,@DefaultValue("all") @QueryParam("calendarType") String calendarType) {
 
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
 
         final Set<String> associationParameters = ApiParameterHelper.extractAssociationsForResponseIfProvided(uriInfo.getQueryParameters());
 
         Collection<CalendarData> calendarsData = new ArrayList<CalendarData>();
+
         List<EnumOptionData>  calendarTypeOptions = createEnumOptionDataListFromQueryParameter(calendarType);
+
 
         if (!associationParameters.isEmpty()) {
             if (associationParameters.contains("parentCalendars")) {
@@ -185,7 +187,11 @@ public class CalendarsApiResource {
 
 
     public List<EnumOptionData> createEnumOptionDataListFromQueryParameter(String calendarTypeQuery) {
-        List<EnumOptionData> calendarTypeOptions = null;
+        List<EnumOptionData> calendarTypeOptions = new ArrayList<EnumOptionData>();
+        // adding all calendar Types if
+        if(calendarTypeQuery.equalsIgnoreCase("all")){
+            return calendarTypeOptions;
+        }
         // creating a list of calendar type options from the comma separated query parameter.
         List<String> calendarTypeOptionsInQuery = new ArrayList<String>();
         StringTokenizer st = new StringTokenizer(calendarTypeQuery, ",");
@@ -204,6 +210,7 @@ public class CalendarsApiResource {
                 calendarTypeOptions.add(CalendarEnumerations.calendarType(CalendarType.GENERAL));
             }
         }
+
         return calendarTypeOptions;
     }
 

@@ -5,13 +5,6 @@
  */
 package org.mifosplatform.portfolio.loanaccount.service;
 
-import java.math.BigDecimal;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
 import org.joda.time.Days;
 import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.codes.data.CodeValueData;
@@ -38,20 +31,8 @@ import org.mifosplatform.portfolio.fund.data.FundData;
 import org.mifosplatform.portfolio.fund.service.FundReadPlatformService;
 import org.mifosplatform.portfolio.group.data.GroupGeneralData;
 import org.mifosplatform.portfolio.group.service.GroupReadPlatformService;
-import org.mifosplatform.portfolio.loanaccount.data.DisbursementData;
-import org.mifosplatform.portfolio.loanaccount.data.LoanAccountData;
-import org.mifosplatform.portfolio.loanaccount.data.LoanApplicationTimelineData;
-import org.mifosplatform.portfolio.loanaccount.data.LoanStatusEnumData;
-import org.mifosplatform.portfolio.loanaccount.data.LoanSummaryData;
-import org.mifosplatform.portfolio.loanaccount.data.LoanTransactionData;
-import org.mifosplatform.portfolio.loanaccount.data.LoanTransactionEnumData;
-import org.mifosplatform.portfolio.loanaccount.data.PaymentDetailData;
-import org.mifosplatform.portfolio.loanaccount.data.RepaymentScheduleRelatedLoanData;
-import org.mifosplatform.portfolio.loanaccount.domain.Loan;
-import org.mifosplatform.portfolio.loanaccount.domain.LoanRepository;
-import org.mifosplatform.portfolio.loanaccount.domain.LoanTransaction;
-import org.mifosplatform.portfolio.loanaccount.domain.LoanTransactionRepository;
-import org.mifosplatform.portfolio.loanaccount.domain.LoanTransactionType;
+import org.mifosplatform.portfolio.loanaccount.data.*;
+import org.mifosplatform.portfolio.loanaccount.domain.*;
 import org.mifosplatform.portfolio.loanaccount.exception.LoanNotFoundException;
 import org.mifosplatform.portfolio.loanaccount.exception.LoanTransactionNotFoundException;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.data.LoanScheduleData;
@@ -69,6 +50,13 @@ import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+
+import java.math.BigDecimal;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 @Service
 public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
@@ -847,8 +835,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
     @Override
     public Collection<CalendarData> retrieveCalendars(Long groupId) {
         Collection<CalendarData> calendarsData = new ArrayList<CalendarData>();
-        calendarsData.addAll(this.calendarReadPlatformService.retrieveParentCalendarsByEntity(groupId,CalendarEntityType.GROUPS.getValue()));
-        calendarsData.addAll(this.calendarReadPlatformService.retrieveCalendarsByEntity(groupId,CalendarEntityType.GROUPS.getValue()));
+        calendarsData.addAll(this.calendarReadPlatformService.retrieveParentCalendarsByEntity(groupId,CalendarEntityType.GROUPS.getValue(),null));
+        calendarsData.addAll(this.calendarReadPlatformService.retrieveCalendarsByEntity(groupId,CalendarEntityType.GROUPS.getValue(),null));
         calendarsData = this.calendarReadPlatformService.generateRecurringDates(calendarsData);
         return calendarsData;
     }
