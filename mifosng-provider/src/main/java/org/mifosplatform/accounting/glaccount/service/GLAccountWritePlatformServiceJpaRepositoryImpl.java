@@ -70,40 +70,42 @@ public class GLAccountWritePlatformServiceJpaRepositoryImpl implements GLAccount
             if (parentId != null) {
                 parentGLAccount = validateParentGLAccount(parentId);
             }
-            
+
             CodeValue glAccountTagType = null;
-            Long tagId = command.longValueOfParameterNamed(GLAccountJsonInputParams.TAGID.getValue());
-            Long type = command.longValueOfParameterNamed(GLAccountJsonInputParams.TYPE.getValue());
+            final Long tagId = command.longValueOfParameterNamed(GLAccountJsonInputParams.TAGID.getValue());
+            final Long type = command.longValueOfParameterNamed(GLAccountJsonInputParams.TYPE.getValue());
             GLAccountType accountType = GLAccountType.fromInt(type.intValue());
             if (accountType == null) {
-            	// TODO:generate an appropriate exception type.
-				throw new RuntimeException("Invalid GLAccount Type");
-			}
+                // TODO: Vishwas - should throw appropriate class that extends
+                // AbstractPlatformResourceNotFoundException
+                throw new RuntimeException("Invalid GLAccount Type");
+            }
 
-        	if (accountType.isAssetType()) {
-        		glAccountTagType = this.codeValueRepositoryWrapper.findOneByCodeNameAndIdWithNotFoundDetection(
-        				AccountingConstants.ASSESTS_TAG_OPTION_CODE_NAME, tagId);
-			} else if (accountType.isLiabilityType()) {
-				glAccountTagType = this.codeValueRepositoryWrapper.findOneByCodeNameAndIdWithNotFoundDetection(
-        				AccountingConstants.LIABILITIES_TAG_OPTION_CODE_NAME, tagId);
-			} else if (accountType.isEquityType()) {
-				glAccountTagType = this.codeValueRepositoryWrapper.findOneByCodeNameAndIdWithNotFoundDetection(
-        				AccountingConstants.EQUITY_TAG_OPTION_CODE_NAME, tagId);
-			} else if (accountType.isIncomeType()) {
-				glAccountTagType = this.codeValueRepositoryWrapper.findOneByCodeNameAndIdWithNotFoundDetection(
-        				AccountingConstants.INCOME_TAG_OPTION_CODE_NAME, tagId);
-			} else if (accountType.isExpenseType()) {
-				glAccountTagType = this.codeValueRepositoryWrapper.findOneByCodeNameAndIdWithNotFoundDetection(
-        				AccountingConstants.EXPENSES_TAG_OPTION_CODE_NAME, tagId);
-			} 
-            	
-            
+            if (tagId != null) {
+                if (accountType.isAssetType()) {
+                    glAccountTagType = this.codeValueRepositoryWrapper.findOneByCodeNameAndIdWithNotFoundDetection(
+                            AccountingConstants.ASSESTS_TAG_OPTION_CODE_NAME, tagId);
+                } else if (accountType.isLiabilityType()) {
+                    glAccountTagType = this.codeValueRepositoryWrapper.findOneByCodeNameAndIdWithNotFoundDetection(
+                            AccountingConstants.LIABILITIES_TAG_OPTION_CODE_NAME, tagId);
+                } else if (accountType.isEquityType()) {
+                    glAccountTagType = this.codeValueRepositoryWrapper.findOneByCodeNameAndIdWithNotFoundDetection(
+                            AccountingConstants.EQUITY_TAG_OPTION_CODE_NAME, tagId);
+                } else if (accountType.isIncomeType()) {
+                    glAccountTagType = this.codeValueRepositoryWrapper.findOneByCodeNameAndIdWithNotFoundDetection(
+                            AccountingConstants.INCOME_TAG_OPTION_CODE_NAME, tagId);
+                } else if (accountType.isExpenseType()) {
+                    glAccountTagType = this.codeValueRepositoryWrapper.findOneByCodeNameAndIdWithNotFoundDetection(
+                            AccountingConstants.EXPENSES_TAG_OPTION_CODE_NAME, tagId);
+                }
+            }
+
             final GLAccount glAccount = GLAccount.fromJson(parentGLAccount, command, glAccountTagType);
 
             this.glAccountRepository.saveAndFlush(glAccount);
-            
+
             glAccount.generateHierarchy();
-            
+
             this.glAccountRepository.save(glAccount);
 
             return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(glAccount.getId()).build();
