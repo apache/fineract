@@ -70,12 +70,13 @@ public final class SearchParameters {
         return StringUtils.isNotBlank(this.sortOrder);
     }
     
-    public static Integer getCheckedLimit(Integer maxLimitAllowed, Integer limit)
-    {
+    public static Integer getCheckedLimit(Integer maxLimitAllowed, Integer limit) {
         if (limit != null && limit < maxLimitAllowed && limit > 0) {
-            maxLimitAllowed = limit;
-        }
-        return maxLimitAllowed;        
+            return limit;
+        } else if (limit != null && limit == -1) {
+            return null;
+        } else
+            return maxLimitAllowed;
     }
 
     public String getSqlSearch() {

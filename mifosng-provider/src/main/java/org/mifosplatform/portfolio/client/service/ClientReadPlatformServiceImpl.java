@@ -103,10 +103,9 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
         if (searchParameters.isLimited()) {
             sqlBuilder.append(" limit ").append(searchParameters.getLimit());
-        }
-
-        if (searchParameters.isOffset()) {
-            sqlBuilder.append(" offset ").append(searchParameters.getOffset());
+            if (searchParameters.isOffset()) {
+                sqlBuilder.append(" offset ").append(searchParameters.getOffset());
+            }
         }
 
         final String sqlCountRows = "SELECT FOUND_ROWS()";
