@@ -110,7 +110,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
                 staff = this.staffRepository.findByOfficeWithNotFoundDetection(staffId, officeId);
             }
 
-            final Set<Client> clientMembers = assembleSetOfClients(parentGroup, command);
+            final Set<Client> clientMembers = assembleSetOfClients(officeId, command);
 
             final Set<Group> groupMembers = assembleSetOfChildGroups(officeId, command);
 
@@ -278,11 +278,14 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
                 }
             }
 
-            /*final Set<Client> clientMembers = assembleSetOfClients(officeId, command);
-            List<String> changes = groupForUpdate.updateClientMembersIfDifferent(clientMembers);
-            if (!changes.isEmpty()) {
-                actualChanges.put(GroupingTypesApiConstants.clientMembersParamName, changes);
-            }*/
+            /*
+             * final Set<Client> clientMembers = assembleSetOfClients(officeId,
+             * command); List<String> changes =
+             * groupForUpdate.updateClientMembersIfDifferent(clientMembers); if
+             * (!changes.isEmpty()) {
+             * actualChanges.put(GroupingTypesApiConstants
+             * .clientMembersParamName, changes); }
+             */
 
             this.groupRepository.saveAndFlush(groupForUpdate);
 
@@ -354,7 +357,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
                 .build();
     }
 
-    private Set<Client> assembleSetOfClients(final Group group, final JsonCommand command) {
+    private Set<Client> assembleSetOfClients(final Long groupOfficeId, final JsonCommand command) {
 
         final Set<Client> clientMembers = new HashSet<Client>();
         final String[] clientMembersArray = command.arrayValueOfParameterNamed(GroupingTypesApiConstants.clientMembersParamName);
@@ -363,9 +366,9 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
             for (final String clientId : clientMembersArray) {
                 final Long id = Long.valueOf(clientId);
                 final Client client = this.clientRepository.findOneWithNotFoundDetection(id);
-                if (!client.isOfficeIdentifiedBy(group.officeId())) {
-                    final String errorMessage = "Group with identifier " + group.getId() + " and Client with identifier " + clientId + " must have the same office.";
-                    throw new InvalidOfficeException("client", "attach.to.group", errorMessage, group.getId(), clientId);
+                if (!client.isOfficeIdentifiedBy(groupOfficeId)) {
+                    final String errorMessage = "Client with identifier " + clientId + " must have the same office as group.";
+                    throw new InvalidOfficeException("client", "attach.to.group", errorMessage, clientId, groupOfficeId);
                 }
                 clientMembers.add(client);
             }
@@ -440,67 +443,68 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
     }
 
     @Override
-    public CommandProcessingResult associateClientsToGroup(Long groupId, JsonCommand command) {
-        
+    public CommandProcessingResult associateClientsToGroup(final Long groupId, final JsonCommand command) {
+
         this.fromApiJsonDeserializer.validateForAssociateClients(command.json());
-        
+
         final Group groupForUpdate = this.groupRepository.findOneWithNotFoundDetection(groupId);
-        final Set<Client> clientMembers = assembleSetOfClients(groupForUpdate, command);
+        final Set<Client> clientMembers = assembleSetOfClients(groupForUpdate.officeId(), command);
         Map<String, Object> actualChanges = new HashMap<String, Object>();
- 
+
         List<String> changes = groupForUpdate.associateClients(clientMembers);
         if (!changes.isEmpty()) {
             actualChanges.put(GroupingTypesApiConstants.clientMembersParamName, changes);
         }
-        
+
         this.groupRepository.saveAndFlush(groupForUpdate);
-        
+
         return new CommandProcessingResultBuilder() //
-        .withCommandId(command.commandId()) //
-        .withOfficeId(groupForUpdate.officeId()) //
-        .withGroupId(groupForUpdate.getId()) //
-        .withEntityId(groupForUpdate.getId()) //
-        .with(actualChanges) //
-        .build();
+                .withCommandId(command.commandId()) //
+                .withOfficeId(groupForUpdate.officeId()) //
+                .withGroupId(groupForUpdate.getId()) //
+                .withEntityId(groupForUpdate.getId()) //
+                .with(actualChanges) //
+                .build();
     }
 
     @Transactional
     @Override
-    public CommandProcessingResult disassociateClientsFromGroup(Long groupId, JsonCommand command) {
-       this.fromApiJsonDeserializer.validateForDisassociateClients(command.json());
-        
+    public CommandProcessingResult disassociateClientsFromGroup(final Long groupId, final JsonCommand command) {
+        this.fromApiJsonDeserializer.validateForDisassociateClients(command.json());
+
         final Group groupForUpdate = this.groupRepository.findOneWithNotFoundDetection(groupId);
-        final Set<Client> clientMembers = assembleSetOfClients(groupForUpdate, command);
-        
-        //check if any client has got group loans
+        final Set<Client> clientMembers = assembleSetOfClients(groupForUpdate.officeId(), command);
+
+        // check if any client has got group loans
         validateForJLGLoan(groupForUpdate.getId(), clientMembers);
         Map<String, Object> actualChanges = new HashMap<String, Object>();
- 
+
         List<String> changes = groupForUpdate.disassociateClients(clientMembers);
         if (!changes.isEmpty()) {
             actualChanges.put(GroupingTypesApiConstants.clientMembersParamName, changes);
         }
-        
+
         this.groupRepository.saveAndFlush(groupForUpdate);
-        
+
         return new CommandProcessingResultBuilder() //
-        .withCommandId(command.commandId()) //
-        .withOfficeId(groupForUpdate.officeId()) //
-        .withGroupId(groupForUpdate.getId()) //
-        .withEntityId(groupForUpdate.getId()) //
-        .with(actualChanges) //
-        .build();
+                .withCommandId(command.commandId()) //
+                .withOfficeId(groupForUpdate.officeId()) //
+                .withGroupId(groupForUpdate.getId()) //
+                .withEntityId(groupForUpdate.getId()) //
+                .with(actualChanges) //
+                .build();
     }
 
     @Transactional
-    private void validateForJLGLoan(Long groupId, Set<Client> clientMembers) {
+    private void validateForJLGLoan(final Long groupId, final Set<Client> clientMembers) {
         for (Client client : clientMembers) {
             Collection<Loan> loans = this.loanRepository.findByClientIdAndGroupId(client.getId(), groupId);
-            if(!CollectionUtils.isEmpty(loans)){
-                final String defaultUserMessage = "Client with identifier " + client.getId() + " cannot be disassociated it has group loans.";
+            if (!CollectionUtils.isEmpty(loans)) {
+                final String defaultUserMessage = "Client with identifier " + client.getId()
+                        + " cannot be disassociated it has group loans.";
                 throw new GroupLoanExistsException("disassociate", "client.has.group.loan", defaultUserMessage, client.getId(), groupId);
             }
         }
     }
-    
+
 }
