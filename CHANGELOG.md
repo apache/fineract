@@ -6,6 +6,7 @@ See VERSIONING (https://github.com/openMF/mifosx/blob/master/VERSIONING.md) for 
 Releases
 ===============
 
+1. 09 May 2013 - 1.1.0.RELEASE
 1. 08 May 2013 - 1.0.1.RELEASE
 1. 07 May 2013 - 1.0.0.RELEASE
 1. 30 April 2013 - 0.12.1.beta
@@ -15,6 +16,22 @@ Releases
 1. 10 April 2013 - 0.11.2.beta
 1. 05 April 2013 - 0.11.1.beta
 1. 05 April 2013 - 0.11.0.beta
+
+1.1.0.RELEASE
+=============
+Feature Release
+
+Scope of release:
+
+General improvements to display of audit details, pagination of list apis. New api to list loans/loan applications.
+
+In addition to items mentioned below see 1.1.0.RELEASE on JIRA: https://mifosforge.jira.com/browse/MIFOSX/fixforversion/11932 for full details of issues addressed in release.
+
+Core Issues:
+
+- [MIFOSX-334] - Group loses clients when updating
+- [MIFOSX-226] - Add ability to API to list loans for applications that require loan centric view of data
+- [MIFOSX-339] - Allow retrieving of all items on paginated endpoints
 
 1.0.1.RELEASE
 =============
