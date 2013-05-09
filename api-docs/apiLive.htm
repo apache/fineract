@@ -292,7 +292,7 @@
 								<td></td>
 								<td>loans</td>
 								<td><a href="#loans_create">Submit a new Loan Application</a></td>
-								<td></td>
+								<td><a href="#loans_list">List Loans/Loan Applications</a></td>
 								<td></td>
 								<td></td>
 							</tr>
@@ -4408,6 +4408,247 @@ GET https://DomainName/api/v1/loans/{loanId}
       10
     ]
   }
+}
+					</code>
+				</div>
+			</div>
+
+			<a id="loans_list" name="loans_list" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>List Loans</h4>
+					<p>The <i>list</i> capability of loans can support <b>pagination</b> and <b>sorting</b>.</p>
+					<h5>Optional Arguments</h5>
+					<dl class="argument-list">
+						<dt>offset</dt>
+						<dd>
+							Integer <span>optional</span>, defaults to 0
+						</dd>
+						<dd>Indicates from what result to start from.</dd>
+						
+						<dt>limit</dt>
+						<dd>
+							Integer <span>optional</span>, defaults to 200
+						</dd>
+						<dd>Restricts the size of results returned. To override the default and return all entries you must explicitly pass a non-positive integer value for limit e.g. limit=0, or limit=-1</dd>
+
+						<dt>orderBy</dt>
+						<dd>
+							String <span>optional</span>, one of <span>displayName, accountNo, officeId, officeName</span>
+						</dd>
+						<dd>Orders the results by the field indicated.</dd>
+
+						<dt>sortBy</dt>
+						<dd>
+							String <span>optional</span>, one of <span>ASC, DESC</span>
+						</dd>
+						<dd>Indicates what way to order results if <i>orderBy</i> is used.</dd>
+
+						<dt>officeId</dt>
+						<dd>
+							Integer <span>optional</span> 
+						</dd>
+						<dd>Provides ability to restrict list of loans returned based on the office there associated with.</dd>
+						
+						<dt>underHierarchy</dt>
+						<dd>
+							String <span>optional</span>
+						</dd>
+						<dd>Use the office hierarchy string to return all loans under a given hierarchy.</dd>
+
+						<dt>accountNo</dt>
+						<dd>
+							String <span>optional</span>
+						</dd>
+						<dd>Use account no. of loans to restrict results.</dd>
+
+						<dt>externalId</dt>
+						<dd>
+							String <span>optional</span>
+						</dd>
+						<dd>Use externalId of loan to restrict results.</dd>
+
+						<dt>sqlSearch</dt>
+						<dd>
+							String <span>optional</span>
+						</dd>
+						<dd>Use an sql fragment valid for the underlying loan schema to filter results. e.g. display_name like %K%</dd>				
+					</dl>
+					<p>Example Requests:</p>
+					<div class=apiClick>loans</div>
+					<br>
+					<div class=apiClick>loans?fields=accountNo</div>
+					<br>
+					<div class=apiClick>loans?offset=10&limit=50</div>
+					<br>
+					<div class=apiClick>loans?orderBy=accountNo,sortOrder=DESC</div>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+GET https://DomainName/mifosng-provider/api/v1/loans
+					</code>
+					<code class="method-response">
+{
+  "totalFilteredRecords": 1,
+  "pageItems": [
+    {
+      "id": 1,
+      "accountNo": "000000001",
+      "status": {
+        "id": 300,
+        "code": "loanStatusType.active",
+        "value": "Active",
+        "pendingApproval": false,
+        "waitingForDisbursal": false,
+        "active": true,
+        "closedObligationsMet": false,
+        "closedWrittenOff": false,
+        "closedRescheduled": false,
+        "closed": false,
+        "overpaid": false
+      },
+      "clientId": 1,
+      "clientName": "Change To IndividualName",
+      "clientOfficeId": 1,
+      "loanProductId": 1,
+      "loanProductName": "AgriCredit",
+      "loanProductDescription": "test",
+      "loanType": {
+        "id": 1,
+        "code": "loanType.individual",
+        "value": "Individual"
+      },
+      "currency": {
+        "code": "USD",
+        "name": "US Dollar",
+        "decimalPlaces": 2,
+        "displaySymbol": "$",
+        "nameCode": "currency.USD",
+        "displayLabel": "US Dollar ($)"
+      },
+      "principal": 10000,
+      "termFrequency": 12,
+      "termPeriodFrequencyType": {
+        "id": 2,
+        "code": "termFrequency.periodFrequencyType.months",
+        "value": "Months"
+      },
+      "numberOfRepayments": 12,
+      "repaymentEvery": 1,
+      "repaymentFrequencyType": {
+        "id": 2,
+        "code": "repaymentFrequency.periodFrequencyType.months",
+        "value": "Months"
+      },
+      "interestRatePerPeriod": 2,
+      "interestRateFrequencyType": {
+        "id": 2,
+        "code": "interestRateFrequency.periodFrequencyType.months",
+        "value": "Per month"
+      },
+      "annualInterestRate": 24,
+      "amortizationType": {
+        "id": 1,
+        "code": "amortizationType.equal.installments",
+        "value": "Equal installments"
+      },
+      "interestType": {
+        "id": 0,
+        "code": "interestType.declining.balance",
+        "value": "Declining Balance"
+      },
+      "interestCalculationPeriodType": {
+        "id": 1,
+        "code": "interestCalculationPeriodType.same.as.repayment.period",
+        "value": "Same as repayment period"
+      },
+      "transactionProcessingStrategyId": 2,
+      "timeline": {
+        "submittedOnDate": [
+          2012,
+          6,
+          1
+        ],
+        "submittedByUsername": "mifos",
+        "submittedByFirstname": "App",
+        "submittedByLastname": "Administrator",
+        "approvedOnDate": [
+          2012,
+          6,
+          1
+        ],
+        "approvedByUsername": "mifos",
+        "approvedByFirstname": "App",
+        "approvedByLastname": "Administrator",
+        "expectedDisbursementDate": [
+          2012,
+          6,
+          1
+        ],
+        "actualDisbursementDate": [
+          2012,
+          6,
+          1
+        ],
+        "disbursedByUsername": "mifos",
+        "disbursedByFirstname": "App",
+        "disbursedByLastname": "Administrator",
+        "expectedMaturityDate": [
+          2013,
+          6,
+          1
+        ]
+      },
+      "summary": {
+        "currency": {
+          "code": "USD",
+          "name": "US Dollar",
+          "decimalPlaces": 2,
+          "displaySymbol": "$",
+          "nameCode": "currency.USD",
+          "displayLabel": "US Dollar ($)"
+        },
+        "principalDisbursed": 10000,
+        "principalPaid": 3073.07,
+        "principalWrittenOff": 0,
+        "principalOutstanding": 6926.93,
+        "principalOverdue": 5999.92,
+        "interestCharged": 1347.15,
+        "interestPaid": 709.33,
+        "interestWaived": 0,
+        "interestWrittenOff": 0,
+        "interestOutstanding": 637.82,
+        "interestOverdue": 619.28,
+        "feeChargesCharged": 0,
+        "feeChargesDueAtDisbursementCharged": 0,
+        "feeChargesPaid": 0,
+        "feeChargesWaived": 0,
+        "feeChargesWrittenOff": 0,
+        "feeChargesOutstanding": 0,
+        "feeChargesOverdue": 0,
+        "penaltyChargesCharged": 0,
+        "penaltyChargesPaid": 0,
+        "penaltyChargesWaived": 0,
+        "penaltyChargesWrittenOff": 0,
+        "penaltyChargesOutstanding": 0,
+        "penaltyChargesOverdue": 0,
+        "totalExpectedRepayment": 11347.15,
+        "totalRepayment": 3782.4,
+        "totalExpectedCostOfLoan": 1347.15,
+        "totalCostOfLoan": 709.33,
+        "totalWaived": 0,
+        "totalWrittenOff": 0,
+        "totalOutstanding": 7564.75,
+        "totalOverdue": 6619.2,
+        "overdueSinceDate": [
+          2012,
+          11,
+          1
+        ]
+      },
+      "feeChargesAtDisbursementCharged": 0
+    }
+  ]
 }
 					</code>
 				</div>
@@ -13611,7 +13852,7 @@ GET https://DomainName/api/v1/search?query=000000111
 					<td></td>
 					<td>loans</td>
 					<td><a href="#loans_create">Submit a new Loan Application</a></td>
-					<td></td>
+					<td><a href="#loans_list">List Loans/Loan Applications</a></td>
 					<td></td>
 					<td></td>
 				</tr>

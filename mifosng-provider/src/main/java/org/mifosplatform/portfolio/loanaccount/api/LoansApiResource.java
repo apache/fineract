@@ -238,7 +238,7 @@ public class LoansApiResource {
 
         context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
 
-        final LoanAccountData loanBasicDetails = this.loanReadPlatformService.retrieveLoanAccountDetails(loanId);
+        final LoanAccountData loanBasicDetails = this.loanReadPlatformService.retrieveOne(loanId);
 
         Collection<LoanTransactionData> loanRepayments = null;
         LoanScheduleData repaymentSchedule = null;
@@ -486,7 +486,7 @@ public class LoansApiResource {
         // normal
         // template method to avoid 'assign' on api. and avoid needing to query
         // for officeId and loanOfficerId in current way!
-        final LoanAccountData loanBasicDetails = this.loanReadPlatformService.retrieveLoanAccountDetails(loanId);
+        final LoanAccountData loanBasicDetails = this.loanReadPlatformService.retrieveOne(loanId);
 
         final Collection<StaffData> allowedLoanOfficers = this.staffReadPlatformService.retrieveAllLoanOfficersByOffice(loanBasicDetails
                 .officeId());

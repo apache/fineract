@@ -66,6 +66,7 @@ import org.mifosplatform.portfolio.loanproduct.data.TransactionProcessingStrateg
 import org.mifosplatform.portfolio.loanproduct.service.LoanDropdownReadPlatformService;
 import org.mifosplatform.portfolio.loanproduct.service.LoanEnumerations;
 import org.mifosplatform.portfolio.loanproduct.service.LoanProductReadPlatformService;
+import org.mifosplatform.useradministration.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -120,16 +121,22 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
     }
 
     @Override
-    public LoanAccountData retrieveLoanAccountDetails(final Long loanId) {
+    public LoanAccountData retrieveOne(final Long loanId) {
 
         try {
-            context.authenticatedUser();
+            final AppUser currentUser = context.authenticatedUser();
+            final String hierarchy = currentUser.getOffice().getHierarchy();
+            final String hierarchySearchString = hierarchy + "%";
 
             LoanMapper rm = new LoanMapper();
 
-            String sql = "select " + rm.loanSchema() + " where l.id = ?";
+            StringBuilder sqlBuilder = new StringBuilder();
+            sqlBuilder.append("select ");
+            sqlBuilder.append(rm.loanSchema());
+            sqlBuilder.append(" join m_office o on o.id = c.office_id");
+            sqlBuilder.append(" where l.id=? and o.hierarchy like ?");
 
-            return this.jdbcTemplate.queryForObject(sql, rm, new Object[] { loanId });
+            return this.jdbcTemplate.queryForObject(sqlBuilder.toString(), rm, new Object[] { loanId, hierarchySearchString });
         } catch (EmptyResultDataAccessException e) {
             throw new LoanNotFoundException(loanId);
         }
@@ -176,12 +183,25 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
     @Override
     public Page<LoanAccountData> retrieveAll(final SearchParameters searchParameters) {
 
+        final AppUser currentUser = context.authenticatedUser();
+        final String hierarchy = currentUser.getOffice().getHierarchy();
+        final String hierarchySearchString = hierarchy + "%";
+
         StringBuilder sqlBuilder = new StringBuilder(200);
         sqlBuilder.append("select SQL_CALC_FOUND_ROWS ");
         sqlBuilder.append(loaanLoanMapper.loanSchema());
 
-        final Object[] objectArray = new Object[1];
-        int arrayPos = 0;
+        // TODO - for time being this will data scope list of loans returned to
+        // only loans that have a client associated.
+        // to support senario where loan has group_id only OR client_id will
+        // probably require a UNION query
+        // but that at present is an edge case
+        sqlBuilder.append(" join m_office o on o.id = c.office_id");
+        sqlBuilder.append(" where o.hierarchy like ?");
+
+        final Object[] objectArray = new Object[2];
+        objectArray[0] = hierarchySearchString;
+        int arrayPos = 1;
 
         String sqlQueryCriteria = searchParameters.getSqlSearch();
         if (StringUtils.isNotBlank(sqlQueryCriteria)) {

@@ -17,7 +17,7 @@ import org.mifosplatform.portfolio.loanaccount.loanschedule.data.LoanScheduleDat
 
 public interface LoanReadPlatformService {
 
-    LoanAccountData retrieveLoanAccountDetails(Long loanId);
+    LoanAccountData retrieveOne(Long loanId);
 
     LoanScheduleData retrieveRepaymentSchedule(Long loanId, RepaymentScheduleRelatedLoanData repaymentScheduleRelatedData);
 
