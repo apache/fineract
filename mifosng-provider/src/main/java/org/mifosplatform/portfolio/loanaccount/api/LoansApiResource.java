@@ -54,6 +54,7 @@ import org.mifosplatform.portfolio.fund.data.FundData;
 import org.mifosplatform.portfolio.fund.service.FundReadPlatformService;
 import org.mifosplatform.portfolio.group.data.GroupGeneralData;
 import org.mifosplatform.portfolio.group.service.GroupReadPlatformService;
+import org.mifosplatform.portfolio.group.service.SearchParameters;
 import org.mifosplatform.portfolio.loanaccount.data.LoanAccountData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanChargeData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanTransactionData;
@@ -367,8 +368,10 @@ public class LoansApiResource {
             @QueryParam("sortOrder") final String sortOrder) {
 
         context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
-        final Page<LoanAccountData> loanBasicDetails = this.loanReadPlatformService.retrieveAll(sqlSearch, externalId, offset, limit,
-                orderBy, sortOrder);
+
+        final SearchParameters searchParameters = SearchParameters.forLoans(sqlSearch, externalId, offset, limit, orderBy, sortOrder);
+
+        final Page<LoanAccountData> loanBasicDetails = this.loanReadPlatformService.retrieveAll(searchParameters);
         return this.toApiJsonSerializer.serialize(loanBasicDetails);
     }
     

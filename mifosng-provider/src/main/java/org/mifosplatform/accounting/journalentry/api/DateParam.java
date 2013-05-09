@@ -20,9 +20,6 @@ import org.apache.commons.lang.StringUtils;
  * Class for parsing dates sent as query parameters
  * 
  * TODO: Vishwas Should move this class to a more generic package
- * 
- * @author
- * 
  */
 public class DateParam {
 

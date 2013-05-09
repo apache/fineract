@@ -9,6 +9,7 @@ import java.util.Collection;
 
 import org.mifosplatform.infrastructure.core.service.Page;
 import org.mifosplatform.portfolio.calendar.data.CalendarData;
+import org.mifosplatform.portfolio.group.service.SearchParameters;
 import org.mifosplatform.portfolio.loanaccount.data.LoanAccountData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanTransactionData;
 import org.mifosplatform.portfolio.loanaccount.data.RepaymentScheduleRelatedLoanData;
@@ -48,5 +49,5 @@ public interface LoanReadPlatformService {
 
     Collection<CalendarData> retrieveCalendars(Long groupId);
 
-    Page<LoanAccountData> retrieveAll(String sqlSearch, String externalId, Integer offset, Integer limit, String orderBy, String sortOrder);
+    Page<LoanAccountData> retrieveAll(SearchParameters searchParameters);
 }

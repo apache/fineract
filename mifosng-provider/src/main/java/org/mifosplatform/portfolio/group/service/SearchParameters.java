@@ -30,20 +30,35 @@ public final class SearchParameters {
             final String displayName, final String firstname, final String lastname, final String hierarchy, final Integer offset,
             final Integer limit, final String orderBy, final String sortOrder) {
 
-        Integer maxLimitAllowed =  getCheckedLimit(200, limit);
-     
+        Integer maxLimitAllowed = getCheckedLimit(limit);
+
         return new SearchParameters(sqlSearch, officeId, externalId, displayName, hierarchy, firstname, lastname, offset, maxLimitAllowed,
                 orderBy, sortOrder);
     }
-    
-    public static SearchParameters forGroups(final String sqlSearch, final Long officeId, final String externalId,
-            final String name, final String hierarchy, final Integer offset,
-            final Integer limit, final String orderBy, final String sortOrder) {
 
-        Integer maxLimitAllowed = getCheckedLimit(200, limit);       
+    public static SearchParameters forGroups(final String sqlSearch, final Long officeId, final String externalId, final String name,
+            final String hierarchy, final Integer offset, final Integer limit, final String orderBy, final String sortOrder) {
 
-        return new SearchParameters(sqlSearch, officeId, externalId, name, hierarchy, null, null, offset, maxLimitAllowed,
-                orderBy, sortOrder);
+        Integer maxLimitAllowed = getCheckedLimit(limit);
+
+        return new SearchParameters(sqlSearch, officeId, externalId, name, hierarchy, null, null, offset, maxLimitAllowed, orderBy,
+                sortOrder);
+    }
+
+    public static SearchParameters forLoans(final String sqlSearch, final String externalId, final Integer offset, final Integer limit,
+            final String orderBy, final String sortOrder) {
+
+        Integer maxLimitAllowed = getCheckedLimit(limit);
+
+        return new SearchParameters(sqlSearch, null, externalId, null, null, null, null, offset, maxLimitAllowed, orderBy, sortOrder);
+    }
+
+    public static SearchParameters forJournalEntries(final Long officeId, final Integer offset, final Integer limit, final String orderBy,
+            final String sortOrder) {
+
+        Integer maxLimitAllowed = getCheckedLimit(limit);
+
+        return new SearchParameters(null, officeId, null, null, null, null, null, offset, maxLimitAllowed, orderBy, sortOrder);
     }
 
     private SearchParameters(final String sqlSearch, final Long officeId, final String externalId, final String name,
@@ -69,14 +84,25 @@ public final class SearchParameters {
     public boolean isSortOrderProvided() {
         return StringUtils.isNotBlank(this.sortOrder);
     }
-    
-    public static Integer getCheckedLimit(Integer maxLimitAllowed, Integer limit) {
-        if (limit != null && limit < maxLimitAllowed && limit > 0) {
-            return limit;
-        } else if (limit != null && limit == -1) {
-            return null;
-        } else
-            return maxLimitAllowed;
+
+    public static Integer getCheckedLimit(final Integer limit) {
+
+        final Integer maxLimitAllowed = 200;
+        // default to max limit first off
+        Integer checkedLimit = maxLimitAllowed;
+
+        if (limit != null && limit > 0) {
+            checkedLimit = limit;
+        } else if (limit != null) {
+            // unlimited case: limit provided and 0 or less
+            checkedLimit = null;
+        }
+
+        return checkedLimit;
+    }
+
+    public boolean isOfficeIdPassed() {
+        return this.officeId != null && this.officeId != 0;
     }
 
     public String getSqlSearch() {

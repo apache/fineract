@@ -23,6 +23,7 @@ import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
 import org.mifosplatform.infrastructure.core.service.Page;
 import org.mifosplatform.infrastructure.core.service.PaginationHelper;
 import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
+import org.mifosplatform.portfolio.group.service.SearchParameters;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -33,7 +34,7 @@ import org.springframework.stereotype.Service;
 public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlatformService {
 
     private final JdbcTemplate jdbcTemplate;
-    
+
     private final GLJournalEntryMapper journalEntryMapper = new GLJournalEntryMapper();
     private final PaginationHelper<JournalEntryData> paginationHelper = new PaginationHelper<JournalEntryData>();
 
@@ -89,16 +90,15 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
             final Boolean reversed = rs.getBoolean("reversed");
             final String referenceNumber = rs.getString("referenceNumber");
 
-            return new JournalEntryData(id, officeId, officeName, glAccountName, glAccountId, glCode, accountType,
-                    transactionDate, entryType, amount, transactionId, manualEntry, entityType, entityId, createdByUserId, createdDate,
-                    createdByUserName, comments, reversed, referenceNumber);
+            return new JournalEntryData(id, officeId, officeName, glAccountName, glAccountId, glCode, accountType, transactionDate,
+                    entryType, amount, transactionId, manualEntry, entityType, entityId, createdByUserId, createdDate, createdByUserName,
+                    comments, reversed, referenceNumber);
         }
     }
 
     @Override
-    public Page<JournalEntryData> retrieveAll(final Long officeId, final Long glAccountId, final Boolean onlyManualEntries,
-            final Date fromDate, final Date toDate, final Integer offset, final Integer limit, final String orderBy,
-            final String sortOrder, final String transactionId) {
+    public Page<JournalEntryData> retrieveAll(final SearchParameters searchParameters, final Long glAccountId,
+            final Boolean onlyManualEntries, final Date fromDate, final Date toDate, final String transactionId) {
 
         StringBuilder sqlBuilder = new StringBuilder(200);
         sqlBuilder.append("select SQL_CALC_FOUND_ROWS ");
@@ -113,9 +113,9 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
             arrayPos = arrayPos + 1;
         }
 
-        if (officeId != null && officeId != 0) {
+        if (searchParameters.isOfficeIdPassed()) {
             sqlBuilder.append(" and journalEntry.office_id = ?");
-            objectArray[arrayPos] = officeId;
+            objectArray[arrayPos] = searchParameters.getOfficeId();
             arrayPos = arrayPos + 1;
         }
 
@@ -156,26 +156,20 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
             }
         }
 
-        if (StringUtils.isNotBlank(orderBy)) {
-            sqlBuilder.append(" order by ").append(orderBy);
-            if (StringUtils.isNotBlank(sortOrder)) {
-                sqlBuilder.append(' ').append(sortOrder);
+        if (searchParameters.isOrderByRequested()) {
+            sqlBuilder.append(" order by ").append(searchParameters.getOrderBy());
+
+            if (searchParameters.isSortOrderProvided()) {
+                sqlBuilder.append(' ').append(searchParameters.getSortOrder());
             }
         }
 
-        if (limit != null && limit > 0) {
-            Integer maxLimitAllowed = 200;
-            if (limit < maxLimitAllowed) {
-                maxLimitAllowed = limit;
+        if (searchParameters.isLimited()) {
+            sqlBuilder.append(" limit ").append(searchParameters.getLimit());
+            if (searchParameters.isOffset()) {
+                sqlBuilder.append(" offset ").append(searchParameters.getOffset());
             }
-            sqlBuilder.append(" limit ").append(maxLimitAllowed);
-            if (offset != null) {
-                sqlBuilder.append(" offset ").append(offset);
-            }
-        } else if (limit != null && limit == -1) {
-            ;
-        } else
-            sqlBuilder.append(" limit ").append(200);
+        }
 
         final Object[] finalObjectArray = Arrays.copyOf(objectArray, arrayPos);
         final String sqlCountRows = "SELECT FOUND_ROWS()";

@@ -42,6 +42,7 @@ import org.mifosplatform.portfolio.fund.data.FundData;
 import org.mifosplatform.portfolio.fund.service.FundReadPlatformService;
 import org.mifosplatform.portfolio.group.data.GroupGeneralData;
 import org.mifosplatform.portfolio.group.service.GroupReadPlatformService;
+import org.mifosplatform.portfolio.group.service.SearchParameters;
 import org.mifosplatform.portfolio.loanaccount.data.DisbursementData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanAccountData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanApplicationTimelineData;
@@ -173,8 +174,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
     }
 
     @Override
-    public Page<LoanAccountData> retrieveAll(final String sqlSearch, final String externalId, final Integer offset, final Integer limit,
-            final String orderBy, final String sortOrder) {
+    public Page<LoanAccountData> retrieveAll(final SearchParameters searchParameters) {
 
         StringBuilder sqlBuilder = new StringBuilder(200);
         sqlBuilder.append("select SQL_CALC_FOUND_ROWS ");
@@ -183,38 +183,32 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         final Object[] objectArray = new Object[1];
         int arrayPos = 0;
 
-        String sqlQueryCriteria = sqlSearch;
+        String sqlQueryCriteria = searchParameters.getSqlSearch();
         if (StringUtils.isNotBlank(sqlQueryCriteria)) {
             sqlQueryCriteria = sqlQueryCriteria.replaceAll("accountNo", "l.account_no");
             sqlBuilder.append(" where (").append(sqlQueryCriteria).append(")");
         }
 
-        if (StringUtils.isNotBlank(externalId)) {
+        if (StringUtils.isNotBlank(searchParameters.getExternalId())) {
             sqlBuilder.append(" and l.external_id = ?");
-            objectArray[arrayPos] = externalId;
+            objectArray[arrayPos] = searchParameters.getExternalId();
             arrayPos = arrayPos + 1;
         }
 
-        if (StringUtils.isNotBlank(orderBy)) {
-            sqlBuilder.append(" order by ").append(orderBy);
-            if (StringUtils.isNotBlank(sortOrder)) {
-                sqlBuilder.append(' ').append(sortOrder);
+        if (searchParameters.isOrderByRequested()) {
+            sqlBuilder.append(" order by ").append(searchParameters.getOrderBy());
+
+            if (searchParameters.isSortOrderProvided()) {
+                sqlBuilder.append(' ').append(searchParameters.getSortOrder());
             }
         }
 
-        if (limit != null && limit > 0) {
-            Integer maxLimitAllowed = 200;
-            if (limit < maxLimitAllowed) {
-                maxLimitAllowed = limit;
+        if (searchParameters.isLimited()) {
+            sqlBuilder.append(" limit ").append(searchParameters.getLimit());
+            if (searchParameters.isOffset()) {
+                sqlBuilder.append(" offset ").append(searchParameters.getOffset());
             }
-            sqlBuilder.append(" limit ").append(maxLimitAllowed);
-            if (offset != null) {
-                sqlBuilder.append(" offset ").append(offset);
-            }
-        } else if (limit != null && limit == -1) {
-            ;
-        } else
-            sqlBuilder.append(" limit ").append(200);
+        }
 
         final Object[] finalObjectArray = Arrays.copyOf(objectArray, arrayPos);
         final String sqlCountRows = "SELECT FOUND_ROWS()";

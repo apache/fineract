@@ -34,6 +34,7 @@ import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSeriali
 import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.mifosplatform.infrastructure.core.service.Page;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
+import org.mifosplatform.portfolio.group.service.SearchParameters;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -80,8 +81,6 @@ public class JournalEntriesApiResource {
 
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermission);
 
-        Page<JournalEntryData> glJournalEntries = null;
-
         Date fromDate = null;
         if (fromDateParam != null) {
             fromDate = fromDateParam.getDate();
@@ -90,11 +89,14 @@ public class JournalEntriesApiResource {
         if (toDateParam != null) {
             toDate = toDateParam.getDate();
         }
-        glJournalEntries = this.journalEntryReadPlatformService.retrieveAll(officeId, glAccountId, onlyManualEntries, fromDate, toDate,
-                offset, limit, orderBy, sortOrder, transactionId);
+
+        final SearchParameters searchParameters = SearchParameters.forJournalEntries(officeId, offset, limit, orderBy, sortOrder);
+
+        Page<JournalEntryData> glJournalEntries = this.journalEntryReadPlatformService.retrieveAll(searchParameters, glAccountId,
+                onlyManualEntries, fromDate, toDate, transactionId);
         return this.apiJsonSerializerService.serialize(glJournalEntries);
     }
-    
+
     @GET
     @Path("{journalEntryId}")
     @Consumes({ MediaType.APPLICATION_JSON })

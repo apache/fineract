@@ -90,9 +90,6 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             sqlBuilder.append(" and (").append(extraCriteria).append(")");
         }
 
-        // DONT order by default - just use database natural ordering so doesnt
-        // have to scan entire database table.
-        // sql += " order by c.display_name ASC, c.account_no ASC";
         if (searchParameters.isOrderByRequested()) {
             sqlBuilder.append(" order by ").append(searchParameters.getOrderBy());
             
