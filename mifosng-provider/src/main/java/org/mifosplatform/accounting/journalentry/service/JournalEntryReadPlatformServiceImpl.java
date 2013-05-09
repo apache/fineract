@@ -169,11 +169,13 @@ public class JournalEntryReadPlatformServiceImpl implements JournalEntryReadPlat
                 maxLimitAllowed = limit;
             }
             sqlBuilder.append(" limit ").append(maxLimitAllowed);
-        }
-
-        if (offset != null) {
-            sqlBuilder.append(" offset ").append(offset);
-        }
+            if (offset != null) {
+                sqlBuilder.append(" offset ").append(offset);
+            }
+        } else if (limit != null && limit == -1) {
+            ;
+        } else
+            sqlBuilder.append(" limit ").append(200);
 
         final Object[] finalObjectArray = Arrays.copyOf(objectArray, arrayPos);
         final String sqlCountRows = "SELECT FOUND_ROWS()";
