@@ -99,7 +99,7 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
     }
 
     @Override
-    public Collection<CalendarData> retrieveCalendarsByEntity(final Long entityId, final Integer entityTypeId, List<EnumOptionData> calendarTypeOptions) {
+    public Collection<CalendarData> retrieveCalendarsByEntity(final Long entityId, final Integer entityTypeId, List<Integer> calendarTypeOptions) {
         final CalendarDataMapper rm = new CalendarDataMapper();
         // the collection result will store the final result
         Collection<CalendarData> result=null;
@@ -110,15 +110,15 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
             sql = rm.schema() + " and ci.entity_id = ? and ci.entity_type_enum = ? order by c.start_date ";
             result =  this.jdbcTemplate.query(sql, rm, new Object[] { entityId, entityTypeId });
         } else if(!calendarTypeOptions.isEmpty()){
-            String sqlCalendarTypeOptions = createSqlValuesInString(calendarTypeOptions);
-            sql = rm.schema() + " and ci.entity_id = ? and ci.entity_type_enum = ? and c.calendar_type_enum in (?) order by c.start_date ";
-            result = this.jdbcTemplate.query(sql,rm, new Object[] {entityId, entityTypeId, sqlCalendarTypeOptions});
+         String sqlCalendarTypeOptions = getSqlCalendarTypeOptionsInString(calendarTypeOptions);
+            sql = rm.schema() + " and ci.entity_id = ? and ci.entity_type_enum = ? and c.calendar_type_enum in ( "+ sqlCalendarTypeOptions + " ) order by c.start_date ";
+            result = this.jdbcTemplate.query(sql, rm, new Object[]{entityId, entityTypeId});
         }
         return result;
     }
 
     @Override
-    public Collection<CalendarData> retrieveParentCalendarsByEntity( Long entityId, Integer entityTypeId, List<EnumOptionData> calendarTypeOptions ) {
+    public Collection<CalendarData> retrieveParentCalendarsByEntity( Long entityId, Integer entityTypeId, List<Integer> calendarTypeOptions ) {
 
         final CalendarDataMapper rm = new CalendarDataMapper();
         Collection<CalendarData> result=null;
@@ -131,9 +131,9 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
             sql = rm.schema() + " " + parentHeirarchyCondition + " and ci.entity_type_enum = ? order by c.start_date ";
             result = this.jdbcTemplate.query(sql, rm, new Object[] { entityId, CalendarEntityType.CENTERS.getValue() });
         } else {
-            String sqlCalendarTypeOptions = createSqlValuesInString(calendarTypeOptions);
-            sql = rm.schema() + " " + parentHeirarchyCondition + " and ci.entity_type_enum = ? and c.calendar_type_enum in ? order by c.start_date ";
-            result = this.jdbcTemplate.query(sql,rm, new Object[] {entityId, entityTypeId, sqlCalendarTypeOptions});
+            String sqlCalendarTypeOptions = getSqlCalendarTypeOptionsInString(calendarTypeOptions);
+            sql = rm.schema() + " " + parentHeirarchyCondition + " and ci.entity_type_enum = ? and c.calendar_type_enum in ("+ sqlCalendarTypeOptions +") order by c.start_date ";
+            result = this.jdbcTemplate.query(sql,rm, new Object[] {entityId, entityTypeId});
         }
         return result;
     }
@@ -231,22 +231,20 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
     }
 
     /**
-     * This method takes the List of calendarType options given in the request and creates a string to be used in the sql statement.
-     * for ex. (1,2,3,4)
+     * function returns a comma separated list of calendar_type_enum values ex. 1,2,3,4
      * @param calendarTypeOptions
      * @return
      */
-    public String createSqlValuesInString(List<EnumOptionData> calendarTypeOptions){
+    public String getSqlCalendarTypeOptionsInString(List<Integer> calendarTypeOptions){
+        String sqlCalendarTypeOptions = "";
         int size = calendarTypeOptions.size();
-        String sqlCalendarTypeOptions = "(" + calendarTypeOptions.get(0).getId().toString();
-        for(int i=1;i<size;i++) {
-            sqlCalendarTypeOptions += "," + calendarTypeOptions.get(i).getId().toString();
+        for(int i=0;i<size-1;i++)
+        {
+            sqlCalendarTypeOptions += calendarTypeOptions.get(i).toString() + ",";
         }
-        sqlCalendarTypeOptions += ")";
-
+        sqlCalendarTypeOptions += calendarTypeOptions.get(size-1).toString();
         return sqlCalendarTypeOptions;
     }
-
 
 }
 

@@ -18,9 +18,7 @@ import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext
 import org.mifosplatform.portfolio.calendar.data.CalendarData;
 import org.mifosplatform.portfolio.calendar.domain.Calendar;
 import org.mifosplatform.portfolio.calendar.domain.CalendarEntityType;
-import org.mifosplatform.portfolio.calendar.domain.CalendarType;
 import org.mifosplatform.portfolio.calendar.service.CalendarDropdownReadPlatformService;
-import org.mifosplatform.portfolio.calendar.service.CalendarEnumerations;
 import org.mifosplatform.portfolio.calendar.service.CalendarReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -87,6 +85,14 @@ public class CalendarsApiResource {
         return this.toApiJsonSerializer.serialize(settings, calendarData, this.RESPONSE_DATA_PARAMETERS);
     }
 
+
+    /**
+     * @param entityType
+     * @param entityId
+     * @param uriInfo
+     * @param calendarType
+     * @return
+     */
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
@@ -99,7 +105,7 @@ public class CalendarsApiResource {
 
         Collection<CalendarData> calendarsData = new ArrayList<CalendarData>();
 
-        List<EnumOptionData>  calendarTypeOptions = createEnumOptionDataListFromQueryParameter(calendarType);
+        List<Integer>  calendarTypeOptions = createIntegerListFromQueryParameter(calendarType);
 
 
         if (!associationParameters.isEmpty()) {
@@ -186,10 +192,14 @@ public class CalendarsApiResource {
     }
 
 
-    public List<EnumOptionData> createEnumOptionDataListFromQueryParameter(String calendarTypeQuery) {
-        List<EnumOptionData> calendarTypeOptions = new ArrayList<EnumOptionData>();
-        // adding all calendar Types if
+    public List<Integer> createIntegerListFromQueryParameter(String calendarTypeQuery) {
+        List<Integer> calendarTypeOptions = new ArrayList<Integer>();
+        // adding all calendar Types if query parameter is "all"
         if(calendarTypeQuery.equalsIgnoreCase("all")){
+            calendarTypeOptions.add(1);
+            calendarTypeOptions.add(2);
+            calendarTypeOptions.add(3);
+            calendarTypeOptions.add(4);
             return calendarTypeOptions;
         }
         // creating a list of calendar type options from the comma separated query parameter.
@@ -201,13 +211,13 @@ public class CalendarsApiResource {
 
         for(String calType : calendarTypeOptionsInQuery){
             if(calType.equalsIgnoreCase("collection")) {
-                calendarTypeOptions.add(CalendarEnumerations.calendarType(CalendarType.COLLECTION));
+                calendarTypeOptions.add(1);
             } else if(calType.equalsIgnoreCase("training")) {
-                calendarTypeOptions.add(CalendarEnumerations.calendarType(CalendarType.TRAINING));
+                calendarTypeOptions.add(2);
             }  else if(calType.equalsIgnoreCase("audit")) {
-                calendarTypeOptions.add(CalendarEnumerations.calendarType(CalendarType.AUDIT));
+                calendarTypeOptions.add(3);
             }  else if(calType.equalsIgnoreCase("general")) {
-                calendarTypeOptions.add(CalendarEnumerations.calendarType(CalendarType.GENERAL));
+                calendarTypeOptions.add(4);
             }
         }
 
