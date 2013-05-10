@@ -12523,6 +12523,19 @@ Request Body:
                             <td class=fielddesc>Human understandable description for the Ledger Account
                             </td>
                         </tr>
+						<tr class=alt>
+                            <td>parentId</td>
+                        </tr>
+                        <tr>
+                            <td class=fielddesc>To assign a parent for this GLAccount
+                            </td>
+                        </tr><tr class=alt>
+                            <td>tagId</td>
+                        </tr>
+                        <tr>
+                            <td class=fielddesc>Used for tagging the AccountHeads, based on GLAccount types.
+                            </td>
+                        </tr>
                     </table>
                 </div>
             </div>
@@ -12549,6 +12562,14 @@ Request Body:
                         <dd>
                             boolean <span>optional</span>
                         </dd>
+						<dt>parentId</dt>
+                        <dd>
+                            Long <span>optional</span>
+                        </dd>
+						<dt>tagId</dt>
+                        <dd>
+                            Long <span>optional</span>
+                        </dd>
                     </dl>
                     <p>Example Requests:</p>
                     <div class=apiClick>glaccounts</div>
@@ -12565,6 +12586,7 @@ GET https://DomainName/api/v1/glaccounts
     {
         "id": 16,
         "name": "Cash",
+		"parentId": 1,
         "glCode": "100001",
         "disabled": false,
         "manualEntriesAllowed": true,
@@ -12578,7 +12600,12 @@ GET https://DomainName/api/v1/glaccounts
             "code": "accountUsage.detail",
             "value": "DETAIL"
         },
-        "description": "Desc"
+        "description": "Desc",
+	"nameDecorated": "....Cash",
+	"tagId": {
+	  "id": 10,
+	  "name": "asset tag"
+	}
     },
     {
         "id": 15,
@@ -12618,11 +12645,13 @@ GET https://DomainName/api/v1/glaccounts
                     </ul>
                     </p>
                     <p>Example Request:</p>
-                    <div class=apiClick>glaccounts/template</div>
+                    <div class=apiClick>glaccounts/template?type=0</div>
+					<br>
+					type is optional and integer value from 1 to 5.<br>
                 </div>
                 <div class="method-example">
                     <code class="method-declaration">
-GET https://DomainName/api/v1/glaccounts/template
+GET https://DomainName/api/v1/glaccounts/template?type=0
                     </code>
                     <code class="method-response">
 {
@@ -12676,7 +12705,161 @@ GET https://DomainName/api/v1/glaccounts/template
             "code": "accountUsage.header",
             "value": "HEADER"
         }
-    ]
+    ],
+  "assetHeaderAccountOptions": [
+    {
+      "id": 1,
+      "name": "Two wheeler loan",
+      "glCode": "10001",
+      "disabled": false,
+      "manualEntriesAllowed": true,
+      "type": {
+        "id": 1,
+        "code": "accountType.asset",
+        "value": "ASSET"
+      },
+      "usage": {
+        "id": 2,
+        "code": "accountUsage.header",
+        "value": "HEADER"
+      },
+      "nameDecorated": "Two wheeler loan",
+      "tagId": {
+        "id": 10,
+        "name": "asset tag"
+      }
+    },
+    {
+      "id": 2,
+      "name": "VEHICLE LOAN",
+      "parentId": 1,
+      "glCode": "10002",
+      "disabled": false,
+      "manualEntriesAllowed": true,
+      "type": {
+        "id": 1,
+        "code": "accountType.asset",
+        "value": "ASSET"
+      },
+      "usage": {
+        "id": 2,
+        "code": "accountUsage.header",
+        "value": "HEADER"
+      },
+      "nameDecorated": "....VEHICLE LOAN",
+      "tagId": {
+        "id": 10,
+        "name": "asset tag"
+      }
+    }
+  ],
+  "liabilityHeaderAccountOptions": [
+    {
+      "id": 15,
+      "name": "liabilitieschild",
+      "glCode": "ltchild",
+      "disabled": false,
+      "manualEntriesAllowed": true,
+      "type": {
+        "id": 2,
+        "code": "accountType.liability",
+        "value": "LIABILITY"
+      },
+      "usage": {
+        "id": 2,
+        "code": "accountUsage.header",
+        "value": "HEADER"
+      },
+      "nameDecorated": "liabilitieschild",
+      "tagId": {
+        "id": 11,
+        "name": "liability tag"
+      }
+    }
+  ],
+  "equityHeaderAccountOptions": [
+    {
+      "id": 13,
+      "name": "testajax",
+      "glCode": "12345678",
+      "disabled": false,
+      "manualEntriesAllowed": true,
+      "type": {
+        "id": 3,
+        "code": "accountType.equity",
+        "value": "EQUITY"
+      },
+      "usage": {
+        "id": 2,
+        "code": "accountUsage.header",
+        "value": "HEADER"
+      },
+      "nameDecorated": "testajax",
+      "tagId": {
+        "id": 12,
+        "name": "Equity tag"
+      }
+    }
+  ],
+  "expenseHeaderAccountOptions": [
+    {
+      "id": 8,
+      "name": "Salary",
+      "glCode": "450098",
+      "disabled": false,
+      "manualEntriesAllowed": true,
+      "type": {
+        "id": 5,
+        "code": "accountType.expense",
+        "value": "EXPENSE"
+      },
+      "usage": {
+        "id": 2,
+        "code": "accountUsage.header",
+        "value": "HEADER"
+      },
+      "nameDecorated": "Salary",
+      "tagId": {
+        "id": 14,
+        "name": "Expenses Tag"
+      }
+    }
+  ],
+  "allowedAssetsTagOptions": [
+    {
+      "id": 10,
+      "name": "asset tag",
+      "position": 0
+    }
+  ],
+  "allowedLiabilitiesTagOptions": [
+    {
+      "id": 11,
+      "name": "liability tag",
+      "position": 0
+    }
+  ],
+  "allowedEquityTagOptions": [
+    {
+      "id": 12,
+      "name": "Equity tag",
+      "position": 0
+    }
+  ],
+  "allowedIncomeTagOptions": [
+    {
+      "id": 13,
+      "name": "Income Tag",
+      "position": 0
+    }
+  ],
+  "allowedExpensesTagOptions": [
+    {
+      "id": 14,
+      "name": "Expenses Tag",
+      "position": 0
+    }
+  ]
 }
                     </code>
                 </div>
@@ -12756,6 +12939,8 @@ Request Body:
     "glCode": "100017",
     "manualEntriesAllowed": true,
     "type": 1,
+    "tagId": "10",
+    "parentId": "18",
     "usage": 1,
     "description": "Cash at Bangalore Branch"
 }
@@ -13190,6 +13375,13 @@ No Request Body:
                             Note: A journal entry is reversed by logging debits
                             for all credits that make up the Journal entry and
                             vice-versa
+                        	</td>
+                        </tr>
+						<tr class=alt>
+                            <td>referenceNumber</td>
+                        </tr>
+                        <tr>
+                            <td class=fielddesc>An additional field that is used to store additional information about the entry (Ex: chequeNo)
                         	</td>
                         </tr>
                     </table>
