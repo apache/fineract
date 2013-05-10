@@ -25,10 +25,10 @@ public class UpdateLoanSummariesScheduledJob {
     }
 
     public void execute() {
-        logger.info("Running Job A " + new Date());
+        logger.info("Running Job UpdateLoanSummariesScheduledJob " + new Date());
 
         this.scheduledJobRunnerService.updateLoanSummaryDetails();
 
-        logger.info("Finishing Job A " + new Date());
+        logger.info("Finishing Job UpdateLoanSummariesScheduledJob " + new Date());
     }
 }
