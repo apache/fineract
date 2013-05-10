@@ -16,6 +16,9 @@
     <bean id="cronQuartzJobB" class="org.mifosplatform.scheduledjobs.UpdateLoanArrearsAgeingScheduledJob">
     	<constructor-arg ref="scheduledJobRunnerService" />
     </bean>
+    <bean id="cronQuartzJobC" class="org.mifosplatform.scheduledjobs.CheckAnnualFeeDueDateScheduledJob">
+    	<constructor-arg ref="scheduledJobRunnerService" />
+    </bean>
 
     <bean id="jobADetail" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
         <property name="group" value="mifosJobs" />
@@ -30,6 +33,13 @@
         <property name="targetMethod" value="execute" />
         <property name="concurrent" value="false" />
     </bean>
+    
+    <bean id="jobCDetail" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+        <property name="group" value="mifosJobs" />
+        <property name="targetObject" ref="cronQuartzJobC" />
+        <property name="targetMethod" value="execute" />
+        <property name="concurrent" value="false" />
+    </bean>
 
     <bean id="cronTriggerA" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
         <property name="jobDetail" ref="jobADetail" />
@@ -40,12 +50,18 @@
         <property name="jobDetail" ref="jobBDetail" />
         <property name="cronExpression" value="0 10 22 1/1 * ? *" />
     </bean>
+    
+    <bean id="cronTriggerC" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+        <property name="jobDetail" ref="jobCDetail" />
+        <property name="cronExpression" value="0 20 22 1/1 * ? *" />
+    </bean>
 
     <bean name="schedulerFactory" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
         <property name="triggers">
             <list>
                 <ref bean="cronTriggerA" />
                 <ref bean="cronTriggerB" />
+                <ref bean="cronTriggerC" />
             </list>
         </property>
     </bean>

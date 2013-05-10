@@ -5,10 +5,13 @@
  */
 package org.mifosplatform.scheduledjobs.service;
 
+import java.util.List;
+
 import org.mifosplatform.infrastructure.core.domain.MifosPlatformTenant;
 import org.mifosplatform.infrastructure.core.service.DataSourcePerTenantService;
 import org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil;
 import org.mifosplatform.infrastructure.security.service.TenantDetailsService;
+import org.mifosplatform.portfolio.savings.service.SavingsAccountWritePlatformService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,12 +26,14 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
 
     private final TenantDetailsService tenantDetailsService;
     private final DataSourcePerTenantService dataSourcePerTenantService;
+    private final SavingsAccountWritePlatformService savingsAccountWritePlatformService;
 
     @Autowired
     public ScheduledJobRunnerServiceImpl(final DataSourcePerTenantService dataSourcePerTenantService,
-            final TenantDetailsService tenantDetailsService) {
+            final TenantDetailsService tenantDetailsService, final SavingsAccountWritePlatformService savingsAccountWritePlatformService) {
         this.dataSourcePerTenantService = dataSourcePerTenantService;
         this.tenantDetailsService = tenantDetailsService;
+        this.savingsAccountWritePlatformService = savingsAccountWritePlatformService;
     }
 
     @Transactional
@@ -137,4 +142,22 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
 
         logger.info("Results affected by update: " + result);
     }
+
+	@Override
+	public void checkAnnualFeeDueDate() {
+		final MifosPlatformTenant tenant = this.tenantDetailsService.loadTenantById("default");
+
+        ThreadLocalContextUtil.setTenant(tenant);
+
+        JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSourcePerTenantService.retrieveTenantAwareDataSource());
+
+        String sql = "SELECT ms.id as savingsAccountId FROM m_savings_account ms WHERE ms.annual_fee_next_due_date <= NOW() ";
+        List<Long> savingsIds = jdbcTemplate.queryForList(sql, Long.class);
+
+        for (Long savingsId : savingsIds) {
+        	this.savingsAccountWritePlatformService.addAnnualFee(savingsId);
+        }
+        
+        logger.info("Results affected by update: " + savingsIds.size());
+	}
 }

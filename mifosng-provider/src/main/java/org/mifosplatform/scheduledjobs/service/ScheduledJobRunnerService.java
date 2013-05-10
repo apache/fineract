@@ -10,4 +10,6 @@ public interface ScheduledJobRunnerService {
     void updateLoanSummaryDetails();
 
     void updateLoanArrearsAgeingDetails();
+    
+    void checkAnnualFeeDueDate(); 
 }
