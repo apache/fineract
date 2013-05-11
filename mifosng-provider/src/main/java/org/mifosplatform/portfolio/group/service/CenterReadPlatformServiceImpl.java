@@ -30,7 +30,7 @@ import org.mifosplatform.portfolio.group.data.CenterData;
 import org.mifosplatform.portfolio.group.data.GroupGeneralData;
 import org.mifosplatform.portfolio.group.domain.GroupTypes;
 import org.mifosplatform.portfolio.group.domain.GroupingTypeEnumerations;
-import org.mifosplatform.portfolio.group.exception.GroupNotFoundException;
+import org.mifosplatform.portfolio.group.exception.CenterNotFoundException;
 import org.mifosplatform.useradministration.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -289,7 +289,7 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
             return this.jdbcTemplate.queryForObject(sql, this.centerMapper, new Object[] { centerId, hierarchySearchString });
 
         } catch (EmptyResultDataAccessException e) {
-            throw new GroupNotFoundException(centerId);
+            throw new CenterNotFoundException(centerId);
         }
     }
 

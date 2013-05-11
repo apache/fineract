@@ -29,14 +29,18 @@ import org.mifosplatform.commands.service.CommandWrapperBuilder;
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.mifosplatform.infrastructure.core.api.ApiParameterHelper;
 import org.mifosplatform.infrastructure.core.api.ApiRequestParameterHelper;
+import org.mifosplatform.infrastructure.core.api.JsonQuery;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.exception.UnrecognizedQueryParamException;
 import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
+import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.mifosplatform.infrastructure.core.service.Page;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.portfolio.client.data.ClientData;
 import org.mifosplatform.portfolio.client.service.ClientReadPlatformService;
+import org.mifosplatform.portfolio.collectionsheet.data.JLGCollectionSheetData;
+import org.mifosplatform.portfolio.collectionsheet.service.CollectionSheetReadPlatformService;
 import org.mifosplatform.portfolio.group.data.GroupAccountSummaryCollectionData;
 import org.mifosplatform.portfolio.group.data.GroupGeneralData;
 import org.mifosplatform.portfolio.group.service.CenterReadPlatformService;
@@ -46,6 +50,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
+
+import com.google.gson.JsonElement;
 
 @Path("/groups")
 @Component
@@ -61,6 +67,8 @@ public class GroupsApiResource {
     private final ToApiJsonSerializer<GroupAccountSummaryCollectionData> groupSummaryToApiJsonSerializer;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
+    private final CollectionSheetReadPlatformService collectionSheetReadPlatformService;
+    private final FromJsonHelper fromJsonHelper;
 
     @Autowired
     public GroupsApiResource(final PlatformSecurityContext context, final GroupReadPlatformService groupReadPlatformService,
@@ -69,7 +77,8 @@ public class GroupsApiResource {
             final ToApiJsonSerializer<GroupGeneralData> groupTopOfHierarchyApiJsonSerializer,
             final ToApiJsonSerializer<GroupAccountSummaryCollectionData> groupSummaryToApiJsonSerializer,
             final ApiRequestParameterHelper apiRequestParameterHelper,
-            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
+            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
+            final CollectionSheetReadPlatformService collectionSheetReadPlatformService, final FromJsonHelper fromJsonHelper) {
         this.context = context;
         this.groupReadPlatformService = groupReadPlatformService;
         this.centerReadPlatformService = centerReadPlatformService;
@@ -79,6 +88,8 @@ public class GroupsApiResource {
         this.groupSummaryToApiJsonSerializer = groupSummaryToApiJsonSerializer;
         this.apiRequestParameterHelper = apiRequestParameterHelper;
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
+        this.collectionSheetReadPlatformService = collectionSheetReadPlatformService;
+        this.fromJsonHelper = fromJsonHelper;
     }
 
     @GET
@@ -214,8 +225,8 @@ public class GroupsApiResource {
     @Path("{groupId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String activate(@PathParam("groupId") final Long groupId, @QueryParam("command") final String commandParam,
-            final String apiRequestBodyAsJson) {
+    public String activateOrGenerateCollectionSheet(@PathParam("groupId") final Long groupId, @QueryParam("command") final String commandParam,
+            final String apiRequestBodyAsJson, @Context final UriInfo uriInfo) {
 
         final CommandWrapperBuilder builder = new CommandWrapperBuilder().withJson(apiRequestBodyAsJson);
 
@@ -223,20 +234,29 @@ public class GroupsApiResource {
         if (is(commandParam, "activate")) {
             final CommandWrapper commandRequest = builder.activateGroup(groupId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            return this.toApiJsonSerializer.serialize(result);
         }else if (is(commandParam, "associateClients")) {
             final CommandWrapper commandRequest = builder.associateClientsToGroup(groupId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            return this.toApiJsonSerializer.serialize(result);
         }else if (is(commandParam, "disassociateClients")) {
             final CommandWrapper commandRequest = builder.disassociateClientsFromGroup(groupId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            return this.toApiJsonSerializer.serialize(result);
+        }else if (is(commandParam, "generateCollectionSheet")) {
+            final JsonElement parsedQuery = this.fromJsonHelper.parse(apiRequestBodyAsJson);
+            final JsonQuery query = JsonQuery.from(apiRequestBodyAsJson, parsedQuery, this.fromJsonHelper);
+            final JLGCollectionSheetData collectionSheet = this.collectionSheetReadPlatformService.generateGroupCollectionSheet(groupId, query);
+            final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+            return this.toApiJsonSerializer.serialize(settings, collectionSheet, GroupingTypesApiConstants.COLLECTIONSHEET_DATA_PARAMETERS);
+        }else if (is(commandParam, "saveCollectionSheet")) {
+            final CommandWrapper commandRequest = builder.saveGroupCollectionSheet(groupId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            return this.toApiJsonSerializer.serialize(result);
+        } else {
+            throw new UnrecognizedQueryParamException("command", commandParam, new Object[] { "activate", "generateCollectionSheet", "saveCollectionSheet" });
         }
-
-        if (result == null) {
-            //
-            throw new UnrecognizedQueryParamException("command", commandParam, new Object[] { "activate" });
-        }
-
-        return this.toApiJsonSerializer.serialize(result);
+        
     }
 
     private boolean is(final String commandParam, final String commandValue) {
