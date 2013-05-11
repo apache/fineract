@@ -63,7 +63,7 @@ public class GLAccountReadPlatformServiceImpl implements GLAccountReadPlatformSe
             final EnumOptionData usage = AccountingEnumerations.gLAccountUsage(usageId);
             final String description = rs.getString("description");
             final String nameDecorated = rs.getString("nameDecorated");
-            final Long codeId = rs.getLong("codeId");
+            final Long codeId = rs.wasNull()? null : rs.getLong("codeId");
             final String codeValue = rs.getString("codeValue");
             CodeValueData tagId = CodeValueData.instance(codeId, codeValue);
             return new GLAccountData(id, name, parentId, glCode, disabled, manualEntriesAllowed, accountType, usage, description,

@@ -62,7 +62,6 @@ public class GLAccount extends AbstractPersistable<Long> {
     @Column(name = "description", nullable = true, length = 500)
     private String description;
     
-    @SuppressWarnings("unused")
 	@ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tag_id")
     private CodeValue tagId;
@@ -106,6 +105,7 @@ public class GLAccount extends AbstractPersistable<Long> {
         handlePropertyUpdate(command, actualChanges, GLAccountJsonInputParams.PARENT_ID.getValue(), 0L);
         handlePropertyUpdate(command, actualChanges, GLAccountJsonInputParams.TYPE.getValue(), this.type, true);
         handlePropertyUpdate(command, actualChanges, GLAccountJsonInputParams.USAGE.getValue(), this.usage, true);
+        handlePropertyUpdate(command, actualChanges, GLAccountJsonInputParams.TAGID.getValue(), this.tagId==null?0L:this.tagId.getId());
         return actualChanges;
     }
 
@@ -223,5 +223,14 @@ public class GLAccount extends AbstractPersistable<Long> {
 
 	public boolean isDetailAccount() {
 		return GLAccountUsage.DETAIL.getValue().equals(this.usage);
+	}
+
+	public void updateTagId(CodeValue tagID) {
+		this.tagId = tagID;
+	}
+
+	public void updateParentAccount(GLAccount parentAccount) {
+		this.parent=parentAccount;
+		this.generateHierarchy();
 	}
 }
