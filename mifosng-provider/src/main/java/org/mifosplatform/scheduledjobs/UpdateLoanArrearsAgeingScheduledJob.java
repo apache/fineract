@@ -22,10 +22,10 @@ public class UpdateLoanArrearsAgeingScheduledJob {
     }
 
     public void execute() {
-        logger.info("Running Job B " + new Date());
+        logger.info("Running Job UpdateLoanArrearsAgeingScheduledJob " + new Date());
 
         this.scheduledJobRunnerService.updateLoanArrearsAgeingDetails();
 
-        logger.info("Finishing Job B " + new Date());
+        logger.info("Finishing Job UpdateLoanArrearsAgeingScheduledJob " + new Date());
     }
 }

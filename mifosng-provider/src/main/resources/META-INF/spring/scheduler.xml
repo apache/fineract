@@ -10,42 +10,42 @@
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
-    <bean id="cronQuartzJobA" class="org.mifosplatform.scheduledjobs.UpdateLoanSummariesScheduledJob">
+    <bean id="updateLoanSummariesScheduledJob" class="org.mifosplatform.scheduledjobs.UpdateLoanSummariesScheduledJob">
     	<constructor-arg ref="scheduledJobRunnerService" />
     </bean>
-    <bean id="cronQuartzJobB" class="org.mifosplatform.scheduledjobs.UpdateLoanArrearsAgeingScheduledJob">
+    <bean id="updateLoanArrearsAgeingScheduledJob" class="org.mifosplatform.scheduledjobs.UpdateLoanArrearsAgeingScheduledJob">
     	<constructor-arg ref="scheduledJobRunnerService" />
     </bean>
 
-    <bean id="jobADetail" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+    <bean id="updateLoanSummariesJobDetail" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
         <property name="group" value="mifosJobs" />
-        <property name="targetObject" ref="cronQuartzJobA" />
+        <property name="targetObject" ref="updateLoanSummariesScheduledJob" />
         <property name="targetMethod" value="execute" />
         <property name="concurrent" value="false" />
     </bean>
     
-    <bean id="jobBDetail" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+    <bean id="UpdateLoanArrearsAgeingJobDetail" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
         <property name="group" value="mifosJobs" />
-        <property name="targetObject" ref="cronQuartzJobB" />
+        <property name="targetObject" ref="updateLoanArrearsAgeingScheduledJob" />
         <property name="targetMethod" value="execute" />
         <property name="concurrent" value="false" />
     </bean>
 
-    <bean id="cronTriggerA" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
-        <property name="jobDetail" ref="jobADetail" />
+    <bean id="updateLoanSummariesJobCronTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+        <property name="jobDetail" ref="updateLoanSummariesJobDetail" />
         <property name="cronExpression" value="0 0 22 1/1 * ? *" />
     </bean>
     
-    <bean id="cronTriggerB" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
-        <property name="jobDetail" ref="jobBDetail" />
+    <bean id="UpdateLoanArrearsAgeingJobDetailCronTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+        <property name="jobDetail" ref="UpdateLoanArrearsAgeingJobDetail" />
         <property name="cronExpression" value="0 10 22 1/1 * ? *" />
     </bean>
 
     <bean name="schedulerFactory" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
         <property name="triggers">
             <list>
-                <ref bean="cronTriggerA" />
-                <ref bean="cronTriggerB" />
+                <ref bean="updateLoanSummariesJobCronTrigger" />
+                <ref bean="UpdateLoanArrearsAgeingJobDetailCronTrigger" />
             </list>
         </property>
     </bean>
