@@ -8,6 +8,8 @@ package org.mifosplatform.infrastructure.core.serialization;
 import java.util.Collection;
 import java.util.Set;
 
+import org.mifosplatform.infrastructure.core.service.Page;
+
 public interface ToApiJsonSerializer<T> {
 
     String serialize(Object object);
@@ -19,4 +21,6 @@ public interface ToApiJsonSerializer<T> {
     String serialize(ApiRequestJsonSerializationSettings settings, Collection<T> collection, Set<String> supportedResponseParameters);
 
     String serialize(ApiRequestJsonSerializationSettings settings, T single, Set<String> supportedResponseParameters);
+    
+    String serialize(ApiRequestJsonSerializationSettings settings, Page<T> singleObject, Set<String> supportedResponseParameters);
 }
