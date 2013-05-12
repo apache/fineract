@@ -362,17 +362,19 @@ public class LoansApiResource {
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveAll(@QueryParam("sqlSearch") final String sqlSearch, @QueryParam("externalId") final String externalId,
-            @QueryParam("underHierarchy") final String hierarchy, @QueryParam("offset") final Integer offset,
-            @QueryParam("limit") final Integer limit, @QueryParam("orderBy") final String orderBy,
-            @QueryParam("sortOrder") final String sortOrder) {
+    public String retrieveAll(@Context final UriInfo uriInfo, @QueryParam("sqlSearch") final String sqlSearch,
+            @QueryParam("externalId") final String externalId, @QueryParam("underHierarchy") final String hierarchy,
+            @QueryParam("offset") final Integer offset, @QueryParam("limit") final Integer limit,
+            @QueryParam("orderBy") final String orderBy, @QueryParam("sortOrder") final String sortOrder) {
 
         context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
 
         final SearchParameters searchParameters = SearchParameters.forLoans(sqlSearch, externalId, offset, limit, orderBy, sortOrder);
 
         final Page<LoanAccountData> loanBasicDetails = this.loanReadPlatformService.retrieveAll(searchParameters);
-        return this.toApiJsonSerializer.serialize(loanBasicDetails);
+
+        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        return this.toApiJsonSerializer.serialize(settings, loanBasicDetails, LOAN_DATA_PARAMETERS);
     }
     
     @POST

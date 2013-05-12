@@ -73,11 +73,12 @@ public class JournalEntriesApiResource {
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveAll(@QueryParam("officeId") final Long officeId, @QueryParam("glAccountId") final Long glAccountId,
-            @QueryParam("manualEntriesOnly") final Boolean onlyManualEntries, @QueryParam("fromDate") final DateParam fromDateParam,
-            @QueryParam("toDate") final DateParam toDateParam, @QueryParam("transactionId") final String transactionId,
-            @QueryParam("offset") final Integer offset, @QueryParam("limit") final Integer limit,
-            @QueryParam("orderBy") final String orderBy, @QueryParam("sortOrder") final String sortOrder) {
+    public String retrieveAll(@Context final UriInfo uriInfo, @QueryParam("officeId") final Long officeId,
+            @QueryParam("glAccountId") final Long glAccountId, @QueryParam("manualEntriesOnly") final Boolean onlyManualEntries,
+            @QueryParam("fromDate") final DateParam fromDateParam, @QueryParam("toDate") final DateParam toDateParam,
+            @QueryParam("transactionId") final String transactionId, @QueryParam("offset") final Integer offset,
+            @QueryParam("limit") final Integer limit, @QueryParam("orderBy") final String orderBy,
+            @QueryParam("sortOrder") final String sortOrder) {
 
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermission);
 
@@ -94,7 +95,8 @@ public class JournalEntriesApiResource {
 
         Page<JournalEntryData> glJournalEntries = this.journalEntryReadPlatformService.retrieveAll(searchParameters, glAccountId,
                 onlyManualEntries, fromDate, toDate, transactionId);
-        return this.apiJsonSerializerService.serialize(glJournalEntries);
+        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        return this.apiJsonSerializerService.serialize(settings, glJournalEntries, RESPONSE_DATA_PARAMETERS);
     }
 
     @GET
