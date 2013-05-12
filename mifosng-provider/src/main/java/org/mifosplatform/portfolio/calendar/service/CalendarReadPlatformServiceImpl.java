@@ -68,11 +68,11 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
             final String recurrence = rs.getString("recurrence");
             final Integer remindById = rs.getInt("remindById");
             EnumOptionData remindBy = null;
-            if(remindById != null && remindById != 0) remindBy = CalendarEnumerations.calendarRemindBy(remindById);
+            if (remindById != null && remindById != 0) remindBy = CalendarEnumerations.calendarRemindBy(remindById);
             final Integer firstReminder = rs.getInt("firstReminder");
             final Integer secondReminder = rs.getInt("secondReminder");
             final String humanReadable = CalendarHelper.getRRuleReadable(startDate, recurrence);
-            
+
             final LocalDate createdDate = JdbcSupport.getLocalDate(rs, "createdDate");
             final LocalDate lastUpdatedDate = JdbcSupport.getLocalDate(rs, "updatedDate");
             final Long createdByUserId = rs.getLong("creatingUserId");
@@ -80,7 +80,9 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
             final Long lastUpdatedByUserId = rs.getLong("updatingUserId");
             final String lastUpdatedByUserName = rs.getString("updatingUserName");
 
-            return new CalendarData(id, entityId, entityType, title, description, location, startDate, endDate, duration, type, repeating, recurrence, remindBy, firstReminder, secondReminder, humanReadable, createdDate, lastUpdatedDate, createdByUserId, createdByUserName, lastUpdatedByUserId, lastUpdatedByUserName);
+            return new CalendarData(id, entityId, entityType, title, description, location, startDate, endDate, duration, type, repeating,
+                    recurrence, remindBy, firstReminder, secondReminder, humanReadable, createdDate, lastUpdatedDate, createdByUserId,
+                    createdByUserName, lastUpdatedByUserId, lastUpdatedByUserName);
         }
     }
 
@@ -99,41 +101,46 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
     }
 
     @Override
-    public Collection<CalendarData> retrieveCalendarsByEntity(final Long entityId, final Integer entityTypeId, final List<EnumOptionData> calendarTypeOptions) {
+    public Collection<CalendarData> retrieveCalendarsByEntity(final Long entityId, final Integer entityTypeId,
+            final List<Integer> calendarTypeOptions) {
         final CalendarDataMapper rm = new CalendarDataMapper();
 
-        Collection<CalendarData> result=null;
+        Collection<CalendarData> result = null;
 
-        String sql="";
+        String sql = "";
 
         if (calendarTypeOptions == null || calendarTypeOptions.isEmpty()) {
             sql = rm.schema() + " and ci.entity_id = ? and ci.entity_type_enum = ? order by c.start_date ";
-            result =  this.jdbcTemplate.query(sql, rm, new Object[] { entityId, entityTypeId });
-        } else if(!calendarTypeOptions.isEmpty()){
-            String sqlCalendarTypeOptions = createSqlValuesInString(calendarTypeOptions);
-            sql = rm.schema() + " and ci.entity_id = ? and ci.entity_type_enum = ? and c.calendar_type_enum in (?) order by c.start_date ";
-            result = this.jdbcTemplate.query(sql,rm, new Object[] {entityId, entityTypeId, sqlCalendarTypeOptions});
+            result = this.jdbcTemplate.query(sql, rm, new Object[] { entityId, entityTypeId });
+        } else if (!calendarTypeOptions.isEmpty()) {
+            String sqlCalendarTypeOptions = getSqlCalendarTypeOptionsInString(calendarTypeOptions);
+            sql = rm.schema() + " and ci.entity_id = ? and ci.entity_type_enum = ? and c.calendar_type_enum in ( " + sqlCalendarTypeOptions
+                    + " ) order by c.start_date ";
+            result = this.jdbcTemplate.query(sql, rm, new Object[] { entityId, entityTypeId });
         }
         return result;
     }
 
     @Override
-    public Collection<CalendarData> retrieveParentCalendarsByEntity( final Long entityId, final Integer entityTypeId, final List<EnumOptionData> calendarTypeOptions ) {
+    public Collection<CalendarData> retrieveParentCalendarsByEntity(final Long entityId, final Integer entityTypeId,
+            final List<Integer> calendarTypeOptions) {
 
         final CalendarDataMapper rm = new CalendarDataMapper();
-        Collection<CalendarData> result=null;
-        String sql="";
+        Collection<CalendarData> result = null;
+        String sql = "";
         CalendarEntityType ceType = CalendarEntityType.fromInt(entityTypeId);
         String parentHeirarchyCondition = getParentHierarchyCondition(ceType);
 
-        //FIXME :AA center is the parent entity of group, change this code to support more parent entity types.
+        // FIXME :AA center is the parent entity of group, change this code to
+        // support more parent entity types.
         if (calendarTypeOptions == null || calendarTypeOptions.isEmpty()) {
             sql = rm.schema() + " " + parentHeirarchyCondition + " and ci.entity_type_enum = ? order by c.start_date ";
             result = this.jdbcTemplate.query(sql, rm, new Object[] { entityId, CalendarEntityType.CENTERS.getValue() });
         } else {
-            String sqlCalendarTypeOptions = createSqlValuesInString(calendarTypeOptions);
-            sql = rm.schema() + " " + parentHeirarchyCondition + " and ci.entity_type_enum = ? and c.calendar_type_enum in ? order by c.start_date ";
-            result = this.jdbcTemplate.query(sql,rm, new Object[] {entityId, entityTypeId, sqlCalendarTypeOptions});
+            String sqlCalendarTypeOptions = getSqlCalendarTypeOptionsInString(calendarTypeOptions);
+            sql = rm.schema() + " " + parentHeirarchyCondition + " and ci.entity_type_enum = ? and c.calendar_type_enum in ("
+                    + sqlCalendarTypeOptions + ") order by c.start_date ";
+            result = this.jdbcTemplate.query(sql, rm, new Object[] { entityId, entityTypeId });
         }
         return result;
     }
@@ -152,23 +159,23 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
     public CalendarData retrieveNewCalendarDetails() {
         return CalendarData.sensibleDefaultsForNewCalendarCreation();
     }
-    
+
     @Override
     public CalendarData generateRecurringDate(final CalendarData calendarData) {
-        if(!calendarData.isRepeating()) return calendarData;
+        if (!calendarData.isRepeating()) return calendarData;
         final String rrule = calendarData.getRecurrence();
         final LocalDate currentDate = DateUtils.getLocalDateOfTenant();
         LocalDate seedDate = calendarData.getStartDate();
         LocalDate endDate = calendarData.getEndDate();
         LocalDate startDate = calendarData.getStartDate();
-        if(seedDate.isBefore(currentDate.minusYears(1))){
+        if (seedDate.isBefore(currentDate.minusYears(1))) {
             startDate = currentDate.minusYears(1);
         }
-        
-        if(endDate == null || endDate.isAfter(currentDate.plusYears(1))){
+
+        if (endDate == null || endDate.isAfter(currentDate.plusYears(1))) {
             endDate = currentDate.plusYears(1);
         }
-        
+
         final Collection<LocalDate> recurringDates = CalendarHelper.getRecurringDates(rrule, seedDate, startDate, endDate, -1);
         final Collection<LocalDate> nextTenRecurringDates = CalendarHelper.getRecurringDates(rrule, seedDate, endDate);
         return new CalendarData(calendarData, recurringDates, nextTenRecurringDates);
@@ -184,42 +191,44 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
 
         return recuCalendarsData;
     }
-    
+
     @Override
     public CalendarData retrieveLoanCalendar(final Long loanId) {
         final CalendarDataMapper rm = new CalendarDataMapper();
 
         final String sql = rm.schema() + " and ci.entity_id = ? and ci.entity_type_enum = ? order by c.start_date ";
         CalendarData calendarData = null;
-        final Collection<CalendarData> calendars = this.jdbcTemplate.query(sql, rm, new Object[] { loanId, CalendarEntityType.LOANS.getValue() });
-        
-        if(!CollectionUtils.isEmpty(calendars)){
+        final Collection<CalendarData> calendars = this.jdbcTemplate.query(sql, rm,
+                new Object[] { loanId, CalendarEntityType.LOANS.getValue() });
+
+        if (!CollectionUtils.isEmpty(calendars)) {
             for (CalendarData calendar : calendars) {
                 calendarData = calendar;
-                break;//Loans are associated with only one calendar
-            } 
+                break;// Loans are associated with only one calendar
+            }
         }
-        
+
         return calendarData;
     }
 
     public static String getParentHierarchyCondition(final CalendarEntityType calendarEntityType) {
         String conditionSql = "";
-        
+
         switch (calendarEntityType) {
             case CLIENTS:
-                //TODO : AA : do we need to propagate to top level parent in hierarchy?
+                // TODO : AA : do we need to propagate to top level parent in
+                // hierarchy?
                 conditionSql = " and ci.entity_id in (select gc.group_id from m_client c join m_group_client gc "
                         + " on c.id=gc.client_id where c.id = ? ) ";
             break;
-            
+
             case GROUPS:
-                //TODO : AA: add parent hierarchy for groups                
+                // TODO : AA: add parent hierarchy for groups
                 conditionSql = " and ci.entity_id in (select g.parent_id from m_group g where g.id = ? ) ";
             break;
-            
+
             case LOANS:
-              //TODO : AA: do we need parent hierarchy calendars for loans?
+                // TODO : AA: do we need parent hierarchy calendars for loans?
                 conditionSql = " and ci.entity_id = ?  ";
             break;
 
@@ -231,19 +240,19 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
     }
 
     /**
-     * This method takes the List of calendarType options given in the request and creates a string to be used in the sql statement.
-     * for ex. (1,2,3,4)
+     * function returns a comma separated list of calendar_type_enum values ex.
+     * 1,2,3,4
+     * 
      * @param calendarTypeOptions
      * @return
      */
-    public String createSqlValuesInString(final List<EnumOptionData> calendarTypeOptions){
+    public String getSqlCalendarTypeOptionsInString(final List<Integer> calendarTypeOptions) {
+        String sqlCalendarTypeOptions = "";
         int size = calendarTypeOptions.size();
-        String sqlCalendarTypeOptions = "(" + calendarTypeOptions.get(0).getId().toString();
-        for(int i=1;i<size;i++) {
-            sqlCalendarTypeOptions += "," + calendarTypeOptions.get(i).getId().toString();
+        for (int i = 0; i < size - 1; i++) {
+            sqlCalendarTypeOptions += calendarTypeOptions.get(i).toString() + ",";
         }
-        sqlCalendarTypeOptions += ")";
-
+        sqlCalendarTypeOptions += calendarTypeOptions.get(size - 1).toString();
         return sqlCalendarTypeOptions;
     }
 }
