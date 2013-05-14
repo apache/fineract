@@ -5,13 +5,13 @@
  */
 package org.mifosplatform.portfolio.loanproduct.service;
 
+import static org.mifosplatform.portfolio.loanproduct.service.LoanEnumerations.accountingRuleType;
 import static org.mifosplatform.portfolio.loanproduct.service.LoanEnumerations.amortizationType;
 import static org.mifosplatform.portfolio.loanproduct.service.LoanEnumerations.interestCalculationPeriodType;
 import static org.mifosplatform.portfolio.loanproduct.service.LoanEnumerations.interestRateFrequencyType;
 import static org.mifosplatform.portfolio.loanproduct.service.LoanEnumerations.interestType;
 import static org.mifosplatform.portfolio.loanproduct.service.LoanEnumerations.loanTermFrequencyType;
 import static org.mifosplatform.portfolio.loanproduct.service.LoanEnumerations.repaymentFrequencyType;
-import static org.mifosplatform.portfolio.loanproduct.service.LoanEnumerations.accountingRuleType;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -20,7 +20,6 @@ import java.util.List;
 
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanTransactionProcessingStrategyRepository;
-import org.mifosplatform.portfolio.loanaccount.domain.PaymentType;
 import org.mifosplatform.portfolio.loanproduct.data.TransactionProcessingStrategyData;
 import org.mifosplatform.portfolio.loanproduct.domain.AccountingRuleType;
 import org.mifosplatform.portfolio.loanproduct.domain.AmortizationMethod;
@@ -111,8 +110,4 @@ public class LoanDropdownReadPlatformServiceImpl implements LoanDropdownReadPlat
         return accountingRuleTypeOptions;
     }
 
-    @Override
-    public List<EnumOptionData> retrievePaymentTypeOptions() {
-        return LoanEnumerations.paymentTypes(PaymentType.values());
-    }
 }

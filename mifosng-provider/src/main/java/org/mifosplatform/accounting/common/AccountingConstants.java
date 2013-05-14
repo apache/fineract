@@ -84,7 +84,8 @@ public class AccountingConstants {
         FUND_SOURCE("fundSourceAccountId"), LOAN_PORTFOLIO("loanPortfolioAccountId"), INTEREST_ON_LOANS("interestOnLoanAccountId"), INCOME_FROM_FEES(
                 "incomeFromFeeAccountId"), INCOME_FROM_PENALTIES("incomeFromPenaltyAccountId"), LOSSES_WRITTEN_OFF("writeOffAccountId"), INTEREST_RECEIVABLE(
                 "receivableInterestAccountId"), FEES_RECEIVABLE("receivableFeeAccountId"), PENALTIES_RECEIVABLE(
-                "receivablePenaltyAccountId");
+                "receivablePenaltyAccountId"), PAYMENT_CHANNEL_FUND_SOURCE_MAPPING("paymentChannelFundSourceMappings"), PAYMENT_TYPE(
+                "paymentTypeId");
 
         private final String value;
 
@@ -101,7 +102,7 @@ public class AccountingConstants {
             return this.value;
         }
     }
-    
+
     public static final String ASSESTS_TAG_OPTION_CODE_NAME = "AssetAccountTags";
     public static final String LIABILITIES_TAG_OPTION_CODE_NAME = "LiabilityAccountTags";
     public static final String EQUITY_TAG_OPTION_CODE_NAME = "EquityAccountTags";

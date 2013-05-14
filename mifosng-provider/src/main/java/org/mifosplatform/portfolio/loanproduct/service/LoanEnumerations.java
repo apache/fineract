@@ -5,16 +5,12 @@
  */
 package org.mifosplatform.portfolio.loanproduct.service;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanStatusEnumData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanTransactionEnumData;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanStatus;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanTransactionType;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanType;
-import org.mifosplatform.portfolio.loanaccount.domain.PaymentType;
 import org.mifosplatform.portfolio.loanproduct.domain.AccountingRuleType;
 import org.mifosplatform.portfolio.loanproduct.domain.AmortizationMethod;
 import org.mifosplatform.portfolio.loanproduct.domain.InterestCalculationPeriodMethod;
@@ -49,8 +45,6 @@ public class LoanEnumerations {
             return interestType(id);
         } else if (typeName.equals(INTEREST_CALCULATION_PERIOD_TYPE)) {
             return interestCalculationPeriodType(id);
-        } else if (typeName.equals(PAYMENT_TYPE)) {
-            return paymentType(id);
         } else if (typeName.equals(ACCOUNTING_RULE_TYPE)) {
             return accountingRuleType(id);
         } else if (typeName.equals(LOAN_TYPE)) { return loanType(id); }
@@ -234,27 +228,6 @@ public class LoanEnumerations {
             break;
         }
         return optionData;
-    }
-
-    public static List<EnumOptionData> paymentTypes(final PaymentType[] paymentTypes) {
-        final List<EnumOptionData> optionDatas = new ArrayList<EnumOptionData>();
-        for (final PaymentType paymentType : paymentTypes) {
-            optionDatas.add(paymentType(paymentType));
-        }
-        return optionDatas;
-    }
-
-    public static EnumOptionData paymentType(final PaymentType paymentType) {
-        final EnumOptionData optionData = new EnumOptionData(paymentType.getValue().longValue(), paymentType.getCode(),
-                paymentType.toString());
-        return optionData;
-    }
-
-    public static EnumOptionData paymentType(final Integer id) {
-        PaymentType paymentType = PaymentType.fromInt(id);
-        EnumOptionData enumOptionData = new EnumOptionData(paymentType.getValue().longValue(), paymentType.getCode(), paymentType
-                .getValue().toString());
-        return enumOptionData;
     }
 
     public static LoanTransactionEnumData transactionType(final Integer id) {

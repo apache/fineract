@@ -27,8 +27,7 @@ public class JournalEntryCommand {
     private final SingleDebitOrCreditEntryCommand[] debits;
 
     public JournalEntryCommand(final Long officeId, final LocalDate transactionDate, final String comments,
-            final SingleDebitOrCreditEntryCommand[] credits, final SingleDebitOrCreditEntryCommand[] debits, 
-            final String referenceNumber) {
+            final SingleDebitOrCreditEntryCommand[] credits, final SingleDebitOrCreditEntryCommand[] debits, final String referenceNumber) {
         this.officeId = officeId;
         this.transactionDate = transactionDate;
         this.comments = comments;
@@ -52,7 +51,7 @@ public class JournalEntryCommand {
         baseDataValidator.reset().parameter("credits").value(this.credits).notNull();
 
         baseDataValidator.reset().parameter("debits").value(this.debits).notNull();
-        
+
         baseDataValidator.reset().parameter("referenceNumber").value(this.referenceNumber).ignoreIfNull().notExceedingLengthOf(100);
 
         // validation for credit array elements
@@ -118,8 +117,8 @@ public class JournalEntryCommand {
         return this.debits;
     }
 
-	public String getReferenceNumber() {
-		return this.referenceNumber;
-	}
+    public String getReferenceNumber() {
+        return this.referenceNumber;
+    }
 
 }

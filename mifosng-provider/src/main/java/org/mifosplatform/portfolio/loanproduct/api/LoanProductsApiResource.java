@@ -31,6 +31,8 @@ import org.mifosplatform.accounting.producttoaccountmapping.service.ProductToGLA
 import org.mifosplatform.commands.domain.CommandWrapper;
 import org.mifosplatform.commands.service.CommandWrapperBuilder;
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
+import org.mifosplatform.infrastructure.codes.data.CodeValueData;
+import org.mifosplatform.infrastructure.codes.service.CodeValueReadPlatformService;
 import org.mifosplatform.infrastructure.core.api.ApiRequestParameterHelper;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
@@ -47,6 +49,7 @@ import org.mifosplatform.portfolio.loanproduct.data.LoanProductData;
 import org.mifosplatform.portfolio.loanproduct.data.TransactionProcessingStrategyData;
 import org.mifosplatform.portfolio.loanproduct.service.LoanDropdownReadPlatformService;
 import org.mifosplatform.portfolio.loanproduct.service.LoanProductReadPlatformService;
+import org.mifosplatform.portfolio.paymentdetail.PaymentDetailConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -61,10 +64,10 @@ public class LoanProductsApiResource {
             "maxNumberOfRepayments", "repaymentEvery", "repaymentFrequencyType", "interestRatePerPeriod", "minInterestRatePerPeriod",
             "maxInterestRatePerPeriod", "interestRateFrequencyType", "annualInterestRate", "amortizationType", "interestType",
             "interestCalculationPeriodType", "inArrearsTolerance", "transactionProcessingStrategyId", "transactionProcessingStrategyName",
-            "charges", "accountingRule", "accountingMappings", "fundOptions", "currencyOptions", "repaymentFrequencyTypeOptions",
-            "interestRateFrequencyTypeOptions", "amortizationTypeOptions", "interestTypeOptions", "interestCalculationPeriodTypeOptions",
-            "transactionProcessingStrategyOptions", "chargeOptions", "accountingOptions", "accountingRuleOptions",
-            "accountingMappingOptions"));
+            "charges", "accountingRule", "accountingMappings", "paymentChannelToFundSourceMappings", "fundOptions", "paymentTypeOptions",
+            "currencyOptions", "repaymentFrequencyTypeOptions", "interestRateFrequencyTypeOptions", "amortizationTypeOptions",
+            "interestTypeOptions", "interestCalculationPeriodTypeOptions", "transactionProcessingStrategyOptions", "chargeOptions",
+            "accountingOptions", "accountingRuleOptions", "accountingMappingOptions"));
 
     private final String resourceNameForPermissions = "LOANPRODUCT";
 
@@ -79,6 +82,7 @@ public class LoanProductsApiResource {
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final GLAccountReadPlatformService accountReadPlatformService;
     private final ProductToGLAccountMappingReadPlatformService accountMappingReadPlatformService;
+    private final CodeValueReadPlatformService codeValueReadPlatformService;
 
     @Autowired
     public LoanProductsApiResource(final PlatformSecurityContext context, final LoanProductReadPlatformService readPlatformService,
@@ -88,7 +92,8 @@ public class LoanProductsApiResource {
             final ApiRequestParameterHelper apiRequestParameterHelper,
             final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
             final GLAccountReadPlatformService accountReadPlatformService,
-            final ProductToGLAccountMappingReadPlatformService accountMappingReadPlatformService) {
+            final ProductToGLAccountMappingReadPlatformService accountMappingReadPlatformService,
+            final CodeValueReadPlatformService codeValueReadPlatformService) {
         this.context = context;
         this.loanProductReadPlatformService = readPlatformService;
         this.chargeReadPlatformService = chargeReadPlatformService;
@@ -100,6 +105,7 @@ public class LoanProductsApiResource {
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
         this.accountReadPlatformService = accountReadPlatformService;
         this.accountMappingReadPlatformService = accountMappingReadPlatformService;
+        this.codeValueReadPlatformService = codeValueReadPlatformService;
     }
 
     @POST
@@ -136,7 +142,7 @@ public class LoanProductsApiResource {
         context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
 
         LoanProductData loanProduct = this.loanProductReadPlatformService.retrieveNewLoanProductDetails();
-        loanProduct = handleTemplate(loanProduct, new HashMap<String, Object>());
+        loanProduct = handleTemplate(loanProduct, new HashMap<String, Object>(), null);
 
         final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serialize(settings, loanProduct, LOAN_PRODUCT_DATA_PARAMETERS);
@@ -155,14 +161,17 @@ public class LoanProductsApiResource {
         LoanProductData loanProduct = this.loanProductReadPlatformService.retrieveLoanProduct(productId);
 
         Map<String, Object> accountingMappings = null;
+        Map<Long, Long> paymentChannelToFundSourceMappings = null;
         if (loanProduct.hasAccountingEnabled()) {
             accountingMappings = accountMappingReadPlatformService.fetchAccountMappingDetailsForLoanProduct(productId, loanProduct
                     .accountingRuleType().getId().intValue());
-            loanProduct = LoanProductData.withAccountingMappings(loanProduct, accountingMappings);
+            paymentChannelToFundSourceMappings = accountMappingReadPlatformService
+                    .fetchPaymentTypeToFundSourceMappingsForLoanProduct(productId);
+            loanProduct = LoanProductData.withAccountingDetails(loanProduct, accountingMappings, paymentChannelToFundSourceMappings);
         }
 
         if (settings.isTemplate()) {
-            loanProduct = handleTemplate(loanProduct, accountingMappings);
+            loanProduct = handleTemplate(loanProduct, accountingMappings, paymentChannelToFundSourceMappings);
         }
         return this.toApiJsonSerializer.serialize(settings, loanProduct, LOAN_PRODUCT_DATA_PARAMETERS);
     }
@@ -181,7 +190,8 @@ public class LoanProductsApiResource {
         return this.toApiJsonSerializer.serialize(result);
     }
 
-    private LoanProductData handleTemplate(final LoanProductData productData, final Map<String, Object> accountingMappings) {
+    private LoanProductData handleTemplate(final LoanProductData productData, final Map<String, Object> accountingMappings,
+            final Map<Long, Long> paymentChannelToFundSourceMappings) {
 
         final boolean feeChargesOnly = true;
         Collection<ChargeData> chargeOptions = this.chargeReadPlatformService.retrieveLoanApplicableCharges(feeChargesOnly);
@@ -197,6 +207,8 @@ public class LoanProductsApiResource {
         final List<EnumOptionData> repaymentFrequencyTypeOptions = dropdownReadPlatformService.retrieveRepaymentFrequencyTypeOptions();
         final List<EnumOptionData> interestRateFrequencyTypeOptions = dropdownReadPlatformService
                 .retrieveInterestRateFrequencyTypeOptions();
+        final Collection<CodeValueData> paymentTypeOptions = codeValueReadPlatformService
+                .retrieveCodeValuesByCode(PaymentDetailConstants.paymentTypeCodeName);
 
         Collection<FundData> fundOptions = this.fundReadPlatformService.retrieveAllFunds();
         if (fundOptions.isEmpty()) {
@@ -226,8 +238,9 @@ public class LoanProductsApiResource {
 
         List<EnumOptionData> accountingRuleTypeOptions = dropdownReadPlatformService.retrieveAccountingRuleTypeOptions();
 
-        return new LoanProductData(productData, chargeOptions, currencyOptions, amortizationTypeOptions, interestTypeOptions,
-                interestCalculationPeriodTypeOptions, repaymentFrequencyTypeOptions, interestRateFrequencyTypeOptions, fundOptions,
-                transactionProcessingStrategyOptions, accountOptions, accountingRuleTypeOptions, accountingMappings);
+        return new LoanProductData(productData, chargeOptions, paymentTypeOptions, currencyOptions, amortizationTypeOptions,
+                interestTypeOptions, interestCalculationPeriodTypeOptions, repaymentFrequencyTypeOptions, interestRateFrequencyTypeOptions,
+                fundOptions, transactionProcessingStrategyOptions, accountOptions, accountingRuleTypeOptions, accountingMappings,
+                paymentChannelToFundSourceMappings);
     }
 }

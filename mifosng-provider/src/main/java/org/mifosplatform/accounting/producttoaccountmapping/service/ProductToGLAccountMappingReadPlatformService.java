@@ -10,4 +10,6 @@ import java.util.Map;
 public interface ProductToGLAccountMappingReadPlatformService {
 
     Map<String, Object> fetchAccountMappingDetailsForLoanProduct(final Long loanProductId, final Integer accountingType);
+
+    Map<Long, Long> fetchPaymentTypeToFundSourceMappingsForLoanProduct(final Long loanProductId);
 }

@@ -14,6 +14,7 @@ public class LoanTransactionDTO {
 
     private final String transactionId;
     private final Date transactionDate;
+    private final Long paymentTypeId;
     private final LoanTransactionEnumData transactionType;
 
     private final BigDecimal amount;
@@ -27,9 +28,10 @@ public class LoanTransactionDTO {
     /*** Boolean values determines if the transaction is reversed ***/
     private final boolean reversed;
 
-    public LoanTransactionDTO(final String transactionId, final Date transactionDate, final LoanTransactionEnumData transactionType,
-            final BigDecimal amount, final BigDecimal principal, final BigDecimal interest, final BigDecimal fees,
-            final BigDecimal penalties, final boolean reversed) {
+    public LoanTransactionDTO(final Long paymentTypeId, final String transactionId, final Date transactionDate,
+            final LoanTransactionEnumData transactionType, final BigDecimal amount, final BigDecimal principal, final BigDecimal interest,
+            final BigDecimal fees, final BigDecimal penalties, final boolean reversed) {
+        this.paymentTypeId = paymentTypeId;
         this.transactionId = transactionId;
         this.transactionDate = transactionDate;
         this.amount = amount;
@@ -75,6 +77,10 @@ public class LoanTransactionDTO {
 
     public boolean isReversed() {
         return this.reversed;
+    }
+
+    public Long getPaymentTypeId() {
+        return this.paymentTypeId;
     }
 
 }
