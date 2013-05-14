@@ -3,9 +3,9 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this file,
  * You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-package org.mifosplatform.portfolio.loanaccount.data;
+package org.mifosplatform.portfolio.paymentdetail.data;
 
-import org.mifosplatform.infrastructure.core.data.EnumOptionData;
+import org.mifosplatform.infrastructure.codes.data.CodeValueData;
 
 /**
  * Immutable data object representing a payment.
@@ -15,7 +15,7 @@ public class PaymentDetailData {
     @SuppressWarnings("unused")
     private final Long id;
     @SuppressWarnings("unused")
-    private final EnumOptionData paymentType;
+    private final CodeValueData paymentType;
     @SuppressWarnings("unused")
     private final String accountNumber;
     @SuppressWarnings("unused")
@@ -27,7 +27,7 @@ public class PaymentDetailData {
     @SuppressWarnings("unused")
     private final String bankNumber;
 
-    public PaymentDetailData(Long id, EnumOptionData paymentType, String accountNumber, String checkNumber, String routingCode,
+    public PaymentDetailData(Long id, CodeValueData paymentType, String accountNumber, String checkNumber, String routingCode,
             String receiptNumber, String bankNumber) {
         this.id = id;
         this.paymentType = paymentType;

@@ -11,7 +11,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.Days;
@@ -50,7 +49,6 @@ import org.mifosplatform.portfolio.loanaccount.data.LoanStatusEnumData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanSummaryData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanTransactionData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanTransactionEnumData;
-import org.mifosplatform.portfolio.loanaccount.data.PaymentDetailData;
 import org.mifosplatform.portfolio.loanaccount.data.RepaymentScheduleRelatedLoanData;
 import org.mifosplatform.portfolio.loanaccount.domain.Loan;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanRepository;
@@ -66,6 +64,8 @@ import org.mifosplatform.portfolio.loanproduct.data.TransactionProcessingStrateg
 import org.mifosplatform.portfolio.loanproduct.service.LoanDropdownReadPlatformService;
 import org.mifosplatform.portfolio.loanproduct.service.LoanEnumerations;
 import org.mifosplatform.portfolio.loanproduct.service.LoanProductReadPlatformService;
+import org.mifosplatform.portfolio.paymentdetail.PaymentDetailConstants;
+import org.mifosplatform.portfolio.paymentdetail.data.PaymentDetailData;
 import org.mifosplatform.useradministration.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
@@ -92,9 +92,9 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
     private final ChargeReadPlatformService chargeReadPlatformService;
     private final CodeValueReadPlatformService codeValueReadPlatformService;
     private final CalendarReadPlatformService calendarReadPlatformService;
-
     private final PaginationHelper<LoanAccountData> paginationHelper = new PaginationHelper<LoanAccountData>();
     private final LoanMapper loaanLoanMapper = new LoanMapper();
+
 
     @Autowired
     public LoanReadPlatformServiceImpl(final PlatformSecurityContext context, final LoanRepository loanRepository,
@@ -313,7 +313,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
         final Money possibleNextRepaymentAmount = loan.possibleNextRepaymentAmount();
         final LoanTransactionEnumData transactionType = LoanEnumerations.transactionType(LoanTransactionType.REPAYMENT);
-        final List<EnumOptionData> paymentOptions = loanDropdownReadPlatformService.retrievePaymentTypeOptions();
+        final Collection<CodeValueData> paymentOptions = codeValueReadPlatformService
+                .retrieveCodeValuesByCode(PaymentDetailConstants.paymentTypeCodeName);
         return new LoanTransactionData(null, transactionType, null, currencyData, earliestUnpaidInstallmentDate,
                 possibleNextRepaymentAmount.getAmount(), null, null, null, null, paymentOptions);
     }
@@ -356,7 +357,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         final Loan loan = this.loanRepository.findOne(loanId);
         if (loan == null) { throw new LoanNotFoundException(loanId); }
         final LoanTransactionEnumData transactionType = LoanEnumerations.transactionType(LoanTransactionType.DISBURSEMENT);
-        final List<EnumOptionData> paymentOptions = loanDropdownReadPlatformService.retrievePaymentTypeOptions();
+        final Collection<CodeValueData> paymentOptions = codeValueReadPlatformService
+                .retrieveCodeValuesByCode(PaymentDetailConstants.paymentTypeCodeName);
         return new LoanTransactionData(null, transactionType, null, null, loan.getExpectedDisbursedOnLocalDate(), null, null, null, null,
                 null, paymentOptions);
     }
@@ -806,13 +808,14 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             return " tr.id as id, tr.transaction_type_enum as transactionType, tr.transaction_date as `date`, tr.amount as total, "
                     + " tr.principal_portion_derived as principal, tr.interest_portion_derived as interest, "
                     + " tr.fee_charges_portion_derived as fees, tr.penalty_charges_portion_derived as penalties, "
-                    + " pd.payment_type_enum as paymentType,pd.account_number as accountNumber,pd.check_number as checkNumber, "
+                    + " pd.payment_type_cv_id as paymentType,pd.account_number as accountNumber,pd.check_number as checkNumber, "
                     + " pd.receipt_number as receiptNumber, pd.bank_number as bankNumber,pd.routing_code as routingCode, "
                     + " l.currency_code as currencyCode, l.currency_digits as currencyDigits, rc.`name` as currencyName, "
-                    + " rc.display_symbol as currencyDisplaySymbol, rc.internationalized_name_code as currencyNameCode "
-                    + " from m_loan l join m_loan_transaction tr on tr.loan_id = l.id"
+                    + " rc.display_symbol as currencyDisplaySymbol, rc.internationalized_name_code as currencyNameCode, "
+                    + " cv.code_value as paymentTypeName " + " from m_loan l join m_loan_transaction tr on tr.loan_id = l.id"
                     + " join m_currency rc on rc.`code` = l.currency_code "
-                    + " left JOIN m_payment_detail pd ON tr.payment_detail_id = pd.id";
+                    + " left JOIN m_payment_detail pd ON tr.payment_detail_id = pd.id"
+                    + " left join m_code_value cv on pd.payment_type_cv_id = cv.id";
         }
 
         @Override
@@ -833,9 +836,10 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             PaymentDetailData paymentDetailData = null;
 
             if (transactionType.isPaymentOrReceipt()) {
-                final Integer paymentTypeId = JdbcSupport.getInteger(rs, "paymentType");
+                final Long paymentTypeId = JdbcSupport.getLong(rs, "paymentType");
                 if (paymentTypeId != null) {
-                    EnumOptionData paymentType = LoanEnumerations.paymentType(paymentTypeId);
+                    final String typeName = rs.getString("paymentTypeName");
+                    CodeValueData paymentType = CodeValueData.instance(paymentTypeId, typeName);
                     final String accountNumber = rs.getString("accountNumber");
                     final String checkNumber = rs.getString("checkNumber");
                     final String routingCode = rs.getString("routingCode");
@@ -859,6 +863,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
     @Override
     public LoanAccountData retrieveLoanProductDetailsTemplate(final Long productId) {
+
 
         context.authenticatedUser();
 

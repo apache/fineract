@@ -14,11 +14,12 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import org.mifosplatform.accounting.glaccount.domain.GLAccount;
+import org.mifosplatform.infrastructure.codes.domain.CodeValue;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
 @Table(name = "acc_product_mapping", uniqueConstraints = { @UniqueConstraint(columnNames = { "product_id", "product_type",
-        "financial_account_type" }, name = "financial_action") })
+        "financial_account_type", "payment_type" }, name = "financial_action") })
 public class ProductToGLAccountMapping extends AbstractPersistable<Long> {
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -27,6 +28,10 @@ public class ProductToGLAccountMapping extends AbstractPersistable<Long> {
 
     @Column(name = "product_id", nullable = false)
     private Long productId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "payment_type", nullable = true)
+    private CodeValue paymentType;
 
     @Column(name = "product_type", nullable = false)
     private int productType;
@@ -44,10 +49,16 @@ public class ProductToGLAccountMapping extends AbstractPersistable<Long> {
     }
 
     public ProductToGLAccountMapping(final GLAccount glAccount, final Long productId, final int productType, final int financialAccountType) {
+        this(glAccount, productId, productType, financialAccountType, null);
+    }
+
+    public ProductToGLAccountMapping(final GLAccount glAccount, final Long productId, final int productType,
+            final int financialAccountType, final CodeValue paymentType) {
         this.glAccount = glAccount;
         this.productId = productId;
         this.productType = productType;
         this.financialAccountType = financialAccountType;
+        this.paymentType = paymentType;
     }
 
     public GLAccount getGlAccount() {
@@ -80,6 +91,14 @@ public class ProductToGLAccountMapping extends AbstractPersistable<Long> {
 
     public void setFinancialAccountType(final int financialAccountType) {
         this.financialAccountType = financialAccountType;
+    }
+
+    public CodeValue getPaymentType() {
+        return this.paymentType;
+    }
+
+    public void setPaymentType(CodeValue paymentType) {
+        this.paymentType = paymentType;
     }
 
 }

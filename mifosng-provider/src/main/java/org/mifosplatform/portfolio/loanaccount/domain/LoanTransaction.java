@@ -24,8 +24,9 @@ import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.organisation.monetary.domain.Money;
 import org.mifosplatform.portfolio.loanaccount.data.LoanTransactionData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanTransactionEnumData;
-import org.mifosplatform.portfolio.loanaccount.data.PaymentDetailData;
 import org.mifosplatform.portfolio.loanproduct.service.LoanEnumerations;
+import org.mifosplatform.portfolio.paymentdetail.data.PaymentDetailData;
+import org.mifosplatform.portfolio.paymentdetail.domain.PaymentDetail;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
 /**
@@ -352,6 +353,10 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
         thisTransactionData.put("interestPortion", this.interestPortion);
         thisTransactionData.put("feeChargesPortion", this.feeChargesPortion);
         thisTransactionData.put("penaltyChargesPortion", this.penaltyChargesPortion);
+
+        if (this.paymentDetail != null) {
+            thisTransactionData.put("paymentTypeId", this.paymentDetail.getPaymentType().getId());
+        }
 
         return thisTransactionData;
     }

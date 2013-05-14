@@ -21,7 +21,6 @@ import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
 import org.mifosplatform.infrastructure.core.exception.InvalidJsonException;
 import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
-import org.mifosplatform.portfolio.loanaccount.domain.PaymentType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -102,8 +101,7 @@ public final class LoanEventApiJsonValidator {
     private void validatePaymentDetails(final DataValidatorBuilder baseDataValidator, final JsonElement element) {
         // Validate all string payment detail fields for max length
         final Integer paymentTypeId = fromApiJsonHelper.extractIntegerWithLocaleNamed("paymentTypeId", element);
-        baseDataValidator.reset().parameter("paymentTypeId").value(paymentTypeId)
-                .inMinMaxRange(PaymentType.getMinValue(), PaymentType.getMaxValue());
+        baseDataValidator.reset().parameter("paymentTypeId").value(paymentTypeId).ignoreIfNull().integerGreaterThanZero();
         final Set<String> paymentDetailParameters = new HashSet<String>(Arrays.asList("accountNumber", "checkNumber", "routingCode",
                 "receiptNumber", "bankNumber"));
         for (String paymentDetailParameterName : paymentDetailParameters) {

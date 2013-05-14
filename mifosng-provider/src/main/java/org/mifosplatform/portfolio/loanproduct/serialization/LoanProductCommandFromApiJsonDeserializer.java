@@ -27,7 +27,9 @@ import org.mifosplatform.portfolio.loanproduct.domain.LoanProduct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 
 @Component
@@ -45,7 +47,8 @@ public final class LoanProductCommandFromApiJsonDeserializer {
             LOAN_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_FEES.getValue(), LOAN_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_PENALTIES.getValue(),
             LOAN_PRODUCT_ACCOUNTING_PARAMS.INTEREST_ON_LOANS.getValue(), LOAN_PRODUCT_ACCOUNTING_PARAMS.INTEREST_RECEIVABLE.getValue(),
             LOAN_PRODUCT_ACCOUNTING_PARAMS.LOAN_PORTFOLIO.getValue(), LOAN_PRODUCT_ACCOUNTING_PARAMS.LOSSES_WRITTEN_OFF.getValue(),
-            LOAN_PRODUCT_ACCOUNTING_PARAMS.PENALTIES_RECEIVABLE.getValue()));
+            LOAN_PRODUCT_ACCOUNTING_PARAMS.PENALTIES_RECEIVABLE.getValue(),
+            LOAN_PRODUCT_ACCOUNTING_PARAMS.PAYMENT_CHANNEL_FUND_SOURCE_MAPPING.getValue()));
 
     private final FromJsonHelper fromApiJsonHelper;
 
@@ -249,6 +252,8 @@ public final class LoanProductCommandFromApiJsonDeserializer {
                     element);
             baseDataValidator.reset().parameter(LOAN_PRODUCT_ACCOUNTING_PARAMS.LOSSES_WRITTEN_OFF.getValue()).value(writeOffAccountId)
                     .notNull().integerGreaterThanZero();
+
+            validatePaymentChannelFundSourceMappings(baseDataValidator, element);
 
         }
 
@@ -461,9 +466,46 @@ public final class LoanProductCommandFromApiJsonDeserializer {
         baseDataValidator.reset().parameter(LOAN_PRODUCT_ACCOUNTING_PARAMS.PENALTIES_RECEIVABLE.getValue())
                 .value(receivablePenaltyAccountId).ignoreIfNull().integerGreaterThanZero();
 
+        validatePaymentChannelFundSourceMappings(baseDataValidator, element);
+
         validateMinMaxConstraints(element, baseDataValidator, loanProduct);
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
+    }
+
+    /**
+     * Validation for advanced accounting options
+     * 
+     * @param baseDataValidator
+     * @param element
+     */
+    private void validatePaymentChannelFundSourceMappings(final DataValidatorBuilder baseDataValidator, final JsonElement element) {
+        if (fromApiJsonHelper.parameterExists(LOAN_PRODUCT_ACCOUNTING_PARAMS.PAYMENT_CHANNEL_FUND_SOURCE_MAPPING.getValue(), element)) {
+            JsonArray paymentChannelMappingArray = fromApiJsonHelper.extractJsonArrayNamed(
+                    LOAN_PRODUCT_ACCOUNTING_PARAMS.PAYMENT_CHANNEL_FUND_SOURCE_MAPPING.getValue(), element);
+            if (paymentChannelMappingArray != null) {
+                int i = 0;
+                do {
+                    final JsonObject jsonObject = paymentChannelMappingArray.get(i).getAsJsonObject();
+                    final Long paymentTypeId = jsonObject.get(LOAN_PRODUCT_ACCOUNTING_PARAMS.PAYMENT_TYPE.getValue()).getAsLong();
+                    final Long paymentSpecificFundAccountId = jsonObject.get(LOAN_PRODUCT_ACCOUNTING_PARAMS.FUND_SOURCE.getValue())
+                            .getAsLong();
+                    baseDataValidator
+                            .reset()
+                            .parameter(
+                                    LOAN_PRODUCT_ACCOUNTING_PARAMS.PAYMENT_CHANNEL_FUND_SOURCE_MAPPING.getValue() + "[" + i + "]."
+                                            + LOAN_PRODUCT_ACCOUNTING_PARAMS.PAYMENT_TYPE.toString()).value(paymentTypeId).notNull()
+                            .integerGreaterThanZero();
+                    baseDataValidator
+                            .reset()
+                            .parameter(
+                                    LOAN_PRODUCT_ACCOUNTING_PARAMS.PAYMENT_CHANNEL_FUND_SOURCE_MAPPING.getValue() + "[" + i + "]."
+                                            + LOAN_PRODUCT_ACCOUNTING_PARAMS.FUND_SOURCE.getValue()).value(paymentSpecificFundAccountId)
+                            .notNull().integerGreaterThanZero();
+                    i++;
+                } while (i < paymentChannelMappingArray.size());
+            }
+        }
     }
 
     public void validateMinMaxConstraints(final JsonElement element, final DataValidatorBuilder baseDataValidator,

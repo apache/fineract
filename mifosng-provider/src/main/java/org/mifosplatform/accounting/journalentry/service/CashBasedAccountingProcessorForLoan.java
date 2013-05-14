@@ -34,6 +34,7 @@ public class CashBasedAccountingProcessorForLoan implements AccountingProcessorF
         for (final LoanTransactionDTO loanTransactionDTO : loanDTO.getNewLoanTransactions()) {
             final Date transactionDate = loanTransactionDTO.getTransactionDate();
             final String transactionId = loanTransactionDTO.getTransactionId();
+            final Long paymentTypeId = loanTransactionDTO.getPaymentTypeId();
             final Long loanId = loanDTO.getLoanId();
 
             helper.checkForBranchClosures(latestGLClosure, transactionDate);
@@ -58,8 +59,8 @@ public class CashBasedAccountingProcessorForLoan implements AccountingProcessorF
             else if (loanTransactionDTO.getTransactionType().isWriteOff() && !loanTransactionDTO.isReversed()) {
                 final BigDecimal principalAmount = loanTransactionDTO.getPrincipal();
                 helper.createCashBasedJournalEntriesAndReversalsForLoan(office, CASH_ACCOUNTS_FOR_LOAN.LOSSES_WRITTEN_OFF,
-                        CASH_ACCOUNTS_FOR_LOAN.LOAN_PORTFOLIO, loanProductId, loanId, transactionId, transactionDate, principalAmount,
-                        false);
+                        CASH_ACCOUNTS_FOR_LOAN.LOAN_PORTFOLIO, loanProductId, paymentTypeId, loanId, transactionId, transactionDate,
+                        principalAmount, false);
             }
         }
     }
@@ -86,9 +87,11 @@ public class CashBasedAccountingProcessorForLoan implements AccountingProcessorF
         final Date transactionDate = loanTransactionDTO.getTransactionDate();
         final BigDecimal disbursalAmount = loanTransactionDTO.getAmount();
         final boolean isReversal = loanTransactionDTO.isReversed();
+        final Long paymentTypeId = loanTransactionDTO.getPaymentTypeId();
 
         helper.createCashBasedJournalEntriesAndReversalsForLoan(office, CASH_ACCOUNTS_FOR_LOAN.LOAN_PORTFOLIO,
-                CASH_ACCOUNTS_FOR_LOAN.FUND_SOURCE, loanProductId, loanId, transactionId, transactionDate, disbursalAmount, isReversal);
+                CASH_ACCOUNTS_FOR_LOAN.FUND_SOURCE, loanProductId, paymentTypeId, loanId, transactionId, transactionDate, disbursalAmount,
+                isReversal);
     }
 
     /**
@@ -113,35 +116,36 @@ public class CashBasedAccountingProcessorForLoan implements AccountingProcessorF
         final BigDecimal feesAmount = loanTransactionDTO.getFees();
         final BigDecimal penaltiesAmount = loanTransactionDTO.getPenalties();
         final boolean isReversal = loanTransactionDTO.isReversed();
+        final Long paymentTypeId = loanTransactionDTO.getPaymentTypeId();
 
         BigDecimal totalDebitAmount = new BigDecimal(0);
 
         if (principalAmount != null && !(principalAmount.compareTo(BigDecimal.ZERO) == 0)) {
             totalDebitAmount = totalDebitAmount.add(principalAmount);
-            helper.createCreditJournalEntryOrReversalForLoan(office, CASH_ACCOUNTS_FOR_LOAN.LOAN_PORTFOLIO, loanProductId, loanId,
-                    transactionId, transactionDate, principalAmount, isReversal);
+            helper.createCreditJournalEntryOrReversalForLoan(office, CASH_ACCOUNTS_FOR_LOAN.LOAN_PORTFOLIO, loanProductId, paymentTypeId,
+                    loanId, transactionId, transactionDate, principalAmount, isReversal);
         }
 
         if (interestAmount != null && !(interestAmount.compareTo(BigDecimal.ZERO) == 0)) {
             totalDebitAmount = totalDebitAmount.add(interestAmount);
-            helper.createCreditJournalEntryOrReversalForLoan(office, CASH_ACCOUNTS_FOR_LOAN.INTEREST_ON_LOANS, loanProductId, loanId,
-                    transactionId, transactionDate, interestAmount, isReversal);
+            helper.createCreditJournalEntryOrReversalForLoan(office, CASH_ACCOUNTS_FOR_LOAN.INTEREST_ON_LOANS, loanProductId,
+                    paymentTypeId, loanId, transactionId, transactionDate, interestAmount, isReversal);
         }
 
         if (feesAmount != null && !(feesAmount.compareTo(BigDecimal.ZERO) == 0)) {
             totalDebitAmount = totalDebitAmount.add(feesAmount);
-            helper.createCreditJournalEntryOrReversalForLoan(office, CASH_ACCOUNTS_FOR_LOAN.INCOME_FROM_FEES, loanProductId, loanId,
-                    transactionId, transactionDate, feesAmount, isReversal);
+            helper.createCreditJournalEntryOrReversalForLoan(office, CASH_ACCOUNTS_FOR_LOAN.INCOME_FROM_FEES, loanProductId, paymentTypeId,
+                    loanId, transactionId, transactionDate, feesAmount, isReversal);
         }
 
         if (penaltiesAmount != null && !(penaltiesAmount.compareTo(BigDecimal.ZERO) == 0)) {
             totalDebitAmount = totalDebitAmount.add(penaltiesAmount);
-            helper.createCreditJournalEntryOrReversalForLoan(office, CASH_ACCOUNTS_FOR_LOAN.INCOME_FROM_PENALTIES, loanProductId, loanId,
-                    transactionId, transactionDate, penaltiesAmount, isReversal);
+            helper.createCreditJournalEntryOrReversalForLoan(office, CASH_ACCOUNTS_FOR_LOAN.INCOME_FROM_PENALTIES, loanProductId,
+                    paymentTypeId, loanId, transactionId, transactionDate, penaltiesAmount, isReversal);
         }
 
         /*** create a single debit entry (or reversal) for the entire amount **/
-        helper.createDebitJournalEntryOrReversalForLoan(office, CASH_ACCOUNTS_FOR_LOAN.FUND_SOURCE, loanProductId, loanId, transactionId,
-                transactionDate, totalDebitAmount, isReversal);
+        helper.createDebitJournalEntryOrReversalForLoan(office, CASH_ACCOUNTS_FOR_LOAN.FUND_SOURCE, loanProductId, paymentTypeId, loanId,
+                transactionId, transactionDate, totalDebitAmount, isReversal);
     }
 }

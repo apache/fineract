@@ -29,5 +29,4 @@ public interface LoanDropdownReadPlatformService {
 
     List<EnumOptionData> retrieveAccountingRuleTypeOptions();
 
-    List<EnumOptionData> retrievePaymentTypeOptions();
 }
