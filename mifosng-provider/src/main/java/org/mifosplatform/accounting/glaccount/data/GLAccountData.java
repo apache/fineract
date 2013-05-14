@@ -108,7 +108,7 @@ public class GLAccountData {
         this.allowedExpensesTagOptions = allowedExpensesTagOptions;
     }
 
-    public static GLAccountData sensibleDefaultsForNewGLAccountCreation(final Integer GLAccType) {
+    public static GLAccountData sensibleDefaultsForNewGLAccountCreation(final Integer glAccType) {
         final Long id = null;
         final String name = null;
         final Long parentId = null;
@@ -116,8 +116,8 @@ public class GLAccountData {
         final boolean disabled = false;
         final boolean manualEntriesAllowed = true;
         final EnumOptionData type;
-        if(GLAccType!=0)
-            type = AccountingEnumerations.gLAccountType(GLAccType);
+        if(glAccType != null && glAccType >= GLAccountType.getMinValue() && glAccType <= GLAccountType.getMaxValue())
+            type = AccountingEnumerations.gLAccountType(glAccType);
           else 
             type = AccountingEnumerations.gLAccountType(GLAccountType.ASSET);
         final EnumOptionData usage = AccountingEnumerations.gLAccountUsage(GLAccountUsage.DETAIL);
