@@ -57,6 +57,8 @@ public final class ResultsetColumnHeaderData {
                 displayType = "INTEGER";
             } else if (isDate()) {
                 displayType = "DATE";
+            } else if (isDateTime()) {
+                displayType = "DATETIME";
             } else if (isDecimal()) {
                 displayType = "DECIMAL";
             } else if (isAnyText()) {
@@ -110,6 +112,10 @@ public final class ResultsetColumnHeaderData {
 
     private boolean isDate() {
         return "date".equalsIgnoreCase(this.columnType);
+    }
+    
+    private boolean isDateTime() {
+        return "datetime".equalsIgnoreCase(this.columnType);
     }
 
     private boolean isString() {
