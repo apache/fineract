@@ -12533,7 +12533,7 @@ Request Body:
                             <td>tagId</td>
                         </tr>
                         <tr>
-                            <td class=fielddesc>Used for tagging the AccountHeads, based on GLAccount types.
+                            <td class=fielddesc>Used for tagging the Account Heads, based on GLAccount types.
                             </td>
                         </tr>
                     </table>
@@ -12586,7 +12586,7 @@ GET https://DomainName/api/v1/glaccounts
     {
         "id": 16,
         "name": "Cash",
-		"parentId": 1,
+	"parentId": 1,
         "glCode": "100001",
         "disabled": false,
         "manualEntriesAllowed": true,
@@ -12645,13 +12645,20 @@ GET https://DomainName/api/v1/glaccounts
                     </ul>
                     </p>
                     <p>Example Request:</p>
-                    <div class=apiClick>glaccounts/template?type=0</div>
+                    <div class=apiClick>glaccounts/template</div>
+                    <div class=apiClick>glaccounts/template?type=1</div>
 					<br>
 					type is optional and integer value from 1 to 5.<br>
+					<P><br>1.Assets
+					   <br>2.Liabilities
+					   <br>3.Equity
+					   <br>4.Income
+					   <br>5.Expenses</p>
                 </div>
                 <div class="method-example">
                     <code class="method-declaration">
-GET https://DomainName/api/v1/glaccounts/template?type=0
+GET https://DomainName/api/v1/glaccounts/template<br>
+GET https://DomainName/api/v1/glaccounts/template?type=1
                     </code>
                     <code class="method-response">
 {
