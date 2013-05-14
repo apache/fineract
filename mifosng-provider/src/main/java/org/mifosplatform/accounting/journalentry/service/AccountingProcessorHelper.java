@@ -264,7 +264,7 @@ public class AccountingProcessorHelper {
          ***/
         if (accountMappingTypeId == CASH_ACCOUNTS_FOR_LOAN.FUND_SOURCE.getValue()) {
             ProductToGLAccountMapping paymentChannelSpecificAccountMapping = this.accountMappingRepository
-                    .findByProductIdAndProductTypeAndFinancialAccountTypeAndPaymentType(loanProductId,
+                    .findByProductIdAndProductTypeAndFinancialAccountTypeAndPaymentTypeId(loanProductId,
                             PortfolioProductType.LOAN.getValue(), accountMappingTypeId, paymentTypeId);
             if (paymentChannelSpecificAccountMapping != null) {
                 accountMapping = paymentChannelSpecificAccountMapping;
