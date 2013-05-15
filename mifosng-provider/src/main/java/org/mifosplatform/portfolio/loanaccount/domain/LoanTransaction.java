@@ -99,7 +99,7 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
     public static LoanTransaction copyTransactionProperties(LoanTransaction loanTransaction) {
         return new LoanTransaction(loanTransaction.loan, loanTransaction.typeOf, loanTransaction.dateOf, loanTransaction.amount,
                 loanTransaction.principalPortion, loanTransaction.interestPortion, loanTransaction.feeChargesPortion,
-                loanTransaction.penaltyChargesPortion, loanTransaction.reversed);
+                loanTransaction.penaltyChargesPortion, loanTransaction.reversed, loanTransaction.paymentDetail);
     }
 
     public static LoanTransaction applyLoanCharge(final Loan loan, final Money amount, final LocalDate applyDate, final Money feeCharges,
@@ -120,7 +120,8 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
     }
 
     private LoanTransaction(Loan loan, Integer typeOf, Date dateOf, BigDecimal amount, BigDecimal principalPortion,
-            BigDecimal interestPortion, BigDecimal feeChargesPortion, BigDecimal penaltyChargesPortion, boolean reversed) {
+            BigDecimal interestPortion, BigDecimal feeChargesPortion, BigDecimal penaltyChargesPortion, boolean reversed,
+            PaymentDetail paymentDetail) {
         super();
         this.loan = loan;
         this.typeOf = typeOf;
@@ -131,6 +132,7 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
         this.feeChargesPortion = feeChargesPortion;
         this.penaltyChargesPortion = penaltyChargesPortion;
         this.reversed = reversed;
+        this.paymentDetail = paymentDetail;
     }
 
     public static LoanTransaction waiveLoanCharge(final Loan loan, final Money waived, final LocalDate waiveDate,
