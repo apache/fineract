@@ -27,6 +27,7 @@ import javax.ws.rs.core.UriInfo;
 import org.mifosplatform.accounting.glaccount.data.GLAccountData;
 import org.mifosplatform.accounting.glaccount.domain.GLAccountType;
 import org.mifosplatform.accounting.glaccount.service.GLAccountReadPlatformService;
+import org.mifosplatform.accounting.producttoaccountmapping.data.PaymentTypeToGLAccountMapper;
 import org.mifosplatform.accounting.producttoaccountmapping.service.ProductToGLAccountMappingReadPlatformService;
 import org.mifosplatform.commands.domain.CommandWrapper;
 import org.mifosplatform.commands.service.CommandWrapperBuilder;
@@ -161,7 +162,7 @@ public class LoanProductsApiResource {
         LoanProductData loanProduct = this.loanProductReadPlatformService.retrieveLoanProduct(productId);
 
         Map<String, Object> accountingMappings = null;
-        Map<Long, Long> paymentChannelToFundSourceMappings = null;
+        Collection<PaymentTypeToGLAccountMapper> paymentChannelToFundSourceMappings = null;
         if (loanProduct.hasAccountingEnabled()) {
             accountingMappings = accountMappingReadPlatformService.fetchAccountMappingDetailsForLoanProduct(productId, loanProduct
                     .accountingRuleType().getId().intValue());
@@ -191,7 +192,7 @@ public class LoanProductsApiResource {
     }
 
     private LoanProductData handleTemplate(final LoanProductData productData, final Map<String, Object> accountingMappings,
-            final Map<Long, Long> paymentChannelToFundSourceMappings) {
+            final Collection<PaymentTypeToGLAccountMapper> paymentChannelToFundSourceMappings) {
 
         final boolean feeChargesOnly = true;
         Collection<ChargeData> chargeOptions = this.chargeReadPlatformService.retrieveLoanApplicableCharges(feeChargesOnly);

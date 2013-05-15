@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.mifosplatform.accounting.glaccount.data.GLAccountData;
+import org.mifosplatform.accounting.producttoaccountmapping.data.PaymentTypeToGLAccountMapper;
 import org.mifosplatform.infrastructure.codes.data.CodeValueData;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
@@ -67,7 +68,7 @@ public class LoanProductData {
     @SuppressWarnings("unused")
     private final Map<String, Object> accountingMappings;
     @SuppressWarnings("unused")
-    private final Map<Long, Long> paymentChannelToFundSourceMappings;
+    private final Collection<PaymentTypeToGLAccountMapper> paymentChannelToFundSourceMappings;
 
     // template related
     private final Collection<FundData> fundOptions;
@@ -191,7 +192,7 @@ public class LoanProductData {
     }
 
     public static LoanProductData withAccountingDetails(final LoanProductData productData, final Map<String, Object> accountingMappings,
-            final Map<Long, Long> paymentChannelToFundSourceMappings) {
+            final Collection<PaymentTypeToGLAccountMapper> paymentChannelToFundSourceMappings) {
 
         return new LoanProductData(productData, productData.chargeOptions, productData.paymentTypeOptions, productData.currencyOptions,
                 productData.amortizationTypeOptions, productData.interestTypeOptions, productData.interestCalculationPeriodTypeOptions,
@@ -270,7 +271,7 @@ public class LoanProductData {
             final List<EnumOptionData> interestRateFrequencyTypeOptions, final Collection<FundData> fundOptions,
             final Collection<TransactionProcessingStrategyData> transactionStrategyOptions,
             final Map<String, List<GLAccountData>> accountingMappingOptions, final List<EnumOptionData> accountingRuleOptions,
-            final Map<String, Object> accountingMappings, final Map<Long, Long> paymentChannelToFundSourceMappings) {
+            final Map<String, Object> accountingMappings, final Collection<PaymentTypeToGLAccountMapper> paymentChannelToFundSourceMappings) {
         this.id = productData.id;
         this.name = productData.name;
         this.description = productData.description;

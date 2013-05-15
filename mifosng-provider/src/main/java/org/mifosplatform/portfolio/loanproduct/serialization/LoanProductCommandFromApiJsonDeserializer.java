@@ -483,7 +483,7 @@ public final class LoanProductCommandFromApiJsonDeserializer {
         if (fromApiJsonHelper.parameterExists(LOAN_PRODUCT_ACCOUNTING_PARAMS.PAYMENT_CHANNEL_FUND_SOURCE_MAPPING.getValue(), element)) {
             JsonArray paymentChannelMappingArray = fromApiJsonHelper.extractJsonArrayNamed(
                     LOAN_PRODUCT_ACCOUNTING_PARAMS.PAYMENT_CHANNEL_FUND_SOURCE_MAPPING.getValue(), element);
-            if (paymentChannelMappingArray != null) {
+            if (paymentChannelMappingArray != null && paymentChannelMappingArray.size() > 0) {
                 int i = 0;
                 do {
                     final JsonObject jsonObject = paymentChannelMappingArray.get(i).getAsJsonObject();
