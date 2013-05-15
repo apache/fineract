@@ -5,11 +5,14 @@
  */
 package org.mifosplatform.accounting.producttoaccountmapping.service;
 
+import java.util.List;
 import java.util.Map;
+
+import org.mifosplatform.accounting.producttoaccountmapping.data.PaymentTypeToGLAccountMapper;
 
 public interface ProductToGLAccountMappingReadPlatformService {
 
     Map<String, Object> fetchAccountMappingDetailsForLoanProduct(final Long loanProductId, final Integer accountingType);
 
-    Map<Long, Long> fetchPaymentTypeToFundSourceMappingsForLoanProduct(final Long loanProductId);
+    List<PaymentTypeToGLAccountMapper> fetchPaymentTypeToFundSourceMappingsForLoanProduct(final Long loanProductId);
 }

@@ -188,7 +188,7 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
     }
 
     /**
-     * Finds
+     * 
      * 
      * @param command
      * @param element
@@ -239,11 +239,11 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
              **/
             else {
                 for (ProductToGLAccountMapping existingPaymentChannelToFundSourceMapping : existingPaymentChannelToFundSourceMappings) {
-                    Long currentPaymentChannelId = existingPaymentChannelToFundSourceMapping.getId();
+                    Long currentPaymentChannelId = existingPaymentChannelToFundSourceMapping.getPaymentType().getId();
                     existingPaymentTypes.add(currentPaymentChannelId);
                     // update existing mappings (if required)
-                    if (inputPaymentChannelFundSourceMap.containsKey(existingPaymentChannelToFundSourceMapping.getId())) {
-                        Long newGLAccountId = inputPaymentChannelFundSourceMap.get(existingPaymentChannelToFundSourceMapping.getId());
+                    if (inputPaymentChannelFundSourceMap.containsKey(currentPaymentChannelId)) {
+                        Long newGLAccountId = inputPaymentChannelFundSourceMap.get(currentPaymentChannelId);
                         if (newGLAccountId != existingPaymentChannelToFundSourceMapping.getGlAccount().getId()) {
                             final GLAccount glAccount = getAccountByIdAndType(LOAN_PRODUCT_ACCOUNTING_PARAMS.FUND_SOURCE.getValue(),
                                     GLAccountType.ASSET, newGLAccountId);
@@ -257,12 +257,12 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
                 }
                 // create new mappings
                 Set<Long> incomingPaymentTypes = inputPaymentChannelFundSourceMap.keySet();
-                boolean newPaymentTypesAdded = incomingPaymentTypes.removeAll(existingPaymentTypes);
-                if (newPaymentTypesAdded) {
-                    for (Long newPaymentType : incomingPaymentTypes) {
-                        Long newGLAccountId = inputPaymentChannelFundSourceMap.get(newPaymentType);
-                        savePaymentChannelToFundSourceMapping(productId, newPaymentType, newGLAccountId);
-                    }
+                incomingPaymentTypes.removeAll(existingPaymentTypes);
+                // incomingPaymentTypes now only contains the newly added
+                // payment Type mappings
+                for (Long newPaymentType : incomingPaymentTypes) {
+                    Long newGLAccountId = inputPaymentChannelFundSourceMap.get(newPaymentType);
+                    savePaymentChannelToFundSourceMapping(productId, newPaymentType, newGLAccountId);
                 }
             }
         }
