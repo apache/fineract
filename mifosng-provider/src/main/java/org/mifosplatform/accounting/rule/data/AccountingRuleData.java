@@ -19,58 +19,89 @@ import org.mifosplatform.organisation.office.data.OfficeData;
  */
 public class AccountingRuleData {
 
-    @SuppressWarnings("unused")
-    private final Long id;
-    @SuppressWarnings("unused")
-    private final Long officeId;
-    @SuppressWarnings("unused")
-    private final String officeName;
-    @SuppressWarnings("unused")
-    private final Long accountToDebitId;
-    @SuppressWarnings("unused")
-    private final Long accountToCreditId;
-    @SuppressWarnings("unused")
-    private final String name;
-    @SuppressWarnings("unused")
-    private final String description;
-    @SuppressWarnings("unused")
-    private final boolean systemDefined;
+	private final Long id;
+	private final Long officeId;
+	private final String officeName;
+	private final Long accountToDebitId;
+	private final Long accountToCreditId;
+	private final String name;
+	private final String description;
+	private final boolean systemDefined;
+	private final String debitAccountName;
+	private final String creditAccountName;
+	private final String debitAccountGLCode;
+	private final String creditAccountGLCode;
 
-    // template
-    @SuppressWarnings("unused")
-    private List<OfficeData> allowedOffices = new ArrayList<OfficeData>();
-    @SuppressWarnings("unused")
-    private List<GLAccountData> allowedAccounts = new ArrayList<GLAccountData>();
+	// template
+	@SuppressWarnings("unused")
+	private List<OfficeData> allowedOffices = new ArrayList<OfficeData>();
+	@SuppressWarnings("unused")
+	private List<GLAccountData> allowedAccounts = new ArrayList<GLAccountData>();
 
-    public AccountingRuleData(Long id, Long accountToDebitId, Long accountToCreditId) {
-        this(id, null, null, accountToDebitId, accountToCreditId, null, null, true, null, null);
-    }
+	public AccountingRuleData(final Long id, final Long accountToDebitId, final Long accountToCreditId) {
+		this(id, null, null, accountToDebitId, accountToCreditId, null, null, true, null, null, null, null, null, null);
+	}
 
-    public AccountingRuleData(Long id, Long officeId, String officeName, Long accountToDebitId, Long accountToCreditId, String name,
-            String description, boolean systemDefined) {
-        this(id, officeId, officeName, accountToDebitId, accountToCreditId, name, description, systemDefined, null, null);
-    }
+	public AccountingRuleData(final Long id, final Long officeId, final String officeName, final Long accountToDebitId,
+			final Long accountToCreditId, final String name, final String description, final boolean systemDefined,
+			final String debitAccountName, final String creditAccountName, final String debitAccountGLCode,
+			final String creditAccountGLCode) {
+		this(id, officeId, officeName, accountToDebitId, accountToCreditId, name, description, systemDefined, debitAccountName,
+				creditAccountName, debitAccountGLCode, creditAccountGLCode, null, null);
+	}
 
-    public AccountingRuleData(Long id, Long officeId, String officeName, Long accountToDebitId, Long accountToCreditId, String name,
-            String description, boolean systemDefined, List<OfficeData> allowedOffices, List<GLAccountData> allowedAccounts) {
-        this.id = id;
-        this.officeId = officeId;
-        this.officeName = officeName;
-        this.accountToDebitId = accountToDebitId;
-        this.accountToCreditId = accountToCreditId;
-        this.name = name;
-        this.description = description;
-        this.systemDefined = systemDefined;
-        this.allowedOffices = allowedOffices;
-        this.allowedAccounts = allowedAccounts;
-    }
+	public AccountingRuleData(final Long id, final Long officeId, final String officeName, final Long accountToDebitId,
+			final Long accountToCreditId, final String name, final String description, final boolean systemDefined,
+			final String debitAccountName, final String creditAccountName, final String debitAccountGLCode,
+			final String creditAccountGLCode, final List<OfficeData> allowedOffices, final List<GLAccountData> allowedAccounts) {
+		this.id = id;
+		this.officeId = officeId;
+		this.officeName = officeName;
+		this.accountToDebitId = accountToDebitId;
+		this.accountToCreditId = accountToCreditId;
+		this.name = name;
+		this.description = description;
+		this.systemDefined = systemDefined;
+		this.allowedOffices = allowedOffices;
+		this.allowedAccounts = allowedAccounts;
+		this.debitAccountName = debitAccountName;
+		this.creditAccountName = creditAccountName;
+		this.debitAccountGLCode = debitAccountGLCode;
+		this.creditAccountGLCode = creditAccountGLCode;
+	}
 
-    public void setAllowedOffices(List<OfficeData> allowedOffices) {
-        this.allowedOffices = allowedOffices;
-    }
+	public AccountingRuleData(final AccountingRuleData accountingRuleData,
+			final List<GLAccountData> allowedAccounts, final List<OfficeData> allowedOffices) {
+		this.id = accountingRuleData.id;
+		this.officeId = accountingRuleData.officeId;
+		this.officeName = accountingRuleData.officeName;
+		this.accountToDebitId = accountingRuleData.accountToDebitId;
+		this.accountToCreditId = accountingRuleData.accountToCreditId;
+		this.name = accountingRuleData.name;
+		this.description = accountingRuleData.description;
+		this.systemDefined = accountingRuleData.systemDefined;
+		this.allowedOffices = allowedOffices;
+		this.allowedAccounts = allowedAccounts;
+		this.debitAccountName = accountingRuleData.debitAccountName;
+		this.creditAccountName = accountingRuleData.creditAccountName;
+		this.debitAccountGLCode = accountingRuleData.debitAccountGLCode;
+		this.creditAccountGLCode = accountingRuleData.creditAccountGLCode;
+	}
 
-    public void setAllowedAccounts(List<GLAccountData> allowedAccounts) {
-        this.allowedAccounts = allowedAccounts;
-    }
-
+	public AccountingRuleData(final List<GLAccountData> allowedAccounts, final List<OfficeData> allowedOffices) {
+		this.id = null;
+		this.officeId = null;
+		this.officeName = null;
+		this.accountToDebitId = null;
+		this.accountToCreditId = null;
+		this.name = null;
+		this.description = null;
+		this.systemDefined = false;
+		this.allowedOffices = allowedOffices;
+		this.allowedAccounts = allowedAccounts;
+		this.debitAccountName = null;
+		this.creditAccountName = null;
+		this.debitAccountGLCode = null;
+		this.creditAccountGLCode = null;
+	}
 }

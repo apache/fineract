@@ -512,4 +512,8 @@ public class CommandWrapper {
     public boolean isDisassociateClients() {
         return this.actionName.equalsIgnoreCase("DISASSOCIATECLIENTS");
     }
+
+	public boolean isAccountingRuleResource() {
+		return this.entityName.equalsIgnoreCase("ACCOUNTINGRULE");
+	}
 }
