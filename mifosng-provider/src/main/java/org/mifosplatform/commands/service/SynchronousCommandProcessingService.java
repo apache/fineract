@@ -395,7 +395,7 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
             } else if (wrapper.isUpdate()) {
                 handler = applicationContext.getBean("updateGroupCommandHandler", NewCommandSourceHandler.class);
             } else if (wrapper.isUnassignStaff()) {
-                handler = applicationContext.getBean("unassignStaffCommandHandler", NewCommandSourceHandler.class);
+                handler = applicationContext.getBean("unassignGroupStaffCommandHandler", NewCommandSourceHandler.class);
             } else if (wrapper.isDelete()) {
                 handler = applicationContext.getBean("deleteGroupCommandHandler", NewCommandSourceHandler.class);
             } else if (wrapper.isGroupActivation()) {

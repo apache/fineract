@@ -305,7 +305,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
 
     @Transactional
     @Override
-    public CommandProcessingResult unassignStaff(final Long grouptId, final JsonCommand command) {
+    public CommandProcessingResult unassignGroupOrCenterStaff(final Long grouptId, final JsonCommand command) {
 
         this.context.authenticatedUser();
 
