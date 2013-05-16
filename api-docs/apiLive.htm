@@ -5103,19 +5103,30 @@ POST loans/1?command=disburse
 Content-Type: application/json 
 Request Body:
 {
-    "locale": "en",
-    "dateFormat": "dd MMMM yyyy",
-    "actualDisbursementDate": "20 September 2011",
-    "note": "Any additional info related to disbursement of funds to applicant."
+  "dateFormat": "dd MMMM yyyy",
+  "locale": "en",
+  "actualDisbursementDate": "14 May 2013",
+  "paymentTypeId": "12",
+  "note": "",
+  "accountNumber": "accno123",
+  "checkNumber": "chec123",
+  "routingCode": "rou123",
+  "receiptNumber": "rec123",
+  "bankNumber": "ban123"
 }
 </code>
 					<code class="method-response">
 {
   "officeId": 1,
   "clientId": 1,
-  "loanId": 4,
-  "resourceId": 4,
+  "loanId": 1,
+  "resourceId": 1,
   "changes": {
+    "accountNumber": "accno123",
+    "checkNumber": "chec123",
+    "routingCode": "rou123",
+    "receiptNumber": "rec123",
+    "bankNumber": "ban123",
     "status": {
       "id": 300,
       "code": "loanStatusType.active",
@@ -5131,7 +5142,7 @@ Request Body:
     },
     "locale": "en",
     "dateFormat": "dd MMMM yyyy",
-    "actualDisbursementDate": "20 September 2011"
+    "actualDisbursementDate": "14 May 2013"
   }
 }
 					</code>
@@ -5155,8 +5166,8 @@ Content-Type: application/json
 {
   "officeId": 1,
   "clientId": 1,
-  "loanId": 4,
-  "resourceId": 4,
+  "loanId": 1,
+  "resourceId": 1,
   "changes": {
     "status": {
       "id": 200,
@@ -5314,11 +5325,17 @@ POST loans/5/transactions?command=repayment
 Content-Type: application/json
 Request Body:
 {
-	"locale": "en_GB",
-	"dateFormat": "dd MMMM yyyy",
-	"transactionDate": "14 May 2012",
-	"transactionAmount": "559.88",
-	"note": "Optional note related to the transaction."
+  "dateFormat": "dd MMMM yyyy",
+  "locale": "en",
+  "transactionDate": "14 May 2013",
+  "transactionAmount": "500.00",
+  "paymentTypeId": "12",
+  "note": "check payment",
+  "accountNumber": "acc123",
+  "checkNumber": "che123",
+  "routingCode": "rou123",
+  "receiptNumber": "rec123",
+  "bankNumber": "ban123"
 }
 					</code>
 					<code class="method-response">
@@ -5326,13 +5343,18 @@ Request Body:
   "officeId": 1,
   "clientId": 1,
   "loanId": 5,
-  "resourceId": 3,
+  "resourceId": 564,
   "changes": {
-    "transactionDate": "14 May 2012",
-    "transactionAmount": "559.88",
-    "locale": "en_GB",
+    "transactionDate": "14 May 2013",
+    "transactionAmount": "500.00",
+    "locale": "en",
     "dateFormat": "dd MMMM yyyy",
-    "note": "Optional note related to the transaction."
+    "note": "check payment",
+    "accountNumber": "acc123",
+    "checkNumber": "che123",
+    "routingCode": "rou123",
+    "receiptNumber": "rec123",
+    "bankNumber": "ban123"
   }
 }
 					</code>
@@ -7479,7 +7501,7 @@ GET https://DomainName/api/v1/loanproducts/{productId}
 							<td><div class="mifosXHeading2">Optional Fields</div></td>
 						</tr>
 						<tr class=alt>
-							<td>inArrearsTolerance, charges</td>
+							<td>inArrearsTolerance, charges,paymentChannelToFundSourceMappings</td>
 						</tr>
 
 						<tr class="matrixHeadingBG">
@@ -7559,7 +7581,17 @@ Request Body:
     "interestOnLoanAccountId":"34",
     "incomeFromFeeAccountId":"37",
     "incomeFromPenaltyAccountId":"35",
-    "writeOffAccountId":"41"
+    "writeOffAccountId":"41",
+    "paymentChannelToFundSourceMappings": [
+    {
+      "paymentTypeId": "14",
+      "fundSourceAccountId": "2"
+    },
+    {
+      "paymentTypeId": "14",
+      "fundSourceAccountId": "2"
+    }
+  ]
 }
 					</code>
 					<code class="method-response">
