@@ -188,7 +188,7 @@ public class GroupsApiResource {
     public String unassignLoanOfficer(@PathParam("groupId") final Long groupId, final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
-                .unassignStaff(groupId) //
+                .unassignGroupStaff(groupId) //
                 .withJson(apiRequestBodyAsJson) //
                 .build(); //
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
@@ -255,8 +255,12 @@ public class GroupsApiResource {
             final CommandWrapper commandRequest = builder.saveGroupCollectionSheet(groupId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
             return this.toApiJsonSerializer.serialize(result);
+        }else if (is(commandParam, "unassignStaff")) {
+            final CommandWrapper commandRequest = builder.unassignGroupStaff(groupId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            return this.toApiJsonSerializer.serialize(result);
         } else {
-            throw new UnrecognizedQueryParamException("command", commandParam, new Object[] { "activate", "generateCollectionSheet", "saveCollectionSheet" });
+            throw new UnrecognizedQueryParamException("command", commandParam, new Object[] { "activate", "generateCollectionSheet", "saveCollectionSheet", "unassignStaff" });
         }
         
     }

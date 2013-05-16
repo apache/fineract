@@ -22,7 +22,7 @@ public interface GroupingTypesWritePlatformService {
 
     CommandProcessingResult deleteGroup(Long groupId);
 
-    CommandProcessingResult unassignStaff(Long groupId, JsonCommand command);
+    CommandProcessingResult unassignGroupOrCenterStaff(Long groupId, JsonCommand command);
     
     CommandProcessingResult associateClientsToGroup(Long groupId, JsonCommand command);
     

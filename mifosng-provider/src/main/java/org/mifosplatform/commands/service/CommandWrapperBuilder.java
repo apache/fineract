@@ -884,7 +884,7 @@ public class CommandWrapperBuilder {
         return this;
     }
 
-    public CommandWrapperBuilder unassignStaff(final Long groupId) {
+    public CommandWrapperBuilder unassignGroupStaff(final Long groupId) {
         this.actionName = "UNASSIGNSTAFF";
         this.entityName = "GROUP";
         this.entityId = groupId;

@@ -14,18 +14,18 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class UnassignStaffCommandHandler implements NewCommandSourceHandler {
+public class UnassignStaffFromCenterCommandHandler implements NewCommandSourceHandler {
 
-    private final GroupingTypesWritePlatformService groupWritePlatformService;
+    private final GroupingTypesWritePlatformService writePlatformService;
 
     @Autowired
-    public UnassignStaffCommandHandler(final GroupingTypesWritePlatformService groupWritePlatformService) {
-        this.groupWritePlatformService = groupWritePlatformService;
+    public UnassignStaffFromCenterCommandHandler(final GroupingTypesWritePlatformService groupWritePlatformService) {
+        this.writePlatformService = groupWritePlatformService;
     }
 
     @Transactional
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.groupWritePlatformService.unassignStaff(command.entityId(), command);
+        return this.writePlatformService.unassignGroupOrCenterStaff(command.entityId(), command);
     }
 }
