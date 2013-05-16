@@ -367,7 +367,7 @@ public final class Client extends AbstractPersistable<Long> {
         this.displayName = nameBuilder.toString();
     }
 
-    private LocalDate getActivationLocalDate() {
+    public LocalDate getActivationLocalDate() {
         LocalDate activationLocalDate = null;
         if (this.activationDate != null) {
             activationLocalDate = LocalDate.fromDateFields(this.activationDate);
@@ -390,4 +390,5 @@ public final class Client extends AbstractPersistable<Long> {
     public Long officeId() {
         return this.office.getId();
     }
+    
 }
