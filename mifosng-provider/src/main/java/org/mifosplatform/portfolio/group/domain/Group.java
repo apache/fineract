@@ -244,7 +244,7 @@ public final class Group extends AbstractPersistable<Long> {
         return actualChanges;
     }
 
-    private LocalDate getActivationLocalDate() {
+    public LocalDate getActivationLocalDate() {
         LocalDate activationLocalDate = null;
         if (this.activationDate != null) {
             activationLocalDate = new LocalDate(this.activationDate);

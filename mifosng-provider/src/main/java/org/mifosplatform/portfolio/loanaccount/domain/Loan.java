@@ -942,6 +942,18 @@ public class Loan extends AbstractPersistable<Long> {
             final String errorMessage = "The date on which a loan is submitted cannot be in the future.";
             throw new InvalidLoanStateTransitionException("submittal", "cannot.be.a.future.date", errorMessage, getSubmittedOnDate());
         }
+        
+        if (!(client == null)){    
+        	if (getSubmittedOnDate().isBefore(client.getActivationLocalDate())) {
+        		final String errorMessage = "The date on which a loan is submitted cannot be earlier than client's activation date.";
+        		throw new InvalidLoanStateTransitionException("submittal", "cannot.be.before.client.activation.date", errorMessage, getSubmittedOnDate());
+        	}
+        }else if (!(group == null)){
+        	if (getSubmittedOnDate().isBefore(group.getActivationLocalDate())) {
+        		final String errorMessage = "The date on which a loan is submitted cannot be earlier than groups's activation date.";
+        		throw new InvalidLoanStateTransitionException("submittal", "cannot.be.before.group.activation.date", errorMessage, getSubmittedOnDate());
+        	}
+        }
 
         if (getSubmittedOnDate().isAfter(getExpectedDisbursedOnLocalDate())) {
             final String errorMessage = "The date on which a loan is submitted cannot be after its expected disbursement date: "
@@ -1067,6 +1079,18 @@ public class Loan extends AbstractPersistable<Long> {
         if (submittedOn.isAfter(DateUtils.getLocalDateOfTenant())) {
             final String errorMessage = "The date on which a loan is submitted cannot be in the future.";
             throw new InvalidLoanStateTransitionException("submittal", "cannot.be.a.future.date", errorMessage, submittedOn);
+        }
+
+        if (!(client == null)){    
+        	if (submittedOn.isBefore(client.getActivationLocalDate())) {
+        		final String errorMessage = "The date on which a loan is submitted cannot be earlier than client's activation date.";
+        		throw new InvalidLoanStateTransitionException("submittal", "cannot.be.before.client.activation.date", errorMessage, submittedOn);
+        	}
+        }else if (!(group == null)){
+        	if (submittedOn.isBefore(group.getActivationLocalDate())) {
+        		final String errorMessage = "The date on which a loan is submitted cannot be earlier than groups's activation date.";
+        		throw new InvalidLoanStateTransitionException("submittal", "cannot.be.before.group.activation.date", errorMessage, submittedOn);
+        	}
         }
 
         if (submittedOn.isAfter(getExpectedDisbursedOnLocalDate())) {
