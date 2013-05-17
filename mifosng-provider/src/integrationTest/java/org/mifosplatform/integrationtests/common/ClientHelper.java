@@ -13,7 +13,7 @@ public class ClientHelper {
     private static final String CREATE_CLIENT_URL = "/mifosng-provider/api/v1/clients?tenantIdentifier=default";
 
     public static Integer createClient(final RequestSpecification requestSpec, final ResponseSpecification responseSpec) {
-        return createClient(requestSpec, responseSpec, "04 March 2012");
+        return createClient(requestSpec, responseSpec, "04 March 2011");
     }
 
     public static Integer createClient(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
