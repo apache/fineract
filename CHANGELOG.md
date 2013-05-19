@@ -6,6 +6,8 @@ See VERSIONING (https://github.com/openMF/mifosx/blob/master/VERSIONING.md) for 
 Releases
 ===============
 
+1. 19 May 2013 - 1.1.2.RELEASE
+1. 12 May 2013 - 1.1.1.RELEASE
 1. 09 May 2013 - 1.1.0.RELEASE
 1. 08 May 2013 - 1.0.1.RELEASE
 1. 07 May 2013 - 1.0.0.RELEASE
@@ -16,6 +18,17 @@ Releases
 1. 10 April 2013 - 0.11.2.beta
 1. 05 April 2013 - 0.11.1.beta
 1. 05 April 2013 - 0.11.0.beta
+
+1.1.2.RELEASE
+=============
+Bug Release
+ - MIFOSX-353 - datetime column in custom table report causes violation
+ - MIFOSX-364 - New loan application save button restriction
+
+1.1.1.RELEASE
+=============
+Bug Release
+ - MIFOSX-348 - General API concepts do not work for paginated endpoints
 
 1.1.0.RELEASE
 =============
