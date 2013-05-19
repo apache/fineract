@@ -26,7 +26,7 @@ The mifos-platform (project named 'Mifos X') has reached <b>public release versi
 
 That means there is a published and stable API. This API is documented in the api-docs under <b>Full API Matrix</b>.
 
-Latest stable release: <a target="_blank" href="https://github.com/openMF/mifosx/tree/mifosplatform-1.1.0" title="mifosplatform-1.1.0">mifosplatform-1.1.0</a>
+Latest stable release: <a target="_blank" href="https://github.com/openMF/mifosx/tree/mifosplatform-1.1.2" title="mifosplatform-1.1.2">mifosplatform-1.1.2</a>
 
 License
 =============
@@ -36,7 +36,7 @@ This project is licensed under the open source MPL V2. See https://github.com/op
 Mifos Platform API
 =====================
 
-<a target="_blank" href="https://demo.openmf.org/api-docs/apiLive.htm" title="mifos platform api beta 1">API Documentation (Demo Server)</a>
+<a target="_blank" href="https://demo.openmf.org/api-docs/apiLive.htm" title="mifos platform api">API Documentation (Demo Server)</a>
 
 
 Online Demos
