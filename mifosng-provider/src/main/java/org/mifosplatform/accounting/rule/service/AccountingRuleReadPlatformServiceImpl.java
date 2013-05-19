@@ -35,10 +35,17 @@ public class AccountingRuleReadPlatformServiceImpl implements AccountingRuleRead
 
         public AccountingRuleMapper() {
             final StringBuilder sqlBuilder = new StringBuilder(400);
-            sqlBuilder.append("select rule.id as id,rule.name as name, rule.office_id as officeId,office.name as officeName,")
+            sqlBuilder.append(" rule.id as id,rule.name as name, rule.office_id as officeId,office.name as officeName,")
                     .append(" rule.debit_account_id as debitAccountId,rule.credit_account_id as creditAccountId,")
-                    .append(" rule.description as description, rule.system_defined as systemDefined ").append("from ")
-                    .append(" acc_accounting_rule rule left join m_office office on rule.office_id=office.id");
+                    .append(" rule.description as description, rule.system_defined as systemDefined, ")
+                    .append("debitAccount.glName as debitAccountName, debitAccount.glCode as debitAccountGLCode,")
+                    .append("creditAccount.glName as creditAccountName, creditAccount.glCode as creditAccountGLCode ")
+                    .append("from (Select gl.id as id,gl.name as glName, gl.gl_code as glCode from acc_gl_account gl,acc_accounting_rule rule ")
+                    .append("where gl.id=rule.debit_account_id ) as debitAccount,")
+                    .append("(Select gl.id as id,gl.name as glName, gl.gl_code as glCode from acc_gl_account gl,acc_accounting_rule rule ")
+                    .append("where gl.id=rule.credit_account_id ) as creditAccount,")
+                    .append("acc_accounting_rule rule left join m_office office on rule.office_id=office.id ")
+            		.append("where debitAccount.id=rule.debit_account_id and creditAccount.id = rule.credit_account_id");
             this.schemaSql = sqlBuilder.toString();
         }
 
@@ -57,17 +64,27 @@ public class AccountingRuleReadPlatformServiceImpl implements AccountingRuleRead
             final Long accountToDebitId = rs.getLong("debitAccountId");
             final Long accountToCreditId = rs.getLong("creditAccountId");
             final boolean systemDefined = rs.getBoolean("systemDefined");
+            final String debitAccountName = rs.getString("debitAccountName");
+        	final String creditAccountName = rs.getString("creditAccountName");
+        	final String debitAccountGLCode = rs.getString("debitAccountGLCode");
+        	final String creditAccountGLCode = rs.getString("creditAccountGLCode");
 
-            return new AccountingRuleData(id, officeId, officeName, accountToDebitId, accountToCreditId, name, description, systemDefined);
+            return new AccountingRuleData(id, officeId, officeName, accountToDebitId, accountToCreditId, name, description, systemDefined,
+            		debitAccountName, creditAccountName, debitAccountGLCode, creditAccountGLCode);
         }
     }
 
     @Override
     public List<AccountingRuleData> retrieveAllAccountingRules(Long officeId) {
         final AccountingRuleMapper rm = new AccountingRuleMapper();
-        String sql = "select " + rm.schema() + " where system_defined=0 and office.id = ?";
-        sql = sql + " order by rule.id asc";
-        return this.jdbcTemplate.query(sql, rm, new Object[] { officeId });
+        if(officeId != null) {
+	        String sql = "select " + rm.schema() + " where system_defined=0 and office.id = ?";
+	        sql = sql + " order by rule.id asc";
+	        return this.jdbcTemplate.query(sql, rm, new Object[] { officeId });
+        }
+		String sql = "select " + rm.schema() + " and system_defined=0 ";
+		sql = sql + " order by rule.id asc";
+		return this.jdbcTemplate.query(sql, rm, new Object[] {});
     }
 
     @Override
@@ -75,7 +92,7 @@ public class AccountingRuleReadPlatformServiceImpl implements AccountingRuleRead
         try {
 
             final AccountingRuleMapper rm = new AccountingRuleMapper();
-            final String sql = "select " + rm.schema() + " and glClosure.id = ?";
+            final String sql = "select " + rm.schema() + " and rule.id = ?";
 
             final AccountingRuleData accountingRuleData = this.jdbcTemplate.queryForObject(sql, rm, new Object[] { accountingRuleId });
             return accountingRuleData;
@@ -83,5 +100,11 @@ public class AccountingRuleReadPlatformServiceImpl implements AccountingRuleRead
             throw new AccountingRuleNotFoundException(accountingRuleId);
         }
     }
+
+	@Override
+	public AccountingRuleData retrieveNewAccountingRuleDetails() {
+		// Modify if any default values required
+		return null;
+	}
 
 }

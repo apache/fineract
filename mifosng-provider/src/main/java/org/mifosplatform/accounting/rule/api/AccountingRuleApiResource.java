@@ -5,7 +5,6 @@
  */
 package org.mifosplatform.accounting.rule.api;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -75,6 +74,21 @@ public class AccountingRuleApiResource {
         this.officeReadPlatformService = officeReadPlatformService;
         this.accountReadPlatformService = accountReadPlatformService;
     }
+    
+    @GET
+	@Path("template")
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public String retrieveTemplate(@Context final UriInfo uriInfo) {
+		
+		context.authenticatedUser().validateHasReadPermission(resourceNameForPermission);
+		
+		AccountingRuleData accountingRuleData = this.accountingRuleReadPlatformService.retrieveNewAccountingRuleDetails();
+		accountingRuleData = handleTemplate(accountingRuleData);
+		
+		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+		return this.apiJsonSerializerService.serialize(settings, accountingRuleData, RESPONSE_DATA_PARAMETERS);
+	}
 
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
@@ -98,11 +112,9 @@ public class AccountingRuleApiResource {
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 
-        final AccountingRuleData accountingRuleData = this.accountingRuleReadPlatformService.retrieveAccountingRuleById(accountingRuleId);
+        AccountingRuleData accountingRuleData = this.accountingRuleReadPlatformService.retrieveAccountingRuleById(accountingRuleId);
         if (settings.isTemplate()) {
-            accountingRuleData.setAllowedOffices(new ArrayList<OfficeData>(this.officeReadPlatformService.retrieveAllOfficesForDropdown()));
-            accountingRuleData.setAllowedAccounts(new ArrayList<GLAccountData>(this.accountReadPlatformService
-                    .retrieveAllEnabledDetailGLAccounts()));
+        	accountingRuleData = handleTemplate(accountingRuleData);
         }
 
         return this.apiJsonSerializerService.serialize(settings, accountingRuleData, RESPONSE_DATA_PARAMETERS);
@@ -145,4 +157,13 @@ public class AccountingRuleApiResource {
 
         return this.apiJsonSerializerService.serialize(result);
     }
+	
+	private AccountingRuleData handleTemplate(AccountingRuleData accountingRuleData) {
+		List<GLAccountData> allowedAccounts = this.accountReadPlatformService.retrieveAllEnabledDetailGLAccounts();
+		List<OfficeData> allowedOffices = (List<OfficeData>) this.officeReadPlatformService.retrieveAllOfficesForDropdown();
+		if (accountingRuleData == null) {
+			return new AccountingRuleData(allowedAccounts, allowedOffices);
+		}
+		return new AccountingRuleData(accountingRuleData, allowedAccounts, allowedOffices);
+	}
 }

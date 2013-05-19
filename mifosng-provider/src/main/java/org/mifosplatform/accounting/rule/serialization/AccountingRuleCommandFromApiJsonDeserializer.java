@@ -10,7 +10,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
-import org.mifosplatform.accounting.closure.api.GLClosureJsonInputParams;
 import org.mifosplatform.accounting.rule.api.AccountingRuleJsonInputParams;
 import org.mifosplatform.accounting.rule.command.AccountingRuleCommand;
 import org.mifosplatform.infrastructure.core.exception.InvalidJsonException;
@@ -43,7 +42,7 @@ public final class AccountingRuleCommandFromApiJsonDeserializer extends Abstract
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        final Set<String> supportedParameters = GLClosureJsonInputParams.getAllValues();
+        final Set<String> supportedParameters = AccountingRuleJsonInputParams.getAllValues();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, supportedParameters);
 
         final JsonElement element = this.fromApiJsonHelper.parse(json);

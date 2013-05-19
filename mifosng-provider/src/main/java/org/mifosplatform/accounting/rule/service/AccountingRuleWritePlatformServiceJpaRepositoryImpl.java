@@ -123,17 +123,17 @@ public class AccountingRuleWritePlatformServiceJpaRepositoryImpl implements Acco
         final AccountingRule accountingRule = this.accountingRuleRepositoryWrapper.findOneWithNotFoundDetection(accountingRuleId);
         final Map<String, Object> changesOnly = accountingRule.update(command);
 
-        if (changesOnly.containsKey(AccountingRuleJsonInputParams.ACCOUNT_TO_DEBIT.getValue())) {
+        if (accountToDebitId != null && changesOnly.containsKey(AccountingRuleJsonInputParams.ACCOUNT_TO_DEBIT.getValue())) {
             final GLAccount accountToDebit = accountRepositoryWrapper.findOneWithNotFoundDetection(accountToDebitId);
             accountingRule.setAccountToDebit(accountToDebit);
         }
 
-        if (changesOnly.containsKey(AccountingRuleJsonInputParams.ACCOUNT_TO_CREDIT.getValue())) {
+        if (accountToCreditId != null && changesOnly.containsKey(AccountingRuleJsonInputParams.ACCOUNT_TO_CREDIT.getValue())) {
             final GLAccount accountToCredit = accountRepositoryWrapper.findOneWithNotFoundDetection(accountToCreditId);
             accountingRule.setAccountToCredit(accountToCredit);
         }
 
-        if (changesOnly.containsKey(AccountingRuleJsonInputParams.OFFICE_ID.getValue())) {
+        if (officeId != null && changesOnly.containsKey(AccountingRuleJsonInputParams.OFFICE_ID.getValue())) {
             final Office userOffice = this.officeRepository.findOne(officeId);
             if (userOffice == null) { throw new OfficeNotFoundException(officeId); }
             accountingRule.setOffice(userOffice);
