@@ -5,6 +5,7 @@
  */
 package org.mifosplatform.accounting.journalentry.command;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,18 +23,35 @@ public class JournalEntryCommand {
     private final LocalDate transactionDate;
     private final String comments;
     private final String referenceNumber;
+    private final Boolean isPredefinedRuleEntry;
+    private final Long accountingRuleId;
+    private final BigDecimal amount;
 
     private final SingleDebitOrCreditEntryCommand[] credits;
     private final SingleDebitOrCreditEntryCommand[] debits;
 
     public JournalEntryCommand(final Long officeId, final LocalDate transactionDate, final String comments,
-            final SingleDebitOrCreditEntryCommand[] credits, final SingleDebitOrCreditEntryCommand[] debits, final String referenceNumber) {
+            final SingleDebitOrCreditEntryCommand[] credits, final SingleDebitOrCreditEntryCommand[] debits,
+            final String referenceNumber, final Boolean isPredefinedRuleEntry, final Long accountingRuleId, final BigDecimal amount) {
         this.officeId = officeId;
         this.transactionDate = transactionDate;
         this.comments = comments;
         this.credits = credits;
         this.debits = debits;
         this.referenceNumber = referenceNumber;
+        this.isPredefinedRuleEntry = isPredefinedRuleEntry;
+        this.accountingRuleId = accountingRuleId;
+        this.amount = amount;
+    }
+
+    public JournalEntryCommand(final Long officeId, final LocalDate transactionDate, final String comments, final String referenceNumber,
+           final Boolean isPredefinedRuleEntry, final Long accountingRuleId, final BigDecimal amount) {
+        this(officeId, transactionDate, comments, null, null, referenceNumber, isPredefinedRuleEntry, accountingRuleId, amount);
+    }
+
+    public JournalEntryCommand(Long officeId, LocalDate transactionDate, String comments, SingleDebitOrCreditEntryCommand[] credits,
+            SingleDebitOrCreditEntryCommand[] debits, String referenceNumber, Boolean isPredefinedRuleEntry) {
+        this(officeId, transactionDate, comments, credits, debits, referenceNumber, isPredefinedRuleEntry, null,null);
     }
 
     public void validateForCreate() {
@@ -47,37 +65,45 @@ public class JournalEntryCommand {
         baseDataValidator.reset().parameter("officeId").value(this.officeId).notNull().integerGreaterThanZero();
 
         baseDataValidator.reset().parameter("comments").value(this.comments).ignoreIfNull().notExceedingLengthOf(500);
-
-        baseDataValidator.reset().parameter("credits").value(this.credits).notNull();
-
-        baseDataValidator.reset().parameter("debits").value(this.debits).notNull();
-
+        
+        baseDataValidator.reset().parameter("isPredefinedRuleEntry").value(this.isPredefinedRuleEntry).notNull();
+        
         baseDataValidator.reset().parameter("referenceNumber").value(this.referenceNumber).ignoreIfNull().notExceedingLengthOf(100);
-
-        // validation for credit array elements
-        if (this.credits != null) {
-            if (this.credits.length == 0) {
-                validateSingleDebitOrCredit(baseDataValidator, "credits", 0, new SingleDebitOrCreditEntryCommand(null, null, null, null));
-            } else {
-                int i = 0;
-                for (final SingleDebitOrCreditEntryCommand credit : this.credits) {
-                    validateSingleDebitOrCredit(baseDataValidator, "credits", i, credit);
-                    i++;
+        
+        if (!this.isPredefinedRuleEntry) {
+            
+            baseDataValidator.reset().parameter("credits").value(this.credits).notNull();
+            
+            baseDataValidator.reset().parameter("debits").value(this.debits).notNull();
+        
+            // validation for credit array elements
+            if (this.credits != null) {
+                if (this.credits.length == 0) {
+                    validateSingleDebitOrCredit(baseDataValidator, "credits", 0, new SingleDebitOrCreditEntryCommand(null, null, null, null));
+                } else {
+                    int i = 0;
+                    for (final SingleDebitOrCreditEntryCommand credit : this.credits) {
+                        validateSingleDebitOrCredit(baseDataValidator, "credits", i, credit);
+                        i++;
+                    }
                 }
             }
-        }
-
-        // validation for debit array elements
-        if (this.debits != null) {
-            if (this.debits.length == 0) {
-                validateSingleDebitOrCredit(baseDataValidator, "credits", 0, new SingleDebitOrCreditEntryCommand(null, null, null, null));
-            } else {
-                int i = 0;
-                for (final SingleDebitOrCreditEntryCommand debit : this.debits) {
-                    validateSingleDebitOrCredit(baseDataValidator, "debits", i, debit);
-                    i++;
+    
+            // validation for debit array elements
+            if (this.debits != null) {
+                if (this.debits.length == 0) {
+                    validateSingleDebitOrCredit(baseDataValidator, "credits", 0, new SingleDebitOrCreditEntryCommand(null, null, null, null));
+                } else {
+                    int i = 0;
+                    for (final SingleDebitOrCreditEntryCommand debit : this.debits) {
+                        validateSingleDebitOrCredit(baseDataValidator, "debits", i, debit);
+                        i++;
+                    }
                 }
             }
+        } else {
+            baseDataValidator.reset().parameter("accountingRule").value(this.accountingRuleId).notNull().longGreaterThanZero();
+            baseDataValidator.reset().parameter("amount").value(this.amount).notNull().zeroOrPositiveAmount();
         }
 
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
@@ -119,6 +145,10 @@ public class JournalEntryCommand {
 
     public String getReferenceNumber() {
         return this.referenceNumber;
+    }
+
+    public Boolean getIsPredefinedRuleEntry() {
+        return this.isPredefinedRuleEntry;
     }
 
 }

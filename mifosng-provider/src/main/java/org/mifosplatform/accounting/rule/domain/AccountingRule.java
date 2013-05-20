@@ -147,4 +147,8 @@ public class AccountingRule extends AbstractPersistable<Long> {
         this.accountToCredit = accountToCredit;
     }
 
+    public String getDescription() {
+        return this.description;
+    }
+
 }
