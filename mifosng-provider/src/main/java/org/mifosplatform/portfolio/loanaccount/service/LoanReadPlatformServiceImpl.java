@@ -206,7 +206,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         String sqlQueryCriteria = searchParameters.getSqlSearch();
         if (StringUtils.isNotBlank(sqlQueryCriteria)) {
             sqlQueryCriteria = sqlQueryCriteria.replaceAll("accountNo", "l.account_no");
-            sqlBuilder.append(" where (").append(sqlQueryCriteria).append(")");
+            sqlBuilder.append(" and (").append(sqlQueryCriteria).append(")");
         }
 
         if (StringUtils.isNotBlank(searchParameters.getExternalId())) {
