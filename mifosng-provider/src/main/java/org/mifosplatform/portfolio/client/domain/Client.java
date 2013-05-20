@@ -168,7 +168,14 @@ public final class Client extends AbstractPersistable<Long> {
         }
 
         deriveDisplayName();
-        validateNameParts();
+        validate();
+    }
+
+    private void validate() {
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        validateNameParts(dataValidationErrors);
+        validateActivationDate(dataValidationErrors);
+        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
     }
 
     public boolean isAccountNumberRequiresAutoGeneration() {
@@ -218,6 +225,8 @@ public final class Client extends AbstractPersistable<Long> {
 
         this.activationDate = activationLocalDate.toDate();
         this.status = ClientStatus.ACTIVE.getValue();
+
+        validate();
     }
 
     public boolean isNotActive() {
@@ -286,8 +295,6 @@ public final class Client extends AbstractPersistable<Long> {
             this.fullname = newValue;
         }
 
-        validateNameParts();
-
         final String dateFormatAsInput = command.dateFormat();
         final String localeAsInput = command.locale();
 
@@ -301,14 +308,14 @@ public final class Client extends AbstractPersistable<Long> {
             this.activationDate = newValue.toDate();
         }
 
+        validate();
+
         deriveDisplayName();
 
         return actualChanges;
     }
 
-    private void validateNameParts() {
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
-
+    private void validateNameParts(final List<ApiParameterError> dataValidationErrors) {
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("client");
 
         if (StringUtils.isNotBlank(this.fullname)) {
@@ -331,7 +338,9 @@ public final class Client extends AbstractPersistable<Long> {
             baseDataValidator.reset().parameter(ClientApiConstants.lastnameParamName).value(this.lastname).notBlank()
                     .notExceedingLengthOf(50);
         }
+    }
 
+    private void validateActivationDate(final List<ApiParameterError> dataValidationErrors) {
         if (this.activationDate != null) {
             if (office.isOpeningDateAfter(getActivationLocalDate())) {
                 final String defaultUserMessage = "Client activation date cannot be a date before the office opening date.";
@@ -341,8 +350,6 @@ public final class Client extends AbstractPersistable<Long> {
                 dataValidationErrors.add(error);
             }
         }
-
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
     }
 
     private void deriveDisplayName() {
