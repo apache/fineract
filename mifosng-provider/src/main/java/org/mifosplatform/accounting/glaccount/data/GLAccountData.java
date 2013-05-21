@@ -126,5 +126,45 @@ public class GLAccountData {
         final CodeValueData tagId = null;
         return new GLAccountData(id, name, parentId, glCode, disabled, manualEntriesAllowed, type, usage, description, nameDecorated, tagId);
     }
+    
+    public GLAccountData(final Long id, final String name, final String glCode) {
+    	this.id = id;
+        this.name = name;
+        this.parentId = null;
+        this.glCode = glCode;
+        this.disabled = false;
+        this.manualEntriesAllowed = false;
+        this.type = null;
+        this.usage = null;
+        this.description = null;
+        this.nameDecorated = null;
+        this.tagId = null;
+        this.accountTypeOptions = null;
+        this.usageOptions = null;
+        this.assetHeaderAccountOptions = null;
+        this.liabilityHeaderAccountOptions = null;
+        this.equityHeaderAccountOptions = null;
+        this.incomeHeaderAccountOptions = null;
+        this.expenseHeaderAccountOptions = null;
+        this.allowedAssetsTagOptions = null;
+        this.allowedLiabilitiesTagOptions = null;
+        this.allowedEquityTagOptions=null;
+        this.allowedIncomeTagOptions=null;
+        this.allowedExpensesTagOptions=null;
+	}
+
+	public Long getId() {
+		return this.id;
+	}
+
+	public String getName() {
+		return this.name;
+	}
+
+	public String getGlCode() {
+		return this.glCode;
+	}
+    
+    
 
 }

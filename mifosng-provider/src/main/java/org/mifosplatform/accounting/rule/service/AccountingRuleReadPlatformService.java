@@ -15,6 +15,4 @@ public interface AccountingRuleReadPlatformService {
 
     AccountingRuleData retrieveAccountingRuleById(long accountingRuleId);
 
-	AccountingRuleData retrieveNewAccountingRuleDetails();
-
 }

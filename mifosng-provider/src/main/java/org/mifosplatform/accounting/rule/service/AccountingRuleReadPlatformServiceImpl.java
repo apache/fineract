@@ -9,6 +9,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
+import org.mifosplatform.accounting.glaccount.data.GLAccountData;
 import org.mifosplatform.accounting.rule.data.AccountingRuleData;
 import org.mifosplatform.accounting.rule.exception.AccountingRuleNotFoundException;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
@@ -35,7 +36,7 @@ public class AccountingRuleReadPlatformServiceImpl implements AccountingRuleRead
 
         public AccountingRuleMapper() {
             final StringBuilder sqlBuilder = new StringBuilder(400);
-            sqlBuilder.append(" rule.id as id,rule.name as name, rule.office_id as officeId,office.name as officeName,")
+            sqlBuilder.append("distinct rule.id as id,rule.name as name, rule.office_id as officeId,office.name as officeName,")
                     .append(" rule.debit_account_id as debitAccountId,rule.credit_account_id as creditAccountId,")
                     .append(" rule.description as description, rule.system_defined as systemDefined, ")
                     .append("debitAccount.glName as debitAccountName, debitAccount.glCode as debitAccountGLCode,")
@@ -68,23 +69,25 @@ public class AccountingRuleReadPlatformServiceImpl implements AccountingRuleRead
         	final String creditAccountName = rs.getString("creditAccountName");
         	final String debitAccountGLCode = rs.getString("debitAccountGLCode");
         	final String creditAccountGLCode = rs.getString("creditAccountGLCode");
+        	
+        	final GLAccountData debitAccountData = new GLAccountData(accountToDebitId, debitAccountName, debitAccountGLCode);
+        	final GLAccountData creditAccountData = new GLAccountData(accountToCreditId, creditAccountName, creditAccountGLCode);
 
-            return new AccountingRuleData(id, officeId, officeName, accountToDebitId, accountToCreditId, name, description, systemDefined,
-            		debitAccountName, creditAccountName, debitAccountGLCode, creditAccountGLCode);
+            return new AccountingRuleData(id, officeId, officeName, name, description, systemDefined, debitAccountData, creditAccountData);
         }
     }
 
     @Override
     public List<AccountingRuleData> retrieveAllAccountingRules(Long officeId) {
         final AccountingRuleMapper rm = new AccountingRuleMapper();
+        Object[] arguments = new Object[]{};
+        String sql = "select " + rm.schema() +" and system_defined=0 ";
         if(officeId != null) {
-	        String sql = "select " + rm.schema() + " where system_defined=0 and office.id = ?";
-	        sql = sql + " order by rule.id asc";
-	        return this.jdbcTemplate.query(sql, rm, new Object[] { officeId });
+	        sql = sql +" and office.id = ?";
+	        arguments = new Object[] { officeId };
         }
-		String sql = "select " + rm.schema() + " and system_defined=0 ";
 		sql = sql + " order by rule.id asc";
-		return this.jdbcTemplate.query(sql, rm, new Object[] {});
+		return this.jdbcTemplate.query(sql, rm, arguments);
     }
 
     @Override
@@ -100,11 +103,4 @@ public class AccountingRuleReadPlatformServiceImpl implements AccountingRuleRead
             throw new AccountingRuleNotFoundException(accountingRuleId);
         }
     }
-
-	@Override
-	public AccountingRuleData retrieveNewAccountingRuleDetails() {
-		// Modify if any default values required
-		return null;
-	}
-
 }
