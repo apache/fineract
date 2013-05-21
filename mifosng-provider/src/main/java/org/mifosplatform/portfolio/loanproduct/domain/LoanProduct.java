@@ -165,6 +165,10 @@ public class LoanProduct extends AbstractPersistable<Long> {
         this.transactionProcessingStrategy = strategy;
     }
 
+    public boolean hasCurrencyCodeOf(final String currencyCode) {
+        return this.loanProductRelatedDetail.hasCurrencyCodeOf(currencyCode);
+    }
+
     public boolean update(final List<Charge> newProductCharges) {
         if (newProductCharges == null) return false;
 

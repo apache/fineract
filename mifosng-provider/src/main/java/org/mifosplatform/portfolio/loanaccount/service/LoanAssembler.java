@@ -45,6 +45,7 @@ import org.mifosplatform.portfolio.loanaccount.loanschedule.service.LoanSchedule
 import org.mifosplatform.portfolio.loanproduct.domain.LoanProduct;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanProductRepository;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanTransactionProcessingStrategy;
+import org.mifosplatform.portfolio.loanproduct.exception.InvalidCurrencyException;
 import org.mifosplatform.portfolio.loanproduct.exception.LoanProductNotFoundException;
 import org.mifosplatform.portfolio.loanproduct.service.LoanEnumerations;
 import org.mifosplatform.useradministration.domain.AppUser;
@@ -123,6 +124,12 @@ public class LoanAssembler {
         }
         final Set<LoanCollateral> collateral = this.loanCollateralAssembler.fromParsedJson(element);
         final Set<LoanCharge> loanCharges = this.loanChargeAssembler.fromParsedJson(element);
+        for (LoanCharge loanCharge : loanCharges) {
+            if (!loanProduct.hasCurrencyCodeOf(loanCharge.currencyCode())) {
+                final String errorMessage = "Charge and Loan must have the same currency.";
+                throw new InvalidCurrencyException("loanCharge", "attach.to.loan", errorMessage);
+            }
+        }
 
         final BigDecimal inArrearsTolerance = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("inArrearsTolerance", element);
         final LoanSchedule loanSchedule = this.loanScheduleAssembler.fromJson(element, inArrearsTolerance);
