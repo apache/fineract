@@ -328,9 +328,8 @@ public final class Client extends AbstractPersistable<Long> {
 
             baseDataValidator.reset().parameter(ClientApiConstants.lastnameParamName).value(this.lastname)
                     .mustBeBlankWhenParameterProvided(ClientApiConstants.fullnameParamName, this.fullname);
-        }
+        } else {
 
-        if (StringUtils.isBlank(this.fullname)) {
             baseDataValidator.reset().parameter(ClientApiConstants.firstnameParamName).value(this.firstname).notBlank()
                     .notExceedingLengthOf(50);
             baseDataValidator.reset().parameter(ClientApiConstants.middlenameParamName).value(this.middlename).ignoreIfNull()
