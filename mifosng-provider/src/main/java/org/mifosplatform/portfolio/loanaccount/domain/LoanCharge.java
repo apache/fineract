@@ -88,21 +88,10 @@ public class LoanCharge extends AbstractPersistable<Long> {
     public static LoanCharge createNewFromJson(final Loan loan, final Charge chargeDefinition, final JsonCommand command) {
 
         final BigDecimal amount = command.bigDecimalValueOfParameterNamed("amount");
-        // final Integer chargeTimeType =
-        // command.integerValueOfParameterNamed("chargeTimeType");
-        // final Integer chargeCalculationType =
-        // command.integerValueOfParameterNamed("chargeCalculationType");
         final LocalDate dueDate = command.localDateValueOfParameterNamed("dueDate");
 
         ChargeTimeType chargeTime = null;
-        // if (chargeTimeType != null) {
-        // chargeTime = ChargeTimeType.fromInt(chargeTimeType);
-        // }
         ChargeCalculationType chargeCalculation = null;
-        // if (chargeCalculationType != null) {
-        // chargeCalculation =
-        // ChargeCalculationType.fromInt(chargeCalculationType);
-        // }
 
         return new LoanCharge(loan, chargeDefinition, loan.getPrincpal().getAmount(), amount, chargeTime, chargeCalculation, dueDate);
     }
@@ -285,28 +274,6 @@ public class LoanCharge extends AbstractPersistable<Long> {
 
         final String dateFormatAsInput = command.dateFormat();
         final String localeAsInput = command.locale();
-
-        // final String chargeTimeParamName = "chargeTime";
-        // if (command.isChangeInIntegerParameterNamed(chargeTimeParamName,
-        // this.chargeTime)) {
-        // final Integer newValue =
-        // command.integerValueOfParameterNamed(chargeTimeParamName);
-        // actualChanges.put(chargeTimeParamName, newValue);
-        // actualChanges.put("locale", localeAsInput);
-        // this.chargeTime = ChargeTimeType.fromInt(newValue).getValue();
-        // }
-        //
-        // final String chargeCalculationParamName = "chargeCalculation";
-        // if
-        // (command.isChangeInIntegerParameterNamed(chargeCalculationParamName,
-        // this.chargeCalculation)) {
-        // final Integer newValue =
-        // command.integerValueOfParameterNamed(chargeCalculationParamName);
-        // actualChanges.put(chargeCalculationParamName, newValue);
-        // actualChanges.put("locale", localeAsInput);
-        // this.chargeCalculation =
-        // ChargeCalculationType.fromInt(newValue).getValue();
-        // }
 
         final String dueDateParamName = "dueDate";
         if (command.isChangeInLocalDateParameterNamed(dueDateParamName, getDueLocalDate())) {
@@ -509,6 +476,10 @@ public class LoanCharge extends AbstractPersistable<Long> {
 
     public String name() {
         return this.charge.getName();
+    }
+
+    public String currencyCode() {
+        return this.charge.getCurrencyCode();
     }
 
     @Override
