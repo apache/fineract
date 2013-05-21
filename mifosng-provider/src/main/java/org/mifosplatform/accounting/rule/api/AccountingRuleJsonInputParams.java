@@ -12,7 +12,7 @@ import java.util.Set;
  * Enum of all parameters passed in while creating/updating a loan product
  ***/
 public enum AccountingRuleJsonInputParams {
-    ID("id"), OFFICE_ID("officeId"), ACCOUNT_TO_DEBIT("accountToDebitId"), ACCOUNT_TO_CREDIT("accountToCreditId"), NAME("name"), DESCRIPTION(
+    ID("id"), OFFICE_ID("officeId"), ACCOUNT_TO_DEBIT("debitAccountHead"), ACCOUNT_TO_CREDIT("creditAccountHead"), NAME("name"), DESCRIPTION(
             "description"), SYSTEM_DEFINED("systemDefined");
 
     private final String value;

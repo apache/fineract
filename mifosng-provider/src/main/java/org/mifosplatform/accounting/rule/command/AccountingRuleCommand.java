@@ -62,9 +62,9 @@ public class AccountingRuleCommand {
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("AccountingRule");
 
         baseDataValidator.reset().parameter(AccountingRuleJsonInputParams.ACCOUNT_TO_DEBIT.getValue()).value(this.accountToDebitId)
-                .ignoreIfNull().integerGreaterThanZero();
+                .ignoreIfNull().notBlank().integerGreaterThanZero();
         baseDataValidator.reset().parameter(AccountingRuleJsonInputParams.ACCOUNT_TO_CREDIT.getValue()).value(this.accountToCreditId)
-                .ignoreIfNull().integerGreaterThanZero();
+                .ignoreIfNull().notBlank().integerGreaterThanZero();
         baseDataValidator.reset().parameter(AccountingRuleJsonInputParams.OFFICE_ID.getValue()).value(this.officeId).ignoreIfNull()
                 .integerGreaterThanZero();
         baseDataValidator.reset().parameter(AccountingRuleJsonInputParams.NAME.getValue()).value(this.name).ignoreIfNull().notBlank()

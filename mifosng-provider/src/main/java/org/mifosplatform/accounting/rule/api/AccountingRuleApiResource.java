@@ -83,7 +83,7 @@ public class AccountingRuleApiResource {
 		
 		context.authenticatedUser().validateHasReadPermission(resourceNameForPermission);
 		
-		AccountingRuleData accountingRuleData = this.accountingRuleReadPlatformService.retrieveNewAccountingRuleDetails();
+		AccountingRuleData accountingRuleData = null;
 		accountingRuleData = handleTemplate(accountingRuleData);
 		
 		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
