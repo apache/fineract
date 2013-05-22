@@ -6,6 +6,7 @@ See VERSIONING (https://github.com/openMF/mifosx/blob/master/VERSIONING.md) for 
 Releases
 ===============
 
+1. 22 May 2013 - 1.1.3.RELEASE
 1. 19 May 2013 - 1.1.2.RELEASE
 1. 12 May 2013 - 1.1.1.RELEASE
 1. 09 May 2013 - 1.1.0.RELEASE
@@ -19,6 +20,23 @@ Releases
 1. 05 April 2013 - 0.11.1.beta
 1. 05 April 2013 - 0.11.0.beta
 
+1.1.3.RELEASE
+=============
+Bug Release
+
+Bug
+ - [MIFOSX-367] - Not able to figure out the loan details, if proper Account no. is entered in Search text field
+ - [MIFOSX-368] - To add a new client of client type "corporate" error message is showing "First name is mandatory" and Last name is mandatory" than Full name or Business name.
+ - [MIFOSX-369] - Client is getting activated before the date of opening of the related office.
+ - [MIFOSX-379] - For applying "New Loan Application", if loan product currency is in US Dollars the charges applied is in Indian Rupees also, it is accepting.
+ - [MIFOSX-380] - Smart search on Gaurantors is broken after change of clients api to paginated response
+
+Improvement
+
+  - [MIFOSX-359] - Edit functionality for "Code Values" not intuitive (and inconsistent with rest of the User Interface)
+  - [MIFOSX-360] - Inconsistent verbiage for "Cancel" button in "Add/Edit Code Value: " page
+  - [MIFOSX-363] - Background is broken in the middle of the table in "Client Loans Listing" page
+ 
 1.1.2.RELEASE
 =============
 Bug Release
