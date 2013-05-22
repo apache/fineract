@@ -29,6 +29,9 @@ import org.mifosplatform.accounting.journalentry.exception.JournalEntriesNotFoun
 import org.mifosplatform.accounting.journalentry.exception.JournalEntryInvalidException;
 import org.mifosplatform.accounting.journalentry.exception.JournalEntryInvalidException.GL_JOURNAL_ENTRY_INVALID_REASON;
 import org.mifosplatform.accounting.journalentry.serialization.JournalEntryCommandFromApiJsonDeserializer;
+import org.mifosplatform.accounting.rule.domain.AccountingRule;
+import org.mifosplatform.accounting.rule.domain.AccountingRuleRepository;
+import org.mifosplatform.accounting.rule.exception.AccountingRuleNotFoundException;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
@@ -55,12 +58,13 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
     private final AccountingProcessorForLoanFactory accountingProcessorForLoanFactory;
     private final AccountingProcessorHelper helper;
     private final JournalEntryCommandFromApiJsonDeserializer fromApiJsonDeserializer;
+    private final AccountingRuleRepository accountingRuleRepository;
 
     @Autowired
     public JournalEntryWritePlatformServiceJpaRepositoryImpl(final GLClosureRepository glClosureRepository,
             final JournalEntryRepository glJournalEntryRepository, final OfficeRepository officeRepository,
             final GLAccountRepository glAccountRepository, final JournalEntryCommandFromApiJsonDeserializer fromApiJsonDeserializer,
-            final AccountingProcessorHelper accountingProcessorHelper,
+            final AccountingProcessorHelper accountingProcessorHelper, final AccountingRuleRepository accountingRuleRepository,
             final AccountingProcessorForLoanFactory accountingProcessorForLoanFactory) {
         this.glClosureRepository = glClosureRepository;
         this.officeRepository = officeRepository;
@@ -69,6 +73,7 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
         this.glAccountRepository = glAccountRepository;
         this.accountingProcessorForLoanFactory = accountingProcessorForLoanFactory;
         this.helper = accountingProcessorHelper;
+        this.accountingRuleRepository = accountingRuleRepository;
     }
 
     @Transactional
@@ -82,18 +87,50 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
             final Long officeId = command.longValueOfParameterNamed(JournalEntryJsonInputParams.OFFICE_ID.getValue());
             final Office office = this.officeRepository.findOne(officeId);
             if (office == null) { throw new OfficeNotFoundException(officeId); }
-
+            
+            final boolean isPredefinedRuleEntry = command.booleanPrimitiveValueOfParameterNamed(JournalEntryJsonInputParams.IS_PREDEFINED_RULE_ENTRY.getValue());
+            
             validateBusinessRulesForJournalEntries(journalEntryCommand);
 
             /** Set a transaction Id and save these Journal entries **/
             final Date transactionDate = command.DateValueOfParameterNamed(JournalEntryJsonInputParams.TRANSACTION_DATE.getValue());
             final String transactionId = generateTransactionId();
+            final String referenceNumber = journalEntryCommand.getReferenceNumber();
+            final boolean manualEntry = true;
 
-            saveAllDebitOrCreditEntries(journalEntryCommand, office, transactionDate, journalEntryCommand.getDebits(), transactionId,
-                    JournalEntryType.DEBIT);
+            if (isPredefinedRuleEntry) {
+                
+                final Long accountingRuleId = command.longValueOfParameterNamed(JournalEntryJsonInputParams.ACCOUNTING_RULE.getValue());
+                final BigDecimal amount = command.bigDecimalValueOfParameterNamed(JournalEntryJsonInputParams.AMOUNT.getValue());
+                final AccountingRule accountingRule = this.accountingRuleRepository.findOne(accountingRuleId);
+                if (accountingRule == null) { throw new AccountingRuleNotFoundException(accountingRuleId); }
+                final GLAccount creditAccountHead = accountingRule.getAccountToCredit();
+                validateGLAccountForTransaction(creditAccountHead);
+                final GLAccount debitAccountHead = accountingRule.getAccountToDebit();
+                validateGLAccountForTransaction(debitAccountHead);
+                String description = accountingRule.getDescription();
+                if (StringUtils.isNotBlank(journalEntryCommand.getComments())) {
+                    description = journalEntryCommand.getComments();
+                }
+                
+                JournalEntry creditEntry = JournalEntry.createNew(office, creditAccountHead, transactionId, manualEntry, transactionDate, 
+                        JournalEntryType.CREDIT, amount, description, null, null, referenceNumber);
+                this.glJournalEntryRepository.saveAndFlush(creditEntry);
+                
+                JournalEntry debitEntry = JournalEntry.createNew(office, debitAccountHead, transactionId, manualEntry, transactionDate, 
+                        JournalEntryType.DEBIT, amount, description, null, null, referenceNumber);
+                this.glJournalEntryRepository.saveAndFlush(debitEntry);
+                
+                
+            } else {
 
-            saveAllDebitOrCreditEntries(journalEntryCommand, office, transactionDate, journalEntryCommand.getCredits(), transactionId,
-                    JournalEntryType.CREDIT);
+                saveAllDebitOrCreditEntries(journalEntryCommand, office, transactionDate, journalEntryCommand.getDebits(), transactionId,
+                        JournalEntryType.DEBIT, referenceNumber);
+    
+                saveAllDebitOrCreditEntries(journalEntryCommand, office, transactionDate, journalEntryCommand.getCredits(), transactionId,
+                        JournalEntryType.CREDIT, referenceNumber);
+                
+            }
 
             return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withOfficeId(officeId)
                     .withTransactionId(transactionId).build();
@@ -101,6 +138,19 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
             handleJournalEntryDataIntegrityIssues(dve);
             return null;
         }
+    }
+
+    private void validateGLAccountForTransaction(GLAccount creditOrDebitAccountHead) {
+        /***
+         * validate that the account allows manual adjustments and is not
+         * disabled
+         **/
+        if (creditOrDebitAccountHead.isDisabled()) {
+            throw new JournalEntryInvalidException(GL_JOURNAL_ENTRY_INVALID_REASON.GL_ACCOUNT_DISABLED, null, creditOrDebitAccountHead.getName(),
+                    creditOrDebitAccountHead.getGlCode());
+        } else if (!creditOrDebitAccountHead.isManualEntriesAllowed()) { throw new JournalEntryInvalidException(
+                GL_JOURNAL_ENTRY_INVALID_REASON.GL_ACCOUNT_MANUAL_ENTRIES_NOT_PERMITTED, null, creditOrDebitAccountHead.getName(),
+                creditOrDebitAccountHead.getGlCode()); }
     }
 
     @Transactional
@@ -168,56 +218,48 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
             if (latestGLClosure.getClosingDate().after(transactionDate) || latestGLClosure.getClosingDate().equals(transactionDate)) { throw new JournalEntryInvalidException(
                     GL_JOURNAL_ENTRY_INVALID_REASON.ACCOUNTING_CLOSED, latestGLClosure.getClosingDate(), null, null); }
         }
-        /*** check if credits and debits are valid **/
-        final SingleDebitOrCreditEntryCommand[] credits = command.getCredits();
-        final SingleDebitOrCreditEntryCommand[] debits = command.getDebits();
-
-        // atleast one debit or credit must be present
-        if ((credits == null || credits.length <= 0) || (debits == null || debits.length <= 0)) { throw new JournalEntryInvalidException(
-                GL_JOURNAL_ENTRY_INVALID_REASON.NO_DEBITS_OR_CREDITS, null, null, null); }
-
-        // sum of all debits must be = sum of all credits
-        BigDecimal creditsSum = BigDecimal.ZERO;
-        BigDecimal debitsSum = BigDecimal.ZERO;
-        for (final SingleDebitOrCreditEntryCommand creditEntryCommand : credits) {
-            if (creditEntryCommand.getAmount() == null || creditEntryCommand.getGlAccountId() == null) { throw new JournalEntryInvalidException(
-                    GL_JOURNAL_ENTRY_INVALID_REASON.DEBIT_CREDIT_ACCOUNT_OR_AMOUNT_EMPTY, null, null, null); }
-            creditsSum = creditsSum.add(creditEntryCommand.getAmount());
+        if(!command.getIsPredefinedRuleEntry()) {
+            /*** check if credits and debits are valid **/
+            final SingleDebitOrCreditEntryCommand[] credits = command.getCredits();
+            final SingleDebitOrCreditEntryCommand[] debits = command.getDebits();
+    
+            // atleast one debit or credit must be present
+            if ((credits == null || credits.length <= 0) || (debits == null || debits.length <= 0)) { throw new JournalEntryInvalidException(
+                    GL_JOURNAL_ENTRY_INVALID_REASON.NO_DEBITS_OR_CREDITS, null, null, null); }
+    
+            // sum of all debits must be = sum of all credits
+            BigDecimal creditsSum = BigDecimal.ZERO;
+            BigDecimal debitsSum = BigDecimal.ZERO;
+            for (final SingleDebitOrCreditEntryCommand creditEntryCommand : credits) {
+                if (creditEntryCommand.getAmount() == null || creditEntryCommand.getGlAccountId() == null) { throw new JournalEntryInvalidException(
+                        GL_JOURNAL_ENTRY_INVALID_REASON.DEBIT_CREDIT_ACCOUNT_OR_AMOUNT_EMPTY, null, null, null); }
+                creditsSum = creditsSum.add(creditEntryCommand.getAmount());
+            }
+            for (final SingleDebitOrCreditEntryCommand debitEntryCommand : debits) {
+                if (debitEntryCommand.getAmount() == null || debitEntryCommand.getGlAccountId() == null) { throw new JournalEntryInvalidException(
+                        GL_JOURNAL_ENTRY_INVALID_REASON.DEBIT_CREDIT_ACCOUNT_OR_AMOUNT_EMPTY, null, null, null); }
+                debitsSum = debitsSum.add(debitEntryCommand.getAmount());
+            }
+            if (creditsSum.compareTo(debitsSum) != 0) { throw new JournalEntryInvalidException(
+                    GL_JOURNAL_ENTRY_INVALID_REASON.DEBIT_CREDIT_SUM_MISMATCH, null, null, null); }
         }
-        for (final SingleDebitOrCreditEntryCommand debitEntryCommand : debits) {
-            if (debitEntryCommand.getAmount() == null || debitEntryCommand.getGlAccountId() == null) { throw new JournalEntryInvalidException(
-                    GL_JOURNAL_ENTRY_INVALID_REASON.DEBIT_CREDIT_ACCOUNT_OR_AMOUNT_EMPTY, null, null, null); }
-            debitsSum = debitsSum.add(debitEntryCommand.getAmount());
-        }
-        if (creditsSum.compareTo(debitsSum) != 0) { throw new JournalEntryInvalidException(
-                GL_JOURNAL_ENTRY_INVALID_REASON.DEBIT_CREDIT_SUM_MISMATCH, null, null, null); }
     }
 
     private void saveAllDebitOrCreditEntries(final JournalEntryCommand command, final Office office, final Date transactionDate,
             final SingleDebitOrCreditEntryCommand[] singleDebitOrCreditEntryCommands, final String transactionId,
-            final JournalEntryType type) {
+            final JournalEntryType type, final String referenceNumber) {
         final boolean manualEntry = true;
         for (final SingleDebitOrCreditEntryCommand singleDebitOrCreditEntryCommand : singleDebitOrCreditEntryCommands) {
             final GLAccount glAccount = this.glAccountRepository.findOne(singleDebitOrCreditEntryCommand.getGlAccountId());
             if (glAccount == null) { throw new GLAccountNotFoundException(singleDebitOrCreditEntryCommand.getGlAccountId()); }
 
-            /***
-             * validate that the account allows manual adjustments and is not
-             * disabled
-             **/
-            if (glAccount.isDisabled()) {
-                throw new JournalEntryInvalidException(GL_JOURNAL_ENTRY_INVALID_REASON.GL_ACCOUNT_DISABLED, null, glAccount.getName(),
-                        glAccount.getGlCode());
-            } else if (!glAccount.isManualEntriesAllowed()) { throw new JournalEntryInvalidException(
-                    GL_JOURNAL_ENTRY_INVALID_REASON.GL_ACCOUNT_MANUAL_ENTRIES_NOT_PERMITTED, null, glAccount.getName(),
-                    glAccount.getGlCode()); }
+            validateGLAccountForTransaction(glAccount);
 
             String comments = command.getComments();
             if (!StringUtils.isBlank(singleDebitOrCreditEntryCommand.getComments())) {
                 comments = singleDebitOrCreditEntryCommand.getComments();
             }
             
-            String referenceNumber = command.getReferenceNumber();
             final JournalEntry glJournalEntry = JournalEntry.createNew(office, glAccount, transactionId, manualEntry, transactionDate,
                     type, singleDebitOrCreditEntryCommand.getAmount(), comments, null, null, referenceNumber);
             this.glJournalEntryRepository.saveAndFlush(glJournalEntry);

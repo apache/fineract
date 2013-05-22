@@ -13,7 +13,7 @@ import java.util.Set;
  ***/
 public enum JournalEntryJsonInputParams {
     OFFICE_ID("officeId"), TRANSACTION_DATE("transactionDate"), COMMENTS("comments"), CREDITS("credits"), DEBITS("debits"), LOCALE("locale"), DATE_FORMAT(
-            "dateFormat"), REFERENCE_NUMBER("referenceNumber") ;
+            "dateFormat"), REFERENCE_NUMBER("referenceNumber"),IS_PREDEFINED_RULE_ENTRY("isPredefinedRuleEntry"),ACCOUNTING_RULE("accountingRule"), AMOUNT("amount");
 
     private final String value;
 
