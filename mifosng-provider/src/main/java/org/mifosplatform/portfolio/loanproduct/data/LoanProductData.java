@@ -153,7 +153,7 @@ public class LoanProductData {
         final Long id = null;
         final String name = null;
         final String description = null;
-        final CurrencyData currency = null;
+        final CurrencyData currency = CurrencyData.blank();
         final BigDecimal principal = null;
         final BigDecimal minPrincipal = null;
         final BigDecimal maxPrincipal = null;
@@ -204,19 +204,10 @@ public class LoanProductData {
             final EnumOptionData interestCalculationPeriodType, final Long fundId, final String fundName,
             final Long transactionProcessingStrategyId, final String transactionProcessingStrategyName,
             final Collection<ChargeData> charges, final EnumOptionData accountingType) {
-
         this.id = id;
         this.name = name;
         this.description = description;
-        if (currency == null) {
-            if (this.currencyOptions != null && this.currencyOptions.size() == 1) {
-                this.currency = new ArrayList<CurrencyData>(this.currencyOptions).get(0);
-            } else {
-                this.currency = CurrencyData.blank();
-            }
-        } else {
-            this.currency = currency;
-        }
+        this.currency = currency;
         this.principal = principal;
         this.minPrincipal = minPrincipal;
         this.maxPrincipal = maxPrincipal;
