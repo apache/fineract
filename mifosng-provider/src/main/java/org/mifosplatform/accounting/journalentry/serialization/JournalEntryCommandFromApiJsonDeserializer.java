@@ -59,15 +59,16 @@ public final class JournalEntryCommandFromApiJsonDeserializer extends AbstractFr
                 JournalEntryJsonInputParams.TRANSACTION_DATE.getValue(), element);
         final String referenceNumber = this.fromApiJsonHelper.extractStringNamed(
         		JournalEntryJsonInputParams.REFERENCE_NUMBER.getValue(), element);
-        final Boolean isPredefinedRuleEntry = this.fromApiJsonHelper.extractBooleanNamed(JournalEntryJsonInputParams.IS_PREDEFINED_RULE_ENTRY.getValue(), element);
+        final Boolean isPredefinedRuleEntry = this.fromApiJsonHelper.extractBooleanNamed(JournalEntryJsonInputParams.USE_ACCOUNTING_RULE.getValue(), element);
+        final Boolean useAccountingRule = isPredefinedRuleEntry==null?false:isPredefinedRuleEntry;
 
         final JsonObject topLevelJsonElement = element.getAsJsonObject();
         final Locale locale = this.fromApiJsonHelper.extractLocaleParameter(topLevelJsonElement);
 
-        if(isPredefinedRuleEntry) {
+        if(useAccountingRule) {
             final Long accountingRuleId = this.fromApiJsonHelper.extractLongNamed(JournalEntryJsonInputParams.ACCOUNTING_RULE.getValue(), element);
             final BigDecimal amount = this.fromApiJsonHelper.extractBigDecimalNamed(JournalEntryJsonInputParams.AMOUNT.getValue(), element, locale);
-            return new JournalEntryCommand(officeId, transactionDate, comments, referenceNumber, isPredefinedRuleEntry, accountingRuleId, amount);
+            return new JournalEntryCommand(officeId, transactionDate, comments, referenceNumber, useAccountingRule, accountingRuleId, amount);
         }
         
         SingleDebitOrCreditEntryCommand[] credits = null;
@@ -82,7 +83,7 @@ public final class JournalEntryCommandFromApiJsonDeserializer extends AbstractFr
                 debits = populateCreditsOrDebitsArray(topLevelJsonElement, locale, debits, JournalEntryJsonInputParams.DEBITS.getValue());
             }
         }
-        return new JournalEntryCommand(officeId, transactionDate, comments, credits, debits, referenceNumber, isPredefinedRuleEntry);
+        return new JournalEntryCommand(officeId, transactionDate, comments, credits, debits, referenceNumber, useAccountingRule);
     }
 
     /**
