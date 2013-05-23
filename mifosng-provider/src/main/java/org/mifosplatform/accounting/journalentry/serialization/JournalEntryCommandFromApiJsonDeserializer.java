@@ -57,20 +57,24 @@ public final class JournalEntryCommandFromApiJsonDeserializer extends AbstractFr
         final String comments = this.fromApiJsonHelper.extractStringNamed(JournalEntryJsonInputParams.COMMENTS.getValue(), element);
         final LocalDate transactionDate = this.fromApiJsonHelper.extractLocalDateNamed(
                 JournalEntryJsonInputParams.TRANSACTION_DATE.getValue(), element);
-        final String referenceNumber = this.fromApiJsonHelper.extractStringNamed(
-        		JournalEntryJsonInputParams.REFERENCE_NUMBER.getValue(), element);
-        final Boolean isPredefinedRuleEntry = this.fromApiJsonHelper.extractBooleanNamed(JournalEntryJsonInputParams.USE_ACCOUNTING_RULE.getValue(), element);
-        final Boolean useAccountingRule = isPredefinedRuleEntry==null?false:isPredefinedRuleEntry;
+        final String referenceNumber = this.fromApiJsonHelper.extractStringNamed(JournalEntryJsonInputParams.REFERENCE_NUMBER.getValue(),
+                element);
+        final Boolean isPredefinedRuleEntry = this.fromApiJsonHelper.extractBooleanNamed(
+                JournalEntryJsonInputParams.USE_ACCOUNTING_RULE.getValue(), element);
+        final Boolean useAccountingRule = isPredefinedRuleEntry == null ? false : isPredefinedRuleEntry;
 
         final JsonObject topLevelJsonElement = element.getAsJsonObject();
         final Locale locale = this.fromApiJsonHelper.extractLocaleParameter(topLevelJsonElement);
 
-        if(useAccountingRule) {
-            final Long accountingRuleId = this.fromApiJsonHelper.extractLongNamed(JournalEntryJsonInputParams.ACCOUNTING_RULE.getValue(), element);
-            final BigDecimal amount = this.fromApiJsonHelper.extractBigDecimalNamed(JournalEntryJsonInputParams.AMOUNT.getValue(), element, locale);
-            return new JournalEntryCommand(officeId, transactionDate, comments, referenceNumber, useAccountingRule, accountingRuleId, amount);
+        if (useAccountingRule) {
+            final Long accountingRuleId = this.fromApiJsonHelper.extractLongNamed(JournalEntryJsonInputParams.ACCOUNTING_RULE.getValue(),
+                    element);
+            final BigDecimal amount = this.fromApiJsonHelper.extractBigDecimalNamed(JournalEntryJsonInputParams.AMOUNT.getValue(), element,
+                    locale);
+            return new JournalEntryCommand(officeId, transactionDate, comments, referenceNumber, useAccountingRule, accountingRuleId,
+                    amount);
         }
-        
+
         SingleDebitOrCreditEntryCommand[] credits = null;
         SingleDebitOrCreditEntryCommand[] debits = null;
         if (element.isJsonObject()) {
