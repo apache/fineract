@@ -23,7 +23,6 @@ public class JournalEntryCommand {
     private final LocalDate transactionDate;
     private final String comments;
     private final String referenceNumber;
-    private final Boolean useAccountingRule;
     private final Long accountingRuleId;
     private final BigDecimal amount;
 
@@ -32,26 +31,15 @@ public class JournalEntryCommand {
 
     public JournalEntryCommand(final Long officeId, final LocalDate transactionDate, final String comments,
             final SingleDebitOrCreditEntryCommand[] credits, final SingleDebitOrCreditEntryCommand[] debits,
-            final String referenceNumber, final Boolean useAccountingRule, final Long accountingRuleId, final BigDecimal amount) {
+            final String referenceNumber, final Long accountingRuleId, final BigDecimal amount) {
         this.officeId = officeId;
         this.transactionDate = transactionDate;
         this.comments = comments;
         this.credits = credits;
         this.debits = debits;
         this.referenceNumber = referenceNumber;
-        this.useAccountingRule = useAccountingRule;
         this.accountingRuleId = accountingRuleId;
         this.amount = amount;
-    }
-
-    public JournalEntryCommand(final Long officeId, final LocalDate transactionDate, final String comments, final String referenceNumber,
-           final Boolean useAccountingRule, final Long accountingRuleId, final BigDecimal amount) {
-        this(officeId, transactionDate, comments, null, null, referenceNumber, useAccountingRule, accountingRuleId, amount);
-    }
-
-    public JournalEntryCommand(Long officeId, LocalDate transactionDate, String comments, SingleDebitOrCreditEntryCommand[] credits,
-            SingleDebitOrCreditEntryCommand[] debits, String referenceNumber, Boolean useAccountingRule) {
-        this(officeId, transactionDate, comments, credits, debits, referenceNumber, useAccountingRule, null,null);
     }
 
     public void validateForCreate() {
@@ -66,11 +54,11 @@ public class JournalEntryCommand {
 
         baseDataValidator.reset().parameter("comments").value(this.comments).ignoreIfNull().notExceedingLengthOf(500);
         
-        baseDataValidator.reset().parameter("useAccountingRule").value(this.useAccountingRule).notNull();
-        
         baseDataValidator.reset().parameter("referenceNumber").value(this.referenceNumber).ignoreIfNull().notExceedingLengthOf(100);
         
-        if (!this.useAccountingRule) {
+        baseDataValidator.reset().parameter("accountingRule").value(this.accountingRuleId).ignoreIfNull().longGreaterThanZero();
+        
+        if (this.accountingRuleId == null) {
             
             baseDataValidator.reset().parameter("credits").value(this.credits).notNull();
             
@@ -102,7 +90,6 @@ public class JournalEntryCommand {
                 }
             }
         } else {
-            baseDataValidator.reset().parameter("accountingRule").value(this.accountingRuleId).notNull().longGreaterThanZero();
             baseDataValidator.reset().parameter("amount").value(this.amount).notNull().zeroOrPositiveAmount();
         }
 
@@ -147,8 +134,8 @@ public class JournalEntryCommand {
         return this.referenceNumber;
     }
 
-	public Boolean getUseAccountingRule() {
-		return this.useAccountingRule;
+	public Long getAccountingRuleId() {
+		return this.accountingRuleId;
 	}
 
 }

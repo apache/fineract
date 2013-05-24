@@ -13753,17 +13753,10 @@ No Request Body:
                         	</td>
                         </tr>
                         <tr class=alt>
-                            <td>useAccountingRule</td>
-                        </tr>
-                        <tr>
-                            <td class=fielddesc>This flag denotes the journal entry should post on basis of Predefined accounting rule or general Journal Entry procudure. <br>If the flag is true the journal entry is posted on basis of predefined accounting rule.
-                        	</td>
-                        </tr>
-                        <tr class=alt>
                             <td>accountingRule</td>
                         </tr>
                         <tr>
-                            <td class=fielddesc>Denotes the accounting rule id for posting journal entries, this parameter should pass in request body when <b>useAccountingRule</b> is true.
+                            <td class=fielddesc>Denotes the accounting rule id for posting journal entries.
                         	</td>
                         </tr>
                     </table>
@@ -13966,7 +13959,7 @@ GET https://DomainName/api/v1/journalentries?transactionId=PB37X8Y21EQUY4S
                             <td><div class="mifosXHeading2">Mandatory Fields</div></td>
                         </tr>
                         <tr class=alt>
-                            <td>officeId, transactionDate, useAccountingRule 
+                            <td>officeId, transactionDate 
                             </td>
                         </tr>
                         <tr>
@@ -14020,7 +14013,6 @@ Request Body:
 "officeId": 1,
 "transactionDate": "06 December 2012",
 "comments": "Gifts for staff",
-"useAccountingRule": "false",
 "locale": "en" ,
 "dateFormat": "dd MMMM yyyy",
 "credits":[{"glAccountId":1,
@@ -14055,7 +14047,6 @@ Request Body:
 	"transactionDate": "23 May 2013",
 	"referenceNumber": "547",
 	"comments": "asdf",
-	"useAccountingRule": "true",
 	"accountingRule": "2",
 	"amount": "547"
 }

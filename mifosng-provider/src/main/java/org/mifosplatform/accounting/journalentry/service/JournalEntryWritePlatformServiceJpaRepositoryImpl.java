@@ -88,7 +88,7 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
             final Office office = this.officeRepository.findOne(officeId);
             if (office == null) { throw new OfficeNotFoundException(officeId); }
             
-            final boolean useAccountingRule = command.booleanPrimitiveValueOfParameterNamed(JournalEntryJsonInputParams.USE_ACCOUNTING_RULE.getValue());
+            final Long accountRuleId = command.longValueOfParameterNamed(JournalEntryJsonInputParams.ACCOUNTING_RULE.getValue());
             
             validateBusinessRulesForJournalEntries(journalEntryCommand);
 
@@ -98,7 +98,7 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
             final String referenceNumber = journalEntryCommand.getReferenceNumber();
             final boolean manualEntry = true;
 
-            if (useAccountingRule) {
+            if (accountRuleId != null) {
                 
                 final Long accountingRuleId = command.longValueOfParameterNamed(JournalEntryJsonInputParams.ACCOUNTING_RULE.getValue());
                 final BigDecimal amount = command.bigDecimalValueOfParameterNamed(JournalEntryJsonInputParams.AMOUNT.getValue());
@@ -218,7 +218,7 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
             if (latestGLClosure.getClosingDate().after(transactionDate) || latestGLClosure.getClosingDate().equals(transactionDate)) { throw new JournalEntryInvalidException(
                     GL_JOURNAL_ENTRY_INVALID_REASON.ACCOUNTING_CLOSED, latestGLClosure.getClosingDate(), null, null); }
         }
-        if(!command.getUseAccountingRule()) {
+        if(command.getAccountingRuleId() == null) {
             /*** check if credits and debits are valid **/
             final SingleDebitOrCreditEntryCommand[] credits = command.getCredits();
             final SingleDebitOrCreditEntryCommand[] debits = command.getDebits();
