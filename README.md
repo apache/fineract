@@ -26,7 +26,7 @@ The mifos-platform (project named 'Mifos X') has reached <b>public release versi
 
 That means there is a published and stable API. This API is documented in the api-docs under <b>Full API Matrix</b>.
 
-Latest stable release: <a target="_blank" href="https://github.com/openMF/mifosx/tree/mifosplatform-1.1.3" title="mifosplatform-1.1.3">mifosplatform-1.1.3</a>
+Latest stable release: <a target="_blank" href="https://github.com/openMF/mifosx/tree/mifosplatform-1.1.4" title="mifosplatform-1.1.4">mifosplatform-1.1.4</a>
 
 License
 =============
