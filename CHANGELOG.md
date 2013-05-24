@@ -6,6 +6,7 @@ See VERSIONING (https://github.com/openMF/mifosx/blob/master/VERSIONING.md) for 
 Releases
 ===============
 
+1. 24 May 2013 - 1.1.4.RELEASE
 1. 22 May 2013 - 1.1.3.RELEASE
 1. 19 May 2013 - 1.1.2.RELEASE
 1. 12 May 2013 - 1.1.1.RELEASE
@@ -19,6 +20,18 @@ Releases
 1. 10 April 2013 - 0.11.2.beta
 1. 05 April 2013 - 0.11.1.beta
 1. 05 April 2013 - 0.11.0.beta
+
+1.1.4.RELEASE
+=============
+Bug Release
+
+Platform & API
+ - [MIFOSX-387] - Loans template for Client not showing currencies
+
+Reference App
+ - [MIFOSX-382] - In Change Loan Application by changing the "Product" name, Details are not getting updated (ie, in Terms & settings),since "currencies" of two loan products are different
+ - [MIFOSX-390] - Regression in ability to associate a fund with a loan application through reference app
+
 
 1.1.3.RELEASE
 =============
