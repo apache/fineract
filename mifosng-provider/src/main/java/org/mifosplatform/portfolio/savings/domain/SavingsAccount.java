@@ -897,11 +897,6 @@ public class SavingsAccount extends AbstractPersistable<Long> {
             }
         }
 
-        /***TODO Fixme: Annual fee seems to be added for all withdrawals?**/
-        final Money annualFee = Money.of(this.currency, this.annualFeeAmount);
-        SavingsAccountTransaction annualFeeTransaction = SavingsAccountTransaction.annualFee(this, transactionDate, annualFee);
-        this.transactions.add(annualFeeTransaction);
-
         this.summary.updateSummary(this.currency, this.savingsAccountTransactionSummaryWrapper, this.transactions);
 
         final LocalDate today = DateUtils.getLocalDateOfTenant();
@@ -910,7 +905,8 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         return transaction;
     }
 
-    public SavingsAccountTransaction addAnnualFee(final DateTimeFormatter formatter, final LocalDate transactionDate) {
+    public SavingsAccountTransaction addAnnualFee(final DateTimeFormatter formatter, final LocalDate transactionDate,
+            List<Long> existingTransactionIds, List<Long> existingReversedTransactionIds) {
 
         if (isNotActive()) {
 
@@ -960,6 +956,9 @@ public class SavingsAccount extends AbstractPersistable<Long> {
 
             throw new PlatformApiDataValidationException(dataValidationErrors);
         }
+
+        existingTransactionIds.addAll(findExistingTransactionIds());
+        existingReversedTransactionIds.addAll(findExistingReversedTransactionIds());
 
         final Money annualFee = Money.of(this.currency, this.annualFeeAmount);
         SavingsAccountTransaction annualFeeTransaction = SavingsAccountTransaction.annualFee(this, transactionDate, annualFee);
