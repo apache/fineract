@@ -1,52 +1,74 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-
-    This Source Code Form is subject to the terms of the Mozilla Public
-    License, v. 2.0. If a copy of the MPL was not distributed with this file,
-    You can obtain one at http://mozilla.org/MPL/2.0/.
-
--->
+<!-- This Source Code Form is subject to the terms of the Mozilla Public 
+	License, v. 2.0. If a copy of the MPL was not distributed with this file, 
+	You can obtain one at http://mozilla.org/MPL/2.0/. -->
 <beans xmlns="http://www.springframework.org/schema/beans"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
-    <bean id="updateLoanSummariesScheduledJob" class="org.mifosplatform.scheduledjobs.UpdateLoanSummariesScheduledJob">
-    	<constructor-arg ref="scheduledJobRunnerService" />
-    </bean>
-    <bean id="updateLoanArrearsAgeingScheduledJob" class="org.mifosplatform.scheduledjobs.UpdateLoanArrearsAgeingScheduledJob">
-    	<constructor-arg ref="scheduledJobRunnerService" />
-    </bean>
+	<bean id="updateLoanSummariesScheduledJob"
+		class="org.mifosplatform.scheduledjobs.UpdateLoanSummariesScheduledJob">
+		<constructor-arg ref="scheduledJobRunnerService" />
+	</bean>
+	<bean id="updateLoanArrearsAgeingScheduledJob"
+		class="org.mifosplatform.scheduledjobs.UpdateLoanArrearsAgeingScheduledJob">
+		<constructor-arg ref="scheduledJobRunnerService" />
+	</bean>
+	<bean id="applyAnnualFeeForSavingsScheduledJob"
+		class="org.mifosplatform.scheduledjobs.ApplyAnnualFeeForSavingsScheduledJob">
+		<constructor-arg ref="scheduledJobRunnerService" />
+	</bean>
 
-    <bean id="updateLoanSummariesJobDetail" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
-        <property name="group" value="mifosJobs" />
-        <property name="targetObject" ref="updateLoanSummariesScheduledJob" />
-        <property name="targetMethod" value="execute" />
-        <property name="concurrent" value="false" />
-    </bean>
-    
-    <bean id="UpdateLoanArrearsAgeingJobDetail" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
-        <property name="group" value="mifosJobs" />
-        <property name="targetObject" ref="updateLoanArrearsAgeingScheduledJob" />
-        <property name="targetMethod" value="execute" />
-        <property name="concurrent" value="false" />
-    </bean>
+	<bean id="updateLoanSummariesJobDetail"
+		class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+		<property name="group" value="mifosJobs" />
+		<property name="targetObject" ref="updateLoanSummariesScheduledJob" />
+		<property name="targetMethod" value="execute" />
+		<property name="concurrent" value="false" />
+	</bean>
 
-    <bean id="updateLoanSummariesJobCronTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
-        <property name="jobDetail" ref="updateLoanSummariesJobDetail" />
-        <property name="cronExpression" value="0 0 22 1/1 * ? *" />
-    </bean>
-    
-    <bean id="UpdateLoanArrearsAgeingJobDetailCronTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
-        <property name="jobDetail" ref="UpdateLoanArrearsAgeingJobDetail" />
-        <property name="cronExpression" value="0 10 22 1/1 * ? *" />
-    </bean>
+	<bean id="updateLoanArrearsAgeingJobDetail"
+		class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+		<property name="group" value="mifosJobs" />
+		<property name="targetObject" ref="updateLoanArrearsAgeingScheduledJob" />
+		<property name="targetMethod" value="execute" />
+		<property name="concurrent" value="false" />
+	</bean>
 
-    <bean name="schedulerFactory" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
-        <property name="triggers">
-            <list>
-                <ref bean="updateLoanSummariesJobCronTrigger" />
-                <ref bean="UpdateLoanArrearsAgeingJobDetailCronTrigger" />
-            </list>
-        </property>
-    </bean>
+	<bean id="applyAnnualFeeForSavingsJobDetail"
+		class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+		<property name="group" value="mifosJobs" />
+		<property name="targetObject" ref="applyAnnualFeeForSavingsScheduledJob" />
+		<property name="targetMethod" value="execute" />
+		<property name="concurrent" value="false" />
+	</bean>
+
+	<bean id="updateLoanSummariesJobCronTrigger"
+		class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+		<property name="jobDetail" ref="updateLoanSummariesJobDetail" />
+		<property name="cronExpression" value="0 0 22 1/1 * ? *" />
+	</bean>
+
+	<bean id="updateLoanArrearsAgeingJobDetailCronTrigger"
+		class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+		<property name="jobDetail" ref="updateLoanArrearsAgeingJobDetail" />
+		<property name="cronExpression" value="0 10 22 1/1 * ? *" />
+	</bean>
+
+	<bean id="applyAnnualFeeForSavingsJobDetailCronTrigger"
+		class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+		<property name="jobDetail" ref="applyAnnualFeeForSavingsJobDetail" />
+		<property name="cronExpression" value="0 20 22 1/1 * ? *" />
+	</bean>
+
+	<bean name="schedulerFactory"
+		class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+		<property name="triggers">
+			<list>
+				<ref bean="updateLoanSummariesJobCronTrigger" />
+				<ref bean="updateLoanArrearsAgeingJobDetailCronTrigger" />
+				<ref bean="applyAnnualFeeForSavingsJobDetailCronTrigger" />
+			</list>
+		</property>
+	</bean>
 </beans>
