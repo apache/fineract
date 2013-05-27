@@ -7,6 +7,9 @@ package org.mifosplatform.portfolio.savings.api;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -20,9 +23,17 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
+import org.mifosplatform.accounting.common.AccountingDropdownReadPlatformService;
+import org.mifosplatform.accounting.common.AccountingEnumerations;
+import org.mifosplatform.accounting.common.AccountingRuleType;
+import org.mifosplatform.accounting.glaccount.data.GLAccountData;
+import org.mifosplatform.accounting.producttoaccountmapping.data.PaymentTypeToGLAccountMapper;
+import org.mifosplatform.accounting.producttoaccountmapping.service.ProductToGLAccountMappingReadPlatformService;
 import org.mifosplatform.commands.domain.CommandWrapper;
 import org.mifosplatform.commands.service.CommandWrapperBuilder;
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
+import org.mifosplatform.infrastructure.codes.data.CodeValueData;
+import org.mifosplatform.infrastructure.codes.service.CodeValueReadPlatformService;
 import org.mifosplatform.infrastructure.core.api.ApiRequestParameterHelper;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
@@ -31,6 +42,7 @@ import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSeria
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.mifosplatform.organisation.monetary.service.CurrencyReadPlatformService;
+import org.mifosplatform.portfolio.paymentdetail.PaymentDetailConstants;
 import org.mifosplatform.portfolio.savings.data.SavingsProductData;
 import org.mifosplatform.portfolio.savings.domain.SavingsCompoundingInterestPeriodType;
 import org.mifosplatform.portfolio.savings.domain.SavingsInterestCalculationDaysInYearType;
@@ -55,6 +67,9 @@ public class SavingsProductsApiResource {
     private final DefaultToApiJsonSerializer<SavingsProductData> toApiJsonSerializer;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
+    private final AccountingDropdownReadPlatformService accountingDropdownReadPlatformService;
+    private final CodeValueReadPlatformService codeValueReadPlatformService;
+    private final ProductToGLAccountMappingReadPlatformService accountMappingReadPlatformService;
 
     @Autowired
     public SavingsProductsApiResource(final SavingsProductReadPlatformService savingProductReadPlatformService,
@@ -62,7 +77,9 @@ public class SavingsProductsApiResource {
             final CurrencyReadPlatformService currencyReadPlatformService, final PlatformSecurityContext context,
             final DefaultToApiJsonSerializer<SavingsProductData> toApiJsonSerializer,
             final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
-            final ApiRequestParameterHelper apiRequestParameterHelper) {
+            final ApiRequestParameterHelper apiRequestParameterHelper, final CodeValueReadPlatformService codeValueReadPlatformService,
+            final AccountingDropdownReadPlatformService accountingDropdownReadPlatformService,
+            final ProductToGLAccountMappingReadPlatformService accountMappingReadPlatformService) {
         this.savingProductReadPlatformService = savingProductReadPlatformService;
         this.dropdownReadPlatformService = dropdownReadPlatformService;
         this.currencyReadPlatformService = currencyReadPlatformService;
@@ -70,6 +87,9 @@ public class SavingsProductsApiResource {
         this.toApiJsonSerializer = toApiJsonSerializer;
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
         this.apiRequestParameterHelper = apiRequestParameterHelper;
+        this.codeValueReadPlatformService = codeValueReadPlatformService;
+        this.accountingDropdownReadPlatformService = accountingDropdownReadPlatformService;
+        this.accountMappingReadPlatformService = accountMappingReadPlatformService;
     }
 
     @POST
@@ -120,15 +140,25 @@ public class SavingsProductsApiResource {
 
         context.authenticatedUser().validateHasReadPermission(SavingsApiConstants.SAVINGS_PRODUCT_RESOURCE_NAME);
 
-        SavingsProductData savingProduct = this.savingProductReadPlatformService.retrieveOne(productId);
+        SavingsProductData savingProductData = this.savingProductReadPlatformService.retrieveOne(productId);
 
         final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 
-        if (settings.isTemplate()) {
-            savingProduct = handleTemplateRelatedData(savingProduct);
+        Map<String, Object> accountingMappings = null;
+        Collection<PaymentTypeToGLAccountMapper> paymentChannelToFundSourceMappings = null;
+        if (savingProductData.hasAccountingEnabled()) {
+            accountingMappings = accountMappingReadPlatformService.fetchAccountMappingDetailsForSavingsProduct(productId,
+                    savingProductData.accountingRuleTypeId());
+            paymentChannelToFundSourceMappings = accountMappingReadPlatformService
+                    .fetchPaymentTypeToFundSourceMappingsForSavingsProduct(productId);
         }
 
-        return this.toApiJsonSerializer.serialize(settings, savingProduct, SavingsApiConstants.SAVINGS_PRODUCT_RESPONSE_DATA_PARAMETERS);
+        if (settings.isTemplate()) {
+            savingProductData = handleTemplateRelatedData(savingProductData, accountingMappings, paymentChannelToFundSourceMappings);
+        }
+
+        return this.toApiJsonSerializer
+                .serialize(settings, savingProductData, SavingsApiConstants.SAVINGS_PRODUCT_RESPONSE_DATA_PARAMETERS);
     }
 
     @GET
@@ -139,13 +169,14 @@ public class SavingsProductsApiResource {
 
         context.authenticatedUser().validateHasReadPermission(SavingsApiConstants.SAVINGS_PRODUCT_RESOURCE_NAME);
 
-        SavingsProductData savingProduct = handleTemplateRelatedData(null);
+        SavingsProductData savingProduct = handleTemplateRelatedData(null, new HashMap<String, Object>(), null);
 
         final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serialize(settings, savingProduct, SavingsApiConstants.SAVINGS_PRODUCT_RESPONSE_DATA_PARAMETERS);
     }
 
-    private SavingsProductData handleTemplateRelatedData(final SavingsProductData savingsProduct) {
+    private SavingsProductData handleTemplateRelatedData(final SavingsProductData savingsProduct,
+            final Map<String, Object> accountingMappings, final Collection<PaymentTypeToGLAccountMapper> paymentChannelToFundSourceMappings) {
 
         final EnumOptionData interestCompoundingPeriodType = SavingsEnumerations
                 .compoundingInterestPeriodType(SavingsCompoundingInterestPeriodType.DAILY);
@@ -158,6 +189,8 @@ public class SavingsProductsApiResource {
 
         final EnumOptionData interestCalculationDaysInYearType = SavingsEnumerations
                 .interestCalculationDaysInYearType(SavingsInterestCalculationDaysInYearType.DAYS_365);
+
+        final EnumOptionData accountingRule = AccountingEnumerations.accountingRuleType(AccountingRuleType.NONE);
 
         CurrencyData currency = CurrencyData.blank();
         final Collection<CurrencyData> currencyOptions = this.currencyReadPlatformService.retrieveAllowedCurrencies();
@@ -182,16 +215,26 @@ public class SavingsProductsApiResource {
 
         final Collection<EnumOptionData> withdrawalFeeTypeOptions = this.dropdownReadPlatformService.retrievewithdrawalFeeTypeOptions();
 
+        final Collection<CodeValueData> paymentTypeOptions = codeValueReadPlatformService
+                .retrieveCodeValuesByCode(PaymentDetailConstants.paymentTypeCodeName);
+        final Collection<EnumOptionData> accountingRuleOptions = this.accountingDropdownReadPlatformService
+                .retrieveAccountingRuleTypeOptions();
+        final Map<String, List<GLAccountData>> accountingMappingOptions = accountingDropdownReadPlatformService
+                .retrieveAccountMappingOptionsForSavingsProducts();
+
         SavingsProductData savingsProductToReturn = null;
         if (savingsProduct != null) {
-            savingsProductToReturn = SavingsProductData.withTemplate(savingsProduct, currencyOptions, interestCompoundingPeriodTypeOptions,
+            savingsProductToReturn = SavingsProductData.withTemplate(savingsProduct, accountingMappings,
+                    paymentChannelToFundSourceMappings, currencyOptions, interestCompoundingPeriodTypeOptions,
                     interestPostingPeriodTypeOptions, interestCalculationTypeOptions, interestCalculationDaysInYearTypeOptions,
-                    lockinPeriodFrequencyTypeOptions, withdrawalFeeTypeOptions);
+                    lockinPeriodFrequencyTypeOptions, withdrawalFeeTypeOptions, paymentTypeOptions, accountingRuleOptions,
+                    accountingMappingOptions);
         } else {
             savingsProductToReturn = SavingsProductData.template(currency, interestCompoundingPeriodType, interestPostingPeriodType,
-                    interestCalculationType, interestCalculationDaysInYearType, currencyOptions, interestCompoundingPeriodTypeOptions,
-                    interestPostingPeriodTypeOptions, interestCalculationTypeOptions, interestCalculationDaysInYearTypeOptions,
-                    lockinPeriodFrequencyTypeOptions, withdrawalFeeTypeOptions);
+                    interestCalculationType, interestCalculationDaysInYearType, accountingRule, currencyOptions,
+                    interestCompoundingPeriodTypeOptions, interestPostingPeriodTypeOptions, interestCalculationTypeOptions,
+                    interestCalculationDaysInYearTypeOptions, lockinPeriodFrequencyTypeOptions, withdrawalFeeTypeOptions,
+                    paymentTypeOptions, accountingRuleOptions, accountingMappingOptions);
         }
 
         return savingsProductToReturn;

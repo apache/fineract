@@ -103,6 +103,63 @@ public class AccountingConstants {
         }
     }
 
+    /*** Accounting placeholders for cash based accounting for loan products ***/
+    public static enum CASH_ACCOUNTS_FOR_SAVINGS {
+        SAVINGS_REFERENCE(1), SAVINGS_CONTROL(2), INTEREST_ON_SAVINGS(3), INCOME_FROM_FEES(4);
+
+        private final Integer value;
+
+        private CASH_ACCOUNTS_FOR_SAVINGS(final Integer value) {
+            this.value = value;
+        }
+
+        @Override
+        public String toString() {
+            return name().toString().replaceAll("_", " ");
+        }
+
+        public Integer getValue() {
+            return this.value;
+        }
+
+        private static final Map<Integer, CASH_ACCOUNTS_FOR_SAVINGS> intToEnumMap = new HashMap<Integer, CASH_ACCOUNTS_FOR_SAVINGS>();
+        static {
+            for (final CASH_ACCOUNTS_FOR_SAVINGS type : CASH_ACCOUNTS_FOR_SAVINGS.values()) {
+                intToEnumMap.put(type.value, type);
+            }
+        }
+
+        public static CASH_ACCOUNTS_FOR_SAVINGS fromInt(final int i) {
+            final CASH_ACCOUNTS_FOR_SAVINGS type = intToEnumMap.get(Integer.valueOf(i));
+            return type;
+        }
+    }
+
+    /***
+     * Enum of all accounting related input parameter names used while
+     * creating/updating a savings product
+     ***/
+    public static enum SAVINGS_PRODUCT_ACCOUNTING_PARAMS {
+        SAVINGS_REFERENCE("savingsReferenceAccountId"), SAVINGS_CONTROL("savingsControlAccountId"), INCOME_FROM_FEES(
+                "incomeFromFeeAccountId"), INTEREST_ON_SAVINGS("interestOnSavingsAccountId"), PAYMENT_CHANNEL_FUND_SOURCE_MAPPING(
+                "paymentChannelToFundSourceMappings"), PAYMENT_TYPE("paymentTypeId"), FUND_SOURCE("fundSourceAccountId");
+
+        private final String value;
+
+        private SAVINGS_PRODUCT_ACCOUNTING_PARAMS(final String value) {
+            this.value = value;
+        }
+
+        @Override
+        public String toString() {
+            return name().toString().replaceAll("_", " ");
+        }
+
+        public String getValue() {
+            return this.value;
+        }
+    }
+
     public static final String ASSESTS_TAG_OPTION_CODE_NAME = "AssetAccountTags";
     public static final String LIABILITIES_TAG_OPTION_CODE_NAME = "LiabilityAccountTags";
     public static final String EQUITY_TAG_OPTION_CODE_NAME = "EquityAccountTags";

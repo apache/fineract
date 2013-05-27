@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.mifosplatform.accounting.common.AccountingConstants.SAVINGS_PRODUCT_ACCOUNTING_PARAMS;
 import org.mifosplatform.portfolio.savings.data.SavingsAccountData;
 import org.mifosplatform.portfolio.savings.data.SavingsProductData;
 
@@ -49,6 +50,13 @@ public class SavingsApiConstants {
     public static final String withdrawalFeeTypeParamName = "withdrawalFeeType";
     public static final String annualFeeAmountParamName = "annualFeeAmount";
     public static final String annualFeeOnMonthDayParamName = "annualFeeOnMonthDay";
+    public static final String accountingRuleParamName = "accountingRule";
+    public static final String paymentTypeIdParamName = "paymentTypeId";
+    public static final String accountNumberParamName = "accountNumber";
+    public static final String checkNumberParamName = "checkNumber";
+    public static final String routingCodeParamName = "routingCode";
+    public static final String receiptNumberParamName = "receiptNumber";
+    public static final String bankNumberParamName = "bankNumber";
 
     // transaction parameters
     public static final String transactionDateParamName = "transactionDate";
@@ -59,7 +67,11 @@ public class SavingsApiConstants {
             nominalAnnualInterestRateParamName, interestCompoundingPeriodTypeParamName, interestPostingPeriodTypeParamName,
             interestCalculationTypeParamName, interestCalculationDaysInYearTypeParamName, minRequiredOpeningBalanceParamName,
             lockinPeriodFrequencyParamName, lockinPeriodFrequencyTypeParamName, withdrawalFeeAmountParamName, withdrawalFeeTypeParamName,
-            annualFeeAmountParamName, annualFeeOnMonthDayParamName));
+            annualFeeAmountParamName, annualFeeOnMonthDayParamName, accountingRuleParamName,
+            SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_FEES.getValue(),
+            SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INTEREST_ON_SAVINGS.getValue(),
+            SAVINGS_PRODUCT_ACCOUNTING_PARAMS.PAYMENT_CHANNEL_FUND_SOURCE_MAPPING.getValue(),
+            SAVINGS_PRODUCT_ACCOUNTING_PARAMS.SAVINGS_CONTROL.getValue(), SAVINGS_PRODUCT_ACCOUNTING_PARAMS.SAVINGS_REFERENCE.getValue()));
 
     /**
      * These parameters will match the class level parameters of
@@ -99,7 +111,8 @@ public class SavingsApiConstants {
             "withdrawalFeeTypeOptions"));
 
     public static final Set<String> SAVINGS_ACCOUNT_TRANSACTION_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(
-            localeParamName, dateFormatParamName, transactionDateParamName, transactionAmountParamName));
+            localeParamName, dateFormatParamName, transactionDateParamName, transactionAmountParamName, paymentTypeIdParamName,
+            accountNumberParamName, checkNumberParamName, routingCodeParamName, receiptNumberParamName, bankNumberParamName));
 
     public static final Set<String> SAVINGS_TRANSACTION_RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(idParamName,
             "accountId", accountNoParamName, "currency", "amount"));

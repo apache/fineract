@@ -6,19 +6,25 @@
 package org.mifosplatform.portfolio.savings.service;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+import org.mifosplatform.accounting.journalentry.service.JournalEntryWritePlatformService;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
+import org.mifosplatform.organisation.monetary.domain.ApplicationCurrency;
+import org.mifosplatform.organisation.monetary.domain.ApplicationCurrencyRepositoryWrapper;
+import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.portfolio.client.domain.AccountNumberGenerator;
 import org.mifosplatform.portfolio.client.domain.AccountNumberGeneratorFactory;
 import org.mifosplatform.portfolio.client.domain.Client;
@@ -26,6 +32,8 @@ import org.mifosplatform.portfolio.client.domain.ClientRepositoryWrapper;
 import org.mifosplatform.portfolio.group.domain.Group;
 import org.mifosplatform.portfolio.group.domain.GroupRepository;
 import org.mifosplatform.portfolio.group.exception.GroupNotFoundException;
+import org.mifosplatform.portfolio.paymentdetail.domain.PaymentDetail;
+import org.mifosplatform.portfolio.paymentdetail.service.PaymentDetailWritePlatformService;
 import org.mifosplatform.portfolio.savings.api.SavingsApiConstants;
 import org.mifosplatform.portfolio.savings.data.SavingsAccountDataValidator;
 import org.mifosplatform.portfolio.savings.data.SavingsAccountTransactionDataValidator;
@@ -59,6 +67,9 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
     private final ClientRepositoryWrapper clientRepository;
     private final GroupRepository groupRepository;
     private final SavingsProductRepository savingsProductRepository;
+    private final PaymentDetailWritePlatformService paymentDetailWritePlatformService;
+    private final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepositoryWrapper;
+    private final JournalEntryWritePlatformService journalEntryWritePlatformService;
 
     @Autowired
     public SavingsAccountWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
@@ -67,7 +78,10 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
             final SavingsAccountAssembler savingAccountAssembler, final SavingsAccountDataValidator savingsAccountDataValidator,
             final SavingsAccountTransactionDataValidator savingsAccountTransactionDataValidator,
             final AccountNumberGeneratorFactory accountIdentifierGeneratorFactory, final ClientRepositoryWrapper clientRepository,
-            final GroupRepository groupRepository, final SavingsProductRepository savingsProductRepository) {
+            final GroupRepository groupRepository, final SavingsProductRepository savingsProductRepository,
+            final PaymentDetailWritePlatformService paymentDetailWritePlatformService,
+            final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepositoryWrapper,
+            final JournalEntryWritePlatformService journalEntryWritePlatformService) {
         this.context = context;
         this.savingAccountRepository = savingAccountRepository;
         this.savingsAccountTransactionRepository = savingsAccountTransactionRepository;
@@ -78,6 +92,9 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         this.clientRepository = clientRepository;
         this.groupRepository = groupRepository;
         this.savingsProductRepository = savingsProductRepository;
+        this.paymentDetailWritePlatformService = paymentDetailWritePlatformService;
+        this.applicationCurrencyRepositoryWrapper = applicationCurrencyRepositoryWrapper;
+        this.journalEntryWritePlatformService = journalEntryWritePlatformService;
     }
 
     /*
@@ -115,7 +132,10 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
             this.context.authenticatedUser();
             this.savingsAccountDataValidator.validateForCreate(command.json());
 
-            final SavingsAccount account = this.savingAccountAssembler.assembleFrom(command);
+            final List<Long> existingTransactionIds = new ArrayList<Long>();
+            final List<Long> existingReversedTransactionIds = new ArrayList<Long>();
+            final SavingsAccount account = this.savingAccountAssembler.assembleFrom(command, existingTransactionIds,
+                    existingReversedTransactionIds);
             this.savingAccountRepository.save(account);
 
             if (account.isAccountNumberRequiresAutoGeneration()) {
@@ -125,6 +145,8 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
 
                 this.savingAccountRepository.save(account);
             }
+
+            postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds);
 
             final Long savingsId = account.getId();
             return new CommandProcessingResultBuilder() //
@@ -237,9 +259,14 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         final Locale locale = command.extractLocale();
         final DateTimeFormatter fmt = DateTimeFormat.forPattern(command.dateFormat()).withLocale(locale);
         final LocalDate activationDate = command.localDateValueOfParameterNamed("activationDate");
-        account.activate(fmt, activationDate);
+        final List<Long> existingTransactionIds = new ArrayList<Long>();
+        final List<Long> existingReversedTransactionIds = new ArrayList<Long>();
+
+        account.activate(fmt, activationDate, existingReversedTransactionIds, existingReversedTransactionIds);
 
         this.savingAccountRepository.save(account);
+
+        postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds);
 
         return new CommandProcessingResultBuilder() //
                 .withEntityId(savingsId) //
@@ -266,10 +293,18 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         final LocalDate transactionDate = command.localDateValueOfParameterNamed("transactionDate");
         final BigDecimal transactionAmount = command.bigDecimalValueOfParameterNamed("transactionAmount");
 
-        final SavingsAccountTransaction deposit = account.deposit(fmt, transactionDate, transactionAmount);
+        final List<Long> existingTransactionIds = new ArrayList<Long>();
+        final List<Long> existingReversedTransactionIds = new ArrayList<Long>();
+        final Map<String, Object> changes = new LinkedHashMap<String, Object>();
+        PaymentDetail paymentDetail = paymentDetailWritePlatformService.createAndPersistPaymentDetail(command, changes);
+
+        final SavingsAccountTransaction deposit = account.deposit(fmt, transactionDate, transactionAmount, existingTransactionIds,
+                existingReversedTransactionIds, paymentDetail);
         final Long transactionId = saveTransactionToGenerateTransactionId(deposit);
 
         this.savingAccountRepository.save(account);
+
+        postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds);
 
         return new CommandProcessingResultBuilder() //
                 .withEntityId(transactionId) //
@@ -277,6 +312,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
                 .withClientId(account.clientId()) //
                 .withGroupId(account.groupId()) //
                 .withSavingsId(savingsId) //
+                .with(changes)//
                 .build();
     }
 
@@ -301,9 +337,17 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         final Locale locale = command.extractLocale();
         final DateTimeFormatter fmt = DateTimeFormat.forPattern(command.dateFormat()).withLocale(locale);
 
-        final SavingsAccountTransaction withdrawal = account.withdraw(fmt, transactionDate, transactionAmount);
+        final List<Long> existingTransactionIds = new ArrayList<Long>();
+        final List<Long> existingReversedTransactionIds = new ArrayList<Long>();
+        final Map<String, Object> changes = new LinkedHashMap<String, Object>();
+        PaymentDetail paymentDetail = paymentDetailWritePlatformService.createAndPersistPaymentDetail(command, changes);
+
+        final SavingsAccountTransaction withdrawal = account.withdraw(fmt, transactionDate, transactionAmount, existingTransactionIds,
+                existingReversedTransactionIds, paymentDetail);
         final Long transactionId = saveTransactionToGenerateTransactionId(withdrawal);
         this.savingAccountRepository.save(account);
+
+        postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds);
 
         return new CommandProcessingResultBuilder() //
                 .withEntityId(transactionId) //
@@ -311,6 +355,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
                 .withClientId(account.clientId()) //
                 .withGroupId(account.groupId()) //
                 .withSavingsId(savingsId) //
+                .with(changes)//
                 .build();
     }
 
@@ -337,12 +382,16 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
     @Override
     public CommandProcessingResult postInterest(final Long savingsId, final JsonCommand command) {
         this.context.authenticatedUser();
+        final List<Long> existingTransactionIds = new ArrayList<Long>();
+        final List<Long> existingReversedTransactionIds = new ArrayList<Long>();
 
         final SavingsAccount account = this.savingAccountRepository.findOneWithNotFoundDetection(savingsId);
 
         final LocalDate today = DateUtils.getLocalDateOfTenant();
-        account.postInterest(today);
+        account.postInterest(today, existingTransactionIds, existingReversedTransactionIds);
         this.savingAccountRepository.save(account);
+
+        postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds);
 
         return new CommandProcessingResultBuilder() //
                 .withEntityId(savingsId) //
@@ -351,5 +400,16 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
                 .withGroupId(account.groupId()) //
                 .withSavingsId(savingsId) //
                 .build();
+    }
+
+    private void postJournalEntries(final SavingsAccount savingsAccount, final List<Long> existingTransactionIds,
+            final List<Long> existingReversedTransactionIds) {
+
+        final MonetaryCurrency currency = savingsAccount.getCurrency();
+        final ApplicationCurrency applicationCurrency = this.applicationCurrencyRepositoryWrapper.findOneWithNotFoundDetection(currency);
+
+        final Map<String, Object> accountingBridgeData = savingsAccount.deriveAccountingBridgeData(applicationCurrency.toData(),
+                existingTransactionIds, existingReversedTransactionIds);
+        journalEntryWritePlatformService.createJournalEntriesForSavings(accountingBridgeData);
     }
 }

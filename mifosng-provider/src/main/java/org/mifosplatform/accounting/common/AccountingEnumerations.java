@@ -80,4 +80,21 @@ public class AccountingEnumerations {
         return optionData;
     }
 
+    public static EnumOptionData accountingRuleType(final int id) {
+        return accountingRuleType(AccountingRuleType.fromInt(id));
+    }
+
+    public static EnumOptionData accountingRuleType(final AccountingRuleType type) {
+        EnumOptionData optionData = new EnumOptionData(type.getValue().longValue(), type.getCode(), type.toString());
+        return optionData;
+    }
+
+    public static List<EnumOptionData> accountingRuleTypes(final AccountingRuleType[] accountingRuleTypes) {
+        final List<EnumOptionData> optionDatas = new ArrayList<EnumOptionData>();
+        for (final AccountingRuleType accountingRuleType : accountingRuleTypes) {
+            optionDatas.add(accountingRuleType(accountingRuleType));
+        }
+        return optionDatas;
+    }
+
 }

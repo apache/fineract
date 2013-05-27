@@ -24,9 +24,8 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
+import org.mifosplatform.accounting.common.AccountingDropdownReadPlatformService;
 import org.mifosplatform.accounting.glaccount.data.GLAccountData;
-import org.mifosplatform.accounting.glaccount.domain.GLAccountType;
-import org.mifosplatform.accounting.glaccount.service.GLAccountReadPlatformService;
 import org.mifosplatform.accounting.producttoaccountmapping.data.PaymentTypeToGLAccountMapper;
 import org.mifosplatform.accounting.producttoaccountmapping.service.ProductToGLAccountMappingReadPlatformService;
 import org.mifosplatform.commands.domain.CommandWrapper;
@@ -81,9 +80,9 @@ public class LoanProductsApiResource {
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final LoanDropdownReadPlatformService dropdownReadPlatformService;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
-    private final GLAccountReadPlatformService accountReadPlatformService;
     private final ProductToGLAccountMappingReadPlatformService accountMappingReadPlatformService;
     private final CodeValueReadPlatformService codeValueReadPlatformService;
+    private final AccountingDropdownReadPlatformService accountingDropdownReadPlatformService;
 
     @Autowired
     public LoanProductsApiResource(final PlatformSecurityContext context, final LoanProductReadPlatformService readPlatformService,
@@ -92,9 +91,9 @@ public class LoanProductsApiResource {
             final DefaultToApiJsonSerializer<LoanProductData> toApiJsonSerializer,
             final ApiRequestParameterHelper apiRequestParameterHelper,
             final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
-            final GLAccountReadPlatformService accountReadPlatformService,
             final ProductToGLAccountMappingReadPlatformService accountMappingReadPlatformService,
-            final CodeValueReadPlatformService codeValueReadPlatformService) {
+            final CodeValueReadPlatformService codeValueReadPlatformService,
+            final AccountingDropdownReadPlatformService accountingDropdownReadPlatformService) {
         this.context = context;
         this.loanProductReadPlatformService = readPlatformService;
         this.chargeReadPlatformService = chargeReadPlatformService;
@@ -104,9 +103,9 @@ public class LoanProductsApiResource {
         this.toApiJsonSerializer = toApiJsonSerializer;
         this.apiRequestParameterHelper = apiRequestParameterHelper;
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
-        this.accountReadPlatformService = accountReadPlatformService;
         this.accountMappingReadPlatformService = accountMappingReadPlatformService;
         this.codeValueReadPlatformService = codeValueReadPlatformService;
+        this.accountingDropdownReadPlatformService = accountingDropdownReadPlatformService;
     }
 
     @POST
@@ -218,26 +217,10 @@ public class LoanProductsApiResource {
         final Collection<TransactionProcessingStrategyData> transactionProcessingStrategyOptions = this.dropdownReadPlatformService
                 .retreiveTransactionProcessingStrategies();
 
-        Map<String, List<GLAccountData>> accountOptions = new HashMap<String, List<GLAccountData>>();
-        List<GLAccountData> assetAccountOptions = accountReadPlatformService.retrieveAllEnabledDetailGLAccounts(GLAccountType.ASSET);
-        if (assetAccountOptions.isEmpty()) {
-            assetAccountOptions = null;
-        }
-        accountOptions.put("assetAccountOptions", assetAccountOptions);
+        Map<String, List<GLAccountData>> accountOptions = accountingDropdownReadPlatformService
+                .retrieveAccountMappingOptionsForLoanProducts();
 
-        List<GLAccountData> incomeAccountOptions = accountReadPlatformService.retrieveAllEnabledDetailGLAccounts(GLAccountType.INCOME);
-        if (incomeAccountOptions.isEmpty()) {
-            incomeAccountOptions = null;
-        }
-        accountOptions.put("incomeAccountOptions", incomeAccountOptions);
-
-        List<GLAccountData> expenseAccountOptions = accountReadPlatformService.retrieveAllEnabledDetailGLAccounts(GLAccountType.EXPENSE);
-        if (expenseAccountOptions.isEmpty()) {
-            expenseAccountOptions = null;
-        }
-        accountOptions.put("expenseAccountOptions", expenseAccountOptions);
-
-        List<EnumOptionData> accountingRuleTypeOptions = dropdownReadPlatformService.retrieveAccountingRuleTypeOptions();
+        List<EnumOptionData> accountingRuleTypeOptions = accountingDropdownReadPlatformService.retrieveAccountingRuleTypeOptions();
 
         return new LoanProductData(productData, chargeOptions, paymentTypeOptions, currencyOptions, amortizationTypeOptions,
                 interestTypeOptions, interestCalculationPeriodTypeOptions, repaymentFrequencyTypeOptions, interestRateFrequencyTypeOptions,

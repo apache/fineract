@@ -11,6 +11,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import org.mifosplatform.accounting.common.AccountingEnumerations;
+import org.mifosplatform.accounting.common.AccountingRuleType;
 import org.mifosplatform.accounting.glaccount.data.GLAccountData;
 import org.mifosplatform.accounting.producttoaccountmapping.data.PaymentTypeToGLAccountMapper;
 import org.mifosplatform.infrastructure.codes.data.CodeValueData;
@@ -18,7 +20,6 @@ import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.mifosplatform.portfolio.charge.data.ChargeData;
 import org.mifosplatform.portfolio.fund.data.FundData;
-import org.mifosplatform.portfolio.loanproduct.domain.AccountingRuleType;
 import org.mifosplatform.portfolio.loanproduct.domain.AmortizationMethod;
 import org.mifosplatform.portfolio.loanproduct.domain.InterestCalculationPeriodMethod;
 import org.mifosplatform.portfolio.loanproduct.domain.InterestMethod;
@@ -182,7 +183,7 @@ public class LoanProductData {
         final Long transactionProcessingStrategyId = null;
         final String transactionProcessingStrategyName = null;
         final Collection<ChargeData> charges = null;
-        final EnumOptionData accountingType = LoanEnumerations.accountingRuleType(AccountingRuleType.NONE);
+        final EnumOptionData accountingType = AccountingEnumerations.accountingRuleType(AccountingRuleType.NONE);
 
         return new LoanProductData(id, name, description, currency, principal, minPrincipal, maxPrincipal, tolerance, numberOfRepayments,
                 minNumberOfRepayments, maxNumberOfRepayments, repaymentEvery, interestRatePerPeriod, minInterestRatePerPeriod,
@@ -346,7 +347,7 @@ public class LoanProductData {
     }
 
     public boolean hasAccountingEnabled() {
-        return this.accountingRule.getId() > 1;
+        return this.accountingRule.getId() > AccountingRuleType.NONE.getValue();
     }
 
     public Long getId() {

@@ -5,15 +5,24 @@
  */
 package org.mifosplatform.portfolio.savings.data;
 
+import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.accountNumberParamName;
 import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.activationDateParamName;
+import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.bankNumberParamName;
+import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.checkNumberParamName;
+import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.paymentTypeIdParamName;
+import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.receiptNumberParamName;
+import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.routingCodeParamName;
 import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.transactionAmountParamName;
 import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.transactionDateParamName;
 
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
@@ -61,6 +70,17 @@ public class SavingsAccountTransactionDataValidator {
 
         final BigDecimal transactionAmount = fromApiJsonHelper.extractBigDecimalWithLocaleNamed(transactionAmountParamName, element);
         baseDataValidator.reset().parameter(transactionAmountParamName).value(transactionAmount).notNull().positiveAmount();
+
+        // Validate all string payment detail fields for max length
+        final Integer paymentTypeId = fromApiJsonHelper.extractIntegerWithLocaleNamed(paymentTypeIdParamName, element);
+        baseDataValidator.reset().parameter(paymentTypeIdParamName).value(paymentTypeId).ignoreIfNull().integerGreaterThanZero();
+        final Set<String> paymentDetailParameters = new HashSet<String>(Arrays.asList(accountNumberParamName, checkNumberParamName,
+                routingCodeParamName, receiptNumberParamName, bankNumberParamName));
+        for (String paymentDetailParameterName : paymentDetailParameters) {
+            final String paymentDetailParameterValue = fromApiJsonHelper.extractStringNamed(paymentDetailParameterName, element);
+            baseDataValidator.reset().parameter(paymentDetailParameterName).value(paymentDetailParameterValue).ignoreIfNull()
+                    .notExceedingLengthOf(50);
+        }
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }

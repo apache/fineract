@@ -13,8 +13,12 @@ public interface ProductToGLAccountMappingWritePlatformService {
 
     void createLoanProductToGLAccountMapping(Long loanProductId, JsonCommand command);
 
+    void createSavingProductToGLAccountMapping(Long savingProductId, JsonCommand command);
+
     Map<String, Object> updateLoanProductToGLAccountMapping(Long loanProductId, JsonCommand command, boolean accountingRuleChanged,
             int accountingRuleTypeId);
 
-    void deleteLoanProductToGLAccountMapping(Long loanProductId);
+    Map<String, Object> updateSavingsProductToGLAccountMapping(Long savingsProductId, JsonCommand command, boolean accountingRuleChanged,
+            int accountingRuleTypeId);
+
 }

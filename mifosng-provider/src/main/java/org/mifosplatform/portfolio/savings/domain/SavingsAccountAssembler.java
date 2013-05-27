@@ -21,6 +21,7 @@ import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.withdr
 import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.withdrawalFeeTypeParamName;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Locale;
 
 import org.joda.time.LocalDate;
@@ -64,8 +65,12 @@ public class SavingsAccountAssembler {
      * Assembles a new {@link SavingsAccount} from JSON details passed in
      * request inheriting details where relevant from chosen
      * {@link SavingsProduct}.
+     * 
+     * @param existingReversedTransactionIds
+     * @param existingTransactionIds
      */
-    public SavingsAccount assembleFrom(final JsonCommand command) {
+    public SavingsAccount assembleFrom(final JsonCommand command, List<Long> existingTransactionIds,
+            List<Long> existingReversedTransactionIds) {
 
         final JsonElement element = command.parsedJson();
 
@@ -198,7 +203,7 @@ public class SavingsAccountAssembler {
         if (active) {
             final Locale locale = command.extractLocale();
             final DateTimeFormatter formatter = DateTimeFormat.forPattern(command.dateFormat()).withLocale(locale);
-            account.activate(formatter, activationDate);
+            account.activate(formatter, activationDate, existingTransactionIds, existingReversedTransactionIds);
         }
 
         return account;
