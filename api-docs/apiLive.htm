@@ -6963,8 +6963,9 @@ Request Body:
 							<td>accountingRule</td>
 						</tr>
 						<tr>
-							<td class=fielddesc><span>Example Values:</span>1=NONE,
-								2=CASH_BASED, 3=ACCRUAL_BASED</td>
+							<td class=fielddesc>Specifies if accounting is enabled for the particular
+								product and the type of the accounting rule to be used
+								<span>Example Values:</span>1=NONE,2=CASH_BASED, 3=ACCRUAL_BASED</td>
 						</tr>
 						</td>
 						</tr>
@@ -9732,6 +9733,13 @@ Content-Type: application/json
 	            <tr class=alt><td>lockinPeriodFrequencyType</td></tr>
 	            <tr><td class=fielddesc><b>Optional</b>: If provided, used along with <i>lockinPeriodFrequency</i> to indicate the length of time that the savings account is 'locked in' and withdrawals are not allowed. 0=Days, 1=Weeks, 2=Months, 3=Years
 	            e.g. 6 <b>Months</b></td></tr>
+
+				<tr class=alt><td>accountingRule</td></tr>
+	            <tr>
+					<td class=fielddesc>Specifies if accounting is enabled for the particular
+					product and the type of the accounting rule to be used
+					<span>Example Values:</span>1=NONE,2=CASH_BASED</td>
+				</tr>
 	        </table>
 	    </div>
 	</div>
@@ -9766,6 +9774,11 @@ Content-Type: application/json
     "code": "savings.interest.period.savingsCompoundingInterestPeriodType.daily",
     "value": "Daily"
   },
+  "interestPostingPeriodType": {
+    "id": 4,
+    "code": "savings.interest.posting.period.savingsInterestPostingPeriodType.monthly",
+    "value": "Monthly"
+  },
   "interestCalculationType": {
     "id": 1,
     "code": "savingsInterestCalculationType.dailybalance",
@@ -9775,6 +9788,11 @@ Content-Type: application/json
     "id": 365,
     "code": "savingsInterestCalculationDaysInYearType.days365",
     "value": "365 Days"
+  },
+  "accountingRule": {
+    "id": 1,
+    "code": "accountingRuleType.none",
+    "value": "NONE"
   },
   "currencyOptions": [
     {
@@ -9828,6 +9846,28 @@ Content-Type: application/json
       "value": "No Compounding - Simple Interest"
     }
   ],
+  "interestPostingPeriodTypeOptions": [
+    {
+      "id": 4,
+      "code": "savings.interest.posting.period.savingsInterestPostingPeriodType.monthly",
+      "value": "Monthly"
+    },
+    {
+      "id": 5,
+      "code": "savings.interest.posting.period.savingsInterestPostingPeriodType.quarterly",
+      "value": "Quarterly"
+    },
+    {
+      "id": 6,
+      "code": "savings.interest.posting.period.savingsInterestPostingPeriodType.biannual",
+      "value": "Semi-Annual"
+    },
+    {
+      "id": 7,
+      "code": "savings.interest.posting.period.savingsInterestPostingPeriodType.annual",
+      "value": "Annually"
+    }
+  ],
   "interestCalculationTypeOptions": [
     {
       "id": 1,
@@ -9873,7 +9913,319 @@ Content-Type: application/json
       "code": "savings.lockin.savingsPeriodFrequencyType.years",
       "value": "Years"
     }
-  ]
+  ],
+  "withdrawalFeeTypeOptions": [
+    {
+      "id": 1,
+      "code": "savingsWithdrawalFeesType.flat",
+      "value": "Flat"
+    },
+    {
+      "id": 2,
+      "code": "savingsWithdrawalFeesType.percent.of.amount",
+      "value": "% of Amount"
+    }
+  ],
+  "paymentTypeOptions": [
+    {
+      "id": 14,
+      "name": "Wire Transfer",
+      "position": 0
+    },
+    {
+      "id": 13,
+      "name": "Cash",
+      "position": 1
+    }
+  ],
+  "accountingRuleOptions": [
+    {
+      "id": 1,
+      "code": "accountingRuleType.none",
+      "value": "NONE"
+    },
+    {
+      "id": 2,
+      "code": "accountingRuleType.cash",
+      "value": "CASH BASED"
+    },
+    {
+      "id": 3,
+      "code": "accountingRuleType.accrual",
+      "value": "ACCRUAL BASED"
+    }
+  ],
+  "accountingMappingOptions": {
+    "liabilityAccountOptions": [
+      {
+        "id": 15,
+        "name": "Savings Control",
+        "glCode": "50001",
+        "disabled": false,
+        "manualEntriesAllowed": true,
+        "type": {
+          "id": 2,
+          "code": "accountType.liability",
+          "value": "LIABILITY"
+        },
+        "usage": {
+          "id": 1,
+          "code": "accountUsage.detail",
+          "value": "DETAIL"
+        },
+        "nameDecorated": "Savings Control",
+        "tagId": {
+          "id": 0
+        }
+      }
+    ],
+    "assetAccountOptions": [
+      {
+        "id": 2,
+        "name": "Cash",
+        "glCode": "100001",
+        "disabled": false,
+        "manualEntriesAllowed": true,
+        "type": {
+          "id": 1,
+          "code": "accountType.asset",
+          "value": "ASSET"
+        },
+        "usage": {
+          "id": 1,
+          "code": "accountUsage.detail",
+          "value": "DETAIL"
+        },
+        "tagId": {}
+      },
+      {
+        "id": 16,
+        "name": "Savings Reference",
+        "glCode": "100007",
+        "disabled": false,
+        "manualEntriesAllowed": true,
+        "type": {
+          "id": 1,
+          "code": "accountType.asset",
+          "value": "ASSET"
+        },
+        "usage": {
+          "id": 1,
+          "code": "accountUsage.detail",
+          "value": "DETAIL"
+        },
+        "nameDecorated": "Savings Reference",
+        "tagId": {
+          "id": 0
+        }
+      },
+      {
+        "id": 12,
+        "name": "HDFC Rajajinagar",
+        "glCode": "100015",
+        "disabled": false,
+        "manualEntriesAllowed": true,
+        "type": {
+          "id": 1,
+          "code": "accountType.asset",
+          "value": "ASSET"
+        },
+        "usage": {
+          "id": 1,
+          "code": "accountUsage.detail",
+          "value": "DETAIL"
+        },
+        "tagId": {}
+      },
+      {
+        "id": 1,
+        "name": "Loan Portfolio",
+        "glCode": "10003",
+        "disabled": false,
+        "manualEntriesAllowed": true,
+        "type": {
+          "id": 1,
+          "code": "accountType.asset",
+          "value": "ASSET"
+        },
+        "usage": {
+          "id": 1,
+          "code": "accountUsage.detail",
+          "value": "DETAIL"
+        },
+        "tagId": {}
+      },
+      {
+        "id": 7,
+        "name": "Interest Receivable",
+        "glCode": "10005",
+        "disabled": false,
+        "manualEntriesAllowed": true,
+        "type": {
+          "id": 1,
+          "code": "accountType.asset",
+          "value": "ASSET"
+        },
+        "usage": {
+          "id": 1,
+          "code": "accountUsage.detail",
+          "value": "DETAIL"
+        },
+        "tagId": {}
+      },
+      {
+        "id": 8,
+        "name": "Penalties Receivable",
+        "glCode": "10008",
+        "disabled": false,
+        "manualEntriesAllowed": true,
+        "type": {
+          "id": 1,
+          "code": "accountType.asset",
+          "value": "ASSET"
+        },
+        "usage": {
+          "id": 1,
+          "code": "accountUsage.detail",
+          "value": "DETAIL"
+        },
+        "tagId": {}
+      },
+      {
+        "id": 9,
+        "name": "Fee Receivable",
+        "glCode": "10009",
+        "disabled": false,
+        "manualEntriesAllowed": true,
+        "type": {
+          "id": 1,
+          "code": "accountType.asset",
+          "value": "ASSET"
+        },
+        "usage": {
+          "id": 1,
+          "code": "accountUsage.detail",
+          "value": "DETAIL"
+        },
+        "tagId": {}
+      }
+    ],
+    "expenseAccountOptions": [
+      {
+        "id": 6,
+        "name": "Write Off Expenses",
+        "glCode": "60001",
+        "disabled": false,
+        "manualEntriesAllowed": true,
+        "type": {
+          "id": 5,
+          "code": "accountType.expense",
+          "value": "EXPENSE"
+        },
+        "usage": {
+          "id": 1,
+          "code": "accountUsage.detail",
+          "value": "DETAIL"
+        },
+        "tagId": {}
+      },
+      {
+        "id": 13,
+        "name": "Employee Salary",
+        "glCode": "60002",
+        "disabled": false,
+        "manualEntriesAllowed": true,
+        "type": {
+          "id": 5,
+          "code": "accountType.expense",
+          "value": "EXPENSE"
+        },
+        "usage": {
+          "id": 1,
+          "code": "accountUsage.detail",
+          "value": "DETAIL"
+        },
+        "tagId": {}
+      },
+      {
+        "id": 18,
+        "name": "Interest On Savings",
+        "glCode": "60003",
+        "disabled": false,
+        "manualEntriesAllowed": true,
+        "type": {
+          "id": 5,
+          "code": "accountType.expense",
+          "value": "EXPENSE"
+        },
+        "usage": {
+          "id": 1,
+          "code": "accountUsage.detail",
+          "value": "DETAIL"
+        },
+        "nameDecorated": "Interest On Savings",
+        "tagId": {
+          "id": 0
+        }
+      }
+    ],
+    "incomeAccountOptions": [
+      {
+        "id": 3,
+        "name": "Income from Interest",
+        "glCode": "40001",
+        "disabled": false,
+        "manualEntriesAllowed": true,
+        "type": {
+          "id": 4,
+          "code": "accountType.income",
+          "value": "INCOME"
+        },
+        "usage": {
+          "id": 1,
+          "code": "accountUsage.detail",
+          "value": "DETAIL"
+        },
+        "tagId": {}
+      },
+      {
+        "id": 4,
+        "name": "Income from Fees",
+        "glCode": "40002",
+        "disabled": false,
+        "manualEntriesAllowed": true,
+        "type": {
+          "id": 4,
+          "code": "accountType.income",
+          "value": "INCOME"
+        },
+        "usage": {
+          "id": 1,
+          "code": "accountUsage.detail",
+          "value": "DETAIL"
+        },
+        "tagId": {}
+      },
+      {
+        "id": 5,
+        "name": "Income from Penalties",
+        "glCode": "40004",
+        "disabled": false,
+        "manualEntriesAllowed": true,
+        "type": {
+          "id": 4,
+          "code": "accountType.income",
+          "value": "INCOME"
+        },
+        "usage": {
+          "id": 1,
+          "code": "accountUsage.detail",
+          "value": "DETAIL"
+        },
+        "tagId": {}
+      }
+    ]
+  }
 }
 			</code>
         </div>
@@ -9887,13 +10239,20 @@ Content-Type: application/json
                 <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Mandatory Fields</div></td></tr>
                 <tr class=alt>
                 	<td>name, description, currencyCode, digitsAfterDecimal, nominalAnnualInterestRate,
-                		interestCompoundingPeriodType, interestCalculationType, interestCalculationDaysInYearType</td>
+                		interestCompoundingPeriodType, interestCalculationType, interestCalculationDaysInYearType,accountingRule</td>
+                </tr>
+            </table>
+            <br/>
+            <table class=matrixHeading>
+                <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Mandatory Fields for Cash based accounting (accountingRule = 2)</div></td></tr>
+                <tr class=alt>
+                	<td>savingsReferenceAccountId,savingsControlAccountId, interestOnSavingsAccountId, incomeFromFeeAccountId</td>
                 </tr>
             </table>
             <br/>
             <table class=matrixHeading>
                 <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Optional Fields</div></td></tr>
-                <tr class=alt><td>minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType</tr>
+                <tr class=alt><td>minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType, paymentChannelToFundSourceMappings</tr>
             </table>
         </div>
         <div class="method-example">
@@ -9909,8 +10268,50 @@ Request Body:
   "locale": "en",
   "nominalAnnualInterestRate": "5.0",
   "interestCompoundingPeriodType": 1, 
+  "interestPostingPeriodType":4,
   "interestCalculationType": 1,
-  "interestCalculationDaysInYearType": "365"
+  "interestCalculationDaysInYearType": "365",
+  "accountingRule":"1"
+}
+			</code>
+			<code class="method-response">
+{
+  "resourceId": 1
+}
+			</code>
+			<code class="method-request">POST savingsproducts
+Content-Type: application/json
+Request Body:
+{
+  "locale": "en",
+  "name": "New Passbook Savings ",
+  "description": "A savings product",
+  "currencyCode": "USD",
+  "digitsAfterDecimal": "2",
+  "nominalAnnualInterestRate": "15",
+  "interestCompoundingPeriodType": "1",
+  "interestPostingPeriodType": "4",
+  "interestCalculationType": "1",
+  "interestCalculationDaysInYearType": "365",
+  "minRequiredOpeningBalance": "50",
+  "lockinPeriodFrequency": "4",
+  "lockinPeriodFrequencyType": "1",
+  "withdrawalFeeAmount": "12",
+  "withdrawalFeeType": "1",
+  "monthDayFormat": "dd MMM",
+  "annualFeeAmount": "12",
+  "annualFeeOnMonthDay": "01 May",
+  "accountingRule": "2",
+  "savingsReferenceAccountId": "16",
+  "savingsControlAccountId": "15",
+  "interestOnSavingsAccountId": "18",
+  "incomeFromFeeAccountId": "4",
+  "paymentChannelToFundSourceMappings": [
+    {
+      "paymentTypeId": "14",
+      "fundSourceAccountId": "2"
+    }
+  ]
 }
 			</code>
 			<code class="method-response">
@@ -9937,8 +10338,8 @@ Request Body:
 			<code class="method-response">
 {
   "id": 1,
-  "name": "Passbook Savings",
-  "description": "Daily compounding using Daily Balance, 5% per year, 365 days in year",
+  "name": "First Product",
+  "description": "A cool saving product",
   "currency": {
     "code": "USD",
     "name": "US Dollar",
@@ -9947,11 +10348,16 @@ Request Body:
     "nameCode": "currency.USD",
     "displayLabel": "US Dollar ($)"
   },
-  "nominalAnnualInterestRate": 5,
+  "nominalAnnualInterestRate": 50.000000,
   "interestCompoundingPeriodType": {
-    "id": 1,
-    "code": "savings.interest.period.savingsCompoundingInterestPeriodType.daily",
-    "value": "Daily"
+    "id": 4,
+    "code": "savings.interest.period.savingsCompoundingInterestPeriodType.monthly",
+    "value": "Monthly"
+  },
+  "interestPostingPeriodType": {
+    "id": 4,
+    "code": "savings.interest.posting.period.savingsInterestPostingPeriodType.monthly",
+    "value": "Monthly"
   },
   "interestCalculationType": {
     "id": 1,
@@ -9962,7 +10368,42 @@ Request Body:
     "id": 365,
     "code": "savingsInterestCalculationDaysInYearType.days365",
     "value": "365 Days"
-  }
+  },
+  "minRequiredOpeningBalance": 20.000000,
+  "lockinPeriodFrequency": 1,
+  "lockinPeriodFrequencyType": {
+    "id": 1,
+    "code": "savings.lockin.savingsPeriodFrequencyType.weeks",
+    "value": "Weeks"
+  },
+  "withdrawalFeeAmount": 12.000000,
+  "withdrawalFeeType": {
+    "id": 1,
+    "code": "savingsWithdrawalFeesType.flat",
+    "value": "Flat"
+  },
+  "annualFeeAmount": 100.000000,
+  "annualFeeOnMonthDay": [
+    5,
+    1
+  ],
+  "accountingRule": {
+    "id": 2,
+    "code": "accountingRuleType.cash",
+    "value": "CASH BASED"
+  },
+  "accountingMappings": {
+    "savingsReferenceAccountId": 16,
+    "incomeFromFeeAccountId": 4,
+    "interestOnSavingsAccountId": 18,
+    "savingsControlAccountId": 15
+  },
+  "paymentChannelToFundSourceMappings": [
+    {
+      "paymentTypeId": 14,
+      "fundSourceAccountId": 2
+    }
+  ]
 }	
 			</code>
         </div>
@@ -10658,12 +11099,12 @@ No Request Body:
 	        </code>
 			<code class="method-response">
 {
-  "accountId": 2,
-  "accountNo": "000000002",
+  "accountId": 1,
+  "accountNo": "000000001",
   "date": [
     2013,
-    3,
-    22
+    5,
+    27
   ],
   "currency": {
     "code": "USD",
@@ -10672,7 +11113,19 @@ No Request Body:
     "displaySymbol": "$",
     "nameCode": "currency.USD",
     "displayLabel": "US Dollar ($)"
-  }
+  },
+  "paymentTypeOptions": [
+    {
+      "id": 14,
+      "name": "Wire Transfer",
+      "position": 0
+    },
+    {
+      "id": 13,
+      "name": "Cash",
+      "position": 1
+    }
+  ]
 }
 			</code>
 	    </div>
@@ -10690,18 +11143,31 @@ No Request Body:
 Content-Type: application/json
 No Request Body:
 {
-	"dateFormat": "dd MMMM yyyy", 
-	"locale": "en",
-	"transactionDate": "02 March 2011",
-	"transactionAmount": "256.67"
+  "locale": "en",
+  "dateFormat": "dd MMMM yyyy",
+  "transactionDate": "27 May 2013",
+  "transactionAmount": "500",
+  "paymentTypeId": "14",
+  "accountNumber": "acc123",
+  "checkNumber": "che123",
+  "routingCode": "rou123",
+  "receiptNumber": "rec123",
+  "bankNumber": "ban123"
 }
 	        </code>
 	        <code class="method-response">
 {
   "officeId": 1,
-  "clientId": 1,
+  "clientId": 2,
   "savingsId": 1,
-  "resourceId": 1
+  "resourceId": 47,
+  "changes": {
+    "accountNumber": "acc123",
+    "checkNumber": "che123",
+    "routingCode": "rou123",
+    "receiptNumber": "rec123",
+    "bankNumber": "ban123"
+  }
 }
 	        </code>
 	    </div>
@@ -10718,18 +11184,31 @@ No Request Body:
 Content-Type: application/json
 No Request Body:
 {
-	"dateFormat": "dd MMMM yyyy", 
-	"locale": "en",
-	"transactionDate": "02 March 2011",
-	"transactionAmount": "99.50"
+  "locale": "en",
+  "dateFormat": "dd MMMM yyyy",
+  "transactionDate": "27 May 2013",
+  "transactionAmount": "500",
+  "paymentTypeId": "14",
+  "accountNumber": "acc123",
+  "checkNumber": "che123",
+  "routingCode": "rou123",
+  "receiptNumber": "rec123",
+  "bankNumber": "ban123"
 }
 	        </code>
 	        <code class="method-response">
 {
   "officeId": 1,
-  "clientId": 1,
+  "clientId": 2,
   "savingsId": 1,
-  "resourceId": 2
+  "resourceId": 48,
+  "changes": {
+    "accountNumber": "acc123",
+    "checkNumber": "che123",
+    "routingCode": "rou123",
+    "receiptNumber": "rec123",
+    "bankNumber": "ban123"
+  }
 }
 	        </code>
 	    </div>

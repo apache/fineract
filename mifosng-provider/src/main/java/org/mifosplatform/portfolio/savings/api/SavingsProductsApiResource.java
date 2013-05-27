@@ -7,7 +7,6 @@ package org.mifosplatform.portfolio.savings.api;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -144,17 +143,17 @@ public class SavingsProductsApiResource {
 
         final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 
-        Map<String, Object> accountingMappings = null;
-        Collection<PaymentTypeToGLAccountMapper> paymentChannelToFundSourceMappings = null;
         if (savingProductData.hasAccountingEnabled()) {
-            accountingMappings = accountMappingReadPlatformService.fetchAccountMappingDetailsForSavingsProduct(productId,
-                    savingProductData.accountingRuleTypeId());
-            paymentChannelToFundSourceMappings = accountMappingReadPlatformService
+            Map<String, Object> accountingMappings = accountMappingReadPlatformService.fetchAccountMappingDetailsForSavingsProduct(
+                    productId, savingProductData.accountingRuleTypeId());
+            Collection<PaymentTypeToGLAccountMapper> paymentChannelToFundSourceMappings = accountMappingReadPlatformService
                     .fetchPaymentTypeToFundSourceMappingsForSavingsProduct(productId);
+            savingProductData = SavingsProductData.withAccountingDetails(savingProductData, accountingMappings,
+                    paymentChannelToFundSourceMappings);
         }
 
         if (settings.isTemplate()) {
-            savingProductData = handleTemplateRelatedData(savingProductData, accountingMappings, paymentChannelToFundSourceMappings);
+            savingProductData = handleTemplateRelatedData(savingProductData);
         }
 
         return this.toApiJsonSerializer
@@ -169,14 +168,13 @@ public class SavingsProductsApiResource {
 
         context.authenticatedUser().validateHasReadPermission(SavingsApiConstants.SAVINGS_PRODUCT_RESOURCE_NAME);
 
-        SavingsProductData savingProduct = handleTemplateRelatedData(null, new HashMap<String, Object>(), null);
+        SavingsProductData savingProduct = handleTemplateRelatedData(null);
 
         final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serialize(settings, savingProduct, SavingsApiConstants.SAVINGS_PRODUCT_RESPONSE_DATA_PARAMETERS);
     }
 
-    private SavingsProductData handleTemplateRelatedData(final SavingsProductData savingsProduct,
-            final Map<String, Object> accountingMappings, final Collection<PaymentTypeToGLAccountMapper> paymentChannelToFundSourceMappings) {
+    private SavingsProductData handleTemplateRelatedData(final SavingsProductData savingsProduct) {
 
         final EnumOptionData interestCompoundingPeriodType = SavingsEnumerations
                 .compoundingInterestPeriodType(SavingsCompoundingInterestPeriodType.DAILY);
@@ -224,8 +222,7 @@ public class SavingsProductsApiResource {
 
         SavingsProductData savingsProductToReturn = null;
         if (savingsProduct != null) {
-            savingsProductToReturn = SavingsProductData.withTemplate(savingsProduct, accountingMappings,
-                    paymentChannelToFundSourceMappings, currencyOptions, interestCompoundingPeriodTypeOptions,
+            savingsProductToReturn = SavingsProductData.withTemplate(savingsProduct, currencyOptions, interestCompoundingPeriodTypeOptions,
                     interestPostingPeriodTypeOptions, interestCalculationTypeOptions, interestCalculationDaysInYearTypeOptions,
                     lockinPeriodFrequencyTypeOptions, withdrawalFeeTypeOptions, paymentTypeOptions, accountingRuleOptions,
                     accountingMappingOptions);
