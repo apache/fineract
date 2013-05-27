@@ -6,6 +6,7 @@ See VERSIONING (https://github.com/openMF/mifosx/blob/master/VERSIONING.md) for 
 Releases
 ===============
 
+1. 27 May 2013 - 1.2.0.RELEASE
 1. 24 May 2013 - 1.1.4.RELEASE
 1. 22 May 2013 - 1.1.3.RELEASE
 1. 19 May 2013 - 1.1.2.RELEASE
@@ -20,6 +21,36 @@ Releases
 1. 10 April 2013 - 0.11.2.beta
 1. 05 April 2013 - 0.11.1.beta
 1. 05 April 2013 - 0.11.0.beta
+
+1.2.0.RELEASE
+=============
+Feature Release
+
+This feature release is focussed on 'Accounting' improvements that provide greater flexibility in use of accounting for MFIs that use mobile money and wish to be able to track through what channels repayments are disbursements go.
+
+The BETA functionality for savings is now integrated with accounting on platform/api side.
+
+It also contains a number of improvements to the reference app UI.
+
+Platform & API
+ - [MIFOSX-223] - Add functionality for Loan Disbursement and Repayment channels/types
+ - [MIFOSX-286] - Ability to setup and use Accounting rules for Manual Journal Entries
+ - [MIFOSX-338] - Tagging Journal Entries
+ - [MIFOSX-392] - Not able to upload .docx (word doccument) and .xlsx (Excel doccument) in Client's "Identity Doccuments" and in "Client Doccuments"
+ - [MIFOSX-328] - Loan approval date should not be earlier to the Client activation date.
+ - [MIFOSX-246] - Add ability to associate fees with savings product/account
+ - [MIFOSX-331] - Add capability to filter the calendars based on Calendar Type.
+
+Reference App
+ - [MIFOSX-320] - Beautify Login page
+ - [MIFOSX-149] - Add status colors to UI
+ - [MIFOSX-147] - Allow ability to produce easy to print loan schedule from the loan screen
+ - [MIFOSX-317] - Add Tooltips that explain the significance of mapped "Accounts" in Loan Product Screens
+ - [MIFOSX-347] - When creating a new GL Account, pick up on selected category from tree view
+ - [MIFOSX-313] - Fix CSS issues with Accounting section of "Define New Loan Products"
+ - [MIFOSX-346] - Upgrade Reference UI to JQuery UI 1.10.3 (latest stable version)
+ - [MIFOSX-384] - JQuery upgrading breaking the functionality of Add LoanProduct.
+ - [MIFOSX-386] - In "Add Loan Product" not able to delete the "Charges"added , similarly in "Accounting" not able to delete "Advanced accounting rules"(ie, Payment Type and Fund Source). Issue may be of latest updation, because in demo version it is working fine.
 
 1.1.4.RELEASE
 =============
