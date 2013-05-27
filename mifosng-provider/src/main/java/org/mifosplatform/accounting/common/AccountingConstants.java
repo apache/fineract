@@ -103,7 +103,7 @@ public class AccountingConstants {
         }
     }
 
-    /*** Accounting placeholders for cash based accounting for loan products ***/
+    /*** Accounting placeholders for cash based accounting for savings products ***/
     public static enum CASH_ACCOUNTS_FOR_SAVINGS {
         SAVINGS_REFERENCE(1), SAVINGS_CONTROL(2), INTEREST_ON_SAVINGS(3), INCOME_FROM_FEES(4);
 
