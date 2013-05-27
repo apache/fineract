@@ -42,9 +42,7 @@ public class SavingsProductData {
 
     // accounting
     private final EnumOptionData accountingRule;
-    @SuppressWarnings("unused")
     private final Map<String, Object> accountingMappings;
-    @SuppressWarnings("unused")
     private final Collection<PaymentTypeToGLAccountMapper> paymentChannelToFundSourceMappings;
 
     // template
@@ -107,15 +105,41 @@ public class SavingsProductData {
      * Returns a {@link SavingsProductData} that contains and exist
      * {@link SavingsProductData} data with further template data for dropdowns.
      */
-    public static SavingsProductData withTemplate(final SavingsProductData existingProduct, final Map<String, Object> accountingMappings,
-            final Collection<PaymentTypeToGLAccountMapper> paymentChannelToFundSourceMappings,
-            final Collection<CurrencyData> currencyOptions, final Collection<EnumOptionData> interestCompoundingPeriodTypeOptions,
+    public static SavingsProductData withTemplate(final SavingsProductData existingProduct, final Collection<CurrencyData> currencyOptions,
+            final Collection<EnumOptionData> interestCompoundingPeriodTypeOptions,
             final Collection<EnumOptionData> interestPostingPeriodTypeOptions,
             final Collection<EnumOptionData> interestCalculationTypeOptions,
             final Collection<EnumOptionData> interestCalculationDaysInYearTypeOptions,
             final Collection<EnumOptionData> lockinPeriodFrequencyTypeOptions, final Collection<EnumOptionData> withdrawalFeeTypeOptions,
             final Collection<CodeValueData> paymentTypeOptions, final Collection<EnumOptionData> accountingRuleOptions,
             final Map<String, List<GLAccountData>> accountingMappingOptions) {
+
+        return new SavingsProductData(existingProduct.id, existingProduct.name, existingProduct.description, existingProduct.currency,
+                existingProduct.nominalAnnualInterestRate, existingProduct.interestCompoundingPeriodType,
+                existingProduct.interestPostingPeriodType, existingProduct.interestCalculationType,
+                existingProduct.interestCalculationDaysInYearType, existingProduct.minRequiredOpeningBalance,
+                existingProduct.lockinPeriodFrequency, existingProduct.lockinPeriodFrequencyType, existingProduct.withdrawalFeeAmount,
+                existingProduct.withdrawalFeeType, existingProduct.accountingRule, existingProduct.annualFeeAmount,
+                existingProduct.annualFeeOnMonthDay, existingProduct.accountingMappings,
+                existingProduct.paymentChannelToFundSourceMappings, currencyOptions, interestCompoundingPeriodTypeOptions,
+                interestPostingPeriodTypeOptions, interestCalculationTypeOptions, interestCalculationDaysInYearTypeOptions,
+                lockinPeriodFrequencyTypeOptions, withdrawalFeeTypeOptions, paymentTypeOptions, accountingRuleOptions,
+                accountingMappingOptions);
+    }
+
+    public static SavingsProductData withAccountingDetails(final SavingsProductData existingProduct,
+            final Map<String, Object> accountingMappings, final Collection<PaymentTypeToGLAccountMapper> paymentChannelToFundSourceMappings) {
+
+        final Collection<CurrencyData> currencyOptions = null;
+        final Collection<EnumOptionData> interestCompoundingPeriodTypeOptions = null;
+        final Collection<EnumOptionData> interestPostingPeriodTypeOptions = null;
+        final Collection<EnumOptionData> interestCalculationTypeOptions = null;
+        final Collection<EnumOptionData> interestCalculationDaysInYearTypeOptions = null;
+        final Collection<EnumOptionData> lockinPeriodFrequencyTypeOptions = null;
+        final Collection<EnumOptionData> withdrawalFeeTypeOptions = null;
+        final Collection<CodeValueData> paymentTypeOptions = null;
+        final Collection<EnumOptionData> accountingRuleOptions = null;
+        final Map<String, List<GLAccountData>> accountingMappingOptions = null;
 
         return new SavingsProductData(existingProduct.id, existingProduct.name, existingProduct.description, existingProduct.currency,
                 existingProduct.nominalAnnualInterestRate, existingProduct.interestCompoundingPeriodType,
