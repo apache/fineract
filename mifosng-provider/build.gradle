@@ -49,12 +49,11 @@ sourceCompatibility = JavaVersion.VERSION_1_6
 /* define binary compatiblity version */
 targetCompatibility = JavaVersion.VERSION_1_6
 
-project.ext.springVersion = '3.2.2.RELEASE'
-project.ext.springSecurityVersion = '3.1.3.RELEASE'
-project.ext.hibernateValidatorVersion = '4.3.1.Final'
+project.ext.springVersion = '3.2.3.RELEASE'
+project.ext.springSecurityVersion = '3.1.4.RELEASE'
 project.ext.hibernateCoreVersion = '4.1.9.Final'
 project.ext.jerseyVersion = '1.17'
-project.ext.springDataJpaVersion = '1.2.1.RELEASE'
+project.ext.springDataJpaVersion = '1.3.0.RELEASE'
 
 project.ext.mysqlUser='root'
 project.ext.mysqlPassword='mysql'
@@ -84,7 +83,7 @@ configurations {
 }
 
 dependencies {
-        def tomcatVersion = '7.0.39'
+        def tomcatVersion = '7.0.40'
 	    tomcat "org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}",
 	           "org.apache.tomcat.embed:tomcat-embed-logging-juli:${tomcatVersion}"
 	    tomcat("org.apache.tomcat.embed:tomcat-embed-jasper:${tomcatVersion}") {
@@ -127,14 +126,14 @@ dependencies {
 	            [group: 'org.apache.commons', name: 'commons-email', version: '1.2'],
 	            [group: 'commons-lang', name: 'commons-lang', version: '2.4'],
 
-	            [group: 'org.slf4j', name: 'slf4j-api', version: '1.7.2'],
-	            [group: 'org.slf4j', name: 'jcl-over-slf4j', version: '1.7.2'],
+	            [group: 'org.slf4j', name: 'slf4j-api', version: '1.7.5'],
+	            [group: 'org.slf4j', name: 'jcl-over-slf4j', version: '1.7.5'],
 
-	            [group: 'ch.qos.logback', name: 'logback-core', version: '1.0.9'],
-	            [group: 'ch.qos.logback', name: 'logback-classic', version: '1.0.9'],
+	            [group: 'ch.qos.logback', name: 'logback-core', version: '1.0.13'],
+	            [group: 'ch.qos.logback', name: 'logback-classic', version: '1.0.13'],
 
 	            [group: 'mysql', name: 'mysql-connector-java', version: '5.1.25'],
-	            [group: 'org.apache.tomcat', name: 'tomcat-jdbc', version: '7.0.39'],
+	            [group: 'org.apache.tomcat', name: 'tomcat-jdbc', version: '7.0.40'],
 
 	            [group: 'pentaho-reporting-engine', name: 'pentaho-reporting-engine-classic-core', version: '3.9.1.1'],
 	            [group: 'pentaho-reporting-engine', name: 'pentaho-reporting-engine-classic-extensions', version: '3.9.1-GA'],
