@@ -694,13 +694,13 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final List<Long> existingReversedTransactionIds = new ArrayList<Long>();
         this.loanChargeRepository.save(loanCharge);
 
-        final LoanTransaction applyLoanChargeTransaction = loan.handleChargeAppliedTransaction(loanCharge, null);
         final ChangedTransactionDetail changedTransactionDetail = loan.addLoanCharge(loanCharge, existingTransactionIds,
                 existingReversedTransactionIds);
 
         // we want to apply charge transactions only for those loans charges
         // that are applied when a loan is active
         if (loan.status().isActive()) {
+            final LoanTransaction applyLoanChargeTransaction = loan.handleChargeAppliedTransaction(loanCharge, null);
             this.loanTransactionRepository.save(applyLoanChargeTransaction);
             /***
              * TODO Vishwas Batch save is giving me a
@@ -714,12 +714,9 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                     this.loanTransactionRepository.save(loanTransaction);
                 }
             }
-        }
 
-        this.loanRepository.save(loan);
-
-        // we post Journal entries only for loans in active status
-        if (loan.status().isActive()) {
+            this.loanRepository.save(loan);
+            // we post Journal entries only for loans in active status
             postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
         }
 
