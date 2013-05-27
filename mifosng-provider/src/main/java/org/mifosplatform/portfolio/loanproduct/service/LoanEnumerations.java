@@ -11,7 +11,6 @@ import org.mifosplatform.portfolio.loanaccount.data.LoanTransactionEnumData;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanStatus;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanTransactionType;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanType;
-import org.mifosplatform.portfolio.loanproduct.domain.AccountingRuleType;
 import org.mifosplatform.portfolio.loanproduct.domain.AmortizationMethod;
 import org.mifosplatform.portfolio.loanproduct.domain.InterestCalculationPeriodMethod;
 import org.mifosplatform.portfolio.loanproduct.domain.InterestMethod;
@@ -45,8 +44,6 @@ public class LoanEnumerations {
             return interestType(id);
         } else if (typeName.equals(INTEREST_CALCULATION_PERIOD_TYPE)) {
             return interestCalculationPeriodType(id);
-        } else if (typeName.equals(ACCOUNTING_RULE_TYPE)) {
-            return accountingRuleType(id);
         } else if (typeName.equals(LOAN_TYPE)) { return loanType(id); }
         return null;
     }
@@ -334,15 +331,6 @@ public class LoanEnumerations {
             break;
         }
 
-        return optionData;
-    }
-
-    public static EnumOptionData accountingRuleType(final int id) {
-        return accountingRuleType(AccountingRuleType.fromInt(id));
-    }
-
-    public static EnumOptionData accountingRuleType(final AccountingRuleType type) {
-        EnumOptionData optionData = new EnumOptionData(type.getValue().longValue(), type.getCode(), type.toString());
         return optionData;
     }
 

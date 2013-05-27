@@ -6,9 +6,12 @@
 package org.mifosplatform.portfolio.savings.data;
 
 import java.math.BigDecimal;
+import java.util.Collection;
 
 import org.joda.time.LocalDate;
+import org.mifosplatform.infrastructure.codes.data.CodeValueData;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
+import org.mifosplatform.portfolio.paymentdetail.data.PaymentDetailData;
 
 /**
  * Immutable data object representing a savings account transaction.
@@ -22,11 +25,18 @@ public class SavingsAccountTransactionData {
     private final String accountNo;
     private final LocalDate date;
     private final CurrencyData currency;
+    private final PaymentDetailData paymentDetailData;
     private final BigDecimal amount;
 
+    // templates
+    final Collection<CodeValueData> paymentTypeOptions;
+
     public static SavingsAccountTransactionData create(final Long id, final SavingsAccountTransactionEnumData transactionType,
-            final Long savingsId, final String savingsAccountNo, final LocalDate date, final CurrencyData currency, final BigDecimal amount) {
-        return new SavingsAccountTransactionData(id, transactionType, savingsId, savingsAccountNo, date, currency, amount);
+            final PaymentDetailData paymentDetailData, final Long savingsId, final String savingsAccountNo, final LocalDate date,
+            final CurrencyData currency, final BigDecimal amount) {
+        final Collection<CodeValueData> paymentTypeOptions = null;
+        return new SavingsAccountTransactionData(id, transactionType, paymentDetailData, savingsId, savingsAccountNo, date, currency,
+                amount, paymentTypeOptions);
     }
 
     public static SavingsAccountTransactionData template(final Long savingsId, final String savingsAccountNo,
@@ -34,17 +44,31 @@ public class SavingsAccountTransactionData {
         final Long id = null;
         final SavingsAccountTransactionEnumData transactionType = null;
         final BigDecimal amount = null;
-        return new SavingsAccountTransactionData(id, transactionType, savingsId, savingsAccountNo, defaultLocalDate, currency, amount);
+        final PaymentDetailData paymentDetailData = null;
+        final Collection<CodeValueData> paymentTypeOptions = null;
+        return new SavingsAccountTransactionData(id, transactionType, paymentDetailData, savingsId, savingsAccountNo, defaultLocalDate,
+                currency, amount, null);
     }
 
-    private SavingsAccountTransactionData(final Long id, final SavingsAccountTransactionEnumData transactionType, final Long savingsId,
-            final String savingsAccountNo, final LocalDate date, final CurrencyData currency, final BigDecimal amount) {
+    public static SavingsAccountTransactionData templateOnTop(final SavingsAccountTransactionData savingsAccountTransactionData,
+            final Collection<CodeValueData> paymentTypeOptions) {
+        return new SavingsAccountTransactionData(savingsAccountTransactionData.id, savingsAccountTransactionData.transactionType,
+                savingsAccountTransactionData.paymentDetailData, savingsAccountTransactionData.accountId,
+                savingsAccountTransactionData.accountNo, savingsAccountTransactionData.date, savingsAccountTransactionData.currency,
+                savingsAccountTransactionData.amount, paymentTypeOptions);
+    }
+
+    private SavingsAccountTransactionData(final Long id, final SavingsAccountTransactionEnumData transactionType,
+            final PaymentDetailData paymentDetailData, final Long savingsId, final String savingsAccountNo, final LocalDate date,
+            final CurrencyData currency, final BigDecimal amount, final Collection<CodeValueData> paymentTypeOptions) {
         this.id = id;
         this.transactionType = transactionType;
+        this.paymentDetailData = paymentDetailData;
         this.accountId = savingsId;
         this.accountNo = savingsAccountNo;
         this.date = date;
         this.currency = currency;
         this.amount = amount;
+        this.paymentTypeOptions = paymentTypeOptions;
     }
 }

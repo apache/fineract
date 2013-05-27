@@ -30,10 +30,10 @@ import org.springframework.data.jpa.domain.AbstractPersistable;
 @Table(name = "acc_gl_account", uniqueConstraints = { @UniqueConstraint(columnNames = { "gl_code" }, name = "acc_gl_code") })
 public class GLAccount extends AbstractPersistable<Long> {
 
-	@ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id")
     private GLAccount parent;
-    
+
     @Column(name = "hierarchy", nullable = true, length = 50)
     private String hierarchy;
 
@@ -61,8 +61,8 @@ public class GLAccount extends AbstractPersistable<Long> {
 
     @Column(name = "description", nullable = true, length = 500)
     private String description;
-    
-	@ManyToOne(fetch = FetchType.LAZY)
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tag_id")
     private CodeValue tagId;
 
@@ -105,7 +105,8 @@ public class GLAccount extends AbstractPersistable<Long> {
         handlePropertyUpdate(command, actualChanges, GLAccountJsonInputParams.PARENT_ID.getValue(), 0L);
         handlePropertyUpdate(command, actualChanges, GLAccountJsonInputParams.TYPE.getValue(), this.type, true);
         handlePropertyUpdate(command, actualChanges, GLAccountJsonInputParams.USAGE.getValue(), this.usage, true);
-        handlePropertyUpdate(command, actualChanges, GLAccountJsonInputParams.TAGID.getValue(), this.tagId==null?0L:this.tagId.getId());
+        handlePropertyUpdate(command, actualChanges, GLAccountJsonInputParams.TAGID.getValue(),
+                this.tagId == null ? 0L : this.tagId.getId());
         return actualChanges;
     }
 
@@ -207,7 +208,7 @@ public class GLAccount extends AbstractPersistable<Long> {
     public Integer getType() {
         return this.type;
     }
-    
+
     public void generateHierarchy() {
 
         if (parent != null) {
@@ -216,21 +217,21 @@ public class GLAccount extends AbstractPersistable<Long> {
             this.hierarchy = ".";
         }
     }
-    
+
     private String hierarchyOf(final Long id) {
         return this.hierarchy + id.toString() + ".";
     }
 
-	public boolean isDetailAccount() {
-		return GLAccountUsage.DETAIL.getValue().equals(this.usage);
-	}
+    public boolean isDetailAccount() {
+        return GLAccountUsage.DETAIL.getValue().equals(this.usage);
+    }
 
-	public void updateTagId(CodeValue tagID) {
-		this.tagId = tagID;
-	}
+    public void updateTagId(CodeValue tagID) {
+        this.tagId = tagID;
+    }
 
-	public void updateParentAccount(GLAccount parentAccount) {
-		this.parent=parentAccount;
-		this.generateHierarchy();
-	}
+    public void updateParentAccount(GLAccount parentAccount) {
+        this.parent = parentAccount;
+        this.generateHierarchy();
+    }
 }

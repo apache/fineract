@@ -25,6 +25,7 @@ import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.withdr
 import java.math.BigDecimal;
 
 import org.joda.time.MonthDay;
+import org.mifosplatform.accounting.common.AccountingRuleType;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.springframework.stereotype.Component;
@@ -86,10 +87,11 @@ public class SavingsProductAssembler {
 
         final BigDecimal annualFeeAmount = command.bigDecimalValueOfParameterNamed(annualFeeAmountParamName);
         final MonthDay monthDayOfAnnualFee = command.extractMonthDayNamed(annualFeeOnMonthDayParamName);
+        final AccountingRuleType accountingRuleType = AccountingRuleType.fromInt(command.integerValueOfParameterNamed("accountingRule"));
 
         return SavingsProduct.createNew(name, description, currency, interestRate, interestCompoundingPeriodType,
                 interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance,
                 lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeAmount, withdrawalFeeType, annualFeeAmount,
-                monthDayOfAnnualFee);
+                monthDayOfAnnualFee, accountingRuleType);
     }
 }

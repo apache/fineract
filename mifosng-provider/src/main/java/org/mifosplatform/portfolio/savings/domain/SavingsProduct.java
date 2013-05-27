@@ -22,6 +22,7 @@ import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.namePa
 import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.nominalAnnualInterestRateParamName;
 import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.withdrawalFeeAmountParamName;
 import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.withdrawalFeeTypeParamName;
+import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.accountingRuleParamName;
 
 import java.math.BigDecimal;
 import java.util.LinkedHashMap;
@@ -33,6 +34,7 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 
 import org.joda.time.MonthDay;
+import org.mifosplatform.accounting.common.AccountingRuleType;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.exception.GeneralPlatformDomainRuleException;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
@@ -93,6 +95,12 @@ public class SavingsProduct extends AbstractPersistable<Long> {
     @Column(name = "lockin_period_frequency_enum", nullable = true)
     private Integer lockinPeriodFrequencyType;
 
+    /**
+     * A value from the {@link AccountingRuleType} enumeration.
+     */
+    @Column(name = "accounting_type", nullable = false)
+    private Integer accountingRule;
+
     @Column(name = "withdrawal_fee_amount", scale = 6, precision = 19, nullable = true)
     private BigDecimal withdrawalFeeAmount;
 
@@ -114,11 +122,11 @@ public class SavingsProduct extends AbstractPersistable<Long> {
             final SavingsInterestCalculationDaysInYearType interestCalculationDaysInYearType, final BigDecimal minRequiredOpeningBalance,
             final Integer lockinPeriodFrequency, final SavingsPeriodFrequencyType lockinPeriodFrequencyType,
             final BigDecimal withdrawalFeeAmount, final SavingsWithdrawalFeesType withdrawalFeeType, final BigDecimal annualFeeAmount,
-            final MonthDay annualFeeOnMonthDay) {
+            final MonthDay annualFeeOnMonthDay, final AccountingRuleType accountingRuleType) {
 
         return new SavingsProduct(name, description, currency, interestRate, interestCompoundingPeriodType, interestPostingPeriodType,
                 interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance, lockinPeriodFrequency,
-                lockinPeriodFrequencyType, withdrawalFeeAmount, withdrawalFeeType, annualFeeAmount, annualFeeOnMonthDay);
+                lockinPeriodFrequencyType, withdrawalFeeAmount, withdrawalFeeType, annualFeeAmount, annualFeeOnMonthDay, accountingRuleType);
     }
 
     protected SavingsProduct() {
@@ -132,7 +140,7 @@ public class SavingsProduct extends AbstractPersistable<Long> {
             final SavingsInterestCalculationDaysInYearType interestCalculationDaysInYearType, final BigDecimal minRequiredOpeningBalance,
             final Integer lockinPeriodFrequency, final SavingsPeriodFrequencyType lockinPeriodFrequencyType,
             final BigDecimal withdrawalFeeAmount, final SavingsWithdrawalFeesType withdrawalFeeType, final BigDecimal annualFeeAmount,
-            final MonthDay annualFeeOnMonthDay) {
+            final MonthDay annualFeeOnMonthDay, final AccountingRuleType accountingRuleType) {
 
         this.name = name;
         this.description = description;
@@ -161,6 +169,10 @@ public class SavingsProduct extends AbstractPersistable<Long> {
         if (annualFeeOnMonthDay != null) {
             this.annualFeeOnMonth = annualFeeOnMonthDay.getMonthOfYear();
             this.annualFeeOnDay = annualFeeOnMonthDay.getDayOfMonth();
+        }
+
+        if (accountingRuleType != null) {
+            this.accountingRule = accountingRuleType.getValue();
         }
 
         validateLockinDetails();
@@ -356,6 +368,12 @@ public class SavingsProduct extends AbstractPersistable<Long> {
             this.annualFeeOnMonth = newValue;
         }
 
+        if (command.isChangeInIntegerParameterNamed(accountingRuleParamName, this.accountingRule)) {
+            final Integer newValue = command.integerValueOfParameterNamed(accountingRuleParamName);
+            actualChanges.put(accountingRuleParamName, newValue);
+            this.accountingRule = newValue;
+        }
+
         validateLockinDetails();
         validateWithdrawalFeeDetails();
         validateAnnualFeeDetails();
@@ -400,5 +418,17 @@ public class SavingsProduct extends AbstractPersistable<Long> {
     private boolean isInvalidConfigurationOfLockinSettings() {
         return (this.lockinPeriodFrequency == null && this.lockinPeriodFrequencyType != null)
                 || (this.lockinPeriodFrequencyType == null && this.lockinPeriodFrequency != null);
+    }
+
+    public boolean isCashBasedAccountingEnabled() {
+        return AccountingRuleType.CASH_BASED.getValue().equals(this.accountingRule);
+    }
+
+    public boolean isAccrualBasedAccountingEnabled() {
+        return AccountingRuleType.ACCRUAL_BASED.getValue().equals(this.accountingRule);
+    }
+
+    public Integer getAccountingType() {
+        return this.accountingRule;
     }
 }

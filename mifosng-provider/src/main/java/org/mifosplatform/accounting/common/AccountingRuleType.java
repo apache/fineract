@@ -3,7 +3,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this file,
  * You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-package org.mifosplatform.portfolio.loanproduct.domain;
+package org.mifosplatform.accounting.common;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -16,8 +16,10 @@ import java.math.MathContext;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -47,11 +49,13 @@ import org.mifosplatform.infrastructure.core.data.ApiParameterError;
 import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.security.service.RandomPasswordGenerator;
+import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.organisation.monetary.domain.Money;
 import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.group.domain.Group;
 import org.mifosplatform.portfolio.loanproduct.domain.PeriodFrequencyType;
+import org.mifosplatform.portfolio.paymentdetail.domain.PaymentDetail;
 import org.mifosplatform.portfolio.savings.api.SavingsApiConstants;
 import org.mifosplatform.portfolio.savings.exception.InsufficientAccountBalanceException;
 import org.slf4j.Logger;
@@ -271,7 +275,8 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         return SavingsAccountStatusType.fromInt(this.status).isActive();
     }
 
-    public void activate(final DateTimeFormatter formatter, final LocalDate activationDate) {
+    public void activate(final DateTimeFormatter formatter, final LocalDate activationDate, List<Long> existingTransactionIds,
+            List<Long> existingReversedTransactionIds) {
 
         if (isActive()) {
             final String defaultUserMessage = "Cannot activate account. Account is already active.";
@@ -305,7 +310,12 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         // activating account.
         final Money minRequiredOpeningBalance = Money.of(this.currency, this.minRequiredOpeningBalance);
         if (minRequiredOpeningBalance.isGreaterThanZero()) {
-            deposit(formatter, activationDate, minRequiredOpeningBalance.getAmount());
+            /**
+             * Vishwas: TODO activate API should be modified to accept payment
+             * details (for entering minimum balance)
+             **/
+            deposit(formatter, activationDate, minRequiredOpeningBalance.getAmount(), existingTransactionIds,
+                    existingReversedTransactionIds, null);
         }
     }
 
@@ -333,7 +343,8 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         return lockedInUntilLocalDate;
     }
 
-    public void postInterest(final LocalDate interestPostingUpToDate) {
+    public void postInterest(final LocalDate interestPostingUpToDate, List<Long> existingTransactionIds,
+            List<Long> existingReversedTransactionIds) {
 
         final SavingsInterestPostingPeriodType postingPeriodType = SavingsInterestPostingPeriodType.fromInt(this.interestPostingPeriodType);
         final List<LocalDate> postingLocalDates = determineInterestPostingDates(getActivationLocalDate(), interestPostingUpToDate,
@@ -344,6 +355,8 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         Money interestPostedToDate = Money.zero(this.currency);
 
         boolean recalucateDailyBalanceDetails = false;
+        existingTransactionIds.addAll(findExistingTransactionIds());
+        existingReversedTransactionIds.addAll(findExistingReversedTransactionIds());
         for (LocalDate postingDate : postingLocalDates) {
             Money interestEarnedToBePostedForPeriod = findInterestEarnedToBePostedOn(interestPostedToDate, postingDate, compoundingPeriods);
 
@@ -734,7 +747,8 @@ public class SavingsAccount extends AbstractPersistable<Long> {
     }
 
     public SavingsAccountTransaction deposit(final DateTimeFormatter formatter, final LocalDate transactionDate,
-            final BigDecimal transactionAmount) {
+            final BigDecimal transactionAmount, List<Long> existingTransactionIds, List<Long> existingReversedTransactionIds,
+            final PaymentDetail paymentDetail) {
 
         if (isNotActive()) {
             final String defaultUserMessage = "Transaction is not allowed. Account is not active.";
@@ -771,8 +785,11 @@ public class SavingsAccount extends AbstractPersistable<Long> {
             throw new PlatformApiDataValidationException(dataValidationErrors);
         }
 
+        existingTransactionIds.addAll(findExistingTransactionIds());
+        existingReversedTransactionIds.addAll(findExistingReversedTransactionIds());
+
         final Money amount = Money.of(this.currency, transactionAmount);
-        final SavingsAccountTransaction transaction = SavingsAccountTransaction.deposit(this, transactionDate, amount);
+        final SavingsAccountTransaction transaction = SavingsAccountTransaction.deposit(this, paymentDetail, transactionDate, amount);
         this.transactions.add(transaction);
 
         this.summary.updateSummary(this.currency, this.savingsAccountTransactionSummaryWrapper, this.transactions);
@@ -792,7 +809,8 @@ public class SavingsAccount extends AbstractPersistable<Long> {
     }
 
     public SavingsAccountTransaction withdraw(final DateTimeFormatter formatter, final LocalDate transactionDate,
-            final BigDecimal transactionAmount) {
+            final BigDecimal transactionAmount, List<Long> existingTransactionIds, List<Long> existingReversedTransactionIds,
+            final PaymentDetail paymentDetail) {
 
         if (isNotActive()) {
 
@@ -843,6 +861,9 @@ public class SavingsAccount extends AbstractPersistable<Long> {
             throw new PlatformApiDataValidationException(dataValidationErrors);
         }
 
+        existingTransactionIds.addAll(findExistingTransactionIds());
+        existingReversedTransactionIds.addAll(findExistingReversedTransactionIds());
+
         final Money transactionAmountMoney = Money.of(this.currency, transactionAmount);
 
         if (isNotEnoughFundsToWithdraw(transactionAmountMoney)) {
@@ -850,7 +871,8 @@ public class SavingsAccount extends AbstractPersistable<Long> {
             throw new InsufficientAccountBalanceException("transactionAmount", getAccountBalance(), transactionAmount);
         }
 
-        final SavingsAccountTransaction transaction = SavingsAccountTransaction.withdrawal(this, transactionDate, transactionAmountMoney);
+        final SavingsAccountTransaction transaction = SavingsAccountTransaction.withdrawal(this, paymentDetail, transactionDate,
+                transactionAmountMoney);
         this.transactions.add(transaction);
 
         if (isAutomaticWithdrawalFee()) {
@@ -875,6 +897,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
             }
         }
 
+        /***TODO Fixme: Annual fee seems to be added for all withdrawals?**/
         final Money annualFee = Money.of(this.currency, this.annualFeeAmount);
         SavingsAccountTransaction annualFeeTransaction = SavingsAccountTransaction.annualFee(this, transactionDate, annualFee);
         this.transactions.add(annualFeeTransaction);
@@ -1096,6 +1119,53 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         }
     }
 
+    public Map<String, Object> deriveAccountingBridgeData(final CurrencyData currencyData, final List<Long> existingTransactionIds,
+            final List<Long> existingReversedTransactionIds) {
+
+        final Map<String, Object> accountingBridgeData = new LinkedHashMap<String, Object>();
+        accountingBridgeData.put("savingsId", this.getId());
+        accountingBridgeData.put("savingsProductId", this.productId());
+        accountingBridgeData.put("officeId", this.officeId());
+        accountingBridgeData.put("cashBasedAccountingEnabled", this.isCashBasedAccountingEnabledOnSavingsProduct());
+        accountingBridgeData.put("accrualBasedAccountingEnabled", this.isAccrualBasedAccountingEnabledOnSavingsProduct());
+
+        final List<Map<String, Object>> newLoanTransactions = new ArrayList<Map<String, Object>>();
+        for (SavingsAccountTransaction transaction : this.transactions) {
+            if (transaction.isReversed() && !existingReversedTransactionIds.contains(transaction.getId())) {
+                newLoanTransactions.add(transaction.toMapData(currencyData));
+            } else if (!existingTransactionIds.contains(transaction.getId())) {
+                newLoanTransactions.add(transaction.toMapData(currencyData));
+            }
+        }
+
+        accountingBridgeData.put("newSavingsTransactions", newLoanTransactions);
+        return accountingBridgeData;
+    }
+
+    private Collection<Long> findExistingTransactionIds() {
+
+        Collection<Long> ids = new ArrayList<Long>();
+
+        for (SavingsAccountTransaction transaction : this.transactions) {
+            ids.add(transaction.getId());
+        }
+
+        return ids;
+    }
+
+    private Collection<Long> findExistingReversedTransactionIds() {
+
+        final Collection<Long> ids = new ArrayList<Long>();
+
+        for (SavingsAccountTransaction transaction : this.transactions) {
+            if (transaction.isReversed()) {
+                ids.add(transaction.getId());
+            }
+        }
+
+        return ids;
+    }
+
     public void update(final Client client) {
         this.client = client;
     }
@@ -1115,6 +1185,18 @@ public class SavingsAccount extends AbstractPersistable<Long> {
 
     public boolean isAccountNumberRequiresAutoGeneration() {
         return this.accountNumberRequiresAutoGeneration;
+    }
+
+    public Long productId() {
+        return this.product.getId();
+    }
+
+    private Boolean isCashBasedAccountingEnabledOnSavingsProduct() {
+        return this.product.isCashBasedAccountingEnabled();
+    }
+
+    private Boolean isAccrualBasedAccountingEnabledOnSavingsProduct() {
+        return this.product.isAccrualBasedAccountingEnabled();
     }
 
     public Long officeId() {
@@ -1142,4 +1224,9 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         }
         return id;
     }
+
+    public MonetaryCurrency getCurrency() {
+        return this.currency;
+    }
+
 }

@@ -7,6 +7,8 @@ package org.mifosplatform.portfolio.savings.domain;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -17,8 +19,12 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
 import org.joda.time.LocalDate;
+import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.organisation.monetary.domain.Money;
+import org.mifosplatform.portfolio.paymentdetail.domain.PaymentDetail;
+import org.mifosplatform.portfolio.savings.data.SavingsAccountTransactionEnumData;
+import org.mifosplatform.portfolio.savings.service.SavingsEnumerations;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
 /**
@@ -33,6 +39,10 @@ public final class SavingsAccountTransaction extends AbstractPersistable<Long> {
     @ManyToOne(optional = false)
     @JoinColumn(name = "savings_account_id", nullable = false)
     private SavingsAccount savingsAccount;
+
+    @ManyToOne(optional = true)
+    @JoinColumn(name = "payment_detail_id", nullable = true)
+    private PaymentDetail paymentDetail;
 
     @Column(name = "transaction_type_enum", nullable = false)
     private final Integer typeOf;
@@ -66,14 +76,18 @@ public final class SavingsAccountTransaction extends AbstractPersistable<Long> {
         this.typeOf = null;
     }
 
-    public static SavingsAccountTransaction deposit(final SavingsAccount savingsAccount, final LocalDate date, final Money amount) {
+    public static SavingsAccountTransaction deposit(final SavingsAccount savingsAccount, final PaymentDetail paymentDetail,
+            final LocalDate date, final Money amount) {
         final boolean isReversed = false;
-        return new SavingsAccountTransaction(savingsAccount, SavingsAccountTransactionType.DEPOSIT.getValue(), date, amount, isReversed);
+        return new SavingsAccountTransaction(savingsAccount, paymentDetail, SavingsAccountTransactionType.DEPOSIT.getValue(), date, amount,
+                isReversed);
     }
 
-    public static SavingsAccountTransaction withdrawal(final SavingsAccount savingsAccount, final LocalDate date, final Money amount) {
+    public static SavingsAccountTransaction withdrawal(final SavingsAccount savingsAccount, final PaymentDetail paymentDetail,
+            final LocalDate date, final Money amount) {
         final boolean isReversed = false;
-        return new SavingsAccountTransaction(savingsAccount, SavingsAccountTransactionType.WITHDRAWAL.getValue(), date, amount, isReversed);
+        return new SavingsAccountTransaction(savingsAccount, paymentDetail, SavingsAccountTransactionType.WITHDRAWAL.getValue(), date,
+                amount, isReversed);
     }
 
     public static SavingsAccountTransaction interestPosting(final SavingsAccount savingsAccount, final LocalDate date, final Money amount) {
@@ -90,17 +104,23 @@ public final class SavingsAccountTransaction extends AbstractPersistable<Long> {
 
     public static SavingsAccountTransaction annualFee(final SavingsAccount savingsAccount, final LocalDate date, final Money amount) {
         final boolean isReversed = false;
-        return new SavingsAccountTransaction(savingsAccount, SavingsAccountTransactionType.ANNUAL_FEE.getValue(), date, amount,
-                isReversed);
+        return new SavingsAccountTransaction(savingsAccount, SavingsAccountTransactionType.ANNUAL_FEE.getValue(), date, amount, isReversed);
     }
 
     private SavingsAccountTransaction(final SavingsAccount savingsAccount, final Integer typeOf, final LocalDate transactionLocalDate,
             final Money amount, final boolean isReversed) {
+        this(savingsAccount, null, typeOf, transactionLocalDate, amount, isReversed);
+    }
+
+    private SavingsAccountTransaction(final SavingsAccount savingsAccount, final PaymentDetail paymentDetail, final Integer typeOf,
+            final LocalDate transactionLocalDate, final Money amount, final boolean isReversed) {
         this.savingsAccount = savingsAccount;
         this.typeOf = typeOf;
         this.dateOf = transactionLocalDate.toDate();
         this.amount = amount.getAmount();
         this.reversed = isReversed;
+        this.paymentDetail = paymentDetail;
+
     }
 
     public LocalDate transactionLocalDate() {
@@ -208,5 +228,24 @@ public final class SavingsAccountTransaction extends AbstractPersistable<Long> {
     public boolean hasNotAmount(final Money amountToCheck) {
         final Money transactionAmount = getAmount(amountToCheck.getCurrency());
         return transactionAmount.isNotEqualTo(amountToCheck);
+    }
+
+    public Map<String, Object> toMapData(final CurrencyData currencyData) {
+        final Map<String, Object> thisTransactionData = new LinkedHashMap<String, Object>();
+
+        final SavingsAccountTransactionEnumData transactionType = SavingsEnumerations.transactionType(this.typeOf);
+
+        thisTransactionData.put("id", this.getId());
+        thisTransactionData.put("type", transactionType);
+        thisTransactionData.put("reversed", Boolean.valueOf(this.isReversed()));
+        thisTransactionData.put("date", this.getTransactionLocalDate());
+        thisTransactionData.put("currency", currencyData);
+        thisTransactionData.put("amount", this.amount);
+
+        if (this.paymentDetail != null) {
+            thisTransactionData.put("paymentTypeId", this.paymentDetail.getPaymentType().getId());
+        }
+
+        return thisTransactionData;
     }
 }

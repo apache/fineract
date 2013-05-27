@@ -7,6 +7,7 @@ package org.mifosplatform.portfolio.savings.service;
 
 import java.util.Map;
 
+import org.mifosplatform.accounting.producttoaccountmapping.service.ProductToGLAccountMappingWritePlatformService;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
@@ -23,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.accountingRuleParamName;
 
 @Service
 public class SavingsProductWritePlatformServiceJpaRepositoryImpl implements SavingsProductWritePlatformService {
@@ -32,16 +34,19 @@ public class SavingsProductWritePlatformServiceJpaRepositoryImpl implements Savi
     private final SavingsProductRepository savingProductRepository;
     private final SavingsProductDataValidator fromApiJsonDataValidator;
     private final SavingsProductAssembler savingsProductAssembler;
+    private final ProductToGLAccountMappingWritePlatformService accountMappingWritePlatformService;
 
     @Autowired
     public SavingsProductWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
             final SavingsProductRepository savingProductRepository, final SavingsProductDataValidator fromApiJsonDataValidator,
-            final SavingsProductAssembler savingsProductAssembler) {
+            final SavingsProductAssembler savingsProductAssembler,
+            final ProductToGLAccountMappingWritePlatformService accountMappingWritePlatformService) {
         this.context = context;
         this.savingProductRepository = savingProductRepository;
         this.fromApiJsonDataValidator = fromApiJsonDataValidator;
         this.savingsProductAssembler = savingsProductAssembler;
         this.logger = LoggerFactory.getLogger(SavingsProductWritePlatformServiceJpaRepositoryImpl.class);
+        this.accountMappingWritePlatformService = accountMappingWritePlatformService;
     }
 
     /*
@@ -78,6 +83,9 @@ public class SavingsProductWritePlatformServiceJpaRepositoryImpl implements Savi
 
             this.savingProductRepository.save(product);
 
+            // save accounting mappings
+            accountMappingWritePlatformService.createSavingProductToGLAccountMapping(product.getId(), command);
+
             return new CommandProcessingResultBuilder() //
                     .withEntityId(product.getId()) //
                     .build();
@@ -99,6 +107,13 @@ public class SavingsProductWritePlatformServiceJpaRepositoryImpl implements Savi
             if (product == null) { throw new SavingsProductNotFoundException(productId); }
 
             final Map<String, Object> changes = product.update(command);
+
+            // accounting related changes
+            boolean accountingTypeChanged = changes.containsKey(accountingRuleParamName);
+            final Map<String, Object> accountingMappingChanges = accountMappingWritePlatformService.updateSavingsProductToGLAccountMapping(
+                    product.getId(), command, accountingTypeChanged, product.getAccountingType());
+            changes.putAll(accountingMappingChanges);
+
             if (!changes.isEmpty()) {
                 this.savingProductRepository.saveAndFlush(product);
             }

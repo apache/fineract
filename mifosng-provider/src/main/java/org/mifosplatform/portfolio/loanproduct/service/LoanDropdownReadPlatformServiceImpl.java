@@ -5,7 +5,6 @@
  */
 package org.mifosplatform.portfolio.loanproduct.service;
 
-import static org.mifosplatform.portfolio.loanproduct.service.LoanEnumerations.accountingRuleType;
 import static org.mifosplatform.portfolio.loanproduct.service.LoanEnumerations.amortizationType;
 import static org.mifosplatform.portfolio.loanproduct.service.LoanEnumerations.interestCalculationPeriodType;
 import static org.mifosplatform.portfolio.loanproduct.service.LoanEnumerations.interestRateFrequencyType;
@@ -21,7 +20,6 @@ import java.util.List;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanTransactionProcessingStrategyRepository;
 import org.mifosplatform.portfolio.loanproduct.data.TransactionProcessingStrategyData;
-import org.mifosplatform.portfolio.loanproduct.domain.AccountingRuleType;
 import org.mifosplatform.portfolio.loanproduct.domain.AmortizationMethod;
 import org.mifosplatform.portfolio.loanproduct.domain.InterestCalculationPeriodMethod;
 import org.mifosplatform.portfolio.loanproduct.domain.InterestMethod;
@@ -101,13 +99,6 @@ public class LoanDropdownReadPlatformServiceImpl implements LoanDropdownReadPlat
         }
 
         return strategyOptions;
-    }
-
-    @Override
-    public List<EnumOptionData> retrieveAccountingRuleTypeOptions() {
-        List<EnumOptionData> accountingRuleTypeOptions = Arrays.asList(accountingRuleType(AccountingRuleType.NONE),
-                accountingRuleType(AccountingRuleType.CASH_BASED), accountingRuleType(AccountingRuleType.ACCRUAL_BASED));
-        return accountingRuleTypeOptions;
     }
 
 }
