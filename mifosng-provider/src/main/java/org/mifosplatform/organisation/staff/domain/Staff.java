@@ -17,6 +17,7 @@ import javax.persistence.UniqueConstraint;
 
 import org.apache.commons.lang.StringUtils;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
+import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.organisation.office.domain.Office;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
@@ -24,7 +25,6 @@ import org.springframework.data.jpa.domain.AbstractPersistable;
 @Table(name = "m_staff", uniqueConstraints = { @UniqueConstraint(columnNames = { "display_name" }, name = "display_name") })
 public class Staff extends AbstractPersistable<Long> {
 
-    
     @Column(name = "firstname", length = 50)
     private String firstname;
 
@@ -44,6 +44,13 @@ public class Staff extends AbstractPersistable<Long> {
     @Column(name = "is_loan_officer ", nullable = false)
     private boolean loanOfficer;
 
+    @Column(name = "organisational_role_enum", nullable = true)
+    private Integer organisationalRoleType;
+
+    @ManyToOne
+    @JoinColumn(name = "organisational_role_parent_staff_id", nullable = true)
+    private Staff organisationalRoleParentStaff;
+
     public static Staff fromJson(final Office staffOffice, final JsonCommand command) {
 
         final String firstnameParamName = "firstname";
@@ -58,7 +65,7 @@ public class Staff extends AbstractPersistable<Long> {
         return new Staff(staffOffice, firstname, lastname, isLoanOfficer);
     }
 
-    public static Staff createNew(Office staffOffice, final String firstname, final String lastname, boolean isLoanOfficer) {
+    public static Staff createNew(final Office staffOffice, final String firstname, final String lastname, final boolean isLoanOfficer) {
         return new Staff(staffOffice, firstname, lastname, isLoanOfficer);
     }
 
@@ -72,6 +79,14 @@ public class Staff extends AbstractPersistable<Long> {
         this.lastname = StringUtils.defaultIfEmpty(lastname, null);
         this.loanOfficer = isLoanOfficer;
         deriveDisplayName(firstname);
+    }
+
+    public EnumOptionData organisationalRoleData() {
+        EnumOptionData organisationalRole = null;
+        if (this.organisationalRoleType != null) {
+            organisationalRole = StaffEnumerations.organisationalRole(this.organisationalRoleType);
+        }
+        return organisationalRole;
     }
 
     public void changeOffice(final Office newOffice) {

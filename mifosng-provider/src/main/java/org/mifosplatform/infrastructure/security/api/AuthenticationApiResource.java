@@ -16,6 +16,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
+import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.mifosplatform.infrastructure.security.data.AuthenticatedUserData;
 import org.mifosplatform.useradministration.data.RoleData;
@@ -73,8 +74,12 @@ public class AuthenticationApiResource {
                 roles.add(role.toData());
             }
 
-            authenticatedUserData = new AuthenticatedUserData(username, roles, permissions, principal.getId(), new String(
-                    base64EncodedAuthenticationKey));
+            final Long officeId = principal.getOffice().getId();
+            final String officeName = principal.getOffice().getName();
+            final EnumOptionData organisationalRole = principal.organisationalRoleData();
+
+            authenticatedUserData = new AuthenticatedUserData(username, officeId, officeName, organisationalRole, roles, permissions,
+                    principal.getId(), new String(base64EncodedAuthenticationKey));
         }
 
         return this.apiJsonSerializerService.serialize(authenticatedUserData);
