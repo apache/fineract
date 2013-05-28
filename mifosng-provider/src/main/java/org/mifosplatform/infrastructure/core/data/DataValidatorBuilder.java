@@ -221,6 +221,27 @@ public class DataValidatorBuilder {
         }
         return this;
     }
+    
+    public DataValidatorBuilder isNotOneOfTheseValues(final Object... values) {
+        if (value == null && ignoreNullValue) { return this; }
+
+        if (value != null) {
+            List<Object> valuesList = Arrays.asList(values);
+
+            if (valuesList.contains(this.value)) {
+                StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append(resource).append(".").append(parameter)
+                        .append(".is.one.of.expected.enumerations");
+                StringBuilder defaultEnglishMessage = new StringBuilder("The parameter ").append(parameter).append(" must not be one of [ ")
+                        .append(values).append(" ] ").append(".");
+
+                ApiParameterError error = ApiParameterError.parameterError(validationErrorCode.toString(),
+                        defaultEnglishMessage.toString(), parameter, this.value, values);
+
+                dataValidationErrors.add(error);
+            }
+        }
+        return this;
+    }
 
     public DataValidatorBuilder positiveAmount() {
         if (value == null && ignoreNullValue) { return this; }
@@ -532,5 +553,24 @@ public class DataValidatorBuilder {
             }
         }
         return this;
+    }
+    
+    public DataValidatorBuilder matchesRegularExpression(final String expression) {
+    	if (value == null && ignoreNullValue) { return this; }
+    	
+    	if (!value.toString().matches(expression)) {
+    		StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append(resource).append(".").append(parameter)
+                    .append(".does.not.match.regexp");
+            StringBuilder defaultEnglishMessage = new StringBuilder("The parameter ").append(parameter)
+            		.append(" must match the provided regular expression ")
+                    .append(expression).append(" ] ").append(".");
+
+            ApiParameterError error = ApiParameterError.parameterError(validationErrorCode.toString(),
+                    defaultEnglishMessage.toString(), parameter, this.value, expression);
+
+            dataValidationErrors.add(error);
+        }
+    	
+    	return this;
     }
 }

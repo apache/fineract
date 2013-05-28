@@ -108,6 +108,21 @@ public class CommandWrapper {
         return this.actionName.equalsIgnoreCase("CREATE");
     }
 
+    public boolean isCreateDatatable() {
+    	return (this.actionName.equalsIgnoreCase("CREATE") && this.href.startsWith("/datatables/")
+    			&& this.entityId == null);
+    }
+
+    public boolean isDeleteDatatable() {
+    	return (this.actionName.equalsIgnoreCase("DELETE") && this.href.startsWith("/datatables/")
+    			&& this.entityId == null);
+    }
+
+    public boolean isUpdateDatatable() {
+    	return (this.actionName.equalsIgnoreCase("UPDATE") && this.href.startsWith("/datatables/")
+    			&& this.entityId == null);
+    }
+
     public String getTaskPermissionName() {
         return this.taskPermissionName;
     }

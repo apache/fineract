@@ -78,7 +78,7 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
             commandSourceResult.updateJsonTo(changesOnlyJson);
         }
 
-        if (!result.hasChanges() && wrapper.isUpdateOperation()) {
+        if (!result.hasChanges() && wrapper.isUpdateOperation() && !wrapper.isUpdateDatatable()) {
             commandSourceResult.updateJsonTo(null);
         }
 
@@ -108,7 +108,13 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
         if (wrapper.isConfigurationResource()) {
             handler = applicationContext.getBean("updateGlobalConfigurationCommandHandler", NewCommandSourceHandler.class);
         } else if (wrapper.isDatatableResource()) {
-            if (wrapper.isCreate()) {
+        	if (wrapper.isCreateDatatable()) {
+        		handler = applicationContext.getBean("createDatatableCommandHandler", NewCommandSourceHandler.class);
+        	} else if (wrapper.isDeleteDatatable()) {
+        		handler = applicationContext.getBean("deleteDatatableCommandHandler", NewCommandSourceHandler.class);
+        	} else if (wrapper.isUpdateDatatable()) {
+        		handler = applicationContext.getBean("updateDatatableCommandHandler", NewCommandSourceHandler.class);
+        	} else if (wrapper.isCreate()) {
                 handler = applicationContext.getBean("createDatatableEntryCommandHandler", NewCommandSourceHandler.class);
             } else if (wrapper.isUpdateMultiple()) {
                 handler = applicationContext.getBean("updateOneToManyDatatableEntryCommandHandler", NewCommandSourceHandler.class);
