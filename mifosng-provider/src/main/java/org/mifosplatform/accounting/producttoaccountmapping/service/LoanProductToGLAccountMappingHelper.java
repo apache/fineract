@@ -1,12 +1,17 @@
+/**
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this file,
+ * You can obtain one at http://mozilla.org/MPL/2.0/.
+ */
 package org.mifosplatform.accounting.producttoaccountmapping.service;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import org.mifosplatform.accounting.common.AccountingRuleType;
 import org.mifosplatform.accounting.common.AccountingConstants.ACCRUAL_ACCOUNTS_FOR_LOAN;
 import org.mifosplatform.accounting.common.AccountingConstants.CASH_ACCOUNTS_FOR_LOAN;
 import org.mifosplatform.accounting.common.AccountingConstants.LOAN_PRODUCT_ACCOUNTING_PARAMS;
+import org.mifosplatform.accounting.common.AccountingRuleType;
 import org.mifosplatform.accounting.glaccount.domain.GLAccountRepository;
 import org.mifosplatform.accounting.glaccount.domain.GLAccountType;
 import org.mifosplatform.accounting.producttoaccountmapping.domain.PortfolioProductType;
@@ -23,9 +28,9 @@ import com.google.gson.JsonElement;
 public class LoanProductToGLAccountMappingHelper extends ProductToGLAccountMappingHelper {
 
     @Autowired
-    public LoanProductToGLAccountMappingHelper(GLAccountRepository glAccountRepository,
-            ProductToGLAccountMappingRepository glAccountMappingRepository, FromJsonHelper fromApiJsonHelper,
-            CodeValueRepositoryWrapper codeValueRepositoryWrapper) {
+    public LoanProductToGLAccountMappingHelper(final GLAccountRepository glAccountRepository,
+            final ProductToGLAccountMappingRepository glAccountMappingRepository, final FromJsonHelper fromApiJsonHelper,
+            final CodeValueRepositoryWrapper codeValueRepositoryWrapper) {
         super(glAccountRepository, glAccountMappingRepository, fromApiJsonHelper, codeValueRepositoryWrapper);
     }
 
@@ -68,12 +73,12 @@ public class LoanProductToGLAccountMappingHelper extends ProductToGLAccountMappi
     /*** Abstractions for payments channel related to loan products ***/
 
     public void savePaymentChannelToFundSourceMappings(final JsonCommand command, final JsonElement element, final Long productId,
-            Map<String, Object> changes) {
+            final Map<String, Object> changes) {
         savePaymentChannelToFundSourceMappings(command, element, productId, changes, PortfolioProductType.LOAN);
     }
 
     public void updatePaymentChannelToFundSourceMappings(final JsonCommand command, final JsonElement element, final Long productId,
-            Map<String, Object> changes) {
+            final Map<String, Object> changes) {
         updatePaymentChannelToFundSourceMappings(command, element, productId, changes, PortfolioProductType.LOAN);
     }
 

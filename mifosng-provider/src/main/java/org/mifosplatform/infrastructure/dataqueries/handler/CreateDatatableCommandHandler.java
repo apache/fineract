@@ -26,7 +26,7 @@ public class CreateDatatableCommandHandler implements NewCommandSourceHandler {
     @Transactional
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
-    	
+
         return this.writePlatformService.createDatatable(command);
     }
 }
