@@ -13,6 +13,6 @@ public interface AccountingRuleReadPlatformService {
 
     List<AccountingRuleData> retrieveAllAccountingRules(Long OfficeId);
 
-    AccountingRuleData retrieveAccountingRuleById(long accountingRuleId);
+    AccountingRuleData retrieveAccountingRuleById(Long accountingRuleId);
 
 }

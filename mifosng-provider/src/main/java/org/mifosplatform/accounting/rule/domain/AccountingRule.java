@@ -5,17 +5,23 @@
  */
 package org.mifosplatform.accounting.rule.domain;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import org.apache.commons.lang.StringUtils;
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
 import org.mifosplatform.accounting.glaccount.domain.GLAccount;
 import org.mifosplatform.accounting.rule.api.AccountingRuleJsonInputParams;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
@@ -34,11 +40,11 @@ public class AccountingRule extends AbstractPersistable<Long> {
     private Office office;
 
     @ManyToOne
-    @JoinColumn(name = "debit_account_id", nullable = false)
+    @JoinColumn(name = "debit_account_id", nullable = true)
     private GLAccount accountToDebit;
 
     @ManyToOne
-    @JoinColumn(name = "credit_account_id", nullable = false)
+    @JoinColumn(name = "credit_account_id", nullable = true)
     private GLAccount accountToCredit;
 
     @Column(name = "description", nullable = true, length = 500)
@@ -46,6 +52,11 @@ public class AccountingRule extends AbstractPersistable<Long> {
 
     @Column(name = "system_defined", nullable = false)
     private Boolean systemDefined;
+    
+    @LazyCollection(LazyCollectionOption.FALSE)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "accountingRule", orphanRemoval = true)
+    private List<AccountingTagRule> accountingTagRules = new ArrayList<AccountingTagRule>();
+    
 
     protected AccountingRule() {}
 
@@ -150,5 +161,13 @@ public class AccountingRule extends AbstractPersistable<Long> {
     public String getDescription() {
         return this.description;
     }
+
+	public List<AccountingTagRule> updateAccountingRuleForTags(List<AccountingTagRule> debitAccountingTagRules) {
+		for(AccountingTagRule accountingTagRule : debitAccountingTagRules){
+			accountingTagRule.updateAccountingTagRule(this);
+			this.accountingTagRules.add(accountingTagRule);
+		}
+		return debitAccountingTagRules;
+	}
 
 }

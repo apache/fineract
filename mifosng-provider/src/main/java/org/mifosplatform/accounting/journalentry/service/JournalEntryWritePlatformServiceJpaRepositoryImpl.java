@@ -112,7 +112,7 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
                 validateGLAccountForTransaction(creditAccountHead);
                 final GLAccount debitAccountHead = accountingRule.getAccountToDebit();
                 validateGLAccountForTransaction(debitAccountHead);
-                String description = accountingRule.getDescription();
+                String description = null;
                 if (StringUtils.isNotBlank(journalEntryCommand.getComments())) {
                     description = journalEntryCommand.getComments();
                 }

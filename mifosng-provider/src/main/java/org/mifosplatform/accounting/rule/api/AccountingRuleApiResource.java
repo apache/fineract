@@ -6,6 +6,7 @@
 package org.mifosplatform.accounting.rule.api;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -23,6 +24,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
+import org.mifosplatform.accounting.common.AccountingConstants;
 import org.mifosplatform.accounting.glaccount.data.GLAccountData;
 import org.mifosplatform.accounting.glaccount.service.GLAccountReadPlatformService;
 import org.mifosplatform.accounting.rule.data.AccountingRuleData;
@@ -30,6 +32,8 @@ import org.mifosplatform.accounting.rule.service.AccountingRuleReadPlatformServi
 import org.mifosplatform.commands.domain.CommandWrapper;
 import org.mifosplatform.commands.service.CommandWrapperBuilder;
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
+import org.mifosplatform.infrastructure.codes.data.CodeValueData;
+import org.mifosplatform.infrastructure.codes.service.CodeValueReadPlatformService;
 import org.mifosplatform.infrastructure.core.api.ApiRequestParameterHelper;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
@@ -47,7 +51,9 @@ import org.springframework.stereotype.Component;
 public class AccountingRuleApiResource {
 
     private static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "officeId", "officeName",
-            "accountToDebitId", "accountToCreditId", "name", "description", "systemDefined"));
+            "accountToDebitId", "accountToCreditId", "name", "description", "systemDefined", "allowedAssetsTagOptions",
+            "allowedLiabilitiesTagOptions", "allowedEquityTagOptions", "allowedIncomeTagOptions", "allowedExpensesTagOptions", "debitTags",
+            "creditTags"));
 
     private final String resourceNameForPermission = "ACCOUNTINGRULE";
 
@@ -58,6 +64,7 @@ public class AccountingRuleApiResource {
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final PlatformSecurityContext context;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
+    private final CodeValueReadPlatformService codeValueReadPlatformService;
 
     @Autowired
     public AccountingRuleApiResource(final PlatformSecurityContext context,
@@ -65,7 +72,7 @@ public class AccountingRuleApiResource {
             final DefaultToApiJsonSerializer<AccountingRuleData> toApiJsonSerializer,
             final ApiRequestParameterHelper apiRequestParameterHelper, final GLAccountReadPlatformService accountReadPlatformService,
             final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
-            final OfficeReadPlatformService officeReadPlatformService) {
+            final OfficeReadPlatformService officeReadPlatformService, final CodeValueReadPlatformService codeValueReadPlatformService) {
         this.context = context;
         this.apiRequestParameterHelper = apiRequestParameterHelper;
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
@@ -73,22 +80,23 @@ public class AccountingRuleApiResource {
         this.accountingRuleReadPlatformService = accountingRuleReadPlatformService;
         this.officeReadPlatformService = officeReadPlatformService;
         this.accountReadPlatformService = accountReadPlatformService;
+        this.codeValueReadPlatformService = codeValueReadPlatformService;
     }
-    
+
     @GET
-	@Path("template")
-	@Consumes({ MediaType.APPLICATION_JSON })
-	@Produces({ MediaType.APPLICATION_JSON })
-	public String retrieveTemplate(@Context final UriInfo uriInfo) {
-		
-		context.authenticatedUser().validateHasReadPermission(resourceNameForPermission);
-		
-		AccountingRuleData accountingRuleData = null;
-		accountingRuleData = handleTemplate(accountingRuleData);
-		
-		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-		return this.apiJsonSerializerService.serialize(settings, accountingRuleData, RESPONSE_DATA_PARAMETERS);
-	}
+    @Path("template")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String retrieveTemplate(@Context final UriInfo uriInfo) {
+
+        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermission);
+
+        AccountingRuleData accountingRuleData = null;
+        accountingRuleData = handleTemplate(accountingRuleData);
+
+        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        return this.apiJsonSerializerService.serialize(settings, accountingRuleData, RESPONSE_DATA_PARAMETERS);
+    }
 
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
@@ -114,7 +122,7 @@ public class AccountingRuleApiResource {
 
         AccountingRuleData accountingRuleData = this.accountingRuleReadPlatformService.retrieveAccountingRuleById(accountingRuleId);
         if (settings.isTemplate()) {
-        	accountingRuleData = handleTemplate(accountingRuleData);
+            accountingRuleData = handleTemplate(accountingRuleData);
         }
 
         return this.apiJsonSerializerService.serialize(settings, accountingRuleData, RESPONSE_DATA_PARAMETERS);
@@ -157,13 +165,31 @@ public class AccountingRuleApiResource {
 
         return this.apiJsonSerializerService.serialize(result);
     }
-	
-	private AccountingRuleData handleTemplate(AccountingRuleData accountingRuleData) {
-		List<GLAccountData> allowedAccounts = this.accountReadPlatformService.retrieveAllEnabledDetailGLAccounts();
-		List<OfficeData> allowedOffices = (List<OfficeData>) this.officeReadPlatformService.retrieveAllOfficesForDropdown();
-		if (accountingRuleData == null) {
-			return new AccountingRuleData(allowedAccounts, allowedOffices);
-		}
-		return new AccountingRuleData(accountingRuleData, allowedAccounts, allowedOffices);
-	}
+
+    private AccountingRuleData handleTemplate(final AccountingRuleData accountingRuleData) {
+        final List<GLAccountData> allowedAccounts = this.accountReadPlatformService.retrieveAllEnabledDetailGLAccounts();
+        final List<OfficeData> allowedOffices = (List<OfficeData>) this.officeReadPlatformService.retrieveAllOfficesForDropdown();
+        final Collection<CodeValueData> allowedAssetsTagOptions = defaultIfEmpty(this.codeValueReadPlatformService
+                .retrieveCodeValuesByCode(AccountingConstants.ASSESTS_TAG_OPTION_CODE_NAME));
+        final Collection<CodeValueData> allowedLiabilitiesTagOptions = defaultIfEmpty(this.codeValueReadPlatformService
+                .retrieveCodeValuesByCode(AccountingConstants.LIABILITIES_TAG_OPTION_CODE_NAME));
+        final Collection<CodeValueData> allowedEquityTagOptions = defaultIfEmpty(this.codeValueReadPlatformService
+                .retrieveCodeValuesByCode(AccountingConstants.EQUITY_TAG_OPTION_CODE_NAME));
+        final Collection<CodeValueData> allowedIncomeTagOptions = defaultIfEmpty(this.codeValueReadPlatformService
+                .retrieveCodeValuesByCode(AccountingConstants.INCOME_TAG_OPTION_CODE_NAME));
+        final Collection<CodeValueData> allowedExpensesTagOptions = defaultIfEmpty(this.codeValueReadPlatformService
+                .retrieveCodeValuesByCode(AccountingConstants.EXPENSES_TAG_OPTION_CODE_NAME));
+        if (accountingRuleData == null) { return new AccountingRuleData(allowedAccounts, allowedOffices, allowedAssetsTagOptions,
+                allowedLiabilitiesTagOptions, allowedEquityTagOptions, allowedIncomeTagOptions, allowedExpensesTagOptions); }
+        return new AccountingRuleData(accountingRuleData, allowedAccounts, allowedOffices, allowedAssetsTagOptions,
+                allowedLiabilitiesTagOptions, allowedEquityTagOptions, allowedIncomeTagOptions, allowedExpensesTagOptions);
+    }
+
+    private Collection<CodeValueData> defaultIfEmpty(final Collection<CodeValueData> collection) {
+        Collection<CodeValueData> returnCollection = null;
+        if (collection != null && !collection.isEmpty()) {
+            returnCollection = collection;
+        }
+        return returnCollection;
+    }
 }

@@ -55,7 +55,8 @@ public final class AccountingRuleCommandFromApiJsonDeserializer extends Abstract
                 element);
         final String name = this.fromApiJsonHelper.extractStringNamed(AccountingRuleJsonInputParams.NAME.getValue(), element);
         final String description = this.fromApiJsonHelper.extractStringNamed(AccountingRuleJsonInputParams.DESCRIPTION.getValue(), element);
-
+        final String[] creditTags = this.fromApiJsonHelper.extractArrayNamed(AccountingRuleJsonInputParams.CREDIT_ACCOUNT_TAGS.getValue(), element);
+        final String[] debitTags = this.fromApiJsonHelper.extractArrayNamed(AccountingRuleJsonInputParams.DEBIT_ACCOUNT_TAGS.getValue(), element);
         return new AccountingRuleCommand(id, officeId, accountToDebitId, accountToCreditId, name, description);
     }
 }

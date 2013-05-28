@@ -5,18 +5,22 @@
  */
 package org.mifosplatform.accounting.rule.service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import org.mifosplatform.accounting.closure.api.GLClosureJsonInputParams;
 import org.mifosplatform.accounting.glaccount.domain.GLAccount;
 import org.mifosplatform.accounting.glaccount.domain.GLAccountRepositoryWrapper;
+import org.mifosplatform.accounting.journalentry.domain.JournalEntryType;
 import org.mifosplatform.accounting.rule.api.AccountingRuleJsonInputParams;
-import org.mifosplatform.accounting.rule.command.AccountingRuleCommand;
 import org.mifosplatform.accounting.rule.domain.AccountingRule;
 import org.mifosplatform.accounting.rule.domain.AccountingRuleRepository;
 import org.mifosplatform.accounting.rule.domain.AccountingRuleRepositoryWrapper;
+import org.mifosplatform.accounting.rule.domain.AccountingTagRule;
 import org.mifosplatform.accounting.rule.exception.AccountingRuleDuplicateException;
-import org.mifosplatform.accounting.rule.serialization.AccountingRuleCommandFromApiJsonDeserializer;
+import org.mifosplatform.infrastructure.codes.domain.CodeValue;
+import org.mifosplatform.infrastructure.codes.domain.CodeValueRepository;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
@@ -40,17 +44,20 @@ public class AccountingRuleWritePlatformServiceJpaRepositoryImpl implements Acco
     private final AccountingRuleRepository accountingRuleRepository;
     private final GLAccountRepositoryWrapper accountRepositoryWrapper;
     private final OfficeRepository officeRepository;
-    private final AccountingRuleCommandFromApiJsonDeserializer fromApiJsonDeserializer;
+    private final AccountingRuleDataValidator fromApiJsonDeserializer;
+    private final CodeValueRepository codeValueRepository;
 
     @Autowired
     public AccountingRuleWritePlatformServiceJpaRepositoryImpl(final AccountingRuleRepositoryWrapper accountingRuleRepositoryWrapper,
             final GLAccountRepositoryWrapper accountRepositoryWrapper, final OfficeRepository officeRepository,
-            final AccountingRuleCommandFromApiJsonDeserializer fromApiJsonDeserializer, final AccountingRuleRepository ruleRepository) {
+            final AccountingRuleRepository ruleRepository, final AccountingRuleDataValidator fromApiJsonDeserializer,
+            final CodeValueRepository codeValueRepository) {
         this.accountRepositoryWrapper = accountRepositoryWrapper;
         this.officeRepository = officeRepository;
-        this.fromApiJsonDeserializer = fromApiJsonDeserializer;
         this.accountingRuleRepository = ruleRepository;
         this.accountingRuleRepositoryWrapper = accountingRuleRepositoryWrapper;
+        this.fromApiJsonDeserializer = fromApiJsonDeserializer;
+        this.codeValueRepository = codeValueRepository;
     }
 
     /**
@@ -69,10 +76,10 @@ public class AccountingRuleWritePlatformServiceJpaRepositoryImpl implements Acco
 
     @Transactional
     @Override
-    public CommandProcessingResult createAccountingRule(JsonCommand command) {
+    public CommandProcessingResult createAccountingRule(final JsonCommand command) {
         try {
-            final AccountingRuleCommand accountingRuleCommand = this.fromApiJsonDeserializer.commandFromApiJson(command.json());
-            accountingRuleCommand.validateForCreate();
+
+            this.fromApiJsonDeserializer.validateForCreate(command.json());
 
             // check office is valid
             final Long officeId = command.longValueOfParameterNamed(GLClosureJsonInputParams.OFFICE_ID.getValue());
@@ -82,15 +89,8 @@ public class AccountingRuleWritePlatformServiceJpaRepositoryImpl implements Acco
                 if (office == null) { throw new OfficeNotFoundException(officeId); }
             }
 
-            // get the GL Accounts to Debit and Credit
-            final Long accountToDebitId = command.longValueOfParameterNamed(AccountingRuleJsonInputParams.ACCOUNT_TO_DEBIT.getValue());
-            final Long accountToCreditId = command.longValueOfParameterNamed(AccountingRuleJsonInputParams.ACCOUNT_TO_CREDIT.getValue());
-            final GLAccount accountToDebit = accountRepositoryWrapper.findOneWithNotFoundDetection(accountToDebitId);
-            final GLAccount accountToCredit = accountRepositoryWrapper.findOneWithNotFoundDetection(accountToCreditId);
-
-            final AccountingRule accountingRule = AccountingRule.fromJson(office, accountToDebit, accountToCredit, command);
+            final AccountingRule accountingRule = assembleAccountingRuleAndTags(office, command);
             this.accountingRuleRepository.saveAndFlush(accountingRule);
-
             return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withOfficeId(officeId)
                     .withEntityId(accountingRule.getId()).build();
         } catch (final DataIntegrityViolationException dve) {
@@ -99,11 +99,43 @@ public class AccountingRuleWritePlatformServiceJpaRepositoryImpl implements Acco
         }
     }
 
+    private AccountingRule assembleAccountingRuleAndTags(final Office office, final JsonCommand command) {
+        // get the GL Accounts or tags to Debit and Credit
+        final String[] debitTags = command.arrayValueOfParameterNamed(AccountingRuleJsonInputParams.DEBIT_ACCOUNT_TAGS.getValue());
+        final String[] creditTags = command.arrayValueOfParameterNamed(AccountingRuleJsonInputParams.CREDIT_ACCOUNT_TAGS.getValue());
+        final Long accountToDebitId = command.longValueOfParameterNamed(AccountingRuleJsonInputParams.ACCOUNT_TO_DEBIT.getValue());
+        final Long accountToCreditId = command.longValueOfParameterNamed(AccountingRuleJsonInputParams.ACCOUNT_TO_CREDIT.getValue());
+        GLAccount debitAccount = null;
+        GLAccount creditAccount = null;
+        List<AccountingTagRule> accountingTagRules = new ArrayList<AccountingTagRule>();
+
+        if (accountToDebitId != null) {
+            debitAccount = this.accountRepositoryWrapper.findOneWithNotFoundDetection(accountToDebitId);
+        } else if (debitTags != null) {
+            accountingTagRules = saveDebitOrCreditTags(debitTags, JournalEntryType.DEBIT, accountingTagRules);
+        } else {
+            throw new RuntimeException("Please Specify debitTags or accountToDebitId");
+        }
+
+        if (accountToCreditId != null) {
+            creditAccount = this.accountRepositoryWrapper.findOneWithNotFoundDetection(accountToCreditId);
+        } else if (debitTags != null) {
+            accountingTagRules = saveDebitOrCreditTags(creditTags, JournalEntryType.CREDIT, accountingTagRules);
+        } else {
+            throw new RuntimeException("Please Specify debitTags or accountToDebitId");
+        }
+
+        final AccountingRule accountingRule = AccountingRule.fromJson(office, debitAccount, creditAccount, command);
+        accountingTagRules = accountingRule.updateAccountingRuleForTags(accountingTagRules);
+
+        return accountingRule;
+    }
+
     @Transactional
     @Override
-    public CommandProcessingResult updateAccountingRule(Long accountingRuleId, JsonCommand command) {
-        final AccountingRuleCommand accountingRuleCommand = this.fromApiJsonDeserializer.commandFromApiJson(command.json());
-        accountingRuleCommand.validateForUpdate();
+    public CommandProcessingResult updateAccountingRule(final Long accountingRuleId, final JsonCommand command) {
+
+        this.fromApiJsonDeserializer.validateForUpdate(command.json());
 
         Long officeId = null;
         if (command.parameterExists(AccountingRuleJsonInputParams.OFFICE_ID.getValue())) {
@@ -124,12 +156,12 @@ public class AccountingRuleWritePlatformServiceJpaRepositoryImpl implements Acco
         final Map<String, Object> changesOnly = accountingRule.update(command);
 
         if (accountToDebitId != null && changesOnly.containsKey(AccountingRuleJsonInputParams.ACCOUNT_TO_DEBIT.getValue())) {
-            final GLAccount accountToDebit = accountRepositoryWrapper.findOneWithNotFoundDetection(accountToDebitId);
+            final GLAccount accountToDebit = this.accountRepositoryWrapper.findOneWithNotFoundDetection(accountToDebitId);
             accountingRule.setAccountToDebit(accountToDebit);
         }
 
         if (accountToCreditId != null && changesOnly.containsKey(AccountingRuleJsonInputParams.ACCOUNT_TO_CREDIT.getValue())) {
-            final GLAccount accountToCredit = accountRepositoryWrapper.findOneWithNotFoundDetection(accountToCreditId);
+            final GLAccount accountToCredit = this.accountRepositoryWrapper.findOneWithNotFoundDetection(accountToCreditId);
             accountingRule.setAccountToCredit(accountToCredit);
         }
 
@@ -149,9 +181,33 @@ public class AccountingRuleWritePlatformServiceJpaRepositoryImpl implements Acco
 
     @Transactional
     @Override
-    public CommandProcessingResult deleteAccountingRule(Long accountingRuleId) {
+    public CommandProcessingResult deleteAccountingRule(final Long accountingRuleId) {
         final AccountingRule accountingRule = this.accountingRuleRepositoryWrapper.findOneWithNotFoundDetection(accountingRuleId);
         this.accountingRuleRepository.delete(accountingRule);
         return new CommandProcessingResultBuilder().withEntityId(accountingRule.getId()).build();
+    }
+
+/*    private GLAccount saveDebitOrCreditTagsOrGetDebitORCreditAccount(final String[] creditOrDebitTagArray, final Long creditOrDebitId,
+            final JournalEntryType transactionType) {
+        GLAccount creditOrDebitAccount = null;
+        if (creditOrDebitId != null) {
+            creditOrDebitAccount = this.accountRepositoryWrapper.findOneWithNotFoundDetection(creditOrDebitId);
+        } else if (creditOrDebitTagArray != null) {
+            final List<AccountingTagRule> accountingTagRules = saveDebitOrCreditTags(creditOrDebitTagArray, transactionType);
+        } else {
+            throw new RuntimeException("Please Specify debitTags or accountToDebitId");
+        }
+        return creditOrDebitAccount;
+    }*/
+
+    private List<AccountingTagRule> saveDebitOrCreditTags(final String[] creditOrDebitTagArray, final JournalEntryType transactionType,
+            final List<AccountingTagRule> accountingTagRules) {
+        for (final String creditOrDebitTag : creditOrDebitTagArray) {
+            final Long creditOrDebitTagIdLongValue = Long.valueOf(creditOrDebitTag);
+            final CodeValue creditOrDebitAccount = this.codeValueRepository.findOne(creditOrDebitTagIdLongValue);
+            final AccountingTagRule accountingTagRule = AccountingTagRule.create(creditOrDebitAccount, transactionType.getValue());
+            accountingTagRules.add(accountingTagRule);
+        }
+        return accountingTagRules;
     }
 }
