@@ -18,6 +18,7 @@ import javax.sql.DataSource;
 
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.exception.ConstraintViolationException;
+import org.hibernate.exception.SQLGrammarException;
 import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.ApiParameterError;
@@ -56,18 +57,13 @@ import com.google.gson.reflect.TypeToken;
 @Service
 public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataService {
 
-    private final static String DATATABLE_NAME_REGEX_PATTERN = "^[a-zA-Z][a-zA-Z0-9\\-_\\s]{0,48}[a-zA-Z0-9]$";
+	private final static String DATATABLE_NAME_REGEX_PATTERN = "^[a-zA-Z][a-zA-Z0-9\\-_\\s]{0,48}[a-zA-Z0-9]$";
 
     private final static Logger logger = LoggerFactory.getLogger(ReadWriteNonCoreDataServiceImpl.class);
-    private final static HashMap<String, String> apiTypeToMySQL = new HashMap<String, String>() {
-
-        {
-            put("String", "VARCHAR");
-            put("Number", "INT");
-            put("Decimal", "DECIMAL");
-            put("Date", "DATE");
-        }
-    };
+    private final static HashMap<String, String> apiTypeToMySQL = new HashMap<String, String>() {{
+    	put("String", "VARCHAR"); put("Number", "INT"); put("Decimal", "DECIMAL"); put("Date", "DATE");
+    	put("Text", "TEXT");
+    }};
 
     private final JdbcTemplate jdbcTemplate;
     private final DataSource dataSource;
@@ -285,232 +281,277 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         }
     }
 
-    private Boolean datatableExists(final String datatable) {
-
-        String sql = "SELECT COUNT(*) FROM `x_registered_table` WHERE `registered_table_name`='" + datatable + "'";
-        Integer rowCount = this.jdbcTemplate.queryForInt(sql);
-
-        return (rowCount > 0);
-    }
-
-    private void validateDatatableExists(final String name) {
-
-        if (!datatableExists(name)) { throw new PlatformDataIntegrityException("error.msg.datatables.missing.table.name", "Table '" + name
-                + "' does not exist.", name); }
-    }
-
-    private void validateDatatableNotExists(final String name) {
-
-        if (datatableExists(name)) { throw new PlatformDataIntegrityException("error.msg.datatables.duplicate.table.name", "Table '" + name
-                + "' already exists.", name); }
-    }
-
     private void validateDatatableName(final String name) {
-
-        if (name == null || name.isEmpty()) {
-            throw new PlatformDataIntegrityException("error.msg.datatables.datatable.null.name", "Data table name must not be blank.");
-        } else if (!name.matches(DATATABLE_NAME_REGEX_PATTERN)) { throw new PlatformDataIntegrityException(
-                "error.msg.datatables.datatable.invalid.name.regex", "Invalid data table name.", name); }
+    	
+    	if (name == null || name.isEmpty()) {
+    		throw new PlatformDataIntegrityException("error.msg.datatables.datatable.null.name",
+    				"Data table name must not be blank.");
+    	} else if (!name.matches(DATATABLE_NAME_REGEX_PATTERN)) {
+    		throw new PlatformDataIntegrityException("error.msg.datatables.datatable.invalid.name.regex",
+    				"Invalid data table name.", name);
+    	}
     }
 
     private void parseDatatableColumnObjectForCreate(final JsonObject column, StringBuilder sqlBuilder) {
-
-        String name = (column.has("name")) ? column.get("name").getAsString() : null;
-        String type = (column.has("type")) ? column.get("type").getAsString() : null;
-        Integer length = (column.has("length")) ? column.get("length").getAsInt() : null;
-        Boolean mandatory = (column.has("mandatory")) ? column.get("mandatory").getAsBoolean() : false;
-
-        String mysqlType = apiTypeToMySQL.get(type);
-        sqlBuilder = sqlBuilder.append("`" + name + "` " + mysqlType);
-
-        if (type != null) {
-            if (type.equals("String")) {
-                sqlBuilder = sqlBuilder.append("(" + length + ")");
-            } else if (type.equals("Decimal")) {
-                sqlBuilder = sqlBuilder.append("(19,6)");
-            }
-        }
-        if (mandatory != null) {
-            if (mandatory) {
-                sqlBuilder = sqlBuilder.append(" NOT NULL");
-            } else {
-                sqlBuilder = sqlBuilder.append(" DEFAULT NULL");
-            }
-        }
-
-        sqlBuilder = sqlBuilder.append(", ");
+    	
+    	String name = (column.has("name")) ? column.get("name").getAsString() : null;
+    	String type = (column.has("type")) ? column.get("type").getAsString() : null;
+    	Integer length = (column.has("length")) ? column.get("length").getAsInt() : null;
+    	Boolean mandatory = (column.has("mandatory")) ? column.get("mandatory").getAsBoolean() : false;
+    	
+    	String mysqlType = apiTypeToMySQL.get(type);
+    	sqlBuilder = sqlBuilder.append("`" + name + "` " + mysqlType);
+    	
+    	if (type != null)
+    	{
+    		if (type.equals("String")) {
+    			sqlBuilder = sqlBuilder.append("(" + length + ")");
+    		} else if (type.equals("Decimal")) {
+    			sqlBuilder = sqlBuilder.append("(19,6)");
+    		}
+    	}
+    	if (mandatory != null) {
+    		if (mandatory) {
+    			sqlBuilder = sqlBuilder.append(" NOT NULL");
+    		} else {
+    			sqlBuilder = sqlBuilder.append(" DEFAULT NULL");
+    		}
+    	}
+    	
+    	sqlBuilder = sqlBuilder.append(", ");
     }
 
     @Transactional
     @Override
     public CommandProcessingResult createDatatable(final JsonCommand command) {
 
-        context.authenticatedUser();
-        this.fromApiJsonDeserializer.validateForCreate(command.json());
+    	String datatableName = null;
+    	
+    	try {
+	    	context.authenticatedUser();
+	    	this.fromApiJsonDeserializer.validateForCreate(command.json());
+	
+	    	JsonElement element = this.fromJsonHelper.parse(command.json());
+	    	JsonArray columns = this.fromJsonHelper.extractJsonArrayNamed("columns", element);
+	    	datatableName = this.fromJsonHelper.extractStringNamed("datatableName", element);
+	    	String apptableName = this.fromJsonHelper.extractStringNamed("apptableName", element);
+	    	Boolean multiRow = this.fromJsonHelper.extractBooleanNamed("multiRow", element);
+	
+	    	if (multiRow == null) {
+	    		multiRow = false;
+	    	}
+	
+	    	validateDatatableName(datatableName);
+	    	validateAppTable(apptableName);
+	
+	    	String fkColumnName = apptableName.substring(2) + "_id";
+	    	String fkName = datatableName.toLowerCase().replaceAll("\\s", "_");
+	    	StringBuilder sqlBuilder = new StringBuilder();
+	    	sqlBuilder = sqlBuilder.append("CREATE TABLE `" + datatableName + "` (");
+	
+	    	if (multiRow) {
+	    		sqlBuilder = sqlBuilder
+	    				.append("`id` BIGINT(20) NOT NULL AUTO_INCREMENT, ")
+	    				.append("`" + fkColumnName + "` BIGINT(20) NOT NULL, ");
+	    	} else {
+	    		sqlBuilder = sqlBuilder
+	    				.append("`" + fkColumnName + "` BIGINT(20) NOT NULL, ");
+	    	}
+	
+	    	for (JsonElement column : columns) {
+	    		parseDatatableColumnObjectForCreate(column.getAsJsonObject(), sqlBuilder);
+	    	}
+	
+	    	// Remove trailing comma and space
+	    	sqlBuilder = sqlBuilder.delete(sqlBuilder.length() - 2, sqlBuilder.length());
+	
+	    	if (multiRow) {
+	    		sqlBuilder = sqlBuilder
+	    				.append(", PRIMARY KEY (`id`)")
+	    				.append(", KEY `fk_" + apptableName + "` (`" + fkColumnName + "`)")
+	    				.append(", CONSTRAINT `fk_" + fkName + "` ")
+	    				.append("FOREIGN KEY (`" + fkColumnName + "`) ")
+	    				.append("REFERENCES `" + apptableName + "` (`id`)");
+	    		
+	    	} else {
+	    		sqlBuilder = sqlBuilder
+	    				.append(", PRIMARY KEY (`" + fkColumnName + "`)")
+	    				.append(", CONSTRAINT `fk_" + fkName + "` ")
+	    				.append("FOREIGN KEY (`" + fkColumnName + "`) ")
+	    				.append("REFERENCES `" + apptableName + "` (`id`)");
+	    	}
+	
+	    	sqlBuilder = sqlBuilder.append(") ENGINE=InnoDB DEFAULT CHARSET=utf8;");
+	    	this.jdbcTemplate.execute(sqlBuilder.toString());
+	
+	    	registerDatatable(datatableName, apptableName);
+    	} catch (SQLGrammarException e) {
+    		Throwable realCause = e.getCause();
 
-        JsonElement element = this.fromJsonHelper.parse(command.json());
-        JsonArray columns = this.fromJsonHelper.extractJsonArrayNamed("columns", element);
-        String datatableName = this.fromJsonHelper.extractStringNamed("datatableName", element);
-        String apptable = this.fromJsonHelper.extractStringNamed("apptableName", element);
-        Boolean multiRow = this.fromJsonHelper.extractBooleanNamed("multiRow", element);
+            if (realCause.getMessage().contains("Table") && realCause.getMessage().contains("already exists")) { 
+            	throw new PlatformDataIntegrityException(
+                    "error.msg.datatable.already.exists", realCause.getMessage());
+        	}
+    	}
 
-        if (multiRow == null) {
-            multiRow = false;
-        }
-
-        validateDatatableName(datatableName);
-        validateDatatableName(apptable);
-        validateDatatableNotExists(datatableName);
-
-        String fkColumnName = apptable.substring(2) + "_id";
-        String fkName = datatableName.toLowerCase().replaceAll("\\s", "_");
-        StringBuilder sqlBuilder = new StringBuilder();
-        sqlBuilder = sqlBuilder.append("CREATE TABLE `" + datatableName + "` (");
-
-        if (multiRow) {
-            sqlBuilder = sqlBuilder.append("`id` BIGINT(20) NOT NULL AUTO_INCREMENT, ").append(
-                    "`" + fkColumnName + "` BIGINT(20) NOT NULL, ");
-        } else {
-            sqlBuilder = sqlBuilder.append("`" + fkColumnName + "` BIGINT(20) NOT NULL, ");
-        }
-
-        for (JsonElement column : columns) {
-            parseDatatableColumnObjectForCreate(column.getAsJsonObject(), sqlBuilder);
-        }
-
-        // Remove trailing comma and space
-        sqlBuilder = sqlBuilder.delete(sqlBuilder.length() - 2, sqlBuilder.length());
-
-        if (multiRow) {
-            sqlBuilder = sqlBuilder.append(", PRIMARY KEY (`id`)").append(", KEY `fk_" + apptable + "` (`" + fkColumnName + "`)")
-                    .append(", CONSTRAINT `fk_" + fkName + "` ").append("FOREIGN KEY (`" + fkColumnName + "`) ")
-                    .append("REFERENCES `" + apptable + "` (`id`)");
-
-        } else {
-            sqlBuilder = sqlBuilder.append(", PRIMARY KEY (`" + fkColumnName + "`)").append(", CONSTRAINT `fk_" + fkName + "` ")
-                    .append("FOREIGN KEY (`" + fkColumnName + "`) ").append("REFERENCES `" + apptable + "` (`id`)");
-        }
-
-        sqlBuilder = sqlBuilder.append(") ENGINE=InnoDB DEFAULT CHARSET=utf8;");
-        this.jdbcTemplate.execute(sqlBuilder.toString());
-
-        registerDatatable(datatableName, apptable);
-
-        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withResourceIdAsString(datatableName).build();
+    	return new CommandProcessingResultBuilder()
+	    	.withCommandId(command.commandId())
+	    	.withResourceIdAsString(datatableName)
+	    	.build();
     }
 
     private void parseDatatableColumnForUpdate(final JsonObject column, StringBuilder sqlBuilder) {
-
-        String name = (column.has("name")) ? column.get("name").getAsString() : null;
-        String newName = (column.has("newName")) ? column.get("newName").getAsString() : name;
-        String type = (column.has("type")) ? column.get("type").getAsString() : null;
-        Integer length = (column.has("length")) ? column.get("length").getAsInt() : null;
-        Boolean mandatory = (column.has("mandatory")) ? column.get("mandatory").getAsBoolean() : false;
-        String after = (column.has("after")) ? column.get("after").getAsString() : null;
-
-        String mysqlType = apiTypeToMySQL.get(type);
-        sqlBuilder = sqlBuilder.append(", CHANGE `" + name + "` `" + newName + "` " + mysqlType);
-
-        if (type != null) {
-            if (type.equals("String") && length != null) {
-                sqlBuilder = sqlBuilder.append("(" + length + ")");
-            } else if (type.equals("Decimal")) {
-                sqlBuilder = sqlBuilder.append("(19,6)");
-            }
-        }
-        if (mandatory != null) {
-            if (mandatory) {
-                sqlBuilder = sqlBuilder.append(" NOT NULL");
-            } else {
-                sqlBuilder = sqlBuilder.append(" DEFAULT NULL");
-            }
-        }
-        if (after != null) {
-            sqlBuilder = sqlBuilder.append(" AFTER `" + after + "`");
-        }
+    	
+    	String name = (column.has("name")) ? column.get("name").getAsString() : null;
+    	String newName = (column.has("newName")) ? column.get("newName").getAsString() : name;
+    	String type = (column.has("type")) ? column.get("type").getAsString() : null;
+    	Integer length = (column.has("length")) ? column.get("length").getAsInt() : null;
+    	Boolean mandatory = (column.has("mandatory")) ? column.get("mandatory").getAsBoolean() : false;
+    	String after = (column.has("after")) ? column.get("after").getAsString() : null;
+    	
+    	String mysqlType = apiTypeToMySQL.get(type);
+    	sqlBuilder = sqlBuilder.append(", CHANGE `" + name + "` `" + newName + "` " + mysqlType);
+    	
+    	if (type != null) {
+    		if (type.equals("String") && length != null) {
+    			sqlBuilder = sqlBuilder.append("(" + length + ")");
+    		} else if (type.equals("Decimal")) {
+    			sqlBuilder = sqlBuilder.append("(19,6)");
+    		}
+    	}
+    	if (mandatory != null) {
+    		if (mandatory) {
+    			sqlBuilder = sqlBuilder.append(" NOT NULL");
+    		} else {
+    			sqlBuilder = sqlBuilder.append(" DEFAULT NULL");
+    		}
+    	}
+    	if (after != null) {
+    		sqlBuilder = sqlBuilder.append(" AFTER `" + after + "`");
+    	}
     }
 
     private void parseDatatableColumnForAdd(final JsonObject column, StringBuilder sqlBuilder) {
-
-        String name = (column.has("name")) ? column.get("name").getAsString() : null;
-        String type = (column.has("type")) ? column.get("type").getAsString() : null;
-        Integer length = (column.has("length")) ? column.get("length").getAsInt() : null;
-        Boolean mandatory = (column.has("mandatory")) ? column.get("mandatory").getAsBoolean() : false;
-        String after = (column.has("after")) ? column.get("after").getAsString() : null;
-
-        String mysqlType = apiTypeToMySQL.get(type);
-        sqlBuilder = sqlBuilder.append(", ADD `" + name + "` " + mysqlType);
-
-        if (type != null) {
-            if (type.equals("String") && length != null) {
-                sqlBuilder = sqlBuilder.append("(" + length + ")");
-            } else if (type.equals("Decimal")) {
-                sqlBuilder = sqlBuilder.append("(19,6)");
-            }
-        }
-        if (mandatory != null) {
-            if (mandatory) {
-                sqlBuilder = sqlBuilder.append(" NOT NULL");
-            } else {
-                sqlBuilder = sqlBuilder.append(" DEFAULT NULL");
-            }
-        }
-        if (after != null) {
-            sqlBuilder = sqlBuilder.append(" AFTER `" + after + "`");
-        }
+    	
+    	String name = (column.has("name")) ? column.get("name").getAsString() : null;
+    	String type = (column.has("type")) ? column.get("type").getAsString() : null;
+    	Integer length = (column.has("length")) ? column.get("length").getAsInt() : null;
+    	Boolean mandatory = (column.has("mandatory")) ? column.get("mandatory").getAsBoolean() : false;
+    	String after = (column.has("after")) ? column.get("after").getAsString() : null;
+    	
+    	String mysqlType = apiTypeToMySQL.get(type);
+    	sqlBuilder = sqlBuilder.append(", ADD `" + name + "` " + mysqlType);
+    	
+    	if (type != null) {
+    		if (type.equals("String") && length != null) {
+    			sqlBuilder = sqlBuilder.append("(" + length + ")");
+    		} else if (type.equals("Decimal")) {
+    			sqlBuilder = sqlBuilder.append("(19,6)");
+    		}
+    	}
+    	if (mandatory != null) {
+    		if (mandatory) {
+    			sqlBuilder = sqlBuilder.append(" NOT NULL");
+    		} else {
+    			sqlBuilder = sqlBuilder.append(" DEFAULT NULL");
+    		}
+    	}
+    	if (after != null) {
+    		sqlBuilder = sqlBuilder.append(" AFTER `" + after + "`");
+    	}
     }
 
-    private void parseDatatableColumnForDrop(final JsonObject column, StringBuilder sqlBuilder) {
-
-        String name = (column.has("name")) ? column.get("name").getAsString() : null;
-
-        sqlBuilder = sqlBuilder.append(", DROP COLUMN `" + name + "`");
-    }
+	private void parseDatatableColumnForDrop(final JsonObject column, StringBuilder sqlBuilder) {
+		
+		String name = (column.has("name")) ? column.get("name").getAsString() : null;
+		
+		sqlBuilder = sqlBuilder.append(", DROP COLUMN `" + name + "`");
+	}
 
     @Transactional
     @Override
     public void updateDatatable(final String datatableName, final JsonCommand command) {
 
-        context.authenticatedUser();
-        this.fromApiJsonDeserializer.validateForUpdate(command.json());
+    	try {
+	    	context.authenticatedUser();
+	    	this.fromApiJsonDeserializer.validateForUpdate(command.json());
+	
+	    	JsonElement element = this.fromJsonHelper.parse(command.json());
+	    	JsonArray changeColumns = this.fromJsonHelper.extractJsonArrayNamed("changeColumns", element);
+	    	JsonArray addColumns = this.fromJsonHelper.extractJsonArrayNamed("addColumns", element);
+	    	JsonArray dropColumns = this.fromJsonHelper.extractJsonArrayNamed("dropColumns", element);
+	    	String apptableName = this.fromJsonHelper.extractStringNamed("apptableName", element);
+	
+	    	validateDatatableName(datatableName);
+	
+	    	if (!StringUtils.isBlank(apptableName)) {
+		    	validateAppTable(apptableName);
+		    	
+		    	String oldApptableName = this.queryForApplicationTableName(datatableName);
+		    	if (!StringUtils.equals(oldApptableName, apptableName)) {
+		    		deregisterDatatable(datatableName);
+		    		registerDatatable(datatableName, apptableName);
+		    	}
+	    	}
+	
+	    	if (changeColumns == null && addColumns == null && dropColumns == null) {
+	    		return;
+	    	}
+	
+	    	StringBuilder sqlBuilder = new StringBuilder("ALTER TABLE `" + datatableName + "`");
+	    	
+	    	if (changeColumns != null) {
+		    	for (JsonElement column : changeColumns) {
+		    		parseDatatableColumnForUpdate(column.getAsJsonObject(), sqlBuilder);
+		    	}
+	    	}
+	    	if (addColumns != null) {
+		    	for (JsonElement column : addColumns) {
+		    		parseDatatableColumnForAdd(column.getAsJsonObject(), sqlBuilder);
+		    	}
+	    	}
+	    	if (dropColumns != null) {
+		    	for (JsonElement column : dropColumns) {
+		    		parseDatatableColumnForDrop(column.getAsJsonObject(), sqlBuilder);
+		    	}
+	    	}
+	
+	    	// Remove the first comma, right after ALTER TABLE `datatable`
+	    	int indexOfFirstComma = sqlBuilder.indexOf(",");
+	    	if (indexOfFirstComma != -1) {
+	    		sqlBuilder = sqlBuilder.deleteCharAt(indexOfFirstComma);
+	    	}
+	    	this.jdbcTemplate.execute(sqlBuilder.toString());
+    	} catch (SQLGrammarException e) {
+    		Throwable realCause = e.getCause();
 
-        JsonElement element = this.fromJsonHelper.parse(command.json());
-        JsonArray changeColumns = this.fromJsonHelper.extractJsonArrayNamed("changeColumns", element);
-        JsonArray addColumns = this.fromJsonHelper.extractJsonArrayNamed("addColumns", element);
-        JsonArray dropColumns = this.fromJsonHelper.extractJsonArrayNamed("dropColumns", element);
-
-        validateDatatableName(datatableName);
-        validateDatatableExists(datatableName);
-
-        StringBuilder sqlBuilder = new StringBuilder("ALTER TABLE `" + datatableName + "`");
-
-        for (JsonElement column : changeColumns) {
-            parseDatatableColumnForUpdate(column.getAsJsonObject(), sqlBuilder);
-        }
-        for (JsonElement column : addColumns) {
-            parseDatatableColumnForAdd(column.getAsJsonObject(), sqlBuilder);
-        }
-        for (JsonElement column : dropColumns) {
-            parseDatatableColumnForDrop(column.getAsJsonObject(), sqlBuilder);
-        }
-
-        // Remove the first comma, right after ALTER TABLE `datatable`
-        sqlBuilder = sqlBuilder.deleteCharAt(sqlBuilder.indexOf(","));
-        this.jdbcTemplate.execute(sqlBuilder.toString());
+        	if (realCause.getMessage().contains("Unknown column")) {
+            	throw new PlatformDataIntegrityException(
+                    "error.msg.datatable.column.missing", realCause.getMessage());
+        	}
+    	}
     }
 
     @Transactional
     @Override
     public void deleteDatatable(final String datatableName) {
-
-        context.authenticatedUser();
-
-        validateDatatableName(datatableName);
-        validateDatatableExists(datatableName);
-        deregisterDatatable(datatableName);
-
-        String sql = "DROP TABLE `" + datatableName + "`";
-        this.jdbcTemplate.execute(sql);
+    	
+    	try {
+	    	context.authenticatedUser();
+	    	
+	    	validateDatatableName(datatableName);
+	    	deregisterDatatable(datatableName);
+	    	
+	    	String sql = "DROP TABLE `" + datatableName + "`";
+	    	this.jdbcTemplate.execute(sql);
+    	} catch (SQLGrammarException e) {
+    		Throwable realCause = e.getCause();
+    		
+    		if (realCause.getMessage().contains("Unknown table")) {
+	    		throw new PlatformDataIntegrityException(
+	                    "error.msg.datatable.missing", realCause.getMessage());
+    		}
+    	}
     }
 
     @Transactional
