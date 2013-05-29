@@ -120,6 +120,7 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
         logger.info("Results affected by update: " + result);
     }
 
+    @Transactional
     @Override
     public void updateLoanArrearsAgeingDetails() {
         final MifosPlatformTenant tenant = this.tenantDetailsService.loadTenantById("default");
@@ -161,6 +162,7 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
         logger.info("Results affected by update: " + result);
     }
 
+    @Transactional
     @Override
     public void applyAnnualFeeForSavings() {
         final MifosPlatformTenant tenant = this.tenantDetailsService.loadTenantById("default");
