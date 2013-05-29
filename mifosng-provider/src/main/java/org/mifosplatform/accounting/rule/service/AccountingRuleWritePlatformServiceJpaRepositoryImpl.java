@@ -21,6 +21,7 @@ import org.mifosplatform.accounting.rule.domain.AccountingTagRule;
 import org.mifosplatform.accounting.rule.exception.AccountingRuleDuplicateException;
 import org.mifosplatform.infrastructure.codes.domain.CodeValue;
 import org.mifosplatform.infrastructure.codes.domain.CodeValueRepository;
+import org.mifosplatform.infrastructure.codes.exception.CodeValueNotFoundException;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
@@ -109,20 +110,22 @@ public class AccountingRuleWritePlatformServiceJpaRepositoryImpl implements Acco
         GLAccount creditAccount = null;
         List<AccountingTagRule> accountingTagRules = new ArrayList<AccountingTagRule>();
 
-        if (accountToDebitId != null) {
+        if ((accountToDebitId != null && debitTags != null) || (accountToDebitId == null && debitTags == null)) {
+            // TODO- Throw Appropriate exception
+            throw new RuntimeException("Please Specify debitTags or accountToDebitId");
+        } else if (accountToDebitId != null) {
             debitAccount = this.accountRepositoryWrapper.findOneWithNotFoundDetection(accountToDebitId);
         } else if (debitTags != null) {
             accountingTagRules = saveDebitOrCreditTags(debitTags, JournalEntryType.DEBIT, accountingTagRules);
-        } else {
-            throw new RuntimeException("Please Specify debitTags or accountToDebitId");
         }
 
-        if (accountToCreditId != null) {
-            creditAccount = this.accountRepositoryWrapper.findOneWithNotFoundDetection(accountToCreditId);
-        } else if (debitTags != null) {
-            accountingTagRules = saveDebitOrCreditTags(creditTags, JournalEntryType.CREDIT, accountingTagRules);
-        } else {
+        if ((accountToCreditId != null && creditTags != null) || (accountToCreditId == null && creditTags == null)) {
+            // TODO- Throw Appropriate exception
             throw new RuntimeException("Please Specify debitTags or accountToDebitId");
+        } else if (accountToCreditId != null) {
+            creditAccount = this.accountRepositoryWrapper.findOneWithNotFoundDetection(accountToCreditId);
+        } else if (creditTags != null) {
+            accountingTagRules = saveDebitOrCreditTags(creditTags, JournalEntryType.CREDIT, accountingTagRules);
         }
 
         final AccountingRule accountingRule = AccountingRule.fromJson(office, debitAccount, creditAccount, command);
@@ -131,6 +134,8 @@ public class AccountingRuleWritePlatformServiceJpaRepositoryImpl implements Acco
         return accountingRule;
     }
 
+    // TODO- This update mehtod should update based on new changes made for
+    // createAccountingRule.
     @Transactional
     @Override
     public CommandProcessingResult updateAccountingRule(final Long accountingRuleId, final JsonCommand command) {
@@ -205,6 +210,7 @@ public class AccountingRuleWritePlatformServiceJpaRepositoryImpl implements Acco
         for (final String creditOrDebitTag : creditOrDebitTagArray) {
             final Long creditOrDebitTagIdLongValue = Long.valueOf(creditOrDebitTag);
             final CodeValue creditOrDebitAccount = this.codeValueRepository.findOne(creditOrDebitTagIdLongValue);
+            if (creditOrDebitAccount == null) { throw new CodeValueNotFoundException(creditOrDebitTagIdLongValue); }
             final AccountingTagRule accountingTagRule = AccountingTagRule.create(creditOrDebitAccount, transactionType.getValue());
             accountingTagRules.add(accountingTagRule);
         }

@@ -16,7 +16,7 @@ public class JournalEntryInvalidException extends AbstractPlatformDomainRuleExce
 
     /*** enum of reasons for invalid Journal Entry **/
     public static enum GL_JOURNAL_ENTRY_INVALID_REASON {
-        FUTURE_DATE, ACCOUNTING_CLOSED, NO_DEBITS_OR_CREDITS, DEBIT_CREDIT_SUM_MISMATCH, DEBIT_CREDIT_ACCOUNT_OR_AMOUNT_EMPTY, GL_ACCOUNT_DISABLED, GL_ACCOUNT_MANUAL_ENTRIES_NOT_PERMITTED;
+        FUTURE_DATE, ACCOUNTING_CLOSED, NO_DEBITS_OR_CREDITS, DEBIT_CREDIT_SUM_MISMATCH_WITH_AMOUNT, DEBIT_CREDIT_SUM_MISMATCH, DEBIT_CREDIT_ACCOUNT_OR_AMOUNT_EMPTY, GL_ACCOUNT_DISABLED, GL_ACCOUNT_MANUAL_ENTRIES_NOT_PERMITTED;
 
         public String errorMessage() {
             if (name().toString().equalsIgnoreCase("FUTURE_DATE")) {
@@ -25,6 +25,8 @@ public class JournalEntryInvalidException extends AbstractPlatformDomainRuleExce
                 return "Journal entry cannot be made prior to last account closing date for the branch";
             } else if (name().toString().equalsIgnoreCase("NO_DEBITS_OR_CREDITS")) {
                 return "Journal Entry must have atleast one Debit and one Credit";
+            } else if (name().toString().equalsIgnoreCase("DEBIT_CREDIT_SUM_MISMATCH_WITH_AMOUNT")) {
+                return "Sum of All Debits OR Credits must equal the Amount for a Journal Entry";
             } else if (name().toString().equalsIgnoreCase("DEBIT_CREDIT_SUM_MISMATCH")) {
                 return "Sum of All Debits must equal the sum of all Credits for a Journal Entry";
             } else if (name().toString().equalsIgnoreCase("DEBIT_CREDIT_ACCOUNT_OR_AMOUNT_EMPTY")) {

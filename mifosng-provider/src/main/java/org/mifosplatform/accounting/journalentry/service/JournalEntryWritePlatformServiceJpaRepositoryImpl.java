@@ -6,6 +6,7 @@
 package org.mifosplatform.accounting.journalentry.service;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -15,9 +16,11 @@ import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
 import org.mifosplatform.accounting.closure.domain.GLClosure;
 import org.mifosplatform.accounting.closure.domain.GLClosureRepository;
+import org.mifosplatform.accounting.glaccount.data.GLAccountDataForLookup;
 import org.mifosplatform.accounting.glaccount.domain.GLAccount;
 import org.mifosplatform.accounting.glaccount.domain.GLAccountRepository;
 import org.mifosplatform.accounting.glaccount.exception.GLAccountNotFoundException;
+import org.mifosplatform.accounting.glaccount.service.GLAccountReadPlatformService;
 import org.mifosplatform.accounting.journalentry.api.JournalEntryJsonInputParams;
 import org.mifosplatform.accounting.journalentry.command.JournalEntryCommand;
 import org.mifosplatform.accounting.journalentry.command.SingleDebitOrCreditEntryCommand;
@@ -61,6 +64,7 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
     private final AccountingProcessorHelper helper;
     private final JournalEntryCommandFromApiJsonDeserializer fromApiJsonDeserializer;
     private final AccountingRuleRepository accountingRuleRepository;
+    private final GLAccountReadPlatformService glAccountReadPlatformService;
 
     @Autowired
     public JournalEntryWritePlatformServiceJpaRepositoryImpl(final GLClosureRepository glClosureRepository,
@@ -68,7 +72,8 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
             final GLAccountRepository glAccountRepository, final JournalEntryCommandFromApiJsonDeserializer fromApiJsonDeserializer,
             final AccountingProcessorHelper accountingProcessorHelper, final AccountingRuleRepository accountingRuleRepository,
             final AccountingProcessorForLoanFactory accountingProcessorForLoanFactory,
-            final AccountingProcessorForSavingsFactory accountingProcessorForSavingsFactory) {
+            final AccountingProcessorForSavingsFactory accountingProcessorForSavingsFactory,
+            final GLAccountReadPlatformService glAccountReadPlatformService) {
         this.glClosureRepository = glClosureRepository;
         this.officeRepository = officeRepository;
         this.glJournalEntryRepository = glJournalEntryRepository;
@@ -78,6 +83,7 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
         this.accountingProcessorForSavingsFactory = accountingProcessorForSavingsFactory;
         this.helper = accountingProcessorHelper;
         this.accountingRuleRepository = accountingRuleRepository;
+        this.glAccountReadPlatformService = glAccountReadPlatformService;
     }
 
     @Transactional
@@ -99,32 +105,65 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
             /** Set a transaction Id and save these Journal entries **/
             final Date transactionDate = command.DateValueOfParameterNamed(JournalEntryJsonInputParams.TRANSACTION_DATE.getValue());
             final String transactionId = generateTransactionId();
-            final String referenceNumber = journalEntryCommand.getReferenceNumber();
+            final String referenceNumber = command.stringValueOfParameterNamed(JournalEntryJsonInputParams.REFERENCE_NUMBER.getValue());
             final boolean manualEntry = true;
 
             if (accountRuleId != null) {
-
-                final Long accountingRuleId = command.longValueOfParameterNamed(JournalEntryJsonInputParams.ACCOUNTING_RULE.getValue());
                 final BigDecimal amount = command.bigDecimalValueOfParameterNamed(JournalEntryJsonInputParams.AMOUNT.getValue());
-                final AccountingRule accountingRule = this.accountingRuleRepository.findOne(accountingRuleId);
-                if (accountingRule == null) { throw new AccountingRuleNotFoundException(accountingRuleId); }
-                final GLAccount creditAccountHead = accountingRule.getAccountToCredit();
-                validateGLAccountForTransaction(creditAccountHead);
-                final GLAccount debitAccountHead = accountingRule.getAccountToDebit();
-                validateGLAccountForTransaction(debitAccountHead);
+
                 String description = null;
                 if (StringUtils.isNotBlank(journalEntryCommand.getComments())) {
                     description = journalEntryCommand.getComments();
                 }
 
-                JournalEntry creditEntry = JournalEntry.createNew(office, creditAccountHead, transactionId, manualEntry, transactionDate,
-                        JournalEntryType.CREDIT, amount, description, null, null, referenceNumber);
-                this.glJournalEntryRepository.saveAndFlush(creditEntry);
+                final AccountingRule accountingRule = this.accountingRuleRepository.findOne(accountRuleId);
+                if (accountingRule == null) { throw new AccountingRuleNotFoundException(accountRuleId); }
 
-                JournalEntry debitEntry = JournalEntry.createNew(office, debitAccountHead, transactionId, manualEntry, transactionDate,
-                        JournalEntryType.DEBIT, amount, description, null, null, referenceNumber);
-                this.glJournalEntryRepository.saveAndFlush(debitEntry);
+                if (accountingRule.getAccountToCredit() == null) {
+                    if (journalEntryCommand.getCredits() == null) { throw new RuntimeException(
+                            "You have to pass atleast one value for credits"); }
+                    if (journalEntryCommand.getDebits() != null) {
+                        checkDebitOrCreditAccountsAreValid(accountingRule, journalEntryCommand.getCredits(),
+                                journalEntryCommand.getDebits());
+                        checkDebitAndCreditAmounts(journalEntryCommand.getCredits(), journalEntryCommand.getDebits());
+                    } else {
+                        checkDebitAndCreditAmounts(journalEntryCommand.getCredits(), amount);
+                    }
 
+                    saveAllDebitOrCreditEntries(journalEntryCommand, office, transactionDate, journalEntryCommand.getCredits(),
+                            transactionId, JournalEntryType.CREDIT, referenceNumber);
+                } else {
+                    if (journalEntryCommand.getCredits() != null) { throw new RuntimeException(
+                            "You can not pass credits for this rule please verify your rule"); }
+                    final GLAccount creditAccountHead = accountingRule.getAccountToCredit();
+                    validateGLAccountForTransaction(creditAccountHead);
+                    final JournalEntry creditEntry = JournalEntry.createNew(office, creditAccountHead, transactionId, manualEntry,
+                            transactionDate, JournalEntryType.CREDIT, amount, description, null, null, referenceNumber);
+                    this.glJournalEntryRepository.saveAndFlush(creditEntry);
+                }
+
+                if (accountingRule.getAccountToDebit() == null) {
+                    if (journalEntryCommand.getDebits() == null) { throw new RuntimeException(
+                            "You have to pass atleast one parameter for debits"); }
+                    if (journalEntryCommand.getCredits() != null) {
+                        checkDebitOrCreditAccountsAreValid(accountingRule, journalEntryCommand.getCredits(),
+                                journalEntryCommand.getDebits());
+                        checkDebitAndCreditAmounts(journalEntryCommand.getCredits(), journalEntryCommand.getDebits());
+                    } else {
+                        checkDebitAndCreditAmounts(journalEntryCommand.getDebits(), amount);
+                    }
+
+                    saveAllDebitOrCreditEntries(journalEntryCommand, office, transactionDate, journalEntryCommand.getDebits(),
+                            transactionId, JournalEntryType.DEBIT, referenceNumber);
+                } else {
+                    if (journalEntryCommand.getDebits() != null) { throw new RuntimeException(
+                            "You can not pass debits for this rule please verify your rule"); }
+                    final GLAccount debitAccountHead = accountingRule.getAccountToDebit();
+                    validateGLAccountForTransaction(debitAccountHead);
+                    final JournalEntry debitEntry = JournalEntry.createNew(office, debitAccountHead, transactionId, manualEntry,
+                            transactionDate, JournalEntryType.DEBIT, amount, description, null, null, referenceNumber);
+                    this.glJournalEntryRepository.saveAndFlush(debitEntry);
+                }
             } else {
 
                 saveAllDebitOrCreditEntries(journalEntryCommand, office, transactionDate, journalEntryCommand.getDebits(), transactionId,
@@ -143,7 +182,76 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
         }
     }
 
-    private void validateGLAccountForTransaction(GLAccount creditOrDebitAccountHead) {
+    @SuppressWarnings("null")
+    private void checkDebitOrCreditAccountsAreValid(final AccountingRule accountingRule, final SingleDebitOrCreditEntryCommand[] credits,
+            final SingleDebitOrCreditEntryCommand[] debits) {
+        // Validate the debit and credit arrays are appropriate accounts
+        List<GLAccountDataForLookup> allowedCreditGLAccounts = new ArrayList<GLAccountDataForLookup>();
+        List<GLAccountDataForLookup> allowedDebitGLAccounts = new ArrayList<GLAccountDataForLookup>();
+        final SingleDebitOrCreditEntryCommand[] validCredits = new SingleDebitOrCreditEntryCommand[credits.length];
+        final SingleDebitOrCreditEntryCommand[] validDebits = new SingleDebitOrCreditEntryCommand[debits.length];
+
+        if (credits != null && credits.length > 0) {
+            allowedCreditGLAccounts = this.glAccountReadPlatformService.retrieveAccountsByTagId(accountingRule.getId(),
+                    JournalEntryType.CREDIT.getValue());
+            for (final GLAccountDataForLookup accountDataForLookup : allowedCreditGLAccounts) {
+                for (int i = 0; i < credits.length; i++) {
+                    final SingleDebitOrCreditEntryCommand credit = credits[i];
+                    if (credit.getGlAccountId().equals(accountDataForLookup.getId())) {
+                        validCredits[i] = credit;
+                    }
+                }
+            }
+            if (credits.length != validCredits.length) { throw new RuntimeException("Invalid credits"); }
+        }
+
+        if (debits != null && debits.length > 0) {
+            allowedDebitGLAccounts = this.glAccountReadPlatformService.retrieveAccountsByTagId(accountingRule.getId(),
+                    JournalEntryType.DEBIT.getValue());
+            for (final GLAccountDataForLookup accountDataForLookup : allowedDebitGLAccounts) {
+                for (int i = 0; i < debits.length; i++) {
+                    final SingleDebitOrCreditEntryCommand debit = debits[i];
+                    if (debit.getGlAccountId().equals(accountDataForLookup.getId())) {
+                        validDebits[i] = debit;
+                    }
+                }
+            }
+            if (debits.length != validDebits.length) { throw new RuntimeException("Invalid debits"); }
+        }
+    }
+
+    private void checkDebitAndCreditAmounts(final SingleDebitOrCreditEntryCommand[] credits, final SingleDebitOrCreditEntryCommand[] debits) {
+        // sum of all debits must be = sum of all credits
+        BigDecimal creditsSum = BigDecimal.ZERO;
+        BigDecimal debitsSum = BigDecimal.ZERO;
+        for (final SingleDebitOrCreditEntryCommand creditEntryCommand : credits) {
+            if (creditEntryCommand.getAmount() == null || creditEntryCommand.getGlAccountId() == null) { throw new JournalEntryInvalidException(
+                    GL_JOURNAL_ENTRY_INVALID_REASON.DEBIT_CREDIT_ACCOUNT_OR_AMOUNT_EMPTY, null, null, null); }
+            creditsSum = creditsSum.add(creditEntryCommand.getAmount());
+        }
+        for (final SingleDebitOrCreditEntryCommand debitEntryCommand : debits) {
+            if (debitEntryCommand.getAmount() == null || debitEntryCommand.getGlAccountId() == null) { throw new JournalEntryInvalidException(
+                    GL_JOURNAL_ENTRY_INVALID_REASON.DEBIT_CREDIT_ACCOUNT_OR_AMOUNT_EMPTY, null, null, null); }
+            debitsSum = debitsSum.add(debitEntryCommand.getAmount());
+        }
+        if (creditsSum.compareTo(debitsSum) != 0) { throw new JournalEntryInvalidException(
+                GL_JOURNAL_ENTRY_INVALID_REASON.DEBIT_CREDIT_SUM_MISMATCH, null, null, null); }
+    }
+
+    private void checkDebitAndCreditAmounts(final SingleDebitOrCreditEntryCommand[] creditOrDebits, final BigDecimal amount) {
+        if (amount == null) { throw new JournalEntryInvalidException(GL_JOURNAL_ENTRY_INVALID_REASON.DEBIT_CREDIT_SUM_MISMATCH_WITH_AMOUNT,
+                null, null, null); }
+        BigDecimal creditOrDebitSum = BigDecimal.ZERO;
+        for (final SingleDebitOrCreditEntryCommand creditEntryCommand : creditOrDebits) {
+            if (creditEntryCommand.getAmount() == null || creditEntryCommand.getGlAccountId() == null) { throw new JournalEntryInvalidException(
+                    GL_JOURNAL_ENTRY_INVALID_REASON.DEBIT_CREDIT_ACCOUNT_OR_AMOUNT_EMPTY, null, null, null); }
+            creditOrDebitSum = creditOrDebitSum.add(creditEntryCommand.getAmount());
+        }
+        if (creditOrDebitSum.compareTo(amount) != 0) { throw new JournalEntryInvalidException(
+                GL_JOURNAL_ENTRY_INVALID_REASON.DEBIT_CREDIT_SUM_MISMATCH, null, null, null); }
+    }
+
+    private void validateGLAccountForTransaction(final GLAccount creditOrDebitAccountHead) {
         /***
          * validate that the account allows manual adjustments and is not
          * disabled
@@ -199,7 +307,7 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
         final boolean accrualBasedAccountingEnabled = (Boolean) accountingBridgeData.get("accrualBasedAccountingEnabled");
 
         if (cashBasedAccountingEnabled || accrualBasedAccountingEnabled) {
-            final LoanDTO loanDTO = helper.populateLoanDtoFromMap(accountingBridgeData, cashBasedAccountingEnabled,
+            final LoanDTO loanDTO = this.helper.populateLoanDtoFromMap(accountingBridgeData, cashBasedAccountingEnabled,
                     accrualBasedAccountingEnabled);
             final AccountingProcessorForLoan accountingProcessorForLoan = this.accountingProcessorForLoanFactory
                     .determineProcessor(loanDTO);
@@ -209,13 +317,13 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
 
     @Transactional
     @Override
-    public void createJournalEntriesForSavings(Map<String, Object> accountingBridgeData) {
+    public void createJournalEntriesForSavings(final Map<String, Object> accountingBridgeData) {
 
         final boolean cashBasedAccountingEnabled = (Boolean) accountingBridgeData.get("cashBasedAccountingEnabled");
         final boolean accrualBasedAccountingEnabled = (Boolean) accountingBridgeData.get("accrualBasedAccountingEnabled");
 
         if (cashBasedAccountingEnabled || accrualBasedAccountingEnabled) {
-            final SavingsDTO savingsDTO = helper.populateSavingsDtoFromMap(accountingBridgeData, cashBasedAccountingEnabled,
+            final SavingsDTO savingsDTO = this.helper.populateSavingsDtoFromMap(accountingBridgeData, cashBasedAccountingEnabled,
                     accrualBasedAccountingEnabled);
             final AccountingProcessorForSavings accountingProcessorForSavings = this.accountingProcessorForSavingsFactory
                     .determineProcessor(savingsDTO);
@@ -247,21 +355,7 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
             if ((credits == null || credits.length <= 0) || (debits == null || debits.length <= 0)) { throw new JournalEntryInvalidException(
                     GL_JOURNAL_ENTRY_INVALID_REASON.NO_DEBITS_OR_CREDITS, null, null, null); }
 
-            // sum of all debits must be = sum of all credits
-            BigDecimal creditsSum = BigDecimal.ZERO;
-            BigDecimal debitsSum = BigDecimal.ZERO;
-            for (final SingleDebitOrCreditEntryCommand creditEntryCommand : credits) {
-                if (creditEntryCommand.getAmount() == null || creditEntryCommand.getGlAccountId() == null) { throw new JournalEntryInvalidException(
-                        GL_JOURNAL_ENTRY_INVALID_REASON.DEBIT_CREDIT_ACCOUNT_OR_AMOUNT_EMPTY, null, null, null); }
-                creditsSum = creditsSum.add(creditEntryCommand.getAmount());
-            }
-            for (final SingleDebitOrCreditEntryCommand debitEntryCommand : debits) {
-                if (debitEntryCommand.getAmount() == null || debitEntryCommand.getGlAccountId() == null) { throw new JournalEntryInvalidException(
-                        GL_JOURNAL_ENTRY_INVALID_REASON.DEBIT_CREDIT_ACCOUNT_OR_AMOUNT_EMPTY, null, null, null); }
-                debitsSum = debitsSum.add(debitEntryCommand.getAmount());
-            }
-            if (creditsSum.compareTo(debitsSum) != 0) { throw new JournalEntryInvalidException(
-                    GL_JOURNAL_ENTRY_INVALID_REASON.DEBIT_CREDIT_SUM_MISMATCH, null, null, null); }
+            checkDebitAndCreditAmounts(credits, debits);
         }
     }
 

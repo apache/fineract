@@ -8,6 +8,7 @@ package org.mifosplatform.accounting.glaccount.service;
 import java.util.List;
 
 import org.mifosplatform.accounting.glaccount.data.GLAccountData;
+import org.mifosplatform.accounting.glaccount.data.GLAccountDataForLookup;
 import org.mifosplatform.accounting.glaccount.domain.GLAccountType;
 
 public interface GLAccountReadPlatformService {
@@ -24,4 +25,6 @@ public interface GLAccountReadPlatformService {
     List<GLAccountData> retrieveAllEnabledHeaderGLAccounts(GLAccountType accountType);
 
     GLAccountData retrieveNewGLAccountDetails(final Integer type);
+
+    List<GLAccountDataForLookup> retrieveAccountsByTagId(final Long ruleId, final Integer transactionType);
 }

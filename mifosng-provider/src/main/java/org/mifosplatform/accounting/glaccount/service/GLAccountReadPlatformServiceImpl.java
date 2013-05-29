@@ -13,6 +13,7 @@ import java.util.List;
 import org.apache.commons.lang.StringUtils;
 import org.mifosplatform.accounting.common.AccountingEnumerations;
 import org.mifosplatform.accounting.glaccount.data.GLAccountData;
+import org.mifosplatform.accounting.glaccount.data.GLAccountDataForLookup;
 import org.mifosplatform.accounting.glaccount.domain.GLAccountType;
 import org.mifosplatform.accounting.glaccount.domain.GLAccountUsage;
 import org.mifosplatform.accounting.glaccount.exception.GLAccountInvalidClassificationException;
@@ -65,7 +66,7 @@ public class GLAccountReadPlatformServiceImpl implements GLAccountReadPlatformSe
             final String nameDecorated = rs.getString("nameDecorated");
             final Long codeId = rs.wasNull() ? null : rs.getLong("codeId");
             final String codeValue = rs.getString("codeValue");
-            CodeValueData tagId = CodeValueData.instance(codeId, codeValue);
+            final CodeValueData tagId = CodeValueData.instance(codeId, codeValue);
             return new GLAccountData(id, name, parentId, glCode, disabled, manualEntriesAllowed, accountType, usage, description,
                     nameDecorated, tagId);
         }
@@ -201,5 +202,26 @@ public class GLAccountReadPlatformServiceImpl implements GLAccountReadPlatformSe
     @Override
     public List<GLAccountData> retrieveAllEnabledHeaderGLAccounts(final GLAccountType accountType) {
         return retrieveAllGLAccounts(accountType.getValue(), null, GLAccountUsage.HEADER.getValue(), null, false);
+    }
+
+    @Override
+    public List<GLAccountDataForLookup> retrieveAccountsByTagId(final Long ruleId, final Integer transactionType) {
+        final GLAccountDataLookUpMapper mapper = new GLAccountDataLookUpMapper();
+        final String sql = "Select " + mapper.schema() + " where rule.id=? and tags.acc_type_enum=?";
+        return this.jdbcTemplate.query(sql, mapper, new Object[] { ruleId, transactionType });
+    }
+
+    private static final class GLAccountDataLookUpMapper implements RowMapper<GLAccountDataForLookup> {
+
+        public String schema() {
+            return " gl.id as id from acc_accounting_rule rule join acc_rule_tags tags on tags.acc_rule_id = rule.id join acc_gl_account gl on gl.tag_id=tags.tag_id";
+        }
+
+        @Override
+        public GLAccountDataForLookup mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+            final Long id = JdbcSupport.getLong(rs, "id");
+            return new GLAccountDataForLookup(id);
+        }
+
     }
 }

@@ -24,10 +24,10 @@ public class AccountingTagRule extends AbstractPersistable<Long> {
 
     @ManyToOne
     @JoinColumn(name = "tag_id", nullable = false)
-    private final CodeValue tagId;
+    private CodeValue tagId;
 
     @Column(name = "acc_type_enum", nullable = false)
-    private final Integer accountType;
+    private Integer accountType;
 
     public static AccountingTagRule create(final CodeValue tagId, final Integer accountType) {
         return new AccountingTagRule(tagId, accountType);
@@ -40,6 +40,14 @@ public class AccountingTagRule extends AbstractPersistable<Long> {
 
     public void updateAccountingTagRule(final AccountingRule accountingRule) {
         this.accountingRule = accountingRule;
+    }
+
+    public AccountingTagRule() {
+        // TODO Auto-generated constructor stub
+    }
+
+    public Integer getAccountType() {
+        return this.accountType;
     }
 
 }

@@ -30,8 +30,8 @@ public class JournalEntryCommand {
     private final SingleDebitOrCreditEntryCommand[] debits;
 
     public JournalEntryCommand(final Long officeId, final LocalDate transactionDate, final String comments,
-            final SingleDebitOrCreditEntryCommand[] credits, final SingleDebitOrCreditEntryCommand[] debits,
-            final String referenceNumber, final Long accountingRuleId, final BigDecimal amount) {
+            final SingleDebitOrCreditEntryCommand[] credits, final SingleDebitOrCreditEntryCommand[] debits, final String referenceNumber,
+            final Long accountingRuleId, final BigDecimal amount) {
         this.officeId = officeId;
         this.transactionDate = transactionDate;
         this.comments = comments;
@@ -53,45 +53,41 @@ public class JournalEntryCommand {
         baseDataValidator.reset().parameter("officeId").value(this.officeId).notNull().integerGreaterThanZero();
 
         baseDataValidator.reset().parameter("comments").value(this.comments).ignoreIfNull().notExceedingLengthOf(500);
-        
+
         baseDataValidator.reset().parameter("referenceNumber").value(this.referenceNumber).ignoreIfNull().notExceedingLengthOf(100);
-        
+
         baseDataValidator.reset().parameter("accountingRule").value(this.accountingRuleId).ignoreIfNull().longGreaterThanZero();
-        
-        if (this.accountingRuleId == null) {
-            
-            baseDataValidator.reset().parameter("credits").value(this.credits).notNull();
-            
-            baseDataValidator.reset().parameter("debits").value(this.debits).notNull();
-        
-            // validation for credit array elements
-            if (this.credits != null) {
-                if (this.credits.length == 0) {
-                    validateSingleDebitOrCredit(baseDataValidator, "credits", 0, new SingleDebitOrCreditEntryCommand(null, null, null, null));
-                } else {
-                    int i = 0;
-                    for (final SingleDebitOrCreditEntryCommand credit : this.credits) {
-                        validateSingleDebitOrCredit(baseDataValidator, "credits", i, credit);
-                        i++;
-                    }
+
+        baseDataValidator.reset().parameter("credits").value(this.credits).ignoreIfNull();
+
+        baseDataValidator.reset().parameter("debits").value(this.debits).ignoreIfNull();
+
+        // validation for credit array elements
+        if (this.credits != null) {
+            if (this.credits.length == 0) {
+                validateSingleDebitOrCredit(baseDataValidator, "credits", 0, new SingleDebitOrCreditEntryCommand(null, null, null, null));
+            } else {
+                int i = 0;
+                for (final SingleDebitOrCreditEntryCommand credit : this.credits) {
+                    validateSingleDebitOrCredit(baseDataValidator, "credits", i, credit);
+                    i++;
                 }
             }
-    
-            // validation for debit array elements
-            if (this.debits != null) {
-                if (this.debits.length == 0) {
-                    validateSingleDebitOrCredit(baseDataValidator, "credits", 0, new SingleDebitOrCreditEntryCommand(null, null, null, null));
-                } else {
-                    int i = 0;
-                    for (final SingleDebitOrCreditEntryCommand debit : this.debits) {
-                        validateSingleDebitOrCredit(baseDataValidator, "debits", i, debit);
-                        i++;
-                    }
-                }
-            }
-        } else {
-            baseDataValidator.reset().parameter("amount").value(this.amount).notNull().zeroOrPositiveAmount();
         }
+
+        // validation for debit array elements
+        if (this.debits != null) {
+            if (this.debits.length == 0) {
+                validateSingleDebitOrCredit(baseDataValidator, "credits", 0, new SingleDebitOrCreditEntryCommand(null, null, null, null));
+            } else {
+                int i = 0;
+                for (final SingleDebitOrCreditEntryCommand debit : this.debits) {
+                    validateSingleDebitOrCredit(baseDataValidator, "debits", i, debit);
+                    i++;
+                }
+            }
+        }
+        baseDataValidator.reset().parameter("amount").value(this.amount).ignoreIfNull().zeroOrPositiveAmount();
 
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
                 "Validation errors exist.", dataValidationErrors); }
@@ -134,8 +130,8 @@ public class JournalEntryCommand {
         return this.referenceNumber;
     }
 
-	public Long getAccountingRuleId() {
-		return this.accountingRuleId;
-	}
+    public Long getAccountingRuleId() {
+        return this.accountingRuleId;
+    }
 
 }
