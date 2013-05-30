@@ -90,7 +90,7 @@
 <body>
 	<div id="page-wrapper">
 		<div id="flybar">
-			<div id="nav-logo">1.2.0.RELEASE API</div>
+			<div id="nav-logo">1.3.0.RELEASE API</div>
 			<div class="flybar-nav">
 				<h2 class="flybar-button">Overview</h2>
 				<div class="flybar-menu-overview">
@@ -12720,8 +12720,7 @@ GET https://DomainName/api/v1/runreports/{reportName}
 				</div>
 			</div>
 
-			<a id="authenticate_request" name="authenticate_request"
-				class="old-syle-anchor">&nbsp;</a>
+			<a id="authenticate_request" name="authenticate_request" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
 					<h4>Verify authentication</h4>
@@ -12736,24 +12735,60 @@ POST authentication?username=mifos&password=password
 Content-Type: application/json 
 No Request Body
 					</code>
+					<p>Example response of autentication for user that is not linked with any staff.</p>
 					<code class="method-response">
 {
-  "username": "mifos",
-  "userId": 1,
-  "base64EncodedAuthenticationKey": "bWlmb3M6cGFzc3dvcmQ=",
-  "authenticated": true,
-  "roles": [
-    {
-      "id": 1,
-      "name": "Super user",
-      "description": "This role provides all application permissions."
-    }
-  ],
-  "permissions": [
-    "ALL_FUNCTIONS"
-  ]
+    "username": "mifos",
+    "userId": 1,
+    "base64EncodedAuthenticationKey": "bWlmb3M6cGFzc3dvcmQ=",
+    "authenticated": true,
+    "officeId": 1,
+    "officeName": "Head Office",
+    "roles": [
+        {
+            "id": 1,
+            "name": "Super user",
+            "description": "This role provides all application permissions."
+        }
+    ],
+    "permissions": [
+        "ALL_FUNCTIONS"
+    ]
 }
 					</code>
+					<p>Example response of autentication for user that is linked with a staff member and role.</p>
+<code class="method-response">
+{
+    "username": "mifos",
+    "userId": 1,
+    "base64EncodedAuthenticationKey": "bWlmb3M6cGFzc3dvcmQ=",
+    "authenticated": true,
+    "officeId": 1,
+    "officeName": "Head Office",
+    "staffId": 1,
+    "staffDisplayName": "Director, Program",
+    "organisationalRole": {
+        "id": 100,
+        "code": "staffOrganisationalRoleType.programDirector",
+        "value": "Program Director"
+    },
+    "roles": [
+        {
+            "id": 1,
+            "name": "Super user",
+            "description": "This role provides all application permissions."
+        }
+    ],
+    "permissions": [
+        "ALL_FUNCTIONS"
+    ]
+}
+</code>
+					
+					
+					
+					
+					
 					<code class="method-request">
 POST authentication?username=mifos&password=fail 
 Content-Type: application/json 

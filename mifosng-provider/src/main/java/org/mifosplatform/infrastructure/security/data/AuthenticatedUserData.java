@@ -28,6 +28,10 @@ public class AuthenticatedUserData {
     @SuppressWarnings("unused")
     private final String officeName;
     @SuppressWarnings("unused")
+    private final Long staffId;
+    @SuppressWarnings("unused")
+    private final String staffDisplayName;
+    @SuppressWarnings("unused")
     private final EnumOptionData organisationalRole;
     @SuppressWarnings("unused")
     private final Collection<RoleData> roles;
@@ -41,17 +45,21 @@ public class AuthenticatedUserData {
         this.authenticated = false;
         this.officeId = null;
         this.officeName = null;
+        this.staffId = null;
+        this.staffDisplayName = null;
         this.organisationalRole = null;
         this.roles = null;
         this.permissions = permissions;
     }
 
-    public AuthenticatedUserData(final String username, final Long officeId, final String officeName,
-            final EnumOptionData organisationalRole, final Collection<RoleData> roles, final Collection<String> permissions,
-            final Long userId, final String base64EncodedAuthenticationKey) {
+    public AuthenticatedUserData(final String username, final Long officeId, final String officeName, final Long staffId,
+            final String staffDisplayName, final EnumOptionData organisationalRole, final Collection<RoleData> roles,
+            final Collection<String> permissions, final Long userId, final String base64EncodedAuthenticationKey) {
         this.username = username;
         this.officeId = officeId;
         this.officeName = officeName;
+        this.staffId = staffId;
+        this.staffDisplayName = staffDisplayName;
         this.organisationalRole = organisationalRole;
         this.userId = userId;
         this.base64EncodedAuthenticationKey = base64EncodedAuthenticationKey;

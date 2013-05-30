@@ -76,9 +76,14 @@ public class AuthenticationApiResource {
 
             final Long officeId = principal.getOffice().getId();
             final String officeName = principal.getOffice().getName();
+
+            final Long staffId = principal.getStaffId();
+            final String staffDisplayName = principal.getStaffDisplayName();
+
             final EnumOptionData organisationalRole = principal.organisationalRoleData();
 
-            authenticatedUserData = new AuthenticatedUserData(username, officeId, officeName, organisationalRole, roles, permissions,
+            authenticatedUserData = new AuthenticatedUserData(username, officeId, officeName, staffId, staffDisplayName,
+                    organisationalRole, roles, permissions,
                     principal.getId(), new String(base64EncodedAuthenticationKey));
         }
 

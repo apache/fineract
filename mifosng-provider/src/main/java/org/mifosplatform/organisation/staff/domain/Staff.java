@@ -31,7 +31,6 @@ public class Staff extends AbstractPersistable<Long> {
     @Column(name = "lastname", length = 50)
     private String lastname;
 
-    @SuppressWarnings("unused")
     @Column(name = "display_name", length = 100)
     private String displayName;
 
@@ -47,6 +46,7 @@ public class Staff extends AbstractPersistable<Long> {
     @Column(name = "organisational_role_enum", nullable = true)
     private Integer organisationalRoleType;
 
+    @SuppressWarnings("unused")
     @ManyToOne
     @JoinColumn(name = "organisational_role_parent_staff_id", nullable = true)
     private Staff organisationalRoleParentStaff;
@@ -157,5 +157,9 @@ public class Staff extends AbstractPersistable<Long> {
 
     public Long officeId() {
         return this.office.getId();
+    }
+
+    public String displayName() {
+        return this.displayName;
     }
 }

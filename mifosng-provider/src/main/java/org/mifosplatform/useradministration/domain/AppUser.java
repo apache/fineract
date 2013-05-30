@@ -465,4 +465,20 @@ public class AppUser extends AbstractPersistable<Long> implements PlatformUser {
         if (hasNotPermissionForDatatable(datatable, "READ")) { throw new NoAuthorizationException("Not authorised to read datatable: "
                 + datatable); }
     }
+
+    public Long getStaffId() {
+        Long staffId = null;
+        if (this.staff != null) {
+            staffId = this.staff.getId();
+        }
+        return staffId;
+    }
+
+    public String getStaffDisplayName() {
+        String staffDisplayName = null;
+        if (this.staff != null) {
+            staffDisplayName = this.staff.displayName();
+        }
+        return staffDisplayName;
+    }
 }
