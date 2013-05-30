@@ -9734,6 +9734,23 @@ Content-Type: application/json
 	            <tr><td class=fielddesc><b>Optional</b>: If provided, used along with <i>lockinPeriodFrequency</i> to indicate the length of time that the savings account is 'locked in' and withdrawals are not allowed. 0=Days, 1=Weeks, 2=Months, 3=Years
 	            e.g. 6 <b>Months</b></td></tr>
 
+	            <tr class=alt><td>withdrawalFeeAmount</td></tr>
+	            <tr><td class=fielddesc><b>Optional</b>: If provided, used along with <i>withdrawalFeeType</i> to indicate the amount to be charged on the account for withdrawing. e.g. <b>5</b> Flat or <b>5</b> % of Amount</td></tr>
+
+	            <tr class=alt><td>withdrawalFeeType</td></tr>
+	            <tr><td class=fielddesc><b>Optional</b>: If provided, used along with <i>withdrawalFeeAmount</i> to indicate the amount to be charged on the account for withdrawing. 1=Flat, 2=% of Amount, e.g. 5 <b>Flat</b> or 5 <b>% of Amount</b></td></tr>
+
+	            <tr class=alt><td>annualFeeAmount</td></tr>
+	            <tr><td class=fielddesc><b>Optional</b>: If provided, used along with <i>annualFeeOnMonthDay</i> to indicate the amount to be charged on the account annually on a given day of month. e.g. <b>10</b> on 10 May. <i>monthDayFormat</i> indicates day and month formatting used e.g. "dd MMM" for 10 May
+	            </td>
+	            </tr>
+
+	            <tr class=alt><td>annualFeeOnMonthDay</td></tr>
+	            <tr>
+	            	<td class=fielddesc><b>Optional</b>: If provided, used along with <i>annualFeeAmount</i> and <i>monthDayFormat</i> to indicate the amount to be charged on the account annually on a given day of month. e.g. 10 on <b>10 May</b>. <i>monthDayFormat</i> indicates day and month formatting used e.g. "dd MMM" for 10 May
+	            	</td>
+	            </tr>
+
 				<tr class=alt><td>accountingRule</td></tr>
 	            <tr>
 					<td class=fielddesc>Specifies if accounting is enabled for the particular
@@ -10252,7 +10269,7 @@ Content-Type: application/json
             <br/>
             <table class=matrixHeading>
                 <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Optional Fields</div></td></tr>
-                <tr class=alt><td>minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType, paymentChannelToFundSourceMappings</tr>
+                <tr class=alt><td>minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeAmount, withdrawalFeeType, annualFeeAmount, annualFeeOnMonthDay, monthDayFormat, paymentChannelToFundSourceMappings</tr>
             </table>
         </div>
         <div class="method-example">
@@ -10558,6 +10575,23 @@ Content-Type: application/json
 	            <tr class=alt><td>lockinPeriodFrequencyType</td></tr>
 	            <tr><td class=fielddesc><b>Optional</b>: If provided, used along with <i>lockinPeriodFrequency</i> to indicate the length of time that the savings account is 'locked in' and withdrawals are not allowed. 0=Days, 1=Weeks, 2=Months, 3=Years
 	            e.g. 6 <b>Months</b></td></tr>
+
+	            <tr class=alt><td>withdrawalFeeAmount</td></tr>
+	            <tr><td class=fielddesc><b>Optional</b>: If provided, used along with <i>withdrawalFeeType</i> to indicate the amount to be charged on the account for withdrawing. e.g. <b>5</b> Flat or <b>5</b> % of Amount</td></tr>
+
+	            <tr class=alt><td>withdrawalFeeType</td></tr>
+	            <tr><td class=fielddesc><b>Optional</b>: If provided, used along with <i>withdrawalFeeAmount</i> to indicate the amount to be charged on the account for withdrawing. 1=Flat, 2=% of Amount, e.g. 5 <b>Flat</b> or 5 <b>% of Amount</b></td></tr>
+
+	            <tr class=alt><td>annualFeeAmount</td></tr>
+	            <tr><td class=fielddesc><b>Optional</b>: If provided, used along with <i>annualFeeOnMonthDay</i> to indicate the amount to be charged on the account annually on a given day of month. e.g. <b>10</b> on 10 May. <i>monthDayFormat</i> indicates day and month formatting used e.g. "dd MMM" for 10 May
+	            </td>
+	            </tr>
+
+	            <tr class=alt><td>annualFeeOnMonthDay</td></tr>
+	            <tr>
+	            	<td class=fielddesc><b>Optional</b>: If provided, used along with <i>annualFeeAmount</i> and <i>monthDayFormat</i> to indicate the amount to be charged on the account annually on a given day of month. e.g. 10 on <b>10 May</b>. <i>monthDayFormat</i> indicates day and month formatting used e.g. "dd MMM" for 10 May
+	            	</td>
+	            </tr>
 	        </table>
 	    </div>
 	</div>
@@ -10758,7 +10792,9 @@ Content-Type: application/json
 	        <br/>
 	        <table class=matrixHeading>
 	            <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Inherited from Product (if not provided)</div></td></tr>
-	            <tr class=alt><td>nominalAnnualInterestRate, interestCompoundingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType</td></tr>
+	            <tr class=alt><td>nominalAnnualInterestRate, interestCompoundingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance, lockinPeriodFrequency, 
+	           lockinPeriodFrequencyType, withdrawalFeeAmount, withdrawalFeeType, annualFeeAmount, annualFeeOnMonthDay</td>
+	       		</tr>
 	        </table>
 	    </div>
 	    <div class="method-example">
