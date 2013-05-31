@@ -214,13 +214,15 @@ public class GLAccountReadPlatformServiceImpl implements GLAccountReadPlatformSe
     private static final class GLAccountDataLookUpMapper implements RowMapper<GLAccountDataForLookup> {
 
         public String schema() {
-            return " gl.id as id from acc_accounting_rule rule join acc_rule_tags tags on tags.acc_rule_id = rule.id join acc_gl_account gl on gl.tag_id=tags.tag_id";
+            return " gl.id as id, gl.name as name, gl.gl_code as glCode from acc_accounting_rule rule join acc_rule_tags tags on tags.acc_rule_id = rule.id join acc_gl_account gl on gl.tag_id=tags.tag_id";
         }
 
         @Override
         public GLAccountDataForLookup mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
             final Long id = JdbcSupport.getLong(rs, "id");
-            return new GLAccountDataForLookup(id);
+            final String name = rs.getString("name");
+            final String glCode = rs.getString("glCode");
+            return new GLAccountDataForLookup(id, name, glCode);
         }
 
     }

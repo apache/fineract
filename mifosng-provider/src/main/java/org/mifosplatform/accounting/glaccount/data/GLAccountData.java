@@ -48,6 +48,10 @@ public class GLAccountData {
     final Collection<CodeValueData> allowedIncomeTagOptions;
     final Collection<CodeValueData> allowedExpensesTagOptions;
 
+    // for predefined journal entry template
+    private final List<GLAccountDataForLookup> creditAccounts;
+    private final List<GLAccountDataForLookup> debitAccounts;
+
     public GLAccountData(final Long id, final String name, final Long parentId, final String glCode, final boolean disabled,
             final boolean manualEntriesAllowed, final EnumOptionData type, final EnumOptionData usage, final String description,
             final String nameDecorated, final CodeValueData tagId) {
@@ -71,17 +75,19 @@ public class GLAccountData {
         this.expenseHeaderAccountOptions = null;
         this.allowedAssetsTagOptions = null;
         this.allowedLiabilitiesTagOptions = null;
-        this.allowedEquityTagOptions=null;
-        this.allowedIncomeTagOptions=null;
-        this.allowedExpensesTagOptions=null;
+        this.allowedEquityTagOptions = null;
+        this.allowedIncomeTagOptions = null;
+        this.allowedExpensesTagOptions = null;
+        this.creditAccounts = null;
+        this.debitAccounts = null;
     }
 
     public GLAccountData(final GLAccountData accountData, final List<EnumOptionData> accountTypeOptions,
             final List<EnumOptionData> usageOptions, final List<GLAccountData> assetHeaderAccountOptions,
             final List<GLAccountData> liabilityHeaderAccountOptions, final List<GLAccountData> equityHeaderAccountOptions,
-            final List<GLAccountData> incomeHeaderAccountOptions, final List<GLAccountData> expenseHeaderAccountOptions, 
-            final Collection<CodeValueData> allowedAssetsTagOptions, final Collection<CodeValueData> allowedLiabilitiesTagOptions, 
-            final Collection<CodeValueData> allowedEquityTagOptions, final Collection<CodeValueData> allowedIncomeTagOptions, 
+            final List<GLAccountData> incomeHeaderAccountOptions, final List<GLAccountData> expenseHeaderAccountOptions,
+            final Collection<CodeValueData> allowedAssetsTagOptions, final Collection<CodeValueData> allowedLiabilitiesTagOptions,
+            final Collection<CodeValueData> allowedEquityTagOptions, final Collection<CodeValueData> allowedIncomeTagOptions,
             final Collection<CodeValueData> allowedExpensesTagOptions) {
         this.id = accountData.id;
         this.name = accountData.name;
@@ -106,6 +112,8 @@ public class GLAccountData {
         this.allowedEquityTagOptions = allowedEquityTagOptions;
         this.allowedIncomeTagOptions = allowedIncomeTagOptions;
         this.allowedExpensesTagOptions = allowedExpensesTagOptions;
+        this.creditAccounts = accountData.creditAccounts;
+        this.debitAccounts = accountData.debitAccounts;
     }
 
     public static GLAccountData sensibleDefaultsForNewGLAccountCreation(final Integer glAccType) {
@@ -116,19 +124,20 @@ public class GLAccountData {
         final boolean disabled = false;
         final boolean manualEntriesAllowed = true;
         final EnumOptionData type;
-        if(glAccType != null && glAccType >= GLAccountType.getMinValue() && glAccType <= GLAccountType.getMaxValue())
+        if (glAccType != null && glAccType >= GLAccountType.getMinValue() && glAccType <= GLAccountType.getMaxValue()) {
             type = AccountingEnumerations.gLAccountType(glAccType);
-          else 
+        } else {
             type = AccountingEnumerations.gLAccountType(GLAccountType.ASSET);
+        }
         final EnumOptionData usage = AccountingEnumerations.gLAccountUsage(GLAccountUsage.DETAIL);
         final String description = null;
         final String nameDecorated = null;
         final CodeValueData tagId = null;
         return new GLAccountData(id, name, parentId, glCode, disabled, manualEntriesAllowed, type, usage, description, nameDecorated, tagId);
     }
-    
+
     public GLAccountData(final Long id, final String name, final String glCode) {
-    	this.id = id;
+        this.id = id;
         this.name = name;
         this.parentId = null;
         this.glCode = glCode;
@@ -148,23 +157,23 @@ public class GLAccountData {
         this.expenseHeaderAccountOptions = null;
         this.allowedAssetsTagOptions = null;
         this.allowedLiabilitiesTagOptions = null;
-        this.allowedEquityTagOptions=null;
-        this.allowedIncomeTagOptions=null;
-        this.allowedExpensesTagOptions=null;
-	}
+        this.allowedEquityTagOptions = null;
+        this.allowedIncomeTagOptions = null;
+        this.allowedExpensesTagOptions = null;
+        this.creditAccounts = null;
+        this.debitAccounts = null;
+    }
 
-	public Long getId() {
-		return this.id;
-	}
+    public Long getId() {
+        return this.id;
+    }
 
-	public String getName() {
-		return this.name;
-	}
+    public String getName() {
+        return this.name;
+    }
 
-	public String getGlCode() {
-		return this.glCode;
-	}
-    
-    
+    public String getGlCode() {
+        return this.glCode;
+    }
 
 }

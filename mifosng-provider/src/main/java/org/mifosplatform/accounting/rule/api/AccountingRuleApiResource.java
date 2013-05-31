@@ -53,7 +53,7 @@ public class AccountingRuleApiResource {
     private static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "officeId", "officeName",
             "accountToDebitId", "accountToCreditId", "name", "description", "systemDefined", "allowedAssetsTagOptions",
             "allowedLiabilitiesTagOptions", "allowedEquityTagOptions", "allowedIncomeTagOptions", "allowedExpensesTagOptions", "debitTags",
-            "creditTags"));
+            "creditTags", "creditAccounts", "debitAccounts"));
 
     private final String resourceNameForPermission = "ACCOUNTINGRULE";
 

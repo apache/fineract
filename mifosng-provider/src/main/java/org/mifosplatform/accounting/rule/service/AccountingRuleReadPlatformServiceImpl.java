@@ -14,6 +14,8 @@ import java.util.Map;
 
 import org.mifosplatform.accounting.common.AccountingEnumerations;
 import org.mifosplatform.accounting.glaccount.data.GLAccountData;
+import org.mifosplatform.accounting.glaccount.data.GLAccountDataForLookup;
+import org.mifosplatform.accounting.glaccount.service.GLAccountReadPlatformService;
 import org.mifosplatform.accounting.journalentry.domain.JournalEntryType;
 import org.mifosplatform.accounting.rule.data.AccountingRuleData;
 import org.mifosplatform.accounting.rule.data.AccountingTagRuleData;
@@ -33,10 +35,13 @@ import org.springframework.stereotype.Service;
 public class AccountingRuleReadPlatformServiceImpl implements AccountingRuleReadPlatformService {
 
     private final JdbcTemplate jdbcTemplate;
+    private final GLAccountReadPlatformService glAccountReadPlatformService;
 
     @Autowired
-    public AccountingRuleReadPlatformServiceImpl(final TenantAwareRoutingDataSource dataSource) {
+    public AccountingRuleReadPlatformServiceImpl(final TenantAwareRoutingDataSource dataSource,
+            final GLAccountReadPlatformService glAccountReadPlatformService) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.glAccountReadPlatformService = glAccountReadPlatformService;
     }
 
     // Will remove the old one if everything goes well.
@@ -88,13 +93,15 @@ public class AccountingRuleReadPlatformServiceImpl implements AccountingRuleRead
         }
     }*/
 
-    private static final class AccountingRuleDataExtractor implements ResultSetExtractor<Object> {
+    private static final class AccountingRuleDataExtractor implements ResultSetExtractor<Map<Long, AccountingRuleData>> {
 
         private final String schemaSql;
         private final JdbcTemplate jdbcTemplate;
+        private final GLAccountReadPlatformService glAccountReadPlatformService;
 
-        public AccountingRuleDataExtractor(final JdbcTemplate jdbcTemplate) {
+        public AccountingRuleDataExtractor(final JdbcTemplate jdbcTemplate, final GLAccountReadPlatformService glAccountReadPlatformService) {
             this.jdbcTemplate = jdbcTemplate;
+            this.glAccountReadPlatformService = glAccountReadPlatformService;
             final StringBuilder sqlBuilder = new StringBuilder(400);
             sqlBuilder
                     .append(" rule.id as id,rule.name as name, rule.office_id as officeId,office.name as officeName,")
@@ -141,11 +148,17 @@ public class AccountingRuleReadPlatformServiceImpl implements AccountingRuleRead
                 }
                 if (accountingRuleData.getCreditAccountHead() == null) {
                     final List<AccountingTagRuleData> creditTags = getCreditOrDebitTags(id, JournalEntryType.CREDIT.getValue());
-                    accountingRuleData = new AccountingRuleData(accountingRuleData, creditTags, accountingRuleData.getDebitTags());
+                    final List<GLAccountDataForLookup> creditAccounts = this.glAccountReadPlatformService.retrieveAccountsByTagId(id,
+                            JournalEntryType.CREDIT.getValue());
+                    accountingRuleData = new AccountingRuleData(accountingRuleData, creditTags, creditAccounts,
+                            accountingRuleData.getDebitTags(), accountingRuleData.getDebitAccounts());
                 }
                 if (accountingRuleData.getDebitAccountHead() == null) {
                     final List<AccountingTagRuleData> debitTags = getCreditOrDebitTags(id, JournalEntryType.DEBIT.getValue());
-                    accountingRuleData = new AccountingRuleData(accountingRuleData, accountingRuleData.getCreditTags(), debitTags);
+                    final List<GLAccountDataForLookup> debitAccounts = this.glAccountReadPlatformService.retrieveAccountsByTagId(id,
+                            JournalEntryType.DEBIT.getValue());
+                    accountingRuleData = new AccountingRuleData(accountingRuleData, accountingRuleData.getCreditTags(),
+                            accountingRuleData.getCreditAccounts(), debitTags, debitAccounts);
                 }
                 extractedData.put(id, accountingRuleData);
             }
@@ -162,7 +175,8 @@ public class AccountingRuleReadPlatformServiceImpl implements AccountingRuleRead
 
     @Override
     public List<AccountingRuleData> retrieveAllAccountingRules(final Long officeId) {
-        final AccountingRuleDataExtractor resultSetExtractor = new AccountingRuleDataExtractor(this.jdbcTemplate);
+        final AccountingRuleDataExtractor resultSetExtractor = new AccountingRuleDataExtractor(this.jdbcTemplate,
+                this.glAccountReadPlatformService);
         Object[] arguments = new Object[] {};
         String sql = "select " + resultSetExtractor.schema() + " and system_defined=0 ";
         if (officeId != null) {
@@ -170,21 +184,19 @@ public class AccountingRuleReadPlatformServiceImpl implements AccountingRuleRead
             arguments = new Object[] { officeId };
         }
         sql = sql + " order by rule.id asc";
-        @SuppressWarnings("unchecked")
-        final Map<Long, AccountingRuleData> extractedData = (Map<Long, AccountingRuleData>) this.jdbcTemplate.query(sql,
-                resultSetExtractor, arguments);
+        final Map<Long, AccountingRuleData> extractedData = this.jdbcTemplate.query(sql, resultSetExtractor, arguments);
         return new ArrayList<AccountingRuleData>(extractedData.values());
     }
 
     @Override
     public AccountingRuleData retrieveAccountingRuleById(final Long accountingRuleId) {
         try {
-            final AccountingRuleDataExtractor resultSetExtractor = new AccountingRuleDataExtractor(this.jdbcTemplate);
+            final AccountingRuleDataExtractor resultSetExtractor = new AccountingRuleDataExtractor(this.jdbcTemplate,
+                    this.glAccountReadPlatformService);
             final String sql = "select " + resultSetExtractor.schema() + " and rule.id = ?";
 
-            @SuppressWarnings("unchecked")
-            final Map<Long, AccountingRuleData> extractedData = (Map<Long, AccountingRuleData>) this.jdbcTemplate.query(sql,
-                    resultSetExtractor, new Object[] { accountingRuleId });
+            final Map<Long, AccountingRuleData> extractedData = this.jdbcTemplate.query(sql, resultSetExtractor,
+                    new Object[] { accountingRuleId });
             final AccountingRuleData accountingRuleData = extractedData.get(accountingRuleId);
             if (accountingRuleData == null) { throw new AccountingRuleNotFoundException(accountingRuleId); }
             return accountingRuleData;

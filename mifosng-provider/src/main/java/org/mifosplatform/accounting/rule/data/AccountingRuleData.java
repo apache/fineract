@@ -10,6 +10,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.mifosplatform.accounting.glaccount.data.GLAccountData;
+import org.mifosplatform.accounting.glaccount.data.GLAccountDataForLookup;
 import org.mifosplatform.infrastructure.codes.data.CodeValueData;
 import org.mifosplatform.organisation.office.data.OfficeData;
 
@@ -40,6 +41,8 @@ public class AccountingRuleData {
     private final Collection<CodeValueData> allowedEquityTagOptions;
     private final Collection<CodeValueData> allowedIncomeTagOptions;
     private final Collection<CodeValueData> allowedExpensesTagOptions;
+    private final List<GLAccountDataForLookup> creditAccounts;
+    private final List<GLAccountDataForLookup> debitAccounts;
 
     public AccountingRuleData(final AccountingRuleData accountingRuleData, final List<GLAccountData> allowedAccounts,
             final List<OfficeData> allowedOffices, final Collection<CodeValueData> allowedAssetsTagOptions,
@@ -62,6 +65,8 @@ public class AccountingRuleData {
         this.allowedExpensesTagOptions = allowedExpensesTagOptions;
         this.creditTags = accountingRuleData.creditTags;
         this.debitTags = accountingRuleData.debitTags;
+        this.creditAccounts = accountingRuleData.creditAccounts;
+        this.debitAccounts = accountingRuleData.debitAccounts;
     }
 
     public AccountingRuleData(final List<GLAccountData> allowedAccounts, final List<OfficeData> allowedOffices,
@@ -85,6 +90,8 @@ public class AccountingRuleData {
         this.allowedExpensesTagOptions = allowedExpensesTagOptions;
         this.creditTags = null;
         this.debitTags = null;
+        this.creditAccounts = null;
+        this.debitAccounts = null;
     }
 
     public AccountingRuleData(final Long id, final Long officeId, final String officeName, final String name, final String description,
@@ -106,10 +113,13 @@ public class AccountingRuleData {
         this.allowedExpensesTagOptions = null;
         this.creditTags = null;
         this.debitTags = null;
+        this.creditAccounts = new ArrayList<GLAccountDataForLookup>();
+        this.debitAccounts = new ArrayList<GLAccountDataForLookup>();
     }
 
     public AccountingRuleData(final AccountingRuleData accountingRuleData, final List<AccountingTagRuleData> creditTags,
-            final List<AccountingTagRuleData> debitTags) {
+            final List<GLAccountDataForLookup> creditAccounts, final List<AccountingTagRuleData> debitTags,
+            final List<GLAccountDataForLookup> debitAccounts) {
         this.id = accountingRuleData.id;
         this.officeId = accountingRuleData.officeId;
         this.officeName = accountingRuleData.officeName;
@@ -126,7 +136,9 @@ public class AccountingRuleData {
         this.allowedIncomeTagOptions = accountingRuleData.allowedIncomeTagOptions;
         this.allowedExpensesTagOptions = accountingRuleData.allowedExpensesTagOptions;
         this.creditTags = creditTags;
+        this.creditAccounts = creditAccounts;
         this.debitTags = debitTags;
+        this.debitAccounts = debitAccounts;
     }
 
     public GLAccountData getDebitAccountHead() {
@@ -143,5 +155,13 @@ public class AccountingRuleData {
 
     public List<AccountingTagRuleData> getDebitTags() {
         return this.debitTags;
+    }
+
+    public List<GLAccountDataForLookup> getCreditAccounts() {
+        return this.creditAccounts;
+    }
+
+    public List<GLAccountDataForLookup> getDebitAccounts() {
+        return this.debitAccounts;
     }
 }
