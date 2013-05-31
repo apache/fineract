@@ -353,7 +353,7 @@ public class SavingsProduct extends AbstractPersistable<Long> {
         if (command.isChangeInIntegerParameterNamed(annualFeeOnMonthDayParamName, this.annualFeeOnDay)) {
             final MonthDay monthDay = command.extractMonthDayNamed(annualFeeOnMonthDayParamName);
             final String actualValueEntered = command.stringValueOfParameterNamed(annualFeeOnMonthDayParamName);
-            final Integer newValue = monthDay.getDayOfMonth();
+            final Integer newValue = monthDay != null? monthDay.getDayOfMonth(): null;
             actualChanges.put(annualFeeOnMonthDayParamName, actualValueEntered);
             actualChanges.put(localeParamName, localeAsInput);
             this.annualFeeOnDay = newValue;
@@ -362,7 +362,7 @@ public class SavingsProduct extends AbstractPersistable<Long> {
         if (command.isChangeInIntegerParameterNamed(annualFeeOnMonthDayParamName, this.annualFeeOnMonth)) {
             final MonthDay monthDay = command.extractMonthDayNamed(annualFeeOnMonthDayParamName);
             final String actualValueEntered = command.stringValueOfParameterNamed(annualFeeOnMonthDayParamName);
-            final Integer newValue = monthDay.getMonthOfYear();
+            final Integer newValue = monthDay != null? monthDay.getMonthOfYear(): null;
             actualChanges.put(annualFeeOnMonthDayParamName, actualValueEntered);
             actualChanges.put(localeParamName, localeAsInput);
             this.annualFeeOnMonth = newValue;
