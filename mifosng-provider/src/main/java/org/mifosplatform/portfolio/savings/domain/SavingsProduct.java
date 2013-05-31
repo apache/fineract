@@ -340,7 +340,7 @@ public class SavingsProduct extends AbstractPersistable<Long> {
         if (command.isChangeInIntegerParameterNamed(withdrawalFeeTypeParamName, this.withdrawalFeeType)) {
             final Integer newValue = command.integerValueOfParameterNamed(withdrawalFeeTypeParamName);
             actualChanges.put(withdrawalFeeTypeParamName, newValue);
-            this.withdrawalFeeType = SavingsWithdrawalFeesType.fromInt(newValue).getValue();
+            this.withdrawalFeeType = newValue != null? SavingsWithdrawalFeesType.fromInt(newValue).getValue(): newValue;
         }
 
         if (command.isChangeInBigDecimalParameterNamed(annualFeeAmountParamName, this.annualFeeAmount)) {
