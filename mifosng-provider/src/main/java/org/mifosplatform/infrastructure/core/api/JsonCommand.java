@@ -179,7 +179,11 @@ public final class JsonCommand {
         boolean differenceExists = false;
 
         if (baseValue != null) {
-            differenceExists = !baseValue.equals(workingCopyValue);
+            if(workingCopyValue != null) {
+            	differenceExists = !baseValue.equals(workingCopyValue);
+            } else {
+            	differenceExists =  true;
+            }
         } else {
             differenceExists = workingCopyValue != null;
         }
