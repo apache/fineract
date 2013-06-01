@@ -16,6 +16,8 @@ import net.fortuna.ical4j.model.property.RRule;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.util.ObjectUtils;
 
+import com.google.gson.JsonArray;
+
 public class DataValidatorBuilder {
 
     private final List<ApiParameterError> dataValidationErrors;
@@ -206,12 +208,13 @@ public class DataValidatorBuilder {
 
         if (value != null) {
             List<Object> valuesList = Arrays.asList(values);
+            String valuesListStr = StringUtils.join(valuesList, ", ");
 
             if (!valuesList.contains(this.value)) {
                 StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append(resource).append(".").append(parameter)
                         .append(".is.not.one.of.expected.enumerations");
                 StringBuilder defaultEnglishMessage = new StringBuilder("The parameter ").append(parameter).append(" must be one of [ ")
-                        .append(values).append(" ] ").append(".");
+                        .append(valuesListStr).append(" ] ").append(".");
 
                 ApiParameterError error = ApiParameterError.parameterError(validationErrorCode.toString(),
                         defaultEnglishMessage.toString(), parameter, this.value, values);
@@ -227,12 +230,13 @@ public class DataValidatorBuilder {
 
         if (value != null) {
             List<Object> valuesList = Arrays.asList(values);
+            String valuesListStr = StringUtils.join(valuesList, ", ");
 
             if (valuesList.contains(this.value)) {
                 StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append(resource).append(".").append(parameter)
-                        .append(".is.one.of.expected.enumerations");
-                StringBuilder defaultEnglishMessage = new StringBuilder("The parameter ").append(parameter).append(" must not be one of [ ")
-                        .append(values).append(" ] ").append(".");
+                        .append(".is.one.of.unwanted.enumerations");
+                StringBuilder defaultEnglishMessage = new StringBuilder("The parameter ").append(parameter).append(" must not be any of [ ")
+                        .append(valuesListStr).append(" ] ").append(".");
 
                 ApiParameterError error = ApiParameterError.parameterError(validationErrorCode.toString(),
                         defaultEnglishMessage.toString(), parameter, this.value, values);
@@ -330,6 +334,22 @@ public class DataValidatorBuilder {
         }
         return this;
     }
+    
+    public DataValidatorBuilder jsonArrayNotEmpty() {
+        if (value == null && ignoreNullValue) { return this; }
+
+        JsonArray array = (JsonArray)value;
+        if (value != null && !array.iterator().hasNext()) {
+            StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append(resource).append(".").append(parameter)
+                    .append(".cannot.be.empty");
+            StringBuilder defaultEnglishMessage = new StringBuilder("The parameter ").append(parameter).append(
+                    " cannot be empty. You must select at least one.");
+            ApiParameterError error = ApiParameterError.parameterError(validationErrorCode.toString(), defaultEnglishMessage.toString(),
+                    parameter);
+            dataValidationErrors.add(error);
+        }
+        return this;
+    }
 
     public void expectedArrayButIsNot() {
         StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append(resource).append(".").append(parameter)
@@ -406,7 +426,7 @@ public class DataValidatorBuilder {
     }
     
     public DataValidatorBuilder cantBeBlankWhenParameterProvidedIs(final String parameterName, final Object parameterValue) {
-        if (StringUtils.isNotBlank(value.toString())) { return this; }
+        if (value != null && StringUtils.isNotBlank(value.toString())) { return this; }
 
         StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append(resource).append(".").append(parameter)
                 .append(".must.be.provided.when.").append(parameterName).append(".is.").append(parameterValue);
@@ -557,12 +577,12 @@ public class DataValidatorBuilder {
     
     public DataValidatorBuilder matchesRegularExpression(final String expression) {
     	if (value == null && ignoreNullValue) { return this; }
-    	
-    	if (!value.toString().matches(expression)) {
+
+    	if (value != null && !value.toString().matches(expression)) {
     		StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append(resource).append(".").append(parameter)
                     .append(".does.not.match.regexp");
             StringBuilder defaultEnglishMessage = new StringBuilder("The parameter ").append(parameter)
-            		.append(" must match the provided regular expression ")
+            		.append(" must match the provided regular expression [ ")
                     .append(expression).append(" ] ").append(".");
 
             ApiParameterError error = ApiParameterError.parameterError(validationErrorCode.toString(),
