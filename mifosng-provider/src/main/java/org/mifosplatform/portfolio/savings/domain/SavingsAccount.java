@@ -58,6 +58,7 @@ import org.mifosplatform.portfolio.loanproduct.domain.PeriodFrequencyType;
 import org.mifosplatform.portfolio.paymentdetail.domain.PaymentDetail;
 import org.mifosplatform.portfolio.savings.api.SavingsApiConstants;
 import org.mifosplatform.portfolio.savings.exception.InsufficientAccountBalanceException;
+import org.mifosplatform.portfolio.savings.exception.InvalidSavingsAccountStateTransitionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.jpa.domain.AbstractPersistable;
@@ -299,6 +300,14 @@ public class SavingsAccount extends AbstractPersistable<Long> {
             dataValidationErrors.add(error);
 
             throw new PlatformApiDataValidationException(dataValidationErrors);
+        }
+        
+        if(this.client.getActivationLocalDate().isAfter(activationDate))
+        {
+        	final String errorMessage = "The date on which a savings account is activate cannot be before its client activated date: "
+                     + this.client.getActivationLocalDate().toString();
+        	throw new InvalidSavingsAccountStateTransitionException("activate", "cannot.be.before.client.activation.date", errorMessage, activationDate,
+        			this.client.getActivationLocalDate());
         }
 
         this.activationDate = activationDate.toDate();
