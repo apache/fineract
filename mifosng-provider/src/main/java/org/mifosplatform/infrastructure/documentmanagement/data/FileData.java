@@ -9,6 +9,7 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 
 public class FileData {
+
     private static final Logger logger = LoggerFactory.getLogger(FileData.class);
 
     private final File file;
@@ -38,19 +39,13 @@ public class FileData {
         return fileName;
     }
 
-    public InputStream file(){
-        try{
-            if(inputStream == null){
-                return new FileInputStream(file);
-            }
-            else {
-                return inputStream;
-            }
-
-        }   catch (FileNotFoundException e){
+    public InputStream file() {
+        try {
+            if (inputStream == null) { return new FileInputStream(file); }
+            return inputStream;
+        } catch (FileNotFoundException e) {
             logger.error(e.toString());
             return null;
         }
     }
 }
-

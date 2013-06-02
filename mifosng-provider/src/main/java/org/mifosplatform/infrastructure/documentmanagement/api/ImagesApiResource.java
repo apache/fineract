@@ -3,51 +3,63 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this file,
  * You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-package org.mifosplatform.portfolio.client.api;
+package org.mifosplatform.infrastructure.documentmanagement.api;
+
+import java.io.InputStream;
+
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.HeaderParam;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
+
+import org.apache.commons.lang.StringUtils;
+import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
+import org.mifosplatform.infrastructure.core.domain.Base64EncodedImage;
+import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
+import org.mifosplatform.infrastructure.documentmanagement.contentrepository.ContentRepositoryUtils;
+import org.mifosplatform.infrastructure.documentmanagement.contentrepository.ContentRepositoryUtils.IMAGE_FILE_EXTENSION;
+import org.mifosplatform.infrastructure.documentmanagement.data.ImageData;
+import org.mifosplatform.infrastructure.documentmanagement.service.ImageReadPlatformService;
+import org.mifosplatform.infrastructure.documentmanagement.service.ImageWritePlatformService;
+import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
+import org.mifosplatform.portfolio.client.data.ClientData;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
 import com.lowagie.text.pdf.codec.Base64;
 import com.sun.jersey.core.header.FormDataContentDisposition;
 import com.sun.jersey.multipart.FormDataBodyPart;
 import com.sun.jersey.multipart.FormDataParam;
-import org.apache.commons.lang.StringUtils;
-import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
-import org.mifosplatform.infrastructure.core.domain.Base64EncodedImage;
-import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
-import org.mifosplatform.infrastructure.core.service.ImageUtils;
-import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
-import org.mifosplatform.portfolio.client.data.ClientData;
-import org.mifosplatform.portfolio.client.exception.ImageNotFoundException;
-import org.mifosplatform.portfolio.client.service.ClientReadPlatformService;
-import org.mifosplatform.portfolio.client.service.ClientWritePlatformService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
 
-import javax.ws.rs.*;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
-import java.io.InputStream;
-
-@Path("/clients/{clientId}/images")
+/**
+ * TODO Vishwas need to change the url to entity/entityId/images to make the
+ * image management API's generic for other entities like staff etc
+ **/
+@Path("{clients}/{clientId}/images")
 @Component
 @Scope("singleton")
-public class ClientImagesApiResource {
+public class ImagesApiResource {
 
     private final PlatformSecurityContext context;
-    private final ClientReadPlatformService clientReadPlatformService;
-    private final ClientWritePlatformService clientWritePlatformService;
+    private final ImageReadPlatformService imageReadPlatformService;
+    private final ImageWritePlatformService imageWritePlatformService;
     private final DefaultToApiJsonSerializer<ClientData> toApiJsonSerializer;
-    private final static Logger logger = LoggerFactory.getLogger(ClientImagesApiResource.class);
 
     @Autowired
-    public ClientImagesApiResource(final PlatformSecurityContext context, final ClientReadPlatformService readPlatformService,
-                                   final ClientWritePlatformService clientWritePlatformService, final DefaultToApiJsonSerializer<ClientData> toApiJsonSerializer) {
+    public ImagesApiResource(final PlatformSecurityContext context, final ImageReadPlatformService readPlatformService,
+            final ImageWritePlatformService imageWritePlatformService, final DefaultToApiJsonSerializer<ClientData> toApiJsonSerializer) {
         this.context = context;
-        this.clientReadPlatformService = readPlatformService;
-        this.clientWritePlatformService = clientWritePlatformService;
+        this.imageReadPlatformService = readPlatformService;
+        this.imageWritePlatformService = imageWritePlatformService;
         this.toApiJsonSerializer = toApiJsonSerializer;
     }
 
@@ -64,10 +76,10 @@ public class ClientImagesApiResource {
         // TODO: vishwas might need more advances validation (like reading magic
         // number) for handling malicious clients
         // and clients not setting mime type
-        ImageUtils.validateClientImageNotEmpty(fileDetails.getFileName());
-        ImageUtils.validateImageMimeType(bodyPart.getMediaType().toString());
+        ContentRepositoryUtils.validateClientImageNotEmpty(fileDetails.getFileName());
+        ContentRepositoryUtils.validateImageMimeType(bodyPart.getMediaType().toString());
 
-        final CommandProcessingResult result = this.clientWritePlatformService.saveOrUpdateClientImage(clientId, fileDetails.getFileName(),
+        final CommandProcessingResult result = this.imageWritePlatformService.saveOrUpdateClientImage(clientId, fileDetails.getFileName(),
                 inputStream, fileSize);
 
         return this.toApiJsonSerializer.serialize(result);
@@ -81,9 +93,9 @@ public class ClientImagesApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String addNewClientImage(@PathParam("clientId") final Long clientId, final String jsonRequestBody) {
 
-        final Base64EncodedImage base64EncodedImage = ImageUtils.extractImageFromDataURL(jsonRequestBody);
+        final Base64EncodedImage base64EncodedImage = ContentRepositoryUtils.extractImageFromDataURL(jsonRequestBody);
 
-        final CommandProcessingResult result = this.clientWritePlatformService.saveOrUpdateClientImage(clientId, base64EncodedImage);
+        final CommandProcessingResult result = this.imageWritePlatformService.saveOrUpdateClientImage(clientId, base64EncodedImage);
 
         return this.toApiJsonSerializer.serialize(result);
     }
@@ -98,19 +110,17 @@ public class ClientImagesApiResource {
 
         context.authenticatedUser().validateHasReadPermission("CLIENTIMAGE");
 
-        final ClientData clientData = this.clientReadPlatformService.retrieveOne(clientId);
-
-        if (clientData.imageKeyDoesNotExist()) { throw new ImageNotFoundException("clients", clientId); }
+        final ImageData imageData = this.imageReadPlatformService.retrieveClientImage(clientId);
 
         // TODO: Need a better way of determining image type
-        String imageDataURISuffix = ImageUtils.IMAGE_DATA_URI_SUFFIX.JPEG.getValue();
-        if (StringUtils.endsWith(clientData.imageKey(), ImageUtils.IMAGE_FILE_EXTENSION.GIF.getValue())) {
-            imageDataURISuffix = ImageUtils.IMAGE_DATA_URI_SUFFIX.GIF.getValue();
-        } else if (StringUtils.endsWith(clientData.imageKey(), ImageUtils.IMAGE_FILE_EXTENSION.PNG.getValue())) {
-            imageDataURISuffix = ImageUtils.IMAGE_DATA_URI_SUFFIX.PNG.getValue();
+        String imageDataURISuffix = ContentRepositoryUtils.IMAGE_DATA_URI_SUFFIX.JPEG.getValue();
+        if (StringUtils.endsWith(imageData.location(), ContentRepositoryUtils.IMAGE_FILE_EXTENSION.GIF.getValue())) {
+            imageDataURISuffix = ContentRepositoryUtils.IMAGE_DATA_URI_SUFFIX.GIF.getValue();
+        } else if (StringUtils.endsWith(imageData.location(), ContentRepositoryUtils.IMAGE_FILE_EXTENSION.PNG.getValue())) {
+            imageDataURISuffix = ContentRepositoryUtils.IMAGE_DATA_URI_SUFFIX.PNG.getValue();
         }
 
-        String clientImageAsBase64Text = imageDataURISuffix + Base64.encodeBytes(clientData.image());
+        String clientImageAsBase64Text = imageDataURISuffix + Base64.encodeBytes(imageData.getContent());
         return clientImageAsBase64Text;
     }
 
@@ -120,16 +130,15 @@ public class ClientImagesApiResource {
     public Response downloadClientImage(@PathParam("clientId") final Long clientId) {
 
         context.authenticatedUser().validateHasReadPermission("CLIENTIMAGE");
-        final ClientData clientData = this.clientReadPlatformService.retrieveOne(clientId);
+        final ImageData imageData = this.imageReadPlatformService.retrieveClientImage(clientId);
 
-        if (clientData.imageKeyDoesNotExist()) { throw new ImageNotFoundException("clients", clientId); }
-
-        ResponseBuilder response = Response.ok(clientData.image());
-        response.header("Content-Disposition", "attachment; filename=\"" + clientData.imageName() + "\"");
+        ResponseBuilder response = Response.ok(imageData.getContent());
+        response.header("Content-Disposition", "attachment; filename=\"" + imageData.getEntityDisplayName() + IMAGE_FILE_EXTENSION.JPEG
+                + "\"");
 
         // TODO: Need a better way of determining image type
 
-        response.header("Content-Type", clientData.imageContentType());
+        response.header("Content-Type", imageData.contentType());
         return response.build();
     }
 
@@ -163,7 +172,7 @@ public class ClientImagesApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String deleteClientImage(@PathParam("clientId") final Long clientId) {
-        this.clientWritePlatformService.deleteClientImage(clientId);
+        this.imageWritePlatformService.deleteClientImage(clientId);
         return this.toApiJsonSerializer.serialize(new CommandProcessingResult(clientId));
     }
 

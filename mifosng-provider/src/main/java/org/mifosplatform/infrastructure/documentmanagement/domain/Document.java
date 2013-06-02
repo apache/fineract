@@ -5,15 +5,13 @@
  */
 package org.mifosplatform.infrastructure.documentmanagement.domain;
 
-import org.apache.commons.lang.StringUtils;
-import org.mifosplatform.infrastructure.core.service.DocumentStore;
-import org.mifosplatform.infrastructure.core.service.DocumentStoreType;
-import org.mifosplatform.infrastructure.documentmanagement.command.DocumentCommand;
-import org.springframework.data.jpa.domain.AbstractPersistable;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+
+import org.apache.commons.lang.StringUtils;
+import org.mifosplatform.infrastructure.documentmanagement.command.DocumentCommand;
+import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
 @Table(name = "m_document")
@@ -43,19 +41,18 @@ public class Document extends AbstractPersistable<Long> {
     @Column(name = "location", length = 500)
     private String location;
 
-    @Column(name = "storage_type", length = 50)
-    private String storageType;
+    @Column(name = "storage_type_enum")
+    private Integer storageType;
 
-    public Document() {
-    }
+    public Document() {}
 
     public static Document createNew(final String parentEntityType, final Long parentEntityId, final String name, final String fileName,
-                                     final Long size, final String type, final String description, final String location, final DocumentStoreType storageType) {
+            final Long size, final String type, final String description, final String location, final StorageType storageType) {
         return new Document(parentEntityType, parentEntityId, name, fileName, size, type, description, location, storageType);
     }
 
     private Document(final String parentEntityType, final Long parentEntityId, final String name, final String fileName, final Long size,
-                     final String type, final String description, final String location, final DocumentStoreType storageType) {
+            final String type, final String description, final String location, final StorageType storageType) {
         this.parentEntityType = StringUtils.defaultIfEmpty(parentEntityType, null);
         this.parentEntityId = parentEntityId;
         this.name = StringUtils.defaultIfEmpty(name, null);
@@ -86,7 +83,6 @@ public class Document extends AbstractPersistable<Long> {
         if (command.isSizeChanged()) {
             this.size = command.getSize();
         }
-        this.storageType = command.getStorageType();
     }
 
     public String getParentEntityType() {
@@ -153,7 +149,7 @@ public class Document extends AbstractPersistable<Long> {
         this.location = location;
     }
 
-    public DocumentStoreType storageType(){
-        return DocumentStore.getDocumentStoreType(this.storageType);
+    public StorageType storageType() {
+        return StorageType.fromInt(this.storageType);
     }
 }

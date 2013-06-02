@@ -13,6 +13,7 @@ import org.mifosplatform.infrastructure.core.data.ApiParameterError;
 import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
 import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.mifosplatform.infrastructure.core.service.DateUtils;
+import org.mifosplatform.infrastructure.documentmanagement.domain.Image;
 import org.mifosplatform.infrastructure.security.service.RandomPasswordGenerator;
 import org.mifosplatform.organisation.office.domain.Office;
 import org.mifosplatform.portfolio.client.api.ClientApiConstants;
@@ -20,6 +21,7 @@ import org.mifosplatform.portfolio.group.domain.Group;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
 import javax.persistence.*;
+
 import java.util.*;
 
 @Entity
@@ -32,6 +34,10 @@ public final class Client extends AbstractPersistable<Long> {
     @ManyToOne
     @JoinColumn(name = "office_id", nullable = false)
     private Office office;
+
+    @OneToOne(optional = true)
+    @JoinColumn(name = "image_id", nullable = true)
+    private Image image;
 
     /**
      * A value from {@link ClientStatus}.
@@ -55,7 +61,6 @@ public final class Client extends AbstractPersistable<Long> {
     @Column(name = "fullname", length = 100)
     private String fullname;
 
-    @SuppressWarnings("unused")
     @Column(name = "display_name", length = 100, nullable = false)
     private String displayName;
 
@@ -365,15 +370,24 @@ public final class Client extends AbstractPersistable<Long> {
         return this.office.identifiedBy(officeId);
     }
 
-//    public String imageKey() {
-//    }
-//
-//    public void updateImageKey(final String imageKey) {
-//        this.image.setKey(imageKey);
-//    }
-
     public Long officeId() {
         return this.office.getId();
+    }
+
+    public void setImage(Image image) {
+        this.image = image;
+    }
+
+    public Image getImage() {
+        return this.image;
+    }
+
+    public String getDisplayName() {
+        return this.displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
     }
 
 }

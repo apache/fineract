@@ -5,19 +5,15 @@
  */
 package org.mifosplatform.infrastructure.documentmanagement.data;
 
-import org.mifosplatform.infrastructure.core.service.DocumentStore;
-import org.mifosplatform.infrastructure.core.service.DocumentStoreType;
+import org.mifosplatform.infrastructure.documentmanagement.domain.StorageType;
 
 /**
  * Immutable data object represent document being managed on platform.
  */
 public class DocumentData {
 
-    @SuppressWarnings("unused")
     private final Long id;
-    @SuppressWarnings("unused")
     private final String parentEntityType;
-    @SuppressWarnings("unused")
     private final Long parentEntityId;
     @SuppressWarnings("unused")
     private final String name;
@@ -27,12 +23,11 @@ public class DocumentData {
     private final String type;
     @SuppressWarnings("unused")
     private final String description;
-    private String location;
-
-    private String storageType;
+    private final String location;
+    private final Integer storageType;
 
     public DocumentData(final Long id, final String parentEntityType, final Long parentEntityId, final String name, final String fileName,
-                        final Long size, final String type, final String description, final String location, String storageType) {
+            final Long size, final String type, final String description, final String location, Integer storageType) {
         this.id = id;
         this.parentEntityType = parentEntityType;
         this.parentEntityId = parentEntityId;
@@ -57,23 +52,19 @@ public class DocumentData {
         return this.location;
     }
 
-    public void setLocation(final String location) {
-        this.location = location;
+    public StorageType storageType() {
+        return StorageType.fromInt(storageType);
     }
 
-    public DocumentStoreType storeType(){
-        return DocumentStore.getDocumentStoreType(storageType);
-    }
-
-    public String getParentEntityType(){
+    public String getParentEntityType() {
         return this.parentEntityType;
     }
 
-    public Long getParentEntityId(){
+    public Long getParentEntityId() {
         return this.parentEntityId;
     }
 
-    public Long getId(){
+    public Long getId() {
         return this.id;
     }
 

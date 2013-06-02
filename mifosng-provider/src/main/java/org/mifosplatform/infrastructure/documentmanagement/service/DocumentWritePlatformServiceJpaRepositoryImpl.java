@@ -5,16 +5,18 @@
  */
 package org.mifosplatform.infrastructure.documentmanagement.service;
 
+import java.io.InputStream;
+
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
-import org.mifosplatform.infrastructure.core.service.DocumentStore;
-import org.mifosplatform.infrastructure.core.service.DocumentStoreFactory;
-import org.mifosplatform.infrastructure.core.service.DocumentStoreType;
 import org.mifosplatform.infrastructure.documentmanagement.command.DocumentCommand;
 import org.mifosplatform.infrastructure.documentmanagement.command.DocumentCommandValidator;
+import org.mifosplatform.infrastructure.documentmanagement.contentrepository.ContentRepository;
+import org.mifosplatform.infrastructure.documentmanagement.contentrepository.ContentRepositoryFactory;
 import org.mifosplatform.infrastructure.documentmanagement.domain.Document;
 import org.mifosplatform.infrastructure.documentmanagement.domain.DocumentRepository;
-import org.mifosplatform.infrastructure.documentmanagement.exception.DocumentManagementException;
+import org.mifosplatform.infrastructure.documentmanagement.domain.StorageType;
+import org.mifosplatform.infrastructure.documentmanagement.exception.ContentManagementException;
 import org.mifosplatform.infrastructure.documentmanagement.exception.DocumentNotFoundException;
 import org.mifosplatform.infrastructure.documentmanagement.exception.InvalidEntityTypeForDocumentManagementException;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
@@ -25,8 +27,6 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.InputStream;
-
 @Service
 public class DocumentWritePlatformServiceJpaRepositoryImpl implements DocumentWritePlatformService {
 
@@ -34,14 +34,14 @@ public class DocumentWritePlatformServiceJpaRepositoryImpl implements DocumentWr
 
     private final PlatformSecurityContext context;
     private final DocumentRepository documentRepository;
-    private final DocumentStoreFactory documentStoreFactory;
+    private final ContentRepositoryFactory contentRepositoryFactory;
 
     @Autowired
-    public DocumentWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final DocumentRepository documentRepository,
-                                                         final DocumentStoreFactory documentStoreFactory) {
+    public DocumentWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
+            final DocumentRepository documentRepository, final ContentRepositoryFactory documentStoreFactory) {
         this.context = context;
         this.documentRepository = documentRepository;
-        this.documentStoreFactory = documentStoreFactory;
+        this.contentRepositoryFactory = documentStoreFactory;
     }
 
     @Transactional
@@ -56,13 +56,13 @@ public class DocumentWritePlatformServiceJpaRepositoryImpl implements DocumentWr
 
             validator.validateForCreate();
 
-            DocumentStore documentStore = this.documentStoreFactory.getInstanceFromConfiguration();
+            ContentRepository contentRepository = this.contentRepositoryFactory.getRepository();
 
-            final String fileLocation = documentStore.saveDocument(inputStream, documentCommand);
+            final String fileLocation = contentRepository.saveFile(inputStream, documentCommand);
 
             final Document document = Document.createNew(documentCommand.getParentEntityType(), documentCommand.getParentEntityId(),
                     documentCommand.getName(), documentCommand.getFileName(), documentCommand.getSize(), documentCommand.getType(),
-                    documentCommand.getDescription(), fileLocation, documentStore.getType());
+                    documentCommand.getDescription(), fileLocation, contentRepository.getStorageType());
 
             this.documentRepository.save(document);
 
@@ -71,9 +71,6 @@ public class DocumentWritePlatformServiceJpaRepositoryImpl implements DocumentWr
             logger.error(dve.getMessage(), dve);
             throw new PlatformDataIntegrityException("error.msg.document.unknown.data.integrity.issue",
                     "Unknown data integrity issue with resource.");
-        } catch (final DocumentManagementException dme) {
-            logger.error(dme.getMessage(), dme);
-            throw new DocumentManagementException(documentCommand.getName());
         }
     }
 
@@ -89,21 +86,22 @@ public class DocumentWritePlatformServiceJpaRepositoryImpl implements DocumentWr
             // TODO check if entity id is valid and within data scope for the
             // user
             final Document documentForUpdate = this.documentRepository.findOne(documentCommand.getId());
-            DocumentStoreType documentStoreType = documentForUpdate.storageType();
             if (documentForUpdate == null) { throw new DocumentNotFoundException(documentCommand.getParentEntityType(),
                     documentCommand.getParentEntityId(), documentCommand.getId()); }
+
+            StorageType documentStoreType = documentForUpdate.storageType();
             oldLocation = documentForUpdate.getLocation();
             if (inputStream != null && documentCommand.isFileNameChanged()) {
-                DocumentStore instanceFromConfiguration = this.documentStoreFactory.getInstanceFromConfiguration();
-                documentCommand.setLocation(instanceFromConfiguration.saveDocument(inputStream, documentCommand));
-                documentCommand.setStorageType(instanceFromConfiguration.getType());
+                ContentRepository contentRepository = this.contentRepositoryFactory.getRepository();
+                documentCommand.setLocation(contentRepository.saveFile(inputStream, documentCommand));
+                documentCommand.setStorageType(contentRepository.getStorageType().getValue());
             }
 
             documentForUpdate.update(documentCommand);
 
             if (inputStream != null && documentCommand.isFileNameChanged()) {
-                DocumentStore documentStore = this.documentStoreFactory.getInstanceFromStorageType(documentStoreType);
-                documentStore.deleteDocument(documentCommand.getName(), oldLocation);
+                ContentRepository contentRepository = this.contentRepositoryFactory.getRepository(documentStoreType);
+                contentRepository.deleteFile(documentCommand.getName(), oldLocation);
             }
 
             this.documentRepository.saveAndFlush(documentForUpdate);
@@ -113,9 +111,9 @@ public class DocumentWritePlatformServiceJpaRepositoryImpl implements DocumentWr
             logger.error(dve.getMessage(), dve);
             throw new PlatformDataIntegrityException("error.msg.document.unknown.data.integrity.issue",
                     "Unknown data integrity issue with resource.");
-        } catch (final DocumentManagementException dme) {
-            logger.error(dme.getMessage(), dme);
-            throw new DocumentManagementException(documentCommand.getName());
+        } catch (final ContentManagementException cme) {
+            logger.error(cme.getMessage(), cme);
+            throw new ContentManagementException(documentCommand.getName(), cme.getMessage());
         }
     }
 
@@ -127,12 +125,12 @@ public class DocumentWritePlatformServiceJpaRepositoryImpl implements DocumentWr
         validateParentEntityType(documentCommand);
         // TODO: Check document is present under this entity Id
         final Document document = this.documentRepository.findOne(documentCommand.getId());
-        DocumentStore documentStore = this.documentStoreFactory.getInstanceFromStorageType(document.storageType());
         if (document == null) { throw new DocumentNotFoundException(documentCommand.getParentEntityType(),
                 documentCommand.getParentEntityId(), documentCommand.getId()); }
-
         this.documentRepository.delete(document);
-        documentStore.deleteDocument(document.getName(), document.getLocation());
+
+        ContentRepository contentRepository = this.contentRepositoryFactory.getRepository(document.storageType());
+        contentRepository.deleteFile(document.getName(), document.getLocation());
         return new CommandProcessingResult(document.getId());
     }
 
@@ -142,7 +140,6 @@ public class DocumentWritePlatformServiceJpaRepositoryImpl implements DocumentWr
     }
 
     private static boolean checkValidEntityType(final String entityType) {
-
         for (final DOCUMENT_MANAGEMENT_ENTITY entities : DOCUMENT_MANAGEMENT_ENTITY.values()) {
             if (entities.name().equalsIgnoreCase(entityType)) { return true; }
         }

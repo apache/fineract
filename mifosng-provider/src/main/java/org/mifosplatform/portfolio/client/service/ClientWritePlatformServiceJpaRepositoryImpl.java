@@ -5,27 +5,28 @@
  */
 package org.mifosplatform.portfolio.client.service;
 
-import org.apache.commons.lang.StringUtils;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
-import org.mifosplatform.infrastructure.core.domain.Base64EncodedImage;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
-import org.mifosplatform.infrastructure.core.service.DocumentStore;
-import org.mifosplatform.infrastructure.core.service.DocumentStoreFactory;
-import org.mifosplatform.infrastructure.documentmanagement.exception.DocumentManagementException;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.office.domain.Office;
 import org.mifosplatform.organisation.office.domain.OfficeRepository;
 import org.mifosplatform.organisation.office.exception.OfficeNotFoundException;
 import org.mifosplatform.portfolio.client.api.ClientApiConstants;
 import org.mifosplatform.portfolio.client.data.ClientDataValidator;
-import org.mifosplatform.portfolio.client.domain.*;
+import org.mifosplatform.portfolio.client.domain.AccountNumberGenerator;
+import org.mifosplatform.portfolio.client.domain.AccountNumberGeneratorFactory;
+import org.mifosplatform.portfolio.client.domain.Client;
+import org.mifosplatform.portfolio.client.domain.ClientRepositoryWrapper;
 import org.mifosplatform.portfolio.client.exception.ClientMustBePendingToBeDeletedException;
-import org.mifosplatform.portfolio.client.exception.ClientNotFoundException;
 import org.mifosplatform.portfolio.group.domain.Group;
 import org.mifosplatform.portfolio.group.domain.GroupRepository;
 import org.mifosplatform.portfolio.group.exception.GroupNotFoundException;
@@ -37,11 +38,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.io.InputStream;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
 
 @Service
 public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWritePlatformService {
@@ -55,14 +51,12 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
     private final GroupRepository groupRepository;
     private final ClientDataValidator fromApiJsonDeserializer;
     private final AccountNumberGeneratorFactory accountIdentifierGeneratorFactory;
-    private final DocumentStoreFactory documentStoreFactory;
-    private final ImageRepository imageRepository;
 
     @Autowired
     public ClientWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
-                                                       final ClientRepositoryWrapper clientRepository, final OfficeRepository officeRepository, final NoteRepository noteRepository,
-                                                       final ClientDataValidator fromApiJsonDeserializer, final AccountNumberGeneratorFactory accountIdentifierGeneratorFactory,
-                                                       final GroupRepository groupRepository, DocumentStoreFactory documentStoreFactory, ImageRepository imageRepository) {
+            final ClientRepositoryWrapper clientRepository, final OfficeRepository officeRepository, final NoteRepository noteRepository,
+            final ClientDataValidator fromApiJsonDeserializer, final AccountNumberGeneratorFactory accountIdentifierGeneratorFactory,
+            final GroupRepository groupRepository) {
         this.context = context;
         this.clientRepository = clientRepository;
         this.officeRepository = officeRepository;
@@ -70,8 +64,6 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
         this.accountIdentifierGeneratorFactory = accountIdentifierGeneratorFactory;
         this.groupRepository = groupRepository;
-        this.documentStoreFactory = documentStoreFactory;
-        this.imageRepository = imageRepository;
     }
 
     @Transactional
@@ -219,77 +211,6 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             handleDataIntegrityIssues(command, dve);
             return CommandProcessingResult.empty();
         }
-    }
-
-    @Transactional
-    @Override
-    public CommandProcessingResult saveOrUpdateClientImage(final Long clientId, final String imageName, final InputStream inputStream, Long fileSize) {
-        try {
-            final Client client = this.clientRepository.findOneWithNotFoundDetection(clientId);
-            deletePreviousClientImage(clientId, client);
-
-            DocumentStore documentStore = this.documentStoreFactory.getInstanceFromConfiguration();
-            String imageLocation = documentStore.saveImage(inputStream, clientId, imageName, fileSize);
-            return updateClientImage(clientId, client, imageLocation, documentStore.getType().getValue());
-        } catch (DocumentManagementException dme) {
-            logger.error(dme.getMessage(), dme);
-            throw new DocumentManagementException(imageName);
-        }
-    }
-
-    @Transactional
-    @Override
-    public CommandProcessingResult deleteClientImage(final Long clientId) {
-
-        final Client client = this.clientRepository.findOneWithNotFoundDetection(clientId);
-
-        Image image = imageRepository.findOneByClient(client);
-        String imageKey = image.getKey();
-        // delete image from the file system
-        if (StringUtils.isNotEmpty((imageKey))) {
-            DocumentStore documentStore = this.documentStoreFactory.getInstanceFromConfiguration();
-            documentStore.deleteImage(clientId, imageKey);
-            this.imageRepository.delete(image);
-        }
-
-        return new CommandProcessingResult(clientId) ;
-    }
-
-    @Override
-    public CommandProcessingResult saveOrUpdateClientImage(final Long clientId, final Base64EncodedImage encodedImage) {
-        try {
-            final Client client = this.clientRepository.findOneWithNotFoundDetection(clientId);
-            deletePreviousClientImage(clientId, client);
-
-            DocumentStore documentStore = this.documentStoreFactory.getInstanceFromConfiguration();
-            final String imageLocation = documentStore.saveImage(encodedImage, clientId, "image");
-
-            return updateClientImage(clientId, client, imageLocation, documentStore.getType().getValue());
-        } catch (DocumentManagementException dme) {
-            logger.error(dme.getMessage(), dme);
-            throw new DocumentManagementException("image");
-        }
-    }
-
-    private void deletePreviousClientImage(final Long clientId, final Client client) {
-        if (client == null) { throw new ClientNotFoundException(clientId); }
-
-        Image image = imageRepository.findOneByClient(client);
-        if (image != null){
-            this.documentStoreFactory.getInstanceFromConfiguration().deleteImage(clientId, image.getKey());
-        }
-    }
-
-    private CommandProcessingResult updateClientImage(final Long clientId, final Client client, final String imageLocation, final String documentStoreType) {
-        Image image = imageRepository.findOneByClient(client);
-        if(image == null){
-            image = new Image(client);
-        }
-        image.updateKey(imageLocation);
-        image.updateStorageType(documentStoreType);
-
-        this.imageRepository.save(image);
-        return new CommandProcessingResult(clientId);
     }
 
     private void logAsErrorUnexpectedDataIntegrityException(final DataIntegrityViolationException dve) {

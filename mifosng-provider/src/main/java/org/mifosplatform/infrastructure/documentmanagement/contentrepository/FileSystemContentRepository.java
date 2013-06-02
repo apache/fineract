@@ -3,57 +3,63 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this file,
  * You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-package org.mifosplatform.infrastructure.core.service;
+package org.mifosplatform.infrastructure.documentmanagement.contentrepository;
 
-import com.lowagie.text.pdf.codec.Base64;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+
 import org.mifosplatform.infrastructure.core.domain.Base64EncodedImage;
+import org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil;
 import org.mifosplatform.infrastructure.documentmanagement.command.DocumentCommand;
 import org.mifosplatform.infrastructure.documentmanagement.data.DocumentData;
 import org.mifosplatform.infrastructure.documentmanagement.data.FileData;
-import org.mifosplatform.infrastructure.documentmanagement.exception.DocumentManagementException;
-import org.mifosplatform.portfolio.client.data.ImageData;
+import org.mifosplatform.infrastructure.documentmanagement.data.ImageData;
+import org.mifosplatform.infrastructure.documentmanagement.domain.StorageType;
+import org.mifosplatform.infrastructure.documentmanagement.exception.ContentManagementException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
+import com.lowagie.text.pdf.codec.Base64;
 
-public class FileSystemDocumentStore extends DocumentStore {
+public class FileSystemContentRepository implements ContentRepository {
 
-    private final static Logger logger = LoggerFactory.getLogger(FileSystemDocumentStore.class);
+    private final static Logger logger = LoggerFactory.getLogger(FileSystemContentRepository.class);
 
     public static final String MIFOSX_BASE_DIR = System.getProperty("user.home") + File.separator + ".mifosx";
 
-
     @Override
-    public String saveDocument(InputStream uploadedInputStream, DocumentCommand documentCommand) throws DocumentManagementException {
-        String documentName = documentCommand.getFileName();
-        String uploadDocumentLocation = generateFileParentDirectory(documentCommand.getParentEntityType(), documentCommand.getParentEntityId());
+    public String saveFile(InputStream uploadedInputStream, DocumentCommand documentCommand) {
+        String fileName = documentCommand.getFileName();
+        String uploadDocumentLocation = generateFileParentDirectory(documentCommand.getParentEntityType(),
+                documentCommand.getParentEntityId());
 
-        validateFileSizeWithinPermissibleRange(documentCommand.getSize(), documentName, maxFileSize);
+        ContentRepositoryUtils.validateFileSizeWithinPermissibleRange(documentCommand.getSize(), fileName);
         makeDirectories(uploadDocumentLocation);
 
-        String fileLocation = uploadDocumentLocation + File.separator + documentName;
+        String fileLocation = uploadDocumentLocation + File.separator + fileName;
 
-        writeFileToFileSystem(uploadedInputStream, fileLocation);
+        writeFileToFileSystem(fileName, uploadedInputStream, fileLocation);
         return fileLocation;
     }
 
-
     @Override
-    public String saveImage(InputStream uploadedInputStream, Long resourceId, String imageName, Long fileSize) throws DocumentManagementException {
+    public String saveImage(InputStream uploadedInputStream, Long resourceId, String imageName, Long fileSize) {
         String uploadImageLocation = generateClientImageParentDirectory(resourceId);
 
-        validateFileSizeWithinPermissibleRange(fileSize, imageName, maxImageSize);
+        ContentRepositoryUtils.validateFileSizeWithinPermissibleRange(fileSize, imageName);
         makeDirectories(uploadImageLocation);
 
         String fileLocation = uploadImageLocation + File.separator + imageName;
 
-        writeFileToFileSystem(uploadedInputStream, fileLocation);
+        writeFileToFileSystem(imageName, uploadedInputStream, fileLocation);
         return fileLocation;
     }
 
     @Override
-    public String saveImage(Base64EncodedImage base64EncodedImage, Long resourceId, String imageName) throws DocumentManagementException {
+    public String saveImage(Base64EncodedImage base64EncodedImage, Long resourceId, String imageName) {
         String uploadImageLocation = generateClientImageParentDirectory(resourceId);
 
         makeDirectories(uploadImageLocation);
@@ -65,8 +71,8 @@ public class FileSystemDocumentStore extends DocumentStore {
             out.write(imgBytes);
             out.flush();
             out.close();
-        }catch (IOException ioe){
-            throw new DocumentManagementException(ioe.getMessage());
+        } catch (IOException ioe) {
+            throw new ContentManagementException(imageName, ioe.getMessage());
         }
         return fileLocation;
     }
@@ -81,9 +87,9 @@ public class FileSystemDocumentStore extends DocumentStore {
     }
 
     @Override
-    public void deleteDocument(String documentName, String documentPath) throws DocumentManagementException{
+    public void deleteFile(String fileName, String documentPath) {
         final boolean fileDeleted = deleteFile(documentPath);
-        if (!fileDeleted) { throw new DocumentManagementException(documentName); }
+        if (!fileDeleted) { throw new ContentManagementException(fileName, null); }
     }
 
     private boolean deleteFile(String documentPath) {
@@ -92,42 +98,43 @@ public class FileSystemDocumentStore extends DocumentStore {
     }
 
     @Override
-    public DocumentStoreType getType() {
-        return DocumentStoreType.FILE_SYSTEM;
+    public StorageType getStorageType() {
+        return StorageType.FILE_SYSTEM;
     }
 
     @Override
-    public FileData retrieveDocument(DocumentData documentData){
+    public FileData fetchFile(DocumentData documentData) {
         File file = new File(documentData.fileLocation());
         return new FileData(file, documentData.fileName(), documentData.contentType());
     }
 
     @Override
-    public ImageData retrieveImage(ImageData imageData) {
-        File file = new File(imageData.imageKey());
-        imageData.setContent(file);
+    public ImageData fetchImage(ImageData imageData) {
+        File file = new File(imageData.location());
+        imageData.updateContent(file);
         return imageData;
     }
 
     /**
      * Generate the directory path for storing the new document
-     *
+     * 
      * @param entityType
      * @param entityId
      * @return
      */
     private String generateFileParentDirectory(String entityType, Long entityId) {
-        return FileSystemDocumentStore.MIFOSX_BASE_DIR + File.separator + ThreadLocalContextUtil.getTenant().getName().replaceAll(" ", "").trim()
-                + File.separator + "documents" + File.separator + entityType + File.separator + entityId + File.separator
-                + RandomStringGenerator.generateRandomString();
+        return FileSystemContentRepository.MIFOSX_BASE_DIR + File.separator
+                + ThreadLocalContextUtil.getTenant().getName().replaceAll(" ", "").trim() + File.separator + "documents" + File.separator
+                + entityType + File.separator + entityId + File.separator + ContentRepositoryUtils.generateRandomString();
     }
 
     /**
      * Generate directory path for storing new Image
      */
     private String generateClientImageParentDirectory(final Long resourceId) {
-        return FileSystemDocumentStore.MIFOSX_BASE_DIR + File.separator + ThreadLocalContextUtil.getTenant().getName().replaceAll(" ", "").trim()
-                + File.separator + "images" + File.separator + "clients" + File.separator + resourceId;
+        return FileSystemContentRepository.MIFOSX_BASE_DIR + File.separator
+                + ThreadLocalContextUtil.getTenant().getName().replaceAll(" ", "").trim() + File.separator + "images" + File.separator
+                + "clients" + File.separator + resourceId;
     }
 
     /**
@@ -139,9 +146,7 @@ public class FileSystemDocumentStore extends DocumentStore {
         }
     }
 
-
-    private void writeFileToFileSystem(InputStream uploadedInputStream, String fileLocation) throws DocumentManagementException {
-
+    private void writeFileToFileSystem(String fileName, InputStream uploadedInputStream, String fileLocation) {
         try {
             OutputStream out = new FileOutputStream(new File(fileLocation));
             int read = 0;
@@ -153,8 +158,7 @@ public class FileSystemDocumentStore extends DocumentStore {
             out.flush();
             out.close();
         } catch (IOException ioException) {
-            throw new DocumentManagementException("IO Exception caught while writing to FileSystem" + ioException.getMessage());
+            throw new ContentManagementException(fileName, ioException.getMessage());
         }
     }
-
 }

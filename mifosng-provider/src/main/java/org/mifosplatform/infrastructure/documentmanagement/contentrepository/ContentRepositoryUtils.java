@@ -1,4 +1,8 @@
-package org.mifosplatform.infrastructure.core.service;
+package org.mifosplatform.infrastructure.documentmanagement.contentrepository;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 import org.apache.commons.lang.StringUtils;
 import org.mifosplatform.infrastructure.core.data.ApiParameterError;
@@ -6,11 +10,11 @@ import org.mifosplatform.infrastructure.core.domain.Base64EncodedImage;
 import org.mifosplatform.infrastructure.core.exception.ImageDataURLNotValidException;
 import org.mifosplatform.infrastructure.core.exception.ImageUploadException;
 import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
+import org.mifosplatform.infrastructure.documentmanagement.exception.ContentManagementException;
 
-import java.util.ArrayList;
-import java.util.List;
+public class ContentRepositoryUtils {
 
-public class ImageUtils {
+    public static Random random = new Random();
 
     public static enum IMAGE_MIME_TYPE {
         GIF("image/gif"), JPEG("image/jpeg"), PNG("image/png");
@@ -54,21 +58,20 @@ public class ImageUtils {
             return this.value;
         }
     }
+
     /**
      * Validates that passed in Mime type maps to known image mime types
-     *
+     * 
      * @param mimeType
      */
     public static void validateImageMimeType(String mimeType) {
         if (!(mimeType.equalsIgnoreCase(IMAGE_MIME_TYPE.GIF.getValue()) || mimeType.equalsIgnoreCase(IMAGE_MIME_TYPE.JPEG.getValue()) || mimeType
-                .equalsIgnoreCase(IMAGE_MIME_TYPE.PNG.getValue()))) {
-            throw new ImageUploadException();
-        }
+                .equalsIgnoreCase(IMAGE_MIME_TYPE.PNG.getValue()))) { throw new ImageUploadException(); }
     }
 
     /**
      * Extracts Image from a Data URL
-     *
+     * 
      * @param mimeType
      */
     public static Base64EncodedImage extractImageFromDataURL(String dataURL) {
@@ -90,6 +93,17 @@ public class ImageUtils {
         return new Base64EncodedImage(base64EncodedString, fileExtension);
     }
 
+    public static void validateFileSizeWithinPermissibleRange(Long fileSize, String name) {
+        /**
+         * Using Content-Length gives me size of the entire request, which is
+         * good enough for now for a fast fail as the length of the rest of the
+         * content i.e name and description while compared to the uploaded file
+         * size is negligible
+         **/
+        if (fileSize != null && ((fileSize / (1024 * 1024)) > ContentRepository.MAX_FILE_UPLOAD_SIZE_IN_MB)) { throw new ContentManagementException(
+                name, fileSize, ContentRepository.MAX_FILE_UPLOAD_SIZE_IN_MB); }
+    }
+
     public static void validateClientImageNotEmpty(String imageFileName) {
         List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
         if (imageFileName == null) {
@@ -101,5 +115,30 @@ public class ImageUtils {
             throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
                     dataValidationErrors);
         }
+    }
+
+    /**
+     * Generate a random String
+     * 
+     * @return
+     */
+    public static String generateRandomString() {
+        String characters = "abcdefghijklmnopqrstuvwxyz123456789";
+        int length = generateRandomNumber();
+        char[] text = new char[length];
+        for (int i = 0; i < length; i++) {
+            text[i] = characters.charAt(random.nextInt(characters.length()));
+        }
+        return new String(text);
+    }
+
+    /**
+     * Generate a random number between 5 to 16
+     * 
+     * @return
+     */
+    public static int generateRandomNumber() {
+        Random randomGenerator = new Random();
+        return randomGenerator.nextInt(11) + 5;
     }
 }

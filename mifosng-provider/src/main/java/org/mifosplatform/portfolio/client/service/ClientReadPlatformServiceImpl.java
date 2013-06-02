@@ -16,7 +16,6 @@ import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.api.ApiParameterHelper;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
-import org.mifosplatform.infrastructure.core.service.DocumentStoreFactory;
 import org.mifosplatform.infrastructure.core.service.Page;
 import org.mifosplatform.infrastructure.core.service.PaginationHelper;
 import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
@@ -26,7 +25,6 @@ import org.mifosplatform.organisation.office.service.OfficeReadPlatformService;
 import org.mifosplatform.portfolio.client.data.ClientAccountSummaryCollectionData;
 import org.mifosplatform.portfolio.client.data.ClientAccountSummaryData;
 import org.mifosplatform.portfolio.client.data.ClientData;
-import org.mifosplatform.portfolio.client.data.ImageData;
 import org.mifosplatform.portfolio.client.domain.ClientEnumerations;
 import org.mifosplatform.portfolio.client.exception.ClientNotFoundException;
 import org.mifosplatform.portfolio.group.data.GroupGeneralData;
@@ -43,11 +41,9 @@ import org.springframework.stereotype.Service;
 @Service
 public class ClientReadPlatformServiceImpl implements ClientReadPlatformService {
 
-
     private final JdbcTemplate jdbcTemplate;
     private final PlatformSecurityContext context;
     private final OfficeReadPlatformService officeReadPlatformService;
-    private final DocumentStoreFactory documentStoreFactory;
 
     // data mappers
     private final PaginationHelper<ClientData> paginationHelper = new PaginationHelper<ClientData>();
@@ -58,10 +54,9 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
     @Autowired
     public ClientReadPlatformServiceImpl(final PlatformSecurityContext context, final TenantAwareRoutingDataSource dataSource,
-            final OfficeReadPlatformService officeReadPlatformService, final DocumentStoreFactory documentStoreFactory) {
+            final OfficeReadPlatformService officeReadPlatformService) {
         this.context = context;
         this.officeReadPlatformService = officeReadPlatformService;
-        this.documentStoreFactory = documentStoreFactory;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
     }
 
@@ -178,12 +173,6 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             Collection<GroupGeneralData> parentGroups = this.jdbcTemplate.query(clientGroupsSql, this.clientGroupsMapper,
                     new Object[] { clientId });
 
-            String clientImageSql = "select * from m_image where client_id =" + clientId;
-
-            try {
-                ImageData imageData = this.jdbcTemplate.queryForObject(clientImageSql, new ImageMapper());
-                clientData.setImageData(documentStoreFactory.getInstanceFromStorageType(imageData.storeType()).retrieveImage(imageData));
-            } catch (EmptyResultDataAccessException e) {}
             return ClientData.setParentGroups(clientData, parentGroups);
 
         } catch (EmptyResultDataAccessException e) {
@@ -234,7 +223,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             sqlBuilder.append("c.office_id as officeId, o.name as officeName, ");
             sqlBuilder.append("c.firstname as firstname, c.middlename as middlename, c.lastname as lastname, ");
             sqlBuilder.append("c.fullname as fullname, c.display_name as displayName, ");
-            sqlBuilder.append("c.activation_date as activationDate, c.image_key as imagekey ");
+            sqlBuilder.append("c.activation_date as activationDate, c.image_id as imageId");
             sqlBuilder.append("from m_client c ");
             sqlBuilder.append("join m_office o on o.id = c.office_id ");
             sqlBuilder.append("join m_group_client pgc on pgc.client_id = c.id");
@@ -262,11 +251,11 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             final String displayName = rs.getString("displayName");
             final String externalId = rs.getString("externalId");
             final LocalDate activationDate = JdbcSupport.getLocalDate(rs, "activationDate");
-            final String imageKey = rs.getString("imageKey");
+            final Long imageId = JdbcSupport.getLong(rs, "imageId");
             final String officeName = rs.getString("officeName");
 
             return ClientData.instance(accountNo, status, officeId, officeName, id, firstname, middlename, lastname, fullname, displayName,
-                    externalId, activationDate, null);
+                    externalId, activationDate, imageId);
         }
     }
 
@@ -282,7 +271,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             builder.append("c.office_id as officeId, o.name as officeName, ");
             builder.append("c.firstname as firstname, c.middlename as middlename, c.lastname as lastname, ");
             builder.append("c.fullname as fullname, c.display_name as displayName, ");
-            builder.append("c.activation_date as activationDate, c.image_key as imagekey ");
+            builder.append("c.activation_date as activationDate, c.image_id as imageId ");
             builder.append("from m_client c ");
             builder.append("join m_office o on o.id = c.office_id ");
 
@@ -310,13 +299,12 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             final String displayName = rs.getString("displayName");
             final String externalId = rs.getString("externalId");
             final LocalDate activationDate = JdbcSupport.getLocalDate(rs, "activationDate");
-            // final String imageKey = rs.getString("imageKey");
             final String officeName = rs.getString("officeName");
+            final Long imageId = JdbcSupport.getLong(rs, "imageId");
 
             return ClientData.instance(accountNo, status, officeId, officeName, id, firstname, middlename, lastname, fullname, displayName,
-                    externalId, activationDate, null);
+                    externalId, activationDate, imageId);
         }
-
     }
 
     private static final class ParentGroupsMapper implements RowMapper<GroupGeneralData> {
@@ -334,18 +322,6 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
             return GroupGeneralData.lookup(groupId, groupName);
         }
-    }
-
-    private static final class ImageMapper implements RowMapper<ImageData> {
-
-        @Override
-        public ImageData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
-            final Long clientId = rs.getLong("client_id");
-            final String imageKey = rs.getString("key");
-            final String storeType = rs.getString("storage_type");
-            return new ImageData(clientId, imageKey, storeType);
-        }
-
     }
 
     private static final class ClientLookupMapper implements RowMapper<ClientData> {

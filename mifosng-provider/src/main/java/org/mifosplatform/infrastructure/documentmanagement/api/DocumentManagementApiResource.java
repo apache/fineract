@@ -52,8 +52,8 @@ public class DocumentManagementApiResource {
 
     @Autowired
     public DocumentManagementApiResource(final PlatformSecurityContext context,
-                                         final DocumentReadPlatformService documentReadPlatformService, final DocumentWritePlatformService documentWritePlatformService,
-                                         final ApiRequestParameterHelper apiRequestParameterHelper, final ToApiJsonSerializer<DocumentData> toApiJsonSerializer) {
+            final DocumentReadPlatformService documentReadPlatformService, final DocumentWritePlatformService documentWritePlatformService,
+            final ApiRequestParameterHelper apiRequestParameterHelper, final ToApiJsonSerializer<DocumentData> toApiJsonSerializer) {
         this.context = context;
         this.documentReadPlatformService = documentReadPlatformService;
         this.documentWritePlatformService = documentWritePlatformService;
@@ -150,9 +150,6 @@ public class DocumentManagementApiResource {
 
         final DocumentData documentData = this.documentReadPlatformService.retrieveDocument(entityType, entityId, documentId);
 
-        // we do not want to send document location as a part of the response
-        documentData.setLocation(null);
-
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serialize(settings, documentData, this.RESPONSE_DATA_PARAMETERS);
     }
@@ -166,7 +163,7 @@ public class DocumentManagementApiResource {
 
         this.context.authenticatedUser().validateHasReadPermission(this.SystemEntityType);
 
-        final FileData fileData = this.documentReadPlatformService.retrieveDocumentAsFile(entityType, entityId, documentId);
+        final FileData fileData = this.documentReadPlatformService.retrieveFileData(entityType, entityId, documentId);
         final ResponseBuilder response = Response.ok(fileData.file());
         response.header("Content-Disposition", "attachment; filename=\"" + fileData.name() + "\"");
         response.header("Content-Type", fileData.contentType());
