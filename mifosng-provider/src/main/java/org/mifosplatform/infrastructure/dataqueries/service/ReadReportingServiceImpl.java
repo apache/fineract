@@ -29,7 +29,6 @@ import javax.ws.rs.core.StreamingOutput;
 import org.apache.commons.lang.StringUtils;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
-import org.mifosplatform.infrastructure.core.service.FileUtils;
 import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
 import org.mifosplatform.infrastructure.dataqueries.data.GenericResultsetData;
 import org.mifosplatform.infrastructure.dataqueries.data.ReportData;
@@ -38,6 +37,7 @@ import org.mifosplatform.infrastructure.dataqueries.data.ReportParameterJoinData
 import org.mifosplatform.infrastructure.dataqueries.data.ResultsetColumnHeaderData;
 import org.mifosplatform.infrastructure.dataqueries.data.ResultsetRowData;
 import org.mifosplatform.infrastructure.dataqueries.exception.ReportNotFoundException;
+import org.mifosplatform.infrastructure.documentmanagement.contentrepository.FileSystemContentRepository;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.useradministration.domain.AppUser;
 import org.pentaho.reporting.engine.classic.core.ClassicEngineBoot;
@@ -243,7 +243,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
         if (noPentaho) { throw new PlatformDataIntegrityException("error.msg.no.pentaho", "Pentaho is not enabled",
                 "Pentaho is not enabled"); }
 
-        final String reportPath = FileUtils.MIFOSX_BASE_DIR + File.separator + "pentahoReports" + File.separator + reportName + ".prpt";
+        final String reportPath = FileSystemContentRepository.MIFOSX_BASE_DIR + File.separator + "pentahoReports" + File.separator + reportName + ".prpt";
         logger.info("Report path: " + reportPath);
 
         // load report definition
@@ -357,7 +357,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
     @Override
     public String retrieveReportPDF(final String reportName, final String type, final Map<String, String> queryParams) {
 
-        String fileLocation = FileUtils.MIFOSX_BASE_DIR + File.separator + "";
+        String fileLocation = FileSystemContentRepository.MIFOSX_BASE_DIR + File.separator + "";
         if (!new File(fileLocation).isDirectory()) {
             new File(fileLocation).mkdirs();
         }

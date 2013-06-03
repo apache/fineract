@@ -39,4 +39,9 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
 
         return thisTask.hasMakerCheckerEnabled() && property.isEnabled();
     }
+
+    @Override
+    public boolean isAmazonS3Enabled(){
+        return this.globalConfigurationRepository.findOneByName("amazon-S3").isEnabled();
+    }
 }

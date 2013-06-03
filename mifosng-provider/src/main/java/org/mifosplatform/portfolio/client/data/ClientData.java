@@ -22,6 +22,7 @@ import org.mifosplatform.portfolio.group.data.GroupGeneralData;
  */
 final public class ClientData implements Comparable<ClientData> {
 
+
     private final Long id;
     private final String accountNo;
     private final String externalId;
@@ -40,8 +41,7 @@ final public class ClientData implements Comparable<ClientData> {
     private final Long officeId;
     private final String officeName;
 
-    private final String imageKey;
-    @SuppressWarnings("unused")
+    private final Long imageId;
     private final Boolean imagePresent;
 
     // associations
@@ -58,13 +58,13 @@ final public class ClientData implements Comparable<ClientData> {
 
         return new ClientData(clientData.accountNo, clientData.status, clientData.officeId, clientData.officeName, clientData.id,
                 clientData.firstname, clientData.middlename, clientData.lastname, clientData.fullname, clientData.displayName,
-                clientData.externalId, clientData.activationDate, clientData.imageKey, allowedOffices, clientData.groups);
+                clientData.externalId, clientData.activationDate, clientData.imageId, allowedOffices, clientData.groups);
     }
 
     public static ClientData setParentGroups(final ClientData clientData, final Collection<GroupGeneralData> parentGroups) {
         return new ClientData(clientData.accountNo, clientData.status, clientData.officeId, clientData.officeName, clientData.id,
                 clientData.firstname, clientData.middlename, clientData.lastname, clientData.fullname, clientData.displayName,
-                clientData.externalId, clientData.activationDate, clientData.imageKey, clientData.officeOptions, parentGroups);
+                clientData.externalId, clientData.activationDate, clientData.imageId, clientData.officeOptions, parentGroups);
     }
 
     public static ClientData clientIdentifier(final Long id, final String accountNo, final EnumOptionData status, final String firstname,
@@ -81,14 +81,14 @@ final public class ClientData implements Comparable<ClientData> {
 
     public static ClientData instance(final String accountNo, final EnumOptionData status, final Long officeId, final String officeName,
             final Long id, final String firstname, final String middlename, final String lastname, final String fullname,
-            final String displayName, final String externalId, final LocalDate activationDate, final String imageKey) {
+            final String displayName, final String externalId, final LocalDate activationDate, final Long imageId) {
         return new ClientData(accountNo, status, officeId, officeName, id, firstname, middlename, lastname, fullname, displayName,
-                externalId, activationDate, imageKey, null, null);
+                externalId, activationDate, imageId, null, null);
     }
 
     private ClientData(final String accountNo, final EnumOptionData status, final Long officeId, final String officeName, final Long id,
             final String firstname, final String middlename, final String lastname, final String fullname, final String displayName,
-            final String externalId, final LocalDate activationDate, final String imageKey, final Collection<OfficeData> allowedOffices,
+            final String externalId, final LocalDate activationDate, final Long imageId, final Collection<OfficeData> allowedOffices,
             final Collection<GroupGeneralData> groups) {
         this.accountNo = accountNo;
         this.status = status;
@@ -107,11 +107,11 @@ final public class ClientData implements Comparable<ClientData> {
         this.displayName = StringUtils.defaultIfEmpty(displayName, null);
         this.externalId = StringUtils.defaultIfEmpty(externalId, null);
         this.activationDate = activationDate;
-        this.imageKey = imageKey;
-        if (imageKey != null) {
+        this.imageId = imageId;
+        if (imageId != null) {
             this.imagePresent = Boolean.TRUE;
         } else {
-            this.imagePresent = null;
+            this.imagePresent = Boolean.FALSE;
         }
 
         // associations
@@ -137,16 +137,12 @@ final public class ClientData implements Comparable<ClientData> {
         return this.officeName;
     }
 
-    public String imageKey() {
-        return this.imageKey;
+    public Long getImageId() {
+        return this.imageId;
     }
 
-    public boolean imageKeyDoesNotExist() {
-        return !imageKeyExists();
-    }
-
-    private boolean imageKeyExists() {
-        return StringUtils.isNotBlank(this.imageKey);
+    public Boolean getImagePresent() {
+        return this.imagePresent;
     }
 
     @Override
@@ -194,4 +190,5 @@ final public class ClientData implements Comparable<ClientData> {
     public LocalDate getActivationDate() {
         return this.activationDate;
     }
+
 }

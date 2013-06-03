@@ -41,15 +41,18 @@ public class Document extends AbstractPersistable<Long> {
     @Column(name = "location", length = 500)
     private String location;
 
+    @Column(name = "storage_type_enum")
+    private Integer storageType;
+
     public Document() {}
 
     public static Document createNew(final String parentEntityType, final Long parentEntityId, final String name, final String fileName,
-            final Long size, final String type, final String description, final String location) {
-        return new Document(parentEntityType, parentEntityId, name, fileName, size, type, description, location);
+            final Long size, final String type, final String description, final String location, final StorageType storageType) {
+        return new Document(parentEntityType, parentEntityId, name, fileName, size, type, description, location, storageType);
     }
 
     private Document(final String parentEntityType, final Long parentEntityId, final String name, final String fileName, final Long size,
-            final String type, final String description, final String location) {
+            final String type, final String description, final String location, final StorageType storageType) {
         this.parentEntityType = StringUtils.defaultIfEmpty(parentEntityType, null);
         this.parentEntityId = parentEntityId;
         this.name = StringUtils.defaultIfEmpty(name, null);
@@ -58,6 +61,7 @@ public class Document extends AbstractPersistable<Long> {
         this.type = StringUtils.defaultIfEmpty(type, null);
         this.description = StringUtils.defaultIfEmpty(description, null);
         this.location = StringUtils.defaultIfEmpty(location, null);
+        this.storageType = storageType.getValue();
     }
 
     public void update(final DocumentCommand command) {
@@ -79,7 +83,6 @@ public class Document extends AbstractPersistable<Long> {
         if (command.isSizeChanged()) {
             this.size = command.getSize();
         }
-
     }
 
     public String getParentEntityType() {
@@ -146,4 +149,7 @@ public class Document extends AbstractPersistable<Long> {
         this.location = location;
     }
 
+    public StorageType storageType() {
+        return StorageType.fromInt(this.storageType);
+    }
 }
