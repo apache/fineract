@@ -798,9 +798,10 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         existingReversedTransactionIds.addAll(findExistingReversedTransactionIds());
 
         final Money amount = Money.of(this.currency, transactionAmount);
+               
         final SavingsAccountTransaction transaction = SavingsAccountTransaction.deposit(this, paymentDetail, transactionDate, amount);
         this.transactions.add(transaction);
-
+        
         this.summary.updateSummary(this.currency, this.savingsAccountTransactionSummaryWrapper, this.transactions);
 
         final LocalDate today = DateUtils.getLocalDateOfTenant();
@@ -875,9 +876,9 @@ public class SavingsAccount extends AbstractPersistable<Long> {
 
         final Money transactionAmountMoney = Money.of(this.currency, transactionAmount);
 
-        if (isNotEnoughFundsToWithdraw(transactionAmountMoney)) {
+        if (this.summary.getAccountBalance(this.currency).isLessThan(transactionAmountMoney.plus(this.withdrawalFeeAmount))) {
             //
-            throw new InsufficientAccountBalanceException("transactionAmount", getAccountBalance(), transactionAmount);
+            throw new InsufficientAccountBalanceException("transactionAmount", getAccountBalance(), this.withdrawalFeeAmount, transactionAmount);
         }
 
         final SavingsAccountTransaction transaction = SavingsAccountTransaction.withdrawal(this, paymentDetail, transactionDate,
@@ -905,11 +906,6 @@ public class SavingsAccount extends AbstractPersistable<Long> {
                 break;
             }
         }
-
-        /***TODO Fixme: Annual fee seems to be added for all withdrawals?**/
-        final Money annualFee = Money.of(this.currency, this.annualFeeAmount);
-        SavingsAccountTransaction annualFeeTransaction = SavingsAccountTransaction.annualFee(this, transactionDate, annualFee);
-        this.transactions.add(annualFeeTransaction);
 
         this.summary.updateSummary(this.currency, this.savingsAccountTransactionSummaryWrapper, this.transactions);
 
