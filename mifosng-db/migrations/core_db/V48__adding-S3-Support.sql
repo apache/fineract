@@ -36,20 +36,28 @@ drop procedure if exists migrate_customer_image_data;
 delimiter #
 create procedure migrate_customer_image_data()
 begin
-declare v_counter int unsigned default 0;
-declare num_of_clients INT DEFAULT 0;
-declare curr_client INT DEFAULT 0;
-declare curr_image INT DEFAULT 0;
-declare prev_image INT DEFAULT 0;
+DECLARE v_counter INT DEFAULT 0;
+DECLARE num_of_clients INT DEFAULT 0;
+DECLARE curr_image INT DEFAULT 0;
+DECLARE prev_image INT DEFAULT 0;
 SELECT COUNT(*) FROM m_client INTO num_of_clients;
+SET @curr_client := 0;
 while v_counter < num_of_clients do
-	INSERT INTO m_image(`location`,`storage_type_enum`) select image_key, 1 FROM m_client where image_key is not null LIMIT v_counter,1;
+	SET @s = CONCAT('INSERT INTO m_image(`location`,`storage_type_enum`) select image_key, 1 FROM m_client where image_key is not null LIMIT  ', v_counter , ', ', 1); 
+	PREPARE stmt1 FROM @s; 
+	EXECUTE stmt1; 
+	DEALLOCATE PREPARE stmt1;
+
 	select ifnull(max(`id`),0) from m_image INTO curr_image;
-	select id FROM m_client where image_key is not null limit v_counter,1 INTO curr_client;
-	IF (prev_image != curr_image) THEN UPDATE m_client set image_id = curr_image where id=curr_client;
+	SET @z = CONCAT('select id INTO @curr_client FROM m_client where image_key is not null limit  ', v_counter , ', ', 1); 
+	PREPARE stmt2 FROM @z; 
+	EXECUTE stmt2; 
+
+	IF (prev_image != curr_image) THEN UPDATE m_client set image_id = curr_image where id=@curr_client;
 	END IF;
+	
 	set prev_image=curr_image;
-    set v_counter=v_counter+1;
+	set v_counter=v_counter+1;
 end while;
 delete from m_image where `location` is null;
 end#
