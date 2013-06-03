@@ -187,7 +187,6 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
             createLoanProductToGLAccountMapping(loanProductId, command);
             changes = loanProductToGLAccountMappingHelper.populateChangesForNewLoanProductToGLAccountMappingCreation(element,
                     accountingRuleType);
-            loanProductToGLAccountMappingHelper.savePaymentChannelToFundSourceMappings(command, element, loanProductId, changes);
         }/*** else examine and update individual changes ***/
         else {
             loanProductToGLAccountMappingHelper.handleChangesToLoanProductToGLAccountMappings(loanProductId, changes, element,
@@ -218,7 +217,6 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
             createSavingProductToGLAccountMapping(savingsProductId, command);
             changes = savingsProductToGLAccountMappingHelper.populateChangesForNewSavingsProductToGLAccountMappingCreation(element,
                     accountingRuleType);
-            savingsProductToGLAccountMappingHelper.savePaymentChannelToFundSourceMappings(command, element, savingsProductId, changes);
         }/*** else examine and update individual changes ***/
         else {
             savingsProductToGLAccountMappingHelper.handleChangesToSavingsProductToGLAccountMappings(savingsProductId, changes, element,
