@@ -163,6 +163,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
     @Column(name = "annual_fee_on_day", nullable = true)
     private Integer annualFeeOnDay;
 
+    @SuppressWarnings("unused")
     @Temporal(TemporalType.DATE)
     @Column(name = "annual_fee_next_due_date", nullable = true)
     private Date annualFeeNextDueDate;
@@ -276,8 +277,8 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         return SavingsAccountStatusType.fromInt(this.status).isActive();
     }
 
-    public void activate(final DateTimeFormatter formatter, final LocalDate activationDate, List<Long> existingTransactionIds,
-            List<Long> existingReversedTransactionIds) {
+    public void activate(final DateTimeFormatter formatter, final LocalDate activationDate, final List<Long> existingTransactionIds,
+            final List<Long> existingReversedTransactionIds) {
 
         if (isActive()) {
             final String defaultUserMessage = "Cannot activate account. Account is already active.";
@@ -352,8 +353,8 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         return lockedInUntilLocalDate;
     }
 
-    public void postInterest(final LocalDate interestPostingUpToDate, List<Long> existingTransactionIds,
-            List<Long> existingReversedTransactionIds) {
+    public void postInterest(final LocalDate interestPostingUpToDate, final List<Long> existingTransactionIds,
+            final List<Long> existingReversedTransactionIds) {
 
         final SavingsInterestPostingPeriodType postingPeriodType = SavingsInterestPostingPeriodType.fromInt(this.interestPostingPeriodType);
         final List<LocalDate> postingLocalDates = determineInterestPostingDates(getActivationLocalDate(), interestPostingUpToDate,
@@ -756,7 +757,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
     }
 
     public SavingsAccountTransaction deposit(final DateTimeFormatter formatter, final LocalDate transactionDate,
-            final BigDecimal transactionAmount, List<Long> existingTransactionIds, List<Long> existingReversedTransactionIds,
+            final BigDecimal transactionAmount, final List<Long> existingTransactionIds, final List<Long> existingReversedTransactionIds,
             final PaymentDetail paymentDetail) {
 
         if (isNotActive()) {
@@ -818,7 +819,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
     }
 
     public SavingsAccountTransaction withdraw(final DateTimeFormatter formatter, final LocalDate transactionDate,
-            final BigDecimal transactionAmount, List<Long> existingTransactionIds, List<Long> existingReversedTransactionIds,
+            final BigDecimal transactionAmount, final List<Long> existingTransactionIds, final List<Long> existingReversedTransactionIds,
             final PaymentDetail paymentDetail) {
 
         if (isNotActive()) {
@@ -915,7 +916,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
     }
 
     public SavingsAccountTransaction addAnnualFee(final DateTimeFormatter formatter, final LocalDate transactionDate,
-            List<Long> existingTransactionIds, List<Long> existingReversedTransactionIds) {
+            final List<Long> existingTransactionIds, final List<Long> existingReversedTransactionIds) {
 
         if (isNotActive()) {
 

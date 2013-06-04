@@ -1,18 +1,7 @@
 package org.mifosplatform.infrastructure.core.service;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mifosplatform.infrastructure.configuration.domain.ConfigurationDomainService;
-import org.mifosplatform.infrastructure.configuration.service.ExternalServicesReadPlatformServiceImpl;
-import org.mifosplatform.infrastructure.documentmanagement.contentrepository.ContentRepositoryFactory;
-import org.mifosplatform.infrastructure.documentmanagement.contentrepository.FileSystemContentRepository;
-import org.mifosplatform.infrastructure.documentmanagement.contentrepository.S3ContentRepository;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.springframework.context.ApplicationContext;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DocumentStoreFactoryTest {

@@ -1,34 +1,13 @@
 package org.mifosplatform.infrastructure.core.service;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.io.IOException;
 import java.io.InputStream;
 
-import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mifosplatform.infrastructure.documentmanagement.command.DocumentCommand;
-import org.mifosplatform.infrastructure.documentmanagement.contentrepository.S3ContentRepository;
 import org.mifosplatform.infrastructure.documentmanagement.data.DocumentData;
-import org.mifosplatform.infrastructure.documentmanagement.data.FileData;
-import org.mifosplatform.infrastructure.documentmanagement.exception.ContentManagementException;
-import org.mifosplatform.infrastructure.documentmanagement.exception.DocumentNotFoundException;
-import org.mockito.Matchers;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.amazonaws.AmazonClientException;
-import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.s3.AmazonS3Client;
-import com.amazonaws.services.s3.model.DeleteObjectRequest;
-import com.amazonaws.services.s3.model.GetObjectRequest;
-import com.amazonaws.services.s3.model.PutObjectRequest;
-import com.amazonaws.services.s3.model.PutObjectResult;
-import com.amazonaws.services.s3.model.S3Object;
 
 @RunWith(MockitoJUnitRunner.class)
 public class S3DocumentStoreTest {

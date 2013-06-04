@@ -1,14 +1,6 @@
 package org.mifosplatform.infrastructure.core.service;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mifosplatform.infrastructure.documentmanagement.contentrepository.FileSystemContentRepository;
-import org.mifosplatform.infrastructure.documentmanagement.data.DocumentData;
-import org.mifosplatform.infrastructure.documentmanagement.data.FileData;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)

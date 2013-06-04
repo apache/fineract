@@ -18,10 +18,12 @@ import org.springframework.data.jpa.domain.AbstractPersistable;
 @Table(name = "acc_rule_tags")
 public class AccountingTagRule extends AbstractPersistable<Long> {
 
+    @SuppressWarnings("unused")
     @ManyToOne
     @JoinColumn(name = "acc_rule_id", nullable = false)
     private AccountingRule accountingRule;
 
+    @SuppressWarnings("unused")
     @ManyToOne
     @JoinColumn(name = "tag_id", nullable = false)
     private CodeValue tagId;

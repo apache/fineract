@@ -14,19 +14,13 @@ import org.mifosplatform.accounting.rule.api.AccountingRuleJsonInputParams;
 import org.mifosplatform.accounting.rule.command.AccountingRuleCommand;
 import org.mifosplatform.infrastructure.core.exception.InvalidJsonException;
 import org.mifosplatform.infrastructure.core.serialization.AbstractFromApiJsonDeserializer;
-import org.mifosplatform.infrastructure.core.serialization.FromApiJsonDeserializer;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
-import org.mifosplatform.portfolio.loanaccount.guarantor.command.GuarantorCommand;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
 
-/**
- * Implementation of {@link FromApiJsonDeserializer} for
- * {@link GuarantorCommand}'s.
- */
 @Component
 public final class AccountingRuleCommandFromApiJsonDeserializer extends AbstractFromApiJsonDeserializer<AccountingRuleCommand> {
 
@@ -55,8 +49,12 @@ public final class AccountingRuleCommandFromApiJsonDeserializer extends Abstract
                 element);
         final String name = this.fromApiJsonHelper.extractStringNamed(AccountingRuleJsonInputParams.NAME.getValue(), element);
         final String description = this.fromApiJsonHelper.extractStringNamed(AccountingRuleJsonInputParams.DESCRIPTION.getValue(), element);
-        final String[] creditTags = this.fromApiJsonHelper.extractArrayNamed(AccountingRuleJsonInputParams.CREDIT_ACCOUNT_TAGS.getValue(), element);
-        final String[] debitTags = this.fromApiJsonHelper.extractArrayNamed(AccountingRuleJsonInputParams.DEBIT_ACCOUNT_TAGS.getValue(), element);
+
+        // final String[] creditTags =
+        this.fromApiJsonHelper.extractArrayNamed(AccountingRuleJsonInputParams.CREDIT_ACCOUNT_TAGS.getValue(), element);
+        // final String[] debitTags =
+        this.fromApiJsonHelper.extractArrayNamed(AccountingRuleJsonInputParams.DEBIT_ACCOUNT_TAGS.getValue(), element);
+
         return new AccountingRuleCommand(id, officeId, accountToDebitId, accountToCreditId, name, description);
     }
 }

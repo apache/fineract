@@ -15,6 +15,7 @@ public class GroupAccountSummaryData {
     private final Long productId;
     private final String productName;
     private final Integer accountStatusId;
+    @SuppressWarnings("unused")
     private final String accountNo;
 
     public GroupAccountSummaryData(final Long id, final String externalId, final Long productId, final String productName,
