@@ -1063,10 +1063,18 @@
 							<tr>
 								<td><a href="#datatables">Data Table</a></td>
 								<td>datatables</td>
-								<td></td>
+                                <td><a href="#datatables_createTable">Create Data Table</a></td>
 								<td><a href="#datatables_list">List Data Tables</a></td>
 								<td></td>
 								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+                                <td>datatables/{datatable}</td>
+                                <td></td>
+								<td><a href="#datatables_getTable">Retrieve Data Table Details</a></td>
+                                <td><a href="#datatables_updateTable">Update Data Table</a></td>
+                                <td><a href="#datatables_deleteTable">Delete Data Table</a></td>
 							</tr>
 							<tr class="alt">
 								<td></td>
@@ -11276,6 +11284,57 @@ No Request Body:
 				</div>
 			</div>
 
+			<a id="datatables_createTable" name="datatables_createTable"
+				class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Create Data Table</h4>
+                    <p>Create a new data table and registers it with the Mifos X Core application
+                        table.</p>
+				</div>
+				<div class="method-example">
+                    <code class="method-declaration">
+POST https://DomainName/api/v1/datatables
+                    </code>
+                    <code class="method-request">
+POST https://DomainName/api/v1/datatables
+
+Content-Type: application/json
+Request Body:
+{
+    "datatableName": "extra_client_details",
+    "apptableName": "m_client",
+    "columns": [
+        {
+            "name": "Gender",
+            "type": "Dropdown",
+            "code": "Gender"
+        },
+        {
+            "name": "Some Decimal",
+            "type": "Decimal",
+            "mandatory": true
+        },
+        {
+            "name": "Birth Date",
+            "type": "Date"
+        },
+        {
+            "name": "Question 2",
+            "type": "String",
+            "length": 100,
+            "mandatory": false
+        }
+    ]
+}
+					</code>
+					<code class="method-response">
+{
+  "resourceIdentifier": "extra_client_details"
+} 
+				</code>
+				</div>
+			</div>
 
 			<a id="datatables_list" name="datatables_list"
 				class="old-syle-anchor">&nbsp;</a>
@@ -11303,25 +11362,191 @@ No Request Body:
 					<code class="method-declaration">
 GET https://DomainName/api/v1/datatables
 					</code>
-					<code class="method-response">
+                    <code class="method-response">
 [
- 	{ 
- 		"applicationTableName": "m_client", 
- 		"registeredTableName": "Additional Client Fields Data"
- 	}, 
-	{
-		"applicationTableName": "m_client", 
-		"registeredTableName": "Extra Family Details Data"
-	}, 
-	{
-		"applicationTableName": "m_loan",
-		"registeredTableName": "Additional Loan Fields Data"
-	}
-] 
+  {
+    "applicationTableName": "m_client",
+    "registeredTableName": "extra_client_details",
+    "columnHeaderData": [
+      {
+        "columnName": "client_id",
+        "columnType": "bigint",
+        "columnLength": 0,
+        "columnDisplayType": "INTEGER",
+        "isColumnNullable": false,
+        "isColumnPrimaryKey": true,
+        "columnValues": []
+      },
+      {
+        "columnName": "Gender_cd_Question",
+        "columnType": "int",
+        "columnLength": 0,
+        "columnDisplayType": "INTEGER",
+        "isColumnNullable": true,
+        "isColumnPrimaryKey": false,
+        "columnValues": []
+      },
+      {
+        "columnName": "Some Decimal",
+        "columnType": "decimal",
+        "columnLength": 0,
+        "columnDisplayType": "DECIMAL",
+        "isColumnNullable": true,
+        "isColumnPrimaryKey": false,
+        "columnValues": []
+      },
+      {
+        "columnName": "Birth Date",
+        "columnType": "date",
+        "columnLength": 0,
+        "columnDisplayType": "DATE",
+        "isColumnNullable": true,
+        "isColumnPrimaryKey": false,
+        "columnValues": []
+      }
+    ]
+  }
+]
 					</code>
 				</div>
 			</div>
 
+			<a id="datatables_getTable" name="datatables_getTable"
+				class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+                    <h4>Retrieve Data Table Details</h4>
+					<p>Lists a registered data table details and the Mifos X Core
+						application table they are registered to.</p>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+GET https://DomainName/api/v1/datatables/{datatable}
+					</code>
+                    <code class="method-response">
+{
+   "applicationTableName": "m_client",
+   "registeredTableName": "extra_client_details",
+   "columnHeaderData": [
+      {
+        "columnName": "client_id",
+        "columnType": "bigint",
+        "columnLength": 0,
+        "columnDisplayType": "INTEGER",
+        "isColumnNullable": false,
+        "isColumnPrimaryKey": true,
+        "columnValues": []
+      },
+      {
+        "columnName": "Gender_cd_Question",
+        "columnType": "int",
+        "columnLength": 0,
+        "columnDisplayType": "INTEGER",
+        "isColumnNullable": true,
+        "isColumnPrimaryKey": false,
+        "columnValues": []
+      },
+      {
+        "columnName": "Some Decimal",
+        "columnType": "decimal",
+        "columnLength": 0,
+        "columnDisplayType": "DECIMAL",
+        "isColumnNullable": true,
+        "isColumnPrimaryKey": false,
+        "columnValues": []
+      },
+      {
+        "columnName": "Birth Date",
+        "columnType": "date",
+        "columnLength": 0,
+        "columnDisplayType": "DATE",
+        "isColumnNullable": true,
+        "isColumnPrimaryKey": false,
+        "columnValues": []
+      }
+   ]
+}
+				</code>
+				</div>
+			</div>
+
+			<a id="datatables_updateTable" name="datatables_updateTable"
+				class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Update Data Table</h4>
+                    <p>Modifies fields of a data table. If the apptableName parameter is passed,
+                        data table is deregistered and registered with the new application table.</p>
+				</div>
+				<div class="method-example">
+                    <code class="method-declaration">
+PUT https://DomainName/api/v1/datatables/{datatables}
+                    </code>
+                    <code class="method-request">
+PUT https://DomainName/api/v1/datatables/extra_client_details
+
+Content-Type: application/json
+Request Body:
+{
+    "apptableName": "m_client",
+    "columns": [
+        {
+            "name": "Gender",
+            "type": "Dropdown",
+            "code": "Gender"
+        },
+        {
+            "name": "Some Decimal",
+            "type": "Decimal",
+            "mandatory": true
+        },
+        {
+            "name": "Birth Date",
+            "type": "Date"
+        },
+        {
+            "name": "Question 2",
+            "type": "String",
+            "length": 100,
+            "mandatory": false
+        }
+    ]
+}
+					</code>
+					<code class="method-response">
+{
+  "resourceIdentifier": "extra_client_details"
+} 
+				</code>
+				</div>
+			</div>
+
+			<a id="datatables_deleteTable" name="datatables_deleteTable"
+				class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Delete Data Table</h4>
+                    <p>Deletes a data table and unregisters it from the Mifos X Core
+                        application table.</p>
+				</div>
+				<div class="method-example">
+                    <code class="method-declaration">
+DELETE https://DomainName/api/v1/datatables/{datatables}
+                    </code>
+                    <code class="method-request">
+DELETE https://DomainName/api/v1/datatables/extra_client_details
+
+Content-Type: application/json
+No Request Body
+					</code>
+					<code class="method-response">
+{
+  "resourceIdentifier": "extra_client_details"
+} 
+				</code>
+            </div>
+
+			</div>
 			<a id="datatables_register" name="datatables_register"
 				class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
@@ -15357,11 +15582,19 @@ GET https://DomainName/api/v1/search?query=000000111
 				<tr class="alt">
 					<td><a href="#datatables">Data Table</a></td>
 					<td>datatables</td>
-					<td></td>
+                    <td><a href="#datatables_createTable">Create Data Table</a></td>
 					<td><a href="#datatables_list">List Data Tables</a></td>
 					<td></td>
 					<td></td>
 				</tr>
+                <tr>
+                    <td></td>
+                    <td>datatables/{datatable}</td>
+                    <td></td>
+                    <td><a href="#datatables_getTable">Retrieve Data Table Details</a></td>
+                    <td><a href="#datatables_updateTable">Update Data Table</a></td>
+                    <td><a href="#datatables_deleteTable">Delete Data Table</a></td>
+                </tr>
 				<tr>
 					<td></td>
 					<td>datatables/register/{datatable}/{apptable}</td>
