@@ -297,7 +297,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         context.authenticatedUser();
 
-        this.loanEventApiJsonValidator.validateTransaction(command.json());
+        this.loanEventApiJsonValidator.validateNewRepaymentTransaction(command.json());
 
         final LocalDate transactionDate = command.localDateValueOfParameterNamed("transactionDate");
         final BigDecimal transactionAmount = command.bigDecimalValueOfParameterNamed("transactionAmount");

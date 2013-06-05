@@ -55,7 +55,7 @@ public class HeavensFamilyLoanRepaymentScheduleTransactionProcessor extends Abst
         lastInstallmentDueDate = previousInstallment.getDueDate();
 
         isInAdvance = !(transactionDate.isAfter(lastInstallmentDueDate) || (transactionDate.isEqual(lastInstallmentDueDate)));
-        
+
         return isInAdvance;
     }
 
@@ -75,16 +75,16 @@ public class HeavensFamilyLoanRepaymentScheduleTransactionProcessor extends Abst
         Money penaltyChargesPortion = Money.zero(currency);
 
         if (loanTransaction.isInterestWaiver()) {
-            interestPortion = currentInstallment.waiveInterestComponent(transactionAmountRemaining);
+            interestPortion = currentInstallment.waiveInterestComponent(transactionDate, transactionAmountRemaining);
             transactionAmountRemaining = transactionAmountRemaining.minus(interestPortion);
         } else {
 
             if (currentInstallment.isPrincipalNotCompleted(currency)) {
-                principalPortion = currentInstallment.payPrincipalComponent(transactionAmountRemaining);
+                principalPortion = currentInstallment.payPrincipalComponent(transactionDate, transactionAmountRemaining);
                 if (currentInstallment.isPrincipalCompleted(currency)) {
                     // FIXME - KW - if auto waiving interest need to create
                     // another transaction to handle this.
-                    currentInstallment.waiveInterestComponent(currentInstallment.getInterestCharged(currency));
+                    currentInstallment.waiveInterestComponent(transactionDate, currentInstallment.getInterestCharged(currency));
                 }
 
                 loanTransaction.updateComponents(principalPortion, interestPortion, feeChargesPortion, penaltyChargesPortion);
@@ -93,16 +93,16 @@ public class HeavensFamilyLoanRepaymentScheduleTransactionProcessor extends Abst
             }
 
             // 1. pay of principal with over payment.
-            principalPortion = currentInstallment.payPrincipalComponent(transactionAmountRemaining);
+            principalPortion = currentInstallment.payPrincipalComponent(transactionDate, transactionAmountRemaining);
             transactionAmountRemaining = transactionAmountRemaining.minus(principalPortion);
-            
-            interestPortion = currentInstallment.payInterestComponent(transactionAmountRemaining);
+
+            interestPortion = currentInstallment.payInterestComponent(transactionDate, transactionAmountRemaining);
             transactionAmountRemaining = transactionAmountRemaining.minus(interestPortion);
-            
-            feeChargesPortion = currentInstallment.payFeeChargesComponent(transactionAmountRemaining);
+
+            feeChargesPortion = currentInstallment.payFeeChargesComponent(transactionDate, transactionAmountRemaining);
             transactionAmountRemaining = transactionAmountRemaining.minus(feeChargesPortion);
-            
-            penaltyChargesPortion = currentInstallment.payPenaltyChargesComponent(transactionAmountRemaining);
+
+            penaltyChargesPortion = currentInstallment.payPenaltyChargesComponent(transactionDate, transactionAmountRemaining);
             transactionAmountRemaining = transactionAmountRemaining.minus(penaltyChargesPortion);
         }
 
@@ -117,6 +117,7 @@ public class HeavensFamilyLoanRepaymentScheduleTransactionProcessor extends Abst
     protected Money handleTransactionThatIsOnTimePaymentOfInstallment(final LoanRepaymentScheduleInstallment currentInstallment,
             final LoanTransaction loanTransaction, final Money transactionAmountUnprocessed) {
 
+        final LocalDate transactionDate = loanTransaction.getTransactionDate();
         final MonetaryCurrency currency = transactionAmountUnprocessed.getCurrency();
         Money transactionAmountRemaining = transactionAmountUnprocessed;
         Money principalPortion = Money.zero(transactionAmountRemaining.getCurrency());
@@ -125,27 +126,30 @@ public class HeavensFamilyLoanRepaymentScheduleTransactionProcessor extends Abst
         Money penaltyChargesPortion = Money.zero(transactionAmountRemaining.getCurrency());
 
         if (loanTransaction.isChargesWaiver()) {
-            penaltyChargesPortion = currentInstallment.waivePenaltyChargesComponent(loanTransaction.getPenaltyChargesPortion(currency));
+            penaltyChargesPortion = currentInstallment.waivePenaltyChargesComponent(transactionDate,
+                    loanTransaction.getPenaltyChargesPortion(currency));
             transactionAmountRemaining = transactionAmountRemaining.minus(penaltyChargesPortion);
 
-            feeChargesPortion = currentInstallment.waiveFeeChargesComponent(loanTransaction.getFeeChargesPortion(currency));
+            feeChargesPortion = currentInstallment
+                    .waiveFeeChargesComponent(transactionDate, loanTransaction.getFeeChargesPortion(currency));
             transactionAmountRemaining = transactionAmountRemaining.minus(feeChargesPortion);
 
         } else if (loanTransaction.isInterestWaiver()) {
-            interestPortion = currentInstallment.waiveInterestComponent(transactionAmountRemaining);
+            interestPortion = currentInstallment.waiveInterestComponent(transactionDate, transactionAmountRemaining);
             transactionAmountRemaining = transactionAmountRemaining.minus(interestPortion);
         } else {
             // 1. pay of principal before interest.
-            principalPortion = currentInstallment.payPrincipalComponent(transactionAmountRemaining);
+
+            principalPortion = currentInstallment.payPrincipalComponent(transactionDate, transactionAmountRemaining);
             transactionAmountRemaining = transactionAmountRemaining.minus(principalPortion);
-            
-            interestPortion = currentInstallment.payInterestComponent(transactionAmountRemaining);
+
+            interestPortion = currentInstallment.payInterestComponent(transactionDate, transactionAmountRemaining);
             transactionAmountRemaining = transactionAmountRemaining.minus(interestPortion);
-            
-            feeChargesPortion = currentInstallment.payFeeChargesComponent(transactionAmountRemaining);
+
+            feeChargesPortion = currentInstallment.payFeeChargesComponent(transactionDate, transactionAmountRemaining);
             transactionAmountRemaining = transactionAmountRemaining.minus(feeChargesPortion);
-            
-            penaltyChargesPortion = currentInstallment.payPenaltyChargesComponent(transactionAmountRemaining);
+
+            penaltyChargesPortion = currentInstallment.payPenaltyChargesComponent(transactionDate, transactionAmountRemaining);
             transactionAmountRemaining = transactionAmountRemaining.minus(penaltyChargesPortion);
         }
 

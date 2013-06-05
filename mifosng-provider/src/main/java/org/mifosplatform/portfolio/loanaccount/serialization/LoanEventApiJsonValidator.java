@@ -94,10 +94,33 @@ public final class LoanEventApiJsonValidator {
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
-    /**
-     * @param baseDataValidator
-     * @param element
-     */
+    public void validateNewRepaymentTransaction(final String json) {
+
+        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+
+        final Set<String> transactionParameters = new HashSet<String>(Arrays.asList("transactionDate", "transactionAmount", "note",
+                "locale", "dateFormat", "paymentTypeId", "accountNumber", "checkNumber", "routingCode", "receiptNumber", "bankNumber"));
+
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, transactionParameters);
+
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan.transaction");
+
+        final JsonElement element = fromApiJsonHelper.parse(json);
+        final LocalDate transactionDate = fromApiJsonHelper.extractLocalDateNamed("transactionDate", element);
+        baseDataValidator.reset().parameter("transactionDate").value(transactionDate).notNull();
+
+        final BigDecimal transactionAmount = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("transactionAmount", element);
+        baseDataValidator.reset().parameter("transactionAmount").value(transactionAmount).notNull().positiveAmount();
+
+        final String note = fromApiJsonHelper.extractStringNamed("note", element);
+        baseDataValidator.reset().parameter("note").value(note).notExceedingLengthOf(1000);
+
+        validatePaymentDetails(baseDataValidator, element);
+        throwExceptionIfValidationWarningsExist(dataValidationErrors);
+    }
+
     private void validatePaymentDetails(final DataValidatorBuilder baseDataValidator, final JsonElement element) {
         // Validate all string payment detail fields for max length
         final Integer paymentTypeId = fromApiJsonHelper.extractIntegerWithLocaleNamed("paymentTypeId", element);

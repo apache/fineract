@@ -1296,23 +1296,25 @@ public class Loan extends AbstractPersistable<Long> {
 
             if (isRepaymentScheduleRegenerationRequiredForDisbursement(actualDisbursementDate)) {
                 regenerateRepaymentSchedule(loanScheduleFactory, currency);
+                updateLoanRepaymentPeriodsDerivedFields(actualDisbursementDate);
             } else {
+                updateLoanRepaymentPeriodsDerivedFields(actualDisbursementDate);
                 updateLoanSummaryDerivedFields();
             }
 
-            /***
-             * Adding a temporary Interest applied transaction (applying the
-             * full Interest as soon as the loan is disbursed), will have to
-             * re-look into this logic once loans with Interest calculation need
-             * to be created or more advances accrual accounting support has to
-             * be provided
-             ***/
             Money interestApplied = Money.of(this.getCurrency(), this.summary.getTotalInterestCharged());
             final LoanTransaction interestAppliedTransaction = LoanTransaction.applyInterest(this, interestApplied, actualDisbursementDate);
             this.loanTransactions.add(interestAppliedTransaction);
         }
 
         return actualChanges;
+    }
+
+    private void updateLoanRepaymentPeriodsDerivedFields(final LocalDate actualDisbursementDate) {
+
+        for (LoanRepaymentScheduleInstallment repaymentPeriod : this.repaymentScheduleInstallments) {
+            repaymentPeriod.updateDerivedFields(this.loanCurrency(), actualDisbursementDate);
+        }
     }
 
     /*
@@ -1623,7 +1625,7 @@ public class Loan extends AbstractPersistable<Long> {
     public LocalDate possibleNextRepaymentDate() {
         LocalDate earliestUnpaidInstallmentDate = new LocalDate();
         for (LoanRepaymentScheduleInstallment installment : this.repaymentScheduleInstallments) {
-            if (installment.isNotFullyCompleted()) {
+            if (installment.isNotFullyPaidOff()) {
                 earliestUnpaidInstallmentDate = installment.getDueDate();
                 break;
             }
@@ -1649,7 +1651,7 @@ public class Loan extends AbstractPersistable<Long> {
         Money possibleNextRepaymentAmount = Money.zero(currency);
 
         for (LoanRepaymentScheduleInstallment installment : this.repaymentScheduleInstallments) {
-            if (installment.isNotFullyCompleted()) {
+            if (installment.isNotFullyPaidOff()) {
                 possibleNextRepaymentAmount = installment.getTotalOutstanding(currency);
                 break;
             }
@@ -1670,7 +1672,7 @@ public class Loan extends AbstractPersistable<Long> {
             for (LoanRepaymentScheduleInstallment scheduledRepayment : this.repaymentScheduleInstallments) {
 
                 final Money outstandingForPeriod = scheduledRepayment.getInterestOutstanding(loanCurrency());
-                if (scheduledRepayment.isOverdueOn(new LocalDate()) && scheduledRepayment.isNotFullyCompleted()
+                if (scheduledRepayment.isOverdueOn(new LocalDate()) && scheduledRepayment.isNotFullyPaidOff()
                         && outstandingForPeriod.isGreaterThanZero()) {
                     transactionDate = scheduledRepayment.getDueDate();
                     possibleInterestToWaive = outstandingForPeriod;

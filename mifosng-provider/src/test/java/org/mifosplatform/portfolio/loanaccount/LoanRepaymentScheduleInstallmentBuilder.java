@@ -8,54 +8,56 @@ import org.mifosplatform.portfolio.loanaccount.domain.LoanRepaymentScheduleInsta
 
 public class LoanRepaymentScheduleInstallmentBuilder {
 
-	private Loan loan = null;
-	private Integer installmentNumber = Integer.valueOf(1);
-	private LocalDate fromDate = LocalDate.now();
-	private LocalDate dueDate = LocalDate.now();
-	private MonetaryCurrency currencyDetail = new MonetaryCurrencyBuilder().build();
-	private Money principal = new MoneyBuilder().build();
-	private Money interest = new MoneyBuilder().build();
-	private Money feeCharges = new MoneyBuilder().build();
-	private Money penaltyCharges = new MoneyBuilder().build();
-	private boolean completed = false;
-	
-	public LoanRepaymentScheduleInstallmentBuilder(MonetaryCurrency currencyDetail) {
-		this.currencyDetail = currencyDetail;
-		this.principal = new MoneyBuilder().with(currencyDetail).build();
-		this.interest = new MoneyBuilder().with(currencyDetail).build();
-	}
+    private final Loan loan = null;
+    private Integer installmentNumber = Integer.valueOf(1);
+    private final LocalDate fromDate = LocalDate.now();
+    private LocalDate dueDate = LocalDate.now();
+    private final LocalDate latestTransactionDate = LocalDate.now();
+    private MonetaryCurrency currencyDetail = new MonetaryCurrencyBuilder().build();
+    private Money principal = new MoneyBuilder().build();
+    private Money interest = new MoneyBuilder().build();
+    private final Money feeCharges = new MoneyBuilder().build();
+    private final Money penaltyCharges = new MoneyBuilder().build();
+    private boolean completed = false;
 
-	public LoanRepaymentScheduleInstallment build() {
-		LoanRepaymentScheduleInstallment installment = new LoanRepaymentScheduleInstallment(loan, installmentNumber, fromDate, dueDate, principal.getAmount(), interest.getAmount(), feeCharges.getAmount(), penaltyCharges.getAmount());
-		if (completed) {
-			installment.payPrincipalComponent(principal);
-			installment.payInterestComponent(interest);
-		}
-		return installment;
-	}
+    public LoanRepaymentScheduleInstallmentBuilder(final MonetaryCurrency currencyDetail) {
+        this.currencyDetail = currencyDetail;
+        this.principal = new MoneyBuilder().with(currencyDetail).build();
+        this.interest = new MoneyBuilder().with(currencyDetail).build();
+    }
 
-	public LoanRepaymentScheduleInstallmentBuilder withPrincipal(String withPrincipal) {
-		this.principal = new MoneyBuilder().with(currencyDetail).with(withPrincipal).build();
-		return this;
-	}
-	
-	public LoanRepaymentScheduleInstallmentBuilder withInterest(String withInterest) {
-		this.interest = new MoneyBuilder().with(currencyDetail).with(withInterest).build();
-		return this;
-	}
+    public LoanRepaymentScheduleInstallment build() {
+        LoanRepaymentScheduleInstallment installment = new LoanRepaymentScheduleInstallment(loan, installmentNumber, fromDate, dueDate,
+                principal.getAmount(), interest.getAmount(), feeCharges.getAmount(), penaltyCharges.getAmount());
+        if (completed) {
+            installment.payPrincipalComponent(latestTransactionDate, principal);
+            installment.payInterestComponent(latestTransactionDate, interest);
+        }
+        return installment;
+    }
 
-	public LoanRepaymentScheduleInstallmentBuilder withDueDate(LocalDate withDueDate) {
-		this.dueDate = withDueDate;
-		return this;
-	}
+    public LoanRepaymentScheduleInstallmentBuilder withPrincipal(final String withPrincipal) {
+        this.principal = new MoneyBuilder().with(currencyDetail).with(withPrincipal).build();
+        return this;
+    }
 
-	public LoanRepaymentScheduleInstallmentBuilder completed() {
-		this.completed = true;
-		return this;
-	}
+    public LoanRepaymentScheduleInstallmentBuilder withInterest(final String withInterest) {
+        this.interest = new MoneyBuilder().with(currencyDetail).with(withInterest).build();
+        return this;
+    }
 
-	public LoanRepaymentScheduleInstallmentBuilder withInstallmentNumber(final int withInstallmentNumber) {
-		this.installmentNumber = withInstallmentNumber;
-		return this;
-	}
+    public LoanRepaymentScheduleInstallmentBuilder withDueDate(final LocalDate withDueDate) {
+        this.dueDate = withDueDate;
+        return this;
+    }
+
+    public LoanRepaymentScheduleInstallmentBuilder completed() {
+        this.completed = true;
+        return this;
+    }
+
+    public LoanRepaymentScheduleInstallmentBuilder withInstallmentNumber(final int withInstallmentNumber) {
+        this.installmentNumber = withInstallmentNumber;
+        return this;
+    }
 }

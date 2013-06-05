@@ -24,105 +24,96 @@ import org.mifosplatform.organisation.monetary.domain.Money;
  * If the entire principal of an installment is paid in advance then the
  * interest component is waived.
  */
-public class CreocoreLoanRepaymentScheduleTransactionProcessor extends
-		AbstractLoanRepaymentScheduleTransactionProcessor {
+public class CreocoreLoanRepaymentScheduleTransactionProcessor extends AbstractLoanRepaymentScheduleTransactionProcessor {
 
-	/**
-	 * For creocore, early is defined as any date before the installment due
-	 * date
-	 */
-	@SuppressWarnings("unused")
-	@Override
-	protected boolean isTransactionInAdvanceOfInstallment(
-			final int currentInstallmentIndex,
-			final List<LoanRepaymentScheduleInstallment> installments,
-			final LocalDate transactionDate, final Money transactionAmount) {
+    /**
+     * For creocore, early is defined as any date before the installment due
+     * date
+     */
+    @SuppressWarnings("unused")
+    @Override
+    protected boolean isTransactionInAdvanceOfInstallment(final int currentInstallmentIndex,
+            final List<LoanRepaymentScheduleInstallment> installments, final LocalDate transactionDate, final Money transactionAmount) {
 
-		LoanRepaymentScheduleInstallment currentInstallment = installments.get(currentInstallmentIndex);
+        LoanRepaymentScheduleInstallment currentInstallment = installments.get(currentInstallmentIndex);
 
-		return transactionDate.isBefore(currentInstallment.getDueDate());
-	}
+        return transactionDate.isBefore(currentInstallment.getDueDate());
+    }
 
-	/**
-	 * For early/'in advance' repayments, pay off in the same way as on-time payments,
-	 * interest first then principal.
-	 */
-	@SuppressWarnings("unused")
-	@Override
-	protected Money handleTransactionThatIsPaymentInAdvanceOfInstallment(
-			final LoanRepaymentScheduleInstallment currentInstallment,
-			final List<LoanRepaymentScheduleInstallment> installments,
-			final LoanTransaction loanTransaction,
-			final LocalDate transactionDate, final Money paymentInAdvance) {
-		
-		return handleTransactionThatIsOnTimePaymentOfInstallment(currentInstallment, loanTransaction, paymentInAdvance);
-	}
+    /**
+     * For early/'in advance' repayments, pay off in the same way as on-time
+     * payments, interest first then principal.
+     */
+    @SuppressWarnings("unused")
+    @Override
+    protected Money handleTransactionThatIsPaymentInAdvanceOfInstallment(final LoanRepaymentScheduleInstallment currentInstallment,
+            final List<LoanRepaymentScheduleInstallment> installments, final LoanTransaction loanTransaction,
+            final LocalDate transactionDate, final Money paymentInAdvance) {
 
-	/**
-	 * For late repayments, pay off in the same way as on-time payments,
-	 * interest first then principal.
-	 */
-	@SuppressWarnings("unused")
-	@Override
-	protected Money handleTransactionThatIsALateRepaymentOfInstallment(
-			final LoanRepaymentScheduleInstallment currentInstallment,
-			final List<LoanRepaymentScheduleInstallment> installments,
-			final LoanTransaction loanTransaction,
-			final Money transactionAmountUnprocessed) {
+        return handleTransactionThatIsOnTimePaymentOfInstallment(currentInstallment, loanTransaction, paymentInAdvance);
+    }
 
-		return handleTransactionThatIsOnTimePaymentOfInstallment(
-				currentInstallment, loanTransaction,
-				transactionAmountUnprocessed);
-	}
+    /**
+     * For late repayments, pay off in the same way as on-time payments,
+     * interest first then principal.
+     */
+    @SuppressWarnings("unused")
+    @Override
+    protected Money handleTransactionThatIsALateRepaymentOfInstallment(final LoanRepaymentScheduleInstallment currentInstallment,
+            final List<LoanRepaymentScheduleInstallment> installments, final LoanTransaction loanTransaction,
+            final Money transactionAmountUnprocessed) {
 
-	/**
-	 * For normal on-time repayments, pays off interest first, then principal.
-	 */
-	@Override
-	protected Money handleTransactionThatIsOnTimePaymentOfInstallment(
-			final LoanRepaymentScheduleInstallment currentInstallment,
-			final LoanTransaction loanTransaction,
-			final Money transactionAmountUnprocessed) {
+        return handleTransactionThatIsOnTimePaymentOfInstallment(currentInstallment, loanTransaction, transactionAmountUnprocessed);
+    }
 
-		final MonetaryCurrency currency = transactionAmountUnprocessed.getCurrency();
-		Money transactionAmountRemaining = transactionAmountUnprocessed;
-		Money principalPortion = Money.zero(transactionAmountRemaining.getCurrency());
-		Money interestPortion = Money.zero(transactionAmountRemaining.getCurrency());
-		Money feeChargesPortion = Money.zero(transactionAmountRemaining.getCurrency());
-		Money penaltyChargesPortion = Money.zero(transactionAmountRemaining.getCurrency());
-		
-		if (loanTransaction.isChargesWaiver()) {
-			penaltyChargesPortion = currentInstallment.waivePenaltyChargesComponent(loanTransaction.getPenaltyChargesPortion(currency));
-			transactionAmountRemaining = transactionAmountRemaining.minus(penaltyChargesPortion);
-			
-			feeChargesPortion = currentInstallment.waiveFeeChargesComponent(loanTransaction.getFeeChargesPortion(currency));
-			transactionAmountRemaining = transactionAmountRemaining.minus(feeChargesPortion);
-			
-		} else if (loanTransaction.isInterestWaiver()) {
-			interestPortion = currentInstallment.waiveInterestComponent(transactionAmountRemaining);
-			transactionAmountRemaining = transactionAmountRemaining.minus(interestPortion);
-		} else {
-			penaltyChargesPortion = currentInstallment.payPenaltyChargesComponent(transactionAmountRemaining);
-			transactionAmountRemaining = transactionAmountRemaining.minus(penaltyChargesPortion);
-			
-			feeChargesPortion = currentInstallment.payFeeChargesComponent(transactionAmountRemaining);
-			transactionAmountRemaining = transactionAmountRemaining.minus(feeChargesPortion);
-		
-			interestPortion = currentInstallment.payInterestComponent(transactionAmountRemaining);
-			transactionAmountRemaining = transactionAmountRemaining.minus(interestPortion);
-	
-			principalPortion = currentInstallment.payPrincipalComponent(transactionAmountRemaining);
-			transactionAmountRemaining = transactionAmountRemaining.minus(principalPortion);
-		}
-		
-		loanTransaction.updateComponents(principalPortion, interestPortion, feeChargesPortion, penaltyChargesPortion);
-		return transactionAmountRemaining;
-	}
+    /**
+     * For normal on-time repayments, pays off interest first, then principal.
+     */
+    @Override
+    protected Money handleTransactionThatIsOnTimePaymentOfInstallment(final LoanRepaymentScheduleInstallment currentInstallment,
+            final LoanTransaction loanTransaction, final Money transactionAmountUnprocessed) {
 
-	@SuppressWarnings("unused")
-	@Override
-	protected void onLoanOverpayment(final LoanTransaction loanTransaction,
-			final Money loanOverPaymentAmount) {
-		// dont do anything for with loan over-payment
-	}
+        final LocalDate transactionDate = loanTransaction.getTransactionDate();
+        final MonetaryCurrency currency = transactionAmountUnprocessed.getCurrency();
+        Money transactionAmountRemaining = transactionAmountUnprocessed;
+        Money principalPortion = Money.zero(transactionAmountRemaining.getCurrency());
+        Money interestPortion = Money.zero(transactionAmountRemaining.getCurrency());
+        Money feeChargesPortion = Money.zero(transactionAmountRemaining.getCurrency());
+        Money penaltyChargesPortion = Money.zero(transactionAmountRemaining.getCurrency());
+
+        if (loanTransaction.isChargesWaiver()) {
+            penaltyChargesPortion = currentInstallment.waivePenaltyChargesComponent(transactionDate,
+                    loanTransaction.getPenaltyChargesPortion(currency));
+            transactionAmountRemaining = transactionAmountRemaining.minus(penaltyChargesPortion);
+
+            feeChargesPortion = currentInstallment
+                    .waiveFeeChargesComponent(transactionDate, loanTransaction.getFeeChargesPortion(currency));
+            transactionAmountRemaining = transactionAmountRemaining.minus(feeChargesPortion);
+
+        } else if (loanTransaction.isInterestWaiver()) {
+            interestPortion = currentInstallment.waiveInterestComponent(transactionDate, transactionAmountRemaining);
+            transactionAmountRemaining = transactionAmountRemaining.minus(interestPortion);
+        } else {
+            penaltyChargesPortion = currentInstallment.payPenaltyChargesComponent(transactionDate, transactionAmountRemaining);
+            transactionAmountRemaining = transactionAmountRemaining.minus(penaltyChargesPortion);
+
+            feeChargesPortion = currentInstallment.payFeeChargesComponent(transactionDate, transactionAmountRemaining);
+            transactionAmountRemaining = transactionAmountRemaining.minus(feeChargesPortion);
+
+            interestPortion = currentInstallment.payInterestComponent(transactionDate, transactionAmountRemaining);
+            transactionAmountRemaining = transactionAmountRemaining.minus(interestPortion);
+
+            principalPortion = currentInstallment.payPrincipalComponent(transactionDate, transactionAmountRemaining);
+            transactionAmountRemaining = transactionAmountRemaining.minus(principalPortion);
+        }
+
+        loanTransaction.updateComponents(principalPortion, interestPortion, feeChargesPortion, penaltyChargesPortion);
+        return transactionAmountRemaining;
+    }
+
+    @SuppressWarnings("unused")
+    @Override
+    protected void onLoanOverpayment(final LoanTransaction loanTransaction, final Money loanOverPaymentAmount) {
+        // dont do anything for with loan over-payment
+    }
 }

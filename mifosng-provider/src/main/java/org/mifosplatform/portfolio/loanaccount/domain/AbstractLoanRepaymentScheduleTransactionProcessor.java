@@ -43,6 +43,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
 
         for (LoanRepaymentScheduleInstallment currentInstallment : installments) {
             currentInstallment.resetDerivedComponents();
+            currentInstallment.updateDerivedFields(currency, disbursementDate);
         }
 
         // re-process loan charges over repayment periods (picking up on waived
@@ -108,7 +109,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
 
         for (LoanRepaymentScheduleInstallment currentInstallment : installments) {
 
-            if (currentInstallment.isNotFullyCompleted()) {
+            if (currentInstallment.isNotFullyPaidOff()) {
 
                 // is this transaction early/late/on-time with respect to the
                 // current installment?
@@ -205,6 +206,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
     public void handleWriteOff(final LoanTransaction loanTransaction, final MonetaryCurrency currency,
             final List<LoanRepaymentScheduleInstallment> installments) {
 
+        LocalDate transactionDate = loanTransaction.getTransactionDate();
         Money principalPortion = Money.zero(currency);
         Money interestPortion = Money.zero(currency);
         Money feeChargesPortion = Money.zero(currency);
@@ -214,11 +216,12 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
         // principal, interest and charges
         for (LoanRepaymentScheduleInstallment currentInstallment : installments) {
 
-            if (currentInstallment.isNotFullyCompleted()) {
-                principalPortion = principalPortion.plus(currentInstallment.writeOffOutstandingPrincipal(currency));
-                interestPortion = interestPortion.plus(currentInstallment.writeOffOutstandingInterest(currency));
-                feeChargesPortion = feeChargesPortion.plus(currentInstallment.writeOffOutstandingFeeCharges(currency));
-                penaltychargesPortion = penaltychargesPortion.plus(currentInstallment.writeOffOutstandingPenaltyCharges(currency));
+            if (currentInstallment.isNotFullyPaidOff()) {
+                principalPortion = principalPortion.plus(currentInstallment.writeOffOutstandingPrincipal(transactionDate, currency));
+                interestPortion = interestPortion.plus(currentInstallment.writeOffOutstandingInterest(transactionDate, currency));
+                feeChargesPortion = feeChargesPortion.plus(currentInstallment.writeOffOutstandingFeeCharges(transactionDate, currency));
+                penaltychargesPortion = penaltychargesPortion.plus(currentInstallment.writeOffOutstandingPenaltyCharges(transactionDate,
+                        currency));
             }
         }
 
