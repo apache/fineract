@@ -32,4 +32,8 @@ public class SavingsAccountStatusEnumData {
         this.active = active;
         this.closed = closed;
     }
+    
+    public Long id() {
+        return this.id;
+    }
 }

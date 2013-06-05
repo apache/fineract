@@ -31,6 +31,10 @@ import org.mifosplatform.portfolio.group.data.GroupGeneralData;
 import org.mifosplatform.portfolio.group.service.SearchParameters;
 import org.mifosplatform.portfolio.loanaccount.data.LoanStatusEnumData;
 import org.mifosplatform.portfolio.loanproduct.service.LoanEnumerations;
+import org.mifosplatform.portfolio.savings.data.SavingsAccountStatusEnumData;
+import org.mifosplatform.portfolio.savings.domain.SavingsAccountStatusType;
+import org.mifosplatform.portfolio.savings.service.SavingStatusMapper;
+import org.mifosplatform.portfolio.savings.service.SavingsEnumerations;
 import org.mifosplatform.useradministration.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -411,8 +415,18 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             final List<ClientAccountSummaryData> savingsAccounts = this.jdbcTemplate.query(savingsSql, savingsAccountSummaryDataMapper,
                     new Object[] { clientId });
 
-            approvedSavingAccounts.addAll(savingsAccounts);
+            if (results != null) {
+                for (ClientAccountSummaryData row : savingsAccounts) {
 
+                	SavingStatusMapper statusMapper = new SavingStatusMapper(row.accountStatusId());
+
+                    if (statusMapper.isOpen()) {
+                    	approvedSavingAccounts.add(row);
+                    } else {
+                    	pendingApprovalSavingAccounts.add(row);
+                    }
+                }
+            }
             return new ClientAccountSummaryCollectionData(pendingApprovalLoans, awaitingDisbursalLoans, openLoans, closedLoans,
                     pendingApprovalDepositAccounts, approvedDepositAccounts, withdrawnByClientDespositAccounts, rejectedDepositAccounts,
                     closedDepositAccounts, preclosedDepositAccounts, maturedDepositAccounts, pendingApprovalSavingAccounts,
@@ -446,7 +460,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
         public ClientSavingsAccountSummaryDataMapper() {
             StringBuilder accountsSummary = new StringBuilder();
-            accountsSummary.append("sa.id as id, sa.account_no as accountNo, sa.external_id as externalId,");
+            accountsSummary.append("sa.id as id, sa.account_no as accountNo, sa.external_id as externalId, sa.status_enum as statusEnum, ");
             accountsSummary.append("sa.product_id as productId, p.name as productName ");
             accountsSummary.append("from m_savings_account sa ");
             accountsSummary.append("join m_savings_product as p on p.id = sa.product_id ");
@@ -465,10 +479,11 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             final String accountNo = rs.getString("accountNo");
             final String externalId = rs.getString("externalId");
             final Long productId = JdbcSupport.getLong(rs, "productId");
-            final String loanProductName = rs.getString("productName");
-            final LoanStatusEnumData loanStatus = null;
+            final String savingsProductName = rs.getString("productName");
+            final Integer statusId = JdbcSupport.getInteger(rs, "statusEnum");
+            final SavingsAccountStatusEnumData savingAccountStatus = SavingsEnumerations.status(statusId);
 
-            return new ClientAccountSummaryData(id, accountNo, externalId, productId, loanProductName, loanStatus);
+            return new ClientAccountSummaryData(id, accountNo, externalId, productId, savingsProductName, savingAccountStatus);
         }
     }
 
