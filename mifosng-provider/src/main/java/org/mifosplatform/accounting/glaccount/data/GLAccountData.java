@@ -48,10 +48,6 @@ public class GLAccountData {
     final Collection<CodeValueData> allowedIncomeTagOptions;
     final Collection<CodeValueData> allowedExpensesTagOptions;
 
-    // for predefined journal entry template
-    private final List<GLAccountDataForLookup> creditAccounts;
-    private final List<GLAccountDataForLookup> debitAccounts;
-
     public GLAccountData(final Long id, final String name, final Long parentId, final String glCode, final boolean disabled,
             final boolean manualEntriesAllowed, final EnumOptionData type, final EnumOptionData usage, final String description,
             final String nameDecorated, final CodeValueData tagId) {
@@ -78,8 +74,6 @@ public class GLAccountData {
         this.allowedEquityTagOptions = null;
         this.allowedIncomeTagOptions = null;
         this.allowedExpensesTagOptions = null;
-        this.creditAccounts = null;
-        this.debitAccounts = null;
     }
 
     public GLAccountData(final GLAccountData accountData, final List<EnumOptionData> accountTypeOptions,
@@ -112,8 +106,6 @@ public class GLAccountData {
         this.allowedEquityTagOptions = allowedEquityTagOptions;
         this.allowedIncomeTagOptions = allowedIncomeTagOptions;
         this.allowedExpensesTagOptions = allowedExpensesTagOptions;
-        this.creditAccounts = accountData.creditAccounts;
-        this.debitAccounts = accountData.debitAccounts;
     }
 
     public static GLAccountData sensibleDefaultsForNewGLAccountCreation(final Integer glAccType) {
@@ -160,8 +152,6 @@ public class GLAccountData {
         this.allowedEquityTagOptions = null;
         this.allowedIncomeTagOptions = null;
         this.allowedExpensesTagOptions = null;
-        this.creditAccounts = null;
-        this.debitAccounts = null;
     }
 
     public Long getId() {

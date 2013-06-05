@@ -28,6 +28,8 @@ public class AccountingRuleData {
     private final String name;
     private final String description;
     private final boolean systemDefined;
+    private final boolean allowMultipleDebitEntries;
+    private final boolean allowMultipleCreditEntries;
     private final GLAccountData debitAccountHead;
     private final GLAccountData creditAccountHead;
     private final List<AccountingTagRuleData> creditTags;
@@ -36,33 +38,28 @@ public class AccountingRuleData {
     // template
     private List<OfficeData> allowedOffices = new ArrayList<OfficeData>();
     private List<GLAccountData> allowedAccounts = new ArrayList<GLAccountData>();
-    private final Collection<CodeValueData> allowedAssetsTagOptions;
-    private final Collection<CodeValueData> allowedLiabilitiesTagOptions;
-    private final Collection<CodeValueData> allowedEquityTagOptions;
-    private final Collection<CodeValueData> allowedIncomeTagOptions;
-    private final Collection<CodeValueData> allowedExpensesTagOptions;
+    private final Collection<CodeValueData> allowedCreditTagOptions;
+    private final Collection<CodeValueData> allowedDebitTagOptions;
     private final List<GLAccountDataForLookup> creditAccounts;
     private final List<GLAccountDataForLookup> debitAccounts;
 
     public AccountingRuleData(final AccountingRuleData accountingRuleData, final List<GLAccountData> allowedAccounts,
-            final List<OfficeData> allowedOffices, final Collection<CodeValueData> allowedAssetsTagOptions,
-            final Collection<CodeValueData> allowedLiabilitiesTagOptions, final Collection<CodeValueData> allowedEquityTagOptions,
-            final Collection<CodeValueData> allowedIncomeTagOptions, final Collection<CodeValueData> allowedExpensesTagOptions) {
+            final List<OfficeData> allowedOffices, final Collection<CodeValueData> allowedCreditTagOptions,
+            final Collection<CodeValueData> allowedDebitTagOptions) {
         this.id = accountingRuleData.id;
         this.officeId = accountingRuleData.officeId;
         this.officeName = accountingRuleData.officeName;
         this.name = accountingRuleData.name;
         this.description = accountingRuleData.description;
         this.systemDefined = accountingRuleData.systemDefined;
+        this.allowMultipleDebitEntries = accountingRuleData.allowMultipleDebitEntries;
+        this.allowMultipleCreditEntries = accountingRuleData.allowMultipleCreditEntries;
         this.allowedOffices = allowedOffices;
         this.allowedAccounts = allowedAccounts;
         this.debitAccountHead = accountingRuleData.debitAccountHead;
         this.creditAccountHead = accountingRuleData.creditAccountHead;
-        this.allowedAssetsTagOptions = allowedAssetsTagOptions;
-        this.allowedLiabilitiesTagOptions = allowedLiabilitiesTagOptions;
-        this.allowedEquityTagOptions = allowedEquityTagOptions;
-        this.allowedIncomeTagOptions = allowedIncomeTagOptions;
-        this.allowedExpensesTagOptions = allowedExpensesTagOptions;
+        this.allowedCreditTagOptions = allowedCreditTagOptions;
+        this.allowedDebitTagOptions = allowedDebitTagOptions;
         this.creditTags = accountingRuleData.creditTags;
         this.debitTags = accountingRuleData.debitTags;
         this.creditAccounts = accountingRuleData.creditAccounts;
@@ -70,24 +67,21 @@ public class AccountingRuleData {
     }
 
     public AccountingRuleData(final List<GLAccountData> allowedAccounts, final List<OfficeData> allowedOffices,
-            final Collection<CodeValueData> allowedAssetsTagOptions, final Collection<CodeValueData> allowedLiabilitiesTagOptions,
-            final Collection<CodeValueData> allowedEquityTagOptions, final Collection<CodeValueData> allowedIncomeTagOptions,
-            final Collection<CodeValueData> allowedExpensesTagOptions) {
+            final Collection<CodeValueData> allowedCreditTagOptions, final Collection<CodeValueData> allowedDebitTagOptions) {
         this.id = null;
         this.officeId = null;
         this.officeName = null;
         this.name = null;
         this.description = null;
         this.systemDefined = false;
+        this.allowMultipleDebitEntries = false;
+        this.allowMultipleCreditEntries = false;
         this.allowedOffices = allowedOffices;
         this.allowedAccounts = allowedAccounts;
         this.debitAccountHead = null;
         this.creditAccountHead = null;
-        this.allowedAssetsTagOptions = allowedAssetsTagOptions;
-        this.allowedLiabilitiesTagOptions = allowedLiabilitiesTagOptions;
-        this.allowedEquityTagOptions = allowedEquityTagOptions;
-        this.allowedIncomeTagOptions = allowedIncomeTagOptions;
-        this.allowedExpensesTagOptions = allowedExpensesTagOptions;
+        this.allowedCreditTagOptions = allowedCreditTagOptions;
+        this.allowedDebitTagOptions = allowedDebitTagOptions;
         this.creditTags = null;
         this.debitTags = null;
         this.creditAccounts = null;
@@ -95,22 +89,22 @@ public class AccountingRuleData {
     }
 
     public AccountingRuleData(final Long id, final Long officeId, final String officeName, final String name, final String description,
-            final boolean systemDefined, final GLAccountData debitAccountData, final GLAccountData creditAccountData) {
+            final boolean systemDefined, final boolean allowMultipleDebitEntries, final boolean allowMultipleCreditEntries,
+            final GLAccountData debitAccountData, final GLAccountData creditAccountData) {
         this.id = id;
         this.officeId = officeId;
         this.officeName = officeName;
         this.name = name;
         this.description = description;
         this.systemDefined = systemDefined;
+        this.allowMultipleDebitEntries = allowMultipleDebitEntries;
+        this.allowMultipleCreditEntries = allowMultipleCreditEntries;
         this.allowedOffices = null;
         this.allowedAccounts = null;
         this.debitAccountHead = debitAccountData;
         this.creditAccountHead = creditAccountData;
-        this.allowedAssetsTagOptions = null;
-        this.allowedLiabilitiesTagOptions = null;
-        this.allowedEquityTagOptions = null;
-        this.allowedIncomeTagOptions = null;
-        this.allowedExpensesTagOptions = null;
+        this.allowedCreditTagOptions = null;
+        this.allowedDebitTagOptions = null;
         this.creditTags = null;
         this.debitTags = null;
         this.creditAccounts = new ArrayList<GLAccountDataForLookup>();
@@ -126,15 +120,14 @@ public class AccountingRuleData {
         this.name = accountingRuleData.name;
         this.description = accountingRuleData.description;
         this.systemDefined = accountingRuleData.systemDefined;
+        this.allowMultipleDebitEntries = accountingRuleData.allowMultipleDebitEntries;
+        this.allowMultipleCreditEntries = accountingRuleData.allowMultipleCreditEntries;
         this.allowedOffices = accountingRuleData.allowedOffices;
         this.allowedAccounts = accountingRuleData.allowedAccounts;
         this.debitAccountHead = accountingRuleData.debitAccountHead;
         this.creditAccountHead = accountingRuleData.creditAccountHead;
-        this.allowedAssetsTagOptions = accountingRuleData.allowedAssetsTagOptions;
-        this.allowedLiabilitiesTagOptions = accountingRuleData.allowedLiabilitiesTagOptions;
-        this.allowedEquityTagOptions = accountingRuleData.allowedEquityTagOptions;
-        this.allowedIncomeTagOptions = accountingRuleData.allowedIncomeTagOptions;
-        this.allowedExpensesTagOptions = accountingRuleData.allowedExpensesTagOptions;
+        this.allowedCreditTagOptions = accountingRuleData.allowedCreditTagOptions;
+        this.allowedDebitTagOptions = accountingRuleData.allowedDebitTagOptions;
         this.creditTags = creditTags;
         this.creditAccounts = creditAccounts;
         this.debitTags = debitTags;

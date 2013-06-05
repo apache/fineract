@@ -73,7 +73,7 @@ public class JournalEntry extends AbstractAuditableCustom<AppUser, Long> {
     @SuppressWarnings("unused")
     @Column(name = "entity_id")
     private Long entityId;
-    
+
     @Column(name = "ref_num")
     private String referenceNumber;
 
@@ -104,7 +104,7 @@ public class JournalEntry extends AbstractAuditableCustom<AppUser, Long> {
         this.entityType = entityType;
         this.entityId = entityId;
         this.referenceNumber = referenceNumber;
-        
+
     }
 
     public boolean isDebitEntry() {
@@ -139,8 +139,8 @@ public class JournalEntry extends AbstractAuditableCustom<AppUser, Long> {
         this.reversed = reversed;
     }
 
-	public String getReferenceNumber() {
-		return this.referenceNumber;
-	}
+    public String getReferenceNumber() {
+        return this.referenceNumber;
+    }
 
 }

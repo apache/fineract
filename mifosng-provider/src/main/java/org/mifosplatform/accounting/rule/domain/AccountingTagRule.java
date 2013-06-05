@@ -10,20 +10,20 @@ import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
+import org.mifosplatform.accounting.journalentry.domain.JournalEntryType;
 import org.mifosplatform.infrastructure.codes.domain.CodeValue;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
-@Table(name = "acc_rule_tags")
+@Table(name = "acc_rule_tags", uniqueConstraints = { @UniqueConstraint(columnNames = { "acc_rule_id", "tag_id", "acc_type_enum" }, name = "UNIQUE_ACCOUNT_RULE_TAGS") })
 public class AccountingTagRule extends AbstractPersistable<Long> {
 
-    @SuppressWarnings("unused")
     @ManyToOne
     @JoinColumn(name = "acc_rule_id", nullable = false)
     private AccountingRule accountingRule;
 
-    @SuppressWarnings("unused")
     @ManyToOne
     @JoinColumn(name = "tag_id", nullable = false)
     private CodeValue tagId;
@@ -50,6 +50,18 @@ public class AccountingTagRule extends AbstractPersistable<Long> {
 
     public Integer getAccountType() {
         return this.accountType;
+    }
+
+    public boolean isDebitAccount() {
+        return JournalEntryType.fromInt(this.accountType).isDebitType();
+    }
+
+    public boolean isCreditAccount() {
+        return JournalEntryType.fromInt(this.accountType).isCreditType();
+    }
+
+    public Long getTagId() {
+        return this.tagId.getId();
     }
 
 }

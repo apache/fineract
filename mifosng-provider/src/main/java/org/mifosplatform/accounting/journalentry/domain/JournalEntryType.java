@@ -45,4 +45,12 @@ public enum JournalEntryType {
         return name().toString();
     }
 
+    public boolean isDebitType() {
+        return this.value.equals(JournalEntryType.DEBIT.getValue());
+    }
+
+    public boolean isCreditType() {
+        return this.value.equals(JournalEntryType.CREDIT.getValue());
+    }
+
 }
