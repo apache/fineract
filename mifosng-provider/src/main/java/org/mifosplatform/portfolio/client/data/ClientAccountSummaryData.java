@@ -5,6 +5,7 @@
  */
 package org.mifosplatform.portfolio.client.data;
 
+import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanStatusEnumData;
 
 /**
@@ -25,6 +26,8 @@ public class ClientAccountSummaryData {
 
     private final Integer accountStatusId;
     private final LoanStatusEnumData status;
+    @SuppressWarnings("unused")
+	private final EnumOptionData loanType;
 
     public ClientAccountSummaryData(final Long id, final String externalId, final Long productId, final String loanProductName,
             final Integer loanStatusId) {
@@ -35,6 +38,7 @@ public class ClientAccountSummaryData {
         this.productName = loanProductName;
         this.accountStatusId = loanStatusId;
         this.status = null;
+        this.loanType = null;
     }
 
     public ClientAccountSummaryData(final Long id, final String accountNo, final String externalId, final Long productId,
@@ -46,6 +50,19 @@ public class ClientAccountSummaryData {
         this.productName = loanProductName;
         this.accountStatusId = null;
         this.status = loanStatus;
+        this.loanType = null;
+    }
+    
+    public ClientAccountSummaryData(final Long id, final String accountNo, final String externalId, final Long productId,
+            final String loanProductName, final LoanStatusEnumData loanStatus, final EnumOptionData loanType) {
+        this.id = id;
+        this.accountNo = accountNo;
+        this.externalId = externalId;
+        this.productId = productId;
+        this.productName = loanProductName;
+        this.accountStatusId = null;
+        this.status = loanStatus;
+        this.loanType = loanType;
     }
 
     public Integer accountStatusId() {
