@@ -256,4 +256,8 @@ public class Money implements Comparable<Money> {
     private MonetaryCurrency monetaryCurrency() {
         return new MonetaryCurrency(this.currencyCode, this.currencyDigitsAfterDecimal);
     }
+
+    public Money zero() {
+        return Money.zero(getCurrency());
+    }
 }

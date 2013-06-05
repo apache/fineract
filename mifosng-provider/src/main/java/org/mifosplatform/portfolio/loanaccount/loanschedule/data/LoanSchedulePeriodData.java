@@ -286,14 +286,6 @@ public class LoanSchedulePeriodData {
         return value;
     }
 
-    public boolean isRepaymentPeriod() {
-        boolean isRepaymentPeriod = false;
-        if (principalDue != null && this.interestDue != null) {
-            isRepaymentPeriod = BigDecimal.ZERO.compareTo(this.principalDue) == -1 || BigDecimal.ZERO.compareTo(this.interestDue) == -1;
-        }
-        return isRepaymentPeriod;
-    }
-
     public Integer periodNumber() {
         return this.period;
     }

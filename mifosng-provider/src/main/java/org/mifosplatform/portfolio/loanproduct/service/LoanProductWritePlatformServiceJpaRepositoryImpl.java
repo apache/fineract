@@ -28,7 +28,7 @@ import org.mifosplatform.portfolio.loanproduct.domain.LoanProductRepository;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanTransactionProcessingStrategy;
 import org.mifosplatform.portfolio.loanproduct.exception.InvalidCurrencyException;
 import org.mifosplatform.portfolio.loanproduct.exception.LoanProductNotFoundException;
-import org.mifosplatform.portfolio.loanproduct.serialization.LoanProductCommandFromApiJsonDeserializer;
+import org.mifosplatform.portfolio.loanproduct.serialization.LoanProductDataValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,7 +44,7 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
 
     private final static Logger logger = LoggerFactory.getLogger(LoanProductWritePlatformServiceJpaRepositoryImpl.class);
     private final PlatformSecurityContext context;
-    private final LoanProductCommandFromApiJsonDeserializer fromApiJsonDeserializer;
+    private final LoanProductDataValidator fromApiJsonDeserializer;
     private final LoanProductRepository loanProductRepository;
     private final AprCalculator aprCalculator;
     private final FundRepository fundRepository;
@@ -54,7 +54,7 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
 
     @Autowired
     public LoanProductWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
-            final LoanProductCommandFromApiJsonDeserializer fromApiJsonDeserializer, final LoanProductRepository loanProductRepository,
+            final LoanProductDataValidator fromApiJsonDeserializer, final LoanProductRepository loanProductRepository,
             final AprCalculator aprCalculator, final FundRepository fundRepository,
             final LoanTransactionProcessingStrategyRepository loanTransactionProcessingStrategyRepository,
             final ChargeRepositoryWrapper chargeRepository,

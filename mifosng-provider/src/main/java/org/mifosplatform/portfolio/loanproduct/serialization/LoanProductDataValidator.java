@@ -16,8 +16,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
-import org.mifosplatform.accounting.common.AccountingRuleType;
 import org.mifosplatform.accounting.common.AccountingConstants.LOAN_PRODUCT_ACCOUNTING_PARAMS;
+import org.mifosplatform.accounting.common.AccountingRuleType;
 import org.mifosplatform.infrastructure.core.data.ApiParameterError;
 import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
 import org.mifosplatform.infrastructure.core.exception.InvalidJsonException;
@@ -33,7 +33,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 
 @Component
-public final class LoanProductCommandFromApiJsonDeserializer {
+public final class LoanProductDataValidator {
 
     /**
      * The parameters supported for this command.
@@ -42,7 +42,8 @@ public final class LoanProductCommandFromApiJsonDeserializer {
             "currencyCode", "digitsAfterDecimal", "principal", "minPrincipal", "maxPrincipal", "repaymentEvery", "numberOfRepayments",
             "minNumberOfRepayments", "maxNumberOfRepayments", "repaymentFrequencyType", "interestRatePerPeriod",
             "minInterestRatePerPeriod", "maxInterestRatePerPeriod", "interestRateFrequencyType", "amortizationType", "interestType",
-            "interestCalculationPeriodType", "inArrearsTolerance", "transactionProcessingStrategyId", "charges", "accountingRule",
+            "interestCalculationPeriodType", "inArrearsTolerance", "transactionProcessingStrategyId", "graceOnPrincipalPayment",
+            "graceOnInterestPayment", "graceOnInterestCharged", "charges", "accountingRule",
             LOAN_PRODUCT_ACCOUNTING_PARAMS.FEES_RECEIVABLE.getValue(), LOAN_PRODUCT_ACCOUNTING_PARAMS.FUND_SOURCE.getValue(),
             LOAN_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_FEES.getValue(), LOAN_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_PENALTIES.getValue(),
             LOAN_PRODUCT_ACCOUNTING_PARAMS.INTEREST_ON_LOANS.getValue(), LOAN_PRODUCT_ACCOUNTING_PARAMS.INTEREST_RECEIVABLE.getValue(),
@@ -53,7 +54,7 @@ public final class LoanProductCommandFromApiJsonDeserializer {
     private final FromJsonHelper fromApiJsonHelper;
 
     @Autowired
-    public LoanProductCommandFromApiJsonDeserializer(final FromJsonHelper fromApiJsonHelper) {
+    public LoanProductDataValidator(final FromJsonHelper fromApiJsonHelper) {
         this.fromApiJsonHelper = fromApiJsonHelper;
     }
 
@@ -217,6 +218,16 @@ public final class LoanProductCommandFromApiJsonDeserializer {
         final Long transactionProcessingStrategyId = fromApiJsonHelper.extractLongNamed("transactionProcessingStrategyId", element);
         baseDataValidator.reset().parameter("transactionProcessingStrategyId").value(transactionProcessingStrategyId).notNull()
                 .integerGreaterThanZero();
+
+        // grace validation
+        final Integer graceOnPrincipalPayment = fromApiJsonHelper.extractIntegerWithLocaleNamed("graceOnPrincipalPayment", element);
+        baseDataValidator.reset().parameter("graceOnPrincipalPayment").value(graceOnPrincipalPayment).zeroOrPositiveAmount();
+
+        final Integer graceOnInterestPayment = fromApiJsonHelper.extractIntegerWithLocaleNamed("graceOnInterestPayment", element);
+        baseDataValidator.reset().parameter("graceOnInterestPayment").value(graceOnInterestPayment).zeroOrPositiveAmount();
+
+        final Integer graceOnInterestCharged = fromApiJsonHelper.extractIntegerWithLocaleNamed("graceOnInterestCharged", element);
+        baseDataValidator.reset().parameter("graceOnInterestCharged").value(graceOnInterestCharged).zeroOrPositiveAmount();
 
         // accounting related data validation
         final Integer accountingRuleType = fromApiJsonHelper.extractIntegerNamed("accountingRule", element, Locale.getDefault());
@@ -396,6 +407,23 @@ public final class LoanProductCommandFromApiJsonDeserializer {
                     .integerGreaterThanZero();
         }
 
+        // grace validation
+        if (fromApiJsonHelper.parameterExists("graceOnPrincipalPayment", element)) {
+            final Integer graceOnPrincipalPayment = fromApiJsonHelper.extractIntegerWithLocaleNamed("graceOnPrincipalPayment", element);
+            baseDataValidator.reset().parameter("graceOnPrincipalPayment").value(graceOnPrincipalPayment).zeroOrPositiveAmount();
+        }
+
+        if (fromApiJsonHelper.parameterExists("graceOnInterestPayment", element)) {
+            final Integer graceOnInterestPayment = fromApiJsonHelper.extractIntegerWithLocaleNamed("graceOnInterestPayment", element);
+            baseDataValidator.reset().parameter("graceOnInterestPayment").value(graceOnInterestPayment).zeroOrPositiveAmount();
+        }
+
+        if (fromApiJsonHelper.parameterExists("graceOnInterestCharged", element)) {
+            final Integer graceOnInterestCharged = fromApiJsonHelper.extractIntegerWithLocaleNamed("graceOnInterestCharged", element);
+            baseDataValidator.reset().parameter("graceOnInterestCharged").value(graceOnInterestCharged).zeroOrPositiveAmount();
+        }
+
+        //
         if (fromApiJsonHelper.parameterExists("interestRateFrequencyType", element)) {
             final Integer interestRateFrequencyType = fromApiJsonHelper.extractIntegerNamed("interestRateFrequencyType", element,
                     Locale.getDefault());
@@ -473,11 +501,8 @@ public final class LoanProductCommandFromApiJsonDeserializer {
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
-    /**
+    /*
      * Validation for advanced accounting options
-     * 
-     * @param baseDataValidator
-     * @param element
      */
     private void validatePaymentChannelFundSourceMappings(final DataValidatorBuilder baseDataValidator, final JsonElement element) {
         if (fromApiJsonHelper.parameterExists(LOAN_PRODUCT_ACCOUNTING_PARAMS.PAYMENT_CHANNEL_FUND_SOURCE_MAPPING.getValue(), element)) {

@@ -51,8 +51,8 @@ import org.mifosplatform.portfolio.loanaccount.exception.LoanApplicationDateExce
 import org.mifosplatform.portfolio.loanaccount.exception.LoanApplicationNotInSubmittedAndPendingApprovalStateCannotBeDeleted;
 import org.mifosplatform.portfolio.loanaccount.exception.LoanApplicationNotInSubmittedAndPendingApprovalStateCannotBeModified;
 import org.mifosplatform.portfolio.loanaccount.exception.LoanNotFoundException;
-import org.mifosplatform.portfolio.loanaccount.loanschedule.data.LoanScheduleData;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.AprCalculator;
+import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.LoanScheduleModel;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.service.LoanScheduleCalculationPlatformService;
 import org.mifosplatform.portfolio.loanaccount.serialization.LoanApplicationCommandFromApiJsonHelper;
 import org.mifosplatform.portfolio.loanaccount.serialization.LoanApplicationTransitionApiJsonValidator;
@@ -60,7 +60,7 @@ import org.mifosplatform.portfolio.loanproduct.domain.LoanProduct;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanProductRepository;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanTransactionProcessingStrategy;
 import org.mifosplatform.portfolio.loanproduct.exception.LoanProductNotFoundException;
-import org.mifosplatform.portfolio.loanproduct.serialization.LoanProductCommandFromApiJsonDeserializer;
+import org.mifosplatform.portfolio.loanproduct.serialization.LoanProductDataValidator;
 import org.mifosplatform.portfolio.note.domain.Note;
 import org.mifosplatform.portfolio.note.domain.NoteRepository;
 import org.mifosplatform.useradministration.domain.AppUser;
@@ -81,7 +81,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
     private final PlatformSecurityContext context;
     private final FromJsonHelper fromJsonHelper;
     private final LoanApplicationTransitionApiJsonValidator loanApplicationTransitionApiJsonValidator;
-    private final LoanProductCommandFromApiJsonDeserializer loanProductCommandFromApiJsonDeserializer;
+    private final LoanProductDataValidator loanProductCommandFromApiJsonDeserializer;
     private final LoanApplicationCommandFromApiJsonHelper fromApiJsonDeserializer;
     private final LoanRepository loanRepository;
     private final NoteRepository noteRepository;
@@ -102,7 +102,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
     public LoanApplicationWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context, final FromJsonHelper fromJsonHelper,
             final LoanApplicationTransitionApiJsonValidator loanApplicationTransitionApiJsonValidator,
             final LoanApplicationCommandFromApiJsonHelper fromApiJsonDeserializer,
-            final LoanProductCommandFromApiJsonDeserializer loanProductCommandFromApiJsonDeserializer, final AprCalculator aprCalculator,
+            final LoanProductDataValidator loanProductCommandFromApiJsonDeserializer, final AprCalculator aprCalculator,
             final LoanAssembler loanAssembler, final LoanChargeAssembler loanChargeAssembler,
             final CollateralAssembler loanCollateralAssembler, final LoanRepository loanRepository, final NoteRepository noteRepository,
             final LoanScheduleCalculationPlatformService calculationPlatformService, final ClientRepositoryWrapper clientRepository,
@@ -294,7 +294,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 final JsonElement parsedQuery = this.fromJsonHelper.parse(command.json());
                 final JsonQuery query = JsonQuery.from(command.json(), parsedQuery, this.fromJsonHelper);
 
-                final LoanScheduleData loanSchedule = this.calculationPlatformService.calculateLoanSchedule(query);
+                final LoanScheduleModel loanSchedule = this.calculationPlatformService.calculateLoanSchedule(query);
                 existingLoanApplication.updateLoanSchedule(loanSchedule);
             }
 
@@ -536,14 +536,16 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         final LocalDate edDate = command.localDateValueOfParameterNamed("expectedDisbursementDate");
 
         if (edDate != null) {
-            //Expected disbursement date should not be before Meeting start date
-            if(edDate.isBefore(calendar.getStartDateLocalDate())){
+            // Expected disbursement date should not be before Meeting start
+            // date
+            if (edDate.isBefore(calendar.getStartDateLocalDate())) {
                 final String errorMessage = "Expected disbursement date '" + edDate.toString() + "' cannot be before meeting start date '"
                         + calendar.getStartDate().toString() + "' ";
-                throw new LoanApplicationDateException("disbursement.date.cannot.be.before.meeting.start.date", errorMessage, edDate, calendar.getStartDate());
+                throw new LoanApplicationDateException("disbursement.date.cannot.be.before.meeting.start.date", errorMessage, edDate,
+                        calendar.getStartDate());
             }
-            
-            //Disbursement date should fall on a meeting date
+
+            // Disbursement date should fall on a meeting date
             if (!CalendarHelper.isValidRedurringDate(calendar.getRecurrence(), calendar.getStartDateLocalDate(), edDate)) {
                 final String errorMessage = "Expected disbursement date '" + edDate.toString() + "' does not fall on a meeting date.";
                 throw new NotValidRecurringDateException("loan.expected.disbursement.date", errorMessage, edDate.toString(),
@@ -553,18 +555,20 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         }
 
         final LocalDate repStartingDate = command.localDateValueOfParameterNamed("repaymentsStartingFromDate");
-      
+
         if (repStartingDate != null) {
 
-          //First repayment date should not be before Meeting date
-            if(repStartingDate.isBefore(calendar.getStartDateLocalDate())){
-                final String errorMessage = "First repayment date '" + repStartingDate.toString() + "' cannot be before meeting start date '"
-                        + calendar.getStartDate().toString() + "' ";
-                throw new LoanApplicationDateException("first.repayment.date.cannot.be.before.meeting.start.date", errorMessage, repStartingDate, calendar.getStartDate());
+            // First repayment date should not be before Meeting date
+            if (repStartingDate.isBefore(calendar.getStartDateLocalDate())) {
+                final String errorMessage = "First repayment date '" + repStartingDate.toString()
+                        + "' cannot be before meeting start date '" + calendar.getStartDate().toString() + "' ";
+                throw new LoanApplicationDateException("first.repayment.date.cannot.be.before.meeting.start.date", errorMessage,
+                        repStartingDate, calendar.getStartDate());
             }
-            
+
             if (!CalendarHelper.isValidRedurringDate(calendar.getRecurrence(), calendar.getStartDateLocalDate(), repStartingDate)) {
-                final String errorMessage = "The First repayment date '" + repStartingDate.toString() + "' does not fall on a meeting date.";
+                final String errorMessage = "The First repayment date '" + repStartingDate.toString()
+                        + "' does not fall on a meeting date.";
                 throw new NotValidRecurringDateException("loan.first.repayment.date", errorMessage, repStartingDate.toString(),
                         calendar.getTitle());
             }

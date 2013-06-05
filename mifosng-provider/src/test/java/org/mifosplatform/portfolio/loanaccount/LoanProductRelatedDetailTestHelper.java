@@ -70,7 +70,7 @@ public class LoanProductRelatedDetailTestHelper {
 
         MonetaryCurrency currency = new MonetaryCurrencyBuilder().withCode("USD").withDigitsAfterDecimal(2).build();
         BigDecimal defaultPrincipal = BigDecimal.valueOf(Double.valueOf("200000"));
-        
+
         // 2% per month, 24% per year
         BigDecimal defaultNominalInterestRatePerPeriod = BigDecimal.valueOf(Double.valueOf("2"));
         PeriodFrequencyType interestPeriodFrequencyType = PeriodFrequencyType.MONTHS;
@@ -116,15 +116,20 @@ public class LoanProductRelatedDetailTestHelper {
                 defaultNumberOfRepayments, amortizationMethod, inArrearsTolerance);
     }
 
-    private static LoanProductRelatedDetail createLoanProductRelatedDetail(MonetaryCurrency currency, BigDecimal defaultPrincipal,
-            BigDecimal defaultNominalInterestRatePerPeriod, PeriodFrequencyType interestPeriodFrequencyType,
-            BigDecimal defaultAnnualNominalInterestRate, InterestMethod interestMethod,
-            InterestCalculationPeriodMethod interestCalculationPeriodMethod, Integer repayEvery,
-            PeriodFrequencyType repaymentFrequencyType, Integer defaultNumberOfRepayments, AmortizationMethod amortizationMethod,
-            BigDecimal inArrearsTolerance) {
+    private static LoanProductRelatedDetail createLoanProductRelatedDetail(final MonetaryCurrency currency, final BigDecimal defaultPrincipal,
+            final BigDecimal defaultNominalInterestRatePerPeriod, final PeriodFrequencyType interestPeriodFrequencyType,
+            final BigDecimal defaultAnnualNominalInterestRate, final InterestMethod interestMethod,
+            final InterestCalculationPeriodMethod interestCalculationPeriodMethod, final Integer repayEvery,
+            final PeriodFrequencyType repaymentFrequencyType, final Integer defaultNumberOfRepayments, final AmortizationMethod amortizationMethod,
+            final BigDecimal inArrearsTolerance) {
+
+        final Integer graceOnPrincipalPayment = Integer.valueOf(0);
+        final Integer graceOnInterestPayment = Integer.valueOf(0);
+        final Integer graceOnInterestCharged = Integer.valueOf(0);
 
         return new LoanProductRelatedDetail(currency, defaultPrincipal, defaultNominalInterestRatePerPeriod, interestPeriodFrequencyType,
                 defaultAnnualNominalInterestRate, interestMethod, interestCalculationPeriodMethod, repayEvery, repaymentFrequencyType,
-                defaultNumberOfRepayments, amortizationMethod, inArrearsTolerance);
+                defaultNumberOfRepayments, graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged, amortizationMethod,
+                inArrearsTolerance);
     }
 }

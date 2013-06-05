@@ -62,6 +62,7 @@ import org.mifosplatform.portfolio.loanaccount.exception.LoanNotFoundException;
 import org.mifosplatform.portfolio.loanaccount.exception.LoanOfficerAssignmentException;
 import org.mifosplatform.portfolio.loanaccount.exception.LoanOfficerUnassignmentException;
 import org.mifosplatform.portfolio.loanaccount.exception.LoanTransactionNotFoundException;
+import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.LoanScheduleGeneratorFactory;
 import org.mifosplatform.portfolio.loanaccount.serialization.LoanEventApiJsonValidator;
 import org.mifosplatform.portfolio.loanaccount.serialization.LoanUpdateCommandFromApiJsonDeserializer;
 import org.mifosplatform.portfolio.loanproduct.exception.InvalidCurrencyException;
@@ -91,6 +92,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     private final JournalEntryWritePlatformService journalEntryWritePlatformService;
     private final LoanSummaryWrapper loanSummaryWrapper;
     private final LoanRepaymentScheduleTransactionProcessorFactory loanRepaymentScheduleTransactionProcessorFactory;
+    private final LoanScheduleGeneratorFactory loanScheduleFactory;
     private final CalendarInstanceRepository calendarInstanceRepository;
     private final PaymentDetailWritePlatformService paymentDetailWritePlatformService;
 
@@ -103,7 +105,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             final LoanChargeRepository loanChargeRepository, final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepository,
             final JournalEntryWritePlatformService journalEntryWritePlatformService, final LoanSummaryWrapper loanSummaryWrapper,
             final LoanRepaymentScheduleTransactionProcessorFactory loanRepaymentScheduleTransactionProcessorFactory,
-            final CalendarInstanceRepository calendarInstanceRepository,
+            final LoanScheduleGeneratorFactory loanScheduleFactory, final CalendarInstanceRepository calendarInstanceRepository,
             final PaymentDetailWritePlatformService paymentDetailWritePlatformService) {
         this.context = context;
         this.loanEventApiJsonValidator = loanEventApiJsonValidator;
@@ -118,6 +120,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         this.loanUpdateCommandFromApiJsonDeserializer = loanUpdateCommandFromApiJsonDeserializer;
         this.loanSummaryWrapper = loanSummaryWrapper;
         this.loanRepaymentScheduleTransactionProcessorFactory = loanRepaymentScheduleTransactionProcessorFactory;
+        this.loanScheduleFactory = loanScheduleFactory;
         this.calendarInstanceRepository = calendarInstanceRepository;
         this.paymentDetailWritePlatformService = paymentDetailWritePlatformService;
     }
@@ -152,8 +155,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         PaymentDetail paymentDetail = paymentDetailWritePlatformService.createAndPersistPaymentDetail(command, changes);
 
-        loan.disburse(currentUser, command, applicationCurrency, existingTransactionIds, existingReversedTransactionIds, changes,
-                paymentDetail);
+        loan.disburse(this.loanScheduleFactory, currentUser, command, applicationCurrency, existingTransactionIds,
+                existingReversedTransactionIds, changes, paymentDetail);
 
         if (!changes.isEmpty()) {
             this.loanRepository.save(loan);
@@ -178,7 +181,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 .build();
     }
 
-    private void validateDisbursementDate(LocalDate disbursementDate, Collection<CalendarInstance> calendarInstances) {
+    private void validateDisbursementDate(final LocalDate disbursementDate, final Collection<CalendarInstance> calendarInstances) {
         if (!CollectionUtils.isEmpty(calendarInstances)) {
             Calendar calendar = null;
             for (CalendarInstance calendarInstance : calendarInstances) {
@@ -208,15 +211,13 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         }
     }
 
+    /****
+     * TODO Vishwas: Pair with Ashok and re-factor collection sheet code-base
+     *****/
     @Transactional
     @Override
     public Map<String, Object> bulkLoanDisbursal(final JsonCommand command, final CollectionSheetBulkDisbursalCommand bulkDisbursalCommand) {
         final AppUser currentUser = context.authenticatedUser();
-
-        /****
-         * TODO Vishwas: Pair with Ashok and re-factor collection sheet
-         * code-base
-         *****/
 
         SingleDisbursalCommand[] disbursalCommand = bulkDisbursalCommand.getDisburseTransactions();
         Map<String, Object> changes = new LinkedHashMap<String, Object>();
@@ -234,8 +235,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
             PaymentDetail paymentDetail = paymentDetailWritePlatformService.createAndPersistPaymentDetail(command, changes);
 
-            loan.disburse(currentUser, command, applicationCurrency, existingTransactionIds, existingReversedTransactionIds, changes,
-                    paymentDetail);
+            loan.disburse(this.loanScheduleFactory, currentUser, command, applicationCurrency, existingTransactionIds,
+                    existingReversedTransactionIds, changes, paymentDetail);
 
             if (!changes.isEmpty()) {
                 this.loanRepository.save(loan);

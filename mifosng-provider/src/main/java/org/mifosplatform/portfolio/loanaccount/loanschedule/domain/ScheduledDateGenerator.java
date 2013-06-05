@@ -8,17 +8,12 @@ package org.mifosplatform.portfolio.loanaccount.loanschedule.domain;
 import java.util.List;
 
 import org.joda.time.LocalDate;
-import org.mifosplatform.portfolio.loanproduct.domain.LoanProductMinimumRepaymentScheduleRelatedDetail;
-import org.mifosplatform.portfolio.loanproduct.domain.LoanProductRelatedDetail;
+import org.mifosplatform.portfolio.loanproduct.domain.PeriodFrequencyType;
 
 public interface ScheduledDateGenerator {
 
-	List<LocalDate> generate(
-			LoanProductMinimumRepaymentScheduleRelatedDetail loanScheduleDateInfo,
-			LocalDate disbursementDate, LocalDate firstRepaymentDate);
+    List<LocalDate> generate(LoanApplicationTerms loanApplicationTerms);
 
-	LocalDate idealDisbursementDateBasedOnFirstRepaymentDate(
-			LoanProductRelatedDetail loanScheduleInfo,
-			List<LocalDate> scheduledDates);
-
+    LocalDate idealDisbursementDateBasedOnFirstRepaymentDate(PeriodFrequencyType repaymentPeriodFrequencyType, int repaidEvery,
+            List<LocalDate> scheduledDates);
 }

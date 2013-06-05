@@ -11,7 +11,7 @@
 		var result = {};
 		if (window.location.search) {
 			// split up the query string and store in an associative array
-			var params = window.location.search.slice(1).split("&");                                 x
+			var params = window.location.search.slice(1).split("&");
 			for ( var i = 0; i < params.length; i++) {
 				var tmp = params[i].split("=");
 				result[tmp[0]] = unescape(tmp[1]);
@@ -3822,6 +3822,34 @@ GET https://DomainName/mifosng-provider/api/v1/groups
 							</td>
 						</tr>
 						<tr class=alt>
+							<td>graceOnPrincipalPayment</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Optional: Integer - represents the number of repayment periods that grace should apply to the principal component of a repayment period.
+							</td>
+						</tr>
+						<tr class=alt>
+							<td>graceOnInterestPayment</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Optional: Integer - represents the number of repayment periods that grace should apply to the interest component of a repayment period. Interest is still calculated but offset to later repayment periods.
+							</td>
+						</tr>
+						<tr class=alt>
+							<td>graceOnInterestCharged</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Optional: Integer - represents the number of repayment periods that should be interest-free.
+							</td>
+						</tr>
+						<tr class=alt>
+							<td>interestChargedFromDate</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Optional: Date - The date from with interest is to start being charged.</td>
+						</tr>
+
+						<tr class=alt>
 							<td>expectedDisbursementDate</td>
 						</tr>
 						<tr>
@@ -4847,6 +4875,15 @@ Request Body:
 								amortizationType, interestType,
 								interestCalculationPeriodType, transactionProcessingStrategyId,
 								expectedDisbursementDate, submittedOnDate, loanType</td>
+						</tr>
+					</table>
+					<br/>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Optional Fields</div></td>
+						</tr>
+						<tr class=alt>
+							<td>graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged</td>
 						</tr>
 					</table>
 				</div>
@@ -6968,6 +7005,28 @@ Request Body:
 							</td>
 						</tr>
 						<tr class=alt>
+							<td>graceOnPrincipalPayment</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Optional: Integer - represents the number of repayment periods that grace should apply to the principal component of a repayment period.
+							</td>
+						</tr>
+						<tr class=alt>
+							<td>graceOnInterestPayment</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Optional: Integer - represents the number of repayment periods that grace should apply to the interest component of a repayment period. Interest is still calculated but offset to later repayment periods.
+							</td>
+						</tr>
+						<tr class=alt>
+							<td>graceOnInterestCharged</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Optional: Integer - represents the number of repayment periods that should be interest-free.
+							</td>
+						</tr>
+
+						<tr class=alt>
 							<td>accountingRule</td>
 						</tr>
 						<tr>
@@ -7524,13 +7583,14 @@ GET https://DomainName/api/v1/loanproducts/{productId}
 							<td>name, currencyCode, digitsAfterDecimal, principal,
 								numberOfRepayments, repaymentEvery, repaymentFrequencyType, 
 								interestRatePerPeriod, interestRateFrequencyType, amortizationType, interestType,
-								interestCalculationPeriodType, transactionProcessingStrategyId, accountingRule</td>
+								interestCalculationPeriodType, transactionProcessingStrategyId,
+								accountingRule</td>
 						</tr>
 						<tr class="matrixHeadingBG">
 							<td><div class="mifosXHeading2">Optional Fields</div></td>
 						</tr>
 						<tr class=alt>
-							<td>inArrearsTolerance, charges,paymentChannelToFundSourceMappings</td>
+							<td>inArrearsTolerance, graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged, charges, paymentChannelToFundSourceMappings</td>
 						</tr>
 
 						<tr class="matrixHeadingBG">

@@ -47,6 +47,19 @@ public class JdbcSupport {
         return (Integer) JdbcUtils.getResultSetValue(rs, rs.findColumn(columnName), Integer.class);
     }
 
+    public static Integer getIntegerDefaultToNullIfZero(final ResultSet rs, final String columnName) throws SQLException {
+        Integer value = (Integer) JdbcUtils.getResultSetValue(rs, rs.findColumn(columnName), Integer.class);
+        return defaultToNullIfZero(value);
+    }
+
+    private static Integer defaultToNullIfZero(final Integer value) {
+        Integer result = value;
+        if (result != null && Integer.valueOf(0).equals(value)) {
+            result = null;
+        }
+        return result;
+    }
+
     public static BigDecimal getBigDecimalDefaultToZeroIfNull(final ResultSet rs, final String columnName) throws SQLException {
         final BigDecimal value = rs.getBigDecimal(columnName);
         return defaultToZeroIfNull(value);

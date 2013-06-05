@@ -6,6 +6,8 @@
 package org.mifosplatform.portfolio.loanaccount.domain;
 
 import java.math.BigDecimal;
+import java.math.MathContext;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -61,14 +63,12 @@ import org.mifosplatform.portfolio.loanaccount.exception.InvalidLoanTransactionT
 import org.mifosplatform.portfolio.loanaccount.exception.LoanOfficerAssignmentDateException;
 import org.mifosplatform.portfolio.loanaccount.exception.LoanOfficerAssignmentException;
 import org.mifosplatform.portfolio.loanaccount.exception.LoanOfficerUnassignmentDateException;
-import org.mifosplatform.portfolio.loanaccount.loanschedule.data.LoanScheduleData;
-import org.mifosplatform.portfolio.loanaccount.loanschedule.data.LoanSchedulePeriodData;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.AprCalculator;
-import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.DefaultLoanScheduleGeneratorFactory;
-import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.LoanSchedule;
+import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.LoanApplicationTerms;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.LoanScheduleGenerator;
-import org.mifosplatform.portfolio.loanproduct.domain.AmortizationMethod;
-import org.mifosplatform.portfolio.loanproduct.domain.InterestCalculationPeriodMethod;
+import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.LoanScheduleGeneratorFactory;
+import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.LoanScheduleModel;
+import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.LoanScheduleModelPeriod;
 import org.mifosplatform.portfolio.loanproduct.domain.InterestMethod;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanProduct;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanProductRelatedDetail;
@@ -266,21 +266,20 @@ public class Loan extends AbstractPersistable<Long> {
 
     public static Loan newIndividualLoanApplication(final String accountNo, final Client client, final Integer loanType,
             final LoanProduct loanProduct, final Fund fund, final Staff officer, final CodeValue loanPurpose,
-            final LoanTransactionProcessingStrategy transactionProcessingStrategy, final LoanSchedule loanSchedule,
-            final Set<LoanCharge> loanCharges, final Set<LoanCollateral> collateral) {
+            final LoanTransactionProcessingStrategy transactionProcessingStrategy,
+            final LoanProductRelatedDetail loanRepaymentScheduleDetail, final Set<LoanCharge> loanCharges,
+            final Set<LoanCollateral> collateral) {
         final LoanStatus status = null;
         final Group group = null;
-        LoanProductRelatedDetail loanRepaymentScheduleDetail = loanSchedule.loanProductRelatedDetail();
         return new Loan(accountNo, client, group, loanType, fund, officer, loanPurpose, transactionProcessingStrategy, loanProduct,
                 loanRepaymentScheduleDetail, status, loanCharges, collateral);
     }
 
     public static Loan newGroupLoanApplication(final String accountNo, final Group group, final Integer loanType,
             final LoanProduct loanProduct, final Fund fund, final Staff officer,
-            final LoanTransactionProcessingStrategy transactionProcessingStrategy, final LoanSchedule loanSchedule,
-            final Set<LoanCharge> loanCharges) {
+            final LoanTransactionProcessingStrategy transactionProcessingStrategy,
+            final LoanProductRelatedDetail loanRepaymentScheduleDetail, final Set<LoanCharge> loanCharges) {
         final LoanStatus status = null;
-        final LoanProductRelatedDetail loanRepaymentScheduleDetail = loanSchedule.loanProductRelatedDetail();
         final CodeValue loanPurpose = null;
         final Set<LoanCollateral> collateral = null;
         final Client client = null;
@@ -290,10 +289,9 @@ public class Loan extends AbstractPersistable<Long> {
 
     public static Loan newIndividualLoanApplicationFromGroup(final String accountNo, final Client client, final Group group,
             final Integer loanType, final LoanProduct loanProduct, final Fund fund, final Staff officer,
-            final LoanTransactionProcessingStrategy transactionProcessingStrategy, final LoanSchedule loanSchedule,
-            final Set<LoanCharge> loanCharges) {
+            final LoanTransactionProcessingStrategy transactionProcessingStrategy,
+            final LoanProductRelatedDetail loanRepaymentScheduleDetail, final Set<LoanCharge> loanCharges) {
         final LoanStatus status = null;
-        final LoanProductRelatedDetail loanRepaymentScheduleDetail = loanSchedule.loanProductRelatedDetail();
         final CodeValue loanPurpose = null;
         final Set<LoanCollateral> collateral = null;
         return new Loan(accountNo, client, group, loanType, fund, officer, loanPurpose, transactionProcessingStrategy, loanProduct,
@@ -308,6 +306,10 @@ public class Loan extends AbstractPersistable<Long> {
             final Staff loanOfficer, final CodeValue loanPurpose, final LoanTransactionProcessingStrategy transactionProcessingStrategy,
             final LoanProduct loanProduct, final LoanProductRelatedDetail loanRepaymentScheduleDetail, final LoanStatus loanStatus,
             final Set<LoanCharge> loanCharges, final Set<LoanCollateral> collateral) {
+
+        this.loanRepaymentScheduleDetail = loanRepaymentScheduleDetail;
+        this.loanRepaymentScheduleDetail.validateRepaymentPeriodWithGraceSettings();
+
         if (StringUtils.isBlank(accountNo)) {
             this.accountNumber = new RandomPasswordGenerator(19).generate();
             this.accountNumberRequiresAutoGeneration = true;
@@ -323,7 +325,6 @@ public class Loan extends AbstractPersistable<Long> {
 
         this.transactionProcessingStrategy = transactionProcessingStrategy;
         this.loanProduct = loanProduct;
-        this.loanRepaymentScheduleDetail = loanRepaymentScheduleDetail;
         if (loanStatus != null) {
             this.loanStatus = loanStatus.getValue();
         } else {
@@ -735,10 +736,10 @@ public class Loan extends AbstractPersistable<Long> {
         this.collateral.addAll(associateWithThisLoan(loanCollateral));
     }
 
-    public void updateLoanSchedule(final LoanScheduleData modifiedLoanSchedule) {
+    public void updateLoanSchedule(final LoanScheduleModel modifiedLoanSchedule) {
         this.repaymentScheduleInstallments.clear();
 
-        for (LoanSchedulePeriodData scheduledLoanInstallment : modifiedLoanSchedule.getPeriods()) {
+        for (LoanScheduleModelPeriod scheduledLoanInstallment : modifiedLoanSchedule.getPeriods()) {
 
             if (scheduledLoanInstallment.isRepaymentPeriod()) {
                 LoanRepaymentScheduleInstallment installment = new LoanRepaymentScheduleInstallment(this,
@@ -749,24 +750,6 @@ public class Loan extends AbstractPersistable<Long> {
                 this.addRepaymentScheduleInstallment(installment);
             }
         }
-
-        // if the loan application/contract is modified when repayments are
-        // already against it - then need to re-process it
-
-        /****
-         * TODO Vishwas Currently we do not allow modifying a Loan contract once
-         * the loan is approved (hence there is no need to adjust any loan
-         * transactions).
-         * 
-         * Consider removing this block of code or logically completing it for
-         * the future by getting the list of affected Transactions
-         ***/
-        final List<LoanTransaction> repaymentsOrWaivers = retreiveListOfTransactionsPostDisbursement();
-
-        final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = this.transactionProcessorFactory
-                .determineProcessor(this.transactionProcessingStrategy);
-        loanRepaymentScheduleTransactionProcessor.handleTransaction(getDisbursementDate(), repaymentsOrWaivers, getCurrency(),
-                this.repaymentScheduleInstallments, setOfLoanCharges());
 
         updateLoanScheduleDependentDerivedFields();
         updateLoanSummaryDerivedFields();
@@ -1042,18 +1025,11 @@ public class Loan extends AbstractPersistable<Long> {
         }
     }
 
-    public void loanApplicationSubmittal(final AppUser currentUser, final LoanSchedule loanSchedule,
-            final LoanLifecycleStateMachine lifecycleStateMachine, final LocalDate submittedOn, final String externalId) {
+    public void loanApplicationSubmittal(final AppUser currentUser, final LoanScheduleModel loanSchedule,
+            final LoanApplicationTerms loanApplicationTerms, final LoanLifecycleStateMachine lifecycleStateMachine,
+            final LocalDate submittedOn, final String externalId) {
 
-        final LoanScheduleData loanScheduleData = loanSchedule.generate();
-
-        // Have to set expectedDisbursementDate to avoid nullPointer so should
-        // be passed down to updateLoanSchedule method
-        if (loanSchedule.getDisbursementDate() != null) {
-            this.expectedDisbursementDate = loanSchedule.getDisbursementDate().toDate();
-        }
-
-        updateLoanSchedule(loanScheduleData);
+        updateLoanSchedule(loanSchedule);
 
         LoanStatus from = null;
         if (this.loanStatus != null) {
@@ -1064,21 +1040,15 @@ public class Loan extends AbstractPersistable<Long> {
         this.loanStatus = statusEnum.getValue();
 
         this.externalId = externalId;
-
-        this.termFrequency = loanSchedule.getLoanTermFrequency();
-        this.termPeriodFrequencyType = loanSchedule.getLoanTermPeriodFrequencyType().getValue();
-
+        this.termFrequency = loanApplicationTerms.getLoanTermFrequency();
+        this.termPeriodFrequencyType = loanApplicationTerms.getLoanTermPeriodFrequencyType().getValue();
         this.submittedOnDate = submittedOn.toDate();
         this.submittedBy = currentUser;
+        this.expectedDisbursementDate = loanApplicationTerms.getExpectedDisbursementDate().toDate();
+        this.expectedFirstRepaymentOnDate = loanApplicationTerms.getRepaymentStartFromDate();
+        this.interestChargedFromDate = loanApplicationTerms.getInterestChargedFromDate();
+
         updateLoanScheduleDependentDerivedFields();
-
-        if (loanSchedule.getRepaymentStartFromDate() != null) {
-            this.expectedFirstRepaymentOnDate = loanSchedule.getRepaymentStartFromDate().toDate();
-        }
-
-        if (loanSchedule.getInterestChargedFromDate() != null) {
-            this.interestChargedFromDate = loanSchedule.getInterestChargedFromDate().toDate();
-        }
 
         if (submittedOn.isAfter(DateUtils.getLocalDateOfTenant())) {
             final String errorMessage = "The date on which a loan is submitted cannot be in the future.";
@@ -1297,9 +1267,9 @@ public class Loan extends AbstractPersistable<Long> {
         return ids;
     }
 
-    public Map<String, Object> disburse(final AppUser currentUser, final JsonCommand command, final ApplicationCurrency currency,
-            final List<Long> existingTransactionIds, final List<Long> existingReversedTransactionIds,
-            final Map<String, Object> actualChanges, final PaymentDetail paymentDetail) {
+    public Map<String, Object> disburse(final LoanScheduleGeneratorFactory loanScheduleFactory, final AppUser currentUser,
+            final JsonCommand command, final ApplicationCurrency currency, final List<Long> existingTransactionIds,
+            final List<Long> existingReversedTransactionIds, final Map<String, Object> actualChanges, final PaymentDetail paymentDetail) {
 
         updateLoanToPreDisbursalState();
 
@@ -1325,7 +1295,7 @@ public class Loan extends AbstractPersistable<Long> {
             handleDisbursementTransaction(paymentDetail, actualDisbursementDate);
 
             if (isRepaymentScheduleRegenerationRequiredForDisbursement(actualDisbursementDate)) {
-                regenerateRepaymentSchedule(currency);
+                regenerateRepaymentSchedule(loanScheduleFactory, currency);
             } else {
                 updateLoanSummaryDerivedFields();
             }
@@ -1349,35 +1319,25 @@ public class Loan extends AbstractPersistable<Long> {
      * Ability to regenerate the repayment schedule based on the loans current
      * details/state.
      */
-    private void regenerateRepaymentSchedule(final ApplicationCurrency applicationCurrency) {
+    private void regenerateRepaymentSchedule(final LoanScheduleGeneratorFactory loanScheduleFactory,
+            final ApplicationCurrency applicationCurrency) {
 
         final InterestMethod interestMethod = this.loanRepaymentScheduleDetail.getInterestMethod();
-        final LoanScheduleGenerator loanScheduleGenerator = new DefaultLoanScheduleGeneratorFactory().create(interestMethod);
+        final LoanScheduleGenerator loanScheduleGenerator = loanScheduleFactory.create(interestMethod);
 
-        final BigDecimal principal = this.loanRepaymentScheduleDetail.getPrincipal().getAmount();
-        final BigDecimal inArrearsTolerance = this.loanRepaymentScheduleDetail.getInArrearsTolerance().getAmount();
-        final BigDecimal interestRatePerPeriod = this.loanRepaymentScheduleDetail.getNominalInterestRatePerPeriod();
-        final PeriodFrequencyType interestRatePeriodFrequencyType = this.loanRepaymentScheduleDetail.getInterestPeriodFrequencyType();
-        final BigDecimal defaultAnnualNominalInterestRate = this.loanRepaymentScheduleDetail.getAnnualNominalInterestRate();
+        final RoundingMode roundingMode = RoundingMode.HALF_EVEN;
+        final MathContext mc = new MathContext(8, roundingMode);
 
-        final InterestCalculationPeriodMethod interestCalculationPeriodMethod = this.loanRepaymentScheduleDetail
-                .getInterestCalculationPeriodMethod();
-        final Integer repaymentEvery = this.loanRepaymentScheduleDetail.getRepayEvery();
-        final PeriodFrequencyType repaymentPeriodFrequencyType = this.loanRepaymentScheduleDetail.getRepaymentPeriodFrequencyType();
-        final Integer numberOfRepayments = this.loanRepaymentScheduleDetail.getNumberOfRepayments();
-        final AmortizationMethod amortizationMethod = this.loanRepaymentScheduleDetail.getAmortizationMethod();
         final Integer loanTermFrequency = this.termFrequency;
         final PeriodFrequencyType loanTermPeriodFrequencyType = PeriodFrequencyType.fromInt(this.termPeriodFrequencyType);
 
-        final LoanSchedule loanSchedule = new LoanSchedule(loanScheduleGenerator, applicationCurrency, principal, interestRatePerPeriod,
-                interestRatePeriodFrequencyType, defaultAnnualNominalInterestRate, interestMethod, interestCalculationPeriodMethod,
-                repaymentEvery, repaymentPeriodFrequencyType, numberOfRepayments, amortizationMethod, loanTermFrequency,
-                loanTermPeriodFrequencyType, setOfLoanCharges(), this.getDisbursementDate(), this.getExpectedFirstRepaymentOnDate(),
-                this.getInterestChargedFromDate(), inArrearsTolerance);
+        LoanApplicationTerms loanApplicationTerms = LoanApplicationTerms.assembleFrom(applicationCurrency, loanTermFrequency,
+                loanTermPeriodFrequencyType, getExpectedDisbursedOnLocalDate(), getExpectedFirstRepaymentOnDate(), getInArrearsTolerance(),
+                this.loanRepaymentScheduleDetail);
 
-        final LoanScheduleData generatedData = loanSchedule.generate();
+        LoanScheduleModel loanSchedule = loanScheduleGenerator.generate(mc, applicationCurrency, loanApplicationTerms, this.charges);
 
-        updateLoanSchedule(generatedData);
+        updateLoanSchedule(loanSchedule);
     }
 
     private LoanTransaction handleDisbursementTransaction(final PaymentDetail paymentDetail, final LocalDate disbursedOn) {
@@ -1431,14 +1391,6 @@ public class Loan extends AbstractPersistable<Long> {
             final String errorMessage = "The date on which a loan with identifier : " + this.accountNumber
                     + " is disbursed cannot be in the future.";
             throw new InvalidLoanStateTransitionException("disbursal", "cannot.be.a.future.date", errorMessage, disbursedOn);
-        }
-
-        LocalDate firstRepaymentDueDate = this.repaymentScheduleInstallments.get(0).getDueDate();
-        if (disbursedOn.isAfter(firstRepaymentDueDate)) {
-            final String errorMessage = "The date on which a loan with identifier : " + this.accountNumber
-                    + " is disbursed cannot be after the first expected repayment date: " + firstRepaymentDueDate.toString();
-            throw new InvalidLoanStateTransitionException("disbursal", "cannot.be.after.first.repayment.due.date", errorMessage,
-                    this.accountNumber, disbursedOn, firstRepaymentDueDate);
         }
 
         return disbursementTransaction;

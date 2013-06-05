@@ -6,7 +6,9 @@
 package org.mifosplatform.portfolio.loanproduct.domain;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.persistence.Column;
@@ -16,6 +18,9 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
+import org.mifosplatform.infrastructure.core.data.ApiParameterError;
+import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
+import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.organisation.monetary.domain.Money;
 import org.mifosplatform.portfolio.loanaccount.domain.Loan;
@@ -33,7 +38,7 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
 
     @Column(name = "principal_amount", scale = 6, precision = 19, nullable = false)
     private BigDecimal principal;
-    
+
     @Column(name = "nominal_interest_rate_per_period", scale = 6, precision = 19, nullable = false)
     private BigDecimal nominalInterestRatePerPeriod;
 
@@ -69,7 +74,16 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
 
     @Column(name = "number_of_repayments", nullable = false)
     private Integer numberOfRepayments;
-    
+
+    @Column(name = "grace_on_principal_periods", nullable = true)
+    private Integer graceOnPrincipalPayment;
+
+    @Column(name = "grace_on_interest_periods", nullable = true)
+    private Integer graceOnInterestPayment;
+
+    @Column(name = "grace_interest_free_periods", nullable = true)
+    private Integer graceOnInterestCharged;
+
     // FIXME - move away form JPA ordinal use for enums using just integer -
     // requires sql patch for existing users of software.
     @Enumerated(EnumType.ORDINAL)
@@ -84,11 +98,13 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
             final BigDecimal nominalAnnualInterestRate, final InterestMethod interestMethod,
             final InterestCalculationPeriodMethod interestCalculationPeriodMethod, final Integer repaymentEvery,
             final PeriodFrequencyType repaymentPeriodFrequencyType, final Integer numberOfRepayments,
+            final Integer graceOnPrincipalPayment, final Integer graceOnInterestPayment, final Integer graceOnInterestCharged,
             final AmortizationMethod amortizationMethod, final BigDecimal inArrearsTolerance) {
 
         return new LoanProductRelatedDetail(currency, principal, nominalInterestRatePerPeriod, interestRatePeriodFrequencyType,
                 nominalAnnualInterestRate, interestMethod, interestCalculationPeriodMethod, repaymentEvery, repaymentPeriodFrequencyType,
-                numberOfRepayments, amortizationMethod, inArrearsTolerance);
+                numberOfRepayments, graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged, amortizationMethod,
+                inArrearsTolerance);
     }
 
     protected LoanProductRelatedDetail() {
@@ -96,10 +112,11 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
     }
 
     public LoanProductRelatedDetail(final MonetaryCurrency currency, final BigDecimal defaultPrincipal,
-            final BigDecimal defaultNominalInterestRatePerPeriod,final PeriodFrequencyType interestPeriodFrequencyType,
+            final BigDecimal defaultNominalInterestRatePerPeriod, final PeriodFrequencyType interestPeriodFrequencyType,
             final BigDecimal defaultAnnualNominalInterestRate, final InterestMethod interestMethod,
             final InterestCalculationPeriodMethod interestCalculationPeriodMethod, final Integer repayEvery,
             final PeriodFrequencyType repaymentFrequencyType, final Integer defaultNumberOfRepayments,
+            final Integer graceOnPrincipalPayment, final Integer graceOnInterestPayment, final Integer graceOnInterestCharged,
             final AmortizationMethod amortizationMethod, final BigDecimal inArrearsTolerance) {
         this.currency = currency;
         this.principal = defaultPrincipal;
@@ -111,12 +128,23 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
         this.repayEvery = repayEvery;
         this.repaymentPeriodFrequencyType = repaymentFrequencyType;
         this.numberOfRepayments = defaultNumberOfRepayments;
+        this.graceOnPrincipalPayment = defaultToNullIfZero(graceOnPrincipalPayment);
+        this.graceOnInterestPayment = defaultToNullIfZero(graceOnInterestPayment);
+        this.graceOnInterestCharged = defaultToNullIfZero(graceOnInterestCharged);
         this.amortizationMethod = amortizationMethod;
         if (inArrearsTolerance != null && BigDecimal.ZERO.compareTo(inArrearsTolerance) == 0) {
             this.inArrearsTolerance = null;
         } else {
             this.inArrearsTolerance = inArrearsTolerance;
         }
+    }
+
+    private Integer defaultToNullIfZero(final Integer value) {
+        Integer defaultTo = value;
+        if (value != null && Integer.valueOf(0).equals(value)) {
+            defaultTo = null;
+        }
+        return defaultTo;
     }
 
     public MonetaryCurrency getCurrency() {
@@ -126,7 +154,7 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
     public Money getPrincipal() {
         return Money.of(this.currency, this.principal);
     }
-    
+
     public Money getInArrearsTolerance() {
         return Money.of(this.currency, this.inArrearsTolerance);
     }
@@ -165,7 +193,7 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
     public Integer getNumberOfRepayments() {
         return numberOfRepayments;
     }
-    
+
     public AmortizationMethod getAmortizationMethod() {
         return amortizationMethod;
     }
@@ -231,7 +259,7 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
             actualChanges.put("locale", localeAsInput);
             this.repaymentPeriodFrequencyType = PeriodFrequencyType.fromInt(newValue);
         }
-        
+
         final String numberOfRepaymentsParamName = "numberOfRepayments";
         if (command.isChangeInIntegerParameterNamed(numberOfRepaymentsParamName, this.numberOfRepayments)) {
             final Integer newValue = command.integerValueOfParameterNamed(numberOfRepaymentsParamName);
@@ -255,7 +283,7 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
             actualChanges.put("locale", localeAsInput);
             this.inArrearsTolerance = newValue;
         }
-        
+
         final String interestRatePerPeriodParamName = "interestRatePerPeriod";
         if (command.isChangeInBigDecimalParameterNamed(interestRatePerPeriodParamName, this.nominalInterestRatePerPeriod)) {
             final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(interestRatePerPeriodParamName);
@@ -291,7 +319,63 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
             this.interestCalculationPeriodMethod = InterestCalculationPeriodMethod.fromInt(newValue);
         }
 
+        final String graceOnPrincipalPaymentParamName = "graceOnPrincipalPayment";
+        if (command.isChangeInIntegerParameterNamed(graceOnPrincipalPaymentParamName, this.graceOnPrincipalPayment)) {
+            final Integer newValue = command.integerValueOfParameterNamed(graceOnPrincipalPaymentParamName);
+            actualChanges.put(graceOnPrincipalPaymentParamName, newValue);
+            actualChanges.put("locale", localeAsInput);
+            this.graceOnPrincipalPayment = newValue;
+        }
+
+        final String graceOnInterestPaymentParamName = "graceOnInterestPayment";
+        if (command.isChangeInIntegerParameterNamed(graceOnInterestPaymentParamName, this.graceOnInterestPayment)) {
+            final Integer newValue = command.integerValueOfParameterNamed(graceOnInterestPaymentParamName);
+            actualChanges.put(graceOnInterestPaymentParamName, newValue);
+            actualChanges.put("locale", localeAsInput);
+            this.graceOnInterestPayment = newValue;
+        }
+
+        final String graceOnInterestChargedParamName = "graceOnInterestCharged";
+        if (command.isChangeInIntegerParameterNamed(graceOnInterestChargedParamName, this.graceOnInterestCharged)) {
+            final Integer newValue = command.integerValueOfParameterNamed(graceOnInterestChargedParamName);
+            actualChanges.put(graceOnInterestChargedParamName, newValue);
+            actualChanges.put("locale", localeAsInput);
+            this.graceOnInterestCharged = newValue;
+        }
+
+        validateRepaymentPeriodWithGraceSettings();
+
         return actualChanges;
+    }
+
+    public void validateRepaymentPeriodWithGraceSettings() {
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loanproduct");
+
+        if (this.numberOfRepayments <= defaultToZeroIfNull(this.graceOnPrincipalPayment)) {
+            baseDataValidator.reset().parameter("graceOnPrincipalPayment").value(graceOnPrincipalPayment)
+                    .failWithCode(".mustBeLessThan.numberOfRepayments");
+        }
+
+        if (this.numberOfRepayments <= defaultToZeroIfNull(this.graceOnInterestPayment)) {
+            baseDataValidator.reset().parameter("graceOnInterestPayment").value(graceOnInterestPayment)
+                    .failWithCode(".mustBeLessThan.numberOfRepayments");
+        }
+
+        if (this.numberOfRepayments < defaultToZeroIfNull(this.graceOnInterestCharged)) {
+            baseDataValidator.reset().parameter("graceOnInterestCharged").value(graceOnInterestCharged)
+                    .failWithCode(".mustBeLessThan.numberOfRepayments");
+        }
+
+        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+    }
+
+    private Integer defaultToZeroIfNull(final Integer value) {
+        Integer result = value;
+        if (value == null) {
+            result = Integer.valueOf(0);
+        }
+        return result;
     }
 
     private void updateInterestRateDerivedFields(final AprCalculator aprCalculator) {

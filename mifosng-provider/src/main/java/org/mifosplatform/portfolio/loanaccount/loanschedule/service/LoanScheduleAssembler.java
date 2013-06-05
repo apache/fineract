@@ -6,6 +6,8 @@
 package org.mifosplatform.portfolio.loanaccount.loanschedule.service;
 
 import java.math.BigDecimal;
+import java.math.MathContext;
+import java.math.RoundingMode;
 import java.util.Set;
 
 import org.joda.time.LocalDate;
@@ -13,16 +15,19 @@ import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.organisation.monetary.domain.ApplicationCurrency;
 import org.mifosplatform.organisation.monetary.domain.ApplicationCurrencyRepositoryWrapper;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
+import org.mifosplatform.organisation.monetary.domain.Money;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanCharge;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.AprCalculator;
-import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.LoanSchedule;
+import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.LoanApplicationTerms;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.LoanScheduleGenerator;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.LoanScheduleGeneratorFactory;
+import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.LoanScheduleModel;
 import org.mifosplatform.portfolio.loanaccount.service.LoanChargeAssembler;
 import org.mifosplatform.portfolio.loanproduct.domain.AmortizationMethod;
 import org.mifosplatform.portfolio.loanproduct.domain.InterestCalculationPeriodMethod;
 import org.mifosplatform.portfolio.loanproduct.domain.InterestMethod;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanProduct;
+import org.mifosplatform.portfolio.loanproduct.domain.LoanProductRelatedDetail;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanProductRepository;
 import org.mifosplatform.portfolio.loanproduct.domain.PeriodFrequencyType;
 import org.mifosplatform.portfolio.loanproduct.exception.LoanProductNotFoundException;
@@ -54,65 +59,96 @@ public class LoanScheduleAssembler {
         this.loanChargeAssembler = loanChargeAssembler;
     }
 
-    public LoanSchedule fromJson(final String json) {
-        final JsonElement element = fromApiJsonHelper.parse(json);
-        return fromJson(element);
-    }
-
-    public LoanSchedule fromJson(final JsonElement element) {
-        return fromJson(element, null);
-    }
-
-    public LoanSchedule fromJson(final JsonElement element, final BigDecimal inArrearsTolerance) {
+    public LoanApplicationTerms assembleLoanTerms(final JsonElement element) {
         final Long loanProductId = fromApiJsonHelper.extractLongNamed("productId", element);
 
         final LoanProduct loanProduct = this.loanProductRepository.findOne(loanProductId);
         if (loanProduct == null) { throw new LoanProductNotFoundException(loanProductId); }
 
+        return assembleLoanApplicationTermsFrom(element, loanProduct);
+    }
+
+    private LoanApplicationTerms assembleLoanApplicationTermsFrom(final JsonElement element, final LoanProduct loanProduct) {
+
         final MonetaryCurrency currency = loanProduct.getCurrency();
         final ApplicationCurrency applicationCurrency = this.applicationCurrencyRepository.findOneWithNotFoundDetection(currency);
 
-        final BigDecimal principal = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("principal", element);
-        final BigDecimal interestRatePerPeriod = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("interestRatePerPeriod", element);
-        //final Integer interestRateFrequencyType = fromApiJsonHelper.extractIntegerWithLocaleNamed("interestRateFrequencyType", element);
-        final Integer interestType = fromApiJsonHelper.extractIntegerWithLocaleNamed("interestType", element);
-        final Integer interestCalculationPeriodType = fromApiJsonHelper.extractIntegerWithLocaleNamed("interestCalculationPeriodType",
-                element);
-
-        final InterestMethod interestMethod = InterestMethod.fromInt(interestType);
-        //final PeriodFrequencyType interestRatePeriodFrequencyType = PeriodFrequencyType.fromInt(interestRateFrequencyType);
-        
-        // PeriodFrequencyType is copied from Loan Product
-        final PeriodFrequencyType interestRatePeriodFrequencyType = loanProduct.loanProductRelatedDetail().getInterestPeriodFrequencyType();
-        final InterestCalculationPeriodMethod interestCalculationPeriodMethod = InterestCalculationPeriodMethod
-                .fromInt(interestCalculationPeriodType);
-
-        final BigDecimal defaultAnnualNominalInterestRate = this.aprCalculator.calculateFrom(interestRatePeriodFrequencyType,
-                interestRatePerPeriod);
-
-        final Integer repaymentEvery = fromApiJsonHelper.extractIntegerWithLocaleNamed("repaymentEvery", element);
-        final Integer repaymentFrequencyType = fromApiJsonHelper.extractIntegerWithLocaleNamed("repaymentFrequencyType", element);
-        final Integer numberOfRepayments = fromApiJsonHelper.extractIntegerWithLocaleNamed("numberOfRepayments", element);
-        final Integer amortizationType = fromApiJsonHelper.extractIntegerWithLocaleNamed("amortizationType", element);
-        final PeriodFrequencyType repaymentPeriodFrequencyType = PeriodFrequencyType.fromInt(repaymentFrequencyType);
-        final AmortizationMethod amortizationMethod = AmortizationMethod.fromInt(amortizationType);
-
+        // loan terms
         final Integer loanTermFrequency = fromApiJsonHelper.extractIntegerWithLocaleNamed("loanTermFrequency", element);
         final Integer loanTermFrequencyType = fromApiJsonHelper.extractIntegerWithLocaleNamed("loanTermFrequencyType", element);
         final PeriodFrequencyType loanTermPeriodFrequencyType = PeriodFrequencyType.fromInt(loanTermFrequencyType);
 
-        final LocalDate expectedDisbursementDate = fromApiJsonHelper.extractLocalDateNamed("expectedDisbursementDate", element);
-        final LocalDate repaymentsStartingFromDate = fromApiJsonHelper.extractLocalDateNamed("repaymentsStartingFromDate", element);
+        final Integer numberOfRepayments = fromApiJsonHelper.extractIntegerWithLocaleNamed("numberOfRepayments", element);
+        final Integer repaymentEvery = fromApiJsonHelper.extractIntegerWithLocaleNamed("repaymentEvery", element);
+        final Integer repaymentFrequencyType = fromApiJsonHelper.extractIntegerWithLocaleNamed("repaymentFrequencyType", element);
+        final PeriodFrequencyType repaymentPeriodFrequencyType = PeriodFrequencyType.fromInt(repaymentFrequencyType);
+
+        final Integer amortizationType = fromApiJsonHelper.extractIntegerWithLocaleNamed("amortizationType", element);
+        final AmortizationMethod amortizationMethod = AmortizationMethod.fromInt(amortizationType);
+
+        // interest terms
+        final Integer interestType = fromApiJsonHelper.extractIntegerWithLocaleNamed("interestType", element);
+        final InterestMethod interestMethod = InterestMethod.fromInt(interestType);
+
+        final Integer interestCalculationPeriodType = fromApiJsonHelper.extractIntegerWithLocaleNamed("interestCalculationPeriodType",
+                element);
+        final InterestCalculationPeriodMethod interestCalculationPeriodMethod = InterestCalculationPeriodMethod
+                .fromInt(interestCalculationPeriodType);
+
+        final BigDecimal interestRatePerPeriod = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("interestRatePerPeriod", element);
+        final PeriodFrequencyType interestRatePeriodFrequencyType = loanProduct.getInterestPeriodFrequencyType();
+
+        final BigDecimal annualNominalInterestRate = this.aprCalculator.calculateFrom(interestRatePeriodFrequencyType,
+                interestRatePerPeriod);
+
+        // disbursement details
+        final BigDecimal principal = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("principal", element);
+        final Money principalMoney = Money.of(currency, principal);
+
+        final LocalDate expectedDisbursementDate = this.fromApiJsonHelper.extractLocalDateNamed("expectedDisbursementDate", element);
+        final LocalDate repaymentsStartingFromDate = this.fromApiJsonHelper.extractLocalDateNamed("repaymentsStartingFromDate", element);
+
+        // grace details
+        final Integer graceOnPrincipalPayment = this.fromApiJsonHelper.extractIntegerWithLocaleNamed("graceOnPrincipalPayment", element);
+        final Integer graceOnInterestPayment = this.fromApiJsonHelper.extractIntegerWithLocaleNamed("graceOnInterestPayment", element);
+        final Integer graceOnInterestCharged = this.fromApiJsonHelper.extractIntegerWithLocaleNamed("graceOnInterestCharged", element);
         final LocalDate interestChargedFromDate = fromApiJsonHelper.extractLocalDateNamed("interestChargedFromDate", element);
+
+        // other
+        final BigDecimal inArrearsTolerance = this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed("inArrearsTolerance", element);
+        final Money inArrearsToleranceMoney = Money.of(currency, inArrearsTolerance);
+
+        return LoanApplicationTerms.assembleFrom(applicationCurrency, loanTermFrequency, loanTermPeriodFrequencyType, numberOfRepayments,
+                repaymentEvery, repaymentPeriodFrequencyType, amortizationMethod, interestMethod, interestRatePerPeriod,
+                interestRatePeriodFrequencyType, annualNominalInterestRate, interestCalculationPeriodMethod, principalMoney,
+                expectedDisbursementDate, repaymentsStartingFromDate, graceOnPrincipalPayment, graceOnInterestPayment,
+                graceOnInterestCharged, interestChargedFromDate, inArrearsToleranceMoney);
+    }
+
+    public LoanProductRelatedDetail assembleLoanProductRelatedDetail(final JsonElement element) {
+        LoanApplicationTerms loanApplicationTerms = assembleLoanTerms(element);
+        return loanApplicationTerms.toLoanProductRelatedDetail();
+    }
+
+    public LoanScheduleModel assembleLoanScheduleFrom(final JsonElement element) {
+
+        final LoanApplicationTerms loanApplicationTerms = assembleLoanTerms(element);
+
+        return assembleLoanScheduleFrom(loanApplicationTerms, element);
+    }
+
+    public LoanScheduleModel assembleLoanScheduleFrom(final LoanApplicationTerms loanApplicationTerms, final JsonElement element) {
 
         final Set<LoanCharge> loanCharges = this.loanChargeAssembler.fromParsedJson(element);
 
-        final LoanScheduleGenerator loanScheduleGenerator = this.loanScheduleFactory.create(interestMethod);
+        final LoanScheduleGenerator loanScheduleGenerator = this.loanScheduleFactory.create(loanApplicationTerms.getInterestMethod());
 
-        return new LoanSchedule(loanScheduleGenerator, applicationCurrency, principal, interestRatePerPeriod,
-                interestRatePeriodFrequencyType, defaultAnnualNominalInterestRate, interestMethod, interestCalculationPeriodMethod,
-                repaymentEvery, repaymentPeriodFrequencyType, numberOfRepayments, amortizationMethod, loanTermFrequency,
-                loanTermPeriodFrequencyType, loanCharges, expectedDisbursementDate, repaymentsStartingFromDate, interestChargedFromDate,
-                inArrearsTolerance);
+        final RoundingMode roundingMode = RoundingMode.HALF_EVEN;
+        final MathContext mc = new MathContext(8, roundingMode);
+
+        final MonetaryCurrency currency = loanApplicationTerms.getCurrency();
+        final ApplicationCurrency applicationCurrency = this.applicationCurrencyRepository.findOneWithNotFoundDetection(currency);
+
+        return loanScheduleGenerator.generate(mc, applicationCurrency, loanApplicationTerms, loanCharges);
     }
 }

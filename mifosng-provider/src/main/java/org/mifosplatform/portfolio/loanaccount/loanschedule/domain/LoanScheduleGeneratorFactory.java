@@ -10,5 +10,4 @@ import org.mifosplatform.portfolio.loanproduct.domain.InterestMethod;
 public interface LoanScheduleGeneratorFactory {
 
     LoanScheduleGenerator create(InterestMethod interestMethod);
-
 }
