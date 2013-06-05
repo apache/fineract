@@ -7,17 +7,23 @@ package org.mifosplatform.portfolio.loanaccount.domain;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
 import org.joda.time.LocalDate;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
@@ -69,6 +75,10 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
 
     @Column(name = "is_reversed", nullable = false)
     private boolean reversed;
+
+    @LazyCollection(LazyCollectionOption.FALSE)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "loanTransaction", orphanRemoval = true)
+    private Set<LoanChargePaidBy> loanChargesPaid = new HashSet<LoanChargePaidBy>();
 
     protected LoanTransaction() {
         this.loan = null;
@@ -250,6 +260,10 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
         return !isReversed();
     }
 
+    public boolean isAnyTypeOfRepayment() {
+        return isRepayment() || isRepaymentAtDisbursement() || isRecoveryRepayment();
+    }
+
     public boolean isRepayment() {
         return LoanTransactionType.REPAYMENT.equals(getTypeOf()) && isNotReversed();
     }
@@ -365,6 +379,14 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
 
     public Loan getLoan() {
         return this.loan;
+    }
+
+    public Set<LoanChargePaidBy> getLoanChargesPaid() {
+        return this.loanChargesPaid;
+    }
+
+    public void setLoanChargesPaid(Set<LoanChargePaidBy> loanChargesPaid) {
+        this.loanChargesPaid = loanChargesPaid;
     }
 
 }

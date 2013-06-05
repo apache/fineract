@@ -337,6 +337,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 defaultLoanLifecycleStateMachine(), existingTransactionIds, existingReversedTransactionIds);
 
         this.loanTransactionRepository.save(newRepaymentTransaction);
+
         /***
          * TODO Vishwas Batch save is giving me a
          * HibernateOptimisticLockingFailureException, looping and saving for

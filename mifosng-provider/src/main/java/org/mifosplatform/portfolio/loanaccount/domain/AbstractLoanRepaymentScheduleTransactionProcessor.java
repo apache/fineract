@@ -133,12 +133,12 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
         if (loanTransaction.isNotWaiver()) {
             Money feeCharges = loanTransaction.getFeeChargesPortion(currency);
             if (feeCharges.isGreaterThanZero()) {
-                updateFeeChargesPaidAmountBy(feeCharges, charges);
+                updateFeeChargesPaidAmountBy(loanTransaction, feeCharges, charges);
             }
 
             Money penaltyCharges = loanTransaction.getPenaltyChargesPortion(currency);
             if (penaltyCharges.isGreaterThanZero()) {
-                updatePenaltyChargesPaidAmountBy(penaltyCharges, charges);
+                updatePenaltyChargesPaidAmountBy(loanTransaction, penaltyCharges, charges);
             }
         }
 
@@ -147,20 +147,27 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
         }
     }
 
-    private void updateFeeChargesPaidAmountBy(final Money feeCharges, final Set<LoanCharge> charges) {
+    private void updateFeeChargesPaidAmountBy(final LoanTransaction loanTransaction, final Money feeCharges, final Set<LoanCharge> charges) {
 
         Money amountRemaining = feeCharges;
         for (LoanCharge loanCharge : charges) {
             if (!loanCharge.isDueAtDisbursement()) {
                 if (loanCharge.isFeeCharge() && loanCharge.isNotFullyPaid() && amountRemaining.isGreaterThanZero()) {
                     final LoanCharge unpaidCharge = findEarliestUnpaidChargeFromUnOrderedSet(charges);
-                    amountRemaining = unpaidCharge.updatePaidAmountBy(amountRemaining);
+                    Money amountPaidTowardsCharge = unpaidCharge.updatePaidAmountBy(amountRemaining);
+                    if (!amountPaidTowardsCharge.isZero()) {
+                        LoanChargePaidBy loanChargePaidBy = new LoanChargePaidBy(loanTransaction, loanCharge,
+                                amountPaidTowardsCharge.getAmount());
+                        loanTransaction.getLoanChargesPaid().add(loanChargePaidBy);
+                        amountRemaining = amountRemaining.minus(amountPaidTowardsCharge);
+                    }
                 }
             }
         }
     }
 
-    private void updatePenaltyChargesPaidAmountBy(final Money feeCharges, final Set<LoanCharge> charges) {
+    private void updatePenaltyChargesPaidAmountBy(final LoanTransaction loanTransaction, final Money feeCharges,
+            final Set<LoanCharge> charges) {
 
         Money amountRemaining = feeCharges;
         for (LoanCharge loanCharge : charges) {
@@ -168,7 +175,13 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
 
                 if (loanCharge.isPenaltyCharge() && amountRemaining.isGreaterThanZero()) {
                     final LoanCharge unpaidCharge = findEarliestUnpaidChargeFromUnOrderedSet(charges);
-                    amountRemaining = unpaidCharge.updatePaidAmountBy(amountRemaining);
+                    Money amountPaidTowardsCharge = unpaidCharge.updatePaidAmountBy(amountRemaining);
+                    if (!amountPaidTowardsCharge.isZero()) {
+                        LoanChargePaidBy loanChargePaidBy = new LoanChargePaidBy(loanTransaction, loanCharge,
+                                amountPaidTowardsCharge.getAmount());
+                        loanTransaction.getLoanChargesPaid().add(loanChargePaidBy);
+                        amountRemaining = amountRemaining.minus(amountPaidTowardsCharge);
+                    }
                 }
             }
         }
