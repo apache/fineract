@@ -101,7 +101,7 @@ public class Loan extends AbstractPersistable<Long> {
     @SuppressWarnings("unused")
     @Column(name = "loan_type_enum", nullable = false)
     private Integer loanType;
-    
+
     @ManyToOne
     @JoinColumn(name = "product_id", nullable = false)
     private LoanProduct loanProduct;
@@ -264,8 +264,8 @@ public class Loan extends AbstractPersistable<Long> {
     @Transient
     private LoanSummaryWrapper loanSummaryWrapper;
 
-    public static Loan newIndividualLoanApplication(final String accountNo, final Client client, final Integer loanType, final LoanProduct loanProduct,
-            final Fund fund, final Staff officer, final CodeValue loanPurpose,
+    public static Loan newIndividualLoanApplication(final String accountNo, final Client client, final Integer loanType,
+            final LoanProduct loanProduct, final Fund fund, final Staff officer, final CodeValue loanPurpose,
             final LoanTransactionProcessingStrategy transactionProcessingStrategy, final LoanSchedule loanSchedule,
             final Set<LoanCharge> loanCharges, final Set<LoanCollateral> collateral) {
         final LoanStatus status = null;
@@ -304,8 +304,8 @@ public class Loan extends AbstractPersistable<Long> {
         this.client = null;
     }
 
-    private Loan(final String accountNo, final Client client, final Group group, final Integer loanType, final Fund fund, final Staff loanOfficer,
-            final CodeValue loanPurpose, final LoanTransactionProcessingStrategy transactionProcessingStrategy,
+    private Loan(final String accountNo, final Client client, final Group group, final Integer loanType, final Fund fund,
+            final Staff loanOfficer, final CodeValue loanPurpose, final LoanTransactionProcessingStrategy transactionProcessingStrategy,
             final LoanProduct loanProduct, final LoanProductRelatedDetail loanRepaymentScheduleDetail, final LoanStatus loanStatus,
             final Set<LoanCharge> loanCharges, final Set<LoanCollateral> collateral) {
         if (StringUtils.isBlank(accountNo)) {
@@ -677,10 +677,10 @@ public class Loan extends AbstractPersistable<Long> {
         return this.client;
     }
 
-    public LoanProduct loanProduct(){
+    public LoanProduct loanProduct() {
         return this.loanProduct;
     }
-    
+
     public LoanProductRelatedDetail repaymentScheduleDetail() {
         return this.loanRepaymentScheduleDetail;
     }
@@ -822,16 +822,18 @@ public class Loan extends AbstractPersistable<Long> {
             this.externalId = StringUtils.defaultIfEmpty(newValue, null);
         }
 
-        //add clientId, groupId and loanType changes to actual changes
-        //FIXME: AA - We may require separate api command to move loan from one client to another
+        // add clientId, groupId and loanType changes to actual changes
+        // FIXME: AA - We may require separate api command to move loan from one
+        // client to another
         final String clientIdParamName = "clientId";
         final Long clientId = this.client == null ? null : this.client.getId();
         if (command.isChangeInLongParameterNamed(clientIdParamName, clientId)) {
             final Long newValue = command.longValueOfParameterNamed(clientIdParamName);
             actualChanges.put(clientIdParamName, newValue);
         }
-        
-        //FIXME: AA - We may require separate api command to move loan from one group to another 
+
+        // FIXME: AA - We may require separate api command to move loan from one
+        // group to another
         final String groupIdParamName = "groupId";
         final Long groupId = this.group == null ? null : this.group.getId();
         if (command.isChangeInLongParameterNamed(groupIdParamName, groupId)) {
@@ -942,17 +944,19 @@ public class Loan extends AbstractPersistable<Long> {
             final String errorMessage = "The date on which a loan is submitted cannot be in the future.";
             throw new InvalidLoanStateTransitionException("submittal", "cannot.be.a.future.date", errorMessage, getSubmittedOnDate());
         }
-        
-        if (!(client == null)){    
-        	if (getSubmittedOnDate().isBefore(client.getActivationLocalDate())) {
-        		final String errorMessage = "The date on which a loan is submitted cannot be earlier than client's activation date.";
-        		throw new InvalidLoanStateTransitionException("submittal", "cannot.be.before.client.activation.date", errorMessage, getSubmittedOnDate());
-        	}
-        }else if (!(group == null)){
-        	if (getSubmittedOnDate().isBefore(group.getActivationLocalDate())) {
-        		final String errorMessage = "The date on which a loan is submitted cannot be earlier than groups's activation date.";
-        		throw new InvalidLoanStateTransitionException("submittal", "cannot.be.before.group.activation.date", errorMessage, getSubmittedOnDate());
-        	}
+
+        if (!(client == null)) {
+            if (getSubmittedOnDate().isBefore(client.getActivationLocalDate())) {
+                final String errorMessage = "The date on which a loan is submitted cannot be earlier than client's activation date.";
+                throw new InvalidLoanStateTransitionException("submittal", "cannot.be.before.client.activation.date", errorMessage,
+                        getSubmittedOnDate());
+            }
+        } else if (!(group == null)) {
+            if (getSubmittedOnDate().isBefore(group.getActivationLocalDate())) {
+                final String errorMessage = "The date on which a loan is submitted cannot be earlier than groups's activation date.";
+                throw new InvalidLoanStateTransitionException("submittal", "cannot.be.before.group.activation.date", errorMessage,
+                        getSubmittedOnDate());
+            }
         }
 
         if (getSubmittedOnDate().isAfter(getExpectedDisbursedOnLocalDate())) {
@@ -986,7 +990,7 @@ public class Loan extends AbstractPersistable<Long> {
                 actualChanges.put(collateralParamName, listOfLoanCollateralData(possiblyModifedLoanCollateralItems));
             }
         }
-        
+
         return actualChanges;
     }
 
@@ -1081,16 +1085,18 @@ public class Loan extends AbstractPersistable<Long> {
             throw new InvalidLoanStateTransitionException("submittal", "cannot.be.a.future.date", errorMessage, submittedOn);
         }
 
-        if (!(client == null)){    
-        	if (submittedOn.isBefore(client.getActivationLocalDate())) {
-        		final String errorMessage = "The date on which a loan is submitted cannot be earlier than client's activation date.";
-        		throw new InvalidLoanStateTransitionException("submittal", "cannot.be.before.client.activation.date", errorMessage, submittedOn);
-        	}
-        }else if (!(group == null)){
-        	if (submittedOn.isBefore(group.getActivationLocalDate())) {
-        		final String errorMessage = "The date on which a loan is submitted cannot be earlier than groups's activation date.";
-        		throw new InvalidLoanStateTransitionException("submittal", "cannot.be.before.group.activation.date", errorMessage, submittedOn);
-        	}
+        if (!(client == null)) {
+            if (submittedOn.isBefore(client.getActivationLocalDate())) {
+                final String errorMessage = "The date on which a loan is submitted cannot be earlier than client's activation date.";
+                throw new InvalidLoanStateTransitionException("submittal", "cannot.be.before.client.activation.date", errorMessage,
+                        submittedOn);
+            }
+        } else if (!(group == null)) {
+            if (submittedOn.isBefore(group.getActivationLocalDate())) {
+                final String errorMessage = "The date on which a loan is submitted cannot be earlier than groups's activation date.";
+                throw new InvalidLoanStateTransitionException("submittal", "cannot.be.before.group.activation.date", errorMessage,
+                        submittedOn);
+            }
         }
 
         if (submittedOn.isAfter(getExpectedDisbursedOnLocalDate())) {
@@ -1405,6 +1411,9 @@ public class Loan extends AbstractPersistable<Long> {
             for (LoanCharge charge : setOfLoanCharges()) {
                 if (charge.isDueAtDisbursement()) {
                     charge.markAsFullyPaid();
+                    // Add "Loan Charge Paid By" details to this transaction
+                    LoanChargePaidBy loanChargePaidBy = new LoanChargePaidBy(disbursementTransaction, charge, charge.amount());
+                    disbursementTransaction.getLoanChargesPaid().add(loanChargePaidBy);
                 } else {
                     handleChargeAppliedTransaction(charge, disbursedOn);
                 }
@@ -1419,14 +1428,15 @@ public class Loan extends AbstractPersistable<Long> {
         }
 
         if (disbursedOn.isAfter(new LocalDate())) {
-            final String errorMessage = "The date on which a loan with identifier : " + this.accountNumber + " is disbursed cannot be in the future.";
+            final String errorMessage = "The date on which a loan with identifier : " + this.accountNumber
+                    + " is disbursed cannot be in the future.";
             throw new InvalidLoanStateTransitionException("disbursal", "cannot.be.a.future.date", errorMessage, disbursedOn);
         }
 
         LocalDate firstRepaymentDueDate = this.repaymentScheduleInstallments.get(0).getDueDate();
         if (disbursedOn.isAfter(firstRepaymentDueDate)) {
-            final String errorMessage = "The date on which a loan with identifier : " + this.accountNumber + " is disbursed cannot be after the first expected repayment date: "
-                    + firstRepaymentDueDate.toString();
+            final String errorMessage = "The date on which a loan with identifier : " + this.accountNumber
+                    + " is disbursed cannot be after the first expected repayment date: " + firstRepaymentDueDate.toString();
             throw new InvalidLoanStateTransitionException("disbursal", "cannot.be.after.first.repayment.due.date", errorMessage,
                     this.accountNumber, disbursedOn, firstRepaymentDueDate);
         }

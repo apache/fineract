@@ -449,6 +449,11 @@ public class LoanCharge extends AbstractPersistable<Long> {
         return Money.of(currency, this.amountWrittenOff);
     }
 
+    /**
+     * @param incrementBy
+     *            Amount used to pay off this charge
+     * @return Actual amount paid on this charge
+     */
     public Money updatePaidAmountBy(final Money incrementBy) {
 
         Money amountPaidToDate = Money.of(incrementBy.getCurrency(), this.amountPaid);
@@ -471,7 +476,7 @@ public class LoanCharge extends AbstractPersistable<Long> {
 
         this.paid = determineIfFullyPaid();
 
-        return incrementBy.minus(amountPaidOnThisCharge);
+        return amountPaidOnThisCharge;
     }
 
     public String name() {
