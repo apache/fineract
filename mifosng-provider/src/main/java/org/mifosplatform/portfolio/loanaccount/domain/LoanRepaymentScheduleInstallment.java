@@ -86,6 +86,12 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
     @Column(name = "penalty_charges_waived_derived", scale = 6, precision = 19, nullable = true)
     private BigDecimal penaltyChargesWaived;
 
+    @Column(name = "total_paid_in_advance_derived", scale = 6, precision = 19, nullable = true)
+    private BigDecimal totalPaidInAdvance;
+
+    @Column(name = "total_paid_late_derived", scale = 6, precision = 19, nullable = true)
+    private BigDecimal totalPaidLate;
+
     @Column(name = "completed_derived", nullable = false)
     private boolean obligationsMet;
 
@@ -272,6 +278,8 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
         this.penaltyChargesPaid = null;
         this.penaltyChargesWaived = null;
         this.penaltyChargesWrittenOff = null;
+        this.totalPaidInAdvance = null;
+        this.totalPaidLate = null;
 
         this.obligationsMet = false;
         this.obligationsMetOnDate = null;
@@ -316,6 +324,8 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
 
         checkIfRepaymentPeriodObligationsAreMet(transactionDate, currency);
 
+        trackAdvanceAndLateTotalsForRepaymentPeriod(transactionDate, currency, feePortionOfTransaction);
+
         return feePortionOfTransaction;
     }
 
@@ -336,6 +346,8 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
         this.interestPaid = defaultToNullIfZero(this.interestPaid);
 
         checkIfRepaymentPeriodObligationsAreMet(transactionDate, currency);
+
+        trackAdvanceAndLateTotalsForRepaymentPeriod(transactionDate, currency, interestPortionOfTransaction);
 
         return interestPortionOfTransaction;
     }
@@ -358,14 +370,9 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
 
         checkIfRepaymentPeriodObligationsAreMet(transactionDate, currency);
 
-        return principalPortionOfTransaction;
-    }
+        trackAdvanceAndLateTotalsForRepaymentPeriod(transactionDate, currency, principalPortionOfTransaction);
 
-    private void checkIfRepaymentPeriodObligationsAreMet(final LocalDate transactionDate, final MonetaryCurrency currency) {
-        this.obligationsMet = getTotalOutstanding(currency).isZero();
-        if (this.obligationsMet) {
-            this.obligationsMetOnDate = transactionDate.toDate();
-        }
+        return principalPortionOfTransaction;
     }
 
     public Money waiveInterestComponent(final LocalDate transactionDate, final Money transactionAmountRemaining) {
@@ -484,6 +491,34 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
         if (!this.obligationsMet && getTotalOutstanding(currency).isZero()) {
             this.obligationsMet = true;
             this.obligationsMetOnDate = actualDisbursementDate.toDate();
+        }
+    }
+
+    private void trackAdvanceAndLateTotalsForRepaymentPeriod(final LocalDate transactionDate, final MonetaryCurrency currency,
+            final Money amountPaidInRepaymentPeriod) {
+        if (isInAdvance(transactionDate)) {
+            this.totalPaidInAdvance = asMoney(this.totalPaidInAdvance, currency).plus(amountPaidInRepaymentPeriod).getAmount();
+        } else if (isLatePayment(transactionDate)) {
+            this.totalPaidLate = asMoney(this.totalPaidLate, currency).plus(amountPaidInRepaymentPeriod).getAmount();
+        }
+    }
+
+    private Money asMoney(final BigDecimal decimal, final MonetaryCurrency currency) {
+        return Money.of(currency, decimal);
+    }
+
+    private boolean isInAdvance(final LocalDate transactionDate) {
+        return transactionDate.isBefore(getDueDate());
+    }
+
+    private boolean isLatePayment(final LocalDate transactionDate) {
+        return transactionDate.isAfter(getDueDate());
+    }
+
+    private void checkIfRepaymentPeriodObligationsAreMet(final LocalDate transactionDate, final MonetaryCurrency currency) {
+        this.obligationsMet = getTotalOutstanding(currency).isZero();
+        if (this.obligationsMet) {
+            this.obligationsMetOnDate = transactionDate.toDate();
         }
     }
 }

@@ -58,6 +58,10 @@ public class LoanSchedulePeriodData {
     @SuppressWarnings("unused")
     private final BigDecimal totalPaidForPeriod;
     @SuppressWarnings("unused")
+    private final BigDecimal totalPaidInAdvanceForPeriod;
+    @SuppressWarnings("unused")
+    private final BigDecimal totalPaidLateForPeriod;
+    @SuppressWarnings("unused")
     private final BigDecimal totalWaivedForPeriod;
     @SuppressWarnings("unused")
     private final BigDecimal totalWrittenOffForPeriod;
@@ -92,15 +96,17 @@ public class LoanSchedulePeriodData {
             final BigDecimal feeChargesWaived, final BigDecimal feeChargesWrittenOff, final BigDecimal feeChargesOutstanding,
             final BigDecimal penaltyChargesDue, final BigDecimal penaltyChargesPaid, final BigDecimal penaltyChargesWaived,
             final BigDecimal penaltyChargesWrittenOff, final BigDecimal penaltyChargesOutstanding, final BigDecimal totalDueForPeriod,
-            final BigDecimal totalPaid, final BigDecimal totalWaived, final BigDecimal totalWrittenOff, final BigDecimal totalOutstanding,
+            final BigDecimal totalPaid, final BigDecimal totalPaidInAdvanceForPeriod, final BigDecimal totalPaidLateForPeriod,
+            final BigDecimal totalWaived, final BigDecimal totalWrittenOff, final BigDecimal totalOutstanding,
             final BigDecimal totalActualCostOfLoanForPeriod) {
 
         return new LoanSchedulePeriodData(periodNumber, fromDate, dueDate, obligationsMetOnDate, complete, principalOriginalDue,
                 principalPaid, principalWrittenOff, principalOutstanding, outstandingPrincipalBalanceOfLoan,
                 interestDueOnPrincipalOutstanding, interestPaid, interestWaived, interestWrittenOff, interestOutstanding, feeChargesDue,
                 feeChargesPaid, feeChargesWaived, feeChargesWrittenOff, feeChargesOutstanding, penaltyChargesDue, penaltyChargesPaid,
-                penaltyChargesWaived, penaltyChargesWrittenOff, penaltyChargesOutstanding, totalDueForPeriod, totalPaid, totalWaived,
-                totalWrittenOff, totalOutstanding, totalActualCostOfLoanForPeriod);
+                penaltyChargesWaived, penaltyChargesWrittenOff, penaltyChargesOutstanding, totalDueForPeriod, totalPaid,
+                totalPaidInAdvanceForPeriod, totalPaidLateForPeriod, totalWaived, totalWrittenOff, totalOutstanding,
+                totalActualCostOfLoanForPeriod);
     }
 
     /*
@@ -156,6 +162,8 @@ public class LoanSchedulePeriodData {
         this.totalOriginalDueForPeriod = chargesDueAtTimeOfDisbursement;
         this.totalDueForPeriod = chargesDueAtTimeOfDisbursement;
         this.totalPaidForPeriod = this.feeChargesPaid;
+        this.totalPaidInAdvanceForPeriod = null;
+        this.totalPaidLateForPeriod = null;
         this.totalWaivedForPeriod = null;
         this.totalWrittenOffForPeriod = null;
         this.totalOutstandingForPeriod = this.feeChargesOutstanding;
@@ -215,6 +223,8 @@ public class LoanSchedulePeriodData {
         this.totalOriginalDueForPeriod = totalDueForPeriod;
         this.totalDueForPeriod = totalDueForPeriod;
         this.totalPaidForPeriod = BigDecimal.ZERO;
+        this.totalPaidInAdvanceForPeriod = null;
+        this.totalPaidLateForPeriod = null;
         this.totalWaivedForPeriod = null;
         this.totalWrittenOffForPeriod = null;
         this.totalOutstandingForPeriod = totalDueForPeriod;
@@ -240,7 +250,8 @@ public class LoanSchedulePeriodData {
             final BigDecimal feeChargesWaived, final BigDecimal feeChargesWrittenOff, final BigDecimal feeChargesOutstanding,
             final BigDecimal penaltyChargesDue, final BigDecimal penaltyChargesPaid, final BigDecimal penaltyChargesWaived,
             final BigDecimal penaltyChargesWrittenOff, final BigDecimal penaltyChargesOutstanding, final BigDecimal totalDueForPeriod,
-            final BigDecimal totalPaid, final BigDecimal totalWaived, final BigDecimal totalWrittenOff, final BigDecimal totalOutstanding,
+            final BigDecimal totalPaid, final BigDecimal totalPaidInAdvanceForPeriod, final BigDecimal totalPaidLateForPeriod,
+            final BigDecimal totalWaived, final BigDecimal totalWrittenOff, final BigDecimal totalOutstanding,
             final BigDecimal totalActualCostOfLoanForPeriod) {
         this.period = periodNumber;
         this.fromDate = fromDate;
@@ -282,6 +293,8 @@ public class LoanSchedulePeriodData {
         this.totalOriginalDueForPeriod = totalDueForPeriod;
         this.totalDueForPeriod = totalDueForPeriod;
         this.totalPaidForPeriod = totalPaid;
+        this.totalPaidInAdvanceForPeriod = totalPaidInAdvanceForPeriod;
+        this.totalPaidLateForPeriod = totalPaidLateForPeriod;
         this.totalWaivedForPeriod = totalWaived;
         this.totalWrittenOffForPeriod = totalWrittenOff;
         this.totalOutstandingForPeriod = totalOutstanding;
