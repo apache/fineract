@@ -10,7 +10,6 @@ package org.mifosplatform.portfolio.savings.data;
  */
 public class SavingsAccountStatusEnumData {
 
-    @SuppressWarnings("unused")
     private final Long id;
     @SuppressWarnings("unused")
     private final String code;
@@ -31,5 +30,9 @@ public class SavingsAccountStatusEnumData {
         this.unactivated = unactivated;
         this.active = active;
         this.closed = closed;
+    }
+    
+    public Long id() {
+        return this.id;
     }
 }

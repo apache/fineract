@@ -9,8 +9,9 @@ import org.mifosplatform.infrastructure.core.exception.AbstractPlatformDomainRul
 
 public class InvalidSavingsAccountStateTransitionException extends AbstractPlatformDomainRuleException {
 
-	public InvalidSavingsAccountStateTransitionException(final String action, String postFix, String defaultUserMessage, Object... defaultUserMessageArgs) {
-		super("error.msg.saving." + action + "." + postFix, defaultUserMessage, defaultUserMessageArgs);
-	}
+    public InvalidSavingsAccountStateTransitionException(final String action, final String postFix, final String defaultUserMessage,
+            final Object... defaultUserMessageArgs) {
+        super("error.msg.saving." + action + "." + postFix, defaultUserMessage, defaultUserMessageArgs);
+    }
 
 }

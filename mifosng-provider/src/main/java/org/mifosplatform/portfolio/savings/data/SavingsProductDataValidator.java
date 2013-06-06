@@ -151,7 +151,7 @@ public class SavingsProductDataValidator {
 
         if (this.fromApiJsonHelper.parameterExists(annualFeeAmountParamName, element)) {
             final BigDecimal annualFeeAmount = fromApiJsonHelper.extractBigDecimalWithLocaleNamed(annualFeeAmountParamName, element);
-            baseDataValidator.reset().parameter(annualFeeAmountParamName).value(annualFeeAmount).notNull().positiveAmount();
+            baseDataValidator.reset().parameter(annualFeeAmountParamName).value(annualFeeAmount).ignoreIfNull().positiveAmount();
 
             if (annualFeeAmount != null) {
                 MonthDay monthDayOfAnnualFee = fromApiJsonHelper.extractMonthDayNamed(annualFeeOnMonthDayParamName, element);
