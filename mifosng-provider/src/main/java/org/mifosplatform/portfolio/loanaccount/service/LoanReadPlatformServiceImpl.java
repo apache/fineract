@@ -132,7 +132,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             StringBuilder sqlBuilder = new StringBuilder();
             sqlBuilder.append("select ");
             sqlBuilder.append(rm.loanSchema());
-            sqlBuilder.append(" join m_office o on o.id = c.office_id");
+            sqlBuilder.append(" join m_office o on (o.id = c.office_id or o.id = g.office_id) ");
             sqlBuilder.append(" where l.id=? and o.hierarchy like ?");
 
             return this.jdbcTemplate.queryForObject(sqlBuilder.toString(), rm, new Object[] { loanId, hierarchySearchString });
