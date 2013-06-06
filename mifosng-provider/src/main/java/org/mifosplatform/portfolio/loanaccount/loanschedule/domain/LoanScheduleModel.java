@@ -72,11 +72,13 @@ public final class LoanScheduleModel {
         BigDecimal totalWaived = null;
         BigDecimal totalWrittenOff = null;
         BigDecimal totalRepayment = null;
+        BigDecimal totalPaidInAdvance = null;
+        BigDecimal totalPaidLate = null;
 
         return new LoanScheduleData(currency, periodsData, this.loanTermInDays, this.totalPrincipalDisbursed.getAmount(),
                 this.totalPrincipalExpected, this.totalPrincipalPaid, this.totalInterestCharged, this.totalFeeChargesCharged,
                 this.totalPenaltyChargesCharged, totalWaived, totalWrittenOff, this.totalRepaymentExpected, totalRepayment,
-                this.totalOutstanding);
+                totalPaidInAdvance, totalPaidLate, this.totalOutstanding);
     }
 
     public Collection<LoanScheduleModelPeriod> getPeriods() {

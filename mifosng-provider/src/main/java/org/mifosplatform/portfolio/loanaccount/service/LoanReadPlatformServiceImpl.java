@@ -702,6 +702,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             Money totalWrittenOff = Money.zero(monCurrency);
             Money totalRepaymentExpected = Money.zero(monCurrency);
             Money totalRepayment = Money.zero(monCurrency);
+            Money totalPaidInAdvance = Money.zero(monCurrency);
+            Money totalPaidLate = Money.zero(monCurrency);
             Money totalOutstanding = Money.zero(monCurrency);
 
             // update totals with details of fees charged during disbursement
@@ -783,6 +785,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
                 totalRepaymentExpected = totalRepaymentExpected.plus(totalDueForPeriod);
                 totalRepayment = totalRepayment.plus(totalPaidForPeriod);
+                totalPaidInAdvance = totalPaidInAdvance.plus(totalPaidInAdvanceForPeriod);
+                totalPaidLate = totalPaidLate.plus(totalPaidLateForPeriod);
                 totalOutstanding = totalOutstanding.plus(totalOutstandingForPeriod);
 
                 if (fromDate == null) {
@@ -810,7 +814,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     totalPrincipalExpected.getAmount(), totalPrincipalPaid.getAmount(), totalInterestCharged.getAmount(),
                     totalFeeChargesCharged.getAmount(), totalPenaltyChargesCharged.getAmount(), totalWaived.getAmount(),
                     totalWrittenOff.getAmount(), totalRepaymentExpected.getAmount(), totalRepayment.getAmount(),
-                    totalOutstanding.getAmount());
+                    totalPaidInAdvance.getAmount(), totalPaidLate.getAmount(), totalOutstanding.getAmount());
         }
     }
 

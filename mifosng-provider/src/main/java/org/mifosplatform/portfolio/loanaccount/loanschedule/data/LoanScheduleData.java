@@ -38,6 +38,8 @@ public class LoanScheduleData {
     private final BigDecimal totalWrittenOff;
     private final BigDecimal totalRepaymentExpected;
     private final BigDecimal totalRepayment;
+    private final BigDecimal totalPaidInAdvance;
+    private final BigDecimal totalPaidLate;
     private final BigDecimal totalOutstanding;
 
     /**
@@ -51,7 +53,8 @@ public class LoanScheduleData {
             final BigDecimal totalPrincipalDisbursed, final BigDecimal totalPrincipalExpected, final BigDecimal totalPrincipalPaid,
             final BigDecimal totalInterestCharged, final BigDecimal totalFeeChargesCharged, final BigDecimal totalPenaltyChargesCharged,
             final BigDecimal totalWaived, final BigDecimal totalWrittenOff, final BigDecimal totalRepaymentExpected,
-            final BigDecimal totalRepayment, final BigDecimal totalOutstanding) {
+            final BigDecimal totalRepayment, final BigDecimal totalPaidInAdvance, final BigDecimal totalPaidLate,
+            final BigDecimal totalOutstanding) {
         this.currency = currency;
         this.periods = periods;
         this.loanTermInDays = loanTermInDays;
@@ -65,6 +68,8 @@ public class LoanScheduleData {
         this.totalWrittenOff = totalWrittenOff;
         this.totalRepaymentExpected = totalRepaymentExpected;
         this.totalRepayment = totalRepayment;
+        this.totalPaidInAdvance = totalPaidInAdvance;
+        this.totalPaidLate = totalPaidLate;
         this.totalOutstanding = totalOutstanding;
     }
 
