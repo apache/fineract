@@ -9494,6 +9494,30 @@ Content-Type: application/json
 						<tr>
 							<td class=fielddesc>Credit account for creating accounting rule</td>
 						</tr>
+						<tr class=alt>
+							<td>debitTags</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Debit tags for creating accounting rule, These tags fetches the all chart of accounts that are tagged with these tagIds</td>
+						</tr>
+						<tr class=alt>
+							<td>creditTags</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Credit tags for creating accounting rule, These tags fetches the all chart of accounts that are tagged with these tagIds</td>
+						</tr>
+						<tr class=alt>
+							<td>allowMultipleDebitEntries</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Allows to add multiple debits if the value is true, while creating journal entries with this rule</td>
+						</tr>
+						<tr class=alt>
+							<td>allowMultipleCreditEntries</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Allows to add multiple credits if the value is true, while creating journal entries with this rule</td>
+						</tr>
 					</table>
 				</div>
 			</div>
@@ -9605,6 +9629,64 @@ Request Body:
 {
 	"officeId":1,
 	"resourceId":1
+}
+					</code>
+					<code class="method-request">
+POST accountingrules
+Content-Type: application/json 
+Request Body:
+{
+	"name": "fordocs",
+	"officeId": "1",
+	"debitTags": ["10","11"],
+	"allowMultipleDebitEntries": "true",
+	"creditTags": ["12","13"],
+	"allowMultipleCreditEntries": "true",
+	"description": "for api docs"
+}
+					</code>
+					<code class="method-response">
+{
+	"officeId":1,
+	"resourceId":2
+}
+					</code>
+					<code class="method-request">
+POST accountingrules
+Content-Type: application/json 
+Request Body:
+{
+	"name": "test123",
+	"officeId": "1",
+	"debitAccountHead": "21",
+	"creditTags": ["12", "13"],
+	"allowMultipleCreditEntries": "false",
+	"description": "Employee salary"
+}
+					</code>
+					<code class="method-response">
+{
+	"officeId":1,
+	"resourceId":3
+}
+					</code>
+					<code class="method-request">
+POST accountingrules
+Content-Type: application/json 
+Request Body:
+{
+	"name": "fordocstest",
+	"officeId": "1",
+	"debitTags": ["10",	"11"],
+	"allowMultipleDebitEntries": "false",
+	"creditAccountHead": "9",
+	"description": "for api docs"
+}
+					</code>
+					<code class="method-response">
+{
+	"officeId":1,
+	"resourceId":4
 }
 					</code>
 				</div>
@@ -14884,6 +14966,68 @@ Request Body:
 	"comments": "asdf",
 	"accountingRule": "2",
 	"amount": "547"
+}
+                    </code>
+                    <code class="method-response">
+{
+	"officeId":1,
+	"transactionId":"RS9MCISID4WK1ZM"
+}
+                    </code>
+                    <code class="method-declaration">
+POST https://DomainName/api/v1/journalentries
+                    </code>
+                    <code class="method-request">
+POST journalentries
+Content-Type: application/json 
+Request Body:
+{
+	"locale": "en",
+	"dateFormat": "dd MMMM yyyy",
+	"officeId": "1",
+	"transactionDate": "23 May 2013",
+	"referenceNumber": "547",
+	"comments": "asdf",
+	"accountingRule": "2",
+	"credits":[{"glAccountId":1,
+				"amount":5000},
+			   {"glAccountId":2,
+				"amount":5000}
+			  ],
+	"debits":[{"glAccountId":3,
+				"amount":5000},
+			   {"glAccountId":4,
+				"amount":5000}
+			 ]
+}
+                    </code>
+                    <code class="method-response">
+{
+	"officeId":1,
+	"transactionId":"RS9MCISID4WK1ZM"
+}
+                    </code>
+                    <code class="method-declaration">
+POST https://DomainName/api/v1/journalentries
+                    </code>
+                    <code class="method-request">
+POST journalentries
+Content-Type: application/json 
+Request Body:
+{
+	"locale": "en",
+	"dateFormat": "dd MMMM yyyy",
+	"officeId": "1",
+	"transactionDate": "23 May 2013",
+	"referenceNumber": "547",
+	"comments": "asdf",
+	"accountingRule": "3",
+	"credits":[{"glAccountId":1,
+				"amount":5000},
+			   {"glAccountId":2,
+				"amount":5000}
+			  ],
+	"amount": "10000"
 }
                     </code>
                     <code class="method-response">

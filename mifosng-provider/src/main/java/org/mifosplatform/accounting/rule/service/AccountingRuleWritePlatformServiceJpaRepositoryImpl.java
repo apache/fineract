@@ -6,9 +6,14 @@
 package org.mifosplatform.accounting.rule.service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import org.apache.commons.lang.StringUtils;
 import org.mifosplatform.accounting.closure.api.GLClosureJsonInputParams;
 import org.mifosplatform.accounting.glaccount.domain.GLAccount;
 import org.mifosplatform.accounting.glaccount.domain.GLAccountRepositoryWrapper;
@@ -18,7 +23,9 @@ import org.mifosplatform.accounting.rule.domain.AccountingRule;
 import org.mifosplatform.accounting.rule.domain.AccountingRuleRepository;
 import org.mifosplatform.accounting.rule.domain.AccountingRuleRepositoryWrapper;
 import org.mifosplatform.accounting.rule.domain.AccountingTagRule;
+import org.mifosplatform.accounting.rule.exception.AccountingRuleDataException;
 import org.mifosplatform.accounting.rule.exception.AccountingRuleDuplicateException;
+import org.mifosplatform.accounting.rule.serialization.AccountingRuleCommandFromApiJsonDeserializer;
 import org.mifosplatform.infrastructure.codes.domain.CodeValue;
 import org.mifosplatform.infrastructure.codes.domain.CodeValueRepository;
 import org.mifosplatform.infrastructure.codes.exception.CodeValueNotFoundException;
@@ -45,13 +52,13 @@ public class AccountingRuleWritePlatformServiceJpaRepositoryImpl implements Acco
     private final AccountingRuleRepository accountingRuleRepository;
     private final GLAccountRepositoryWrapper accountRepositoryWrapper;
     private final OfficeRepository officeRepository;
-    private final AccountingRuleDataValidator fromApiJsonDeserializer;
+    private final AccountingRuleCommandFromApiJsonDeserializer fromApiJsonDeserializer;
     private final CodeValueRepository codeValueRepository;
 
     @Autowired
     public AccountingRuleWritePlatformServiceJpaRepositoryImpl(final AccountingRuleRepositoryWrapper accountingRuleRepositoryWrapper,
             final GLAccountRepositoryWrapper accountRepositoryWrapper, final OfficeRepository officeRepository,
-            final AccountingRuleRepository ruleRepository, final AccountingRuleDataValidator fromApiJsonDeserializer,
+            final AccountingRuleRepository ruleRepository, final AccountingRuleCommandFromApiJsonDeserializer fromApiJsonDeserializer,
             final CodeValueRepository codeValueRepository) {
         this.accountRepositoryWrapper = accountRepositoryWrapper;
         this.officeRepository = officeRepository;
@@ -67,8 +74,9 @@ public class AccountingRuleWritePlatformServiceJpaRepositoryImpl implements Acco
      */
     private void handleAccountingRuleIntegrityIssues(final JsonCommand command, final DataIntegrityViolationException dve) {
         final Throwable realCause = dve.getMostSpecificCause();
-        if (realCause.getMessage().contains("accounting_rule_name_unique")) { throw new AccountingRuleDuplicateException(
-                command.stringValueOfParameterNamed(AccountingRuleJsonInputParams.NAME.getValue())); }
+        if (realCause.getMessage().contains("accounting_rule_name_unique")) {
+            throw new AccountingRuleDuplicateException(command.stringValueOfParameterNamed(AccountingRuleJsonInputParams.NAME.getValue()));
+        } else if (realCause.getMessage().contains("UNIQUE_ACCOUNT_RULE_TAGS")) { throw new AccountingRuleDuplicateException(); }
 
         logger.error(dve.getMessage(), dve);
         throw new PlatformDataIntegrityException("error.msg.accounting.rule.unknown.data.integrity.issue",
@@ -104,84 +112,204 @@ public class AccountingRuleWritePlatformServiceJpaRepositoryImpl implements Acco
         // get the GL Accounts or tags to Debit and Credit
         final String[] debitTags = command.arrayValueOfParameterNamed(AccountingRuleJsonInputParams.DEBIT_ACCOUNT_TAGS.getValue());
         final String[] creditTags = command.arrayValueOfParameterNamed(AccountingRuleJsonInputParams.CREDIT_ACCOUNT_TAGS.getValue());
+        final Set<String> incomingDebitTags = new HashSet<String>(Arrays.asList(debitTags));
+        final Set<String> incomingCreditTags = new HashSet<String>(Arrays.asList(creditTags));
         final Long accountToDebitId = command.longValueOfParameterNamed(AccountingRuleJsonInputParams.ACCOUNT_TO_DEBIT.getValue());
         final Long accountToCreditId = command.longValueOfParameterNamed(AccountingRuleJsonInputParams.ACCOUNT_TO_CREDIT.getValue());
+
+        boolean allowMultipleCreditEntries = false;
+        boolean allowMultipleDebitEntries = false;
         GLAccount debitAccount = null;
         GLAccount creditAccount = null;
         List<AccountingTagRule> accountingTagRules = new ArrayList<AccountingTagRule>();
 
         if ((accountToDebitId != null && debitTags != null) || (accountToDebitId == null && debitTags == null)) {
-            // TODO- Throw Appropriate exception
-            throw new RuntimeException("Please Specify debitTags or accountToDebitId");
+            throw new AccountingRuleDataException(AccountingRuleJsonInputParams.ACCOUNT_TO_DEBIT.getValue(),
+                    AccountingRuleJsonInputParams.DEBIT_ACCOUNT_TAGS.getValue());
         } else if (accountToDebitId != null) {
             debitAccount = this.accountRepositoryWrapper.findOneWithNotFoundDetection(accountToDebitId);
         } else if (debitTags != null) {
-            accountingTagRules = saveDebitOrCreditTags(debitTags, JournalEntryType.DEBIT, accountingTagRules);
+            accountingTagRules = saveDebitOrCreditTags(incomingDebitTags, JournalEntryType.DEBIT, accountingTagRules);
+            allowMultipleDebitEntries = command
+                    .booleanPrimitiveValueOfParameterNamed(AccountingRuleJsonInputParams.ALLOW_MULTIPLE_DEBIT_ENTRIES.getValue());
         }
 
         if ((accountToCreditId != null && creditTags != null) || (accountToCreditId == null && creditTags == null)) {
-            // TODO- Throw Appropriate exception
-            throw new RuntimeException("Please Specify debitTags or accountToDebitId");
+            throw new AccountingRuleDataException(AccountingRuleJsonInputParams.ACCOUNT_TO_CREDIT.getValue(),
+                    AccountingRuleJsonInputParams.CREDIT_ACCOUNT_TAGS.getValue());
         } else if (accountToCreditId != null) {
             creditAccount = this.accountRepositoryWrapper.findOneWithNotFoundDetection(accountToCreditId);
         } else if (creditTags != null) {
-            accountingTagRules = saveDebitOrCreditTags(creditTags, JournalEntryType.CREDIT, accountingTagRules);
+            accountingTagRules = saveDebitOrCreditTags(incomingCreditTags, JournalEntryType.CREDIT, accountingTagRules);
+            allowMultipleCreditEntries = command
+                    .booleanPrimitiveValueOfParameterNamed(AccountingRuleJsonInputParams.ALLOW_MULTIPLE_CREDIT_ENTRIES.getValue());
         }
 
-        final AccountingRule accountingRule = AccountingRule.fromJson(office, debitAccount, creditAccount, command);
-        accountingTagRules = accountingRule.updateAccountingRuleForTags(accountingTagRules);
+        final AccountingRule accountingRule = AccountingRule.fromJson(office, debitAccount, creditAccount, command,
+                allowMultipleCreditEntries, allowMultipleDebitEntries);
+        accountingRule.updateAccountingRuleForTags(accountingTagRules);
 
         return accountingRule;
     }
 
-    // TODO- This update mehtod should update based on new changes made for
-    // createAccountingRule.
     @Transactional
     @Override
     public CommandProcessingResult updateAccountingRule(final Long accountingRuleId, final JsonCommand command) {
 
-        this.fromApiJsonDeserializer.validateForUpdate(command.json());
+        try {
 
-        Long officeId = null;
-        if (command.parameterExists(AccountingRuleJsonInputParams.OFFICE_ID.getValue())) {
-            officeId = command.longValueOfParameterNamed(AccountingRuleJsonInputParams.OFFICE_ID.getValue());
+            this.fromApiJsonDeserializer.validateForUpdate(command.json());
+
+            Long officeId = null;
+            if (command.parameterExists(AccountingRuleJsonInputParams.OFFICE_ID.getValue())) {
+                officeId = command.longValueOfParameterNamed(AccountingRuleJsonInputParams.OFFICE_ID.getValue());
+            }
+
+            Long accountToDebitId = null;
+            if (command.parameterExists(AccountingRuleJsonInputParams.ACCOUNT_TO_DEBIT.getValue())) {
+                accountToDebitId = command.longValueOfParameterNamed(AccountingRuleJsonInputParams.ACCOUNT_TO_DEBIT.getValue());
+            }
+
+            Long accountToCreditId = null;
+            if (command.parameterExists(AccountingRuleJsonInputParams.ACCOUNT_TO_CREDIT.getValue())) {
+                accountToCreditId = command.longValueOfParameterNamed(AccountingRuleJsonInputParams.ACCOUNT_TO_CREDIT.getValue());
+            }
+
+            String[] debitTags = null;
+            if (command.parameterExists(AccountingRuleJsonInputParams.DEBIT_ACCOUNT_TAGS.getValue())) {
+                debitTags = command.arrayValueOfParameterNamed(AccountingRuleJsonInputParams.DEBIT_ACCOUNT_TAGS.getValue());
+            }
+
+            String[] creditTags = null;
+            if (command.parameterExists(AccountingRuleJsonInputParams.CREDIT_ACCOUNT_TAGS.getValue())) {
+                creditTags = command.arrayValueOfParameterNamed(AccountingRuleJsonInputParams.CREDIT_ACCOUNT_TAGS.getValue());
+            }
+
+            if (accountToDebitId != null && debitTags != null) { throw new AccountingRuleDataException(
+                    AccountingRuleJsonInputParams.ACCOUNT_TO_DEBIT.getValue(), AccountingRuleJsonInputParams.DEBIT_ACCOUNT_TAGS.getValue()); }
+
+            if (accountToCreditId != null && creditTags != null) { throw new AccountingRuleDataException(
+                    AccountingRuleJsonInputParams.ACCOUNT_TO_CREDIT.getValue(),
+                    AccountingRuleJsonInputParams.CREDIT_ACCOUNT_TAGS.getValue()); }
+
+            boolean allowMultipleCreditEntries = false;
+            if (command.parameterExists(AccountingRuleJsonInputParams.ALLOW_MULTIPLE_CREDIT_ENTRIES.getValue())) {
+                allowMultipleCreditEntries = command
+                        .booleanPrimitiveValueOfParameterNamed(AccountingRuleJsonInputParams.ALLOW_MULTIPLE_CREDIT_ENTRIES.getValue());
+            }
+
+            boolean allowMultipleDebitEntries = false;
+            if (command.parameterExists(AccountingRuleJsonInputParams.ALLOW_MULTIPLE_DEBIT_ENTRIES.getValue())) {
+                allowMultipleDebitEntries = command
+                        .booleanPrimitiveValueOfParameterNamed(AccountingRuleJsonInputParams.ALLOW_MULTIPLE_DEBIT_ENTRIES.getValue());
+            }
+
+            final AccountingRule accountingRule = this.accountingRuleRepositoryWrapper.findOneWithNotFoundDetection(accountingRuleId);
+            final Map<String, Object> changesOnly = accountingRule.update(command);
+
+            if (accountToDebitId != null && changesOnly.containsKey(AccountingRuleJsonInputParams.ACCOUNT_TO_DEBIT.getValue())) {
+                final GLAccount accountToDebit = this.accountRepositoryWrapper.findOneWithNotFoundDetection(accountToDebitId);
+                accountingRule.updateDebitAccount(accountToDebit);
+                accountingRule.updateTags(JournalEntryType.CREDIT);
+            }
+
+            if (accountToCreditId != null && changesOnly.containsKey(AccountingRuleJsonInputParams.ACCOUNT_TO_CREDIT.getValue())) {
+                final GLAccount accountToCredit = this.accountRepositoryWrapper.findOneWithNotFoundDetection(accountToCreditId);
+                accountingRule.updateCreditAccount(accountToCredit);
+                accountingRule.updateTags(JournalEntryType.DEBIT);
+            }
+
+            if (creditTags != null && creditTags.length > 0
+                    && command.parameterExists(AccountingRuleJsonInputParams.CREDIT_ACCOUNT_TAGS.getValue())) {
+
+                final Set<String> creditTagsToAdd = determineCreditTagToAddAndRemoveOldTags(creditTags, JournalEntryType.CREDIT,
+                        accountingRule);
+
+                if (!creditTagsToAdd.isEmpty()) {
+                    List<AccountingTagRule> accountingTagRules = new ArrayList<AccountingTagRule>();
+                    accountingTagRules = saveDebitOrCreditTags(creditTagsToAdd, JournalEntryType.CREDIT, accountingTagRules);
+                    accountingRule.updateAccountingRuleForTags(accountingTagRules);
+                    accountingRule.updateCreditAccount(null);
+                    if (allowMultipleCreditEntries) {
+                        accountingRule.updateAllowMultipleCreditEntries(allowMultipleCreditEntries);
+                    }
+                    changesOnly.put(AccountingRuleJsonInputParams.CREDIT_ACCOUNT_TAGS.getValue(), creditTagsToAdd);
+                }
+
+            }
+
+            if (debitTags != null && debitTags.length > 0
+                    && command.parameterExists(AccountingRuleJsonInputParams.DEBIT_ACCOUNT_TAGS.getValue())) {
+                final Set<String> debitTagsToAdd = determineCreditTagToAddAndRemoveOldTags(debitTags, JournalEntryType.DEBIT,
+                        accountingRule);
+                if (!debitTagsToAdd.isEmpty()) {
+                    List<AccountingTagRule> accountingTagRules = new ArrayList<AccountingTagRule>();
+                    accountingTagRules = saveDebitOrCreditTags(debitTagsToAdd, JournalEntryType.DEBIT, accountingTagRules);
+                    accountingRule.updateAccountingRuleForTags(accountingTagRules);
+                    accountingRule.updateDebitAccount(null);
+                    if (allowMultipleDebitEntries) {
+                        accountingRule.updateAllowMultipleDebitEntries(allowMultipleDebitEntries);
+                    }
+                    changesOnly.put(AccountingRuleJsonInputParams.DEBIT_ACCOUNT_TAGS.getValue(), debitTagsToAdd);
+                }
+            }
+
+            if (officeId != null && changesOnly.containsKey(AccountingRuleJsonInputParams.OFFICE_ID.getValue())) {
+                final Office userOffice = this.officeRepository.findOne(officeId);
+                if (userOffice == null) { throw new OfficeNotFoundException(officeId); }
+                accountingRule.setOffice(userOffice);
+            }
+
+            if (!changesOnly.isEmpty()) {
+                this.accountingRuleRepository.saveAndFlush(accountingRule);
+            }
+
+            return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(accountingRule.getId())
+                    .with(changesOnly).build();
+        } catch (final DataIntegrityViolationException dve) {
+            handleAccountingRuleIntegrityIssues(command, dve);
+            return CommandProcessingResult.empty();
         }
 
-        Long accountToDebitId = null;
-        if (command.parameterExists(AccountingRuleJsonInputParams.ACCOUNT_TO_DEBIT.getValue())) {
-            accountToDebitId = command.longValueOfParameterNamed(AccountingRuleJsonInputParams.ACCOUNT_TO_DEBIT.getValue());
+    }
+
+    private Set<String> determineCreditTagToAddAndRemoveOldTags(final String[] creditOrDebitTags, final JournalEntryType type,
+            final AccountingRule accountingRule) {
+
+        final Set<String> incomingTags = new HashSet<String>(Arrays.asList(creditOrDebitTags));
+        final Set<AccountingTagRule> existingTags = accountingRule.getAccountingTagRulesByType(type);
+        final Set<String> existingTagIds = retrieveExistingTagIds(existingTags);
+        final Set<String> tagsToAdd = new HashSet<String>();
+        final Set<String> tagsToRemove = existingTagIds;
+        final Map<Long, AccountingTagRule> accountsToRemove = new HashMap<Long, AccountingTagRule>();
+
+        for (final String tagId : incomingTags) {
+            if (existingTagIds.contains(tagId)) {
+                tagsToRemove.remove(tagId);
+            } else {
+                tagsToAdd.add(tagId);
+            }
         }
 
-        Long accountToCreditId = null;
-        if (command.parameterExists(AccountingRuleJsonInputParams.ACCOUNT_TO_CREDIT.getValue())) {
-            accountToCreditId = command.longValueOfParameterNamed(AccountingRuleJsonInputParams.ACCOUNT_TO_CREDIT.getValue());
+        if (!tagsToRemove.isEmpty()) {
+            for (final String tagId : tagsToRemove) {
+                for (final AccountingTagRule accountingTagRule : existingTags) {
+                    if (tagId.equals(accountingTagRule.getTagId().toString())) {
+                        accountsToRemove.put(accountingTagRule.getId(), accountingTagRule);
+                    }
+                }
+            }
+            accountingRule.removeOldTags(new ArrayList<AccountingTagRule>(accountsToRemove.values()));
         }
+        return tagsToAdd;
+    }
 
-        final AccountingRule accountingRule = this.accountingRuleRepositoryWrapper.findOneWithNotFoundDetection(accountingRuleId);
-        final Map<String, Object> changesOnly = accountingRule.update(command);
-
-        if (accountToDebitId != null && changesOnly.containsKey(AccountingRuleJsonInputParams.ACCOUNT_TO_DEBIT.getValue())) {
-            final GLAccount accountToDebit = this.accountRepositoryWrapper.findOneWithNotFoundDetection(accountToDebitId);
-            accountingRule.setAccountToDebit(accountToDebit);
+    private Set<String> retrieveExistingTagIds(final Set<AccountingTagRule> existingCreditTags) {
+        final Set<String> existingCreditTagIds = new HashSet<String>();
+        for (final AccountingTagRule accountingTagRule : existingCreditTags) {
+            existingCreditTagIds.add(accountingTagRule.getTagId().toString());
         }
-
-        if (accountToCreditId != null && changesOnly.containsKey(AccountingRuleJsonInputParams.ACCOUNT_TO_CREDIT.getValue())) {
-            final GLAccount accountToCredit = this.accountRepositoryWrapper.findOneWithNotFoundDetection(accountToCreditId);
-            accountingRule.setAccountToCredit(accountToCredit);
-        }
-
-        if (officeId != null && changesOnly.containsKey(AccountingRuleJsonInputParams.OFFICE_ID.getValue())) {
-            final Office userOffice = this.officeRepository.findOne(officeId);
-            if (userOffice == null) { throw new OfficeNotFoundException(officeId); }
-            accountingRule.setOffice(userOffice);
-        }
-
-        if (!changesOnly.isEmpty()) {
-            this.accountingRuleRepository.saveAndFlush(accountingRule);
-        }
-
-        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(accountingRule.getId())
-                .with(changesOnly).build();
+        return existingCreditTagIds;
     }
 
     @Transactional
@@ -192,27 +320,16 @@ public class AccountingRuleWritePlatformServiceJpaRepositoryImpl implements Acco
         return new CommandProcessingResultBuilder().withEntityId(accountingRule.getId()).build();
     }
 
-/*    private GLAccount saveDebitOrCreditTagsOrGetDebitORCreditAccount(final String[] creditOrDebitTagArray, final Long creditOrDebitId,
-            final JournalEntryType transactionType) {
-        GLAccount creditOrDebitAccount = null;
-        if (creditOrDebitId != null) {
-            creditOrDebitAccount = this.accountRepositoryWrapper.findOneWithNotFoundDetection(creditOrDebitId);
-        } else if (creditOrDebitTagArray != null) {
-            final List<AccountingTagRule> accountingTagRules = saveDebitOrCreditTags(creditOrDebitTagArray, transactionType);
-        } else {
-            throw new RuntimeException("Please Specify debitTags or accountToDebitId");
-        }
-        return creditOrDebitAccount;
-    }*/
-
-    private List<AccountingTagRule> saveDebitOrCreditTags(final String[] creditOrDebitTagArray, final JournalEntryType transactionType,
+    private List<AccountingTagRule> saveDebitOrCreditTags(final Set<String> creditOrDebitTagArray, final JournalEntryType transactionType,
             final List<AccountingTagRule> accountingTagRules) {
         for (final String creditOrDebitTag : creditOrDebitTagArray) {
-            final Long creditOrDebitTagIdLongValue = Long.valueOf(creditOrDebitTag);
-            final CodeValue creditOrDebitAccount = this.codeValueRepository.findOne(creditOrDebitTagIdLongValue);
-            if (creditOrDebitAccount == null) { throw new CodeValueNotFoundException(creditOrDebitTagIdLongValue); }
-            final AccountingTagRule accountingTagRule = AccountingTagRule.create(creditOrDebitAccount, transactionType.getValue());
-            accountingTagRules.add(accountingTagRule);
+            if (creditOrDebitTag != null && StringUtils.isNotBlank(creditOrDebitTag)) {
+                final Long creditOrDebitTagIdLongValue = Long.valueOf(creditOrDebitTag);
+                final CodeValue creditOrDebitAccount = this.codeValueRepository.findOne(creditOrDebitTagIdLongValue);
+                if (creditOrDebitAccount == null) { throw new CodeValueNotFoundException(creditOrDebitTagIdLongValue); }
+                final AccountingTagRule accountingTagRule = AccountingTagRule.create(creditOrDebitAccount, transactionType.getValue());
+                accountingTagRules.add(accountingTagRule);
+            }
         }
         return accountingTagRules;
     }

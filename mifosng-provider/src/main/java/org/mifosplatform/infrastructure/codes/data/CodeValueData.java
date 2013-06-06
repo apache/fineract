@@ -10,7 +10,6 @@ package org.mifosplatform.infrastructure.codes.data;
  */
 public class CodeValueData {
 
-    @SuppressWarnings("unused")
     private final Long id;
 
     @SuppressWarnings("unused")
@@ -31,5 +30,9 @@ public class CodeValueData {
         this.id = id;
         this.name = name;
         this.position = position;
+    }
+
+    public Long getId() {
+        return id;
     }
 }

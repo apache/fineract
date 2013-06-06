@@ -5,21 +5,25 @@
  */
 package org.mifosplatform.accounting.rule.data;
 
+import org.mifosplatform.infrastructure.codes.data.CodeValueData;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 
 public class AccountingTagRuleData {
 
     @SuppressWarnings("unused")
     private final Long id;
-    @SuppressWarnings("unused")
-    private final Long tagId;
+    private final CodeValueData tag;
     @SuppressWarnings("unused")
     private final EnumOptionData transactionType;
 
-    public AccountingTagRuleData(final Long id, final Long tagId, final EnumOptionData transactionType) {
+    public AccountingTagRuleData(final Long id, final CodeValueData tag, final EnumOptionData transactionType) {
         this.id = id;
-        this.tagId = tagId;
+        this.tag = tag;
         this.transactionType = transactionType;
+    }
+
+    public CodeValueData getTag() {
+        return tag;
     }
 
 }

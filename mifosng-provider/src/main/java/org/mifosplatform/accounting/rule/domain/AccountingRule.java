@@ -6,9 +6,11 @@
 package org.mifosplatform.accounting.rule.domain;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -23,6 +25,7 @@ import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 import org.mifosplatform.accounting.glaccount.domain.GLAccount;
+import org.mifosplatform.accounting.journalentry.domain.JournalEntryType;
 import org.mifosplatform.accounting.rule.api.AccountingRuleJsonInputParams;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.organisation.office.domain.Office;
@@ -52,16 +55,22 @@ public class AccountingRule extends AbstractPersistable<Long> {
 
     @Column(name = "system_defined", nullable = false)
     private Boolean systemDefined;
-    
+
     @LazyCollection(LazyCollectionOption.FALSE)
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "accountingRule", orphanRemoval = true)
-    private List<AccountingTagRule> accountingTagRules = new ArrayList<AccountingTagRule>();
-    
+    private final List<AccountingTagRule> accountingTagRules = new ArrayList<AccountingTagRule>();
+
+    @Column(name = "allow_multiple_credits", nullable = false)
+    private boolean allowMultipleCreditEntries;
+
+    @Column(name = "allow_multiple_debits", nullable = false)
+    private boolean allowMultipleDebitEntries;
 
     protected AccountingRule() {}
 
-    private AccountingRule(Office office, GLAccount accountToDebit, GLAccount accountToCredit, String name, String description,
-            boolean systemDefined) {
+    private AccountingRule(final Office office, final GLAccount accountToDebit, final GLAccount accountToCredit, final String name,
+            final String description, final boolean systemDefined, final boolean allowMultipleCreditEntries,
+            final boolean allowMultipleDebitEntries) {
         this.accountToDebit = accountToDebit;
         this.accountToCredit = accountToCredit;
         this.name = name;
@@ -71,24 +80,34 @@ public class AccountingRule extends AbstractPersistable<Long> {
             this.description = this.description.trim();
         }
         this.systemDefined = systemDefined;
+        this.allowMultipleCreditEntries = allowMultipleCreditEntries;
+        this.allowMultipleDebitEntries = allowMultipleDebitEntries;
     }
 
     public static AccountingRule fromJson(final Office office, final GLAccount accountToDebit, final GLAccount accountToCredit,
-            JsonCommand command) {
+            final JsonCommand command, final boolean allowMultipleCreditEntries, final boolean allowMultipleDebitEntries) {
         final String name = command.stringValueOfParameterNamed(AccountingRuleJsonInputParams.NAME.getValue());
         final String description = command.stringValueOfParameterNamed(AccountingRuleJsonInputParams.DESCRIPTION.getValue());
         final boolean systemDefined = false;
-        return new AccountingRule(office, accountToDebit, accountToCredit, name, description, systemDefined);
+        return new AccountingRule(office, accountToDebit, accountToCredit, name, description, systemDefined, allowMultipleCreditEntries,
+                allowMultipleDebitEntries);
     }
 
     public Map<String, Object> update(final JsonCommand command) {
-        final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(5);
-        handlePropertyUpdate(command, actualChanges, AccountingRuleJsonInputParams.OFFICE_ID.getValue(), 0L);
-        handlePropertyUpdate(command, actualChanges, AccountingRuleJsonInputParams.ACCOUNT_TO_DEBIT.getValue(), 0L);
-        handlePropertyUpdate(command, actualChanges, AccountingRuleJsonInputParams.ACCOUNT_TO_CREDIT.getValue(), 0L);
+        final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(10);
+        handlePropertyUpdate(command, actualChanges, AccountingRuleJsonInputParams.OFFICE_ID.getValue(), this.office == null ? 0L
+                : this.office.getId());
+        handlePropertyUpdate(command, actualChanges, AccountingRuleJsonInputParams.ACCOUNT_TO_DEBIT.getValue(),
+                this.accountToDebit == null ? 0L : this.accountToDebit.getId());
+        handlePropertyUpdate(command, actualChanges, AccountingRuleJsonInputParams.ACCOUNT_TO_CREDIT.getValue(),
+                this.accountToCredit == null ? 0L : this.accountToCredit.getId());
         handlePropertyUpdate(command, actualChanges, AccountingRuleJsonInputParams.NAME.getValue(), this.name);
         handlePropertyUpdate(command, actualChanges, AccountingRuleJsonInputParams.DESCRIPTION.getValue(), this.description);
         handlePropertyUpdate(command, actualChanges, AccountingRuleJsonInputParams.SYSTEM_DEFINED.getValue(), this.systemDefined);
+        handlePropertyUpdate(command, actualChanges, AccountingRuleJsonInputParams.ALLOW_MULTIPLE_CREDIT_ENTRIES.getValue(),
+                this.allowMultipleCreditEntries);
+        handlePropertyUpdate(command, actualChanges, AccountingRuleJsonInputParams.ALLOW_MULTIPLE_DEBIT_ENTRIES.getValue(),
+                this.allowMultipleDebitEntries);
         return actualChanges;
     }
 
@@ -114,6 +133,14 @@ public class AccountingRule extends AbstractPersistable<Long> {
             // now update actual property
             if (paramName.equals(AccountingRuleJsonInputParams.SYSTEM_DEFINED.getValue())) {
                 this.systemDefined = newValue;
+            } else if (paramName.equals(AccountingRuleJsonInputParams.ALLOW_MULTIPLE_CREDIT_ENTRIES.getValue())) {
+                if (this.accountToCredit == null) {
+                    this.allowMultipleCreditEntries = newValue;
+                }
+            } else if (paramName.equals(AccountingRuleJsonInputParams.ALLOW_MULTIPLE_DEBIT_ENTRIES.getValue())) {
+                if (this.accountToDebit == null) {
+                    this.allowMultipleDebitEntries = newValue;
+                }
             }
         }
     }
@@ -134,7 +161,7 @@ public class AccountingRule extends AbstractPersistable<Long> {
         }
     }
 
-    public void setOffice(Office office) {
+    public void setOffice(final Office office) {
         this.office = office;
     }
 
@@ -150,11 +177,11 @@ public class AccountingRule extends AbstractPersistable<Long> {
         return this.accountToCredit;
     }
 
-    public void setAccountToDebit(GLAccount accountToDebit) {
+    public void setAccountToDebit(final GLAccount accountToDebit) {
         this.accountToDebit = accountToDebit;
     }
 
-    public void setAccountToCredit(GLAccount accountToCredit) {
+    public void setAccountToCredit(final GLAccount accountToCredit) {
         this.accountToCredit = accountToCredit;
     }
 
@@ -162,12 +189,66 @@ public class AccountingRule extends AbstractPersistable<Long> {
         return this.description;
     }
 
-	public List<AccountingTagRule> updateAccountingRuleForTags(List<AccountingTagRule> debitAccountingTagRules) {
-		for(AccountingTagRule accountingTagRule : debitAccountingTagRules){
-			accountingTagRule.updateAccountingTagRule(this);
-			this.accountingTagRules.add(accountingTagRule);
-		}
-		return debitAccountingTagRules;
-	}
+    public List<AccountingTagRule> getAccountingTagRules() {
+        return this.accountingTagRules;
+    }
+
+    public void updateAccountingRuleForTags(final List<AccountingTagRule> debitAccountingTagRules) {
+        for (final AccountingTagRule accountingTagRule : debitAccountingTagRules) {
+            accountingTagRule.updateAccountingTagRule(this);
+            this.accountingTagRules.add(accountingTagRule);
+        }
+    }
+
+    public void updateDebitAccount(final GLAccount accountToDebit) {
+        this.accountToDebit = accountToDebit;
+        this.allowMultipleDebitEntries = false;
+    }
+
+    public void updateCreditAccount(final GLAccount accountToCredit) {
+        this.accountToCredit = accountToCredit;
+        this.allowMultipleCreditEntries = false;
+    }
+
+    public void updateAllowMultipleCreditEntries(final boolean allowMultipleCreditEntries) {
+        this.allowMultipleCreditEntries = allowMultipleCreditEntries;
+    }
+
+    public void updateAllowMultipleDebitEntries(final boolean allowMultipleDebitEntries) {
+        this.allowMultipleDebitEntries = allowMultipleDebitEntries;
+    }
+
+    public void updateTags(final JournalEntryType type) {
+        final Set<AccountingTagRule> existedCreditTags = new HashSet<AccountingTagRule>();
+        final Set<AccountingTagRule> existedDebitTags = new HashSet<AccountingTagRule>();
+        for (final AccountingTagRule accountingTagRule : this.accountingTagRules) {
+            if (accountingTagRule.isCreditAccount()) {
+                existedCreditTags.add(accountingTagRule);
+            } else if (accountingTagRule.isDebitAccount()) {
+                existedDebitTags.add(accountingTagRule);
+            }
+        }
+
+        if (type.isCreditType()) {
+            this.accountingTagRules.retainAll(existedCreditTags);
+        } else if (type.isDebitType()) {
+            this.accountingTagRules.retainAll(existedDebitTags);
+        }
+
+    }
+
+    public Set<AccountingTagRule> getAccountingTagRulesByType(final JournalEntryType type) {
+        final Set<AccountingTagRule> existedTags = new HashSet<AccountingTagRule>();
+        for (final AccountingTagRule accountingTagRule : this.accountingTagRules) {
+            if (accountingTagRule.getAccountType().equals(type.getValue())) {
+                existedTags.add(accountingTagRule);
+            }
+        }
+        return existedTags;
+    }
+
+    public void removeOldTags(final List<AccountingTagRule> accountsToRemove) {
+        this.accountingTagRules.removeAll(accountsToRemove);
+    }
 
 }
