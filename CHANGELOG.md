@@ -6,6 +6,7 @@ See VERSIONING (https://github.com/openMF/mifosx/blob/master/VERSIONING.md) for 
 Releases
 ===============
 
+1. 06 Jun 2013 - 1.2.1.RELEASE
 1. 27 May 2013 - 1.2.0.RELEASE
 1. 24 May 2013 - 1.1.4.RELEASE
 1. 22 May 2013 - 1.1.3.RELEASE
@@ -21,6 +22,25 @@ Releases
 1. 10 April 2013 - 0.11.2.beta
 1. 05 April 2013 - 0.11.1.beta
 1. 05 April 2013 - 0.11.0.beta
+
+1.2.1.RELEASE
+=============
+Bug Release
+
+Platform & API
+
+Bug
+ - [MIFOSX-402] - Unable to use 'days' period frequency when entering value for 'lockin' on savings product/account
+ - [MIFOSX-398] - In savings account - " New saving product" is getting activated before Client activation date.
+ - [MIFOSX-399] - If full balance amount is withdrawn from saving account, it is displaying negative balance as withdrawal fee is defined in saving product.
+    
+Reference App
+ - [MIFOSX-358] - Register/Deregister datatables for groups and centers
+ - [MIFOSX-396] - Not able to deposit / Withdraw amount in savings account
+ - [MIFOSX-401] - While Updating the saving product if withdrawal fee is defined as "0" error message is displayed.
+ - [MIFOSX-403] - While defining and updating the saving product if Annual fee is defined as "0" error message is displayed.
+ - [MIFOSX-407] - For some transactions by clicking on Deposit/Withdraw, 2-3 popup pages displayed as blank.
+ - [MIFOSX-410] - While defining saving product if Annual fee and date text field kept blank it is displaying error. But while editing saving product if Annual fee and date text field kept blank it is accepting.
 
 1.2.0.RELEASE
 =============
