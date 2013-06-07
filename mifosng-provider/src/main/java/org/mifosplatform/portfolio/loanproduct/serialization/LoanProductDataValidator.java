@@ -49,7 +49,9 @@ public final class LoanProductDataValidator {
             LOAN_PRODUCT_ACCOUNTING_PARAMS.INTEREST_ON_LOANS.getValue(), LOAN_PRODUCT_ACCOUNTING_PARAMS.INTEREST_RECEIVABLE.getValue(),
             LOAN_PRODUCT_ACCOUNTING_PARAMS.LOAN_PORTFOLIO.getValue(), LOAN_PRODUCT_ACCOUNTING_PARAMS.LOSSES_WRITTEN_OFF.getValue(),
             LOAN_PRODUCT_ACCOUNTING_PARAMS.PENALTIES_RECEIVABLE.getValue(),
-            LOAN_PRODUCT_ACCOUNTING_PARAMS.PAYMENT_CHANNEL_FUND_SOURCE_MAPPING.getValue()));
+            LOAN_PRODUCT_ACCOUNTING_PARAMS.PAYMENT_CHANNEL_FUND_SOURCE_MAPPING.getValue(),
+            LOAN_PRODUCT_ACCOUNTING_PARAMS.FEE_INCOME_ACCOUNT_MAPPING.getValue(),
+            LOAN_PRODUCT_ACCOUNTING_PARAMS.PENALTY_INCOME_ACCOUNT_MAPPING.getValue()));
 
     private final FromJsonHelper fromApiJsonHelper;
 
@@ -265,6 +267,7 @@ public final class LoanProductDataValidator {
                     .notNull().integerGreaterThanZero();
 
             validatePaymentChannelFundSourceMappings(baseDataValidator, element);
+            validateChargeToIncomeAccountMappings(baseDataValidator, element);
 
         }
 
@@ -495,6 +498,7 @@ public final class LoanProductDataValidator {
                 .value(receivablePenaltyAccountId).ignoreIfNull().integerGreaterThanZero();
 
         validatePaymentChannelFundSourceMappings(baseDataValidator, element);
+        validateChargeToIncomeAccountMappings(baseDataValidator, element);
 
         validateMinMaxConstraints(element, baseDataValidator, loanProduct);
 
@@ -529,6 +533,41 @@ public final class LoanProductDataValidator {
                             .notNull().integerGreaterThanZero();
                     i++;
                 } while (i < paymentChannelMappingArray.size());
+            }
+        }
+    }
+
+    private void validateChargeToIncomeAccountMappings(final DataValidatorBuilder baseDataValidator, final JsonElement element) {
+        // validate for both fee and penalty charges
+        validateChargeToIncomeAccountMappings(baseDataValidator, element, true);
+        validateChargeToIncomeAccountMappings(baseDataValidator, element, true);
+    }
+
+    private void validateChargeToIncomeAccountMappings(final DataValidatorBuilder baseDataValidator, final JsonElement element,
+            boolean isPenalty) {
+        String parameterName;
+        if (isPenalty) {
+            parameterName = LOAN_PRODUCT_ACCOUNTING_PARAMS.PENALTY_INCOME_ACCOUNT_MAPPING.getValue();
+        } else {
+            parameterName = LOAN_PRODUCT_ACCOUNTING_PARAMS.FEE_INCOME_ACCOUNT_MAPPING.getValue();
+        }
+
+        if (fromApiJsonHelper.parameterExists(parameterName, element)) {
+            JsonArray chargeToIncomeAccountMappingArray = fromApiJsonHelper.extractJsonArrayNamed(parameterName, element);
+            if (chargeToIncomeAccountMappingArray != null && chargeToIncomeAccountMappingArray.size() > 0) {
+                int i = 0;
+                do {
+                    final JsonObject jsonObject = chargeToIncomeAccountMappingArray.get(i).getAsJsonObject();
+                    final Long chargeId = jsonObject.get(LOAN_PRODUCT_ACCOUNTING_PARAMS.CHARGE_ID.getValue()).getAsLong();
+                    final Long incomeAccountId = jsonObject.get(LOAN_PRODUCT_ACCOUNTING_PARAMS.INCOME_ACCOUNT_ID.getValue()).getAsLong();
+                    baseDataValidator.reset()
+                            .parameter(parameterName + "[" + i + "]." + LOAN_PRODUCT_ACCOUNTING_PARAMS.CHARGE_ID.toString())
+                            .value(chargeId).notNull().integerGreaterThanZero();
+                    baseDataValidator.reset()
+                            .parameter(parameterName + "[" + i + "]." + LOAN_PRODUCT_ACCOUNTING_PARAMS.INCOME_ACCOUNT_ID.getValue())
+                            .value(incomeAccountId).notNull().integerGreaterThanZero();
+                    i++;
+                } while (i < chargeToIncomeAccountMappingArray.size());
             }
         }
     }
