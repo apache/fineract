@@ -77,7 +77,9 @@ public class LoanProductData {
 
     // template related
     private final Collection<FundData> fundOptions;
+    @SuppressWarnings("unused")
     private final Collection<CodeValueData> paymentTypeOptions;
+    @SuppressWarnings("unused")
     private final Collection<CurrencyData> currencyOptions;
     private final List<EnumOptionData> repaymentFrequencyTypeOptions;
     private final List<EnumOptionData> interestRateFrequencyTypeOptions;
@@ -86,7 +88,9 @@ public class LoanProductData {
     private final List<EnumOptionData> interestCalculationPeriodTypeOptions;
     private final Collection<TransactionProcessingStrategyData> transactionProcessingStrategyOptions;
     private final Collection<ChargeData> chargeOptions;
+    @SuppressWarnings("unused")
     private final List<EnumOptionData> accountingRuleOptions;
+    @SuppressWarnings("unused")
     private final Map<String, List<GLAccountData>> accountingMappingOptions;
 
     /**
