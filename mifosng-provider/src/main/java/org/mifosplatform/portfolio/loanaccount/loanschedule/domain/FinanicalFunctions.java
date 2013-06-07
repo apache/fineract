@@ -5,72 +5,7 @@
  */
 package org.mifosplatform.portfolio.loanaccount.loanschedule.domain;
 
-import java.math.BigDecimal;
-
-import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
-import org.mifosplatform.organisation.monetary.domain.Money;
-import org.mifosplatform.portfolio.loanproduct.domain.LoanProductRelatedDetail;
-
 public class FinanicalFunctions {
-
-    @Deprecated
-    public Money calculatePaymentForOnePeriodFrom(final LoanProductRelatedDetail loanScheduleInfo,
-            final BigDecimal periodInterestRateForRepaymentPeriod, final MonetaryCurrency monetaryCurrency) {
-        double interestRateFraction = periodInterestRateForRepaymentPeriod.doubleValue();
-
-        double futureValue = 0;
-        double numberOfPeriods = loanScheduleInfo.getNumberOfRepayments().doubleValue();
-        double principal = loanScheduleInfo.getPrincipal().getAmount().multiply(BigDecimal.valueOf(-1)).doubleValue();
-
-        // work out the total payment (principal + interest components) for each
-        // installment due.
-        // use the period type and interest as expressed e.g. 2% per month or
-        // 24% per year even is 'daily' interest calculation is selected
-        double paymentPerInstallment = pmt(interestRateFraction, numberOfPeriods, principal, futureValue, false);
-
-        return Money.of(monetaryCurrency, BigDecimal.valueOf(paymentPerInstallment));
-    }
-
-    @Deprecated
-    public Money calculateTotalRepaymentFrom(final LoanProductRelatedDetail loanScheduleInfo,
-            final BigDecimal periodInterestRateForRepaymentPeriod, final MonetaryCurrency monetaryCurrency) {
-        double interestRateFraction = periodInterestRateForRepaymentPeriod.doubleValue();
-
-        double futureValue = 0;
-        double numberOfPeriods = loanScheduleInfo.getNumberOfRepayments().doubleValue();
-        double principal = loanScheduleInfo.getPrincipal().getAmount().multiply(BigDecimal.valueOf(-1)).doubleValue();
-
-        // work out the total payment (principal + interest components) for each
-        // installment due.
-        // use the period type and interest as expressed e.g. 2% per month or
-        // 24% per year even is 'daily' interest calculation is selected
-        double paymentPerInstallment = pmt(interestRateFraction, numberOfPeriods, principal, futureValue, false);
-
-        double totalRepayment = paymentPerInstallment * loanScheduleInfo.getNumberOfRepayments();
-
-        return Money.of(monetaryCurrency, BigDecimal.valueOf(totalRepayment));
-    }
-
-    @Deprecated
-    public Money calculateTotalRepaymentFrom(final Money principal, final Integer loanTermFrequency,
-            final BigDecimal periodInterestRateForLoanTermPeriod, final MonetaryCurrency monetaryCurrency) {
-
-        double interestRateFraction = periodInterestRateForLoanTermPeriod.doubleValue();
-
-        double futureValue = 0;
-        double numberOfPeriods = loanTermFrequency.doubleValue();
-        double principalAmount = principal.getAmount().multiply(BigDecimal.valueOf(-1)).doubleValue();
-
-        // work out the total payment (principal + interest components) for each
-        // installment due.
-        // use the period type and interest as expressed e.g. 2% per month or
-        // 24% per year even is 'daily' interest calculation is selected
-        double paymentPerInstallment = pmt(interestRateFraction, numberOfPeriods, principalAmount, futureValue, false);
-
-        double totalRepayment = paymentPerInstallment * loanTermFrequency;
-
-        return Money.of(monetaryCurrency, BigDecimal.valueOf(totalRepayment));
-    }
 
     /**
      * PMT calculates a fixed monthly payment to be paid by borrower every

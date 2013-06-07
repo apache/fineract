@@ -62,8 +62,52 @@ public class Money implements Comparable<Money> {
         this.currencyDigitsAfterDecimal = digitsAfterDecimal;
 
         final BigDecimal amountZeroed = defaultToZeroIfNull(amount);
-        BigDecimal amountStripped = amountZeroed.stripTrailingZeros();
-        this.amount = amountStripped.setScale(this.currencyDigitsAfterDecimal, RoundingMode.HALF_EVEN);
+        final BigDecimal amountStripped = amountZeroed.stripTrailingZeros();
+        final BigDecimal amountScaled = amountStripped.setScale(this.currencyDigitsAfterDecimal, RoundingMode.HALF_EVEN);
+        this.amount = amountScaled;
+
+        // TODO - KW - below was test of using floor/ceil functions to support
+        // round monetary amounts into multiples of say 20/50.
+        // if (this.currencyDigitsAfterDecimal == 0) {
+        // double existingVal = amountScaled.doubleValue();
+        // double ceilingOfValue = ceiling(existingVal, Double.valueOf("20.0"));
+        // double floorOfValue = floor(existingVal, Double.valueOf("20.0"));
+        //
+        // double floorDiff = existingVal - floorOfValue;
+        // double ceilDiff = ceilingOfValue - existingVal;
+        //
+        // if (ceilDiff > floorDiff) {
+        // this.amount = BigDecimal.valueOf(floorOfValue);
+        // } else {
+        // this.amount = BigDecimal.valueOf(ceilingOfValue);
+        // }
+        // } else {
+        // this.amount = amountScaled;
+        // }
+    }
+
+    public static double ceiling(final double n, final double s) {
+        double c;
+
+        if ((n < 0 && s > 0) || (n > 0 && s < 0)) {
+            c = Double.NaN;
+        } else {
+            c = (n == 0 || s == 0) ? 0 : Math.ceil(n / s) * s;
+        }
+
+        return c;
+    }
+
+    public static double floor(final double n, final double s) {
+        double f;
+
+        if ((n < 0 && s > 0) || (n > 0 && s < 0) || (s == 0 && n != 0)) {
+            f = Double.NaN;
+        } else {
+            f = (n == 0 || s == 0) ? 0 : Math.floor(n / s) * s;
+        }
+
+        return f;
     }
 
     private static BigDecimal defaultToZeroIfNull(final BigDecimal value) {
