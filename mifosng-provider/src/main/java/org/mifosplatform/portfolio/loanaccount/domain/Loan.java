@@ -1374,8 +1374,8 @@ public class Loan extends AbstractPersistable<Long> {
                 if (charge.isDueAtDisbursement()) {
                     charge.markAsFullyPaid();
                     // Add "Loan Charge Paid By" details to this transaction
-                    LoanChargePaidBy loanChargePaidBy = new LoanChargePaidBy(disbursementTransaction, charge, charge.amount());
-                    disbursementTransaction.getLoanChargesPaid().add(loanChargePaidBy);
+                    LoanChargePaidBy loanChargePaidBy = new LoanChargePaidBy(chargesPayment, charge, charge.amount());
+                    chargesPayment.getLoanChargesPaid().add(loanChargePaidBy);
                 } else {
                     handleChargeAppliedTransaction(charge, disbursedOn);
                 }

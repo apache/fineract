@@ -487,6 +487,10 @@ public class LoanCharge extends AbstractPersistable<Long> {
         return this.charge.getCurrencyCode();
     }
 
+    public Charge getCharge() {
+        return this.charge;
+    }
+
     @Override
     public boolean equals(final Object obj) {
         if (obj == null) { return false; }

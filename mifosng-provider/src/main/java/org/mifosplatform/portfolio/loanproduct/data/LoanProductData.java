@@ -14,6 +14,7 @@ import java.util.Map;
 import org.mifosplatform.accounting.common.AccountingEnumerations;
 import org.mifosplatform.accounting.common.AccountingRuleType;
 import org.mifosplatform.accounting.glaccount.data.GLAccountData;
+import org.mifosplatform.accounting.producttoaccountmapping.data.ChargeToGLAccountMapper;
 import org.mifosplatform.accounting.producttoaccountmapping.data.PaymentTypeToGLAccountMapper;
 import org.mifosplatform.infrastructure.codes.data.CodeValueData;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
@@ -68,11 +69,11 @@ public class LoanProductData {
     private final Collection<ChargeData> charges;
 
     // accounting
-    private final EnumOptionData accountingRule;
-    @SuppressWarnings("unused")
-    private final Map<String, Object> accountingMappings;
-    @SuppressWarnings("unused")
-    private final Collection<PaymentTypeToGLAccountMapper> paymentChannelToFundSourceMappings;
+    private EnumOptionData accountingRule;
+    private Map<String, Object> accountingMappings;
+    private Collection<PaymentTypeToGLAccountMapper> paymentChannelToFundSourceMappings;
+    private Collection<ChargeToGLAccountMapper> feeToIncomeAccountMappings;
+    private Collection<ChargeToGLAccountMapper> penaltyToIncomeAccountMappings;
 
     // template related
     private final Collection<FundData> fundOptions;
@@ -212,13 +213,14 @@ public class LoanProductData {
     }
 
     public static LoanProductData withAccountingDetails(final LoanProductData productData, final Map<String, Object> accountingMappings,
-            final Collection<PaymentTypeToGLAccountMapper> paymentChannelToFundSourceMappings) {
-
-        return new LoanProductData(productData, productData.chargeOptions, productData.paymentTypeOptions, productData.currencyOptions,
-                productData.amortizationTypeOptions, productData.interestTypeOptions, productData.interestCalculationPeriodTypeOptions,
-                productData.repaymentFrequencyTypeOptions, productData.interestRateFrequencyTypeOptions, productData.fundOptions,
-                productData.transactionProcessingStrategyOptions, productData.accountingMappingOptions, productData.accountingRuleOptions,
-                accountingMappings, paymentChannelToFundSourceMappings);
+            final Collection<PaymentTypeToGLAccountMapper> paymentChannelToFundSourceMappings,
+            final Collection<ChargeToGLAccountMapper> feeToGLAccountMappings,
+            final Collection<ChargeToGLAccountMapper> penaltyToGLAccountMappings) {
+        productData.accountingMappings = accountingMappings;
+        productData.paymentChannelToFundSourceMappings = paymentChannelToFundSourceMappings;
+        productData.feeToIncomeAccountMappings = feeToGLAccountMappings;
+        productData.penaltyToIncomeAccountMappings = penaltyToGLAccountMappings;
+        return productData;
     }
 
     public LoanProductData(final Long id, final String name, final String description, final CurrencyData currency,
@@ -277,6 +279,8 @@ public class LoanProductData {
         this.accountingRuleOptions = null;
         this.accountingMappings = null;
         this.paymentChannelToFundSourceMappings = null;
+        this.feeToIncomeAccountMappings = null;
+        this.penaltyToIncomeAccountMappings = null;
     }
 
     public LoanProductData(final LoanProductData productData, final Collection<ChargeData> chargeOptions,
@@ -285,8 +289,7 @@ public class LoanProductData {
             final List<EnumOptionData> interestCalculationPeriodTypeOptions, final List<EnumOptionData> repaymentFrequencyTypeOptions,
             final List<EnumOptionData> interestRateFrequencyTypeOptions, final Collection<FundData> fundOptions,
             final Collection<TransactionProcessingStrategyData> transactionStrategyOptions,
-            final Map<String, List<GLAccountData>> accountingMappingOptions, final List<EnumOptionData> accountingRuleOptions,
-            final Map<String, Object> accountingMappings, final Collection<PaymentTypeToGLAccountMapper> paymentChannelToFundSourceMappings) {
+            final Map<String, List<GLAccountData>> accountingMappingOptions, final List<EnumOptionData> accountingRuleOptions) {
         this.id = productData.id;
         this.name = productData.name;
         this.description = productData.description;
@@ -313,6 +316,10 @@ public class LoanProductData {
 
         this.charges = nullIfEmpty(productData.charges());
         this.accountingRule = productData.accountingRule;
+        this.accountingMappings = productData.accountingMappings;
+        this.paymentChannelToFundSourceMappings = productData.paymentChannelToFundSourceMappings;
+        this.feeToIncomeAccountMappings = productData.feeToIncomeAccountMappings;
+        this.penaltyToIncomeAccountMappings = productData.penaltyToIncomeAccountMappings;
 
         this.chargeOptions = chargeOptions;
         this.paymentTypeOptions = paymentTypeOptions;
@@ -344,13 +351,7 @@ public class LoanProductData {
         this.accountingMappingOptions = accountingMappingOptions;
         this.accountingRuleOptions = accountingRuleOptions;
 
-        if (accountingMappings == null || accountingMappings.isEmpty()) {
-            this.accountingMappings = null;
-        } else {
-            this.accountingMappings = accountingMappings;
-        }
-
-        this.paymentChannelToFundSourceMappings = paymentChannelToFundSourceMappings;
+       
     }
 
     private Collection<ChargeData> nullIfEmpty(final Collection<ChargeData> charges) {

@@ -8,6 +8,7 @@ package org.mifosplatform.accounting.journalentry.service;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -18,6 +19,7 @@ import org.mifosplatform.accounting.common.AccountingConstants.ACCRUAL_ACCOUNTS_
 import org.mifosplatform.accounting.common.AccountingConstants.CASH_ACCOUNTS_FOR_LOAN;
 import org.mifosplatform.accounting.common.AccountingConstants.CASH_ACCOUNTS_FOR_SAVINGS;
 import org.mifosplatform.accounting.glaccount.domain.GLAccount;
+import org.mifosplatform.accounting.journalentry.data.ChargePaymentDTO;
 import org.mifosplatform.accounting.journalentry.data.LoanDTO;
 import org.mifosplatform.accounting.journalentry.data.LoanTransactionDTO;
 import org.mifosplatform.accounting.journalentry.data.SavingsDTO;
@@ -30,6 +32,7 @@ import org.mifosplatform.accounting.journalentry.exception.JournalEntryInvalidEx
 import org.mifosplatform.accounting.producttoaccountmapping.domain.PortfolioProductType;
 import org.mifosplatform.accounting.producttoaccountmapping.domain.ProductToGLAccountMapping;
 import org.mifosplatform.accounting.producttoaccountmapping.domain.ProductToGLAccountMappingRepository;
+import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.mifosplatform.organisation.office.domain.Office;
 import org.mifosplatform.organisation.office.domain.OfficeRepository;
 import org.mifosplatform.portfolio.loanaccount.data.LoanTransactionEnumData;
@@ -77,8 +80,28 @@ public class AccountingProcessorHelper {
             final boolean reversed = (Boolean) map.get("reversed");
             final Long paymentTypeId = (Long) map.get("paymentTypeId");
 
+            List<ChargePaymentDTO> feePayments = new ArrayList<ChargePaymentDTO>();
+            List<ChargePaymentDTO> penaltyPayments = new ArrayList<ChargePaymentDTO>();
+            // extract charge payment details (if exists)
+            if (map.containsKey("loanChargesPaid")) {
+                @SuppressWarnings("unchecked")
+                final List<Map<String, Object>> loanChargesPaidData = (List<Map<String, Object>>) map.get("loanChargesPaid");
+                for (final Map<String, Object> loanChargePaid : loanChargesPaidData) {
+                    final Long chargeId = (Long) loanChargePaid.get("chargeId");
+                    final Long loanChargeId = (Long) loanChargePaid.get("chargeId");
+                    final boolean isPenalty = (Boolean) loanChargePaid.get("isPenalty");
+                    final BigDecimal chargeAmountPaid = (BigDecimal) loanChargePaid.get("amount");
+                    ChargePaymentDTO chargePaymentDTO = new ChargePaymentDTO(chargeId, loanChargeId, chargeAmountPaid);
+                    if (isPenalty) {
+                        penaltyPayments.add(chargePaymentDTO);
+                    } else {
+                        feePayments.add(chargePaymentDTO);
+                    }
+                }
+            }
+
             final LoanTransactionDTO transaction = new LoanTransactionDTO(paymentTypeId, transactionId, transactionDate, transactionType,
-                    amount, principal, interest, fees, penalties, reversed);
+                    amount, principal, interest, fees, penalties, reversed, feePayments, penaltyPayments);
 
             newLoanTransactions.add(transaction);
 
@@ -304,6 +327,48 @@ public class AccountingProcessorHelper {
         }
     }
 
+    public void createCreditJournalEntryOrReversalForLoanCharges(final Office office, final int accountMappingTypeId,
+            final Long loanProductId, final Long loanId, final String transactionId, final Date transactionDate,
+            final BigDecimal totalAmount, final Boolean isReversal, final List<ChargePaymentDTO> chargePaymentDTOs) {
+        /***
+         * Map to track each account and the net credit to be made for a
+         * particular account
+         ***/
+        Map<GLAccount, BigDecimal> creditDetailsMap = new LinkedHashMap<GLAccount, BigDecimal>();
+        for (ChargePaymentDTO chargePaymentDTO : chargePaymentDTOs) {
+            Long chargeId = chargePaymentDTO.getChargeId();
+            GLAccount chargeSpecificAccount = getLinkedGLAccountForLoanCharges(loanProductId, accountMappingTypeId, chargeId);
+            BigDecimal chargeSpecificAmount = chargePaymentDTO.getAmount();
+
+            // adjust net credit amount if the account is already present in the
+            // map
+            if (creditDetailsMap.containsKey(chargeSpecificAccount)) {
+                BigDecimal existingAmount = creditDetailsMap.get(chargeSpecificAccount);
+                chargeSpecificAmount = chargeSpecificAmount.add(existingAmount);
+            }
+            creditDetailsMap.put(chargeSpecificAccount, chargeSpecificAmount);
+        }
+
+        BigDecimal totalCreditedAmount = BigDecimal.ZERO;
+        for (Map.Entry<GLAccount, BigDecimal> entry : creditDetailsMap.entrySet()) {
+            GLAccount account = entry.getKey();
+            BigDecimal amount = entry.getValue();
+            totalCreditedAmount = totalCreditedAmount.add(amount);
+            if (isReversal) {
+                createDebitJournalEntryForLoan(office, account, loanId, transactionId, transactionDate, amount);
+            } else {
+                createCreditJournalEntryForLoan(office, account, loanId, transactionId, transactionDate, amount);
+            }
+        }
+
+        // TODO: Vishwas Temporary validation to be removed before moving to
+        // release branch
+        if (totalAmount.compareTo(totalCreditedAmount) != 0) { throw new PlatformDataIntegrityException(
+                "Meltdown in advanced accounting...sum of all charges is not equal to the fee charge for a transaction",
+                "Meltdown in advanced accounting...sum of all charges is not equal to the fee charge for a transaction",
+                totalCreditedAmount, totalAmount); }
+    }
+
     private void createCreditJournalEntryOrReversalForLoan(final Office office, final int accountMappingTypeId, final Long loanProductId,
             final Long paymentTypeId, final Long loanId, final String transactionId, final Date transactionDate, final BigDecimal amount,
             final Boolean isReversal) {
@@ -361,6 +426,30 @@ public class AccountingProcessorHelper {
                             PortfolioProductType.LOAN.getValue(), accountMappingTypeId, paymentTypeId);
             if (paymentChannelSpecificAccountMapping != null) {
                 accountMapping = paymentChannelSpecificAccountMapping;
+            }
+        }
+
+        return accountMapping.getGlAccount();
+    }
+
+    private GLAccount getLinkedGLAccountForLoanCharges(final Long loanProductId, final int accountMappingTypeId, final Long chargeId) {
+        ProductToGLAccountMapping accountMapping = this.accountMappingRepository.findCoreProductToFinAccountMapping(loanProductId,
+                PortfolioProductType.LOAN.getValue(), accountMappingTypeId);
+        /*****
+         * Get more specific mappings for Charges and penalties (based on the
+         * actual charge /penalty coupled with the loan product). Note the
+         * income from fees and income from penalties placeholder ID would be
+         * the same for both cash and accrual based accounts
+         *****/
+
+        // Vishwas TODO: remove this condition as it should always be true
+        if (accountMappingTypeId == CASH_ACCOUNTS_FOR_LOAN.INCOME_FROM_FEES.getValue()
+                || accountMappingTypeId == CASH_ACCOUNTS_FOR_LOAN.INCOME_FROM_PENALTIES.getValue()) {
+            ProductToGLAccountMapping chargeSpecificIncomeAccountMapping = this.accountMappingRepository
+                    .findByProductIdAndProductTypeAndFinancialAccountTypeAndChargeId(loanProductId, PortfolioProductType.LOAN.getValue(),
+                            accountMappingTypeId, chargeId);
+            if (chargeSpecificIncomeAccountMapping != null) {
+                accountMapping = chargeSpecificIncomeAccountMapping;
             }
         }
         return accountMapping.getGlAccount();
