@@ -81,6 +81,7 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
 
                 // advanced accounting mappings
                 loanProductToGLAccountMappingHelper.savePaymentChannelToFundSourceMappings(command, element, loanProductId, null);
+                loanProductToGLAccountMappingHelper.saveChargesToIncomeAccountMappings(command, element, loanProductId, null);
             break;
             case ACCRUAL_BASED:
 
@@ -119,6 +120,7 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
 
                 // advanced accounting mappings
                 loanProductToGLAccountMappingHelper.savePaymentChannelToFundSourceMappings(command, element, loanProductId, null);
+                loanProductToGLAccountMappingHelper.saveChargesToIncomeAccountMappings(command, element, loanProductId, null);
             break;
         }
     }

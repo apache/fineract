@@ -18,8 +18,10 @@ import org.mifosplatform.accounting.common.AccountingConstants.CASH_ACCOUNTS_FOR
 import org.mifosplatform.accounting.common.AccountingConstants.LOAN_PRODUCT_ACCOUNTING_PARAMS;
 import org.mifosplatform.accounting.common.AccountingConstants.SAVINGS_PRODUCT_ACCOUNTING_PARAMS;
 import org.mifosplatform.accounting.common.AccountingRuleType;
+import org.mifosplatform.accounting.producttoaccountmapping.data.ChargeToGLAccountMapper;
 import org.mifosplatform.accounting.producttoaccountmapping.data.PaymentTypeToGLAccountMapper;
 import org.mifosplatform.accounting.producttoaccountmapping.domain.PortfolioProductType;
+import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
 import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -39,8 +41,11 @@ public class ProductToGLAccountMappingReadPlatformServiceImpl implements Product
     private static final class ProductToGLAccountMappingMapper implements RowMapper<Map<String, Object>> {
 
         public String schema() {
-            return " id as id, gl_account_id as glAccountId,product_id as productId,product_type as productType,financial_account_type as financialAccountType,"
-                    + " payment_type as paymentTypeId from acc_product_mapping " + " where product_type= ? ";
+            return " mapping.id as id, mapping.gl_account_id as glAccountId, mapping.product_id as productId, "
+                    + " mapping.product_type as productType,mapping.financial_account_type as financialAccountType, "
+                    + " mapping.payment_type as paymentTypeId, mapping.charge_id as chargeId, charge.is_penalty as penalty "
+                    + " from acc_product_mapping mapping left join m_charge charge on mapping.charge_id=charge.id "
+                    + " where mapping.product_type= ? ";
         }
 
         @Override
@@ -49,7 +54,8 @@ public class ProductToGLAccountMappingReadPlatformServiceImpl implements Product
             final Long id = rs.getLong("id");
             final Long glAccountId = rs.getLong("glAccountId");
             final Long productId = rs.getLong("productId");
-            final Long paymentTypeId = rs.getLong("paymentTypeId");
+            final Long paymentTypeId = JdbcSupport.getLong(rs, "paymentTypeId");
+            final Long chargeId = rs.getLong("chargeId");
             final Integer productType = rs.getInt("productType");
             final Integer financialAccountType = rs.getInt("financialAccountType");
 
@@ -60,6 +66,7 @@ public class ProductToGLAccountMappingReadPlatformServiceImpl implements Product
             loanProductToGLAccountMap.put("productType", productType);
             loanProductToGLAccountMap.put("financialAccountType", financialAccountType);
             loanProductToGLAccountMap.put("paymentTypeId", paymentTypeId);
+            loanProductToGLAccountMap.put("chargeId", chargeId);
 
             return loanProductToGLAccountMap;
         }
@@ -71,7 +78,7 @@ public class ProductToGLAccountMappingReadPlatformServiceImpl implements Product
         final Map<String, Object> accountMappingDetails = new LinkedHashMap<String, Object>(8);
 
         final ProductToGLAccountMappingMapper rm = new ProductToGLAccountMappingMapper();
-        final String sql = "select " + rm.schema() + " and product_id = ? and payment_type is null ";
+        final String sql = "select " + rm.schema() + " and product_id = ? and payment_type is null and mapping.charge_id is null";
 
         final List<Map<String, Object>> listOfProductToGLAccountMaps = this.jdbcTemplate.query(sql, rm, new Object[] {
                 PortfolioProductType.LOAN.getValue(), loanProductId });
@@ -138,7 +145,7 @@ public class ProductToGLAccountMappingReadPlatformServiceImpl implements Product
         final Map<String, Object> accountMappingDetails = new LinkedHashMap<String, Object>(8);
 
         final ProductToGLAccountMappingMapper rm = new ProductToGLAccountMappingMapper();
-        final String sql = "select " + rm.schema() + " and product_id = ? and payment_type is null ";
+        final String sql = "select " + rm.schema() + " and product_id = ? and payment_type is null and mapping.charge_id is null ";
 
         final List<Map<String, Object>> listOfProductToGLAccountMaps = this.jdbcTemplate.query(sql, rm, new Object[] {
                 PortfolioProductType.SAVING.getValue(), savingsProductId });
@@ -168,14 +175,12 @@ public class ProductToGLAccountMappingReadPlatformServiceImpl implements Product
 
     @Override
     public List<PaymentTypeToGLAccountMapper> fetchPaymentTypeToFundSourceMappingsForLoanProduct(Long loanProductId) {
-        List<PaymentTypeToGLAccountMapper> paymentTypeToGLAccountMappers = null;
-        return fetchPaymentTypeToFundSourceMappings(PortfolioProductType.LOAN, loanProductId, paymentTypeToGLAccountMappers);
+        return fetchPaymentTypeToFundSourceMappings(PortfolioProductType.LOAN, loanProductId);
     }
 
     @Override
     public List<PaymentTypeToGLAccountMapper> fetchPaymentTypeToFundSourceMappingsForSavingsProduct(Long savingsProductId) {
-        List<PaymentTypeToGLAccountMapper> paymentTypeToGLAccountMappers = null;
-        return fetchPaymentTypeToFundSourceMappings(PortfolioProductType.SAVING, savingsProductId, paymentTypeToGLAccountMappers);
+        return fetchPaymentTypeToFundSourceMappings(PortfolioProductType.SAVING, savingsProductId);
     }
 
     /**
@@ -184,13 +189,14 @@ public class ProductToGLAccountMappingReadPlatformServiceImpl implements Product
      * @return
      */
     private List<PaymentTypeToGLAccountMapper> fetchPaymentTypeToFundSourceMappings(PortfolioProductType portfolioProductType,
-            Long loanProductId, List<PaymentTypeToGLAccountMapper> paymentTypeToGLAccountMappers) {
+            Long loanProductId) {
         final ProductToGLAccountMappingMapper rm = new ProductToGLAccountMappingMapper();
         final String sql = "select " + rm.schema() + " and product_id = ? and payment_type is not null";
 
         final List<Map<String, Object>> paymentTypeToFundSourceMappingsList = this.jdbcTemplate.query(sql, rm, new Object[] {
                 portfolioProductType.getValue(), loanProductId });
 
+        List<PaymentTypeToGLAccountMapper> paymentTypeToGLAccountMappers = null;
         for (final Map<String, Object> productToGLAccountMap : paymentTypeToFundSourceMappingsList) {
             if (paymentTypeToGLAccountMappers == null) {
                 paymentTypeToGLAccountMappers = new ArrayList<PaymentTypeToGLAccountMapper>();
@@ -203,4 +209,38 @@ public class ProductToGLAccountMappingReadPlatformServiceImpl implements Product
         return paymentTypeToGLAccountMappers;
     }
 
+    @Override
+    public List<ChargeToGLAccountMapper> fetchFeeToIncomeAccountMappingsForLoanProduct(Long loanProductId) {
+        return fetchChargeToIncomeAccountMappings(PortfolioProductType.LOAN, loanProductId, false);
+    }
+
+    @Override
+    public List<ChargeToGLAccountMapper> fetchPenaltyToIncomeAccountMappingsForLoanProduct(Long loanProductId) {
+        return fetchChargeToIncomeAccountMappings(PortfolioProductType.LOAN, loanProductId, true);
+    }
+
+    private List<ChargeToGLAccountMapper> fetchChargeToIncomeAccountMappings(PortfolioProductType portfolioProductType, Long loanProductId,
+            boolean penalty) {
+        final ProductToGLAccountMappingMapper rm = new ProductToGLAccountMappingMapper();
+        String sql = "select " + rm.schema() + " and product_id = ? and mapping.charge_id is not null and charge.is_penalty=";
+        if (penalty) {
+            sql = sql + " 1";
+        } else {
+            sql = sql + " 0";
+        }
+
+        final List<Map<String, Object>> chargeToFundSourceMappingsList = this.jdbcTemplate.query(sql, rm, new Object[] {
+                portfolioProductType.getValue(), loanProductId });
+        List<ChargeToGLAccountMapper> chargeToGLAccountMappers = null;
+        for (final Map<String, Object> chargeToIncomeAccountMap : chargeToFundSourceMappingsList) {
+            if (chargeToGLAccountMappers == null) {
+                chargeToGLAccountMappers = new ArrayList<ChargeToGLAccountMapper>();
+            }
+            final Long glAccountId = (Long) chargeToIncomeAccountMap.get("glAccountId");
+            final Long chargeId = (Long) chargeToIncomeAccountMap.get("chargeId");
+            ChargeToGLAccountMapper chargeToGLAccountMapper = new ChargeToGLAccountMapper(chargeId, glAccountId);
+            chargeToGLAccountMappers.add(chargeToGLAccountMapper);
+        }
+        return chargeToGLAccountMappers;
+    }
 }

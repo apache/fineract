@@ -7,6 +7,7 @@ package org.mifosplatform.accounting.journalentry.data;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 
 import org.mifosplatform.portfolio.loanaccount.data.LoanTransactionEnumData;
 
@@ -28,9 +29,14 @@ public class LoanTransactionDTO {
     /*** Boolean values determines if the transaction is reversed ***/
     private final boolean reversed;
 
+    /** Breakdowns of fees and penalties this Transaction pays **/
+    private final List<ChargePaymentDTO> penaltyPayments;
+    private final List<ChargePaymentDTO> feePayments;
+
     public LoanTransactionDTO(final Long paymentTypeId, final String transactionId, final Date transactionDate,
             final LoanTransactionEnumData transactionType, final BigDecimal amount, final BigDecimal principal, final BigDecimal interest,
-            final BigDecimal fees, final BigDecimal penalties, final boolean reversed) {
+            final BigDecimal fees, final BigDecimal penalties, final boolean reversed, final List<ChargePaymentDTO> feePayments,
+            final List<ChargePaymentDTO> penaltyPayments) {
         this.paymentTypeId = paymentTypeId;
         this.transactionId = transactionId;
         this.transactionDate = transactionDate;
@@ -41,6 +47,8 @@ public class LoanTransactionDTO {
         this.penalties = penalties;
         this.reversed = reversed;
         this.transactionType = transactionType;
+        this.feePayments = feePayments;
+        this.penaltyPayments = penaltyPayments;
     }
 
     public String getTransactionId() {
@@ -81,6 +89,14 @@ public class LoanTransactionDTO {
 
     public Long getPaymentTypeId() {
         return this.paymentTypeId;
+    }
+
+    public List<ChargePaymentDTO> getPenaltyPayments() {
+        return this.penaltyPayments;
+    }
+
+    public List<ChargePaymentDTO> getFeePayments() {
+        return this.feePayments;
     }
 
 }

@@ -6,9 +6,11 @@
 package org.mifosplatform.portfolio.loanaccount.domain;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -372,6 +374,20 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
 
         if (this.paymentDetail != null) {
             thisTransactionData.put("paymentTypeId", this.paymentDetail.getPaymentType().getId());
+        }
+
+        if (!this.loanChargesPaid.isEmpty()) {
+            final List<Map<String, Object>> loanChargesPaidData = new ArrayList<Map<String, Object>>();
+            for (LoanChargePaidBy chargePaidBy : this.loanChargesPaid) {
+                final Map<String, Object> loanChargePaidData = new LinkedHashMap<String, Object>();
+                loanChargePaidData.put("chargeId", chargePaidBy.getLoanCharge().getCharge().getId());
+                loanChargePaidData.put("isPenalty", chargePaidBy.getLoanCharge().getCharge().isPenalty());
+                loanChargePaidData.put("loanChargeId", chargePaidBy.getLoanCharge().getId());
+                loanChargePaidData.put("amount", chargePaidBy.getAmount());
+
+                loanChargesPaidData.add(loanChargePaidData);
+            }
+            thisTransactionData.put("loanChargesPaid", loanChargesPaidData);
         }
 
         return thisTransactionData;

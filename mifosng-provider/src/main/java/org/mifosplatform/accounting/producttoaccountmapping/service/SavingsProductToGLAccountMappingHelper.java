@@ -18,6 +18,7 @@ import org.mifosplatform.accounting.producttoaccountmapping.domain.ProductToGLAc
 import org.mifosplatform.infrastructure.codes.domain.CodeValueRepositoryWrapper;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
+import org.mifosplatform.portfolio.charge.domain.ChargeRepositoryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -29,8 +30,8 @@ public class SavingsProductToGLAccountMappingHelper extends ProductToGLAccountMa
     @Autowired
     public SavingsProductToGLAccountMappingHelper(GLAccountRepository glAccountRepository,
             ProductToGLAccountMappingRepository glAccountMappingRepository, FromJsonHelper fromApiJsonHelper,
-            CodeValueRepositoryWrapper codeValueRepositoryWrapper) {
-        super(glAccountRepository, glAccountMappingRepository, fromApiJsonHelper, codeValueRepositoryWrapper);
+            CodeValueRepositoryWrapper codeValueRepositoryWrapper, ChargeRepositoryWrapper chargeRepositoryWrapper) {
+        super(glAccountRepository, glAccountMappingRepository, fromApiJsonHelper, codeValueRepositoryWrapper, chargeRepositoryWrapper);
     }
 
     /*** Set of abstractions for saving Saving Products to GL Account Mappings ***/

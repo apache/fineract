@@ -85,7 +85,8 @@ public class AccountingConstants {
                 "incomeFromFeeAccountId"), INCOME_FROM_PENALTIES("incomeFromPenaltyAccountId"), LOSSES_WRITTEN_OFF("writeOffAccountId"), INTEREST_RECEIVABLE(
                 "receivableInterestAccountId"), FEES_RECEIVABLE("receivableFeeAccountId"), PENALTIES_RECEIVABLE(
                 "receivablePenaltyAccountId"), PAYMENT_CHANNEL_FUND_SOURCE_MAPPING("paymentChannelToFundSourceMappings"), PAYMENT_TYPE(
-                "paymentTypeId");
+                "paymentTypeId"), FEE_INCOME_ACCOUNT_MAPPING("feeToIncomeAccountMappings"), PENALTY_INCOME_ACCOUNT_MAPPING(
+                "penaltyToIncomeAccountMappings"), CHARGE_ID("chargeId"), INCOME_ACCOUNT_ID("incomeAccountId");
 
         private final String value;
 
