@@ -3,28 +3,38 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this file,
  * You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-package org.mifosplatform.portfolio.loanaccount.domain;
+package org.mifosplatform.portfolio.loanaccount.domain.transactionprocessor.impl;
 
 import java.util.List;
 
 import org.joda.time.LocalDate;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.organisation.monetary.domain.Money;
+import org.mifosplatform.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
+import org.mifosplatform.portfolio.loanaccount.domain.LoanTransaction;
+import org.mifosplatform.portfolio.loanaccount.domain.transactionprocessor.AbstractLoanRepaymentScheduleTransactionProcessor;
+import org.mifosplatform.portfolio.loanaccount.domain.transactionprocessor.LoanRepaymentScheduleTransactionProcessor;
 
 /**
- * Old Mifos style {@link LoanRepaymentScheduleTransactionProcessor}.
+ * Creocore style {@link LoanRepaymentScheduleTransactionProcessor}.
  * 
- * For ALL types of transactions, pays off components in order of interest, then
+ * For standard transactions, pays off components in order of interest, then
  * principal.
  * 
- * Other formulas exist on mifos where you can choose 'Declining-Balance
- * Interest Recalculation' which simply means, recalculate the interest
- * component based on the how much principal is outstanding at a point in time;
- * but this isnt trying to model that option only the basic one for now.
+ * If a transaction results in an advance payment or over-payment for a given
+ * installment, the over paid amount is pay off on the principal component of
+ * subsequent installments.
+ * 
+ * If the entire principal of an installment is paid in advance then the
+ * interest component is waived.
  */
-@SuppressWarnings("unused")
-public class MifosStyleLoanRepaymentScheduleTransactionProcessor extends AbstractLoanRepaymentScheduleTransactionProcessor {
+public class CreocoreLoanRepaymentScheduleTransactionProcessor extends AbstractLoanRepaymentScheduleTransactionProcessor {
 
+    /**
+     * For creocore, early is defined as any date before the installment due
+     * date
+     */
+    @SuppressWarnings("unused")
     @Override
     protected boolean isTransactionInAdvanceOfInstallment(final int currentInstallmentIndex,
             final List<LoanRepaymentScheduleInstallment> installments, final LocalDate transactionDate, final Money transactionAmount) {
@@ -38,6 +48,7 @@ public class MifosStyleLoanRepaymentScheduleTransactionProcessor extends Abstrac
      * For early/'in advance' repayments, pay off in the same way as on-time
      * payments, interest first then principal.
      */
+    @SuppressWarnings("unused")
     @Override
     protected Money handleTransactionThatIsPaymentInAdvanceOfInstallment(final LoanRepaymentScheduleInstallment currentInstallment,
             final List<LoanRepaymentScheduleInstallment> installments, final LoanTransaction loanTransaction,
@@ -50,6 +61,7 @@ public class MifosStyleLoanRepaymentScheduleTransactionProcessor extends Abstrac
      * For late repayments, pay off in the same way as on-time payments,
      * interest first then principal.
      */
+    @SuppressWarnings("unused")
     @Override
     protected Money handleTransactionThatIsALateRepaymentOfInstallment(final LoanRepaymentScheduleInstallment currentInstallment,
             final List<LoanRepaymentScheduleInstallment> installments, final LoanTransaction loanTransaction,
@@ -74,23 +86,17 @@ public class MifosStyleLoanRepaymentScheduleTransactionProcessor extends Abstrac
         Money penaltyChargesPortion = Money.zero(transactionAmountRemaining.getCurrency());
 
         if (loanTransaction.isChargesWaiver()) {
-            // penaltyChargesPortion =
-            // currentInstallment.waivePenaltyChargesComponent(loanTransaction.getPenaltyChargesPortion(currency));
-            // transactionAmountRemaining =
-            // transactionAmountRemaining.minus(penaltyChargesPortion);
-            //
-            // feeChargesPortion =
-            // currentInstallment.waiveFeeChargesComponent(loanTransaction.getFeeChargesPortion(currency));
-            // transactionAmountRemaining =
-            // transactionAmountRemaining.minus(feeChargesPortion);
-            //
-            // zero this type of transaction and ignore it for now.
-            transactionAmountRemaining = Money.zero(currency);
+            penaltyChargesPortion = currentInstallment.waivePenaltyChargesComponent(transactionDate,
+                    loanTransaction.getPenaltyChargesPortion(currency));
+            transactionAmountRemaining = transactionAmountRemaining.minus(penaltyChargesPortion);
+
+            feeChargesPortion = currentInstallment
+                    .waiveFeeChargesComponent(transactionDate, loanTransaction.getFeeChargesPortion(currency));
+            transactionAmountRemaining = transactionAmountRemaining.minus(feeChargesPortion);
+
         } else if (loanTransaction.isInterestWaiver()) {
             interestPortion = currentInstallment.waiveInterestComponent(transactionDate, transactionAmountRemaining);
             transactionAmountRemaining = transactionAmountRemaining.minus(interestPortion);
-
-            loanTransaction.updateComponents(principalPortion, interestPortion, feeChargesPortion, penaltyChargesPortion);
         } else {
             penaltyChargesPortion = currentInstallment.payPenaltyChargesComponent(transactionDate, transactionAmountRemaining);
             transactionAmountRemaining = transactionAmountRemaining.minus(penaltyChargesPortion);
@@ -103,15 +109,15 @@ public class MifosStyleLoanRepaymentScheduleTransactionProcessor extends Abstrac
 
             principalPortion = currentInstallment.payPrincipalComponent(transactionDate, transactionAmountRemaining);
             transactionAmountRemaining = transactionAmountRemaining.minus(principalPortion);
-
-            loanTransaction.updateComponents(principalPortion, interestPortion, feeChargesPortion, penaltyChargesPortion);
         }
 
+        loanTransaction.updateComponents(principalPortion, interestPortion, feeChargesPortion, penaltyChargesPortion);
         return transactionAmountRemaining;
     }
 
+    @SuppressWarnings("unused")
     @Override
     protected void onLoanOverpayment(final LoanTransaction loanTransaction, final Money loanOverPaymentAmount) {
-        // TODO - KW - dont do anything with loan over-payment for now
+        // dont do anything for with loan over-payment
     }
 }

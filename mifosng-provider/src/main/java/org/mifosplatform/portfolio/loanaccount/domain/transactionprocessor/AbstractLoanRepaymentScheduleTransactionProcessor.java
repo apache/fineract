@@ -3,7 +3,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this file,
  * You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-package org.mifosplatform.portfolio.loanaccount.domain;
+package org.mifosplatform.portfolio.loanaccount.domain.transactionprocessor;
 
 import java.util.List;
 import java.util.Set;
@@ -11,10 +11,21 @@ import java.util.Set;
 import org.joda.time.LocalDate;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.organisation.monetary.domain.Money;
+import org.mifosplatform.portfolio.loanaccount.domain.ChangedTransactionDetail;
+import org.mifosplatform.portfolio.loanaccount.domain.LoanCharge;
+import org.mifosplatform.portfolio.loanaccount.domain.LoanChargePaidBy;
+import org.mifosplatform.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
+import org.mifosplatform.portfolio.loanaccount.domain.LoanRepaymentScheduleProcessingWrapper;
+import org.mifosplatform.portfolio.loanaccount.domain.LoanTransaction;
+import org.mifosplatform.portfolio.loanaccount.domain.transactionprocessor.impl.CreocoreLoanRepaymentScheduleTransactionProcessor;
+import org.mifosplatform.portfolio.loanaccount.domain.transactionprocessor.impl.HeavensFamilyLoanRepaymentScheduleTransactionProcessor;
+import org.mifosplatform.portfolio.loanaccount.domain.transactionprocessor.impl.InterestPrincipalPenaltyFeesOrderLoanRepaymentScheduleTransactionProcessor;
 
 /**
  * Abstract implementation of {@link LoanRepaymentScheduleTransactionProcessor}
  * which is more convenient for concrete implementations to extend.
+ * 
+ * @see InterestPrincipalPenaltyFeesOrderLoanRepaymentScheduleTransactionProcessor
  * 
  * @see HeavensFamilyLoanRepaymentScheduleTransactionProcessor
  * @see CreocoreLoanRepaymentScheduleTransactionProcessor
@@ -254,9 +265,18 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
     /**
      * This method is responsible for checking if the current transaction is 'an
      * advance/early payment' based on the details passed through.
+     * 
+     * Default implementation is check transaction date is before installment
+     * due date.
      */
-    protected abstract boolean isTransactionInAdvanceOfInstallment(final int currentInstallmentIndex,
-            final List<LoanRepaymentScheduleInstallment> installments, final LocalDate transactionDate, final Money transactionAmount);
+    protected boolean isTransactionInAdvanceOfInstallment(final int currentInstallmentIndex,
+            final List<LoanRepaymentScheduleInstallment> installments, final LocalDate transactionDate,
+            @SuppressWarnings("unused") final Money transactionAmount) {
+
+        LoanRepaymentScheduleInstallment currentInstallment = installments.get(currentInstallmentIndex);
+
+        return transactionDate.isBefore(currentInstallment.getDueDate());
+    }
 
     /**
      * For early/'in advance' repayments.
@@ -277,5 +297,8 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
      * transaction amount is greater than the total expected principal and
      * interest of the loan.
      */
-    protected abstract void onLoanOverpayment(final LoanTransaction loanTransaction, final Money loanOverPaymentAmount);
+    @SuppressWarnings("unused")
+    protected void onLoanOverpayment(final LoanTransaction loanTransaction, final Money loanOverPaymentAmount) {
+        // empty implementation by default.
+    }
 }
