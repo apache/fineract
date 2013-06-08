@@ -5,6 +5,7 @@
  */
 package org.mifosplatform.portfolio.loanaccount.domain.transactionprocessor;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -142,21 +143,44 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
             installmentIndex++;
         }
 
+        Set<LoanCharge> loanFees = extractFeeCharges(charges);
+        Set<LoanCharge> loanPenalties = extractPenaltyCharges(charges);
+
         if (loanTransaction.isNotWaiver()) {
             Money feeCharges = loanTransaction.getFeeChargesPortion(currency);
             if (feeCharges.isGreaterThanZero()) {
-                updateFeeChargesPaidAmountBy(loanTransaction, feeCharges, charges);
+                updateFeeChargesPaidAmountBy(loanTransaction, feeCharges, loanFees);
             }
 
             Money penaltyCharges = loanTransaction.getPenaltyChargesPortion(currency);
             if (penaltyCharges.isGreaterThanZero()) {
-                updatePenaltyChargesPaidAmountBy(loanTransaction, penaltyCharges, charges);
+                updatePenaltyChargesPaidAmountBy(loanTransaction, penaltyCharges, loanPenalties);
             }
         }
 
         if (transactionAmountUnprocessed.isGreaterThanZero()) {
             onLoanOverpayment(loanTransaction, transactionAmountUnprocessed);
         }
+    }
+
+    private Set<LoanCharge> extractFeeCharges(Set<LoanCharge> loanCharges) {
+        final Set<LoanCharge> feeCharges = new HashSet<LoanCharge>();
+        for (LoanCharge loanCharge : loanCharges) {
+            if (loanCharge.isFeeCharge()) {
+                feeCharges.add(loanCharge);
+            }
+        }
+        return feeCharges;
+    }
+
+    private Set<LoanCharge> extractPenaltyCharges(Set<LoanCharge> loanCharges) {
+        final Set<LoanCharge> penaltyCharges = new HashSet<LoanCharge>();
+        for (LoanCharge loanCharge : loanCharges) {
+            if (loanCharge.isPenaltyCharge()) {
+                penaltyCharges.add(loanCharge);
+            }
+        }
+        return penaltyCharges;
     }
 
     private void updateFeeChargesPaidAmountBy(final LoanTransaction loanTransaction, final Money feeCharges, final Set<LoanCharge> charges) {
@@ -185,7 +209,7 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
         for (LoanCharge loanCharge : charges) {
             if (!loanCharge.isDueAtDisbursement()) {
 
-                if (loanCharge.isPenaltyCharge() && amountRemaining.isGreaterThanZero()) {
+                if (loanCharge.isPenaltyCharge() && loanCharge.isNotFullyPaid() && amountRemaining.isGreaterThanZero()) {
                     final LoanCharge unpaidCharge = findEarliestUnpaidChargeFromUnOrderedSet(charges);
                     Money amountPaidTowardsCharge = unpaidCharge.updatePaidAmountBy(amountRemaining);
                     if (!amountPaidTowardsCharge.isZero()) {
