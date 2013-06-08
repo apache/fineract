@@ -516,14 +516,16 @@ public final class LoanProductDataValidator {
                 int i = 0;
                 do {
                     final JsonObject jsonObject = paymentChannelMappingArray.get(i).getAsJsonObject();
-                    final Long paymentTypeId = jsonObject.get(LOAN_PRODUCT_ACCOUNTING_PARAMS.PAYMENT_TYPE.getValue()).getAsLong();
-                    final Long paymentSpecificFundAccountId = jsonObject.get(LOAN_PRODUCT_ACCOUNTING_PARAMS.FUND_SOURCE.getValue())
-                            .getAsLong();
+                    final Long paymentTypeId = fromApiJsonHelper.extractLongNamed(LOAN_PRODUCT_ACCOUNTING_PARAMS.PAYMENT_TYPE.getValue(),
+                            jsonObject);
+                    final Long paymentSpecificFundAccountId = fromApiJsonHelper.extractLongNamed(
+                            LOAN_PRODUCT_ACCOUNTING_PARAMS.FUND_SOURCE.getValue(), jsonObject);
+
                     baseDataValidator
                             .reset()
                             .parameter(
                                     LOAN_PRODUCT_ACCOUNTING_PARAMS.PAYMENT_CHANNEL_FUND_SOURCE_MAPPING.getValue() + "[" + i + "]."
-                                            + LOAN_PRODUCT_ACCOUNTING_PARAMS.PAYMENT_TYPE.toString()).value(paymentTypeId).notNull()
+                                            + LOAN_PRODUCT_ACCOUNTING_PARAMS.PAYMENT_TYPE.getValue()).value(paymentTypeId).notNull()
                             .integerGreaterThanZero();
                     baseDataValidator
                             .reset()
@@ -558,10 +560,12 @@ public final class LoanProductDataValidator {
                 int i = 0;
                 do {
                     final JsonObject jsonObject = chargeToIncomeAccountMappingArray.get(i).getAsJsonObject();
-                    final Long chargeId = jsonObject.get(LOAN_PRODUCT_ACCOUNTING_PARAMS.CHARGE_ID.getValue()).getAsLong();
-                    final Long incomeAccountId = jsonObject.get(LOAN_PRODUCT_ACCOUNTING_PARAMS.INCOME_ACCOUNT_ID.getValue()).getAsLong();
+                    final Long chargeId = fromApiJsonHelper.extractLongNamed(LOAN_PRODUCT_ACCOUNTING_PARAMS.CHARGE_ID.getValue(),
+                            jsonObject);
+                    final Long incomeAccountId = fromApiJsonHelper.extractLongNamed(
+                            LOAN_PRODUCT_ACCOUNTING_PARAMS.INCOME_ACCOUNT_ID.getValue(), jsonObject);
                     baseDataValidator.reset()
-                            .parameter(parameterName + "[" + i + "]." + LOAN_PRODUCT_ACCOUNTING_PARAMS.CHARGE_ID.toString())
+                            .parameter(parameterName + "[" + i + "]." + LOAN_PRODUCT_ACCOUNTING_PARAMS.CHARGE_ID.getValue())
                             .value(chargeId).notNull().integerGreaterThanZero();
                     baseDataValidator.reset()
                             .parameter(parameterName + "[" + i + "]." + LOAN_PRODUCT_ACCOUNTING_PARAMS.INCOME_ACCOUNT_ID.getValue())

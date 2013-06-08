@@ -171,7 +171,7 @@ public class LoanProductsApiResource {
             paymentChannelToFundSourceMappings = accountMappingReadPlatformService
                     .fetchPaymentTypeToFundSourceMappingsForLoanProduct(productId);
             feeToGLAccountMappings = accountMappingReadPlatformService.fetchFeeToIncomeAccountMappingsForLoanProduct(productId);
-            penaltyToGLAccountMappings = accountMappingReadPlatformService.fetchFeeToIncomeAccountMappingsForLoanProduct(productId);
+            penaltyToGLAccountMappings = accountMappingReadPlatformService.fetchPenaltyToIncomeAccountMappingsForLoanProduct(productId);
             loanProduct = LoanProductData.withAccountingDetails(loanProduct, accountingMappings, paymentChannelToFundSourceMappings,
                     feeToGLAccountMappings, penaltyToGLAccountMappings);
         }
