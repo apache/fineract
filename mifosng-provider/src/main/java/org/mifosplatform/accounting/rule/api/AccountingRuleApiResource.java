@@ -198,8 +198,20 @@ public class AccountingRuleApiResource {
 
         } else {
 
-            final Collection<CodeValueData> allowedCreditTagOptions = retrieveSelectedTags(allowedTagOptions, accountingRuleData.getCreditTags());
-            final Collection<CodeValueData> allowedDebitTagOptions = retrieveSelectedTags(allowedTagOptions, accountingRuleData.getDebitTags());
+            final Collection<CodeValueData> allowedCreditTagOptions;
+            final Collection<CodeValueData> allowedDebitTagOptions;
+
+            if (accountingRuleData.getCreditTags() != null) {
+                allowedCreditTagOptions = retrieveSelectedTags(allowedTagOptions, accountingRuleData.getCreditTags());
+            } else {
+                allowedCreditTagOptions = allowedTagOptions;
+            }
+
+            if (accountingRuleData.getDebitTags() != null) {
+                allowedDebitTagOptions = retrieveSelectedTags(allowedTagOptions, accountingRuleData.getDebitTags());
+            } else {
+                allowedDebitTagOptions = allowedTagOptions;
+            }
 
             accountingRuleData = new AccountingRuleData(accountingRuleData, allowedAccounts, allowedOffices, allowedCreditTagOptions,
                     allowedDebitTagOptions);
