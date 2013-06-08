@@ -226,7 +226,7 @@ war {
 }
 
 license {
-    header rootProject.file('../LICENSE.MD')
+    header rootProject.file('../LICENSE.md')
     strictCheck true
 }
 
