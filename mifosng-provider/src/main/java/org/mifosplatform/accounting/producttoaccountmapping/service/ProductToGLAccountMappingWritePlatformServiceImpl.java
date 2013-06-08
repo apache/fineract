@@ -194,6 +194,7 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
             loanProductToGLAccountMappingHelper.handleChangesToLoanProductToGLAccountMappings(loanProductId, changes, element,
                     accountingRuleType);
             loanProductToGLAccountMappingHelper.updatePaymentChannelToFundSourceMappings(command, element, loanProductId, changes);
+            loanProductToGLAccountMappingHelper.updateChargesToIncomeAccountMappings(command, element, loanProductId, changes);
         }
         return changes;
     }

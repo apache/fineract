@@ -204,6 +204,11 @@ public class LoanProductsApiResource {
             chargeOptions = null;
         }
 
+        Collection<ChargeData> penaltyOptions = this.chargeReadPlatformService.retrieveLoanApplicablePenalties();
+        if (penaltyOptions.isEmpty()) {
+            penaltyOptions = null;
+        }
+
         final Collection<CurrencyData> currencyOptions = currencyReadPlatformService.retrieveAllowedCurrencies();
         final List<EnumOptionData> amortizationTypeOptions = dropdownReadPlatformService.retrieveLoanAmortizationTypeOptions();
         final List<EnumOptionData> interestTypeOptions = dropdownReadPlatformService.retrieveLoanInterestTypeOptions();
@@ -227,8 +232,9 @@ public class LoanProductsApiResource {
 
         List<EnumOptionData> accountingRuleTypeOptions = accountingDropdownReadPlatformService.retrieveAccountingRuleTypeOptions();
 
-        return new LoanProductData(productData, chargeOptions, paymentTypeOptions, currencyOptions, amortizationTypeOptions,
-                interestTypeOptions, interestCalculationPeriodTypeOptions, repaymentFrequencyTypeOptions, interestRateFrequencyTypeOptions,
-                fundOptions, transactionProcessingStrategyOptions, accountOptions, accountingRuleTypeOptions);
+        return new LoanProductData(productData, chargeOptions, penaltyOptions, paymentTypeOptions, currencyOptions,
+                amortizationTypeOptions, interestTypeOptions, interestCalculationPeriodTypeOptions, repaymentFrequencyTypeOptions,
+                interestRateFrequencyTypeOptions, fundOptions, transactionProcessingStrategyOptions, accountOptions,
+                accountingRuleTypeOptions);
     }
 }

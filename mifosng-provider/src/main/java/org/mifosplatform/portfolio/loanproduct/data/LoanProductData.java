@@ -89,6 +89,8 @@ public class LoanProductData {
     private final Collection<TransactionProcessingStrategyData> transactionProcessingStrategyOptions;
     private final Collection<ChargeData> chargeOptions;
     @SuppressWarnings("unused")
+    private final Collection<ChargeData> penaltyOptions;
+    @SuppressWarnings("unused")
     private final List<EnumOptionData> accountingRuleOptions;
     @SuppressWarnings("unused")
     private final Map<String, List<GLAccountData>> accountingMappingOptions;
@@ -269,6 +271,7 @@ public class LoanProductData {
         this.accountingRule = accountingType;
 
         this.chargeOptions = null;
+        this.penaltyOptions = null;
         this.paymentTypeOptions = null;
         this.currencyOptions = null;
         this.fundOptions = null;
@@ -288,11 +291,11 @@ public class LoanProductData {
     }
 
     public LoanProductData(final LoanProductData productData, final Collection<ChargeData> chargeOptions,
-            final Collection<CodeValueData> paymentTypeOptions, final Collection<CurrencyData> currencyOptions,
-            final List<EnumOptionData> amortizationTypeOptions, final List<EnumOptionData> interestTypeOptions,
-            final List<EnumOptionData> interestCalculationPeriodTypeOptions, final List<EnumOptionData> repaymentFrequencyTypeOptions,
-            final List<EnumOptionData> interestRateFrequencyTypeOptions, final Collection<FundData> fundOptions,
-            final Collection<TransactionProcessingStrategyData> transactionStrategyOptions,
+            final Collection<ChargeData> penaltyOptions, final Collection<CodeValueData> paymentTypeOptions,
+            final Collection<CurrencyData> currencyOptions, final List<EnumOptionData> amortizationTypeOptions,
+            final List<EnumOptionData> interestTypeOptions, final List<EnumOptionData> interestCalculationPeriodTypeOptions,
+            final List<EnumOptionData> repaymentFrequencyTypeOptions, final List<EnumOptionData> interestRateFrequencyTypeOptions,
+            final Collection<FundData> fundOptions, final Collection<TransactionProcessingStrategyData> transactionStrategyOptions,
             final Map<String, List<GLAccountData>> accountingMappingOptions, final List<EnumOptionData> accountingRuleOptions) {
         this.id = productData.id;
         this.name = productData.name;
@@ -326,6 +329,7 @@ public class LoanProductData {
         this.penaltyToIncomeAccountMappings = productData.penaltyToIncomeAccountMappings;
 
         this.chargeOptions = chargeOptions;
+        this.penaltyOptions = penaltyOptions;
         this.paymentTypeOptions = paymentTypeOptions;
         this.currencyOptions = currencyOptions;
         this.currency = productData.currency;
@@ -355,7 +359,6 @@ public class LoanProductData {
         this.accountingMappingOptions = accountingMappingOptions;
         this.accountingRuleOptions = accountingRuleOptions;
 
-       
     }
 
     private Collection<ChargeData> nullIfEmpty(final Collection<ChargeData> charges) {
