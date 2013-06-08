@@ -111,6 +111,17 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
 
         return this.jdbcTemplate.query(sql, rm, new Object[] { ChargeAppliesTo.LOAN.getValue() });
     }
+    
+    @Override
+    public Collection<ChargeData> retrieveLoanApplicablePenalties() {
+        this.context.authenticatedUser();
+
+        final ChargeMapper rm = new ChargeMapper();
+
+        String sql = "select " + rm.chargeSchema()
+                + " where c.is_deleted=0 and c.is_active=1 and c.is_penalty=1 and c.charge_applies_to_enum=? order by c.name ";
+        return this.jdbcTemplate.query(sql, rm, new Object[] { ChargeAppliesTo.LOAN.getValue() });
+    }
 
     private static final class ChargeMapper implements RowMapper<ChargeData> {
 
@@ -157,4 +168,5 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
                     active);
         }
     }
+
 }
