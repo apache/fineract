@@ -6,6 +6,7 @@ See VERSIONING (https://github.com/openMF/mifosx/blob/master/VERSIONING.md) for 
 Releases
 ===============
 
+1. 10 Jun 2013 - 1.3.0.RELEASE
 1. 06 Jun 2013 - 1.2.1.RELEASE
 1. 27 May 2013 - 1.2.0.RELEASE
 1. 24 May 2013 - 1.1.4.RELEASE
@@ -23,6 +24,42 @@ Releases
 1. 05 April 2013 - 0.11.1.beta
 1. 05 April 2013 - 0.11.0.beta
 
+1.3.0.RELEASE
+=============
+Feature Release
+
+This feature release focussed mainly on features requested by Musoni for their upcoming m-lite product and by Quipu technolgies for their TEVI project.
+
+Key changes are improvements to accounting and flexible support for grace concepts in loan repayment schedule.
+
+Platform & API
+
+Bug
+ - [MIFOSX-427] - Charges and penalties functionality wonky when multiple charges/penalties are due on the same date
+
+New Features & Improvements
+ - [MIFOSX-391] - "Advanced" accounting rules for compound Journal entries
+ - [MIFOSX-413] - Ability to account different charges (both fees and penalties) under different heads
+ - [MIFOSX-295] - Support Prinicpal and Interest Grace Periods for Loans, Loan Schedules
+ - [MIFOSX-297] - Support over payment of loan scenarios common when repayments through mobile, third party
+ - [MIFOSX-374] - TEVI: Repayment strategy to support payment ordering of Interest, Principal, Penalties, Fees
+ - [MIFOSX-376] - TEVI: Track additional details on the loan repayment schedule
+  
+Reference App
+ - [MIFOSX-405] - In client's General page not able to differentiate between Activated and not Activated savings accounts.
+ - [MIFOSX-416] - Distinguish between Individual and JLG loans in clients general details
+ - [MIFOSX-418] - Hide/show Centers and center creation based on permissions
+ - [MIFOSX-419] - Display Center summary details in UI
+ - [MIFOSX-423] - Unable to view group loan in group context
+ 
+BETA (functionality related to BETA functionality
+ - [MIFOSX-344] - Add overnight scheduled task to detect if annual fee is due on savings account and apply it
+ - [MIFOSX-325] - GSOC 2013 - Savings accounts server side sorting and pagination on retrieve all
+ - [MIFOSX-310] - Generate Collection sheet based on meeting calendar dates
+ - [MIFOSX-356] - Modify unassign staff API call in group
+ - [MIFOSX-69] - Amazon S3 appender for document upload
+ - [MIFOSX-395] - TEVI: Support hierarchial staff and organisational roles on staff with linkage to Application User
+ 
 1.2.1.RELEASE
 =============
 Bug Release
