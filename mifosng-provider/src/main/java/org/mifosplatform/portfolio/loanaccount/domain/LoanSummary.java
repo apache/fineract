@@ -13,9 +13,13 @@ import javax.persistence.Embeddable;
 
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.organisation.monetary.domain.Money;
+import org.mifosplatform.scheduledjobs.UpdateLoanSummariesScheduledJob;
 
 /**
- * LoanSummary encapsulates all the summary details of a {@link Loan}.
+ * Encapsulates all the summary details of a {@link Loan}.
+ * 
+ * {@link LoanSummary} fields are updated through a scheduled job. see -
+ * {@link UpdateLoanSummariesScheduledJob}.
  */
 @Embeddable
 public final class LoanSummary {

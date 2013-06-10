@@ -134,14 +134,15 @@ public class CashBasedAccountingProcessorForLoan implements AccountingProcessorF
 
         if (feesAmount != null && !(feesAmount.compareTo(BigDecimal.ZERO) == 0)) {
             totalDebitAmount = totalDebitAmount.add(feesAmount);
-            helper.createCreditJournalEntryOrReversalForLoan(office, CASH_ACCOUNTS_FOR_LOAN.INCOME_FROM_FEES, loanProductId, paymentTypeId,
-                    loanId, transactionId, transactionDate, feesAmount, isReversal);
+            helper.createCreditJournalEntryOrReversalForLoanCharges(office, CASH_ACCOUNTS_FOR_LOAN.INCOME_FROM_FEES.getValue(),
+                    loanProductId, loanId, transactionId, transactionDate, feesAmount, isReversal, loanTransactionDTO.getFeePayments());
         }
 
         if (penaltiesAmount != null && !(penaltiesAmount.compareTo(BigDecimal.ZERO) == 0)) {
             totalDebitAmount = totalDebitAmount.add(penaltiesAmount);
-            helper.createCreditJournalEntryOrReversalForLoan(office, CASH_ACCOUNTS_FOR_LOAN.INCOME_FROM_PENALTIES, loanProductId,
-                    paymentTypeId, loanId, transactionId, transactionDate, penaltiesAmount, isReversal);
+            helper.createCreditJournalEntryOrReversalForLoanCharges(office, CASH_ACCOUNTS_FOR_LOAN.INCOME_FROM_PENALTIES.getValue(),
+                    loanProductId, loanId, transactionId, transactionDate, penaltiesAmount, isReversal,
+                    loanTransactionDTO.getPenaltyPayments());
         }
 
         /*** create a single debit entry (or reversal) for the entire amount **/

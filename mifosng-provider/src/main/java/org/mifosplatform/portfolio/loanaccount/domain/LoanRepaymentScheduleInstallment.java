@@ -86,14 +86,25 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
     @Column(name = "penalty_charges_waived_derived", scale = 6, precision = 19, nullable = true)
     private BigDecimal penaltyChargesWaived;
 
+    @Column(name = "total_paid_in_advance_derived", scale = 6, precision = 19, nullable = true)
+    private BigDecimal totalPaidInAdvance;
+
+    @Column(name = "total_paid_late_derived", scale = 6, precision = 19, nullable = true)
+    private BigDecimal totalPaidLate;
+
     @Column(name = "completed_derived", nullable = false)
-    private boolean completed;
+    private boolean obligationsMet;
+
+    @SuppressWarnings("unused")
+    @Temporal(TemporalType.DATE)
+    @Column(name = "obligations_met_on_date")
+    private Date obligationsMetOnDate;
 
     protected LoanRepaymentScheduleInstallment() {
         this.installmentNumber = null;
         this.fromDate = null;
         this.dueDate = null;
-        this.completed = false;
+        this.obligationsMet = false;
     }
 
     public LoanRepaymentScheduleInstallment(final Loan loan, final Integer installmentNumber, final LocalDate fromDate,
@@ -107,7 +118,7 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
         this.interestCharged = defaultToNullIfZero(interest);
         this.feeChargesCharged = defaultToNullIfZero(feeCharges);
         this.penaltyCharges = defaultToNullIfZero(penaltyCharges);
-        this.completed = false;
+        this.obligationsMet = false;
     }
 
     private BigDecimal defaultToNullIfZero(final BigDecimal value) {
@@ -173,8 +184,8 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
     }
 
     public Money getInterestOutstanding(final MonetaryCurrency currency) {
-        final Money interestAccountedFor = getInterestPaid(currency).plus(getInterestWaived(currency)).plus(
-                getInterestWrittenOff(currency));
+        final Money interestAccountedFor = getInterestPaid(currency).plus(getInterestWaived(currency))
+                .plus(getInterestWrittenOff(currency));
         return getInterestCharged(currency).minus(interestAccountedFor);
     }
 
@@ -239,12 +250,12 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
         this.loan = loan;
     }
 
-    public boolean isFullyCompleted() {
-        return this.completed;
+    public boolean isObligationsMet() {
+        return this.obligationsMet;
     }
 
-    public boolean isNotFullyCompleted() {
-        return !this.completed;
+    public boolean isNotFullyPaidOff() {
+        return !this.obligationsMet;
     }
 
     public boolean isPrincipalNotCompleted(final MonetaryCurrency currency) {
@@ -267,11 +278,14 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
         this.penaltyChargesPaid = null;
         this.penaltyChargesWaived = null;
         this.penaltyChargesWrittenOff = null;
+        this.totalPaidInAdvance = null;
+        this.totalPaidLate = null;
 
-        this.completed = false;
+        this.obligationsMet = false;
+        this.obligationsMetOnDate = null;
     }
 
-    public Money payPenaltyChargesComponent(final Money transactionAmountRemaining) {
+    public Money payPenaltyChargesComponent(final LocalDate transactionDate, final Money transactionAmountRemaining) {
 
         final MonetaryCurrency currency = transactionAmountRemaining.getCurrency();
         Money penaltyPortionOfTransaction = Money.zero(currency);
@@ -287,12 +301,12 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
 
         this.penaltyChargesPaid = defaultToNullIfZero(this.penaltyChargesPaid);
 
-        this.completed = getTotalOutstanding(currency).isZero();
+        checkIfRepaymentPeriodObligationsAreMet(transactionDate, currency);
 
         return penaltyPortionOfTransaction;
     }
 
-    public Money payFeeChargesComponent(final Money transactionAmountRemaining) {
+    public Money payFeeChargesComponent(final LocalDate transactionDate, final Money transactionAmountRemaining) {
 
         final MonetaryCurrency currency = transactionAmountRemaining.getCurrency();
         Money feePortionOfTransaction = Money.zero(currency);
@@ -308,12 +322,14 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
 
         this.feeChargesPaid = defaultToNullIfZero(this.feeChargesPaid);
 
-        this.completed = getTotalOutstanding(currency).isZero();
+        checkIfRepaymentPeriodObligationsAreMet(transactionDate, currency);
+
+        trackAdvanceAndLateTotalsForRepaymentPeriod(transactionDate, currency, feePortionOfTransaction);
 
         return feePortionOfTransaction;
     }
 
-    public Money payInterestComponent(final Money transactionAmountRemaining) {
+    public Money payInterestComponent(final LocalDate transactionDate, final Money transactionAmountRemaining) {
 
         final MonetaryCurrency currency = transactionAmountRemaining.getCurrency();
         Money interestPortionOfTransaction = Money.zero(currency);
@@ -329,12 +345,14 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
 
         this.interestPaid = defaultToNullIfZero(this.interestPaid);
 
-        this.completed = getTotalOutstanding(currency).isZero();
+        checkIfRepaymentPeriodObligationsAreMet(transactionDate, currency);
+
+        trackAdvanceAndLateTotalsForRepaymentPeriod(transactionDate, currency, interestPortionOfTransaction);
 
         return interestPortionOfTransaction;
     }
 
-    public Money payPrincipalComponent(final Money transactionAmountRemaining) {
+    public Money payPrincipalComponent(final LocalDate transactionDate, final Money transactionAmountRemaining) {
 
         final MonetaryCurrency currency = transactionAmountRemaining.getCurrency();
         Money principalPortionOfTransaction = Money.zero(currency);
@@ -350,12 +368,14 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
 
         this.principalCompleted = defaultToNullIfZero(this.principalCompleted);
 
-        this.completed = getTotalOutstanding(currency).isZero();
+        checkIfRepaymentPeriodObligationsAreMet(transactionDate, currency);
+
+        trackAdvanceAndLateTotalsForRepaymentPeriod(transactionDate, currency, principalPortionOfTransaction);
 
         return principalPortionOfTransaction;
     }
 
-    public Money waiveInterestComponent(final Money transactionAmountRemaining) {
+    public Money waiveInterestComponent(final LocalDate transactionDate, final Money transactionAmountRemaining) {
         MonetaryCurrency currency = transactionAmountRemaining.getCurrency();
         Money waivedInterestPortionOfTransaction = Money.zero(currency);
 
@@ -370,12 +390,12 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
 
         this.interestWaived = defaultToNullIfZero(this.interestWaived);
 
-        this.completed = getTotalOutstanding(currency).isZero();
+        checkIfRepaymentPeriodObligationsAreMet(transactionDate, currency);
 
         return waivedInterestPortionOfTransaction;
     }
 
-    public Money waivePenaltyChargesComponent(final Money transactionAmountRemaining) {
+    public Money waivePenaltyChargesComponent(final LocalDate transactionDate, final Money transactionAmountRemaining) {
         MonetaryCurrency currency = transactionAmountRemaining.getCurrency();
         Money waivedPenaltyChargesPortionOfTransaction = Money.zero(currency);
 
@@ -390,12 +410,12 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
 
         this.penaltyChargesWaived = defaultToNullIfZero(this.penaltyChargesWaived);
 
-        this.completed = getTotalOutstanding(currency).isZero();
+        checkIfRepaymentPeriodObligationsAreMet(transactionDate, currency);
 
         return waivedPenaltyChargesPortionOfTransaction;
     }
 
-    public Money waiveFeeChargesComponent(final Money transactionAmountRemaining) {
+    public Money waiveFeeChargesComponent(final LocalDate transactionDate, final Money transactionAmountRemaining) {
         MonetaryCurrency currency = transactionAmountRemaining.getCurrency();
         Money waivedFeeChargesPortionOfTransaction = Money.zero(currency);
 
@@ -410,47 +430,51 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
 
         this.feeChargesWaived = defaultToNullIfZero(this.feeChargesWaived);
 
-        this.completed = getTotalOutstanding(currency).isZero();
+        checkIfRepaymentPeriodObligationsAreMet(transactionDate, currency);
 
         return waivedFeeChargesPortionOfTransaction;
     }
 
-    public Money writeOffOutstandingPrincipal(final MonetaryCurrency currency) {
+    public Money writeOffOutstandingPrincipal(final LocalDate transactionDate, final MonetaryCurrency currency) {
 
         final Money principalDue = getPrincipalOutstanding(currency);
         this.principalWrittenOff = defaultToNullIfZero(principalDue.getAmount());
-        this.completed = getTotalOutstanding(currency).isZero();
+
+        checkIfRepaymentPeriodObligationsAreMet(transactionDate, currency);
 
         return principalDue;
     }
 
-    public Money writeOffOutstandingInterest(final MonetaryCurrency currency) {
+    public Money writeOffOutstandingInterest(final LocalDate transactionDate, final MonetaryCurrency currency) {
 
         final Money interestDue = getInterestOutstanding(currency);
         this.interestWrittenOff = defaultToNullIfZero(interestDue.getAmount());
-        this.completed = getTotalOutstanding(currency).isZero();
+
+        checkIfRepaymentPeriodObligationsAreMet(transactionDate, currency);
 
         return interestDue;
     }
 
-    public Money writeOffOutstandingFeeCharges(final MonetaryCurrency currency) {
+    public Money writeOffOutstandingFeeCharges(final LocalDate transactionDate, final MonetaryCurrency currency) {
         final Money feeChargesOutstanding = getFeeChargesOutstanding(currency);
         this.feeChargesWrittenOff = defaultToNullIfZero(feeChargesOutstanding.getAmount());
-        this.completed = getTotalOutstanding(currency).isZero();
+
+        checkIfRepaymentPeriodObligationsAreMet(transactionDate, currency);
 
         return feeChargesOutstanding;
     }
 
-    public Money writeOffOutstandingPenaltyCharges(final MonetaryCurrency currency) {
+    public Money writeOffOutstandingPenaltyCharges(final LocalDate transactionDate, final MonetaryCurrency currency) {
         final Money penaltyChargesOutstanding = getPenaltyChargesOutstanding(currency);
         this.penaltyChargesWrittenOff = defaultToNullIfZero(penaltyChargesOutstanding.getAmount());
-        this.completed = getTotalOutstanding(currency).isZero();
+
+        checkIfRepaymentPeriodObligationsAreMet(transactionDate, currency);
 
         return penaltyChargesOutstanding;
     }
 
-    public boolean isOverdueOn(final LocalDate transactionDate) {
-        return this.getDueDate().isBefore(transactionDate);
+    public boolean isOverdueOn(final LocalDate date) {
+        return this.getDueDate().isBefore(date);
     }
 
     public void updateChargePortion(final Money feeChargesDue, final Money feeChargesWaived, final Money feeChargesWrittenOff,
@@ -461,5 +485,40 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
         this.penaltyCharges = defaultToNullIfZero(penaltyChargesDue.getAmount());
         this.penaltyChargesWaived = defaultToNullIfZero(penaltyChargesWaived.getAmount());
         this.penaltyChargesWrittenOff = defaultToNullIfZero(penaltyChargesWrittenOff.getAmount());
+    }
+
+    public void updateDerivedFields(final MonetaryCurrency currency, final LocalDate actualDisbursementDate) {
+        if (!this.obligationsMet && getTotalOutstanding(currency).isZero()) {
+            this.obligationsMet = true;
+            this.obligationsMetOnDate = actualDisbursementDate.toDate();
+        }
+    }
+
+    private void trackAdvanceAndLateTotalsForRepaymentPeriod(final LocalDate transactionDate, final MonetaryCurrency currency,
+            final Money amountPaidInRepaymentPeriod) {
+        if (isInAdvance(transactionDate)) {
+            this.totalPaidInAdvance = asMoney(this.totalPaidInAdvance, currency).plus(amountPaidInRepaymentPeriod).getAmount();
+        } else if (isLatePayment(transactionDate)) {
+            this.totalPaidLate = asMoney(this.totalPaidLate, currency).plus(amountPaidInRepaymentPeriod).getAmount();
+        }
+    }
+
+    private Money asMoney(final BigDecimal decimal, final MonetaryCurrency currency) {
+        return Money.of(currency, decimal);
+    }
+
+    private boolean isInAdvance(final LocalDate transactionDate) {
+        return transactionDate.isBefore(getDueDate());
+    }
+
+    private boolean isLatePayment(final LocalDate transactionDate) {
+        return transactionDate.isAfter(getDueDate());
+    }
+
+    private void checkIfRepaymentPeriodObligationsAreMet(final LocalDate transactionDate, final MonetaryCurrency currency) {
+        this.obligationsMet = getTotalOutstanding(currency).isZero();
+        if (this.obligationsMet) {
+            this.obligationsMetOnDate = transactionDate.toDate();
+        }
     }
 }

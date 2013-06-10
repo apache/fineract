@@ -5,12 +5,8 @@
  */
 package org.mifosplatform.portfolio.client.service;
 
-import java.io.InputStream;
-
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
-import org.mifosplatform.infrastructure.core.domain.Base64EncodedImage;
-import org.springframework.security.access.prepost.PreAuthorize;
 
 public interface ClientWritePlatformService {
 
@@ -22,12 +18,4 @@ public interface ClientWritePlatformService {
 
     CommandProcessingResult deleteClient(Long clientId);
 
-    @PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'CREATE_CLIENTIMAGE')")
-    CommandProcessingResult saveOrUpdateClientImage(Long clientId, String imageName, InputStream inputStream);
-
-    @PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'CREATE_CLIENTIMAGE')")
-    CommandProcessingResult saveOrUpdateClientImage(Long clientId, Base64EncodedImage encodedImage);
-
-    @PreAuthorize(value = "hasAnyRole('ALL_FUNCTIONS', 'DELETE_CLIENTIMAGE')")
-    CommandProcessingResult deleteClientImage(Long clientId);
 }

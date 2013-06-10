@@ -81,6 +81,7 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
 
                 // advanced accounting mappings
                 loanProductToGLAccountMappingHelper.savePaymentChannelToFundSourceMappings(command, element, loanProductId, null);
+                loanProductToGLAccountMappingHelper.saveChargesToIncomeAccountMappings(command, element, loanProductId, null);
             break;
             case ACCRUAL_BASED:
 
@@ -119,6 +120,7 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
 
                 // advanced accounting mappings
                 loanProductToGLAccountMappingHelper.savePaymentChannelToFundSourceMappings(command, element, loanProductId, null);
+                loanProductToGLAccountMappingHelper.saveChargesToIncomeAccountMappings(command, element, loanProductId, null);
             break;
         }
     }
@@ -187,12 +189,12 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
             createLoanProductToGLAccountMapping(loanProductId, command);
             changes = loanProductToGLAccountMappingHelper.populateChangesForNewLoanProductToGLAccountMappingCreation(element,
                     accountingRuleType);
-            loanProductToGLAccountMappingHelper.savePaymentChannelToFundSourceMappings(command, element, loanProductId, changes);
         }/*** else examine and update individual changes ***/
         else {
             loanProductToGLAccountMappingHelper.handleChangesToLoanProductToGLAccountMappings(loanProductId, changes, element,
                     accountingRuleType);
             loanProductToGLAccountMappingHelper.updatePaymentChannelToFundSourceMappings(command, element, loanProductId, changes);
+            loanProductToGLAccountMappingHelper.updateChargesToIncomeAccountMappings(command, element, loanProductId, changes);
         }
         return changes;
     }
@@ -218,7 +220,6 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
             createSavingProductToGLAccountMapping(savingsProductId, command);
             changes = savingsProductToGLAccountMappingHelper.populateChangesForNewSavingsProductToGLAccountMappingCreation(element,
                     accountingRuleType);
-            savingsProductToGLAccountMappingHelper.savePaymentChannelToFundSourceMappings(command, element, savingsProductId, changes);
         }/*** else examine and update individual changes ***/
         else {
             savingsProductToGLAccountMappingHelper.handleChangesToSavingsProductToGLAccountMappings(savingsProductId, changes, element,

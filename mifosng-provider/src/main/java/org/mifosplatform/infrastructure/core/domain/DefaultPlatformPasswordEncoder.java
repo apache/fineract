@@ -13,12 +13,13 @@ import org.springframework.security.authentication.dao.SaltSource;
 import org.springframework.security.authentication.encoding.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+@SuppressWarnings("deprecation")
 @Service(value = "applicationPasswordEncoder")
 @Scope("singleton")
 public class DefaultPlatformPasswordEncoder implements PlatformPasswordEncoder {
 
     private final PasswordEncoder passwordEncoder;
-    private final SaltSource      saltSource;
+    private final SaltSource saltSource;
 
     @Autowired
     public DefaultPlatformPasswordEncoder(final PasswordEncoder passwordEncoder, final SaltSource saltSource) {

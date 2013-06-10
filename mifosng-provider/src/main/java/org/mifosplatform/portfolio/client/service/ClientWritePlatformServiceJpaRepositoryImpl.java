@@ -5,24 +5,17 @@
  */
 package org.mifosplatform.portfolio.client.service;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
-import org.mifosplatform.infrastructure.core.domain.Base64EncodedImage;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
-import org.mifosplatform.infrastructure.core.service.FileUtils;
-import org.mifosplatform.infrastructure.documentmanagement.exception.DocumentManagementException;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.office.domain.Office;
 import org.mifosplatform.organisation.office.domain.OfficeRepository;
@@ -34,7 +27,6 @@ import org.mifosplatform.portfolio.client.domain.AccountNumberGeneratorFactory;
 import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.client.domain.ClientRepositoryWrapper;
 import org.mifosplatform.portfolio.client.exception.ClientMustBePendingToBeDeletedException;
-import org.mifosplatform.portfolio.client.exception.ClientNotFoundException;
 import org.mifosplatform.portfolio.group.domain.Group;
 import org.mifosplatform.portfolio.group.domain.GroupRepository;
 import org.mifosplatform.portfolio.group.exception.GroupNotFoundException;
@@ -219,73 +211,6 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             handleDataIntegrityIssues(command, dve);
             return CommandProcessingResult.empty();
         }
-    }
-
-    @Transactional
-    @Override
-    public CommandProcessingResult saveOrUpdateClientImage(final Long clientId, final String imageName, final InputStream inputStream) {
-        try {
-            final Client client = this.clientRepository.findOneWithNotFoundDetection(clientId);
-            String imageUploadLocation = setupForClientImageUpdate(clientId, client);
-
-            String imageLocation = FileUtils.saveToFileSystem(inputStream, imageUploadLocation, imageName);
-
-            return updateClientImage(clientId, client, imageLocation);
-        } catch (IOException ioe) {
-            logger.error(ioe.getMessage(), ioe);
-            throw new DocumentManagementException(imageName);
-        }
-    }
-
-    @Transactional
-    @Override
-    public CommandProcessingResult deleteClientImage(final Long clientId) {
-
-        final Client client = this.clientRepository.findOneWithNotFoundDetection(clientId);
-
-        // delete image from the file system
-        if (StringUtils.isNotEmpty(client.imageKey())) {
-            FileUtils.deleteClientImage(clientId, client.imageKey());
-        }
-        return updateClientImage(clientId, client, null);
-    }
-
-    @Override
-    public CommandProcessingResult saveOrUpdateClientImage(final Long clientId, final Base64EncodedImage encodedImage) {
-        try {
-            final Client client = this.clientRepository.findOneWithNotFoundDetection(clientId);
-            final String imageUploadLocation = setupForClientImageUpdate(clientId, client);
-
-            final String imageLocation = FileUtils.saveToFileSystem(encodedImage, imageUploadLocation, "image");
-
-            return updateClientImage(clientId, client, imageLocation);
-        } catch (IOException ioe) {
-            logger.error(ioe.getMessage(), ioe);
-            throw new DocumentManagementException("image");
-        }
-    }
-
-    private String setupForClientImageUpdate(final Long clientId, final Client client) {
-        if (client == null) { throw new ClientNotFoundException(clientId); }
-
-        final String imageUploadLocation = FileUtils.generateClientImageParentDirectory(clientId);
-        // delete previous image from the file system
-        if (StringUtils.isNotEmpty(client.imageKey())) {
-            FileUtils.deleteClientImage(clientId, client.imageKey());
-        }
-
-        /** Recursively create the directory if it does not exist **/
-        if (!new File(imageUploadLocation).isDirectory()) {
-            new File(imageUploadLocation).mkdirs();
-        }
-        return imageUploadLocation;
-    }
-
-    private CommandProcessingResult updateClientImage(final Long clientId, final Client client, final String imageLocation) {
-        client.updateImageKey(imageLocation);
-        this.clientRepository.save(client);
-
-        return new CommandProcessingResult(clientId);
     }
 
     private void logAsErrorUnexpectedDataIntegrityException(final DataIntegrityViolationException dve) {

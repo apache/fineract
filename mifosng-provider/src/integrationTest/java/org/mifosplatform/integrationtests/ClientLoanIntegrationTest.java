@@ -9,10 +9,10 @@ import java.util.HashMap;
 import org.junit.Before;
 import org.junit.Test;
 import org.mifosplatform.integrationtests.common.ClientHelper;
+import org.mifosplatform.integrationtests.common.Utils;
 import org.mifosplatform.integrationtests.common.loans.LoanApplicationTestBuilder;
 import org.mifosplatform.integrationtests.common.loans.LoanProductTestBuilder;
 import org.mifosplatform.integrationtests.common.loans.LoanTransactionHelper;
-import org.mifosplatform.integrationtests.common.Utils;
 
 import com.jayway.restassured.builder.RequestSpecBuilder;
 import com.jayway.restassured.builder.ResponseSpecBuilder;
@@ -30,6 +30,7 @@ public class ClientLoanIntegrationTest {
     private ResponseSpecification responseSpec;
     private RequestSpecification requestSpec;
     private LoanTransactionHelper loanTransactionHelper;
+
     @Before
     public void setup() {
         Utils.initializeRESTAssured();
@@ -40,7 +41,7 @@ public class ClientLoanIntegrationTest {
 
     @Test
     public void checkClientLoanCreateAndDisburseFlow() {
-        loanTransactionHelper = new LoanTransactionHelper(requestSpec,responseSpec);
+        loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
 
         Integer clientID = ClientHelper.createClient(requestSpec, responseSpec);
         ClientHelper.verifyClientCreatedOnServer(requestSpec, responseSpec, clientID);
@@ -53,21 +54,35 @@ public class ClientLoanIntegrationTest {
 
     private Integer createLoanProduct() {
         System.out.println("------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
-        String loanProductJSON = new LoanProductTestBuilder().withPrincipal("12,000.00").withNumberOfRepayments("4")
-                .withRepaymentAfterEvery("1").withRepaymentTypeAsMonth().withinterestRatePerPeriod("2")
-                .withInterestRateFrequencyTypeAsMonths().withAmortizationTypeAsEqualInstallments().withInterestTypeAsDecliningBalance()
-                .withinterestRatePerPeriod("1").build();
+        String loanProductJSON = new LoanProductTestBuilder() //
+                .withPrincipal("12,000.00") //
+                .withNumberOfRepayments("4") //
+                .withRepaymentAfterEvery("1") //
+                .withRepaymentTypeAsMonth() //
+                .withinterestRatePerPeriod("1") //
+                .withInterestRateFrequencyTypeAsMonths() //
+                .withAmortizationTypeAsEqualInstallments() //
+                .withInterestTypeAsDecliningBalance() //
+                .build();
         return loanTransactionHelper.getLoanProductId(loanProductJSON);
     }
 
     private Integer applyForLoanApplication(final Integer clientID, final Integer loanProductID) {
         System.out.println("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
-        String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal("12,000.00").withLoanTermFrequency("4")
-                .withLoanTermFrequencyAsMonths().withNumberOfRepayments("4").withRepaymentEveryAfter("1")
-                .withRepaymentFrequencyTypeAsMonths().withInterestRatePerPeriod("2")
-                .withAmortizationTypeAsEqualInstallments().withInterestTypeAsDecliningBalance()
-                .withInterestCalculationPeriodTypeSameAsRepaymentPeriod().withExpectedDisbursementDate("20 September 2011")
-                .withSubmittedOnDate("20 September 2011").build(clientID.toString(), loanProductID.toString());
+        String loanApplicationJSON = new LoanApplicationTestBuilder() //
+                .withPrincipal("12,000.00") //
+                .withLoanTermFrequency("4") //
+                .withLoanTermFrequencyAsMonths() //
+                .withNumberOfRepayments("4") //
+                .withRepaymentEveryAfter("1") //
+                .withRepaymentFrequencyTypeAsMonths() //
+                .withInterestRatePerPeriod("2") //
+                .withAmortizationTypeAsEqualInstallments() //
+                .withInterestTypeAsDecliningBalance() //
+                .withInterestCalculationPeriodTypeSameAsRepaymentPeriod() //
+                .withExpectedDisbursementDate("20 September 2011") //
+                .withSubmittedOnDate("20 September 2011") //
+                .build(clientID.toString(), loanProductID.toString());
         return loanTransactionHelper.getLoanId(loanApplicationJSON);
     }
 
@@ -81,17 +96,17 @@ public class ClientLoanIntegrationTest {
 
         assertEquals("Checking for Due Date for 2nd Month", new ArrayList<Integer>(Arrays.asList(2011, 11, 20)),
                 loanSchedule.get(2).get("dueDate"));
-        assertEquals("Checking for Principal Due for 2nd Month", new Float("2969.72"), loanSchedule.get(2).get("principalDue"));
+        assertEquals("Checking for Principal Due for 2nd Month", new Float("2969.71"), loanSchedule.get(2).get("principalDue"));
         assertEquals("Checking for Interest Due for 2nd Month", new Float("181.77"), loanSchedule.get(2).get("interestOriginalDue"));
 
         assertEquals("Checking for Due Date for 3rd Month", new ArrayList<Integer>(Arrays.asList(2011, 12, 20)),
                 loanSchedule.get(3).get("dueDate"));
-        assertEquals("Checking for Principal Due for 3rd Month", new Float("3029.11"), loanSchedule.get(3).get("principalDue"));
+        assertEquals("Checking for Principal Due for 3rd Month", new Float("3029.1"), loanSchedule.get(3).get("principalDue"));
         assertEquals("Checking for Interest Due for 3rd Month", new Float("122.38"), loanSchedule.get(3).get("interestOriginalDue"));
 
         assertEquals("Checking for Due Date for 4th Month", new ArrayList<Integer>(Arrays.asList(2012, 1, 20)),
                 loanSchedule.get(4).get("dueDate"));
-        assertEquals("Checking for Principal Due for 4th Month", new Float("3089.68"), loanSchedule.get(4).get("principalDue"));
+        assertEquals("Checking for Principal Due for 4th Month", new Float("3089.7"), loanSchedule.get(4).get("principalDue"));
         assertEquals("Checking for Interest Due for 4th Month", new Float("61.79"), loanSchedule.get(4).get("interestOriginalDue"));
     }
 }

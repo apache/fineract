@@ -5,6 +5,7 @@
  */
 package org.mifosplatform.portfolio.client.data;
 
+import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanStatusEnumData;
 import org.mifosplatform.portfolio.savings.data.SavingsAccountStatusEnumData;
 
@@ -26,6 +27,8 @@ public class ClientAccountSummaryData {
 
     private final Integer accountStatusId;
     private final LoanStatusEnumData status;
+    @SuppressWarnings("unused")
+    private final EnumOptionData loanType;
     private final SavingsAccountStatusEnumData savingAccountStatus;
 
     public ClientAccountSummaryData(final Long id, final String externalId, final Long productId, final String loanProductName,
@@ -37,11 +40,12 @@ public class ClientAccountSummaryData {
         this.productName = loanProductName;
         this.accountStatusId = loanStatusId;
         this.status = null;
+        this.loanType = null;
         this.savingAccountStatus = null;
     }
 
     public ClientAccountSummaryData(final Long id, final String accountNo, final String externalId, final Long productId,
-            final String loanProductName, final LoanStatusEnumData loanStatus) {
+            final String loanProductName, final LoanStatusEnumData loanStatus, final EnumOptionData loanType) {
         this.id = id;
         this.accountNo = accountNo;
         this.externalId = externalId;
@@ -49,9 +53,10 @@ public class ClientAccountSummaryData {
         this.productName = loanProductName;
         this.accountStatusId = null;
         this.status = loanStatus;
+        this.loanType = loanType;
         this.savingAccountStatus = null;
     }
-    
+
     public ClientAccountSummaryData(final Long id, final String accountNo, final String externalId, final Long productId,
             final String loanProductName, final SavingsAccountStatusEnumData savingAccountStatus) {
         this.id = id;
@@ -61,6 +66,7 @@ public class ClientAccountSummaryData {
         this.productName = loanProductName;
         this.accountStatusId = null;
         this.status = null;
+        this.loanType = null;
         this.savingAccountStatus = savingAccountStatus;
     }
 
@@ -68,7 +74,7 @@ public class ClientAccountSummaryData {
         Integer accountStatus = this.accountStatusId;
         if (accountStatus == null && this.status != null) {
             accountStatus = this.status.id().intValue();
-        }else  if (accountStatus == null && this.savingAccountStatus != null) {
+        } else if (accountStatus == null && this.savingAccountStatus != null) {
             accountStatus = this.savingAccountStatus.id().intValue();
         }
         return accountStatus;

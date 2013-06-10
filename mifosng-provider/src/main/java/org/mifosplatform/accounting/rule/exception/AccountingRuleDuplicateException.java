@@ -16,5 +16,9 @@ public class AccountingRuleDuplicateException extends AbstractPlatformDomainRule
     public AccountingRuleDuplicateException(String name) {
         super("error.msg.accounting.rule.duplicate", "An accounting rule with the name " + name + " already exists" + name);
     }
+    
+    public AccountingRuleDuplicateException() {
+        super("error.msg.accounting.rule.tag.duplicate", "The accounting rule already have the tags which you defined");
+    }
 
 }

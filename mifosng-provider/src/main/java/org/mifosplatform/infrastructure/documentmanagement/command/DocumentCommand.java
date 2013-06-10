@@ -22,6 +22,7 @@ public class DocumentCommand {
     private Long size;
     private String type;
     private String location;
+    private Integer storageType;
 
     private final Set<String> modifiedParameters;
 
@@ -93,6 +94,14 @@ public class DocumentCommand {
 
     public void setLocation(final String location) {
         this.location = location;
+    }
+
+    public Integer getStorageType() {
+        return this.storageType;
+    }
+
+    public void setStorageType(Integer storageType) {
+        this.storageType = storageType;
     }
 
     public boolean isNameChanged() {

@@ -40,8 +40,9 @@ public final class CalculateLoanScheduleQueryFromApiJsonHelper {
             "productId", "accountNo", "externalId", "fundId", "loanOfficerId", "loanPurposeId", "transactionProcessingStrategyId",
             "principal", "inArrearsTolerance", "interestRatePerPeriod", "repaymentEvery", "numberOfRepayments", "loanTermFrequency",
             "loanTermFrequencyType", "repaymentFrequencyType", "interestRateFrequencyType", "amortizationType", "interestType",
-            "interestCalculationPeriodType", "expectedDisbursementDate", "repaymentsStartingFromDate", "interestChargedFromDate",
-            "submittedOnDate", "submittedOnNote", "locale", "dateFormat", "charges", "collateral"));
+            "interestCalculationPeriodType", "expectedDisbursementDate", "repaymentsStartingFromDate", "graceOnPrincipalPayment",
+            "graceOnInterestPayment", "graceOnInterestCharged", "interestChargedFromDate", "submittedOnDate", "submittedOnNote", "locale",
+            "dateFormat", "charges", "collateral"));
 
     private final FromJsonHelper fromApiJsonHelper;
 

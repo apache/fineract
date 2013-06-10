@@ -101,6 +101,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
                     + "lp.nominal_interest_rate_per_period as interestRatePerPeriod, lp.min_nominal_interest_rate_per_period as minInterestRatePerPeriod, lp.max_nominal_interest_rate_per_period as maxInterestRatePerPeriod, lp.interest_period_frequency_enum as interestRatePerPeriodFreq, "
                     + "lp.annual_nominal_interest_rate as annualInterestRate, lp.interest_method_enum as interestMethod, lp.interest_calculated_in_period_enum as interestCalculationInPeriodMethod,"
                     + "lp.repay_every as repaidEvery, lp.repayment_period_frequency_enum as repaymentPeriodFrequency, lp.number_of_repayments as numberOfRepayments, lp.min_number_of_repayments as minNumberOfRepayments, lp.max_number_of_repayments as maxNumberOfRepayments, "
+                    + "lp.grace_on_principal_periods as graceOnPrincipalPayment, lp.grace_on_interest_periods as graceOnInterestPayment, lp.grace_interest_free_periods as graceOnInterestCharged,"
                     + "lp.amortization_method_enum as amortizationMethod, lp.arrearstolerance_amount as tolerance, "
                     + "lp.accounting_type as accountingType, "
                     + "curr.name as currencyName, curr.internationalized_name_code as currencyNameCode, curr.display_symbol as currencyDisplaySymbol "
@@ -140,6 +141,10 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
             final Integer maxNumberOfRepayments = JdbcSupport.getInteger(rs, "maxNumberOfRepayments");
             final Integer repaymentEvery = JdbcSupport.getInteger(rs, "repaidEvery");
 
+            final Integer graceOnPrincipalPayment = JdbcSupport.getIntegerDefaultToNullIfZero(rs, "graceOnPrincipalPayment");
+            final Integer graceOnInterestPayment = JdbcSupport.getIntegerDefaultToNullIfZero(rs, "graceOnInterestPayment");
+            final Integer graceOnInterestCharged = JdbcSupport.getIntegerDefaultToNullIfZero(rs, "graceOnInterestCharged");
+
             final Integer accountingRuleId = JdbcSupport.getInteger(rs, "accountingType");
             final EnumOptionData accountingRuleType = AccountingEnumerations.accountingRuleType(accountingRuleId);
 
@@ -168,7 +173,8 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
                     numberOfRepayments, minNumberOfRepayments, maxNumberOfRepayments, repaymentEvery, interestRatePerPeriod,
                     minInterestRatePerPeriod, maxInterestRatePerPeriod, annualInterestRate, repaymentFrequencyType,
                     interestRateFrequencyType, amortizationType, interestType, interestCalculationPeriodType, fundId, fundName,
-                    transactionStrategyId, transactionStrategyName, this.charges, accountingRuleType);
+                    transactionStrategyId, transactionStrategyName, graceOnPrincipalPayment, graceOnInterestPayment,
+                    graceOnInterestCharged, this.charges, accountingRuleType);
         }
 
     }

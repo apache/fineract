@@ -7,12 +7,14 @@ package org.mifosplatform.portfolio.savings.service;
 
 import java.util.Collection;
 
+import org.mifosplatform.infrastructure.core.service.Page;
+import org.mifosplatform.portfolio.group.service.SearchParameters;
 import org.mifosplatform.portfolio.savings.data.SavingsAccountData;
 import org.mifosplatform.portfolio.savings.data.SavingsAccountTransactionData;
 
 public interface SavingsAccountReadPlatformService {
 
-    Collection<SavingsAccountData> retrieveAll();
+    Page<SavingsAccountData> retrieveAll(SearchParameters searchParameters);
 
     SavingsAccountData retrieveOne(Long savingsId);
 

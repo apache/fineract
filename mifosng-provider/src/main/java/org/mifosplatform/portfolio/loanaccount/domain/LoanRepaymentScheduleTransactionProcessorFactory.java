@@ -5,6 +5,13 @@
  */
 package org.mifosplatform.portfolio.loanaccount.domain;
 
+import org.mifosplatform.portfolio.loanaccount.domain.transactionprocessor.LoanRepaymentScheduleTransactionProcessor;
+import org.mifosplatform.portfolio.loanaccount.domain.transactionprocessor.impl.CreocoreLoanRepaymentScheduleTransactionProcessor;
+import org.mifosplatform.portfolio.loanaccount.domain.transactionprocessor.impl.HeavensFamilyLoanRepaymentScheduleTransactionProcessor;
+import org.mifosplatform.portfolio.loanaccount.domain.transactionprocessor.impl.InterestPrincipalPenaltyFeesOrderLoanRepaymentScheduleTransactionProcessor;
+import org.mifosplatform.portfolio.loanaccount.domain.transactionprocessor.impl.MifosStyleLoanRepaymentScheduleTransactionProcessor;
+import org.mifosplatform.portfolio.loanaccount.domain.transactionprocessor.impl.PrincipalInterestPenaltyFeesOrderLoanRepaymentScheduleTransactionProcessor;
+import org.mifosplatform.portfolio.loanaccount.domain.transactionprocessor.impl.RBILoanRepaymentScheduleTransactionProcessor;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanTransactionProcessingStrategy;
 import org.springframework.stereotype.Component;
 
@@ -14,7 +21,7 @@ public class LoanRepaymentScheduleTransactionProcessorFactory {
     public LoanRepaymentScheduleTransactionProcessor determineProcessor(
             final LoanTransactionProcessingStrategy transactionProcessingStrategy) {
 
-        LoanRepaymentScheduleTransactionProcessor processor = new MifosStyleLoanRepaymentScheduleTransactionProcessor();
+        LoanRepaymentScheduleTransactionProcessor processor = new PrincipalInterestPenaltyFeesOrderLoanRepaymentScheduleTransactionProcessor();
 
         if (transactionProcessingStrategy != null) {
 
@@ -32,6 +39,14 @@ public class LoanRepaymentScheduleTransactionProcessorFactory {
 
             if (transactionProcessingStrategy.isIndianRBIStrategy()) {
                 processor = new RBILoanRepaymentScheduleTransactionProcessor();
+            }
+
+            if (transactionProcessingStrategy.isPrincipalInterestPenaltiesFeesOrderStrategy()) {
+                processor = new PrincipalInterestPenaltyFeesOrderLoanRepaymentScheduleTransactionProcessor();
+            }
+
+            if (transactionProcessingStrategy.isInterestPrincipalPenaltiesFeesOrderStrategy()) {
+                processor = new InterestPrincipalPenaltyFeesOrderLoanRepaymentScheduleTransactionProcessor();
             }
         }
 

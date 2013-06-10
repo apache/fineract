@@ -25,10 +25,12 @@ import javax.persistence.UniqueConstraint;
 
 import org.apache.commons.lang.StringUtils;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
+import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.security.domain.PlatformUser;
 import org.mifosplatform.infrastructure.security.exception.NoAuthorizationException;
 import org.mifosplatform.infrastructure.security.service.PlatformPasswordEncoder;
 import org.mifosplatform.organisation.office.domain.Office;
+import org.mifosplatform.organisation.staff.domain.Staff;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.jpa.domain.AbstractPersistable;
@@ -77,8 +79,12 @@ public class AppUser extends AbstractPersistable<Long> implements PlatformUser {
     private boolean deleted;
 
     @ManyToOne
-    @JoinColumn(name = "office_id")
+    @JoinColumn(name = "office_id", nullable = false)
     private Office office;
+
+    @ManyToOne
+    @JoinColumn(name = "staff_id", nullable = true)
+    private Staff staff;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "m_appuser_role", joinColumns = @JoinColumn(name = "appuser_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
@@ -130,6 +136,14 @@ public class AppUser extends AbstractPersistable<Long> implements PlatformUser {
         this.enabled = user.isEnabled();
         this.roles = roles;
         this.firstTimeLoginRemaining = true;
+    }
+
+    public EnumOptionData organisationalRoleData() {
+        EnumOptionData organisationalRole = null;
+        if (this.staff != null) {
+            organisationalRole = this.staff.organisationalRoleData();
+        }
+        return organisationalRole;
     }
 
     public void updatePassword(final String encodePassword) {
@@ -450,5 +464,21 @@ public class AppUser extends AbstractPersistable<Long> implements PlatformUser {
     public void validateHasDatatableReadPermission(final String datatable) {
         if (hasNotPermissionForDatatable(datatable, "READ")) { throw new NoAuthorizationException("Not authorised to read datatable: "
                 + datatable); }
+    }
+
+    public Long getStaffId() {
+        Long staffId = null;
+        if (this.staff != null) {
+            staffId = this.staff.getId();
+        }
+        return staffId;
+    }
+
+    public String getStaffDisplayName() {
+        String staffDisplayName = null;
+        if (this.staff != null) {
+            staffDisplayName = this.staff.displayName();
+        }
+        return staffDisplayName;
     }
 }

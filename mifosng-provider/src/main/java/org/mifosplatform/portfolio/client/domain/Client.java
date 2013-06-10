@@ -5,26 +5,6 @@
  */
 package org.mifosplatform.portfolio.client.domain;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.persistence.Transient;
-import javax.persistence.UniqueConstraint;
-
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormatter;
@@ -33,11 +13,16 @@ import org.mifosplatform.infrastructure.core.data.ApiParameterError;
 import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
 import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.mifosplatform.infrastructure.core.service.DateUtils;
+import org.mifosplatform.infrastructure.documentmanagement.domain.Image;
 import org.mifosplatform.infrastructure.security.service.RandomPasswordGenerator;
 import org.mifosplatform.organisation.office.domain.Office;
 import org.mifosplatform.portfolio.client.api.ClientApiConstants;
 import org.mifosplatform.portfolio.group.domain.Group;
 import org.springframework.data.jpa.domain.AbstractPersistable;
+
+import javax.persistence.*;
+
+import java.util.*;
 
 @Entity
 @Table(name = "m_client", uniqueConstraints = { @UniqueConstraint(columnNames = { "account_no" }, name = "account_no_UNIQUE") })
@@ -49,6 +34,10 @@ public final class Client extends AbstractPersistable<Long> {
     @ManyToOne
     @JoinColumn(name = "office_id", nullable = false)
     private Office office;
+
+    @OneToOne(optional = true)
+    @JoinColumn(name = "image_id", nullable = true)
+    private Image image;
 
     /**
      * A value from {@link ClientStatus}.
@@ -72,15 +61,11 @@ public final class Client extends AbstractPersistable<Long> {
     @Column(name = "fullname", length = 100)
     private String fullname;
 
-    @SuppressWarnings("unused")
     @Column(name = "display_name", length = 100, nullable = false)
     private String displayName;
 
     @Column(name = "external_id", length = 100, nullable = true, unique = true)
     private String externalId;
-
-    @Column(name = "image_key", length = 500, nullable = true)
-    private String imageKey;
 
     @ManyToMany
     @JoinTable(name = "m_group_client", joinColumns = @JoinColumn(name = "client_id"), inverseJoinColumns = @JoinColumn(name = "group_id"))
@@ -385,16 +370,24 @@ public final class Client extends AbstractPersistable<Long> {
         return this.office.identifiedBy(officeId);
     }
 
-    public String imageKey() {
-        return imageKey;
-    }
-
-    public void updateImageKey(final String imageKey) {
-        this.imageKey = imageKey;
-    }
-
     public Long officeId() {
         return this.office.getId();
+    }
+
+    public void setImage(Image image) {
+        this.image = image;
+    }
+
+    public Image getImage() {
+        return this.image;
+    }
+
+    public String getDisplayName() {
+        return this.displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
     }
 
 }

@@ -9,16 +9,12 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
-import org.mifosplatform.infrastructure.core.domain.AbstractAuditableCustom;
 import org.mifosplatform.portfolio.loanproduct.data.TransactionProcessingStrategyData;
-import org.mifosplatform.useradministration.domain.AppUser;
+import org.springframework.data.jpa.domain.AbstractPersistable;
 
-/**
- *
- */
 @Entity
 @Table(name = "ref_loan_transaction_processing_strategy")
-public class LoanTransactionProcessingStrategy extends AbstractAuditableCustom<AppUser, Long> {
+public class LoanTransactionProcessingStrategy extends AbstractPersistable<Long> {
 
     @Column(name = "code", unique = true)
     private String code;
@@ -48,5 +44,13 @@ public class LoanTransactionProcessingStrategy extends AbstractAuditableCustom<A
 
     public boolean isIndianRBIStrategy() {
         return "rbi-india-strategy".equalsIgnoreCase(this.code);
+    }
+
+    public boolean isPrincipalInterestPenaltiesFeesOrderStrategy() {
+        return "principal-interest-penalties-fees-order-strategy".equalsIgnoreCase(this.code);
+    }
+
+    public boolean isInterestPrincipalPenaltiesFeesOrderStrategy() {
+        return "interest-principal-penalties-fees-order-strategy".equalsIgnoreCase(this.code);
     }
 }

@@ -71,6 +71,46 @@ public class DatatablesApiResource {
     }
 
     @POST
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String createDatatable(final String apiRequestBodyAsJson) {
+    	
+    	final CommandWrapper commandRequest = new CommandWrapperBuilder()
+    		.createDBDatatable(apiRequestBodyAsJson).build();
+
+    	final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+    	return this.toApiJsonSerializer.serialize(result);
+    }
+
+    @PUT
+    @Path("{datatableName}")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String updateDatatable(@PathParam("datatableName") final String datatableName,
+    		final String apiRequestBodyAsJson) {
+    	
+    	final CommandWrapper commandRequest = new CommandWrapperBuilder()
+    		.updateDBDatatable(datatableName, apiRequestBodyAsJson).build();
+
+    	final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+    	return this.toApiJsonSerializer.serialize(result);
+    }
+
+    @DELETE
+    @Path("{datatableName}")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String deleteDatatable(@PathParam("datatableName") final String datatableName,
+    		final String apiRequestBodyAsJson) {
+    	
+    	final CommandWrapper commandRequest = new CommandWrapperBuilder()
+    		.deleteDBDatatable(datatableName, apiRequestBodyAsJson).build();
+
+    	final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+    	return this.toApiJsonSerializer.serialize(result);
+    }
+
+    @POST
     @Path("register/{datatable}/{apptable}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
@@ -93,6 +133,18 @@ public class DatatablesApiResource {
         final CommandProcessingResult result = new CommandProcessingResultBuilder().withResourceIdAsString(datatable).build();
 
         return this.toApiJsonSerializer.serialize(result);
+    }
+
+    @GET
+    @Path("{datatable}")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String getDatatable(@PathParam("datatable") final String datatable, @Context final UriInfo uriInfo) {
+
+        final DatatableData result = this.readWriteNonCoreDataService.retrieveDatatable(datatable);
+
+        final boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
+        return this.toApiJsonSerializer.serializePretty(prettyPrint, result);
     }
 
     @GET

@@ -5,6 +5,8 @@
  */
 package org.mifosplatform.infrastructure.dataqueries.data;
 
+import java.util.List;
+
 /**
  * Immutable data object representing datatable data.
  */
@@ -14,13 +16,18 @@ public class DatatableData {
     private final String applicationTableName;
     @SuppressWarnings("unused")
     private final String registeredTableName;
-
-    public static DatatableData create(final String applicationTableName, final String registeredTableName) {
-        return new DatatableData(applicationTableName, registeredTableName);
+    @SuppressWarnings("unused")
+    private final List<ResultsetColumnHeaderData> columnHeaderData;
+    
+    public static DatatableData create(final String applicationTableName, final String registeredTableName,
+    		final List<ResultsetColumnHeaderData> columnHeaderData) {
+        return new DatatableData(applicationTableName, registeredTableName, columnHeaderData);
     }
 
-    private DatatableData(final String applicationTableName, final String registeredTableName) {
+    private DatatableData(final String applicationTableName, final String registeredTableName,
+    		final List<ResultsetColumnHeaderData> columnHeaderData) {
         this.applicationTableName = applicationTableName;
         this.registeredTableName = registeredTableName;
+        this.columnHeaderData = columnHeaderData;
     }
 }

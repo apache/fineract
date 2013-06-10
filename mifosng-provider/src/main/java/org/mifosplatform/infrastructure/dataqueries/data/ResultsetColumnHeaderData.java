@@ -17,7 +17,6 @@ public final class ResultsetColumnHeaderData {
 
     private final String columnName;
     private final String columnType;
-    @SuppressWarnings("unused")
     private final Long columnLength;
     private final String columnDisplayType;
     private final boolean isColumnNullable;
@@ -160,6 +159,10 @@ public final class ResultsetColumnHeaderData {
 
     public String getColumnType() {
         return this.columnType;
+    }
+    
+    public Long getColumnLength() {
+    	return this.columnLength;
     }
 
     public String getColumnDisplayType() {

@@ -5,7 +5,6 @@
  */
 package org.mifosplatform.portfolio.loanaccount.service;
 
-import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
@@ -40,9 +39,11 @@ import org.mifosplatform.portfolio.loanaccount.domain.LoanStatus;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanSummaryWrapper;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanTransactionProcessingStrategyRepository;
 import org.mifosplatform.portfolio.loanaccount.exception.LoanTransactionProcessingStrategyNotFoundException;
-import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.LoanSchedule;
+import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.LoanApplicationTerms;
+import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.LoanScheduleModel;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.service.LoanScheduleAssembler;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanProduct;
+import org.mifosplatform.portfolio.loanproduct.domain.LoanProductRelatedDetail;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanProductRepository;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanTransactionProcessingStrategy;
 import org.mifosplatform.portfolio.loanproduct.exception.InvalidCurrencyException;
@@ -131,22 +132,21 @@ public class LoanAssembler {
             }
         }
 
-        final BigDecimal inArrearsTolerance = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("inArrearsTolerance", element);
-        final LoanSchedule loanSchedule = this.loanScheduleAssembler.fromJson(element, inArrearsTolerance);
-
         Loan loanApplication = null;
         Client client = null;
         Group group = null;
-        
+
+        final LoanProductRelatedDetail loanProductRelatedDetail = this.loanScheduleAssembler.assembleLoanProductRelatedDetail(element);
+
         final String loanTypeParameterName = "loanType";
         final String loanTypeStr = fromApiJsonHelper.extractStringNamed(loanTypeParameterName, element);
         final EnumOptionData loanType = LoanEnumerations.loanType(loanTypeStr);
-        
+
         if (clientId != null) {
             client = this.clientRepository.findOneWithNotFoundDetection(clientId);
 
             loanApplication = Loan.newIndividualLoanApplication(accountNo, client, loanType.getId().intValue(), loanProduct, fund,
-                    loanOfficer, loanPurpose, loanTransactionProcessingStrategy, loanSchedule, loanCharges, collateral);
+                    loanOfficer, loanPurpose, loanTransactionProcessingStrategy, loanProductRelatedDetail, loanCharges, collateral);
         }
 
         if (groupId != null) {
@@ -154,15 +154,15 @@ public class LoanAssembler {
             if (group == null) { throw new GroupNotFoundException(groupId); }
 
             loanApplication = Loan.newGroupLoanApplication(accountNo, group, loanType.getId().intValue(), loanProduct, fund, loanOfficer,
-                    loanTransactionProcessingStrategy, loanSchedule, loanCharges);
+                    loanTransactionProcessingStrategy, loanProductRelatedDetail, loanCharges);
         }
 
         if (client != null && group != null) {
 
             if (!group.hasClientAsMember(client)) { throw new ClientNotInGroupException(clientId, groupId); }
 
-            loanApplication = Loan.newIndividualLoanApplicationFromGroup(accountNo, client, group, loanType.getId().intValue(), loanProduct, fund, loanOfficer,
-                    loanTransactionProcessingStrategy, loanSchedule, loanCharges);
+            loanApplication = Loan.newIndividualLoanApplicationFromGroup(accountNo, client, group, loanType.getId().intValue(),
+                    loanProduct, fund, loanOfficer, loanTransactionProcessingStrategy, loanProductRelatedDetail, loanCharges);
         }
 
         final String externalId = fromApiJsonHelper.extractStringNamed("externalId", element);
@@ -172,8 +172,11 @@ public class LoanAssembler {
         loanApplication.setHelpers(defaultLoanLifecycleStateMachine(), this.loanSummaryWrapper,
                 this.loanRepaymentScheduleTransactionProcessorFactory);
 
-        loanApplication
-                .loanApplicationSubmittal(currentUser, loanSchedule, defaultLoanLifecycleStateMachine(), submittedOnDate, externalId);
+        final LoanApplicationTerms loanApplicationTerms = this.loanScheduleAssembler.assembleLoanTerms(element);
+        final LoanScheduleModel loanScheduleModel = this.loanScheduleAssembler.assembleLoanScheduleFrom(loanApplicationTerms, element);
+
+        loanApplication.loanApplicationSubmittal(currentUser, loanScheduleModel, loanApplicationTerms, defaultLoanLifecycleStateMachine(),
+                submittedOnDate, externalId);
 
         return loanApplication;
     }

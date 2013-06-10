@@ -32,7 +32,6 @@ import org.mifosplatform.portfolio.group.service.SearchParameters;
 import org.mifosplatform.portfolio.loanaccount.data.LoanStatusEnumData;
 import org.mifosplatform.portfolio.loanproduct.service.LoanEnumerations;
 import org.mifosplatform.portfolio.savings.data.SavingsAccountStatusEnumData;
-import org.mifosplatform.portfolio.savings.domain.SavingsAccountStatusType;
 import org.mifosplatform.portfolio.savings.service.SavingStatusMapper;
 import org.mifosplatform.portfolio.savings.service.SavingsEnumerations;
 import org.mifosplatform.useradministration.domain.AppUser;
@@ -42,7 +41,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
-@Service(value = "clientReadPlatformService")
+@Service
 public class ClientReadPlatformServiceImpl implements ClientReadPlatformService {
 
     private final JdbcTemplate jdbcTemplate;
@@ -96,7 +95,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
         if (searchParameters.isOrderByRequested()) {
             sqlBuilder.append(" order by ").append(searchParameters.getOrderBy());
-            
+
             if (searchParameters.isSortOrderProvided()) {
                 sqlBuilder.append(' ').append(searchParameters.getSortOrder());
             }
@@ -113,7 +112,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlCountRows, sqlBuilder.toString(),
                 new Object[] { hierarchySearchString }, this.clientMapper);
     }
-    
+
     private String buildSqlStringFromClientCriteria(final SearchParameters searchParameters) {
 
         final String sqlSearch = searchParameters.getSqlSearch();
@@ -163,7 +162,6 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
     @Override
     public ClientData retrieveOne(final Long clientId) {
-
         try {
             AppUser currentUser = context.authenticatedUser();
             String hierarchy = currentUser.getOffice().getHierarchy();
@@ -177,7 +175,9 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
             Collection<GroupGeneralData> parentGroups = this.jdbcTemplate.query(clientGroupsSql, this.clientGroupsMapper,
                     new Object[] { clientId });
+
             return ClientData.setParentGroups(clientData, parentGroups);
+
         } catch (EmptyResultDataAccessException e) {
             throw new ClientNotFoundException(clientId);
         }
@@ -210,8 +210,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         final String hierarchy = currentUser.getOffice().getHierarchy();
         final String hierarchySearchString = hierarchy + "%";
 
-        final String sql = "select " + this.membersOfGroupMapper.schema()
- + " where o.hierarchy like ? and pgc.group_id = ?";
+        final String sql = "select " + this.membersOfGroupMapper.schema() + " where o.hierarchy like ? and pgc.group_id = ?";
 
         return this.jdbcTemplate.query(sql, this.membersOfGroupMapper, new Object[] { hierarchySearchString, groupId });
     }
@@ -227,7 +226,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             sqlBuilder.append("c.office_id as officeId, o.name as officeName, ");
             sqlBuilder.append("c.firstname as firstname, c.middlename as middlename, c.lastname as lastname, ");
             sqlBuilder.append("c.fullname as fullname, c.display_name as displayName, ");
-            sqlBuilder.append("c.activation_date as activationDate, c.image_key as imagekey ");
+            sqlBuilder.append("c.activation_date as activationDate, c.image_id as imageId ");
             sqlBuilder.append("from m_client c ");
             sqlBuilder.append("join m_office o on o.id = c.office_id ");
             sqlBuilder.append("join m_group_client pgc on pgc.client_id = c.id");
@@ -255,11 +254,11 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             final String displayName = rs.getString("displayName");
             final String externalId = rs.getString("externalId");
             final LocalDate activationDate = JdbcSupport.getLocalDate(rs, "activationDate");
-            final String imageKey = rs.getString("imageKey");
+            final Long imageId = JdbcSupport.getLong(rs, "imageId");
             final String officeName = rs.getString("officeName");
 
             return ClientData.instance(accountNo, status, officeId, officeName, id, firstname, middlename, lastname, fullname, displayName,
-                    externalId, activationDate, imageKey);
+                    externalId, activationDate, imageId);
         }
     }
 
@@ -275,7 +274,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             builder.append("c.office_id as officeId, o.name as officeName, ");
             builder.append("c.firstname as firstname, c.middlename as middlename, c.lastname as lastname, ");
             builder.append("c.fullname as fullname, c.display_name as displayName, ");
-            builder.append("c.activation_date as activationDate, c.image_key as imagekey ");
+            builder.append("c.activation_date as activationDate, c.image_id as imageId ");
             builder.append("from m_client c ");
             builder.append("join m_office o on o.id = c.office_id ");
 
@@ -303,13 +302,12 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             final String displayName = rs.getString("displayName");
             final String externalId = rs.getString("externalId");
             final LocalDate activationDate = JdbcSupport.getLocalDate(rs, "activationDate");
-            final String imageKey = rs.getString("imageKey");
             final String officeName = rs.getString("officeName");
+            final Long imageId = JdbcSupport.getLong(rs, "imageId");
 
             return ClientData.instance(accountNo, status, officeId, officeName, id, firstname, middlename, lastname, fullname, displayName,
-                    externalId, activationDate, imageKey);
+                    externalId, activationDate, imageId);
         }
-
     }
 
     private static final class ParentGroupsMapper implements RowMapper<GroupGeneralData> {
@@ -418,12 +416,12 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             if (results != null) {
                 for (ClientAccountSummaryData row : savingsAccounts) {
 
-                	SavingStatusMapper statusMapper = new SavingStatusMapper(row.accountStatusId());
+                    SavingStatusMapper statusMapper = new SavingStatusMapper(row.accountStatusId());
 
                     if (statusMapper.isOpen()) {
-                    	approvedSavingAccounts.add(row);
+                        approvedSavingAccounts.add(row);
                     } else {
-                    	pendingApprovalSavingAccounts.add(row);
+                        pendingApprovalSavingAccounts.add(row);
                     }
                 }
             }
@@ -492,8 +490,9 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         public String loanAccountSummarySchema() {
 
             StringBuilder accountsSummary = new StringBuilder("l.id as id, l.account_no as accountNo, l.external_id as externalId,");
-            accountsSummary.append("l.product_id as productId, lp.name as productName,").append("l.loan_status_id as statusId ")
-                    .append("from m_loan l ").append("LEFT JOIN m_product_loan AS lp ON lp.id = l.product_id ");
+            accountsSummary.append("l.product_id as productId, lp.name as productName,")
+                    .append("l.loan_status_id as statusId, l.loan_type_enum as loanType ").append("from m_loan l ")
+                    .append("LEFT JOIN m_product_loan AS lp ON lp.id = l.product_id ");
 
             return accountsSummary.toString();
         }
@@ -508,8 +507,10 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             final String loanProductName = rs.getString("productName");
             final Integer loanStatusId = JdbcSupport.getInteger(rs, "statusId");
             final LoanStatusEnumData loanStatus = LoanEnumerations.status(loanStatusId);
+            final Integer loanTypeId = JdbcSupport.getInteger(rs, "loanType");
+            final EnumOptionData loanType = LoanEnumerations.loanType(loanTypeId);
 
-            return new ClientAccountSummaryData(id, accountNo, externalId, productId, loanProductName, loanStatus);
+            return new ClientAccountSummaryData(id, accountNo, externalId, productId, loanProductName, loanStatus, loanType);
         }
     }
 

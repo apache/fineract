@@ -31,7 +31,7 @@ public class LoanApplicationTestBuilder {
     private final String transactionProcessingID = MIFOS_STANDARD_STRATEGY;
     private String expectedDisbursmentDate = "";
     private String submittedOnDate = "";
-    private String loanType = "individual"; //default it to individual
+    private String loanType = "individual";
 
     public String build(final String clientID, final String loanProductId) {
 
@@ -42,7 +42,7 @@ public class LoanApplicationTestBuilder {
         map.put("productId", loanProductId);
         map.put("principal", principal);
         map.put("loanTermFrequency", loanTermFrequency);
-        map.put("loanTermFrequencyType", loanTermFrequencyType); // FIXME - Should this be using
+        map.put("loanTermFrequencyType", loanTermFrequencyType);
         map.put("numberOfRepayments", numberOfRepayment);
         map.put("repaymentEvery", repaymentPeriod);
         map.put("repaymentFrequencyType", repaymentFrequencyType);
@@ -53,7 +53,7 @@ public class LoanApplicationTestBuilder {
         map.put("transactionProcessingStrategyId", transactionProcessingID);
         map.put("expectedDisbursementDate", expectedDisbursmentDate);
         map.put("submittedOnDate", submittedOnDate);
-        map.put("loanType", "individual");
+        map.put("loanType", loanType);
         return new Gson().toJson(map);
     }
 

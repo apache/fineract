@@ -1,12 +1,17 @@
+/**
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this file,
+ * You can obtain one at http://mozilla.org/MPL/2.0/.
+ */
 package org.mifosplatform.accounting.producttoaccountmapping.service;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import org.mifosplatform.accounting.common.AccountingRuleType;
 import org.mifosplatform.accounting.common.AccountingConstants.ACCRUAL_ACCOUNTS_FOR_LOAN;
 import org.mifosplatform.accounting.common.AccountingConstants.CASH_ACCOUNTS_FOR_LOAN;
 import org.mifosplatform.accounting.common.AccountingConstants.LOAN_PRODUCT_ACCOUNTING_PARAMS;
+import org.mifosplatform.accounting.common.AccountingRuleType;
 import org.mifosplatform.accounting.glaccount.domain.GLAccountRepository;
 import org.mifosplatform.accounting.glaccount.domain.GLAccountType;
 import org.mifosplatform.accounting.producttoaccountmapping.domain.PortfolioProductType;
@@ -14,6 +19,7 @@ import org.mifosplatform.accounting.producttoaccountmapping.domain.ProductToGLAc
 import org.mifosplatform.infrastructure.codes.domain.CodeValueRepositoryWrapper;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
+import org.mifosplatform.portfolio.charge.domain.ChargeRepositoryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -23,10 +29,10 @@ import com.google.gson.JsonElement;
 public class LoanProductToGLAccountMappingHelper extends ProductToGLAccountMappingHelper {
 
     @Autowired
-    public LoanProductToGLAccountMappingHelper(GLAccountRepository glAccountRepository,
-            ProductToGLAccountMappingRepository glAccountMappingRepository, FromJsonHelper fromApiJsonHelper,
-            CodeValueRepositoryWrapper codeValueRepositoryWrapper) {
-        super(glAccountRepository, glAccountMappingRepository, fromApiJsonHelper, codeValueRepositoryWrapper);
+    public LoanProductToGLAccountMappingHelper(final GLAccountRepository glAccountRepository,
+            final ProductToGLAccountMappingRepository glAccountMappingRepository, final FromJsonHelper fromApiJsonHelper,
+            final CodeValueRepositoryWrapper codeValueRepositoryWrapper, final ChargeRepositoryWrapper chargeRepositoryWrapper) {
+        super(glAccountRepository, glAccountMappingRepository, fromApiJsonHelper, codeValueRepositoryWrapper, chargeRepositoryWrapper);
     }
 
     /*** Set of abstractions for saving Loan Products to GL Account Mappings ***/
@@ -68,13 +74,27 @@ public class LoanProductToGLAccountMappingHelper extends ProductToGLAccountMappi
     /*** Abstractions for payments channel related to loan products ***/
 
     public void savePaymentChannelToFundSourceMappings(final JsonCommand command, final JsonElement element, final Long productId,
-            Map<String, Object> changes) {
+            final Map<String, Object> changes) {
         savePaymentChannelToFundSourceMappings(command, element, productId, changes, PortfolioProductType.LOAN);
     }
 
     public void updatePaymentChannelToFundSourceMappings(final JsonCommand command, final JsonElement element, final Long productId,
-            Map<String, Object> changes) {
+            final Map<String, Object> changes) {
         updatePaymentChannelToFundSourceMappings(command, element, productId, changes, PortfolioProductType.LOAN);
+    }
+
+    public void saveChargesToIncomeAccountMappings(final JsonCommand command, final JsonElement element, final Long productId,
+            final Map<String, Object> changes) {
+        // save both fee and penalty charges
+        saveChargesToIncomeAccountMappings(command, element, productId, changes, PortfolioProductType.LOAN, true);
+        saveChargesToIncomeAccountMappings(command, element, productId, changes, PortfolioProductType.LOAN, false);
+    }
+
+    public void updateChargesToIncomeAccountMappings(final JsonCommand command, final JsonElement element, final Long productId,
+            final Map<String, Object> changes) {
+        // update both fee and penalty charges
+        updateChargeToIncomeAccountMappings(command, element, productId, changes, PortfolioProductType.LOAN, true);
+        updateChargeToIncomeAccountMappings(command, element, productId, changes, PortfolioProductType.LOAN, false);
     }
 
     public Map<String, Object> populateChangesForNewLoanProductToGLAccountMappingCreation(final JsonElement element,

@@ -14,6 +14,7 @@ import java.util.Map;
 import org.mifosplatform.accounting.common.AccountingEnumerations;
 import org.mifosplatform.accounting.common.AccountingRuleType;
 import org.mifosplatform.accounting.glaccount.data.GLAccountData;
+import org.mifosplatform.accounting.producttoaccountmapping.data.ChargeToGLAccountMapper;
 import org.mifosplatform.accounting.producttoaccountmapping.data.PaymentTypeToGLAccountMapper;
 import org.mifosplatform.infrastructure.codes.data.CodeValueData;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
@@ -60,20 +61,25 @@ public class LoanProductData {
     private final BigDecimal inArrearsTolerance;
     private final Long transactionProcessingStrategyId;
     private final String transactionProcessingStrategyName;
+    private final Integer graceOnPrincipalPayment;
+    private final Integer graceOnInterestPayment;
+    private final Integer graceOnInterestCharged;
 
     // charges
     private final Collection<ChargeData> charges;
 
     // accounting
-    private final EnumOptionData accountingRule;
-    @SuppressWarnings("unused")
-    private final Map<String, Object> accountingMappings;
-    @SuppressWarnings("unused")
-    private final Collection<PaymentTypeToGLAccountMapper> paymentChannelToFundSourceMappings;
+    private EnumOptionData accountingRule;
+    private Map<String, Object> accountingMappings;
+    private Collection<PaymentTypeToGLAccountMapper> paymentChannelToFundSourceMappings;
+    private Collection<ChargeToGLAccountMapper> feeToIncomeAccountMappings;
+    private Collection<ChargeToGLAccountMapper> penaltyToIncomeAccountMappings;
 
     // template related
     private final Collection<FundData> fundOptions;
+    @SuppressWarnings("unused")
     private final Collection<CodeValueData> paymentTypeOptions;
+    @SuppressWarnings("unused")
     private final Collection<CurrencyData> currencyOptions;
     private final List<EnumOptionData> repaymentFrequencyTypeOptions;
     private final List<EnumOptionData> interestRateFrequencyTypeOptions;
@@ -82,7 +88,11 @@ public class LoanProductData {
     private final List<EnumOptionData> interestCalculationPeriodTypeOptions;
     private final Collection<TransactionProcessingStrategyData> transactionProcessingStrategyOptions;
     private final Collection<ChargeData> chargeOptions;
+    @SuppressWarnings("unused")
+    private final Collection<ChargeData> penaltyOptions;
+    @SuppressWarnings("unused")
     private final List<EnumOptionData> accountingRuleOptions;
+    @SuppressWarnings("unused")
     private final Map<String, List<GLAccountData>> accountingMappingOptions;
 
     /**
@@ -112,6 +122,9 @@ public class LoanProductData {
         final String fundName = null;
         final Long transactionProcessingStrategyId = null;
         final String transactionProcessingStrategyName = null;
+        final Integer graceOnPrincipalPayment = null;
+        final Integer graceOnInterestPayment = null;
+        final Integer graceOnInterestCharged = null;
         final Collection<ChargeData> charges = null;
         final EnumOptionData accountingType = null;
 
@@ -119,7 +132,8 @@ public class LoanProductData {
                 minNumberOfRepayments, maxNumberOfRepayments, repaymentEvery, interestRatePerPeriod, minInterestRatePerPeriod,
                 maxInterestRatePerPeriod, annualInterestRate, repaymentFrequencyType, interestRateFrequencyType, amortizationType,
                 interestType, interestCalculationPeriodType, fundId, fundName, transactionProcessingStrategyId,
-                transactionProcessingStrategyName, charges, accountingType);
+                transactionProcessingStrategyName, graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged, charges,
+                accountingType);
     }
 
     public static LoanProductData lookupWithCurrency(final Long id, final String name, final CurrencyData currency) {
@@ -145,6 +159,10 @@ public class LoanProductData {
         final String fundName = null;
         final Long transactionProcessingStrategyId = null;
         final String transactionProcessingStrategyName = null;
+        final Integer graceOnPrincipalPayment = null;
+        final Integer graceOnInterestPayment = null;
+        final Integer graceOnInterestCharged = null;
+
         final Collection<ChargeData> charges = null;
         final EnumOptionData accountingType = null;
 
@@ -152,7 +170,8 @@ public class LoanProductData {
                 minNumberOfRepayments, maxNumberOfRepayments, repaymentEvery, interestRatePerPeriod, minInterestRatePerPeriod,
                 maxInterestRatePerPeriod, annualInterestRate, repaymentFrequencyType, interestRateFrequencyType, amortizationType,
                 interestType, interestCalculationPeriodType, fundId, fundName, transactionProcessingStrategyId,
-                transactionProcessingStrategyName, charges, accountingType);
+                transactionProcessingStrategyName, graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged, charges,
+                accountingType);
     }
 
     public static LoanProductData sensibleDefaultsForNewLoanProductCreation() {
@@ -167,6 +186,7 @@ public class LoanProductData {
         final Integer numberOfRepayments = null;
         final Integer minNumberOfRepayments = null;
         final Integer maxNumberOfRepayments = null;
+
         final Integer repaymentEvery = null;
         final BigDecimal interestRatePerPeriod = null;
         final BigDecimal minInterestRatePerPeriod = null;
@@ -182,6 +202,11 @@ public class LoanProductData {
         final String fundName = null;
         final Long transactionProcessingStrategyId = null;
         final String transactionProcessingStrategyName = null;
+
+        final Integer graceOnPrincipalPayment = null;
+        final Integer graceOnInterestPayment = null;
+        final Integer graceOnInterestCharged = null;
+
         final Collection<ChargeData> charges = null;
         final EnumOptionData accountingType = AccountingEnumerations.accountingRuleType(AccountingRuleType.NONE);
 
@@ -189,17 +214,19 @@ public class LoanProductData {
                 minNumberOfRepayments, maxNumberOfRepayments, repaymentEvery, interestRatePerPeriod, minInterestRatePerPeriod,
                 maxInterestRatePerPeriod, annualInterestRate, repaymentFrequencyType, interestRateFrequencyType, amortizationType,
                 interestType, interestCalculationPeriodType, fundId, fundName, transactionProcessingStrategyId,
-                transactionProcessingStrategyName, charges, accountingType);
+                transactionProcessingStrategyName, graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged, charges,
+                accountingType);
     }
 
     public static LoanProductData withAccountingDetails(final LoanProductData productData, final Map<String, Object> accountingMappings,
-            final Collection<PaymentTypeToGLAccountMapper> paymentChannelToFundSourceMappings) {
-
-        return new LoanProductData(productData, productData.chargeOptions, productData.paymentTypeOptions, productData.currencyOptions,
-                productData.amortizationTypeOptions, productData.interestTypeOptions, productData.interestCalculationPeriodTypeOptions,
-                productData.repaymentFrequencyTypeOptions, productData.interestRateFrequencyTypeOptions, productData.fundOptions,
-                productData.transactionProcessingStrategyOptions, productData.accountingMappingOptions, productData.accountingRuleOptions,
-                accountingMappings, paymentChannelToFundSourceMappings);
+            final Collection<PaymentTypeToGLAccountMapper> paymentChannelToFundSourceMappings,
+            final Collection<ChargeToGLAccountMapper> feeToGLAccountMappings,
+            final Collection<ChargeToGLAccountMapper> penaltyToGLAccountMappings) {
+        productData.accountingMappings = accountingMappings;
+        productData.paymentChannelToFundSourceMappings = paymentChannelToFundSourceMappings;
+        productData.feeToIncomeAccountMappings = feeToGLAccountMappings;
+        productData.penaltyToIncomeAccountMappings = penaltyToGLAccountMappings;
+        return productData;
     }
 
     public LoanProductData(final Long id, final String name, final String description, final CurrencyData currency,
@@ -210,6 +237,7 @@ public class LoanProductData {
             final EnumOptionData interestRateFrequencyType, final EnumOptionData amortizationType, final EnumOptionData interestType,
             final EnumOptionData interestCalculationPeriodType, final Long fundId, final String fundName,
             final Long transactionProcessingStrategyId, final String transactionProcessingStrategyName,
+            final Integer graceOnPrincipalPayment, final Integer graceOnInterestPayment, final Integer graceOnInterestCharged,
             final Collection<ChargeData> charges, final EnumOptionData accountingType) {
         this.id = id;
         this.name = name;
@@ -222,6 +250,9 @@ public class LoanProductData {
         this.numberOfRepayments = numberOfRepayments;
         this.minNumberOfRepayments = minNumberOfRepayments;
         this.maxNumberOfRepayments = maxNumberOfRepayments;
+        this.graceOnPrincipalPayment = graceOnPrincipalPayment;
+        this.graceOnInterestPayment = graceOnInterestPayment;
+        this.graceOnInterestCharged = graceOnInterestCharged;
         this.repaymentEvery = repaymentEvery;
         this.interestRatePerPeriod = interestRatePerPeriod;
         this.minInterestRatePerPeriod = minInterestRatePerPeriod;
@@ -240,6 +271,7 @@ public class LoanProductData {
         this.accountingRule = accountingType;
 
         this.chargeOptions = null;
+        this.penaltyOptions = null;
         this.paymentTypeOptions = null;
         this.currencyOptions = null;
         this.fundOptions = null;
@@ -254,16 +286,17 @@ public class LoanProductData {
         this.accountingRuleOptions = null;
         this.accountingMappings = null;
         this.paymentChannelToFundSourceMappings = null;
+        this.feeToIncomeAccountMappings = null;
+        this.penaltyToIncomeAccountMappings = null;
     }
 
     public LoanProductData(final LoanProductData productData, final Collection<ChargeData> chargeOptions,
-            final Collection<CodeValueData> paymentTypeOptions, final Collection<CurrencyData> currencyOptions,
-            final List<EnumOptionData> amortizationTypeOptions, final List<EnumOptionData> interestTypeOptions,
-            final List<EnumOptionData> interestCalculationPeriodTypeOptions, final List<EnumOptionData> repaymentFrequencyTypeOptions,
-            final List<EnumOptionData> interestRateFrequencyTypeOptions, final Collection<FundData> fundOptions,
-            final Collection<TransactionProcessingStrategyData> transactionStrategyOptions,
-            final Map<String, List<GLAccountData>> accountingMappingOptions, final List<EnumOptionData> accountingRuleOptions,
-            final Map<String, Object> accountingMappings, final Collection<PaymentTypeToGLAccountMapper> paymentChannelToFundSourceMappings) {
+            final Collection<ChargeData> penaltyOptions, final Collection<CodeValueData> paymentTypeOptions,
+            final Collection<CurrencyData> currencyOptions, final List<EnumOptionData> amortizationTypeOptions,
+            final List<EnumOptionData> interestTypeOptions, final List<EnumOptionData> interestCalculationPeriodTypeOptions,
+            final List<EnumOptionData> repaymentFrequencyTypeOptions, final List<EnumOptionData> interestRateFrequencyTypeOptions,
+            final Collection<FundData> fundOptions, final Collection<TransactionProcessingStrategyData> transactionStrategyOptions,
+            final Map<String, List<GLAccountData>> accountingMappingOptions, final List<EnumOptionData> accountingRuleOptions) {
         this.id = productData.id;
         this.name = productData.name;
         this.description = productData.description;
@@ -290,8 +323,13 @@ public class LoanProductData {
 
         this.charges = nullIfEmpty(productData.charges());
         this.accountingRule = productData.accountingRule;
+        this.accountingMappings = productData.accountingMappings;
+        this.paymentChannelToFundSourceMappings = productData.paymentChannelToFundSourceMappings;
+        this.feeToIncomeAccountMappings = productData.feeToIncomeAccountMappings;
+        this.penaltyToIncomeAccountMappings = productData.penaltyToIncomeAccountMappings;
 
         this.chargeOptions = chargeOptions;
+        this.penaltyOptions = penaltyOptions;
         this.paymentTypeOptions = paymentTypeOptions;
         this.currencyOptions = currencyOptions;
         this.currency = productData.currency;
@@ -308,6 +346,10 @@ public class LoanProductData {
             this.transactionProcessingStrategyName = productData.transactionProcessingStrategyName;
         }
 
+        this.graceOnPrincipalPayment = productData.graceOnPrincipalPayment;
+        this.graceOnInterestPayment = productData.graceOnInterestPayment;
+        this.graceOnInterestCharged = productData.graceOnInterestCharged;
+
         this.amortizationTypeOptions = amortizationTypeOptions;
         this.interestTypeOptions = interestTypeOptions;
         this.interestCalculationPeriodTypeOptions = interestCalculationPeriodTypeOptions;
@@ -317,13 +359,6 @@ public class LoanProductData {
         this.accountingMappingOptions = accountingMappingOptions;
         this.accountingRuleOptions = accountingRuleOptions;
 
-        if (accountingMappings == null || accountingMappings.isEmpty()) {
-            this.accountingMappings = null;
-        } else {
-            this.accountingMappings = accountingMappings;
-        }
-
-        this.paymentChannelToFundSourceMappings = paymentChannelToFundSourceMappings;
     }
 
     private Collection<ChargeData> nullIfEmpty(final Collection<ChargeData> charges) {
@@ -416,6 +451,18 @@ public class LoanProductData {
 
     public EnumOptionData getRepaymentFrequencyType() {
         return repaymentFrequencyType;
+    }
+
+    public Integer getGraceOnPrincipalPayment() {
+        return this.graceOnPrincipalPayment;
+    }
+
+    public Integer getGraceOnInterestPayment() {
+        return this.graceOnInterestPayment;
+    }
+
+    public Integer getGraceOnInterestCharged() {
+        return this.graceOnInterestCharged;
     }
 
     public EnumOptionData getInterestRateFrequencyType() {

@@ -9,13 +9,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Set;
 
-import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
+import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.mifosplatform.infrastructure.security.data.AuthenticatedUserData;
 import org.mifosplatform.useradministration.data.RoleData;
@@ -49,7 +49,6 @@ public class AuthenticationApiResource {
     }
 
     @POST
-    @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String authenticate(@QueryParam("username") final String username, @QueryParam("password") final String password) {
 
@@ -73,8 +72,17 @@ public class AuthenticationApiResource {
                 roles.add(role.toData());
             }
 
-            authenticatedUserData = new AuthenticatedUserData(username, roles, permissions, principal.getId(), new String(
-                    base64EncodedAuthenticationKey));
+            final Long officeId = principal.getOffice().getId();
+            final String officeName = principal.getOffice().getName();
+
+            final Long staffId = principal.getStaffId();
+            final String staffDisplayName = principal.getStaffDisplayName();
+
+            final EnumOptionData organisationalRole = principal.organisationalRoleData();
+
+            authenticatedUserData = new AuthenticatedUserData(username, officeId, officeName, staffId, staffDisplayName,
+                    organisationalRole, roles, permissions,
+                    principal.getId(), new String(base64EncodedAuthenticationKey));
         }
 
         return this.apiJsonSerializerService.serialize(authenticatedUserData);

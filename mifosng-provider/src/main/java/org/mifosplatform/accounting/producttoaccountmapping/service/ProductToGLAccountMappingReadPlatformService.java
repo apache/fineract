@@ -8,6 +8,7 @@ package org.mifosplatform.accounting.producttoaccountmapping.service;
 import java.util.List;
 import java.util.Map;
 
+import org.mifosplatform.accounting.producttoaccountmapping.data.ChargeToGLAccountMapper;
 import org.mifosplatform.accounting.producttoaccountmapping.data.PaymentTypeToGLAccountMapper;
 
 public interface ProductToGLAccountMappingReadPlatformService {
@@ -16,7 +17,12 @@ public interface ProductToGLAccountMappingReadPlatformService {
 
     public List<PaymentTypeToGLAccountMapper> fetchPaymentTypeToFundSourceMappingsForLoanProduct(final Long loanProductId);
 
+    public List<ChargeToGLAccountMapper> fetchFeeToIncomeAccountMappingsForLoanProduct(final Long loanProductId);
+
+    public List<ChargeToGLAccountMapper> fetchPenaltyToIncomeAccountMappingsForLoanProduct(final Long loanProductId);
+
     public Map<String, Object> fetchAccountMappingDetailsForSavingsProduct(final Long savingsProductId, final Integer accountingType);
 
     public List<PaymentTypeToGLAccountMapper> fetchPaymentTypeToFundSourceMappingsForSavingsProduct(final Long savingsProductId);
+
 }

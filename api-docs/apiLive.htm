@@ -11,7 +11,7 @@
 		var result = {};
 		if (window.location.search) {
 			// split up the query string and store in an associative array
-			var params = window.location.search.slice(1).split("&");                                 x
+			var params = window.location.search.slice(1).split("&");
 			for ( var i = 0; i < params.length; i++) {
 				var tmp = params[i].split("=");
 				result[tmp[0]] = unescape(tmp[1]);
@@ -90,7 +90,7 @@
 <body>
 	<div id="page-wrapper">
 		<div id="flybar">
-			<div id="nav-logo">1.2.1.RELEASE API</div>
+			<div id="nav-logo">1.3.0.RELEASE API</div>
 			<div class="flybar-nav">
 				<h2 class="flybar-button">Overview</h2>
 				<div class="flybar-menu-overview">
@@ -1063,10 +1063,18 @@
 							<tr>
 								<td><a href="#datatables">Data Table</a></td>
 								<td>datatables</td>
-								<td></td>
+                                <td><a href="#datatables_createTable">Create Data Table</a></td>
 								<td><a href="#datatables_list">List Data Tables</a></td>
 								<td></td>
 								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+                                <td>datatables/{datatable}</td>
+                                <td></td>
+								<td><a href="#datatables_getTable">Retrieve Data Table Details</a></td>
+                                <td><a href="#datatables_updateTable">Update Data Table</a></td>
+                                <td><a href="#datatables_deleteTable">Delete Data Table</a></td>
 							</tr>
 							<tr class="alt">
 								<td></td>
@@ -3814,6 +3822,34 @@ GET https://DomainName/mifosng-provider/api/v1/groups
 							</td>
 						</tr>
 						<tr class=alt>
+							<td>graceOnPrincipalPayment</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Optional: Integer - represents the number of repayment periods that grace should apply to the principal component of a repayment period.
+							</td>
+						</tr>
+						<tr class=alt>
+							<td>graceOnInterestPayment</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Optional: Integer - represents the number of repayment periods that grace should apply to the interest component of a repayment period. Interest is still calculated but offset to later repayment periods.
+							</td>
+						</tr>
+						<tr class=alt>
+							<td>graceOnInterestCharged</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Optional: Integer - represents the number of repayment periods that should be interest-free.
+							</td>
+						</tr>
+						<tr class=alt>
+							<td>interestChargedFromDate</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Optional: Date - The date from with interest is to start being charged.</td>
+						</tr>
+
+						<tr class=alt>
 							<td>expectedDisbursementDate</td>
 						</tr>
 						<tr>
@@ -4839,6 +4875,15 @@ Request Body:
 								amortizationType, interestType,
 								interestCalculationPeriodType, transactionProcessingStrategyId,
 								expectedDisbursementDate, submittedOnDate, loanType</td>
+						</tr>
+					</table>
+					<br/>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Optional Fields</div></td>
+						</tr>
+						<tr class=alt>
+							<td>graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged</td>
 						</tr>
 					</table>
 				</div>
@@ -6960,6 +7005,28 @@ Request Body:
 							</td>
 						</tr>
 						<tr class=alt>
+							<td>graceOnPrincipalPayment</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Optional: Integer - represents the number of repayment periods that grace should apply to the principal component of a repayment period.
+							</td>
+						</tr>
+						<tr class=alt>
+							<td>graceOnInterestPayment</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Optional: Integer - represents the number of repayment periods that grace should apply to the interest component of a repayment period. Interest is still calculated but offset to later repayment periods.
+							</td>
+						</tr>
+						<tr class=alt>
+							<td>graceOnInterestCharged</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Optional: Integer - represents the number of repayment periods that should be interest-free.
+							</td>
+						</tr>
+
+						<tr class=alt>
 							<td>accountingRule</td>
 						</tr>
 						<tr>
@@ -7516,13 +7583,14 @@ GET https://DomainName/api/v1/loanproducts/{productId}
 							<td>name, currencyCode, digitsAfterDecimal, principal,
 								numberOfRepayments, repaymentEvery, repaymentFrequencyType, 
 								interestRatePerPeriod, interestRateFrequencyType, amortizationType, interestType,
-								interestCalculationPeriodType, transactionProcessingStrategyId, accountingRule</td>
+								interestCalculationPeriodType, transactionProcessingStrategyId,
+								accountingRule</td>
 						</tr>
 						<tr class="matrixHeadingBG">
 							<td><div class="mifosXHeading2">Optional Fields</div></td>
 						</tr>
 						<tr class=alt>
-							<td>inArrearsTolerance, charges,paymentChannelToFundSourceMappings</td>
+							<td>inArrearsTolerance, graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged, charges, paymentChannelToFundSourceMappings</td>
 						</tr>
 
 						<tr class="matrixHeadingBG">
@@ -9426,6 +9494,30 @@ Content-Type: application/json
 						<tr>
 							<td class=fielddesc>Credit account for creating accounting rule</td>
 						</tr>
+						<tr class=alt>
+							<td>debitTags</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Debit tags for creating accounting rule, These tags fetches the all chart of accounts that are tagged with these tagIds</td>
+						</tr>
+						<tr class=alt>
+							<td>creditTags</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Credit tags for creating accounting rule, These tags fetches the all chart of accounts that are tagged with these tagIds</td>
+						</tr>
+						<tr class=alt>
+							<td>allowMultipleDebitEntries</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Allows to add multiple debits if the value is true, while creating journal entries with this rule</td>
+						</tr>
+						<tr class=alt>
+							<td>allowMultipleCreditEntries</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Allows to add multiple credits if the value is true, while creating journal entries with this rule</td>
+						</tr>
 					</table>
 				</div>
 			</div>
@@ -9537,6 +9629,64 @@ Request Body:
 {
 	"officeId":1,
 	"resourceId":1
+}
+					</code>
+					<code class="method-request">
+POST accountingrules
+Content-Type: application/json 
+Request Body:
+{
+	"name": "fordocs",
+	"officeId": "1",
+	"debitTags": ["10","11"],
+	"allowMultipleDebitEntries": "true",
+	"creditTags": ["12","13"],
+	"allowMultipleCreditEntries": "true",
+	"description": "for api docs"
+}
+					</code>
+					<code class="method-response">
+{
+	"officeId":1,
+	"resourceId":2
+}
+					</code>
+					<code class="method-request">
+POST accountingrules
+Content-Type: application/json 
+Request Body:
+{
+	"name": "test123",
+	"officeId": "1",
+	"debitAccountHead": "21",
+	"creditTags": ["12", "13"],
+	"allowMultipleCreditEntries": "false",
+	"description": "Employee salary"
+}
+					</code>
+					<code class="method-response">
+{
+	"officeId":1,
+	"resourceId":3
+}
+					</code>
+					<code class="method-request">
+POST accountingrules
+Content-Type: application/json 
+Request Body:
+{
+	"name": "fordocstest",
+	"officeId": "1",
+	"debitTags": ["10",	"11"],
+	"allowMultipleDebitEntries": "false",
+	"creditAccountHead": "9",
+	"description": "for api docs"
+}
+					</code>
+					<code class="method-response">
+{
+	"officeId":1,
+	"resourceId":4
 }
 					</code>
 				</div>
@@ -9733,6 +9883,23 @@ Content-Type: application/json
 	            <tr class=alt><td>lockinPeriodFrequencyType</td></tr>
 	            <tr><td class=fielddesc><b>Optional</b>: If provided, used along with <i>lockinPeriodFrequency</i> to indicate the length of time that the savings account is 'locked in' and withdrawals are not allowed. 0=Days, 1=Weeks, 2=Months, 3=Years
 	            e.g. 6 <b>Months</b></td></tr>
+
+	            <tr class=alt><td>withdrawalFeeAmount</td></tr>
+	            <tr><td class=fielddesc><b>Optional</b>: If provided, used along with <i>withdrawalFeeType</i> to indicate the amount to be charged on the account for withdrawing. e.g. <b>5</b> Flat or <b>5</b> % of Amount</td></tr>
+
+	            <tr class=alt><td>withdrawalFeeType</td></tr>
+	            <tr><td class=fielddesc><b>Optional</b>: If provided, used along with <i>withdrawalFeeAmount</i> to indicate the amount to be charged on the account for withdrawing. 1=Flat, 2=% of Amount, e.g. 5 <b>Flat</b> or 5 <b>% of Amount</b></td></tr>
+
+	            <tr class=alt><td>annualFeeAmount</td></tr>
+	            <tr><td class=fielddesc><b>Optional</b>: If provided, used along with <i>annualFeeOnMonthDay</i> to indicate the amount to be charged on the account annually on a given day of month. e.g. <b>10</b> on 10 May. <i>monthDayFormat</i> indicates day and month formatting used e.g. "dd MMM" for 10 May
+	            </td>
+	            </tr>
+
+	            <tr class=alt><td>annualFeeOnMonthDay</td></tr>
+	            <tr>
+	            	<td class=fielddesc><b>Optional</b>: If provided, used along with <i>annualFeeAmount</i> and <i>monthDayFormat</i> to indicate the amount to be charged on the account annually on a given day of month. e.g. 10 on <b>10 May</b>. <i>monthDayFormat</i> indicates day and month formatting used e.g. "dd MMM" for 10 May
+	            	</td>
+	            </tr>
 
 				<tr class=alt><td>accountingRule</td></tr>
 	            <tr>
@@ -10252,7 +10419,7 @@ Content-Type: application/json
             <br/>
             <table class=matrixHeading>
                 <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Optional Fields</div></td></tr>
-                <tr class=alt><td>minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType, paymentChannelToFundSourceMappings</tr>
+                <tr class=alt><td>minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeAmount, withdrawalFeeType, annualFeeAmount, annualFeeOnMonthDay, monthDayFormat, paymentChannelToFundSourceMappings</tr>
             </table>
         </div>
         <div class="method-example">
@@ -10558,6 +10725,23 @@ Content-Type: application/json
 	            <tr class=alt><td>lockinPeriodFrequencyType</td></tr>
 	            <tr><td class=fielddesc><b>Optional</b>: If provided, used along with <i>lockinPeriodFrequency</i> to indicate the length of time that the savings account is 'locked in' and withdrawals are not allowed. 0=Days, 1=Weeks, 2=Months, 3=Years
 	            e.g. 6 <b>Months</b></td></tr>
+
+	            <tr class=alt><td>withdrawalFeeAmount</td></tr>
+	            <tr><td class=fielddesc><b>Optional</b>: If provided, used along with <i>withdrawalFeeType</i> to indicate the amount to be charged on the account for withdrawing. e.g. <b>5</b> Flat or <b>5</b> % of Amount</td></tr>
+
+	            <tr class=alt><td>withdrawalFeeType</td></tr>
+	            <tr><td class=fielddesc><b>Optional</b>: If provided, used along with <i>withdrawalFeeAmount</i> to indicate the amount to be charged on the account for withdrawing. 1=Flat, 2=% of Amount, e.g. 5 <b>Flat</b> or 5 <b>% of Amount</b></td></tr>
+
+	            <tr class=alt><td>annualFeeAmount</td></tr>
+	            <tr><td class=fielddesc><b>Optional</b>: If provided, used along with <i>annualFeeOnMonthDay</i> to indicate the amount to be charged on the account annually on a given day of month. e.g. <b>10</b> on 10 May. <i>monthDayFormat</i> indicates day and month formatting used e.g. "dd MMM" for 10 May
+	            </td>
+	            </tr>
+
+	            <tr class=alt><td>annualFeeOnMonthDay</td></tr>
+	            <tr>
+	            	<td class=fielddesc><b>Optional</b>: If provided, used along with <i>annualFeeAmount</i> and <i>monthDayFormat</i> to indicate the amount to be charged on the account annually on a given day of month. e.g. 10 on <b>10 May</b>. <i>monthDayFormat</i> indicates day and month formatting used e.g. "dd MMM" for 10 May
+	            	</td>
+	            </tr>
 	        </table>
 	    </div>
 	</div>
@@ -10758,7 +10942,9 @@ Content-Type: application/json
 	        <br/>
 	        <table class=matrixHeading>
 	            <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Inherited from Product (if not provided)</div></td></tr>
-	            <tr class=alt><td>nominalAnnualInterestRate, interestCompoundingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType</td></tr>
+	            <tr class=alt><td>nominalAnnualInterestRate, interestCompoundingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance, lockinPeriodFrequency, 
+	           lockinPeriodFrequencyType, withdrawalFeeAmount, withdrawalFeeType, annualFeeAmount, annualFeeOnMonthDay</td>
+	       		</tr>
 	        </table>
 	    </div>
 	    <div class="method-example">
@@ -11240,6 +11426,57 @@ No Request Body:
 				</div>
 			</div>
 
+			<a id="datatables_createTable" name="datatables_createTable"
+				class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Create Data Table</h4>
+                    <p>Create a new data table and registers it with the Mifos X Core application
+                        table.</p>
+				</div>
+				<div class="method-example">
+                    <code class="method-declaration">
+POST https://DomainName/api/v1/datatables
+                    </code>
+                    <code class="method-request">
+POST https://DomainName/api/v1/datatables
+
+Content-Type: application/json
+Request Body:
+{
+    "datatableName": "extra_client_details",
+    "apptableName": "m_client",
+    "columns": [
+        {
+            "name": "Gender",
+            "type": "Dropdown",
+            "code": "Gender"
+        },
+        {
+            "name": "Some Decimal",
+            "type": "Decimal",
+            "mandatory": true
+        },
+        {
+            "name": "Birth Date",
+            "type": "Date"
+        },
+        {
+            "name": "Question 2",
+            "type": "String",
+            "length": 100,
+            "mandatory": false
+        }
+    ]
+}
+					</code>
+					<code class="method-response">
+{
+  "resourceIdentifier": "extra_client_details"
+} 
+				</code>
+				</div>
+			</div>
 
 			<a id="datatables_list" name="datatables_list"
 				class="old-syle-anchor">&nbsp;</a>
@@ -11267,25 +11504,191 @@ No Request Body:
 					<code class="method-declaration">
 GET https://DomainName/api/v1/datatables
 					</code>
-					<code class="method-response">
+                    <code class="method-response">
 [
- 	{ 
- 		"applicationTableName": "m_client", 
- 		"registeredTableName": "Additional Client Fields Data"
- 	}, 
-	{
-		"applicationTableName": "m_client", 
-		"registeredTableName": "Extra Family Details Data"
-	}, 
-	{
-		"applicationTableName": "m_loan",
-		"registeredTableName": "Additional Loan Fields Data"
-	}
-] 
+  {
+    "applicationTableName": "m_client",
+    "registeredTableName": "extra_client_details",
+    "columnHeaderData": [
+      {
+        "columnName": "client_id",
+        "columnType": "bigint",
+        "columnLength": 0,
+        "columnDisplayType": "INTEGER",
+        "isColumnNullable": false,
+        "isColumnPrimaryKey": true,
+        "columnValues": []
+      },
+      {
+        "columnName": "Gender_cd_Question",
+        "columnType": "int",
+        "columnLength": 0,
+        "columnDisplayType": "INTEGER",
+        "isColumnNullable": true,
+        "isColumnPrimaryKey": false,
+        "columnValues": []
+      },
+      {
+        "columnName": "Some Decimal",
+        "columnType": "decimal",
+        "columnLength": 0,
+        "columnDisplayType": "DECIMAL",
+        "isColumnNullable": true,
+        "isColumnPrimaryKey": false,
+        "columnValues": []
+      },
+      {
+        "columnName": "Birth Date",
+        "columnType": "date",
+        "columnLength": 0,
+        "columnDisplayType": "DATE",
+        "isColumnNullable": true,
+        "isColumnPrimaryKey": false,
+        "columnValues": []
+      }
+    ]
+  }
+]
 					</code>
 				</div>
 			</div>
 
+			<a id="datatables_getTable" name="datatables_getTable"
+				class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+                    <h4>Retrieve Data Table Details</h4>
+					<p>Lists a registered data table details and the Mifos X Core
+						application table they are registered to.</p>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+GET https://DomainName/api/v1/datatables/{datatable}
+					</code>
+                    <code class="method-response">
+{
+   "applicationTableName": "m_client",
+   "registeredTableName": "extra_client_details",
+   "columnHeaderData": [
+      {
+        "columnName": "client_id",
+        "columnType": "bigint",
+        "columnLength": 0,
+        "columnDisplayType": "INTEGER",
+        "isColumnNullable": false,
+        "isColumnPrimaryKey": true,
+        "columnValues": []
+      },
+      {
+        "columnName": "Gender_cd_Question",
+        "columnType": "int",
+        "columnLength": 0,
+        "columnDisplayType": "INTEGER",
+        "isColumnNullable": true,
+        "isColumnPrimaryKey": false,
+        "columnValues": []
+      },
+      {
+        "columnName": "Some Decimal",
+        "columnType": "decimal",
+        "columnLength": 0,
+        "columnDisplayType": "DECIMAL",
+        "isColumnNullable": true,
+        "isColumnPrimaryKey": false,
+        "columnValues": []
+      },
+      {
+        "columnName": "Birth Date",
+        "columnType": "date",
+        "columnLength": 0,
+        "columnDisplayType": "DATE",
+        "isColumnNullable": true,
+        "isColumnPrimaryKey": false,
+        "columnValues": []
+      }
+   ]
+}
+				</code>
+				</div>
+			</div>
+
+			<a id="datatables_updateTable" name="datatables_updateTable"
+				class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Update Data Table</h4>
+                    <p>Modifies fields of a data table. If the apptableName parameter is passed,
+                        data table is deregistered and registered with the new application table.</p>
+				</div>
+				<div class="method-example">
+                    <code class="method-declaration">
+PUT https://DomainName/api/v1/datatables/{datatables}
+                    </code>
+                    <code class="method-request">
+PUT https://DomainName/api/v1/datatables/extra_client_details
+
+Content-Type: application/json
+Request Body:
+{
+    "apptableName": "m_client",
+    "columns": [
+        {
+            "name": "Gender",
+            "type": "Dropdown",
+            "code": "Gender"
+        },
+        {
+            "name": "Some Decimal",
+            "type": "Decimal",
+            "mandatory": true
+        },
+        {
+            "name": "Birth Date",
+            "type": "Date"
+        },
+        {
+            "name": "Question 2",
+            "type": "String",
+            "length": 100,
+            "mandatory": false
+        }
+    ]
+}
+					</code>
+					<code class="method-response">
+{
+  "resourceIdentifier": "extra_client_details"
+} 
+				</code>
+				</div>
+			</div>
+
+			<a id="datatables_deleteTable" name="datatables_deleteTable"
+				class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Delete Data Table</h4>
+                    <p>Deletes a data table and unregisters it from the Mifos X Core
+                        application table.</p>
+				</div>
+				<div class="method-example">
+                    <code class="method-declaration">
+DELETE https://DomainName/api/v1/datatables/{datatables}
+                    </code>
+                    <code class="method-request">
+DELETE https://DomainName/api/v1/datatables/extra_client_details
+
+Content-Type: application/json
+No Request Body
+					</code>
+					<code class="method-response">
+{
+  "resourceIdentifier": "extra_client_details"
+} 
+				</code>
+            </div>
+
+			</div>
 			<a id="datatables_register" name="datatables_register"
 				class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
@@ -12720,8 +13123,7 @@ GET https://DomainName/api/v1/runreports/{reportName}
 				</div>
 			</div>
 
-			<a id="authenticate_request" name="authenticate_request"
-				class="old-syle-anchor">&nbsp;</a>
+			<a id="authenticate_request" name="authenticate_request" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
 					<h4>Verify authentication</h4>
@@ -12736,24 +13138,60 @@ POST authentication?username=mifos&password=password
 Content-Type: application/json 
 No Request Body
 					</code>
+					<p>Example response of autentication for user that is not linked with any staff.</p>
 					<code class="method-response">
 {
-  "username": "mifos",
-  "userId": 1,
-  "base64EncodedAuthenticationKey": "bWlmb3M6cGFzc3dvcmQ=",
-  "authenticated": true,
-  "roles": [
-    {
-      "id": 1,
-      "name": "Super user",
-      "description": "This role provides all application permissions."
-    }
-  ],
-  "permissions": [
-    "ALL_FUNCTIONS"
-  ]
+    "username": "mifos",
+    "userId": 1,
+    "base64EncodedAuthenticationKey": "bWlmb3M6cGFzc3dvcmQ=",
+    "authenticated": true,
+    "officeId": 1,
+    "officeName": "Head Office",
+    "roles": [
+        {
+            "id": 1,
+            "name": "Super user",
+            "description": "This role provides all application permissions."
+        }
+    ],
+    "permissions": [
+        "ALL_FUNCTIONS"
+    ]
 }
 					</code>
+					<p>Example response of autentication for user that is linked with a staff member and role.</p>
+<code class="method-response">
+{
+    "username": "mifos",
+    "userId": 1,
+    "base64EncodedAuthenticationKey": "bWlmb3M6cGFzc3dvcmQ=",
+    "authenticated": true,
+    "officeId": 1,
+    "officeName": "Head Office",
+    "staffId": 1,
+    "staffDisplayName": "Director, Program",
+    "organisationalRole": {
+        "id": 100,
+        "code": "staffOrganisationalRoleType.programDirector",
+        "value": "Program Director"
+    },
+    "roles": [
+        {
+            "id": 1,
+            "name": "Super user",
+            "description": "This role provides all application permissions."
+        }
+    ],
+    "permissions": [
+        "ALL_FUNCTIONS"
+    ]
+}
+</code>
+					
+					
+					
+					
+					
 					<code class="method-request">
 POST authentication?username=mifos&password=fail 
 Content-Type: application/json 
@@ -14536,6 +14974,68 @@ Request Body:
 	"transactionId":"RS9MCISID4WK1ZM"
 }
                     </code>
+                    <code class="method-declaration">
+POST https://DomainName/api/v1/journalentries
+                    </code>
+                    <code class="method-request">
+POST journalentries
+Content-Type: application/json 
+Request Body:
+{
+	"locale": "en",
+	"dateFormat": "dd MMMM yyyy",
+	"officeId": "1",
+	"transactionDate": "23 May 2013",
+	"referenceNumber": "547",
+	"comments": "asdf",
+	"accountingRule": "2",
+	"credits":[{"glAccountId":1,
+				"amount":5000},
+			   {"glAccountId":2,
+				"amount":5000}
+			  ],
+	"debits":[{"glAccountId":3,
+				"amount":5000},
+			   {"glAccountId":4,
+				"amount":5000}
+			 ]
+}
+                    </code>
+                    <code class="method-response">
+{
+	"officeId":1,
+	"transactionId":"RS9MCISID4WK1ZM"
+}
+                    </code>
+                    <code class="method-declaration">
+POST https://DomainName/api/v1/journalentries
+                    </code>
+                    <code class="method-request">
+POST journalentries
+Content-Type: application/json 
+Request Body:
+{
+	"locale": "en",
+	"dateFormat": "dd MMMM yyyy",
+	"officeId": "1",
+	"transactionDate": "23 May 2013",
+	"referenceNumber": "547",
+	"comments": "asdf",
+	"accountingRule": "3",
+	"credits":[{"glAccountId":1,
+				"amount":5000},
+			   {"glAccountId":2,
+				"amount":5000}
+			  ],
+	"amount": "10000"
+}
+                    </code>
+                    <code class="method-response">
+{
+	"officeId":1,
+	"transactionId":"RS9MCISID4WK1ZM"
+}
+                    </code>
                 </div>
             </div>
 
@@ -15286,11 +15786,19 @@ GET https://DomainName/api/v1/search?query=000000111
 				<tr class="alt">
 					<td><a href="#datatables">Data Table</a></td>
 					<td>datatables</td>
-					<td></td>
+                    <td><a href="#datatables_createTable">Create Data Table</a></td>
 					<td><a href="#datatables_list">List Data Tables</a></td>
 					<td></td>
 					<td></td>
 				</tr>
+                <tr>
+                    <td></td>
+                    <td>datatables/{datatable}</td>
+                    <td></td>
+                    <td><a href="#datatables_getTable">Retrieve Data Table Details</a></td>
+                    <td><a href="#datatables_updateTable">Update Data Table</a></td>
+                    <td><a href="#datatables_deleteTable">Delete Data Table</a></td>
+                </tr>
 				<tr>
 					<td></td>
 					<td>datatables/register/{datatable}/{apptable}</td>

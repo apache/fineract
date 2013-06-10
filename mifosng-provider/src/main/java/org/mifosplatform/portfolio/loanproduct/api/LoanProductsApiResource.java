@@ -7,7 +7,6 @@ package org.mifosplatform.portfolio.loanproduct.api;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -26,6 +25,7 @@ import javax.ws.rs.core.UriInfo;
 
 import org.mifosplatform.accounting.common.AccountingDropdownReadPlatformService;
 import org.mifosplatform.accounting.glaccount.data.GLAccountData;
+import org.mifosplatform.accounting.producttoaccountmapping.data.ChargeToGLAccountMapper;
 import org.mifosplatform.accounting.producttoaccountmapping.data.PaymentTypeToGLAccountMapper;
 import org.mifosplatform.accounting.producttoaccountmapping.service.ProductToGLAccountMappingReadPlatformService;
 import org.mifosplatform.commands.domain.CommandWrapper;
@@ -61,13 +61,14 @@ public class LoanProductsApiResource {
 
     private final Set<String> LOAN_PRODUCT_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "name", "description", "fundId",
             "fundName", "currency", "principal", "minPrincipal", "maxPrincipal", "numberOfRepayments", "minNumberOfRepayments",
-            "maxNumberOfRepayments", "repaymentEvery", "repaymentFrequencyType", "interestRatePerPeriod", "minInterestRatePerPeriod",
-            "maxInterestRatePerPeriod", "interestRateFrequencyType", "annualInterestRate", "amortizationType", "interestType",
-            "interestCalculationPeriodType", "inArrearsTolerance", "transactionProcessingStrategyId", "transactionProcessingStrategyName",
-            "charges", "accountingRule", "accountingMappings", "paymentChannelToFundSourceMappings", "fundOptions", "paymentTypeOptions",
-            "currencyOptions", "repaymentFrequencyTypeOptions", "interestRateFrequencyTypeOptions", "amortizationTypeOptions",
-            "interestTypeOptions", "interestCalculationPeriodTypeOptions", "transactionProcessingStrategyOptions", "chargeOptions",
-            "accountingOptions", "accountingRuleOptions", "accountingMappingOptions"));
+            "maxNumberOfRepayments", "repaymentEvery", "repaymentFrequencyType", "graceOnPrincipalPayment", "graceOnInterestPayment",
+            "graceOnInterestCharged", "interestRatePerPeriod", "minInterestRatePerPeriod", "maxInterestRatePerPeriod",
+            "interestRateFrequencyType", "annualInterestRate", "amortizationType", "interestType", "interestCalculationPeriodType",
+            "inArrearsTolerance", "transactionProcessingStrategyId", "transactionProcessingStrategyName", "charges", "accountingRule",
+            "accountingMappings", "paymentChannelToFundSourceMappings", "fundOptions", "paymentTypeOptions", "currencyOptions",
+            "repaymentFrequencyTypeOptions", "interestRateFrequencyTypeOptions", "amortizationTypeOptions", "interestTypeOptions",
+            "interestCalculationPeriodTypeOptions", "transactionProcessingStrategyOptions", "chargeOptions", "accountingOptions",
+            "accountingRuleOptions", "accountingMappingOptions"));
 
     private final String resourceNameForPermissions = "LOANPRODUCT";
 
@@ -142,7 +143,7 @@ public class LoanProductsApiResource {
         context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
 
         LoanProductData loanProduct = this.loanProductReadPlatformService.retrieveNewLoanProductDetails();
-        loanProduct = handleTemplate(loanProduct, new HashMap<String, Object>(), null);
+        loanProduct = handleTemplate(loanProduct);
 
         final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serialize(settings, loanProduct, LOAN_PRODUCT_DATA_PARAMETERS);
@@ -162,16 +163,21 @@ public class LoanProductsApiResource {
 
         Map<String, Object> accountingMappings = null;
         Collection<PaymentTypeToGLAccountMapper> paymentChannelToFundSourceMappings = null;
+        Collection<ChargeToGLAccountMapper> feeToGLAccountMappings = null;
+        Collection<ChargeToGLAccountMapper> penaltyToGLAccountMappings = null;
         if (loanProduct.hasAccountingEnabled()) {
             accountingMappings = accountMappingReadPlatformService.fetchAccountMappingDetailsForLoanProduct(productId, loanProduct
                     .accountingRuleType().getId().intValue());
             paymentChannelToFundSourceMappings = accountMappingReadPlatformService
                     .fetchPaymentTypeToFundSourceMappingsForLoanProduct(productId);
-            loanProduct = LoanProductData.withAccountingDetails(loanProduct, accountingMappings, paymentChannelToFundSourceMappings);
+            feeToGLAccountMappings = accountMappingReadPlatformService.fetchFeeToIncomeAccountMappingsForLoanProduct(productId);
+            penaltyToGLAccountMappings = accountMappingReadPlatformService.fetchPenaltyToIncomeAccountMappingsForLoanProduct(productId);
+            loanProduct = LoanProductData.withAccountingDetails(loanProduct, accountingMappings, paymentChannelToFundSourceMappings,
+                    feeToGLAccountMappings, penaltyToGLAccountMappings);
         }
 
         if (settings.isTemplate()) {
-            loanProduct = handleTemplate(loanProduct, accountingMappings, paymentChannelToFundSourceMappings);
+            loanProduct = handleTemplate(loanProduct);
         }
         return this.toApiJsonSerializer.serialize(settings, loanProduct, LOAN_PRODUCT_DATA_PARAMETERS);
     }
@@ -190,13 +196,17 @@ public class LoanProductsApiResource {
         return this.toApiJsonSerializer.serialize(result);
     }
 
-    private LoanProductData handleTemplate(final LoanProductData productData, final Map<String, Object> accountingMappings,
-            final Collection<PaymentTypeToGLAccountMapper> paymentChannelToFundSourceMappings) {
+    private LoanProductData handleTemplate(final LoanProductData productData) {
 
         final boolean feeChargesOnly = true;
         Collection<ChargeData> chargeOptions = this.chargeReadPlatformService.retrieveLoanApplicableCharges(feeChargesOnly);
         if (chargeOptions.isEmpty()) {
             chargeOptions = null;
+        }
+
+        Collection<ChargeData> penaltyOptions = this.chargeReadPlatformService.retrieveLoanApplicablePenalties();
+        if (penaltyOptions.isEmpty()) {
+            penaltyOptions = null;
         }
 
         final Collection<CurrencyData> currencyOptions = currencyReadPlatformService.retrieveAllowedCurrencies();
@@ -222,9 +232,9 @@ public class LoanProductsApiResource {
 
         List<EnumOptionData> accountingRuleTypeOptions = accountingDropdownReadPlatformService.retrieveAccountingRuleTypeOptions();
 
-        return new LoanProductData(productData, chargeOptions, paymentTypeOptions, currencyOptions, amortizationTypeOptions,
-                interestTypeOptions, interestCalculationPeriodTypeOptions, repaymentFrequencyTypeOptions, interestRateFrequencyTypeOptions,
-                fundOptions, transactionProcessingStrategyOptions, accountOptions, accountingRuleTypeOptions, accountingMappings,
-                paymentChannelToFundSourceMappings);
+        return new LoanProductData(productData, chargeOptions, penaltyOptions, paymentTypeOptions, currencyOptions,
+                amortizationTypeOptions, interestTypeOptions, interestCalculationPeriodTypeOptions, repaymentFrequencyTypeOptions,
+                interestRateFrequencyTypeOptions, fundOptions, transactionProcessingStrategyOptions, accountOptions,
+                accountingRuleTypeOptions);
     }
 }

@@ -5,9 +5,13 @@
  */
 package org.mifosplatform.accounting.rule.api;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.ws.rs.Consumes;
@@ -18,18 +22,22 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
+import org.mifosplatform.accounting.common.AccountingConstants;
 import org.mifosplatform.accounting.glaccount.data.GLAccountData;
 import org.mifosplatform.accounting.glaccount.service.GLAccountReadPlatformService;
 import org.mifosplatform.accounting.rule.data.AccountingRuleData;
+import org.mifosplatform.accounting.rule.data.AccountingTagRuleData;
 import org.mifosplatform.accounting.rule.service.AccountingRuleReadPlatformService;
 import org.mifosplatform.commands.domain.CommandWrapper;
 import org.mifosplatform.commands.service.CommandWrapperBuilder;
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
+import org.mifosplatform.infrastructure.codes.data.CodeValueData;
+import org.mifosplatform.infrastructure.codes.service.CodeValueReadPlatformService;
+import org.mifosplatform.infrastructure.core.api.ApiParameterHelper;
 import org.mifosplatform.infrastructure.core.api.ApiRequestParameterHelper;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
@@ -47,7 +55,9 @@ import org.springframework.stereotype.Component;
 public class AccountingRuleApiResource {
 
     private static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "officeId", "officeName",
-            "accountToDebitId", "accountToCreditId", "name", "description", "systemDefined"));
+            "accountToDebitId", "accountToCreditId", "name", "description", "systemDefined", "allowedCreditTagOptions",
+            "allowedDebitTagOptions", "debitTags", "creditTags", "creditAccounts", "debitAccounts", "allowMultipleCreditEntries",
+            "allowMultipleDebitEntries", "tag"));
 
     private final String resourceNameForPermission = "ACCOUNTINGRULE";
 
@@ -58,6 +68,7 @@ public class AccountingRuleApiResource {
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final PlatformSecurityContext context;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
+    private final CodeValueReadPlatformService codeValueReadPlatformService;
 
     @Autowired
     public AccountingRuleApiResource(final PlatformSecurityContext context,
@@ -65,7 +76,7 @@ public class AccountingRuleApiResource {
             final DefaultToApiJsonSerializer<AccountingRuleData> toApiJsonSerializer,
             final ApiRequestParameterHelper apiRequestParameterHelper, final GLAccountReadPlatformService accountReadPlatformService,
             final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
-            final OfficeReadPlatformService officeReadPlatformService) {
+            final OfficeReadPlatformService officeReadPlatformService, final CodeValueReadPlatformService codeValueReadPlatformService) {
         this.context = context;
         this.apiRequestParameterHelper = apiRequestParameterHelper;
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
@@ -73,30 +84,40 @@ public class AccountingRuleApiResource {
         this.accountingRuleReadPlatformService = accountingRuleReadPlatformService;
         this.officeReadPlatformService = officeReadPlatformService;
         this.accountReadPlatformService = accountReadPlatformService;
+        this.codeValueReadPlatformService = codeValueReadPlatformService;
     }
-    
+
     @GET
-	@Path("template")
-	@Consumes({ MediaType.APPLICATION_JSON })
-	@Produces({ MediaType.APPLICATION_JSON })
-	public String retrieveTemplate(@Context final UriInfo uriInfo) {
-		
-		context.authenticatedUser().validateHasReadPermission(resourceNameForPermission);
-		
-		AccountingRuleData accountingRuleData = null;
-		accountingRuleData = handleTemplate(accountingRuleData);
-		
-		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-		return this.apiJsonSerializerService.serialize(settings, accountingRuleData, RESPONSE_DATA_PARAMETERS);
-	}
+    @Path("template")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String retrieveTemplate(@Context final UriInfo uriInfo) {
+
+        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermission);
+
+        AccountingRuleData accountingRuleData = null;
+        accountingRuleData = handleTemplate(accountingRuleData);
+
+        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        return this.apiJsonSerializerService.serialize(settings, accountingRuleData, RESPONSE_DATA_PARAMETERS);
+    }
 
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveAllAccountingRules(@Context final UriInfo uriInfo, @QueryParam("officeId") final Long officeId) {
+    public String retrieveAllAccountingRules(@Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermission);
-        final List<AccountingRuleData> accountingRuleDatas = this.accountingRuleReadPlatformService.retrieveAllAccountingRules(officeId);
+        final Set<String> associationParameters = ApiParameterHelper.extractAssociationsForResponseIfProvided(uriInfo.getQueryParameters());
+        final Long officeId = this.context.authenticatedUser().getOffice().getId();
+        boolean isAssociationParametersExists = false;
+        if (!associationParameters.isEmpty()) {
+            if (associationParameters.contains("all")) {
+                isAssociationParametersExists = true; // If true, retrieve additional fields for journal entry form.
+            }
+        }
+        final List<AccountingRuleData> accountingRuleDatas = this.accountingRuleReadPlatformService.retrieveAllAccountingRules(officeId,
+                isAssociationParametersExists);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.apiJsonSerializerService.serialize(settings, accountingRuleDatas, RESPONSE_DATA_PARAMETERS);
@@ -109,12 +130,11 @@ public class AccountingRuleApiResource {
     public String retreiveAccountingRule(@PathParam("accountingRuleId") final Long accountingRuleId, @Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermission);
-
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 
         AccountingRuleData accountingRuleData = this.accountingRuleReadPlatformService.retrieveAccountingRuleById(accountingRuleId);
         if (settings.isTemplate()) {
-        	accountingRuleData = handleTemplate(accountingRuleData);
+            accountingRuleData = handleTemplate(accountingRuleData);
         }
 
         return this.apiJsonSerializerService.serialize(settings, accountingRuleData, RESPONSE_DATA_PARAMETERS);
@@ -157,13 +177,60 @@ public class AccountingRuleApiResource {
 
         return this.apiJsonSerializerService.serialize(result);
     }
-	
-	private AccountingRuleData handleTemplate(AccountingRuleData accountingRuleData) {
-		List<GLAccountData> allowedAccounts = this.accountReadPlatformService.retrieveAllEnabledDetailGLAccounts();
-		List<OfficeData> allowedOffices = (List<OfficeData>) this.officeReadPlatformService.retrieveAllOfficesForDropdown();
-		if (accountingRuleData == null) {
-			return new AccountingRuleData(allowedAccounts, allowedOffices);
-		}
-		return new AccountingRuleData(accountingRuleData, allowedAccounts, allowedOffices);
-	}
+
+    private AccountingRuleData handleTemplate(AccountingRuleData accountingRuleData) {
+        final List<GLAccountData> allowedAccounts = this.accountReadPlatformService.retrieveAllEnabledDetailGLAccounts();
+        final List<OfficeData> allowedOffices = (List<OfficeData>) this.officeReadPlatformService.retrieveAllOfficesForDropdown();
+        final Collection<CodeValueData> allowedTagOptions = this.codeValueReadPlatformService
+                .retrieveCodeValuesByCode(AccountingConstants.ASSESTS_TAG_OPTION_CODE_NAME);
+
+        allowedTagOptions.addAll(this.codeValueReadPlatformService.retrieveCodeValuesByCode(AccountingConstants.LIABILITIES_TAG_OPTION_CODE_NAME));
+        allowedTagOptions.addAll(this.codeValueReadPlatformService.retrieveCodeValuesByCode(AccountingConstants.EQUITY_TAG_OPTION_CODE_NAME));
+        allowedTagOptions.addAll(this.codeValueReadPlatformService.retrieveCodeValuesByCode(AccountingConstants.INCOME_TAG_OPTION_CODE_NAME));
+        allowedTagOptions.addAll(this.codeValueReadPlatformService.retrieveCodeValuesByCode(AccountingConstants.EXPENSES_TAG_OPTION_CODE_NAME));
+
+        if (accountingRuleData == null) {
+
+            final Collection<CodeValueData> allowedCreditTagOptions = allowedTagOptions;
+            final Collection<CodeValueData> allowedDebitTagOptions = allowedTagOptions;
+
+            accountingRuleData = new AccountingRuleData(allowedAccounts, allowedOffices, allowedCreditTagOptions, allowedDebitTagOptions);
+
+        } else {
+
+            final Collection<CodeValueData> allowedCreditTagOptions;
+            final Collection<CodeValueData> allowedDebitTagOptions;
+
+            if (accountingRuleData.getCreditTags() != null) {
+                allowedCreditTagOptions = retrieveSelectedTags(allowedTagOptions, accountingRuleData.getCreditTags());
+            } else {
+                allowedCreditTagOptions = allowedTagOptions;
+            }
+
+            if (accountingRuleData.getDebitTags() != null) {
+                allowedDebitTagOptions = retrieveSelectedTags(allowedTagOptions, accountingRuleData.getDebitTags());
+            } else {
+                allowedDebitTagOptions = allowedTagOptions;
+            }
+
+            accountingRuleData = new AccountingRuleData(accountingRuleData, allowedAccounts, allowedOffices, allowedCreditTagOptions,
+                    allowedDebitTagOptions);
+        }
+        return accountingRuleData;
+    }
+
+    private Collection<CodeValueData> retrieveSelectedTags(final Collection<CodeValueData> allowedTagOptions,
+            final List<AccountingTagRuleData> existedTags) {
+        final Collection<CodeValueData> tempOptions = new ArrayList<CodeValueData>(allowedTagOptions);
+        final Map<Long, CodeValueData> selectedTags = new HashMap<Long, CodeValueData>();
+        for (final AccountingTagRuleData accountingTagRuleData : existedTags) {
+            for (final CodeValueData codeValueData : tempOptions) {
+                if (codeValueData.getId().equals(accountingTagRuleData.getTag().getId())) {
+                    selectedTags.put(codeValueData.getId(), codeValueData);
+                }
+            }
+        }
+        tempOptions.removeAll(selectedTags.values());
+        return tempOptions;
+    }
 }

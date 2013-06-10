@@ -8,14 +8,18 @@ package org.mifosplatform.portfolio.savings.service;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.Collection;
 
+import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
 import org.joda.time.MonthDay;
 import org.mifosplatform.infrastructure.codes.data.CodeValueData;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
 import org.mifosplatform.infrastructure.core.service.DateUtils;
+import org.mifosplatform.infrastructure.core.service.Page;
+import org.mifosplatform.infrastructure.core.service.PaginationHelper;
 import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
@@ -23,6 +27,7 @@ import org.mifosplatform.portfolio.client.data.ClientData;
 import org.mifosplatform.portfolio.client.service.ClientReadPlatformService;
 import org.mifosplatform.portfolio.group.data.GroupGeneralData;
 import org.mifosplatform.portfolio.group.service.GroupReadPlatformService;
+import org.mifosplatform.portfolio.group.service.SearchParameters;
 import org.mifosplatform.portfolio.paymentdetail.data.PaymentDetailData;
 import org.mifosplatform.portfolio.savings.data.SavingsAccountData;
 import org.mifosplatform.portfolio.savings.data.SavingsAccountStatusEnumData;
@@ -36,6 +41,7 @@ import org.mifosplatform.portfolio.savings.domain.SavingsInterestCalculationType
 import org.mifosplatform.portfolio.savings.domain.SavingsInterestPostingPeriodType;
 import org.mifosplatform.portfolio.savings.domain.SavingsPeriodFrequencyType;
 import org.mifosplatform.portfolio.savings.exception.SavingsAccountNotFoundException;
+import org.mifosplatform.useradministration.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -53,6 +59,9 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
     private final SavingsDropdownReadPlatformService dropdownReadPlatformService;
     private final SavingsAccountTransactionTemplateMapper transactionTemplateMapper;
     private final SavingsAccountTransactionsMapper transactionsMapper;
+    
+    private final PaginationHelper<SavingsAccountData> paginationHelper = new PaginationHelper<SavingsAccountData>();
+    private final SavingAccountMapper savingAccountMapper = new SavingAccountMapper();
 
     @Autowired
     public SavingsAccountReadPlatformServiceImpl(final PlatformSecurityContext context, final TenantAwareRoutingDataSource dataSource,
@@ -70,12 +79,54 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
     }
 
     @Override
-    public Collection<SavingsAccountData> retrieveAll() {
+    public Page<SavingsAccountData> retrieveAll(final SearchParameters searchParameters) {
 
-        this.context.authenticatedUser();
-        final SavingAccountMapper mapper = new SavingAccountMapper();
-        final String sql = "select " + mapper.schema();
-        return this.jdbcTemplate.query(sql, mapper, new Object[] {});
+        final AppUser currentUser = context.authenticatedUser();
+        final String hierarchy = currentUser.getOffice().getHierarchy();
+        final String hierarchySearchString = hierarchy + "%";
+
+        StringBuilder sqlBuilder = new StringBuilder(200);
+        sqlBuilder.append("select SQL_CALC_FOUND_ROWS ");
+        sqlBuilder.append(savingAccountMapper.schema());
+
+        sqlBuilder.append(" join m_office o on o.id = c.office_id");
+        sqlBuilder.append(" where o.hierarchy like ?");
+
+        final Object[] objectArray = new Object[2];
+        objectArray[0] = hierarchySearchString;
+        int arrayPos = 1;
+
+        String sqlQueryCriteria = searchParameters.getSqlSearch();
+        if (StringUtils.isNotBlank(sqlQueryCriteria)) {
+            sqlQueryCriteria = sqlQueryCriteria.replaceAll("accountNo", "sa.account_no");
+            sqlBuilder.append(" and (").append(sqlQueryCriteria).append(")");
+        }
+
+        if (StringUtils.isNotBlank(searchParameters.getExternalId())) {
+            sqlBuilder.append(" and sa.external_id = ?");
+            objectArray[arrayPos] = searchParameters.getExternalId();
+            arrayPos = arrayPos + 1;
+        }
+
+        if (searchParameters.isOrderByRequested()) {
+            sqlBuilder.append(" order by ").append(searchParameters.getOrderBy());
+
+            if (searchParameters.isSortOrderProvided()) {
+                sqlBuilder.append(' ').append(searchParameters.getSortOrder());
+            }
+        }
+
+        if (searchParameters.isLimited()) {
+            sqlBuilder.append(" limit ").append(searchParameters.getLimit());
+            if (searchParameters.isOffset()) {
+                sqlBuilder.append(" offset ").append(searchParameters.getOffset());
+            }
+        }
+
+        final Object[] finalObjectArray = Arrays.copyOf(objectArray, arrayPos);
+        final String sqlCountRows = "SELECT FOUND_ROWS()";
+        return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlCountRows, sqlBuilder.toString(), finalObjectArray,
+                this.savingAccountMapper);
     }
 
     @Override

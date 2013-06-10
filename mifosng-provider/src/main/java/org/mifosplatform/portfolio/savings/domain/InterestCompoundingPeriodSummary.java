@@ -9,6 +9,7 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 
 import org.joda.time.LocalDate;
+import org.mifosplatform.infrastructure.core.domain.LocalDateInterval;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.organisation.monetary.domain.Money;
 

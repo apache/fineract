@@ -359,6 +359,35 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
                 .build();
     }
 
+    @Transactional
+    @Override
+    public CommandProcessingResult applyAnnualFee(final Long savingsId) {
+
+        final SavingsAccount account = this.savingAccountRepository.findOneWithNotFoundDetection(savingsId);
+
+        final LocalDate transactionDate = LocalDate.now();
+
+        final DateTimeFormatter fmt = DateTimeFormat.forPattern("dd MM yyyy");
+
+        final List<Long> existingTransactionIds = new ArrayList<Long>();
+        final List<Long> existingReversedTransactionIds = new ArrayList<Long>();
+
+        final SavingsAccountTransaction annualFee = account.addAnnualFee(fmt, transactionDate, existingTransactionIds,
+                existingReversedTransactionIds);
+        final Long transactionId = saveTransactionToGenerateTransactionId(annualFee);
+        this.savingAccountRepository.save(account);
+
+        postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds);
+
+        return new CommandProcessingResultBuilder() //
+                .withEntityId(transactionId) //
+                .withOfficeId(account.officeId()) //
+                .withClientId(account.clientId()) //
+                .withGroupId(account.groupId()) //
+                .withSavingsId(savingsId) //
+                .build();
+    }
+
     @Override
     public CommandProcessingResult calculateInterest(final Long savingsId, final JsonCommand command) {
         this.context.authenticatedUser();

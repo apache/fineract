@@ -13,7 +13,8 @@ import java.util.Set;
  ***/
 public enum AccountingRuleJsonInputParams {
     ID("id"), OFFICE_ID("officeId"), ACCOUNT_TO_DEBIT("debitAccountHead"), ACCOUNT_TO_CREDIT("creditAccountHead"), NAME("name"), DESCRIPTION(
-            "description"), SYSTEM_DEFINED("systemDefined");
+            "description"), SYSTEM_DEFINED("systemDefined"), DEBIT_ACCOUNT_TAGS("debitTags"), CREDIT_ACCOUNT_TAGS("creditTags"), ALLOW_MULTIPLE_CREDIT_ENTRIES(
+            "allowMultipleCreditEntries"), ALLOW_MULTIPLE_DEBIT_ENTRIES("allowMultipleDebitEntries");
 
     private final String value;
 

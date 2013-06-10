@@ -104,12 +104,19 @@ public class LoanProduct extends AbstractPersistable<Long> {
         final Integer minNumberOfRepayments = command.integerValueOfParameterNamed("minNumberOfRepayments");
         final Integer maxNumberOfRepayments = command.integerValueOfParameterNamed("maxNumberOfRepayments");
         final BigDecimal inArrearsTolerance = command.bigDecimalValueOfParameterNamed("inArrearsTolerance");
+
+        // grace details
+        final Integer graceOnPrincipalPayment = command.integerValueOfParameterNamed("graceOnPrincipalPayment");
+        final Integer graceOnInterestPayment = command.integerValueOfParameterNamed("graceOnInterestPayment");
+        final Integer graceOnInterestCharged = command.integerValueOfParameterNamed("graceOnInterestCharged");
+
         final AccountingRuleType accountingRuleType = AccountingRuleType.fromInt(command.integerValueOfParameterNamed("accountingRule"));
 
         return new LoanProduct(fund, loanTransactionProcessingStrategy, name, description, currency, principal, minPrincipal, maxPrincipal,
                 interestRatePerPeriod, minInterestRatePerPeriod, maxInterestRatePerPeriod, interestFrequencyType, annualInterestRate,
                 interestMethod, interestCalculationPeriodMethod, repaymentEvery, repaymentFrequencyType, numberOfRepayments,
-                minNumberOfRepayments, maxNumberOfRepayments, amortizationMethod, inArrearsTolerance, productCharges, accountingRuleType);
+                minNumberOfRepayments, maxNumberOfRepayments, graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged,
+                amortizationMethod, inArrearsTolerance, productCharges, accountingRuleType);
     }
 
     protected LoanProduct() {
@@ -126,6 +133,7 @@ public class LoanProduct extends AbstractPersistable<Long> {
             final InterestCalculationPeriodMethod interestCalculationPeriodMethod, final Integer repayEvery,
             final PeriodFrequencyType repaymentFrequencyType, final Integer defaultNumberOfInstallments,
             final Integer defaultMinNumberOfInstallments, final Integer defaultMaxNumberOfInstallments,
+            final Integer graceOnPrincipalPayment, final Integer graceOnInterestPayment, final Integer graceOnInterestCharged,
             final AmortizationMethod amortizationMethod, final BigDecimal inArrearsTolerance, final List<Charge> charges,
             final AccountingRuleType accountingRuleType) {
         this.fund = fund;
@@ -143,7 +151,10 @@ public class LoanProduct extends AbstractPersistable<Long> {
 
         this.loanProductRelatedDetail = new LoanProductRelatedDetail(currency, defaultPrincipal, defaultNominalInterestRatePerPeriod,
                 interestPeriodFrequencyType, defaultAnnualNominalInterestRate, interestMethod, interestCalculationPeriodMethod, repayEvery,
-                repaymentFrequencyType, defaultNumberOfInstallments, amortizationMethod, inArrearsTolerance);
+                repaymentFrequencyType, defaultNumberOfInstallments, graceOnPrincipalPayment, graceOnInterestPayment,
+                graceOnInterestCharged, amortizationMethod, inArrearsTolerance);
+
+        this.loanProductRelatedDetail.validateRepaymentPeriodWithGraceSettings();
 
         this.loanProductMinMaxConstraints = new LoanProductMinMaxConstraints(defaultMinPrincipal, defaultMaxPrincipal,
                 defaultMinNominalInterestRatePerPeriod, defaultMaxNominalInterestRatePerPeriod, defaultMinNumberOfInstallments,
@@ -274,6 +285,10 @@ public class LoanProduct extends AbstractPersistable<Long> {
         return this.loanProductRelatedDetail.getNominalInterestRatePerPeriod();
     }
 
+    public PeriodFrequencyType getInterestPeriodFrequencyType() {
+        return this.loanProductRelatedDetail.getInterestPeriodFrequencyType();
+    }
+
     public BigDecimal getMinNominalInterestRatePerPeriod() {
         return this.loanProductMinMaxConstraints().getMinNominalInterestRatePerPeriod();
     }
@@ -283,7 +298,7 @@ public class LoanProduct extends AbstractPersistable<Long> {
     }
 
     public Integer getNumberOfRepayments() {
-        return this.loanProductRelatedDetail().getNumberOfRepayments();
+        return this.loanProductRelatedDetail.getNumberOfRepayments();
     }
 
     public Integer getMinNumberOfRepayments() {
@@ -292,10 +307,6 @@ public class LoanProduct extends AbstractPersistable<Long> {
 
     public Integer getMaxNumberOfRepayments() {
         return this.loanProductMinMaxConstraints().getMaxNumberOfRepayments();
-    }
-
-    public LoanProductRelatedDetail loanProductRelatedDetail() {
-        return this.loanProductRelatedDetail;
     }
 
     public LoanProductMinMaxConstraints loanProductMinMaxConstraints() {

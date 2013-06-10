@@ -40,8 +40,9 @@ public final class LoanApplicationCommandFromApiJsonHelper {
      */
     final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("dateFormat", "locale", "id", "clientId", "groupId",
             "loanType", "productId", "principal", "loanTermFrequency", "loanTermFrequencyType", "numberOfRepayments", "repaymentEvery",
-            "repaymentFrequencyType", "interestRatePerPeriod", "amortizationType", "interestType",
-            "interestCalculationPeriodType", "expectedDisbursementDate", "repaymentsStartingFromDate", "interestChargedFromDate",
+            "repaymentFrequencyType", "interestRatePerPeriod", "amortizationType", "interestType", "interestCalculationPeriodType",
+            "expectedDisbursementDate", "repaymentsStartingFromDate", "graceOnPrincipalPayment", "graceOnInterestPayment",
+            "graceOnInterestCharged", "interestChargedFromDate", //
             "submittedOnDate", "submittedOnNote", //
             "accountNo", "externalId", "fundId", "loanOfficerId", // optional
             "loanPurposeId", "inArrearsTolerance", "charges", "collateral", // optional
@@ -50,7 +51,7 @@ public final class LoanApplicationCommandFromApiJsonHelper {
     ));
 
     private final FromJsonHelper fromApiJsonHelper;
-    
+
     @Autowired
     public LoanApplicationCommandFromApiJsonHelper(final FromJsonHelper fromApiJsonHelper) {
         this.fromApiJsonHelper = fromApiJsonHelper;
@@ -70,14 +71,14 @@ public final class LoanApplicationCommandFromApiJsonHelper {
         final String loanTypeParameterName = "loanType";
         final String loanTypeStr = fromApiJsonHelper.extractStringNamed(loanTypeParameterName, element);
         baseDataValidator.reset().parameter(loanTypeParameterName).value(loanTypeStr).notNull();
-        
-        if(!StringUtils.isBlank(loanTypeStr)){
+
+        if (!StringUtils.isBlank(loanTypeStr)) {
             final LoanType loanType = LoanType.fromName(loanTypeStr);
             baseDataValidator.reset().parameter(loanTypeParameterName).value(loanType.getValue()).inMinMaxRange(1, 3);
-            
+
             final Long clientId = fromApiJsonHelper.extractLongNamed("clientId", element);
             final Long groupId = fromApiJsonHelper.extractLongNamed("groupId", element);
-            if(loanType.isIndividualLoan()){
+            if (loanType.isIndividualLoan()) {
                 baseDataValidator.reset().parameter("clientId").value(clientId).notNull().longGreaterThanZero();
                 baseDataValidator.reset().parameter("groupId").value(groupId).mustBeBlankWhenParameterProvided("clientId", clientId);
             }
@@ -93,7 +94,7 @@ public final class LoanApplicationCommandFromApiJsonHelper {
             }
 
         }
-        
+
         final Long productId = fromApiJsonHelper.extractLongNamed("productId", element);
         baseDataValidator.reset().parameter("productId").value(productId).notNull().integerGreaterThanZero();
 
@@ -176,19 +177,29 @@ public final class LoanApplicationCommandFromApiJsonHelper {
         final LocalDate expectedDisbursementDate = fromApiJsonHelper.extractLocalDateNamed(expectedDisbursementDateParameterName, element);
         baseDataValidator.reset().parameter(expectedDisbursementDateParameterName).value(expectedDisbursementDate).notNull();
 
-        final String repaymentsStartingFromDateParameterName = "repaymentsStartingFromDate";
-        if (fromApiJsonHelper.parameterExists(repaymentsStartingFromDateParameterName, element)) {
-            final LocalDate repaymentsStartingFromDate = fromApiJsonHelper.extractLocalDateNamed(repaymentsStartingFromDateParameterName,
-                    element);
-            baseDataValidator.reset().parameter(repaymentsStartingFromDateParameterName).value(repaymentsStartingFromDate).ignoreIfNull()
-                    .notNull();
-        }
+        // grace validation
+        final Integer graceOnPrincipalPayment = fromApiJsonHelper.extractIntegerWithLocaleNamed("graceOnPrincipalPayment", element);
+        baseDataValidator.reset().parameter("graceOnPrincipalPayment").value(graceOnPrincipalPayment).zeroOrPositiveAmount();
+
+        final Integer graceOnInterestPayment = fromApiJsonHelper.extractIntegerWithLocaleNamed("graceOnInterestPayment", element);
+        baseDataValidator.reset().parameter("graceOnInterestPayment").value(graceOnInterestPayment).zeroOrPositiveAmount();
+
+        final Integer graceOnInterestCharged = fromApiJsonHelper.extractIntegerWithLocaleNamed("graceOnInterestCharged", element);
+        baseDataValidator.reset().parameter("graceOnInterestCharged").value(graceOnInterestCharged).zeroOrPositiveAmount();
 
         final String interestChargedFromDateParameterName = "interestChargedFromDate";
         if (fromApiJsonHelper.parameterExists(interestChargedFromDateParameterName, element)) {
             final LocalDate interestChargedFromDate = fromApiJsonHelper
                     .extractLocalDateNamed(interestChargedFromDateParameterName, element);
             baseDataValidator.reset().parameter(interestChargedFromDateParameterName).value(interestChargedFromDate).ignoreIfNull()
+                    .notNull();
+        }
+
+        final String repaymentsStartingFromDateParameterName = "repaymentsStartingFromDate";
+        if (fromApiJsonHelper.parameterExists(repaymentsStartingFromDateParameterName, element)) {
+            final LocalDate repaymentsStartingFromDate = fromApiJsonHelper.extractLocalDateNamed(repaymentsStartingFromDateParameterName,
+                    element);
+            baseDataValidator.reset().parameter(repaymentsStartingFromDateParameterName).value(repaymentsStartingFromDate).ignoreIfNull()
                     .notNull();
         }
 
@@ -304,7 +315,7 @@ public final class LoanApplicationCommandFromApiJsonHelper {
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan");
         final JsonElement element = fromApiJsonHelper.parse(json);
         boolean atLeastOneParameterPassedForUpdate = false;
-                
+
         final String clientIdParameterName = "clientId";
         if (fromApiJsonHelper.parameterExists(clientIdParameterName, element)) {
             atLeastOneParameterPassedForUpdate = true;
@@ -459,12 +470,20 @@ public final class LoanApplicationCommandFromApiJsonHelper {
             baseDataValidator.reset().parameter(expectedDisbursementDateParameterName).value(expectedDisbursementDate).notNull();
         }
 
-        final String repaymentsStartingFromDateParameterName = "repaymentsStartingFromDate";
-        if (fromApiJsonHelper.parameterExists(repaymentsStartingFromDateParameterName, element)) {
-            atLeastOneParameterPassedForUpdate = true;
-            final LocalDate repaymentsStartingFromDate = fromApiJsonHelper.extractLocalDateNamed(repaymentsStartingFromDateParameterName,
-                    element);
-            baseDataValidator.reset().parameter(repaymentsStartingFromDateParameterName).value(repaymentsStartingFromDate).ignoreIfNull();
+        // grace validation
+        if (fromApiJsonHelper.parameterExists("graceOnPrincipalPayment", element)) {
+            final Integer graceOnPrincipalPayment = fromApiJsonHelper.extractIntegerWithLocaleNamed("graceOnPrincipalPayment", element);
+            baseDataValidator.reset().parameter("graceOnPrincipalPayment").value(graceOnPrincipalPayment).zeroOrPositiveAmount();
+        }
+
+        if (fromApiJsonHelper.parameterExists("graceOnInterestPayment", element)) {
+            final Integer graceOnInterestPayment = fromApiJsonHelper.extractIntegerWithLocaleNamed("graceOnInterestPayment", element);
+            baseDataValidator.reset().parameter("graceOnInterestPayment").value(graceOnInterestPayment).zeroOrPositiveAmount();
+        }
+
+        if (fromApiJsonHelper.parameterExists("graceOnInterestCharged", element)) {
+            final Integer graceOnInterestCharged = fromApiJsonHelper.extractIntegerWithLocaleNamed("graceOnInterestCharged", element);
+            baseDataValidator.reset().parameter("graceOnInterestCharged").value(graceOnInterestCharged).zeroOrPositiveAmount();
         }
 
         final String interestChargedFromDateParameterName = "interestChargedFromDate";
@@ -473,6 +492,14 @@ public final class LoanApplicationCommandFromApiJsonHelper {
             final LocalDate interestChargedFromDate = fromApiJsonHelper
                     .extractLocalDateNamed(interestChargedFromDateParameterName, element);
             baseDataValidator.reset().parameter(interestChargedFromDateParameterName).value(interestChargedFromDate).ignoreIfNull();
+        }
+
+        final String repaymentsStartingFromDateParameterName = "repaymentsStartingFromDate";
+        if (fromApiJsonHelper.parameterExists(repaymentsStartingFromDateParameterName, element)) {
+            atLeastOneParameterPassedForUpdate = true;
+            final LocalDate repaymentsStartingFromDate = fromApiJsonHelper.extractLocalDateNamed(repaymentsStartingFromDateParameterName,
+                    element);
+            baseDataValidator.reset().parameter(repaymentsStartingFromDateParameterName).value(repaymentsStartingFromDate).ignoreIfNull();
         }
 
         final String submittedOnDateParameterName = "submittedOnDate";
@@ -593,7 +620,7 @@ public final class LoanApplicationCommandFromApiJsonHelper {
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
                 "Validation errors exist.", dataValidationErrors); }
     }
-    
+
     public void validateMinMaxConstraintValues(final JsonElement element, final LoanProduct loanProduct) {
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();

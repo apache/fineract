@@ -12,7 +12,7 @@ import org.junit.runner.RunWith;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.organisation.monetary.domain.Money;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanRepaymentScheduleInstallment;
-import org.mifosplatform.portfolio.loanaccount.domain.RBILoanRepaymentScheduleTransactionProcessor;
+import org.mifosplatform.portfolio.loanaccount.domain.transactionprocessor.impl.RBILoanRepaymentScheduleTransactionProcessor;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @SuppressWarnings("unused")
