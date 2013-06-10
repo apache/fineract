@@ -224,6 +224,10 @@ public class Loan extends AbstractPersistable<Long> {
     @Column(name = "interest_calculated_from_date")
     private Date interestChargedFromDate;
 
+    @SuppressWarnings("unused")
+    @Column(name = "total_overpaid_derived", scale = 6, precision = 19)
+    private BigDecimal totalOverpaid;
+
     @LazyCollection(LazyCollectionOption.FALSE)
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "loan", orphanRemoval = true)
     private Set<LoanCharge> charges = new HashSet<LoanCharge>();
@@ -766,7 +770,11 @@ public class Loan extends AbstractPersistable<Long> {
         if (isNotDisbursed()) {
             this.summary.zeroFields();
             this.summaryArrearsAging = null;
+            this.totalOverpaid = null;
         } else {
+            final Money overpaidBy = calculateTotalOverpayment();
+            this.totalOverpaid = overpaidBy.getAmountDefaultedToNullIfZero();
+
             final Money principal = this.loanRepaymentScheduleDetail.getPrincipal();
             this.summary.updateSummary(loanCurrency(), principal, this.repaymentScheduleInstallments, this.loanSummaryWrapper,
                     isDisbursed());
@@ -1558,12 +1566,9 @@ public class Loan extends AbstractPersistable<Long> {
     private void doPostLoanTransactionChecks(final LocalDate transactionDate, final LoanLifecycleStateMachine loanLifecycleStateMachine) {
 
         if (this.isOverPaid()) {
+            // FIXME - kw - update account balance to negative amount.
             handleLoanOverpayment(loanLifecycleStateMachine);
         } else if (this.summary.isRepaidInFull(loanCurrency())) {
-            // TODO - KW - probably should not close the loan automatically but
-            // let user decide if loan is closed or not and provide closing
-            // date.
-            // - need to dig into loan closure scenarios with MFIs
             handleLoanRepaymentInFull(transactionDate, loanLifecycleStateMachine);
         }
     }

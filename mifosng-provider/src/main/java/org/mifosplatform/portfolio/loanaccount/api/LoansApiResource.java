@@ -86,12 +86,12 @@ public class LoansApiResource {
 
     private final Set<String> LOAN_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "accountNo", "status", "externalId",
             "clientId", "group", "loanProductId", "loanProductName", "loanProductDescription", "fundId", "fundName", "loanPurposeId",
-            "loanPurposeName", "loanOfficerId", "loanOfficerName", "currency", "principal", "inArrearsTolerance", "termFrequency",
-            "termPeriodFrequencyType", "numberOfRepayments", "repaymentEvery", "interestRatePerPeriod", "annualInterestRate",
-            "repaymentFrequencyType", "transactionProcessingStrategyId", "interestRateFrequencyType", "amortizationType", "interestType",
-            "interestCalculationPeriodType", "expectedFirstRepaymentOnDate", "graceOnPrincipalPayment", "graceOnInterestPayment",
-            "graceOnInterestCharged", "interestChargedFromDate", "timeline", "totalFeeChargesAtDisbursement", "summary",
-            "repaymentSchedule", "transactions", "charges", "collateral", "guarantors", "meeting", "productOptions",
+            "loanPurposeName", "loanOfficerId", "loanOfficerName", "currency", "principal", "totalOverpaid", "inArrearsTolerance",
+            "termFrequency", "termPeriodFrequencyType", "numberOfRepayments", "repaymentEvery", "interestRatePerPeriod",
+            "annualInterestRate", "repaymentFrequencyType", "transactionProcessingStrategyId", "interestRateFrequencyType",
+            "amortizationType", "interestType", "interestCalculationPeriodType", "expectedFirstRepaymentOnDate", "graceOnPrincipalPayment",
+            "graceOnInterestPayment", "graceOnInterestCharged", "interestChargedFromDate", "timeline", "totalFeeChargesAtDisbursement",
+            "summary", "repaymentSchedule", "transactions", "charges", "collateral", "guarantors", "meeting", "productOptions",
             "amortizationTypeOptions", "interestTypeOptions", "interestCalculationPeriodTypeOptions", "repaymentFrequencyTypeOptions",
             "termFrequencyTypeOptions", "interestRateFrequencyTypeOptions", "fundOptions", "repaymentStrategyOptions", "chargeOptions",
             "loanOfficerOptions", "loanPurposeOptions", "loanCollateralOptions", "chargeTemplate", "calendarOptions"));

@@ -436,6 +436,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     + " l.total_waived_derived as totalWaived,"
                     + " l.total_writtenoff_derived as totalWrittenOff,"
                     + " l.total_outstanding_derived as totalOutstanding,"
+                    + " l.total_overpaid_derived as totalOverpaid,"
                     + " la.principal_overdue_derived as principalOverdue,"
                     + " la.interest_overdue_derived as interestOverdue,"
                     + " la.fee_charges_overdue_derived as feeChargesOverdue,"
@@ -543,6 +544,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     expectedMaturityDate);
 
             final BigDecimal principal = rs.getBigDecimal("principal");
+            final BigDecimal totalOverpaid = rs.getBigDecimal("totalOverpaid");
             final BigDecimal inArrearsTolerance = rs.getBigDecimal("inArrearsTolerance");
 
             final Integer numberOfRepayments = JdbcSupport.getInteger(rs, "numberOfRepayments");
@@ -646,11 +648,11 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
             return LoanAccountData.basicLoanDetails(id, accountNo, status, externalId, clientId, clientName, clientOfficeId, groupData,
                     loanType, loanProductId, loanProductName, loanProductDescription, fundId, fundName, loanPurposeId, loanPurposeName,
-                    loanOfficerId, loanOfficerName, currencyData, principal, inArrearsTolerance, termFrequency, termPeriodFrequencyType,
-                    numberOfRepayments, repaymentEvery, repaymentFrequencyType, transactionStrategyId, amortizationType,
-                    interestRatePerPeriod, interestRateFrequencyType, annualInterestRate, interestType, interestCalculationPeriodType,
-                    expectedFirstRepaymentOnDate, graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged,
-                    interestChargedFromDate, timeline, loanSummary, feeChargesDueAtDisbursementCharged);
+                    loanOfficerId, loanOfficerName, currencyData, principal, totalOverpaid, inArrearsTolerance, termFrequency,
+                    termPeriodFrequencyType, numberOfRepayments, repaymentEvery, repaymentFrequencyType, transactionStrategyId,
+                    amortizationType, interestRatePerPeriod, interestRateFrequencyType, annualInterestRate, interestType,
+                    interestCalculationPeriodType, expectedFirstRepaymentOnDate, graceOnPrincipalPayment, graceOnInterestPayment,
+                    graceOnInterestCharged, interestChargedFromDate, timeline, loanSummary, feeChargesDueAtDisbursementCharged);
         }
     }
 
