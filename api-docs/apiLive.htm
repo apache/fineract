@@ -9455,11 +9455,30 @@ Content-Type: application/json
 				<div class="method-description">
 					<h3>Accounting Rules</h3>
 					<p>
-						Its additional option for MFIs to define their own accounting rules.
-						Its typically used to perform daily accounting postings of journal entries.
+						It is typical scenario in MFI's that non accountants pass journal entries on a regular basis.
+						For Ex: A branch office might deposit their entire cash at hand to their Bank account at the end of a
+						working day. The branch office users might not understand enough of accounting to figure out which
+						account needs to get credited and which account needs to be debited to represent this transaction.
 					</p>
-					<p>For an accounting rule debit account and credit account is fixed, so that we can avoid 
-						the selection of credit and debit accounts every time for default journal entries</p>
+					<p>Enter accounting rules, an abstraction on top of manual Journal entires for enabling 
+					 simpler data entry.
+					 An accounting rule can define any of the following abstractions  
+					<ul>
+					 	<li>A Simple journal entry where both the credit and debit account have been preselected</li>
+					 	<li>A Simple journal entry where either credit or debit accounts have been limited to a
+					 		pre-selected list of accounts (Ex: Debit account should be one of "Bank of America" of "JP Morgan"
+					 		and credit account should be "Cash")
+					 	</li>
+					 	<li>A Compound journal entry where multiple debits and / or multiple credits may be made 
+					 		amongst a set of preselected list of accounts (Ex: Credit account should be either "Bank Of America"
+					 		or "Cash" and debit account can be "Employee Salary" and/or "Miscellenous Expenses")
+					 	</li>
+					</ul>
+
+					</p>
+
+					<p>An accounting rule can also be optionally associated with a branch, so that only a particular Branch's
+						users have access to the rule</p>
 					<table class=matrixHeading>
 						<tr class="matrixHeadingBG">
 							<td><div class="mifosXHeading2">Field Descriptions</div></td>
@@ -9474,49 +9493,51 @@ Content-Type: application/json
 							<td>description</td>
 						</tr>
 						<tr>
-							<td class=fielddesc>The description about the accounting rule.</td>
+							<td class=fielddesc>A description of the accounting rule.</td>
 						</tr>
 						<tr class=alt>
 							<td>officeId</td>
 						</tr>
 						<tr>
-							<td class=fielddesc>The officeId of the office/branch for this accounting rule is applicable.</td>
+							<td class=fielddesc>An Optional Office for this accounting rule is applicable.</td>
 						</tr>
 						<tr class=alt>
 							<td>debitAccountHead</td>
 						</tr>
 						<tr>
-							<td class=fielddesc>Debit account for creating accounting rule</td>
+							<td class=fielddesc>ID of the target account to be Debited</td>
 						</tr>
 						<tr class=alt>
 							<td>creditAccountHead</td>
 						</tr>
 						<tr>
-							<td class=fielddesc>Credit account for creating accounting rule</td>
+							<td class=fielddesc>ID of the target account to be Credited</td>
 						</tr>
 						<tr class=alt>
 							<td>debitTags</td>
 						</tr>
 						<tr>
-							<td class=fielddesc>Debit tags for creating accounting rule, These tags fetches the all chart of accounts that are tagged with these tagIds</td>
+							<td class=fielddesc>A list of accounting Tags. Any Ledger account with this tag can serve as the 
+								account to be debited</td>
 						</tr>
 						<tr class=alt>
 							<td>creditTags</td>
 						</tr>
 						<tr>
-							<td class=fielddesc>Credit tags for creating accounting rule, These tags fetches the all chart of accounts that are tagged with these tagIds</td>
+							<td class=fielddesc>A list of accounting Tags. Any Ledger account with this tag can serve as the 
+								account to be credited</td>
 						</tr>
 						<tr class=alt>
 							<td>allowMultipleDebitEntries</td>
 						</tr>
 						<tr>
-							<td class=fielddesc>Allows to add multiple debits if the value is true, while creating journal entries with this rule</td>
+							<td class=fielddesc>Allows passing multiple debit entries for the accounting rule</td>
 						</tr>
 						<tr class=alt>
 							<td>allowMultipleCreditEntries</td>
 						</tr>
 						<tr>
-							<td class=fielddesc>Allows to add multiple credits if the value is true, while creating journal entries with this rule</td>
+							<td class=fielddesc>Allows passing multiple credit entries for the accounting rule</td>
 						</tr>
 					</table>
 				</div>
