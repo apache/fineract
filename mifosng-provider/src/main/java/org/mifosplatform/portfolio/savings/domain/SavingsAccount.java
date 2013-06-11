@@ -621,7 +621,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
             break;
             case ANNUAL:
                 periodEndDate = periodStartDate.monthOfYear().withMaximumValue();
-                periodEndDate = periodStartDate.dayOfMonth().withMaximumValue();
+                periodEndDate = periodEndDate.dayOfMonth().withMaximumValue();
             break;
         }
 
@@ -680,11 +680,11 @@ public class SavingsAccount extends AbstractPersistable<Long> {
             break;
             case ANNUAL:
                 periodEndDate = periodStartDate.monthOfYear().withMaximumValue();
-                periodEndDate = periodStartDate.dayOfMonth().withMaximumValue();
+                periodEndDate = periodEndDate.dayOfMonth().withMaximumValue();
             break;
             case NO_COMPOUNDING_SIMPLE_INTEREST:
                 periodEndDate = periodStartDate.monthOfYear().withMaximumValue();
-                periodEndDate = periodStartDate.dayOfMonth().withMaximumValue();
+                periodEndDate = periodEndDate.dayOfMonth().withMaximumValue();
             break;
         }
 
