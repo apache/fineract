@@ -43,7 +43,7 @@ public class DatatableCommandFromApiJsonDeserializer {
     private final Set<String> supportedParametersForAddColumns = new HashSet<String>(Arrays.asList(
     		"name", "type", "length", "mandatory", "after", "code"));
     private final Set<String> supportedParametersForChangeColumns = new HashSet<String>(Arrays.asList(
-    		"name", "newName", "mandatory", "after", "code", "newCode"));
+    		"name", "newName", "length", "mandatory", "after", "code", "newCode"));
     private final Set<String> supportedParametersForDropColumns = new HashSet<String>(Arrays.asList(
     		"name"));
     private final Object[] supportedColumnTypes = { "String", "Number", "Decimal", "Date", "Text", "Dropdown" };
@@ -65,7 +65,7 @@ public class DatatableCommandFromApiJsonDeserializer {
     	if (type != null && type.equals("String")) {
     		if (length != null) {
     			baseDataValidator.reset().parameter("length").value(length).notBlank()
-        			.zeroOrPositiveAmount();
+        			.positiveAmount();
     		} else {
     			baseDataValidator.reset().parameter("length").value(length)
     				.cantBeBlankWhenParameterProvidedIs("type", type);
@@ -78,8 +78,13 @@ public class DatatableCommandFromApiJsonDeserializer {
     	final String code = fromApiJsonHelper.extractStringNamed("code", column);
 
     	if (type != null && type.equals("Dropdown")) {
-        	baseDataValidator.reset().parameter("code").value(code).notBlank()
-        		.matchesRegularExpression(DATATABLE_NAME_REGEX_PATTERN);
+    		if (code != null) {
+    			baseDataValidator.reset().parameter("code").value(code).notBlank()
+        			.matchesRegularExpression(DATATABLE_NAME_REGEX_PATTERN);
+    		} else {
+    			baseDataValidator.reset().parameter("code").value(code)
+    				.cantBeBlankWhenParameterProvidedIs("type", type);
+    		}
     	} else {
     		baseDataValidator.reset().parameter("code").value(code).mustBeBlankWhenParameterProvided("type", type);
     	}
@@ -95,14 +100,15 @@ public class DatatableCommandFromApiJsonDeserializer {
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("datatable");
 
         final JsonElement element = fromApiJsonHelper.parse(json);
+        
+        final String datatableName = fromApiJsonHelper.extractStringNamed("datatableName", element);
+        baseDataValidator.reset().parameter("datatableName").value(datatableName).notBlank().notExceedingLengthOf(50)
+        	.matchesRegularExpression(DATATABLE_NAME_REGEX_PATTERN);
+        
         final String apptableName = fromApiJsonHelper.extractStringNamed("apptableName", element);
         baseDataValidator.reset().parameter("apptableName").value(apptableName).notBlank().notExceedingLengthOf(50)
         	.isOneOfTheseValues(supportedApptableNames);
         final String fkColumnName = (apptableName != null) ? apptableName.substring(2) + "_id" : "";
-
-        final String datatableName = fromApiJsonHelper.extractStringNamed("datatableName", element);
-        baseDataValidator.reset().parameter("datatableName").value(datatableName).notBlank().notExceedingLengthOf(50)
-        	.matchesRegularExpression(DATATABLE_NAME_REGEX_PATTERN);
 
         final Boolean multiRow = fromApiJsonHelper.extractBooleanNamed("multiRow", element);
         baseDataValidator.reset().parameter("multiRow").value(multiRow).ignoreIfNull().notBlank()
@@ -169,6 +175,18 @@ public class DatatableCommandFromApiJsonDeserializer {
 	        	baseDataValidator.reset().parameter("newName").value(newName).ignoreIfNull().notBlank()
 	        		.notExceedingLengthOf(50).isNotOneOfTheseValues("id", fkColumnName)
 	        		.matchesRegularExpression(DATATABLE_NAME_REGEX_PATTERN);
+
+	        	if (fromApiJsonHelper.parameterExists("length", column)) {
+		        	final String lengthStr = fromApiJsonHelper.extractStringNamed("length", column);
+	        		if (StringUtils.isWhitespace(lengthStr) || !StringUtils.isNumeric(lengthStr)
+	        				|| StringUtils.isBlank(lengthStr)) {
+	        			baseDataValidator.reset().parameter("length").failWithCode("not.greater.than.zero");
+	        		} else {
+	        			Integer length = Integer.parseInt(lengthStr);
+	        			baseDataValidator.reset().parameter("length").value(length).ignoreIfNull().notBlank()
+    						.positiveAmount();
+		        	}
+	        	}
 
 	        	final String code = fromApiJsonHelper.extractStringNamed("code", column);
 	        	baseDataValidator.reset().parameter("code").value(code).ignoreIfNull().notBlank()

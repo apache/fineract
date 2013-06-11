@@ -24,6 +24,7 @@ import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.ApiParameterError;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
+import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
 import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.mifosplatform.infrastructure.core.serialization.DatatableCommandFromApiJsonDeserializer;
@@ -297,6 +298,11 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
     	return (code + "_cd_" + columnName);
     }
 
+    private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
+        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
+                "Validation errors exist.", dataValidationErrors); }
+    }
+    
     private void parseDatatableColumnObjectForCreate(final JsonObject column, StringBuilder sqlBuilder) {
     	
     	String name = (column.has("name")) ? column.get("name").getAsString() : null;
@@ -357,7 +363,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
 	    	validateAppTable(apptableName);
 
 	    	String fkColumnName = apptableName.substring(2) + "_id";
-	    	String fkName = datatableName.toLowerCase().replaceAll("\\s", "_");
+	    	String fkName = datatableName.toLowerCase().replaceAll("\\s", "_") + "_" + fkColumnName;
 	    	StringBuilder sqlBuilder = new StringBuilder();
 	    	sqlBuilder = sqlBuilder.append("CREATE TABLE `" + datatableName + "` (");
 
@@ -380,7 +386,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
 	    	if (multiRow) {
 	    		sqlBuilder = sqlBuilder
 	    				.append(", PRIMARY KEY (`id`)")
-	    				.append(", KEY `fk_" + apptableName + "` (`" + fkColumnName + "`)")
+	    				.append(", KEY `fk_" + apptableName.substring(2) + "_id` (`" + fkColumnName + "`)")
 	    				.append(", CONSTRAINT `fk_" + fkName + "` ")
 	    				.append("FOREIGN KEY (`" + fkColumnName + "`) ")
 	    				.append("REFERENCES `" + apptableName + "` (`id`)");
@@ -398,11 +404,17 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
 	    	registerDatatable(datatableName, apptableName);
     	} catch (SQLGrammarException e) {
     		Throwable realCause = e.getCause();
-
-            if (realCause.getMessage().contains("Table") && realCause.getMessage().contains("already exists")) { 
-            	throw new PlatformDataIntegrityException(
-                    "error.msg.datatable.already.exists", realCause.getMessage());
-        	}
+    		List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+    		final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("datatable");
+    		
+    		if (realCause.getMessage().toLowerCase().contains("duplicate column name")) {
+        		baseDataValidator.reset().parameter("name").failWithCode("duplicate.column.name");
+            } else if (realCause.getMessage().contains("Table") && realCause.getMessage().contains("already exists")) { 
+            	baseDataValidator.reset().parameter("datatableName").value(datatableName)
+            		.failWithCode("datatable.already.exists");
+        	} 
+            
+            throwExceptionIfValidationWarningsExist(dataValidationErrors);
     	}
 
     	return new CommandProcessingResultBuilder()
@@ -415,6 +427,8 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
     		final Map<String, ResultsetColumnHeaderData> mapColumnNameDefinition, StringBuilder sqlBuilder) {
 
     	String name = (column.has("name")) ? column.get("name").getAsString() : null;
+    	String lengthStr = (column.has("length")) ? column.get("length").getAsString() : null;
+    	Integer length = (StringUtils.isNotBlank(lengthStr)) ? Integer.parseInt(lengthStr) : null;
     	String newName = (column.has("newName")) ? column.get("newName").getAsString() : name;
     	Boolean mandatory = (column.has("mandatory")) ? column.get("mandatory").getAsBoolean() : false;
     	String after = (column.has("after")) ? column.get("after").getAsString() : null;
@@ -437,13 +451,15 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
     	}
 
     	String type = mapColumnNameDefinition.get(name).getColumnType();
-    	Long length = mapColumnNameDefinition.get(name).getColumnLength();
+    	if (length == null && type.toLowerCase().equals("varchar")) {
+    		length = mapColumnNameDefinition.get(name).getColumnLength().intValue();
+    	}
 
     	sqlBuilder = sqlBuilder.append(", CHANGE `" + name + "` `" + newName + "` " + type);
     	if (length != null && length > 0) {
-    		if (type.equals("DECIMAL")) {
+    		if (type.toLowerCase().equals("decimal")) {
     			sqlBuilder.append("(19,6)");
-    		} else if (type.equals("VARCHAR")) {
+    		} else if (type.toLowerCase().equals("varchar")) {
     			sqlBuilder.append("(" + length + ")");
     		}
     	}
@@ -531,6 +547,34 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
 
 		    	String oldApptableName = this.queryForApplicationTableName(datatableName);
 		    	if (!StringUtils.equals(oldApptableName, apptableName)) {
+		    		String oldFKName = oldApptableName.substring(2) + "_id";
+			    	String newFKName = apptableName.substring(2) + "_id";
+			    	String oldConstraintName = datatableName.toLowerCase().replaceAll("\\s", "_") + "_" + oldFKName;
+			    	String newConstraintName = datatableName.toLowerCase().replaceAll("\\s", "_") + "_" + newFKName;
+			    	StringBuilder sqlBuilder = new StringBuilder();
+			    	
+			    	if (mapColumnNameDefinition.containsKey("id")) {
+			    		sqlBuilder = sqlBuilder
+				    		.append("ALTER TABLE `" + datatableName + "` ")
+				    		.append("DROP KEY `fk_" + oldFKName + "`,")
+				    		.append("DROP FOREIGN KEY `fk_" + oldConstraintName + "`,")
+				    		.append("CHANGE COLUMN `" + oldFKName + "` `" + newFKName + "` BIGINT(20) NOT NULL,")
+				    		.append("ADD KEY `fk_" + newFKName + "` (`" + newFKName + "`),")
+				    		.append("ADD CONSTRAINT `fk_" + newConstraintName + "` ")
+				    		.append("FOREIGN KEY (`" + newFKName + "`) ")
+				    		.append("REFERENCES `" + apptableName + "` (`id`)");
+			    	} else {
+			    		sqlBuilder = sqlBuilder
+				    		.append("ALTER TABLE `" + datatableName + "` ")
+				    		.append("DROP FOREIGN KEY `fk_" + oldConstraintName + "`,")
+				    		.append("CHANGE COLUMN `" + oldFKName + "` `" + newFKName + "` BIGINT(20) NOT NULL,")
+				    		.append("ADD CONSTRAINT `fk_" + newConstraintName + "` ")
+				    		.append("FOREIGN KEY (`" + newFKName + "`) ")
+				    		.append("REFERENCES `" + apptableName + "` (`id`)");
+			    	}
+			    	
+			    	this.jdbcTemplate.execute(sqlBuilder.toString());
+		    		
 		    		deregisterDatatable(datatableName);
 		    		registerDatatable(datatableName, apptableName);
 		    	}
@@ -590,17 +634,18 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
 	    	}
     	} catch (SQLGrammarException e) {
     		Throwable realCause = e.getCause();
+    		List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+    		final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("datatable");
 
         	if (realCause.getMessage().toLowerCase().contains("unknown column")) {
-            	throw new PlatformDataIntegrityException(
-                    "error.msg.datatable.column.missing.update", realCause.getMessage());
+        		baseDataValidator.reset().parameter("name").failWithCode("does.not.exist");
         	} else if (realCause.getMessage().toLowerCase().contains("can't drop")) {
-            	throw new PlatformDataIntegrityException(
-                    "error.msg.datatable.column.missing.drop", realCause.getMessage());
+        		baseDataValidator.reset().parameter("name").failWithCode("does.not.exist");
         	}  else if (realCause.getMessage().toLowerCase().contains("duplicate column")) {
-            	throw new PlatformDataIntegrityException(
-                    "error.msg.datatable.duplicate.column", realCause.getMessage());
+        		baseDataValidator.reset().parameter("name").failWithCode("column.already.exists");
         	}
+
+        	throwExceptionIfValidationWarningsExist(dataValidationErrors);
     	}
     }
 
@@ -618,11 +663,14 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
 	    	this.jdbcTemplate.execute(sql);
     	} catch (SQLGrammarException e) {
     		Throwable realCause = e.getCause();
+    		List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+    		final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("datatable");
 
     		if (realCause.getMessage().contains("Unknown table")) {
-	    		throw new PlatformDataIntegrityException(
-	                    "error.msg.datatable.missing", realCause.getMessage());
+    			baseDataValidator.reset().parameter("datatableName").failWithCode("does.not.exist");
     		}
+    		
+    		throwExceptionIfValidationWarningsExist(dataValidationErrors);
     	}
     }
 
