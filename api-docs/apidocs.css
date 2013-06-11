@@ -724,3 +724,16 @@ strong { font-weight: bold; }
 .stripe-version {
     float: left;
 }
+
+ul.field {
+    margin: 5px 10px;
+}
+
+ul.field li {
+    list-style: square inside none;
+    font-style: italic;
+}
+
+tt {
+    font-size: 9.5pt;
+}

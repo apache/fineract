@@ -11454,6 +11454,83 @@ No Request Body:
 					<h4>Create Data Table</h4>
                     <p>Create a new data table and registers it with the Mifos X Core application
                         table.</p>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Field Descriptions</div></td>
+						</tr>
+						<tr class=alt>
+                            <td><strong>Mandatory - </strong> datatableName</td>
+						</tr>
+						<tr>
+                            <td class=fielddesc>The name of the Data Table.</td>
+						</tr>
+						<tr class=alt>
+                            <td><strong>Mandatory - </strong> apptableName</td>
+						</tr>
+						<tr>
+                            <td class=fielddesc>
+                                Application table name. Must be one of the following:
+                                <ul class="field">
+                                    <li>m_client</li>
+                                    <li>m_group</li>
+                                    <li>m_loan</li>
+                                    <li>m_office</li>
+                                    <li>m_saving_account</li>
+                                </ul>
+                            </td>
+						</tr>
+						<tr class=alt>
+                            <td><strong>Mandatory - </strong>columns</td>
+                        </tr>
+						<tr>
+                            <td class=fielddesc>An array of columns in the new Data Table.</td>
+						</tr>
+                    </table>
+                    <table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Field Descriptions - columns</div></td>
+						</tr>
+						<tr class=alt>
+                            <td><strong>Mandatory - </strong>name</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Name of the created column. Can contain only alphanumeric characters, underscores and spaces, but cannot start with a number. Cannot start or end with an underscore or space.</td>
+						</tr>
+						<tr class=alt>
+                            <td><strong>Mandatory - </strong>type</td>
+						</tr>
+						<tr>
+                            <td class=fielddesc>
+                                Column type. Must be one of the following:
+                                <ul class="field">
+                                    <li>Date</li>
+                                    <li>Decimal</li>
+                                    <li>Dropdown</li>
+                                    <li>Number</li>
+                                    <li>String</li>
+                                    <li>Text</li>
+                                </ul>
+                            </td>
+						</tr>
+						<tr class=alt>
+                            <td><strong>Mandatory [type = Dropdown] - </strong>code</td>
+						</tr>
+						<tr>
+                            <td class=fielddesc>Used in Code Value fields. Column name becomes: <tt>code_cd_name</tt>. Mandatory if using type Dropdown, otherwise an error is returned.</td>
+						</tr>
+						<tr class=alt>
+                            <td><em>Optional - </em>mandatory</td>
+						</tr>
+						<tr>
+                            <td class=fielddesc>Determines whether this column must have a value in every entry. Optional, defaults to <tt>false</tt>.</td>
+						</tr>
+						<tr class=alt>
+                            <td><strong>Mandatory [type = String] - </strong>length</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Length of the text field. Mandatory if type String is used, otherwise an error is returned.</td>
+						</tr>
+					</table>
 				</div>
 				<div class="method-example">
                     <code class="method-declaration">
@@ -11640,6 +11717,153 @@ GET https://DomainName/api/v1/datatables/{datatable}
 					<h4>Update Data Table</h4>
                     <p>Modifies fields of a data table. If the apptableName parameter is passed,
                         data table is deregistered and registered with the new application table.</p>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Field Descriptions</div></td>
+                        </tr>
+                        <tr class=alt>
+                            <td><em>Optional - </em> apptableName</td>
+						</tr>
+						<tr>
+                            <td class=fielddesc>
+                                Application table name. Only necessary if changing the application table this Data Table is registered to. Must be one of the following:
+                                <ul class="field">
+                                    <li>m_client</li>
+                                    <li>m_group</li>
+                                    <li>m_loan</li>
+                                    <li>m_office</li>
+                                    <li>m_saving_account</li>
+                                </ul>
+                            </td>
+						</tr>
+						<tr class=alt>
+                            <td><em>Optional - </em>dropColumns</td>
+                        </tr>
+						<tr>
+                            <td class=fielddesc>An array of columns to be deleted from the Data Table.</td>
+						</tr>
+						<tr class=alt>
+                            <td><em>Optional - </em>addColumns</td>
+                        </tr>
+						<tr>
+                            <td class=fielddesc>An array of columns to be added to the Data Table.</td>
+						</tr>
+						<tr class=alt>
+                            <td><em>Optional - </em>changeColumns</td>
+                        </tr>
+						<tr>
+                            <td class=fielddesc>An array of columns to be changed in the Data Table.</td>
+						</tr>
+                    </table>
+                    <table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Field Descriptions - dropColumns</div></td>
+						</tr>
+						<tr class=alt>
+                            <td><strong>Mandatory - </strong>name</td>
+						</tr>
+						<tr>
+                            <td class=fielddesc>Requires a full name of the deleted column to be provided.</td>
+						</tr>
+					</table>
+                    <table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Field Descriptions - addColumns</div></td>
+						</tr>
+						<tr class=alt>
+                            <td><strong>Mandatory - </strong>name</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Name of the created column. Can contain only alphanumeric characters, underscores and spaces, but cannot start with a number. Cannot start or end with an underscore or space.</td>
+						</tr>
+						<tr class=alt>
+                            <td><strong>Mandatory - </strong>type</td>
+						</tr>
+						<tr>
+                            <td class=fielddesc>
+                                Column type. Must be one of the following:
+                                <ul class="field">
+                                    <li>Date</li>
+                                    <li>Decimal</li>
+                                    <li>Dropdown</li>
+                                    <li>Number</li>
+                                    <li>String</li>
+                                    <li>Text</li>
+                                </ul>
+                            </td>
+						</tr>
+						<tr class=alt>
+                            <td><strong>Mandatory [type = Dropdown] - </strong>code</td>
+						</tr>
+						<tr>
+                            <td class=fielddesc>Used in Code Value fields. Column name becomes: <tt>code_cd_name</tt>. Mandatory if using type Dropdown, otherwise an error is returned.</td>
+						</tr>
+						<tr class=alt>
+                            <td><em>Optional - </em>mandatory</td>
+						</tr>
+						<tr>
+                            <td class=fielddesc>Determines whether this column must have a value in every entry. Optional, defaults to <tt>false</tt>.</td>
+						</tr>
+						<tr class=alt>
+                            <td><strong>Mandatory [type = String] - </strong>length</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Length of the text field. Mandatory if type String is used, otherwise an error is returned.</td>
+						</tr>
+						<tr class=alt>
+                            <td><em>Optional - </em>after</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Only used when re-ordering Data Table columns. Requires a full column name to be provided.</td>
+						</tr>
+					</table>
+                    <table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Field Descriptions - changeColumns</div></td>
+						</tr>
+						<tr class=alt>
+                            <td><strong>Mandatory - </strong>name</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Name of the created column. Can contain only alphanumeric characters, underscores and spaces, but cannot start with a number. Cannot start or end with an underscore or space.</td>
+						</tr>
+						<tr class=alt>
+                            <td><em>Optional - </em>newName</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>New name of the created column. Can contain only alphanumeric characters, underscores and spaces, but cannot start with a number. Cannot start or end with an underscore or space.</td>
+						</tr>
+						<tr class=alt>
+                            <td><strong>Mandatory [type = Dropdown] - </strong>code</td>
+						</tr>
+						<tr>
+                            <td class=fielddesc>Used in Code Value fields. Column name becomes: <tt>code_cd_name</tt>. Mandatory if using type Dropdown, otherwise an error is returned.</td>
+						</tr>
+						<tr class=alt>
+                            <td><em>Optional [type = Dropdown] - </em>newCode</td>
+						</tr>
+						<tr>
+                            <td class=fielddesc>Used in Code Value fields. Column name becomes: <tt>code_cd_name</tt>. Optional if using type Dropdown, otherwise an error is returned.</td>
+						</tr>
+						<tr class=alt>
+                            <td><em>Optional - </em>mandatory</td>
+						</tr>
+						<tr>
+                            <td class=fielddesc>Determines whether this column must have a value in every entry. Optional, defaults to <tt>false</tt>.</td>
+						</tr>
+						<tr class=alt>
+                            <td><strong>Mandatory [type = String] - </strong>length</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Length of the text field. Mandatory if type String is used, otherwise an error is returned.</td>
+						</tr>
+						<tr class=alt>
+                            <td><em>Optional - </em>after</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Only used when re-ordering Data Table columns. Requires a full column name to be provided.</td>
+						</tr>
+					</table>
 				</div>
 				<div class="method-example">
                     <code class="method-declaration">
@@ -11652,26 +11876,31 @@ Content-Type: application/json
 Request Body:
 {
     "apptableName": "m_client",
-    "columns": [
+    "dropColumns": [
         {
-            "name": "Gender",
+            "name": "Gender_cd_Question"
+        }
+    ],
+    "addColumns": [
+        {
+            "name": "Question",
             "type": "Dropdown",
-            "code": "Gender"
-        },
-        {
-            "name": "Some Decimal",
-            "type": "Decimal",
+            "code": "Gender",
             "mandatory": true
         },
         {
-            "name": "Birth Date",
-            "type": "Date"
-        },
+            "name": "Some Number",
+            "type": "Number",
+            "after": "Some Field"
+        }
+    ],
+    "changeColumns": [
         {
-            "name": "Question 2",
-            "type": "String",
-            "length": 100,
-            "mandatory": false
+            "name": "Question",
+            "newName": "Question 2",
+            "mandatory": true,
+            "code": "Gender",
+            "newCode": "Gender2"
         }
     ]
 }
@@ -11689,7 +11918,7 @@ Request Body:
 			<div class="method-section">
 				<div class="method-description">
 					<h4>Delete Data Table</h4>
-                    <p>Deletes a data table and unregisters it from the Mifos X Core
+                    <p>Deletes a data table and deregisters it from the Mifos X Core
                         application table.</p>
 				</div>
 				<div class="method-example">
