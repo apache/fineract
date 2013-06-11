@@ -7590,7 +7590,7 @@ GET https://DomainName/api/v1/loanproducts/{productId}
 							<td><div class="mifosXHeading2">Optional Fields</div></td>
 						</tr>
 						<tr class=alt>
-							<td>inArrearsTolerance, graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged, charges, paymentChannelToFundSourceMappings</td>
+							<td>inArrearsTolerance, graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged, charges, paymentChannelToFundSourceMappings, feeToIncomeAccountMappings, penaltyToIncomeAccountMappings</td>
 						</tr>
 
 						<tr class="matrixHeadingBG">
@@ -7673,14 +7673,27 @@ Request Body:
     "writeOffAccountId":"41",
     "paymentChannelToFundSourceMappings": [
     {
-      "paymentTypeId": "14",
-      "fundSourceAccountId": "2"
+      "paymentTypeId": "11",
+      "fundSourceAccountId": "11"
+    }
+  ],
+  "feeToIncomeAccountMappings": [
+    {
+      "chargeId": "1",
+      "incomeAccountId": "5"
     },
     {
-      "paymentTypeId": "14",
-      "fundSourceAccountId": "2"
+      "chargeId": "2",
+      "incomeAccountId": "8"
+    }
+  ],
+  "penaltyToIncomeAccountMappings": [
+    {
+      "chargeId": "6",
+      "incomeAccountId": "9"
     }
   ]
+    
 }
 					</code>
 					<code class="method-response">
