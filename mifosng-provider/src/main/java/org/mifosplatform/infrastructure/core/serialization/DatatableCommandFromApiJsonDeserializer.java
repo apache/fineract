@@ -61,22 +61,26 @@ public class DatatableCommandFromApiJsonDeserializer {
     	baseDataValidator.reset().parameter("type").value(type).notBlank()
     		.isOneOfTheseValues(supportedColumnTypes);
 
-    	final Integer length = fromApiJsonHelper.extractIntegerSansLocaleNamed("length", column);
     	if (type != null && type.equals("String")) {
-    		if (length != null) {
-    			baseDataValidator.reset().parameter("length").value(length).notBlank()
-        			.positiveAmount();
+    		if (fromApiJsonHelper.parameterExists("length", column)) {
+    			final String lengthStr = fromApiJsonHelper.extractStringNamed("length", column);
+	    		if (lengthStr != null && !StringUtils.isWhitespace(lengthStr)
+	    				&& StringUtils.isNumeric(lengthStr) && StringUtils.isNotBlank(lengthStr)) {
+	    			Integer length = Integer.parseInt(lengthStr);
+	    			baseDataValidator.reset().parameter("length").value(length).positiveAmount();
+	    		} else if (StringUtils.isBlank(lengthStr) || StringUtils.isWhitespace(lengthStr)) {
+	    			baseDataValidator.reset().parameter("length").failWithCode("must.be.provided.when.type.is.String");
+	    		} else if (!StringUtils.isNumeric(lengthStr)) {
+	    			baseDataValidator.reset().parameter("length").failWithCode("not.greater.than.zero");
+	    		}
     		} else {
-    			baseDataValidator.reset().parameter("length").value(length)
-    				.cantBeBlankWhenParameterProvidedIs("type", type);
+    			baseDataValidator.reset().parameter("length").failWithCode("must.be.provided.when.type.is.String");
     		}
     	} else {
-    		baseDataValidator.reset().parameter("length").value(length)
-    			.mustBeBlankWhenParameterProvidedIs("type", type);
+    		baseDataValidator.reset().parameter("length").mustBeBlankWhenParameterProvidedIs("type", type);
     	}
-
+    	
     	final String code = fromApiJsonHelper.extractStringNamed("code", column);
-
     	if (type != null && type.equals("Dropdown")) {
     		if (code != null) {
     			baseDataValidator.reset().parameter("code").value(code).notBlank()
@@ -124,9 +128,6 @@ public class DatatableCommandFromApiJsonDeserializer {
 	        	final String name = fromApiJsonHelper.extractStringNamed("name", column);
 	        	baseDataValidator.reset().parameter("name").value(name).notBlank()
 	        		.isNotOneOfTheseValues("id", fkColumnName).matchesRegularExpression(DATATABLE_COLUMN_NAME_REGEX_PATTERN);
-
-	        	final String type = fromApiJsonHelper.extractStringNamed("type", column);
-	        	baseDataValidator.reset().parameter("type").value(type).notBlank().isOneOfTheseValues(supportedColumnTypes);
 
 	        	validateType(baseDataValidator, column);
 
