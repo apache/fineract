@@ -22,15 +22,16 @@ public class CommandProcessingResult {
     private final Long savingsId;
     private final Long resourceId;
     private final String transactionId;
+    private final Long holidayId;
     private final Map<String, Object> changes;
     @SuppressWarnings("unused")
     private final String resourceIdentifier;
 
     public static CommandProcessingResult fromDetails(final Long commandId, final Long officeId, final Long groupId, final Long clientId,
             final Long loanId, final Long savingsId, final String resourceIdentifier, final Long entityId, final String transactionId,
-            final Map<String, Object> changes) {
+            final Long holidayId, final Map<String, Object> changes) {
         return new CommandProcessingResult(commandId, officeId, groupId, clientId, loanId, savingsId, resourceIdentifier, entityId,
-                transactionId, changes);
+                transactionId, holidayId, changes);
     }
 
     public static CommandProcessingResult commandOnlyResult(final Long commandId) {
@@ -78,11 +79,12 @@ public class CommandProcessingResult {
         this.loanId = null;
         this.savingsId = null;
         this.transactionId = null;
+        this.holidayId = null;
         this.changes = new HashMap<String, Object>();
     }
 
     private CommandProcessingResult(final Long commandId, final Long officeId, final Long groupId, final Long clientId, final Long loanId,
-            final Long savingsId, final String resourceIdentifier, final Long resourceId, final String transactionId,
+            final Long savingsId, final String resourceIdentifier, final Long resourceId, final String transactionId, final Long holidayId,
             final Map<String, Object> changesOnly) {
         this.commandId = commandId;
         this.officeId = officeId;
@@ -94,6 +96,7 @@ public class CommandProcessingResult {
         this.resourceId = resourceId;
         this.changes = changesOnly;
         this.transactionId = transactionId;
+        this.holidayId = holidayId;
     }
 
     private CommandProcessingResult(final Long resourceId, final Long officeId, final Long commandId, final Map<String, Object> changesOnly) {
@@ -109,6 +112,7 @@ public class CommandProcessingResult {
         this.loanId = null;
         this.savingsId = null;
         this.transactionId = null;
+        this.holidayId = null;
         this.commandId = commandId;
         this.changes = changesOnly;
     }

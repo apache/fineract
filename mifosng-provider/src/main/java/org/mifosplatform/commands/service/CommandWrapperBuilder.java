@@ -1018,4 +1018,12 @@ public class CommandWrapperBuilder {
         this.href = "/accountingrules/" + accountingRuleId;
         return this;
     }
+    
+    public CommandWrapperBuilder createHoliday() {
+        this.actionName = "CREATE";
+        this.entityName = "HOLIDAY";
+        this.entityId = null;
+        this.href = "/holidays/template";
+        return this;
+    }
 }

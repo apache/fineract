@@ -461,7 +461,12 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
                 throw new UnsupportedCommandException(wrapper.commandName());
             }
 
-        }else {
+        } else if(wrapper.isHolidayResource()) {
+        	
+        	if (wrapper.isCreate()) {
+                handler = applicationContext.getBean("createHolidayCommandHandler", NewCommandSourceHandler.class);
+            }
+        } else {
             throw new UnsupportedCommandException(wrapper.commandName());
         }
 
