@@ -22,7 +22,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
-import org.apache.commons.lang.StringUtils;
 import org.mifosplatform.commands.domain.CommandWrapper;
 import org.mifosplatform.commands.service.CommandWrapperBuilder;
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -81,8 +80,7 @@ public class StaffApiResource {
 
         context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
 
-        final String extraCriteria = getStaffCriteria(sqlSearch, officeId);
-        final Collection<StaffData> staff = this.readPlatformService.retrieveAllStaff(extraCriteria);
+        final Collection<StaffData> staff = this.readPlatformService.retrieveAllStaff(sqlSearch, officeId);
 
         final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serialize(settings, staff, RESPONSE_DATA_PARAMETERS);
@@ -130,23 +128,5 @@ public class StaffApiResource {
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
         return this.toApiJsonSerializer.serialize(result);
-    }
-
-    private String getStaffCriteria(final String sqlSearch, final Long officeId) {
-
-        String extraCriteria = "";
-
-        if (sqlSearch != null) {
-            extraCriteria = " and (" + sqlSearch + ")";
-        }
-        if (officeId != null) {
-            extraCriteria += " and office_id = " + officeId;
-        }
-
-        if (StringUtils.isNotBlank(extraCriteria)) {
-            extraCriteria = extraCriteria.substring(4);
-        }
-
-        return extraCriteria;
     }
 }

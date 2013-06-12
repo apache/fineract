@@ -3901,12 +3901,14 @@ GET https://DomainName/mifosng-provider/api/v1/groups
 							<td class=fielddesc>The type of transaction processing strategy to be used.<br>
 								At present some MFI specific ones exist. This is an important point of change for many MFIs.
 								<br>Responsible for things like payment order and how early or late repayments should be processed.<br>
-								Out of the box, four available:
+								Out of the box options available are:
 								<ol>
 									<li>id=1, code=mifos-standard-strategy, name=Mifos style</li>
 									<li>id=2, code=heavensfamily-strategy, name=Heavensfamily</li>
 									<li>id=3, code=creocore-strategy, name=Creocore</li>
 									<li>id=4, code=rbi-india-strategy, name=RBI (India)</li>
+									<li>id=5, code=principal-interest-penalties-fees-order-strategy, name=Principal Interest Penalties Fees Order</li>
+									<li>id=6, code=interest-principal-penalties-fees-order-strategy, name=Interest Principal Penalties Fees Order</li>
 								</ol>
 							</td>
 						</tr>
@@ -3973,6 +3975,13 @@ GET https://DomainName/mifosng-provider/api/v1/groups
 						</dd>
 						<dd>If entered, productId, productName and selectedProduct
 							fields are returned.</dd>
+							
+						<dt>loanOfficersInSelectedOfficeOnly</dt>
+						<dd>
+							Boolean <span>optional</span>
+						</dd>
+						<dd>Defaults to false if not provided. If <strong>loanOfficersInSelectedOfficeOnly=true</strong> only loan officers 
+						who are associated with the select branch are returned.</dd>	
 					</dl>
 					<p>Example Requests:</p>
 					<div class=apiClick>loans/template?templateType=individual&clientId=1</div>
@@ -6995,12 +7004,14 @@ Request Body:
 							<td class=fielddesc>The type of transaction processing strategy to be used.<br>
 								At present some MFI specific ones exist. This is an important point of change for many MFIs.
 								<br>Responsible for things like payment order and how early or late repayments should be processed.<br>
-								Out of the box, four available:
+								Out of the box options available are:
 								<ol>
 									<li>id=1, code=mifos-standard-strategy, name=Mifos style</li>
 									<li>id=2, code=heavensfamily-strategy, name=Heavensfamily</li>
 									<li>id=3, code=creocore-strategy, name=Creocore</li>
 									<li>id=4, code=rbi-india-strategy, name=RBI (India)</li>
+									<li>id=5, code=principal-interest-penalties-fees-order-strategy, name=Principal Interest Penalties Fees Order</li>
+									<li>id=6, code=interest-principal-penalties-fees-order-strategy, name=Interest Principal Penalties Fees Order</li>
 								</ol>
 							</td>
 						</tr>

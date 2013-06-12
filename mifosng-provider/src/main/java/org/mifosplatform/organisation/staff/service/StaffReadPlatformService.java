@@ -13,9 +13,15 @@ public interface StaffReadPlatformService {
 
     StaffData retrieveStaff(Long staffId);
 
-    Collection<StaffData> retrieveAllStaff(final String extraCriteria);
-
     Collection<StaffData> retrieveAllStaffForDropdown(Long officeId);
 
-    Collection<StaffData> retrieveAllLoanOfficersByOffice(final Long officeId);
+    Collection<StaffData> retrieveAllLoanOfficersInOfficeById(final Long officeId);
+
+    /**
+     * returns all loan officers in offices that are above the provided
+     * <code>officeId</code>.
+     */
+    Collection<StaffData> retrieveAllLoanOfficersInOfficeAndItsParentOfficeHierarchy(Long officeId);
+
+    Collection<StaffData> retrieveAllStaff(String sqlSearch, Long officeId);
 }

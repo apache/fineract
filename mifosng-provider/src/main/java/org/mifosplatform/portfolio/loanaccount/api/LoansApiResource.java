@@ -5,6 +5,7 @@
  */
 package org.mifosplatform.portfolio.loanaccount.api;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -12,6 +13,7 @@ import java.util.Set;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -162,6 +164,7 @@ public class LoansApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String template(@QueryParam("clientId") final Long clientId, @QueryParam("groupId") final Long groupId,
             @QueryParam("productId") final Long productId, @QueryParam("templateType") final String templateType,
+            @DefaultValue("false") @QueryParam("loanOfficersInSelectedOfficeOnly") final boolean loanOfficersInSelectedOfficeOnly,
             @Context final UriInfo uriInfo) {
 
         context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
@@ -223,7 +226,28 @@ public class LoansApiResource {
                 throw new NotSupportedLoanTemplateTypeException(errorMsg, templateType);
             }
 
-            if (officeId != null) allowedLoanOfficers = this.staffReadPlatformService.retrieveAllLoanOfficersByOffice(officeId);
+            if (officeId != null) {
+                if (loanOfficersInSelectedOfficeOnly) {
+                    // only bring back loan officers in selected branch/office
+                    Collection<StaffData> loanOfficersInBranch = this.staffReadPlatformService
+                            .retrieveAllLoanOfficersInOfficeById(officeId);
+
+                    if (!CollectionUtils.isEmpty(loanOfficersInBranch)) {
+                        allowedLoanOfficers = new ArrayList<StaffData>(loanOfficersInBranch);
+                    }
+                } else {
+                    // by default bring back all loan officers in selected
+                    // branch/office as well as loan officers in officer above
+                    // this office
+                    Collection<StaffData> loanOfficersInHierarchy = this.staffReadPlatformService
+                            .retrieveAllLoanOfficersInOfficeAndItsParentOfficeHierarchy(officeId);
+
+                    if (!CollectionUtils.isEmpty(loanOfficersInHierarchy)) {
+                        allowedLoanOfficers = new ArrayList<StaffData>(loanOfficersInHierarchy);
+                    }
+                }
+            }
+
             // add product options, allowed loan officers and calendar options
             // (calendar options will be null in individual loan)
             newLoanAccount = LoanAccountData.associationsAndTemplate(newLoanAccount, productOptions, allowedLoanOfficers, calendarOptions);
@@ -336,9 +360,9 @@ public class LoansApiResource {
             chargeTemplate = this.loanChargeReadPlatformService.retrieveLoanChargeTemplate();
 
             if (loanBasicDetails.officeId() != null) {
-                allowedLoanOfficers = this.staffReadPlatformService.retrieveAllLoanOfficersByOffice(loanBasicDetails.officeId());
+                allowedLoanOfficers = this.staffReadPlatformService.retrieveAllLoanOfficersInOfficeById(loanBasicDetails.officeId());
             } else if (loanBasicDetails.groupOfficeId() != null) {
-                allowedLoanOfficers = this.staffReadPlatformService.retrieveAllLoanOfficersByOffice(loanBasicDetails.groupOfficeId());
+                allowedLoanOfficers = this.staffReadPlatformService.retrieveAllLoanOfficersInOfficeById(loanBasicDetails.groupOfficeId());
             }
 
             loanPurposeOptions = this.codeValueReadPlatformService.retrieveCodeValuesByCode("LoanPurpose");
@@ -492,8 +516,8 @@ public class LoansApiResource {
         // for officeId and loanOfficerId in current way!
         final LoanAccountData loanBasicDetails = this.loanReadPlatformService.retrieveOne(loanId);
 
-        final Collection<StaffData> allowedLoanOfficers = this.staffReadPlatformService.retrieveAllLoanOfficersByOffice(loanBasicDetails
-                .officeId());
+        final Collection<StaffData> allowedLoanOfficers = this.staffReadPlatformService
+                .retrieveAllLoanOfficersInOfficeById(loanBasicDetails.officeId());
         final Long fromLoanOfficerId = loanBasicDetails.loanOfficerId();
 
         final BulkTransferLoanOfficerData loanReassignmentData = BulkTransferLoanOfficerData.template(fromLoanOfficerId,

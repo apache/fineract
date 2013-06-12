@@ -26,6 +26,7 @@ public class StaffReadPlatformServiceImpl implements StaffReadPlatformService {
     private final JdbcTemplate jdbcTemplate;
     private final PlatformSecurityContext context;
     private final StaffLookupMapper lookupMapper = new StaffLookupMapper();
+    private final StaffInOfficeHierarchyMapper staffInOfficeHierarchyMapper = new StaffInOfficeHierarchyMapper();
 
     @Autowired
     public StaffReadPlatformServiceImpl(final PlatformSecurityContext context, final TenantAwareRoutingDataSource dataSource) {
@@ -51,6 +52,43 @@ public class StaffReadPlatformServiceImpl implements StaffReadPlatformService {
             final Long officeId = rs.getLong("officeId");
             final boolean isLoanOfficer = rs.getBoolean("isLoanOfficer");
             final String officeName = rs.getString("officeName");
+
+            return StaffData.instance(id, firstname, lastname, displayName, officeId, officeName, isLoanOfficer);
+        }
+    }
+
+    private static final class StaffInOfficeHierarchyMapper implements RowMapper<StaffData> {
+
+        final String schema;
+
+        public StaffInOfficeHierarchyMapper() {
+            
+            StringBuilder sqlBuilder = new StringBuilder(200);
+            sqlBuilder.append("s.id as id, s.office_id as officeId, o.name as officeName,");
+            sqlBuilder.append("s.firstname as firstname, s.lastname as lastname,");
+            sqlBuilder.append("s.display_name as displayName, s.is_loan_officer as isLoanOfficer ");
+            sqlBuilder.append("from m_office o ");
+            sqlBuilder.append("join m_office ohierarchy on o.hierarchy like concat(ohierarchy.hierarchy, '%') ");
+            sqlBuilder.append("join m_staff s on s.office_id = ohierarchy.id and s.is_loan_officer is true ");
+            sqlBuilder.append("where o.id = ? ");
+            
+            this.schema = sqlBuilder.toString();
+        }
+
+        public String schema() {
+            return this.schema;
+        }
+
+        @Override
+        public StaffData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+
+            final Long id = rs.getLong("id");
+            final String firstname = rs.getString("firstname");
+            final String lastname = rs.getString("lastname");
+            final String displayName = rs.getString("displayName");
+            final Long officeId = rs.getLong("officeId");
+            final String officeName = rs.getString("officeName");
+            final boolean isLoanOfficer = rs.getBoolean("isLoanOfficer");
 
             return StaffData.instance(id, firstname, lastname, displayName, officeId, officeName, isLoanOfficer);
         }
@@ -84,19 +122,7 @@ public class StaffReadPlatformServiceImpl implements StaffReadPlatformService {
     }
 
     @Override
-    public Collection<StaffData> retrieveAllStaff(final String extraCriteria) {
-
-        final StaffMapper rm = new StaffMapper();
-        String sql = "select " + rm.schema();
-        if (StringUtils.isNotBlank(extraCriteria)) {
-            sql += " where " + extraCriteria;
-        }
-        sql = sql + " order by s.lastname";
-        return this.jdbcTemplate.query(sql, rm, new Object[] {});
-    }
-
-    @Override
-    public Collection<StaffData> retrieveAllLoanOfficersByOffice(final Long officeId) {
+    public Collection<StaffData> retrieveAllLoanOfficersInOfficeById(final Long officeId) {
         return retrieveAllStaff(" office_id=" + officeId + " and is_loan_officer=1");
     }
 
@@ -131,5 +157,49 @@ public class StaffReadPlatformServiceImpl implements StaffReadPlatformService {
         } catch (EmptyResultDataAccessException e) {
             throw new StaffNotFoundException(staffId);
         }
+    }
+
+    @Override
+    public Collection<StaffData> retrieveAllStaff(final String sqlSearch, final Long officeId) {
+        final String extraCriteria = getStaffCriteria(sqlSearch, officeId);
+        return retrieveAllStaff(extraCriteria);
+    }
+
+    private Collection<StaffData> retrieveAllStaff(final String extraCriteria) {
+
+        final StaffMapper rm = new StaffMapper();
+        String sql = "select " + rm.schema();
+        if (StringUtils.isNotBlank(extraCriteria)) {
+            sql += " where " + extraCriteria;
+        }
+        sql = sql + " order by s.lastname";
+        return this.jdbcTemplate.query(sql, rm, new Object[] {});
+    }
+
+    private String getStaffCriteria(final String sqlSearch, final Long officeId) {
+
+        String extraCriteria = "";
+
+        if (sqlSearch != null) {
+            extraCriteria = " and (" + sqlSearch + ")";
+        }
+        if (officeId != null) {
+            extraCriteria += " and office_id = " + officeId;
+        }
+
+        if (StringUtils.isNotBlank(extraCriteria)) {
+            extraCriteria = extraCriteria.substring(4);
+        }
+
+        return extraCriteria;
+    }
+
+    @Override
+    public Collection<StaffData> retrieveAllLoanOfficersInOfficeAndItsParentOfficeHierarchy(final Long officeId) {
+
+        String sql = "select " + this.staffInOfficeHierarchyMapper.schema();
+        sql = sql + " order by s.lastname";
+
+        return this.jdbcTemplate.query(sql, this.staffInOfficeHierarchyMapper, new Object[] { officeId });
     }
 }

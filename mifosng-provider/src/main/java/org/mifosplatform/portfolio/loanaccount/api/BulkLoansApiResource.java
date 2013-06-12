@@ -88,7 +88,7 @@ public class BulkLoansApiResource {
         StaffAccountSummaryCollectionData staffAccountSummaryCollectionData = null;
 
         if (officeId != null) {
-            loanOfficers = this.staffReadPlatformService.retrieveAllLoanOfficersByOffice(officeId);
+            loanOfficers = this.staffReadPlatformService.retrieveAllLoanOfficersInOfficeById(officeId);
         }
 
         if (loanOfficerId != null) {
