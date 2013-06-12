@@ -531,4 +531,8 @@ public class CommandWrapper {
 	public boolean isAccountingRuleResource() {
 		return this.entityName.equalsIgnoreCase("ACCOUNTINGRULE");
 	}
+	
+	public boolean isHolidayResource() {
+		return this.entityName.equalsIgnoreCase("HOLIDAY");
+	}
 }
