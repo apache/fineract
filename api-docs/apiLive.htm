@@ -9658,13 +9658,13 @@ Content-Type: application/json
 							<td class=fielddesc>An Optional Office for this accounting rule is applicable.</td>
 						</tr>
 						<tr class=alt>
-							<td>debitAccountHead</td>
+							<td>accountToDebit</td>
 						</tr>
 						<tr>
 							<td class=fielddesc>ID of the target account to be Debited</td>
 						</tr>
 						<tr class=alt>
-							<td>creditAccountHead</td>
+							<td>accountToCredit</td>
 						</tr>
 						<tr>
 							<td class=fielddesc>ID of the target account to be Credited</td>
@@ -9674,14 +9674,14 @@ Content-Type: application/json
 						</tr>
 						<tr>
 							<td class=fielddesc>A list of accounting Tags. Any Ledger account with this tag can serve as the 
-								account to be debited</td>
+								account to be debited.<br> This parameter is optional, if <b>accountToDebit</b> present in the request params</td>
 						</tr>
 						<tr class=alt>
 							<td>creditTags</td>
 						</tr>
 						<tr>
 							<td class=fielddesc>A list of accounting Tags. Any Ledger account with this tag can serve as the 
-								account to be credited</td>
+								account to be credited.<br> This parameter is optional, if <b>accountToCredit</b> present in the request params</td></td>
 						</tr>
 						<tr class=alt>
 							<td>allowMultipleDebitEntries</td>
@@ -9785,6 +9785,24 @@ GET https://DomainName/api/v1/accountingrules/template
 				<div class="method-description">
 					<h4>Create/Define a Accounting rule</h4>
 					<p>Define a new Accounting rule.</p>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Mandatory Fields</div></td>
+						</tr>
+						<tr class=alt>
+							<td>name, officeId,<br> accountToDebit OR debitTags,<br> accountToCredit OR creditTags.<br>
+							</td>
+						</tr>
+					</table>
+						<br />
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Optional Fields</div></td>
+						</tr>
+						<tr class=alt>
+							<td>description</td>
+						</tr>
+					</table>
 				</div>
 				<div class="method-example">
 					<code class="method-declaration">
@@ -9797,8 +9815,8 @@ Request Body:
 {
 	"name": "test",
 	"officeId": "1",
-	"debitAccountHead": "21",
-	"creditAccountHead": "9",
+	"accountToDebit": "21",
+	"accountToCredit": "9",
 	"description": "Employee salary"
 }
 					</code>
@@ -9835,7 +9853,7 @@ Request Body:
 {
 	"name": "test123",
 	"officeId": "1",
-	"debitAccountHead": "21",
+	"accountToDebit": "21",
 	"creditTags": ["12", "13"],
 	"allowMultipleCreditEntries": "false",
 	"description": "Employee salary"
@@ -9854,9 +9872,9 @@ Request Body:
 {
 	"name": "fordocstest",
 	"officeId": "1",
-	"debitTags": ["10",	"11"],
+	"debitTags": ["10","11"],
 	"allowMultipleDebitEntries": "false",
-	"creditAccountHead": "9",
+	"accountToCredit": "9",
 	"description": "for api docs"
 }
 					</code>
