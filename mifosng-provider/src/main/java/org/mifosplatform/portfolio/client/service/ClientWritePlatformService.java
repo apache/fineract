@@ -18,4 +18,6 @@ public interface ClientWritePlatformService {
 
     CommandProcessingResult deleteClient(Long clientId);
 
+    CommandProcessingResult unassignClientStaff(Long clientId, JsonCommand command);
+
 }

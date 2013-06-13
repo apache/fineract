@@ -5,6 +5,7 @@
  */
 package org.mifosplatform.portfolio.client.service;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -20,12 +21,15 @@ import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext
 import org.mifosplatform.organisation.office.domain.Office;
 import org.mifosplatform.organisation.office.domain.OfficeRepository;
 import org.mifosplatform.organisation.office.exception.OfficeNotFoundException;
+import org.mifosplatform.organisation.staff.domain.Staff;
+import org.mifosplatform.organisation.staff.domain.StaffRepositoryWrapper;
 import org.mifosplatform.portfolio.client.api.ClientApiConstants;
 import org.mifosplatform.portfolio.client.data.ClientDataValidator;
 import org.mifosplatform.portfolio.client.domain.AccountNumberGenerator;
 import org.mifosplatform.portfolio.client.domain.AccountNumberGeneratorFactory;
 import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.client.domain.ClientRepositoryWrapper;
+import org.mifosplatform.portfolio.client.exception.ClientHasNoStaffException;
 import org.mifosplatform.portfolio.client.exception.ClientMustBePendingToBeDeletedException;
 import org.mifosplatform.portfolio.group.domain.Group;
 import org.mifosplatform.portfolio.group.domain.GroupRepository;
@@ -51,12 +55,13 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
     private final GroupRepository groupRepository;
     private final ClientDataValidator fromApiJsonDeserializer;
     private final AccountNumberGeneratorFactory accountIdentifierGeneratorFactory;
+    private final StaffRepositoryWrapper staffRepository;
 
     @Autowired
     public ClientWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
             final ClientRepositoryWrapper clientRepository, final OfficeRepository officeRepository, final NoteRepository noteRepository,
             final ClientDataValidator fromApiJsonDeserializer, final AccountNumberGeneratorFactory accountIdentifierGeneratorFactory,
-            final GroupRepository groupRepository) {
+            final GroupRepository groupRepository, final StaffRepositoryWrapper staffRepository) {
         this.context = context;
         this.clientRepository = clientRepository;
         this.officeRepository = officeRepository;
@@ -64,6 +69,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
         this.accountIdentifierGeneratorFactory = accountIdentifierGeneratorFactory;
         this.groupRepository = groupRepository;
+        this.staffRepository = staffRepository;
     }
 
     @Transactional
@@ -74,7 +80,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 
         if (client.isNotPending()) { throw new ClientMustBePendingToBeDeletedException(clientId); }
 
-        List<Note> relatedNotes = this.noteRepository.findByClientId(clientId);
+        final List<Note> relatedNotes = this.noteRepository.findByClientId(clientId);
         this.noteRepository.deleteInBatch(relatedNotes);
 
         this.clientRepository.delete(client);
@@ -92,7 +98,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
      */
     private void handleDataIntegrityIssues(final JsonCommand command, final DataIntegrityViolationException dve) {
 
-        Throwable realCause = dve.getMostSpecificCause();
+        final Throwable realCause = dve.getMostSpecificCause();
         if (realCause.getMessage().contains("external_id")) {
 
             final String externalId = command.stringValueOfParameterNamed("externalId");
@@ -114,7 +120,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
     public CommandProcessingResult createClient(final JsonCommand command) {
 
         try {
-            context.authenticatedUser();
+            this.context.authenticatedUser();
 
             this.fromApiJsonDeserializer.validateForCreate(command.json());
 
@@ -131,7 +137,13 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                 if (clientParentGroup == null) { throw new GroupNotFoundException(groupId); }
             }
 
-            final Client newClient = Client.createNew(clientOffice, clientParentGroup, command);
+            Staff staff = null;
+            final Long staffId = command.longValueOfParameterNamed(ClientApiConstants.staffIdParamName);
+            if (staffId != null) {
+                staff = this.staffRepository.findByOfficeWithNotFoundDetection(staffId, officeId);
+            }
+
+            final Client newClient = Client.createNew(clientOffice, clientParentGroup, staff, command);
 
             this.clientRepository.save(newClient);
 
@@ -149,7 +161,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                     .withGroupId(groupId) //
                     .withEntityId(newClient.getId()) //
                     .build();
-        } catch (DataIntegrityViolationException dve) {
+        } catch (final DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(command, dve);
             return CommandProcessingResult.empty();
         }
@@ -160,13 +172,23 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
     public CommandProcessingResult updateClient(final Long clientId, final JsonCommand command) {
 
         try {
-            context.authenticatedUser();
+            this.context.authenticatedUser();
 
             this.fromApiJsonDeserializer.validateForUpdate(command.json());
 
             final Client clientForUpdate = this.clientRepository.findOneWithNotFoundDetection(clientId);
 
             final Map<String, Object> changes = clientForUpdate.update(command);
+
+            if (changes.containsKey(ClientApiConstants.staffIdParamName)) {
+
+                final Long newValue = command.longValueOfParameterNamed(ClientApiConstants.staffIdParamName);
+                Staff newStaff = null;
+                if (newValue != null) {
+                    newStaff = this.staffRepository.findByOfficeWithNotFoundDetection(newValue, clientForUpdate.officeId());
+                }
+                clientForUpdate.updateStaff(newStaff);
+            }
 
             if (!changes.isEmpty()) {
                 this.clientRepository.saveAndFlush(clientForUpdate);
@@ -179,7 +201,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                     .withEntityId(clientId) //
                     .with(changes) //
                     .build();
-        } catch (DataIntegrityViolationException dve) {
+        } catch (final DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(command, dve);
             return CommandProcessingResult.empty();
         }
@@ -207,7 +229,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                     .withClientId(clientId) //
                     .withEntityId(clientId) //
                     .build();
-        } catch (DataIntegrityViolationException dve) {
+        } catch (final DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(command, dve);
             return CommandProcessingResult.empty();
         }
@@ -215,5 +237,38 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 
     private void logAsErrorUnexpectedDataIntegrityException(final DataIntegrityViolationException dve) {
         logger.error(dve.getMessage(), dve);
+    }
+
+    @Transactional
+    @Override
+    public CommandProcessingResult unassignClientStaff(final Long clientId, final JsonCommand command) {
+
+        this.context.authenticatedUser();
+
+        final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(5);
+
+        this.fromApiJsonDeserializer.validateForUnassignStaff(command.json());
+
+        final Client clientForUpdate = this.clientRepository.findOneWithNotFoundDetection(clientId);
+
+        final Staff presentStaff = clientForUpdate.getStaff();
+        Long presentStaffId = null;
+        if (presentStaff == null) { throw new ClientHasNoStaffException(clientId); }
+        presentStaffId = presentStaff.getId();
+        final String staffIdParamName = ClientApiConstants.staffIdParamName;
+        if (!command.isChangeInLongParameterNamed(staffIdParamName, presentStaffId)) {
+            clientForUpdate.unassignStaff();
+        }
+        this.clientRepository.saveAndFlush(clientForUpdate);
+
+        actualChanges.put(staffIdParamName, presentStaffId);
+
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(command.commandId()) //
+                .withOfficeId(clientForUpdate.officeId()) //
+                .withEntityId(clientForUpdate.getId()) //
+                .withClientId(clientId) //
+                .with(actualChanges) //
+                .build();
     }
 }

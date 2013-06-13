@@ -535,4 +535,8 @@ public class CommandWrapper {
 	public boolean isHolidayResource() {
 		return this.entityName.equalsIgnoreCase("HOLIDAY");
 	}
+
+    public boolean isClientUnassignStaff() {
+        return this.actionName.equalsIgnoreCase("UNASSIGNSTAFF") && this.entityName.equalsIgnoreCase("CLIENT");
+    }
 }

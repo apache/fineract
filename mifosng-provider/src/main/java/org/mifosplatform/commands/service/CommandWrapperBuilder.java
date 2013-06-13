@@ -1026,4 +1026,13 @@ public class CommandWrapperBuilder {
         this.href = "/holidays/template";
         return this;
     }
+
+    public CommandWrapperBuilder unassignClientStaff(Long clientId) {
+        this.actionName = "UNASSIGNSTAFF";
+        this.entityName = "CLIENT";
+        this.entityId = clientId;
+        this.clientId = clientId;
+        this.href = "/clients/" + clientId + "?command=unassignStaff";
+        return this;
+    }
 }

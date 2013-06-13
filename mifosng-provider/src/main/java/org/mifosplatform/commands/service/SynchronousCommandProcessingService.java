@@ -157,6 +157,8 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
                 handler = applicationContext.getBean("deleteClientCommandHandler", NewCommandSourceHandler.class);
             } else if (wrapper.isClientActivation()) {
                 handler = applicationContext.getBean("activateClientCommandHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isClientUnassignStaff()) {
+                handler = applicationContext.getBean("unassignClientStaffCommandHandler", NewCommandSourceHandler.class);
             } else {
                 throw new UnsupportedCommandException(wrapper.commandName());
             }

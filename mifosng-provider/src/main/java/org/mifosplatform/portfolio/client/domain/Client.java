@@ -5,6 +5,27 @@
  */
 package org.mifosplatform.portfolio.client.domain;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
+import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+import javax.persistence.Transient;
+import javax.persistence.UniqueConstraint;
+
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormatter;
@@ -16,13 +37,10 @@ import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.documentmanagement.domain.Image;
 import org.mifosplatform.infrastructure.security.service.RandomPasswordGenerator;
 import org.mifosplatform.organisation.office.domain.Office;
+import org.mifosplatform.organisation.staff.domain.Staff;
 import org.mifosplatform.portfolio.client.api.ClientApiConstants;
 import org.mifosplatform.portfolio.group.domain.Group;
 import org.springframework.data.jpa.domain.AbstractPersistable;
-
-import javax.persistence.*;
-
-import java.util.*;
 
 @Entity
 @Table(name = "m_client", uniqueConstraints = { @UniqueConstraint(columnNames = { "account_no" }, name = "account_no_UNIQUE") })
@@ -67,6 +85,10 @@ public final class Client extends AbstractPersistable<Long> {
     @Column(name = "external_id", length = 100, nullable = true, unique = true)
     private String externalId;
 
+    @ManyToOne
+    @JoinColumn(name = "staff_id")
+    private Staff staff;
+
     @ManyToMany
     @JoinTable(name = "m_group_client", joinColumns = @JoinColumn(name = "client_id"), inverseJoinColumns = @JoinColumn(name = "group_id"))
     private Set<Group> groups;
@@ -74,7 +96,7 @@ public final class Client extends AbstractPersistable<Long> {
     @Transient
     private boolean accountNumberRequiresAutoGeneration = false;
 
-    public static Client createNew(final Office clientOffice, final Group clientParentGroup, final JsonCommand command) {
+    public static Client createNew(final Office clientOffice, final Group clientParentGroup, final Staff staff, final JsonCommand command) {
 
         final String accountNo = command.stringValueOfParameterNamed(ClientApiConstants.accountNoParamName);
         final String externalId = command.stringValueOfParameterNamed(ClientApiConstants.externalIdParamName);
@@ -97,7 +119,7 @@ public final class Client extends AbstractPersistable<Long> {
         }
 
         return new Client(status, clientOffice, clientParentGroup, accountNo, firstname, middlename, lastname, fullname, activationDate,
-                externalId);
+                externalId, staff);
     }
 
     protected Client() {
@@ -106,7 +128,7 @@ public final class Client extends AbstractPersistable<Long> {
 
     private Client(final ClientStatus status, final Office office, final Group clientParentGroup, final String accountNo,
             final String firstname, final String middlename, final String lastname, final String fullname, final LocalDate activationDate,
-            final String externalId) {
+            final String externalId, final Staff staff) {
         if (StringUtils.isBlank(accountNo)) {
             this.accountNumber = new RandomPasswordGenerator(19).generate();
             this.accountNumberRequiresAutoGeneration = true;
@@ -151,6 +173,8 @@ public final class Client extends AbstractPersistable<Long> {
             this.groups = new HashSet<Group>();
             this.groups.add(clientParentGroup);
         }
+
+        this.staff = staff;
 
         deriveDisplayName();
         validate();
@@ -280,6 +304,11 @@ public final class Client extends AbstractPersistable<Long> {
             this.fullname = newValue;
         }
 
+        if (command.isChangeInLongParameterNamed(ClientApiConstants.staffIdParamName, staffId())) {
+            final Long newValue = command.longValueOfParameterNamed(ClientApiConstants.staffIdParamName);
+            actualChanges.put(ClientApiConstants.staffIdParamName, newValue);
+        }
+
         final String dateFormatAsInput = command.dateFormat();
         final String localeAsInput = command.locale();
 
@@ -326,7 +355,7 @@ public final class Client extends AbstractPersistable<Long> {
 
     private void validateActivationDate(final List<ApiParameterError> dataValidationErrors) {
         if (this.activationDate != null) {
-            if (office.isOpeningDateAfter(getActivationLocalDate())) {
+            if (this.office.isOpeningDateAfter(getActivationLocalDate())) {
                 final String defaultUserMessage = "Client activation date cannot be a date before the office opening date.";
                 final ApiParameterError error = ApiParameterError.parameterError(
                         "error.msg.clients.activationDate.cannot.be.before.office.activation.date", defaultUserMessage,
@@ -374,7 +403,7 @@ public final class Client extends AbstractPersistable<Long> {
         return this.office.getId();
     }
 
-    public void setImage(Image image) {
+    public void setImage(final Image image) {
         this.image = image;
     }
 
@@ -386,8 +415,28 @@ public final class Client extends AbstractPersistable<Long> {
         return this.displayName;
     }
 
-    public void setDisplayName(String displayName) {
+    public void setDisplayName(final String displayName) {
         this.displayName = displayName;
+    }
+
+    private Long staffId() {
+        Long staffId = null;
+        if (this.staff != null) {
+            staffId = this.staff.getId();
+        }
+        return staffId;
+    }
+
+    public void updateStaff(final Staff staff) {
+        this.staff = staff;
+    }
+
+    public Staff getStaff() {
+        return this.staff;
+    }
+
+    public void unassignStaff() {
+        this.staff = null;
     }
 
 }
