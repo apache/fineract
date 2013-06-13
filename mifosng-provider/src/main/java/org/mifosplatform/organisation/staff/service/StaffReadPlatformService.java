@@ -18,10 +18,10 @@ public interface StaffReadPlatformService {
     Collection<StaffData> retrieveAllLoanOfficersInOfficeById(final Long officeId);
 
     /**
-     * returns all loan officers in offices that are above the provided
+     * returns all staff in offices that are above the provided
      * <code>officeId</code>.
      */
-    Collection<StaffData> retrieveAllLoanOfficersInOfficeAndItsParentOfficeHierarchy(Long officeId);
+    Collection<StaffData> retrieveAllStaffInOfficeAndItsParentOfficeHierarchy(Long officeId, boolean loanOfficersOnly);
 
     Collection<StaffData> retrieveAllStaff(String sqlSearch, Long officeId);
 }

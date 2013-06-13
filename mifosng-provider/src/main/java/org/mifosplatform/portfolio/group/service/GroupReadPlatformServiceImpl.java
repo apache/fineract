@@ -65,7 +65,7 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
     }
 
     @Override
-    public GroupGeneralData retrieveTemplate(final Long officeId, final boolean isCenterGroup) {
+    public GroupGeneralData retrieveTemplate(final Long officeId, final boolean isCenterGroup, final boolean staffInSelectedOfficeOnly) {
 
         final Long defaultOfficeId = defaultToUsersOfficeIfNull(officeId);
 
@@ -75,7 +75,16 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
         }
 
         final Collection<OfficeData> officeOptions = this.officeReadPlatformService.retrieveAllOfficesForDropdown();
-        Collection<StaffData> staffOptions = this.staffReadPlatformService.retrieveAllStaffForDropdown(defaultOfficeId);
+
+        final boolean loanOfficersOnly = false;
+        Collection<StaffData> staffOptions = null;
+        if (staffInSelectedOfficeOnly) {
+            staffOptions = this.staffReadPlatformService.retrieveAllStaffForDropdown(defaultOfficeId);
+        } else {
+            staffOptions = this.staffReadPlatformService.retrieveAllStaffInOfficeAndItsParentOfficeHierarchy(defaultOfficeId,
+                    loanOfficersOnly);
+        }
+
         if (CollectionUtils.isEmpty(staffOptions)) {
             staffOptions = null;
         }

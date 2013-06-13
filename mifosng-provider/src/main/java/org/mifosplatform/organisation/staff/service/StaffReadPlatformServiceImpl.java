@@ -59,24 +59,23 @@ public class StaffReadPlatformServiceImpl implements StaffReadPlatformService {
 
     private static final class StaffInOfficeHierarchyMapper implements RowMapper<StaffData> {
 
-        final String schema;
+        public String schema(final boolean loanOfficersOnly) {
 
-        public StaffInOfficeHierarchyMapper() {
-            
             StringBuilder sqlBuilder = new StringBuilder(200);
             sqlBuilder.append("s.id as id, s.office_id as officeId, o.name as officeName,");
             sqlBuilder.append("s.firstname as firstname, s.lastname as lastname,");
             sqlBuilder.append("s.display_name as displayName, s.is_loan_officer as isLoanOfficer ");
             sqlBuilder.append("from m_office o ");
             sqlBuilder.append("join m_office ohierarchy on o.hierarchy like concat(ohierarchy.hierarchy, '%') ");
-            sqlBuilder.append("join m_staff s on s.office_id = ohierarchy.id and s.is_loan_officer is true ");
-            sqlBuilder.append("where o.id = ? ");
-            
-            this.schema = sqlBuilder.toString();
-        }
+            sqlBuilder.append("join m_staff s on s.office_id = ohierarchy.id ");
 
-        public String schema() {
-            return this.schema;
+            if (loanOfficersOnly) {
+                sqlBuilder.append("and s.is_loan_officer is true ");
+            }
+
+            sqlBuilder.append("where o.id = ? ");
+
+            return sqlBuilder.toString();
         }
 
         @Override
@@ -195,9 +194,9 @@ public class StaffReadPlatformServiceImpl implements StaffReadPlatformService {
     }
 
     @Override
-    public Collection<StaffData> retrieveAllLoanOfficersInOfficeAndItsParentOfficeHierarchy(final Long officeId) {
+    public Collection<StaffData> retrieveAllStaffInOfficeAndItsParentOfficeHierarchy(final Long officeId, final boolean loanOfficersOnly) {
 
-        String sql = "select " + this.staffInOfficeHierarchyMapper.schema();
+        String sql = "select " + this.staffInOfficeHierarchyMapper.schema(loanOfficersOnly);
         sql = sql + " order by s.lastname";
 
         return this.jdbcTemplate.query(sql, this.staffInOfficeHierarchyMapper, new Object[] { officeId });

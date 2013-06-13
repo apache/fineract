@@ -164,7 +164,7 @@ public class LoansApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String template(@QueryParam("clientId") final Long clientId, @QueryParam("groupId") final Long groupId,
             @QueryParam("productId") final Long productId, @QueryParam("templateType") final String templateType,
-            @DefaultValue("false") @QueryParam("loanOfficersInSelectedOfficeOnly") final boolean loanOfficersInSelectedOfficeOnly,
+            @DefaultValue("false") @QueryParam("staffInSelectedOfficeOnly") final boolean staffInSelectedOfficeOnly,
             @Context final UriInfo uriInfo) {
 
         context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
@@ -227,7 +227,7 @@ public class LoansApiResource {
             }
 
             if (officeId != null) {
-                if (loanOfficersInSelectedOfficeOnly) {
+                if (staffInSelectedOfficeOnly) {
                     // only bring back loan officers in selected branch/office
                     Collection<StaffData> loanOfficersInBranch = this.staffReadPlatformService
                             .retrieveAllLoanOfficersInOfficeById(officeId);
@@ -239,8 +239,9 @@ public class LoansApiResource {
                     // by default bring back all loan officers in selected
                     // branch/office as well as loan officers in officer above
                     // this office
+                    final boolean restrictToLoanOfficersOnly = true;
                     Collection<StaffData> loanOfficersInHierarchy = this.staffReadPlatformService
-                            .retrieveAllLoanOfficersInOfficeAndItsParentOfficeHierarchy(officeId);
+                            .retrieveAllStaffInOfficeAndItsParentOfficeHierarchy(officeId, restrictToLoanOfficersOnly);
 
                     if (!CollectionUtils.isEmpty(loanOfficersInHierarchy)) {
                         allowedLoanOfficers = new ArrayList<StaffData>(loanOfficersInHierarchy);

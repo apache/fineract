@@ -1372,6 +1372,10 @@
 								<td>clients/template</td>
 								<td><a href="#clients_template">Retrieve Client Template</a></td>
 							</tr>
+							<tr class="alt">
+								<td>groups/template</td>
+								<td><a href="#groups_template">Retrieve Group Template</a></td>
+							</tr>
 							<tr >
 								<td>loanproducts/template</td>
 								<td><a href="#loanproducts_template">Retrieve Loan Product Template</a></td>
@@ -3353,6 +3357,33 @@ GET https://DomainName/mifosng-provider/api/v1/centers
 			<div class="method-section">
 				<div class="method-description">
 					<h4>Retrieve Group Template</h4>
+					<p>This is a convenience resource. It can be useful when
+						building maintenance user interface screens for client
+						applications. The template data returned consists of any or all
+						of:
+					<ul>
+						<li class=normalli>Field Defaults</li>
+						<li class=normalli>Allowed Value Lists</li>
+					</ul>
+					</p>
+					<h5>Arguments</h5>
+					<dl class="argument-list">
+						<dt>officeId</dt>
+						<dd>
+							Integer <span>optional</span>
+						</dd>
+						<dt>centerId</dt>
+						<dd>
+							Integer <span>optional</span>
+						</dd>
+						<dt>staffInSelectedOfficeOnly</dt>
+						<dd>
+							Boolean <span>optional</span>
+						</dd>
+						<dd>Defaults to false if not provided. If <strong>staffInSelectedOfficeOnly=true</strong> only staff 
+						who are associated with the selected branch are returned.</dd>	
+					</dl>
+					
 					<p>Example Requests:</p>
 					<div class=apiClick>groups/template</div>
 					<br/>
@@ -3360,7 +3391,8 @@ GET https://DomainName/mifosng-provider/api/v1/centers
 					<br/>
 					<div class=apiClick>groups/template?centerId=1</div>
 					<br/>
-					
+					<div class=apiClick>groups/template?centerId=1&staffInSelectedOfficeOnly=true</div>
+					<br/>
 				</div>
 				<div class="method-example">
 					<p>Template to create a standard group</p>
@@ -4076,12 +4108,12 @@ GET https://DomainName/mifosng-provider/api/v1/groups
 						<dd>If entered, productId, productName and selectedProduct
 							fields are returned.</dd>
 							
-						<dt>loanOfficersInSelectedOfficeOnly</dt>
+						<dt>staffInSelectedOfficeOnly</dt>
 						<dd>
 							Boolean <span>optional</span>
 						</dd>
-						<dd>Defaults to false if not provided. If <strong>loanOfficersInSelectedOfficeOnly=true</strong> only loan officers 
-						who are associated with the select branch are returned.</dd>	
+						<dd>Defaults to false if not provided. If <strong>staffInSelectedOfficeOnly=true</strong> only loan officers 
+						who are associated with the selected branch are returned.</dd>	
 					</dl>
 					<p>Example Requests:</p>
 					<div class=apiClick>loans/template?templateType=individual&clientId=1</div>
