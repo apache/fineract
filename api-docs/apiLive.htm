@@ -449,6 +449,106 @@
 				</div>
 			</div>
 
+			<div class="flybar-nav">
+				<h2 class="flybar-button">Group</h2>
+				<div id="toc-menu-loan" class="flybar-menu">
+					<div class="tocMatrix">
+						<table class=matrixHeading>
+							<tr class="matrixHeadingBG">
+								<td colspan=2 valign="top"><div class="matrixHeadingVerbs">
+										<table>
+											<tr>
+												<td>RESOURCES</td>
+											</tr>
+										</table>
+									</div></td>
+								<td><table>
+										<tr>
+											<td><div class="matrixHeadingVerbs">POST</div></td>
+										</tr>
+										<tr>
+											<td><div class=matrixHeadingCommands>create/complex
+													update</div></td>
+										</tr>
+									</table></td>
+								<td><table>
+										<tr>
+											<td><div class="matrixHeadingVerbs">GET</div></td>
+										</tr>
+										<tr>
+											<td><div class=matrixHeadingCommands>read</div></td>
+										</tr>
+									</table></td>
+								<td><table>
+										<tr>
+											<td><div class="matrixHeadingVerbs">PUT</div></td>
+										</tr>
+										<tr>
+											<td><div class=matrixHeadingCommands>update</div></td>
+										</tr>
+									</table></td>
+								<td><table>
+										<tr>
+											<td><div class="matrixHeadingVerbs">DELETE</div></td>
+										</tr>
+										<tr>
+											<td><div class=matrixHeadingCommands>delete</div></td>
+										</tr>
+									</table></td>
+							</tr>
+							<tr class="alt">
+								<td><a href="#groups">Group</a></td>
+								<td>groups</td>
+								<td><a href="#groups_create">Create a Group</a></td>
+								<td><a href="#groups_list">List Groups</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+			                    <td>groups/template</td>
+			                    <td></td>
+			                    <td><a href="#groups_template">Retrieve Group Template</a></td>
+			                    <td></td>
+								<td></td>
+			                </tr>
+							<tr class="alt">
+								<td></td>
+								<td>groups/{groupId}</td>
+								<td></td>
+								<td><a href="#groups_retrieve">Retrieve a Group</a></td>
+								<td><a href="#groups_update">Update a Group</a></td>
+								<td><a href="#groups_delete">Delete a Group</a></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>groups/{groupId}?command=activate</td>
+								<td><a href="#groups_activate">Activate a Group</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>groups/{groupId}?command=associateClients</td>
+								<td><a href="#groups_associate_clients">Associate Clients</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>groups/{groupId}?command=disassociateClients</td>
+								<td><a href="#groups_disassociate_clients">Disassociate Clients</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+						</table>
+					</div>
+				</div>
+			</div>
+
 			<!-- disabled Groupings API for release 1.0.0 as its beta -->
 			<!--
 			<div class="flybar-nav">
@@ -15661,6 +15761,54 @@ GET https://DomainName/api/v1/search?query=000000111
 					<td></td>
 				</tr>
 				<tr class="alt">
+					<td><a href="#groups">Group</a></td>
+					<td>groups</td>
+					<td><a href="#groups_create">Create a Group</a></td>
+					<td><a href="#groups_list">List Groups</a></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
+                    <td>groups/template</td>
+                    <td></td>
+                    <td><a href="#groups_template">Retrieve Group Template</a></td>
+                    <td></td>
+					<td></td>
+                </tr>
+				<tr class="alt">
+					<td></td>
+					<td>groups/{groupId}</td>
+					<td></td>
+					<td><a href="#groups_retrieve">Retrieve a Group</a></td>
+					<td><a href="#groups_update">Update a Group</a></td>
+					<td><a href="#groups_delete">Delete a Group</a></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>groups/{groupId}?command=activate</td>
+					<td><a href="#groups_activate">Activate a Group</a></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>groups/{groupId}?command=associateClients</td>
+					<td><a href="#groups_associate_clients">Associate Clients</a></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>groups/{groupId}?command=disassociateClients</td>
+					<td><a href="#groups_disassociate_clients">Disassociate Clients</a></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr class="alt">
 					<td><a href="#loanproducts">Loan Product</a></td>
 					<td>loanproducts</td>
 					<td><a href="#loanproducts_create">Create a Loan Product</a></td>
@@ -16398,54 +16546,6 @@ GET https://DomainName/api/v1/search?query=000000111
 					<td></td>
 					<td>centers/{centerId}?command=activate</td>
 					<td><a href="#centers_activate">Activate a Center</a></td>
-					<td></td>
-					<td></td>
-					<td></td>
-				</tr>
-				<tr class="alt">
-					<td><a href="#groups">Group</a></td>
-					<td>groups</td>
-					<td><a href="#groups_create">Create a Group</a></td>
-					<td><a href="#groups_list">List Groups</a></td>
-					<td></td>
-					<td></td>
-				</tr>
-				<tr>
-					<td></td>
-                    <td>groups/template</td>
-                    <td></td>
-                    <td><a href="#groups_template">Retrieve Group Template</a></td>
-                    <td></td>
-					<td></td>
-                </tr>
-				<tr class="alt">
-					<td></td>
-					<td>groups/{groupId}</td>
-					<td></td>
-					<td><a href="#groups_retrieve">Retrieve a Group</a></td>
-					<td><a href="#groups_update">Update a Group</a></td>
-					<td><a href="#groups_delete">Delete a Group</a></td>
-				</tr>
-				<tr>
-					<td></td>
-					<td>groups/{groupId}?command=activate</td>
-					<td><a href="#groups_activate">Activate a Group</a></td>
-					<td></td>
-					<td></td>
-					<td></td>
-				</tr>
-				<tr>
-					<td></td>
-					<td>groups/{groupId}?command=associateClients</td>
-					<td><a href="#groups_associate_clients">Associate Clients</a></td>
-					<td></td>
-					<td></td>
-					<td></td>
-				</tr>
-				<tr>
-					<td></td>
-					<td>groups/{groupId}?command=disassociateClients</td>
-					<td><a href="#groups_disassociate_clients">Disassociate Clients</a></td>
 					<td></td>
 					<td></td>
 					<td></td>
