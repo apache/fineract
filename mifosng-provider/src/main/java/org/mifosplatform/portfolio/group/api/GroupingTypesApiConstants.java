@@ -16,6 +16,15 @@ public class GroupingTypesApiConstants {
     public static final String CENTER_RESOURCE_NAME = "center";
     public static final String GROUP_RESOURCE_NAME = "group";
     public static final String COMMUNAL_BANK_RESOURCE_NAME = "communalbank";
+    
+    //group roles
+    public static final String GROUP_ROLE_RESOURCE_NAME = "grouprole";
+    public static final String GROUP_ROLE_NAME = "GROUPROLE";
+    
+    public static final String roleParamName = "role";
+    public static final String groupIdParamName = "groupId";
+    public static final String clientIdParamName = "clientId";
+    public static final String groupRolesParamName = "groupRoles";
 
     // general
     public static final String localeParamName = "locale";
@@ -51,6 +60,8 @@ public class GroupingTypesApiConstants {
     public static final Set<String> GROUP_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(localeParamName, dateFormatParamName,
             idParamName, nameParamName, externalIdParamName, centerIdParamName, officeIdParamName, staffIdParamName, activeParamName,
             activationDateParamName, clientMembersParamName));
+    
+    public static final Set<String> GROUP_ROLES_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(roleParamName, clientIdParamName));
 
     /**
      * These parameters will match the class level parameters of
@@ -74,4 +85,5 @@ public class GroupingTypesApiConstants {
     
     
     public static final Set<String> COLLECTIONSHEET_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("dueDate", "loanProducts", "groups"));
+
 }

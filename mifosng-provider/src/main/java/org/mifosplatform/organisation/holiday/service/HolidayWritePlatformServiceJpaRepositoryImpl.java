@@ -82,8 +82,7 @@ public class HolidayWritePlatformServiceJpaRepositoryImpl implements HolidayWrit
 
             this.holidayRepository.save(holiday);
 
-            return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(holiday.getId())
-                    .withHolidayId(holiday.getId()).build();
+            return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(holiday.getId()).build();
         } catch (final DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(command, dve);
             return CommandProcessingResult.empty();

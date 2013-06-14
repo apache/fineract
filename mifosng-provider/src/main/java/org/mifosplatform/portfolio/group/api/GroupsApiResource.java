@@ -44,8 +44,10 @@ import org.mifosplatform.portfolio.collectionsheet.data.JLGCollectionSheetData;
 import org.mifosplatform.portfolio.collectionsheet.service.CollectionSheetReadPlatformService;
 import org.mifosplatform.portfolio.group.data.GroupAccountSummaryCollectionData;
 import org.mifosplatform.portfolio.group.data.GroupGeneralData;
+import org.mifosplatform.portfolio.group.data.GroupRoleData;
 import org.mifosplatform.portfolio.group.service.CenterReadPlatformService;
 import org.mifosplatform.portfolio.group.service.GroupReadPlatformService;
+import org.mifosplatform.portfolio.group.service.GroupRolesReadPlatformService;
 import org.mifosplatform.portfolio.group.service.SearchParameters;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -70,6 +72,7 @@ public class GroupsApiResource {
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final CollectionSheetReadPlatformService collectionSheetReadPlatformService;
     private final FromJsonHelper fromJsonHelper;
+    private final GroupRolesReadPlatformService groupRolesReadPlatformService;
 
     @Autowired
     public GroupsApiResource(final PlatformSecurityContext context, final GroupReadPlatformService groupReadPlatformService,
@@ -79,7 +82,8 @@ public class GroupsApiResource {
             final ToApiJsonSerializer<GroupAccountSummaryCollectionData> groupSummaryToApiJsonSerializer,
             final ApiRequestParameterHelper apiRequestParameterHelper,
             final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
-            final CollectionSheetReadPlatformService collectionSheetReadPlatformService, final FromJsonHelper fromJsonHelper) {
+            final CollectionSheetReadPlatformService collectionSheetReadPlatformService, final FromJsonHelper fromJsonHelper,
+            final GroupRolesReadPlatformService groupRolesReadPlatformService) {
         this.context = context;
         this.groupReadPlatformService = groupReadPlatformService;
         this.centerReadPlatformService = centerReadPlatformService;
@@ -91,6 +95,7 @@ public class GroupsApiResource {
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
         this.collectionSheetReadPlatformService = collectionSheetReadPlatformService;
         this.fromJsonHelper = fromJsonHelper;
+        this.groupRolesReadPlatformService = groupRolesReadPlatformService;
     }
 
     @GET
@@ -132,7 +137,7 @@ public class GroupsApiResource {
                 limit, orderBy, sortOrder);
         final Page<GroupGeneralData> groups = this.groupReadPlatformService.retrieveAll(searchParameters);
 
-        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serialize(settings, groups, GroupingTypesApiConstants.GROUP_RESPONSE_DATA_PARAMETERS);
     }
 
@@ -141,7 +146,8 @@ public class GroupsApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveOne(@Context final UriInfo uriInfo, @PathParam("groupId") final Long groupId,
-            @DefaultValue("false") @QueryParam("staffInSelectedOfficeOnly") final boolean staffInSelectedOfficeOnly) {
+            @DefaultValue("false") @QueryParam("staffInSelectedOfficeOnly") final boolean staffInSelectedOfficeOnly,
+            @QueryParam("roleId") final Long roleId) {
 
         this.context.authenticatedUser().validateHasReadPermission(GroupingTypesApiConstants.GROUP_RESOURCE_NAME);
         final Set<String> associationParameters = ApiParameterHelper.extractAssociationsForResponseIfProvided(uriInfo.getQueryParameters());
@@ -150,11 +156,28 @@ public class GroupsApiResource {
 
         // associations
         Collection<ClientData> membersOfGroup = null;
+        Collection<GroupRoleData> groupRoles = null;
+        GroupRoleData selectedRole = null;
         if (!associationParameters.isEmpty()) {
+            if (associationParameters.contains("all")) {
+                associationParameters.addAll(Arrays.asList("clientMembers", "groupRoles"));
+            }
             if (associationParameters.contains("clientMembers")) {
                 membersOfGroup = this.clientReadPlatformService.retrieveClientMembersOfGroup(groupId);
                 if (CollectionUtils.isEmpty(membersOfGroup)) {
                     membersOfGroup = null;
+                }
+            }
+            if (associationParameters.contains("groupRoles")) {
+                groupRoles = this.groupRolesReadPlatformService.retrieveGroupRoles(groupId);
+                if (CollectionUtils.isEmpty(membersOfGroup)) {
+                    groupRoles = null;
+                }
+            }
+            if (roleId != null) {
+                selectedRole = this.groupRolesReadPlatformService.retrieveGroupRole(groupId, roleId);
+                if (selectedRole != null) {
+                    group = GroupGeneralData.updateSelectedRole(group, selectedRole);
                 }
             }
         }
@@ -163,9 +186,9 @@ public class GroupsApiResource {
         if (template) {
             final GroupGeneralData templateGroup = this.groupReadPlatformService.retrieveTemplate(group.officeId(), false,
                     staffInSelectedOfficeOnly);
-            group = GroupGeneralData.withTemplateAndAssociations(templateGroup, group, membersOfGroup);
+            group = GroupGeneralData.withTemplateAndAssociations(templateGroup, group, membersOfGroup, groupRoles);
         } else {
-            group = GroupGeneralData.withAssocations(group, membersOfGroup);
+            group = GroupGeneralData.withAssocations(group, membersOfGroup, groupRoles);
         }
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
@@ -232,8 +255,8 @@ public class GroupsApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String activateOrGenerateCollectionSheet(@PathParam("groupId") final Long groupId,
-            @QueryParam("command") final String commandParam, final String apiRequestBodyAsJson, @Context final UriInfo uriInfo) {
-
+            @QueryParam("command") final String commandParam, @QueryParam("roleId") final Long roleId, final String apiRequestBodyAsJson,
+            @Context final UriInfo uriInfo) {
         final CommandWrapperBuilder builder = new CommandWrapperBuilder().withJson(apiRequestBodyAsJson);
 
         CommandProcessingResult result = null;
@@ -264,9 +287,21 @@ public class GroupsApiResource {
             final CommandWrapper commandRequest = builder.unassignGroupStaff(groupId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
             return this.toApiJsonSerializer.serialize(result);
+        } else if (is(commandParam, "assignRole")) {
+            final CommandWrapper commandRequest = builder.assignRole(groupId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            return this.toApiJsonSerializer.serialize(result);
+        } else if (is(commandParam, "unassignRole")) {
+            final CommandWrapper commandRequest = builder.unassignRole(groupId, roleId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            return this.toApiJsonSerializer.serialize(result);
+        } else if (is(commandParam, "updateRole")) {
+            final CommandWrapper commandRequest = builder.updateRole(groupId, roleId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            return this.toApiJsonSerializer.serialize(result);
         } else {
             throw new UnrecognizedQueryParamException("command", commandParam, new Object[] { "activate", "generateCollectionSheet",
-                    "saveCollectionSheet", "unassignStaff" });
+                    "saveCollectionSheet", "unassignStaff", "assignRole", "unassignRole", "updateassignRole" });
         }
 
     }
