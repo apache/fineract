@@ -279,7 +279,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         // get group associations
         Collection<ClientData> membersOfGroup = this.clientReadPlatformService.retrieveClientMembersOfGroup(groupId);
         if (!CollectionUtils.isEmpty(membersOfGroup)) {
-            groupAccount = GroupGeneralData.withAssocations(groupAccount, membersOfGroup);
+            groupAccount = GroupGeneralData.withAssocations(groupAccount, membersOfGroup, null);
         }
 
         final LocalDate expectedDisbursementDate = DateUtils.getLocalDateOfTenant();
@@ -938,7 +938,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         // get group associations
         Collection<ClientData> membersOfGroup = this.clientReadPlatformService.retrieveClientMembersOfGroup(groupId);
         if (!CollectionUtils.isEmpty(membersOfGroup)) {
-            groupAccount = GroupGeneralData.withAssocations(groupAccount, membersOfGroup);
+            groupAccount = GroupGeneralData.withAssocations(groupAccount, membersOfGroup, null);
         }
 
         return LoanAccountData.groupDefaults(groupAccount, expectedDisbursementDate);

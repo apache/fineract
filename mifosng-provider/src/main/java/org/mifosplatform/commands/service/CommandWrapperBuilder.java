@@ -1026,4 +1026,31 @@ public class CommandWrapperBuilder {
         this.href = "/holidays/template";
         return this;
     }
+
+    public CommandWrapperBuilder assignRole(Long groupId) {
+        this.actionName = "ASSIGNROLE";
+        this.entityName = "GROUP";
+        this.groupId = groupId;
+        this.entityId = null;
+        this.href = "/groups/"+groupId+"?command=assignRole";
+        return this;
+    }
+
+    public CommandWrapperBuilder unassignRole(Long groupId, Long roleId) {
+        this.actionName = "UNASSIGNROLE";
+        this.entityName = "GROUP";
+        this.groupId = groupId;
+        this.entityId = roleId;
+        this.href = "/groups/"+groupId+"?command=unassignRole";
+        return this;
+    }
+
+    public CommandWrapperBuilder updateRole(Long groupId, Long roleId) {
+        this.actionName = "UPDATEROLE";
+        this.entityName = "GROUP";
+        this.groupId = groupId;
+        this.entityId = roleId;
+        this.href = "/groups/"+groupId+"?command=updateRole";
+        return this;
+    }
 }
