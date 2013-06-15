@@ -370,4 +370,8 @@ public final class Group extends AbstractPersistable<Long> {
     public void setParent(final Group parent) {
         this.parent = parent;
     }
+
+    public Office getOffice() {
+        return this.office;
+    }
 }
