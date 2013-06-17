@@ -15,6 +15,7 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.organisation.office.data.OfficeData;
+import org.mifosplatform.organisation.staff.data.StaffData;
 import org.mifosplatform.portfolio.group.data.GroupGeneralData;
 
 /**
@@ -43,28 +44,34 @@ final public class ClientData implements Comparable<ClientData> {
 
     private final Long imageId;
     private final Boolean imagePresent;
+    private final Long staffId;
+    private final String staffName;
 
     // associations
     private final Collection<GroupGeneralData> groups;
 
     // template
     private final Collection<OfficeData> officeOptions;
+    private final Collection<StaffData> staffOptions;
 
-    public static ClientData template(final Long officeId, final LocalDate joinedDate, final Collection<OfficeData> officeOptions) {
-        return new ClientData(null, null, officeId, null, null, null, null, null, null, null, null, joinedDate, null, officeOptions, null);
+    public static ClientData template(final Long officeId, final LocalDate joinedDate, final Collection<OfficeData> officeOptions, 
+            final Collection<StaffData> staffOptions) {
+        return new ClientData(null, null, officeId, null, null, null, null, null, null, null, null, joinedDate, null, null, null, officeOptions, null, staffOptions);
     }
 
-    public static ClientData templateOnTop(final ClientData clientData, final List<OfficeData> allowedOffices) {
+    public static ClientData templateOnTop(final ClientData clientData, final List<OfficeData> allowedOffices, final Collection<StaffData> staffOptions) {
 
         return new ClientData(clientData.accountNo, clientData.status, clientData.officeId, clientData.officeName, clientData.id,
                 clientData.firstname, clientData.middlename, clientData.lastname, clientData.fullname, clientData.displayName,
-                clientData.externalId, clientData.activationDate, clientData.imageId, allowedOffices, clientData.groups);
+                clientData.externalId, clientData.activationDate, clientData.imageId, clientData.staffId, clientData.staffName,
+                allowedOffices, clientData.groups, staffOptions);
     }
 
     public static ClientData setParentGroups(final ClientData clientData, final Collection<GroupGeneralData> parentGroups) {
         return new ClientData(clientData.accountNo, clientData.status, clientData.officeId, clientData.officeName, clientData.id,
                 clientData.firstname, clientData.middlename, clientData.lastname, clientData.fullname, clientData.displayName,
-                clientData.externalId, clientData.activationDate, clientData.imageId, clientData.officeOptions, parentGroups);
+                clientData.externalId, clientData.activationDate, clientData.imageId, clientData.staffId, clientData.staffName,
+                clientData.officeOptions, parentGroups, clientData.staffOptions);
     }
 
     public static ClientData clientIdentifier(final Long id, final String accountNo, final EnumOptionData status, final String firstname,
@@ -72,24 +79,25 @@ final public class ClientData implements Comparable<ClientData> {
             final String officeName) {
 
         return new ClientData(accountNo, status, officeId, officeName, id, firstname, middlename, lastname, fullname, displayName, null,
-                null, null, null, null);
+                null, null, null, null, null, null,null);
     }
 
     public static ClientData lookup(final Long id, final String displayName, final Long officeId, final String officeName) {
-        return new ClientData(null, null, officeId, officeName, id, null, null, null, null, displayName, null, null, null, null, null);
+        return new ClientData(null, null, officeId, officeName, id, null, null, null, null, displayName, null, null, null, null, null, null, null, null);
     }
 
     public static ClientData instance(final String accountNo, final EnumOptionData status, final Long officeId, final String officeName,
             final Long id, final String firstname, final String middlename, final String lastname, final String fullname,
-            final String displayName, final String externalId, final LocalDate activationDate, final Long imageId) {
+            final String displayName, final String externalId, final LocalDate activationDate, final Long imageId, final Long staffId,
+            final String staffName) {
         return new ClientData(accountNo, status, officeId, officeName, id, firstname, middlename, lastname, fullname, displayName,
-                externalId, activationDate, imageId, null, null);
+                externalId, activationDate, imageId, staffId, staffName, null, null, null);
     }
 
     private ClientData(final String accountNo, final EnumOptionData status, final Long officeId, final String officeName, final Long id,
             final String firstname, final String middlename, final String lastname, final String fullname, final String displayName,
-            final String externalId, final LocalDate activationDate, final Long imageId, final Collection<OfficeData> allowedOffices,
-            final Collection<GroupGeneralData> groups) {
+            final String externalId, final LocalDate activationDate, final Long imageId, final Long staffId, final String staffName,
+            final Collection<OfficeData> allowedOffices, final Collection<GroupGeneralData> groups, final Collection<StaffData> staffOptions) {
         this.accountNo = accountNo;
         this.status = status;
         if (status != null) {
@@ -113,12 +121,15 @@ final public class ClientData implements Comparable<ClientData> {
         } else {
             this.imagePresent = Boolean.FALSE;
         }
+        this.staffId = staffId;
+        this.staffName = staffName;
 
         // associations
         this.groups = groups;
 
         // template
         this.officeOptions = allowedOffices;
+        this.staffOptions = staffOptions;
     }
 
     public Long id() {

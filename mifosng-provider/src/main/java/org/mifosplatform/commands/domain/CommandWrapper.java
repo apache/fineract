@@ -532,6 +532,10 @@ public class CommandWrapper {
     public boolean isAccountingRuleResource() {
         return this.entityName.equalsIgnoreCase("ACCOUNTINGRULE");
     }
+    
+    public boolean isClientUnassignStaff() {
+        return this.actionName.equalsIgnoreCase("UNASSIGNSTAFF") && this.entityName.equalsIgnoreCase("CLIENT");
+    }
 
     public boolean isAssignRole() {
         return this.entityName.equalsIgnoreCase("GROUP") && this.actionName.equalsIgnoreCase("ASSIGNROLE");
@@ -544,4 +548,5 @@ public class CommandWrapper {
     public boolean isUpdateRole() {
         return this.entityName.equalsIgnoreCase("GROUP") && this.actionName.equalsIgnoreCase("UPDATEROLE");
     }
+  
 }
