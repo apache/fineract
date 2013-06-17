@@ -418,6 +418,10 @@ public final class Client extends AbstractPersistable<Long> {
     public void setDisplayName(final String displayName) {
         this.displayName = displayName;
     }
+    
+    public Office getOffice() {
+        return this.office;
+    }
 
     private Long staffId() {
         Long staffId = null;

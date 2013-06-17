@@ -17,6 +17,7 @@ import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
+import org.mifosplatform.infrastructure.security.exception.PermissionDeniedException;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.office.domain.Office;
 import org.mifosplatform.organisation.office.domain.OfficeRepository;
@@ -36,6 +37,7 @@ import org.mifosplatform.portfolio.group.domain.GroupRepository;
 import org.mifosplatform.portfolio.group.exception.GroupNotFoundException;
 import org.mifosplatform.portfolio.note.domain.Note;
 import org.mifosplatform.portfolio.note.domain.NoteRepository;
+import org.mifosplatform.useradministration.domain.AppUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -172,11 +174,22 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
     public CommandProcessingResult updateClient(final Long clientId, final JsonCommand command) {
 
         try {
-            this.context.authenticatedUser();
+            AppUser user = context.authenticatedUser();
 
             this.fromApiJsonDeserializer.validateForUpdate(command.json());
 
             final Client clientForUpdate = this.clientRepository.findOneWithNotFoundDetection(clientId);
+            final String clientHierarchy = clientForUpdate.getOffice().getHierarchy();
+
+            // Don't allow other office user to update
+            final Office loginUserOffice = user.getOffice();
+            final String userHierarchy = loginUserOffice.getHierarchy();
+
+            if (!clientHierarchy.startsWith(userHierarchy)) {
+                final String code = "error.msg.not.enough.permissions.to.access.resource";
+                final String defaultMessage = "The User with id " + user.getId() + " don't have permission to update this client";
+                throw new PermissionDeniedException(code, defaultMessage, user.getId());
+            }
 
             final Map<String, Object> changes = clientForUpdate.update(command);
 
