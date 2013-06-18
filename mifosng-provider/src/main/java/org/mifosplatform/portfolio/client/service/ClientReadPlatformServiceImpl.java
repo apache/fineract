@@ -240,7 +240,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             sqlBuilder.append("c.staff_id as staffId, s.display_name as staffName ");
             sqlBuilder.append("from m_client c ");
             sqlBuilder.append("join m_office o on o.id = c.office_id ");
-            sqlBuilder.append("join m_group_client pgc on pgc.client_id = c.id");
+            sqlBuilder.append("join m_group_client pgc on pgc.client_id = c.id ");
             sqlBuilder.append("left join m_staff s on s.id = c.staff_id ");
 
             this.schema = sqlBuilder.toString();
