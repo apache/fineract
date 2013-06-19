@@ -12,7 +12,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
-import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.codes.domain.CodeValue;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.api.JsonQuery;
@@ -31,8 +30,6 @@ import org.mifosplatform.portfolio.calendar.domain.CalendarInstance;
 import org.mifosplatform.portfolio.calendar.domain.CalendarInstanceRepository;
 import org.mifosplatform.portfolio.calendar.domain.CalendarRepository;
 import org.mifosplatform.portfolio.calendar.exception.CalendarNotFoundException;
-import org.mifosplatform.portfolio.calendar.exception.NotValidRecurringDateException;
-import org.mifosplatform.portfolio.calendar.service.CalendarHelper;
 import org.mifosplatform.portfolio.client.domain.AccountNumberGenerator;
 import org.mifosplatform.portfolio.client.domain.AccountNumberGeneratorFactory;
 import org.mifosplatform.portfolio.client.domain.Client;
@@ -48,7 +45,6 @@ import org.mifosplatform.portfolio.loanaccount.domain.LoanRepaymentScheduleTrans
 import org.mifosplatform.portfolio.loanaccount.domain.LoanRepository;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanStatus;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanSummaryWrapper;
-import org.mifosplatform.portfolio.loanaccount.exception.LoanApplicationDateException;
 import org.mifosplatform.portfolio.loanaccount.exception.LoanApplicationNotInSubmittedAndPendingApprovalStateCannotBeDeleted;
 import org.mifosplatform.portfolio.loanaccount.exception.LoanApplicationNotInSubmittedAndPendingApprovalStateCannotBeModified;
 import org.mifosplatform.portfolio.loanaccount.exception.LoanNotFoundException;
@@ -156,16 +152,6 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
 
-        // validate dates against calendar recurring dates
-        // get calendar
-        final Long calendarId = command.longValueOfParameterNamed("calendarId");
-        Calendar calendar = null;
-        if (calendarId != null && calendarId != 0) {
-            calendar = this.calendarRepository.findOne(calendarId);
-            if (calendar == null) { throw new CalendarNotFoundException(calendarId); }
-            validateCalendarDates(command, calendar);
-        }
-
         final Loan newLoanApplication = loanAssembler.assembleFrom(command, currentUser);
 
         this.loanRepository.save(newLoanApplication);
@@ -184,12 +170,19 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         }
 
         // Save calendar instance
-        if (calendar != null) {
+        final Long calendarId = command.longValueOfParameterNamed("calendarId");
+        Calendar calendar = null;
+        
+        if (calendarId != null && calendarId != 0) {
+            calendar = this.calendarRepository.findOne(calendarId);
+            if (calendar == null) { throw new CalendarNotFoundException(calendarId); }
+            
             CalendarInstance calendarInstance = new CalendarInstance(calendar, newLoanApplication.getId(),
                     CalendarEntityType.LOANS.getValue());
             this.calendarInstanceRepository.save(calendarInstance);
         }
-
+        
+        
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
                 .withEntityId(newLoanApplication.getId()) //
@@ -208,14 +201,6 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             context.authenticatedUser();
 
             this.fromApiJsonDeserializer.validateForModify(command.json());
-
-            final Long calendarId = command.longValueOfParameterNamed("calendarId");
-            Calendar calendar = null;
-            if (calendarId != null && calendarId != 0) {
-                calendar = this.calendarRepository.findOne(calendarId);
-                if (calendar == null) { throw new CalendarNotFoundException(calendarId); }
-                validateCalendarDates(command, calendar);
-            }
 
             final Loan existingLoanApplication = retrieveLoanBy(loanId);
 
@@ -309,6 +294,13 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 this.noteRepository.save(note);
             }
 
+            final Long calendarId = command.longValueOfParameterNamed("calendarId");
+            Calendar calendar = null;
+            if (calendarId != null && calendarId != 0) {
+                calendar = this.calendarRepository.findOne(calendarId);
+                if (calendar == null) { throw new CalendarNotFoundException(calendarId); }
+            }
+            
             List<CalendarInstance> ciList = (List<CalendarInstance>) this.calendarInstanceRepository.findByEntityIdAndEntityTypeId(loanId,
                     CalendarEntityType.LOANS.getValue());
             if (calendar != null) {
@@ -534,49 +526,4 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         return loan;
     }
 
-    private void validateCalendarDates(final JsonCommand command, final Calendar calendar) {
-
-        final LocalDate edDate = command.localDateValueOfParameterNamed("expectedDisbursementDate");
-
-        if (edDate != null) {
-            // Expected disbursement date should not be before Meeting start
-            // date
-            if (edDate.isBefore(calendar.getStartDateLocalDate())) {
-                final String errorMessage = "Expected disbursement date '" + edDate.toString() + "' cannot be before meeting start date '"
-                        + calendar.getStartDate().toString() + "' ";
-                throw new LoanApplicationDateException("disbursement.date.cannot.be.before.meeting.start.date", errorMessage, edDate,
-                        calendar.getStartDate());
-            }
-
-            // Disbursement date should fall on a meeting date
-            if (!CalendarHelper.isValidRedurringDate(calendar.getRecurrence(), calendar.getStartDateLocalDate(), edDate)) {
-                final String errorMessage = "Expected disbursement date '" + edDate.toString() + "' does not fall on a meeting date.";
-                throw new NotValidRecurringDateException("loan.expected.disbursement.date", errorMessage, edDate.toString(),
-                        calendar.getTitle());
-            }
-
-        }
-
-        final LocalDate repStartingDate = command.localDateValueOfParameterNamed("repaymentsStartingFromDate");
-
-        if (repStartingDate != null) {
-
-            // First repayment date should not be before Meeting date
-            if (repStartingDate.isBefore(calendar.getStartDateLocalDate())) {
-                final String errorMessage = "First repayment date '" + repStartingDate.toString()
-                        + "' cannot be before meeting start date '" + calendar.getStartDate().toString() + "' ";
-                throw new LoanApplicationDateException("first.repayment.date.cannot.be.before.meeting.start.date", errorMessage,
-                        repStartingDate, calendar.getStartDate());
-            }
-
-            if (!CalendarHelper.isValidRedurringDate(calendar.getRecurrence(), calendar.getStartDateLocalDate(), repStartingDate)) {
-                final String errorMessage = "The First repayment date '" + repStartingDate.toString()
-                        + "' does not fall on a meeting date.";
-                throw new NotValidRecurringDateException("loan.first.repayment.date", errorMessage, repStartingDate.toString(),
-                        calendar.getTitle());
-            }
-
-        }
-
-    }
 }
