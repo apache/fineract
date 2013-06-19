@@ -71,7 +71,7 @@ public class HolidayWritePlatformServiceJpaRepositoryImpl implements HolidayWrit
                 offices = new HashSet<Office>(array.size());
                 for (int i = 0; i < array.size(); i++) {
                     final JsonObject officeElement = array.get(i).getAsJsonObject();
-                    final Long officeId = this.fromApiJsonHelper.extractLongNamed("officeId", officeElement);
+                    final Long officeId = this.fromApiJsonHelper.extractLongNamed(HolidayApiConstants.officeId, officeElement);
                     final Office office = this.officeRepository.findOne(officeId);
                     if (office == null) { throw new OfficeNotFoundException(officeId); }
                     offices.add(office);
