@@ -168,7 +168,7 @@ public class Charge extends AbstractPersistable<Long> {
             this.amount = newValue;
         }
 
-        final String chargeTimeParamName = "chargeTime";
+        final String chargeTimeParamName = "chargeTimeType";
         if (command.isChangeInIntegerParameterNamed(chargeTimeParamName, this.chargeTime)) {
             final Integer newValue = command.integerValueOfParameterNamed(chargeTimeParamName);
             actualChanges.put(chargeTimeParamName, newValue);
@@ -184,7 +184,7 @@ public class Charge extends AbstractPersistable<Long> {
             this.chargeAppliesTo = ChargeAppliesTo.fromInt(newValue).getValue();
         }
 
-        final String chargeCalculationParamName = "chargeCalculation";
+        final String chargeCalculationParamName = "chargeCalculationType";
         if (command.isChangeInIntegerParameterNamed(chargeCalculationParamName, this.chargeCalculation)) {
             final Integer newValue = command.integerValueOfParameterNamed(chargeCalculationParamName);
             actualChanges.put(chargeCalculationParamName, newValue);
