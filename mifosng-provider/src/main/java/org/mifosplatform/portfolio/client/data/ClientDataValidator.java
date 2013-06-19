@@ -63,7 +63,7 @@ public final class ClientDataValidator {
 
         if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.staffIdParamName, element)) {
             final Long staffId = this.fromApiJsonHelper.extractLongNamed(ClientApiConstants.staffIdParamName, element);
-            baseDataValidator.reset().parameter(ClientApiConstants.staffIdParamName).value(staffId).notNull().longGreaterThanZero();
+            baseDataValidator.reset().parameter(ClientApiConstants.staffIdParamName).value(staffId).ignoreIfNull().longGreaterThanZero();
         }
 
         if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.accountNoParamName, element)) {
@@ -289,7 +289,7 @@ public final class ClientDataValidator {
 
         if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.staffIdParamName, element)) {
             final Long staffId = this.fromApiJsonHelper.extractLongNamed(ClientApiConstants.staffIdParamName, element);
-            baseDataValidator.reset().parameter(ClientApiConstants.staffIdParamName).value(staffId).notNull().longGreaterThanZero();
+            baseDataValidator.reset().parameter(ClientApiConstants.staffIdParamName).value(staffId).ignoreIfNull().longGreaterThanZero();
         }
 
         if (!atLeastOneParameterPassedForUpdate) {
