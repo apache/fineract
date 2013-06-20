@@ -96,7 +96,7 @@ public class LoansApiResource {
             "summary", "repaymentSchedule", "transactions", "charges", "collateral", "guarantors", "meeting", "productOptions",
             "amortizationTypeOptions", "interestTypeOptions", "interestCalculationPeriodTypeOptions", "repaymentFrequencyTypeOptions",
             "termFrequencyTypeOptions", "interestRateFrequencyTypeOptions", "fundOptions", "repaymentStrategyOptions", "chargeOptions",
-            "loanOfficerOptions", "loanPurposeOptions", "loanCollateralOptions", "chargeTemplate", "calendarOptions"));
+            "loanOfficerOptions", "loanPurposeOptions", "loanCollateralOptions", "chargeTemplate", "calendarOptions", "syncDisbursementWithMeeting"));
 
     private final String resourceNameForPermissions = "LOAN";
 

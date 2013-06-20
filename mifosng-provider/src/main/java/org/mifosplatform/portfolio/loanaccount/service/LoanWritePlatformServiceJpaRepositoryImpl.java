@@ -8,7 +8,6 @@ package org.mifosplatform.portfolio.loanaccount.service;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,7 +28,6 @@ import org.mifosplatform.portfolio.calendar.domain.Calendar;
 import org.mifosplatform.portfolio.calendar.domain.CalendarEntityType;
 import org.mifosplatform.portfolio.calendar.domain.CalendarInstance;
 import org.mifosplatform.portfolio.calendar.domain.CalendarInstanceRepository;
-import org.mifosplatform.portfolio.calendar.exception.NotValidRecurringDateException;
 import org.mifosplatform.portfolio.calendar.service.CalendarHelper;
 import org.mifosplatform.portfolio.charge.domain.Charge;
 import org.mifosplatform.portfolio.charge.domain.ChargeRepositoryWrapper;
@@ -57,7 +55,6 @@ import org.mifosplatform.portfolio.loanaccount.domain.LoanStatus;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanSummaryWrapper;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanTransaction;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanTransactionRepository;
-import org.mifosplatform.portfolio.loanaccount.exception.LoanApplicationDateException;
 import org.mifosplatform.portfolio.loanaccount.exception.LoanNotFoundException;
 import org.mifosplatform.portfolio.loanaccount.exception.LoanOfficerAssignmentException;
 import org.mifosplatform.portfolio.loanaccount.exception.LoanOfficerUnassignmentException;
@@ -65,6 +62,7 @@ import org.mifosplatform.portfolio.loanaccount.exception.LoanTransactionNotFound
 import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.LoanScheduleGeneratorFactory;
 import org.mifosplatform.portfolio.loanaccount.serialization.LoanEventApiJsonValidator;
 import org.mifosplatform.portfolio.loanaccount.serialization.LoanUpdateCommandFromApiJsonDeserializer;
+import org.mifosplatform.portfolio.loanproduct.domain.LoanProductRelatedDetail;
 import org.mifosplatform.portfolio.loanproduct.exception.InvalidCurrencyException;
 import org.mifosplatform.portfolio.note.domain.Note;
 import org.mifosplatform.portfolio.note.domain.NoteRepository;
@@ -74,7 +72,6 @@ import org.mifosplatform.useradministration.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.CollectionUtils;
 
 @Service
 public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatformService {
@@ -139,12 +136,15 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         this.loanEventApiJsonValidator.validateDisbursement(command.json());
 
         final Loan loan = retrieveLoanBy(loanId);
-
-        // validate actual disbursement date against meeting date
-        Collection<CalendarInstance> calendarInstances = this.calendarInstanceRepository.findByEntityIdAndEntityTypeId(loan.getId(),
+     // validate actual disbursement date against meeting date
+        final CalendarInstance calendarInstance = this.calendarInstanceRepository.findCalendarInstaneByLoanId(loan.getId(),
                 CalendarEntityType.LOANS.getValue());
-        validateDisbursementDate(command.localDateValueOfParameterNamed("actualDisbursementDate"), calendarInstances);
-
+        if(loan.isSyncDisbursementWithMeeting()){
+	        
+            final LocalDate actualDisbursementDate = command.localDateValueOfParameterNamed("actualDisbursementDate");
+	        this.loanEventApiJsonValidator.validateDisbursementDateWithMeetingDate(actualDisbursementDate, calendarInstance);
+        }
+        
         final MonetaryCurrency currency = loan.getCurrency();
         final ApplicationCurrency applicationCurrency = this.applicationCurrencyRepository.findOneWithNotFoundDetection(currency);
 
@@ -155,8 +155,12 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         PaymentDetail paymentDetail = paymentDetailWritePlatformService.createAndPersistPaymentDetail(command, changes);
 
+        //Recalculate first repayment date based in actual disbursement date.
+        final LocalDate actualDisbursementDate = command.localDateValueOfParameterNamed("actualDisbursementDate");
+        final LocalDate firstRepaymentMeetingDate = getFirstRepaymentMeetingDate(actualDisbursementDate, loan, calendarInstance);
+        
         loan.disburse(this.loanScheduleFactory, currentUser, command, applicationCurrency, existingTransactionIds,
-                existingReversedTransactionIds, changes, paymentDetail);
+                existingReversedTransactionIds, changes, paymentDetail, firstRepaymentMeetingDate);
 
         if (!changes.isEmpty()) {
             this.loanRepository.save(loan);
@@ -181,36 +185,39 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 .build();
     }
 
-    private void validateDisbursementDate(final LocalDate disbursementDate, final Collection<CalendarInstance> calendarInstances) {
-        if (!CollectionUtils.isEmpty(calendarInstances)) {
-            Calendar calendar = null;
-            for (CalendarInstance calendarInstance : calendarInstances) {
-                calendar = calendarInstance.getCalendar();
-                break;
-            }
-            if (calendar != null && disbursementDate != null) {
+	private LocalDate getFirstRepaymentMeetingDate(
+			final LocalDate actualDisbursementDate, final Loan loan,
+			final CalendarInstance calendarInstance) {
+		final Calendar calendar = (calendarInstance == null) ? null
+				: calendarInstance.getCalendar();
+		LocalDate firstRepaymentMeetingDate = null;
+		if (calendar != null) {// sync repayments
 
-                // Actual disbursement date cannot be before Meeting start
-                // date
-                if (disbursementDate.isBefore(calendar.getStartDateLocalDate())) {
-                    final String errorMessage = "Actual disbursement date '" + disbursementDate.toString()
-                            + "' cannot be before meeting start date '" + calendar.getStartDate().toString() + "' ";
-                    throw new LoanApplicationDateException("actual.disbursement.date.cannot.be.before.meeting.start.date", errorMessage,
-                            disbursementDate.toString(), calendar.getStartDate());
-                }
-
-                // Disbursement date should fall on a meeting date
-                if (!CalendarHelper.isValidRedurringDate(calendar.getRecurrence(), calendar.getStartDateLocalDate(), disbursementDate)) {
-                    final String errorMessage = "Expected disbursement date '" + disbursementDate.toString()
-                            + "' does not fall on a meeting date.";
-                    throw new NotValidRecurringDateException("loan.actual.disbursement.date", errorMessage, disbursementDate.toString(),
-                            calendar.getTitle());
-                }
-
-            }
-        }
-    }
-
+			// TODO: AA - user provided first repayment date takes precedence over recalculated meeting date 
+			if (loan.getExpectedFirstRepaymentOnDate() == null) {
+				// FIXME: AA - Possibility of having next meeting date
+				// immediately after disbursement date,
+				// need to have minimum number of days gap between disbursement
+				// and first repayment date.
+				final LoanProductRelatedDetail repaymentScheduleDetails = loan
+						.repaymentScheduleDetail();
+				if (repaymentScheduleDetails != null) {// Not expecting to be
+														// null
+					final Integer repayEvery = repaymentScheduleDetails
+							.getRepayEvery();
+					final String frequency = CalendarHelper
+							.getMeetingFrequencyFromPeriodFrequencyType(repaymentScheduleDetails
+									.getRepaymentPeriodFrequencyType());
+					firstRepaymentMeetingDate = CalendarHelper
+							.getFirstRepaymentMeetingDate(calendar,
+									actualDisbursementDate, repayEvery,
+									frequency);
+				}
+			}
+		}
+		return firstRepaymentMeetingDate;
+	}
+    
     /****
      * TODO Vishwas: Pair with Ashok and re-factor collection sheet code-base
      *****/
@@ -235,8 +242,12 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
             PaymentDetail paymentDetail = paymentDetailWritePlatformService.createAndPersistPaymentDetail(command, changes);
 
+            // Bulk disbursement should happen on meeting date (mostly from collection sheet).
+            //FIXME: AA - this should be first meeting date based on disbursement date and next available meeting dates
+            //assuming repayment schedule won't regenerate because expected disbursement and actual disbursement happens on same date
+            final LocalDate firstRepaymentOnDate = null;
             loan.disburse(this.loanScheduleFactory, currentUser, command, applicationCurrency, existingTransactionIds,
-                    existingReversedTransactionIds, changes, paymentDetail);
+                    existingReversedTransactionIds, changes, paymentDetail, firstRepaymentOnDate);
 
             if (!changes.isEmpty()) {
                 this.loanRepository.save(loan);
@@ -327,7 +338,15 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     private CommandProcessingResultBuilder saveLoanRepayment(final Long loanId, final PaymentDetail paymentDetail,
             final BigDecimal transactionAmount, final LocalDate transactionDate, final String noteText) {
         final Loan loan = retrieveLoanBy(loanId);
-
+        
+        //TODO: Is it required to validate transaction date with meeting dates if repayments is synced with meeting?
+        /*if(loan.isSyncDisbursementWithMeeting()){
+	        // validate actual disbursement date against meeting date
+	        CalendarInstance calendarInstance = this.calendarInstanceRepository.findCalendarInstaneByLoanId(loan.getId(),
+	                CalendarEntityType.LOANS.getValue());
+	        this.loanEventApiJsonValidator.validateRepaymentDateWithMeetingDate(transactionDate, calendarInstance);
+        }*/
+        
         final List<Long> existingTransactionIds = new ArrayList<Long>();
         final List<Long> existingReversedTransactionIds = new ArrayList<Long>();
 

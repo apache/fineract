@@ -9,6 +9,8 @@ import java.util.Collection;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface CalendarInstanceRepository extends JpaRepository<CalendarInstance, Long>, JpaSpecificationExecutor<CalendarInstance> {
     
@@ -16,4 +18,6 @@ public interface CalendarInstanceRepository extends JpaRepository<CalendarInstan
 
     Collection<CalendarInstance> findByEntityIdAndEntityTypeId(Long entityId, Integer entityTypeId);
 
+    @Query("from CalendarInstance ci where ci.entityId = :loanId and ci.entityTypeId = :entityTypeId")
+    CalendarInstance findCalendarInstaneByLoanId(@Param("loanId") Long loanId, @Param("entityTypeId") Integer entityTypeId);
 }

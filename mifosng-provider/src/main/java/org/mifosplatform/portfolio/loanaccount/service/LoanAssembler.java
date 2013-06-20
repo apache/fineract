@@ -112,6 +112,7 @@ public class LoanAssembler {
         final Long loanOfficerId = fromApiJsonHelper.extractLongNamed("loanOfficerId", element);
         final Long transactionProcessingStrategyId = fromApiJsonHelper.extractLongNamed("transactionProcessingStrategyId", element);
         final Long loanPurposeId = fromApiJsonHelper.extractLongNamed("loanPurposeId", element);
+        final Boolean syncDisbursementWithMeeting = fromApiJsonHelper.extractBooleanNamed("syncDisbursementWithMeeting", element);
 
         final LoanProduct loanProduct = this.loanProductRepository.findOne(productId);
         if (loanProduct == null) { throw new LoanProductNotFoundException(productId); }
@@ -154,7 +155,7 @@ public class LoanAssembler {
             if (group == null) { throw new GroupNotFoundException(groupId); }
 
             loanApplication = Loan.newGroupLoanApplication(accountNo, group, loanType.getId().intValue(), loanProduct, fund, loanOfficer,
-                    loanTransactionProcessingStrategy, loanProductRelatedDetail, loanCharges);
+                    loanTransactionProcessingStrategy, loanProductRelatedDetail, loanCharges, syncDisbursementWithMeeting);
         }
 
         if (client != null && group != null) {
@@ -162,7 +163,7 @@ public class LoanAssembler {
             if (!group.hasClientAsMember(client)) { throw new ClientNotInGroupException(clientId, groupId); }
 
             loanApplication = Loan.newIndividualLoanApplicationFromGroup(accountNo, client, group, loanType.getId().intValue(),
-                    loanProduct, fund, loanOfficer, loanTransactionProcessingStrategy, loanProductRelatedDetail, loanCharges);
+                    loanProduct, fund, loanOfficer, loanTransactionProcessingStrategy, loanProductRelatedDetail, loanCharges, syncDisbursementWithMeeting);
         }
 
         final String externalId = fromApiJsonHelper.extractStringNamed("externalId", element);
