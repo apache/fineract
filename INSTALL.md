@@ -32,22 +32,22 @@ The two ways to get up and running with mifos platform is:
 
 ## 1. Amazon Public AMI
 
-  Launch instance <a target="_blank" href="https://console.aws.amazon.com/ec2/home?region=eu-west-1#launchAmi=ami-b73e28c3" title="Mifos Platform Public AMI 1.0.0.RELEASE">ami-b73e28c3</a>
+  Launch instance <a target="_blank" href="https://console.aws.amazon.com/ec2/home?region=eu-west-1#launchAmi=ami-2b2d3f5f" title="Mifos Platform Public AMI 1.4.0.RELEASE">ami-2b2d3f5f</a>
 
-  *Name:* Mifos Platform 1.0.0.RELEASE Public AMI
+  *Name:* Mifos Platform 1.4.0.RELEASE Public AMI
   
- - AMI ID: ami-b73e28c3
+ - AMI ID: ami-2b2d3f5f
  - Kernel ID: aki-71665e05
- - Name: Mifos Platform 1.0.0.RELEASE Public AMI
+ - Name: Mifos Platform 1.4.0.RELEASE Public AMI
  - Owner: 476083131096
- - Source: 476083131096/Mifos Platform 1.0.0.RELEASE Public AMI
+ - Source: 476083131096/Mifos Platform 1.4.0.RELEASE Public AMI
  - Architecture: Ubuntu12.04 LTS x86_64
  - Built starting from Ubuntu AMI ami-35acbb41
  - Java 1.6_45 32 bit JVM
  - Tomcat 7.0.39 (with SSL configured for self-signed certificate)
  - MySql 5.5.31
- - Mifos Platform 1.0.0.RELEASE
- - Mifos Reference App 1.0.0.RELEASE
+ - Mifos Platform 1.4.0.RELEASE
+ - Mifos Reference App 1.4.0.RELEASE
 
 ## 2. Manual Installation
 
