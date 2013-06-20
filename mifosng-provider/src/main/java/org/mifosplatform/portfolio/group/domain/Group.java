@@ -107,11 +107,13 @@ public final class Group extends AbstractPersistable<Long> {
             final Set<Client> clientMembers, final Set<Group> groupMembers) {
 
         GroupingTypeStatus status = GroupingTypeStatus.PENDING;
+        LocalDate groupActivationDate = null;
         if (active) {
             status = GroupingTypeStatus.ACTIVE;
+            groupActivationDate = activationDate;//set activation date only if group is made active
         }
 
-        return new Group(office, staff, parent, groupLevel, name, externalId, status, activationDate, clientMembers, groupMembers);
+        return new Group(office, staff, parent, groupLevel, name, externalId, status, groupActivationDate, clientMembers, groupMembers);
     }
 
     public Group(final Office office, final Staff staff, final Group parent, final GroupLevel groupLevel, final String name,
@@ -369,5 +371,9 @@ public final class Group extends AbstractPersistable<Long> {
 
     public void setParent(final Group parent) {
         this.parent = parent;
+    }
+
+    public Office getOffice() {
+        return this.office;
     }
 }

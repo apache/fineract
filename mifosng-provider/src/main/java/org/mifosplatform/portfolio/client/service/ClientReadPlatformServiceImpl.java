@@ -22,6 +22,8 @@ import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSourc
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.office.data.OfficeData;
 import org.mifosplatform.organisation.office.service.OfficeReadPlatformService;
+import org.mifosplatform.organisation.staff.data.StaffData;
+import org.mifosplatform.organisation.staff.service.StaffReadPlatformService;
 import org.mifosplatform.portfolio.client.data.ClientAccountSummaryCollectionData;
 import org.mifosplatform.portfolio.client.data.ClientAccountSummaryData;
 import org.mifosplatform.portfolio.client.data.ClientData;
@@ -40,6 +42,7 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 @Service
 public class ClientReadPlatformServiceImpl implements ClientReadPlatformService {
@@ -47,6 +50,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
     private final JdbcTemplate jdbcTemplate;
     private final PlatformSecurityContext context;
     private final OfficeReadPlatformService officeReadPlatformService;
+    private final StaffReadPlatformService staffReadPlatformService;
 
     // data mappers
     private final PaginationHelper<ClientData> paginationHelper = new PaginationHelper<ClientData>();
@@ -57,22 +61,28 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
     @Autowired
     public ClientReadPlatformServiceImpl(final PlatformSecurityContext context, final TenantAwareRoutingDataSource dataSource,
-            final OfficeReadPlatformService officeReadPlatformService) {
+            final OfficeReadPlatformService officeReadPlatformService, final StaffReadPlatformService staffReadPlatformService) {
         this.context = context;
         this.officeReadPlatformService = officeReadPlatformService;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
+        this.staffReadPlatformService = staffReadPlatformService;
     }
 
     @Override
-    public ClientData retrieveTemplate() {
+    public ClientData retrieveTemplate(final Long officeId) {
 
-        final AppUser currentUser = context.authenticatedUser();
+        this.context.authenticatedUser();
+        
+        final Long defaultOfficeId = defaultToUsersOfficeIfNull(officeId);
 
         final Collection<OfficeData> offices = officeReadPlatformService.retrieveAllOfficesForDropdown();
 
-        final Long officeId = currentUser.getOffice().getId();
-
-        return ClientData.template(officeId, new LocalDate(), offices);
+        Collection<StaffData> staffOptions = this.staffReadPlatformService.retrieveAllStaffForDropdown(defaultOfficeId);
+        if (CollectionUtils.isEmpty(staffOptions)) {
+            staffOptions = null;
+        }
+        
+        return ClientData.template(defaultOfficeId, new LocalDate(), offices, staffOptions);
     }
 
     @Override
@@ -226,10 +236,12 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             sqlBuilder.append("c.office_id as officeId, o.name as officeName, ");
             sqlBuilder.append("c.firstname as firstname, c.middlename as middlename, c.lastname as lastname, ");
             sqlBuilder.append("c.fullname as fullname, c.display_name as displayName, ");
-            sqlBuilder.append("c.activation_date as activationDate, c.image_id as imageId ");
+            sqlBuilder.append("c.activation_date as activationDate, c.image_id as imageId, ");
+            sqlBuilder.append("c.staff_id as staffId, s.display_name as staffName ");
             sqlBuilder.append("from m_client c ");
             sqlBuilder.append("join m_office o on o.id = c.office_id ");
-            sqlBuilder.append("join m_group_client pgc on pgc.client_id = c.id");
+            sqlBuilder.append("join m_group_client pgc on pgc.client_id = c.id ");
+            sqlBuilder.append("left join m_staff s on s.id = c.staff_id ");
 
             this.schema = sqlBuilder.toString();
         }
@@ -256,9 +268,11 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             final LocalDate activationDate = JdbcSupport.getLocalDate(rs, "activationDate");
             final Long imageId = JdbcSupport.getLong(rs, "imageId");
             final String officeName = rs.getString("officeName");
+            final Long staffId = JdbcSupport.getLong(rs, "staffId");
+            final String staffName = rs.getString("staffName");
 
             return ClientData.instance(accountNo, status, officeId, officeName, id, firstname, middlename, lastname, fullname, displayName,
-                    externalId, activationDate, imageId);
+                    externalId, activationDate, imageId, staffId, staffName);
         }
     }
 
@@ -274,9 +288,11 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             builder.append("c.office_id as officeId, o.name as officeName, ");
             builder.append("c.firstname as firstname, c.middlename as middlename, c.lastname as lastname, ");
             builder.append("c.fullname as fullname, c.display_name as displayName, ");
-            builder.append("c.activation_date as activationDate, c.image_id as imageId ");
+            builder.append("c.activation_date as activationDate, c.image_id as imageId, ");
+            builder.append("c.staff_id as staffId, s.display_name as staffName ");
             builder.append("from m_client c ");
             builder.append("join m_office o on o.id = c.office_id ");
+            builder.append("left join m_staff s on s.id = c.staff_id ");
 
             this.schema = builder.toString();
         }
@@ -304,9 +320,11 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             final LocalDate activationDate = JdbcSupport.getLocalDate(rs, "activationDate");
             final String officeName = rs.getString("officeName");
             final Long imageId = JdbcSupport.getLong(rs, "imageId");
+            final Long staffId = JdbcSupport.getLong(rs, "staffId");
+            final String staffName = rs.getString("staffName");
 
             return ClientData.instance(accountNo, status, officeId, officeName, id, firstname, middlename, lastname, fullname, displayName,
-                    externalId, activationDate, imageId);
+                    externalId, activationDate, imageId, staffId, staffName);
         }
     }
 
@@ -559,5 +577,13 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             return ClientData.clientIdentifier(id, accountNo, status, firstname, middlename, lastname, fullname, displayName, officeId,
                     officeName);
         }
+    }
+    
+    private Long defaultToUsersOfficeIfNull(final Long officeId) {
+        Long defaultOfficeId = officeId;
+        if (defaultOfficeId == null) {
+            defaultOfficeId = this.context.authenticatedUser().getOffice().getId();
+        }
+        return defaultOfficeId;
     }
 }

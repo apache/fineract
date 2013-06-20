@@ -1018,4 +1018,48 @@ public class CommandWrapperBuilder {
         this.href = "/accountingrules/" + accountingRuleId;
         return this;
     }
+    
+    public CommandWrapperBuilder createHoliday() {
+        this.actionName = "CREATE";
+        this.entityName = "HOLIDAY";
+        this.entityId = null;
+        this.href = "/holidays/template";
+        return this;
+    }
+
+    public CommandWrapperBuilder assignRole(Long groupId) {
+        this.actionName = "ASSIGNROLE";
+        this.entityName = "GROUP";
+        this.groupId = groupId;
+        this.entityId = null;
+        this.href = "/groups/"+groupId+"?command=assignRole";
+        return this;
+    }
+
+    public CommandWrapperBuilder unassignRole(Long groupId, Long roleId) {
+        this.actionName = "UNASSIGNROLE";
+        this.entityName = "GROUP";
+        this.groupId = groupId;
+        this.entityId = roleId;
+        this.href = "/groups/"+groupId+"?command=unassignRole";
+        return this;
+    }
+
+    public CommandWrapperBuilder updateRole(Long groupId, Long roleId) {
+        this.actionName = "UPDATEROLE";
+        this.entityName = "GROUP";
+        this.groupId = groupId;
+        this.entityId = roleId;
+        this.href = "/groups/"+groupId+"?command=updateRole";
+        return this;
+    }
+    
+    public CommandWrapperBuilder unassignClientStaff(Long clientId) {
+        this.actionName = "UNASSIGNSTAFF";
+        this.entityName = "CLIENT";
+        this.entityId = clientId;
+        this.clientId = clientId;
+        this.href = "/clients/" + clientId + "?command=unassignStaff";
+        return this;
+    }
 }

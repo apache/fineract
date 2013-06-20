@@ -53,7 +53,7 @@ public class OfficesApiResource {
     private final OfficeReadPlatformService readPlatformService;
     private final DefaultToApiJsonSerializer<OfficeData> toApiJsonSerializer;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
-    private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
+     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 
     @Autowired
     public OfficesApiResource(final PlatformSecurityContext context, final OfficeReadPlatformService readPlatformService,

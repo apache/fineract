@@ -9,8 +9,11 @@ import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.activa
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
@@ -42,24 +45,29 @@ public final class ClientDataValidator {
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, ClientApiConstants.CLIENT_CREATE_REQUEST_DATA_PARAMETERS);
-        final JsonElement element = fromApiJsonHelper.parse(json);
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, ClientApiConstants.CLIENT_CREATE_REQUEST_DATA_PARAMETERS);
+        final JsonElement element = this.fromApiJsonHelper.parse(json);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
 
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(ClientApiConstants.CLIENT_RESOURCE_NAME);
 
-        final Long officeId = fromApiJsonHelper.extractLongNamed(ClientApiConstants.officeIdParamName, element);
+        final Long officeId = this.fromApiJsonHelper.extractLongNamed(ClientApiConstants.officeIdParamName, element);
         baseDataValidator.reset().parameter(ClientApiConstants.officeIdParamName).value(officeId).notNull().integerGreaterThanZero();
 
-        if (fromApiJsonHelper.parameterExists(ClientApiConstants.groupIdParamName, element)) {
-            final Long groupId = fromApiJsonHelper.extractLongNamed(ClientApiConstants.groupIdParamName, element);
+        if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.groupIdParamName, element)) {
+            final Long groupId = this.fromApiJsonHelper.extractLongNamed(ClientApiConstants.groupIdParamName, element);
             baseDataValidator.reset().parameter(ClientApiConstants.groupIdParamName).value(groupId).notNull().integerGreaterThanZero();
         }
 
-        if (fromApiJsonHelper.parameterExists(ClientApiConstants.accountNoParamName, element)) {
-            final String accountNo = fromApiJsonHelper.extractStringNamed(ClientApiConstants.accountNoParamName, element);
+        if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.staffIdParamName, element)) {
+            final Long staffId = this.fromApiJsonHelper.extractLongNamed(ClientApiConstants.staffIdParamName, element);
+            baseDataValidator.reset().parameter(ClientApiConstants.staffIdParamName).value(staffId).ignoreIfNull().longGreaterThanZero();
+        }
+
+        if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.accountNoParamName, element)) {
+            final String accountNo = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.accountNoParamName, element);
             baseDataValidator.reset().parameter(ClientApiConstants.accountNoParamName).value(accountNo).notBlank().notExceedingLengthOf(20);
         }
 
@@ -103,16 +111,17 @@ public final class ClientDataValidator {
             }
         }
 
-        if (fromApiJsonHelper.parameterExists(ClientApiConstants.externalIdParamName, element)) {
-            final String externalId = fromApiJsonHelper.extractStringNamed(ClientApiConstants.externalIdParamName, element);
+        if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.externalIdParamName, element)) {
+            final String externalId = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.externalIdParamName, element);
             baseDataValidator.reset().parameter(ClientApiConstants.externalIdParamName).value(externalId).ignoreIfNull()
                     .notExceedingLengthOf(100);
         }
 
-        final Boolean active = fromApiJsonHelper.extractBooleanNamed(ClientApiConstants.activeParamName, element);
+        final Boolean active = this.fromApiJsonHelper.extractBooleanNamed(ClientApiConstants.activeParamName, element);
         if (active != null) {
             if (active.booleanValue()) {
-                final LocalDate joinedDate = fromApiJsonHelper.extractLocalDateNamed(ClientApiConstants.activationDateParamName, element);
+                final LocalDate joinedDate = this.fromApiJsonHelper.extractLocalDateNamed(ClientApiConstants.activationDateParamName,
+                        element);
                 baseDataValidator.reset().parameter(ClientApiConstants.activationDateParamName).value(joinedDate).notNull();
             }
         } else {
@@ -123,67 +132,67 @@ public final class ClientDataValidator {
     }
 
     private void validateIndividualNamePartsCannotBeUsedWithFullname(final JsonElement element, final DataValidatorBuilder baseDataValidator) {
-        final String firstnameParam = fromApiJsonHelper.extractStringNamed(ClientApiConstants.firstnameParamName, element);
+        final String firstnameParam = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.firstnameParamName, element);
         if (StringUtils.isNotBlank(firstnameParam)) {
-            final String fullnameParam = fromApiJsonHelper.extractStringNamed(ClientApiConstants.fullnameParamName, element);
+            final String fullnameParam = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.fullnameParamName, element);
             baseDataValidator.reset().parameter(ClientApiConstants.fullnameParamName).value(fullnameParam)
                     .mustBeBlankWhenParameterProvided(ClientApiConstants.firstnameParamName, firstnameParam);
         }
 
-        final String middlenameParam = fromApiJsonHelper.extractStringNamed(ClientApiConstants.middlenameParamName, element);
+        final String middlenameParam = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.middlenameParamName, element);
         if (StringUtils.isNotBlank(middlenameParam)) {
-            final String fullnameParam = fromApiJsonHelper.extractStringNamed(ClientApiConstants.fullnameParamName, element);
+            final String fullnameParam = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.fullnameParamName, element);
             baseDataValidator.reset().parameter(ClientApiConstants.fullnameParamName).value(fullnameParam)
                     .mustBeBlankWhenParameterProvided(ClientApiConstants.middlenameParamName, middlenameParam);
         }
 
-        final String lastnameParamName = fromApiJsonHelper.extractStringNamed(ClientApiConstants.lastnameParamName, element);
+        final String lastnameParamName = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.lastnameParamName, element);
         if (StringUtils.isNotBlank(lastnameParamName)) {
-            final String fullnameParam = fromApiJsonHelper.extractStringNamed(ClientApiConstants.fullnameParamName, element);
+            final String fullnameParam = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.fullnameParamName, element);
             baseDataValidator.reset().parameter(ClientApiConstants.fullnameParamName).value(fullnameParam)
                     .mustBeBlankWhenParameterProvided(ClientApiConstants.lastnameParamName, lastnameParamName);
         }
     }
 
     private void validateRequiredIndividualNamePartsExist(final JsonElement element, final DataValidatorBuilder baseDataValidator) {
-        final String firstnameParam = fromApiJsonHelper.extractStringNamed(ClientApiConstants.firstnameParamName, element);
+        final String firstnameParam = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.firstnameParamName, element);
         baseDataValidator.reset().parameter(ClientApiConstants.firstnameParamName).value(firstnameParam).notBlank()
                 .notExceedingLengthOf(50);
 
-        final String middlenameParam = fromApiJsonHelper.extractStringNamed(ClientApiConstants.middlenameParamName, element);
+        final String middlenameParam = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.middlenameParamName, element);
         baseDataValidator.reset().parameter(ClientApiConstants.middlenameParamName).value(middlenameParam).ignoreIfNull()
                 .notExceedingLengthOf(50);
 
-        final String lastnameParamName = fromApiJsonHelper.extractStringNamed(ClientApiConstants.lastnameParamName, element);
+        final String lastnameParamName = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.lastnameParamName, element);
         baseDataValidator.reset().parameter(ClientApiConstants.lastnameParamName).value(lastnameParamName).notBlank()
                 .notExceedingLengthOf(50);
     }
 
     private void fullnameCannotBeBlank(final JsonElement element, final DataValidatorBuilder baseDataValidator) {
-        final String fullnameParam = fromApiJsonHelper.extractStringNamed(ClientApiConstants.fullnameParamName, element);
+        final String fullnameParam = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.fullnameParamName, element);
         baseDataValidator.reset().parameter(ClientApiConstants.fullnameParamName).value(fullnameParam).notBlank().notExceedingLengthOf(100);
     }
 
     private boolean isIndividualNamePartParameterPassed(final JsonElement element) {
-        return fromApiJsonHelper.parameterExists(ClientApiConstants.firstnameParamName, element)
-                || fromApiJsonHelper.parameterExists(ClientApiConstants.middlenameParamName, element)
-                || fromApiJsonHelper.parameterExists(ClientApiConstants.lastnameParamName, element);
+        return this.fromApiJsonHelper.parameterExists(ClientApiConstants.firstnameParamName, element)
+                || this.fromApiJsonHelper.parameterExists(ClientApiConstants.middlenameParamName, element)
+                || this.fromApiJsonHelper.parameterExists(ClientApiConstants.lastnameParamName, element);
     }
 
     private boolean isFullnameParameterPassed(final JsonElement element) {
-        return fromApiJsonHelper.parameterExists(ClientApiConstants.fullnameParamName, element);
+        return this.fromApiJsonHelper.parameterExists(ClientApiConstants.fullnameParamName, element);
     }
 
     private boolean isIndividualNameProvided(final JsonElement element) {
-        final String firstname = fromApiJsonHelper.extractStringNamed(ClientApiConstants.firstnameParamName, element);
-        final String middlename = fromApiJsonHelper.extractStringNamed(ClientApiConstants.middlenameParamName, element);
-        final String lastname = fromApiJsonHelper.extractStringNamed(ClientApiConstants.lastnameParamName, element);
+        final String firstname = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.firstnameParamName, element);
+        final String middlename = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.middlenameParamName, element);
+        final String lastname = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.lastnameParamName, element);
 
         return StringUtils.isNotBlank(firstname) || StringUtils.isNotBlank(middlename) || StringUtils.isNotBlank(lastname);
     }
 
     private boolean isFullnameProvided(final JsonElement element) {
-        final String fullname = fromApiJsonHelper.extractStringNamed(ClientApiConstants.fullnameParamName, element);
+        final String fullname = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.fullnameParamName, element);
         return StringUtils.isNotBlank(fullname);
     }
 
@@ -192,8 +201,8 @@ public final class ClientDataValidator {
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, ClientApiConstants.CLIENT_UPDATE_REQUEST_DATA_PARAMETERS);
-        final JsonElement element = fromApiJsonHelper.parse(json);
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, ClientApiConstants.CLIENT_UPDATE_REQUEST_DATA_PARAMETERS);
+        final JsonElement element = this.fromApiJsonHelper.parse(json);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
 
@@ -201,9 +210,9 @@ public final class ClientDataValidator {
                 .resource(ClientApiConstants.CLIENT_RESOURCE_NAME);
 
         boolean atLeastOneParameterPassedForUpdate = false;
-        if (fromApiJsonHelper.parameterExists(ClientApiConstants.accountNoParamName, element)) {
+        if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.accountNoParamName, element)) {
             atLeastOneParameterPassedForUpdate = true;
-            final String accountNo = fromApiJsonHelper.extractStringNamed(ClientApiConstants.accountNoParamName, element);
+            final String accountNo = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.accountNoParamName, element);
             baseDataValidator.reset().parameter(ClientApiConstants.accountNoParamName).value(accountNo).notBlank().notExceedingLengthOf(20);
         }
 
@@ -247,34 +256,40 @@ public final class ClientDataValidator {
             }
         }
 
-        if (fromApiJsonHelper.parameterExists(ClientApiConstants.fullnameParamName, element)) {
+        if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.fullnameParamName, element)) {
             atLeastOneParameterPassedForUpdate = true;
         }
 
-        if (fromApiJsonHelper.parameterExists(ClientApiConstants.lastnameParamName, element)) {
+        if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.lastnameParamName, element)) {
             atLeastOneParameterPassedForUpdate = true;
         }
 
-        if (fromApiJsonHelper.parameterExists(ClientApiConstants.middlenameParamName, element)) {
+        if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.middlenameParamName, element)) {
             atLeastOneParameterPassedForUpdate = true;
         }
 
-        if (fromApiJsonHelper.parameterExists(ClientApiConstants.firstnameParamName, element)) {
+        if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.firstnameParamName, element)) {
             atLeastOneParameterPassedForUpdate = true;
         }
 
-        if (fromApiJsonHelper.parameterExists(ClientApiConstants.externalIdParamName, element)) {
+        if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.externalIdParamName, element)) {
             atLeastOneParameterPassedForUpdate = true;
-            final String externalId = fromApiJsonHelper.extractStringNamed(ClientApiConstants.externalIdParamName, element);
+            final String externalId = this.fromApiJsonHelper.extractStringNamed(ClientApiConstants.externalIdParamName, element);
             baseDataValidator.reset().parameter(ClientApiConstants.externalIdParamName).value(externalId).notExceedingLengthOf(100);
         }
 
-        final Boolean active = fromApiJsonHelper.extractBooleanNamed(ClientApiConstants.activeParamName, element);
+        final Boolean active = this.fromApiJsonHelper.extractBooleanNamed(ClientApiConstants.activeParamName, element);
         if (active != null) {
             if (active.booleanValue()) {
-                final LocalDate joinedDate = fromApiJsonHelper.extractLocalDateNamed(ClientApiConstants.activationDateParamName, element);
+                final LocalDate joinedDate = this.fromApiJsonHelper.extractLocalDateNamed(ClientApiConstants.activationDateParamName,
+                        element);
                 baseDataValidator.reset().parameter(ClientApiConstants.activationDateParamName).value(joinedDate).notNull();
             }
+        }
+
+        if (this.fromApiJsonHelper.parameterExists(ClientApiConstants.staffIdParamName, element)) {
+            final Long staffId = this.fromApiJsonHelper.extractLongNamed(ClientApiConstants.staffIdParamName, element);
+            baseDataValidator.reset().parameter(ClientApiConstants.staffIdParamName).value(staffId).ignoreIfNull().longGreaterThanZero();
         }
 
         if (!atLeastOneParameterPassedForUpdate) {
@@ -291,7 +306,7 @@ public final class ClientDataValidator {
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, ClientApiConstants.ACTIVATION_REQUEST_DATA_PARAMETERS);
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, ClientApiConstants.ACTIVATION_REQUEST_DATA_PARAMETERS);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
@@ -299,7 +314,7 @@ public final class ClientDataValidator {
 
         final JsonElement element = command.parsedJson();
 
-        final LocalDate activationDate = fromApiJsonHelper.extractLocalDateNamed(activationDateParamName, element);
+        final LocalDate activationDate = this.fromApiJsonHelper.extractLocalDateNamed(activationDateParamName, element);
         baseDataValidator.reset().parameter(activationDateParamName).value(activationDate).notNull();
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
@@ -310,5 +325,29 @@ public final class ClientDataValidator {
             //
             throw new PlatformApiDataValidationException(dataValidationErrors);
         }
+    }
+
+    public void validateForUnassignStaff(final String json) {
+
+        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+
+        final Set<String> supportedParametersUnassignStaff = new HashSet<String>(Arrays.asList(ClientApiConstants.staffIdParamName));
+
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, supportedParametersUnassignStaff);
+        final JsonElement element = this.fromApiJsonHelper.parse(json);
+
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+                .resource(ClientApiConstants.CLIENT_RESOURCE_NAME);
+
+        final String staffIdParameterName = ClientApiConstants.staffIdParamName;
+        final Long staffId = this.fromApiJsonHelper.extractLongNamed(staffIdParameterName, element);
+        baseDataValidator.reset().parameter(staffIdParameterName).value(staffId).notNull().longGreaterThanZero();
+
+        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+
     }
 }

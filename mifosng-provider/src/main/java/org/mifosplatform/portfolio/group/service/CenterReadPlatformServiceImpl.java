@@ -323,7 +323,7 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
         }
 
         return GroupGeneralData.template(centerOfficeId, center.getId(), center.getName(), staffId, staffName, centerOptions,
-                officeOptions, staffOptions, clientOptions);
+                officeOptions, staffOptions, clientOptions, null);
     }
 
     @Override

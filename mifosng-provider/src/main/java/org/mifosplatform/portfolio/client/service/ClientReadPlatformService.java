@@ -16,7 +16,7 @@ import org.mifosplatform.portfolio.group.service.SearchParameters;
 
 public interface ClientReadPlatformService {
 
-    ClientData retrieveTemplate();
+    ClientData retrieveTemplate(Long officeId);
 
     Page<ClientData> retrieveAll(SearchParameters searchParameters);
 

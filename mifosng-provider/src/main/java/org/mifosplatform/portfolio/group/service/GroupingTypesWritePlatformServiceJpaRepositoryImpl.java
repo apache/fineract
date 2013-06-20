@@ -21,6 +21,7 @@ import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
+import org.mifosplatform.infrastructure.security.exception.PermissionDeniedException;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.office.domain.Office;
 import org.mifosplatform.organisation.office.domain.OfficeRepository;
@@ -45,6 +46,7 @@ import org.mifosplatform.portfolio.loanaccount.domain.Loan;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanRepository;
 import org.mifosplatform.portfolio.note.domain.Note;
 import org.mifosplatform.portfolio.note.domain.NoteRepository;
+import org.mifosplatform.useradministration.domain.AppUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -213,8 +215,21 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
     private CommandProcessingResult updateGroupingType(final Long groupId, final JsonCommand command, final GroupTypes groupingType) {
 
         try {
+            AppUser user = this.context.authenticatedUser();
             final Group groupForUpdate = this.groupRepository.findOneWithNotFoundDetection(groupId);
             final Long officeId = groupForUpdate.officeId();
+            final Office groupOffice = groupForUpdate.getOffice();
+            final String groupHierarchy = groupOffice.getHierarchy();
+            
+            //Don't allow other office user to update 
+            final Office loginUserOffice = this.context.authenticatedUser().getOffice();
+            final String userHierarchy = loginUserOffice.getHierarchy();
+            
+            if (!groupHierarchy.startsWith(userHierarchy)) {
+                final String code = "error.msg.not.enough.permissions.to.access.resource";
+                final String defaultMessage = "The User with id "+user.getId()+" don't have permission to update this "+ groupingType.getValue();
+                throw new PermissionDeniedException(code, defaultMessage, user.getId());
+            }
 
             final Map<String, Object> actualChanges = groupForUpdate.update(command);
 
