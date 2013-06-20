@@ -6,6 +6,7 @@ See VERSIONING (https://github.com/openMF/mifosx/blob/master/VERSIONING.md) for 
 Releases
 ===============
 
+1. 20 Jun 2013 - 1.4.0.RELEASE
 1. 10 Jun 2013 - 1.3.0.RELEASE
 1. 06 Jun 2013 - 1.2.1.RELEASE
 1. 27 May 2013 - 1.2.0.RELEASE
@@ -23,6 +24,47 @@ Releases
 1. 10 April 2013 - 0.11.2.beta
 1. 05 April 2013 - 0.11.1.beta
 1. 05 April 2013 - 0.11.0.beta
+
+
+1.4.0.RELEASE
+=============
+Feature Release
+
+This feature release focussed on moving groups functionality from BETA to public API. 
+
+Along with Group releated work, key improvements was the addition of a UI and API for adding 'additional data' and staff relationship to clients.
+
+Platform & API
+
+Bug 
+ - [MIFOSX-420] - In "Change loan application" not able to save the modifications made because of error message getting displayed on charges.
+ - [MIFOSX-424] - In new loan application, loan is getting approved for the Principal amount beyond the range (Minimum and Maximum) defined in the loan product.
+ - [MIFOSX-429] - App user of one branch can edit client of another branch
+ - [MIFOSX-446] - New loan application is not validating Min-Max Principal defined in the product defination
+ - [MIFOSX-447] - New loan application is not validating Min-Max for "# Of Repayments" defined in the product defination
+ - [MIFOSX-448] - New loan application is not validating Min-Max "Nominal interest rate %" defined in the product defination
+ - [MIFOSX-468] - In "Change loan application" error message is displaying for the second charge which was applied before.
+ - [MIFOSX-474] - Adjusting an existing loan transaction fails when 'note' information is passed
+
+New Features & Improvements
+ - [MIFOSX-365] - Simplify "Data Tables" functionality
+ - [MIFOSX-421] - Ability to create and associate Group Roles
+ - [MIFOSX-434] - Allow linking of staff to Clients
+ - [MIFOSX-445] - Show loanofficers at higher hierarchical level in product template
+ - [MIFOSX-449] - Group and JLG loans repayment schedule should match group meeting dates if loan repayment is synched with group meeting
+ - [MIFOSX-457] - Update API param names for accounting rules to be consistent with rest of the accounting services
+ - [MIFOSX-458] - Unable to create accounting rules with Tag Id, multiple debits/credits etc
+  
+Reference App
+ - [MIFOSX-378] - TEVI: Produce 'role-based' dashboards as entry/landing page for users that login
+ - [MIFOSX-455] - CodeValues functionality broken on the reference Client app
+ - [MIFOSX-469] - In Groups unable to activate the created group
+ - [MIFOSX-464] - Unable to edit the created charge in "charge details" page
+ 
+BETA (functionality related to BETA functionality
+ - [MIFOSX-456] - CRUD services and UI for creating Holidays
+ - [MIFOSX-411] - While creating new savings account, If "Interest posting period" is defined Annually, it is getting posted monthly.
+
 
 1.3.0.RELEASE
 =============
