@@ -47,7 +47,8 @@ public final class LoanApplicationCommandFromApiJsonHelper {
             "accountNo", "externalId", "fundId", "loanOfficerId", // optional
             "loanPurposeId", "inArrearsTolerance", "charges", "collateral", // optional
             "transactionProcessingStrategyId", // settings
-            "calendarId" // optional
+            "calendarId", // optional
+            "syncDisbursementWithMeeting"//optional
     ));
 
     private final FromJsonHelper fromApiJsonHelper;
@@ -230,12 +231,6 @@ public final class LoanApplicationCommandFromApiJsonHelper {
         baseDataValidator.reset().parameter(transactionProcessingStrategyIdParameterName).value(transactionProcessingStrategyId).notNull()
                 .integerGreaterThanZero();
 
-        final String calendarIdParameterName = "calendarId";
-        if (fromApiJsonHelper.parameterExists(calendarIdParameterName, element)) {
-            final Long calendarId = fromApiJsonHelper.extractLongNamed(calendarIdParameterName, element);
-            baseDataValidator.reset().parameter(calendarIdParameterName).value(calendarId).ignoreIfNull().integerGreaterThanZero();
-        }
-
         // charges
         final String chargesParameterName = "charges";
         if (element.isJsonObject() && fromApiJsonHelper.parameterExists(chargesParameterName, element)) {
@@ -300,6 +295,25 @@ public final class LoanApplicationCommandFromApiJsonHelper {
             } else {
                 baseDataValidator.reset().parameter(collateralParameterName).expectedArrayButIsNot();
             }
+        }
+
+        boolean meetingIdRequired = false;
+        //validate syncDisbursement
+        final String syncDisbursementParameterName = "syncDisbursementWithMeeting";
+        if (fromApiJsonHelper.parameterExists(syncDisbursementParameterName, element)) {
+        	final Boolean syncDisbursement = fromApiJsonHelper.extractBooleanNamed(syncDisbursementParameterName, element);
+        	if(syncDisbursement == null){
+        		baseDataValidator.reset().parameter(syncDisbursementParameterName).value(syncDisbursement).trueOrFalseRequired(false);
+        	}else if(syncDisbursement.booleanValue()) {
+        		meetingIdRequired = true;
+        	}
+        }
+      
+        final String calendarIdParameterName = "calendarId";
+        //if disbursement is synced then must have a meeting (calendar)
+        if (meetingIdRequired || fromApiJsonHelper.parameterExists(syncDisbursementParameterName, element)) {
+        	final Long calendarId = fromApiJsonHelper.extractLongNamed(calendarIdParameterName, element);
+	        baseDataValidator.reset().parameter(calendarIdParameterName).value(calendarId).notNull().integerGreaterThanZero();
         }
 
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
@@ -517,12 +531,6 @@ public final class LoanApplicationCommandFromApiJsonHelper {
                     .notExceedingLengthOf(500);
         }
 
-        final String calendarIdParameterName = "calendarId";
-        if (fromApiJsonHelper.parameterExists(calendarIdParameterName, element)) {
-            final Long calendarId = fromApiJsonHelper.extractLongNamed(calendarIdParameterName, element);
-            baseDataValidator.reset().parameter(calendarIdParameterName).value(calendarId).ignoreIfNull().integerGreaterThanZero();
-        }
-
         // charges
         final String chargesParameterName = "charges";
         if (element.isJsonObject() && fromApiJsonHelper.parameterExists(chargesParameterName, element)) {
@@ -591,6 +599,25 @@ public final class LoanApplicationCommandFromApiJsonHelper {
             }
         }
 
+        boolean meetingIdRequired = false;
+        //validate syncDisbursement
+        final String syncDisbursementParameterName = "syncDisbursementWithMeeting";
+        if (fromApiJsonHelper.parameterExists(syncDisbursementParameterName, element)) {
+        	final Boolean syncDisbursement = fromApiJsonHelper.extractBooleanNamed(syncDisbursementParameterName, element);
+        	if(syncDisbursement == null){
+        		baseDataValidator.reset().parameter(syncDisbursementParameterName).value(syncDisbursement).trueOrFalseRequired(false);
+        	}else if(syncDisbursement.booleanValue()) {
+        		meetingIdRequired = true;
+        	}
+        }
+      
+        final String calendarIdParameterName = "calendarId";
+        //if disbursement is synced then must have a meeting (calendar)
+        if (meetingIdRequired || fromApiJsonHelper.parameterExists(syncDisbursementParameterName, element)) {
+        	final Long calendarId = fromApiJsonHelper.extractLongNamed(calendarIdParameterName, element);
+	        baseDataValidator.reset().parameter(calendarIdParameterName).value(calendarId).notNull().integerGreaterThanZero();
+        }
+        
         if (!atLeastOneParameterPassedForUpdate) {
             final Object forceError = null;
             baseDataValidator.reset().anyOfNotNull(forceError);
@@ -639,4 +666,5 @@ public final class LoanApplicationCommandFromApiJsonHelper {
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
                 "Validation errors exist.", dataValidationErrors); }
     }
+
 }
