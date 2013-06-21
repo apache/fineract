@@ -20,4 +20,6 @@ public interface ClientWritePlatformService {
 
     CommandProcessingResult unassignClientStaff(Long clientId, JsonCommand command);
 
+    CommandProcessingResult assignClientStaff(Long clientId, JsonCommand command);
+
 }

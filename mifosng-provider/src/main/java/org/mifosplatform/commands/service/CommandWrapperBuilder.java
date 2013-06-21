@@ -1062,4 +1062,13 @@ public class CommandWrapperBuilder {
         this.href = "/clients/" + clientId + "?command=unassignStaff";
         return this;
     }
+
+    public CommandWrapperBuilder assignClientStaff(Long clientId) {
+        this.actionName = "ASSIGNSTAFF";
+        this.entityName = "CLIENT";
+        this.entityId = clientId;
+        this.clientId = clientId;
+        this.href = "/clients/" + clientId + "?command=assignStaff";
+        return this;
+    }
 }

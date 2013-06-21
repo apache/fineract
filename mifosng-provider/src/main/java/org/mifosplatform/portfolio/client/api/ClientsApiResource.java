@@ -197,6 +197,10 @@ public class ClientsApiResource {
         if (is(commandParam, "activate")) {
             final CommandWrapper commandRequest = builder.activateClient(clientId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        } else if (is(commandParam, "assignStaff")) {
+            final CommandWrapper commandRequest = builder.assignClientStaff(clientId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            return this.toApiJsonSerializer.serialize(result);
         } else if (is(commandParam, "unassignStaff")) {
             final CommandWrapper commandRequest = builder.unassignClientStaff(clientId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
@@ -204,7 +208,7 @@ public class ClientsApiResource {
         }
 
         if (result == null) {
-            throw new UnrecognizedQueryParamException("command", commandParam, new Object[] { "activate", "unassignStaff" });
+            throw new UnrecognizedQueryParamException("command", commandParam, new Object[] { "activate", "unassignStaff", "assignStaff" });
         }
 
         return this.toApiJsonSerializer.serialize(result);
