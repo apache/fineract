@@ -84,11 +84,18 @@ public class ClientsApiResource {
     @Path("template")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveTemplate(@Context final UriInfo uriInfo, @QueryParam("officeId") final Long officeId) {
+    public String retrieveTemplate(@Context final UriInfo uriInfo, @QueryParam("officeId") final Long officeId,
+            @QueryParam("commandParam") final String commandParam) {
 
         context.authenticatedUser().validateHasReadPermission(ClientApiConstants.CLIENT_RESOURCE_NAME);
 
-        final ClientData clientData = this.clientReadPlatformService.retrieveTemplate(officeId);
+        ClientData clientData = null;
+        context.authenticatedUser().validateHasReadPermission(ClientApiConstants.CLIENT_RESOURCE_NAME);
+        if (is(commandParam, "close")) {
+                clientData =  this.clientReadPlatformService.retrieveAllClosureReasons(ClientApiConstants.CLIENT_CLOSURE_REASON);
+        }else{
+                clientData = this.clientReadPlatformService.retrieveTemplate(officeId);
+        }
 
         final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serialize(settings, clientData, ClientApiConstants.CLIENT_RESPONSE_DATA_PARAMETERS);
@@ -194,17 +201,21 @@ public class ClientsApiResource {
         final CommandWrapperBuilder builder = new CommandWrapperBuilder().withJson(apiRequestBodyAsJson);
 
         CommandProcessingResult result = null;
+        CommandWrapper commandRequest = null;
         if (is(commandParam, "activate")) {
-            final CommandWrapper commandRequest = builder.activateClient(clientId).build();
+            commandRequest = builder.activateClient(clientId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, "assignStaff")) {
-            final CommandWrapper commandRequest = builder.assignClientStaff(clientId).build();
+            commandRequest = builder.assignClientStaff(clientId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
             return this.toApiJsonSerializer.serialize(result);
         } else if (is(commandParam, "unassignStaff")) {
-            final CommandWrapper commandRequest = builder.unassignClientStaff(clientId).build();
+            commandRequest = builder.unassignClientStaff(clientId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
             return this.toApiJsonSerializer.serialize(result);
+        } else if(is(commandParam, "close")) {
+            commandRequest = builder.closeClient(clientId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         }
 
         if (result == null) {

@@ -2317,8 +2317,12 @@ public class Loan extends AbstractPersistable<Long> {
         this.transactionProcessorFactory = transactionProcessorFactory;
     }
 
-	public boolean isSyncDisbursementWithMeeting() {
-		return this.syncDisbursementWithMeeting == null ? false : this.syncDisbursementWithMeeting;
-	}
+    public boolean isSyncDisbursementWithMeeting() {
+        return this.syncDisbursementWithMeeting == null ? false : this.syncDisbursementWithMeeting;
+    }
+
+    public Date getClosedOnDate() {
+        return this.closedOnDate;
+    }
 
 }

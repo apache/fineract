@@ -553,4 +553,7 @@ public class CommandWrapper {
         return this.actionName.equalsIgnoreCase("ASSIGNSTAFF") && this.entityName.equalsIgnoreCase("CLIENT");
     }
   
+    public boolean isClientClose() {
+        return this.actionName.equalsIgnoreCase("CLOSE") && this.entityName.equalsIgnoreCase("CLIENT");
+    }
 }

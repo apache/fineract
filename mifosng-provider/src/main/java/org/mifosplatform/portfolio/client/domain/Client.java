@@ -95,6 +95,15 @@ public final class Client extends AbstractPersistable<Long> {
 
     @Transient
     private boolean accountNumberRequiresAutoGeneration = false;
+    
+    @SuppressWarnings("unused")
+    @Column(name = "closure_reason_cv_id", nullable = true)
+    private Long closureReasonId;
+    
+    @SuppressWarnings("unused")
+    @Column(name = "closedon_date", nullable = true)
+    @Temporal(TemporalType.DATE)
+    private Date closureDate;
 
     public static Client createNew(final Office clientOffice, final Group clientParentGroup, final Staff staff, final JsonCommand command) {
 
@@ -447,4 +456,14 @@ public final class Client extends AbstractPersistable<Long> {
         this.staff = staff;
     }
 
+    
+    public void close(final Long closureReasonId, final Date closureDate) {
+        this.closureReasonId = closureReasonId;
+        this.closureDate = closureDate;
+        this.status = ClientStatus.CLOSED.getValue();
+    }
+    
+    public Integer getStatus() {
+        return status;
+    }
 }

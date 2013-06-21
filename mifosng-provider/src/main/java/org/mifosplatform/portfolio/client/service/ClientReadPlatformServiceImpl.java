@@ -13,6 +13,8 @@ import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
+import org.mifosplatform.infrastructure.codes.data.CodeValueData;
+import org.mifosplatform.infrastructure.codes.service.CodeValueReadPlatformService;
 import org.mifosplatform.infrastructure.core.api.ApiParameterHelper;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
@@ -51,7 +53,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
     private final PlatformSecurityContext context;
     private final OfficeReadPlatformService officeReadPlatformService;
     private final StaffReadPlatformService staffReadPlatformService;
-
+    private final CodeValueReadPlatformService codeValueReadPlatformService;
     // data mappers
     private final PaginationHelper<ClientData> paginationHelper = new PaginationHelper<ClientData>();
     private final ClientMapper clientMapper = new ClientMapper();
@@ -61,11 +63,13 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
     @Autowired
     public ClientReadPlatformServiceImpl(final PlatformSecurityContext context, final TenantAwareRoutingDataSource dataSource,
-            final OfficeReadPlatformService officeReadPlatformService, final StaffReadPlatformService staffReadPlatformService) {
+            final OfficeReadPlatformService officeReadPlatformService, final StaffReadPlatformService staffReadPlatformService,
+            final CodeValueReadPlatformService codeValueReadPlatformService) {
         this.context = context;
         this.officeReadPlatformService = officeReadPlatformService;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.staffReadPlatformService = staffReadPlatformService;
+        this.codeValueReadPlatformService = codeValueReadPlatformService;
     }
 
     @Override
@@ -82,7 +86,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             staffOptions = null;
         }
         
-        return ClientData.template(defaultOfficeId, new LocalDate(), offices, staffOptions);
+        return ClientData.template(defaultOfficeId, new LocalDate(), offices, staffOptions, null);
     }
 
     @Override
@@ -586,4 +590,11 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         }
         return defaultOfficeId;
     }
+
+    @Override
+    public ClientData retrieveAllClosureReasons(String clientClosureReason) {
+        final List<CodeValueData> closureReasons = new ArrayList<CodeValueData>(codeValueReadPlatformService.retrieveCodeValuesByCode(clientClosureReason));
+        return ClientData.template(null, null, null, null, closureReasons);
+    }
+
 }

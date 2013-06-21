@@ -14,6 +14,7 @@ import org.mifosplatform.portfolio.client.data.ClientData;
 public class ClientApiConstants {
 
     public static final String CLIENT_RESOURCE_NAME = "client";
+    public static final String CLIENT_CLOSURE_REASON = "ClientClosureReason";
 
     // general
     public static final String localeParamName = "locale";
@@ -32,7 +33,8 @@ public class ClientApiConstants {
     public static final String activeParamName = "active";
     public static final String activationDateParamName = "activationDate";
     public static final String staffIdParamName = "staffId";
-
+    public static final String closureDateParamName = "closureDate";
+    public static final String closureReasonIdParamName = "closureReasonId";
     // response parameters
     public static final String statusParamName = "status";
     public static final String hierarchyParamName = "hierarchy";
@@ -68,4 +70,7 @@ public class ClientApiConstants {
 
     public static final Set<String> ACTIVATION_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(localeParamName,
             dateFormatParamName, activationDateParamName));
+    
+    public static final Set<String> CLIENT_CLOSE_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(localeParamName,
+            dateFormatParamName, closureDateParamName, closureReasonIdParamName));
 }
