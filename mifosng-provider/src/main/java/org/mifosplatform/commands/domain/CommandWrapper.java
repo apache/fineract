@@ -537,16 +537,20 @@ public class CommandWrapper {
         return this.actionName.equalsIgnoreCase("UNASSIGNSTAFF") && this.entityName.equalsIgnoreCase("CLIENT");
     }
 
-    public boolean isAssignRole() {
+    public boolean isAssignGroupRole() {
         return this.entityName.equalsIgnoreCase("GROUP") && this.actionName.equalsIgnoreCase("ASSIGNROLE");
     }
 
-    public boolean isUnAssignRole() {
+    public boolean isUnAssignGroupRole() {
         return this.entityName.equalsIgnoreCase("GROUP") && this.actionName.equalsIgnoreCase("UNASSIGNROLE");
     }
 
-    public boolean isUpdateRole() {
+    public boolean isUpdateGroupRole() {
         return this.entityName.equalsIgnoreCase("GROUP") && this.actionName.equalsIgnoreCase("UPDATEROLE");
+    }
+
+    public boolean isClientAssignStaff() {
+        return this.actionName.equalsIgnoreCase("ASSIGNSTAFF") && this.entityName.equalsIgnoreCase("CLIENT");
     }
   
 }

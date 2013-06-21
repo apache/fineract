@@ -158,7 +158,9 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
             } else if (wrapper.isClientActivation()) {
                 handler = this.applicationContext.getBean("activateClientCommandHandler", NewCommandSourceHandler.class);
             } else if (wrapper.isClientUnassignStaff()) {
-                handler = applicationContext.getBean("unassignClientStaffCommandHandler", NewCommandSourceHandler.class);
+                handler = this.applicationContext.getBean("unassignClientStaffCommandHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isClientAssignStaff()) {
+                handler = this.applicationContext.getBean("assignClientStaffCommandHandler", NewCommandSourceHandler.class);
             } else {
                 throw new UnsupportedCommandException(wrapper.commandName());
             }
@@ -415,11 +417,11 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
                 handler = this.applicationContext.getBean("disassociateClientsFromGroupCommandHandler", NewCommandSourceHandler.class);
             } else if (wrapper.isSaveGroupCollectionSheet()) {
                 handler = this.applicationContext.getBean("saveGroupCollectionSheetCommandHandler", NewCommandSourceHandler.class);
-            } else if (wrapper.isAssignRole()) {
+            } else if (wrapper.isAssignGroupRole()) {
                 handler = this.applicationContext.getBean("assignRoleCommandHandler", NewCommandSourceHandler.class);
-            } else if (wrapper.isUnAssignRole()) {
+            } else if (wrapper.isUnAssignGroupRole()) {
                 handler = this.applicationContext.getBean("unassignRoleCommandHandler", NewCommandSourceHandler.class);
-            } else if (wrapper.isUpdateRole()) {
+            } else if (wrapper.isUpdateGroupRole()) {
                 handler = this.applicationContext.getBean("updateGroupRoleCommandHandler", NewCommandSourceHandler.class);
             } else {
                 throw new UnsupportedCommandException(wrapper.commandName());
@@ -473,7 +475,7 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
         } else if (wrapper.isHolidayResource()) {
 
             if (wrapper.isCreate()) {
-                handler = applicationContext.getBean("createHolidayCommandHandler", NewCommandSourceHandler.class);
+                handler = this.applicationContext.getBean("createHolidayCommandHandler", NewCommandSourceHandler.class);
             }
         } else {
             throw new UnsupportedCommandException(wrapper.commandName());

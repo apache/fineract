@@ -443,4 +443,8 @@ public final class Client extends AbstractPersistable<Long> {
         this.staff = null;
     }
 
+    public void assignStaff(Staff staff) {
+        this.staff = staff;
+    }
+
 }

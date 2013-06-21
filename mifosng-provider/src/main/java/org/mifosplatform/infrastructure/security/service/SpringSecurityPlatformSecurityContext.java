@@ -5,6 +5,7 @@
  */
 package org.mifosplatform.infrastructure.security.service;
 
+import org.mifosplatform.infrastructure.security.exception.NoAuthorizationException;
 import org.mifosplatform.useradministration.domain.AppUser;
 import org.mifosplatform.useradministration.exception.UnAuthenticatedUserException;
 import org.springframework.security.core.Authentication;
@@ -22,9 +23,9 @@ public class SpringSecurityPlatformSecurityContext implements PlatformSecurityCo
     @Override
     public AppUser authenticatedUser() {
         AppUser currentUser = null;
-        SecurityContext context = SecurityContextHolder.getContext();
+        final SecurityContext context = SecurityContextHolder.getContext();
         if (context != null) {
-            Authentication auth = context.getAuthentication();
+            final Authentication auth = context.getAuthentication();
             if (auth != null) {
                 currentUser = (AppUser) auth.getPrincipal();
             }
@@ -33,5 +34,17 @@ public class SpringSecurityPlatformSecurityContext implements PlatformSecurityCo
         if (currentUser == null) { throw new UnAuthenticatedUserException(); }
 
         return currentUser;
+    }
+
+    @Override
+    public void validateAccessRights(final String resourceOfficeHierarchy) {
+
+        final AppUser user = authenticatedUser();
+        final String userOfficeHierarchy = user.getOffice().getHierarchy();
+
+        if (!resourceOfficeHierarchy.startsWith(userOfficeHierarchy)) {
+            throw new NoAuthorizationException("The user doesn't have enough permissions to access the resource.");
+        }
+
     }
 }
