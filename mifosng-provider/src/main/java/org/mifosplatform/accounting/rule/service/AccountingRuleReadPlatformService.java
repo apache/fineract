@@ -11,7 +11,7 @@ import org.mifosplatform.accounting.rule.data.AccountingRuleData;
 
 public interface AccountingRuleReadPlatformService {
 
-    List<AccountingRuleData> retrieveAllAccountingRules(Long OfficeId, boolean isAssociationParametersExists);
+    List<AccountingRuleData> retrieveAllAccountingRules(String hierarchySearchString, boolean isAssociationParametersExists);
 
     AccountingRuleData retrieveAccountingRuleById(Long accountingRuleId);
 
