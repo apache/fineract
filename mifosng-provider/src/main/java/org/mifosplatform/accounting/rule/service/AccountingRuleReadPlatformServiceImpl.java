@@ -133,14 +133,14 @@ public class AccountingRuleReadPlatformServiceImpl implements AccountingRuleRead
     }
 
     @Override
-    public List<AccountingRuleData> retrieveAllAccountingRules(final Long officeId, final boolean isAssociationParametersExists) {
+    public List<AccountingRuleData> retrieveAllAccountingRules(final String hierarchySearchString, final boolean isAssociationParametersExists) {
         final AccountingRuleDataExtractor resultSetExtractor = new AccountingRuleDataExtractor(this.jdbcTemplate,
                 this.glAccountReadPlatformService, isAssociationParametersExists);
         Object[] arguments = new Object[] {};
         String sql = "select " + resultSetExtractor.schema() + " and system_defined=0 ";
-        if (officeId != null) {
-            sql = sql + " and office.id = ?";
-            arguments = new Object[] { officeId };
+        if (hierarchySearchString != null) {
+            sql = sql + " and office.hierarchy like ?";
+            arguments = new Object[] { hierarchySearchString };
         }
         sql = sql + " order by rule.id asc";
         final Map<Long, AccountingRuleData> extractedData = this.jdbcTemplate.query(sql, resultSetExtractor, arguments);

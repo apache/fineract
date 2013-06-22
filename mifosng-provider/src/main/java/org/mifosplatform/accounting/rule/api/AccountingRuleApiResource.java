@@ -45,6 +45,7 @@ import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSeria
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.office.data.OfficeData;
 import org.mifosplatform.organisation.office.service.OfficeReadPlatformService;
+import org.mifosplatform.useradministration.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -106,17 +107,21 @@ public class AccountingRuleApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveAllAccountingRules(@Context final UriInfo uriInfo) {
-
-        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermission);
+        
+        final AppUser currentUser = context.authenticatedUser();
+        currentUser.validateHasReadPermission(this.resourceNameForPermission);
+        
+        final String hierarchy = currentUser.getOffice().getHierarchy();
+        final String hierarchySearchString = hierarchy + "%";
+        
         final Set<String> associationParameters = ApiParameterHelper.extractAssociationsForResponseIfProvided(uriInfo.getQueryParameters());
-        final Long officeId = this.context.authenticatedUser().getOffice().getId();
         boolean isAssociationParametersExists = false;
         if (!associationParameters.isEmpty()) {
             if (associationParameters.contains("all")) {
                 isAssociationParametersExists = true; // If true, retrieve additional fields for journal entry form.
             }
         }
-        final List<AccountingRuleData> accountingRuleDatas = this.accountingRuleReadPlatformService.retrieveAllAccountingRules(officeId,
+        final List<AccountingRuleData> accountingRuleDatas = this.accountingRuleReadPlatformService.retrieveAllAccountingRules(hierarchySearchString,
                 isAssociationParametersExists);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
