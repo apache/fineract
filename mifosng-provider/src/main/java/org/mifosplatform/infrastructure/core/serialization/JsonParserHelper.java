@@ -518,7 +518,7 @@ public class JsonParserHelper {
         }
     }
 
-    private Locale localeFromString(final String localeAsString) {
+    public static Locale localeFromString(final String localeAsString) {
 
         if (StringUtils.isBlank(localeAsString)) {
             List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
@@ -531,7 +531,7 @@ public class JsonParserHelper {
         }
 
         String languageCode = "";
-        String courntryCode = "";
+        String countryCode = "";
         String variantCode = "";
 
         String[] localeParts = localeAsString.split("_");
@@ -542,19 +542,19 @@ public class JsonParserHelper {
 
         if (localeParts != null && localeParts.length == 2) {
             languageCode = localeParts[0];
-            courntryCode = localeParts[1];
+            countryCode = localeParts[1];
         }
 
         if (localeParts != null && localeParts.length == 3) {
             languageCode = localeParts[0];
-            courntryCode = localeParts[1];
+            countryCode = localeParts[1];
             variantCode = localeParts[2];
         }
 
-        return localeFrom(languageCode, courntryCode, variantCode);
+        return localeFrom(languageCode, countryCode, variantCode);
     }
 
-    private Locale localeFrom(final String languageCode, final String courntryCode, final String variantCode) {
+    private static Locale localeFrom(final String languageCode, final String courntryCode, final String variantCode) {
 
         List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
 

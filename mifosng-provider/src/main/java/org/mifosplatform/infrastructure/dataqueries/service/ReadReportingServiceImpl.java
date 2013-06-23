@@ -19,6 +19,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -41,6 +42,7 @@ import org.mifosplatform.infrastructure.documentmanagement.contentrepository.Fil
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.useradministration.domain.AppUser;
 import org.pentaho.reporting.engine.classic.core.ClassicEngineBoot;
+import org.pentaho.reporting.engine.classic.core.DefaultReportEnvironment;
 import org.pentaho.reporting.engine.classic.core.MasterReport;
 import org.pentaho.reporting.engine.classic.core.ReportProcessingException;
 import org.pentaho.reporting.engine.classic.core.modules.output.pageable.pdf.PdfReportUtil;
@@ -231,7 +233,8 @@ public class ReadReportingServiceImpl implements ReadReportingService {
     }
 
     @Override
-    public Response processPentahoRequest(final String reportName, final String outputTypeParam, final Map<String, String> queryParams) {
+    public Response processPentahoRequest(final String reportName, final String outputTypeParam, final Map<String, String> queryParams,
+            final Locale locale) {
 
         String outputType = "HTML";
         if (StringUtils.isNotBlank(outputTypeParam)) outputType = outputTypeParam;
@@ -243,7 +246,8 @@ public class ReadReportingServiceImpl implements ReadReportingService {
         if (noPentaho) { throw new PlatformDataIntegrityException("error.msg.no.pentaho", "Pentaho is not enabled",
                 "Pentaho is not enabled"); }
 
-        final String reportPath = FileSystemContentRepository.MIFOSX_BASE_DIR + File.separator + "pentahoReports" + File.separator + reportName + ".prpt";
+        final String reportPath = FileSystemContentRepository.MIFOSX_BASE_DIR + File.separator + "pentahoReports" + File.separator
+                + reportName + ".prpt";
         logger.info("Report path: " + reportPath);
 
         // load report definition
@@ -254,7 +258,10 @@ public class ReadReportingServiceImpl implements ReadReportingService {
         try {
             res = manager.createDirectly(reportPath, MasterReport.class);
             MasterReport masterReport = (MasterReport) res.getResource();
-
+            DefaultReportEnvironment reportEnvironment = (DefaultReportEnvironment) masterReport.getReportEnvironment();
+            if (locale != null) {
+                reportEnvironment.setLocale(locale);
+            }
             addParametersToReport(masterReport, queryParams);
 
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -336,12 +343,9 @@ public class ReadReportingServiceImpl implements ReadReportingService {
             // data scoping
             Connection connection = dataSource.getConnection();
             String tenantdb;
-            try
-            {
+            try {
                 tenantdb = connection.getCatalog();
-            }
-            finally
-            {
+            } finally {
                 connection.close();
             }
             String userhierarchy = currentUser.getOffice().getHierarchy();
@@ -467,8 +471,8 @@ public class ReadReportingServiceImpl implements ReadReportingService {
                 if (reportParameters == null) {
                     reportParameters = new ArrayList<ReportParameterData>();
                 }
-                reportParameters.add(new ReportParameterData(rpJoin.getReportParameterId(), rpJoin.getParameterId(), rpJoin.getReportParameterName(), rpJoin
-                        .getParameterName()));
+                reportParameters.add(new ReportParameterData(rpJoin.getReportParameterId(), rpJoin.getParameterId(), rpJoin
+                        .getReportParameterName(), rpJoin.getParameterName()));
 
             } else {
                 if (firstReport) {
@@ -494,8 +498,8 @@ public class ReadReportingServiceImpl implements ReadReportingService {
                 if (rpJoin.getReportParameterId() != null) {
                     // report has at least one parameter
                     reportParameters = new ArrayList<ReportParameterData>();
-                    reportParameters.add(new ReportParameterData(rpJoin.getReportParameterId(),rpJoin.getParameterId(), rpJoin.getReportParameterName(), rpJoin
-                            .getParameterName()));
+                    reportParameters.add(new ReportParameterData(rpJoin.getReportParameterId(), rpJoin.getParameterId(), rpJoin
+                            .getReportParameterName(), rpJoin.getParameterName()));
                 } else {
                     reportParameters = null;
                 }
@@ -509,17 +513,15 @@ public class ReadReportingServiceImpl implements ReadReportingService {
         return reportList;
     }
 
+    @Override
+    public Collection<ReportParameterData> getAllowedParameters() {
 
-	@Override
-	public Collection<ReportParameterData> getAllowedParameters() {
-		
         ReportParameterMapper rm = new ReportParameterMapper();
         String sql = rm.schema();
         Collection<ReportParameterData> parameters = this.jdbcTemplate.query(sql, rm, new Object[] {});
         return parameters;
-	}
-	
-	
+    }
+
     private static final class ReportParameterJoinMapper implements RowMapper<ReportParameterJoinData> {
 
         public String schema(final Long reportId) {

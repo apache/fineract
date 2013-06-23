@@ -9,12 +9,14 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
 import javax.ws.rs.core.MultivaluedMap;
 
 import org.apache.commons.lang.StringUtils;
+import org.mifosplatform.infrastructure.core.serialization.JsonParserHelper;
 
 public class ApiParameterHelper {
 
@@ -60,6 +62,15 @@ public class ApiParameterHelper {
             prettyPrint = "true".equalsIgnoreCase(prettyPrintValue);
         }
         return prettyPrint;
+    }
+
+    public static Locale extractLocale(final MultivaluedMap<String, String> queryParams) {
+        Locale locale = null;
+        if (queryParams.getFirst("locale") != null) {
+            String localeAsString = queryParams.getFirst("locale");
+            locale = JsonParserHelper.localeFromString(localeAsString);
+        }
+        return locale;
     }
 
     public static boolean exportCsv(final MultivaluedMap<String, String> queryParams) {
@@ -128,7 +139,7 @@ public class ApiParameterHelper {
     public static boolean genericResultSetPassed(MultivaluedMap<String, String> queryParams) {
         return queryParams.getFirst("genericResultSet") != null;
     }
-    
+
     public static String sqlEncodeString(String str) {
         String singleQuote = "'";
         String twoSingleQuotes = "''";
