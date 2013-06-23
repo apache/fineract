@@ -11,5 +11,7 @@ public interface ScheduledJobRunnerService {
 
     void updateLoanArrearsAgeingDetails();
     
+    void updateLoanPaidInAdvance();
+    
     void applyAnnualFeeForSavings(); 
 }

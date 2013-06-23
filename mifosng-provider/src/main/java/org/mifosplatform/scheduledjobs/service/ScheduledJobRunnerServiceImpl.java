@@ -167,6 +167,41 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
 
     @Transactional
     @Override
+    public void updateLoanPaidInAdvance() {
+
+        List<MifosPlatformTenant> allTenants = this.tenantDetailsService.findAllTenants();
+        for (MifosPlatformTenant tenant : allTenants) {
+            ThreadLocalContextUtil.setTenant(tenant);
+
+            JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSourcePerTenantService.retrieveTenantAwareDataSource());
+
+            jdbcTemplate.execute("truncate table m_loan_paid_in_advance");
+
+            StringBuilder updateSqlBuilder = new StringBuilder(900);
+
+            updateSqlBuilder.append("INSERT INTO m_loan_paid_in_advance(loan_id, principal_in_advance_derived, interest_in_advance_derived, fee_charges_in_advance_derived, penalty_charges_in_advance_derived, total_in_advance_derived)");
+            updateSqlBuilder.append("select ml.id as loanId,");
+            updateSqlBuilder.append("SUM(ifnull(mr.principal_completed_derived, 0)) as principal_in_advance_derived,");
+            updateSqlBuilder.append("SUM(ifnull(mr.interest_completed_derived, 0)) as interest_in_advance_derived,");
+            updateSqlBuilder.append("SUM(ifnull(mr.fee_charges_completed_derived, 0)) as fee_charges_in_advance_derived,");
+            updateSqlBuilder.append("SUM(ifnull(mr.penalty_charges_completed_derived, 0)) as penalty_charges_in_advance_derived,");
+            updateSqlBuilder.append("(SUM(ifnull(mr.principal_completed_derived, 0)) + SUM(ifnull(mr.interest_completed_derived, 0)) + SUM(ifnull(mr.fee_charges_completed_derived, 0)) + SUM(ifnull(mr.penalty_charges_completed_derived, 0))) as total_in_advance_derived");
+            updateSqlBuilder.append("FROM m_loan ml ");
+            updateSqlBuilder.append("INNER JOIN m_loan_repayment_schedule mr on mr.loan_id = ml.id ");
+            updateSqlBuilder.append("WHERE ml.loan_status_id = 300 ");
+            updateSqlBuilder.append("and mr.duedate >= CURDATE() ");
+            updateSqlBuilder.append("GROUP BY ml.id");
+            updateSqlBuilder.append("HAVING (SUM(ifnull(mr.principal_completed_derived, 0)) + SUM(ifnull(mr.interest_completed_derived, 0)) +");
+            updateSqlBuilder.append("SUM(ifnull(mr.fee_charges_completed_derived, 0)) + SUM(ifnull(mr.penalty_charges_completed_derived, 0))) > 0.0");
+            
+            int result = jdbcTemplate.update(updateSqlBuilder.toString());
+
+            logger.info(tenant.getName() + ": Results affected by update: " + result);
+        }
+    }
+
+    @Transactional
+    @Override
     public void applyAnnualFeeForSavings() {
 
         List<MifosPlatformTenant> allTenants = this.tenantDetailsService.findAllTenants();
