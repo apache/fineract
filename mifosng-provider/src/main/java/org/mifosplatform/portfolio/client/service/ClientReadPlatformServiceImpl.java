@@ -73,19 +73,26 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
     }
 
     @Override
-    public ClientData retrieveTemplate(final Long officeId) {
-
+    public ClientData retrieveTemplate(final Long officeId, final boolean staffInSelectedOfficeOnly) {
         this.context.authenticatedUser();
-        
+
         final Long defaultOfficeId = defaultToUsersOfficeIfNull(officeId);
 
         final Collection<OfficeData> offices = officeReadPlatformService.retrieveAllOfficesForDropdown();
 
         Collection<StaffData> staffOptions = this.staffReadPlatformService.retrieveAllStaffForDropdown(defaultOfficeId);
+
+        final boolean loanOfficersOnly = false;
+        if (staffInSelectedOfficeOnly) {
+            staffOptions = this.staffReadPlatformService.retrieveAllStaffForDropdown(defaultOfficeId);
+        } else {
+            staffOptions = this.staffReadPlatformService.retrieveAllStaffInOfficeAndItsParentOfficeHierarchy(defaultOfficeId,
+                    loanOfficersOnly);
+        }
         if (CollectionUtils.isEmpty(staffOptions)) {
             staffOptions = null;
         }
-        
+
         return ClientData.template(defaultOfficeId, new LocalDate(), offices, staffOptions, null);
     }
 
@@ -582,7 +589,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
                     officeName);
         }
     }
-    
+
     private Long defaultToUsersOfficeIfNull(final Long officeId) {
         Long defaultOfficeId = officeId;
         if (defaultOfficeId == null) {
@@ -593,7 +600,8 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
     @Override
     public ClientData retrieveAllClosureReasons(String clientClosureReason) {
-        final List<CodeValueData> closureReasons = new ArrayList<CodeValueData>(codeValueReadPlatformService.retrieveCodeValuesByCode(clientClosureReason));
+        final List<CodeValueData> closureReasons = new ArrayList<CodeValueData>(
+                codeValueReadPlatformService.retrieveCodeValuesByCode(clientClosureReason));
         return ClientData.template(null, null, null, null, closureReasons);
     }
 
