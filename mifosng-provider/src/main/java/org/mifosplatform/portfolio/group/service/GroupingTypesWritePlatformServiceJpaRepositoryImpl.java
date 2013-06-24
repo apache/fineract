@@ -107,7 +107,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
             Staff staff = null;
             final Long staffId = command.longValueOfParameterNamed(GroupingTypesApiConstants.staffIdParamName);
             if (staffId != null) {
-                staff = this.staffRepository.findByOfficeWithNotFoundDetection(staffId, officeId);
+                staff = this.staffRepository.findByOfficeHierarchyWithNotFoundDetection(staffId, groupOffice.getHierarchy());
             }
 
             final Set<Client> clientMembers = assembleSetOfClients(officeId, command);
@@ -228,7 +228,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
 
                 Staff newStaff = null;
                 if (newValue != null) {
-                    newStaff = this.staffRepository.findByOfficeWithNotFoundDetection(newValue, officeId);
+                    newStaff = this.staffRepository.findByOfficeHierarchyWithNotFoundDetection(newValue, groupHierarchy);
                 }
                 groupForUpdate.updateStaff(newStaff);
             }
