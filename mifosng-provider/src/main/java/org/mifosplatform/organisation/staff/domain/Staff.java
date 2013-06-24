@@ -162,4 +162,8 @@ public class Staff extends AbstractPersistable<Long> {
     public String displayName() {
         return this.displayName;
     }
+    
+    public Office office() {
+        return this.office;
+    }
 }

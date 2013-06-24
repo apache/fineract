@@ -20,7 +20,5 @@ public interface StaffRepository extends JpaRepository<Staff, Long>,
      */
     @Query(FIND_BY_OFFICE_QUERY)
     public Staff findByOffice(@Param("id") Long id, @Param("officeId") Long officeId);
-   
-    
     
 }
