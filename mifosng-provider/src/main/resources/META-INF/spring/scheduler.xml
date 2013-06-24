@@ -6,11 +6,6 @@
     You can obtain one at http://mozilla.org/MPL/2.0/.
 
 -->
-<!--
-    This Source Code Form is subject to the terms of the Mozilla Public
-    License, v. 2.0. If a copy of the MPL was not distributed with this file,
-    You can obtain one at http://mozilla.org/MPL/2.0/.
--->
 <beans xmlns="http://www.springframework.org/schema/beans"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
@@ -21,6 +16,10 @@
 	</bean>
 	<bean id="updateLoanArrearsAgeingScheduledJob"
 		class="org.mifosplatform.scheduledjobs.UpdateLoanArrearsAgeingScheduledJob">
+		<constructor-arg ref="scheduledJobRunnerService" />
+	</bean>
+	<bean id="updateLoanPaidInAdvanceScheduledJob"
+		class="org.mifosplatform.scheduledjobs.UpdateLoanPaidInAdvanceScheduledJob">
 		<constructor-arg ref="scheduledJobRunnerService" />
 	</bean>
 	<bean id="applyAnnualFeeForSavingsScheduledJob"
@@ -43,6 +42,14 @@
 		<property name="targetMethod" value="execute" />
 		<property name="concurrent" value="false" />
 	</bean>
+	
+	<bean id="updateLoanPaidInAdvanceJobDetail"
+		class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+		<property name="group" value="mifosJobs" />
+		<property name="targetObject" ref="updateLoanPaidInAdvanceScheduledJob" />
+		<property name="targetMethod" value="execute" />
+		<property name="concurrent" value="false" />
+	</bean>
 
 	<bean id="applyAnnualFeeForSavingsJobDetail"
 		class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
@@ -61,7 +68,13 @@
 	<bean id="updateLoanArrearsAgeingJobDetailCronTrigger"
 		class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
 		<property name="jobDetail" ref="updateLoanArrearsAgeingJobDetail" />
-		<property name="cronExpression" value="0 10 22 1/1 * ? *" />
+		<property name="cronExpression" value="0 1 0 1/1 * ? *" />
+	</bean>
+	
+	<bean id="updateLoanPaidInAdvanceJobDetailCronTrigger"
+		class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+		<property name="jobDetail" ref="updateLoanPaidInAdvanceJobDetail" />
+		<property name="cronExpression" value="0 5 0 1/1 * ? *" />
 	</bean>
 
 	<bean id="applyAnnualFeeForSavingsJobDetailCronTrigger"
@@ -76,6 +89,7 @@
 			<list>
 				<ref bean="updateLoanSummariesJobCronTrigger" />
 				<ref bean="updateLoanArrearsAgeingJobDetailCronTrigger" />
+				<ref bean="updateLoanPaidInAdvanceJobDetailCronTrigger" />
 				<ref bean="applyAnnualFeeForSavingsJobDetailCronTrigger" />
 			</list>
 		</property>
