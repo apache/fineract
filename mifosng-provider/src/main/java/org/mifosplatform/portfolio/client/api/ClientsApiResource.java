@@ -14,6 +14,7 @@ import java.util.Set;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -68,7 +69,7 @@ public class ClientsApiResource {
             final OfficeReadPlatformService officeReadPlatformService, final ToApiJsonSerializer<ClientData> toApiJsonSerializer,
             final ToApiJsonSerializer<ClientAccountSummaryCollectionData> clientAccountSummaryToApiJsonSerializer,
             final ApiRequestParameterHelper apiRequestParameterHelper,
-            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService, 
+            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
             final StaffReadPlatformService staffReadPlatformService) {
         this.context = context;
         this.clientReadPlatformService = readPlatformService;
@@ -85,16 +86,17 @@ public class ClientsApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveTemplate(@Context final UriInfo uriInfo, @QueryParam("officeId") final Long officeId,
-            @QueryParam("commandParam") final String commandParam) {
+            @QueryParam("commandParam") final String commandParam,
+            @DefaultValue("false") @QueryParam("staffInSelectedOfficeOnly") final boolean staffInSelectedOfficeOnly) {
 
         context.authenticatedUser().validateHasReadPermission(ClientApiConstants.CLIENT_RESOURCE_NAME);
 
         ClientData clientData = null;
         context.authenticatedUser().validateHasReadPermission(ClientApiConstants.CLIENT_RESOURCE_NAME);
         if (is(commandParam, "close")) {
-                clientData =  this.clientReadPlatformService.retrieveAllClosureReasons(ClientApiConstants.CLIENT_CLOSURE_REASON);
-        }else{
-                clientData = this.clientReadPlatformService.retrieveTemplate(officeId);
+            clientData = this.clientReadPlatformService.retrieveAllClosureReasons(ClientApiConstants.CLIENT_CLOSURE_REASON);
+        } else {
+            clientData = this.clientReadPlatformService.retrieveTemplate(officeId, staffInSelectedOfficeOnly);
         }
 
         final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
@@ -119,7 +121,7 @@ public class ClientsApiResource {
         final Page<ClientData> clientData = this.clientReadPlatformService.retrieveAll(searchParameters);
 
         final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, clientData , ClientApiConstants.CLIENT_RESPONSE_DATA_PARAMETERS);
+        return this.toApiJsonSerializer.serialize(settings, clientData, ClientApiConstants.CLIENT_RESPONSE_DATA_PARAMETERS);
     }
 
     @GET
@@ -213,14 +215,13 @@ public class ClientsApiResource {
             commandRequest = builder.unassignClientStaff(clientId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
             return this.toApiJsonSerializer.serialize(result);
-        } else if(is(commandParam, "close")) {
+        } else if (is(commandParam, "close")) {
             commandRequest = builder.closeClient(clientId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         }
 
-        if (result == null) {
-            throw new UnrecognizedQueryParamException("command", commandParam, new Object[] { "activate", "unassignStaff", "assignStaff" });
-        }
+        if (result == null) { throw new UnrecognizedQueryParamException("command", commandParam, new Object[] { "activate",
+                "unassignStaff", "assignStaff" }); }
 
         return this.toApiJsonSerializer.serialize(result);
     }

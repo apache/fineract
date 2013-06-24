@@ -71,8 +71,9 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
     public ClientWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
             final ClientRepositoryWrapper clientRepository, final OfficeRepository officeRepository, final NoteRepository noteRepository,
             final ClientDataValidator fromApiJsonDeserializer, final AccountNumberGeneratorFactory accountIdentifierGeneratorFactory,
-            final GroupRepository groupRepository, final StaffRepositoryWrapper staffRepository, final CodeValueRepositoryWrapper codeValueRepository,
-            final LoanRepository loanRepository, final SavingsAccountRepository savingsRepository) {
+            final GroupRepository groupRepository, final StaffRepositoryWrapper staffRepository,
+            final CodeValueRepositoryWrapper codeValueRepository, final LoanRepository loanRepository,
+            final SavingsAccountRepository savingsRepository) {
         this.context = context;
         this.clientRepository = clientRepository;
         this.officeRepository = officeRepository;
@@ -154,7 +155,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             Staff staff = null;
             final Long staffId = command.longValueOfParameterNamed(ClientApiConstants.staffIdParamName);
             if (staffId != null) {
-                staff = this.staffRepository.findByOfficeWithNotFoundDetection(staffId, officeId);
+                staff = this.staffRepository.findByOfficeHierarchyWithNotFoundDetection(staffId, clientOffice.getHierarchy());
             }
 
             final Client newClient = Client.createNew(clientOffice, clientParentGroup, staff, command);
@@ -192,7 +193,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 
             final Client clientForUpdate = this.clientRepository.findOneWithNotFoundDetection(clientId);
             final String clientHierarchy = clientForUpdate.getOffice().getHierarchy();
-            
+
             this.context.validateAccessRights(clientHierarchy);
 
             final Map<String, Object> changes = clientForUpdate.update(command);
@@ -202,7 +203,8 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                 final Long newValue = command.longValueOfParameterNamed(ClientApiConstants.staffIdParamName);
                 Staff newStaff = null;
                 if (newValue != null) {
-                    newStaff = this.staffRepository.findByOfficeWithNotFoundDetection(newValue, clientForUpdate.officeId());
+                    newStaff = this.staffRepository.findByOfficeHierarchyWithNotFoundDetection(newValue, clientForUpdate.getOffice()
+                            .getHierarchy());
                 }
                 clientForUpdate.updateStaff(newStaff);
             }
@@ -303,7 +305,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
         Staff staff = null;
         final Long staffId = command.longValueOfParameterNamed(ClientApiConstants.staffIdParamName);
         if (staffId != null) {
-            staff = this.staffRepository.findByOfficeWithNotFoundDetection(staffId, clientForUpdate.officeId());
+            staff = this.staffRepository.findByOfficeHierarchyWithNotFoundDetection(staffId, clientForUpdate.getOffice().getHierarchy());
             clientForUpdate.assignStaff(staff);
         }
 
@@ -319,7 +321,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                 .with(actualChanges) //
                 .build();
     }
-    
+
     @Transactional
     @Override
     public CommandProcessingResult closeClient(final Long clientId, final JsonCommand command) {

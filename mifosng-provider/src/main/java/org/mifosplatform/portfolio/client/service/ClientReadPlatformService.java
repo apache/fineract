@@ -5,7 +5,6 @@
  */
 package org.mifosplatform.portfolio.client.service;
 
-
 import java.util.Collection;
 
 import org.mifosplatform.infrastructure.core.service.Page;
@@ -16,7 +15,7 @@ import org.mifosplatform.portfolio.group.service.SearchParameters;
 
 public interface ClientReadPlatformService {
 
-    ClientData retrieveTemplate(Long officeId);
+    ClientData retrieveTemplate(Long officeId, boolean staffInSelectedOfficeOnly);
 
     Page<ClientData> retrieveAll(SearchParameters searchParameters);
 
@@ -33,6 +32,6 @@ public interface ClientReadPlatformService {
     ClientData retrieveClientByIdentifier(Long identifierTypeId, String identifierKey);
 
     Collection<ClientData> retrieveClientMembersOfGroup(Long groupId);
-    
-    ClientData retrieveAllClosureReasons(String clientClosureReason); 
+
+    ClientData retrieveAllClosureReasons(String clientClosureReason);
 }

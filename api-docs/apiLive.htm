@@ -1827,6 +1827,19 @@ function executeAjaxRequest(url, verbType, jsonData, basicAuthKey, successFuncti
 						<li class=normalli>Allowed Value Lists</li>
 					</ul>
 					</p>
+					<h5>Arguments</h5>
+					<dl class="argument-list">
+						<dt>officeId</dt>
+						<dd>
+							Integer <span>optional</span>
+						</dd>
+						<dt>staffInSelectedOfficeOnly</dt>
+						<dd>
+							Boolean <span>optional</span>
+						</dd>
+						<dd>Defaults to false if not provided. If <strong>staffInSelectedOfficeOnly=true</strong> only staff 
+						who are associated with the selected branch are returned.</dd>	
+					</dl>
 					<p>Example Request:</p>
 					<div class=apiClick>clients/template</div>
 				</div>
