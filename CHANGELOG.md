@@ -5,7 +5,7 @@ See VERSIONING (https://github.com/openMF/mifosx/blob/master/VERSIONING.md) for 
 
 Releases
 ===============
-
+1. 25 Jun 2013 - 1.4.1.RELEASE
 1. 20 Jun 2013 - 1.4.0.RELEASE
 1. 10 Jun 2013 - 1.3.0.RELEASE
 1. 06 Jun 2013 - 1.2.1.RELEASE
@@ -25,6 +25,26 @@ Releases
 1. 05 April 2013 - 0.11.1.beta
 1. 05 April 2013 - 0.11.0.beta
 
+1.4.1.RELEASE
+=============
+Bug Release
+
+Platform & API
+
+Bug
+ - [MIFOSX-362] - Date format is not similar In Balance Sheet as in other pages.
+ - [MIFOSX-473] - "Accounting Rules" created for Branch office (at Head office) is not displaying in head office.
+ - [MIFOSX-479] - Scheduled jobs only run for tenant with identifier 'default'
+ - [MIFOSX-480] - Not able to "Create A Group" under Branch Office using Head Office staff.
+ - [MIFOSX-488] - With DELETE datatables service, one can drop system tables
+ 
+Reference App
+ - [MIFOSX-388] - Buttons on table based reports no longer working
+ - [MIFOSX-463] - Numeric ids are number formated (causing NumberFormatException )
+ - [MIFOSX-467] - Unable to create group in spanish locale as activation date doesnt pick up on culture/locale in datepicker
+ - [MIFOSX-481] - Not able to navigate to the immediate previous page from "Clients loan application" page
+ - [MIFOSX-482] - In Groups -> Clients loan application page -> no error message is displaying asking for proper inputs
+ - [MIFOSX-484] - While creating a "new client" for group (in branch office), Not able to select "Staff" from that (branch) office, if user is Admin.
 
 1.4.0.RELEASE
 =============
