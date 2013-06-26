@@ -8,6 +8,7 @@ package org.mifosplatform.portfolio.loanaccount.service;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -55,6 +56,7 @@ import org.mifosplatform.portfolio.loanaccount.domain.LoanStatus;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanSummaryWrapper;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanTransaction;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanTransactionRepository;
+import org.mifosplatform.portfolio.loanaccount.domain.LoanType;
 import org.mifosplatform.portfolio.loanaccount.exception.LoanNotFoundException;
 import org.mifosplatform.portfolio.loanaccount.exception.LoanOfficerAssignmentException;
 import org.mifosplatform.portfolio.loanaccount.exception.LoanOfficerUnassignmentException;
@@ -981,5 +983,27 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final Map<String, Object> accountingBridgeData = loan.deriveAccountingBridgeData(applicationCurrency.toData(),
                 existingTransactionIds, existingReversedTransactionIds);
         journalEntryWritePlatformService.createJournalEntriesForLoan(accountingBridgeData);
+    }
+
+    @Override
+    public void updateRepaymentsSchedule(final Calendar calendar, Collection<CalendarInstance> loanCalendarInstances) {
+        
+        final Collection<Integer> loanStatuses = new ArrayList<Integer>(Arrays.asList(LoanStatus.SUBMITTED_AND_PENDING_APPROVAL.getValue(),
+                LoanStatus.APPROVED.getValue(), LoanStatus.ACTIVE.getValue()));
+        final Collection<Integer> loanTypes = new ArrayList<Integer>(Arrays.asList(LoanType.GROUP.getValue(), LoanType.JLG.getValue()));
+        final Collection<Long> loanIds = new ArrayList<Long>(loanCalendarInstances.size());
+        //loop through loanCalendarInstances to get loan ids
+        for (CalendarInstance calendarInstance : loanCalendarInstances) {
+            loanIds.add(calendarInstance.getEntityId());
+        }
+        
+        final List<Loan> loans = this.loanRepository.findByIdsAndLoanStatusAndLoanType(loanIds, loanStatuses, loanTypes);
+        //loop through each loan to reschedule the repayment dates
+        for (Loan loan : loans) {
+            if(loan != null){
+                loan.updateLoanRepaymentScheduleDates(calendar.getStartDateLocalDate(), calendar.getRecurrence());
+                this.loanRepository.save(loan);
+            }
+        }
     }
 }

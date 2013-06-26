@@ -44,4 +44,13 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
     public boolean isAmazonS3Enabled(){
         return this.globalConfigurationRepository.findOneByName("amazon-S3").isEnabled();
     }
+
+    @Override
+    public boolean isRescheduleFutureRepaymentsEnabled() {
+        final String rescheduleRepaymentsConfigurationProperty = "reschedule-future-repayments";
+        final GlobalConfigurationProperty property = this.globalConfigurationRepository.findOneByName(rescheduleRepaymentsConfigurationProperty);
+        if (property == null) { throw new GlobalConfigurationPropertyNotFoundException(rescheduleRepaymentsConfigurationProperty); }
+        return property.isEnabled();
+    }
+    
 }

@@ -20,4 +20,6 @@ public interface CalendarInstanceRepository extends JpaRepository<CalendarInstan
 
     @Query("from CalendarInstance ci where ci.entityId = :loanId and ci.entityTypeId = :entityTypeId")
     CalendarInstance findCalendarInstaneByLoanId(@Param("loanId") Long loanId, @Param("entityTypeId") Integer entityTypeId);
+    
+    Collection<CalendarInstance> findByCalendarIdAndEntityTypeId(Long calendarId, Integer entityTypeId);
 }
