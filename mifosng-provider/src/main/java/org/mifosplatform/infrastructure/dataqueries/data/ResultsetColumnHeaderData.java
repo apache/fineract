@@ -117,7 +117,7 @@ public final class ResultsetColumnHeaderData {
         return "datetime".equalsIgnoreCase(this.columnType);
     }
 
-    private boolean isString() {
+    public boolean isString() {
         return isVarchar() || isChar();
     }
 
