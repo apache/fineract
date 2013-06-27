@@ -33,26 +33,29 @@ import org.mifosplatform.portfolio.loanproduct.domain.PeriodFrequencyType;
 public class CalendarHelper {
 
     public static LocalDate getNextRecurringDate(final String recurringRule, final LocalDate seedDate, final LocalDate startDate) {
-
         final Recur recur = CalendarHelper.getICalRecur(recurringRule);
-
         if (recur == null) { return null; }
-        
+        return getNextRecurringDate(recur, seedDate, startDate);
+    }
+
+    private static LocalDate getNextRecurringDate(final Recur recur, final LocalDate seedDate, final LocalDate startDate) {
         final DateTime periodStart = new DateTime(startDate.toDate());
-        final DateFormat df = new SimpleDateFormat("yyyy-MM-dd");//Date format in iCal4J is hard coded
-        final String seedDateStr = df.format(seedDate.toDateTimeAtStartOfDay().toDate()); 
-        
-        Date seed = null;
-        try {
-            seed = new Date(seedDateStr, "yyyy-MM-dd");
-        } catch (ParseException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        
-        
+        final Date seed = convertToiCal4JCompatibleDate(seedDate);
         final Date nextRecDate = recur.getNextDate(seed, periodStart);
         return nextRecDate == null ? null : new LocalDate(nextRecDate);
+    }
+    
+    private static Date convertToiCal4JCompatibleDate(final LocalDate inputDate){
+     // Date format in iCal4J is hard coded
+        Date formattedDate = null;
+        final DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+        final String seedDateStr = df.format(inputDate.toDateTimeAtStartOfDay().toDate());
+        try {
+            formattedDate = new Date(seedDateStr, "yyyy-MM-dd");
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return formattedDate;
     }
 
     public static Collection<LocalDate> getRecurringDates(final String recurringRule, final LocalDate seedDate, final LocalDate endDate) {
@@ -79,16 +82,14 @@ public class CalendarHelper {
 
         final Recur recur = CalendarHelper.getICalRecur(recurringRule);
 
+        return getRecurringDates(recur, seedDate, periodStartDate,
+				periodEndDate, maxCount);
+    }
+
+    private static Collection<LocalDate> getRecurringDates(final Recur recur, final LocalDate seedDate, final LocalDate periodStartDate,
+            final LocalDate periodEndDate, final int maxCount) {
         if (recur == null) { return null; }
-        final DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-        final String seedDateStr = df.format(seedDate.toDateTimeAtStartOfDay().toDate()); 
-        Date seed = null;
-        try {
-            seed = new Date(seedDateStr, "yyyy-MM-dd");
-        } catch (ParseException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+        final Date seed = convertToiCal4JCompatibleDate(seedDate);
         final DateTime periodStart = new DateTime(periodStartDate.toDate());
         final DateTime periodEnd = new DateTime(periodEndDate.toDate());
 
@@ -207,7 +208,15 @@ public class CalendarHelper {
     
     public static boolean isValidRedurringDate(final String recurringRule, final LocalDate seedDate, final LocalDate date){
         
-        final Collection<LocalDate> recurDate = getRecurringDates(recurringRule, seedDate, date, date.plusDays(1), 1);
+    	final Recur recur = CalendarHelper.getICalRecur(recurringRule);
+    	if (recur == null) { return false; }
+    	
+    	return isValidRedurringDate(recur, seedDate, date);
+    }
+    
+    public static boolean isValidRedurringDate(final Recur recur, final LocalDate seedDate, final LocalDate date){
+        
+        final Collection<LocalDate> recurDate = getRecurringDates(recur, seedDate, date, date.plusDays(1), 1);
         return (recurDate == null || recurDate.isEmpty()) ? false : true;
     }
     
@@ -287,22 +296,50 @@ public class CalendarHelper {
     	if(recur.getFrequency().equals(Recur.DAILY)){
     		recur.setFrequency(frequency);
     	}
-    	
-        final DateTime periodStart = new DateTime(startDate.toDate());
-        final DateFormat df = new SimpleDateFormat("yyyy-MM-dd");//Date format in iCal4J is hard coded
-        final String seedDateStr = df.format(seedDate.toDateTimeAtStartOfDay().toDate()); 
-        
-        Date seed = null;
-        try {
-            seed = new Date(seedDateStr, "yyyy-MM-dd");
-        } catch (ParseException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        
-        final Date nextRecDate = recur.getNextDate(seed, periodStart);
-    	final LocalDate firstRepaymentDate = nextRecDate == null ? null : new LocalDate(nextRecDate);
+    	        
+    	final LocalDate firstRepaymentDate = getNextRecurringDate(recur, seedDate, startDate);
     	
     	return firstRepaymentDate;
+    }
+    
+    public static LocalDate getNewRepaymentMeetingDate(final String recurringRule, final LocalDate seedDate, final LocalDate oldRepaymentDate, final Integer loanRepaymentInterval, final String frequency){
+        final Recur recur = CalendarHelper.getICalRecur(recurringRule);
+        if (recur == null) { return null; }
+        
+    	if(isValidRedurringDate(recur, seedDate, oldRepaymentDate)){
+    		return oldRepaymentDate;
+    	}
+    	/* Recurring dates should follow loanRepaymentInterval.
+    	    e.g. The weekly meeting will have interval of 1, if the loan product with fortnightly frequency will have interval of 2,
+    	    to generate right set of meeting dates reset interval same as loan repayment interval.  
+    	*/
+    	recur.setInterval(loanRepaymentInterval);
+    	
+    	/*Recurring dates should follow loanRepayment frequency.
+    	//e.g. daily meeting frequency should support all loan products with any type of frequency.
+    	    to generate right set of meeting dates reset frequency same as loan repayment frequency.
+    	*/
+    	if(recur.getFrequency().equals(Recur.DAILY)){
+    		recur.setFrequency(frequency);
+    	}
+    	
+    	final LocalDate newRepaymentDate = getNextRecurringDate(recur, seedDate, oldRepaymentDate);
+    	return newRepaymentDate;
+    }
+    
+    public static boolean isFrequencySame(final String oldRRule, final String newRRule) {
+        Recur oldRecur = getICalRecur(oldRRule);
+        Recur newRecur = getICalRecur(newRRule);
+
+        if (oldRecur == null || oldRecur.getFrequency() == null || newRecur == null || newRecur.getFrequency() == null) { return false; }
+        return oldRecur.getFrequency().equals(newRecur.getFrequency());
+    }
+    
+    public static boolean isIntervalSame(final String oldRRule, final String newRRule) {
+        Recur oldRecur = getICalRecur(oldRRule);
+        Recur newRecur = getICalRecur(newRRule);
+
+        if (oldRecur == null || oldRecur.getFrequency() == null || newRecur == null || newRecur.getFrequency() == null) { return false; }
+        return (oldRecur.getInterval() == newRecur.getInterval());
     }
 }

@@ -5,19 +5,24 @@
  */
 package org.mifosplatform.portfolio.calendar.service;
 
+import java.util.Collection;
 import java.util.Map;
 
+import org.mifosplatform.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.mifosplatform.portfolio.calendar.domain.Calendar;
+import org.mifosplatform.portfolio.calendar.domain.CalendarEntityType;
 import org.mifosplatform.portfolio.calendar.domain.CalendarInstance;
 import org.mifosplatform.portfolio.calendar.domain.CalendarInstanceRepository;
 import org.mifosplatform.portfolio.calendar.domain.CalendarRepository;
 import org.mifosplatform.portfolio.calendar.exception.CalendarNotFoundException;
 import org.mifosplatform.portfolio.calendar.serialization.CalendarCommandFromApiJsonDeserializer;
+import org.mifosplatform.portfolio.loanaccount.service.LoanWritePlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 @Service
 public class CalendarWritePlatformServiceJpaRepositoryImpl implements CalendarWritePlatformService {
@@ -25,14 +30,18 @@ public class CalendarWritePlatformServiceJpaRepositoryImpl implements CalendarWr
     private final CalendarRepository calendarRepository;
     private final CalendarCommandFromApiJsonDeserializer fromApiJsonDeserializer;
     private final CalendarInstanceRepository calendarInstanceRepository;
+    private final LoanWritePlatformService loanWritePlatformService;
+    private final ConfigurationDomainService configurationDomainService;
 
     @Autowired
     public CalendarWritePlatformServiceJpaRepositoryImpl(final CalendarRepository calendarRepository,
             final CalendarCommandFromApiJsonDeserializer fromApiJsonDeserializer,
-            final CalendarInstanceRepository calendarInstanceRepository) {
+            final CalendarInstanceRepository calendarInstanceRepository, final LoanWritePlatformService loanWritePlatformService, final ConfigurationDomainService configurationDomainService) {
         this.calendarRepository = calendarRepository;
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
         this.calendarInstanceRepository = calendarInstanceRepository;
+        this.loanWritePlatformService = loanWritePlatformService;
+        this.configurationDomainService = configurationDomainService;
     }
 
     @Override
@@ -66,6 +75,18 @@ public class CalendarWritePlatformServiceJpaRepositoryImpl implements CalendarWr
 
         if (!changes.isEmpty()) {
             this.calendarRepository.saveAndFlush(calendarForUpdate);
+            
+            if(this.configurationDomainService.isRescheduleFutureRepaymentsEnabled()){
+                //In this approach loans following this meeting calendar will be affected immediately.
+                //get all calendar instances following this meeting calendar and calendar entity type is loan    
+                final Collection<CalendarInstance> loanCalendarInstances = this.calendarInstanceRepository.findByCalendarIdAndEntityTypeId(calendarId, CalendarEntityType.LOANS.getValue());
+                
+                if (!CollectionUtils.isEmpty(loanCalendarInstances)) {
+                    // update all loans which are following this meeting calendar
+                    this.loanWritePlatformService.updateRepaymentsSchedule(calendarForUpdate, loanCalendarInstances);
+                    //
+                }
+            }
         }
 
         return new CommandProcessingResultBuilder() //

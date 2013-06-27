@@ -35,11 +35,11 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
 
     @Temporal(TemporalType.DATE)
     @Column(name = "fromdate", nullable = true)
-    private final Date fromDate;
+    private Date fromDate;
 
     @Temporal(TemporalType.DATE)
     @Column(name = "duedate", nullable = false)
-    private final Date dueDate;
+    private Date dueDate;
 
     @Column(name = "principal_amount", scale = 6, precision = 19, nullable = true)
     private BigDecimal principal;
@@ -519,6 +519,18 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
         this.obligationsMet = getTotalOutstanding(currency).isZero();
         if (this.obligationsMet) {
             this.obligationsMetOnDate = transactionDate.toDate();
+        }
+    }
+    
+    public void updateDueDate(final LocalDate newDueDate){
+        if(newDueDate != null){
+            this.dueDate = newDueDate.toDate();
+        }
+    }
+    
+    public void updateFromDate(final LocalDate newFromDate){
+        if(newFromDate != null){
+            this.fromDate = newFromDate.toDate();
         }
     }
 }

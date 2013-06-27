@@ -5,10 +5,13 @@
  */
 package org.mifosplatform.portfolio.loanaccount.service;
 
+import java.util.Collection;
 import java.util.Map;
 
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
+import org.mifosplatform.portfolio.calendar.domain.Calendar;
+import org.mifosplatform.portfolio.calendar.domain.CalendarInstance;
 import org.mifosplatform.portfolio.collectionsheet.command.CollectionSheetBulkDisbursalCommand;
 import org.mifosplatform.portfolio.collectionsheet.command.CollectionSheetBulkRepaymentCommand;
 
@@ -47,4 +50,6 @@ public interface LoanWritePlatformService {
     CommandProcessingResult bulkLoanReassignment(JsonCommand command);
 
     CommandProcessingResult removeLoanOfficer(Long loanId, JsonCommand command);
+    
+    void updateRepaymentsSchedule(Calendar calendar, Collection<CalendarInstance> loanCalendarInstances);
 }

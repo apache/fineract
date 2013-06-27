@@ -221,6 +221,7 @@ public class CalendarCommandFromApiJsonDeserializer extends AbstractFromApiJsonD
                     CALENDAR_SUPPORTED_PARAMETERS.DURATION.getValue(), element);
             baseDataValidator.reset().parameter(CALENDAR_SUPPORTED_PARAMETERS.DURATION.getValue()).value(duration).ignoreIfNull();
         }
+        //TODO: AA do not allow to change calendar type.
         if (this.fromApiJsonHelper.parameterExists(CALENDAR_SUPPORTED_PARAMETERS.TYPE_ID.getValue(), element)) {
             final Integer typeId = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(CALENDAR_SUPPORTED_PARAMETERS.TYPE_ID.getValue(),
                     element);

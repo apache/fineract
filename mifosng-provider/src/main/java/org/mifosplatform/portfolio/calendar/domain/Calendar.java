@@ -21,6 +21,9 @@ import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.domain.AbstractAuditableCustom;
 import org.mifosplatform.portfolio.calendar.CalendarConstants.CALENDAR_SUPPORTED_PARAMETERS;
+import org.mifosplatform.portfolio.calendar.exception.CalendarDateException;
+import org.mifosplatform.portfolio.calendar.exception.CalendarParameterUpdateNotSupportedException;
+import org.mifosplatform.portfolio.calendar.service.CalendarHelper;
 import org.mifosplatform.useradministration.domain.AppUser;
 
 @Entity
@@ -147,13 +150,19 @@ public class Calendar extends AbstractAuditableCustom<AppUser, Long> {
         final String localeAsInput = command.locale();
         final String startDateParamName = CALENDAR_SUPPORTED_PARAMETERS.START_DATE.getValue();
         if (command.isChangeInLocalDateParameterNamed(startDateParamName, getStartDateLocalDate())) {
-            final String valueAsInput = command.stringValueOfParameterNamed(startDateParamName);
-            actualChanges.put(startDateParamName, valueAsInput);
-            actualChanges.put("dateFormat", dateFormatAsInput);
-            actualChanges.put("locale", localeAsInput);
 
+            final String valueAsInput = command.stringValueOfParameterNamed(startDateParamName);
             final LocalDate newValue = command.localDateValueOfParameterNamed(startDateParamName);
-            this.startDate = newValue.toDate();
+            if(isStartDateBefore(newValue)){
+                actualChanges.put(startDateParamName, valueAsInput);
+                actualChanges.put("dateFormat", dateFormatAsInput);
+                actualChanges.put("locale", localeAsInput);
+                this.startDate = newValue.toDate();
+            }else{
+                //new meeting start date should be greater than existing meeting start date
+                final String defaultUserMessage = "New meeting start on or after date cannot be a date before existing meeting start date";
+                throw new CalendarDateException("new.start.date.before.existing.date", defaultUserMessage, newValue, getStartDateLocalDate());
+            }
         }
 
         final String endDateParamName = CALENDAR_SUPPORTED_PARAMETERS.END_DATE.getValue();
@@ -174,13 +183,21 @@ public class Calendar extends AbstractAuditableCustom<AppUser, Long> {
             this.duration = newValue;
         }
 
+        //Do not allow to change calendar type
+        //TODO: AA Instead of throwing an exception, do not allow meeting calendar type to update. 
         final String typeParamName = CALENDAR_SUPPORTED_PARAMETERS.TYPE_ID.getValue();
         if (command.isChangeInIntegerSansLocaleParameterNamed(typeParamName, this.typeId)) {
             final Integer newValue = command.integerValueSansLocaleOfParameterNamed(typeParamName);
+            final String defaultUserMessage = "Meeting calendar type update is not supported";
+            final String oldMeeingType = CalendarType.fromInt(this.typeId).name();
+            final String newMeetingType = CalendarType.fromInt(newValue).name();
+            
+            throw new CalendarParameterUpdateNotSupportedException("meeting.type", defaultUserMessage, newMeetingType, oldMeeingType);
+            /*final Integer newValue = command.integerValueSansLocaleOfParameterNamed(typeParamName);
             actualChanges.put(typeParamName, newValue);
-            this.typeId = newValue;
+            this.typeId = newValue;*/
         }
-
+        
         final String repeatingParamName = CALENDAR_SUPPORTED_PARAMETERS.REPEATING.getValue();
         if (command.isChangeInBooleanParameterNamed(repeatingParamName, this.repeating)) {
             final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(repeatingParamName);
@@ -188,9 +205,25 @@ public class Calendar extends AbstractAuditableCustom<AppUser, Long> {
             this.repeating = newValue;
         }
 
+        //FIXME: AA Construct recurrence rule in API rather than getting it from UI
         final String recurrenceParamName = CALENDAR_SUPPORTED_PARAMETERS.RECURRENCE.getValue();
         if (command.isChangeInStringParameterNamed(recurrenceParamName, this.recurrence)) {
             final String newValue = command.stringValueOfParameterNamed(recurrenceParamName);
+
+            //FIXME: AA - Is this restriction required only for collection type meetings or for all?. 
+            //Do not allow to change meeting frequency
+            
+            if(!CalendarHelper.isFrequencySame(this.recurrence, newValue)){
+                final String defaultUserMessage = "Update of meeting frequency is not supported";
+                throw new CalendarParameterUpdateNotSupportedException("meeting.frequency", defaultUserMessage);
+            }
+            
+            //Do not allow to change meeting interval
+            if(!CalendarHelper.isIntervalSame(this.recurrence, newValue)){
+                final String defaultUserMessage = "Update of meeting interval is not supported";
+                throw new CalendarParameterUpdateNotSupportedException("meeting.interval", defaultUserMessage);
+            }
+            
             actualChanges.put(recurrenceParamName, newValue);
             this.recurrence = StringUtils.defaultIfEmpty(newValue, null);
         }
@@ -283,4 +316,8 @@ public class Calendar extends AbstractAuditableCustom<AppUser, Long> {
         return endDateLocalDate;
     }
 
+    public boolean isStartDateBefore(final LocalDate newStartDate) {
+        if (this.startDate != null && newStartDate != null && getStartDateLocalDate().isBefore(newStartDate)) { return true; }
+        return false;
+    }
 }
