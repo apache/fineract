@@ -183,6 +183,14 @@
 								<td></td>
 								<td></td>
 							</tr>
+							<tr>
+								<td></td>
+								<td>clients/{clientId}?command=close</td>
+								<td><a href="#clients_close">Close a Client</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
 							<tr class="alt">
 								<td></td>
 								<td>clients/{clientId}/loans</td>
@@ -1839,6 +1847,12 @@ function executeAjaxRequest(url, verbType, jsonData, basicAuthKey, successFuncti
 						</dd>
 						<dd>Defaults to false if not provided. If <strong>staffInSelectedOfficeOnly=true</strong> only staff 
 						who are associated with the selected branch are returned.</dd>	
+						<dt>commandParam</dt>
+						<dd>
+							String <span>optional</span>
+						</dd>
+						<dd>If <strong>commandParam=close</strong> retrieves all closureReasons which are associated with 
+						<strong>"ClientClosureReason"</strong> value.</dd>
 					</dl>
 					<p>Example Request:</p>
 					<div class=apiClick>clients/template</div>
@@ -1975,7 +1989,34 @@ Request Body:
 	        </code>
 	    </div>
 	</div>
-
+	
+	<a id="clients_close" name="clients_close" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h4>Close a Client</h4>
+	        <p>Clients can be closed if they dont have any non-closed loans/savingsAccount. This API exists to close a client .</p>
+	        <p>If the client have any corresponding active loans/savingsAccount this API will result in an error.</p>
+	    </div>
+		<div class="method-example">
+	        <code class="method-declaration">POST https://Domain Name/api/v1/clients/{clientId}?command=close</code>
+	        <code class="method-request">POST clients/1?command=close
+Content-Type: application/json
+Request Body:
+{
+  "dateFormat":"dd MMMM yyyy",
+  "locale":"en",
+  "closureDate":"25 June 2013",
+  "closureReasonId":"11"
+}				
+			</code>
+	        <code class="method-response">
+{ 
+  "clientId":15,
+  "resourceId":15
+}
+	        </code>
+	    </div>
+	</div>	
 			<a id="clients_retrieve" name="clients_retrieve" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
@@ -15779,6 +15820,14 @@ GET https://DomainName/api/v1/search?query=000000111
 					<td></td>
 					<td>clients/{clientId}?command=activate</td>
 					<td><a href="#clients_activate">Activate a Client</a></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>clients/{clientId}?command=close</td>
+					<td><a href="#clients_close">Close a Client</a></td>
 					<td></td>
 					<td></td>
 					<td></td>
