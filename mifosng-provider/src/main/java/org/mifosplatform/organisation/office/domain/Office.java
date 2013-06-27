@@ -149,7 +149,7 @@ public class Office extends AbstractPersistable<Long> {
         return getOpeningLocalDate().isAfter(activationLocalDate);
     }
 
-    private LocalDate getOpeningLocalDate() {
+    public LocalDate getOpeningLocalDate() {
         LocalDate openingLocalDate = null;
         if (this.openingDate != null) {
             openingLocalDate = LocalDate.fromDateFields(this.openingDate);
