@@ -40,6 +40,7 @@ import org.mifosplatform.portfolio.group.exception.GroupHasNoStaffException;
 import org.mifosplatform.portfolio.group.exception.GroupLoanExistsException;
 import org.mifosplatform.portfolio.group.exception.GroupMustBePendingToBeDeletedException;
 import org.mifosplatform.portfolio.group.exception.InvalidGroupLevelException;
+import org.mifosplatform.portfolio.group.exception.InvalidGroupStateTransitionException;
 import org.mifosplatform.portfolio.group.serialization.GroupingTypesDataValidator;
 import org.mifosplatform.portfolio.loanaccount.domain.Loan;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanRepository;
@@ -103,7 +104,16 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
 
             final Office groupOffice = this.officeRepository.findOne(officeId);
             if (groupOffice == null) { throw new OfficeNotFoundException(officeId); }
+            
+            final LocalDate activationDate = command.localDateValueOfParameterNamed(GroupingTypesApiConstants.activationDateParamName);
 
+            if (groupOffice.getOpeningLocalDate().isAfter(activationDate)) {
+                final String errorMessage = "Group activation date should be greater than or equal to the parent Office's creation date "
+                        + activationDate.toString();
+                throw new InvalidGroupStateTransitionException("activate.date", "cannot.be.before.office.activation.date", errorMessage, activationDate,
+                        groupOffice.getOpeningLocalDate());
+            }
+            
             Staff staff = null;
             final Long staffId = command.longValueOfParameterNamed(GroupingTypesApiConstants.staffIdParamName);
             if (staffId != null) {
@@ -115,7 +125,6 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
             final Set<Group> groupMembers = assembleSetOfChildGroups(officeId, command);
 
             final boolean active = command.booleanPrimitiveValueOfParameterNamed(GroupingTypesApiConstants.activeParamName);
-            final LocalDate activationDate = command.localDateValueOfParameterNamed(GroupingTypesApiConstants.activationDateParamName);
             final GroupLevel groupLevel = this.groupLevelRepository.findOne(groupingType.getId());
             final Group newGroup = Group.newGroup(groupOffice, staff, parentGroup, groupLevel, name, externalId, active, activationDate,
                     clientMembers, groupMembers);
@@ -220,6 +229,15 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
             final String groupHierarchy = groupOffice.getHierarchy();
 
             this.context.validateAccessRights(groupHierarchy);
+            
+            final LocalDate activationDate = command.localDateValueOfParameterNamed(GroupingTypesApiConstants.activationDateParamName);
+
+            if (groupOffice.getOpeningLocalDate().isAfter(activationDate)) {
+                final String errorMessage = "Group activation date should be greater than or equal to the parent Office's creation date "
+                        + activationDate.toString();
+                throw new InvalidGroupStateTransitionException("activate.date", "cannot.be.before.office.activation.date", errorMessage, activationDate,
+                        groupOffice.getOpeningLocalDate());
+            }
 
             final Map<String, Object> actualChanges = groupForUpdate.update(command);
 
