@@ -1165,23 +1165,29 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
                 } else {
                     paramValue = tmpDate.toString();
                 }
-            }
-
-            if (columnHeader.isIntegerDisplayType()) {
+            } else if (columnHeader.isIntegerDisplayType()) {
                 Integer tmpInt = helper.convertToInteger(paramValue, columnHeader.getColumnName(), clientApplicationLocale);
                 if (tmpInt == null) {
                     paramValue = null;
                 } else {
                     paramValue = tmpInt.toString();
                 }
-            }
-
-            if (columnHeader.isDecimalDisplayType()) {
+            } else if (columnHeader.isDecimalDisplayType()) {
                 BigDecimal tmpDecimal = helper.convertFrom(paramValue, columnHeader.getColumnName(), clientApplicationLocale);
                 if (tmpDecimal == null) {
                     paramValue = null;
                 } else {
                     paramValue = tmpDecimal.toString();
+                }
+            } else if (columnHeader.isString()) {
+                if (paramValue.length() > columnHeader.getColumnLength()) {
+                    ApiParameterError error = ApiParameterError.parameterError("validation.msg.datatable.entry.column.exceeds.maxlength",
+                            "The column `" + columnHeader.getColumnName() + "` exceeds its defined max-length ",
+                            columnHeader.getColumnName(), paramValue);
+                    List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+                    dataValidationErrors.add(error);
+                    throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
+                            dataValidationErrors);
                 }
             }
         }
