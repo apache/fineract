@@ -37,6 +37,7 @@ public class LoanProductData {
     private final String description;
     private final Long fundId;
     private final String fundName;
+    private final boolean includeInBorrowerCycle;
 
     // terms
     private final CurrencyData currency;
@@ -127,13 +128,14 @@ public class LoanProductData {
         final Integer graceOnInterestCharged = null;
         final Collection<ChargeData> charges = null;
         final EnumOptionData accountingType = null;
+        final boolean includeInBorrowerCycle = false;
 
         return new LoanProductData(id, name, description, currency, principal, minPrincipal, maxPrincipal, tolerance, numberOfRepayments,
                 minNumberOfRepayments, maxNumberOfRepayments, repaymentEvery, interestRatePerPeriod, minInterestRatePerPeriod,
                 maxInterestRatePerPeriod, annualInterestRate, repaymentFrequencyType, interestRateFrequencyType, amortizationType,
                 interestType, interestCalculationPeriodType, fundId, fundName, transactionProcessingStrategyId,
                 transactionProcessingStrategyName, graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged, charges,
-                accountingType);
+                accountingType, includeInBorrowerCycle);
     }
 
     public static LoanProductData lookupWithCurrency(final Long id, final String name, final CurrencyData currency) {
@@ -165,13 +167,14 @@ public class LoanProductData {
 
         final Collection<ChargeData> charges = null;
         final EnumOptionData accountingType = null;
+        final boolean includeInBorrowerCycle = false;
 
         return new LoanProductData(id, name, description, currency, principal, minPrincipal, maxPrincipal, tolerance, numberOfRepayments,
                 minNumberOfRepayments, maxNumberOfRepayments, repaymentEvery, interestRatePerPeriod, minInterestRatePerPeriod,
                 maxInterestRatePerPeriod, annualInterestRate, repaymentFrequencyType, interestRateFrequencyType, amortizationType,
                 interestType, interestCalculationPeriodType, fundId, fundName, transactionProcessingStrategyId,
                 transactionProcessingStrategyName, graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged, charges,
-                accountingType);
+                accountingType, includeInBorrowerCycle);
     }
 
     public static LoanProductData sensibleDefaultsForNewLoanProductCreation() {
@@ -209,13 +212,14 @@ public class LoanProductData {
 
         final Collection<ChargeData> charges = null;
         final EnumOptionData accountingType = AccountingEnumerations.accountingRuleType(AccountingRuleType.NONE);
+        final boolean includeInBorrowerCycle = false;
 
         return new LoanProductData(id, name, description, currency, principal, minPrincipal, maxPrincipal, tolerance, numberOfRepayments,
                 minNumberOfRepayments, maxNumberOfRepayments, repaymentEvery, interestRatePerPeriod, minInterestRatePerPeriod,
                 maxInterestRatePerPeriod, annualInterestRate, repaymentFrequencyType, interestRateFrequencyType, amortizationType,
                 interestType, interestCalculationPeriodType, fundId, fundName, transactionProcessingStrategyId,
                 transactionProcessingStrategyName, graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged, charges,
-                accountingType);
+                accountingType, includeInBorrowerCycle);
     }
 
     public static LoanProductData withAccountingDetails(final LoanProductData productData, final Map<String, Object> accountingMappings,
@@ -238,7 +242,7 @@ public class LoanProductData {
             final EnumOptionData interestCalculationPeriodType, final Long fundId, final String fundName,
             final Long transactionProcessingStrategyId, final String transactionProcessingStrategyName,
             final Integer graceOnPrincipalPayment, final Integer graceOnInterestPayment, final Integer graceOnInterestCharged,
-            final Collection<ChargeData> charges, final EnumOptionData accountingType) {
+            final Collection<ChargeData> charges, final EnumOptionData accountingType, final boolean includeInBorrowerCycle) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -269,6 +273,7 @@ public class LoanProductData {
         this.transactionProcessingStrategyName = transactionProcessingStrategyName;
         this.charges = charges;
         this.accountingRule = accountingType;
+        this.includeInBorrowerCycle = includeInBorrowerCycle;
 
         this.chargeOptions = null;
         this.penaltyOptions = null;
@@ -349,6 +354,7 @@ public class LoanProductData {
         this.graceOnPrincipalPayment = productData.graceOnPrincipalPayment;
         this.graceOnInterestPayment = productData.graceOnInterestPayment;
         this.graceOnInterestCharged = productData.graceOnInterestCharged;
+        this.includeInBorrowerCycle = productData.includeInBorrowerCycle;
 
         this.amortizationTypeOptions = amortizationTypeOptions;
         this.interestTypeOptions = interestTypeOptions;

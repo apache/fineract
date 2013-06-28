@@ -72,6 +72,9 @@ public class LoanProduct extends AbstractPersistable<Long> {
 
     @Column(name = "accounting_type", nullable = false)
     private Integer accountingRule;
+    
+    @Column(name = "include_in_borrower_cycle")
+    private boolean includeInBorrowerCycle;
 
     public static LoanProduct assembleFromJson(final Fund fund, final LoanTransactionProcessingStrategy loanTransactionProcessingStrategy,
             final List<Charge> productCharges, final JsonCommand command, final AprCalculator aprCalculator) {
@@ -111,12 +114,13 @@ public class LoanProduct extends AbstractPersistable<Long> {
         final Integer graceOnInterestCharged = command.integerValueOfParameterNamed("graceOnInterestCharged");
 
         final AccountingRuleType accountingRuleType = AccountingRuleType.fromInt(command.integerValueOfParameterNamed("accountingRule"));
+        final boolean includeInBorrowerCycle = command.booleanPrimitiveValueOfParameterNamed("includeInBorrowerCycle");
 
         return new LoanProduct(fund, loanTransactionProcessingStrategy, name, description, currency, principal, minPrincipal, maxPrincipal,
                 interestRatePerPeriod, minInterestRatePerPeriod, maxInterestRatePerPeriod, interestFrequencyType, annualInterestRate,
                 interestMethod, interestCalculationPeriodMethod, repaymentEvery, repaymentFrequencyType, numberOfRepayments,
                 minNumberOfRepayments, maxNumberOfRepayments, graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged,
-                amortizationMethod, inArrearsTolerance, productCharges, accountingRuleType);
+                amortizationMethod, inArrearsTolerance, productCharges, accountingRuleType, includeInBorrowerCycle);
     }
 
     protected LoanProduct() {
@@ -135,7 +139,7 @@ public class LoanProduct extends AbstractPersistable<Long> {
             final Integer defaultMinNumberOfInstallments, final Integer defaultMaxNumberOfInstallments,
             final Integer graceOnPrincipalPayment, final Integer graceOnInterestPayment, final Integer graceOnInterestCharged,
             final AmortizationMethod amortizationMethod, final BigDecimal inArrearsTolerance, final List<Charge> charges,
-            final AccountingRuleType accountingRuleType) {
+            final AccountingRuleType accountingRuleType, final boolean includeInBorrowerCycle) {
         this.fund = fund;
         this.transactionProcessingStrategy = transactionProcessingStrategy;
         this.name = name.trim();
@@ -163,6 +167,7 @@ public class LoanProduct extends AbstractPersistable<Long> {
         if (accountingRuleType != null) {
             this.accountingRule = accountingRuleType.getValue();
         }
+        this.includeInBorrowerCycle = includeInBorrowerCycle;
     }
 
     public MonetaryCurrency getCurrency() {
@@ -256,6 +261,13 @@ public class LoanProduct extends AbstractPersistable<Long> {
             if (jsonArray != null) {
                 actualChanges.put(chargesParamName, command.jsonFragment(chargesParamName));
             }
+        }
+        
+        final String includeInBorrowerCycleParamName = "includeInBorrowerCycle";
+        if (command.isChangeInBooleanParameterNamed(includeInBorrowerCycleParamName, this.includeInBorrowerCycle)) {
+            final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(includeInBorrowerCycleParamName);
+            actualChanges.put(includeInBorrowerCycleParamName, newValue);
+            this.includeInBorrowerCycle = newValue;
         }
 
         return actualChanges;

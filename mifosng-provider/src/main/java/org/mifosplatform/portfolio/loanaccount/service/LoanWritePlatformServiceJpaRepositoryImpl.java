@@ -39,6 +39,7 @@ import org.mifosplatform.portfolio.charge.exception.LoanChargeCannotBeUpdatedExc
 import org.mifosplatform.portfolio.charge.exception.LoanChargeCannotBeWaivedException;
 import org.mifosplatform.portfolio.charge.exception.LoanChargeCannotBeWaivedException.LOAN_CHARGE_CANNOT_BE_WAIVED_REASON;
 import org.mifosplatform.portfolio.charge.exception.LoanChargeNotFoundException;
+import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.collectionsheet.command.CollectionSheetBulkDisbursalCommand;
 import org.mifosplatform.portfolio.collectionsheet.command.CollectionSheetBulkRepaymentCommand;
 import org.mifosplatform.portfolio.collectionsheet.command.SingleDisbursalCommand;
@@ -49,6 +50,8 @@ import org.mifosplatform.portfolio.loanaccount.domain.DefaultLoanLifecycleStateM
 import org.mifosplatform.portfolio.loanaccount.domain.Loan;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanCharge;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanChargeRepository;
+import org.mifosplatform.portfolio.loanaccount.domain.LoanCycle;
+import org.mifosplatform.portfolio.loanaccount.domain.LoanCycleRepository;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanLifecycleStateMachine;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanRepaymentScheduleTransactionProcessorFactory;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanRepository;
@@ -64,6 +67,7 @@ import org.mifosplatform.portfolio.loanaccount.exception.LoanTransactionNotFound
 import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.LoanScheduleGeneratorFactory;
 import org.mifosplatform.portfolio.loanaccount.serialization.LoanEventApiJsonValidator;
 import org.mifosplatform.portfolio.loanaccount.serialization.LoanUpdateCommandFromApiJsonDeserializer;
+import org.mifosplatform.portfolio.loanproduct.domain.LoanProduct;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanProductRelatedDetail;
 import org.mifosplatform.portfolio.loanproduct.exception.InvalidCurrencyException;
 import org.mifosplatform.portfolio.note.domain.Note;
@@ -94,6 +98,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     private final LoanScheduleGeneratorFactory loanScheduleFactory;
     private final CalendarInstanceRepository calendarInstanceRepository;
     private final PaymentDetailWritePlatformService paymentDetailWritePlatformService;
+    private final LoanCycleRepository loanCycleRepository;
 
     @Autowired
     public LoanWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
@@ -105,7 +110,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             final JournalEntryWritePlatformService journalEntryWritePlatformService, final LoanSummaryWrapper loanSummaryWrapper,
             final LoanRepaymentScheduleTransactionProcessorFactory loanRepaymentScheduleTransactionProcessorFactory,
             final LoanScheduleGeneratorFactory loanScheduleFactory, final CalendarInstanceRepository calendarInstanceRepository,
-            final PaymentDetailWritePlatformService paymentDetailWritePlatformService) {
+            final PaymentDetailWritePlatformService paymentDetailWritePlatformService, final LoanCycleRepository loanCycleRepository) {
         this.context = context;
         this.loanEventApiJsonValidator = loanEventApiJsonValidator;
         this.loanAssembler = loanAssembler;
@@ -122,6 +127,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         this.loanScheduleFactory = loanScheduleFactory;
         this.calendarInstanceRepository = calendarInstanceRepository;
         this.paymentDetailWritePlatformService = paymentDetailWritePlatformService;
+        this.loanCycleRepository = loanCycleRepository;
     }
 
     private LoanLifecycleStateMachine defaultLoanLifecycleStateMachine() {
@@ -160,6 +166,31 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         //Recalculate first repayment date based in actual disbursement date.
         final LocalDate actualDisbursementDate = command.localDateValueOfParameterNamed("actualDisbursementDate");
         final LocalDate firstRepaymentMeetingDate = getFirstRepaymentMeetingDate(actualDisbursementDate, loan, calendarInstance);
+        
+     // create loan cycle
+        final LoanProduct product = loan.loanProduct();
+        final Client client = loan.client();
+        // get the loan Ids which have disbursement date greater than
+        // 'actualDisbursementDate'.
+        final List<Long> loansToUpdateLoanCycle = this.loanRepository.getLoansDisbursedAfter(actualDisbursementDate.toDate());
+
+        // get all available loan cycles.
+        final List<LoanCycle> loanCycles = this.loanCycleRepository.findByClientIdAndLoanProductId(client.getId(), product.getId());
+
+        Integer loanCounter = loanCycles.size() + 1;
+        for (final long loanCycleLoanId : loansToUpdateLoanCycle) {
+            for (final LoanCycle loanCycle : loanCycles) {
+                if (loanCycle.loan().getId() == loanCycleLoanId) {
+                    int runningCounter = loanCycle.getRunningCounter();
+                    if (loanCounter > runningCounter) {
+                        loanCounter = runningCounter;
+                    }
+                    loanCycle.updateLoanCycleCounter(++runningCounter);
+                }
+            }
+        }
+        final LoanCycle loanCycle = LoanCycle.create(client, product, loan, loanCounter);
+        this.loanCycleRepository.save(loanCycle);
         
         loan.disburse(this.loanScheduleFactory, currentUser, command, applicationCurrency, existingTransactionIds,
                 existingReversedTransactionIds, changes, paymentDetail, firstRepaymentMeetingDate);
@@ -273,6 +304,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         context.authenticatedUser();
 
         final Loan loan = retrieveLoanBy(loanId);
+        removeLoanCycle(loan);
         final List<Long> existingTransactionIds = new ArrayList<Long>();
         final List<Long> existingReversedTransactionIds = new ArrayList<Long>();
         final Map<String, Object> changes = loan.undoDisbursal(existingTransactionIds, existingReversedTransactionIds);
@@ -574,6 +606,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         changes.put("dateFormat", command.dateFormat());
 
         final Loan loan = retrieveLoanBy(loanId);
+        removeLoanCycle(loan);
 
         final List<Long> existingTransactionIds = new ArrayList<Long>();
         final List<Long> existingReversedTransactionIds = new ArrayList<Long>();
@@ -674,6 +707,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         this.loanEventApiJsonValidator.validateTransactionWithNoAmount(command.json());
 
         final Loan loan = retrieveLoanBy(loanId);
+        removeLoanCycle(loan);
 
         final Map<String, Object> changes = new LinkedHashMap<String, Object>();
         changes.put("transactionDate", command.stringValueOfParameterNamed("transactionDate"));
@@ -1004,6 +1038,25 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 loan.updateLoanRepaymentScheduleDates(calendar.getStartDateLocalDate(), calendar.getRecurrence());
                 this.loanRepository.save(loan);
             }
+        }
+    }
+    
+    private void removeLoanCycle(final Loan loan) {
+        final Client client = loan.client();
+        final LoanProduct product = loan.loanProduct();
+        final List<LoanCycle> loanCycles = this.loanCycleRepository.findByClientIdAndLoanProductId(client.getId(), product.getId());
+        LoanCycle loanCycleToRemove = null;
+        for (LoanCycle loanCycle : loanCycles) {
+            if (loanCycle.loan().getId().equals(loan.getId())) {
+                loanCycleToRemove = loanCycle;
+            } else if (loanCycleToRemove != null) {
+                loanCycle = loanCycle.updateLoanCycleCounter(loanCycle.getRunningCounter() - 1);
+            }
+        }
+        
+        if (loanCycleToRemove != null) {
+            this.loanCycleRepository.save(loanCycles);
+            this.loanCycleRepository.delete(loanCycleToRemove);
         }
     }
 }

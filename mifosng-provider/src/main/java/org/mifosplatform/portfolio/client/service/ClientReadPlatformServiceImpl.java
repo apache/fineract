@@ -520,8 +520,10 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
             StringBuilder accountsSummary = new StringBuilder("l.id as id, l.account_no as accountNo, l.external_id as externalId,");
             accountsSummary.append("l.product_id as productId, lp.name as productName,")
-                    .append("l.loan_status_id as statusId, l.loan_type_enum as loanType ").append("from m_loan l ")
-                    .append("LEFT JOIN m_product_loan AS lp ON lp.id = l.product_id ");
+                    .append("l.loan_status_id as statusId, l.loan_type_enum as loanType, ")
+                    .append("lc.running_count as loanCycle ").append(" from m_loan l ")
+                    .append("LEFT JOIN m_product_loan AS lp ON lp.id = l.product_id ")
+                    .append("LEFT JOIN m_client_loan_counter lc on l.id = lc.loan_id ");
 
             return accountsSummary.toString();
         }
@@ -538,8 +540,9 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             final LoanStatusEnumData loanStatus = LoanEnumerations.status(loanStatusId);
             final Integer loanTypeId = JdbcSupport.getInteger(rs, "loanType");
             final EnumOptionData loanType = LoanEnumerations.loanType(loanTypeId);
+            final Integer loanCycle = JdbcSupport.getInteger(rs, "loanCycle");
 
-            return new ClientAccountSummaryData(id, accountNo, externalId, productId, loanProductName, loanStatus, loanType);
+            return new ClientAccountSummaryData(id, accountNo, externalId, productId, loanProductName, loanStatus, loanType, loanCycle);
         }
     }
 

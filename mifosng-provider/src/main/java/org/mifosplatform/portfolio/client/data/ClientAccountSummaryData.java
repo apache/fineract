@@ -30,6 +30,8 @@ public class ClientAccountSummaryData {
     @SuppressWarnings("unused")
     private final EnumOptionData loanType;
     private final SavingsAccountStatusEnumData savingAccountStatus;
+    @SuppressWarnings("unused")
+    private final Integer loanCycle;
 
     public ClientAccountSummaryData(final Long id, final String externalId, final Long productId, final String loanProductName,
             final Integer loanStatusId) {
@@ -42,10 +44,11 @@ public class ClientAccountSummaryData {
         this.status = null;
         this.loanType = null;
         this.savingAccountStatus = null;
+        this.loanCycle = null;
     }
 
     public ClientAccountSummaryData(final Long id, final String accountNo, final String externalId, final Long productId,
-            final String loanProductName, final LoanStatusEnumData loanStatus, final EnumOptionData loanType) {
+            final String loanProductName, final LoanStatusEnumData loanStatus, final EnumOptionData loanType, final Integer loanCycle) {
         this.id = id;
         this.accountNo = accountNo;
         this.externalId = externalId;
@@ -55,6 +58,7 @@ public class ClientAccountSummaryData {
         this.status = loanStatus;
         this.loanType = loanType;
         this.savingAccountStatus = null;
+        this.loanCycle = loanCycle;
     }
 
     public ClientAccountSummaryData(final Long id, final String accountNo, final String externalId, final Long productId,
@@ -68,6 +72,7 @@ public class ClientAccountSummaryData {
         this.status = null;
         this.loanType = null;
         this.savingAccountStatus = savingAccountStatus;
+        this.loanCycle = null;
     }
 
     public Integer accountStatusId() {
