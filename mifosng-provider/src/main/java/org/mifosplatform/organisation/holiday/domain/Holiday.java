@@ -34,12 +34,10 @@ public class Holiday extends AbstractPersistable<Long> {
     @Column(name = "name", unique = true, nullable = false, length = 100)
     private String name;
 
-    @SuppressWarnings("unused")
     @Column(name = "from_date", nullable = false)
     @Temporal(TemporalType.DATE)
     private Date fromDate;
 
-    @SuppressWarnings("unused")
     @Column(name = "to_date", nullable = false)
     @Temporal(TemporalType.DATE)
     private Date toDate;
@@ -55,7 +53,6 @@ public class Holiday extends AbstractPersistable<Long> {
     @Column(name = "description", length = 100)
     private String description;
 
-    @SuppressWarnings("unused")
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "m_holiday_office", joinColumns = @JoinColumn(name = "holiday_id"), inverseJoinColumns = @JoinColumn(name = "office_id"))
     private Set<Office> offices;
@@ -99,12 +96,42 @@ public class Holiday extends AbstractPersistable<Long> {
             this.offices = offices;
         }
     }
+        
+    protected Holiday() {}
 
-    public Date getRepaymentsRescheduledTo() {
-        return this.repaymentsRescheduledTo;
+    public LocalDate getRepaymentsRescheduledToLocalDate() {
+        LocalDate repaymentsRescheduledTo = null;
+        if (this.repaymentsRescheduledTo != null) {
+            repaymentsRescheduledTo = new LocalDate(this.repaymentsRescheduledTo);
+        }
+        return repaymentsRescheduledTo;
     }
 
     public boolean isProcessed() {
         return this.processed;
+    }
+
+    public Set<Office> getOffices() {
+        return this.offices;
+    }
+    
+    public LocalDate getFromDateLocalDate() {
+        LocalDate fromDate = null;
+        if (this.fromDate != null) {
+            fromDate = new LocalDate(this.fromDate);
+        }
+        return fromDate;
+    }
+    
+    public LocalDate getToDateLocalDate() {
+        LocalDate toDate = null;
+        if (this.toDate != null) {
+            toDate = new LocalDate(this.toDate);
+        }
+        return toDate;
+    }    
+
+    public void processed(){
+        this.processed = true;
     }
 }

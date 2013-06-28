@@ -52,5 +52,17 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
         if (property == null) { throw new GlobalConfigurationPropertyNotFoundException(rescheduleRepaymentsConfigurationProperty); }
         return property.isEnabled();
     }
+
+    /* (non-Javadoc)
+     * @see org.mifosplatform.infrastructure.configuration.domain.ConfigurationDomainService#isHolidaysEnabled()
+     */
+    @Override
+    public boolean isRescheduleRepaymentsOnHolidaysEnabled() {
+        final String holidaysConfigurationProperty = "reschedule-repayments-on-holidays";
+        final GlobalConfigurationProperty property = this.globalConfigurationRepository.findOneByName(holidaysConfigurationProperty);
+        if (property == null) { throw new GlobalConfigurationPropertyNotFoundException(holidaysConfigurationProperty); }
+        return property.isEnabled();
+    }
+    
     
 }

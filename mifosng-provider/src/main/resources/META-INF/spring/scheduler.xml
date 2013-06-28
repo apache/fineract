@@ -26,7 +26,11 @@
 		class="org.mifosplatform.scheduledjobs.ApplyAnnualFeeForSavingsScheduledJob">
 		<constructor-arg ref="scheduledJobRunnerService" />
 	</bean>
-
+	<bean id="applyHolidaysToLoansScheduledJob"
+		class="org.mifosplatform.scheduledjobs.ApplyHolidaysToLoansScheduledJob">
+		<constructor-arg ref="scheduledJobRunnerService" />
+	</bean>
+	
 	<bean id="updateLoanSummariesJobDetail"
 		class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
 		<property name="group" value="mifosJobs" />
@@ -58,6 +62,14 @@
 		<property name="targetMethod" value="execute" />
 		<property name="concurrent" value="false" />
 	</bean>
+	
+	<bean id="applyHolidaysToLoansJobDetail"
+		class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+		<property name="group" value="mifosJobs" />
+		<property name="targetObject" ref="applyHolidaysToLoansScheduledJob" />
+		<property name="targetMethod" value="execute" />
+		<property name="concurrent" value="false" />
+	</bean>
 
 	<bean id="updateLoanSummariesJobCronTrigger"
 		class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
@@ -83,6 +95,12 @@
 		<property name="cronExpression" value="0 20 22 1/1 * ? *" />
 	</bean>
 
+	<bean id="applyHolidaysToJobDetailCronTrigger"
+		class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+		<property name="jobDetail" ref="applyHolidaysToLoansJobDetail" />
+		<property name="cronExpression" value="0 0 12 * * ?" />
+	</bean>
+
 	<bean name="schedulerFactory"
 		class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
 		<property name="triggers">
@@ -91,6 +109,7 @@
 				<ref bean="updateLoanArrearsAgeingJobDetailCronTrigger" />
 				<ref bean="updateLoanPaidInAdvanceJobDetailCronTrigger" />
 				<ref bean="applyAnnualFeeForSavingsJobDetailCronTrigger" />
+				<ref bean="applyHolidaysToJobDetailCronTrigger" />
 			</list>
 		</property>
 	</bean>

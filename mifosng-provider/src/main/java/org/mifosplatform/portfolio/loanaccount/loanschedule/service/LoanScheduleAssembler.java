@@ -8,10 +8,14 @@ package org.mifosplatform.portfolio.loanaccount.loanschedule.service;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
+import java.util.List;
 import java.util.Set;
 
 import org.joda.time.LocalDate;
+import org.mifosplatform.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
+import org.mifosplatform.organisation.holiday.domain.Holiday;
+import org.mifosplatform.organisation.holiday.domain.HolidayRepository;
 import org.mifosplatform.organisation.monetary.domain.ApplicationCurrency;
 import org.mifosplatform.organisation.monetary.domain.ApplicationCurrencyRepositoryWrapper;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
@@ -21,6 +25,10 @@ import org.mifosplatform.portfolio.calendar.domain.CalendarRepository;
 import org.mifosplatform.portfolio.calendar.exception.CalendarNotFoundException;
 import org.mifosplatform.portfolio.calendar.exception.MeetingFrequencyMismatchException;
 import org.mifosplatform.portfolio.calendar.service.CalendarHelper;
+import org.mifosplatform.portfolio.client.domain.Client;
+import org.mifosplatform.portfolio.client.domain.ClientRepositoryWrapper;
+import org.mifosplatform.portfolio.group.domain.Group;
+import org.mifosplatform.portfolio.group.domain.GroupRepositoryWrapper;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanCharge;
 import org.mifosplatform.portfolio.loanaccount.exception.LoanApplicationDateException;
 import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.AprCalculator;
@@ -52,12 +60,18 @@ public class LoanScheduleAssembler {
     private final LoanScheduleGeneratorFactory loanScheduleFactory;
     private final AprCalculator aprCalculator;
     private final CalendarRepository calendarRepository;
+    private final HolidayRepository holidayRepository;
+    private final ConfigurationDomainService configurationDomainService;
+    private final ClientRepositoryWrapper  clientRepository;
+    private final GroupRepositoryWrapper groupRepository;
 
     @Autowired
     public LoanScheduleAssembler(final FromJsonHelper fromApiJsonHelper, final LoanProductRepository loanProductRepository,
             final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepository,
             final LoanScheduleGeneratorFactory loanScheduleFactory, final AprCalculator aprCalculator,
-            final LoanChargeAssembler loanChargeAssembler, final CalendarRepository calendarRepository) {
+            final LoanChargeAssembler loanChargeAssembler, final CalendarRepository calendarRepository,
+            final HolidayRepository holidayRepository, final ConfigurationDomainService configurationDomainService,
+            final ClientRepositoryWrapper clientRepository, final GroupRepositoryWrapper groupRepository) {
         this.fromApiJsonHelper = fromApiJsonHelper;
         this.loanProductRepository = loanProductRepository;
         this.applicationCurrencyRepository = applicationCurrencyRepository;
@@ -65,6 +79,10 @@ public class LoanScheduleAssembler {
         this.aprCalculator = aprCalculator;
         this.loanChargeAssembler = loanChargeAssembler;
         this.calendarRepository = calendarRepository;
+        this.holidayRepository = holidayRepository;
+        this.configurationDomainService = configurationDomainService;
+        this.clientRepository = clientRepository;
+        this.groupRepository = groupRepository;
     }
 
     public LoanApplicationTerms assembleLoanTerms(final JsonElement element) {
@@ -119,32 +137,33 @@ public class LoanScheduleAssembler {
         final Boolean synchDisbursement = fromApiJsonHelper.extractBooleanNamed("syncDisbursementWithMeeting", element);
         final Long calendarId = this.fromApiJsonHelper.extractLongNamed("calendarId", element);
         Calendar calendar = null;
-        if ((synchDisbursement != null && synchDisbursement.booleanValue()) || 
-        		(calendarId != null && calendarId != 0)) {
-        	calendar = this.calendarRepository.findOne(calendarId);
+        if ((synchDisbursement != null && synchDisbursement.booleanValue()) || (calendarId != null && calendarId != 0)) {
+            calendar = this.calendarRepository.findOne(calendarId);
             if (calendar == null) { throw new CalendarNotFoundException(calendarId); }
-            
-        	//validate repayment frequency and interval with meeting frequency and interval
-        	PeriodFrequencyType meetingPeriodFrequency = CalendarHelper.getMeetingPeriodFrequencyType(calendar.getRecurrence());
-    		validateRepaymentFrequencyIsSameAsMeetingFrequency(meetingPeriodFrequency.getValue(), repaymentFrequencyType,
-    				CalendarHelper.getInterval(calendar.getRecurrence()),repaymentEvery);
+
+            // validate repayment frequency and interval with meeting frequency and interval
+            PeriodFrequencyType meetingPeriodFrequency = CalendarHelper.getMeetingPeriodFrequencyType(calendar.getRecurrence());
+            validateRepaymentFrequencyIsSameAsMeetingFrequency(meetingPeriodFrequency.getValue(), repaymentFrequencyType,
+                    CalendarHelper.getInterval(calendar.getRecurrence()), repaymentEvery);
         }
         
-		if (synchDisbursement != null && synchDisbursement.booleanValue()) {
-			validateDisbursementDateWithMeetingDates(expectedDisbursementDate, calendar);
-		}
-		
-		//if calendar is attached (not null) then reschedule repayment dates according to meeting
+        if (synchDisbursement != null && synchDisbursement.booleanValue()) {
+            validateDisbursementDateWithMeetingDates(expectedDisbursementDate, calendar);
+        }
+	
+        // if calendar is attached (not null) then reschedule repayment dates according to meeting
         if (null != calendar) {
-        	//TODO : AA - Is it require to reset repaymentsStartingFromDate or set only if it is not provided (or null)
-        	// Currently provided repaymentsStartingFromDate takes precedence over system generated next meeting date
-        	if(repaymentsStartingFromDate == null){
-            	//FIXME: AA - Possibility of having next meeting date immediately after disbursement date, 
-            	//need to have minimum number of days gap between disbursement and first repayment date.
-    			final String frequency = CalendarHelper.getMeetingFrequencyFromPeriodFrequencyType(repaymentPeriodFrequencyType);
-    			repaymentsStartingFromDate = CalendarHelper.getFirstRepaymentMeetingDate(calendar, expectedDisbursementDate, repaymentEvery, frequency);
-            }else{//validate user provided repaymentsStartFromDate
-            	validateRepaymentsStartDateWithMeetingDates(repaymentsStartingFromDate, calendar);
+            // TODO : AA - Is it require to reset repaymentsStartingFromDate or
+            // set only if it is not provided (or null)
+            // Currently provided repaymentsStartingFromDate takes precedence over system generated next meeting date
+            if (repaymentsStartingFromDate == null) {
+                // FIXME: AA - Possibility of having next meeting date immediately after disbursement date,
+                // need to have minimum number of days gap between disbursement and first repayment date.
+                final String frequency = CalendarHelper.getMeetingFrequencyFromPeriodFrequencyType(repaymentPeriodFrequencyType);
+                repaymentsStartingFromDate = CalendarHelper.getFirstRepaymentMeetingDate(calendar, expectedDisbursementDate,
+                        repaymentEvery, frequency);
+            } else {// validate user provided repaymentsStartFromDate
+                validateRepaymentsStartDateWithMeetingDates(repaymentsStartingFromDate, calendar);
             }
         }
         // grace details
@@ -164,59 +183,77 @@ public class LoanScheduleAssembler {
                 graceOnInterestCharged, interestChargedFromDate, inArrearsToleranceMoney);
     }
 
-	private void validateRepaymentsStartDateWithMeetingDates(final LocalDate repaymentsStartingFromDate, final Calendar calendar) {
-		if(repaymentsStartingFromDate != null && !CalendarHelper.isValidRedurringDate(calendar.getRecurrence(), calendar.getStartDateLocalDate(), repaymentsStartingFromDate)){
-			final String errorMessage = "First repayment date '" + repaymentsStartingFromDate + "' do not fall on a meeting date";
-    		throw new LoanApplicationDateException("first.repayment.date.do.not.match.meeting.date", errorMessage, repaymentsStartingFromDate);
-		}
-	}
+    private void validateRepaymentsStartDateWithMeetingDates(final LocalDate repaymentsStartingFromDate, final Calendar calendar) {
+        if (repaymentsStartingFromDate != null
+                && !CalendarHelper.isValidRedurringDate(calendar.getRecurrence(), calendar.getStartDateLocalDate(),
+                        repaymentsStartingFromDate)) {
+            final String errorMessage = "First repayment date '" + repaymentsStartingFromDate + "' do not fall on a meeting date";
+            throw new LoanApplicationDateException("first.repayment.date.do.not.match.meeting.date", errorMessage,
+                    repaymentsStartingFromDate);
+        }
+    }
 
-	private void validateDisbursementDateWithMeetingDates(
-			final LocalDate expectedDisbursementDate, final Calendar calendar) {
-		// disbursement date should fall on a meeting date
-		if (!CalendarHelper.isValidRedurringDate(calendar.getRecurrence(),
-				calendar.getStartDateLocalDate(), expectedDisbursementDate)) {
-			final String errorMessage = "Expected disbursement date '"
-					+ expectedDisbursementDate
-					+ "' do not fall on a meeting date";
-			throw new LoanApplicationDateException(
-					"disbursement.date.do.not.match.meeting.date",
-					errorMessage, expectedDisbursementDate);
-		}
+    private void validateDisbursementDateWithMeetingDates(final LocalDate expectedDisbursementDate, final Calendar calendar) {
+        // disbursement date should fall on a meeting date
+        if (!CalendarHelper.isValidRedurringDate(calendar.getRecurrence(), calendar.getStartDateLocalDate(), expectedDisbursementDate)) {
+            final String errorMessage = "Expected disbursement date '" + expectedDisbursementDate + "' do not fall on a meeting date";
+            throw new LoanApplicationDateException("disbursement.date.do.not.match.meeting.date", errorMessage, expectedDisbursementDate);
+        }
 
-	}
+    }
 
-	private void validateRepaymentFrequencyIsSameAsMeetingFrequency(
-			final Integer meetingFrequency, final Integer repaymentFrequency,
-			final Integer meetingInterval, final Integer repaymentInterval) {
-    	//meeting with daily frequency should allow loan products with any frequency.
-    	if(!PeriodFrequencyType.DAYS.getValue().equals(meetingFrequency)){
-    		//repayment frequency must match with meeting frequency
-    		if(!meetingFrequency.equals(repaymentFrequency)){
-    			throw new MeetingFrequencyMismatchException("loanapplication.repayment.frequency", "Loan repayment frequency period must match that of meeting frequency period", repaymentFrequency);
-    		}else if(meetingFrequency.equals(repaymentFrequency)){//repayment frequency is same as meeting frequency
-    			//repayment interval should be same or multiple of meeting interval
-    			if (repaymentInterval % meetingInterval != 0) {
-					// throw exception: Loan product frequency/interval
-					throw new MeetingFrequencyMismatchException("loanapplication.repayment.interval", "Loan repayment repaid every # must equal or multiple of meeting interval", repaymentInterval);
-				}
-    		}
-    	}
-	}
+    private void validateRepaymentFrequencyIsSameAsMeetingFrequency(final Integer meetingFrequency, final Integer repaymentFrequency,
+            final Integer meetingInterval, final Integer repaymentInterval) {
+        // meeting with daily frequency should allow loan products with any
+        // frequency.
+        if (!PeriodFrequencyType.DAYS.getValue().equals(meetingFrequency)) {
+            // repayment frequency must match with meeting frequency
+            if (!meetingFrequency.equals(repaymentFrequency)) {
+                throw new MeetingFrequencyMismatchException("loanapplication.repayment.frequency",
+                        "Loan repayment frequency period must match that of meeting frequency period", repaymentFrequency);
+            } else if (meetingFrequency.equals(repaymentFrequency)) {
+             // repayment frequency is same as meeting frequency repayment interval should be same or multiple of meeting interval
+                if (repaymentInterval % meetingInterval != 0) {
+                    // throw exception: Loan product frequency/interval
+                    throw new MeetingFrequencyMismatchException("loanapplication.repayment.interval",
+                            "Loan repayment repaid every # must equal or multiple of meeting interval", repaymentInterval);
+                }
+            }
+        }
+    }
 
-	public LoanProductRelatedDetail assembleLoanProductRelatedDetail(final JsonElement element) {
+    public LoanProductRelatedDetail assembleLoanProductRelatedDetail(final JsonElement element) {
         LoanApplicationTerms loanApplicationTerms = assembleLoanTerms(element);
         return loanApplicationTerms.toLoanProductRelatedDetail();
     }
 
     public LoanScheduleModel assembleLoanScheduleFrom(final JsonElement element) {
-
+        //This method is getting called from calculate loan schedule.
         final LoanApplicationTerms loanApplicationTerms = assembleLoanTerms(element);
-
-        return assembleLoanScheduleFrom(loanApplicationTerms, element);
+        //Get holiday details
+        final boolean isHolidayEnabled = this.configurationDomainService.isRescheduleRepaymentsOnHolidaysEnabled();
+        
+        final Long clientId = fromApiJsonHelper.extractLongNamed("clientId", element);
+        final Long groupId = fromApiJsonHelper.extractLongNamed("groupId", element);
+        
+        Client client = null;
+        Group group = null;
+        Long officeId = null;
+        if(clientId != null){
+            client = this.clientRepository.findOneWithNotFoundDetection(clientId);
+            officeId = client.getOffice().getId();
+        }else if (groupId != null){
+            group = this.groupRepository.findOneWithNotFoundDetection(groupId);
+            officeId = group.getOffice().getId();
+        }
+        
+        final LocalDate expectedDisbursementDate = this.fromApiJsonHelper.extractLocalDateNamed("expectedDisbursementDate", element);
+        final List<Holiday> holidays = this.holidayRepository.findByOfficeIdAndGreaterThanDate(officeId, expectedDisbursementDate.toDate());
+        return assembleLoanScheduleFrom(loanApplicationTerms, isHolidayEnabled, holidays, element);
     }
 
-    public LoanScheduleModel assembleLoanScheduleFrom(final LoanApplicationTerms loanApplicationTerms, final JsonElement element) {
+    public LoanScheduleModel assembleLoanScheduleFrom(final LoanApplicationTerms loanApplicationTerms, final boolean isHolidayEnabled,
+            final List<Holiday> holidays, final JsonElement element) {
 
         final Set<LoanCharge> loanCharges = this.loanChargeAssembler.fromParsedJson(element);
 
@@ -228,6 +265,6 @@ public class LoanScheduleAssembler {
         final MonetaryCurrency currency = loanApplicationTerms.getCurrency();
         final ApplicationCurrency applicationCurrency = this.applicationCurrencyRepository.findOneWithNotFoundDetection(currency);
 
-        return loanScheduleGenerator.generate(mc, applicationCurrency, loanApplicationTerms, loanCharges);
+        return loanScheduleGenerator.generate(mc, applicationCurrency, loanApplicationTerms, loanCharges, isHolidayEnabled, holidays);
     }
 }

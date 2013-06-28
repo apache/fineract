@@ -159,7 +159,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         this.fromApiJsonDeserializer.validateLoanTermAndRepaidEveryValues(newLoanApplication.getTermFrequency(), newLoanApplication.getTermPeriodFrequencyType(),
                 productRelatedDetail.getNumberOfRepayments(), productRelatedDetail.getRepayEvery(),
                 productRelatedDetail.getRepaymentPeriodFrequencyType().getValue());
-
+        
         this.loanRepository.save(newLoanApplication);
 
         if (newLoanApplication.isAccountNumberRequiresAutoGeneration()) {

@@ -33,28 +33,18 @@ public interface LoanRepository extends JpaRepository<Loan, Long>, JpaSpecificat
 
     public static final String FIND_MAX_CLIENT_OR_JLG_LOAN_PRODUCT_COUNTER_QUERY = "Select MAX(l.loanProductCounter) from Loan l where "
             + "l.client.id = :clientId and l.loanProduct.id = :productId";
-    
+
     public static final String FIND_GROUP_LOANS_TO_UPDATE = "from Loan l where l.loanCounter > :loanCounter and "
             + "l.group.id = :groupId and l.loanType = :groupLoanType order by l.loanCounter";
-    
+
     public static final String FIND_CLIENT_OR_JLG_LOANS_TO_UPDATE = "from Loan l where l.loanCounter > :loanCounter and "
             + "l.client.id = :clientId order by l.loanCounter";
-    
+
     public static final String FIND_GROUP_LOANS_TO_UPDATE_LOANPRODUCT_COUNTER = "from Loan l where l.loanProductCounter > :loanProductCounter"
             + " and l.group.id = :groupId and l.loanType = :groupLoanType and l.loanCounter is NULL order by l.loanProductCounter";
-    
+
     public static final String FIND_CLIENT_LOANS_TO_UPDATE_LOANPRODUCT_COUNTER = "from Loan l where l.loanProductCounter > :loanProductCounter"
             + " and l.client.id = :clientId and l.loanCounter is NULL order by l.loanProductCounter";
-
-    @Query("from Loan loan where loan.client.id = :clientId and loan.group.id = :groupId")
-    List<Loan> findByClientIdAndGroupId(@Param("clientId") Long clientId, @Param("groupId") Long groupId);
-
-    @Query("from Loan loan where loan.client.id = :clientId")
-    List<Loan> findLoanByClientId(@Param("clientId") Long clientId);
-
-    @Query("from Loan loan where loan.id IN :ids and loan.loanStatus IN :loanStatuses and loan.loanType IN :loanTypes")
-    List<Loan> findByIdsAndLoanStatusAndLoanType(@Param("ids") Collection<Long> ids,
-            @Param("loanStatuses") Collection<Integer> loanStatuses, @Param("loanTypes") Collection<Integer> loanTypes);
 
     @Query(FIND_GROUP_LOANS_DISBURSED_AFTER)
     List<Loan> getGroupLoansDisbursedAfter(@Param("disbursementDate") Date disbursementDate, @Param("groupId") Long groupId,
@@ -82,11 +72,32 @@ public interface LoanRepository extends JpaRepository<Loan, Long>, JpaSpecificat
 
     @Query(FIND_CLIENT_OR_JLG_LOANS_TO_UPDATE)
     List<Loan> getClientOrJLGLoansToUpdateLoanCounter(@Param("loanCounter") Integer loanCounter, @Param("clientId") Long clientId);
-    
+
     @Query(FIND_GROUP_LOANS_TO_UPDATE_LOANPRODUCT_COUNTER)
-    List<Loan> getGroupLoansToUpdateLoanProductCounter(@Param("loanProductCounter") Integer loanProductCounter, @Param("groupId") Long groupId,
-            @Param("groupLoanType") Integer groupLoanType);
-    
+    List<Loan> getGroupLoansToUpdateLoanProductCounter(@Param("loanProductCounter") Integer loanProductCounter,
+            @Param("groupId") Long groupId, @Param("groupLoanType") Integer groupLoanType);
+
     @Query(FIND_CLIENT_LOANS_TO_UPDATE_LOANPRODUCT_COUNTER)
-    List<Loan> getClientLoansToUpdateLoanProductCounter(@Param("loanProductCounter") Integer loanProductCounter, @Param("clientId") Long clientId);
+    List<Loan> getClientLoansToUpdateLoanProductCounter(@Param("loanProductCounter") Integer loanProductCounter,
+            @Param("clientId") Long clientId);
+
+    @Query("from Loan loan where loan.client.id = :clientId and loan.group.id = :groupId")
+    List<Loan> findByClientIdAndGroupId(@Param("clientId") Long clientId, @Param("groupId") Long groupId);
+
+    @Query("from Loan loan where loan.client.id = :clientId")
+    List<Loan> findLoanByClientId(@Param("clientId") Long clientId);
+
+    @Query("from Loan loan where loan.id IN :ids and loan.loanStatus IN :loanStatuses and loan.loanType IN :loanTypes")
+    List<Loan> findByIdsAndLoanStatusAndLoanType(@Param("ids") Collection<Long> ids,
+            @Param("loanStatuses") Collection<Integer> loanStatuses, @Param("loanTypes") Collection<Integer> loanTypes);
+
+    @Query("select loan.id from Loan loan where loan.actualDisbursementDate > :disbursalDate order by loan.actualDisbursementDate")
+    List<Long> getLoansDisbursedAfter(@Param("disbursalDate") Date disbursalDate);
+
+    @Query("from Loan loan where loan.client.office.id IN :officeIds and loan.loanStatus IN :loanStatuses")
+    List<Loan> findByClientOfficeIdsAndLoanStatus(@Param("officeIds") Collection<Long> officeIds, @Param("loanStatuses") Collection<Integer> loanStatuses);
+    
+    @Query("from Loan loan where loan.group.office.id IN :officeIds and loan.loanStatus IN :loanStatuses")
+    List<Loan> findByGroupOfficeIdsAndLoanStatus(@Param("officeIds") Collection<Long> officeIds, @Param("loanStatuses") Collection<Integer> loanStatuses);
+
 }
