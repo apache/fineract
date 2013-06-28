@@ -44,6 +44,13 @@ public class Holiday extends AbstractPersistable<Long> {
     @Temporal(TemporalType.DATE)
     private Date toDate;
 
+    @Column(name = "repayments_rescheduled_to", nullable = false)
+    @Temporal(TemporalType.DATE)
+    private Date repaymentsRescheduledTo;
+    
+    @Column(name = "processed", nullable = false)
+    private boolean processed;
+
     @SuppressWarnings("unused")
     @Column(name = "description", length = 100)
     private String description;
@@ -57,11 +64,13 @@ public class Holiday extends AbstractPersistable<Long> {
         final String name = command.stringValueOfParameterNamed(HolidayApiConstants.name);
         final LocalDate fromDate = command.localDateValueOfParameterNamed(HolidayApiConstants.fromDate);
         final LocalDate toDate = command.localDateValueOfParameterNamed(HolidayApiConstants.toDate);
+        final LocalDate repaymentsRescheduledTo = command.localDateValueOfParameterNamed(HolidayApiConstants.repaymentsRescheduledTo);
+        final boolean processed = false;//default it to false. Only batch job should update this field.
         final String description = command.stringValueOfParameterNamed(HolidayApiConstants.description);
-        return new Holiday(name, fromDate, toDate, description, offices);
+        return new Holiday(name, fromDate, toDate, repaymentsRescheduledTo, processed, description, offices);
     }
 
-    private Holiday(final String name, final LocalDate fromDate, final LocalDate toDate, final String description, final Set<Office> offices) {
+    private Holiday(final String name, final LocalDate fromDate, final LocalDate toDate, final LocalDate repaymentsRescheduledTo, final boolean processed, final String description, final Set<Office> offices) {
         if (StringUtils.isNotBlank(name)) {
             this.name = name.trim();
         }
@@ -73,7 +82,13 @@ public class Holiday extends AbstractPersistable<Long> {
         if (toDate != null) {
             this.toDate = toDate.toDate();
         }
+        
+        if (repaymentsRescheduledTo != null) {
+            this.repaymentsRescheduledTo = repaymentsRescheduledTo.toDate();
+        }
 
+        this.processed = processed;
+        
         if (StringUtils.isNotBlank(name)) {
             this.description = description.trim();
         } else {
@@ -85,4 +100,11 @@ public class Holiday extends AbstractPersistable<Long> {
         }
     }
 
+    public Date getRepaymentsRescheduledTo() {
+        return this.repaymentsRescheduledTo;
+    }
+
+    public boolean isProcessed() {
+        return this.processed;
+    }
 }

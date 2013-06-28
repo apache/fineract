@@ -54,6 +54,9 @@ public class HolidayDataValidator {
 
         final LocalDate toDate = this.fromApiJsonHelper.extractLocalDateNamed(HolidayApiConstants.toDate, element);
         baseDataValidator.reset().parameter(HolidayApiConstants.toDate).value(toDate).notNull();
+        
+        final LocalDate repaymentsRescheduledTo = this.fromApiJsonHelper.extractLocalDateNamed(HolidayApiConstants.repaymentsRescheduledTo, element);
+        baseDataValidator.reset().parameter(HolidayApiConstants.repaymentsRescheduledTo).value(repaymentsRescheduledTo).notNull();
 
         Set<Long> offices = null;
         final JsonObject topLevelJsonElement = element.getAsJsonObject();
