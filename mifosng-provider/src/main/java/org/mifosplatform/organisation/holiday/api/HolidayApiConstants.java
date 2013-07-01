@@ -19,7 +19,9 @@ public class HolidayApiConstants {
     public static final String description = "description";
     public static final String offices = "offices";
     public static final String officeId = "officeId";
+    public static final String repaymentsRescheduledTo = "repaymentsRescheduledTo";
+    public static final String processed = "processed";
     
     public static final Set<String> HOLIDAY_CREATE_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(localeParamName,
-            dateFormatParamName, name, fromDate, toDate, description, offices));
+            dateFormatParamName, name, fromDate, toDate, description, offices, repaymentsRescheduledTo));
 }

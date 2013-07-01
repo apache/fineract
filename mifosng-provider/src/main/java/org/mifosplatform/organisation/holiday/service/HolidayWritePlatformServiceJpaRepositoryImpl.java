@@ -1,16 +1,12 @@
 package org.mifosplatform.organisation.holiday.service;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
-import org.mifosplatform.infrastructure.core.data.ApiParameterError;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
-import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
@@ -18,6 +14,7 @@ import org.mifosplatform.organisation.holiday.api.HolidayApiConstants;
 import org.mifosplatform.organisation.holiday.data.HolidayDataValidator;
 import org.mifosplatform.organisation.holiday.domain.Holiday;
 import org.mifosplatform.organisation.holiday.domain.HolidayRepository;
+import org.mifosplatform.organisation.holiday.exception.HolidayDateException;
 import org.mifosplatform.organisation.office.domain.Office;
 import org.mifosplatform.organisation.office.domain.OfficeRepository;
 import org.mifosplatform.organisation.office.exception.OfficeNotFoundException;
@@ -61,22 +58,9 @@ public class HolidayWritePlatformServiceJpaRepositoryImpl implements HolidayWrit
             this.context.authenticatedUser();
             this.fromApiJsonDeserializer.validateForCreate(command.json());
 
-            validateToDateBeforeFromDate(command);
-
-            Set<Office> offices = null;
-            final JsonObject topLevelJsonElement = this.fromApiJsonHelper.parse(command.json()).getAsJsonObject();
-            if (topLevelJsonElement.has(HolidayApiConstants.offices) && topLevelJsonElement.get(HolidayApiConstants.offices).isJsonArray()) {
-
-                final JsonArray array = topLevelJsonElement.get(HolidayApiConstants.offices).getAsJsonArray();
-                offices = new HashSet<Office>(array.size());
-                for (int i = 0; i < array.size(); i++) {
-                    final JsonObject officeElement = array.get(i).getAsJsonObject();
-                    final Long officeId = this.fromApiJsonHelper.extractLongNamed(HolidayApiConstants.officeId, officeElement);
-                    final Office office = this.officeRepository.findOne(officeId);
-                    if (office == null) { throw new OfficeNotFoundException(officeId); }
-                    offices.add(office);
-                }
-            }
+            validateInputDates(command);
+            
+            final Set<Office> offices = getSelectedOffices(command);
 
             final Holiday holiday = Holiday.createNew(offices, command);
 
@@ -87,6 +71,24 @@ public class HolidayWritePlatformServiceJpaRepositoryImpl implements HolidayWrit
             handleDataIntegrityIssues(command, dve);
             return CommandProcessingResult.empty();
         }
+    }
+
+    private Set<Office> getSelectedOffices(final JsonCommand command) {
+        Set<Office> offices = null;
+        final JsonObject topLevelJsonElement = this.fromApiJsonHelper.parse(command.json()).getAsJsonObject();
+        if (topLevelJsonElement.has(HolidayApiConstants.offices) && topLevelJsonElement.get(HolidayApiConstants.offices).isJsonArray()) {
+
+            final JsonArray array = topLevelJsonElement.get(HolidayApiConstants.offices).getAsJsonArray();
+            offices = new HashSet<Office>(array.size());
+            for (int i = 0; i < array.size(); i++) {
+                final JsonObject officeElement = array.get(i).getAsJsonObject();
+                final Long officeId = this.fromApiJsonHelper.extractLongNamed(HolidayApiConstants.officeId, officeElement);
+                final Office office = this.officeRepository.findOne(officeId);
+                if (office == null) { throw new OfficeNotFoundException(officeId); }
+                offices.add(office);
+            }
+        }
+        return offices;
     }
 
     private void handleDataIntegrityIssues(final JsonCommand command, final DataIntegrityViolationException dve) {
@@ -102,18 +104,24 @@ public class HolidayWritePlatformServiceJpaRepositoryImpl implements HolidayWrit
                 "Unknown data integrity issue with resource.");
     }
 
-    private void validateToDateBeforeFromDate(final JsonCommand command) {
+    private void validateInputDates(final JsonCommand command) {
         final LocalDate fromDate = command.localDateValueOfParameterNamed(HolidayApiConstants.fromDate);
         final LocalDate toDate = command.localDateValueOfParameterNamed(HolidayApiConstants.toDate);
+        final LocalDate repaymentsRescheduledTo = command.localDateValueOfParameterNamed(HolidayApiConstants.repaymentsRescheduledTo);
         if (toDate.isBefore(fromDate)) {
-
-            final String defaultUserMessage = "ToDate date cannot be before the FromDate.";
-            final ApiParameterError error = ApiParameterError.parameterError("error.msg.holiday.toDate.cannot be.before.the.FromDate",
-                    defaultUserMessage, "ToDate");
-            final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
-            dataValidationErrors.add(error);
-
-            throw new PlatformApiDataValidationException(dataValidationErrors);
+            final String defaultUserMessage = "To Date date cannot be before the From Date.";
+            throw new HolidayDateException("to.date.cannot.be.before.from.date", defaultUserMessage, fromDate.toString(), toDate.toString());
+        }
+        
+        //validate alternative working date 
+        //1. should be within a 7 days date range.
+        //2. Alternative date should not be an exist holiday.//TBD
+        //3. Holiday should not be on an alternate working date of another holiday.//TBD
+        
+        //restricting alternative working date to be within 7 days range before or after from date and to date.
+        if(repaymentsRescheduledTo.isBefore(fromDate.minusDays(7)) || repaymentsRescheduledTo.isAfter(toDate.plusDays(7))){
+            final String defaultUserMessage = "Alternative working date must be within 7 days before or after from and to dates";
+            throw new HolidayDateException("repayments.rescheduled.to.must.be.within.range", defaultUserMessage, fromDate.toString(), toDate.toString(), repaymentsRescheduledTo.toString());
         }
     }
 }
