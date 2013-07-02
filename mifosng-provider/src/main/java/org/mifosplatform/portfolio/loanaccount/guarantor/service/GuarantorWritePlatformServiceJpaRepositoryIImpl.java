@@ -5,6 +5,7 @@
  */
 package org.mifosplatform.portfolio.loanaccount.guarantor.service;
 
+import java.util.List;
 import java.util.Map;
 
 import org.mifosplatform.infrastructure.codes.domain.CodeValue;
@@ -22,6 +23,7 @@ import org.mifosplatform.portfolio.loanaccount.guarantor.GuarantorConstants.GUAR
 import org.mifosplatform.portfolio.loanaccount.guarantor.command.GuarantorCommand;
 import org.mifosplatform.portfolio.loanaccount.guarantor.domain.Guarantor;
 import org.mifosplatform.portfolio.loanaccount.guarantor.domain.GuarantorRepository;
+import org.mifosplatform.portfolio.loanaccount.guarantor.exception.DuplicateGuarantorException;
 import org.mifosplatform.portfolio.loanaccount.guarantor.exception.GuarantorNotFoundException;
 import org.mifosplatform.portfolio.loanaccount.guarantor.exception.InvalidGuarantorException;
 import org.mifosplatform.portfolio.loanaccount.guarantor.serialization.GuarantorCommandFromApiJsonDeserializer;
@@ -73,7 +75,19 @@ public class GuarantorWritePlatformServiceJpaRepositoryIImpl implements Guaranto
                 clientRelationshipType = this.codeValueRepositoryWrapper.findOneByCodeNameAndIdWithNotFoundDetection(
                         GuarantorConstants.GUARANTOR_RELATIONSHIP_CODE_NAME, clientRelationshipId);
             }
+            
+            List<Guarantor> existGuarantorList = this.guarantorRepository.findByLoan(loan);
+            Long entityId = guarantorCommand.getEntityId();
 
+            for (Guarantor guarantor : existGuarantorList) {
+                if (guarantor.getLoanId() == loanId && guarantor.getEntityId() == entityId) {
+                    String defaultUserMessage = this.clientRepositoryWrapper.findOneWithNotFoundDetection(entityId).getDisplayName();
+                    defaultUserMessage = defaultUserMessage + " is already exist as a guarantor for this loan";
+                    String action = loan.client() != null ? "client.guarantor" : "group.guarantor";
+                    throw new DuplicateGuarantorException(action, "is.already.exist.same.loan", defaultUserMessage, entityId, loanId);
+                }
+            }
+            
             Guarantor guarantor = null;
             guarantor = Guarantor.fromJson(loan, clientRelationshipType, command);
 
@@ -111,12 +125,24 @@ public class GuarantorWritePlatformServiceJpaRepositoryIImpl implements Guaranto
                 }
                 guarantorForUpdate.setClientRelationshipType(clientRelationshipType);
             }
+            
+            List<Guarantor> existGuarantorList = this.guarantorRepository.findByLoan(loan);
+            Long entityId = guarantorCommand.getEntityId();
 
+            for (Guarantor guarantor : existGuarantorList) {
+                if (guarantor.getLoanId() == loanId && guarantor.getEntityId() == entityId) {
+                    String defaultUserMessage = this.clientRepositoryWrapper.findOneWithNotFoundDetection(entityId).getDisplayName();
+                    defaultUserMessage = defaultUserMessage + " is already exist as a guarantor for this loan";
+                    String action = loan.client() != null ? "client.guarantor" : "group.guarantor";
+                    throw new DuplicateGuarantorException(action, "is.already.exist.same.loan", defaultUserMessage, entityId, loanId);
+                }
+            }
+            
             if (changesOnly.containsKey(GUARANTOR_JSON_INPUT_PARAMS.ENTITY_ID)
                     || changesOnly.containsKey(GUARANTOR_JSON_INPUT_PARAMS.GUARANTOR_TYPE_ID)) {
                 validateGuarantorBusinessRules(guarantorForUpdate);
             }
-
+            
             if (!changesOnly.isEmpty()) {
                 this.guarantorRepository.saveAndFlush(guarantorForUpdate);
             }
@@ -148,9 +174,11 @@ public class GuarantorWritePlatformServiceJpaRepositoryIImpl implements Guaranto
             // check client exists
             clientRepositoryWrapper.findOneWithNotFoundDetection(guarantor.getEntityId());
             // validate that the client is not set as a self guarantor
-            if (guarantor.getClientId().equals(guarantor.getEntityId())) {
-                //
-                throw new InvalidGuarantorException(guarantor.getEntityId(), guarantor.getLoanId());
+            if (guarantor.getClientId() != null) {
+                if (guarantor.getClientId().equals(guarantor.getEntityId())) {
+                    //
+                    throw new InvalidGuarantorException(guarantor.getEntityId(), guarantor.getLoanId());
+                }
             }
         } else if (guarantor.isExistingEmployee()) {
             staffRepositoryWrapper.findOneWithNotFoundDetection(guarantor.getEntityId());
