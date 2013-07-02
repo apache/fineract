@@ -20,6 +20,7 @@ import com.google.gson.JsonArray;
 
 public class DataValidatorBuilder {
 
+    public static final String VALID_INPUT_SEPERATOR = "_";
     private final List<ApiParameterError> dataValidationErrors;
     private String resource;
     private String parameter;
@@ -592,5 +593,31 @@ public class DataValidatorBuilder {
         }
     	
     	return this;
+    }
+    
+    private DataValidatorBuilder validateStringFor(final String validInputs) {
+        if (this.value == null && this.ignoreNullValue) { return this; }
+        final String[] inputs = validInputs.split(VALID_INPUT_SEPERATOR);
+        boolean validationErr = true;
+        for (final String input : inputs) {
+            if (input.equalsIgnoreCase(this.value.toString().trim())) {
+                validationErr = false;
+                break;
+            }
+        }
+        if (validationErr) {
+            final StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append(this.resource).append(".")
+                    .append(this.parameter).append(".value.should.true.or.false");
+            final StringBuilder defaultEnglishMessage = new StringBuilder("The parameter ").append(this.parameter)
+                    .append(" value should true or false ");
+            final ApiParameterError error = ApiParameterError.parameterError(validationErrorCode.toString(),
+                    defaultEnglishMessage.toString(), this.parameter, this.value);
+            this.dataValidationErrors.add(error);
+        }
+        return this;
+    }
+    
+    public DataValidatorBuilder validateForBooleanValue() {
+        return validateStringFor("TRUE" + VALID_INPUT_SEPERATOR + "FALSE");
     }
 }
