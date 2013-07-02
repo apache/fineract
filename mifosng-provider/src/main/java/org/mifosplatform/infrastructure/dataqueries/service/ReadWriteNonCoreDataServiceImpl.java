@@ -759,8 +759,12 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             final Long id) {
 
         final String appTable = queryForApplicationTableName(dataTableName);
-        checkMainResourceExistsWithinScope(appTable, appTableId);
-
+        if(!appTable.equalsIgnoreCase("m_product_loan") && !appTable.equalsIgnoreCase("m_savings_product"))
+        {
+            checkMainResourceExistsWithinScope(appTable, appTableId);
+        }
+        
+        
         final List<ResultsetColumnHeaderData> columnHeaders = this.genericDataService.fillResultsetColumnHeaders(dataTableName);
 
         String sql = "";
@@ -907,6 +911,8 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         if (appTable.equalsIgnoreCase("m_client")) return;
         if (appTable.equalsIgnoreCase("m_group")) return;
         if (appTable.equalsIgnoreCase("m_office")) return;
+        if (appTable.equalsIgnoreCase("m_product_loan")) return;
+        if (appTable.equalsIgnoreCase("m_savings_product")) return;
 
         throw new PlatformDataIntegrityException("error.msg.invalid.application.table", "Invalid Application Table: " + appTable);
     }
