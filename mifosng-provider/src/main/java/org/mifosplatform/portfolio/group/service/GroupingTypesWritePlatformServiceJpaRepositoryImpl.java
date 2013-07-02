@@ -106,13 +106,9 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
             if (groupOffice == null) { throw new OfficeNotFoundException(officeId); }
             
             final LocalDate activationDate = command.localDateValueOfParameterNamed(GroupingTypesApiConstants.activationDateParamName);
-
-            if (groupOffice.getOpeningLocalDate().isAfter(activationDate)) {
-                final String errorMessage = "Group activation date should be greater than or equal to the parent Office's creation date "
-                        + activationDate.toString();
-                throw new InvalidGroupStateTransitionException("activate.date", "cannot.be.before.office.activation.date", errorMessage, activationDate,
-                        groupOffice.getOpeningLocalDate());
-            }
+            final GroupLevel groupLevel = this.groupLevelRepository.findOne(groupingType.getId());
+            
+            validateOfficeOpeningDateisAfterGroupOrCenterOpeningDate(groupOffice, groupLevel, activationDate);
             
             Staff staff = null;
             final Long staffId = command.longValueOfParameterNamed(GroupingTypesApiConstants.staffIdParamName);
@@ -125,7 +121,6 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
             final Set<Group> groupMembers = assembleSetOfChildGroups(officeId, command);
 
             final boolean active = command.booleanPrimitiveValueOfParameterNamed(GroupingTypesApiConstants.activeParamName);
-            final GroupLevel groupLevel = this.groupLevelRepository.findOne(groupingType.getId());
             final Group newGroup = Group.newGroup(groupOffice, staff, parentGroup, groupLevel, name, externalId, active, activationDate,
                     clientMembers, groupMembers);
 
@@ -184,7 +179,8 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
             final Locale locale = command.extractLocale();
             final DateTimeFormatter fmt = DateTimeFormat.forPattern(command.dateFormat()).withLocale(locale);
             final LocalDate activationDate = command.localDateValueOfParameterNamed("activationDate");
-
+            
+            validateOfficeOpeningDateisAfterGroupOrCenterOpeningDate(group.getOffice(), group.getGroupLevel(), activationDate);
             group.activate(fmt, activationDate);
 
             this.groupRepository.saveAndFlush(group);
@@ -232,13 +228,8 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
             
             final LocalDate activationDate = command.localDateValueOfParameterNamed(GroupingTypesApiConstants.activationDateParamName);
 
-            if (groupOffice.getOpeningLocalDate().isAfter(activationDate)) {
-                final String errorMessage = "Group activation date should be greater than or equal to the parent Office's creation date "
-                        + activationDate.toString();
-                throw new InvalidGroupStateTransitionException("activate.date", "cannot.be.before.office.activation.date", errorMessage, activationDate,
-                        groupOffice.getOpeningLocalDate());
-            }
-
+            validateOfficeOpeningDateisAfterGroupOrCenterOpeningDate(groupOffice, groupForUpdate.getGroupLevel(), activationDate);
+            
             final Map<String, Object> actualChanges = groupForUpdate.update(command);
 
             if (actualChanges.containsKey(GroupingTypesApiConstants.staffIdParamName)) {
@@ -527,6 +518,17 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
                         + " cannot be disassociated it has group loans.";
                 throw new GroupLoanExistsException("disassociate", "client.has.group.loan", defaultUserMessage, client.getId(), groupId);
             }
+        }
+    }
+
+    public void validateOfficeOpeningDateisAfterGroupOrCenterOpeningDate(final Office groupOffice, final GroupLevel groupLevel,
+            final LocalDate activationDate) {
+        if (activationDate != null && groupOffice.getOpeningLocalDate().isAfter(activationDate)) {
+            final String levelName = groupLevel.getLevelName();
+            final String errorMessage = levelName
+                    + " activation date should be greater than or equal to the parent Office's creation date " + activationDate.toString();
+            throw new InvalidGroupStateTransitionException(levelName.toLowerCase(), "activate.date",
+                    "cannot.be.before.office.activation.date", errorMessage, activationDate, groupOffice.getOpeningLocalDate());
         }
     }
 

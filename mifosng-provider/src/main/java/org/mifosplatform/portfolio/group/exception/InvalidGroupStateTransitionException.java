@@ -10,9 +10,9 @@ import org.mifosplatform.infrastructure.core.exception.AbstractPlatformDomainRul
 
 public class InvalidGroupStateTransitionException extends AbstractPlatformDomainRuleException {
 
-    public InvalidGroupStateTransitionException(final String action, final String postFix, final String defaultUserMessage,
-            final Object... defaultUserMessageArgs) {
-        super("error.msg.group." + action + "." + postFix, defaultUserMessage, defaultUserMessageArgs);
+    public InvalidGroupStateTransitionException(final String levelName, final String action, final String postFix,
+            final String defaultUserMessage, final Object... defaultUserMessageArgs) {
+        super("error.msg." + levelName + "." + action + "." + postFix, defaultUserMessage, defaultUserMessageArgs);
     }
 
 }
