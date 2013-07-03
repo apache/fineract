@@ -100,7 +100,6 @@ public class Loan extends AbstractPersistable<Long> {
     @JoinColumn(name = "group_id", nullable = true)
     private Group group;
 
-    @SuppressWarnings("unused")
     @Column(name = "loan_type_enum", nullable = false)
     private Integer loanType;
 
@@ -230,6 +229,12 @@ public class Loan extends AbstractPersistable<Long> {
     @SuppressWarnings("unused")
     @Column(name = "total_overpaid_derived", scale = 6, precision = 19)
     private BigDecimal totalOverpaid;
+    
+    @Column(name = "loan_counter")
+    private Integer loanCounter;
+    
+    @Column(name = "loan_product_counter")
+    private Integer loanProductCounter;
 
     @LazyCollection(LazyCollectionOption.FALSE)
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "loan", orphanRemoval = true)
@@ -2347,6 +2352,30 @@ public class Loan extends AbstractPersistable<Long> {
             }
             
         }
+    }
+
+    public Group group() {
+        return this.group;
+    }
+
+    public Integer getCurrentLoanCounter() {
+        return this.loanCounter;
+    }
+
+    public Integer getLoanProductLoanCounter() {
+        return this.loanProductCounter;
+    }
+
+    public void updateClientLoanCounter(Integer newLoanCounter) {
+        this.loanCounter = newLoanCounter;
+    }
+
+    public void updateLoanProductLoanCounter(Integer newLoanProductLoanCounter) {
+        this.loanProductCounter = newLoanProductLoanCounter;
+    }
+
+    public boolean isGroupLoan() {
+        return LoanType.fromInt(this.loanType).isGroupLoan();
     }
 
 }

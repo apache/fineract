@@ -443,7 +443,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     + " la.penalty_charges_overdue_derived as penaltyChargesOverdue,"
                     + " la.total_overdue_derived as totalOverdue,"
                     + " la.overdue_since_date_derived as overdueSinceDate,"
-                    + " l.sync_disbursement_with_meeting as syncDisbursementWithMeeting"
+                    + " l.sync_disbursement_with_meeting as syncDisbursementWithMeeting,"
+                    + " l.loan_counter as loanCounter, l.loan_product_counter as loanProductCounter"
                     + " from m_loan l" //
                     + " join m_product_loan lp on lp.id = l.product_id" //
                     + " join m_currency rc on rc.`code` = l.currency_code" //
@@ -648,6 +649,9 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                 groupData = GroupGeneralData.instance(groupId, groupName, groupExternalId, groupStatus, activationDate, groupOfficeId,
                         null, groupParentId, null, groupStaffId, null, groupHierarchy);
             }
+            
+            final Integer loanCounter = JdbcSupport.getInteger(rs, "loanCounter");
+            final Integer loanProductCounter = JdbcSupport.getInteger(rs, "loanProductCounter");
 
             return LoanAccountData.basicLoanDetails(id, accountNo, status, externalId, clientId, clientName, clientOfficeId, groupData,
                     loanType, loanProductId, loanProductName, loanProductDescription, fundId, fundName, loanPurposeId, loanPurposeName,
@@ -656,7 +660,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     amortizationType, interestRatePerPeriod, interestRateFrequencyType, annualInterestRate, interestType,
                     interestCalculationPeriodType, expectedFirstRepaymentOnDate, graceOnPrincipalPayment, graceOnInterestPayment,
                     graceOnInterestCharged, interestChargedFromDate, timeline, loanSummary, feeChargesDueAtDisbursementCharged, 
-                    syncDisbursementWithMeeting);
+                    syncDisbursementWithMeeting, loanCounter, loanProductCounter);
         }
     }
 

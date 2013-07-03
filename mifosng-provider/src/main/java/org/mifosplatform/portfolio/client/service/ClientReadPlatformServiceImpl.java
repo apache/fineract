@@ -521,9 +521,8 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             StringBuilder accountsSummary = new StringBuilder("l.id as id, l.account_no as accountNo, l.external_id as externalId,");
             accountsSummary.append("l.product_id as productId, lp.name as productName,")
                     .append("l.loan_status_id as statusId, l.loan_type_enum as loanType, ")
-                    .append("lc.running_count as loanCycle ").append(" from m_loan l ")
-                    .append("LEFT JOIN m_product_loan AS lp ON lp.id = l.product_id ")
-                    .append("LEFT JOIN m_client_loan_counter lc on l.id = lc.loan_id ");
+                    .append("l.loan_product_counter as loanCycle ").append(" from m_loan l ")
+                    .append("LEFT JOIN m_product_loan AS lp ON lp.id = l.product_id");
 
             return accountsSummary.toString();
         }
