@@ -177,4 +177,8 @@ public class GuarantorCommand {
     public Long getClientRelationshipTypeId() {
         return this.clientRelationshipTypeId;
     }
+    
+    public Long getEntityId() {
+        return this.entityId;
+    }
 }
