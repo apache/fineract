@@ -135,7 +135,7 @@ public class CodeValueWritePlatformServiceJpaRepositoryImpl implements CodeValue
 
             boolean removed = code.remove(codeValueToDelete);
             if (removed) {
-                this.codeRepository.save(code);
+                this.codeRepository.saveAndFlush(code);
             }
 
             return new CommandProcessingResultBuilder() //
