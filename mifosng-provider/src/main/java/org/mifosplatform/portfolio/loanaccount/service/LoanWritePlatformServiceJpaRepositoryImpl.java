@@ -39,7 +39,6 @@ import org.mifosplatform.portfolio.charge.exception.LoanChargeCannotBeUpdatedExc
 import org.mifosplatform.portfolio.charge.exception.LoanChargeCannotBeWaivedException;
 import org.mifosplatform.portfolio.charge.exception.LoanChargeCannotBeWaivedException.LOAN_CHARGE_CANNOT_BE_WAIVED_REASON;
 import org.mifosplatform.portfolio.charge.exception.LoanChargeNotFoundException;
-import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.collectionsheet.command.CollectionSheetBulkDisbursalCommand;
 import org.mifosplatform.portfolio.collectionsheet.command.CollectionSheetBulkRepaymentCommand;
 import org.mifosplatform.portfolio.collectionsheet.command.SingleDisbursalCommand;
@@ -50,8 +49,6 @@ import org.mifosplatform.portfolio.loanaccount.domain.DefaultLoanLifecycleStateM
 import org.mifosplatform.portfolio.loanaccount.domain.Loan;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanCharge;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanChargeRepository;
-import org.mifosplatform.portfolio.loanaccount.domain.LoanCycle;
-import org.mifosplatform.portfolio.loanaccount.domain.LoanCycleRepository;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanLifecycleStateMachine;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanRepaymentScheduleTransactionProcessorFactory;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanRepository;
@@ -67,7 +64,6 @@ import org.mifosplatform.portfolio.loanaccount.exception.LoanTransactionNotFound
 import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.LoanScheduleGeneratorFactory;
 import org.mifosplatform.portfolio.loanaccount.serialization.LoanEventApiJsonValidator;
 import org.mifosplatform.portfolio.loanaccount.serialization.LoanUpdateCommandFromApiJsonDeserializer;
-import org.mifosplatform.portfolio.loanproduct.domain.LoanProduct;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanProductRelatedDetail;
 import org.mifosplatform.portfolio.loanproduct.exception.InvalidCurrencyException;
 import org.mifosplatform.portfolio.note.domain.Note;
@@ -98,7 +94,6 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     private final LoanScheduleGeneratorFactory loanScheduleFactory;
     private final CalendarInstanceRepository calendarInstanceRepository;
     private final PaymentDetailWritePlatformService paymentDetailWritePlatformService;
-    private final LoanCycleRepository loanCycleRepository;
 
     @Autowired
     public LoanWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
@@ -110,7 +105,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             final JournalEntryWritePlatformService journalEntryWritePlatformService, final LoanSummaryWrapper loanSummaryWrapper,
             final LoanRepaymentScheduleTransactionProcessorFactory loanRepaymentScheduleTransactionProcessorFactory,
             final LoanScheduleGeneratorFactory loanScheduleFactory, final CalendarInstanceRepository calendarInstanceRepository,
-            final PaymentDetailWritePlatformService paymentDetailWritePlatformService, final LoanCycleRepository loanCycleRepository) {
+            final PaymentDetailWritePlatformService paymentDetailWritePlatformService) {
         this.context = context;
         this.loanEventApiJsonValidator = loanEventApiJsonValidator;
         this.loanAssembler = loanAssembler;
@@ -127,7 +122,6 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         this.loanScheduleFactory = loanScheduleFactory;
         this.calendarInstanceRepository = calendarInstanceRepository;
         this.paymentDetailWritePlatformService = paymentDetailWritePlatformService;
-        this.loanCycleRepository = loanCycleRepository;
     }
 
     private LoanLifecycleStateMachine defaultLoanLifecycleStateMachine() {
@@ -167,31 +161,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final LocalDate actualDisbursementDate = command.localDateValueOfParameterNamed("actualDisbursementDate");
         final LocalDate firstRepaymentMeetingDate = getFirstRepaymentMeetingDate(actualDisbursementDate, loan, calendarInstance);
         
-     // create loan cycle
-        final LoanProduct product = loan.loanProduct();
-        final Client client = loan.client();
-        // get the loan Ids which have disbursement date greater than
-        // 'actualDisbursementDate'.
-        final List<Long> loansToUpdateLoanCycle = this.loanRepository.getLoansDisbursedAfter(actualDisbursementDate.toDate());
+        updateLoanCounters(loan, actualDisbursementDate);
 
-        // get all available loan cycles.
-        final List<LoanCycle> loanCycles = this.loanCycleRepository.findByClientIdAndLoanProductId(client.getId(), product.getId());
-
-        Integer loanCounter = loanCycles.size() + 1;
-        for (final long loanCycleLoanId : loansToUpdateLoanCycle) {
-            for (final LoanCycle loanCycle : loanCycles) {
-                if (loanCycle.loan().getId() == loanCycleLoanId) {
-                    int runningCounter = loanCycle.getRunningCounter();
-                    if (loanCounter > runningCounter) {
-                        loanCounter = runningCounter;
-                    }
-                    loanCycle.updateLoanCycleCounter(++runningCounter);
-                }
-            }
-        }
-        final LoanCycle loanCycle = LoanCycle.create(client, product, loan, loanCounter);
-        this.loanCycleRepository.save(loanCycle);
-        
         loan.disburse(this.loanScheduleFactory, currentUser, command, applicationCurrency, existingTransactionIds,
                 existingReversedTransactionIds, changes, paymentDetail, firstRepaymentMeetingDate);
 
@@ -1042,21 +1013,148 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     }
     
     private void removeLoanCycle(final Loan loan) {
-        final Client client = loan.client();
-        final LoanProduct product = loan.loanProduct();
-        final List<LoanCycle> loanCycles = this.loanCycleRepository.findByClientIdAndLoanProductId(client.getId(), product.getId());
-        LoanCycle loanCycleToRemove = null;
-        for (LoanCycle loanCycle : loanCycles) {
-            if (loanCycle.loan().getId().equals(loan.getId())) {
-                loanCycleToRemove = loanCycle;
-            } else if (loanCycleToRemove != null) {
-                loanCycle = loanCycle.updateLoanCycleCounter(loanCycle.getRunningCounter() - 1);
+        final List<Loan> loansToUpdate;
+        if (loan.isGroupLoan()) {
+            if (loan.loanProduct().isIncludeInBorrowerCycle()) {
+                loansToUpdate = this.loanRepository.getGroupLoansToUpdateLoanCounter(loan.getCurrentLoanCounter(), loan.getGroupId(),
+                        LoanType.GROUP.getValue());
+            } else {
+                loansToUpdate = this.loanRepository.getGroupLoansToUpdateLoanProductCounter(loan.getLoanProductLoanCounter(),
+                        loan.getGroupId(), LoanType.GROUP.getValue());
+            }
+
+        } else {
+            if (loan.loanProduct().isIncludeInBorrowerCycle()) {
+                loansToUpdate = this.loanRepository
+                        .getClientOrJLGLoansToUpdateLoanCounter(loan.getCurrentLoanCounter(), loan.getClientId());
+            } else {
+                loansToUpdate = this.loanRepository.getClientLoansToUpdateLoanProductCounter(loan.getLoanProductLoanCounter(),
+                        loan.getClientId());
+            }
+
+        }
+        if (loansToUpdate != null) {
+            updateLoanCycleCounter(loansToUpdate, loan);
+        }
+        loan.updateClientLoanCounter(null);
+        loan.updateLoanProductLoanCounter(null);
+
+    }
+    
+    private void updateLoanCounters(final Loan loan, final LocalDate actualDisbursementDate) {
+
+        if (loan.isGroupLoan()) {
+            final List<Loan> loansToUpdateForLoanCounter = this.loanRepository.getGroupLoansDisbursedAfter(actualDisbursementDate.toDate(),
+                    loan.getGroupId(), LoanType.GROUP.getValue());
+            final Integer newLoanCounter = getNewGroupLoanCounter(loan);
+            final Integer newLoanProductCounter = getNewGroupLoanProductCounter(loan);
+            updateLoanCounter(loan, loansToUpdateForLoanCounter, newLoanCounter, newLoanProductCounter);
+        } else {
+            final List<Loan> loansToUpdateForLoanCounter = this.loanRepository.getClientOrJLGLoansDisbursedAfter(
+                    actualDisbursementDate.toDate(), loan.getClientId());
+            final Integer newLoanCounter = getNewClientOrJLGLoanCounter(loan);
+            final Integer newLoanProductCounter = getNewClientOrJLGLoanProductCounter(loan);
+            updateLoanCounter(loan, loansToUpdateForLoanCounter, newLoanCounter, newLoanProductCounter);
+        }
+    }
+
+    private Integer getNewGroupLoanCounter(final Loan loan) {
+
+        Integer maxClientLoanCounter = this.loanRepository.getMaxGroupLoanCounter(loan.getGroupId(), LoanType.GROUP.getValue());
+        if (maxClientLoanCounter == null) {
+            maxClientLoanCounter = 1;
+        } else {
+            maxClientLoanCounter = maxClientLoanCounter + 1;
+        }
+        return maxClientLoanCounter;
+    }
+
+    private Integer getNewGroupLoanProductCounter(final Loan loan) {
+
+        Integer maxLoanProductLoanCounter = this.loanRepository.getMaxGroupLoanProductCounter(loan.loanProduct().getId(),
+                loan.getGroupId(), LoanType.GROUP.getValue());
+        if (maxLoanProductLoanCounter == null) {
+            maxLoanProductLoanCounter = 1;
+        } else {
+            maxLoanProductLoanCounter = maxLoanProductLoanCounter + 1;
+        }
+        return maxLoanProductLoanCounter;
+    }
+
+    private void updateLoanCounter(final Loan loan, final List<Loan> loansToUpdateForLoanCounter, Integer newLoanCounter,
+            Integer newLoanProductCounter) {
+
+        final boolean includeInBorrowerCycle = loan.loanProduct().isIncludeInBorrowerCycle();
+        for (final Loan loanToUpdate : loansToUpdateForLoanCounter) {
+            //Update client loan counter if loan product includeInBorrowerCycle is true
+            if (includeInBorrowerCycle) {
+                Integer currentLoanCounter = loanToUpdate.getCurrentLoanCounter();
+                if (newLoanCounter > currentLoanCounter) {
+                    newLoanCounter = currentLoanCounter;
+                }
+                loanToUpdate.updateClientLoanCounter(++currentLoanCounter);
+            }
+
+            if (loanToUpdate.loanProduct().getId().equals(loan.loanProduct().getId())) {
+                Integer loanProductLoanCounter = loanToUpdate.getLoanProductLoanCounter();
+                if (newLoanProductCounter > loanProductLoanCounter) {
+                    newLoanProductCounter = loanProductLoanCounter;
+                }
+                loanToUpdate.updateLoanProductLoanCounter(++loanProductLoanCounter);
             }
         }
-        
-        if (loanCycleToRemove != null) {
-            this.loanCycleRepository.save(loanCycles);
-            this.loanCycleRepository.delete(loanCycleToRemove);
+
+        if (includeInBorrowerCycle) {
+            loan.updateClientLoanCounter(newLoanCounter);
+        } else {
+            loan.updateClientLoanCounter(null);
         }
+        loan.updateLoanProductLoanCounter(newLoanProductCounter);
+        this.loanRepository.save(loansToUpdateForLoanCounter);
+    }
+
+    private Integer getNewClientOrJLGLoanCounter(final Loan loan) {
+
+        Integer maxClientLoanCounter = this.loanRepository.getMaxClientOrJLGLoanCounter(loan.getClientId());
+        if (maxClientLoanCounter == null) {
+            maxClientLoanCounter = 1;
+        } else {
+            maxClientLoanCounter = maxClientLoanCounter + 1;
+        }
+        return maxClientLoanCounter;
+    }
+
+    private Integer getNewClientOrJLGLoanProductCounter(final Loan loan) {
+
+        Integer maxLoanProductLoanCounter = this.loanRepository.getMaxClientOrJLGLoanProductCounter(loan.loanProduct().getId(),
+                loan.getClientId());
+        if (maxLoanProductLoanCounter == null) {
+            maxLoanProductLoanCounter = 1;
+        } else {
+            maxLoanProductLoanCounter = maxLoanProductLoanCounter + 1;
+        }
+        return maxLoanProductLoanCounter;
+    }
+    
+    private void updateLoanCycleCounter(final List<Loan> loansToUpdate, final Loan loan) {
+
+        final Integer currentLoancounter = loan.getCurrentLoanCounter();
+        final Integer currentLoanProductCounter = loan.getLoanProductLoanCounter();
+
+        for (final Loan loanToUpdate : loansToUpdate) {
+            if (loan.loanProduct().isIncludeInBorrowerCycle()) {
+                Integer runningLoancounter = loanToUpdate.getCurrentLoanCounter();
+                if (runningLoancounter > currentLoancounter) {
+                    loanToUpdate.updateClientLoanCounter(--runningLoancounter);
+                }
+            }
+            if (loan.loanProduct().getId().equals(loanToUpdate.loanProduct().getId())) {
+                Integer runningLoanProductCounter = loanToUpdate.getLoanProductLoanCounter();
+                if (runningLoanProductCounter > currentLoanProductCounter) {
+                    loanToUpdate.updateLoanProductLoanCounter(--runningLoanProductCounter);
+                }
+            }
+        }
+        this.loanRepository.save(loansToUpdate);
     }
 }

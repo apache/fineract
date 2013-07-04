@@ -329,4 +329,8 @@ public class LoanProduct extends AbstractPersistable<Long> {
                 null, null, null, null) : this.loanProductMinMaxConstraints;
         return loanProductMinMaxConstraints;
     }
+
+    public boolean isIncludeInBorrowerCycle() {
+        return this.includeInBorrowerCycle;
+    }
 }

@@ -193,6 +193,22 @@
 							</tr>
 							<tr class="alt">
 								<td></td>
+								<td>clients/{clientId}?command=assignStaff</td>
+								<td><a href="#clients_assignStaff">Assign Staff</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>clients/{clientId}?command=unassignStaff</td>
+								<td><a href="#clients_unassignStaff">Unassign Staff</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr class="alt">
+								<td></td>
 								<td>clients/{clientId}/loans</td>
 								<td></td>
 								<td><a href="#clients_loansummary">Retrieve a Client's
@@ -1818,6 +1834,12 @@ function executeAjaxRequest(url, verbType, jsonData, basicAuthKey, successFuncti
 								business that doesnt suit the firstname,middlename,lastname
 								structure.</td>
 						</tr>
+						<tr class=alt>
+							<td>staffId</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>The staffId of the staff member dealing with the client office. The staff member is not specifically the loan officer.</td>
+						</tr>
 					</table>
 				</div>
 			</div>
@@ -1906,7 +1928,7 @@ GET https://DomainName/api/v1/clients/template
 							<td><div class="mifosXHeading2">Optional Fields</div></td>
 						</tr>
 						<tr class=alt>
-							<td>groupId, externalId, accountNo</td>
+							<td>groupId, externalId, accountNo, staffId</td>
 						</tr>
 					</table>
 				</div>
@@ -2013,6 +2035,59 @@ Request Body:
 { 
   "clientId":15,
   "resourceId":15
+}
+	        </code>
+	    </div>
+	</div>
+	
+		<a id="clients_assignStaff" name="clients_assignStaff" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h4>Assign a Staff</h4>
+	        <p>Allows you to assign <i>Staff</i> for existed Client.</p>
+	        <p>The selected Staff member should be belongs to the client's office.</p>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">POST https://Domain Name/api/v1/clients/{clientId}?command=assignStaff</code>
+	        <code class="method-request">POST clients/1?command=assignStaff
+Content-Type: application/json
+Request Body:
+{
+  "staffId": "1"
+}
+			</code>
+	        <code class="method-response">
+{
+  "officeId": 1,
+  "clientId": 1,
+  "resourceId": 1,
+  "changes": {"staffId":1}
+}
+	        </code>
+	    </div>
+	</div>
+	
+	<a id="clients_unassignStaff" name="clients_unassignStaff" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h4>Unassign a Staff</h4>
+	        <p>Allows you to unassign the <i>Staff</i>.</p>
+	    </div>
+		<div class="method-example">
+	        <code class="method-declaration">POST https://Domain Name/api/v1/clients/{clientId}?command=unassignStaff</code>
+	        <code class="method-request">POST clients/1?command=unassignStaff
+Content-Type: application/json
+Request Body:
+{
+  "staffId":"1"
+}				
+			</code>
+	        <code class="method-response">
+{ 
+  "officeId": 1,
+  "clientId": 1,
+  "resourceId": 1,
+  "changes": {"staffId":1}
 }
 	        </code>
 	    </div>
@@ -7085,6 +7160,12 @@ Request Body:
 							<td class=fielddesc>For associating a loan product with a given fund by default.</td>
 						</tr>
 						<tr class=alt>
+							<td>includeInBorrowerCycle</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>It is a flag, Used to denote whether the loans should include in loan cycle counter or not.</td>
+						</tr>
+						<tr class=alt>
 							<td>currencyCode</td>
 						</tr>
 						<tr>
@@ -7786,7 +7867,7 @@ GET https://DomainName/api/v1/loanproducts/{productId}
 							<td><div class="mifosXHeading2">Optional Fields</div></td>
 						</tr>
 						<tr class=alt>
-							<td>inArrearsTolerance, graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged, charges, paymentChannelToFundSourceMappings, feeToIncomeAccountMappings, penaltyToIncomeAccountMappings</td>
+							<td>inArrearsTolerance, graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged, charges, paymentChannelToFundSourceMappings, feeToIncomeAccountMappings, penaltyToIncomeAccountMappings, includeInBorrowerCycle</td>
 						</tr>
 
 						<tr class="matrixHeadingBG">
@@ -15830,6 +15911,22 @@ GET https://DomainName/api/v1/search?query=000000111
 					<td></td>
 					<td>clients/{clientId}?command=close</td>
 					<td><a href="#clients_close">Close a Client</a></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr class="alt">
+					<td></td>
+					<td>clients/{clientId}?command=assignStaff</td>
+					<td><a href="#clients_assignStaff">Assign Staff</a></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>clients/{clientId}?command=unassignStaff</td>
+					<td><a href="#clients_unassignStaff">Unassign Staff</a></td>
 					<td></td>
 					<td></td>
 					<td></td>
