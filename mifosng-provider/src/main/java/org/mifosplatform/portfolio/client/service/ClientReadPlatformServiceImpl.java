@@ -81,7 +81,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
         final Collection<OfficeData> offices = officeReadPlatformService.retrieveAllOfficesForDropdown();
 
-        Collection<StaffData> staffOptions = this.staffReadPlatformService.retrieveAllStaffForDropdown(defaultOfficeId);
+        Collection<StaffData> staffOptions = null;
 
         final boolean loanOfficersOnly = false;
         if (staffInSelectedOfficeOnly) {

@@ -6,7 +6,6 @@
 package org.mifosplatform.portfolio.client.data;
 
 import java.util.Collection;
-import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.builder.CompareToBuilder;
@@ -61,12 +60,12 @@ final public class ClientData implements Comparable<ClientData> {
         return new ClientData(null, null, officeId, null, null, null, null, null, null, null, null, joinedDate, null, null, null, officeOptions, null, staffOptions, closureReasons);
     }
 
-    public static ClientData templateOnTop(final ClientData clientData, final List<OfficeData> allowedOffices, final Collection<StaffData> staffOptions) {
+    public static ClientData templateOnTop(final ClientData clientData, final ClientData templateData) {
 
         return new ClientData(clientData.accountNo, clientData.status, clientData.officeId, clientData.officeName, clientData.id,
                 clientData.firstname, clientData.middlename, clientData.lastname, clientData.fullname, clientData.displayName,
                 clientData.externalId, clientData.activationDate, clientData.imageId, clientData.staffId, clientData.staffName,
-                allowedOffices, clientData.groups, staffOptions, null);
+                templateData.officeOptions, clientData.groups, templateData.staffOptions, null);
     }
 
     public static ClientData setParentGroups(final ClientData clientData, final Collection<GroupGeneralData> parentGroups) {
