@@ -137,7 +137,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
     private String buildSqlStringFromClientCriteria(final SearchParameters searchParameters) {
 
-        final String sqlSearch = searchParameters.getSqlSearch();
+        String sqlSearch = searchParameters.getSqlSearch();
         final Long officeId = searchParameters.getOfficeId();
         final String externalId = searchParameters.getExternalId();
         final String displayName = searchParameters.getName();
@@ -147,6 +147,8 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
         String extraCriteria = "";
         if (sqlSearch != null) {
+            sqlSearch = sqlSearch.replaceAll(" display_name ", " c.display_name ");
+            sqlSearch = sqlSearch.replaceAll("display_name ", "c.display_name ");
             extraCriteria = " and (" + sqlSearch + ")";
         }
 
