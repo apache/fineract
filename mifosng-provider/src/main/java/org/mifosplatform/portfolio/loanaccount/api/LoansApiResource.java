@@ -188,6 +188,7 @@ public class LoansApiResource {
             final String errorMsg = "Loan template type must be provided";
             throw new LoanTemplateTypeRequiredException(errorMsg);
         } else if (templateType.equals("collateral")) {
+            loanCollateralOptions = this.codeValueReadPlatformService.retrieveCodeValuesByCode("LoanCollateral");
             newLoanAccount = LoanAccountData.collateralTemplate(loanCollateralOptions);
         } else {
             // for JLG loan both client and group details are required
