@@ -203,7 +203,7 @@ public final class CalculateLoanScheduleQueryFromApiJsonHelper {
                 "Validation errors exist.", dataValidationErrors); }
     }
 
-    private void validateSelectedPeriodFrequencyTypeIsTheSame(final List<ApiParameterError> dataValidationErrors,
+    public void validateSelectedPeriodFrequencyTypeIsTheSame(final List<ApiParameterError> dataValidationErrors,
             final Integer loanTermFrequency, final Integer loanTermFrequencyType, final Integer numberOfRepayments,
             final Integer repaymentEvery, final Integer repaymentEveryType) {
         if (loanTermFrequencyType != null && !loanTermFrequencyType.equals(repaymentEveryType)) {

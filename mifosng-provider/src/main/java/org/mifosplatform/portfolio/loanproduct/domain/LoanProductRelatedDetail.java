@@ -385,4 +385,8 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
     public boolean hasCurrencyCodeOf(final String currencyCode) {
         return this.currency.getCode().equalsIgnoreCase(currencyCode);
     }
+    
+    public void updatenterestPeriodFrequencyType(final PeriodFrequencyType interestPeriodFrequencyType) {
+        this.interestPeriodFrequencyType = interestPeriodFrequencyType;
+    }
 }

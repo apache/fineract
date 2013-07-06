@@ -54,6 +54,7 @@ import org.mifosplatform.portfolio.loanaccount.loanschedule.service.LoanSchedule
 import org.mifosplatform.portfolio.loanaccount.serialization.LoanApplicationCommandFromApiJsonHelper;
 import org.mifosplatform.portfolio.loanaccount.serialization.LoanApplicationTransitionApiJsonValidator;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanProduct;
+import org.mifosplatform.portfolio.loanproduct.domain.LoanProductRelatedDetail;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanProductRepository;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanTransactionProcessingStrategy;
 import org.mifosplatform.portfolio.loanproduct.exception.LoanProductNotFoundException;
@@ -153,6 +154,11 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
 
         final Loan newLoanApplication = loanAssembler.assembleFrom(command, currentUser);
+        
+        final LoanProductRelatedDetail productRelatedDetail = newLoanApplication.repaymentScheduleDetail();
+        this.fromApiJsonDeserializer.validateLoanTermAndRepaidEveryValues(newLoanApplication.getTermFrequency(), newLoanApplication.getTermPeriodFrequencyType(),
+                productRelatedDetail.getNumberOfRepayments(), productRelatedDetail.getRepayEvery(),
+                productRelatedDetail.getRepaymentPeriodFrequencyType().getValue());
 
         this.loanRepository.save(newLoanApplication);
 
@@ -229,10 +235,17 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                 if (loanProduct == null) { throw new LoanProductNotFoundException(productId); }
 
                 existingLoanApplication.updateLoanProduct(loanProduct);
+                if (!changes.containsKey("interestRateFrequencyType")) {
+                    existingLoanApplication.updateInterestRateFrequencyType();
+                }
             }
 
             // validate min and maximum constraints
             this.fromApiJsonDeserializer.validateForModify(command.json());
+            final LoanProductRelatedDetail productRelatedDetail = existingLoanApplication.repaymentScheduleDetail();
+            this.fromApiJsonDeserializer.validateLoanTermAndRepaidEveryValues(existingLoanApplication.getTermFrequency(), existingLoanApplication.getTermPeriodFrequencyType(),
+                    productRelatedDetail.getNumberOfRepayments(), productRelatedDetail.getRepayEvery(),
+                    productRelatedDetail.getRepaymentPeriodFrequencyType().getValue());
 
             final String fundIdParamName = "fundId";
             if (changes.containsKey(fundIdParamName)) {
