@@ -52,10 +52,13 @@ public final class LoanApplicationCommandFromApiJsonHelper {
     ));
 
     private final FromJsonHelper fromApiJsonHelper;
+    private final CalculateLoanScheduleQueryFromApiJsonHelper apiJsonHelper;
 
     @Autowired
-    public LoanApplicationCommandFromApiJsonHelper(final FromJsonHelper fromApiJsonHelper) {
+    public LoanApplicationCommandFromApiJsonHelper(final FromJsonHelper fromApiJsonHelper,
+            final CalculateLoanScheduleQueryFromApiJsonHelper apiJsonHelper) {
         this.fromApiJsonHelper = fromApiJsonHelper;
+        this.apiJsonHelper = apiJsonHelper;
     }
 
     public void validateForCreate(final String json) {
@@ -663,6 +666,15 @@ public final class LoanApplicationCommandFromApiJsonHelper {
                     .inMinAndMaxAmountRange(minPrincipal, maxPrincipal);
         }
 
+        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
+                "Validation errors exist.", dataValidationErrors); }
+    }
+    
+    public void validateLoanTermAndRepaidEveryValues(final Integer loanTermFrequency, final Integer loanTermFrequencyType,
+            final Integer numberOfRepayments, final Integer repaymentEvery, final Integer repaymentEveryType) {
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        this.apiJsonHelper.validateSelectedPeriodFrequencyTypeIsTheSame(dataValidationErrors, loanTermFrequency, loanTermFrequencyType,
+                numberOfRepayments, repaymentEvery, repaymentEveryType);
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
                 "Validation errors exist.", dataValidationErrors); }
     }

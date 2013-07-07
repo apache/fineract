@@ -1001,6 +1001,21 @@ public class Loan extends AbstractPersistable<Long> {
                 actualChanges.put(collateralParamName, listOfLoanCollateralData(possiblyModifedLoanCollateralItems));
             }
         }
+        
+        final String loanTermFrequencyParamName = "loanTermFrequency";
+        if (command.isChangeInIntegerParameterNamed(loanTermFrequencyParamName, this.termFrequency)) {
+            final Integer newValue = command.integerValueOfParameterNamed(loanTermFrequencyParamName);
+            actualChanges.put(externalIdParamName, newValue);
+            this.termFrequency = newValue;
+        }
+        
+        final String loanTermFrequencyTypeParamName = "loanTermFrequencyType";
+        if (command.isChangeInIntegerParameterNamed(loanTermFrequencyTypeParamName, this.termPeriodFrequencyType)) {
+            final Integer newValue = command.integerValueOfParameterNamed(loanTermFrequencyTypeParamName);
+            final PeriodFrequencyType newTermPeriodFrequencyType = PeriodFrequencyType.fromInt(newValue);
+            actualChanges.put(loanTermFrequencyTypeParamName, newTermPeriodFrequencyType.getValue());
+            this.termPeriodFrequencyType = newValue;
+        }
 
         return actualChanges;
     }
@@ -2376,6 +2391,19 @@ public class Loan extends AbstractPersistable<Long> {
 
     public boolean isGroupLoan() {
         return LoanType.fromInt(this.loanType).isGroupLoan();
+    }
+
+    public void updateInterestRateFrequencyType() {
+        this.loanRepaymentScheduleDetail.updatenterestPeriodFrequencyType(this.loanProduct.getInterestPeriodFrequencyType());
+    }
+
+    public Integer getTermFrequency() {
+        return this.termFrequency;
+    }
+
+    
+    public Integer getTermPeriodFrequencyType() {
+        return this.termPeriodFrequencyType;
     }
 
 }
