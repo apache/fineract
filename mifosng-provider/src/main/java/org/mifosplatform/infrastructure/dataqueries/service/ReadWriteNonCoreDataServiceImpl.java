@@ -261,7 +261,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
 
             final String sql = getAddSql(columnHeaders, dataTableName, getFKField(appTable), appTableId, dataParams);
 
-            this.jdbcTemplate.update(sql);  
+            this.jdbcTemplate.update(sql);
 
             return commandProcessingResult; //
 
@@ -365,6 +365,15 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             String apptableName = this.fromJsonHelper.extractStringNamed("apptableName", element);
             Boolean multiRow = this.fromJsonHelper.extractBooleanNamed("multiRow", element);
 
+            /***
+             * In cases of tables storing hierarchical entities (like m_group),
+             * different entities would end up being stored in the same table.
+             * 
+             * Ex: Centers are a specific type of group, add abstractions for
+             * the same
+             ***/
+            String actualAppTableName = mapToActualAppTable(apptableName);
+
             if (multiRow == null) {
                 multiRow = false;
             }
@@ -395,10 +404,10 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
                 sqlBuilder = sqlBuilder.append(", PRIMARY KEY (`id`)")
                         .append(", KEY `fk_" + apptableName.substring(2) + "_id` (`" + fkColumnName + "`)")
                         .append(", CONSTRAINT `fk_" + fkName + "` ").append("FOREIGN KEY (`" + fkColumnName + "`) ")
-                        .append("REFERENCES `" + apptableName + "` (`id`)");
+                        .append("REFERENCES `" + actualAppTableName + "` (`id`)");
             } else {
                 sqlBuilder = sqlBuilder.append(", PRIMARY KEY (`" + fkColumnName + "`)").append(", CONSTRAINT `fk_" + fkName + "` ")
-                        .append("FOREIGN KEY (`" + fkColumnName + "`) ").append("REFERENCES `" + apptableName + "` (`id`)");
+                        .append("FOREIGN KEY (`" + fkColumnName + "`) ").append("REFERENCES `" + actualAppTableName + "` (`id`)");
             }
 
             sqlBuilder = sqlBuilder.append(") ENGINE=InnoDB DEFAULT CHARSET=utf8;");
@@ -546,6 +555,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
                 if (!StringUtils.equals(oldApptableName, apptableName)) {
                     String oldFKName = oldApptableName.substring(2) + "_id";
                     String newFKName = apptableName.substring(2) + "_id";
+                    String actualAppTableName = mapToActualAppTable(apptableName);
                     String oldConstraintName = datatableName.toLowerCase().replaceAll("\\s", "_") + "_" + oldFKName;
                     String newConstraintName = datatableName.toLowerCase().replaceAll("\\s", "_") + "_" + newFKName;
                     StringBuilder sqlBuilder = new StringBuilder();
@@ -556,13 +566,13 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
                                 .append("CHANGE COLUMN `" + oldFKName + "` `" + newFKName + "` BIGINT(20) NOT NULL,")
                                 .append("ADD KEY `fk_" + newFKName + "` (`" + newFKName + "`),")
                                 .append("ADD CONSTRAINT `fk_" + newConstraintName + "` ").append("FOREIGN KEY (`" + newFKName + "`) ")
-                                .append("REFERENCES `" + apptableName + "` (`id`)");
+                                .append("REFERENCES `" + actualAppTableName + "` (`id`)");
                     } else {
                         sqlBuilder = sqlBuilder.append("ALTER TABLE `" + datatableName + "` ")
                                 .append("DROP FOREIGN KEY `fk_" + oldConstraintName + "`,")
                                 .append("CHANGE COLUMN `" + oldFKName + "` `" + newFKName + "` BIGINT(20) NOT NULL,")
                                 .append("ADD CONSTRAINT `fk_" + newConstraintName + "` ").append("FOREIGN KEY (`" + newFKName + "`) ")
-                                .append("REFERENCES `" + apptableName + "` (`id`)");
+                                .append("REFERENCES `" + actualAppTableName + "` (`id`)");
                     }
 
                     this.jdbcTemplate.execute(sqlBuilder.toString());
@@ -759,11 +769,9 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             final Long id) {
 
         final String appTable = queryForApplicationTableName(dataTableName);
-        
+
         checkMainResourceExistsWithinScope(appTable, appTableId);
-        
-        
-        
+
         final List<ResultsetColumnHeaderData> columnHeaders = this.genericDataService.fillResultsetColumnHeaders(dataTableName);
 
         String sql = "";
@@ -827,8 +835,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
                 .withGroupId(groupId) //
                 .withClientId(clientId) //
                 .withSavingsId(savingsId) //
-                .withLoanId(LoanId)
-                .withEntityId(entityId)//
+                .withLoanId(LoanId).withEntityId(entityId)//
                 .build();
     }
 
@@ -885,22 +892,26 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         }
         if (appTable.equalsIgnoreCase("m_client")) {
             scopedSQL = "select o.id as officeId, null as groupId, c.id as clientId, null as savingsId, null as loanId, null as entityId from m_client c "
-                    + " join m_office o on o.id = c.office_id and o.hierarchy like '" + currentUser.getOffice().getHierarchy() + "%'"
+                    + " join m_office o on o.id = c.office_id and o.hierarchy like '"
+                    + currentUser.getOffice().getHierarchy()
+                    + "%'"
                     + " where c.id = " + appTableId;
         }
-        if (appTable.equalsIgnoreCase("m_group")) {
+        if (appTable.equalsIgnoreCase("m_group") || appTable.equalsIgnoreCase("m_center")) {
             scopedSQL = "select o.id as officeId, g.id as groupId, null as clientId, null as savingsId, null as loanId, null as entityId from m_group g "
-                    + " join m_office o on o.id = g.office_id and o.hierarchy like '" + currentUser.getOffice().getHierarchy() + "%'"
+                    + " join m_office o on o.id = g.office_id and o.hierarchy like '"
+                    + currentUser.getOffice().getHierarchy()
+                    + "%'"
                     + " where g.id = " + appTableId;
         }
         if (appTable.equalsIgnoreCase("m_office")) {
             scopedSQL = "select o.id as officeId, null as groupId, null as clientId, null as savingsId, null as loanId from, null as entityId m_office o "
                     + " where o.hierarchy like '" + currentUser.getOffice().getHierarchy() + "%'" + " and o.id = " + appTableId;
         }
-        
+
         if (appTable.equalsIgnoreCase("m_product_loan") || appTable.equalsIgnoreCase("m_savings_product")) {
-            scopedSQL = "select null as officeId, null as groupId, null as clientId, null as savingsId, null as loanId, p.id as entityId from " + appTable
-                    + " as p WHERE p.id = " + appTableId;
+            scopedSQL = "select null as officeId, null as groupId, null as clientId, null as savingsId, null as loanId, p.id as entityId from "
+                    + appTable + " as p WHERE p.id = " + appTableId;
         }
 
         if (scopedSQL == null) { throw new PlatformDataIntegrityException("error.msg.invalid.dataScopeCriteria", "Application Table: "
@@ -916,11 +927,17 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         if (appTable.equalsIgnoreCase("m_savings_account")) return;
         if (appTable.equalsIgnoreCase("m_client")) return;
         if (appTable.equalsIgnoreCase("m_group")) return;
+        if (appTable.equalsIgnoreCase("m_center")) return;
         if (appTable.equalsIgnoreCase("m_office")) return;
         if (appTable.equalsIgnoreCase("m_product_loan")) return;
         if (appTable.equalsIgnoreCase("m_savings_product")) return;
 
         throw new PlatformDataIntegrityException("error.msg.invalid.application.table", "Invalid Application Table: " + appTable);
+    }
+
+    private String mapToActualAppTable(final String appTable) {
+        if (appTable.equalsIgnoreCase("m_center")) { return "m_group"; }
+        return appTable;
     }
 
     private List<ResultsetRowData> fillDatatableResultSetDataRows(final String sql) {
