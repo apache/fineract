@@ -94,17 +94,17 @@ public class NoteReadPlatformServiceImpl implements NoteReadPlatformService {
 
         final String sql = rm.schema() + " where " + conditionSql + " order by n.created_date DESC";
 
-        return this.jdbcTemplate.query(sql, rm, new Object[] { resourceId });
+        return this.jdbcTemplate.query(sql, rm, new Object[] { resourceId});
     }
 
     public static String getResourceCondition(final NoteType noteType) {
         String conditionSql = "";
         switch (noteType) {
             case CLIENT:
-                conditionSql = " n.client_id = ? ";
+                conditionSql = " n.client_id = ? and note_type_enum = " + NoteType.CLIENT.getValue();
             break;
             case LOAN:
-                conditionSql = " n.loan_id = ? ";
+                conditionSql = " n.loan_id = ? and ( n.note_type_enum = " + NoteType.LOAN.getValue()+ " or n.note_type_enum = " + NoteType.LOAN_TRANSACTION.getValue() + " )";
             break;
             case LOAN_TRANSACTION:
                 conditionSql = " n.loan_transaction_id = ? ";

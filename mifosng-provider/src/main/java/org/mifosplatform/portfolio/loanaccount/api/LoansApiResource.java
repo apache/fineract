@@ -74,6 +74,9 @@ import org.mifosplatform.portfolio.loanproduct.data.LoanProductData;
 import org.mifosplatform.portfolio.loanproduct.data.TransactionProcessingStrategyData;
 import org.mifosplatform.portfolio.loanproduct.service.LoanDropdownReadPlatformService;
 import org.mifosplatform.portfolio.loanproduct.service.LoanProductReadPlatformService;
+import org.mifosplatform.portfolio.note.data.NoteData;
+import org.mifosplatform.portfolio.note.domain.NoteType;
+import org.mifosplatform.portfolio.note.service.NoteReadPlatformServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -97,7 +100,7 @@ public class LoansApiResource {
             "amortizationTypeOptions", "interestTypeOptions", "interestCalculationPeriodTypeOptions", "repaymentFrequencyTypeOptions",
             "termFrequencyTypeOptions", "interestRateFrequencyTypeOptions", "fundOptions", "repaymentStrategyOptions", "chargeOptions",
             "loanOfficerOptions", "loanPurposeOptions", "loanCollateralOptions", "chargeTemplate", "calendarOptions", "syncDisbursementWithMeeting",
-            "loanCounter", "loanProductCounter"));
+            "loanCounter", "loanProductCounter", "notes"));
 
     private final String resourceNameForPermissions = "LOAN";
 
@@ -121,6 +124,7 @@ public class LoansApiResource {
     private final FromJsonHelper fromJsonHelper;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final CalendarReadPlatformService calendarReadPlatformService;
+    private final NoteReadPlatformServiceImpl noteReadPlatformService;
 
     @Autowired
     public LoansApiResource(final PlatformSecurityContext context, final LoanReadPlatformService loanReadPlatformService,
@@ -136,7 +140,7 @@ public class LoansApiResource {
             final DefaultToApiJsonSerializer<BulkTransferLoanOfficerData> loanOfficeTransferToApiJsonSerializer,
             final ApiRequestParameterHelper apiRequestParameterHelper, final FromJsonHelper fromJsonHelper,
             final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
-            final CalendarReadPlatformService calendarReadPlatformService) {
+            final CalendarReadPlatformService calendarReadPlatformService, final NoteReadPlatformServiceImpl noteReadPlatformService) {
         this.context = context;
         this.loanReadPlatformService = loanReadPlatformService;
         this.loanProductReadPlatformService = loanProductReadPlatformService;
@@ -157,6 +161,7 @@ public class LoansApiResource {
         this.fromJsonHelper = fromJsonHelper;
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
         this.calendarReadPlatformService = calendarReadPlatformService;
+        this.noteReadPlatformService = noteReadPlatformService;
     }
 
     @GET
@@ -275,13 +280,14 @@ public class LoansApiResource {
         Collection<GuarantorData> guarantors = null;
         Collection<CollateralData> collateral = null;
         CalendarData meeting = null;
+        Collection<NoteData> notes = null;
 
         final Set<String> mandatoryResponseParameters = new HashSet<String>();
         final Set<String> associationParameters = ApiParameterHelper.extractAssociationsForResponseIfProvided(uriInfo.getQueryParameters());
         if (!associationParameters.isEmpty()) {
 
             if (associationParameters.contains("all")) {
-                associationParameters.addAll(Arrays.asList("repaymentSchedule", "transactions", "charges", "guarantors", "collateral"));
+                associationParameters.addAll(Arrays.asList("repaymentSchedule", "transactions", "charges", "guarantors", "collateral","notes"));
             }
 
             if (associationParameters.contains("guarantors")) {
@@ -326,6 +332,14 @@ public class LoansApiResource {
             if (associationParameters.contains("meeting")) {
                 mandatoryResponseParameters.add("meeting");
                 meeting = this.calendarReadPlatformService.retrieveLoanCalendar(loanId);
+            }
+            
+            if (associationParameters.contains("notes")) {
+                mandatoryResponseParameters.add("notes");
+                notes = this.noteReadPlatformService.retrieveNotesByResource(loanId, NoteType.LOAN.getValue());
+                if (CollectionUtils.isEmpty(notes)) {
+                    notes = null;
+                }
             }
         }
 
@@ -381,7 +395,7 @@ public class LoansApiResource {
                 charges, collateral, guarantors, meeting, productOptions, loanTermFrequencyTypeOptions, repaymentFrequencyTypeOptions,
                 repaymentStrategyOptions, interestRateFrequencyTypeOptions, amortizationTypeOptions, interestTypeOptions,
                 interestCalculationPeriodTypeOptions, fundOptions, chargeOptions, chargeTemplate, allowedLoanOfficers, loanPurposeOptions,
-                loanCollateralOptions, calendarOptions);
+                loanCollateralOptions, calendarOptions, notes);
 
         final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters(),
                 mandatoryResponseParameters);
