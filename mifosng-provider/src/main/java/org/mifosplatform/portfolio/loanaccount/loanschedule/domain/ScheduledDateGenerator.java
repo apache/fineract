@@ -8,11 +8,12 @@ package org.mifosplatform.portfolio.loanaccount.loanschedule.domain;
 import java.util.List;
 
 import org.joda.time.LocalDate;
+import org.mifosplatform.organisation.holiday.domain.Holiday;
 import org.mifosplatform.portfolio.loanproduct.domain.PeriodFrequencyType;
 
 public interface ScheduledDateGenerator {
 
-    List<LocalDate> generate(LoanApplicationTerms loanApplicationTerms);
+    List<LocalDate> generate(LoanApplicationTerms loanApplicationTerms, boolean isHolidayEnabled, List<Holiday> holidays);
 
     LocalDate idealDisbursementDateBasedOnFirstRepaymentDate(PeriodFrequencyType repaymentPeriodFrequencyType, int repaidEvery,
             List<LocalDate> scheduledDates);

@@ -14,6 +14,7 @@ import java.util.Set;
 
 import org.joda.time.Days;
 import org.joda.time.LocalDate;
+import org.mifosplatform.organisation.holiday.domain.Holiday;
 import org.mifosplatform.organisation.monetary.domain.ApplicationCurrency;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.organisation.monetary.domain.Money;
@@ -29,10 +30,10 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
 
     @Override
     public LoanScheduleModel generate(final MathContext mc, final ApplicationCurrency applicationCurrency,
-            final LoanApplicationTerms loanApplicationTerms, final Set<LoanCharge> loanCharges) {
+            final LoanApplicationTerms loanApplicationTerms, final Set<LoanCharge> loanCharges, final boolean isHolidayEnabled, final List<Holiday> holidays) {
 
         // 1. generate list of proposed schedule due dates
-        final List<LocalDate> scheduledDates = this.scheduledDateGenerator.generate(loanApplicationTerms);
+        final List<LocalDate> scheduledDates = this.scheduledDateGenerator.generate(loanApplicationTerms, isHolidayEnabled, holidays);
 
         // 2. determine the total charges due at time of disbursement
         final BigDecimal chargesDueAtTimeOfDisbursement = deriveTotalChargesDueAtTimeOfDisbursement(loanCharges);

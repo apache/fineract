@@ -5,11 +5,20 @@
  */
 package org.mifosplatform.organisation.holiday.domain;
 
+import java.util.Date;
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface HolidayRepository extends JpaRepository<Holiday, Long>,
 		JpaSpecificationExecutor<Holiday> {
-    // no added behaviour
+    @Query("select holiday from Holiday holiday, IN(holiday.offices) office where holiday.fromDate >= :fromDate and office.id = :officeId")
+    List<Holiday> findByOfficeIdAndGreaterThanDate(@Param("officeId") Long officeId, @Param("fromDate") Date fromDate);
+    
+    @Query("from Holiday holiday where holiday.processed = false")
+    List<Holiday> findUnprocessed();
 }
 

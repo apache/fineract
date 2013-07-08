@@ -10,4 +10,5 @@ public interface ConfigurationDomainService {
     boolean isMakerCheckerEnabledForTask(String taskPermissionCode);
     boolean isAmazonS3Enabled();
     boolean isRescheduleFutureRepaymentsEnabled();
+    boolean isRescheduleRepaymentsOnHolidaysEnabled();
 }

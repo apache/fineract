@@ -11,6 +11,7 @@ import org.mifosplatform.infrastructure.core.domain.MifosPlatformTenant;
 import org.mifosplatform.infrastructure.core.service.DataSourcePerTenantService;
 import org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil;
 import org.mifosplatform.infrastructure.security.service.TenantDetailsService;
+import org.mifosplatform.portfolio.loanaccount.service.LoanWritePlatformService;
 import org.mifosplatform.portfolio.savings.service.SavingsAccountWritePlatformService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,13 +28,16 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
     private final TenantDetailsService tenantDetailsService;
     private final DataSourcePerTenantService dataSourcePerTenantService;
     private final SavingsAccountWritePlatformService savingsAccountWritePlatformService;
+    private final LoanWritePlatformService loanWritePlatformService;
 
     @Autowired
     public ScheduledJobRunnerServiceImpl(final DataSourcePerTenantService dataSourcePerTenantService,
-            final TenantDetailsService tenantDetailsService, final SavingsAccountWritePlatformService savingsAccountWritePlatformService) {
+            final TenantDetailsService tenantDetailsService, final SavingsAccountWritePlatformService savingsAccountWritePlatformService,
+            final LoanWritePlatformService loanWritePlatformService) {
         this.dataSourcePerTenantService = dataSourcePerTenantService;
         this.tenantDetailsService = tenantDetailsService;
         this.savingsAccountWritePlatformService = savingsAccountWritePlatformService;
+        this.loanWritePlatformService = loanWritePlatformService;
     }
 
     @Transactional
@@ -218,6 +222,16 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
             }
 
             logger.info(tenant.getName() + ": Results affected by update: " + savingsIds.size());
+        }
+    }
+    
+    @Transactional
+    @Override
+    public void applyHolidaysToLoans() {
+        List<MifosPlatformTenant> allTenants = this.tenantDetailsService.findAllTenants();
+        for (MifosPlatformTenant tenant : allTenants) {
+            ThreadLocalContextUtil.setTenant(tenant);
+            this.loanWritePlatformService.applyHolidaysToLoans();
         }
     }
 }

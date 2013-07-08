@@ -5,7 +5,10 @@
  */
 package org.mifosplatform.infrastructure.core.service;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.joda.time.DateTime;
@@ -49,5 +52,11 @@ public class DateUtils {
             throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
                     dataValidationErrors);
         }
+    }
+    
+    public static String formatToSqlDate(final Date date){
+        final DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+        final String formattedSqlDate = df.format(date);
+        return formattedSqlDate;
     }
 }

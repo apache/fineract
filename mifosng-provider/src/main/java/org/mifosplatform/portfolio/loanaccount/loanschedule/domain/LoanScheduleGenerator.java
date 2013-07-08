@@ -6,13 +6,15 @@
 package org.mifosplatform.portfolio.loanaccount.loanschedule.domain;
 
 import java.math.MathContext;
+import java.util.List;
 import java.util.Set;
 
+import org.mifosplatform.organisation.holiday.domain.Holiday;
 import org.mifosplatform.organisation.monetary.domain.ApplicationCurrency;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanCharge;
 
 public interface LoanScheduleGenerator {
 
     LoanScheduleModel generate(MathContext mc, ApplicationCurrency applicationCurrency, LoanApplicationTerms loanApplicationTerms,
-            Set<LoanCharge> loanCharges);
+            Set<LoanCharge> loanCharges, boolean isHolidayEnabled, List<Holiday> holidays);
 }

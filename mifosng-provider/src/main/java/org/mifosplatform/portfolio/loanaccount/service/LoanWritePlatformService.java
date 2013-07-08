@@ -52,4 +52,6 @@ public interface LoanWritePlatformService {
     CommandProcessingResult removeLoanOfficer(Long loanId, JsonCommand command);
     
     void updateRepaymentsSchedule(Calendar calendar, Collection<CalendarInstance> loanCalendarInstances);
+    
+    void applyHolidaysToLoans();
 }
