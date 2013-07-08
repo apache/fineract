@@ -9,6 +9,8 @@ import java.math.BigDecimal;
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import net.fortuna.ical4j.model.ValidationException;
 import net.fortuna.ical4j.model.property.RRule;
@@ -619,5 +621,31 @@ public class DataValidatorBuilder {
     
     public DataValidatorBuilder validateForBooleanValue() {
         return validateStringFor("TRUE" + VALID_INPUT_SEPERATOR + "FALSE");
+    }
+
+    public DataValidatorBuilder validatePhoneNumber() {
+        if (this.value == null && this.ignoreNullValue) { return this; }
+        boolean validationErr = true;
+        String regex = "^\\+?[0-9. ()-]{0,25}$"; // supports numbers,
+                                                 // parentheses(), hyphens and
+                                                 // may contain + sign in the
+                                                 // beginning and can contain
+                                                 // whitespaces in between and
+                                                 // length allowed is 0-25 chars.
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(this.value.toString());
+        if (matcher.matches()) {
+            validationErr = false;
+        }
+        if (validationErr) {
+            final StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append(this.resource).append(".")
+                    .append(this.parameter).append(".format.is.invalid");
+            final StringBuilder defaultEnglishMessage = new StringBuilder("The ").append(this.resource).append(this.parameter)
+                    .append(" is in invalid format, should contain '-','+','()' and numbers only.");
+            final ApiParameterError error = ApiParameterError.parameterError(validationErrorCode.toString(),
+                    defaultEnglishMessage.toString(), this.parameter, this.value);
+            this.dataValidationErrors.add(error);
+        }
+        return this;
     }
 }

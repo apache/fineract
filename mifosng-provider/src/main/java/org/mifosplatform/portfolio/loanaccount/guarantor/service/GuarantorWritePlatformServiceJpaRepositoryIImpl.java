@@ -116,26 +116,14 @@ public class GuarantorWritePlatformServiceJpaRepositoryIImpl implements Guaranto
 
             final Map<String, Object> changesOnly = guarantorForUpdate.update(command);
 
-            if (changesOnly.containsKey(GUARANTOR_JSON_INPUT_PARAMS.CLIENT_RELATIONSHIP_TYPE_ID)) {
+            if (changesOnly.containsKey(GUARANTOR_JSON_INPUT_PARAMS.CLIENT_RELATIONSHIP_TYPE_ID.getValue())) {
                 Long clientRelationshipId = guarantorCommand.getClientRelationshipTypeId();
                 CodeValue clientRelationshipType = null;
                 if (clientRelationshipId != null) {
                     clientRelationshipType = this.codeValueRepositoryWrapper.findOneByCodeNameAndIdWithNotFoundDetection(
                             GuarantorConstants.GUARANTOR_RELATIONSHIP_CODE_NAME, clientRelationshipId);
                 }
-                guarantorForUpdate.setClientRelationshipType(clientRelationshipType);
-            }
-            
-            List<Guarantor> existGuarantorList = this.guarantorRepository.findByLoan(loan);
-            Long entityId = guarantorCommand.getEntityId();
-
-            for (Guarantor guarantor : existGuarantorList) {
-                if (guarantor.getLoanId() == loanId && guarantor.getEntityId() == entityId) {
-                    String defaultUserMessage = this.clientRepositoryWrapper.findOneWithNotFoundDetection(entityId).getDisplayName();
-                    defaultUserMessage = defaultUserMessage + " is already exist as a guarantor for this loan";
-                    String action = loan.client() != null ? "client.guarantor" : "group.guarantor";
-                    throw new DuplicateGuarantorException(action, "is.already.exist.same.loan", defaultUserMessage, entityId, loanId);
-                }
+                guarantorForUpdate.updateClientRelationshipType(clientRelationshipType);
             }
             
             if (changesOnly.containsKey(GUARANTOR_JSON_INPUT_PARAMS.ENTITY_ID)
