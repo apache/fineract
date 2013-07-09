@@ -81,11 +81,11 @@ public class SearchReadPlatformServiceImpl implements SearchReadPlatformService 
                     + " from m_client_identifier ci join m_client c on ci.client_id=c.id join m_office o on o.id = c.office_id "
                     + " where o.hierarchy like :hierarchy and ci.document_key like :partialSearch and ci.document_key not like :search) ";
 
-            String groupExactMatchSql = " (select 'GROUP' as entityType, g.id as entityId, g.display_name as entityName, g.external_id as entityExternalId, NULL as entityAccountNo "
+            String groupExactMatchSql = " (select IF(g.level_id=1,'CENTER','GROUP') as entityType, g.id as entityId, g.display_name as entityName, g.external_id as entityExternalId, NULL as entityAccountNo "
                     + " , g.office_id as parentId, o.name as parentName "
                     + " from m_group g join m_office o on o.id = g.office_id where o.hierarchy like :hierarchy and g.display_name like :search) ";
 
-            String groupMatchSql = " (select 'GROUP' as entityType, g.id as entityId, g.display_name as entityName, g.external_id as entityExternalId, NULL as entityAccountNo "
+            String groupMatchSql = " (select IF(g.level_id=1,'CENTER','GROUP') as entityType, g.id as entityId, g.display_name as entityName, g.external_id as entityExternalId, NULL as entityAccountNo "
                     + " , g.office_id as parentId, o.name as parentName "
                     + " from m_group g join m_office o on o.id = g.office_id where o.hierarchy like :hierarchy and g.display_name like :partialSearch and g.display_name not like :search) ";
 
