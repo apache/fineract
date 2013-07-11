@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.joda.time.LocalDate;
 import org.mifosplatform.accounting.producttoaccountmapping.service.ProductToGLAccountMappingWritePlatformService;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
@@ -27,6 +28,7 @@ import org.mifosplatform.portfolio.loanproduct.domain.LoanProduct;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanProductRepository;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanTransactionProcessingStrategy;
 import org.mifosplatform.portfolio.loanproduct.exception.InvalidCurrencyException;
+import org.mifosplatform.portfolio.loanproduct.exception.LoanProductDateException;
 import org.mifosplatform.portfolio.loanproduct.exception.LoanProductNotFoundException;
 import org.mifosplatform.portfolio.loanproduct.serialization.LoanProductDataValidator;
 import org.slf4j.Logger;
@@ -78,7 +80,8 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
             this.context.authenticatedUser();
 
             this.fromApiJsonDeserializer.validateForCreate(command.json());
-
+            validateInputDates(command);
+            
             final Fund fund = findFundByIdIfProvided(command.longValueOfParameterNamed("fundId"));
 
             final Long transactionProcessingStrategyId = command.longValueOfParameterNamed("transactionProcessingStrategyId");
@@ -136,6 +139,7 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
             if (product == null) { throw new LoanProductNotFoundException(loanProductId); }
             
             this.fromApiJsonDeserializer.validateForUpdate(command.json(), product);
+            validateInputDates(command);
             
             final Map<String, Object> changes = product.update(command, this.aprCalculator);
 
@@ -236,6 +240,17 @@ public class LoanProductWritePlatformServiceJpaRepositoryImpl implements LoanPro
         logAsErrorUnexpectedDataIntegrityException(dve);
         throw new PlatformDataIntegrityException("error.msg.product.loan.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource.");
+    }
+    
+    private void validateInputDates(final JsonCommand command) {
+        final LocalDate startDate = command.localDateValueOfParameterNamed("startDate");
+        final LocalDate closeDate = command.localDateValueOfParameterNamed("closeDate");
+
+        if (startDate != null && closeDate != null) {
+            if (closeDate.isBefore(startDate)) {
+                throw new LoanProductDateException(startDate.toString(), closeDate.toString());
+            }
+        }
     }
 
     private void logAsErrorUnexpectedDataIntegrityException(final DataIntegrityViolationException dve) {
