@@ -10,9 +10,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 
+import org.joda.time.LocalDate;
 import org.mifosplatform.accounting.common.AccountingEnumerations;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
@@ -103,7 +105,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
                     + "lp.repay_every as repaidEvery, lp.repayment_period_frequency_enum as repaymentPeriodFrequency, lp.number_of_repayments as numberOfRepayments, lp.min_number_of_repayments as minNumberOfRepayments, lp.max_number_of_repayments as maxNumberOfRepayments, "
                     + "lp.grace_on_principal_periods as graceOnPrincipalPayment, lp.grace_on_interest_periods as graceOnInterestPayment, lp.grace_interest_free_periods as graceOnInterestCharged,"
                     + "lp.amortization_method_enum as amortizationMethod, lp.arrearstolerance_amount as tolerance, "
-                    + "lp.accounting_type as accountingType, lp.include_in_borrower_cycle as includeInBorrowerCycle, "
+                    + "lp.accounting_type as accountingType, lp.include_in_borrower_cycle as includeInBorrowerCycle, lp.start_date as startDate, lp.close_date as closeDate,  "
                     + "curr.name as currencyName, curr.internationalized_name_code as currencyNameCode, curr.display_symbol as currencyDisplaySymbol "
                     + " from m_product_loan lp "
                     + " left join m_fund f on f.id = lp.fund_id"
@@ -170,13 +172,21 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
                     .interestCalculationPeriodType(interestCalculationPeriodTypeId);
             
             final boolean includeInBorrowerCycle = rs.getBoolean("includeInBorrowerCycle");
-
+            final LocalDate startDate = JdbcSupport.getLocalDate(rs, "startDate");
+            final LocalDate closeDate = JdbcSupport.getLocalDate(rs, "closeDate");
+            String status = "";
+            if (closeDate != null && closeDate.isBefore(DateUtils.getLocalDateOfTenant())) {
+                status = "loanProduct.inActive";
+            } else {
+                status = "loanProduct.active";
+            }
+            
             return new LoanProductData(id, name, description, currency, principal, minPrincipal, maxPrincipal, tolerance,
                     numberOfRepayments, minNumberOfRepayments, maxNumberOfRepayments, repaymentEvery, interestRatePerPeriod,
                     minInterestRatePerPeriod, maxInterestRatePerPeriod, annualInterestRate, repaymentFrequencyType,
                     interestRateFrequencyType, amortizationType, interestType, interestCalculationPeriodType, fundId, fundName,
                     transactionStrategyId, transactionStrategyName, graceOnPrincipalPayment, graceOnInterestPayment,
-                    graceOnInterestCharged, this.charges, accountingRuleType, includeInBorrowerCycle);
+                    graceOnInterestCharged, this.charges, accountingRuleType, includeInBorrowerCycle, startDate, closeDate, status);
         }
 
     }

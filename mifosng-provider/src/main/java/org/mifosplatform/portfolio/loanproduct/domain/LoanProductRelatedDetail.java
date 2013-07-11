@@ -223,7 +223,7 @@ public class LoanProductRelatedDetail implements LoanProductMinimumRepaymentSche
             currencyCode = newValue;
             this.currency = new MonetaryCurrency(currencyCode, digitsAfterDecimal);
         }
-
+        
         final Map<String, Object> loanApplicationAttributeChanges = updateLoanApplicationAttributes(command, aprCalculator);
 
         actualChanges.putAll(loanApplicationAttributeChanges);

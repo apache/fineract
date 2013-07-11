@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
+import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.codes.domain.CodeValue;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.api.JsonQuery;
@@ -45,6 +46,7 @@ import org.mifosplatform.portfolio.loanaccount.domain.LoanRepaymentScheduleTrans
 import org.mifosplatform.portfolio.loanaccount.domain.LoanRepository;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanStatus;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanSummaryWrapper;
+import org.mifosplatform.portfolio.loanaccount.exception.LoanApplicationDateException;
 import org.mifosplatform.portfolio.loanaccount.exception.LoanApplicationNotInSubmittedAndPendingApprovalStateCannotBeDeleted;
 import org.mifosplatform.portfolio.loanaccount.exception.LoanApplicationNotInSubmittedAndPendingApprovalStateCannotBeModified;
 import org.mifosplatform.portfolio.loanaccount.exception.LoanNotFoundException;
@@ -148,7 +150,9 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         final Long productId = fromJsonHelper.extractLongNamed("productId", command.parsedJson());
         final LoanProduct loanProduct = this.loanProductRepository.findOne(productId);
         if (loanProduct == null) { throw new LoanProductNotFoundException(productId); }
-
+        
+        validateSubmittedOnDate(command, loanProduct);
+        
         this.loanProductCommandFromApiJsonDeserializer.validateMinMaxConstraints(command.parsedJson(), baseDataValidator, loanProduct);
         
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
@@ -537,6 +541,25 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         if (loan == null) { throw new LoanNotFoundException(loanId); }
         loan.setHelpers(defaultLoanLifecycleStateMachine(), this.loanSummaryWrapper, this.loanRepaymentScheduleTransactionProcessorFactory);
         return loan;
+    }
+    
+    private void validateSubmittedOnDate(final JsonCommand command, final LoanProduct loanProduct) {
+        final LocalDate startDate = loanProduct.getStartDate();
+        final LocalDate closeDate = loanProduct.getCloseDate();
+        final LocalDate submittedOnDate = command.localDateValueOfParameterNamed("submittedOnDate");
+
+        String defaultUserMessage = "";
+        if (startDate != null && submittedOnDate.isBefore(startDate)) {
+            defaultUserMessage = "submittedOnDate cannot be before the loan product startDate.";
+            throw new LoanApplicationDateException("submitted.on.date.cannot.be.before.the.loan.product.start.date", defaultUserMessage,
+                    submittedOnDate.toString(), startDate.toString());
+        }
+        
+        if (closeDate != null && submittedOnDate.isAfter(closeDate)) {
+            defaultUserMessage = "submittedOnDate cannot be after the loan product closeDate.";
+            throw new LoanApplicationDateException("submitted.on.date.cannot.be.after.the.loan.product.close.date", defaultUserMessage,
+                    submittedOnDate.toString(), closeDate.toString());
+        }
     }
 
 }
