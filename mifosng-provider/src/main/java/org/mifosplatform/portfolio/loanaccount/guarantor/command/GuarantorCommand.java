@@ -158,9 +158,9 @@ public class GuarantorCommand {
         baseDataValidator.reset().parameter(GUARANTOR_JSON_INPUT_PARAMS.COUNTRY.getValue()).value(this.country).ignoreIfNull()
                 .notExceedingLengthOf(50);
         baseDataValidator.reset().parameter(GUARANTOR_JSON_INPUT_PARAMS.MOBILE_NUMBER.getValue()).value(this.mobileNumber).ignoreIfNull()
-                .notExceedingLengthOf(20);
+                .notExceedingLengthOf(20).validatePhoneNumber();
         baseDataValidator.reset().parameter(GUARANTOR_JSON_INPUT_PARAMS.PHONE_NUMBER.getValue()).value(this.housePhoneNumber)
-                .ignoreIfNull().notExceedingLengthOf(20);
+                .ignoreIfNull().notExceedingLengthOf(20).validatePhoneNumber();
         baseDataValidator.reset().parameter(GUARANTOR_JSON_INPUT_PARAMS.COMMENT.getValue()).value(this.comment).ignoreIfNull()
                 .notExceedingLengthOf(500);
     }

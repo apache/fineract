@@ -144,7 +144,6 @@ public class Guarantor extends AbstractPersistable<Long> {
 
         handlePropertyUpdate(command, actualChanges, GUARANTOR_JSON_INPUT_PARAMS.GUARANTOR_TYPE_ID.getValue(), this.gurantorType, true);
         handlePropertyUpdate(command, actualChanges, GUARANTOR_JSON_INPUT_PARAMS.CLIENT_RELATIONSHIP_TYPE_ID.getValue(), 0, true);
-        handlePropertyUpdate(command, actualChanges, GUARANTOR_JSON_INPUT_PARAMS.ENTITY_ID.getValue(), this.entityId);
 
         if (this.isExternalGuarantor()) {
             handlePropertyUpdate(command, actualChanges, GUARANTOR_JSON_INPUT_PARAMS.FIRSTNAME.getValue(), this.firstname);
@@ -159,6 +158,10 @@ public class Guarantor extends AbstractPersistable<Long> {
             handlePropertyUpdate(command, actualChanges, GUARANTOR_JSON_INPUT_PARAMS.PHONE_NUMBER.getValue(), this.housePhoneNumber);
             handlePropertyUpdate(command, actualChanges, GUARANTOR_JSON_INPUT_PARAMS.MOBILE_NUMBER.getValue(), this.mobilePhoneNumber);
             handlePropertyUpdate(command, actualChanges, GUARANTOR_JSON_INPUT_PARAMS.COMMENT.getValue(), this.comment);
+            updateExistingEntityToNull();
+        } else {
+            handlePropertyUpdate(command, actualChanges, GUARANTOR_JSON_INPUT_PARAMS.ENTITY_ID.getValue(), this.entityId);
+            updateExternalGuarantorFieldsToNull();
         }
 
         return actualChanges;
@@ -277,8 +280,26 @@ public class Guarantor extends AbstractPersistable<Long> {
         return this.clientRelationshipType;
     }
 
-    public void setClientRelationshipType(CodeValue clientRelationshipType) {
+    public void updateClientRelationshipType(CodeValue clientRelationshipType) {
         this.clientRelationshipType = clientRelationshipType;
     }
 
+    private void updateExternalGuarantorFieldsToNull() {
+        this.firstname = null;
+        this.lastname = null;
+        this.dateOfBirth = null;
+        this.addressLine1 = null;
+        this.addressLine2 = null;
+        this.city = null;
+        this.state = null;
+        this.country = null;
+        this.zip = null;
+        this.housePhoneNumber = null;
+        this.mobilePhoneNumber = null;
+        this.comment = null;
+    }
+
+    private void updateExistingEntityToNull() {
+        this.entityId = null;
+    }
 }
