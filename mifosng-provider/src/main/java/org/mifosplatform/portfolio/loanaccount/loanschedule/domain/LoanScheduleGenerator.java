@@ -11,10 +11,11 @@ import java.util.Set;
 
 import org.mifosplatform.organisation.holiday.domain.Holiday;
 import org.mifosplatform.organisation.monetary.domain.ApplicationCurrency;
+import org.mifosplatform.organisation.workingdays.domain.WorkingDays;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanCharge;
 
 public interface LoanScheduleGenerator {
 
     LoanScheduleModel generate(MathContext mc, ApplicationCurrency applicationCurrency, LoanApplicationTerms loanApplicationTerms,
-            Set<LoanCharge> loanCharges, boolean isHolidayEnabled, List<Holiday> holidays);
+            Set<LoanCharge> loanCharges, boolean isHolidayEnabled, List<Holiday> holidays, final WorkingDays workingDays);
 }

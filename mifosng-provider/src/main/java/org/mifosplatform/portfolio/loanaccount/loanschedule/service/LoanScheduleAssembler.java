@@ -16,10 +16,14 @@ import org.mifosplatform.infrastructure.configuration.domain.ConfigurationDomain
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.organisation.holiday.domain.Holiday;
 import org.mifosplatform.organisation.holiday.domain.HolidayRepository;
+import org.mifosplatform.organisation.holiday.service.HolidayUtil;
 import org.mifosplatform.organisation.monetary.domain.ApplicationCurrency;
 import org.mifosplatform.organisation.monetary.domain.ApplicationCurrencyRepositoryWrapper;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.organisation.monetary.domain.Money;
+import org.mifosplatform.organisation.workingdays.domain.WorkingDaysRepositoryWrapper;
+import org.mifosplatform.organisation.workingdays.domain.WorkingDays;
+import org.mifosplatform.organisation.workingdays.service.WorkingDaysUtil;
 import org.mifosplatform.portfolio.calendar.domain.Calendar;
 import org.mifosplatform.portfolio.calendar.domain.CalendarRepository;
 import org.mifosplatform.portfolio.calendar.exception.CalendarNotFoundException;
@@ -64,6 +68,7 @@ public class LoanScheduleAssembler {
     private final ConfigurationDomainService configurationDomainService;
     private final ClientRepositoryWrapper  clientRepository;
     private final GroupRepositoryWrapper groupRepository;
+    private final WorkingDaysRepositoryWrapper workingDaysRepository;
 
     @Autowired
     public LoanScheduleAssembler(final FromJsonHelper fromApiJsonHelper, final LoanProductRepository loanProductRepository,
@@ -71,7 +76,8 @@ public class LoanScheduleAssembler {
             final LoanScheduleGeneratorFactory loanScheduleFactory, final AprCalculator aprCalculator,
             final LoanChargeAssembler loanChargeAssembler, final CalendarRepository calendarRepository,
             final HolidayRepository holidayRepository, final ConfigurationDomainService configurationDomainService,
-            final ClientRepositoryWrapper clientRepository, final GroupRepositoryWrapper groupRepository) {
+            final ClientRepositoryWrapper clientRepository, final GroupRepositoryWrapper groupRepository,
+            final WorkingDaysRepositoryWrapper workingDaysRepository) {
         this.fromApiJsonHelper = fromApiJsonHelper;
         this.loanProductRepository = loanProductRepository;
         this.applicationCurrencyRepository = applicationCurrencyRepository;
@@ -83,6 +89,7 @@ public class LoanScheduleAssembler {
         this.configurationDomainService = configurationDomainService;
         this.clientRepository = clientRepository;
         this.groupRepository = groupRepository;
+        this.workingDaysRepository = workingDaysRepository;
     }
 
     public LoanApplicationTerms assembleLoanTerms(final JsonElement element) {
@@ -182,7 +189,7 @@ public class LoanScheduleAssembler {
                 expectedDisbursementDate, repaymentsStartingFromDate, graceOnPrincipalPayment, graceOnInterestPayment,
                 graceOnInterestCharged, interestChargedFromDate, inArrearsToleranceMoney);
     }
-
+    
     private void validateRepaymentsStartDateWithMeetingDates(final LocalDate repaymentsStartingFromDate, final Calendar calendar) {
         if (repaymentsStartingFromDate != null
                 && !CalendarHelper.isValidRedurringDate(calendar.getRecurrence(), calendar.getStartDateLocalDate(),
@@ -221,7 +228,7 @@ public class LoanScheduleAssembler {
             }
         }
     }
-
+    
     public LoanProductRelatedDetail assembleLoanProductRelatedDetail(final JsonElement element) {
         LoanApplicationTerms loanApplicationTerms = assembleLoanTerms(element);
         return loanApplicationTerms.toLoanProductRelatedDetail();
@@ -249,11 +256,16 @@ public class LoanScheduleAssembler {
         
         final LocalDate expectedDisbursementDate = this.fromApiJsonHelper.extractLocalDateNamed("expectedDisbursementDate", element);
         final List<Holiday> holidays = this.holidayRepository.findByOfficeIdAndGreaterThanDate(officeId, expectedDisbursementDate.toDate());
-        return assembleLoanScheduleFrom(loanApplicationTerms, isHolidayEnabled, holidays, element);
+        final WorkingDays workingDays = this.workingDaysRepository.findOne();
+        
+        validateDisbursementDateIsOnNonWorkingDay(loanApplicationTerms.getExpectedDisbursementDate(), workingDays);
+        validateDisbursementDateIsOnHoliday(loanApplicationTerms.getExpectedDisbursementDate(), isHolidayEnabled, holidays);
+        
+        return assembleLoanScheduleFrom(loanApplicationTerms, isHolidayEnabled, holidays, workingDays, element);
     }
 
     public LoanScheduleModel assembleLoanScheduleFrom(final LoanApplicationTerms loanApplicationTerms, final boolean isHolidayEnabled,
-            final List<Holiday> holidays, final JsonElement element) {
+            final List<Holiday> holidays, final WorkingDays workingDays, final JsonElement element) {
 
         final Set<LoanCharge> loanCharges = this.loanChargeAssembler.fromParsedJson(element);
 
@@ -264,7 +276,22 @@ public class LoanScheduleAssembler {
 
         final MonetaryCurrency currency = loanApplicationTerms.getCurrency();
         final ApplicationCurrency applicationCurrency = this.applicationCurrencyRepository.findOneWithNotFoundDetection(currency);
+        return loanScheduleGenerator.generate(mc, applicationCurrency, loanApplicationTerms, loanCharges, isHolidayEnabled, holidays, workingDays);
+    }
+    
+    private void validateDisbursementDateIsOnNonWorkingDay(final LocalDate disbursementDate, final WorkingDays workingDays) {
+        if(!WorkingDaysUtil.isWorkingDay(workingDays, disbursementDate)){
+            final String errorMessage = "The expected disbursement date cannot be on a non working day";
+            throw new LoanApplicationDateException("disbursement.date.on.non.working.day", errorMessage, disbursementDate);
+        }
+    }
 
-        return loanScheduleGenerator.generate(mc, applicationCurrency, loanApplicationTerms, loanCharges, isHolidayEnabled, holidays);
+    private void validateDisbursementDateIsOnHoliday(final LocalDate disbursementDate, final boolean isHolidayEnabled, final List<Holiday> holidays) {
+        if (isHolidayEnabled) {
+            if (HolidayUtil.isHoliday(disbursementDate, holidays)) {
+                final String errorMessage = "The expected disbursement date cannot be on a holiday";
+                throw new LoanApplicationDateException("disbursement.date.on.holiday", errorMessage, disbursementDate);
+            }
+        }
     }
 }
