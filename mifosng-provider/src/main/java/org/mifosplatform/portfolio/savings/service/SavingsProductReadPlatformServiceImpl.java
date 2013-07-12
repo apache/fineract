@@ -14,7 +14,7 @@ import org.joda.time.MonthDay;
 import org.mifosplatform.accounting.common.AccountingEnumerations;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
-import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
+import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.mifosplatform.portfolio.savings.data.SavingsProductData;
@@ -34,7 +34,7 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
     private final SavingProductLookupMapper savingsProductLookupsRowMapper = new SavingProductLookupMapper();
 
     @Autowired
-    public SavingsProductReadPlatformServiceImpl(final PlatformSecurityContext context, final TenantAwareRoutingDataSource dataSource) {
+    public SavingsProductReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource) {
         this.context = context;
         jdbcTemplate = new JdbcTemplate(dataSource);
     }

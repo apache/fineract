@@ -30,7 +30,7 @@ import javax.ws.rs.core.StreamingOutput;
 import org.apache.commons.lang.StringUtils;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
-import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
+import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
 import org.mifosplatform.infrastructure.dataqueries.data.GenericResultsetData;
 import org.mifosplatform.infrastructure.dataqueries.data.ReportData;
 import org.mifosplatform.infrastructure.dataqueries.data.ReportParameterData;
@@ -80,7 +80,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
     private boolean noPentaho = false;
 
     @Autowired
-    public ReadReportingServiceImpl(final PlatformSecurityContext context, final TenantAwareRoutingDataSource dataSource,
+    public ReadReportingServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
             final GenericDataService genericDataService) {
         // kick off pentaho reports server
         ClassicEngineBoot.getInstance().start();

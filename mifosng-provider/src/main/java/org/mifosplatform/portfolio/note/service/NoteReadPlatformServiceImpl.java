@@ -13,7 +13,7 @@ import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
-import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
+import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
 import org.mifosplatform.portfolio.note.data.NoteData;
 import org.mifosplatform.portfolio.note.domain.NoteType;
 import org.mifosplatform.portfolio.note.exception.NoteNotFoundException;
@@ -29,7 +29,7 @@ public class NoteReadPlatformServiceImpl implements NoteReadPlatformService {
     private final JdbcTemplate jdbcTemplate;
 
     @Autowired
-    public NoteReadPlatformServiceImpl(final TenantAwareRoutingDataSource dataSource) {
+    public NoteReadPlatformServiceImpl(final RoutingDataSource dataSource) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
     }
 

@@ -26,7 +26,7 @@ import org.springframework.stereotype.Service;
  * {@link MifosPlatformTenant} for the request.
  */
 @Service
-public class TomcatJdbcDataSourcePerTenantService implements DataSourcePerTenantService {
+public class TomcatJdbcDataSourcePerTenantService implements RoutingDataSourceService {
 
     private final Map<Long, DataSource> tenantToDataSourceMap = new HashMap<Long, DataSource>(1);
     private final DataSource tenantDataSource;
@@ -37,7 +37,7 @@ public class TomcatJdbcDataSourcePerTenantService implements DataSourcePerTenant
     }
 
     @Override
-    public DataSource retrieveTenantAwareDataSource() {
+    public DataSource retrieveDataSource() {
 
         // default to tenant database datasource
         DataSource tenantDataSource = this.tenantDataSource;

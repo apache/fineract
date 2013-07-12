@@ -12,7 +12,7 @@ import java.util.List;
 
 import org.mifosplatform.infrastructure.codes.data.CodeValueData;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
-import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
+import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.mifosplatform.portfolio.collateral.data.CollateralData;
@@ -34,7 +34,7 @@ public class CollateralReadPlatformServiceImpl implements CollateralReadPlatform
     private final LoanRepository loanRepository;
 
     @Autowired
-    public CollateralReadPlatformServiceImpl(final PlatformSecurityContext context, final TenantAwareRoutingDataSource dataSource,
+    public CollateralReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
             final LoanRepository loanRepository) {
         this.context = context;
         this.jdbcTemplate = new JdbcTemplate(dataSource);

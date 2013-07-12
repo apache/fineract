@@ -14,7 +14,7 @@
     	http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-3.0.xsd">
 
     <bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean" depends-on="tenantDatabaseUpgradeService">
-        <property name="dataSource" ref="tenantAwareDataSource" />
+        <property name="dataSource" ref="routingDataSource" />
         <property name="persistenceUnitName" value="jpa-pu" />
         <property name="jpaVendorAdapter">
             <bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">

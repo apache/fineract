@@ -13,18 +13,35 @@ import org.springframework.util.Assert;
  */
 public class ThreadLocalContextUtil {
 
-    private static final ThreadLocal<MifosPlatformTenant> contextHolder = new ThreadLocal<MifosPlatformTenant>();
+    public static final String CONTEXT_TENANTS = "tenants";
+
+    private static final ThreadLocal<String> contextHolder = new ThreadLocal<String>();
+
+    private static final ThreadLocal<MifosPlatformTenant> tenantcontext = new ThreadLocal<MifosPlatformTenant>();
 
     public static void setTenant(final MifosPlatformTenant tenant) {
         Assert.notNull(tenant, "tenant cannot be null");
-        contextHolder.set(tenant);
+        tenantcontext.set(tenant);
     }
 
     public static MifosPlatformTenant getTenant() {
-        return contextHolder.get();
+        return tenantcontext.get();
     }
 
     public static void clearTenant() {
+        tenantcontext.remove();
+    }
+
+    public static String getDataSourceContext() {
+        return contextHolder.get();
+    }
+
+    public static void setDataSourceContext(final String dataSourceContext) {
+        contextHolder.set(dataSourceContext);
+    }
+
+    public static void clearDataSourceContext() {
         contextHolder.remove();
     }
+
 }

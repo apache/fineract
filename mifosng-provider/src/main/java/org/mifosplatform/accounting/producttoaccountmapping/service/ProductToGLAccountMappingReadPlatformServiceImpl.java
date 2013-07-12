@@ -22,7 +22,7 @@ import org.mifosplatform.accounting.producttoaccountmapping.data.ChargeToGLAccou
 import org.mifosplatform.accounting.producttoaccountmapping.data.PaymentTypeToGLAccountMapper;
 import org.mifosplatform.accounting.producttoaccountmapping.domain.PortfolioProductType;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
-import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
+import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -34,7 +34,7 @@ public class ProductToGLAccountMappingReadPlatformServiceImpl implements Product
     private final JdbcTemplate jdbcTemplate;
 
     @Autowired
-    public ProductToGLAccountMappingReadPlatformServiceImpl(final TenantAwareRoutingDataSource dataSource) {
+    public ProductToGLAccountMappingReadPlatformServiceImpl(final RoutingDataSource dataSource) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
     }
 

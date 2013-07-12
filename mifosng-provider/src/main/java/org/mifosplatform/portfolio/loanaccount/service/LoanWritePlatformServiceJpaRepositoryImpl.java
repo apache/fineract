@@ -75,6 +75,7 @@ import org.mifosplatform.portfolio.note.domain.Note;
 import org.mifosplatform.portfolio.note.domain.NoteRepository;
 import org.mifosplatform.portfolio.paymentdetail.domain.PaymentDetail;
 import org.mifosplatform.portfolio.paymentdetail.service.PaymentDetailWritePlatformService;
+import org.mifosplatform.scheduledjobs.annotation.CronTargetMethod;
 import org.mifosplatform.useradministration.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -1178,6 +1179,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     
     @Transactional
     @Override
+    @CronTargetMethod(jobName="Apply Holidays To Loans")
     public void applyHolidaysToLoans() {        
 
         final Collection<Integer> loanStatuses = new ArrayList<Integer>(Arrays.asList(LoanStatus.SUBMITTED_AND_PENDING_APPROVAL.getValue(),

@@ -14,7 +14,7 @@ import org.joda.time.LocalDate;
 import org.mifosplatform.accounting.closure.data.GLClosureData;
 import org.mifosplatform.accounting.closure.exception.GLClosureNotFoundException;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
-import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
+import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -27,7 +27,7 @@ public class GLClosureReadPlatformServiceImpl implements GLClosureReadPlatformSe
     private final JdbcTemplate jdbcTemplate;
 
     @Autowired
-    public GLClosureReadPlatformServiceImpl(final TenantAwareRoutingDataSource dataSource) {
+    public GLClosureReadPlatformServiceImpl(final RoutingDataSource dataSource) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
     }
 

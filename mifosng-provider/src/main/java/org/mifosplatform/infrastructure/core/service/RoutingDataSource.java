@@ -22,14 +22,14 @@ import org.springframework.stereotype.Service;
  * 
  * The tenant details are process earlier and stored in a {@link ThreadLocal}.
  * 
- * The {@link DataSourcePerTenantService} is responsible for returning the
+ * The {@link RoutingDataSourceService} is responsible for returning the
  * appropriate {@link DataSource} for the tenant of this request.
  */
-@Service(value = "tenantAwareDataSource")
-public class TenantAwareRoutingDataSource extends AbstractDataSource {
+@Service(value = "routingDataSource")
+public class RoutingDataSource extends AbstractDataSource {
 
     @Autowired
-    private DataSourcePerTenantService dataSourcePerTenantService;
+    private RoutingDataSourceServiceFactory dataSourceServiceFactory;
 
     @Override
     public Connection getConnection() throws SQLException {
@@ -37,7 +37,7 @@ public class TenantAwareRoutingDataSource extends AbstractDataSource {
     }
 
     private DataSource determineTargetDataSource() {
-        return dataSourcePerTenantService.retrieveTenantAwareDataSource();
+        return dataSourceServiceFactory.determineDataSourceService().retrieveDataSource();
     }
 
     @Override

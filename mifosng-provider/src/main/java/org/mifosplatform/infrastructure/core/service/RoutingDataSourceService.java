@@ -9,9 +9,9 @@ import javax.sql.DataSource;
 
 /**
  * A service for getting hold of the appropriate {@link DataSource} connection
- * pool for the given tenant.
+ * pool.
  */
-public interface DataSourcePerTenantService {
+public interface RoutingDataSourceService {
 
-    DataSource retrieveTenantAwareDataSource();
+    DataSource retrieveDataSource();
 }
