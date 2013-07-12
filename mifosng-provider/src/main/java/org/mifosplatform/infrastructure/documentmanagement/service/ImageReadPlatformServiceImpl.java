@@ -9,7 +9,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
-import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
+import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
 import org.mifosplatform.infrastructure.documentmanagement.contentrepository.ContentRepository;
 import org.mifosplatform.infrastructure.documentmanagement.contentrepository.ContentRepositoryFactory;
 import org.mifosplatform.infrastructure.documentmanagement.data.ImageData;
@@ -30,7 +30,7 @@ public class ImageReadPlatformServiceImpl implements ImageReadPlatformService {
     private final ClientRepositoryWrapper clientRepositoryWrapper;
 
     @Autowired
-    public ImageReadPlatformServiceImpl(final TenantAwareRoutingDataSource dataSource, final ContentRepositoryFactory documentStoreFactory,
+    public ImageReadPlatformServiceImpl(final RoutingDataSource dataSource, final ContentRepositoryFactory documentStoreFactory,
             final ClientRepositoryWrapper clientRepositoryWrapper) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.contentRepositoryFactory = documentStoreFactory;

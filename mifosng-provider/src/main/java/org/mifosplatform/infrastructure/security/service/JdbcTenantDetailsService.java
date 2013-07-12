@@ -37,7 +37,7 @@ public class JdbcTenantDetailsService implements TenantDetailsService {
     private static final class TenantMapper implements RowMapper<MifosPlatformTenant> {
 
         private StringBuilder sqlBuilder = new StringBuilder(
-                "id, name, schema_name as schemaName, schema_server as schemaServer, schema_server_port as schemaServerPort, auto_update as autoUpdate, ")//
+                "id, name,identifier, schema_name as schemaName, schema_server as schemaServer, schema_server_port as schemaServerPort, auto_update as autoUpdate, ")//
                 .append(" schema_username as schemaUsername, schema_password as schemaPassword , timezone_id as timezoneId ")//
                 .append(" from tenants t");//
 
@@ -49,6 +49,7 @@ public class JdbcTenantDetailsService implements TenantDetailsService {
         public MifosPlatformTenant mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
 
             Long id = rs.getLong("id");
+            String tenantIdentifier = rs.getString("identifier");
             String name = rs.getString("name");
             String schemaName = rs.getString("schemaName");
             String schemaServer = rs.getString("schemaServer");
@@ -58,7 +59,7 @@ public class JdbcTenantDetailsService implements TenantDetailsService {
             String timezoneId = rs.getString("timezoneId");
             boolean autoUpdateEnabled = rs.getBoolean("autoUpdate");
 
-            return new MifosPlatformTenant(id, name, schemaName, schemaServer, schemaServerPort, schemaUsername, schemaPassword,
+            return new MifosPlatformTenant(id, tenantIdentifier,name, schemaName, schemaServer, schemaServerPort, schemaUsername, schemaPassword,
                     timezoneId, autoUpdateEnabled);
         }
     }

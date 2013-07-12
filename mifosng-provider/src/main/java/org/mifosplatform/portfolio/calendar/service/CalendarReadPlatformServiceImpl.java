@@ -15,7 +15,7 @@ import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
 import org.mifosplatform.infrastructure.core.service.DateUtils;
-import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
+import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
 import org.mifosplatform.portfolio.calendar.data.CalendarData;
 import org.mifosplatform.portfolio.calendar.domain.CalendarEntityType;
 import org.mifosplatform.portfolio.calendar.exception.CalendarNotFoundException;
@@ -32,7 +32,7 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
     private final JdbcTemplate jdbcTemplate;
 
     @Autowired
-    public CalendarReadPlatformServiceImpl(final TenantAwareRoutingDataSource dataSource) {
+    public CalendarReadPlatformServiceImpl(final RoutingDataSource dataSource) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
     }
 

@@ -29,7 +29,7 @@
 										  org.mifosplatform.audit.*,
 										  org.mifosplatform.infrastructure.*,
 										  org.mifosplatform.scheduledjobs.*,
-										  org.mifosplatform.organisation.*, 
+										  org.mifosplatform.organisation.*,
 										  org.mifosplatform.portfolio.loanaccount.*,
 										  org.mifosplatform.portfolio.savingsaccount.*,
 										  org.mifosplatform.portfolio.*,
@@ -46,6 +46,7 @@
     <jpa:repositories base-package="org.mifosplatform.useradministration.domain" />
     <jpa:repositories base-package="org.mifosplatform.organisation.*.domain" />
     <jpa:repositories base-package="org.mifosplatform.portfolio.*" />
+    <jpa:repositories base-package="org.mifosplatform.scheduledjobs.domain" />
 
     <import resource="infrastructure.xml" />
 		

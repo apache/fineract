@@ -10,7 +10,7 @@ import java.sql.SQLException;
 import java.util.Collection;
 
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
-import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
+import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
 import org.mifosplatform.useradministration.data.RoleData;
 import org.mifosplatform.useradministration.exception.RoleNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +26,7 @@ public class RoleReadPlatformServiceImpl implements RoleReadPlatformService {
     private final RoleMapper roleRowMapper;
 
     @Autowired
-    public RoleReadPlatformServiceImpl(final TenantAwareRoutingDataSource dataSource) {
+    public RoleReadPlatformServiceImpl(final RoutingDataSource dataSource) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.roleRowMapper = new RoleMapper();
     }

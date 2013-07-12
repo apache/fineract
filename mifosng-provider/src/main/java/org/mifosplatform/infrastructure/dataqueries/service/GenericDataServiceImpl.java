@@ -11,7 +11,7 @@ import java.util.List;
 import javax.sql.DataSource;
 
 import org.joda.time.LocalDate;
-import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
+import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
 import org.mifosplatform.infrastructure.dataqueries.data.GenericResultsetData;
 import org.mifosplatform.infrastructure.dataqueries.data.ResultsetColumnHeaderData;
 import org.mifosplatform.infrastructure.dataqueries.data.ResultsetColumnValueData;
@@ -30,7 +30,7 @@ public class GenericDataServiceImpl implements GenericDataService {
     private final DataSource dataSource;
 
     @Autowired
-    public GenericDataServiceImpl(final TenantAwareRoutingDataSource dataSource) {
+    public GenericDataServiceImpl(final RoutingDataSource dataSource) {
         this.dataSource = dataSource;
         this.jdbcTemplate = new JdbcTemplate(this.dataSource);
     }

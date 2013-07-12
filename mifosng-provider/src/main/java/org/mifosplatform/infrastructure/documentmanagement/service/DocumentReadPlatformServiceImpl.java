@@ -6,7 +6,7 @@
 package org.mifosplatform.infrastructure.documentmanagement.service;
 
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
-import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
+import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
 import org.mifosplatform.infrastructure.documentmanagement.contentrepository.ContentRepository;
 import org.mifosplatform.infrastructure.documentmanagement.contentrepository.ContentRepositoryFactory;
 import org.mifosplatform.infrastructure.documentmanagement.data.DocumentData;
@@ -31,7 +31,7 @@ public class DocumentReadPlatformServiceImpl implements DocumentReadPlatformServ
     private final ContentRepositoryFactory contentRepositoryFactory;
 
     @Autowired
-    public DocumentReadPlatformServiceImpl(final PlatformSecurityContext context, final TenantAwareRoutingDataSource dataSource,
+    public DocumentReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
             final ContentRepositoryFactory documentStoreFactory) {
         this.context = context;
         this.jdbcTemplate = new JdbcTemplate(dataSource);

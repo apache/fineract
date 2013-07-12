@@ -14,7 +14,7 @@ import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.codes.data.CodeValueData;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
-import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
+import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
 import org.mifosplatform.organisation.staff.data.StaffData;
 import org.mifosplatform.organisation.staff.service.StaffReadPlatformService;
 import org.mifosplatform.portfolio.client.data.ClientData;
@@ -37,7 +37,7 @@ public class GuarantorReadPlatformServiceImpl implements GuarantorReadPlatformSe
     private final LoanRepository loanRepository;
 
     @Autowired
-    public GuarantorReadPlatformServiceImpl(final TenantAwareRoutingDataSource dataSource,
+    public GuarantorReadPlatformServiceImpl(final RoutingDataSource dataSource,
             final ClientReadPlatformService clientReadPlatformService, final StaffReadPlatformService staffReadPlatformService,
             final LoanRepository loanRepository) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);

@@ -4,7 +4,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import org.mifosplatform.infrastructure.configuration.data.S3CredentialsData;
-import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
+import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -17,7 +17,7 @@ public class ExternalServicesReadPlatformServiceImpl implements ExternalServices
     private final JdbcTemplate jdbcTemplate;
 
     @Autowired
-    public ExternalServicesReadPlatformServiceImpl(final TenantAwareRoutingDataSource dataSource) {
+    public ExternalServicesReadPlatformServiceImpl(final RoutingDataSource dataSource) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
     }
 

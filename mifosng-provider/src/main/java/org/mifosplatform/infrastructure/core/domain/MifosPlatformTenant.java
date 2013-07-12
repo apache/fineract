@@ -5,22 +5,54 @@
  */
 package org.mifosplatform.infrastructure.core.domain;
 
-public class MifosPlatformTenant {
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Table;
 
-    private final Long id;
-    private final String name;
-    private final String schemaName;
-    private final String schemaServer;
-    private final String schemaServerPort;
-    private final String schemaUsername;
-    private final String schemaPassword;
-    private final String timezoneId;
-    private final boolean autoUpdateEnabled;
+import org.springframework.data.jpa.domain.AbstractPersistable;
 
-    public MifosPlatformTenant(final Long id, final String name, final String schemaName, final String schemaServer,
+
+@Entity
+@Table(name = "tenants")
+public class MifosPlatformTenant extends AbstractPersistable<Long>{
+
+    @Column(name="identifier")
+    private String tenantIdentifier;
+    
+    @Column(name = "name")
+    private String name;
+    
+    @Column(name = "schema_name")
+    private String schemaName;
+    
+    @Column(name = "schema_server")
+    private String schemaServer;
+    
+    @Column(name = "schema_server_port")
+    private String schemaServerPort;
+    
+    @Column(name = "schema_username")
+    private String schemaUsername;
+    
+    @Column(name = "schema_password")
+    private String schemaPassword;
+    
+    @Column(name = "timezone_id")
+    private String timezoneId;
+    
+    @Column(name = "auto_update")
+    private boolean autoUpdateEnabled;
+    
+    
+    public MifosPlatformTenant() {
+        
+    }
+
+    public MifosPlatformTenant(final Long id,final String tenantIdentifier, final String name, final String schemaName, final String schemaServer,
             final String schemaServerPort, final String schemaUsername, final String schemaPassword, String timezoneId,
             final boolean autoUpdateEnabled) {
-        this.id = id;
+        setId(id);
+        this.tenantIdentifier = tenantIdentifier;
         this.name = name;
         this.schemaName = schemaName;
         this.schemaServer = schemaServer;
@@ -38,8 +70,9 @@ public class MifosPlatformTenant {
         return url;
     }
 
-    public Long getId() {
-        return id;
+     
+    public String getTenantIdentifier() {
+        return this.tenantIdentifier;
     }
 
     public String getName() {

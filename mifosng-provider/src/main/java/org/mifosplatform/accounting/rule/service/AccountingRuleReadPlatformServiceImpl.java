@@ -23,7 +23,7 @@ import org.mifosplatform.accounting.rule.exception.AccountingRuleNotFoundExcepti
 import org.mifosplatform.infrastructure.codes.data.CodeValueData;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
-import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
+import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -39,7 +39,7 @@ public class AccountingRuleReadPlatformServiceImpl implements AccountingRuleRead
     private final GLAccountReadPlatformService glAccountReadPlatformService;
 
     @Autowired
-    public AccountingRuleReadPlatformServiceImpl(final TenantAwareRoutingDataSource dataSource,
+    public AccountingRuleReadPlatformServiceImpl(final RoutingDataSource dataSource,
             final GLAccountReadPlatformService glAccountReadPlatformService) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.glAccountReadPlatformService = glAccountReadPlatformService;
