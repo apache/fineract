@@ -78,17 +78,18 @@ public class JournalEntriesApiResource {
             @QueryParam("fromDate") final DateParam fromDateParam, @QueryParam("toDate") final DateParam toDateParam,
             @QueryParam("transactionId") final String transactionId, @QueryParam("offset") final Integer offset,
             @QueryParam("limit") final Integer limit, @QueryParam("orderBy") final String orderBy,
-            @QueryParam("sortOrder") final String sortOrder) {
+            @QueryParam("sortOrder") final String sortOrder, @QueryParam("locale") final String locale,
+            @QueryParam("dateFormat") final String dateFormat) {
 
         this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermission);
 
         Date fromDate = null;
         if (fromDateParam != null) {
-            fromDate = fromDateParam.getDate();
+            fromDate = fromDateParam.getDate("fromDate", dateFormat, locale);
         }
         Date toDate = null;
         if (toDateParam != null) {
-            toDate = toDateParam.getDate();
+            toDate = toDateParam.getDate("toDate", dateFormat, locale);
         }
 
         final SearchParameters searchParameters = SearchParameters.forJournalEntries(officeId, offset, limit, orderBy, sortOrder);

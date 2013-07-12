@@ -5,16 +5,13 @@
  */
 package org.mifosplatform.accounting.journalentry.api;
 
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 
 import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 
-import org.apache.commons.lang.StringUtils;
+import org.joda.time.LocalDate;
+import org.mifosplatform.infrastructure.core.serialization.JsonParserHelper;
 
 /**
  * Class for parsing dates sent as query parameters
@@ -23,23 +20,15 @@ import org.apache.commons.lang.StringUtils;
  */
 public class DateParam {
 
-    private final Date date;
+    private final String dateAsString;
 
     public DateParam(final String dateStr) throws WebApplicationException {
-        if (StringUtils.isEmpty(dateStr)) {
-            this.date = null;
-            return;
-        }
-        final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        try {
-            this.date = dateFormat.parse(dateStr);
-        } catch (final ParseException e) {
-            throw new WebApplicationException(Response.status(Status.BAD_REQUEST)
-                    .entity("Couldn't parse date string: Expected format yyyy-mm-dd " + e.getMessage()).build());
-        }
+        this.dateAsString = dateStr;
     }
 
-    public Date getDate() {
-        return this.date;
+    public Date getDate(String parameterName,String dateFormat, String localeAsString) {
+        Locale locale = JsonParserHelper.localeFromString(localeAsString);
+        LocalDate localDate = JsonParserHelper.convertFrom(dateAsString, parameterName, dateFormat, locale);
+        return localDate.toDate();
     }
 }
