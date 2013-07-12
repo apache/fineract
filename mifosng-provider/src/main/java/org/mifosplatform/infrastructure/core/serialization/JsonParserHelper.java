@@ -338,7 +338,7 @@ public class JsonParserHelper {
         return value;
     }
 
-    public LocalDate convertFrom(final String dateAsString, final String parameterName, final String dateFormat,
+    public static LocalDate convertFrom(final String dateAsString, final String parameterName, final String dateFormat,
             final Locale clientApplicationLocale) {
 
         if (StringUtils.isBlank(dateFormat) || clientApplicationLocale == null) {
@@ -518,6 +518,7 @@ public class JsonParserHelper {
         }
     }
 
+    /***TODO: Vishwas move all Locale related code to a separate Utils class***/
     public static Locale localeFromString(final String localeAsString) {
 
         if (StringUtils.isBlank(localeAsString)) {

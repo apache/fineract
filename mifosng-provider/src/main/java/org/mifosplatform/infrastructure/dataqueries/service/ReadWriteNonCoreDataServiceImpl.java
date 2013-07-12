@@ -162,6 +162,7 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
     public void registerDatatable(final String dataTableName, final String applicationTableName) {
 
         validateAppTable(applicationTableName);
+        assertDataTableExists(dataTableName);
 
         final String registerDatatableSql = "insert into x_registered_table (registered_table_name, application_table_name) values ('"
                 + dataTableName + "', '" + applicationTableName + "')";
@@ -214,6 +215,17 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             String[] sqlArray = { registerDatatableSql, permissionsSql };
             this.jdbcTemplate.batchUpdate(sqlArray);
 
+        }
+        /***
+         * Strangely, a Hibernate contraint violation exception is thrown
+         ****/
+        catch (ConstraintViolationException cve) {
+            Throwable realCause = cve.getCause();
+            // even if duplicate is only due to permission duplicate, okay to
+            // show duplicate datatable error msg
+            if (realCause.getMessage().contains("Duplicate entry")) { throw new PlatformDataIntegrityException(
+                    "error.msg.datatable.registered", "Datatable `" + dataTableName
+                            + "` is already registered against an application table.", "dataTableName", dataTableName); }
         } catch (DataIntegrityViolationException dve) {
             Throwable realCause = dve.getMostSpecificCause();
             // even if duplicate is only due to permission duplicate, okay to
@@ -221,7 +233,6 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             if (realCause.getMessage().contains("Duplicate entry")) { throw new PlatformDataIntegrityException(
                     "error.msg.datatable.registered", "Datatable `" + dataTableName
                             + "` is already registered against an application table.", "dataTableName", dataTableName); }
-
             logAsErrorUnexpectedDataIntegrityException(dve);
             throw new PlatformDataIntegrityException("error.msg.unknown.data.integrity.issue",
                     "Unknown data integrity issue with resource.");
@@ -294,6 +305,14 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         final String sql = "select if((exists (select 1 from x_registered_table where registered_table_name = ?)) = 1, 'true', 'false')";
         final String isRegisteredDataTable = this.jdbcTemplate.queryForObject(sql, String.class, new Object[] { name });
         return new Boolean(isRegisteredDataTable);
+    }
+
+    private void assertDataTableExists(String datatableName) {
+        final String sql = "select if((exists (select 1 from information_schema.tables where table_schema = schema() and table_name = ?)) = 1, 'true', 'false')";
+        final String dataTableExistsString = this.jdbcTemplate.queryForObject(sql, String.class, new Object[] { datatableName });
+        final boolean dataTableExists = new Boolean(dataTableExistsString);
+        if (!dataTableExists) { throw new PlatformDataIntegrityException("error.msg.invalid.datatable", "Invalid Data Table: "
+                + datatableName, "name", datatableName); }
     }
 
     private void validateDatatableName(final String name) {
@@ -932,7 +951,8 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
         if (appTable.equalsIgnoreCase("m_product_loan")) return;
         if (appTable.equalsIgnoreCase("m_savings_product")) return;
 
-        throw new PlatformDataIntegrityException("error.msg.invalid.application.table", "Invalid Application Table: " + appTable);
+        throw new PlatformDataIntegrityException("error.msg.invalid.application.table", "Invalid Application Table: " + appTable, "name",
+                appTable);
     }
 
     private String mapToActualAppTable(final String appTable) {
@@ -1188,7 +1208,8 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             }
 
             if (columnHeader.isDateDisplayType()) {
-                final LocalDate tmpDate = helper.convertFrom(paramValue, columnHeader.getColumnName(), dateFormat, clientApplicationLocale);
+                final LocalDate tmpDate = JsonParserHelper.convertFrom(paramValue, columnHeader.getColumnName(), dateFormat,
+                        clientApplicationLocale);
                 if (tmpDate == null) {
                     paramValue = null;
                 } else {

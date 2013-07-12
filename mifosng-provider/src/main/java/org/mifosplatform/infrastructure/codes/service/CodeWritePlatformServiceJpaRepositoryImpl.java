@@ -49,12 +49,13 @@ public class CodeWritePlatformServiceJpaRepositoryImpl implements CodeWritePlatf
             context.authenticatedUser();
 
             this.fromApiJsonDeserializer.validateForCreate(command.json());
-            
+
             final Code code = Code.fromJson(command);
             this.codeRepository.save(code);
 
             return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(code.getId()).build();
         } catch (DataIntegrityViolationException dve) {
+            handleCodeDataIntegrityIssues(command, dve);
             return CommandProcessingResult.empty();
         }
     }
@@ -65,9 +66,9 @@ public class CodeWritePlatformServiceJpaRepositoryImpl implements CodeWritePlatf
 
         try {
             context.authenticatedUser();
-            
+
             this.fromApiJsonDeserializer.validateForUpdate(command.json());
-            
+
             final Code code = retrieveCodeBy(codeId);
             final Map<String, Object> changes = code.update(command);
 
@@ -112,9 +113,10 @@ public class CodeWritePlatformServiceJpaRepositoryImpl implements CodeWritePlatf
      */
     private void handleCodeDataIntegrityIssues(final JsonCommand command, final DataIntegrityViolationException dve) {
         Throwable realCause = dve.getMostSpecificCause();
-        if (realCause.getMessage().contains("code_name_org")) {
+        if (realCause.getMessage().contains("code_name")) {
             final String name = command.stringValueOfParameterNamed("name");
-            throw new PlatformDataIntegrityException("error.msg.code.duplicate.name", "A code with name '" + name + "' already exists");
+            throw new PlatformDataIntegrityException("error.msg.code.duplicate.name", "A code with name '" + name + "' already exists",
+                    "name", name);
         }
 
         logger.error(dve.getMessage(), dve);
