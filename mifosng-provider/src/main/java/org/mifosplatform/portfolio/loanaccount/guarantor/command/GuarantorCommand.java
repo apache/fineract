@@ -146,9 +146,9 @@ public class GuarantorCommand {
     private void validateNonMandatoryFieldsForMaxLength(DataValidatorBuilder baseDataValidator) {
         // validate non mandatory fields for length
         baseDataValidator.reset().parameter(GUARANTOR_JSON_INPUT_PARAMS.ADDRESS_LINE_1.getValue()).value(this.addressLine1).ignoreIfNull()
-                .notExceedingLengthOf(50);
+                .notExceedingLengthOf(500);
         baseDataValidator.reset().parameter(GUARANTOR_JSON_INPUT_PARAMS.ADDRESS_LINE_2.getValue()).value(this.addressLine2).ignoreIfNull()
-                .notExceedingLengthOf(50);
+                .notExceedingLengthOf(500);
         baseDataValidator.reset().parameter(GUARANTOR_JSON_INPUT_PARAMS.CITY.getValue()).value(this.city).ignoreIfNull()
                 .notExceedingLengthOf(50);
         baseDataValidator.reset().parameter(GUARANTOR_JSON_INPUT_PARAMS.STATE.getValue()).value(this.state).ignoreIfNull()
@@ -180,5 +180,9 @@ public class GuarantorCommand {
     
     public Long getEntityId() {
         return this.entityId;
+    }
+
+    public Integer getGuarantorTypeId() {
+        return this.guarantorTypeId;
     }
 }

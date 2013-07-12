@@ -65,4 +65,12 @@ public enum GuarantorType {
         return name().toString();
     }
 
+    public boolean isCustomer() {
+        return this.value.equals(GuarantorType.CUSTOMER.getValue());
+    }
+
+    public boolean isStaff() {
+        return this.value.equals(GuarantorType.STAFF.getValue());
+    }
+
 }

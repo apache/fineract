@@ -302,4 +302,8 @@ public class Guarantor extends AbstractPersistable<Long> {
     private void updateExistingEntityToNull() {
         this.entityId = null;
     }
+
+    public Integer getGurantorType() {
+        return this.gurantorType;
+    }
 }
