@@ -626,12 +626,12 @@ public class DataValidatorBuilder {
     public DataValidatorBuilder validatePhoneNumber() {
         if (this.value == null && this.ignoreNullValue) { return this; }
         boolean validationErr = true;
-        String regex = "^\\+?[0-9. ()-]{0,25}$"; // supports numbers,
-                                                 // parentheses(), hyphens and
-                                                 // may contain + sign in the
-                                                 // beginning and can contain
-                                                 // whitespaces in between and
-                                                 // length allowed is 0-25 chars.
+        /*
+         * supports numbers, parentheses(), hyphens and may contain + sign in
+         * the beginning and can contain whitespaces in between and length
+         * allowed is 0-25 chars.
+         */
+        String regex = "^\\+?[0-9. ()-]{0,25}$";
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(this.value.toString());
         if (matcher.matches()) {

@@ -23,6 +23,7 @@ import org.mifosplatform.portfolio.loanaccount.guarantor.GuarantorConstants.GUAR
 import org.mifosplatform.portfolio.loanaccount.guarantor.command.GuarantorCommand;
 import org.mifosplatform.portfolio.loanaccount.guarantor.domain.Guarantor;
 import org.mifosplatform.portfolio.loanaccount.guarantor.domain.GuarantorRepository;
+import org.mifosplatform.portfolio.loanaccount.guarantor.domain.GuarantorType;
 import org.mifosplatform.portfolio.loanaccount.guarantor.exception.DuplicateGuarantorException;
 import org.mifosplatform.portfolio.loanaccount.guarantor.exception.GuarantorNotFoundException;
 import org.mifosplatform.portfolio.loanaccount.guarantor.exception.InvalidGuarantorException;
@@ -126,6 +127,22 @@ public class GuarantorWritePlatformServiceJpaRepositoryIImpl implements Guaranto
                 guarantorForUpdate.updateClientRelationshipType(clientRelationshipType);
             }
             
+            final List<Guarantor> existGuarantorList = this.guarantorRepository.findByLoan(loan);
+            final Integer guarantorTypeId = guarantorCommand.getGuarantorTypeId();
+            final GuarantorType guarantorType = GuarantorType.fromInt(guarantorTypeId);
+            if (guarantorType.isCustomer() || guarantorType.isStaff()) {
+                final Long entityId = guarantorCommand.getEntityId();
+                for (final Guarantor guarantor : existGuarantorList) {
+                    if (guarantor.getLoanId() == loanId && guarantor.getEntityId() == entityId
+                            && guarantor.getGurantorType() == guarantorTypeId && !guarantorForUpdate.getId().equals(guarantor.getId())) {
+                        String defaultUserMessage = this.clientRepositoryWrapper.findOneWithNotFoundDetection(entityId).getDisplayName();
+                        defaultUserMessage = defaultUserMessage + " is already exist as a guarantor for this loan";
+                        final String action = loan.client() != null ? "client.guarantor" : "group.guarantor";
+                        throw new DuplicateGuarantorException(action, "is.already.exist.same.loan", defaultUserMessage, entityId, loanId);
+                    }
+                }
+            }
+
             if (changesOnly.containsKey(GUARANTOR_JSON_INPUT_PARAMS.ENTITY_ID)
                     || changesOnly.containsKey(GUARANTOR_JSON_INPUT_PARAMS.GUARANTOR_TYPE_ID)) {
                 validateGuarantorBusinessRules(guarantorForUpdate);
