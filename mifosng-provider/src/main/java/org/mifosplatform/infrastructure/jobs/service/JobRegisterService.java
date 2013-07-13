@@ -1,4 +1,4 @@
-package org.mifosplatform.scheduledjobs.service;
+package org.mifosplatform.infrastructure.jobs.service;
 
 import java.util.List;
 import java.util.TimeZone;
@@ -7,9 +7,9 @@ import javax.annotation.PostConstruct;
 
 import org.mifosplatform.infrastructure.core.domain.MifosPlatformTenant;
 import org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil;
+import org.mifosplatform.infrastructure.jobs.annotation.CronMethodParser;
+import org.mifosplatform.infrastructure.jobs.domain.ScheduledJobDetail;
 import org.mifosplatform.infrastructure.security.service.TenantDetailsService;
-import org.mifosplatform.scheduledjobs.annotation.CronMethodParser;
-import org.mifosplatform.scheduledjobs.domain.ScheduledJobDetails;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 import org.quartz.JobKey;
@@ -54,8 +54,8 @@ public class JobRegisterService {
         List<MifosPlatformTenant> allTenants = this.tenantDetailsService.findAllTenants();
         for (MifosPlatformTenant tenant : allTenants) {
             ThreadLocalContextUtil.setTenant(tenant);
-            List<ScheduledJobDetails> scheduledJobDetails = this.schedularService.getScheduledJobDetails();
-            for (ScheduledJobDetails jobDetails : scheduledJobDetails) {
+            List<ScheduledJobDetail> scheduledJobDetails = this.schedularService.getScheduledJobDetails();
+            for (ScheduledJobDetail jobDetails : scheduledJobDetails) {
                 if (jobDetails.isActiveSchedular()) {
                     scheduleJob(jobDetails);
                     this.schedularService.saveOrUpdate(jobDetails);
@@ -76,7 +76,7 @@ public class JobRegisterService {
 
     }
 
-    public void rescheduleJob(ScheduledJobDetails scheduledJobDetails) {
+    public void rescheduleJob(ScheduledJobDetail scheduledJobDetails) {
         try {
             String triggerIdentity = scheduledJobDetails.getTriggerKey();
             String[] triggerKeyIds = triggerIdentity.split(SchedularServiceConstants.TRIGGER_KEY_SEPERATOR);
@@ -95,7 +95,7 @@ public class JobRegisterService {
         }
     }
 
-    private void scheduleJob(ScheduledJobDetails scheduledJobDetails) {
+    private void scheduleJob(ScheduledJobDetail scheduledJobDetails) {
         try {
             JobDetail jobDetail = createJobDetail(scheduledJobDetails);
             Trigger trigger = createTrigger(scheduledJobDetails, jobDetail);
@@ -109,7 +109,7 @@ public class JobRegisterService {
         }
     }
 
-    private JobDetail createJobDetail(ScheduledJobDetails scheduledJobDetails) throws Exception {
+    private JobDetail createJobDetail(ScheduledJobDetail scheduledJobDetails) throws Exception {
         MifosPlatformTenant tenant = ThreadLocalContextUtil.getTenant();
         String[] jobDetails = CronMethodParser.findTargetMethodDetails(scheduledJobDetails.getJobName());
         String[] beanNames = this.applicationContext.getBeanNamesForType(Class.forName(jobDetails[CronMethodParser.CLASS_INDEX]));
@@ -134,7 +134,7 @@ public class JobRegisterService {
      * @param scheduledJobDetails
      * @return
      */
-    private Trigger createTrigger(ScheduledJobDetails scheduledJobDetails, JobDetail jobDetail) {
+    private Trigger createTrigger(ScheduledJobDetail scheduledJobDetails, JobDetail jobDetail) {
         MifosPlatformTenant tenant = ThreadLocalContextUtil.getTenant();
         CronTriggerFactoryBean cronTriggerFactoryBean = new CronTriggerFactoryBean();
         cronTriggerFactoryBean.setName(scheduledJobDetails.getJobName() + "Trigger-" + tenant.getId());

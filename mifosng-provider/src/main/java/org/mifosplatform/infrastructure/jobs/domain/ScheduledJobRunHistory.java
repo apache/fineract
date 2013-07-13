@@ -1,4 +1,4 @@
-package org.mifosplatform.scheduledjobs.domain;
+package org.mifosplatform.infrastructure.jobs.domain;
 
 import java.util.Date;
 
@@ -13,12 +13,12 @@ import javax.persistence.TemporalType;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
-@Table(name = "scheduled_job_runhistory")
+@Table(name = "job_run_history")
 public class ScheduledJobRunHistory extends AbstractPersistable<Long> {
 
     @ManyToOne
     @JoinColumn(name = "job_id")
-    private ScheduledJobDetails scheduledJobDetails;
+    private ScheduledJobDetail scheduledJobDetail;
 
     @Column(name = "version")
     private Long version;
@@ -34,22 +34,22 @@ public class ScheduledJobRunHistory extends AbstractPersistable<Long> {
     @Column(name = "status")
     private String status;
 
-    @Column(name = "errormessage")
+    @Column(name = "error_message")
     private String errorMessage;
 
-    @Column(name = "triggertype")
+    @Column(name = "trigger_type")
     private String triggerType;
 
-    @Column(name = "errorlog")
+    @Column(name = "error_log")
     private String errorLog;
 
     public ScheduledJobRunHistory() {
 
     }
 
-    public ScheduledJobRunHistory(final ScheduledJobDetails scheduledJobDetails, final Long version, final Date startTime,
+    public ScheduledJobRunHistory(final ScheduledJobDetail scheduledJobDetail, final Long version, final Date startTime,
             final Date endTime, final String status, final String errorMessage, final String triggerType, final String errorLog) {
-        this.scheduledJobDetails = scheduledJobDetails;
+        this.scheduledJobDetail = scheduledJobDetail;
         this.version = version;
         this.startTime = startTime;
         this.endTime = endTime;

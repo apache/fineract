@@ -1,4 +1,4 @@
-package org.mifosplatform.scheduledjobs.service;
+package org.mifosplatform.infrastructure.jobs.service;
 
 public interface SchedularServiceConstants {
 

@@ -1,4 +1,4 @@
-package org.mifosplatform.scheduledjobs.domain;
+package org.mifosplatform.infrastructure.jobs.domain;
 
 import java.util.Date;
 
@@ -11,13 +11,13 @@ import javax.persistence.TemporalType;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
-@Table(name = "scheduled_jobs")
-public class ScheduledJobDetails extends AbstractPersistable<Long> {
+@Table(name = "job")
+public class ScheduledJobDetail extends AbstractPersistable<Long> {
 
-    @Column(name = "job_name")
+    @Column(name = "name")
     private String jobName;
 
-    @Column(name = "job_display_name")
+    @Column(name = "display_name")
     private String jobDisplayName;
 
     @Column(name = "cron_expression")
@@ -44,17 +44,17 @@ public class ScheduledJobDetails extends AbstractPersistable<Long> {
     @Column(name = "trigger_key")
     private String triggerKey;
 
-    @Column(name = "job_initializing_errorlog")
+    @Column(name = "initializing_errorlog")
     private String errorLog;
 
     @Column(name = "is_active")
     private boolean activeSchedular;
 
-    public ScheduledJobDetails() {
+    public ScheduledJobDetail() {
 
     }
 
-    public ScheduledJobDetails(final String jobName, final String jobDisplayName, final String croneExpression, Date createTime,
+    public ScheduledJobDetail(final String jobName, final String jobDisplayName, final String croneExpression, Date createTime,
             final Short taskPriority, final String groupName, final Date previousRunStartTime, final Date nextRunTime,
             final String triggKey, final String errorLog, final boolean activeSchedular) {
         this.jobName = jobName;

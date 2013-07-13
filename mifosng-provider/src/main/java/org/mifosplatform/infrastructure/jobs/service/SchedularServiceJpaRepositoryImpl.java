@@ -1,11 +1,11 @@
-package org.mifosplatform.scheduledjobs.service;
+package org.mifosplatform.infrastructure.jobs.service;
 
 import java.util.List;
 
-import org.mifosplatform.scheduledjobs.domain.ScheduledJobDetails;
-import org.mifosplatform.scheduledjobs.domain.ScheduledJobDetailsRepository;
-import org.mifosplatform.scheduledjobs.domain.ScheduledJobRunHistory;
-import org.mifosplatform.scheduledjobs.domain.ScheduledJobRunHistoryRepository;
+import org.mifosplatform.infrastructure.jobs.domain.ScheduledJobDetail;
+import org.mifosplatform.infrastructure.jobs.domain.ScheduledJobDetailRepository;
+import org.mifosplatform.infrastructure.jobs.domain.ScheduledJobRunHistory;
+import org.mifosplatform.infrastructure.jobs.domain.ScheduledJobRunHistoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,36 +13,36 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class SchedularServiceJpaRepositoryImpl implements SchedularService {
 
-    private final ScheduledJobDetailsRepository scheduledJobDetailsRepository;
+    private final ScheduledJobDetailRepository scheduledJobDetailsRepository;
 
     private final ScheduledJobRunHistoryRepository scheduledJobRunHistoryRepository;
 
     @Autowired
-    public SchedularServiceJpaRepositoryImpl(final ScheduledJobDetailsRepository scheduledJobDetailsRepository,
+    public SchedularServiceJpaRepositoryImpl(final ScheduledJobDetailRepository scheduledJobDetailsRepository,
             final ScheduledJobRunHistoryRepository scheduledJobRunHistoryRepository) {
         this.scheduledJobDetailsRepository = scheduledJobDetailsRepository;
         this.scheduledJobRunHistoryRepository = scheduledJobRunHistoryRepository;
     }
 
     @Override
-    public List<ScheduledJobDetails> getScheduledJobDetails() {
+    public List<ScheduledJobDetail> getScheduledJobDetails() {
         return scheduledJobDetailsRepository.findAll();
     }
 
     @Override
-    public ScheduledJobDetails getByTriggerKey(final String triggerKey) {
+    public ScheduledJobDetail getByTriggerKey(final String triggerKey) {
         return scheduledJobDetailsRepository.findByTriggerKey(triggerKey);
     }
 
     @Transactional
     @Override
-    public void saveOrUpdate(final ScheduledJobDetails scheduledJobDetails) {
+    public void saveOrUpdate(final ScheduledJobDetail scheduledJobDetails) {
         this.scheduledJobDetailsRepository.save(scheduledJobDetails);
     }
 
     @Transactional
     @Override
-    public void saveOrUpdate(final ScheduledJobDetails scheduledJobDetails, final ScheduledJobRunHistory scheduledJobRunHistory) {
+    public void saveOrUpdate(final ScheduledJobDetail scheduledJobDetails, final ScheduledJobRunHistory scheduledJobRunHistory) {
         this.scheduledJobDetailsRepository.save(scheduledJobDetails);
         this.scheduledJobRunHistoryRepository.save(scheduledJobRunHistory);
     }
