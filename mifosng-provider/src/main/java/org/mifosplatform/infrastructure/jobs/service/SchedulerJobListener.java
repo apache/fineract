@@ -1,12 +1,12 @@
-package org.mifosplatform.scheduledjobs.service;
+package org.mifosplatform.infrastructure.jobs.service;
 
 import java.util.Date;
 
 import org.mifosplatform.infrastructure.core.domain.MifosPlatformTenant;
 import org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil;
+import org.mifosplatform.infrastructure.jobs.domain.ScheduledJobDetail;
+import org.mifosplatform.infrastructure.jobs.domain.ScheduledJobRunHistory;
 import org.mifosplatform.infrastructure.security.service.TenantDetailsService;
-import org.mifosplatform.scheduledjobs.domain.ScheduledJobDetails;
-import org.mifosplatform.scheduledjobs.domain.ScheduledJobRunHistory;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.quartz.JobListener;
@@ -60,7 +60,7 @@ public class SchedulerJobListener implements JobListener {
         Trigger trigger = context.getTrigger();
         TriggerKey key = trigger.getKey();
         String triggerKey = key.getName() + SchedularServiceConstants.TRIGGER_KEY_SEPERATOR + key.getGroup();
-        final ScheduledJobDetails scheduledJobDetails = schedularService.getByTriggerKey(triggerKey);
+        final ScheduledJobDetail scheduledJobDetails = schedularService.getByTriggerKey(triggerKey);
         Long version = schedularService.getMaxVersionBy(triggerKey) + 1;
         String status = SchedularServiceConstants.STATUS_SUCCESS;
         String errorMessage = null;

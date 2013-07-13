@@ -1,4 +1,4 @@
-package org.mifosplatform.scheduledjobs.annotation;
+package org.mifosplatform.infrastructure.jobs.annotation;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import org.mifosplatform.infrastructure.jobs.service.JobName;
 import org.springframework.core.env.StandardEnvironment;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
@@ -38,11 +39,11 @@ public class CronMethodParser {
 
     public static final int METHOD_INDEX = 1;
 
-    public static String[] findTargetMethodDetails(String attriuteValue) throws IOException {
-        if (!targetMethosMap.containsKey(attriuteValue)) {
-            findAnnotationMethods(CronTargetMethod.class, CRON_ANNOTATION_ATTRIBUTE_NAME);
+    public static String[] findTargetMethodDetails(String attributeValue) throws IOException {
+        if (!targetMethosMap.containsKey(attributeValue)) {
+            findAnnotationMethods(CronTarget.class, CRON_ANNOTATION_ATTRIBUTE_NAME);
         }
-        return targetMethosMap.get(attriuteValue);
+        return targetMethosMap.get(attributeValue);
     }
 
     /**
@@ -61,13 +62,20 @@ public class CronMethodParser {
                 if (metadataSet != null && metadataSet.size() > 0) {
                     for (MethodMetadata metadata : metadataSet) {
                         Map<String, Object> attributes = metadata.getAnnotationAttributes(annotationClass.getName());
-                        String attributeValue = (String) attributes.get(attributeName);
+                        JobName attributeValue = (JobName) attributes.get(attributeName);
                         String className = metadata.getDeclaringClassName();
-                        if (attributeValue == null || attributeValue.trim().length() < 1) {
-                            attributeValue = className.substring(className.lastIndexOf(".") + 1);
-                        }
+                        /**
+                         * TODO: Vishwas, have commented out this piece of code,
+                         * check its need with Pramod
+                         **/
+                        /**
+                         * if (attributeValue == null ||
+                         * attributeValue.trim().length() < 1) { attributeValue
+                         * = className.substring(className.lastIndexOf(".") +
+                         * 1); }
+                         **/
                         String[] mapVal = { className, metadata.getMethodName() };
-                        targetMethosMap.put(attributeValue, mapVal);
+                        targetMethosMap.put(attributeValue.toString(), mapVal);
                     }
                 }
             }

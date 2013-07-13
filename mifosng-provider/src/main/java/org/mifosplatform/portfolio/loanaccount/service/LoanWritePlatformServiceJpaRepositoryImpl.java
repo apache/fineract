@@ -21,6 +21,8 @@ import org.mifosplatform.infrastructure.configuration.domain.ConfigurationDomain
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
+import org.mifosplatform.infrastructure.jobs.annotation.CronTarget;
+import org.mifosplatform.infrastructure.jobs.service.JobName;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.holiday.domain.Holiday;
 import org.mifosplatform.organisation.holiday.domain.HolidayRepository;
@@ -75,7 +77,6 @@ import org.mifosplatform.portfolio.note.domain.Note;
 import org.mifosplatform.portfolio.note.domain.NoteRepository;
 import org.mifosplatform.portfolio.paymentdetail.domain.PaymentDetail;
 import org.mifosplatform.portfolio.paymentdetail.service.PaymentDetailWritePlatformService;
-import org.mifosplatform.scheduledjobs.annotation.CronTargetMethod;
 import org.mifosplatform.useradministration.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -113,8 +114,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             final JournalEntryWritePlatformService journalEntryWritePlatformService, final LoanSummaryWrapper loanSummaryWrapper,
             final LoanRepaymentScheduleTransactionProcessorFactory loanRepaymentScheduleTransactionProcessorFactory,
             final LoanScheduleGeneratorFactory loanScheduleFactory, final CalendarInstanceRepository calendarInstanceRepository,
-            final PaymentDetailWritePlatformService paymentDetailWritePlatformService,
-            final HolidayRepository holidayRepository, final ConfigurationDomainService configurationDomainService) {
+            final PaymentDetailWritePlatformService paymentDetailWritePlatformService, final HolidayRepository holidayRepository,
+            final ConfigurationDomainService configurationDomainService) {
         this.context = context;
         this.loanEventApiJsonValidator = loanEventApiJsonValidator;
         this.loanAssembler = loanAssembler;
@@ -149,15 +150,15 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         this.loanEventApiJsonValidator.validateDisbursement(command.json());
 
         final Loan loan = retrieveLoanBy(loanId);
-     // validate actual disbursement date against meeting date
+        // validate actual disbursement date against meeting date
         final CalendarInstance calendarInstance = this.calendarInstanceRepository.findCalendarInstaneByLoanId(loan.getId(),
                 CalendarEntityType.LOANS.getValue());
-        if(loan.isSyncDisbursementWithMeeting()){
-	        
+        if (loan.isSyncDisbursementWithMeeting()) {
+
             final LocalDate actualDisbursementDate = command.localDateValueOfParameterNamed("actualDisbursementDate");
-	        this.loanEventApiJsonValidator.validateDisbursementDateWithMeetingDate(actualDisbursementDate, calendarInstance);
+            this.loanEventApiJsonValidator.validateDisbursementDateWithMeetingDate(actualDisbursementDate, calendarInstance);
         }
-        
+
         final MonetaryCurrency currency = loan.getCurrency();
         final ApplicationCurrency applicationCurrency = this.applicationCurrencyRepository.findOneWithNotFoundDetection(currency);
 
@@ -168,12 +169,13 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         PaymentDetail paymentDetail = paymentDetailWritePlatformService.createAndPersistPaymentDetail(command, changes);
 
-        //Recalculate first repayment date based in actual disbursement date.
+        // Recalculate first repayment date based in actual disbursement date.
         final LocalDate actualDisbursementDate = command.localDateValueOfParameterNamed("actualDisbursementDate");
         final LocalDate firstRepaymentMeetingDate = getFirstRepaymentMeetingDate(actualDisbursementDate, loan, calendarInstance);
         final boolean isHolidayEnabled = this.configurationDomainService.isRescheduleRepaymentsOnHolidaysEnabled();
-        final List<Holiday> holidays = this.holidayRepository.findByOfficeIdAndGreaterThanDate(loan.getOfficeId(), actualDisbursementDate.toDate());
-        
+        final List<Holiday> holidays = this.holidayRepository.findByOfficeIdAndGreaterThanDate(loan.getOfficeId(),
+                actualDisbursementDate.toDate());
+
         updateLoanCounters(loan, actualDisbursementDate);
 
         loan.disburse(this.loanScheduleFactory, currentUser, command, applicationCurrency, existingTransactionIds,
@@ -202,39 +204,33 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 .build();
     }
 
-	private LocalDate getFirstRepaymentMeetingDate(
-			final LocalDate actualDisbursementDate, final Loan loan,
-			final CalendarInstance calendarInstance) {
-		final Calendar calendar = (calendarInstance == null) ? null
-				: calendarInstance.getCalendar();
-		LocalDate firstRepaymentMeetingDate = null;
-		if (calendar != null) {// sync repayments
+    private LocalDate getFirstRepaymentMeetingDate(final LocalDate actualDisbursementDate, final Loan loan,
+            final CalendarInstance calendarInstance) {
+        final Calendar calendar = (calendarInstance == null) ? null : calendarInstance.getCalendar();
+        LocalDate firstRepaymentMeetingDate = null;
+        if (calendar != null) {// sync repayments
 
-			// TODO: AA - user provided first repayment date takes precedence over recalculated meeting date 
-			if (loan.getExpectedFirstRepaymentOnDate() == null) {
-				// FIXME: AA - Possibility of having next meeting date
-				// immediately after disbursement date,
-				// need to have minimum number of days gap between disbursement
-				// and first repayment date.
-				final LoanProductRelatedDetail repaymentScheduleDetails = loan
-						.repaymentScheduleDetail();
-				if (repaymentScheduleDetails != null) {// Not expecting to be
-														// null
-					final Integer repayEvery = repaymentScheduleDetails
-							.getRepayEvery();
-					final String frequency = CalendarHelper
-							.getMeetingFrequencyFromPeriodFrequencyType(repaymentScheduleDetails
-									.getRepaymentPeriodFrequencyType());
-					firstRepaymentMeetingDate = CalendarHelper
-							.getFirstRepaymentMeetingDate(calendar,
-									actualDisbursementDate, repayEvery,
-									frequency);
-				}
-			}
-		}
-		return firstRepaymentMeetingDate;
-	}
-    
+            // TODO: AA - user provided first repayment date takes precedence
+            // over recalculated meeting date
+            if (loan.getExpectedFirstRepaymentOnDate() == null) {
+                // FIXME: AA - Possibility of having next meeting date
+                // immediately after disbursement date,
+                // need to have minimum number of days gap between disbursement
+                // and first repayment date.
+                final LoanProductRelatedDetail repaymentScheduleDetails = loan.repaymentScheduleDetail();
+                if (repaymentScheduleDetails != null) {// Not expecting to be
+                                                       // null
+                    final Integer repayEvery = repaymentScheduleDetails.getRepayEvery();
+                    final String frequency = CalendarHelper.getMeetingFrequencyFromPeriodFrequencyType(repaymentScheduleDetails
+                            .getRepaymentPeriodFrequencyType());
+                    firstRepaymentMeetingDate = CalendarHelper.getFirstRepaymentMeetingDate(calendar, actualDisbursementDate, repayEvery,
+                            frequency);
+                }
+            }
+        }
+        return firstRepaymentMeetingDate;
+    }
+
     /****
      * TODO Vishwas: Pair with Ashok and re-factor collection sheet code-base
      *****/
@@ -259,9 +255,12 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
             PaymentDetail paymentDetail = paymentDetailWritePlatformService.createAndPersistPaymentDetail(command, changes);
 
-            // Bulk disbursement should happen on meeting date (mostly from collection sheet).
-            //FIXME: AA - this should be first meeting date based on disbursement date and next available meeting dates
-            //assuming repayment schedule won't regenerate because expected disbursement and actual disbursement happens on same date
+            // Bulk disbursement should happen on meeting date (mostly from
+            // collection sheet).
+            // FIXME: AA - this should be first meeting date based on
+            // disbursement date and next available meeting dates
+            // assuming repayment schedule won't regenerate because expected
+            // disbursement and actual disbursement happens on same date
             final LocalDate firstRepaymentOnDate = null;
             final boolean isHolidayEnabled = false;
             final List<Holiday> holidays = null;
@@ -358,15 +357,20 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     private CommandProcessingResultBuilder saveLoanRepayment(final Long loanId, final PaymentDetail paymentDetail,
             final BigDecimal transactionAmount, final LocalDate transactionDate, final String noteText) {
         final Loan loan = retrieveLoanBy(loanId);
-        
-        //TODO: Is it required to validate transaction date with meeting dates if repayments is synced with meeting?
-        /*if(loan.isSyncDisbursementWithMeeting()){
-	        // validate actual disbursement date against meeting date
-	        CalendarInstance calendarInstance = this.calendarInstanceRepository.findCalendarInstaneByLoanId(loan.getId(),
-	                CalendarEntityType.LOANS.getValue());
-	        this.loanEventApiJsonValidator.validateRepaymentDateWithMeetingDate(transactionDate, calendarInstance);
-        }*/
-        
+
+        // TODO: Is it required to validate transaction date with meeting dates
+        // if repayments is synced with meeting?
+        /*
+         * if(loan.isSyncDisbursementWithMeeting()){ // validate actual
+         * disbursement date against meeting date CalendarInstance
+         * calendarInstance =
+         * this.calendarInstanceRepository.findCalendarInstaneByLoanId
+         * (loan.getId(), CalendarEntityType.LOANS.getValue());
+         * this.loanEventApiJsonValidator
+         * .validateRepaymentDateWithMeetingDate(transactionDate,
+         * calendarInstance); }
+         */
+
         final List<Long> existingTransactionIds = new ArrayList<Long>();
         final List<Long> existingReversedTransactionIds = new ArrayList<Long>();
 
@@ -1008,29 +1012,30 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     @Transactional
     @Override
     public void updateRepaymentsSchedule(final Calendar calendar, Collection<CalendarInstance> loanCalendarInstances) {
-        
+
         final boolean isHolidayEnabled = this.configurationDomainService.isRescheduleRepaymentsOnHolidaysEnabled();
         final Collection<Integer> loanStatuses = new ArrayList<Integer>(Arrays.asList(LoanStatus.SUBMITTED_AND_PENDING_APPROVAL.getValue(),
                 LoanStatus.APPROVED.getValue(), LoanStatus.ACTIVE.getValue()));
         final Collection<Integer> loanTypes = new ArrayList<Integer>(Arrays.asList(LoanType.GROUP.getValue(), LoanType.JLG.getValue()));
         final Collection<Long> loanIds = new ArrayList<Long>(loanCalendarInstances.size());
-        //loop through loanCalendarInstances to get loan ids
+        // loop through loanCalendarInstances to get loan ids
         for (CalendarInstance calendarInstance : loanCalendarInstances) {
             loanIds.add(calendarInstance.getEntityId());
         }
-        
+
         final List<Loan> loans = this.loanRepository.findByIdsAndLoanStatusAndLoanType(loanIds, loanStatuses, loanTypes);
         List<Holiday> holidays = null;
-        //loop through each loan to reschedule the repayment dates
+        // loop through each loan to reschedule the repayment dates
         for (Loan loan : loans) {
-            if(loan != null){
+            if (loan != null) {
                 holidays = this.holidayRepository.findByOfficeIdAndGreaterThanDate(loan.getOfficeId(), loan.getDisbursementDate().toDate());
-                loan.updateLoanRepaymentScheduleDates(calendar.getStartDateLocalDate(), calendar.getRecurrence(), isHolidayEnabled, holidays);
+                loan.updateLoanRepaymentScheduleDates(calendar.getStartDateLocalDate(), calendar.getRecurrence(), isHolidayEnabled,
+                        holidays);
                 this.loanRepository.save(loan);
             }
         }
     }
-    
+
     private void removeLoanCycle(final Loan loan) {
         final List<Loan> loansToUpdate;
         if (loan.isGroupLoan()) {
@@ -1059,7 +1064,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         loan.updateLoanProductLoanCounter(null);
 
     }
-    
+
     private void updateLoanCounters(final Loan loan, final LocalDate actualDisbursementDate) {
 
         if (loan.isGroupLoan()) {
@@ -1105,7 +1110,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         final boolean includeInBorrowerCycle = loan.loanProduct().isIncludeInBorrowerCycle();
         for (final Loan loanToUpdate : loansToUpdateForLoanCounter) {
-            //Update client loan counter if loan product includeInBorrowerCycle is true
+            // Update client loan counter if loan product includeInBorrowerCycle
+            // is true
             if (includeInBorrowerCycle) {
                 Integer currentLoanCounter = loanToUpdate.getCurrentLoanCounter();
                 if (newLoanCounter > currentLoanCounter) {
@@ -1154,7 +1160,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         }
         return maxLoanProductLoanCounter;
     }
-    
+
     private void updateLoanCycleCounter(final List<Loan> loansToUpdate, final Loan loan) {
 
         final Integer currentLoancounter = loan.getCurrentLoanCounter();
@@ -1176,11 +1182,11 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         }
         this.loanRepository.save(loansToUpdate);
     }
-    
+
     @Transactional
     @Override
-    @CronTargetMethod(jobName="Apply Holidays To Loans")
-    public void applyHolidaysToLoans() {        
+    @CronTarget(jobName = JobName.APPLY_HOLIDAYS_TO_LOANS)
+    public void applyHolidaysToLoans() {
 
         final Collection<Integer> loanStatuses = new ArrayList<Integer>(Arrays.asList(LoanStatus.SUBMITTED_AND_PENDING_APPROVAL.getValue(),
                 LoanStatus.APPROVED.getValue(), LoanStatus.ACTIVE.getValue()));
@@ -1198,10 +1204,11 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
             // get all loans
             List<Loan> loans = new ArrayList<Loan>();
-            //get all individual and jlg loans
+            // get all individual and jlg loans
             loans.addAll(this.loanRepository.findByClientOfficeIdsAndLoanStatus(officeIds, loanStatuses));
-            //FIXME: optimize to get all client and group loans belongs to a office id
-            //get all group loans
+            // FIXME: optimize to get all client and group loans belongs to a
+            // office id
+            // get all group loans
             loans.addAll(this.loanRepository.findByGroupOfficeIdsAndLoanStatus(officeIds, loanStatuses));
 
             for (Loan loan : loans) {
@@ -1210,7 +1217,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             }
             this.loanRepository.save(loans);
             holiday.processed();
-        }        
+        }
         this.holidayRepository.save(holidays);
     }
 }
