@@ -22,30 +22,29 @@ public class JournalEntryHelper {
         this.responseSpec = responseSpec;
     }
 
-    public  void checkJournalEntryForExpenseAccount(final Account expenseAccount, final String date, final JournalEntry accountEntries) {
-       checkJournalEntry(expenseAccount, Utils.convertDateToURLFormat(date),accountEntries);
+    public void checkJournalEntryForExpenseAccount(final Account expenseAccount, final String date, final JournalEntry accountEntries) {
+        checkJournalEntry(expenseAccount, date, accountEntries);
     }
 
-
-    public  void checkJournalEntryForAssetAccount(final Account assetAccount, final String date, final JournalEntry... accountEntries) {
-         checkJournalEntry(assetAccount,Utils.convertDateToURLFormat(date),accountEntries);
+    public void checkJournalEntryForAssetAccount(final Account assetAccount, final String date, final JournalEntry... accountEntries) {
+        checkJournalEntry(assetAccount, date, accountEntries);
     }
 
     public void checkJournalEntryForIncomeAccount(final Account incomeAccount, final String date, final JournalEntry accountEntries) {
-         checkJournalEntry(incomeAccount, Utils.convertDateToURLFormat(date), accountEntries);
+        checkJournalEntry(incomeAccount, date, accountEntries);
     }
 
-    private  String getEntryValueFromJournalEntry(final ArrayList<HashMap> entryResponse, final int entryNumber) {
+    private String getEntryValueFromJournalEntry(final ArrayList<HashMap> entryResponse, final int entryNumber) {
         HashMap map = (HashMap) entryResponse.get(entryNumber).get("entryType");
         return (String) map.get("value");
     }
 
-    private  Float getTransactionAmountFromJournalEntry(final ArrayList<HashMap> entryResponse, final int entryNumber) {
+    private Float getTransactionAmountFromJournalEntry(final ArrayList<HashMap> entryResponse, final int entryNumber) {
         return (Float) entryResponse.get(entryNumber).get("amount");
     }
 
-    private void checkJournalEntry(final Account account, final String date, final JournalEntry... accountEntries){
-        String url = createURLForGettingAccountEntries(account,date);
+    private void checkJournalEntry(final Account account, final String date, final JournalEntry... accountEntries) {
+        String url = createURLForGettingAccountEntries(account, date);
         ArrayList<HashMap> response = Utils.performServerGet(requestSpec, responseSpec, url, "pageItems");
         for (int i = 0; i < accountEntries.length; i++) {
             assertThat(getEntryValueFromJournalEntry(response, i), equalTo(accountEntries[i].getTransactionType()));
@@ -53,9 +52,10 @@ public class JournalEntryHelper {
         }
     }
 
-    private String createURLForGettingAccountEntries (final Account account,final String date){
-        return new String ("/mifosng-provider/api/v1/journalentries?glAccountId=" + account.getAccountID() + "&type=" +account.getAccountType()
-                            + "&fromDate=" + date + "&toDate=" + date + "&tenantIdentifier=default"+"&orderBy=id&sortOrder=desc");
+    private String createURLForGettingAccountEntries(final Account account, final String date) {
+        return new String("/mifosng-provider/api/v1/journalentries?glAccountId=" + account.getAccountID() + "&type="
+                + account.getAccountType() + "&fromDate=" + date + "&toDate=" + date + "&tenantIdentifier=default"
+                + "&orderBy=id&sortOrder=desc&locale=en&dateFormat=dd MMMM yyyy");
     }
 
 }
