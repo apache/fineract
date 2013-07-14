@@ -53,6 +53,7 @@ final public class ClientData implements Comparable<ClientData> {
     // template
     private final Collection<OfficeData> officeOptions;
     private final Collection<StaffData> staffOptions;
+    @SuppressWarnings("unused")
     private final Collection<CodeValueData> closureReasons;
     
     public static ClientData template(final Long officeId, final LocalDate joinedDate, final Collection<OfficeData> officeOptions, 
