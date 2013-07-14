@@ -5,6 +5,7 @@ See VERSIONING (https://github.com/openMF/mifosx/blob/master/VERSIONING.md) for 
 
 Releases
 ===============
+1. 14 July 2013 - 1.5.0.RELEASE
 1. 25 Jun 2013 - 1.4.1.RELEASE
 1. 20 Jun 2013 - 1.4.0.RELEASE
 1. 10 Jun 2013 - 1.3.0.RELEASE
@@ -24,6 +25,55 @@ Releases
 1. 10 April 2013 - 0.11.2.beta
 1. 05 April 2013 - 0.11.1.beta
 1. 05 April 2013 - 0.11.0.beta
+
+
+1.5.0.RELEASE
+=============
+Feature (and Bug) Release
+
+This feature (and bug) release focussed on adding support for Holidays and various improvements and bug fixes for Group Functionality
+
+Platform & API
+
+Bug 
+ - [MIFOSX-443] - Additional data tables added to groups are appearing for Centers
+ - [MIFOSX-471] - Group activation is accepting dates prior to office opening
+ - [MIFOSX-491] - In data table, if string length is more than the defined length, no error message is displayed
+ - [MIFOSX-493] - For groups, in "Change Loan Application" page not able to modify the "Product" (ie modified product details not getting updated/saved)
+ - [MIFOSX-494] - If any changes are made in "Change loan application" (For group loan), the loan cannot be approve (multiple pages popup for single click on "Approve" tab.)
+ - [MIFOSX-498] - Searched "Center" is behaving as Group entity
+ - [MIFOSX-516] - No/Incorrect error messages on "Register Data Table" screens
+ - [MIFOSX-519] - In "add code" page if already existing Code name is entered in the field, no proper error message is displaying
+ - [MIFOSX-521] - Not able to disburse the Group Loan
+ - [MIFOSX-522] - In add new group form if activation date field is empty, showing connection failure on the UI.
+ - [MIFOSX-525] - Not able to select an existing client as Guarantor
+ - [MIFOSX-526] - Issues with fields in Add Guarantors Page
+ - [MIFOSX-527] - In "New loan application" / "Change loan application" not able to add Collaterals
+ - [MIFOSX-528] - For a loan, same guarantor can be associated more than once.
+ - [MIFOSX-529] - For the loan under "Pending Approval" stage not able to edit or delete (already added) collaterals.
+ - [MIFOSX-531] - Able to approve loans for a Closed client. (ie, client got closed after submitting "new loan application")
+ - [MIFOSX-533] - Able to associate closed clients with Groups
+ - [MIFOSX-534] - In Client's page not able to assign staff from parent office
+ - [MIFOSX-536] - Client search doesn't work at all at present and should support not only account no but also search by any part of client name
+
+New Features & Improvements
+ - [MIFOSX-76]  - Support for Holidays
+ - [MIFOSX-438] - Allow closing of clients
+ - [MIFOSX-486] - Show loanofficers at higher hierarchical level in client product template
+ - [MIFOSX-518] - Capture "Repayments rescheduled to" date for a holiday and add processed field
+ - [MIFOSX-212] - loan cycle concept for loans
+ - [MIFOSX-499] - Inactivate a loan Product
+ - [MIFOSX-537] - Ability to display "Note" related to client in Client's page and "note" related to Loan in Loan's page
+ - [MIFOSX-475] - Regenerate loan repayment dates if group meeting frequency is changed
+ - [MIFOSX-361] - Inconsistent "From Date" and "To Date" formats in View Journal Entry Screens
+ - [MIFOSX-362] - Date format is not similar In Balance Sheet as in other pages.
+ 
+Reference App
+ - [MIFOSX-535] - Client details screen centers on screen when there are many notes - it should align to top
+ - [MIFOSX-309] - Move Global Search to end of the Header
+ - [MIFOSX-530] - Connection fail message is displayed by clicking on delete button in Add/Edit code value page
+ - [MIFOSX-483] - Support wizard view for Loan Product creation
+ - [MIFOSX-476] - Group permissons (in portfolio grouping) makes reference UI grotesque
 
 1.4.1.RELEASE
 =============
