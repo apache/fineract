@@ -179,6 +179,10 @@ public final class Group extends AbstractPersistable<Long> {
         this.status = GroupingTypeStatus.ACTIVE.getValue();
     }
 
+    public boolean isActivatedAfter(final LocalDate submittedOn) {
+        return getActivationLocalDate().isAfter(submittedOn);
+    }
+
     public boolean isNotActive() {
         return !isActive();
     }

@@ -5,7 +5,7 @@
  */
 package org.mifosplatform.portfolio.client.data;
 
-import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.activationDateParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.activationDateParamName;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;

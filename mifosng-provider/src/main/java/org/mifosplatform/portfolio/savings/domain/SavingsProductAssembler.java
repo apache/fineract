@@ -5,22 +5,22 @@
  */
 package org.mifosplatform.portfolio.savings.domain;
 
-import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.annualFeeAmountParamName;
-import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.annualFeeOnMonthDayParamName;
-import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.currencyCodeParamName;
-import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.descriptionParamName;
-import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.digitsAfterDecimalParamName;
-import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.interestCalculationDaysInYearTypeParamName;
-import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.interestCalculationTypeParamName;
-import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.interestCompoundingPeriodTypeParamName;
-import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.interestPostingPeriodTypeParamName;
-import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.lockinPeriodFrequencyParamName;
-import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.lockinPeriodFrequencyTypeParamName;
-import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.minRequiredOpeningBalanceParamName;
-import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.nameParamName;
-import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.nominalAnnualInterestRateParamName;
-import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.withdrawalFeeAmountParamName;
-import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.withdrawalFeeTypeParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.annualFeeAmountParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.annualFeeOnMonthDayParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.currencyCodeParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.descriptionParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.digitsAfterDecimalParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.interestCalculationDaysInYearTypeParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.interestCalculationTypeParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.interestCompoundingPeriodTypeParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.interestPostingPeriodTypeParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.lockinPeriodFrequencyParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.lockinPeriodFrequencyTypeParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.minRequiredOpeningBalanceParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.nameParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.nominalAnnualInterestRateParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.withdrawalFeeAmountParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.withdrawalFeeTypeParamName;
 
 import java.math.BigDecimal;
 
@@ -28,6 +28,12 @@ import org.joda.time.MonthDay;
 import org.mifosplatform.accounting.common.AccountingRuleType;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
+import org.mifosplatform.portfolio.savings.SavingsCompoundingInterestPeriodType;
+import org.mifosplatform.portfolio.savings.SavingsInterestCalculationDaysInYearType;
+import org.mifosplatform.portfolio.savings.SavingsInterestCalculationType;
+import org.mifosplatform.portfolio.savings.SavingsPeriodFrequencyType;
+import org.mifosplatform.portfolio.savings.SavingsPostingInterestPeriodType;
+import org.mifosplatform.portfolio.savings.SavingsWithdrawalFeesType;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -50,10 +56,10 @@ public class SavingsProductAssembler {
             interestCompoundingPeriodType = SavingsCompoundingInterestPeriodType.fromInt(interestPeriodTypeValue);
         }
 
-        SavingsInterestPostingPeriodType interestPostingPeriodType = null;
+        SavingsPostingInterestPeriodType interestPostingPeriodType = null;
         final Integer interestPostingPeriodTypeValue = command.integerValueOfParameterNamed(interestPostingPeriodTypeParamName);
         if (interestPostingPeriodTypeValue != null) {
-            interestPostingPeriodType = SavingsInterestPostingPeriodType.fromInt(interestPostingPeriodTypeValue);
+            interestPostingPeriodType = SavingsPostingInterestPeriodType.fromInt(interestPostingPeriodTypeValue);
         }
 
         SavingsInterestCalculationType interestCalculationType = null;
@@ -69,23 +75,24 @@ public class SavingsProductAssembler {
             interestCalculationDaysInYearType = SavingsInterestCalculationDaysInYearType.fromInt(interestCalculationDaysInYearTypeValue);
         }
 
-        final BigDecimal minRequiredOpeningBalance = command.bigDecimalValueOfParameterNamed(minRequiredOpeningBalanceParamName);
+        final BigDecimal minRequiredOpeningBalance = command
+                .bigDecimalValueOfParameterNamedDefaultToNullIfZero(minRequiredOpeningBalanceParamName);
 
-        final Integer lockinPeriodFrequency = command.integerValueOfParameterNamed(lockinPeriodFrequencyParamName);
+        final Integer lockinPeriodFrequency = command.integerValueOfParameterNamedDefaultToNullIfZero(lockinPeriodFrequencyParamName);
         SavingsPeriodFrequencyType lockinPeriodFrequencyType = null;
         final Integer lockinPeriodFrequencyTypeValue = command.integerValueOfParameterNamed(lockinPeriodFrequencyTypeParamName);
         if (lockinPeriodFrequencyTypeValue != null) {
             lockinPeriodFrequencyType = SavingsPeriodFrequencyType.fromInt(lockinPeriodFrequencyTypeValue);
         }
 
-        final BigDecimal withdrawalFeeAmount = command.bigDecimalValueOfParameterNamed(withdrawalFeeAmountParamName);
+        final BigDecimal withdrawalFeeAmount = command.bigDecimalValueOfParameterNamedDefaultToNullIfZero(withdrawalFeeAmountParamName);
         SavingsWithdrawalFeesType withdrawalFeeType = null;
         final Integer withdrawalFeeTypeValue = command.integerValueOfParameterNamed(withdrawalFeeTypeParamName);
         if (withdrawalFeeTypeValue != null) {
             withdrawalFeeType = SavingsWithdrawalFeesType.fromInt(withdrawalFeeTypeValue);
         }
 
-        final BigDecimal annualFeeAmount = command.bigDecimalValueOfParameterNamed(annualFeeAmountParamName);
+        final BigDecimal annualFeeAmount = command.bigDecimalValueOfParameterNamedDefaultToNullIfZero(annualFeeAmountParamName);
         final MonthDay monthDayOfAnnualFee = command.extractMonthDayNamed(annualFeeOnMonthDayParamName);
         final AccountingRuleType accountingRuleType = AccountingRuleType.fromInt(command.integerValueOfParameterNamed("accountingRule"));
 

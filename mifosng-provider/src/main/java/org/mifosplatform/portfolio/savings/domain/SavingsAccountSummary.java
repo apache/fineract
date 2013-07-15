@@ -13,6 +13,7 @@ import javax.persistence.Embeddable;
 
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.organisation.monetary.domain.Money;
+import org.mifosplatform.portfolio.savings.domain.interest.PostingPeriod;
 
 /**
  * {@link SavingsAccountSummary} encapsulates all the summary details of a
@@ -60,19 +61,15 @@ public final class SavingsAccountSummary {
                 .minus(this.totalWithdrawalFees).minus(this.totalAnnualFees).getAmount();
     }
 
-    public void updateFromInterestPeriodSummaries(final MonetaryCurrency currency,
-            final List<InterestCompoundingPeriodSummary> compoundingPeriods) {
+    public void updateFromInterestPeriodSummaries(final MonetaryCurrency currency, final List<PostingPeriod> allPostingPeriods) {
 
-        // get the max compounded interest
-        final BigDecimal compoundedInterestToDate = compoundingPeriods.get(compoundingPeriods.size() - 1).compoundedInterest();
-        final Money maxIntrestCompoundedToDate = Money.of(currency, compoundedInterestToDate);
+        Money totalEarned = Money.zero(currency);
 
-        BigDecimal totalInterestUnrounded = BigDecimal.ZERO;
-        for (InterestCompoundingPeriodSummary interestPeriodSummary : compoundingPeriods) {
-            totalInterestUnrounded = totalInterestUnrounded.add(interestPeriodSummary.interestUnrounded());
+        for (PostingPeriod period : allPostingPeriods) {
+            totalEarned = totalEarned.plus(period.interest());
         }
 
-        this.totalInterestEarned = maxIntrestCompoundedToDate.getAmountDefaultedToNullIfZero();
+        this.totalInterestEarned = totalEarned.getAmount();
     }
 
     public boolean isLessThanOrEqualToAccountBalance(final Money amount) {

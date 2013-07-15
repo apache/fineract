@@ -415,48 +415,28 @@ public class CommandWrapper {
         return isUserResource() && isUpdate() && loggedInUserId.equals(this.entityId);
     }
 
-    public boolean isDepositProductResource() {
-        return this.entityName.equalsIgnoreCase("DEPOSITPRODUCT");
-    }
-
-    public boolean isDepositAccountResource() {
-        return this.entityName.equalsIgnoreCase("DEPOSITACCOUNT");
-    }
-
-    public boolean isApprovalOfDeposit() {
-        return this.actionName.equalsIgnoreCase("APPROVE") && this.entityName.equalsIgnoreCase("DEPOSITACCOUNT");
-    }
-
-    public boolean isWithdrawDepositAmount() {
-        return this.actionName.equalsIgnoreCase("WITHDRAWAL") && this.entityName.equalsIgnoreCase("DEPOSITACCOUNT");
-    }
-
-    public boolean isWithdrawInterest() {
-        return this.actionName.equalsIgnoreCase("INTEREST") && this.entityName.equalsIgnoreCase("DEPOSITACCOUNT");
-    }
-
-    public boolean isRenewOfDepositApplicaion() {
-        return this.actionName.equalsIgnoreCase("RENEW") && this.entityName.equalsIgnoreCase("DEPOSITACCOUNT");
-    }
-
-    public boolean isRejectionOfDepositApplicaion() {
-        return this.actionName.equalsIgnoreCase("REJECT") && this.entityName.equalsIgnoreCase("DEPOSITACCOUNT");
-    }
-
-    public boolean isWithdrawByApplicant() {
-        return this.actionName.equalsIgnoreCase("WITHDRAW") && this.entityName.equalsIgnoreCase("DEPOSITACCOUNT");
-    }
-
-    public boolean isUndoApprovalOfDepositApplication() {
-        return this.actionName.equalsIgnoreCase("APPROVALUNDO") && this.entityName.equalsIgnoreCase("DEPOSITACCOUNT");
-    }
-
     public boolean isSavingsProductResource() {
         return this.entityName.equalsIgnoreCase("SAVINGSPRODUCT");
     }
 
     public boolean isSavingsAccountResource() {
         return this.entityName.equalsIgnoreCase("SAVINGSACCOUNT");
+    }
+
+    public boolean isRejectionOfSavingsAccountApplication() {
+        return this.actionName.equalsIgnoreCase("REJECT") && this.entityName.equalsIgnoreCase("SAVINGSACCOUNT");
+    }
+
+    public boolean isWithdrawFromSavingsAccountApplicationByApplicant() {
+        return this.actionName.equalsIgnoreCase("WITHDRAW") && this.entityName.equalsIgnoreCase("SAVINGSACCOUNT");
+    }
+
+    public boolean isApprovalOfSavingsAccountApplication() {
+        return this.actionName.equalsIgnoreCase("APPROVE") && this.entityName.equalsIgnoreCase("SAVINGSACCOUNT");
+    }
+
+    public boolean isUndoApprovalOfSavingsAccountApplication() {
+        return this.actionName.equalsIgnoreCase("APPROVALUNDO") && this.entityName.equalsIgnoreCase("SAVINGSACCOUNT");
     }
 
     public boolean isSavingsAccountActivation() {

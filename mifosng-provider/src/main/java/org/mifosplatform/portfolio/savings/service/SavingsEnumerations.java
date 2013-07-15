@@ -6,16 +6,16 @@
 package org.mifosplatform.portfolio.savings.service;
 
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
+import org.mifosplatform.portfolio.savings.SavingsAccountTransactionType;
+import org.mifosplatform.portfolio.savings.SavingsCompoundingInterestPeriodType;
+import org.mifosplatform.portfolio.savings.SavingsInterestCalculationDaysInYearType;
+import org.mifosplatform.portfolio.savings.SavingsInterestCalculationType;
+import org.mifosplatform.portfolio.savings.SavingsPeriodFrequencyType;
+import org.mifosplatform.portfolio.savings.SavingsPostingInterestPeriodType;
+import org.mifosplatform.portfolio.savings.SavingsWithdrawalFeesType;
 import org.mifosplatform.portfolio.savings.data.SavingsAccountStatusEnumData;
 import org.mifosplatform.portfolio.savings.data.SavingsAccountTransactionEnumData;
 import org.mifosplatform.portfolio.savings.domain.SavingsAccountStatusType;
-import org.mifosplatform.portfolio.savings.domain.SavingsAccountTransactionType;
-import org.mifosplatform.portfolio.savings.domain.SavingsCompoundingInterestPeriodType;
-import org.mifosplatform.portfolio.savings.domain.SavingsInterestCalculationDaysInYearType;
-import org.mifosplatform.portfolio.savings.domain.SavingsInterestCalculationType;
-import org.mifosplatform.portfolio.savings.domain.SavingsInterestPostingPeriodType;
-import org.mifosplatform.portfolio.savings.domain.SavingsPeriodFrequencyType;
-import org.mifosplatform.portfolio.savings.domain.SavingsWithdrawalFeesType;
 
 public class SavingsEnumerations {
 
@@ -94,59 +94,81 @@ public class SavingsEnumerations {
 
     public static SavingsAccountStatusEnumData status(final SavingsAccountStatusType type) {
 
+        final boolean submittedAndPendingApproval = type.isSubmittedAndPendingApproval();
+        final boolean isApproved = type.isApproved();
+        final boolean isRejected = type.isRejected();
+        final boolean isWithdrawnByApplicant = type.isApplicationWithdrawnByApplicant();
+        final boolean isActive = type.isActive();
+        final boolean isClosed = type.isClosed();
+
         SavingsAccountStatusEnumData optionData = new SavingsAccountStatusEnumData(SavingsAccountStatusType.INVALID.getValue().longValue(),
-                SavingsAccountStatusType.INVALID.getCode(), "Invalid", false, false, false);
+                SavingsAccountStatusType.INVALID.getCode(), "Invalid", submittedAndPendingApproval, isApproved, isRejected,
+                isWithdrawnByApplicant, isActive, isClosed);
 
         switch (type) {
             case INVALID:
                 optionData = new SavingsAccountStatusEnumData(SavingsAccountStatusType.INVALID.getValue().longValue(),
-                        SavingsAccountStatusType.INVALID.getCode(), "Invalid", type.isUnactivated(), type.isActive(), type.isClosed());
+                        SavingsAccountStatusType.INVALID.getCode(), "Invalid", submittedAndPendingApproval, isApproved, isRejected,
+                        isWithdrawnByApplicant, isActive, isClosed);
             break;
-            case UNACTIVATED:
-                optionData = new SavingsAccountStatusEnumData(SavingsAccountStatusType.UNACTIVATED.getValue().longValue(),
-                        SavingsAccountStatusType.UNACTIVATED.getCode(), "Unactivated", type.isUnactivated(), type.isActive(),
-                        type.isClosed());
+            case SUBMITTED_AND_PENDING_APPROVAL:
+                optionData = new SavingsAccountStatusEnumData(SavingsAccountStatusType.SUBMITTED_AND_PENDING_APPROVAL.getValue()
+                        .longValue(), SavingsAccountStatusType.SUBMITTED_AND_PENDING_APPROVAL.getCode(), "Submitted and pending approval",
+                        submittedAndPendingApproval, isApproved, isRejected, isWithdrawnByApplicant, isActive, isClosed);
+            break;
+            case REJECTED:
+                optionData = new SavingsAccountStatusEnumData(SavingsAccountStatusType.REJECTED.getValue().longValue(),
+                        SavingsAccountStatusType.REJECTED.getCode(), "Rejected", submittedAndPendingApproval, isApproved, isRejected,
+                        isWithdrawnByApplicant, isActive, isClosed);
+            break;
+            case WITHDRAWN_BY_APPLICANT:
+                optionData = new SavingsAccountStatusEnumData(SavingsAccountStatusType.WITHDRAWN_BY_APPLICANT.getValue().longValue(),
+                        SavingsAccountStatusType.WITHDRAWN_BY_APPLICANT.getCode(), "Withdrawn by applicant", submittedAndPendingApproval,
+                        isApproved, isRejected, isWithdrawnByApplicant, isActive, isClosed);
+            break;
+            case APPROVED:
+                optionData = new SavingsAccountStatusEnumData(SavingsAccountStatusType.APPROVED.getValue().longValue(),
+                        SavingsAccountStatusType.APPROVED.getCode(), "Approved", submittedAndPendingApproval, isApproved, isRejected,
+                        isWithdrawnByApplicant, isActive, isClosed);
             break;
             case ACTIVE:
                 optionData = new SavingsAccountStatusEnumData(SavingsAccountStatusType.ACTIVE.getValue().longValue(),
-                        SavingsAccountStatusType.ACTIVE.getCode(), "Active", type.isUnactivated(), type.isActive(), type.isClosed());
+                        SavingsAccountStatusType.ACTIVE.getCode(), "Active", submittedAndPendingApproval, isApproved, isRejected,
+                        isWithdrawnByApplicant, isActive, isClosed);
             break;
             case CLOSED:
                 optionData = new SavingsAccountStatusEnumData(SavingsAccountStatusType.CLOSED.getValue().longValue(),
-                        SavingsAccountStatusType.CLOSED.getCode(), "Closed", type.isUnactivated(), type.isActive(), type.isClosed());
+                        SavingsAccountStatusType.CLOSED.getCode(), "Closed", submittedAndPendingApproval, isApproved, isRejected,
+                        isWithdrawnByApplicant, isActive, isClosed);
             break;
         }
         return optionData;
     }
 
     public static EnumOptionData interestPostingPeriodType(final Integer type) {
-        return interestPostingPeriodType(SavingsInterestPostingPeriodType.fromInt(type));
+        return interestPostingPeriodType(SavingsPostingInterestPeriodType.fromInt(type));
     }
 
-    public static EnumOptionData interestPostingPeriodType(final SavingsInterestPostingPeriodType type) {
+    public static EnumOptionData interestPostingPeriodType(final SavingsPostingInterestPeriodType type) {
 
         final String codePrefix = "savings.interest.posting.period.";
-        EnumOptionData optionData = new EnumOptionData(SavingsInterestPostingPeriodType.INVALID.getValue().longValue(),
-                SavingsInterestPostingPeriodType.INVALID.getCode(), "Invalid");
+        EnumOptionData optionData = new EnumOptionData(SavingsPostingInterestPeriodType.INVALID.getValue().longValue(),
+                SavingsPostingInterestPeriodType.INVALID.getCode(), "Invalid");
 
         switch (type) {
             case INVALID:
             break;
             case MONTHLY:
-                optionData = new EnumOptionData(SavingsInterestPostingPeriodType.MONTHLY.getValue().longValue(), codePrefix
-                        + SavingsInterestPostingPeriodType.MONTHLY.getCode(), "Monthly");
+                optionData = new EnumOptionData(SavingsPostingInterestPeriodType.MONTHLY.getValue().longValue(), codePrefix
+                        + SavingsPostingInterestPeriodType.MONTHLY.getCode(), "Monthly");
             break;
             case QUATERLY:
-                optionData = new EnumOptionData(SavingsInterestPostingPeriodType.QUATERLY.getValue().longValue(), codePrefix
-                        + SavingsInterestPostingPeriodType.QUATERLY.getCode(), "Quarterly");
-            break;
-            case BI_ANNUAL:
-                optionData = new EnumOptionData(SavingsInterestPostingPeriodType.BI_ANNUAL.getValue().longValue(), codePrefix
-                        + SavingsInterestPostingPeriodType.BI_ANNUAL.getCode(), "Semi-Annual");
+                optionData = new EnumOptionData(SavingsPostingInterestPeriodType.QUATERLY.getValue().longValue(), codePrefix
+                        + SavingsPostingInterestPeriodType.QUATERLY.getCode(), "Quarterly");
             break;
             case ANNUAL:
-                optionData = new EnumOptionData(SavingsInterestPostingPeriodType.ANNUAL.getValue().longValue(), codePrefix
-                        + SavingsInterestPostingPeriodType.ANNUAL.getCode(), "Annually");
+                optionData = new EnumOptionData(SavingsPostingInterestPeriodType.ANNUAL.getValue().longValue(), codePrefix
+                        + SavingsPostingInterestPeriodType.ANNUAL.getCode(), "Annually");
             break;
         }
 
@@ -170,35 +192,51 @@ public class SavingsEnumerations {
                 optionData = new EnumOptionData(SavingsCompoundingInterestPeriodType.DAILY.getValue().longValue(), codePrefix
                         + SavingsCompoundingInterestPeriodType.DAILY.getCode(), "Daily");
             break;
-            case WEEKLY:
-                optionData = new EnumOptionData(SavingsCompoundingInterestPeriodType.WEEKLY.getValue().longValue(), codePrefix
-                        + SavingsCompoundingInterestPeriodType.WEEKLY.getCode(), "Weekly");
-            break;
-            case BIWEEKLY:
-                optionData = new EnumOptionData(SavingsCompoundingInterestPeriodType.BIWEEKLY.getValue().longValue(), codePrefix
-                        + SavingsCompoundingInterestPeriodType.BIWEEKLY.getCode(), "Bi-Weekly");
-            break;
+            // case WEEKLY:
+            // optionData = new
+            // EnumOptionData(SavingsCompoundingInterestPeriodType.WEEKLY.getValue().longValue(),
+            // codePrefix
+            // + SavingsCompoundingInterestPeriodType.WEEKLY.getCode(),
+            // "Weekly");
+            // break;
+            // case BIWEEKLY:
+            // optionData = new
+            // EnumOptionData(SavingsCompoundingInterestPeriodType.BIWEEKLY.getValue().longValue(),
+            // codePrefix
+            // + SavingsCompoundingInterestPeriodType.BIWEEKLY.getCode(),
+            // "Bi-Weekly");
+            // break;
             case MONTHLY:
                 optionData = new EnumOptionData(SavingsCompoundingInterestPeriodType.MONTHLY.getValue().longValue(), codePrefix
                         + SavingsCompoundingInterestPeriodType.MONTHLY.getCode(), "Monthly");
             break;
-            case QUATERLY:
-                optionData = new EnumOptionData(SavingsCompoundingInterestPeriodType.QUATERLY.getValue().longValue(), codePrefix
-                        + SavingsCompoundingInterestPeriodType.QUATERLY.getCode(), "Quarterly");
-            break;
-            case BI_ANNUAL:
-                optionData = new EnumOptionData(SavingsCompoundingInterestPeriodType.BI_ANNUAL.getValue().longValue(), codePrefix
-                        + SavingsCompoundingInterestPeriodType.BI_ANNUAL.getCode(), "Semi-Annual");
-            break;
-            case ANNUAL:
-                optionData = new EnumOptionData(SavingsCompoundingInterestPeriodType.ANNUAL.getValue().longValue(), codePrefix
-                        + SavingsCompoundingInterestPeriodType.ANNUAL.getCode(), "Annually");
-            break;
-            case NO_COMPOUNDING_SIMPLE_INTEREST:
-                optionData = new EnumOptionData(SavingsCompoundingInterestPeriodType.NO_COMPOUNDING_SIMPLE_INTEREST.getValue().longValue(),
-                        codePrefix + SavingsCompoundingInterestPeriodType.NO_COMPOUNDING_SIMPLE_INTEREST.getCode(),
-                        "No Compounding - Simple Interest");
-            break;
+        // case QUATERLY:
+        // optionData = new
+        // EnumOptionData(SavingsCompoundingInterestPeriodType.QUATERLY.getValue().longValue(),
+        // codePrefix
+        // + SavingsCompoundingInterestPeriodType.QUATERLY.getCode(),
+        // "Quarterly");
+        // break;
+        // case BI_ANNUAL:
+        // optionData = new
+        // EnumOptionData(SavingsCompoundingInterestPeriodType.BI_ANNUAL.getValue().longValue(),
+        // codePrefix
+        // + SavingsCompoundingInterestPeriodType.BI_ANNUAL.getCode(),
+        // "Semi-Annual");
+        // break;
+        // case ANNUAL:
+        // optionData = new
+        // EnumOptionData(SavingsCompoundingInterestPeriodType.ANNUAL.getValue().longValue(),
+        // codePrefix
+        // + SavingsCompoundingInterestPeriodType.ANNUAL.getCode(), "Annually");
+        // break;
+        // case NO_COMPOUNDING_SIMPLE_INTEREST:
+        // optionData = new
+        // EnumOptionData(SavingsCompoundingInterestPeriodType.NO_COMPOUNDING_SIMPLE_INTEREST.getValue().longValue(),
+        // codePrefix +
+        // SavingsCompoundingInterestPeriodType.NO_COMPOUNDING_SIMPLE_INTEREST.getCode(),
+        // "No Compounding - Simple Interest");
+        // break;
         }
 
         return optionData;

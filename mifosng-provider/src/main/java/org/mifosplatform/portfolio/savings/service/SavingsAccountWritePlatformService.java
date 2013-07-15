@@ -10,21 +10,15 @@ import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 
 public interface SavingsAccountWritePlatformService {
 
-    CommandProcessingResult createSavingAccount(JsonCommand command);
-
-    CommandProcessingResult updateSavingAccount(Long accountId, JsonCommand command);
-
-    CommandProcessingResult deleteSavingAccount(Long accountId);
-
     CommandProcessingResult activate(Long savingsId, JsonCommand command);
 
     CommandProcessingResult deposit(Long savingsId, JsonCommand command);
 
     CommandProcessingResult withdrawal(Long savingsId, JsonCommand command);
-    
+
     CommandProcessingResult applyAnnualFee(Long savingsId);
 
-    CommandProcessingResult calculateInterest(Long savingsId, JsonCommand command);
+    CommandProcessingResult calculateInterest(Long savingsId);
 
-    CommandProcessingResult postInterest(Long savingsId, JsonCommand command);
+    CommandProcessingResult postInterest(Long savingsId);
 }

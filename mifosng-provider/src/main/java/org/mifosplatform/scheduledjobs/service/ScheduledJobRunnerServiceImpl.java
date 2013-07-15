@@ -205,5 +205,4 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
 
         logger.info(ThreadLocalContextUtil.getTenant().getName() + ": Results affected by update: " + savingsIds.size());
     }
-
 }

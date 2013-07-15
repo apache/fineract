@@ -647,8 +647,7 @@ public final class LoanApplicationCommandFromApiJsonHelper {
             baseDataValidator.reset().parameter(note).value(noteText).notExceedingLengthOf(1000);
         }
 
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
-                "Validation errors exist.", dataValidationErrors); }
+        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
     }
 
     public void validateMinMaxConstraintValues(final JsonElement element, final LoanProduct loanProduct) {

@@ -46,6 +46,7 @@ public final class JsonCommand {
     private final Long supportedEntityId;
     private final String transactionId;
     private final String url;
+
     public static JsonCommand from(final String jsonCommand, final JsonElement parsedCommand, final FromJsonHelper fromApiJsonHelper,
             final String entityName, final Long resourceId, final Long subresourceId, final Long groupId, final Long clientId,
             final Long loanId, final Long savingsId, final Long codeId, final String supportedEntityType, final Long supportedEntityId,
@@ -64,8 +65,7 @@ public final class JsonCommand {
     public JsonCommand(final Long commandId, final String jsonCommand, final JsonElement parsedCommand,
             final FromJsonHelper fromApiJsonHelper, final String entityName, final Long resourceId, final Long subresourceId,
             final Long groupId, final Long clientId, final Long loanId, final Long savingsId, final Long codeId,
-            final String supportedEntityType, final Long supportedEntityId, final String transactionId,
-            final String url) {
+            final String supportedEntityType, final Long supportedEntityId, final String transactionId, final String url) {
         this.commandId = commandId;
         this.jsonCommand = jsonCommand;
         this.parsedCommand = parsedCommand;
@@ -148,9 +148,9 @@ public final class JsonCommand {
     public String getTransactionId() {
         return this.transactionId;
     }
-    
+
     public String getUrl() {
-    	return this.url;
+        return this.url;
     }
 
     private boolean differenceExists(final LocalDate baseValue, final LocalDate workingCopyValue) {
@@ -187,10 +187,10 @@ public final class JsonCommand {
         boolean differenceExists = false;
 
         if (baseValue != null) {
-            if(workingCopyValue != null) {
-            	differenceExists = !baseValue.equals(workingCopyValue);
+            if (workingCopyValue != null) {
+                differenceExists = !baseValue.equals(workingCopyValue);
             } else {
-            	differenceExists =  true;
+                differenceExists = true;
             }
         } else {
             differenceExists = workingCopyValue != null;
@@ -203,11 +203,11 @@ public final class JsonCommand {
         boolean differenceExists = false;
 
         if (baseValue != null) {
-        	if(workingCopyValue != null) {
-        		differenceExists = baseValue.compareTo(workingCopyValue) != 0;
-        	}else {
-        		differenceExists =  true;
-        	}
+            if (workingCopyValue != null) {
+                differenceExists = baseValue.compareTo(workingCopyValue) != 0;
+            } else {
+                differenceExists = true;
+            }
         } else {
             differenceExists = workingCopyValue != null;
         }
@@ -301,6 +301,15 @@ public final class JsonCommand {
         return StringUtils.defaultIfEmpty(value, "");
     }
 
+    public boolean isChangeInBigDecimalParameterNamedDefaultingZeroToNull(final String parameterName, final BigDecimal existingValue) {
+        boolean isChanged = false;
+        if (parameterExists(parameterName)) {
+            final BigDecimal workingValue = bigDecimalValueOfParameterNamedDefaultToNullIfZero(parameterName);
+            isChanged = differenceExists(existingValue, workingValue);
+        }
+        return isChanged;
+    }
+
     public boolean isChangeInBigDecimalParameterNamed(final String parameterName, final BigDecimal existingValue) {
         boolean isChanged = false;
         if (parameterExists(parameterName)) {
@@ -309,22 +318,51 @@ public final class JsonCommand {
         }
         return isChanged;
     }
-    
+
     public boolean isChangeInBigDecimalParameterNamedWithNullCheck(final String parameterName, final BigDecimal existingValue) {
         boolean isChanged = false;
         if (parameterExists(parameterName)) {
             final BigDecimal workingValue = bigDecimalValueOfParameterNamed(parameterName);
-            if(workingValue == null && existingValue != null){
+            if (workingValue == null && existingValue != null) {
                 isChanged = true;
-            }else{
+            } else {
                 isChanged = differenceExists(existingValue, workingValue);
             }
         }
         return isChanged;
     }
 
+    private static BigDecimal defaultToNullIfZero(final BigDecimal value) {
+        BigDecimal result = value;
+        if (value != null && BigDecimal.ZERO.compareTo(value) == 0) {
+            result = null;
+        }
+        return result;
+    }
+
+    private static Integer defaultToNullIfZero(final Integer value) {
+        Integer result = value;
+        if (value != null && value == 0) {
+            result = null;
+        }
+        return result;
+    }
+
     public BigDecimal bigDecimalValueOfParameterNamed(final String parameterName) {
         return this.fromApiJsonHelper.extractBigDecimalWithLocaleNamed(parameterName, parsedCommand);
+    }
+
+    public BigDecimal bigDecimalValueOfParameterNamedDefaultToNullIfZero(final String parameterName) {
+        return defaultToNullIfZero(bigDecimalValueOfParameterNamed(parameterName));
+    }
+
+    public boolean isChangeInIntegerParameterNamedDefaultingZeroToNull(final String parameterName, final Integer existingValue) {
+        boolean isChanged = false;
+        if (parameterExists(parameterName)) {
+            final Integer workingValue = integerValueOfParameterNamedDefaultToNullIfZero(parameterName);
+            isChanged = differenceExists(existingValue, workingValue);
+        }
+        return isChanged;
     }
 
     public boolean isChangeInIntegerParameterNamed(final String parameterName, final Integer existingValue) {
@@ -340,17 +378,21 @@ public final class JsonCommand {
         boolean isChanged = false;
         if (parameterExists(parameterName)) {
             final Integer workingValue = integerValueOfParameterNamed(parameterName);
-            if(workingValue == null && existingValue != null){
+            if (workingValue == null && existingValue != null) {
                 isChanged = true;
-            }else{
+            } else {
                 isChanged = differenceExists(existingValue, workingValue);
             }
         }
         return isChanged;
     }
-    
+
     public Integer integerValueOfParameterNamed(final String parameterName) {
         return this.fromApiJsonHelper.extractIntegerWithLocaleNamed(parameterName, parsedCommand);
+    }
+
+    public Integer integerValueOfParameterNamedDefaultToNullIfZero(final String parameterName) {
+        return defaultToNullIfZero(integerValueOfParameterNamed(parameterName));
     }
 
     public boolean isChangeInIntegerSansLocaleParameterNamed(final String parameterName, final Integer existingValue) {

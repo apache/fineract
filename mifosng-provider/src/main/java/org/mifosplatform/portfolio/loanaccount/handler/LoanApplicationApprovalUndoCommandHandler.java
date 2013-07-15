@@ -27,6 +27,6 @@ public class LoanApplicationApprovalUndoCommandHandler implements NewCommandSour
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
 
-        return this.writePlatformService.undoLoanApplicationApproval(command.entityId(), command);
+        return this.writePlatformService.undoApplicationApproval(command.entityId(), command);
     }
 }

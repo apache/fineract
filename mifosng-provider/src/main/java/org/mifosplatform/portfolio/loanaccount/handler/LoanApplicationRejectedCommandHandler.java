@@ -27,6 +27,6 @@ public class LoanApplicationRejectedCommandHandler implements NewCommandSourceHa
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
 
-        return this.writePlatformService.rejectLoanApplication(command.entityId(), command);
+        return this.writePlatformService.rejectApplication(command.entityId(), command);
     }
 }

@@ -12,6 +12,7 @@ import java.util.Set;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -36,7 +37,9 @@ import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSeriali
 import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.mifosplatform.infrastructure.core.service.Page;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
+import org.mifosplatform.organisation.staff.data.StaffData;
 import org.mifosplatform.portfolio.group.service.SearchParameters;
+import org.mifosplatform.portfolio.savings.SavingsApiConstants;
 import org.mifosplatform.portfolio.savings.data.SavingsAccountData;
 import org.mifosplatform.portfolio.savings.data.SavingsAccountTransactionData;
 import org.mifosplatform.portfolio.savings.data.SavingsProductData;
@@ -81,12 +84,15 @@ public class SavingsAccountsApiResource {
     @Path("template")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveTemplate(@QueryParam("clientId") final Long clientId, @QueryParam("groupId") final Long groupId,
-            @QueryParam("productId") final Long productId, @Context final UriInfo uriInfo) {
+    public String template(@QueryParam("clientId") final Long clientId, @QueryParam("groupId") final Long groupId,
+            @QueryParam("productId") final Long productId,
+            @DefaultValue("false") @QueryParam("staffInSelectedOfficeOnly") final boolean staffInSelectedOfficeOnly,
+            @Context final UriInfo uriInfo) {
 
         context.authenticatedUser().validateHasReadPermission(SavingsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME);
 
-        final SavingsAccountData savingsAccount = this.savingsAccountReadPlatformService.retrieveTemplate(clientId, groupId, productId);
+        final SavingsAccountData savingsAccount = this.savingsAccountReadPlatformService.retrieveTemplate(clientId, groupId, productId,
+                staffInSelectedOfficeOnly);
 
         final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serialize(settings, savingsAccount, SavingsApiConstants.SAVINGS_ACCOUNT_RESPONSE_DATA_PARAMETERS);
@@ -113,7 +119,7 @@ public class SavingsAccountsApiResource {
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String create(final String apiRequestBodyAsJson) {
+    public String submitApplication(final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().createSavingsAccount().withJson(apiRequestBodyAsJson).build();
 
@@ -147,6 +153,7 @@ public class SavingsAccountsApiResource {
 
         Collection<SavingsAccountTransactionData> transactions = null;
         Collection<SavingsProductData> productOptions = null;
+        Collection<StaffData> fieldOfficerOptions = null;
         Collection<EnumOptionData> interestCompoundingPeriodTypeOptions = null;
         Collection<EnumOptionData> interestCompoundingPostingTypeOptions = null;
         Collection<EnumOptionData> interestCalculationTypeOptions = null;
@@ -174,16 +181,49 @@ public class SavingsAccountsApiResource {
         final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         if (settings.isTemplate()) {
             productOptions = this.savingsProductReadPlatformService.retrieveAllForLookup();
+
+            // FIXME - FOR CHANGE SAVINGS ACCOUNT APPLICATION need to determine
+            // office id of savings account
+            // if (savingsAccount.officeId() != null) {
+            //
+            // if (staffInSelectedOfficeOnly) {
+            // // only bring back loan officers in selected branch/office
+            // Collection<StaffData> fieldOfficersInBranch =
+            // this.staffReadPlatformService
+            // .retrieveAllLoanOfficersInOfficeById(officeId);
+            //
+            // if (!CollectionUtils.isEmpty(fieldOfficersInBranch)) {
+            // fieldOfficerOptions = new
+            // ArrayList<StaffData>(fieldOfficersInBranch);
+            // }
+            // } else {
+            // // by default bring back all officers in selected
+            // // branch/office as well as officers in office above
+            // // this office
+            // final boolean restrictToLoanOfficersOnly = true;
+            // Collection<StaffData> loanOfficersInHierarchy =
+            // this.staffReadPlatformService
+            // .retrieveAllStaffInOfficeAndItsParentOfficeHierarchy(officeId,
+            // restrictToLoanOfficersOnly);
+            //
+            // if (!CollectionUtils.isEmpty(loanOfficersInHierarchy)) {
+            // fieldOfficerOptions = new
+            // ArrayList<StaffData>(loanOfficersInHierarchy);
+            // }
+            // }
+            // }
+
             interestCompoundingPeriodTypeOptions = this.dropdownReadPlatformService.retrieveCompoundingInterestPeriodTypeOptions();
             interestCompoundingPostingTypeOptions = this.dropdownReadPlatformService.retrieveInterestPostingPeriodTypeOptions();
             interestCalculationTypeOptions = this.dropdownReadPlatformService.retrieveInterestCalculationTypeOptions();
+            interestCalculationDaysInYearTypeOptions = this.dropdownReadPlatformService.retrieveInterestCalculationDaysInYearTypeOptions();
             lockinPeriodFrequencyTypeOptions = this.dropdownReadPlatformService.retrieveLockinPeriodFrequencyTypeOptions();
             withdrawalFeeTypeOptions = this.dropdownReadPlatformService.retrievewithdrawalFeeTypeOptions();
         }
 
-        return SavingsAccountData.withTemplateOptions(savingsAccount, productOptions, interestCompoundingPeriodTypeOptions,
-                interestCompoundingPostingTypeOptions, interestCalculationTypeOptions, interestCalculationDaysInYearTypeOptions,
-                lockinPeriodFrequencyTypeOptions, withdrawalFeeTypeOptions, transactions);
+        return SavingsAccountData.withTemplateOptions(savingsAccount, productOptions, fieldOfficerOptions,
+                interestCompoundingPeriodTypeOptions, interestCompoundingPostingTypeOptions, interestCalculationTypeOptions,
+                interestCalculationDaysInYearTypeOptions, lockinPeriodFrequencyTypeOptions, withdrawalFeeTypeOptions, transactions);
     }
 
     @PUT
@@ -210,7 +250,19 @@ public class SavingsAccountsApiResource {
         final CommandWrapperBuilder builder = new CommandWrapperBuilder().withJson(apiRequestBodyAsJson);
 
         CommandProcessingResult result = null;
-        if (is(commandParam, "activate")) {
+        if (is(commandParam, "reject")) {
+            final CommandWrapper commandRequest = builder.rejectSavingsAccountApplication(accountId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        } else if (is(commandParam, "withdrawnByApplicant")) {
+            final CommandWrapper commandRequest = builder.withdrawSavingsAccountApplication(accountId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        } else if (is(commandParam, "approve")) {
+            final CommandWrapper commandRequest = builder.approveSavingsAccountApplication(accountId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        } else if (is(commandParam, "undoapproval")) {
+            final CommandWrapper commandRequest = builder.undoSavingsAccountApplication(accountId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        } else if (is(commandParam, "activate")) {
             final CommandWrapper commandRequest = builder.savingsAccountActivation(accountId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, "calculateInterest")) {
@@ -223,8 +275,8 @@ public class SavingsAccountsApiResource {
 
         if (result == null) {
             //
-            throw new UnrecognizedQueryParamException("command", commandParam, new Object[] { "activate", "calculateInterest",
-                    "postInterest" });
+            throw new UnrecognizedQueryParamException("command", commandParam, new Object[] { "reject", "withdrawnByApplicant", "approve",
+                    "undoapproval", "activate", "calculateInterest", "postInterest" });
         }
 
         return this.toApiJsonSerializer.serialize(result);

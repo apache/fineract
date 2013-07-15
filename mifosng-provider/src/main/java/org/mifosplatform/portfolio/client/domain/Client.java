@@ -452,7 +452,7 @@ public final class Client extends AbstractPersistable<Long> {
         this.staff = null;
     }
 
-    public void assignStaff(Staff staff) {
+    public void assignStaff(final Staff staff) {
         this.staff = staff;
     }
 
@@ -465,5 +465,9 @@ public final class Client extends AbstractPersistable<Long> {
     
     public Integer getStatus() {
         return status;
+    }
+
+    public boolean isActivatedAfter(final LocalDate submittedOn) {
+        return getActivationLocalDate().isAfter(submittedOn);
     }
 }

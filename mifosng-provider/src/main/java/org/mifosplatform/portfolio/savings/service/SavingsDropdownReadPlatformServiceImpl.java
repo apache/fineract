@@ -10,12 +10,12 @@ import java.util.Collection;
 import java.util.List;
 
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
-import org.mifosplatform.portfolio.savings.domain.SavingsCompoundingInterestPeriodType;
-import org.mifosplatform.portfolio.savings.domain.SavingsInterestCalculationDaysInYearType;
-import org.mifosplatform.portfolio.savings.domain.SavingsInterestCalculationType;
-import org.mifosplatform.portfolio.savings.domain.SavingsInterestPostingPeriodType;
-import org.mifosplatform.portfolio.savings.domain.SavingsPeriodFrequencyType;
-import org.mifosplatform.portfolio.savings.domain.SavingsWithdrawalFeesType;
+import org.mifosplatform.portfolio.savings.SavingsCompoundingInterestPeriodType;
+import org.mifosplatform.portfolio.savings.SavingsInterestCalculationDaysInYearType;
+import org.mifosplatform.portfolio.savings.SavingsInterestCalculationType;
+import org.mifosplatform.portfolio.savings.SavingsPeriodFrequencyType;
+import org.mifosplatform.portfolio.savings.SavingsPostingInterestPeriodType;
+import org.mifosplatform.portfolio.savings.SavingsWithdrawalFeesType;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -47,13 +47,13 @@ public class SavingsDropdownReadPlatformServiceImpl implements SavingsDropdownRe
     public Collection<EnumOptionData> retrieveCompoundingInterestPeriodTypeOptions() {
         List<EnumOptionData> allowedOptions = Arrays.asList( //
                 SavingsEnumerations.compoundingInterestPeriodType(SavingsCompoundingInterestPeriodType.DAILY), //
-                SavingsEnumerations.compoundingInterestPeriodType(SavingsCompoundingInterestPeriodType.WEEKLY), //
-                SavingsEnumerations.compoundingInterestPeriodType(SavingsCompoundingInterestPeriodType.BIWEEKLY), //
-                SavingsEnumerations.compoundingInterestPeriodType(SavingsCompoundingInterestPeriodType.MONTHLY), //
-                SavingsEnumerations.compoundingInterestPeriodType(SavingsCompoundingInterestPeriodType.QUATERLY), //
-                SavingsEnumerations.compoundingInterestPeriodType(SavingsCompoundingInterestPeriodType.BI_ANNUAL), //
-                SavingsEnumerations.compoundingInterestPeriodType(SavingsCompoundingInterestPeriodType.ANNUAL), //
-                SavingsEnumerations.compoundingInterestPeriodType(SavingsCompoundingInterestPeriodType.NO_COMPOUNDING_SIMPLE_INTEREST) //
+//                SavingsEnumerations.compoundingInterestPeriodType(SavingsCompoundingInterestPeriodType.WEEKLY), //
+//                SavingsEnumerations.compoundingInterestPeriodType(SavingsCompoundingInterestPeriodType.BIWEEKLY), //
+                SavingsEnumerations.compoundingInterestPeriodType(SavingsCompoundingInterestPeriodType.MONTHLY)
+//                SavingsEnumerations.compoundingInterestPeriodType(SavingsCompoundingInterestPeriodType.QUATERLY), //
+//                SavingsEnumerations.compoundingInterestPeriodType(SavingsCompoundingInterestPeriodType.BI_ANNUAL), //
+//                SavingsEnumerations.compoundingInterestPeriodType(SavingsCompoundingInterestPeriodType.ANNUAL), //
+//                SavingsEnumerations.compoundingInterestPeriodType(SavingsCompoundingInterestPeriodType.NO_COMPOUNDING_SIMPLE_INTEREST) //
                 );
 
         return allowedOptions;
@@ -62,10 +62,9 @@ public class SavingsDropdownReadPlatformServiceImpl implements SavingsDropdownRe
     @Override
     public Collection<EnumOptionData> retrieveInterestPostingPeriodTypeOptions() {
         List<EnumOptionData> allowedOptions = Arrays.asList( //
-                SavingsEnumerations.interestPostingPeriodType(SavingsInterestPostingPeriodType.MONTHLY), //
-                SavingsEnumerations.interestPostingPeriodType(SavingsInterestPostingPeriodType.QUATERLY), //
-                SavingsEnumerations.interestPostingPeriodType(SavingsInterestPostingPeriodType.BI_ANNUAL), //
-                SavingsEnumerations.interestPostingPeriodType(SavingsInterestPostingPeriodType.ANNUAL) //
+                SavingsEnumerations.interestPostingPeriodType(SavingsPostingInterestPeriodType.MONTHLY), //
+                SavingsEnumerations.interestPostingPeriodType(SavingsPostingInterestPeriodType.QUATERLY), //
+                SavingsEnumerations.interestPostingPeriodType(SavingsPostingInterestPeriodType.ANNUAL) //
                 );
 
         return allowedOptions;

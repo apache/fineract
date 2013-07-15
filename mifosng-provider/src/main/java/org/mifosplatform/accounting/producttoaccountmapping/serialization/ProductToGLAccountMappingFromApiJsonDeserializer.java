@@ -23,7 +23,8 @@ import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanProduct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.*;
+
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.*;
 
 import com.google.gson.JsonElement;
 

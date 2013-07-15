@@ -27,6 +27,6 @@ public class LoanApplicationDeletionCommandHandler implements NewCommandSourceHa
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
 
-        return this.writePlatformService.deleteLoanApplication(command.entityId());
+        return this.writePlatformService.deleteApplication(command.entityId());
     }
 }

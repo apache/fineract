@@ -10,17 +10,17 @@ import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 
 public interface LoanApplicationWritePlatformService {
 
-    CommandProcessingResult submitLoanApplication(JsonCommand command);
+    CommandProcessingResult submitApplication(JsonCommand command);
 
-    CommandProcessingResult modifyLoanApplication(Long loanId, JsonCommand command);
+    CommandProcessingResult modifyApplication(Long loanId, JsonCommand command);
 
-    CommandProcessingResult deleteLoanApplication(Long loanId);
+    CommandProcessingResult deleteApplication(Long loanId);
 
-    CommandProcessingResult approveLoanApplication(Long loanId, JsonCommand command);
+    CommandProcessingResult approveApplication(Long loanId, JsonCommand command);
 
-    CommandProcessingResult undoLoanApplicationApproval(Long loanId, JsonCommand command);
+    CommandProcessingResult undoApplicationApproval(Long loanId, JsonCommand command);
 
-    CommandProcessingResult rejectLoanApplication(Long loanId, JsonCommand command);
+    CommandProcessingResult rejectApplication(Long loanId, JsonCommand command);
 
-    CommandProcessingResult applicantWithdrawsFromLoanApplication(Long loanId, JsonCommand command);
+    CommandProcessingResult applicantWithdrawsFromApplication(Long loanId, JsonCommand command);
 }

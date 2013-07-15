@@ -5,15 +5,15 @@
  */
 package org.mifosplatform.portfolio.savings.data;
 
-import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.accountNumberParamName;
-import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.activationDateParamName;
-import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.bankNumberParamName;
-import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.checkNumberParamName;
-import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.paymentTypeIdParamName;
-import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.receiptNumberParamName;
-import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.routingCodeParamName;
-import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.transactionAmountParamName;
-import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.transactionDateParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.activationDateParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.bankNumberParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.checkNumberParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.paymentTypeIdParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.receiptNumberParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.routingCodeParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.transactionAccountNumberParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.transactionAmountParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.transactionDateParamName;
 
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
@@ -32,7 +32,7 @@ import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
 import org.mifosplatform.infrastructure.core.exception.InvalidJsonException;
 import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
-import org.mifosplatform.portfolio.savings.api.SavingsApiConstants;
+import org.mifosplatform.portfolio.savings.SavingsApiConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -74,7 +74,7 @@ public class SavingsAccountTransactionDataValidator {
         // Validate all string payment detail fields for max length
         final Integer paymentTypeId = fromApiJsonHelper.extractIntegerWithLocaleNamed(paymentTypeIdParamName, element);
         baseDataValidator.reset().parameter(paymentTypeIdParamName).value(paymentTypeId).ignoreIfNull().integerGreaterThanZero();
-        final Set<String> paymentDetailParameters = new HashSet<String>(Arrays.asList(accountNumberParamName, checkNumberParamName,
+        final Set<String> paymentDetailParameters = new HashSet<String>(Arrays.asList(transactionAccountNumberParamName, checkNumberParamName,
                 routingCodeParamName, receiptNumberParamName, bankNumberParamName));
         for (String paymentDetailParameterName : paymentDetailParameters) {
             final String paymentDetailParameterValue = fromApiJsonHelper.extractStringNamed(paymentDetailParameterName, element);

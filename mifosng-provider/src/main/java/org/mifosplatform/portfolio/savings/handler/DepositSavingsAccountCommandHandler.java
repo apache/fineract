@@ -16,16 +16,16 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class DepositSavingsAccountCommandHandler implements NewCommandSourceHandler {
 
-    private final SavingsAccountWritePlatformService savingAccountWritePlatformService;
+    private final SavingsAccountWritePlatformService writePlatformService;
 
     @Autowired
-    public DepositSavingsAccountCommandHandler(final SavingsAccountWritePlatformService savingAccountWritePlatformService) {
-        this.savingAccountWritePlatformService = savingAccountWritePlatformService;
+    public DepositSavingsAccountCommandHandler(final SavingsAccountWritePlatformService writePlatformService) {
+        this.writePlatformService = writePlatformService;
     }
 
     @Transactional
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
-        return this.savingAccountWritePlatformService.deposit(command.getSavingsId(), command);
+        return this.writePlatformService.deposit(command.getSavingsId(), command);
     }
 }

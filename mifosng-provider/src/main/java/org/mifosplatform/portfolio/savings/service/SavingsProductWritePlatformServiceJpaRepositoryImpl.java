@@ -24,7 +24,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.accountingRuleParamName;
+
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.accountingRuleParamName;
 
 @Service
 public class SavingsProductWritePlatformServiceJpaRepositoryImpl implements SavingsProductWritePlatformService {

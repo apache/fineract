@@ -5,15 +5,17 @@
  */
 package org.mifosplatform.portfolio.savings.domain;
 
-import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.annualFeeAmountParamName;
-import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.annualFeeOnMonthDayParamName;
-import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.localeParamName;
-import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.withdrawalFeeAmountParamName;
-import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.withdrawalFeeTypeParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.annualFeeAmountParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.annualFeeOnMonthDayParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.localeParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.lockinPeriodFrequencyParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.lockinPeriodFrequencyTypeParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.withdrawalFeeAmountParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.withdrawalFeeTypeParamName;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
-import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -21,6 +23,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import javax.persistence.CascadeType;
@@ -40,12 +43,13 @@ import javax.persistence.UniqueConstraint;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
-import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 import org.joda.time.MonthDay;
+import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.ApiParameterError;
+import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
 import org.mifosplatform.infrastructure.core.domain.LocalDateInterval;
 import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.mifosplatform.infrastructure.core.service.DateUtils;
@@ -53,23 +57,29 @@ import org.mifosplatform.infrastructure.security.service.RandomPasswordGenerator
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.organisation.monetary.domain.Money;
+import org.mifosplatform.organisation.staff.domain.Staff;
 import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.group.domain.Group;
 import org.mifosplatform.portfolio.loanproduct.domain.PeriodFrequencyType;
 import org.mifosplatform.portfolio.paymentdetail.domain.PaymentDetail;
-import org.mifosplatform.portfolio.savings.api.SavingsApiConstants;
+import org.mifosplatform.portfolio.savings.SavingsApiConstants;
+import org.mifosplatform.portfolio.savings.SavingsCompoundingInterestPeriodType;
+import org.mifosplatform.portfolio.savings.SavingsInterestCalculationDaysInYearType;
+import org.mifosplatform.portfolio.savings.SavingsInterestCalculationType;
+import org.mifosplatform.portfolio.savings.SavingsPeriodFrequencyType;
+import org.mifosplatform.portfolio.savings.SavingsPostingInterestPeriodType;
+import org.mifosplatform.portfolio.savings.SavingsWithdrawalFeesType;
+import org.mifosplatform.portfolio.savings.domain.interest.PostingPeriod;
 import org.mifosplatform.portfolio.savings.exception.InsufficientAccountBalanceException;
 import org.mifosplatform.portfolio.savings.exception.InvalidSavingsAccountStateTransitionException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.mifosplatform.portfolio.savings.service.SavingsEnumerations;
+import org.mifosplatform.useradministration.domain.AppUser;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
 @Table(name = "m_savings_account", uniqueConstraints = { @UniqueConstraint(columnNames = { "account_no" }, name = "sa_account_no_UNIQUE"),
         @UniqueConstraint(columnNames = { "external_id" }, name = "sa_external_id_UNIQUE") })
 public class SavingsAccount extends AbstractPersistable<Long> {
-
-    private final static Logger logger = LoggerFactory.getLogger(SavingsAccount.class);
 
     @Column(name = "account_no", length = 20, unique = true, nullable = false)
     private String accountNumber;
@@ -89,12 +99,70 @@ public class SavingsAccount extends AbstractPersistable<Long> {
     @JoinColumn(name = "product_id", nullable = false)
     private SavingsProduct product;
 
+    @SuppressWarnings("unused")
+    @ManyToOne
+    @JoinColumn(name = "field_officer_id", nullable = true)
+    private Staff fieldOfficer;
+
     @Column(name = "status_enum", nullable = false)
     private Integer status;
 
     @Temporal(TemporalType.DATE)
-    @Column(name = "activation_date", nullable = true)
-    private Date activationDate;
+    @Column(name = "submittedon_date", nullable = true)
+    private Date submittedOnDate;
+
+    @SuppressWarnings("unused")
+    @ManyToOne(optional = true)
+    @JoinColumn(name = "submittedon_userid", nullable = true)
+    private AppUser submittedBy;
+
+    @SuppressWarnings("unused")
+    @Temporal(TemporalType.DATE)
+    @Column(name = "rejectedon_date")
+    private Date rejectedOnDate;
+
+    @SuppressWarnings("unused")
+    @ManyToOne(optional = true)
+    @JoinColumn(name = "rejectedon_userid", nullable = true)
+    private AppUser rejectedBy;
+
+    @SuppressWarnings("unused")
+    @Temporal(TemporalType.DATE)
+    @Column(name = "withdrawnon_date")
+    private Date withdrawnOnDate;
+
+    @SuppressWarnings("unused")
+    @ManyToOne(optional = true)
+    @JoinColumn(name = "withdrawnon_userid", nullable = true)
+    private AppUser withdrawnBy;
+
+    @Temporal(TemporalType.DATE)
+    @Column(name = "approvedon_date")
+    private Date approvedOnDate;
+
+    @SuppressWarnings("unused")
+    @ManyToOne(optional = true)
+    @JoinColumn(name = "approvedon_userid", nullable = true)
+    private AppUser approvedBy;
+
+    @Temporal(TemporalType.DATE)
+    @Column(name = "activatedon_date", nullable = true)
+    private Date activatedOnDate;
+
+    @SuppressWarnings("unused")
+    @ManyToOne(optional = true)
+    @JoinColumn(name = "activatedon_userid", nullable = true)
+    private AppUser activatedBy;
+
+    @SuppressWarnings("unused")
+    @Temporal(TemporalType.DATE)
+    @Column(name = "closedon_date")
+    private Date closedOnDate;
+
+    @SuppressWarnings("unused")
+    @ManyToOne(optional = true)
+    @JoinColumn(name = "closedon_userid", nullable = true)
+    private AppUser closedBy;
 
     @Embedded
     private MonetaryCurrency currency;
@@ -113,7 +181,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
     private Integer interestCompoundingPeriodType;
 
     /**
-     * A value from the {@link SavingsInterestPostingPeriodType} enumeration.
+     * A value from the {@link SavingsPostingInterestPeriodType} enumeration.
      */
     @Column(name = "interest_posting_period_enum", nullable = false)
     private Integer interestPostingPeriodType;
@@ -186,27 +254,26 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         //
     }
 
-    public static SavingsAccount createNewAccount(final Client client, final Group group, final SavingsProduct product,
-            final String accountNo, final String externalId, final BigDecimal interestRate,
-            final SavingsCompoundingInterestPeriodType interestCompoundingPeriodType,
-            final SavingsInterestPostingPeriodType interestPostingPeriodType, final SavingsInterestCalculationType interestCalculationType,
+    public static SavingsAccount createNewApplicationForSubmittal(final Client client, final Group group, final SavingsProduct product,
+            final Staff fieldOfficer, final String accountNo, final String externalId, final LocalDate submittedOnDate,
+            final BigDecimal interestRate, final SavingsCompoundingInterestPeriodType interestCompoundingPeriodType,
+            final SavingsPostingInterestPeriodType interestPostingPeriodType, final SavingsInterestCalculationType interestCalculationType,
             final SavingsInterestCalculationDaysInYearType interestCalculationDaysInYearType, final BigDecimal minRequiredOpeningBalance,
             final Integer lockinPeriodFrequency, final SavingsPeriodFrequencyType lockinPeriodFrequencyType,
             final BigDecimal withdrawalFeeAmount, final SavingsWithdrawalFeesType withdrawalFeeType, final BigDecimal annualFeeAmount,
             final MonthDay annualFeeOnMonthDay) {
 
-        final SavingsAccountStatusType status = SavingsAccountStatusType.UNACTIVATED;
-        final LocalDate activationDate = null;
-        return new SavingsAccount(client, group, product, accountNo, externalId, status, activationDate, interestRate,
+        final SavingsAccountStatusType status = SavingsAccountStatusType.SUBMITTED_AND_PENDING_APPROVAL;
+        return new SavingsAccount(client, group, product, fieldOfficer, accountNo, externalId, status, submittedOnDate, interestRate,
                 interestCompoundingPeriodType, interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType,
                 minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeAmount, withdrawalFeeType,
                 annualFeeAmount, annualFeeOnMonthDay);
     }
 
-    private SavingsAccount(final Client client, final Group group, final SavingsProduct product, final String accountNo,
-            final String externalId, final SavingsAccountStatusType status, final LocalDate activationDate,
+    private SavingsAccount(final Client client, final Group group, final SavingsProduct product, final Staff fieldOfficer,
+            final String accountNo, final String externalId, final SavingsAccountStatusType status, final LocalDate submittedOnDate,
             final BigDecimal nominalAnnualInterestRate, final SavingsCompoundingInterestPeriodType interestCompoundingPeriodType,
-            final SavingsInterestPostingPeriodType interestPostingPeriodType, final SavingsInterestCalculationType interestCalculationType,
+            final SavingsPostingInterestPeriodType interestPostingPeriodType, final SavingsInterestCalculationType interestCalculationType,
             final SavingsInterestCalculationDaysInYearType interestCalculationDaysInYearType, final BigDecimal minRequiredOpeningBalance,
             final Integer lockinPeriodFrequency, final SavingsPeriodFrequencyType lockinPeriodFrequencyType,
             final BigDecimal withdrawalFeeAmount, final SavingsWithdrawalFeesType withdrawalFeeType, final BigDecimal annualFeeAmount,
@@ -214,6 +281,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         this.client = client;
         this.group = group;
         this.product = product;
+        this.fieldOfficer = fieldOfficer;
         if (StringUtils.isBlank(accountNo)) {
             this.accountNumber = new RandomPasswordGenerator(19).generate();
             this.accountNumberRequiresAutoGeneration = true;
@@ -223,9 +291,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         this.currency = product.currency();
         this.externalId = externalId;
         this.status = status.getValue();
-        if (activationDate != null) {
-            this.activationDate = activationDate.toDate();
-        }
+        this.submittedOnDate = submittedOnDate.toDate();
         this.nominalAnnualInterestRate = nominalAnnualInterestRate;
         this.interestCompoundingPeriodType = interestCompoundingPeriodType.getValue();
         this.interestPostingPeriodType = interestPostingPeriodType.getValue();
@@ -278,115 +344,41 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         return SavingsAccountStatusType.fromInt(this.status).isActive();
     }
 
-    public void activate(final DateTimeFormatter formatter, final LocalDate activationDate, final List<Long> existingTransactionIds,
-            final List<Long> existingReversedTransactionIds) {
+    public void postInterest(final SavingsHelper savingsHelper, final MathContext mc, final LocalDate interestPostingUpToDate,
+            final List<Long> existingTransactionIds, final List<Long> existingReversedTransactionIds) {
 
-        if (isActive()) {
-            final String defaultUserMessage = "Cannot activate account. Account is already active.";
-            final ApiParameterError error = ApiParameterError.parameterError("error.msg.savingsaccount.transaction.account.already.active",
-                    defaultUserMessage, "activationDate", activationDate.toString(formatter));
-
-            final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
-            dataValidationErrors.add(error);
-
-            throw new PlatformApiDataValidationException(dataValidationErrors);
-        }
-
-        if (isDateInTheFuture(activationDate)) {
-
-            final String defaultUserMessage = "Activation date cannot be in the future.";
-            final ApiParameterError error = ApiParameterError.parameterError("error.msg.savingsaccount.transaction.in.the.future",
-                    defaultUserMessage, "activationDate", activationDate);
-
-            final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
-            dataValidationErrors.add(error);
-
-            throw new PlatformApiDataValidationException(dataValidationErrors);
-        }
-        
-        if(this.client.getActivationLocalDate().isAfter(activationDate))
-        {
-        	final String errorMessage = "The date on which a savings account is activate cannot be before its client activated date: "
-                     + this.client.getActivationLocalDate().toString();
-        	throw new InvalidSavingsAccountStateTransitionException("activate", "cannot.be.before.client.activation.date", errorMessage, activationDate,
-        			this.client.getActivationLocalDate());
-        }
-
-        this.activationDate = activationDate.toDate();
-        this.status = SavingsAccountStatusType.ACTIVE.getValue();
-
-        this.lockedInUntilDate = calculateDateAccountIsLockedUntil(getActivationLocalDate());
-
-        // auto enter deposit for minimum required opening balance when
-        // activating account.
-        final Money minRequiredOpeningBalance = Money.of(this.currency, this.minRequiredOpeningBalance);
-        if (minRequiredOpeningBalance.isGreaterThanZero()) {
-            /**
-             * Vishwas: TODO activate API should be modified to accept payment
-             * details (for entering minimum balance)
-             **/
-            deposit(formatter, activationDate, minRequiredOpeningBalance.getAmount(), existingTransactionIds,
-                    existingReversedTransactionIds, null);
-        }
-    }
-
-    private Date calculateDateAccountIsLockedUntil(final LocalDate activationLocalDate) {
-
-        Date lockedInUntilLocalDate = null;
-        final PeriodFrequencyType lockinPeriodFrequencyType = PeriodFrequencyType.fromInt(this.lockinPeriodFrequencyType);
-        switch (lockinPeriodFrequencyType) {
-            case INVALID:
-            break;
-            case DAYS:
-                lockedInUntilLocalDate = activationLocalDate.plusDays(this.lockinPeriodFrequency).toDate();
-            break;
-            case WEEKS:
-                lockedInUntilLocalDate = activationLocalDate.plusWeeks(this.lockinPeriodFrequency).toDate();
-            break;
-            case MONTHS:
-                lockedInUntilLocalDate = activationLocalDate.plusMonths(this.lockinPeriodFrequency).toDate();
-            break;
-            case YEARS:
-                lockedInUntilLocalDate = activationLocalDate.plusYears(this.lockinPeriodFrequency).toDate();
-            break;
-        }
-
-        return lockedInUntilLocalDate;
-    }
-
-    public void postInterest(final LocalDate interestPostingUpToDate, final List<Long> existingTransactionIds,
-            final List<Long> existingReversedTransactionIds) {
-
-        final SavingsInterestPostingPeriodType postingPeriodType = SavingsInterestPostingPeriodType.fromInt(this.interestPostingPeriodType);
-        final List<LocalDate> postingLocalDates = determineInterestPostingDates(getActivationLocalDate(), interestPostingUpToDate,
-                postingPeriodType);
-
-        final List<InterestCompoundingPeriodSummary> compoundingPeriods = calculateInterest(interestPostingUpToDate);
+        final List<PostingPeriod> postingPeriods = calculateInterestUsing(savingsHelper, mc, interestPostingUpToDate);
 
         Money interestPostedToDate = Money.zero(this.currency);
 
         boolean recalucateDailyBalanceDetails = false;
         existingTransactionIds.addAll(findExistingTransactionIds());
         existingReversedTransactionIds.addAll(findExistingReversedTransactionIds());
-        for (LocalDate postingDate : postingLocalDates) {
-            Money interestEarnedToBePostedForPeriod = findInterestEarnedToBePostedOn(interestPostedToDate, postingDate, compoundingPeriods);
 
-            interestPostedToDate = interestPostedToDate.plus(interestEarnedToBePostedForPeriod);
+        for (PostingPeriod interestPostingPeriod : postingPeriods) {
 
-            SavingsAccountTransaction postingTransaction = findInterestPostingTransactionFor(postingDate);
-            if (postingTransaction == null) {
-                final SavingsAccountTransaction newPostingTransaction = SavingsAccountTransaction.interestPosting(this, postingDate,
-                        interestEarnedToBePostedForPeriod);
-                this.transactions.add(newPostingTransaction);
-                recalucateDailyBalanceDetails = true;
-            } else {
-                boolean correctionRequired = postingTransaction.hasNotAmount(interestEarnedToBePostedForPeriod);
-                if (correctionRequired) {
-                    postingTransaction.reverse();
-                    final SavingsAccountTransaction newPostingTransaction = SavingsAccountTransaction.interestPosting(this, postingDate,
-                            interestEarnedToBePostedForPeriod);
+            final LocalDate interestPostingTransactionDate = interestPostingPeriod.dateOfPostingTransaction();
+            final Money interestEarnedToBePostedForPeriod = interestPostingPeriod.getInterestEarned();
+
+            if (!interestPostingTransactionDate.isAfter(interestPostingUpToDate)) {
+
+                interestPostedToDate = interestPostedToDate.plus(interestEarnedToBePostedForPeriod);
+
+                SavingsAccountTransaction postingTransaction = findInterestPostingTransactionFor(interestPostingTransactionDate);
+                if (postingTransaction == null) {
+                    final SavingsAccountTransaction newPostingTransaction = SavingsAccountTransaction.interestPosting(this,
+                            interestPostingTransactionDate, interestEarnedToBePostedForPeriod);
                     this.transactions.add(newPostingTransaction);
                     recalucateDailyBalanceDetails = true;
+                } else {
+                    boolean correctionRequired = postingTransaction.hasNotAmount(interestEarnedToBePostedForPeriod);
+                    if (correctionRequired) {
+                        postingTransaction.reverse();
+                        final SavingsAccountTransaction newPostingTransaction = SavingsAccountTransaction.interestPosting(this,
+                                interestPostingTransactionDate, interestEarnedToBePostedForPeriod);
+                        this.transactions.add(newPostingTransaction);
+                        recalucateDailyBalanceDetails = true;
+                    }
                 }
             }
         }
@@ -419,52 +411,22 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         return postingTransation;
     }
 
-    private Money findInterestEarnedToBePostedOn(final Money interestPostedToDate, final LocalDate postingDate,
-            final List<InterestCompoundingPeriodSummary> compoundingPeriods) {
-
-        Money interestToBePosted = Money.zero(this.currency);
-
-        BigDecimal lastRelevantInterest = BigDecimal.ZERO;
-        for (InterestCompoundingPeriodSummary interestCompoundingPeriodSummary : compoundingPeriods) {
-            if (interestCompoundingPeriodSummary.fallsBefore(postingDate)) {
-                interestToBePosted = Money.of(this.currency, interestCompoundingPeriodSummary.compoundedInterest());
-                lastRelevantInterest = interestCompoundingPeriodSummary.compoundedInterest();
-            }
-        }
-        logger.info("Interest is: " + lastRelevantInterest + " :>> ");
-
-        return interestToBePosted.minus(interestPostedToDate);
-    }
-
-    private List<LocalDate> determineInterestPostingDates(final LocalDate activationLocalDate, final LocalDate interestPostingUpToDate,
-            final SavingsInterestPostingPeriodType postingPeriodType) {
-
-        List<LocalDate> postingDates = new ArrayList<LocalDate>();
-
-        LocalDate periodStartDate = activationLocalDate;
-        LocalDate periodEndDate = periodStartDate;
-
-        while (!periodStartDate.isAfter(interestPostingUpToDate) && !periodEndDate.isAfter(interestPostingUpToDate)) {
-
-            final LocalDate interestPostingLocalDate = determineInterestPostingPeriodEndDateFrom(periodStartDate, postingPeriodType);
-            if (!interestPostingLocalDate.isAfter(DateUtils.getLocalDateOfTenant())) {
-                postingDates.add(interestPostingLocalDate);
-            }
-
-            periodEndDate = interestPostingLocalDate;
-            periodStartDate = interestPostingLocalDate;
-        }
-
-        return postingDates;
-    }
-
     /**
      * All interest calculation based on END-OF-DAY-BALANCE.
      * 
      * Interest calculation is performed on-the-fly over all account
      * transactions.
+     * 
+     * 
+     * 1. Calculate Interest From Beginning Of Account 1a. determine the
+     * 'crediting' periods that exist for this savings acccount 1b. determine
+     * the 'compounding' periods that exist within each 'crediting' period
+     * calculate the amount of interest due at the end of each 'crediting'
+     * period check if an existing 'interest posting' transaction exists for
+     * date and matches the amount posted
      */
-    public List<InterestCompoundingPeriodSummary> calculateInterest(final LocalDate interestCalculationUpToDate) {
+    public List<PostingPeriod> calculateInterestUsing(final SavingsHelper savingsHelper, final MathContext mc,
+            final LocalDate upToInterestCalculationDate) {
 
         // no openingBalance concept supported yet but probably will to allow
         // for migrations.
@@ -474,239 +436,59 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         // correct.
         recalculateDailyBalances(openingAccountBalance);
 
-        final SavingsInterestCalculationDaysInYearType daysInYearType = SavingsInterestCalculationDaysInYearType
-                .fromInt(this.interestCalculationDaysInYearType);
+        // 1. default to calculate interest based on entire history OR
+        // 2. determine latest 'posting period' and find interest credited to
+        // that period
+
+        // A generate list of EndOfDayBalances (not including interest postings)
+        final SavingsPostingInterestPeriodType postingPeriodType = SavingsPostingInterestPeriodType.fromInt(this.interestPostingPeriodType);
+
         final SavingsCompoundingInterestPeriodType compoundingPeriodType = SavingsCompoundingInterestPeriodType
                 .fromInt(this.interestCompoundingPeriodType);
-        final List<LocalDateInterval> interestCompoundingPeriods = determineInterestCompoundingPeriods(getActivationLocalDate(),
-                interestCalculationUpToDate, compoundingPeriodType);
 
-        // determine opening balance, daily interest rate to apply, interest
-        // due, interest to compound for each period
-        final List<InterestCompoundingPeriodSummary> compoundingPeriods = determineInterestCompoundingPeriodSummaries(
-                openingAccountBalance, this.nominalAnnualInterestRate, daysInYearType, interestCompoundingPeriods);
+        final SavingsInterestCalculationDaysInYearType daysInYearType = SavingsInterestCalculationDaysInYearType
+                .fromInt(this.interestCalculationDaysInYearType);
 
-        this.summary.updateFromInterestPeriodSummaries(currency, compoundingPeriods);
+        List<LocalDateInterval> postingPeriodIntervals = savingsHelper.determineInterestPostingPeriods(getActivationLocalDate(),
+                upToInterestCalculationDate, postingPeriodType);
 
-        this.summary.updateSummary(this.currency, this.savingsAccountTransactionSummaryWrapper, this.transactions);
+        List<PostingPeriod> allPostingPeriods = new ArrayList<PostingPeriod>();
 
-        return compoundingPeriods;
-    }
-
-    private List<InterestCompoundingPeriodSummary> determineInterestCompoundingPeriodSummaries(final Money openingAccountBalance,
-            final BigDecimal annualInterestRate, final SavingsInterestCalculationDaysInYearType daysInYearType,
-            final List<LocalDateInterval> interestCompoundingPeriods) {
-
-        List<InterestCompoundingPeriodSummary> summaries = new ArrayList<InterestCompoundingPeriodSummary>();
-
-        final MathContext mc = new MathContext(10, RoundingMode.HALF_EVEN);
-        final BigDecimal percentageDivisor = BigDecimal.valueOf(100l);
-        final BigDecimal periodsInOneYear = determinePeriodsInOneYear(daysInYearType);
-        final BigDecimal periodsInOneYearAsFraction = BigDecimal.ONE.divide(periodsInOneYear, mc);
-        final BigDecimal annualInterestRateAsFraction = annualInterestRate.divide(percentageDivisor, mc);
+        Money periodStartingBalance = Money.zero(this.currency);
 
         final SavingsInterestCalculationType interestCalculationType = SavingsInterestCalculationType.fromInt(this.interestCalculationType);
+        BigDecimal interestRateAsFraction = nominalAnnualInterestRate.divide(BigDecimal.valueOf(100l), mc);
+        for (LocalDateInterval periodInterval : postingPeriodIntervals) {
 
-        final SavingsInterestCalculatorFactory interestCalculatorFactory = new SavingsInterestCalculatorFactory();
-        final SavingsCompoundInterestCalculator interestCalculator = interestCalculatorFactory.createFrom(interestCalculationType,
-                periodsInOneYearAsFraction, annualInterestRateAsFraction);
+            PostingPeriod postingPeriod = PostingPeriod.createFrom(periodInterval, periodStartingBalance,
+                    retreiveOrderedListOfTransactions(), currency, compoundingPeriodType, interestCalculationType, interestRateAsFraction,
+                    daysInYearType.getValue());
 
-        BigDecimal periodOpeningBalance = openingAccountBalance.copy().getAmount();
-        BigDecimal compoundedInterestToDate = BigDecimal.ZERO;
-        for (LocalDateInterval periodInterval : interestCompoundingPeriods) {
+            periodStartingBalance = postingPeriod.closingBalance();
 
-            InterestCompoundingPeriodSummary compoundingSummary = calculateInterestCompoundingPeriodSummary(periodInterval,
-                    periodOpeningBalance, compoundedInterestToDate, interestCalculator);
-
-            periodOpeningBalance = compoundingSummary.closingBalance();
-            compoundedInterestToDate = compoundingSummary.compoundedInterest();
-
-            summaries.add(compoundingSummary);
+            allPostingPeriods.add(postingPeriod);
         }
 
-        return summaries;
+        savingsHelper.calculateInterestForAllPostingPeriods(currency, allPostingPeriods);
+
+        this.summary.updateFromInterestPeriodSummaries(currency, allPostingPeriods);
+        this.summary.updateSummary(this.currency, this.savingsAccountTransactionSummaryWrapper, this.transactions);
+
+        return allPostingPeriods;
     }
 
-    private InterestCompoundingPeriodSummary calculateInterestCompoundingPeriodSummary(final LocalDateInterval periodInterval,
-            final BigDecimal periodOpeningBalance, final BigDecimal compoundedInterestToDate,
-            final SavingsCompoundInterestCalculator interestCalculator) {
+    private List<SavingsAccountTransaction> retreiveOrderedListOfTransactions() {
+        List<SavingsAccountTransaction> listOfTransactionsSorted = retreiveListOfTransactions();
 
-        BigDecimal periodClosingBalance = periodOpeningBalance;
-        List<SavingsAccountDailyBalance> dailyBalances = new ArrayList<SavingsAccountDailyBalance>();
-        for (SavingsAccountTransaction transaction : this.transactions) {
+        List<SavingsAccountTransaction> orderedNonInterestPostingTransactions = new ArrayList<SavingsAccountTransaction>();
 
-            if (transaction.isAcceptableForDailyBalance(periodInterval)) {
-                SavingsAccountDailyBalance dailyBalance = transaction.toCompoundedDailyBalance(periodInterval.endDate(),
-                        compoundedInterestToDate);
-                dailyBalances.add(dailyBalance);
-
-                periodClosingBalance = dailyBalance.endOfDayBalance();
+        for (SavingsAccountTransaction transaction : listOfTransactionsSorted) {
+            if (!transaction.isInterestPosting() && transaction.isNotReversed()) {
+                orderedNonInterestPostingTransactions.add(transaction);
             }
         }
 
-        if (dailyBalances.isEmpty()) {
-            SavingsAccountDailyBalance dailyBalance = SavingsAccountDailyBalance.createFrom(periodInterval, periodOpeningBalance,
-                    compoundedInterestToDate);
-            dailyBalances.add(dailyBalance);
-        }
-
-        final BigDecimal totalInterestEarnedUnrounded = interestCalculator.calculate(dailyBalances,
-                periodInterval.daysInPeriodInclusiveOfEndDate());
-
-        final MathContext mc = new MathContext(10, RoundingMode.HALF_EVEN);
-        final BigDecimal cumulativeCompoundedInterestToDate = compoundedInterestToDate.add(totalInterestEarnedUnrounded, mc);
-
-        return InterestCompoundingPeriodSummary.create(periodInterval, periodOpeningBalance, periodClosingBalance,
-                totalInterestEarnedUnrounded, cumulativeCompoundedInterestToDate);
-    }
-
-    private List<LocalDateInterval> determineInterestCompoundingPeriods(final LocalDate activationLocalDate,
-            final LocalDate interestCalculationEndDate, final SavingsCompoundingInterestPeriodType interestPeriodType) {
-        LocalDate periodStartDate = activationLocalDate;
-        LocalDate periodEndDate = periodStartDate;
-
-        final List<LocalDateInterval> interestPeriods = new ArrayList<LocalDateInterval>();
-
-        while (!periodStartDate.isAfter(interestCalculationEndDate) && !periodEndDate.isAfter(interestCalculationEndDate)) {
-
-            periodEndDate = determineInterestPeriodEndDateFrom(periodStartDate, interestPeriodType);
-            if (periodEndDate.isAfter(interestCalculationEndDate)) {
-                periodEndDate = interestCalculationEndDate;
-            }
-            interestPeriods.add(LocalDateInterval.create(periodStartDate, periodEndDate));
-
-            // move periodStartDate forward to day after this period
-            periodStartDate = periodEndDate.plusDays(1);
-        }
-
-        return interestPeriods;
-    }
-
-    private LocalDate determineInterestPostingPeriodEndDateFrom(final LocalDate periodStartDate,
-            final SavingsInterestPostingPeriodType interestPostingPeriodType) {
-
-        LocalDate periodEndDate = DateUtils.getLocalDateOfTenant();
-
-        switch (interestPostingPeriodType) {
-            case INVALID:
-            break;
-            case MONTHLY:
-                // produce period end date on last day of current month
-                periodEndDate = periodStartDate.dayOfMonth().withMaximumValue();
-            break;
-            case QUATERLY:
-                // jan 1st to mar 31st, 1st apr to jun 30, jul 1st to sept 30,
-                // oct 1st to dec 31
-                int year = periodStartDate.getYearOfEra();
-                int monthofYear = periodStartDate.getMonthOfYear();
-                if (monthofYear <= 3) {
-                    periodEndDate = new DateTime().withDate(year, 3, 31).toLocalDate();
-                } else if (monthofYear <= 6) {
-                    periodEndDate = new DateTime().withDate(year, 6, 30).toLocalDate();
-                } else if (monthofYear <= 9) {
-                    periodEndDate = new DateTime().withDate(year, 9, 30).toLocalDate();
-                } else if (monthofYear <= 12) {
-                    periodEndDate = new DateTime().withDate(year, 12, 31).toLocalDate();
-                }
-            break;
-            case BI_ANNUAL:
-                // jan 1st to 30, jul 1st to dec 31
-                year = periodStartDate.getYearOfEra();
-                monthofYear = periodStartDate.getMonthOfYear();
-                if (monthofYear <= 6) {
-                    periodEndDate = new DateTime().withDate(year, 6, 30).toLocalDate();
-                } else if (monthofYear <= 12) {
-                    periodEndDate = new DateTime().withDate(year, 12, 31).toLocalDate();
-                }
-            break;
-            case ANNUAL:
-                periodEndDate = periodStartDate.monthOfYear().withMaximumValue();
-                periodEndDate = periodEndDate.dayOfMonth().withMaximumValue();
-            break;
-        }
-
-        // interest posting always occurs on next day after the period end date.
-        periodEndDate = periodEndDate.plusDays(1);
-
-        return periodEndDate;
-    }
-
-    private LocalDate determineInterestPeriodEndDateFrom(final LocalDate periodStartDate,
-            final SavingsCompoundingInterestPeriodType interestPeriodType) {
-
-        LocalDate periodEndDate = DateUtils.getLocalDateOfTenant();
-
-        switch (interestPeriodType) {
-            case INVALID:
-            break;
-            case DAILY:
-                periodEndDate = periodStartDate;
-            break;
-            case WEEKLY:
-                periodEndDate = periodStartDate.dayOfWeek().withMaximumValue();
-            break;
-            case BIWEEKLY:
-                final LocalDate closestEndOfWeek = periodStartDate.dayOfWeek().withMaximumValue();
-                periodEndDate = closestEndOfWeek.plusWeeks(1);
-            break;
-            case MONTHLY:
-                // produce period end date on last day of current month
-                periodEndDate = periodStartDate.dayOfMonth().withMaximumValue();
-            break;
-            case QUATERLY:
-                // jan 1st to mar 31st, 1st apr to jun 30, jul 1st to sept 30,
-                // oct 1st to dec 31
-                int year = periodStartDate.getYearOfEra();
-                int monthofYear = periodStartDate.getMonthOfYear();
-                if (monthofYear <= 3) {
-                    periodEndDate = new DateTime().withDate(year, 3, 31).toLocalDate();
-                } else if (monthofYear <= 6) {
-                    periodEndDate = new DateTime().withDate(year, 6, 30).toLocalDate();
-                } else if (monthofYear <= 9) {
-                    periodEndDate = new DateTime().withDate(year, 9, 30).toLocalDate();
-                } else if (monthofYear <= 12) {
-                    periodEndDate = new DateTime().withDate(year, 12, 31).toLocalDate();
-                }
-            break;
-            case BI_ANNUAL:
-                // jan 1st to 30, jul 1st to dec 31
-                year = periodStartDate.getYearOfEra();
-                monthofYear = periodStartDate.getMonthOfYear();
-                if (monthofYear <= 6) {
-                    periodEndDate = new DateTime().withDate(year, 6, 30).toLocalDate();
-                } else if (monthofYear <= 12) {
-                    periodEndDate = new DateTime().withDate(year, 12, 31).toLocalDate();
-                }
-            break;
-            case ANNUAL:
-                periodEndDate = periodStartDate.monthOfYear().withMaximumValue();
-                periodEndDate = periodEndDate.dayOfMonth().withMaximumValue();
-            break;
-            case NO_COMPOUNDING_SIMPLE_INTEREST:
-                periodEndDate = periodStartDate.monthOfYear().withMaximumValue();
-                periodEndDate = periodEndDate.dayOfMonth().withMaximumValue();
-            break;
-        }
-
-        return periodEndDate;
-    }
-
-    private BigDecimal determinePeriodsInOneYear(final SavingsInterestCalculationDaysInYearType daysInYearType) {
-
-        BigDecimal periodsInOneYear = BigDecimal.ZERO;
-
-        switch (daysInYearType) {
-            case DAYS_360:
-                periodsInOneYear = BigDecimal.valueOf(360l);
-            break;
-            case DAYS_365:
-                periodsInOneYear = BigDecimal.valueOf(365l);
-            break;
-            case INVALID:
-            break;
-        }
-
-        return periodsInOneYear;
+        return orderedNonInterestPostingTransactions;
     }
 
     private List<SavingsAccountTransaction> retreiveListOfTransactions() {
@@ -749,11 +531,13 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         LocalDate endOfBalanceDate = DateUtils.getLocalDateOfTenant();
         for (int i = accountTransactionsSorted.size() - 1; i >= 0; i--) {
             SavingsAccountTransaction transaction = accountTransactionsSorted.get(i);
-            transaction.updateCumulativeBalanceAndDates(this.currency, endOfBalanceDate);
+            if (transaction.isNotReversed()) {
+                transaction.updateCumulativeBalanceAndDates(this.currency, endOfBalanceDate);
 
-            // this transactions transaction date is end of balance date for
-            // previous transaction.
-            endOfBalanceDate = transaction.transactionLocalDate().minusDays(1);
+                // this transactions transaction date is end of balance date for
+                // previous transaction.
+                endOfBalanceDate = transaction.transactionLocalDate().minusDays(1);
+            }
         }
     }
 
@@ -800,22 +584,19 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         existingReversedTransactionIds.addAll(findExistingReversedTransactionIds());
 
         final Money amount = Money.of(this.currency, transactionAmount);
-               
+
         final SavingsAccountTransaction transaction = SavingsAccountTransaction.deposit(this, paymentDetail, transactionDate, amount);
         this.transactions.add(transaction);
-        
-        this.summary.updateSummary(this.currency, this.savingsAccountTransactionSummaryWrapper, this.transactions);
 
-        final LocalDate today = DateUtils.getLocalDateOfTenant();
-        calculateInterest(today);
+        this.summary.updateSummary(this.currency, this.savingsAccountTransactionSummaryWrapper, this.transactions);
 
         return transaction;
     }
 
     private LocalDate getActivationLocalDate() {
         LocalDate activationLocalDate = null;
-        if (this.activationDate != null) {
-            activationLocalDate = new LocalDate(this.activationDate);
+        if (this.activatedOnDate != null) {
+            activationLocalDate = new LocalDate(this.activatedOnDate);
         }
         return activationLocalDate;
     }
@@ -877,12 +658,6 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         existingReversedTransactionIds.addAll(findExistingReversedTransactionIds());
 
         final Money transactionAmountMoney = Money.of(this.currency, transactionAmount);
-
-        if (this.summary.getAccountBalance(this.currency).isLessThan(transactionAmountMoney.plus(this.withdrawalFeeAmount))) {
-            //
-            throw new InsufficientAccountBalanceException("transactionAmount", getAccountBalance(), this.withdrawalFeeAmount, transactionAmount);
-        }
-
         final SavingsAccountTransaction transaction = SavingsAccountTransaction.withdrawal(this, paymentDetail, transactionDate,
                 transactionAmountMoney);
         this.transactions.add(transaction);
@@ -890,7 +665,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         if (isAutomaticWithdrawalFee()) {
 
             SavingsAccountTransaction withdrawalFeeTransaction = null;
-            Money feeAmount = null;
+            Money feeAmount = Money.zero(this.currency);
             switch (SavingsWithdrawalFeesType.fromInt(this.withdrawalFeeType)) {
                 case INVALID:
                 break;
@@ -909,16 +684,51 @@ public class SavingsAccount extends AbstractPersistable<Long> {
             }
         }
 
-        this.summary.updateSummary(this.currency, this.savingsAccountTransactionSummaryWrapper, this.transactions);
+        validateAccountBalanceDoesNotBecomeNegative(retreiveListOfTransactions(), transactionAmountMoney);
 
-        final LocalDate today = DateUtils.getLocalDateOfTenant();
-        calculateInterest(today);
+        this.summary.updateSummary(this.currency, this.savingsAccountTransactionSummaryWrapper, this.transactions);
 
         return transaction;
     }
 
-    public SavingsAccountTransaction addAnnualFee(final DateTimeFormatter formatter, final LocalDate transactionDate,
-            final List<Long> existingTransactionIds, final List<Long> existingReversedTransactionIds) {
+    public boolean isBeforeLastPostingPeriod(final LocalDate transactionDate) {
+
+        boolean transactionBeforeLastInterestPosting = false;
+
+        for (SavingsAccountTransaction transaction : retreiveListOfTransactions()) {
+            if (transaction.isNotReversed() && transaction.isInterestPosting() && transaction.isAfter(transactionDate)) {
+                transactionBeforeLastInterestPosting = true;
+                break;
+            }
+        }
+
+        return transactionBeforeLastInterestPosting;
+    }
+
+    private void validateAccountBalanceDoesNotBecomeNegative(final List<SavingsAccountTransaction> transactionsSortedByDate,
+            final Money transactionAmount) {
+
+        Money runningBalance = Money.zero(this.currency);
+
+        for (SavingsAccountTransaction transaction : transactionsSortedByDate) {
+            if (transaction.isNotReversed() && transaction.isDeposit() || transaction.isInterestPosting()) {
+                runningBalance = runningBalance.plus(transaction.getAmount(this.currency));
+            } else if (transaction.isNotReversed() && transaction.isWithdrawal()) {
+                runningBalance = runningBalance.minus(transaction.getAmount(this.currency));
+            }
+
+            if (runningBalance.isLessThanZero()) {
+                //
+                final BigDecimal withdrawalFee = null;
+                throw new InsufficientAccountBalanceException("transactionAmount", getAccountBalance(), withdrawalFee,
+                        transactionAmount.getAmount());
+            }
+        }
+    }
+
+    public SavingsAccountTransaction addAnnualFee(final SavingsHelper savingsHelper, final MathContext mc,
+            final DateTimeFormatter formatter, final LocalDate transactionDate, final List<Long> existingTransactionIds,
+            final List<Long> existingReversedTransactionIds) {
 
         if (isNotActive()) {
 
@@ -979,7 +789,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         this.summary.updateSummary(this.currency, this.savingsAccountTransactionSummaryWrapper, this.transactions);
 
         final LocalDate today = DateUtils.getLocalDateOfTenant();
-        calculateInterest(today);
+        calculateInterestUsing(savingsHelper, mc, today);
 
         updateAnnualFeeNextDueDate();
 
@@ -1013,14 +823,6 @@ public class SavingsAccount extends AbstractPersistable<Long> {
 
     private BigDecimal getAccountBalance() {
         return this.summary.getAccountBalance(this.currency).getAmount();
-    }
-
-    private boolean isNotEnoughFundsToWithdraw(final Money amount) {
-        return !isEnoughFundsToWithdraw(amount);
-    }
-
-    private boolean isEnoughFundsToWithdraw(final Money amount) {
-        return this.summary.isLessThanOrEqualToAccountBalance(amount);
     }
 
     public void update(final JsonCommand command, final Map<String, Object> actualChanges) {
@@ -1062,16 +864,19 @@ public class SavingsAccount extends AbstractPersistable<Long> {
             this.nominalAnnualInterestRate = newValue;
         }
 
-        if (command.isChangeInBigDecimalParameterNamed(SavingsApiConstants.minRequiredOpeningBalanceParamName,
+        if (command.isChangeInBigDecimalParameterNamedDefaultingZeroToNull(SavingsApiConstants.minRequiredOpeningBalanceParamName,
                 this.minRequiredOpeningBalance)) {
-            final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(SavingsApiConstants.minRequiredOpeningBalanceParamName);
+            final BigDecimal newValue = command
+                    .bigDecimalValueOfParameterNamedDefaultToNullIfZero(SavingsApiConstants.minRequiredOpeningBalanceParamName);
             actualChanges.put(SavingsApiConstants.minRequiredOpeningBalanceParamName, newValue);
             actualChanges.put("locale", localeAsInput);
             this.minRequiredOpeningBalance = Money.of(this.currency, newValue).getAmount();
         }
 
-        if (command.isChangeInIntegerParameterNamed(SavingsApiConstants.lockinPeriodFrequencyParamName, this.lockinPeriodFrequency)) {
-            final Integer newValue = command.integerValueOfParameterNamed(SavingsApiConstants.lockinPeriodFrequencyParamName);
+        if (command.isChangeInIntegerParameterNamedDefaultingZeroToNull(SavingsApiConstants.lockinPeriodFrequencyParamName,
+                this.lockinPeriodFrequency)) {
+            final Integer newValue = command
+                    .integerValueOfParameterNamedDefaultToNullIfZero(SavingsApiConstants.lockinPeriodFrequencyParamName);
             actualChanges.put(SavingsApiConstants.lockinPeriodFrequencyParamName, newValue);
             actualChanges.put("locale", localeAsInput);
             this.lockinPeriodFrequency = newValue;
@@ -1080,54 +885,138 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         if (command.isChangeInIntegerParameterNamed(SavingsApiConstants.lockinPeriodFrequencyTypeParamName, this.lockinPeriodFrequencyType)) {
             final Integer newValue = command.integerValueOfParameterNamed(SavingsApiConstants.lockinPeriodFrequencyTypeParamName);
             actualChanges.put(SavingsApiConstants.lockinPeriodFrequencyTypeParamName, newValue);
-            if (newValue != null) {
-                this.lockinPeriodFrequencyType = PeriodFrequencyType.fromInt(newValue).getValue();
-            } else {
-                this.lockinPeriodFrequencyType = null;
-            }
+            this.lockinPeriodFrequencyType = newValue != null ? SavingsPeriodFrequencyType.fromInt(newValue).getValue() : newValue;
         }
 
-        if (command.isChangeInBigDecimalParameterNamed(withdrawalFeeAmountParamName, this.withdrawalFeeAmount)) {
-            final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(withdrawalFeeAmountParamName);
+        // set period type to null if frequency is null
+        if (this.lockinPeriodFrequency == null) {
+            this.lockinPeriodFrequencyType = null;
+        }
+
+        if (command.isChangeInBigDecimalParameterNamedDefaultingZeroToNull(withdrawalFeeAmountParamName, this.withdrawalFeeAmount)) {
+            final BigDecimal newValue = command.bigDecimalValueOfParameterNamedDefaultToNullIfZero(withdrawalFeeAmountParamName);
             actualChanges.put(withdrawalFeeAmountParamName, newValue);
             actualChanges.put(localeParamName, localeAsInput);
             this.withdrawalFeeAmount = newValue;
         }
 
-        if (command.isChangeInIntegerParameterNamed(withdrawalFeeTypeParamName, this.withdrawalFeeType)) {
-            final Integer newValue = command.integerValueOfParameterNamed(withdrawalFeeTypeParamName);
+        if (command.isChangeInIntegerParameterNamedDefaultingZeroToNull(withdrawalFeeTypeParamName, this.withdrawalFeeType)) {
+            final Integer newValue = command.integerValueOfParameterNamedDefaultToNullIfZero(withdrawalFeeTypeParamName);
             actualChanges.put(withdrawalFeeTypeParamName, newValue);
-            this.withdrawalFeeType = SavingsWithdrawalFeesType.fromInt(newValue).getValue();
+            this.withdrawalFeeType = newValue != null ? SavingsWithdrawalFeesType.fromInt(newValue).getValue() : newValue;
         }
 
-        if (command.isChangeInBigDecimalParameterNamed(annualFeeAmountParamName, this.annualFeeAmount)) {
-            final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(annualFeeAmountParamName);
+        // set period type to null if frequency is null
+        if (this.withdrawalFeeAmount == null) {
+            this.withdrawalFeeType = null;
+        }
+
+        if (command.isChangeInBigDecimalParameterNamedDefaultingZeroToNull(annualFeeAmountParamName, this.annualFeeAmount)) {
+            final BigDecimal newValue = command.bigDecimalValueOfParameterNamedDefaultToNullIfZero(annualFeeAmountParamName);
             actualChanges.put(annualFeeAmountParamName, newValue);
             actualChanges.put(localeParamName, localeAsInput);
             this.annualFeeAmount = newValue;
         }
 
-        if (command.isChangeInIntegerParameterNamed(annualFeeOnMonthDayParamName, this.annualFeeOnDay)) {
+        if (command.isChangeInIntegerParameterNamedDefaultingZeroToNull(annualFeeOnMonthDayParamName, this.annualFeeOnDay)) {
             final MonthDay monthDay = command.extractMonthDayNamed(annualFeeOnMonthDayParamName);
             final String actualValueEntered = command.stringValueOfParameterNamed(annualFeeOnMonthDayParamName);
             final Integer newValue = monthDay.getDayOfMonth();
             actualChanges.put(annualFeeOnMonthDayParamName, actualValueEntered);
             actualChanges.put(localeParamName, localeAsInput);
             this.annualFeeOnDay = newValue;
-
-            updateAnnualFeeNextDueDate();
         }
 
-        if (command.isChangeInIntegerParameterNamed(annualFeeOnMonthDayParamName, this.annualFeeOnMonth)) {
+        if (command.isChangeInIntegerParameterNamedDefaultingZeroToNull(annualFeeOnMonthDayParamName, this.annualFeeOnMonth)) {
             final MonthDay monthDay = command.extractMonthDayNamed(annualFeeOnMonthDayParamName);
             final String actualValueEntered = command.stringValueOfParameterNamed(annualFeeOnMonthDayParamName);
             final Integer newValue = monthDay.getMonthOfYear();
             actualChanges.put(annualFeeOnMonthDayParamName, actualValueEntered);
             actualChanges.put(localeParamName, localeAsInput);
             this.annualFeeOnMonth = newValue;
+        }
 
+        // set period type to null if frequency is null
+        if (this.annualFeeAmount == null) {
+            this.annualFeeOnDay = null;
+            this.annualFeeOnMonth = null;
+        }
+
+        if (this.annualFeeOnDay != null && this.annualFeeOnMonth != null) {
             updateAnnualFeeNextDueDate();
         }
+
+        validateLockinDetails();
+        validateWithdrawalFeeDetails();
+        validateAnnualFeeDetails();
+    }
+
+    private void validateAnnualFeeDetails() {
+
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+                .resource(SAVINGS_ACCOUNT_RESOURCE_NAME);
+
+        if (this.annualFeeAmount == null) {
+
+            if (this.annualFeeOnMonth != null || this.annualFeeOnDay != null) {
+                baseDataValidator.reset().parameter(annualFeeAmountParamName).value(this.annualFeeAmount).notNull();
+            }
+        } else {
+
+            if (this.annualFeeOnMonth == null || this.annualFeeOnDay == null) {
+                baseDataValidator.reset().parameter(annualFeeOnMonthDayParamName).value(this.annualFeeOnMonth).notNull();
+            }
+
+            baseDataValidator.reset().parameter(annualFeeAmountParamName).value(this.annualFeeAmount).zeroOrPositiveAmount();
+        }
+
+        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+    }
+
+    private void validateWithdrawalFeeDetails() {
+
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+                .resource(SAVINGS_ACCOUNT_RESOURCE_NAME);
+
+        if (this.withdrawalFeeAmount == null) {
+            baseDataValidator.reset().parameter(withdrawalFeeTypeParamName).value(this.withdrawalFeeType).ignoreIfNull()
+                    .isOneOfTheseValues(1, 2);
+
+            if (this.withdrawalFeeType != null) {
+                baseDataValidator.reset().parameter(withdrawalFeeAmountParamName).value(this.withdrawalFeeAmount).notNull();
+            }
+        } else {
+            baseDataValidator.reset().parameter(withdrawalFeeAmountParamName).value(this.withdrawalFeeAmount).zeroOrPositiveAmount();
+            baseDataValidator.reset().parameter(withdrawalFeeTypeParamName).value(this.withdrawalFeeType).notNull()
+                    .isOneOfTheseValues(1, 2);
+        }
+
+        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+    }
+
+    private void validateLockinDetails() {
+
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+                .resource(SAVINGS_ACCOUNT_RESOURCE_NAME);
+
+        if (this.lockinPeriodFrequency == null) {
+            baseDataValidator.reset().parameter(lockinPeriodFrequencyTypeParamName).value(lockinPeriodFrequencyType).ignoreIfNull()
+                    .inMinMaxRange(0, 3);
+
+            if (this.lockinPeriodFrequencyType != null) {
+                baseDataValidator.reset().parameter(lockinPeriodFrequencyParamName).value(lockinPeriodFrequency).notNull()
+                        .integerZeroOrGreater();
+            }
+        } else {
+            baseDataValidator.reset().parameter(lockinPeriodFrequencyParamName).value(lockinPeriodFrequencyType).integerZeroOrGreater();
+            baseDataValidator.reset().parameter(lockinPeriodFrequencyTypeParamName).value(lockinPeriodFrequencyType).notNull()
+                    .inMinMaxRange(0, 3);
+        }
+
+        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
     }
 
     public Map<String, Object> deriveAccountingBridgeData(final CurrencyData currencyData, final List<Long> existingTransactionIds,
@@ -1240,4 +1129,312 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         return this.currency;
     }
 
+    public void validateNewApplicationState(final LocalDate todayDateOfTenant) {
+
+        validateLockinDetails();
+        validateWithdrawalFeeDetails();
+        validateAnnualFeeDetails();
+
+        final LocalDate submittedOn = getSubmittedOnLocalDate();
+
+        if (submittedOn.isAfter(todayDateOfTenant)) {
+            final String errorMessage = "Savings account application submitted on date cannot be in the future.";
+            throw new InvalidSavingsAccountStateTransitionException("submittal", "cannot.be.a.future.date", errorMessage, submittedOn);
+        }
+
+        if (client != null && client.isActivatedAfter(submittedOn)) {
+            final String errorMessage = "Savings account application submitted on date cannot be earlier than client's activation date.";
+            throw new InvalidSavingsAccountStateTransitionException("submittal", "cannot.be.before.client.activation.date", errorMessage,
+                    submittedOn);
+        } else if (group != null && group.isActivatedAfter(submittedOn)) {
+            final String errorMessage = "Savings account application submitted on date cannot be earlier than group's activation date.";
+            throw new InvalidSavingsAccountStateTransitionException("submittal", "cannot.be.before.group.activation.date", errorMessage,
+                    submittedOn);
+        }
+    }
+
+    private LocalDate getSubmittedOnLocalDate() {
+        LocalDate submittedOn = null;
+        if (this.submittedOnDate != null) {
+            submittedOn = new LocalDate(this.submittedOnDate);
+        }
+        return submittedOn;
+    }
+
+    private LocalDate getApprovedOnLocalDate() {
+        LocalDate approvedOnLocalDate = null;
+        if (this.approvedOnDate != null) {
+            approvedOnLocalDate = new LocalDate(this.approvedOnDate);
+        }
+        return approvedOnLocalDate;
+    }
+
+    public Client getClient() {
+        return this.client;
+    }
+
+    public Map<String, Object> approveApplication(final AppUser currentUser, final JsonCommand command, final LocalDate tenantsTodayDate) {
+
+        final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>();
+
+        SavingsAccountStatusType currentStatus = SavingsAccountStatusType.fromInt(this.status);
+        if (!SavingsAccountStatusType.SUBMITTED_AND_PENDING_APPROVAL.hasStateOf(currentStatus)) {
+            final String errorMessage = "Savings account application can only be approved when in 'Submitted and pending approval' state. ";
+            throw new InvalidSavingsAccountStateTransitionException("approval", "not.in.submittedandpendingapproval.state", errorMessage);
+        }
+
+        this.status = SavingsAccountStatusType.APPROVED.getValue();
+        actualChanges.put("status", SavingsEnumerations.status(this.status));
+
+        // only do below if status has changed in the 'approval' case
+        LocalDate approvedOn = command.localDateValueOfParameterNamed("approvedOnDate");
+        String approvedOnDateChange = command.stringValueOfParameterNamed("approvedOnDate");
+        if (approvedOn == null) {
+            approvedOn = command.localDateValueOfParameterNamed("eventDate");
+            approvedOnDateChange = command.stringValueOfParameterNamed("eventDate");
+        }
+
+        this.approvedOnDate = approvedOn.toDate();
+        this.approvedBy = currentUser;
+        actualChanges.put("locale", command.locale());
+        actualChanges.put("dateFormat", command.dateFormat());
+        actualChanges.put("approvedOnDate", approvedOnDateChange);
+
+        // FIXME - kw - format dates based on based locale when doing error
+        // messages related dates.
+        final LocalDate submittalDate = new LocalDate(this.submittedOnDate);
+        if (approvedOn.isBefore(submittalDate)) {
+            final String errorMessage = "Savings account application cannot be approved on date before its submittal date: "
+                    + submittalDate.toString();
+            throw new InvalidSavingsAccountStateTransitionException("approval", "cannot.be.before.submittal.date", errorMessage,
+                    getApprovedOnLocalDate(), submittalDate);
+        }
+
+        if (approvedOn.isAfter(tenantsTodayDate)) {
+            final String errorMessage = "Savings account application cannot be approved on date in the future.";
+            throw new InvalidSavingsAccountStateTransitionException("approval", "cannot.be.a.future.date", errorMessage,
+                    getApprovedOnLocalDate());
+        }
+
+        // FIXME - kw - support field officer history for savings accounts
+        // if (this.fieldOfficer != null) {
+        // final LoanOfficerAssignmentHistory loanOfficerAssignmentHistory =
+        // LoanOfficerAssignmentHistory.createNew(this,
+        // this.fieldOfficer, approvedOn);
+        // this.loanOfficerHistory.add(loanOfficerAssignmentHistory);
+        // }
+
+        return actualChanges;
+    }
+
+    public Map<String, Object> undoApplicationApproval() {
+        final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>();
+
+        SavingsAccountStatusType currentStatus = SavingsAccountStatusType.fromInt(this.status);
+        if (!SavingsAccountStatusType.APPROVED.hasStateOf(currentStatus)) {
+            final String errorMessage = "Savings account application can only undo approval when in 'Approved' state. ";
+            throw new InvalidSavingsAccountStateTransitionException("approval", "not.in.approved.state", errorMessage);
+        }
+
+        this.status = SavingsAccountStatusType.SUBMITTED_AND_PENDING_APPROVAL.getValue();
+        actualChanges.put("status", SavingsEnumerations.status(this.status));
+
+        this.approvedOnDate = null;
+        this.approvedBy = null;
+        this.rejectedOnDate = null;
+        this.rejectedBy = null;
+        this.withdrawnOnDate = null;
+        this.withdrawnBy = null;
+        this.closedOnDate = null;
+        this.closedBy = null;
+        actualChanges.put("approvedOnDate", "");
+
+        // FIXME - kw - support field officer history for savings accounts
+        // this.loanOfficerHistory.clear();
+
+        return actualChanges;
+    }
+
+    public Map<String, Object> rejectApplication(final AppUser currentUser, final JsonCommand command, final LocalDate tenantsTodayDate) {
+
+        final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>();
+
+        SavingsAccountStatusType currentStatus = SavingsAccountStatusType.fromInt(this.status);
+        if (!SavingsAccountStatusType.SUBMITTED_AND_PENDING_APPROVAL.hasStateOf(currentStatus)) {
+            final String errorMessage = "Savings account application can only be rejected when in 'Submitted and pending approval' state. ";
+            throw new InvalidSavingsAccountStateTransitionException("reject", "not.in.submittedandpendingapproval.state", errorMessage);
+        }
+
+        this.status = SavingsAccountStatusType.REJECTED.getValue();
+        actualChanges.put("status", SavingsEnumerations.status(this.status));
+
+        LocalDate rejectedOn = command.localDateValueOfParameterNamed("rejectedOnDate");
+
+        final Locale locale = new Locale(command.locale());
+        final DateTimeFormatter fmt = DateTimeFormat.forPattern(command.dateFormat()).withLocale(locale);
+
+        this.rejectedOnDate = rejectedOn.toDate();
+        this.rejectedBy = currentUser;
+        this.withdrawnOnDate = null;
+        this.withdrawnBy = null;
+        this.closedOnDate = rejectedOn.toDate();
+        this.closedBy = currentUser;
+
+        actualChanges.put("locale", command.locale());
+        actualChanges.put("dateFormat", command.dateFormat());
+        actualChanges.put("rejectedOnDate", rejectedOn.toString(fmt));
+        actualChanges.put("closedOnDate", rejectedOn.toString(fmt));
+
+        final LocalDate submittalDate = getSubmittedOnLocalDate();
+        if (rejectedOn.isBefore(submittalDate)) {
+            final String errorMessage = "Savings account application cannot be rejected on date before its submittal date: "
+                    + submittalDate.toString();
+            throw new InvalidSavingsAccountStateTransitionException("reject", "cannot.be.before.submittal.date", errorMessage,
+                    getApprovedOnLocalDate(), submittalDate);
+        }
+
+        if (rejectedOn.isAfter(tenantsTodayDate)) {
+            final String errorMessage = "Savings account application cannot be rejected on date in the future.";
+            throw new InvalidSavingsAccountStateTransitionException("reject", "cannot.be.a.future.date", errorMessage,
+                    getApprovedOnLocalDate());
+        }
+
+        return actualChanges;
+    }
+
+    public Map<String, Object> applicantWithdrawsFromApplication(final AppUser currentUser, final JsonCommand command,
+            final LocalDate tenantsTodayDate) {
+        final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>();
+
+        SavingsAccountStatusType currentStatus = SavingsAccountStatusType.fromInt(this.status);
+        if (!SavingsAccountStatusType.SUBMITTED_AND_PENDING_APPROVAL.hasStateOf(currentStatus)) {
+            final String errorMessage = "Savings account application can only be withdrawn by applicant when in 'Submitted and pending approval' state. ";
+            throw new InvalidSavingsAccountStateTransitionException("withdrawnByApplicant", "not.in.submittedandpendingapproval.state",
+                    errorMessage);
+        }
+
+        this.status = SavingsAccountStatusType.WITHDRAWN_BY_APPLICANT.getValue();
+        actualChanges.put("status", SavingsEnumerations.status(this.status));
+
+        LocalDate withdrawnOn = command.localDateValueOfParameterNamed("withdrawnOnDate");
+
+        final Locale locale = new Locale(command.locale());
+        final DateTimeFormatter fmt = DateTimeFormat.forPattern(command.dateFormat()).withLocale(locale);
+
+        this.rejectedOnDate = null;
+        this.rejectedBy = null;
+        this.withdrawnOnDate = withdrawnOn.toDate();
+        this.withdrawnBy = currentUser;
+        this.closedOnDate = withdrawnOn.toDate();
+        this.closedBy = currentUser;
+
+        actualChanges.put("locale", command.locale());
+        actualChanges.put("dateFormat", command.dateFormat());
+        actualChanges.put("withdrawnOnDate", withdrawnOn.toString(fmt));
+        actualChanges.put("closedOnDate", withdrawnOn.toString(fmt));
+
+        final LocalDate submittalDate = getSubmittedOnLocalDate();
+        if (withdrawnOn.isBefore(submittalDate)) {
+            final String errorMessage = "Savings account application cannot be withdrawn by applicant on date before its submittal date: "
+                    + submittalDate.toString();
+            throw new InvalidSavingsAccountStateTransitionException("withdrawnByApplicant", "cannot.be.before.submittal.date",
+                    errorMessage, getApprovedOnLocalDate(), submittalDate);
+        }
+
+        if (withdrawnOn.isAfter(tenantsTodayDate)) {
+            final String errorMessage = "Savings account application cannot be withdrawn by applicant on date in the future.";
+            throw new InvalidSavingsAccountStateTransitionException("withdrawnByApplicant", "cannot.be.a.future.date", errorMessage,
+                    getApprovedOnLocalDate());
+        }
+
+        return actualChanges;
+    }
+
+    public Map<String, Object> activate(final AppUser currentUser, final JsonCommand command, final LocalDate tenantsTodayDate,
+            final List<Long> existingTransactionIds, final List<Long> existingReversedTransactionIds) {
+
+        final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>();
+
+        SavingsAccountStatusType currentStatus = SavingsAccountStatusType.fromInt(this.status);
+        if (!SavingsAccountStatusType.APPROVED.hasStateOf(currentStatus)) {
+            final String errorMessage = "Savings account application can only be activated when in 'approved' state. ";
+            throw new InvalidSavingsAccountStateTransitionException("activation", "not.in.approved.state", errorMessage);
+        }
+
+        final Locale locale = command.extractLocale();
+        final DateTimeFormatter fmt = DateTimeFormat.forPattern(command.dateFormat()).withLocale(locale);
+        final LocalDate activationDate = command.localDateValueOfParameterNamed("activationDate");
+
+        this.status = SavingsAccountStatusType.ACTIVE.getValue();
+        actualChanges.put("status", SavingsEnumerations.status(this.status));
+
+        this.rejectedOnDate = null;
+        this.rejectedBy = null;
+        this.withdrawnOnDate = null;
+        this.withdrawnBy = null;
+        this.closedOnDate = null;
+        this.closedBy = null;
+        this.activatedOnDate = activationDate.toDate();
+        this.activatedBy = currentUser;
+        this.lockedInUntilDate = calculateDateAccountIsLockedUntil(getActivationLocalDate());
+
+        actualChanges.put("locale", command.locale());
+        actualChanges.put("dateFormat", command.dateFormat());
+        actualChanges.put("activationDate", activationDate.toString(fmt));
+
+        if (this.client.isActivatedAfter(activationDate)) {
+            final String errorMessage = "The date on which a savings account is activate cannot be before its client activated date: "
+                    + this.client.getActivationLocalDate().toString();
+            throw new InvalidSavingsAccountStateTransitionException("activate", "cannot.be.before.client.activation.date", errorMessage,
+                    activationDate, this.client.getActivationLocalDate());
+        }
+
+        final LocalDate submittalDate = getSubmittedOnLocalDate();
+        if (activationDate.isBefore(submittalDate)) {
+            final String errorMessage = "Savings account application cannot be withdrawn by applicant on date before its submittal date: "
+                    + submittalDate.toString();
+            throw new InvalidSavingsAccountStateTransitionException("withdrawnByApplicant", "cannot.be.before.submittal.date",
+                    errorMessage, getApprovedOnLocalDate(), submittalDate);
+        }
+
+        if (activationDate.isAfter(tenantsTodayDate)) {
+            final String errorMessage = "Savings account application cannot be withdrawn by applicant on date in the future.";
+            throw new InvalidSavingsAccountStateTransitionException("withdrawnByApplicant", "cannot.be.a.future.date", errorMessage,
+                    getApprovedOnLocalDate());
+        }
+
+        // auto enter deposit for minimum required opening balance when
+        // activating account.
+        final Money minRequiredOpeningBalance = Money.of(this.currency, this.minRequiredOpeningBalance);
+        if (minRequiredOpeningBalance.isGreaterThanZero()) {
+            deposit(fmt, activationDate, minRequiredOpeningBalance.getAmount(), existingTransactionIds, existingReversedTransactionIds,
+                    null);
+        }
+
+        return actualChanges;
+    }
+
+    private Date calculateDateAccountIsLockedUntil(final LocalDate activationLocalDate) {
+
+        Date lockedInUntilLocalDate = null;
+        final PeriodFrequencyType lockinPeriodFrequencyType = PeriodFrequencyType.fromInt(this.lockinPeriodFrequencyType);
+        switch (lockinPeriodFrequencyType) {
+            case INVALID:
+            break;
+            case DAYS:
+                lockedInUntilLocalDate = activationLocalDate.plusDays(this.lockinPeriodFrequency).toDate();
+            break;
+            case WEEKS:
+                lockedInUntilLocalDate = activationLocalDate.plusWeeks(this.lockinPeriodFrequency).toDate();
+            break;
+            case MONTHS:
+                lockedInUntilLocalDate = activationLocalDate.plusMonths(this.lockinPeriodFrequency).toDate();
+            break;
+            case YEARS:
+                lockedInUntilLocalDate = activationLocalDate.plusYears(this.lockinPeriodFrequency).toDate();
+            break;
+        }
+
+        return lockedInUntilLocalDate;
+    }
 }

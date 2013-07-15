@@ -5,6 +5,8 @@
  */
 package org.mifosplatform.infrastructure.core.domain;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.joda.time.Days;
 import org.joda.time.LocalDate;
 
@@ -38,6 +40,14 @@ public class LocalDateInterval {
         return Days.daysBetween(this.startDate, this.endDate).getDays();
     }
 
+    public boolean containsPortionOf(final LocalDateInterval interval) {
+        return contains(interval.startDate) || contains(interval.endDate);
+    }
+
+    public boolean contains(final LocalDateInterval interval) {
+        return contains(interval.startDate) && contains(interval.endDate);
+    }
+
     public boolean contains(final LocalDate target) {
         return isBetweenInclusive(this.startDate, this.endDate, target);
     }
@@ -48,5 +58,10 @@ public class LocalDateInterval {
 
     public boolean fallsBefore(final LocalDate dateToCheck) {
         return this.endDate.isBefore(dateToCheck);
+    }
+
+    @Override
+    public String toString() {
+        return ToStringBuilder.reflectionToString(this, ToStringStyle.MULTI_LINE_STYLE);
     }
 }

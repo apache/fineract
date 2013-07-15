@@ -11,8 +11,11 @@ package org.mifosplatform.portfolio.savings.domain;
 public enum SavingsAccountStatusType {
 
     INVALID(0, "savingsAccountStatusType.invalid"), //
-    UNACTIVATED(100, "savingsAccountStatusType.unactivated"), //
+    SUBMITTED_AND_PENDING_APPROVAL(100, "savingsAccountStatusType.submitted.and.pending.approval"), //
+    APPROVED(200, "savingsAccountStatusType.approved"), //
     ACTIVE(300, "savingsAccountStatusType.active"), //
+    WITHDRAWN_BY_APPLICANT(400, "savingsAccountStatusType.withdrawn.by.applicant"), //
+    REJECTED(500, "savingsAccountStatusType.rejected"), //
     CLOSED(600, "savingsAccountStatusType.closed");
 
     private final Integer value;
@@ -23,10 +26,19 @@ public enum SavingsAccountStatusType {
         SavingsAccountStatusType enumeration = SavingsAccountStatusType.INVALID;
         switch (type) {
             case 100:
-                enumeration = SavingsAccountStatusType.UNACTIVATED;
+                enumeration = SavingsAccountStatusType.SUBMITTED_AND_PENDING_APPROVAL;
+            break;
+            case 200:
+                enumeration = SavingsAccountStatusType.APPROVED;
             break;
             case 300:
                 enumeration = SavingsAccountStatusType.ACTIVE;
+            break;
+            case 400:
+                enumeration = SavingsAccountStatusType.WITHDRAWN_BY_APPLICANT;
+            break;
+            case 500:
+                enumeration = SavingsAccountStatusType.REJECTED;
             break;
             case 600:
                 enumeration = SavingsAccountStatusType.CLOSED;
@@ -52,8 +64,20 @@ public enum SavingsAccountStatusType {
         return code;
     }
 
-    public boolean isUnactivated() {
-        return this.value.equals(SavingsAccountStatusType.UNACTIVATED.getValue());
+    public boolean isSubmittedAndPendingApproval() {
+        return this.value.equals(SavingsAccountStatusType.SUBMITTED_AND_PENDING_APPROVAL.getValue());
+    }
+
+    public boolean isApproved() {
+        return this.value.equals(SavingsAccountStatusType.APPROVED.getValue());
+    }
+
+    public boolean isRejected() {
+        return this.value.equals(SavingsAccountStatusType.REJECTED.getValue());
+    }
+
+    public boolean isApplicationWithdrawnByApplicant() {
+        return this.value.equals(SavingsAccountStatusType.WITHDRAWN_BY_APPLICANT.getValue());
     }
 
     public boolean isActive() {

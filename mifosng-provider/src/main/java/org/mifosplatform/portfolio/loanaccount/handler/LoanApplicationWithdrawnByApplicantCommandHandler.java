@@ -27,6 +27,6 @@ public class LoanApplicationWithdrawnByApplicantCommandHandler implements NewCom
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
 
-        return this.writePlatformService.applicantWithdrawsFromLoanApplication(command.entityId(), command);
+        return this.writePlatformService.applicantWithdrawsFromApplication(command.entityId(), command);
     }
 }

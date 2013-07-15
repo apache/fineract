@@ -5,36 +5,45 @@
  */
 package org.mifosplatform.portfolio.savings.domain;
 
-import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.activationDateParamName;
-import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.activeParamName;
-import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.annualFeeAmountParamName;
-import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.annualFeeOnMonthDayParamName;
-import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.interestCalculationDaysInYearTypeParamName;
-import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.interestCalculationTypeParamName;
-import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.interestCompoundingPeriodTypeParamName;
-import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.interestPostingPeriodTypeParamName;
-import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.lockinPeriodFrequencyParamName;
-import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.lockinPeriodFrequencyTypeParamName;
-import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.minRequiredOpeningBalanceParamName;
-import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.nominalAnnualInterestRateParamName;
-import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.withdrawalFeeAmountParamName;
-import static org.mifosplatform.portfolio.savings.api.SavingsApiConstants.withdrawalFeeTypeParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.accountNoParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.annualFeeAmountParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.annualFeeOnMonthDayParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.clientIdParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.externalIdParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.fieldOfficerIdParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.groupIdParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.interestCalculationDaysInYearTypeParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.interestCalculationTypeParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.interestCompoundingPeriodTypeParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.interestPostingPeriodTypeParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.lockinPeriodFrequencyParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.lockinPeriodFrequencyTypeParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.minRequiredOpeningBalanceParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.nominalAnnualInterestRateParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.productIdParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.submittedOnDateParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.withdrawalFeeAmountParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.withdrawalFeeTypeParamName;
 
 import java.math.BigDecimal;
-import java.util.List;
-import java.util.Locale;
 
 import org.joda.time.LocalDate;
 import org.joda.time.MonthDay;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
+import org.mifosplatform.organisation.staff.domain.Staff;
+import org.mifosplatform.organisation.staff.domain.StaffRepositoryWrapper;
 import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.client.domain.ClientRepositoryWrapper;
 import org.mifosplatform.portfolio.group.domain.Group;
-import org.mifosplatform.portfolio.group.domain.GroupRepository;
-import org.mifosplatform.portfolio.group.exception.GroupNotFoundException;
+import org.mifosplatform.portfolio.group.domain.GroupRepositoryWrapper;
+import org.mifosplatform.portfolio.savings.SavingsCompoundingInterestPeriodType;
+import org.mifosplatform.portfolio.savings.SavingsInterestCalculationDaysInYearType;
+import org.mifosplatform.portfolio.savings.SavingsInterestCalculationType;
+import org.mifosplatform.portfolio.savings.SavingsPeriodFrequencyType;
+import org.mifosplatform.portfolio.savings.SavingsPostingInterestPeriodType;
+import org.mifosplatform.portfolio.savings.SavingsWithdrawalFeesType;
 import org.mifosplatform.portfolio.savings.exception.SavingsProductNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -46,18 +55,24 @@ public class SavingsAccountAssembler {
 
     private final SavingsAccountTransactionSummaryWrapper savingsAccountTransactionSummaryWrapper;
     private final ClientRepositoryWrapper clientRepository;
-    private final GroupRepository groupRepository;
+    private final GroupRepositoryWrapper groupRepository;
+    private final StaffRepositoryWrapper staffRepository;
     private final SavingsProductRepository savingProductRepository;
+    private final SavingsAccountRepositoryWrapper savingsAccountRepository;
     private final FromJsonHelper fromApiJsonHelper;
 
     @Autowired
     public SavingsAccountAssembler(final SavingsAccountTransactionSummaryWrapper savingsAccountTransactionSummaryWrapper,
-            final ClientRepositoryWrapper clientRepository, final GroupRepository groupRepository,
-            final SavingsProductRepository savingProductRepository, final FromJsonHelper fromApiJsonHelper) {
+            final ClientRepositoryWrapper clientRepository, final GroupRepositoryWrapper groupRepository,
+            final StaffRepositoryWrapper staffRepository, final SavingsProductRepository savingProductRepository,
+            final SavingsAccountRepositoryWrapper savingsAccountRepository,
+            final FromJsonHelper fromApiJsonHelper) {
         this.savingsAccountTransactionSummaryWrapper = savingsAccountTransactionSummaryWrapper;
         this.clientRepository = clientRepository;
         this.groupRepository = groupRepository;
+        this.staffRepository = staffRepository;
         this.savingProductRepository = savingProductRepository;
+        this.savingsAccountRepository = savingsAccountRepository;
         this.fromApiJsonHelper = fromApiJsonHelper;
     }
 
@@ -65,35 +80,38 @@ public class SavingsAccountAssembler {
      * Assembles a new {@link SavingsAccount} from JSON details passed in
      * request inheriting details where relevant from chosen
      * {@link SavingsProduct}.
-     * 
-     * @param existingReversedTransactionIds
-     * @param existingTransactionIds
      */
-    public SavingsAccount assembleFrom(final JsonCommand command, List<Long> existingTransactionIds,
-            List<Long> existingReversedTransactionIds) {
+    public SavingsAccount assembleFrom(final JsonCommand command) {
 
         final JsonElement element = command.parsedJson();
 
-        final String accountNo = fromApiJsonHelper.extractStringNamed("accountNo", element);
-        final String externalId = fromApiJsonHelper.extractStringNamed("externalId", element);
-        final Long productId = fromApiJsonHelper.extractLongNamed("productId", element);
+        final String accountNo = fromApiJsonHelper.extractStringNamed(accountNoParamName, element);
+        final String externalId = fromApiJsonHelper.extractStringNamed(externalIdParamName, element);
+        final Long productId = fromApiJsonHelper.extractLongNamed(productIdParamName, element);
 
         final SavingsProduct product = this.savingProductRepository.findOne(productId);
         if (product == null) { throw new SavingsProductNotFoundException(productId); }
 
-        final Long clientId = fromApiJsonHelper.extractLongNamed("clientId", element);
-        final Long groupId = fromApiJsonHelper.extractLongNamed("groupId", element);
-
         Client client = null;
         Group group = null;
+        Staff fieldOfficer = null;
+
+        final Long clientId = fromApiJsonHelper.extractLongNamed(clientIdParamName, element);
         if (clientId != null) {
             client = this.clientRepository.findOneWithNotFoundDetection(clientId);
         }
 
+        final Long groupId = fromApiJsonHelper.extractLongNamed(groupIdParamName, element);
         if (groupId != null) {
-            group = this.groupRepository.findOne(groupId);
-            if (group == null) { throw new GroupNotFoundException(groupId); }
+            group = this.groupRepository.findOneWithNotFoundDetection(groupId);
         }
+
+        final Long fieldOfficerId = fromApiJsonHelper.extractLongNamed(fieldOfficerIdParamName, element);
+        if (fieldOfficerId != null) {
+            fieldOfficer = this.staffRepository.findOneWithNotFoundDetection(fieldOfficerId);
+        }
+
+        final LocalDate submittedOnDate = fromApiJsonHelper.extractLocalDateNamed(submittedOnDateParamName, element);
 
         BigDecimal interestRate = null;
         if (command.parameterExists(nominalAnnualInterestRateParamName)) {
@@ -101,9 +119,6 @@ public class SavingsAccountAssembler {
         } else {
             interestRate = product.nominalAnnualInterestRate();
         }
-
-        final boolean active = fromApiJsonHelper.extractBooleanNamed(activeParamName, element);
-        final LocalDate activationDate = fromApiJsonHelper.extractLocalDateNamed(activationDateParamName, element);
 
         SavingsCompoundingInterestPeriodType interestCompoundingPeriodType = null;
         final Integer interestPeriodTypeValue = command.integerValueOfParameterNamed(interestCompoundingPeriodTypeParamName);
@@ -113,10 +128,10 @@ public class SavingsAccountAssembler {
             interestCompoundingPeriodType = product.interestCompoundingPeriodType();
         }
 
-        SavingsInterestPostingPeriodType interestPostingPeriodType = null;
+        SavingsPostingInterestPeriodType interestPostingPeriodType = null;
         final Integer interestPostingPeriodTypeValue = command.integerValueOfParameterNamed(interestPostingPeriodTypeParamName);
         if (interestPostingPeriodTypeValue != null) {
-            interestPostingPeriodType = SavingsInterestPostingPeriodType.fromInt(interestPostingPeriodTypeValue);
+            interestPostingPeriodType = SavingsPostingInterestPeriodType.fromInt(interestPostingPeriodTypeValue);
         } else {
             interestPostingPeriodType = product.interestPostingPeriodType();
         }
@@ -194,17 +209,20 @@ public class SavingsAccountAssembler {
             monthDayOfAnnualFee = product.monthDayOfAnnualFee();
         }
 
-        final SavingsAccount account = SavingsAccount.createNewAccount(client, group, product, accountNo, externalId, interestRate,
-                interestCompoundingPeriodType, interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType,
-                minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeAmount, withdrawalFeeType,
-                annualFeeAmount, monthDayOfAnnualFee);
+        final SavingsAccount account = SavingsAccount.createNewApplicationForSubmittal(client, group, product, fieldOfficer, accountNo, externalId,
+                submittedOnDate, interestRate, interestCompoundingPeriodType, interestPostingPeriodType, interestCalculationType,
+                interestCalculationDaysInYearType, minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType,
+                withdrawalFeeAmount, withdrawalFeeType, annualFeeAmount, monthDayOfAnnualFee);
         account.setHelpers(this.savingsAccountTransactionSummaryWrapper);
 
-        if (active) {
-            final Locale locale = command.extractLocale();
-            final DateTimeFormatter formatter = DateTimeFormat.forPattern(command.dateFormat()).withLocale(locale);
-            account.activate(formatter, activationDate, existingTransactionIds, existingReversedTransactionIds);
-        }
+        account.validateNewApplicationState(DateUtils.getLocalDateOfTenant());
+
+        return account;
+    }
+
+    public SavingsAccount assembleFrom(final Long savingsId) {
+        SavingsAccount account = this.savingsAccountRepository.findOneWithNotFoundDetection(savingsId);
+        account.setHelpers(this.savingsAccountTransactionSummaryWrapper);
 
         return account;
     }

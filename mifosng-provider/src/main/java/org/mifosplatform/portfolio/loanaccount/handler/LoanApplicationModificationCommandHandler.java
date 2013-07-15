@@ -27,6 +27,6 @@ public class LoanApplicationModificationCommandHandler implements NewCommandSour
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
 
-        return this.writePlatformService.modifyLoanApplication(command.getLoanId(), command);
+        return this.writePlatformService.modifyApplication(command.getLoanId(), command);
     }
 }

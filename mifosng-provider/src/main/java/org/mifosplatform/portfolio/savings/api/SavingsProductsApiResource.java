@@ -42,11 +42,12 @@ import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.mifosplatform.organisation.monetary.service.CurrencyReadPlatformService;
 import org.mifosplatform.portfolio.paymentdetail.PaymentDetailConstants;
+import org.mifosplatform.portfolio.savings.SavingsApiConstants;
+import org.mifosplatform.portfolio.savings.SavingsCompoundingInterestPeriodType;
+import org.mifosplatform.portfolio.savings.SavingsInterestCalculationDaysInYearType;
+import org.mifosplatform.portfolio.savings.SavingsInterestCalculationType;
+import org.mifosplatform.portfolio.savings.SavingsPostingInterestPeriodType;
 import org.mifosplatform.portfolio.savings.data.SavingsProductData;
-import org.mifosplatform.portfolio.savings.domain.SavingsCompoundingInterestPeriodType;
-import org.mifosplatform.portfolio.savings.domain.SavingsInterestCalculationDaysInYearType;
-import org.mifosplatform.portfolio.savings.domain.SavingsInterestCalculationType;
-import org.mifosplatform.portfolio.savings.domain.SavingsInterestPostingPeriodType;
 import org.mifosplatform.portfolio.savings.service.SavingsDropdownReadPlatformService;
 import org.mifosplatform.portfolio.savings.service.SavingsEnumerations;
 import org.mifosplatform.portfolio.savings.service.SavingsProductReadPlatformService;
@@ -180,7 +181,7 @@ public class SavingsProductsApiResource {
                 .compoundingInterestPeriodType(SavingsCompoundingInterestPeriodType.DAILY);
 
         final EnumOptionData interestPostingPeriodType = SavingsEnumerations
-                .interestPostingPeriodType(SavingsInterestPostingPeriodType.MONTHLY);
+                .interestPostingPeriodType(SavingsPostingInterestPeriodType.MONTHLY);
 
         final EnumOptionData interestCalculationType = SavingsEnumerations
                 .interestCalculationType(SavingsInterestCalculationType.DAILY_BALANCE);

@@ -5,7 +5,7 @@
  */
 package org.mifosplatform.portfolio.savings.data;
 
-import org.mifosplatform.portfolio.savings.domain.SavingsAccountTransactionType;
+import org.mifosplatform.portfolio.savings.SavingsAccountTransactionType;
 
 /**
  * Immutable data object represent savings account transaction type

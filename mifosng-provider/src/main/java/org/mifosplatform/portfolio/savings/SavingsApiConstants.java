@@ -3,7 +3,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this file,
  * You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-package org.mifosplatform.portfolio.savings.api;
+package org.mifosplatform.portfolio.savings;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -32,8 +32,10 @@ public class SavingsApiConstants {
     public static final String clientIdParamName = "clientId";
     public static final String groupIdParamName = "groupId";
     public static final String productIdParamName = "productId";
+    public static final String fieldOfficerIdParamName = "fieldOfficerId";
+    public static final String submittedOnDateParamName = "submittedOnDate";
     public static final String activeParamName = "active";
-    public static final String activationDateParamName = "activationDate";
+    public static final String activationDateParamName = "activatedOnDate";
     public static final String nameParamName = "name";
     public static final String descriptionParamName = "description";
     public static final String currencyCodeParamName = "currencyCode";
@@ -52,7 +54,7 @@ public class SavingsApiConstants {
     public static final String annualFeeOnMonthDayParamName = "annualFeeOnMonthDay";
     public static final String accountingRuleParamName = "accountingRule";
     public static final String paymentTypeIdParamName = "paymentTypeId";
-    public static final String accountNumberParamName = "accountNumber";
+    public static final String transactionAccountNumberParamName = "accountNumber";
     public static final String checkNumberParamName = "checkNumber";
     public static final String routingCodeParamName = "routingCode";
     public static final String receiptNumberParamName = "receiptNumber";
@@ -89,7 +91,7 @@ public class SavingsApiConstants {
 
     public static final Set<String> SAVINGS_ACCOUNT_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(localeParamName,
             dateFormatParamName, monthDayFormatParamName, accountNoParamName, externalIdParamName, clientIdParamName, groupIdParamName,
-            productIdParamName, activeParamName, activationDateParamName, nominalAnnualInterestRateParamName,
+            productIdParamName, fieldOfficerIdParamName, submittedOnDateParamName, nominalAnnualInterestRateParamName,
             interestCompoundingPeriodTypeParamName, interestPostingPeriodTypeParamName, interestCalculationTypeParamName,
             interestCalculationDaysInYearTypeParamName, minRequiredOpeningBalanceParamName, lockinPeriodFrequencyParamName,
             lockinPeriodFrequencyTypeParamName, withdrawalFeeAmountParamName, withdrawalFeeTypeParamName, annualFeeAmountParamName,
@@ -112,7 +114,7 @@ public class SavingsApiConstants {
 
     public static final Set<String> SAVINGS_ACCOUNT_TRANSACTION_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(
             localeParamName, dateFormatParamName, transactionDateParamName, transactionAmountParamName, paymentTypeIdParamName,
-            accountNumberParamName, checkNumberParamName, routingCodeParamName, receiptNumberParamName, bankNumberParamName));
+            transactionAccountNumberParamName, checkNumberParamName, routingCodeParamName, receiptNumberParamName, bankNumberParamName));
 
     public static final Set<String> SAVINGS_TRANSACTION_RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(idParamName,
             "accountId", accountNoParamName, "currency", "amount"));

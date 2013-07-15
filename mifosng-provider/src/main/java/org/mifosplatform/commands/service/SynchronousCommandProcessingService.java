@@ -374,11 +374,23 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
             }
         } else if (wrapper.isSavingsAccountResource()) {
             if (wrapper.isCreate()) {
-                handler = this.applicationContext.getBean("createSavingsAccountCommandHandler", NewCommandSourceHandler.class);
+                handler = this.applicationContext
+                        .getBean("savingsAccountApplicationSubmittalCommandHandler", NewCommandSourceHandler.class);
             } else if (wrapper.isUpdate()) {
-                handler = this.applicationContext.getBean("updateSavingsAccountCommandHandler", NewCommandSourceHandler.class);
+                handler = this.applicationContext.getBean("savingsAccountApplicationModificationCommandHandler",
+                        NewCommandSourceHandler.class);
             } else if (wrapper.isDelete()) {
-                handler = this.applicationContext.getBean("deleteSavingsAccountCommandHandler", NewCommandSourceHandler.class);
+                handler = this.applicationContext.getBean("savingsAccountApplicationDeletionCommandHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isRejectionOfSavingsAccountApplication()) {
+                handler = this.applicationContext.getBean("savingsAccountApplicationRejectedCommandHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isWithdrawFromSavingsAccountApplicationByApplicant()) {
+                handler = this.applicationContext.getBean("savingsAccountApplicationWithdrawnByApplicantCommandHandler",
+                        NewCommandSourceHandler.class);
+            } else if (wrapper.isApprovalOfSavingsAccountApplication()) {
+                handler = this.applicationContext.getBean("savingsAccountApplicationApprovalCommandHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isUndoApprovalOfSavingsAccountApplication()) {
+                handler = this.applicationContext.getBean("savingsAccountApplicationApprovalUndoCommandHandler",
+                        NewCommandSourceHandler.class);
             } else if (wrapper.isSavingsAccountDeposit()) {
                 handler = this.applicationContext.getBean("depositSavingsAccountCommandHandler", NewCommandSourceHandler.class);
             } else if (wrapper.isSavingsAccountWithdrawal()) {

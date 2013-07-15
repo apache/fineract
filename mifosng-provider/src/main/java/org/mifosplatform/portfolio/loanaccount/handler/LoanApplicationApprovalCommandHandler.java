@@ -27,6 +27,6 @@ public class LoanApplicationApprovalCommandHandler implements NewCommandSourceHa
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
 
-        return this.writePlatformService.approveLoanApplication(command.entityId(), command);
+        return this.writePlatformService.approveApplication(command.entityId(), command);
     }
 }

@@ -27,6 +27,6 @@ public class LoanApplicationSubmittalCommandHandler implements NewCommandSourceH
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
 
-        return this.writePlatformService.submitLoanApplication(command);
+        return this.writePlatformService.submitApplication(command);
     }
 }
