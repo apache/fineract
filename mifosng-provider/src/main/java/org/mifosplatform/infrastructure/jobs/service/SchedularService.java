@@ -7,14 +7,16 @@ import org.mifosplatform.infrastructure.jobs.domain.ScheduledJobRunHistory;
 
 public interface SchedularService {
 
-    public List<ScheduledJobDetail> getScheduledJobDetails();
+    public List<ScheduledJobDetail> retrieveAllJobs();
 
-    public ScheduledJobDetail getByTriggerKey(String triggerKey);
+    public ScheduledJobDetail findByJobKey(String triggerKey);
 
     public void saveOrUpdate(ScheduledJobDetail scheduledJobDetails);
 
     public void saveOrUpdate(ScheduledJobDetail scheduledJobDetails, ScheduledJobRunHistory scheduledJobRunHistory);
 
-    public Long getMaxVersionBy(String triggerKey);
+    public Long fetchMaxVersionBy(String triggerKey);
+
+    public ScheduledJobDetail findByJobId(Long jobId);
 
 }

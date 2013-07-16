@@ -45,8 +45,8 @@ public class ScheduledJobDetail extends AbstractPersistable<Long> {
     @Temporal(TemporalType.TIMESTAMP)
     private Date nextRunTime;
 
-    @Column(name = "trigger_key")
-    private String triggerKey;
+    @Column(name = "job_key")
+    private String jobKey;
 
     @SuppressWarnings("unused")
     @Column(name = "initializing_errorlog")
@@ -55,13 +55,16 @@ public class ScheduledJobDetail extends AbstractPersistable<Long> {
     @Column(name = "is_active")
     private boolean activeSchedular;
 
+    @Column(name = "currently_running")
+    private boolean currentlyRunning;
+
     public ScheduledJobDetail() {
 
     }
 
-    public ScheduledJobDetail(final String jobName, final String jobDisplayName, final String croneExpression, final Date createTime,
-            final Short taskPriority, final String groupName, final Date previousRunStartTime, final Date nextRunTime,
-            final String triggKey, final String errorLog, final boolean activeSchedular) {
+    public ScheduledJobDetail(final String jobName, final String jobDisplayName, final String croneExpression, Date createTime,
+            final Short taskPriority, final String groupName, final Date previousRunStartTime, final Date nextRunTime, final String jobKey,
+            final String errorLog, final boolean activeSchedular, final boolean currentlyRunning) {
         this.jobName = jobName;
         this.jobDisplayName = jobDisplayName;
         this.croneExpression = croneExpression;
@@ -70,9 +73,10 @@ public class ScheduledJobDetail extends AbstractPersistable<Long> {
         this.groupName = groupName;
         this.previousRunStartTime = previousRunStartTime;
         this.nextRunTime = nextRunTime;
-        this.triggerKey = triggKey;
+        this.jobKey = jobKey;
         this.errorLog = errorLog;
         this.activeSchedular = activeSchedular;
+        this.currentlyRunning = currentlyRunning;
     }
 
     public String getJobName() {
@@ -91,8 +95,8 @@ public class ScheduledJobDetail extends AbstractPersistable<Long> {
         return this.groupName;
     }
 
-    public String getTriggerKey() {
-        return this.triggerKey;
+    public String getJobKey() {
+        return this.jobKey;
     }
 
     public boolean isActiveSchedular() {
@@ -111,12 +115,20 @@ public class ScheduledJobDetail extends AbstractPersistable<Long> {
         this.nextRunTime = nextRunTime;
     }
 
-    public void updateTriggerKey(final String triggerKey) {
-        this.triggerKey = triggerKey;
+    public void updateJobKey(String jobKey) {
+        this.jobKey = jobKey;
     }
 
     public void updateErrorLog(final String errorLog) {
         this.errorLog = errorLog;
+    }
+
+    public boolean isCurrentlyRunning() {
+        return this.currentlyRunning;
+    }
+
+    public void updateCurrentlyRunningStatus(boolean currentlyRunning) {
+        this.currentlyRunning = currentlyRunning;
     }
 
 }

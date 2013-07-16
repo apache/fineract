@@ -2,7 +2,7 @@ package org.mifosplatform.infrastructure.jobs.service;
 
 public interface SchedularServiceConstants {
 
-    public static final String TRIGGER_KEY_SEPERATOR = " _ ";
+    public static final String JOB_KEY_SEPERATOR = " _ ";
     public static final String TRIGGER_TYPE_CRON = "cron";
     public static final String TRIGGER_TYPE_APPLICATION = "application";
     public static final String TRIGGER_TYPE_REFERENCE = "TRIGGER_TYPE_REFERENCE";

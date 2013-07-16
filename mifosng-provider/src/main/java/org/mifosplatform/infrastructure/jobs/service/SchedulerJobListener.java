@@ -6,12 +6,13 @@ import org.mifosplatform.infrastructure.core.domain.MifosPlatformTenant;
 import org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil;
 import org.mifosplatform.infrastructure.jobs.domain.ScheduledJobDetail;
 import org.mifosplatform.infrastructure.jobs.domain.ScheduledJobRunHistory;
+import org.mifosplatform.infrastructure.jobs.exception.JobInProcessExecution;
 import org.mifosplatform.infrastructure.security.service.TenantDetailsService;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
+import org.quartz.JobKey;
 import org.quartz.JobListener;
 import org.quartz.Trigger;
-import org.quartz.TriggerKey;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -48,6 +49,13 @@ public class SchedulerJobListener implements JobListener {
         String tenantIdentifier = context.getTrigger().getJobDataMap().getString(SchedularServiceConstants.TENANT_IDENTIFIER);
         MifosPlatformTenant tenant = this.tenantDetailsService.loadTenantById(tenantIdentifier);
         ThreadLocalContextUtil.setTenant(tenant);
+        JobKey key = context.getTrigger().getJobKey();
+        String jobKey = key.getName() + SchedularServiceConstants.JOB_KEY_SEPERATOR + key.getGroup();
+        final ScheduledJobDetail scheduledJobDetail = schedularService.findByJobKey(jobKey);
+        if (scheduledJobDetail.isCurrentlyRunning()) { throw new JobInProcessExecution(scheduledJobDetail.getJobName()); }
+        scheduledJobDetail.updateCurrentlyRunningStatus(true);
+        this.schedularService.saveOrUpdate(scheduledJobDetail);
+
     }
 
     @Override
@@ -58,10 +66,10 @@ public class SchedulerJobListener implements JobListener {
     @Override
     public void jobWasExecuted(final JobExecutionContext context, final JobExecutionException jobException) {
         Trigger trigger = context.getTrigger();
-        TriggerKey key = trigger.getKey();
-        String triggerKey = key.getName() + SchedularServiceConstants.TRIGGER_KEY_SEPERATOR + key.getGroup();
-        final ScheduledJobDetail scheduledJobDetails = schedularService.getByTriggerKey(triggerKey);
-        Long version = schedularService.getMaxVersionBy(triggerKey) + 1;
+        JobKey key = context.getJobDetail().getKey();
+        String jobKey = key.getName() + SchedularServiceConstants.JOB_KEY_SEPERATOR + key.getGroup();
+        final ScheduledJobDetail scheduledJobDetails = schedularService.findByJobKey(jobKey);
+        Long version = schedularService.fetchMaxVersionBy(jobKey) + 1;
         String status = SchedularServiceConstants.STATUS_SUCCESS;
         String errorMessage = null;
         String errorLog = null;
@@ -84,11 +92,13 @@ public class SchedulerJobListener implements JobListener {
         String triggerType = SchedularServiceConstants.TRIGGER_TYPE_CRON;
         if (context.getMergedJobDataMap().containsKey(SchedularServiceConstants.TRIGGER_TYPE_REFERENCE)) {
             triggerType = context.getMergedJobDataMap().getString(SchedularServiceConstants.TRIGGER_TYPE_REFERENCE);
-
+        }
+        if (triggerType == SchedularServiceConstants.TRIGGER_TYPE_CRON) {
+            scheduledJobDetails.updateNextRunTime(trigger.getNextFireTime());
         }
 
         scheduledJobDetails.updatePreviousRunStartTime(context.getFireTime());
-        scheduledJobDetails.updateNextRunTime(trigger.getNextFireTime());
+        scheduledJobDetails.updateCurrentlyRunningStatus(false);
 
         ScheduledJobRunHistory runHistory = new ScheduledJobRunHistory(scheduledJobDetails, version, context.getFireTime(), new Date(),
                 status, errorMessage, triggerType, errorLog);

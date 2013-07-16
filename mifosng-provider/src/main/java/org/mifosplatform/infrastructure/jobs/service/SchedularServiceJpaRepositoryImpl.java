@@ -25,13 +25,13 @@ public class SchedularServiceJpaRepositoryImpl implements SchedularService {
     }
 
     @Override
-    public List<ScheduledJobDetail> getScheduledJobDetails() {
+    public List<ScheduledJobDetail> retrieveAllJobs() {
         return scheduledJobDetailsRepository.findAll();
     }
 
     @Override
-    public ScheduledJobDetail getByTriggerKey(final String triggerKey) {
-        return scheduledJobDetailsRepository.findByTriggerKey(triggerKey);
+    public ScheduledJobDetail findByJobKey(final String jobKey) {
+        return scheduledJobDetailsRepository.findByJobKey(jobKey);
     }
 
     @Transactional
@@ -48,12 +48,18 @@ public class SchedularServiceJpaRepositoryImpl implements SchedularService {
     }
 
     @Override
-    public Long getMaxVersionBy(final String triggerKey) {
+    public Long fetchMaxVersionBy(final String jobKey) {
         Long version = 0L;
-        Long versionFromDB = scheduledJobRunHistoryRepository.findMaxVersionByTriggerKey(triggerKey);
+        Long versionFromDB = this.scheduledJobRunHistoryRepository.findMaxVersionByJobKey(jobKey);
         if (versionFromDB != null) {
             version = versionFromDB;
         }
         return version;
     }
+
+    @Override
+    public ScheduledJobDetail findByJobId(Long jobId) {
+        return this.scheduledJobDetailsRepository.findByJobId(jobId);
+    }
+
 }
