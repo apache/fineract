@@ -162,7 +162,8 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
 
             final SavingsAccount account = this.savingAccountRepository.findOneWithNotFoundDetection(savingsId);
 
-            account.update(command, changes);
+            account.modifyApplication(command, changes);
+            account.validateNewApplicationState(DateUtils.getLocalDateOfTenant());
 
             if (!changes.isEmpty()) {
 

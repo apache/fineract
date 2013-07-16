@@ -19,6 +19,15 @@ public class SavingsApiConstants {
     public static final String SAVINGS_ACCOUNT_RESOURCE_NAME = "savingsaccount";
     public static final String SAVINGS_ACCOUNT_TRANSACTION_RESOURCE_NAME = "savingsaccount.transaction";
 
+    // actions
+    public static String summitalAction = ".summital";
+    public static String approvalAction = ".approval";
+    public static String undoApprovalAction = ".undoApproval";
+    public static String rejectAction = ".reject";
+    public static String withdrawnByApplicantAction = ".withdrawnByApplicant";
+    public static String activateAction = ".activate";
+    public static String modifyApplicationAction = ".modify";
+
     // general
     public static final String localeParamName = "locale";
     public static final String dateFormatParamName = "dateFormat";
@@ -33,9 +42,15 @@ public class SavingsApiConstants {
     public static final String groupIdParamName = "groupId";
     public static final String productIdParamName = "productId";
     public static final String fieldOfficerIdParamName = "fieldOfficerId";
+
     public static final String submittedOnDateParamName = "submittedOnDate";
-    public static final String activeParamName = "active";
+    public static final String rejectedOnDateParamName = "rejectedOnDate";
+    public static final String withdrawnOnDateParamName = "withdrawnOnDate";
+    public static final String approvedOnDateParamName = "approvedOnDate";
     public static final String activatedOnDateParamName = "activatedOnDate";
+    public static final String closedOnDateParamName = "closedOnDate";
+
+    public static final String activeParamName = "active";
     public static final String nameParamName = "name";
     public static final String descriptionParamName = "description";
     public static final String currencyCodeParamName = "currencyCode";

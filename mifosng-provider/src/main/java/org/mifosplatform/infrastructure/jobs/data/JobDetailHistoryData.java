@@ -4,13 +4,20 @@ import java.util.Date;
 
 public class JobDetailHistoryData {
 
-    private Long version;
-    private Date jobRunStartTime;
-    private Date jobRunEndTime;
-    private String status;
-    private String jobRunErrorMessage;
-    private String triggerType;
-    private String jobRunErrorLog;
+    @SuppressWarnings("unused")
+    private final Long version;
+    @SuppressWarnings("unused")
+    private final Date jobRunStartTime;
+    @SuppressWarnings("unused")
+    private final Date jobRunEndTime;
+    @SuppressWarnings("unused")
+    private final String status;
+    @SuppressWarnings("unused")
+    private final String jobRunErrorMessage;
+    @SuppressWarnings("unused")
+    private final String triggerType;
+    @SuppressWarnings("unused")
+    private final String jobRunErrorLog;
 
     public JobDetailHistoryData(final Long version, final Date jobRunStartTime, final Date jobRunEndTime, final String status,
             final String jobRunErrorMessage, final String triggerType, final String jobRunErrorLog) {

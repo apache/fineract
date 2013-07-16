@@ -71,7 +71,6 @@ import org.mifosplatform.portfolio.savings.SavingsPostingInterestPeriodType;
 import org.mifosplatform.portfolio.savings.SavingsWithdrawalFeesType;
 import org.mifosplatform.portfolio.savings.domain.interest.PostingPeriod;
 import org.mifosplatform.portfolio.savings.exception.InsufficientAccountBalanceException;
-import org.mifosplatform.portfolio.savings.exception.InvalidSavingsAccountStateTransitionException;
 import org.mifosplatform.portfolio.savings.service.SavingsEnumerations;
 import org.mifosplatform.useradministration.domain.AppUser;
 import org.springframework.data.jpa.domain.AbstractPersistable;
@@ -825,9 +824,30 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         return this.summary.getAccountBalance(this.currency).getAmount();
     }
 
-    public void update(final JsonCommand command, final Map<String, Object> actualChanges) {
+    public void modifyApplication(final JsonCommand command, final Map<String, Object> actualChanges) {
+
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+                .resource(SAVINGS_ACCOUNT_RESOURCE_NAME + SavingsApiConstants.modifyApplicationAction);
+
+        SavingsAccountStatusType currentStatus = SavingsAccountStatusType.fromInt(this.status);
+        if (!SavingsAccountStatusType.SUBMITTED_AND_PENDING_APPROVAL.hasStateOf(currentStatus)) {
+            baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("not.in.submittedandpendingapproval.state");
+
+            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        }
 
         final String localeAsInput = command.locale();
+        final String dateFormat = command.dateFormat();
+
+        if (command.isChangeInLocalDateParameterNamed(SavingsApiConstants.submittedOnDateParamName, getSubmittedOnLocalDate())) {
+            final LocalDate newValue = command.localDateValueOfParameterNamed(SavingsApiConstants.submittedOnDateParamName);
+            final String newValueAsString = command.stringValueOfParameterNamed(SavingsApiConstants.submittedOnDateParamName);
+            actualChanges.put(SavingsApiConstants.submittedOnDateParamName, newValueAsString);
+            actualChanges.put(SavingsApiConstants.localeParamName, localeAsInput);
+            actualChanges.put(SavingsApiConstants.dateFormatParamName, dateFormat);
+            this.submittedOnDate = newValue.toDate();
+        }
 
         if (command.isChangeInStringParameterNamed(SavingsApiConstants.accountNoParamName, this.accountNumber)) {
             final String newValue = command.stringValueOfParameterNamed(SavingsApiConstants.accountNoParamName);
@@ -1137,20 +1157,25 @@ public class SavingsAccount extends AbstractPersistable<Long> {
 
         final LocalDate submittedOn = getSubmittedOnLocalDate();
 
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+                .resource(SAVINGS_ACCOUNT_RESOURCE_NAME + SavingsApiConstants.summitalAction);
+
         if (submittedOn.isAfter(todayDateOfTenant)) {
-            final String errorMessage = "Savings account application submitted on date cannot be in the future.";
-            throw new InvalidSavingsAccountStateTransitionException("submittal", "cannot.be.a.future.date", errorMessage, submittedOn);
+            baseDataValidator.reset().parameter(SavingsApiConstants.submittedOnDateParamName).value(submittedOn)
+                    .failWithCodeNoParameterAddedToErrorCode("cannot.be.a.future.date");
         }
 
         if (client != null && client.isActivatedAfter(submittedOn)) {
-            final String errorMessage = "Savings account application submitted on date cannot be earlier than client's activation date.";
-            throw new InvalidSavingsAccountStateTransitionException("submittal", "cannot.be.before.client.activation.date", errorMessage,
-                    submittedOn);
+            baseDataValidator.reset().parameter(SavingsApiConstants.submittedOnDateParamName).value(client.getActivationLocalDate())
+                    .failWithCodeNoParameterAddedToErrorCode("cannot.be.before.client.activation.date");
         } else if (group != null && group.isActivatedAfter(submittedOn)) {
-            final String errorMessage = "Savings account application submitted on date cannot be earlier than group's activation date.";
-            throw new InvalidSavingsAccountStateTransitionException("submittal", "cannot.be.before.group.activation.date", errorMessage,
-                    submittedOn);
+
+            baseDataValidator.reset().parameter(SavingsApiConstants.submittedOnDateParamName).value(group.getActivationLocalDate())
+                    .failWithCodeNoParameterAddedToErrorCode("cannot.be.before.client.activation.date");
         }
+
+        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
     }
 
     private LocalDate getSubmittedOnLocalDate() {
@@ -1177,43 +1202,49 @@ public class SavingsAccount extends AbstractPersistable<Long> {
 
         final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>();
 
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+                .resource(SAVINGS_ACCOUNT_RESOURCE_NAME + SavingsApiConstants.approvalAction);
+
         SavingsAccountStatusType currentStatus = SavingsAccountStatusType.fromInt(this.status);
         if (!SavingsAccountStatusType.SUBMITTED_AND_PENDING_APPROVAL.hasStateOf(currentStatus)) {
-            final String errorMessage = "Savings account application can only be approved when in 'Submitted and pending approval' state. ";
-            throw new InvalidSavingsAccountStateTransitionException("approval", "not.in.submittedandpendingapproval.state", errorMessage);
+            baseDataValidator.reset().parameter(SavingsApiConstants.approvedOnDateParamName)
+                    .failWithCodeNoParameterAddedToErrorCode("not.in.submittedandpendingapproval.state");
+
+            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
         }
 
         this.status = SavingsAccountStatusType.APPROVED.getValue();
-        actualChanges.put("status", SavingsEnumerations.status(this.status));
+        actualChanges.put(SavingsApiConstants.statusParamName, SavingsEnumerations.status(this.status));
 
         // only do below if status has changed in the 'approval' case
-        LocalDate approvedOn = command.localDateValueOfParameterNamed("approvedOnDate");
-        String approvedOnDateChange = command.stringValueOfParameterNamed("approvedOnDate");
-        if (approvedOn == null) {
-            approvedOn = command.localDateValueOfParameterNamed("eventDate");
-            approvedOnDateChange = command.stringValueOfParameterNamed("eventDate");
-        }
+        LocalDate approvedOn = command.localDateValueOfParameterNamed(SavingsApiConstants.approvedOnDateParamName);
+        String approvedOnDateChange = command.stringValueOfParameterNamed(SavingsApiConstants.approvedOnDateParamName);
 
         this.approvedOnDate = approvedOn.toDate();
         this.approvedBy = currentUser;
-        actualChanges.put("locale", command.locale());
-        actualChanges.put("dateFormat", command.dateFormat());
-        actualChanges.put("approvedOnDate", approvedOnDateChange);
+        actualChanges.put(SavingsApiConstants.localeParamName, command.locale());
+        actualChanges.put(SavingsApiConstants.dateFormatParamName, command.dateFormat());
+        actualChanges.put(SavingsApiConstants.approvedOnDateParamName, approvedOnDateChange);
 
-        // FIXME - kw - format dates based on based locale when doing error
-        // messages related dates.
-        final LocalDate submittalDate = new LocalDate(this.submittedOnDate);
+        final LocalDate submittalDate = getSubmittedOnLocalDate();
         if (approvedOn.isBefore(submittalDate)) {
-            final String errorMessage = "Savings account application cannot be approved on date before its submittal date: "
-                    + submittalDate.toString();
-            throw new InvalidSavingsAccountStateTransitionException("approval", "cannot.be.before.submittal.date", errorMessage,
-                    getApprovedOnLocalDate(), submittalDate);
+
+            final DateTimeFormatter formatter = DateTimeFormat.forPattern(command.dateFormat()).withLocale(command.extractLocale());
+            final String submittalDateAsString = formatter.print(submittalDate);
+
+            baseDataValidator.reset().parameter(SavingsApiConstants.approvedOnDateParamName).value(submittalDateAsString)
+                    .failWithCodeNoParameterAddedToErrorCode("cannot.be.before.submittal.date");
+
+            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
         }
 
         if (approvedOn.isAfter(tenantsTodayDate)) {
-            final String errorMessage = "Savings account application cannot be approved on date in the future.";
-            throw new InvalidSavingsAccountStateTransitionException("approval", "cannot.be.a.future.date", errorMessage,
-                    getApprovedOnLocalDate());
+
+            baseDataValidator.reset().parameter(SavingsApiConstants.approvedOnDateParamName)
+                    .failWithCodeNoParameterAddedToErrorCode("cannot.be.a.future.date");
+
+            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
         }
 
         // FIXME - kw - support field officer history for savings accounts
@@ -1230,14 +1261,21 @@ public class SavingsAccount extends AbstractPersistable<Long> {
     public Map<String, Object> undoApplicationApproval() {
         final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>();
 
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+                .resource(SAVINGS_ACCOUNT_RESOURCE_NAME + SavingsApiConstants.undoApprovalAction);
+
         SavingsAccountStatusType currentStatus = SavingsAccountStatusType.fromInt(this.status);
         if (!SavingsAccountStatusType.APPROVED.hasStateOf(currentStatus)) {
-            final String errorMessage = "Savings account application can only undo approval when in 'Approved' state. ";
-            throw new InvalidSavingsAccountStateTransitionException("approval", "not.in.approved.state", errorMessage);
+
+            baseDataValidator.reset().parameter(SavingsApiConstants.approvedOnDateParamName)
+                    .failWithCodeNoParameterAddedToErrorCode("not.in.approved.state");
+
+            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
         }
 
         this.status = SavingsAccountStatusType.SUBMITTED_AND_PENDING_APPROVAL.getValue();
-        actualChanges.put("status", SavingsEnumerations.status(this.status));
+        actualChanges.put(SavingsApiConstants.statusParamName, SavingsEnumerations.status(this.status));
 
         this.approvedOnDate = null;
         this.approvedBy = null;
@@ -1247,7 +1285,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         this.withdrawnBy = null;
         this.closedOnDate = null;
         this.closedBy = null;
-        actualChanges.put("approvedOnDate", "");
+        actualChanges.put(SavingsApiConstants.approvedOnDateParamName, "");
 
         // FIXME - kw - support field officer history for savings accounts
         // this.loanOfficerHistory.clear();
@@ -1259,19 +1297,24 @@ public class SavingsAccount extends AbstractPersistable<Long> {
 
         final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>();
 
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+                .resource(SAVINGS_ACCOUNT_RESOURCE_NAME + SavingsApiConstants.rejectAction);
+
         SavingsAccountStatusType currentStatus = SavingsAccountStatusType.fromInt(this.status);
         if (!SavingsAccountStatusType.SUBMITTED_AND_PENDING_APPROVAL.hasStateOf(currentStatus)) {
-            final String errorMessage = "Savings account application can only be rejected when in 'Submitted and pending approval' state. ";
-            throw new InvalidSavingsAccountStateTransitionException("reject", "not.in.submittedandpendingapproval.state", errorMessage);
+
+            baseDataValidator.reset().parameter(SavingsApiConstants.rejectedOnDateParamName)
+                    .failWithCodeNoParameterAddedToErrorCode("not.in.submittedandpendingapproval.state");
+
+            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
         }
 
         this.status = SavingsAccountStatusType.REJECTED.getValue();
-        actualChanges.put("status", SavingsEnumerations.status(this.status));
+        actualChanges.put(SavingsApiConstants.statusParamName, SavingsEnumerations.status(this.status));
 
-        LocalDate rejectedOn = command.localDateValueOfParameterNamed("rejectedOnDate");
-
-        final Locale locale = new Locale(command.locale());
-        final DateTimeFormatter fmt = DateTimeFormat.forPattern(command.dateFormat()).withLocale(locale);
+        LocalDate rejectedOn = command.localDateValueOfParameterNamed(SavingsApiConstants.rejectedOnDateParamName);
+        final String rejectedOnAsString = command.stringValueOfParameterNamed(SavingsApiConstants.rejectedOnDateParamName);
 
         this.rejectedOnDate = rejectedOn.toDate();
         this.rejectedBy = currentUser;
@@ -1280,23 +1323,29 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         this.closedOnDate = rejectedOn.toDate();
         this.closedBy = currentUser;
 
-        actualChanges.put("locale", command.locale());
-        actualChanges.put("dateFormat", command.dateFormat());
-        actualChanges.put("rejectedOnDate", rejectedOn.toString(fmt));
-        actualChanges.put("closedOnDate", rejectedOn.toString(fmt));
+        actualChanges.put(SavingsApiConstants.localeParamName, command.locale());
+        actualChanges.put(SavingsApiConstants.dateFormatParamName, command.dateFormat());
+        actualChanges.put(SavingsApiConstants.rejectedOnDateParamName, rejectedOnAsString);
+        actualChanges.put(SavingsApiConstants.closedOnDateParamName, rejectedOnAsString);
 
         final LocalDate submittalDate = getSubmittedOnLocalDate();
         if (rejectedOn.isBefore(submittalDate)) {
-            final String errorMessage = "Savings account application cannot be rejected on date before its submittal date: "
-                    + submittalDate.toString();
-            throw new InvalidSavingsAccountStateTransitionException("reject", "cannot.be.before.submittal.date", errorMessage,
-                    getApprovedOnLocalDate(), submittalDate);
+
+            final DateTimeFormatter formatter = DateTimeFormat.forPattern(command.dateFormat()).withLocale(command.extractLocale());
+            final String submittalDateAsString = formatter.print(submittalDate);
+
+            baseDataValidator.reset().parameter(SavingsApiConstants.rejectedOnDateParamName).value(submittalDateAsString)
+                    .failWithCodeNoParameterAddedToErrorCode("cannot.be.before.submittal.date");
+
+            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
         }
 
         if (rejectedOn.isAfter(tenantsTodayDate)) {
-            final String errorMessage = "Savings account application cannot be rejected on date in the future.";
-            throw new InvalidSavingsAccountStateTransitionException("reject", "cannot.be.a.future.date", errorMessage,
-                    getApprovedOnLocalDate());
+
+            baseDataValidator.reset().parameter(SavingsApiConstants.rejectedOnDateParamName).value(rejectedOn)
+                    .failWithCodeNoParameterAddedToErrorCode("cannot.be.a.future.date");
+
+            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
         }
 
         return actualChanges;
@@ -1306,20 +1355,24 @@ public class SavingsAccount extends AbstractPersistable<Long> {
             final LocalDate tenantsTodayDate) {
         final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>();
 
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+                .resource(SAVINGS_ACCOUNT_RESOURCE_NAME + SavingsApiConstants.withdrawnByApplicantAction);
+
         SavingsAccountStatusType currentStatus = SavingsAccountStatusType.fromInt(this.status);
         if (!SavingsAccountStatusType.SUBMITTED_AND_PENDING_APPROVAL.hasStateOf(currentStatus)) {
-            final String errorMessage = "Savings account application can only be withdrawn by applicant when in 'Submitted and pending approval' state. ";
-            throw new InvalidSavingsAccountStateTransitionException("withdrawnByApplicant", "not.in.submittedandpendingapproval.state",
-                    errorMessage);
+
+            baseDataValidator.reset().parameter(SavingsApiConstants.withdrawnOnDateParamName)
+                    .failWithCodeNoParameterAddedToErrorCode("not.in.submittedandpendingapproval.state");
+
+            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
         }
 
         this.status = SavingsAccountStatusType.WITHDRAWN_BY_APPLICANT.getValue();
-        actualChanges.put("status", SavingsEnumerations.status(this.status));
+        actualChanges.put(SavingsApiConstants.statusParamName, SavingsEnumerations.status(this.status));
 
-        LocalDate withdrawnOn = command.localDateValueOfParameterNamed("withdrawnOnDate");
-
-        final Locale locale = new Locale(command.locale());
-        final DateTimeFormatter fmt = DateTimeFormat.forPattern(command.dateFormat()).withLocale(locale);
+        final LocalDate withdrawnOn = command.localDateValueOfParameterNamed(SavingsApiConstants.withdrawnOnDateParamName);
+        final String withdrawnOnAsString = command.stringValueOfParameterNamed(SavingsApiConstants.withdrawnOnDateParamName);
 
         this.rejectedOnDate = null;
         this.rejectedBy = null;
@@ -1328,23 +1381,29 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         this.closedOnDate = withdrawnOn.toDate();
         this.closedBy = currentUser;
 
-        actualChanges.put("locale", command.locale());
-        actualChanges.put("dateFormat", command.dateFormat());
-        actualChanges.put("withdrawnOnDate", withdrawnOn.toString(fmt));
-        actualChanges.put("closedOnDate", withdrawnOn.toString(fmt));
+        actualChanges.put(SavingsApiConstants.localeParamName, command.locale());
+        actualChanges.put(SavingsApiConstants.dateFormatParamName, command.dateFormat());
+        actualChanges.put(SavingsApiConstants.withdrawnOnDateParamName, withdrawnOnAsString);
+        actualChanges.put(SavingsApiConstants.closedOnDateParamName, withdrawnOnAsString);
 
         final LocalDate submittalDate = getSubmittedOnLocalDate();
         if (withdrawnOn.isBefore(submittalDate)) {
-            final String errorMessage = "Savings account application cannot be withdrawn by applicant on date before its submittal date: "
-                    + submittalDate.toString();
-            throw new InvalidSavingsAccountStateTransitionException("withdrawnByApplicant", "cannot.be.before.submittal.date",
-                    errorMessage, getApprovedOnLocalDate(), submittalDate);
+
+            final DateTimeFormatter formatter = DateTimeFormat.forPattern(command.dateFormat()).withLocale(command.extractLocale());
+            final String submittalDateAsString = formatter.print(submittalDate);
+
+            baseDataValidator.reset().parameter(SavingsApiConstants.withdrawnOnDateParamName).value(submittalDateAsString)
+                    .failWithCodeNoParameterAddedToErrorCode("cannot.be.before.submittal.date");
+
+            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
         }
 
         if (withdrawnOn.isAfter(tenantsTodayDate)) {
-            final String errorMessage = "Savings account application cannot be withdrawn by applicant on date in the future.";
-            throw new InvalidSavingsAccountStateTransitionException("withdrawnByApplicant", "cannot.be.a.future.date", errorMessage,
-                    getApprovedOnLocalDate());
+
+            baseDataValidator.reset().parameter(SavingsApiConstants.withdrawnOnDateParamName).value(withdrawnOn)
+                    .failWithCodeNoParameterAddedToErrorCode("cannot.be.a.future.date");
+
+            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
         }
 
         return actualChanges;
@@ -1355,10 +1414,17 @@ public class SavingsAccount extends AbstractPersistable<Long> {
 
         final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>();
 
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+                .resource(SAVINGS_ACCOUNT_RESOURCE_NAME + SavingsApiConstants.activateAction);
+
         SavingsAccountStatusType currentStatus = SavingsAccountStatusType.fromInt(this.status);
         if (!SavingsAccountStatusType.APPROVED.hasStateOf(currentStatus)) {
-            final String errorMessage = "Savings account application can only be activated when in 'approved' state. ";
-            throw new InvalidSavingsAccountStateTransitionException("activation", "not.in.approved.state", errorMessage);
+
+            baseDataValidator.reset().parameter(SavingsApiConstants.activatedOnDateParamName)
+                    .failWithCodeNoParameterAddedToErrorCode("not.in.approved.state");
+
+            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
         }
 
         final Locale locale = command.extractLocale();
@@ -1382,24 +1448,34 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         this.lockedInUntilDate = calculateDateAccountIsLockedUntil(getActivationLocalDate());
 
         if (this.client.isActivatedAfter(activationDate)) {
-            final String errorMessage = "The date on which a savings account is activate cannot be before its client activated date: "
-                    + this.client.getActivationLocalDate().toString();
-            throw new InvalidSavingsAccountStateTransitionException("activate", "cannot.be.before.client.activation.date", errorMessage,
-                    activationDate, this.client.getActivationLocalDate());
+
+            final DateTimeFormatter formatter = DateTimeFormat.forPattern(command.dateFormat()).withLocale(command.extractLocale());
+            final String dateAsString = formatter.print(client.getActivationLocalDate());
+
+            baseDataValidator.reset().parameter(SavingsApiConstants.activatedOnDateParamName).value(dateAsString)
+                    .failWithCodeNoParameterAddedToErrorCode("cannot.be.before.client.activation.date");
+
+            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
         }
 
-        final LocalDate submittalDate = getSubmittedOnLocalDate();
-        if (activationDate.isBefore(submittalDate)) {
-            final String errorMessage = "Savings account application cannot be withdrawn by applicant on date before its submittal date: "
-                    + submittalDate.toString();
-            throw new InvalidSavingsAccountStateTransitionException("activate", "cannot.be.before.submittal.date",
-                    errorMessage, getApprovedOnLocalDate(), submittalDate);
+        final LocalDate approvalDate = getApprovedOnLocalDate();
+        if (activationDate.isBefore(approvalDate)) {
+
+            final DateTimeFormatter formatter = DateTimeFormat.forPattern(command.dateFormat()).withLocale(command.extractLocale());
+            final String dateAsString = formatter.print(approvalDate);
+
+            baseDataValidator.reset().parameter(SavingsApiConstants.activatedOnDateParamName).value(dateAsString)
+                    .failWithCodeNoParameterAddedToErrorCode("cannot.be.before.approval.date");
+
+            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
         }
 
         if (activationDate.isAfter(tenantsTodayDate)) {
-            final String errorMessage = "Savings account application cannot be withdrawn by applicant on date in the future.";
-            throw new InvalidSavingsAccountStateTransitionException("activate", "cannot.be.a.future.date", errorMessage,
-                    getApprovedOnLocalDate());
+
+            baseDataValidator.reset().parameter(SavingsApiConstants.activatedOnDateParamName).value(activationDate)
+                    .failWithCodeNoParameterAddedToErrorCode("cannot.be.a.future.date");
+
+            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
         }
 
         // auto enter deposit for minimum required opening balance when

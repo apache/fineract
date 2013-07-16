@@ -4,19 +4,26 @@ import java.util.Date;
 
 public class JobDetailData {
 
-    private Long jobId;
+    @SuppressWarnings("unused")
+    private final Long jobId;
 
-    private String displayName;
+    @SuppressWarnings("unused")
+    private final String displayName;
 
-    private Date nextRunTime;
+    @SuppressWarnings("unused")
+    private final Date nextRunTime;
 
-    private String initializingError;
+    @SuppressWarnings("unused")
+    private final String initializingError;
 
-    private boolean active;
+    @SuppressWarnings("unused")
+    private final boolean active;
 
-    private boolean currentlyRunning;
+    @SuppressWarnings("unused")
+    private final boolean currentlyRunning;
 
-    private JobDetailHistoryData lastRunHistory;
+    @SuppressWarnings("unused")
+    private final JobDetailHistoryData lastRunHistory;
 
     public JobDetailData(final Long jobId, final String displayName, final Date nextRunTime, final String initializingError,
             final boolean active, final boolean currentlyRunning, final JobDetailHistoryData lastRunHistory) {
@@ -28,5 +35,4 @@ public class JobDetailData {
         this.lastRunHistory = lastRunHistory;
         this.currentlyRunning = currentlyRunning;
     }
-
 }

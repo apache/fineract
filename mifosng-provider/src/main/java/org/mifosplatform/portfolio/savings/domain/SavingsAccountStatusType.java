@@ -85,6 +85,6 @@ public enum SavingsAccountStatusType {
     }
 
     public boolean isClosed() {
-        return this.value.equals(SavingsAccountStatusType.CLOSED.getValue());
+        return this.value.equals(SavingsAccountStatusType.CLOSED.getValue()) || isRejected() || isApplicationWithdrawnByApplicant();
     }
 }
