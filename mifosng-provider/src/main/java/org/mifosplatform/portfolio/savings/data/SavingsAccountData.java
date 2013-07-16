@@ -28,8 +28,8 @@ public class SavingsAccountData {
     private final String clientName;
     private final Long savingsProductId;
     private final String savingsProductName;
-    private final Long fieldofficerId;
-    private final String fieldofficerName;
+    private final Long fieldOfficerId;
+    private final String fieldOfficerName;
     private final SavingsAccountStatusEnumData status;
     private final SavingsAccountApplicationTimelineData timeline;
     private final CurrencyData currency;
@@ -53,21 +53,13 @@ public class SavingsAccountData {
     private final Collection<SavingsAccountTransactionData> transactions;
 
     // template
-    @SuppressWarnings("unused")
     private final Collection<SavingsProductData> productOptions;
-    @SuppressWarnings("unused")
     private final Collection<StaffData> fieldOfficerOptions;
-    @SuppressWarnings("unused")
     private final Collection<EnumOptionData> interestCompoundingPeriodTypeOptions;
-    @SuppressWarnings("unused")
     private final Collection<EnumOptionData> interestPostingPeriodTypeOptions;
-    @SuppressWarnings("unused")
     private final Collection<EnumOptionData> interestCalculationTypeOptions;
-    @SuppressWarnings("unused")
     private final Collection<EnumOptionData> interestCalculationDaysInYearTypeOptions;
-    @SuppressWarnings("unused")
     private final Collection<EnumOptionData> lockinPeriodFrequencyTypeOptions;
-    @SuppressWarnings("unused")
     private final Collection<EnumOptionData> withdrawalFeeTypeOptions;
 
     public static SavingsAccountData instance(final Long id, final String accountNo, final String externalId, final Long groupId,
@@ -101,6 +93,36 @@ public class SavingsAccountData {
                 interestCalculationDaysInYearTypeOptions, lockinPeriodFrequencyTypeOptions, withdrawalFeeTypeOptions);
     }
 
+    public static SavingsAccountData withTemplateOptions(final SavingsAccountData account, final SavingsAccountData template,
+            final Collection<SavingsAccountTransactionData> transactions) {
+
+        if (template == null) {
+            final Collection<SavingsProductData> productOptions = null;
+            final Collection<StaffData> fieldOfficerOptions = null;
+            final Collection<EnumOptionData> interestCompoundingPeriodTypeOptions = null;
+            final Collection<EnumOptionData> interestPostingPeriodTypeOptions = null;
+            final Collection<EnumOptionData> interestCalculationTypeOptions = null;
+            final Collection<EnumOptionData> interestCalculationDaysInYearTypeOptions = null;
+            final Collection<EnumOptionData> lockinPeriodFrequencyTypeOptions = null;
+            final Collection<EnumOptionData> withdrawalFeeTypeOptions = null;
+
+            return withTemplateOptions(account, productOptions, fieldOfficerOptions, interestCompoundingPeriodTypeOptions,
+                    interestPostingPeriodTypeOptions, interestCalculationTypeOptions, interestCalculationDaysInYearTypeOptions,
+                    lockinPeriodFrequencyTypeOptions, withdrawalFeeTypeOptions, transactions);
+        }
+
+        return new SavingsAccountData(account.id, account.accountNo, account.externalId, account.groupId, account.groupName,
+                account.clientId, account.clientName, account.savingsProductId, account.savingsProductName, account.fieldOfficerId,
+                account.fieldOfficerName, account.status, account.timeline, account.currency, account.nominalAnnualInterestRate,
+                account.interestCompoundingPeriodType, account.interestPostingPeriodType, account.interestCalculationType,
+                account.interestCalculationDaysInYearType, account.minRequiredOpeningBalance, account.lockinPeriodFrequency,
+                account.lockinPeriodFrequencyType, account.withdrawalFeeAmount, account.withdrawalFeeType, account.annualFeeAmount,
+                account.annualFeeOnMonthDay, account.annualFeeNextDueDate, account.summary, transactions, template.productOptions,
+                template.fieldOfficerOptions, template.interestCompoundingPeriodTypeOptions, template.interestPostingPeriodTypeOptions,
+                template.interestCalculationTypeOptions, template.interestCalculationDaysInYearTypeOptions,
+                template.lockinPeriodFrequencyTypeOptions, template.withdrawalFeeTypeOptions);
+    }
+
     public static SavingsAccountData withTemplateOptions(final SavingsAccountData account,
             final Collection<SavingsProductData> productOptions, final Collection<StaffData> fieldOfficerOptions,
             final Collection<EnumOptionData> interestCompoundingPeriodTypeOptions,
@@ -111,8 +133,8 @@ public class SavingsAccountData {
             final Collection<SavingsAccountTransactionData> transactions) {
 
         return new SavingsAccountData(account.id, account.accountNo, account.externalId, account.groupId, account.groupName,
-                account.clientId, account.clientName, account.savingsProductId, account.savingsProductName, account.fieldofficerId,
-                account.fieldofficerName, account.status, account.timeline, account.currency, account.nominalAnnualInterestRate,
+                account.clientId, account.clientName, account.savingsProductId, account.savingsProductName, account.fieldOfficerId,
+                account.fieldOfficerName, account.status, account.timeline, account.currency, account.nominalAnnualInterestRate,
                 account.interestCompoundingPeriodType, account.interestPostingPeriodType, account.interestCalculationType,
                 account.interestCalculationDaysInYearType, account.minRequiredOpeningBalance, account.lockinPeriodFrequency,
                 account.lockinPeriodFrequencyType, account.withdrawalFeeAmount, account.withdrawalFeeType, account.annualFeeAmount,
@@ -194,8 +216,8 @@ public class SavingsAccountData {
         this.clientName = clientName;
         this.savingsProductId = productId;
         this.savingsProductName = productName;
-        this.fieldofficerId = fieldofficerId;
-        this.fieldofficerName = fieldofficerName;
+        this.fieldOfficerId = fieldofficerId;
+        this.fieldOfficerName = fieldofficerName;
         this.status = status;
         this.timeline = timeline;
         this.currency = currency;
@@ -224,5 +246,17 @@ public class SavingsAccountData {
         this.interestCalculationDaysInYearTypeOptions = interestCalculationDaysInYearTypeOptions;
         this.lockinPeriodFrequencyTypeOptions = lockinPeriodFrequencyTypeOptions;
         this.withdrawalFeeTypeOptions = withdrawalFeeTypeOptions;
+    }
+
+    public Long clientId() {
+        return this.clientId;
+    }
+
+    public Long groupId() {
+        return this.groupId;
+    }
+
+    public Long productId() {
+        return this.savingsProductId;
     }
 }

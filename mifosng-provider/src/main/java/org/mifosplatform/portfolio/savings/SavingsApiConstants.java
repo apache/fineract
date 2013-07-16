@@ -35,7 +35,7 @@ public class SavingsApiConstants {
     public static final String fieldOfficerIdParamName = "fieldOfficerId";
     public static final String submittedOnDateParamName = "submittedOnDate";
     public static final String activeParamName = "active";
-    public static final String activationDateParamName = "activatedOnDate";
+    public static final String activatedOnDateParamName = "activatedOnDate";
     public static final String nameParamName = "name";
     public static final String descriptionParamName = "description";
     public static final String currencyCodeParamName = "currencyCode";
@@ -103,7 +103,7 @@ public class SavingsApiConstants {
      * parameters to match those of request parameters.
      */
     public static final Set<String> SAVINGS_ACCOUNT_RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(idParamName,
-            accountNoParamName, externalIdParamName, statusParamName, activationDateParamName, clientIdParamName, "clientName",
+            accountNoParamName, externalIdParamName, statusParamName, activatedOnDateParamName, clientIdParamName, "clientName",
             groupIdParamName, "groupName", "savingsProductId", "savingsProductName", "currency", nominalAnnualInterestRateParamName,
             interestCompoundingPeriodTypeParamName, interestCalculationTypeParamName, interestCalculationDaysInYearTypeParamName,
             minRequiredOpeningBalanceParamName, lockinPeriodFrequencyParamName, lockinPeriodFrequencyTypeParamName,
@@ -120,5 +120,5 @@ public class SavingsApiConstants {
             "accountId", accountNoParamName, "currency", "amount"));
 
     public static final Set<String> SAVINGS_ACCOUNT_ACTIVATION_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(localeParamName,
-            dateFormatParamName, activationDateParamName));
+            dateFormatParamName, activatedOnDateParamName));
 }

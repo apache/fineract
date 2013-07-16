@@ -5,7 +5,7 @@
  */
 package org.mifosplatform.portfolio.client.data;
 
-import static org.mifosplatform.portfolio.savings.SavingsApiConstants.activationDateParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.activatedOnDateParamName;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -314,8 +314,8 @@ public final class ClientDataValidator {
 
         final JsonElement element = command.parsedJson();
 
-        final LocalDate activationDate = this.fromApiJsonHelper.extractLocalDateNamed(activationDateParamName, element);
-        baseDataValidator.reset().parameter(activationDateParamName).value(activationDate).notNull();
+        final LocalDate activationDate = this.fromApiJsonHelper.extractLocalDateNamed(activatedOnDateParamName, element);
+        baseDataValidator.reset().parameter(activatedOnDateParamName).value(activationDate).notNull();
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }

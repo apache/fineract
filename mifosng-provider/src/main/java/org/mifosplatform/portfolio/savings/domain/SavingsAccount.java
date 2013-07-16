@@ -1363,10 +1363,13 @@ public class SavingsAccount extends AbstractPersistable<Long> {
 
         final Locale locale = command.extractLocale();
         final DateTimeFormatter fmt = DateTimeFormat.forPattern(command.dateFormat()).withLocale(locale);
-        final LocalDate activationDate = command.localDateValueOfParameterNamed("activationDate");
+        final LocalDate activationDate = command.localDateValueOfParameterNamed(SavingsApiConstants.activatedOnDateParamName);
 
         this.status = SavingsAccountStatusType.ACTIVE.getValue();
-        actualChanges.put("status", SavingsEnumerations.status(this.status));
+        actualChanges.put(SavingsApiConstants.statusParamName, SavingsEnumerations.status(this.status));
+        actualChanges.put(SavingsApiConstants.localeParamName, command.locale());
+        actualChanges.put(SavingsApiConstants.dateFormatParamName, command.dateFormat());
+        actualChanges.put(SavingsApiConstants.activatedOnDateParamName, activationDate.toString(fmt));
 
         this.rejectedOnDate = null;
         this.rejectedBy = null;
@@ -1377,10 +1380,6 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         this.activatedOnDate = activationDate.toDate();
         this.activatedBy = currentUser;
         this.lockedInUntilDate = calculateDateAccountIsLockedUntil(getActivationLocalDate());
-
-        actualChanges.put("locale", command.locale());
-        actualChanges.put("dateFormat", command.dateFormat());
-        actualChanges.put("activationDate", activationDate.toString(fmt));
 
         if (this.client.isActivatedAfter(activationDate)) {
             final String errorMessage = "The date on which a savings account is activate cannot be before its client activated date: "
@@ -1393,13 +1392,13 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         if (activationDate.isBefore(submittalDate)) {
             final String errorMessage = "Savings account application cannot be withdrawn by applicant on date before its submittal date: "
                     + submittalDate.toString();
-            throw new InvalidSavingsAccountStateTransitionException("withdrawnByApplicant", "cannot.be.before.submittal.date",
+            throw new InvalidSavingsAccountStateTransitionException("activate", "cannot.be.before.submittal.date",
                     errorMessage, getApprovedOnLocalDate(), submittalDate);
         }
 
         if (activationDate.isAfter(tenantsTodayDate)) {
             final String errorMessage = "Savings account application cannot be withdrawn by applicant on date in the future.";
-            throw new InvalidSavingsAccountStateTransitionException("withdrawnByApplicant", "cannot.be.a.future.date", errorMessage,
+            throw new InvalidSavingsAccountStateTransitionException("activate", "cannot.be.a.future.date", errorMessage,
                     getApprovedOnLocalDate());
         }
 

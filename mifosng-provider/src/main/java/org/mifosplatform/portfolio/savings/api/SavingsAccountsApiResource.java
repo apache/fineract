@@ -31,21 +31,16 @@ import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformSer
 import org.mifosplatform.infrastructure.core.api.ApiParameterHelper;
 import org.mifosplatform.infrastructure.core.api.ApiRequestParameterHelper;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
-import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.exception.UnrecognizedQueryParamException;
 import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.mifosplatform.infrastructure.core.service.Page;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
-import org.mifosplatform.organisation.staff.data.StaffData;
 import org.mifosplatform.portfolio.group.service.SearchParameters;
 import org.mifosplatform.portfolio.savings.SavingsApiConstants;
 import org.mifosplatform.portfolio.savings.data.SavingsAccountData;
 import org.mifosplatform.portfolio.savings.data.SavingsAccountTransactionData;
-import org.mifosplatform.portfolio.savings.data.SavingsProductData;
 import org.mifosplatform.portfolio.savings.service.SavingsAccountReadPlatformService;
-import org.mifosplatform.portfolio.savings.service.SavingsDropdownReadPlatformService;
-import org.mifosplatform.portfolio.savings.service.SavingsProductReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -57,8 +52,6 @@ import org.springframework.util.CollectionUtils;
 public class SavingsAccountsApiResource {
 
     private final SavingsAccountReadPlatformService savingsAccountReadPlatformService;
-    private final SavingsProductReadPlatformService savingsProductReadPlatformService;
-    private final SavingsDropdownReadPlatformService dropdownReadPlatformService;
     private final PlatformSecurityContext context;
     private final DefaultToApiJsonSerializer<SavingsAccountData> toApiJsonSerializer;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
@@ -66,14 +59,10 @@ public class SavingsAccountsApiResource {
 
     @Autowired
     public SavingsAccountsApiResource(final SavingsAccountReadPlatformService savingsAccountReadPlatformService,
-            final SavingsProductReadPlatformService savingsProductReadPlatformService,
-            final SavingsDropdownReadPlatformService dropdownReadPlatformService, final PlatformSecurityContext context,
-            final DefaultToApiJsonSerializer<SavingsAccountData> toApiJsonSerializer,
+            final PlatformSecurityContext context, final DefaultToApiJsonSerializer<SavingsAccountData> toApiJsonSerializer,
             final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
             final ApiRequestParameterHelper apiRequestParameterHelper) {
         this.savingsAccountReadPlatformService = savingsAccountReadPlatformService;
-        this.savingsProductReadPlatformService = savingsProductReadPlatformService;
-        this.dropdownReadPlatformService = dropdownReadPlatformService;
         this.context = context;
         this.toApiJsonSerializer = toApiJsonSerializer;
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
@@ -132,15 +121,17 @@ public class SavingsAccountsApiResource {
     @Path("{accountId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveOne(@PathParam("accountId") final Long accountId, @Context final UriInfo uriInfo) {
+    public String retrieveOne(@PathParam("accountId") final Long accountId,
+            @DefaultValue("false") @QueryParam("staffInSelectedOfficeOnly") final boolean staffInSelectedOfficeOnly,
+            @Context final UriInfo uriInfo) {
 
         context.authenticatedUser().validateHasReadPermission(SavingsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME);
 
         final SavingsAccountData savingsAccount = this.savingsAccountReadPlatformService.retrieveOne(accountId);
 
         final Set<String> mandatoryResponseParameters = new HashSet<String>();
-        SavingsAccountData savingsAccountTemplate = populateTemplateAndAssociations(accountId, savingsAccount, uriInfo,
-                mandatoryResponseParameters);
+        SavingsAccountData savingsAccountTemplate = populateTemplateAndAssociations(accountId, savingsAccount, staffInSelectedOfficeOnly,
+                uriInfo, mandatoryResponseParameters);
 
         final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters(),
                 mandatoryResponseParameters);
@@ -149,17 +140,9 @@ public class SavingsAccountsApiResource {
     }
 
     private SavingsAccountData populateTemplateAndAssociations(final Long accountId, final SavingsAccountData savingsAccount,
-            final UriInfo uriInfo, final Set<String> mandatoryResponseParameters) {
+            final boolean staffInSelectedOfficeOnly, final UriInfo uriInfo, final Set<String> mandatoryResponseParameters) {
 
         Collection<SavingsAccountTransactionData> transactions = null;
-        Collection<SavingsProductData> productOptions = null;
-        Collection<StaffData> fieldOfficerOptions = null;
-        Collection<EnumOptionData> interestCompoundingPeriodTypeOptions = null;
-        Collection<EnumOptionData> interestCompoundingPostingTypeOptions = null;
-        Collection<EnumOptionData> interestCalculationTypeOptions = null;
-        Collection<EnumOptionData> interestCalculationDaysInYearTypeOptions = null;
-        Collection<EnumOptionData> lockinPeriodFrequencyTypeOptions = null;
-        Collection<EnumOptionData> withdrawalFeeTypeOptions = null;
 
         final Set<String> associationParameters = ApiParameterHelper.extractAssociationsForResponseIfProvided(uriInfo.getQueryParameters());
         if (!associationParameters.isEmpty()) {
@@ -178,52 +161,15 @@ public class SavingsAccountsApiResource {
             }
         }
 
+        SavingsAccountData templateData = null;
         final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         if (settings.isTemplate()) {
-            productOptions = this.savingsProductReadPlatformService.retrieveAllForLookup();
 
-            // FIXME - FOR CHANGE SAVINGS ACCOUNT APPLICATION need to determine
-            // office id of savings account
-            // if (savingsAccount.officeId() != null) {
-            //
-            // if (staffInSelectedOfficeOnly) {
-            // // only bring back loan officers in selected branch/office
-            // Collection<StaffData> fieldOfficersInBranch =
-            // this.staffReadPlatformService
-            // .retrieveAllLoanOfficersInOfficeById(officeId);
-            //
-            // if (!CollectionUtils.isEmpty(fieldOfficersInBranch)) {
-            // fieldOfficerOptions = new
-            // ArrayList<StaffData>(fieldOfficersInBranch);
-            // }
-            // } else {
-            // // by default bring back all officers in selected
-            // // branch/office as well as officers in office above
-            // // this office
-            // final boolean restrictToLoanOfficersOnly = true;
-            // Collection<StaffData> loanOfficersInHierarchy =
-            // this.staffReadPlatformService
-            // .retrieveAllStaffInOfficeAndItsParentOfficeHierarchy(officeId,
-            // restrictToLoanOfficersOnly);
-            //
-            // if (!CollectionUtils.isEmpty(loanOfficersInHierarchy)) {
-            // fieldOfficerOptions = new
-            // ArrayList<StaffData>(loanOfficersInHierarchy);
-            // }
-            // }
-            // }
-
-            interestCompoundingPeriodTypeOptions = this.dropdownReadPlatformService.retrieveCompoundingInterestPeriodTypeOptions();
-            interestCompoundingPostingTypeOptions = this.dropdownReadPlatformService.retrieveInterestPostingPeriodTypeOptions();
-            interestCalculationTypeOptions = this.dropdownReadPlatformService.retrieveInterestCalculationTypeOptions();
-            interestCalculationDaysInYearTypeOptions = this.dropdownReadPlatformService.retrieveInterestCalculationDaysInYearTypeOptions();
-            lockinPeriodFrequencyTypeOptions = this.dropdownReadPlatformService.retrieveLockinPeriodFrequencyTypeOptions();
-            withdrawalFeeTypeOptions = this.dropdownReadPlatformService.retrievewithdrawalFeeTypeOptions();
+            templateData = this.savingsAccountReadPlatformService.retrieveTemplate(savingsAccount.clientId(), savingsAccount.groupId(),
+                    savingsAccount.productId(), staffInSelectedOfficeOnly);
         }
 
-        return SavingsAccountData.withTemplateOptions(savingsAccount, productOptions, fieldOfficerOptions,
-                interestCompoundingPeriodTypeOptions, interestCompoundingPostingTypeOptions, interestCalculationTypeOptions,
-                interestCalculationDaysInYearTypeOptions, lockinPeriodFrequencyTypeOptions, withdrawalFeeTypeOptions, transactions);
+        return SavingsAccountData.withTemplateOptions(savingsAccount, templateData, transactions);
     }
 
     @PUT

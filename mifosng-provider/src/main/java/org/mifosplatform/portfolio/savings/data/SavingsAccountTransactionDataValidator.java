@@ -5,7 +5,7 @@
  */
 package org.mifosplatform.portfolio.savings.data;
 
-import static org.mifosplatform.portfolio.savings.SavingsApiConstants.activationDateParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.activatedOnDateParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.bankNumberParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.checkNumberParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.paymentTypeIdParamName;
@@ -100,8 +100,8 @@ public class SavingsAccountTransactionDataValidator {
 
         final JsonElement element = command.parsedJson();
 
-        final LocalDate activationDate = fromApiJsonHelper.extractLocalDateNamed(activationDateParamName, element);
-        baseDataValidator.reset().parameter(activationDateParamName).value(activationDate).notNull();
+        final LocalDate activationDate = fromApiJsonHelper.extractLocalDateNamed(activatedOnDateParamName, element);
+        baseDataValidator.reset().parameter(activatedOnDateParamName).value(activationDate).notNull();
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
