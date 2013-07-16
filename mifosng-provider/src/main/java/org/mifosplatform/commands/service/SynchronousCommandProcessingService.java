@@ -70,7 +70,7 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
         }
         commandSourceResult.updateResourceId(result.resourceId());
         commandSourceResult.updateForAudit(result.getOfficeId(), result.getGroupId(), result.getClientId(), result.getLoanId(),
-                result.getSavingsId());
+                result.getSavingsId(), result.getProductId());
 
         String changesOnlyJson = null;
         if (result.hasChanges()) {
@@ -490,6 +490,16 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
 
             if (wrapper.isCreate()) {
                 handler = this.applicationContext.getBean("createHolidayCommandHandler", NewCommandSourceHandler.class);
+            }
+        } else if (wrapper.isProductMixResource()) {
+            if (wrapper.isCreate()) {
+                handler = this.applicationContext.getBean("createProductMixCommandHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isUpdateOperation()) {
+                handler = this.applicationContext.getBean("updateProductMixCommandHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isDeleteOperation()) {
+                handler = this.applicationContext.getBean("deleteProductMixCommandHandler", NewCommandSourceHandler.class);
+            } else {
+                throw new UnsupportedCommandException(wrapper.commandName());
             }
         } else {
             throw new UnsupportedCommandException(wrapper.commandName());

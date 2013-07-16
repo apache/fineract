@@ -23,10 +23,11 @@ public class CommandProcessingResultBuilder {
     private Long entityId;
     private String transactionId;
     private Map<String, Object> changes;
+    private Long productId;
 
     public CommandProcessingResult build() {
         return CommandProcessingResult.fromDetails(commandId, officeId, groupId, clientId, loanId, savingsId, resourceIdentifier, entityId,
-                transactionId, changes);
+                transactionId, changes, productId);
     }
 
     public CommandProcessingResultBuilder withCommandId(final Long withCommandId) {
@@ -76,6 +77,11 @@ public class CommandProcessingResultBuilder {
 
     public CommandProcessingResultBuilder withTransactionId(final String withTransactionId) {
         this.transactionId = withTransactionId;
+        return this;
+    }
+    
+    public CommandProcessingResultBuilder withProductId(final Long productId) {
+        this.productId = productId;
         return this;
     }
 

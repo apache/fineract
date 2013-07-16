@@ -891,6 +891,22 @@
 								<td><a href="#charges_update">Update a Charge</a></td>
 								<td><a href="#charges_delete">Delete a Charge</a></td>
 							</tr>
+							<tr>
+								<td><a href="#loanproductmix">Loan Product Mix</a></td>
+								<td>loanproducts?associations=productMixes</td>
+								<td></td>
+								<td><a href="#loanproductmix_list">List Loan Products Mix</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr class="alt">
+								<td></td>
+								<td>loanproducts/{productId}/productmix</td>
+								<td><a href="#loanproductmix_create">Create a Loan Product Mix</a></td>
+								<td><a href="#loanproductmix_retrieve">Retrieve Loan Products Mix</a></td>
+								<td><a href="#loanproductmix_update">Update Loan Product Mix</a></td>
+								<td><a href="#loanproductmix_delete">Delete Loan Products Mix</a></td>
+							</tr>
 						</table>
 					</div>
 				</div>
@@ -1403,6 +1419,10 @@
 							<tr >
 								<td>loanproducts/template</td>
 								<td><a href="#loanproducts_template">Retrieve Loan Product Template</a></td>
+							</tr>
+							<tr >
+								<td>loanproducts/template?isProductMixTemplate=true</td>
+								<td><a href="#loanproductmix_template">Retrieve Loan Product Mix Template</a></td>
 							</tr>
 							<tr class="alt">
 								<td>loans/template?clientId={clientId}</td>
@@ -8049,6 +8069,355 @@ Request Body:
 				</div>
 			</div>
 			<!-- end of loan products api docs -->
+
+			<!-- start of loan products mix api docs -->
+			<a id="loanproductmix" name="loanproductmix" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h3>Loan Products Mix</h3>
+					<p>If you have the appropriate permissions, you can decide which types of products a given client or group can mix. In this way, you can restrict clients from having active loans accounts of different products at the same time.</p>
+
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Field Descriptions</div></td>
+						</tr>
+						<tr class=alt>
+							<td>restrictedProducts</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>List of productIds to create a product mix</td>
+						</tr>
+					</table>
+				</div>
+			</div>
+
+			<a id="loanproductmix_list" name="loanproductmix_list"
+				class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>List Loan Product Mix</h4>
+					<p>Example Requests:</p>
+					<div class=apiClick>loanproducts?associations=productMixes</div>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+GET https://DomainName/api/v1/loanproducts?associations=productMixes
+					</code>
+					<code class="method-response">
+[
+  {
+    "productId": 1,
+    "productName": "Personal Loan",
+    "restrictedProducts": [
+      {
+        "id": 2,
+        "name": "Joint Loan",
+        "includeInBorrowerCycle": false
+      },
+      {
+        "id": 5,
+        "name": "Primary Loan",
+        "includeInBorrowerCycle": false
+      },
+      {
+        "id": 3,
+        "name": "Daily Loan",
+        "includeInBorrowerCycle": false
+      }
+    ],
+    "allowedProducts": [
+      {
+        "id": 1,
+        "name": "Personal Loan",
+        "includeInBorrowerCycle": false
+      },
+      {
+        "id": 6,
+        "name": "Personal Loan -2",
+        "includeInBorrowerCycle": false
+      },
+      {
+        "id": 4,
+        "name": "Weekly Loan",
+        "includeInBorrowerCycle": false
+      }
+    ]
+  },
+  {
+    "productId": 2,
+    "productName": "Joint Loan",
+    "restrictedProducts": [
+      {
+        "id": 1,
+        "name": "Personal Loan",
+        "includeInBorrowerCycle": false
+      },
+      {
+        "id": 6,
+        "name": "Personal Loan -2",
+        "includeInBorrowerCycle": false
+      }
+    ],
+    "allowedProducts": [
+      {
+        "id": 3,
+        "name": "Daily Loan",
+        "includeInBorrowerCycle": false
+      },
+      {
+        "id": 2,
+        "name": "Joint Loan",
+        "includeInBorrowerCycle": false
+      },
+      {
+        "id": 5,
+        "name": "Primary Loan",
+        "includeInBorrowerCycle": false
+      },
+      {
+        "id": 4,
+        "name": "Weekly Loan",
+        "includeInBorrowerCycle": false
+      }
+    ]
+  }
+]
+					</code>
+				</div>
+			</div>
+
+			<a id="loanproductmix_template" name="loanproductmix_template"
+				class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Retrieve Product Mix Details Template</h4>
+					<p>This is a convenience resource. It can be useful when
+						building maintenance user interface screens for client
+						applications. The template data returned consists of any or all
+						of:
+					<ul>
+						<li class=normalli>Field Defaults</li>
+						<li class=normalli>Allowed Value Lists</li>
+					</ul>
+					</p>
+					<p>Example Request:</p>
+          <p>This request gets all the products details for which productmix is not defined.</p>
+          <br/>
+					<div class=apiClick>loanproducts/template?isProductMixTemplate=true</div>
+          <br/><br/>
+          <p>This request gets the productmix details for the specific loanproduct.</p>
+          <br/>
+          <div class=apiClick>loanproducts/5/productmix</div>
+          <br/>
+          <div class=apiClick>loanproducts/5/productmix?template=true</div>
+
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+GET https://DomainName/api/v1/loanproducts/template?isProductMixTemplate=true
+					</code>
+					<code class="method-response">
+{
+  "productOptions": [
+    {
+      "id": 5,
+      "name": "Primary Loan"
+    },
+    {
+      "id": 4,
+      "name": "Weekly Loan"
+    }
+  ]
+}
+					</code>
+          <code class="method-declaration">
+GET https://DomainName/api/v1/loanproducts/5/productmix
+          </code>
+          <code class="method-response">
+{
+  "restrictedProducts": [
+    {
+      "id": 1,
+      "name": "Personal Loan",
+      "includeInBorrowerCycle": false
+    }
+  ],
+  "allowedProducts": [
+    {
+      "id": 3,
+      "name": "Daily Loan",
+      "includeInBorrowerCycle": false
+    },
+    {
+      "id": 2,
+      "name": "Joint Loan",
+      "includeInBorrowerCycle": false
+    },
+    {
+      "id": 6,
+      "name": "Personal Loan -2",
+      "includeInBorrowerCycle": false
+    },
+    {
+      "id": 5,
+      "name": "Primary Loan",
+      "includeInBorrowerCycle": false
+    },
+    {
+      "id": 4,
+      "name": "Weekly Loan",
+      "includeInBorrowerCycle": false
+    }
+  ]
+}
+          </code>
+				</div>
+			</div>
+
+      <a id="loanproductmix_retrieve" name="loanproductmix_retrieve"
+        class="old-syle-anchor">&nbsp;</a>
+      <div class="method-section">
+        <div class="method-description">
+          <h4>Retrieve Loan Product Mix</h4>
+          <p>Example Requests:</p>
+          <div class=apiClick>loanproducts/5/productmix</div>
+        </div>
+        <div class="method-example">
+          <code class="method-declaration">
+GET https://DomainName/api/v1/loanproducts/5/productmix
+          </code>
+          <code class="method-response">
+{
+  "restrictedProducts": [
+    {
+      "id": 1,
+      "name": "Personal Loan",
+      "includeInBorrowerCycle": false
+    }
+  ],
+  "allowedProducts": [
+    {
+      "id": 3,
+      "name": "Daily Loan",
+      "includeInBorrowerCycle": false
+    },
+    {
+      "id": 2,
+      "name": "Joint Loan",
+      "includeInBorrowerCycle": false
+    },
+    {
+      "id": 6,
+      "name": "Personal Loan -2",
+      "includeInBorrowerCycle": false
+    },
+    {
+      "id": 5,
+      "name": "Primary Loan",
+      "includeInBorrowerCycle": false
+    },
+    {
+      "id": 4,
+      "name": "Weekly Loan",
+      "includeInBorrowerCycle": false
+    }
+  ]
+}
+          </code>
+        </div>
+      </div>
+
+			<a id="loanproductmix_create" name="loanproductmix_create"
+				class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Create a Loan Product Mix</h4>
+
+          <table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Mandatory Fields</div></td>
+						</tr>
+						<tr class=alt>
+							<td>restrictedProducts</td>
+						</tr>
+					</table>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+POST https://DomainName/api/v1/loanproducts/5/productmix
+					</code>
+					<code class="method-request">
+POST loanproducts/{productId}/productmix
+Content-Type: application/json 
+Request Body:
+{"restrictedProducts":["1"]}
+					</code>
+					<code class="method-response">
+{ 
+  "changes":{
+    "restrictedProductsForMix":[1],
+    "removedProductsForMix":[]
+  },
+  "productId":5
+}
+					</code>			
+				</div>
+			</div>
+
+			<a id="loanproductmix_update" name="loanproductmix_update"
+				class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Update a Loan Product Mix</h4>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+PUT https://DomainName/api/v1/loanproducts/{productId}/productmix
+					</code>
+					<code class="method-request">
+PUT loanproducts/5/productmix
+Content-Type: application/json 
+Request Body: 
+{
+    "restrictedProducts":["3"]
+}
+					</code>
+					<code class="method-response">
+{
+  "changes": {
+    "restrictedProductsForMix": [3],
+    "removedProductsForMix": [1]
+  },
+  "productId": 5
+}
+					</code>
+				</div>
+			</div>
+
+      <a id="loanproductmix_delete" name="loanproductmix_delete"
+        class="old-syle-anchor">&nbsp;</a>
+      <div class="method-section">
+        <div class="method-description">
+          <h4>Delete a Loan Product Mix</h4>
+        </div>
+        <div class="method-example">
+          <code class="method-declaration">
+DELETE https://DomainName/api/v1/loanproducts/{productId}/productmix
+          </code>
+          <code class="method-request">
+DELETE loanproducts/5/productmix
+          </code>
+          <code class="method-response">
+{
+  "changes": {
+    "removedProductsForMix": [3]
+  },
+  "productId": 5
+}
+          </code>
+        </div>
+      </div>      
+			<!-- end of loan products mix api docs -->
 
 			<!-- start of configurations api docs -->
 			<a id="configs" name="configs" class="old-syle-anchor">&nbsp;</a>
@@ -16372,6 +16741,30 @@ GET https://DomainName/api/v1/search?query=000000111
 					<td><a href="#loanproducts_retrieve">Retrieve a Loan Product</a></td>
 					<td><a href="#loanproducts_update">Update a Loan Product</a></td>
 					<td></td>
+				</tr>
+				<tr class="alt">
+					<td><a href="#loanproductmix">Loan Product Mix</a></td>
+					<td>loanproducts/template?isProductMixTemplate=true</td>
+					<td></td>
+					<td><a href="#loanproductmix_template">Retrieve Loan Product Mix Template</a></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>loanproducts?associations=productMixes</td>
+					<td></td>
+					<td><a href="#loanproductmix_list">List Loan Products Mix</a></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr class="alt">
+					<td></td>
+					<td>loanproducts/{productId}/productmix</td>
+					<td><a href="#loanproductmix_create">Create a Loan Product Mix</a></td>
+					<td><a href="#loanproductmix_retrieve">Retrieve Loan Products Mix</a></td>
+					<td><a href="#loanproductmix_update">Update Loan Product Mix</a></td>
+					<td><a href="#loanproductmix_delete">Delete Loan Products Mix</a></td>
 				</tr>
 				<tr>
 					<td><a href="#loans">Loans</a></td>

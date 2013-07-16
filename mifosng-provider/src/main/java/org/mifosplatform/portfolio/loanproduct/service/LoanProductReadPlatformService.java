@@ -18,4 +18,10 @@ public interface LoanProductReadPlatformService {
     LoanProductData retrieveLoanProduct(Long productId);
 
     LoanProductData retrieveNewLoanProductDetails();
+
+    Collection<LoanProductData> retrieveAvailableLoanProductsForMix();
+
+    Collection<LoanProductData> retrieveRestrictedProductsForMix(Long productId);
+    
+    Collection<LoanProductData> retrieveAllowedProductsForMix(Long productId);
 }
