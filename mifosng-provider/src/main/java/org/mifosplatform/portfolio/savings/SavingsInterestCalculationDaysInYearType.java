@@ -5,6 +5,9 @@
  */
 package org.mifosplatform.portfolio.savings;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * <ul>
  * People typically use either of the following settings when calculating there
@@ -33,6 +36,17 @@ public enum SavingsInterestCalculationDaysInYearType {
 
     public String getCode() {
         return code;
+    }
+
+    public static Object[] integerValues() {
+        List<Integer> values = new ArrayList<Integer>();
+        for (SavingsInterestCalculationDaysInYearType enumType : values()) {
+            if (enumType.getValue() > 0) {
+                values.add(enumType.getValue());
+            }
+        }
+
+        return values.toArray();
     }
 
     public static SavingsInterestCalculationDaysInYearType fromInt(final Integer type) {

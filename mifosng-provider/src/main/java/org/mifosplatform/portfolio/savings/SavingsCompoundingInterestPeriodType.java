@@ -46,7 +46,9 @@ public enum SavingsCompoundingInterestPeriodType {
     public static Object[] integerValues() {
         List<Integer> values = new ArrayList<Integer>();
         for (SavingsCompoundingInterestPeriodType enumType : values()) {
-            values.add(enumType.getValue());
+            if (enumType.getValue() > 0) {
+                values.add(enumType.getValue());
+            }
         }
 
         return values.toArray();

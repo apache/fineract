@@ -5,6 +5,9 @@
  */
 package org.mifosplatform.portfolio.savings;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public enum SavingsWithdrawalFeesType {
 
     INVALID(0, "savingsWithdrawalFeesType.invalid"), //
@@ -25,6 +28,17 @@ public enum SavingsWithdrawalFeesType {
 
     public String getCode() {
         return code;
+    }
+
+    public static Object[] integerValues() {
+        List<Integer> values = new ArrayList<Integer>();
+        for (SavingsWithdrawalFeesType enumType : values()) {
+            if (enumType.getValue() > 0) {
+                values.add(enumType.getValue());
+            }
+        }
+
+        return values.toArray();
     }
 
     public static SavingsWithdrawalFeesType fromInt(final Integer type) {

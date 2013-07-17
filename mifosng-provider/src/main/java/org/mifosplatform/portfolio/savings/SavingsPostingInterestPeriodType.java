@@ -5,6 +5,9 @@
  */
 package org.mifosplatform.portfolio.savings;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * The interest posting period is the span of time at the end of which savings
  * earned but not yet credited/posted in a client's account is credited/posted.
@@ -30,6 +33,17 @@ public enum SavingsPostingInterestPeriodType {
 
     public String getCode() {
         return code;
+    }
+
+    public static Object[] integerValues() {
+        List<Integer> values = new ArrayList<Integer>();
+        for (SavingsPostingInterestPeriodType enumType : values()) {
+            if (enumType.getValue() > 0) {
+                values.add(enumType.getValue());
+            }
+        }
+
+        return values.toArray();
     }
 
     public static SavingsPostingInterestPeriodType fromInt(final Integer type) {

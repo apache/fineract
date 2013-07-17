@@ -5,6 +5,9 @@
  */
 package org.mifosplatform.portfolio.savings;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * <ul>
  * There are two methods to calculate the interest on a savings account:
@@ -47,6 +50,17 @@ public enum SavingsInterestCalculationType {
 
     public String getCode() {
         return code;
+    }
+
+    public static Object[] integerValues() {
+        List<Integer> values = new ArrayList<Integer>();
+        for (SavingsInterestCalculationType enumType : values()) {
+            if (enumType.getValue() > 0) {
+                values.add(enumType.getValue());
+            }
+        }
+
+        return values.toArray();
     }
 
     public static SavingsInterestCalculationType fromInt(final Integer type) {

@@ -41,6 +41,10 @@ import org.mifosplatform.infrastructure.core.exception.InvalidJsonException;
 import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.portfolio.savings.SavingsCompoundingInterestPeriodType;
+import org.mifosplatform.portfolio.savings.SavingsInterestCalculationDaysInYearType;
+import org.mifosplatform.portfolio.savings.SavingsInterestCalculationType;
+import org.mifosplatform.portfolio.savings.SavingsPostingInterestPeriodType;
+import org.mifosplatform.portfolio.savings.SavingsWithdrawalFeesType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -96,16 +100,16 @@ public class SavingsProductDataValidator {
         final Integer interestPostingPeriodType = fromApiJsonHelper.extractIntegerSansLocaleNamed(interestPostingPeriodTypeParamName,
                 element);
         baseDataValidator.reset().parameter(interestPostingPeriodTypeParamName).value(interestPostingPeriodType).notNull()
-                .isOneOfTheseValues(new Object[] { 4, 5, 6, 7 });
+                .isOneOfTheseValues(SavingsPostingInterestPeriodType.integerValues());
 
         final Integer interestCalculationType = fromApiJsonHelper.extractIntegerSansLocaleNamed(interestCalculationTypeParamName, element);
         baseDataValidator.reset().parameter(interestCalculationTypeParamName).value(interestCalculationType).notNull()
-                .isOneOfTheseValues(new Object[] { 1, 2 });
+                .isOneOfTheseValues(SavingsInterestCalculationType.integerValues());
 
         final Integer interestCalculationDaysInYearType = fromApiJsonHelper.extractIntegerSansLocaleNamed(
                 interestCalculationDaysInYearTypeParamName, element);
         baseDataValidator.reset().parameter(interestCalculationDaysInYearTypeParamName).value(interestCalculationDaysInYearType).notNull()
-                .isOneOfTheseValues(360, 365);
+                .isOneOfTheseValues(SavingsInterestCalculationDaysInYearType.integerValues());
 
         if (this.fromApiJsonHelper.parameterExists(minRequiredOpeningBalanceParamName, element)) {
             final BigDecimal minOpeningBalance = fromApiJsonHelper.extractBigDecimalWithLocaleNamed(minRequiredOpeningBalanceParamName,
@@ -147,7 +151,8 @@ public class SavingsProductDataValidator {
 
             if (withdrawalFeeAmount != null) {
                 final Integer withdrawalFeeType = fromApiJsonHelper.extractIntegerSansLocaleNamed(withdrawalFeeTypeParamName, element);
-                baseDataValidator.reset().parameter(withdrawalFeeTypeParamName).value(withdrawalFeeType).isOneOfTheseValues(1, 2);
+                baseDataValidator.reset().parameter(withdrawalFeeTypeParamName).value(withdrawalFeeType)
+                        .isOneOfTheseValues(SavingsWithdrawalFeesType.integerValues());
             }
         }
 

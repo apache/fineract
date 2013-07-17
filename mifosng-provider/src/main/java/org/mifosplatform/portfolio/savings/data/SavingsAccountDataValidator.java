@@ -10,6 +10,7 @@ import static org.mifosplatform.portfolio.savings.SavingsApiConstants.annualFeeA
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.annualFeeOnMonthDayParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.clientIdParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.externalIdParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.fieldOfficerIdParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.groupIdParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.interestCalculationDaysInYearTypeParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.interestCalculationTypeParamName;
@@ -39,6 +40,11 @@ import org.mifosplatform.infrastructure.core.exception.InvalidJsonException;
 import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.portfolio.savings.SavingsApiConstants;
+import org.mifosplatform.portfolio.savings.SavingsCompoundingInterestPeriodType;
+import org.mifosplatform.portfolio.savings.SavingsInterestCalculationDaysInYearType;
+import org.mifosplatform.portfolio.savings.SavingsInterestCalculationType;
+import org.mifosplatform.portfolio.savings.SavingsPostingInterestPeriodType;
+import org.mifosplatform.portfolio.savings.SavingsWithdrawalFeesType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -84,6 +90,11 @@ public class SavingsAccountDataValidator {
         final Long productId = fromApiJsonHelper.extractLongNamed(productIdParamName, element);
         baseDataValidator.reset().parameter(productIdParamName).value(productId).notNull().integerGreaterThanZero();
 
+        if (fromApiJsonHelper.parameterExists(fieldOfficerIdParamName, element)) {
+            final Long fieldOfficerId = fromApiJsonHelper.extractLongNamed(fieldOfficerIdParamName, element);
+            baseDataValidator.reset().parameter(fieldOfficerIdParamName).value(fieldOfficerId).notNull().integerGreaterThanZero();
+        }
+
         final LocalDate submittedOnDate = fromApiJsonHelper.extractLocalDateNamed(submittedOnDateParamName, element);
         baseDataValidator.reset().parameter(submittedOnDateParamName).value(submittedOnDate).notNull();
 
@@ -106,28 +117,28 @@ public class SavingsAccountDataValidator {
             final Integer interestCompoundingPeriodType = fromApiJsonHelper.extractIntegerSansLocaleNamed(
                     interestCompoundingPeriodTypeParamName, element);
             baseDataValidator.reset().parameter(interestCompoundingPeriodTypeParamName).value(interestCompoundingPeriodType).notNull()
-                    .isOneOfTheseValues(new Object[] { 1, 2, 3, 4, 5, 6, 7, 8 });
+                    .isOneOfTheseValues(SavingsCompoundingInterestPeriodType.integerValues());
         }
 
         if (fromApiJsonHelper.parameterExists(interestPostingPeriodTypeParamName, element)) {
             final Integer interestPostingPeriodType = fromApiJsonHelper.extractIntegerSansLocaleNamed(interestPostingPeriodTypeParamName,
                     element);
             baseDataValidator.reset().parameter(interestPostingPeriodTypeParamName).value(interestPostingPeriodType).notNull()
-                    .isOneOfTheseValues(new Object[] { 4, 5, 6, 7 });
+                    .isOneOfTheseValues(SavingsPostingInterestPeriodType.integerValues());
         }
 
         if (fromApiJsonHelper.parameterExists(interestCalculationTypeParamName, element)) {
             final Integer interestCalculationType = fromApiJsonHelper.extractIntegerSansLocaleNamed(interestCalculationTypeParamName,
                     element);
             baseDataValidator.reset().parameter(interestCalculationTypeParamName).value(interestCalculationType).notNull()
-                    .isOneOfTheseValues(new Object[] { 1, 2 });
+                    .isOneOfTheseValues(SavingsInterestCalculationType.integerValues());
         }
 
         if (fromApiJsonHelper.parameterExists(interestCalculationDaysInYearTypeParamName, element)) {
             final Integer interestCalculationDaysInYearType = fromApiJsonHelper.extractIntegerSansLocaleNamed(
                     interestCalculationDaysInYearTypeParamName, element);
             baseDataValidator.reset().parameter(interestCalculationDaysInYearTypeParamName).value(interestCalculationDaysInYearType)
-                    .notNull().isOneOfTheseValues(360, 365);
+                    .notNull().isOneOfTheseValues(SavingsInterestCalculationDaysInYearType.integerValues());
         }
 
         if (this.fromApiJsonHelper.parameterExists(minRequiredOpeningBalanceParamName, element)) {
@@ -170,7 +181,8 @@ public class SavingsAccountDataValidator {
 
             if (withdrawalFeeAmount != null) {
                 final Integer withdrawalFeeType = fromApiJsonHelper.extractIntegerSansLocaleNamed(withdrawalFeeTypeParamName, element);
-                baseDataValidator.reset().parameter(withdrawalFeeTypeParamName).value(withdrawalFeeType).isOneOfTheseValues(1, 2);
+                baseDataValidator.reset().parameter(withdrawalFeeTypeParamName).value(withdrawalFeeType)
+                        .isOneOfTheseValues(SavingsWithdrawalFeesType.integerValues());
             }
         }
 
@@ -262,6 +274,11 @@ public class SavingsAccountDataValidator {
             baseDataValidator.reset().parameter(productIdParamName).value(productId).notNull().integerGreaterThanZero();
         }
 
+        if (fromApiJsonHelper.parameterExists(fieldOfficerIdParamName, element)) {
+            final Long fieldOfficerId = fromApiJsonHelper.extractLongNamed(fieldOfficerIdParamName, element);
+            baseDataValidator.reset().parameter(fieldOfficerIdParamName).value(fieldOfficerId).notNull().integerGreaterThanZero();
+        }
+
         if (fromApiJsonHelper.parameterExists(submittedOnDateParamName, element)) {
             final LocalDate submittedOnDate = fromApiJsonHelper.extractLocalDateNamed(submittedOnDateParamName, element);
             baseDataValidator.reset().parameter(submittedOnDateParamName).value(submittedOnDate).notNull();
@@ -286,28 +303,28 @@ public class SavingsAccountDataValidator {
             final Integer interestCompoundingPeriodType = fromApiJsonHelper.extractIntegerSansLocaleNamed(
                     interestCompoundingPeriodTypeParamName, element);
             baseDataValidator.reset().parameter(interestCompoundingPeriodTypeParamName).value(interestCompoundingPeriodType).notNull()
-                    .isOneOfTheseValues(new Object[] { 1, 2, 3, 4, 5, 6, 7, 8 });
+                    .isOneOfTheseValues(SavingsCompoundingInterestPeriodType.integerValues());
         }
 
         if (this.fromApiJsonHelper.parameterExists(interestPostingPeriodTypeParamName, element)) {
             final Integer interestPostingPeriodType = fromApiJsonHelper.extractIntegerSansLocaleNamed(interestPostingPeriodTypeParamName,
                     element);
             baseDataValidator.reset().parameter(interestPostingPeriodTypeParamName).value(interestPostingPeriodType).notNull()
-                    .isOneOfTheseValues(new Object[] { 4, 5, 6, 7 });
+                    .isOneOfTheseValues(SavingsPostingInterestPeriodType.integerValues());
         }
 
         if (this.fromApiJsonHelper.parameterExists(interestCalculationTypeParamName, element)) {
             final Integer interestCalculationType = fromApiJsonHelper.extractIntegerSansLocaleNamed(interestCalculationTypeParamName,
                     element);
             baseDataValidator.reset().parameter(interestCalculationTypeParamName).value(interestCalculationType).notNull()
-                    .isOneOfTheseValues(new Object[] { 1, 2 });
+                    .isOneOfTheseValues(SavingsInterestCalculationType.integerValues());
         }
 
         if (this.fromApiJsonHelper.parameterExists(interestCalculationDaysInYearTypeParamName, element)) {
             final Integer interestCalculationDaysInYearType = fromApiJsonHelper.extractIntegerSansLocaleNamed(
                     interestCalculationDaysInYearTypeParamName, element);
             baseDataValidator.reset().parameter(interestCalculationDaysInYearTypeParamName).value(interestCalculationDaysInYearType)
-                    .notNull().isOneOfTheseValues(360, 365);
+                    .notNull().isOneOfTheseValues(SavingsInterestCalculationDaysInYearType.integerValues());
         }
 
         if (this.fromApiJsonHelper.parameterExists(minRequiredOpeningBalanceParamName, element)) {
@@ -339,7 +356,7 @@ public class SavingsAccountDataValidator {
         if (this.fromApiJsonHelper.parameterExists(withdrawalFeeTypeParamName, element)) {
             final Integer withdrawalFeeType = fromApiJsonHelper.extractIntegerSansLocaleNamed(withdrawalFeeTypeParamName, element);
             baseDataValidator.reset().parameter(withdrawalFeeTypeParamName).value(withdrawalFeeType).ignoreIfNull()
-                    .isOneOfTheseValues(1, 2);
+                    .isOneOfTheseValues(SavingsWithdrawalFeesType.integerValues());
         }
 
         if (this.fromApiJsonHelper.parameterExists(annualFeeAmountParamName, element)) {
