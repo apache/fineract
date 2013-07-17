@@ -5,6 +5,8 @@
  */
 package org.mifosplatform.portfolio.savings.service;
 
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME;
+
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -13,14 +15,19 @@ import java.util.Map;
 import org.apache.commons.lang.StringUtils;
 import org.mifosplatform.accounting.journalentry.service.JournalEntryWritePlatformService;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
+import org.mifosplatform.infrastructure.core.data.ApiParameterError;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
+import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
+import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.monetary.domain.ApplicationCurrency;
 import org.mifosplatform.organisation.monetary.domain.ApplicationCurrencyRepositoryWrapper;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
+import org.mifosplatform.organisation.staff.domain.Staff;
+import org.mifosplatform.organisation.staff.domain.StaffRepositoryWrapper;
 import org.mifosplatform.portfolio.client.domain.AccountNumberGenerator;
 import org.mifosplatform.portfolio.client.domain.AccountNumberGeneratorFactory;
 import org.mifosplatform.portfolio.client.domain.Client;
@@ -60,6 +67,7 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
     private final GroupRepository groupRepository;
     private final SavingsProductRepository savingsProductRepository;
     private final NoteRepository noteRepository;
+    private final StaffRepositoryWrapper staffRepository;
     private final SavingsAccountApplicationTransitionApiJsonValidator savingsAccountApplicationTransitionApiJsonValidator;
     private final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepositoryWrapper;
     private final JournalEntryWritePlatformService journalEntryWritePlatformService;
@@ -70,7 +78,7 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
             final SavingsAccountDataValidator savingsAccountDataValidator,
             final AccountNumberGeneratorFactory accountIdentifierGeneratorFactory, final ClientRepositoryWrapper clientRepository,
             final GroupRepository groupRepository, final SavingsProductRepository savingsProductRepository,
-            final NoteRepository noteRepository,
+            final NoteRepository noteRepository, final StaffRepositoryWrapper staffRepository,
             final SavingsAccountApplicationTransitionApiJsonValidator savingsAccountApplicationTransitionApiJsonValidator,
             final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepositoryWrapper,
             final JournalEntryWritePlatformService journalEntryWritePlatformService) {
@@ -83,6 +91,7 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
         this.groupRepository = groupRepository;
         this.savingsProductRepository = savingsProductRepository;
         this.noteRepository = noteRepository;
+        this.staffRepository = staffRepository;
         this.savingsAccountApplicationTransitionApiJsonValidator = savingsAccountApplicationTransitionApiJsonValidator;
         this.applicationCurrencyRepositoryWrapper = applicationCurrencyRepositoryWrapper;
         this.journalEntryWritePlatformService = journalEntryWritePlatformService;
@@ -198,6 +207,13 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
                     account.update(product);
                 }
 
+                if (changes.containsKey(SavingsApiConstants.fieldOfficerIdParamName)) {
+                    final Long fieldOfficerId = command.longValueOfParameterNamed(SavingsApiConstants.fieldOfficerIdParamName);
+                    final Staff fieldOfficer = this.staffRepository.findOneWithNotFoundDetection(fieldOfficerId);
+
+                    account.update(fieldOfficer);
+                }
+
                 this.savingAccountRepository.saveAndFlush(account);
             }
 
@@ -220,9 +236,18 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
     @Override
     public CommandProcessingResult deleteApplication(final Long savingsId) {
 
-        this.context.authenticatedUser();
-
         final SavingsAccount account = this.savingAccountRepository.findOneWithNotFoundDetection(savingsId);
+
+        if (account.isNotSubmittedAndPendingApproval()) {
+            final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+            final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+                    .resource(SAVINGS_ACCOUNT_RESOURCE_NAME + SavingsApiConstants.deleteApplicationAction);
+
+            baseDataValidator.reset().parameter(SavingsApiConstants.activatedOnDateParamName)
+                    .failWithCodeNoParameterAddedToErrorCode("not.in.submittedandpendingapproval.state");
+
+            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        }
 
         List<Note> relatedNotes = this.noteRepository.findBySavingsAccountId(savingsId);
         this.noteRepository.deleteInBatch(relatedNotes);

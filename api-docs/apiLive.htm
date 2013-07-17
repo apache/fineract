@@ -10175,7 +10175,7 @@ Content-Type: application/json
 	    <div class="method-description">
 	        <h3>Savings Product:</h3>
 	        <p>An MFIs savings product offerings are modeled using this API.</p>
-	        <p>When creating savings accounts, the details from the savings product are used to auto fill details of savings account.</p>
+	        <p>When creating savings accounts, the details from the savings product are used to auto fill details of the savings account application process.</p>
 	        <table class=matrixHeading>
 	            <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Field Descriptions</div></td></tr>
 				
@@ -10195,7 +10195,10 @@ Content-Type: application/json
 	            <tr><td class=fielddesc>The default interest rate set when creating savings accounts of this type of product. e.g. <b>5</b>% Per year - It number here is always expressed as the Nominal APR.</td></tr>
 
 				<tr class=alt><td>interestCompoundingPeriodType</td></tr>
-	            <tr><td class=fielddesc>The period at which interest rate is compounded. 1=Daily, 2=Weekly (at end of week, sunday), 3=Every two weeks (at end of two weeks, sunday), 4=Monthly (at end of month), 5=Quarterly (at end of quarter, 31st Mar, 30th Jun, 30th Sep, 31st Dec), 6=Bi-Annually (30th June, 31st Dec), 7=Annually (31st Dec), 8=No Compounding - Simple Interest</td></tr>
+	            <tr><td class=fielddesc>The period at which interest rate is compounded. 1=Daily, 4=Monthly (at end of month)</td></tr>
+
+	            <tr class=alt><td>interestPostingPeriodType</td></tr>
+	            <tr><td class=fielddesc>The period at which interest rate is posted or credited to savings account. 4=Monthly (at end of month), 5=Quarterly (at end of quarter, 31st Mar, 30th Jun, 30th Sep, 31st Dec)</td></tr>
 
 	            <tr class=alt><td>interestCalculationType</td></tr>
 	            <tr><td class=fielddesc>The interest calculation method used: 1=Daily Balance or 2=Average Daily Balance</td></tr>
@@ -11008,7 +11011,50 @@ Content-Type: application/json
 	<div class="method-section">
 	    <div class="method-description">
 	        <h2>Savings Account:</h2>
-	        <p>An instance of a savings account for a individual or group.</p>
+	        <p>Savings accounts are instances of a praticular savings product created for an individual or group. An application process around the creation of accounts is also supported.</p>
+
+	        <table class=matrixHeading>
+	        	<thead>
+	        		<tr class="matrixHeadingBG">
+	        			<td class="mifosXHeading2">Starting State</td>
+	        			<td class="mifosXHeading2">Action</td>
+	        			<td class="mifosXHeading2">Resultant State</td>
+	        		</tr>
+	        	</thead>
+	        	<tbody>
+	        		<tr>
+	        			<td>-</td>
+	        			<td>Submit</td>
+	        			<td>Submitted and pending approval</td>
+	        		</tr>
+	        		<tr>
+	        			<td>Submitted and pending approval</td>
+	        			<td>Reject</td>
+	        			<td>Closed - Rejected</td>
+	        		</tr>
+	        		<tr>
+	        			<td>Submitted and pending approval</td>
+	        			<td>Withdrawn by Applicant</td>
+	        			<td>Closed - Withdrawn by Applicant</td>
+	        		</tr>
+	        		<tr>
+	        			<td>Submitted and pending approval</td>
+	        			<td>Approve</td>
+	        			<td>Approved</td>
+	        		</tr>
+	        		<tr>
+	        			<td>Approved</td>
+	        			<td>Undo Approval</td>
+	        			<td>Submitted and pending approval</td>
+	        		</tr>
+	        		<tr>
+	        			<td>Approved</td>
+	        			<td>Activate</td>
+	        			<td>Active</td>
+	        		</tr>
+	        	</tbody>
+	        </table>
+	        <br/>
 	      	<table class=matrixHeading>
 	            <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Field Descriptions</div></td></tr>
 
@@ -11025,19 +11071,19 @@ Content-Type: application/json
 				<tr><td class=fielddesc>The account no. associated with this loan. Is auto generated if not provided at creation time.</td></tr>
 
 				<tr class=alt><td>externalId</td></tr>
-				<tr><td class=fielddesc>A place to put an external reference for this savings account e.g. The ID another system uses. If provided, it must be unique.</td></tr>
+				<tr><td class=fielddesc>A place to put an external reference for this savings account useful in migrations e.g. The ID another system uses. If provided, it must be unique.</td></tr>
 
-				<tr class=alt><td>active</td></tr>
-				<tr><td class=fielddesc>Indicates whether this savings account should go into active state or not automatically</td></tr>
-
-				<tr class=alt><td>activationDate</td></tr>
-				<tr><td class=fielddesc>If <b>active</b> is true the <i>activationDate</i> must be provided. If the savings account has an entry for <i>minRequiredOpeningBalance</i> then a deposit for that amount with <i>activationDate</i> as the date is automatically entered.</td></tr>
+				<tr class=alt><td>submittedOnDate</td></tr>
+				<tr><td class=fielddesc><i>submittedOnDate</i> must be provided when initially creating savings account application. <i>locale</i> and <i>dateFormat</i> parameters must be provided with this.</td></tr>
 
 				<tr class=alt><td>nominalAnnualInterestRate</td></tr>
 	            <tr><td class=fielddesc>The interest rate set for savings account e.g. <b>5</b>% Per year - It is always expressed as the Nominal APR.</td></tr>
 
-				<tr class=alt><td>interestCompoundingPeriodType</td></tr>
-	            <tr><td class=fielddesc>The period at which interest rate is compounded. 1=Daily, 2=Weekly (at end of week, sunday), 3=Every two weeks (at end of two weeks, sunday), 4=Monthly (at end of month), 5=Quarterly (at end of quarter, 31st Mar, 30th Jun, 30th Sep, 31st Dec), 6=Bi-Annually (30th June, 31st Dec), 7=Annually (31st Dec), 8=No Compounding - Simple Interest</td></tr>
+	            <tr class=alt><td>interestCompoundingPeriodType</td></tr>
+	            <tr><td class=fielddesc>The period at which interest rate is compounded. 1=Daily, 4=Monthly (at end of month)</td></tr>
+
+	            <tr class=alt><td>interestPostingPeriodType</td></tr>
+	            <tr><td class=fielddesc>The period at which interest rate is posted or credited to savings account. The actual crediting or posting transaction is date as occurring on the day after the end of the period.  4=Monthly (at end of month), 5=Quarterly (at end of quarter, 31st Mar, 30th Jun, 30th Sep, 31st Dec), 7=Annually (at end of calendar year 31st Dec)</td></tr>
 
 	            <tr class=alt><td>interestCalculationType</td></tr>
 	            <tr><td class=fielddesc>The interest calculation method used: 1=Daily Balance or 2=Average Daily Balance</td></tr>
@@ -11103,11 +11149,11 @@ Content-Type: application/json
 			<code class="method-response">
 {
   "clientId": 1,
-  "clientName": "Client A AB",
+  "clientName": "small business",
   "productOptions": [
     {
       "id": 1,
-      "name": "First"
+      "name": "Passbook Savings"
     }
   ]
 }
@@ -11119,9 +11165,10 @@ Content-Type: application/json
 			<code class="method-response">
 {
   "clientId": 1,
-  "clientName": "John Doe",
-  "savingsProductId": 3,
+  "clientName": "small business",
+  "savingsProductId": 1,
   "savingsProductName": "Passbook Savings",
+  "timeline": {},
   "currency": {
     "code": "USD",
     "name": "US Dollar",
@@ -11136,6 +11183,11 @@ Content-Type: application/json
     "code": "savings.interest.period.savingsCompoundingInterestPeriodType.daily",
     "value": "Daily"
   },
+  "interestPostingPeriodType": {
+    "id": 4,
+    "code": "savings.interest.posting.period.savingsPostingInterestPeriodType.monthly",
+    "value": "Monthly"
+  },
   "interestCalculationType": {
     "id": 1,
     "code": "savingsInterestCalculationType.dailybalance",
@@ -11149,15 +11201,27 @@ Content-Type: application/json
   "productOptions": [
     {
       "id": 1,
-      "name": "01-Compounding Daily"
-    },
-    {
-      "id": 2,
-      "name": "02-Compounding Monthly"
-    },
+      "name": "Passbook Savings"
+    }
+  ],
+  "fieldOfficerOptions": [
     {
       "id": 3,
-      "name": "Passbook Savings"
+      "firstname": "Mrs.",
+      "lastname": "loanofficerB1",
+      "displayName": "loanofficerB1, Mrs.",
+      "officeId": 2,
+      "officeName": "branch 1",
+      "isLoanOfficer": true
+    },
+    {
+      "id": 1,
+      "firstname": "Mr.",
+      "lastname": "loanofficerHO",
+      "displayName": "loanofficerHO, Mr.",
+      "officeId": 1,
+      "officeName": "branch 1",
+      "isLoanOfficer": true
     }
   ],
   "interestCompoundingPeriodTypeOptions": [
@@ -11167,39 +11231,26 @@ Content-Type: application/json
       "value": "Daily"
     },
     {
-      "id": 2,
-      "code": "savings.interest.period.savingsCompoundingInterestPeriodType.weekly",
-      "value": "Weekly"
-    },
-    {
-      "id": 3,
-      "code": "savings.interest.period.savingsCompoundingInterestPeriodType.biweekly",
-      "value": "Bi-Weekly"
-    },
-    {
       "id": 4,
       "code": "savings.interest.period.savingsCompoundingInterestPeriodType.monthly",
+      "value": "Monthly"
+    }
+  ],
+  "interestPostingPeriodTypeOptions": [
+    {
+      "id": 4,
+      "code": "savings.interest.posting.period.savingsPostingInterestPeriodType.monthly",
       "value": "Monthly"
     },
     {
       "id": 5,
-      "code": "savings.interest.period.savingsCompoundingInterestPeriodType.quarterly",
+      "code": "savings.interest.posting.period.savingsPostingInterestPeriodType.quarterly",
       "value": "Quarterly"
     },
     {
-      "id": 6,
-      "code": "savings.interest.period.savingsCompoundingInterestPeriodType.biannual",
-      "value": "Semi-Annual"
-    },
-    {
       "id": 7,
-      "code": "savings.interest.period.savingsCompoundingInterestPeriodType.annual",
+      "code": "savings.interest.posting.period.savingsPostingInterestPeriodType.annual",
       "value": "Annually"
-    },
-    {
-      "id": 8,
-      "code": "savings.interest.period.savingsCompoundingInterestPeriodType.nocompounding",
-      "value": "No Compounding - Simple Interest"
     }
   ],
   "interestCalculationTypeOptions": [
@@ -11247,6 +11298,18 @@ Content-Type: application/json
       "code": "savings.lockin.savingsPeriodFrequencyType.years",
       "value": "Years"
     }
+  ],
+  "withdrawalFeeTypeOptions": [
+    {
+      "id": 1,
+      "code": "savingsWithdrawalFeesType.flat",
+      "value": "Flat"
+    },
+    {
+      "id": 2,
+      "code": "savingsWithdrawalFeesType.percent.of.amount",
+      "value": "% of Amount"
+    }
   ]
 }
 			</code>
@@ -11256,23 +11319,21 @@ Content-Type: application/json
 	<a id="savingsaccounts_create" name="savingsaccounts_create" class="old-syle-anchor">&nbsp;</a>
 	<div class="method-section">
 	    <div class="method-description">
-	        <h2>Create a New Savings Account</h2>
+	        <h2>Submit new savings application</h2>
 	        <br/>
 	        <table class=matrixHeading>
 	            <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Mandatory Fields</div></td></tr>
-	            <tr class=alt><td>clientId or groupId, productId, accountNo, externalId, 
-	            	active, (activationDate if active is true)</td></tr>
+	            <tr class=alt><td>clientId or groupId, productId, submittedOnDate</td></tr>
 	        </table>
 	        <br/>
 	        <table class=matrixHeading>
 	            <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Optional Fields</div></td></tr>
-	            <tr class=alt><td>accountNo, externalId</td></tr>
+	            <tr class=alt><td>accountNo, externalId, fieldOfficerId</td></tr>
 	        </table>
 	        <br/>
 	        <table class=matrixHeading>
 	            <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Inherited from Product (if not provided)</div></td></tr>
-	            <tr class=alt><td>nominalAnnualInterestRate, interestCompoundingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance, lockinPeriodFrequency, 
-	           lockinPeriodFrequencyType, withdrawalFeeAmount, withdrawalFeeType, annualFeeAmount, annualFeeOnMonthDay</td>
+	            <tr class=alt><td>nominalAnnualInterestRate, interestCompoundingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeAmount, withdrawalFeeType, annualFeeAmount, annualFeeOnMonthDay</td>
 	       		</tr>
 	        </table>
 	    </div>
@@ -11285,7 +11346,9 @@ Request Body:
 {
   "clientId": 1,
   "productId": 1,
-  "active": false
+  "locale": "en", 
+  "dateFormat": "dd MMMM yyyy", 
+  "submittedOnDate": "01 March 2011"
 }
 			</code>
 			<p>Minimal request: accountNo provided (must be unique), remaining details inherited from savings product.</p>
@@ -11295,7 +11358,9 @@ Request Body:
 {
   "clientId": 1,
   "productId": 1,
-  "active": false,
+  "locale": "en", 
+  "dateFormat": "dd MMMM yyyy", 
+  "submittedOnDate": "01 March 2011",
   "accountNo": "SA000023",
   "externalId": "SYS-23"
 }
@@ -11307,14 +11372,17 @@ Request Body:
 {
   "clientId": 1,
   "productId": 1,
+  "fieldOfficerId": 1,
+  "locale": "en", 
+  "dateFormat": "dd MMMM yyyy", 
+  "submittedOnDate": "01 March 2013",
   "accountNo": "SA000023",
   "externalId": "SYS-23",
-  "active": true,
-  "locale": "en",
-  "dateFormat": "dd MMMM yyyy",
-  "activationDate": "01 March 2011", 
-  "interestRate": "5.65", 
-  "interestRatePeriodFrequencyType": 2,
+  "nominalAnnualInterestRate": "5.65", 
+  "interestCompoundingPeriodType": 1,
+  "interestPostingPeriodType": 4,
+  "interestCalculationType": 1,
+  "interestCalculationDaysInYearType": 365,
   "minRequiredOpeningBalance": "1,000", 
   "lockinPeriodFrequency": 6,
   "lockinPeriodFrequencyType": 2
@@ -11322,7 +11390,7 @@ Request Body:
 			</code>
 	        <code class="method-response">
 {
-  "officeId": 1,
+  "officeId": 2,
   "clientId": 1,
   "savingsId": 1,
   "resourceId": 1
@@ -11331,11 +11399,184 @@ Request Body:
 	    </div>
 	</div>
 
+	<a id="savingsaccounts_approve" name="savingsaccounts_approve" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Approve savings application</h2>
+	        <p>Approves savings application so long as its in 'Submitted and pending approval' state.</p>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">POST https://Domain Name/api/v1/savingsaccounts/{savingsId}?command=approve</code>
+	        <code class="method-request">POST savingsaccount/1?command=approve
+Content-Type: application/json
+Request Body:
+{
+  "locale": "en",
+  "dateFormat": "dd MMMM yyyy",
+  "approvedOnDate": "01 March 2013"
+}
+			</code>
+	        <code class="method-response">
+{
+  "officeId": 2,
+  "clientId": 1,
+  "savingsId": 1,
+  "resourceId": 1,
+  "changes": {
+    "status": {
+      "id": 200,
+      "code": "savingsAccountStatusType.approved",
+      "value": "Approved",
+      "submittedAndPendingApproval": false,
+      "approved": true,
+      "rejected": false,
+      "withdrawnByApplicant": false,
+      "active": false,
+      "closed": false
+    },
+    "locale": "en",
+    "dateFormat": "dd MMMM yyyy",
+    "approvedOnDate": "02 March 2013"
+  }
+}
+	        </code>
+	    </div>
+	</div>
+
+	<a id="savingsaccounts_undoapproval" name="savingsaccounts_undoapproval" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Undo approval savings application</h2>
+	        <p>Will move 'approved' savings application back to 'Submitted and pending approval' state.</p>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">POST https://Domain Name/api/v1/savingsaccounts/{savingsId}?command=undoApproval</code>
+	        <code class="method-request">POST savingsaccount/1?command=undoApproval
+Content-Type: application/json
+Request Body:
+{
+}
+			</code>
+	        <code class="method-response">
+{
+  "officeId": 2,
+  "clientId": 1,
+  "savingsId": 1,
+  "resourceId": 1,
+  "changes": {
+    "status": {
+      "id": 100,
+      "code": "savingsAccountStatusType.submitted.and.pending.approval",
+      "value": "Submitted and pending approval",
+      "submittedAndPendingApproval": true,
+      "approved": false,
+      "rejected": false,
+      "withdrawnByApplicant": false,
+      "active": false,
+      "closed": false
+    },
+    "approvedOnDate": ""
+  }
+}
+	        </code>
+	    </div>
+	</div>
+
+	<a id="savingsaccounts_reject" name="savingsaccounts_reject" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Reject savings application</h2>
+	        <p>Rejects savings application so long as its in 'Submitted and pending approval' state.</p>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">POST https://Domain Name/api/v1/savingsaccounts/{savingsId}?command=reject</code>
+	        <code class="method-request">POST savingsaccount/1?command=reject
+Content-Type: application/json
+Request Body:
+{
+  "locale": "en",
+  "dateFormat": "dd MMMM yyyy",
+  "rejectedOnDate": "03 March 2013"
+}
+			</code>
+	        <code class="method-response">
+{
+  "officeId": 2,
+  "clientId": 1,
+  "savingsId": 1,
+  "resourceId": 1,
+  "changes": {
+    "status": {
+      "id": 500,
+      "code": "savingsAccountStatusType.rejected",
+      "value": "Rejected",
+      "submittedAndPendingApproval": false,
+      "approved": false,
+      "rejected": true,
+      "withdrawnByApplicant": false,
+      "active": false,
+      "closed": true
+    },
+    "locale": "en",
+    "dateFormat": "dd MMMM yyyy",
+    "rejectedOnDate": "03 March 2013",
+    "closedOnDate": "03 March 2013"
+  }
+}
+	        </code>
+	    </div>
+	</div>
+
+	<a id="savingsaccounts_withdrawbyapplicant" name="savingsaccounts_withdrawbyapplicant" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Withdraw savings application</h2>
+	        <p>Used when an applicant withdraws from the savings application. It must be in 'Submitted and pending approval' state.</p>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">POST https://Domain Name/api/v1/savingsaccounts/{savingsId}?command=withdrawnByApplicant</code>
+	        <code class="method-request">POST savingsaccount/1?command=withdrawnByApplicant
+Content-Type: application/json
+Request Body:
+{
+  "locale": "en",
+  "dateFormat": "dd MMMM yyyy",
+  "withdrawnOnDate": "03 March 2013"
+}
+			</code>
+	        <code class="method-response">
+{
+  "officeId": 2,
+  "clientId": 1,
+  "savingsId": 1,
+  "resourceId": 1,
+  "changes": {
+    "status": {
+      "id": 400,
+      "code": "savingsAccountStatusType.withdrawn.by.applicant",
+      "value": "Withdrawn by applicant",
+      "submittedAndPendingApproval": false,
+      "approved": false,
+      "rejected": false,
+      "withdrawnByApplicant": true,
+      "active": false,
+      "closed": true
+    },
+    "locale": "en",
+    "dateFormat": "dd MMMM yyyy",
+    "withdrawnOnDate": "03 March 2013",
+    "closedOnDate": "03 March 2013"
+  }
+}
+	        </code>
+	    </div>
+	</div>
+
 	<a id="savingsaccounts_activate" name="savingsaccounts_activate" class="old-syle-anchor">&nbsp;</a>
 	<div class="method-section">
 	    <div class="method-description">
-	        <h2>Activate a Savings Account</h2>
-	        <p>Activates a savings account.</p>
+	        <h2>Activate a savings account</h2>
+	        <p>Results in an approved savings application being converted into an 'active' savings account.</p>
 	    </div>
 	    <div class="method-example">
 	        <code class="method-declaration">POST https://Domain Name/api/v1/savingsaccounts/{savingsId}?command=activate</code>
@@ -11345,15 +11586,31 @@ Request Body:
 {
   "locale": "en",
   "dateFormat": "dd MMMM yyyy",
-  "activationDate": "01 March 2011"
+  "activatedOnDate": "01 March 2013"
 }
 			</code>
 	        <code class="method-response">
 {
-  "officeId": 1,
+  "officeId": 2,
   "clientId": 1,
   "savingsId": 1,
-  "resourceId": 1
+  "resourceId": 1,
+  "changes": {
+    "status": {
+      "id": 300,
+      "code": "savingsAccountStatusType.active",
+      "value": "Active",
+      "submittedAndPendingApproval": false,
+      "approved": false,
+      "rejected": false,
+      "withdrawnByApplicant": false,
+      "active": true,
+      "closed": false
+    },
+    "locale": "en",
+    "dateFormat": "dd MMMM yyyy",
+    "activatedOnDate": "01 March 2013"
+  }
 }
 	        </code>
 	    </div>
@@ -11416,7 +11673,7 @@ Request Body:
 	<a id="savingsaccounts_list" name="savingsaccounts_list" class="old-syle-anchor">&nbsp;</a>
     <div class="method-section">
         <div class="method-description">
-            <h2>List Savings Accounts</h2>
+            <h2>List savings applications/accounts</h2>
             <p>Example Requests:</p> 
             <div class=apiClick>savingsaccounts</div>
             <br><br>
@@ -11425,40 +11682,78 @@ Request Body:
         <div class="method-example">
             <code class="method-declaration">GET https://Domain Name/api/v1/savingsaccounts</code>
             <code class="method-response">
-[
-  {
-    "id": 1,
-    "accountNo": "SA000023",
-    "externalId": "SYS-23",
-    "groupId": 0,
-    "clientId": 1,
-    "clientName": "Client A AB",
-    "savingsProductId": 1,
-    "savingsProductName": "First",
-    "currency": {
-      "code": "USD",
-      "name": "US Dollar",
-      "decimalPlaces": 2,
-      "displaySymbol": "$",
-      "nameCode": "currency.USD",
-      "displayLabel": "US Dollar ($)"
-    },
-    "interestRate": 5.65,
-    "interestRatePeriodFrequencyType": {
-      "id": 2,
-      "code": "savings.interest.rate.periodFrequencyType.months",
-      "value": "Per month"
-    },
-    "annualInterestRate": 67.8,
-    "minRequiredOpeningBalance": 1000,
-    "lockinPeriodFrequency": 6,
-    "lockinPeriodFrequencyType": {
-      "id": 2,
-      "code": "savings.interest.rate.periodFrequencyType.months",
-      "value": "Per month"
+{
+  "totalFilteredRecords": 1,
+  "pageItems": [
+    {
+      "id": 1,
+      "accountNo": "000000001",
+      "clientId": 1,
+      "clientName": "small business",
+      "savingsProductId": 1,
+      "savingsProductName": "Passbook Savings",
+      "fieldOfficerId": 0,
+      "status": {
+        "id": 100,
+        "code": "savingsAccountStatusType.submitted.and.pending.approval",
+        "value": "Submitted and pending approval",
+        "submittedAndPendingApproval": true,
+        "approved": false,
+        "rejected": false,
+        "withdrawnByApplicant": false,
+        "active": false,
+        "closed": false
+      },
+      "timeline": {
+        "submittedOnDate": [
+          2013,
+          3,
+          1
+        ]
+      },
+      "currency": {
+        "code": "USD",
+        "name": "US Dollar",
+        "decimalPlaces": 2,
+        "displaySymbol": "$",
+        "nameCode": "currency.USD",
+        "displayLabel": "US Dollar ($)"
+      },
+      "nominalAnnualInterestRate": 5,
+      "interestCompoundingPeriodType": {
+        "id": 1,
+        "code": "savings.interest.period.savingsCompoundingInterestPeriodType.daily",
+        "value": "Daily"
+      },
+      "interestPostingPeriodType": {
+        "id": 4,
+        "code": "savings.interest.posting.period.savingsPostingInterestPeriodType.monthly",
+        "value": "Monthly"
+      },
+      "interestCalculationType": {
+        "id": 1,
+        "code": "savingsInterestCalculationType.dailybalance",
+        "value": "Daily Balance"
+      },
+      "interestCalculationDaysInYearType": {
+        "id": 365,
+        "code": "savingsInterestCalculationDaysInYearType.days365",
+        "value": "365 Days"
+      },
+      "summary": {
+        "currency": {
+          "code": "USD",
+          "name": "US Dollar",
+          "decimalPlaces": 2,
+          "displaySymbol": "$",
+          "nameCode": "currency.USD",
+          "displayLabel": "US Dollar ($)"
+        },
+        "accountBalance": 0
+      }
     }
-  }
-]
+  ]
+}
 			</code>
         </div>
     </div>
@@ -11466,7 +11761,7 @@ Request Body:
 	<a id="savingsaccounts_retrieve" name="savingsaccounts_retrieve" class="old-syle-anchor">&nbsp;</a>
 	<div class="method-section">
 	    <div class="method-description">
-	        <h2>Retrieve a Savings Account:</h2>
+	        <h2>Retrieve a savings application/account:</h2>
 	        <h4>Arguments</h4>
 	        <dl class="argument-list">
 	            <dt>associations</dt>        
@@ -11485,12 +11780,30 @@ Request Body:
 	        <code class="method-response">
 {
   "id": 1,
-  "accountNo": "000000002",
-  "groupId": 0,
+  "accountNo": "000000001",
   "clientId": 1,
-  "clientName": "Test b Client",
+  "clientName": "small business",
   "savingsProductId": 1,
-  "savingsProductName": "individual savings",
+  "savingsProductName": "Passbook Savings",
+  "fieldOfficerId": 0,
+  "status": {
+    "id": 100,
+    "code": "savingsAccountStatusType.submitted.and.pending.approval",
+    "value": "Submitted and pending approval",
+    "submittedAndPendingApproval": true,
+    "approved": false,
+    "rejected": false,
+    "withdrawnByApplicant": false,
+    "active": false,
+    "closed": false
+  },
+  "timeline": {
+    "submittedOnDate": [
+      2013,
+      3,
+      1
+    ]
+  },
   "currency": {
     "code": "USD",
     "name": "US Dollar",
@@ -11499,13 +11812,27 @@ Request Body:
     "nameCode": "currency.USD",
     "displayLabel": "US Dollar ($)"
   },
-  "interestRate": 9.8,
-  "interestRatePeriodFrequencyType": {
-    "id": 3,
-    "code": "savings.interest.rate.periodFrequencyType.years",
-    "value": "Per year"
+  "nominalAnnualInterestRate": 5,
+  "interestCompoundingPeriodType": {
+    "id": 1,
+    "code": "savings.interest.period.savingsCompoundingInterestPeriodType.daily",
+    "value": "Daily"
   },
-  "annualInterestRate": 9.8,
+  "interestPostingPeriodType": {
+    "id": 4,
+    "code": "savings.interest.posting.period.savingsPostingInterestPeriodType.monthly",
+    "value": "Monthly"
+  },
+  "interestCalculationType": {
+    "id": 1,
+    "code": "savingsInterestCalculationType.dailybalance",
+    "value": "Daily Balance"
+  },
+  "interestCalculationDaysInYearType": {
+    "id": 365,
+    "code": "savingsInterestCalculationDaysInYearType.days365",
+    "value": "365 Days"
+  },
   "summary": {
     "currency": {
       "code": "USD",
@@ -11515,9 +11842,7 @@ Request Body:
       "nameCode": "currency.USD",
       "displayLabel": "US Dollar ($)"
     },
-    "totalDeposits": 456.67,
-    "totalWithdrawals": 173,
-    "accountBalance": 283.67
+    "accountBalance": 0
   }
 }
 	        </code>
@@ -11527,9 +11852,8 @@ Request Body:
 	<a id="savingsaccounts_update" name="savingsaccounts_update" class="old-syle-anchor">&nbsp;</a>
 	<div class="method-section">
 	    <div class="method-description">
-	        <h2>Update a Savings Account</h2>
-	        <p>Will most likely have a restriction to only allow 'inactive' savings accounts to be updated.</p>
-	        <p>As other updates like change of interest rate are possibly special cases for savings.</p>
+	        <h2>Modify a savings application</h2>
+	        <p>Savings application can only be modified when in 'Submitted and pending approval' state. Once the application is approved, the details cannot be changed using this method. Specific api endpoints will be created to allow change of interest detail such as rate, compounding period, posting period etc</p>
 	    </div>
 	    <div class="method-example">
 	        <code class="method-declaration">PUT https://Domain Name/api/v1/savingsaccounts/{accountsId}</code>
@@ -11538,16 +11862,17 @@ Content-Type: application/json
 No Request Body:
 {
 	"locale": "en", 
-	"interestRate": "5.2323"
+	"nominalAnnualInterestRate": "5.65",
 }
 	        </code>
 	        <code class="method-response">
 {
-  "officeId": 1,
+  "officeId": 2,
   "clientId": 1,
+  "savingsId": 1,
   "resourceId": 1,
   "changes": {
-    "interestRate": 5.2323,
+    "nominalAnnualInterestRate": 5.9999999999,
     "locale": "en"
   }
 }
@@ -11558,8 +11883,8 @@ No Request Body:
 	<a id="savingsaccounts_delete" name="savingsaccounts_delete" class="old-syle-anchor">&nbsp;</a>
 	<div class="method-section">
 	    <div class="method-description">
-	        <h2>Delete a Savings Account</h2>
-	        <p>At present we support <b>hard</b> delete of savings account but this is likely to change to a savings account <b>closure</b> or <b>De-activation</b> process/command.</p>
+	        <h2>Delete a savings application</h2>
+	        <p>At present we support <b>hard</b> delete of savings application so long as its in 'Submitted and pending approval' state. One the application is moves past this state, it is not possible to do a 'hard' delete of the application or the account. An API endpoint will be added to close/de-activate the savings account.</p>
 	    </div>
 	    <div class="method-example">
 	        <code class="method-declaration">DELETE https://Domain Name/api/v1/savingsaccounts/{accountsId}</code>
@@ -16786,15 +17111,15 @@ GET https://DomainName/api/v1/search?query=000000111
 					<td></td>
 					<td>savingsproducts/{productId}</td>
 					<td></td>
-					<td><a href="#savingsproducts_retrieve">Retrieve a Savings product</a></td>
-					<td><a href="#savingsproducts_update">Update a Savings product</a></td>
-					<td><a href="#savingsproducts_delete">Delete a Savings product</a></td>
+					<td><a href="#savingsproducts_retrieve">Retrieve a savings product</a></td>
+					<td><a href="#savingsproducts_update">Update a savings product</a></td>
+					<td><a href="#savingsproducts_delete">Delete a savings product</a></td>
 				</tr>
 				<tr>
 					<td><a href="#savingsaccounts">Savings Accounts</a></td>
 					<td>savingsaccounts</td>
-					<td><a href="#savingsaccounts_create">Create new Savings Account</a></td>
-					<td><a href="#savingsaccounts_list">List Savings Accounts</a></td>
+					<td><a href="#savingsaccounts_create">Submit new savings application</a></td>
+					<td><a href="#savingsaccounts_list">List savings application/accounts</a></td>
 					<td></td>
 					<td></td>
 				</tr>
@@ -16802,7 +17127,7 @@ GET https://DomainName/api/v1/search?query=000000111
 					<td></td>
 					<td>savingsaccounts/template?clientId={clientId}</td>
 					<td></td>
-					<td><a href="#savingsaccounts_template">Retrieve Savings Account Template</a></td>
+					<td><a href="#savingsaccounts_template">Retrieve savings template</a></td>
 					<td></td>
 					<td></td>
 				</tr>
@@ -16810,14 +17135,46 @@ GET https://DomainName/api/v1/search?query=000000111
 					<td></td>
 					<td>savingsaccounts/{accountId}</td>
 					<td></td>
-					<td><a href="#savingsaccounts_retrieve">Retrieve a Savings Account</a></td>
-					<td><a href="#savingsaccounts_update">Update a Savings Account</a></td>
-					<td><a href="#savingsaccounts_delete">Delete a Savings Account</a></td>
+					<td><a href="#savingsaccounts_retrieve">Retrieve a savings application/account</a></td>
+					<td><a href="#savingsaccounts_update">Modify a savings application</a></td>
+					<td><a href="#savingsaccounts_delete">Delete a savings application</a></td>
+				</tr>
+				<tr class="alt">
+					<td></td>
+					<td>savingsaccounts/{accountId}?command=approve</td>
+					<td><a href="#savingsaccounts_approve">Approve a savings application</a></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>savingsaccounts/{accountId}?command=undoApproval</td>
+					<td><a href="#savingsaccounts_undoapproval">Undo savings application approval</a></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr class="alt">
+					<td></td>
+					<td>savingsaccounts/{accountId}?command=reject</td>
+					<td><a href="#savingsaccounts_reject">Reject a savings application</a></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>savingsaccounts/{accountId}?command=withdraw</td>
+					<td><a href="#savingsaccounts_withdrawbyapplicant">Withdraw savings application</a></td>
+					<td></td>
+					<td></td>
+					<td></td>
 				</tr>
 				<tr class="alt">
 					<td></td>
 					<td>savingsaccounts/{accountId}?command=activate</td>
-					<td><a href="#savingsaccounts_activate">Activate a Savings Account</a></td>
+					<td><a href="#savingsaccounts_activate">Activate a savings account</a></td>
 					<td></td>
 					<td></td>
 					<td></td>
@@ -16825,7 +17182,7 @@ GET https://DomainName/api/v1/search?query=000000111
 				<tr>
 					<td></td>
 					<td>savingsaccounts/{accountId}?command=calculateInterest</td>
-					<td><a href="#savingsaccounts_calculate_interest">Calculate Interest on a Savings Account</a></td>
+					<td><a href="#savingsaccounts_calculate_interest">Calculate interest on a savings account</a></td>
 					<td></td>
 					<td></td>
 					<td></td>
@@ -16833,7 +17190,7 @@ GET https://DomainName/api/v1/search?query=000000111
 				<tr class="alt">
 					<td></td>
 					<td>savingsaccounts/{accountId}?command=postInterest</td>
-					<td><a href="#savingsaccounts_post_interest">Post Interest on a Savings Account</a></td>
+					<td><a href="#savingsaccounts_post_interest">Post interest on a savings account</a></td>
 					<td></td>
 					<td></td>
 					<td></td>
@@ -16842,14 +17199,14 @@ GET https://DomainName/api/v1/search?query=000000111
 					<td></td>
 					<td>savingsaccounts/{accountId}/transactions/template</td>
 					<td></td>
-					<td><a href="#savingsaccounts_transactions_template">Retrieve Savings Account Transaction Template</a></td>
+					<td><a href="#savingsaccounts_transactions_template">Retrieve savings account transaction template</a></td>
 					<td></td>
 					<td></td>
 				</tr>
 				<tr class="alt">
 					<td><a href="#savingsaccounts_transactions">Savings Transactions</a></td>
 					<td>savingsaccounts/{accountId}/transactions?command=deposit</td>
-					<td><a href="#savingsaccounts_deposit">Make a Deposit</a></td>
+					<td><a href="#savingsaccounts_deposit">Make a deposit</a></td>
 					<td></td>
 					<td></td>
 					<td></td>
@@ -16857,7 +17214,7 @@ GET https://DomainName/api/v1/search?query=000000111
 				<tr>
 					<td></td>
 					<td>savingsaccounts/{accountId}/transactions?command=withdrawal</td>
-					<td><a href="#savingsaccounts_withdrawal">Make a Withdrawal</a></td>
+					<td><a href="#savingsaccounts_withdrawal">Make a withdrawal</a></td>
 					<td></td>
 					<td></td>
 					<td></td>

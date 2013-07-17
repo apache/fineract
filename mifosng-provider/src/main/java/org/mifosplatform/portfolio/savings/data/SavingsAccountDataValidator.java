@@ -85,9 +85,7 @@ public class SavingsAccountDataValidator {
         baseDataValidator.reset().parameter(productIdParamName).value(productId).notNull().integerGreaterThanZero();
 
         final LocalDate submittedOnDate = fromApiJsonHelper.extractLocalDateNamed(submittedOnDateParamName, element);
-        if (submittedOnDate == null) {
-            baseDataValidator.reset().parameter(submittedOnDateParamName).value(submittedOnDate).notNull();
-        }
+        baseDataValidator.reset().parameter(submittedOnDateParamName).value(submittedOnDate).notNull();
 
         if (fromApiJsonHelper.parameterExists(accountNoParamName, element)) {
             final String accountNo = fromApiJsonHelper.extractStringNamed(accountNoParamName, element);
@@ -262,6 +260,11 @@ public class SavingsAccountDataValidator {
         if (fromApiJsonHelper.parameterExists(productIdParamName, element)) {
             final Long productId = fromApiJsonHelper.extractLongNamed(productIdParamName, element);
             baseDataValidator.reset().parameter(productIdParamName).value(productId).notNull().integerGreaterThanZero();
+        }
+
+        if (fromApiJsonHelper.parameterExists(submittedOnDateParamName, element)) {
+            final LocalDate submittedOnDate = fromApiJsonHelper.extractLocalDateNamed(submittedOnDateParamName, element);
+            baseDataValidator.reset().parameter(submittedOnDateParamName).value(submittedOnDate).notNull();
         }
 
         if (fromApiJsonHelper.parameterExists(accountNoParamName, element)) {

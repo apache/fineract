@@ -98,7 +98,6 @@ public class SavingsAccount extends AbstractPersistable<Long> {
     @JoinColumn(name = "product_id", nullable = false)
     private SavingsProduct product;
 
-    @SuppressWarnings("unused")
     @ManyToOne
     @JoinColumn(name = "field_officer_id", nullable = true)
     private Staff fieldOfficer;
@@ -341,6 +340,14 @@ public class SavingsAccount extends AbstractPersistable<Long> {
 
     public boolean isActive() {
         return SavingsAccountStatusType.fromInt(this.status).isActive();
+    }
+
+    public boolean isNotSubmittedAndPendingApproval() {
+        return !isSubmittedAndPendingApproval();
+    }
+
+    public boolean isSubmittedAndPendingApproval() {
+        return SavingsAccountStatusType.fromInt(this.status).isSubmittedAndPendingApproval();
     }
 
     public void postInterest(final SavingsHelper savingsHelper, final MathContext mc, final LocalDate interestPostingUpToDate,
@@ -876,12 +883,45 @@ public class SavingsAccount extends AbstractPersistable<Long> {
             actualChanges.put(SavingsApiConstants.productIdParamName, newValue);
         }
 
+        if (command.isChangeInLongParameterNamed(SavingsApiConstants.fieldOfficerIdParamName, fieldOfficerId())) {
+            final Long newValue = command.longValueOfParameterNamed(SavingsApiConstants.fieldOfficerIdParamName);
+            actualChanges.put(SavingsApiConstants.fieldOfficerIdParamName, newValue);
+        }
+
         if (command.isChangeInBigDecimalParameterNamed(SavingsApiConstants.nominalAnnualInterestRateParamName,
                 this.nominalAnnualInterestRate)) {
             final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(SavingsApiConstants.nominalAnnualInterestRateParamName);
             actualChanges.put(SavingsApiConstants.nominalAnnualInterestRateParamName, newValue);
             actualChanges.put("locale", localeAsInput);
             this.nominalAnnualInterestRate = newValue;
+        }
+
+        if (command.isChangeInIntegerParameterNamed(SavingsApiConstants.interestCompoundingPeriodTypeParamName,
+                this.interestCompoundingPeriodType)) {
+            final Integer newValue = command.integerValueOfParameterNamed(SavingsApiConstants.interestCompoundingPeriodTypeParamName);
+            this.interestCompoundingPeriodType = newValue != null ? SavingsCompoundingInterestPeriodType.fromInt(newValue).getValue()
+                    : newValue;
+            actualChanges.put(SavingsApiConstants.interestCompoundingPeriodTypeParamName, this.interestCompoundingPeriodType);
+        }
+
+        if (command.isChangeInIntegerParameterNamed(SavingsApiConstants.interestPostingPeriodTypeParamName, this.interestPostingPeriodType)) {
+            final Integer newValue = command.integerValueOfParameterNamed(SavingsApiConstants.interestPostingPeriodTypeParamName);
+            this.interestPostingPeriodType = newValue != null ? SavingsPostingInterestPeriodType.fromInt(newValue).getValue() : newValue;
+            actualChanges.put(SavingsApiConstants.interestPostingPeriodTypeParamName, this.interestPostingPeriodType);
+        }
+
+        if (command.isChangeInIntegerParameterNamed(SavingsApiConstants.interestCalculationTypeParamName, this.interestCalculationType)) {
+            final Integer newValue = command.integerValueOfParameterNamed(SavingsApiConstants.interestCalculationTypeParamName);
+            this.interestCalculationType = newValue != null ? SavingsInterestCalculationType.fromInt(newValue).getValue() : newValue;
+            actualChanges.put(SavingsApiConstants.interestCalculationTypeParamName, this.interestCalculationType);
+        }
+
+        if (command.isChangeInIntegerParameterNamed(SavingsApiConstants.interestCalculationDaysInYearTypeParamName,
+                this.interestCalculationDaysInYearType)) {
+            final Integer newValue = command.integerValueOfParameterNamed(SavingsApiConstants.interestCalculationDaysInYearTypeParamName);
+            this.interestCalculationDaysInYearType = newValue != null ? SavingsInterestCalculationDaysInYearType.fromInt(newValue)
+                    .getValue() : newValue;
+            actualChanges.put(SavingsApiConstants.interestCalculationDaysInYearTypeParamName, this.interestCalculationDaysInYearType);
         }
 
         if (command.isChangeInBigDecimalParameterNamedDefaultingZeroToNull(SavingsApiConstants.minRequiredOpeningBalanceParamName,
@@ -1098,6 +1138,10 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         this.product = product;
     }
 
+    public void update(final Staff fieldOfficer) {
+        this.fieldOfficer = fieldOfficer;
+    }
+
     public void updateAccountNo(final String newAccountNo) {
         this.accountNumber = newAccountNo;
         this.accountNumberRequiresAutoGeneration = false;
@@ -1141,6 +1185,14 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         Long id = null;
         if (this.group != null) {
             id = this.group.getId();
+        }
+        return id;
+    }
+
+    public Long fieldOfficerId() {
+        Long id = null;
+        if (this.fieldOfficer != null) {
+            id = this.fieldOfficer.getId();
         }
         return id;
     }
