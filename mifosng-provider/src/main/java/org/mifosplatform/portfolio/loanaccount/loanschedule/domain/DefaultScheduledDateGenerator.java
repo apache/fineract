@@ -11,13 +11,15 @@ import java.util.List;
 import org.joda.time.LocalDate;
 import org.mifosplatform.organisation.holiday.domain.Holiday;
 import org.mifosplatform.organisation.holiday.service.HolidayUtil;
+import org.mifosplatform.organisation.workingdays.domain.WorkingDays;
+import org.mifosplatform.organisation.workingdays.service.WorkingDaysUtil;
 import org.mifosplatform.portfolio.loanproduct.domain.PeriodFrequencyType;
 
 public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
 
     @Override
     public List<LocalDate> generate(final LoanApplicationTerms loanApplicationTerms, final boolean isHolidayEnabled,
-            final List<Holiday> holidays) {
+            final List<Holiday> holidays, final WorkingDays workingDays) {
 
         final int numberOfRepayments = loanApplicationTerms.getNumberOfRepayments();
 
@@ -29,42 +31,47 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
         for (int repaymentPeriod = 1; repaymentPeriod <= numberOfRepayments; repaymentPeriod++) {
 
             LocalDate dueRepaymentPeriodDate = startDate;
-
             if (repaymentPeriod == 1 && firstRepaymentPeriodDate != null) {
                 dueRepaymentPeriodDate = firstRepaymentPeriodDate;
             } else {
-
-                final int repaidEvery = loanApplicationTerms.getRepaymentEvery();
-
-                switch (loanApplicationTerms.getRepaymentPeriodFrequencyType()) {
-                    case DAYS:
-                        dueRepaymentPeriodDate = startDate.plusDays(repaidEvery);
-                    break;
-                    case WEEKS:
-                        dueRepaymentPeriodDate = startDate.plusWeeks(repaidEvery);
-                    break;
-                    case MONTHS:
-                        dueRepaymentPeriodDate = startDate.plusMonths(repaidEvery);
-                    break;
-                    case YEARS:
-                        dueRepaymentPeriodDate = startDate.plusYears(repaidEvery);
-                    break;
-                    case INVALID:
-                    break;
-                }
+                dueRepaymentPeriodDate = getRepaymentPeriodDate(loanApplicationTerms, startDate);
             }
             
-          //start date should be assigned before applying holidays to avoid the reset of next repayment dates.
             startDate = dueRepaymentPeriodDate;
-            //Apply holidays
+            LocalDate nextDueRepaymentPeriodDate = getRepaymentPeriodDate(loanApplicationTerms, dueRepaymentPeriodDate);
+            
+            dueRepaymentPeriodDate = WorkingDaysUtil.getOffSetDateIfNonWorkingDay(dueRepaymentPeriodDate, nextDueRepaymentPeriodDate, workingDays);
+            
             if(isHolidayEnabled){
                 dueRepaymentPeriodDate = HolidayUtil.getRepaymentRescheduleDateToIfHoliday(dueRepaymentPeriodDate, holidays);
             }
-            
+
             dueRepaymentPeriodDates.add(dueRepaymentPeriodDate);
         }
         
         return dueRepaymentPeriodDates;
+    }
+
+    private LocalDate getRepaymentPeriodDate(final LoanApplicationTerms loanApplicationTerms, LocalDate startDate) {
+        final int repaidEvery = loanApplicationTerms.getRepaymentEvery();
+        LocalDate dueRepaymentPeriodDate = startDate;
+        switch (loanApplicationTerms.getRepaymentPeriodFrequencyType()) {
+            case DAYS:
+                dueRepaymentPeriodDate = startDate.plusDays(repaidEvery);
+            break;
+            case WEEKS:
+                dueRepaymentPeriodDate = startDate.plusWeeks(repaidEvery);
+            break;
+            case MONTHS:
+                dueRepaymentPeriodDate = startDate.plusMonths(repaidEvery);
+            break;
+            case YEARS:
+                dueRepaymentPeriodDate = startDate.plusYears(repaidEvery);
+            break;
+            case INVALID:
+            break;
+        }
+        return dueRepaymentPeriodDate;
     }
 
     @Override

@@ -18,6 +18,7 @@ import org.mifosplatform.organisation.holiday.domain.Holiday;
 import org.mifosplatform.organisation.monetary.domain.ApplicationCurrency;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.organisation.monetary.domain.Money;
+import org.mifosplatform.organisation.workingdays.domain.WorkingDays;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanCharge;
 
 /**
@@ -30,10 +31,11 @@ public abstract class AbstractLoanScheduleGenerator implements LoanScheduleGener
 
     @Override
     public LoanScheduleModel generate(final MathContext mc, final ApplicationCurrency applicationCurrency,
-            final LoanApplicationTerms loanApplicationTerms, final Set<LoanCharge> loanCharges, final boolean isHolidayEnabled, final List<Holiday> holidays) {
+            final LoanApplicationTerms loanApplicationTerms, final Set<LoanCharge> loanCharges, final boolean isHolidayEnabled,
+            final List<Holiday> holidays, final WorkingDays workingDays) {
 
         // 1. generate list of proposed schedule due dates
-        final List<LocalDate> scheduledDates = this.scheduledDateGenerator.generate(loanApplicationTerms, isHolidayEnabled, holidays);
+        final List<LocalDate> scheduledDates = this.scheduledDateGenerator.generate(loanApplicationTerms, isHolidayEnabled, holidays, workingDays);
 
         // 2. determine the total charges due at time of disbursement
         final BigDecimal chargesDueAtTimeOfDisbursement = deriveTotalChargesDueAtTimeOfDisbursement(loanCharges);

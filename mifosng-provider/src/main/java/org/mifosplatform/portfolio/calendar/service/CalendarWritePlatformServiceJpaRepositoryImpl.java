@@ -83,7 +83,7 @@ public class CalendarWritePlatformServiceJpaRepositoryImpl implements CalendarWr
                 
                 if (!CollectionUtils.isEmpty(loanCalendarInstances)) {
                     // update all loans which are following this meeting calendar
-                    this.loanWritePlatformService.updateRepaymentsSchedule(calendarForUpdate, loanCalendarInstances);
+                    this.loanWritePlatformService.applyMeetingDateChanges(calendarForUpdate, loanCalendarInstances);
                     //
                 }
             }

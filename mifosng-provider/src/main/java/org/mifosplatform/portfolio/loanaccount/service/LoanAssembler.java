@@ -22,6 +22,8 @@ import org.mifosplatform.organisation.staff.domain.Staff;
 import org.mifosplatform.organisation.staff.domain.StaffRepository;
 import org.mifosplatform.organisation.staff.exception.StaffNotFoundException;
 import org.mifosplatform.organisation.staff.exception.StaffRoleException;
+import org.mifosplatform.organisation.workingdays.domain.WorkingDaysRepositoryWrapper;
+import org.mifosplatform.organisation.workingdays.domain.WorkingDays;
 import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.client.domain.ClientRepositoryWrapper;
 import org.mifosplatform.portfolio.collateral.domain.LoanCollateral;
@@ -76,6 +78,7 @@ public class LoanAssembler {
     private final LoanRepaymentScheduleTransactionProcessorFactory loanRepaymentScheduleTransactionProcessorFactory;
     private final HolidayRepository holidayRepository;
     private final ConfigurationDomainService configurationDomainService;
+    private final WorkingDaysRepositoryWrapper workingDaysRepository;
 
     @Autowired
     public LoanAssembler(final FromJsonHelper fromApiJsonHelper, final LoanProductRepository loanProductRepository,
@@ -84,8 +87,9 @@ public class LoanAssembler {
             final StaffRepository staffRepository, final CodeValueRepositoryWrapper codeValueRepository,
             final LoanScheduleAssembler loanScheduleAssembler, final LoanChargeAssembler loanChargeAssembler,
             final CollateralAssembler loanCollateralAssembler, final LoanSummaryWrapper loanSummaryWrapper,
-            final LoanRepaymentScheduleTransactionProcessorFactory loanRepaymentScheduleTransactionProcessorFactory, 
-            final HolidayRepository holidayRepository, final ConfigurationDomainService configurationDomainService) {
+            final LoanRepaymentScheduleTransactionProcessorFactory loanRepaymentScheduleTransactionProcessorFactory,
+            final HolidayRepository holidayRepository, final ConfigurationDomainService configurationDomainService,
+            final WorkingDaysRepositoryWrapper workingDaysRepository) {
         this.fromApiJsonHelper = fromApiJsonHelper;
         this.loanProductRepository = loanProductRepository;
         this.clientRepository = clientRepository;
@@ -101,6 +105,7 @@ public class LoanAssembler {
         this.loanRepaymentScheduleTransactionProcessorFactory = loanRepaymentScheduleTransactionProcessorFactory;
         this.holidayRepository = holidayRepository;
         this.configurationDomainService = configurationDomainService;
+        this.workingDaysRepository = workingDaysRepository;
     }
 
     public Loan assembleFrom(final JsonCommand command, final AppUser currentUser) {
@@ -184,10 +189,10 @@ public class LoanAssembler {
         final LoanApplicationTerms loanApplicationTerms = this.loanScheduleAssembler.assembleLoanTerms(element);
         final boolean isHolidayEnabled = this.configurationDomainService.isRescheduleRepaymentsOnHolidaysEnabled();
         final List<Holiday> holidays = this.holidayRepository.findByOfficeIdAndGreaterThanDate(loanApplication.getOfficeId(), loanApplicationTerms.getExpectedDisbursementDate().toDate());
-        final LoanScheduleModel loanScheduleModel = this.loanScheduleAssembler.assembleLoanScheduleFrom(loanApplicationTerms, isHolidayEnabled, holidays, element);
-
+        final WorkingDays workingDays = this.workingDaysRepository.findOne();
+        final LoanScheduleModel loanScheduleModel = this.loanScheduleAssembler.assembleLoanScheduleFrom(loanApplicationTerms, isHolidayEnabled, holidays, workingDays, element);
         loanApplication.loanApplicationSubmittal(currentUser, loanScheduleModel, loanApplicationTerms, defaultLoanLifecycleStateMachine(),
-                submittedOnDate, externalId);
+                submittedOnDate, externalId, isHolidayEnabled, holidays, workingDays);
 
         return loanApplication;
     }

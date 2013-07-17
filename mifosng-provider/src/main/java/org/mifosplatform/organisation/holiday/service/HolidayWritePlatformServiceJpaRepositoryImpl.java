@@ -113,14 +113,14 @@ public class HolidayWritePlatformServiceJpaRepositoryImpl implements HolidayWrit
             throw new HolidayDateException("to.date.cannot.be.before.from.date", defaultUserMessage, fromDate.toString(), toDate.toString());
         }
         
-        //validate alternative working date 
+        //validate repaymentsRescheduledTo date 
         //1. should be within a 7 days date range.
         //2. Alternative date should not be an exist holiday.//TBD
-        //3. Holiday should not be on an alternate working date of another holiday.//TBD
+        //3. Holiday should not be on an repaymentsRescheduledTo date of another holiday.//TBD
         
-        //restricting alternative working date to be within 7 days range before or after from date and to date.
+        //restricting repaymentsRescheduledTo date to be within 7 days range before or after from date and to date.
         if(repaymentsRescheduledTo.isBefore(fromDate.minusDays(7)) || repaymentsRescheduledTo.isAfter(toDate.plusDays(7))){
-            final String defaultUserMessage = "Alternative working date must be within 7 days before or after from and to dates";
+            final String defaultUserMessage = "Repayments Rescheduled to date must be within 7 days before or after from and to dates";
             throw new HolidayDateException("repayments.rescheduled.to.must.be.within.range", defaultUserMessage, fromDate.toString(), toDate.toString(), repaymentsRescheduledTo.toString());
         }
     }
