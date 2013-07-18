@@ -8,7 +8,7 @@ package org.mifosplatform.organisation.staff.data;
 import java.util.Collection;
 import java.util.List;
 
-import org.mifosplatform.portfolio.client.data.ClientAccountSummaryData;
+import org.mifosplatform.portfolio.client.data.ClientLoanAccountSummaryData;
 import org.mifosplatform.portfolio.group.data.GroupAccountSummaryData;
 
 /**
@@ -31,7 +31,7 @@ public class StaffAccountSummaryCollectionData {
         private final Long id;
         private final String displayName;
 
-        private Collection<ClientAccountSummaryData> loans;
+        private Collection<ClientLoanAccountSummaryData> loans;
 
         public ClientSummary(Long id, String displayName) {
             this.id = id;
@@ -46,11 +46,11 @@ public class StaffAccountSummaryCollectionData {
             return displayName;
         }
 
-        public Collection<ClientAccountSummaryData> getLoans() {
+        public Collection<ClientLoanAccountSummaryData> getLoans() {
             return loans;
         }
 
-        public void setLoans(Collection<ClientAccountSummaryData> loans) {
+        public void setLoans(Collection<ClientLoanAccountSummaryData> loans) {
             this.loans = loans;
         }
     }

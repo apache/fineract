@@ -14,7 +14,7 @@ import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
 import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.staff.data.StaffAccountSummaryCollectionData;
-import org.mifosplatform.portfolio.client.data.ClientAccountSummaryData;
+import org.mifosplatform.portfolio.client.data.ClientLoanAccountSummaryData;
 import org.mifosplatform.portfolio.client.service.ClientReadPlatformService;
 import org.mifosplatform.portfolio.group.data.GroupAccountSummaryData;
 import org.mifosplatform.portfolio.group.service.GroupReadPlatformService;
@@ -56,7 +56,7 @@ public class BulkLoansReadPlatformServiceImpl implements BulkLoansReadPlatformSe
 
         for (StaffAccountSummaryCollectionData.ClientSummary clientSummary : clientSummaryList) {
 
-            final Collection<ClientAccountSummaryData> clientLoanAccounts = this.clientReadPlatformService
+            final Collection<ClientLoanAccountSummaryData> clientLoanAccounts = this.clientReadPlatformService
                     .retrieveClientLoanAccountsByLoanOfficerId(clientSummary.getId(), loanOfficerId);
 
             clientSummary.setLoans(clientLoanAccounts);

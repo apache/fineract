@@ -2329,19 +2329,16 @@ Request Body:
 			<a id="clients_loansummary" name="clients_loansummary" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
-					<h4>Retrieve a Client's Loan Account Summary</h4>
+					<h4>Retrieve client accounts overview</h4>
 					<p>
 						An example of how a loan portfolio summary can be provided. This
-						one contains quite a bit of redundant data (like the counts) and
-						is requested in a specific use case of the Individual Lending User
-						Interface.<br> However, it is quite reasonable to add
-						resources like this to simplify User Interface development.
+						is requested in a specific use case of the reference application.<br> It is quite reasonable to add resources like this to simplify User Interface development.
 					</p>
 					<p>Example Requests:</p>
-					<div class=apiClick>clients/1/loans</div>
+					<div class=apiClick>clients/1/accounts</div>
 					<br>
 					<br>
-					<div class=apiClick>clients/1/loans?fields=openLoans,closedLoans,activeLoanCount</div>
+					<div class=apiClick>clients/1/accounts?fields=loanAccounts,savingsAccounts</div>
 				</div>
 				<div class="method-example">
 					<code class="method-declaration">
@@ -2349,112 +2346,109 @@ GET https://DomainName/api/v1/clients/{clientId}/loans
 					</code>
 					<code class="method-response">
 {
-    "anyLoanCount": 9,
-    "pendingApprovalLoanCount": 4,
-    "pendingApprovalLoans": [
+    "loanAccounts": [
         {
-            "id": 48,
-            "accountNo": "48",
+            "id": 1,
+            "accountNo": "000000001",
+            "externalId": "456",
             "productId": 1,
-            "productName": "PORetailLoan",
-            "status": {
-                "id": 100,
-                "code": "loanStatusType.submitted.and.pending.approval",
-                "value": "Submitted and pending approval"
-            }
-        },
-        {
-            "id": 50,
-            "accountNo": "50",
-            "productId": 1,
-            "productName": "PORetailLoan",
-            "status": {
-                "id": 100,
-                "code": "loanStatusType.submitted.and.pending.approval",
-                "value": "Submitted and pending approval"
-            }
-        },
-        {
-            "id": 51,
-            "accountNo": "51",
-            "productId": 1,
-            "productName": "PORetailLoan",
-            "status": {
-                "id": 100,
-                "code": "loanStatusType.submitted.and.pending.approval",
-                "value": "Submitted and pending approval"
-            }
-        },
-        {
-            "id": 62,
-            "accountNo": "62",
-            "productId": 3,
-            "productName": "Further Loan Product",
-            "status": {
-                "id": 100,
-                "code": "loanStatusType.submitted.and.pending.approval",
-                "value": "Submitted and pending approval"
-            }
-        }
-    ],
-    "activeLoanCount": 2,
-    "openLoans": [
-        {
-            "id": 46,
-            "accountNo": "46",
-            "productId": 1,
-            "productName": "PORetailLoan",
+            "productName": "TestOne",
             "status": {
                 "id": 300,
                 "code": "loanStatusType.active",
-                "value": "Active"
-            }
-        },
-        {
-            "id": 60,
-            "accountNo": "60",
-            "productId": 1,
-            "productName": "PORetailLoan",
-            "status": {
-                "id": 300,
-                "code": "loanStatusType.active",
-                "value": "Active"
-            }
+                "value": "Active",
+                "pendingApproval": false,
+                "waitingForDisbursal": false,
+                "active": true,
+                "closedObligationsMet": false,
+                "closedWrittenOff": false,
+                "closedRescheduled": false,
+                "closed": false,
+                "overpaid": false
+            },
+            "loanType": {
+                "id": 1,
+                "code": "loanType.individual",
+                "value": "Individual"
+            },
+            "loanCycle": 1
         }
     ],
-    "closedLoanCount": 3,
-    "closedLoans": [
+    "savingsAccounts": [
         {
-            "id": 22,
-            "accountNo": "22",
-            "productId": 1,
-            "productName": "PORetailLoan",
+            "id": 7,
+            "accountNo": "000000007",
+            "productId": 2,
+            "productName": "Other product",
             "status": {
-                "id": 700,
-                "code": "loanStatusType.overpaid",
-                "value": "Overpaid"
+                "id": 100,
+                "code": "savingsAccountStatusType.submitted.and.pending.approval",
+                "value": "Submitted and pending approval",
+                "submittedAndPendingApproval": true,
+                "approved": false,
+                "rejected": false,
+                "withdrawnByApplicant": false,
+                "active": false,
+                "closed": false
+            },
+            "currency": {
+                "code": "USD",
+                "name": "US Dollar",
+                "decimalPlaces": 2,
+                "displaySymbol": "$",
+                "nameCode": "currency.USD",
+                "displayLabel": "US Dollar ($)"
             }
         },
         {
-            "id": 33,
-            "accountNo": "33",
+            "id": 6,
+            "accountNo": "000000006",
             "productId": 1,
-            "productName": "PORetailLoan",
+            "productName": "Passbook Savings",
             "status": {
-                "id": 601,
-                "code": "loanStatusType.closed.written.off",
-                "value": "Closed (written off)"
-            }
+                "id": 300,
+                "code": "savingsAccountStatusType.active",
+                "value": "Active",
+                "submittedAndPendingApproval": false,
+                "approved": false,
+                "rejected": false,
+                "withdrawnByApplicant": false,
+                "active": true,
+                "closed": false
+            },
+            "currency": {
+                "code": "USD",
+                "name": "US Dollar",
+                "decimalPlaces": 2,
+                "displaySymbol": "$",
+                "nameCode": "currency.USD",
+                "displayLabel": "US Dollar ($)"
+            },
+            "accountBalance": 1828.03
         },
         {
-            "id": 44,
-            "accountNo": "44",
+            "id": 5,
+            "accountNo": "000000005",
             "productId": 1,
-            "productName": "PORetailLoan",
+            "productName": "Passbook Savings",
             "status": {
-                "id": 600,
-                "code": "loanStatusType.closed.obligations.met",
-                "value": "Closed (obligations met)"
+                "id": 400,
+                "code": "savingsAccountStatusType.withdrawn.by.applicant",
+                "value": "Withdrawn by applicant",
+                "submittedAndPendingApproval": false,
+                "approved": false,
+                "rejected": false,
+                "withdrawnByApplicant": true,
+                "active": false,
+                "closed": true
+            },
+            "currency": {
+                "code": "USD",
+                "name": "US Dollar",
+                "decimalPlaces": 2,
+                "displaySymbol": "$",
+                "nameCode": "currency.USD",
+                "displayLabel": "US Dollar ($)"
             }
         }
     ]

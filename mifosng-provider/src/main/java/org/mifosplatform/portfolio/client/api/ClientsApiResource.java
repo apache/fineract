@@ -115,7 +115,7 @@ public class ClientsApiResource {
     @Path("{clientId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveOne(@PathParam("clientId") final Long clientId, @Context final UriInfo uriInfo, 
+    public String retrieveOne(@PathParam("clientId") final Long clientId, @Context final UriInfo uriInfo,
             @DefaultValue("false") @QueryParam("staffInSelectedOfficeOnly") final boolean staffInSelectedOfficeOnly) {
 
         context.authenticatedUser().validateHasReadPermission(ClientApiConstants.CLIENT_RESOURCE_NAME);
@@ -124,7 +124,8 @@ public class ClientsApiResource {
 
         ClientData clientData = this.clientReadPlatformService.retrieveOne(clientId);
         if (settings.isTemplate()) {
-            final ClientData templateData = this.clientReadPlatformService.retrieveTemplate(clientData.officeId(), staffInSelectedOfficeOnly);
+            final ClientData templateData = this.clientReadPlatformService.retrieveTemplate(clientData.officeId(),
+                    staffInSelectedOfficeOnly);
             clientData = ClientData.templateOnTop(clientData, templateData);
         }
 
@@ -215,7 +216,7 @@ public class ClientsApiResource {
     }
 
     @GET
-    @Path("{clientId}/loans")
+    @Path("{clientId}/accounts")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveAssociatedAccounts(@PathParam("clientId") final Long clientId, @Context final UriInfo uriInfo) {
@@ -224,12 +225,7 @@ public class ClientsApiResource {
 
         final ClientAccountSummaryCollectionData clientAccount = this.clientReadPlatformService.retrieveClientAccountDetails(clientId);
 
-        final Set<String> CLIENT_ACCOUNTS_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("pendingApprovalLoans",
-                "awaitingDisbursalLoans", "openLoans", "closedLoans", "anyLoanCount", "pendingApprovalLoanCount",
-                "awaitingDisbursalLoanCount", "activeLoanCount", "closedLoanCount", "pendingApprovalSavingAccountsCount",
-                "pendingApprovalSavingAccounts", "approvedSavingAccountsCount", "approvedSavingAccounts",
-                "withdrawnByClientSavingAccountsCount", "withdrawnByClientSavingAccounts", "rejectedSavingAccountsCount",
-                "rejectedSavingAccounts", "closedSavingAccountsCount", "closedSavingAccounts"));
+        final Set<String> CLIENT_ACCOUNTS_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("loanAccounts", "savingsAccounts"));
 
         final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.clientAccountSummaryToApiJsonSerializer.serialize(settings, clientAccount, CLIENT_ACCOUNTS_DATA_PARAMETERS);
