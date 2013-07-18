@@ -2,10 +2,12 @@ package org.mifosplatform.infrastructure.jobs.service;
 
 import java.util.List;
 
+import org.mifosplatform.infrastructure.core.api.JsonCommand;
+import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.jobs.domain.ScheduledJobDetail;
 import org.mifosplatform.infrastructure.jobs.domain.ScheduledJobRunHistory;
 
-public interface SchedularService {
+public interface SchedularWritePlatformService {
 
     public List<ScheduledJobDetail> retrieveAllJobs();
 
@@ -18,5 +20,7 @@ public interface SchedularService {
     public Long fetchMaxVersionBy(String triggerKey);
 
     public ScheduledJobDetail findByJobId(Long jobId);
+
+    CommandProcessingResult updateJobDetail(Long jobId, JsonCommand command);
 
 }

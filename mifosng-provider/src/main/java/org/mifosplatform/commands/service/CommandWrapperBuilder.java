@@ -1116,4 +1116,13 @@ public class CommandWrapperBuilder {
         this.href = "/clients/" + clientId + "?command=assignStaff";
         return this;
     }
+    
+    public CommandWrapperBuilder updateJobDetail(final Long jobId) {
+        this.actionName = "UPDATE";
+        this.entityName = "SCHEDULER";
+        this.entityId = jobId;
+        this.href = "/updateJobDetail/" + jobId+"/updateJobDetail";
+        return this;
+    }
+
 }

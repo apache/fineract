@@ -64,16 +64,6 @@ public class CronMethodParser {
                         Map<String, Object> attributes = metadata.getAnnotationAttributes(annotationClass.getName());
                         JobName attributeValue = (JobName) attributes.get(attributeName);
                         String className = metadata.getDeclaringClassName();
-                        /**
-                         * TODO: Vishwas, have commented out this piece of code,
-                         * check its need with Pramod
-                         **/
-                        /**
-                         * if (attributeValue == null ||
-                         * attributeValue.trim().length() < 1) { attributeValue
-                         * = className.substring(className.lastIndexOf(".") +
-                         * 1); }
-                         **/
                         String[] mapVal = { className, metadata.getMethodName() };
                         targetMethosMap.put(attributeValue.toString(), mapVal);
                     }

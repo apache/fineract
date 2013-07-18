@@ -1,27 +1,36 @@
 package org.mifosplatform.infrastructure.jobs.service;
 
 import java.util.List;
+import java.util.Map;
 
+import org.mifosplatform.infrastructure.core.api.JsonCommand;
+import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
+import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
+import org.mifosplatform.infrastructure.jobs.data.JobDetailDataValidator;
 import org.mifosplatform.infrastructure.jobs.domain.ScheduledJobDetail;
 import org.mifosplatform.infrastructure.jobs.domain.ScheduledJobDetailRepository;
 import org.mifosplatform.infrastructure.jobs.domain.ScheduledJobRunHistory;
 import org.mifosplatform.infrastructure.jobs.domain.ScheduledJobRunHistoryRepository;
+import org.mifosplatform.infrastructure.jobs.exception.JobNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class SchedularServiceJpaRepositoryImpl implements SchedularService {
+public class SchedularWritePlatformServiceJpaRepositoryImpl implements SchedularWritePlatformService {
 
     private final ScheduledJobDetailRepository scheduledJobDetailsRepository;
 
     private final ScheduledJobRunHistoryRepository scheduledJobRunHistoryRepository;
 
+    private final JobDetailDataValidator dataValidator;
+
     @Autowired
-    public SchedularServiceJpaRepositoryImpl(final ScheduledJobDetailRepository scheduledJobDetailsRepository,
-            final ScheduledJobRunHistoryRepository scheduledJobRunHistoryRepository) {
+    public SchedularWritePlatformServiceJpaRepositoryImpl(final ScheduledJobDetailRepository scheduledJobDetailsRepository,
+            final ScheduledJobRunHistoryRepository scheduledJobRunHistoryRepository, final JobDetailDataValidator dataValidator) {
         this.scheduledJobDetailsRepository = scheduledJobDetailsRepository;
         this.scheduledJobRunHistoryRepository = scheduledJobRunHistoryRepository;
+        this.dataValidator = dataValidator;
     }
 
     @Override
@@ -60,6 +69,24 @@ public class SchedularServiceJpaRepositoryImpl implements SchedularService {
     @Override
     public ScheduledJobDetail findByJobId(Long jobId) {
         return this.scheduledJobDetailsRepository.findByJobId(jobId);
+    }
+
+    @Transactional
+    @Override
+    public CommandProcessingResult updateJobDetail(final Long jobId, final JsonCommand command) {
+        dataValidator.validateForUpdate(command.json());
+        final ScheduledJobDetail scheduledJobDetail = findByJobId(jobId);
+        if (scheduledJobDetail == null) { throw new JobNotFoundException(String.valueOf(jobId)); }
+        final Map<String, Object> changes = scheduledJobDetail.update(command);
+        if (!changes.isEmpty()) {
+            this.scheduledJobDetailsRepository.saveAndFlush(scheduledJobDetail);
+        }
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(command.commandId()) //
+                .withEntityId(jobId) //
+                .with(changes) //
+                .build();
+
     }
 
 }

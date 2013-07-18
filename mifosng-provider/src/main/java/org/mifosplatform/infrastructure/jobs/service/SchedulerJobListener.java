@@ -29,12 +29,12 @@ public class SchedulerJobListener implements JobListener {
 
     private final String name = SchedularServiceConstants.DEFAULT_LISTENER_NAME;
 
-    private final SchedularService schedularService;
+    private final SchedularWritePlatformService schedularService;
 
     private final TenantDetailsService tenantDetailsService;
 
     @Autowired
-    public SchedulerJobListener(final SchedularService schedularService, final TenantDetailsService tenantDetailsService) {
+    public SchedulerJobListener(final SchedularWritePlatformService schedularService, final TenantDetailsService tenantDetailsService) {
         this.schedularService = schedularService;
         this.tenantDetailsService = tenantDetailsService;
     }
