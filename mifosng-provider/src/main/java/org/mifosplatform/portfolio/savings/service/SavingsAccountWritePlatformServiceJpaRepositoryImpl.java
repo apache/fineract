@@ -34,7 +34,6 @@ import org.mifosplatform.portfolio.savings.domain.SavingsAccountAssembler;
 import org.mifosplatform.portfolio.savings.domain.SavingsAccountRepositoryWrapper;
 import org.mifosplatform.portfolio.savings.domain.SavingsAccountTransaction;
 import org.mifosplatform.portfolio.savings.domain.SavingsAccountTransactionRepository;
-import org.mifosplatform.portfolio.savings.domain.SavingsHelper;
 import org.mifosplatform.useradministration.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -51,8 +50,6 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
     private final PaymentDetailWritePlatformService paymentDetailWritePlatformService;
     private final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepositoryWrapper;
     private final JournalEntryWritePlatformService journalEntryWritePlatformService;
-
-    private final SavingsHelper savingsHelper = new SavingsHelper();
 
     @Autowired
     public SavingsAccountWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
@@ -131,10 +128,10 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
 
         if (account.isBeforeLastPostingPeriod(transactionDate)) {
             final LocalDate today = DateUtils.getLocalDateOfTenant();
-            account.postInterest(this.savingsHelper, mc, today, existingTransactionIds, existingReversedTransactionIds);
+            account.postInterest(mc, today, existingTransactionIds, existingReversedTransactionIds);
         } else {
             final LocalDate today = DateUtils.getLocalDateOfTenant();
-            account.calculateInterestUsing(this.savingsHelper, mc, today);
+            account.calculateInterestUsing(mc, today);
         }
 
         final Long transactionId = saveTransactionToGenerateTransactionId(deposit);
@@ -185,10 +182,10 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
 
         if (account.isBeforeLastPostingPeriod(transactionDate)) {
             final LocalDate today = DateUtils.getLocalDateOfTenant();
-            account.postInterest(this.savingsHelper, mc, today, existingTransactionIds, existingReversedTransactionIds);
+            account.postInterest(mc, today, existingTransactionIds, existingReversedTransactionIds);
         } else {
             final LocalDate today = DateUtils.getLocalDateOfTenant();
-            account.calculateInterestUsing(this.savingsHelper, mc, today);
+            account.calculateInterestUsing(mc, today);
         }
 
         final Long transactionId = saveTransactionToGenerateTransactionId(withdrawal);
@@ -220,7 +217,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         final List<Long> existingReversedTransactionIds = new ArrayList<Long>();
 
         final MathContext mc = new MathContext(10, RoundingMode.HALF_EVEN);
-        final SavingsAccountTransaction annualFee = account.addAnnualFee(this.savingsHelper, mc, fmt, transactionDate,
+        final SavingsAccountTransaction annualFee = account.addAnnualFee(mc, fmt, transactionDate,
                 existingTransactionIds, existingReversedTransactionIds);
         final Long transactionId = saveTransactionToGenerateTransactionId(annualFee);
         this.savingAccountRepository.save(account);
@@ -239,15 +236,13 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
     @Transactional
     @Override
     public CommandProcessingResult calculateInterest(final Long savingsId) {
-        this.context.authenticatedUser();
 
         final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsId);
 
         final LocalDate today = DateUtils.getLocalDateOfTenant();
-
         final MathContext mc = new MathContext(15, RoundingMode.HALF_EVEN);
 
-        account.calculateInterestUsing(this.savingsHelper, mc, today);
+        account.calculateInterestUsing(mc, today);
 
         this.savingAccountRepository.save(account);
 
@@ -263,7 +258,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
     @Transactional
     @Override
     public CommandProcessingResult postInterest(final Long savingsId) {
-        this.context.authenticatedUser();
+
         final List<Long> existingTransactionIds = new ArrayList<Long>();
         final List<Long> existingReversedTransactionIds = new ArrayList<Long>();
 
@@ -272,10 +267,39 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         final LocalDate today = DateUtils.getLocalDateOfTenant();
         final MathContext mc = new MathContext(10, RoundingMode.HALF_EVEN);
 
-        account.postInterest(this.savingsHelper, mc, today, existingTransactionIds, existingReversedTransactionIds);
+        account.postInterest(mc, today, existingTransactionIds, existingReversedTransactionIds);
         this.savingAccountRepository.save(account);
 
         postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds);
+
+        return new CommandProcessingResultBuilder() //
+                .withEntityId(savingsId) //
+                .withOfficeId(account.officeId()) //
+                .withClientId(account.clientId()) //
+                .withGroupId(account.groupId()) //
+                .withSavingsId(savingsId) //
+                .build();
+    }
+
+    @Override
+    public CommandProcessingResult undoTransaction(final Long savingsId, final Long transactionId) {
+
+        final List<Long> newTransactionIds = new ArrayList<Long>();
+        final List<Long> reversedTransactionIds = new ArrayList<Long>();
+
+        SavingsAccountTransaction savingsAccountTransaction = this.savingsAccountTransactionRepository.findOneByIdAndSavingsAccountId(
+                transactionId, savingsId);
+        if (savingsAccountTransaction == null) {
+            // throw new not found exception
+        }
+
+        final LocalDate today = DateUtils.getLocalDateOfTenant();
+        final MathContext mc = new MathContext(15, RoundingMode.HALF_EVEN);
+
+        final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsId);
+        account.undoTransaction(transactionId, reversedTransactionIds, mc, today);
+
+        postJournalEntries(account, newTransactionIds, reversedTransactionIds);
 
         return new CommandProcessingResultBuilder() //
                 .withEntityId(savingsId) //

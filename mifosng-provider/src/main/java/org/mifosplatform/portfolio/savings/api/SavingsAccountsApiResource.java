@@ -193,7 +193,12 @@ public class SavingsAccountsApiResource {
     public String handleCommands(@PathParam("accountId") final Long accountId, @QueryParam("command") final String commandParam,
             final String apiRequestBodyAsJson) {
 
-        final CommandWrapperBuilder builder = new CommandWrapperBuilder().withJson(apiRequestBodyAsJson);
+        String jsonApiRequest = apiRequestBodyAsJson;
+        if (StringUtils.isBlank(jsonApiRequest)) {
+            jsonApiRequest = "{}";
+        }
+
+        final CommandWrapperBuilder builder = new CommandWrapperBuilder().withJson(jsonApiRequest);
 
         CommandProcessingResult result = null;
         if (is(commandParam, "reject")) {
@@ -212,7 +217,7 @@ public class SavingsAccountsApiResource {
             final CommandWrapper commandRequest = builder.savingsAccountActivation(accountId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, "calculateInterest")) {
-            final CommandWrapper commandRequest = builder.savingsAccountInterestCalculation(accountId).build();
+            final CommandWrapper commandRequest = builder.withJson(null).savingsAccountInterestCalculation(accountId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, "postInterest")) {
             final CommandWrapper commandRequest = builder.savingsAccountInterestPosting(accountId).build();

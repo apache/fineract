@@ -11,4 +11,6 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 public interface SavingsAccountTransactionRepository extends JpaRepository<SavingsAccountTransaction, Long>,
         JpaSpecificationExecutor<SavingsAccountTransaction> {
 
+    SavingsAccountTransaction findOneByIdAndSavingsAccountId(Long transactionId, Long savingsId);
+
 }

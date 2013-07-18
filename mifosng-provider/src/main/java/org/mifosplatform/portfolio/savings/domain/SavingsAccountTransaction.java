@@ -325,4 +325,8 @@ public final class SavingsAccountTransaction extends AbstractPersistable<Long> {
         LocalDateInterval balanceInterval = LocalDateInterval.create(getTransactionLocalDate(), getEndOfBalanceLocalDate());
         return balanceInterval.containsPortionOf(periodInterval);
     }
+
+    public boolean isIdentifiedBy(final Long transactionId) {
+        return this.getId().equals(transactionId);
+    }
 }

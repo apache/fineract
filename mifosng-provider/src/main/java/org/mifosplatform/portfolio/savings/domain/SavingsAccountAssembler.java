@@ -54,6 +54,7 @@ import com.google.gson.JsonElement;
 public class SavingsAccountAssembler {
 
     private final SavingsAccountTransactionSummaryWrapper savingsAccountTransactionSummaryWrapper;
+    private final SavingsHelper savingsHelper = new SavingsHelper();
     private final ClientRepositoryWrapper clientRepository;
     private final GroupRepositoryWrapper groupRepository;
     private final StaffRepositoryWrapper staffRepository;
@@ -213,7 +214,7 @@ public class SavingsAccountAssembler {
                 submittedOnDate, interestRate, interestCompoundingPeriodType, interestPostingPeriodType, interestCalculationType,
                 interestCalculationDaysInYearType, minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType,
                 withdrawalFeeAmount, withdrawalFeeType, annualFeeAmount, monthDayOfAnnualFee);
-        account.setHelpers(this.savingsAccountTransactionSummaryWrapper);
+        account.setHelpers(this.savingsAccountTransactionSummaryWrapper, this.savingsHelper);
 
         account.validateNewApplicationState(DateUtils.getLocalDateOfTenant());
 
@@ -222,7 +223,7 @@ public class SavingsAccountAssembler {
 
     public SavingsAccount assembleFrom(final Long savingsId) {
         SavingsAccount account = this.savingsAccountRepository.findOneWithNotFoundDetection(savingsId);
-        account.setHelpers(this.savingsAccountTransactionSummaryWrapper);
+        account.setHelpers(this.savingsAccountTransactionSummaryWrapper, savingsHelper);
 
         return account;
     }

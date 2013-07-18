@@ -459,6 +459,10 @@ public class CommandWrapper {
         return this.actionName.equalsIgnoreCase("POSTINTEREST") && this.entityName.equalsIgnoreCase("SAVINGSACCOUNT");
     }
 
+    public boolean isSavingsAccountUndoTransaction() {
+        return this.actionName.equalsIgnoreCase("UNDOTRANSACTION") && this.entityName.equalsIgnoreCase("SAVINGSACCOUNT");
+    }
+
     public boolean isCalendarResource() {
         return this.entityName.equalsIgnoreCase("CALENDAR");
     }

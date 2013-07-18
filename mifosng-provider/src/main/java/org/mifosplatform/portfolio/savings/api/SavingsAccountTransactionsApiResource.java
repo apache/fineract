@@ -109,8 +109,36 @@ public class SavingsAccountTransactionsApiResource {
         }
 
         if (result == null) {
-            // FIXME - KW - handle blank command param use case
-            throw new UnrecognizedQueryParamException("command", commandParam);
+            //
+            throw new UnrecognizedQueryParamException("command", commandParam, new Object[] { "deposit", "withdrawal" });
+        }
+
+        return this.toApiJsonSerializer.serialize(result);
+    }
+
+    @POST
+    @Path("{transactionId}")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String transaction(@PathParam("savingsId") final Long savingsId, @PathParam("transactionId") final Long transactionId,
+            @QueryParam("command") final String commandParam, final String apiRequestBodyAsJson) {
+
+        String jsonApiRequest = apiRequestBodyAsJson;
+        if (StringUtils.isBlank(jsonApiRequest)) {
+            jsonApiRequest = "{}";
+        }
+
+        final CommandWrapperBuilder builder = new CommandWrapperBuilder().withJson(jsonApiRequest);
+
+        CommandProcessingResult result = null;
+        if (is(commandParam, "undo")) {
+            final CommandWrapper commandRequest = builder.undoSavingsAccountTransaction(savingsId, transactionId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        }
+
+        if (result == null) {
+            //
+            throw new UnrecognizedQueryParamException("command", commandParam, new Object[] { "undo" });
         }
 
         return this.toApiJsonSerializer.serialize(result);

@@ -80,4 +80,12 @@ public enum SavingsAccountTransactionType {
     public boolean isAnnualFee() {
         return this.value.equals(SavingsAccountTransactionType.ANNUAL_FEE.getValue());
     }
+
+    public boolean isDebit() {
+        return isWithdrawal() || isWithdrawalFee() || isAnnualFee();
+    }
+
+    public boolean isCredit() {
+        return isDeposit() || isInterestPosting();
+    }
 }

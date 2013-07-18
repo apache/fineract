@@ -27,16 +27,18 @@ public class SavingsAccountTransactionData {
     private final CurrencyData currency;
     private final PaymentDetailData paymentDetailData;
     private final BigDecimal amount;
+    private final BigDecimal runningBalance;
+    private final boolean reversed;
 
     // templates
     final Collection<CodeValueData> paymentTypeOptions;
 
     public static SavingsAccountTransactionData create(final Long id, final SavingsAccountTransactionEnumData transactionType,
             final PaymentDetailData paymentDetailData, final Long savingsId, final String savingsAccountNo, final LocalDate date,
-            final CurrencyData currency, final BigDecimal amount) {
+            final CurrencyData currency, final BigDecimal amount, final BigDecimal runningBalance, final boolean reversed) {
         final Collection<CodeValueData> paymentTypeOptions = null;
         return new SavingsAccountTransactionData(id, transactionType, paymentDetailData, savingsId, savingsAccountNo, date, currency,
-                amount, paymentTypeOptions);
+                amount, runningBalance, reversed, paymentTypeOptions);
     }
 
     public static SavingsAccountTransactionData template(final Long savingsId, final String savingsAccountNo,
@@ -44,10 +46,12 @@ public class SavingsAccountTransactionData {
         final Long id = null;
         final SavingsAccountTransactionEnumData transactionType = null;
         final BigDecimal amount = null;
+        final BigDecimal runningBalance = null;
+        final boolean reversed = false;
         final PaymentDetailData paymentDetailData = null;
         final Collection<CodeValueData> paymentTypeOptions = null;
         return new SavingsAccountTransactionData(id, transactionType, paymentDetailData, savingsId, savingsAccountNo, defaultLocalDate,
-                currency, amount, null);
+                currency, amount, runningBalance, reversed, null);
     }
 
     public static SavingsAccountTransactionData templateOnTop(final SavingsAccountTransactionData savingsAccountTransactionData,
@@ -55,12 +59,14 @@ public class SavingsAccountTransactionData {
         return new SavingsAccountTransactionData(savingsAccountTransactionData.id, savingsAccountTransactionData.transactionType,
                 savingsAccountTransactionData.paymentDetailData, savingsAccountTransactionData.accountId,
                 savingsAccountTransactionData.accountNo, savingsAccountTransactionData.date, savingsAccountTransactionData.currency,
-                savingsAccountTransactionData.amount, paymentTypeOptions);
+                savingsAccountTransactionData.amount, savingsAccountTransactionData.runningBalance, savingsAccountTransactionData.reversed,
+                paymentTypeOptions);
     }
 
     private SavingsAccountTransactionData(final Long id, final SavingsAccountTransactionEnumData transactionType,
             final PaymentDetailData paymentDetailData, final Long savingsId, final String savingsAccountNo, final LocalDate date,
-            final CurrencyData currency, final BigDecimal amount, final Collection<CodeValueData> paymentTypeOptions) {
+            final CurrencyData currency, final BigDecimal amount, final BigDecimal runningBalance, final boolean reversed,
+            final Collection<CodeValueData> paymentTypeOptions) {
         this.id = id;
         this.transactionType = transactionType;
         this.paymentDetailData = paymentDetailData;
@@ -69,6 +75,8 @@ public class SavingsAccountTransactionData {
         this.date = date;
         this.currency = currency;
         this.amount = amount;
+        this.runningBalance = runningBalance;
+        this.reversed = reversed;
         this.paymentTypeOptions = paymentTypeOptions;
     }
 }

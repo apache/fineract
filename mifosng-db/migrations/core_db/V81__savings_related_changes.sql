@@ -35,7 +35,7 @@ SET
 `approvedon_date`=`activatedon_date`;
 
 
-INSERT INTO `mifostenant-default`.`m_permission`
+INSERT INTO `m_permission`
 (`grouping`,`code`,`entity_name`,`action_name`,`can_maker_checker`)
 VALUES
 ('transaction_savings', 'APPROVE_SAVINGSACCOUNT', 'SAVINGSACCOUNT', 'APPROVE', 1),
@@ -44,7 +44,7 @@ VALUES
 ('transaction_savings', 'APPROVALUNDO_SAVINGSACCOUNT', 'SAVINGSACCOUNT', 'APPROVALUNDO', 1),
 ('transaction_savings', 'CLOSE_SAVINGSACCOUNT', 'SAVINGSACCOUNT', 'CLOSE', 1);
 
-INSERT INTO `mifostenant-default`.`m_permission`
+INSERT INTO `m_permission`
 (`grouping`,`code`,`entity_name`,`action_name`,`can_maker_checker`)
 VALUES
 ('transaction_savings', 'APPROVE_SAVINGSACCOUNT_CHECKER', 'SAVINGSACCOUNT', 'APPROVE', 0),

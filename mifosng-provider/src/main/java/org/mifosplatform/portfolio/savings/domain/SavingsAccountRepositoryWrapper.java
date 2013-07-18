@@ -25,21 +25,15 @@ import org.springframework.stereotype.Service;
 public class SavingsAccountRepositoryWrapper {
 
     private final SavingsAccountRepository repository;
-    private final SavingsAccountTransactionSummaryWrapper savingsAccountTransactionSummaryWrapper;
 
     @Autowired
-    public SavingsAccountRepositoryWrapper(final SavingsAccountRepository repository,
-            final SavingsAccountTransactionSummaryWrapper savingsAccountTransactionSummaryWrapper) {
+    public SavingsAccountRepositoryWrapper(final SavingsAccountRepository repository) {
         this.repository = repository;
-        this.savingsAccountTransactionSummaryWrapper = savingsAccountTransactionSummaryWrapper;
     }
 
     public SavingsAccount findOneWithNotFoundDetection(final Long savingsId) {
         final SavingsAccount account = this.repository.findOne(savingsId);
         if (account == null) { throw new SavingsAccountNotFoundException(savingsId); }
-
-        account.setHelpers(this.savingsAccountTransactionSummaryWrapper);
-
         return account;
     }
 

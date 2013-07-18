@@ -169,7 +169,7 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
 
             final Map<String, Object> changes = new LinkedHashMap<String, Object>(20);
 
-            final SavingsAccount account = this.savingAccountRepository.findOneWithNotFoundDetection(savingsId);
+            final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsId);
 
             account.modifyApplication(command, changes);
             account.validateNewApplicationState(DateUtils.getLocalDateOfTenant());
@@ -236,7 +236,7 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
     @Override
     public CommandProcessingResult deleteApplication(final Long savingsId) {
 
-        final SavingsAccount account = this.savingAccountRepository.findOneWithNotFoundDetection(savingsId);
+        final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsId);
 
         if (account.isNotSubmittedAndPendingApproval()) {
             final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();

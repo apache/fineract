@@ -28,6 +28,7 @@ public class SavingsApiConstants {
     public static String activateAction = ".activate";
     public static String modifyApplicationAction = ".modify";
     public static String deleteApplicationAction = ".delete";
+    public static String undoTransactionAction = ".undotransaction";
 
     // general
     public static final String localeParamName = "locale";

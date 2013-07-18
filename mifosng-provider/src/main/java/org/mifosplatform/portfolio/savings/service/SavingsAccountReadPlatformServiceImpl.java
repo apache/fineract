@@ -489,8 +489,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
     @Override
     public Collection<SavingsAccountTransactionData> retrieveAllTransactions(final Long savingsId) {
 
-        final String sql = "select " + this.transactionsMapper.schema()
-                + " where sa.id = ? and tr.is_reversed=0 order by tr.transaction_date DESC, tr.id DESC";
+        final String sql = "select " + this.transactionsMapper.schema() + " where sa.id = ? order by tr.transaction_date DESC, tr.id DESC";
 
         return this.jdbcTemplate.query(sql, this.transactionsMapper, new Object[] { savingsId });
     }
@@ -504,7 +503,8 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             final StringBuilder sqlBuilder = new StringBuilder(400);
             sqlBuilder.append("tr.id as transactionId, tr.transaction_type_enum as transactionType, ");
             sqlBuilder.append("tr.transaction_date as transactionDate, tr.amount as transactionAmount,");
-            sqlBuilder.append("sa.id as savingsId, sa.account_no as accountNo, ");
+            sqlBuilder.append("tr.running_balance_derived as runningBalance, tr.is_reversed as reversed,");
+            sqlBuilder.append("sa.id as savingsId, sa.account_no as accountNo,");
             sqlBuilder.append("pd.payment_type_cv_id as paymentType,pd.account_number as accountNumber,pd.check_number as checkNumber, ");
             sqlBuilder.append("pd.receipt_number as receiptNumber, pd.bank_number as bankNumber,pd.routing_code as routingCode, ");
             sqlBuilder.append("sa.currency_code as currencyCode, sa.currency_digits as currencyDigits, ");
@@ -514,7 +514,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             sqlBuilder.append("from m_savings_account sa ");
             sqlBuilder.append("join m_savings_account_transaction tr on tr.savings_account_id = sa.id ");
             sqlBuilder.append("join m_currency curr on curr.code = sa.currency_code ");
-            sqlBuilder.append("left JOIN m_payment_detail pd ON tr.payment_detail_id = pd.id ");
+            sqlBuilder.append("left join m_payment_detail pd on tr.payment_detail_id = pd.id ");
             sqlBuilder.append("left join m_code_value cv on pd.payment_type_cv_id = cv.id ");
 
             this.schemaSql = sqlBuilder.toString();
@@ -532,6 +532,8 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
 
             final LocalDate date = JdbcSupport.getLocalDate(rs, "transactionDate");
             final BigDecimal amount = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "transactionAmount");
+            final BigDecimal runningBalance = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "runningBalance");
+            final boolean reversed = rs.getBoolean("reversed");
 
             final Long savingsId = rs.getLong("savingsId");
             final String accountNo = rs.getString("accountNo");
@@ -561,7 +563,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
                     currencyNameCode);
 
             return SavingsAccountTransactionData.create(id, transactionType, paymentDetailData, savingsId, accountNo, date, currency,
-                    amount);
+                    amount, runningBalance, reversed);
         }
     }
 

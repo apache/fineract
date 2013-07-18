@@ -247,6 +247,8 @@ public class SavingsAccount extends AbstractPersistable<Long> {
     private boolean accountNumberRequiresAutoGeneration = false;
     @Transient
     private SavingsAccountTransactionSummaryWrapper savingsAccountTransactionSummaryWrapper;
+    @Transient
+    private SavingsHelper savingsHelper;
 
     protected SavingsAccount() {
         //
@@ -330,8 +332,10 @@ public class SavingsAccount extends AbstractPersistable<Long> {
      * helper services/components used for update summary details after
      * events/transactions on a {@link SavingsAccount}.
      */
-    public void setHelpers(final SavingsAccountTransactionSummaryWrapper savingsAccountTransactionSummaryWrapper) {
+    public void setHelpers(final SavingsAccountTransactionSummaryWrapper savingsAccountTransactionSummaryWrapper,
+            final SavingsHelper savingsHelper) {
         this.savingsAccountTransactionSummaryWrapper = savingsAccountTransactionSummaryWrapper;
+        this.savingsHelper = savingsHelper;
     }
 
     public boolean isNotActive() {
@@ -350,10 +354,10 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         return SavingsAccountStatusType.fromInt(this.status).isSubmittedAndPendingApproval();
     }
 
-    public void postInterest(final SavingsHelper savingsHelper, final MathContext mc, final LocalDate interestPostingUpToDate,
-            final List<Long> existingTransactionIds, final List<Long> existingReversedTransactionIds) {
+    public void postInterest(final MathContext mc, final LocalDate interestPostingUpToDate, final List<Long> existingTransactionIds,
+            final List<Long> existingReversedTransactionIds) {
 
-        final List<PostingPeriod> postingPeriods = calculateInterestUsing(savingsHelper, mc, interestPostingUpToDate);
+        final List<PostingPeriod> postingPeriods = calculateInterestUsing(mc, interestPostingUpToDate);
 
         Money interestPostedToDate = Money.zero(this.currency);
 
@@ -431,8 +435,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
      * period check if an existing 'interest posting' transaction exists for
      * date and matches the amount posted
      */
-    public List<PostingPeriod> calculateInterestUsing(final SavingsHelper savingsHelper, final MathContext mc,
-            final LocalDate upToInterestCalculationDate) {
+    public List<PostingPeriod> calculateInterestUsing(final MathContext mc, final LocalDate upToInterestCalculationDate) {
 
         // no openingBalance concept supported yet but probably will to allow
         // for migrations.
@@ -732,9 +735,32 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         }
     }
 
-    public SavingsAccountTransaction addAnnualFee(final SavingsHelper savingsHelper, final MathContext mc,
-            final DateTimeFormatter formatter, final LocalDate transactionDate, final List<Long> existingTransactionIds,
-            final List<Long> existingReversedTransactionIds) {
+    private void validateAccountBalanceDoesNotBecomeNegativeDueToUndoAction(final List<SavingsAccountTransaction> transactionsSortedByDate) {
+
+        Money runningBalance = Money.zero(this.currency);
+
+        for (SavingsAccountTransaction transaction : transactionsSortedByDate) {
+            if (transaction.isNotReversed() && transaction.isDeposit() || transaction.isInterestPosting()) {
+                runningBalance = runningBalance.plus(transaction.getAmount(this.currency));
+            } else if (transaction.isNotReversed() && transaction.isWithdrawal()) {
+                runningBalance = runningBalance.minus(transaction.getAmount(this.currency));
+            }
+
+            if (runningBalance.isLessThanZero()) {
+                //
+                final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+                final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+                        .resource(SAVINGS_ACCOUNT_RESOURCE_NAME + SavingsApiConstants.undoTransactionAction);
+
+                baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("results.in.balance.going.negative");
+
+                if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+            }
+        }
+    }
+
+    public SavingsAccountTransaction addAnnualFee(final MathContext mc, final DateTimeFormatter formatter, final LocalDate transactionDate,
+            final List<Long> existingTransactionIds, final List<Long> existingReversedTransactionIds) {
 
         if (isNotActive()) {
 
@@ -795,7 +821,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         this.summary.updateSummary(this.currency, this.savingsAccountTransactionSummaryWrapper, this.transactions);
 
         final LocalDate today = DateUtils.getLocalDateOfTenant();
-        calculateInterestUsing(savingsHelper, mc, today);
+        calculateInterestUsing(mc, today);
 
         updateAnnualFeeNextDueDate();
 
@@ -1343,6 +1369,29 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         // this.loanOfficerHistory.clear();
 
         return actualChanges;
+    }
+
+    public void undoTransaction(final Long transactionId, final List<Long> reversedTransactionIds, final MathContext mc,
+            final LocalDate upToInterestCalculationDate) {
+
+        SavingsAccountTransaction transactionToUndo = null;
+        for (SavingsAccountTransaction transaction : this.transactions) {
+            if (transaction.isIdentifiedBy(transactionId)) {
+                transactionToUndo = transaction;
+            }
+        }
+
+        if (transactionToUndo == null) {
+            // throw non found exception
+
+        } else {
+            transactionToUndo.reverse();
+            reversedTransactionIds.add(transactionId);
+
+            calculateInterestUsing(mc, upToInterestCalculationDate);
+
+            validateAccountBalanceDoesNotBecomeNegativeDueToUndoAction(retreiveListOfTransactions());
+        }
     }
 
     public Map<String, Object> rejectApplication(final AppUser currentUser, final JsonCommand command, final LocalDate tenantsTodayDate) {
