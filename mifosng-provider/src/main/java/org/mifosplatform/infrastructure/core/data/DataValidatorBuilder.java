@@ -16,6 +16,7 @@ import net.fortuna.ical4j.model.ValidationException;
 import net.fortuna.ical4j.model.property.RRule;
 
 import org.apache.commons.lang.StringUtils;
+import org.quartz.CronExpression;
 import org.springframework.util.ObjectUtils;
 
 import com.google.gson.JsonArray;
@@ -684,4 +685,18 @@ public class DataValidatorBuilder {
         }
         return this;
     }
+
+    public DataValidatorBuilder validateCronExpression() {
+        if (value != null && !CronExpression.isValidExpression(this.value.toString().trim())) {
+            final StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append(resource).append(".").append(parameter)
+                    .append(".invalid");
+            final StringBuilder defaultEnglishMessage = new StringBuilder("The parameter ").append(parameter).append(
+                    " value is not a valid cron expression");
+            final ApiParameterError error = ApiParameterError.parameterError(validationErrorCode.toString(),
+                    defaultEnglishMessage.toString(), parameter, this.value);
+            dataValidationErrors.add(error);
+        }
+        return this;
+    }
+
 }

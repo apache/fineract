@@ -40,15 +40,15 @@ public class JobRegisterServiceImpl implements JobRegisterService {
 
     private final SchedulerFactoryBean schedulerFactoryBean;
 
-    private final SchedularService schedularService;
+    private final SchedularWritePlatformService schedularWritePlatformService;
 
     private final TenantDetailsService tenantDetailsService;
 
     @Autowired
     public JobRegisterServiceImpl(final ApplicationContext applicationContext, final SchedulerFactoryBean schedulerFactoryBean,
-            final SchedularService schedularService, final TenantDetailsService tenantDetailsService) {
+            final SchedularWritePlatformService schedularService, final TenantDetailsService tenantDetailsService) {
         this.applicationContext = applicationContext;
-        this.schedularService = schedularService;
+        this.schedularWritePlatformService = schedularService;
         this.schedulerFactoryBean = schedulerFactoryBean;
         this.tenantDetailsService = tenantDetailsService;
     }
@@ -58,15 +58,10 @@ public class JobRegisterServiceImpl implements JobRegisterService {
         List<MifosPlatformTenant> allTenants = this.tenantDetailsService.findAllTenants();
         for (MifosPlatformTenant tenant : allTenants) {
             ThreadLocalContextUtil.setTenant(tenant);
-            List<ScheduledJobDetail> scheduledJobDetails = this.schedularService.retrieveAllJobs();
+            List<ScheduledJobDetail> scheduledJobDetails = this.schedularWritePlatformService.retrieveAllJobs();
             for (ScheduledJobDetail jobDetails : scheduledJobDetails) {
-                if (jobDetails.isActiveSchedular()) {
-                    scheduleJob(jobDetails);
-                }else{
-                    jobDetails.updateNextRunTime(null);
-                }
-                
-                this.schedularService.saveOrUpdate(jobDetails);
+                scheduleJob(jobDetails);
+                this.schedularWritePlatformService.saveOrUpdate(jobDetails);
             }
         }
     }
@@ -77,21 +72,11 @@ public class JobRegisterServiceImpl implements JobRegisterService {
             jobDataMap.put(SchedularServiceConstants.TRIGGER_TYPE_REFERENCE, SchedularServiceConstants.TRIGGER_TYPE_APPLICATION);
             jobDataMap.put(SchedularServiceConstants.TENANT_IDENTIFIER, ThreadLocalContextUtil.getTenant().getTenantIdentifier());
             if (schedulerFactoryBean.getScheduler().checkExists(jobKey)) {
-                Thread newThread = new Thread(new Runnable() {
-
-                    @Override
-                    public void run() {
-                        final JobKey threadLocalJobKey = jobKey;
-                        final JobDataMap threadLocalJobDataMap = jobDataMap;
-                        try {
-                            schedulerFactoryBean.getScheduler().triggerJob(threadLocalJobKey, threadLocalJobDataMap);
-                        } catch (SchedulerException e) {
-                            logger.error(e.getMessage(), e);
-                        }
-
-                    }
-                });
-                newThread.run();
+                try {
+                    schedulerFactoryBean.getScheduler().triggerJob(jobKey, jobDataMap);
+                } catch (SchedulerException e) {
+                    logger.error(e.getMessage(), e);
+                }
             } else {
                 throw new JobNotFoundException(jobKey.toString());
             }
@@ -101,25 +86,30 @@ public class JobRegisterServiceImpl implements JobRegisterService {
 
     }
 
-    @Override
     public void rescheduleJob(ScheduledJobDetail scheduledJobDetails) {
         try {
             String jobIdentity = scheduledJobDetails.getJobKey();
             JobKey jobKey = constructJobKey(jobIdentity);
             schedulerFactoryBean.getScheduler().deleteJob(jobKey);
             scheduleJob(scheduledJobDetails);
-            this.schedularService.saveOrUpdate(scheduledJobDetails);
+            this.schedularWritePlatformService.saveOrUpdate(scheduledJobDetails);
         } catch (Throwable throwable) {
             String stackTrace = getStackTraceAsString(throwable);
             scheduledJobDetails.updateErrorLog(stackTrace);
-            this.schedularService.saveOrUpdate(scheduledJobDetails);
+            this.schedularWritePlatformService.saveOrUpdate(scheduledJobDetails);
         }
+    }
+
+    @Override
+    public void rescheduleJob(Long jobId) {
+        ScheduledJobDetail scheduledJobDetail = this.schedularWritePlatformService.findByJobId(jobId);
+        rescheduleJob(scheduledJobDetail);
     }
 
     @Override
     public void executeJob(Long jobId) {
         try {
-            ScheduledJobDetail scheduledJobDetail = this.schedularService.findByJobId(jobId);
+            ScheduledJobDetail scheduledJobDetail = this.schedularWritePlatformService.findByJobId(jobId);
             if (scheduledJobDetail != null) {
                 String key = scheduledJobDetail.getJobKey();
                 JobKey jobKey = constructJobKey(key);
@@ -133,6 +123,10 @@ public class JobRegisterServiceImpl implements JobRegisterService {
     }
 
     private void scheduleJob(ScheduledJobDetail scheduledJobDetails) {
+        if (!scheduledJobDetails.isActiveSchedular()) {
+            scheduledJobDetails.updateNextRunTime(null);
+            return;
+        }
         try {
             JobDetail jobDetail = createJobDetail(scheduledJobDetails);
             Trigger trigger = createTrigger(scheduledJobDetails, jobDetail);
@@ -184,7 +178,7 @@ public class JobRegisterServiceImpl implements JobRegisterService {
         TimeZone timeZone = TimeZone.getTimeZone(tenant.getTimezoneId());
         cronTriggerFactoryBean.setTimeZone(timeZone);
         cronTriggerFactoryBean.setGroup(scheduledJobDetails.getGroupName());
-        cronTriggerFactoryBean.setCronExpression(scheduledJobDetails.getCroneExpression());
+        cronTriggerFactoryBean.setCronExpression(scheduledJobDetails.getCronExpression());
         cronTriggerFactoryBean.setPriority(scheduledJobDetails.getTaskPriority());
         cronTriggerFactoryBean.afterPropertiesSet();
         return cronTriggerFactoryBean.getObject();
@@ -213,5 +207,4 @@ public class JobRegisterServiceImpl implements JobRegisterService {
         JobKey JobKey = new JobKey(keyParams[0], keyParams[1]);
         return JobKey;
     }
-
 }

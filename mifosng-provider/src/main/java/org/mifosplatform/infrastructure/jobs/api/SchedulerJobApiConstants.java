@@ -6,6 +6,8 @@ import java.util.Set;
 
 public class SchedulerJobApiConstants {
 
+    
+    public static final String JOB_RESOURCE_NAME = "schedulerjob";
     // response parameters
     public static final String jobIdentifierParamName = "jobId";
     public static final String displayNameParamName = "displayName";
@@ -23,6 +25,8 @@ public class SchedulerJobApiConstants {
     public static final String jobRunErrorMessageParamName = "jobRunErrorMessage";
     public static final String triggerTypeParamName = "triggerType";
     public static final String jobRunErrorLogParamName = "jobRunErrorLog";
+    
+    public static final String cronExpressionParamName = "cronExpression";
 
     public static final Set<String> JOB_DETAIL_RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(jobIdentifierParamName,
             displayNameParamName, nextRunTimeParamName, initializingErrorParamName, jobActiveStatusParamName,currentlyRunningParamName, lastRunHistoryObjParamName));
@@ -30,5 +34,7 @@ public class SchedulerJobApiConstants {
     public static final Set<String> JOB_HISTORY_RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(versionParamName,
             jobRunStartTimeParamName, jobRunEndTimeParamName, statusParamName, jobRunErrorMessageParamName, triggerTypeParamName,
             jobRunErrorLogParamName));
+    
+    public static final Set<String> JOB_UPDATE_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(displayNameParamName,jobActiveStatusParamName,cronExpressionParamName));
 
 }
