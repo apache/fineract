@@ -85,6 +85,9 @@ public class CommandSource extends AbstractPersistable<Long> {
 
     @Column(name = "processing_result_enum", nullable = false)
     private Integer processingResult;
+    
+    @Column(name = "product_id")
+    private Long productId;
 
     public static CommandSource fullEntryFrom(final CommandWrapper wrapper, final JsonCommand command, final AppUser maker) {
         return new CommandSource(wrapper.actionName(), wrapper.entityName(), wrapper.getHref(), command.entityId(), command.subentityId(),
@@ -172,15 +175,21 @@ public class CommandSource extends AbstractPersistable<Long> {
         return false;
     }
 
-    public void updateForAudit(final Long officeId, final Long groupId, final Long clientId, final Long loanId, final Long savingsId) {
+    public void updateForAudit(final Long officeId, final Long groupId, final Long clientId, final Long loanId, final Long savingsId,
+            final Long productId) {
         this.officeId = officeId;
         this.groupId = groupId;
         this.clientId = clientId;
         this.loanId = loanId;
         this.savingsId = savingsId;
+        this.productId = productId;
     }
 
     public String getResourceGetUrl() {
         return this.resourceGetUrl;
+    }
+
+    public Long getProductId() {
+        return this.productId;
     }
 }
