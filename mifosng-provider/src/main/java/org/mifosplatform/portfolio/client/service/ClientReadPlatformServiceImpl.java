@@ -242,6 +242,20 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         return this.jdbcTemplate.query(sql, this.membersOfGroupMapper, new Object[] { hierarchySearchString, groupId });
     }
 
+    @Override
+    public Collection<ClientData> retrieveActiveClientMembersOfGroup(final Long groupId) {
+
+        final AppUser currentUser = context.authenticatedUser();
+        final String hierarchy = currentUser.getOffice().getHierarchy();
+        final String hierarchySearchString = hierarchy + "%";
+
+        final String sql = "select " + this.membersOfGroupMapper.schema()
+                + " where o.hierarchy like ? and pgc.group_id = ? and c.status_enum = ? ";
+
+        return this.jdbcTemplate.query(sql, this.membersOfGroupMapper,
+                new Object[] { hierarchySearchString, groupId, ClientStatus.ACTIVE.getValue() });
+    }
+    
     private static final class ClientMembersOfGroupMapper implements RowMapper<ClientData> {
 
         private final String schema;
