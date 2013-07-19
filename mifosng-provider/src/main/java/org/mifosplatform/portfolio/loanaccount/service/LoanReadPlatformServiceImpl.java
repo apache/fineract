@@ -944,7 +944,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         final LocalDate expectedDisbursementDate = DateUtils.getLocalDateOfTenant();
 
         // get group associations
-        Collection<ClientData> membersOfGroup = this.clientReadPlatformService.retrieveClientMembersOfGroup(groupId);
+        Collection<ClientData> membersOfGroup = this.clientReadPlatformService.retrieveActiveClientMembersOfGroup(groupId);
         if (!CollectionUtils.isEmpty(membersOfGroup)) {
             groupAccount = GroupGeneralData.withAssocations(groupAccount, membersOfGroup, null);
         }
