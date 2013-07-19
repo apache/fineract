@@ -197,6 +197,19 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
             return "lp.id as id, lp.name as name from m_product_loan lp";
         }
 
+        public String productMixSchema() {
+            return "lp.id as id, lp.name as name FROM m_product_loan lp left join m_product_mix pm on pm.product_id=lp.id where lp.id not IN("
+                    + "select lp.id from m_product_loan lp inner join m_product_mix pm on pm.product_id=lp.id)";
+        }
+        
+        public String restrictedProductsSchema() {
+            return "pm.restricted_product_id as id, rp.name as name from m_product_mix pm join m_product_loan rp on rp.id = pm.restricted_product_id ";
+        }
+        
+        public String derivedRestrictedProductsSchema() {
+            return "pm.product_id as id, lp.name as name from m_product_mix pm join m_product_loan lp on lp.id=pm.product_id";
+        }
+
         @Override
         public LoanProductData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
 
@@ -206,4 +219,44 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
             return LoanProductData.lookup(id, name);
         }
     }
+
+    @Override
+    public Collection<LoanProductData> retrieveAvailableLoanProductsForMix() {
+
+        this.context.authenticatedUser();
+
+        final LoanProductLookupMapper rm = new LoanProductLookupMapper();
+
+        final String sql = "Select " + rm.productMixSchema();
+
+        return this.jdbcTemplate.query(sql, rm, new Object[] {});
+    }
+
+    @Override
+    public Collection<LoanProductData> retrieveRestrictedProductsForMix(final Long productId) {
+
+        this.context.authenticatedUser();
+
+        final LoanProductLookupMapper rm = new LoanProductLookupMapper();
+
+        final String sql = "Select " + rm.restrictedProductsSchema() + " where pm.product_id=? UNION Select "
+                + rm.derivedRestrictedProductsSchema() + " where pm.restricted_product_id=?";
+
+        return this.jdbcTemplate.query(sql, rm, new Object[] { productId, productId });
+    }
+
+    @Override
+    public Collection<LoanProductData> retrieveAllowedProductsForMix(final Long productId) {
+
+        this.context.authenticatedUser();
+
+        final LoanProductLookupMapper rm = new LoanProductLookupMapper();
+
+        final String sql = "Select " + rm.schema() + " where lp.id not in ("
+                + "Select pm.restricted_product_id from m_product_mix pm where pm.product_id=? " + "UNION "
+                + "Select pm.product_id from m_product_mix pm where pm.restricted_product_id=?)";
+
+        return this.jdbcTemplate.query(sql, rm, new Object[] { productId, productId });
+    }
+
 }

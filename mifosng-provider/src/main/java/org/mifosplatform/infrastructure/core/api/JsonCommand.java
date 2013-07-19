@@ -46,26 +46,27 @@ public final class JsonCommand {
     private final Long supportedEntityId;
     private final String transactionId;
     private final String url;
+    private final Long productId;
 
     public static JsonCommand from(final String jsonCommand, final JsonElement parsedCommand, final FromJsonHelper fromApiJsonHelper,
             final String entityName, final Long resourceId, final Long subresourceId, final Long groupId, final Long clientId,
             final Long loanId, final Long savingsId, final Long codeId, final String supportedEntityType, final Long supportedEntityId,
-            final String transactionId, final String url) {
+            final String transactionId, final String url, final Long productId) {
         return new JsonCommand(null, jsonCommand, parsedCommand, fromApiJsonHelper, entityName, resourceId, subresourceId, groupId,
-                clientId, loanId, savingsId, codeId, supportedEntityType, supportedEntityId, transactionId, url);
+                clientId, loanId, savingsId, codeId, supportedEntityType, supportedEntityId, transactionId, url, productId);
     }
 
     public static JsonCommand fromExistingCommand(final Long commandId, final String jsonCommand, final JsonElement parsedCommand,
             final FromJsonHelper fromApiJsonHelper, final String entityName, final Long resourceId, final Long subresourceId,
-            final String url) {
+            final String url, final Long productId) {
         return new JsonCommand(commandId, jsonCommand, parsedCommand, fromApiJsonHelper, entityName, resourceId, subresourceId, null, null,
-                null, null, null, null, null, null, url);
+                null, null, null, null, null, null, url, productId);
     }
 
     public JsonCommand(final Long commandId, final String jsonCommand, final JsonElement parsedCommand,
             final FromJsonHelper fromApiJsonHelper, final String entityName, final Long resourceId, final Long subresourceId,
             final Long groupId, final Long clientId, final Long loanId, final Long savingsId, final Long codeId,
-            final String supportedEntityType, final Long supportedEntityId, final String transactionId, final String url) {
+            final String supportedEntityType, final Long supportedEntityId, final String transactionId, final String url, final Long productId) {
         this.commandId = commandId;
         this.jsonCommand = jsonCommand;
         this.parsedCommand = parsedCommand;
@@ -82,6 +83,7 @@ public final class JsonCommand {
         this.supportedEntityId = supportedEntityId;
         this.transactionId = transactionId;
         this.url = url;
+        this.productId = productId;
     }
 
     public String json() {
@@ -151,6 +153,10 @@ public final class JsonCommand {
 
     public String getUrl() {
         return this.url;
+    }
+
+    public Long getProductId() {
+        return this.productId;
     }
 
     private boolean differenceExists(final LocalDate baseValue, final LocalDate workingCopyValue) {

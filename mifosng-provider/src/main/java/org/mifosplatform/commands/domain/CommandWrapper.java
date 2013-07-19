@@ -25,18 +25,19 @@ public class CommandWrapper {
     private final String transactionId;
     private final String supportedEntityType;
     private final Long supportedEntityId;
+    private final Long productId;
 
     public static CommandWrapper wrap(final String actionName, final String entityName, final Long resourceId, final Long subresourceId) {
-        return new CommandWrapper(null, actionName, entityName, resourceId, subresourceId, null);
+        return new CommandWrapper(null, actionName, entityName, resourceId, subresourceId, null, null);
     }
 
     public static CommandWrapper fromExistingCommand(final Long commandId, final String actionName, final String entityName,
-            final Long resourceId, final Long subresourceId, final String resourceGetUrl) {
-        return new CommandWrapper(commandId, actionName, entityName, resourceId, subresourceId, resourceGetUrl);
+            final Long resourceId, final Long subresourceId, final String resourceGetUrl, final Long productId) {
+        return new CommandWrapper(commandId, actionName, entityName, resourceId, subresourceId, resourceGetUrl, productId);
     }
 
     private CommandWrapper(final Long commandId, final String actionName, final String entityName, final Long resourceId,
-            final Long subresourceId, final String resourceGetUrl) {
+            final Long subresourceId, final String resourceGetUrl, final Long productId) {
         this.commandId = commandId;
         this.officeId = null;
         this.groupId = null;
@@ -54,12 +55,14 @@ public class CommandWrapper {
         this.href = resourceGetUrl;
         this.json = null;
         this.transactionId = null;
+        this.productId = productId;
 
     }
 
     public CommandWrapper(final Long officeId, final Long groupId, final Long clientId, final Long loanId, final Long savingsId,
             final String actionName, final String entityName, final Long entityId, final Long subentityId, final Long codeId,
-            final String supportedEntityType, final Long supportedEntityId, final String href, final String json, final String transactionId) {
+            final String supportedEntityType, final Long supportedEntityId, final String href, final String json,
+            final String transactionId, final Long productId) {
         this.commandId = null;
         this.officeId = officeId;
         this.groupId = groupId;
@@ -77,7 +80,7 @@ public class CommandWrapper {
         this.href = href;
         this.json = json;
         this.transactionId = transactionId;
-
+        this.productId = productId;
     }
 
     public Long commandId() {
@@ -176,6 +179,10 @@ public class CommandWrapper {
         return this.supportedEntityType;
     }
 
+    public Long getProductId() {
+        return this.productId;
+    }
+
     public boolean isUpdate() {
         // permissions resource has special update which involves no resource.
         return (isPermissionResource() && isUpdateOperation()) || (isCurrencyResource() && isUpdateOperation())
@@ -190,7 +197,7 @@ public class CommandWrapper {
         return isDeleteOperation() && this.entityId != null;
     }
 
-    private boolean isDeleteOperation() {
+    public boolean isDeleteOperation() {
         return this.actionName.equalsIgnoreCase("DELETE");
     }
 
@@ -539,5 +546,9 @@ public class CommandWrapper {
   
     public boolean isClientClose() {
         return this.actionName.equalsIgnoreCase("CLOSE") && this.entityName.equalsIgnoreCase("CLIENT");
+    }
+
+    public boolean isProductMixResource() {
+        return this.entityName.equalsIgnoreCase("PRODUCTMIX");
     }
 }

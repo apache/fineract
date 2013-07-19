@@ -25,12 +25,13 @@ public class CommandProcessingResult {
     private final Map<String, Object> changes;
     @SuppressWarnings("unused")
     private final String resourceIdentifier;
+    private final Long productId;
 
     public static CommandProcessingResult fromDetails(final Long commandId, final Long officeId, final Long groupId, final Long clientId,
             final Long loanId, final Long savingsId, final String resourceIdentifier, final Long entityId, final String transactionId,
-            final Map<String, Object> changes) {
+            final Map<String, Object> changes, final Long productId) {
         return new CommandProcessingResult(commandId, officeId, groupId, clientId, loanId, savingsId, resourceIdentifier, entityId,
-                transactionId, changes);
+                transactionId, changes, productId);
     }
 
     public static CommandProcessingResult commandOnlyResult(final Long commandId) {
@@ -79,11 +80,12 @@ public class CommandProcessingResult {
         this.savingsId = null;
         this.transactionId = null;
         this.changes = new HashMap<String, Object>();
+        this.productId = null;
     }
 
     private CommandProcessingResult(final Long commandId, final Long officeId, final Long groupId, final Long clientId, final Long loanId,
             final Long savingsId, final String resourceIdentifier, final Long resourceId, final String transactionId,
-            final Map<String, Object> changesOnly) {
+            final Map<String, Object> changesOnly, final Long productId) {
         this.commandId = commandId;
         this.officeId = officeId;
         this.groupId = groupId;
@@ -94,6 +96,7 @@ public class CommandProcessingResult {
         this.resourceId = resourceId;
         this.changes = changesOnly;
         this.transactionId = transactionId;
+        this.productId = productId;
     }
 
     private CommandProcessingResult(final Long resourceId, final Long officeId, final Long commandId, final Map<String, Object> changesOnly) {
@@ -111,6 +114,7 @@ public class CommandProcessingResult {
         this.transactionId = null;
         this.commandId = commandId;
         this.changes = changesOnly;
+        this.productId = null;
     }
 
     public Long commandId() {
@@ -160,5 +164,9 @@ public class CommandProcessingResult {
     public boolean hasChanges() {
         final boolean noChanges = this.changes == null || this.changes.isEmpty();
         return !noChanges;
+    }
+
+    public Long getProductId() {
+        return this.productId;
     }
 }

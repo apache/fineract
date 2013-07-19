@@ -63,7 +63,7 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
             final JsonCommand command = JsonCommand.from(json, parsedCommand, this.fromApiJsonHelper, wrapper.getEntityName(),
                     wrapper.getEntityId(), wrapper.getSubentityId(), wrapper.getGroupId(), wrapper.getClientId(), wrapper.getLoanId(),
                     wrapper.getSavingsId(), wrapper.getCodeId(), wrapper.getSupportedEntityType(), wrapper.getSupportedEntityId(),
-                    wrapper.getTransactionId(), wrapper.getHref());
+                    wrapper.getTransactionId(), wrapper.getHref(), wrapper.getProductId());
 
             result = this.processAndLogCommandService.processAndLogCommand(wrapper, command, isApprovedByChecker);
         } catch (RollbackTransactionAsCommandIsNotApprovedByCheckerException e) {
@@ -81,12 +81,12 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
 
         final CommandWrapper wrapper = CommandWrapper.fromExistingCommand(makerCheckerId, commandSourceInput.getActionName(),
                 commandSourceInput.getEntityName(), commandSourceInput.resourceId(), commandSourceInput.subresourceId(),
-                commandSourceInput.getResourceGetUrl());
+                commandSourceInput.getResourceGetUrl(), commandSourceInput.getProductId());
 
         final JsonElement parsedCommand = this.fromApiJsonHelper.parse(commandSourceInput.json());
         final JsonCommand command = JsonCommand.fromExistingCommand(makerCheckerId, commandSourceInput.json(), parsedCommand,
                 this.fromApiJsonHelper, commandSourceInput.getEntityName(), commandSourceInput.resourceId(),
-                commandSourceInput.subresourceId(), commandSourceInput.getResourceGetUrl());
+                commandSourceInput.subresourceId(), commandSourceInput.getResourceGetUrl(), commandSourceInput.getProductId());
 
         final boolean makerCheckerApproval = true;
         return this.processAndLogCommandService.processAndLogCommand(wrapper, command, makerCheckerApproval);
