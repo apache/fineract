@@ -26,7 +26,7 @@ public class DefaultScheduledDateGenerator implements ScheduledDateGenerator {
         final List<LocalDate> dueRepaymentPeriodDates = new ArrayList<LocalDate>(numberOfRepayments);
 
         LocalDate startDate = loanApplicationTerms.getExpectedDisbursementDate();
-        final LocalDate firstRepaymentPeriodDate = loanApplicationTerms.getRepaymentsStartingFromLocalDate();
+        final LocalDate firstRepaymentPeriodDate = loanApplicationTerms.getCalculatedRepaymentsStartingFromLocalDate();
 
         for (int repaymentPeriod = 1; repaymentPeriod <= numberOfRepayments; repaymentPeriod++) {
 

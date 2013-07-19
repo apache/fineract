@@ -139,8 +139,8 @@ public class LoanScheduleAssembler {
         final Money principalMoney = Money.of(currency, principal);
         
         final LocalDate expectedDisbursementDate = this.fromApiJsonHelper.extractLocalDateNamed("expectedDisbursementDate", element);
-        LocalDate repaymentsStartingFromDate = this.fromApiJsonHelper.extractLocalDateNamed("repaymentsStartingFromDate", element);
-        
+        final LocalDate repaymentsStartingFromDate = this.fromApiJsonHelper.extractLocalDateNamed("repaymentsStartingFromDate", element);
+        LocalDate calculatedRepaymentsStartingFromDate = repaymentsStartingFromDate;
         final Boolean synchDisbursement = fromApiJsonHelper.extractBooleanNamed("syncDisbursementWithMeeting", element);
         final Long calendarId = this.fromApiJsonHelper.extractLongNamed("calendarId", element);
         Calendar calendar = null;
@@ -163,11 +163,11 @@ public class LoanScheduleAssembler {
             // TODO : AA - Is it require to reset repaymentsStartingFromDate or
             // set only if it is not provided (or null)
             // Currently provided repaymentsStartingFromDate takes precedence over system generated next meeting date
-            if (repaymentsStartingFromDate == null) {
+            if (calculatedRepaymentsStartingFromDate == null) {
                 // FIXME: AA - Possibility of having next meeting date immediately after disbursement date,
                 // need to have minimum number of days gap between disbursement and first repayment date.
                 final String frequency = CalendarHelper.getMeetingFrequencyFromPeriodFrequencyType(repaymentPeriodFrequencyType);
-                repaymentsStartingFromDate = CalendarHelper.getFirstRepaymentMeetingDate(calendar, expectedDisbursementDate,
+                calculatedRepaymentsStartingFromDate = CalendarHelper.getFirstRepaymentMeetingDate(calendar, expectedDisbursementDate,
                         repaymentEvery, frequency);
             } else {// validate user provided repaymentsStartFromDate
                 validateRepaymentsStartDateWithMeetingDates(repaymentsStartingFromDate, calendar);
@@ -186,7 +186,7 @@ public class LoanScheduleAssembler {
         return LoanApplicationTerms.assembleFrom(applicationCurrency, loanTermFrequency, loanTermPeriodFrequencyType, numberOfRepayments,
                 repaymentEvery, repaymentPeriodFrequencyType, amortizationMethod, interestMethod, interestRatePerPeriod,
                 interestRatePeriodFrequencyType, annualNominalInterestRate, interestCalculationPeriodMethod, principalMoney,
-                expectedDisbursementDate, repaymentsStartingFromDate, graceOnPrincipalPayment, graceOnInterestPayment,
+                expectedDisbursementDate, repaymentsStartingFromDate, calculatedRepaymentsStartingFromDate, graceOnPrincipalPayment, graceOnInterestPayment,
                 graceOnInterestCharged, interestChargedFromDate, inArrearsToleranceMoney);
     }
     

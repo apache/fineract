@@ -1317,7 +1317,7 @@ public class Loan extends AbstractPersistable<Long> {
     public Map<String, Object> disburse(final LoanScheduleGeneratorFactory loanScheduleFactory, final AppUser currentUser,
             final JsonCommand command, final ApplicationCurrency currency, final List<Long> existingTransactionIds,
             final List<Long> existingReversedTransactionIds, final Map<String, Object> actualChanges, final PaymentDetail paymentDetail,
-            final LocalDate firstRepaymentMeetingDate, final boolean isHolidayEnabled, final List<Holiday> holidays, final WorkingDays workingDays) {
+            final LocalDate calculatedRepaymentsStartingFromDate, final boolean isHolidayEnabled, final List<Holiday> holidays, final WorkingDays workingDays) {
 
         updateLoanToPreDisbursalState();
 
@@ -1347,7 +1347,7 @@ public class Loan extends AbstractPersistable<Long> {
             handleDisbursementTransaction(paymentDetail, actualDisbursementDate);
 
             if (isRepaymentScheduleRegenerationRequiredForDisbursement(actualDisbursementDate)) {
-                regenerateRepaymentSchedule(loanScheduleFactory, currency, firstRepaymentMeetingDate, isHolidayEnabled, holidays, workingDays);
+                regenerateRepaymentSchedule(loanScheduleFactory, currency, calculatedRepaymentsStartingFromDate, isHolidayEnabled, holidays, workingDays);
                 updateLoanRepaymentPeriodsDerivedFields(actualDisbursementDate);
             } else {
                 updateLoanRepaymentPeriodsDerivedFields(actualDisbursementDate);
@@ -1374,7 +1374,7 @@ public class Loan extends AbstractPersistable<Long> {
      * details/state.
      */
     private void regenerateRepaymentSchedule(final LoanScheduleGeneratorFactory loanScheduleFactory,
-            final ApplicationCurrency applicationCurrency, final LocalDate firstRepaymentMeetingDate, final boolean isHolidayEnabled,
+            final ApplicationCurrency applicationCurrency, final LocalDate calculatedRepaymentsStartingFromDate, final boolean isHolidayEnabled,
             final List<Holiday> holidays, final WorkingDays workingDays) {
 
         final InterestMethod interestMethod = this.loanRepaymentScheduleDetail.getInterestMethod();
@@ -1385,13 +1385,8 @@ public class Loan extends AbstractPersistable<Long> {
 
         final Integer loanTermFrequency = this.termFrequency;
         final PeriodFrequencyType loanTermPeriodFrequencyType = PeriodFrequencyType.fromInt(this.termPeriodFrequencyType);
-        // If ExpectedFirstRepaymentOnDate is null and repayment is synced with
-        // meeting then use firstRepaymentMeetingDate
-        // to generate repayment schedule dates
-        final LocalDate firstRepaymentOnDate = (getExpectedFirstRepaymentOnDate() == null) ? firstRepaymentMeetingDate
-                : getExpectedFirstRepaymentOnDate();
         LoanApplicationTerms loanApplicationTerms = LoanApplicationTerms.assembleFrom(applicationCurrency, loanTermFrequency,
-                loanTermPeriodFrequencyType, getDisbursementDate(), firstRepaymentOnDate, getInArrearsTolerance(),
+                loanTermPeriodFrequencyType, getDisbursementDate(), getExpectedFirstRepaymentOnDate(), calculatedRepaymentsStartingFromDate, getInArrearsTolerance(),
                 this.loanRepaymentScheduleDetail);
 
         LoanScheduleModel loanSchedule = loanScheduleGenerator.generate(mc, applicationCurrency, loanApplicationTerms, this.charges, isHolidayEnabled, holidays, workingDays);
