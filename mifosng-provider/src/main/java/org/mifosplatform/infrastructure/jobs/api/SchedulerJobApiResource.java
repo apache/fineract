@@ -31,7 +31,7 @@ import org.mifosplatform.portfolio.group.service.SearchParameters;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-@Path("/schedulerJobs")
+@Path("/jobs")
 @Component
 public class SchedulerJobApiResource {
 
@@ -76,7 +76,7 @@ public class SchedulerJobApiResource {
     }
 
     @GET
-    @Path("{jobId}/history")
+    @Path("{jobId}/runhistory")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveHistory(@Context final UriInfo uriInfo, @PathParam("jobId") final Long jobId,
@@ -94,6 +94,13 @@ public class SchedulerJobApiResource {
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public Response executeJob(@PathParam("jobId") final Long jobId) {
+        /**
+         * TODO : this API needs to be refactored to accept a mandatory command
+         * param i.e POST to jobs/{jobId}?command=run would trigger the job
+         * execution, any other command or no command would throw and invalid
+         * command exception..similar to
+         * https://demo.openmf.org/api-docs/apiLive.htm#loans_approve
+         **/
         Response response = Response.status(400).build();
         jobRegisterService.executeJob(jobId);
         response = Response.status(202).build();
@@ -101,7 +108,7 @@ public class SchedulerJobApiResource {
     }
 
     @PUT
-    @Path("{jobId}/updateJobDetail")
+    @Path("{jobId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String updateJobDetail(@PathParam("jobId") final Long jobId, final String jsonRequestBody) {
