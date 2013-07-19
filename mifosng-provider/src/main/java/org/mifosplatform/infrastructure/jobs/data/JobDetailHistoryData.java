@@ -6,16 +6,22 @@ public class JobDetailHistoryData {
 
     @SuppressWarnings("unused")
     private final Long version;
+
     @SuppressWarnings("unused")
     private final Date jobRunStartTime;
+
     @SuppressWarnings("unused")
     private final Date jobRunEndTime;
+
     @SuppressWarnings("unused")
     private final String status;
+
     @SuppressWarnings("unused")
     private final String jobRunErrorMessage;
+
     @SuppressWarnings("unused")
     private final String triggerType;
+
     @SuppressWarnings("unused")
     private final String jobRunErrorLog;
 

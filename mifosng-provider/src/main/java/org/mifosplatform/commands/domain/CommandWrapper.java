@@ -523,7 +523,7 @@ public class CommandWrapper {
     public boolean isAccountingRuleResource() {
         return this.entityName.equalsIgnoreCase("ACCOUNTINGRULE");
     }
-    
+
     public boolean isClientUnassignStaff() {
         return this.actionName.equalsIgnoreCase("UNASSIGNSTAFF") && this.entityName.equalsIgnoreCase("CLIENT");
     }
@@ -543,12 +543,16 @@ public class CommandWrapper {
     public boolean isClientAssignStaff() {
         return this.actionName.equalsIgnoreCase("ASSIGNSTAFF") && this.entityName.equalsIgnoreCase("CLIENT");
     }
-  
+
     public boolean isClientClose() {
         return this.actionName.equalsIgnoreCase("CLOSE") && this.entityName.equalsIgnoreCase("CLIENT");
     }
 
     public boolean isProductMixResource() {
         return this.entityName.equalsIgnoreCase("PRODUCTMIX");
+    }
+    
+    public boolean isSchedulerResource() {
+        return this.entityName.equalsIgnoreCase("SCHEDULER");
     }
 }

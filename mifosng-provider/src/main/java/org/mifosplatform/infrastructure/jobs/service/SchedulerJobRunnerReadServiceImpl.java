@@ -11,6 +11,7 @@ import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
 import org.mifosplatform.infrastructure.jobs.data.JobDetailData;
 import org.mifosplatform.infrastructure.jobs.data.JobDetailHistoryData;
 import org.mifosplatform.infrastructure.jobs.exception.JobNotFoundException;
+import org.mifosplatform.portfolio.group.service.SearchParameters;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -50,12 +51,28 @@ public class SchedulerJobRunnerReadServiceImpl implements SchedulerJobRunnerRead
     }
 
     @Override
-    public Page<JobDetailHistoryData> retrieveJobHistory(Long jobId) {
+    public Page<JobDetailHistoryData> retrieveJobHistory(Long jobId, SearchParameters searchParameters) {
         retrieveOne(jobId);
         JobHistoryMapper jobHistoryMapper = new JobHistoryMapper();
-        String sql = jobHistoryMapper.schema() + " where job.id=?";
+        StringBuilder sqlBuilder = new StringBuilder(jobHistoryMapper.schema());
+        sqlBuilder.append(" where job.id=?");
+        if (searchParameters.isOrderByRequested()) {
+            sqlBuilder.append(" order by ").append(searchParameters.getOrderBy());
+
+            if (searchParameters.isSortOrderProvided()) {
+                sqlBuilder.append(' ').append(searchParameters.getSortOrder());
+            }
+        }
+
+        if (searchParameters.isLimited()) {
+            sqlBuilder.append(" limit ").append(searchParameters.getLimit());
+            if (searchParameters.isOffset()) {
+                sqlBuilder.append(" offset ").append(searchParameters.getOffset());
+            }
+        }
+
         final String sqlCountRows = "SELECT FOUND_ROWS()";
-        return paginationHelper.fetchPage(jdbcTemplate, sqlCountRows, sql, new Object[] { jobId }, jobHistoryMapper);
+        return paginationHelper.fetchPage(jdbcTemplate, sqlCountRows, sqlBuilder.toString(), new Object[] { jobId }, jobHistoryMapper);
     }
 
     private static final class JobDetailMapper implements RowMapper<JobDetailData> {
@@ -73,21 +90,24 @@ public class SchedulerJobRunnerReadServiceImpl implements SchedulerJobRunnerRead
         public JobDetailData mapRow(ResultSet rs, @SuppressWarnings("unused") int rowNum) throws SQLException {
             Long id = rs.getLong("id");
             String displayName = rs.getString("displayName");
-            Date nextRunTime = rs.getDate("nextRunTime");
+            Date nextRunTime = rs.getTimestamp("nextRunTime");
             String initializingError = rs.getString("initializingError");
             boolean active = rs.getBoolean("active");
             boolean currentlyRunning = rs.getBoolean("currentlyRunning");
 
             Long version = rs.getLong("version");
-            Date jobRunStartTime = rs.getDate("lastRunStartTime");
-            Date jobRunEndTime = rs.getDate("lastRunEndTime");
+            Date jobRunStartTime = rs.getTimestamp("lastRunStartTime");
+            Date jobRunEndTime = rs.getTimestamp("lastRunEndTime");
             String status = rs.getString("status");
             String jobRunErrorMessage = rs.getString("jobRunErrorMessage");
             String triggerType = rs.getString("triggerType");
             String jobRunErrorLog = rs.getString("jobRunErrorLog");
 
-            JobDetailHistoryData lastRunHistory = new JobDetailHistoryData(version, jobRunStartTime, jobRunEndTime, status,
-                    jobRunErrorMessage, triggerType, jobRunErrorLog);
+            JobDetailHistoryData lastRunHistory = null;
+            if (version > 0) {
+                lastRunHistory = new JobDetailHistoryData(version, jobRunStartTime, jobRunEndTime, status, jobRunErrorMessage, triggerType,
+                        jobRunErrorLog);
+            }
             JobDetailData jobDetail = new JobDetailData(id, displayName, nextRunTime, initializingError, active, currentlyRunning,
                     lastRunHistory);
             return jobDetail;
@@ -108,8 +128,8 @@ public class SchedulerJobRunnerReadServiceImpl implements SchedulerJobRunnerRead
         @Override
         public JobDetailHistoryData mapRow(ResultSet rs, @SuppressWarnings("unused") int rowNum) throws SQLException {
             Long version = rs.getLong("version");
-            Date jobRunStartTime = rs.getDate("runStartTime");
-            Date jobRunEndTime = rs.getDate("runEndTime");
+            Date jobRunStartTime = rs.getTimestamp("runStartTime");
+            Date jobRunEndTime = rs.getTimestamp("runEndTime");
             String status = rs.getString("status");
             String jobRunErrorMessage = rs.getString("jobRunErrorMessage");
             String triggerType = rs.getString("triggerType");
