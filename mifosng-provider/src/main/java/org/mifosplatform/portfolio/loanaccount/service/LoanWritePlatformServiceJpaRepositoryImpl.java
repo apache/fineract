@@ -176,14 +176,14 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         // Recalculate first repayment date based in actual disbursement date.
         final LocalDate actualDisbursementDate = command.localDateValueOfParameterNamed("actualDisbursementDate");
-        final LocalDate firstRepaymentMeetingDate = getFirstRepaymentMeetingDate(actualDisbursementDate, loan, calendarInstance);
+        final LocalDate calculatedRepaymentsStartingFromDate = getCalculatedRepaymentsStartingFromDate(actualDisbursementDate, loan, calendarInstance);
         final boolean isHolidayEnabled = this.configurationDomainService.isRescheduleRepaymentsOnHolidaysEnabled();
         final List<Holiday> holidays = this.holidayRepository.findByOfficeIdAndGreaterThanDate(loan.getOfficeId(), actualDisbursementDate.toDate());
         final WorkingDays workingDays = this.workingDaysRepository.findOne();
         updateLoanCounters(loan, actualDisbursementDate);
 
         loan.disburse(this.loanScheduleFactory, currentUser, command, applicationCurrency, existingTransactionIds,
-                existingReversedTransactionIds, changes, paymentDetail, firstRepaymentMeetingDate, isHolidayEnabled, holidays, workingDays);
+                existingReversedTransactionIds, changes, paymentDetail, calculatedRepaymentsStartingFromDate, isHolidayEnabled, holidays, workingDays);
 
         if (!changes.isEmpty()) {
             this.loanRepository.save(loan);
@@ -208,15 +208,15 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 .build();
     }
 
-    private LocalDate getFirstRepaymentMeetingDate(final LocalDate actualDisbursementDate, final Loan loan,
+    private LocalDate getCalculatedRepaymentsStartingFromDate(final LocalDate actualDisbursementDate, final Loan loan,
             final CalendarInstance calendarInstance) {
         final Calendar calendar = (calendarInstance == null) ? null : calendarInstance.getCalendar();
-        LocalDate firstRepaymentMeetingDate = null;
+        LocalDate calculatedRepaymentsStartingFromDate = loan.getExpectedFirstRepaymentOnDate();
         if (calendar != null) {// sync repayments
 
             // TODO: AA - user provided first repayment date takes precedence
             // over recalculated meeting date
-            if (loan.getExpectedFirstRepaymentOnDate() == null) {
+            if (calculatedRepaymentsStartingFromDate == null) {
                 // FIXME: AA - Possibility of having next meeting date
                 // immediately after disbursement date,
                 // need to have minimum number of days gap between disbursement
@@ -227,12 +227,12 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                     final Integer repayEvery = repaymentScheduleDetails.getRepayEvery();
                     final String frequency = CalendarHelper.getMeetingFrequencyFromPeriodFrequencyType(repaymentScheduleDetails
                             .getRepaymentPeriodFrequencyType());
-                    firstRepaymentMeetingDate = CalendarHelper.getFirstRepaymentMeetingDate(calendar, actualDisbursementDate, repayEvery,
+                    calculatedRepaymentsStartingFromDate = CalendarHelper.getFirstRepaymentMeetingDate(calendar, actualDisbursementDate, repayEvery,
                             frequency);
                 }
             }
         }
-        return firstRepaymentMeetingDate;
+        return calculatedRepaymentsStartingFromDate;
     }
 
     /****
