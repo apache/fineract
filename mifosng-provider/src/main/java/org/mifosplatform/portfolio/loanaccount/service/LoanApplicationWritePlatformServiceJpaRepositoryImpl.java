@@ -213,7 +213,9 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             this.fromApiJsonDeserializer.validateForModify(command.json());
 
             final Loan existingLoanApplication = retrieveLoanBy(loanId);
-
+            
+            validateSubmittedOnDate(command, existingLoanApplication.loanProduct());
+            
             if (!existingLoanApplication.isSubmittedAndPendingApproval()) { throw new LoanApplicationNotInSubmittedAndPendingApprovalStateCannotBeModified(
                     loanId); }
 
