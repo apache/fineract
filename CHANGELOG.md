@@ -5,6 +5,7 @@ See VERSIONING (https://github.com/openMF/mifosx/blob/master/VERSIONING.md) for 
 
 Releases
 ===============
+1. 20 July 2013 - 1.6.0.RELEASE
 1. 14 July 2013 - 1.5.0.RELEASE
 1. 25 Jun 2013 - 1.4.1.RELEASE
 1. 20 Jun 2013 - 1.4.0.RELEASE
@@ -26,6 +27,33 @@ Releases
 1. 05 April 2013 - 0.11.1.beta
 1. 05 April 2013 - 0.11.0.beta
 
+1.6.0.RELEASE
+=============
+Feature (and Bug) Release
+
+This Feature release focussed on various improvements to the Savings functionality as requested by Musoni, support for defining working days and the beta version of the batch jobs scheduler along with minor bug fixes
+
+Platform & API
+
+Bug 
+ - [MIFOSX-400] - If one withdrawal is made between two deposits and amount equal to sum of 2 deposits it is accepting, (Though all 3 transactions happened in different dates)
+ - [MIFOSX-404] - In Transactions -> Savings account activity table interest displayed is inconsistent.
+ - [MIFOSX-412] - If only interest amount is balance in savings account, Compound interest is not getting calculated for that amount in future dates.
+ - [MIFOSX-469] - In Groups unable to activate the created group
+ - [MIFOSX-489] - If "New loan application" is submitted for an inactive client under Groups, no proper error message is displayed about the approval status, also activation of the client.
+ - [MIFOSX-551] - For Groups, Loan First Repayment date is taking after expected disbursement date than actual disbursement date.
+ - [MIFOSX-552] - Group Loan is getting disbursed on meeting date if holiday is declared on that day.
+ - [MIFOSX-558] - In modify loan application, am able to define an "application submitted on date" after the loan product's "close date"
+
+New Features & Improvements
+ - [MIFOSX-406] - Provide ability to edit all details of pending savings account application
+ - [MIFOSX-541] - Introduce application process around savings accounts similiar to loan accounts
+ - [MIFOSX-543] - Support working days in loan lifecycle
+ - [MIFOSX-550] - Ability to View Holidays
+ 
+Reference App
+ - [MIFOSX-500] - Select Applicable Codes from a Combobox while creating new Data Tables
+ - [MIFOSX-549] - Loan Product inactivation date improvements
 
 1.5.0.RELEASE
 =============
