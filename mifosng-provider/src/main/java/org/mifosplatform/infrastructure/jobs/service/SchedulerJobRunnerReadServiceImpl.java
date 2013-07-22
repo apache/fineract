@@ -11,6 +11,7 @@ import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
 import org.mifosplatform.infrastructure.jobs.data.JobDetailData;
 import org.mifosplatform.infrastructure.jobs.data.JobDetailHistoryData;
 import org.mifosplatform.infrastructure.jobs.exception.JobNotFoundException;
+import org.mifosplatform.infrastructure.jobs.exception.OperationNotAllowedException;
 import org.mifosplatform.portfolio.group.service.SearchParameters;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -52,7 +53,7 @@ public class SchedulerJobRunnerReadServiceImpl implements SchedulerJobRunnerRead
 
     @Override
     public Page<JobDetailHistoryData> retrieveJobHistory(Long jobId, SearchParameters searchParameters) {
-        retrieveOne(jobId);
+        if (!isJobExist(jobId)) { throw new JobNotFoundException(String.valueOf(jobId)); }
         JobHistoryMapper jobHistoryMapper = new JobHistoryMapper();
         StringBuilder sqlBuilder = new StringBuilder(jobHistoryMapper.schema());
         sqlBuilder.append(" where job.id=?");
@@ -73,6 +74,28 @@ public class SchedulerJobRunnerReadServiceImpl implements SchedulerJobRunnerRead
 
         final String sqlCountRows = "SELECT FOUND_ROWS()";
         return paginationHelper.fetchPage(jdbcTemplate, sqlCountRows, sqlBuilder.toString(), new Object[] { jobId }, jobHistoryMapper);
+    }
+
+    @Override
+    public boolean isUpdatesAllowed() {
+        String sql = "select job.display_name from job job where job.currently_running=true and job.updates_allowed=false";
+        List<String> names = jdbcTemplate.queryForList(sql, String.class);
+        if (names != null && names.size() > 0) {
+            String listVals = names.toString();
+            String jobNames = listVals.substring(listVals.indexOf("[") + 1, listVals.indexOf("]"));
+            throw new OperationNotAllowedException(jobNames);
+        }
+        return true;
+    }
+
+    private boolean isJobExist(Long jobId) {
+        boolean isJobPresent = false;
+        String sql = "select count(*) from job job where job.id=" + jobId;
+        int count = jdbcTemplate.queryForInt(sql);
+        if (count == 1) {
+            isJobPresent = true;
+        }
+        return isJobPresent;
     }
 
     private static final class JobDetailMapper implements RowMapper<JobDetailData> {

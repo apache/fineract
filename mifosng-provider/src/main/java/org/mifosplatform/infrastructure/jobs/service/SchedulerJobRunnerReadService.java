@@ -15,4 +15,6 @@ public interface SchedulerJobRunnerReadService {
 
     public Page<JobDetailHistoryData> retrieveJobHistory(Long jobId, SearchParameters searchParameters);
 
+    public boolean isUpdatesAllowed();
+
 }

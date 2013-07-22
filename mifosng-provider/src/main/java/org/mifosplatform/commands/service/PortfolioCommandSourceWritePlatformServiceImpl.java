@@ -14,6 +14,7 @@ import org.mifosplatform.commands.exception.RollbackTransactionAsCommandIsNotApp
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
+import org.mifosplatform.infrastructure.jobs.service.SchedulerJobRunnerReadService;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -28,15 +29,17 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
     private final CommandSourceRepository commandSourceRepository;
     private final FromJsonHelper fromApiJsonHelper;
     private final CommandProcessingService processAndLogCommandService;
+    private final SchedulerJobRunnerReadService schedulerJobRunnerReadService;
 
     @Autowired
     public PortfolioCommandSourceWritePlatformServiceImpl(final PlatformSecurityContext context,
             final CommandSourceRepository commandSourceRepository, final FromJsonHelper fromApiJsonHelper,
-            final CommandProcessingService processAndLogCommandService) {
+            final CommandProcessingService processAndLogCommandService, final SchedulerJobRunnerReadService schedulerJobRunnerReadService) {
         this.context = context;
         this.commandSourceRepository = commandSourceRepository;
         this.fromApiJsonHelper = fromApiJsonHelper;
         this.processAndLogCommandService = processAndLogCommandService;
+        this.schedulerJobRunnerReadService = schedulerJobRunnerReadService;
     }
 
     @Override
@@ -55,6 +58,7 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
             // permission to perform specific task.
             context.authenticatedUser().validateHasPermissionTo(wrapper.getTaskPermissionName());
         }
+        validateIsUpdateAllowed();
 
         final String json = wrapper.getJson();
         CommandProcessingResult result = null;
@@ -78,6 +82,7 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
     public CommandProcessingResult approveEntry(final Long makerCheckerId) {
 
         CommandSource commandSourceInput = validateMakerCheckerTransaction(makerCheckerId);
+        validateIsUpdateAllowed();
 
         final CommandWrapper wrapper = CommandWrapper.fromExistingCommand(makerCheckerId, commandSourceInput.getActionName(),
                 commandSourceInput.getEntityName(), commandSourceInput.resourceId(), commandSourceInput.subresourceId(),
@@ -97,6 +102,7 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
     public Long deleteEntry(final Long makerCheckerId) {
 
         validateMakerCheckerTransaction(makerCheckerId);
+        validateIsUpdateAllowed();
 
         this.commandSourceRepository.delete(makerCheckerId);
 
@@ -112,5 +118,10 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements Portfolio
         context.authenticatedUser().validateHasCheckerPermissionTo(commandSourceInput.getPermissionCode());
 
         return commandSourceInput;
+    }
+
+    private boolean validateIsUpdateAllowed() {
+        return schedulerJobRunnerReadService.isUpdatesAllowed();
+
     }
 }
