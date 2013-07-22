@@ -46,6 +46,12 @@ public interface LoanRepository extends JpaRepository<Loan, Long>, JpaSpecificat
     public static final String FIND_CLIENT_LOANS_TO_UPDATE_LOANPRODUCT_COUNTER = "from Loan l where l.loanProductCounter > :loanProductCounter"
             + " and l.client.id = :clientId and l.loanCounter is NULL order by l.loanProductCounter";
 
+    public static final String FIND_ACTIVE_LOANS_PRODUCT_IDS_BY_CLIENT = "Select loan.loanProduct.id from Loan loan where "
+            + "loan.client.id = :clientId and loan.loanStatus = :loanStatus group by loan.loanProduct.id";
+
+    public static final String FIND_ACTIVE_LOANS_PRODUCT_IDS_BY_GROUP = "Select loan.loanProduct.id from Loan loan where "
+            + "loan.group.id = :groupId and loan.loanStatus = :loanStatus and loan.client.id is NULL group by loan.loanProduct.id";
+
     @Query(FIND_GROUP_LOANS_DISBURSED_AFTER)
     List<Loan> getGroupLoansDisbursedAfter(@Param("disbursementDate") Date disbursementDate, @Param("groupId") Long groupId,
             @Param("loanType") Integer loanType);
@@ -99,5 +105,11 @@ public interface LoanRepository extends JpaRepository<Loan, Long>, JpaSpecificat
     
     @Query("from Loan loan where loan.group.office.id IN :officeIds and loan.loanStatus IN :loanStatuses")
     List<Loan> findByGroupOfficeIdsAndLoanStatus(@Param("officeIds") Collection<Long> officeIds, @Param("loanStatuses") Collection<Integer> loanStatuses);
+
+    @Query(FIND_ACTIVE_LOANS_PRODUCT_IDS_BY_CLIENT)
+    List<Long> findActiveLoansLoanProductIdsByClient(@Param("clientId") Long clientId, @Param("loanStatus") Integer loanStatus);
+
+    @Query(FIND_ACTIVE_LOANS_PRODUCT_IDS_BY_GROUP)
+    List<Long> findActiveLoansLoanProductIdsByGroup(@Param("groupId") Long groupId, @Param("loanStatus") Integer loanStatus);
 
 }

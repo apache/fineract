@@ -408,5 +408,9 @@ public class LoanProduct extends AbstractPersistable<Long> {
         }
         return closeLocalDate;
     }
+
+    public String productName() {
+        return this.name;
+    }
     
 }

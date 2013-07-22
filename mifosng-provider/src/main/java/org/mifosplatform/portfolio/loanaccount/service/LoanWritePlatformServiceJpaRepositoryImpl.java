@@ -32,8 +32,8 @@ import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.organisation.monetary.domain.Money;
 import org.mifosplatform.organisation.office.domain.Office;
 import org.mifosplatform.organisation.staff.domain.Staff;
-import org.mifosplatform.organisation.workingdays.domain.WorkingDaysRepositoryWrapper;
 import org.mifosplatform.organisation.workingdays.domain.WorkingDays;
+import org.mifosplatform.organisation.workingdays.domain.WorkingDaysRepositoryWrapper;
 import org.mifosplatform.portfolio.calendar.domain.Calendar;
 import org.mifosplatform.portfolio.calendar.domain.CalendarEntityType;
 import org.mifosplatform.portfolio.calendar.domain.CalendarInstance;
@@ -66,6 +66,7 @@ import org.mifosplatform.portfolio.loanaccount.domain.LoanSummaryWrapper;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanTransaction;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanTransactionRepository;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanType;
+import org.mifosplatform.portfolio.loanaccount.exception.LoanDisbursalException;
 import org.mifosplatform.portfolio.loanaccount.exception.LoanNotFoundException;
 import org.mifosplatform.portfolio.loanaccount.exception.LoanOfficerAssignmentException;
 import org.mifosplatform.portfolio.loanaccount.exception.LoanOfficerUnassignmentException;
@@ -73,8 +74,10 @@ import org.mifosplatform.portfolio.loanaccount.exception.LoanTransactionNotFound
 import org.mifosplatform.portfolio.loanaccount.loanschedule.domain.LoanScheduleGeneratorFactory;
 import org.mifosplatform.portfolio.loanaccount.serialization.LoanEventApiJsonValidator;
 import org.mifosplatform.portfolio.loanaccount.serialization.LoanUpdateCommandFromApiJsonDeserializer;
+import org.mifosplatform.portfolio.loanproduct.data.LoanProductData;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanProductRelatedDetail;
 import org.mifosplatform.portfolio.loanproduct.exception.InvalidCurrencyException;
+import org.mifosplatform.portfolio.loanproduct.service.LoanProductReadPlatformService;
 import org.mifosplatform.portfolio.note.domain.Note;
 import org.mifosplatform.portfolio.note.domain.NoteRepository;
 import org.mifosplatform.portfolio.paymentdetail.domain.PaymentDetail;
@@ -83,6 +86,7 @@ import org.mifosplatform.useradministration.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 @Service
 public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatformService {
@@ -106,6 +110,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     private final HolidayRepository holidayRepository;
     private final ConfigurationDomainService configurationDomainService;
     private final WorkingDaysRepositoryWrapper workingDaysRepository;
+    private final LoanProductReadPlatformService loanProductReadPlatformService;
 
     @Autowired
     public LoanWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
@@ -118,7 +123,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             final LoanRepaymentScheduleTransactionProcessorFactory loanRepaymentScheduleTransactionProcessorFactory,
             final LoanScheduleGeneratorFactory loanScheduleFactory, final CalendarInstanceRepository calendarInstanceRepository,
             final PaymentDetailWritePlatformService paymentDetailWritePlatformService, final HolidayRepository holidayRepository,
-            final ConfigurationDomainService configurationDomainService, final WorkingDaysRepositoryWrapper workingDaysRepository) {
+            final ConfigurationDomainService configurationDomainService, final WorkingDaysRepositoryWrapper workingDaysRepository,
+            final LoanProductReadPlatformService loanProductReadPlatformService) {
 
         this.context = context;
         this.loanEventApiJsonValidator = loanEventApiJsonValidator;
@@ -139,6 +145,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         this.holidayRepository = holidayRepository;
         this.configurationDomainService = configurationDomainService;
         this.workingDaysRepository = workingDaysRepository;
+        this.loanProductReadPlatformService = loanProductReadPlatformService;
     }
 
     private LoanLifecycleStateMachine defaultLoanLifecycleStateMachine() {
@@ -155,6 +162,10 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         this.loanEventApiJsonValidator.validateDisbursement(command.json());
 
         final Loan loan = retrieveLoanBy(loanId);
+
+        //check for product mix validations
+        checkForProductMixRestrictions(loan);
+
         // validate actual disbursement date against meeting date
         final CalendarInstance calendarInstance = this.calendarInstanceRepository.findCalendarInstaneByLoanId(loan.getId(),
                 CalendarEntityType.LOANS.getValue());
@@ -1232,5 +1243,32 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             holiday.processed();
         }
         this.holidayRepository.save(holidays);
+    }
+
+    private void checkForProductMixRestrictions(final Loan loan) {
+
+        final List<Long> activeLoansLoanProductIds;
+        final Long productId = loan.loanProduct().getId();
+
+        if (loan.isGroupLoan()) {
+            activeLoansLoanProductIds = this.loanRepository.findActiveLoansLoanProductIdsByGroup(loan.getGroupId(),
+                    LoanStatus.ACTIVE.getValue());
+        } else {
+            activeLoansLoanProductIds = this.loanRepository.findActiveLoansLoanProductIdsByClient(loan.getClientId(),
+                    LoanStatus.ACTIVE.getValue());
+        }
+        checkForProductMixRestrictions(activeLoansLoanProductIds, productId, loan.loanProduct().productName());
+    }
+
+    private void checkForProductMixRestrictions(final List<Long> activeLoansLoanProductIds, final Long productId, final String productName) {
+
+        if (!CollectionUtils.isEmpty(activeLoansLoanProductIds)) {
+            final Collection<LoanProductData> restrictedPrdouctsList = this.loanProductReadPlatformService
+                    .retrieveRestrictedProductsForMix(productId);
+            for (LoanProductData restrictedProduct : restrictedPrdouctsList) {
+                if (activeLoansLoanProductIds.contains(restrictedProduct.getId())) { throw new LoanDisbursalException(productName,
+                        restrictedProduct.getName()); }
+            }
+        }
     }
 }
