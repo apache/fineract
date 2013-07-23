@@ -125,6 +125,7 @@ public class JobRegisterServiceImpl implements JobRegisterService {
     private void scheduleJob(ScheduledJobDetail scheduledJobDetails) {
         if (!scheduledJobDetails.isActiveSchedular()) {
             scheduledJobDetails.updateNextRunTime(null);
+            scheduledJobDetails.updateCurrentlyRunningStatus(false);
             return;
         }
         try {
@@ -133,13 +134,13 @@ public class JobRegisterServiceImpl implements JobRegisterService {
             schedulerFactoryBean.getScheduler().scheduleJob(jobDetail, trigger);
             scheduledJobDetails.updateJobKey(getJobKeyAsString(jobDetail.getKey()));
             scheduledJobDetails.updateNextRunTime(trigger.getNextFireTime());
-            scheduledJobDetails.updateCurrentlyRunningStatus(false);
             scheduledJobDetails.updateErrorLog(null);
         } catch (Throwable throwable) {
             scheduledJobDetails.updateNextRunTime(null);
             String stackTrace = getStackTraceAsString(throwable);
             scheduledJobDetails.updateErrorLog(stackTrace);
         }
+        scheduledJobDetails.updateCurrentlyRunningStatus(false);
     }
 
     private JobDetail createJobDetail(ScheduledJobDetail scheduledJobDetails) throws Exception {
