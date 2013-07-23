@@ -5,21 +5,29 @@
  */
 package org.mifosplatform.portfolio.charge.service;
 
+import java.util.Collection;
 import java.util.Map;
+
+import javax.sql.DataSource;
 
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
+import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.portfolio.charge.domain.Charge;
 import org.mifosplatform.portfolio.charge.domain.ChargeRepository;
+import org.mifosplatform.portfolio.charge.exception.ChargeCannotBeDeletedException;
 import org.mifosplatform.portfolio.charge.exception.ChargeNotFoundException;
 import org.mifosplatform.portfolio.charge.serialization.ChargeDefinitionCommandFromApiJsonDeserializer;
+import org.mifosplatform.portfolio.loanproduct.domain.LoanProduct;
+import org.mifosplatform.portfolio.loanproduct.domain.LoanProductRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,14 +38,20 @@ public class ChargeWritePlatformServiceJpaRepositoryImpl implements ChargeWriteP
 
     private final PlatformSecurityContext context;
     private final ChargeDefinitionCommandFromApiJsonDeserializer fromApiJsonDeserializer;
+    private final JdbcTemplate jdbcTemplate;
+    private final DataSource dataSource;
     private final ChargeRepository chargeRepository;
-
+    private final LoanProductRepository loanProductRepository;
     @Autowired
     public ChargeWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
-            final ChargeDefinitionCommandFromApiJsonDeserializer fromApiJsonDeserializer, final ChargeRepository chargeRepository) {
+            final ChargeDefinitionCommandFromApiJsonDeserializer fromApiJsonDeserializer, final ChargeRepository chargeRepository,
+            final LoanProductRepository loanProductRepository, final RoutingDataSource dataSource) {
         this.context = context;
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
+        this.dataSource = dataSource;
+        this.jdbcTemplate = new JdbcTemplate(this.dataSource);
         this.chargeRepository = chargeRepository;
+        this.loanProductRepository = loanProductRepository;
     }
 
     @Transactional
@@ -50,7 +64,7 @@ public class ChargeWritePlatformServiceJpaRepositoryImpl implements ChargeWriteP
 
             final Charge charge = Charge.fromJson(command);
             this.chargeRepository.save(charge);
-
+            
             return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(charge.getId()).build();
         } catch (DataIntegrityViolationException dve) {
             handleDataIntegrityIssues(command, dve);
@@ -91,9 +105,16 @@ public class ChargeWritePlatformServiceJpaRepositoryImpl implements ChargeWriteP
 
         final Charge chargeForDelete = this.chargeRepository.findOne(chargeId);
         if (chargeForDelete == null || chargeForDelete.isDeleted()) { throw new ChargeNotFoundException(chargeId); }
-
+        
+        Collection<LoanProduct> loanProducts = this.loanProductRepository.retrieveLoanProductsByChargeId(chargeId);
+        Boolean isChargeExistWithLoans = isAnyLoansAssociateWithThisCharge(chargeId);
+        
+        if (!loanProducts.isEmpty() || isChargeExistWithLoans) { throw new ChargeCannotBeDeletedException(
+                "error.msg.charge.cannot.be.deleted.it.is.already.used.in.loan",
+                "This charge cannot be deleted, it is already used in loan"); }
+        
         chargeForDelete.delete();
-
+        
         chargeRepository.save(chargeForDelete);
 
         return new CommandProcessingResultBuilder().withEntityId(chargeForDelete.getId()).build();
@@ -115,5 +136,12 @@ public class ChargeWritePlatformServiceJpaRepositoryImpl implements ChargeWriteP
         logger.error(dve.getMessage(), dve);
         throw new PlatformDataIntegrityException("error.msg.charge.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource: " + realCause.getMessage());
+    }
+    
+    private boolean isAnyLoansAssociateWithThisCharge(final Long chargeId) {
+
+        final String sql = "select if((exists (select 1 from m_loan_charge lc where lc.charge_id = ?)) = 1, 'true', 'false')";
+        final String isLoansUsingCharge = this.jdbcTemplate.queryForObject(sql, String.class, new Object[] { chargeId });
+        return new Boolean(isLoansUsingCharge);
     }
 }
