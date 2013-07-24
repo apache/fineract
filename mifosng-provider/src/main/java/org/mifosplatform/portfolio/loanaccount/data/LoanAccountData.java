@@ -83,6 +83,7 @@ public class LoanAccountData {
     private final EnumOptionData interestCalculationPeriodType;
     private final BigDecimal inArrearsTolerance;
     private final Long transactionProcessingStrategyId;
+    private final String transactionProcessingStrategyName;
     private final Integer graceOnPrincipalPayment;
     private final Integer graceOnInterestPayment;
     private final Integer graceOnInterestCharged;
@@ -162,6 +163,7 @@ public class LoanAccountData {
         final Integer repaymentEvery = null;
         final EnumOptionData repaymentFrequencyType = null;
         final Long transactionProcessingStrategyId = null;
+        final String transactionProcessingStrategyName = null;
         final EnumOptionData amortizationType = null;
         final BigDecimal interestRatePerPeriod = null;
         final EnumOptionData interestRateFrequencyType = null;
@@ -205,7 +207,7 @@ public class LoanAccountData {
         return new LoanAccountData(id, accountNo, status, externalId, clientId, clientName, clientOfficeId, group, loanType, loanProductId,
                 loanProductName, loanProductDescription, fundId, fundName, loanPurposeId, loanPurposeName, loanOfficerId, loanOfficerName,
                 currencyData, principal, totalOverpaid, inArrearsTolerance, termFrequency, termPeriodFrequencyType, numberOfRepayments,
-                repaymentEvery, repaymentFrequencyType, transactionProcessingStrategyId, amortizationType, interestRatePerPeriod,
+                repaymentEvery, repaymentFrequencyType, transactionProcessingStrategyId, transactionProcessingStrategyName , amortizationType, interestRatePerPeriod,
                 interestRateFrequencyType, annualInterestRate, interestType, interestCalculationPeriodType, expectedFirstRepaymentOnDate,
                 graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged, interestChargedFromDate, timeline, summary,
                 feeChargesDueAtDisbursementCharged, repaymentSchedule, transactions, charges, collateral, guarantors, calendarData,
@@ -247,6 +249,7 @@ public class LoanAccountData {
         final Integer repaymentEvery = null;
         final EnumOptionData repaymentFrequencyType = null;
         final Long transactionProcessingStrategyId = null;
+        final String transactionProcessingStrategyName = null;
         final EnumOptionData amortizationType = null;
         final BigDecimal interestRatePerPeriod = null;
         final EnumOptionData interestRateFrequencyType = null;
@@ -291,7 +294,7 @@ public class LoanAccountData {
         return new LoanAccountData(id, accountNo, status, externalId, clientId, clientName, clientOfficeId, group, loanType, loanProductId,
                 loanProductName, loanProductDescription, fundId, fundName, loanPurposeId, loanPurposeName, loanOfficerId, loanOfficerName,
                 currencyData, principal, totalOverpaid, inArrearsTolerance, termFrequency, termPeriodFrequencyType, numberOfRepayments,
-                repaymentEvery, repaymentFrequencyType, transactionProcessingStrategyId, amortizationType, interestRatePerPeriod,
+                repaymentEvery, repaymentFrequencyType, transactionProcessingStrategyId, transactionProcessingStrategyName ,amortizationType, interestRatePerPeriod,
                 interestRateFrequencyType, annualInterestRate, interestType, interestCalculationPeriodType, expectedFirstRepaymentOnDate,
                 graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged, interestChargedFromDate, timeline, summary,
                 feeChargesDueAtDisbursementCharged, repaymentSchedule, transactions, charges, collateral, guarantors, calendarData,
@@ -307,9 +310,9 @@ public class LoanAccountData {
                 clientAcc.clientOfficeId, acc.group, acc.loanType, acc.loanProductId, acc.loanProductName, acc.loanProductDescription,
                 acc.fundId, acc.fundName, acc.loanPurposeId, acc.loanPurposeName, acc.loanOfficerId, acc.loanOfficerName, acc.currency,
                 acc.principal, acc.totalOverpaid, acc.inArrearsTolerance, acc.termFrequency, acc.termPeriodFrequencyType,
-                acc.numberOfRepayments, acc.repaymentEvery, acc.repaymentFrequencyType, acc.transactionProcessingStrategyId,
-                acc.amortizationType, acc.interestRatePerPeriod, acc.interestRateFrequencyType, acc.annualInterestRate, acc.interestType,
-                acc.interestCalculationPeriodType, acc.expectedFirstRepaymentOnDate, acc.graceOnPrincipalPayment,
+                acc.numberOfRepayments, acc.repaymentEvery, acc.repaymentFrequencyType, acc.transactionProcessingStrategyId,  
+                acc.transactionProcessingStrategyName, acc.amortizationType, acc.interestRatePerPeriod, acc.interestRateFrequencyType, acc.annualInterestRate, 
+                acc.interestType, acc.interestCalculationPeriodType, acc.expectedFirstRepaymentOnDate, acc.graceOnPrincipalPayment,
                 acc.graceOnInterestPayment, acc.graceOnInterestCharged, acc.interestChargedFromDate, clientAcc.timeline, acc.summary,
                 acc.feeChargesAtDisbursementCharged, acc.repaymentSchedule, acc.transactions, acc.charges, acc.collateral, acc.guarantors,
                 acc.meeting, acc.productOptions, acc.termFrequencyTypeOptions, acc.repaymentFrequencyTypeOptions,
@@ -352,6 +355,7 @@ public class LoanAccountData {
         final Integer repaymentEvery = null;
         final EnumOptionData repaymentFrequencyType = null;
         final Long transactionProcessingStrategyId = null;
+        final String transactionProcessingStrategyName = null;
         final EnumOptionData amortizationType = null;
         final BigDecimal interestRatePerPeriod = null;
         final EnumOptionData interestRateFrequencyType = null;
@@ -396,7 +400,7 @@ public class LoanAccountData {
         return new LoanAccountData(id, accountNo, status, externalId, clientId, clientName, clientOfficeId, group, loanType, loanProductId,
                 loanProductName, loanProductDescription, fundId, fundName, loanPurposeId, loanPurposeName, loanOfficerId, loanOfficerName,
                 currencyData, principal, totalOverpaid, inArrearsTolerance, termFrequency, termPeriodFrequencyType, numberOfRepayments,
-                repaymentEvery, repaymentFrequencyType, transactionProcessingStrategyId, amortizationType, interestRatePerPeriod,
+                repaymentEvery, repaymentFrequencyType, transactionProcessingStrategyId, transactionProcessingStrategyName , amortizationType, interestRatePerPeriod,
                 interestRateFrequencyType, annualInterestRate, interestType, interestCalculationPeriodType, expectedFirstRepaymentOnDate,
                 graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged, interestChargedFromDate, timeline, summary,
                 feeChargesDueAtDisbursementCharged, repaymentSchedule, transactions, charges, collateral, guarantors, calendarData,
@@ -412,7 +416,7 @@ public class LoanAccountData {
                 groupAcc.group, acc.loanType, acc.loanProductId, acc.loanProductName, acc.loanProductDescription, acc.fundId, acc.fundName,
                 acc.loanPurposeId, acc.loanPurposeName, acc.loanOfficerId, acc.loanOfficerName, acc.currency, acc.principal,
                 acc.totalOverpaid, acc.inArrearsTolerance, acc.termFrequency, acc.termPeriodFrequencyType, acc.numberOfRepayments,
-                acc.repaymentEvery, acc.repaymentFrequencyType, acc.transactionProcessingStrategyId, acc.amortizationType,
+                acc.repaymentEvery, acc.repaymentFrequencyType, acc.transactionProcessingStrategyId, acc.transactionProcessingStrategyName , acc.amortizationType,
                 acc.interestRatePerPeriod, acc.interestRateFrequencyType, acc.annualInterestRate, acc.interestType,
                 acc.interestCalculationPeriodType, acc.expectedFirstRepaymentOnDate, acc.graceOnPrincipalPayment,
                 acc.graceOnInterestPayment, acc.graceOnInterestCharged, acc.interestChargedFromDate, groupAcc.timeline, acc.summary,
@@ -456,6 +460,7 @@ public class LoanAccountData {
         final Integer repaymentEvery = null;
         final EnumOptionData repaymentFrequencyType = null;
         final Long transactionProcessingStrategyId = null;
+        final String transactionProcessingStrategyName = null;
         final EnumOptionData amortizationType = null;
         final BigDecimal interestRatePerPeriod = null;
         final EnumOptionData interestRateFrequencyType = null;
@@ -495,7 +500,7 @@ public class LoanAccountData {
                 product.getId(), product.getName(), product.getDescription(), product.getFundId(), product.getFundName(), loanPurposeId,
                 loanPurposeName, loanOfficerId, loanOfficerName, product.getCurrency(), product.getPrincipal(), totalOverpaid,
                 product.getInArrearsTolerance(), termFrequency, termPeriodFrequencyType, product.getNumberOfRepayments(),
-                product.getRepaymentEvery(), product.getRepaymentFrequencyType(), product.getTransactionProcessingStrategyId(),
+                product.getRepaymentEvery(), product.getRepaymentFrequencyType(), product.getTransactionProcessingStrategyId(), transactionProcessingStrategyName ,
                 product.getAmortizationType(), product.getInterestRatePerPeriod(), product.getInterestRateFrequencyType(),
                 product.getAnnualInterestRate(), product.getInterestType(), product.getInterestCalculationPeriodType(),
                 expectedFirstRepaymentOnDate, product.getGraceOnPrincipalPayment(), product.getGraceOnInterestPayment(),
@@ -543,7 +548,7 @@ public class LoanAccountData {
                 product.getFundName(), acc.loanPurposeId, acc.loanPurposeName, acc.loanOfficerId, acc.loanOfficerName,
                 product.getCurrency(), product.getPrincipal(), acc.totalOverpaid, product.getInArrearsTolerance(), termFrequency,
                 termPeriodFrequencyType, product.getNumberOfRepayments(), product.getRepaymentEvery(), product.getRepaymentFrequencyType(),
-                product.getTransactionProcessingStrategyId(), product.getAmortizationType(), product.getInterestRatePerPeriod(),
+                product.getTransactionProcessingStrategyId(), product.getTransactionProcessingStrategyName(), product.getAmortizationType(), product.getInterestRatePerPeriod(),
                 product.getInterestRateFrequencyType(), product.getAnnualInterestRate(), product.getInterestType(),
                 product.getInterestCalculationPeriodType(), acc.expectedFirstRepaymentOnDate, product.getGraceOnPrincipalPayment(),
                 product.getGraceOnInterestPayment(), product.getGraceOnInterestCharged(), acc.interestChargedFromDate, acc.timeline,
@@ -565,7 +570,7 @@ public class LoanAccountData {
             final String loanOfficerName, final CurrencyData currencyData, final BigDecimal principal, final BigDecimal totalOverpaid,
             final BigDecimal inArrearsTolerance, final Integer termFrequency, final EnumOptionData termPeriodFrequencyType,
             final Integer numberOfRepayments, final Integer repaymentEvery, final EnumOptionData repaymentFrequencyType,
-            final Long transactionStrategyId, final EnumOptionData amortizationType, final BigDecimal interestRatePerPeriod,
+            final Long transactionStrategyId, final String transactionStrategyName ,  final EnumOptionData amortizationType, final BigDecimal interestRatePerPeriod,
             final EnumOptionData interestRateFrequencyType, final BigDecimal annualInterestRate, final EnumOptionData interestType,
             final EnumOptionData interestCalculationPeriodType, final LocalDate expectedFirstRepaymentOnDate,
             final Integer graceOnPrincipalPayment, final Integer graceOnInterestPayment, final Integer graceOnInterestCharged,
@@ -599,7 +604,7 @@ public class LoanAccountData {
         return new LoanAccountData(id, accountNo, status, externalId, clientId, clientName, clientOfficeId, group, loanType, loanProductId,
                 loanProductName, loanProductDescription, fundId, fundName, loanPurposeId, loanPurposeName, loanOfficerId, loanOfficerName,
                 currencyData, principal, totalOverpaid, inArrearsTolerance, termFrequency, termPeriodFrequencyType, numberOfRepayments,
-                repaymentEvery, repaymentFrequencyType, transactionStrategyId, amortizationType, interestRatePerPeriod,
+                repaymentEvery, repaymentFrequencyType, transactionStrategyId, transactionStrategyName , amortizationType, interestRatePerPeriod,
                 interestRateFrequencyType, annualInterestRate, interestType, interestCalculationPeriodType, expectedFirstRepaymentOnDate,
                 graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged, interestChargedFromDate, timeline, loanSummary,
                 feeChargesDueAtDisbursementCharged, repaymentSchedule, transactions, charges, collateral, guarantors, calendarData,
@@ -628,7 +633,7 @@ public class LoanAccountData {
                 acc.group, acc.loanType, acc.loanProductId, acc.loanProductName, acc.loanProductDescription, acc.fundId, acc.fundName,
                 acc.loanPurposeId, acc.loanPurposeName, acc.loanOfficerId, acc.loanOfficerName, acc.currency, acc.principal,
                 acc.totalOverpaid, acc.inArrearsTolerance, acc.termFrequency, acc.termPeriodFrequencyType, acc.numberOfRepayments,
-                acc.repaymentEvery, acc.repaymentFrequencyType, acc.transactionProcessingStrategyId, acc.amortizationType,
+                acc.repaymentEvery, acc.repaymentFrequencyType, acc.transactionProcessingStrategyId, acc.transactionProcessingStrategyName, acc.amortizationType,
                 acc.interestRatePerPeriod, acc.interestRateFrequencyType, acc.annualInterestRate, acc.interestType,
                 acc.interestCalculationPeriodType, acc.expectedFirstRepaymentOnDate, acc.graceOnPrincipalPayment,
                 acc.graceOnInterestPayment, acc.graceOnInterestCharged, acc.interestChargedFromDate, acc.timeline, acc.summary,
@@ -653,7 +658,8 @@ public class LoanAccountData {
                 group, acc.loanType, acc.loanProductId, acc.loanProductName, acc.loanProductDescription, acc.fundId, acc.fundName,
                 acc.loanPurposeId, acc.loanPurposeName, acc.loanOfficerId, acc.loanOfficerName, acc.currency, acc.principal,
                 acc.totalOverpaid, acc.inArrearsTolerance, acc.termFrequency, acc.termPeriodFrequencyType, acc.numberOfRepayments,
-                acc.repaymentEvery, acc.repaymentFrequencyType, acc.transactionProcessingStrategyId, acc.amortizationType,
+                acc.repaymentEvery, acc.repaymentFrequencyType, acc.transactionProcessingStrategyId, 
+             	acc.transactionProcessingStrategyName, acc.amortizationType,
                 acc.interestRatePerPeriod, acc.interestRateFrequencyType, acc.annualInterestRate, acc.interestType,
                 acc.interestCalculationPeriodType, acc.expectedFirstRepaymentOnDate, acc.graceOnPrincipalPayment,
                 acc.graceOnInterestPayment, acc.graceOnInterestCharged, acc.interestChargedFromDate, acc.timeline, acc.summary,
@@ -693,7 +699,9 @@ public class LoanAccountData {
             final Integer numberOfRepayments,
             final Integer repaymentEvery,
             final EnumOptionData repaymentFrequencyType, //
-            final Long transactionProcessingStrategyId, final EnumOptionData amortizationType, final BigDecimal interestRatePerPeriod,
+            final Long transactionProcessingStrategyId, 
+            final String transactionProcessingStrategyName, 
+            final EnumOptionData amortizationType, final BigDecimal interestRatePerPeriod,
             final EnumOptionData interestRateFrequencyType, final BigDecimal annualInterestRate, final EnumOptionData interestType,
             final EnumOptionData interestCalculationPeriodType, final LocalDate expectedFirstRepaymentOnDate,
             final Integer graceOnPrincipalPayment, final Integer graceOnInterestPayment, final Integer graceOnInterestCharged,
@@ -738,6 +746,7 @@ public class LoanAccountData {
         this.repaymentEvery = repaymentEvery;
         this.repaymentFrequencyType = repaymentFrequencyType;
         this.transactionProcessingStrategyId = transactionProcessingStrategyId;
+        this.transactionProcessingStrategyName = transactionProcessingStrategyName;
         this.amortizationType = amortizationType;
         this.interestRatePerPeriod = interestRatePerPeriod;
         this.interestRateFrequencyType = interestRateFrequencyType;
