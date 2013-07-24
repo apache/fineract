@@ -160,6 +160,22 @@ public class ApiGlobalErrorResponse {
 
         return globalErrorResponse;
     }
+    
+    public static ApiGlobalErrorResponse serviceUnavailable(final String globalisationMessageCode, final String defaultUserMessage,
+            final Object... defaultUserMessageArgs) {
+
+        ApiGlobalErrorResponse globalErrorResponse = new ApiGlobalErrorResponse();
+        globalErrorResponse.setHttpStatusCode("503");
+        globalErrorResponse.setDeveloperMessage("The server is currently unable to handle the request , please try after some time.");
+        globalErrorResponse.setUserMessageGlobalisationCode("error.msg.platform.service.unavailable");
+        globalErrorResponse.setDefaultUserMessage("The server is currently unable to handle the request , please try after some time.");
+
+        List<ApiParameterError> errors = new ArrayList<ApiParameterError>();
+        errors.add(ApiParameterError.generalError(globalisationMessageCode, defaultUserMessage, defaultUserMessageArgs));
+        globalErrorResponse.setErrors(errors);
+
+        return globalErrorResponse;
+    }
 
     protected ApiGlobalErrorResponse() {
         //
