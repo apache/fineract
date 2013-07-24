@@ -128,7 +128,7 @@ public class CalendarWritePlatformServiceJpaRepositoryImpl implements CalendarWr
         final Calendar calendarForUpdate = this.calendarRepository.findOne(calendarId);
         if (calendarForUpdate == null) { throw new CalendarNotFoundException(calendarId); }
         
-        final CalendarInstance calendarInstanceForUpdate = this.calendarInstanceRepository.findByCalendarAndEntityIdAndEntityTypeId(calendarId, entityId, entityTypeId);
+        final CalendarInstance calendarInstanceForUpdate = this.calendarInstanceRepository.findByCalendarIdAndEntityIdAndEntityTypeId(calendarId, entityId, entityTypeId);
         this.calendarInstanceRepository.saveAndFlush(calendarInstanceForUpdate);
         return new CommandProcessingResultBuilder() //
         .withCommandId(null) //

@@ -41,6 +41,7 @@ import org.mifosplatform.portfolio.client.service.ClientReadPlatformService;
 import org.mifosplatform.portfolio.fund.data.FundData;
 import org.mifosplatform.portfolio.fund.service.FundReadPlatformService;
 import org.mifosplatform.portfolio.group.data.GroupGeneralData;
+import org.mifosplatform.portfolio.group.data.GroupRoleData;
 import org.mifosplatform.portfolio.group.service.GroupReadPlatformService;
 import org.mifosplatform.portfolio.group.service.SearchParameters;
 import org.mifosplatform.portfolio.loanaccount.data.DisbursementData;
@@ -280,7 +281,10 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         // get group associations
         Collection<ClientData> membersOfGroup = this.clientReadPlatformService.retrieveClientMembersOfGroup(groupId);
         if (!CollectionUtils.isEmpty(membersOfGroup)) {
-            groupAccount = GroupGeneralData.withAssocations(groupAccount, membersOfGroup, null);
+            final Collection<CalendarData> calendarsData = null;
+            final CalendarData collectionMeetingCalendar = null;
+            final Collection<GroupRoleData> groupRoles = null;
+            groupAccount = GroupGeneralData.withAssocations(groupAccount, membersOfGroup, groupRoles, calendarsData, collectionMeetingCalendar);
         }
 
         final LocalDate expectedDisbursementDate = DateUtils.getLocalDateOfTenant();
@@ -958,7 +962,10 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         // get group associations
         Collection<ClientData> membersOfGroup = this.clientReadPlatformService.retrieveActiveClientMembersOfGroup(groupId);
         if (!CollectionUtils.isEmpty(membersOfGroup)) {
-            groupAccount = GroupGeneralData.withAssocations(groupAccount, membersOfGroup, null);
+            final Collection<CalendarData> calendarsData = null;
+            final CalendarData collectionMeetingCalendar = null;
+            final Collection<GroupRoleData> groupRoles = null;
+            groupAccount = GroupGeneralData.withAssocations(groupAccount, membersOfGroup, groupRoles, calendarsData, collectionMeetingCalendar);
         }
 
         return LoanAccountData.groupDefaults(groupAccount, expectedDisbursementDate);

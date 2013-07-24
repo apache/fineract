@@ -11,6 +11,7 @@ import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.organisation.office.data.OfficeData;
 import org.mifosplatform.organisation.staff.data.StaffData;
+import org.mifosplatform.portfolio.calendar.data.CalendarData;
 
 /**
  * Immutable data object representing groups.
@@ -40,17 +41,19 @@ public class CenterData {
     private final Collection<OfficeData> officeOptions;
     private final Collection<StaffData> staffOptions;
     private final Collection<GroupGeneralData> groupMembersOptions;
+    private final CalendarData collectionMeetingCalendar;
 
     public static CenterData template(final Long officeId, final LocalDate activationDate, final Collection<OfficeData> officeOptions,
             final Collection<StaffData> staffOptions, final Collection<GroupGeneralData> groupMembersOptions) {
+        final CalendarData collectionMeetingCalendar = null;
         return new CenterData(null, null, null, null, activationDate, officeId, null, null, null, null, null, officeOptions, staffOptions,
-                groupMembersOptions);
+                groupMembersOptions, collectionMeetingCalendar);
     }
 
     public static CenterData withTemplate(final CenterData templateCenter, final CenterData center) {
         return new CenterData(center.id, center.name, center.externalId, center.status, center.activationDate, center.officeId,
                 center.officeName, center.staffId, center.staffName, center.hierarchy, center.groupMembers, templateCenter.officeOptions,
-                templateCenter.staffOptions, templateCenter.groupMembersOptions);
+                templateCenter.staffOptions, templateCenter.groupMembersOptions, templateCenter.collectionMeetingCalendar);
     }
 
     public static CenterData instance(final Long id, final String name, final String externalId, final EnumOptionData status,
@@ -61,21 +64,22 @@ public class CenterData {
         final Collection<OfficeData> officeOptions = null;
         final Collection<StaffData> staffOptions = null;
         final Collection<GroupGeneralData> groupMembersOptions = null;
+        final CalendarData collectionMeetingCalendar = null;
 
         return new CenterData(id, name, externalId, status, activationDate, officeId, officeName, staffId, staffName, hierarchy,
-                groupMembers, officeOptions, staffOptions, groupMembersOptions);
+                groupMembers, officeOptions, staffOptions, groupMembersOptions, collectionMeetingCalendar);
     }
 
-    public static CenterData setGroups(final CenterData centerData, final Collection<GroupGeneralData> groupMembers) {
+    public static CenterData withAssociations(final CenterData centerData, final Collection<GroupGeneralData> groupMembers, final CalendarData collectionMeetingCalendar) {
         return new CenterData(centerData.id, centerData.name, centerData.externalId, centerData.status, centerData.activationDate,
                 centerData.officeId, centerData.officeName, centerData.staffId, centerData.staffName, centerData.hierarchy, groupMembers,
-                centerData.officeOptions, centerData.staffOptions, centerData.groupMembersOptions);
+                centerData.officeOptions, centerData.staffOptions, centerData.groupMembersOptions, collectionMeetingCalendar);
     }
 
     private CenterData(final Long id, final String name, final String externalId, final EnumOptionData status,
             final LocalDate activationDate, final Long officeId, final String officeName, final Long staffId, final String staffName,
             final String hierarchy, final Collection<GroupGeneralData> groupMembers, final Collection<OfficeData> officeOptions,
-            final Collection<StaffData> staffOptions, final Collection<GroupGeneralData> groupMembersOptions) {
+            final Collection<StaffData> staffOptions, final Collection<GroupGeneralData> groupMembersOptions, final CalendarData collectionMeetingCalendar) {
         this.id = id;
         this.name = name;
         this.externalId = externalId;
@@ -98,6 +102,7 @@ public class CenterData {
         this.officeOptions = officeOptions;
         this.staffOptions = staffOptions;
         this.groupMembersOptions = groupMembersOptions;
+        this.collectionMeetingCalendar = collectionMeetingCalendar;
     }
 
     public Long officeId() {

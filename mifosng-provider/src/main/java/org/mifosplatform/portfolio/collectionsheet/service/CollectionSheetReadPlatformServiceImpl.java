@@ -216,9 +216,10 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
                     + "JOIN m_client cl ON cl.id = gc.client_id "
                     + "LEFT JOIN m_loan ln ON cl.id = ln.client_id AND ln.group_id is not null AND ( ln.loan_status_id = 300 OR ( ln.loan_status_id =200 AND ln.expected_disbursedon_date <= :dueDate )) "
                     + "LEFT JOIN m_product_loan pl ON pl.id = ln.product_id "
-                    + "JOIN m_currency rc on rc.`code` = ln.currency_code "
+                    + "LEFT JOIN m_currency rc on rc.`code` = ln.currency_code "
                     + "LEFT JOIN m_loan_repayment_schedule ls ON ls.loan_id = ln.id AND ls.completed_derived = 0 AND ls.duedate <= :dueDate "
                     + "LEFT JOIN m_loan_charge lc ON lc.loan_id = ln.id AND lc.is_paid_derived = 0 AND ( lc.due_for_collection_as_of_date  <= :dueDate OR lc.charge_time_enum = 1) ";
+
             // + "WHERE gp.hierarchy like :hierarchy " +
             // "GROUP BY gp.id ,cl.id , ln.id " +
             // "ORDER BY gp.id , cl.id , ln.id ";

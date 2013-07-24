@@ -56,7 +56,7 @@ import org.mifosplatform.organisation.staff.domain.Staff;
 import org.mifosplatform.organisation.workingdays.domain.WorkingDays;
 import org.mifosplatform.organisation.workingdays.service.WorkingDaysUtil;
 import org.mifosplatform.portfolio.accountdetails.domain.AccountType;
-import org.mifosplatform.portfolio.calendar.service.CalendarHelper;
+import org.mifosplatform.portfolio.calendar.service.CalendarUtils;
 import org.mifosplatform.portfolio.charge.exception.LoanChargeCannotBeAddedException;
 import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.collateral.data.CollateralData;
@@ -2387,41 +2387,47 @@ public class Loan extends AbstractPersistable<Long> {
 
     public void updateLoanRepaymentScheduleDates(final LocalDate meetingStartDate, final String recuringRule,
             final boolean isHolidayEnabled, final List<Holiday> holidays, final WorkingDays workingDays) {
-        //update repayment dates of repayment schedule installaments
-        LocalDate tmpFromDate = this.getDisbursementDate();//first repayment's from date is same as disbursement date.
+
+        //first repayment's from date is same as disbursement date. 
+        LocalDate tmpFromDate = this.getDisbursementDate();
         final PeriodFrequencyType repaymentPeriodFrequencyType = this.loanRepaymentScheduleDetail.getRepaymentPeriodFrequencyType();
         final Integer loanRepaymentInterval = this.loanRepaymentScheduleDetail.getRepayEvery();
-        final String frequency = CalendarHelper.getMeetingFrequencyFromPeriodFrequencyType(repaymentPeriodFrequencyType);
+        final String frequency = CalendarUtils.getMeetingFrequencyFromPeriodFrequencyType(repaymentPeriodFrequencyType);
 
         LocalDate newRepaymentDate = null;
         for (final LoanRepaymentScheduleInstallment loanRepaymentScheduleInstallment : this.repaymentScheduleInstallments) {
             final LocalDate oldDueDate = loanRepaymentScheduleInstallment.getDueDate();
             // FIXME: AA this won't update repayment dates before current date.
             if (oldDueDate.isAfter(meetingStartDate) && oldDueDate.isAfter(DateUtils.getLocalDateOfTenant())) {
-
-                newRepaymentDate = CalendarHelper.getNewRepaymentMeetingDate(recuringRule, meetingStartDate, oldDueDate,
+                newRepaymentDate = CalendarUtils.getNewRepaymentMeetingDate(recuringRule, meetingStartDate, oldDueDate,
                         loanRepaymentInterval, frequency, workingDays);
 
                 final LocalDate maxDateLimitForNewRepayment = getMaxDateLimitForNewRepayment(repaymentPeriodFrequencyType,
                         loanRepaymentInterval, tmpFromDate);
 
                 if (newRepaymentDate.isAfter(maxDateLimitForNewRepayment)) {
-                    newRepaymentDate = CalendarHelper.getNextRepaymentMeetingDate(recuringRule, meetingStartDate, tmpFromDate,
+                    newRepaymentDate = CalendarUtils.getNextRepaymentMeetingDate(recuringRule, meetingStartDate, tmpFromDate,
                             loanRepaymentInterval, frequency, workingDays);
                 }
 
                 if (isHolidayEnabled) {
-                    newRepaymentDate = HolidayUtil.getRepaymentRescheduleDateToIfHoliday(newRepaymentDate, holidays);
+                    // reset repayment date with new meeting date
+                    newRepaymentDate = CalendarUtils.getNewRepaymentMeetingDate(recuringRule, meetingStartDate, oldDueDate,
+                            loanRepaymentInterval, frequency, workingDays);
+                    if (isHolidayEnabled) {
+                        newRepaymentDate = HolidayUtil.getRepaymentRescheduleDateToIfHoliday(newRepaymentDate, holidays);
+                    }
+
+                    loanRepaymentScheduleInstallment.updateDueDate(newRepaymentDate);
+                    // reset from date to get actual daysInPeriod
+                    loanRepaymentScheduleInstallment.updateFromDate(tmpFromDate);
+                    tmpFromDate = newRepaymentDate;// update with new repayment
+                                                   // date
+                } else {
+                    tmpFromDate = oldDueDate;
                 }
 
-                loanRepaymentScheduleInstallment.updateDueDate(newRepaymentDate);
-                // reset from date to get actual daysInPeriod
-                loanRepaymentScheduleInstallment.updateFromDate(tmpFromDate);
-                tmpFromDate = newRepaymentDate;// update with new repayment date
-            } else {
-                tmpFromDate = oldDueDate;
             }
-
         }
     }
 

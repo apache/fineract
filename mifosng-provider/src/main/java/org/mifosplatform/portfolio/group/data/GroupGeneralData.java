@@ -12,6 +12,7 @@ import org.mifosplatform.infrastructure.codes.data.CodeValueData;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.organisation.office.data.OfficeData;
 import org.mifosplatform.organisation.staff.data.StaffData;
+import org.mifosplatform.portfolio.calendar.data.CalendarData;
 import org.mifosplatform.portfolio.client.data.ClientData;
 
 /**
@@ -40,6 +41,8 @@ public class GroupGeneralData {
     // associations
     private final Collection<ClientData> clientMembers;
     private final Collection<GroupRoleData> groupRoles;
+    private final Collection<CalendarData> calendarsData;
+    private final CalendarData collectionMeetingCalendar; 
 
     // template
     private final Collection<CenterData> centerOptions;
@@ -54,7 +57,7 @@ public class GroupGeneralData {
         final Collection<GroupRoleData> groupRoles = null;
 
         return new GroupGeneralData(groupId, groupName, null, null, null, null, null, null, null, null, null, null, clientMembers, null,
-                null, null, null, groupRoles, null, null);
+                null, null, null, groupRoles, null, null, null, null);
     }
 
     public static GroupGeneralData template(final Long officeId, final Long centerId, final String centerName, final Long staffId,
@@ -66,7 +69,7 @@ public class GroupGeneralData {
         final Collection<GroupRoleData> groupRoles = null;
 
         return new GroupGeneralData(null, null, null, null, null, officeId, null, centerId, centerName, staffId, staffName, null,
-                clientMembers, centerOptions, officeOptions, staffOptions, clientOptions, groupRoles, availableRoles, null);
+                clientMembers, centerOptions, officeOptions, staffOptions, clientOptions, groupRoles, availableRoles, null, null, null);
     }
 
     public static GroupGeneralData withTemplate(final GroupGeneralData templatedGrouping, final GroupGeneralData grouping) {
@@ -74,24 +77,15 @@ public class GroupGeneralData {
                 grouping.officeId, grouping.officeName, grouping.centerId, grouping.centerName, grouping.staffId, grouping.staffName,
                 grouping.hierarchy, grouping.clientMembers, templatedGrouping.centerOptions, templatedGrouping.officeOptions,
                 templatedGrouping.staffOptions, templatedGrouping.clientOptions, grouping.groupRoles, templatedGrouping.availableRoles,
-                grouping.selectedRole);
-    }
-
-    public static GroupGeneralData withTemplateAndAssociations(final GroupGeneralData templatedGrouping, final GroupGeneralData grouping,
-            final Collection<ClientData> membersOfGroup, final Collection<GroupRoleData> groupRoles) {
-        return new GroupGeneralData(grouping.id, grouping.name, grouping.externalId, grouping.status, grouping.activationDate,
-                grouping.officeId, grouping.officeName, grouping.centerId, grouping.centerName, grouping.staffId, grouping.staffName,
-                grouping.hierarchy, membersOfGroup, templatedGrouping.centerOptions, templatedGrouping.officeOptions,
-                templatedGrouping.staffOptions, templatedGrouping.clientOptions, groupRoles, templatedGrouping.availableRoles,
-                grouping.selectedRole);
+                grouping.selectedRole, grouping.calendarsData, grouping.collectionMeetingCalendar);
     }
 
     public static GroupGeneralData withAssocations(final GroupGeneralData grouping, final Collection<ClientData> membersOfGroup,
-            final Collection<GroupRoleData> groupRoles) {
+            final Collection<GroupRoleData> groupRoles, final Collection<CalendarData> calendarsData, final CalendarData collectionMeetingCalendar) {
         return new GroupGeneralData(grouping.id, grouping.name, grouping.externalId, grouping.status, grouping.activationDate,
                 grouping.officeId, grouping.officeName, grouping.centerId, grouping.centerName, grouping.staffId, grouping.staffName,
                 grouping.hierarchy, membersOfGroup, grouping.centerOptions, grouping.officeOptions, grouping.staffOptions,
-                grouping.clientOptions, groupRoles, grouping.availableRoles, grouping.selectedRole);
+                grouping.clientOptions, groupRoles, grouping.availableRoles, grouping.selectedRole, calendarsData, collectionMeetingCalendar);
     }
 
     public static GroupGeneralData instance(final Long id, final String name, final String externalId, final EnumOptionData status,
@@ -106,10 +100,12 @@ public class GroupGeneralData {
         final Collection<GroupRoleData> groupRoles = null;
         final Collection<CodeValueData> availableRoles = null;
         final GroupRoleData role = null;
+        final Collection<CalendarData> calendarsData = null;
+        final CalendarData collectionMeetingCalendar = null;
 
         return new GroupGeneralData(id, name, externalId, status, activationDate, officeId, officeName, centerId, centerName, staffId,
                 staffName, hierarchy, clientMembers, centerOptions, officeOptions, staffOptions, clientOptions, groupRoles, availableRoles,
-                role);
+                role, calendarsData, collectionMeetingCalendar);
     }
 
     private GroupGeneralData(final Long id, final String name, final String externalId, final EnumOptionData status,
@@ -117,7 +113,8 @@ public class GroupGeneralData {
             final Long staffId, final String staffName, final String hierarchy, final Collection<ClientData> clientMembers,
             final Collection<CenterData> centerOptions, final Collection<OfficeData> officeOptions,
             final Collection<StaffData> staffOptions, final Collection<ClientData> clientOptions,
-            final Collection<GroupRoleData> groupRoles, final Collection<CodeValueData> availableRoles, final GroupRoleData role) {
+            final Collection<GroupRoleData> groupRoles, final Collection<CodeValueData> availableRoles, final GroupRoleData role,
+            final Collection<CalendarData> calendarsData, final CalendarData collectionMeetingCalendar) {
         this.id = id;
         this.name = name;
         this.externalId = externalId;
@@ -152,6 +149,8 @@ public class GroupGeneralData {
         this.groupRoles = groupRoles;
         this.availableRoles = availableRoles;
         this.selectedRole = role;
+        this.calendarsData = calendarsData;
+        this.collectionMeetingCalendar = collectionMeetingCalendar;
     }
 
     public Long getId() {
@@ -174,7 +173,7 @@ public class GroupGeneralData {
         return new GroupGeneralData(grouping.id, grouping.name, grouping.externalId, grouping.status, grouping.activationDate,
                 grouping.officeId, grouping.officeName, grouping.centerId, grouping.centerName, grouping.staffId, grouping.staffName,
                 grouping.hierarchy, grouping.clientMembers, grouping.centerOptions, grouping.officeOptions, grouping.staffOptions,
-                grouping.clientOptions, grouping.groupRoles, grouping.availableRoles, selectedRole);
+                grouping.clientOptions, grouping.groupRoles, grouping.availableRoles, selectedRole, grouping.calendarsData, grouping.collectionMeetingCalendar);
     }
 
 }

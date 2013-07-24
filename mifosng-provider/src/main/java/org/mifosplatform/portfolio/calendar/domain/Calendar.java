@@ -23,7 +23,7 @@ import org.mifosplatform.infrastructure.core.domain.AbstractAuditableCustom;
 import org.mifosplatform.portfolio.calendar.CalendarConstants.CALENDAR_SUPPORTED_PARAMETERS;
 import org.mifosplatform.portfolio.calendar.exception.CalendarDateException;
 import org.mifosplatform.portfolio.calendar.exception.CalendarParameterUpdateNotSupportedException;
-import org.mifosplatform.portfolio.calendar.service.CalendarHelper;
+import org.mifosplatform.portfolio.calendar.service.CalendarUtils;
 import org.mifosplatform.useradministration.domain.AppUser;
 
 @Entity
@@ -213,13 +213,13 @@ public class Calendar extends AbstractAuditableCustom<AppUser, Long> {
             //FIXME: AA - Is this restriction required only for collection type meetings or for all?. 
             //Do not allow to change meeting frequency
             
-            if(!CalendarHelper.isFrequencySame(this.recurrence, newValue)){
+            if(!CalendarUtils.isFrequencySame(this.recurrence, newValue)){
                 final String defaultUserMessage = "Update of meeting frequency is not supported";
                 throw new CalendarParameterUpdateNotSupportedException("meeting.frequency", defaultUserMessage);
             }
             
             //Do not allow to change meeting interval
-            if(!CalendarHelper.isIntervalSame(this.recurrence, newValue)){
+            if(!CalendarUtils.isIntervalSame(this.recurrence, newValue)){
                 final String defaultUserMessage = "Update of meeting interval is not supported";
                 throw new CalendarParameterUpdateNotSupportedException("meeting.interval", defaultUserMessage);
             }
