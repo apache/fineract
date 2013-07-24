@@ -14,4 +14,9 @@ public interface SchedularServiceConstants {
     public static final String DEFAULT_LISTENER_NAME = "Global Listner";
     public static final int STACK_TRACE_LEVEL = 7;
     public static final String TENANT_IDENTIFIER = "tenantIdentifier";
+    public static final String SCHEDULER = "Scheduler";
+    public static final String SCHEDULER_GROUP = "group";
+    public static final int DEFAULT_THREAD_COUNT = 7;
+    public static final int GROUP_THREAD_COUNT = 1;
+    
 }

@@ -6,4 +6,10 @@ public interface JobRegisterService {
 
     public void rescheduleJob(Long jobId);
 
+    public void stopScheduler();
+
+    public void startScheduler();
+
+    public boolean isSchedulerRunning();
+
 }
