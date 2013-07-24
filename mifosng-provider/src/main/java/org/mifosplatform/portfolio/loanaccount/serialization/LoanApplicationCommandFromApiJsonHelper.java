@@ -314,7 +314,7 @@ public final class LoanApplicationCommandFromApiJsonHelper {
       
         final String calendarIdParameterName = "calendarId";
         //if disbursement is synced then must have a meeting (calendar)
-        if (meetingIdRequired || fromApiJsonHelper.parameterExists(syncDisbursementParameterName, element)) {
+        if (meetingIdRequired || fromApiJsonHelper.parameterExists(calendarIdParameterName, element)) {
         	final Long calendarId = fromApiJsonHelper.extractLongNamed(calendarIdParameterName, element);
 	        baseDataValidator.reset().parameter(calendarIdParameterName).value(calendarId).notNull().integerGreaterThanZero();
         }
@@ -616,7 +616,7 @@ public final class LoanApplicationCommandFromApiJsonHelper {
       
         final String calendarIdParameterName = "calendarId";
         //if disbursement is synced then must have a meeting (calendar)
-        if (meetingIdRequired || fromApiJsonHelper.parameterExists(syncDisbursementParameterName, element)) {
+        if (meetingIdRequired || fromApiJsonHelper.parameterExists(calendarIdParameterName, element)) {
         	final Long calendarId = fromApiJsonHelper.extractLongNamed(calendarIdParameterName, element);
 	        baseDataValidator.reset().parameter(calendarIdParameterName).value(calendarId).notNull().integerGreaterThanZero();
         }
