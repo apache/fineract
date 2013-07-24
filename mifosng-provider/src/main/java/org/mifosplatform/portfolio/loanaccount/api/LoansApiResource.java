@@ -93,7 +93,7 @@ public class LoansApiResource {
             "clientId", "group", "loanProductId", "loanProductName", "loanProductDescription", "fundId", "fundName", "loanPurposeId",
             "loanPurposeName", "loanOfficerId", "loanOfficerName", "currency", "principal", "totalOverpaid", "inArrearsTolerance",
             "termFrequency", "termPeriodFrequencyType", "numberOfRepayments", "repaymentEvery", "interestRatePerPeriod",
-            "annualInterestRate", "repaymentFrequencyType", "transactionProcessingStrategyId", "interestRateFrequencyType",
+            "annualInterestRate", "repaymentFrequencyType", "transactionProcessingStrategyId", "transactionProcessingStrategyName", "interestRateFrequencyType",
             "amortizationType", "interestType", "interestCalculationPeriodType", "expectedFirstRepaymentOnDate", "graceOnPrincipalPayment",
             "graceOnInterestPayment", "graceOnInterestCharged", "interestChargedFromDate", "timeline", "totalFeeChargesAtDisbursement",
             "summary", "repaymentSchedule", "transactions", "charges", "collateral", "guarantors", "meeting", "productOptions",
