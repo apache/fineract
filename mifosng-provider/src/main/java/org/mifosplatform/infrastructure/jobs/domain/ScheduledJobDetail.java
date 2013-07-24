@@ -62,6 +62,13 @@ public class ScheduledJobDetail extends AbstractPersistable<Long> {
     @Column(name = "currently_running")
     private boolean currentlyRunning;
 
+    @SuppressWarnings("unused")
+    @Column(name = "updates_allowed")
+    private boolean updatesAllowed;
+
+    @Column(name = "scheduler_group")
+    private Short schedulerGroup;
+
     protected ScheduledJobDetail() {
 
     }
@@ -84,6 +91,10 @@ public class ScheduledJobDetail extends AbstractPersistable<Long> {
 
     public String getJobKey() {
         return this.jobKey;
+    }
+
+    public Short getSchedulerGroup() {
+        return this.schedulerGroup;
     }
 
     public boolean isActiveSchedular() {

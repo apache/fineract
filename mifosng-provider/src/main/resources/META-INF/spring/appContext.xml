@@ -51,5 +51,4 @@
 		
 	<import resource="securityContext.xml" />
 
-    <import resource="scheduler.xml"/>
 </beans>
