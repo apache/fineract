@@ -37,6 +37,7 @@ import org.mifosplatform.portfolio.savings.SavingsInterestCalculationDaysInYearT
 import org.mifosplatform.portfolio.savings.SavingsInterestCalculationType;
 import org.mifosplatform.portfolio.savings.SavingsPeriodFrequencyType;
 import org.mifosplatform.portfolio.savings.SavingsPostingInterestPeriodType;
+import org.mifosplatform.portfolio.savings.data.SavingsAccountAnnualFeeData;
 import org.mifosplatform.portfolio.savings.data.SavingsAccountApplicationTimelineData;
 import org.mifosplatform.portfolio.savings.data.SavingsAccountData;
 import org.mifosplatform.portfolio.savings.data.SavingsAccountStatusEnumData;
@@ -63,11 +64,16 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
     private final SavingsProductReadPlatformService savingsProductReadPlatformService;
     private final StaffReadPlatformService staffReadPlatformService;
     private final SavingsDropdownReadPlatformService dropdownReadPlatformService;
+
+    // mappers
     private final SavingsAccountTransactionTemplateMapper transactionTemplateMapper;
     private final SavingsAccountTransactionsMapper transactionsMapper;
+    private final SavingAccountMapper savingAccountMapper;
+    private final SavingsAccountAnnualFeeMapper annualFeeMapper;
 
+    // pagination
     private final PaginationHelper<SavingsAccountData> paginationHelper = new PaginationHelper<SavingsAccountData>();
-    private final SavingAccountMapper savingAccountMapper = new SavingAccountMapper();
+
 
     @Autowired
     public SavingsAccountReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
@@ -83,6 +89,8 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
         this.dropdownReadPlatformService = dropdownReadPlatformService;
         this.transactionTemplateMapper = new SavingsAccountTransactionTemplateMapper();
         this.transactionsMapper = new SavingsAccountTransactionsMapper();
+        this.savingAccountMapper = new SavingAccountMapper();
+        this.annualFeeMapper = new SavingsAccountAnnualFeeMapper();
     }
 
     @Override
@@ -476,8 +484,6 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
     public SavingsAccountTransactionData retrieveDepositTransactionTemplate(final Long savingsId) {
 
         try {
-            this.context.authenticatedUser();
-
             final String sql = "select " + transactionTemplateMapper.schema() + " where sa.id = ?";
 
             return this.jdbcTemplate.queryForObject(sql, transactionTemplateMapper, new Object[] { savingsId });
@@ -492,6 +498,14 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
         final String sql = "select " + this.transactionsMapper.schema() + " where sa.id = ? order by tr.transaction_date DESC, tr.id DESC";
 
         return this.jdbcTemplate.query(sql, this.transactionsMapper, new Object[] { savingsId });
+    }
+
+    @Override
+    public Collection<SavingsAccountAnnualFeeData> retrieveAccountsWithAnnualFeeDue() {
+        final String sql = "select " + annualFeeMapper.schema()
+                + " where sa.annual_fee_next_due_date not null and sa.annual_fee_next_due_date <= NOW()";
+
+        return this.jdbcTemplate.query(sql, this.annualFeeMapper, new Object[] {});
     }
 
     private static final class SavingsAccountTransactionsMapper implements RowMapper<SavingsAccountTransactionData> {
@@ -729,6 +743,34 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
                     interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance,
                     lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeAmount, withdrawalFeeType, annualFeeAmount,
                     annualFeeOnMonthDay, annualFeeNextDueDate, summary);
+        }
+    }
+
+    private static final class SavingsAccountAnnualFeeMapper implements RowMapper<SavingsAccountAnnualFeeData> {
+
+        private final String schemaSql;
+
+        public SavingsAccountAnnualFeeMapper() {
+            final StringBuilder sqlBuilder = new StringBuilder(200);
+            sqlBuilder.append("sa.id as id, sa.account_no as accountNo, ");
+            sqlBuilder.append("sa.annual_fee_next_due_date as annualFeeNextDueDate, ");
+            sqlBuilder.append("from m_savings_account sa ");
+
+            this.schemaSql = sqlBuilder.toString();
+        }
+
+        public String schema() {
+            return this.schemaSql;
+        }
+
+        @Override
+        public SavingsAccountAnnualFeeData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+
+            final Long id = rs.getLong("id");
+            final String accountNo = rs.getString("accountNo");
+            final LocalDate annualFeeNextDueDate = JdbcSupport.getLocalDate(rs, "annualFeeNextDueDate");
+
+            return SavingsAccountAnnualFeeData.instance(id, accountNo, annualFeeNextDueDate);
         }
     }
 }

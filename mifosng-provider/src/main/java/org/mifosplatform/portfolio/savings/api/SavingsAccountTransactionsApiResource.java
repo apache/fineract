@@ -120,7 +120,7 @@ public class SavingsAccountTransactionsApiResource {
     @Path("{transactionId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String transaction(@PathParam("savingsId") final Long savingsId, @PathParam("transactionId") final Long transactionId,
+    public String undoTransaction(@PathParam("savingsId") final Long savingsId, @PathParam("transactionId") final Long transactionId,
             @QueryParam("command") final String commandParam, final String apiRequestBodyAsJson) {
 
         String jsonApiRequest = apiRequestBodyAsJson;

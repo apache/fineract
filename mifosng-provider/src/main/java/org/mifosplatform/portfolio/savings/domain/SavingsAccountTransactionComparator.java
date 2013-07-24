@@ -19,9 +19,9 @@ public class SavingsAccountTransactionComparator implements Comparator<SavingsAc
         final int comparsion = o1.transactionLocalDate().compareTo(o2.transactionLocalDate());
         if (comparsion == 0) {
             // equal transaction dates
-            if (o1.isInterestPosting() && !o2.isInterestPosting()) {
+            if (o1.isInterestPostingAndNotReversed() && !o2.isInterestPostingAndNotReversed()) {
                 compareResult = -1;
-            } else if (!o1.isInterestPosting() && o2.isInterestPosting()) {
+            } else if (!o1.isInterestPostingAndNotReversed() && o2.isInterestPostingAndNotReversed()) {
                 compareResult = 1;
             } else {
                 compareResult = 0;

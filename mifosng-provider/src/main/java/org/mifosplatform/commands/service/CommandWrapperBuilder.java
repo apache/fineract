@@ -47,6 +47,11 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    public CommandWrapperBuilder withNoJsonBody() {
+        this.json = null;
+        return this;
+    }
+
     public CommandWrapperBuilder updateGlobalConfiguration() {
         this.actionName = "UPDATE";
         this.entityName = "CONFIGURATION";
@@ -850,6 +855,15 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    public CommandWrapperBuilder savingsAccountApplyAnnualFees(final Long accountId) {
+        this.actionName = "APPLYANNUALFEE";
+        this.entityName = "SAVINGSACCOUNT";
+        this.savingsId = accountId;
+        this.entityId = accountId;
+        this.href = "/savingsaccounts/" + accountId + "?command=applyAnnualFees";
+        return this;
+    }
+
     public CommandWrapperBuilder createCalendar(final String supportedEntityType, final Long supportedEntityId) {
         this.actionName = "CREATE";
         this.entityName = "CALENDAR";
@@ -1168,5 +1182,4 @@ public class CommandWrapperBuilder {
         this.href = "/updateJobDetail/" + jobId+"/updateJobDetail";
         return this;
     }
-
 }

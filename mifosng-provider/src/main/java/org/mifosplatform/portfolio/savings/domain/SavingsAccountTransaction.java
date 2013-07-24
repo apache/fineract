@@ -146,16 +146,20 @@ public final class SavingsAccountTransaction extends AbstractPersistable<Long> {
         return SavingsAccountTransactionType.fromInt(this.typeOf).isWithdrawal();
     }
 
-    public boolean isInterestPosting() {
+    public boolean isInterestPostingAndNotReversed() {
         return SavingsAccountTransactionType.fromInt(this.typeOf).isInterestPosting() && isNotReversed();
     }
 
-    public boolean isWithdrawalFee() {
+    public boolean isWithdrawalFeeAndNotReversed() {
         return SavingsAccountTransactionType.fromInt(this.typeOf).isWithdrawalFee() && isNotReversed();
     }
 
+    public boolean isAnnualFeeAndNotReversed() {
+        return isAnnualFee() && isNotReversed();
+    }
+
     public boolean isAnnualFee() {
-        return SavingsAccountTransactionType.fromInt(this.typeOf).isAnnualFee() && isNotReversed();
+        return SavingsAccountTransactionType.fromInt(this.typeOf).isAnnualFee();
     }
 
     public boolean isNotReversed() {
@@ -258,7 +262,7 @@ public final class SavingsAccountTransaction extends AbstractPersistable<Long> {
         Money endOfDayBalance = openingBalance.copy();
         if (isDeposit()) {
             endOfDayBalance = openingBalance.plus(getAmount(currency));
-        } else if (isWithdrawal() || isWithdrawalFee()) {
+        } else if (isWithdrawal() || isWithdrawalFeeAndNotReversed()) {
             endOfDayBalance = openingBalance.minus(getAmount(currency));
         }
 
@@ -274,7 +278,7 @@ public final class SavingsAccountTransaction extends AbstractPersistable<Long> {
         Money endOfDayBalance = openingBalance.copy();
         if (isDeposit()) {
             endOfDayBalance = openingBalance.plus(getAmount(currency));
-        } else if (isWithdrawal() || isWithdrawalFee()) {
+        } else if (isWithdrawal() || isWithdrawalFeeAndNotReversed()) {
             endOfDayBalance = openingBalance.minus(getAmount(currency));
         }
 
@@ -298,7 +302,7 @@ public final class SavingsAccountTransaction extends AbstractPersistable<Long> {
         } else {
             if (isDeposit()) {
                 endOfDayBalance = openingBalance.plus(getAmount(currency));
-            } else if (isWithdrawal() || isWithdrawalFee()) {
+            } else if (isWithdrawal() || isWithdrawalFeeAndNotReversed()) {
                 endOfDayBalance = openingBalance.minus(getAmount(currency));
             }
         }
@@ -328,5 +332,13 @@ public final class SavingsAccountTransaction extends AbstractPersistable<Long> {
 
     public boolean isIdentifiedBy(final Long transactionId) {
         return this.getId().equals(transactionId);
+    }
+
+    public boolean isCredit() {
+        return isDeposit() || isInterestPostingAndNotReversed();
+    }
+
+    public boolean isDebit() {
+        return isWithdrawal() || isWithdrawalFeeAndNotReversed() || isAnnualFeeAndNotReversed();
     }
 }

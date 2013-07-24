@@ -9,6 +9,7 @@ import java.util.Collection;
 
 import org.mifosplatform.infrastructure.core.service.Page;
 import org.mifosplatform.portfolio.group.service.SearchParameters;
+import org.mifosplatform.portfolio.savings.data.SavingsAccountAnnualFeeData;
 import org.mifosplatform.portfolio.savings.data.SavingsAccountData;
 import org.mifosplatform.portfolio.savings.data.SavingsAccountTransactionData;
 
@@ -23,4 +24,6 @@ public interface SavingsAccountReadPlatformService {
     SavingsAccountTransactionData retrieveDepositTransactionTemplate(Long savingsId);
 
     Collection<SavingsAccountTransactionData> retrieveAllTransactions(Long savingsId);
+
+    Collection<SavingsAccountAnnualFeeData> retrieveAccountsWithAnnualFeeDue();
 }

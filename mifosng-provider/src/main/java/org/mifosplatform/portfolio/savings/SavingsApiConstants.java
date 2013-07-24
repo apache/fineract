@@ -29,6 +29,7 @@ public class SavingsApiConstants {
     public static String modifyApplicationAction = ".modify";
     public static String deleteApplicationAction = ".delete";
     public static String undoTransactionAction = ".undotransaction";
+    public static String applyAnnualFeeTransactionAction = ".applyannualfee";
 
     // general
     public static final String localeParamName = "locale";

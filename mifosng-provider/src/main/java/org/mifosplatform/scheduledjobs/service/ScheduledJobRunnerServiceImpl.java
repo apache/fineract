@@ -5,12 +5,14 @@
  */
 package org.mifosplatform.scheduledjobs.service;
 
-import java.util.List;
+import java.util.Collection;
 
 import org.mifosplatform.infrastructure.core.service.RoutingDataSourceServiceFactory;
 import org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil;
 import org.mifosplatform.infrastructure.jobs.annotation.CronTarget;
 import org.mifosplatform.infrastructure.jobs.service.JobName;
+import org.mifosplatform.portfolio.savings.data.SavingsAccountAnnualFeeData;
+import org.mifosplatform.portfolio.savings.service.SavingsAccountReadPlatformService;
 import org.mifosplatform.portfolio.savings.service.SavingsAccountWritePlatformService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,14 +25,18 @@ import org.springframework.transaction.annotation.Transactional;
 public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService {
 
     private final static Logger logger = LoggerFactory.getLogger(ScheduledJobRunnerServiceImpl.class);
+
     private final RoutingDataSourceServiceFactory dataSourceServiceFactory;
     private final SavingsAccountWritePlatformService savingsAccountWritePlatformService;
+    private final SavingsAccountReadPlatformService savingsAccountReadPlatformService;
 
     @Autowired
     public ScheduledJobRunnerServiceImpl(final RoutingDataSourceServiceFactory dataSourceServiceFactory,
-            final SavingsAccountWritePlatformService savingsAccountWritePlatformService) {
+            final SavingsAccountWritePlatformService savingsAccountWritePlatformService,
+            final SavingsAccountReadPlatformService savingsAccountReadPlatformService) {
         this.dataSourceServiceFactory = dataSourceServiceFactory;
         this.savingsAccountWritePlatformService = savingsAccountWritePlatformService;
+        this.savingsAccountReadPlatformService = savingsAccountReadPlatformService;
     }
 
     @Transactional
@@ -193,16 +199,15 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
     @Override
     @CronTarget(jobName = JobName.APPLY_ANNUAL_FEE_FOR_SAVINGS)
     public void applyAnnualFeeForSavings() {
+        
+        final Collection<SavingsAccountAnnualFeeData> annualFeeData = this.savingsAccountReadPlatformService
+                .retrieveAccountsWithAnnualFeeDue();
 
-        JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSourceServiceFactory.determineDataSourceService().retrieveDataSource());
-
-        String sql = "SELECT ms.id as savingsAccountId FROM m_savings_account ms WHERE ms.annual_fee_next_due_date <= NOW() ";
-        List<Long> savingsIds = jdbcTemplate.queryForList(sql, Long.class);
-
-        for (Long savingsId : savingsIds) {
-            this.savingsAccountWritePlatformService.applyAnnualFee(savingsId);
+        for (SavingsAccountAnnualFeeData savingsAccountReference : annualFeeData) {
+            this.savingsAccountWritePlatformService.applyAnnualFee(savingsAccountReference.getId(),
+                    savingsAccountReference.getNextAnnualFeeDueDate());
         }
 
-        logger.info(ThreadLocalContextUtil.getTenant().getName() + ": Results affected by update: " + savingsIds.size());
+        logger.info(ThreadLocalContextUtil.getTenant().getName() + ": Savings accounts affected by update: " + annualFeeData.size());
     }
 }

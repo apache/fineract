@@ -205,20 +205,20 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
 
     @Transactional
     @Override
-    public CommandProcessingResult applyAnnualFee(final Long savingsId) {
+    public CommandProcessingResult applyAnnualFee(final Long savingsId, final LocalDate annualFeeTransactionDate) {
 
         final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsId);
-
-        final LocalDate transactionDate = LocalDate.now();
 
         final DateTimeFormatter fmt = DateTimeFormat.forPattern("dd MM yyyy");
 
         final List<Long> existingTransactionIds = new ArrayList<Long>();
         final List<Long> existingReversedTransactionIds = new ArrayList<Long>();
 
-        final MathContext mc = new MathContext(10, RoundingMode.HALF_EVEN);
-        final SavingsAccountTransaction annualFee = account.addAnnualFee(mc, fmt, transactionDate,
-                existingTransactionIds, existingReversedTransactionIds);
+        final MathContext mc = MathContext.DECIMAL64;
+        final LocalDate today = DateUtils.getLocalDateOfTenant();
+
+        final SavingsAccountTransaction annualFee = account.addAnnualFee(mc, fmt, annualFeeTransactionDate, today, existingTransactionIds,
+                existingReversedTransactionIds);
         final Long transactionId = saveTransactionToGenerateTransactionId(annualFee);
         this.savingAccountRepository.save(account);
 

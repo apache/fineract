@@ -248,6 +248,10 @@ public class SavingsAccountData {
         this.withdrawalFeeTypeOptions = withdrawalFeeTypeOptions;
     }
 
+    public Long id() {
+        return this.id;
+    }
+
     public Long clientId() {
         return this.clientId;
     }

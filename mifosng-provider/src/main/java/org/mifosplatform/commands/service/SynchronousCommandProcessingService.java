@@ -401,6 +401,8 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
                 handler = this.applicationContext.getBean("calculateInterestSavingsAccountCommandHandler", NewCommandSourceHandler.class);
             } else if (wrapper.isSavingsAccountInterestPosting()) {
                 handler = this.applicationContext.getBean("postInterestSavingsAccountCommandHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isSavingsAccountApplyAnnualFee()) {
+                handler = this.applicationContext.getBean("applyAnnualFeeSavingsAccountCommandHandler", NewCommandSourceHandler.class);
             } else if (wrapper.isSavingsAccountUndoTransaction()) {
                 handler = this.applicationContext.getBean("undoTransactionSavingsAccountCommandHandler", NewCommandSourceHandler.class);
             } else {

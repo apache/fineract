@@ -209,8 +209,12 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
 
                 if (changes.containsKey(SavingsApiConstants.fieldOfficerIdParamName)) {
                     final Long fieldOfficerId = command.longValueOfParameterNamed(SavingsApiConstants.fieldOfficerIdParamName);
-                    final Staff fieldOfficer = this.staffRepository.findOneWithNotFoundDetection(fieldOfficerId);
-
+                    Staff fieldOfficer = null;
+                    if (fieldOfficerId != null) {
+                        fieldOfficer = this.staffRepository.findOneWithNotFoundDetection(fieldOfficerId);
+                    } else {
+                        changes.put(SavingsApiConstants.fieldOfficerIdParamName, "");
+                    }
                     account.update(fieldOfficer);
                 }
 

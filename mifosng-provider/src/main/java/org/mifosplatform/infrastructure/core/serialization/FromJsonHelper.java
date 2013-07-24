@@ -97,7 +97,13 @@ public class FromJsonHelper {
     }
 
     public JsonElement parse(final String json) {
-        return parser.parse(json);
+
+        JsonElement parsedElement = null;
+        if (StringUtils.isNotBlank(json)) {
+            parsedElement = parser.parse(json);
+        }
+
+        return parsedElement;
     }
 
     public boolean parameterExists(final String parameterName, final JsonElement element) {

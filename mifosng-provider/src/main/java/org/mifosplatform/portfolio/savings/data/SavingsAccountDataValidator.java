@@ -92,7 +92,7 @@ public class SavingsAccountDataValidator {
 
         if (fromApiJsonHelper.parameterExists(fieldOfficerIdParamName, element)) {
             final Long fieldOfficerId = fromApiJsonHelper.extractLongNamed(fieldOfficerIdParamName, element);
-            baseDataValidator.reset().parameter(fieldOfficerIdParamName).value(fieldOfficerId).notNull().integerGreaterThanZero();
+            baseDataValidator.reset().parameter(fieldOfficerIdParamName).value(fieldOfficerId).ignoreIfNull().integerGreaterThanZero();
         }
 
         final LocalDate submittedOnDate = fromApiJsonHelper.extractLocalDateNamed(submittedOnDateParamName, element);
@@ -276,7 +276,7 @@ public class SavingsAccountDataValidator {
 
         if (fromApiJsonHelper.parameterExists(fieldOfficerIdParamName, element)) {
             final Long fieldOfficerId = fromApiJsonHelper.extractLongNamed(fieldOfficerIdParamName, element);
-            baseDataValidator.reset().parameter(fieldOfficerIdParamName).value(fieldOfficerId).notNull().integerGreaterThanZero();
+            baseDataValidator.reset().parameter(fieldOfficerIdParamName).value(fieldOfficerId).ignoreIfNull().integerGreaterThanZero();
         }
 
         if (fromApiJsonHelper.parameterExists(submittedOnDateParamName, element)) {

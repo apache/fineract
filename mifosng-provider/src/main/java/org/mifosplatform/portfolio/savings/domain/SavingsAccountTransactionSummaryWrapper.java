@@ -42,7 +42,7 @@ public final class SavingsAccountTransactionSummaryWrapper {
     public BigDecimal calculateTotalInterestPosted(final MonetaryCurrency currency, final List<SavingsAccountTransaction> transactions) {
         Money total = Money.zero(currency);
         for (SavingsAccountTransaction transaction : transactions) {
-            if (transaction.isInterestPosting() && transaction.isNotReversed()) {
+            if (transaction.isInterestPostingAndNotReversed() && transaction.isNotReversed()) {
                 total = total.plus(transaction.getAmount(currency));
             }
         }
@@ -52,7 +52,7 @@ public final class SavingsAccountTransactionSummaryWrapper {
     public BigDecimal calculateTotalWithdrawalFees(final MonetaryCurrency currency, final List<SavingsAccountTransaction> transactions) {
         Money total = Money.zero(currency);
         for (SavingsAccountTransaction transaction : transactions) {
-            if (transaction.isWithdrawalFee() && transaction.isNotReversed()) {
+            if (transaction.isWithdrawalFeeAndNotReversed() && transaction.isNotReversed()) {
                 total = total.plus(transaction.getAmount(currency));
             }
         }
@@ -62,7 +62,7 @@ public final class SavingsAccountTransactionSummaryWrapper {
     public BigDecimal calculateTotalAnnualFees(final MonetaryCurrency currency, final List<SavingsAccountTransaction> transactions) {
         Money total = Money.zero(currency);
         for (SavingsAccountTransaction transaction : transactions) {
-            if (transaction.isAnnualFee() && transaction.isNotReversed()) {
+            if (transaction.isAnnualFeeAndNotReversed() && transaction.isNotReversed()) {
                 total = total.plus(transaction.getAmount(currency));
             }
         }

@@ -164,7 +164,6 @@ public class SavingsAccountsApiResource {
         SavingsAccountData templateData = null;
         final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         if (settings.isTemplate()) {
-
             templateData = this.savingsAccountReadPlatformService.retrieveTemplate(savingsAccount.clientId(), savingsAccount.groupId(),
                     savingsAccount.productId(), staffInSelectedOfficeOnly);
         }
@@ -217,10 +216,13 @@ public class SavingsAccountsApiResource {
             final CommandWrapper commandRequest = builder.savingsAccountActivation(accountId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, "calculateInterest")) {
-            final CommandWrapper commandRequest = builder.withJson(null).savingsAccountInterestCalculation(accountId).build();
+            final CommandWrapper commandRequest = builder.withNoJsonBody().savingsAccountInterestCalculation(accountId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else if (is(commandParam, "postInterest")) {
             final CommandWrapper commandRequest = builder.savingsAccountInterestPosting(accountId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        } else if (is(commandParam, "applyAnnualFees")) {
+            final CommandWrapper commandRequest = builder.savingsAccountApplyAnnualFees(accountId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         }
 

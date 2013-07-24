@@ -5,6 +5,7 @@
  */
 package org.mifosplatform.portfolio.savings.service;
 
+import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 
@@ -16,7 +17,7 @@ public interface SavingsAccountWritePlatformService {
 
     CommandProcessingResult withdrawal(Long savingsId, JsonCommand command);
 
-    CommandProcessingResult applyAnnualFee(Long savingsId);
+    CommandProcessingResult applyAnnualFee(Long savingsId, LocalDate annualFeeTransactionDate);
 
     CommandProcessingResult calculateInterest(Long savingsId);
 
