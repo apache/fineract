@@ -15,11 +15,13 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
+import org.apache.commons.lang.StringUtils;
 import org.mifosplatform.commands.domain.CommandWrapper;
 import org.mifosplatform.commands.service.CommandWrapperBuilder;
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.mifosplatform.infrastructure.core.api.ApiRequestParameterHelper;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
+import org.mifosplatform.infrastructure.core.exception.UnrecognizedQueryParamException;
 import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.mifosplatform.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.mifosplatform.infrastructure.core.service.Page;
@@ -66,52 +68,50 @@ public class SchedulerJobApiResource {
     }
 
     @GET
-    @Path("{jobId}")
+    @Path("{" + SchedulerJobApiConstants.JOB_ID + "}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveOne(@PathParam("jobId") final Long jobId, @Context final UriInfo uriInfo) {
+    public String retrieveOne(@PathParam(SchedulerJobApiConstants.JOB_ID) final Long jobId, @Context final UriInfo uriInfo) {
         JobDetailData jobDetailData = this.schedulerJobRunnerReadService.retrieveOne(jobId);
-        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serialize(settings, jobDetailData, SchedulerJobApiConstants.JOB_DETAIL_RESPONSE_DATA_PARAMETERS);
     }
 
     @GET
-    @Path("{jobId}/runhistory")
+    @Path("{" + SchedulerJobApiConstants.JOB_ID + "}/" + SchedulerJobApiConstants.JOB_RUN_HISTORY)
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveHistory(@Context final UriInfo uriInfo, @PathParam("jobId") final Long jobId,
+    public String retrieveHistory(@Context final UriInfo uriInfo, @PathParam(SchedulerJobApiConstants.JOB_ID) final Long jobId,
             @QueryParam("offset") final Integer offset, @QueryParam("limit") final Integer limit,
             @QueryParam("orderBy") final String orderBy, @QueryParam("sortOrder") final String sortOrder) {
         final SearchParameters searchParameters = SearchParameters.forPagination(offset, limit, orderBy, sortOrder);
         Page<JobDetailHistoryData> jobhistoryDetailData = this.schedulerJobRunnerReadService.retrieveJobHistory(jobId, searchParameters);
-        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.jobHistoryToApiJsonSerializer.serialize(settings, jobhistoryDetailData,
                 SchedulerJobApiConstants.JOB_HISTORY_RESPONSE_DATA_PARAMETERS);
     }
 
     @POST
-    @Path("{jobId}/executeJob")
+    @Path("{" + SchedulerJobApiConstants.JOB_ID + "}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public Response executeJob(@PathParam("jobId") final Long jobId) {
-        /**
-         * TODO : this API needs to be refactored to accept a mandatory command
-         * param i.e POST to jobs/{jobId}?command=run would trigger the job
-         * execution, any other command or no command would throw and invalid
-         * command exception..similar to
-         * https://demo.openmf.org/api-docs/apiLive.htm#loans_approve
-         **/
+    public Response executeJob(@PathParam(SchedulerJobApiConstants.JOB_ID) final Long jobId,
+            @QueryParam(SchedulerJobApiConstants.COMMAND) final String commandParam) {
         Response response = Response.status(400).build();
-        jobRegisterService.executeJob(jobId);
-        response = Response.status(202).build();
+        if (is(commandParam, SchedulerJobApiConstants.COMMAND_EXECUTE_JOB)) {
+            this.jobRegisterService.executeJob(jobId);
+            response = Response.status(202).build();
+        } else {
+            throw new UnrecognizedQueryParamException(SchedulerJobApiConstants.COMMAND, commandParam);
+        }
         return response;
     }
 
     @PUT
-    @Path("{jobId}")
+    @Path("{" + SchedulerJobApiConstants.JOB_ID + "}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String updateJobDetail(@PathParam("jobId") final Long jobId, final String jsonRequestBody) {
+    public String updateJobDetail(@PathParam(SchedulerJobApiConstants.JOB_ID) final Long jobId, final String jsonRequestBody) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
                 .updateJobDetail(jobId) //
@@ -125,4 +125,9 @@ public class SchedulerJobApiResource {
         }
         return this.toApiJsonSerializer.serialize(result);
     }
+
+    private boolean is(final String commandParam, final String commandValue) {
+        return StringUtils.isNotBlank(commandParam) && commandParam.trim().equalsIgnoreCase(commandValue);
+    }
+
 }
