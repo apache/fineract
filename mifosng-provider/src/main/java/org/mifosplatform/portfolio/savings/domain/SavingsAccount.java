@@ -706,9 +706,9 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         Money runningBalance = Money.zero(this.currency);
 
         for (SavingsAccountTransaction transaction : transactionsSortedByDate) {
-            if (transaction.isNotReversed() && transaction.isDeposit() || transaction.isInterestPostingAndNotReversed()) {
+            if (transaction.isNotReversed() && transaction.isCredit()) {
                 runningBalance = runningBalance.plus(transaction.getAmount(this.currency));
-            } else if (transaction.isNotReversed() && transaction.isWithdrawal()) {
+            } else if (transaction.isNotReversed() && transaction.isDebit()) {
                 runningBalance = runningBalance.minus(transaction.getAmount(this.currency));
             }
 
@@ -726,9 +726,9 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         Money runningBalance = Money.zero(this.currency);
 
         for (SavingsAccountTransaction transaction : transactionsSortedByDate) {
-            if (transaction.isNotReversed() && transaction.isDeposit() || transaction.isInterestPostingAndNotReversed()) {
+            if (transaction.isNotReversed() && transaction.isCredit()) {
                 runningBalance = runningBalance.plus(transaction.getAmount(this.currency));
-            } else if (transaction.isNotReversed() && transaction.isWithdrawal()) {
+            } else if (transaction.isNotReversed() && transaction.isDebit()) {
                 runningBalance = runningBalance.minus(transaction.getAmount(this.currency));
             }
 
