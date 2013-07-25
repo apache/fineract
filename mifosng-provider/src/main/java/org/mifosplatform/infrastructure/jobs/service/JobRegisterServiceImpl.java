@@ -1,6 +1,7 @@
 package org.mifosplatform.infrastructure.jobs.service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -100,6 +101,7 @@ public class JobRegisterServiceImpl implements JobRegisterService {
             }
 
         } catch (Exception e) {
+            e.printStackTrace();
             throw new PlatformInternalServerException("error.msg.sheduler.job.execution.failed", "Job execution failed for job with id:"
                     + scheduledJobDetail.getId(), scheduledJobDetail.getId());
         }
@@ -286,12 +288,29 @@ public class JobRegisterServiceImpl implements JobRegisterService {
      * @throws ClassNotFoundException
      */
     private Object getBeanObject(Class<?> classType) throws ClassNotFoundException {
-        String[] beanNames = this.applicationContext.getBeanNamesForType(classType);
-        Object targetObject = this.applicationContext.getBean(beanNames[0]);
+        List<Class<?>> typesList = new ArrayList<Class<?>>();
+        Class<?>[] interfaceType = classType.getInterfaces();
+        if (interfaceType.length > 0) {
+            typesList.addAll(Arrays.asList(interfaceType));
+        } else {
+            Class<?> superclassType = classType;
+            while (!Object.class.getName().equals(superclassType.getSuperclass().getName())) {
+                superclassType = superclassType.getSuperclass();
+            }
+            typesList.add(superclassType);
+        }
+        List<String> beanNames = new ArrayList<String>();
+        for (Class<?> clazz : typesList) {
+            beanNames.addAll(Arrays.asList(this.applicationContext.getBeanNamesForType(clazz)));
+        }
+        Object targetObject = null;
         for (String beanName : beanNames) {
             Object nextObject = this.applicationContext.getBean(beanName);
-            if (nextObject != null && !targetObject.getClass().isAssignableFrom(nextObject.getClass())) {
+            String targetObjName = nextObject.toString();
+            targetObjName = targetObjName.substring(0, targetObjName.lastIndexOf("@"));
+            if (classType.getName().equals(targetObjName)) {
                 targetObject = nextObject;
+                break;
             }
         }
         return targetObject;
