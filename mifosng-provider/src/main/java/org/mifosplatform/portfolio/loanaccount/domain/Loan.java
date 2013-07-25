@@ -1752,11 +1752,6 @@ public class Loan extends AbstractPersistable<Long> {
                     errorMessage);
         }
 
-        if (isClosed()) {
-            final String errorMessage = "Transactions of a closed loan cannot be adjusted.";
-            throw new InvalidLoanTransactionTypeException("transaction", "adjustment.is.not.allowed.on.closed.loan", errorMessage);
-        }
-
         transactionForAdjustment.reverse();
         if (newTransactionDetail.isRepayment() || newTransactionDetail.isInterestWaiver()) {
             changedTransactionDetail = handleRepaymentOrWaiverTransaction(newTransactionDetail, loanLifecycleStateMachine,
