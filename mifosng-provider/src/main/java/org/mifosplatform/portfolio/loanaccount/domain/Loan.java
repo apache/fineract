@@ -1753,12 +1753,35 @@ public class Loan extends AbstractPersistable<Long> {
         }
 
         transactionForAdjustment.reverse();
+
+        if (isClosedWrittenOff()) {
+            // find write off transaction and reverse it
+            LoanTransaction writeOffTransaction = findWriteOffTransaction();
+            writeOffTransaction.reverse();
+        }
+
+        if (isClosedObligationsMet() || isClosedWrittenOff() || isClosedWithOutsandingAmountMarkedForReschedule()) {
+            this.loanStatus = LoanStatus.ACTIVE.getValue();
+        }
+
         if (newTransactionDetail.isRepayment() || newTransactionDetail.isInterestWaiver()) {
             changedTransactionDetail = handleRepaymentOrWaiverTransaction(newTransactionDetail, loanLifecycleStateMachine,
                     transactionForAdjustment);
         }
 
         return changedTransactionDetail;
+    }
+
+    private LoanTransaction findWriteOffTransaction() {
+
+        LoanTransaction writeOff = null;
+        for (LoanTransaction transaction : this.loanTransactions) {
+            if (!transaction.isReversed() && transaction.isWriteOff()) {
+                writeOff = transaction;
+            }
+        }
+
+        return writeOff;
     }
 
     private boolean isOverPaid() {
@@ -1982,6 +2005,18 @@ public class Loan extends AbstractPersistable<Long> {
 
     private boolean isClosed() {
         return status().isClosed() || this.isCancelled();
+    }
+
+    private boolean isClosedObligationsMet() {
+        return status().isClosedObligationsMet();
+    }
+
+    private boolean isClosedWrittenOff() {
+        return status().isClosedWrittenOff();
+    }
+
+    private boolean isClosedWithOutsandingAmountMarkedForReschedule() {
+        return status().isClosedWithOutsandingAmountMarkedForReschedule();
     }
 
     private boolean isCancelled() {
