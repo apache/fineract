@@ -55,7 +55,9 @@ public class SchedulerJobRunnerReadServiceImpl implements SchedulerJobRunnerRead
     public Page<JobDetailHistoryData> retrieveJobHistory(Long jobId, SearchParameters searchParameters) {
         if (!isJobExist(jobId)) { throw new JobNotFoundException(String.valueOf(jobId)); }
         JobHistoryMapper jobHistoryMapper = new JobHistoryMapper();
-        StringBuilder sqlBuilder = new StringBuilder(jobHistoryMapper.schema());
+        StringBuilder sqlBuilder = new StringBuilder(200);
+        sqlBuilder.append("select SQL_CALC_FOUND_ROWS ");
+        sqlBuilder.append(jobHistoryMapper.schema());
         sqlBuilder.append(" where job.id=?");
         if (searchParameters.isOrderByRequested()) {
             sqlBuilder.append(" order by ").append(searchParameters.getOrderBy());
@@ -140,7 +142,7 @@ public class SchedulerJobRunnerReadServiceImpl implements SchedulerJobRunnerRead
 
     private static final class JobHistoryMapper implements RowMapper<JobDetailHistoryData> {
 
-        private StringBuilder sqlBuilder = new StringBuilder("select")
+        private StringBuilder sqlBuilder = new StringBuilder(200)
                 .append(" runHistory.version,runHistory.start_time as runStartTime,runHistory.end_time as runEndTime,runHistory.`status`,runHistory.error_message as jobRunErrorMessage,runHistory.trigger_type as triggerType,runHistory.error_log as jobRunErrorLog ")
                 .append(" from job job join job_run_history runHistory ON job.id=runHistory.job_id");
 
