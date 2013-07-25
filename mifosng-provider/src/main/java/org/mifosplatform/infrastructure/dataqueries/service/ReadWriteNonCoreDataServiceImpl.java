@@ -442,6 +442,10 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
                 baseDataValidator.reset().parameter("name").failWithCode("duplicate.column.name");
             } else if (realCause.getMessage().contains("Table") && realCause.getMessage().contains("already exists")) {
                 baseDataValidator.reset().parameter("datatableName").value(datatableName).failWithCode("datatable.already.exists");
+            } else if (realCause.getMessage().contains("Column") && realCause.getMessage().contains("big")) {
+                baseDataValidator.reset().parameter("column").failWithCode("length.too.big");
+            } else if (realCause.getMessage().contains("Row") && realCause.getMessage().contains("large")) {
+                baseDataValidator.reset().parameter("row").failWithCode("size.too.large");
             }
 
             throwExceptionIfValidationWarningsExist(dataValidationErrors);
