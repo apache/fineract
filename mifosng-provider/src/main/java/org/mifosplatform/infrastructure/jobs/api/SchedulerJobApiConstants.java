@@ -27,8 +27,8 @@ public class SchedulerJobApiConstants {
     public static final String schedulerStatusParamName = "active";
 
     public static final Set<String> JOB_DETAIL_RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(jobIdentifierParamName,
-            displayNameParamName, nextRunTimeParamName, initializingErrorParamName, jobActiveStatusParamName, currentlyRunningParamName,
-            lastRunHistoryObjParamName));
+            displayNameParamName, nextRunTimeParamName, initializingErrorParamName, cronExpressionParamName, jobActiveStatusParamName,
+            currentlyRunningParamName, lastRunHistoryObjParamName));
 
     public static final Set<String> JOB_HISTORY_RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(versionParamName,
             jobRunStartTimeParamName, jobRunEndTimeParamName, statusParamName, jobRunErrorMessageParamName, triggerTypeParamName,
