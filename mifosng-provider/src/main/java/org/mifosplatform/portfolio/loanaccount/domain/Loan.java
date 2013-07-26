@@ -2020,7 +2020,7 @@ public class Loan extends AbstractPersistable<Long> {
         return this.submittedOnDate == null ? false : (new LocalDate(submittedOnDate)).isAfter(compareDate);
     }
 
-    private LocalDate getSubmittedOnDate() {
+    public LocalDate getSubmittedOnDate() {
         return (LocalDate) ObjectUtils.defaultIfNull(new LocalDate(this.submittedOnDate), null);
     }
 

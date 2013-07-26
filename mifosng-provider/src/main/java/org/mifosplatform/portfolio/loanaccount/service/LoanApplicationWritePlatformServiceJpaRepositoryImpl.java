@@ -151,13 +151,13 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         final LoanProduct loanProduct = this.loanProductRepository.findOne(productId);
         if (loanProduct == null) { throw new LoanProductNotFoundException(productId); }
         
-        validateSubmittedOnDate(command, loanProduct);
-        
         this.loanProductCommandFromApiJsonDeserializer.validateMinMaxConstraints(command.parsedJson(), baseDataValidator, loanProduct);
         
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
 
         final Loan newLoanApplication = loanAssembler.assembleFrom(command, currentUser);
+        
+        validateSubmittedOnDate(newLoanApplication);
         
         final LoanProductRelatedDetail productRelatedDetail = newLoanApplication.repaymentScheduleDetail();
         this.fromApiJsonDeserializer.validateLoanTermAndRepaidEveryValues(newLoanApplication.getTermFrequency(), newLoanApplication.getTermPeriodFrequencyType(),
@@ -214,8 +214,6 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
 
             final Loan existingLoanApplication = retrieveLoanBy(loanId);
             
-            validateSubmittedOnDate(command, existingLoanApplication.loanProduct());
-            
             if (!existingLoanApplication.isSubmittedAndPendingApproval()) { throw new LoanApplicationNotInSubmittedAndPendingApprovalStateCannotBeModified(
                     loanId); }
 
@@ -245,7 +243,8 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
                     existingLoanApplication.updateInterestRateFrequencyType();
                 }
             }
-
+            
+            validateSubmittedOnDate(existingLoanApplication);
             // validate min and maximum constraints
             this.fromApiJsonDeserializer.validateForModify(command.json());
             final LoanProductRelatedDetail productRelatedDetail = existingLoanApplication.repaymentScheduleDetail();
@@ -545,10 +544,10 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         return loan;
     }
     
-    private void validateSubmittedOnDate(final JsonCommand command, final LoanProduct loanProduct) {
-        final LocalDate startDate = loanProduct.getStartDate();
-        final LocalDate closeDate = loanProduct.getCloseDate();
-        final LocalDate submittedOnDate = command.localDateValueOfParameterNamed("submittedOnDate");
+    private void validateSubmittedOnDate(final Loan loan) {
+        final LocalDate startDate = loan.loanProduct().getStartDate();
+        final LocalDate closeDate = loan.loanProduct().getCloseDate();
+        final LocalDate submittedOnDate = loan.getSubmittedOnDate();
 
         String defaultUserMessage = "";
         if (startDate != null && submittedOnDate.isBefore(startDate)) {
