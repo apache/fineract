@@ -1148,6 +1148,62 @@
 								<td></td>
 								<td></td>
 							</tr>
+							<tr class="alt">
+								<td><a href="#scheduler_jobs">Scheduler jobs</a></td>
+								<td>jobs</td>
+								<td></td>
+								<td><a href="#scheduler_jobs_list">List Scheduler jobs</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>jobs/{jobId}</td>
+								<td></td>
+								<td><a href="#retrieve_scheduler_job">Retrieve a job</a></td>
+								<td><a href="#update_scheduler_job">Update a job</a></td>
+								<td></td>
+							</tr>
+							<tr class="alt">
+								<td></td>
+								<td>jobs/{jobId}?command=executeJob</td>
+								<td><a href="#run_job">Run a job</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>jobs/{jobid}/runhistory?offset=0&limit=200</td>
+								<td></td>
+								<td><a href="#retrieve_job_runhistory">Retrieve job history</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr class="alt">
+								<td></td>
+								<td>scheduler</td>
+								<td></td>
+								<td><a href="#retrieve_scheduler_status">Retrieve scheduler status</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>scheduler?command=start</td>
+								<td><a href="#activate_scheduler">Activate a scheduler service</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr class="alt">
+								<td></td>
+								<td>scheduler?command=stop</td>
+								<td><a href="#suspend_scheduler">Suspend a scheduler service</td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
 						</table>
 					</div>
 				</div>
@@ -9520,8 +9576,322 @@ Content-Type: application/json
 					<code class="method-response">{ "auditId": 1 } </code>
 				</div>
 			</div>
+			
+			<!-- Maker Checker starts here -->
+			<a id="scheduler_jobs" name="scheduler_jobs" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h3>MIFOSX-BATCH JOBS</h3>
+						<p>Batch jobs (also known as cron jobs on Unix-based systems) are a series of back-end jobs executed on a computer at a particular time defined in job's cron expression.
+						</p>
+						
+						<p>At any point, you can view the list of batch jobs scheduled to run along with other details specific to each job. Manually you can execute the jobs at any point of time.
+						</p>
+						<p>The scheduler status can be either "Active" or "Standby". If the scheduler status is Active, it indicates that all batch jobs are running/ will run as per the specified schedule.If the scheduler status is Standby, it will ensure all scheduled batch runs are suspended.
+						</p>
+				</div>
+			</div>
+			
+			<a id="scheduler_jobs_list" name="scheduler_jobs_list"
+				class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Retrieve Scheduler Jobs</h4>
+					<p>Returns the list of jobs.</p>
+					<p>Example Requests:</p>
+					<div class=apiClick>jobs</div>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+GET https://DomainName/api/v1/jobs
+					</code>
+					<code class="method-response">
+[
+  {
+    "jobId": 1,
+    "displayName": "Update loan Summary",
+    "cronExpression": "0 0 22 1/1 * ? *",
+    "active": false,
+    "currentlyRunning": false,
+    "lastRunHistory": {
+      "version": 17,
+      "jobRunStartTime": "Jul 26, 2013 1:38:26 PM",
+      "jobRunEndTime": "Jul 26, 2013 1:38:26 PM",
+      "status": "success",
+      "triggerType": "application"
+    }
+  },
+  {
+    "jobId": 2,
+    "displayName": "Update Loan Arrears Ageing",
+    "nextRunTime": "Jul 27, 2013 12:01:00 AM",
+    "cronExpression": "0 1 0 1/1 * ? *",
+    "active": true,
+    "currentlyRunning": false,
+    "lastRunHistory": {
+      "version": 18,
+      "jobRunStartTime": "Jul 26, 2013 4:05:32 PM",
+      "jobRunEndTime": "Jul 26, 2013 4:05:32 PM",
+      "status": "success",
+      "triggerType": "application"
+    }
+  },
+  {
+    "jobId": 3,
+    "displayName": "Update Loan Paid In Advance",
+    "nextRunTime": "Jul 27, 2013 12:05:00 AM",
+    "cronExpression": "0 5 0 1/1 * ? *",
+    "active": true,
+    "currentlyRunning": false,
+    "lastRunHistory": {
+      "version": 16,
+      "jobRunStartTime": "Jul 26, 2013 4:15:47 PM",
+      "jobRunEndTime": "Jul 26, 2013 4:15:47 PM",
+      "status": "success",
+      "triggerType": "application"
+    }
+  },
+  {
+    "jobId": 4,
+    "displayName": "Apply Annual Fee For Savings",
+    "nextRunTime": "Jul 26, 2013 10:20:00 PM",
+    "cronExpression": "0 20 22 1/1 * ? *",
+    "active": true,
+    "currentlyRunning": false,
+    "lastRunHistory": {
+      "version": 11,
+      "jobRunStartTime": "Jul 26, 2013 12:00:37 PM",
+      "jobRunEndTime": "Jul 26, 2013 12:00:38 PM",
+       "status": "success
+      "triggerType": "application"
+    }
+  },
+  {
+    "jobId": 5,
+    "displayName": "Apply Holidays To Loans",
+    "nextRunTime": "Jul 27, 2013 12:00:00 PM",
+    "cronExpression": "0 0 12 * * ?",
+    "active": true,
+    "currentlyRunning": false,
+    "lastRunHistory": {
+      "version": 16,
+      "jobRunStartTime": "Jul 26, 2013 4:31:54 PM",
+      "jobRunEndTime": "Jul 26, 2013 4:31:55 PM",
+      "status": "success",
+      "triggerType": "application"
+    }
+  }
+]
 
-
+					</code>
+				</div>
+			</div>
+			
+			<a id="retrieve_scheduler_job" name="retrieve_scheduler_job"
+				class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Retrieve a Job</h4>
+					<p>Returns the details of a Job.</p>
+					<p>Example Requests:</p>
+					<div class=apiClick>jobs/5</div>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+GET https://DomainName/api/v1/jobs/{jobId}
+					</code>
+					<code class="method-response">
+https://localhost:8443/mifosng-provider/api/v1/jobs/5
+{
+  "jobId": 5,
+  "displayName": "Apply Holidays To Loans",
+  "nextRunTime": "Jul 27, 2013 12:00:00 PM",
+  "cronExpression": "0 0 12 * * ?",
+  "active": true,
+  "currentlyRunning": false,
+  "lastRunHistory": {
+    "version": 16,
+    "jobRunStartTime": "Jul 26, 2013 4:31:54 PM",
+    "jobRunEndTime": "Jul 26, 2013 4:31:55 PM",
+    "status": "success",
+    "triggerType": "application"
+  }
+}
+					</code>
+				</div>
+			</div>
+			
+			<a id="update_scheduler_job" name="update_scheduler_job"
+				class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Update a Job</h4>
+					<p>Updates the details of a job.</p>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+PUT https://DomainName/api/v1/jobs/{jobId}
+					</code>
+					<code class="method-request">
+PUT jobs/1
+Content-Type: application/json 
+{
+  "displayName":"Update loan Summary",
+  "cronExpression":"0 0 22 1/1 * ? *",
+  "active":"true"
+}					</code>
+				</div>
+			</div>
+			
+			<a id="run_job" name="run_job"
+				class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Run a Job</h4>
+					<p>Manually Execute Specific Job.</p>
+				</div>
+					<div class="method-example">
+						<code class="method-declaration">
+POST https://DomainName/api/v1/jobs/{jobId}?command=executeJob
+						</code>
+						<code class="method-request">
+POST jobs/1?command=executeJob
+						</code>
+					</div>
+				</div>
+			
+			<a id="retrieve_job_runhistory" name="retrieve_job_runhistory"
+				class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Retrieve Job Run History</h4>
+					<p>Example Requests:</p>
+					<div class=apiClick>jobs/5/runhistory?offset=0&limit=200</div>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+GET https://DomainName/api/v1/jobs/{jobid}/runhistory?offset=0&limit=200
+					</code>
+					<code class="method-response">
+{
+  "totalFilteredRecords": 8,
+  "pageItems": [
+    {
+      "version": 1,
+      "jobRunStartTime": "Jul 16, 2013 12:00:00 PM",
+      "jobRunEndTime": "Jul 16, 2013 12:00:00 PM",
+      "status": "success",
+      "triggerType": "cron"
+    },
+    {
+      "version": 2,
+      "jobRunStartTime": "Jul 17, 2013 12:00:00 PM",
+      "jobRunEndTime": "Jul 17, 2013 12:00:00 PM",
+      "status": "success",
+      "triggerType": "cron"
+    },
+    {
+      "version": 3,
+      "jobRunStartTime": "Jul 18, 2013 12:00:00 PM",
+      "jobRunEndTime": "Jul 18, 2013 12:00:01 PM",
+      "status": "success",
+      "triggerType": "cron"
+    },
+    {
+      "version": 4,
+      "jobRunStartTime": "Jul 19, 2013 12:00:00 PM",
+      "jobRunEndTime": "Jul 19, 2013 12:00:00 PM",
+      "status": "success",
+      "triggerType": "cron"
+    },
+    {
+      "version": 5,
+      "jobRunStartTime": "Jul 20, 2013 11:16:07 AM",
+      "jobRunEndTime": "Jul 20, 2013 11:16:07 AM",
+      "status": "success",
+      "triggerType": "application"
+    },
+    {
+      "version": 6,
+      "jobRunStartTime": "Jul 20, 2013 11:35:05 AM",
+      "jobRunEndTime": "Jul 20, 2013 11:35:05 AM",
+      "status": "success",
+      "triggerType": "application"
+    },
+    {
+      "version": 7,
+      "jobRunStartTime": "Jul 20, 2013 12:00:00 PM",
+      "jobRunEndTime": "Jul 20, 2013 12:00:00 PM",
+      "status": "success",
+      "triggerType": "cron"
+    },
+    {
+      "version": 8,
+      "jobRunStartTime": "Jul 22, 2013 12:00:00 PM",
+      "jobRunEndTime": "Jul 22, 2013 12:00:00 PM",
+      "status": "success",
+      "triggerType": "cron"
+    }
+  ]
+}
+					</code>
+				</div>
+			</div>
+			
+			<a id="retrieve_scheduler_status" name="retrieve_scheduler_status"
+				class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Retrieve Scheduler Status</h4>
+					<p>Returns the scheduler status.</p>
+					<p>Example Requests:</p>
+					<div class=apiClick>scheduler</div>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+GET https://DomainName/api/v1/scheduler
+					</code>
+					<code class="method-response">
+https://localhost:8443/mifosng-provider/api/v1/scheduler
+{
+  "active": true
+}
+					</code>
+				</div>
+			</div>
+			
+			<a id="activate_scheduler" name="activate_scheduler"
+				class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Activate Scheduler Jobs</h4>
+					<p>Activates the scheduler job service.</p>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+POST https://DomainName/api/v1/scheduler?command=start
+					</code>
+					<code class="method-request">
+POST scheduler?command=start
+					</code>
+				</div>
+			</div>
+			
+			<a id="suspend_scheduler" name="suspend_scheduler" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Suspend Scheduler Jobs</h4>
+					<p>Suspends the scheduler job service.</p>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+POST https://DomainName/api/v1/scheduler?command=stop
+					</code>
+					<code class="method-request">
+POST scheduler?command=stop
+					</code>
+				</div>
+			</div>
 
 			<!-- Fund starts here -->
 			<a id="funds" name="funds" class="old-syle-anchor">&nbsp;</a>
@@ -17415,7 +17785,63 @@ GET https://DomainName/api/v1/search?query=000000111
                     <td></td>
                     <td></td>
                     <td></td>
-                </tr>				
+                </tr>
+				<tr class="alt">
+				<td><a href="#scheduler_jobs">Scheduler jobs</a></td>
+				<td>jobs</td>
+				<td></td>
+				<td><a href="#scheduler_jobs_list">List Scheduler jobs</a></td>
+				<td></td>
+				<td></td>
+			</tr>
+			<tr>
+				<td></td>
+				<td>jobs/{jobId}</td>
+				<td></td>
+				<td><a href="#retrieve_scheduler_job">Retrieve a job</a></td>
+				<td><a href="#update_scheduler_job">Update a job</a></td>
+				<td></td>
+			</tr>
+			<tr class="alt">
+				<td></td>
+				<td>jobs/{jobId}?command=executeJob</td>
+				<td><a href="#run_job">Run a job</a></td>
+				<td></td>
+				<td></td>
+				<td></td>
+			</tr>
+			<tr>
+				<td></td>
+				<td>jobs/{jobid}/runhistory?offset=0&limit=200</td>
+				<td></td>
+				<td><a href="#retrieve_job_runhistory">Retrieve job history</a></td>
+				<td></td>
+				<td></td>
+			</tr>
+			<tr class="alt">
+				<td></td>
+				<td>scheduler</td>
+				<td></td>
+				<td><a href="#retrieve_scheduler_status">Retrieve scheduler status</a></td>
+				<td></td>
+				<td></td>
+			</tr>
+			<tr>
+				<td></td>
+				<td>scheduler?command=start</td>
+				<td><a href="#activate_scheduler">Activate a scheduler service</a></td>
+				<td></td>
+				<td></td>
+				<td></td>
+			</tr>
+			<tr class="alt">
+				<td></td>
+				<td>scheduler?command=stop</td>
+				<td><a href="#suspend_scheduler">Suspend a scheduler service</td>
+				<td></td>
+				<td></td>
+				<td></td>
+			</tr>
 			</table>
 		</div>
 
