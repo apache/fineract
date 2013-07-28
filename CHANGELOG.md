@@ -5,6 +5,7 @@ See VERSIONING (https://github.com/openMF/mifosx/blob/master/VERSIONING.md) for 
 
 Releases
 ===============
+1. 28 July 2013 - 1.6.1.RELEASE
 1. 20 July 2013 - 1.6.0.RELEASE
 1. 14 July 2013 - 1.5.0.RELEASE
 1. 25 Jun 2013 - 1.4.1.RELEASE
@@ -26,6 +27,19 @@ Releases
 1. 10 April 2013 - 0.11.2.beta
 1. 05 April 2013 - 0.11.1.beta
 1. 05 April 2013 - 0.11.0.beta
+
+1.6.1.RELEASE
+=============
+Bug Release
+
+Platform & API
+
+Bug
+ - [MIFOSX-485] - In Groups -> Group loan under "Submitted and pending approval" state -> "Change loan application" page,not able to edit/update "Sync repayments with meeting" and "Loan term" fields.
+ - [MIFOSX-564] - Create data table does not work for attached request
+ 
+Reference App
+ - [MIFOSX-560] - In "Modify Application page" if Product is changed, it not getting updated in Loan account overview list
 
 1.6.0.RELEASE
 =============
