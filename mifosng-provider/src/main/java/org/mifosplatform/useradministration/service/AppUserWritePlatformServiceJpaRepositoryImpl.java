@@ -83,7 +83,8 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
             final Set<Role> allRoles = assembleSetOfRoles(roles);
 
             final AppUser appUser = AppUser.fromJson(userOffice, allRoles, command);
-            this.userDomainService.create(appUser);
+            final Boolean sendPasswordToEmail = command.booleanObjectValueOfParameterNamed("sendPasswordToEmail");
+            this.userDomainService.create(appUser,sendPasswordToEmail);
 
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //

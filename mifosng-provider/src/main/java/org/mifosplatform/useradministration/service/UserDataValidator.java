@@ -32,7 +32,7 @@ public final class UserDataValidator {
      * The parameters supported for this command.
      */
     private final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("username", "firstname", "lastname", "password",
-            "repeatPassword", "email", "officeId", "notSelectedRoles", "roles"));
+            "repeatPassword", "email", "officeId", "notSelectedRoles", "roles", "sendPasswordToEmail"));
 
     private final FromJsonHelper fromApiJsonHelper;
 
@@ -61,8 +61,23 @@ public final class UserDataValidator {
         final String lastname = fromApiJsonHelper.extractStringNamed("lastname", element);
         baseDataValidator.reset().parameter("lastname").value(lastname).notBlank().notExceedingLengthOf(100);
 
-        final String email = fromApiJsonHelper.extractStringNamed("email", element);
-        baseDataValidator.reset().parameter("email").value(email).notBlank().notExceedingLengthOf(100);
+		final Boolean sendPasswordToEmail = this.fromApiJsonHelper.extractBooleanNamed("sendPasswordToEmail", element);
+		if (sendPasswordToEmail != null) {
+			if (sendPasswordToEmail.booleanValue()) {
+	        	final String email = fromApiJsonHelper.extractStringNamed("email", element);
+	        	baseDataValidator.reset().parameter("email").value(email).notBlank().notExceedingLengthOf(100);
+			}
+			else{
+	        	final String password = fromApiJsonHelper.extractStringNamed("password", element);
+	        	final String repeatPassword = fromApiJsonHelper.extractStringNamed("repeatPassword", element);
+	            baseDataValidator.reset().parameter("password").value(password).notBlank().notExceedingLengthOf(50);
+	            if (StringUtils.isNotBlank(password)) {
+	                baseDataValidator.reset().parameter("password").value(password).equalToParameter("repeatPassword", repeatPassword);
+	            }
+			}
+		} else {
+            baseDataValidator.reset().parameter("sendPasswordToEmail").value(sendPasswordToEmail).trueOrFalseRequired(false);
+		}
 
         final Long officeId = fromApiJsonHelper.extractLongNamed("officeId", element);
         baseDataValidator.reset().parameter("officeId").value(officeId).notNull().integerGreaterThanZero();

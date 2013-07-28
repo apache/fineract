@@ -29,6 +29,7 @@ import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.security.domain.PlatformUser;
 import org.mifosplatform.infrastructure.security.exception.NoAuthorizationException;
 import org.mifosplatform.infrastructure.security.service.PlatformPasswordEncoder;
+import org.mifosplatform.infrastructure.security.service.RandomPasswordGenerator;
 import org.mifosplatform.organisation.office.domain.Office;
 import org.mifosplatform.organisation.staff.domain.Staff;
 import org.slf4j.Logger;
@@ -95,7 +96,7 @@ public class AppUser extends AbstractPersistable<Long> implements PlatformUser {
         final String username = command.stringValueOfParameterNamed("username");
         String password = command.stringValueOfParameterNamed("password");
         if (StringUtils.isBlank(password)) {
-            password = "autogenerate";
+            password = new RandomPasswordGenerator(13).generate();
         }
 
         boolean userEnabled = true;
