@@ -5,6 +5,7 @@ See VERSIONING (https://github.com/openMF/mifosx/blob/master/VERSIONING.md) for 
 
 Releases
 ===============
+1. 28 July 2013 - 1.7.0.RELEASE
 1. 28 July 2013 - 1.6.1.RELEASE
 1. 20 July 2013 - 1.6.0.RELEASE
 1. 14 July 2013 - 1.5.0.RELEASE
@@ -27,6 +28,30 @@ Releases
 1. 10 April 2013 - 0.11.2.beta
 1. 05 April 2013 - 0.11.1.beta
 1. 05 April 2013 - 0.11.0.beta
+
+1.7.0.RELEASE
+=============
+Feature Release
+
+This Feature Release ships a stable version of the Scheduler and Product mix functionality along with minor updates to Savings functionality
+
+Platform & API
+
+Bug 
+ - [MIFOSX-397] - Annual fee collection date is displaying on 2nd year of opening/activation date of savings account.
+
+New Features & Improvements
+ - [MIFOSX-495] - Client performance History
+ - [MIFOSX-565] - Support ability to undo/reverse transactions even when the loan is in closed state
+ - [MIFOSX-563] - Repayment strategy is not displayed in loan account details page
+ - [MIFOSX-548] - A holiday's "Reschedule Repayment to" date should not be a non-working day
+ - [MIFOSX-506] - Batch Job Implementation - Part 2
+ - [MIFOSX-478] - Product Mix Functionality
+ - [MIFOSX-470] - Avoiding Deletion of active Charge which was already assigned to a Loan product.
+ - [MIFOSX-428] - Add user giving invalid emailid error
+ 
+Reference App
+ - [MIFOSX-561] - Add loan cycle and loan product cycle details to Client Summary
 
 1.6.1.RELEASE
 =============
