@@ -195,6 +195,9 @@ public class JobRegisterServiceImpl implements JobRegisterService {
             JobDetail jobDetail = createJobDetail(scheduledJobDetails);
             Trigger trigger = createTrigger(scheduledJobDetails, jobDetail);
             Scheduler scheduler = getScheduler(scheduledJobDetails);
+            if (!this.schedulerStatus.get(ThreadLocalContextUtil.getTenant().getId()) && !scheduler.isInStandbyMode()) {
+                scheduler.standby();
+            }
             scheduler.scheduleJob(jobDetail, trigger);
             scheduledJobDetails.updateJobKey(getJobKeyAsString(jobDetail.getKey()));
             scheduledJobDetails.updateNextRunTime(trigger.getNextFireTime());
