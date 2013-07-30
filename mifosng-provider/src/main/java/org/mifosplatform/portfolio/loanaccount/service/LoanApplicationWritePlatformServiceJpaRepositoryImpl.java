@@ -224,6 +224,10 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             final Map<String, Object> changes = existingLoanApplication.loanApplicationModification(command, possiblyModifedLoanCharges,
                     possiblyModifedLoanCollateralItems, this.aprCalculator);
 
+            if (changes.containsKey("expectedDisbursementDate")) {
+                this.loanAssembler.validateExpectedDisbursementForHolidayAndNonWorkingDay(existingLoanApplication);
+            }
+
             final String clientIdParamName = "clientId";
             if (changes.containsKey(clientIdParamName)) {
                 final Long clientId = command.longValueOfParameterNamed(clientIdParamName);
@@ -245,8 +249,6 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             }
             
             validateSubmittedOnDate(existingLoanApplication);
-            // validate min and maximum constraints
-            this.fromApiJsonDeserializer.validateForModify(command.json());
             final LoanProductRelatedDetail productRelatedDetail = existingLoanApplication.repaymentScheduleDetail();
             this.fromApiJsonDeserializer.validateLoanTermAndRepaidEveryValues(existingLoanApplication.getTermFrequency(), existingLoanApplication.getTermPeriodFrequencyType(),
                     productRelatedDetail.getNumberOfRepayments(), productRelatedDetail.getRepayEvery(),
