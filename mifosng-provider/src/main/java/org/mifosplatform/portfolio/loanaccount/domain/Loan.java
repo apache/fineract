@@ -2511,4 +2511,12 @@ public class Loan extends AbstractPersistable<Long> {
         return this.termPeriodFrequencyType;
     }
 
+    public void validateExpectedDisbursementForHolidayAndNonWorkingDay(WorkingDays workingDays, boolean isHolidayEnabled,
+            List<Holiday> holidays) {
+        // validate if disbursement date is a holiday or a non-working day
+        validateDisbursementDateIsOnNonWorkingDay(workingDays);
+        validateDisbursementDateIsOnHoliday(isHolidayEnabled, holidays);
+
+    }
+
 }
