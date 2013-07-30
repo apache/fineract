@@ -22,8 +22,8 @@ import org.mifosplatform.organisation.staff.domain.Staff;
 import org.mifosplatform.organisation.staff.domain.StaffRepository;
 import org.mifosplatform.organisation.staff.exception.StaffNotFoundException;
 import org.mifosplatform.organisation.staff.exception.StaffRoleException;
-import org.mifosplatform.organisation.workingdays.domain.WorkingDaysRepositoryWrapper;
 import org.mifosplatform.organisation.workingdays.domain.WorkingDays;
+import org.mifosplatform.organisation.workingdays.domain.WorkingDaysRepositoryWrapper;
 import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.client.domain.ClientRepositoryWrapper;
 import org.mifosplatform.portfolio.collateral.domain.LoanCollateral;
@@ -237,5 +237,15 @@ public class LoanAssembler {
             if (strategy == null) { throw new LoanTransactionProcessingStrategyNotFoundException(transactionProcessingStrategyId); }
         }
         return strategy;
+    }
+
+    public void validateExpectedDisbursementForHolidayAndNonWorkingDay(final Loan loanApplication) {
+
+        final boolean isHolidayEnabled = this.configurationDomainService.isRescheduleRepaymentsOnHolidaysEnabled();
+        final List<Holiday> holidays = this.holidayRepository.findByOfficeIdAndGreaterThanDate(loanApplication.getOfficeId(),
+                loanApplication.getExpectedDisbursedOnLocalDate().toDate());
+        final WorkingDays workingDays = this.workingDaysRepository.findOne();
+        
+        loanApplication.validateExpectedDisbursementForHolidayAndNonWorkingDay(workingDays,isHolidayEnabled,holidays);
     }
 }
