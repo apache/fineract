@@ -1815,7 +1815,8 @@ public class Loan extends AbstractPersistable<Long> {
     }
 
     public LoanTransaction closeAsWrittenOff(final JsonCommand command, final LoanLifecycleStateMachine loanLifecycleStateMachine,
-            final Map<String, Object> changes, final List<Long> existingTransactionIds, final List<Long> existingReversedTransactionIds) {
+            final Map<String, Object> changes, final List<Long> existingTransactionIds, final List<Long> existingReversedTransactionIds,
+            final AppUser currentUser) {
 
         final LoanStatus statusEnum = loanLifecycleStateMachine.transition(LoanEvent.WRITE_OFF_OUTSTANDING,
                 LoanStatus.fromInt(this.loanStatus));
@@ -1832,6 +1833,7 @@ public class Loan extends AbstractPersistable<Long> {
 
             this.closedOnDate = writtenOffOnLocalDate.toDate();
             this.writtenOffOnDate = writtenOffOnLocalDate.toDate();
+            this.closedBy = currentUser;
             changes.put("closedOnDate", command.stringValueOfParameterNamed("transactionDate"));
             changes.put("writtenOffOnDate", command.stringValueOfParameterNamed("transactionDate"));
 
