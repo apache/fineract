@@ -38,7 +38,7 @@ public class StaffReadPlatformServiceImpl implements StaffReadPlatformService {
 
         public String schema() {
             return " s.id as id,s.office_id as officeId, o.name as officeName, s.firstname as firstname, s.lastname as lastname,"
-                    + " s.display_name as displayName, s.is_loan_officer as isLoanOfficer from m_staff s "
+                    + " s.display_name as displayName, s.is_loan_officer as isLoanOfficer, s.external_id as externalId from m_staff s "
                     + " join m_office o on o.id = s.office_id";
         }
 
@@ -52,8 +52,9 @@ public class StaffReadPlatformServiceImpl implements StaffReadPlatformService {
             final Long officeId = rs.getLong("officeId");
             final boolean isLoanOfficer = rs.getBoolean("isLoanOfficer");
             final String officeName = rs.getString("officeName");
+            final String externalId = rs.getString("externalId");
 
-            return StaffData.instance(id, firstname, lastname, displayName, officeId, officeName, isLoanOfficer);
+            return StaffData.instance(id, firstname, lastname, displayName, officeId, officeName, isLoanOfficer, externalId);
         }
     }
 
@@ -64,7 +65,7 @@ public class StaffReadPlatformServiceImpl implements StaffReadPlatformService {
             StringBuilder sqlBuilder = new StringBuilder(200);
             sqlBuilder.append("s.id as id, s.office_id as officeId, o.name as officeName,");
             sqlBuilder.append("s.firstname as firstname, s.lastname as lastname,");
-            sqlBuilder.append("s.display_name as displayName, s.is_loan_officer as isLoanOfficer ");
+            sqlBuilder.append("s.display_name as displayName, s.is_loan_officer as isLoanOfficer, s.external_id as externalId ");
             sqlBuilder.append("from m_office o ");
             sqlBuilder.append("join m_office ohierarchy on o.hierarchy like concat(ohierarchy.hierarchy, '%') ");
             sqlBuilder.append("join m_staff s on s.office_id = ohierarchy.id ");
@@ -88,8 +89,9 @@ public class StaffReadPlatformServiceImpl implements StaffReadPlatformService {
             final Long officeId = rs.getLong("officeId");
             final String officeName = rs.getString("officeName");
             final boolean isLoanOfficer = rs.getBoolean("isLoanOfficer");
+            final String externalId = rs.getString("externalId");
 
-            return StaffData.instance(id, firstname, lastname, displayName, officeId, officeName, isLoanOfficer);
+            return StaffData.instance(id, firstname, lastname, displayName, officeId, officeName, isLoanOfficer, externalId);
         }
     }
 

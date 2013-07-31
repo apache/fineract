@@ -34,6 +34,9 @@ public class Staff extends AbstractPersistable<Long> {
     @Column(name = "display_name", length = 100)
     private String displayName;
 
+    @Column(name = "external_id", length = 100, nullable = true, unique = true)
+    private String externalId;
+
     // Office to which this employee belongs
     @ManyToOne
     @JoinColumn(name = "office_id", nullable = false)
@@ -58,25 +61,29 @@ public class Staff extends AbstractPersistable<Long> {
 
         final String lastnameParamName = "lastname";
         String lastname = command.stringValueOfParameterNamed(lastnameParamName);
+        
+        final String externalIdParamName = "externalId";
+        String externalId = command.stringValueOfParameterNamed(externalIdParamName);
 
         final String isLoanOfficerParamName = "isLoanOfficer";
         final boolean isLoanOfficer = command.booleanPrimitiveValueOfParameterNamed(isLoanOfficerParamName);
 
-        return new Staff(staffOffice, firstname, lastname, isLoanOfficer);
+        return new Staff(staffOffice, firstname, lastname, externalId, isLoanOfficer);
     }
 
-    public static Staff createNew(final Office staffOffice, final String firstname, final String lastname, final boolean isLoanOfficer) {
-        return new Staff(staffOffice, firstname, lastname, isLoanOfficer);
+    public static Staff createNew(final Office staffOffice, final String firstname, final String lastname, final String externalId, final boolean isLoanOfficer) {
+        return new Staff(staffOffice, firstname, lastname, externalId, isLoanOfficer);
     }
 
     protected Staff() {
         //
     }
 
-    private Staff(final Office staffOffice, final String firstname, final String lastname, final boolean isLoanOfficer) {
+    private Staff(final Office staffOffice, final String firstname, final String lastname, final String externalId, final boolean isLoanOfficer) {
         this.office = staffOffice;
         this.firstname = StringUtils.defaultIfEmpty(firstname, null);
         this.lastname = StringUtils.defaultIfEmpty(lastname, null);
+        this.externalId = externalId;
         this.loanOfficer = isLoanOfficer;
         deriveDisplayName(firstname);
     }
@@ -125,6 +132,13 @@ public class Staff extends AbstractPersistable<Long> {
             deriveDisplayName(this.firstname);
         }
 
+        final String externalIdParamName = "externalId";
+        if (command.isChangeInStringParameterNamed(externalIdParamName, this.externalId)) {
+            final String newValue = command.stringValueOfParameterNamed(externalIdParamName);
+            actualChanges.put(externalIdParamName, newValue);
+            this.externalId = newValue;
+        }
+        
         final String isLoanOfficerParamName = "isLoanOfficer";
         if (command.isChangeInBooleanParameterNamed(isLoanOfficerParamName, this.loanOfficer)) {
             final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(isLoanOfficerParamName);

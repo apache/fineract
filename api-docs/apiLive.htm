@@ -861,7 +861,7 @@
 							<tr>
 								<td><a href="#staff">Staff</a></td>
 								<td>staff</td>
-								<td><a href="#staff_create">Create a Staff</a></td>
+								<td><a href="#staff_create">Create a Staff Member</a></td>
 								<td><a href="#staff_list">List Staff</a></td>
 								<td></td>
 								<td></td>
@@ -10029,7 +10029,8 @@ Request Body:
     "officeId": 1,
     "firstname": "John",
     "lastname": "Doe",
-    "isLoanOfficer": "true"
+    "isLoanOfficer": "true",
+    "externalId": "17H"
 }
 					</code>
 					<code class="method-response">
@@ -10062,7 +10063,8 @@ GET https://DomainName/api/v1/staff
         "displayName": "Doe, John",
         "officeId": 1,
         "officeName": "Head Office",
-        "isLoanOfficer": true
+        "isLoanOfficer": true,
+	"externalId": "17H"
     }
 ]
 					</code>
@@ -10087,7 +10089,8 @@ GET https://DomainName/api/v1/staff
     "displayName": "Doe, John",
     "officeId": 1,
     "officeName": "Head Office",
-    "isLoanOfficer": true
+    "isLoanOfficer": true,
+    "externalId": "17H"
 }
 					</code>
 				</div>
@@ -10108,7 +10111,8 @@ PUT staff/1
 Content-Type: application/json 
 Request Body: 
 { 
-	"isLoanOfficer": "false" 
+	"isLoanOfficer": "false",
+	"externalId": "17Hbb"
 }
 					</code>
 					<code class="method-response">
@@ -10116,7 +10120,8 @@ Request Body:
     "officeId": 1,
     "resourceId": 1,
     "changes": {
-        "isLoanOfficer": false
+        "isLoanOfficer": false,
+	"externalId": "17Hbb"
     }
 }
 					</code>
