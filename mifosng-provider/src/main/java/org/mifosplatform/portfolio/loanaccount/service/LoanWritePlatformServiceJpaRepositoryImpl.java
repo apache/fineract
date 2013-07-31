@@ -607,7 +607,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     @Transactional
     @Override
     public CommandProcessingResult writeOff(final Long loanId, final JsonCommand command) {
-        context.authenticatedUser();
+        final AppUser currentUser = this.context.authenticatedUser();
 
         this.loanEventApiJsonValidator.validateTransactionWithNoAmount(command.json());
 
@@ -622,7 +622,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final List<Long> existingTransactionIds = new ArrayList<Long>();
         final List<Long> existingReversedTransactionIds = new ArrayList<Long>();
         final LoanTransaction writeoff = loan.closeAsWrittenOff(command, defaultLoanLifecycleStateMachine(), changes,
-                existingTransactionIds, existingReversedTransactionIds);
+                existingTransactionIds, existingReversedTransactionIds, currentUser);
 
         this.loanTransactionRepository.save(writeoff);
         this.loanRepository.save(loan);
