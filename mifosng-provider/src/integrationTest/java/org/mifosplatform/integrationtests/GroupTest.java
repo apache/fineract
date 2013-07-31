@@ -41,7 +41,7 @@ public class GroupTest {
     }
 
     @Test
-    public void checkGroupLoanCreateAndDisburseFlow() {
+    public void checkGroupFunctions() {
         Integer clientID = ClientHelper.createClient(requestSpec, responseSpec);
         Integer groupID = GroupHelper.createGroup(requestSpec, responseSpec);
         GroupHelper.verifyGroupCreatedOnServer(requestSpec, responseSpec, groupID);
@@ -60,8 +60,7 @@ public class GroupTest {
         GroupHelper.verifyGroupDetails(requestSpec, responseSpec, groupID,"name",updatedGroupName);
 
         groupID = GroupHelper.createGroup(requestSpec, responseSpec);
-        groupID = GroupHelper.deleteGroup(requestSpec, responseSpec, groupID.toString());
-        GroupHelper.verifyGroupCreatedOnServer(requestSpec, responseSpec, groupID);
-
+        Integer groupID2 = GroupHelper.deleteGroup(requestSpec, responseSpec, groupID.toString());
+        GroupHelper.verifyGroupDeleted(requestSpec, responseSpec, groupID);
     }
 }

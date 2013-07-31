@@ -2,6 +2,7 @@ package org.mifosplatform.integrationtests.common;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
 
 import java.util.HashMap;
 import java.util.ArrayList;
@@ -153,8 +154,17 @@ public class GroupHelper {
         System.out.println("------------------------------CHECK EMPTY GROUP MEMBER LIST------------------------------------\n");
         String GROUP_URL = "/mifosng-provider/api/v1/groups/" + generatedGroupID + "?associations=clientMembers&tenantIdentifier=default";
         list = Utils.performServerGet(requestSpec, responseSpec, GROUP_URL, "clientMembers");
-        System.out.println(list);
         assertEquals("GROUP MEMBER LIST NOT EMPTY",list, null);
+    }
+
+    public static void verifyGroupDeleted(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+                                               final Integer generatedGroupID) {
+        List<String> list = new ArrayList<String>();
+        System.out.println("------------------------------CHECK GROUP DELETED------------------------------------\n");
+        String GROUP_URL = "/mifosng-provider/api/v1/groups/?tenantIdentifier=default";
+        list = Utils.performServerGet(requestSpec, responseSpec, GROUP_URL, "pageItems");
+        
+        assertFalse("GROUP NOT DELETED",list.toString().contains("id=" + generatedGroupID.toString()));
     }
 
     public static String randomNameGenerator(final String prefix, final int lenOfRandomSuffix) {
