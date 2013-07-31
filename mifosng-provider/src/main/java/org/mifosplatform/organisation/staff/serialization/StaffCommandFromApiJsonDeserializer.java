@@ -31,7 +31,7 @@ public final class StaffCommandFromApiJsonDeserializer {
     /**
      * The parameters supported for this command.
      */
-    private final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("firstname", "lastname", "officeId", "isLoanOfficer"));
+    private final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("firstname", "lastname", "officeId", "externalId", "isLoanOfficer"));
 
     private final FromJsonHelper fromApiJsonHelper;
 
