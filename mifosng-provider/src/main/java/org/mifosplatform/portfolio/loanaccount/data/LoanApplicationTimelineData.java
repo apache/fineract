@@ -39,6 +39,10 @@ public class LoanApplicationTimelineData {
     private final String disbursedByFirstname;
     private final String disbursedByLastname;
     private final LocalDate expectedMaturityDate;
+    private final LocalDate writeOffOnDate;
+    private final String writeOffByUsername;
+    private final String writeOffByFirstname;
+    private final String writeOffByLastname;
 
     public static LoanApplicationTimelineData templateDefault(final LocalDate expectedDisbursementDate) {
 
@@ -67,12 +71,17 @@ public class LoanApplicationTimelineData {
         final String closedByFirstname = null;
         final String closedByLastname = null;
         final LocalDate expectedMaturityDate = null;
+        final LocalDate writeOffOnDate = null;
+        final String writeOffByUsername = null;
+        final String writeOffByFirstname = null;
+        final String writeOffByLastname = null;
 
         return new LoanApplicationTimelineData(submittedOnDate, submittedByUsername, submittedByFirstname, submittedByLastname,
                 rejectedOnDate, rejectedByUsername, rejectedByFirstname, rejectedByLastname, withdrawnOnDate, withdrawnByUsername,
                 withdrawnByFirstname, withdrawnByLastname, approvedOnDate, approvedByUsername, approvedByFirstname, approvedByLastname,
                 expectedDisbursementDate, actualDisbursementDate, disbursedByUsername, disbursedByFirstname, disbursedByLastname,
-                closedOnDate, closedByUsername, closedByFirstname, closedByLastname, expectedMaturityDate);
+                closedOnDate, closedByUsername, closedByFirstname, closedByLastname, expectedMaturityDate, writeOffOnDate,
+                writeOffByUsername, writeOffByFirstname, writeOffByLastname);
     }
 
     public LoanApplicationTimelineData(final LocalDate submittedOnDate, final String submittedByUsername,
@@ -83,7 +92,8 @@ public class LoanApplicationTimelineData {
             final String approvedByFirstname, final String approvedByLastname, final LocalDate expectedDisbursementDate,
             final LocalDate actualDisbursementDate, final String disbursedByUsername, final String disbursedByFirstname,
             final String disbursedByLastname, final LocalDate closedOnDate, final String closedByUsername, final String closedByFirstname,
-            final String closedByLastname, final LocalDate expectedMaturityDate) {
+            final String closedByLastname, final LocalDate expectedMaturityDate, final LocalDate writeOffOnDate,
+            final String writeOffByUsername, final String writeOffByFirstname, final String writeOffByLastname) {
         this.submittedOnDate = submittedOnDate;
         this.submittedByUsername = submittedByUsername;
         this.submittedByFirstname = submittedByFirstname;
@@ -106,6 +116,10 @@ public class LoanApplicationTimelineData {
         this.disbursedByFirstname = disbursedByFirstname;
         this.disbursedByLastname = disbursedByLastname;
         this.expectedMaturityDate = expectedMaturityDate;
+        this.writeOffOnDate = writeOffOnDate;
+        this.writeOffByUsername = writeOffByUsername;
+        this.writeOffByFirstname = writeOffByFirstname;
+        this.writeOffByLastname = writeOffByLastname;
     }
 
     public RepaymentScheduleRelatedLoanData repaymentScheduleRelatedData(final CurrencyData currency, final BigDecimal principal,
