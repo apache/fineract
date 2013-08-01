@@ -22,7 +22,8 @@ import org.mifosplatform.organisation.office.domain.Office;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
-@Table(name = "m_staff", uniqueConstraints = { @UniqueConstraint(columnNames = { "display_name" }, name = "display_name") })
+@Table(name = "m_staff", uniqueConstraints = { @UniqueConstraint(columnNames = { "display_name" }, name = "display_name") ,
+@UniqueConstraint(columnNames = { "external_id" }, name = "external_id_UNIQUE") })
 public class Staff extends AbstractPersistable<Long> {
 
     @Column(name = "firstname", length = 50)
