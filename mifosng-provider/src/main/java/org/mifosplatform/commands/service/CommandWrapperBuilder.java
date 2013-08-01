@@ -990,7 +990,16 @@ public class CommandWrapperBuilder {
         this.href = "/groups/" + groupId;
         return this;
     }
-
+    
+    public CommandWrapperBuilder assignGroupStaff(final Long groupId) {
+        this.actionName = "ASSIGNSTAFF";
+        this.entityName = "GROUP";
+        this.entityId = groupId;
+        this.groupId = groupId;
+        this.href = "/groups/" + groupId +"?command=assignStaff";
+        return this;
+    }
+    
     public CommandWrapperBuilder createCollateral(final Long loanId) {
         this.actionName = "CREATE";
         this.entityName = "COLLATERAL";

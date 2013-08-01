@@ -413,7 +413,11 @@ public class CommandWrapper {
     public boolean isUnassignStaff() {
         return this.actionName.equalsIgnoreCase("UNASSIGNSTAFF") && this.entityName.equalsIgnoreCase("GROUP");
     }
-
+    
+    public boolean isAssignStaff() {
+        return this.actionName.equalsIgnoreCase("ASSIGNSTAFF");
+    }
+    
     public String commandName() {
         return this.actionName + "_" + this.entityName;
     }

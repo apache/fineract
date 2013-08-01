@@ -24,6 +24,8 @@ public interface GroupingTypesWritePlatformService {
 
     CommandProcessingResult unassignGroupOrCenterStaff(Long groupId, JsonCommand command);
     
+    CommandProcessingResult assignGroupOrCenterStaff(Long groupId, JsonCommand command);
+    
     CommandProcessingResult associateClientsToGroup(Long groupId, JsonCommand command);
     
     CommandProcessingResult disassociateClientsFromGroup(Long groupId, JsonCommand command);    

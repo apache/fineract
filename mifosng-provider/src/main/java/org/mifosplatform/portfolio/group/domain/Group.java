@@ -380,4 +380,5 @@ public final class Group extends AbstractPersistable<Long> {
     public Office getOffice() {
         return this.office;
     }
+
 }
