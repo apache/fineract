@@ -441,7 +441,9 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
                 handler = this.applicationContext.getBean("unassignRoleCommandHandler", NewCommandSourceHandler.class);
             } else if (wrapper.isUpdateGroupRole()) {
                 handler = this.applicationContext.getBean("updateGroupRoleCommandHandler", NewCommandSourceHandler.class);
-            } else {
+            }  else if (wrapper.isAssignStaff()) {
+                handler = this.applicationContext.getBean("assignGroupStaffCommandHandler", NewCommandSourceHandler.class);
+            }else {
                 throw new UnsupportedCommandException(wrapper.commandName());
             }
         } else if (wrapper.isCenterResource()) {

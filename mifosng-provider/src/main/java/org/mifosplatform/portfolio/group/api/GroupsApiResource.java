@@ -222,7 +222,7 @@ public class GroupsApiResource {
         return this.toApiJsonSerializer.serialize(result);
 
     }
-
+    
     @PUT
     @Path("{groupId}")
     @Consumes({ MediaType.APPLICATION_JSON })
@@ -285,6 +285,10 @@ public class GroupsApiResource {
             return this.toApiJsonSerializer.serialize(result);
         } else if (is(commandParam, "unassignStaff")) {
             final CommandWrapper commandRequest = builder.unassignGroupStaff(groupId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            return this.toApiJsonSerializer.serialize(result);
+        } else if (is(commandParam, "assignStaff")) {
+            final CommandWrapper commandRequest = builder.assignGroupStaff(groupId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
             return this.toApiJsonSerializer.serialize(result);
         } else if (is(commandParam, "assignRole")) {
