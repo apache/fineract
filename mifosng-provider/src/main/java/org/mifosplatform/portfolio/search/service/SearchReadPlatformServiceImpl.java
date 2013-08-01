@@ -52,7 +52,7 @@ public class SearchReadPlatformServiceImpl implements SearchReadPlatformService 
 
         public String searchSchema(final SearchConditions searchConditions) {
 
-            String union = " union all ";
+            String union = " union ";
             String clientExactMatchSql = " (select 'CLIENT' as entityType, c.id as entityId, c.display_name as entityName, c.external_id as entityExternalId, c.account_no as entityAccountNo "
                     + " , c.office_id as parentId, o.name as parentName "
                     + " from m_client c join m_office o on o.id = c.office_id where o.hierarchy like :hierarchy and (c.account_no like :search or c.display_name like :search or c.external_id like :search)) ";
