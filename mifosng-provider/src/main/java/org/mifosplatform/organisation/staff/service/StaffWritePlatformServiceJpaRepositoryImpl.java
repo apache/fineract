@@ -98,7 +98,7 @@ public class StaffWritePlatformServiceJpaRepositoryImpl implements StaffWritePla
             }
 
             if (!changesOnly.isEmpty()) {
-                this.staffRepository.save(staffForUpdate);
+                this.staffRepository.saveAndFlush(staffForUpdate);
             }
 
             return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(staffId)
