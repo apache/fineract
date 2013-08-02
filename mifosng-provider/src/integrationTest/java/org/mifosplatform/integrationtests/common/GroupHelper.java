@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertFalse;
 
+import java.lang.Boolean;
 import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.List;
@@ -135,7 +136,7 @@ public class GroupHelper {
                                                     final Integer generatedGroupID, final boolean generatedGroupStatus) {
         System.out.println("------------------------------CHECK GROUP STATUS------------------------------------\n");
         String GROUP_URL = "/mifosng-provider/api/v1/groups/" + generatedGroupID + "?tenantIdentifier=default";
-        boolean  responseGroupStatus = Utils.performServerGet(requestSpec, responseSpec, GROUP_URL, "active");
+        Boolean responseGroupStatus = Utils.performServerGet(requestSpec, responseSpec, GROUP_URL, "active");
         assertEquals("ERROR IN ACTIVATING THE GROUP",generatedGroupStatus, responseGroupStatus);
     }
 
