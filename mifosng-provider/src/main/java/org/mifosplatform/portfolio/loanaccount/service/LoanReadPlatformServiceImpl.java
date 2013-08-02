@@ -315,7 +315,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         final Collection<CodeValueData> paymentOptions = codeValueReadPlatformService
                 .retrieveCodeValuesByCode(PaymentDetailConstants.paymentTypeCodeName);
         return new LoanTransactionData(null, transactionType, null, currencyData, earliestUnpaidInstallmentDate,
-                possibleNextRepaymentAmount.getAmount(), null, null, null, null, paymentOptions);
+                possibleNextRepaymentAmount.getAmount(), null, null, null, null, paymentOptions, null);
     }
 
     @Override
@@ -339,7 +339,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
         final BigDecimal amount = waiveOfInterest.getAmount(currency).getAmount();
         return new LoanTransactionData(null, transactionType, null, currencyData, waiveOfInterest.getTransactionDate(), amount, null, null,
-                null, null);
+                null, null, null);
     }
 
     @Override
@@ -348,7 +348,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         context.authenticatedUser();
 
         final LoanTransactionEnumData transactionType = LoanEnumerations.transactionType(LoanTransactionType.WRITEOFF);
-        return new LoanTransactionData(null, transactionType, null, null, DateUtils.getLocalDateOfTenant(), null, null, null, null, null);
+        return new LoanTransactionData(null, transactionType, null, null, DateUtils.getLocalDateOfTenant(), null, null, null, null, null, null);
     }
 
     @Override
@@ -359,7 +359,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         final Collection<CodeValueData> paymentOptions = codeValueReadPlatformService
                 .retrieveCodeValuesByCode(PaymentDetailConstants.paymentTypeCodeName);
         return new LoanTransactionData(null, transactionType, null, null, loan.getExpectedDisbursedOnLocalDate(), null, null, null, null,
-                null, paymentOptions);
+                null, paymentOptions, null);
     }
 
     @Override
@@ -844,7 +844,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     + " pd.receipt_number as receiptNumber, pd.bank_number as bankNumber,pd.routing_code as routingCode, "
                     + " l.currency_code as currencyCode, l.currency_digits as currencyDigits, rc.`name` as currencyName, "
                     + " rc.display_symbol as currencyDisplaySymbol, rc.internationalized_name_code as currencyNameCode, "
-                    + " cv.code_value as paymentTypeName " + " from m_loan l join m_loan_transaction tr on tr.loan_id = l.id"
+                    + " cv.code_value as paymentTypeName, tr.external_id as externalId " + " from m_loan l join m_loan_transaction tr on tr.loan_id = l.id"
                     + " join m_currency rc on rc.`code` = l.currency_code "
                     + " left JOIN m_payment_detail pd ON tr.payment_detail_id = pd.id"
                     + " left join m_code_value cv on pd.payment_type_cv_id = cv.id";
@@ -887,9 +887,10 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             final BigDecimal interestPortion = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "interest");
             final BigDecimal feeChargesPortion = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "fees");
             final BigDecimal penaltyChargesPortion = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "penalties");
+            final String externalId = rs.getString("externalId");
 
             return new LoanTransactionData(id, transactionType, paymentDetailData, currencyData, date, totalAmount, principalPortion,
-                    interestPortion, feeChargesPortion, penaltyChargesPortion);
+                    interestPortion, feeChargesPortion, penaltyChargesPortion, externalId);
         }
     }
 

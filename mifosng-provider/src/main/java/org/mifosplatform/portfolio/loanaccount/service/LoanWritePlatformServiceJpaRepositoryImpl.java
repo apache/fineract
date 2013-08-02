@@ -349,6 +349,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         final LocalDate transactionDate = command.localDateValueOfParameterNamed("transactionDate");
         final BigDecimal transactionAmount = command.bigDecimalValueOfParameterNamed("transactionAmount");
+        final String txnExternalId = command.stringValueOfParameterNamed("externalId");
 
         final Map<String, Object> changes = new LinkedHashMap<String, Object>();
         changes.put("transactionDate", command.stringValueOfParameterNamed("transactionDate"));
@@ -364,7 +365,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         PaymentDetail paymentDetail = paymentDetailWritePlatformService.createAndPersistPaymentDetail(command, changes);
 
         CommandProcessingResultBuilder commandProcessingResultBuilder = saveLoanRepayment(loanId, paymentDetail, transactionAmount,
-                transactionDate, noteText);
+                transactionDate, noteText, txnExternalId);
 
         return commandProcessingResultBuilder.withCommandId(command.commandId()) //
                 .withLoanId(loanId) //
@@ -373,7 +374,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     }
 
     private CommandProcessingResultBuilder saveLoanRepayment(final Long loanId, final PaymentDetail paymentDetail,
-            final BigDecimal transactionAmount, final LocalDate transactionDate, final String noteText) {
+            final BigDecimal transactionAmount, final LocalDate transactionDate, final String noteText, final String txnExternalId) {
         final Loan loan = retrieveLoanBy(loanId);
 
         // TODO: Is it required to validate transaction date with meeting dates
@@ -393,7 +394,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final List<Long> existingReversedTransactionIds = new ArrayList<Long>();
 
         final Money repaymentAmount = Money.of(loan.getCurrency(), transactionAmount);
-        final LoanTransaction newRepaymentTransaction = LoanTransaction.repayment(repaymentAmount, paymentDetail, transactionDate);
+        final LoanTransaction newRepaymentTransaction = LoanTransaction.repayment(repaymentAmount, paymentDetail, transactionDate, txnExternalId);
         final boolean isHolidayEnabled = this.configurationDomainService.isRescheduleRepaymentsOnHolidaysEnabled();
         final List<Holiday> holidays = this.holidayRepository.findByOfficeIdAndGreaterThanDate(loan.getOfficeId(), transactionDate.toDate());
         final WorkingDays workingDays = this.workingDaysRepository.findOne();
@@ -448,7 +449,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
              ***/
             PaymentDetail paymentDetail = null;
             saveLoanRepayment(singleLoanRepaymentCommand.getLoanId(), paymentDetail, singleLoanRepaymentCommand.getTransactionAmount(),
-                    bulkRepaymentCommand.getTransactionDate(), bulkRepaymentCommand.getNote());
+                    bulkRepaymentCommand.getTransactionDate(), bulkRepaymentCommand.getNote(), null);
             changes.put("bulkTransations", singleLoanRepaymentCommand);
         }
         return changes;
@@ -469,6 +470,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         final LocalDate transactionDate = command.localDateValueOfParameterNamed("transactionDate");
         final BigDecimal transactionAmount = command.bigDecimalValueOfParameterNamed("transactionAmount");
+        final String txnExternalId = command.stringValueOfParameterNamed("externalId");
 
         final Map<String, Object> changes = new LinkedHashMap<String, Object>();
         changes.put("transactionDate", command.stringValueOfParameterNamed("transactionDate"));
@@ -481,7 +483,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         final Money transactionAmountAsMoney = Money.of(loan.getCurrency(), transactionAmount);
         PaymentDetail paymentDetail = paymentDetailWritePlatformService.createPaymentDetail(command, changes);
-        LoanTransaction newTransactionDetail = LoanTransaction.repayment(transactionAmountAsMoney, paymentDetail, transactionDate);
+        LoanTransaction newTransactionDetail = LoanTransaction.repayment(transactionAmountAsMoney, paymentDetail, transactionDate, txnExternalId);
         if (transactionToAdjust.isInterestWaiver()) {
             newTransactionDetail = LoanTransaction.waiver(loan, transactionAmountAsMoney, transactionDate);
         }
