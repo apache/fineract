@@ -1331,7 +1331,8 @@ public class Loan extends AbstractPersistable<Long> {
             actualChanges.put("status", LoanEnumerations.status(this.loanStatus));
 
             final LocalDate actualDisbursementDate = command.localDateValueOfParameterNamed("actualDisbursementDate");
-
+            final String txnExternalId = command.stringValueOfParameterNamed("externalId");
+            
             this.actualDisbursementDate = actualDisbursementDate.toDate();
             this.disbursedBy = currentUser;
             updateLoanScheduleDependentDerivedFields();
@@ -1344,7 +1345,7 @@ public class Loan extends AbstractPersistable<Long> {
             validateDisbursementDateIsOnNonWorkingDay(workingDays);
             validateDisbursementDateIsOnHoliday(isHolidayEnabled, holidays);
             
-            handleDisbursementTransaction(paymentDetail, actualDisbursementDate);
+            handleDisbursementTransaction(paymentDetail, actualDisbursementDate, txnExternalId);
 
             if (isRepaymentScheduleRegenerationRequiredForDisbursement(actualDisbursementDate)) {
                 regenerateRepaymentSchedule(loanScheduleFactory, currency, calculatedRepaymentsStartingFromDate, isHolidayEnabled, holidays, workingDays);
@@ -1394,10 +1395,10 @@ public class Loan extends AbstractPersistable<Long> {
         updateLoanSchedule(loanSchedule);
     }
 
-    private LoanTransaction handleDisbursementTransaction(final PaymentDetail paymentDetail, final LocalDate disbursedOn) {
+    private LoanTransaction handleDisbursementTransaction(final PaymentDetail paymentDetail, final LocalDate disbursedOn, final String txnExternalId) {
         // track disbursement transaction
         final LoanTransaction disbursementTransaction = LoanTransaction.disbursement(this.loanRepaymentScheduleDetail.getPrincipal(),
-                paymentDetail, disbursedOn);
+                paymentDetail, disbursedOn, txnExternalId);
         disbursementTransaction.updateLoan(this);
         this.loanTransactions.add(disbursementTransaction);
 
@@ -1411,7 +1412,7 @@ public class Loan extends AbstractPersistable<Long> {
         final Money totalFeeChargesDueAtDisbursement = this.summary.getTotalFeeChargesDueAtDisbursement(loanCurrency());
         if (totalFeeChargesDueAtDisbursement.isGreaterThanZero()) {
 
-            LoanTransaction chargesPayment = LoanTransaction.repaymentAtDisbursement(totalFeeChargesDueAtDisbursement, null, disbursedOn);
+            LoanTransaction chargesPayment = LoanTransaction.repaymentAtDisbursement(totalFeeChargesDueAtDisbursement, null, disbursedOn, txnExternalId);
             Money zero = Money.zero(getCurrency());
             chargesPayment.updateComponents(zero, zero, totalFeeChargesDueAtDisbursement, zero);
             chargesPayment.updateLoan(this);
@@ -1830,6 +1831,7 @@ public class Loan extends AbstractPersistable<Long> {
             existingReversedTransactionIds.addAll(findExistingReversedTransactionIds());
 
             final LocalDate writtenOffOnLocalDate = command.localDateValueOfParameterNamed("transactionDate");
+            final String txnExternalId = command.stringValueOfParameterNamed("externalId");
 
             this.closedOnDate = writtenOffOnLocalDate.toDate();
             this.writtenOffOnDate = writtenOffOnLocalDate.toDate();
@@ -1849,7 +1851,7 @@ public class Loan extends AbstractPersistable<Long> {
                 throw new InvalidLoanStateTransitionException("writeoff", "cannot.be.a.future.date", errorMessage, writtenOffOnLocalDate);
             }
 
-            loanTransaction = LoanTransaction.writeoff(this, writtenOffOnLocalDate);
+            loanTransaction = LoanTransaction.writeoff(this, writtenOffOnLocalDate, txnExternalId);
             final boolean isLastTransaction = isChronologicallyLatestTransaction(loanTransaction, loanTransactions);
             if (!isLastTransaction) {
                 final String errorMessage = "The date of the writeoff transaction must occur on or before previous transactions.";
@@ -1876,7 +1878,8 @@ public class Loan extends AbstractPersistable<Long> {
         existingReversedTransactionIds.addAll(findExistingReversedTransactionIds());
 
         final LocalDate closureDate = command.localDateValueOfParameterNamed("transactionDate");
-
+        final String txnExternalId = command.stringValueOfParameterNamed("externalId");
+        
         this.closedOnDate = closureDate.toDate();
         changes.put("closedOnDate", command.stringValueOfParameterNamed("transactionDate"));
 
@@ -1905,7 +1908,7 @@ public class Loan extends AbstractPersistable<Long> {
                 }
                 this.closedOnDate = closureDate.toDate();
 
-                loanTransaction = LoanTransaction.writeoff(this, closureDate);
+                loanTransaction = LoanTransaction.writeoff(this, closureDate, txnExternalId);
                 boolean isLastTransaction = isChronologicallyLatestTransaction(loanTransaction, loanTransactions);
                 if (!isLastTransaction) {
                     final String errorMessage = "The closing date of the loan must be on or after latest transaction date.";

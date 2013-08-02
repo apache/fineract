@@ -32,6 +32,7 @@ public class LoanTransactionData {
     private final BigDecimal interestPortion;
     private final BigDecimal feeChargesPortion;
     private final BigDecimal penaltyChargesPortion;
+    private final String externalId;
 
     // templates
     final Collection<CodeValueData> paymentTypeOptions;
@@ -40,20 +41,20 @@ public class LoanTransactionData {
         return new LoanTransactionData(loanTransactionData.id, loanTransactionData.type, loanTransactionData.paymentDetailData,
                 loanTransactionData.currency, loanTransactionData.date, loanTransactionData.amount, loanTransactionData.principalPortion,
                 loanTransactionData.interestPortion, loanTransactionData.feeChargesPortion, loanTransactionData.penaltyChargesPortion,
-                paymentTypeOptions);
+                paymentTypeOptions, loanTransactionData.externalId);
     }
 
     public LoanTransactionData(final Long id, final LoanTransactionEnumData transactionType, final PaymentDetailData paymentDetailData,
             final CurrencyData currency, final LocalDate date, final BigDecimal amount, final BigDecimal principalPortion,
-            final BigDecimal interestPortion, final BigDecimal feeChargesPortion, final BigDecimal penaltyChargesPortion) {
+            final BigDecimal interestPortion, final BigDecimal feeChargesPortion, final BigDecimal penaltyChargesPortion, final String externalId) {
         this(id, transactionType, paymentDetailData, currency, date, amount, principalPortion, interestPortion, feeChargesPortion,
-                penaltyChargesPortion, null);
+                penaltyChargesPortion, null, externalId);
     }
 
     public LoanTransactionData(final Long id, final LoanTransactionEnumData transactionType, final PaymentDetailData paymentDetailData,
             final CurrencyData currency, final LocalDate date, final BigDecimal amount, final BigDecimal principalPortion,
             final BigDecimal interestPortion, final BigDecimal feeChargesPortion, final BigDecimal penaltyChargesPortion,
-            final Collection<CodeValueData> paymentTypeOptions) {
+            final Collection<CodeValueData> paymentTypeOptions, final String externalId) {
         this.id = id;
         this.type = transactionType;
         this.paymentDetailData = paymentDetailData;
@@ -65,6 +66,7 @@ public class LoanTransactionData {
         this.feeChargesPortion = feeChargesPortion;
         this.penaltyChargesPortion = penaltyChargesPortion;
         this.paymentTypeOptions = paymentTypeOptions;
+        this.externalId = externalId;
     }
 
     public LocalDate dateOf() {
