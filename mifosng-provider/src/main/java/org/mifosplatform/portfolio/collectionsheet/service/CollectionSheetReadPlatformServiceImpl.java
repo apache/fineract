@@ -101,8 +101,10 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
 
             for (final JLGCollectionSheetFlatData collectionSheetFlatData : jlgCollectionSheetFlatData) {
 
-                loanProducts.add(LoanProductData.lookupWithCurrency(collectionSheetFlatData.getProductId(),
+                if(collectionSheetFlatData.getProductId() !=null){
+                    loanProducts.add(LoanProductData.lookupWithCurrency(collectionSheetFlatData.getProductId(),
                         collectionSheetFlatData.getProductShortName(), collectionSheetFlatData.getCurrency()));
+                }
                 corrCollectioSheetFlatData = collectionSheetFlatData;
 
                 if (firstTime || collectionSheetFlatData.getGroupId().equals(prevGroupId)) {
@@ -239,8 +241,11 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
             final String currencyNameCode = rs.getString("currencyNameCode");
             final String currencyDisplaySymbol = rs.getString("currencyDisplaySymbol");
             final Integer currencyDigits = JdbcSupport.getInteger(rs, "currencyDigits");
-            final CurrencyData currencyData = new CurrencyData(currencyCode, currencyName, currencyDigits, currencyDisplaySymbol,
-                    currencyNameCode);
+            CurrencyData currencyData = null;
+            if(currencyCode != null){
+                currencyData = new CurrencyData(currencyCode, currencyName, currencyDigits, currencyDisplaySymbol,
+                        currencyNameCode);
+            }
 
             final BigDecimal disbursementAmount = rs.getBigDecimal("disbursementAmount");
             final BigDecimal principalDue = rs.getBigDecimal("principalDue");
