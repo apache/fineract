@@ -488,8 +488,13 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             newTransactionDetail = LoanTransaction.waiver(loan, transactionAmountAsMoney, transactionDate);
         }
 
+        final boolean isHolidayEnabled = this.configurationDomainService.isRescheduleRepaymentsOnHolidaysEnabled();
+        final List<Holiday> holidays = this.holidayRepository.findByOfficeIdAndGreaterThanDate(loan.getOfficeId(), transactionDate.toDate());
+        final WorkingDays workingDays = this.workingDaysRepository.findOne();
+
         final ChangedTransactionDetail changedTransactionDetail = loan.adjustExistingTransaction(newTransactionDetail,
-                defaultLoanLifecycleStateMachine(), transactionToAdjust, existingTransactionIds, existingReversedTransactionIds);
+                defaultLoanLifecycleStateMachine(), transactionToAdjust, existingTransactionIds, existingReversedTransactionIds,
+                isHolidayEnabled, holidays, workingDays);
 
         if (newTransactionDetail.isGreaterThanZero(loan.getPrincpal().getCurrency())) {
             if (paymentDetail != null) {
