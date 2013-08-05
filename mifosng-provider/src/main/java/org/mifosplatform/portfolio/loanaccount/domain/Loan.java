@@ -1739,7 +1739,11 @@ public class Loan extends AbstractPersistable<Long> {
 
     public ChangedTransactionDetail adjustExistingTransaction(final LoanTransaction newTransactionDetail,
             final LoanLifecycleStateMachine loanLifecycleStateMachine, final LoanTransaction transactionForAdjustment,
-            final List<Long> existingTransactionIds, final List<Long> existingReversedTransactionIds) {
+            final List<Long> existingTransactionIds, final List<Long> existingReversedTransactionIds, final boolean isHolidayEnabled,
+            final List<Holiday> holidays, final WorkingDays workingDays) {
+
+        validateRepaymentDateIsOnHoliday(newTransactionDetail.getTransactionDate(), isHolidayEnabled, holidays);
+        validateRepaymentDateIsOnNonWorkingDay(newTransactionDetail.getTransactionDate(), workingDays);
 
         ChangedTransactionDetail changedTransactionDetail = null;
 
