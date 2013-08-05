@@ -55,6 +55,7 @@ import org.mifosplatform.organisation.monetary.domain.Money;
 import org.mifosplatform.organisation.staff.domain.Staff;
 import org.mifosplatform.organisation.workingdays.domain.WorkingDays;
 import org.mifosplatform.organisation.workingdays.service.WorkingDaysUtil;
+import org.mifosplatform.portfolio.accountdetails.domain.AccountType;
 import org.mifosplatform.portfolio.calendar.service.CalendarHelper;
 import org.mifosplatform.portfolio.charge.exception.LoanChargeCannotBeAddedException;
 import org.mifosplatform.portfolio.client.domain.Client;
@@ -2499,7 +2500,7 @@ public class Loan extends AbstractPersistable<Long> {
     }
 
     public boolean isGroupLoan() {
-        return LoanType.fromInt(this.loanType).isGroupLoan();
+        return AccountType.fromInt(this.loanType).isGroupAccount();
     }
 
     public void updateInterestRateFrequencyType() {

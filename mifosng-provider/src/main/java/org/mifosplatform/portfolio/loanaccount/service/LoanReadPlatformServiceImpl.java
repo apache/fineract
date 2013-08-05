@@ -29,6 +29,7 @@ import org.mifosplatform.organisation.monetary.domain.ApplicationCurrency;
 import org.mifosplatform.organisation.monetary.domain.ApplicationCurrencyRepositoryWrapper;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.organisation.monetary.domain.Money;
+import org.mifosplatform.portfolio.accountdetails.service.AccountEnumerations;
 import org.mifosplatform.portfolio.calendar.data.CalendarData;
 import org.mifosplatform.portfolio.calendar.domain.CalendarEntityType;
 import org.mifosplatform.portfolio.calendar.service.CalendarReadPlatformService;
@@ -492,7 +493,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             final String groupHierarchy = rs.getString("groupHierarchy");
 
             final Integer loanTypeId = JdbcSupport.getInteger(rs, "loanType");
-            final EnumOptionData loanType = LoanEnumerations.loanType(loanTypeId);
+            final EnumOptionData loanType = AccountEnumerations.loanType(loanTypeId);
 
             final Long fundId = JdbcSupport.getLong(rs, "fundId");
             final String fundName = rs.getString("fundName");
