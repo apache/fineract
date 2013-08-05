@@ -3,7 +3,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this file,
  * You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-package org.mifosplatform.portfolio.client.data;
+package org.mifosplatform.portfolio.accountdetails.data;
 
 import java.math.BigDecimal;
 
@@ -11,10 +11,10 @@ import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.mifosplatform.portfolio.savings.data.SavingsAccountStatusEnumData;
 
 /**
- * Immutable data object for client savings accounts.
+ * Immutable data object for savings accounts.
  */
 @SuppressWarnings("unused")
-public class ClientSavingsAccountSummaryData {
+public class SavingsAccountSummaryData {
 
     private final Long id;
     private final String accountNo;
@@ -25,7 +25,7 @@ public class ClientSavingsAccountSummaryData {
     private final CurrencyData currency;
     private final BigDecimal accountBalance;
 
-    public ClientSavingsAccountSummaryData(final Long id, final String accountNo, final String externalId, final Long productId,
+    public SavingsAccountSummaryData(final Long id, final String accountNo, final String externalId, final Long productId,
             final String productName, final SavingsAccountStatusEnumData status, final CurrencyData currency,
             final BigDecimal accountBalance) {
         this.id = id;

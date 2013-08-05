@@ -6,17 +6,17 @@
 package org.mifosplatform.portfolio.loanproduct.service;
 
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
+import org.mifosplatform.portfolio.accountdetails.service.AccountEnumerations;
 import org.mifosplatform.portfolio.loanaccount.data.LoanStatusEnumData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanTransactionEnumData;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanStatus;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanTransactionType;
-import org.mifosplatform.portfolio.loanaccount.domain.LoanType;
 import org.mifosplatform.portfolio.loanproduct.domain.AmortizationMethod;
 import org.mifosplatform.portfolio.loanproduct.domain.InterestCalculationPeriodMethod;
 import org.mifosplatform.portfolio.loanproduct.domain.InterestMethod;
 import org.mifosplatform.portfolio.loanproduct.domain.PeriodFrequencyType;
 
-public class LoanEnumerations {
+public class LoanEnumerations{
 
     public static final String LOAN_TERM_FREQUENCY_TYPE = "loanTermFrequencyType";
     public static final String TERM_FREQUENCY_TYPE = "termFrequencyType";
@@ -44,7 +44,7 @@ public class LoanEnumerations {
             return interestType(id);
         } else if (typeName.equals(INTEREST_CALCULATION_PERIOD_TYPE)) {
             return interestCalculationPeriodType(id);
-        } else if (typeName.equals(LOAN_TYPE)) { return loanType(id); }
+        } else if (typeName.equals(LOAN_TYPE)) { return AccountEnumerations.loanType(id); }
         return null;
     }
 
@@ -328,34 +328,6 @@ public class LoanEnumerations {
             break;
             case OVERPAID:
                 optionData = new LoanStatusEnumData(LoanStatus.OVERPAID.getValue().longValue(), LoanStatus.OVERPAID.getCode(), "Overpaid");
-            break;
-        }
-
-        return optionData;
-    }
-
-    public static EnumOptionData loanType(final Integer loanTypeId) {
-        return loanType(LoanType.fromInt(loanTypeId));
-    }
-
-    public static EnumOptionData loanType(final String name) {
-        return loanType(LoanType.fromName(name));
-    }
-
-    public static EnumOptionData loanType(final LoanType type) {
-        EnumOptionData optionData = new EnumOptionData(LoanType.INVALID.getValue().longValue(), LoanType.INVALID.getCode(), "Invalid");
-        switch (type) {
-            case INVALID:
-                optionData = new EnumOptionData(LoanType.INVALID.getValue().longValue(), LoanType.INVALID.getCode(), "Invalid");
-            break;
-            case INDIVIDUAL:
-                optionData = new EnumOptionData(LoanType.INDIVIDUAL.getValue().longValue(), LoanType.INDIVIDUAL.getCode(), "Individual");
-            break;
-            case GROUP:
-                optionData = new EnumOptionData(LoanType.GROUP.getValue().longValue(), LoanType.GROUP.getCode(), "Group");
-            break;
-            case JLG:
-                optionData = new EnumOptionData(LoanType.JLG.getValue().longValue(), LoanType.JLG.getCode(), "JLG");
             break;
         }
 

@@ -38,11 +38,12 @@ import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.mifosplatform.infrastructure.core.service.Page;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
+import org.mifosplatform.portfolio.accountdetails.data.AccountSummaryCollectionData;
+import org.mifosplatform.portfolio.accountdetails.service.AccountDetailsReadPlatformService;
 import org.mifosplatform.portfolio.client.data.ClientData;
 import org.mifosplatform.portfolio.client.service.ClientReadPlatformService;
 import org.mifosplatform.portfolio.collectionsheet.data.JLGCollectionSheetData;
 import org.mifosplatform.portfolio.collectionsheet.service.CollectionSheetReadPlatformService;
-import org.mifosplatform.portfolio.group.data.GroupAccountSummaryCollectionData;
 import org.mifosplatform.portfolio.group.data.GroupGeneralData;
 import org.mifosplatform.portfolio.group.data.GroupRoleData;
 import org.mifosplatform.portfolio.group.service.CenterReadPlatformService;
@@ -67,23 +68,25 @@ public class GroupsApiResource {
     private final ClientReadPlatformService clientReadPlatformService;
     private final ToApiJsonSerializer<Object> toApiJsonSerializer;
     private final ToApiJsonSerializer<GroupGeneralData> groupGeneralApiJsonSerializer;
-    private final ToApiJsonSerializer<GroupAccountSummaryCollectionData> groupSummaryToApiJsonSerializer;
+    private final ToApiJsonSerializer<AccountSummaryCollectionData> groupSummaryToApiJsonSerializer;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final CollectionSheetReadPlatformService collectionSheetReadPlatformService;
     private final FromJsonHelper fromJsonHelper;
     private final GroupRolesReadPlatformService groupRolesReadPlatformService;
+    private final AccountDetailsReadPlatformService accountDetailsReadPlatformService;
 
     @Autowired
     public GroupsApiResource(final PlatformSecurityContext context, final GroupReadPlatformService groupReadPlatformService,
             final CenterReadPlatformService centerReadPlatformService, final ClientReadPlatformService clientReadPlatformService,
             final ToApiJsonSerializer<Object> toApiJsonSerializer,
             final ToApiJsonSerializer<GroupGeneralData> groupTopOfHierarchyApiJsonSerializer,
-            final ToApiJsonSerializer<GroupAccountSummaryCollectionData> groupSummaryToApiJsonSerializer,
+            final ToApiJsonSerializer<AccountSummaryCollectionData> groupSummaryToApiJsonSerializer,
             final ApiRequestParameterHelper apiRequestParameterHelper,
             final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
             final CollectionSheetReadPlatformService collectionSheetReadPlatformService, final FromJsonHelper fromJsonHelper,
-            final GroupRolesReadPlatformService groupRolesReadPlatformService) {
+            final GroupRolesReadPlatformService groupRolesReadPlatformService,
+            final AccountDetailsReadPlatformService accountDetailsReadPlatformService) {
         this.context = context;
         this.groupReadPlatformService = groupReadPlatformService;
         this.centerReadPlatformService = centerReadPlatformService;
@@ -96,6 +99,7 @@ public class GroupsApiResource {
         this.collectionSheetReadPlatformService = collectionSheetReadPlatformService;
         this.fromJsonHelper = fromJsonHelper;
         this.groupRolesReadPlatformService = groupRolesReadPlatformService;
+        this.accountDetailsReadPlatformService = accountDetailsReadPlatformService;
     }
 
     @GET
@@ -315,20 +319,20 @@ public class GroupsApiResource {
     }
 
     @GET
-    @Path("{groupId}/loans")
+    @Path("{groupId}/accounts")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveLoans(@PathParam("groupId") final Long groupId, @Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission("GROUP");
 
-        final GroupAccountSummaryCollectionData groupAccount = this.groupReadPlatformService.retrieveGroupAccountDetails(groupId);
+        final AccountSummaryCollectionData groupAccount = this.accountDetailsReadPlatformService.retrieveGroupAccountDetails(groupId);
 
-        final Set<String> GROUP_ACCOUNTS_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("pendingApprovalLoans",
-                "awaitingDisbursalLoans", "openLoans", "closedLoans", "anyLoanCount", "pendingApprovalLoanCount",
-                "awaitingDisbursalLoanCount", "activeLoanCount", "closedLoanCount"));
+        final Set<String> GROUP_ACCOUNTS_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("loanAccounts", "savingsAccounts",
+                "memberLoanAccounts", "memberSavingsAccounts"));
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.groupSummaryToApiJsonSerializer.serialize(settings, groupAccount, GROUP_ACCOUNTS_DATA_PARAMETERS);
     }
+
 }

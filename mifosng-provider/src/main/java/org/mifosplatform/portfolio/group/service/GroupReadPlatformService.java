@@ -5,11 +5,7 @@
  */
 package org.mifosplatform.portfolio.group.service;
 
-import java.util.Collection;
-
 import org.mifosplatform.infrastructure.core.service.Page;
-import org.mifosplatform.portfolio.group.data.GroupAccountSummaryCollectionData;
-import org.mifosplatform.portfolio.group.data.GroupAccountSummaryData;
 import org.mifosplatform.portfolio.group.data.GroupGeneralData;
 
 public interface GroupReadPlatformService {
@@ -19,9 +15,4 @@ public interface GroupReadPlatformService {
     Page<GroupGeneralData> retrieveAll(SearchParameters searchParameters);
 
     GroupGeneralData retrieveOne(Long groupId);
-
-    //
-    GroupAccountSummaryCollectionData retrieveGroupAccountDetails(Long groupId);
-
-    Collection<GroupAccountSummaryData> retrieveGroupLoanAccountsByLoanOfficerId(Long groupId, Long loanOfficerId);
 }

@@ -38,6 +38,7 @@ import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.client.domain.ClientRepositoryWrapper;
 import org.mifosplatform.portfolio.group.domain.Group;
 import org.mifosplatform.portfolio.group.domain.GroupRepositoryWrapper;
+import org.mifosplatform.portfolio.group.exception.ClientNotInGroupException;
 import org.mifosplatform.portfolio.savings.SavingsCompoundingInterestPeriodType;
 import org.mifosplatform.portfolio.savings.SavingsInterestCalculationDaysInYearType;
 import org.mifosplatform.portfolio.savings.SavingsInterestCalculationType;
@@ -105,6 +106,10 @@ public class SavingsAccountAssembler {
         final Long groupId = fromApiJsonHelper.extractLongNamed(groupIdParamName, element);
         if (groupId != null) {
             group = this.groupRepository.findOneWithNotFoundDetection(groupId);
+        }
+        
+        if(group != null && client != null){
+            if (!group.hasClientAsMember(client)) { throw new ClientNotInGroupException(clientId, groupId); }
         }
 
         final Long fieldOfficerId = fromApiJsonHelper.extractLongNamed(fieldOfficerIdParamName, element);

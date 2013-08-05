@@ -24,6 +24,7 @@ import org.mifosplatform.organisation.staff.exception.StaffNotFoundException;
 import org.mifosplatform.organisation.staff.exception.StaffRoleException;
 import org.mifosplatform.organisation.workingdays.domain.WorkingDays;
 import org.mifosplatform.organisation.workingdays.domain.WorkingDaysRepositoryWrapper;
+import org.mifosplatform.portfolio.accountdetails.service.AccountEnumerations;
 import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.client.domain.ClientRepositoryWrapper;
 import org.mifosplatform.portfolio.collateral.domain.LoanCollateral;
@@ -53,7 +54,6 @@ import org.mifosplatform.portfolio.loanproduct.domain.LoanProductRepository;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanTransactionProcessingStrategy;
 import org.mifosplatform.portfolio.loanproduct.exception.InvalidCurrencyException;
 import org.mifosplatform.portfolio.loanproduct.exception.LoanProductNotFoundException;
-import org.mifosplatform.portfolio.loanproduct.service.LoanEnumerations;
 import org.mifosplatform.useradministration.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -154,7 +154,7 @@ public class LoanAssembler {
 
         final String loanTypeParameterName = "loanType";
         final String loanTypeStr = fromApiJsonHelper.extractStringNamed(loanTypeParameterName, element);
-        final EnumOptionData loanType = LoanEnumerations.loanType(loanTypeStr);
+        final EnumOptionData loanType = AccountEnumerations.loanType(loanTypeStr);
 
         if (clientId != null) {
             client = this.clientRepository.findOneWithNotFoundDetection(clientId);

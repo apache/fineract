@@ -22,7 +22,7 @@ import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
 import org.mifosplatform.infrastructure.core.exception.InvalidJsonException;
 import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
-import org.mifosplatform.portfolio.loanaccount.domain.LoanType;
+import org.mifosplatform.portfolio.accountdetails.domain.AccountType;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanProduct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -77,22 +77,22 @@ public final class LoanApplicationCommandFromApiJsonHelper {
         baseDataValidator.reset().parameter(loanTypeParameterName).value(loanTypeStr).notNull();
 
         if (!StringUtils.isBlank(loanTypeStr)) {
-            final LoanType loanType = LoanType.fromName(loanTypeStr);
+            final AccountType loanType = AccountType.fromName(loanTypeStr);
             baseDataValidator.reset().parameter(loanTypeParameterName).value(loanType.getValue()).inMinMaxRange(1, 3);
 
             final Long clientId = fromApiJsonHelper.extractLongNamed("clientId", element);
             final Long groupId = fromApiJsonHelper.extractLongNamed("groupId", element);
-            if (loanType.isIndividualLoan()) {
+            if (loanType.isIndividualAccount()) {
                 baseDataValidator.reset().parameter("clientId").value(clientId).notNull().longGreaterThanZero();
                 baseDataValidator.reset().parameter("groupId").value(groupId).mustBeBlankWhenParameterProvided("clientId", clientId);
             }
 
-            if (loanType.isGroupLoan()) {
+            if (loanType.isGroupAccount()) {
                 baseDataValidator.reset().parameter("groupId").value(groupId).notNull().longGreaterThanZero();
                 baseDataValidator.reset().parameter("clientId").value(clientId).mustBeBlankWhenParameterProvided("groupId", groupId);
             }
 
-            if (loanType.isJLGLoan()) {
+            if (loanType.isJLGAccount()) {
                 baseDataValidator.reset().parameter("clientId").value(clientId).notNull().integerGreaterThanZero();
                 baseDataValidator.reset().parameter("groupId").value(groupId).notNull().longGreaterThanZero();
             }

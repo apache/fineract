@@ -36,12 +36,12 @@ import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.mifosplatform.infrastructure.core.service.Page;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
+import org.mifosplatform.portfolio.accountdetails.data.AccountSummaryCollectionData;
+import org.mifosplatform.portfolio.accountdetails.service.AccountDetailsReadPlatformService;
 import org.mifosplatform.portfolio.collectionsheet.data.JLGCollectionSheetData;
 import org.mifosplatform.portfolio.collectionsheet.service.CollectionSheetReadPlatformService;
 import org.mifosplatform.portfolio.group.data.CenterData;
-import org.mifosplatform.portfolio.group.data.GroupAccountSummaryCollectionData;
 import org.mifosplatform.portfolio.group.service.CenterReadPlatformService;
-import org.mifosplatform.portfolio.group.service.GroupReadPlatformService;
 import org.mifosplatform.portfolio.group.service.SearchParameters;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -56,26 +56,25 @@ public class CentersApiResource {
 
     private final PlatformSecurityContext context;
     private final CenterReadPlatformService centerReadPlatformService;
-    private final GroupReadPlatformService groupReadPlatformService;
     private final ToApiJsonSerializer<CenterData> centerApiJsonSerializer;
     private final ToApiJsonSerializer<Object> toApiJsonSerializer;
-    private final ToApiJsonSerializer<GroupAccountSummaryCollectionData> groupSummaryToApiJsonSerializer;
+    private final ToApiJsonSerializer<AccountSummaryCollectionData> groupSummaryToApiJsonSerializer;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final CollectionSheetReadPlatformService collectionSheetReadPlatformService;
     private final FromJsonHelper fromJsonHelper;
+    private final AccountDetailsReadPlatformService accountDetailsReadPlatformService;
 
     @Autowired
     public CentersApiResource(final PlatformSecurityContext context, final CenterReadPlatformService centerReadPlatformService,
-            final GroupReadPlatformService groupReadPlatformService, final ToApiJsonSerializer<CenterData> centerApiJsonSerializer,
-            final ToApiJsonSerializer<Object> toApiJsonSerializer,
-            final ToApiJsonSerializer<GroupAccountSummaryCollectionData> groupSummaryToApiJsonSerializer,
+            final ToApiJsonSerializer<CenterData> centerApiJsonSerializer, final ToApiJsonSerializer<Object> toApiJsonSerializer,
+            final ToApiJsonSerializer<AccountSummaryCollectionData> groupSummaryToApiJsonSerializer,
             final ApiRequestParameterHelper apiRequestParameterHelper,
             final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
-            final CollectionSheetReadPlatformService collectionSheetReadPlatformService, final FromJsonHelper fromJsonHelper) {
+            final CollectionSheetReadPlatformService collectionSheetReadPlatformService, final FromJsonHelper fromJsonHelper,
+            final AccountDetailsReadPlatformService accountDetailsReadPlatformService) {
         this.context = context;
         this.centerReadPlatformService = centerReadPlatformService;
-        this.groupReadPlatformService = groupReadPlatformService;
         this.centerApiJsonSerializer = centerApiJsonSerializer;
         this.toApiJsonSerializer = toApiJsonSerializer;
         this.groupSummaryToApiJsonSerializer = groupSummaryToApiJsonSerializer;
@@ -83,6 +82,7 @@ public class CentersApiResource {
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
         this.collectionSheetReadPlatformService = collectionSheetReadPlatformService;
         this.fromJsonHelper = fromJsonHelper;
+        this.accountDetailsReadPlatformService = accountDetailsReadPlatformService;
     }
 
     @GET
@@ -126,7 +126,7 @@ public class CentersApiResource {
 
         this.context.authenticatedUser().validateHasReadPermission(GroupingTypesApiConstants.CENTER_RESOURCE_NAME);
         final Set<String> associationParameters = ApiParameterHelper.extractAssociationsForResponseIfProvided(uriInfo.getQueryParameters());
-        
+
         CenterData center = this.centerReadPlatformService.retrieveOne(centerId);
 
         final boolean template = ApiParameterHelper.template(uriInfo.getQueryParameters());
@@ -134,7 +134,7 @@ public class CentersApiResource {
             final CenterData templateCenter = this.centerReadPlatformService.retrieveTemplate(center.officeId());
             center = CenterData.withTemplate(templateCenter, center);
         }
-        
+
         if (!associationParameters.isEmpty()) {
             if (associationParameters.contains("groupMembers")) {
                 center = CenterData.setGroups(center, this.centerReadPlatformService.retrieveAssociatedGroups(centerId));
@@ -200,18 +200,20 @@ public class CentersApiResource {
             final CommandWrapper commandRequest = builder.activateCenter(centerId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
             return this.toApiJsonSerializer.serialize(result);
-        }else if (is(commandParam, "generateCollectionSheet")) {
+        } else if (is(commandParam, "generateCollectionSheet")) {
             final JsonElement parsedQuery = this.fromJsonHelper.parse(apiRequestBodyAsJson);
             final JsonQuery query = JsonQuery.from(apiRequestBodyAsJson, parsedQuery, this.fromJsonHelper);
-            final JLGCollectionSheetData collectionSheet = this.collectionSheetReadPlatformService.generateCenterCollectionSheet(centerId, query);
+            final JLGCollectionSheetData collectionSheet = this.collectionSheetReadPlatformService.generateCenterCollectionSheet(centerId,
+                    query);
             final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
             return this.toApiJsonSerializer.serialize(settings, collectionSheet, GroupingTypesApiConstants.COLLECTIONSHEET_DATA_PARAMETERS);
-        }else if (is(commandParam, "saveCollectionSheet")) {
+        } else if (is(commandParam, "saveCollectionSheet")) {
             final CommandWrapper commandRequest = builder.saveCenterCollectionSheet(centerId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
             return this.toApiJsonSerializer.serialize(result);
-        } else { 
-            throw new UnrecognizedQueryParamException("command", commandParam, new Object[] { "activate", "generateCollectionSheet", "createRole" });
+        } else {
+            throw new UnrecognizedQueryParamException("command", commandParam, new Object[] { "activate", "generateCollectionSheet",
+                    "createRole" });
         }
 
     }
@@ -221,18 +223,17 @@ public class CentersApiResource {
     }
 
     @GET
-    @Path("{centerId}/loans")
+    @Path("{centerId}/accounts")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveGroupAccount(@PathParam("centerId") final Long centerId, @Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission(GroupingTypesApiConstants.CENTER_RESOURCE_NAME);
 
-        final GroupAccountSummaryCollectionData groupAccount = this.groupReadPlatformService.retrieveGroupAccountDetails(centerId);
+        final AccountSummaryCollectionData groupAccount = this.accountDetailsReadPlatformService.retrieveGroupAccountDetails(centerId);
 
-        final Set<String> GROUP_ACCOUNTS_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("pendingApprovalLoans",
-                "awaitingDisbursalLoans", "openLoans", "closedLoans", "anyLoanCount", "pendingApprovalLoanCount",
-                "awaitingDisbursalLoanCount", "activeLoanCount", "closedLoanCount"));
+        final Set<String> GROUP_ACCOUNTS_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("loanAccounts", "savingsAccounts",
+                "memberLoanAccounts", "memberSavingsAccounts"));
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.groupSummaryToApiJsonSerializer.serialize(settings, groupAccount, GROUP_ACCOUNTS_DATA_PARAMETERS);
