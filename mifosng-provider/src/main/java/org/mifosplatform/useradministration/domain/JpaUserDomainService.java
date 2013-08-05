@@ -29,7 +29,7 @@ public class JpaUserDomainService implements UserDomainService {
 
     @Transactional
     @Override
-    public void create(final AppUser appUser , final Boolean sendPasswordToEmail) {
+    public void create(final AppUser appUser, final Boolean sendPasswordToEmail) {
 
         generateKeyUsedForPasswordSalting(appUser);
 
@@ -40,11 +40,11 @@ public class JpaUserDomainService implements UserDomainService {
 
         this.userRepository.save(appUser);
 
-        if (sendPasswordToEmail.booleanValue()){
-        	final EmailDetail emailDetail = new EmailDetail(appUser.getFirstname(), appUser.getFirstname(), appUser.getEmail(),
-                appUser.getUsername());
+        if (sendPasswordToEmail.booleanValue()) {
+            final EmailDetail emailDetail = new EmailDetail(appUser.getOffice().getName(), appUser.getFirstname(), appUser.getEmail(),
+                    appUser.getUsername());
 
-        	this.emailService.sendToUserAccount(emailDetail, unencodedPassword);
+            this.emailService.sendToUserAccount(emailDetail, unencodedPassword);
         }
     }
 
