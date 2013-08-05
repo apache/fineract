@@ -134,7 +134,7 @@ public class LoanProduct extends AbstractPersistable<Long> {
         
         final LocalDate startDate = command.localDateValueOfParameterNamed("startDate");
         final LocalDate closeDate = command.localDateValueOfParameterNamed("closeDate");
-        final String externalId = command.stringValueOfParameterNamed("externalId");
+        final String externalId = command.stringValueOfParameterNamedAllowingNull("externalId");
         
         return new LoanProduct(fund, loanTransactionProcessingStrategy, name, description, currency, principal, minPrincipal, maxPrincipal,
                 interestRatePerPeriod, minInterestRatePerPeriod, maxInterestRatePerPeriod, interestFrequencyType, annualInterestRate,

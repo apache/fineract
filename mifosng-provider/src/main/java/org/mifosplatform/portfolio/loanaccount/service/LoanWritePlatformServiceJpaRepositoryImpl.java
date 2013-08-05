@@ -349,7 +349,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         final LocalDate transactionDate = command.localDateValueOfParameterNamed("transactionDate");
         final BigDecimal transactionAmount = command.bigDecimalValueOfParameterNamed("transactionAmount");
-        final String txnExternalId = command.stringValueOfParameterNamed("externalId");
+        final String txnExternalId = command.stringValueOfParameterNamedAllowingNull("externalId");
 
         final Map<String, Object> changes = new LinkedHashMap<String, Object>();
         changes.put("transactionDate", command.stringValueOfParameterNamed("transactionDate"));
@@ -470,7 +470,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         final LocalDate transactionDate = command.localDateValueOfParameterNamed("transactionDate");
         final BigDecimal transactionAmount = command.bigDecimalValueOfParameterNamed("transactionAmount");
-        final String txnExternalId = command.stringValueOfParameterNamed("externalId");
+        final String txnExternalId = command.stringValueOfParameterNamedAllowingNull("externalId");
 
         final Map<String, Object> changes = new LinkedHashMap<String, Object>();
         changes.put("transactionDate", command.stringValueOfParameterNamed("transactionDate"));

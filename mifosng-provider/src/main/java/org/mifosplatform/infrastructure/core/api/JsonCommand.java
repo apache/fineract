@@ -306,6 +306,10 @@ public final class JsonCommand {
         final String value = this.fromApiJsonHelper.extractStringNamed(parameterName, parsedCommand);
         return StringUtils.defaultIfEmpty(value, "");
     }
+    
+    public String stringValueOfParameterNamedAllowingNull(final String parameterName) {
+        return this.fromApiJsonHelper.extractStringNamed(parameterName, parsedCommand);
+    }
 
     public boolean isChangeInBigDecimalParameterNamedDefaultingZeroToNull(final String parameterName, final BigDecimal existingValue) {
         boolean isChanged = false;
