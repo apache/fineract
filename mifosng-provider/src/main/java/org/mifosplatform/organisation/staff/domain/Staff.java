@@ -64,7 +64,7 @@ public class Staff extends AbstractPersistable<Long> {
         String lastname = command.stringValueOfParameterNamed(lastnameParamName);
         
         final String externalIdParamName = "externalId";
-        String externalId = command.stringValueOfParameterNamed(externalIdParamName);
+        String externalId = command.stringValueOfParameterNamedAllowingNull(externalIdParamName);
 
         final String isLoanOfficerParamName = "isLoanOfficer";
         final boolean isLoanOfficer = command.booleanPrimitiveValueOfParameterNamed(isLoanOfficerParamName);
