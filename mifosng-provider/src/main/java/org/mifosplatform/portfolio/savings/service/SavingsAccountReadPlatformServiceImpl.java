@@ -753,7 +753,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
         public SavingsAccountAnnualFeeMapper() {
             final StringBuilder sqlBuilder = new StringBuilder(200);
             sqlBuilder.append("sa.id as id, sa.account_no as accountNo, ");
-            sqlBuilder.append("sa.annual_fee_next_due_date as annualFeeNextDueDate, ");
+            sqlBuilder.append("sa.annual_fee_next_due_date as annualFeeNextDueDate ");
             sqlBuilder.append("from m_savings_account sa ");
 
             this.schemaSql = sqlBuilder.toString();
