@@ -63,7 +63,7 @@ public class AccountDetailsReadPlatformServiceJpaRepositoryImpl implements Accou
         List<LoanAccountSummaryData> memberLoanAccounts = retrieveLoanAccountDetails(loanWhereClauseForMembers, new Object[] { groupId });
         List<SavingsAccountSummaryData> memberSavingsAccounts = retrieveAccountDetails(savingswhereClauseForMembers,
                 new Object[] { groupId });
-        return new AccountSummaryCollectionData(groupLoanAccounts, groupSavingsAccounts,memberLoanAccounts, memberSavingsAccounts);
+        return new AccountSummaryCollectionData(groupLoanAccounts, groupSavingsAccounts, memberLoanAccounts, memberSavingsAccounts);
     }
 
     @Override
@@ -105,6 +105,7 @@ public class AccountDetailsReadPlatformServiceJpaRepositoryImpl implements Accou
         public SavingsAccountSummaryDataMapper() {
             StringBuilder accountsSummary = new StringBuilder();
             accountsSummary.append("sa.id as id, sa.account_no as accountNo, sa.external_id as externalId, sa.status_enum as statusEnum, ");
+            accountsSummary.append("sa.account_type_enum as accountType, ");
             accountsSummary.append("sa.account_balance_derived as accountBalance, ");
             accountsSummary.append("sa.currency_code as currencyCode, sa.currency_digits as currencyDigits, ");
             accountsSummary.append("curr.name as currencyName, curr.internationalized_name_code as currencyNameCode, ");
@@ -132,6 +133,8 @@ public class AccountDetailsReadPlatformServiceJpaRepositoryImpl implements Accou
             final Integer statusId = JdbcSupport.getInteger(rs, "statusEnum");
             final BigDecimal accountBalance = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "accountBalance");
             final SavingsAccountStatusEnumData status = SavingsEnumerations.status(statusId);
+            final Integer accountType = JdbcSupport.getInteger(rs, "accountType");
+            final EnumOptionData accountTypeData = AccountEnumerations.loanType(accountType);
 
             final String currencyCode = rs.getString("currencyCode");
             final String currencyName = rs.getString("currencyName");
@@ -141,7 +144,8 @@ public class AccountDetailsReadPlatformServiceJpaRepositoryImpl implements Accou
             final CurrencyData currency = new CurrencyData(currencyCode, currencyName, currencyDigits, currencyDisplaySymbol,
                     currencyNameCode);
 
-            return new SavingsAccountSummaryData(id, accountNo, externalId, productId, productName, status, currency, accountBalance);
+            return new SavingsAccountSummaryData(id, accountNo, externalId, productId, productName, status, currency, accountBalance,
+                    accountTypeData);
         }
     }
 

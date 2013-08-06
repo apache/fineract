@@ -567,6 +567,15 @@
 								<td></td>
 								<td></td>
 							</tr>
+							<tr class="alt">
+								<td></td>
+								<td>groups/{groupId}/accounts</td>
+								<td></td>
+								<td><a href="#groups_accounts">Retrive Group accounts summary</a></td>
+								<td></td>
+								<td></td>
+							</tr>
+
 						</table>
 					</div>
 				</div>
@@ -3887,6 +3896,233 @@ GET https://DomainName/mifosng-provider/api/v1/groups/1?associations=clientMembe
 					</code>
 				</div>
 			</div>
+
+<!--Start of Group account summary -->
+			<a id="groups_accounts" name="groups_accounts" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Retrieve Group accounts overview</h4>
+					<p>
+						An example of how a loan portfolio summary can be provided. This
+						is requested in a specific use case of the reference application.<br> It is quite reasonable to add resources like this to simplify User Interface development.
+					</p>
+					<p>Example Requests:</p>
+					<div class=apiClick>groups/1/accounts</div>
+					<br>
+					<br>
+					<div class=apiClick>groups/1/accounts?fields=loanAccounts,savingsAccounts,memberLoanAccounts,<br> memberSavingsAccounts</div>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+GET https://DomainName/api/v1/groups/{groupId}/accounts
+					</code>
+					<code class="method-response">
+{
+  "loanAccounts": [
+    {
+      "id": 3,
+      "accountNo": "000000003",
+      "productId": 3,
+      "productName": "daily product",
+      "status": {
+        "id": 100,
+        "code": "loanStatusType.submitted.and.pending.approval",
+        "value": "Submitted and pending approval",
+        "pendingApproval": true,
+        "waitingForDisbursal": false,
+        "active": false,
+        "closedObligationsMet": false,
+        "closedWrittenOff": false,
+        "closedRescheduled": false,
+        "closed": false,
+        "overpaid": false
+      },
+      "loanType": {
+        "id": 2,
+        "code": "accountType.group",
+        "value": "Group"
+      }
+    }
+  ],
+  "savingsAccounts": [
+    {
+      "id": 9,
+      "accountNo": "000000009",
+      "productId": 1,
+      "productName": "p_sav",
+      "status": {
+        "id": 100,
+        "code": "savingsAccountStatusType.submitted.and.pending.approval",
+        "value": "Submitted and pending approval",
+        "submittedAndPendingApproval": true,
+        "approved": false,
+        "rejected": false,
+        "withdrawnByApplicant": false,
+        "active": false,
+        "closed": false
+      },
+      "currency": {
+        "code": "USD",
+        "name": "US Dollar",
+        "decimalPlaces": 2,
+        "displaySymbol": "$",
+        "nameCode": "currency.USD",
+        "displayLabel": "US Dollar ($)"
+      },
+      "accountType": {
+        "id": 2,
+        "code": "accountType.group",
+        "value": "Group"
+      }
+    },
+    {
+      "id": 4,
+      "accountNo": "000000004",
+      "productId": 1,
+      "productName": "p_sav",
+      "status": {
+        "id": 300,
+        "code": "savingsAccountStatusType.active",
+        "value": "Active",
+        "submittedAndPendingApproval": false,
+        "approved": false,
+        "rejected": false,
+        "withdrawnByApplicant": false,
+        "active": true,
+        "closed": false
+      },
+      "currency": {
+        "code": "USD",
+        "name": "US Dollar",
+        "decimalPlaces": 2,
+        "displaySymbol": "$",
+        "nameCode": "currency.USD",
+        "displayLabel": "US Dollar ($)"
+      },
+      "accountType": {
+        "id": 2,
+        "code": "accountType.group",
+        "value": "Group"
+      }
+    }
+  ],
+  "memberLoanAccounts": [
+    {
+      "id": 4,
+      "accountNo": "000000004",
+      "productId": 1,
+      "productName": "testLoan",
+      "status": {
+        "id": 200,
+        "code": "loanStatusType.approved",
+        "value": "Approved",
+        "pendingApproval": false,
+        "waitingForDisbursal": true,
+        "active": false,
+        "closedObligationsMet": false,
+        "closedWrittenOff": false,
+        "closedRescheduled": false,
+        "closed": false,
+        "overpaid": false
+      },
+      "loanType": {
+        "id": 3,
+        "code": "accountType.jlg",
+        "value": "JLG"
+      }
+    },
+    {
+      "id": 7,
+      "accountNo": "000000007",
+      "productId": 2,
+      "productName": "weekly product",
+      "status": {
+        "id": 100,
+        "code": "loanStatusType.submitted.and.pending.approval",
+        "value": "Submitted and pending approval",
+        "pendingApproval": true,
+        "waitingForDisbursal": false,
+        "active": false,
+        "closedObligationsMet": false,
+        "closedWrittenOff": false,
+        "closedRescheduled": false,
+        "closed": false,
+        "overpaid": false
+      },
+      "loanType": {
+        "id": 3,
+        "code": "accountType.jlg",
+        "value": "JLG"
+      }
+    }
+  ],
+  "memberSavingsAccounts": [
+    {
+      "id": 3,
+      "accountNo": "000000003",
+      "productId": 1,
+      "productName": "p_sav",
+      "status": {
+        "id": 100,
+        "code": "savingsAccountStatusType.submitted.and.pending.approval",
+        "value": "Submitted and pending approval",
+        "submittedAndPendingApproval": true,
+        "approved": false,
+        "rejected": false,
+        "withdrawnByApplicant": false,
+        "active": false,
+        "closed": false
+      },
+      "currency": {
+        "code": "USD",
+        "name": "US Dollar",
+        "decimalPlaces": 2,
+        "displaySymbol": "$",
+        "nameCode": "currency.USD",
+        "displayLabel": "US Dollar ($)"
+      },
+      "accountType": {
+        "id": 3,
+        "code": "accountType.jlg",
+        "value": "JLG"
+      }
+    },
+    {
+      "id": 10,
+      "accountNo": "000000010",
+      "productId": 1,
+      "productName": "p_sav",
+      "status": {
+        "id": 100,
+        "code": "savingsAccountStatusType.submitted.and.pending.approval",
+        "value": "Submitted and pending approval",
+        "submittedAndPendingApproval": true,
+        "approved": false,
+        "rejected": false,
+        "withdrawnByApplicant": false,
+        "active": false,
+        "closed": false
+      },
+      "currency": {
+        "code": "USD",
+        "name": "US Dollar",
+        "decimalPlaces": 2,
+        "displaySymbol": "$",
+        "nameCode": "currency.USD",
+        "displayLabel": "US Dollar ($)"
+      },
+      "accountType": {
+        "id": 3,
+        "code": "accountType.jlg",
+        "value": "JLG"
+      }
+    }
+   ]
+}
+					</code>
+				</div>
+			</div>
+<!--End of Group account summary -->
 
 			<a id="groups_update" name="groups_update" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
@@ -17110,6 +17346,15 @@ GET https://DomainName/api/v1/search?query=000000111
 					<td></td>
 					<td></td>
 				</tr>
+				<tr>
+					<td></td>
+					<td>groups/{groupId}/accounts</td>
+					<td></td>
+					<td><a href="#groups_accounts">Retrive Group accounts summary</a></td>
+					<td></td>
+					<td></td>
+				</tr>
+
 				<tr class="alt">
 					<td><a href="#loanproducts">Loan Product</a></td>
 					<td>loanproducts</td>

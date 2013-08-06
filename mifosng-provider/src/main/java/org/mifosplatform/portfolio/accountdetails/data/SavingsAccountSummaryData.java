@@ -7,6 +7,7 @@ package org.mifosplatform.portfolio.accountdetails.data;
 
 import java.math.BigDecimal;
 
+import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.mifosplatform.portfolio.savings.data.SavingsAccountStatusEnumData;
 
@@ -24,10 +25,11 @@ public class SavingsAccountSummaryData {
     private final SavingsAccountStatusEnumData status;
     private final CurrencyData currency;
     private final BigDecimal accountBalance;
+    private final EnumOptionData accountType;
 
     public SavingsAccountSummaryData(final Long id, final String accountNo, final String externalId, final Long productId,
             final String productName, final SavingsAccountStatusEnumData status, final CurrencyData currency,
-            final BigDecimal accountBalance) {
+            final BigDecimal accountBalance, final EnumOptionData accountType) {
         this.id = id;
         this.accountNo = accountNo;
         this.externalId = externalId;
@@ -36,5 +38,6 @@ public class SavingsAccountSummaryData {
         this.status = status;
         this.currency = currency;
         this.accountBalance = accountBalance;
+        this.accountType = accountType;
     }
 }
