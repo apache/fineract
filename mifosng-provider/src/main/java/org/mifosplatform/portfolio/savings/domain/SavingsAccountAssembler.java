@@ -235,4 +235,8 @@ public class SavingsAccountAssembler {
 
         return account;
     }
+    
+    public void assignSavingAccountHelpers(SavingsAccount savingsAccount){
+        savingsAccount.setHelpers(this.savingsAccountTransactionSummaryWrapper, this.savingsHelper);
+    }
 }
