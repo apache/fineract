@@ -60,7 +60,7 @@ public class GroupTest {
         GroupHelper.verifyGroupDetails(requestSpec, responseSpec, groupID,"name",updatedGroupName);
 
         groupID = GroupHelper.createGroup(requestSpec, responseSpec);
-        Integer groupID2 = GroupHelper.deleteGroup(requestSpec, responseSpec, groupID.toString());
+        GroupHelper.deleteGroup(requestSpec, responseSpec, groupID.toString());
         GroupHelper.verifyGroupDeleted(requestSpec, responseSpec, groupID);
     }
 }
