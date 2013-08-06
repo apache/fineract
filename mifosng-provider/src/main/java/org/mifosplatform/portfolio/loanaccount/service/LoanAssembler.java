@@ -190,9 +190,11 @@ public class LoanAssembler {
         final boolean isHolidayEnabled = this.configurationDomainService.isRescheduleRepaymentsOnHolidaysEnabled();
         final List<Holiday> holidays = this.holidayRepository.findByOfficeIdAndGreaterThanDate(loanApplication.getOfficeId(), loanApplicationTerms.getExpectedDisbursementDate().toDate());
         final WorkingDays workingDays = this.workingDaysRepository.findOne();
+        final boolean allowTransactionsOnNonWorkingDay = this.configurationDomainService.allowTransactionsOnNonWorkingDayEnabled();
+        final boolean allowTransactionsOnHoliday = this.configurationDomainService.allowTransactionsOnHolidayEnabled();
         final LoanScheduleModel loanScheduleModel = this.loanScheduleAssembler.assembleLoanScheduleFrom(loanApplicationTerms, isHolidayEnabled, holidays, workingDays, element);
         loanApplication.loanApplicationSubmittal(currentUser, loanScheduleModel, loanApplicationTerms, defaultLoanLifecycleStateMachine(),
-                submittedOnDate, externalId, isHolidayEnabled, holidays, workingDays);
+                submittedOnDate, externalId, allowTransactionsOnHoliday, holidays, workingDays, allowTransactionsOnNonWorkingDay);
 
         return loanApplication;
     }
@@ -241,11 +243,13 @@ public class LoanAssembler {
 
     public void validateExpectedDisbursementForHolidayAndNonWorkingDay(final Loan loanApplication) {
 
-        final boolean isHolidayEnabled = this.configurationDomainService.isRescheduleRepaymentsOnHolidaysEnabled();
+        final boolean allowTransactionsOnHoliday = this.configurationDomainService.allowTransactionsOnHolidayEnabled();
         final List<Holiday> holidays = this.holidayRepository.findByOfficeIdAndGreaterThanDate(loanApplication.getOfficeId(),
                 loanApplication.getExpectedDisbursedOnLocalDate().toDate());
         final WorkingDays workingDays = this.workingDaysRepository.findOne();
+        final boolean allowTransactionsOnNonWorkingDay = this.configurationDomainService.allowTransactionsOnNonWorkingDayEnabled();
         
-        loanApplication.validateExpectedDisbursementForHolidayAndNonWorkingDay(workingDays,isHolidayEnabled,holidays);
+        loanApplication.validateExpectedDisbursementForHolidayAndNonWorkingDay(workingDays, allowTransactionsOnHoliday, holidays,
+                allowTransactionsOnNonWorkingDay);
     }
 }
