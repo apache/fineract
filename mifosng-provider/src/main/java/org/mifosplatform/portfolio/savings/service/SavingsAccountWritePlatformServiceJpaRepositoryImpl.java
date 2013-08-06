@@ -22,6 +22,8 @@ import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.mifosplatform.infrastructure.core.service.DateUtils;
+import org.mifosplatform.infrastructure.jobs.annotation.CronTarget;
+import org.mifosplatform.infrastructure.jobs.service.JobName;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.monetary.domain.ApplicationCurrency;
 import org.mifosplatform.organisation.monetary.domain.ApplicationCurrencyRepositoryWrapper;
@@ -31,7 +33,8 @@ import org.mifosplatform.portfolio.paymentdetail.service.PaymentDetailWritePlatf
 import org.mifosplatform.portfolio.savings.data.SavingsAccountTransactionDataValidator;
 import org.mifosplatform.portfolio.savings.domain.SavingsAccount;
 import org.mifosplatform.portfolio.savings.domain.SavingsAccountAssembler;
-import org.mifosplatform.portfolio.savings.domain.SavingsAccountRepositoryWrapper;
+import org.mifosplatform.portfolio.savings.domain.SavingsAccountRepository;
+import org.mifosplatform.portfolio.savings.domain.SavingsAccountStatusType;
 import org.mifosplatform.portfolio.savings.domain.SavingsAccountTransaction;
 import org.mifosplatform.portfolio.savings.domain.SavingsAccountTransactionRepository;
 import org.mifosplatform.useradministration.domain.AppUser;
@@ -43,7 +46,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements SavingsAccountWritePlatformService {
 
     private final PlatformSecurityContext context;
-    private final SavingsAccountRepositoryWrapper savingAccountRepository;
+    private final SavingsAccountRepository savingAccountRepository;
     private final SavingsAccountTransactionRepository savingsAccountTransactionRepository;
     private final SavingsAccountAssembler savingAccountAssembler;
     private final SavingsAccountTransactionDataValidator savingsAccountTransactionDataValidator;
@@ -53,7 +56,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
 
     @Autowired
     public SavingsAccountWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
-            final SavingsAccountRepositoryWrapper savingAccountRepository,
+            final SavingsAccountRepository savingAccountRepository,
             final SavingsAccountTransactionRepository savingsAccountTransactionRepository,
             final SavingsAccountAssembler savingAccountAssembler,
             final SavingsAccountTransactionDataValidator savingsAccountTransactionDataValidator,
@@ -259,19 +262,8 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
     @Override
     public CommandProcessingResult postInterest(final Long savingsId) {
 
-        final List<Long> existingTransactionIds = new ArrayList<Long>();
-        final List<Long> existingReversedTransactionIds = new ArrayList<Long>();
-
         final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsId);
-
-        final LocalDate today = DateUtils.getLocalDateOfTenant();
-        final MathContext mc = new MathContext(10, RoundingMode.HALF_EVEN);
-
-        account.postInterest(mc, today, existingTransactionIds, existingReversedTransactionIds);
-        this.savingAccountRepository.save(account);
-
-        postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds);
-
+        postInterest(account);
         return new CommandProcessingResultBuilder() //
                 .withEntityId(savingsId) //
                 .withOfficeId(account.officeId()) //
@@ -279,6 +271,30 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
                 .withGroupId(account.groupId()) //
                 .withSavingsId(savingsId) //
                 .build();
+    }
+
+ 
+    @Transactional
+    private void postInterest(final SavingsAccount account) {
+        final List<Long> existingTransactionIds = new ArrayList<Long>();
+        final List<Long> existingReversedTransactionIds = new ArrayList<Long>();
+        final LocalDate today = DateUtils.getLocalDateOfTenant();
+        final MathContext mc = new MathContext(10, RoundingMode.HALF_EVEN);
+
+        account.postInterest(mc, today, existingTransactionIds, existingReversedTransactionIds);
+        this.savingAccountRepository.save(account);
+
+        postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds);
+    }
+
+    @CronTarget(jobName = JobName.POST_INTEREST_FOR_SAVINGS)
+    @Override
+    public void postInterestForAccounts() {
+        final List<SavingsAccount> savingsAccounts = this.savingAccountRepository.findSavingAccountByStatus(SavingsAccountStatusType.ACTIVE.getValue());
+        for (final SavingsAccount savingsAccount : savingsAccounts) {
+            this.savingAccountAssembler.assignSavingAccountHelpers(savingsAccount);
+            postInterest(savingsAccount);
+        }
     }
 
     @Override
