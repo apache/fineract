@@ -322,7 +322,7 @@ public class GroupsApiResource {
     @Path("{groupId}/accounts")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveLoans(@PathParam("groupId") final Long groupId, @Context final UriInfo uriInfo) {
+    public String retrieveAccounts(@PathParam("groupId") final Long groupId, @Context final UriInfo uriInfo) {
 
         this.context.authenticatedUser().validateHasReadPermission("GROUP");
 

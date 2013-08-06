@@ -58,6 +58,7 @@ import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.organisation.monetary.domain.Money;
 import org.mifosplatform.organisation.staff.domain.Staff;
+import org.mifosplatform.portfolio.accountdetails.domain.AccountType;
 import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.group.domain.Group;
 import org.mifosplatform.portfolio.loanproduct.domain.PeriodFrequencyType;
@@ -104,6 +105,10 @@ public class SavingsAccount extends AbstractPersistable<Long> {
 
     @Column(name = "status_enum", nullable = false)
     private Integer status;
+
+    @SuppressWarnings("unused")
+    @Column(name = "account_type_enum", nullable = false)
+    private Integer accountType;
 
     @Temporal(TemporalType.DATE)
     @Column(name = "submittedon_date", nullable = true)
@@ -254,8 +259,9 @@ public class SavingsAccount extends AbstractPersistable<Long> {
     }
 
     public static SavingsAccount createNewApplicationForSubmittal(final Client client, final Group group, final SavingsProduct product,
-            final Staff fieldOfficer, final String accountNo, final String externalId, final LocalDate submittedOnDate,
-            final BigDecimal interestRate, final SavingsCompoundingInterestPeriodType interestCompoundingPeriodType,
+            final Staff fieldOfficer, final String accountNo, final String externalId, final AccountType accountType,
+            final LocalDate submittedOnDate, final BigDecimal interestRate,
+            final SavingsCompoundingInterestPeriodType interestCompoundingPeriodType,
             final SavingsPostingInterestPeriodType interestPostingPeriodType, final SavingsInterestCalculationType interestCalculationType,
             final SavingsInterestCalculationDaysInYearType interestCalculationDaysInYearType, final BigDecimal minRequiredOpeningBalance,
             final Integer lockinPeriodFrequency, final SavingsPeriodFrequencyType lockinPeriodFrequencyType,
@@ -263,15 +269,16 @@ public class SavingsAccount extends AbstractPersistable<Long> {
             final MonthDay annualFeeOnMonthDay) {
 
         final SavingsAccountStatusType status = SavingsAccountStatusType.SUBMITTED_AND_PENDING_APPROVAL;
-        return new SavingsAccount(client, group, product, fieldOfficer, accountNo, externalId, status, submittedOnDate, interestRate,
-                interestCompoundingPeriodType, interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType,
-                minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeAmount, withdrawalFeeType,
-                annualFeeAmount, annualFeeOnMonthDay);
+        return new SavingsAccount(client, group, product, fieldOfficer, accountNo, externalId, status, accountType, submittedOnDate,
+                interestRate, interestCompoundingPeriodType, interestPostingPeriodType, interestCalculationType,
+                interestCalculationDaysInYearType, minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType,
+                withdrawalFeeAmount, withdrawalFeeType, annualFeeAmount, annualFeeOnMonthDay);
     }
 
     private SavingsAccount(final Client client, final Group group, final SavingsProduct product, final Staff fieldOfficer,
-            final String accountNo, final String externalId, final SavingsAccountStatusType status, final LocalDate submittedOnDate,
-            final BigDecimal nominalAnnualInterestRate, final SavingsCompoundingInterestPeriodType interestCompoundingPeriodType,
+            final String accountNo, final String externalId, final SavingsAccountStatusType status, final AccountType accountType,
+            final LocalDate submittedOnDate, final BigDecimal nominalAnnualInterestRate,
+            final SavingsCompoundingInterestPeriodType interestCompoundingPeriodType,
             final SavingsPostingInterestPeriodType interestPostingPeriodType, final SavingsInterestCalculationType interestCalculationType,
             final SavingsInterestCalculationDaysInYearType interestCalculationDaysInYearType, final BigDecimal minRequiredOpeningBalance,
             final Integer lockinPeriodFrequency, final SavingsPeriodFrequencyType lockinPeriodFrequencyType,
@@ -290,6 +297,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         this.currency = product.currency();
         this.externalId = externalId;
         this.status = status.getValue();
+        this.accountType = accountType.getValue();
         this.submittedOnDate = submittedOnDate.toDate();
         this.nominalAnnualInterestRate = nominalAnnualInterestRate;
         this.interestCompoundingPeriodType = interestCompoundingPeriodType.getValue();
@@ -1612,14 +1620,19 @@ public class SavingsAccount extends AbstractPersistable<Long> {
             updateToNextAnnualFeeDueDateFrom(getActivationLocalDate());
         }
 
-        if (this.client.isActivatedAfter(activationDate)) {
-
+        if (this.client != null && this.client.isActivatedAfter(activationDate)) {
             final DateTimeFormatter formatter = DateTimeFormat.forPattern(command.dateFormat()).withLocale(command.extractLocale());
             final String dateAsString = formatter.print(client.getActivationLocalDate());
-
             baseDataValidator.reset().parameter(SavingsApiConstants.activatedOnDateParamName).value(dateAsString)
                     .failWithCodeNoParameterAddedToErrorCode("cannot.be.before.client.activation.date");
-
+            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        } 
+        
+        if (this.group != null && this.group.isActivatedAfter(activationDate)) {
+            final DateTimeFormatter formatter = DateTimeFormat.forPattern(command.dateFormat()).withLocale(command.extractLocale());
+            final String dateAsString = formatter.print(client.getActivationLocalDate());
+            baseDataValidator.reset().parameter(SavingsApiConstants.activatedOnDateParamName).value(dateAsString)
+                    .failWithCodeNoParameterAddedToErrorCode("cannot.be.before.group.activation.date");
             if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
         }
 
