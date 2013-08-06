@@ -63,6 +63,21 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
         if (property == null) { throw new GlobalConfigurationPropertyNotFoundException(holidaysConfigurationProperty); }
         return property.isEnabled();
     }
-    
-    
+
+    @Override
+    public boolean allowTransactionsOnHolidayEnabled() {
+        final String allowTransactionsOnHolidayProperty = "allow-transactions-on-holiday";
+        final GlobalConfigurationProperty property = this.globalConfigurationRepository.findOneByName(allowTransactionsOnHolidayProperty);
+        if (property == null) { throw new GlobalConfigurationPropertyNotFoundException(allowTransactionsOnHolidayProperty); }
+        return property.isEnabled();
+    }
+
+    @Override
+    public boolean allowTransactionsOnNonWorkingDayEnabled() {
+        final String allowTransactionsOnNonWorkingDayProperty = "allow-transactions-on-non_workingday";
+        final GlobalConfigurationProperty property = this.globalConfigurationRepository.findOneByName(allowTransactionsOnNonWorkingDayProperty);
+        if (property == null) { throw new GlobalConfigurationPropertyNotFoundException(allowTransactionsOnNonWorkingDayProperty); }
+        return property.isEnabled();
+    }
+
 }
