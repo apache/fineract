@@ -2,7 +2,6 @@ package org.mifosplatform.integrationtests;
 
 import static org.junit.Assert.assertEquals;
 
-import java.lang.System;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -46,7 +45,7 @@ public class GroupLoanIntegrationTest {
         loanTransactionHelper = new LoanTransactionHelper(requestSpec, responseSpec);
 
         Integer clientID = ClientHelper.createClient(requestSpec, responseSpec);
-        Integer groupID = GroupHelper.createGroup(requestSpec, responseSpec,true);
+        Integer groupID = GroupHelper.createGroup(requestSpec, responseSpec, true);
         groupID = GroupHelper.associateClient(requestSpec, responseSpec, groupID.toString(),clientID.toString());
 
         Integer loanProductID = createLoanProduct();
