@@ -28,7 +28,6 @@ public class ScheduledJobDetail extends AbstractPersistable<Long> {
     @Column(name = "cron_expression")
     private String cronExpression;
 
-    @SuppressWarnings("unused")
     @Column(name = "create_time")
     @Temporal(TemporalType.TIMESTAMP)
     private Date createTime;
@@ -39,12 +38,10 @@ public class ScheduledJobDetail extends AbstractPersistable<Long> {
     @Column(name = "group_name")
     private String groupName;
 
-    @SuppressWarnings("unused")
     @Column(name = "previous_run_start_time")
     @Temporal(TemporalType.TIMESTAMP)
     private Date previousRunStartTime;
 
-    @SuppressWarnings("unused")
     @Column(name = "next_run_time")
     @Temporal(TemporalType.TIMESTAMP)
     private Date nextRunTime;
@@ -52,7 +49,6 @@ public class ScheduledJobDetail extends AbstractPersistable<Long> {
     @Column(name = "job_key")
     private String jobKey;
 
-    @SuppressWarnings("unused")
     @Column(name = "initializing_errorlog")
     private String errorLog;
 
@@ -62,7 +58,6 @@ public class ScheduledJobDetail extends AbstractPersistable<Long> {
     @Column(name = "currently_running")
     private boolean currentlyRunning;
 
-    @SuppressWarnings("unused")
     @Column(name = "updates_allowed")
     private boolean updatesAllowed;
 
@@ -113,7 +108,7 @@ public class ScheduledJobDetail extends AbstractPersistable<Long> {
         this.nextRunTime = nextRunTime;
     }
 
-    public void updateJobKey(String jobKey) {
+    public void updateJobKey(final String jobKey) {
         this.jobKey = jobKey;
     }
 
@@ -125,7 +120,7 @@ public class ScheduledJobDetail extends AbstractPersistable<Long> {
         return this.currentlyRunning;
     }
 
-    public void updateCurrentlyRunningStatus(boolean currentlyRunning) {
+    public void updateCurrentlyRunningStatus(final boolean currentlyRunning) {
         this.currentlyRunning = currentlyRunning;
     }
 

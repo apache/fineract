@@ -15,7 +15,6 @@ import org.springframework.data.jpa.domain.AbstractPersistable;
 @Table(name = "c_configuration")
 public class GlobalConfigurationProperty extends AbstractPersistable<Long> {
 
-    @SuppressWarnings("unused")
     @Column(name = "name", nullable = false)
     private final String name;
 

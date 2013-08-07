@@ -30,7 +30,6 @@ import org.springframework.data.jpa.domain.AbstractPersistable;
 @Table(name = "m_loan_collateral")
 public class LoanCollateral extends AbstractPersistable<Long> {
 
-    @SuppressWarnings("unused")
     @ManyToOne(optional = false)
     @JoinColumn(name = "loan_id", nullable = false)
     private Loan loan;
@@ -105,10 +104,10 @@ public class LoanCollateral extends AbstractPersistable<Long> {
 
     public CollateralData toData() {
         final CodeValueData typeData = this.type.toData();
-        return CollateralData.instance(this.getId(), typeData, this.value, this.description, null);
+        return CollateralData.instance(getId(), typeData, this.value, this.description, null);
     }
 
-    public void setCollateralType(CodeValue type) {
+    public void setCollateralType(final CodeValue type) {
         this.type = type;
     }
 
@@ -117,9 +116,9 @@ public class LoanCollateral extends AbstractPersistable<Long> {
         if (obj == null) { return false; }
         if (obj == this) { return true; }
         if (obj.getClass() != getClass()) { return false; }
-        LoanCollateral rhs = (LoanCollateral) obj;
+        final LoanCollateral rhs = (LoanCollateral) obj;
         return new EqualsBuilder().appendSuper(super.equals(obj)) //
-                .append(this.getId(), rhs.getId()) //
+                .append(getId(), rhs.getId()) //
                 .append(this.type.getId(), rhs.type.getId()) //
                 .append(this.description, rhs.description) //
                 .append(this.value, this.value)//
@@ -129,7 +128,7 @@ public class LoanCollateral extends AbstractPersistable<Long> {
     @Override
     public int hashCode() {
         return new HashCodeBuilder(3, 5) //
-                .append(this.getId()) //
+                .append(getId()) //
                 .append(this.type.getId()) //
                 .append(this.description) //
                 .append(this.value)//

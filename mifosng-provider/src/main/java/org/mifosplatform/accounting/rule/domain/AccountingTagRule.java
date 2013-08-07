@@ -20,7 +20,6 @@ import org.springframework.data.jpa.domain.AbstractPersistable;
 @Table(name = "acc_rule_tags", uniqueConstraints = { @UniqueConstraint(columnNames = { "acc_rule_id", "tag_id", "acc_type_enum" }, name = "UNIQUE_ACCOUNT_RULE_TAGS") })
 public class AccountingTagRule extends AbstractPersistable<Long> {
 
-    @SuppressWarnings("unused")
     @ManyToOne
     @JoinColumn(name = "acc_rule_id", nullable = false)
     private AccountingRule accountingRule;

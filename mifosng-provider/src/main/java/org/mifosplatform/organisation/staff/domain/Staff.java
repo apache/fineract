@@ -50,7 +50,6 @@ public class Staff extends AbstractPersistable<Long> {
     @Column(name = "organisational_role_enum", nullable = true)
     private Integer organisationalRoleType;
 
-    @SuppressWarnings("unused")
     @ManyToOne
     @JoinColumn(name = "organisational_role_parent_staff_id", nullable = true)
     private Staff organisationalRoleParentStaff;
@@ -58,13 +57,13 @@ public class Staff extends AbstractPersistable<Long> {
     public static Staff fromJson(final Office staffOffice, final JsonCommand command) {
 
         final String firstnameParamName = "firstname";
-        String firstname = command.stringValueOfParameterNamed(firstnameParamName);
+        final String firstname = command.stringValueOfParameterNamed(firstnameParamName);
 
         final String lastnameParamName = "lastname";
-        String lastname = command.stringValueOfParameterNamed(lastnameParamName);
+        final String lastname = command.stringValueOfParameterNamed(lastnameParamName);
         
         final String externalIdParamName = "externalId";
-        String externalId = command.stringValueOfParameterNamedAllowingNull(externalIdParamName);
+        final String externalId = command.stringValueOfParameterNamedAllowingNull(externalIdParamName);
 
         final String isLoanOfficerParamName = "isLoanOfficer";
         final boolean isLoanOfficer = command.booleanPrimitiveValueOfParameterNamed(isLoanOfficerParamName);

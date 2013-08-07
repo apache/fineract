@@ -25,171 +25,175 @@ import org.springframework.data.jpa.domain.AbstractPersistable;
 @Table(name = "m_portfolio_command_source")
 public class CommandSource extends AbstractPersistable<Long> {
 
-    @Column(name = "action_name", nullable = true, length = 100)
-    private String actionName;
+	@Column(name = "action_name", nullable = true, length = 100)
+	private String actionName;
 
-    @Column(name = "entity_name", nullable = true, length = 100)
-    private String entityName;
+	@Column(name = "entity_name", nullable = true, length = 100)
+	private String entityName;
 
-    @SuppressWarnings("unused")
-    @Column(name = "office_id")
-    private Long officeId;
+	@Column(name = "office_id")
+	private Long officeId;
 
-    @SuppressWarnings("unused")
-    @Column(name = "group_id")
-    private Long groupId;
+	@Column(name = "group_id")
+	private Long groupId;
 
-    @SuppressWarnings("unused")
-    @Column(name = "client_id")
-    private Long clientId;
+	@Column(name = "client_id")
+	private Long clientId;
 
-    @SuppressWarnings("unused")
-    @Column(name = "loan_id")
-    private Long loanId;
+	@Column(name = "loan_id")
+	private Long loanId;
 
-    @SuppressWarnings("unused")
-    @Column(name = "savings_account_id")
-    private Long savingsId;
+	@Column(name = "savings_account_id")
+	private Long savingsId;
 
-    @Column(name = "api_get_url", length = 100)
-    private String resourceGetUrl;
+	@Column(name = "api_get_url", length = 100)
+	private String resourceGetUrl;
 
-    @Column(name = "resource_id")
-    private Long resourceId;
+	@Column(name = "resource_id")
+	private Long resourceId;
 
-    @Column(name = "subresource_id")
-    private Long subresourceId;
+	@Column(name = "subresource_id")
+	private Long subresourceId;
 
-    @Column(name = "command_as_json", length = 1000)
-    private String commandAsJson;
+	@Column(name = "command_as_json", length = 1000)
+	private String commandAsJson;
 
-    @SuppressWarnings("unused")
-    @ManyToOne
-    @JoinColumn(name = "maker_id", nullable = false)
-    private AppUser maker;
+	@ManyToOne
+	@JoinColumn(name = "maker_id", nullable = false)
+	private AppUser maker;
 
-    @SuppressWarnings("unused")
-    @Column(name = "made_on_date", nullable = false)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date madeOnDate;
+	@Column(name = "made_on_date", nullable = false)
+	@Temporal(TemporalType.TIMESTAMP)
+	private Date madeOnDate;
 
-    @SuppressWarnings("unused")
-    @ManyToOne
-    @JoinColumn(name = "checker_id", nullable = true)
-    private AppUser checker;
+	@ManyToOne
+	@JoinColumn(name = "checker_id", nullable = true)
+	private AppUser checker;
 
-    @SuppressWarnings("unused")
-    @Column(name = "checked_on_date", nullable = true)
-    @Temporal(TemporalType.TIMESTAMP)
-    private Date checkedOnDate;
+	@Column(name = "checked_on_date", nullable = true)
+	@Temporal(TemporalType.TIMESTAMP)
+	private Date checkedOnDate;
 
-    @Column(name = "processing_result_enum", nullable = false)
-    private Integer processingResult;
-    
-    @Column(name = "product_id")
-    private Long productId;
+	@Column(name = "processing_result_enum", nullable = false)
+	private Integer processingResult;
 
-    public static CommandSource fullEntryFrom(final CommandWrapper wrapper, final JsonCommand command, final AppUser maker) {
-        return new CommandSource(wrapper.actionName(), wrapper.entityName(), wrapper.getHref(), command.entityId(), command.subentityId(),
-                command.json(), maker, DateTime.now());
-    }
+	@Column(name = "product_id")
+	private Long productId;
 
-    protected CommandSource() {
-        //
-    }
+	public static CommandSource fullEntryFrom(final CommandWrapper wrapper,
+			final JsonCommand command, final AppUser maker) {
+		return new CommandSource(wrapper.actionName(), wrapper.entityName(),
+				wrapper.getHref(), command.entityId(), command.subentityId(),
+				command.json(), maker, DateTime.now());
+	}
 
-    private CommandSource(final String actionName, final String entityName, final String href, final Long resourceId,
-            final Long subresourceId, final String commandSerializedAsJson, final AppUser maker, final DateTime madeOnDateTime) {
-        this.actionName = actionName;
-        this.entityName = entityName;
-        this.resourceGetUrl = href;
-        this.resourceId = resourceId;
-        this.subresourceId = subresourceId;
-        this.commandAsJson = commandSerializedAsJson;
-        this.maker = maker;
-        this.madeOnDate = madeOnDateTime.toDate();
-        this.processingResult = CommandProcessingResultType.PROCESSED.getValue();
-    }
+	protected CommandSource() {
+		//
+	}
 
-    public void markAsChecked(final AppUser checker, final DateTime checkedOnDate) {
-        this.checker = checker;
-        this.checkedOnDate = checkedOnDate.toDate();
-        this.processingResult = CommandProcessingResultType.PROCESSED.getValue();
-    }
+	private CommandSource(final String actionName, final String entityName,
+			final String href, final Long resourceId, final Long subresourceId,
+			final String commandSerializedAsJson, final AppUser maker,
+			final DateTime madeOnDateTime) {
+		this.actionName = actionName;
+		this.entityName = entityName;
+		this.resourceGetUrl = href;
+		this.resourceId = resourceId;
+		this.subresourceId = subresourceId;
+		this.commandAsJson = commandSerializedAsJson;
+		this.maker = maker;
+		this.madeOnDate = madeOnDateTime.toDate();
+		this.processingResult = CommandProcessingResultType.PROCESSED
+				.getValue();
+	}
 
-    public void updateResourceId(final Long resourceId) {
-        this.resourceId = resourceId;
-    }
+	public void markAsChecked(final AppUser checker,
+			final DateTime checkedOnDate) {
+		this.checker = checker;
+		this.checkedOnDate = checkedOnDate.toDate();
+		this.processingResult = CommandProcessingResultType.PROCESSED
+				.getValue();
+	}
 
-    public void updateSubresourceId(final Long subresourceId) {
-        this.subresourceId = subresourceId;
-    }
+	public void updateResourceId(final Long resourceId) {
+		this.resourceId = resourceId;
+	}
 
-    public void updateJsonTo(final String json) {
-        this.commandAsJson = json;
-    }
+	public void updateSubresourceId(final Long subresourceId) {
+		this.subresourceId = subresourceId;
+	}
 
-    public Long resourceId() {
-        return this.resourceId;
-    }
+	public void updateJsonTo(final String json) {
+		this.commandAsJson = json;
+	}
 
-    public Long subresourceId() {
-        return this.subresourceId;
-    }
+	public Long resourceId() {
+		return this.resourceId;
+	}
 
-    public boolean hasJson() {
-        return StringUtils.isNotBlank(this.commandAsJson);
-    }
+	public Long subresourceId() {
+		return this.subresourceId;
+	}
 
-    public String json() {
-        return this.commandAsJson;
-    }
+	public boolean hasJson() {
+		return StringUtils.isNotBlank(this.commandAsJson);
+	}
 
-    public String getActionName() {
-        return this.actionName;
-    }
+	public String json() {
+		return this.commandAsJson;
+	}
 
-    public String getEntityName() {
-        return this.entityName;
-    }
+	public String getActionName() {
+		return this.actionName;
+	}
 
-    public String getPermissionCode() {
-        return this.actionName + "_" + this.entityName;
-    }
+	public String getEntityName() {
+		return this.entityName;
+	}
 
-    public Long getResourceId() {
-        return this.resourceId;
-    }
+	public String getPermissionCode() {
+		return this.actionName + "_" + this.entityName;
+	}
 
-    public Long getSubresourceId() {
-        return this.subresourceId;
-    }
+	public Long getResourceId() {
+		return this.resourceId;
+	}
 
-    public void markAsAwaitingApproval() {
-        this.processingResult = CommandProcessingResultType.AWAITING_APPROVAL.getValue();
-    }
+	public Long getSubresourceId() {
+		return this.subresourceId;
+	}
 
-    public boolean isMarkedAsAwaitingApproval() {
-        if (this.processingResult.equals(CommandProcessingResultType.AWAITING_APPROVAL.getValue())) return true;
+	public void markAsAwaitingApproval() {
+		this.processingResult = CommandProcessingResultType.AWAITING_APPROVAL
+				.getValue();
+	}
 
-        return false;
-    }
+	public boolean isMarkedAsAwaitingApproval() {
+		if (this.processingResult
+				.equals(CommandProcessingResultType.AWAITING_APPROVAL
+						.getValue())) {
+			return true;
+		}
 
-    public void updateForAudit(final Long officeId, final Long groupId, final Long clientId, final Long loanId, final Long savingsId,
-            final Long productId) {
-        this.officeId = officeId;
-        this.groupId = groupId;
-        this.clientId = clientId;
-        this.loanId = loanId;
-        this.savingsId = savingsId;
-        this.productId = productId;
-    }
+		return false;
+	}
 
-    public String getResourceGetUrl() {
-        return this.resourceGetUrl;
-    }
+	public void updateForAudit(final Long officeId, final Long groupId,
+			final Long clientId, final Long loanId, final Long savingsId,
+			final Long productId) {
+		this.officeId = officeId;
+		this.groupId = groupId;
+		this.clientId = clientId;
+		this.loanId = loanId;
+		this.savingsId = savingsId;
+		this.productId = productId;
+	}
 
-    public Long getProductId() {
-        return this.productId;
-    }
+	public String getResourceGetUrl() {
+		return this.resourceGetUrl;
+	}
+
+	public Long getProductId() {
+		return this.productId;
+	}
 }

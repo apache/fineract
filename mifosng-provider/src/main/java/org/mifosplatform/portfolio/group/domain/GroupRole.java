@@ -19,7 +19,6 @@ import org.springframework.data.jpa.domain.AbstractPersistable;
 @Table(name = "m_group_roles")
 public class GroupRole extends AbstractPersistable<Long> {
 
-    @SuppressWarnings("unused")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "group_id")
     private Group group;

@@ -30,7 +30,6 @@ import org.springframework.data.jpa.domain.AbstractPersistable;
 @Table(name = "m_holiday", uniqueConstraints = { @UniqueConstraint(columnNames = { "name" }, name = "holiday_name") })
 public class Holiday extends AbstractPersistable<Long> {
 
-    @SuppressWarnings("unused")
     @Column(name = "name", unique = true, nullable = false, length = 100)
     private String name;
 
@@ -49,7 +48,6 @@ public class Holiday extends AbstractPersistable<Long> {
     @Column(name = "processed", nullable = false)
     private boolean processed;
 
-    @SuppressWarnings("unused")
     @Column(name = "description", length = 100)
     private String description;
 

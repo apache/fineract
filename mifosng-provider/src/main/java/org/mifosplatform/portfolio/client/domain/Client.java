@@ -96,11 +96,9 @@ public final class Client extends AbstractPersistable<Long> {
     @Transient
     private boolean accountNumberRequiresAutoGeneration = false;
     
-    @SuppressWarnings("unused")
     @Column(name = "closure_reason_cv_id", nullable = true)
     private Long closureReasonId;
     
-    @SuppressWarnings("unused")
     @Column(name = "closedon_date", nullable = true)
     @Temporal(TemporalType.DATE)
     private Date closureDate;
@@ -464,7 +462,7 @@ public final class Client extends AbstractPersistable<Long> {
     }
     
     public Integer getStatus() {
-        return status;
+        return this.status;
     }
 
     public boolean isActivatedAfter(final LocalDate submittedOn) {

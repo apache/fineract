@@ -14,10 +14,9 @@ import javax.persistence.UniqueConstraint;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
-@Table(name = "c_external_service", uniqueConstraints = { @UniqueConstraint(columnNames = ("name")) })
+@Table(name = "c_external_service", uniqueConstraints = { @UniqueConstraint(columnNames = "name") })
 public class ExternalService extends AbstractPersistable<Long> {
 
-    @SuppressWarnings("unused")
     @Column(name = "name", nullable = false)
     private String name;
 

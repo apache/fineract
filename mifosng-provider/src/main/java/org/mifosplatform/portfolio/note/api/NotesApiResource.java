@@ -70,10 +70,9 @@ public class NotesApiResource {
     public String retrieveNotesByResource(@PathParam("resourceType") final String resourceType,
             @PathParam("resourceId") final Long resourceId, @Context final UriInfo uriInfo) {
 
-        NoteType noteType = NoteType.fromApiUrl(resourceType);
+        final NoteType noteType = NoteType.fromApiUrl(resourceType);
 
         if (noteType == null) { throw new NoteResourceNotSupportedException(resourceType); }
-        ;
 
         this.context.authenticatedUser().validateHasReadPermission(getResourceNameForPermissions(noteType));
 
@@ -92,10 +91,9 @@ public class NotesApiResource {
     public String retrieveNote(@PathParam("resourceType") final String resourceType, @PathParam("resourceId") final Long resourceId,
             @PathParam("noteId") final Long noteId, @Context final UriInfo uriInfo) {
 
-        NoteType noteType = NoteType.fromApiUrl(resourceType);
+        final NoteType noteType = NoteType.fromApiUrl(resourceType);
 
         if (noteType == null) { throw new NoteResourceNotSupportedException(resourceType); }
-        ;
 
         this.context.authenticatedUser().validateHasReadPermission(getResourceNameForPermissions(noteType));
 
@@ -113,10 +111,9 @@ public class NotesApiResource {
     public String addNewNote(@PathParam("resourceType") final String resourceType, @PathParam("resourceId") final Long resourceId,
             final String apiRequestBodyAsJson) {
 
-        NoteType noteType = NoteType.fromApiUrl(resourceType);
+        final NoteType noteType = NoteType.fromApiUrl(resourceType);
 
         if (noteType == null) { throw new NoteResourceNotSupportedException(resourceType); }
-        ;
 
         final String resourceNameForPermissions = getResourceNameForPermissions(noteType);
         final CommandWrapper commandRequest = new CommandWrapperBuilder().createNote(resourceNameForPermissions, resourceType, resourceId)
@@ -134,10 +131,9 @@ public class NotesApiResource {
     public String updateNote(@PathParam("resourceType") final String resourceType, @PathParam("resourceId") final Long resourceId,
             @PathParam("noteId") final Long noteId, final String apiRequestBodyAsJson) {
 
-        NoteType noteType = NoteType.fromApiUrl(resourceType);
+        final NoteType noteType = NoteType.fromApiUrl(resourceType);
 
         if (noteType == null) { throw new NoteResourceNotSupportedException(resourceType); }
-        ;
 
         final String resourceNameForPermissions = getResourceNameForPermissions(noteType);
 
@@ -156,10 +152,9 @@ public class NotesApiResource {
     public String deleteNote(@PathParam("resourceType") final String resourceType, @PathParam("resourceId") final Long resourceId,
             @PathParam("noteId") final Long noteId) {
 
-        NoteType noteType = NoteType.fromApiUrl(resourceType);
+        final NoteType noteType = NoteType.fromApiUrl(resourceType);
 
         if (noteType == null) { throw new NoteResourceNotSupportedException(resourceType); }
-        ;
 
         final String resourceNameForPermissions = getResourceNameForPermissions(noteType);
 

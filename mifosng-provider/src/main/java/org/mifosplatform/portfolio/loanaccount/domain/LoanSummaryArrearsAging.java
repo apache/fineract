@@ -63,12 +63,10 @@ public final class LoanSummaryArrearsAging implements Persistable<Long> {
     @Column(name = "total_overdue_derived", scale = 6, precision = 19)
     private BigDecimal totalOverdue;
 
-    @SuppressWarnings("unused")
     @Temporal(TemporalType.DATE)
     @Column(name = "overdue_since_date_derived")
     private Date overdueSinceDate;
 
-    @SuppressWarnings("unused")
     @OneToOne(optional = false)
     @PrimaryKeyJoinColumn
     private Loan loan;

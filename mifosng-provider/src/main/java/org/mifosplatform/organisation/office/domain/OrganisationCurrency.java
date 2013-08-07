@@ -18,23 +18,18 @@ import org.springframework.data.jpa.domain.AbstractPersistable;
 @Table(name = "m_organisation_currency")
 public class OrganisationCurrency extends AbstractPersistable<Long> {
 
-    @SuppressWarnings("unused")
     @Column(name = "code", nullable = false, length = 3)
     private final String code;
 
-    @SuppressWarnings("unused")
     @Column(name = "decimal_places", nullable = false)
     private final Integer decimalPlaces;
 
-    @SuppressWarnings("unused")
     @Column(name = "name", nullable = false, length = 50)
     private final String name;
 
-    @SuppressWarnings("unused")
     @Column(name = "internationalized_name_code", nullable = false, length = 50)
     private final String nameCode;
 
-    @SuppressWarnings("unused")
     @Column(name = "display_symbol", nullable = true, length = 10)
     private final String displaySymbol;
 

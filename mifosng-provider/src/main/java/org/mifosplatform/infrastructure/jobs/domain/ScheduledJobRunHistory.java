@@ -16,38 +16,30 @@ import org.springframework.data.jpa.domain.AbstractPersistable;
 @Table(name = "job_run_history")
 public class ScheduledJobRunHistory extends AbstractPersistable<Long> {
 
-    @SuppressWarnings("unused")
     @ManyToOne
     @JoinColumn(name = "job_id")
     private ScheduledJobDetail scheduledJobDetail;
 
-    @SuppressWarnings("unused")
     @Column(name = "version")
     private Long version;
 
-    @SuppressWarnings("unused")
     @Column(name = "start_time")
     @Temporal(TemporalType.TIMESTAMP)
     private Date startTime;
 
-    @SuppressWarnings("unused")
     @Column(name = "end_time")
     @Temporal(TemporalType.TIMESTAMP)
     private Date endTime;
 
-    @SuppressWarnings("unused")
     @Column(name = "status")
     private String status;
 
-    @SuppressWarnings("unused")
     @Column(name = "error_message")
     private String errorMessage;
 
-    @SuppressWarnings("unused")
     @Column(name = "trigger_type")
     private String triggerType;
 
-    @SuppressWarnings("unused")
     @Column(name = "error_log")
     private String errorLog;
 

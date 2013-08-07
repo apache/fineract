@@ -106,7 +106,6 @@ public class SavingsAccount extends AbstractPersistable<Long> {
     @Column(name = "status_enum", nullable = false)
     private Integer status;
 
-    @SuppressWarnings("unused")
     @Column(name = "account_type_enum", nullable = false)
     private Integer accountType;
 
@@ -114,27 +113,22 @@ public class SavingsAccount extends AbstractPersistable<Long> {
     @Column(name = "submittedon_date", nullable = true)
     private Date submittedOnDate;
 
-    @SuppressWarnings("unused")
     @ManyToOne(optional = true)
     @JoinColumn(name = "submittedon_userid", nullable = true)
     private AppUser submittedBy;
 
-    @SuppressWarnings("unused")
     @Temporal(TemporalType.DATE)
     @Column(name = "rejectedon_date")
     private Date rejectedOnDate;
 
-    @SuppressWarnings("unused")
     @ManyToOne(optional = true)
     @JoinColumn(name = "rejectedon_userid", nullable = true)
     private AppUser rejectedBy;
 
-    @SuppressWarnings("unused")
     @Temporal(TemporalType.DATE)
     @Column(name = "withdrawnon_date")
     private Date withdrawnOnDate;
 
-    @SuppressWarnings("unused")
     @ManyToOne(optional = true)
     @JoinColumn(name = "withdrawnon_userid", nullable = true)
     private AppUser withdrawnBy;
@@ -143,7 +137,6 @@ public class SavingsAccount extends AbstractPersistable<Long> {
     @Column(name = "approvedon_date")
     private Date approvedOnDate;
 
-    @SuppressWarnings("unused")
     @ManyToOne(optional = true)
     @JoinColumn(name = "approvedon_userid", nullable = true)
     private AppUser approvedBy;
@@ -152,17 +145,14 @@ public class SavingsAccount extends AbstractPersistable<Long> {
     @Column(name = "activatedon_date", nullable = true)
     private Date activatedOnDate;
 
-    @SuppressWarnings("unused")
     @ManyToOne(optional = true)
     @JoinColumn(name = "activatedon_userid", nullable = true)
     private AppUser activatedBy;
 
-    @SuppressWarnings("unused")
     @Temporal(TemporalType.DATE)
     @Column(name = "closedon_date")
     private Date closedOnDate;
 
-    @SuppressWarnings("unused")
     @ManyToOne(optional = true)
     @JoinColumn(name = "closedon_userid", nullable = true)
     private AppUser closedBy;
@@ -361,7 +351,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         existingTransactionIds.addAll(findExistingTransactionIds());
         existingReversedTransactionIds.addAll(findExistingReversedTransactionIds());
 
-        for (PostingPeriod interestPostingPeriod : postingPeriods) {
+        for (final PostingPeriod interestPostingPeriod : postingPeriods) {
 
             final LocalDate interestPostingTransactionDate = interestPostingPeriod.dateOfPostingTransaction();
             final Money interestEarnedToBePostedForPeriod = interestPostingPeriod.getInterestEarned();
@@ -370,14 +360,14 @@ public class SavingsAccount extends AbstractPersistable<Long> {
 
                 interestPostedToDate = interestPostedToDate.plus(interestEarnedToBePostedForPeriod);
 
-                SavingsAccountTransaction postingTransaction = findInterestPostingTransactionFor(interestPostingTransactionDate);
+                final SavingsAccountTransaction postingTransaction = findInterestPostingTransactionFor(interestPostingTransactionDate);
                 if (postingTransaction == null) {
                     final SavingsAccountTransaction newPostingTransaction = SavingsAccountTransaction.interestPosting(this,
                             interestPostingTransactionDate, interestEarnedToBePostedForPeriod);
                     this.transactions.add(newPostingTransaction);
                     recalucateDailyBalanceDetails = true;
                 } else {
-                    boolean correctionRequired = postingTransaction.hasNotAmount(interestEarnedToBePostedForPeriod);
+                    final boolean correctionRequired = postingTransaction.hasNotAmount(interestEarnedToBePostedForPeriod);
                     if (correctionRequired) {
                         postingTransaction.reverse();
                         final SavingsAccountTransaction newPostingTransaction = SavingsAccountTransaction.interestPosting(this,
@@ -407,7 +397,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
 
         SavingsAccountTransaction postingTransation = null;
 
-        for (SavingsAccountTransaction transaction : this.transactions) {
+        for (final SavingsAccountTransaction transaction : this.transactions) {
             if (transaction.isInterestPostingAndNotReversed() && transaction.occursOn(postingDate)) {
                 postingTransation = transaction;
                 break;
@@ -454,19 +444,19 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         final SavingsInterestCalculationDaysInYearType daysInYearType = SavingsInterestCalculationDaysInYearType
                 .fromInt(this.interestCalculationDaysInYearType);
 
-        List<LocalDateInterval> postingPeriodIntervals = savingsHelper.determineInterestPostingPeriods(getActivationLocalDate(),
+        final List<LocalDateInterval> postingPeriodIntervals = this.savingsHelper.determineInterestPostingPeriods(getActivationLocalDate(),
                 upToInterestCalculationDate, postingPeriodType);
 
-        List<PostingPeriod> allPostingPeriods = new ArrayList<PostingPeriod>();
+        final List<PostingPeriod> allPostingPeriods = new ArrayList<PostingPeriod>();
 
         Money periodStartingBalance = Money.zero(this.currency);
 
         final SavingsInterestCalculationType interestCalculationType = SavingsInterestCalculationType.fromInt(this.interestCalculationType);
-        BigDecimal interestRateAsFraction = nominalAnnualInterestRate.divide(BigDecimal.valueOf(100l), mc);
-        for (LocalDateInterval periodInterval : postingPeriodIntervals) {
+        final BigDecimal interestRateAsFraction = this.nominalAnnualInterestRate.divide(BigDecimal.valueOf(100l), mc);
+        for (final LocalDateInterval periodInterval : postingPeriodIntervals) {
 
-            PostingPeriod postingPeriod = PostingPeriod.createFrom(periodInterval, periodStartingBalance,
-                    retreiveOrderedListOfTransactions(), currency, compoundingPeriodType, interestCalculationType, interestRateAsFraction,
+            final PostingPeriod postingPeriod = PostingPeriod.createFrom(periodInterval, periodStartingBalance,
+                    retreiveOrderedListOfTransactions(), this.currency, compoundingPeriodType, interestCalculationType, interestRateAsFraction,
                     daysInYearType.getValue());
 
             periodStartingBalance = postingPeriod.closingBalance();
@@ -474,20 +464,20 @@ public class SavingsAccount extends AbstractPersistable<Long> {
             allPostingPeriods.add(postingPeriod);
         }
 
-        savingsHelper.calculateInterestForAllPostingPeriods(currency, allPostingPeriods);
+        this.savingsHelper.calculateInterestForAllPostingPeriods(this.currency, allPostingPeriods);
 
-        this.summary.updateFromInterestPeriodSummaries(currency, allPostingPeriods);
+        this.summary.updateFromInterestPeriodSummaries(this.currency, allPostingPeriods);
         this.summary.updateSummary(this.currency, this.savingsAccountTransactionSummaryWrapper, this.transactions);
 
         return allPostingPeriods;
     }
 
     private List<SavingsAccountTransaction> retreiveOrderedListOfTransactions() {
-        List<SavingsAccountTransaction> listOfTransactionsSorted = retreiveListOfTransactions();
+        final List<SavingsAccountTransaction> listOfTransactionsSorted = retreiveListOfTransactions();
 
-        List<SavingsAccountTransaction> orderedNonInterestPostingTransactions = new ArrayList<SavingsAccountTransaction>();
+        final List<SavingsAccountTransaction> orderedNonInterestPostingTransactions = new ArrayList<SavingsAccountTransaction>();
 
-        for (SavingsAccountTransaction transaction : listOfTransactionsSorted) {
+        for (final SavingsAccountTransaction transaction : listOfTransactionsSorted) {
             if (!transaction.isInterestPostingAndNotReversed() && transaction.isNotReversed()) {
                 orderedNonInterestPostingTransactions.add(transaction);
             }
@@ -497,12 +487,12 @@ public class SavingsAccount extends AbstractPersistable<Long> {
     }
 
     private List<SavingsAccountTransaction> retreiveListOfTransactions() {
-        List<SavingsAccountTransaction> listOfTransactionsSorted = new ArrayList<SavingsAccountTransaction>();
-        for (SavingsAccountTransaction transaction : this.transactions) {
+        final List<SavingsAccountTransaction> listOfTransactionsSorted = new ArrayList<SavingsAccountTransaction>();
+        for (final SavingsAccountTransaction transaction : this.transactions) {
             listOfTransactionsSorted.add(transaction);
         }
 
-        SavingsAccountTransactionComparator transactionComparator = new SavingsAccountTransactionComparator();
+        final SavingsAccountTransactionComparator transactionComparator = new SavingsAccountTransactionComparator();
         Collections.sort(listOfTransactionsSorted, transactionComparator);
 
         return listOfTransactionsSorted;
@@ -512,9 +502,9 @@ public class SavingsAccount extends AbstractPersistable<Long> {
 
         Money runningBalance = openingAccountBalance.copy();
 
-        List<SavingsAccountTransaction> accountTransactionsSorted = retreiveListOfTransactions();
+        final List<SavingsAccountTransaction> accountTransactionsSorted = retreiveListOfTransactions();
 
-        for (SavingsAccountTransaction transaction : accountTransactionsSorted) {
+        for (final SavingsAccountTransaction transaction : accountTransactionsSorted) {
             if (transaction.isReversed()) {
                 transaction.zeroBalanceFields();
             } else {
@@ -533,7 +523,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         // loop over transactions in reverse
         LocalDate endOfBalanceDate = DateUtils.getLocalDateOfTenant();
         for (int i = accountTransactionsSorted.size() - 1; i >= 0; i--) {
-            SavingsAccountTransaction transaction = accountTransactionsSorted.get(i);
+            final SavingsAccountTransaction transaction = accountTransactionsSorted.get(i);
             if (transaction.isNotReversed()) {
                 transaction.updateCumulativeBalanceAndDates(this.currency, endOfBalanceDate);
 
@@ -698,7 +688,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
 
         boolean transactionBeforeLastInterestPosting = false;
 
-        for (SavingsAccountTransaction transaction : retreiveListOfTransactions()) {
+        for (final SavingsAccountTransaction transaction : retreiveListOfTransactions()) {
             if (transaction.isInterestPostingAndNotReversed() && transaction.isAfter(transactionDate)) {
                 transactionBeforeLastInterestPosting = true;
                 break;
@@ -713,7 +703,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
 
         Money runningBalance = Money.zero(this.currency);
 
-        for (SavingsAccountTransaction transaction : transactionsSortedByDate) {
+        for (final SavingsAccountTransaction transaction : transactionsSortedByDate) {
             if (transaction.isNotReversed() && transaction.isCredit()) {
                 runningBalance = runningBalance.plus(transaction.getAmount(this.currency));
             } else if (transaction.isNotReversed() && transaction.isDebit()) {
@@ -733,7 +723,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
 
         Money runningBalance = Money.zero(this.currency);
 
-        for (SavingsAccountTransaction transaction : transactionsSortedByDate) {
+        for (final SavingsAccountTransaction transaction : transactionsSortedByDate) {
             if (transaction.isNotReversed() && transaction.isCredit()) {
                 runningBalance = runningBalance.plus(transaction.getAmount(this.currency));
             } else if (transaction.isNotReversed() && transaction.isDebit()) {
@@ -767,7 +757,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
             if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
         }
 
-        LocalDate nextAnnualFeeDueDate = getNextAnnualFeeDueDate();
+        final LocalDate nextAnnualFeeDueDate = getNextAnnualFeeDueDate();
         if (nextAnnualFeeDueDate == null || annualFeeSettingsNotSet()) {
             baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("no.annualfee.settings");
 
@@ -806,7 +796,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         existingReversedTransactionIds.addAll(findExistingReversedTransactionIds());
 
         final Money annualFee = Money.of(this.currency, this.annualFeeAmount);
-        SavingsAccountTransaction annualFeeTransaction = SavingsAccountTransaction.annualFee(this, annualFeeTransactionDate, annualFee);
+        final SavingsAccountTransaction annualFeeTransaction = SavingsAccountTransaction.annualFee(this, annualFeeTransactionDate, annualFee);
         this.transactions.add(annualFeeTransaction);
 
         this.summary.updateSummary(this.currency, this.savingsAccountTransactionSummaryWrapper, this.transactions);
@@ -815,7 +805,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
 
         currentAnnualFeeNextDueDate = findLatestAnnualFeeTransactionDueDate();
         if (currentAnnualFeeNextDueDate != null) {
-            LocalDate newAnnualFeeNextDueDate = new LocalDate(currentAnnualFeeNextDueDate).withMonthOfYear(this.annualFeeOnMonth)
+            final LocalDate newAnnualFeeNextDueDate = new LocalDate(currentAnnualFeeNextDueDate).withMonthOfYear(this.annualFeeOnMonth)
                     .withDayOfMonth(this.annualFeeOnDay).plusYears(1);
             this.annualFeeNextDueDate = newAnnualFeeNextDueDate.toDate();
         } else {
@@ -847,7 +837,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
     }
 
     private void updateToNextAnnualFeeDueDateFrom(final LocalDate startingDate) {
-        LocalDate nextDueLocalDate = startingDate.withMonthOfYear(this.annualFeeOnMonth).withDayOfMonth(this.annualFeeOnDay);
+        final LocalDate nextDueLocalDate = startingDate.withMonthOfYear(this.annualFeeOnMonth).withDayOfMonth(this.annualFeeOnDay);
         this.annualFeeNextDueDate = nextDueLocalDate.toDate();
     }
 
@@ -902,7 +892,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(SAVINGS_ACCOUNT_RESOURCE_NAME + SavingsApiConstants.modifyApplicationAction);
 
-        SavingsAccountStatusType currentStatus = SavingsAccountStatusType.fromInt(this.status);
+        final SavingsAccountStatusType currentStatus = SavingsAccountStatusType.fromInt(this.status);
         if (!SavingsAccountStatusType.SUBMITTED_AND_PENDING_APPROVAL.hasStateOf(currentStatus)) {
             baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("not.in.submittedandpendingapproval.state");
 
@@ -1124,16 +1114,16 @@ public class SavingsAccount extends AbstractPersistable<Long> {
                 .resource(SAVINGS_ACCOUNT_RESOURCE_NAME);
 
         if (this.lockinPeriodFrequency == null) {
-            baseDataValidator.reset().parameter(lockinPeriodFrequencyTypeParamName).value(lockinPeriodFrequencyType).ignoreIfNull()
+            baseDataValidator.reset().parameter(lockinPeriodFrequencyTypeParamName).value(this.lockinPeriodFrequencyType).ignoreIfNull()
                     .inMinMaxRange(0, 3);
 
             if (this.lockinPeriodFrequencyType != null) {
-                baseDataValidator.reset().parameter(lockinPeriodFrequencyParamName).value(lockinPeriodFrequency).notNull()
+                baseDataValidator.reset().parameter(lockinPeriodFrequencyParamName).value(this.lockinPeriodFrequency).notNull()
                         .integerZeroOrGreater();
             }
         } else {
-            baseDataValidator.reset().parameter(lockinPeriodFrequencyParamName).value(lockinPeriodFrequencyType).integerZeroOrGreater();
-            baseDataValidator.reset().parameter(lockinPeriodFrequencyTypeParamName).value(lockinPeriodFrequencyType).notNull()
+            baseDataValidator.reset().parameter(lockinPeriodFrequencyParamName).value(this.lockinPeriodFrequencyType).integerZeroOrGreater();
+            baseDataValidator.reset().parameter(lockinPeriodFrequencyTypeParamName).value(this.lockinPeriodFrequencyType).notNull()
                     .inMinMaxRange(0, 3);
         }
 
@@ -1144,14 +1134,14 @@ public class SavingsAccount extends AbstractPersistable<Long> {
             final List<Long> existingReversedTransactionIds) {
 
         final Map<String, Object> accountingBridgeData = new LinkedHashMap<String, Object>();
-        accountingBridgeData.put("savingsId", this.getId());
-        accountingBridgeData.put("savingsProductId", this.productId());
-        accountingBridgeData.put("officeId", this.officeId());
-        accountingBridgeData.put("cashBasedAccountingEnabled", this.isCashBasedAccountingEnabledOnSavingsProduct());
-        accountingBridgeData.put("accrualBasedAccountingEnabled", this.isAccrualBasedAccountingEnabledOnSavingsProduct());
+        accountingBridgeData.put("savingsId", getId());
+        accountingBridgeData.put("savingsProductId", productId());
+        accountingBridgeData.put("officeId", officeId());
+        accountingBridgeData.put("cashBasedAccountingEnabled", isCashBasedAccountingEnabledOnSavingsProduct());
+        accountingBridgeData.put("accrualBasedAccountingEnabled", isAccrualBasedAccountingEnabledOnSavingsProduct());
 
         final List<Map<String, Object>> newLoanTransactions = new ArrayList<Map<String, Object>>();
-        for (SavingsAccountTransaction transaction : this.transactions) {
+        for (final SavingsAccountTransaction transaction : this.transactions) {
             if (transaction.isReversed() && !existingReversedTransactionIds.contains(transaction.getId())) {
                 newLoanTransactions.add(transaction.toMapData(currencyData));
             } else if (!existingTransactionIds.contains(transaction.getId())) {
@@ -1165,9 +1155,9 @@ public class SavingsAccount extends AbstractPersistable<Long> {
 
     private Collection<Long> findExistingTransactionIds() {
 
-        Collection<Long> ids = new ArrayList<Long>();
+        final Collection<Long> ids = new ArrayList<Long>();
 
-        for (SavingsAccountTransaction transaction : this.transactions) {
+        for (final SavingsAccountTransaction transaction : this.transactions) {
             ids.add(transaction.getId());
         }
 
@@ -1178,7 +1168,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
 
         final Collection<Long> ids = new ArrayList<Long>();
 
-        for (SavingsAccountTransaction transaction : this.transactions) {
+        for (final SavingsAccountTransaction transaction : this.transactions) {
             if (transaction.isReversed()) {
                 ids.add(transaction.getId());
             }
@@ -1279,12 +1269,12 @@ public class SavingsAccount extends AbstractPersistable<Long> {
                     .failWithCodeNoParameterAddedToErrorCode("cannot.be.a.future.date");
         }
 
-        if (client != null && client.isActivatedAfter(submittedOn)) {
-            baseDataValidator.reset().parameter(SavingsApiConstants.submittedOnDateParamName).value(client.getActivationLocalDate())
+        if (this.client != null && this.client.isActivatedAfter(submittedOn)) {
+            baseDataValidator.reset().parameter(SavingsApiConstants.submittedOnDateParamName).value(this.client.getActivationLocalDate())
                     .failWithCodeNoParameterAddedToErrorCode("cannot.be.before.client.activation.date");
-        } else if (group != null && group.isActivatedAfter(submittedOn)) {
+        } else if (this.group != null && this.group.isActivatedAfter(submittedOn)) {
 
-            baseDataValidator.reset().parameter(SavingsApiConstants.submittedOnDateParamName).value(group.getActivationLocalDate())
+            baseDataValidator.reset().parameter(SavingsApiConstants.submittedOnDateParamName).value(this.group.getActivationLocalDate())
                     .failWithCodeNoParameterAddedToErrorCode("cannot.be.before.client.activation.date");
         }
 
@@ -1319,7 +1309,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(SAVINGS_ACCOUNT_RESOURCE_NAME + SavingsApiConstants.approvalAction);
 
-        SavingsAccountStatusType currentStatus = SavingsAccountStatusType.fromInt(this.status);
+        final SavingsAccountStatusType currentStatus = SavingsAccountStatusType.fromInt(this.status);
         if (!SavingsAccountStatusType.SUBMITTED_AND_PENDING_APPROVAL.hasStateOf(currentStatus)) {
             baseDataValidator.reset().parameter(SavingsApiConstants.approvedOnDateParamName)
                     .failWithCodeNoParameterAddedToErrorCode("not.in.submittedandpendingapproval.state");
@@ -1331,8 +1321,8 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         actualChanges.put(SavingsApiConstants.statusParamName, SavingsEnumerations.status(this.status));
 
         // only do below if status has changed in the 'approval' case
-        LocalDate approvedOn = command.localDateValueOfParameterNamed(SavingsApiConstants.approvedOnDateParamName);
-        String approvedOnDateChange = command.stringValueOfParameterNamed(SavingsApiConstants.approvedOnDateParamName);
+        final LocalDate approvedOn = command.localDateValueOfParameterNamed(SavingsApiConstants.approvedOnDateParamName);
+        final String approvedOnDateChange = command.stringValueOfParameterNamed(SavingsApiConstants.approvedOnDateParamName);
 
         this.approvedOnDate = approvedOn.toDate();
         this.approvedBy = currentUser;
@@ -1378,7 +1368,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(SAVINGS_ACCOUNT_RESOURCE_NAME + SavingsApiConstants.undoApprovalAction);
 
-        SavingsAccountStatusType currentStatus = SavingsAccountStatusType.fromInt(this.status);
+        final SavingsAccountStatusType currentStatus = SavingsAccountStatusType.fromInt(this.status);
         if (!SavingsAccountStatusType.APPROVED.hasStateOf(currentStatus)) {
 
             baseDataValidator.reset().parameter(SavingsApiConstants.approvedOnDateParamName)
@@ -1410,7 +1400,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
             final LocalDate upToInterestCalculationDate) {
 
         SavingsAccountTransaction transactionToUndo = null;
-        for (SavingsAccountTransaction transaction : this.transactions) {
+        for (final SavingsAccountTransaction transaction : this.transactions) {
             if (transaction.isIdentifiedBy(transactionId)) {
                 transactionToUndo = transaction;
             }
@@ -1428,7 +1418,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
                 if (this.annualFeeNextDueDate == null) {
                     updateToNextAnnualFeeDueDateFrom(getActivationLocalDate());
                 } else {
-                    LocalDate newAnnualFeeNextDueDate = new LocalDate(this.annualFeeNextDueDate).withMonthOfYear(this.annualFeeOnMonth)
+                    final LocalDate newAnnualFeeNextDueDate = new LocalDate(this.annualFeeNextDueDate).withMonthOfYear(this.annualFeeOnMonth)
                             .withDayOfMonth(this.annualFeeOnDay).plusYears(1);
                     this.annualFeeNextDueDate = newAnnualFeeNextDueDate.toDate();
                 }
@@ -1445,7 +1435,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         Date nextDueDate = null;
 
         LocalDate lastAnnualFeeTransactionDate = null;
-        for (SavingsAccountTransaction transaction : retreiveOrderedListOfTransactions()) {
+        for (final SavingsAccountTransaction transaction : retreiveOrderedListOfTransactions()) {
             if (transaction.isAnnualFeeAndNotReversed()) {
                 if (lastAnnualFeeTransactionDate == null) {
                     lastAnnualFeeTransactionDate = transaction.transactionLocalDate();
@@ -1470,7 +1460,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(SAVINGS_ACCOUNT_RESOURCE_NAME + SavingsApiConstants.rejectAction);
 
-        SavingsAccountStatusType currentStatus = SavingsAccountStatusType.fromInt(this.status);
+        final SavingsAccountStatusType currentStatus = SavingsAccountStatusType.fromInt(this.status);
         if (!SavingsAccountStatusType.SUBMITTED_AND_PENDING_APPROVAL.hasStateOf(currentStatus)) {
 
             baseDataValidator.reset().parameter(SavingsApiConstants.rejectedOnDateParamName)
@@ -1482,7 +1472,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         this.status = SavingsAccountStatusType.REJECTED.getValue();
         actualChanges.put(SavingsApiConstants.statusParamName, SavingsEnumerations.status(this.status));
 
-        LocalDate rejectedOn = command.localDateValueOfParameterNamed(SavingsApiConstants.rejectedOnDateParamName);
+        final LocalDate rejectedOn = command.localDateValueOfParameterNamed(SavingsApiConstants.rejectedOnDateParamName);
         final String rejectedOnAsString = command.stringValueOfParameterNamed(SavingsApiConstants.rejectedOnDateParamName);
 
         this.rejectedOnDate = rejectedOn.toDate();
@@ -1528,7 +1518,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(SAVINGS_ACCOUNT_RESOURCE_NAME + SavingsApiConstants.withdrawnByApplicantAction);
 
-        SavingsAccountStatusType currentStatus = SavingsAccountStatusType.fromInt(this.status);
+        final SavingsAccountStatusType currentStatus = SavingsAccountStatusType.fromInt(this.status);
         if (!SavingsAccountStatusType.SUBMITTED_AND_PENDING_APPROVAL.hasStateOf(currentStatus)) {
 
             baseDataValidator.reset().parameter(SavingsApiConstants.withdrawnOnDateParamName)
@@ -1587,7 +1577,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
                 .resource(SAVINGS_ACCOUNT_RESOURCE_NAME + SavingsApiConstants.activateAction);
 
-        SavingsAccountStatusType currentStatus = SavingsAccountStatusType.fromInt(this.status);
+        final SavingsAccountStatusType currentStatus = SavingsAccountStatusType.fromInt(this.status);
         if (!SavingsAccountStatusType.APPROVED.hasStateOf(currentStatus)) {
 
             baseDataValidator.reset().parameter(SavingsApiConstants.activatedOnDateParamName)
@@ -1622,7 +1612,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
 
         if (this.client != null && this.client.isActivatedAfter(activationDate)) {
             final DateTimeFormatter formatter = DateTimeFormat.forPattern(command.dateFormat()).withLocale(command.extractLocale());
-            final String dateAsString = formatter.print(client.getActivationLocalDate());
+            final String dateAsString = formatter.print(this.client.getActivationLocalDate());
             baseDataValidator.reset().parameter(SavingsApiConstants.activatedOnDateParamName).value(dateAsString)
                     .failWithCodeNoParameterAddedToErrorCode("cannot.be.before.client.activation.date");
             if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
@@ -1630,7 +1620,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         
         if (this.group != null && this.group.isActivatedAfter(activationDate)) {
             final DateTimeFormatter formatter = DateTimeFormat.forPattern(command.dateFormat()).withLocale(command.extractLocale());
-            final String dateAsString = formatter.print(client.getActivationLocalDate());
+            final String dateAsString = formatter.print(this.client.getActivationLocalDate());
             baseDataValidator.reset().parameter(SavingsApiConstants.activatedOnDateParamName).value(dateAsString)
                     .failWithCodeNoParameterAddedToErrorCode("cannot.be.before.group.activation.date");
             if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
