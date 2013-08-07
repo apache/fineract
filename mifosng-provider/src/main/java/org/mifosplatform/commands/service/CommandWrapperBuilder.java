@@ -808,6 +808,14 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    public CommandWrapperBuilder createAccountTransfer() {
+        this.actionName = "CREATE";
+        this.entityName = "ACCOUNTTRANSFER";
+        this.entityId = null;
+        this.href = "/accounttransfers";
+        return this;
+    }
+
     public CommandWrapperBuilder savingsAccountDeposit(final Long accountId) {
         this.actionName = "DEPOSIT";
         this.entityName = "SAVINGSACCOUNT";

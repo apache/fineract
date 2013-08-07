@@ -699,7 +699,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         boolean transactionBeforeLastInterestPosting = false;
 
         for (SavingsAccountTransaction transaction : retreiveListOfTransactions()) {
-            if (transaction.isNotReversed() && transaction.isInterestPostingAndNotReversed() && transaction.isAfter(transactionDate)) {
+            if (transaction.isInterestPostingAndNotReversed() && transaction.isAfter(transactionDate)) {
                 transactionBeforeLastInterestPosting = true;
                 break;
             }

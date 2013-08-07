@@ -11,6 +11,7 @@ import java.util.Collection;
 import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.codes.data.CodeValueData;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
+import org.mifosplatform.portfolio.accounttransfers.data.AccountTransferData;
 import org.mifosplatform.portfolio.paymentdetail.data.PaymentDetailData;
 
 /**
@@ -29,16 +30,18 @@ public class SavingsAccountTransactionData {
     private final BigDecimal amount;
     private final BigDecimal runningBalance;
     private final boolean reversed;
+    private final AccountTransferData transfer;
 
     // templates
     final Collection<CodeValueData> paymentTypeOptions;
 
     public static SavingsAccountTransactionData create(final Long id, final SavingsAccountTransactionEnumData transactionType,
             final PaymentDetailData paymentDetailData, final Long savingsId, final String savingsAccountNo, final LocalDate date,
-            final CurrencyData currency, final BigDecimal amount, final BigDecimal runningBalance, final boolean reversed) {
+            final CurrencyData currency, final BigDecimal amount, final BigDecimal runningBalance, final boolean reversed,
+            final AccountTransferData transfer) {
         final Collection<CodeValueData> paymentTypeOptions = null;
         return new SavingsAccountTransactionData(id, transactionType, paymentDetailData, savingsId, savingsAccountNo, date, currency,
-                amount, runningBalance, reversed, paymentTypeOptions);
+                amount, runningBalance, reversed, transfer, paymentTypeOptions);
     }
 
     public static SavingsAccountTransactionData template(final Long savingsId, final String savingsAccountNo,
@@ -51,7 +54,7 @@ public class SavingsAccountTransactionData {
         final PaymentDetailData paymentDetailData = null;
         final Collection<CodeValueData> paymentTypeOptions = null;
         return new SavingsAccountTransactionData(id, transactionType, paymentDetailData, savingsId, savingsAccountNo, defaultLocalDate,
-                currency, amount, runningBalance, reversed, null);
+                currency, amount, runningBalance, reversed, null, null);
     }
 
     public static SavingsAccountTransactionData templateOnTop(final SavingsAccountTransactionData savingsAccountTransactionData,
@@ -60,13 +63,13 @@ public class SavingsAccountTransactionData {
                 savingsAccountTransactionData.paymentDetailData, savingsAccountTransactionData.accountId,
                 savingsAccountTransactionData.accountNo, savingsAccountTransactionData.date, savingsAccountTransactionData.currency,
                 savingsAccountTransactionData.amount, savingsAccountTransactionData.runningBalance, savingsAccountTransactionData.reversed,
-                paymentTypeOptions);
+                savingsAccountTransactionData.transfer, paymentTypeOptions);
     }
 
     private SavingsAccountTransactionData(final Long id, final SavingsAccountTransactionEnumData transactionType,
             final PaymentDetailData paymentDetailData, final Long savingsId, final String savingsAccountNo, final LocalDate date,
             final CurrencyData currency, final BigDecimal amount, final BigDecimal runningBalance, final boolean reversed,
-            final Collection<CodeValueData> paymentTypeOptions) {
+            final AccountTransferData transfer, final Collection<CodeValueData> paymentTypeOptions) {
         this.id = id;
         this.transactionType = transactionType;
         this.paymentDetailData = paymentDetailData;
@@ -77,6 +80,7 @@ public class SavingsAccountTransactionData {
         this.amount = amount;
         this.runningBalance = runningBalance;
         this.reversed = reversed;
+        this.transfer = transfer;
         this.paymentTypeOptions = paymentTypeOptions;
     }
 }

@@ -563,4 +563,8 @@ public class CommandWrapper {
     public boolean isSchedulerResource() {
         return this.entityName.equalsIgnoreCase("SCHEDULER");
     }
+
+    public boolean isAccountTransferResource() {
+        return this.entityName.equalsIgnoreCase("ACCOUNTTRANSFER");
+    }
 }

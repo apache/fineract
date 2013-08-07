@@ -33,6 +33,7 @@ import org.mifosplatform.portfolio.paymentdetail.service.PaymentDetailWritePlatf
 import org.mifosplatform.portfolio.savings.data.SavingsAccountTransactionDataValidator;
 import org.mifosplatform.portfolio.savings.domain.SavingsAccount;
 import org.mifosplatform.portfolio.savings.domain.SavingsAccountAssembler;
+import org.mifosplatform.portfolio.savings.domain.SavingsAccountDomainService;
 import org.mifosplatform.portfolio.savings.domain.SavingsAccountRepository;
 import org.mifosplatform.portfolio.savings.domain.SavingsAccountStatusType;
 import org.mifosplatform.portfolio.savings.domain.SavingsAccountTransaction;
@@ -53,6 +54,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
     private final PaymentDetailWritePlatformService paymentDetailWritePlatformService;
     private final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepositoryWrapper;
     private final JournalEntryWritePlatformService journalEntryWritePlatformService;
+    private final SavingsAccountDomainService savingsAccountDomainService;
 
     @Autowired
     public SavingsAccountWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
@@ -62,7 +64,8 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
             final SavingsAccountTransactionDataValidator savingsAccountTransactionDataValidator,
             final PaymentDetailWritePlatformService paymentDetailWritePlatformService,
             final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepositoryWrapper,
-            final JournalEntryWritePlatformService journalEntryWritePlatformService) {
+            final JournalEntryWritePlatformService journalEntryWritePlatformService,
+            final SavingsAccountDomainService savingsAccountDomainService) {
         this.context = context;
         this.savingAccountRepository = savingAccountRepository;
         this.savingsAccountTransactionRepository = savingsAccountTransactionRepository;
@@ -71,6 +74,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         this.paymentDetailWritePlatformService = paymentDetailWritePlatformService;
         this.applicationCurrencyRepositoryWrapper = applicationCurrencyRepositoryWrapper;
         this.journalEntryWritePlatformService = journalEntryWritePlatformService;
+        this.savingsAccountDomainService = savingsAccountDomainService;
     }
 
     @Transactional
@@ -120,36 +124,19 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         final LocalDate transactionDate = command.localDateValueOfParameterNamed("transactionDate");
         final BigDecimal transactionAmount = command.bigDecimalValueOfParameterNamed("transactionAmount");
 
-        final List<Long> existingTransactionIds = new ArrayList<Long>();
-        final List<Long> existingReversedTransactionIds = new ArrayList<Long>();
         final Map<String, Object> changes = new LinkedHashMap<String, Object>();
         PaymentDetail paymentDetail = paymentDetailWritePlatformService.createAndPersistPaymentDetail(command, changes);
 
-        final MathContext mc = new MathContext(10, RoundingMode.HALF_EVEN);
-        final SavingsAccountTransaction deposit = account.deposit(fmt, transactionDate, transactionAmount, existingTransactionIds,
-                existingReversedTransactionIds, paymentDetail);
-
-        if (account.isBeforeLastPostingPeriod(transactionDate)) {
-            final LocalDate today = DateUtils.getLocalDateOfTenant();
-            account.postInterest(mc, today, existingTransactionIds, existingReversedTransactionIds);
-        } else {
-            final LocalDate today = DateUtils.getLocalDateOfTenant();
-            account.calculateInterestUsing(mc, today);
-        }
-
-        final Long transactionId = saveTransactionToGenerateTransactionId(deposit);
-
-        this.savingAccountRepository.save(account);
-
-        postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds);
+        final SavingsAccountTransaction deposit = this.savingsAccountDomainService.handleDeposit(account, fmt, transactionDate,
+                transactionAmount, paymentDetail);
 
         return new CommandProcessingResultBuilder() //
-                .withEntityId(transactionId) //
+                .withEntityId(deposit.getId()) //
                 .withOfficeId(account.officeId()) //
                 .withClientId(account.clientId()) //
                 .withGroupId(account.groupId()) //
                 .withSavingsId(savingsId) //
-                .with(changes)//
+                .with(changes) //
                 .build();
     }
 
@@ -162,11 +149,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
     @Override
     public CommandProcessingResult withdrawal(final Long savingsId, final JsonCommand command) {
 
-        this.context.authenticatedUser();
-
         this.savingsAccountTransactionDataValidator.validate(command);
-
-        final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsId);
 
         final LocalDate transactionDate = command.localDateValueOfParameterNamed("transactionDate");
         final BigDecimal transactionAmount = command.bigDecimalValueOfParameterNamed("transactionAmount");
@@ -174,30 +157,16 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         final Locale locale = command.extractLocale();
         final DateTimeFormatter fmt = DateTimeFormat.forPattern(command.dateFormat()).withLocale(locale);
 
-        final List<Long> existingTransactionIds = new ArrayList<Long>();
-        final List<Long> existingReversedTransactionIds = new ArrayList<Long>();
         final Map<String, Object> changes = new LinkedHashMap<String, Object>();
         PaymentDetail paymentDetail = paymentDetailWritePlatformService.createAndPersistPaymentDetail(command, changes);
 
-        final MathContext mc = new MathContext(10, RoundingMode.HALF_EVEN);
-        final SavingsAccountTransaction withdrawal = account.withdraw(fmt, transactionDate, transactionAmount, existingTransactionIds,
-                existingReversedTransactionIds, paymentDetail);
+        final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsId);
 
-        if (account.isBeforeLastPostingPeriod(transactionDate)) {
-            final LocalDate today = DateUtils.getLocalDateOfTenant();
-            account.postInterest(mc, today, existingTransactionIds, existingReversedTransactionIds);
-        } else {
-            final LocalDate today = DateUtils.getLocalDateOfTenant();
-            account.calculateInterestUsing(mc, today);
-        }
-
-        final Long transactionId = saveTransactionToGenerateTransactionId(withdrawal);
-        this.savingAccountRepository.save(account);
-
-        postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds);
+        SavingsAccountTransaction withdrawal = this.savingsAccountDomainService.handleWithdrawal(account, fmt, transactionDate,
+                transactionAmount, paymentDetail);
 
         return new CommandProcessingResultBuilder() //
-                .withEntityId(transactionId) //
+                .withEntityId(withdrawal.getId()) //
                 .withOfficeId(account.officeId()) //
                 .withClientId(account.clientId()) //
                 .withGroupId(account.groupId()) //
@@ -273,7 +242,6 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
                 .build();
     }
 
- 
     @Transactional
     private void postInterest(final SavingsAccount account) {
         final List<Long> existingTransactionIds = new ArrayList<Long>();
@@ -290,7 +258,8 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
     @CronTarget(jobName = JobName.POST_INTEREST_FOR_SAVINGS)
     @Override
     public void postInterestForAccounts() {
-        final List<SavingsAccount> savingsAccounts = this.savingAccountRepository.findSavingAccountByStatus(SavingsAccountStatusType.ACTIVE.getValue());
+        final List<SavingsAccount> savingsAccounts = this.savingAccountRepository.findSavingAccountByStatus(SavingsAccountStatusType.ACTIVE
+                .getValue());
         for (final SavingsAccount savingsAccount : savingsAccounts) {
             this.savingAccountAssembler.assignSavingAccountHelpers(savingsAccount);
             postInterest(savingsAccount);

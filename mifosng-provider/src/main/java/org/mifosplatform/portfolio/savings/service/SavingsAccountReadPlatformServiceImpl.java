@@ -26,6 +26,7 @@ import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.mifosplatform.organisation.staff.data.StaffData;
 import org.mifosplatform.organisation.staff.service.StaffReadPlatformService;
+import org.mifosplatform.portfolio.accounttransfers.data.AccountTransferData;
 import org.mifosplatform.portfolio.client.data.ClientData;
 import org.mifosplatform.portfolio.client.service.ClientReadPlatformService;
 import org.mifosplatform.portfolio.group.data.GroupGeneralData;
@@ -74,7 +75,6 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
     // pagination
     private final PaginationHelper<SavingsAccountData> paginationHelper = new PaginationHelper<SavingsAccountData>();
 
-
     @Autowired
     public SavingsAccountReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
             final ClientReadPlatformService clientReadPlatformService, final GroupReadPlatformService groupReadPlatformService,
@@ -91,6 +91,16 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
         this.transactionsMapper = new SavingsAccountTransactionsMapper();
         this.savingAccountMapper = new SavingAccountMapper();
         this.annualFeeMapper = new SavingsAccountAnnualFeeMapper();
+    }
+
+    @Override
+    public Collection<SavingsAccountData> retrieveAllForLookup(final Long clientId) {
+
+        StringBuilder sqlBuilder = new StringBuilder("select " + this.savingAccountMapper.schema());
+        sqlBuilder.append(" where sa.client_id = ? and sa.status_enum = 300");
+
+        Object[] queryParameters = new Object[] { clientId };
+        return this.jdbcTemplate.query(sqlBuilder.toString(), this.savingAccountMapper, queryParameters);
     }
 
     @Override
@@ -148,12 +158,9 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
     public SavingsAccountData retrieveOne(final Long accountId) {
 
         try {
-            this.context.authenticatedUser();
+            final String sql = "select " + this.savingAccountMapper.schema() + " where sa.id = ?";
 
-            final SavingAccountMapper mapper = new SavingAccountMapper();
-            final String sql = "select " + mapper.schema() + " where sa.id = ?";
-
-            return this.jdbcTemplate.queryForObject(sql, mapper, new Object[] { accountId });
+            return this.jdbcTemplate.queryForObject(sql, this.savingAccountMapper, new Object[] { accountId });
         } catch (EmptyResultDataAccessException e) {
             throw new SavingsAccountNotFoundException(accountId);
         }
@@ -518,6 +525,12 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             sqlBuilder.append("tr.id as transactionId, tr.transaction_type_enum as transactionType, ");
             sqlBuilder.append("tr.transaction_date as transactionDate, tr.amount as transactionAmount,");
             sqlBuilder.append("tr.running_balance_derived as runningBalance, tr.is_reversed as reversed,");
+            sqlBuilder.append("fromtran.id as fromTransferId, fromtran.is_reversed as fromTransferReversed,");
+            sqlBuilder.append("fromtran.transaction_date as fromTransferDate, fromtran.amount as fromTransferAmount,");
+            sqlBuilder.append("fromtran.description as fromTransferDescription,");
+            sqlBuilder.append("totran.id as toTransferId, totran.is_reversed as toTransferReversed,");
+            sqlBuilder.append("totran.transaction_date as toTransferDate, totran.amount as toTransferAmount,");
+            sqlBuilder.append("totran.description as toTransferDescription,");
             sqlBuilder.append("sa.id as savingsId, sa.account_no as accountNo,");
             sqlBuilder.append("pd.payment_type_cv_id as paymentType,pd.account_number as accountNumber,pd.check_number as checkNumber, ");
             sqlBuilder.append("pd.receipt_number as receiptNumber, pd.bank_number as bankNumber,pd.routing_code as routingCode, ");
@@ -528,6 +541,8 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             sqlBuilder.append("from m_savings_account sa ");
             sqlBuilder.append("join m_savings_account_transaction tr on tr.savings_account_id = sa.id ");
             sqlBuilder.append("join m_currency curr on curr.code = sa.currency_code ");
+            sqlBuilder.append("left join m_savings_account_transfer fromtran on fromtran.from_savings_transaction_id = tr.id ");
+            sqlBuilder.append("left join m_savings_account_transfer totran on totran.to_savings_transaction_id = tr.id ");
             sqlBuilder.append("left join m_payment_detail pd on tr.payment_detail_id = pd.id ");
             sqlBuilder.append("left join m_code_value cv on pd.payment_type_cv_id = cv.id ");
 
@@ -576,8 +591,29 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             final CurrencyData currency = new CurrencyData(currencyCode, currencyName, currencyDigits, currencyDisplaySymbol,
                     currencyNameCode);
 
+            AccountTransferData transfer = null;
+            final Long fromTransferId = JdbcSupport.getLong(rs, "fromTransferId");
+            final Long toTransferId = JdbcSupport.getLong(rs, "toTransferId");
+            if (fromTransferId != null) {
+                final LocalDate fromTransferDate = JdbcSupport.getLocalDate(rs, "fromTransferDate");
+                final BigDecimal fromTransferAmount = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "fromTransferAmount");
+                final boolean fromTransferReversed = rs.getBoolean("fromTransferReversed");
+                final String fromTransferDescription = rs.getString("fromTransferDescription");
+
+                transfer = AccountTransferData.transferBasicDetails(fromTransferId, currency, fromTransferAmount, fromTransferDate,
+                        fromTransferDescription, fromTransferReversed);
+            } else if (toTransferId != null) {
+                final LocalDate toTransferDate = JdbcSupport.getLocalDate(rs, "toTransferDate");
+                final BigDecimal toTransferAmount = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "toTransferAmount");
+                final boolean toTransferReversed = rs.getBoolean("toTransferReversed");
+                final String toTransferDescription = rs.getString("toTransferDescription");
+
+                transfer = AccountTransferData.transferBasicDetails(toTransferId, currency, toTransferAmount, toTransferDate,
+                        toTransferDescription, toTransferReversed);
+            }
+
             return SavingsAccountTransactionData.create(id, transactionType, paymentDetailData, savingsId, accountNo, date, currency,
-                    amount, runningBalance, reversed);
+                    amount, runningBalance, reversed, transfer);
         }
     }
 

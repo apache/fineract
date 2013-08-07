@@ -581,61 +581,6 @@
 				</div>
 			</div>
 
-			<!-- disabled Groupings API for release 1.0.0 as its beta -->
-			<!--
-			<div class="flybar-nav">
-				<h2 class="flybar-button">Savings</h2>
-				<div id="toc-menu-savings" class="flybar-menu">
-					<div class="tocMatrix">
-						<table class=matrixHeading>
-							<tr class="matrixHeadingBG">
-								<td colspan=2 valign="top"><div class="matrixHeadingVerbs">
-										<table>
-											<tr>
-												<td>RESOURCES</td>
-											</tr>
-										</table>
-									</div></td>
-								<td><table>
-										<tr>
-											<td><div class="matrixHeadingVerbs">POST</div></td>
-										</tr>
-										<tr>
-											<td><div class=matrixHeadingCommands>create/complex
-													update</div></td>
-										</tr>
-									</table></td>
-								<td><table>
-										<tr>
-											<td><div class="matrixHeadingVerbs">GET</div></td>
-										</tr>
-										<tr>
-											<td><div class=matrixHeadingCommands>read</div></td>
-										</tr>
-									</table></td>
-								<td><table>
-										<tr>
-											<td><div class="matrixHeadingVerbs">PUT</div></td>
-										</tr>
-										<tr>
-											<td><div class=matrixHeadingCommands>update</div></td>
-										</tr>
-									</table></td>
-								<td><table>
-										<tr>
-											<td><div class="matrixHeadingVerbs">DELETE</div></td>
-										</tr>
-										<tr>
-											<td><div class=matrixHeadingCommands>delete</div></td>
-										</tr>
-									</table></td>
-							</tr>
-						</table>
-					</div>
-				</div>
-			</div>
-			-->
-
 			<div class="flybar-nav">
 				<h2 class="flybar-button">Accounting</h2>
 				<div id="toc-menu-accounting" class="flybar-menu">
@@ -12892,7 +12837,6 @@ No Request Body:
 	    </div>
 	</div>
 
-	savingsaccounts_transactions_template
 	<a id="savingsaccounts_transactions_template" name="savingsaccounts_transactions_template" class="old-syle-anchor">&nbsp;</a>
 	<div class="method-section">
 	    <div class="method-description">
@@ -12943,7 +12887,6 @@ No Request Body:
 			</code>
 	    </div>
 	</div>
-
 
 	<a id="savingsaccounts_deposit" name="savingsaccounts_deposit" class="old-syle-anchor">&nbsp;</a>
 	<div class="method-section">
@@ -13052,6 +12995,1457 @@ No Request Body:
 	    </div>
 	</div>	
 <!-- end of savings accounts api -->
+
+<!-- account transfers -->
+<a id="accounttransfers" name="accounttransfers" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Account Transfers:</h2>
+	        <p>Ability to be able to transfer monetary funds from one account to another.</p>
+	        <p>Note: At present only savings account to savings account transfers are supported.</p>
+	      	<table class=matrixHeading>
+	            <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Mandatory Parameters</div></td></tr>
+
+	            <tr class=alt><td>fromOfficeId</td></tr>
+				<tr><td class=fielddesc>The id of the office/branch from which the transfer is made.</td></tr>
+
+				<tr class=alt><td>fromClientId</td></tr>
+				<tr><td class=fielddesc>The id of the client from which the transfer is made.</td></tr>
+
+				<tr class=alt><td>fromAccountType</td></tr>
+				<tr><td class=fielddesc>The type of account from which the transfer is made. 1=Loan Account, 2=Savings Account</td></tr>
+
+				<tr class=alt><td>fromAccountId</td></tr>
+				<tr><td class=fielddesc>The id of the account from which the transfer is made.</td></tr>
+
+				<tr class=alt><td>toOfficeId</td></tr>
+				<tr><td class=fielddesc>The id of the office/branch to which the transfer is made.</td></tr>
+
+				<tr class=alt><td>toClientId</td></tr>
+				<tr><td class=fielddesc>The id of the client to which the transfer is made.</td></tr>
+
+				<tr class=alt><td>toAccountType</td></tr>
+				<tr><td class=fielddesc>The type of account to which the transfer is made. 1=Loan Account, 2=Savings Account</td></tr>
+
+				<tr class=alt><td>toAccountId</td></tr>
+				<tr><td class=fielddesc>The id of the account to which the transfer is made.</td></tr>
+
+				<tr class=alt><td>transferDate</td></tr>
+				<tr><td class=fielddesc>The date of the transfer. Requires <i>dateFormat</i> and <i>locale</i> parameters.</td></tr>
+
+				<tr class=alt><td>transferAmount</td></tr>
+				<tr><td class=fielddesc>The amount of the transfer. Requires <i>locale</i> parameter.</td></tr>
+
+				<tr class=alt><td>transferDescription</td></tr>
+				<tr><td class=fielddesc>Description of the transfer itself.</td></tr>
+	        </table>
+	    </div>
+	</div>
+
+	<a id="accounttransfers_template" name="accounttransfers_template" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Retrieve Account Transfer Template:</h2>
+	            <p>This is a convenience resource. It can be useful when building maintenance user interface screens for client applications. The template data returned consists of any or all of:
+	                <ul>
+	                <li class=normalli>Field Defaults</li>   
+	                <li class=normalli>Allowed Value Lists</li>    
+	                </ul>
+	            </p>
+	        <p>Example Requests:</p>
+	        <div class=apiClick>accounttransfers/template?fromAccountType=2&fromOfficeId=1</div>
+	        <br/>
+	        <div class=apiClick>accounttransfers/template?fromAccountType=2&fromOfficeId=1&fromClientId=1</div>
+	        <br/>
+	        <div class=apiClick>accounttransfers/template?fromClientId=1&fromAccountType=2&fromAccountId=1</div>
+	        <br/>
+	    </div> 
+	    <div class="method-example">
+	        <code class="method-declaration">GET https://Domain Name/api/v1/accounttransfers/template?fromAccountType=2&fromOfficeId=1
+	        </code>
+			<code class="method-response">
+{
+  "transferAmount": 0,
+  "transferDate": [
+    2013,
+    8,
+    7
+  ],
+  "fromOffice": {
+    "id": 1,
+    "name": "HO",
+    "nameDecorated": "HO",
+    "externalId": "1",
+    "openingDate": [
+      2009,
+      1,
+      1
+    ],
+    "hierarchy": "."
+  },
+  "toOffice": {
+    "id": 1,
+    "name": "HO",
+    "nameDecorated": "HO",
+    "externalId": "1",
+    "openingDate": [
+      2009,
+      1,
+      1
+    ],
+    "hierarchy": "."
+  },
+  "fromOfficeOptions": [
+    {
+      "id": 1,
+      "name": "HO",
+      "nameDecorated": "HO"
+    },
+    {
+      "id": 3,
+      "name": "branch 1",
+      "nameDecorated": "....branch 1"
+    }
+  ],
+  "fromClientOptions": [
+    {
+      "id": 2,
+      "displayName": "headoffice-business",
+      "officeId": 1,
+      "officeName": "HO",
+      "imagePresent": false
+    }
+  ],
+  "toOfficeOptions": [
+    {
+      "id": 1,
+      "name": "HO",
+      "nameDecorated": "HO"
+    },
+    {
+      "id": 3,
+      "name": "branch 1",
+      "nameDecorated": "....branch 1"
+    }
+  ],
+  "toClientOptions": [
+    {
+      "id": 2,
+      "displayName": "headoffice-business",
+      "officeId": 1,
+      "officeName": "HO",
+      "imagePresent": false
+    }
+  ]
+}
+			</code>
+	    </div>
+
+	    <div class="method-example">
+	        <code class="method-declaration">GET https://Domain Name/api/v1/accounttransfers/template?fromAccountType=2&fromOfficeId=1&fromClientId=1
+	        </code>
+			<code class="method-response">
+{
+  "transferAmount": 0,
+  "transferDate": [
+    2013,
+    8,
+    7
+  ],
+  "fromOffice": {
+    "id": 3,
+    "name": "branch 1",
+    "nameDecorated": "....branch 1",
+    "externalId": "2",
+    "openingDate": [
+      2011,
+      7,
+      1
+    ],
+    "hierarchy": ".3.",
+    "parentId": 1,
+    "parentName": "HO"
+  },
+  "fromClient": {
+    "id": 1,
+    "accountNo": "000000001",
+    "status": {
+      "id": 300,
+      "code": "clientStatusType.active",
+      "value": "Active"
+    },
+    "active": true,
+    "activationDate": [
+      2012,
+      3,
+      1
+    ],
+    "fullname": "Small shop",
+    "displayName": "Small shop",
+    "officeId": 3,
+    "officeName": "branch 1",
+    "imagePresent": false,
+    "groups": []
+  },
+  "toOffice": {
+    "id": 3,
+    "name": "branch 1",
+    "nameDecorated": "....branch 1",
+    "externalId": "2",
+    "openingDate": [
+      2011,
+      7,
+      1
+    ],
+    "hierarchy": ".3.",
+    "parentId": 1,
+    "parentName": "HO"
+  },
+  "toClient": {
+    "id": 1,
+    "accountNo": "000000001",
+    "status": {
+      "id": 300,
+      "code": "clientStatusType.active",
+      "value": "Active"
+    },
+    "active": true,
+    "activationDate": [
+      2012,
+      3,
+      1
+    ],
+    "fullname": "Small shop",
+    "displayName": "Small shop",
+    "officeId": 3,
+    "officeName": "branch 1",
+    "imagePresent": false,
+    "groups": []
+  },
+  "fromOfficeOptions": [
+    {
+      "id": 1,
+      "name": "HO",
+      "nameDecorated": "HO"
+    },
+    {
+      "id": 3,
+      "name": "branch 1",
+      "nameDecorated": "....branch 1"
+    }
+  ],
+  "fromClientOptions": [
+    {
+      "id": 1,
+      "displayName": "Small shop",
+      "officeId": 3,
+      "officeName": "branch 1",
+      "imagePresent": false
+    }
+  ],
+  "fromAccountOptions": [
+    {
+      "id": 1,
+      "accountNo": "000000001",
+      "clientId": 1,
+      "clientName": "Small shop",
+      "savingsProductId": 1,
+      "savingsProductName": "Passbook",
+      "fieldOfficerId": 2,
+      "fieldOfficerName": "Clare, Claire",
+      "status": {
+        "id": 300,
+        "code": "savingsAccountStatusType.active",
+        "value": "Active",
+        "submittedAndPendingApproval": false,
+        "approved": false,
+        "rejected": false,
+        "withdrawnByApplicant": false,
+        "active": true,
+        "closed": false
+      },
+      "timeline": {
+        "submittedOnDate": [
+          2013,
+          3,
+          1
+        ],
+        "approvedOnDate": [
+          2013,
+          3,
+          1
+        ],
+        "approvedByUsername": "mifos",
+        "approvedByFirstname": "App",
+        "approvedByLastname": "Administrator",
+        "activatedOnDate": [
+          2013,
+          3,
+          1
+        ]
+      },
+      "currency": {
+        "code": "USD",
+        "name": "US Dollar",
+        "decimalPlaces": 2,
+        "displaySymbol": "$",
+        "nameCode": "currency.USD",
+        "displayLabel": "US Dollar ($)"
+      },
+      "nominalAnnualInterestRate": 5,
+      "interestCompoundingPeriodType": {
+        "id": 1,
+        "code": "savings.interest.period.savingsCompoundingInterestPeriodType.daily",
+        "value": "Daily"
+      },
+      "interestPostingPeriodType": {
+        "id": 4,
+        "code": "savings.interest.posting.period.savingsPostingInterestPeriodType.monthly",
+        "value": "Monthly"
+      },
+      "interestCalculationType": {
+        "id": 1,
+        "code": "savingsInterestCalculationType.dailybalance",
+        "value": "Daily Balance"
+      },
+      "interestCalculationDaysInYearType": {
+        "id": 365,
+        "code": "savingsInterestCalculationDaysInYearType.days365",
+        "value": "365 Days"
+      },
+      "summary": {
+        "currency": {
+          "code": "USD",
+          "name": "US Dollar",
+          "decimalPlaces": 2,
+          "displaySymbol": "$",
+          "nameCode": "currency.USD",
+          "displayLabel": "US Dollar ($)"
+        },
+        "totalDeposits": 1242,
+        "totalWithdrawals": 101,
+        "totalInterestEarned": 26.03,
+        "accountBalance": 1141
+      }
+    },
+    {
+      "id": 2,
+      "accountNo": "000000002",
+      "clientId": 1,
+      "clientName": "Small shop",
+      "savingsProductId": 1,
+      "savingsProductName": "Passbook",
+      "fieldOfficerId": 3,
+      "fieldOfficerName": "George, John",
+      "status": {
+        "id": 300,
+        "code": "savingsAccountStatusType.active",
+        "value": "Active",
+        "submittedAndPendingApproval": false,
+        "approved": false,
+        "rejected": false,
+        "withdrawnByApplicant": false,
+        "active": true,
+        "closed": false
+      },
+      "timeline": {
+        "submittedOnDate": [
+          2013,
+          6,
+          1
+        ],
+        "approvedOnDate": [
+          2013,
+          6,
+          1
+        ],
+        "approvedByUsername": "mifos",
+        "approvedByFirstname": "App",
+        "approvedByLastname": "Administrator",
+        "activatedOnDate": [
+          2013,
+          6,
+          1
+        ]
+      },
+      "currency": {
+        "code": "USD",
+        "name": "US Dollar",
+        "decimalPlaces": 2,
+        "displaySymbol": "$",
+        "nameCode": "currency.USD",
+        "displayLabel": "US Dollar ($)"
+      },
+      "nominalAnnualInterestRate": 5,
+      "interestCompoundingPeriodType": {
+        "id": 1,
+        "code": "savings.interest.period.savingsCompoundingInterestPeriodType.daily",
+        "value": "Daily"
+      },
+      "interestPostingPeriodType": {
+        "id": 4,
+        "code": "savings.interest.posting.period.savingsPostingInterestPeriodType.monthly",
+        "value": "Monthly"
+      },
+      "interestCalculationType": {
+        "id": 1,
+        "code": "savingsInterestCalculationType.dailybalance",
+        "value": "Daily Balance"
+      },
+      "interestCalculationDaysInYearType": {
+        "id": 365,
+        "code": "savingsInterestCalculationDaysInYearType.days365",
+        "value": "365 Days"
+      },
+      "summary": {
+        "currency": {
+          "code": "USD",
+          "name": "US Dollar",
+          "decimalPlaces": 2,
+          "displaySymbol": "$",
+          "nameCode": "currency.USD",
+          "displayLabel": "US Dollar ($)"
+        },
+        "totalDeposits": 101,
+        "totalWithdrawals": 42,
+        "totalInterestEarned": 0.58,
+        "accountBalance": 59
+      }
+    }
+  ],
+  "toOfficeOptions": [
+    {
+      "id": 1,
+      "name": "HO",
+      "nameDecorated": "HO"
+    },
+    {
+      "id": 3,
+      "name": "branch 1",
+      "nameDecorated": "....branch 1"
+    }
+  ],
+  "toClientOptions": [
+    {
+      "id": 1,
+      "displayName": "Small shop",
+      "officeId": 3,
+      "officeName": "branch 1",
+      "imagePresent": false
+    }
+  ],
+  "toAccountOptions": [
+    {
+      "id": 1,
+      "accountNo": "000000001",
+      "clientId": 1,
+      "clientName": "Small shop",
+      "savingsProductId": 1,
+      "savingsProductName": "Passbook",
+      "fieldOfficerId": 2,
+      "fieldOfficerName": "Clare, Claire",
+      "status": {
+        "id": 300,
+        "code": "savingsAccountStatusType.active",
+        "value": "Active",
+        "submittedAndPendingApproval": false,
+        "approved": false,
+        "rejected": false,
+        "withdrawnByApplicant": false,
+        "active": true,
+        "closed": false
+      },
+      "timeline": {
+        "submittedOnDate": [
+          2013,
+          3,
+          1
+        ],
+        "approvedOnDate": [
+          2013,
+          3,
+          1
+        ],
+        "approvedByUsername": "mifos",
+        "approvedByFirstname": "App",
+        "approvedByLastname": "Administrator",
+        "activatedOnDate": [
+          2013,
+          3,
+          1
+        ]
+      },
+      "currency": {
+        "code": "USD",
+        "name": "US Dollar",
+        "decimalPlaces": 2,
+        "displaySymbol": "$",
+        "nameCode": "currency.USD",
+        "displayLabel": "US Dollar ($)"
+      },
+      "nominalAnnualInterestRate": 5,
+      "interestCompoundingPeriodType": {
+        "id": 1,
+        "code": "savings.interest.period.savingsCompoundingInterestPeriodType.daily",
+        "value": "Daily"
+      },
+      "interestPostingPeriodType": {
+        "id": 4,
+        "code": "savings.interest.posting.period.savingsPostingInterestPeriodType.monthly",
+        "value": "Monthly"
+      },
+      "interestCalculationType": {
+        "id": 1,
+        "code": "savingsInterestCalculationType.dailybalance",
+        "value": "Daily Balance"
+      },
+      "interestCalculationDaysInYearType": {
+        "id": 365,
+        "code": "savingsInterestCalculationDaysInYearType.days365",
+        "value": "365 Days"
+      },
+      "summary": {
+        "currency": {
+          "code": "USD",
+          "name": "US Dollar",
+          "decimalPlaces": 2,
+          "displaySymbol": "$",
+          "nameCode": "currency.USD",
+          "displayLabel": "US Dollar ($)"
+        },
+        "totalDeposits": 1242,
+        "totalWithdrawals": 101,
+        "totalInterestEarned": 26.03,
+        "accountBalance": 1141
+      }
+    },
+    {
+      "id": 2,
+      "accountNo": "000000002",
+      "clientId": 1,
+      "clientName": "Small shop",
+      "savingsProductId": 1,
+      "savingsProductName": "Passbook",
+      "fieldOfficerId": 3,
+      "fieldOfficerName": "George, John",
+      "status": {
+        "id": 300,
+        "code": "savingsAccountStatusType.active",
+        "value": "Active",
+        "submittedAndPendingApproval": false,
+        "approved": false,
+        "rejected": false,
+        "withdrawnByApplicant": false,
+        "active": true,
+        "closed": false
+      },
+      "timeline": {
+        "submittedOnDate": [
+          2013,
+          6,
+          1
+        ],
+        "approvedOnDate": [
+          2013,
+          6,
+          1
+        ],
+        "approvedByUsername": "mifos",
+        "approvedByFirstname": "App",
+        "approvedByLastname": "Administrator",
+        "activatedOnDate": [
+          2013,
+          6,
+          1
+        ]
+      },
+      "currency": {
+        "code": "USD",
+        "name": "US Dollar",
+        "decimalPlaces": 2,
+        "displaySymbol": "$",
+        "nameCode": "currency.USD",
+        "displayLabel": "US Dollar ($)"
+      },
+      "nominalAnnualInterestRate": 5,
+      "interestCompoundingPeriodType": {
+        "id": 1,
+        "code": "savings.interest.period.savingsCompoundingInterestPeriodType.daily",
+        "value": "Daily"
+      },
+      "interestPostingPeriodType": {
+        "id": 4,
+        "code": "savings.interest.posting.period.savingsPostingInterestPeriodType.monthly",
+        "value": "Monthly"
+      },
+      "interestCalculationType": {
+        "id": 1,
+        "code": "savingsInterestCalculationType.dailybalance",
+        "value": "Daily Balance"
+      },
+      "interestCalculationDaysInYearType": {
+        "id": 365,
+        "code": "savingsInterestCalculationDaysInYearType.days365",
+        "value": "365 Days"
+      },
+      "summary": {
+        "currency": {
+          "code": "USD",
+          "name": "US Dollar",
+          "decimalPlaces": 2,
+          "displaySymbol": "$",
+          "nameCode": "currency.USD",
+          "displayLabel": "US Dollar ($)"
+        },
+        "totalDeposits": 101,
+        "totalWithdrawals": 42,
+        "totalInterestEarned": 0.58,
+        "accountBalance": 59
+      }
+    }
+  ]
+}
+			</code>
+	    </div>
+
+	   	<div class="method-example">
+	        <code class="method-declaration">GET https://Domain Name/api/v1/accounttransfers/template?fromClientId=1&fromAccountType=2&fromAccountId=1
+	        </code>
+			<code class="method-response">
+{
+  "currency": {
+    "code": "USD",
+    "name": "US Dollar",
+    "decimalPlaces": 2,
+    "displaySymbol": "$",
+    "nameCode": "currency.USD",
+    "displayLabel": "US Dollar ($)"
+  },
+  "transferAmount": 0,
+  "transferDate": [
+    2013,
+    8,
+    7
+  ],
+  "fromOffice": {
+    "id": 3,
+    "name": "branch 1",
+    "nameDecorated": "....branch 1",
+    "externalId": "2",
+    "openingDate": [
+      2011,
+      7,
+      1
+    ],
+    "hierarchy": ".3.",
+    "parentId": 1,
+    "parentName": "HO"
+  },
+  "fromClient": {
+    "id": 1,
+    "accountNo": "000000001",
+    "status": {
+      "id": 300,
+      "code": "clientStatusType.active",
+      "value": "Active"
+    },
+    "active": true,
+    "activationDate": [
+      2012,
+      3,
+      1
+    ],
+    "fullname": "Small shop",
+    "displayName": "Small shop",
+    "officeId": 3,
+    "officeName": "branch 1",
+    "imagePresent": false,
+    "groups": []
+  },
+  "fromAccount": {
+    "id": 1,
+    "accountNo": "000000001",
+    "clientId": 1,
+    "clientName": "Small shop",
+    "savingsProductId": 1,
+    "savingsProductName": "Passbook",
+    "fieldOfficerId": 2,
+    "fieldOfficerName": "Clare, Claire",
+    "status": {
+      "id": 300,
+      "code": "savingsAccountStatusType.active",
+      "value": "Active",
+      "submittedAndPendingApproval": false,
+      "approved": false,
+      "rejected": false,
+      "withdrawnByApplicant": false,
+      "active": true,
+      "closed": false
+    },
+    "timeline": {
+      "submittedOnDate": [
+        2013,
+        3,
+        1
+      ],
+      "approvedOnDate": [
+        2013,
+        3,
+        1
+      ],
+      "approvedByUsername": "mifos",
+      "approvedByFirstname": "App",
+      "approvedByLastname": "Administrator",
+      "activatedOnDate": [
+        2013,
+        3,
+        1
+      ]
+    },
+    "currency": {
+      "code": "USD",
+      "name": "US Dollar",
+      "decimalPlaces": 2,
+      "displaySymbol": "$",
+      "nameCode": "currency.USD",
+      "displayLabel": "US Dollar ($)"
+    },
+    "nominalAnnualInterestRate": 5,
+    "interestCompoundingPeriodType": {
+      "id": 1,
+      "code": "savings.interest.period.savingsCompoundingInterestPeriodType.daily",
+      "value": "Daily"
+    },
+    "interestPostingPeriodType": {
+      "id": 4,
+      "code": "savings.interest.posting.period.savingsPostingInterestPeriodType.monthly",
+      "value": "Monthly"
+    },
+    "interestCalculationType": {
+      "id": 1,
+      "code": "savingsInterestCalculationType.dailybalance",
+      "value": "Daily Balance"
+    },
+    "interestCalculationDaysInYearType": {
+      "id": 365,
+      "code": "savingsInterestCalculationDaysInYearType.days365",
+      "value": "365 Days"
+    },
+    "summary": {
+      "currency": {
+        "code": "USD",
+        "name": "US Dollar",
+        "decimalPlaces": 2,
+        "displaySymbol": "$",
+        "nameCode": "currency.USD",
+        "displayLabel": "US Dollar ($)"
+      },
+      "totalDeposits": 1242,
+      "totalWithdrawals": 101,
+      "totalInterestEarned": 26.03,
+      "accountBalance": 1141
+    }
+  },
+  "toOffice": {
+    "id": 3,
+    "name": "branch 1",
+    "nameDecorated": "....branch 1",
+    "externalId": "2",
+    "openingDate": [
+      2011,
+      7,
+      1
+    ],
+    "hierarchy": ".3.",
+    "parentId": 1,
+    "parentName": "HO"
+  },
+  "toClient": {
+    "id": 1,
+    "accountNo": "000000001",
+    "status": {
+      "id": 300,
+      "code": "clientStatusType.active",
+      "value": "Active"
+    },
+    "active": true,
+    "activationDate": [
+      2012,
+      3,
+      1
+    ],
+    "fullname": "Small shop",
+    "displayName": "Small shop",
+    "officeId": 3,
+    "officeName": "branch 1",
+    "imagePresent": false,
+    "groups": []
+  },
+  "fromOfficeOptions": [
+    {
+      "id": 1,
+      "name": "HO",
+      "nameDecorated": "HO"
+    },
+    {
+      "id": 3,
+      "name": "branch 1",
+      "nameDecorated": "....branch 1"
+    }
+  ],
+  "fromClientOptions": [
+    {
+      "id": 1,
+      "displayName": "Small shop",
+      "officeId": 3,
+      "officeName": "branch 1",
+      "imagePresent": false
+    }
+  ],
+  "fromAccountOptions": [
+    {
+      "id": 1,
+      "accountNo": "000000001",
+      "clientId": 1,
+      "clientName": "Small shop",
+      "savingsProductId": 1,
+      "savingsProductName": "Passbook",
+      "fieldOfficerId": 2,
+      "fieldOfficerName": "Clare, Claire",
+      "status": {
+        "id": 300,
+        "code": "savingsAccountStatusType.active",
+        "value": "Active",
+        "submittedAndPendingApproval": false,
+        "approved": false,
+        "rejected": false,
+        "withdrawnByApplicant": false,
+        "active": true,
+        "closed": false
+      },
+      "timeline": {
+        "submittedOnDate": [
+          2013,
+          3,
+          1
+        ],
+        "approvedOnDate": [
+          2013,
+          3,
+          1
+        ],
+        "approvedByUsername": "mifos",
+        "approvedByFirstname": "App",
+        "approvedByLastname": "Administrator",
+        "activatedOnDate": [
+          2013,
+          3,
+          1
+        ]
+      },
+      "currency": {
+        "code": "USD",
+        "name": "US Dollar",
+        "decimalPlaces": 2,
+        "displaySymbol": "$",
+        "nameCode": "currency.USD",
+        "displayLabel": "US Dollar ($)"
+      },
+      "nominalAnnualInterestRate": 5,
+      "interestCompoundingPeriodType": {
+        "id": 1,
+        "code": "savings.interest.period.savingsCompoundingInterestPeriodType.daily",
+        "value": "Daily"
+      },
+      "interestPostingPeriodType": {
+        "id": 4,
+        "code": "savings.interest.posting.period.savingsPostingInterestPeriodType.monthly",
+        "value": "Monthly"
+      },
+      "interestCalculationType": {
+        "id": 1,
+        "code": "savingsInterestCalculationType.dailybalance",
+        "value": "Daily Balance"
+      },
+      "interestCalculationDaysInYearType": {
+        "id": 365,
+        "code": "savingsInterestCalculationDaysInYearType.days365",
+        "value": "365 Days"
+      },
+      "summary": {
+        "currency": {
+          "code": "USD",
+          "name": "US Dollar",
+          "decimalPlaces": 2,
+          "displaySymbol": "$",
+          "nameCode": "currency.USD",
+          "displayLabel": "US Dollar ($)"
+        },
+        "totalDeposits": 1242,
+        "totalWithdrawals": 101,
+        "totalInterestEarned": 26.03,
+        "accountBalance": 1141
+      }
+    },
+    {
+      "id": 2,
+      "accountNo": "000000002",
+      "clientId": 1,
+      "clientName": "Small shop",
+      "savingsProductId": 1,
+      "savingsProductName": "Passbook",
+      "fieldOfficerId": 3,
+      "fieldOfficerName": "George, John",
+      "status": {
+        "id": 300,
+        "code": "savingsAccountStatusType.active",
+        "value": "Active",
+        "submittedAndPendingApproval": false,
+        "approved": false,
+        "rejected": false,
+        "withdrawnByApplicant": false,
+        "active": true,
+        "closed": false
+      },
+      "timeline": {
+        "submittedOnDate": [
+          2013,
+          6,
+          1
+        ],
+        "approvedOnDate": [
+          2013,
+          6,
+          1
+        ],
+        "approvedByUsername": "mifos",
+        "approvedByFirstname": "App",
+        "approvedByLastname": "Administrator",
+        "activatedOnDate": [
+          2013,
+          6,
+          1
+        ]
+      },
+      "currency": {
+        "code": "USD",
+        "name": "US Dollar",
+        "decimalPlaces": 2,
+        "displaySymbol": "$",
+        "nameCode": "currency.USD",
+        "displayLabel": "US Dollar ($)"
+      },
+      "nominalAnnualInterestRate": 5,
+      "interestCompoundingPeriodType": {
+        "id": 1,
+        "code": "savings.interest.period.savingsCompoundingInterestPeriodType.daily",
+        "value": "Daily"
+      },
+      "interestPostingPeriodType": {
+        "id": 4,
+        "code": "savings.interest.posting.period.savingsPostingInterestPeriodType.monthly",
+        "value": "Monthly"
+      },
+      "interestCalculationType": {
+        "id": 1,
+        "code": "savingsInterestCalculationType.dailybalance",
+        "value": "Daily Balance"
+      },
+      "interestCalculationDaysInYearType": {
+        "id": 365,
+        "code": "savingsInterestCalculationDaysInYearType.days365",
+        "value": "365 Days"
+      },
+      "summary": {
+        "currency": {
+          "code": "USD",
+          "name": "US Dollar",
+          "decimalPlaces": 2,
+          "displaySymbol": "$",
+          "nameCode": "currency.USD",
+          "displayLabel": "US Dollar ($)"
+        },
+        "totalDeposits": 101,
+        "totalWithdrawals": 42,
+        "totalInterestEarned": 0.58,
+        "accountBalance": 59
+      }
+    }
+  ],
+  "toOfficeOptions": [
+    {
+      "id": 1,
+      "name": "HO",
+      "nameDecorated": "HO"
+    },
+    {
+      "id": 3,
+      "name": "branch 1",
+      "nameDecorated": "....branch 1"
+    }
+  ],
+  "toClientOptions": [
+    {
+      "id": 1,
+      "displayName": "Small shop",
+      "officeId": 3,
+      "officeName": "branch 1",
+      "imagePresent": false
+    }
+  ],
+  "toAccountOptions": [
+    {
+      "id": 2,
+      "accountNo": "000000002",
+      "clientId": 1,
+      "clientName": "Small shop",
+      "savingsProductId": 1,
+      "savingsProductName": "Passbook",
+      "fieldOfficerId": 3,
+      "fieldOfficerName": "George, John",
+      "status": {
+        "id": 300,
+        "code": "savingsAccountStatusType.active",
+        "value": "Active",
+        "submittedAndPendingApproval": false,
+        "approved": false,
+        "rejected": false,
+        "withdrawnByApplicant": false,
+        "active": true,
+        "closed": false
+      },
+      "timeline": {
+        "submittedOnDate": [
+          2013,
+          6,
+          1
+        ],
+        "approvedOnDate": [
+          2013,
+          6,
+          1
+        ],
+        "approvedByUsername": "mifos",
+        "approvedByFirstname": "App",
+        "approvedByLastname": "Administrator",
+        "activatedOnDate": [
+          2013,
+          6,
+          1
+        ]
+      },
+      "currency": {
+        "code": "USD",
+        "name": "US Dollar",
+        "decimalPlaces": 2,
+        "displaySymbol": "$",
+        "nameCode": "currency.USD",
+        "displayLabel": "US Dollar ($)"
+      },
+      "nominalAnnualInterestRate": 5,
+      "interestCompoundingPeriodType": {
+        "id": 1,
+        "code": "savings.interest.period.savingsCompoundingInterestPeriodType.daily",
+        "value": "Daily"
+      },
+      "interestPostingPeriodType": {
+        "id": 4,
+        "code": "savings.interest.posting.period.savingsPostingInterestPeriodType.monthly",
+        "value": "Monthly"
+      },
+      "interestCalculationType": {
+        "id": 1,
+        "code": "savingsInterestCalculationType.dailybalance",
+        "value": "Daily Balance"
+      },
+      "interestCalculationDaysInYearType": {
+        "id": 365,
+        "code": "savingsInterestCalculationDaysInYearType.days365",
+        "value": "365 Days"
+      },
+      "summary": {
+        "currency": {
+          "code": "USD",
+          "name": "US Dollar",
+          "decimalPlaces": 2,
+          "displaySymbol": "$",
+          "nameCode": "currency.USD",
+          "displayLabel": "US Dollar ($)"
+        },
+        "totalDeposits": 101,
+        "totalWithdrawals": 42,
+        "totalInterestEarned": 0.58,
+        "accountBalance": 59
+      }
+    }
+  ]
+}
+			</code>
+	    </div>
+
+	</div>
+
+	<a id="accounttransfers_create" name="accounttransfers_create" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Create new Transfer</h2>
+	        <p>Ability to create new transfer of monetary funds from one account to another.</p>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">POST https://Domain Name/api/v1/accounttransfers</code>
+	        <code class="method-request">POST accounttransfers/              
+Content-Type: application/json
+No Request Body:
+{
+"fromOfficeId": 1,
+"fromClientId": 1,
+"fromAccountType": 2,
+"fromAccountId": 1,
+"toOfficeId": 1,
+"toClientId": 1,
+"toAccountType": 2,
+"toAccountId": 2,
+"dateFormat": "dd MMMM yyyy", 
+"locale": "en",
+"transferDate": "01 August 2011",
+"transferAmount": "112.45",
+"transferDescription": "A description of the transfer"
+}
+	        </code>
+	        <code class="method-response">
+	        </code>
+	    </div>
+	</div>
+
+	<a id="accounttransfers_list" name="accounttransfers_list" class="old-syle-anchor">&nbsp;</a>
+    <div class="method-section">
+        <div class="method-description">
+            <h2>List account transfers</h2>
+            <p>Example Requests:</p> 
+            <div class=apiClick>accounttransfers</div>
+            <br>
+        </div>
+        <div class="method-example">
+            <code class="method-declaration">GET https://Domain Name/api/v1/accounttransfers</code>
+            <code class="method-response">
+{
+  "totalFilteredRecords": 5,
+  "pageItems": [
+    {
+      "id": 1,
+      "reversed": false,
+      "currency": {
+        "code": "USD",
+        "name": "US Dollar",
+        "decimalPlaces": 2,
+        "displaySymbol": "$",
+        "nameCode": "currency.USD",
+        "displayLabel": "US Dollar ($)"
+      },
+      "transferAmount": 25,
+      "transferDate": [
+        2013,
+        6,
+        8
+      ],
+      "transferDescription": "another transfer",
+      "fromOffice": {
+        "id": 1,
+        "name": "HO"
+      },
+      "fromClient": {
+        "id": 1,
+        "displayName": "Small shop",
+        "officeId": 1,
+        "officeName": "HO",
+        "imagePresent": false
+      },
+      "fromAccount": {
+        "id": 1,
+        "accountNo": "000000001"
+      },
+      "toOffice": {
+        "id": 1,
+        "name": "HO"
+      },
+      "toClient": {
+        "id": 1,
+        "displayName": "Small shop",
+        "officeId": 1,
+        "officeName": "HO",
+        "imagePresent": false
+      },
+      "toAccount": {
+        "id": 2,
+        "accountNo": "000000002"
+      }
+    },
+    {
+      "id": 2,
+      "reversed": false,
+      "currency": {
+        "code": "USD",
+        "name": "US Dollar",
+        "decimalPlaces": 2,
+        "displaySymbol": "$",
+        "nameCode": "currency.USD",
+        "displayLabel": "US Dollar ($)"
+      },
+      "transferAmount": 13,
+      "transferDate": [
+        2013,
+        6,
+        15
+      ],
+      "transferDescription": "T3",
+      "fromOffice": {
+        "id": 1,
+        "name": "HO"
+      },
+      "fromClient": {
+        "id": 1,
+        "displayName": "Small shop",
+        "officeId": 1,
+        "officeName": "HO",
+        "imagePresent": false
+      },
+      "fromAccount": {
+        "id": 1,
+        "accountNo": "000000001"
+      },
+      "toOffice": {
+        "id": 1,
+        "name": "HO"
+      },
+      "toClient": {
+        "id": 1,
+        "displayName": "Small shop",
+        "officeId": 1,
+        "officeName": "HO",
+        "imagePresent": false
+      },
+      "toAccount": {
+        "id": 2,
+        "accountNo": "000000002"
+      }
+    },
+    {
+      "id": 3,
+      "reversed": false,
+      "currency": {
+        "code": "USD",
+        "name": "US Dollar",
+        "decimalPlaces": 2,
+        "displaySymbol": "$",
+        "nameCode": "currency.USD",
+        "displayLabel": "US Dollar ($)"
+      },
+      "transferAmount": 17,
+      "transferDate": [
+        2013,
+        6,
+        22
+      ],
+      "transferDescription": "T4",
+      "fromOffice": {
+        "id": 1,
+        "name": "HO"
+      },
+      "fromClient": {
+        "id": 1,
+        "displayName": "Small shop",
+        "officeId": 1,
+        "officeName": "HO",
+        "imagePresent": false
+      },
+      "fromAccount": {
+        "id": 1,
+        "accountNo": "000000001"
+      },
+      "toOffice": {
+        "id": 1,
+        "name": "HO"
+      },
+      "toClient": {
+        "id": 1,
+        "displayName": "Small shop",
+        "officeId": 1,
+        "officeName": "HO",
+        "imagePresent": false
+      },
+      "toAccount": {
+        "id": 2,
+        "accountNo": "000000002"
+      }
+    },
+    {
+      "id": 4,
+      "reversed": false,
+      "currency": {
+        "code": "USD",
+        "name": "US Dollar",
+        "decimalPlaces": 2,
+        "displaySymbol": "$",
+        "nameCode": "currency.USD",
+        "displayLabel": "US Dollar ($)"
+      },
+      "transferAmount": 21,
+      "transferDate": [
+        2013,
+        6,
+        29
+      ],
+      "transferDescription": "T5",
+      "fromOffice": {
+        "id": 1,
+        "name": "HO"
+      },
+      "fromClient": {
+        "id": 1,
+        "displayName": "Small shop",
+        "officeId": 1,
+        "officeName": "HO",
+        "imagePresent": false
+      },
+      "fromAccount": {
+        "id": 1,
+        "accountNo": "000000001"
+      },
+      "toOffice": {
+        "id": 1,
+        "name": "HO"
+      },
+      "toClient": {
+        "id": 1,
+        "displayName": "Small shop",
+        "officeId": 1,
+        "officeName": "HO",
+        "imagePresent": false
+      },
+      "toAccount": {
+        "id": 2,
+        "accountNo": "000000002"
+      }
+    },
+    {
+      "id": 5,
+      "reversed": false,
+      "currency": {
+        "code": "USD",
+        "name": "US Dollar",
+        "decimalPlaces": 2,
+        "displaySymbol": "$",
+        "nameCode": "currency.USD",
+        "displayLabel": "US Dollar ($)"
+      },
+      "transferAmount": 42,
+      "transferDate": [
+        2013,
+        7,
+        5
+      ],
+      "transferDescription": "pay back loan",
+      "fromOffice": {
+        "id": 1,
+        "name": "HO"
+      },
+      "fromClient": {
+        "id": 1,
+        "displayName": "Small shop",
+        "officeId": 1,
+        "officeName": "HO",
+        "imagePresent": false
+      },
+      "fromAccount": {
+        "id": 2,
+        "accountNo": "000000002"
+      },
+      "toOffice": {
+        "id": 1,
+        "name": "HO"
+      },
+      "toClient": {
+        "id": 1,
+        "displayName": "Small shop",
+        "officeId": 1,
+        "officeName": "HO",
+        "imagePresent": false
+      },
+      "toAccount": {
+        "id": 1,
+        "accountNo": "000000001"
+      }
+    }
+  ]
+}
+			</code>
+        </div>
+    </div>
+        
+	<a id="accounttransfers_retrieve" name="accounttransfers_retrieve" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Retrieve account transfer:</h2>
+	        <p>Example Requests : </p>
+	        <div class=apiClick>accounttransfers/1</div>
+	        <br>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">GET https://DomainName/api/v1/accounttransfers/{transferId}</code>
+	        <code class="method-response">
+{
+  "id": 1,
+  "reversed": false,
+  "currency": {
+    "code": "USD",
+    "name": "US Dollar",
+    "decimalPlaces": 2,
+    "displaySymbol": "$",
+    "nameCode": "currency.USD",
+    "displayLabel": "US Dollar ($)"
+  },
+  "transferAmount": 25,
+  "transferDate": [
+    2013,
+    6,
+    8
+  ],
+  "transferDescription": "another transfer",
+  "fromOffice": {
+    "id": 1,
+    "name": "HO"
+  },
+  "fromClient": {
+    "id": 1,
+    "displayName": "Small shop",
+    "officeId": 1,
+    "officeName": "HO",
+    "imagePresent": false
+  },
+  "fromAccount": {
+    "id": 1,
+    "accountNo": "000000001"
+  },
+  "toOffice": {
+    "id": 1,
+    "name": "HO"
+  },
+  "toClient": {
+    "id": 1,
+    "displayName": "Small shop",
+    "officeId": 1,
+    "officeName": "HO",
+    "imagePresent": false
+  },
+  "toAccount": {
+    "id": 2,
+    "accountNo": "000000002"
+  }
+}
+	        </code>
+	    </div>
+	</div>
+<!-- end of acount transfers api -->
     
 <!-- start of datatables api docs -->
 			<a id="datatables" name="datatables" class="old-syle-anchor">&nbsp;</a>
@@ -18281,14 +19675,6 @@ GET https://DomainName/api/v1/search?query=000000111
 					<td></td>
 					<td></td>
 				</tr>
-				<tr>
-					<td></td>
-					<td>savingsaccounts/{accountId}/transactions/template</td>
-					<td></td>
-					<td><a href="#savingsaccounts_transactions_template">Retrieve savings account transaction template</a></td>
-					<td></td>
-					<td></td>
-				</tr>
 				<tr class="alt">
 					<td><a href="#savingsaccounts_transactions">Savings Transactions</a></td>
 					<td>savingsaccounts/{accountId}/transactions?command=deposit</td>
@@ -18312,7 +19698,39 @@ GET https://DomainName/api/v1/search?query=000000111
 					<td></td>
 					<td></td>
 					<td></td>
-				</tr>	
+				</tr>
+				<tr>
+					<td></td>
+					<td>savingsaccounts/{accountId}/transactions/template</td>
+					<td></td>
+					<td><a href="#savingsaccounts_transactions_template">Retrieve savings account transaction template</a></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr class="alt">
+					<td><a href="#accounttransfers">Account Transfers</a></td>
+					<td>accounttransfers/</td>
+					<td><a href="#accounttransfers_create">Create new Transfer</a></td>
+					<td><a href="#accounttransfers_list">List Transfers</a></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>accounttransfers/template</td>
+					<td></td>
+					<td><a href="#accounttransfers_template">Retrieve Template</a></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>accounttransfers/{transferId}</td>
+					<td></td>
+					<td><a href="#accounttransfers_retrieve">Retrieve Transfer</a></td>
+					<td></td>
+					<td></td>
+				</tr>
 			</table>
 		</div>
 	</div>

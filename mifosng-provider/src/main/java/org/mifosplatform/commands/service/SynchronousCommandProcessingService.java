@@ -105,7 +105,14 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
     private NewCommandSourceHandler findCommandHandler(final CommandWrapper wrapper) {
         NewCommandSourceHandler handler = null;
 
-        if (wrapper.isConfigurationResource()) {
+        if (wrapper.isAccountTransferResource()) {
+            if (wrapper.isCreate()) {
+                handler = this.applicationContext.getBean("createAccountTransferCommandHandler", NewCommandSourceHandler.class);
+            } else {
+                throw new UnsupportedCommandException(wrapper.commandName());
+            }
+        }
+        else if (wrapper.isConfigurationResource()) {
             handler = this.applicationContext.getBean("updateGlobalConfigurationCommandHandler", NewCommandSourceHandler.class);
         } else if (wrapper.isDatatableResource()) {
             if (wrapper.isCreateDatatable()) {

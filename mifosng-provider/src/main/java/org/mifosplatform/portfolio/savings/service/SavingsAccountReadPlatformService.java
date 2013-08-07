@@ -17,6 +17,8 @@ public interface SavingsAccountReadPlatformService {
 
     Page<SavingsAccountData> retrieveAll(SearchParameters searchParameters);
 
+    Collection<SavingsAccountData> retrieveAllForLookup(Long clientId);
+
     SavingsAccountData retrieveOne(Long savingsId);
 
     SavingsAccountData retrieveTemplate(Long clientId, Long groupId, Long productId, boolean staffInSelectedOfficeOnly);

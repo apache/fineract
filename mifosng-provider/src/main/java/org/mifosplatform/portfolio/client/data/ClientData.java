@@ -23,7 +23,6 @@ import org.mifosplatform.portfolio.group.data.GroupGeneralData;
  */
 final public class ClientData implements Comparable<ClientData> {
 
-
     private final Long id;
     private final String accountNo;
     private final String externalId;
@@ -49,16 +48,17 @@ final public class ClientData implements Comparable<ClientData> {
 
     // associations
     private final Collection<GroupGeneralData> groups;
-    
+
     // template
     private final Collection<OfficeData> officeOptions;
     private final Collection<StaffData> staffOptions;
     @SuppressWarnings("unused")
     private final Collection<CodeValueData> closureReasons;
-    
-    public static ClientData template(final Long officeId, final LocalDate joinedDate, final Collection<OfficeData> officeOptions, 
+
+    public static ClientData template(final Long officeId, final LocalDate joinedDate, final Collection<OfficeData> officeOptions,
             final Collection<StaffData> staffOptions, final Collection<CodeValueData> closureReasons) {
-        return new ClientData(null, null, officeId, null, null, null, null, null, null, null, null, joinedDate, null, null, null, officeOptions, null, staffOptions, closureReasons);
+        return new ClientData(null, null, officeId, null, null, null, null, null, null, null, null, joinedDate, null, null, null,
+                officeOptions, null, staffOptions, closureReasons);
     }
 
     public static ClientData templateOnTop(final ClientData clientData, final ClientData templateData) {
@@ -81,11 +81,12 @@ final public class ClientData implements Comparable<ClientData> {
             final String officeName) {
 
         return new ClientData(accountNo, status, officeId, officeName, id, firstname, middlename, lastname, fullname, displayName, null,
-                null, null, null, null, null, null,null, null);
+                null, null, null, null, null, null, null, null);
     }
 
     public static ClientData lookup(final Long id, final String displayName, final Long officeId, final String officeName) {
-        return new ClientData(null, null, officeId, officeName, id, null, null, null, null, displayName, null, null, null, null, null, null, null, null, null);
+        return new ClientData(null, null, officeId, officeName, id, null, null, null, null, displayName, null, null, null, null, null,
+                null, null, null, null);
     }
 
     public static ClientData instance(final String accountNo, final EnumOptionData status, final Long officeId, final String officeName,
@@ -99,8 +100,8 @@ final public class ClientData implements Comparable<ClientData> {
     private ClientData(final String accountNo, final EnumOptionData status, final Long officeId, final String officeName, final Long id,
             final String firstname, final String middlename, final String lastname, final String fullname, final String displayName,
             final String externalId, final LocalDate activationDate, final Long imageId, final Long staffId, final String staffName,
-            final Collection<OfficeData> allowedOffices, final Collection<GroupGeneralData> groups, final Collection<StaffData> staffOptions,
-            final Collection<CodeValueData> closureReasons) {
+            final Collection<OfficeData> allowedOffices, final Collection<GroupGeneralData> groups,
+            final Collection<StaffData> staffOptions, final Collection<CodeValueData> closureReasons) {
         this.accountNo = accountNo;
         this.status = status;
         if (status != null) {
@@ -122,7 +123,7 @@ final public class ClientData implements Comparable<ClientData> {
         if (imageId != null) {
             this.imagePresent = Boolean.TRUE;
         } else {
-            this.imagePresent = Boolean.FALSE;
+            this.imagePresent = null;
         }
         this.staffId = staffId;
         this.staffName = staffName;
@@ -189,7 +190,6 @@ final public class ClientData implements Comparable<ClientData> {
                 .toHashCode();
     }
 
-    // TODO - kw - look into removing usage of the getters below
     public String getExternalId() {
         return this.externalId;
     }
@@ -205,5 +205,4 @@ final public class ClientData implements Comparable<ClientData> {
     public LocalDate getActivationDate() {
         return this.activationDate;
     }
-
 }
