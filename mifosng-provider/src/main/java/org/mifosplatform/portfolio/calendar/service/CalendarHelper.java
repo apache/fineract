@@ -312,30 +312,41 @@ public class CalendarHelper {
     public static LocalDate getNewRepaymentMeetingDate(final String recurringRule, final LocalDate seedDate, final LocalDate oldRepaymentDate, final Integer loanRepaymentInterval, final String frequency, final WorkingDays workingDays){
         final Recur recur = CalendarHelper.getICalRecur(recurringRule);
         if (recur == null) { return null; }
-        
     	if(isValidRecurringDate(recur, seedDate, oldRepaymentDate)){
     		return oldRepaymentDate;
     	}
-    	/* Recurring dates should follow loanRepaymentInterval.
-    	    e.g. The weekly meeting will have interval of 1, if the loan product with fortnightly frequency will have interval of 2,
-    	    to generate right set of meeting dates reset interval same as loan repayment interval.  
-    	*/
-    	recur.setInterval(loanRepaymentInterval);
-    	
-    	/*Recurring dates should follow loanRepayment frequency.
-    	//e.g. daily meeting frequency should support all loan products with any type of frequency.
-    	    to generate right set of meeting dates reset frequency same as loan repayment frequency.
-    	*/
-    	if(recur.getFrequency().equals(Recur.DAILY)){
-    		recur.setFrequency(frequency);
-    	}
-    	
-    	LocalDate newRepaymentDate = getNextRecurringDate(recur, seedDate, oldRepaymentDate);
-    	LocalDate nextRepaymentDate = getNextRecurringDate(recur, seedDate, newRepaymentDate);
-    	
-    	newRepaymentDate = WorkingDaysUtil.getOffSetDateIfNonWorkingDay(newRepaymentDate, nextRepaymentDate, workingDays);
-    	
-    	return newRepaymentDate;
+    	return getNextRepaymentMeetingDate(recurringRule, seedDate, oldRepaymentDate, loanRepaymentInterval, frequency, workingDays);
+    }
+    
+    public static LocalDate getNextRepaymentMeetingDate(final String recurringRule, final LocalDate seedDate, final LocalDate repaymentDate, final Integer loanRepaymentInterval, final String frequency, final WorkingDays workingDays){
+        
+        final Recur recur = CalendarHelper.getICalRecur(recurringRule);
+        if (recur == null) { return null; }
+        LocalDate tmpDate = repaymentDate;
+        if(isValidRecurringDate(recur, seedDate, repaymentDate)){
+            tmpDate = repaymentDate.plusDays(1);
+        }
+        /* Recurring dates should follow loanRepaymentInterval.
+         * 
+            e.g. The weekly meeting will have interval of 1, if the loan product with fortnightly frequency will have interval of 2,
+            to generate right set of meeting dates reset interval same as loan repayment interval.  
+        */
+        recur.setInterval(loanRepaymentInterval);
+        
+        /*Recurring dates should follow loanRepayment frequency.
+        //e.g. daily meeting frequency should support all loan products with any type of frequency.
+            to generate right set of meeting dates reset frequency same as loan repayment frequency.
+        */
+        if(recur.getFrequency().equals(Recur.DAILY)){
+                recur.setFrequency(frequency);
+        }
+        
+        LocalDate newRepaymentDate = getNextRecurringDate(recur, seedDate, tmpDate);
+        LocalDate nextRepaymentDate = getNextRecurringDate(recur, seedDate, newRepaymentDate);
+        
+        newRepaymentDate = WorkingDaysUtil.getOffSetDateIfNonWorkingDay(newRepaymentDate, nextRepaymentDate, workingDays);
+        
+        return newRepaymentDate;
     }
     
     public static boolean isFrequencySame(final String oldRRule, final String newRRule) {
