@@ -30,6 +30,7 @@ import org.mifosplatform.organisation.monetary.domain.ApplicationCurrencyReposit
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.portfolio.paymentdetail.domain.PaymentDetail;
 import org.mifosplatform.portfolio.paymentdetail.service.PaymentDetailWritePlatformService;
+import org.mifosplatform.portfolio.savings.SavingsApiConstants;
 import org.mifosplatform.portfolio.savings.data.SavingsAccountTransactionDataValidator;
 import org.mifosplatform.portfolio.savings.domain.SavingsAccount;
 import org.mifosplatform.portfolio.savings.domain.SavingsAccountAssembler;
@@ -38,6 +39,8 @@ import org.mifosplatform.portfolio.savings.domain.SavingsAccountRepository;
 import org.mifosplatform.portfolio.savings.domain.SavingsAccountStatusType;
 import org.mifosplatform.portfolio.savings.domain.SavingsAccountTransaction;
 import org.mifosplatform.portfolio.savings.domain.SavingsAccountTransactionRepository;
+import org.mifosplatform.portfolio.savings.exception.SavingsAccountTransactionNotFoundException;
+import org.mifosplatform.portfolio.savings.exception.TransactionUpdateNotAllowedException;
 import org.mifosplatform.useradministration.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -274,15 +277,20 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
 
         SavingsAccountTransaction savingsAccountTransaction = this.savingsAccountTransactionRepository.findOneByIdAndSavingsAccountId(
                 transactionId, savingsId);
-        if (savingsAccountTransaction == null) {
-            // throw new not found exception
-        }
+        if (savingsAccountTransaction == null) { throw new SavingsAccountTransactionNotFoundException(savingsId, transactionId); }
 
         final LocalDate today = DateUtils.getLocalDateOfTenant();
         final MathContext mc = new MathContext(15, RoundingMode.HALF_EVEN);
 
         final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsId);
-        account.undoTransaction(transactionId, reversedTransactionIds, mc, today);
+        account.undoTransaction(transactionId, reversedTransactionIds);
+        if ((savingsAccountTransaction.isDeposit() || savingsAccountTransaction.isWithdrawal())
+                && account.isBeforeLastPostingPeriod(savingsAccountTransaction.transactionLocalDate())) {
+            account.postInterest(mc, today, newTransactionIds, reversedTransactionIds);
+        } else {
+            account.calculateInterestUsing(mc, today);
+        }
+        account.validateAccountBalanceDoesNotBecomeNegative(SavingsApiConstants.undoTransactionAction);
 
         postJournalEntries(account, newTransactionIds, reversedTransactionIds);
 
@@ -292,6 +300,60 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
                 .withClientId(account.clientId()) //
                 .withGroupId(account.groupId()) //
                 .withSavingsId(savingsId) //
+                .build();
+    }
+
+    @Override
+    public CommandProcessingResult adjustSavingsTransaction(final Long savingsId, final Long transactionId, final JsonCommand command) {
+
+        SavingsAccountTransaction savingsAccountTransaction = this.savingsAccountTransactionRepository.findOneByIdAndSavingsAccountId(
+                transactionId, savingsId);
+        if (savingsAccountTransaction == null) { throw new SavingsAccountTransactionNotFoundException(savingsId, transactionId); }
+
+        if (!(savingsAccountTransaction.isDeposit() || savingsAccountTransaction.isWithdrawal()) || savingsAccountTransaction.isReversed()) { throw new TransactionUpdateNotAllowedException(
+                savingsId, transactionId); }
+        this.savingsAccountTransactionDataValidator.validate(command);
+
+        final LocalDate today = DateUtils.getLocalDateOfTenant();
+
+        final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsId);
+
+        final Locale locale = command.extractLocale();
+        final DateTimeFormatter fmt = DateTimeFormat.forPattern(command.dateFormat()).withLocale(locale);
+        final LocalDate transactionDate = command.localDateValueOfParameterNamed(SavingsApiConstants.transactionDateParamName);
+        final BigDecimal transactionAmount = command.bigDecimalValueOfParameterNamed(SavingsApiConstants.transactionAmountParamName);
+        final List<Long> existingTransactionIds = new ArrayList<Long>();
+        final List<Long> existingReversedTransactionIds = new ArrayList<Long>();
+        final Map<String, Object> changes = new LinkedHashMap<String, Object>();
+        PaymentDetail paymentDetail = paymentDetailWritePlatformService.createAndPersistPaymentDetail(command, changes);
+
+        final MathContext mc = new MathContext(10, RoundingMode.HALF_EVEN);
+        account.undoTransaction(transactionId, existingReversedTransactionIds);
+        SavingsAccountTransaction transaction = null;
+        if (savingsAccountTransaction.isDeposit()) {
+            transaction = account.deposit(fmt, transactionDate, transactionAmount, existingTransactionIds, existingReversedTransactionIds,
+                    paymentDetail);
+        } else {
+            transaction = account.withdraw(fmt, transactionDate, transactionAmount, existingTransactionIds, existingReversedTransactionIds,
+                    paymentDetail);
+        }
+        final Long newtransactionId = saveTransactionToGenerateTransactionId(transaction);
+
+        if (account.isBeforeLastPostingPeriod(transactionDate)
+                || account.isBeforeLastPostingPeriod(savingsAccountTransaction.transactionLocalDate())) {
+            account.postInterest(mc, today, existingTransactionIds, existingReversedTransactionIds);
+        } else {
+            account.calculateInterestUsing(mc, today);
+        }
+        account.validateAccountBalanceDoesNotBecomeNegative(SavingsApiConstants.adjustTransactionAction);
+        postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds);
+        return new CommandProcessingResultBuilder() //
+                .withEntityId(newtransactionId) //
+                .withOfficeId(account.officeId()) //
+                .withClientId(account.clientId()) //
+                .withGroupId(account.groupId()) //
+                .withSavingsId(savingsId) //
+                .with(changes)//
                 .build();
     }
 

@@ -26,4 +26,6 @@ public interface SavingsAccountWritePlatformService {
     CommandProcessingResult undoTransaction(Long savingsId, Long transactionId);
 
     void postInterestForAccounts();
+
+    CommandProcessingResult adjustSavingsTransaction(Long savingsId, Long transactionId, JsonCommand command);
 }

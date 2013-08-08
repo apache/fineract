@@ -342,7 +342,7 @@ public class CommandWrapperBuilder {
         this.href = "/clients/" + clientId + "?command=activate&template=true";
         return this;
     }
-    
+
     public CommandWrapperBuilder closeClient(final Long clientId) {
         this.actionName = "CLOSE";
         this.entityName = "CLIENT";
@@ -372,30 +372,30 @@ public class CommandWrapperBuilder {
     }
 
     public CommandWrapperBuilder createDBDatatable(final String json) {
-    	this.actionName = "CREATE";
-    	this.entityName = "DATATABLE";
-    	this.entityId = null;
-    	this.href = "/datatables/";
-    	this.json = json;
-    	return this;
+        this.actionName = "CREATE";
+        this.entityName = "DATATABLE";
+        this.entityId = null;
+        this.href = "/datatables/";
+        this.json = json;
+        return this;
     }
 
     public CommandWrapperBuilder updateDBDatatable(final String datatable, final String json) {
-    	this.actionName = "UPDATE";
-    	this.entityName = "DATATABLE";
-    	this.entityId = null;
-    	this.href = "/datatables/" + datatable;
-    	this.json = json;
-    	return this;
+        this.actionName = "UPDATE";
+        this.entityName = "DATATABLE";
+        this.entityId = null;
+        this.href = "/datatables/" + datatable;
+        this.json = json;
+        return this;
     }
 
     public CommandWrapperBuilder deleteDBDatatable(final String datatable, final String json) {
-    	this.actionName = "DELETE";
-    	this.entityName = "DATATABLE";
-    	this.entityId = null;
-    	this.href = "/datatables/" + datatable;
-    	this.json = json;
-    	return this;
+        this.actionName = "DELETE";
+        this.entityName = "DATATABLE";
+        this.entityId = null;
+        this.href = "/datatables/" + datatable;
+        this.json = json;
+        return this;
     }
 
     public CommandWrapperBuilder createDatatable(final String datatable, final Long apptableId, final Long datatableId) {
@@ -845,6 +845,17 @@ public class CommandWrapperBuilder {
         return this;
     }
 
+    public CommandWrapperBuilder adjustSavingsAccountTransaction(final Long accountId, final Long transactionId) {
+        this.actionName = "ADJUSTTRANSACTION";
+        this.entityName = "SAVINGSACCOUNT";
+        this.savingsId = accountId;
+        this.entityId = accountId;
+        this.subentityId = transactionId;
+        this.transactionId = transactionId.toString();
+        this.href = "/savingsaccounts/" + accountId + "/transactions/" + transactionId + "?command=modify";
+        return this;
+    }
+
     public CommandWrapperBuilder savingsAccountInterestCalculation(final Long accountId) {
         this.actionName = "CALCULATEINTEREST";
         this.entityName = "SAVINGSACCOUNT";
@@ -953,7 +964,7 @@ public class CommandWrapperBuilder {
         this.href = "/groups/" + groupId + "?command=activate";
         return this;
     }
-    
+
     public CommandWrapperBuilder saveGroupCollectionSheet(final Long groupId) {
         this.actionName = "SAVECOLLECTIONSHEET";
         this.entityName = "GROUP";
@@ -962,7 +973,7 @@ public class CommandWrapperBuilder {
         this.href = "/groups/" + groupId + "?command=saveCollectionSheet";
         return this;
     }
-    
+
     public CommandWrapperBuilder deleteGroup(final Long groupId) {
         this.actionName = "DELETE";
         this.entityName = "GROUP";
@@ -998,16 +1009,16 @@ public class CommandWrapperBuilder {
         this.href = "/groups/" + groupId;
         return this;
     }
-    
+
     public CommandWrapperBuilder assignGroupStaff(final Long groupId) {
         this.actionName = "ASSIGNSTAFF";
         this.entityName = "GROUP";
         this.entityId = groupId;
         this.groupId = groupId;
-        this.href = "/groups/" + groupId +"?command=assignStaff";
+        this.href = "/groups/" + groupId + "?command=assignStaff";
         return this;
     }
-    
+
     public CommandWrapperBuilder createCollateral(final Long loanId) {
         this.actionName = "CREATE";
         this.entityName = "COLLATERAL";
@@ -1106,7 +1117,7 @@ public class CommandWrapperBuilder {
         this.href = "/accountingrules/" + accountingRuleId;
         return this;
     }
-    
+
     public CommandWrapperBuilder createHoliday() {
         this.actionName = "CREATE";
         this.entityName = "HOLIDAY";
@@ -1120,7 +1131,7 @@ public class CommandWrapperBuilder {
         this.entityName = "GROUP";
         this.groupId = groupId;
         this.entityId = null;
-        this.href = "/groups/"+groupId+"?command=assignRole";
+        this.href = "/groups/" + groupId + "?command=assignRole";
         return this;
     }
 
@@ -1129,7 +1140,7 @@ public class CommandWrapperBuilder {
         this.entityName = "GROUP";
         this.groupId = groupId;
         this.entityId = roleId;
-        this.href = "/groups/"+groupId+"?command=unassignRole";
+        this.href = "/groups/" + groupId + "?command=unassignRole";
         return this;
     }
 
@@ -1138,10 +1149,10 @@ public class CommandWrapperBuilder {
         this.entityName = "GROUP";
         this.groupId = groupId;
         this.entityId = roleId;
-        this.href = "/groups/"+groupId+"?command=updateRole";
+        this.href = "/groups/" + groupId + "?command=updateRole";
         return this;
     }
-    
+
     public CommandWrapperBuilder unassignClientStaff(final Long clientId) {
         this.actionName = "UNASSIGNSTAFF";
         this.entityName = "CLIENT";
@@ -1177,7 +1188,7 @@ public class CommandWrapperBuilder {
         this.href = "/loanproducts/" + productId + "/productmix";
         return this;
     }
-    
+
     public CommandWrapperBuilder deleteProductMix(final Long productId) {
         this.actionName = "DELETE";
         this.entityName = "PRODUCTMIX";
@@ -1186,17 +1197,17 @@ public class CommandWrapperBuilder {
         this.href = "/loanproducts/" + productId + "/productmix";
         return this;
     }
-    
+
     public CommandWrapperBuilder withProduct(final Long productId) {
         this.productId = productId;
         return this;
     }
-    
+
     public CommandWrapperBuilder updateJobDetail(final Long jobId) {
         this.actionName = "UPDATE";
         this.entityName = "SCHEDULER";
         this.entityId = jobId;
-        this.href = "/updateJobDetail/" + jobId+"/updateJobDetail";
+        this.href = "/updateJobDetail/" + jobId + "/updateJobDetail";
         return this;
     }
 }

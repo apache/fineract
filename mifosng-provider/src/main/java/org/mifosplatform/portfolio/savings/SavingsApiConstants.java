@@ -30,6 +30,11 @@ public class SavingsApiConstants {
     public static String deleteApplicationAction = ".delete";
     public static String undoTransactionAction = ".undotransaction";
     public static String applyAnnualFeeTransactionAction = ".applyannualfee";
+    public static String adjustTransactionAction = ".adjusttransaction";
+
+    // command
+    public static String COMMAND_UNDO_TRANSACTION = "undo";
+    public static String COMMAND_ADJUST_TRANSACTION = "modify";
 
     // general
     public static final String localeParamName = "locale";
@@ -81,6 +86,10 @@ public class SavingsApiConstants {
     // transaction parameters
     public static final String transactionDateParamName = "transactionDate";
     public static final String transactionAmountParamName = "transactionAmount";
+    public static final String paymentDetailDataParamName = "paymentDetailData";
+    public static final String runningBalanceParamName = "runningBalance";
+    public static final String reversedParamName = "reversed";
+    public static final String dateParamName = "date";
 
     public static final Set<String> SAVINGS_PRODUCT_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(localeParamName,
             monthDayFormatParamName, nameParamName, descriptionParamName, currencyCodeParamName, digitsAfterDecimalParamName,
@@ -135,7 +144,8 @@ public class SavingsApiConstants {
             transactionAccountNumberParamName, checkNumberParamName, routingCodeParamName, receiptNumberParamName, bankNumberParamName));
 
     public static final Set<String> SAVINGS_TRANSACTION_RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(idParamName,
-            "accountId", accountNoParamName, "currency", "amount"));
+            "accountId", accountNoParamName, "currency", "amount", dateParamName, paymentDetailDataParamName, runningBalanceParamName,
+            reversedParamName));
 
     public static final Set<String> SAVINGS_ACCOUNT_ACTIVATION_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(localeParamName,
             dateFormatParamName, activatedOnDateParamName));

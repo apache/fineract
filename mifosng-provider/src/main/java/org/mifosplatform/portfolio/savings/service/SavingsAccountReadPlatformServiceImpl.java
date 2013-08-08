@@ -508,6 +508,14 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
     }
 
     @Override
+    public SavingsAccountTransactionData retrieveSavingsTransaction(final Long savingsId, final Long transactionId) {
+
+        final String sql = "select " + this.transactionsMapper.schema() + " where sa.id = ? and tr.id= ?";
+
+        return this.jdbcTemplate.queryForObject(sql, this.transactionsMapper, new Object[] { savingsId, transactionId });
+    }
+
+    @Override
     public Collection<SavingsAccountAnnualFeeData> retrieveAccountsWithAnnualFeeDue() {
         final String sql = "select " + annualFeeMapper.schema()
                 + " where sa.annual_fee_next_due_date not null and sa.annual_fee_next_due_date <= NOW()";
