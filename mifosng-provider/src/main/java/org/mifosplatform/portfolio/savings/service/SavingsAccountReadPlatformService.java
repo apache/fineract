@@ -28,4 +28,6 @@ public interface SavingsAccountReadPlatformService {
     Collection<SavingsAccountTransactionData> retrieveAllTransactions(Long savingsId);
 
     Collection<SavingsAccountAnnualFeeData> retrieveAccountsWithAnnualFeeDue();
+
+    SavingsAccountTransactionData retrieveSavingsTransaction(Long savingsId, Long transactionId);
 }

@@ -719,8 +719,9 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         }
     }
 
-    private void validateAccountBalanceDoesNotBecomeNegativeDueToUndoAction(final List<SavingsAccountTransaction> transactionsSortedByDate) {
+    public void validateAccountBalanceDoesNotBecomeNegative(String transactionAction) {
 
+        final List<SavingsAccountTransaction> transactionsSortedByDate = retreiveListOfTransactions();
         Money runningBalance = Money.zero(this.currency);
 
         for (final SavingsAccountTransaction transaction : transactionsSortedByDate) {
@@ -734,7 +735,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
                 //
                 final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
                 final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
-                        .resource(SAVINGS_ACCOUNT_RESOURCE_NAME + SavingsApiConstants.undoTransactionAction);
+                        .resource(SAVINGS_ACCOUNT_RESOURCE_NAME + transactionAction);
 
                 baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("results.in.balance.going.negative");
 
@@ -1396,8 +1397,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         return actualChanges;
     }
 
-    public void undoTransaction(final Long transactionId, final List<Long> reversedTransactionIds, final MathContext mc,
-            final LocalDate upToInterestCalculationDate) {
+    public void undoTransaction(final Long transactionId, final List<Long> reversedTransactionIds) {
 
         SavingsAccountTransaction transactionToUndo = null;
         for (final SavingsAccountTransaction transaction : this.transactions) {
@@ -1424,9 +1424,6 @@ public class SavingsAccount extends AbstractPersistable<Long> {
                 }
             }
 
-            calculateInterestUsing(mc, upToInterestCalculationDate);
-
-            validateAccountBalanceDoesNotBecomeNegativeDueToUndoAction(retreiveListOfTransactions());
         }
     }
 
@@ -1616,8 +1613,8 @@ public class SavingsAccount extends AbstractPersistable<Long> {
             baseDataValidator.reset().parameter(SavingsApiConstants.activatedOnDateParamName).value(dateAsString)
                     .failWithCodeNoParameterAddedToErrorCode("cannot.be.before.client.activation.date");
             if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
-        } 
-        
+        }
+
         if (this.group != null && this.group.isActivatedAfter(activationDate)) {
             final DateTimeFormatter formatter = DateTimeFormat.forPattern(command.dateFormat()).withLocale(command.extractLocale());
             final String dateAsString = formatter.print(this.client.getActivationLocalDate());
