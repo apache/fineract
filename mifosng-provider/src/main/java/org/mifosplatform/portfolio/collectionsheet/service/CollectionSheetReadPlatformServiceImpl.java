@@ -52,7 +52,8 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
 
     @Autowired
     public CollectionSheetReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
-            final CenterReadPlatformService centerReadPlatformService, final GroupReadPlatformService groupReadPlatformService, final CollectionSheetGenerateCommandFromApiJsonDeserializer collectionSheetGenerateCommandFromApiJsonDeserializer) {
+            final CenterReadPlatformService centerReadPlatformService, final GroupReadPlatformService groupReadPlatformService,
+            final CollectionSheetGenerateCommandFromApiJsonDeserializer collectionSheetGenerateCommandFromApiJsonDeserializer) {
         this.context = context;
         this.centerReadPlatformService = centerReadPlatformService;
         this.namedParameterjdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
@@ -69,9 +70,10 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
 
         final CenterData center = this.centerReadPlatformService.retrieveOne(centerId);
         final String groupHierarchy = center.getHierarchy() + "%";
-        
-        Collection<JLGCollectionSheetFlatData> collectionSheetFlatDatas = this.retriveJLGCollectionSheet(groupHierarchy, officeHierarchy, dueDate);
-        
+
+        Collection<JLGCollectionSheetFlatData> collectionSheetFlatDatas = this.retriveJLGCollectionSheet(groupHierarchy, officeHierarchy,
+                dueDate);
+
         final JLGCollectionSheetData jlgCollectionSheetData = buildJLGCollectionSheet(dueDate, collectionSheetFlatDatas);
 
         return jlgCollectionSheetData;
@@ -83,7 +85,8 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
      * Groups >> Clients >> Loans.
      */
     @SuppressWarnings("null")
-    private JLGCollectionSheetData buildJLGCollectionSheet(final LocalDate dueDate, final Collection<JLGCollectionSheetFlatData> jlgCollectionSheetFlatData) {
+    private JLGCollectionSheetData buildJLGCollectionSheet(final LocalDate dueDate,
+            final Collection<JLGCollectionSheetFlatData> jlgCollectionSheetFlatData) {
 
         boolean firstTime = true;
         Long prevGroupId = null;
@@ -101,9 +104,9 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
 
             for (final JLGCollectionSheetFlatData collectionSheetFlatData : jlgCollectionSheetFlatData) {
 
-                if(collectionSheetFlatData.getProductId() !=null){
+                if (collectionSheetFlatData.getProductId() != null) {
                     loanProducts.add(LoanProductData.lookupWithCurrency(collectionSheetFlatData.getProductId(),
-                        collectionSheetFlatData.getProductShortName(), collectionSheetFlatData.getCurrency()));
+                            collectionSheetFlatData.getProductShortName(), collectionSheetFlatData.getCurrency()));
                 }
                 corrCollectioSheetFlatData = collectionSheetFlatData;
 
@@ -197,7 +200,7 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
                     + "ln.loan_status_id As accountStatusId, "
                     + "pl.name As productShortName, "
                     + "ln.product_id As productId, "
-                    + "ln.currency_code as currencyCode, ln.currency_digits as currencyDigits, rc.`name` as currencyName, rc.display_symbol as currencyDisplaySymbol, rc.internationalized_name_code as currencyNameCode, "
+                    + "ln.currency_code as currencyCode, ln.currency_digits as currencyDigits, ln.currency_multiplesof as inMulitplesOf, rc.`name` as currencyName, rc.display_symbol as currencyDisplaySymbol, rc.internationalized_name_code as currencyNameCode, "
                     + "if(ln.loan_status_id = 200 , ln.principal_amount , null) As disbursementAmount, "
                     + "sum(ifnull(if(ln.loan_status_id = 300, ls.principal_amount, 0.0), 0.0) - ifnull(if(ln.loan_status_id = 300, ls.principal_completed_derived, 0.0), 0.0)) As principalDue, "
                     + "ln.principal_repaid_derived As principalPaid, "
@@ -206,7 +209,7 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
                     + "sum(if(ln.loan_status_id = 300, lc.amount_outstanding_derived, 0.0)) as chargesDue "
                     + "FROM m_group gp "
                     + "LEFT JOIN m_office of ON of.id = gp.office_id AND of.hierarchy like :officeHierarchy "
-                    //+ "LEFT JOIN m_office of ON of.id = gp.office_id "
+                    // + "LEFT JOIN m_office of ON of.id = gp.office_id "
                     + "JOIN m_group_level gl ON gl.id = gp.level_Id "
                     + "LEFT JOIN m_staff sf ON sf.id = gp.staff_id "
                     + "JOIN m_group_client gc ON gc.group_id = gp.id "
@@ -216,7 +219,9 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
                     + "JOIN m_currency rc on rc.`code` = ln.currency_code "
                     + "LEFT JOIN m_loan_repayment_schedule ls ON ls.loan_id = ln.id AND ls.completed_derived = 0 AND ls.duedate <= :dueDate "
                     + "LEFT JOIN m_loan_charge lc ON lc.loan_id = ln.id AND lc.is_paid_derived = 0 AND ( lc.due_for_collection_as_of_date  <= :dueDate OR lc.charge_time_enum = 1) ";
-                    //+ "WHERE gp.hierarchy like :hierarchy " + "GROUP BY gp.id ,cl.id , ln.id " + "ORDER BY gp.id , cl.id , ln.id ";
+            // + "WHERE gp.hierarchy like :hierarchy " +
+            // "GROUP BY gp.id ,cl.id , ln.id " +
+            // "ORDER BY gp.id , cl.id , ln.id ";
         }
 
         @Override
@@ -241,9 +246,10 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
             final String currencyNameCode = rs.getString("currencyNameCode");
             final String currencyDisplaySymbol = rs.getString("currencyDisplaySymbol");
             final Integer currencyDigits = JdbcSupport.getInteger(rs, "currencyDigits");
+            final Integer inMulitplesOf = JdbcSupport.getInteger(rs, "inMulitplesOf");
             CurrencyData currencyData = null;
-            if(currencyCode != null){
-                currencyData = new CurrencyData(currencyCode, currencyName, currencyDigits, currencyDisplaySymbol,
+            if (currencyCode != null) {
+                currencyData = new CurrencyData(currencyCode, currencyName, currencyDigits, inMulitplesOf, currencyDisplaySymbol,
                         currencyNameCode);
             }
 
@@ -263,7 +269,7 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
 
     @Override
     public JLGCollectionSheetData generateGroupCollectionSheet(final Long groupId, final JsonQuery query) {
-        
+
         this.collectionSheetGenerateCommandFromApiJsonDeserializer.validateForGenerateCollectionSheet(query.json());
 
         final AppUser currentUser = this.context.authenticatedUser();
@@ -281,18 +287,18 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
         String sql = mapper.collectionSheetSchema();
         sql += "WHERE gp.id = :groupId GROUP BY gp.id ,cl.id , ln.id ORDER BY gp.id , cl.id , ln.id";
 
-        final SqlParameterSource namedParameters = new MapSqlParameterSource().addValue("dueDate", dueDateStr).addValue("groupId", group.getId())
-                .addValue("officeHierarchy", officeHierarchy);
+        final SqlParameterSource namedParameters = new MapSqlParameterSource().addValue("dueDate", dueDateStr)
+                .addValue("groupId", group.getId()).addValue("officeHierarchy", officeHierarchy);
 
         final Collection<JLGCollectionSheetFlatData> collectionSheetFlatDatas = this.namedParameterjdbcTemplate.query(sql, namedParameters,
                 mapper);
 
         return buildJLGCollectionSheet(dueDate, collectionSheetFlatDatas);
     }
-    
+
     @Override
     public JLGCollectionSheetData generateCenterCollectionSheet(final Long centerId, final JsonQuery query) {
-        
+
         this.collectionSheetGenerateCommandFromApiJsonDeserializer.validateForGenerateCollectionSheet(query.json());
 
         final AppUser currentUser = this.context.authenticatedUser();
@@ -310,8 +316,8 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
         String sql = mapper.collectionSheetSchema();
         sql += "WHERE gp.parent_id = :centerId GROUP BY gp.id ,cl.id , ln.id ORDER BY gp.id , cl.id , ln.id";
 
-        final SqlParameterSource namedParameters = new MapSqlParameterSource().addValue("dueDate", dueDateStr).addValue("centerId", center.getId())
-                .addValue("officeHierarchy", officeHierarchy);
+        final SqlParameterSource namedParameters = new MapSqlParameterSource().addValue("dueDate", dueDateStr)
+                .addValue("centerId", center.getId()).addValue("officeHierarchy", officeHierarchy);
 
         final Collection<JLGCollectionSheetFlatData> collectionSheetFlatDatas = this.namedParameterjdbcTemplate.query(sql, namedParameters,
                 mapper);

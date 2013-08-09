@@ -99,7 +99,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
         public String loanProductSchema() {
             return "lp.id as id, lp.fund_id as fundId, f.name as fundName, lp.loan_transaction_strategy_id as transactionStrategyId, ltps.name as transactionStrategyName, "
                     + "lp.name as name, lp.description as description, "
-                    + "lp.principal_amount as principal, lp.min_principal_amount as minPrincipal, lp.max_principal_amount as maxPrincipal, lp.currency_code as currencyCode, lp.currency_digits as currencyDigits, "
+                    + "lp.principal_amount as principal, lp.min_principal_amount as minPrincipal, lp.max_principal_amount as maxPrincipal, lp.currency_code as currencyCode, lp.currency_digits as currencyDigits, lp.currency_multiplesof as inMulitplesOf, "
                     + "lp.nominal_interest_rate_per_period as interestRatePerPeriod, lp.min_nominal_interest_rate_per_period as minInterestRatePerPeriod, lp.max_nominal_interest_rate_per_period as maxInterestRatePerPeriod, lp.interest_period_frequency_enum as interestRatePerPeriodFreq, "
                     + "lp.annual_nominal_interest_rate as annualInterestRate, lp.interest_method_enum as interestMethod, lp.interest_calculated_in_period_enum as interestCalculationInPeriodMethod,"
                     + "lp.repay_every as repaidEvery, lp.repayment_period_frequency_enum as repaymentPeriodFrequency, lp.number_of_repayments as numberOfRepayments, lp.min_number_of_repayments as minNumberOfRepayments, lp.max_number_of_repayments as maxNumberOfRepayments, "
@@ -129,9 +129,10 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
             final String currencyNameCode = rs.getString("currencyNameCode");
             final String currencyDisplaySymbol = rs.getString("currencyDisplaySymbol");
             final Integer currencyDigits = JdbcSupport.getInteger(rs, "currencyDigits");
+            final Integer inMulitplesOf = JdbcSupport.getInteger(rs, "inMulitplesOf");
 
-            final CurrencyData currency = new CurrencyData(currencyCode, currencyName, currencyDigits, currencyDisplaySymbol,
-                    currencyNameCode);
+            final CurrencyData currency = new CurrencyData(currencyCode, currencyName, currencyDigits, inMulitplesOf,
+                    currencyDisplaySymbol, currencyNameCode);
 
             final BigDecimal principal = rs.getBigDecimal("principal");
             final BigDecimal minPrincipal = rs.getBigDecimal("minPrincipal");
@@ -170,7 +171,7 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
             final int interestCalculationPeriodTypeId = JdbcSupport.getInteger(rs, "interestCalculationInPeriodMethod");
             final EnumOptionData interestCalculationPeriodType = LoanEnumerations
                     .interestCalculationPeriodType(interestCalculationPeriodTypeId);
-            
+
             final boolean includeInBorrowerCycle = rs.getBoolean("includeInBorrowerCycle");
             final LocalDate startDate = JdbcSupport.getLocalDate(rs, "startDate");
             final LocalDate closeDate = JdbcSupport.getLocalDate(rs, "closeDate");
@@ -181,13 +182,14 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
                 status = "loanProduct.active";
             }
             final String externalId = rs.getString("externalId");
-            
+
             return new LoanProductData(id, name, description, currency, principal, minPrincipal, maxPrincipal, tolerance,
                     numberOfRepayments, minNumberOfRepayments, maxNumberOfRepayments, repaymentEvery, interestRatePerPeriod,
                     minInterestRatePerPeriod, maxInterestRatePerPeriod, annualInterestRate, repaymentFrequencyType,
                     interestRateFrequencyType, amortizationType, interestType, interestCalculationPeriodType, fundId, fundName,
                     transactionStrategyId, transactionStrategyName, graceOnPrincipalPayment, graceOnInterestPayment,
-                    graceOnInterestCharged, this.charges, accountingRuleType, includeInBorrowerCycle, startDate, closeDate, status, externalId);
+                    graceOnInterestCharged, this.charges, accountingRuleType, includeInBorrowerCycle, startDate, closeDate, status,
+                    externalId);
         }
 
     }
@@ -202,11 +204,11 @@ public class LoanProductReadPlatformServiceImpl implements LoanProductReadPlatfo
             return "lp.id as id, lp.name as name FROM m_product_loan lp left join m_product_mix pm on pm.product_id=lp.id where lp.id not IN("
                     + "select lp.id from m_product_loan lp inner join m_product_mix pm on pm.product_id=lp.id)";
         }
-        
+
         public String restrictedProductsSchema() {
             return "pm.restricted_product_id as id, rp.name as name from m_product_mix pm join m_product_loan rp on rp.id = pm.restricted_product_id ";
         }
-        
+
         public String derivedRestrictedProductsSchema() {
             return "pm.product_id as id, lp.name as name from m_product_mix pm join m_product_loan lp on lp.id=pm.product_id";
         }

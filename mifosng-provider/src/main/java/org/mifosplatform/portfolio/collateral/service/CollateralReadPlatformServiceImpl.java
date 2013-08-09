@@ -45,7 +45,7 @@ public class CollateralReadPlatformServiceImpl implements CollateralReadPlatform
 
         private StringBuilder sqlBuilder = new StringBuilder(
                 "lc.id as id, lc.description as description, lc.value as value, cv.id as typeId, cv.code_value as typeName, oc.code as currencyCode, ")
-                .append(" oc.name as currencyName,oc.decimal_places as currencyDecimalPlaces, oc.display_symbol as currencyDisplaySymbol, oc.internationalized_name_code as currencyNameCode")
+                .append(" oc.name as currencyName,oc.decimal_places as currencyDecimalPlaces, oc.currency_multiplesof as inMulitplesOf, oc.display_symbol as currencyDisplaySymbol, oc.internationalized_name_code as currencyNameCode")
                 .append(" FROM m_loan_collateral lc") //
                 .append(" JOIN m_code_value cv on lc.type_cv_id = cv.id")//
                 .append(" JOIN m_loan loan on lc.loan_id = loan.id")//
@@ -71,9 +71,10 @@ public class CollateralReadPlatformServiceImpl implements CollateralReadPlatform
             final String currencyNameCode = rs.getString("currencyNameCode");
             final String currencyDisplaySymbol = rs.getString("currencyDisplaySymbol");
             final Integer currencyDecimalPlaces = JdbcSupport.getInteger(rs, "currencyDecimalPlaces");
+            final Integer inMulitplesOf = JdbcSupport.getInteger(rs, "inMulitplesOf");
 
-            final CurrencyData currencyData = new CurrencyData(currencyCode, currencyName, currencyDecimalPlaces, currencyDisplaySymbol,
-                    currencyNameCode);
+            final CurrencyData currencyData = new CurrencyData(currencyCode, currencyName, currencyDecimalPlaces, inMulitplesOf,
+                    currencyDisplaySymbol, currencyNameCode);
 
             return CollateralData.instance(id, type, value, description, currencyData);
         }

@@ -12,6 +12,7 @@ import static org.mifosplatform.portfolio.savings.SavingsApiConstants.annualFeeO
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.currencyCodeParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.descriptionParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.digitsAfterDecimalParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.inMulitplesOfParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.interestCalculationDaysInYearTypeParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.interestCalculationTypeParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.interestCompoundingPeriodTypeParamName;
@@ -86,6 +87,9 @@ public class SavingsProductDataValidator {
 
         final Integer digitsAfterDecimal = fromApiJsonHelper.extractIntegerSansLocaleNamed(digitsAfterDecimalParamName, element);
         baseDataValidator.reset().parameter(digitsAfterDecimalParamName).value(digitsAfterDecimal).notNull().inMinMaxRange(0, 6);
+
+        final Integer inMulitplesOf = fromApiJsonHelper.extractIntegerSansLocaleNamed(inMulitplesOfParamName, element);
+        baseDataValidator.reset().parameter(inMulitplesOfParamName).value(inMulitplesOf).ignoreIfNull().integerZeroOrGreater();
 
         final BigDecimal nominalAnnualInterestRate = fromApiJsonHelper.extractBigDecimalWithLocaleNamed(nominalAnnualInterestRateParamName,
                 element);
@@ -250,6 +254,11 @@ public class SavingsProductDataValidator {
         if (this.fromApiJsonHelper.parameterExists(digitsAfterDecimalParamName, element)) {
             final Integer digitsAfterDecimal = fromApiJsonHelper.extractIntegerSansLocaleNamed(digitsAfterDecimalParamName, element);
             baseDataValidator.reset().parameter(digitsAfterDecimalParamName).value(digitsAfterDecimal).notNull().inMinMaxRange(0, 6);
+        }
+
+        if (this.fromApiJsonHelper.parameterExists(inMulitplesOfParamName, element)) {
+            final Integer inMulitplesOf = fromApiJsonHelper.extractIntegerSansLocaleNamed(inMulitplesOfParamName, element);
+            baseDataValidator.reset().parameter(inMulitplesOfParamName).value(inMulitplesOf).ignoreIfNull().integerZeroOrGreater();
         }
 
         if (this.fromApiJsonHelper.parameterExists(nominalAnnualInterestRateParamName, element)) {

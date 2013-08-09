@@ -99,8 +99,9 @@ public class LoanProduct extends AbstractPersistable<Long> {
         final String description = command.stringValueOfParameterNamed("description");
         final String currencyCode = command.stringValueOfParameterNamed("currencyCode");
         final Integer digitsAfterDecimal = command.integerValueOfParameterNamed("digitsAfterDecimal");
-
-        final MonetaryCurrency currency = new MonetaryCurrency(currencyCode, digitsAfterDecimal);
+        final Integer inMulitplesOf = command.integerValueOfParameterNamed("inMulitplesOf");
+        
+        final MonetaryCurrency currency = new MonetaryCurrency(currencyCode, digitsAfterDecimal,inMulitplesOf);
         final BigDecimal principal = command.bigDecimalValueOfParameterNamed("principal");
         final BigDecimal minPrincipal = command.bigDecimalValueOfParameterNamed("minPrincipal");
         final BigDecimal maxPrincipal = command.bigDecimalValueOfParameterNamed("maxPrincipal");
