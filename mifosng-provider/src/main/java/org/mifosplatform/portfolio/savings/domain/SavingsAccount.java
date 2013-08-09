@@ -342,6 +342,10 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         return SavingsAccountStatusType.fromInt(this.status).isSubmittedAndPendingApproval();
     }
 
+    public boolean isApproved() {
+        return SavingsAccountStatusType.fromInt(this.status).isApproved();
+    }
+
     public void postInterest(final MathContext mc, final LocalDate interestPostingUpToDate, final List<Long> existingTransactionIds,
             final List<Long> existingReversedTransactionIds) {
 
@@ -1676,5 +1680,9 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         }
 
         return lockedInUntilLocalDate;
+    }
+
+    public Group group() {
+        return this.group;
     }
 }

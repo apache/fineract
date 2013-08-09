@@ -380,4 +380,8 @@ public final class Group extends AbstractPersistable<Long> {
     public Office getOffice() {
         return this.office;
     }
+
+    public boolean isCenter() {
+        return this.groupLevel.isCenter();
+    }
 }

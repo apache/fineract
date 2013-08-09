@@ -2564,4 +2564,8 @@ public class Loan extends AbstractPersistable<Long> {
 
     }
 
+    public void updateGroup(Group group) {
+        this.group = group;
+    }
+
 }
