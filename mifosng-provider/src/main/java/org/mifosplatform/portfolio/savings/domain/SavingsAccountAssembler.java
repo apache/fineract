@@ -37,9 +37,12 @@ import org.mifosplatform.organisation.staff.domain.StaffRepositoryWrapper;
 import org.mifosplatform.portfolio.accountdetails.domain.AccountType;
 import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.client.domain.ClientRepositoryWrapper;
+import org.mifosplatform.portfolio.client.exception.ClientNotActiveException;
 import org.mifosplatform.portfolio.group.domain.Group;
 import org.mifosplatform.portfolio.group.domain.GroupRepositoryWrapper;
 import org.mifosplatform.portfolio.group.exception.ClientNotInGroupException;
+import org.mifosplatform.portfolio.group.exception.CenterNotActiveException;
+import org.mifosplatform.portfolio.group.exception.GroupNotActiveException;
 import org.mifosplatform.portfolio.savings.SavingsCompoundingInterestPeriodType;
 import org.mifosplatform.portfolio.savings.SavingsInterestCalculationDaysInYearType;
 import org.mifosplatform.portfolio.savings.SavingsInterestCalculationType;
@@ -102,6 +105,7 @@ public class SavingsAccountAssembler {
         if (clientId != null) {
             client = this.clientRepository.findOneWithNotFoundDetection(clientId);
             accountType = AccountType.INDIVIDUAL;
+            if (client.isNotActive()) { throw new ClientNotActiveException(clientId); }
         }
 
         final Long groupId = fromApiJsonHelper.extractLongNamed(groupIdParamName, element);
@@ -113,6 +117,10 @@ public class SavingsAccountAssembler {
         if (group != null && client != null) {
             if (!group.hasClientAsMember(client)) { throw new ClientNotInGroupException(clientId, groupId); }
             accountType = AccountType.JLG;
+            if (group.isNotActive()) {
+                if (group.isCenter()) { throw new CenterNotActiveException(groupId); }
+                throw new GroupNotActiveException(groupId);
+            }
         }
 
         final Long fieldOfficerId = fromApiJsonHelper.extractLongNamed(fieldOfficerIdParamName, element);

@@ -32,8 +32,11 @@ import org.mifosplatform.portfolio.client.domain.AccountNumberGenerator;
 import org.mifosplatform.portfolio.client.domain.AccountNumberGeneratorFactory;
 import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.client.domain.ClientRepositoryWrapper;
+import org.mifosplatform.portfolio.client.exception.ClientNotActiveException;
 import org.mifosplatform.portfolio.group.domain.Group;
 import org.mifosplatform.portfolio.group.domain.GroupRepository;
+import org.mifosplatform.portfolio.group.exception.CenterNotActiveException;
+import org.mifosplatform.portfolio.group.exception.GroupNotActiveException;
 import org.mifosplatform.portfolio.group.exception.GroupNotFoundException;
 import org.mifosplatform.portfolio.note.domain.Note;
 import org.mifosplatform.portfolio.note.domain.NoteRepository;
@@ -170,7 +173,7 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
             final Map<String, Object> changes = new LinkedHashMap<String, Object>(20);
 
             final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsId);
-
+            checkClientOrGroupActive(account);
             account.modifyApplication(command, changes);
             account.validateNewApplicationState(DateUtils.getLocalDateOfTenant());
 
@@ -180,6 +183,7 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
                     final Long clientId = command.longValueOfParameterNamed(SavingsApiConstants.clientIdParamName);
                     if (clientId != null) {
                         final Client client = this.clientRepository.findOneWithNotFoundDetection(clientId);
+                        if (client.isNotActive()) { throw new ClientNotActiveException(clientId); }
                         account.update(client);
                     } else {
                         final Client client = null;
@@ -192,6 +196,10 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
                     if (groupId != null) {
                         final Group group = this.groupRepository.findOne(groupId);
                         if (group == null) { throw new GroupNotFoundException(groupId); }
+                        if (group.isNotActive()) {
+                            if (group.isCenter()) { throw new CenterNotActiveException(groupId); }
+                            throw new GroupNotActiveException(groupId);
+                        }
                         account.update(group);
                     } else {
                         final Group group = null;
@@ -241,6 +249,7 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
     public CommandProcessingResult deleteApplication(final Long savingsId) {
 
         final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsId);
+        checkClientOrGroupActive(account);
 
         if (account.isNotSubmittedAndPendingApproval()) {
             final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
@@ -276,6 +285,7 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
         this.savingsAccountApplicationTransitionApiJsonValidator.validateApproval(command.json());
 
         final SavingsAccount savingsAccount = this.savingAccountAssembler.assembleFrom(savingsId);
+        checkClientOrGroupActive(savingsAccount);
 
         final Map<String, Object> changes = savingsAccount.approveApplication(currentUser, command, DateUtils.getLocalDateOfTenant());
         if (!changes.isEmpty()) {
@@ -309,6 +319,7 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
         this.savingsAccountApplicationTransitionApiJsonValidator.validateForUndo(command.json());
 
         final SavingsAccount savingsAccount = this.savingAccountAssembler.assembleFrom(savingsId);
+        checkClientOrGroupActive(savingsAccount);
 
         final Map<String, Object> changes = savingsAccount.undoApplicationApproval();
         if (!changes.isEmpty()) {
@@ -342,6 +353,7 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
         this.savingsAccountApplicationTransitionApiJsonValidator.validateRejection(command.json());
 
         final SavingsAccount savingsAccount = this.savingAccountAssembler.assembleFrom(savingsId);
+        checkClientOrGroupActive(savingsAccount);
 
         final Map<String, Object> changes = savingsAccount.rejectApplication(currentUser, command, DateUtils.getLocalDateOfTenant());
         if (!changes.isEmpty()) {
@@ -374,6 +386,7 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
         this.savingsAccountApplicationTransitionApiJsonValidator.validateApplicantWithdrawal(command.json());
 
         final SavingsAccount savingsAccount = this.savingAccountAssembler.assembleFrom(savingsId);
+        checkClientOrGroupActive(savingsAccount);
 
         final Map<String, Object> changes = savingsAccount.applicantWithdrawsFromApplication(currentUser, command,
                 DateUtils.getLocalDateOfTenant());
@@ -408,5 +421,19 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
         final Map<String, Object> accountingBridgeData = savingsAccount.deriveAccountingBridgeData(applicationCurrency.toData(),
                 existingTransactionIds, existingReversedTransactionIds);
         journalEntryWritePlatformService.createJournalEntriesForSavings(accountingBridgeData);
+    }
+
+    private void checkClientOrGroupActive(final SavingsAccount account) {
+        final Client client = account.getClient();
+        if (client != null) {
+            if (client.isNotActive()) { throw new ClientNotActiveException(client.getId()); }
+        }
+        final Group group = account.group();
+        if (group != null) {
+            if (group.isNotActive()) {
+                if (group.isCenter()) { throw new CenterNotActiveException(group.getId()); }
+                throw new GroupNotActiveException(group.getId());
+            }
+        }
     }
 }

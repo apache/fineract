@@ -35,9 +35,13 @@ import org.mifosplatform.portfolio.client.domain.AccountNumberGenerator;
 import org.mifosplatform.portfolio.client.domain.AccountNumberGeneratorFactory;
 import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.client.domain.ClientRepositoryWrapper;
+import org.mifosplatform.portfolio.client.exception.ClientNotActiveException;
 import org.mifosplatform.portfolio.collateral.domain.LoanCollateral;
 import org.mifosplatform.portfolio.collateral.service.CollateralAssembler;
 import org.mifosplatform.portfolio.fund.domain.Fund;
+import org.mifosplatform.portfolio.group.domain.Group;
+import org.mifosplatform.portfolio.group.domain.GroupRepositoryWrapper;
+import org.mifosplatform.portfolio.group.exception.GroupNotActiveException;
 import org.mifosplatform.portfolio.loanaccount.domain.DefaultLoanLifecycleStateMachine;
 import org.mifosplatform.portfolio.loanaccount.domain.Loan;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanCharge;
@@ -94,6 +98,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
     private final AprCalculator aprCalculator;
     private final AccountNumberGeneratorFactory accountIdentifierGeneratorFactory;
     private final LoanSummaryWrapper loanSummaryWrapper;
+    private final GroupRepositoryWrapper groupRepository;
     private final LoanRepaymentScheduleTransactionProcessorFactory loanRepaymentScheduleTransactionProcessorFactory;
     private final CalendarRepository calendarRepository;
     private final CalendarInstanceRepository calendarInstanceRepository;
@@ -107,7 +112,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             final CollateralAssembler loanCollateralAssembler, final LoanRepository loanRepository, final NoteRepository noteRepository,
             final LoanScheduleCalculationPlatformService calculationPlatformService, final ClientRepositoryWrapper clientRepository,
             final LoanProductRepository loanProductRepository, final AccountNumberGeneratorFactory accountIdentifierGeneratorFactory,
-            final LoanSummaryWrapper loanSummaryWrapper,
+            final LoanSummaryWrapper loanSummaryWrapper, final GroupRepositoryWrapper groupRepository,
             final LoanRepaymentScheduleTransactionProcessorFactory loanRepaymentScheduleTransactionProcessorFactory,
             final CalendarRepository calendarRepository, final CalendarInstanceRepository calendarInstanceRepository) {
         this.context = context;
@@ -126,6 +131,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         this.loanProductRepository = loanProductRepository;
         this.accountIdentifierGeneratorFactory = accountIdentifierGeneratorFactory;
         this.loanSummaryWrapper = loanSummaryWrapper;
+        this.groupRepository = groupRepository;
         this.loanRepaymentScheduleTransactionProcessorFactory = loanRepaymentScheduleTransactionProcessorFactory;
         this.calendarRepository = calendarRepository;
         this.calendarInstanceRepository = calendarInstanceRepository;
@@ -218,6 +224,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             this.fromApiJsonDeserializer.validateForModify(command.json());
 
             final Loan existingLoanApplication = retrieveLoanBy(loanId);
+            checkClientOrGroupActive(existingLoanApplication);
             
             if (!existingLoanApplication.isSubmittedAndPendingApproval()) { throw new LoanApplicationNotInSubmittedAndPendingApprovalStateCannotBeModified(
                     loanId); }
@@ -237,8 +244,18 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             if (changes.containsKey(clientIdParamName)) {
                 final Long clientId = command.longValueOfParameterNamed(clientIdParamName);
                 final Client client = this.clientRepository.findOneWithNotFoundDetection(clientId);
+                if (client.isNotActive()) { throw new ClientNotActiveException(clientId); }
 
                 existingLoanApplication.updateClient(client);
+            }
+
+            final String groupIdParamName = "groupId";
+            if (changes.containsKey(groupIdParamName)) {
+                final Long groupId = command.longValueOfParameterNamed(groupIdParamName);
+                final Group group = this.groupRepository.findOneWithNotFoundDetection(groupId);
+                if (group.isNotActive()) { throw new GroupNotActiveException(groupId); }
+
+                existingLoanApplication.updateGroup(group);
             }
 
             final String productIdParamName = "productId";
@@ -397,6 +414,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         context.authenticatedUser();
 
         final Loan loan = retrieveLoanBy(loanId);
+        checkClientOrGroupActive(loan);
 
         if (loan.isNotSubmittedAndPendingApproval()) { throw new LoanApplicationNotInSubmittedAndPendingApprovalStateCannotBeDeleted(loanId); }
 
@@ -423,6 +441,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         this.loanApplicationTransitionApiJsonValidator.validateApproval(command.json());
 
         final Loan loan = retrieveLoanBy(loanId);
+        checkClientOrGroupActive(loan);
 
         final Map<String, Object> changes = loan.loanApplicationApproval(currentUser, command, defaultLoanLifecycleStateMachine());
         if (!changes.isEmpty()) {
@@ -456,6 +475,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         this.fromApiJsonDeserializer.validateForUndo(command.json());
 
         final Loan loan = retrieveLoanBy(loanId);
+        checkClientOrGroupActive(loan);
 
         final Map<String, Object> changes = loan.undoApproval(defaultLoanLifecycleStateMachine());
         if (!changes.isEmpty()) {
@@ -488,6 +508,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         this.loanApplicationTransitionApiJsonValidator.validateRejection(command.json());
 
         final Loan loan = retrieveLoanBy(loanId);
+        checkClientOrGroupActive(loan);
 
         final Map<String, Object> changes = loan.loanApplicationRejection(currentUser, command, defaultLoanLifecycleStateMachine());
         if (!changes.isEmpty()) {
@@ -520,6 +541,7 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
         this.loanApplicationTransitionApiJsonValidator.validateApplicantWithdrawal(command.json());
 
         final Loan loan = retrieveLoanBy(loanId);
+        checkClientOrGroupActive(loan);
 
         final Map<String, Object> changes = loan.loanApplicationWithdrawnByApplicant(currentUser, command,
                 defaultLoanLifecycleStateMachine());
@@ -567,6 +589,17 @@ public class LoanApplicationWritePlatformServiceJpaRepositoryImpl implements Loa
             defaultUserMessage = "submittedOnDate cannot be after the loan product closeDate.";
             throw new LoanApplicationDateException("submitted.on.date.cannot.be.after.the.loan.product.close.date", defaultUserMessage,
                     submittedOnDate.toString(), closeDate.toString());
+        }
+    }
+
+    private void checkClientOrGroupActive(final Loan loan) {
+        final Client client = loan.client();
+        if (client != null) {
+            if (client.isNotActive()) { throw new ClientNotActiveException(client.getId()); }
+        }
+        final Group group = loan.group();
+        if (group != null) {
+            if (group.isNotActive()) { throw new GroupNotActiveException(group.getId()); }
         }
     }
 

@@ -49,10 +49,14 @@ import org.mifosplatform.portfolio.charge.exception.LoanChargeCannotBeUpdatedExc
 import org.mifosplatform.portfolio.charge.exception.LoanChargeCannotBeWaivedException;
 import org.mifosplatform.portfolio.charge.exception.LoanChargeCannotBeWaivedException.LOAN_CHARGE_CANNOT_BE_WAIVED_REASON;
 import org.mifosplatform.portfolio.charge.exception.LoanChargeNotFoundException;
+import org.mifosplatform.portfolio.client.domain.Client;
+import org.mifosplatform.portfolio.client.exception.ClientNotActiveException;
 import org.mifosplatform.portfolio.collectionsheet.command.CollectionSheetBulkDisbursalCommand;
 import org.mifosplatform.portfolio.collectionsheet.command.CollectionSheetBulkRepaymentCommand;
 import org.mifosplatform.portfolio.collectionsheet.command.SingleDisbursalCommand;
 import org.mifosplatform.portfolio.collectionsheet.command.SingleRepaymentCommand;
+import org.mifosplatform.portfolio.group.domain.Group;
+import org.mifosplatform.portfolio.group.exception.GroupNotActiveException;
 import org.mifosplatform.portfolio.loanaccount.command.LoanUpdateCommand;
 import org.mifosplatform.portfolio.loanaccount.domain.ChangedTransactionDetail;
 import org.mifosplatform.portfolio.loanaccount.domain.DefaultLoanLifecycleStateMachine;
@@ -162,6 +166,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         this.loanEventApiJsonValidator.validateDisbursement(command.json());
 
         final Loan loan = retrieveLoanBy(loanId);
+        checkClientOrGroupActive(loan);
 
         //check for product mix validations
         checkForProductMixRestrictions(loan);
@@ -265,6 +270,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             SingleDisbursalCommand singleLoanDisbursalCommand = disbursalCommand[i];
 
             final Loan loan = retrieveLoanBy(singleLoanDisbursalCommand.getLoanId());
+            checkClientOrGroupActive(loan);
             final MonetaryCurrency currency = loan.getCurrency();
             final ApplicationCurrency applicationCurrency = this.applicationCurrencyRepository.findOneWithNotFoundDetection(currency);
 
@@ -314,6 +320,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         context.authenticatedUser();
 
         final Loan loan = retrieveLoanBy(loanId);
+        checkClientOrGroupActive(loan);
         removeLoanCycle(loan);
         final List<Long> existingTransactionIds = new ArrayList<Long>();
         final List<Long> existingReversedTransactionIds = new ArrayList<Long>();
@@ -383,6 +390,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     private CommandProcessingResultBuilder saveLoanRepayment(final Long loanId, final PaymentDetail paymentDetail,
             final BigDecimal transactionAmount, final LocalDate transactionDate, final String noteText, final String txnExternalId) {
         final Loan loan = retrieveLoanBy(loanId);
+        checkClientOrGroupActive(loan);
 
         // TODO: Is it required to validate transaction date with meeting dates
         // if repayments is synced with meeting?
@@ -473,6 +481,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         this.loanEventApiJsonValidator.validateTransaction(command.json());
 
         final Loan loan = retrieveLoanBy(loanId);
+        checkClientOrGroupActive(loan);
 
         final LoanTransaction transactionToAdjust = this.loanTransactionRepository.findOne(transactionId);
         if (transactionToAdjust == null) { throw new LoanTransactionNotFoundException(transactionId); }
@@ -574,6 +583,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final BigDecimal transactionAmount = command.bigDecimalValueOfParameterNamed("transactionAmount");
 
         final Loan loan = retrieveLoanBy(loanId);
+        checkClientOrGroupActive(loan);
 
         final List<Long> existingTransactionIds = new ArrayList<Long>();
         final List<Long> existingReversedTransactionIds = new ArrayList<Long>();
@@ -634,6 +644,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         changes.put("dateFormat", command.dateFormat());
 
         final Loan loan = retrieveLoanBy(loanId);
+        checkClientOrGroupActive(loan);
         removeLoanCycle(loan);
 
         final List<Long> existingTransactionIds = new ArrayList<Long>();
@@ -673,6 +684,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         this.loanEventApiJsonValidator.validateTransactionWithNoAmount(command.json());
 
         final Loan loan = retrieveLoanBy(loanId);
+        checkClientOrGroupActive(loan);
 
         final Map<String, Object> changes = new LinkedHashMap<String, Object>();
         changes.put("transactionDate", command.stringValueOfParameterNamed("transactionDate"));
@@ -735,6 +747,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         this.loanEventApiJsonValidator.validateTransactionWithNoAmount(command.json());
 
         final Loan loan = retrieveLoanBy(loanId);
+        checkClientOrGroupActive(loan);
         removeLoanCycle(loan);
 
         final Map<String, Object> changes = new LinkedHashMap<String, Object>();
@@ -773,6 +786,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         this.loanEventApiJsonValidator.validateAddLoanCharge(command.json());
 
         final Loan loan = retrieveLoanBy(loanId);
+        checkClientOrGroupActive(loan);
 
         final Long chargeDefinitionId = command.longValueOfParameterNamed("chargeId");
         final Charge chargeDefinition = this.chargeRepository.findOneWithNotFoundDetection(chargeDefinitionId);
@@ -833,6 +847,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         this.loanEventApiJsonValidator.validateUpdateOfLoanCharge(command.json());
 
         final Loan loan = retrieveLoanBy(loanId);
+        checkClientOrGroupActive(loan);
         final LoanCharge loanCharge = retrieveLoanChargeBy(loanId, loanChargeId);
 
         // Charges may be edited only when the loan associated with them are
@@ -862,6 +877,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         this.context.authenticatedUser();
 
         final Loan loan = retrieveLoanBy(loanId);
+        checkClientOrGroupActive(loan);
         final LoanCharge loanCharge = retrieveLoanChargeBy(loanId, loanChargeId);
 
         // Charges may be waived only when the loan associated with them are
@@ -906,6 +922,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         this.context.authenticatedUser();
 
         final Loan loan = retrieveLoanBy(loanId);
+        checkClientOrGroupActive(loan);
         final LoanCharge loanCharge = retrieveLoanChargeBy(loanId, loanChargeId);
 
         // Charges may be deleted only when the loan associated with them are
@@ -957,6 +974,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final LocalDate dateOfLoanOfficerAssignment = command.localDateValueOfParameterNamed("assignmentDate");
 
         final Loan loan = retrieveLoanBy(loanId);
+        checkClientOrGroupActive(loan);
 
         if (!loan.hasLoanOfficer(fromLoanOfficer)) { throw new LoanOfficerAssignmentException(loanId, fromLoanOfficerId); }
 
@@ -992,6 +1010,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         for (final String loanIdString : loanIds) {
             final Long loanId = Long.valueOf(loanIdString);
             final Loan loan = retrieveLoanBy(loanId);
+            checkClientOrGroupActive(loan);
 
             if (!loan.hasLoanOfficer(fromLoanOfficer)) { throw new LoanOfficerAssignmentException(loanId, fromLoanOfficerId); }
 
@@ -1019,6 +1038,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final LocalDate dateOfLoanOfficerunAssigned = command.localDateValueOfParameterNamed("unassignedDate");
 
         final Loan loan = retrieveLoanBy(loanId);
+        checkClientOrGroupActive(loan);
 
         if (loan.getLoanOfficer() == null) { throw new LoanOfficerUnassignmentException(loanId); }
 
@@ -1286,6 +1306,17 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                 if (activeLoansLoanProductIds.contains(restrictedProduct.getId())) { throw new LoanDisbursalException(productName,
                         restrictedProduct.getName()); }
             }
+        }
+    }
+
+    private void checkClientOrGroupActive(final Loan loan) {
+        final Client client = loan.client();
+        if (client != null) {
+            if (client.isNotActive()) { throw new ClientNotActiveException(client.getId()); }
+        }
+        final Group group = loan.group();
+        if (group != null) {
+            if (group.isNotActive()) { throw new GroupNotActiveException(group.getId()); }
         }
     }
 }
