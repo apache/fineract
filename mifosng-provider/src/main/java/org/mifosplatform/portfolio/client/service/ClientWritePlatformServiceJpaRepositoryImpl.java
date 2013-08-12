@@ -359,12 +359,21 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
                 } else if (loanStatus.isPendingApproval()) {
                     final String errorMessage = "Client cannot be closed because of non-closed loans.";
                     throw new InvalidClientStateTransitionException("close", "loan.non-closed", errorMessage);
+                } else if (loanStatus.isAwaitingDisbursal()) {
+                    final String errorMessage = "Client cannot be closed because of non-closed loans.";
+                    throw new InvalidClientStateTransitionException("close", "loan.non-closed", errorMessage);
                 }
             }
             List<SavingsAccount> clientSavingAccounts = this.savingsRepository.findSavingAccountByClientId(clientId);
 
             for (SavingsAccount saving : clientSavingAccounts) {
                 if (saving.isActive()) {
+                    final String errorMessage = "Client cannot be closed because of non-closed savings account.";
+                    throw new InvalidClientStateTransitionException("close", "non-closed.savings.account", errorMessage);
+                } else if (saving.isSubmittedAndPendingApproval()) {
+                    final String errorMessage = "Client cannot be closed because of non-closed savings account.";
+                    throw new InvalidClientStateTransitionException("close", "non-closed.savings.account", errorMessage);
+                } else if (saving.isApproved()) {
                     final String errorMessage = "Client cannot be closed because of non-closed savings account.";
                     throw new InvalidClientStateTransitionException("close", "non-closed.savings.account", errorMessage);
                 }

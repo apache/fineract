@@ -7,9 +7,9 @@ package org.mifosplatform.portfolio.group.exception;
 
 import org.mifosplatform.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 
-public class GroupLoanExistsException extends AbstractPlatformDomainRuleException {
+public class GroupAccountExistsException extends AbstractPlatformDomainRuleException {
 
-    public GroupLoanExistsException(final String action, String postFix, String defaultUserMessage, Object... defaultUserMessageArgs) {
+    public GroupAccountExistsException(final String action, String postFix, String defaultUserMessage, Object... defaultUserMessageArgs) {
         super("error.msg.group." + action + "." + postFix, defaultUserMessage, defaultUserMessageArgs);
     }
 }

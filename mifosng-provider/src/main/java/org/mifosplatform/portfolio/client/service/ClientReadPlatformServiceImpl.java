@@ -263,7 +263,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         public ClientMembersOfGroupMapper() {
             final StringBuilder sqlBuilder = new StringBuilder(200);
 
-            sqlBuilder.append("c.id as id, c.account_no as accountNo, c.external_id as externalId, ");
+            sqlBuilder.append("c.id as id, c.account_no as accountNo, c.external_id as externalId, c.status_enum as statusEnum, ");
             sqlBuilder.append("c.office_id as officeId, o.name as officeName, ");
             sqlBuilder.append("c.firstname as firstname, c.middlename as middlename, c.lastname as lastname, ");
             sqlBuilder.append("c.fullname as fullname, c.display_name as displayName, ");
@@ -286,7 +286,8 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
             final String accountNo = rs.getString("accountNo");
 
-            final EnumOptionData status = null;
+            final Integer statusEnum = JdbcSupport.getInteger(rs, "statusEnum");
+            final EnumOptionData status = ClientEnumerations.status(statusEnum);
 
             final Long officeId = JdbcSupport.getLong(rs, "officeId");
             final Long id = JdbcSupport.getLong(rs, "id");

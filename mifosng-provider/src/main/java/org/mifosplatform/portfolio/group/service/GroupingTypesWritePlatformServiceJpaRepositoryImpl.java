@@ -36,8 +36,8 @@ import org.mifosplatform.portfolio.group.domain.GroupLevel;
 import org.mifosplatform.portfolio.group.domain.GroupLevelRepository;
 import org.mifosplatform.portfolio.group.domain.GroupRepositoryWrapper;
 import org.mifosplatform.portfolio.group.domain.GroupTypes;
+import org.mifosplatform.portfolio.group.exception.GroupAccountExistsException;
 import org.mifosplatform.portfolio.group.exception.GroupHasNoStaffException;
-import org.mifosplatform.portfolio.group.exception.GroupLoanExistsException;
 import org.mifosplatform.portfolio.group.exception.GroupMustBePendingToBeDeletedException;
 import org.mifosplatform.portfolio.group.exception.InvalidGroupLevelException;
 import org.mifosplatform.portfolio.group.exception.InvalidGroupStateTransitionException;
@@ -46,6 +46,8 @@ import org.mifosplatform.portfolio.loanaccount.domain.Loan;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanRepository;
 import org.mifosplatform.portfolio.note.domain.Note;
 import org.mifosplatform.portfolio.note.domain.NoteRepository;
+import org.mifosplatform.portfolio.savings.domain.SavingsAccount;
+import org.mifosplatform.portfolio.savings.domain.SavingsAccountRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,13 +71,14 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
     private final GroupLevelRepository groupLevelRepository;
     private final GroupingTypesDataValidator fromApiJsonDeserializer;
     private final LoanRepository loanRepository;
+    private final SavingsAccountRepository savingsRepository;
 
     @Autowired
     public GroupingTypesWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
             final GroupRepositoryWrapper groupRepository, final ClientRepositoryWrapper clientRepository,
             final OfficeRepository officeRepository, final StaffRepositoryWrapper staffRepository, final NoteRepository noteRepository,
             final GroupLevelRepository groupLevelRepository, final GroupingTypesDataValidator fromApiJsonDeserializer,
-            final LoanRepository loanRepository) {
+            final LoanRepository loanRepository, final SavingsAccountRepository savingsRepository) {
         this.context = context;
         this.groupRepository = groupRepository;
         this.clientRepository = clientRepository;
@@ -85,6 +88,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
         this.groupLevelRepository = groupLevelRepository;
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
         this.loanRepository = loanRepository;
+        this.savingsRepository = savingsRepository;
     }
 
     private CommandProcessingResult createGroupingType(final JsonCommand command, final GroupTypes groupingType, final Long centerId) {
@@ -491,6 +495,7 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
 
         // check if any client has got group loans
         validateForJLGLoan(groupForUpdate.getId(), clientMembers);
+        validateForJLGSavings(groupForUpdate.getId(), clientMembers);
         final Map<String, Object> actualChanges = new HashMap<String, Object>();
 
         final List<String> changes = groupForUpdate.disassociateClients(clientMembers);
@@ -516,7 +521,20 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
             if (!CollectionUtils.isEmpty(loans)) {
                 final String defaultUserMessage = "Client with identifier " + client.getId()
                         + " cannot be disassociated it has group loans.";
-                throw new GroupLoanExistsException("disassociate", "client.has.group.loan", defaultUserMessage, client.getId(), groupId);
+                throw new GroupAccountExistsException("disassociate", "client.has.group.loan", defaultUserMessage, client.getId(), groupId);
+            }
+        }
+    }
+
+    @Transactional
+    private void validateForJLGSavings(final Long groupId, final Set<Client> clientMembers) {
+        for (final Client client : clientMembers) {
+            final Collection<SavingsAccount> savings = this.savingsRepository.findByClientIdAndGroupId(client.getId(), groupId);
+            if (!CollectionUtils.isEmpty(savings)) {
+                final String defaultUserMessage = "Client with identifier " + client.getId()
+                        + " cannot be disassociated it has group savings.";
+                throw new GroupAccountExistsException("disassociate", "client.has.group.saving", defaultUserMessage, client.getId(),
+                        groupId);
             }
         }
     }
