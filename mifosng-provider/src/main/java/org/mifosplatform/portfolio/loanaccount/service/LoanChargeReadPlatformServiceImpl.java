@@ -44,14 +44,19 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
     private static final class LoanChargeMapper implements RowMapper<LoanChargeData> {
 
         public String schema() {
-            return "lc.id as id, c.id as chargeId, c.name as name, " + "lc.amount as amountDue, "
-                    + "lc.amount_paid_derived as amountPaid, " + "lc.amount_waived_derived as amountWaived, "
-                    + "lc.amount_writtenoff_derived as amountWrittenOff, " + "lc.amount_outstanding_derived as amountOutstanding, "
+            return "lc.id as id, c.id as chargeId, c.name as name, "
+                    + "lc.amount as amountDue, "
+                    + "lc.amount_paid_derived as amountPaid, "
+                    + "lc.amount_waived_derived as amountWaived, "
+                    + "lc.amount_writtenoff_derived as amountWrittenOff, "
+                    + "lc.amount_outstanding_derived as amountOutstanding, "
                     + "lc.calculation_percentage as percentageOf, lc.calculation_on_amount as amountPercentageAppliedTo, "
-                    + "lc.charge_time_enum as chargeTime, " + "lc.is_penalty as penalty, "
-                    + "lc.due_for_collection_as_of_date as dueAsOfDate, " + "lc.charge_calculation_enum as chargeCalculation, "
+                    + "lc.charge_time_enum as chargeTime, "
+                    + "lc.is_penalty as penalty, "
+                    + "lc.due_for_collection_as_of_date as dueAsOfDate, "
+                    + "lc.charge_calculation_enum as chargeCalculation, "
                     + "c.currency_code as currencyCode, oc.name as currencyName, "
-                    + "oc.decimal_places as currencyDecimalPlaces, oc.display_symbol as currencyDisplaySymbol, "
+                    + "oc.decimal_places as currencyDecimalPlaces, oc.currency_multiplesof as inMulitplesOf, oc.display_symbol as currencyDisplaySymbol, "
                     + "oc.internationalized_name_code as currencyNameCode from m_charge c "
                     + "join m_organisation_currency oc on c.currency_code = oc.code " + "join m_loan_charge lc on lc.charge_id = c.id ";
         }
@@ -76,9 +81,10 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
             final String currencyNameCode = rs.getString("currencyNameCode");
             final String currencyDisplaySymbol = rs.getString("currencyDisplaySymbol");
             final Integer currencyDecimalPlaces = JdbcSupport.getInteger(rs, "currencyDecimalPlaces");
+            final Integer inMulitplesOf = JdbcSupport.getInteger(rs, "inMulitplesOf");
 
-            final CurrencyData currency = new CurrencyData(currencyCode, currencyName, currencyDecimalPlaces, currencyDisplaySymbol,
-                    currencyNameCode);
+            final CurrencyData currency = new CurrencyData(currencyCode, currencyName, currencyDecimalPlaces, inMulitplesOf,
+                    currencyDisplaySymbol, currencyNameCode);
 
             final int chargeTime = rs.getInt("chargeTime");
             final EnumOptionData chargeTimeType = ChargeEnumerations.chargeTimeType(chargeTime);

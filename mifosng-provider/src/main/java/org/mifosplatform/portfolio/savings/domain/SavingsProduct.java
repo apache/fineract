@@ -12,6 +12,7 @@ import static org.mifosplatform.portfolio.savings.SavingsApiConstants.annualFeeO
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.currencyCodeParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.descriptionParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.digitsAfterDecimalParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.inMulitplesOfParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.interestCalculationDaysInYearTypeParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.interestCalculationTypeParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.interestCompoundingPeriodTypeParamName;
@@ -279,7 +280,7 @@ public class SavingsProduct extends AbstractPersistable<Long> {
             actualChanges.put(digitsAfterDecimalParamName, newValue);
             actualChanges.put(localeParamName, localeAsInput);
             digitsAfterDecimal = newValue;
-            this.currency = new MonetaryCurrency(this.currency.getCode(), digitsAfterDecimal);
+            this.currency = new MonetaryCurrency(this.currency.getCode(), digitsAfterDecimal,this.currency.getCurrencyInMulitplesOf());
         }
 
         String currencyCode = this.currency.getCode();
@@ -287,7 +288,16 @@ public class SavingsProduct extends AbstractPersistable<Long> {
             final String newValue = command.stringValueOfParameterNamed(currencyCodeParamName);
             actualChanges.put(currencyCodeParamName, newValue);
             currencyCode = newValue;
-            this.currency = new MonetaryCurrency(currencyCode, this.currency.getDigitsAfterDecimal());
+            this.currency = new MonetaryCurrency(currencyCode, this.currency.getDigitsAfterDecimal(),this.currency.getCurrencyInMulitplesOf());
+        }
+
+        Integer inMulitplesOf = this.currency.getCurrencyInMulitplesOf();
+        if (command.isChangeInIntegerParameterNamed(inMulitplesOfParamName, inMulitplesOf)) {
+            final Integer newValue = command.integerValueOfParameterNamed(inMulitplesOfParamName);
+            actualChanges.put(inMulitplesOfParamName, newValue);
+            actualChanges.put(localeParamName, localeAsInput);
+            inMulitplesOf = newValue;
+            this.currency = new MonetaryCurrency(this.currency.getCode(), this.currency.getDigitsAfterDecimal(),inMulitplesOf);
         }
 
         if (command.isChangeInBigDecimalParameterNamed(nominalAnnualInterestRateParamName, this.nominalAnnualInterestRate)) {

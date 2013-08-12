@@ -107,7 +107,8 @@ public class AccountDetailsReadPlatformServiceJpaRepositoryImpl implements Accou
             accountsSummary.append("sa.id as id, sa.account_no as accountNo, sa.external_id as externalId, sa.status_enum as statusEnum, ");
             accountsSummary.append("sa.account_type_enum as accountType, ");
             accountsSummary.append("sa.account_balance_derived as accountBalance, ");
-            accountsSummary.append("sa.currency_code as currencyCode, sa.currency_digits as currencyDigits, ");
+            accountsSummary
+                    .append("sa.currency_code as currencyCode, sa.currency_digits as currencyDigits, sa.currency_multiplesof as inMulitplesOf, ");
             accountsSummary.append("curr.name as currencyName, curr.internationalized_name_code as currencyNameCode, ");
             accountsSummary.append("curr.display_symbol as currencyDisplaySymbol, ");
             accountsSummary.append("sa.product_id as productId, p.name as productName ");
@@ -141,8 +142,9 @@ public class AccountDetailsReadPlatformServiceJpaRepositoryImpl implements Accou
             final String currencyNameCode = rs.getString("currencyNameCode");
             final String currencyDisplaySymbol = rs.getString("currencyDisplaySymbol");
             final Integer currencyDigits = JdbcSupport.getInteger(rs, "currencyDigits");
-            final CurrencyData currency = new CurrencyData(currencyCode, currencyName, currencyDigits, currencyDisplaySymbol,
-                    currencyNameCode);
+            final Integer inMulitplesOf = JdbcSupport.getInteger(rs, "inMulitplesOf");
+            final CurrencyData currency = new CurrencyData(currencyCode, currencyName, currencyDigits, inMulitplesOf,
+                    currencyDisplaySymbol, currencyNameCode);
 
             return new SavingsAccountSummaryData(id, accountNo, externalId, productId, productName, status, currency, accountBalance,
                     accountTypeData);

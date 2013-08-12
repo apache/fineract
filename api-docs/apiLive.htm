@@ -5882,6 +5882,7 @@ GET https://DomainName/api/v1/loans/{loanId}/transactions/template"
     "total": {
         "currencyCode": "XOF",
         "digitsAfterDecimal": 0,
+        "inMulitplesOf": 0,
         "amount": 471,
         "defaultName": "CFA Franc BCEAO",
         "nameCode": "currency.XOF",
@@ -7428,6 +7429,13 @@ Request Body:
 							<td class=fielddesc>Override the currency default value for digitsAfterDecimal.</td>
 						</tr>
 						<tr class=alt>
+							<td>inMulitplesOf</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Override the default value for rounding currency to multiples of value provided.</td>
+						</tr>
+
+						<tr class=alt>
 							<td>principal</td>
 						</tr>
 						<tr>
@@ -8107,7 +8115,7 @@ GET https://DomainName/api/v1/loanproducts/{productId}
 							<td><div class="mifosXHeading2">Mandatory Fields</div></td>
 						</tr>
 						<tr class=alt>
-							<td>name, currencyCode, digitsAfterDecimal, principal,
+							<td>name, currencyCode, digitsAfterDecimal, inMulitplesOf, principal,
 								numberOfRepayments, repaymentEvery, repaymentFrequencyType, 
 								interestRatePerPeriod, interestRateFrequencyType, amortizationType, interestType,
 								interestCalculationPeriodType, transactionProcessingStrategyId,
@@ -8152,6 +8160,7 @@ Request Body:
     "currencyCode": "USD",
     "locale": "en_GB",
     "digitsAfterDecimal": "2",
+    "inMulitplesOf": 0,
     "principal": "100,000.00",
     "numberOfRepayments": "12",
     "repaymentEvery": "1",
@@ -8181,6 +8190,7 @@ Request Body:
     "currencyCode": "USD",
     "locale": "en_GB",
     "digitsAfterDecimal": "2",
+    "inMulitplesOf": 0,
     "principal": "100,000.00",
     "numberOfRepayments": "12",
     "repaymentEvery": "1",
@@ -8237,6 +8247,7 @@ Request Body:
     "currencyCode": "USD",
     "locale": "en_GB",
     "digitsAfterDecimal": "2",
+    "inMulitplesOf": 0,
     "principal": "100,000.00",
     "numberOfRepayments": "12",
     "repaymentEvery": "1",
@@ -11109,6 +11120,9 @@ Content-Type: application/json
 	            <tr class=alt><td>digitsAfterDecimal</td></tr>
 	            <tr><td class=fielddesc>Override the currency default value for digitsAfterDecimal.</td></tr>
 
+	            <tr class=alt><td>inMulitplesOf</td></tr>
+	            <tr><td class=fielddesc>Override the default value for rounding currency to multiples of provided value.</td></tr>
+
 				<tr class=alt><td>nominalAnnualInterestRate</td></tr>
 	            <tr><td class=fielddesc>The default interest rate set when creating savings accounts of this type of product. e.g. <b>5</b>% Per year - It number here is always expressed as the Nominal APR.</td></tr>
 
@@ -11655,7 +11669,7 @@ Content-Type: application/json
             <table class=matrixHeading>
                 <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Mandatory Fields</div></td></tr>
                 <tr class=alt>
-                	<td>name, description, currencyCode, digitsAfterDecimal, nominalAnnualInterestRate,
+                	<td>name, description, currencyCode, digitsAfterDecimal,inMulitplesOf, nominalAnnualInterestRate,
                 		interestCompoundingPeriodType, interestCalculationType, interestCalculationDaysInYearType,accountingRule</td>
                 </tr>
             </table>
@@ -11682,6 +11696,7 @@ Request Body:
   "description": "Daily compounding using Daily Balance, 5% per year, 365 days in year",
   "currencyCode": "USD",
   "digitsAfterDecimal": 2,
+  "inMulitplesOf": 0,
   "locale": "en",
   "nominalAnnualInterestRate": "5.0",
   "interestCompoundingPeriodType": 1, 
@@ -11705,6 +11720,7 @@ Request Body:
   "description": "A savings product",
   "currencyCode": "USD",
   "digitsAfterDecimal": "2",
+  "inMulitplesOf": 0,
   "nominalAnnualInterestRate": "15",
   "interestCompoundingPeriodType": "1",
   "interestPostingPeriodType": "4",
@@ -12888,6 +12904,71 @@ No Request Body:
 	    </div>
 	</div>
 
+<a id="savingsaccounts_transaction" name="savingsaccounts_transaction" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Retrieve Savings Account Transaction:</h2>
+	            <p>This is a convenience resource. It can be useful when building maintenance user interface screens for client applications. The template data returned consists of any or all of:
+	                <ul>
+	                <li class=normalli>Field Defaults</li>   
+	                <li class=normalli>Allowed Value Lists</li>    
+	                </ul>
+	            </p>
+	        <p>Example Requests: </p>
+	        <div class=apiClick>savingsaccounts/1/transactions/1</div>
+	        <br/>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">GET https://Domain Name/api/v1/savingsaccounts/{accountId}/transactions/{transactionId}
+	        </code>
+			<code class="method-response">
+{
+  "id": 1,
+  "transactionType": {
+    "id": 2,
+    "code": "savingsAccountTransactionType.withdrawal",
+    "value": "Withdrawal",
+    "deposit": false,
+    "withdrawal": true,
+    "interestPosting": false,
+    "feeDeduction": false
+  },
+  "accountId": 1,
+  "accountNo": "000000001",
+  "date": [
+    2013,
+    8,
+    7
+  ],
+  "currency": {
+    "code": "USD",
+    "name": "US Dollar",
+    "decimalPlaces": 2,
+    "inMulitplesOf": 0,
+    "displaySymbol": "$",
+    "nameCode": "currency.USD",
+    "displayLabel": "US Dollar ($)"
+  },
+  "paymentDetailData": {
+    "id": 62,
+    "paymentType": {
+      "id": 11,
+      "name": "cash"
+    },
+    "accountNumber": "",
+    "checkNumber": "",
+    "routingCode": "",
+    "receiptNumber": "",
+    "bankNumber": ""
+  },
+  "amount": 5000,
+  "runningBalance": 0,
+  "reversed": true
+}
+</code>
+	    </div>
+	</div>
+
 	<a id="savingsaccounts_deposit" name="savingsaccounts_deposit" class="old-syle-anchor">&nbsp;</a>
 	<div class="method-section">
 	    <div class="method-description">
@@ -12969,6 +13050,49 @@ No Request Body:
 	        </code>
 	    </div>
 	</div>
+
+	<a id="savingsaccounts_adjusttransaction" name="savingsaccounts_adjusttransaction" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Adjust Transaction</h2>
+	        <p>This command modifies the given transaction.</p>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">POST https://Domain Name/api/v1/savingsaccounts/{accountsId}/transactions/{transactionId}?command=modify</code>
+	        <code class="method-request">POST savingsaccounts/1/transactions/1?command=modify             
+Content-Type: application/json
+No Request Body:
+{
+  "locale": "en",
+  "dateFormat": "dd MMMM yyyy",
+  "transactionDate": "27 May 2013",
+  "transactionAmount": "500",
+  "paymentTypeId": "14",
+  "accountNumber": "acc123",
+  "checkNumber": "che123",
+  "routingCode": "rou123",
+  "receiptNumber": "rec123",
+  "bankNumber": "ban123"
+}
+	        </code>
+	        <code class="method-response">
+{
+  "officeId": 1,
+  "clientId": 2,
+  "savingsId": 1,
+  "resourceId": 48,
+  "changes": {
+    "accountNumber": "acc123",
+    "checkNumber": "che123",
+    "routingCode": "rou123",
+    "receiptNumber": "rec123",
+    "bankNumber": "ban123"
+  }
+}
+	        </code>
+	    </div>
+	</div>
+
 
 	<a id="savingsaccounts_undotransaction" name="savingsaccounts_undotransaction" class="old-syle-anchor">&nbsp;</a>
 	<div class="method-section">
@@ -19699,11 +19823,27 @@ GET https://DomainName/api/v1/search?query=000000111
 					<td></td>
 					<td></td>
 				</tr>
+				<tr class="alt">
+					<td></td>
+					<td>savingsaccounts/{accountId}/transactions/{transactionId}?command=modify</td>
+					<td><a href="#savingsaccounts_adjusttransaction">Adjust transaction</a></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
 				<tr>
 					<td></td>
 					<td>savingsaccounts/{accountId}/transactions/template</td>
 					<td></td>
 					<td><a href="#savingsaccounts_transactions_template">Retrieve savings account transaction template</a></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>savingsaccounts/{accountId}/transactions/{transactionId}</td>
+					<td></td>
+					<td><a href="#savingsaccounts_transaction">Retrieve savings account transaction</a></td>
 					<td></td>
 					<td></td>
 				</tr>
