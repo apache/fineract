@@ -277,7 +277,10 @@ public final class SavingsAccountTransaction extends AbstractPersistable<Long> {
         if (isDeposit()) {
             endOfDayBalance = openingBalance.plus(getAmount(currency));
         } else if (isWithdrawal() || isWithdrawalFeeAndNotReversed()) {
-            endOfDayBalance = openingBalance.minus(getAmount(currency));
+
+            if (openingBalance.isGreaterThanZero()) {
+                endOfDayBalance = openingBalance.minus(getAmount(currency));
+            }
         }
 
         return EndOfDayBalance.from(getTransactionLocalDate(), openingBalance, endOfDayBalance, this.balanceNumberOfDays);
