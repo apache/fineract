@@ -10,7 +10,7 @@ import static org.mifosplatform.portfolio.savings.SavingsApiConstants.annualFeeO
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.currencyCodeParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.descriptionParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.digitsAfterDecimalParamName;
-import static org.mifosplatform.portfolio.savings.SavingsApiConstants.inMulitplesOfParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.inMultiplesOfParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.interestCalculationDaysInYearTypeParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.interestCalculationTypeParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.interestCompoundingPeriodTypeParamName;
@@ -47,8 +47,8 @@ public class SavingsProductAssembler {
 
         final String currencyCode = command.stringValueOfParameterNamed(currencyCodeParamName);
         final Integer digitsAfterDecimal = command.integerValueOfParameterNamed(digitsAfterDecimalParamName);
-        final Integer inMulitplesOf = command.integerValueOfParameterNamed(inMulitplesOfParamName);
-        MonetaryCurrency currency = new MonetaryCurrency(currencyCode, digitsAfterDecimal,inMulitplesOf);
+        final Integer inMultiplesOf = command.integerValueOfParameterNamed(inMultiplesOfParamName);
+        MonetaryCurrency currency = new MonetaryCurrency(currencyCode, digitsAfterDecimal,inMultiplesOf);
 
         final BigDecimal interestRate = command.bigDecimalValueOfParameterNamed(nominalAnnualInterestRateParamName);
 

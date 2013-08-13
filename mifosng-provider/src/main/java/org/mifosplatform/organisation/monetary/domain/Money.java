@@ -22,7 +22,7 @@ public class Money implements Comparable<Money> {
     private final int currencyDigitsAfterDecimal;
 
     @Column(name = "currency_multiplesof")
-    private final Integer inMulitplesOf;
+    private final Integer inMultiplesOf;
 
     @Column(name = "amount", scale = 6, precision = 19)
     private final BigDecimal amount;
@@ -48,34 +48,34 @@ public class Money implements Comparable<Money> {
 
     public static Money of(final MonetaryCurrency currency, final BigDecimal newAmount) {
         return new Money(currency.getCode(), currency.getDigitsAfterDecimal(), defaultToZeroIfNull(newAmount),
-                currency.getCurrencyInMulitplesOf());
+                currency.getCurrencyInMultiplesOf());
     }
 
     public static Money zero(final MonetaryCurrency currency) {
-        return new Money(currency.getCode(), currency.getDigitsAfterDecimal(), BigDecimal.ZERO, currency.getCurrencyInMulitplesOf());
+        return new Money(currency.getCode(), currency.getDigitsAfterDecimal(), BigDecimal.ZERO, currency.getCurrencyInMultiplesOf());
     }
 
     protected Money() {
         this.currencyCode = null;
         this.currencyDigitsAfterDecimal = 0;
-        this.inMulitplesOf = 0;
+        this.inMultiplesOf = 0;
         this.amount = null;
     }
 
-    private Money(final String currencyCode, final int digitsAfterDecimal, final BigDecimal amount, final Integer inMulitplesOf) {
+    private Money(final String currencyCode, final int digitsAfterDecimal, final BigDecimal amount, final Integer inMultiplesOf) {
         this.currencyCode = currencyCode;
         this.currencyDigitsAfterDecimal = digitsAfterDecimal;
-        this.inMulitplesOf = inMulitplesOf;
+        this.inMultiplesOf = inMultiplesOf;
 
         final BigDecimal amountZeroed = defaultToZeroIfNull(amount);
         final BigDecimal amountStripped = amountZeroed.stripTrailingZeros();
         final BigDecimal amountScaled = amountStripped.setScale(this.currencyDigitsAfterDecimal, RoundingMode.HALF_EVEN);
 
         // round monetary amounts into multiplesof say 20/50.
-        if (inMulitplesOf!= null && this.currencyDigitsAfterDecimal == 0 && inMulitplesOf>0 && amountScaled.doubleValue()>0) {
+        if (inMultiplesOf!= null && this.currencyDigitsAfterDecimal == 0 && inMultiplesOf>0 && amountScaled.doubleValue()>0) {
             double existingVal = amountScaled.doubleValue();
-            double ceilingOfValue = ceiling(existingVal, inMulitplesOf);
-            double floorOfValue = floor(existingVal, inMulitplesOf);
+            double ceilingOfValue = ceiling(existingVal, inMultiplesOf);
+            double floorOfValue = floor(existingVal, inMultiplesOf);
 
             double floorDiff = existingVal - floorOfValue;
             double ceilDiff = ceilingOfValue - existingVal;
@@ -123,7 +123,7 @@ public class Money implements Comparable<Money> {
     }
 
     public Money copy() {
-        return new Money(this.currencyCode, this.currencyDigitsAfterDecimal, this.amount.stripTrailingZeros(), this.inMulitplesOf);
+        return new Money(this.currencyCode, this.currencyDigitsAfterDecimal, this.amount.stripTrailingZeros(), this.inMultiplesOf);
     }
 
     public Money plus(final Iterable<? extends Money> moniesToAdd) {
@@ -267,8 +267,8 @@ public class Money implements Comparable<Money> {
         return this.currencyDigitsAfterDecimal;
     }
 
-    public int getCurrencyInMulitplesOf() {
-        return this.inMulitplesOf;
+    public int getCurrencyInMultiplesOf() {
+        return this.inMultiplesOf;
     }
 
     public BigDecimal getAmount() {
@@ -306,7 +306,7 @@ public class Money implements Comparable<Money> {
     }
 
     private MonetaryCurrency monetaryCurrency() {
-        return new MonetaryCurrency(this.currencyCode, this.currencyDigitsAfterDecimal, this.inMulitplesOf);
+        return new MonetaryCurrency(this.currencyCode, this.currencyDigitsAfterDecimal, this.inMultiplesOf);
     }
 
     public Money zero() {

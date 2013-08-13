@@ -18,22 +18,22 @@ public class MonetaryCurrency {
     private final int digitsAfterDecimal;
 
     @Column(name = "currency_multiplesof")
-    private final Integer inMulitplesOf;
+    private final Integer inMultiplesOf;
 
     protected MonetaryCurrency() {
         this.code = null;
         this.digitsAfterDecimal = 0;
-        this.inMulitplesOf = 0;
+        this.inMultiplesOf = 0;
     }
 
-    public MonetaryCurrency(final String code, final int digitsAfterDecimal,final Integer inMulitplesOf) {
+    public MonetaryCurrency(final String code, final int digitsAfterDecimal,final Integer inMultiplesOf) {
         this.code = code;
         this.digitsAfterDecimal = digitsAfterDecimal;
-        this.inMulitplesOf = inMulitplesOf;
+        this.inMultiplesOf = inMultiplesOf;
     }
 
     public MonetaryCurrency copy() {
-        return new MonetaryCurrency(this.code, this.digitsAfterDecimal,this.inMulitplesOf);
+        return new MonetaryCurrency(this.code, this.digitsAfterDecimal,this.inMultiplesOf);
     }
 
     public String getCode() {
@@ -44,7 +44,7 @@ public class MonetaryCurrency {
         return digitsAfterDecimal;
     }
     
-    public Integer getCurrencyInMulitplesOf() {
-        return inMulitplesOf;
+    public Integer getCurrencyInMultiplesOf() {
+        return inMultiplesOf;
     }
 }

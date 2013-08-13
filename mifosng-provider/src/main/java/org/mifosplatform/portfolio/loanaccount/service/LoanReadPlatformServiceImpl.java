@@ -410,7 +410,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     + " l.amortization_method_enum as amortizationType, l.interest_method_enum as interestType, l.interest_calculated_in_period_enum as interestCalculationPeriodType,"
                     + " l.loan_status_id as lifeCycleStatusId, l.loan_transaction_strategy_id as transactionStrategyId, "
                     + " lps.name as transactionStrategyName, "
-                    + " l.currency_code as currencyCode, l.currency_digits as currencyDigits, l.currency_multiplesof as inMulitplesOf, rc.`name` as currencyName, rc.display_symbol as currencyDisplaySymbol, rc.internationalized_name_code as currencyNameCode, "
+                    + " l.currency_code as currencyCode, l.currency_digits as currencyDigits, l.currency_multiplesof as inMultiplesOf, rc.`name` as currencyName, rc.display_symbol as currencyDisplaySymbol, rc.internationalized_name_code as currencyNameCode, "
                     + " l.loan_officer_id as loanOfficerId, s.display_name as loanOfficerName, "
                     + " l.principal_disbursed_derived as principalDisbursed,"
                     + " l.principal_repaid_derived as principalPaid,"
@@ -474,8 +474,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             final String currencyNameCode = rs.getString("currencyNameCode");
             final String currencyDisplaySymbol = rs.getString("currencyDisplaySymbol");
             final Integer currencyDigits = JdbcSupport.getInteger(rs, "currencyDigits");
-            final Integer inMulitplesOf = JdbcSupport.getInteger(rs, "inMulitplesOf");
-            final CurrencyData currencyData = new CurrencyData(currencyCode, currencyName, currencyDigits, inMulitplesOf,
+            final Integer inMultiplesOf = JdbcSupport.getInteger(rs, "inMultiplesOf");
+            final CurrencyData currencyData = new CurrencyData(currencyCode, currencyName, currencyDigits, inMultiplesOf,
                     currencyDisplaySymbol, currencyNameCode);
 
             final Long id = rs.getLong("id");
@@ -710,7 +710,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             periods.add(disbursementPeriod);
 
             final MonetaryCurrency monCurrency = new MonetaryCurrency(this.currency.code(), this.currency.decimalPlaces(),
-                    this.currency.currencyInMulitplesOf());
+                    this.currency.currencyInMultiplesOf());
             final BigDecimal totalPrincipalDisbursed = Money.of(monCurrency, this.disbursement.amount()).getAmount();
             Money totalPrincipalExpected = Money.zero(monCurrency);
             Money totalPrincipalPaid = Money.zero(monCurrency);
@@ -846,7 +846,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     + " tr.fee_charges_portion_derived as fees, tr.penalty_charges_portion_derived as penalties, "
                     + " pd.payment_type_cv_id as paymentType,pd.account_number as accountNumber,pd.check_number as checkNumber, "
                     + " pd.receipt_number as receiptNumber, pd.bank_number as bankNumber,pd.routing_code as routingCode, "
-                    + " l.currency_code as currencyCode, l.currency_digits as currencyDigits, l.currency_multiplesof as inMulitplesOf, rc.`name` as currencyName, "
+                    + " l.currency_code as currencyCode, l.currency_digits as currencyDigits, l.currency_multiplesof as inMultiplesOf, rc.`name` as currencyName, "
                     + " rc.display_symbol as currencyDisplaySymbol, rc.internationalized_name_code as currencyNameCode, "
                     + " cv.code_value as paymentTypeName, tr.external_id as externalId "
                     + " from m_loan l join m_loan_transaction tr on tr.loan_id = l.id"
@@ -863,8 +863,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             final String currencyNameCode = rs.getString("currencyNameCode");
             final String currencyDisplaySymbol = rs.getString("currencyDisplaySymbol");
             final Integer currencyDigits = JdbcSupport.getInteger(rs, "currencyDigits");
-            final Integer inMulitplesOf = JdbcSupport.getInteger(rs, "inMulitplesOf");
-            final CurrencyData currencyData = new CurrencyData(currencyCode, currencyName, currencyDigits, inMulitplesOf,
+            final Integer inMultiplesOf = JdbcSupport.getInteger(rs, "inMultiplesOf");
+            final CurrencyData currencyData = new CurrencyData(currencyCode, currencyName, currencyDigits, inMultiplesOf,
                     currencyDisplaySymbol, currencyNameCode);
 
             final Long id = rs.getLong("id");

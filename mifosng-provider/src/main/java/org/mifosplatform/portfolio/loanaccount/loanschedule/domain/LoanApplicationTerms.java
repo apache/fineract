@@ -174,7 +174,7 @@ public final class LoanApplicationTerms {
         // adjust cumulative fields for principal & interest if needed
         if (this.principal.getAmount().subtract(totalCumulativePrincipalToDate.getAmount()).add(principalForPeriod.getAmount()).compareTo(principalForPeriod.getAmount()) == -1) {
             adjusted = adjusted.minus(adjusted);
-            MonetaryCurrency monetaryCurrency = new MonetaryCurrency(adjusted.getCurrencyCode(), 0, adjusted.getCurrencyInMulitplesOf());
+            MonetaryCurrency monetaryCurrency = new MonetaryCurrency(adjusted.getCurrencyCode(), 0, adjusted.getCurrencyInMultiplesOf());
             BigDecimal diff = this.principal.getAmount().subtract(totalCumulativePrincipalToDate.getAmount()).add(principalForPeriod.getAmount());
             if(diff.doubleValue()<0){
                 diff = BigDecimal.ZERO;
@@ -200,7 +200,7 @@ public final class LoanApplicationTerms {
         if (totalInterestDueForLoan.getAmount().subtract(totalCumulativeInterestToDate.getAmount()).add(interestForThisPeriod.getAmount())
                 .compareTo(interestForThisPeriod.getAmount()) == -1) {
             adjusted = adjusted.minus(adjusted);
-            MonetaryCurrency monetaryCurrency = new MonetaryCurrency(adjusted.getCurrencyCode(), 0, adjusted.getCurrencyInMulitplesOf());
+            MonetaryCurrency monetaryCurrency = new MonetaryCurrency(adjusted.getCurrencyCode(), 0, adjusted.getCurrencyInMultiplesOf());
             BigDecimal diff = totalInterestDueForLoan.getAmount().subtract(totalCumulativeInterestToDate.getAmount()).add(interestForThisPeriod.getAmount());
             if(diff.doubleValue()<0){
                 diff = BigDecimal.ZERO;
@@ -636,7 +636,7 @@ public final class LoanApplicationTerms {
 
     public LoanProductRelatedDetail toLoanProductRelatedDetail() {
         final MonetaryCurrency currency = new MonetaryCurrency(this.currency.getCode(), this.currency.getDecimalPlaces(),
-                this.currency.getCurrencyInMulitplesOf());
+                this.currency.getCurrencyInMultiplesOf());
 
         return LoanProductRelatedDetail.createFrom(currency, this.principal.getAmount(), this.interestRatePerPeriod,
                 this.interestRatePeriodFrequencyType, this.annualNominalInterestRate, this.interestMethod,

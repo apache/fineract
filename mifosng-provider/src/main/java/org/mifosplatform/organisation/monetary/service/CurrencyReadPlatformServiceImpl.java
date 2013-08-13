@@ -58,15 +58,15 @@ public class CurrencyReadPlatformServiceImpl implements CurrencyReadPlatformServ
             final String code = rs.getString("code");
             final String name = rs.getString("name");
             final int decimalPlaces = JdbcSupport.getInteger(rs, "decimalPlaces");
-            final Integer inMulitplesOf = JdbcSupport.getInteger(rs, "inMulitplesOf");
+            final Integer inMultiplesOf = JdbcSupport.getInteger(rs, "inMultiplesOf");
             final String displaySymbol = rs.getString("displaySymbol");
             final String nameCode = rs.getString("nameCode");
 
-            return new CurrencyData(code, name, decimalPlaces, inMulitplesOf, displaySymbol, nameCode);
+            return new CurrencyData(code, name, decimalPlaces, inMultiplesOf, displaySymbol, nameCode);
         }
 
         public String schema() {
-            return " c.code as code, c.name as name, c.decimal_places as decimalPlaces,c.currency_multiplesof as inMulitplesOf, c.display_symbol as displaySymbol, c.internationalized_name_code as nameCode ";
+            return " c.code as code, c.name as name, c.decimal_places as decimalPlaces,c.currency_multiplesof as inMultiplesOf, c.display_symbol as displaySymbol, c.internationalized_name_code as nameCode ";
         }
     }
 }

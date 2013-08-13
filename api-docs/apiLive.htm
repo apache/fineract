@@ -5882,7 +5882,7 @@ GET https://DomainName/api/v1/loans/{loanId}/transactions/template"
     "total": {
         "currencyCode": "XOF",
         "digitsAfterDecimal": 0,
-        "inMulitplesOf": 0,
+        "inMultiplesOf": 0,
         "amount": 471,
         "defaultName": "CFA Franc BCEAO",
         "nameCode": "currency.XOF",
@@ -7429,7 +7429,7 @@ Request Body:
 							<td class=fielddesc>Override the currency default value for digitsAfterDecimal.</td>
 						</tr>
 						<tr class=alt>
-							<td>inMulitplesOf</td>
+							<td>inMultiplesOf</td>
 						</tr>
 						<tr>
 							<td class=fielddesc>Override the default value for rounding currency to multiples of value provided.</td>
@@ -8115,7 +8115,7 @@ GET https://DomainName/api/v1/loanproducts/{productId}
 							<td><div class="mifosXHeading2">Mandatory Fields</div></td>
 						</tr>
 						<tr class=alt>
-							<td>name, currencyCode, digitsAfterDecimal, inMulitplesOf, principal,
+							<td>name, currencyCode, digitsAfterDecimal, inMultiplesOf, principal,
 								numberOfRepayments, repaymentEvery, repaymentFrequencyType, 
 								interestRatePerPeriod, interestRateFrequencyType, amortizationType, interestType,
 								interestCalculationPeriodType, transactionProcessingStrategyId,
@@ -8160,7 +8160,7 @@ Request Body:
     "currencyCode": "USD",
     "locale": "en_GB",
     "digitsAfterDecimal": "2",
-    "inMulitplesOf": 0,
+    "inMultiplesOf": 0,
     "principal": "100,000.00",
     "numberOfRepayments": "12",
     "repaymentEvery": "1",
@@ -8190,7 +8190,7 @@ Request Body:
     "currencyCode": "USD",
     "locale": "en_GB",
     "digitsAfterDecimal": "2",
-    "inMulitplesOf": 0,
+    "inMultiplesOf": 0,
     "principal": "100,000.00",
     "numberOfRepayments": "12",
     "repaymentEvery": "1",
@@ -8247,7 +8247,7 @@ Request Body:
     "currencyCode": "USD",
     "locale": "en_GB",
     "digitsAfterDecimal": "2",
-    "inMulitplesOf": 0,
+    "inMultiplesOf": 0,
     "principal": "100,000.00",
     "numberOfRepayments": "12",
     "repaymentEvery": "1",
@@ -11120,7 +11120,7 @@ Content-Type: application/json
 	            <tr class=alt><td>digitsAfterDecimal</td></tr>
 	            <tr><td class=fielddesc>Override the currency default value for digitsAfterDecimal.</td></tr>
 
-	            <tr class=alt><td>inMulitplesOf</td></tr>
+	            <tr class=alt><td>inMultiplesOf</td></tr>
 	            <tr><td class=fielddesc>Override the default value for rounding currency to multiples of provided value.</td></tr>
 
 				<tr class=alt><td>nominalAnnualInterestRate</td></tr>
@@ -11669,7 +11669,7 @@ Content-Type: application/json
             <table class=matrixHeading>
                 <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Mandatory Fields</div></td></tr>
                 <tr class=alt>
-                	<td>name, description, currencyCode, digitsAfterDecimal,inMulitplesOf, nominalAnnualInterestRate,
+                	<td>name, description, currencyCode, digitsAfterDecimal,inMultiplesOf, nominalAnnualInterestRate,
                 		interestCompoundingPeriodType, interestCalculationType, interestCalculationDaysInYearType,accountingRule</td>
                 </tr>
             </table>
@@ -11696,7 +11696,7 @@ Request Body:
   "description": "Daily compounding using Daily Balance, 5% per year, 365 days in year",
   "currencyCode": "USD",
   "digitsAfterDecimal": 2,
-  "inMulitplesOf": 0,
+  "inMultiplesOf": 0,
   "locale": "en",
   "nominalAnnualInterestRate": "5.0",
   "interestCompoundingPeriodType": 1, 
@@ -11720,7 +11720,7 @@ Request Body:
   "description": "A savings product",
   "currencyCode": "USD",
   "digitsAfterDecimal": "2",
-  "inMulitplesOf": 0,
+  "inMultiplesOf": 0,
   "nominalAnnualInterestRate": "15",
   "interestCompoundingPeriodType": "1",
   "interestPostingPeriodType": "4",
@@ -12944,7 +12944,7 @@ No Request Body:
     "code": "USD",
     "name": "US Dollar",
     "decimalPlaces": 2,
-    "inMulitplesOf": 0,
+    "inMultiplesOf": 0,
     "displaySymbol": "$",
     "nameCode": "currency.USD",
     "displayLabel": "US Dollar ($)"

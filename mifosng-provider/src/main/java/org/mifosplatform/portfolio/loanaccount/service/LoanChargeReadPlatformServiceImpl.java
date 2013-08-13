@@ -56,7 +56,7 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
                     + "lc.due_for_collection_as_of_date as dueAsOfDate, "
                     + "lc.charge_calculation_enum as chargeCalculation, "
                     + "c.currency_code as currencyCode, oc.name as currencyName, "
-                    + "oc.decimal_places as currencyDecimalPlaces, oc.currency_multiplesof as inMulitplesOf, oc.display_symbol as currencyDisplaySymbol, "
+                    + "oc.decimal_places as currencyDecimalPlaces, oc.currency_multiplesof as inMultiplesOf, oc.display_symbol as currencyDisplaySymbol, "
                     + "oc.internationalized_name_code as currencyNameCode from m_charge c "
                     + "join m_organisation_currency oc on c.currency_code = oc.code " + "join m_loan_charge lc on lc.charge_id = c.id ";
         }
@@ -81,9 +81,9 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
             final String currencyNameCode = rs.getString("currencyNameCode");
             final String currencyDisplaySymbol = rs.getString("currencyDisplaySymbol");
             final Integer currencyDecimalPlaces = JdbcSupport.getInteger(rs, "currencyDecimalPlaces");
-            final Integer inMulitplesOf = JdbcSupport.getInteger(rs, "inMulitplesOf");
+            final Integer inMultiplesOf = JdbcSupport.getInteger(rs, "inMultiplesOf");
 
-            final CurrencyData currency = new CurrencyData(currencyCode, currencyName, currencyDecimalPlaces, inMulitplesOf,
+            final CurrencyData currency = new CurrencyData(currencyCode, currencyName, currencyDecimalPlaces, inMultiplesOf,
                     currencyDisplaySymbol, currencyNameCode);
 
             final int chargeTime = rs.getInt("chargeTime");

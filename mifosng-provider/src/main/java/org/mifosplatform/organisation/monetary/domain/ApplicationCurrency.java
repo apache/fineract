@@ -24,7 +24,7 @@ public class ApplicationCurrency extends AbstractPersistable<Long> {
     private final Integer decimalPlaces;
 
     @Column(name = "currency_multiplesof")
-    private final Integer inMulitplesOf;
+    private final Integer inMultiplesOf;
 
     @Column(name = "name", nullable = false, length = 50)
     private final String name;
@@ -39,22 +39,22 @@ public class ApplicationCurrency extends AbstractPersistable<Long> {
         this.code = null;
         this.name = null;
         this.decimalPlaces = null;
-        this.inMulitplesOf = null;
+        this.inMultiplesOf = null;
         this.nameCode = null;
         this.displaySymbol = null;
     }
 
-    public static ApplicationCurrency from(final ApplicationCurrency currency, final int decimalPlaces, final Integer inMulitplesOf) {
-        return new ApplicationCurrency(currency.code, currency.name, decimalPlaces, inMulitplesOf, currency.nameCode,
+    public static ApplicationCurrency from(final ApplicationCurrency currency, final int decimalPlaces, final Integer inMultiplesOf) {
+        return new ApplicationCurrency(currency.code, currency.name, decimalPlaces, inMultiplesOf, currency.nameCode,
                 currency.displaySymbol);
     }
 
-    private ApplicationCurrency(final String code, final String name, final int decimalPlaces, final Integer inMulitplesOf,
+    private ApplicationCurrency(final String code, final String name, final int decimalPlaces, final Integer inMultiplesOf,
             final String nameCode, final String displaySymbol) {
         this.code = code;
         this.name = name;
         this.decimalPlaces = decimalPlaces;
-        this.inMulitplesOf = inMulitplesOf;
+        this.inMultiplesOf = inMultiplesOf;
         this.nameCode = nameCode;
         this.displaySymbol = displaySymbol;
     }
@@ -71,8 +71,8 @@ public class ApplicationCurrency extends AbstractPersistable<Long> {
         return this.decimalPlaces;
     }
 
-    public Integer getCurrencyInMulitplesOf() {
-        return this.inMulitplesOf;
+    public Integer getCurrencyInMultiplesOf() {
+        return this.inMultiplesOf;
     }
 
     public String getNameCode() {
@@ -84,14 +84,14 @@ public class ApplicationCurrency extends AbstractPersistable<Long> {
     }
 
     public CurrencyData toData() {
-        return new CurrencyData(this.code, this.name, this.decimalPlaces, this.inMulitplesOf, this.displaySymbol, this.nameCode);
+        return new CurrencyData(this.code, this.name, this.decimalPlaces, this.inMultiplesOf, this.displaySymbol, this.nameCode);
     }
 
-    public CurrencyData toData(final int digitsAfterDecimalSupported, final Integer inMulitplesOf) {
-        return new CurrencyData(this.code, this.name, digitsAfterDecimalSupported, inMulitplesOf, this.displaySymbol, this.nameCode);
+    public CurrencyData toData(final int digitsAfterDecimalSupported, final Integer inMultiplesOf) {
+        return new CurrencyData(this.code, this.name, digitsAfterDecimalSupported, inMultiplesOf, this.displaySymbol, this.nameCode);
     }
 
     public OrganisationCurrency toOrganisationCurrency() {
-        return new OrganisationCurrency(this.code, this.name, this.decimalPlaces,this.inMulitplesOf, this.nameCode, this.displaySymbol);
+        return new OrganisationCurrency(this.code, this.name, this.decimalPlaces,this.inMultiplesOf, this.nameCode, this.displaySymbol);
     }
 }

@@ -212,7 +212,7 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
             sqlBuilder.append("sat.transaction_date as transferDate, sat.amount as transferAmount,");
             sqlBuilder.append("sat.description as transferDescription,");
             sqlBuilder
-                    .append("sat.currency_code as currencyCode, sat.currency_digits as currencyDigits, sat.currency_multiplesof as inMulitplesOf, ");
+                    .append("sat.currency_code as currencyCode, sat.currency_digits as currencyDigits, sat.currency_multiplesof as inMultiplesOf, ");
             sqlBuilder.append("curr.name as currencyName, curr.internationalized_name_code as currencyNameCode, ");
             sqlBuilder.append("curr.display_symbol as currencyDisplaySymbol, ");
             sqlBuilder.append("fromoff.id as fromOfficeId, fromoff.name as fromOfficeName,");
@@ -258,8 +258,8 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
             final String currencyNameCode = rs.getString("currencyNameCode");
             final String currencyDisplaySymbol = rs.getString("currencyDisplaySymbol");
             final Integer currencyDigits = JdbcSupport.getInteger(rs, "currencyDigits");
-            final Integer inMulitplesOf = JdbcSupport.getInteger(rs, "inMulitplesOf");
-            final CurrencyData currency = new CurrencyData(currencyCode, currencyName, currencyDigits, inMulitplesOf,
+            final Integer inMultiplesOf = JdbcSupport.getInteger(rs, "inMultiplesOf");
+            final CurrencyData currency = new CurrencyData(currencyCode, currencyName, currencyDigits, inMultiplesOf,
                     currencyDisplaySymbol, currencyNameCode);
 
             final Long fromOfficeId = JdbcSupport.getLong(rs, "fromOfficeId");

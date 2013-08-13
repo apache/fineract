@@ -62,8 +62,8 @@ public final class LoanScheduleModel {
     public LoanScheduleData toData() {
 
         final int decimalPlaces = this.totalPrincipalDisbursed.getCurrencyDigitsAfterDecimal();
-        final Integer inMulitplesOf = this.totalPrincipalDisbursed.getCurrencyInMulitplesOf();
-        final CurrencyData currency = applicationCurrency.toData(decimalPlaces,inMulitplesOf);
+        final Integer inMultiplesOf = this.totalPrincipalDisbursed.getCurrencyInMultiplesOf();
+        final CurrencyData currency = applicationCurrency.toData(decimalPlaces,inMultiplesOf);
 
         final Collection<LoanSchedulePeriodData> periodsData = new ArrayList<LoanSchedulePeriodData>();
         for (LoanScheduleModelPeriod modelPeriod : this.periods) {
