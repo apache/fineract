@@ -200,7 +200,7 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
                     + "ln.loan_status_id As accountStatusId, "
                     + "pl.name As productShortName, "
                     + "ln.product_id As productId, "
-                    + "ln.currency_code as currencyCode, ln.currency_digits as currencyDigits, ln.currency_multiplesof as inMulitplesOf, rc.`name` as currencyName, rc.display_symbol as currencyDisplaySymbol, rc.internationalized_name_code as currencyNameCode, "
+                    + "ln.currency_code as currencyCode, ln.currency_digits as currencyDigits, ln.currency_multiplesof as inMultiplesOf, rc.`name` as currencyName, rc.display_symbol as currencyDisplaySymbol, rc.internationalized_name_code as currencyNameCode, "
                     + "if(ln.loan_status_id = 200 , ln.principal_amount , null) As disbursementAmount, "
                     + "sum(ifnull(if(ln.loan_status_id = 300, ls.principal_amount, 0.0), 0.0) - ifnull(if(ln.loan_status_id = 300, ls.principal_completed_derived, 0.0), 0.0)) As principalDue, "
                     + "ln.principal_repaid_derived As principalPaid, "
@@ -246,10 +246,10 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
             final String currencyNameCode = rs.getString("currencyNameCode");
             final String currencyDisplaySymbol = rs.getString("currencyDisplaySymbol");
             final Integer currencyDigits = JdbcSupport.getInteger(rs, "currencyDigits");
-            final Integer inMulitplesOf = JdbcSupport.getInteger(rs, "inMulitplesOf");
+            final Integer inMultiplesOf = JdbcSupport.getInteger(rs, "inMultiplesOf");
             CurrencyData currencyData = null;
             if (currencyCode != null) {
-                currencyData = new CurrencyData(currencyCode, currencyName, currencyDigits, inMulitplesOf, currencyDisplaySymbol,
+                currencyData = new CurrencyData(currencyCode, currencyName, currencyDigits, inMultiplesOf, currencyDisplaySymbol,
                         currencyNameCode);
             }
 

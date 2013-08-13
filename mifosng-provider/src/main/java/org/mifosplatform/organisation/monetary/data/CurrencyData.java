@@ -13,7 +13,7 @@ public class CurrencyData {
     private final String code;
     private final String name;
     private final int decimalPlaces;
-    private final Integer inMulitplesOf;
+    private final Integer inMultiplesOf;
     private final String displaySymbol;
     @SuppressWarnings("unused")
     private final String nameCode;
@@ -24,11 +24,11 @@ public class CurrencyData {
         return new CurrencyData("", "", 0,0, "", "");
     }
 
-    public CurrencyData(final String code, final String name, final int decimalPlaces,final Integer inMulitplesOf, final String displaySymbol, final String nameCode) {
+    public CurrencyData(final String code, final String name, final int decimalPlaces,final Integer inMultiplesOf, final String displaySymbol, final String nameCode) {
         this.code = code;
         this.name = name;
         this.decimalPlaces = decimalPlaces;
-        this.inMulitplesOf = inMulitplesOf;
+        this.inMultiplesOf = inMultiplesOf;
         this.displaySymbol = displaySymbol;
         this.nameCode = nameCode;
         this.displayLabel = generateDisplayLabel();
@@ -42,8 +42,8 @@ public class CurrencyData {
         return this.decimalPlaces;
     }
     
-    public Integer currencyInMulitplesOf() {
-        return this.inMulitplesOf;
+    public Integer currencyInMultiplesOf() {
+        return this.inMultiplesOf;
     }
     
     @Override

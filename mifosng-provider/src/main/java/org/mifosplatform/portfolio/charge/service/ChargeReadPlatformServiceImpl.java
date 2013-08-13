@@ -129,7 +129,7 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
             return "c.id as id, c.name as name, c.amount as amount, c.currency_code as currencyCode, "
                     + "c.charge_applies_to_enum as chargeAppliesTo, c.charge_time_enum as chargeTime, "
                     + "c.charge_calculation_enum as chargeCalculation, c.is_penalty as penalty, c.is_active as active, oc.name as currencyName, "
-                    + "oc.decimal_places as currencyDecimalPlaces,oc.currency_multiplesof as inMulitplesOf, oc.display_symbol as currencyDisplaySymbol, "
+                    + "oc.decimal_places as currencyDecimalPlaces,oc.currency_multiplesof as inMultiplesOf, oc.display_symbol as currencyDisplaySymbol, "
                     + "oc.internationalized_name_code as currencyNameCode from m_charge c "
                     + "join m_organisation_currency oc on c.currency_code = oc.code";
         }
@@ -149,9 +149,9 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
             final String currencyNameCode = rs.getString("currencyNameCode");
             final String currencyDisplaySymbol = rs.getString("currencyDisplaySymbol");
             final Integer currencyDecimalPlaces = JdbcSupport.getInteger(rs, "currencyDecimalPlaces");
-            final Integer inMulitplesOf = JdbcSupport.getInteger(rs, "inMulitplesOf");
+            final Integer inMultiplesOf = JdbcSupport.getInteger(rs, "inMultiplesOf");
 
-            final CurrencyData currency = new CurrencyData(currencyCode, currencyName, currencyDecimalPlaces, inMulitplesOf,
+            final CurrencyData currency = new CurrencyData(currencyCode, currencyName, currencyDecimalPlaces, inMultiplesOf,
                     currencyDisplaySymbol, currencyNameCode);
 
             final int chargeAppliesTo = rs.getInt("chargeAppliesTo");

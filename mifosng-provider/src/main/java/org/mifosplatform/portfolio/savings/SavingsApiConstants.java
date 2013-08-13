@@ -63,7 +63,7 @@ public class SavingsApiConstants {
     public static final String descriptionParamName = "description";
     public static final String currencyCodeParamName = "currencyCode";
     public static final String digitsAfterDecimalParamName = "digitsAfterDecimal";
-    public static final String inMulitplesOfParamName = "inMulitplesOf";
+    public static final String inMultiplesOfParamName = "inMultiplesOf";
     public static final String nominalAnnualInterestRateParamName = "nominalAnnualInterestRate";
     public static final String interestCompoundingPeriodTypeParamName = "interestCompoundingPeriodType";
     public static final String interestPostingPeriodTypeParamName = "interestPostingPeriodType";
@@ -94,7 +94,7 @@ public class SavingsApiConstants {
 
     public static final Set<String> SAVINGS_PRODUCT_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(localeParamName,
             monthDayFormatParamName, nameParamName, descriptionParamName, currencyCodeParamName, digitsAfterDecimalParamName,
-            inMulitplesOfParamName, nominalAnnualInterestRateParamName, interestCompoundingPeriodTypeParamName,
+            inMultiplesOfParamName, nominalAnnualInterestRateParamName, interestCompoundingPeriodTypeParamName,
             interestPostingPeriodTypeParamName, interestCalculationTypeParamName, interestCalculationDaysInYearTypeParamName,
             minRequiredOpeningBalanceParamName, lockinPeriodFrequencyParamName, lockinPeriodFrequencyTypeParamName,
             withdrawalFeeAmountParamName, withdrawalFeeTypeParamName, annualFeeAmountParamName, annualFeeOnMonthDayParamName,
@@ -109,7 +109,7 @@ public class SavingsApiConstants {
      * parameters to match those of request parameters.
      */
     public static final Set<String> SAVINGS_PRODUCT_RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(idParamName,
-            nameParamName, descriptionParamName, "currency", digitsAfterDecimalParamName, inMulitplesOfParamName,
+            nameParamName, descriptionParamName, "currency", digitsAfterDecimalParamName, inMultiplesOfParamName,
             nominalAnnualInterestRateParamName, interestCompoundingPeriodTypeParamName, interestPostingPeriodTypeParamName,
             interestCalculationTypeParamName, interestCalculationDaysInYearTypeParamName, minRequiredOpeningBalanceParamName,
             lockinPeriodFrequencyParamName, lockinPeriodFrequencyTypeParamName, withdrawalFeeAmountParamName, withdrawalFeeTypeParamName,
