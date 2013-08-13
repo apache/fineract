@@ -174,7 +174,7 @@ public final class LoanApplicationTerms {
         // adjust cumulative fields for principal & interest if needed
         if (this.principal.getAmount().subtract(totalCumulativePrincipalToDate.getAmount()).add(principalForPeriod.getAmount()).compareTo(principalForPeriod.getAmount()) == -1) {
             adjusted = adjusted.minus(adjusted);
-            MonetaryCurrency monetaryCurrency = new MonetaryCurrency(adjusted.getCurrencyCode(), 0, principalForPeriod.getAmount().intValue());
+            MonetaryCurrency monetaryCurrency = new MonetaryCurrency(adjusted.getCurrencyCode(), 0, adjusted.getCurrencyInMulitplesOf());
             BigDecimal diff = this.principal.getAmount().subtract(totalCumulativePrincipalToDate.getAmount()).add(principalForPeriod.getAmount());
             if(diff.doubleValue()<0){
                 diff = BigDecimal.ZERO;
@@ -200,7 +200,7 @@ public final class LoanApplicationTerms {
         if (totalInterestDueForLoan.getAmount().subtract(totalCumulativeInterestToDate.getAmount()).add(interestForThisPeriod.getAmount())
                 .compareTo(interestForThisPeriod.getAmount()) == -1) {
             adjusted = adjusted.minus(adjusted);
-            MonetaryCurrency monetaryCurrency = new MonetaryCurrency(adjusted.getCurrencyCode(), 0, interestForThisPeriod.getAmount().intValue());
+            MonetaryCurrency monetaryCurrency = new MonetaryCurrency(adjusted.getCurrencyCode(), 0, adjusted.getCurrencyInMulitplesOf());
             BigDecimal diff = totalInterestDueForLoan.getAmount().subtract(totalCumulativeInterestToDate.getAmount()).add(interestForThisPeriod.getAmount());
             if(diff.doubleValue()<0){
                 diff = BigDecimal.ZERO;
