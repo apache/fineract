@@ -5,6 +5,7 @@ See VERSIONING (https://github.com/openMF/mifosx/blob/master/VERSIONING.md) for 
 
 Releases
 ===============
+1. 14 Aug 2013 - 1.7.2.RELEASE
 1. 12 Aug 2013 - 1.7.1.RELEASE
 1. 28 July 2013 - 1.7.0.RELEASE
 1. 28 July 2013 - 1.6.1.RELEASE
@@ -29,6 +30,15 @@ Releases
 1. 10 April 2013 - 0.11.2.beta
 1. 05 April 2013 - 0.11.1.beta
 1. 05 April 2013 - 0.11.0.beta
+
+1.7.2.RELEASE
+=============
+Bug Release
+
+Platform & API
+
+Bug
+ - [MIFOSX-606] - Unable to activate client from pending state
 
 1.7.1.RELEASE
 =============
