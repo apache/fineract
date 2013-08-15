@@ -3,7 +3,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this file,
  * You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-package org.mifosplatform.portfolio.accounttransfers.api;
+package org.mifosplatform.portfolio.account.api;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -25,9 +25,9 @@ import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSeriali
 import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.mifosplatform.infrastructure.core.service.Page;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
-import org.mifosplatform.portfolio.accounttransfers.AccountTransfersApiConstants;
-import org.mifosplatform.portfolio.accounttransfers.data.AccountTransferData;
-import org.mifosplatform.portfolio.accounttransfers.service.AccountTransfersReadPlatformService;
+import org.mifosplatform.portfolio.account.AccountTransfersApiConstants;
+import org.mifosplatform.portfolio.account.data.AccountTransferData;
+import org.mifosplatform.portfolio.account.service.AccountTransfersReadPlatformService;
 import org.mifosplatform.portfolio.group.service.SearchParameters;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;

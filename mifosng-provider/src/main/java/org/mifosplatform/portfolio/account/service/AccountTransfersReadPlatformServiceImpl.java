@@ -3,7 +3,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this file,
  * You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-package org.mifosplatform.portfolio.accounttransfers.service;
+package org.mifosplatform.portfolio.account.service;
 
 import java.math.BigDecimal;
 import java.sql.ResultSet;
@@ -14,6 +14,7 @@ import java.util.Collection;
 
 import org.joda.time.LocalDate;
 import org.mifosplatform.commands.exception.UnsupportedCommandException;
+import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
 import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.core.service.Page;
@@ -22,18 +23,19 @@ import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.mifosplatform.organisation.office.data.OfficeData;
 import org.mifosplatform.organisation.office.service.OfficeReadPlatformService;
-import org.mifosplatform.portfolio.accounttransfers.data.AccountTransferData;
-import org.mifosplatform.portfolio.accounttransfers.exception.AccountTransferNotFoundException;
+import org.mifosplatform.portfolio.account.PortfolioAccountType;
+import org.mifosplatform.portfolio.account.data.AccountTransferData;
+import org.mifosplatform.portfolio.account.data.PortfolioAccountData;
+import org.mifosplatform.portfolio.account.exception.AccountTransferNotFoundException;
 import org.mifosplatform.portfolio.client.data.ClientData;
 import org.mifosplatform.portfolio.client.service.ClientReadPlatformService;
 import org.mifosplatform.portfolio.group.service.SearchParameters;
-import org.mifosplatform.portfolio.savings.data.SavingsAccountData;
-import org.mifosplatform.portfolio.savings.service.SavingsAccountReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 @Service
 public class AccountTransfersReadPlatformServiceImpl implements AccountTransfersReadPlatformService {
@@ -41,7 +43,7 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
     private final JdbcTemplate jdbcTemplate;
     private final ClientReadPlatformService clientReadPlatformService;
     private final OfficeReadPlatformService officeReadPlatformService;
-    private final SavingsAccountReadPlatformService savingsAccountReadPlatformService;
+    private final PortfolioAccountReadPlatformService portfolioAccountReadPlatformService;
 
     // mapper
     private final AccountTransfersMapper accountTransfersMapper;
@@ -52,11 +54,11 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
     @Autowired
     public AccountTransfersReadPlatformServiceImpl(final RoutingDataSource dataSource,
             final ClientReadPlatformService clientReadPlatformService, final OfficeReadPlatformService officeReadPlatformService,
-            final SavingsAccountReadPlatformService savingsAccountReadPlatformService) {
+            final PortfolioAccountReadPlatformService portfolioAccountReadPlatformService) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.clientReadPlatformService = clientReadPlatformService;
         this.officeReadPlatformService = officeReadPlatformService;
-        this.savingsAccountReadPlatformService = savingsAccountReadPlatformService;
+        this.portfolioAccountReadPlatformService = portfolioAccountReadPlatformService;
 
         this.accountTransfersMapper = new AccountTransfersMapper();
     }
@@ -65,30 +67,38 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
     public AccountTransferData retrieveTemplate(final Long fromOfficeId, final Long fromClientId, final Long fromAccountId,
             final Integer fromAccountType, final Long toOfficeId, final Long toClientId, final Long toAccountId, final Integer toAccountType) {
 
+        final EnumOptionData loanAccountType = AccountTransferEnumerations.accountType(PortfolioAccountType.LOAN);
+        final EnumOptionData savingsAccountType = AccountTransferEnumerations.accountType(PortfolioAccountType.SAVINGS);
+
+        final Collection<EnumOptionData> fromAccountTypeOptions = Arrays.asList(savingsAccountType);
+        final Collection<EnumOptionData> toAccountTypeOptions = Arrays.asList(loanAccountType, savingsAccountType);
+
+        // TODO - remove this after doing overpaid loan to savings transfers
         Integer mostRelevantFromAccountType = fromAccountType;
         if (mostRelevantFromAccountType == null) {
             mostRelevantFromAccountType = 2; // savings
         }
 
-        Integer mostRelevantToAccountType = toAccountType;
-        if (mostRelevantToAccountType == null) {
-            mostRelevantToAccountType = 2; // savings
-        }
+        final Integer mostRelevantToAccountType = toAccountType;
+
+        final EnumOptionData fromAccountTypeData = AccountTransferEnumerations.accountType(mostRelevantFromAccountType);
+        final EnumOptionData toAccountTypeData = AccountTransferEnumerations.accountType(mostRelevantToAccountType);
+
         // check for now that only savings account type is passed and used.
-        if (mostRelevantFromAccountType != 2) { throw new UnsupportedCommandException("transferFromLoanAccount"); }
+        if (mostRelevantFromAccountType != 2) { throw new UnsupportedCommandException("transferFromLoanAccountNotSupported"); }
 
         // from settings
         OfficeData fromOffice = null;
         ClientData fromClient = null;
-        SavingsAccountData fromAccount = null;
+        PortfolioAccountData fromAccount = null;
 
         OfficeData toOffice = null;
         ClientData toClient = null;
-        SavingsAccountData toAccount = null;
+        PortfolioAccountData toAccount = null;
 
         // template
-        Collection<SavingsAccountData> fromAccountOptions = null;
-        Collection<SavingsAccountData> toAccountOptions = null;
+        Collection<PortfolioAccountData> fromAccountOptions = null;
+        Collection<PortfolioAccountData> toAccountOptions = null;
 
         Long mostRelevantFromOfficeId = fromOfficeId;
         Long mostRelevantFromClientId = fromClientId;
@@ -96,20 +106,21 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
         Long mostRelevantToOfficeId = toOfficeId;
         Long mostRelevantToClientId = toClientId;
 
-        if (fromAccountId != null && fromAccountType == 2) {
-            fromAccount = this.savingsAccountReadPlatformService.retrieveOne(fromAccountId);
+        if (fromAccountId != null && mostRelevantFromAccountType == 2) {
+            fromAccount = this.portfolioAccountReadPlatformService.retrieveOne(fromAccountId, PortfolioAccountType.SAVINGS.getValue());
 
             // override provided fromClient with client of account
             mostRelevantFromClientId = fromAccount.clientId();
+        } else if (fromAccountId != null && mostRelevantFromAccountType == 1) { // loans
+            // fetch loan account
         }
 
         if (mostRelevantFromClientId != null) {
             fromClient = this.clientReadPlatformService.retrieveOne(mostRelevantFromClientId);
             mostRelevantFromOfficeId = fromClient.officeId();
-            toClient = fromClient;
-            fromAccountOptions = this.savingsAccountReadPlatformService.retrieveAllForLookup(mostRelevantFromClientId);
-            toAccountOptions = new ArrayList<SavingsAccountData>(fromAccountOptions);
-            toAccountOptions.remove(fromAccount);
+
+            fromAccountOptions = this.portfolioAccountReadPlatformService.retrieveAllForLookup(mostRelevantFromAccountType,
+                    mostRelevantFromClientId);
         }
 
         Collection<OfficeData> fromOfficeOptions = null;
@@ -121,29 +132,25 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
         }
 
         // defaults
-        LocalDate transferDate = DateUtils.getLocalDateOfTenant();
-        toOffice = fromOffice;
+        final LocalDate transferDate = DateUtils.getLocalDateOfTenant();
         Collection<OfficeData> toOfficeOptions = fromOfficeOptions;
-        Collection<ClientData> toClientOptions = fromClientOptions;
+        Collection<ClientData> toClientOptions = null;
 
-        if (toAccountId != null) {
-            toAccount = this.savingsAccountReadPlatformService.retrieveOne(toAccountId);
-
-            // override provided toClient with client of account
+        if (toAccountId != null && fromAccount != null) {
+            toAccount = this.portfolioAccountReadPlatformService.retrieveOne(toAccountId, mostRelevantToAccountType, fromAccount.currencyCode());
             mostRelevantToClientId = toAccount.clientId();
         }
 
-        if (mostRelevantToClientId != null && mostRelevantToClientId != mostRelevantFromClientId) {
+        if (mostRelevantToClientId != null) {
             toClient = this.clientReadPlatformService.retrieveOne(mostRelevantToClientId);
             mostRelevantToOfficeId = toClient.officeId();
 
             toClientOptions = this.clientReadPlatformService.retrieveAllForLookupByOfficeId(mostRelevantToOfficeId);
 
-            toAccountOptions = this.savingsAccountReadPlatformService.retrieveAllForLookup(mostRelevantToClientId);
-            toAccountOptions.remove(fromAccount);
+            toAccountOptions = retrieveToAccounts(fromAccount, mostRelevantToAccountType, mostRelevantToClientId);
         }
 
-        if (mostRelevantToOfficeId != null && mostRelevantToOfficeId != mostRelevantFromOfficeId) {
+        if (mostRelevantToOfficeId != null) {
             toOffice = this.officeReadPlatformService.retrieveOffice(mostRelevantToOfficeId);
             toOfficeOptions = this.officeReadPlatformService.retrieveAllOfficesForDropdown();
 
@@ -151,21 +158,37 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
             if (toClientOptions != null && toClientOptions.size() == 1) {
                 toClient = new ArrayList<ClientData>(toClientOptions).get(0);
 
-                toAccountOptions = this.savingsAccountReadPlatformService.retrieveAllForLookup(mostRelevantToClientId);
-                toAccountOptions.remove(fromAccount);
+                toAccountOptions = retrieveToAccounts(fromAccount, mostRelevantToAccountType, mostRelevantToClientId);
             }
         }
 
-        return AccountTransferData.template(fromOffice, fromClient, fromAccount, transferDate, toOffice, toClient, toAccount,
-                fromOfficeOptions, fromClientOptions, fromAccountOptions, toOfficeOptions, toClientOptions, toAccountOptions);
+        return AccountTransferData.template(fromOffice, fromClient, fromAccountTypeData, fromAccount, transferDate, toOffice, toClient,
+                toAccountTypeData, toAccount, fromOfficeOptions, fromClientOptions, fromAccountTypeOptions, fromAccountOptions,
+                toOfficeOptions, toClientOptions, toAccountTypeOptions, toAccountOptions);
+    }
+
+    private Collection<PortfolioAccountData> retrieveToAccounts(final PortfolioAccountData excludeThisAccountFromOptions,
+            final Integer toAccountType, final Long toClientId) {
+
+        final String currencyCode = excludeThisAccountFromOptions != null ? excludeThisAccountFromOptions.currencyCode() : null;
+
+        Collection<PortfolioAccountData> accountOptions = this.portfolioAccountReadPlatformService.retrieveAllForLookup(toAccountType,
+                toClientId, currencyCode);
+        if (!CollectionUtils.isEmpty(accountOptions)) {
+            accountOptions.remove(excludeThisAccountFromOptions);
+        } else {
+            accountOptions = null;
+        }
+
+        return accountOptions;
     }
 
     @Override
     public Page<AccountTransferData> retrieveAll(final SearchParameters searchParameters) {
 
-        StringBuilder sqlBuilder = new StringBuilder(200);
+        final StringBuilder sqlBuilder = new StringBuilder(200);
         sqlBuilder.append("select SQL_CALC_FOUND_ROWS ");
-        sqlBuilder.append(accountTransfersMapper.schema());
+        sqlBuilder.append(this.accountTransfersMapper.schema());
 
         if (searchParameters.isOrderByRequested()) {
             sqlBuilder.append(" order by ").append(searchParameters.getOrderBy());
@@ -183,7 +206,7 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
         }
 
         final Object[] objectArray = new Object[2];
-        int arrayPos = 0;
+        final int arrayPos = 0;
         final Object[] finalObjectArray = Arrays.copyOf(objectArray, arrayPos);
         final String sqlCountRows = "SELECT FOUND_ROWS()";
         return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlCountRows, sqlBuilder.toString(), finalObjectArray,
@@ -197,7 +220,7 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
             final String sql = "select " + this.accountTransfersMapper.schema() + " where sat.id = ?";
 
             return this.jdbcTemplate.queryForObject(sql, this.accountTransfersMapper, new Object[] { transferId });
-        } catch (EmptyResultDataAccessException e) {
+        } catch (final EmptyResultDataAccessException e) {
             throw new AccountTransferNotFoundException(transferId);
         }
     }
@@ -206,13 +229,13 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
 
         private final String schemaSql;
 
-        public AccountTransfersMapper() {       
+        public AccountTransfersMapper() {
             final StringBuilder sqlBuilder = new StringBuilder(400);
             sqlBuilder.append("sat.id as id, sat.is_reversed as isReversed,");
             sqlBuilder.append("sat.transaction_date as transferDate, sat.amount as transferAmount,");
             sqlBuilder.append("sat.description as transferDescription,");
-            sqlBuilder
-                    .append("sat.currency_code as currencyCode, sat.currency_digits as currencyDigits, sat.currency_multiplesof as inMultiplesOf, ");
+            sqlBuilder.append("sat.currency_code as currencyCode, sat.currency_digits as currencyDigits,");
+            sqlBuilder.append("sat.currency_multiplesof as inMultiplesOf, ");
             sqlBuilder.append("curr.name as currencyName, curr.internationalized_name_code as currencyNameCode, ");
             sqlBuilder.append("curr.display_symbol as currencyDisplaySymbol, ");
             sqlBuilder.append("fromoff.id as fromOfficeId, fromoff.name as fromOfficeName,");
@@ -221,6 +244,7 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
             sqlBuilder.append("toclient.id as toClientId, toclient.display_name as toClientName,");
             sqlBuilder.append("fromsavacc.id as fromSavingsAccountId, fromsavacc.account_no as fromSavingsAccountNo,");
             sqlBuilder.append("tosavacc.id as toSavingsAccountId, tosavacc.account_no as toSavingsAccountNo,");
+            sqlBuilder.append("toloanacc.id as toLoanAccountId, toloanacc.account_no as toLoanAccountNo,");
             sqlBuilder.append("fromsavtran.id as fromSavingsAccountTransactionId,");
             sqlBuilder.append("fromsavtran.transaction_type_enum as fromSavingsAccountTransactionType,");
             sqlBuilder.append("tosavtran.id as toSavingsAccountTransactionId,");
@@ -233,6 +257,7 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
             sqlBuilder.append("join m_client toclient on toclient.id = sat.to_client_id ");
             sqlBuilder.append("left join m_savings_account fromsavacc on fromsavacc.id = sat.from_savings_account_id ");
             sqlBuilder.append("left join m_savings_account tosavacc on tosavacc.id = sat.to_savings_account_id ");
+            sqlBuilder.append("left join m_loan toloanacc on toloanacc.id = sat.to_loan_account_id ");
             sqlBuilder.append("left join m_savings_account_transaction fromsavtran on fromsavtran.id = sat.from_savings_transaction_id ");
             sqlBuilder.append("left join m_savings_account_transaction tosavtran on tosavtran.id = sat.to_savings_transaction_id ");
 
@@ -264,30 +289,43 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
 
             final Long fromOfficeId = JdbcSupport.getLong(rs, "fromOfficeId");
             final String fromOfficeName = rs.getString("fromOfficeName");
-            OfficeData fromOffice = OfficeData.dropdown(fromOfficeId, fromOfficeName, null);
+            final OfficeData fromOffice = OfficeData.dropdown(fromOfficeId, fromOfficeName, null);
 
             final Long toOfficeId = JdbcSupport.getLong(rs, "toOfficeId");
             final String toOfficeName = rs.getString("toOfficeName");
-            OfficeData toOffice = OfficeData.dropdown(toOfficeId, toOfficeName, null);
+            final OfficeData toOffice = OfficeData.dropdown(toOfficeId, toOfficeName, null);
 
             final Long fromClientId = JdbcSupport.getLong(rs, "fromClientId");
             final String fromClientName = rs.getString("fromClientName");
-            ClientData fromClient = ClientData.lookup(fromClientId, fromClientName, fromOfficeId, fromOfficeName);
+            final ClientData fromClient = ClientData.lookup(fromClientId, fromClientName, fromOfficeId, fromOfficeName);
 
             final Long toClientId = JdbcSupport.getLong(rs, "toClientId");
             final String toClientName = rs.getString("toClientName");
-            ClientData toClient = ClientData.lookup(toClientId, toClientName, toOfficeId, toOfficeName);
+            final ClientData toClient = ClientData.lookup(toClientId, toClientName, toOfficeId, toOfficeName);
+
+            final EnumOptionData fromAccountType = AccountTransferEnumerations.accountType(PortfolioAccountType.SAVINGS);
 
             final Long fromSavingsAccountId = JdbcSupport.getLong(rs, "fromSavingsAccountId");
             final String fromSavingsAccountNo = rs.getString("fromSavingsAccountNo");
-            SavingsAccountData fromSavingsAccount = SavingsAccountData.lookup(fromSavingsAccountId, fromSavingsAccountNo);
+            final PortfolioAccountData fromSavingsAccount = PortfolioAccountData.lookup(fromSavingsAccountId, fromSavingsAccountNo);
 
+            PortfolioAccountData toAccount = null;
+            EnumOptionData toAccountType = null;
             final Long toSavingsAccountId = JdbcSupport.getLong(rs, "toSavingsAccountId");
             final String toSavingsAccountNo = rs.getString("toSavingsAccountNo");
-            SavingsAccountData toSavingsAccount = SavingsAccountData.lookup(toSavingsAccountId, toSavingsAccountNo);
+            final Long toLoanAccountId = JdbcSupport.getLong(rs, "toLoanAccountId");
+            final String toLoanAccountNo = rs.getString("toLoanAccountNo");
+
+            if (toSavingsAccountId != null) {
+                toAccount = PortfolioAccountData.lookup(toSavingsAccountId, toSavingsAccountNo);
+                toAccountType = AccountTransferEnumerations.accountType(PortfolioAccountType.SAVINGS);
+            } else if (toLoanAccountId != null) {
+                toAccount = PortfolioAccountData.lookup(toLoanAccountId, toLoanAccountNo);
+                toAccountType = AccountTransferEnumerations.accountType(PortfolioAccountType.LOAN);
+            }
 
             return AccountTransferData.instance(id, reversed, transferDate, currency, transferAmount, transferDescription, fromOffice,
-                    toOffice, fromClient, toClient, fromSavingsAccount, toSavingsAccount);
+                    toOffice, fromClient, toClient, fromAccountType, fromSavingsAccount, toAccountType, toAccount);
         }
     }
 }

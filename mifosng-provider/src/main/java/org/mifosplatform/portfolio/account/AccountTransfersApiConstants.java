@@ -3,13 +3,13 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this file,
  * You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-package org.mifosplatform.portfolio.accounttransfers;
+package org.mifosplatform.portfolio.account;
 
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.mifosplatform.portfolio.accounttransfers.data.AccountTransferData;
+import org.mifosplatform.portfolio.account.data.AccountTransferData;
 
 public class AccountTransfersApiConstants {
 

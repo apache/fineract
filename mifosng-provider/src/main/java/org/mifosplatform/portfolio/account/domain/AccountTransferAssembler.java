@@ -3,17 +3,17 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this file,
  * You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-package org.mifosplatform.portfolio.accounttransfers.domain;
+package org.mifosplatform.portfolio.account.domain;
 
-import static org.mifosplatform.portfolio.accounttransfers.AccountTransfersApiConstants.transferDescriptionParamName;
-import static org.mifosplatform.portfolio.accounttransfers.AccountTransfersApiConstants.fromAccountIdParamName;
-import static org.mifosplatform.portfolio.accounttransfers.AccountTransfersApiConstants.fromClientIdParamName;
-import static org.mifosplatform.portfolio.accounttransfers.AccountTransfersApiConstants.fromOfficeIdParamName;
-import static org.mifosplatform.portfolio.accounttransfers.AccountTransfersApiConstants.toAccountIdParamName;
-import static org.mifosplatform.portfolio.accounttransfers.AccountTransfersApiConstants.toClientIdParamName;
-import static org.mifosplatform.portfolio.accounttransfers.AccountTransfersApiConstants.toOfficeIdParamName;
-import static org.mifosplatform.portfolio.accounttransfers.AccountTransfersApiConstants.transferAmountParamName;
-import static org.mifosplatform.portfolio.accounttransfers.AccountTransfersApiConstants.transferDateParamName;
+import static org.mifosplatform.portfolio.account.AccountTransfersApiConstants.fromAccountIdParamName;
+import static org.mifosplatform.portfolio.account.AccountTransfersApiConstants.fromClientIdParamName;
+import static org.mifosplatform.portfolio.account.AccountTransfersApiConstants.fromOfficeIdParamName;
+import static org.mifosplatform.portfolio.account.AccountTransfersApiConstants.toAccountIdParamName;
+import static org.mifosplatform.portfolio.account.AccountTransfersApiConstants.toClientIdParamName;
+import static org.mifosplatform.portfolio.account.AccountTransfersApiConstants.toOfficeIdParamName;
+import static org.mifosplatform.portfolio.account.AccountTransfersApiConstants.transferAmountParamName;
+import static org.mifosplatform.portfolio.account.AccountTransfersApiConstants.transferDateParamName;
+import static org.mifosplatform.portfolio.account.AccountTransfersApiConstants.transferDescriptionParamName;
 
 import java.math.BigDecimal;
 
@@ -25,6 +25,8 @@ import org.mifosplatform.organisation.office.domain.Office;
 import org.mifosplatform.organisation.office.domain.OfficeRepository;
 import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.client.domain.ClientRepositoryWrapper;
+import org.mifosplatform.portfolio.loanaccount.domain.Loan;
+import org.mifosplatform.portfolio.loanaccount.domain.LoanTransaction;
 import org.mifosplatform.portfolio.savings.domain.SavingsAccount;
 import org.mifosplatform.portfolio.savings.domain.SavingsAccountAssembler;
 import org.mifosplatform.portfolio.savings.domain.SavingsAccountTransaction;
@@ -55,19 +57,19 @@ public class AccountTransferAssembler {
 
         final JsonElement element = command.parsedJson();
 
-        final Long fromOfficeId = fromApiJsonHelper.extractLongNamed(fromOfficeIdParamName, element);
+        final Long fromOfficeId = this.fromApiJsonHelper.extractLongNamed(fromOfficeIdParamName, element);
         final Office fromOffice = this.officeRepository.findOne(fromOfficeId);
 
-        final Long fromClientId = fromApiJsonHelper.extractLongNamed(fromClientIdParamName, element);
+        final Long fromClientId = this.fromApiJsonHelper.extractLongNamed(fromClientIdParamName, element);
         final Client fromClient = this.clientRepository.findOneWithNotFoundDetection(fromClientId);
 
         final Long fromSavingsId = command.longValueOfParameterNamed(fromAccountIdParamName);
         final SavingsAccount fromSavingsAccount = this.savingsAccountAssembler.assembleFrom(fromSavingsId);
 
-        final Long toOfficeId = fromApiJsonHelper.extractLongNamed(toOfficeIdParamName, element);
+        final Long toOfficeId = this.fromApiJsonHelper.extractLongNamed(toOfficeIdParamName, element);
         final Office toOffice = this.officeRepository.findOne(toOfficeId);
 
-        final Long toClientId = fromApiJsonHelper.extractLongNamed(toClientIdParamName, element);
+        final Long toClientId = this.fromApiJsonHelper.extractLongNamed(toClientIdParamName, element);
         final Client toClient = this.clientRepository.findOneWithNotFoundDetection(toClientId);
 
         final Long toSavingsId = command.longValueOfParameterNamed(toAccountIdParamName);
@@ -81,5 +83,32 @@ public class AccountTransferAssembler {
 
         return AccountTransfer.savingsToSavingsTransfer(fromOffice, fromClient, fromSavingsAccount, toOffice, toClient, toSavingsAccount,
                 withdrawal, deposit, transactionDate, transactionMonetaryAmount, description);
+    }
+
+    public AccountTransfer assembleSavingsToLoanTransfer(final JsonCommand command, final SavingsAccount fromSavingsAccount,
+            final Loan toLoanAccount, final SavingsAccountTransaction withdrawal, final LoanTransaction loanRepaymentTransaction) {
+
+        final JsonElement element = command.parsedJson();
+
+        final Long fromOfficeId = this.fromApiJsonHelper.extractLongNamed(fromOfficeIdParamName, element);
+        final Office fromOffice = this.officeRepository.findOne(fromOfficeId);
+
+        final Long fromClientId = this.fromApiJsonHelper.extractLongNamed(fromClientIdParamName, element);
+        final Client fromClient = this.clientRepository.findOneWithNotFoundDetection(fromClientId);
+
+        final Long toOfficeId = this.fromApiJsonHelper.extractLongNamed(toOfficeIdParamName, element);
+        final Office toOffice = this.officeRepository.findOne(toOfficeId);
+
+        final Long toClientId = this.fromApiJsonHelper.extractLongNamed(toClientIdParamName, element);
+        final Client toClient = this.clientRepository.findOneWithNotFoundDetection(toClientId);
+
+        final LocalDate transactionDate = command.localDateValueOfParameterNamed(transferDateParamName);
+        final BigDecimal transactionAmount = command.bigDecimalValueOfParameterNamed(transferAmountParamName);
+        final Money transactionMonetaryAmount = Money.of(fromSavingsAccount.getCurrency(), transactionAmount);
+
+        final String description = command.stringValueOfParameterNamed(transferDescriptionParamName);
+
+        return AccountTransfer.savingsToLoanTransfer(fromOffice, fromClient, fromSavingsAccount, toOffice, toClient, toLoanAccount,
+                withdrawal, loanRepaymentTransaction, transactionDate, transactionMonetaryAmount, description);
     }
 }

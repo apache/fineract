@@ -3,21 +3,21 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this file,
  * You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-package org.mifosplatform.portfolio.accounttransfers.data;
+package org.mifosplatform.portfolio.account.data;
 
-import static org.mifosplatform.portfolio.accounttransfers.AccountTransfersApiConstants.ACCOUNT_TRANSFER_RESOURCE_NAME;
-import static org.mifosplatform.portfolio.accounttransfers.AccountTransfersApiConstants.REQUEST_DATA_PARAMETERS;
-import static org.mifosplatform.portfolio.accounttransfers.AccountTransfersApiConstants.transferDescriptionParamName;
-import static org.mifosplatform.portfolio.accounttransfers.AccountTransfersApiConstants.fromAccountIdParamName;
-import static org.mifosplatform.portfolio.accounttransfers.AccountTransfersApiConstants.fromAccountTypeParamName;
-import static org.mifosplatform.portfolio.accounttransfers.AccountTransfersApiConstants.fromClientIdParamName;
-import static org.mifosplatform.portfolio.accounttransfers.AccountTransfersApiConstants.fromOfficeIdParamName;
-import static org.mifosplatform.portfolio.accounttransfers.AccountTransfersApiConstants.toAccountIdParamName;
-import static org.mifosplatform.portfolio.accounttransfers.AccountTransfersApiConstants.toAccountTypeParamName;
-import static org.mifosplatform.portfolio.accounttransfers.AccountTransfersApiConstants.toClientIdParamName;
-import static org.mifosplatform.portfolio.accounttransfers.AccountTransfersApiConstants.toOfficeIdParamName;
-import static org.mifosplatform.portfolio.accounttransfers.AccountTransfersApiConstants.transferAmountParamName;
-import static org.mifosplatform.portfolio.accounttransfers.AccountTransfersApiConstants.transferDateParamName;
+import static org.mifosplatform.portfolio.account.AccountTransfersApiConstants.ACCOUNT_TRANSFER_RESOURCE_NAME;
+import static org.mifosplatform.portfolio.account.AccountTransfersApiConstants.REQUEST_DATA_PARAMETERS;
+import static org.mifosplatform.portfolio.account.AccountTransfersApiConstants.fromAccountIdParamName;
+import static org.mifosplatform.portfolio.account.AccountTransfersApiConstants.fromAccountTypeParamName;
+import static org.mifosplatform.portfolio.account.AccountTransfersApiConstants.fromClientIdParamName;
+import static org.mifosplatform.portfolio.account.AccountTransfersApiConstants.fromOfficeIdParamName;
+import static org.mifosplatform.portfolio.account.AccountTransfersApiConstants.toAccountIdParamName;
+import static org.mifosplatform.portfolio.account.AccountTransfersApiConstants.toAccountTypeParamName;
+import static org.mifosplatform.portfolio.account.AccountTransfersApiConstants.toClientIdParamName;
+import static org.mifosplatform.portfolio.account.AccountTransfersApiConstants.toOfficeIdParamName;
+import static org.mifosplatform.portfolio.account.AccountTransfersApiConstants.transferAmountParamName;
+import static org.mifosplatform.portfolio.account.AccountTransfersApiConstants.transferDateParamName;
+import static org.mifosplatform.portfolio.account.AccountTransfersApiConstants.transferDescriptionParamName;
 
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
