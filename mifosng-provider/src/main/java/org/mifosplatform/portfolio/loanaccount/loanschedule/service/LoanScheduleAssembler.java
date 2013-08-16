@@ -28,7 +28,7 @@ import org.mifosplatform.portfolio.calendar.domain.Calendar;
 import org.mifosplatform.portfolio.calendar.domain.CalendarRepository;
 import org.mifosplatform.portfolio.calendar.exception.CalendarNotFoundException;
 import org.mifosplatform.portfolio.calendar.exception.MeetingFrequencyMismatchException;
-import org.mifosplatform.portfolio.calendar.service.CalendarHelper;
+import org.mifosplatform.portfolio.calendar.service.CalendarUtils;
 import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.client.domain.ClientRepositoryWrapper;
 import org.mifosplatform.portfolio.group.domain.Group;
@@ -149,9 +149,9 @@ public class LoanScheduleAssembler {
             if (calendar == null) { throw new CalendarNotFoundException(calendarId); }
 
             // validate repayment frequency and interval with meeting frequency and interval
-            PeriodFrequencyType meetingPeriodFrequency = CalendarHelper.getMeetingPeriodFrequencyType(calendar.getRecurrence());
+            PeriodFrequencyType meetingPeriodFrequency = CalendarUtils.getMeetingPeriodFrequencyType(calendar.getRecurrence());
             validateRepaymentFrequencyIsSameAsMeetingFrequency(meetingPeriodFrequency.getValue(), repaymentFrequencyType,
-                    CalendarHelper.getInterval(calendar.getRecurrence()), repaymentEvery);
+                    CalendarUtils.getInterval(calendar.getRecurrence()), repaymentEvery);
         }
         
         if (synchDisbursement != null && synchDisbursement.booleanValue()) {
@@ -166,8 +166,8 @@ public class LoanScheduleAssembler {
             if (calculatedRepaymentsStartingFromDate == null) {
                 // FIXME: AA - Possibility of having next meeting date immediately after disbursement date,
                 // need to have minimum number of days gap between disbursement and first repayment date.
-                final String frequency = CalendarHelper.getMeetingFrequencyFromPeriodFrequencyType(repaymentPeriodFrequencyType);
-                calculatedRepaymentsStartingFromDate = CalendarHelper.getFirstRepaymentMeetingDate(calendar, expectedDisbursementDate,
+                final String frequency = CalendarUtils.getMeetingFrequencyFromPeriodFrequencyType(repaymentPeriodFrequencyType);
+                calculatedRepaymentsStartingFromDate = CalendarUtils.getFirstRepaymentMeetingDate(calendar, expectedDisbursementDate,
                         repaymentEvery, frequency);
             } else {// validate user provided repaymentsStartFromDate
                 validateRepaymentsStartDateWithMeetingDates(repaymentsStartingFromDate, calendar);
@@ -192,7 +192,7 @@ public class LoanScheduleAssembler {
     
     private void validateRepaymentsStartDateWithMeetingDates(final LocalDate repaymentsStartingFromDate, final Calendar calendar) {
         if (repaymentsStartingFromDate != null
-                && !CalendarHelper.isValidRedurringDate(calendar.getRecurrence(), calendar.getStartDateLocalDate(),
+                && !CalendarUtils.isValidRedurringDate(calendar.getRecurrence(), calendar.getStartDateLocalDate(),
                         repaymentsStartingFromDate)) {
             final String errorMessage = "First repayment date '" + repaymentsStartingFromDate + "' do not fall on a meeting date";
             throw new LoanApplicationDateException("first.repayment.date.do.not.match.meeting.date", errorMessage,
@@ -202,7 +202,7 @@ public class LoanScheduleAssembler {
 
     private void validateDisbursementDateWithMeetingDates(final LocalDate expectedDisbursementDate, final Calendar calendar) {
         // disbursement date should fall on a meeting date
-        if (!CalendarHelper.isValidRedurringDate(calendar.getRecurrence(), calendar.getStartDateLocalDate(), expectedDisbursementDate)) {
+        if (!CalendarUtils.isValidRedurringDate(calendar.getRecurrence(), calendar.getStartDateLocalDate(), expectedDisbursementDate)) {
             final String errorMessage = "Expected disbursement date '" + expectedDisbursementDate + "' do not fall on a meeting date";
             throw new LoanApplicationDateException("disbursement.date.do.not.match.meeting.date", errorMessage, expectedDisbursementDate);
         }

@@ -468,4 +468,13 @@ public final class Client extends AbstractPersistable<Long> {
     public boolean isActivatedAfter(final LocalDate submittedOn) {
         return getActivationLocalDate().isAfter(submittedOn);
     }
+    
+    public boolean isChildOfGroup(final Long groupId) {
+        if (groupId != null && this.groups != null && !this.groups.isEmpty()) {
+            for (Group group : this.groups) {
+                if (group.getId().equals(groupId)) return true;
+            }
+        }
+        return false;
+    }
 }

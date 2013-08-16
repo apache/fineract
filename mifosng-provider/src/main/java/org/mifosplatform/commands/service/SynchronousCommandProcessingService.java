@@ -522,6 +522,18 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
             } else {
                 throw new UnsupportedCommandException(wrapper.commandName());
             }
+        } else if (wrapper.isMeetingResource()) {
+            if (wrapper.isCreate()) {
+                handler = this.applicationContext.getBean("createMeetingCommandHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isUpdate()) {
+                handler = this.applicationContext.getBean("updateMeetingCommandHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isDelete()) {
+                handler = this.applicationContext.getBean("deleteMeetingCommandHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isSaveOrUpdateAttendance()) {
+                handler = this.applicationContext.getBean("updateMeetingAttendanceCommandHandler", NewCommandSourceHandler.class);
+            } else {
+                throw new UnsupportedCommandException(wrapper.commandName());
+            }
         } else {
             throw new UnsupportedCommandException(wrapper.commandName());
         }

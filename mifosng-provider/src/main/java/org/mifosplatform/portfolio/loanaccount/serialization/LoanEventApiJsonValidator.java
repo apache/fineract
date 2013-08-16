@@ -24,7 +24,7 @@ import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.portfolio.calendar.domain.Calendar;
 import org.mifosplatform.portfolio.calendar.domain.CalendarInstance;
 import org.mifosplatform.portfolio.calendar.exception.NotValidRecurringDateException;
-import org.mifosplatform.portfolio.calendar.service.CalendarHelper;
+import org.mifosplatform.portfolio.calendar.service.CalendarUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -76,7 +76,7 @@ public final class LoanEventApiJsonValidator {
             Calendar calendar = calendarInstance.getCalendar();
             if (calendar != null && actualDisbursementDate != null) {
                 // Disbursement date should fall on a meeting date
-                if (!CalendarHelper.isValidRedurringDate(calendar.getRecurrence(), calendar.getStartDateLocalDate(), actualDisbursementDate)) {
+                if (!CalendarUtils.isValidRedurringDate(calendar.getRecurrence(), calendar.getStartDateLocalDate(), actualDisbursementDate)) {
                     final String errorMessage = "Expected disbursement date '" + actualDisbursementDate.toString()
                             + "' does not fall on a meeting date.";
                     throw new NotValidRecurringDateException("loan.actual.disbursement.date", errorMessage, actualDisbursementDate.toString(),
@@ -147,7 +147,7 @@ public final class LoanEventApiJsonValidator {
             Calendar calendar = calendarInstance.getCalendar();
             if (calendar != null && repaymentDate != null) {
                 // Disbursement date should fall on a meeting date
-                if (!CalendarHelper.isValidRedurringDate(calendar.getRecurrence(), calendar.getStartDateLocalDate(), repaymentDate)) {
+                if (!CalendarUtils.isValidRedurringDate(calendar.getRecurrence(), calendar.getStartDateLocalDate(), repaymentDate)) {
                     final String errorMessage = "Transaction date '" + repaymentDate.toString()
                             + "' does not fall on a meeting date.";
                     throw new NotValidRecurringDateException("loan.transaction.date", errorMessage, repaymentDate.toString(),

@@ -571,4 +571,12 @@ public class CommandWrapper {
     public boolean isAccountTransferResource() {
         return this.entityName.equalsIgnoreCase("ACCOUNTTRANSFER");
     }
+    
+    public boolean isMeetingResource() {
+        return this.entityName.equalsIgnoreCase("MEETING");
+    }
+ 
+    public boolean isSaveOrUpdateAttendance(){
+        return this.actionName.equalsIgnoreCase("SAVEORUPDATEATTENDANCE");
+    }
 }

@@ -11,6 +11,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
+import java.util.StringTokenizer;
 
 import net.fortuna.ical4j.model.Date;
 import net.fortuna.ical4j.model.DateList;
@@ -32,10 +34,10 @@ import org.mifosplatform.organisation.workingdays.service.WorkingDaysUtil;
 import org.mifosplatform.portfolio.calendar.domain.Calendar;
 import org.mifosplatform.portfolio.loanproduct.domain.PeriodFrequencyType;
 
-public class CalendarHelper {
+public class CalendarUtils {
 
     public static LocalDate getNextRecurringDate(final String recurringRule, final LocalDate seedDate, final LocalDate startDate) {
-        final Recur recur = CalendarHelper.getICalRecur(recurringRule);
+        final Recur recur = CalendarUtils.getICalRecur(recurringRule);
         if (recur == null) { return null; }
         return getNextRecurringDate(recur, seedDate, startDate);
     }
@@ -82,7 +84,7 @@ public class CalendarHelper {
     public static Collection<LocalDate> getRecurringDates(final String recurringRule, final LocalDate seedDate,
             final LocalDate periodStartDate, final LocalDate periodEndDate, final int maxCount) {
 
-        final Recur recur = CalendarHelper.getICalRecur(recurringRule);
+        final Recur recur = CalendarUtils.getICalRecur(recurringRule);
 
         return getRecurringDates(recur, seedDate, periodStartDate,
 				periodEndDate, maxCount);
@@ -210,7 +212,7 @@ public class CalendarHelper {
     
     public static boolean isValidRedurringDate(final String recurringRule, final LocalDate seedDate, final LocalDate date){
         
-    	final Recur recur = CalendarHelper.getICalRecur(recurringRule);
+    	final Recur recur = CalendarUtils.getICalRecur(recurringRule);
     	if (recur == null) { return false; }
     	
     	return isValidRecurringDate(recur, seedDate, date);
@@ -248,7 +250,7 @@ public class CalendarHelper {
     }
     
     public static PeriodFrequencyType getMeetingPeriodFrequencyType(final String recurringRule){
-    	final Recur recur = CalendarHelper.getICalRecur(recurringRule);
+    	final Recur recur = CalendarUtils.getICalRecur(recurringRule);
     	PeriodFrequencyType meetingFrequencyType = PeriodFrequencyType.INVALID;
     	if(recur.getFrequency().equals(Recur.DAILY)){
     		meetingFrequencyType = PeriodFrequencyType.DAYS;
@@ -277,12 +279,12 @@ public class CalendarHelper {
     }
     
     public static int getInterval(final String recurringRule){
-    	final Recur recur = CalendarHelper.getICalRecur(recurringRule);
+    	final Recur recur = CalendarUtils.getICalRecur(recurringRule);
     	return recur.getInterval();
     }
     
     public static LocalDate getFirstRepaymentMeetingDate(final Calendar calendar, final LocalDate disbursementDate, final Integer loanRepaymentInterval, final String frequency){
-    	final Recur recur = CalendarHelper.getICalRecur(calendar.getRecurrence());
+    	final Recur recur = CalendarUtils.getICalRecur(calendar.getRecurrence());
     	if (recur == null) { return null; }
     	LocalDate startDate = disbursementDate;
     	final LocalDate seedDate = calendar.getStartDateLocalDate();
@@ -310,7 +312,7 @@ public class CalendarHelper {
     }
     
     public static LocalDate getNewRepaymentMeetingDate(final String recurringRule, final LocalDate seedDate, final LocalDate oldRepaymentDate, final Integer loanRepaymentInterval, final String frequency, final WorkingDays workingDays){
-        final Recur recur = CalendarHelper.getICalRecur(recurringRule);
+        final Recur recur = CalendarUtils.getICalRecur(recurringRule);
         if (recur == null) { return null; }
     	if(isValidRecurringDate(recur, seedDate, oldRepaymentDate)){
     		return oldRepaymentDate;
@@ -320,7 +322,7 @@ public class CalendarHelper {
     
     public static LocalDate getNextRepaymentMeetingDate(final String recurringRule, final LocalDate seedDate, final LocalDate repaymentDate, final Integer loanRepaymentInterval, final String frequency, final WorkingDays workingDays){
         
-        final Recur recur = CalendarHelper.getICalRecur(recurringRule);
+        final Recur recur = CalendarUtils.getICalRecur(recurringRule);
         if (recur == null) { return null; }
         LocalDate tmpDate = repaymentDate;
         if(isValidRecurringDate(recur, seedDate, repaymentDate)){
@@ -363,5 +365,54 @@ public class CalendarHelper {
 
         if (oldRecur == null || oldRecur.getFrequency() == null || newRecur == null || newRecur.getFrequency() == null) { return false; }
         return (oldRecur.getInterval() == newRecur.getInterval());
+    }
+    
+    public static List<Integer> createIntegerListFromQueryParameter(String calendarTypeQuery) {
+        List<Integer> calendarTypeOptions = new ArrayList<Integer>();
+        // adding all calendar Types if query parameter is "all"
+        if(calendarTypeQuery.equalsIgnoreCase("all")){
+            calendarTypeOptions.add(1);
+            calendarTypeOptions.add(2);
+            calendarTypeOptions.add(3);
+            calendarTypeOptions.add(4);
+            return calendarTypeOptions;
+        }
+        // creating a list of calendar type options from the comma separated query parameter.
+        List<String> calendarTypeOptionsInQuery = new ArrayList<String>();
+        StringTokenizer st = new StringTokenizer(calendarTypeQuery, ",");
+        while (st.hasMoreElements()) {
+            calendarTypeOptionsInQuery.add(st.nextElement().toString());
+        }
+
+        for(String calType : calendarTypeOptionsInQuery){
+            if(calType.equalsIgnoreCase("collection")) {
+                calendarTypeOptions.add(1);
+            } else if(calType.equalsIgnoreCase("training")) {
+                calendarTypeOptions.add(2);
+            }  else if(calType.equalsIgnoreCase("audit")) {
+                calendarTypeOptions.add(3);
+            }  else if(calType.equalsIgnoreCase("general")) {
+                calendarTypeOptions.add(4);
+            }
+        }
+
+        return calendarTypeOptions;
+    }
+    
+    /**
+     * function returns a comma separated list of calendar_type_enum values ex.
+     * 1,2,3,4
+     * 
+     * @param calendarTypeOptions
+     * @return
+     */
+    public static String getSqlCalendarTypeOptionsInString(final List<Integer> calendarTypeOptions) {
+        String sqlCalendarTypeOptions = "";
+        int size = calendarTypeOptions.size();
+        for (int i = 0; i < size - 1; i++) {
+            sqlCalendarTypeOptions += calendarTypeOptions.get(i).toString() + ",";
+        }
+        sqlCalendarTypeOptions += calendarTypeOptions.get(size - 1).toString();
+        return sqlCalendarTypeOptions;
     }
 }

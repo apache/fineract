@@ -5,6 +5,7 @@
  */
 package org.mifosplatform.portfolio.calendar.service;
 
+import org.joda.time.LocalDate;
 import org.mifosplatform.portfolio.calendar.data.CalendarData;
 
 import java.util.Collection;
@@ -23,9 +24,13 @@ public interface CalendarReadPlatformService {
     CalendarData retrieveNewCalendarDetails();
     
     CalendarData generateRecurringDate(final CalendarData calendarData);
+
+    CalendarData generateRecurringDate(final CalendarData calendarData, final LocalDate tillDate);
     
     Collection<CalendarData> generateRecurringDates(final Collection<CalendarData> calendarsData);
     
     CalendarData retrieveLoanCalendar(final Long loanId);
+    
+    CalendarData retrieveCollctionCalendarByEntity(final Long entityId, final Integer entityTypeId);
 
 }

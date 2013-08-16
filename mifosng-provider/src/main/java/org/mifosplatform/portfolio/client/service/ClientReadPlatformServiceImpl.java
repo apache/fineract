@@ -298,6 +298,20 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         }
     }
 
+    @Override
+    public Collection<ClientData> retrieveActiveClientMembersOfCenter(final Long centerId) {
+
+        final AppUser currentUser = context.authenticatedUser();
+        final String hierarchy = currentUser.getOffice().getHierarchy();
+        final String hierarchySearchString = hierarchy + "%";
+
+        final String sql = "select " + this.membersOfGroupMapper.schema()
+                + " left join m_group g on pgc.group_id=g.id where o.hierarchy like ? and g.parent_id = ? and c.status_enum = ? group by c.id";
+
+        return this.jdbcTemplate.query(sql, this.membersOfGroupMapper,
+                new Object[] { hierarchySearchString, centerId, ClientStatus.ACTIVE.getValue() });
+    }
+    
     private static final class ClientMapper implements RowMapper<ClientData> {
 
         private final String schema;

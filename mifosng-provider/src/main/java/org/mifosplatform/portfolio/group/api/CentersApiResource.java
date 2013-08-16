@@ -6,6 +6,7 @@
 package org.mifosplatform.portfolio.group.api;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -38,9 +39,13 @@ import org.mifosplatform.infrastructure.core.service.Page;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.portfolio.accountdetails.data.AccountSummaryCollectionData;
 import org.mifosplatform.portfolio.accountdetails.service.AccountDetailsReadPlatformService;
+import org.mifosplatform.portfolio.calendar.data.CalendarData;
+import org.mifosplatform.portfolio.calendar.domain.CalendarEntityType;
+import org.mifosplatform.portfolio.calendar.service.CalendarReadPlatformService;
 import org.mifosplatform.portfolio.collectionsheet.data.JLGCollectionSheetData;
 import org.mifosplatform.portfolio.collectionsheet.service.CollectionSheetReadPlatformService;
 import org.mifosplatform.portfolio.group.data.CenterData;
+import org.mifosplatform.portfolio.group.data.GroupGeneralData;
 import org.mifosplatform.portfolio.group.service.CenterReadPlatformService;
 import org.mifosplatform.portfolio.group.service.SearchParameters;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,6 +69,7 @@ public class CentersApiResource {
     private final CollectionSheetReadPlatformService collectionSheetReadPlatformService;
     private final FromJsonHelper fromJsonHelper;
     private final AccountDetailsReadPlatformService accountDetailsReadPlatformService;
+    private final CalendarReadPlatformService calendarReadPlatformService;
 
     @Autowired
     public CentersApiResource(final PlatformSecurityContext context, final CenterReadPlatformService centerReadPlatformService,
@@ -72,7 +78,7 @@ public class CentersApiResource {
             final ApiRequestParameterHelper apiRequestParameterHelper,
             final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
             final CollectionSheetReadPlatformService collectionSheetReadPlatformService, final FromJsonHelper fromJsonHelper,
-            final AccountDetailsReadPlatformService accountDetailsReadPlatformService) {
+            final AccountDetailsReadPlatformService accountDetailsReadPlatformService, final CalendarReadPlatformService calendarReadPlatformService) {
         this.context = context;
         this.centerReadPlatformService = centerReadPlatformService;
         this.centerApiJsonSerializer = centerApiJsonSerializer;
@@ -83,6 +89,7 @@ public class CentersApiResource {
         this.collectionSheetReadPlatformService = collectionSheetReadPlatformService;
         this.fromJsonHelper = fromJsonHelper;
         this.accountDetailsReadPlatformService = accountDetailsReadPlatformService;
+        this.calendarReadPlatformService = calendarReadPlatformService;
     }
 
     @GET
@@ -126,7 +133,8 @@ public class CentersApiResource {
 
         this.context.authenticatedUser().validateHasReadPermission(GroupingTypesApiConstants.CENTER_RESOURCE_NAME);
         final Set<String> associationParameters = ApiParameterHelper.extractAssociationsForResponseIfProvided(uriInfo.getQueryParameters());
-
+        CalendarData collectionMeetingCalendar = null;
+        Collection<GroupGeneralData> groups = null;
         CenterData center = this.centerReadPlatformService.retrieveOne(centerId);
 
         final boolean template = ApiParameterHelper.template(uriInfo.getQueryParameters());
@@ -137,9 +145,16 @@ public class CentersApiResource {
 
         if (!associationParameters.isEmpty()) {
             if (associationParameters.contains("groupMembers")) {
-                center = CenterData.setGroups(center, this.centerReadPlatformService.retrieveAssociatedGroups(centerId));
+                groups = this.centerReadPlatformService.retrieveAssociatedGroups(centerId);
             }
+            
+            if (associationParameters.contains("collectionMeetingCalendar")) {
+                collectionMeetingCalendar = this.calendarReadPlatformService.retrieveCollctionCalendarByEntity(centerId, CalendarEntityType.CENTERS.getValue());
+            }
+
+            center = CenterData.withAssociations(center, groups, collectionMeetingCalendar);
         }
+        
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.centerApiJsonSerializer.serialize(settings, center, GroupingTypesApiConstants.CENTER_RESPONSE_DATA_PARAMETERS);

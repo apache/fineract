@@ -14,7 +14,7 @@ import org.springframework.data.repository.query.Param;
 
 public interface CalendarInstanceRepository extends JpaRepository<CalendarInstance, Long>, JpaSpecificationExecutor<CalendarInstance> {
     
-    CalendarInstance findByCalendarAndEntityIdAndEntityTypeId(Long calendarId, Long entityId, Integer entityTypeId);
+    CalendarInstance findByCalendarIdAndEntityIdAndEntityTypeId(Long calendarId, Long entityId, Integer entityTypeId);
 
     Collection<CalendarInstance> findByEntityIdAndEntityTypeId(Long entityId, Integer entityTypeId);
 
