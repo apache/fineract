@@ -10,7 +10,7 @@ import java.util.Collection;
 /**
  * Immutable data object for groups with clients due for disbursement or collection.
  */
-public class JLGClientsData {
+public class JLGGroupData {
 
     private final Long groupId;
     private final String groupName;
@@ -18,9 +18,9 @@ public class JLGClientsData {
     private final String staffName;
     private final Long levelId;
     private final String levelName;
-    private Collection<ClientLoansData> clients;
+    private Collection<JLGClientData> clients;
 
-    public JLGClientsData(final Long groupId, final String groupName, final Long staffId, final String staffName, final Long levelId,
+    public JLGGroupData(final Long groupId, final String groupName, final Long staffId, final String staffName, final Long levelId,
             final String levelName) {
         this.groupId = groupId;
         this.groupName = groupName;
@@ -54,11 +54,11 @@ public class JLGClientsData {
         return this.levelName;
     }
 
-    public Collection<ClientLoansData> getCutomers() {
+    public Collection<JLGClientData> getClients() {
         return this.clients;
     }
 
-    public void setClients(final Collection<ClientLoansData> clients) {
+    public void setClients(final Collection<JLGClientData> clients) {
         this.clients = clients;
     }
 }

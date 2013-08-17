@@ -13,6 +13,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static org.mifosplatform.portfolio.collectionsheet.CollectionSheetConstants.localeParamName;
+import static org.mifosplatform.portfolio.collectionsheet.CollectionSheetConstants.dateFormatParamName;
+import static org.mifosplatform.portfolio.collectionsheet.CollectionSheetConstants.calendarIdParamName;
+import static org.mifosplatform.portfolio.collectionsheet.CollectionSheetConstants.transactionDateParamName;
+
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.data.ApiParameterError;
@@ -32,7 +37,8 @@ public class CollectionSheetGenerateCommandFromApiJsonDeserializer {
     /**
      * The parameters supported for this command.
      */
-    final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("dueDate", "locale", "dateFormat"));
+    final Set<String> supportedParameters = new HashSet<String>(Arrays.asList(transactionDateParamName, localeParamName,
+            dateFormatParamName, calendarIdParamName));
 
     private final FromJsonHelper fromApiJsonHelper;
 
@@ -53,14 +59,16 @@ public class CollectionSheetGenerateCommandFromApiJsonDeserializer {
 
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("collectionsheet");
 
-        final String dueDateParameterName = "dueDate";
-        final String dueDateStr = this.fromApiJsonHelper.extractStringNamed(dueDateParameterName, element);
-        baseDataValidator.reset().parameter(dueDateParameterName).value(dueDateStr).notBlank();
+        final String transactionDateStr = this.fromApiJsonHelper.extractStringNamed(transactionDateParamName, element);
+        baseDataValidator.reset().parameter(transactionDateParamName).value(transactionDateStr).notBlank();
 
-        if(!StringUtils.isBlank(dueDateStr)){
-            final LocalDate dueDate = this.fromApiJsonHelper.extractLocalDateNamed(dueDateParameterName, element);
-            baseDataValidator.reset().parameter(dueDateParameterName).value(dueDate).notNull();
+        if (!StringUtils.isBlank(transactionDateStr)) {
+            final LocalDate dueDate = this.fromApiJsonHelper.extractLocalDateNamed(transactionDateParamName, element);
+            baseDataValidator.reset().parameter(transactionDateParamName).value(dueDate).notNull();
         }
+
+        final Long calendarId = this.fromApiJsonHelper.extractLongNamed(calendarIdParamName, element);
+        baseDataValidator.reset().parameter(calendarIdParamName).value(calendarId).notNull();
 
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
                 "Validation errors exist.", dataValidationErrors); }

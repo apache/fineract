@@ -150,6 +150,9 @@ public class CentersApiResource {
             
             if (associationParameters.contains("collectionMeetingCalendar")) {
                 collectionMeetingCalendar = this.calendarReadPlatformService.retrieveCollctionCalendarByEntity(centerId, CalendarEntityType.CENTERS.getValue());
+                if(collectionMeetingCalendar != null){
+                    collectionMeetingCalendar = this.calendarReadPlatformService.generateRecurringDate(collectionMeetingCalendar);
+                }
             }
 
             center = CenterData.withAssociations(center, groups, collectionMeetingCalendar);

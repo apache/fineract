@@ -37,6 +37,7 @@ public class CalendarData {
     private final Collection<LocalDate> recurringDates;
     private final Collection<LocalDate> nextTenRecurringDates;
     private final String humanReadable;
+    private final LocalDate recentEligibleMeetingDate;
 
     private final LocalDate createdDate;
     private final LocalDate lastUpdatedDate;
@@ -53,7 +54,7 @@ public class CalendarData {
     public CalendarData(final Long id, final Long entityId, final EnumOptionData entityType, final String title, final String description,
             final String location, final LocalDate startDate, final LocalDate endDate, final Integer duration, final EnumOptionData type,
             final boolean repeating, final String recurrence, final EnumOptionData remindBy, final Integer firstReminder,
-            final Integer secondReminder, final String humanReadable, final LocalDate createdDate, final LocalDate lastUpdatedDate,
+            final Integer secondReminder, final String humanReadable, final LocalDate recentEligibleMeetingDate, final LocalDate createdDate, final LocalDate lastUpdatedDate,
             final Long createdByUserId, final String createdByUsername, final Long lastUpdatedByUserId, final String lastUpdatedByUsername) {
 
         this.id = id;
@@ -77,6 +78,7 @@ public class CalendarData {
         this.recurringDates = null;
         this.nextTenRecurringDates = null;
         this.humanReadable = humanReadable;
+        this.recentEligibleMeetingDate = recentEligibleMeetingDate;
 
         this.createdDate = createdDate;
         this.lastUpdatedDate = lastUpdatedDate;
@@ -109,6 +111,7 @@ public class CalendarData {
         this.recurringDates = calendarData.recurringDates;
         this.nextTenRecurringDates = calendarData.nextTenRecurringDates;
         this.humanReadable = calendarData.humanReadable;
+        this.recentEligibleMeetingDate = calendarData.recentEligibleMeetingDate;
         this.createdDate = calendarData.createdDate;
         this.lastUpdatedDate = calendarData.lastUpdatedDate;
         this.createdByUserId = calendarData.createdByUserId;
@@ -117,7 +120,7 @@ public class CalendarData {
         this.lastUpdatedByUsername = calendarData.lastUpdatedByUsername;
     }
 
-    public CalendarData(final CalendarData calendarData, final Collection<LocalDate> recurringDates, final Collection<LocalDate> nextTenRecurringDates) {
+    public CalendarData(final CalendarData calendarData, final Collection<LocalDate> recurringDates, final Collection<LocalDate> nextTenRecurringDates, final LocalDate recentEligibleMeetingDate) {
         this.id = calendarData.id;
         this.entityId = calendarData.entityId;
         this.entityType = calendarData.entityType;
@@ -139,6 +142,7 @@ public class CalendarData {
         this.recurringDates = recurringDates;
         this.nextTenRecurringDates = nextTenRecurringDates;
         this.humanReadable = calendarData.humanReadable;
+        this.recentEligibleMeetingDate = recentEligibleMeetingDate;
         this.createdDate = calendarData.createdDate;
         this.lastUpdatedDate = calendarData.lastUpdatedDate;
         this.createdByUserId = calendarData.createdByUserId;
@@ -165,9 +169,18 @@ public class CalendarData {
         final Integer firstReminder = new Integer(0);
         final Integer secondReminder = new Integer(0);
         final String humanReadable = null;
+        final LocalDate recentEligibleMeetingDate = null;
+        
+        final LocalDate createdDate = null;
+        final LocalDate lastUpdatedDate = null;
+        final Long createdByUserId = null;
+        final String createdByUsername = null;
+        final Long lastUpdatedByUserId = null;
+        final String lastUpdatedByUsername = null;
 
         return new CalendarData(id, entityId, entityType, title, description, location, startDate, endDate, duration, type, repeating,
-                recurrence, remindBy, firstReminder, secondReminder, humanReadable, null, null, null, null, null, null);
+                recurrence, remindBy, firstReminder, secondReminder, humanReadable, recentEligibleMeetingDate, createdDate,
+                lastUpdatedDate, createdByUserId, createdByUsername, lastUpdatedByUserId, lastUpdatedByUsername);
     }
 
     public Long getId() {

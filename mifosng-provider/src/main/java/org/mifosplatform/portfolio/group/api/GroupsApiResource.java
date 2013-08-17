@@ -203,7 +203,7 @@ public class GroupsApiResource {
                     groupRoles = null;
                 }
             }
-            if (associationParameters.contains("calendars")) {
+            if (associationParameters.contains("parentCalendars")) {
                 final List<Integer>  calendarTypeOptions = CalendarUtils.createIntegerListFromQueryParameter("all");
                 calendars = this.calendarReadPlatformService.retrieveParentCalendarsByEntity(groupId, CalendarEntityType.GROUPS.getValue(), calendarTypeOptions);
                 if (CollectionUtils.isEmpty(calendars)) {
@@ -211,7 +211,14 @@ public class GroupsApiResource {
                 }
             }
             if (associationParameters.contains("collectionMeetingCalendar")) {
-                collectionMeetingCalendar = this.calendarReadPlatformService.retrieveCollctionCalendarByEntity(groupId, CalendarEntityType.GROUPS.getValue());
+                if(group.isChildGroup()){
+                    collectionMeetingCalendar = this.calendarReadPlatformService.retrieveCollctionCalendarByEntity(group.getParentId(), CalendarEntityType.CENTERS.getValue());
+                }else {
+                    collectionMeetingCalendar = this.calendarReadPlatformService.retrieveCollctionCalendarByEntity(groupId, CalendarEntityType.GROUPS.getValue());
+                }
+                if(collectionMeetingCalendar != null){
+                    collectionMeetingCalendar = this.calendarReadPlatformService.generateRecurringDate(collectionMeetingCalendar);
+                }
             }
             
             group = GroupGeneralData.withAssocations(group, membersOfGroup, groupRoles, calendars, collectionMeetingCalendar);

@@ -6,6 +6,7 @@
 package org.mifosplatform.commands.service;
 
 import org.mifosplatform.commands.domain.CommandWrapper;
+import org.mifosplatform.portfolio.calendar.domain.CalendarEntityType;
 
 public class CommandWrapperBuilder {
 
@@ -1016,6 +1017,8 @@ public class CommandWrapperBuilder {
         this.entityName = "GROUP";
         this.entityId = groupId;
         this.groupId = groupId;
+        this.supportedEntityId = groupId;
+        this.supportedEntityType = CalendarEntityType.GROUPS.name();
         this.href = "/groups/" + groupId + "?command=saveCollectionSheet";
         return this;
     }
@@ -1145,6 +1148,8 @@ public class CommandWrapperBuilder {
         this.actionName = "SAVECOLLECTIONSHEET";
         this.entityName = "CENTER";
         this.entityId = centerId;
+        this.supportedEntityId = centerId;
+        this.supportedEntityType = CalendarEntityType.CENTERS.name();
         this.href = "/centers/" + centerId + "?command=saveCollectionSheet";
         return this;
     }

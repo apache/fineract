@@ -10,12 +10,14 @@ import static org.mifosplatform.portfolio.meeting.MeetingApiConstants.calendarId
 import static org.mifosplatform.portfolio.meeting.MeetingApiConstants.clientIdParamName;
 import static org.mifosplatform.portfolio.meeting.MeetingApiConstants.clientsAttendanceParamName;
 import static org.mifosplatform.portfolio.meeting.MeetingApiConstants.meetingDateParamName;
+import static org.mifosplatform.portfolio.collectionsheet.CollectionSheetConstants.transactionDateParamName;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
 
+import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
@@ -36,6 +38,7 @@ import org.mifosplatform.portfolio.group.exception.ClientNotInGroupException;
 import org.mifosplatform.portfolio.meeting.attendance.domain.ClientAttendance;
 import org.mifosplatform.portfolio.meeting.data.MeetingDataValidator;
 import org.mifosplatform.portfolio.meeting.domain.Meeting;
+import org.mifosplatform.portfolio.meeting.domain.MeetingRepository;
 import org.mifosplatform.portfolio.meeting.domain.MeetingRepositoryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -48,7 +51,8 @@ import com.google.gson.JsonObject;
 @Service
 public class MeetingWritePlatformServiceJpaRepositoryImpl implements MeetingWritePlatformService {
 
-    private final MeetingRepositoryWrapper meetingRepository;
+    private final MeetingRepositoryWrapper meetingRepositoryWrapper;
+    private final MeetingRepository meetingRepository;
     private final MeetingDataValidator meetingDataValidator;
     private final CalendarInstanceRepository calendarInstanceRepository;
     private final CalendarRepository calendarRepository;
@@ -57,10 +61,11 @@ public class MeetingWritePlatformServiceJpaRepositoryImpl implements MeetingWrit
     private final FromJsonHelper fromApiJsonHelper;
 
     @Autowired
-    public MeetingWritePlatformServiceJpaRepositoryImpl(MeetingRepositoryWrapper meetingRepository,
-            MeetingDataValidator meetingDataValidator, CalendarInstanceRepository calendarInstanceRepository,
-            CalendarRepository calendarRepository, final ClientRepository clientRepository, final GroupRepository groupRepository,
-            final FromJsonHelper fromApiJsonHelper) {
+    public MeetingWritePlatformServiceJpaRepositoryImpl(final MeetingRepositoryWrapper meetingRepositoryWrapper,
+            final MeetingRepository meetingRepository, final MeetingDataValidator meetingDataValidator,
+            final CalendarInstanceRepository calendarInstanceRepository, final CalendarRepository calendarRepository,
+            final ClientRepository clientRepository, final GroupRepository groupRepository, final FromJsonHelper fromApiJsonHelper) {
+        this.meetingRepositoryWrapper = meetingRepositoryWrapper;
         this.meetingRepository = meetingRepository;
         this.meetingDataValidator = meetingDataValidator;
         this.calendarInstanceRepository = calendarInstanceRepository;
@@ -71,7 +76,7 @@ public class MeetingWritePlatformServiceJpaRepositoryImpl implements MeetingWrit
     }
 
     @Override
-    public CommandProcessingResult createMeeting(JsonCommand command) {
+    public CommandProcessingResult createMeeting(final JsonCommand command) {
 
         this.meetingDataValidator.validateForCreate(command);
 
@@ -87,13 +92,13 @@ public class MeetingWritePlatformServiceJpaRepositoryImpl implements MeetingWrit
                 newMeeting.associateClientsAttendance(clientsAttendance);
             }
             // save meeting details
-            this.meetingRepository.save(newMeeting);
+            this.meetingRepositoryWrapper.save(newMeeting);
             final Long groupId = newMeeting.isGroupEntity() ? newMeeting.entityId() : null;
             return new CommandProcessingResultBuilder() //
                     .withEntityId(newMeeting.getId()) //
                     .withGroupId(groupId).build();
 
-        } catch (DataIntegrityViolationException dve) {
+        } catch (final DataIntegrityViolationException dve) {
             handleMeetingDataIntegrityIssues(meetingDate, dve);
             return new CommandProcessingResultBuilder() //
                     .build();
@@ -107,11 +112,12 @@ public class MeetingWritePlatformServiceJpaRepositoryImpl implements MeetingWrit
         if (calendarForUpdate == null) { throw new CalendarNotFoundException(calendarId); }
 
         final Integer entityTypeId = CalendarEntityType.valueOf(command.getSupportedEntityType().toUpperCase()).getValue();
-        final CalendarInstance calendarInstance = calendarInstanceRepository.findByCalendarIdAndEntityIdAndEntityTypeId(
+        final CalendarInstance calendarInstance = this.calendarInstanceRepository.findByCalendarIdAndEntityIdAndEntityTypeId(
                 calendarForUpdate.getId(), entityId, entityTypeId);
-        if(calendarInstance == null) {
+        if (calendarInstance == null) {
             final String postFix = "for." + command.getSupportedEntityType() + "not.found";
-            final String defaultUserMessage = "No Calendar Instance details found for group with identifier " + entityId + " and calendar with identifier " + calendarId;
+            final String defaultUserMessage = "No Calendar Instance details found for group with identifier " + entityId
+                    + " and calendar with identifier " + calendarId;
             throw new CalendarInstanceNotFoundException(postFix, defaultUserMessage, entityId, calendarId);
         }
         return calendarInstance;
@@ -144,16 +150,17 @@ public class MeetingWritePlatformServiceJpaRepositoryImpl implements MeetingWrit
                     } else if (meeting.isCenterEntity()) {
                         if (childGroups != null && !childGroups.isEmpty()) {
                             boolean isChildClient = false;
-                            for (Group group : childGroups) {
-                                if (group.isChildClient(clientId)){
+                            for (final Group group : childGroups) {
+                                if (group.isChildClient(clientId)) {
                                     isChildClient = true;
                                     break;
                                 }
                             }
-                            if(!isChildClient){
+                            if (!isChildClient) {
                                 final String defaultUserMessage = "Client with identifier " + clientId + " is not in center "
                                         + meeting.entityId();
-                                throw new ClientNotInGroupException("client.not.in.center", defaultUserMessage, clientId, meeting.entityId());
+                                throw new ClientNotInGroupException("client.not.in.center", defaultUserMessage, clientId,
+                                        meeting.entityId());
                             }
                         }
                     }
@@ -167,17 +174,17 @@ public class MeetingWritePlatformServiceJpaRepositoryImpl implements MeetingWrit
     }
 
     @Override
-    public CommandProcessingResult updateMeeting(JsonCommand command) {
+    public CommandProcessingResult updateMeeting(final JsonCommand command) {
         this.meetingDataValidator.validateForUpdate(command);
 
-        final Meeting meetingForUpdate = this.meetingRepository.findOneWithNotFoundDetection(command.entityId());
+        final Meeting meetingForUpdate = this.meetingRepositoryWrapper.findOneWithNotFoundDetection(command.entityId());
         final Map<String, Object> changes = meetingForUpdate.update(command);
 
         try {
             if (!changes.isEmpty()) {
-                this.meetingRepository.saveAndFlush(meetingForUpdate);
+                this.meetingRepositoryWrapper.saveAndFlush(meetingForUpdate);
             }
-        } catch (DataIntegrityViolationException dve) {
+        } catch (final DataIntegrityViolationException dve) {
             handleMeetingDataIntegrityIssues(meetingForUpdate.getMeetingDate(), dve);
             return new CommandProcessingResultBuilder() //
                     .build();
@@ -191,23 +198,23 @@ public class MeetingWritePlatformServiceJpaRepositoryImpl implements MeetingWrit
     }
 
     @Override
-    public CommandProcessingResult deleteMeeting(Long meetingId) {
-        final Meeting meetingForDelete = this.meetingRepository.findOneWithNotFoundDetection(meetingId);
-        this.meetingRepository.delete(meetingForDelete);
+    public CommandProcessingResult deleteMeeting(final Long meetingId) {
+        final Meeting meetingForDelete = this.meetingRepositoryWrapper.findOneWithNotFoundDetection(meetingId);
+        this.meetingRepositoryWrapper.delete(meetingForDelete);
         return new CommandProcessingResultBuilder() //
                 .withEntityId(meetingId) //
                 .build();
     }
 
     @Override
-    public CommandProcessingResult saveOrUpdateAttendance(JsonCommand command) {
+    public CommandProcessingResult saveOrUpdateAttendance(final JsonCommand command) {
         this.meetingDataValidator.validateForUpdateAttendance(command);
 
-        final Meeting meetingForUpdate = this.meetingRepository.findOneWithNotFoundDetection(command.entityId());
+        final Meeting meetingForUpdate = this.meetingRepositoryWrapper.findOneWithNotFoundDetection(command.entityId());
         final Collection<ClientAttendance> clientsAttendance = getClientsAttendance(meetingForUpdate, command);
         final Map<String, Object> changes = meetingForUpdate.updateAttendance(clientsAttendance);
 
-        this.meetingRepository.saveAndFlush(meetingForUpdate);
+        this.meetingRepositoryWrapper.saveAndFlush(meetingForUpdate);
         final Long groupId = meetingForUpdate.isGroupEntity() ? meetingForUpdate.entityId() : null;
         return new CommandProcessingResultBuilder() //
                 .withEntityId(meetingForUpdate.getId()) //
@@ -219,11 +226,35 @@ public class MeetingWritePlatformServiceJpaRepositoryImpl implements MeetingWrit
     private void handleMeetingDataIntegrityIssues(final Date meetingDate, final DataIntegrityViolationException dve) {
         final Throwable realCause = dve.getMostSpecificCause();
         if (realCause.getMessage().contains("unique_calendar_instance_id_meeting_date")) {
-
-        throw new PlatformDataIntegrityException("error.msg.meeting.duplicate", "A meeting with date '" + meetingDate + "' already exists",
-                meetingDateParamName, meetingDate); }
+        final LocalDate meetingDateLocal = LocalDate.fromDateFields(meetingDate);
+        throw new PlatformDataIntegrityException("error.msg.meeting.duplicate", "A meeting with date '" + meetingDateLocal + "' already exists",
+                meetingDateParamName, meetingDateLocal); }
 
         throw new PlatformDataIntegrityException("error.msg.meeting.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource: " + realCause.getMessage());
     }
+
+    @Override
+    public void updateCollectionSheetAttendance(final JsonCommand command) {
+        final Date meetingDate = command.DateValueOfParameterNamed(transactionDateParamName);
+
+        try {
+            final CalendarInstance calendarInstance = getCalendarInstance(command);
+            final Meeting meeting = this.meetingRepository.findByCalendarInstanceIdAndMeetingDate(calendarInstance.getId(), meetingDate);
+
+            // create new meeting
+            final Meeting newMeeting = (meeting != null) ? meeting : Meeting.createNew(calendarInstance, meetingDate);
+
+            final Collection<ClientAttendance> clientsAttendance = getClientsAttendance(newMeeting, command);
+            if (clientsAttendance != null && !clientsAttendance.isEmpty()) {
+                newMeeting.updateAttendance(clientsAttendance);
+            }
+            // save meeting details
+            this.meetingRepositoryWrapper.save(newMeeting);
+        } catch (final DataIntegrityViolationException dve) {
+            handleMeetingDataIntegrityIssues(meetingDate, dve);
+        }
+
+    }
+
 }

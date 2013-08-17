@@ -7,6 +7,7 @@ package org.mifosplatform.portfolio.collectionsheet.data;
 
 import java.math.BigDecimal;
 
+import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
 
 /**
@@ -34,12 +35,13 @@ public class JLGCollectionSheetFlatData {
     private BigDecimal interestDue = BigDecimal.ZERO;
     private BigDecimal interestPaid = BigDecimal.ZERO;
     private BigDecimal chargesDue = BigDecimal.ZERO;
+    private final EnumOptionData attendanceType;
 
     public JLGCollectionSheetFlatData(final String groupName, final Long groupId, final Long staffId, final String staffName,
             final Long levelId, final String levelName, final String clientName, final Long clientId, final Long loanId,
             final String accountId, final Integer accountStatusId, final String productShortName, final Long productId,
             final CurrencyData currency, final BigDecimal disbursementAmount, final BigDecimal principalDue,
-            final BigDecimal principalPaid, final BigDecimal interestDue, final BigDecimal interestPaid, final BigDecimal chargesDue) {
+            final BigDecimal principalPaid, final BigDecimal interestDue, final BigDecimal interestPaid, final BigDecimal chargesDue, final EnumOptionData attendanceType) {
         this.groupName = groupName;
         this.groupId = groupId;
         this.staffId = staffId;
@@ -60,6 +62,7 @@ public class JLGCollectionSheetFlatData {
         this.interestDue = interestDue;
         this.interestPaid = interestPaid;
         this.chargesDue = chargesDue;
+        this.attendanceType = attendanceType;
     }
 
     public String getGroupName() {
@@ -147,13 +150,13 @@ public class JLGCollectionSheetFlatData {
                 this.disbursementAmount, this.principalDue, this.principalPaid, this.interestDue, this.interestPaid, this.chargesDue);
     }
 
-    public ClientLoansData getClientLoansData() {
-        return new ClientLoansData(this.clientId, this.clientName);
+    public JLGClientData getClientData() {
+        return new JLGClientData(this.clientId, this.clientName, this.attendanceType);
     }
 
-    public JLGClientsData getJLGClientsData() {
+    public JLGGroupData getJLGGroupData() {
 
-        return new JLGClientsData(this.groupId, this.groupName, this.staffId, this.staffName, this.levelId, this.levelName);
+        return new JLGGroupData(this.groupId, this.groupName, this.staffId, this.staffName, this.levelId, this.levelName);
     }
 
 }

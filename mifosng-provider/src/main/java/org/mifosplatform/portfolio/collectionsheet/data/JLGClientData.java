@@ -7,25 +7,30 @@ package org.mifosplatform.portfolio.collectionsheet.data;
 
 import java.util.Collection;
 
+import org.mifosplatform.infrastructure.core.data.EnumOptionData;
+
 /**
  * Immutable data object for clients with loans due for disbursement or collection.
  */
-public class ClientLoansData {
+public class JLGClientData {
 
     private final Long clientId;
     private final String clientName;
     private Collection<LoanDueData> loans;
+    private final EnumOptionData attendanceType;
 
-    public ClientLoansData(final Long clientId, final String clientName, final Collection<LoanDueData> loans) {
+    public JLGClientData(final Long clientId, final String clientName, final Collection<LoanDueData> loans, final EnumOptionData attendanceType) {
         this.clientId = clientId;
         this.clientName = clientName;
         this.loans = loans;
+        this.attendanceType = attendanceType;
     }
 
-    public ClientLoansData(final Long clientId, final String clientName) {
+    public JLGClientData(final Long clientId, final String clientName, final EnumOptionData attendanceType) {
         this.clientId = clientId;
         this.clientName = clientName;
         this.loans = null;
+        this.attendanceType = attendanceType;
     }
 
     public Long getClientId() {

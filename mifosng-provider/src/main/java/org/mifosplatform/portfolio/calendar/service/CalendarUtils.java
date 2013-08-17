@@ -415,4 +415,26 @@ public class CalendarUtils {
         sqlCalendarTypeOptions += calendarTypeOptions.get(size - 1).toString();
         return sqlCalendarTypeOptions;
     }
+    
+    public static LocalDate getRecentEligibleMeetingDate(final String recurringRule, final LocalDate seedDate){
+        LocalDate currentDate = DateUtils.getLocalDateOfTenant();
+        final Recur recur = CalendarUtils.getICalRecur(recurringRule);
+        if (recur == null) { return null; }
+        
+        if(isValidRecurringDate(recur, seedDate, currentDate)){
+            return currentDate;
+        }
+        
+        if(recur.getFrequency().equals(Recur.DAILY)){
+            currentDate = currentDate.plusDays(recur.getInterval());
+        }else if(recur.getFrequency().equals(Recur.WEEKLY)){
+            currentDate = currentDate.plusWeeks(recur.getInterval());
+        }else if(recur.getFrequency().equals(Recur.MONTHLY)){
+            currentDate = currentDate.plusMonths(recur.getInterval());
+        }else if(recur.getFrequency().equals(Recur.YEARLY)){
+            currentDate = currentDate.plusYears(recur.getInterval());
+        }
+        
+        return getNextRecurringDate(recur, seedDate, currentDate);
+    }
 }
