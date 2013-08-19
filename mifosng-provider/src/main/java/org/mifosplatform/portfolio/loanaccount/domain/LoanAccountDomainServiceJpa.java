@@ -145,7 +145,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
 
         final Map<String, Object> accountingBridgeData = loanAccount.deriveAccountingBridgeData(applicationCurrency.toData(),
                 existingTransactionIds, existingReversedTransactionIds);
-        this.journalEntryWritePlatformService.createJournalEntriesForSavings(accountingBridgeData);
+        this.journalEntryWritePlatformService.createJournalEntriesForLoan(accountingBridgeData);
     }
 
     private LoanLifecycleStateMachine defaultLoanLifecycleStateMachine() {
