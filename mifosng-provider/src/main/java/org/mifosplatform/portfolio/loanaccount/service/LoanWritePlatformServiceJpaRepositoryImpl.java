@@ -930,6 +930,7 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
     public CommandProcessingResult bulkLoanReassignment(final JsonCommand command) {
 
         this.context.authenticatedUser();
+        this.loanEventApiJsonValidator.validateForBulkLoanReassignment(command.json());
 
         final Long fromLoanOfficerId = command.longValueOfParameterNamed("fromLoanOfficerId");
         final Long toLoanOfficerId = command.longValueOfParameterNamed("toLoanOfficerId");
@@ -950,7 +951,6 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             loan.reassignLoanOfficer(toLoanOfficer, dateOfLoanOfficerAssignment);
             this.loanRepository.save(loan);
         }
-
         this.loanRepository.flush();
 
         return new CommandProcessingResultBuilder() //
