@@ -28,6 +28,7 @@ public class ScheduledJobDetail extends AbstractPersistable<Long> {
     @Column(name = "cron_expression")
     private String cronExpression;
 
+    @SuppressWarnings("unused")
     @Column(name = "create_time")
     @Temporal(TemporalType.TIMESTAMP)
     private Date createTime;
@@ -38,6 +39,7 @@ public class ScheduledJobDetail extends AbstractPersistable<Long> {
     @Column(name = "group_name")
     private String groupName;
 
+    @SuppressWarnings("unused")
     @Column(name = "previous_run_start_time")
     @Temporal(TemporalType.TIMESTAMP)
     private Date previousRunStartTime;
@@ -49,6 +51,7 @@ public class ScheduledJobDetail extends AbstractPersistable<Long> {
     @Column(name = "job_key")
     private String jobKey;
 
+    @SuppressWarnings("unused")
     @Column(name = "initializing_errorlog")
     private String errorLog;
 
@@ -58,11 +61,15 @@ public class ScheduledJobDetail extends AbstractPersistable<Long> {
     @Column(name = "currently_running")
     private boolean currentlyRunning;
 
+    @SuppressWarnings("unused")
     @Column(name = "updates_allowed")
     private boolean updatesAllowed;
 
     @Column(name = "scheduler_group")
     private Short schedulerGroup;
+
+    @Column(name = "is_misfired")
+    private boolean triggerMisfired;
 
     protected ScheduledJobDetail() {
 
@@ -102,6 +109,10 @@ public class ScheduledJobDetail extends AbstractPersistable<Long> {
 
     public void updatePreviousRunStartTime(final Date previousRunStartTime) {
         this.previousRunStartTime = previousRunStartTime;
+    }
+
+    public Date getNextRunTime() {
+        return this.nextRunTime;
     }
 
     public void updateNextRunTime(final Date nextRunTime) {
@@ -145,6 +156,14 @@ public class ScheduledJobDetail extends AbstractPersistable<Long> {
         }
 
         return actualChanges;
+    }
+
+    public boolean isTriggerMisfired() {
+        return this.triggerMisfired;
+    }
+
+    public void updateTriggerMisfired(boolean triggerMisfired) {
+        this.triggerMisfired = triggerMisfired;
     }
 
 }

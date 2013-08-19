@@ -1,5 +1,6 @@
 package org.mifosplatform.infrastructure.jobs.service;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -11,6 +12,8 @@ import org.mifosplatform.infrastructure.jobs.domain.ScheduledJobDetail;
 import org.mifosplatform.infrastructure.jobs.domain.ScheduledJobDetailRepository;
 import org.mifosplatform.infrastructure.jobs.domain.ScheduledJobRunHistory;
 import org.mifosplatform.infrastructure.jobs.domain.ScheduledJobRunHistoryRepository;
+import org.mifosplatform.infrastructure.jobs.domain.SchedulerDetail;
+import org.mifosplatform.infrastructure.jobs.domain.SchedulerDetailRepository;
 import org.mifosplatform.infrastructure.jobs.exception.JobNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,13 +26,17 @@ public class SchedularWritePlatformServiceJpaRepositoryImpl implements Schedular
 
     private final ScheduledJobRunHistoryRepository scheduledJobRunHistoryRepository;
 
+    private final SchedulerDetailRepository schedulerDetailRepository;
+
     private final JobDetailDataValidator dataValidator;
 
     @Autowired
     public SchedularWritePlatformServiceJpaRepositoryImpl(final ScheduledJobDetailRepository scheduledJobDetailsRepository,
-            final ScheduledJobRunHistoryRepository scheduledJobRunHistoryRepository, final JobDetailDataValidator dataValidator) {
+            final ScheduledJobRunHistoryRepository scheduledJobRunHistoryRepository, final JobDetailDataValidator dataValidator,
+            final SchedulerDetailRepository schedulerDetailRepository) {
         this.scheduledJobDetailsRepository = scheduledJobDetailsRepository;
         this.scheduledJobRunHistoryRepository = scheduledJobRunHistoryRepository;
+        this.schedulerDetailRepository = schedulerDetailRepository;
         this.dataValidator = dataValidator;
     }
 
@@ -71,6 +78,22 @@ public class SchedularWritePlatformServiceJpaRepositoryImpl implements Schedular
         return this.scheduledJobDetailsRepository.findByJobId(jobId);
     }
 
+    @Override
+    @Transactional
+    public void updateSchedulerDetail(final SchedulerDetail schedulerDetail) {
+        this.schedulerDetailRepository.save(schedulerDetail);
+    }
+
+    @Override
+    public SchedulerDetail retriveSchedulerDetail() {
+        SchedulerDetail schedulerDetail = null;
+        List<SchedulerDetail> schedulerDetailList = schedulerDetailRepository.findAll();
+        if (schedulerDetailList != null) {
+            schedulerDetail = schedulerDetailList.get(0);
+        }
+        return schedulerDetail;
+    }
+
     @Transactional
     @Override
     public CommandProcessingResult updateJobDetail(final Long jobId, final JsonCommand command) {
@@ -87,6 +110,26 @@ public class SchedularWritePlatformServiceJpaRepositoryImpl implements Schedular
                 .with(changes) //
                 .build();
 
+    }
+
+    @Transactional
+    @Override
+    public boolean processJobDetailForExecution(String jobKey, String triggerType) {
+        boolean isStopExecution = false;
+        final ScheduledJobDetail scheduledJobDetail = scheduledJobDetailsRepository.findByJobKeyWithLock(jobKey);
+        if (scheduledJobDetail.isCurrentlyRunning()
+                || (triggerType == SchedulerServiceConstants.TRIGGER_TYPE_CRON && (scheduledJobDetail.getNextRunTime().after(new Date())))) {
+            isStopExecution = true;
+        }
+        final SchedulerDetail schedulerDetail = retriveSchedulerDetail();
+        if (triggerType == SchedulerServiceConstants.TRIGGER_TYPE_CRON && schedulerDetail.isSuspended()) {
+            scheduledJobDetail.updateTriggerMisfired(true);
+            isStopExecution = true;
+        } else if (!isStopExecution) {
+            scheduledJobDetail.updateCurrentlyRunningStatus(true);
+        }
+        scheduledJobDetailsRepository.save(scheduledJobDetail);
+        return isStopExecution;
     }
 
 }
