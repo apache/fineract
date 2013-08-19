@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 import java.util.TimeZone;
 
@@ -15,6 +14,7 @@ import org.mifosplatform.infrastructure.core.exception.PlatformInternalServerExc
 import org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil;
 import org.mifosplatform.infrastructure.jobs.annotation.CronMethodParser;
 import org.mifosplatform.infrastructure.jobs.domain.ScheduledJobDetail;
+import org.mifosplatform.infrastructure.jobs.domain.SchedulerDetail;
 import org.mifosplatform.infrastructure.jobs.exception.JobNotFoundException;
 import org.mifosplatform.infrastructure.security.service.TenantDetailsService;
 import org.quartz.JobDataMap;
@@ -24,6 +24,7 @@ import org.quartz.JobListener;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.Trigger;
+import org.quartz.TriggerListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,8 +51,6 @@ public class JobRegisterServiceImpl implements JobRegisterService {
 
     private final TenantDetailsService tenantDetailsService;
 
-    private final HashMap<Long, Boolean> schedulerStatus = new HashMap<Long, Boolean>(2);
-
     private final HashMap<String, Scheduler> schedulers = new HashMap<String, Scheduler>(4);
 
     @Autowired
@@ -68,24 +67,32 @@ public class JobRegisterServiceImpl implements JobRegisterService {
         for (MifosPlatformTenant tenant : allTenants) {
             ThreadLocalContextUtil.setTenant(tenant);
             List<ScheduledJobDetail> scheduledJobDetails = this.schedularWritePlatformService.retrieveAllJobs();
-            schedulerStatus.put(tenant.getId(), true);
             for (ScheduledJobDetail jobDetails : scheduledJobDetails) {
                 scheduleJob(jobDetails);
+                jobDetails.updateTriggerMisfired(false);
                 this.schedularWritePlatformService.saveOrUpdate(jobDetails);
+            }
+            SchedulerDetail schedulerDetail = this.schedularWritePlatformService.retriveSchedulerDetail();
+            if (schedulerDetail.isResetSchedulerOnBootup()) {
+                schedulerDetail.updateSuspendedState(false);
+                this.schedularWritePlatformService.updateSchedulerDetail(schedulerDetail);
             }
         }
     }
 
-    public void executeJob(final ScheduledJobDetail scheduledJobDetail) {
+    public void executeJob(final ScheduledJobDetail scheduledJobDetail, String triggerType) {
         try {
             final JobDataMap jobDataMap = new JobDataMap();
-            jobDataMap.put(SchedulerServiceConstants.TRIGGER_TYPE_REFERENCE, SchedulerServiceConstants.TRIGGER_TYPE_APPLICATION);
+            if (triggerType == null) {
+                triggerType = SchedulerServiceConstants.TRIGGER_TYPE_APPLICATION;
+            }
+            jobDataMap.put(SchedulerServiceConstants.TRIGGER_TYPE_REFERENCE, triggerType);
             jobDataMap.put(SchedulerServiceConstants.TENANT_IDENTIFIER, ThreadLocalContextUtil.getTenant().getTenantIdentifier());
             String key = scheduledJobDetail.getJobKey();
             JobKey jobKey = constructJobKey(key);
             String schedulerName = getSchedulerName(scheduledJobDetail);
             Scheduler scheduler = schedulers.get(schedulerName);
-            if (scheduler == null || scheduler.isInStandbyMode() || !scheduler.checkExists(jobKey)) {
+            if (scheduler == null || !scheduler.checkExists(jobKey)) {
                 JobDetail jobDetail = createJobDetail(scheduledJobDetail);
                 String tempSchedulerName = "temp" + scheduledJobDetail.getId();
                 List<Class<? extends JobListener>> listenerClasses = new ArrayList<Class<? extends JobListener>>(2);
@@ -101,7 +108,6 @@ public class JobRegisterServiceImpl implements JobRegisterService {
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
             throw new PlatformInternalServerException("error.msg.sheduler.job.execution.failed", "Job execution failed for job with id:"
                     + scheduledJobDetail.getId(), scheduledJobDetail.getId());
         }
@@ -128,32 +134,48 @@ public class JobRegisterServiceImpl implements JobRegisterService {
 
     @Override
     public void pauseScheduler() {
-        schedulerStatus.put(ThreadLocalContextUtil.getTenant().getId(), false);
-        for (Map.Entry<String, Scheduler> schedulerEntry : this.schedulers.entrySet()) {
-            try {
-                String schedulerName = schedulerEntry.getValue().getSchedulerName();
-                if (isCurrentTenantsScheduler(schedulerName)) {
-                    schedulerEntry.getValue().standby();
-                }
-            } catch (SchedulerException e) {
-                logger.error(e.getMessage(), e);
-            }
+        SchedulerDetail schedulerDetail = this.schedularWritePlatformService.retriveSchedulerDetail();
+        if (!schedulerDetail.isSuspended()) {
+            schedulerDetail.updateSuspendedState(true);
+            this.schedularWritePlatformService.updateSchedulerDetail(schedulerDetail);
         }
     }
 
     @Override
     public void startScheduler() {
-        for (Map.Entry<String, Scheduler> schedulerEntry : this.schedulers.entrySet()) {
-            try {
-                String schedulerName = schedulerEntry.getValue().getSchedulerName();
-                if (isCurrentTenantsScheduler(schedulerName)) {
-                    schedulerEntry.getValue().start();
+        SchedulerDetail schedulerDetail = this.schedularWritePlatformService.retriveSchedulerDetail();
+        if (schedulerDetail.isSuspended()) {
+            schedulerDetail.updateSuspendedState(false);
+            this.schedularWritePlatformService.updateSchedulerDetail(schedulerDetail);
+            if (schedulerDetail.isExecuteInstructionForMisfiredJobs()) {
+                List<ScheduledJobDetail> scheduledJobDetails = this.schedularWritePlatformService.retrieveAllJobs();
+                for (ScheduledJobDetail jobDetail : scheduledJobDetails) {
+                    if (jobDetail.isTriggerMisfired()) {
+                        if (jobDetail.isActiveSchedular()) {
+                            executeJob(jobDetail, SchedulerServiceConstants.TRIGGER_TYPE_CRON);
+                        }
+                        String schedulerName = getSchedulerName(jobDetail);
+                        Scheduler scheduler = schedulers.get(schedulerName);
+                        if (scheduler != null) {
+                            String key = jobDetail.getJobKey();
+                            JobKey jobKey = constructJobKey(key);
+                            try {
+                                List<? extends Trigger> triggers = scheduler.getTriggersOfJob(jobKey);
+                                for (Trigger trigger : triggers) {
+                                    if (trigger.getNextFireTime() != null && trigger.getNextFireTime().after(jobDetail.getNextRunTime())) {
+                                        jobDetail.updateNextRunTime(trigger.getNextFireTime());
+                                    }
+                                }
+                            } catch (SchedulerException e) {
+                                logger.error(e.getMessage(), e);
+                            }
+                        }
+                        jobDetail.updateTriggerMisfired(false);
+                        this.schedularWritePlatformService.saveOrUpdate(jobDetail);
+                    }
                 }
-            } catch (SchedulerException e) {
-                logger.error(e.getMessage(), e);
             }
         }
-        schedulerStatus.put(ThreadLocalContextUtil.getTenant().getId(), true);
     }
 
     @Override
@@ -166,23 +188,12 @@ public class JobRegisterServiceImpl implements JobRegisterService {
     public void executeJob(final Long jobId) {
         ScheduledJobDetail scheduledJobDetail = this.schedularWritePlatformService.findByJobId(jobId);
         if (scheduledJobDetail == null) { throw new JobNotFoundException(String.valueOf(jobId)); }
-        executeJob(scheduledJobDetail);
+        executeJob(scheduledJobDetail, null);
     }
 
     @Override
     public boolean isSchedulerRunning() {
-        return this.schedulerStatus.get(ThreadLocalContextUtil.getTenant().getId());
-    }
-
-    private boolean isCurrentTenantsScheduler(final String schedulerName) {
-        int beginIndex = SchedulerServiceConstants.SCHEDULER.length();
-        int endIndex = schedulerName.length();
-        if (schedulerName.contains(SchedulerServiceConstants.SCHEDULER_GROUP)) {
-            endIndex = schedulerName.indexOf(SchedulerServiceConstants.SCHEDULER_GROUP);
-        }
-        String tenantId = schedulerName.substring(beginIndex, endIndex);
-        MifosPlatformTenant tenant = ThreadLocalContextUtil.getTenant();
-        return tenant.getId() == Long.valueOf(tenantId);
+        return !this.schedularWritePlatformService.retriveSchedulerDetail().isSuspended();
     }
 
     private void scheduleJob(final ScheduledJobDetail scheduledJobDetails) {
@@ -195,9 +206,6 @@ public class JobRegisterServiceImpl implements JobRegisterService {
             JobDetail jobDetail = createJobDetail(scheduledJobDetails);
             Trigger trigger = createTrigger(scheduledJobDetails, jobDetail);
             Scheduler scheduler = getScheduler(scheduledJobDetails);
-            if (!this.schedulerStatus.get(ThreadLocalContextUtil.getTenant().getId()) && !scheduler.isInStandbyMode()) {
-                scheduler.standby();
-            }
             scheduler.scheduleJob(jobDetail, trigger);
             scheduledJobDetails.updateJobKey(getJobKeyAsString(jobDetail.getKey()));
             scheduledJobDetails.updateNextRunTime(trigger.getNextFireTime());
@@ -253,6 +261,9 @@ public class JobRegisterServiceImpl implements JobRegisterService {
             listenerClasses.add(SchedulerJobListener.class);
         }
         schedulerFactoryBean.setGlobalJobListeners(getGlobalListener(listenerClasses));
+        TriggerListener globalTriggerListener = applicationContext.getBean("schedulerTriggerListener", TriggerListener.class);
+        TriggerListener[] globalTriggerListeners = { globalTriggerListener };
+        schedulerFactoryBean.setGlobalTriggerListeners(globalTriggerListeners);
         Properties quartzProperties = new Properties();
         quartzProperties.put(SchedulerFactoryBean.PROP_THREAD_COUNT, Integer.toString(noOfThreads));
         schedulerFactoryBean.setQuartzProperties(quartzProperties);
