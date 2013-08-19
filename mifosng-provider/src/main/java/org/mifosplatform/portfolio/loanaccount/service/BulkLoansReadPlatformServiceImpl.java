@@ -16,6 +16,8 @@ import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext
 import org.mifosplatform.organisation.staff.data.StaffAccountSummaryCollectionData;
 import org.mifosplatform.portfolio.accountdetails.data.LoanAccountSummaryData;
 import org.mifosplatform.portfolio.accountdetails.service.AccountDetailsReadPlatformService;
+import org.mifosplatform.portfolio.client.domain.ClientStatus;
+import org.mifosplatform.portfolio.group.domain.GroupingTypeStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -42,13 +44,13 @@ public class BulkLoansReadPlatformServiceImpl implements BulkLoansReadPlatformSe
         context.authenticatedUser();
 
         final StaffClientMapper staffClientMapper = new StaffClientMapper();
-        final String clientSql = "select distinct " + staffClientMapper.schema();
+        final String clientSql = "select distinct " + staffClientMapper.schema() +" and c.status_enum=?";
 
         final StaffGroupMapper staffGroupMapper = new StaffGroupMapper();
-        final String groupSql = "select distinct " + staffGroupMapper.schema();
+        final String groupSql = "select distinct " + staffGroupMapper.schema() +" and g.status_enum=?";
 
         final List<StaffAccountSummaryCollectionData.LoanAccountSummary> clientSummaryList = this.jdbcTemplate.query(clientSql,
-                staffClientMapper, new Object[] { loanOfficerId });
+                staffClientMapper, new Object[] { loanOfficerId, ClientStatus.ACTIVE.getValue()});
 
         for (StaffAccountSummaryCollectionData.LoanAccountSummary clientSummary : clientSummaryList) {
 
@@ -59,7 +61,7 @@ public class BulkLoansReadPlatformServiceImpl implements BulkLoansReadPlatformSe
         }
 
         final List<StaffAccountSummaryCollectionData.LoanAccountSummary> groupSummaryList = this.jdbcTemplate.query(groupSql, staffGroupMapper,
-                new Object[] { loanOfficerId });
+                new Object[] { loanOfficerId, GroupingTypeStatus.ACTIVE.getValue()});
 
         for (StaffAccountSummaryCollectionData.LoanAccountSummary groupSummary : groupSummaryList) {
 

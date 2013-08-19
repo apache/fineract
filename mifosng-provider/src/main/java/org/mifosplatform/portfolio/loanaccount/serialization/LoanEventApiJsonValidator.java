@@ -263,4 +263,30 @@ public final class LoanEventApiJsonValidator {
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
+    
+    public void validateForBulkLoanReassignment(final String json) {
+        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+
+        final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("assignmentDate", "fromLoanOfficerId",
+                "toLoanOfficerId", "loans", "locale", "dateFormat"));
+
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, supportedParameters);
+
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loanOfficer");
+
+        final JsonElement element = this.fromApiJsonHelper.parse(json);
+
+        final LocalDate assignmentDate = this.fromApiJsonHelper.extractLocalDateNamed("assignmentDate", element);
+        baseDataValidator.reset().parameter("assignmentDate").value(assignmentDate).notNull();
+        final Long fromLoanOfficerId = this.fromApiJsonHelper.extractLongNamed("fromLoanOfficerId", element);
+        baseDataValidator.reset().parameter("fromLoanOfficerId").value(fromLoanOfficerId).notNull().longGreaterThanZero();
+        final Long toLoanOfficerId = this.fromApiJsonHelper.extractLongNamed("toLoanOfficerId", element);
+        baseDataValidator.reset().parameter("toLoanOfficerId").value(toLoanOfficerId).notNull().longGreaterThanZero();
+        final String[] loans = this.fromApiJsonHelper.extractArrayNamed("loans", element);
+        baseDataValidator.reset().parameter("loans").value(loans).arrayNotEmpty();
+
+        throwExceptionIfValidationWarningsExist(dataValidationErrors);
+    }
 }
