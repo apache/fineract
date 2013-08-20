@@ -354,7 +354,35 @@ public class GroupingTypesWritePlatformServiceJpaRepositoryImpl implements Group
                 .build();
 
     }
+    
+    @Override
+    public CommandProcessingResult assignGroupOrCenterStaff(final Long grouptId, final JsonCommand command) {
 
+        this.context.authenticatedUser();
+
+        final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(5);
+
+        this.fromApiJsonDeserializer.validateForAssignStaff(command.json());
+
+        final Group groupForUpdate = this.groupRepository.findOneWithNotFoundDetection(grouptId);
+
+        Staff staff = null;
+        final Long staffId = command.longValueOfParameterNamed(GroupingTypesApiConstants.staffIdParamName);
+        staff = this.staffRepository.findByOfficeHierarchyWithNotFoundDetection(staffId, groupForUpdate.getOffice().getHierarchy());
+        groupForUpdate.updateStaff(staff);
+
+        this.groupRepository.saveAndFlush(groupForUpdate);
+
+        actualChanges.put(GroupingTypesApiConstants.staffIdParamName, staffId);
+
+        return new CommandProcessingResultBuilder() //
+                .withOfficeId(groupForUpdate.officeId()) //
+                .withEntityId(groupForUpdate.getId()) //
+                .withGroupId(grouptId) //
+                .with(actualChanges) //
+                .build();
+    }
+    
     @Transactional
     @Override
     public CommandProcessingResult deleteGroup(final Long groupId) {

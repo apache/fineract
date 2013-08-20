@@ -34,11 +34,13 @@ import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.organisation.staff.domain.Staff;
 import org.mifosplatform.organisation.staff.domain.StaffRepositoryWrapper;
+import org.mifosplatform.portfolio.accountdetails.domain.AccountType;
 import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.client.domain.ClientRepositoryWrapper;
 import org.mifosplatform.portfolio.client.exception.ClientNotActiveException;
 import org.mifosplatform.portfolio.group.domain.Group;
 import org.mifosplatform.portfolio.group.domain.GroupRepositoryWrapper;
+import org.mifosplatform.portfolio.group.exception.ClientNotInGroupException;
 import org.mifosplatform.portfolio.group.exception.CenterNotActiveException;
 import org.mifosplatform.portfolio.group.exception.GroupNotActiveException;
 import org.mifosplatform.portfolio.savings.SavingsCompoundingInterestPeriodType;
@@ -69,8 +71,7 @@ public class SavingsAccountAssembler {
     public SavingsAccountAssembler(final SavingsAccountTransactionSummaryWrapper savingsAccountTransactionSummaryWrapper,
             final ClientRepositoryWrapper clientRepository, final GroupRepositoryWrapper groupRepository,
             final StaffRepositoryWrapper staffRepository, final SavingsProductRepository savingProductRepository,
-            final SavingsAccountRepositoryWrapper savingsAccountRepository,
-            final FromJsonHelper fromApiJsonHelper) {
+            final SavingsAccountRepositoryWrapper savingsAccountRepository, final FromJsonHelper fromApiJsonHelper) {
         this.savingsAccountTransactionSummaryWrapper = savingsAccountTransactionSummaryWrapper;
         this.clientRepository = clientRepository;
         this.groupRepository = groupRepository;
@@ -99,21 +100,27 @@ public class SavingsAccountAssembler {
         Client client = null;
         Group group = null;
         Staff fieldOfficer = null;
-
+        AccountType accountType = AccountType.INVALID;
         final Long clientId = fromApiJsonHelper.extractLongNamed(clientIdParamName, element);
         if (clientId != null) {
             client = this.clientRepository.findOneWithNotFoundDetection(clientId);
+            accountType = AccountType.INDIVIDUAL;
             if (client.isNotActive()) { throw new ClientNotActiveException(clientId); }
         }
 
         final Long groupId = fromApiJsonHelper.extractLongNamed(groupIdParamName, element);
         if (groupId != null) {
             group = this.groupRepository.findOneWithNotFoundDetection(groupId);
+            accountType = AccountType.GROUP;
+        }
+
+        if (group != null && client != null) {
+            if (!group.hasClientAsMember(client)) { throw new ClientNotInGroupException(clientId, groupId); }
+            accountType = AccountType.JLG;
             if (group.isNotActive()) {
                 if (group.isCenter()) { throw new CenterNotActiveException(groupId); }
                 throw new GroupNotActiveException(groupId);
             }
-
         }
 
         final Long fieldOfficerId = fromApiJsonHelper.extractLongNamed(fieldOfficerIdParamName, element);
@@ -219,10 +226,10 @@ public class SavingsAccountAssembler {
             monthDayOfAnnualFee = product.monthDayOfAnnualFee();
         }
 
-        final SavingsAccount account = SavingsAccount.createNewApplicationForSubmittal(client, group, product, fieldOfficer, accountNo, externalId,
-                submittedOnDate, interestRate, interestCompoundingPeriodType, interestPostingPeriodType, interestCalculationType,
-                interestCalculationDaysInYearType, minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType,
-                withdrawalFeeAmount, withdrawalFeeType, annualFeeAmount, monthDayOfAnnualFee);
+        final SavingsAccount account = SavingsAccount.createNewApplicationForSubmittal(client, group, product, fieldOfficer, accountNo,
+                externalId, accountType, submittedOnDate, interestRate, interestCompoundingPeriodType, interestPostingPeriodType,
+                interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance, lockinPeriodFrequency,
+                lockinPeriodFrequencyType, withdrawalFeeAmount, withdrawalFeeType, annualFeeAmount, monthDayOfAnnualFee);
         account.setHelpers(this.savingsAccountTransactionSummaryWrapper, this.savingsHelper);
 
         account.validateNewApplicationState(DateUtils.getLocalDateOfTenant());
@@ -235,5 +242,9 @@ public class SavingsAccountAssembler {
         account.setHelpers(this.savingsAccountTransactionSummaryWrapper, savingsHelper);
 
         return account;
+    }
+    
+    public void assignSavingAccountHelpers(SavingsAccount savingsAccount){
+        savingsAccount.setHelpers(this.savingsAccountTransactionSummaryWrapper, this.savingsHelper);
     }
 }

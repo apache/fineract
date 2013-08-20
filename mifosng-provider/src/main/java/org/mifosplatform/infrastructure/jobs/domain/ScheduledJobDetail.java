@@ -44,7 +44,6 @@ public class ScheduledJobDetail extends AbstractPersistable<Long> {
     @Temporal(TemporalType.TIMESTAMP)
     private Date previousRunStartTime;
 
-    @SuppressWarnings("unused")
     @Column(name = "next_run_time")
     @Temporal(TemporalType.TIMESTAMP)
     private Date nextRunTime;
@@ -68,6 +67,9 @@ public class ScheduledJobDetail extends AbstractPersistable<Long> {
 
     @Column(name = "scheduler_group")
     private Short schedulerGroup;
+
+    @Column(name = "is_misfired")
+    private boolean triggerMisfired;
 
     protected ScheduledJobDetail() {
 
@@ -109,11 +111,15 @@ public class ScheduledJobDetail extends AbstractPersistable<Long> {
         this.previousRunStartTime = previousRunStartTime;
     }
 
+    public Date getNextRunTime() {
+        return this.nextRunTime;
+    }
+
     public void updateNextRunTime(final Date nextRunTime) {
         this.nextRunTime = nextRunTime;
     }
 
-    public void updateJobKey(String jobKey) {
+    public void updateJobKey(final String jobKey) {
         this.jobKey = jobKey;
     }
 
@@ -125,7 +131,7 @@ public class ScheduledJobDetail extends AbstractPersistable<Long> {
         return this.currentlyRunning;
     }
 
-    public void updateCurrentlyRunningStatus(boolean currentlyRunning) {
+    public void updateCurrentlyRunningStatus(final boolean currentlyRunning) {
         this.currentlyRunning = currentlyRunning;
     }
 
@@ -150,6 +156,14 @@ public class ScheduledJobDetail extends AbstractPersistable<Long> {
         }
 
         return actualChanges;
+    }
+
+    public boolean isTriggerMisfired() {
+        return this.triggerMisfired;
+    }
+
+    public void updateTriggerMisfired(boolean triggerMisfired) {
+        this.triggerMisfired = triggerMisfired;
     }
 
 }

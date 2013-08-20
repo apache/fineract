@@ -96,11 +96,9 @@ public final class Client extends AbstractPersistable<Long> {
     @Transient
     private boolean accountNumberRequiresAutoGeneration = false;
     
-    @SuppressWarnings("unused")
     @Column(name = "closure_reason_cv_id", nullable = true)
     private Long closureReasonId;
     
-    @SuppressWarnings("unused")
     @Column(name = "closedon_date", nullable = true)
     @Temporal(TemporalType.DATE)
     private Date closureDate;
@@ -431,6 +429,10 @@ public final class Client extends AbstractPersistable<Long> {
     public Office getOffice() {
         return this.office;
     }
+    
+    public void updateOffice(final Office office) {
+        this.office = office;
+    }
 
     private Long staffId() {
         Long staffId = null;
@@ -455,6 +457,10 @@ public final class Client extends AbstractPersistable<Long> {
     public void assignStaff(final Staff staff) {
         this.staff = staff;
     }
+    
+    public Set<Group> getGroups(){
+        return this.groups;
+    }
 
     
     public void close(final Long closureReasonId, final Date closureDate) {
@@ -464,10 +470,19 @@ public final class Client extends AbstractPersistable<Long> {
     }
     
     public Integer getStatus() {
-        return status;
+        return this.status;
     }
 
     public boolean isActivatedAfter(final LocalDate submittedOn) {
         return getActivationLocalDate().isAfter(submittedOn);
+    }
+    
+    public boolean isChildOfGroup(final Long groupId) {
+        if (groupId != null && this.groups != null && !this.groups.isEmpty()) {
+            for (Group group : this.groups) {
+                if (group.getId().equals(groupId)) return true;
+            }
+        }
+        return false;
     }
 }

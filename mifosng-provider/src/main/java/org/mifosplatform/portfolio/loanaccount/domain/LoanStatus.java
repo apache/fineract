@@ -111,4 +111,8 @@ public enum LoanStatus {
     public boolean isRejected() {
         return this.value.equals(LoanStatus.REJECTED.getValue());
     }
+
+    public boolean isActiveOrAwaitingApprovalOrDisbursal() {
+        return this.isApproved() || this.isSubmittedAndPendingApproval() || this.isActive();
+    }
 }

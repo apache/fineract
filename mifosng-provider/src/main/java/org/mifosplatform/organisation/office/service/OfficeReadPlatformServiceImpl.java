@@ -90,7 +90,7 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
         public String schema() {
             return " ot.id as id, ot.transaction_date as transactionDate, ot.from_office_id as fromOfficeId, fromoff.name as fromOfficeName, "
                     + " ot.to_office_id as toOfficeId, tooff.name as toOfficeName, ot.transaction_amount as transactionAmount, ot.description as description, "
-                    + " ot.currency_code as currencyCode, rc.decimal_places as currencyDigits, "
+                    + " ot.currency_code as currencyCode, rc.decimal_places as currencyDigits, rc.currency_multiplesof as inMultiplesOf, "
                     + " rc.name as currencyName, rc.internationalized_name_code as currencyNameCode, rc.display_symbol as currencyDisplaySymbol "
                     + " from m_office_transaction ot "
                     + " left join m_office fromoff on fromoff.id = ot.from_office_id "
@@ -112,9 +112,10 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
             String currencyNameCode = rs.getString("currencyNameCode");
             String currencyDisplaySymbol = rs.getString("currencyDisplaySymbol");
             Integer currencyDigits = JdbcSupport.getInteger(rs, "currencyDigits");
+            Integer inMultiplesOf = JdbcSupport.getInteger(rs, "inMultiplesOf");
 
-            CurrencyData currencyData = new CurrencyData(currencyCode, currencyName, currencyDigits, currencyDisplaySymbol,
-                    currencyNameCode);
+            CurrencyData currencyData = new CurrencyData(currencyCode, currencyName, currencyDigits, inMultiplesOf,
+                    currencyDisplaySymbol, currencyNameCode);
 
             BigDecimal transactionAmount = rs.getBigDecimal("transactionAmount");
             String description = rs.getString("description");

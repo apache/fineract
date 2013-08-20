@@ -7,9 +7,7 @@ package org.mifosplatform.portfolio.group.service;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 import org.mifosplatform.infrastructure.codes.data.CodeValueData;
@@ -26,11 +24,8 @@ import org.mifosplatform.organisation.staff.data.StaffData;
 import org.mifosplatform.organisation.staff.service.StaffReadPlatformService;
 import org.mifosplatform.portfolio.client.data.ClientData;
 import org.mifosplatform.portfolio.client.service.ClientReadPlatformService;
-import org.mifosplatform.portfolio.client.service.LoanStatusMapper;
 import org.mifosplatform.portfolio.group.api.GroupingTypesApiConstants;
 import org.mifosplatform.portfolio.group.data.CenterData;
-import org.mifosplatform.portfolio.group.data.GroupAccountSummaryCollectionData;
-import org.mifosplatform.portfolio.group.data.GroupAccountSummaryData;
 import org.mifosplatform.portfolio.group.data.GroupGeneralData;
 import org.mifosplatform.portfolio.group.domain.GroupTypes;
 import org.mifosplatform.portfolio.group.exception.GroupNotFoundException;
@@ -211,112 +206,24 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
     }
 
     @Override
-    public GroupAccountSummaryCollectionData retrieveGroupAccountDetails(final Long groupId) {
-        try {
-            this.context.authenticatedUser();
-
-            // Check if group exists
-            // retrieveGroup(groupId);
-
-            final List<GroupAccountSummaryData> pendingApprovalLoans = new ArrayList<GroupAccountSummaryData>();
-            final List<GroupAccountSummaryData> awaitingDisbursalLoans = new ArrayList<GroupAccountSummaryData>();
-            final List<GroupAccountSummaryData> openLoans = new ArrayList<GroupAccountSummaryData>();
-            final List<GroupAccountSummaryData> closedLoans = new ArrayList<GroupAccountSummaryData>();
-
-            final GroupLoanAccountSummaryDataMapper rm = new GroupLoanAccountSummaryDataMapper();
-
-            String sql = "select " + rm.loanAccountSummarySchema() + " where l.group_id = ? and l.client_id is null";
-
-            List<GroupAccountSummaryData> results = this.jdbcTemplate.query(sql, rm, new Object[] { groupId });
-            if (results != null) {
-                for (final GroupAccountSummaryData row : results) {
-
-                    final LoanStatusMapper statusMapper = new LoanStatusMapper(row.getAccountStatusId());
-
-                    if (statusMapper.isOpen()) {
-                        openLoans.add(row);
-                    } else if (statusMapper.isAwaitingDisbursal()) {
-                        awaitingDisbursalLoans.add(row);
-                    } else if (statusMapper.isPendingApproval()) {
-                        pendingApprovalLoans.add(row);
-                    } else {
-                        closedLoans.add(row);
-                    }
-                }
-            }
-
-            final List<GroupAccountSummaryData> pendingApprovalIndividualLoans = new ArrayList<GroupAccountSummaryData>();
-            final List<GroupAccountSummaryData> awaitingDisbursalIndividualLoans = new ArrayList<GroupAccountSummaryData>();
-            final List<GroupAccountSummaryData> openIndividualLoans = new ArrayList<GroupAccountSummaryData>();
-            final List<GroupAccountSummaryData> closedIndividualLoans = new ArrayList<GroupAccountSummaryData>();
-
-            sql = "select " + rm.loanAccountSummarySchema() + " where l.group_id = ? and l.client_id is not null";
-
-            results = this.jdbcTemplate.query(sql, rm, new Object[] { groupId });
-            if (results != null) {
-                for (final GroupAccountSummaryData row : results) {
-
-                    final LoanStatusMapper statusMapper = new LoanStatusMapper(row.getAccountStatusId());
-
-                    if (statusMapper.isOpen()) {
-                        openIndividualLoans.add(row);
-                    } else if (statusMapper.isAwaitingDisbursal()) {
-                        awaitingDisbursalIndividualLoans.add(row);
-                    } else if (statusMapper.isPendingApproval()) {
-                        pendingApprovalIndividualLoans.add(row);
-                    } else {
-                        closedIndividualLoans.add(row);
-                    }
-                }
-            }
-
-            return new GroupAccountSummaryCollectionData(pendingApprovalLoans, awaitingDisbursalLoans, openLoans, closedLoans,
-                    pendingApprovalIndividualLoans, awaitingDisbursalIndividualLoans, openIndividualLoans, closedIndividualLoans);
-        } catch (final EmptyResultDataAccessException e) {
-            throw new GroupNotFoundException(groupId);
-        }
-    }
-
-    @Override
-    public Collection<GroupAccountSummaryData> retrieveGroupLoanAccountsByLoanOfficerId(final Long groupId, final Long loanOfficerId) {
-
+    public Collection<GroupGeneralData> retrieveGroupsForLookup(final Long officeId, final Long groupId) {
         this.context.authenticatedUser();
-
-        // Check if group exists
-        // retrieveGroup(groupId);
-
-        final GroupLoanAccountSummaryDataMapper rm = new GroupLoanAccountSummaryDataMapper();
-
-        final String sql = "select " + rm.loanAccountSummarySchema()
-                + " where l.group_id = ? and l.client_id is null and l.loan_officer_id = ?";
-
-        final List<GroupAccountSummaryData> loanAccounts = this.jdbcTemplate.query(sql, rm, new Object[] { groupId, loanOfficerId });
-
-        return loanAccounts;
+        GroupLookupDataMapper rm = new GroupLookupDataMapper();
+        String sql = "Select " + rm.schema() + " where g.office_id=? and g.id !=?";
+        return this.jdbcTemplate.query(sql, rm, new Object[] { officeId, groupId });
     }
 
-    private static final class GroupLoanAccountSummaryDataMapper implements RowMapper<GroupAccountSummaryData> {
+    private static final class GroupLookupDataMapper implements RowMapper<GroupGeneralData> {
 
-        public String loanAccountSummarySchema() {
-
-            final StringBuilder accountsSummary = new StringBuilder("l.id as id, l.external_id as externalId,");
-            accountsSummary.append("l.product_id as productId, lp.name as productName,").append("l.loan_status_id as statusId, ")
-                    .append("l.account_no as accountNo ").append("from m_loan l ")
-                    .append("LEFT JOIN m_product_loan AS lp ON lp.id = l.product_id ");
-
-            return accountsSummary.toString();
+        public final String schema() {
+            return "g.id as id, g.display_name as displayName from m_group g";
         }
 
         @Override
-        public GroupAccountSummaryData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
-
+        public GroupGeneralData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
             final Long id = JdbcSupport.getLong(rs, "id");
-            final String externalId = rs.getString("externalId");
-            final Long productId = JdbcSupport.getLong(rs, "productId");
-            final String loanProductName = rs.getString("productName");
-            final Integer loanStatusId = JdbcSupport.getInteger(rs, "statusId");
-            final String accountNo = rs.getString("accountNo");
-            return new GroupAccountSummaryData(id, externalId, productId, loanProductName, loanStatusId, accountNo);
+            final String displayName = rs.getString("displayName");
+            return GroupGeneralData.lookup(id, displayName);
         }
     }
 }

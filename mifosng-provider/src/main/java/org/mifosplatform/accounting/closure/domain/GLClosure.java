@@ -33,7 +33,6 @@ public class GLClosure extends AbstractAuditableCustom<AppUser, Long> {
     @JoinColumn(name = "office_id", nullable = false)
     private Office office;
 
-    @SuppressWarnings("unused")
     @Column(name = "is_deleted", nullable = false)
     private boolean deleted = true;
 

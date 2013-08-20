@@ -20,6 +20,7 @@ import org.mifosplatform.portfolio.calendar.domain.Calendar;
 import org.mifosplatform.portfolio.calendar.domain.CalendarEntityType;
 import org.mifosplatform.portfolio.calendar.service.CalendarDropdownReadPlatformService;
 import org.mifosplatform.portfolio.calendar.service.CalendarReadPlatformService;
+import org.mifosplatform.portfolio.calendar.service.CalendarUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -105,7 +106,7 @@ public class CalendarsApiResource {
 
         Collection<CalendarData> calendarsData = new ArrayList<CalendarData>();
 
-        List<Integer>  calendarTypeOptions = createIntegerListFromQueryParameter(calendarType);
+        List<Integer>  calendarTypeOptions = CalendarUtils.createIntegerListFromQueryParameter(calendarType);
 
 
         if (!associationParameters.isEmpty()) {
@@ -189,39 +190,6 @@ public class CalendarsApiResource {
         final List<EnumOptionData> calendarTypeOptions = this.dropdownReadPlatformService.retrieveCalendarTypeOptions();
         final List<EnumOptionData> remindByOptions = this.dropdownReadPlatformService.retrieveCalendarRemindByOptions();
         return new CalendarData(calendarData, entityTypeOptions, calendarTypeOptions, remindByOptions);
-    }
-
-
-    public List<Integer> createIntegerListFromQueryParameter(String calendarTypeQuery) {
-        List<Integer> calendarTypeOptions = new ArrayList<Integer>();
-        // adding all calendar Types if query parameter is "all"
-        if(calendarTypeQuery.equalsIgnoreCase("all")){
-            calendarTypeOptions.add(1);
-            calendarTypeOptions.add(2);
-            calendarTypeOptions.add(3);
-            calendarTypeOptions.add(4);
-            return calendarTypeOptions;
-        }
-        // creating a list of calendar type options from the comma separated query parameter.
-        List<String> calendarTypeOptionsInQuery = new ArrayList<String>();
-        StringTokenizer st = new StringTokenizer(calendarTypeQuery, ",");
-        while (st.hasMoreElements()) {
-            calendarTypeOptionsInQuery.add(st.nextElement().toString());
-        }
-
-        for(String calType : calendarTypeOptionsInQuery){
-            if(calType.equalsIgnoreCase("collection")) {
-                calendarTypeOptions.add(1);
-            } else if(calType.equalsIgnoreCase("training")) {
-                calendarTypeOptions.add(2);
-            }  else if(calType.equalsIgnoreCase("audit")) {
-                calendarTypeOptions.add(3);
-            }  else if(calType.equalsIgnoreCase("general")) {
-                calendarTypeOptions.add(4);
-            }
-        }
-
-        return calendarTypeOptions;
     }
 
 }

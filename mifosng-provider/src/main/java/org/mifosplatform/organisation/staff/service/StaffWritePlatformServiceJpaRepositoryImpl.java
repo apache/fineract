@@ -98,7 +98,7 @@ public class StaffWritePlatformServiceJpaRepositoryImpl implements StaffWritePla
             }
 
             if (!changesOnly.isEmpty()) {
-                this.staffRepository.save(staffForUpdate);
+                this.staffRepository.saveAndFlush(staffForUpdate);
             }
 
             return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(staffId)
@@ -115,7 +115,14 @@ public class StaffWritePlatformServiceJpaRepositoryImpl implements StaffWritePla
      */
     private void handleStaffDataIntegrityIssues(final JsonCommand command, final DataIntegrityViolationException dve) {
         Throwable realCause = dve.getMostSpecificCause();
-        if (realCause.getMessage().contains("display_name")) {
+
+        if (realCause.getMessage().contains("external_id")) {
+
+            final String externalId = command.stringValueOfParameterNamed("externalId");
+            throw new PlatformDataIntegrityException("error.msg.staff.duplicate.externalId", "Staff with externalId `" + externalId
+                    + "` already exists", "externalId", externalId);
+        }
+        else if (realCause.getMessage().contains("display_name")) {
             final String lastname = command.stringValueOfParameterNamed("lastname");
             String displayName = lastname;
             if (!StringUtils.isBlank(displayName)) {

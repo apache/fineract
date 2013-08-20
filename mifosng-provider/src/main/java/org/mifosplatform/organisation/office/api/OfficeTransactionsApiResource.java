@@ -41,7 +41,7 @@ import org.springframework.stereotype.Component;
 public class OfficeTransactionsApiResource {
 
     private static final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "transactionDate", "fromOfficeId",
-            "fromOfficeName", "toOfficeId", "toOfficeIdName", "currencyCode", "digitsAfterDecimal", "transactionAmount", "description",
+            "fromOfficeName", "toOfficeId", "toOfficeIdName", "currencyCode", "digitsAfterDecimal","inMultiplesOf", "transactionAmount", "description",
             "allowedOffices", "currencyOptions"));
 
     private final String resourceNameForReadPermissions = "OFFICE";

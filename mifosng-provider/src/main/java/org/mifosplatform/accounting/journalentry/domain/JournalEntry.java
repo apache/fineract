@@ -35,20 +35,16 @@ public class JournalEntry extends AbstractAuditableCustom<AppUser, Long> {
     @JoinColumn(name = "account_id", nullable = false)
     private GLAccount glAccount;
 
-    @SuppressWarnings("unused")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reversal_id")
     private JournalEntry reversalJournalEntry;
 
-    @SuppressWarnings("unused")
     @Column(name = "transaction_id", nullable = false, length = 50)
     private String transactionId;
 
-    @SuppressWarnings("unused")
     @Column(name = "reversed", nullable = false)
     private boolean reversed = false;
 
-    @SuppressWarnings("unused")
     @Column(name = "manual_entry", nullable = false)
     private boolean manualEntry = false;
 
@@ -62,15 +58,12 @@ public class JournalEntry extends AbstractAuditableCustom<AppUser, Long> {
     @Column(name = "amount", scale = 6, precision = 19, nullable = false)
     private BigDecimal amount;
 
-    @SuppressWarnings("unused")
     @Column(name = "description", length = 500)
     private String description;
 
-    @SuppressWarnings("unused")
     @Column(name = "entity_type_enum", length = 50)
     private Integer entityType;
 
-    @SuppressWarnings("unused")
     @Column(name = "entity_id")
     private Long entityId;
 

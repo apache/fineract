@@ -8,6 +8,8 @@ package org.mifosplatform.portfolio.savings.data;
 import java.math.BigDecimal;
 import java.util.Collection;
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.joda.time.LocalDate;
 import org.joda.time.MonthDay;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
@@ -91,6 +93,26 @@ public class SavingsAccountData {
                 annualFeeOnMonthDay, annualFeeNextDueDate, summary, transactions, productOptions, fieldOfficerOptions,
                 interestCompoundingPeriodTypeOptions, interestPostingPeriodTypeOptions, interestCalculationTypeOptions,
                 interestCalculationDaysInYearTypeOptions, lockinPeriodFrequencyTypeOptions, withdrawalFeeTypeOptions);
+    }
+
+    public static SavingsAccountData lookup(final Long accountId, final String accountNo) {
+
+        final Collection<SavingsProductData> productOptions = null;
+        final Collection<StaffData> fieldOfficerOptions = null;
+        final Collection<EnumOptionData> interestCompoundingPeriodTypeOptions = null;
+        final Collection<EnumOptionData> interestPostingPeriodTypeOptions = null;
+        final Collection<EnumOptionData> interestCalculationTypeOptions = null;
+        final Collection<EnumOptionData> interestCalculationDaysInYearTypeOptions = null;
+        final Collection<EnumOptionData> lockinPeriodFrequencyTypeOptions = null;
+        final Collection<EnumOptionData> withdrawalFeeTypeOptions = null;
+
+        final Collection<SavingsAccountTransactionData> transactions = null;
+
+        return new SavingsAccountData(accountId, accountNo, null, null, null, null, null, null, null, null, null, null, null, null, null,
+                null, null, null, null, null, null, null, null, null, null, null, null, null, transactions, productOptions,
+                fieldOfficerOptions, interestCompoundingPeriodTypeOptions, interestPostingPeriodTypeOptions,
+                interestCalculationTypeOptions, interestCalculationDaysInYearTypeOptions, lockinPeriodFrequencyTypeOptions,
+                withdrawalFeeTypeOptions);
     }
 
     public static SavingsAccountData withTemplateOptions(final SavingsAccountData account, final SavingsAccountData template,
@@ -262,5 +284,24 @@ public class SavingsAccountData {
 
     public Long productId() {
         return this.savingsProductId;
+    }
+
+    public CurrencyData currency() {
+        return this.currency;
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+
+        if (obj == null) { return false; }
+        if (obj == this) { return true; }
+        if (obj.getClass() != getClass()) { return false; }
+        SavingsAccountData rhs = (SavingsAccountData) obj;
+        return new EqualsBuilder().append(this.id, rhs.id).append(this.accountNo, rhs.accountNo).isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37).append(this.id).append(this.accountNo).toHashCode();
     }
 }

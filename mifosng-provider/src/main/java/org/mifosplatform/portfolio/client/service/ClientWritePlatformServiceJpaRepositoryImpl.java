@@ -306,6 +306,11 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
         final Long staffId = command.longValueOfParameterNamed(ClientApiConstants.staffIdParamName);
         if (staffId != null) {
             staff = this.staffRepository.findByOfficeHierarchyWithNotFoundDetection(staffId, clientForUpdate.getOffice().getHierarchy());
+            /**
+             * TODO Vishwas: We maintain history of chage of loan officer w.r.t
+             * loan in a history table, should we do the same for a client?
+             * Especially useful when the change happens due to a transfer etc
+             **/
             clientForUpdate.assignStaff(staff);
         }
 

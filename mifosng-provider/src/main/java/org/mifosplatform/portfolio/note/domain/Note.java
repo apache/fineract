@@ -32,17 +32,14 @@ public class Note extends AbstractAuditableCustom<AppUser, Long> {
     @JoinColumn(name = "client_id", nullable = true)
     private final Client client;
 
-    @SuppressWarnings("unused")
     @ManyToOne
     @JoinColumn(name = "group_id", nullable = true)
     private Group group;
 
-    @SuppressWarnings("unused")
     @ManyToOne
     @JoinColumn(name = "loan_id", nullable = true)
     private Loan loan;
 
-    @SuppressWarnings("unused")
     @ManyToOne
     @JoinColumn(name = "loan_transaction_id", nullable = true)
     private LoanTransaction loanTransaction;
@@ -50,11 +47,9 @@ public class Note extends AbstractAuditableCustom<AppUser, Long> {
     @Column(name = "note", length = 1000)
     private String note;
 
-    @SuppressWarnings("unused")
     @Column(name = "note_type_enum")
     private final Integer noteTypeId;
 
-    @SuppressWarnings("unused")
     @ManyToOne
     @JoinColumn(name = "savings_account_id", nullable = true)
     private SavingsAccount savingsAccount;

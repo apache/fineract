@@ -33,12 +33,15 @@ public class LoanApplicationTestBuilder {
     private String submittedOnDate = "";
     private String loanType = "individual";
 
-    public String build(final String clientID, final String loanProductId) {
+    public String build(final String ID, final String loanProductId) {
 
         HashMap<String, String> map = new HashMap<String, String>();
         map.put("dateFormat", "dd MMMM yyyy");
         map.put("locale", "en_GB");
-        map.put("clientId", clientID);
+        if (loanType == "group")
+            map.put("groupId", ID);
+        else
+            map.put("clientId", ID);
         map.put("productId", loanProductId);
         map.put("principal", principal);
         map.put("loanTermFrequency", loanTermFrequency);

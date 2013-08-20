@@ -2,12 +2,9 @@ package org.mifosplatform.infrastructure.jobs.service;
 
 import java.util.Date;
 
-import org.mifosplatform.infrastructure.core.domain.MifosPlatformTenant;
 import org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil;
 import org.mifosplatform.infrastructure.jobs.domain.ScheduledJobDetail;
 import org.mifosplatform.infrastructure.jobs.domain.ScheduledJobRunHistory;
-import org.mifosplatform.infrastructure.jobs.exception.JobInProcessExecution;
-import org.mifosplatform.infrastructure.security.service.TenantDetailsService;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.quartz.JobKey;
@@ -31,12 +28,9 @@ public class SchedulerJobListener implements JobListener {
 
     private final SchedularWritePlatformService schedularService;
 
-    private final TenantDetailsService tenantDetailsService;
-
     @Autowired
-    public SchedulerJobListener(final SchedularWritePlatformService schedularService, final TenantDetailsService tenantDetailsService) {
+    public SchedulerJobListener(final SchedularWritePlatformService schedularService) {
         this.schedularService = schedularService;
-        this.tenantDetailsService = tenantDetailsService;
     }
 
     @Override
@@ -45,16 +39,7 @@ public class SchedulerJobListener implements JobListener {
     }
 
     @Override
-    public void jobToBeExecuted(final JobExecutionContext context) {
-        String tenantIdentifier = context.getTrigger().getJobDataMap().getString(SchedulerServiceConstants.TENANT_IDENTIFIER);
-        MifosPlatformTenant tenant = this.tenantDetailsService.loadTenantById(tenantIdentifier);
-        ThreadLocalContextUtil.setTenant(tenant);
-        JobKey key = context.getTrigger().getJobKey();
-        String jobKey = key.getName() + SchedulerServiceConstants.JOB_KEY_SEPERATOR + key.getGroup();
-        final ScheduledJobDetail scheduledJobDetail = schedularService.findByJobKey(jobKey);
-        if (scheduledJobDetail.isCurrentlyRunning()) { throw new JobInProcessExecution(scheduledJobDetail.getJobName()); }
-        scheduledJobDetail.updateCurrentlyRunningStatus(true);
-        this.schedularService.saveOrUpdate(scheduledJobDetail);
+    public void jobToBeExecuted(@SuppressWarnings("unused") final JobExecutionContext context) {
 
     }
 
@@ -93,7 +78,8 @@ public class SchedulerJobListener implements JobListener {
         if (context.getMergedJobDataMap().containsKey(SchedulerServiceConstants.TRIGGER_TYPE_REFERENCE)) {
             triggerType = context.getMergedJobDataMap().getString(SchedulerServiceConstants.TRIGGER_TYPE_REFERENCE);
         }
-        if (triggerType == SchedulerServiceConstants.TRIGGER_TYPE_CRON) {
+        if (triggerType == SchedulerServiceConstants.TRIGGER_TYPE_CRON && trigger.getNextFireTime() != null
+                && trigger.getNextFireTime().after(scheduledJobDetails.getNextRunTime())) {
             scheduledJobDetails.updateNextRunTime(trigger.getNextFireTime());
         }
 

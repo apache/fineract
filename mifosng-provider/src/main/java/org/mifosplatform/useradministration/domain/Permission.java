@@ -21,11 +21,9 @@ public class Permission extends AbstractPersistable<Long> {
 	@Column(name = "code", nullable = false, length = 100)
 	private final String code;
 
-	@SuppressWarnings("unused")
 	@Column(name = "entity_name", nullable = true, length = 100)
 	private final String entityName;
 
-	@SuppressWarnings("unused")
 	@Column(name = "action_name", nullable = true, length = 100)
 	private final String actionName;
 
@@ -66,7 +64,7 @@ public class Permission extends AbstractPersistable<Long> {
 	}
 
 	public boolean enableMakerChecker(final boolean canMakerChecker) {
-		final boolean isUpdatedValueSame = (this.canMakerChecker == canMakerChecker);
+		final boolean isUpdatedValueSame = this.canMakerChecker == canMakerChecker;
 		this.canMakerChecker = canMakerChecker;
 
 		return !isUpdatedValueSame;

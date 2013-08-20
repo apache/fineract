@@ -22,7 +22,8 @@ import org.mifosplatform.organisation.office.domain.Office;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
-@Table(name = "m_staff", uniqueConstraints = { @UniqueConstraint(columnNames = { "display_name" }, name = "display_name") })
+@Table(name = "m_staff", uniqueConstraints = { @UniqueConstraint(columnNames = { "display_name" }, name = "display_name") ,
+@UniqueConstraint(columnNames = { "external_id" }, name = "external_id_UNIQUE") })
 public class Staff extends AbstractPersistable<Long> {
 
     @Column(name = "firstname", length = 50)
@@ -33,6 +34,9 @@ public class Staff extends AbstractPersistable<Long> {
 
     @Column(name = "display_name", length = 100)
     private String displayName;
+
+    @Column(name = "external_id", length = 100, nullable = true, unique = true)
+    private String externalId;
 
     // Office to which this employee belongs
     @ManyToOne
@@ -46,7 +50,6 @@ public class Staff extends AbstractPersistable<Long> {
     @Column(name = "organisational_role_enum", nullable = true)
     private Integer organisationalRoleType;
 
-    @SuppressWarnings("unused")
     @ManyToOne
     @JoinColumn(name = "organisational_role_parent_staff_id", nullable = true)
     private Staff organisationalRoleParentStaff;
@@ -54,29 +57,33 @@ public class Staff extends AbstractPersistable<Long> {
     public static Staff fromJson(final Office staffOffice, final JsonCommand command) {
 
         final String firstnameParamName = "firstname";
-        String firstname = command.stringValueOfParameterNamed(firstnameParamName);
+        final String firstname = command.stringValueOfParameterNamed(firstnameParamName);
 
         final String lastnameParamName = "lastname";
-        String lastname = command.stringValueOfParameterNamed(lastnameParamName);
+        final String lastname = command.stringValueOfParameterNamed(lastnameParamName);
+        
+        final String externalIdParamName = "externalId";
+        final String externalId = command.stringValueOfParameterNamedAllowingNull(externalIdParamName);
 
         final String isLoanOfficerParamName = "isLoanOfficer";
         final boolean isLoanOfficer = command.booleanPrimitiveValueOfParameterNamed(isLoanOfficerParamName);
 
-        return new Staff(staffOffice, firstname, lastname, isLoanOfficer);
+        return new Staff(staffOffice, firstname, lastname, externalId, isLoanOfficer);
     }
 
-    public static Staff createNew(final Office staffOffice, final String firstname, final String lastname, final boolean isLoanOfficer) {
-        return new Staff(staffOffice, firstname, lastname, isLoanOfficer);
+    public static Staff createNew(final Office staffOffice, final String firstname, final String lastname, final String externalId, final boolean isLoanOfficer) {
+        return new Staff(staffOffice, firstname, lastname, externalId, isLoanOfficer);
     }
 
     protected Staff() {
         //
     }
 
-    private Staff(final Office staffOffice, final String firstname, final String lastname, final boolean isLoanOfficer) {
+    private Staff(final Office staffOffice, final String firstname, final String lastname, final String externalId, final boolean isLoanOfficer) {
         this.office = staffOffice;
         this.firstname = StringUtils.defaultIfEmpty(firstname, null);
         this.lastname = StringUtils.defaultIfEmpty(lastname, null);
+        this.externalId = externalId;
         this.loanOfficer = isLoanOfficer;
         deriveDisplayName(firstname);
     }
@@ -125,6 +132,13 @@ public class Staff extends AbstractPersistable<Long> {
             deriveDisplayName(this.firstname);
         }
 
+        final String externalIdParamName = "externalId";
+        if (command.isChangeInStringParameterNamed(externalIdParamName, this.externalId)) {
+            final String newValue = command.stringValueOfParameterNamed(externalIdParamName);
+            actualChanges.put(externalIdParamName, newValue);
+            this.externalId = newValue;
+        }
+        
         final String isLoanOfficerParamName = "isLoanOfficer";
         if (command.isChangeInBooleanParameterNamed(isLoanOfficerParamName, this.loanOfficer)) {
             final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(isLoanOfficerParamName);

@@ -384,4 +384,13 @@ public final class Group extends AbstractPersistable<Long> {
     public boolean isCenter() {
         return this.groupLevel.isCenter();
     }
+    
+    public boolean isChildClient(final Long clientId){
+        if (clientId != null && this.clientMembers != null && !this.clientMembers.isEmpty()) {
+            for (Client client : this.clientMembers) {
+                if(client.getId().equals(clientId)) return true;
+            }
+        }
+        return false;
+    }
 }

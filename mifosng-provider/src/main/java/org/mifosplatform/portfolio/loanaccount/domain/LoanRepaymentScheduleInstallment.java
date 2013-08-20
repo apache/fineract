@@ -95,7 +95,6 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
     @Column(name = "completed_derived", nullable = false)
     private boolean obligationsMet;
 
-    @SuppressWarnings("unused")
     @Temporal(TemporalType.DATE)
     @Column(name = "obligations_met_on_date")
     private Date obligationsMetOnDate;
@@ -376,10 +375,10 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
     }
 
     public Money waiveInterestComponent(final LocalDate transactionDate, final Money transactionAmountRemaining) {
-        MonetaryCurrency currency = transactionAmountRemaining.getCurrency();
+        final MonetaryCurrency currency = transactionAmountRemaining.getCurrency();
         Money waivedInterestPortionOfTransaction = Money.zero(currency);
 
-        Money interestDue = getInterestOutstanding(currency);
+        final Money interestDue = getInterestOutstanding(currency);
         if (transactionAmountRemaining.isGreaterThanOrEqualTo(interestDue)) {
             this.interestWaived = getInterestWaived(currency).plus(interestDue).getAmount();
             waivedInterestPortionOfTransaction = waivedInterestPortionOfTransaction.plus(interestDue);
@@ -396,10 +395,10 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
     }
 
     public Money waivePenaltyChargesComponent(final LocalDate transactionDate, final Money transactionAmountRemaining) {
-        MonetaryCurrency currency = transactionAmountRemaining.getCurrency();
+        final MonetaryCurrency currency = transactionAmountRemaining.getCurrency();
         Money waivedPenaltyChargesPortionOfTransaction = Money.zero(currency);
 
-        Money penanltiesDue = getPenaltyChargesOutstanding(currency);
+        final Money penanltiesDue = getPenaltyChargesOutstanding(currency);
         if (transactionAmountRemaining.isGreaterThanOrEqualTo(penanltiesDue)) {
             this.penaltyChargesWaived = getPenaltyChargesWaived(currency).plus(penanltiesDue).getAmount();
             waivedPenaltyChargesPortionOfTransaction = waivedPenaltyChargesPortionOfTransaction.plus(penanltiesDue);
@@ -416,10 +415,10 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
     }
 
     public Money waiveFeeChargesComponent(final LocalDate transactionDate, final Money transactionAmountRemaining) {
-        MonetaryCurrency currency = transactionAmountRemaining.getCurrency();
+        final MonetaryCurrency currency = transactionAmountRemaining.getCurrency();
         Money waivedFeeChargesPortionOfTransaction = Money.zero(currency);
 
-        Money feesDue = getPenaltyChargesOutstanding(currency);
+        final Money feesDue = getPenaltyChargesOutstanding(currency);
         if (transactionAmountRemaining.isGreaterThanOrEqualTo(feesDue)) {
             this.feeChargesWaived = getFeeChargesWaived(currency).plus(feesDue).getAmount();
             waivedFeeChargesPortionOfTransaction = waivedFeeChargesPortionOfTransaction.plus(feesDue);
@@ -474,7 +473,7 @@ public final class LoanRepaymentScheduleInstallment extends AbstractAuditableCus
     }
 
     public boolean isOverdueOn(final LocalDate date) {
-        return this.getDueDate().isBefore(date);
+        return getDueDate().isBefore(date);
     }
 
     public void updateChargePortion(final Money feeChargesDue, final Money feeChargesWaived, final Money feeChargesWrittenOff,

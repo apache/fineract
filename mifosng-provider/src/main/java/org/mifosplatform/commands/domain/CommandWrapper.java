@@ -413,7 +413,11 @@ public class CommandWrapper {
     public boolean isUnassignStaff() {
         return this.actionName.equalsIgnoreCase("UNASSIGNSTAFF") && this.entityName.equalsIgnoreCase("GROUP");
     }
-
+    
+    public boolean isAssignStaff() {
+        return this.actionName.equalsIgnoreCase("ASSIGNSTAFF");
+    }
+    
     public String commandName() {
         return this.actionName + "_" + this.entityName;
     }
@@ -472,6 +476,10 @@ public class CommandWrapper {
 
     public boolean isSavingsAccountUndoTransaction() {
         return this.actionName.equalsIgnoreCase("UNDOTRANSACTION") && this.entityName.equalsIgnoreCase("SAVINGSACCOUNT");
+    }
+
+    public boolean isAdjustSavingsAccountTransaction() {
+        return this.actionName.equalsIgnoreCase("ADJUSTTRANSACTION") && this.entityName.equalsIgnoreCase("SAVINGSACCOUNT");
     }
 
     public boolean isCalendarResource() {
@@ -543,6 +551,10 @@ public class CommandWrapper {
     public boolean isUpdateGroupRole() {
         return this.entityName.equalsIgnoreCase("GROUP") && this.actionName.equalsIgnoreCase("UPDATEROLE");
     }
+    
+    public boolean isTransferClientsBetweenGroups() {
+        return this.entityName.equalsIgnoreCase("GROUP") && this.actionName.equalsIgnoreCase("TRANSFERCLIENTS");
+    }
 
     public boolean isClientAssignStaff() {
         return this.actionName.equalsIgnoreCase("ASSIGNSTAFF") && this.entityName.equalsIgnoreCase("CLIENT");
@@ -551,6 +563,10 @@ public class CommandWrapper {
     public boolean isClientClose() {
         return this.actionName.equalsIgnoreCase("CLOSE") && this.entityName.equalsIgnoreCase("CLIENT");
     }
+    
+    public boolean isClientTransfer() {
+        return this.actionName.equalsIgnoreCase("TRANSFER") && this.entityName.equalsIgnoreCase("CLIENT");
+    }
 
     public boolean isProductMixResource() {
         return this.entityName.equalsIgnoreCase("PRODUCTMIX");
@@ -558,5 +574,17 @@ public class CommandWrapper {
     
     public boolean isSchedulerResource() {
         return this.entityName.equalsIgnoreCase("SCHEDULER");
+    }
+
+    public boolean isAccountTransferResource() {
+        return this.entityName.equalsIgnoreCase("ACCOUNTTRANSFER");
+    }
+    
+    public boolean isMeetingResource() {
+        return this.entityName.equalsIgnoreCase("MEETING");
+    }
+ 
+    public boolean isSaveOrUpdateAttendance(){
+        return this.actionName.equalsIgnoreCase("SAVEORUPDATEATTENDANCE");
     }
 }

@@ -5,7 +5,6 @@
  */
 package org.mifosplatform.portfolio.client.service;
 
-import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -23,24 +22,16 @@ import org.mifosplatform.infrastructure.core.service.Page;
 import org.mifosplatform.infrastructure.core.service.PaginationHelper;
 import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
-import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.mifosplatform.organisation.office.data.OfficeData;
 import org.mifosplatform.organisation.office.service.OfficeReadPlatformService;
 import org.mifosplatform.organisation.staff.data.StaffData;
 import org.mifosplatform.organisation.staff.service.StaffReadPlatformService;
-import org.mifosplatform.portfolio.client.data.ClientAccountSummaryCollectionData;
-import org.mifosplatform.portfolio.client.data.ClientLoanAccountSummaryData;
 import org.mifosplatform.portfolio.client.data.ClientData;
-import org.mifosplatform.portfolio.client.data.ClientSavingsAccountSummaryData;
 import org.mifosplatform.portfolio.client.domain.ClientEnumerations;
 import org.mifosplatform.portfolio.client.domain.ClientStatus;
 import org.mifosplatform.portfolio.client.exception.ClientNotFoundException;
 import org.mifosplatform.portfolio.group.data.GroupGeneralData;
 import org.mifosplatform.portfolio.group.service.SearchParameters;
-import org.mifosplatform.portfolio.loanaccount.data.LoanStatusEnumData;
-import org.mifosplatform.portfolio.loanproduct.service.LoanEnumerations;
-import org.mifosplatform.portfolio.savings.data.SavingsAccountStatusEnumData;
-import org.mifosplatform.portfolio.savings.service.SavingsEnumerations;
 import org.mifosplatform.useradministration.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -63,7 +54,6 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
     private final ClientLookupMapper lookupMapper = new ClientLookupMapper();
     private final ClientMembersOfGroupMapper membersOfGroupMapper = new ClientMembersOfGroupMapper();
     private final ParentGroupsMapper clientGroupsMapper = new ParentGroupsMapper();
-    private final ClientSavingsAccountSummaryDataMapper savingsAccountSummaryDataMapper = new ClientSavingsAccountSummaryDataMapper();
 
     @Autowired
     public ClientReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
@@ -255,7 +245,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         return this.jdbcTemplate.query(sql, this.membersOfGroupMapper,
                 new Object[] { hierarchySearchString, groupId, ClientStatus.ACTIVE.getValue() });
     }
-    
+
     private static final class ClientMembersOfGroupMapper implements RowMapper<ClientData> {
 
         private final String schema;
@@ -308,6 +298,20 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         }
     }
 
+    @Override
+    public Collection<ClientData> retrieveActiveClientMembersOfCenter(final Long centerId) {
+
+        final AppUser currentUser = context.authenticatedUser();
+        final String hierarchy = currentUser.getOffice().getHierarchy();
+        final String hierarchySearchString = hierarchy + "%";
+
+        final String sql = "select " + this.membersOfGroupMapper.schema()
+                + " left join m_group g on pgc.group_id=g.id where o.hierarchy like ? and g.parent_id = ? and c.status_enum = ? group by c.id";
+
+        return this.jdbcTemplate.query(sql, this.membersOfGroupMapper,
+                new Object[] { hierarchySearchString, centerId, ClientStatus.ACTIVE.getValue() });
+    }
+    
     private static final class ClientMapper implements RowMapper<ClientData> {
 
         private final String schema;
@@ -405,125 +409,6 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             final String officeName = rs.getString("officeName");
 
             return ClientData.lookup(id, displayName, officeId, officeName);
-        }
-    }
-
-    @Override
-    public ClientAccountSummaryCollectionData retrieveClientAccountDetails(final Long clientId) {
-
-        try {
-            // Check if client exists
-            retrieveOne(clientId);
-
-            ClientLoanAccountSummaryDataMapper rm = new ClientLoanAccountSummaryDataMapper();
-
-            String sql = "select " + rm.loanAccountSummarySchema() + " where l.client_id = ?";
-
-            List<ClientLoanAccountSummaryData> allLoanAccounts = this.jdbcTemplate.query(sql, rm, new Object[] { clientId });
-
-            final String savingsSql = "select " + this.savingsAccountSummaryDataMapper.schema()
-                    + " where sa.client_id = ? order by sa.status_enum ASC, sa.account_no ASC";
-
-            final List<ClientSavingsAccountSummaryData> allSavingsAccounts = this.jdbcTemplate.query(savingsSql,
-                    savingsAccountSummaryDataMapper, new Object[] { clientId });
-
-            return new ClientAccountSummaryCollectionData(allLoanAccounts, allSavingsAccounts);
-        } catch (EmptyResultDataAccessException e) {
-            throw new ClientNotFoundException(clientId);
-        }
-    }
-
-    @Override
-    public Collection<ClientLoanAccountSummaryData> retrieveClientLoanAccountsByLoanOfficerId(final Long clientId, final Long loanOfficerId) {
-
-        this.context.authenticatedUser();
-
-        // Check if client exists
-        retrieveOne(clientId);
-
-        ClientLoanAccountSummaryDataMapper rm = new ClientLoanAccountSummaryDataMapper();
-
-        String sql = "select " + rm.loanAccountSummarySchema() + " where l.client_id = ? and l.loan_officer_id = ?";
-
-        List<ClientLoanAccountSummaryData> loanAccounts = this.jdbcTemplate.query(sql, rm, new Object[] { clientId, loanOfficerId });
-
-        return loanAccounts;
-    }
-
-    private static final class ClientSavingsAccountSummaryDataMapper implements RowMapper<ClientSavingsAccountSummaryData> {
-
-        final String schemaSql;
-
-        public ClientSavingsAccountSummaryDataMapper() {
-            StringBuilder accountsSummary = new StringBuilder();
-            accountsSummary.append("sa.id as id, sa.account_no as accountNo, sa.external_id as externalId, sa.status_enum as statusEnum, ");
-            accountsSummary.append("sa.account_balance_derived as accountBalance, ");
-            accountsSummary.append("sa.currency_code as currencyCode, sa.currency_digits as currencyDigits, ");
-            accountsSummary.append("curr.name as currencyName, curr.internationalized_name_code as currencyNameCode, ");
-            accountsSummary.append("curr.display_symbol as currencyDisplaySymbol, ");
-            accountsSummary.append("sa.product_id as productId, p.name as productName ");
-            accountsSummary.append("from m_savings_account sa ");
-            accountsSummary.append("join m_savings_product as p on p.id = sa.product_id ");
-            accountsSummary.append("join m_currency curr on curr.code = sa.currency_code ");
-
-            this.schemaSql = accountsSummary.toString();
-        }
-
-        public String schema() {
-            return this.schemaSql;
-        }
-
-        @Override
-        public ClientSavingsAccountSummaryData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
-
-            final Long id = JdbcSupport.getLong(rs, "id");
-            final String accountNo = rs.getString("accountNo");
-            final String externalId = rs.getString("externalId");
-            final Long productId = JdbcSupport.getLong(rs, "productId");
-            final String productName = rs.getString("productName");
-            final Integer statusId = JdbcSupport.getInteger(rs, "statusEnum");
-            final BigDecimal accountBalance = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "accountBalance");
-            final SavingsAccountStatusEnumData status = SavingsEnumerations.status(statusId);
-
-            final String currencyCode = rs.getString("currencyCode");
-            final String currencyName = rs.getString("currencyName");
-            final String currencyNameCode = rs.getString("currencyNameCode");
-            final String currencyDisplaySymbol = rs.getString("currencyDisplaySymbol");
-            final Integer currencyDigits = JdbcSupport.getInteger(rs, "currencyDigits");
-            final CurrencyData currency = new CurrencyData(currencyCode, currencyName, currencyDigits, currencyDisplaySymbol,
-                    currencyNameCode);
-
-            return new ClientSavingsAccountSummaryData(id, accountNo, externalId, productId, productName, status, currency, accountBalance);
-        }
-    }
-
-    private static final class ClientLoanAccountSummaryDataMapper implements RowMapper<ClientLoanAccountSummaryData> {
-
-        public String loanAccountSummarySchema() {
-
-            StringBuilder accountsSummary = new StringBuilder("l.id as id, l.account_no as accountNo, l.external_id as externalId,");
-            accountsSummary.append("l.product_id as productId, lp.name as productName,")
-                    .append("l.loan_status_id as statusId, l.loan_type_enum as loanType, ").append("l.loan_product_counter as loanCycle ")
-                    .append(" from m_loan l ").append("LEFT JOIN m_product_loan AS lp ON lp.id = l.product_id");
-
-            return accountsSummary.toString();
-        }
-
-        @Override
-        public ClientLoanAccountSummaryData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
-
-            final Long id = JdbcSupport.getLong(rs, "id");
-            final String accountNo = rs.getString("accountNo");
-            final String externalId = rs.getString("externalId");
-            final Long productId = JdbcSupport.getLong(rs, "productId");
-            final String loanProductName = rs.getString("productName");
-            final Integer loanStatusId = JdbcSupport.getInteger(rs, "statusId");
-            final LoanStatusEnumData loanStatus = LoanEnumerations.status(loanStatusId);
-            final Integer loanTypeId = JdbcSupport.getInteger(rs, "loanType");
-            final EnumOptionData loanType = LoanEnumerations.loanType(loanTypeId);
-            final Integer loanCycle = JdbcSupport.getInteger(rs, "loanCycle");
-
-            return new ClientLoanAccountSummaryData(id, accountNo, externalId, productId, loanProductName, loanStatus, loanType, loanCycle);
         }
     }
 

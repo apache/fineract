@@ -14,10 +14,10 @@ import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
 import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.staff.data.StaffAccountSummaryCollectionData;
-import org.mifosplatform.portfolio.client.data.ClientLoanAccountSummaryData;
-import org.mifosplatform.portfolio.client.service.ClientReadPlatformService;
-import org.mifosplatform.portfolio.group.data.GroupAccountSummaryData;
-import org.mifosplatform.portfolio.group.service.GroupReadPlatformService;
+import org.mifosplatform.portfolio.accountdetails.data.LoanAccountSummaryData;
+import org.mifosplatform.portfolio.accountdetails.service.AccountDetailsReadPlatformService;
+import org.mifosplatform.portfolio.client.domain.ClientStatus;
+import org.mifosplatform.portfolio.group.domain.GroupingTypeStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -28,16 +28,14 @@ public class BulkLoansReadPlatformServiceImpl implements BulkLoansReadPlatformSe
 
     private final JdbcTemplate jdbcTemplate;
     private final PlatformSecurityContext context;
-    private final ClientReadPlatformService clientReadPlatformService;
-    private final GroupReadPlatformService groupReadPlatformService;
+    private final AccountDetailsReadPlatformService accountDetailsReadPlatformService;
 
     @Autowired
     public BulkLoansReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
-            final ClientReadPlatformService clientReadPlatformService, final GroupReadPlatformService groupReadPlatformService) {
+            final AccountDetailsReadPlatformService accountDetailsReadPlatformService) {
         this.context = context;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
-        this.clientReadPlatformService = clientReadPlatformService;
-        this.groupReadPlatformService = groupReadPlatformService;
+        this.accountDetailsReadPlatformService = accountDetailsReadPlatformService;
     }
 
     @Override
@@ -46,28 +44,28 @@ public class BulkLoansReadPlatformServiceImpl implements BulkLoansReadPlatformSe
         context.authenticatedUser();
 
         final StaffClientMapper staffClientMapper = new StaffClientMapper();
-        final String clientSql = "select distinct " + staffClientMapper.schema();
+        final String clientSql = "select distinct " + staffClientMapper.schema() +" and c.status_enum=?";
 
         final StaffGroupMapper staffGroupMapper = new StaffGroupMapper();
-        final String groupSql = "select distinct " + staffGroupMapper.schema();
+        final String groupSql = "select distinct " + staffGroupMapper.schema() +" and g.status_enum=?";
 
-        final List<StaffAccountSummaryCollectionData.ClientSummary> clientSummaryList = this.jdbcTemplate.query(clientSql,
-                staffClientMapper, new Object[] { loanOfficerId });
+        final List<StaffAccountSummaryCollectionData.LoanAccountSummary> clientSummaryList = this.jdbcTemplate.query(clientSql,
+                staffClientMapper, new Object[] { loanOfficerId, ClientStatus.ACTIVE.getValue()});
 
-        for (StaffAccountSummaryCollectionData.ClientSummary clientSummary : clientSummaryList) {
+        for (StaffAccountSummaryCollectionData.LoanAccountSummary clientSummary : clientSummaryList) {
 
-            final Collection<ClientLoanAccountSummaryData> clientLoanAccounts = this.clientReadPlatformService
+            final Collection<LoanAccountSummaryData> clientLoanAccounts = this.accountDetailsReadPlatformService
                     .retrieveClientLoanAccountsByLoanOfficerId(clientSummary.getId(), loanOfficerId);
 
             clientSummary.setLoans(clientLoanAccounts);
         }
 
-        final List<StaffAccountSummaryCollectionData.GroupSummary> groupSummaryList = this.jdbcTemplate.query(groupSql, staffGroupMapper,
-                new Object[] { loanOfficerId });
+        final List<StaffAccountSummaryCollectionData.LoanAccountSummary> groupSummaryList = this.jdbcTemplate.query(groupSql, staffGroupMapper,
+                new Object[] { loanOfficerId, GroupingTypeStatus.ACTIVE.getValue()});
 
-        for (StaffAccountSummaryCollectionData.GroupSummary groupSummary : groupSummaryList) {
+        for (StaffAccountSummaryCollectionData.LoanAccountSummary groupSummary : groupSummaryList) {
 
-            final Collection<GroupAccountSummaryData> groupLoanAccounts = this.groupReadPlatformService
+            final Collection<LoanAccountSummaryData> groupLoanAccounts = this.accountDetailsReadPlatformService
                     .retrieveGroupLoanAccountsByLoanOfficerId(groupSummary.getId(), loanOfficerId);
 
             groupSummary.setLoans(groupLoanAccounts);
@@ -76,7 +74,7 @@ public class BulkLoansReadPlatformServiceImpl implements BulkLoansReadPlatformSe
         return new StaffAccountSummaryCollectionData(clientSummaryList, groupSummaryList);
     }
 
-    private static final class StaffClientMapper implements RowMapper<StaffAccountSummaryCollectionData.ClientSummary> {
+    private static final class StaffClientMapper implements RowMapper<StaffAccountSummaryCollectionData.LoanAccountSummary> {
 
         public String schema() {
             return " c.id as id, c.display_name as displayName from m_client c "
@@ -84,16 +82,16 @@ public class BulkLoansReadPlatformServiceImpl implements BulkLoansReadPlatformSe
         }
 
         @Override
-        public StaffAccountSummaryCollectionData.ClientSummary mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum)
+        public StaffAccountSummaryCollectionData.LoanAccountSummary mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum)
                 throws SQLException {
             final Long id = JdbcSupport.getLong(rs, "id");
             final String displayName = rs.getString("displayName");
 
-            return new StaffAccountSummaryCollectionData.ClientSummary(id, displayName);
+            return new StaffAccountSummaryCollectionData.LoanAccountSummary(id, displayName);
         }
     }
 
-    private static final class StaffGroupMapper implements RowMapper<StaffAccountSummaryCollectionData.GroupSummary> {
+    private static final class StaffGroupMapper implements RowMapper<StaffAccountSummaryCollectionData.LoanAccountSummary> {
 
         public String schema() {
             return " g.id as id, g.display_name as name from m_group g"
@@ -101,12 +99,12 @@ public class BulkLoansReadPlatformServiceImpl implements BulkLoansReadPlatformSe
         }
 
         @Override
-        public StaffAccountSummaryCollectionData.GroupSummary mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum)
+        public StaffAccountSummaryCollectionData.LoanAccountSummary mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum)
                 throws SQLException {
             final Long id = JdbcSupport.getLong(rs, "id");
             final String name = rs.getString("name");
 
-            return new StaffAccountSummaryCollectionData.GroupSummary(id, name);
+            return new StaffAccountSummaryCollectionData.LoanAccountSummary(id, name);
         }
     }
 }

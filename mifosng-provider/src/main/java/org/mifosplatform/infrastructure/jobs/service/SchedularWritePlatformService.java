@@ -6,6 +6,7 @@ import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.jobs.domain.ScheduledJobDetail;
 import org.mifosplatform.infrastructure.jobs.domain.ScheduledJobRunHistory;
+import org.mifosplatform.infrastructure.jobs.domain.SchedulerDetail;
 
 public interface SchedularWritePlatformService {
 
@@ -21,6 +22,12 @@ public interface SchedularWritePlatformService {
 
     public ScheduledJobDetail findByJobId(Long jobId);
 
-    CommandProcessingResult updateJobDetail(Long jobId, JsonCommand command);
+    public CommandProcessingResult updateJobDetail(Long jobId, JsonCommand command);
+
+    public SchedulerDetail retriveSchedulerDetail();
+
+    public void updateSchedulerDetail(final SchedulerDetail schedulerDetail);
+
+    public boolean processJobDetailForExecution(String jobKey, String triggerType);
 
 }

@@ -90,7 +90,7 @@
 <body>
 	<div id="page-wrapper">
 		<div id="flybar">
-			<div id="nav-logo">1.7.0.RELEASE API</div>
+			<div id="nav-logo">1.8.0.RELEASE API</div>
 			<div class="flybar-nav">
 				<h2 class="flybar-button">Overview</h2>
 				<div class="flybar-menu-overview">
@@ -208,6 +208,14 @@
 								<td></td>
 							</tr>
 							<tr class="alt">
+								<td></td>
+								<td>clients/{clientId}?command=transfer</td>
+								<td><a href="#clients_transfer">Transfer Client</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
 								<td></td>
 								<td>clients/{clientId}/accounts</td>
 								<td></td>
@@ -567,65 +575,27 @@
 								<td></td>
 								<td></td>
 							</tr>
-						</table>
-					</div>
-				</div>
-			</div>
-
-			<!-- disabled Groupings API for release 1.0.0 as its beta -->
-			<!--
-			<div class="flybar-nav">
-				<h2 class="flybar-button">Savings</h2>
-				<div id="toc-menu-savings" class="flybar-menu">
-					<div class="tocMatrix">
-						<table class=matrixHeading>
-							<tr class="matrixHeadingBG">
-								<td colspan=2 valign="top"><div class="matrixHeadingVerbs">
-										<table>
-											<tr>
-												<td>RESOURCES</td>
-											</tr>
-										</table>
-									</div></td>
-								<td><table>
-										<tr>
-											<td><div class="matrixHeadingVerbs">POST</div></td>
-										</tr>
-										<tr>
-											<td><div class=matrixHeadingCommands>create/complex
-													update</div></td>
-										</tr>
-									</table></td>
-								<td><table>
-										<tr>
-											<td><div class="matrixHeadingVerbs">GET</div></td>
-										</tr>
-										<tr>
-											<td><div class=matrixHeadingCommands>read</div></td>
-										</tr>
-									</table></td>
-								<td><table>
-										<tr>
-											<td><div class="matrixHeadingVerbs">PUT</div></td>
-										</tr>
-										<tr>
-											<td><div class=matrixHeadingCommands>update</div></td>
-										</tr>
-									</table></td>
-								<td><table>
-										<tr>
-											<td><div class="matrixHeadingVerbs">DELETE</div></td>
-										</tr>
-										<tr>
-											<td><div class=matrixHeadingCommands>delete</div></td>
-										</tr>
-									</table></td>
+							<tr class="alt">
+								<td></td>
+								<td>groups/{groupId}/accounts</td>
+								<td></td>
+								<td><a href="#groups_accounts">Retrive Group accounts summary</a></td>
+								<td></td>
+								<td></td>
 							</tr>
+							<tr>
+								<td></td>
+								<td>groups/{groupId}?command=transferClients</td>
+								<td><a href="#groups_transfer_clients">Transfer Clients</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+
 						</table>
 					</div>
 				</div>
 			</div>
-			-->
 
 			<div class="flybar-nav">
 				<h2 class="flybar-button">Accounting</h2>
@@ -861,7 +831,7 @@
 							<tr>
 								<td><a href="#staff">Staff</a></td>
 								<td>staff</td>
-								<td><a href="#staff_create">Create a Staff</a></td>
+								<td><a href="#staff_create">Create a Staff Member</a></td>
 								<td><a href="#staff_list">List Staff</a></td>
 								<td></td>
 								<td></td>
@@ -2166,7 +2136,33 @@ Request Body:
 }
 	        </code>
 	    </div>
-	</div>	
+	</div>
+
+	<a id="clients_transfer" name="clients_transfer" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h4>Transfer a Client</h4>
+	        <p>Allows you to transfer a <i>Client</i> between <i>Offices</i>.</p>
+	    </div>
+		<div class="method-example">
+	        <code class="method-declaration">POST https://Domain Name/api/v1/clients/{clientId}?command=transfer</code>
+	        <code class="method-request">POST clients/1?command=transfer
+Content-Type: application/json
+Request Body:
+{
+  destinationOfficeId:1
+}				
+			</code>
+	        <code class="method-response">
+{
+   "clientId": 2,
+   "resourceId": 2
+}
+
+
+	        </code>
+	    </div>
+	</div>		
 			<a id="clients_retrieve" name="clients_retrieve" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
@@ -3828,6 +3824,118 @@ Request Body:
 	        </code>
 	    </div>
 	</div>
+
+	<a id="groups_associate_clients" name="groups_associate_clients" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Associate Clients</h2>
+	        <p>This API allows to associate existing clients to a group.</p>
+	        <p>The clients are listed from the office to which the group is associated.</p>
+	        <p>If client(s) is already associated with group then API will result in an error.</p>
+	    </div>
+
+	    <div class="method-example">
+	        <code class="method-declaration">POST https://Domain Name/api/v1/groups/{groupId}?command=associateClients</code>
+	        <code class="method-request">POST groups/1?command=associateClients
+Content-Type: application/json
+Request Body:
+{
+  "clientMembers":[1,2]
+}
+			</code>
+	        <code class="method-response">
+{
+  "officeId": 1,
+  "groupId": 1,
+  "resourceId": 1,
+  "clientMembers": [1,2]
+}
+	        </code>
+	    </div>
+	</div>
+			<a id="groups_transfer_clients" name="groups_transfer_clients" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+			    <div class="method-description">
+			        <h2>Transfer Clients across groups</h2>
+			        <p>This API allows to transfer clients from one group to another</p>
+			        <table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Field Descriptions</div></td>
+						</tr>
+						<tr class=alt>
+							<td>destinationGroupId</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>The identifier of the group to which the clients are to be transferred.</td>
+						</tr>
+						<tr class=alt>
+							<td>clients</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Identifiers of all clients who need to be transferred
+							</td>
+						</tr>
+						<tr class=alt>
+							<td>inheritDestinationGroupLoanOfficer</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Flag specifies if the transferred clients (and all their active loans)
+							should be linked to the assigned loan officer for the group
+							</td>
+						</tr>
+						<tr class=alt>
+							<td>transferActiveLoans</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Flag specifies if transfers should proceed when active loans are encountered.
+							If set to true, the schedules of the actives loans are updated to match that meeting schedule
+							of the destination Group
+							</td>
+						</tr>
+					</table>
+					<br/>
+			        <table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Mandatory Fields</div></td>
+						</tr>
+						<tr class=alt>
+							<td>destinationGroupId, clients</td>
+						</tr>
+					</table>
+					<br/>
+					<table class=matrixHeading>
+						<tr class="matrixHeadingBG">
+							<td><div class="mifosXHeading2">Optional Fields</div></td>
+						</tr>
+						<tr class=alt>
+							<td>inheritDestinationGroupLoanOfficer (defaults to true), transferActiveLoans (defaults to true)</td>
+						</tr>
+					</table>
+
+			       
+			    </div>
+
+
+			    <div class="method-example">
+
+			        <code class="method-declaration">POST https://Domain Name/api/v1/groups/{groupId}?command=transferClients</code>
+			        <code class="method-request">POST groups/1?command=transferClients
+Content-Type: application/json
+Request Body:
+{
+  destinationGroupId:2,
+  clients:[{id:1}]
+}
+					</code>
+	        		<code class="method-response">
+{
+   "resourceId": 1
+}
+
+
+			  		</code>
+			    </div>
+			</div>
 			<a id="groups_retrieve" name="groups_retrieve" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
@@ -3887,6 +3995,233 @@ GET https://DomainName/mifosng-provider/api/v1/groups/1?associations=clientMembe
 					</code>
 				</div>
 			</div>
+
+<!--Start of Group account summary -->
+			<a id="groups_accounts" name="groups_accounts" class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Retrieve Group accounts overview</h4>
+					<p>
+						An example of how a loan portfolio summary can be provided. This
+						is requested in a specific use case of the reference application.<br> It is quite reasonable to add resources like this to simplify User Interface development.
+					</p>
+					<p>Example Requests:</p>
+					<div class=apiClick>groups/1/accounts</div>
+					<br>
+					<br>
+					<div class=apiClick>groups/1/accounts?fields=loanAccounts,savingsAccounts,memberLoanAccounts,<br> memberSavingsAccounts</div>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+GET https://DomainName/api/v1/groups/{groupId}/accounts
+					</code>
+					<code class="method-response">
+{
+  "loanAccounts": [
+    {
+      "id": 3,
+      "accountNo": "000000003",
+      "productId": 3,
+      "productName": "daily product",
+      "status": {
+        "id": 100,
+        "code": "loanStatusType.submitted.and.pending.approval",
+        "value": "Submitted and pending approval",
+        "pendingApproval": true,
+        "waitingForDisbursal": false,
+        "active": false,
+        "closedObligationsMet": false,
+        "closedWrittenOff": false,
+        "closedRescheduled": false,
+        "closed": false,
+        "overpaid": false
+      },
+      "loanType": {
+        "id": 2,
+        "code": "accountType.group",
+        "value": "Group"
+      }
+    }
+  ],
+  "savingsAccounts": [
+    {
+      "id": 9,
+      "accountNo": "000000009",
+      "productId": 1,
+      "productName": "p_sav",
+      "status": {
+        "id": 100,
+        "code": "savingsAccountStatusType.submitted.and.pending.approval",
+        "value": "Submitted and pending approval",
+        "submittedAndPendingApproval": true,
+        "approved": false,
+        "rejected": false,
+        "withdrawnByApplicant": false,
+        "active": false,
+        "closed": false
+      },
+      "currency": {
+        "code": "USD",
+        "name": "US Dollar",
+        "decimalPlaces": 2,
+        "displaySymbol": "$",
+        "nameCode": "currency.USD",
+        "displayLabel": "US Dollar ($)"
+      },
+      "accountType": {
+        "id": 2,
+        "code": "accountType.group",
+        "value": "Group"
+      }
+    },
+    {
+      "id": 4,
+      "accountNo": "000000004",
+      "productId": 1,
+      "productName": "p_sav",
+      "status": {
+        "id": 300,
+        "code": "savingsAccountStatusType.active",
+        "value": "Active",
+        "submittedAndPendingApproval": false,
+        "approved": false,
+        "rejected": false,
+        "withdrawnByApplicant": false,
+        "active": true,
+        "closed": false
+      },
+      "currency": {
+        "code": "USD",
+        "name": "US Dollar",
+        "decimalPlaces": 2,
+        "displaySymbol": "$",
+        "nameCode": "currency.USD",
+        "displayLabel": "US Dollar ($)"
+      },
+      "accountType": {
+        "id": 2,
+        "code": "accountType.group",
+        "value": "Group"
+      }
+    }
+  ],
+  "memberLoanAccounts": [
+    {
+      "id": 4,
+      "accountNo": "000000004",
+      "productId": 1,
+      "productName": "testLoan",
+      "status": {
+        "id": 200,
+        "code": "loanStatusType.approved",
+        "value": "Approved",
+        "pendingApproval": false,
+        "waitingForDisbursal": true,
+        "active": false,
+        "closedObligationsMet": false,
+        "closedWrittenOff": false,
+        "closedRescheduled": false,
+        "closed": false,
+        "overpaid": false
+      },
+      "loanType": {
+        "id": 3,
+        "code": "accountType.jlg",
+        "value": "JLG"
+      }
+    },
+    {
+      "id": 7,
+      "accountNo": "000000007",
+      "productId": 2,
+      "productName": "weekly product",
+      "status": {
+        "id": 100,
+        "code": "loanStatusType.submitted.and.pending.approval",
+        "value": "Submitted and pending approval",
+        "pendingApproval": true,
+        "waitingForDisbursal": false,
+        "active": false,
+        "closedObligationsMet": false,
+        "closedWrittenOff": false,
+        "closedRescheduled": false,
+        "closed": false,
+        "overpaid": false
+      },
+      "loanType": {
+        "id": 3,
+        "code": "accountType.jlg",
+        "value": "JLG"
+      }
+    }
+  ],
+  "memberSavingsAccounts": [
+    {
+      "id": 3,
+      "accountNo": "000000003",
+      "productId": 1,
+      "productName": "p_sav",
+      "status": {
+        "id": 100,
+        "code": "savingsAccountStatusType.submitted.and.pending.approval",
+        "value": "Submitted and pending approval",
+        "submittedAndPendingApproval": true,
+        "approved": false,
+        "rejected": false,
+        "withdrawnByApplicant": false,
+        "active": false,
+        "closed": false
+      },
+      "currency": {
+        "code": "USD",
+        "name": "US Dollar",
+        "decimalPlaces": 2,
+        "displaySymbol": "$",
+        "nameCode": "currency.USD",
+        "displayLabel": "US Dollar ($)"
+      },
+      "accountType": {
+        "id": 3,
+        "code": "accountType.jlg",
+        "value": "JLG"
+      }
+    },
+    {
+      "id": 10,
+      "accountNo": "000000010",
+      "productId": 1,
+      "productName": "p_sav",
+      "status": {
+        "id": 100,
+        "code": "savingsAccountStatusType.submitted.and.pending.approval",
+        "value": "Submitted and pending approval",
+        "submittedAndPendingApproval": true,
+        "approved": false,
+        "rejected": false,
+        "withdrawnByApplicant": false,
+        "active": false,
+        "closed": false
+      },
+      "currency": {
+        "code": "USD",
+        "name": "US Dollar",
+        "decimalPlaces": 2,
+        "displaySymbol": "$",
+        "nameCode": "currency.USD",
+        "displayLabel": "US Dollar ($)"
+      },
+      "accountType": {
+        "id": 3,
+        "code": "accountType.jlg",
+        "value": "JLG"
+      }
+    }
+   ]
+}
+					</code>
+				</div>
+			</div>
+<!--End of Group account summary -->
 
 			<a id="groups_update" name="groups_update" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
@@ -5701,6 +6036,7 @@ GET https://DomainName/api/v1/loans/{loanId}/transactions/template"
     "total": {
         "currencyCode": "XOF",
         "digitsAfterDecimal": 0,
+        "inMultiplesOf": 0,
         "amount": 471,
         "defaultName": "CFA Franc BCEAO",
         "nameCode": "currency.XOF",
@@ -7247,6 +7583,13 @@ Request Body:
 							<td class=fielddesc>Override the currency default value for digitsAfterDecimal.</td>
 						</tr>
 						<tr class=alt>
+							<td>inMultiplesOf</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>Override the default value for rounding currency to multiples of value provided.</td>
+						</tr>
+
+						<tr class=alt>
 							<td>principal</td>
 						</tr>
 						<tr>
@@ -7926,7 +8269,7 @@ GET https://DomainName/api/v1/loanproducts/{productId}
 							<td><div class="mifosXHeading2">Mandatory Fields</div></td>
 						</tr>
 						<tr class=alt>
-							<td>name, currencyCode, digitsAfterDecimal, principal,
+							<td>name, currencyCode, digitsAfterDecimal, inMultiplesOf, principal,
 								numberOfRepayments, repaymentEvery, repaymentFrequencyType, 
 								interestRatePerPeriod, interestRateFrequencyType, amortizationType, interestType,
 								interestCalculationPeriodType, transactionProcessingStrategyId,
@@ -7971,6 +8314,7 @@ Request Body:
     "currencyCode": "USD",
     "locale": "en_GB",
     "digitsAfterDecimal": "2",
+    "inMultiplesOf": 0,
     "principal": "100,000.00",
     "numberOfRepayments": "12",
     "repaymentEvery": "1",
@@ -8000,6 +8344,7 @@ Request Body:
     "currencyCode": "USD",
     "locale": "en_GB",
     "digitsAfterDecimal": "2",
+    "inMultiplesOf": 0,
     "principal": "100,000.00",
     "numberOfRepayments": "12",
     "repaymentEvery": "1",
@@ -8056,6 +8401,7 @@ Request Body:
     "currencyCode": "USD",
     "locale": "en_GB",
     "digitsAfterDecimal": "2",
+    "inMultiplesOf": 0,
     "principal": "100,000.00",
     "numberOfRepayments": "12",
     "repaymentEvery": "1",
@@ -10029,7 +10375,8 @@ Request Body:
     "officeId": 1,
     "firstname": "John",
     "lastname": "Doe",
-    "isLoanOfficer": "true"
+    "isLoanOfficer": "true",
+    "externalId": "17H"
 }
 					</code>
 					<code class="method-response">
@@ -10062,7 +10409,8 @@ GET https://DomainName/api/v1/staff
         "displayName": "Doe, John",
         "officeId": 1,
         "officeName": "Head Office",
-        "isLoanOfficer": true
+        "isLoanOfficer": true,
+	"externalId": "17H"
     }
 ]
 					</code>
@@ -10087,7 +10435,8 @@ GET https://DomainName/api/v1/staff
     "displayName": "Doe, John",
     "officeId": 1,
     "officeName": "Head Office",
-    "isLoanOfficer": true
+    "isLoanOfficer": true,
+    "externalId": "17H"
 }
 					</code>
 				</div>
@@ -10108,7 +10457,8 @@ PUT staff/1
 Content-Type: application/json 
 Request Body: 
 { 
-	"isLoanOfficer": "false" 
+	"isLoanOfficer": "false",
+	"externalId": "17Hbb"
 }
 					</code>
 					<code class="method-response">
@@ -10116,7 +10466,8 @@ Request Body:
     "officeId": 1,
     "resourceId": 1,
     "changes": {
-        "isLoanOfficer": false
+        "isLoanOfficer": false,
+	"externalId": "17Hbb"
     }
 }
 					</code>
@@ -10923,6 +11274,9 @@ Content-Type: application/json
 	            <tr class=alt><td>digitsAfterDecimal</td></tr>
 	            <tr><td class=fielddesc>Override the currency default value for digitsAfterDecimal.</td></tr>
 
+	            <tr class=alt><td>inMultiplesOf</td></tr>
+	            <tr><td class=fielddesc>Override the default value for rounding currency to multiples of provided value.</td></tr>
+
 				<tr class=alt><td>nominalAnnualInterestRate</td></tr>
 	            <tr><td class=fielddesc>The default interest rate set when creating savings accounts of this type of product. e.g. <b>5</b>% Per year - It number here is always expressed as the Nominal APR.</td></tr>
 
@@ -11469,7 +11823,7 @@ Content-Type: application/json
             <table class=matrixHeading>
                 <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Mandatory Fields</div></td></tr>
                 <tr class=alt>
-                	<td>name, description, currencyCode, digitsAfterDecimal, nominalAnnualInterestRate,
+                	<td>name, description, currencyCode, digitsAfterDecimal,inMultiplesOf, nominalAnnualInterestRate,
                 		interestCompoundingPeriodType, interestCalculationType, interestCalculationDaysInYearType,accountingRule</td>
                 </tr>
             </table>
@@ -11496,6 +11850,7 @@ Request Body:
   "description": "Daily compounding using Daily Balance, 5% per year, 365 days in year",
   "currencyCode": "USD",
   "digitsAfterDecimal": 2,
+  "inMultiplesOf": 0,
   "locale": "en",
   "nominalAnnualInterestRate": "5.0",
   "interestCompoundingPeriodType": 1, 
@@ -11519,6 +11874,7 @@ Request Body:
   "description": "A savings product",
   "currencyCode": "USD",
   "digitsAfterDecimal": "2",
+  "inMultiplesOf": 0,
   "nominalAnnualInterestRate": "15",
   "interestCompoundingPeriodType": "1",
   "interestPostingPeriodType": "4",
@@ -12651,7 +13007,6 @@ No Request Body:
 	    </div>
 	</div>
 
-	savingsaccounts_transactions_template
 	<a id="savingsaccounts_transactions_template" name="savingsaccounts_transactions_template" class="old-syle-anchor">&nbsp;</a>
 	<div class="method-section">
 	    <div class="method-description">
@@ -12703,6 +13058,70 @@ No Request Body:
 	    </div>
 	</div>
 
+<a id="savingsaccounts_transaction" name="savingsaccounts_transaction" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Retrieve Savings Account Transaction:</h2>
+	            <p>This is a convenience resource. It can be useful when building maintenance user interface screens for client applications. The template data returned consists of any or all of:
+	                <ul>
+	                <li class=normalli>Field Defaults</li>   
+	                <li class=normalli>Allowed Value Lists</li>    
+	                </ul>
+	            </p>
+	        <p>Example Requests: </p>
+	        <div class=apiClick>savingsaccounts/1/transactions/1</div>
+	        <br/>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">GET https://Domain Name/api/v1/savingsaccounts/{accountId}/transactions/{transactionId}
+	        </code>
+			<code class="method-response">
+{
+  "id": 1,
+  "transactionType": {
+    "id": 2,
+    "code": "savingsAccountTransactionType.withdrawal",
+    "value": "Withdrawal",
+    "deposit": false,
+    "withdrawal": true,
+    "interestPosting": false,
+    "feeDeduction": false
+  },
+  "accountId": 1,
+  "accountNo": "000000001",
+  "date": [
+    2013,
+    8,
+    7
+  ],
+  "currency": {
+    "code": "USD",
+    "name": "US Dollar",
+    "decimalPlaces": 2,
+    "inMultiplesOf": 0,
+    "displaySymbol": "$",
+    "nameCode": "currency.USD",
+    "displayLabel": "US Dollar ($)"
+  },
+  "paymentDetailData": {
+    "id": 62,
+    "paymentType": {
+      "id": 11,
+      "name": "cash"
+    },
+    "accountNumber": "",
+    "checkNumber": "",
+    "routingCode": "",
+    "receiptNumber": "",
+    "bankNumber": ""
+  },
+  "amount": 5000,
+  "runningBalance": 0,
+  "reversed": true
+}
+</code>
+	    </div>
+	</div>
 
 	<a id="savingsaccounts_deposit" name="savingsaccounts_deposit" class="old-syle-anchor">&nbsp;</a>
 	<div class="method-section">
@@ -12786,6 +13205,49 @@ No Request Body:
 	    </div>
 	</div>
 
+	<a id="savingsaccounts_adjusttransaction" name="savingsaccounts_adjusttransaction" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Adjust Transaction</h2>
+	        <p>This command modifies the given transaction.</p>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">POST https://Domain Name/api/v1/savingsaccounts/{accountsId}/transactions/{transactionId}?command=modify</code>
+	        <code class="method-request">POST savingsaccounts/1/transactions/1?command=modify             
+Content-Type: application/json
+No Request Body:
+{
+  "locale": "en",
+  "dateFormat": "dd MMMM yyyy",
+  "transactionDate": "27 May 2013",
+  "transactionAmount": "500",
+  "paymentTypeId": "14",
+  "accountNumber": "acc123",
+  "checkNumber": "che123",
+  "routingCode": "rou123",
+  "receiptNumber": "rec123",
+  "bankNumber": "ban123"
+}
+	        </code>
+	        <code class="method-response">
+{
+  "officeId": 1,
+  "clientId": 2,
+  "savingsId": 1,
+  "resourceId": 48,
+  "changes": {
+    "accountNumber": "acc123",
+    "checkNumber": "che123",
+    "routingCode": "rou123",
+    "receiptNumber": "rec123",
+    "bankNumber": "ban123"
+  }
+}
+	        </code>
+	    </div>
+	</div>
+
+
 	<a id="savingsaccounts_undotransaction" name="savingsaccounts_undotransaction" class="old-syle-anchor">&nbsp;</a>
 	<div class="method-section">
 	    <div class="method-description">
@@ -12811,6 +13273,835 @@ No Request Body:
 	    </div>
 	</div>	
 <!-- end of savings accounts api -->
+
+<!-- account transfers -->
+<a id="accounttransfers" name="accounttransfers" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Account Transfers:</h2>
+	        <p>Ability to be able to transfer monetary funds from one account to another.</p>
+	        <p>Note: At present only savings account to savings account transfers are supported.</p>
+	      	<table class=matrixHeading>
+	            <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Mandatory Parameters</div></td></tr>
+
+	            <tr class=alt><td>fromOfficeId</td></tr>
+				<tr><td class=fielddesc>The id of the office/branch from which the transfer is made.</td></tr>
+
+				<tr class=alt><td>fromClientId</td></tr>
+				<tr><td class=fielddesc>The id of the client from which the transfer is made.</td></tr>
+
+				<tr class=alt><td>fromAccountType</td></tr>
+				<tr><td class=fielddesc>The type of account from which the transfer is made. 1=Loan Account, 2=Savings Account</td></tr>
+
+				<tr class=alt><td>fromAccountId</td></tr>
+				<tr><td class=fielddesc>The id of the account from which the transfer is made.</td></tr>
+
+				<tr class=alt><td>toOfficeId</td></tr>
+				<tr><td class=fielddesc>The id of the office/branch to which the transfer is made.</td></tr>
+
+				<tr class=alt><td>toClientId</td></tr>
+				<tr><td class=fielddesc>The id of the client to which the transfer is made.</td></tr>
+
+				<tr class=alt><td>toAccountType</td></tr>
+				<tr><td class=fielddesc>The type of account to which the transfer is made. 1=Loan Account, 2=Savings Account</td></tr>
+
+				<tr class=alt><td>toAccountId</td></tr>
+				<tr><td class=fielddesc>The id of the account to which the transfer is made. The accouont must be <i>active</i> and must have the same currency as that of the selected <b>fromAccountId</b>.</td></tr>
+
+				<tr class=alt><td>transferDate</td></tr>
+				<tr><td class=fielddesc>The date of the transfer. Requires <i>dateFormat</i> and <i>locale</i> parameters.</td></tr>
+
+				<tr class=alt><td>transferAmount</td></tr>
+				<tr><td class=fielddesc>The amount of the transfer. Requires <i>locale</i> parameter.</td></tr>
+
+				<tr class=alt><td>transferDescription</td></tr>
+				<tr><td class=fielddesc>Description of the transfer itself.</td></tr>
+	        </table>
+	    </div>
+	</div>
+
+	<a id="accounttransfers_template" name="accounttransfers_template" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Retrieve Account Transfer Template:</h2>
+	            <p>This is a convenience resource. It can be useful when building maintenance user interface screens for client applications. The template data returned consists of any or all of:
+	                <ul>
+	                <li class=normalli>Field Defaults</li>   
+	                <li class=normalli>Allowed Value Lists</li>    
+	                </ul>
+	            </p>
+	        <p>Example Requests:</p>
+	        <div class=apiClick>accounttransfers/template?fromAccountType=2&fromOfficeId=1</div>
+	        <br/>
+	        <div class=apiClick>accounttransfers/template?fromAccountType=2&fromOfficeId=1&fromClientId=1</div>
+	        <br/>
+	        <div class=apiClick>accounttransfers/template?fromClientId=1&fromAccountType=2&fromAccountId=1</div>
+	        <br/>
+	    </div> 
+	    <div class="method-example">
+	        <code class="method-declaration">GET https://Domain Name/api/v1/accounttransfers/template?fromAccountType=2&fromOfficeId=1
+	        </code>
+			<code class="method-response">
+{
+  "transferAmount": 0,
+  "transferDate": [
+    2013,
+    8,
+    15
+  ],
+  "fromOffice": {
+    "id": 1,
+    "name": "HO",
+    "nameDecorated": "HO",
+    "externalId": "1",
+    "openingDate": [
+      2009,
+      1,
+      1
+    ],
+    "hierarchy": "."
+  },
+  "fromAccountType": {
+    "id": 2,
+    "code": "accountType.savings",
+    "value": "Savings Account"
+  },
+  "fromOfficeOptions": [
+    {
+      "id": 1,
+      "name": "HO",
+      "nameDecorated": "HO"
+    },
+    {
+      "id": 2,
+      "name": "Branch 1",
+      "nameDecorated": "....Branch 1"
+    }
+  ],
+  "fromClientOptions": [
+    {
+      "id": 1,
+      "displayName": "Small shop",
+      "officeId": 1,
+      "officeName": "HO"
+    },
+    {
+      "id": 3,
+      "displayName": "Third client",
+      "officeId": 1,
+      "officeName": "HO"
+    }
+  ],
+  "fromAccountTypeOptions": [
+    {
+      "id": 2,
+      "code": "accountType.savings",
+      "value": "Savings Account"
+    }
+  ],
+  "toOfficeOptions": [
+    {
+      "id": 1,
+      "name": "HO",
+      "nameDecorated": "HO"
+    },
+    {
+      "id": 2,
+      "name": "Branch 1",
+      "nameDecorated": "....Branch 1"
+    }
+  ],
+  "toAccountTypeOptions": [
+    {
+      "id": 1,
+      "code": "accountType.loan",
+      "value": "Loan Account"
+    },
+    {
+      "id": 2,
+      "code": "accountType.savings",
+      "value": "Savings Account"
+    }
+  ]
+}
+			</code>
+	    </div>
+
+	    <div class="method-example">
+	        <code class="method-declaration">GET https://Domain Name/api/v1/accounttransfers/template?fromAccountType=2&fromOfficeId=1&fromClientId=1
+	        </code>
+			<code class="method-response">
+{
+  "transferAmount": 0,
+  "transferDate": [
+    2013,
+    8,
+    15
+  ],
+  "fromOffice": {
+    "id": 1,
+    "name": "HO",
+    "nameDecorated": "HO",
+    "externalId": "1",
+    "openingDate": [
+      2009,
+      1,
+      1
+    ],
+    "hierarchy": "."
+  },
+  "fromClient": {
+    "id": 1,
+    "accountNo": "000000001",
+    "status": {
+      "id": 300,
+      "code": "clientStatusType.active",
+      "value": "Active"
+    },
+    "active": true,
+    "activationDate": [
+      2013,
+      3,
+      1
+    ],
+    "fullname": "Small shop",
+    "displayName": "Small shop",
+    "officeId": 1,
+    "officeName": "HO",
+    "groups": []
+  },
+  "fromAccountType": {
+    "id": 2,
+    "code": "accountType.savings",
+    "value": "Savings Account"
+  },
+  "fromOfficeOptions": [
+    {
+      "id": 1,
+      "name": "HO",
+      "nameDecorated": "HO"
+    },
+    {
+      "id": 2,
+      "name": "Branch 1",
+      "nameDecorated": "....Branch 1"
+    }
+  ],
+  "fromClientOptions": [
+    {
+      "id": 1,
+      "displayName": "Small shop",
+      "officeId": 1,
+      "officeName": "HO"
+    },
+    {
+      "id": 3,
+      "displayName": "Third client",
+      "officeId": 1,
+      "officeName": "HO"
+    }
+  ],
+  "fromAccountTypeOptions": [
+    {
+      "id": 2,
+      "code": "accountType.savings",
+      "value": "Savings Account"
+    }
+  ],
+  "fromAccountOptions": [
+    {
+      "id": 1,
+      "accountNo": "000000001",
+      "clientId": 1,
+      "clientName": "Small shop",
+      "productId": 1,
+      "productName": "Passbook",
+      "fieldOfficerId": 0,
+      "currency": {
+        "code": "USD",
+        "name": "US Dollar",
+        "decimalPlaces": 2,
+        "displaySymbol": "$",
+        "nameCode": "currency.USD",
+        "displayLabel": "US Dollar ($)"
+      }
+    },
+    {
+      "id": 3,
+      "accountNo": "000000003",
+      "clientId": 1,
+      "clientName": "Small shop",
+      "productId": 2,
+      "productName": "Shilling product",
+      "fieldOfficerId": 0,
+      "currency": {
+        "code": "KES",
+        "name": "Kenyan Shilling",
+        "decimalPlaces": 0,
+        "inMultiplesOf": 0,
+        "displaySymbol": "KSh",
+        "nameCode": "currency.KES",
+        "displayLabel": "Kenyan Shilling (KSh)"
+      }
+    }
+  ],
+  "toOfficeOptions": [
+    {
+      "id": 1,
+      "name": "HO",
+      "nameDecorated": "HO"
+    },
+    {
+      "id": 2,
+      "name": "Branch 1",
+      "nameDecorated": "....Branch 1"
+    }
+  ],
+  "toAccountTypeOptions": [
+    {
+      "id": 1,
+      "code": "accountType.loan",
+      "value": "Loan Account"
+    },
+    {
+      "id": 2,
+      "code": "accountType.savings",
+      "value": "Savings Account"
+    }
+  ]
+}
+			</code>
+	    </div>
+
+	   	<div class="method-example">
+	        <code class="method-declaration">GET https://Domain Name/api/v1/accounttransfers/template?fromClientId=1&fromAccountType=2&fromAccountId=1
+	        </code>
+			<code class="method-response">
+{
+  "currency": {
+    "code": "USD",
+    "name": "US Dollar",
+    "decimalPlaces": 2,
+    "displaySymbol": "$",
+    "nameCode": "currency.USD",
+    "displayLabel": "US Dollar ($)"
+  },
+  "transferAmount": 0,
+  "transferDate": [
+    2013,
+    8,
+    15
+  ],
+  "fromOffice": {
+    "id": 1,
+    "name": "HO",
+    "nameDecorated": "HO",
+    "externalId": "1",
+    "openingDate": [
+      2009,
+      1,
+      1
+    ],
+    "hierarchy": "."
+  },
+  "fromClient": {
+    "id": 1,
+    "accountNo": "000000001",
+    "status": {
+      "id": 300,
+      "code": "clientStatusType.active",
+      "value": "Active"
+    },
+    "active": true,
+    "activationDate": [
+      2013,
+      3,
+      1
+    ],
+    "fullname": "Small shop",
+    "displayName": "Small shop",
+    "officeId": 1,
+    "officeName": "HO",
+    "groups": []
+  },
+  "fromAccountType": {
+    "id": 2,
+    "code": "accountType.savings",
+    "value": "Savings Account"
+  },
+  "fromAccount": {
+    "id": 1,
+    "accountNo": "000000001",
+    "clientId": 1,
+    "clientName": "Small shop",
+    "productId": 1,
+    "productName": "Passbook",
+    "fieldOfficerId": 0,
+    "currency": {
+      "code": "USD",
+      "name": "US Dollar",
+      "decimalPlaces": 2,
+      "displaySymbol": "$",
+      "nameCode": "currency.USD",
+      "displayLabel": "US Dollar ($)"
+    }
+  },
+  "fromOfficeOptions": [
+    {
+      "id": 1,
+      "name": "HO",
+      "nameDecorated": "HO"
+    },
+    {
+      "id": 2,
+      "name": "Branch 1",
+      "nameDecorated": "....Branch 1"
+    }
+  ],
+  "fromClientOptions": [
+    {
+      "id": 1,
+      "displayName": "Small shop",
+      "officeId": 1,
+      "officeName": "HO"
+    },
+    {
+      "id": 3,
+      "displayName": "Third client",
+      "officeId": 1,
+      "officeName": "HO"
+    }
+  ],
+  "fromAccountTypeOptions": [
+    {
+      "id": 2,
+      "code": "accountType.savings",
+      "value": "Savings Account"
+    }
+  ],
+  "fromAccountOptions": [
+    {
+      "id": 1,
+      "accountNo": "000000001",
+      "clientId": 1,
+      "clientName": "Small shop",
+      "productId": 1,
+      "productName": "Passbook",
+      "fieldOfficerId": 0,
+      "currency": {
+        "code": "USD",
+        "name": "US Dollar",
+        "decimalPlaces": 2,
+        "displaySymbol": "$",
+        "nameCode": "currency.USD",
+        "displayLabel": "US Dollar ($)"
+      }
+    },
+    {
+      "id": 3,
+      "accountNo": "000000003",
+      "clientId": 1,
+      "clientName": "Small shop",
+      "productId": 2,
+      "productName": "Shilling product",
+      "fieldOfficerId": 0,
+      "currency": {
+        "code": "KES",
+        "name": "Kenyan Shilling",
+        "decimalPlaces": 0,
+        "inMultiplesOf": 0,
+        "displaySymbol": "KSh",
+        "nameCode": "currency.KES",
+        "displayLabel": "Kenyan Shilling (KSh)"
+      }
+    }
+  ],
+  "toOfficeOptions": [
+    {
+      "id": 1,
+      "name": "HO",
+      "nameDecorated": "HO"
+    },
+    {
+      "id": 2,
+      "name": "Branch 1",
+      "nameDecorated": "....Branch 1"
+    }
+  ],
+  "toAccountTypeOptions": [
+    {
+      "id": 1,
+      "code": "accountType.loan",
+      "value": "Loan Account"
+    },
+    {
+      "id": 2,
+      "code": "accountType.savings",
+      "value": "Savings Account"
+    }
+  ]
+}
+			</code>
+	    </div>
+
+	</div>
+
+	<a id="accounttransfers_create" name="accounttransfers_create" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Create new Transfer</h2>
+	        <p>Ability to create new transfer of monetary funds from one account to another.</p>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">POST https://Domain Name/api/v1/accounttransfers</code>
+	        <code class="method-request">POST accounttransfers/              
+Content-Type: application/json
+No Request Body:
+{
+"fromOfficeId": 1,
+"fromClientId": 1,
+"fromAccountType": 2,
+"fromAccountId": 1,
+"toOfficeId": 1,
+"toClientId": 1,
+"toAccountType": 2,
+"toAccountId": 2,
+"dateFormat": "dd MMMM yyyy", 
+"locale": "en",
+"transferDate": "01 August 2011",
+"transferAmount": "112.45",
+"transferDescription": "A description of the transfer"
+}
+	        </code>
+	        <code class="method-response">
+{
+  "savingsId": 1,
+  "resourceId": 1
+}
+	        </code>
+	    </div>
+	</div>
+
+	<a id="accounttransfers_list" name="accounttransfers_list" class="old-syle-anchor">&nbsp;</a>
+    <div class="method-section">
+        <div class="method-description">
+            <h2>List account transfers</h2>
+            <p>Example Requests:</p> 
+            <div class=apiClick>accounttransfers</div>
+            <br>
+        </div>
+        <div class="method-example">
+            <code class="method-declaration">GET https://Domain Name/api/v1/accounttransfers</code>
+            <code class="method-response">
+{
+  "totalFilteredRecords": 4,
+  "pageItems": [
+    {
+      "id": 1,
+      "reversed": false,
+      "currency": {
+        "code": "USD",
+        "name": "US Dollar",
+        "decimalPlaces": 2,
+        "displaySymbol": "$",
+        "nameCode": "currency.USD",
+        "displayLabel": "US Dollar ($)"
+      },
+      "transferAmount": 200,
+      "transferDate": [
+        2013,
+        4,
+        1
+      ],
+      "transferDescription": "pay off loan from savings.",
+      "fromOffice": {
+        "id": 1,
+        "name": "HO"
+      },
+      "fromClient": {
+        "id": 1,
+        "displayName": "Small shop",
+        "officeId": 1,
+        "officeName": "HO"
+      },
+      "fromAccountType": {
+        "id": 2,
+        "code": "accountType.savings",
+        "value": "Savings Account"
+      },
+      "fromAccount": {
+        "id": 1,
+        "accountNo": "000000001"
+      },
+      "toOffice": {
+        "id": 1,
+        "name": "HO"
+      },
+      "toClient": {
+        "id": 1,
+        "displayName": "Small shop",
+        "officeId": 1,
+        "officeName": "HO"
+      },
+      "toAccountType": {
+        "id": 1,
+        "code": "accountType.loan",
+        "value": "Loan Account"
+      },
+      "toAccount": {
+        "id": 1,
+        "accountNo": "000000001"
+      }
+    },
+    {
+      "id": 2,
+      "reversed": false,
+      "currency": {
+        "code": "USD",
+        "name": "US Dollar",
+        "decimalPlaces": 2,
+        "displaySymbol": "$",
+        "nameCode": "currency.USD",
+        "displayLabel": "US Dollar ($)"
+      },
+      "transferAmount": 112.45,
+      "transferDate": [
+        2013,
+        6,
+        1
+      ],
+      "transferDescription": "A description of the transfer",
+      "fromOffice": {
+        "id": 1,
+        "name": "HO"
+      },
+      "fromClient": {
+        "id": 1,
+        "displayName": "Small shop",
+        "officeId": 1,
+        "officeName": "HO"
+      },
+      "fromAccountType": {
+        "id": 2,
+        "code": "accountType.savings",
+        "value": "Savings Account"
+      },
+      "fromAccount": {
+        "id": 1,
+        "accountNo": "000000001"
+      },
+      "toOffice": {
+        "id": 1,
+        "name": "HO"
+      },
+      "toClient": {
+        "id": 1,
+        "displayName": "Small shop",
+        "officeId": 1,
+        "officeName": "HO"
+      },
+      "toAccountType": {
+        "id": 2,
+        "code": "accountType.savings",
+        "value": "Savings Account"
+      },
+      "toAccount": {
+        "id": 3,
+        "accountNo": "000000003"
+      }
+    },
+    {
+      "id": 3,
+      "reversed": false,
+      "currency": {
+        "code": "USD",
+        "name": "US Dollar",
+        "decimalPlaces": 2,
+        "displaySymbol": "$",
+        "nameCode": "currency.USD",
+        "displayLabel": "US Dollar ($)"
+      },
+      "transferAmount": 112.45,
+      "transferDate": [
+        2013,
+        6,
+        1
+      ],
+      "transferDescription": "A description of the transfer",
+      "fromOffice": {
+        "id": 1,
+        "name": "HO"
+      },
+      "fromClient": {
+        "id": 1,
+        "displayName": "Small shop",
+        "officeId": 1,
+        "officeName": "HO"
+      },
+      "fromAccountType": {
+        "id": 2,
+        "code": "accountType.savings",
+        "value": "Savings Account"
+      },
+      "fromAccount": {
+        "id": 1,
+        "accountNo": "000000001"
+      },
+      "toOffice": {
+        "id": 1,
+        "name": "HO"
+      },
+      "toClient": {
+        "id": 1,
+        "displayName": "Small shop",
+        "officeId": 1,
+        "officeName": "HO"
+      },
+      "toAccountType": {
+        "id": 2,
+        "code": "accountType.savings",
+        "value": "Savings Account"
+      },
+      "toAccount": {
+        "id": 3,
+        "accountNo": "000000003"
+      }
+    },
+    {
+      "id": 4,
+      "reversed": false,
+      "currency": {
+        "code": "USD",
+        "name": "US Dollar",
+        "decimalPlaces": 2,
+        "displaySymbol": "$",
+        "nameCode": "currency.USD",
+        "displayLabel": "US Dollar ($)"
+      },
+      "transferAmount": 112.45,
+      "transferDate": [
+        2013,
+        6,
+        1
+      ],
+      "transferDescription": "A description of the transfer",
+      "fromOffice": {
+        "id": 1,
+        "name": "HO"
+      },
+      "fromClient": {
+        "id": 1,
+        "displayName": "Small shop",
+        "officeId": 1,
+        "officeName": "HO"
+      },
+      "fromAccountType": {
+        "id": 2,
+        "code": "accountType.savings",
+        "value": "Savings Account"
+      },
+      "fromAccount": {
+        "id": 1,
+        "accountNo": "000000001"
+      },
+      "toOffice": {
+        "id": 1,
+        "name": "HO"
+      },
+      "toClient": {
+        "id": 1,
+        "displayName": "Small shop",
+        "officeId": 1,
+        "officeName": "HO"
+      },
+      "toAccountType": {
+        "id": 2,
+        "code": "accountType.savings",
+        "value": "Savings Account"
+      },
+      "toAccount": {
+        "id": 3,
+        "accountNo": "000000003"
+      }
+    }
+  ]
+}
+			</code>
+        </div>
+    </div>
+        
+	<a id="accounttransfers_retrieve" name="accounttransfers_retrieve" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Retrieve account transfer:</h2>
+	        <p>Example Requests : </p>
+	        <div class=apiClick>accounttransfers/1</div>
+	        <br>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">GET https://DomainName/api/v1/accounttransfers/{transferId}</code>
+	        <code class="method-response">
+{
+  "id": 1,
+  "reversed": false,
+  "currency": {
+    "code": "USD",
+    "name": "US Dollar",
+    "decimalPlaces": 2,
+    "displaySymbol": "$",
+    "nameCode": "currency.USD",
+    "displayLabel": "US Dollar ($)"
+  },
+  "transferAmount": 200,
+  "transferDate": [
+    2013,
+    4,
+    1
+  ],
+  "transferDescription": "pay off loan from savings.",
+  "fromOffice": {
+    "id": 1,
+    "name": "HO"
+  },
+  "fromClient": {
+    "id": 1,
+    "displayName": "Small shop",
+    "officeId": 1,
+    "officeName": "HO"
+  },
+  "fromAccountType": {
+    "id": 2,
+    "code": "accountType.savings",
+    "value": "Savings Account"
+  },
+  "fromAccount": {
+    "id": 1,
+    "accountNo": "000000001"
+  },
+  "toOffice": {
+    "id": 1,
+    "name": "HO"
+  },
+  "toClient": {
+    "id": 1,
+    "displayName": "Small shop",
+    "officeId": 1,
+    "officeName": "HO"
+  },
+  "toAccountType": {
+    "id": 1,
+    "code": "accountType.loan",
+    "value": "Loan Account"
+  },
+  "toAccount": {
+    "id": 1,
+    "accountNo": "000000001"
+  }
+}
+	        </code>
+	    </div>
+	</div>
+<!-- end of acount transfers api -->
     
 <!-- start of datatables api docs -->
 			<a id="datatables" name="datatables" class="old-syle-anchor">&nbsp;</a>
@@ -17022,6 +18313,14 @@ GET https://DomainName/api/v1/search?query=000000111
 					<td></td>
 				</tr>
 				<tr>
+					<td></td>
+					<td>clients/{clientId}?command=transfer</td>
+					<td><a href="#clients_transfer">Transfer Client</a></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
 					<td><a href="#client_identifiers">Client Identifiers</a></td>
 					<td>clients/{clientId}/identifiers</td>
 					<td><a href="#client_identifiers_create">Create an Identifier for a Client</a></td>
@@ -17105,6 +18404,15 @@ GET https://DomainName/api/v1/search?query=000000111
 					<td></td>
 					<td></td>
 				</tr>
+				<tr>
+					<td></td>
+					<td>groups/{groupId}/accounts</td>
+					<td></td>
+					<td><a href="#groups_accounts">Retrive Group accounts summary</a></td>
+					<td></td>
+					<td></td>
+				</tr>
+
 				<tr class="alt">
 					<td><a href="#loanproducts">Loan Product</a></td>
 					<td>loanproducts</td>
@@ -18031,14 +19339,6 @@ GET https://DomainName/api/v1/search?query=000000111
 					<td></td>
 					<td></td>
 				</tr>
-				<tr>
-					<td></td>
-					<td>savingsaccounts/{accountId}/transactions/template</td>
-					<td></td>
-					<td><a href="#savingsaccounts_transactions_template">Retrieve savings account transaction template</a></td>
-					<td></td>
-					<td></td>
-				</tr>
 				<tr class="alt">
 					<td><a href="#savingsaccounts_transactions">Savings Transactions</a></td>
 					<td>savingsaccounts/{accountId}/transactions?command=deposit</td>
@@ -18062,7 +19362,55 @@ GET https://DomainName/api/v1/search?query=000000111
 					<td></td>
 					<td></td>
 					<td></td>
-				</tr>	
+				</tr>
+				<tr class="alt">
+					<td></td>
+					<td>savingsaccounts/{accountId}/transactions/{transactionId}?command=modify</td>
+					<td><a href="#savingsaccounts_adjusttransaction">Adjust transaction</a></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>savingsaccounts/{accountId}/transactions/template</td>
+					<td></td>
+					<td><a href="#savingsaccounts_transactions_template">Retrieve savings account transaction template</a></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>savingsaccounts/{accountId}/transactions/{transactionId}</td>
+					<td></td>
+					<td><a href="#savingsaccounts_transaction">Retrieve savings account transaction</a></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr class="alt">
+					<td><a href="#accounttransfers">Account Transfers</a></td>
+					<td>accounttransfers/</td>
+					<td><a href="#accounttransfers_create">Create new Transfer</a></td>
+					<td><a href="#accounttransfers_list">List Transfers</a></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>accounttransfers/template</td>
+					<td></td>
+					<td><a href="#accounttransfers_template">Retrieve Template</a></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>accounttransfers/{transferId}</td>
+					<td></td>
+					<td><a href="#accounttransfers_retrieve">Retrieve Transfer</a></td>
+					<td></td>
+					<td></td>
+				</tr>
 			</table>
 		</div>
 	</div>

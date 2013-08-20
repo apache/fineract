@@ -229,7 +229,7 @@ public class Charge extends AbstractPersistable<Long> {
         EnumOptionData chargeAppliesTo = ChargeEnumerations.chargeAppliesTo(this.chargeAppliesTo);
         EnumOptionData chargeCalculationType = ChargeEnumerations.chargeCalculationType(this.chargeCalculation);
 
-        CurrencyData currency = new CurrencyData(this.currencyCode, null, 0, null, null);
+        CurrencyData currency = new CurrencyData(this.currencyCode, null, 0, 0, null, null);
         return ChargeData.instance(this.getId(), this.name, this.amount, currency, chargeTimeType, chargeAppliesTo, chargeCalculationType,
                 penalty, active);
     }

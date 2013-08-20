@@ -84,27 +84,21 @@ public final class LoanSummary {
     @Column(name = "penalty_charges_outstanding_derived", scale = 6, precision = 19)
     private BigDecimal totalPenaltyChargesOutstanding;
 
-    @SuppressWarnings("unused")
     @Column(name = "total_expected_repayment_derived", scale = 6, precision = 19)
     private BigDecimal totalExpectedRepayment;
 
-    @SuppressWarnings("unused")
     @Column(name = "total_repayment_derived", scale = 6, precision = 19)
     private BigDecimal totalRepayment;
 
-    @SuppressWarnings("unused")
     @Column(name = "total_expected_costofloan_derived", scale = 6, precision = 19)
     private BigDecimal totalExpectedCostOfLoan;
 
-    @SuppressWarnings("unused")
     @Column(name = "total_costofloan_derived", scale = 6, precision = 19)
     private BigDecimal totalCostOfLoan;
 
-    @SuppressWarnings("unused")
     @Column(name = "total_waived_derived", scale = 6, precision = 19)
     private BigDecimal totalWaived;
 
-    @SuppressWarnings("unused")
     @Column(name = "total_writtenoff_derived", scale = 6, precision = 19)
     private BigDecimal totalWrittenOff;
 
@@ -185,7 +179,7 @@ public final class LoanSummary {
         this.totalPrincipalWrittenOff = summaryWrapper.calculateTotalPrincipalWrittenOff(repaymentScheduleInstallments, currency)
                 .getAmount();
 
-        this.totalPrincipalOutstanding = principal.minus(totalPrincipalRepaid).minus(totalPrincipalWrittenOff).getAmount();
+        this.totalPrincipalOutstanding = principal.minus(this.totalPrincipalRepaid).minus(this.totalPrincipalWrittenOff).getAmount();
 
         final Money totalInterestCharged = summaryWrapper.calculateTotalInterestCharged(repaymentScheduleInstallments, currency);
         this.totalInterestCharged = totalInterestCharged.getAmount();

@@ -157,7 +157,7 @@ public final class LoanApplicationTerms {
         this.expectedDisbursementDate = expectedDisbursementDate;
         this.repaymentsStartingFromDate = repaymentsStartingFromDate;
         this.calculatedRepaymentsStartingFromDate = calculatedRepaymentsStartingFromDate;
-        
+
         this.principalGrace = principalGrace;
         this.interestPaymentGrace = interestPaymentGrace;
         this.interestChargingGrace = interestChargingGrace;
@@ -172,7 +172,15 @@ public final class LoanApplicationTerms {
         Money adjusted = principalForPeriod;
 
         // adjust cumulative fields for principal & interest if needed
-        if (isLastRepaymentPeriod(this.numberOfRepayments, periodNumber)) {
+        if (this.principal.getAmount().subtract(totalCumulativePrincipalToDate.getAmount()).add(principalForPeriod.getAmount()).compareTo(principalForPeriod.getAmount()) == -1) {
+            adjusted = adjusted.minus(adjusted);
+            MonetaryCurrency monetaryCurrency = new MonetaryCurrency(adjusted.getCurrencyCode(), 0, adjusted.getCurrencyInMultiplesOf());
+            BigDecimal diff = this.principal.getAmount().subtract(totalCumulativePrincipalToDate.getAmount()).add(principalForPeriod.getAmount());
+            if(diff.doubleValue()<0){
+                diff = BigDecimal.ZERO;
+            }
+            adjusted = adjusted.plus(Money.of(monetaryCurrency,diff));
+        } else if (isLastRepaymentPeriod(this.numberOfRepayments, periodNumber)) {
 
             final Money difference = totalCumulativePrincipalToDate.minus(this.principal);
             if (difference.isLessThanZero()) {
@@ -189,9 +197,16 @@ public final class LoanApplicationTerms {
             final Money totalInterestDueForLoan, final int periodNumber) {
 
         Money adjusted = interestForThisPeriod;
-
-        if (isLastRepaymentPeriod(this.numberOfRepayments, periodNumber)) {
-
+        if (totalInterestDueForLoan.getAmount().subtract(totalCumulativeInterestToDate.getAmount()).add(interestForThisPeriod.getAmount())
+                .compareTo(interestForThisPeriod.getAmount()) == -1) {
+            adjusted = adjusted.minus(adjusted);
+            MonetaryCurrency monetaryCurrency = new MonetaryCurrency(adjusted.getCurrencyCode(), 0, adjusted.getCurrencyInMultiplesOf());
+            BigDecimal diff = totalInterestDueForLoan.getAmount().subtract(totalCumulativeInterestToDate.getAmount()).add(interestForThisPeriod.getAmount());
+            if(diff.doubleValue()<0){
+                diff = BigDecimal.ZERO;
+            }
+            adjusted = adjusted.plus(Money.of(monetaryCurrency,diff));
+        } else if (isLastRepaymentPeriod(this.numberOfRepayments, periodNumber)) {
             final Money interestDifference = totalCumulativeInterestToDate.minus(totalInterestDueForLoan);
             if (interestDifference.isLessThanZero()) {
                 adjusted = interestForThisPeriod.plus(interestDifference.abs());
@@ -199,7 +214,9 @@ public final class LoanApplicationTerms {
                 adjusted = interestForThisPeriod.minus(interestDifference.abs());
             }
         }
-
+        if (adjusted.isLessThanZero()) {
+            adjusted = adjusted.plus(adjusted);
+        }
         return adjusted;
     }
 
@@ -618,7 +635,8 @@ public final class LoanApplicationTerms {
     }
 
     public LoanProductRelatedDetail toLoanProductRelatedDetail() {
-        final MonetaryCurrency currency = new MonetaryCurrency(this.currency.getCode(), this.currency.getDecimalPlaces());
+        final MonetaryCurrency currency = new MonetaryCurrency(this.currency.getCode(), this.currency.getDecimalPlaces(),
+                this.currency.getCurrencyInMultiplesOf());
 
         return LoanProductRelatedDetail.createFrom(currency, this.principal.getAmount(), this.interestRatePerPeriod,
                 this.interestRatePeriodFrequencyType, this.annualNominalInterestRate, this.interestMethod,
@@ -690,7 +708,7 @@ public final class LoanApplicationTerms {
     public LocalDate getCalculatedRepaymentsStartingFromLocalDate() {
         return this.calculatedRepaymentsStartingFromDate;
     }
-    
+
     public Money getPrincipal() {
         return this.principal;
     }
