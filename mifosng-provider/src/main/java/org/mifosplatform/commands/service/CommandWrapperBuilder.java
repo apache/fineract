@@ -351,6 +351,15 @@ public class CommandWrapperBuilder {
         this.href = "/clients/" + clientId + "?command=close&template=true";
         return this;
     }
+    
+    public CommandWrapperBuilder transferClient(final Long clientId) {
+        this.actionName = "TRANSFER";
+        this.entityName = "CLIENT";
+        this.entityId = clientId;
+        this.clientId = clientId;
+        this.href = "/clientId/" + clientId + "?command=transfer";
+        return this;
+    }
 
     public CommandWrapperBuilder updateClient(final Long clientId) {
         this.actionName = "UPDATE";
@@ -998,6 +1007,15 @@ public class CommandWrapperBuilder {
         this.entityId = groupId;
         this.groupId = groupId;
         this.href = "/groups/" + groupId + "?command=disassociateClients";
+        return this;
+    }
+    
+    public CommandWrapperBuilder transferClientsBetweenGroups(final Long sourceGroupId) {
+        this.actionName = "TRANSFERCLIENTS";
+        this.entityName = "GROUP";
+        this.entityId = sourceGroupId;
+        this.groupId = sourceGroupId;
+        this.href = "/groups/" + sourceGroupId + "?command=transferClients";
         return this;
     }
 

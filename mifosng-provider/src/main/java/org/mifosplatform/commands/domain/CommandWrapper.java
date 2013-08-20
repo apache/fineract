@@ -551,6 +551,10 @@ public class CommandWrapper {
     public boolean isUpdateGroupRole() {
         return this.entityName.equalsIgnoreCase("GROUP") && this.actionName.equalsIgnoreCase("UPDATEROLE");
     }
+    
+    public boolean isTransferClientsBetweenGroups() {
+        return this.entityName.equalsIgnoreCase("GROUP") && this.actionName.equalsIgnoreCase("TRANSFERCLIENTS");
+    }
 
     public boolean isClientAssignStaff() {
         return this.actionName.equalsIgnoreCase("ASSIGNSTAFF") && this.entityName.equalsIgnoreCase("CLIENT");
@@ -558,6 +562,10 @@ public class CommandWrapper {
 
     public boolean isClientClose() {
         return this.actionName.equalsIgnoreCase("CLOSE") && this.entityName.equalsIgnoreCase("CLIENT");
+    }
+    
+    public boolean isClientTransfer() {
+        return this.actionName.equalsIgnoreCase("TRANSFER") && this.entityName.equalsIgnoreCase("CLIENT");
     }
 
     public boolean isProductMixResource() {
