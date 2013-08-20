@@ -5,6 +5,7 @@ See VERSIONING (https://github.com/openMF/mifosx/blob/master/VERSIONING.md) for 
 
 Releases
 ===============
+1. 20 Aug 2013 - 1.8.0.RELEASE
 1. 14 Aug 2013 - 1.7.2.RELEASE
 1. 12 Aug 2013 - 1.7.1.RELEASE
 1. 28 July 2013 - 1.7.0.RELEASE
@@ -30,6 +31,34 @@ Releases
 1. 10 April 2013 - 0.11.2.beta
 1. 05 April 2013 - 0.11.1.beta
 1. 05 April 2013 - 0.11.0.beta
+
+1.8.0.RELEASE
+=============
+Feature Release
+
+This feature release ships various improvements to the savings module (including ability to transfer funds from a savings accounts to another savings/loan accounts, adjust deposits/withdrawals, batch jobs for posting interest etc), ability to capture attendance details against center/group meetings, updates to the scheduler to run in a clustered environment and the beta release of the transfers functionality (with support for transferring clients with active accounts between groups and transferring clients with closed accounts between branches)
+
+Platform & API
+
+New Features & Improvements
+ - [MIFOSX-310] - Generate Collection sheet based on meeting calendar dates
+ - [MIFOSX-357] - Add Assign staff functionality to Group API call
+ - [MIFOSX-433] - Allow rounding of loan schedules and charges to multiples of 100's or 1000's
+ - [MIFOSX-441] - Synch JLG loans first repayment date with meeting dates
+ - [MIFOSX-586] - Support ability to adjust/edit an existing savings transaction
+ - [MIFOSX-591] - changes to group loan API
+ - [MIFOSX-599] - Ability to add savings account details in Group Summary Page.
+ - [MIFOSX-602] - Display transaction ID after applying withdrawal/repayment/etc.
+ - [MIFOSX-605] - add support for scheduling to work in clustered mode
+ - [MIFOSX-159] - Add batch job for posting of interest to savings accounts
+ - [MIFOSX-432] - Support ability to transfer money from savings account to other savings accounts
+ - [MIFOSX-496] - Capture Client Attendance details
+ - [MIFOSX-574] - Add support for Savings accounts at the Center level
+ - [MIFOSX-575] - Add support for Savings accounts for Groups
+ - [MIFOSX-595] - Support ability to transfer money from savings account to loan accounts for purposes of making a repayment
+ 
+Reference App
+ - [MIFOSX-609] - Show "Add Holidays" link in demo server
 
 1.7.2.RELEASE
 =============
