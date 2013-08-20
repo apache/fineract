@@ -22,7 +22,7 @@ public class TransferApiConstants {
     public static final String inheritDestinationGroupLoanOfficer = "inheritDestinationGroupLoanOfficer";
     public static final String newStaffIdParamName = "newStaffId";
     public static final String transferActiveLoans = "transferActiveLoans";
-    public static final String destinationOfficeIdParamName = "destinationOfficeIdParamName";
+    public static final String destinationOfficeIdParamName = "destinationOfficeId";
 
     public static final Set<String> TRANSFER_CLIENTS_BETWEEN_GROUPS_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(localeParamName,
             dateFormatParamName, destinationGroupIdParamName, clients, inheritDestinationGroupLoanOfficer, newStaffIdParamName,

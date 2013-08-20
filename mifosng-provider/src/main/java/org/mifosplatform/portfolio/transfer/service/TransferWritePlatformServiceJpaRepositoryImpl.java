@@ -210,7 +210,7 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
     @Override
     public CommandProcessingResult transferClientBetweenBranches(final Long clientId, final JsonCommand jsonCommand) {
         // validation
-        this.transfersDataValidator.validateForClientsTransferBetweenGroups(jsonCommand.json());
+        this.transfersDataValidator.validateForClientTransferBetweenBranches(jsonCommand.json());
 
         final Long destinationOfficeId = jsonCommand.longValueOfParameterNamed(TransferApiConstants.destinationOfficeIdParamName);
         final Office office = this.officeRepository.findOneWithNotFoundDetection(destinationOfficeId);
