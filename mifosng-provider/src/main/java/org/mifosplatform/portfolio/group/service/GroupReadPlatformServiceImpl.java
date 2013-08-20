@@ -5,12 +5,15 @@
  */
 package org.mifosplatform.portfolio.group.service;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Collection;
 
 import org.apache.commons.lang.StringUtils;
 import org.mifosplatform.infrastructure.codes.data.CodeValueData;
 import org.mifosplatform.infrastructure.codes.service.CodeValueReadPlatformService;
 import org.mifosplatform.infrastructure.core.api.ApiParameterHelper;
+import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
 import org.mifosplatform.infrastructure.core.service.Page;
 import org.mifosplatform.infrastructure.core.service.PaginationHelper;
 import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
@@ -30,6 +33,7 @@ import org.mifosplatform.useradministration.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -198,6 +202,28 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
             return this.jdbcTemplate.queryForObject(sql, this.allGroupTypesDataMapper, new Object[] { groupId, hierarchySearchString });
         } catch (final EmptyResultDataAccessException e) {
             throw new GroupNotFoundException(groupId);
+        }
+    }
+
+    @Override
+    public Collection<GroupGeneralData> retrieveGroupsForLookup(final Long officeId, final Long groupId) {
+        this.context.authenticatedUser();
+        GroupLookupDataMapper rm = new GroupLookupDataMapper();
+        String sql = "Select " + rm.schema() + " where g.office_id=? and g.id !=?";
+        return this.jdbcTemplate.query(sql, rm, new Object[] { officeId, groupId });
+    }
+
+    private static final class GroupLookupDataMapper implements RowMapper<GroupGeneralData> {
+
+        public final String schema() {
+            return "g.id as id, g.display_name as displayName from m_group g";
+        }
+
+        @Override
+        public GroupGeneralData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+            final Long id = JdbcSupport.getLong(rs, "id");
+            final String displayName = rs.getString("displayName");
+            return GroupGeneralData.lookup(id, displayName);
         }
     }
 }

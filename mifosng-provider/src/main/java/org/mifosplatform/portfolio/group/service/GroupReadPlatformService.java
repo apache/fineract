@@ -5,6 +5,8 @@
  */
 package org.mifosplatform.portfolio.group.service;
 
+import java.util.Collection;
+
 import org.mifosplatform.infrastructure.core.service.Page;
 import org.mifosplatform.portfolio.group.data.GroupGeneralData;
 
@@ -15,4 +17,6 @@ public interface GroupReadPlatformService {
     Page<GroupGeneralData> retrieveAll(SearchParameters searchParameters);
 
     GroupGeneralData retrieveOne(Long groupId);
+    
+    Collection<GroupGeneralData> retrieveGroupsForLookup(Long officeId, Long groupId);
 }
