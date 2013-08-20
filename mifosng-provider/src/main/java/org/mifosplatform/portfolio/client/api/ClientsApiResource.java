@@ -207,6 +207,9 @@ public class ClientsApiResource {
         } else if (is(commandParam, "close")) {
             commandRequest = builder.closeClient(clientId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        }else if (is(commandParam, "transfer")) {
+            commandRequest = builder.transferClient(clientId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         }
 
         if (result == null) { throw new UnrecognizedQueryParamException("command", commandParam, new Object[] { "activate",

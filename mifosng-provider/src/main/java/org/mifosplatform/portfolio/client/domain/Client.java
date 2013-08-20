@@ -429,6 +429,10 @@ public final class Client extends AbstractPersistable<Long> {
     public Office getOffice() {
         return this.office;
     }
+    
+    public void updateOffice(final Office office) {
+        this.office = office;
+    }
 
     private Long staffId() {
         Long staffId = null;
@@ -452,6 +456,10 @@ public final class Client extends AbstractPersistable<Long> {
 
     public void assignStaff(final Staff staff) {
         this.staff = staff;
+    }
+    
+    public Set<Group> getGroups(){
+        return this.groups;
     }
 
     

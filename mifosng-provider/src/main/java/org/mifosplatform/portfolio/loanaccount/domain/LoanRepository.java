@@ -52,6 +52,8 @@ public interface LoanRepository extends JpaRepository<Loan, Long>, JpaSpecificat
     public static final String FIND_ACTIVE_LOANS_PRODUCT_IDS_BY_GROUP = "Select loan.loanProduct.id from Loan loan where "
             + "loan.group.id = :groupId and loan.loanStatus = :loanStatus and loan.client.id is NULL group by loan.loanProduct.id";
 
+    public static final String DOES_CLIENT_HAVE_ACTIVE_LOANS = "select case when (count (loan) > 0) then true else false end from Loan loan where loan.client.id = :clientId and loan.loanStatus in (100,200,300)";
+
     @Query(FIND_GROUP_LOANS_DISBURSED_AFTER)
     List<Loan> getGroupLoansDisbursedAfter(@Param("disbursementDate") Date disbursementDate, @Param("groupId") Long groupId,
             @Param("loanType") Integer loanType);
@@ -101,15 +103,21 @@ public interface LoanRepository extends JpaRepository<Loan, Long>, JpaSpecificat
     List<Long> getLoansDisbursedAfter(@Param("disbursalDate") Date disbursalDate);
 
     @Query("from Loan loan where loan.client.office.id IN :officeIds and loan.loanStatus IN :loanStatuses")
-    List<Loan> findByClientOfficeIdsAndLoanStatus(@Param("officeIds") Collection<Long> officeIds, @Param("loanStatuses") Collection<Integer> loanStatuses);
-    
-    @Query("from Loan loan where loan.group.office.id IN :officeIds and loan.loanStatus IN :loanStatuses")
-    List<Loan> findByGroupOfficeIdsAndLoanStatus(@Param("officeIds") Collection<Long> officeIds, @Param("loanStatuses") Collection<Integer> loanStatuses);
+    List<Loan> findByClientOfficeIdsAndLoanStatus(@Param("officeIds") Collection<Long> officeIds,
+            @Param("loanStatuses") Collection<Integer> loanStatuses);
 
+    @Query("from Loan loan where loan.group.office.id IN :officeIds and loan.loanStatus IN :loanStatuses")
+    List<Loan> findByGroupOfficeIdsAndLoanStatus(@Param("officeIds") Collection<Long> officeIds,
+            @Param("loanStatuses") Collection<Integer> loanStatuses);
+
+    /*** FIXME: Add more appropriate names for the query ***/
     @Query(FIND_ACTIVE_LOANS_PRODUCT_IDS_BY_CLIENT)
     List<Long> findActiveLoansLoanProductIdsByClient(@Param("clientId") Long clientId, @Param("loanStatus") Integer loanStatus);
 
     @Query(FIND_ACTIVE_LOANS_PRODUCT_IDS_BY_GROUP)
     List<Long> findActiveLoansLoanProductIdsByGroup(@Param("groupId") Long groupId, @Param("loanStatus") Integer loanStatus);
+
+    @Query(DOES_CLIENT_HAVE_ACTIVE_LOANS)
+    boolean doesClientHaveActiveLoans(@Param("clientId") Long clientId);
 
 }
