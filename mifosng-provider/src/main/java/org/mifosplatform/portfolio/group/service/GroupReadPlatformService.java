@@ -9,6 +9,7 @@ import java.util.Collection;
 
 import org.mifosplatform.infrastructure.core.service.Page;
 import org.mifosplatform.portfolio.group.data.GroupGeneralData;
+import org.mifosplatform.portfolio.group.data.GroupTransferData;
 
 public interface GroupReadPlatformService {
 
@@ -17,6 +18,8 @@ public interface GroupReadPlatformService {
     Page<GroupGeneralData> retrieveAll(SearchParameters searchParameters);
 
     GroupGeneralData retrieveOne(Long groupId);
-    
+
     Collection<GroupGeneralData> retrieveGroupsForLookup(Long officeId, Long groupId);
+
+    GroupTransferData retrieveClientTransferTemplate(Long officeId, Long groupId, boolean staffInSelectedOfficeOnly);
 }

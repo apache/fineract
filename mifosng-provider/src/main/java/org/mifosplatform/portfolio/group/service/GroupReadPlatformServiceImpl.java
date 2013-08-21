@@ -27,6 +27,7 @@ import org.mifosplatform.portfolio.client.service.ClientReadPlatformService;
 import org.mifosplatform.portfolio.group.api.GroupingTypesApiConstants;
 import org.mifosplatform.portfolio.group.data.CenterData;
 import org.mifosplatform.portfolio.group.data.GroupGeneralData;
+import org.mifosplatform.portfolio.group.data.GroupTransferData;
 import org.mifosplatform.portfolio.group.domain.GroupTypes;
 import org.mifosplatform.portfolio.group.exception.GroupNotFoundException;
 import org.mifosplatform.useradministration.domain.AppUser;
@@ -225,5 +226,32 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
             final String displayName = rs.getString("displayName");
             return GroupGeneralData.lookup(id, displayName);
         }
+    }
+
+    @Override
+    public GroupTransferData retrieveClientTransferTemplate(final Long officeId, final Long groupId, final boolean staffInSelectedOfficeOnly) {
+
+        final boolean transferActiveLoans = true;
+        final boolean inheritDestinationGroupLoanOfficer = true;
+
+        Collection<ClientData> membersOfGroup = this.clientReadPlatformService.retrieveClientMembersOfGroup(groupId);
+        if (CollectionUtils.isEmpty(membersOfGroup)) {
+            membersOfGroup = null;
+        }
+
+        final boolean loanOfficersOnly = false;
+        Collection<StaffData> staffOptions = null;
+        if (staffInSelectedOfficeOnly) {
+            staffOptions = this.staffReadPlatformService.retrieveAllStaffForDropdown(officeId);
+        } else {
+            staffOptions = this.staffReadPlatformService.retrieveAllStaffInOfficeAndItsParentOfficeHierarchy(officeId, loanOfficersOnly);
+        }
+        if (CollectionUtils.isEmpty(staffOptions)) {
+            staffOptions = null;
+        }
+
+        Collection<GroupGeneralData> groupOptions = this.retrieveGroupsForLookup(officeId, groupId);
+        return GroupTransferData.template(groupId, membersOfGroup, groupOptions, staffOptions, transferActiveLoans,
+                inheritDestinationGroupLoanOfficer);
     }
 }
