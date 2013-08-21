@@ -65,7 +65,6 @@ public class CalendarCommandFromApiJsonDeserializer extends AbstractFromApiJsonD
         final Integer typeId = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(CALENDAR_SUPPORTED_PARAMETERS.TYPE_ID.getValue(),
                 element);
         final boolean repeating = this.fromApiJsonHelper.extractBooleanNamed(CALENDAR_SUPPORTED_PARAMETERS.REPEATING.getValue(), element);
-        final String recurrence = this.fromApiJsonHelper.extractStringNamed(CALENDAR_SUPPORTED_PARAMETERS.RECURRENCE.getValue(), element);
         final Integer remindById = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(
                 CALENDAR_SUPPORTED_PARAMETERS.REMIND_BY_ID.getValue(), element);
         final Integer firstReminder = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(
@@ -73,8 +72,8 @@ public class CalendarCommandFromApiJsonDeserializer extends AbstractFromApiJsonD
         final Integer secondReminder = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(
                 CALENDAR_SUPPORTED_PARAMETERS.SECOND_REMINDER.getValue(), element);
 
-        return new CalendarCommand(title, description, location, startDate, endDate, createdDate, duration, typeId, repeating, recurrence,
-                remindById, firstReminder, secondReminder);
+        return new CalendarCommand(title, description, location, startDate, endDate, createdDate, duration, typeId, repeating, remindById,
+                firstReminder, secondReminder);
     }
 
     public void validateForCreate(final String json) {
@@ -139,11 +138,25 @@ public class CalendarCommandFromApiJsonDeserializer extends AbstractFromApiJsonD
             final boolean repeating = this.fromApiJsonHelper.extractBooleanNamed(CALENDAR_SUPPORTED_PARAMETERS.REPEATING.getValue(),
                     element);
             baseDataValidator.reset().parameter(CALENDAR_SUPPORTED_PARAMETERS.REPEATING.getValue()).value(repeating).notNull();
-            
-            if(repeating){
-	            final String recurrence = this.fromApiJsonHelper.extractStringNamed(CALENDAR_SUPPORTED_PARAMETERS.RECURRENCE.getValue(), element);
-	            baseDataValidator.reset().parameter(CALENDAR_SUPPORTED_PARAMETERS.RECURRENCE.getValue()).value(recurrence).notNull()
-	                    .notExceedingLengthOf(100).isValidRecurringRule(recurrence);
+
+            if (repeating) {
+                final String repeats = this.fromApiJsonHelper.extractStringNamed(CALENDAR_SUPPORTED_PARAMETERS.REPEATS.getValue(), element);
+                baseDataValidator.reset().parameter(CALENDAR_SUPPORTED_PARAMETERS.REPEATS.getValue()).value(repeats).notBlank()
+                        .notExceedingLengthOf(20);
+
+                if (this.fromApiJsonHelper.parameterExists(CALENDAR_SUPPORTED_PARAMETERS.REPEATS_EVERY.getValue(), element)) {
+                    final Integer repeatsEvery = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(
+                            CALENDAR_SUPPORTED_PARAMETERS.REPEATS_EVERY.getValue(), element);
+                    baseDataValidator.reset().parameter(CALENDAR_SUPPORTED_PARAMETERS.REPEATS_EVERY.getValue()).value(repeatsEvery)
+                            .notNull().integerGreaterThanZero();
+                }
+
+                if (this.fromApiJsonHelper.parameterExists(CALENDAR_SUPPORTED_PARAMETERS.REPEATS_ON_DAY.getValue(), element)) {
+                    final String repeatsOnDay = this.fromApiJsonHelper.extractStringNamed(
+                            CALENDAR_SUPPORTED_PARAMETERS.REPEATS_ON_DAY.getValue(), element);
+                    baseDataValidator.reset().parameter(CALENDAR_SUPPORTED_PARAMETERS.REPEATS_ON_DAY.getValue()).value(repeatsOnDay)
+                            .notBlank().notNull();
+                }
             }
         }
 
@@ -234,10 +247,24 @@ public class CalendarCommandFromApiJsonDeserializer extends AbstractFromApiJsonD
                     element);
             baseDataValidator.reset().parameter(CALENDAR_SUPPORTED_PARAMETERS.REPEATING.getValue()).value(repeating).notNull();
             
-            if(repeating){
-	            final String recurrence = this.fromApiJsonHelper.extractStringNamed(CALENDAR_SUPPORTED_PARAMETERS.RECURRENCE.getValue(), element);
-	            baseDataValidator.reset().parameter(CALENDAR_SUPPORTED_PARAMETERS.RECURRENCE.getValue()).value(recurrence).notNull()
-	                    .notExceedingLengthOf(100).isValidRecurringRule(recurrence);
+            if (repeating) {
+                final String repeats = this.fromApiJsonHelper.extractStringNamed(CALENDAR_SUPPORTED_PARAMETERS.REPEATS.getValue(), element);
+                baseDataValidator.reset().parameter(CALENDAR_SUPPORTED_PARAMETERS.REPEATS.getValue()).value(repeats).ignoreIfNull()
+                        .notBlank().notExceedingLengthOf(20);
+
+                if (this.fromApiJsonHelper.parameterExists(CALENDAR_SUPPORTED_PARAMETERS.REPEATS_EVERY.getValue(), element)) {
+                    final Integer repeatsEvery = this.fromApiJsonHelper.extractIntegerSansLocaleNamed(
+                            CALENDAR_SUPPORTED_PARAMETERS.REPEATS_EVERY.getValue(), element);
+                    baseDataValidator.reset().parameter(CALENDAR_SUPPORTED_PARAMETERS.REPEATS_EVERY.getValue()).value(repeatsEvery)
+                            .notNull().integerGreaterThanZero();
+                }
+
+                if (this.fromApiJsonHelper.parameterExists(CALENDAR_SUPPORTED_PARAMETERS.REPEATS_ON_DAY.getValue(), element)) {
+                    final String repeatsOnDay = this.fromApiJsonHelper.extractStringNamed(
+                            CALENDAR_SUPPORTED_PARAMETERS.REPEATS_ON_DAY.getValue(), element);
+                    baseDataValidator.reset().parameter(CALENDAR_SUPPORTED_PARAMETERS.REPEATS_ON_DAY.getValue()).value(repeatsOnDay)
+                            .notBlank();
+                }
             }
         }
         

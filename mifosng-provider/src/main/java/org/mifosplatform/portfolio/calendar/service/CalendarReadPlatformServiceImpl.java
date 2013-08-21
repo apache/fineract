@@ -72,7 +72,8 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
             if (remindById != null && remindById != 0) remindBy = CalendarEnumerations.calendarRemindBy(remindById);
             final Integer firstReminder = rs.getInt("firstReminder");
             final Integer secondReminder = rs.getInt("secondReminder");
-            final String humanReadable = CalendarUtils.getRRuleReadable(startDate, recurrence);
+            String humanReadable = null;
+            if (startDate != null && recurrence != null) humanReadable = CalendarUtils.getRRuleReadable(startDate, recurrence);
 
             final LocalDate createdDate = JdbcSupport.getLocalDate(rs, "createdDate");
             final LocalDate lastUpdatedDate = JdbcSupport.getLocalDate(rs, "updatedDate");

@@ -28,8 +28,6 @@ public class CalendarCommand {
     @SuppressWarnings("unused")
     private final boolean repeating;
     @SuppressWarnings("unused")
-    private final String recurrence;
-    @SuppressWarnings("unused")
     private final Integer remindById;
     @SuppressWarnings("unused")
     private final Integer firstReminder;
@@ -38,7 +36,7 @@ public class CalendarCommand {
 
     public CalendarCommand(final String title, final String description, final String location, final LocalDate startDate,
             final LocalDate endDate, final LocalDate createdDate, final Integer duration, final Integer typeId, final boolean repeating,
-            final String recurrence, final Integer remindById, final Integer firstReminder, final Integer secondReminder) {
+            final Integer remindById, final Integer firstReminder, final Integer secondReminder) {
         this.title = title;
         this.description = description;
         this.location = location;
@@ -48,7 +46,6 @@ public class CalendarCommand {
         this.duration = duration;
         this.typeId = typeId;
         this.repeating = repeating;
-        this.recurrence = recurrence;
         this.remindById = remindById;
         this.firstReminder = firstReminder;
         this.secondReminder = secondReminder;

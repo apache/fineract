@@ -135,6 +135,4 @@ public class CalendarWritePlatformServiceJpaRepositoryImpl implements CalendarWr
         .withEntityId(calendarForUpdate.getId()) //
         .build();
     }
-
-    
 }
