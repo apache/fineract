@@ -5,6 +5,7 @@ See VERSIONING (https://github.com/openMF/mifosx/blob/master/VERSIONING.md) for 
 
 Releases
 ===============
+1. 21 Aug 2013 - 1.8.1.RELEASE
 1. 20 Aug 2013 - 1.8.0.RELEASE
 1. 14 Aug 2013 - 1.7.2.RELEASE
 1. 12 Aug 2013 - 1.7.1.RELEASE
@@ -31,6 +32,17 @@ Releases
 1. 10 April 2013 - 0.11.2.beta
 1. 05 April 2013 - 0.11.1.beta
 1. 05 April 2013 - 0.11.0.beta
+
+
+1.8.1.RELEASE
+=============
+Bug Release
+
+Platform & API
+
+Bug
+ - [MIFOSX-617] - Unable to create a new Loan Application
+
 
 1.8.0.RELEASE
 =============
