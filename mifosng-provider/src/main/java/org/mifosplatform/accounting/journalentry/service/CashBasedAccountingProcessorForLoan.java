@@ -29,11 +29,13 @@ public class CashBasedAccountingProcessorForLoan implements AccountingProcessorF
     @Override
     public void createJournalEntriesForLoan(LoanDTO loanDTO) {
         final GLClosure latestGLClosure = this.helper.getLatestClosureByBranch(loanDTO.getOfficeId());
-        final Office office = this.helper.getOfficeById(loanDTO.getOfficeId());
+        // final Office office =
+        // this.helper.getOfficeById(loanDTO.getOfficeId());
         final Long loanProductId = loanDTO.getLoanProductId();
         for (final LoanTransactionDTO loanTransactionDTO : loanDTO.getNewLoanTransactions()) {
             final Date transactionDate = loanTransactionDTO.getTransactionDate();
             final String transactionId = loanTransactionDTO.getTransactionId();
+            final Office office = this.helper.getOfficeById(loanTransactionDTO.getOfficeId());
             final Long paymentTypeId = loanTransactionDTO.getPaymentTypeId();
             final Long loanId = loanDTO.getLoanId();
 

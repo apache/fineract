@@ -69,6 +69,7 @@ public class AccountingProcessorHelper {
         final List<Map<String, Object>> newTransactionsMap = (List<Map<String, Object>>) accountingBridgeData.get("newLoanTransactions");
 
         for (final Map<String, Object> map : newTransactionsMap) {
+            final Long transactionOfficeId = (Long) map.get("officeId");
             final String transactionId = ((Long) map.get("id")).toString();
             final Date transactionDate = ((LocalDate) map.get("date")).toDate();
             final LoanTransactionEnumData transactionType = (LoanTransactionEnumData) map.get("type");
@@ -100,8 +101,8 @@ public class AccountingProcessorHelper {
                 }
             }
 
-            final LoanTransactionDTO transaction = new LoanTransactionDTO(paymentTypeId, transactionId, transactionDate, transactionType,
-                    amount, principal, interest, fees, penalties, reversed, feePayments, penaltyPayments);
+            final LoanTransactionDTO transaction = new LoanTransactionDTO(transactionOfficeId, paymentTypeId, transactionId,
+                    transactionDate, transactionType, amount, principal, interest, fees, penalties, reversed, feePayments, penaltyPayments);
 
             newLoanTransactions.add(transaction);
 

@@ -13,6 +13,8 @@ import org.mifosplatform.portfolio.loanaccount.data.LoanTransactionEnumData;
 
 public class LoanTransactionDTO {
 
+    private final Long officeId;
+
     private final String transactionId;
     private final Date transactionDate;
     private final Long paymentTypeId;
@@ -33,7 +35,7 @@ public class LoanTransactionDTO {
     private final List<ChargePaymentDTO> penaltyPayments;
     private final List<ChargePaymentDTO> feePayments;
 
-    public LoanTransactionDTO(final Long paymentTypeId, final String transactionId, final Date transactionDate,
+    public LoanTransactionDTO(final Long officeId, final Long paymentTypeId, final String transactionId, final Date transactionDate,
             final LoanTransactionEnumData transactionType, final BigDecimal amount, final BigDecimal principal, final BigDecimal interest,
             final BigDecimal fees, final BigDecimal penalties, final boolean reversed, final List<ChargePaymentDTO> feePayments,
             final List<ChargePaymentDTO> penaltyPayments) {
@@ -49,6 +51,11 @@ public class LoanTransactionDTO {
         this.transactionType = transactionType;
         this.feePayments = feePayments;
         this.penaltyPayments = penaltyPayments;
+        this.officeId = officeId;
+    }
+
+    public Long getOfficeId() {
+        return this.officeId;
     }
 
     public String getTransactionId() {

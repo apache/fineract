@@ -231,7 +231,7 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
          * For now, do not allow Clients with active loans to be transferred
          * between branches
          **/
-        if (loanRepository.doesClientHaveActiveLoans(client.getId())) { throw new TransferNotSupportedException(); }
+        //if (loanRepository.doesClientHaveActiveLoans(client.getId())) { throw new TransferNotSupportedException(); }
         // set the new office for the client
         client.updateOffice(destinationOffice);
     }
