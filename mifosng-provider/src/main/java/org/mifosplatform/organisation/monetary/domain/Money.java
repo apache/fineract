@@ -267,7 +267,7 @@ public class Money implements Comparable<Money> {
         return this.currencyDigitsAfterDecimal;
     }
 
-    public int getCurrencyInMultiplesOf() {
+    public Integer getCurrencyInMultiplesOf() {
         return this.inMultiplesOf;
     }
 
