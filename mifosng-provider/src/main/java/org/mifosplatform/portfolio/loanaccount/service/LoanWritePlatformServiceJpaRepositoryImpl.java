@@ -243,8 +243,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
                     final Integer repayEvery = repaymentScheduleDetails.getRepayEvery();
                     final String frequency = CalendarUtils.getMeetingFrequencyFromPeriodFrequencyType(repaymentScheduleDetails
                             .getRepaymentPeriodFrequencyType());
-                    calculatedRepaymentsStartingFromDate = CalendarUtils.getFirstRepaymentMeetingDate(calendar, actualDisbursementDate, repayEvery,
-                            frequency);
+                    calculatedRepaymentsStartingFromDate = CalendarUtils.getFirstRepaymentMeetingDate(calendar, actualDisbursementDate,
+                            repayEvery, frequency);
                 }
             }
         }
@@ -439,10 +439,10 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
         final Money transactionAmountAsMoney = Money.of(loan.getCurrency(), transactionAmount);
         final PaymentDetail paymentDetail = this.paymentDetailWritePlatformService.createPaymentDetail(command, changes);
-        LoanTransaction newTransactionDetail = LoanTransaction.repayment(transactionAmountAsMoney, paymentDetail, transactionDate,
-                txnExternalId);
+        LoanTransaction newTransactionDetail = LoanTransaction.repayment(loan.getOffice(), transactionAmountAsMoney, paymentDetail,
+                transactionDate, txnExternalId);
         if (transactionToAdjust.isInterestWaiver()) {
-            newTransactionDetail = LoanTransaction.waiver(loan, transactionAmountAsMoney, transactionDate);
+            newTransactionDetail = LoanTransaction.waiver(loan.getOffice(), loan, transactionAmountAsMoney, transactionDate);
         }
 
         final boolean allowTransactionsOnHoliday = this.configurationDomainService.allowTransactionsOnHolidayEnabled();
@@ -529,7 +529,8 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final List<Long> existingReversedTransactionIds = new ArrayList<Long>();
 
         final Money transactionAmountAsMoney = Money.of(loan.getCurrency(), transactionAmount);
-        final LoanTransaction waiveInterestTransaction = LoanTransaction.waiver(loan, transactionAmountAsMoney, transactionDate);
+        final LoanTransaction waiveInterestTransaction = LoanTransaction.waiver(loan.getOffice(), loan, transactionAmountAsMoney,
+                transactionDate);
 
         final ChangedTransactionDetail changedTransactionDetail = loan.waiveInterest(waiveInterestTransaction,
                 defaultLoanLifecycleStateMachine(), existingTransactionIds, existingReversedTransactionIds);
