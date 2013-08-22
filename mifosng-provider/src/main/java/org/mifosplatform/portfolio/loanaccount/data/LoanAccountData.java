@@ -835,7 +835,11 @@ public class LoanAccountData {
     }
 
     public Long officeId() {
-        return this.clientOfficeId;
+        Long officeId = this.clientOfficeId;
+        if (officeId == null) {
+            officeId = groupOfficeId();
+        }
+        return officeId;
     }
 
     public Long loanOfficerId() {
