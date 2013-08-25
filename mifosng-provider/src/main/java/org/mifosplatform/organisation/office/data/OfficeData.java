@@ -5,6 +5,7 @@
  */
 package org.mifosplatform.organisation.office.data;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 
@@ -13,7 +14,7 @@ import org.joda.time.LocalDate;
 /**
  * Immutable data object for office data.
  */
-public class OfficeData {
+public class OfficeData implements Serializable {
 
     private final Long id;
     private final String name;

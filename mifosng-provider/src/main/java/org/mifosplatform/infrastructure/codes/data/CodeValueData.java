@@ -5,10 +5,12 @@
  */
 package org.mifosplatform.infrastructure.codes.data;
 
+import java.io.Serializable;
+
 /**
  * Immutable data object represent code-value data in system.
  */
-public class CodeValueData {
+public class CodeValueData implements Serializable{
 
     private final Long id;
 

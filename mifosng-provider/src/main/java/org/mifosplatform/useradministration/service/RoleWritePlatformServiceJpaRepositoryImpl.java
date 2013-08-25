@@ -25,6 +25,7 @@ import org.mifosplatform.useradministration.serialization.PermissionsCommandFrom
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -52,6 +53,7 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
 
     @Transactional
     @Override
+    @CacheEvict(value = "roles", key = "T(org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier()")
     public CommandProcessingResult createRole(final JsonCommand command) {
 
         try {
@@ -97,6 +99,7 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
 
     @Transactional
     @Override
+    @CacheEvict(value = "roles", key = "T(org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier()")
     public CommandProcessingResult updateRole(final Long roleId, final JsonCommand command) {
         try {
             context.authenticatedUser();
@@ -126,6 +129,7 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
 
     @Transactional
     @Override
+    @CacheEvict(value = "roles", key = "T(org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier()")
     public CommandProcessingResult updateRolePermissions(final Long roleId, final JsonCommand command) {
         context.authenticatedUser();
 

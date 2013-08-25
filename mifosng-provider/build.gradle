@@ -161,7 +161,10 @@ dependencies {
 				[group: 'org.mnode.ical4j', name: 'ical4j', version: '1.0.4'],
                 [group: 'com.googlecode.flyway', name: 'flyway-maven-plugin', version: '2.1.1'],
                 [group: 'org.quartz-scheduler', name: 'quartz', version: '2.1.7'],
-                [group: 'com.amazonaws', name: 'aws-java-sdk', version: '1.2.1']
+                [group: 'com.amazonaws', name: 'aws-java-sdk', version: '1.2.1'],
+                
+                [group: 'com.google.code.simple-spring-memcached', name: 'xmemcached-provider', version: '3.2.0'],
+                [group: 'com.google.code.simple-spring-memcached', name: 'spring-cache', version: '3.2.0']
  	        )
 
  	 testCompile 'junit:junit:4.10',

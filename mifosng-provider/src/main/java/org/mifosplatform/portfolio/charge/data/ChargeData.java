@@ -5,6 +5,7 @@
  */
 package org.mifosplatform.portfolio.charge.data;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.List;
@@ -16,7 +17,7 @@ import org.mifosplatform.portfolio.loanaccount.data.LoanChargeData;
 /**
  * Immutable data object for charge data.
  */
-public class ChargeData implements Comparable<ChargeData> {
+public class ChargeData implements Comparable<ChargeData>, Serializable {
 
     private final Long id;
     private final String name;

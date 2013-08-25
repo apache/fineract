@@ -5,10 +5,12 @@
  */
 package org.mifosplatform.infrastructure.codes.data;
 
+import java.io.Serializable;
+
 /**
  * Immutable data object representing a code.
  */
-public class CodeData {
+public class CodeData implements Serializable {
 
     private final Long id;
     @SuppressWarnings("unused")

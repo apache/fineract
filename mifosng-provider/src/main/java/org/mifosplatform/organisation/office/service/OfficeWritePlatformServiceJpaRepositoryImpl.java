@@ -28,6 +28,8 @@ import org.mifosplatform.useradministration.domain.AppUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -60,6 +62,9 @@ public class OfficeWritePlatformServiceJpaRepositoryImpl implements OfficeWriteP
 
     @Transactional
     @Override
+    @Caching(evict = {
+            @CacheEvict(value = "offices", key = "T(org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat(#root.target.context.authenticatedUser().getOffice().getHierarchy())"),
+            @CacheEvict(value = "office_template", key = "T(org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat(#root.target.context.authenticatedUser().getOffice().getHierarchy())") })
     public CommandProcessingResult createOffice(final JsonCommand command) {
 
         try {
@@ -95,6 +100,9 @@ public class OfficeWritePlatformServiceJpaRepositoryImpl implements OfficeWriteP
 
     @Transactional
     @Override
+    @Caching(evict = {
+            @CacheEvict(value = "offices", key = "T(org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat(#root.target.context.authenticatedUser().getOffice().getHierarchy())"),
+            @CacheEvict(value = "office_template", key = "T(org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat(#root.target.context.authenticatedUser().getOffice().getHierarchy())") })
     public CommandProcessingResult updateOffice(final Long officeId, final JsonCommand command) {
 
         try {
@@ -229,5 +237,9 @@ public class OfficeWritePlatformServiceJpaRepositoryImpl implements OfficeWriteP
         }
 
         return officeToReturn;
+    }
+
+    public PlatformSecurityContext getContext() {
+        return this.context;
     }
 }

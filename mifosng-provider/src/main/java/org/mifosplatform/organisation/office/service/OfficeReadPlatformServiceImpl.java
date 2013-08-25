@@ -22,6 +22,7 @@ import org.mifosplatform.organisation.office.data.OfficeTransactionData;
 import org.mifosplatform.organisation.office.exception.OfficeNotFoundException;
 import org.mifosplatform.useradministration.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -126,6 +127,7 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
     }
 
     @Override
+    @Cacheable(value = "offices", key = "T(org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat(#root.target.context.authenticatedUser().getOffice().getHierarchy())")
     public Collection<OfficeData> retrieveAllOffices() {
 
         AppUser currentUser = context.authenticatedUser();
@@ -140,6 +142,7 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
     }
 
     @Override
+    @Cacheable(value = "office_template", key = "T(org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat(#root.target.context.authenticatedUser().getOffice().getHierarchy())")
     public Collection<OfficeData> retrieveAllOfficesForDropdown() {
         final AppUser currentUser = context.authenticatedUser();
 
@@ -223,5 +226,9 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
         final Collection<CurrencyData> currencyOptions = currencyReadPlatformService.retrieveAllowedCurrencies();
 
         return OfficeTransactionData.template(new LocalDate(), parentLookups, currencyOptions);
+    }
+    
+    public PlatformSecurityContext getContext() {
+        return this.context;
     }
 }

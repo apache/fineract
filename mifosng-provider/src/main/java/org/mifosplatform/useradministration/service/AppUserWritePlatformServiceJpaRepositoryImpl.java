@@ -33,6 +33,7 @@ import org.mifosplatform.useradministration.exception.UserNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -66,6 +67,7 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
 
     @Transactional
     @Override
+    @CacheEvict(value = "users", allEntries = true)
     public CommandProcessingResult createUser(final JsonCommand command) {
 
         try {
@@ -109,6 +111,7 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
 
     @Transactional
     @Override
+    @CacheEvict(value = "users", allEntries = true)
     public CommandProcessingResult updateUser(final Long userId, final JsonCommand command) {
 
         try {
@@ -169,6 +172,7 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
 
     @Transactional
     @Override
+    @CacheEvict(value = "users", allEntries = true)
     public CommandProcessingResult deleteUser(final Long userId) {
 
         final AppUser user = this.appUserRepository.findOne(userId);
