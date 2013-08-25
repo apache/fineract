@@ -43,7 +43,7 @@ public class FundWritePlatformServiceJpaRepositoryImpl implements FundWritePlatf
 
     @Transactional
     @Override
-    @CacheEvict(value = "fund", key = "T(org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier()")
+    @CacheEvict(value = "funds", key = "T(org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat('fn')")
     public CommandProcessingResult createFund(final JsonCommand command) {
 
         try {
@@ -64,7 +64,7 @@ public class FundWritePlatformServiceJpaRepositoryImpl implements FundWritePlatf
 
     @Transactional
     @Override
-    @CacheEvict(value = "fund", key = "T(org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier()")
+    @CacheEvict(value = "funds", key = "T(org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat('fn')")
     public CommandProcessingResult updateFund(final Long fundId, final JsonCommand command) {
 
         try {

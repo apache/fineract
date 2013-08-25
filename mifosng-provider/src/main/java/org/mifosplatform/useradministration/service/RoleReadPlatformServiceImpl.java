@@ -34,7 +34,7 @@ public class RoleReadPlatformServiceImpl implements RoleReadPlatformService {
     }
 
     @Override
-    @Cacheable(value = "roles", key = "T(org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier()")
+    @Cacheable(value = "roles", key = "T(org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat('rl')")
     public Collection<RoleData> retrieveAll() {
         final String sql = "select " + roleRowMapper.schema() + " order by r.id";
 

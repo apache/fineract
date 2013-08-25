@@ -5,12 +5,13 @@
  */
 package org.mifosplatform.useradministration.data;
 
+import java.io.Serializable;
 import java.util.Collection;
 
 /**
  * Immutable data object for role data.
  */
-public class RoleData {
+public class RoleData implements Serializable {
 
     private final Long id;
     private final String name;

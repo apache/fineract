@@ -27,7 +27,7 @@ import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
 @Table(name = "m_role",  uniqueConstraints = { @UniqueConstraint(columnNames = { "name" }, name = "unq_name")})
-public class Role extends AbstractPersistable<Long> implements Serializable {
+public class Role extends AbstractPersistable<Long> {
 
     @Column(name = "name", unique = true, nullable = false, length = 100)
     private String name;

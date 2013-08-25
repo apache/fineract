@@ -60,7 +60,7 @@ public class CodeValueReadPlatformServiceImpl implements CodeValueReadPlatformSe
     }
 
     @Override
-    @Cacheable(value = "code_values", key = "T(org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat(#codeId)")
+    @Cacheable(value = "code_values", key = "T(org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat(#codeId+'cv')")
     public Collection<CodeValueData> retrieveAllCodeValues(Long codeId) {
 
         context.authenticatedUser();

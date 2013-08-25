@@ -127,7 +127,7 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
     }
 
     @Override
-    @Cacheable(value = "offices", key = "T(org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat(#root.target.context.authenticatedUser().getOffice().getHierarchy())")
+    @Cacheable(value = "offices", key = "T(org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat(#root.target.context.authenticatedUser().getOffice().getHierarchy()+'of')")
     public Collection<OfficeData> retrieveAllOffices() {
 
         AppUser currentUser = context.authenticatedUser();
@@ -142,7 +142,7 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
     }
 
     @Override
-    @Cacheable(value = "office_template", key = "T(org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat(#root.target.context.authenticatedUser().getOffice().getHierarchy())")
+    @Cacheable(value = "office_template", key = "T(org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat(#root.target.context.authenticatedUser().getOffice().getHierarchy()+'oft')")
     public Collection<OfficeData> retrieveAllOfficesForDropdown() {
         final AppUser currentUser = context.authenticatedUser();
 

@@ -50,7 +50,7 @@ public class FundReadPlatformServiceImpl implements FundReadPlatformService {
     }
 
     @Override
-    @Cacheable(value = "funds", key = "T(org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier()")
+    @Cacheable(value = "funds", key = "T(org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat('fn')")
     public Collection<FundData> retrieveAllFunds() {
 
         context.authenticatedUser();

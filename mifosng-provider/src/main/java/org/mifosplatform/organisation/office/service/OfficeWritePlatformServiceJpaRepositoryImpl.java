@@ -63,8 +63,8 @@ public class OfficeWritePlatformServiceJpaRepositoryImpl implements OfficeWriteP
     @Transactional
     @Override
     @Caching(evict = {
-            @CacheEvict(value = "offices", key = "T(org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat(#root.target.context.authenticatedUser().getOffice().getHierarchy())"),
-            @CacheEvict(value = "office_template", key = "T(org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat(#root.target.context.authenticatedUser().getOffice().getHierarchy())") })
+            @CacheEvict(value = "offices", key = "T(org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat(#root.target.context.authenticatedUser().getOffice().getHierarchy()+'of')"),
+            @CacheEvict(value = "office_template", key = "T(org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat(#root.target.context.authenticatedUser().getOffice().getHierarchy()+'oft')") })
     public CommandProcessingResult createOffice(final JsonCommand command) {
 
         try {
@@ -101,8 +101,8 @@ public class OfficeWritePlatformServiceJpaRepositoryImpl implements OfficeWriteP
     @Transactional
     @Override
     @Caching(evict = {
-            @CacheEvict(value = "offices", key = "T(org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat(#root.target.context.authenticatedUser().getOffice().getHierarchy())"),
-            @CacheEvict(value = "office_template", key = "T(org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat(#root.target.context.authenticatedUser().getOffice().getHierarchy())") })
+            @CacheEvict(value = "offices", key = "T(org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat(#root.target.context.authenticatedUser().getOffice().getHierarchy()+'of')"),
+            @CacheEvict(value = "office_template", key = "T(org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat(#root.target.context.authenticatedUser().getOffice().getHierarchy()+'oft')") })
     public CommandProcessingResult updateOffice(final Long officeId, final JsonCommand command) {
 
         try {

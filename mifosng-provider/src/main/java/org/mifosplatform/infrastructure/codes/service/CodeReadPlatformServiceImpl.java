@@ -50,7 +50,7 @@ public class CodeReadPlatformServiceImpl implements CodeReadPlatformService {
     }
 
     @Override
-    @Cacheable(value = "codes", key = "T(org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier()")
+    @Cacheable(value = "codes", key = "T(org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat('CD')")
     public Collection<CodeData> retrieveAllCodes() {
         context.authenticatedUser();
 

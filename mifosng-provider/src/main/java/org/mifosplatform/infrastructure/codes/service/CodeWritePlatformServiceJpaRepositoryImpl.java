@@ -44,7 +44,7 @@ public class CodeWritePlatformServiceJpaRepositoryImpl implements CodeWritePlatf
 
     @Transactional
     @Override
-    @CacheEvict(value = "codes", key = "T(org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier()")
+    @CacheEvict(value = "codes", key = "T(org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat('cv')")
     public CommandProcessingResult createCode(final JsonCommand command) {
 
         try {
@@ -64,7 +64,7 @@ public class CodeWritePlatformServiceJpaRepositoryImpl implements CodeWritePlatf
 
     @Transactional
     @Override
-    @CacheEvict(value = "codes", key = "T(org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier()")
+    @CacheEvict(value = "codes", key = "T(org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat('cv')")
     public CommandProcessingResult updateCode(final Long codeId, final JsonCommand command) {
 
         try {
@@ -92,7 +92,7 @@ public class CodeWritePlatformServiceJpaRepositoryImpl implements CodeWritePlatf
 
     @Transactional
     @Override
-    @CacheEvict(value = "codes", key = "T(org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier()")
+    @CacheEvict(value = "codes", key = "T(org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat('cv')")
     public CommandProcessingResult deleteCode(final Long codeId) {
 
         context.authenticatedUser();

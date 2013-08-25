@@ -46,7 +46,7 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
     }
 
     @Override
-    @Cacheable(value = "charges", key = "T(org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier()")
+    @Cacheable(value = "charges", key = "T(org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat('ch')")
     public Collection<ChargeData> retrieveAllCharges() {
         this.context.authenticatedUser();
 

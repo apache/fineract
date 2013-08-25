@@ -53,7 +53,7 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
 
     @Transactional
     @Override
-    @CacheEvict(value = "roles", key = "T(org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier()")
+    @CacheEvict(value = "roles", key = "T(org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat('rl')")
     public CommandProcessingResult createRole(final JsonCommand command) {
 
         try {
@@ -99,7 +99,7 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
 
     @Transactional
     @Override
-    @CacheEvict(value = "roles", key = "T(org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier()")
+    @CacheEvict(value = "roles", key = "T(org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat('rl')")
     public CommandProcessingResult updateRole(final Long roleId, final JsonCommand command) {
         try {
             context.authenticatedUser();
@@ -129,7 +129,7 @@ public class RoleWritePlatformServiceJpaRepositoryImpl implements RoleWritePlatf
 
     @Transactional
     @Override
-    @CacheEvict(value = "roles", key = "T(org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier()")
+    @CacheEvict(value = "roles", key = "T(org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat('rl')")
     public CommandProcessingResult updateRolePermissions(final Long roleId, final JsonCommand command) {
         context.authenticatedUser();
 
