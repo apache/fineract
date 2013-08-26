@@ -38,17 +38,17 @@ public final class LoanProductDataValidator {
     /**
      * The parameters supported for this command.
      */
-    private final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("locale", "dateFormat", "name", "description", "fundId",
-            "currencyCode", "digitsAfterDecimal","inMultiplesOf", "principal", "minPrincipal", "maxPrincipal", "repaymentEvery", "numberOfRepayments",
-            "minNumberOfRepayments", "maxNumberOfRepayments", "repaymentFrequencyType", "interestRatePerPeriod",
+    private final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("locale", "dateFormat", "name", "description",
+            "fundId", "currencyCode", "digitsAfterDecimal", "inMultiplesOf", "principal", "minPrincipal", "maxPrincipal", "repaymentEvery",
+            "numberOfRepayments", "minNumberOfRepayments", "maxNumberOfRepayments", "repaymentFrequencyType", "interestRatePerPeriod",
             "minInterestRatePerPeriod", "maxInterestRatePerPeriod", "interestRateFrequencyType", "amortizationType", "interestType",
             "interestCalculationPeriodType", "inArrearsTolerance", "transactionProcessingStrategyId", "graceOnPrincipalPayment",
-            "graceOnInterestPayment", "graceOnInterestCharged", "charges", "accountingRule","includeInBorrowerCycle", "startDate", "closeDate", "externalId",
-            LOAN_PRODUCT_ACCOUNTING_PARAMS.FEES_RECEIVABLE.getValue(), LOAN_PRODUCT_ACCOUNTING_PARAMS.FUND_SOURCE.getValue(),
-            LOAN_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_FEES.getValue(), LOAN_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_PENALTIES.getValue(),
-            LOAN_PRODUCT_ACCOUNTING_PARAMS.INTEREST_ON_LOANS.getValue(), LOAN_PRODUCT_ACCOUNTING_PARAMS.INTEREST_RECEIVABLE.getValue(),
-            LOAN_PRODUCT_ACCOUNTING_PARAMS.LOAN_PORTFOLIO.getValue(), LOAN_PRODUCT_ACCOUNTING_PARAMS.LOSSES_WRITTEN_OFF.getValue(),
-            LOAN_PRODUCT_ACCOUNTING_PARAMS.PENALTIES_RECEIVABLE.getValue(),
+            "graceOnInterestPayment", "graceOnInterestCharged", "charges", "accountingRule", "includeInBorrowerCycle", "startDate",
+            "closeDate", "externalId", LOAN_PRODUCT_ACCOUNTING_PARAMS.FEES_RECEIVABLE.getValue(),
+            LOAN_PRODUCT_ACCOUNTING_PARAMS.FUND_SOURCE.getValue(), LOAN_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_FEES.getValue(),
+            LOAN_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_PENALTIES.getValue(), LOAN_PRODUCT_ACCOUNTING_PARAMS.INTEREST_ON_LOANS.getValue(),
+            LOAN_PRODUCT_ACCOUNTING_PARAMS.INTEREST_RECEIVABLE.getValue(), LOAN_PRODUCT_ACCOUNTING_PARAMS.LOAN_PORTFOLIO.getValue(),
+            LOAN_PRODUCT_ACCOUNTING_PARAMS.LOSSES_WRITTEN_OFF.getValue(), LOAN_PRODUCT_ACCOUNTING_PARAMS.PENALTIES_RECEIVABLE.getValue(),
             LOAN_PRODUCT_ACCOUNTING_PARAMS.PAYMENT_CHANNEL_FUND_SOURCE_MAPPING.getValue(),
             LOAN_PRODUCT_ACCOUNTING_PARAMS.FEE_INCOME_ACCOUNT_MAPPING.getValue(),
             LOAN_PRODUCT_ACCOUNTING_PARAMS.PENALTY_INCOME_ACCOUNT_MAPPING.getValue()));
@@ -81,9 +81,10 @@ public final class LoanProductDataValidator {
             final Long fundId = fromApiJsonHelper.extractLongNamed("fundId", element);
             baseDataValidator.reset().parameter("fundId").value(fundId).ignoreIfNull().integerGreaterThanZero();
         }
-        
+
         final Boolean includeInBorrowerCycle = fromApiJsonHelper.extractBooleanNamed("includeInBorrowerCycle", element);
-        baseDataValidator.reset().parameter("includeInBorrowerCycle").value(includeInBorrowerCycle).ignoreIfNull().validateForBooleanValue();
+        baseDataValidator.reset().parameter("includeInBorrowerCycle").value(includeInBorrowerCycle).ignoreIfNull()
+                .validateForBooleanValue();
 
         // terms
         final String currencyCode = fromApiJsonHelper.extractStringNamed("currencyCode", element);
@@ -91,7 +92,7 @@ public final class LoanProductDataValidator {
 
         final Integer digitsAfterDecimal = fromApiJsonHelper.extractIntegerNamed("digitsAfterDecimal", element, Locale.getDefault());
         baseDataValidator.reset().parameter("digitsAfterDecimal").value(digitsAfterDecimal).notNull().inMinMaxRange(0, 6);
-        
+
         final Integer inMultiplesOf = fromApiJsonHelper.extractIntegerNamed("inMultiplesOf", element, Locale.getDefault());
         baseDataValidator.reset().parameter("inMultiplesOf").value(inMultiplesOf).ignoreIfNull().integerZeroOrGreater();
 
@@ -252,6 +253,11 @@ public final class LoanProductDataValidator {
             baseDataValidator.reset().parameter(LOAN_PRODUCT_ACCOUNTING_PARAMS.LOAN_PORTFOLIO.getValue()).value(loanPortfolioAccountId)
                     .notNull().integerGreaterThanZero();
 
+            final Long transfersInSuspenseAccountId = fromApiJsonHelper.extractLongNamed(
+                    LOAN_PRODUCT_ACCOUNTING_PARAMS.TRANSFERS_SUSPENSE.getValue(), element);
+            baseDataValidator.reset().parameter(LOAN_PRODUCT_ACCOUNTING_PARAMS.TRANSFERS_SUSPENSE.getValue())
+                    .value(transfersInSuspenseAccountId).notNull().integerGreaterThanZero();
+
             final Long incomeFromInterestId = fromApiJsonHelper.extractLongNamed(
                     LOAN_PRODUCT_ACCOUNTING_PARAMS.INTEREST_ON_LOANS.getValue(), element);
             baseDataValidator.reset().parameter(LOAN_PRODUCT_ACCOUNTING_PARAMS.INTEREST_ON_LOANS.getValue()).value(incomeFromInterestId)
@@ -322,10 +328,11 @@ public final class LoanProductDataValidator {
             final Long fundId = fromApiJsonHelper.extractLongNamed("fundId", element);
             baseDataValidator.reset().parameter("fundId").value(fundId).ignoreIfNull().integerGreaterThanZero();
         }
-        
+
         if (fromApiJsonHelper.parameterExists("includeInBorrowerCycle", element)) {
             final Boolean includeInBorrowerCycle = fromApiJsonHelper.extractBooleanNamed("includeInBorrowerCycle", element);
-            baseDataValidator.reset().parameter("includeInBorrowerCycle").value(includeInBorrowerCycle).ignoreIfNull().validateForBooleanValue();
+            baseDataValidator.reset().parameter("includeInBorrowerCycle").value(includeInBorrowerCycle).ignoreIfNull()
+                    .validateForBooleanValue();
         }
 
         if (fromApiJsonHelper.parameterExists("currencyCode", element)) {
@@ -337,7 +344,7 @@ public final class LoanProductDataValidator {
             final Integer digitsAfterDecimal = fromApiJsonHelper.extractIntegerNamed("digitsAfterDecimal", element, Locale.getDefault());
             baseDataValidator.reset().parameter("digitsAfterDecimal").value(digitsAfterDecimal).notNull().inMinMaxRange(0, 6);
         }
-        
+
         if (fromApiJsonHelper.parameterExists("inMultiplesOf", element)) {
             final Integer inMultiplesOf = fromApiJsonHelper.extractIntegerNamed("inMultiplesOf", element, Locale.getDefault());
             baseDataValidator.reset().parameter("inMultiplesOf").value(inMultiplesOf).ignoreIfNull().integerZeroOrGreater();
@@ -477,6 +484,11 @@ public final class LoanProductDataValidator {
                 element);
         baseDataValidator.reset().parameter(LOAN_PRODUCT_ACCOUNTING_PARAMS.LOAN_PORTFOLIO.getValue()).value(loanPortfolioAccountId)
                 .ignoreIfNull().integerGreaterThanZero();
+
+        final Long transfersInSuspenseAccountId = fromApiJsonHelper.extractLongNamed(
+                LOAN_PRODUCT_ACCOUNTING_PARAMS.TRANSFERS_SUSPENSE.getValue(), element);
+        baseDataValidator.reset().parameter(LOAN_PRODUCT_ACCOUNTING_PARAMS.TRANSFERS_SUSPENSE.getValue())
+                .value(transfersInSuspenseAccountId).ignoreIfNull().integerGreaterThanZero();
 
         final Long incomeFromInterestId = fromApiJsonHelper.extractLongNamed(LOAN_PRODUCT_ACCOUNTING_PARAMS.INTEREST_ON_LOANS.getValue(),
                 element);

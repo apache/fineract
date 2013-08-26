@@ -16,7 +16,7 @@ import org.mifosplatform.portfolio.loanproduct.domain.InterestCalculationPeriodM
 import org.mifosplatform.portfolio.loanproduct.domain.InterestMethod;
 import org.mifosplatform.portfolio.loanproduct.domain.PeriodFrequencyType;
 
-public class LoanEnumerations{
+public class LoanEnumerations {
 
     public static final String LOAN_TERM_FREQUENCY_TYPE = "loanTermFrequencyType";
     public static final String TERM_FREQUENCY_TYPE = "termFrequencyType";
@@ -282,6 +282,24 @@ public class LoanEnumerations{
                 optionData = new LoanTransactionEnumData(LoanTransactionType.APPLY_INTEREST.getValue().longValue(),
                         LoanTransactionType.APPLY_INTEREST.getCode(), "Apply Interest");
             break;
+            case APPROVE_TRANSFER:
+                optionData = new LoanTransactionEnumData(LoanTransactionType.APPROVE_TRANSFER.getValue().longValue(),
+                        LoanTransactionType.APPROVE_TRANSFER.getCode(), "Transfer approved");
+            break;
+            case INITIATE_TRANSFER:
+                optionData = new LoanTransactionEnumData(LoanTransactionType.INITIATE_TRANSFER.getValue().longValue(),
+                        LoanTransactionType.INITIATE_TRANSFER.getCode(), "Transfer initiated");
+            break;
+            case WITHDRAW_TRANSFER:
+                optionData = new LoanTransactionEnumData(LoanTransactionType.WITHDRAW_TRANSFER.getValue().longValue(),
+                        LoanTransactionType.WITHDRAW_TRANSFER.getCode(), "Transfer Withdrawn");
+            break;
+            case REJECT_TRANSFER:
+                optionData = new LoanTransactionEnumData(LoanTransactionType.REJECT_TRANSFER.getValue().longValue(),
+                        LoanTransactionType.REJECT_TRANSFER.getCode(), "Transfer Rejected");
+            break;
+            default:
+            break;
         }
         return optionData;
     }
@@ -328,6 +346,16 @@ public class LoanEnumerations{
             break;
             case OVERPAID:
                 optionData = new LoanStatusEnumData(LoanStatus.OVERPAID.getValue().longValue(), LoanStatus.OVERPAID.getCode(), "Overpaid");
+            break;
+            case TRANSFER_IN_PROGRESS:
+                optionData = new LoanStatusEnumData(LoanStatus.TRANSFER_IN_PROGRESS.getValue().longValue(),
+                        LoanStatus.TRANSFER_IN_PROGRESS.getCode(), "Transfer in progress");
+            break;
+            case TRANSFER_ON_HOLD:
+                optionData = new LoanStatusEnumData(LoanStatus.TRANSFER_ON_HOLD.getValue().longValue(),
+                        LoanStatus.TRANSFER_ON_HOLD.getCode(), "Transfer in hold");
+            break;
+            default:
             break;
         }
 

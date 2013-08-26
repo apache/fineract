@@ -252,6 +252,10 @@ public final class Client extends AbstractPersistable<Long> {
     public boolean isActive() {
         return ClientStatus.fromInt(this.status).isActive();
     }
+    
+    public boolean isTransferInProgress () {
+        return ClientStatus.fromInt(this.status).isTransferInProgress();
+    }
 
     public boolean isNotPending() {
         return !isPending();
@@ -471,6 +475,10 @@ public final class Client extends AbstractPersistable<Long> {
     
     public Integer getStatus() {
         return this.status;
+    }
+    
+    public void setStatus(Integer status) {
+        this.status = status;
     }
 
     public boolean isActivatedAfter(final LocalDate submittedOn) {

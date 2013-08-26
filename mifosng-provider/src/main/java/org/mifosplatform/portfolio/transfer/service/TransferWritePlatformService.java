@@ -12,6 +12,12 @@ public interface TransferWritePlatformService {
 
     CommandProcessingResult transferClientsBetweenGroups(final Long sourceGroupId, final JsonCommand jsonCommand);
 
-    CommandProcessingResult transferClientBetweenBranches(final Long clientId, final JsonCommand jsonCommand);
+    CommandProcessingResult proposeClientTransfer(final Long clientId, final JsonCommand jsonCommand);
+
+    CommandProcessingResult withdrawClientTransfer(final Long clientId, final JsonCommand jsonCommand);
+
+    CommandProcessingResult acceptClientTransfer(final Long clientId, final JsonCommand jsonCommand);
+
+    CommandProcessingResult rejectClientTransfer(final Long clientId, final JsonCommand jsonCommand);
 
 }

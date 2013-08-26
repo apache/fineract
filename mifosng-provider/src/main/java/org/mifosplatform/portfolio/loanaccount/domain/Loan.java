@@ -1281,7 +1281,7 @@ public class Loan extends AbstractPersistable<Long> {
         return actualChanges;
     }
 
-    private Collection<Long> findExistingTransactionIds() {
+    public Collection<Long> findExistingTransactionIds() {
 
         final Collection<Long> ids = new ArrayList<Long>();
 
@@ -1292,7 +1292,7 @@ public class Loan extends AbstractPersistable<Long> {
         return ids;
     }
 
-    private Collection<Long> findExistingReversedTransactionIds() {
+    public Collection<Long> findExistingReversedTransactionIds() {
 
         final Collection<Long> ids = new ArrayList<Long>();
 
@@ -2011,7 +2011,7 @@ public class Loan extends AbstractPersistable<Long> {
         return hasDisbursementTransaction();
     }
 
-    private boolean isClosed() {
+    public boolean isClosed() {
         return status().isClosed() || isCancelled();
     }
 
@@ -2577,6 +2577,14 @@ public class Loan extends AbstractPersistable<Long> {
 
     public Integer getTermPeriodFrequencyType() {
         return this.termPeriodFrequencyType;
+    }
+    
+    public List<LoanTransaction> getLoanTransactions() {
+        return this.loanTransactions;
+    }
+    
+    public void setLoanStatus(Integer loanStatus) {
+        this.loanStatus = loanStatus;
     }
 
     public void validateExpectedDisbursementForHolidayAndNonWorkingDay(final WorkingDays workingDays,

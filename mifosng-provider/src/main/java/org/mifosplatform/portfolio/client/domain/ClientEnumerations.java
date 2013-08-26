@@ -29,6 +29,16 @@ public class ClientEnumerations {
             case CLOSED:
                 optionData = new EnumOptionData(ClientStatus.CLOSED.getValue().longValue(), ClientStatus.CLOSED.getCode(), "Closed");
             break;
+            case TRANSFER_IN_PROGRESS:
+                optionData = new EnumOptionData(ClientStatus.TRANSFER_IN_PROGRESS.getValue().longValue(),
+                        ClientStatus.TRANSFER_IN_PROGRESS.getCode(), "Transfer in progress");
+            break;
+            case TRANSFER_ON_HOLD:
+                optionData = new EnumOptionData(ClientStatus.TRANSFER_ON_HOLD.getValue().longValue(),
+                        ClientStatus.TRANSFER_ON_HOLD.getCode(), "Transfer on hold");
+            break;
+            default:
+            break;
         }
 
         return optionData;

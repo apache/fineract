@@ -28,7 +28,7 @@ public class TransferApiConstants {
             dateFormatParamName, destinationGroupIdParamName, clients, inheritDestinationGroupLoanOfficer, newStaffIdParamName,
             transferActiveLoans));
 
-    public static final Set<String> TRANSFER_CLIENT_BETWEEN_BRANCHES_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(localeParamName,
-            dateFormatParamName, destinationOfficeIdParamName, newStaffIdParamName, transferActiveLoans));
+    public static final Set<String> PROPOSE_CLIENT_TRANSFER_BETWEEN_BRANCHES_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(
+            localeParamName, dateFormatParamName, destinationOfficeIdParamName, newStaffIdParamName, transferActiveLoans));
 
 }

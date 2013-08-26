@@ -123,6 +123,20 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
         return new LoanTransaction(loan, office, LoanTransactionType.APPLY_INTEREST, amount.getAmount(), interestAppliedDate, null);
     }
 
+    public static LoanTransaction initiateTransfer(final Office office, final Loan loan, final LocalDate transferDate) {
+        return new LoanTransaction(loan, office, LoanTransactionType.INITIATE_TRANSFER.getValue(), transferDate.toDateMidnight().toDate(),
+                loan.getSummary().getTotalOutstanding(), loan.getSummary().getTotalPrincipalOutstanding(), loan.getSummary()
+                        .getTotalInterestOutstanding(), loan.getSummary().getTotalFeeChargesOutstanding(), loan.getSummary()
+                        .getTotalPenaltyChargesOutstanding(), false, null);
+    }
+
+    public static LoanTransaction approveTransfer(final Office office, final Loan loan, final LocalDate transferDate) {
+        return new LoanTransaction(loan, office, LoanTransactionType.APPROVE_TRANSFER.getValue(), transferDate.toDateMidnight().toDate(),
+                loan.getSummary().getTotalOutstanding(), loan.getSummary().getTotalPrincipalOutstanding(), loan.getSummary()
+                        .getTotalInterestOutstanding(), loan.getSummary().getTotalFeeChargesOutstanding(), loan.getSummary()
+                        .getTotalPenaltyChargesOutstanding(), false, null);
+    }
+
     public static LoanTransaction copyTransactionProperties(LoanTransaction loanTransaction) {
         return new LoanTransaction(loanTransaction.loan, loanTransaction.office, loanTransaction.typeOf, loanTransaction.dateOf,
                 loanTransaction.amount, loanTransaction.principalPortion, loanTransaction.interestPortion,

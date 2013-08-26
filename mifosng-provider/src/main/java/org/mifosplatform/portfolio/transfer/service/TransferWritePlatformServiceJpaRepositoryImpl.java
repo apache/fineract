@@ -23,6 +23,7 @@ import org.mifosplatform.portfolio.calendar.domain.CalendarType;
 import org.mifosplatform.portfolio.calendar.service.CalendarUtils;
 import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.client.domain.ClientRepositoryWrapper;
+import org.mifosplatform.portfolio.client.domain.ClientStatus;
 import org.mifosplatform.portfolio.client.exception.ClientHasBeenClosedException;
 import org.mifosplatform.portfolio.group.domain.Group;
 import org.mifosplatform.portfolio.group.domain.GroupRepositoryWrapper;
@@ -160,7 +161,8 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
 
         } else {
             Office destinationOffice = destinationGroup.getOffice();
-            transferClientToNewBranch(client, destinationOffice);
+            // handleClientTransfer(client, destinationOffice);
+            // TODO: Fill in the blanks
         }
 
         /**
@@ -208,16 +210,16 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
      **/
     @Transactional
     @Override
-    public CommandProcessingResult transferClientBetweenBranches(final Long clientId, final JsonCommand jsonCommand) {
+    public CommandProcessingResult proposeClientTransfer(final Long clientId, final JsonCommand jsonCommand) {
         // validation
-        this.transfersDataValidator.validateForClientTransferBetweenBranches(jsonCommand.json());
+        this.transfersDataValidator.validateForProposeClientTransferBetweenBranches(jsonCommand.json());
 
         final Long destinationOfficeId = jsonCommand.longValueOfParameterNamed(TransferApiConstants.destinationOfficeIdParamName);
         final Office office = this.officeRepository.findOneWithNotFoundDetection(destinationOfficeId);
         final Client client = this.clientRepository.findOneWithNotFoundDetection(clientId);
         /*** Remove all group associations for this client ***/
         client.getGroups().clear();
-        transferClientToNewBranch(client, office);
+        handleClientTransfer(client, office, TransferEventType.PROPOSAL);
         this.clientRepository.save(client);
 
         return new CommandProcessingResultBuilder() //
@@ -226,14 +228,100 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
                 .build();
     }
 
-    private void transferClientToNewBranch(final Client client, final Office destinationOffice) {
-        /**
-         * For now, do not allow Clients with active loans to be transferred
-         * between branches
-         **/
-        //if (loanRepository.doesClientHaveActiveLoans(client.getId())) { throw new TransferNotSupportedException(); }
-        // set the new office for the client
-        client.updateOffice(destinationOffice);
+    /**
+     * This API is meant for transferring clients between branches mainly by
+     * Organizations following an Individual lending Model <br/>
+     * If the Client is linked to any Groups, we can optionally choose to have
+     * all the linkages broken and all JLG Loans are converted into Individual
+     * Loans
+     * 
+     * @param clientId
+     * @param destinationOfficeId
+     * @param jsonCommand
+     * @return
+     **/
+    @Transactional
+    @Override
+    public CommandProcessingResult acceptClientTransfer(final Long clientId, final JsonCommand jsonCommand) {
+        final Client client = this.clientRepository.findOneWithNotFoundDetection(clientId);
+        /*** Remove all group associations for this client ***/
+        client.getGroups().clear();
+        handleClientTransfer(client, client.getOffice(), TransferEventType.ACCEPTANCE);
+        this.clientRepository.save(client);
+
+        return new CommandProcessingResultBuilder() //
+                .withClientId(clientId) //
+                .withEntityId(clientId) //
+                .build();
+    }
+
+    @Override
+    @Transactional
+    public CommandProcessingResult withdrawClientTransfer(Long clientId, JsonCommand jsonCommand) {
+        final Client client = this.clientRepository.findOneWithNotFoundDetection(clientId);
+        /*** Remove all group associations for this client ***/
+        client.getGroups().clear();
+        handleClientTransfer(client, client.getOffice(), TransferEventType.WITHDRAWAL);
+        this.clientRepository.save(client);
+
+        return new CommandProcessingResultBuilder() //
+                .withClientId(clientId) //
+                .withEntityId(clientId) //
+                .build();
+    }
+
+    @Override
+    @Transactional
+    public CommandProcessingResult rejectClientTransfer(Long clientId, JsonCommand jsonCommand) {
+        final Client client = this.clientRepository.findOneWithNotFoundDetection(clientId);
+        /*** Remove all group associations for this client ***/
+        client.getGroups().clear();
+        handleClientTransfer(client, client.getOffice(), TransferEventType.REJECTION);
+        this.clientRepository.save(client);
+
+        return new CommandProcessingResultBuilder() //
+                .withClientId(clientId) //
+                .withEntityId(clientId) //
+                .build();
+    }
+
+    private void handleClientTransfer(final Client client, final Office destinationOffice, TransferEventType transferEventType) {
+        if (loanRepository.doesClientHaveActiveLoans(client.getId())) {
+            // get each individual loan for the client
+            for (Loan loan : loanRepository.findLoanByClientId(client.getId())) {
+                if (!loan.isClosed()) {
+                    switch (transferEventType) {
+                        case ACCEPTANCE:
+                            this.loanWritePlatformService.acceptLoanTransfer(loan.getId(), DateUtils.getLocalDateOfTenant());
+                        break;
+                        case PROPOSAL:
+                            this.loanWritePlatformService.initiateLoanTransfer(loan.getId(), DateUtils.getLocalDateOfTenant());
+                        break;
+                        case REJECTION:
+                            this.loanWritePlatformService.rejectLoanTransfer(loan.getId(), DateUtils.getLocalDateOfTenant());
+                        break;
+                        case WITHDRAWAL:
+                            this.loanWritePlatformService.withdrawLoanTransfer(loan.getId(), DateUtils.getLocalDateOfTenant());
+                    }
+                }
+            }
+        }
+
+        switch (transferEventType) {
+            case ACCEPTANCE:
+                client.setStatus(ClientStatus.ACTIVE.getValue());
+            break;
+            case PROPOSAL:
+                client.setStatus(ClientStatus.TRANSFER_IN_PROGRESS.getValue());
+                client.updateOffice(destinationOffice);
+            break;
+            case REJECTION:
+                client.setStatus(ClientStatus.TRANSFER_ON_HOLD.getValue());
+            break;
+            // TODO update client with previous office
+            case WITHDRAWAL:
+                client.setStatus(ClientStatus.ACTIVE.getValue());
+        }
     }
 
     private List<Client> assembleListOfClients(final JsonCommand command) {

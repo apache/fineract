@@ -80,13 +80,13 @@ public final class TransfersDataValidator {
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
-    public void validateForClientTransferBetweenBranches(final String json) {
+    public void validateForProposeClientTransferBetweenBranches(final String json) {
 
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,
-                TransferApiConstants.TRANSFER_CLIENT_BETWEEN_BRANCHES_DATA_PARAMETERS);
+                TransferApiConstants.PROPOSE_CLIENT_TRANSFER_BETWEEN_BRANCHES_DATA_PARAMETERS);
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
