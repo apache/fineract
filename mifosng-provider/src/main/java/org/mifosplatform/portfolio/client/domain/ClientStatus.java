@@ -13,6 +13,8 @@ public enum ClientStatus {
     INVALID(0, "clientStatusType.invalid"), //
     PENDING(100, "clientStatusType.pending"), //
     ACTIVE(300, "clientStatusType.active"), //
+    TRANSFER_IN_PROGRESS(303, "clientStatusType.transfer.in.progress"), //
+    TRANSFER_ON_HOLD(304, "clientStatusType.transfer.on.hold"), //
     CLOSED(600, "clientStatusType.closed");
 
     private final Integer value;
@@ -27,6 +29,12 @@ public enum ClientStatus {
             break;
             case 300:
                 enumeration = ClientStatus.ACTIVE;
+                break;
+            case 303:
+                enumeration = ClientStatus.TRANSFER_IN_PROGRESS;
+                break;
+            case 304:
+                enumeration = ClientStatus.TRANSFER_ON_HOLD;
             break;
             case 600:
                 enumeration = ClientStatus.CLOSED;
@@ -62,5 +70,17 @@ public enum ClientStatus {
 
     public boolean isClosed() {
         return this.value.equals(ClientStatus.CLOSED.getValue());
+    }
+
+    public boolean isTransferInProgress() {
+        return this.value.equals(ClientStatus.TRANSFER_IN_PROGRESS.getValue());
+    }
+
+    public boolean isTransferOnHold() {
+        return this.value.equals(ClientStatus.TRANSFER_ON_HOLD.getValue());
+    }
+
+    public boolean isUnderTransfer() {
+        return isTransferInProgress() || isTransferOnHold();
     }
 }

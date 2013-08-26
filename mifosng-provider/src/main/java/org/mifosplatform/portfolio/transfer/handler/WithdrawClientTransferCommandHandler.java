@@ -14,12 +14,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class TransferClientBetweenBranchesCommandHandler implements NewCommandSourceHandler {
+public class WithdrawClientTransferCommandHandler implements NewCommandSourceHandler {
 
     private final TransferWritePlatformService writePlatformService;
 
     @Autowired
-    public TransferClientBetweenBranchesCommandHandler(final TransferWritePlatformService writePlatformService) {
+    public WithdrawClientTransferCommandHandler(final TransferWritePlatformService writePlatformService) {
         this.writePlatformService = writePlatformService;
     }
 
@@ -27,6 +27,6 @@ public class TransferClientBetweenBranchesCommandHandler implements NewCommandSo
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
 
-        return this.writePlatformService.transferClientBetweenBranches(command.entityId(), command);
+        return this.writePlatformService.withdrawClientTransfer(command.entityId(), command);
     }
 }

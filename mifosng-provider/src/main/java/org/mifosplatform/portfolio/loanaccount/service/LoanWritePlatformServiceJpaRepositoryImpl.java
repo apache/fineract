@@ -51,6 +51,7 @@ import org.mifosplatform.portfolio.charge.exception.LoanChargeCannotBeWaivedExce
 import org.mifosplatform.portfolio.charge.exception.LoanChargeNotFoundException;
 import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.client.exception.ClientNotActiveException;
+import org.mifosplatform.portfolio.client.exception.ClientNotAwaitingTransferApprovalException;
 import org.mifosplatform.portfolio.collectionsheet.command.CollectionSheetBulkDisbursalCommand;
 import org.mifosplatform.portfolio.collectionsheet.command.CollectionSheetBulkRepaymentCommand;
 import org.mifosplatform.portfolio.collectionsheet.command.SingleDisbursalCommand;
@@ -894,6 +895,64 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
 
     @Transactional
     @Override
+    public LoanTransaction initiateLoanTransfer(final Long accountId, final LocalDate TransferDate) {
+
+        final Loan loan = this.loanAssembler.assembleFrom(accountId);
+        checkClientOrGroupActive(loan);
+
+        final List<Long> existingTransactionIds = new ArrayList<Long>(loan.findExistingTransactionIds());
+        final List<Long> existingReversedTransactionIds = new ArrayList<Long>(loan.findExistingReversedTransactionIds());
+
+        final LoanTransaction newTransferTransaction = LoanTransaction.initiateTransfer(loan.getOffice(), loan, TransferDate);
+        loan.getLoanTransactions().add(newTransferTransaction);
+        loan.setLoanStatus(LoanStatus.TRANSFER_IN_PROGRESS.getValue());
+
+        this.loanTransactionRepository.save(newTransferTransaction);
+        this.loanRepository.save(loan);
+
+        postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
+
+        return newTransferTransaction;
+    }
+
+    @Transactional
+    @Override
+    public LoanTransaction acceptLoanTransfer(final Long accountId, final LocalDate TransferDate) {
+
+        final Loan loan = this.loanAssembler.assembleFrom(accountId);
+        validateClientOrGroupAwaitingTransferAcceptance(loan);
+
+        final List<Long> existingTransactionIds = new ArrayList<Long>(loan.findExistingTransactionIds());
+        final List<Long> existingReversedTransactionIds = new ArrayList<Long>(loan.findExistingReversedTransactionIds());
+
+        final LoanTransaction newTransferAcceptanceTransaction = LoanTransaction.approveTransfer(loan.getOffice(), loan, TransferDate);
+        loan.getLoanTransactions().add(newTransferAcceptanceTransaction);
+        loan.setLoanStatus(LoanStatus.ACTIVE.getValue());
+
+        this.loanTransactionRepository.save(newTransferAcceptanceTransaction);
+        this.loanRepository.save(loan);
+
+        postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
+
+        return newTransferAcceptanceTransaction;
+    }
+
+    @Transactional
+    @Override
+    public LoanTransaction withdrawLoanTransfer(Long accountId, LocalDate TransferDate) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Transactional
+    @Override
+    public LoanTransaction rejectLoanTransfer(Long accountId, LocalDate TransferDate) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Transactional
+    @Override
     public CommandProcessingResult loanReassignment(final Long loanId, final JsonCommand command) {
 
         this.context.authenticatedUser();
@@ -1256,4 +1315,16 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             if (group.isNotActive()) { throw new GroupNotActiveException(group.getId()); }
         }
     }
+
+    private void validateClientOrGroupAwaitingTransferAcceptance(final Loan loan) {
+        final Client client = loan.client();
+        if (client != null) {
+            if (!client.isTransferInProgress()) { throw new ClientNotAwaitingTransferApprovalException(client.getId()); }
+        }
+        final Group group = loan.group();
+        if (group != null) {
+            if (!group.isTransferInProgress()) { throw new ClientNotAwaitingTransferApprovalException(group.getId()); }
+        }
+    }
+
 }

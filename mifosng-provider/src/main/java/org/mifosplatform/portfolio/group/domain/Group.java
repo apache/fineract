@@ -38,6 +38,7 @@ import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.organisation.office.domain.Office;
 import org.mifosplatform.organisation.staff.domain.Staff;
 import org.mifosplatform.portfolio.client.domain.Client;
+import org.mifosplatform.portfolio.client.domain.ClientStatus;
 import org.mifosplatform.portfolio.group.api.GroupingTypesApiConstants;
 import org.mifosplatform.portfolio.group.exception.ClientExistInGroupException;
 import org.mifosplatform.portfolio.group.exception.ClientNotInGroupException;
@@ -383,6 +384,10 @@ public final class Group extends AbstractPersistable<Long> {
 
     public boolean isCenter() {
         return this.groupLevel.isCenter();
+    }
+    
+    public boolean isTransferInProgress () {
+        return GroupingTypeStatus.fromInt(this.status).isTransferInProgress();
     }
     
     public boolean isChildClient(final Long clientId){

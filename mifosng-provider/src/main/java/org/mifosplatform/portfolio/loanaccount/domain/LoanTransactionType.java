@@ -22,7 +22,17 @@ public enum LoanTransactionType {
     RECOVERY_REPAYMENT(8, "loanTransactionType.recoveryRepayment"), //
     WAIVE_CHARGES(9, "loanTransactionType.waiveCharges"), //
     APPLY_CHARGES(10, "loanTransactionType.applyCharges"), //
-    APPLY_INTEREST(11, "loanTransactionType.applyInterest");
+    APPLY_INTEREST(11, "loanTransactionType.applyInterest"),
+
+    /***
+     * A Loan Transfer involves two steps, first a "initiate" Loan transfer
+     * transaction done by the Source branch followed by a "complete" loan
+     * transaction initiated by the destination branch
+     **/
+    INITIATE_TRANSFER(12, "loanTransactionType.initiateTransfer"), //
+    APPROVE_TRANSFER(13, "loanTransactionType.approveTransfer"), //
+    WITHDRAW_TRANSFER(14, "loanTransactionType.withdrawTransfer"), //
+    REJECT_TRANSFER(15, "loanTransactionType.rejectTransfer");
 
     private final Integer value;
     private final String code;
@@ -78,6 +88,18 @@ public enum LoanTransactionType {
             break;
             case 11:
                 loanTransactionType = LoanTransactionType.APPLY_INTEREST;
+            break;
+            case 12:
+                loanTransactionType = LoanTransactionType.INITIATE_TRANSFER;
+            break;
+            case 13:
+                loanTransactionType = LoanTransactionType.APPROVE_TRANSFER;
+            break;
+            case 14:
+                loanTransactionType = LoanTransactionType.WITHDRAW_TRANSFER;
+            break;
+            case 15:
+                loanTransactionType = LoanTransactionType.REJECT_TRANSFER;
             break;
             default:
                 loanTransactionType = LoanTransactionType.INVALID;

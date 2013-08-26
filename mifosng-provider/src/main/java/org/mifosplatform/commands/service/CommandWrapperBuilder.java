@@ -351,13 +351,40 @@ public class CommandWrapperBuilder {
         this.href = "/clients/" + clientId + "?command=close&template=true";
         return this;
     }
-    
-    public CommandWrapperBuilder transferClient(final Long clientId) {
-        this.actionName = "TRANSFER";
+
+    public CommandWrapperBuilder proposeClientTransfer(final Long clientId) {
+        this.actionName = "PROPOSETRANSFER";
         this.entityName = "CLIENT";
         this.entityId = clientId;
         this.clientId = clientId;
-        this.href = "/clientId/" + clientId + "?command=transfer";
+        this.href = "/clientId/" + clientId + "?command=proposeTransfer";
+        return this;
+    }
+
+    public CommandWrapperBuilder withdrawClientTransferRequest(final Long clientId) {
+        this.actionName = "PROPOSETRANSFER";
+        this.entityName = "CLIENT";
+        this.entityId = clientId;
+        this.clientId = clientId;
+        this.href = "/clientId/" + clientId + "?command=withdrawTransfer";
+        return this;
+    }
+
+    public CommandWrapperBuilder acceptClientTransfer(final Long clientId) {
+        this.actionName = "ACCEPTTRANSFER";
+        this.entityName = "CLIENT";
+        this.entityId = clientId;
+        this.clientId = clientId;
+        this.href = "/clientId/" + clientId + "?command=acceptTransfer";
+        return this;
+    }
+
+    public CommandWrapperBuilder rejectClientTransfer(final Long clientId) {
+        this.actionName = "REJECTTRANSFER";
+        this.entityName = "CLIENT";
+        this.entityId = clientId;
+        this.clientId = clientId;
+        this.href = "/clientId/" + clientId + "?command=rejectTransfer";
         return this;
     }
 
@@ -1009,7 +1036,7 @@ public class CommandWrapperBuilder {
         this.href = "/groups/" + groupId + "?command=disassociateClients";
         return this;
     }
-    
+
     public CommandWrapperBuilder transferClientsBetweenGroups(final Long sourceGroupId) {
         this.actionName = "TRANSFERCLIENTS";
         this.entityName = "GROUP";
@@ -1253,7 +1280,7 @@ public class CommandWrapperBuilder {
         this.href = "/" + supportedEntityType + "/" + supportedEntityId + "/meetings/" + meetingId;
         return this;
     }
-    
+
     public CommandWrapperBuilder saveOrUpdateAttendance(final Long entityId, final String supportedEntityType, final Long supportedEntityId) {
         this.actionName = "SAVEORUPDATEATTENDANCE";
         this.entityName = "MEETING";

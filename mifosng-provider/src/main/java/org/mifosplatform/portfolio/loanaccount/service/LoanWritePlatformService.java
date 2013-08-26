@@ -8,23 +8,25 @@ package org.mifosplatform.portfolio.loanaccount.service;
 import java.util.Collection;
 import java.util.Map;
 
+import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.portfolio.calendar.domain.Calendar;
 import org.mifosplatform.portfolio.calendar.domain.CalendarInstance;
 import org.mifosplatform.portfolio.collectionsheet.command.CollectionSheetBulkDisbursalCommand;
 import org.mifosplatform.portfolio.collectionsheet.command.CollectionSheetBulkRepaymentCommand;
+import org.mifosplatform.portfolio.loanaccount.domain.LoanTransaction;
 
 public interface LoanWritePlatformService {
 
     CommandProcessingResult disburseLoan(Long loanId, JsonCommand command);
-    
+
     Map<String, Object> bulkLoanDisbursal(JsonCommand command, CollectionSheetBulkDisbursalCommand bulkDisbursalCommand);
 
     CommandProcessingResult undoLoanDisbursal(Long loanId, JsonCommand command);
 
     CommandProcessingResult makeLoanRepayment(Long loanId, JsonCommand command);
-    
+
     Map<String, Object> makeLoanBulkRepayment(CollectionSheetBulkRepaymentCommand bulkRepaymentCommand);
 
     CommandProcessingResult adjustLoanTransaction(Long loanId, Long transactionId, JsonCommand command);
@@ -50,8 +52,16 @@ public interface LoanWritePlatformService {
     CommandProcessingResult bulkLoanReassignment(JsonCommand command);
 
     CommandProcessingResult removeLoanOfficer(Long loanId, JsonCommand command);
-    
+
     void applyMeetingDateChanges(Calendar calendar, Collection<CalendarInstance> loanCalendarInstances);
-    
+
     void applyHolidaysToLoans();
+
+    LoanTransaction initiateLoanTransfer(Long accountId, LocalDate TransferDate);
+
+    LoanTransaction acceptLoanTransfer(Long accountId, LocalDate TransferDate);
+    
+    LoanTransaction withdrawLoanTransfer(Long accountId, LocalDate TransferDate);
+
+    LoanTransaction rejectLoanTransfer(Long accountId, LocalDate TransferDate);
 }

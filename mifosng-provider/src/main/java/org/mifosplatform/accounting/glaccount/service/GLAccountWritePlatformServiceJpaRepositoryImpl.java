@@ -76,11 +76,11 @@ public class GLAccountWritePlatformServiceJpaRepositoryImpl implements GLAccount
             final Long tagId = command.longValueOfParameterNamed(GLAccountJsonInputParams.TAGID.getValue());
             final Long type = command.longValueOfParameterNamed(GLAccountJsonInputParams.TYPE.getValue());
             GLAccountType accountType = GLAccountType.fromInt(type.intValue());
-            
-        	if(tagId != null) {
-        		glAccountTagType = retrieveTagId(tagId, accountType); 
-        	}	
-            
+
+            if (tagId != null) {
+                glAccountTagType = retrieveTagId(tagId, accountType);
+            }
+
             final GLAccount glAccount = GLAccount.fromJson(parentGLAccount, command, glAccountTagType);
 
             this.glAccountRepository.saveAndFlush(glAccount);
@@ -104,9 +104,7 @@ public class GLAccountWritePlatformServiceJpaRepositoryImpl implements GLAccount
             accountCommand.validateForUpdate();
 
             final Long parentId = command.longValueOfParameterNamed(GLAccountJsonInputParams.PARENT_ID.getValue());
-            if (glAccountId.equals(parentId)) {
-				throw new InvalidParentGLAccountHeadException(glAccountId,parentId);
-			}
+            if (glAccountId.equals(parentId)) { throw new InvalidParentGLAccountHeadException(glAccountId, parentId); }
             // is the glAccount valid
             final GLAccount glAccount = this.glAccountRepository.findOne(glAccountId);
             if (glAccount == null) { throw new GLAccountNotFoundException(glAccountId); }
@@ -118,15 +116,15 @@ public class GLAccountWritePlatformServiceJpaRepositoryImpl implements GLAccount
                 GLAccount parentAccount = validateParentGLAccount(parentId);
                 glAccount.updateParentAccount(parentAccount);
             }
-            
+
             if (changesOnly.containsKey(GLAccountJsonInputParams.TAGID.getValue())) {
-            	final Long tagIdLongValue = command.longValueOfParameterNamed(GLAccountJsonInputParams.TAGID.getValue());
-            	final GLAccountType accountType = GLAccountType.fromInt(glAccount.getType());
-            	CodeValue tagID = null;
-            	if (tagIdLongValue != null) {
-            		tagID = retrieveTagId(tagIdLongValue, accountType);
-				}
-            	glAccount.updateTagId(tagID);
+                final Long tagIdLongValue = command.longValueOfParameterNamed(GLAccountJsonInputParams.TAGID.getValue());
+                final GLAccountType accountType = GLAccountType.fromInt(glAccount.getType());
+                CodeValue tagID = null;
+                if (tagIdLongValue != null) {
+                    tagID = retrieveTagId(tagIdLongValue, accountType);
+                }
+                glAccount.updateTagId(tagID);
             }
 
             /**
@@ -180,11 +178,11 @@ public class GLAccountWritePlatformServiceJpaRepositoryImpl implements GLAccount
      */
     private GLAccount validateParentGLAccount(final Long parentAccountId) {
         GLAccount parentGLAccount = null;
-        if (parentAccountId != null){
-	        parentGLAccount = this.glAccountRepository.findOne(parentAccountId);
-	        if (parentGLAccount == null) { throw new GLAccountNotFoundException(parentAccountId); }
-	        // ensure parent is not a detail account
-	        if (parentGLAccount.isDetailAccount()) { throw new GLAccountInvalidParentException(parentAccountId); }
+        if (parentAccountId != null) {
+            parentGLAccount = this.glAccountRepository.findOne(parentAccountId);
+            if (parentGLAccount == null) { throw new GLAccountNotFoundException(parentAccountId); }
+            // ensure parent is not a detail account
+            if (parentGLAccount.isDetailAccount()) { throw new GLAccountInvalidParentException(parentAccountId); }
         }
         return parentGLAccount;
     }
@@ -204,26 +202,26 @@ public class GLAccountWritePlatformServiceJpaRepositoryImpl implements GLAccount
         throw new PlatformDataIntegrityException("error.msg.glAccount.unknown.data.integrity.issue",
                 "Unknown data integrity issue with resource GL Account: " + realCause.getMessage());
     }
-    
+
     private CodeValue retrieveTagId(Long tagId, GLAccountType accountType) {
-    	CodeValue glAccountTagType = null;
-    	if (accountType.isAssetType()) {
-    		glAccountTagType = this.codeValueRepositoryWrapper.findOneByCodeNameAndIdWithNotFoundDetection(
-    				AccountingConstants.ASSESTS_TAG_OPTION_CODE_NAME, tagId);
-		} else if (accountType.isLiabilityType()) {
-			glAccountTagType = this.codeValueRepositoryWrapper.findOneByCodeNameAndIdWithNotFoundDetection(
-    				AccountingConstants.LIABILITIES_TAG_OPTION_CODE_NAME, tagId);
-		} else if (accountType.isEquityType()) {
-			glAccountTagType = this.codeValueRepositoryWrapper.findOneByCodeNameAndIdWithNotFoundDetection(
-    				AccountingConstants.EQUITY_TAG_OPTION_CODE_NAME, tagId);
-		} else if (accountType.isIncomeType()) {
-			glAccountTagType = this.codeValueRepositoryWrapper.findOneByCodeNameAndIdWithNotFoundDetection(
-    				AccountingConstants.INCOME_TAG_OPTION_CODE_NAME, tagId);
-		} else if (accountType.isExpenseType()) {
-			glAccountTagType = this.codeValueRepositoryWrapper.findOneByCodeNameAndIdWithNotFoundDetection(
-    				AccountingConstants.EXPENSES_TAG_OPTION_CODE_NAME, tagId);
-		}
-    	return glAccountTagType;
+        CodeValue glAccountTagType = null;
+        if (accountType.isAssetType()) {
+            glAccountTagType = this.codeValueRepositoryWrapper.findOneByCodeNameAndIdWithNotFoundDetection(
+                    AccountingConstants.ASSESTS_TAG_OPTION_CODE_NAME, tagId);
+        } else if (accountType.isLiabilityType()) {
+            glAccountTagType = this.codeValueRepositoryWrapper.findOneByCodeNameAndIdWithNotFoundDetection(
+                    AccountingConstants.LIABILITIES_TAG_OPTION_CODE_NAME, tagId);
+        } else if (accountType.isEquityType()) {
+            glAccountTagType = this.codeValueRepositoryWrapper.findOneByCodeNameAndIdWithNotFoundDetection(
+                    AccountingConstants.EQUITY_TAG_OPTION_CODE_NAME, tagId);
+        } else if (accountType.isIncomeType()) {
+            glAccountTagType = this.codeValueRepositoryWrapper.findOneByCodeNameAndIdWithNotFoundDetection(
+                    AccountingConstants.INCOME_TAG_OPTION_CODE_NAME, tagId);
+        } else if (accountType.isExpenseType()) {
+            glAccountTagType = this.codeValueRepositoryWrapper.findOneByCodeNameAndIdWithNotFoundDetection(
+                    AccountingConstants.EXPENSES_TAG_OPTION_CODE_NAME, tagId);
+        }
+        return glAccountTagType;
     }
 
 }

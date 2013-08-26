@@ -63,6 +63,9 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
                 loanProductToGLAccountMappingHelper.saveLoanToAssetAccountMapping(element,
                         LOAN_PRODUCT_ACCOUNTING_PARAMS.LOAN_PORTFOLIO.getValue(), loanProductId,
                         CASH_ACCOUNTS_FOR_LOAN.LOAN_PORTFOLIO.getValue());
+                loanProductToGLAccountMappingHelper.saveLoanToAssetAccountMapping(element,
+                        LOAN_PRODUCT_ACCOUNTING_PARAMS.TRANSFERS_SUSPENSE.getValue(), loanProductId,
+                        CASH_ACCOUNTS_FOR_LOAN.TRANSFERS_SUSPENSE.getValue());
 
                 // income
                 loanProductToGLAccountMappingHelper.saveLoanToIncomeAccountMapping(element,
@@ -93,6 +96,9 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
                 loanProductToGLAccountMappingHelper.saveLoanToAssetAccountMapping(element,
                         LOAN_PRODUCT_ACCOUNTING_PARAMS.LOAN_PORTFOLIO.getValue(), loanProductId,
                         ACCRUAL_ACCOUNTS_FOR_LOAN.LOAN_PORTFOLIO.getValue());
+                loanProductToGLAccountMappingHelper.saveLoanToAssetAccountMapping(element,
+                        LOAN_PRODUCT_ACCOUNTING_PARAMS.TRANSFERS_SUSPENSE.getValue(), loanProductId,
+                        ACCRUAL_ACCOUNTS_FOR_LOAN.TRANSFERS_SUSPENSE.getValue());
                 loanProductToGLAccountMappingHelper.saveLoanToAssetAccountMapping(element,
                         LOAN_PRODUCT_ACCOUNTING_PARAMS.INTEREST_RECEIVABLE.getValue(), loanProductId,
                         ACCRUAL_ACCOUNTS_FOR_LOAN.INTEREST_RECEIVABLE.getValue());

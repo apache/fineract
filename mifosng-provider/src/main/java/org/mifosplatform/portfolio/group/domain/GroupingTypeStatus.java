@@ -13,6 +13,8 @@ public enum GroupingTypeStatus {
     INVALID(0, "groupingStatusType.invalid"), //
     PENDING(100, "groupingStatusType.pending"), //
     ACTIVE(300, "groupingStatusType.active"), //
+    TRANSFER_IN_PROGRESS(303, "clientStatusType.transfer.in.progress"), //
+    TRANSFER_ON_HOLD(304, "clientStatusType.transfer.on.hold"), //
     CLOSED(600, "groupingStatusType.closed");
 
     private final Integer value;
@@ -62,5 +64,17 @@ public enum GroupingTypeStatus {
 
     public boolean isClosed() {
         return this.value.equals(GroupingTypeStatus.CLOSED.getValue());
+    }
+
+    public boolean isTransferInProgress() {
+        return this.isTransferInProgress();
+    }
+
+    public boolean isTransferOnHold() {
+        return this.isTransferOnHold();
+    }
+
+    public boolean isUnderTransfer() {
+        return isTransferInProgress() || isTransferOnHold();
     }
 }
