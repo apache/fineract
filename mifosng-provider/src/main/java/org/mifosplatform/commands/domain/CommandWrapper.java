@@ -457,6 +457,10 @@ public class CommandWrapper {
     public boolean isSavingsAccountDeposit() {
         return this.actionName.equalsIgnoreCase("DEPOSIT") && this.entityName.equalsIgnoreCase("SAVINGSACCOUNT");
     }
+    
+    public boolean isSavingsAccountClose() {
+        return this.actionName.equalsIgnoreCase("CLOSE") && this.entityName.equalsIgnoreCase("SAVINGSACCOUNT");
+    }
 
     public boolean isSavingsAccountWithdrawal() {
         return this.actionName.equalsIgnoreCase("WITHDRAWAL") && this.entityName.equalsIgnoreCase("SAVINGSACCOUNT");

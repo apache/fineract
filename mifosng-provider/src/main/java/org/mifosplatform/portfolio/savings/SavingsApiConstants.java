@@ -31,6 +31,7 @@ public class SavingsApiConstants {
     public static String undoTransactionAction = ".undotransaction";
     public static String applyAnnualFeeTransactionAction = ".applyannualfee";
     public static String adjustTransactionAction = ".adjusttransaction";
+    public static String closeAction = ".close";
 
     // command
     public static String COMMAND_UNDO_TRANSACTION = "undo";
@@ -91,6 +92,8 @@ public class SavingsApiConstants {
     public static final String runningBalanceParamName = "runningBalance";
     public static final String reversedParamName = "reversed";
     public static final String dateParamName = "date";
+    
+    public static final String noteParamName = "note";
 
     public static final Set<String> SAVINGS_PRODUCT_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(localeParamName,
             monthDayFormatParamName, nameParamName, descriptionParamName, currencyCodeParamName, digitsAfterDecimalParamName,
@@ -150,4 +153,7 @@ public class SavingsApiConstants {
 
     public static final Set<String> SAVINGS_ACCOUNT_ACTIVATION_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(localeParamName,
             dateFormatParamName, activatedOnDateParamName));
+    
+    public static final Set<String> SAVINGS_ACCOUNT_CLOSE_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(localeParamName,
+            dateFormatParamName, closedOnDateParamName, noteParamName));
 }

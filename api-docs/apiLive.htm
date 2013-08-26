@@ -12704,6 +12704,52 @@ Request Body:
 	    </div>
 	</div>
 
+	<a id="savingsaccounts_close" name="savingsaccounts_close" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h2>Close a savings account</h2>
+	        <p>Results in an Activated savings application being converted into an 'closed' savings account.</p>
+	    </div>
+	    <div class="method-example">
+	        <code class="method-declaration">POST https://Domain Name/api/v1/savingsaccounts/{savingsId}?command=close</code>
+	        <code class="method-request">POST savingsaccount/5?command=close
+Content-Type: application/json
+Request Body:
+	{
+	"dateFormat":"dd MMMM yyyy",
+	"locale":"en",
+	"closedOnDate":"26 August 2013",
+	"note":"close note"
+	}
+			</code>
+	        <code class="method-response">
+{
+"officeId":1,
+"clientId":1,
+"savingsId":5,
+"resourceId":5,
+"changes":{
+	"status":{
+		"id":600,
+		"code":"savingsAccountStatusType.closed",
+		"value":"Closed",
+		"submittedAndPendingApproval":false,
+		"approved":false,
+		"rejected":false,
+		"withdrawnByApplicant":false,
+		"active":false,
+		"closed":true
+		},
+	"locale":"en",
+	"dateFormat":"dd MMMM yyyy",
+	"closedOnDate":"26 August 2013",
+	"note":"close note"
+	}
+}
+	        </code>
+	    </div>
+	</div>
+
 	<a id="savingsaccounts_calculate_interest" name="savingsaccounts_calculate_interest" class="old-syle-anchor">&nbsp;</a>
 	<div class="method-section">
 	    <div class="method-description">
@@ -19319,6 +19365,14 @@ GET https://DomainName/api/v1/search?query=000000111
 					<td></td>
 					<td>savingsaccounts/{accountId}?command=activate</td>
 					<td><a href="#savingsaccounts_activate">Activate a savings account</a></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<tr class="alt">
+					<td></td>
+					<td>savingsaccounts/{accountId}?command=close</td>
+					<td><a href="#savingsaccounts_close">Close a savings account</a></td>
 					<td></td>
 					<td></td>
 					<td></td>

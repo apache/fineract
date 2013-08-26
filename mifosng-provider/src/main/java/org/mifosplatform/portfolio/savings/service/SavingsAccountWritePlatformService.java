@@ -28,4 +28,6 @@ public interface SavingsAccountWritePlatformService {
     void postInterestForAccounts();
 
     CommandProcessingResult adjustSavingsTransaction(Long savingsId, Long transactionId, JsonCommand command);
+    
+    CommandProcessingResult close(Long savingsId, JsonCommand command);
 }

@@ -1658,6 +1658,63 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         return actualChanges;
     }
 
+    public Map<String, Object> close(final AppUser currentUser, final JsonCommand command, final LocalDate tenantsTodayDate) {
+
+        final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>();
+
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+                .resource(SAVINGS_ACCOUNT_RESOURCE_NAME + SavingsApiConstants.closeAction);
+
+        final SavingsAccountStatusType currentStatus = SavingsAccountStatusType.fromInt(this.status);
+        if (!SavingsAccountStatusType.ACTIVE.hasStateOf(currentStatus)) {
+            baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("not.in.active.state");
+            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        }
+
+        final Locale locale = command.extractLocale();
+        final DateTimeFormatter fmt = DateTimeFormat.forPattern(command.dateFormat()).withLocale(locale);
+        final LocalDate closedDate = command.localDateValueOfParameterNamed(SavingsApiConstants.closedOnDateParamName);
+
+        if (closedDate.isBefore(getActivationLocalDate())) {
+            baseDataValidator.reset().parameter(SavingsApiConstants.closedOnDateParamName).value(closedDate)
+                    .failWithCode("must.be.after.activation.date");
+            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        }
+        if (closedDate.isAfter(tenantsTodayDate)) {
+            baseDataValidator.reset().parameter(SavingsApiConstants.closedOnDateParamName).value(closedDate)
+                    .failWithCode("cannot.be.a.future.date");
+            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        }
+        List<SavingsAccountTransaction> savingsAccountTransactions = retreiveListOfTransactions();
+        if (savingsAccountTransactions.size() > 0) {
+            SavingsAccountTransaction accountTransaction = savingsAccountTransactions.get(savingsAccountTransactions.size() - 1);
+            if (accountTransaction.isAfter(closedDate)) {
+                baseDataValidator.reset().parameter(SavingsApiConstants.closedOnDateParamName).value(closedDate)
+                        .failWithCode("must.be.after.last.transaction.date");
+                if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+            }
+        }
+        if (getAccountBalance().doubleValue() > 0) {
+            baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("results.in.balance.not.zero");
+            if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        }
+        this.status = SavingsAccountStatusType.CLOSED.getValue();
+        actualChanges.put(SavingsApiConstants.statusParamName, SavingsEnumerations.status(this.status));
+        actualChanges.put(SavingsApiConstants.localeParamName, command.locale());
+        actualChanges.put(SavingsApiConstants.dateFormatParamName, command.dateFormat());
+        actualChanges.put(SavingsApiConstants.closedOnDateParamName, closedDate.toString(fmt));
+
+        this.rejectedOnDate = null;
+        this.rejectedBy = null;
+        this.withdrawnOnDate = null;
+        this.withdrawnBy = null;
+        this.closedOnDate = closedDate.toDate();
+        this.closedBy = currentUser;
+
+        return actualChanges;
+    }
+
     private Date calculateDateAccountIsLockedUntil(final LocalDate activationLocalDate) {
 
         Date lockedInUntilLocalDate = null;

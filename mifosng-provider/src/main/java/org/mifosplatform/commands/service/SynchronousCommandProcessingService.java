@@ -416,6 +416,8 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
                 handler = this.applicationContext.getBean("undoTransactionSavingsAccountCommandHandler", NewCommandSourceHandler.class);
             } else if (wrapper.isAdjustSavingsAccountTransaction()) {
                 handler = this.applicationContext.getBean("savingsTransactionAdjustmentCommandHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isSavingsAccountClose()) {
+                handler = this.applicationContext.getBean("closeSavingsAccountCommandHandler", NewCommandSourceHandler.class);
             } else {
                 throw new UnsupportedCommandException(wrapper.commandName());
             }
