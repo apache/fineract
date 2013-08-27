@@ -224,12 +224,15 @@ public class SavingsAccountsApiResource {
         } else if (is(commandParam, "applyAnnualFees")) {
             final CommandWrapper commandRequest = builder.savingsAccountApplyAnnualFees(accountId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        } else if (is(commandParam, "close")) {
+            final CommandWrapper commandRequest = builder.closeSavingsAccountApplication(accountId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         }
 
         if (result == null) {
             //
             throw new UnrecognizedQueryParamException("command", commandParam, new Object[] { "reject", "withdrawnByApplicant", "approve",
-                    "undoapproval", "activate", "calculateInterest", "postInterest" });
+                    "undoapproval", "activate", "calculateInterest", "postInterest", "close" });
         }
 
         return this.toApiJsonSerializer.serialize(result);

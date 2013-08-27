@@ -8,6 +8,7 @@ package org.mifosplatform.portfolio.savings.data;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.activatedOnDateParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.bankNumberParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.checkNumberParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.closedOnDateParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.paymentTypeIdParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.receiptNumberParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.routingCodeParamName;
@@ -105,6 +106,28 @@ public class SavingsAccountTransactionDataValidator {
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
+    
+    public void validateClosing(final JsonCommand command) {
+        final String json = command.json();
+
+        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,
+                SavingsApiConstants.SAVINGS_ACCOUNT_CLOSE_REQUEST_DATA_PARAMETERS);
+
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+                .resource(SavingsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME);
+
+        final JsonElement element = command.parsedJson();
+
+        final LocalDate activationDate = fromApiJsonHelper.extractLocalDateNamed(closedOnDateParamName, element);
+        baseDataValidator.reset().parameter(closedOnDateParamName).value(activationDate).notNull();
+
+        throwExceptionIfValidationWarningsExist(dataValidationErrors);
+    }
+
 
     private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
         if (!dataValidationErrors.isEmpty()) {
