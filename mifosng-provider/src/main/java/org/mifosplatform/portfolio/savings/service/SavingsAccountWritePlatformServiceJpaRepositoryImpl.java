@@ -400,11 +400,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         final AppUser user = this.context.authenticatedUser();
 
         this.savingsAccountTransactionDataValidator.validateClosing(command);
-
         final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsId);
-        final List<Long> existingTransactionIds = new ArrayList<Long>();
-        final List<Long> existingReversedTransactionIds = new ArrayList<Long>();
-
         final Map<String, Object> changes = account.close(user, command, DateUtils.getLocalDateOfTenant());
         if (!changes.isEmpty()) {
             this.savingAccountRepository.save(account);
@@ -416,8 +412,6 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
             }
 
         }
-        postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds);
-
         return new CommandProcessingResultBuilder() //
                 .withEntityId(savingsId) //
                 .withOfficeId(account.officeId()) //
