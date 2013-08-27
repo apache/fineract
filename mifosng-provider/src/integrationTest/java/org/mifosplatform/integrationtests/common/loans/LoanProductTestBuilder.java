@@ -197,6 +197,7 @@ public class LoanProductTestBuilder {
                 String ID = accountList[i].getAccountID().toString();
                 map.put("fundSourceAccountId",ID);
                 map.put("loanPortfolioAccountId",ID);
+                map.put("transfersInSuspenseAccountId",ID);
             }
             if(accountList[i].getAccountType().equals(Account.AccountType.INCOME)){
                 String ID = accountList[i].getAccountID().toString();
@@ -220,6 +221,7 @@ public class LoanProductTestBuilder {
                 String ID = accountList[i].getAccountID().toString();
                 map.put("fundSourceAccountId",ID);
                 map.put("loanPortfolioAccountId",ID);
+                map.put("transfersInSuspenseAccountId",ID);
                 map.put("receivableInterestAccountId",ID);
                 map.put("receivableFeeAccountId",ID);
                 map.put("receivablePenaltyAccountId",ID);
