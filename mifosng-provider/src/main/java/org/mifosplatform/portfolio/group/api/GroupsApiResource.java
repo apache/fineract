@@ -5,6 +5,7 @@
  */
 package org.mifosplatform.portfolio.group.api;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -51,7 +52,6 @@ import org.mifosplatform.portfolio.collectionsheet.data.JLGCollectionSheetData;
 import org.mifosplatform.portfolio.collectionsheet.service.CollectionSheetReadPlatformService;
 import org.mifosplatform.portfolio.group.data.GroupGeneralData;
 import org.mifosplatform.portfolio.group.data.GroupRoleData;
-import org.mifosplatform.portfolio.group.data.GroupTransferData;
 import org.mifosplatform.portfolio.group.service.CenterReadPlatformService;
 import org.mifosplatform.portfolio.group.service.GroupReadPlatformService;
 import org.mifosplatform.portfolio.group.service.GroupRolesReadPlatformService;
@@ -143,15 +143,26 @@ public class GroupsApiResource {
             @QueryParam("officeId") final Long officeId, @QueryParam("externalId") final String externalId,
             @QueryParam("name") final String name, @QueryParam("underHierarchy") final String hierarchy,
             @QueryParam("offset") final Integer offset, @QueryParam("limit") final Integer limit,
-            @QueryParam("orderBy") final String orderBy, @QueryParam("sortOrder") final String sortOrder) {
+            @QueryParam("orderBy") final String orderBy, @QueryParam("sortOrder") final String sortOrder,
+            @QueryParam("templateType") final String templateType, @QueryParam("groupId") final Long groupId) {
 
         this.context.authenticatedUser().validateHasReadPermission(GroupingTypesApiConstants.GROUP_RESOURCE_NAME);
+        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+
+        if (templateType != null && templateType.equalsIgnoreCase("clientstransfertemplate")) {
+            final Collection<GroupGeneralData> groups;
+            if (officeId != null && groupId != null) {
+                groups = this.groupReadPlatformService.retrieveGroupsForLookup(officeId, groupId);
+            } else {
+                groups = new ArrayList<GroupGeneralData>();
+            }
+            return this.groupGeneralApiJsonSerializer.serialize(settings, groups, GroupingTypesApiConstants.GROUP_RESPONSE_DATA_PARAMETERS);
+        }
 
         final SearchParameters searchParameters = SearchParameters.forGroups(sqlSearch, officeId, externalId, name, hierarchy, offset,
                 limit, orderBy, sortOrder);
         final Page<GroupGeneralData> groups = this.groupReadPlatformService.retrieveAll(searchParameters);
 
-        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serialize(settings, groups, GroupingTypesApiConstants.GROUP_RESPONSE_DATA_PARAMETERS);
     }
 
@@ -161,22 +172,13 @@ public class GroupsApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveOne(@Context final UriInfo uriInfo, @PathParam("groupId") final Long groupId,
             @DefaultValue("false") @QueryParam("staffInSelectedOfficeOnly") final boolean staffInSelectedOfficeOnly,
-            @QueryParam("roleId") final Long roleId, @QueryParam("templateType") final String templateType) {
+            @QueryParam("roleId") final Long roleId) {
 
         this.context.authenticatedUser().validateHasReadPermission(GroupingTypesApiConstants.GROUP_RESOURCE_NAME);
         final Set<String> associationParameters = ApiParameterHelper.extractAssociationsForResponseIfProvided(uriInfo.getQueryParameters());
 
         GroupGeneralData group = this.groupReadPlatformService.retrieveOne(groupId);
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-
-        if (templateType != null && templateType.equalsIgnoreCase("clientstransfertemplate")) {
-            final GroupTransferData groupTransferData = this.groupReadPlatformService.retrieveClientTransferTemplate(group.officeId(),
-                    groupId, staffInSelectedOfficeOnly);
-            final Set<String> GROUP_TRANSFERS_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("groupId", "clientOptions",
-                    "groupOptions", "staffOptions", "transferActiveLoans", "inheritDestinationGroupLoanOfficer"));
-
-            return this.toApiJsonSerializer.serialize(settings, groupTransferData, GROUP_TRANSFERS_DATA_PARAMETERS);
-        }
 
         // associations
         Collection<ClientData> membersOfGroup = null;
