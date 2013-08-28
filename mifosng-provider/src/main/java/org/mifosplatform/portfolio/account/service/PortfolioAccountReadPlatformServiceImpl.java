@@ -66,7 +66,7 @@ public class PortfolioAccountReadPlatformServiceImpl implements PortfolioAccount
                 case SAVINGS:
                     sql = "select " + this.savingsAccountMapper.schema() + " where sa.id = ?";
                     if (currencyCode != null) {
-                        sql += " and la.currency_code = ?";
+                        sql += " and sa.currency_code = ?";
                         sqlParams = new Object[] {accountId, currencyCode};
                     }
 
