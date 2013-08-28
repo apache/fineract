@@ -6,8 +6,10 @@
 package org.mifosplatform.portfolio.collectionsheet.data;
 
 import java.util.Collection;
+import java.util.List;
 
 import org.joda.time.LocalDate;
+import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.portfolio.loanproduct.data.LoanProductData;
 
 /**
@@ -17,19 +19,23 @@ public class JLGCollectionSheetData {
 
     private final LocalDate dueDate;
     private final Collection<LoanProductData> loanProducts;
-    private final Collection<JLGClientsData> groups;
+    private final Collection<JLGGroupData> groups;
+    @SuppressWarnings("unused")
+    private final List<EnumOptionData> attendanceTypeOptions; 
 
-    public JLGCollectionSheetData(final LocalDate date, final Collection<LoanProductData> loanProducts, final Collection<JLGClientsData> groups) {
+    public JLGCollectionSheetData(final LocalDate date, final Collection<LoanProductData> loanProducts,
+            final Collection<JLGGroupData> groups, final List<EnumOptionData> attendanceTypeOptions) {
         this.dueDate = date;
         this.loanProducts = loanProducts;
         this.groups = groups;
+        this.attendanceTypeOptions = attendanceTypeOptions;
     }
 
     public LocalDate getDate() {
         return this.dueDate;
     }
 
-    public Collection<JLGClientsData> getGroups() {
+    public Collection<JLGGroupData> getGroups() {
         return this.groups;
     }
 

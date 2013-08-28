@@ -67,16 +67,15 @@ public class Meeting extends AbstractPersistable<Long> {
     }
 
     public static Meeting createNew(final CalendarInstance calendarInstance, final Date meetingDate) {
-        
-        if(!isValidMeetingDate(calendarInstance, meetingDate)){
-            throw new NotValidRecurringDateException("meeting", "The date '" + meetingDate + "' is not a valid meeting date.", meetingDate);
-        }
+
+        if (!isValidMeetingDate(calendarInstance, meetingDate)) { throw new NotValidRecurringDateException("meeting", "The date '"
+                + meetingDate + "' is not a valid meeting date.", meetingDate); }
         return new Meeting(calendarInstance, meetingDate);
     }
 
     public void associateClientsAttendance(final Collection<ClientAttendance> clientsAttendance) {
-        //do not allow to capture attendance in advance.
-        if(isMeetingDateAfter(DateUtils.getLocalDateOfTenant())){
+        // do not allow to capture attendance in advance.
+        if (isMeetingDateAfter(DateUtils.getLocalDateOfTenant())) {
             final String errorMessage = "Attendance cannot be in the future.";
             throw new MeetingDateException("cannot.be.a.future.date", errorMessage, getMeetingDateLocalDate());
         }
@@ -95,11 +94,10 @@ public class Meeting extends AbstractPersistable<Long> {
             actualChanges.put("dateFormat", dateFormatAsInput);
             actualChanges.put("locale", localeAsInput);
             this.meetingDate = newValue.toDate();
-            
-            if(!isValidMeetingDate(this.calendarInstance, this.meetingDate)){
-                throw new NotValidRecurringDateException("meeting", "Not a valid meeting date", meetingDate);
-            }
-            
+
+            if (!isValidMeetingDate(this.calendarInstance, this.meetingDate)) { throw new NotValidRecurringDateException("meeting",
+                    "Not a valid meeting date", meetingDate); }
+
         }
 
         return actualChanges;
@@ -108,12 +106,15 @@ public class Meeting extends AbstractPersistable<Long> {
     public Map<String, Object> updateAttendance(final Collection<ClientAttendance> clientsAttendance) {
         final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(1);
         final Map<String, Object> clientAttendanceChanges = new LinkedHashMap<String, Object>(clientsAttendance.size());
-        
+
         updateAttendanceLoop: for (ClientAttendance clientAttendance : clientsAttendance) {
+            if (this.clientsAttendance == null) {
+                this.clientsAttendance = new HashSet<ClientAttendance>();
+            }
             for (ClientAttendance clientAttendanceOriginal : this.clientsAttendance) {
                 if (clientAttendanceOriginal.clientId().equals(clientAttendance.clientId())) {
-                    final Integer newValue = clientAttendance.getAttendanceTypeId(); 
-                    if(!newValue.equals(clientAttendanceOriginal.getAttendanceTypeId())){
+                    final Integer newValue = clientAttendance.getAttendanceTypeId();
+                    if (!newValue.equals(clientAttendanceOriginal.getAttendanceTypeId())) {
                         clientAttendanceOriginal.updateAttendanceTypeId(newValue);
                         final Map<String, Object> clientAttendanceChange = new LinkedHashMap<String, Object>(2);
                         clientAttendanceChange.put(clientIdParamName, clientAttendanceOriginal.clientId());
@@ -123,32 +124,32 @@ public class Meeting extends AbstractPersistable<Long> {
                     continue updateAttendanceLoop;
                 }
             }
-            
+
             final Map<String, Object> clientAttendanceChange = new LinkedHashMap<String, Object>();
             clientAttendanceChange.put(clientIdParamName, clientAttendance.clientId());
             clientAttendanceChange.put(attendanceTypeParamName, clientAttendance.getAttendanceTypeId());
             clientAttendanceChanges.put(clientAttendance.clientId().toString(), clientAttendanceChange);
-            //New attendance record
+            // New attendance record
             this.clientsAttendance.add(clientAttendance);
         }
-        
+
         actualChanges.put(clientsAttendanceParamName, clientAttendanceChanges);
-        
+
         return actualChanges;
     }
 
     public Long entityId() {
         return calendarInstance.getEntityId();
     }
-    
-    public boolean isCenterEntity(){
+
+    public boolean isCenterEntity() {
         return CalendarEntityType.isCenter(calendarInstance.getEntityTypeId());
     }
 
-    public boolean isGroupEntity(){
+    public boolean isGroupEntity() {
         return CalendarEntityType.isGroup(calendarInstance.getEntityTypeId());
     }
-    
+
     public LocalDate getMeetingDateLocalDate() {
         LocalDate meetingDateLocalDate = null;
         if (this.meetingDate != null) {
@@ -156,8 +157,8 @@ public class Meeting extends AbstractPersistable<Long> {
         }
         return meetingDateLocalDate;
     }
-    
-    public Date getMeetingDate(){
+
+    public Date getMeetingDate() {
         return this.meetingDate;
     }
 
@@ -165,24 +166,23 @@ public class Meeting extends AbstractPersistable<Long> {
         return (this.meetingDate != null && newStartDate != null && getMeetingDateLocalDate().isBefore(newStartDate)) ? true : false;
     }
 
-    private static boolean isValidMeetingDate(final CalendarInstance calendarInstance, final Date meetingDate ){
+    private static boolean isValidMeetingDate(final CalendarInstance calendarInstance, final Date meetingDate) {
         final Calendar calendar = calendarInstance.getCalendar();
-        LocalDate meetingDateLocalDate = null; 
+        LocalDate meetingDateLocalDate = null;
         if (meetingDate != null) {
             meetingDateLocalDate = LocalDate.fromDateFields(meetingDate);
-        }        
-        if(meetingDateLocalDate == null || !CalendarUtils.isValidRedurringDate(calendar.getRecurrence(), calendar.getStartDateLocalDate(), meetingDateLocalDate)){
-           return false; 
         }
+        if (meetingDateLocalDate == null
+                || !CalendarUtils.isValidRedurringDate(calendar.getRecurrence(), calendar.getStartDateLocalDate(), meetingDateLocalDate)) { return false; }
         return true;
     }
-    
-    private boolean isMeetingDateAfter(final LocalDate date){
+
+    private boolean isMeetingDateAfter(final LocalDate date) {
         return getMeetingDateLocalDate().isAfter(date);
     }
-    
+
     public Collection<ClientAttendance> getClientsAttendance() {
         return this.clientsAttendance;
     }
-    
+
 }

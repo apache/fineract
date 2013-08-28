@@ -81,9 +81,11 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
             final String createdByUserName = rs.getString("creatingUserName");
             final Long lastUpdatedByUserId = rs.getLong("updatingUserId");
             final String lastUpdatedByUserName = rs.getString("updatingUserName");
+            
+            final LocalDate recentEligibleMeetingDate = null;
 
             return new CalendarData(id, entityId, entityType, title, description, location, startDate, endDate, duration, type, repeating,
-                    recurrence, remindBy, firstReminder, secondReminder, humanReadable, createdDate, lastUpdatedDate, createdByUserId,
+                    recurrence, remindBy, firstReminder, secondReminder, humanReadable, recentEligibleMeetingDate, createdDate, lastUpdatedDate, createdByUserId,
                     createdByUserName, lastUpdatedByUserId, lastUpdatedByUserName);
         }
     }
@@ -207,7 +209,8 @@ public class CalendarReadPlatformServiceImpl implements CalendarReadPlatformServ
         
         final Collection<LocalDate> recurringDates = CalendarUtils.getRecurringDates(rrule, seedDate, startDate, endDate, -1);
         final Collection<LocalDate> nextTenRecurringDates = CalendarUtils.getRecurringDates(rrule, seedDate, endDate);
-        return new CalendarData(calendarData, recurringDates, nextTenRecurringDates);
+        final LocalDate recentEligibleMeetingDate = CalendarUtils.getRecentEligibleMeetingDate(rrule, seedDate);
+        return new CalendarData(calendarData, recurringDates, nextTenRecurringDates, recentEligibleMeetingDate);
 
     }
 

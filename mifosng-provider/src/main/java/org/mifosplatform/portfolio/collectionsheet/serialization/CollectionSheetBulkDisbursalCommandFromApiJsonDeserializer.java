@@ -5,22 +5,12 @@
  */
 package org.mifosplatform.portfolio.collectionsheet.serialization;
 
-import java.lang.reflect.Type;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
-import org.mifosplatform.infrastructure.core.data.ApiParameterError;
-import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
 import org.mifosplatform.infrastructure.core.exception.InvalidJsonException;
-import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.mifosplatform.infrastructure.core.serialization.AbstractFromApiJsonDeserializer;
 import org.mifosplatform.infrastructure.core.serialization.FromApiJsonDeserializer;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
@@ -32,7 +22,6 @@ import org.springframework.stereotype.Component;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.reflect.TypeToken;
 
 /**
  * Implementation of {@link FromApiJsonDeserializer} for
@@ -52,21 +41,12 @@ public final class CollectionSheetBulkDisbursalCommandFromApiJsonDeserializer ex
     public CollectionSheetBulkDisbursalCommand commandFromApiJson(final String json) {
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
-        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        //TODO: AA need to refactor transactionDate and actualDisbursementDate
-        //actualDisbursementDate used in Loan.disburse()
-        final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("transactionDate", "actualDisbursementDate", "bulkRepaymentTransactions", "bulkDisbursementTransactions", "note",
-                "locale", "dateFormat"));
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, supportedParameters);
-
         final JsonElement element = this.fromApiJsonHelper.parse(json);
-
-        final LocalDate transactionDate = fromApiJsonHelper.extractLocalDateNamed("transactionDate", element);
-
-        final String note = fromApiJsonHelper.extractStringNamed("note", element);
-        
         final JsonObject topLevelJsonElement = element.getAsJsonObject();
+
         final Locale locale = this.fromApiJsonHelper.extractLocaleParameter(topLevelJsonElement);
+        final LocalDate transactionDate = fromApiJsonHelper.extractLocalDateNamed("transactionDate", element);
+        final String note = fromApiJsonHelper.extractStringNamed("note", element);
 
         SingleDisbursalCommand[] loanDisbursementTransactions = null;
 
@@ -85,34 +65,5 @@ public final class CollectionSheetBulkDisbursalCommandFromApiJsonDeserializer ex
             }
         }
         return new CollectionSheetBulkDisbursalCommand(note, transactionDate, loanDisbursementTransactions);
-    }
-    
-    public void validateBulkDisbursalTransaction(final CollectionSheetBulkDisbursalCommand bulkDisburseCommand) {
-
-        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
-        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("loan.bulk.disbursement.transaction");
-
-        baseDataValidator.reset().parameter("transactionDate").value(bulkDisburseCommand.getTransactionDate()).notNull();
-        
-        if (StringUtils.isNotBlank(bulkDisburseCommand.getNote())) {
-            baseDataValidator.reset().parameter("note").value(bulkDisburseCommand.getNote()).notExceedingLengthOf(1000);
-        }
-        final SingleDisbursalCommand[] loanDisbursements = bulkDisburseCommand.getDisburseTransactions();
-        if (loanDisbursements != null) {
-            for (int i = 0; i < loanDisbursements.length; i++) {
-                SingleDisbursalCommand singleLoanDisburseCommand = loanDisbursements[i];
-
-                baseDataValidator.reset().parameter("bulktransaction" + "[" + i + "].loan.id").value(singleLoanDisburseCommand.getLoanId())
-                        .notNull().integerGreaterThanZero();
-                baseDataValidator.reset().parameter("bulktransaction" + "[" + i + "].disbursement.amount")
-                        .value(singleLoanDisburseCommand.getTransactionAmount()).notNull().zeroOrPositiveAmount();
-            }
-        }
-        throwExceptionIfValidationWarningsExist(dataValidationErrors);
-    }
-
-    private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
-        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
-                "Validation errors exist.", dataValidationErrors); }
     }
 }

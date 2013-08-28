@@ -11,6 +11,8 @@ import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 public interface MeetingWritePlatformService {
 
     CommandProcessingResult createMeeting(JsonCommand command);
+    
+    void updateCollectionSheetAttendance(JsonCommand command);
 
     CommandProcessingResult updateMeeting(JsonCommand command);
 

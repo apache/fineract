@@ -168,7 +168,16 @@ public class GroupGeneralData {
     public String getHierarchy() {
         return this.hierarchy;
     }
+    
+    public boolean isChildGroup(){
+        return this.centerId == null ? false : true;
+    }
 
+    public Long getParentId(){
+        return this.centerId;
+    }
+    
+    
     public static GroupGeneralData updateSelectedRole(final GroupGeneralData grouping, final GroupRoleData selectedRole) {
         return new GroupGeneralData(grouping.id, grouping.name, grouping.externalId, grouping.status, grouping.activationDate,
                 grouping.officeId, grouping.officeName, grouping.centerId, grouping.centerName, grouping.staffId, grouping.staffName,

@@ -14,9 +14,11 @@ import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.mifosplatform.portfolio.collectionsheet.command.CollectionSheetBulkDisbursalCommand;
 import org.mifosplatform.portfolio.collectionsheet.command.CollectionSheetBulkRepaymentCommand;
+import org.mifosplatform.portfolio.collectionsheet.data.CollectionSheetTransactionDataValidator;
 import org.mifosplatform.portfolio.collectionsheet.serialization.CollectionSheetBulkDisbursalCommandFromApiJsonDeserializer;
 import org.mifosplatform.portfolio.collectionsheet.serialization.CollectionSheetBulkRepaymentCommandFromApiJsonDeserializer;
 import org.mifosplatform.portfolio.loanaccount.service.LoanWritePlatformService;
+import org.mifosplatform.portfolio.meeting.service.MeetingWritePlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -25,20 +27,26 @@ public class CollectionSheetWritePlatformServiceJpaRepositoryImpl implements Col
 
     private final LoanWritePlatformService loanWritePlatformService;
     private final CollectionSheetBulkRepaymentCommandFromApiJsonDeserializer bulkRepaymentCommandFromApiJsonDeserializer;
-    private final CollectionSheetBulkDisbursalCommandFromApiJsonDeserializer bulkDisbursalCommandFromApiJsonDeserializer; 
+    private final CollectionSheetBulkDisbursalCommandFromApiJsonDeserializer bulkDisbursalCommandFromApiJsonDeserializer;
+    private final CollectionSheetTransactionDataValidator transactionDataValidator;
+    private final MeetingWritePlatformService meetingWritePlatformService;
 
     @Autowired
     public CollectionSheetWritePlatformServiceJpaRepositoryImpl(LoanWritePlatformService loanWritePlatformService,
             CollectionSheetBulkRepaymentCommandFromApiJsonDeserializer bulkRepaymentCommandFromApiJsonDeserializer,
-            CollectionSheetBulkDisbursalCommandFromApiJsonDeserializer bulkDisbursalCommandFromApiJsonDeserializer) {
+            CollectionSheetBulkDisbursalCommandFromApiJsonDeserializer bulkDisbursalCommandFromApiJsonDeserializer,
+            final CollectionSheetTransactionDataValidator transactionDataValidator, final MeetingWritePlatformService meetingWritePlatformService) {
         this.loanWritePlatformService = loanWritePlatformService;
         this.bulkRepaymentCommandFromApiJsonDeserializer = bulkRepaymentCommandFromApiJsonDeserializer;
         this.bulkDisbursalCommandFromApiJsonDeserializer = bulkDisbursalCommandFromApiJsonDeserializer;
+        this.transactionDataValidator = transactionDataValidator;
+        this.meetingWritePlatformService = meetingWritePlatformService;
     }
-
 
     @Override
     public CommandProcessingResult updateCollectionSheet(JsonCommand command) {
+        
+        this.transactionDataValidator.validateTransaction(command);
         
         Map<String, Object> changes = new HashMap<String, Object>();
         changes.put("locale", command.locale());
@@ -52,6 +60,8 @@ public class CollectionSheetWritePlatformServiceJpaRepositoryImpl implements Col
         changes.putAll(updateBulkReapayments(command));
 
         changes.putAll(updateBulkDisbursals(command));
+        
+        this.meetingWritePlatformService.updateCollectionSheetAttendance(command);
 
         return new CommandProcessingResultBuilder() //
                 .withCommandId(command.commandId()) //
@@ -64,7 +74,6 @@ public class CollectionSheetWritePlatformServiceJpaRepositoryImpl implements Col
     private Map<String, Object> updateBulkReapayments(JsonCommand command) {
         Map<String, Object> changes = new HashMap<String, Object>();
         final CollectionSheetBulkRepaymentCommand bulkRepaymentCommand = this.bulkRepaymentCommandFromApiJsonDeserializer.commandFromApiJson(command.json());
-        this.bulkRepaymentCommandFromApiJsonDeserializer.validateBulkRepaymentTransaction(bulkRepaymentCommand);
         changes.putAll(this.loanWritePlatformService.makeLoanBulkRepayment(bulkRepaymentCommand));
         return changes;
     }
@@ -72,7 +81,6 @@ public class CollectionSheetWritePlatformServiceJpaRepositoryImpl implements Col
     private Map<String, Object> updateBulkDisbursals(JsonCommand command) {
         Map<String, Object> changes = new HashMap<String, Object>();
         final CollectionSheetBulkDisbursalCommand bulkDisbursalCommand = this.bulkDisbursalCommandFromApiJsonDeserializer.commandFromApiJson(command.json());
-        this.bulkDisbursalCommandFromApiJsonDeserializer.validateBulkDisbursalTransaction(bulkDisbursalCommand);
         changes.putAll(this.loanWritePlatformService.bulkLoanDisbursal(command, bulkDisbursalCommand));
         return changes;
     }

@@ -5,6 +5,9 @@
  */
 package org.mifosplatform.portfolio.collectionsheet.service;
 
+import static org.mifosplatform.portfolio.collectionsheet.CollectionSheetConstants.calendarIdParamName;
+import static org.mifosplatform.portfolio.collectionsheet.CollectionSheetConstants.transactionDateParamName;
+
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -18,14 +21,20 @@ import java.util.Set;
 
 import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.api.JsonQuery;
+import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
 import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
-import org.mifosplatform.portfolio.collectionsheet.data.ClientLoansData;
-import org.mifosplatform.portfolio.collectionsheet.data.JLGClientsData;
+import org.mifosplatform.portfolio.calendar.domain.Calendar;
+import org.mifosplatform.portfolio.calendar.domain.CalendarEntityType;
+import org.mifosplatform.portfolio.calendar.domain.CalendarRepositoryWrapper;
+import org.mifosplatform.portfolio.calendar.exception.NotValidRecurringDateException;
+import org.mifosplatform.portfolio.calendar.service.CalendarUtils;
+import org.mifosplatform.portfolio.collectionsheet.data.JLGClientData;
 import org.mifosplatform.portfolio.collectionsheet.data.JLGCollectionSheetData;
 import org.mifosplatform.portfolio.collectionsheet.data.JLGCollectionSheetFlatData;
+import org.mifosplatform.portfolio.collectionsheet.data.JLGGroupData;
 import org.mifosplatform.portfolio.collectionsheet.data.LoanDueData;
 import org.mifosplatform.portfolio.collectionsheet.serialization.CollectionSheetGenerateCommandFromApiJsonDeserializer;
 import org.mifosplatform.portfolio.group.data.CenterData;
@@ -33,6 +42,8 @@ import org.mifosplatform.portfolio.group.data.GroupGeneralData;
 import org.mifosplatform.portfolio.group.service.CenterReadPlatformService;
 import org.mifosplatform.portfolio.group.service.GroupReadPlatformService;
 import org.mifosplatform.portfolio.loanproduct.data.LoanProductData;
+import org.mifosplatform.portfolio.meeting.attendance.service.AttendanceDropdownReadPlatformService;
+import org.mifosplatform.portfolio.meeting.attendance.service.AttendanceEnumerations;
 import org.mifosplatform.useradministration.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.RowMapper;
@@ -49,16 +60,22 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
     private final CenterReadPlatformService centerReadPlatformService;
     private final GroupReadPlatformService groupReadPlatformService;
     private final CollectionSheetGenerateCommandFromApiJsonDeserializer collectionSheetGenerateCommandFromApiJsonDeserializer;
+    private final CalendarRepositoryWrapper calendarRepositoryWrapper;
+    private final AttendanceDropdownReadPlatformService attendanceDropdownReadPlatformService;
 
     @Autowired
     public CollectionSheetReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
             final CenterReadPlatformService centerReadPlatformService, final GroupReadPlatformService groupReadPlatformService,
-            final CollectionSheetGenerateCommandFromApiJsonDeserializer collectionSheetGenerateCommandFromApiJsonDeserializer) {
+            final CollectionSheetGenerateCommandFromApiJsonDeserializer collectionSheetGenerateCommandFromApiJsonDeserializer,
+            final CalendarRepositoryWrapper calendarRepositoryWrapper,
+            final AttendanceDropdownReadPlatformService attendanceDropdownReadPlatformService) {
         this.context = context;
         this.centerReadPlatformService = centerReadPlatformService;
         this.namedParameterjdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
         this.collectionSheetGenerateCommandFromApiJsonDeserializer = collectionSheetGenerateCommandFromApiJsonDeserializer;
         this.groupReadPlatformService = groupReadPlatformService;
+        this.calendarRepositoryWrapper = calendarRepositoryWrapper;
+        this.attendanceDropdownReadPlatformService = attendanceDropdownReadPlatformService;
     }
 
     @Override
@@ -92,9 +109,9 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
         Long prevGroupId = null;
         Long prevClientId = null;
 
-        final List<JLGClientsData> jlgClientsDatas = new ArrayList<JLGClientsData>();
-        List<ClientLoansData> clientLoansDatas = new ArrayList<ClientLoansData>();
-        List<LoanDueData> loanDueDatas = new ArrayList<LoanDueData>();
+        final List<JLGGroupData> jlgGroupsData = new ArrayList<JLGGroupData>();
+        List<JLGClientData> clientsData = new ArrayList<JLGClientData>();
+        List<LoanDueData> loansDueData = new ArrayList<LoanDueData>();
 
         JLGCollectionSheetData jlgCollectionSheetData = null;
         JLGCollectionSheetFlatData prevCollectioSheetFlatData = null;
@@ -113,35 +130,35 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
                 if (firstTime || collectionSheetFlatData.getGroupId().equals(prevGroupId)) {
                     if (firstTime || collectionSheetFlatData.getClientId().equals(prevClientId)) {
                         if (collectionSheetFlatData.getLoanId() != null) {
-                            loanDueDatas.add(collectionSheetFlatData.getLoanDueData());
+                            loansDueData.add(collectionSheetFlatData.getLoanDueData());
                         }
                     } else {
-                        final ClientLoansData clientLoansData = prevCollectioSheetFlatData.getClientLoansData();
-                        clientLoansData.setLoans(loanDueDatas);
-                        clientLoansDatas.add(clientLoansData);
-                        loanDueDatas = new ArrayList<LoanDueData>();
+                        final JLGClientData clientData = prevCollectioSheetFlatData.getClientData();
+                        clientData.setLoans(loansDueData);
+                        clientsData.add(clientData);
+                        loansDueData = new ArrayList<LoanDueData>();
 
                         if (collectionSheetFlatData.getLoanId() != null) {
-                            loanDueDatas.add(collectionSheetFlatData.getLoanDueData());
+                            loansDueData.add(collectionSheetFlatData.getLoanDueData());
                         }
 
                     }
                 } else {
 
-                    final ClientLoansData clientLoansData = prevCollectioSheetFlatData.getClientLoansData();
-                    clientLoansData.setLoans(loanDueDatas);
-                    clientLoansDatas.add(clientLoansData);
+                    final JLGClientData clientData = prevCollectioSheetFlatData.getClientData();
+                    clientData.setLoans(loansDueData);
+                    clientsData.add(clientData);
 
-                    final JLGClientsData jlgClientsData = prevCollectioSheetFlatData.getJLGClientsData();
-                    jlgClientsData.setClients(clientLoansDatas);
+                    final JLGGroupData jlgGroupData = prevCollectioSheetFlatData.getJLGGroupData();
+                    jlgGroupData.setClients(clientsData);
 
-                    jlgClientsDatas.add(jlgClientsData);
+                    jlgGroupsData.add(jlgGroupData);
 
-                    loanDueDatas = new ArrayList<LoanDueData>();
-                    clientLoansDatas = new ArrayList<ClientLoansData>();
+                    loansDueData = new ArrayList<LoanDueData>();
+                    clientsData = new ArrayList<JLGClientData>();
 
                     if (collectionSheetFlatData.getLoanId() != null) {
-                        loanDueDatas.add(collectionSheetFlatData.getLoanDueData());
+                        loansDueData.add(collectionSheetFlatData.getLoanDueData());
                     }
                 }
 
@@ -155,16 +172,17 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
             // client/group or new client / previous group or new client / new
             // group
             if (corrCollectioSheetFlatData != null) {
-                final ClientLoansData lastClientLoansData = corrCollectioSheetFlatData.getClientLoansData();
-                lastClientLoansData.setLoans(loanDueDatas);
-                clientLoansDatas.add(lastClientLoansData);
+                final JLGClientData lastClientData = corrCollectioSheetFlatData.getClientData();
+                lastClientData.setLoans(loansDueData);
+                clientsData.add(lastClientData);
 
-                final JLGClientsData jlgClientsData = corrCollectioSheetFlatData.getJLGClientsData();
-                jlgClientsData.setClients(clientLoansDatas);
-                jlgClientsDatas.add(jlgClientsData);
+                final JLGGroupData jlgGroupData = corrCollectioSheetFlatData.getJLGGroupData();
+                jlgGroupData.setClients(clientsData);
+                jlgGroupsData.add(jlgGroupData);
             }
 
-            jlgCollectionSheetData = new JLGCollectionSheetData(dueDate, loanProducts, jlgClientsDatas);
+            jlgCollectionSheetData = new JLGCollectionSheetData(dueDate, loanProducts, jlgGroupsData,
+                    attendanceDropdownReadPlatformService.retrieveAttendanceTypeOptions());
         }
 
         return jlgCollectionSheetData;
@@ -206,7 +224,8 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
                     + "ln.principal_repaid_derived As principalPaid, "
                     + "sum(ifnull(if(ln.loan_status_id = 300, ls.interest_amount, 0.0), 0.0) - ifnull(if(ln.loan_status_id = 300, ls.interest_completed_derived, 0.0), 0.0)) As interestDue, "
                     + "ln.interest_repaid_derived As interestPaid, "
-                    + "sum(if(ln.loan_status_id = 300, lc.amount_outstanding_derived, 0.0)) as chargesDue "
+                    + "sum(if(ln.loan_status_id = 300, lc.amount_outstanding_derived, 0.0)) as chargesDue, "
+                    + "ca.attendance_type_enum as attendanceTypeId "
                     + "FROM m_group gp "
                     + "LEFT JOIN m_office of ON of.id = gp.office_id AND of.hierarchy like :officeHierarchy "
                     // + "LEFT JOIN m_office of ON of.id = gp.office_id "
@@ -218,7 +237,10 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
                     + "LEFT JOIN m_product_loan pl ON pl.id = ln.product_id "
                     + "LEFT JOIN m_currency rc on rc.`code` = ln.currency_code "
                     + "LEFT JOIN m_loan_repayment_schedule ls ON ls.loan_id = ln.id AND ls.completed_derived = 0 AND ls.duedate <= :dueDate "
-                    + "LEFT JOIN m_loan_charge lc ON lc.loan_id = ln.id AND lc.is_paid_derived = 0 AND ( lc.due_for_collection_as_of_date  <= :dueDate OR lc.charge_time_enum = 1) ";
+                    + "LEFT JOIN m_loan_charge lc ON lc.loan_id = ln.id AND lc.is_paid_derived = 0 AND ( lc.due_for_collection_as_of_date  <= :dueDate OR lc.charge_time_enum = 1) "
+                    + "left join m_calendar_instance ci on gp.parent_id = ci.entity_id and ci.entity_type_enum =:entityTypeId "
+                    + "left join m_meeting mt on ci.id = mt.calendar_instance_id and mt.meeting_date =:dueDate "
+                    + "left join m_client_attendance ca on ca.meeting_id=mt.id and ca.client_id=cl.id ";
 
             // + "WHERE gp.hierarchy like :hierarchy " +
             // "GROUP BY gp.id ,cl.id , ln.id " +
@@ -261,9 +283,12 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
             final BigDecimal interestPaid = rs.getBigDecimal("interestPaid");
             final BigDecimal chargesDue = rs.getBigDecimal("chargesDue");
 
+            final Integer attendanceTypeId = rs.getInt("attendanceTypeId");
+            final EnumOptionData attendanceType = AttendanceEnumerations.attendanceType(attendanceTypeId);
+
             return new JLGCollectionSheetFlatData(groupName, groupId, staffId, staffName, levelId, levelName, clientName, clientId, loanId,
                     accountId, accountStatusId, productShortName, productId, currencyData, disbursementAmount, principalDue, principalPaid,
-                    interestDue, interestPaid, chargesDue);
+                    interestDue, interestPaid, chargesDue, attendanceType);
         }
 
     }
@@ -273,28 +298,34 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
 
         this.collectionSheetGenerateCommandFromApiJsonDeserializer.validateForGenerateCollectionSheet(query.json());
 
+        final Long calendarId = query.longValueOfParameterNamed(calendarIdParamName);
+        final LocalDate transactionDate = query.localDateValueOfParameterNamed(transactionDateParamName);
+        final DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+        final String transactionDateStr = df.format(transactionDate.toDate());
+
+        final Calendar calendar = this.calendarRepositoryWrapper.findOneWithNotFoundDetection(calendarId);
+        if (!CalendarUtils.isValidRedurringDate(calendar.getRecurrence(), calendar.getStartDateLocalDate(), transactionDate)) { throw new NotValidRecurringDateException(
+                "collectionsheet", "The date '" + transactionDate + "' is not a valid meeting date.", transactionDate); }
+
         final AppUser currentUser = this.context.authenticatedUser();
         final String hierarchy = currentUser.getOffice().getHierarchy();
         final String officeHierarchy = hierarchy + "%";
 
         final GroupGeneralData group = this.groupReadPlatformService.retrieveOne(groupId);
 
-        final LocalDate dueDate = query.localDateValueOfParameterNamed("dueDate");
-        final DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-        final String dueDateStr = df.format(dueDate.toDate());
-
         final JLGCollectionSheetFaltDataMapper mapper = new JLGCollectionSheetFaltDataMapper();
 
-        String sql = mapper.collectionSheetSchema();
-        sql += "WHERE gp.id = :groupId GROUP BY gp.id ,cl.id , ln.id ORDER BY gp.id , cl.id , ln.id";
+        StringBuilder sql = new StringBuilder(mapper.collectionSheetSchema());
+        sql.append(" WHERE gp.id = :groupId GROUP BY gp.id ,cl.id , ln.id ORDER BY gp.id , cl.id , ln.id ");
 
-        final SqlParameterSource namedParameters = new MapSqlParameterSource().addValue("dueDate", dueDateStr)
-                .addValue("groupId", group.getId()).addValue("officeHierarchy", officeHierarchy);
+        final SqlParameterSource namedParameters = new MapSqlParameterSource().addValue("dueDate", transactionDateStr)
+                .addValue("groupId", group.getId()).addValue("officeHierarchy", officeHierarchy)
+                .addValue("entityTypeId", CalendarEntityType.CENTERS.getValue());
 
-        final Collection<JLGCollectionSheetFlatData> collectionSheetFlatDatas = this.namedParameterjdbcTemplate.query(sql, namedParameters,
-                mapper);
+        final Collection<JLGCollectionSheetFlatData> collectionSheetFlatDatas = this.namedParameterjdbcTemplate.query(sql.toString(),
+                namedParameters, mapper);
 
-        return buildJLGCollectionSheet(dueDate, collectionSheetFlatDatas);
+        return buildJLGCollectionSheet(transactionDate, collectionSheetFlatDatas);
     }
 
     @Override
@@ -308,9 +339,9 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
 
         final CenterData center = this.centerReadPlatformService.retrieveOne(centerId);
 
-        final LocalDate dueDate = query.localDateValueOfParameterNamed("dueDate");
+        final LocalDate transactionDate = query.localDateValueOfParameterNamed(transactionDateParamName);
         final DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-        final String dueDateStr = df.format(dueDate.toDate());
+        final String dueDateStr = df.format(transactionDate.toDate());
 
         final JLGCollectionSheetFaltDataMapper mapper = new JLGCollectionSheetFaltDataMapper();
 
@@ -318,12 +349,13 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
         sql += "WHERE gp.parent_id = :centerId GROUP BY gp.id ,cl.id , ln.id ORDER BY gp.id , cl.id , ln.id";
 
         final SqlParameterSource namedParameters = new MapSqlParameterSource().addValue("dueDate", dueDateStr)
-                .addValue("centerId", center.getId()).addValue("officeHierarchy", officeHierarchy);
+                .addValue("centerId", center.getId()).addValue("officeHierarchy", officeHierarchy)
+                .addValue("entityTypeId", CalendarEntityType.CENTERS.getValue());
 
         final Collection<JLGCollectionSheetFlatData> collectionSheetFlatDatas = this.namedParameterjdbcTemplate.query(sql, namedParameters,
                 mapper);
 
-        return buildJLGCollectionSheet(dueDate, collectionSheetFlatDatas);
+        return buildJLGCollectionSheet(transactionDate, collectionSheetFlatDatas);
     }
 
 }
