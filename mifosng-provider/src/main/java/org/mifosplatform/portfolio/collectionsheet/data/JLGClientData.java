@@ -17,6 +17,7 @@ public class JLGClientData {
     private final Long clientId;
     private final String clientName;
     private Collection<LoanDueData> loans;
+    @SuppressWarnings("unused")
     private final EnumOptionData attendanceType;
 
     public JLGClientData(final Long clientId, final String clientName, final Collection<LoanDueData> loans, final EnumOptionData attendanceType) {
@@ -48,5 +49,4 @@ public class JLGClientData {
     public void setLoans(final Collection<LoanDueData> loans) {
         this.loans = loans;
     }
-
 }
