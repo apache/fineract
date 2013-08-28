@@ -106,63 +106,48 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
             final Date transactionDate = command.DateValueOfParameterNamed(JournalEntryJsonInputParams.TRANSACTION_DATE.getValue());
             final String transactionId = generateTransactionId();
             final String referenceNumber = command.stringValueOfParameterNamed(JournalEntryJsonInputParams.REFERENCE_NUMBER.getValue());
-            final boolean manualEntry = true;
 
             if (accountRuleId != null) {
-                final BigDecimal amount = command.bigDecimalValueOfParameterNamed(JournalEntryJsonInputParams.AMOUNT.getValue());
-
-                String description = null;
-                if (StringUtils.isNotBlank(journalEntryCommand.getComments())) {
-                    description = journalEntryCommand.getComments();
-                }
 
                 final AccountingRule accountingRule = this.accountingRuleRepository.findOne(accountRuleId);
                 if (accountingRule == null) { throw new AccountingRuleNotFoundException(accountRuleId); }
 
                 if (accountingRule.getAccountToCredit() == null) {
-                    if (journalEntryCommand.getCredits() == null) { throw new RuntimeException(
-                            "You have to pass atleast one value for credits"); }
+                    if (journalEntryCommand.getCredits() == null) { throw new JournalEntryInvalidException(
+                            GL_JOURNAL_ENTRY_INVALID_REASON.NO_DEBITS_OR_CREDITS, null, null, null); }
                     if (journalEntryCommand.getDebits() != null) {
                         checkDebitOrCreditAccountsAreValid(accountingRule, journalEntryCommand.getCredits(),
                                 journalEntryCommand.getDebits());
                         checkDebitAndCreditAmounts(journalEntryCommand.getCredits(), journalEntryCommand.getDebits());
-                    } else {
-                        checkDebitAndCreditAmounts(journalEntryCommand.getCredits(), amount);
                     }
 
                     saveAllDebitOrCreditEntries(journalEntryCommand, office, transactionDate, journalEntryCommand.getCredits(),
                             transactionId, JournalEntryType.CREDIT, referenceNumber);
                 } else {
-                    if (journalEntryCommand.getCredits() != null) { throw new RuntimeException(
-                            "You can not pass credits for this rule please verify your rule"); }
                     final GLAccount creditAccountHead = accountingRule.getAccountToCredit();
                     validateGLAccountForTransaction(creditAccountHead);
-                    final JournalEntry creditEntry = JournalEntry.createNew(office, creditAccountHead, transactionId, manualEntry,
-                            transactionDate, JournalEntryType.CREDIT, amount, description, null, null, referenceNumber);
-                    this.glJournalEntryRepository.saveAndFlush(creditEntry);
+                    validateDebitOrCreditArrayForExistingGLAccount(creditAccountHead,journalEntryCommand.getCredits());
+                    saveAllDebitOrCreditEntries(journalEntryCommand, office, transactionDate, journalEntryCommand.getCredits(),
+                            transactionId, JournalEntryType.CREDIT, referenceNumber);
                 }
 
                 if (accountingRule.getAccountToDebit() == null) {
-                    if (journalEntryCommand.getDebits() == null) { throw new RuntimeException(
-                            "You have to pass atleast one parameter for debits"); }
+                    if (journalEntryCommand.getDebits() == null) { throw new JournalEntryInvalidException(
+                            GL_JOURNAL_ENTRY_INVALID_REASON.NO_DEBITS_OR_CREDITS, null, null, null); }
                     if (journalEntryCommand.getCredits() != null) {
                         checkDebitOrCreditAccountsAreValid(accountingRule, journalEntryCommand.getCredits(),
                                 journalEntryCommand.getDebits());
                         checkDebitAndCreditAmounts(journalEntryCommand.getCredits(), journalEntryCommand.getDebits());
-                    } else {
-                        checkDebitAndCreditAmounts(journalEntryCommand.getDebits(), amount);
                     }
 
                     saveAllDebitOrCreditEntries(journalEntryCommand, office, transactionDate, journalEntryCommand.getDebits(),
                             transactionId, JournalEntryType.DEBIT, referenceNumber);
                 } else {
-                    if (journalEntryCommand.getDebits() != null) { throw new RuntimeException(
-                            "You can not pass debits for this rule please verify your rule"); }
                     final GLAccount debitAccountHead = accountingRule.getAccountToDebit();
                     validateGLAccountForTransaction(debitAccountHead);
-                    final JournalEntry debitEntry = JournalEntry.createNew(office, debitAccountHead, transactionId, manualEntry,
-                            transactionDate, JournalEntryType.DEBIT, amount, description, null, null, referenceNumber);
-                    this.glJournalEntryRepository.saveAndFlush(debitEntry);
+                    validateDebitOrCreditArrayForExistingGLAccount(debitAccountHead,journalEntryCommand.getDebits());
+                    saveAllDebitOrCreditEntries(journalEntryCommand, office, transactionDate, journalEntryCommand.getDebits(),
+                            transactionId, JournalEntryType.DEBIT, referenceNumber);
                 }
             } else {
 
@@ -179,6 +164,19 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
         } catch (final DataIntegrityViolationException dve) {
             handleJournalEntryDataIntegrityIssues(dve);
             return null;
+        }
+    }
+
+    private void validateDebitOrCreditArrayForExistingGLAccount(GLAccount glaccount, SingleDebitOrCreditEntryCommand[] creditOrDebits) {
+        /**
+         * If a glaccount is assigned for a rule the credits or debits array
+         * should have only one entry and it must be same as existing account
+         */
+        if (creditOrDebits.length != 1) { throw new JournalEntryInvalidException(
+                GL_JOURNAL_ENTRY_INVALID_REASON.INVALID_DEBIT_OR_CREDIT_ACCOUNTS, null, null, null); }
+        for (SingleDebitOrCreditEntryCommand creditOrDebit : creditOrDebits) {
+            if (!glaccount.getId().equals(creditOrDebit.getGlAccountId())) { throw new JournalEntryInvalidException(
+                    GL_JOURNAL_ENTRY_INVALID_REASON.INVALID_DEBIT_OR_CREDIT_ACCOUNTS, null, null, null); }
         }
     }
 
@@ -235,19 +233,6 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
             debitsSum = debitsSum.add(debitEntryCommand.getAmount());
         }
         if (creditsSum.compareTo(debitsSum) != 0) { throw new JournalEntryInvalidException(
-                GL_JOURNAL_ENTRY_INVALID_REASON.DEBIT_CREDIT_SUM_MISMATCH, null, null, null); }
-    }
-
-    private void checkDebitAndCreditAmounts(final SingleDebitOrCreditEntryCommand[] creditOrDebits, final BigDecimal amount) {
-        if (amount == null) { throw new JournalEntryInvalidException(GL_JOURNAL_ENTRY_INVALID_REASON.DEBIT_CREDIT_SUM_MISMATCH_WITH_AMOUNT,
-                null, null, null); }
-        BigDecimal creditOrDebitSum = BigDecimal.ZERO;
-        for (final SingleDebitOrCreditEntryCommand creditEntryCommand : creditOrDebits) {
-            if (creditEntryCommand.getAmount() == null || creditEntryCommand.getGlAccountId() == null) { throw new JournalEntryInvalidException(
-                    GL_JOURNAL_ENTRY_INVALID_REASON.DEBIT_CREDIT_ACCOUNT_OR_AMOUNT_EMPTY, null, null, null); }
-            creditOrDebitSum = creditOrDebitSum.add(creditEntryCommand.getAmount());
-        }
-        if (creditOrDebitSum.compareTo(amount) != 0) { throw new JournalEntryInvalidException(
                 GL_JOURNAL_ENTRY_INVALID_REASON.DEBIT_CREDIT_SUM_MISMATCH, null, null, null); }
     }
 
@@ -346,17 +331,16 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
             if (latestGLClosure.getClosingDate().after(transactionDate) || latestGLClosure.getClosingDate().equals(transactionDate)) { throw new JournalEntryInvalidException(
                     GL_JOURNAL_ENTRY_INVALID_REASON.ACCOUNTING_CLOSED, latestGLClosure.getClosingDate(), null, null); }
         }
-        if (command.getAccountingRuleId() == null) {
-            /*** check if credits and debits are valid **/
-            final SingleDebitOrCreditEntryCommand[] credits = command.getCredits();
-            final SingleDebitOrCreditEntryCommand[] debits = command.getDebits();
 
-            // atleast one debit or credit must be present
-            if ((credits == null || credits.length <= 0) || (debits == null || debits.length <= 0)) { throw new JournalEntryInvalidException(
-                    GL_JOURNAL_ENTRY_INVALID_REASON.NO_DEBITS_OR_CREDITS, null, null, null); }
+        /*** check if credits and debits are valid **/
+        final SingleDebitOrCreditEntryCommand[] credits = command.getCredits();
+        final SingleDebitOrCreditEntryCommand[] debits = command.getDebits();
 
-            checkDebitAndCreditAmounts(credits, debits);
-        }
+        // atleast one debit or credit must be present
+        if ((credits == null || credits.length <= 0) || (debits == null || debits.length <= 0)) { throw new JournalEntryInvalidException(
+                GL_JOURNAL_ENTRY_INVALID_REASON.NO_DEBITS_OR_CREDITS, null, null, null); }
+
+        checkDebitAndCreditAmounts(credits, debits);
     }
 
     private void saveAllDebitOrCreditEntries(final JournalEntryCommand command, final Office office, final Date transactionDate,
