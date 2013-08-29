@@ -288,7 +288,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             final Collection<CalendarData> calendarsData = null;
             final CalendarData collectionMeetingCalendar = null;
             final Collection<GroupRoleData> groupRoles = null;
-            groupAccount = GroupGeneralData.withAssocations(groupAccount, membersOfGroup, groupRoles, calendarsData, collectionMeetingCalendar);
+            groupAccount = GroupGeneralData.withAssocations(groupAccount, membersOfGroup, groupRoles, calendarsData,
+                    collectionMeetingCalendar);
         }
 
         final LocalDate expectedDisbursementDate = DateUtils.getLocalDateOfTenant();
@@ -323,7 +324,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         final LoanTransactionEnumData transactionType = LoanEnumerations.transactionType(LoanTransactionType.REPAYMENT);
         final Collection<CodeValueData> paymentOptions = codeValueReadPlatformService
                 .retrieveCodeValuesByCode(PaymentDetailConstants.paymentTypeCodeName);
-        return new LoanTransactionData(null, transactionType, null, currencyData, earliestUnpaidInstallmentDate,
+        return new LoanTransactionData(null, null, null, transactionType, null, currencyData, earliestUnpaidInstallmentDate,
                 possibleNextRepaymentAmount.getAmount(), null, null, null, null, paymentOptions, null);
     }
 
@@ -347,8 +348,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         final LoanTransactionEnumData transactionType = LoanEnumerations.transactionType(LoanTransactionType.WAIVE_INTEREST);
 
         final BigDecimal amount = waiveOfInterest.getAmount(currency).getAmount();
-        return new LoanTransactionData(null, transactionType, null, currencyData, waiveOfInterest.getTransactionDate(), amount, null, null,
-                null, null, null);
+        return new LoanTransactionData(null, null, null, transactionType, null, currencyData, waiveOfInterest.getTransactionDate(), amount,
+                null, null, null, null, null);
     }
 
     @Override
@@ -357,8 +358,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         context.authenticatedUser();
 
         final LoanTransactionEnumData transactionType = LoanEnumerations.transactionType(LoanTransactionType.WRITEOFF);
-        return new LoanTransactionData(null, transactionType, null, null, DateUtils.getLocalDateOfTenant(), null, null, null, null, null,
-                null);
+        return new LoanTransactionData(null, null, null, transactionType, null, null, DateUtils.getLocalDateOfTenant(), null, null, null,
+                null, null, null);
     }
 
     @Override
@@ -368,8 +369,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         final LoanTransactionEnumData transactionType = LoanEnumerations.transactionType(LoanTransactionType.DISBURSEMENT);
         final Collection<CodeValueData> paymentOptions = codeValueReadPlatformService
                 .retrieveCodeValuesByCode(PaymentDetailConstants.paymentTypeCodeName);
-        return new LoanTransactionData(null, transactionType, null, null, loan.getExpectedDisbursedOnLocalDate(), null, null, null, null,
-                null, paymentOptions, null);
+        return new LoanTransactionData(null, null, null, transactionType, null, null, loan.getExpectedDisbursedOnLocalDate(), null, null,
+                null, null, null, paymentOptions, null);
     }
 
     @Override
@@ -856,11 +857,12 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     + " pd.receipt_number as receiptNumber, pd.bank_number as bankNumber,pd.routing_code as routingCode, "
                     + " l.currency_code as currencyCode, l.currency_digits as currencyDigits, l.currency_multiplesof as inMultiplesOf, rc.`name` as currencyName, "
                     + " rc.display_symbol as currencyDisplaySymbol, rc.internationalized_name_code as currencyNameCode, "
-                    + " cv.code_value as paymentTypeName, tr.external_id as externalId "
+                    + " cv.code_value as paymentTypeName, tr.external_id as externalId, tr.office_id as officeId, office.name as officeName "
                     + " from m_loan l join m_loan_transaction tr on tr.loan_id = l.id"
                     + " join m_currency rc on rc.`code` = l.currency_code "
                     + " left JOIN m_payment_detail pd ON tr.payment_detail_id = pd.id"
-                    + " left join m_code_value cv on pd.payment_type_cv_id = cv.id";
+                    + " left join m_code_value cv on pd.payment_type_cv_id = cv.id"
+                    + " left join m_office office on office.id=tr.office_id";
         }
 
         @Override
@@ -876,6 +878,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     currencyDisplaySymbol, currencyNameCode);
 
             final Long id = rs.getLong("id");
+            final Long officeId = rs.getLong("officeId");
+            final String officeName = rs.getString("officeName");
             final int transactionTypeInt = JdbcSupport.getInteger(rs, "transactionType");
             final LoanTransactionEnumData transactionType = LoanEnumerations.transactionType(transactionTypeInt);
 
@@ -903,8 +907,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             final BigDecimal penaltyChargesPortion = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "penalties");
             final String externalId = rs.getString("externalId");
 
-            return new LoanTransactionData(id, transactionType, paymentDetailData, currencyData, date, totalAmount, principalPortion,
-                    interestPortion, feeChargesPortion, penaltyChargesPortion, externalId);
+            return new LoanTransactionData(id, officeId, officeName, transactionType, paymentDetailData, currencyData, date, totalAmount,
+                    principalPortion, interestPortion, feeChargesPortion, penaltyChargesPortion, externalId);
         }
     }
 
@@ -969,7 +973,8 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             final Collection<CalendarData> calendarsData = null;
             final CalendarData collectionMeetingCalendar = null;
             final Collection<GroupRoleData> groupRoles = null;
-            groupAccount = GroupGeneralData.withAssocations(groupAccount, membersOfGroup, groupRoles, calendarsData, collectionMeetingCalendar);
+            groupAccount = GroupGeneralData.withAssocations(groupAccount, membersOfGroup, groupRoles, calendarsData,
+                    collectionMeetingCalendar);
         }
 
         return LoanAccountData.groupDefaults(groupAccount, expectedDisbursementDate);
@@ -1006,5 +1011,5 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
         return allowedLoanOfficers;
     }
-    
+
 }

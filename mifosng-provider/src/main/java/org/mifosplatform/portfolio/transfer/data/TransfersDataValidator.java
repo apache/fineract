@@ -101,7 +101,7 @@ public final class TransfersDataValidator {
 
         if (this.fromApiJsonHelper.parameterExists(TransferApiConstants.newStaffIdParamName, element)) {
             final Long newStaffId = this.fromApiJsonHelper.extractLongNamed(TransferApiConstants.newStaffIdParamName, element);
-            baseDataValidator.reset().parameter(TransferApiConstants.newStaffIdParamName).value(newStaffId).notNull()
+            baseDataValidator.reset().parameter(TransferApiConstants.newStaffIdParamName).value(newStaffId).ignoreIfNull()
                     .integerGreaterThanZero();
         }
 
