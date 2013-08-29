@@ -135,4 +135,8 @@ public enum LoanStatus {
     public boolean isUnderTransfer() {
         return isTransferInProgress() || isTransferOnHold();
     }
+    
+    public boolean isOverpaid(){
+        return this.value.equals(LoanStatus.OVERPAID.getValue());
+    }
 }

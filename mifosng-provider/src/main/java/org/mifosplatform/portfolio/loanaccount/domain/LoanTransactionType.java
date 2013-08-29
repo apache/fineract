@@ -32,7 +32,9 @@ public enum LoanTransactionType {
     INITIATE_TRANSFER(12, "loanTransactionType.initiateTransfer"), //
     APPROVE_TRANSFER(13, "loanTransactionType.approveTransfer"), //
     WITHDRAW_TRANSFER(14, "loanTransactionType.withdrawTransfer"), //
-    REJECT_TRANSFER(15, "loanTransactionType.rejectTransfer");
+    REJECT_TRANSFER(15, "loanTransactionType.rejectTransfer"),
+    
+    REFUND(16,"loanTransactionType.refund");
 
     private final Integer value;
     private final String code;
@@ -100,6 +102,9 @@ public enum LoanTransactionType {
             break;
             case 15:
                 loanTransactionType = LoanTransactionType.REJECT_TRANSFER;
+            break;
+            case 16:
+                loanTransactionType = LoanTransactionType.REFUND;
             break;
             default:
                 loanTransactionType = LoanTransactionType.INVALID;

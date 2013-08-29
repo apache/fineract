@@ -13,6 +13,7 @@ import static org.mifosplatform.portfolio.account.AccountTransfersApiConstants.t
 import static org.mifosplatform.portfolio.account.AccountTransfersApiConstants.transferDateParamName;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Locale;
 
 import org.joda.time.LocalDate;
@@ -35,6 +36,7 @@ import org.mifosplatform.portfolio.savings.domain.SavingsAccount;
 import org.mifosplatform.portfolio.savings.domain.SavingsAccountAssembler;
 import org.mifosplatform.portfolio.savings.domain.SavingsAccountDomainService;
 import org.mifosplatform.portfolio.savings.domain.SavingsAccountTransaction;
+import org.mifosplatform.portfolio.savings.service.SavingsAccountWritePlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -49,12 +51,14 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
     private final SavingsAccountDomainService savingsAccountDomainService;
     private final LoanAssembler loanAccountAssembler;
     private final LoanAccountDomainService loanAccountDomainService;
+    private final SavingsAccountWritePlatformService savingsAccountWritePlatformService;
 
     @Autowired
     public AccountTransfersWritePlatformServiceImpl(final AccountTransfersDataValidator accountTransfersDataValidator,
             final AccountTransferAssembler accountTransferAssembler, final AccountTransferRepository accountTransferRepository,
             final SavingsAccountAssembler savingsAccountAssembler, final SavingsAccountDomainService savingsAccountDomainService,
-            final LoanAssembler loanAssembler, final LoanAccountDomainService loanAccountDomainService) {
+            final LoanAssembler loanAssembler, final LoanAccountDomainService loanAccountDomainService,
+            final SavingsAccountWritePlatformService savingsAccountWritePlatformService) {
         this.accountTransfersDataValidator = accountTransfersDataValidator;
         this.accountTransferAssembler = accountTransferAssembler;
         this.accountTransferRepository = accountTransferRepository;
@@ -62,6 +66,7 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
         this.savingsAccountDomainService = savingsAccountDomainService;
         this.loanAccountAssembler = loanAssembler;
         this.loanAccountDomainService = loanAccountDomainService;
+        this.savingsAccountWritePlatformService = savingsAccountWritePlatformService;
     }
 
     @Transactional
@@ -124,7 +129,27 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
             transferTransactionId = transferTransaction.getId();
 
         } else if (isLoanToSavingsAccountTransfer(fromAccountType, toAccountType)) {
-            // FIXME - kw - ADD overpaid loan to savings account transfer support.
+            // FIXME - kw - ADD overpaid loan to savings account transfer
+            // support.
+
+            //
+            final Long fromLoanAccountId = command.longValueOfParameterNamed(fromAccountIdParamName);
+            final Loan fromLoanAccount = this.loanAccountAssembler.assembleFrom(fromLoanAccountId);
+
+            final LoanTransaction loanRefundTransaction = this.loanAccountDomainService.makeRefund(fromLoanAccountId,
+                    new CommandProcessingResultBuilder(), transactionDate, transactionAmount, paymentDetail, null, null);
+
+            final Long toSavingsAccountId = command.longValueOfParameterNamed(toAccountIdParamName);
+            final SavingsAccount toSavingsAccount = this.savingsAccountAssembler.assembleFrom(toSavingsAccountId);
+
+            final SavingsAccountTransaction deposit = this.savingsAccountDomainService.handleDeposit(toSavingsAccount, fmt,
+                    transactionDate, transactionAmount, paymentDetail);
+
+            final AccountTransfer transferTransaction = this.accountTransferAssembler.assembleLoanToSavingsTransfer(command,
+                    fromLoanAccount, toSavingsAccount, deposit, loanRefundTransaction);
+            this.accountTransferRepository.saveAndFlush(transferTransaction);
+            transferTransactionId = transferTransaction.getId();
+
         } else {
 
         }
@@ -137,6 +162,25 @@ public class AccountTransfersWritePlatformServiceImpl implements AccountTransfer
         }
 
         return builder.build();
+    }
+
+    @Override
+    @Transactional
+    public void reverseTransfers(Long accountNumber, PortfolioAccountType accountTypeId) {
+        List<AccountTransfer> acccountTransfers = null;
+        if (accountTypeId.isLoanAccount()) {
+            acccountTransfers = this.accountTransferRepository.findByLoanId(accountNumber);
+        }
+        if (acccountTransfers != null && acccountTransfers.size() > 0) {
+            for (AccountTransfer accountTransfer : acccountTransfers) {
+                this.loanAccountDomainService.reverseTransfer(accountTransfer.getFromLoanTransaction());
+                this.savingsAccountWritePlatformService.undoTransaction(accountTransfer.getToSavingsAccount().getId(), accountTransfer
+                        .getToSavingsTransaction().getId());
+                accountTransfer.reverse();
+                this.accountTransferRepository.save(accountTransfer);
+            }
+        }
+
     }
 
     private boolean isLoanToSavingsAccountTransfer(final PortfolioAccountType fromAccountType, final PortfolioAccountType toAccountType) {

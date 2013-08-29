@@ -7,8 +7,11 @@ package org.mifosplatform.portfolio.account.service;
 
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
+import org.mifosplatform.portfolio.account.PortfolioAccountType;
 
 public interface AccountTransfersWritePlatformService {
 
     CommandProcessingResult create(JsonCommand command);
+
+    void reverseTransfers(Long accountNumber, PortfolioAccountType accountTypeId);
 }
