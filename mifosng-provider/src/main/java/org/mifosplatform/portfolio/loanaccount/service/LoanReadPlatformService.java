@@ -8,6 +8,7 @@ package org.mifosplatform.portfolio.loanaccount.service;
 import java.util.Collection;
 
 import org.mifosplatform.infrastructure.core.service.Page;
+import org.mifosplatform.organisation.staff.data.StaffData;
 import org.mifosplatform.portfolio.calendar.data.CalendarData;
 import org.mifosplatform.portfolio.group.service.SearchParameters;
 import org.mifosplatform.portfolio.loanaccount.data.LoanAccountData;
@@ -50,4 +51,6 @@ public interface LoanReadPlatformService {
     Collection<CalendarData> retrieveCalendars(Long groupId);
 
     Page<LoanAccountData> retrieveAll(SearchParameters searchParameters);
+    
+    Collection<StaffData> retrieveAllowedLoanOfficers(Long selectedOfficeId, boolean staffInSelectedOfficeOnly);
 }

@@ -29,6 +29,8 @@ import org.mifosplatform.organisation.monetary.domain.ApplicationCurrency;
 import org.mifosplatform.organisation.monetary.domain.ApplicationCurrencyRepositoryWrapper;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.organisation.monetary.domain.Money;
+import org.mifosplatform.organisation.staff.data.StaffData;
+import org.mifosplatform.organisation.staff.service.StaffReadPlatformService;
 import org.mifosplatform.portfolio.accountdetails.service.AccountEnumerations;
 import org.mifosplatform.portfolio.calendar.data.CalendarData;
 import org.mifosplatform.portfolio.calendar.domain.CalendarEntityType;
@@ -94,6 +96,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
     private final ChargeReadPlatformService chargeReadPlatformService;
     private final CodeValueReadPlatformService codeValueReadPlatformService;
     private final CalendarReadPlatformService calendarReadPlatformService;
+    private final StaffReadPlatformService staffReadPlatformService;
     private final PaginationHelper<LoanAccountData> paginationHelper = new PaginationHelper<LoanAccountData>();
     private final LoanMapper loaanLoanMapper = new LoanMapper();
 
@@ -105,7 +108,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             final GroupReadPlatformService groupReadPlatformService, final LoanDropdownReadPlatformService loanDropdownReadPlatformService,
             final FundReadPlatformService fundReadPlatformService, final ChargeReadPlatformService chargeReadPlatformService,
             final CodeValueReadPlatformService codeValueReadPlatformService, final RoutingDataSource dataSource,
-            final CalendarReadPlatformService calendarReadPlatformService) {
+            final CalendarReadPlatformService calendarReadPlatformService, final StaffReadPlatformService staffReadPlatformService) {
         this.context = context;
         this.loanRepository = loanRepository;
         this.loanTransactionRepository = loanTransactionRepository;
@@ -118,6 +121,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         this.chargeReadPlatformService = chargeReadPlatformService;
         this.codeValueReadPlatformService = codeValueReadPlatformService;
         this.calendarReadPlatformService = calendarReadPlatformService;
+        this.staffReadPlatformService = staffReadPlatformService;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
     }
 
@@ -982,4 +986,25 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         return calendarsData;
     }
 
+    @Override
+    public Collection<StaffData> retrieveAllowedLoanOfficers(Long selectedOfficeId, boolean staffInSelectedOfficeOnly) {
+        if (selectedOfficeId == null) return null;
+
+        Collection<StaffData> allowedLoanOfficers = null;
+
+        if (staffInSelectedOfficeOnly) {
+            // only bring back loan officers in selected branch/office
+            allowedLoanOfficers = this.staffReadPlatformService.retrieveAllLoanOfficersInOfficeById(selectedOfficeId);
+        } else {
+            // by default bring back all loan officers in selected
+            // branch/office as well as loan officers in officer above
+            // this office
+            final boolean restrictToLoanOfficersOnly = true;
+            allowedLoanOfficers = this.staffReadPlatformService.retrieveAllStaffInOfficeAndItsParentOfficeHierarchy(selectedOfficeId,
+                    restrictToLoanOfficersOnly);
+        }
+
+        return allowedLoanOfficers;
+    }
+    
 }
