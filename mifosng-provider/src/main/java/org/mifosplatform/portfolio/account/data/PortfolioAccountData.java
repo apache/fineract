@@ -5,6 +5,8 @@
  */
 package org.mifosplatform.portfolio.account.data;
 
+import java.math.BigDecimal;
+
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
@@ -27,9 +29,10 @@ public class PortfolioAccountData {
     private final Long fieldOfficerId;
     private final String fieldOfficerName;
     private final CurrencyData currency;
+    private final BigDecimal amtForTransfer;
 
     public static PortfolioAccountData lookup(final Long accountId, final String accountNo) {
-        return new PortfolioAccountData(accountId, accountNo, null, null, null, null, null, null, null, null, null, null);
+        return new PortfolioAccountData(accountId, accountNo, null, null, null, null, null, null, null, null, null, null, null);
     }
 
     public PortfolioAccountData(final Long id, final String accountNo, final String externalId, final Long groupId, final String groupName,
@@ -47,6 +50,25 @@ public class PortfolioAccountData {
         this.fieldOfficerId = fieldofficerId;
         this.fieldOfficerName = fieldofficerName;
         this.currency = currency;
+        this.amtForTransfer = null;
+    }
+
+    public PortfolioAccountData(final Long id, final String accountNo, final String externalId, final Long groupId, final String groupName,
+            final Long clientId, final String clientName, final Long productId, final String productName, final Long fieldofficerId,
+            final String fieldofficerName, final CurrencyData currency, final BigDecimal amtForTransfer) {
+        this.id = id;
+        this.accountNo = accountNo;
+        this.externalId = externalId;
+        this.groupId = groupId;
+        this.groupName = groupName;
+        this.clientId = clientId;
+        this.clientName = clientName;
+        this.productId = productId;
+        this.productName = productName;
+        this.fieldOfficerId = fieldofficerId;
+        this.fieldOfficerName = fieldofficerName;
+        this.currency = currency;
+        this.amtForTransfer = amtForTransfer;
     }
 
     @Override
@@ -56,12 +78,14 @@ public class PortfolioAccountData {
         if (obj == this) { return true; }
         if (obj.getClass() != getClass()) { return false; }
         final PortfolioAccountData rhs = (PortfolioAccountData) obj;
-        return new EqualsBuilder().append(this.id, rhs.id).append(this.accountNo, rhs.accountNo).append(this.productId, rhs.productId).append(this.productName, rhs.productName).isEquals();
+        return new EqualsBuilder().append(this.id, rhs.id).append(this.accountNo, rhs.accountNo).append(this.productId, rhs.productId)
+                .append(this.productName, rhs.productName).isEquals();
     }
 
     @Override
     public int hashCode() {
-        return new HashCodeBuilder(17, 37).append(this.id).append(this.accountNo).append(this.productId).append(this.productName).toHashCode();
+        return new HashCodeBuilder(17, 37).append(this.id).append(this.accountNo).append(this.productId).append(this.productName)
+                .toHashCode();
     }
 
     public Long clientId() {
@@ -74,5 +98,9 @@ public class PortfolioAccountData {
 
     public String currencyCode() {
         return this.currency.code();
+    }
+
+    public BigDecimal getAmtForTransfer() {
+        return this.amtForTransfer;
     }
 }

@@ -163,4 +163,49 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
             if (group.isNotActive()) { throw new GroupNotActiveException(group.getId()); }
         }
     }
+
+    @Override
+    public LoanTransaction makeRefund(Long accountId, CommandProcessingResultBuilder builderResult, LocalDate transactionDate,
+            BigDecimal transactionAmount, PaymentDetail paymentDetail, String noteText, String txnExternalId) {
+        final Loan loan = this.loanAccountAssembler.assembleFrom(accountId);
+        checkClientOrGroupActive(loan);
+
+        final List<Long> existingTransactionIds = new ArrayList<Long>();
+        final List<Long> existingReversedTransactionIds = new ArrayList<Long>();
+
+        final Money refundAmount = Money.of(loan.getCurrency(), transactionAmount);
+        final LoanTransaction newRefundTransaction = LoanTransaction.refund(loan.getOffice(), refundAmount, paymentDetail, transactionDate,
+                txnExternalId);
+        final boolean allowTransactionsOnHoliday = this.configurationDomainService.allowTransactionsOnHolidayEnabled();
+        final List<Holiday> holidays = this.holidayRepository
+                .findByOfficeIdAndGreaterThanDate(loan.getOfficeId(), transactionDate.toDate());
+        final WorkingDays workingDays = this.workingDaysRepository.findOne();
+        final boolean allowTransactionsOnNonWorkingDay = this.configurationDomainService.allowTransactionsOnNonWorkingDayEnabled();
+
+        loan.makeRefund(newRefundTransaction, defaultLoanLifecycleStateMachine(), existingTransactionIds, existingReversedTransactionIds,
+                allowTransactionsOnHoliday, holidays, workingDays, allowTransactionsOnNonWorkingDay);
+
+        this.loanTransactionRepository.save(newRefundTransaction);
+        this.loanRepository.save(loan);
+
+        if (StringUtils.isNotBlank(noteText)) {
+            final Note note = Note.loanTransactionNote(loan, newRefundTransaction, noteText);
+            this.noteRepository.save(note);
+        }
+
+        postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
+
+        builderResult.withEntityId(newRefundTransaction.getId()) //
+                .withOfficeId(loan.getOfficeId()) //
+                .withClientId(loan.getClientId()) //
+                .withGroupId(loan.getGroupId()); //
+
+        return newRefundTransaction;
+    }
+
+    @Override
+    public void reverseTransfer(LoanTransaction loanTransaction) {
+        loanTransaction.reverse();
+        this.loanTransactionRepository.save(loanTransaction);
+    }
 }

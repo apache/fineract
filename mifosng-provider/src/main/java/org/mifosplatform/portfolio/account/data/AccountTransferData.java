@@ -54,11 +54,13 @@ public class AccountTransferData {
             final Collection<EnumOptionData> toAccountTypeOptions, final Collection<PortfolioAccountData> toAccountOptions) {
         final Long id = null;
         CurrencyData currency = null;
+        BigDecimal transferAmount = BigDecimal.ZERO;
         if (fromAccount != null) {
             currency = fromAccount.currency();
+            if(fromAccount.getAmtForTransfer() != null){
+                transferAmount = fromAccount.getAmtForTransfer();
+            }
         }
-
-        final BigDecimal transferAmount = BigDecimal.ZERO;
         final String transferDescription = null;
         final Boolean reversed = null;
         return new AccountTransferData(id, reversed, fromOffice, fromClient, fromAccountType, fromAccount, currency, transferAmount,

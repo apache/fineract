@@ -298,6 +298,10 @@ public class LoanEnumerations {
                 optionData = new LoanTransactionEnumData(LoanTransactionType.REJECT_TRANSFER.getValue().longValue(),
                         LoanTransactionType.REJECT_TRANSFER.getCode(), "Transfer Rejected");
             break;
+            case REFUND:
+                optionData = new LoanTransactionEnumData(LoanTransactionType.REFUND.getValue().longValue(),
+                        LoanTransactionType.REFUND.getCode(), "Transfer Refund");
+            break;
             default:
             break;
         }

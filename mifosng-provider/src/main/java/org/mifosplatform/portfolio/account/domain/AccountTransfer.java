@@ -69,11 +69,19 @@ public class AccountTransfer extends AbstractPersistable<Long> {
     private Loan toLoanAccount;
 
     @ManyToOne
+    @JoinColumn(name = "from_loan_account_id", nullable = true)
+    private Loan fromLoanAccount;
+
+    @ManyToOne
     @JoinColumn(name = "to_loan_transaction_id", nullable = true)
     private LoanTransaction toLoanTransaction;
 
+    @ManyToOne
+    @JoinColumn(name = "from_loan_transaction_id", nullable = true)
+    private LoanTransaction fromLoanTransaction;
+
     @Column(name = "is_reversed", nullable = false)
-    private final boolean reversed = false;
+    private boolean reversed = false;
 
     @Temporal(TemporalType.DATE)
     @Column(name = "transaction_date")
@@ -93,16 +101,23 @@ public class AccountTransfer extends AbstractPersistable<Long> {
             final SavingsAccountTransaction withdrawal, final SavingsAccountTransaction deposit, final LocalDate transactionDate,
             final Money transactionAmount, final String description) {
 
-        return new AccountTransfer(fromOffice, fromClient, fromSavingsAccount, toOffice, toClient, toSavingsAccount, null, withdrawal,
-                deposit, null, transactionDate, transactionAmount, description);
+        return new AccountTransfer(fromOffice, fromClient, fromSavingsAccount, null, toOffice, toClient, toSavingsAccount, null,
+                withdrawal, deposit, null, null, transactionDate, transactionAmount, description);
     }
 
     public static AccountTransfer savingsToLoanTransfer(final Office fromOffice, final Client fromClient,
             final SavingsAccount fromSavingsAccount, final Office toOffice, final Client toClient, final Loan toLoanAccount,
             final SavingsAccountTransaction withdrawal, final LoanTransaction loanRepaymentTransaction, final LocalDate transactionDate,
             final Money transactionAmount, final String description) {
-        return new AccountTransfer(fromOffice, fromClient, fromSavingsAccount, toOffice, toClient, null, toLoanAccount, withdrawal, null,
-                loanRepaymentTransaction, transactionDate, transactionAmount, description);
+        return new AccountTransfer(fromOffice, fromClient, fromSavingsAccount, null, toOffice, toClient, null, toLoanAccount, withdrawal,
+                null, loanRepaymentTransaction, null, transactionDate, transactionAmount, description);
+    }
+
+    public static AccountTransfer LoanTosavingsTransfer(final Office fromOffice, final Client fromClient, final Loan fromLoanAccount,
+            final Office toOffice, final Client toClient, final SavingsAccount toSavingsAccount, final SavingsAccountTransaction deposit,
+            final LoanTransaction loanRefundTransaction, final LocalDate transactionDate, final Money transactionAmount, final String description) {
+        return new AccountTransfer(fromOffice, fromClient, null, fromLoanAccount, toOffice, toClient, toSavingsAccount, null, null,
+                deposit, null, loanRefundTransaction, transactionDate, transactionAmount, description);
     }
 
     protected AccountTransfer() {
@@ -110,13 +125,15 @@ public class AccountTransfer extends AbstractPersistable<Long> {
     }
 
     private AccountTransfer(final Office fromOffice, final Client fromClient, final SavingsAccount fromSavingsAccount,
-            final Office toOffice, final Client toClient, final SavingsAccount toSavingsAccount, final Loan toLoanAccount,
-            final SavingsAccountTransaction withdrawal, final SavingsAccountTransaction deposit,
-            final LoanTransaction loanRepaymentTransaction, final LocalDate transactionDate, final Money transactionAmount,
-            final String description) {
+            final Loan fromLoanAccount, final Office toOffice, final Client toClient, final SavingsAccount toSavingsAccount,
+            final Loan toLoanAccount, final SavingsAccountTransaction withdrawal, final SavingsAccountTransaction deposit,
+            final LoanTransaction loanRepaymentTransaction, LoanTransaction loanRefundTransaction, final LocalDate transactionDate,
+            final Money transactionAmount, final String description) {
         this.fromOffice = fromOffice;
         this.fromClient = fromClient;
         this.fromAccount = fromSavingsAccount;
+        this.fromLoanAccount = fromLoanAccount;
+        this.fromLoanTransaction = loanRefundTransaction;
         this.toOffice = toOffice;
         this.toClient = toClient;
         this.toSavingsAccount = toSavingsAccount;
@@ -128,5 +145,39 @@ public class AccountTransfer extends AbstractPersistable<Long> {
         this.currency = transactionAmount.getCurrency();
         this.amount = transactionAmount.getAmountDefaultedToNullIfZero();
         this.description = description;
+    }
+
+    
+    public LoanTransaction getFromLoanTransaction() {
+        return this.fromLoanTransaction;
+    }
+
+    
+    public SavingsAccountTransaction getFromTransaction() {
+        return this.fromTransaction;
+    }
+
+    
+    public LoanTransaction getToLoanTransaction() {
+        return this.toLoanTransaction;
+    }
+
+    
+    public SavingsAccountTransaction getToSavingsTransaction() {
+        return this.toSavingsTransaction;
+    }
+
+    public void reverse() {
+        this.reversed = true;
+    }
+
+    
+    public SavingsAccount getToSavingsAccount() {
+        return this.toSavingsAccount;
+    }
+
+    
+    public SavingsAccount getFromAccount() {
+        return this.fromAccount;
     }
 }

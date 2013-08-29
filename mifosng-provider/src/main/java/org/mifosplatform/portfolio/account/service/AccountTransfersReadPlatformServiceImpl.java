@@ -13,7 +13,6 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import org.joda.time.LocalDate;
-import org.mifosplatform.commands.exception.UnsupportedCommandException;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
 import org.mifosplatform.infrastructure.core.service.DateUtils;
@@ -70,22 +69,19 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
         final EnumOptionData loanAccountType = AccountTransferEnumerations.accountType(PortfolioAccountType.LOAN);
         final EnumOptionData savingsAccountType = AccountTransferEnumerations.accountType(PortfolioAccountType.SAVINGS);
 
-        final Collection<EnumOptionData> fromAccountTypeOptions = Arrays.asList(savingsAccountType);
-        final Collection<EnumOptionData> toAccountTypeOptions = Arrays.asList(loanAccountType, savingsAccountType);
-
-        // TODO - remove this after doing overpaid loan to savings transfers
         Integer mostRelevantFromAccountType = fromAccountType;
-        if (mostRelevantFromAccountType == null) {
-            mostRelevantFromAccountType = 2; // savings
+        final Collection<EnumOptionData> fromAccountTypeOptions = Arrays.asList(savingsAccountType, loanAccountType);
+        final Collection<EnumOptionData> toAccountTypeOptions;
+        if (mostRelevantFromAccountType == 1) {
+            // overpaid loan amt transfer to savings account
+            toAccountTypeOptions = Arrays.asList(savingsAccountType);
+        } else {
+            toAccountTypeOptions = Arrays.asList(loanAccountType, savingsAccountType);
         }
-
         final Integer mostRelevantToAccountType = toAccountType;
 
         final EnumOptionData fromAccountTypeData = AccountTransferEnumerations.accountType(mostRelevantFromAccountType);
         final EnumOptionData toAccountTypeData = AccountTransferEnumerations.accountType(mostRelevantToAccountType);
-
-        // check for now that only savings account type is passed and used.
-        if (mostRelevantFromAccountType != 2) { throw new UnsupportedCommandException("transferFromLoanAccountNotSupported"); }
 
         // from settings
         OfficeData fromOffice = null;
@@ -106,21 +102,28 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
         Long mostRelevantToOfficeId = toOfficeId;
         Long mostRelevantToClientId = toClientId;
 
-        if (fromAccountId != null && mostRelevantFromAccountType == 2) {
-            fromAccount = this.portfolioAccountReadPlatformService.retrieveOne(fromAccountId, PortfolioAccountType.SAVINGS.getValue());
+        if (fromAccountId != null) {
+            Integer accountType;
+            if (mostRelevantFromAccountType == 1) {
+                accountType = PortfolioAccountType.LOAN.getValue();
+            } else {
+                accountType = PortfolioAccountType.SAVINGS.getValue();
+            }
+            fromAccount = this.portfolioAccountReadPlatformService.retrieveOne(fromAccountId, accountType);
 
             // override provided fromClient with client of account
             mostRelevantFromClientId = fromAccount.clientId();
-        } else if (fromAccountId != null && mostRelevantFromAccountType == 1) { // loans
-            // fetch loan account
         }
 
         if (mostRelevantFromClientId != null) {
             fromClient = this.clientReadPlatformService.retrieveOne(mostRelevantFromClientId);
             mostRelevantFromOfficeId = fromClient.officeId();
-
+            long[] loanStatus = null;
+            if (mostRelevantFromAccountType == 1) {
+                loanStatus = new long[] { 300, 700 };
+            }
             fromAccountOptions = this.portfolioAccountReadPlatformService.retrieveAllForLookup(mostRelevantFromAccountType,
-                    mostRelevantFromClientId);
+                    mostRelevantFromClientId, loanStatus);
         }
 
         Collection<OfficeData> fromOfficeOptions = null;
@@ -137,7 +140,8 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
         Collection<ClientData> toClientOptions = null;
 
         if (toAccountId != null && fromAccount != null) {
-            toAccount = this.portfolioAccountReadPlatformService.retrieveOne(toAccountId, mostRelevantToAccountType, fromAccount.currencyCode());
+            toAccount = this.portfolioAccountReadPlatformService.retrieveOne(toAccountId, mostRelevantToAccountType,
+                    fromAccount.currencyCode());
             mostRelevantToClientId = toAccount.clientId();
         }
 
@@ -173,7 +177,7 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
         final String currencyCode = excludeThisAccountFromOptions != null ? excludeThisAccountFromOptions.currencyCode() : null;
 
         Collection<PortfolioAccountData> accountOptions = this.portfolioAccountReadPlatformService.retrieveAllForLookup(toAccountType,
-                toClientId, currencyCode);
+                toClientId, currencyCode, null);
         if (!CollectionUtils.isEmpty(accountOptions)) {
             accountOptions.remove(excludeThisAccountFromOptions);
         } else {

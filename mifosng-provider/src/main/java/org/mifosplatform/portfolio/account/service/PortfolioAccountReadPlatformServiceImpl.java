@@ -5,6 +5,7 @@
  */
 package org.mifosplatform.portfolio.account.service;
 
+import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
@@ -45,24 +46,24 @@ public class PortfolioAccountReadPlatformServiceImpl implements PortfolioAccount
     @Override
     public PortfolioAccountData retrieveOne(final Long accountId, final Integer accountTypeId, final String currencyCode) {
 
-        Object[] sqlParams = new Object[] {accountId};
+        Object[] sqlParams = new Object[] { accountId };
         PortfolioAccountData accountData = null;
         try {
             String sql = null;
             final PortfolioAccountType accountType = PortfolioAccountType.fromInt(accountTypeId);
             switch (accountType) {
                 case INVALID:
-                    break;
+                break;
                 case LOAN:
 
                     sql = "select " + this.loanAccountMapper.schema() + " where la.id = ?";
                     if (currencyCode != null) {
                         sql += " and la.currency_code = ?";
-                        sqlParams = new Object[] {accountId, currencyCode};
+                        sqlParams = new Object[] { accountId, currencyCode };
                     }
 
-                    accountData = this.jdbcTemplate.queryForObject(sql, this.savingsAccountMapper, sqlParams);
-                    break;
+                    accountData = this.jdbcTemplate.queryForObject(sql, this.loanAccountMapper, sqlParams);
+                break;
                 case SAVINGS:
                     sql = "select " + this.savingsAccountMapper.schema() + " where sa.id = ?";
                     if (currencyCode != null) {
@@ -71,9 +72,9 @@ public class PortfolioAccountReadPlatformServiceImpl implements PortfolioAccount
                     }
 
                     accountData = this.jdbcTemplate.queryForObject(sql, this.savingsAccountMapper, sqlParams);
-                    break;
+                break;
                 default:
-                    break;
+                break;
             }
         } catch (final EmptyResultDataAccessException e) {
             throw new AccountTransferNotFoundException(accountId);
@@ -83,40 +84,50 @@ public class PortfolioAccountReadPlatformServiceImpl implements PortfolioAccount
     }
 
     @Override
-    public Collection<PortfolioAccountData> retrieveAllForLookup(final Integer accountTypeId, final Long clientId) {
-        return retrieveAllForLookup(accountTypeId, clientId, null);
+    public Collection<PortfolioAccountData> retrieveAllForLookup(final Integer accountTypeId, final Long clientId, long[] accountStatus) {
+        return retrieveAllForLookup(accountTypeId, clientId, null, accountStatus);
     }
 
     @Override
-    public Collection<PortfolioAccountData> retrieveAllForLookup(final Integer accountTypeId, final Long clientId, final String currencyCode) {
+    public Collection<PortfolioAccountData> retrieveAllForLookup(final Integer accountTypeId, final Long clientId,
+            final String currencyCode, long[] accountStatus) {
 
-        Object[] sqlParams = new Object[] {clientId};
+        Object[] sqlParams = new Object[] { clientId };
         Collection<PortfolioAccountData> accounts = null;
         String sql = null;
+        String defaultAccountStatus = "300";
+        if (accountStatus != null) {
+            for (long status : accountStatus) {
+                defaultAccountStatus += ", " + status;
+            }
+            defaultAccountStatus = defaultAccountStatus.substring(defaultAccountStatus.indexOf(",")+1);
+        }
         final PortfolioAccountType accountType = PortfolioAccountType.fromInt(accountTypeId);
         switch (accountType) {
             case INVALID:
-                break;
+            break;
             case LOAN:
-                sql = "select " + this.loanAccountMapper.schema() + " where la.client_id = ? and la.loan_status_id = 300";
+                sql = "select " + this.loanAccountMapper.schema() + " where la.client_id = ? and la.loan_status_id in ("
+                        + defaultAccountStatus.toString() + ")";
                 if (currencyCode != null) {
                     sql += " and la.currency_code = ?";
-                    sqlParams = new Object[] {clientId, currencyCode};
+                    sqlParams = new Object[] { clientId, currencyCode };
                 }
 
                 accounts = this.jdbcTemplate.query(sql, this.loanAccountMapper, sqlParams);
-                break;
+            break;
             case SAVINGS:
-                sql = "select " + this.savingsAccountMapper.schema() + " where sa.client_id = ? and sa.status_enum = 300";
+                sql = "select " + this.savingsAccountMapper.schema() + " where sa.client_id = ? and sa.status_enum in ("
+                        + defaultAccountStatus.toString() + ")";
                 if (currencyCode != null) {
                     sql += " and sa.currency_code = ?";
-                    sqlParams = new Object[] {clientId, currencyCode};
+                    sqlParams = new Object[] { clientId, currencyCode };
                 }
 
                 accounts = this.jdbcTemplate.query(sql, this.savingsAccountMapper, sqlParams);
-                break;
+            break;
             default:
-                break;
+            break;
         }
 
         return accounts;
@@ -198,6 +209,7 @@ public class PortfolioAccountReadPlatformServiceImpl implements PortfolioAccount
             sqlBuilder.append("s.id as fieldOfficerId, s.display_name as fieldOfficerName, ");
             sqlBuilder.append("la.currency_code as currencyCode, la.currency_digits as currencyDigits,");
             sqlBuilder.append("la.currency_multiplesof as inMultiplesOf, ");
+            sqlBuilder.append("la.total_overpaid_derived as totalOverpaid, ");
             sqlBuilder.append("curr.name as currencyName, curr.internationalized_name_code as currencyNameCode, ");
             sqlBuilder.append("curr.display_symbol as currencyDisplaySymbol ");
             sqlBuilder.append("from m_loan la ");
@@ -238,11 +250,12 @@ public class PortfolioAccountReadPlatformServiceImpl implements PortfolioAccount
             final String currencyDisplaySymbol = rs.getString("currencyDisplaySymbol");
             final Integer currencyDigits = JdbcSupport.getInteger(rs, "currencyDigits");
             final Integer inMulitplesOf = JdbcSupport.getInteger(rs, "inMultiplesOf");
+            final BigDecimal amtForTransfer = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "totalOverpaid");
             final CurrencyData currency = new CurrencyData(currencyCode, currencyName, currencyDigits, inMulitplesOf,
                     currencyDisplaySymbol, currencyNameCode);
 
             return new PortfolioAccountData(id, accountNo, externalId, groupId, groupName, clientId, clientName, productId, productName,
-                    fieldOfficerId, fieldOfficerName, currency);
+                    fieldOfficerId, fieldOfficerName, currency, amtForTransfer);
         }
     }
 }

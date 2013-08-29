@@ -137,6 +137,11 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
                         .getTotalPenaltyChargesOutstanding(), false, null);
     }
 
+    public static LoanTransaction refund(final Office office, final Money amount, final PaymentDetail paymentDetail,
+            final LocalDate paymentDate, final String externalId) {
+        return new LoanTransaction(null, office, LoanTransactionType.REFUND, paymentDetail, amount.getAmount(), paymentDate, externalId);
+    }
+
     public static LoanTransaction copyTransactionProperties(LoanTransaction loanTransaction) {
         return new LoanTransaction(loanTransaction.loan, loanTransaction.office, loanTransaction.typeOf, loanTransaction.dateOf,
                 loanTransaction.amount, loanTransaction.principalPortion, loanTransaction.interestPortion,
@@ -445,6 +450,10 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
 
     public String getExternalId() {
         return externalId;
+    }
+    
+    public boolean isRefund(){
+        return LoanTransactionType.REFUND.equals(getTypeOf()) && isNotReversed();
     }
 
 }

@@ -111,4 +111,32 @@ public class AccountTransferAssembler {
         return AccountTransfer.savingsToLoanTransfer(fromOffice, fromClient, fromSavingsAccount, toOffice, toClient, toLoanAccount,
                 withdrawal, loanRepaymentTransaction, transactionDate, transactionMonetaryAmount, description);
     }
+
+    public AccountTransfer assembleLoanToSavingsTransfer(final JsonCommand command, final Loan fromLoanAccount,
+            final SavingsAccount toSavingsAccount, final SavingsAccountTransaction deposit, final LoanTransaction loanRefundTransaction) {
+
+        final JsonElement element = command.parsedJson();
+
+        final Long fromOfficeId = this.fromApiJsonHelper.extractLongNamed(fromOfficeIdParamName, element);
+        final Office fromOffice = this.officeRepository.findOne(fromOfficeId);
+
+        final Long fromClientId = this.fromApiJsonHelper.extractLongNamed(fromClientIdParamName, element);
+        final Client fromClient = this.clientRepository.findOneWithNotFoundDetection(fromClientId);
+
+        final Long toOfficeId = this.fromApiJsonHelper.extractLongNamed(toOfficeIdParamName, element);
+        final Office toOffice = this.officeRepository.findOne(toOfficeId);
+
+        final Long toClientId = this.fromApiJsonHelper.extractLongNamed(toClientIdParamName, element);
+        final Client toClient = this.clientRepository.findOneWithNotFoundDetection(toClientId);
+
+        final LocalDate transactionDate = command.localDateValueOfParameterNamed(transferDateParamName);
+        final BigDecimal transactionAmount = command.bigDecimalValueOfParameterNamed(transferAmountParamName);
+        final Money transactionMonetaryAmount = Money.of(toSavingsAccount.getCurrency(), transactionAmount);
+
+        final String description = command.stringValueOfParameterNamed(transferDescriptionParamName);
+
+        return AccountTransfer.LoanTosavingsTransfer(fromOffice, fromClient, fromLoanAccount, toOffice, toClient, toSavingsAccount,
+                deposit, loanRefundTransaction, transactionDate, transactionMonetaryAmount, description);
+    }
+
 }
