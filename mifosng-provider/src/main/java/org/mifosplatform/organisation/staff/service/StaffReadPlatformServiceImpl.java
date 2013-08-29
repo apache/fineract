@@ -63,7 +63,7 @@ public class StaffReadPlatformServiceImpl implements StaffReadPlatformService {
         public String schema(final boolean loanOfficersOnly) {
 
             StringBuilder sqlBuilder = new StringBuilder(200);
-            sqlBuilder.append("s.id as id, s.office_id as officeId, o.name as officeName,");
+            sqlBuilder.append("s.id as id, s.office_id as officeId, ohierarchy.name as officeName,");
             sqlBuilder.append("s.firstname as firstname, s.lastname as lastname,");
             sqlBuilder.append("s.display_name as displayName, s.is_loan_officer as isLoanOfficer, s.external_id as externalId ");
             sqlBuilder.append("from m_office o ");

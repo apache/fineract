@@ -255,12 +255,17 @@ public final class LoanEventApiJsonValidator {
 
         final JsonElement element = fromApiJsonHelper.parse(json);
 
-        // final Long fromLoanOfficerId =
-        // fromApiJsonHelper.extractLongNamed("fromLoanOfficerId", element);
         final Long toLoanOfficerId = fromApiJsonHelper.extractLongNamed("toLoanOfficerId", element);
+        baseDataValidator.reset().parameter("toLoanOfficerId").value(toLoanOfficerId).notNull().integerGreaterThanZero();
 
-        baseDataValidator.reset().parameter("toLoanOfficerId").value(toLoanOfficerId).ignoreIfNull().integerGreaterThanZero();
-
+        final String assignmentDateStr = this.fromApiJsonHelper.extractStringNamed("assignmentDate", element);
+        baseDataValidator.reset().parameter("assignmentDate").value(assignmentDateStr).notBlank();
+        
+        if(!StringUtils.isBlank(assignmentDateStr)){
+            final LocalDate assignmentDate = this.fromApiJsonHelper.extractLocalDateNamed("assignmentDate", element);
+            baseDataValidator.reset().parameter("assignmentDate").value(assignmentDate).notNull();
+        }
+        
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
     
