@@ -15,6 +15,7 @@ import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
@@ -29,6 +30,7 @@ import javax.persistence.UniqueConstraint;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormatter;
+import org.mifosplatform.infrastructure.codes.domain.CodeValue;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.ApiParameterError;
 import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
@@ -95,10 +97,11 @@ public final class Client extends AbstractPersistable<Long> {
 
     @Transient
     private boolean accountNumberRequiresAutoGeneration = false;
-    
-    @Column(name = "closure_reason_cv_id", nullable = true)
-    private Long closureReasonId;
-    
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "closure_reason_cv_id", nullable = true)
+    private CodeValue closureReason;
+
     @Column(name = "closedon_date", nullable = true)
     @Temporal(TemporalType.DATE)
     private Date closureDate;
@@ -252,8 +255,8 @@ public final class Client extends AbstractPersistable<Long> {
     public boolean isActive() {
         return ClientStatus.fromInt(this.status).isActive();
     }
-    
-    public boolean isTransferInProgress () {
+
+    public boolean isTransferInProgress() {
         return ClientStatus.fromInt(this.status).isTransferInProgress();
     }
 
@@ -429,11 +432,11 @@ public final class Client extends AbstractPersistable<Long> {
     public void setDisplayName(final String displayName) {
         this.displayName = displayName;
     }
-    
+
     public Office getOffice() {
         return this.office;
     }
-    
+
     public void updateOffice(final Office office) {
         this.office = office;
     }
@@ -461,22 +464,21 @@ public final class Client extends AbstractPersistable<Long> {
     public void assignStaff(final Staff staff) {
         this.staff = staff;
     }
-    
-    public Set<Group> getGroups(){
+
+    public Set<Group> getGroups() {
         return this.groups;
     }
 
-    
-    public void close(final Long closureReasonId, final Date closureDate) {
-        this.closureReasonId = closureReasonId;
+    public void close(final CodeValue closureReason, final Date closureDate) {
+        this.closureReason = closureReason;
         this.closureDate = closureDate;
         this.status = ClientStatus.CLOSED.getValue();
     }
-    
+
     public Integer getStatus() {
         return this.status;
     }
-    
+
     public void setStatus(Integer status) {
         this.status = status;
     }
@@ -484,7 +486,7 @@ public final class Client extends AbstractPersistable<Long> {
     public boolean isActivatedAfter(final LocalDate submittedOn) {
         return getActivationLocalDate().isAfter(submittedOn);
     }
-    
+
     public boolean isChildOfGroup(final Long groupId) {
         if (groupId != null && this.groups != null && !this.groups.isEmpty()) {
             for (Group group : this.groups) {
