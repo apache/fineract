@@ -19,6 +19,8 @@ import org.mifosplatform.portfolio.paymentdetail.data.PaymentDetailData;
 public class LoanTransactionData {
 
     private final Long id;
+    private final Long officeId;
+    private final String officeName;
 
     private final LoanTransactionEnumData type;
 
@@ -38,24 +40,28 @@ public class LoanTransactionData {
     final Collection<CodeValueData> paymentTypeOptions;
 
     public static LoanTransactionData templateOnTop(LoanTransactionData loanTransactionData, Collection<CodeValueData> paymentTypeOptions) {
-        return new LoanTransactionData(loanTransactionData.id, loanTransactionData.type, loanTransactionData.paymentDetailData,
-                loanTransactionData.currency, loanTransactionData.date, loanTransactionData.amount, loanTransactionData.principalPortion,
-                loanTransactionData.interestPortion, loanTransactionData.feeChargesPortion, loanTransactionData.penaltyChargesPortion,
-                paymentTypeOptions, loanTransactionData.externalId);
+        return new LoanTransactionData(loanTransactionData.id, loanTransactionData.officeId, loanTransactionData.officeName,
+                loanTransactionData.type, loanTransactionData.paymentDetailData, loanTransactionData.currency, loanTransactionData.date,
+                loanTransactionData.amount, loanTransactionData.principalPortion, loanTransactionData.interestPortion,
+                loanTransactionData.feeChargesPortion, loanTransactionData.penaltyChargesPortion, paymentTypeOptions,
+                loanTransactionData.externalId);
     }
 
-    public LoanTransactionData(final Long id, final LoanTransactionEnumData transactionType, final PaymentDetailData paymentDetailData,
-            final CurrencyData currency, final LocalDate date, final BigDecimal amount, final BigDecimal principalPortion,
-            final BigDecimal interestPortion, final BigDecimal feeChargesPortion, final BigDecimal penaltyChargesPortion, final String externalId) {
-        this(id, transactionType, paymentDetailData, currency, date, amount, principalPortion, interestPortion, feeChargesPortion,
-                penaltyChargesPortion, null, externalId);
+    public LoanTransactionData(final Long id, final Long officeId, final String officeName, final LoanTransactionEnumData transactionType,
+            final PaymentDetailData paymentDetailData, final CurrencyData currency, final LocalDate date, final BigDecimal amount,
+            final BigDecimal principalPortion, final BigDecimal interestPortion, final BigDecimal feeChargesPortion,
+            final BigDecimal penaltyChargesPortion, final String externalId) {
+        this(id, officeId, officeName, transactionType, paymentDetailData, currency, date, amount, principalPortion, interestPortion,
+                feeChargesPortion, penaltyChargesPortion, null, externalId);
     }
 
-    public LoanTransactionData(final Long id, final LoanTransactionEnumData transactionType, final PaymentDetailData paymentDetailData,
-            final CurrencyData currency, final LocalDate date, final BigDecimal amount, final BigDecimal principalPortion,
-            final BigDecimal interestPortion, final BigDecimal feeChargesPortion, final BigDecimal penaltyChargesPortion,
-            final Collection<CodeValueData> paymentTypeOptions, final String externalId) {
+    public LoanTransactionData(final Long id, final Long officeId, final String officeName, final LoanTransactionEnumData transactionType,
+            final PaymentDetailData paymentDetailData, final CurrencyData currency, final LocalDate date, final BigDecimal amount,
+            final BigDecimal principalPortion, final BigDecimal interestPortion, final BigDecimal feeChargesPortion,
+            final BigDecimal penaltyChargesPortion, final Collection<CodeValueData> paymentTypeOptions, final String externalId) {
         this.id = id;
+        this.officeId = officeId;
+        this.officeName = officeName;
         this.type = transactionType;
         this.paymentDetailData = paymentDetailData;
         this.currency = currency;

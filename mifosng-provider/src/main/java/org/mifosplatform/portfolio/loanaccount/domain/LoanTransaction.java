@@ -394,8 +394,9 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
         if (this.paymentDetail != null) {
             paymentDetailData = paymentDetail.toData();
         }
-        return new LoanTransactionData(this.getId(), transactionType, paymentDetailData, currencyData, getTransactionDate(), this.amount,
-                this.principalPortion, this.interestPortion, this.feeChargesPortion, this.penaltyChargesPortion, this.externalId);
+        return new LoanTransactionData(this.getId(), this.office.getId(), this.office.getName(), transactionType, paymentDetailData,
+                currencyData, getTransactionDate(), this.amount, this.principalPortion, this.interestPortion, this.feeChargesPortion,
+                this.penaltyChargesPortion, this.externalId);
     }
 
     public Map<String, Object> toMapData(final CurrencyData currencyData) {
@@ -451,8 +452,8 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
     public String getExternalId() {
         return externalId;
     }
-    
-    public boolean isRefund(){
+
+    public boolean isRefund() {
         return LoanTransactionType.REFUND.equals(getTypeOf()) && isNotReversed();
     }
 
