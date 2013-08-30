@@ -35,7 +35,7 @@ public class GroupRolesWritePlatformServiceJpaRepositoryImpl implements GroupRol
     private final CodeValueRepositoryWrapper codeValueRepository;
     private final ClientRepositoryWrapper clientRepository;
     private final GroupRoleRepositoryWrapper groupRoleRepository;
-
+    
     @Autowired
     public GroupRolesWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
             final GroupRepositoryWrapper groupRepository, final GroupRolesDataValidator fromApiJsonDeserializer,
@@ -143,5 +143,5 @@ public class GroupRolesWritePlatformServiceJpaRepositoryImpl implements GroupRol
         this.groupRoleRepository.delete(groupRole);
         return new CommandProcessingResultBuilder().withEntityId(groupRole.getId()).build();
     }
-
+    
 }

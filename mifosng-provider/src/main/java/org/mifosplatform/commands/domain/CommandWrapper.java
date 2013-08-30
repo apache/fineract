@@ -288,11 +288,19 @@ public class CommandWrapper {
     public boolean isGroupActivation() {
         return this.actionName.equalsIgnoreCase("ACTIVATE") && this.entityName.equalsIgnoreCase("GROUP");
     }
+    
+    public boolean isGroupClose() {
+        return this.actionName.equalsIgnoreCase("CLOSE") && this.entityName.equalsIgnoreCase("GROUP");
+    }
 
     public boolean isCenterActivation() {
         return this.actionName.equalsIgnoreCase("ACTIVATE") && this.entityName.equalsIgnoreCase("CENTER");
     }
 
+    public boolean isCenterClose() {
+        return this.actionName.equalsIgnoreCase("CLOSE") && this.entityName.equalsIgnoreCase("CENTER");
+    }
+    
     public boolean isClientIdentifierResource() {
         return this.entityName.equals("CLIENTIDENTIFIER");
     }

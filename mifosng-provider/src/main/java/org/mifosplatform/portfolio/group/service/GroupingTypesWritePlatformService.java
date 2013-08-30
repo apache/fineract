@@ -21,6 +21,10 @@ public interface GroupingTypesWritePlatformService {
     CommandProcessingResult updateGroup(Long groupId, JsonCommand command);
 
     CommandProcessingResult deleteGroup(Long groupId);
+    
+    CommandProcessingResult closeGroup(final Long groupId, final JsonCommand command);
+    
+    CommandProcessingResult closeCenter(final Long centerId, final JsonCommand command);
 
     CommandProcessingResult unassignGroupOrCenterStaff(Long groupId, JsonCommand command);
     

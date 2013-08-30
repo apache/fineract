@@ -117,10 +117,17 @@ public class GroupsApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveTemplate(@Context final UriInfo uriInfo, @QueryParam("officeId") final Long officeId,
             @QueryParam("center") final boolean isCenterGroup, @QueryParam("centerId") final Long centerId,
+            @QueryParam("command") final String commandParam,
             @DefaultValue("false") @QueryParam("staffInSelectedOfficeOnly") final boolean staffInSelectedOfficeOnly) {
 
         this.context.authenticatedUser().validateHasReadPermission(GroupingTypesApiConstants.GROUP_RESOURCE_NAME);
 
+        if (is(commandParam, "close")) {
+            final GroupGeneralData groupClosureTemplate = this.groupReadPlatformService.retrieveGroupWithClosureReasons();
+            final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+            return this.groupGeneralApiJsonSerializer.serialize(settings, groupClosureTemplate, GroupingTypesApiConstants.GROUP_RESPONSE_DATA_PARAMETERS);
+        }
+        
         if (centerId != null) {
             final GroupGeneralData centerGroupTemplate = this.centerReadPlatformService.retrieveCenterGroupTemplate(centerId);
             final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
@@ -342,6 +349,10 @@ public class GroupsApiResource {
             return this.toApiJsonSerializer.serialize(result);
         } else if (is(commandParam, "transferClients")) {
             final CommandWrapper commandRequest = builder.transferClientsBetweenGroups(groupId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            return this.toApiJsonSerializer.serialize(result);
+        } else if (is(commandParam, "close")) {
+            final CommandWrapper commandRequest = builder.closeGroup(groupId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
             return this.toApiJsonSerializer.serialize(result);
         } else {

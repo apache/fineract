@@ -7,7 +7,9 @@ package org.mifosplatform.portfolio.group.service;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 import org.mifosplatform.infrastructure.codes.data.CodeValueData;
@@ -227,4 +229,11 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
         }
     }
 
+    @Override
+    public GroupGeneralData retrieveGroupWithClosureReasons() {
+        final List<CodeValueData> closureReasons = new ArrayList<CodeValueData>(
+                codeValueReadPlatformService.retrieveCodeValuesByCode(GroupingTypesApiConstants.GROUP_CLOSURE_REASON));
+        return GroupGeneralData.withClosureReasons(closureReasons);
+    }
+    
 }
