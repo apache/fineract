@@ -398,4 +398,8 @@ public final class Group extends AbstractPersistable<Long> {
         }
         return false;
     }
+
+    public boolean isChildGroup(){
+        return (this.parent == null) ? false : true;
+    }
 }

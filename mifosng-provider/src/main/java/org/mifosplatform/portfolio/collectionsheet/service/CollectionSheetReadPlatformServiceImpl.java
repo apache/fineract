@@ -318,9 +318,12 @@ public class CollectionSheetReadPlatformServiceImpl implements CollectionSheetRe
         StringBuilder sql = new StringBuilder(mapper.collectionSheetSchema());
         sql.append(" WHERE gp.id = :groupId GROUP BY gp.id ,cl.id , ln.id ORDER BY gp.id , cl.id , ln.id ");
 
+        //entityType should be center if it's within a center
+        final CalendarEntityType entityType = (group.isChildGroup()) ? CalendarEntityType.CENTERS : CalendarEntityType.GROUPS;
+
         final SqlParameterSource namedParameters = new MapSqlParameterSource().addValue("dueDate", transactionDateStr)
                 .addValue("groupId", group.getId()).addValue("officeHierarchy", officeHierarchy)
-                .addValue("entityTypeId", CalendarEntityType.CENTERS.getValue());
+                .addValue("entityTypeId", entityType.getValue());
 
         final Collection<JLGCollectionSheetFlatData> collectionSheetFlatDatas = this.namedParameterjdbcTemplate.query(sql.toString(),
                 namedParameters, mapper);
