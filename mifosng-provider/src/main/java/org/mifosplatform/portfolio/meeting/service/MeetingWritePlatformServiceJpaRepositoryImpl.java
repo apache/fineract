@@ -5,12 +5,12 @@
  */
 package org.mifosplatform.portfolio.meeting.service;
 
+import static org.mifosplatform.portfolio.collectionsheet.CollectionSheetConstants.transactionDateParamName;
 import static org.mifosplatform.portfolio.meeting.MeetingApiConstants.attendanceTypeParamName;
 import static org.mifosplatform.portfolio.meeting.MeetingApiConstants.calendarIdParamName;
 import static org.mifosplatform.portfolio.meeting.MeetingApiConstants.clientIdParamName;
 import static org.mifosplatform.portfolio.meeting.MeetingApiConstants.clientsAttendanceParamName;
 import static org.mifosplatform.portfolio.meeting.MeetingApiConstants.meetingDateParamName;
-import static org.mifosplatform.portfolio.collectionsheet.CollectionSheetConstants.transactionDateParamName;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -107,13 +107,21 @@ public class MeetingWritePlatformServiceJpaRepositoryImpl implements MeetingWrit
 
     private CalendarInstance getCalendarInstance(final JsonCommand command) {
         final Long calendarId = command.longValueOfParameterNamed(calendarIdParamName);
-        final Long entityId = command.getSupportedEntityId();
+        Long entityId = command.getSupportedEntityId();
         final Calendar calendarForUpdate = this.calendarRepository.findOne(calendarId);
         if (calendarForUpdate == null) { throw new CalendarNotFoundException(calendarId); }
+        CalendarEntityType entityType = CalendarEntityType.valueOf(command.getSupportedEntityType().toUpperCase());
+        //If group is within a center then center entityType should be passed for retrieving  CalendarInstance.
+        if(CalendarEntityType.isGroup(command.getSupportedEntityType().toUpperCase())){
+            final Group group = this.groupRepository.findOne(entityId);
+            if(group.isChildGroup()){
+                entityType = CalendarEntityType.CENTERS;
+                entityId = group.getParent().getId();
+            }
+        }
 
-        final Integer entityTypeId = CalendarEntityType.valueOf(command.getSupportedEntityType().toUpperCase()).getValue();
         final CalendarInstance calendarInstance = this.calendarInstanceRepository.findByCalendarIdAndEntityIdAndEntityTypeId(
-                calendarForUpdate.getId(), entityId, entityTypeId);
+                calendarForUpdate.getId(), entityId, entityType.getValue());
         if (calendarInstance == null) {
             final String postFix = "for." + command.getSupportedEntityType() + "not.found";
             final String defaultUserMessage = "No Calendar Instance details found for group with identifier " + entityId
