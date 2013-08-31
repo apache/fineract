@@ -80,4 +80,11 @@ public class ConfigurationDomainServiceJpa implements ConfigurationDomainService
         return property.isEnabled();
     }
 
+    @Override
+    public boolean isConstraintApproachEnabledForDatatables() {
+        final String colunnValue = "constraint_approach_for_datatables";
+        final GlobalConfigurationProperty property = this.globalConfigurationRepository.findOneByName(colunnValue);
+        if (property == null) { throw new GlobalConfigurationPropertyNotFoundException(colunnValue); }
+        return property.isEnabled();
+    }
 }

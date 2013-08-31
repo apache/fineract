@@ -96,8 +96,13 @@ public class CodeWritePlatformServiceJpaRepositoryImpl implements CodeWritePlatf
         final Code code = retrieveCodeBy(codeId);
         if (code.isSystemDefined()) { throw new SystemDefinedCodeCannotBeChangedException(); }
 
-        this.codeRepository.delete(code);
-
+        try {
+            this.codeRepository.delete(code);
+            this.codeRepository.flush();
+        } catch (DataIntegrityViolationException e) {
+            throw new PlatformDataIntegrityException("error.msg.cund.unknown.data.integrity.issue",
+                    "Unknown data integrity issue with resource: " + e.getMostSpecificCause());
+        }
         return new CommandProcessingResultBuilder().withEntityId(codeId).build();
     }
 
