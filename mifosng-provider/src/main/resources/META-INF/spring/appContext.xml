@@ -58,6 +58,6 @@
 		
 	<import resource="securityContext.xml" />
 	
-	<import resource="memcached.xml" />
+	<import resource="cache.xml" />
 
 </beans>
