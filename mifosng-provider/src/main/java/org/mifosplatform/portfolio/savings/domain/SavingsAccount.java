@@ -842,7 +842,10 @@ public class SavingsAccount extends AbstractPersistable<Long> {
     }
 
     private void updateToNextAnnualFeeDueDateFrom(final LocalDate startingDate) {
-        final LocalDate nextDueLocalDate = startingDate.withMonthOfYear(this.annualFeeOnMonth).withDayOfMonth(this.annualFeeOnDay);
+        LocalDate nextDueLocalDate = startingDate.withMonthOfYear(this.annualFeeOnMonth).withDayOfMonth(this.annualFeeOnDay);
+        if (startingDate.isAfter(nextDueLocalDate)) {
+            nextDueLocalDate = nextDueLocalDate.plusYears(1);
+        }
         this.annualFeeNextDueDate = nextDueLocalDate.toDate();
     }
 
