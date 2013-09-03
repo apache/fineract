@@ -24,6 +24,7 @@ public final class ResultsetColumnHeaderData {
     private final boolean isColumnPrimaryKey;
 
     private final List<ResultsetColumnValueData> columnValues;
+    private final String columnCode;
 
     public static ResultsetColumnHeaderData basic(final String columnName, final String columnType) {
 
@@ -31,25 +32,31 @@ public final class ResultsetColumnHeaderData {
         final boolean columnNullable = false;
         final boolean columnIsPrimaryKey = false;
         final List<ResultsetColumnValueData> columnValues = new ArrayList<ResultsetColumnValueData>();
-        return new ResultsetColumnHeaderData(columnName, columnType, columnLength, columnNullable, columnIsPrimaryKey, columnValues);
+        final String columnCode = null;
+        return new ResultsetColumnHeaderData(columnName, columnType, columnLength, columnNullable, columnIsPrimaryKey, columnValues,
+                columnCode);
     }
 
     public static ResultsetColumnHeaderData detailed(final String columnName, final String columnType, final Long columnLength,
-            final boolean columnNullable, final boolean columnIsPrimaryKey, final List<ResultsetColumnValueData> columnValues) {
-        return new ResultsetColumnHeaderData(columnName, columnType, columnLength, columnNullable, columnIsPrimaryKey, columnValues);
+            final boolean columnNullable, final boolean columnIsPrimaryKey, final List<ResultsetColumnValueData> columnValues,
+            String columnCode) {
+        return new ResultsetColumnHeaderData(columnName, columnType, columnLength, columnNullable, columnIsPrimaryKey, columnValues,
+                columnCode);
     }
 
     private ResultsetColumnHeaderData(final String columnName, final String columnType, final Long columnLength,
-            final boolean columnNullable, final boolean columnIsPrimaryKey, final List<ResultsetColumnValueData> columnValues) {
+            final boolean columnNullable, final boolean columnIsPrimaryKey, final List<ResultsetColumnValueData> columnValues,
+            String columnCode) {
         this.columnName = columnName;
         this.columnType = columnType;
         this.columnLength = columnLength;
         this.isColumnNullable = columnNullable;
         this.isColumnPrimaryKey = columnIsPrimaryKey;
         this.columnValues = columnValues;
+        this.columnCode = columnCode;
 
         String displayType = null;
-        if (this.columnValues.isEmpty()) {
+        if (this.columnCode == null) {
             if (isString()) {
                 displayType = "STRING";
             } else if (isAnyInteger()) {
@@ -227,5 +234,9 @@ public final class ResultsetColumnHeaderData {
             }
         }
         return allowed;
+    }
+
+    public String getColumnCode() {
+        return this.columnCode;
     }
 }

@@ -13,4 +13,5 @@ public interface ConfigurationDomainService {
     boolean isRescheduleRepaymentsOnHolidaysEnabled();
     boolean allowTransactionsOnHolidayEnabled();
     boolean allowTransactionsOnNonWorkingDayEnabled();
+    boolean isConstraintApproachEnabledForDatatables();
 }

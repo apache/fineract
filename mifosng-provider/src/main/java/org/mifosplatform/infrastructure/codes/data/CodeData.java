@@ -10,7 +10,6 @@ package org.mifosplatform.infrastructure.codes.data;
  */
 public class CodeData {
 
-    @SuppressWarnings("unused")
     private final Long id;
     @SuppressWarnings("unused")
     private final String name;
@@ -25,5 +24,9 @@ public class CodeData {
         this.id = id;
         this.name = name;
         this.systemDefined = systemDefined;
+    }
+    
+    public Long getCodeId(){
+        return this.id;
     }
 }

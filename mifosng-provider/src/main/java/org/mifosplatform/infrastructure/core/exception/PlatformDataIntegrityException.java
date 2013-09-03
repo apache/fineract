@@ -20,7 +20,7 @@ public class PlatformDataIntegrityException extends RuntimeException {
             final Object... defaultUserMessageArgs) {
         this.globalisationMessageCode = globalisationMessageCode;
         this.defaultUserMessage = defaultUserMessage;
-        this.parameterName = "";
+        this.parameterName = null;
         this.defaultUserMessageArgs = defaultUserMessageArgs;
     }
 
