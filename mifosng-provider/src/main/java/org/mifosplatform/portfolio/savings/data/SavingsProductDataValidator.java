@@ -88,9 +88,10 @@ public class SavingsProductDataValidator {
         final Integer digitsAfterDecimal = fromApiJsonHelper.extractIntegerSansLocaleNamed(digitsAfterDecimalParamName, element);
         baseDataValidator.reset().parameter(digitsAfterDecimalParamName).value(digitsAfterDecimal).notNull().inMinMaxRange(0, 6);
 
-        final Integer inMultiplesOf = fromApiJsonHelper.extractIntegerSansLocaleNamed(inMultiplesOfParamName, element);
-        baseDataValidator.reset().parameter(inMultiplesOfParamName).value(inMultiplesOf).ignoreIfNull().integerZeroOrGreater();
-
+        if (this.fromApiJsonHelper.parameterExists(inMultiplesOfParamName, element)) {
+            final Integer inMultiplesOf = fromApiJsonHelper.extractIntegerNamed(inMultiplesOfParamName, element, Locale.getDefault());
+            baseDataValidator.reset().parameter(inMultiplesOfParamName).value(inMultiplesOf).ignoreIfNull().integerZeroOrGreater();
+        }
         final BigDecimal nominalAnnualInterestRate = fromApiJsonHelper.extractBigDecimalWithLocaleNamed(nominalAnnualInterestRateParamName,
                 element);
         baseDataValidator.reset().parameter(nominalAnnualInterestRateParamName).value(nominalAnnualInterestRate).notNull()
@@ -257,7 +258,7 @@ public class SavingsProductDataValidator {
         }
 
         if (this.fromApiJsonHelper.parameterExists(inMultiplesOfParamName, element)) {
-            final Integer inMultiplesOf = fromApiJsonHelper.extractIntegerSansLocaleNamed(inMultiplesOfParamName, element);
+            final Integer inMultiplesOf = fromApiJsonHelper.extractIntegerNamed(inMultiplesOfParamName, element, Locale.getDefault());
             baseDataValidator.reset().parameter(inMultiplesOfParamName).value(inMultiplesOf).ignoreIfNull().integerZeroOrGreater();
         }
 
