@@ -6,7 +6,10 @@
 package org.mifosplatform.scheduledjobs.service;
 
 import java.util.Collection;
+import java.util.List;
 
+import org.mifosplatform.infrastructure.core.data.ApiParameterError;
+import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.mifosplatform.infrastructure.core.service.RoutingDataSourceServiceFactory;
 import org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil;
 import org.mifosplatform.infrastructure.jobs.annotation.CronTarget;
@@ -204,8 +207,15 @@ public class ScheduledJobRunnerServiceImpl implements ScheduledJobRunnerService 
                 .retrieveAccountsWithAnnualFeeDue();
 
         for (SavingsAccountAnnualFeeData savingsAccountReference : annualFeeData) {
-            this.savingsAccountWritePlatformService.applyAnnualFee(savingsAccountReference.getId(),
-                    savingsAccountReference.getNextAnnualFeeDueDate());
+            try{
+                this.savingsAccountWritePlatformService.applyAnnualFee(savingsAccountReference.getId(),
+                        savingsAccountReference.getNextAnnualFeeDueDate());
+            } catch (PlatformApiDataValidationException e) {
+                List<ApiParameterError> errors = e.getErrors();
+                for(ApiParameterError error : errors){
+                    logger.error("Apply annual fee failed for account:"+savingsAccountReference.getAccountNo()+" with message "+error.getDeveloperMessage());
+                }
+            }
         }
 
         logger.info(ThreadLocalContextUtil.getTenant().getName() + ": Savings accounts affected by update: " + annualFeeData.size());

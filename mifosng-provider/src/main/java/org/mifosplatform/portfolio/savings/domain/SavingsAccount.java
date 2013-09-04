@@ -803,7 +803,9 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         final Money annualFee = Money.of(this.currency, this.annualFeeAmount);
         final SavingsAccountTransaction annualFeeTransaction = SavingsAccountTransaction.annualFee(this, annualFeeTransactionDate, annualFee);
         this.transactions.add(annualFeeTransaction);
-
+        
+        validateAccountBalanceDoesNotBecomeNegative(SavingsApiConstants.applyAnnualFeeTransactionAction);
+        
         this.summary.updateSummary(this.currency, this.savingsAccountTransactionSummaryWrapper, this.transactions);
 
         calculateInterestUsing(mc, today);
