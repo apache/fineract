@@ -13,39 +13,39 @@ import org.mifosplatform.infrastructure.core.exception.AbstractPlatformDomainRul
  */
 public class TransferNotSupportedException extends AbstractPlatformDomainRuleException {
 
-    /**
-     * Default Constructor (cannot transfer entities with active loan/savings
-     * accounts)
-     */
-    public TransferNotSupportedException() {
-        super("error.msg.entity.transfers.with.active.accounts", "Cannot transfer Clients/Groups having active loan or savings accounts");
+    /*** enum of reasons for invalid Journal Entry **/
+    public static enum TRANSFER_NOT_SUPPORTED_REASON {
+        SOURCE_AND_DESTINATION_GROUP_CANNOT_BE_SAME, ACTIVE_SAVINGS_ACCOUNT, BULK_CLIENT_TRANSFER_ACROSS_BRANCHES, DESTINATION_GROUP_MEETING_FREQUENCY_MISMATCH, DESTINATION_GROUP_HAS_NO_MEETING;
+
+        public String errorMessage() {
+            if (name().toString().equalsIgnoreCase("ACTIVE_SAVINGS_ACCOUNT")) {
+                return "Cannot transfer Clients/Groups having active Savings accounts";
+            } else if (name().toString().equalsIgnoreCase("BULK_CLIENT_TRANSFER_ACROSS_BRANCHES")) {
+                return "Bulk Transfers of clients between Groups in different branches not allowed ";
+            } else if (name().toString().equalsIgnoreCase("DESTINATION_GROUP_MEETING_FREQUENCY_MISMATCH")) {
+                return "Cannot transfer Clients with active accounts between groups with different meeting frequency";
+            } else if (name().toString().equalsIgnoreCase("SOURCE_AND_DESTINATION_GROUP_CANNOT_BE_SAME")) {
+                return "Source and destination groups for bulk client transfers should be different";
+            } else if (name().toString().equalsIgnoreCase("DESTINATION_GROUP_HAS_NO_MEETING")) { return "Cannot transfer Client with active accounts to a groups with no meeting frequency"; }
+            return name().toString();
+        }
+
+        public String errorCode() {
+            if (name().toString().equalsIgnoreCase("ACTIVE_SAVINGS_ACCOUNT")) {
+                return "error.msg.entity.transfers.with.active.savings.accounts";
+            } else if (name().toString().equalsIgnoreCase("BULK_CLIENT_TRANSFER_ACROSS_BRANCHES")) {
+                return "error.msg.groups.bulk.client.transfers.to.different.office";
+            } else if (name().toString().equalsIgnoreCase("DESTINATION_GROUP_MEETING_FREQUENCY_MISMATCH")) {
+                return "error.msg.client.transfers.with.active.accounts.between.groups.with.different.meeting.frequency";
+            } else if (name().toString().equalsIgnoreCase("SOURCE_AND_DESTINATION_GROUP_CANNOT_BE_SAME")) {
+                return "error.msg.groups.bulk.client.transfers.to.same.group";
+            } else if (name().toString().equalsIgnoreCase("DESTINATION_GROUP_HAS_NO_MEETING")) { return "error.msg.client.transfers.with.active.accounts.to.group.with.no.meeting.frequencys"; }
+            return name().toString();
+        }
     }
 
-    /**
-     * Overloaded Constructor (Cannot transfer Clients with active accounts
-     * between groups with different meeting frequency)
-     * 
-     * @param clientId
-     * @param sourceGroupId
-     * @param destinationGroupId
-     */
-    public TransferNotSupportedException(Long clientId, Long sourceGroupId, Long destinationGroupId) {
-        super("error.msg.client.transfers.with.active.accounts.between.groups.with.different.meeting.frequency",
-                "Cannot transfer Clients with active accounts between groups with different meeting frequency", clientId, sourceGroupId,
-                destinationGroupId);
+    public TransferNotSupportedException(final TRANSFER_NOT_SUPPORTED_REASON reason, final Object... defaultUserMessageArgs) {
+        super(reason.errorCode(), reason.errorMessage(), defaultUserMessageArgs);
     }
 
-    /**
-     * Overloaded Constructor (Cannot transfer Clients with active (JLG)
-     * accounts to a group with no meetings defined)
-     * 
-     * @param clientId
-     * @param sourceGroupId
-     * @param destinationGroupId
-     */
-    public TransferNotSupportedException(Long clientId, Long sourceGroupId, Long destinationGroupId, boolean destinationGroupMeetingAbsent) {
-        super("error.msg.client.transfers.with.active.accounts.to.group.with.no.meeting.frequency",
-                "Cannot transfer Client with active accounts to a groups with no meeting frequency", clientId, sourceGroupId,
-                destinationGroupId,destinationGroupMeetingAbsent);
-    }
 }

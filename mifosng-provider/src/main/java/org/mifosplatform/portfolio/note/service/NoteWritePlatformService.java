@@ -7,6 +7,7 @@ package org.mifosplatform.portfolio.note.service;
 
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
+import org.mifosplatform.portfolio.client.domain.Client;
 
 public interface NoteWritePlatformService {
 
@@ -15,4 +16,6 @@ public interface NoteWritePlatformService {
     CommandProcessingResult updateNote(JsonCommand command);
 
     CommandProcessingResult deleteNote(JsonCommand command);
+
+    void createAndPersistClientNote(Client client, JsonCommand command);
 }

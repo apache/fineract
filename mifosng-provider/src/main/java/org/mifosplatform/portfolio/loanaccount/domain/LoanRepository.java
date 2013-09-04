@@ -52,7 +52,7 @@ public interface LoanRepository extends JpaRepository<Loan, Long>, JpaSpecificat
     public static final String FIND_ACTIVE_LOANS_PRODUCT_IDS_BY_GROUP = "Select loan.loanProduct.id from Loan loan where "
             + "loan.group.id = :groupId and loan.loanStatus = :loanStatus and loan.client.id is NULL group by loan.loanProduct.id";
 
-    public static final String DOES_CLIENT_HAVE_ACTIVE_LOANS = "select case when (count (loan) > 0) then true else false end from Loan loan where loan.client.id = :clientId and loan.loanStatus in (100,200,300,303,304)";
+    public static final String DOES_CLIENT_HAVE_NON_CLOSED_LOANS = "select case when (count (loan) > 0) then true else false end from Loan loan where loan.client.id = :clientId and loan.loanStatus in (100,200,300,303,304)";
 
     @Query(FIND_GROUP_LOANS_DISBURSED_AFTER)
     List<Loan> getGroupLoansDisbursedAfter(@Param("disbursementDate") Date disbursementDate, @Param("groupId") Long groupId,
@@ -117,7 +117,7 @@ public interface LoanRepository extends JpaRepository<Loan, Long>, JpaSpecificat
     @Query(FIND_ACTIVE_LOANS_PRODUCT_IDS_BY_GROUP)
     List<Long> findActiveLoansLoanProductIdsByGroup(@Param("groupId") Long groupId, @Param("loanStatus") Integer loanStatus);
 
-    @Query(DOES_CLIENT_HAVE_ACTIVE_LOANS)
-    boolean doesClientHaveActiveLoans(@Param("clientId") Long clientId);
+    @Query(DOES_CLIENT_HAVE_NON_CLOSED_LOANS)
+    boolean doNonClosedLoanAccountsExistForClient(@Param("clientId") Long clientId);
 
 }

@@ -27,7 +27,7 @@ public interface CalendarInstanceRepository extends JpaRepository<CalendarInstan
     Collection<CalendarInstance> findByCalendarIdAndEntityTypeId(Long calendarId, Integer entityTypeId);
 
     /**Should use in clause, can I do it without creating a new class?**/
-    @Query("from CalendarInstance ci where ci.entityId in (select id from Loan loan where loan.client.id = :clientId and loan.group.id=:groupId and (loan.loanStatus = 100 or loan.loanStatus = 200 or loan.loanStatus = 300)) and ci.entityTypeId = 3")
+    @Query("from CalendarInstance ci where ci.entityId in (select id from Loan loan where loan.client.id = :clientId and loan.group.id = :groupId and (loan.loanStatus = 100 or loan.loanStatus = 200 or loan.loanStatus = 300)) and ci.entityTypeId = 3")
     List<CalendarInstance> findCalendarInstancesForActiveLoansByGroupIdAndClientId(@Param("clientId") Long clientId,
             @Param("groupId") Long groupId);
 }

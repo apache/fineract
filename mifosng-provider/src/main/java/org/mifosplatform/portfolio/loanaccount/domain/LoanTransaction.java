@@ -137,6 +137,13 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
                         .getTotalPenaltyChargesOutstanding(), false, null);
     }
 
+    public static LoanTransaction withdrawTransfer(final Office office, final Loan loan, final LocalDate transferDate) {
+        return new LoanTransaction(loan, office, LoanTransactionType.APPROVE_TRANSFER.getValue(), transferDate.toDateMidnight().toDate(),
+                loan.getSummary().getTotalOutstanding(), loan.getSummary().getTotalPrincipalOutstanding(), loan.getSummary()
+                        .getTotalInterestOutstanding(), loan.getSummary().getTotalFeeChargesOutstanding(), loan.getSummary()
+                        .getTotalPenaltyChargesOutstanding(), false, null);
+    }
+
     public static LoanTransaction refund(final Office office, final Money amount, final PaymentDetail paymentDetail,
             final LocalDate paymentDate, final String externalId) {
         return new LoanTransaction(null, office, LoanTransactionType.REFUND, paymentDetail, amount.getAmount(), paymentDate, externalId);

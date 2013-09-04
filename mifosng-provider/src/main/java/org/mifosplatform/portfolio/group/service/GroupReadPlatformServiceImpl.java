@@ -206,17 +206,17 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
     }
 
     @Override
-    public Collection<GroupGeneralData> retrieveGroupsForLookup(final Long officeId, final Long groupId) {
+    public Collection<GroupGeneralData> retrieveGroupsForLookup(final Long officeId) {
         this.context.authenticatedUser();
         GroupLookupDataMapper rm = new GroupLookupDataMapper();
-        String sql = "Select " + rm.schema() + " where g.office_id=? and g.id !=?";
-        return this.jdbcTemplate.query(sql, rm, new Object[] { officeId, groupId });
+        String sql = "Select " + rm.schema() + " and g.office_id=?";
+        return this.jdbcTemplate.query(sql, rm, new Object[] { officeId });
     }
 
     private static final class GroupLookupDataMapper implements RowMapper<GroupGeneralData> {
 
         public final String schema() {
-            return "g.id as id, g.display_name as displayName from m_group g";
+            return "g.id as id, g.display_name as displayName from m_group g where g.level_id = 2 ";
         }
 
         @Override

@@ -86,6 +86,8 @@ public class ClientsApiResource {
         context.authenticatedUser().validateHasReadPermission(ClientApiConstants.CLIENT_RESOURCE_NAME);
         if (is(commandParam, "close")) {
             clientData = this.clientReadPlatformService.retrieveAllClosureReasons(ClientApiConstants.CLIENT_CLOSURE_REASON);
+        } else if (is(commandParam, "acceptTransfer")) {
+            clientData = this.clientReadPlatformService.retrieveAllClosureReasons(ClientApiConstants.CLIENT_CLOSURE_REASON);
         } else {
             clientData = this.clientReadPlatformService.retrieveTemplate(officeId, staffInSelectedOfficeOnly);
         }

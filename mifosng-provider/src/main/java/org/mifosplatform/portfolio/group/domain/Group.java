@@ -387,6 +387,14 @@ public final class Group extends AbstractPersistable<Long> {
     public boolean isTransferInProgress() {
         return GroupingTypeStatus.fromInt(this.status).isTransferInProgress();
     }
+    
+    public boolean isTransferOnHold() {
+        return GroupingTypeStatus.fromInt(this.status).isTransferOnHold();
+    }
+
+    public boolean isTransferInProgressOrOnHold() {
+        return isTransferInProgress() || isTransferOnHold();
+    }
 
     public boolean isChildClient(final Long clientId) {
         if (clientId != null && this.clientMembers != null && !this.clientMembers.isEmpty()) {

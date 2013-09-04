@@ -76,7 +76,7 @@ public class Note extends AbstractAuditableCustom<AppUser, Long> {
         return new Note(account, note);
     }
     
-    private Note(final Client client, final String note) {
+    public Note(final Client client, final String note) {
         this.client = client;
         this.note = note;
         this.noteTypeId = NoteType.CLIENT.getValue();

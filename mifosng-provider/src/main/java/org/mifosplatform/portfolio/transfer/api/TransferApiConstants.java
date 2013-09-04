@@ -20,15 +20,23 @@ public class TransferApiConstants {
     public static final String destinationGroupIdParamName = "destinationGroupId";
     public static final String clients = "clients";
     public static final String inheritDestinationGroupLoanOfficer = "inheritDestinationGroupLoanOfficer";
-    public static final String newStaffIdParamName = "newStaffId";
+    public static final String newStaffIdParamName = "staffId";
     public static final String transferActiveLoans = "transferActiveLoans";
     public static final String destinationOfficeIdParamName = "destinationOfficeId";
+    public static final String note = "note";
 
     public static final Set<String> TRANSFER_CLIENTS_BETWEEN_GROUPS_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(localeParamName,
             dateFormatParamName, destinationGroupIdParamName, clients, inheritDestinationGroupLoanOfficer, newStaffIdParamName,
             transferActiveLoans));
 
-    public static final Set<String> PROPOSE_CLIENT_TRANSFER_BETWEEN_BRANCHES_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(
-            localeParamName, dateFormatParamName, destinationOfficeIdParamName, newStaffIdParamName, transferActiveLoans));
+    public static final Set<String> PROPOSE_CLIENT_TRANSFER_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(localeParamName,
+            dateFormatParamName, destinationOfficeIdParamName, transferActiveLoans, note));
+
+    public static final Set<String> ACCEPT_CLIENT_TRANSFER_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(newStaffIdParamName,
+            destinationGroupIdParamName, note));
+
+    public static final Set<String> REJECT_CLIENT_TRANSFER_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(note));
+
+    public static final Set<String> WITHDRAW_CLIENT_TRANSFER_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(note));
 
 }

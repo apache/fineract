@@ -7,6 +7,7 @@ package org.mifosplatform.portfolio.note.service;
 
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
@@ -71,6 +72,15 @@ public class NoteWritePlatformServiceJpaRepositoryImpl implements NoteWritePlatf
                 .withOfficeId(client.officeId()) //
                 .build();
 
+    }
+
+    @Override
+    public void createAndPersistClientNote(final Client client, final JsonCommand command) {
+        final String noteText = command.stringValueOfParameterNamed("note");
+        if (StringUtils.isNotBlank(noteText)) {
+            final Note newNote = new Note(client, noteText);
+            this.noteRepository.save(newNote);
+        }
     }
 
     private CommandProcessingResult createGroupNote(final JsonCommand command) {

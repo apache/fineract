@@ -178,7 +178,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             /*** TODO Vishwas: Remove references to "Contra" from the codebase ***/
             String sql = "select "
                     + rm.LoanPaymentsSchema()
-                    + " where tr.loan_id = ? and tr.transaction_type_enum not in (0, 3) and tr.is_reversed=0 order by tr.transaction_date ASC";
+                    + " where tr.loan_id = ? and tr.transaction_type_enum not in (0, 3) and tr.is_reversed=0 order by tr.transaction_date ASC,id ";
             return this.jdbcTemplate.query(sql, rm, new Object[] { loanId });
         } catch (EmptyResultDataAccessException e) {
             return null;

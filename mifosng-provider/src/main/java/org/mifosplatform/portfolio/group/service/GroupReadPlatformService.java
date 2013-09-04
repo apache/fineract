@@ -18,5 +18,5 @@ public interface GroupReadPlatformService {
 
     GroupGeneralData retrieveOne(Long groupId);
 
-    Collection<GroupGeneralData> retrieveGroupsForLookup(Long officeId, Long groupId);
+    Collection<GroupGeneralData> retrieveGroupsForLookup(Long officeId);
 }
