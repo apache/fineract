@@ -363,7 +363,7 @@ public class CommandWrapperBuilder {
     }
 
     public CommandWrapperBuilder withdrawClientTransferRequest(final Long clientId) {
-        this.actionName = "PROPOSETRANSFER";
+        this.actionName = "WITHDRAWTRANSFER";
         this.entityName = "CLIENT";
         this.entityId = clientId;
         this.clientId = clientId;

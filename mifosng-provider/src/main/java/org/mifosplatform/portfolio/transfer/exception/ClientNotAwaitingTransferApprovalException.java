@@ -1,4 +1,4 @@
-package org.mifosplatform.portfolio.client.exception;
+package org.mifosplatform.portfolio.transfer.exception;
 
 import org.mifosplatform.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 

@@ -63,13 +63,6 @@ public final class TransfersDataValidator {
                     .integerGreaterThanZero();
         }
 
-        if (this.fromApiJsonHelper.parameterExists(TransferApiConstants.transferActiveLoans, element)) {
-            final Boolean inheritDestinationGroupLoanOfficer = this.fromApiJsonHelper.extractBooleanNamed(
-                    TransferApiConstants.transferActiveLoans, element);
-            baseDataValidator.reset().parameter(TransferApiConstants.transferActiveLoans).value(inheritDestinationGroupLoanOfficer)
-                    .notNull();
-        }
-
         if (this.fromApiJsonHelper.parameterExists(TransferApiConstants.inheritDestinationGroupLoanOfficer, element)) {
             final Boolean inheritDestinationGroupLoanOfficer = this.fromApiJsonHelper.extractBooleanNamed(
                     TransferApiConstants.inheritDestinationGroupLoanOfficer, element);
@@ -80,13 +73,12 @@ public final class TransfersDataValidator {
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
-    public void validateForProposeClientTransferBetweenBranches(final String json) {
+    public void validateForProposeClientTransfer(final String json) {
 
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
-        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,
-                TransferApiConstants.PROPOSE_CLIENT_TRANSFER_BETWEEN_BRANCHES_DATA_PARAMETERS);
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, TransferApiConstants.PROPOSE_CLIENT_TRANSFER_DATA_PARAMETERS);
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
@@ -99,13 +91,76 @@ public final class TransfersDataValidator {
         baseDataValidator.reset().parameter(TransferApiConstants.destinationOfficeIdParamName).value(destinationOfficeId).notNull()
                 .integerGreaterThanZero();
 
+        validateNote(baseDataValidator, element);
+
+        throwExceptionIfValidationWarningsExist(dataValidationErrors);
+    }
+
+    public void validateForAcceptClientTransfer(final String json) {
+        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, TransferApiConstants.ACCEPT_CLIENT_TRANSFER_DATA_PARAMETERS);
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+                .resource(ClientApiConstants.CLIENT_RESOURCE_NAME);
+        final JsonElement element = fromApiJsonHelper.parse(json);
+
         if (this.fromApiJsonHelper.parameterExists(TransferApiConstants.newStaffIdParamName, element)) {
             final Long newStaffId = this.fromApiJsonHelper.extractLongNamed(TransferApiConstants.newStaffIdParamName, element);
-            baseDataValidator.reset().parameter(TransferApiConstants.newStaffIdParamName).value(newStaffId).ignoreIfNull()
+            baseDataValidator.reset().parameter(TransferApiConstants.newStaffIdParamName).value(newStaffId).notNull()
                     .integerGreaterThanZero();
         }
 
+        if (this.fromApiJsonHelper.parameterExists(TransferApiConstants.destinationGroupIdParamName, element)) {
+            final Long destinationGroupId = this.fromApiJsonHelper.extractLongNamed(TransferApiConstants.destinationGroupIdParamName,
+                    element);
+            baseDataValidator.reset().parameter(TransferApiConstants.destinationGroupIdParamName).value(destinationGroupId).notNull()
+                    .integerGreaterThanZero();
+        }
+
+        validateNote(baseDataValidator, element);
+
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
+    }
+
+    public void validateForRejectClientTransfer(final String json) {
+        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, TransferApiConstants.REJECT_CLIENT_TRANSFER_DATA_PARAMETERS);
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+                .resource(ClientApiConstants.CLIENT_RESOURCE_NAME);
+        final JsonElement element = fromApiJsonHelper.parse(json);
+
+        validateNote(baseDataValidator, element);
+
+        throwExceptionIfValidationWarningsExist(dataValidationErrors);
+    }
+
+    public void validateForWithdrawClientTransfer(final String json) {
+        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        this.fromApiJsonHelper
+                .checkForUnsupportedParameters(typeOfMap, json, TransferApiConstants.WITHDRAW_CLIENT_TRANSFER_DATA_PARAMETERS);
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+                .resource(ClientApiConstants.CLIENT_RESOURCE_NAME);
+        final JsonElement element = fromApiJsonHelper.parse(json);
+
+        validateNote(baseDataValidator, element);
+
+        throwExceptionIfValidationWarningsExist(dataValidationErrors);
+    }
+
+    private void validateNote(final DataValidatorBuilder baseDataValidator, final JsonElement element) {
+        final String note = fromApiJsonHelper.extractStringNamed(TransferApiConstants.note, element);
+        baseDataValidator.reset().parameter(TransferApiConstants.note).value(note).notExceedingLengthOf(1000);
     }
 
 }

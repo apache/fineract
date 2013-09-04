@@ -11,6 +11,8 @@ import java.util.Map;
 import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
+import org.mifosplatform.organisation.office.domain.Office;
+import org.mifosplatform.organisation.staff.domain.Staff;
 import org.mifosplatform.portfolio.calendar.domain.Calendar;
 import org.mifosplatform.portfolio.calendar.domain.CalendarInstance;
 import org.mifosplatform.portfolio.collectionsheet.command.CollectionSheetBulkDisbursalCommand;
@@ -59,9 +61,10 @@ public interface LoanWritePlatformService {
 
     LoanTransaction initiateLoanTransfer(Long accountId, LocalDate TransferDate);
 
-    LoanTransaction acceptLoanTransfer(Long accountId, LocalDate TransferDate);
-    
     LoanTransaction withdrawLoanTransfer(Long accountId, LocalDate TransferDate);
 
-    LoanTransaction rejectLoanTransfer(Long accountId, LocalDate TransferDate);
+    void rejectLoanTransfer(Long accountId);
+
+    LoanTransaction acceptLoanTransfer(Long accountId, LocalDate TransferDate, Office acceptedInOffice, Staff loanOfficer);
+
 }

@@ -22,6 +22,10 @@ import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidation
 
 public class DateUtils {
 
+    public static Date getDateOfTenant() {
+        return getLocalDateOfTenant().toDateMidnight().toDate();
+    }
+
     public static LocalDate getLocalDateOfTenant() {
 
         LocalDate today = new LocalDate();
@@ -53,8 +57,8 @@ public class DateUtils {
                     dataValidationErrors);
         }
     }
-    
-    public static String formatToSqlDate(final Date date){
+
+    public static String formatToSqlDate(final Date date) {
         final DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
         final String formattedSqlDate = df.format(date);
         return formattedSqlDate;

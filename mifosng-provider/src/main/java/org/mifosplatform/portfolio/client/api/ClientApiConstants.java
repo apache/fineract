@@ -30,6 +30,7 @@ public class ClientApiConstants {
     public static final String lastnameParamName = "lastname";
     public static final String fullnameParamName = "fullname";
     public static final String officeIdParamName = "officeId";
+    public static final String transferOfficeIdParamName = "transferOfficeIdParamName";
     public static final String activeParamName = "active";
     public static final String activationDateParamName = "activationDate";
     public static final String staffIdParamName = "staffId";
@@ -40,6 +41,7 @@ public class ClientApiConstants {
     public static final String hierarchyParamName = "hierarchy";
     public static final String displayNameParamName = "displayName";
     public static final String officeNameParamName = "officeName";
+    public static final String trasnferOfficeNameParamName = "transferOfficeName";
     public static final String imageKeyParamName = "imageKey";
     public static final String imagePresentParamName = "imagePresent";
 
@@ -55,8 +57,8 @@ public class ClientApiConstants {
             lastnameParamName, fullnameParamName, officeIdParamName, activeParamName, activationDateParamName, staffIdParamName));
 
     public static final Set<String> CLIENT_UPDATE_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(localeParamName,
-            dateFormatParamName, accountNoParamName, externalIdParamName, firstnameParamName, middlenameParamName,
-            lastnameParamName, fullnameParamName, activeParamName, activationDateParamName, staffIdParamName));
+            dateFormatParamName, accountNoParamName, externalIdParamName, firstnameParamName, middlenameParamName, lastnameParamName,
+            fullnameParamName, activeParamName, activationDateParamName, staffIdParamName));
 
     /**
      * These parameters will match the class level parameters of
@@ -65,12 +67,13 @@ public class ClientApiConstants {
      */
     public static final Set<String> CLIENT_RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(idParamName, accountNoParamName,
             externalIdParamName, statusParamName, activeParamName, activationDateParamName, firstnameParamName, middlenameParamName,
-            lastnameParamName, fullnameParamName, displayNameParamName, officeIdParamName, officeNameParamName, hierarchyParamName,
-            imageKeyParamName, imagePresentParamName, groupsParamName, officeOptionsParamName, staffOptionsParamName));
+            lastnameParamName, fullnameParamName, displayNameParamName, officeIdParamName, officeNameParamName, transferOfficeIdParamName,
+            trasnferOfficeNameParamName, hierarchyParamName, imageKeyParamName, imagePresentParamName, groupsParamName,
+            officeOptionsParamName, staffOptionsParamName));
 
     public static final Set<String> ACTIVATION_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(localeParamName,
             dateFormatParamName, activationDateParamName));
-    
+
     public static final Set<String> CLIENT_CLOSE_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(localeParamName,
             dateFormatParamName, closureDateParamName, closureReasonIdParamName));
 }

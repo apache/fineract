@@ -5,7 +5,6 @@
  */
 package org.mifosplatform.portfolio.group.api;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -143,21 +142,10 @@ public class GroupsApiResource {
             @QueryParam("officeId") final Long officeId, @QueryParam("externalId") final String externalId,
             @QueryParam("name") final String name, @QueryParam("underHierarchy") final String hierarchy,
             @QueryParam("offset") final Integer offset, @QueryParam("limit") final Integer limit,
-            @QueryParam("orderBy") final String orderBy, @QueryParam("sortOrder") final String sortOrder,
-            @QueryParam("templateType") final String templateType, @QueryParam("groupId") final Long groupId) {
+            @QueryParam("orderBy") final String orderBy, @QueryParam("sortOrder") final String sortOrder) {
 
         this.context.authenticatedUser().validateHasReadPermission(GroupingTypesApiConstants.GROUP_RESOURCE_NAME);
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-
-        if (templateType != null && templateType.equalsIgnoreCase("clientstransfertemplate")) {
-            final Collection<GroupGeneralData> groups;
-            if (officeId != null && groupId != null) {
-                groups = this.groupReadPlatformService.retrieveGroupsForLookup(officeId, groupId);
-            } else {
-                groups = new ArrayList<GroupGeneralData>();
-            }
-            return this.groupGeneralApiJsonSerializer.serialize(settings, groups, GroupingTypesApiConstants.GROUP_RESPONSE_DATA_PARAMETERS);
-        }
 
         final SearchParameters searchParameters = SearchParameters.forGroups(sqlSearch, officeId, externalId, name, hierarchy, offset,
                 limit, orderBy, sortOrder);
@@ -186,7 +174,7 @@ public class GroupsApiResource {
         GroupRoleData selectedRole = null;
         Collection<CalendarData> calendars = null;
         CalendarData collectionMeetingCalendar = null;
-                
+
         if (!associationParameters.isEmpty()) {
             if (associationParameters.contains("all")) {
                 associationParameters.addAll(Arrays.asList("clientMembers", "groupRoles", "calendars", "collectionMeetingCalendar"));
@@ -204,26 +192,29 @@ public class GroupsApiResource {
                 }
             }
             if (associationParameters.contains("parentCalendars")) {
-                final List<Integer>  calendarTypeOptions = CalendarUtils.createIntegerListFromQueryParameter("all");
-                calendars = this.calendarReadPlatformService.retrieveParentCalendarsByEntity(groupId, CalendarEntityType.GROUPS.getValue(), calendarTypeOptions);
+                final List<Integer> calendarTypeOptions = CalendarUtils.createIntegerListFromQueryParameter("all");
+                calendars = this.calendarReadPlatformService.retrieveParentCalendarsByEntity(groupId, CalendarEntityType.GROUPS.getValue(),
+                        calendarTypeOptions);
                 if (CollectionUtils.isEmpty(calendars)) {
                     calendars = null;
                 }
             }
             if (associationParameters.contains("collectionMeetingCalendar")) {
-                if(group.isChildGroup()){
-                    collectionMeetingCalendar = this.calendarReadPlatformService.retrieveCollctionCalendarByEntity(group.getParentId(), CalendarEntityType.CENTERS.getValue());
-                }else {
-                    collectionMeetingCalendar = this.calendarReadPlatformService.retrieveCollctionCalendarByEntity(groupId, CalendarEntityType.GROUPS.getValue());
+                if (group.isChildGroup()) {
+                    collectionMeetingCalendar = this.calendarReadPlatformService.retrieveCollctionCalendarByEntity(group.getParentId(),
+                            CalendarEntityType.CENTERS.getValue());
+                } else {
+                    collectionMeetingCalendar = this.calendarReadPlatformService.retrieveCollctionCalendarByEntity(groupId,
+                            CalendarEntityType.GROUPS.getValue());
                 }
-                if(collectionMeetingCalendar != null){
+                if (collectionMeetingCalendar != null) {
                     collectionMeetingCalendar = this.calendarReadPlatformService.generateRecurringDate(collectionMeetingCalendar);
                 }
             }
-            
+
             group = GroupGeneralData.withAssocations(group, membersOfGroup, groupRoles, calendars, collectionMeetingCalendar);
         }
-        
+
         if (roleId != null) {
             selectedRole = this.groupRolesReadPlatformService.retrieveGroupRole(groupId, roleId);
             if (selectedRole != null) {
@@ -268,7 +259,7 @@ public class GroupsApiResource {
         return this.toApiJsonSerializer.serialize(result);
 
     }
-    
+
     @PUT
     @Path("{groupId}")
     @Consumes({ MediaType.APPLICATION_JSON })

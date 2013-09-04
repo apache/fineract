@@ -100,7 +100,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         StringBuilder sqlBuilder = new StringBuilder(200);
         sqlBuilder.append("select SQL_CALC_FOUND_ROWS ");
         sqlBuilder.append(this.clientMapper.schema());
-        sqlBuilder.append(" where o.hierarchy like ?");
+        sqlBuilder.append(" where o.hierarchy like ? or transferToOffice.hierarchy like ?");
 
         final String extraCriteria = buildSqlStringFromClientCriteria(searchParameters);
 
@@ -124,8 +124,8 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         }
 
         final String sqlCountRows = "SELECT FOUND_ROWS()";
-        return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlCountRows, sqlBuilder.toString(),
-                new Object[] { hierarchySearchString }, this.clientMapper);
+        return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlCountRows, sqlBuilder.toString(), new Object[] {
+                hierarchySearchString, hierarchySearchString }, this.clientMapper);
     }
 
     private String buildSqlStringFromClientCriteria(final SearchParameters searchParameters) {
@@ -184,9 +184,10 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             String hierarchy = currentUser.getOffice().getHierarchy();
             String hierarchySearchString = hierarchy + "%";
 
-            String sql = "select " + this.clientMapper.schema() + " where o.hierarchy like ? and c.id = ?";
-            ClientData clientData = this.jdbcTemplate.queryForObject(sql, this.clientMapper,
-                    new Object[] { hierarchySearchString, clientId });
+            String sql = "select " + this.clientMapper.schema()
+                    + " where ( o.hierarchy like ? or transferToOffice.hierarchy like ?) and c.id = ?";
+            ClientData clientData = this.jdbcTemplate.queryForObject(sql, this.clientMapper, new Object[] { hierarchySearchString,
+                    hierarchySearchString, clientId });
 
             String clientGroupsSql = "select " + this.clientGroupsMapper.parentGroupsSchema();
 
@@ -255,6 +256,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
             sqlBuilder.append("c.id as id, c.account_no as accountNo, c.external_id as externalId, c.status_enum as statusEnum, ");
             sqlBuilder.append("c.office_id as officeId, o.name as officeName, ");
+            sqlBuilder.append("c.transfer_to_office_id as transferToOfficeId, transferToOffice.name as transferToOfficeName, ");
             sqlBuilder.append("c.firstname as firstname, c.middlename as middlename, c.lastname as lastname, ");
             sqlBuilder.append("c.fullname as fullname, c.display_name as displayName, ");
             sqlBuilder.append("c.activation_date as activationDate, c.image_id as imageId, ");
@@ -263,6 +265,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             sqlBuilder.append("join m_office o on o.id = c.office_id ");
             sqlBuilder.append("join m_group_client pgc on pgc.client_id = c.id ");
             sqlBuilder.append("left join m_staff s on s.id = c.staff_id ");
+            sqlBuilder.append("left join m_office transferToOffice on transferToOffice.id = c.transfer_to_office_id ");
 
             this.schema = sqlBuilder.toString();
         }
@@ -280,6 +283,11 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             final EnumOptionData status = ClientEnumerations.status(statusEnum);
 
             final Long officeId = JdbcSupport.getLong(rs, "officeId");
+            final String officeName = rs.getString("officeName");
+
+            final Long transferToOfficeId = JdbcSupport.getLong(rs, "transferToOfficeId");
+            final String transferToOfficeName = rs.getString("transferToOfficeName");
+
             final Long id = JdbcSupport.getLong(rs, "id");
             final String firstname = rs.getString("firstname");
             final String middlename = rs.getString("middlename");
@@ -289,12 +297,11 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             final String externalId = rs.getString("externalId");
             final LocalDate activationDate = JdbcSupport.getLocalDate(rs, "activationDate");
             final Long imageId = JdbcSupport.getLong(rs, "imageId");
-            final String officeName = rs.getString("officeName");
             final Long staffId = JdbcSupport.getLong(rs, "staffId");
             final String staffName = rs.getString("staffName");
 
-            return ClientData.instance(accountNo, status, officeId, officeName, id, firstname, middlename, lastname, fullname, displayName,
-                    externalId, activationDate, imageId, staffId, staffName);
+            return ClientData.instance(accountNo, status, officeId, officeName, transferToOfficeId, transferToOfficeName, id, firstname,
+                    middlename, lastname, fullname, displayName, externalId, activationDate, imageId, staffId, staffName);
         }
     }
 
@@ -305,13 +312,14 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         final String hierarchy = currentUser.getOffice().getHierarchy();
         final String hierarchySearchString = hierarchy + "%";
 
-        final String sql = "select " + this.membersOfGroupMapper.schema()
+        final String sql = "select "
+                + this.membersOfGroupMapper.schema()
                 + " left join m_group g on pgc.group_id=g.id where o.hierarchy like ? and g.parent_id = ? and c.status_enum = ? group by c.id";
 
         return this.jdbcTemplate.query(sql, this.membersOfGroupMapper,
                 new Object[] { hierarchySearchString, centerId, ClientStatus.ACTIVE.getValue() });
     }
-    
+
     private static final class ClientMapper implements RowMapper<ClientData> {
 
         private final String schema;
@@ -321,7 +329,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
             builder.append("c.id as id, c.account_no as accountNo, c.external_id as externalId, c.status_enum as statusEnum, ");
             builder.append("c.office_id as officeId, o.name as officeName, ");
-            builder.append("c.office_id as officeId, o.name as officeName, ");
+            builder.append("c.transfer_to_office_id as transferToOfficeId, transferToOffice.name as transferToOfficeName, ");
             builder.append("c.firstname as firstname, c.middlename as middlename, c.lastname as lastname, ");
             builder.append("c.fullname as fullname, c.display_name as displayName, ");
             builder.append("c.activation_date as activationDate, c.image_id as imageId, ");
@@ -329,7 +337,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             builder.append("from m_client c ");
             builder.append("join m_office o on o.id = c.office_id ");
             builder.append("left join m_staff s on s.id = c.staff_id ");
-
+            builder.append("left join m_office transferToOffice on transferToOffice.id = c.transfer_to_office_id ");
             this.schema = builder.toString();
         }
 
@@ -346,6 +354,11 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             final EnumOptionData status = ClientEnumerations.status(statusEnum);
 
             final Long officeId = JdbcSupport.getLong(rs, "officeId");
+            final String officeName = rs.getString("officeName");
+
+            final Long transferToOfficeId = JdbcSupport.getLong(rs, "transferToOfficeId");
+            final String transferToOfficeName = rs.getString("transferToOfficeName");
+
             final Long id = JdbcSupport.getLong(rs, "id");
             final String firstname = rs.getString("firstname");
             final String middlename = rs.getString("middlename");
@@ -354,13 +367,12 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             final String displayName = rs.getString("displayName");
             final String externalId = rs.getString("externalId");
             final LocalDate activationDate = JdbcSupport.getLocalDate(rs, "activationDate");
-            final String officeName = rs.getString("officeName");
             final Long imageId = JdbcSupport.getLong(rs, "imageId");
             final Long staffId = JdbcSupport.getLong(rs, "staffId");
             final String staffName = rs.getString("staffName");
 
-            return ClientData.instance(accountNo, status, officeId, officeName, id, firstname, middlename, lastname, fullname, displayName,
-                    externalId, activationDate, imageId, staffId, staffName);
+            return ClientData.instance(accountNo, status, officeId, officeName, transferToOfficeId, transferToOfficeName, id, firstname,
+                    middlename, lastname, fullname, displayName, externalId, activationDate, imageId, staffId, staffName);
         }
     }
 

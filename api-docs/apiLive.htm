@@ -90,7 +90,7 @@
 <body>
 	<div id="page-wrapper">
 		<div id="flybar">
-			<div id="nav-logo">1.8.1.RELEASE API</div>
+			<div id="nav-logo">1.9.0.RELEASE API</div>
 			<div class="flybar-nav">
 				<h2 class="flybar-button">Overview</h2>
 				<div class="flybar-menu-overview">
@@ -209,8 +209,32 @@
 							</tr>
 							<tr class="alt">
 								<td></td>
-								<td>clients/{clientId}?command=transfer</td>
-								<td><a href="#clients_transfer">Transfer Client</a></td>
+								<td>clients/{clientId}?command=proposeTransfer</td>
+								<td><a href="#clients_propose_transfer">Propose a Client Transfer</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>clients/{clientId}?command=withdrawTransfer</td>
+								<td><a href="#clients_withdraw_transfer">Withdraw Client Transfer Proposal</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr class="alt">
+								<td></td>
+								<td>clients/{clientId}?command=acceptTransfer</td>
+								<td><a href="#clients_accept_transfer">Accept Client Transfer</a></td>
+								<td></td>
+								<td></td>
+								<td></td>
+							</tr>
+							<tr>
+								<td></td>
+								<td>clients/{clientId}?command=rejectTransfer</td>
+								<td><a href="#clients_reject_transfer">Reject Client Transfer</a></td>
 								<td></td>
 								<td></td>
 								<td></td>
@@ -586,7 +610,7 @@
 							<tr>
 								<td></td>
 								<td>groups/{groupId}?command=transferClients</td>
-								<td><a href="#groups_transfer_clients">Transfer Clients</a></td>
+								<td><a href="#groups_transfer_clients">Bulk Transfer Clients across Groups</a></td>
 								<td></td>
 								<td></td>
 								<td></td>
@@ -2138,19 +2162,20 @@ Request Body:
 	    </div>
 	</div>
 
-	<a id="clients_transfer" name="clients_transfer" class="old-syle-anchor">&nbsp;</a>
+	<a id="clients_propose_transfer" name="clients_propose_transfer" class="old-syle-anchor">&nbsp;</a>
 	<div class="method-section">
 	    <div class="method-description">
-	        <h4>Transfer a Client</h4>
-	        <p>Allows you to transfer a <i>Client</i> between <i>Offices</i>.</p>
+	        <h4>Propose a Client Transfer</h4>
+	        <p>Allows you to propose the transfer of a <i>Client</i> to a different <i>Offices</i>.</p>
 	    </div>
 		<div class="method-example">
-	        <code class="method-declaration">POST https://Domain Name/api/v1/clients/{clientId}?command=transfer</code>
-	        <code class="method-request">POST clients/1?command=transfer
+	        <code class="method-declaration">POST https://Domain Name/api/v1/clients/{clientId}?command=proposeTransfer</code>
+	        <code class="method-request">POST clients/1?command=proposeTransfer
 Content-Type: application/json
 Request Body:
 {
-  destinationOfficeId:1
+  "destinationOfficeId":"2",
+  "note":"Client Relocating to Bangalore"
 }				
 			</code>
 	        <code class="method-response">
@@ -2162,7 +2187,92 @@ Request Body:
 
 	        </code>
 	    </div>
-	</div>		
+	</div>
+
+	<a id="clients_withdraw_transfer" name="clients_withdraw_transfer" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h4>Withdraw a Client Transfer</h4>
+	        <p>Allows you to withdraw the proposed the transfer of a <i>Client</i> to a different <i>Offices</i>.</p>
+	        <p>Withdrawal can happen only if the destination Branch (to which the transfer was 
+	        <a href="#clients_propose_transfer">proposed</a>) has not already
+	         <a href="#clients_accept_transfer">accepted</a> the transfer proposal </p>
+	    </div>
+		<div class="method-example">
+	        <code class="method-declaration">POST https://Domain Name/api/v1/clients/{clientId}?command=withdrawTransfer</code>
+	        <code class="method-request">POST clients/1?command=withdrawTransfer
+Content-Type: application/json
+Request Body:
+{
+	"note":"Sorry, data entry error"
+}			
+			</code>
+	        <code class="method-response">
+{
+   "clientId": 2,
+   "resourceId": 2
+}
+
+
+	        </code>
+	    </div>
+	</div>
+
+	<a id="clients_reject_transfer" name="clients_reject_transfer" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h4>Reject a Client Transfer</h4>
+	        <p>Allows the Destination Branch to reject the <a href="#clients_propose_transfer">proposed</a> Client Transfer.</p>
+	    </div>
+		<div class="method-example">
+	        <code class="method-declaration">POST https://Domain Name/api/v1/clients/{clientId}?command=rejectTransfer</code>
+	        <code class="method-request">POST clients/1?command=rejectTransfer
+Content-Type: application/json
+Request Body:
+{
+	"note":"We cannot accept tranfers of clients having loans with less than 1 repayment left"
+}			
+			</code>
+	        <code class="method-response">
+{
+   "clientId": 2,
+   "resourceId": 2
+}
+
+
+	        </code>
+	    </div>
+	</div>	
+
+	<a id="clients_accept_transfer" name="clients_accept_transfer" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+	    <div class="method-description">
+	        <h4>Reject a Client Transfer</h4>
+	        <p>Allows the Destination Branch to accept the <a href="#clients_propose_transfer">proposed</a> Client Transfer.</p>
+	        <p>The destination branch may also choose to link this client to a group (in which case, any existing active JLG loan of the client is rescheduled to match the meeting frequency of the group) and loan Officer at the time of accepting
+	        the transfer</p>
+	    </div>
+		<div class="method-example">
+	        <code class="method-declaration">POST https://Domain Name/api/v1/clients/{clientId}?command=acceptTransfer</code>
+	        <code class="method-request">POST clients/1?command=acceptTransfer
+Content-Type: application/json
+Request Body:
+{
+	"note":"Due Diligence done and all documents received"
+}			
+			</code>
+	        <code class="method-response">
+{
+   "clientId": 2,
+   "resourceId": 2
+}
+
+
+	        </code>
+	    </div>
+	</div>			
+
+
 			<a id="clients_retrieve" name="clients_retrieve" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
@@ -3866,7 +3976,8 @@ Request Body:
 							<td>destinationGroupId</td>
 						</tr>
 						<tr>
-							<td class=fielddesc>The identifier of the group to which the clients are to be transferred.</td>
+							<td class=fielddesc>The identifier of the group to which the clients are to be transferred (
+							has to be in the same branch as the source Group).</td>
 						</tr>
 						<tr class=alt>
 							<td>clients</td>
@@ -3881,15 +3992,6 @@ Request Body:
 						<tr>
 							<td class=fielddesc>Flag specifies if the transferred clients (and all their active loans)
 							should be linked to the assigned loan officer for the group
-							</td>
-						</tr>
-						<tr class=alt>
-							<td>transferActiveLoans</td>
-						</tr>
-						<tr>
-							<td class=fielddesc>Flag specifies if transfers should proceed when active loans are encountered.
-							If set to true, the schedules of the actives loans are updated to match that meeting schedule
-							of the destination Group
 							</td>
 						</tr>
 					</table>
@@ -3911,8 +4013,6 @@ Request Body:
 							<td>inheritDestinationGroupLoanOfficer (defaults to true), transferActiveLoans (defaults to true)</td>
 						</tr>
 					</table>
-
-			       
 			    </div>
 
 

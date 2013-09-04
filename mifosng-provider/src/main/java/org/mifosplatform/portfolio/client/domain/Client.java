@@ -55,6 +55,10 @@ public final class Client extends AbstractPersistable<Long> {
     @JoinColumn(name = "office_id", nullable = false)
     private Office office;
 
+    @ManyToOne
+    @JoinColumn(name = "transfer_to_office_id", nullable = true)
+    private Office transferToOffice;
+
     @OneToOne(optional = true)
     @JoinColumn(name = "image_id", nullable = true)
     private Image image;
@@ -68,6 +72,10 @@ public final class Client extends AbstractPersistable<Long> {
     @Column(name = "activation_date", nullable = true)
     @Temporal(TemporalType.DATE)
     private Date activationDate;
+
+    @Column(name = "office_joining_date", nullable = true)
+    @Temporal(TemporalType.DATE)
+    private Date officeJoiningDate;
 
     @Column(name = "firstname", length = 50)
     private String firstname;
@@ -123,13 +131,15 @@ public final class Client extends AbstractPersistable<Long> {
         }
 
         LocalDate activationDate = null;
+        LocalDate officeJoiningDate = null;
         if (active) {
             status = ClientStatus.ACTIVE;
             activationDate = command.localDateValueOfParameterNamed(ClientApiConstants.activationDateParamName);
+            officeJoiningDate = activationDate;
         }
 
         return new Client(status, clientOffice, clientParentGroup, accountNo, firstname, middlename, lastname, fullname, activationDate,
-                externalId, staff);
+                officeJoiningDate, externalId, staff);
     }
 
     protected Client() {
@@ -138,7 +148,7 @@ public final class Client extends AbstractPersistable<Long> {
 
     private Client(final ClientStatus status, final Office office, final Group clientParentGroup, final String accountNo,
             final String firstname, final String middlename, final String lastname, final String fullname, final LocalDate activationDate,
-            final String externalId, final Staff staff) {
+            final LocalDate officeJoiningDate, final String externalId, final Staff staff) {
         if (StringUtils.isBlank(accountNo)) {
             this.accountNumber = new RandomPasswordGenerator(19).generate();
             this.accountNumberRequiresAutoGeneration = true;
@@ -154,6 +164,9 @@ public final class Client extends AbstractPersistable<Long> {
         }
         if (activationDate != null) {
             this.activationDate = activationDate.toDateMidnight().toDate();
+        }
+        if (officeJoiningDate != null) {
+            this.officeJoiningDate = officeJoiningDate.toDateMidnight().toDate();
         }
         if (StringUtils.isNotBlank(firstname)) {
             this.firstname = firstname.trim();
@@ -243,6 +256,7 @@ public final class Client extends AbstractPersistable<Long> {
         }
 
         this.activationDate = activationLocalDate.toDate();
+        this.officeJoiningDate = activationDate;
         this.status = ClientStatus.ACTIVE.getValue();
 
         validate();
@@ -258,6 +272,14 @@ public final class Client extends AbstractPersistable<Long> {
 
     public boolean isTransferInProgress() {
         return ClientStatus.fromInt(this.status).isTransferInProgress();
+    }
+
+    public boolean isTransferOnHold() {
+        return ClientStatus.fromInt(this.status).isTransferOnHold();
+    }
+
+    public boolean isTransferInProgressOrOnHold() {
+        return isTransferInProgress() || isTransferOnHold();
     }
 
     public boolean isNotPending() {
@@ -334,6 +356,7 @@ public final class Client extends AbstractPersistable<Long> {
 
             final LocalDate newValue = command.localDateValueOfParameterNamed(ClientApiConstants.activationDateParamName);
             this.activationDate = newValue.toDate();
+            this.officeJoiningDate = activationDate;
         }
 
         validate();
@@ -437,8 +460,20 @@ public final class Client extends AbstractPersistable<Long> {
         return this.office;
     }
 
+    public Office getTransferToOffice() {
+        return this.transferToOffice;
+    }
+
     public void updateOffice(final Office office) {
         this.office = office;
+    }
+
+    public void updateTransferToOffice(final Office office) {
+        this.transferToOffice = office;
+    }
+
+    public void updateOfficeJoiningDate(final Date date) {
+        this.officeJoiningDate = date;
     }
 
     private Long staffId() {
