@@ -2486,22 +2486,16 @@ public class Loan extends AbstractPersistable<Long> {
                 }
 
                 if (isHolidayEnabled) {
-                    // reset repayment date with new meeting date
-                    newRepaymentDate = CalendarUtils.getNewRepaymentMeetingDate(recuringRule, meetingStartDate, oldDueDate,
-                            loanRepaymentInterval, frequency, workingDays);
-                    if (isHolidayEnabled) {
-                        newRepaymentDate = HolidayUtil.getRepaymentRescheduleDateToIfHoliday(newRepaymentDate, holidays);
-                    }
-
-                    loanRepaymentScheduleInstallment.updateDueDate(newRepaymentDate);
-                    // reset from date to get actual daysInPeriod
-                    loanRepaymentScheduleInstallment.updateFromDate(tmpFromDate);
-                    tmpFromDate = newRepaymentDate;// update with new repayment
-                                                   // date
-                } else {
-                    tmpFromDate = oldDueDate;
+                    newRepaymentDate = HolidayUtil.getRepaymentRescheduleDateToIfHoliday(newRepaymentDate, holidays);
                 }
-
+                
+                loanRepaymentScheduleInstallment.updateDueDate(newRepaymentDate);
+                // reset from date to get actual daysInPeriod
+                loanRepaymentScheduleInstallment.updateFromDate(tmpFromDate);
+                tmpFromDate = newRepaymentDate;// update with new repayment
+                                   // date
+            }else {
+                tmpFromDate = oldDueDate;
             }
         }
     }
