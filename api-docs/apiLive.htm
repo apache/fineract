@@ -11408,6 +11408,9 @@ Content-Type: application/json
 	            <tr class=alt><td>withdrawalFeeType</td></tr>
 	            <tr><td class=fielddesc><b>Optional</b>: If provided, used along with <i>withdrawalFeeAmount</i> to indicate the amount to be charged on the account for withdrawing. 1=Flat, 2=% of Amount, e.g. 5 <b>Flat</b> or 5 <b>% of Amount</b></td></tr>
 
+	            <tr class=alt><td>withdrawalFeeForTransfers</td></tr>
+	            <tr><td class=fielddesc><b>Optional</b>: Used along with <i>withdrawalFeeAmount</i> to indicate whether the withdrawal fee should be applied on the account for account transfers .</td></tr>
+
 	            <tr class=alt><td>annualFeeAmount</td></tr>
 	            <tr><td class=fielddesc><b>Optional</b>: If provided, used along with <i>annualFeeOnMonthDay</i> to indicate the amount to be charged on the account annually on a given day of month. e.g. <b>10</b> on 10 May. <i>monthDayFormat</i> indicates day and month formatting used e.g. "dd MMM" for 10 May
 	            </td>
@@ -11937,7 +11940,7 @@ Content-Type: application/json
             <br/>
             <table class=matrixHeading>
                 <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Optional Fields</div></td></tr>
-                <tr class=alt><td>minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeAmount, withdrawalFeeType, annualFeeAmount, annualFeeOnMonthDay, monthDayFormat, paymentChannelToFundSourceMappings</tr>
+                <tr class=alt><td>minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeAmount, withdrawalFeeType,withdrawalFeeForTransfers, annualFeeAmount, annualFeeOnMonthDay, monthDayFormat, paymentChannelToFundSourceMappings</tr>
             </table>
         </div>
         <div class="method-example">
@@ -11985,6 +11988,7 @@ Request Body:
   "lockinPeriodFrequencyType": "1",
   "withdrawalFeeAmount": "12",
   "withdrawalFeeType": "1",
+  "withdrawalFeeForTransfers":false,
   "monthDayFormat": "dd MMM",
   "annualFeeAmount": "12",
   "annualFeeOnMonthDay": "01 May",
@@ -12069,6 +12073,7 @@ Request Body:
     "code": "savingsWithdrawalFeesType.flat",
     "value": "Flat"
   },
+  "withdrawalFeeForTransfers":true,
   "annualFeeAmount": 100.000000,
   "annualFeeOnMonthDay": [
     5,
@@ -12294,6 +12299,9 @@ Content-Type: application/json
 
 	            <tr class=alt><td>withdrawalFeeType</td></tr>
 	            <tr><td class=fielddesc><b>Optional</b>: If provided, used along with <i>withdrawalFeeAmount</i> to indicate the amount to be charged on the account for withdrawing. 1=Flat, 2=% of Amount, e.g. 5 <b>Flat</b> or 5 <b>% of Amount</b></td></tr>
+
+	            <tr class=alt><td>withdrawalFeeForTransfers</td></tr>
+	            <tr><td class=fielddesc><b>Optional</b>: Used along with <i>withdrawalFeeAmount</i> to indicate whether the withdrawal fee should be applied on the account for account transfers .</td></tr>
 
 	            <tr class=alt><td>annualFeeAmount</td></tr>
 	            <tr><td class=fielddesc><b>Optional</b>: If provided, used along with <i>annualFeeOnMonthDay</i> to indicate the amount to be charged on the account annually on a given day of month. e.g. <b>10</b> on 10 May. <i>monthDayFormat</i> indicates day and month formatting used e.g. "dd MMM" for 10 May
@@ -12521,7 +12529,7 @@ Content-Type: application/json
 	        <br/>
 	        <table class=matrixHeading>
 	            <tr class="matrixHeadingBG"><td><div class="mifosXHeading2">Inherited from Product (if not provided)</div></td></tr>
-	            <tr class=alt><td>nominalAnnualInterestRate, interestCompoundingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeAmount, withdrawalFeeType, annualFeeAmount, annualFeeOnMonthDay</td>
+	            <tr class=alt><td>nominalAnnualInterestRate, interestCompoundingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeAmount, withdrawalFeeType,withdrawalFeeForTransfers, annualFeeAmount, annualFeeOnMonthDay</td>
 	       		</tr>
 	        </table>
 	    </div>
