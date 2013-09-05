@@ -21,6 +21,7 @@ import static org.mifosplatform.portfolio.savings.SavingsApiConstants.minRequire
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.nameParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.nominalAnnualInterestRateParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.withdrawalFeeAmountParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.withdrawalFeeForTransfersParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.withdrawalFeeTypeParamName;
 
 import java.math.BigDecimal;
@@ -93,6 +94,11 @@ public class SavingsProductAssembler {
         if (withdrawalFeeTypeValue != null) {
             withdrawalFeeType = SavingsWithdrawalFeesType.fromInt(withdrawalFeeTypeValue);
         }
+        
+        boolean iswithdrawalFeeApplicableForTransfer = false;
+        if(command.parameterExists(withdrawalFeeForTransfersParamName)){
+            iswithdrawalFeeApplicableForTransfer = command.booleanPrimitiveValueOfParameterNamed(withdrawalFeeForTransfersParamName);
+        }
 
         final BigDecimal annualFeeAmount = command.bigDecimalValueOfParameterNamedDefaultToNullIfZero(annualFeeAmountParamName);
         final MonthDay monthDayOfAnnualFee = command.extractMonthDayNamed(annualFeeOnMonthDayParamName);
@@ -100,7 +106,7 @@ public class SavingsProductAssembler {
 
         return SavingsProduct.createNew(name, description, currency, interestRate, interestCompoundingPeriodType,
                 interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance,
-                lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeAmount, withdrawalFeeType, annualFeeAmount,
-                monthDayOfAnnualFee, accountingRuleType);
+                lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeAmount, withdrawalFeeType, iswithdrawalFeeApplicableForTransfer,
+                annualFeeAmount, monthDayOfAnnualFee, accountingRuleType);
     }
 }

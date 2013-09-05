@@ -24,6 +24,7 @@ import static org.mifosplatform.portfolio.savings.SavingsApiConstants.minRequire
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.nameParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.nominalAnnualInterestRateParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.withdrawalFeeAmountParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.withdrawalFeeForTransfersParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.withdrawalFeeTypeParamName;
 
 import java.math.BigDecimal;
@@ -118,6 +119,10 @@ public class SavingsProduct extends AbstractPersistable<Long> {
 
     @Column(name = "withdrawal_fee_type_enum", nullable = true)
     private Integer withdrawalFeeType;
+    
+    @Column(name = "withdrawal_fee_for_transfer")
+    @SuppressWarnings("unused")
+    private boolean withdrawalFeeApplicableForTransfer;
 
     @Column(name = "annual_fee_amount", scale = 6, precision = 19, nullable = true)
     private BigDecimal annualFeeAmount;
@@ -133,12 +138,13 @@ public class SavingsProduct extends AbstractPersistable<Long> {
             final SavingsPostingInterestPeriodType interestPostingPeriodType, final SavingsInterestCalculationType interestCalculationType,
             final SavingsInterestCalculationDaysInYearType interestCalculationDaysInYearType, final BigDecimal minRequiredOpeningBalance,
             final Integer lockinPeriodFrequency, final SavingsPeriodFrequencyType lockinPeriodFrequencyType,
-            final BigDecimal withdrawalFeeAmount, final SavingsWithdrawalFeesType withdrawalFeeType, final BigDecimal annualFeeAmount,
-            final MonthDay annualFeeOnMonthDay, final AccountingRuleType accountingRuleType) {
+            final BigDecimal withdrawalFeeAmount, final SavingsWithdrawalFeesType withdrawalFeeType, boolean withdrawalFeeApplicableForTransfer,
+            final BigDecimal annualFeeAmount, final MonthDay annualFeeOnMonthDay, final AccountingRuleType accountingRuleType) {
 
         return new SavingsProduct(name, description, currency, interestRate, interestCompoundingPeriodType, interestPostingPeriodType,
                 interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance, lockinPeriodFrequency,
-                lockinPeriodFrequencyType, withdrawalFeeAmount, withdrawalFeeType, annualFeeAmount, annualFeeOnMonthDay, accountingRuleType);
+                lockinPeriodFrequencyType, withdrawalFeeAmount, withdrawalFeeType,withdrawalFeeApplicableForTransfer, annualFeeAmount, 
+                annualFeeOnMonthDay, accountingRuleType);
     }
 
     protected SavingsProduct() {
@@ -151,8 +157,8 @@ public class SavingsProduct extends AbstractPersistable<Long> {
             final SavingsPostingInterestPeriodType interestPostingPeriodType, final SavingsInterestCalculationType interestCalculationType,
             final SavingsInterestCalculationDaysInYearType interestCalculationDaysInYearType, final BigDecimal minRequiredOpeningBalance,
             final Integer lockinPeriodFrequency, final SavingsPeriodFrequencyType lockinPeriodFrequencyType,
-            final BigDecimal withdrawalFeeAmount, final SavingsWithdrawalFeesType withdrawalFeeType, final BigDecimal annualFeeAmount,
-            final MonthDay annualFeeOnMonthDay, final AccountingRuleType accountingRuleType) {
+            final BigDecimal withdrawalFeeAmount, final SavingsWithdrawalFeesType withdrawalFeeType, final boolean withdrawalFeeApplicableForTransfer,
+            final BigDecimal annualFeeAmount, final MonthDay annualFeeOnMonthDay, final AccountingRuleType accountingRuleType) {
 
         this.name = name;
         this.description = description;
@@ -177,6 +183,7 @@ public class SavingsProduct extends AbstractPersistable<Long> {
         if (withdrawalFeeAmount != null && withdrawalFeeType != null) {
             this.withdrawalFeeType = withdrawalFeeType.getValue();
         }
+        this.withdrawalFeeApplicableForTransfer = withdrawalFeeApplicableForTransfer;
         this.annualFeeAmount = annualFeeAmount;
         if (annualFeeAmount != null && annualFeeOnMonthDay != null) {
             this.annualFeeOnMonth = annualFeeOnMonthDay.getMonthOfYear();
@@ -368,6 +375,12 @@ public class SavingsProduct extends AbstractPersistable<Long> {
             final Integer newValue = command.integerValueOfParameterNamedDefaultToNullIfZero(withdrawalFeeTypeParamName);
             actualChanges.put(withdrawalFeeTypeParamName, newValue);
             this.withdrawalFeeType = newValue != null ? SavingsWithdrawalFeesType.fromInt(newValue).getValue() : newValue;
+        }
+        
+        if(command.isChangeInBooleanParameterNamed(withdrawalFeeForTransfersParamName, this.withdrawalFeeApplicableForTransfer)){
+            final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(withdrawalFeeForTransfersParamName);
+            actualChanges.put(withdrawalFeeForTransfersParamName, newValue);
+            this.withdrawalFeeApplicableForTransfer = newValue;
         }
 
         // set period type to null if frequency is null
