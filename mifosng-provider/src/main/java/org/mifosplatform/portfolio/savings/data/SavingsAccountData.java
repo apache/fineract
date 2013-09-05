@@ -45,6 +45,7 @@ public class SavingsAccountData {
     private final EnumOptionData lockinPeriodFrequencyType;
     private final BigDecimal withdrawalFeeAmount;
     private final EnumOptionData withdrawalFeeType;
+    private final boolean withdrawalFeeForTransfers;
     private final BigDecimal annualFeeAmount;
     private final MonthDay annualFeeOnMonthDay;
     private final LocalDate annualFeeNextDueDate;
@@ -72,8 +73,8 @@ public class SavingsAccountData {
             final EnumOptionData interestCalculationType, final EnumOptionData interestCalculationDaysInYearType,
             final BigDecimal minRequiredOpeningBalance, final Integer lockinPeriodFrequency,
             final EnumOptionData lockinPeriodFrequencyType, final BigDecimal withdrawalFeeAmount, final EnumOptionData withdrawalFeeType,
-            final BigDecimal annualFeeAmount, final MonthDay annualFeeOnMonthDay, final LocalDate annualFeeNextDueDate,
-            final SavingsAccountSummaryData summary) {
+            boolean withdrawalFeeForTransfers, final BigDecimal annualFeeAmount, final MonthDay annualFeeOnMonthDay,
+            final LocalDate annualFeeNextDueDate, final SavingsAccountSummaryData summary) {
 
         final Collection<SavingsProductData> productOptions = null;
         final Collection<StaffData> fieldOfficerOptions = null;
@@ -89,8 +90,8 @@ public class SavingsAccountData {
         return new SavingsAccountData(id, accountNo, externalId, groupId, groupName, clientId, clientName, productId, productName,
                 fieldOfficerId, fieldOfficerName, status, timeline, currency, interestRate, interestCompoundingPeriodType,
                 interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance,
-                lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeAmount, withdrawalFeeType, annualFeeAmount,
-                annualFeeOnMonthDay, annualFeeNextDueDate, summary, transactions, productOptions, fieldOfficerOptions,
+                lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeAmount, withdrawalFeeType, withdrawalFeeForTransfers,
+                annualFeeAmount, annualFeeOnMonthDay, annualFeeNextDueDate, summary, transactions, productOptions, fieldOfficerOptions,
                 interestCompoundingPeriodTypeOptions, interestPostingPeriodTypeOptions, interestCalculationTypeOptions,
                 interestCalculationDaysInYearTypeOptions, lockinPeriodFrequencyTypeOptions, withdrawalFeeTypeOptions);
     }
@@ -109,7 +110,7 @@ public class SavingsAccountData {
         final Collection<SavingsAccountTransactionData> transactions = null;
 
         return new SavingsAccountData(accountId, accountNo, null, null, null, null, null, null, null, null, null, null, null, null, null,
-                null, null, null, null, null, null, null, null, null, null, null, null, null, transactions, productOptions,
+                null, null, null, null, null, null, null, null, null, false, null, null, null, null, transactions, productOptions,
                 fieldOfficerOptions, interestCompoundingPeriodTypeOptions, interestPostingPeriodTypeOptions,
                 interestCalculationTypeOptions, interestCalculationDaysInYearTypeOptions, lockinPeriodFrequencyTypeOptions,
                 withdrawalFeeTypeOptions);
@@ -138,8 +139,8 @@ public class SavingsAccountData {
                 account.fieldOfficerName, account.status, account.timeline, account.currency, account.nominalAnnualInterestRate,
                 account.interestCompoundingPeriodType, account.interestPostingPeriodType, account.interestCalculationType,
                 account.interestCalculationDaysInYearType, account.minRequiredOpeningBalance, account.lockinPeriodFrequency,
-                account.lockinPeriodFrequencyType, account.withdrawalFeeAmount, account.withdrawalFeeType, account.annualFeeAmount,
-                account.annualFeeOnMonthDay, account.annualFeeNextDueDate, account.summary, transactions, template.productOptions,
+                account.lockinPeriodFrequencyType, account.withdrawalFeeAmount, account.withdrawalFeeType, account.withdrawalFeeForTransfers,
+                account.annualFeeAmount, account.annualFeeOnMonthDay, account.annualFeeNextDueDate, account.summary, transactions, template.productOptions,
                 template.fieldOfficerOptions, template.interestCompoundingPeriodTypeOptions, template.interestPostingPeriodTypeOptions,
                 template.interestCalculationTypeOptions, template.interestCalculationDaysInYearTypeOptions,
                 template.lockinPeriodFrequencyTypeOptions, template.withdrawalFeeTypeOptions);
@@ -159,8 +160,8 @@ public class SavingsAccountData {
                 account.fieldOfficerName, account.status, account.timeline, account.currency, account.nominalAnnualInterestRate,
                 account.interestCompoundingPeriodType, account.interestPostingPeriodType, account.interestCalculationType,
                 account.interestCalculationDaysInYearType, account.minRequiredOpeningBalance, account.lockinPeriodFrequency,
-                account.lockinPeriodFrequencyType, account.withdrawalFeeAmount, account.withdrawalFeeType, account.annualFeeAmount,
-                account.annualFeeOnMonthDay, account.annualFeeNextDueDate, account.summary, transactions, productOptions,
+                account.lockinPeriodFrequencyType, account.withdrawalFeeAmount, account.withdrawalFeeType,account.withdrawalFeeForTransfers,
+                account.annualFeeAmount, account.annualFeeOnMonthDay, account.annualFeeNextDueDate, account.summary, transactions, productOptions,
                 fieldOfficerOptions, interestCompoundingPeriodTypeOptions, interestPostingPeriodTypeOptions,
                 interestCalculationTypeOptions, interestCalculationDaysInYearTypeOptions, lockinPeriodFrequencyTypeOptions,
                 withdrawalFeeTypeOptions);
@@ -189,6 +190,7 @@ public class SavingsAccountData {
         final EnumOptionData lockinPeriodFrequencyType = null;
         final BigDecimal withdrawalFeeAmount = null;
         final EnumOptionData withdrawalFeeType = null;
+        final boolean withdrawalFeeForTransfers = false;
         final BigDecimal annualFeeAmount = null;
         final MonthDay annualFeeOnMonthDay = null;
         final LocalDate annualFeeNextDueDate = null;
@@ -208,8 +210,8 @@ public class SavingsAccountData {
         return new SavingsAccountData(id, accountNo, externalId, groupId, groupName, clientId, clientName, productId, productName,
                 fieldOfficerId, fieldOfficerName, status, timeline, currency, nominalAnnualInterestRate, interestPeriodType,
                 interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance,
-                lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeAmount, withdrawalFeeType, annualFeeAmount,
-                annualFeeOnMonthDay, annualFeeNextDueDate, summary, transactions, productOptions, fieldOfficerOptions,
+                lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeAmount, withdrawalFeeType,withdrawalFeeForTransfers,
+                annualFeeAmount, annualFeeOnMonthDay, annualFeeNextDueDate, summary, transactions, productOptions, fieldOfficerOptions,
                 interestCompoundingPeriodTypeOptions, interestPostingPeriodTypeOptions, interestCalculationTypeOptions,
                 interestCalculationDaysInYearTypeOptions, lockinPeriodFrequencyTypeOptions, withdrawalFeeTypeOptions);
     }
@@ -221,7 +223,7 @@ public class SavingsAccountData {
             final EnumOptionData interestPostingPeriodType, final EnumOptionData interestCalculationType,
             final EnumOptionData interestCalculationDaysInYearType, final BigDecimal minRequiredOpeningBalance,
             final Integer lockinPeriodFrequency, final EnumOptionData lockinPeriodFrequencyType, final BigDecimal withdrawalFeeAmount,
-            final EnumOptionData withdrawalFeeType, final BigDecimal annualFeeAmount, final MonthDay annualFeeOnMonthDay,
+            final EnumOptionData withdrawalFeeType,final boolean withdrawalFeeForTransfers, final BigDecimal annualFeeAmount, final MonthDay annualFeeOnMonthDay,
             final LocalDate annualFeeNextDueDate, final SavingsAccountSummaryData summary,
             final Collection<SavingsAccountTransactionData> transactions, final Collection<SavingsProductData> productOptions,
             final Collection<StaffData> fieldOfficerOptions, final Collection<EnumOptionData> interestCompoundingPeriodTypeOptions,
@@ -253,6 +255,7 @@ public class SavingsAccountData {
         this.lockinPeriodFrequencyType = lockinPeriodFrequencyType;
         this.withdrawalFeeAmount = withdrawalFeeAmount;
         this.withdrawalFeeType = withdrawalFeeType;
+        this.withdrawalFeeForTransfers = withdrawalFeeForTransfers;
         this.annualFeeAmount = annualFeeAmount;
         this.annualFeeOnMonthDay = annualFeeOnMonthDay;
         this.annualFeeNextDueDate = annualFeeNextDueDate;

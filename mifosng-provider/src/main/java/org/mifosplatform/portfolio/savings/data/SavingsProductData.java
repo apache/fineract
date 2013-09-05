@@ -37,6 +37,7 @@ public class SavingsProductData {
     private final EnumOptionData lockinPeriodFrequencyType;
     private final BigDecimal withdrawalFeeAmount;
     private final EnumOptionData withdrawalFeeType;
+    private final boolean withdrawalFeeForTransfers;
     private final BigDecimal annualFeeAmount;
     private final MonthDay annualFeeOnMonthDay;
 
@@ -87,6 +88,7 @@ public class SavingsProductData {
         final EnumOptionData lockinPeriodFrequencyType = null;
         final BigDecimal withdrawalFeeAmount = null;
         final EnumOptionData withdrawalFeeType = null;
+        final boolean withdrawalFeeForTransfers = false;
         final BigDecimal annualFeeAmount = null;
         final MonthDay annualFeeMonthDay = null;
         final Map<String, Object> accountingMappings = null;
@@ -94,8 +96,8 @@ public class SavingsProductData {
 
         return new SavingsProductData(id, name, description, currency, nominalAnnualInterestRate, interestCompoundingPeriodType,
                 interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance,
-                lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeAmount, withdrawalFeeType, accountingRule, annualFeeAmount,
-                annualFeeMonthDay, accountingMappings, paymentChannelToFundSourceMappings, currencyOptions,
+                lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeAmount, withdrawalFeeType,withdrawalFeeForTransfers,
+                accountingRule, annualFeeAmount, annualFeeMonthDay, accountingMappings, paymentChannelToFundSourceMappings, currencyOptions,
                 interestCompoundingPeriodTypeOptions, interestPostingPeriodTypeOptions, interestCalculationTypeOptions,
                 interestCalculationDaysInYearTypeOptions, lockinPeriodFrequencyTypeOptions, withdrawalFeeTypeOptions, paymentTypeOptions,
                 accountingRuleOptions, accountingMappingOptions);
@@ -119,7 +121,7 @@ public class SavingsProductData {
                 existingProduct.interestPostingPeriodType, existingProduct.interestCalculationType,
                 existingProduct.interestCalculationDaysInYearType, existingProduct.minRequiredOpeningBalance,
                 existingProduct.lockinPeriodFrequency, existingProduct.lockinPeriodFrequencyType, existingProduct.withdrawalFeeAmount,
-                existingProduct.withdrawalFeeType, existingProduct.accountingRule, existingProduct.annualFeeAmount,
+                existingProduct.withdrawalFeeType,existingProduct.withdrawalFeeForTransfers, existingProduct.accountingRule, existingProduct.annualFeeAmount,
                 existingProduct.annualFeeOnMonthDay, existingProduct.accountingMappings,
                 existingProduct.paymentChannelToFundSourceMappings, currencyOptions, interestCompoundingPeriodTypeOptions,
                 interestPostingPeriodTypeOptions, interestCalculationTypeOptions, interestCalculationDaysInYearTypeOptions,
@@ -146,7 +148,7 @@ public class SavingsProductData {
                 existingProduct.interestPostingPeriodType, existingProduct.interestCalculationType,
                 existingProduct.interestCalculationDaysInYearType, existingProduct.minRequiredOpeningBalance,
                 existingProduct.lockinPeriodFrequency, existingProduct.lockinPeriodFrequencyType, existingProduct.withdrawalFeeAmount,
-                existingProduct.withdrawalFeeType, existingProduct.accountingRule, existingProduct.annualFeeAmount,
+                existingProduct.withdrawalFeeType,existingProduct.withdrawalFeeForTransfers, existingProduct.accountingRule, existingProduct.annualFeeAmount,
                 existingProduct.annualFeeOnMonthDay, accountingMappings, paymentChannelToFundSourceMappings, currencyOptions,
                 interestCompoundingPeriodTypeOptions, interestPostingPeriodTypeOptions, interestCalculationTypeOptions,
                 interestCalculationDaysInYearTypeOptions, lockinPeriodFrequencyTypeOptions, withdrawalFeeTypeOptions, paymentTypeOptions,
@@ -158,8 +160,8 @@ public class SavingsProductData {
             final EnumOptionData interestPostingPeriodType, final EnumOptionData interestCalculationType,
             final EnumOptionData interestCalculationDaysInYearType, final BigDecimal minRequiredOpeningBalance,
             final Integer lockinPeriodFrequency, final EnumOptionData lockinPeriodFrequencyType, final BigDecimal withdrawalFeeAmount,
-            final EnumOptionData withdrawalFeeType, final BigDecimal annualFeeAmount, final MonthDay annualFeeOnMonthDay,
-            final EnumOptionData accountingType) {
+            final EnumOptionData withdrawalFeeType, boolean withdrawalFeeForTransfers, final BigDecimal annualFeeAmount,
+            final MonthDay annualFeeOnMonthDay, final EnumOptionData accountingType) {
 
         final Map<String, Object> accountingMappings = null;
         final Collection<PaymentTypeToGLAccountMapper> paymentChannelToFundSourceMappings = null;
@@ -177,8 +179,8 @@ public class SavingsProductData {
 
         return new SavingsProductData(id, name, description, currency, nominalAnnualInterestRate, interestCompoundingPeriodType,
                 interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance,
-                lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeAmount, withdrawalFeeType, accountingType, annualFeeAmount,
-                annualFeeOnMonthDay, accountingMappings, paymentChannelToFundSourceMappings, currencyOptions,
+                lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeAmount, withdrawalFeeType,withdrawalFeeForTransfers, accountingType,
+                annualFeeAmount, annualFeeOnMonthDay, accountingMappings, paymentChannelToFundSourceMappings, currencyOptions,
                 interestCompoundingPeriodTypeOptions, interestPostingPeriodTypeOptions, interestCalculationTypeOptions,
                 interestCalculationDaysInYearTypeOptions, lockinPeriodFrequencyTypeOptions, withdrawalFeeTypeOptions, paymentTypeOptions,
                 accountingRuleOptions, accountingMappingOptions);
@@ -198,6 +200,7 @@ public class SavingsProductData {
         final EnumOptionData lockinPeriodFrequencyType = null;
         final BigDecimal withdrawalFeeAmount = null;
         final EnumOptionData withdrawalFeeType = null;
+        final boolean withdrawalFeeForTransfers = false;
         final EnumOptionData accountingType = null;
         final BigDecimal annualFeeAmount = null;
         final MonthDay annualFeeMonthDay = null;
@@ -217,8 +220,8 @@ public class SavingsProductData {
 
         return new SavingsProductData(id, name, description, currency, nominalAnnualInterestRate, interestCompoundingPeriodType,
                 interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance,
-                lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeAmount, withdrawalFeeType, accountingType, annualFeeAmount,
-                annualFeeMonthDay, accountingMappings, paymentChannelToFundSourceMappings, currencyOptions,
+                lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeAmount, withdrawalFeeType,withdrawalFeeForTransfers, accountingType, 
+                annualFeeAmount, annualFeeMonthDay, accountingMappings, paymentChannelToFundSourceMappings, currencyOptions,
                 interestCompoundingPeriodTypeOptions, interestPostingPeriodTypeOptions, interestCalculationTypeOptions,
                 interestCalculationDaysInYearTypeOptions, lockinPeriodFrequencyTypeOptions, withdrawalFeeTypeOptions, paymentTypeOptions,
                 accountingRuleOptions, accountingMappingOptions);
@@ -229,8 +232,8 @@ public class SavingsProductData {
             final EnumOptionData interestPostingPeriodType, final EnumOptionData interestCalculationType,
             final EnumOptionData interestCalculationDaysInYearType, final BigDecimal minRequiredOpeningBalance,
             final Integer lockinPeriodFrequency, final EnumOptionData lockinPeriodFrequencyType, final BigDecimal withdrawalFeeAmount,
-            final EnumOptionData withdrawalFeeType, final EnumOptionData accountingType, final BigDecimal annualFeeAmount,
-            final MonthDay annualFeeOnMonthDay, final Map<String, Object> accountingMappings,
+            final EnumOptionData withdrawalFeeType,final boolean withdrawalFeeForTransfers, final EnumOptionData accountingType, 
+            final BigDecimal annualFeeAmount, final MonthDay annualFeeOnMonthDay, final Map<String, Object> accountingMappings,
             final Collection<PaymentTypeToGLAccountMapper> paymentChannelToFundSourceMappings,
             final Collection<CurrencyData> currencyOptions, final Collection<EnumOptionData> interestCompoundingPeriodTypeOptions,
             final Collection<EnumOptionData> interestPostingPeriodTypeOptions,
@@ -254,6 +257,7 @@ public class SavingsProductData {
         this.lockinPeriodFrequencyType = lockinPeriodFrequencyType;
         this.withdrawalFeeAmount = withdrawalFeeAmount;
         this.withdrawalFeeType = withdrawalFeeType;
+        this.withdrawalFeeForTransfers = withdrawalFeeForTransfers;
         this.annualFeeAmount = annualFeeAmount;
         this.annualFeeOnMonthDay = annualFeeOnMonthDay;
 

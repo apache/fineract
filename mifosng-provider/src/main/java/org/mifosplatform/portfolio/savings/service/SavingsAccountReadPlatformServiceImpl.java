@@ -218,6 +218,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             sqlBuilder.append("sa.lockin_period_frequency_enum as lockinPeriodFrequencyType, ");
             sqlBuilder.append("sa.withdrawal_fee_amount as withdrawalFeeAmount,");
             sqlBuilder.append("sa.withdrawal_fee_type_enum as withdrawalFeeTypeEnum, ");
+            sqlBuilder.append("sa.withdrawal_fee_for_transfer as withdrawalFeeForTransfers, ");
             sqlBuilder.append("sa.annual_fee_amount as annualFeeAmount,");
             sqlBuilder.append("sa.annual_fee_on_month as annualFeeOnMonth, ");
             sqlBuilder.append("sa.annual_fee_on_day as annualFeeOnDay, ");
@@ -349,6 +350,8 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             if (withdrawalFeeTypeValue != null) {
                 withdrawalFeeType = SavingsEnumerations.withdrawalFeeType(withdrawalFeeTypeValue);
             }
+            
+            final boolean withdrawalFeeForTransfers = rs.getBoolean("withdrawalFeeForTransfers");
 
             final BigDecimal annualFeeAmount = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "annualFeeAmount");
 
@@ -376,8 +379,8 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             return SavingsAccountData.instance(id, accountNo, externalId, groupId, groupName, clientId, clientName, productId, productName,
                     fieldOfficerId, fieldOfficerName, status, timeline, currency, nominalAnnualInterestRate, interestCompoundingPeriodType,
                     interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance,
-                    lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeAmount, withdrawalFeeType, annualFeeAmount,
-                    annualFeeOnMonthDay, annualFeeNextDueDate, summary);
+                    lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeAmount, withdrawalFeeType, withdrawalFeeForTransfers,
+                    annualFeeAmount, annualFeeOnMonthDay, annualFeeNextDueDate, summary);
         }
     }
 
@@ -697,6 +700,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             sqlBuilder.append("sp.lockin_period_frequency_enum as lockinPeriodFrequencyType, ");
             sqlBuilder.append("sp.withdrawal_fee_amount as withdrawalFeeAmount,");
             sqlBuilder.append("sp.withdrawal_fee_type_enum as withdrawalFeeTypeEnum, ");
+            sqlBuilder.append("sp.withdrawal_fee_for_transfer as withdrawalFeeForTransfers, ");
             sqlBuilder.append("sp.annual_fee_amount as annualFeeAmount,");
             sqlBuilder.append("sp.annual_fee_on_month as annualFeeOnMonth, ");
             sqlBuilder.append("sp.annual_fee_on_day as annualFeeOnDay ");
@@ -758,7 +762,9 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             if (withdrawalFeeTypeValue != null) {
                 withdrawalFeeType = SavingsEnumerations.withdrawalFeeType(withdrawalFeeTypeValue);
             }
-
+            
+            final boolean withdrawalFeeForTransfers = rs.getBoolean("withdrawalFeeForTransfers");
+            
             final BigDecimal annualFeeAmount = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "annualFeeAmount");
 
             MonthDay annualFeeOnMonthDay = null;
@@ -793,8 +799,8 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             return SavingsAccountData.instance(null, null, null, groupId, groupName, clientId, clientName, productId, productName,
                     fieldOfficerId, fieldOfficerName, status, timeline, currency, nominalAnnualIterestRate, interestCompoundingPeriodType,
                     interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance,
-                    lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeAmount, withdrawalFeeType, annualFeeAmount,
-                    annualFeeOnMonthDay, annualFeeNextDueDate, summary);
+                    lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeAmount, withdrawalFeeType, withdrawalFeeForTransfers,
+                    annualFeeAmount, annualFeeOnMonthDay, annualFeeNextDueDate, summary);
         }
     }
 

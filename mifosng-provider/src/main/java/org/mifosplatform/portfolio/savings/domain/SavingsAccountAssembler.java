@@ -24,6 +24,7 @@ import static org.mifosplatform.portfolio.savings.SavingsApiConstants.productIdP
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.submittedOnDateParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.withdrawalFeeAmountParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.withdrawalFeeTypeParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.withdrawalFeeForTransfersParamName;
 
 import java.math.BigDecimal;
 
@@ -211,6 +212,11 @@ public class SavingsAccountAssembler {
         } else {
             withdrawalFeeType = product.withdrawalFeeType();
         }
+        
+        boolean iswithdrawalFeeApplicableForTransfer = false;
+        if(command.parameterExists(withdrawalFeeForTransfersParamName)){
+            iswithdrawalFeeApplicableForTransfer = command.booleanPrimitiveValueOfParameterNamed(withdrawalFeeForTransfersParamName);
+        }
 
         BigDecimal annualFeeAmount = null;
         if (command.parameterExists(annualFeeAmountParamName)) {
@@ -229,7 +235,8 @@ public class SavingsAccountAssembler {
         final SavingsAccount account = SavingsAccount.createNewApplicationForSubmittal(client, group, product, fieldOfficer, accountNo,
                 externalId, accountType, submittedOnDate, interestRate, interestCompoundingPeriodType, interestPostingPeriodType,
                 interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance, lockinPeriodFrequency,
-                lockinPeriodFrequencyType, withdrawalFeeAmount, withdrawalFeeType, annualFeeAmount, monthDayOfAnnualFee);
+                lockinPeriodFrequencyType, withdrawalFeeAmount, withdrawalFeeType, iswithdrawalFeeApplicableForTransfer, annualFeeAmount,
+                monthDayOfAnnualFee);
         account.setHelpers(this.savingsAccountTransactionSummaryWrapper, this.savingsHelper);
 
         account.validateNewApplicationState(DateUtils.getLocalDateOfTenant());

@@ -89,6 +89,7 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
             sqlBuilder.append("sp.lockin_period_frequency_enum as lockinPeriodFrequencyType, ");
             sqlBuilder.append("sp.withdrawal_fee_amount as withdrawalFeeAmount,");
             sqlBuilder.append("sp.withdrawal_fee_type_enum as withdrawalFeeTypeEnum, ");
+            sqlBuilder.append("sp.withdrawal_fee_for_transfer as withdrawalFeeForTransfers, ");
             sqlBuilder.append("sp.annual_fee_amount as annualFeeAmount,");
             sqlBuilder.append("sp.annual_fee_on_month as annualFeeOnMonth, ");
             sqlBuilder.append("sp.annual_fee_on_day as annualFeeOnDay, ");
@@ -156,6 +157,8 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
             if (withdrawalFeeTypeValue != null) {
                 withdrawalFeeType = SavingsEnumerations.withdrawalFeeType(withdrawalFeeTypeValue);
             }
+            
+            final boolean withdrawalFeeForTransfers = rs.getBoolean("withdrawalFeeForTransfers");
 
             final BigDecimal annualFeeAmount = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "annualFeeAmount");
 
@@ -168,8 +171,8 @@ public class SavingsProductReadPlatformServiceImpl implements SavingsProductRead
 
             return SavingsProductData.instance(id, name, description, currency, nominalAnnualInterestRate, compoundingInterestPeriodType,
                     interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance,
-                    lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeAmount, withdrawalFeeType, annualFeeAmount,
-                    annualFeeOnMonthDay, accountingRuleType);
+                    lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeAmount, withdrawalFeeType, withdrawalFeeForTransfers,
+                    annualFeeAmount, annualFeeOnMonthDay, accountingRuleType);
         }
     }
 

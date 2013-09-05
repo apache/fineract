@@ -13,6 +13,7 @@ import static org.mifosplatform.portfolio.savings.SavingsApiConstants.lockinPeri
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.lockinPeriodFrequencyTypeParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.withdrawalFeeAmountParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.withdrawalFeeTypeParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.withdrawalFeeForTransfersParamName;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
@@ -216,6 +217,9 @@ public class SavingsAccount extends AbstractPersistable<Long> {
     @Column(name = "withdrawal_fee_type_enum", nullable = true)
     private Integer withdrawalFeeType;
 
+    @Column(name = "withdrawal_fee_for_transfer", nullable = true)
+    private boolean withdrawalFeeApplicableForTransfer;
+
     @Column(name = "annual_fee_amount", scale = 6, precision = 19, nullable = true)
     private BigDecimal annualFeeAmount;
 
@@ -255,14 +259,14 @@ public class SavingsAccount extends AbstractPersistable<Long> {
             final SavingsPostingInterestPeriodType interestPostingPeriodType, final SavingsInterestCalculationType interestCalculationType,
             final SavingsInterestCalculationDaysInYearType interestCalculationDaysInYearType, final BigDecimal minRequiredOpeningBalance,
             final Integer lockinPeriodFrequency, final SavingsPeriodFrequencyType lockinPeriodFrequencyType,
-            final BigDecimal withdrawalFeeAmount, final SavingsWithdrawalFeesType withdrawalFeeType, final BigDecimal annualFeeAmount,
-            final MonthDay annualFeeOnMonthDay) {
+            final BigDecimal withdrawalFeeAmount, final SavingsWithdrawalFeesType withdrawalFeeType, boolean withdrawalFeeApplicableForTransfer,
+            final BigDecimal annualFeeAmount, final MonthDay annualFeeOnMonthDay) {
 
         final SavingsAccountStatusType status = SavingsAccountStatusType.SUBMITTED_AND_PENDING_APPROVAL;
         return new SavingsAccount(client, group, product, fieldOfficer, accountNo, externalId, status, accountType, submittedOnDate,
                 interestRate, interestCompoundingPeriodType, interestPostingPeriodType, interestCalculationType,
                 interestCalculationDaysInYearType, minRequiredOpeningBalance, lockinPeriodFrequency, lockinPeriodFrequencyType,
-                withdrawalFeeAmount, withdrawalFeeType, annualFeeAmount, annualFeeOnMonthDay);
+                withdrawalFeeAmount, withdrawalFeeType,withdrawalFeeApplicableForTransfer, annualFeeAmount, annualFeeOnMonthDay);
     }
 
     private SavingsAccount(final Client client, final Group group, final SavingsProduct product, final Staff fieldOfficer,
@@ -272,7 +276,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
             final SavingsPostingInterestPeriodType interestPostingPeriodType, final SavingsInterestCalculationType interestCalculationType,
             final SavingsInterestCalculationDaysInYearType interestCalculationDaysInYearType, final BigDecimal minRequiredOpeningBalance,
             final Integer lockinPeriodFrequency, final SavingsPeriodFrequencyType lockinPeriodFrequencyType,
-            final BigDecimal withdrawalFeeAmount, final SavingsWithdrawalFeesType withdrawalFeeType, final BigDecimal annualFeeAmount,
+            final BigDecimal withdrawalFeeAmount, final SavingsWithdrawalFeesType withdrawalFeeType,final boolean withdrawalFeeApplicableForTransfer, final BigDecimal annualFeeAmount,
             final MonthDay annualFeeOnMonthDay) {
         this.client = client;
         this.group = group;
@@ -303,6 +307,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         if (withdrawalFeeType != null) {
             this.withdrawalFeeType = withdrawalFeeType.getValue();
         }
+        this.withdrawalFeeApplicableForTransfer = withdrawalFeeApplicableForTransfer;
 
         this.annualFeeAmount = annualFeeAmount;
         if (annualFeeOnMonthDay != null) {
@@ -600,7 +605,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
 
     public SavingsAccountTransaction withdraw(final DateTimeFormatter formatter, final LocalDate transactionDate,
             final BigDecimal transactionAmount, final List<Long> existingTransactionIds, final List<Long> existingReversedTransactionIds,
-            final PaymentDetail paymentDetail) {
+            final PaymentDetail paymentDetail,final boolean applyWithdrawFee) {
 
         if (isNotActive()) {
 
@@ -659,7 +664,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
                 transactionAmountMoney);
         this.transactions.add(transaction);
 
-        if (isAutomaticWithdrawalFee()) {
+        if (applyWithdrawFee && isAutomaticWithdrawalFee()) {
 
             SavingsAccountTransaction withdrawalFeeTransaction = null;
             Money feeAmount = Money.zero(this.currency);
@@ -1029,6 +1034,12 @@ public class SavingsAccount extends AbstractPersistable<Long> {
             final Integer newValue = command.integerValueOfParameterNamedDefaultToNullIfZero(withdrawalFeeTypeParamName);
             actualChanges.put(withdrawalFeeTypeParamName, newValue);
             this.withdrawalFeeType = newValue != null ? SavingsWithdrawalFeesType.fromInt(newValue).getValue() : newValue;
+        }
+        
+        if(command.isChangeInBooleanParameterNamed(withdrawalFeeForTransfersParamName, this.withdrawalFeeApplicableForTransfer)){
+            final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(withdrawalFeeForTransfersParamName);
+            actualChanges.put(withdrawalFeeForTransfersParamName, newValue);
+            this.withdrawalFeeApplicableForTransfer = newValue;
         }
 
         // set period type to null if frequency is null
@@ -1746,5 +1757,10 @@ public class SavingsAccount extends AbstractPersistable<Long> {
 
     public Group group() {
         return this.group;
+    }
+
+    
+    public boolean isWithdrawalFeeApplicableForTransfer() {
+        return this.withdrawalFeeApplicableForTransfer;
     }
 }

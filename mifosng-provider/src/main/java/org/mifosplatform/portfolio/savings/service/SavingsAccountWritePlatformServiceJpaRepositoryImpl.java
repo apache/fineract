@@ -178,7 +178,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         checkClientOrGroupActive(account);
 
         SavingsAccountTransaction withdrawal = this.savingsAccountDomainService.handleWithdrawal(account, fmt, transactionDate,
-                transactionAmount, paymentDetail);
+                transactionAmount, paymentDetail, true);
 
         return new CommandProcessingResultBuilder() //
                 .withEntityId(withdrawal.getId()) //
@@ -351,7 +351,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
                     paymentDetail);
         } else {
             transaction = account.withdraw(fmt, transactionDate, transactionAmount, existingTransactionIds, existingReversedTransactionIds,
-                    paymentDetail);
+                    paymentDetail, true);
         }
         final Long newtransactionId = saveTransactionToGenerateTransactionId(transaction);
 

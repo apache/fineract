@@ -23,6 +23,7 @@ import static org.mifosplatform.portfolio.savings.SavingsApiConstants.minRequire
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.nameParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.nominalAnnualInterestRateParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.withdrawalFeeAmountParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.withdrawalFeeForTransfersParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.withdrawalFeeTypeParamName;
 
 import java.lang.reflect.Type;
@@ -173,6 +174,12 @@ public class SavingsProductDataValidator {
                         .zeroOrPositiveAmount();
             }
         }
+        
+        if(this.fromApiJsonHelper.parameterExists(withdrawalFeeForTransfersParamName, element)) {
+            final Boolean isWithdrawalFeeApplicableForTransfers = fromApiJsonHelper.extractBooleanNamed(withdrawalFeeForTransfersParamName, element);
+            baseDataValidator.reset().parameter(withdrawalFeeForTransfersParamName).value(isWithdrawalFeeApplicableForTransfers).ignoreIfNull()
+                    .validateForBooleanValue();
+        }
 
         if (this.fromApiJsonHelper.parameterExists(annualFeeAmountParamName, element)) {
             final BigDecimal annualFeeAmount = fromApiJsonHelper.extractBigDecimalWithLocaleNamed(annualFeeAmountParamName, element);
@@ -318,6 +325,12 @@ public class SavingsProductDataValidator {
             final Integer withdrawalFeeType = fromApiJsonHelper.extractIntegerSansLocaleNamed(withdrawalFeeTypeParamName, element);
             baseDataValidator.reset().parameter(withdrawalFeeTypeParamName).value(withdrawalFeeType).ignoreIfNull()
                     .isOneOfTheseValues(1, 2);
+        }
+        
+        if(this.fromApiJsonHelper.parameterExists(withdrawalFeeForTransfersParamName, element)) {
+            final Boolean isWithdrawalFeeApplicableForTransfers = fromApiJsonHelper.extractBooleanNamed(withdrawalFeeForTransfersParamName, element);
+            baseDataValidator.reset().parameter(withdrawalFeeForTransfersParamName).value(isWithdrawalFeeApplicableForTransfers).ignoreIfNull()
+                    .validateForBooleanValue();
         }
 
         if (this.fromApiJsonHelper.parameterExists(annualFeeAmountParamName, element)) {
