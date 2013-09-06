@@ -38,6 +38,7 @@ import org.mifosplatform.portfolio.note.domain.NoteRepository;
 import org.mifosplatform.portfolio.paymentdetail.domain.PaymentDetail;
 import org.mifosplatform.portfolio.paymentdetail.service.PaymentDetailWritePlatformService;
 import org.mifosplatform.portfolio.savings.SavingsApiConstants;
+import org.mifosplatform.portfolio.savings.data.SavingsAccountTransactionDTO;
 import org.mifosplatform.portfolio.savings.data.SavingsAccountTransactionDataValidator;
 import org.mifosplatform.portfolio.savings.domain.SavingsAccount;
 import org.mifosplatform.portfolio.savings.domain.SavingsAccountAssembler;
@@ -307,7 +308,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
             account.calculateInterestUsing(mc, today);
         }
         account.validateAccountBalanceDoesNotBecomeNegative(SavingsApiConstants.undoTransactionAction);
-
+        account.activateAccountBasedOnBalance();
         postJournalEntries(account, newTransactionIds, reversedTransactionIds);
 
         return new CommandProcessingResultBuilder() //
@@ -345,13 +346,23 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
 
         final MathContext mc = new MathContext(10, RoundingMode.HALF_EVEN);
         account.undoTransaction(transactionId, existingReversedTransactionIds);
+        
+        //for undo withdrawal fee
+        SavingsAccountTransaction nextSavingsAccountTransaction = this.savingsAccountTransactionRepository.findOneByIdAndSavingsAccountId(
+                transactionId+1, savingsId);
+        if(nextSavingsAccountTransaction.isWithdrawalFeeAndNotReversed()){
+            account.undoTransaction(transactionId+1, existingReversedTransactionIds);
+        }
+        
         SavingsAccountTransaction transaction = null;
         if (savingsAccountTransaction.isDeposit()) {
-            transaction = account.deposit(fmt, transactionDate, transactionAmount, existingTransactionIds, existingReversedTransactionIds,
-                    paymentDetail);
+            SavingsAccountTransactionDTO transactionDTO = new SavingsAccountTransactionDTO(fmt, transactionDate, transactionAmount, 
+                    existingTransactionIds, existingReversedTransactionIds,paymentDetail, false);
+            transaction = account.deposit(transactionDTO);
         } else {
-            transaction = account.withdraw(fmt, transactionDate, transactionAmount, existingTransactionIds, existingReversedTransactionIds,
-                    paymentDetail, true);
+            SavingsAccountTransactionDTO transactionDTO = new SavingsAccountTransactionDTO(fmt, transactionDate, transactionAmount, 
+                    existingTransactionIds, existingReversedTransactionIds, paymentDetail, false);
+            transaction = account.withdraw(transactionDTO , true);
         }
         final Long newtransactionId = saveTransactionToGenerateTransactionId(transaction);
 
@@ -362,6 +373,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
             account.calculateInterestUsing(mc, today);
         }
         account.validateAccountBalanceDoesNotBecomeNegative(SavingsApiConstants.adjustTransactionAction);
+        account.activateAccountBasedOnBalance();
         postJournalEntries(account, existingTransactionIds, existingReversedTransactionIds);
         return new CommandProcessingResultBuilder() //
                 .withEntityId(newtransactionId) //
