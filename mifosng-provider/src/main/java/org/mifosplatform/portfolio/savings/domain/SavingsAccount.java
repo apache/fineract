@@ -550,7 +550,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
 
     public SavingsAccountTransaction deposit(final SavingsAccountTransactionDTO transactionDTO) {
 
-        if (transactionDTO.isCheckAccountStatus() && isNotActive()) {
+        if (isNotActive()) {
             final String defaultUserMessage = "Transaction is not allowed. Account is not active.";
             final ApiParameterError error = ApiParameterError.parameterError("error.msg.savingsaccount.transaction.account.is.not.active",
                     defaultUserMessage, "transactionDate", transactionDTO.getTransactionDate().toString(transactionDTO.getFormatter()));
@@ -609,7 +609,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
 
     public SavingsAccountTransaction withdraw(SavingsAccountTransactionDTO transactionDTO, final boolean applyWithdrawFee) {
 
-        if (transactionDTO.isCheckAccountStatus() && isNotActive()) {
+        if (isNotActive()) {
 
             final String defaultUserMessage = "Transaction is not allowed. Account is not active.";
             final ApiParameterError error = ApiParameterError.parameterError("error.msg.savingsaccount.transaction.account.is.not.active",
@@ -689,8 +689,6 @@ public class SavingsAccount extends AbstractPersistable<Long> {
             }
         }
 
-        validateAccountBalanceDoesNotBecomeNegative(retreiveListOfTransactions(), transactionAmountMoney);
-
         this.summary.updateSummary(this.currency, this.savingsAccountTransactionSummaryWrapper, this.transactions);
 
         return transaction;
@@ -710,9 +708,8 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         return transactionBeforeLastInterestPosting;
     }
 
-    private void validateAccountBalanceDoesNotBecomeNegative(final List<SavingsAccountTransaction> transactionsSortedByDate,
-            final Money transactionAmount) {
-
+    public void validateAccountBalanceDoesNotBecomeNegative(final BigDecimal transactionAmount) {
+        final List<SavingsAccountTransaction> transactionsSortedByDate = retreiveListOfTransactions();
         Money runningBalance = Money.zero(this.currency);
 
         for (final SavingsAccountTransaction transaction : transactionsSortedByDate) {
@@ -726,7 +723,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
                 //
                 final BigDecimal withdrawalFee = null;
                 throw new InsufficientAccountBalanceException("transactionAmount", getAccountBalance(), withdrawalFee,
-                        transactionAmount.getAmount());
+                        transactionAmount);
             }
         }
     }
@@ -1672,8 +1669,8 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         // activating account.
         final Money minRequiredOpeningBalance = Money.of(this.currency, this.minRequiredOpeningBalance);
         if (minRequiredOpeningBalance.isGreaterThanZero()) {
-            SavingsAccountTransactionDTO transactionDTO = new SavingsAccountTransactionDTO(fmt, activationDate,
-                    minRequiredOpeningBalance.getAmount(), existingTransactionIds, existingReversedTransactionIds, null, true);
+            SavingsAccountTransactionDTO transactionDTO = new SavingsAccountTransactionDTO(fmt, activationDate, minRequiredOpeningBalance.getAmount(), 
+                    existingTransactionIds, existingReversedTransactionIds, null);
             deposit(transactionDTO);
         }
 

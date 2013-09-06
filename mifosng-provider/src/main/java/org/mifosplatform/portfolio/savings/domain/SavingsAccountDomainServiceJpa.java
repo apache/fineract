@@ -51,7 +51,7 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
         final List<Long> existingTransactionIds = new ArrayList<Long>();
         final List<Long> existingReversedTransactionIds = new ArrayList<Long>();
         SavingsAccountTransactionDTO transactionDTO = new SavingsAccountTransactionDTO(fmt, transactionDate, transactionAmount, 
-                existingTransactionIds,existingReversedTransactionIds, paymentDetail,true);
+                existingTransactionIds,existingReversedTransactionIds, paymentDetail);
         final SavingsAccountTransaction withdrawal = account.withdraw(transactionDTO , applyWithdrawFee);
 
         final MathContext mc = MathContext.DECIMAL64;
@@ -62,7 +62,7 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
             final LocalDate today = DateUtils.getLocalDateOfTenant();
             account.calculateInterestUsing(mc, today);
         }
-
+        account.validateAccountBalanceDoesNotBecomeNegative(transactionAmount);
         saveTransactionToGenerateTransactionId(withdrawal);
         this.savingsAccountRepository.save(account);
 
@@ -79,7 +79,7 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
         final List<Long> existingTransactionIds = new ArrayList<Long>();
         final List<Long> existingReversedTransactionIds = new ArrayList<Long>();
         SavingsAccountTransactionDTO transactionDTO = new SavingsAccountTransactionDTO(fmt, transactionDate, transactionAmount, 
-                existingTransactionIds, existingReversedTransactionIds, paymentDetail, true);
+                existingTransactionIds, existingReversedTransactionIds, paymentDetail);
         final SavingsAccountTransaction deposit = account.deposit(transactionDTO);
 
         final MathContext mc = MathContext.DECIMAL64;

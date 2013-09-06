@@ -5,6 +5,8 @@
  */
 package org.mifosplatform.portfolio.savings.service;
 
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME;
+
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
@@ -20,8 +22,11 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.mifosplatform.accounting.journalentry.service.JournalEntryWritePlatformService;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
+import org.mifosplatform.infrastructure.core.data.ApiParameterError;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
+import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
+import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.jobs.annotation.CronTarget;
 import org.mifosplatform.infrastructure.jobs.service.JobName;
@@ -299,6 +304,9 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         final MathContext mc = new MathContext(15, RoundingMode.HALF_EVEN);
 
         final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsId);
+        if(account.isNotActive()){
+            throwValidationForActiveStatus(SavingsApiConstants.undoTransactionAction);
+        }
         account.undoTransaction(transactionId, reversedTransactionIds);
         checkClientOrGroupActive(account);
         if ((savingsAccountTransaction.isDeposit() || savingsAccountTransaction.isWithdrawal())
@@ -334,6 +342,9 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         final LocalDate today = DateUtils.getLocalDateOfTenant();
 
         final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsId);
+        if(account.isNotActive()){
+            throwValidationForActiveStatus(SavingsApiConstants.adjustTransactionAction);
+        }
 
         final Locale locale = command.extractLocale();
         final DateTimeFormatter fmt = DateTimeFormat.forPattern(command.dateFormat()).withLocale(locale);
@@ -357,11 +368,11 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         SavingsAccountTransaction transaction = null;
         if (savingsAccountTransaction.isDeposit()) {
             SavingsAccountTransactionDTO transactionDTO = new SavingsAccountTransactionDTO(fmt, transactionDate, transactionAmount, 
-                    existingTransactionIds, existingReversedTransactionIds,paymentDetail, false);
+                    existingTransactionIds, existingReversedTransactionIds,paymentDetail);
             transaction = account.deposit(transactionDTO);
         } else {
             SavingsAccountTransactionDTO transactionDTO = new SavingsAccountTransactionDTO(fmt, transactionDate, transactionAmount, 
-                    existingTransactionIds, existingReversedTransactionIds, paymentDetail, false);
+                    existingTransactionIds, existingReversedTransactionIds, paymentDetail);
             transaction = account.withdraw(transactionDTO , true);
         }
         final Long newtransactionId = saveTransactionToGenerateTransactionId(transaction);
@@ -383,6 +394,17 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
                 .withSavingsId(savingsId) //
                 .with(changes)//
                 .build();
+    }
+
+    /**
+     * 
+     */
+    private void throwValidationForActiveStatus(String actionName) {
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+                .resource(SAVINGS_ACCOUNT_RESOURCE_NAME + actionName);
+        baseDataValidator.reset().failWithCodeNoParameterAddedToErrorCode("account.is.not.active");
+        throw new PlatformApiDataValidationException(dataValidationErrors);
     }
 
     private void postJournalEntries(final SavingsAccount savingsAccount, final List<Long> existingTransactionIds,

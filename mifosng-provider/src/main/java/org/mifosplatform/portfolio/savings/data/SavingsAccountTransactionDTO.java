@@ -15,18 +15,16 @@ public class SavingsAccountTransactionDTO {
     private List<Long> existingTransactionIds;
     private List<Long> existingReversedTransactionIds;
     private PaymentDetail paymentDetail;
-    private boolean checkAccountStatus;
 
     public SavingsAccountTransactionDTO(final DateTimeFormatter formatter, final LocalDate transactionDate,
             final BigDecimal transactionAmount, final List<Long> existingTransactionIds, final List<Long> existingReversedTransactionIds,
-            final PaymentDetail paymentDetail, boolean checkAccountStatus) {
+            final PaymentDetail paymentDetail) {
         this.formatter = formatter;
         this.transactionDate = transactionDate;
         this.transactionAmount = transactionAmount;
         this.existingTransactionIds = existingTransactionIds;
         this.existingReversedTransactionIds = existingReversedTransactionIds;
         this.paymentDetail = paymentDetail;
-        this.checkAccountStatus = checkAccountStatus;
     }
 
     public DateTimeFormatter getFormatter() {
@@ -51,9 +49,5 @@ public class SavingsAccountTransactionDTO {
 
     public PaymentDetail getPaymentDetail() {
         return this.paymentDetail;
-    }
-
-    public boolean isCheckAccountStatus() {
-        return this.checkAccountStatus;
     }
 }
