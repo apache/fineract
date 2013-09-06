@@ -19,6 +19,7 @@ import org.mifosplatform.organisation.monetary.domain.ApplicationCurrency;
 import org.mifosplatform.organisation.monetary.domain.ApplicationCurrencyRepositoryWrapper;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.portfolio.paymentdetail.domain.PaymentDetail;
+import org.mifosplatform.portfolio.savings.data.SavingsAccountTransactionDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -49,9 +50,9 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
 
         final List<Long> existingTransactionIds = new ArrayList<Long>();
         final List<Long> existingReversedTransactionIds = new ArrayList<Long>();
-
-        final SavingsAccountTransaction withdrawal = account.withdraw(fmt, transactionDate, transactionAmount, existingTransactionIds,
-                existingReversedTransactionIds, paymentDetail, applyWithdrawFee);
+        SavingsAccountTransactionDTO transactionDTO = new SavingsAccountTransactionDTO(fmt, transactionDate, transactionAmount, 
+                existingTransactionIds,existingReversedTransactionIds, paymentDetail,true);
+        final SavingsAccountTransaction withdrawal = account.withdraw(transactionDTO , applyWithdrawFee);
 
         final MathContext mc = MathContext.DECIMAL64;
         if (account.isBeforeLastPostingPeriod(transactionDate)) {
@@ -77,9 +78,9 @@ public class SavingsAccountDomainServiceJpa implements SavingsAccountDomainServi
 
         final List<Long> existingTransactionIds = new ArrayList<Long>();
         final List<Long> existingReversedTransactionIds = new ArrayList<Long>();
-
-        final SavingsAccountTransaction deposit = account.deposit(fmt, transactionDate, transactionAmount, existingTransactionIds,
-                existingReversedTransactionIds, paymentDetail);
+        SavingsAccountTransactionDTO transactionDTO = new SavingsAccountTransactionDTO(fmt, transactionDate, transactionAmount, 
+                existingTransactionIds, existingReversedTransactionIds, paymentDetail, true);
+        final SavingsAccountTransaction deposit = account.deposit(transactionDTO);
 
         final MathContext mc = MathContext.DECIMAL64;
         if (account.isBeforeLastPostingPeriod(transactionDate)) {
