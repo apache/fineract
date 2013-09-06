@@ -28,6 +28,8 @@ import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
 import org.apache.commons.lang.StringUtils;
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormatter;
 import org.mifosplatform.infrastructure.codes.domain.CodeValue;
@@ -99,6 +101,7 @@ public final class Client extends AbstractPersistable<Long> {
     @JoinColumn(name = "staff_id")
     private Staff staff;
 
+    @LazyCollection(LazyCollectionOption.FALSE)
     @ManyToMany
     @JoinTable(name = "m_group_client", joinColumns = @JoinColumn(name = "client_id"), inverseJoinColumns = @JoinColumn(name = "group_id"))
     private Set<Group> groups;
@@ -270,11 +273,15 @@ public final class Client extends AbstractPersistable<Long> {
         return ClientStatus.fromInt(this.status).isActive();
     }
 
+    public boolean isClosed() {
+        return ClientStatus.fromInt(this.status).isClosed();
+    }
+
     public boolean isTransferInProgress() {
         return ClientStatus.fromInt(this.status).isTransferInProgress();
     }
-
-    public boolean isTransferOnHold() {
+    
+    public boolean isTransferOnHold () {
         return ClientStatus.fromInt(this.status).isTransferOnHold();
     }
 

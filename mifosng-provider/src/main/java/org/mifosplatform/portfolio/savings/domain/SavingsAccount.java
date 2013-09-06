@@ -41,6 +41,7 @@ import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 
+import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
@@ -349,6 +350,10 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         return SavingsAccountStatusType.fromInt(this.status).isApproved();
     }
 
+    public boolean isClosed(){
+        return SavingsAccountStatusType.fromInt(this.status).isClosed();
+    }
+    
     public void postInterest(final MathContext mc, final LocalDate interestPostingUpToDate, final List<Long> existingTransactionIds,
             final List<Long> existingReversedTransactionIds) {
 
@@ -1762,9 +1767,8 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         return this.withdrawalFeeApplicableForTransfer;
     }
 
-    public void activateAccountBasedOnBalance() {
-        if (SavingsAccountStatusType.fromInt(this.status).isClosed() && !this.summary.getAccountBalance(getCurrency()).isZero()) {
-            this.status = SavingsAccountStatusType.ACTIVE.getValue();
-        }
+    
+    public LocalDate getClosedOnDate() {
+        return (LocalDate) ObjectUtils.defaultIfNull(new LocalDate(this.closedOnDate), null);
     }
 }

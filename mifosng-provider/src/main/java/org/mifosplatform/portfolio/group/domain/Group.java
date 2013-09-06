@@ -31,6 +31,7 @@ import javax.persistence.TemporalType;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormatter;
+import org.mifosplatform.infrastructure.codes.domain.CodeValue;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.ApiParameterError;
 import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
@@ -41,6 +42,7 @@ import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.group.api.GroupingTypesApiConstants;
 import org.mifosplatform.portfolio.group.exception.ClientExistInGroupException;
 import org.mifosplatform.portfolio.group.exception.ClientNotInGroupException;
+import org.mifosplatform.portfolio.group.exception.InvalidGroupStateTransitionException;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
 import com.google.common.collect.Sets;
@@ -95,6 +97,14 @@ public final class Group extends AbstractPersistable<Long> {
     @ManyToMany
     @JoinTable(name = "m_group_client", joinColumns = @JoinColumn(name = "group_id"), inverseJoinColumns = @JoinColumn(name = "client_id"))
     private Set<Client> clientMembers;
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "closure_reason_cv_id", nullable = true)
+    private CodeValue closureReason;
+    
+    @Column(name = "closedon_date", nullable = true)
+    @Temporal(TemporalType.DATE)
+    private Date closureDate;
 
     public Group() {
         this.name = null;
@@ -409,5 +419,41 @@ public final class Group extends AbstractPersistable<Long> {
 
     public boolean isChildGroup(){
         return (this.parent == null) ? false : true;
+
+    }
+    
+    public boolean isClosed(){
+        return GroupingTypeStatus.fromInt(this.status).isClosed();
+    }
+    
+    public void close(final CodeValue closureReason, final LocalDate closureDate){
+        
+        if (this.isClosed()) {
+            final String errorMessage = "Group with identifier " + this.getId() + " is alread closed.";
+            throw new InvalidGroupStateTransitionException(this.groupLevel.getLevelName(), "close", "already.closed", errorMessage, this.getId());
+        }
+        
+        if (this.isNotPending() && this.getActivationLocalDate().isAfter(closureDate)) {
+            final String errorMessage = "The Group closure Date " + closureDate + " cannot be before the group Activation Date " + this.getActivationLocalDate() + ".";
+            throw new InvalidGroupStateTransitionException(this.groupLevel.getLevelName(), "close", "date.cannot.before.group.actvation.date", errorMessage, closureDate, this.getActivationLocalDate());
+        }
+        
+        this.closureReason = closureReason;
+        this.closureDate = closureDate.toDate();
+        this.status = GroupingTypeStatus.CLOSED.getValue();
+    }
+    
+    public boolean hasActiveClients(){
+        for (Client client : this.clientMembers) {
+            if(!client.isClosed()) return true;
+        }
+        return false;
+    }
+    
+    public boolean hasActiveGroups(){
+        for(Group group : this.groupMembers){
+            if(!group.isClosed()) return true;
+        }
+        return false;
     }
 }

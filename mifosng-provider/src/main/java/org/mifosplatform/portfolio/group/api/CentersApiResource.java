@@ -96,10 +96,17 @@ public class CentersApiResource {
     @Path("template")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveTemplate(@Context final UriInfo uriInfo, @QueryParam("officeId") final Long officeId) {
+    public String retrieveTemplate(@Context final UriInfo uriInfo, @QueryParam("command") final String commandParam,
+            @QueryParam("officeId") final Long officeId) {
 
         this.context.authenticatedUser().validateHasReadPermission(GroupingTypesApiConstants.CENTER_RESOURCE_NAME);
 
+        if (is(commandParam, "close")) {
+            final CenterData centerClosureTemplate = this.centerReadPlatformService.retrieveCenterWithClosureReasons();
+            final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+            return this.centerApiJsonSerializer.serialize(settings, centerClosureTemplate, GroupingTypesApiConstants.CENTER_RESPONSE_DATA_PARAMETERS);
+        }
+        
         final CenterData template = this.centerReadPlatformService.retrieveTemplate(officeId);
 
         final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
@@ -227,6 +234,10 @@ public class CentersApiResource {
             return this.toApiJsonSerializer.serialize(settings, collectionSheet, GroupingTypesApiConstants.COLLECTIONSHEET_DATA_PARAMETERS);
         } else if (is(commandParam, "saveCollectionSheet")) {
             final CommandWrapper commandRequest = builder.saveCenterCollectionSheet(centerId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+            return this.toApiJsonSerializer.serialize(result);
+        } else if (is(commandParam, "close")) {
+            final CommandWrapper commandRequest = builder.closeCenter(centerId).build();
             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
             return this.toApiJsonSerializer.serialize(result);
         } else {

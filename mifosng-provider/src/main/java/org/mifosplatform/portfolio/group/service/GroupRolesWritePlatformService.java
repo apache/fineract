@@ -11,5 +11,5 @@ public interface GroupRolesWritePlatformService {
     CommandProcessingResult updateRole(JsonCommand command);
 
     CommandProcessingResult deleteRole(Long ruleId);
-
+    
 }

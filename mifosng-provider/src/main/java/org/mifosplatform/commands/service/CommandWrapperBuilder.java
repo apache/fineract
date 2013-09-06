@@ -1076,7 +1076,16 @@ public class CommandWrapperBuilder {
         this.href = "/groups/" + groupId + "?command=assignStaff";
         return this;
     }
-
+    
+    public CommandWrapperBuilder closeGroup(final Long groupId) {
+        this.actionName = "CLOSE";
+        this.entityName = "GROUP";
+        this.entityId = groupId;
+        this.groupId = groupId;
+        this.href = "/groups/" + groupId + "?command=close";
+        return this;
+    }
+    
     public CommandWrapperBuilder createCollateral(final Long loanId) {
         this.actionName = "CREATE";
         this.entityName = "COLLATERAL";
@@ -1151,6 +1160,15 @@ public class CommandWrapperBuilder {
         this.supportedEntityId = centerId;
         this.supportedEntityType = CalendarEntityType.CENTERS.name();
         this.href = "/centers/" + centerId + "?command=saveCollectionSheet";
+        return this;
+    }
+    
+    public CommandWrapperBuilder closeCenter(final Long centerId) {
+        this.actionName = "CLOSE";
+        this.entityName = "CENTER";
+        this.entityId = centerId;
+        this.groupId = centerId;
+        this.href = "/centers/" + centerId + "?command=close";
         return this;
     }
 

@@ -406,4 +406,52 @@ public final class GroupingTypesDataValidator {
         
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
+    
+    public void validateForGroupClose(final JsonCommand command) {
+        final String json = command.json();
+
+        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, GroupingTypesApiConstants.GROUP_CLOSE_REQUEST_DATA_PARAMETERS);
+        
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+                .resource(GroupingTypesApiConstants.GROUP_RESOURCE_NAME);
+        
+        final JsonElement element = command.parsedJson();
+
+        final LocalDate closureDate = this.fromApiJsonHelper.extractLocalDateNamed(GroupingTypesApiConstants.closureDateParamName, element);
+        baseDataValidator.reset().parameter(GroupingTypesApiConstants.closureDateParamName).value(closureDate).notNull();
+        
+        final Long closureReasonId = this.fromApiJsonHelper.extractLongNamed(GroupingTypesApiConstants.closureReasonIdParamName, element);
+        baseDataValidator.reset().parameter(GroupingTypesApiConstants.closureReasonIdParamName).value(closureReasonId).notNull().longGreaterThanZero();
+        
+        throwExceptionIfValidationWarningsExist(dataValidationErrors);
+
+    }
+    
+    public void validateForCenterClose(final JsonCommand command) {
+        final String json = command.json();
+
+        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, GroupingTypesApiConstants.GROUP_CLOSE_REQUEST_DATA_PARAMETERS);
+        
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+                .resource(GroupingTypesApiConstants.CENTER_RESOURCE_NAME);
+        
+        final JsonElement element = command.parsedJson();
+
+        final LocalDate closureDate = this.fromApiJsonHelper.extractLocalDateNamed(GroupingTypesApiConstants.closureDateParamName, element);
+        baseDataValidator.reset().parameter(GroupingTypesApiConstants.closureDateParamName).value(closureDate).notNull();
+        
+        final Long closureReasonId = this.fromApiJsonHelper.extractLongNamed(GroupingTypesApiConstants.closureReasonIdParamName, element);
+        baseDataValidator.reset().parameter(GroupingTypesApiConstants.closureReasonIdParamName).value(closureReasonId).notNull().longGreaterThanZero();
+        
+        throwExceptionIfValidationWarningsExist(dataValidationErrors);
+
+    }
 }
