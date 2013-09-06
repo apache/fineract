@@ -1665,8 +1665,8 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         // activating account.
         final Money minRequiredOpeningBalance = Money.of(this.currency, this.minRequiredOpeningBalance);
         if (minRequiredOpeningBalance.isGreaterThanZero()) {
-            SavingsAccountTransactionDTO transactionDTO = new SavingsAccountTransactionDTO(fmt, activationDate, minRequiredOpeningBalance.getAmount(), existingTransactionIds, existingReversedTransactionIds,
-                    null, true);
+            SavingsAccountTransactionDTO transactionDTO = new SavingsAccountTransactionDTO(fmt, activationDate, minRequiredOpeningBalance.getAmount(), 
+                    existingTransactionIds, existingReversedTransactionIds, null, true);
             deposit(transactionDTO);
         }
 
