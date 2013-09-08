@@ -139,9 +139,11 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             sqlBuilder.append("select ");
             sqlBuilder.append(rm.loanSchema());
             sqlBuilder.append(" join m_office o on (o.id = c.office_id or o.id = g.office_id) ");
-            sqlBuilder.append(" where l.id=? and o.hierarchy like ?");
+            sqlBuilder.append(" left join m_office transferToOffice on transferToOffice.id = c.transfer_to_office_id ");
+            sqlBuilder.append(" where l.id=? and ( o.hierarchy like ? or transferToOffice.hierarchy like ?)");
 
-            return this.jdbcTemplate.queryForObject(sqlBuilder.toString(), rm, new Object[] { loanId, hierarchySearchString });
+            return this.jdbcTemplate.queryForObject(sqlBuilder.toString(), rm, new Object[] { loanId, hierarchySearchString,
+                    hierarchySearchString });
         } catch (EmptyResultDataAccessException e) {
             throw new LoanNotFoundException(loanId);
         }
@@ -202,11 +204,13 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         // probably require a UNION query
         // but that at present is an edge case
         sqlBuilder.append(" join m_office o on o.id = c.office_id");
-        sqlBuilder.append(" where o.hierarchy like ?");
+        sqlBuilder.append(" left join m_office transferToOffice on transferToOffice.id = c.transfer_to_office_id ");
+        sqlBuilder.append(" where ( o.hierarchy like ? or transferToOffice.hierarchy like ?)");
 
         final Object[] objectArray = new Object[2];
         objectArray[0] = hierarchySearchString;
-        int arrayPos = 1;
+        objectArray[1] = hierarchySearchString;
+        int arrayPos = 2;
 
         String sqlQueryCriteria = searchParameters.getSqlSearch();
         if (StringUtils.isNotBlank(sqlQueryCriteria)) {
