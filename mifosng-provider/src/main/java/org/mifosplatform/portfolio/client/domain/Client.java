@@ -432,6 +432,14 @@ public final class Client extends AbstractPersistable<Long> {
         return activationLocalDate;
     }
 
+    public LocalDate getOfficeJoiningLocalDate() {
+        LocalDate officeJoiningLocalDate = null;
+        if (this.officeJoiningDate != null) {
+            officeJoiningLocalDate = LocalDate.fromDateFields(this.officeJoiningDate);
+        }
+        return officeJoiningLocalDate;
+    }
+
     public boolean isOfficeIdentifiedBy(final Long officeId) {
         return this.office.identifiedBy(officeId);
     }

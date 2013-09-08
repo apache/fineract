@@ -1098,6 +1098,9 @@ public class Loan extends AbstractPersistable<Long> {
             final String errorMessage = "The date on which a loan is submitted cannot be earlier than client's activation date.";
             throw new InvalidLoanStateTransitionException("submittal", "cannot.be.before.client.activation.date", errorMessage, submittedOn);
         }
+
+        validateActivityNotBeforeClientOrGroupTransferDate(LoanEvent.LOAN_CREATED, submittedOn);
+
         if (this.group != null && this.group.isActivatedAfter(submittedOn)) {
             final String errorMessage = "The date on which a loan is submitted cannot be earlier than groups's activation date.";
             throw new InvalidLoanStateTransitionException("submittal", "cannot.be.before.group.activation.date", errorMessage, submittedOn);
@@ -1156,6 +1159,9 @@ public class Loan extends AbstractPersistable<Long> {
                 throw new InvalidLoanStateTransitionException("reject", "cannot.be.before.submittal.date", errorMessage, rejectedOn,
                         getSubmittedOnDate());
             }
+
+            validateActivityNotBeforeClientOrGroupTransferDate(LoanEvent.LOAN_REJECTED, rejectedOn);
+
             if (rejectedOn.isAfter(DateUtils.getLocalDateOfTenant())) {
                 final String errorMessage = "The date on which a loan is rejected cannot be in the future.";
                 throw new InvalidLoanStateTransitionException("reject", "cannot.be.a.future.date", errorMessage, rejectedOn);
@@ -1199,13 +1205,15 @@ public class Loan extends AbstractPersistable<Long> {
             if (withdrawnOn.isBefore(getSubmittedOnDate())) {
                 final String errorMessage = "The date on which a loan is withdrawn cannot be before its submittal date: "
                         + getSubmittedOnDate().toString();
-                throw new InvalidLoanStateTransitionException("reject", "cannot.be.before.submittal.date", errorMessage, command,
+                throw new InvalidLoanStateTransitionException("withdraw", "cannot.be.before.submittal.date", errorMessage, command,
                         getSubmittedOnDate());
             }
 
+            validateActivityNotBeforeClientOrGroupTransferDate(LoanEvent.LOAN_WITHDRAWN, withdrawnOn);
+
             if (withdrawnOn.isAfter(DateUtils.getLocalDateOfTenant())) {
                 final String errorMessage = "The date on which a loan is withdrawn cannot be in the future.";
-                throw new InvalidLoanStateTransitionException("reject", "cannot.be.a.future.date", errorMessage, command);
+                throw new InvalidLoanStateTransitionException("withdraw", "cannot.be.a.future.date", errorMessage, command);
             }
         } else {
             final String errorMessage = "Only the loan applications with status 'Submitted and pending approval' are allowed to be withdrawn by applicant.";
@@ -1246,6 +1254,9 @@ public class Loan extends AbstractPersistable<Long> {
                 throw new InvalidLoanStateTransitionException("approval", "cannot.be.before.submittal.date", errorMessage,
                         getApprovedOnDate(), submittalDate);
             }
+
+            validateActivityNotBeforeClientOrGroupTransferDate(LoanEvent.LOAN_APPROVED, approvedOn);
+
             if (approvedOn.isAfter(DateUtils.getLocalDateOfTenant())) {
                 final String errorMessage = "The date on which a loan is approved cannot be in the future.";
                 throw new InvalidLoanStateTransitionException("approval", "cannot.be.a.future.date", errorMessage, getApprovedOnDate());
@@ -1440,6 +1451,8 @@ public class Loan extends AbstractPersistable<Long> {
                     getApprovedOnDate());
         }
 
+        validateActivityNotBeforeClientOrGroupTransferDate(LoanEvent.LOAN_DISBURSED, disbursedOn);
+
         if (disbursedOn.isAfter(new LocalDate())) {
             final String errorMessage = "The date on which a loan with identifier : " + this.accountNumber
                     + " is disbursed cannot be in the future.";
@@ -1455,6 +1468,7 @@ public class Loan extends AbstractPersistable<Long> {
 
         final LoanStatus currentStatus = LoanStatus.fromInt(this.loanStatus);
         final LoanStatus statusEnum = this.loanLifecycleStateMachine.transition(LoanEvent.LOAN_DISBURSAL_UNDO, currentStatus);
+        validateActivityNotBeforeClientOrGroupTransferDate(LoanEvent.LOAN_DISBURSAL_UNDO, this.getDisbursementDate());
         if (!statusEnum.hasStateOf(currentStatus)) {
             this.loanStatus = statusEnum.getValue();
             actualChanges.put("status", LoanEnumerations.status(this.loanStatus));
@@ -1502,6 +1516,9 @@ public class Loan extends AbstractPersistable<Long> {
             final LoanLifecycleStateMachine loanLifecycleStateMachine, final List<Long> existingTransactionIds,
             final List<Long> existingReversedTransactionIds) {
 
+        validateActivityNotBeforeClientOrGroupTransferDate(LoanEvent.LOAN_REPAYMENT_OR_WAIVER,
+                waiveInterestTransaction.getTransactionDate());
+
         existingTransactionIds.addAll(findExistingTransactionIds());
         existingReversedTransactionIds.addAll(findExistingReversedTransactionIds());
 
@@ -1515,6 +1532,8 @@ public class Loan extends AbstractPersistable<Long> {
             final LoanLifecycleStateMachine loanLifecycleStateMachine, final List<Long> existingTransactionIds,
             final List<Long> existingReversedTransactionIds, final boolean allowTransactionsOnHoliday, final List<Holiday> holidays,
             final WorkingDays workingDays, final boolean allowTransactionsOnNonWorkingDay) {
+
+        validateActivityNotBeforeClientOrGroupTransferDate(LoanEvent.LOAN_REPAYMENT_OR_WAIVER, repaymentTransaction.getTransactionDate());
 
         validateRepaymentDateIsOnHoliday(repaymentTransaction.getTransactionDate(), allowTransactionsOnHoliday, holidays);
         validateRepaymentDateIsOnNonWorkingDay(repaymentTransaction.getTransactionDate(), workingDays, allowTransactionsOnNonWorkingDay);
@@ -1846,7 +1865,7 @@ public class Loan extends AbstractPersistable<Long> {
 
     private Money calculateTotalOverpayment() {
 
-         Money totalPaidInRepayments = getTotalPaidInRepayments();
+        Money totalPaidInRepayments = getTotalPaidInRepayments();
 
         final MonetaryCurrency currency = loanCurrency();
         Money cumulativeTotalPaidOnInstallments = Money.zero(currency);
@@ -1907,6 +1926,8 @@ public class Loan extends AbstractPersistable<Long> {
                         writtenOffOnLocalDate, getDisbursementDate());
             }
 
+            validateActivityNotBeforeClientOrGroupTransferDate(LoanEvent.WRITE_OFF_OUTSTANDING, writtenOffOnLocalDate);
+
             if (writtenOffOnLocalDate.isAfter(DateUtils.getLocalDateOfTenant())) {
                 final String errorMessage = "The date on which a loan is written off cannot be in the future.";
                 throw new InvalidLoanStateTransitionException("writeoff", "cannot.be.a.future.date", errorMessage, writtenOffOnLocalDate);
@@ -1944,6 +1965,7 @@ public class Loan extends AbstractPersistable<Long> {
         this.closedOnDate = closureDate.toDate();
         changes.put("closedOnDate", command.stringValueOfParameterNamed("transactionDate"));
 
+        validateActivityNotBeforeClientOrGroupTransferDate(LoanEvent.REPAID_IN_FULL, closureDate);
         if (closureDate.isBefore(getDisbursementDate())) {
             final String errorMessage = "The date on which a loan is closed cannot be before the loan disbursement date: "
                     + getDisbursementDate().toString();
@@ -2488,13 +2510,13 @@ public class Loan extends AbstractPersistable<Long> {
                 if (isHolidayEnabled) {
                     newRepaymentDate = HolidayUtil.getRepaymentRescheduleDateToIfHoliday(newRepaymentDate, holidays);
                 }
-                
+
                 loanRepaymentScheduleInstallment.updateDueDate(newRepaymentDate);
                 // reset from date to get actual daysInPeriod
                 loanRepaymentScheduleInstallment.updateFromDate(tmpFromDate);
                 tmpFromDate = newRepaymentDate;// update with new repayment
-                                   // date
-            }else {
+                // date
+            } else {
                 tmpFromDate = oldDueDate;
             }
         }
@@ -2647,4 +2669,69 @@ public class Loan extends AbstractPersistable<Long> {
 
     }
 
+    private void validateActivityNotBeforeClientOrGroupTransferDate(LoanEvent event, LocalDate activityDate) {
+        if (this.client != null && this.client.getOfficeJoiningLocalDate() != null) {
+            LocalDate clientOfficeJoiningDate = client.getOfficeJoiningLocalDate();
+            if (activityDate.isBefore(clientOfficeJoiningDate)) {
+                String errorMessage = null;
+                String action = null;
+                String postfix = null;
+                switch (event) {
+                    case LOAN_CREATED:
+                        errorMessage = "The date on which a loan is submitted cannot be earlier than client's transfer date to this office";
+                        action = "submittal";
+                        postfix = "cannot.be.before.client.transfer.date";
+                    break;
+                    case LOAN_APPROVED:
+                        errorMessage = "The date on which a loan is approved cannot be earlier than client's transfer date to this office";
+                        action = "approval";
+                        postfix = "cannot.be.before.client.transfer.date";
+                    break;
+                    case LOAN_APPROVAL_UNDO:
+                        errorMessage = "The date on which a loan is approved cannot be earlier than client's transfer date to this office";
+                        action = "approval";
+                        postfix = "cannot.be.undone.before.client.transfer.date";
+                    break;
+                    case LOAN_DISBURSED:
+                        errorMessage = "The date on which a loan is disbursed cannot be earlier than client's transfer date to this office";
+                        action = "disbursal";
+                        postfix = "cannot.be.before.client.transfer.date";
+                    break;
+                    case LOAN_DISBURSAL_UNDO:
+                        errorMessage = "The date on which a loan is disbursed cannot be earlier than client's transfer date to this office";
+                        action = "disbursal";
+                        postfix = "cannot.be.undone.before.client.transfer.date";
+                    break;
+                    case LOAN_REPAYMENT_OR_WAIVER:
+                        errorMessage = "The date on which a repayment or waiver is made cannot be earlier than client's transfer date to this office";
+                        action = "repayment.or.waiver";
+                        postfix = "cannot.be.undone.before.client.transfer.date";
+                    break;
+                    case LOAN_REJECTED:
+                        errorMessage = "The date on which a loan is rejected cannot be earlier than client's transfer date to this office";
+                        action = "reject";
+                        postfix = "cannot.be.before.client.transfer.date";
+                    break;
+                    case LOAN_WITHDRAWN:
+                        errorMessage = "The date on which a loan is withdrawn cannot be earlier than client's transfer date to this office";
+                        action = "withdraw";
+                        postfix = "cannot.be.before.client.transfer.date";
+                    break;
+                    case WRITE_OFF_OUTSTANDING:
+                        errorMessage = "The date on which a write off is made cannot be earlier than client's transfer date to this office";
+                        action = "writeoff";
+                        postfix = "cannot.be.undone.before.client.transfer.date";
+                    break;
+                    case REPAID_IN_FULL:
+                        errorMessage = "The date on which the loan is repaid in full cannot be earlier than client's transfer date to this office";
+                        action = "close";
+                        postfix = "cannot.be.undone.before.client.transfer.date";
+                    break;
+                    default:
+                    break;
+                }
+                throw new InvalidLoanStateTransitionException(action, postfix, errorMessage, clientOfficeJoiningDate);
+            }
+        }
+    }
 }
