@@ -30,6 +30,7 @@ import org.mifosplatform.portfolio.client.exception.ClientHasBeenClosedException
 import org.mifosplatform.portfolio.group.domain.Group;
 import org.mifosplatform.portfolio.group.domain.GroupRepositoryWrapper;
 import org.mifosplatform.portfolio.group.exception.ClientNotInGroupException;
+import org.mifosplatform.portfolio.group.exception.GroupNotActiveException;
 import org.mifosplatform.portfolio.loanaccount.domain.Loan;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanRepository;
 import org.mifosplatform.portfolio.loanaccount.service.LoanWritePlatformService;
@@ -235,8 +236,6 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
         final Long destinationOfficeId = jsonCommand.longValueOfParameterNamed(TransferApiConstants.destinationOfficeIdParamName);
         final Office office = this.officeRepository.findOneWithNotFoundDetection(destinationOfficeId);
         final Client client = this.clientRepository.findOneWithNotFoundDetection(clientId);
-        /*** Remove all group associations for this client ***/
-        client.getGroups().clear();
         handleClientTransferLifecycleEvent(client, office, TransferEventType.PROPOSAL, jsonCommand);
         this.clientRepository.save(client);
 
@@ -266,8 +265,6 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
         final Client client = this.clientRepository.findOneWithNotFoundDetection(clientId);
         validateClientAwaitingTransferAcceptance(client);
 
-        /*** Remove all (old) group associations for this client ***/
-        client.getGroups().clear();
         handleClientTransferLifecycleEvent(client, client.getTransferToOffice(), TransferEventType.ACCEPTANCE, jsonCommand);
         this.clientRepository.save(client);
 
@@ -358,7 +355,17 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
                 client.updateOffice(destinationOffice);
                 client.updateOfficeJoiningDate(todaysDate);
                 if (client.getGroups().size() == 1) {
+                    if (destinationGroup == null) {
+                        throw new TransferNotSupportedException(TRANSFER_NOT_SUPPORTED_REASON.CLIENT_DESTINATION_GROUP_NOT_SPECIFIED,
+                                client.getId());
+                    } else if (!destinationGroup.isActive()) { throw new GroupNotActiveException(destinationGroup.getId()); }
                     transferClientBetweenGroups(Iterables.get(client.getGroups(), 0), client, destinationGroup, true, staff);
+                } else if (client.getGroups().size() == 0 && destinationGroup != null) {
+                    client.getGroups().add(destinationGroup);
+                    client.updateStaff(destinationGroup.getStaff());
+                    if (staff != null) {
+                        client.updateStaff(staff);
+                    }
                 }
             break;
             case PROPOSAL:

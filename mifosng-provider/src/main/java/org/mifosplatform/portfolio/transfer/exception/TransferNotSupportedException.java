@@ -15,13 +15,17 @@ public class TransferNotSupportedException extends AbstractPlatformDomainRuleExc
 
     /*** enum of reasons for invalid Journal Entry **/
     public static enum TRANSFER_NOT_SUPPORTED_REASON {
-        SOURCE_AND_DESTINATION_GROUP_CANNOT_BE_SAME, ACTIVE_SAVINGS_ACCOUNT, BULK_CLIENT_TRANSFER_ACROSS_BRANCHES, DESTINATION_GROUP_MEETING_FREQUENCY_MISMATCH, DESTINATION_GROUP_HAS_NO_MEETING;
+        CLIENT_DESTINATION_GROUP_NOT_SPECIFIED, CLIENT_BELONGS_TO_MULTIPLE_GROUPS, SOURCE_AND_DESTINATION_GROUP_CANNOT_BE_SAME, ACTIVE_SAVINGS_ACCOUNT, BULK_CLIENT_TRANSFER_ACROSS_BRANCHES, DESTINATION_GROUP_MEETING_FREQUENCY_MISMATCH, DESTINATION_GROUP_HAS_NO_MEETING;
 
         public String errorMessage() {
             if (name().toString().equalsIgnoreCase("ACTIVE_SAVINGS_ACCOUNT")) {
                 return "Cannot transfer Clients/Groups having active Savings accounts";
             } else if (name().toString().equalsIgnoreCase("BULK_CLIENT_TRANSFER_ACROSS_BRANCHES")) {
                 return "Bulk Transfers of clients between Groups in different branches not allowed ";
+            } else if (name().toString().equalsIgnoreCase("CLIENT_DESTINATION_GROUP_NOT_SPECIFIED")) {
+                return "Destination Group for transfer of clients originally linked to a group not selected ";
+            } else if (name().toString().equalsIgnoreCase("CLIENT_BELONGS_TO_MULTIPLE_GROUPS")) {
+                return "Transfer of clients linked to multiple groups is not supported  ";
             } else if (name().toString().equalsIgnoreCase("DESTINATION_GROUP_MEETING_FREQUENCY_MISMATCH")) {
                 return "Cannot transfer Clients with active accounts between groups with different meeting frequency";
             } else if (name().toString().equalsIgnoreCase("SOURCE_AND_DESTINATION_GROUP_CANNOT_BE_SAME")) {
@@ -35,6 +39,10 @@ public class TransferNotSupportedException extends AbstractPlatformDomainRuleExc
                 return "error.msg.entity.transfers.with.active.savings.accounts";
             } else if (name().toString().equalsIgnoreCase("BULK_CLIENT_TRANSFER_ACROSS_BRANCHES")) {
                 return "error.msg.groups.bulk.client.transfers.to.different.office";
+            } else if (name().toString().equalsIgnoreCase("CLIENT_DESTINATION_GROUP_NOT_SPECIFIED")) {
+                return "error.msg.client.transfers.destination.group.absent";
+            } else if (name().toString().equalsIgnoreCase("CLIENT_BELONGS_TO_MULTIPLE_GROUPS")) {
+                return "error.msg.client.transfers.with.multiple.group.linkages";
             } else if (name().toString().equalsIgnoreCase("DESTINATION_GROUP_MEETING_FREQUENCY_MISMATCH")) {
                 return "error.msg.client.transfers.with.active.accounts.between.groups.with.different.meeting.frequency";
             } else if (name().toString().equalsIgnoreCase("SOURCE_AND_DESTINATION_GROUP_CANNOT_BE_SAME")) {
