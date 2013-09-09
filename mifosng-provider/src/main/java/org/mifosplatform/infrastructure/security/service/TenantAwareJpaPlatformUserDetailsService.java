@@ -25,7 +25,7 @@ public class TenantAwareJpaPlatformUserDetailsService implements PlatformUserDet
     private PlatformUserRepository platformUserRepository;
 
     @Override
-    @Cacheable(value = "users", key = "T(org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat(#username+'un')")
+    @Cacheable(value = "usersByUsername", key = "T(org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat(#username+'ubu')")
     public UserDetails loadUserByUsername(final String username) throws UsernameNotFoundException, DataAccessException {
 
         final PlatformUser appUser = this.platformUserRepository.findByUsername(username);

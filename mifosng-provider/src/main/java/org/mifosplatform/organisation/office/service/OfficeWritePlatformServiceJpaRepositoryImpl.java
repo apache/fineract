@@ -64,7 +64,7 @@ public class OfficeWritePlatformServiceJpaRepositoryImpl implements OfficeWriteP
     @Override
     @Caching(evict = {
             @CacheEvict(value = "offices", key = "T(org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat(#root.target.context.authenticatedUser().getOffice().getHierarchy()+'of')"),
-            @CacheEvict(value = "office_template", key = "T(org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat(#root.target.context.authenticatedUser().getOffice().getHierarchy()+'oft')") })
+            @CacheEvict(value = "officesForDropdown", key = "T(org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat(#root.target.context.authenticatedUser().getOffice().getHierarchy()+'ofd')") })
     public CommandProcessingResult createOffice(final JsonCommand command) {
 
         try {
@@ -102,7 +102,8 @@ public class OfficeWritePlatformServiceJpaRepositoryImpl implements OfficeWriteP
     @Override
     @Caching(evict = {
             @CacheEvict(value = "offices", key = "T(org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat(#root.target.context.authenticatedUser().getOffice().getHierarchy()+'of')"),
-            @CacheEvict(value = "office_template", key = "T(org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat(#root.target.context.authenticatedUser().getOffice().getHierarchy()+'oft')") })
+            @CacheEvict(value = "officesForDropdown", key = "T(org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat(#root.target.context.authenticatedUser().getOffice().getHierarchy()+'ofd')"),
+            @CacheEvict(value = "officesById", key = "T(org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat(#officeId)")})
     public CommandProcessingResult updateOffice(final Long officeId, final JsonCommand command) {
 
         try {

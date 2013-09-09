@@ -67,7 +67,7 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
 
     @Transactional
     @Override
-    @CacheEvict(value = "users", allEntries = true)
+    @CacheEvict(value = "usersByUsername", allEntries = true)
     public CommandProcessingResult createUser(final JsonCommand command) {
 
         try {
@@ -111,7 +111,7 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
 
     @Transactional
     @Override
-    @CacheEvict(value = "users", allEntries = true)
+    @CacheEvict(value = "usersByUsername", allEntries = true)
     public CommandProcessingResult updateUser(final Long userId, final JsonCommand command) {
 
         try {
@@ -172,7 +172,7 @@ public class AppUserWritePlatformServiceJpaRepositoryImpl implements AppUserWrit
 
     @Transactional
     @Override
-    @CacheEvict(value = "users", allEntries = true)
+    @CacheEvict(value = "usersByUsername", allEntries = true)
     public CommandProcessingResult deleteUser(final Long userId) {
 
         final AppUser user = this.appUserRepository.findOne(userId);

@@ -15,6 +15,7 @@ import org.mifosplatform.infrastructure.core.domain.MifosPlatformTenant;
 import org.mifosplatform.infrastructure.security.exception.InvalidTenantIdentiferException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -65,6 +66,7 @@ public class JdbcTenantDetailsService implements TenantDetailsService {
     }
 
     @Override
+    @Cacheable(value = "tenantsById", key = "#tenantIdentifier")
     public MifosPlatformTenant loadTenantById(final String tenantIdentifier) {
 
         try {

@@ -14,8 +14,6 @@ import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
 import org.mifosplatform.useradministration.data.RoleData;
 import org.mifosplatform.useradministration.exception.RoleNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -34,7 +32,6 @@ public class RoleReadPlatformServiceImpl implements RoleReadPlatformService {
     }
 
     @Override
-    @Cacheable(value = "roles", key = "T(org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat('rl')")
     public Collection<RoleData> retrieveAll() {
         final String sql = "select " + roleRowMapper.schema() + " order by r.id";
 

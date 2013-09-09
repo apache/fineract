@@ -23,6 +23,7 @@ import org.mifosplatform.useradministration.domain.AppUserRepository;
 import org.mifosplatform.useradministration.domain.Role;
 import org.mifosplatform.useradministration.exception.UserNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
@@ -48,6 +49,7 @@ public class AppUserReadPlatformServiceImpl implements AppUserReadPlatformServic
     }
 
     @Override
+    @Cacheable(value = "users", key = "T(org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat(#root.target.context.authenticatedUser().getOffice().getHierarchy())")
     public Collection<AppUserData> retrieveAllUsers() {
 
         AppUser currentUser = context.authenticatedUser();
@@ -142,5 +144,9 @@ public class AppUserReadPlatformServiceImpl implements AppUserReadPlatformServic
             return " u.id as id, u.username as username from m_appuser u "
                     + " join m_office o on o.id = u.office_id where o.hierarchy like ? and u.is_deleted=0 order by u.username";
         }
+    }
+    
+    public PlatformSecurityContext getContext() {
+        return this.context;
     }
 }
