@@ -5,6 +5,7 @@ See VERSIONING (https://github.com/openMF/mifosx/blob/master/VERSIONING.md) for 
 
 Releases
 ===============
+1. 8 Sep 2013 - 1.9.0.RELEASE
 1. 21 Aug 2013 - 1.8.1.RELEASE
 1. 20 Aug 2013 - 1.8.0.RELEASE
 1. 14 Aug 2013 - 1.7.2.RELEASE
@@ -33,7 +34,42 @@ Releases
 1. 05 April 2013 - 0.11.1.beta
 1. 05 April 2013 - 0.11.0.beta
 
+1.9.0.RELEASE
+=============
+Feature Release
 
+This feature release ships various improvements to the core portfolio modules like adding the ability to close a savings account, reactivate a savings account by undoingingediting transactions, transferring money from overpaid loan to savings accounts, closing group accounts, transferring clients with active loans between groups and across branches and adding ability to capture attendance through the collection sheet along with various bug fixes
+
+Platform & API
+
+Bug 
+ - [MIFOSX-611] - Not able to reassign loan from one loan officer to other in Bulk Loan Reassignment page
+ - [MIFOSX-613] - Not able to assign Loan officer after submitting the Group Loan Application.
+ - [MIFOSX-615] - regression issue fixes for integration test
+ - [MIFOSX-624] - Applying Annual Fee results in Savings Account Having a Negative Balance
+ - [MIFOSX-627] - End of day balance is calculated incorrectly for same day transations which results in negative interest been calculated
+ - [MIFOSX-628] - The default Annual fee due on date is not displaying future date in case provided
+ - [MIFOSX-635] - Currency in multiples of 1000 returns an an invalid integer error in edit saving product
+ - [MIFOSX-640] - Approve Transfer Client button
+ - [MIFOSX-517] - If "Code" is added and defined in "Create Data Table" and utilized for a client and then if that code is deleted wrong entry is displayed in Client's page
+
+New Features & Improvements
+ - [MIFOSX-547] - Client, Group and Center Transfers
+ - [MIFOSX-567] - External Id work for migration
+ - [MIFOSX-596] - Support ability to transfer money from overpaid loan accounts to savings accounts
+ - [MIFOSX-619] - Support ability to close an existing active savings account
+ - [MIFOSX-436] - Transfer clients between loanofficers, groups and branches
+ - [MIFOSX-607] - Capture attendance through collectionsheet
+ - [MIFOSX-622] - Savings transfers involving a withdrawal should not auto apply withdrawal fees if configured for account
+ - [MIFOSX-625] - Support ability to close a group
+ - [MIFOSX-634] - Support ability to undo/reverse transactions for the Savings account in closed state and activate again
+ - [MIFOSX-440] - Meeting calendar clean up
+ 
+Reference App
+ - [MIFOSX-612] - Not able to configure Maker Checker Tasks in UI
+ - [MIFOSX-646] - Client "Close" tab is not working
+ - [MIFOSX-618] - Not able to add permisons for the new role created.
+ 
 1.8.1.RELEASE
 =============
 Bug Release
