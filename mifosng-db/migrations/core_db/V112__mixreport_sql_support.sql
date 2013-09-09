@@ -1,14 +1,15 @@
-INSERT INTO `m_permission` (`grouping`, `code`, `entity_name`, `action_name`, `can_maker_checker`) VALUES ('xbrlmapping', 'UPDATE_XBRLMAPPING', 'XBRLMAPPING', 'UPDATE', 0);
+INSERT INTO `m_permission` (`grouping`, `code`, `entity_name`, `action_name`, `can_maker_checker`) VALUES 
+('xbrlmapping', 'UPDATE_XBRLMAPPING', 'XBRLMAPPING', 'UPDATE', 0);
 
 DROP TABLE IF EXISTS `mix_taxonomy`;
 
 CREATE TABLE `mix_taxonomy` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(100) CHARACTER SET latin1 DEFAULT NULL,
+  `name` varchar(100) DEFAULT NULL,
   `namespace_id` int(11) DEFAULT NULL,
-  `dimension` varchar(100) CHARACTER SET latin1 DEFAULT NULL,
+  `dimension` varchar(100) DEFAULT NULL,
   `type` int(11) DEFAULT NULL,
-  `description` varchar(1000) CHARACTER SET latin1 DEFAULT NULL,
+  `description` varchar(1000) DEFAULT NULL,
   `need_mapping` tinyint(1) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -73,18 +74,17 @@ DROP TABLE IF EXISTS `mix_taxonomy_mapping`;
 
 CREATE TABLE `mix_taxonomy_mapping` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `identifier` varchar(50) CHARACTER SET latin1 NOT NULL DEFAULT '',
-  `config` varchar(200) CHARACTER SET latin1 DEFAULT NULL,
+  `identifier` varchar(50) NOT NULL DEFAULT '',
+  `config` varchar(200) DEFAULT NULL,
   `last_update_date` datetime DEFAULT NULL,
-  `currency` varchar(11) CHARACTER SET latin1 DEFAULT NULL,
+  `currency` varchar(11) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 LOCK TABLES `mix_taxonomy_mapping` WRITE;
 
-INSERT INTO `mix_taxonomy_mapping` (`id`, `identifier`, `config`, `last_update_date`, `currency`)
-VALUES
-	(1,'default',NULL,NULL,'');
+INSERT INTO `mix_taxonomy_mapping` (`id`, `identifier`, `config`, `last_update_date`, `currency`) VALUES 
+(1,'default',NULL,NULL,'');
 
 UNLOCK TABLES;
 
@@ -93,8 +93,8 @@ DROP TABLE IF EXISTS `mix_xbrl_namespace`;
 
 CREATE TABLE `mix_xbrl_namespace` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `prefix` varchar(20) CHARACTER SET latin1 NOT NULL DEFAULT '',
-  `url` varchar(100) CHARACTER SET latin1 DEFAULT NULL,
+  `prefix` varchar(20) NOT NULL DEFAULT '',
+  `url` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `UNQUE` (`prefix`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -110,5 +110,4 @@ VALUES
 	(5,'xbrli','http://www.xbrl.org/2003/instance'),
 	(6,'link','http://www.xbrl.org/2003/linkbase'),
 	(7,'dc-all','http://www.themix.org/int/fr/ifrs/basi/2010-08-31/dc-all');
-
 UNLOCK TABLES;
