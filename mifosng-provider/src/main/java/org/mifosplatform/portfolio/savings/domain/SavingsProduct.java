@@ -73,7 +73,7 @@ public class SavingsProduct extends AbstractPersistable<Long> {
     /**
      * The interest period is the span of time at the end of which savings in a
      * client's account earn interest.
-     * 
+     *
      * A value from the {@link SavingsCompoundingInterestPeriodType}
      * enumeration.
      */
@@ -119,9 +119,8 @@ public class SavingsProduct extends AbstractPersistable<Long> {
 
     @Column(name = "withdrawal_fee_type_enum", nullable = true)
     private Integer withdrawalFeeType;
-    
+
     @Column(name = "withdrawal_fee_for_transfer")
-    @SuppressWarnings("unused")
     private boolean withdrawalFeeApplicableForTransfer;
 
     @Column(name = "annual_fee_amount", scale = 6, precision = 19, nullable = true)
@@ -138,12 +137,12 @@ public class SavingsProduct extends AbstractPersistable<Long> {
             final SavingsPostingInterestPeriodType interestPostingPeriodType, final SavingsInterestCalculationType interestCalculationType,
             final SavingsInterestCalculationDaysInYearType interestCalculationDaysInYearType, final BigDecimal minRequiredOpeningBalance,
             final Integer lockinPeriodFrequency, final SavingsPeriodFrequencyType lockinPeriodFrequencyType,
-            final BigDecimal withdrawalFeeAmount, final SavingsWithdrawalFeesType withdrawalFeeType, boolean withdrawalFeeApplicableForTransfer,
+            final BigDecimal withdrawalFeeAmount, final SavingsWithdrawalFeesType withdrawalFeeType, final boolean withdrawalFeeApplicableForTransfer,
             final BigDecimal annualFeeAmount, final MonthDay annualFeeOnMonthDay, final AccountingRuleType accountingRuleType) {
 
         return new SavingsProduct(name, description, currency, interestRate, interestCompoundingPeriodType, interestPostingPeriodType,
                 interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance, lockinPeriodFrequency,
-                lockinPeriodFrequencyType, withdrawalFeeAmount, withdrawalFeeType,withdrawalFeeApplicableForTransfer, annualFeeAmount, 
+                lockinPeriodFrequencyType, withdrawalFeeAmount, withdrawalFeeType,withdrawalFeeApplicableForTransfer, annualFeeAmount,
                 annualFeeOnMonthDay, accountingRuleType);
     }
 
@@ -376,7 +375,7 @@ public class SavingsProduct extends AbstractPersistable<Long> {
             actualChanges.put(withdrawalFeeTypeParamName, newValue);
             this.withdrawalFeeType = newValue != null ? SavingsWithdrawalFeesType.fromInt(newValue).getValue() : newValue;
         }
-        
+
         if(command.isChangeInBooleanParameterNamed(withdrawalFeeForTransfersParamName, this.withdrawalFeeApplicableForTransfer)){
             final boolean newValue = command.booleanPrimitiveValueOfParameterNamed(withdrawalFeeForTransfersParamName);
             actualChanges.put(withdrawalFeeForTransfersParamName, newValue);
@@ -484,16 +483,16 @@ public class SavingsProduct extends AbstractPersistable<Long> {
                 .resource(SAVINGS_PRODUCT_RESOURCE_NAME);
 
         if (this.lockinPeriodFrequency == null) {
-            baseDataValidator.reset().parameter(lockinPeriodFrequencyTypeParamName).value(lockinPeriodFrequencyType).ignoreIfNull()
+            baseDataValidator.reset().parameter(lockinPeriodFrequencyTypeParamName).value(this.lockinPeriodFrequencyType).ignoreIfNull()
                     .inMinMaxRange(0, 3);
 
             if (this.lockinPeriodFrequencyType != null) {
-                baseDataValidator.reset().parameter(lockinPeriodFrequencyParamName).value(lockinPeriodFrequency).notNull()
+                baseDataValidator.reset().parameter(lockinPeriodFrequencyParamName).value(this.lockinPeriodFrequency).notNull()
                         .integerZeroOrGreater();
             }
         } else {
-            baseDataValidator.reset().parameter(lockinPeriodFrequencyParamName).value(lockinPeriodFrequencyType).integerZeroOrGreater();
-            baseDataValidator.reset().parameter(lockinPeriodFrequencyTypeParamName).value(lockinPeriodFrequencyType).notNull()
+            baseDataValidator.reset().parameter(lockinPeriodFrequencyParamName).value(this.lockinPeriodFrequencyType).integerZeroOrGreater();
+            baseDataValidator.reset().parameter(lockinPeriodFrequencyTypeParamName).value(this.lockinPeriodFrequencyType).notNull()
                     .inMinMaxRange(0, 3);
         }
 
