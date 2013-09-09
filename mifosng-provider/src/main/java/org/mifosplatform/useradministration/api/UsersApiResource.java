@@ -75,25 +75,25 @@ public class UsersApiResource {
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveUsers(@Context final UriInfo uriInfo) {
+    public String retrieveAll(@Context final UriInfo uriInfo) {
 
-        context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
+        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
 
         final Collection<AppUserData> users = this.readPlatformService.retrieveAllUsers();
 
-        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, users, RESPONSE_DATA_PARAMETERS);
+        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        return this.toApiJsonSerializer.serialize(settings, users, this.RESPONSE_DATA_PARAMETERS);
     }
 
     @GET
     @Path("{userId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveUser(@PathParam("userId") final Long userId, @Context final UriInfo uriInfo) {
+    public String retrieveOne(@PathParam("userId") final Long userId, @Context final UriInfo uriInfo) {
 
-        context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
+        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions, userId);
 
-        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 
         AppUserData user = this.readPlatformService.retrieveUser(userId);
         if (settings.isTemplate()) {
@@ -101,27 +101,27 @@ public class UsersApiResource {
             user = AppUserData.template(user, offices);
         }
 
-        return this.toApiJsonSerializer.serialize(settings, user, RESPONSE_DATA_PARAMETERS);
+        return this.toApiJsonSerializer.serialize(settings, user, this.RESPONSE_DATA_PARAMETERS);
     }
 
     @GET
     @Path("template")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String newUserDetails(@Context final UriInfo uriInfo) {
+    public String template(@Context final UriInfo uriInfo) {
 
-        context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
+        this.context.authenticatedUser().validateHasReadPermission(this.resourceNameForPermissions);
 
         final AppUserData user = this.readPlatformService.retrieveNewUserDetails();
 
-        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        return this.toApiJsonSerializer.serialize(settings, user, RESPONSE_DATA_PARAMETERS);
+        final ApiRequestJsonSerializationSettings settings = this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        return this.toApiJsonSerializer.serialize(settings, user, this.RESPONSE_DATA_PARAMETERS);
     }
 
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String createUser(final String apiRequestBodyAsJson) {
+    public String create(final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
                 .createUser() //
@@ -137,7 +137,7 @@ public class UsersApiResource {
     @Path("{userId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String updateUser(@PathParam("userId") final Long userId, final String apiRequestBodyAsJson) {
+    public String update(@PathParam("userId") final Long userId, final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
                 .updateUser(userId) //
@@ -153,7 +153,7 @@ public class UsersApiResource {
     @Path("{userId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String deleteUser(@PathParam("userId") final Long userId) {
+    public String delete(@PathParam("userId") final Long userId) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
                 .deleteUser(userId) //
