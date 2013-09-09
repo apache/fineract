@@ -288,7 +288,7 @@ public class CommandWrapper {
     public boolean isGroupActivation() {
         return this.actionName.equalsIgnoreCase("ACTIVATE") && this.entityName.equalsIgnoreCase("GROUP");
     }
-    
+
     public boolean isGroupClose() {
         return this.actionName.equalsIgnoreCase("CLOSE") && this.entityName.equalsIgnoreCase("GROUP");
     }
@@ -300,7 +300,7 @@ public class CommandWrapper {
     public boolean isCenterClose() {
         return this.actionName.equalsIgnoreCase("CLOSE") && this.entityName.equalsIgnoreCase("CENTER");
     }
-    
+
     public boolean isClientIdentifierResource() {
         return this.entityName.equals("CLIENTIDENTIFIER");
     }
@@ -421,11 +421,11 @@ public class CommandWrapper {
     public boolean isUnassignStaff() {
         return this.actionName.equalsIgnoreCase("UNASSIGNSTAFF") && this.entityName.equalsIgnoreCase("GROUP");
     }
-    
+
     public boolean isAssignStaff() {
         return this.actionName.equalsIgnoreCase("ASSIGNSTAFF");
     }
-    
+
     public String commandName() {
         return this.actionName + "_" + this.entityName;
     }
@@ -465,7 +465,7 @@ public class CommandWrapper {
     public boolean isSavingsAccountDeposit() {
         return this.actionName.equalsIgnoreCase("DEPOSIT") && this.entityName.equalsIgnoreCase("SAVINGSACCOUNT");
     }
-    
+
     public boolean isSavingsAccountClose() {
         return this.actionName.equalsIgnoreCase("CLOSE") && this.entityName.equalsIgnoreCase("SAVINGSACCOUNT");
     }
@@ -540,6 +540,10 @@ public class CommandWrapper {
         return this.actionName.equalsIgnoreCase("DISASSOCIATECLIENTS");
     }
 
+    public boolean isXBRLMappingResource() {
+        return this.entityName.equalsIgnoreCase("XBRLMAPPING");
+    }
+
     public boolean isHolidayResource() {
         return this.entityName.equalsIgnoreCase("HOLIDAY");
     }
@@ -563,7 +567,7 @@ public class CommandWrapper {
     public boolean isUpdateGroupRole() {
         return this.entityName.equalsIgnoreCase("GROUP") && this.actionName.equalsIgnoreCase("UPDATEROLE");
     }
-    
+
     public boolean isTransferClientsBetweenGroups() {
         return this.entityName.equalsIgnoreCase("GROUP") && this.actionName.equalsIgnoreCase("TRANSFERCLIENTS");
     }
@@ -575,19 +579,19 @@ public class CommandWrapper {
     public boolean isClientClose() {
         return this.actionName.equalsIgnoreCase("CLOSE") && this.entityName.equalsIgnoreCase("CLIENT");
     }
-    
+
     public boolean isProposeClientTransfer() {
         return this.actionName.equalsIgnoreCase("PROPOSETRANSFER") && this.entityName.equalsIgnoreCase("CLIENT");
     }
-    
+
     public boolean isWithdrawClientTransfer() {
         return this.actionName.equalsIgnoreCase("WITHDRAWTRANSFER") && this.entityName.equalsIgnoreCase("CLIENT");
     }
-    
+
     public boolean isAcceptClientTransfer() {
         return this.actionName.equalsIgnoreCase("ACCEPTTRANSFER") && this.entityName.equalsIgnoreCase("CLIENT");
     }
-    
+
     public boolean isRejectClientTransfer() {
         return this.actionName.equalsIgnoreCase("REJECTTRANSFER") && this.entityName.equalsIgnoreCase("CLIENT");
     }
@@ -595,7 +599,7 @@ public class CommandWrapper {
     public boolean isProductMixResource() {
         return this.entityName.equalsIgnoreCase("PRODUCTMIX");
     }
-    
+
     public boolean isSchedulerResource() {
         return this.entityName.equalsIgnoreCase("SCHEDULER");
     }
@@ -603,12 +607,12 @@ public class CommandWrapper {
     public boolean isAccountTransferResource() {
         return this.entityName.equalsIgnoreCase("ACCOUNTTRANSFER");
     }
-    
+
     public boolean isMeetingResource() {
         return this.entityName.equalsIgnoreCase("MEETING");
     }
- 
-    public boolean isSaveOrUpdateAttendance(){
+
+    public boolean isSaveOrUpdateAttendance() {
         return this.actionName.equalsIgnoreCase("SAVEORUPDATEATTENDANCE");
     }
 }

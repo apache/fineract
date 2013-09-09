@@ -5,6 +5,8 @@
  */
 package org.mifosplatform.portfolio.savings.service;
 
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.accountingRuleParamName;
+
 import java.util.Map;
 
 import org.mifosplatform.accounting.producttoaccountmapping.service.ProductToGLAccountMappingWritePlatformService;
@@ -24,8 +26,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import static org.mifosplatform.portfolio.savings.SavingsApiConstants.accountingRuleParamName;
 
 @Service
 public class SavingsProductWritePlatformServiceJpaRepositoryImpl implements SavingsProductWritePlatformService {

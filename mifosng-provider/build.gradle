@@ -393,6 +393,20 @@ task showTenantListDBInfo<<{
     flywayInfo.execute()
 }
 
+task repairTenantDB<<{
+    description="repair migrate"
+    
+    def filePath = "filesystem:$projectDir" + System.properties['file.separator'] + '..' + System.properties['file.separator'] + 'mifosng-db' + System.properties['file.separator'] + 'migrations/list_db'
+    def tenantsDbName = 'mifosplatform-tenants';
+    if (rootProject.hasProperty("dbName")) {
+        tenantsDbName = rootProject.getProperty("dbName")
+    }
+    
+    flyway.url= "jdbc:mysql://localhost:3306/$tenantsDbName"
+    flyway.locations= [filePath]
+    flywayRepair.execute()
+}
+
 /*
 * Support publication of artifacts versioned by topic branch.
 * CI builds supply `-P BRANCH_NAME=<TOPIC>` to gradle at build time.

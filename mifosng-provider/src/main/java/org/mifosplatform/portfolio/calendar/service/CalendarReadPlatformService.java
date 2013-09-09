@@ -11,6 +11,8 @@ import org.mifosplatform.portfolio.calendar.data.CalendarData;
 import java.util.Collection;
 import java.util.List;
 
+import org.mifosplatform.portfolio.calendar.data.CalendarData;
+
 public interface CalendarReadPlatformService {
 
     CalendarData retrieveCalendar(final Long calendarId, Long entityId, Integer entityTypeId);
