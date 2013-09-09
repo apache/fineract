@@ -34,7 +34,7 @@
 										  org.mifosplatform.portfolio.savingsaccount.*,
 										  org.mifosplatform.portfolio.*,
 										  org.mifosplatform.useradministration.*,
-										  org.mifosplatform.xbrl.*">
+										  org.mifosplatform.mix.*">
 		<context:exclude-filter expression="org.springframework.stereotype.Controller" type="annotation" />
 	</context:component-scan>
 	
