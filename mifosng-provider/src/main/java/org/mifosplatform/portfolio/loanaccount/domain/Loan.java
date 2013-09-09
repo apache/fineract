@@ -1821,6 +1821,9 @@ public class Loan extends AbstractPersistable<Long> {
         existingTransactionIds.addAll(findExistingTransactionIds());
         existingReversedTransactionIds.addAll(findExistingReversedTransactionIds());
 
+        validateActivityNotBeforeClientOrGroupTransferDate(LoanEvent.LOAN_REPAYMENT_OR_WAIVER,
+                transactionForAdjustment.getTransactionDate());
+
         if (transactionForAdjustment.isNotRepayment() && transactionForAdjustment.isNotWaiver()) {
             final String errorMessage = "Only transactions of type repayment or waiver can be adjusted.";
             throw new InvalidLoanTransactionTypeException("transaction", "adjustment.is.only.allowed.to.repayment.or.waiver.transaction",
@@ -2698,14 +2701,14 @@ public class Loan extends AbstractPersistable<Long> {
                         postfix = "cannot.be.before.client.transfer.date";
                     break;
                     case LOAN_DISBURSAL_UNDO:
-                        errorMessage = "The date on which a loan is disbursed cannot be earlier than client's transfer date to this office";
+                        errorMessage = "Cannot undo a disbursal done in another branch";
                         action = "disbursal";
                         postfix = "cannot.be.undone.before.client.transfer.date";
                     break;
                     case LOAN_REPAYMENT_OR_WAIVER:
                         errorMessage = "The date on which a repayment or waiver is made cannot be earlier than client's transfer date to this office";
                         action = "repayment.or.waiver";
-                        postfix = "cannot.be.undone.before.client.transfer.date";
+                        postfix = "cannot.be.made.before.client.transfer.date";
                     break;
                     case LOAN_REJECTED:
                         errorMessage = "The date on which a loan is rejected cannot be earlier than client's transfer date to this office";
