@@ -1195,6 +1195,14 @@ public class CommandWrapperBuilder {
         this.href = "/accountingrules/" + accountingRuleId;
         return this;
     }
+    
+    public CommandWrapperBuilder updateTaxonomyMapping(final Long mappingId) {
+        this.actionName = "UPDATE";
+        this.entityName = "XBRLMAPPING";
+        this.entityId = mappingId;
+        this.href = "/xbrlmapping";
+        return this;
+    }
 
     public CommandWrapperBuilder createHoliday() {
         this.actionName = "CREATE";
