@@ -12,8 +12,8 @@ import static org.mifosplatform.portfolio.savings.SavingsApiConstants.localePara
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.lockinPeriodFrequencyParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.lockinPeriodFrequencyTypeParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.withdrawalFeeAmountParamName;
-import static org.mifosplatform.portfolio.savings.SavingsApiConstants.withdrawalFeeTypeParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.withdrawalFeeForTransfersParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.withdrawalFeeTypeParamName;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
@@ -59,6 +59,7 @@ import org.mifosplatform.infrastructure.security.service.RandomPasswordGenerator
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.organisation.monetary.domain.Money;
+import org.mifosplatform.organisation.office.domain.Office;
 import org.mifosplatform.organisation.staff.domain.Staff;
 import org.mifosplatform.portfolio.accountdetails.domain.AccountType;
 import org.mifosplatform.portfolio.client.domain.Client;
@@ -376,7 +377,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
 
                 final SavingsAccountTransaction postingTransaction = findInterestPostingTransactionFor(interestPostingTransactionDate);
                 if (postingTransaction == null) {
-                    final SavingsAccountTransaction newPostingTransaction = SavingsAccountTransaction.interestPosting(this,
+                    final SavingsAccountTransaction newPostingTransaction = SavingsAccountTransaction.interestPosting(this, office(),
                             interestPostingTransactionDate, interestEarnedToBePostedForPeriod);
                     this.transactions.add(newPostingTransaction);
                     recalucateDailyBalanceDetails = true;
@@ -384,7 +385,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
                     final boolean correctionRequired = postingTransaction.hasNotAmount(interestEarnedToBePostedForPeriod);
                     if (correctionRequired) {
                         postingTransaction.reverse();
-                        final SavingsAccountTransaction newPostingTransaction = SavingsAccountTransaction.interestPosting(this,
+                        final SavingsAccountTransaction newPostingTransaction = SavingsAccountTransaction.interestPosting(this, office(),
                                 interestPostingTransactionDate, interestEarnedToBePostedForPeriod);
                         this.transactions.add(newPostingTransaction);
                         recalucateDailyBalanceDetails = true;
@@ -590,7 +591,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
 
         final Money amount = Money.of(this.currency, transactionDTO.getTransactionAmount());
 
-        final SavingsAccountTransaction transaction = SavingsAccountTransaction.deposit(this, transactionDTO.getPaymentDetail(),
+        final SavingsAccountTransaction transaction = SavingsAccountTransaction.deposit(this, office(), transactionDTO.getPaymentDetail(),
                 transactionDTO.getTransactionDate(), amount);
         this.transactions.add(transaction);
 
@@ -663,8 +664,8 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         transactionDTO.getExistingReversedTransactionIds().addAll(findExistingReversedTransactionIds());
 
         final Money transactionAmountMoney = Money.of(this.currency, transactionDTO.getTransactionAmount());
-        final SavingsAccountTransaction transaction = SavingsAccountTransaction.withdrawal(this, transactionDTO.getPaymentDetail(),
-                transactionDTO.getTransactionDate(), transactionAmountMoney);
+        final SavingsAccountTransaction transaction = SavingsAccountTransaction.withdrawal(this, office(),
+                transactionDTO.getPaymentDetail(), transactionDTO.getTransactionDate(), transactionAmountMoney);
         this.transactions.add(transaction);
 
         if (applyWithdrawFee && isAutomaticWithdrawalFee()) {
@@ -676,14 +677,16 @@ public class SavingsAccount extends AbstractPersistable<Long> {
                 break;
                 case FLAT:
                     feeAmount = Money.of(this.currency, this.withdrawalFeeAmount);
-                    withdrawalFeeTransaction = SavingsAccountTransaction.fee(this, transactionDTO.getTransactionDate(), feeAmount);
+                    withdrawalFeeTransaction = SavingsAccountTransaction
+                            .fee(this, office(), transactionDTO.getTransactionDate(), feeAmount);
                     this.transactions.add(withdrawalFeeTransaction);
                 break;
                 case PERCENT_OF_AMOUNT:
                     final BigDecimal feeAmountDecimal = transactionDTO.getTransactionAmount().multiply(this.withdrawalFeeAmount)
                             .divide(BigDecimal.valueOf(100l));
                     feeAmount = Money.of(this.currency, feeAmountDecimal);
-                    withdrawalFeeTransaction = SavingsAccountTransaction.fee(this, transactionDTO.getTransactionDate(), feeAmount);
+                    withdrawalFeeTransaction = SavingsAccountTransaction
+                            .fee(this, office(), transactionDTO.getTransactionDate(), feeAmount);
                     this.transactions.add(withdrawalFeeTransaction);
                 break;
             }
@@ -722,8 +725,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
             if (runningBalance.isLessThanZero()) {
                 //
                 final BigDecimal withdrawalFee = null;
-                throw new InsufficientAccountBalanceException("transactionAmount", getAccountBalance(), withdrawalFee,
-                        transactionAmount);
+                throw new InsufficientAccountBalanceException("transactionAmount", getAccountBalance(), withdrawalFee, transactionAmount);
             }
         }
     }
@@ -806,8 +808,8 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         existingReversedTransactionIds.addAll(findExistingReversedTransactionIds());
 
         final Money annualFee = Money.of(this.currency, this.annualFeeAmount);
-        final SavingsAccountTransaction annualFeeTransaction = SavingsAccountTransaction.annualFee(this, annualFeeTransactionDate,
-                annualFee);
+        final SavingsAccountTransaction annualFeeTransaction = SavingsAccountTransaction.annualFee(this, office(),
+                annualFeeTransactionDate, annualFee);
         this.transactions.add(annualFeeTransaction);
 
         validateAccountBalanceDoesNotBecomeNegative(SavingsApiConstants.applyAnnualFeeTransactionAction);
@@ -1247,6 +1249,16 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         return officeId;
     }
 
+    public Office office() {
+        Office office = null;
+        if (this.client != null) {
+            office = this.client.getOffice();
+        } else {
+            office = this.group.getOffice();
+        }
+        return office;
+    }
+
     public Long clientId() {
         Long id = null;
         if (this.client != null) {
@@ -1669,8 +1681,8 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         // activating account.
         final Money minRequiredOpeningBalance = Money.of(this.currency, this.minRequiredOpeningBalance);
         if (minRequiredOpeningBalance.isGreaterThanZero()) {
-            SavingsAccountTransactionDTO transactionDTO = new SavingsAccountTransactionDTO(fmt, activationDate, minRequiredOpeningBalance.getAmount(), 
-                    existingTransactionIds, existingReversedTransactionIds, null);
+            SavingsAccountTransactionDTO transactionDTO = new SavingsAccountTransactionDTO(fmt, activationDate,
+                    minRequiredOpeningBalance.getAmount(), existingTransactionIds, existingReversedTransactionIds, null);
             deposit(transactionDTO);
         }
 
