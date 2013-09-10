@@ -325,7 +325,11 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
         if (loanRepository.doNonClosedLoanAccountsExistForClient(client.getId())) {
             // get each individual loan for the client
             for (Loan loan : loanRepository.findLoanByClientId(client.getId())) {
-                if (!loan.isClosed()) {
+                /**
+                 * We need to create transactions etc only for loans which are
+                 * disbursed and not yet closed
+                 **/
+                if (loan.isDisbursed() && !loan.isClosed()) {
                     switch (transferEventType) {
                         case ACCEPTANCE:
                             this.loanWritePlatformService.acceptLoanTransfer(loan.getId(), DateUtils.getLocalDateOfTenant(),
@@ -335,7 +339,7 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
                             this.loanWritePlatformService.initiateLoanTransfer(loan.getId(), DateUtils.getLocalDateOfTenant());
                         break;
                         case REJECTION:
-                        // do nothing
+                            this.loanWritePlatformService.rejectLoanTransfer(loan.getId());
                         break;
                         case WITHDRAWAL:
                             this.loanWritePlatformService.withdrawLoanTransfer(loan.getId(), DateUtils.getLocalDateOfTenant());
