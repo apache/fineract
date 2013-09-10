@@ -59,12 +59,12 @@ public interface LoanWritePlatformService {
 
     void applyHolidaysToLoans();
 
-    LoanTransaction initiateLoanTransfer(Long accountId, LocalDate TransferDate);
+    LoanTransaction initiateLoanTransfer(Long accountId, LocalDate transferDate);
 
-    LoanTransaction withdrawLoanTransfer(Long accountId, LocalDate TransferDate);
+    LoanTransaction withdrawLoanTransfer(Long accountId, LocalDate transferDate);
 
     void rejectLoanTransfer(Long accountId);
 
-    LoanTransaction acceptLoanTransfer(Long accountId, LocalDate TransferDate, Office acceptedInOffice, Staff loanOfficer);
+    LoanTransaction acceptLoanTransfer(Long accountId, LocalDate transferDate, Office acceptedInOffice, Staff loanOfficer);
 
 }
