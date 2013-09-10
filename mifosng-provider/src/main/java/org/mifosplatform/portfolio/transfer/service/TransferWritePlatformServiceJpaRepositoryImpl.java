@@ -409,16 +409,20 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
         if (!client.isTransferInProgress()) { throw new ClientNotAwaitingTransferApprovalException(client.getId()); }
     }
 
-    private void validateGroupAwaitingTransferAcceptance(final Group group) {
-        if (!group.isTransferInProgress()) { throw new ClientNotAwaitingTransferApprovalException(group.getId()); }
-    }
+    /**
+     * private void validateGroupAwaitingTransferAcceptance(final Group group) {
+     * if (!group.isTransferInProgress()) { throw new
+     * ClientNotAwaitingTransferApprovalException(group.getId()); } }
+     **/
 
     private void validateClientAwaitingTransferAcceptanceOnHold(final Client client) {
         if (!client.isTransferInProgressOrOnHold()) { throw new ClientNotAwaitingTransferApprovalOrOnHoldException(client.getId()); }
     }
 
-    private void validateGroupAwaitingTransferAcceptanceOnHold(final Group group) {
-        if (!group.isTransferInProgressOrOnHold()) { throw new ClientNotAwaitingTransferApprovalException(group.getId()); }
-    }
+    /**
+     * private void validateGroupAwaitingTransferAcceptanceOnHold(final Group
+     * group) { if (!group.isTransferInProgressOrOnHold()) { throw new
+     * ClientNotAwaitingTransferApprovalException(group.getId()); } }
+     **/
 
 }
