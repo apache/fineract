@@ -29,12 +29,12 @@ public class CashBasedAccountingProcessorForSavings implements AccountingProcess
     @Override
     public void createJournalEntriesForSavings(SavingsDTO savingsDTO) {
         final GLClosure latestGLClosure = this.helper.getLatestClosureByBranch(savingsDTO.getOfficeId());
-        final Office office = this.helper.getOfficeById(savingsDTO.getOfficeId());
         final Long savingsProductId = savingsDTO.getSavingsProductId();
         final Long savingsId = savingsDTO.getSavingsId();
         for (final SavingsTransactionDTO savingsTransactionDTO : savingsDTO.getNewSavingsTransactions()) {
             final Date transactionDate = savingsTransactionDTO.getTransactionDate();
             final String transactionId = savingsTransactionDTO.getTransactionId();
+            final Office office = this.helper.getOfficeById(savingsTransactionDTO.getOfficeId());
             final Long paymentTypeId = savingsTransactionDTO.getPaymentTypeId();
             final boolean isReversal = savingsTransactionDTO.isReversed();
             final BigDecimal amount = savingsTransactionDTO.getAmount();

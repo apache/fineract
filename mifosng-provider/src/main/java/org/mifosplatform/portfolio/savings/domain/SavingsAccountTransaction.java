@@ -230,6 +230,7 @@ public final class SavingsAccountTransaction extends AbstractPersistable<Long> {
         final SavingsAccountTransactionEnumData transactionType = SavingsEnumerations.transactionType(this.typeOf);
 
         thisTransactionData.put("id", getId());
+        thisTransactionData.put("officeId", this.office.getId());
         thisTransactionData.put("type", transactionType);
         thisTransactionData.put("reversed", Boolean.valueOf(isReversed()));
         thisTransactionData.put("date", getTransactionLocalDate());
