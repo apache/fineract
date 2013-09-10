@@ -27,6 +27,7 @@ import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
 import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
+import org.mifosplatform.infrastructure.core.exception.PlatformServiceUnavailableException;
 import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.jobs.annotation.CronTarget;
 import org.mifosplatform.infrastructure.jobs.service.JobName;
@@ -36,6 +37,8 @@ import org.mifosplatform.organisation.monetary.domain.ApplicationCurrencyReposit
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.organisation.office.domain.Office;
 import org.mifosplatform.organisation.staff.domain.Staff;
+import org.mifosplatform.portfolio.account.PortfolioAccountType;
+import org.mifosplatform.portfolio.account.service.AccountTransfersReadPlatformService;
 import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.client.exception.ClientNotActiveException;
 import org.mifosplatform.portfolio.group.domain.Group;
@@ -74,6 +77,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
     private final JournalEntryWritePlatformService journalEntryWritePlatformService;
     private final SavingsAccountDomainService savingsAccountDomainService;
     private final NoteRepository noteRepository;
+    private final AccountTransfersReadPlatformService accountTransfersReadPlatformService;
 
     @Autowired
     public SavingsAccountWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
@@ -84,7 +88,8 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
             final PaymentDetailWritePlatformService paymentDetailWritePlatformService,
             final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepositoryWrapper,
             final JournalEntryWritePlatformService journalEntryWritePlatformService,
-            final SavingsAccountDomainService savingsAccountDomainService, final NoteRepository noteRepository) {
+            final SavingsAccountDomainService savingsAccountDomainService, final NoteRepository noteRepository,
+            final AccountTransfersReadPlatformService accountTransfersReadPlatformService) {
         this.context = context;
         this.savingAccountRepository = savingAccountRepository;
         this.savingsAccountTransactionRepository = savingsAccountTransactionRepository;
@@ -95,6 +100,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         this.journalEntryWritePlatformService = journalEntryWritePlatformService;
         this.savingsAccountDomainService = savingsAccountDomainService;
         this.noteRepository = noteRepository;
+        this.accountTransfersReadPlatformService = accountTransfersReadPlatformService;
     }
 
     @Transactional
@@ -301,6 +307,10 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         SavingsAccountTransaction savingsAccountTransaction = this.savingsAccountTransactionRepository.findOneByIdAndSavingsAccountId(
                 transactionId, savingsId);
         if (savingsAccountTransaction == null) { throw new SavingsAccountTransactionNotFoundException(savingsId, transactionId); }
+        
+        if(accountTransfersReadPlatformService.isAccountTransfer(transactionId, PortfolioAccountType.SAVINGS)){
+            throw new PlatformServiceUnavailableException("error.msg.saving.account.transfer.transaction.update.not.allowed","Savings account transaction:"+transactionId+" update not allowed as it involves in account transfer",transactionId);
+        }
 
         final LocalDate today = DateUtils.getLocalDateOfTenant();
         final MathContext mc = new MathContext(15, RoundingMode.HALF_EVEN);
@@ -339,6 +349,10 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
 
         if (!(savingsAccountTransaction.isDeposit() || savingsAccountTransaction.isWithdrawal()) || savingsAccountTransaction.isReversed()) { throw new TransactionUpdateNotAllowedException(
                 savingsId, transactionId); }
+        
+        if(accountTransfersReadPlatformService.isAccountTransfer(transactionId, PortfolioAccountType.SAVINGS)){
+            throw new PlatformServiceUnavailableException("error.msg.saving.account.transfer.transaction.update.not.allowed","Savings account transaction:"+transactionId+" update not allowed as it involves in account transfer",transactionId);
+        }
         this.savingsAccountTransactionDataValidator.validate(command);
 
         final LocalDate today = DateUtils.getLocalDateOfTenant();
@@ -362,9 +376,9 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
 
         // for undo withdrawal fee
         SavingsAccountTransaction nextSavingsAccountTransaction = this.savingsAccountTransactionRepository.findOneByIdAndSavingsAccountId(
-                transactionId + 1, savingsId);
-        if (nextSavingsAccountTransaction.isWithdrawalFeeAndNotReversed()) {
-            account.undoTransaction(transactionId + 1, existingReversedTransactionIds);
+                transactionId+1, savingsId);
+        if(nextSavingsAccountTransaction!=null && nextSavingsAccountTransaction.isWithdrawalFeeAndNotReversed()){
+            account.undoTransaction(transactionId+1, existingReversedTransactionIds);
         }
 
         SavingsAccountTransaction transaction = null;

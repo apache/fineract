@@ -2090,7 +2090,7 @@ public class Loan extends AbstractPersistable<Long> {
         return !isDisbursed();
     }
 
-    private boolean isDisbursed() {
+    public boolean isDisbursed() {
         return hasDisbursementTransaction();
     }
 

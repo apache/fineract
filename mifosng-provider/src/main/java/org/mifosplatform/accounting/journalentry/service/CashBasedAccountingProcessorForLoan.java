@@ -64,7 +64,8 @@ public class CashBasedAccountingProcessorForLoan implements AccountingProcessorF
                         CASH_ACCOUNTS_FOR_LOAN.LOAN_PORTFOLIO, loanProductId, paymentTypeId, loanId, transactionId, transactionDate,
                         principalAmount, false);
             } else if (loanTransactionDTO.getTransactionType().isInitiateTransfer()
-                    || loanTransactionDTO.getTransactionType().isApproveTransfer()) {
+                    || loanTransactionDTO.getTransactionType().isApproveTransfer()
+                    || loanTransactionDTO.getTransactionType().isWithdrawTransfer()) {
                 createJournalEntriesForTransfers(loanDTO, loanTransactionDTO, office);
             }
         }
@@ -184,7 +185,8 @@ public class CashBasedAccountingProcessorForLoan implements AccountingProcessorF
             helper.createCashBasedJournalEntriesAndReversalsForLoan(office, CASH_ACCOUNTS_FOR_LOAN.TRANSFERS_SUSPENSE,
                     CASH_ACCOUNTS_FOR_LOAN.LOAN_PORTFOLIO, loanProductId, null, loanId, transactionId, transactionDate, principalAmount,
                     isReversal);
-        } else if (loanTransactionDTO.getTransactionType().isApproveTransfer()) {
+        } else if (loanTransactionDTO.getTransactionType().isApproveTransfer()
+                || loanTransactionDTO.getTransactionType().isWithdrawTransfer()) {
             helper.createCashBasedJournalEntriesAndReversalsForLoan(office, CASH_ACCOUNTS_FOR_LOAN.LOAN_PORTFOLIO,
                     CASH_ACCOUNTS_FOR_LOAN.TRANSFERS_SUSPENSE, loanProductId, null, loanId, transactionId, transactionDate,
                     principalAmount, isReversal);

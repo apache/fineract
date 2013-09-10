@@ -31,6 +31,7 @@ import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.organisation.monetary.domain.Money;
 import org.mifosplatform.organisation.staff.data.StaffData;
 import org.mifosplatform.organisation.staff.service.StaffReadPlatformService;
+import org.mifosplatform.portfolio.account.data.AccountTransferData;
 import org.mifosplatform.portfolio.accountdetails.service.AccountEnumerations;
 import org.mifosplatform.portfolio.calendar.data.CalendarData;
 import org.mifosplatform.portfolio.calendar.domain.CalendarEntityType;
@@ -329,7 +330,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         final Collection<CodeValueData> paymentOptions = codeValueReadPlatformService
                 .retrieveCodeValuesByCode(PaymentDetailConstants.paymentTypeCodeName);
         return new LoanTransactionData(null, null, null, transactionType, null, currencyData, earliestUnpaidInstallmentDate,
-                possibleNextRepaymentAmount.getAmount(), null, null, null, null, paymentOptions, null);
+                possibleNextRepaymentAmount.getAmount(), null, null, null, null, paymentOptions, null,null);
     }
 
     @Override
@@ -353,7 +354,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
         final BigDecimal amount = waiveOfInterest.getAmount(currency).getAmount();
         return new LoanTransactionData(null, null, null, transactionType, null, currencyData, waiveOfInterest.getTransactionDate(), amount,
-                null, null, null, null, null);
+                null, null, null, null, null, null);
     }
 
     @Override
@@ -363,7 +364,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
 
         final LoanTransactionEnumData transactionType = LoanEnumerations.transactionType(LoanTransactionType.WRITEOFF);
         return new LoanTransactionData(null, null, null, transactionType, null, null, DateUtils.getLocalDateOfTenant(), null, null, null,
-                null, null, null);
+                null, null, null, null);
     }
 
     @Override
@@ -374,7 +375,7 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         final Collection<CodeValueData> paymentOptions = codeValueReadPlatformService
                 .retrieveCodeValuesByCode(PaymentDetailConstants.paymentTypeCodeName);
         return new LoanTransactionData(null, null, null, transactionType, null, null, loan.getExpectedDisbursedOnLocalDate(), null, null,
-                null, null, null, paymentOptions, null);
+                null, null, null, paymentOptions, null,null);
     }
 
     @Override
@@ -393,8 +394,13 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
         if (transaction == null) { throw new LoanTransactionNotFoundException(transactionId); }
 
         if (transaction.isNotBelongingToLoanOf(loan)) { throw new LoanTransactionNotFoundException(transactionId, loanId); }
-
-        return transaction.toData(currencyData);
+        
+        LoanTransactionsAccountTransferMapper trasfermapper = new LoanTransactionsAccountTransferMapper();
+        String sql = "select "
+                + trasfermapper.accountTransferSchema()
+                + " where tr.loan_id = ? and tr.id = ?";
+        AccountTransferData accountTransferData = this.jdbcTemplate.queryForObject(sql, trasfermapper, loanId, transactionId);
+        return transaction.toData(currencyData,accountTransferData);
     }
 
     private static final class LoanMapper implements RowMapper<LoanAccountData> {
@@ -861,12 +867,20 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
                     + " pd.receipt_number as receiptNumber, pd.bank_number as bankNumber,pd.routing_code as routingCode, "
                     + " l.currency_code as currencyCode, l.currency_digits as currencyDigits, l.currency_multiplesof as inMultiplesOf, rc.`name` as currencyName, "
                     + " rc.display_symbol as currencyDisplaySymbol, rc.internationalized_name_code as currencyNameCode, "
-                    + " cv.code_value as paymentTypeName, tr.external_id as externalId, tr.office_id as officeId, office.name as officeName "
+                    + " cv.code_value as paymentTypeName, tr.external_id as externalId, tr.office_id as officeId, office.name as officeName, "
+                    + " fromtran.id as fromTransferId, fromtran.is_reversed as fromTransferReversed,"
+                    + " fromtran.transaction_date as fromTransferDate, fromtran.amount as fromTransferAmount,"
+                    + " fromtran.description as fromTransferDescription,"
+                    + " totran.id as toTransferId, totran.is_reversed as toTransferReversed,"
+                    + " totran.transaction_date as toTransferDate, totran.amount as toTransferAmount,"
+                    + " totran.description as toTransferDescription "
                     + " from m_loan l join m_loan_transaction tr on tr.loan_id = l.id"
                     + " join m_currency rc on rc.`code` = l.currency_code "
                     + " left JOIN m_payment_detail pd ON tr.payment_detail_id = pd.id"
                     + " left join m_code_value cv on pd.payment_type_cv_id = cv.id"
-                    + " left join m_office office on office.id=tr.office_id";
+                    + " left join m_office office on office.id=tr.office_id"
+                    + " left join m_savings_account_transfer fromtran on fromtran.from_loan_transaction_id = tr.id "
+                    + " left join m_savings_account_transfer totran on totran.to_loan_transaction_id = tr.id ";
         }
 
         @Override
@@ -910,11 +924,88 @@ public class LoanReadPlatformServiceImpl implements LoanReadPlatformService {
             final BigDecimal feeChargesPortion = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "fees");
             final BigDecimal penaltyChargesPortion = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "penalties");
             final String externalId = rs.getString("externalId");
+            
+            AccountTransferData transfer = null;
+            final Long fromTransferId = JdbcSupport.getLong(rs, "fromTransferId");
+            final Long toTransferId = JdbcSupport.getLong(rs, "toTransferId");
+            if (fromTransferId != null) {
+                final LocalDate fromTransferDate = JdbcSupport.getLocalDate(rs, "fromTransferDate");
+                final BigDecimal fromTransferAmount = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "fromTransferAmount");
+                final boolean fromTransferReversed = rs.getBoolean("fromTransferReversed");
+                final String fromTransferDescription = rs.getString("fromTransferDescription");
+
+                transfer = AccountTransferData.transferBasicDetails(fromTransferId, currencyData, fromTransferAmount, fromTransferDate,
+                        fromTransferDescription, fromTransferReversed);
+            } else if (toTransferId != null) {
+                final LocalDate toTransferDate = JdbcSupport.getLocalDate(rs, "toTransferDate");
+                final BigDecimal toTransferAmount = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "toTransferAmount");
+                final boolean toTransferReversed = rs.getBoolean("toTransferReversed");
+                final String toTransferDescription = rs.getString("toTransferDescription");
+
+                transfer = AccountTransferData.transferBasicDetails(toTransferId, currencyData, toTransferAmount, toTransferDate,
+                        toTransferDescription, toTransferReversed);
+            }
+
 
             return new LoanTransactionData(id, officeId, officeName, transactionType, paymentDetailData, currencyData, date, totalAmount,
-                    principalPortion, interestPortion, feeChargesPortion, penaltyChargesPortion, externalId);
+                    principalPortion, interestPortion, feeChargesPortion, penaltyChargesPortion, externalId, transfer);
         }
     }
+
+    private static final class LoanTransactionsAccountTransferMapper implements RowMapper<AccountTransferData> {
+
+        public String accountTransferSchema() {
+
+            return " l.currency_code as currencyCode, l.currency_digits as currencyDigits, l.currency_multiplesof as inMultiplesOf, rc.`name` as currencyName, "
+                    + " rc.display_symbol as currencyDisplaySymbol, rc.internationalized_name_code as currencyNameCode, "
+                    + " fromtran.id as fromTransferId, fromtran.is_reversed as fromTransferReversed,"
+                    + " fromtran.transaction_date as fromTransferDate, fromtran.amount as fromTransferAmount,"
+                    + " fromtran.description as fromTransferDescription,"
+                    + " totran.id as toTransferId, totran.is_reversed as toTransferReversed,"
+                    + " totran.transaction_date as toTransferDate, totran.amount as toTransferAmount,"
+                    + " totran.description as toTransferDescription "
+                    + " from m_loan l join m_loan_transaction tr on tr.loan_id = l.id"
+                    + " join m_currency rc on rc.`code` = l.currency_code "
+                    + " left join m_savings_account_transfer fromtran on fromtran.from_loan_transaction_id = tr.id "
+                    + " left join m_savings_account_transfer totran on totran.to_loan_transaction_id = tr.id ";
+        }
+
+        @Override
+        public AccountTransferData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+
+            final String currencyCode = rs.getString("currencyCode");
+            final String currencyName = rs.getString("currencyName");
+            final String currencyNameCode = rs.getString("currencyNameCode");
+            final String currencyDisplaySymbol = rs.getString("currencyDisplaySymbol");
+            final Integer currencyDigits = JdbcSupport.getInteger(rs, "currencyDigits");
+            final Integer inMultiplesOf = JdbcSupport.getInteger(rs, "inMultiplesOf");
+            final CurrencyData currencyData = new CurrencyData(currencyCode, currencyName, currencyDigits, inMultiplesOf,
+                    currencyDisplaySymbol, currencyNameCode);
+
+            AccountTransferData transfer = null;
+            final Long fromTransferId = JdbcSupport.getLong(rs, "fromTransferId");
+            final Long toTransferId = JdbcSupport.getLong(rs, "toTransferId");
+            if (fromTransferId != null) {
+                final LocalDate fromTransferDate = JdbcSupport.getLocalDate(rs, "fromTransferDate");
+                final BigDecimal fromTransferAmount = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "fromTransferAmount");
+                final boolean fromTransferReversed = rs.getBoolean("fromTransferReversed");
+                final String fromTransferDescription = rs.getString("fromTransferDescription");
+
+                transfer = AccountTransferData.transferBasicDetails(fromTransferId, currencyData, fromTransferAmount, fromTransferDate,
+                        fromTransferDescription, fromTransferReversed);
+            } else if (toTransferId != null) {
+                final LocalDate toTransferDate = JdbcSupport.getLocalDate(rs, "toTransferDate");
+                final BigDecimal toTransferAmount = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "toTransferAmount");
+                final boolean toTransferReversed = rs.getBoolean("toTransferReversed");
+                final String toTransferDescription = rs.getString("toTransferDescription");
+
+                transfer = AccountTransferData.transferBasicDetails(toTransferId, currencyData, toTransferAmount, toTransferDate,
+                        toTransferDescription, toTransferReversed);
+            }
+            return transfer;
+        }
+    }
+
 
     @Override
     public LoanAccountData retrieveLoanProductDetailsTemplate(final Long productId) {
