@@ -11,6 +11,7 @@ import java.util.Collection;
 import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.codes.data.CodeValueData;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
+import org.mifosplatform.portfolio.account.data.AccountTransferData;
 import org.mifosplatform.portfolio.paymentdetail.data.PaymentDetailData;
 
 /**
@@ -35,6 +36,7 @@ public class LoanTransactionData {
     private final BigDecimal feeChargesPortion;
     private final BigDecimal penaltyChargesPortion;
     private final String externalId;
+    private final AccountTransferData transfer;
 
     // templates
     final Collection<CodeValueData> paymentTypeOptions;
@@ -44,21 +46,22 @@ public class LoanTransactionData {
                 loanTransactionData.type, loanTransactionData.paymentDetailData, loanTransactionData.currency, loanTransactionData.date,
                 loanTransactionData.amount, loanTransactionData.principalPortion, loanTransactionData.interestPortion,
                 loanTransactionData.feeChargesPortion, loanTransactionData.penaltyChargesPortion, paymentTypeOptions,
-                loanTransactionData.externalId);
+                loanTransactionData.externalId,loanTransactionData.transfer);
     }
 
     public LoanTransactionData(final Long id, final Long officeId, final String officeName, final LoanTransactionEnumData transactionType,
             final PaymentDetailData paymentDetailData, final CurrencyData currency, final LocalDate date, final BigDecimal amount,
             final BigDecimal principalPortion, final BigDecimal interestPortion, final BigDecimal feeChargesPortion,
-            final BigDecimal penaltyChargesPortion, final String externalId) {
+            final BigDecimal penaltyChargesPortion, final String externalId, AccountTransferData transfer) {
         this(id, officeId, officeName, transactionType, paymentDetailData, currency, date, amount, principalPortion, interestPortion,
-                feeChargesPortion, penaltyChargesPortion, null, externalId);
+                feeChargesPortion, penaltyChargesPortion, null, externalId,transfer);
     }
 
     public LoanTransactionData(final Long id, final Long officeId, final String officeName, final LoanTransactionEnumData transactionType,
             final PaymentDetailData paymentDetailData, final CurrencyData currency, final LocalDate date, final BigDecimal amount,
             final BigDecimal principalPortion, final BigDecimal interestPortion, final BigDecimal feeChargesPortion,
-            final BigDecimal penaltyChargesPortion, final Collection<CodeValueData> paymentTypeOptions, final String externalId) {
+            final BigDecimal penaltyChargesPortion, final Collection<CodeValueData> paymentTypeOptions, final String externalId,
+            final AccountTransferData transfer) {
         this.id = id;
         this.officeId = officeId;
         this.officeName = officeName;
@@ -73,6 +76,7 @@ public class LoanTransactionData {
         this.penaltyChargesPortion = penaltyChargesPortion;
         this.paymentTypeOptions = paymentTypeOptions;
         this.externalId = externalId;
+        this.transfer = transfer;
     }
 
     public LocalDate dateOf() {

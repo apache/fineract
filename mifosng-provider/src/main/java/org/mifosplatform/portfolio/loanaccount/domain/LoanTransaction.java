@@ -32,6 +32,7 @@ import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.organisation.monetary.domain.Money;
 import org.mifosplatform.organisation.office.domain.Office;
+import org.mifosplatform.portfolio.account.data.AccountTransferData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanTransactionData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanTransactionEnumData;
 import org.mifosplatform.portfolio.loanproduct.service.LoanEnumerations;
@@ -395,7 +396,7 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
         return result;
     }
 
-    public LoanTransactionData toData(final CurrencyData currencyData) {
+    public LoanTransactionData toData(final CurrencyData currencyData,final AccountTransferData transfer) {
         final LoanTransactionEnumData transactionType = LoanEnumerations.transactionType(this.typeOf);
         PaymentDetailData paymentDetailData = null;
         if (this.paymentDetail != null) {
@@ -403,7 +404,7 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
         }
         return new LoanTransactionData(this.getId(), this.office.getId(), this.office.getName(), transactionType, paymentDetailData,
                 currencyData, getTransactionDate(), this.amount, this.principalPortion, this.interestPortion, this.feeChargesPortion,
-                this.penaltyChargesPortion, this.externalId);
+                this.penaltyChargesPortion, this.externalId, transfer);
     }
 
     public Map<String, Object> toMapData(final CurrencyData currencyData) {
