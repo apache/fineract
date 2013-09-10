@@ -122,6 +122,7 @@ public class AccountingProcessorHelper {
         final List<Map<String, Object>> newTransactionsMap = (List<Map<String, Object>>) accountingBridgeData.get("newSavingsTransactions");
 
         for (final Map<String, Object> map : newTransactionsMap) {
+            final Long transactionOfficeId = (Long) map.get("officeId");
             final String transactionId = ((Long) map.get("id")).toString();
             final Date transactionDate = ((LocalDate) map.get("date")).toDate();
             final SavingsAccountTransactionEnumData transactionType = (SavingsAccountTransactionEnumData) map.get("type");
@@ -129,8 +130,8 @@ public class AccountingProcessorHelper {
             final boolean reversed = (Boolean) map.get("reversed");
             final Long paymentTypeId = (Long) map.get("paymentTypeId");
 
-            final SavingsTransactionDTO transaction = new SavingsTransactionDTO(paymentTypeId, transactionId, transactionDate,
-                    transactionType, amount, reversed);
+            final SavingsTransactionDTO transaction = new SavingsTransactionDTO(transactionOfficeId, paymentTypeId, transactionId,
+                    transactionDate, transactionType, amount, reversed);
 
             newSavingsTransactions.add(transaction);
 

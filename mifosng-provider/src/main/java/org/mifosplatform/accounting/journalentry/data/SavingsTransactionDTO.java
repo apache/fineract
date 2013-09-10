@@ -12,6 +12,7 @@ import org.mifosplatform.portfolio.savings.data.SavingsAccountTransactionEnumDat
 
 public class SavingsTransactionDTO {
 
+    private final Long officeId;
     private final String transactionId;
     private final Date transactionDate;
     private final Long paymentTypeId;
@@ -22,7 +23,7 @@ public class SavingsTransactionDTO {
     /*** Boolean values determines if the transaction is reversed ***/
     private final boolean reversed;
 
-    public SavingsTransactionDTO(final Long paymentTypeId, final String transactionId, final Date transactionDate,
+    public SavingsTransactionDTO(final Long officeId, final Long paymentTypeId, final String transactionId, final Date transactionDate,
             final SavingsAccountTransactionEnumData transactionType, final BigDecimal amount, final boolean reversed) {
         this.paymentTypeId = paymentTypeId;
         this.transactionId = transactionId;
@@ -30,6 +31,11 @@ public class SavingsTransactionDTO {
         this.amount = amount;
         this.reversed = reversed;
         this.transactionType = transactionType;
+        this.officeId = officeId;
+    }
+
+    public Long getOfficeId() {
+        return this.officeId;
     }
 
     public String getTransactionId() {
