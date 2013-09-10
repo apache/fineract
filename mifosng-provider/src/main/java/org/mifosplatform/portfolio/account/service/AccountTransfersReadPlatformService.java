@@ -6,6 +6,7 @@
 package org.mifosplatform.portfolio.account.service;
 
 import org.mifosplatform.infrastructure.core.service.Page;
+import org.mifosplatform.portfolio.account.PortfolioAccountType;
 import org.mifosplatform.portfolio.account.data.AccountTransferData;
 import org.mifosplatform.portfolio.group.service.SearchParameters;
 
@@ -17,4 +18,6 @@ public interface AccountTransfersReadPlatformService {
     Page<AccountTransferData> retrieveAll(SearchParameters searchParameters);
 
     AccountTransferData retrieveOne(Long transferId);
+    
+    boolean isAccountTransfer(Long transactionId,PortfolioAccountType accountType);
 }
