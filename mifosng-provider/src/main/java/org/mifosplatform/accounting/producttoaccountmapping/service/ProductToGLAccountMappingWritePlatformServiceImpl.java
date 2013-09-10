@@ -163,6 +163,9 @@ public class ProductToGLAccountMappingWritePlatformServiceImpl implements Produc
                 savingsProductToGLAccountMappingHelper.saveSavingsToLiabilityAccountMapping(element,
                         SAVINGS_PRODUCT_ACCOUNTING_PARAMS.SAVINGS_CONTROL.getValue(), savingProductId,
                         CASH_ACCOUNTS_FOR_SAVINGS.SAVINGS_CONTROL.getValue());
+                savingsProductToGLAccountMappingHelper.saveSavingsToLiabilityAccountMapping(element,
+                        SAVINGS_PRODUCT_ACCOUNTING_PARAMS.TRANSFERS_SUSPENSE.getValue(), savingProductId,
+                        CASH_ACCOUNTS_FOR_SAVINGS.TRANSFERS_SUSPENSE.getValue());
 
                 // advanced accounting mappings
                 savingsProductToGLAccountMappingHelper.savePaymentChannelToFundSourceMappings(command, element, savingProductId, null);

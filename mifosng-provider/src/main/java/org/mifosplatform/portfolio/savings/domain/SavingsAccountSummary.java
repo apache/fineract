@@ -79,4 +79,9 @@ public final class SavingsAccountSummary {
     public Money getAccountBalance(final MonetaryCurrency currency) {
         return Money.of(currency, this.accountBalance);
     }
+
+    public BigDecimal getAccountBalance() {
+        return this.accountBalance;
+    }
+
 }

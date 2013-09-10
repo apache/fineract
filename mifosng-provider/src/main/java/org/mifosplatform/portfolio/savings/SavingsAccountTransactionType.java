@@ -18,7 +18,11 @@ public enum SavingsAccountTransactionType {
     WITHDRAWAL(2, "savingsAccountTransactionType.withdrawal"), //
     INTEREST_POSTING(3, "savingsAccountTransactionType.interestPosting"), //
     WITHDRAWAL_FEE(4, "savingsAccountTransactionType.withdrawalFee"), //
-    ANNUAL_FEE(5, "savingsAccountTransactionType.annualFee");
+    ANNUAL_FEE(5, "savingsAccountTransactionType.annualFee"), //
+    INITIATE_TRANSFER(12, "savingsAccountTransactionType.initiateTransfer"), //
+    APPROVE_TRANSFER(13, "savingsAccountTransactionType.approveTransfer"), //
+    WITHDRAW_TRANSFER(14, "savingsAccountTransactionType.withdrawTransfer"), //
+    REJECT_TRANSFER(15, "savingsAccountTransactionType.rejectTransfer");
 
     private final Integer value;
     private final String code;
@@ -56,6 +60,18 @@ public enum SavingsAccountTransactionType {
             break;
             case 5:
                 loanTransactionType = SavingsAccountTransactionType.ANNUAL_FEE;
+            break;
+            case 12:
+                loanTransactionType = SavingsAccountTransactionType.INITIATE_TRANSFER;
+            break;
+            case 13:
+                loanTransactionType = SavingsAccountTransactionType.APPROVE_TRANSFER;
+            break;
+            case 14:
+                loanTransactionType = SavingsAccountTransactionType.WITHDRAW_TRANSFER;
+            break;
+            case 15:
+                loanTransactionType = SavingsAccountTransactionType.REJECT_TRANSFER;
             break;
         }
         return loanTransactionType;

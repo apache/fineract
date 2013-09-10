@@ -125,18 +125,18 @@ public enum LoanStatus {
     }
 
     public boolean isTransferInProgress() {
-        return this.isTransferInProgress();
+        return this.value.equals(LoanStatus.TRANSFER_IN_PROGRESS.getValue());
     }
 
     public boolean isTransferOnHold() {
-        return this.isTransferOnHold();
+        return this.value.equals(LoanStatus.TRANSFER_ON_HOLD.getValue());
     }
 
     public boolean isUnderTransfer() {
         return isTransferInProgress() || isTransferOnHold();
     }
-    
-    public boolean isOverpaid(){
+
+    public boolean isOverpaid() {
         return this.value.equals(LoanStatus.OVERPAID.getValue());
     }
 }

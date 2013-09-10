@@ -35,7 +35,9 @@ import org.mifosplatform.portfolio.loanaccount.domain.Loan;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanRepository;
 import org.mifosplatform.portfolio.loanaccount.service.LoanWritePlatformService;
 import org.mifosplatform.portfolio.note.service.NoteWritePlatformService;
+import org.mifosplatform.portfolio.savings.domain.SavingsAccount;
 import org.mifosplatform.portfolio.savings.domain.SavingsAccountRepository;
+import org.mifosplatform.portfolio.savings.service.SavingsAccountWritePlatformService;
 import org.mifosplatform.portfolio.transfer.api.TransferApiConstants;
 import org.mifosplatform.portfolio.transfer.data.TransfersDataValidator;
 import org.mifosplatform.portfolio.transfer.exception.ClientNotAwaitingTransferApprovalException;
@@ -58,6 +60,7 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
     private final CalendarInstanceRepository calendarInstanceRepository;
     private final GroupRepositoryWrapper groupRepository;
     private final LoanWritePlatformService loanWritePlatformService;
+    private final SavingsAccountWritePlatformService savingsAccountWritePlatformService;
     private final LoanRepository loanRepository;
     private final SavingsAccountRepository savingsAccountRepository;
     private final TransfersDataValidator transfersDataValidator;
@@ -70,7 +73,8 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
             final LoanWritePlatformService loanWritePlatformService, final GroupRepositoryWrapper groupRepository,
             final LoanRepository loanRepository, final TransfersDataValidator transfersDataValidator,
             final NoteWritePlatformService noteWritePlatformService, final StaffRepositoryWrapper staffRepositoryWrapper,
-            final SavingsAccountRepository savingsAccountRepository) {
+            final SavingsAccountRepository savingsAccountRepository,
+            final SavingsAccountWritePlatformService savingsAccountWritePlatformService) {
         this.clientRepository = clientRepository;
         this.officeRepository = officeRepository;
         this.calendarInstanceRepository = calendarInstanceRepository;
@@ -81,6 +85,7 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
         this.noteWritePlatformService = noteWritePlatformService;
         this.staffRepositoryWrapper = staffRepositoryWrapper;
         this.savingsAccountRepository = savingsAccountRepository;
+        this.savingsAccountWritePlatformService = savingsAccountWritePlatformService;
     }
 
     @Override
@@ -345,8 +350,30 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
         }
 
         /*** Handle Active Savings (Currently throw and exception) ***/
-        if (savingsAccountRepository.doNonClosedSavingAccountsExistForClient(client.getId())) { throw new TransferNotSupportedException(
-                TRANSFER_NOT_SUPPORTED_REASON.ACTIVE_SAVINGS_ACCOUNT, client.getId()); }
+        if (savingsAccountRepository.doNonClosedSavingAccountsExistForClient(client.getId())) {
+            // get each individual saving account for the client
+            for (SavingsAccount savingsAccount : savingsAccountRepository.findSavingAccountByClientId(client.getId())) {
+                if (!savingsAccount.isClosed()) {
+                    switch (transferEventType) {
+                        case ACCEPTANCE:
+                            this.savingsAccountWritePlatformService.acceptSavingsTransfer(savingsAccount.getId(),
+                                    DateUtils.getLocalDateOfTenant(), destinationOffice, staff);
+                        break;
+                        case PROPOSAL:
+                            this.savingsAccountWritePlatformService.initiateSavingsTransfer(savingsAccount.getId(),
+                                    DateUtils.getLocalDateOfTenant());
+                        break;
+                        case REJECTION:
+                            this.savingsAccountWritePlatformService.withdrawSavingsTransfer(savingsAccount.getId(),
+                                    DateUtils.getLocalDateOfTenant());
+                        break;
+                        case WITHDRAWAL:
+                            this.savingsAccountWritePlatformService.withdrawSavingsTransfer(savingsAccount.getId(),
+                                    DateUtils.getLocalDateOfTenant());
+                    }
+                }
+            }
+        }
 
         switch (transferEventType) {
             case ACCEPTANCE:

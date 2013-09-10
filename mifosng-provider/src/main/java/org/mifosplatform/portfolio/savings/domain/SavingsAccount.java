@@ -1178,7 +1178,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         return accountingBridgeData;
     }
 
-    private Collection<Long> findExistingTransactionIds() {
+    public Collection<Long> findExistingTransactionIds() {
 
         final Collection<Long> ids = new ArrayList<Long>();
 
@@ -1189,7 +1189,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         return ids;
     }
 
-    private Collection<Long> findExistingReversedTransactionIds() {
+    public Collection<Long> findExistingReversedTransactionIds() {
 
         final Collection<Long> ids = new ArrayList<Long>();
 
@@ -1787,4 +1787,17 @@ public class SavingsAccount extends AbstractPersistable<Long> {
     public LocalDate getClosedOnDate() {
         return (LocalDate) ObjectUtils.defaultIfNull(new LocalDate(this.closedOnDate), null);
     }
+
+    public SavingsAccountSummary getSummary() {
+        return this.summary;
+    }
+
+    public List<SavingsAccountTransaction> getTransactions() {
+        return this.transactions;
+    }
+
+    public void setStatus(Integer status) {
+        this.status = status;
+    }
+
 }

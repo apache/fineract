@@ -117,6 +117,30 @@ public final class SavingsAccountTransaction extends AbstractPersistable<Long> {
                 isReversed);
     }
 
+    public static SavingsAccountTransaction initiateTransfer(final SavingsAccount savingsAccount, final Office office, final LocalDate date) {
+        final boolean isReversed = false;
+        final PaymentDetail paymentDetail = null;
+        return new SavingsAccountTransaction(savingsAccount, office, paymentDetail,
+                SavingsAccountTransactionType.INITIATE_TRANSFER.getValue(), date, savingsAccount.getSummary().getAccountBalance(),
+                isReversed);
+    }
+
+    public static SavingsAccountTransaction approveTransfer(final SavingsAccount savingsAccount, final Office office, final LocalDate date) {
+        final boolean isReversed = false;
+        final PaymentDetail paymentDetail = null;
+        return new SavingsAccountTransaction(savingsAccount, office, paymentDetail,
+                SavingsAccountTransactionType.APPROVE_TRANSFER.getValue(), date, savingsAccount.getSummary().getAccountBalance(),
+                isReversed);
+    }
+
+    public static SavingsAccountTransaction withdrawTransfer(final SavingsAccount savingsAccount, final Office office, final LocalDate date) {
+        final boolean isReversed = false;
+        final PaymentDetail paymentDetail = null;
+        return new SavingsAccountTransaction(savingsAccount, office, paymentDetail,
+                SavingsAccountTransactionType.WITHDRAW_TRANSFER.getValue(), date, savingsAccount.getSummary().getAccountBalance(),
+                isReversed);
+    }
+
     private SavingsAccountTransaction(final SavingsAccount savingsAccount, final Office office, final Integer typeOf,
             final LocalDate transactionLocalDate, final Money amount, final boolean isReversed) {
         this(savingsAccount, office, null, typeOf, transactionLocalDate, amount, isReversed);
@@ -124,11 +148,16 @@ public final class SavingsAccountTransaction extends AbstractPersistable<Long> {
 
     private SavingsAccountTransaction(final SavingsAccount savingsAccount, final Office office, final PaymentDetail paymentDetail,
             final Integer typeOf, final LocalDate transactionLocalDate, final Money amount, final boolean isReversed) {
+        this(savingsAccount, office, paymentDetail, typeOf, transactionLocalDate, amount.getAmount(), isReversed);
+    }
+
+    private SavingsAccountTransaction(final SavingsAccount savingsAccount, final Office office, final PaymentDetail paymentDetail,
+            final Integer typeOf, final LocalDate transactionLocalDate, final BigDecimal amount, final boolean isReversed) {
         this.savingsAccount = savingsAccount;
         this.office = office;
         this.typeOf = typeOf;
         this.dateOf = transactionLocalDate.toDate();
-        this.amount = amount.getAmount();
+        this.amount = amount;
         this.reversed = isReversed;
         this.paymentDetail = paymentDetail;
 

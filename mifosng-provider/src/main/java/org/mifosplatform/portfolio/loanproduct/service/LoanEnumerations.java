@@ -357,7 +357,7 @@ public class LoanEnumerations {
             break;
             case TRANSFER_ON_HOLD:
                 optionData = new LoanStatusEnumData(LoanStatus.TRANSFER_ON_HOLD.getValue().longValue(),
-                        LoanStatus.TRANSFER_ON_HOLD.getCode(), "Transfer in hold");
+                        LoanStatus.TRANSFER_ON_HOLD.getCode(), "Transfer on hold");
             break;
             default:
             break;

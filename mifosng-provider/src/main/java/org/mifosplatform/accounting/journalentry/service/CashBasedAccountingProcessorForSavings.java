@@ -72,6 +72,21 @@ public class CashBasedAccountingProcessorForSavings implements AccountingProcess
                         transactionDate, amount, isReversal);
             }
 
+            /** Handle Transfers proposal **/
+            else if (savingsTransactionDTO.getTransactionType().isInitiateTransfer()) {
+                helper.createCashBasedJournalEntriesAndReversalsForSavings(office, CASH_ACCOUNTS_FOR_SAVINGS.SAVINGS_CONTROL,
+                        CASH_ACCOUNTS_FOR_SAVINGS.TRANSFERS_SUSPENSE, savingsProductId, paymentTypeId, savingsId, transactionId,
+                        transactionDate, amount, isReversal);
+            }
+
+            /** Handle Transfer Withdrawal or Acceptance **/
+            else if (savingsTransactionDTO.getTransactionType().isWithdrawTransfer()
+                    || savingsTransactionDTO.getTransactionType().isApproveTransfer()) {
+                helper.createCashBasedJournalEntriesAndReversalsForSavings(office, CASH_ACCOUNTS_FOR_SAVINGS.TRANSFERS_SUSPENSE,
+                        CASH_ACCOUNTS_FOR_SAVINGS.SAVINGS_CONTROL, savingsProductId, paymentTypeId, savingsId, transactionId,
+                        transactionDate, amount, isReversal);
+            }
+
         }
     }
 }

@@ -34,6 +34,8 @@ import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext
 import org.mifosplatform.organisation.monetary.domain.ApplicationCurrency;
 import org.mifosplatform.organisation.monetary.domain.ApplicationCurrencyRepositoryWrapper;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
+import org.mifosplatform.organisation.office.domain.Office;
+import org.mifosplatform.organisation.staff.domain.Staff;
 import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.client.exception.ClientNotActiveException;
 import org.mifosplatform.portfolio.group.domain.Group;
@@ -304,7 +306,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         final MathContext mc = new MathContext(15, RoundingMode.HALF_EVEN);
 
         final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsId);
-        if(account.isNotActive()){
+        if (account.isNotActive()) {
             throwValidationForActiveStatus(SavingsApiConstants.undoTransactionAction);
         }
         account.undoTransaction(transactionId, reversedTransactionIds);
@@ -342,7 +344,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         final LocalDate today = DateUtils.getLocalDateOfTenant();
 
         final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsId);
-        if(account.isNotActive()){
+        if (account.isNotActive()) {
             throwValidationForActiveStatus(SavingsApiConstants.adjustTransactionAction);
         }
 
@@ -357,23 +359,23 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
 
         final MathContext mc = new MathContext(10, RoundingMode.HALF_EVEN);
         account.undoTransaction(transactionId, existingReversedTransactionIds);
-        
-        //for undo withdrawal fee
+
+        // for undo withdrawal fee
         SavingsAccountTransaction nextSavingsAccountTransaction = this.savingsAccountTransactionRepository.findOneByIdAndSavingsAccountId(
-                transactionId+1, savingsId);
-        if(nextSavingsAccountTransaction.isWithdrawalFeeAndNotReversed()){
-            account.undoTransaction(transactionId+1, existingReversedTransactionIds);
+                transactionId + 1, savingsId);
+        if (nextSavingsAccountTransaction.isWithdrawalFeeAndNotReversed()) {
+            account.undoTransaction(transactionId + 1, existingReversedTransactionIds);
         }
-        
+
         SavingsAccountTransaction transaction = null;
         if (savingsAccountTransaction.isDeposit()) {
-            SavingsAccountTransactionDTO transactionDTO = new SavingsAccountTransactionDTO(fmt, transactionDate, transactionAmount, 
-                    existingTransactionIds, existingReversedTransactionIds,paymentDetail);
+            SavingsAccountTransactionDTO transactionDTO = new SavingsAccountTransactionDTO(fmt, transactionDate, transactionAmount,
+                    existingTransactionIds, existingReversedTransactionIds, paymentDetail);
             transaction = account.deposit(transactionDTO);
         } else {
-            SavingsAccountTransactionDTO transactionDTO = new SavingsAccountTransactionDTO(fmt, transactionDate, transactionAmount, 
+            SavingsAccountTransactionDTO transactionDTO = new SavingsAccountTransactionDTO(fmt, transactionDate, transactionAmount,
                     existingTransactionIds, existingReversedTransactionIds, paymentDetail);
-            transaction = account.withdraw(transactionDTO , true);
+            transaction = account.withdraw(transactionDTO, true);
         }
         final Long newtransactionId = saveTransactionToGenerateTransactionId(transaction);
 
@@ -454,5 +456,76 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
                 .withSavingsId(savingsId) //
                 .with(changes) //
                 .build();
+    }
+
+    @Override
+    public SavingsAccountTransaction initiateSavingsTransfer(Long accountId, LocalDate transferDate) {
+        final SavingsAccount savingsAccount = this.savingAccountAssembler.assembleFrom(accountId);
+
+        final List<Long> existingTransactionIds = new ArrayList<Long>(savingsAccount.findExistingTransactionIds());
+        final List<Long> existingReversedTransactionIds = new ArrayList<Long>(savingsAccount.findExistingReversedTransactionIds());
+
+        final SavingsAccountTransaction newTransferTransaction = SavingsAccountTransaction.initiateTransfer(savingsAccount,
+                savingsAccount.office(), transferDate);
+        savingsAccount.getTransactions().add(newTransferTransaction);
+        savingsAccount.setStatus(SavingsAccountStatusType.TRANSFER_IN_PROGRESS.getValue());
+
+        this.savingsAccountTransactionRepository.save(newTransferTransaction);
+        this.savingAccountRepository.save(savingsAccount);
+
+        postJournalEntries(savingsAccount, existingTransactionIds, existingReversedTransactionIds);
+
+        return newTransferTransaction;
+    }
+
+    @Override
+    public SavingsAccountTransaction withdrawSavingsTransfer(Long accountId, LocalDate transferDate) {
+        final SavingsAccount savingsAccount = this.savingAccountAssembler.assembleFrom(accountId);
+
+        final List<Long> existingTransactionIds = new ArrayList<Long>(savingsAccount.findExistingTransactionIds());
+        final List<Long> existingReversedTransactionIds = new ArrayList<Long>(savingsAccount.findExistingReversedTransactionIds());
+
+        final SavingsAccountTransaction withdrawtransferTransaction = SavingsAccountTransaction.withdrawTransfer(savingsAccount,
+                savingsAccount.office(), transferDate);
+        savingsAccount.getTransactions().add(withdrawtransferTransaction);
+        savingsAccount.setStatus(SavingsAccountStatusType.ACTIVE.getValue());
+
+        this.savingsAccountTransactionRepository.save(withdrawtransferTransaction);
+        this.savingAccountRepository.save(savingsAccount);
+
+        postJournalEntries(savingsAccount, existingTransactionIds, existingReversedTransactionIds);
+
+        return withdrawtransferTransaction;
+    }
+
+    @Override
+    public void rejectSavingsTransfer(Long accountId) {
+        final SavingsAccount savingsAccount = this.savingAccountAssembler.assembleFrom(accountId);
+        savingsAccount.setStatus(SavingsAccountStatusType.TRANSFER_ON_HOLD.getValue());
+        this.savingAccountRepository.save(savingsAccount);
+    }
+
+    @Override
+    public SavingsAccountTransaction acceptSavingsTransfer(Long accountId, LocalDate transferDate, Office acceptedInOffice,
+            Staff fieldOfficer) {
+        final SavingsAccount savingsAccount = this.savingAccountAssembler.assembleFrom(accountId);
+
+        final List<Long> existingTransactionIds = new ArrayList<Long>(savingsAccount.findExistingTransactionIds());
+        final List<Long> existingReversedTransactionIds = new ArrayList<Long>(savingsAccount.findExistingReversedTransactionIds());
+
+        final SavingsAccountTransaction acceptTransferTransaction = SavingsAccountTransaction.approveTransfer(savingsAccount,
+                acceptedInOffice, transferDate);
+        savingsAccount.getTransactions().add(acceptTransferTransaction);
+        savingsAccount.setStatus(SavingsAccountStatusType.ACTIVE.getValue());
+        if (fieldOfficer != null) {
+            savingsAccount.update(fieldOfficer);
+        }
+
+        this.savingsAccountTransactionRepository.save(acceptTransferTransaction);
+        this.savingAccountRepository.save(savingsAccount);
+
+        postJournalEntries(savingsAccount, existingTransactionIds, existingReversedTransactionIds);
+
+        return acceptTransferTransaction;
     }
 }

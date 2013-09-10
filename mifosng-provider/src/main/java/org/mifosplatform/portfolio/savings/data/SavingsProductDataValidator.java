@@ -174,11 +174,12 @@ public class SavingsProductDataValidator {
                         .zeroOrPositiveAmount();
             }
         }
-        
-        if(this.fromApiJsonHelper.parameterExists(withdrawalFeeForTransfersParamName, element)) {
-            final Boolean isWithdrawalFeeApplicableForTransfers = fromApiJsonHelper.extractBooleanNamed(withdrawalFeeForTransfersParamName, element);
-            baseDataValidator.reset().parameter(withdrawalFeeForTransfersParamName).value(isWithdrawalFeeApplicableForTransfers).ignoreIfNull()
-                    .validateForBooleanValue();
+
+        if (this.fromApiJsonHelper.parameterExists(withdrawalFeeForTransfersParamName, element)) {
+            final Boolean isWithdrawalFeeApplicableForTransfers = fromApiJsonHelper.extractBooleanNamed(withdrawalFeeForTransfersParamName,
+                    element);
+            baseDataValidator.reset().parameter(withdrawalFeeForTransfersParamName).value(isWithdrawalFeeApplicableForTransfers)
+                    .ignoreIfNull().validateForBooleanValue();
         }
 
         if (this.fromApiJsonHelper.parameterExists(annualFeeAmountParamName, element)) {
@@ -215,6 +216,11 @@ public class SavingsProductDataValidator {
                     SAVINGS_PRODUCT_ACCOUNTING_PARAMS.SAVINGS_REFERENCE.getValue(), element);
             baseDataValidator.reset().parameter(SAVINGS_PRODUCT_ACCOUNTING_PARAMS.SAVINGS_REFERENCE.getValue())
                     .value(savingsReferenceAccountId).notNull().integerGreaterThanZero();
+
+            final Long transfersInSuspenseAccountId = fromApiJsonHelper.extractLongNamed(
+                    SAVINGS_PRODUCT_ACCOUNTING_PARAMS.TRANSFERS_SUSPENSE.getValue(), element);
+            baseDataValidator.reset().parameter(SAVINGS_PRODUCT_ACCOUNTING_PARAMS.TRANSFERS_SUSPENSE.getValue())
+                    .value(transfersInSuspenseAccountId).notNull().integerGreaterThanZero();
 
             final Long interestOnSavingsAccountId = fromApiJsonHelper.extractLongNamed(
                     SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INTEREST_ON_SAVINGS.getValue(), element);
@@ -326,11 +332,12 @@ public class SavingsProductDataValidator {
             baseDataValidator.reset().parameter(withdrawalFeeTypeParamName).value(withdrawalFeeType).ignoreIfNull()
                     .isOneOfTheseValues(1, 2);
         }
-        
-        if(this.fromApiJsonHelper.parameterExists(withdrawalFeeForTransfersParamName, element)) {
-            final Boolean isWithdrawalFeeApplicableForTransfers = fromApiJsonHelper.extractBooleanNamed(withdrawalFeeForTransfersParamName, element);
-            baseDataValidator.reset().parameter(withdrawalFeeForTransfersParamName).value(isWithdrawalFeeApplicableForTransfers).ignoreIfNull()
-                    .validateForBooleanValue();
+
+        if (this.fromApiJsonHelper.parameterExists(withdrawalFeeForTransfersParamName, element)) {
+            final Boolean isWithdrawalFeeApplicableForTransfers = fromApiJsonHelper.extractBooleanNamed(withdrawalFeeForTransfersParamName,
+                    element);
+            baseDataValidator.reset().parameter(withdrawalFeeForTransfersParamName).value(isWithdrawalFeeApplicableForTransfers)
+                    .ignoreIfNull().validateForBooleanValue();
         }
 
         if (this.fromApiJsonHelper.parameterExists(annualFeeAmountParamName, element)) {
@@ -352,6 +359,11 @@ public class SavingsProductDataValidator {
                 SAVINGS_PRODUCT_ACCOUNTING_PARAMS.SAVINGS_REFERENCE.getValue(), element);
         baseDataValidator.reset().parameter(SAVINGS_PRODUCT_ACCOUNTING_PARAMS.SAVINGS_REFERENCE.getValue())
                 .value(savingsReferenceAccountId).ignoreIfNull().integerGreaterThanZero();
+
+        final Long transfersInSuspenseAccountId = fromApiJsonHelper.extractLongNamed(
+                SAVINGS_PRODUCT_ACCOUNTING_PARAMS.TRANSFERS_SUSPENSE.getValue(), element);
+        baseDataValidator.reset().parameter(SAVINGS_PRODUCT_ACCOUNTING_PARAMS.TRANSFERS_SUSPENSE.getValue())
+                .value(transfersInSuspenseAccountId).ignoreIfNull().integerGreaterThanZero();
 
         final Long interestOnSavingsAccountId = fromApiJsonHelper.extractLongNamed(
                 SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INTEREST_ON_SAVINGS.getValue(), element);

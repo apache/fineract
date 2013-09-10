@@ -8,6 +8,9 @@ package org.mifosplatform.portfolio.savings.service;
 import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
+import org.mifosplatform.organisation.office.domain.Office;
+import org.mifosplatform.organisation.staff.domain.Staff;
+import org.mifosplatform.portfolio.savings.domain.SavingsAccountTransaction;
 
 public interface SavingsAccountWritePlatformService {
 
@@ -28,6 +31,14 @@ public interface SavingsAccountWritePlatformService {
     void postInterestForAccounts();
 
     CommandProcessingResult adjustSavingsTransaction(Long savingsId, Long transactionId, JsonCommand command);
-    
+
     CommandProcessingResult close(Long savingsId, JsonCommand command);
+
+    SavingsAccountTransaction initiateSavingsTransfer(Long accountId, LocalDate transferDate);
+
+    SavingsAccountTransaction withdrawSavingsTransfer(Long accountId, LocalDate transferDate);
+
+    void rejectSavingsTransfer(Long accountId);
+
+    SavingsAccountTransaction acceptSavingsTransfer(Long accountId, LocalDate transferDate, Office acceptedInOffice, Staff staff);
 }
