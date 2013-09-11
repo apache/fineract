@@ -24,8 +24,6 @@
 	
 	<tx:annotation-driven />
 	
-	<cache:annotation-driven />
-	
 	<context:component-scan base-package="org.mifosplatform.accounting.*,
 									      org.mifosplatform.commands.handler.*,
 										  org.mifosplatform.commands.service.*,

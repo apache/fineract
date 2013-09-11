@@ -7,10 +7,13 @@ package org.mifosplatform.organisation.office.service;
 
 import java.util.Collection;
 
+import org.mifosplatform.infrastructure.core.domain.MifosPlatformTenant;
 import org.mifosplatform.organisation.office.data.OfficeData;
 import org.mifosplatform.organisation.office.data.OfficeTransactionData;
 
 public interface OfficeReadPlatformService {
+
+    MifosPlatformTenant loadTenantById(String tenantIdentifier);
 
     Collection<OfficeData> retrieveAllOffices();
 

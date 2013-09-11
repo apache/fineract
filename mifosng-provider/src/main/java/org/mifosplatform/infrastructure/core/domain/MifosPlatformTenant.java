@@ -5,53 +5,23 @@
  */
 package org.mifosplatform.infrastructure.core.domain;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
+public class MifosPlatformTenant {
 
-import org.springframework.data.jpa.domain.AbstractPersistable;
+    private final Long id;
+    private final String tenantIdentifier;
+    private final String name;
+    private final String schemaName;
+    private final String schemaServer;
+    private final String schemaServerPort;
+    private final String schemaUsername;
+    private final String schemaPassword;
+    private final String timezoneId;
+    private final boolean autoUpdateEnabled;
 
-
-@Entity
-@Table(name = "tenants")
-public class MifosPlatformTenant extends AbstractPersistable<Long>{
-
-    @Column(name="identifier")
-    private String tenantIdentifier;
-    
-    @Column(name = "name")
-    private String name;
-    
-    @Column(name = "schema_name")
-    private String schemaName;
-    
-    @Column(name = "schema_server")
-    private String schemaServer;
-    
-    @Column(name = "schema_server_port")
-    private String schemaServerPort;
-    
-    @Column(name = "schema_username")
-    private String schemaUsername;
-    
-    @Column(name = "schema_password")
-    private String schemaPassword;
-    
-    @Column(name = "timezone_id")
-    private String timezoneId;
-    
-    @Column(name = "auto_update")
-    private boolean autoUpdateEnabled;
-    
-    
-    public MifosPlatformTenant() {
-        
-    }
-
-    public MifosPlatformTenant(final Long id,final String tenantIdentifier, final String name, final String schemaName, final String schemaServer,
-            final String schemaServerPort, final String schemaUsername, final String schemaPassword, String timezoneId,
-            final boolean autoUpdateEnabled) {
-        setId(id);
+    public MifosPlatformTenant(final Long id, final String tenantIdentifier, final String name, final String schemaName,
+            final String schemaServer, final String schemaServerPort, final String schemaUsername, final String schemaPassword,
+            final String timezoneId, final boolean autoUpdateEnabled) {
+        this.id = id;
         this.tenantIdentifier = tenantIdentifier;
         this.name = name;
         this.schemaName = schemaName;
@@ -61,22 +31,24 @@ public class MifosPlatformTenant extends AbstractPersistable<Long>{
         this.schemaPassword = schemaPassword;
         this.timezoneId = timezoneId;
         this.autoUpdateEnabled = autoUpdateEnabled;
-
     }
 
     public String databaseURL() {
-        String url = new StringBuilder("jdbc:mysql://").append(schemaServer).append(':').append(schemaServerPort).append('/')
-                .append(schemaName).toString();
+        final String url = new StringBuilder("jdbc:mysql://").append(this.schemaServer).append(':').append(this.schemaServerPort)
+                .append('/').append(this.schemaName).toString();
         return url;
     }
 
-     
+    public Long getId() {
+        return this.id;
+    }
+
     public String getTenantIdentifier() {
         return this.tenantIdentifier;
     }
 
     public String getName() {
-        return name;
+        return this.name;
     }
 
     public String getSchemaName() {
@@ -84,15 +56,15 @@ public class MifosPlatformTenant extends AbstractPersistable<Long>{
     }
 
     public String getSchemaUsername() {
-        return schemaUsername;
+        return this.schemaUsername;
     }
 
     public String getSchemaPassword() {
-        return schemaPassword;
+        return this.schemaPassword;
     }
 
     public String getTimezoneId() {
-        return timezoneId;
+        return this.timezoneId;
     }
 
     public boolean isAutoUpdateEnabled() {

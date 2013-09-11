@@ -7,7 +7,6 @@ package org.mifosplatform.infrastructure.security.service;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.List;
 
 import javax.sql.DataSource;
 
@@ -22,16 +21,16 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
 /**
- * A JDBC implementation of {@link TenantDetailsService} for loading a tenants
- * details by a <code>tenantIdentifier</code>.
+ * A JDBC implementation of {@link BasicAuthTenantDetailsService} for loading a
+ * tenants details by a <code>tenantIdentifier</code>.
  */
 @Service
-public class JdbcTenantDetailsService implements TenantDetailsService {
+public class BasicAuthTenantDetailsServiceJdbc implements BasicAuthTenantDetailsService {
 
     private final JdbcTemplate jdbcTemplate;
 
     @Autowired
-    public JdbcTenantDetailsService(@Qualifier("tenantDataSourceJndi") final DataSource dataSource) {
+    public BasicAuthTenantDetailsServiceJdbc(@Qualifier("tenantDataSourceJndi") final DataSource dataSource) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
     }
 
@@ -60,8 +59,8 @@ public class JdbcTenantDetailsService implements TenantDetailsService {
             final String timezoneId = rs.getString("timezoneId");
             final boolean autoUpdateEnabled = rs.getBoolean("autoUpdate");
 
-            return new MifosPlatformTenant(id, tenantIdentifier,name, schemaName, schemaServer, schemaServerPort, schemaUsername, schemaPassword,
-                    timezoneId, autoUpdateEnabled);
+            return new MifosPlatformTenant(id, tenantIdentifier, name, schemaName, schemaServer, schemaServerPort, schemaUsername,
+                    schemaPassword, timezoneId, autoUpdateEnabled);
         }
     }
 
@@ -77,14 +76,5 @@ public class JdbcTenantDetailsService implements TenantDetailsService {
         } catch (final EmptyResultDataAccessException e) {
             throw new InvalidTenantIdentiferException("The tenant identifier: " + tenantIdentifier + " is not valid.");
         }
-    }
-
-    @Override
-    public List<MifosPlatformTenant> findAllTenants() {
-        final TenantMapper rm = new TenantMapper();
-        final String sql = "select  " + rm.schema();
-
-        final List<MifosPlatformTenant> mifosPlatformTenants = this.jdbcTemplate.query(sql, rm, new Object[] {});
-        return mifosPlatformTenants;
     }
 }
