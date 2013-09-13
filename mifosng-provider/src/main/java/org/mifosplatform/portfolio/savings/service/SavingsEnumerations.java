@@ -84,6 +84,24 @@ public class SavingsEnumerations {
                 optionData = new SavingsAccountTransactionEnumData(SavingsAccountTransactionType.ANNUAL_FEE.getValue().longValue(),
                         SavingsAccountTransactionType.ANNUAL_FEE.getCode(), "Annual fee");
             break;
+            case APPROVE_TRANSFER:
+                optionData = new SavingsAccountTransactionEnumData(SavingsAccountTransactionType.APPROVE_TRANSFER.getValue().longValue(),
+                        SavingsAccountTransactionType.APPROVE_TRANSFER.getCode(), "Transfer approved");
+            break;
+            case INITIATE_TRANSFER:
+                optionData = new SavingsAccountTransactionEnumData(SavingsAccountTransactionType.INITIATE_TRANSFER.getValue().longValue(),
+                        SavingsAccountTransactionType.INITIATE_TRANSFER.getCode(), "Transfer initiated");
+            break;
+            case REJECT_TRANSFER:
+                optionData = new SavingsAccountTransactionEnumData(SavingsAccountTransactionType.REJECT_TRANSFER.getValue().longValue(),
+                        SavingsAccountTransactionType.REJECT_TRANSFER.getCode(), "Transfer Rejected");
+            break;
+            case WITHDRAW_TRANSFER:
+                optionData = new SavingsAccountTransactionEnumData(SavingsAccountTransactionType.WITHDRAW_TRANSFER.getValue().longValue(),
+                        SavingsAccountTransactionType.WITHDRAW_TRANSFER.getCode(), "Transfer Withdrawn");
+            break;
+            default:
+            break;
         }
         return optionData;
     }
