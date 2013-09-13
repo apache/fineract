@@ -368,8 +368,7 @@ public class TransferWritePlatformServiceJpaRepositoryImpl implements TransferWr
                                     DateUtils.getLocalDateOfTenant());
                         break;
                         case REJECTION:
-                            this.savingsAccountWritePlatformService.withdrawSavingsTransfer(savingsAccount.getId(),
-                                    DateUtils.getLocalDateOfTenant());
+                            this.savingsAccountWritePlatformService.rejectSavingsTransfer(savingsAccount.getId());
                         break;
                         case WITHDRAWAL:
                             this.savingsAccountWritePlatformService.withdrawSavingsTransfer(savingsAccount.getId(),
