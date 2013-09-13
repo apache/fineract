@@ -18,6 +18,8 @@ public class SavingsApiConstants {
     public static final String SAVINGS_PRODUCT_RESOURCE_NAME = "savingsproduct";
     public static final String SAVINGS_ACCOUNT_RESOURCE_NAME = "savingsaccount";
     public static final String SAVINGS_ACCOUNT_TRANSACTION_RESOURCE_NAME = "savingsaccount.transaction";
+    public static final String SAVINGS_ACCOUNT_CHARGE_RESOURCE_NAME = "savingsaccountcharge";
+    
 
     // actions
     public static String summitalAction = ".summital";
@@ -32,10 +34,13 @@ public class SavingsApiConstants {
     public static String applyAnnualFeeTransactionAction = ".applyannualfee";
     public static String adjustTransactionAction = ".adjusttransaction";
     public static String closeAction = ".close";
+    public static String payChargeTransactionAction = ".paycharge";
 
     // command
     public static String COMMAND_UNDO_TRANSACTION = "undo";
     public static String COMMAND_ADJUST_TRANSACTION = "modify";
+    public static String COMMAND_WAIVE_CHARGE= "waive";
+    public static String COMMAND_PAY_CHARGE= "paycharge";
 
     // general
     public static final String localeParamName = "locale";
@@ -93,6 +98,26 @@ public class SavingsApiConstants {
     public static final String runningBalanceParamName = "runningBalance";
     public static final String reversedParamName = "reversed";
     public static final String dateParamName = "date";
+    
+    //charges parameters
+    public static final String chargeIdParamName = "chargeId";
+    public static final String chargesParamName = "charges";
+    public static final String savingsAccountChargeIdParamName = "savingsAccountChargeId";
+    public static final String chargeNameParamName = "name";
+    public static final String penaltyParamName = "penalty";
+    public static final String chargeTimeTypeParamName = "chargeTimeType";
+    public static final String dueAsOfDateParamName = "dueDate";
+    public static final String chargeCalculationTypeParamName = "chargeCalculationType";
+    public static final String percentageParamName = "percentage";
+    public static final String amountPercentageAppliedToParamName = "amountPercentageAppliedTo";
+    public static final String currencyParamName = "currency";
+    public static final String amountWaivedParamName = "amountWaived";
+    public static final String amountWrittenOffParamName = "amountWrittenOff";
+    public static final String amountOutstandingParamName = "amountOutstanding";
+    public static final String amountOrPercentageParamName = "amountOrPercentage";
+    public static final String amountParamName = "amount";
+    public static final String amountPaidParamName = "amountPaid";
+    public static final String chargeOptionsParamName = "chargeOptions";    
 
     public static final String noteParamName = "note";
 
@@ -102,7 +127,8 @@ public class SavingsApiConstants {
             interestPostingPeriodTypeParamName, interestCalculationTypeParamName, interestCalculationDaysInYearTypeParamName,
             minRequiredOpeningBalanceParamName, lockinPeriodFrequencyParamName, lockinPeriodFrequencyTypeParamName,
             withdrawalFeeAmountParamName, withdrawalFeeTypeParamName, withdrawalFeeForTransfersParamName, annualFeeAmountParamName,
-            annualFeeOnMonthDayParamName, accountingRuleParamName, SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_FEES.getValue(),
+            annualFeeOnMonthDayParamName, accountingRuleParamName, chargesParamName,
+            SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INCOME_FROM_FEES.getValue(),
             SAVINGS_PRODUCT_ACCOUNTING_PARAMS.INTEREST_ON_SAVINGS.getValue(),
             SAVINGS_PRODUCT_ACCOUNTING_PARAMS.PAYMENT_CHANNEL_FUND_SOURCE_MAPPING.getValue(),
             SAVINGS_PRODUCT_ACCOUNTING_PARAMS.SAVINGS_CONTROL.getValue(), SAVINGS_PRODUCT_ACCOUNTING_PARAMS.TRANSFERS_SUSPENSE.getValue(),
@@ -128,7 +154,7 @@ public class SavingsApiConstants {
             interestCompoundingPeriodTypeParamName, interestPostingPeriodTypeParamName, interestCalculationTypeParamName,
             interestCalculationDaysInYearTypeParamName, minRequiredOpeningBalanceParamName, lockinPeriodFrequencyParamName,
             lockinPeriodFrequencyTypeParamName, withdrawalFeeAmountParamName, withdrawalFeeTypeParamName,
-            withdrawalFeeForTransfersParamName, annualFeeAmountParamName, annualFeeOnMonthDayParamName));
+            withdrawalFeeForTransfersParamName, annualFeeAmountParamName, annualFeeOnMonthDayParamName, chargesParamName));
 
     /**
      * These parameters will match the class level parameters of
@@ -158,4 +184,13 @@ public class SavingsApiConstants {
 
     public static final Set<String> SAVINGS_ACCOUNT_CLOSE_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(localeParamName,
             dateFormatParamName, closedOnDateParamName, noteParamName));
+    
+    public static final Set<String> SAVINGS_ACCOUNT_CHARGES_RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(chargeIdParamName,
+            savingsAccountChargeIdParamName, chargeNameParamName, penaltyParamName, chargeTimeTypeParamName, dueAsOfDateParamName,
+            chargeCalculationTypeParamName, percentageParamName, amountPercentageAppliedToParamName, currencyParamName,
+            amountWaivedParamName, amountWrittenOffParamName, amountOutstandingParamName, amountOrPercentageParamName, amountParamName, amountPaidParamName,
+            chargeOptionsParamName));
+    
+    public static final Set<String> SAVINGS_ACCOUNT_CHARGES_ADD_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(
+            chargeIdParamName, amountParamName, dueAsOfDateParamName, dateFormatParamName, localeParamName));
 }

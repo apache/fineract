@@ -6,8 +6,10 @@
 package org.mifosplatform.portfolio.savings.service;
 
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.accountingRuleParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.chargesParamName;
 
 import java.util.Map;
+import java.util.Set;
 
 import org.mifosplatform.accounting.producttoaccountmapping.service.ProductToGLAccountMappingWritePlatformService;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
@@ -15,6 +17,7 @@ import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
+import org.mifosplatform.portfolio.charge.domain.Charge;
 import org.mifosplatform.portfolio.savings.data.SavingsProductDataValidator;
 import org.mifosplatform.portfolio.savings.domain.SavingsProduct;
 import org.mifosplatform.portfolio.savings.domain.SavingsProductAssembler;
@@ -109,6 +112,14 @@ public class SavingsProductWritePlatformServiceJpaRepositoryImpl implements Savi
 
             final Map<String, Object> changes = product.update(command);
 
+            if (changes.containsKey(chargesParamName)) {
+                final Set<Charge> savingsProductCharges = this.savingsProductAssembler.assembleListOfSavingsProductCharges(command, product.currency().getCode());
+                boolean updated = product.update(savingsProductCharges);
+                if (!updated) {
+                    changes.remove(chargesParamName);
+                }
+            }
+            
             // accounting related changes
             boolean accountingTypeChanged = changes.containsKey(accountingRuleParamName);
             final Map<String, Object> accountingMappingChanges = accountMappingWritePlatformService.updateSavingsProductToGLAccountMapping(
@@ -142,4 +153,5 @@ public class SavingsProductWritePlatformServiceJpaRepositoryImpl implements Savi
                 .withEntityId(product.getId()) //
                 .build();
     }
+
 }

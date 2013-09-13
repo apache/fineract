@@ -21,6 +21,8 @@ import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
 import org.mifosplatform.infrastructure.core.exception.InvalidJsonException;
 import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
+import org.mifosplatform.portfolio.charge.domain.ChargeAppliesTo;
+import org.mifosplatform.portfolio.charge.domain.ChargeTimeType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -65,10 +67,10 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
         baseDataValidator.reset().parameter("amount").value(amount).notNull().positiveAmount();
 
         final Integer chargeAppliesTo = fromApiJsonHelper.extractIntegerNamed("chargeAppliesTo", element, Locale.getDefault());
-        baseDataValidator.reset().parameter("chargeAppliesTo").value(chargeAppliesTo).notNull().inMinMaxRange(1, 1);
+        baseDataValidator.reset().parameter("chargeAppliesTo").value(chargeAppliesTo).notNull().inMinMaxRange(ChargeAppliesTo.minValue(), ChargeAppliesTo.maxValue());
 
         final Integer chargeTimeType = fromApiJsonHelper.extractIntegerNamed("chargeTimeType", element, Locale.getDefault());
-        baseDataValidator.reset().parameter("chargeTimeType").value(chargeTimeType).notNull().inMinMaxRange(1, 2);
+        baseDataValidator.reset().parameter("chargeTimeType").value(chargeTimeType).notNull().inMinMaxRange(ChargeTimeType.minValue(), ChargeTimeType.maxValue());
 
         final Integer chargeCalculationType = fromApiJsonHelper.extractIntegerNamed("chargeCalculationType", element, Locale.getDefault());
         baseDataValidator.reset().parameter("chargeCalculationType").value(chargeCalculationType).notNull().inMinMaxRange(1, 4);
@@ -116,12 +118,12 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
 
         if (fromApiJsonHelper.parameterExists("chargeAppliesTo", element)) {
             final Integer chargeAppliesTo = fromApiJsonHelper.extractIntegerNamed("chargeAppliesTo", element, Locale.getDefault());
-            baseDataValidator.reset().parameter("chargeAppliesTo").value(chargeAppliesTo).notNull().inMinMaxRange(1, 1);
+            baseDataValidator.reset().parameter("chargeAppliesTo").value(chargeAppliesTo).notNull().inMinMaxRange(ChargeAppliesTo.minValue(), ChargeAppliesTo.maxValue());
         }
 
         if (fromApiJsonHelper.parameterExists("chargeTimeType", element)) {
             final Integer chargeTimeType = fromApiJsonHelper.extractIntegerNamed("chargeTimeType", element, Locale.getDefault());
-            baseDataValidator.reset().parameter("chargeTimeType").value(chargeTimeType).notNull().inMinMaxRange(1, 2);
+            baseDataValidator.reset().parameter("chargeTimeType").value(chargeTimeType).notNull().inMinMaxRange(ChargeTimeType.minValue(), ChargeTimeType.maxValue());
         }
 
         if (fromApiJsonHelper.parameterExists("chargeCalculationType", element)) {

@@ -47,4 +47,16 @@ public enum ChargeCalculationType {
         }
         return chargeCalculationType;
     }
+    
+    public boolean isPercentageOfAmount(){
+        return this.value.equals(ChargeCalculationType.PERCENT_OF_AMOUNT.getValue());
+    }
+    
+    public boolean isFlat(){
+        return this.value.equals(ChargeCalculationType.FLAT.getValue());
+    }
+    
+    public boolean isAllowedSavingsChargeCalculationType(){
+        return this.isFlat();
+    }
 }

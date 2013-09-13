@@ -5,11 +5,10 @@
  */
 package org.mifosplatform.portfolio.charge.service;
 
-import static org.mifosplatform.portfolio.charge.service.ChargeEnumerations.chargeAppliesTo;
 import static org.mifosplatform.portfolio.charge.service.ChargeEnumerations.chargeCalculationType;
-import static org.mifosplatform.portfolio.charge.service.ChargeEnumerations.chargeTimeType;
 import static org.mifosplatform.portfolio.charge.service.ChargeEnumerations.chargePaymentMode;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -35,12 +34,25 @@ public class ChargeDropdownReadPlatformServiceImpl implements ChargeDropdownRead
 
     @Override
     public List<EnumOptionData> retrieveApplicableToTypes() {
-        return Arrays.asList(chargeAppliesTo(ChargeAppliesTo.LOAN));
+        List<EnumOptionData> chargeAppliesToTypes = new ArrayList<EnumOptionData>();
+        for (ChargeAppliesTo chargeAppliesTo : ChargeAppliesTo.values()) {
+            if(ChargeAppliesTo.INVALID.equals(chargeAppliesTo)) continue;
+            chargeAppliesToTypes.add(ChargeEnumerations.chargeAppliesTo(chargeAppliesTo));
+        }
+        return chargeAppliesToTypes;
     }
 
     @Override
     public List<EnumOptionData> retrieveCollectionTimeTypes() {
-        return Arrays.asList(chargeTimeType(ChargeTimeType.DISBURSEMENT), chargeTimeType(ChargeTimeType.SPECIFIED_DUE_DATE));
+        List<EnumOptionData> chargeTimeTypes = new ArrayList<EnumOptionData>();
+        for (ChargeTimeType chargeTimeType : ChargeTimeType.values()) {
+            if (ChargeTimeType.INVALID.equals(chargeTimeType) 
+                    || ChargeTimeType.MONTHLY.equals(chargeTimeType) // To be implemented for Savings
+                    || ChargeTimeType.YEARLY.equals(chargeTimeType)) // To be implemented for Savings 
+                continue;
+            chargeTimeTypes.add(ChargeEnumerations.chargeTimeType(chargeTimeType));
+        }
+        return chargeTimeTypes;
     }
 
     @Override

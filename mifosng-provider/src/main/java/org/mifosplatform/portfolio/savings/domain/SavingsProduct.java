@@ -10,6 +10,7 @@ import static org.mifosplatform.portfolio.savings.SavingsApiConstants.SAVINGS_PR
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.accountingRuleParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.annualFeeAmountParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.annualFeeOnMonthDayParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.chargesParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.currencyCodeParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.descriptionParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.digitsAfterDecimalParamName;
@@ -30,13 +31,18 @@ import static org.mifosplatform.portfolio.savings.SavingsApiConstants.withdrawal
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 
 import org.joda.time.MonthDay;
@@ -47,6 +53,7 @@ import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
 import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.organisation.monetary.domain.Money;
+import org.mifosplatform.portfolio.charge.domain.Charge;
 import org.mifosplatform.portfolio.savings.SavingsCompoundingInterestPeriodType;
 import org.mifosplatform.portfolio.savings.SavingsInterestCalculationDaysInYearType;
 import org.mifosplatform.portfolio.savings.SavingsInterestCalculationType;
@@ -54,6 +61,8 @@ import org.mifosplatform.portfolio.savings.SavingsPeriodFrequencyType;
 import org.mifosplatform.portfolio.savings.SavingsPostingInterestPeriodType;
 import org.mifosplatform.portfolio.savings.SavingsWithdrawalFeesType;
 import org.springframework.data.jpa.domain.AbstractPersistable;
+
+import com.google.gson.JsonArray;
 
 @Entity
 @Table(name = "m_savings_product")
@@ -132,6 +141,10 @@ public class SavingsProduct extends AbstractPersistable<Long> {
 
     @Column(name = "annual_fee_on_day", nullable = true)
     private Integer annualFeeOnDay;
+    
+    @ManyToMany
+    @JoinTable(name = "m_savings_product_charge", joinColumns = @JoinColumn(name = "savings_product_id"), inverseJoinColumns = @JoinColumn(name = "charge_id"))
+    private Set<Charge> charges;
 
     public static SavingsProduct createNew(final String name, final String description, final MonetaryCurrency currency,
             final BigDecimal interestRate, final SavingsCompoundingInterestPeriodType interestCompoundingPeriodType,
@@ -139,12 +152,12 @@ public class SavingsProduct extends AbstractPersistable<Long> {
             final SavingsInterestCalculationDaysInYearType interestCalculationDaysInYearType, final BigDecimal minRequiredOpeningBalance,
             final Integer lockinPeriodFrequency, final SavingsPeriodFrequencyType lockinPeriodFrequencyType,
             final BigDecimal withdrawalFeeAmount, final SavingsWithdrawalFeesType withdrawalFeeType, final boolean withdrawalFeeApplicableForTransfer,
-            final BigDecimal annualFeeAmount, final MonthDay annualFeeOnMonthDay, final AccountingRuleType accountingRuleType) {
+            final BigDecimal annualFeeAmount, final MonthDay annualFeeOnMonthDay, final AccountingRuleType accountingRuleType, final Set<Charge> charges) {
 
         return new SavingsProduct(name, description, currency, interestRate, interestCompoundingPeriodType, interestPostingPeriodType,
                 interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance, lockinPeriodFrequency,
                 lockinPeriodFrequencyType, withdrawalFeeAmount, withdrawalFeeType,withdrawalFeeApplicableForTransfer, annualFeeAmount,
-                annualFeeOnMonthDay, accountingRuleType);
+                annualFeeOnMonthDay, accountingRuleType, charges);
     }
 
     protected SavingsProduct() {
@@ -158,7 +171,7 @@ public class SavingsProduct extends AbstractPersistable<Long> {
             final SavingsInterestCalculationDaysInYearType interestCalculationDaysInYearType, final BigDecimal minRequiredOpeningBalance,
             final Integer lockinPeriodFrequency, final SavingsPeriodFrequencyType lockinPeriodFrequencyType,
             final BigDecimal withdrawalFeeAmount, final SavingsWithdrawalFeesType withdrawalFeeType, final boolean withdrawalFeeApplicableForTransfer,
-            final BigDecimal annualFeeAmount, final MonthDay annualFeeOnMonthDay, final AccountingRuleType accountingRuleType) {
+            final BigDecimal annualFeeAmount, final MonthDay annualFeeOnMonthDay, final AccountingRuleType accountingRuleType, final Set<Charge> charges) {
 
         this.name = name;
         this.description = description;
@@ -192,6 +205,10 @@ public class SavingsProduct extends AbstractPersistable<Long> {
 
         if (accountingRuleType != null) {
             this.accountingRule = accountingRuleType.getValue();
+        }
+
+        if (charges != null) {
+            this.charges = charges;
         }
 
         validateLockinDetails();
@@ -424,6 +441,14 @@ public class SavingsProduct extends AbstractPersistable<Long> {
             actualChanges.put(accountingRuleParamName, newValue);
             this.accountingRule = newValue;
         }
+ 
+        //charges 
+        if (command.hasParameter(chargesParamName)) {
+            JsonArray jsonArray = command.arrayOfParameterNamed(chargesParamName);
+            if (jsonArray != null) {
+                actualChanges.put(chargesParamName, command.jsonFragment(chargesParamName));
+            }
+        }
 
         validateLockinDetails();
         validateWithdrawalFeeDetails();
@@ -511,5 +536,24 @@ public class SavingsProduct extends AbstractPersistable<Long> {
 
     public Integer getAccountingType() {
         return this.accountingRule;
+    }
+    
+    public boolean update(final Set<Charge> newSavingsProductCharges) {
+        if (newSavingsProductCharges == null) return false;
+
+        boolean updated = false;
+        if (this.charges != null) {
+            final Set<Charge> currentSetOfCharges = new HashSet<Charge>(this.charges);
+            final Set<Charge> newSetOfCharges = new HashSet<Charge>(newSavingsProductCharges);
+
+            if (!(currentSetOfCharges.equals(newSetOfCharges))) {
+                updated = true;
+                this.charges = newSavingsProductCharges;
+            }
+        } else {
+            updated = true;
+            this.charges = newSavingsProductCharges;
+        }
+        return updated;
     }
 }

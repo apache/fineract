@@ -7,17 +7,23 @@ package org.mifosplatform.portfolio.savings.domain;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
 import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.domain.LocalDateInterval;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
@@ -30,6 +36,7 @@ import org.mifosplatform.portfolio.savings.data.SavingsAccountTransactionEnumDat
 import org.mifosplatform.portfolio.savings.domain.interest.EndOfDayBalance;
 import org.mifosplatform.portfolio.savings.service.SavingsEnumerations;
 import org.springframework.data.jpa.domain.AbstractPersistable;
+import org.springframework.util.CollectionUtils;
 
 /**
  * All monetary transactions against a savings account are modelled through this
@@ -76,7 +83,11 @@ public final class SavingsAccountTransaction extends AbstractPersistable<Long> {
 
     @Column(name = "balance_number_of_days_derived", nullable = false)
     private Integer balanceNumberOfDays;
-
+    
+    @LazyCollection(LazyCollectionOption.FALSE)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "savingsAccountTransaction", orphanRemoval = true)
+    private Set<SavingsAccountChargePaidBy> savingsAccountChargesPaid = new HashSet<SavingsAccountChargePaidBy>();
+    
     protected SavingsAccountTransaction() {
         this.dateOf = null;
         this.typeOf = null;
@@ -114,6 +125,20 @@ public final class SavingsAccountTransaction extends AbstractPersistable<Long> {
             final Money amount) {
         final boolean isReversed = false;
         return new SavingsAccountTransaction(savingsAccount, office, SavingsAccountTransactionType.ANNUAL_FEE.getValue(), date, amount,
+                isReversed);
+    }
+    
+    public static SavingsAccountTransaction charge(final SavingsAccount savingsAccount, final Office office, final LocalDate date,
+            final Money amount) {
+        final boolean isReversed = false;
+        return new SavingsAccountTransaction(savingsAccount, office, SavingsAccountTransactionType.APPLY_CHARGES.getValue(), date, amount,
+                isReversed);
+    }
+    
+    public static SavingsAccountTransaction waiver(final SavingsAccount savingsAccount, final Office office, final LocalDate date,
+            final Money amount) {
+        final boolean isReversed = false;
+        return new SavingsAccountTransaction(savingsAccount, office, SavingsAccountTransactionType.WAIVE_CHARGES.getValue(), date, amount,
                 isReversed);
     }
 
@@ -386,6 +411,40 @@ public final class SavingsAccountTransaction extends AbstractPersistable<Long> {
     }
 
     public boolean isDebit() {
-        return isWithdrawal() || isWithdrawalFeeAndNotReversed() || isAnnualFeeAndNotReversed();
+        return isWithdrawal() || isWithdrawalFeeAndNotReversed() || isAnnualFeeAndNotReversed() || isCharge();
     }
+ 
+    public boolean isCharge() {
+        return SavingsAccountTransactionType.fromInt(this.typeOf).isCharge();
+    }
+    
+    public boolean isFeeCharge() {
+        final SavingsAccountChargePaidBy chargePaidBy = getSavingsAccountChargePaidBy();
+        return (isCharge() && chargePaidBy != null) ? chargePaidBy.isFeeCharge() : false;
+    }
+
+    public boolean isPenaltyCharge() {
+        final SavingsAccountChargePaidBy chargePaidBy = getSavingsAccountChargePaidBy();
+        return (isCharge() && chargePaidBy != null) ? chargePaidBy.isPenaltyCharge() : false;
+    }
+    
+    public boolean isFeeChargeAndNotReversed(){
+        return isFeeCharge() && isNotReversed();
+    }
+    
+    public boolean isPenaltyChargeAndNotReversed(){
+        return isPenaltyCharge() && isNotReversed();
+    }
+    
+    private SavingsAccountChargePaidBy getSavingsAccountChargePaidBy(){
+        if(!CollectionUtils.isEmpty(this.savingsAccountChargesPaid)){
+            return this.savingsAccountChargesPaid.iterator().next();
+        }
+        return null;
+    }
+    
+    public Set<SavingsAccountChargePaidBy> getSavingsAccountChargesPaid() {
+        return this.savingsAccountChargesPaid;
+    }
+    
 }

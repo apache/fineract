@@ -17,6 +17,7 @@ import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
 import org.mifosplatform.infrastructure.core.service.RoutingDataSource;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
+import org.mifosplatform.portfolio.charge.data.ChargeData;
 import org.mifosplatform.portfolio.savings.data.SavingsProductData;
 import org.mifosplatform.portfolio.savings.exception.SavingsProductNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;

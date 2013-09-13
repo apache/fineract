@@ -41,4 +41,14 @@ public interface SavingsAccountWritePlatformService {
     void rejectSavingsTransfer(Long accountId);
 
     SavingsAccountTransaction acceptSavingsTransfer(Long accountId, LocalDate transferDate, Office acceptedInOffice, Staff staff);
+    
+    CommandProcessingResult addSavingsAccountCharge(JsonCommand command);
+
+    CommandProcessingResult updateSavingsAccountCharge(JsonCommand command);
+
+    CommandProcessingResult deleteSavingsAccountCharge(Long savingsAccountId, Long savingsAccountChargeId, JsonCommand command);
+
+    CommandProcessingResult waiveCharge(Long savingsAccountId, Long savingsAccountChargeId, JsonCommand command);
+    
+    CommandProcessingResult payCharge(Long savingsAccountId, Long savingsAccountChargeId, JsonCommand command);
 }

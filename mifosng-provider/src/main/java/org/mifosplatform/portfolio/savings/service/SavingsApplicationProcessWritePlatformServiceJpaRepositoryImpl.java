@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.mifosplatform.accounting.journalentry.service.JournalEntryWritePlatformService;
@@ -28,6 +29,7 @@ import org.mifosplatform.organisation.monetary.domain.ApplicationCurrencyReposit
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.organisation.staff.domain.Staff;
 import org.mifosplatform.organisation.staff.domain.StaffRepositoryWrapper;
+import org.mifosplatform.portfolio.charge.domain.Charge;
 import org.mifosplatform.portfolio.client.domain.AccountNumberGenerator;
 import org.mifosplatform.portfolio.client.domain.AccountNumberGeneratorFactory;
 import org.mifosplatform.portfolio.client.domain.Client;
@@ -44,6 +46,8 @@ import org.mifosplatform.portfolio.savings.SavingsApiConstants;
 import org.mifosplatform.portfolio.savings.data.SavingsAccountDataValidator;
 import org.mifosplatform.portfolio.savings.domain.SavingsAccount;
 import org.mifosplatform.portfolio.savings.domain.SavingsAccountAssembler;
+import org.mifosplatform.portfolio.savings.domain.SavingsAccountCharge;
+import org.mifosplatform.portfolio.savings.domain.SavingsAccountChargeAssembler;
 import org.mifosplatform.portfolio.savings.domain.SavingsAccountRepositoryWrapper;
 import org.mifosplatform.portfolio.savings.domain.SavingsProduct;
 import org.mifosplatform.portfolio.savings.domain.SavingsProductRepository;
@@ -74,6 +78,7 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
     private final SavingsAccountApplicationTransitionApiJsonValidator savingsAccountApplicationTransitionApiJsonValidator;
     private final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepositoryWrapper;
     private final JournalEntryWritePlatformService journalEntryWritePlatformService;
+    private final SavingsAccountChargeAssembler savingsAccountChargeAssembler;
 
     @Autowired
     public SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
@@ -84,7 +89,8 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
             final NoteRepository noteRepository, final StaffRepositoryWrapper staffRepository,
             final SavingsAccountApplicationTransitionApiJsonValidator savingsAccountApplicationTransitionApiJsonValidator,
             final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepositoryWrapper,
-            final JournalEntryWritePlatformService journalEntryWritePlatformService) {
+            final JournalEntryWritePlatformService journalEntryWritePlatformService,
+            final SavingsAccountChargeAssembler savingsAccountChargeAssembler) {
         this.context = context;
         this.savingAccountRepository = savingAccountRepository;
         this.savingAccountAssembler = savingAccountAssembler;
@@ -98,6 +104,7 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
         this.savingsAccountApplicationTransitionApiJsonValidator = savingsAccountApplicationTransitionApiJsonValidator;
         this.applicationCurrencyRepositoryWrapper = applicationCurrencyRepositoryWrapper;
         this.journalEntryWritePlatformService = journalEntryWritePlatformService;
+        this.savingsAccountChargeAssembler = savingsAccountChargeAssembler;
     }
 
     /*
@@ -224,6 +231,15 @@ public class SavingsApplicationProcessWritePlatformServiceJpaRepositoryImpl impl
                         changes.put(SavingsApiConstants.fieldOfficerIdParamName, "");
                     }
                     account.update(fieldOfficer);
+                }
+                
+                if (changes.containsKey("charges")) {
+                    //final Set<Charge> savingsProductCharges = this.savi.assembleListOfSavingsProductCharges(command, product.currency().getCode());
+                    final Set<SavingsAccountCharge> charges = this.savingsAccountChargeAssembler.fromParsedJson(command.parsedJson());
+                    boolean updated = account.update(charges);
+                    if (!updated) {
+                        changes.remove("charges");
+                    }
                 }
 
                 this.savingAccountRepository.saveAndFlush(account);
