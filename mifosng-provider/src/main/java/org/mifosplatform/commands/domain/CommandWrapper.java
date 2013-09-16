@@ -112,15 +112,15 @@ public class CommandWrapper {
     }
 
     public boolean isCreateDatatable() {
-        return (this.actionName.equalsIgnoreCase("CREATE") && this.href.startsWith("/datatables/") && this.entityId == null);
+        return this.actionName.equalsIgnoreCase("CREATE") && this.href.startsWith("/datatables/") && this.entityId == null;
     }
 
     public boolean isDeleteDatatable() {
-        return (this.actionName.equalsIgnoreCase("DELETE") && this.href.startsWith("/datatables/") && this.entityId == null);
+        return this.actionName.equalsIgnoreCase("DELETE") && this.href.startsWith("/datatables/") && this.entityId == null;
     }
 
     public boolean isUpdateDatatable() {
-        return (this.actionName.equalsIgnoreCase("UPDATE") && this.href.startsWith("/datatables/") && this.entityId == null);
+        return this.actionName.equalsIgnoreCase("UPDATE") && this.href.startsWith("/datatables/") && this.entityId == null;
     }
 
     public String getTaskPermissionName() {
@@ -185,8 +185,8 @@ public class CommandWrapper {
 
     public boolean isUpdate() {
         // permissions resource has special update which involves no resource.
-        return (isPermissionResource() && isUpdateOperation()) || (isCurrencyResource() && isUpdateOperation())
-                || (isUpdateOperation() && this.entityId != null);
+        return isPermissionResource() && isUpdateOperation() || isCurrencyResource() && isUpdateOperation() || isCacheResource() && isUpdateOperation()
+                || isUpdateOperation() && this.entityId != null;
     }
 
     public boolean isUpdateOperation() {
@@ -614,5 +614,9 @@ public class CommandWrapper {
 
     public boolean isSaveOrUpdateAttendance() {
         return this.actionName.equalsIgnoreCase("SAVEORUPDATEATTENDANCE");
+    }
+
+    public boolean isCacheResource() {
+        return this.entityName.equalsIgnoreCase("CACHE");
     }
 }

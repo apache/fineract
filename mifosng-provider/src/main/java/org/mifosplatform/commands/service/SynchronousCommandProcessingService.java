@@ -519,7 +519,7 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
 
         } else if (wrapper.isXBRLMappingResource()) {
         	if (wrapper.isUpdate()) {
-        		handler = applicationContext.getBean("updateTaxonomyMappingCommandHandler", NewCommandSourceHandler.class);
+        		handler = this.applicationContext.getBean("updateTaxonomyMappingCommandHandler", NewCommandSourceHandler.class);
         	} else {
                 throw new UnsupportedCommandException(wrapper.commandName());
             }
@@ -541,6 +541,12 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
         } else if (wrapper.isSchedulerResource()) {
             if (wrapper.isUpdate()) {
                 handler = this.applicationContext.getBean("updateJobDetailCommandhandler", NewCommandSourceHandler.class);
+            } else {
+                throw new UnsupportedCommandException(wrapper.commandName());
+            }
+        } else if (wrapper.isCacheResource()) {
+            if (wrapper.isUpdateOperation()) {
+                handler = this.applicationContext.getBean("updateCacheCommandHandler", NewCommandSourceHandler.class);
             } else {
                 throw new UnsupportedCommandException(wrapper.commandName());
             }

@@ -1,5 +1,6 @@
 package org.mifosplatform.infrastructure.cache;
 
+import org.mifosplatform.infrastructure.cache.service.RuntimeDelegatingCacheManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CachingConfigurer;

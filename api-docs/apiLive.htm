@@ -9091,6 +9091,92 @@ Request Body: { }
 				</div>
 			</div>
 
+	<a id="cache" name="cache" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+		<div class="method-description">
+			<h3>Cache</h3>
+			<p>The following settings are possible for cache:
+				<ul>
+					<li><b>No Caching</b>: caching turned off</li>
+					<li><b>Single node</b>: caching on for single instance deployments of platorm (works for multiple tenants but only one tomcat)</li>
+				</ul>
+			</p>
+			<p>By default caching is set to <i>No Caching</i>. Switching between caches results in the cache been clear e.g. from <i>Single node</i> to <i>No cache</i> and back again would clear down the single node cache.</p>
+		</div>
+	</div>
+
+	<a id="caches_list" name="caches_list" class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+		<div class="method-description">
+			<h4>Retrieve Cache Types</h4>
+			<p>Returns the list of caches.</p>
+			<p>Example Requests:</p>
+			<div class=apiClick>caches</div>
+		</div>
+		<div class="method-example">
+			<code class="method-declaration">
+GET https://DomainName/api/v1/caches
+			</code>
+			<code class="method-response">
+[
+  {
+    "cacheType": {
+      "id": 1,
+      "code": "cacheType.noCache",
+      "value": "No cache"
+    },
+    "enabled": true
+  },
+  {
+    "cacheType": {
+      "id": 2,
+      "code": "cacheType.singleNode",
+      "value": "Single node"
+    },
+    "enabled": false
+  },
+  {
+    "cacheType": {
+      "id": 3,
+      "code": "cacheType.multiNode",
+      "value": "Multi node"
+    },
+    "enabled": false
+  }
+]
+			</code>
+		</div>
+	</div>
+
+	<a id="caches_switch" name="caches_switch" 
+						class="old-syle-anchor">&nbsp;</a>
+	<div class="method-section">
+		<div class="method-description">
+			<h4>Switch Cache</h4>
+			<p>Switches the cache to chosen one.</p>
+		</div>
+		<div class="method-example">
+			<code class="method-declaration">
+PUT https://DomainName/api/v1/caches
+			</code>
+			<code class="method-request">
+PUT caches
+Content-Type: application/json 
+Request Body: 
+{
+	"cacheType": 2
+}
+			</code>
+			<code class="method-response">
+{
+  "changes": {
+    "cacheType": 2
+  }
+}
+			</code>
+		</div>
+	</div>
+
 			<a id="configs_codes" name="configs_codes" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
@@ -19358,6 +19444,14 @@ GET https://DomainName/api/v1/search?query=000000111
 							</tr>
 						</table>
 					</td>
+				</tr>
+				<tr class="alt">
+					<td><a href="#cache">Cache</a></td>
+					<td>caches</td>
+					<td></td>
+					<td><a href="#caches_list">List Cache Types</a></td>
+					<td><a href="#caches_switch">Switch Cache</a></td>
+					<td></td>
 				</tr>
 				<tr class="alt">
 					<td><a href="#centers">Center</a></td>

@@ -5,6 +5,8 @@
  */
 package org.mifosplatform.infrastructure.configuration.domain;
 
+import org.mifosplatform.infrastructure.cache.domain.CacheType;
+
 public interface ConfigurationDomainService {
 
     boolean isMakerCheckerEnabledForTask(String taskPermissionCode);
@@ -14,4 +16,6 @@ public interface ConfigurationDomainService {
     boolean allowTransactionsOnHolidayEnabled();
     boolean allowTransactionsOnNonWorkingDayEnabled();
     boolean isConstraintApproachEnabledForDatatables();
+    boolean isEhcacheEnabled();
+    void updateCache(CacheType cacheType);
 }
