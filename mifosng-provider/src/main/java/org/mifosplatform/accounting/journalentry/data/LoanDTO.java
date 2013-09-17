@@ -12,18 +12,22 @@ public class LoanDTO {
     private Long loanId;
     private Long loanProductId;
     private Long officeId;
+
+    private String currencyCode;
     private boolean cashBasedAccountingEnabled;
     private boolean accrualBasedAccountingEnabled;
     private List<LoanTransactionDTO> newLoanTransactions;
 
-    public LoanDTO(final Long loanId, final Long loanProductId, final Long officeId, final boolean cashBasedAccountingEnabled,
-            final boolean accrualBasedAccountingEnabled, final List<LoanTransactionDTO> newLoanTransactions) {
+    public LoanDTO(final Long loanId, final Long loanProductId, final Long officeId, final String currencyCode,
+            final boolean cashBasedAccountingEnabled, final boolean accrualBasedAccountingEnabled,
+            final List<LoanTransactionDTO> newLoanTransactions) {
         this.loanId = loanId;
         this.loanProductId = loanProductId;
         this.officeId = officeId;
         this.cashBasedAccountingEnabled = cashBasedAccountingEnabled;
         this.accrualBasedAccountingEnabled = accrualBasedAccountingEnabled;
         this.newLoanTransactions = newLoanTransactions;
+        this.currencyCode = currencyCode;
     }
 
     public Long getLoanId() {
@@ -72,6 +76,14 @@ public class LoanDTO {
 
     public void setNewLoanTransactions(final List<LoanTransactionDTO> newLoanTransactions) {
         this.newLoanTransactions = newLoanTransactions;
+    }
+
+    public String getCurrencyCode() {
+        return this.currencyCode;
+    }
+
+    public void setCurrencyCode(String currencyCode) {
+        this.currencyCode = currencyCode;
     }
 
 }

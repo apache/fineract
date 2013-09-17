@@ -2454,6 +2454,7 @@ public class Loan extends AbstractPersistable<Long> {
         accountingBridgeData.put("loanId", getId());
         accountingBridgeData.put("loanProductId", productId());
         accountingBridgeData.put("officeId", getOfficeId());
+        accountingBridgeData.put("currency", currencyData);
         accountingBridgeData.put("calculatedInterest", this.summary.getTotalInterestCharged());
         accountingBridgeData.put("cashBasedAccountingEnabled", isCashBasedAccountingEnabledOnLoanProduct());
         accountingBridgeData.put("accrualBasedAccountingEnabled", isAccrualBasedAccountingEnabledOnLoanProduct());

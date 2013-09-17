@@ -54,6 +54,8 @@ public final class JournalEntryCommandFromApiJsonDeserializer extends AbstractFr
         final JsonElement element = this.fromApiJsonHelper.parse(json);
 
         final Long officeId = this.fromApiJsonHelper.extractLongNamed(JournalEntryJsonInputParams.OFFICE_ID.getValue(), element);
+        final String currencyCode = this.fromApiJsonHelper
+                .extractStringNamed(JournalEntryJsonInputParams.CURRENCY_CODE.getValue(), element);
         final String comments = this.fromApiJsonHelper.extractStringNamed(JournalEntryJsonInputParams.COMMENTS.getValue(), element);
         final LocalDate transactionDate = this.fromApiJsonHelper.extractLocalDateNamed(
                 JournalEntryJsonInputParams.TRANSACTION_DATE.getValue(), element);
@@ -64,7 +66,8 @@ public final class JournalEntryCommandFromApiJsonDeserializer extends AbstractFr
         final JsonObject topLevelJsonElement = element.getAsJsonObject();
         final Locale locale = this.fromApiJsonHelper.extractLocaleParameter(topLevelJsonElement);
 
-        final BigDecimal amount = this.fromApiJsonHelper.extractBigDecimalNamed(JournalEntryJsonInputParams.AMOUNT.getValue(), element, locale);
+        final BigDecimal amount = this.fromApiJsonHelper.extractBigDecimalNamed(JournalEntryJsonInputParams.AMOUNT.getValue(), element,
+                locale);
 
         SingleDebitOrCreditEntryCommand[] credits = null;
         SingleDebitOrCreditEntryCommand[] debits = null;
@@ -78,7 +81,8 @@ public final class JournalEntryCommandFromApiJsonDeserializer extends AbstractFr
                 debits = populateCreditsOrDebitsArray(topLevelJsonElement, locale, debits, JournalEntryJsonInputParams.DEBITS.getValue());
             }
         }
-        return new JournalEntryCommand(officeId, transactionDate, comments, credits, debits, referenceNumber, accountingRuleId, amount);
+        return new JournalEntryCommand(officeId, currencyCode, transactionDate, comments, credits, debits, referenceNumber,
+                accountingRuleId, amount);
     }
 
     /**

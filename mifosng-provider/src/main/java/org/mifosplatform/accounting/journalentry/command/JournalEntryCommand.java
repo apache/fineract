@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.joda.time.LocalDate;
+import org.mifosplatform.accounting.journalentry.api.JournalEntryJsonInputParams;
 import org.mifosplatform.infrastructure.core.data.ApiParameterError;
 import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
 import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
@@ -21,6 +22,7 @@ public class JournalEntryCommand {
 
     private final Long officeId;
     private final LocalDate transactionDate;
+    private final String currencyCode;
     private final String comments;
     private final String referenceNumber;
     private final Long accountingRuleId;
@@ -29,10 +31,11 @@ public class JournalEntryCommand {
     private final SingleDebitOrCreditEntryCommand[] credits;
     private final SingleDebitOrCreditEntryCommand[] debits;
 
-    public JournalEntryCommand(final Long officeId, final LocalDate transactionDate, final String comments,
+    public JournalEntryCommand(final Long officeId, final String currencyCode, final LocalDate transactionDate, final String comments,
             final SingleDebitOrCreditEntryCommand[] credits, final SingleDebitOrCreditEntryCommand[] debits, final String referenceNumber,
             final Long accountingRuleId, final BigDecimal amount) {
         this.officeId = officeId;
+        this.currencyCode = currencyCode;
         this.transactionDate = transactionDate;
         this.comments = comments;
         this.credits = credits;
@@ -51,6 +54,8 @@ public class JournalEntryCommand {
         baseDataValidator.reset().parameter("transactionDate").value(this.transactionDate).notBlank();
 
         baseDataValidator.reset().parameter("officeId").value(this.officeId).notNull().integerGreaterThanZero();
+
+        baseDataValidator.reset().parameter(JournalEntryJsonInputParams.CURRENCY_CODE.getValue()).value(this.currencyCode).notBlank();
 
         baseDataValidator.reset().parameter("comments").value(this.comments).ignoreIfNull().notExceedingLengthOf(500);
 

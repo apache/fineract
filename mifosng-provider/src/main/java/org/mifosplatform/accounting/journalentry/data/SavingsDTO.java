@@ -12,18 +12,21 @@ public class SavingsDTO {
     private Long savingsId;
     private Long savingsProductId;
     private Long officeId;
+    private String currencyCode;
     private boolean cashBasedAccountingEnabled;
     private boolean accrualBasedAccountingEnabled;
     private List<SavingsTransactionDTO> newSavingsTransactions;
 
-    public SavingsDTO(final Long savingsId, final Long savingsProductId, final Long officeId, final boolean cashBasedAccountingEnabled,
-            final boolean accrualBasedAccountingEnabled, final List<SavingsTransactionDTO> newSavingsTransactions) {
+    public SavingsDTO(final Long savingsId, final Long savingsProductId, final Long officeId, final String currencyCode,
+            final boolean cashBasedAccountingEnabled, final boolean accrualBasedAccountingEnabled,
+            final List<SavingsTransactionDTO> newSavingsTransactions) {
         this.savingsId = savingsId;
         this.savingsProductId = savingsProductId;
         this.officeId = officeId;
         this.cashBasedAccountingEnabled = cashBasedAccountingEnabled;
         this.accrualBasedAccountingEnabled = accrualBasedAccountingEnabled;
         this.newSavingsTransactions = newSavingsTransactions;
+        this.currencyCode = currencyCode;
     }
 
     public Long getSavingsId() {
@@ -72,6 +75,14 @@ public class SavingsDTO {
 
     public void setNewSavingsTransactions(List<SavingsTransactionDTO> newSavingsTransactions) {
         this.newSavingsTransactions = newSavingsTransactions;
+    }
+
+    public String getCurrencyCode() {
+        return this.currencyCode;
+    }
+
+    public void setCurrencyCode(String currencyCode) {
+        this.currencyCode = currencyCode;
     }
 
 }
