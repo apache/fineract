@@ -35,6 +35,9 @@ public class JournalEntry extends AbstractAuditableCustom<AppUser, Long> {
     @JoinColumn(name = "account_id", nullable = false)
     private GLAccount glAccount;
 
+    @Column(name = "currency_code", length = 3, nullable = false)
+    private String currencyCode;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reversal_id")
     private JournalEntry reversalJournalEntry;
@@ -70,20 +73,20 @@ public class JournalEntry extends AbstractAuditableCustom<AppUser, Long> {
     @Column(name = "ref_num")
     private String referenceNumber;
 
-    public static JournalEntry createNew(final Office office, final GLAccount glAccount, final String transactionId,
-            final boolean manualEntry, final Date transactionDate, final JournalEntryType journalEntryType, final BigDecimal amount,
-            final String description, final Integer entityType, final Long entityId, final String referenceNumber) {
-        return new JournalEntry(office, glAccount, transactionId, manualEntry, transactionDate, journalEntryType.getValue(), amount,
-                description, entityType, entityId, referenceNumber);
+    public static JournalEntry createNew(final Office office, final GLAccount glAccount, final String currencyCode,
+            final String transactionId, final boolean manualEntry, final Date transactionDate, final JournalEntryType journalEntryType,
+            final BigDecimal amount, final String description, final Integer entityType, final Long entityId, final String referenceNumber) {
+        return new JournalEntry(office, glAccount, currencyCode, transactionId, manualEntry, transactionDate, journalEntryType.getValue(),
+                amount, description, entityType, entityId, referenceNumber);
     }
 
     protected JournalEntry() {
         //
     }
 
-    public JournalEntry(final Office office, final GLAccount glAccount, final String transactionId, final boolean manualEntry,
-            final Date transactionDate, final Integer type, final BigDecimal amount, final String description, final Integer entityType,
-            final Long entityId, final String referenceNumber) {
+    public JournalEntry(final Office office, final GLAccount glAccount, final String currencyCode, final String transactionId,
+            final boolean manualEntry, final Date transactionDate, final Integer type, final BigDecimal amount, final String description,
+            final Integer entityType, final Long entityId, final String referenceNumber) {
         this.office = office;
         this.glAccount = glAccount;
         this.reversalJournalEntry = null;
@@ -97,6 +100,7 @@ public class JournalEntry extends AbstractAuditableCustom<AppUser, Long> {
         this.entityType = entityType;
         this.entityId = entityId;
         this.referenceNumber = referenceNumber;
+        this.currencyCode = currencyCode;
 
     }
 
@@ -134,6 +138,10 @@ public class JournalEntry extends AbstractAuditableCustom<AppUser, Long> {
 
     public String getReferenceNumber() {
         return this.referenceNumber;
+    }
+
+    public String getCurrencyCode() {
+        return this.currencyCode;
     }
 
 }
