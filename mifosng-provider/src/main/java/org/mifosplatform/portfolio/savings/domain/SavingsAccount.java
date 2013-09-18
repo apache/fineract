@@ -169,7 +169,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
     /**
      * The interest period is the span of time at the end of which savings in a
      * client's account earn interest.
-     * 
+     *
      * A value from the {@link SavingsCompoundingInterestPeriodType}
      * enumeration.
      */
@@ -262,7 +262,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
             final SavingsInterestCalculationDaysInYearType interestCalculationDaysInYearType, final BigDecimal minRequiredOpeningBalance,
             final Integer lockinPeriodFrequency, final SavingsPeriodFrequencyType lockinPeriodFrequencyType,
             final BigDecimal withdrawalFeeAmount, final SavingsWithdrawalFeesType withdrawalFeeType,
-            boolean withdrawalFeeApplicableForTransfer, final BigDecimal annualFeeAmount, final MonthDay annualFeeOnMonthDay) {
+            final boolean withdrawalFeeApplicableForTransfer, final BigDecimal annualFeeAmount, final MonthDay annualFeeOnMonthDay) {
 
         final SavingsAccountStatusType status = SavingsAccountStatusType.SUBMITTED_AND_PENDING_APPROVAL;
         return new SavingsAccount(client, group, product, fieldOfficer, accountNo, externalId, status, accountType, submittedOnDate,
@@ -424,11 +424,11 @@ public class SavingsAccount extends AbstractPersistable<Long> {
 
     /**
      * All interest calculation based on END-OF-DAY-BALANCE.
-     * 
+     *
      * Interest calculation is performed on-the-fly over all account
      * transactions.
-     * 
-     * 
+     *
+     *
      * 1. Calculate Interest From Beginning Of Account 1a. determine the
      * 'crediting' periods that exist for this savings acccount 1b. determine
      * the 'compounding' periods that exist within each 'crediting' period
@@ -608,7 +608,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         return activationLocalDate;
     }
 
-    public SavingsAccountTransaction withdraw(SavingsAccountTransactionDTO transactionDTO, final boolean applyWithdrawFee) {
+    public SavingsAccountTransaction withdraw(final SavingsAccountTransactionDTO transactionDTO, final boolean applyWithdrawFee) {
 
         if (isNotActive()) {
 
@@ -730,7 +730,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         }
     }
 
-    public void validateAccountBalanceDoesNotBecomeNegative(String transactionAction) {
+    public void validateAccountBalanceDoesNotBecomeNegative(final String transactionAction) {
 
         final List<SavingsAccountTransaction> transactionsSortedByDate = retreiveListOfTransactions();
         Money runningBalance = Money.zero(this.currency);
@@ -1682,9 +1682,14 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         // activating account.
         final Money minRequiredOpeningBalance = Money.of(this.currency, this.minRequiredOpeningBalance);
         if (minRequiredOpeningBalance.isGreaterThanZero()) {
-            SavingsAccountTransactionDTO transactionDTO = new SavingsAccountTransactionDTO(fmt, activationDate,
+
+            final SavingsAccountTransactionDTO transactionDTO = new SavingsAccountTransactionDTO(fmt, activationDate,
                     minRequiredOpeningBalance.getAmount(), existingTransactionIds, existingReversedTransactionIds, null);
+
             deposit(transactionDTO);
+
+            final Money openingAccountBalance = Money.zero(this.currency);
+            recalculateDailyBalances(openingAccountBalance);
         }
 
         return actualChanges;
@@ -1718,9 +1723,9 @@ public class SavingsAccount extends AbstractPersistable<Long> {
                     .failWithCode("cannot.be.a.future.date");
             if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
         }
-        List<SavingsAccountTransaction> savingsAccountTransactions = retreiveListOfTransactions();
+        final List<SavingsAccountTransaction> savingsAccountTransactions = retreiveListOfTransactions();
         if (savingsAccountTransactions.size() > 0) {
-            SavingsAccountTransaction accountTransaction = savingsAccountTransactions.get(savingsAccountTransactions.size() - 1);
+            final SavingsAccountTransaction accountTransaction = savingsAccountTransactions.get(savingsAccountTransactions.size() - 1);
             if (accountTransaction.isAfter(closedDate)) {
                 baseDataValidator.reset().parameter(SavingsApiConstants.closedOnDateParamName).value(closedDate)
                         .failWithCode("must.be.after.last.transaction.date");
@@ -1797,7 +1802,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         return this.transactions;
     }
 
-    public void setStatus(Integer status) {
+    public void setStatus(final Integer status) {
         this.status = status;
     }
 
