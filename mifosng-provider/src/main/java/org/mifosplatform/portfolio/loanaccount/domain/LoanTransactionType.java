@@ -34,7 +34,8 @@ public enum LoanTransactionType {
     WITHDRAW_TRANSFER(14, "loanTransactionType.withdrawTransfer"), //
     REJECT_TRANSFER(15, "loanTransactionType.rejectTransfer"),
     
-    REFUND(16,"loanTransactionType.refund");
+    REFUND(16,"loanTransactionType.refund"),
+    CHARGE_PAYMENT(17,"loanTransactionType.chargePayment");
 
     private final Integer value;
     private final String code;
@@ -106,6 +107,9 @@ public enum LoanTransactionType {
             case 16:
                 loanTransactionType = LoanTransactionType.REFUND;
             break;
+            case 17:
+                loanTransactionType = LoanTransactionType.CHARGE_PAYMENT;
+                break;
             default:
                 loanTransactionType = LoanTransactionType.INVALID;
             break;
@@ -143,5 +147,9 @@ public enum LoanTransactionType {
 
     public boolean isWriteOff() {
         return this.value.equals(LoanTransactionType.WRITEOFF.getValue());
+    }
+    
+    public boolean isChargePayment(){
+        return this.value.equals(LoanTransactionType.CHARGE_PAYMENT.getValue());
     }
 }

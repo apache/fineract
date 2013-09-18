@@ -15,5 +15,8 @@ import org.springframework.data.repository.query.Param;
 public interface AccountTransferRepository extends JpaRepository<AccountTransfer, Long>, JpaSpecificationExecutor<AccountTransfer> {
 
     @Query("from AccountTransfer at where at.fromLoanAccount.id= :accountNumber and at.reversed=false")
-    List<AccountTransfer> findByLoanId(@Param("accountNumber") Long accountNumber);
+    List<AccountTransfer> findByFromLoanId(@Param("accountNumber") Long accountNumber);
+    
+    @Query("from AccountTransfer at where (at.fromLoanAccount.id= :accountNumber or at.toLoanAccount.id=:accountNumber) and at.reversed=false")
+    List<AccountTransfer> findAllByLoanId(@Param("accountNumber") Long accountNumber);
 }

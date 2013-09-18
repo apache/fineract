@@ -54,9 +54,9 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
              * Repayments and Repayments at disbursement
              ***/
             else if (loanTransactionDTO.getTransactionType().isRepayment()
-                    || loanTransactionDTO.getTransactionType().isRepaymentAtDisbursement()) {
+                    || loanTransactionDTO.getTransactionType().isRepaymentAtDisbursement() || loanTransactionDTO.getTransactionType().isChargePayment()) {
                 createJournalEntriesForRepaymentsAndWriteOffs(loanDTO, loanTransactionDTO, office, false, loanTransactionDTO
-                        .getTransactionType().isRepaymentAtDisbursement());
+                        .getTransactionType().isRepaymentAtDisbursement() || loanTransactionDTO.getTransactionType().isChargePayment());
             }
 
             /** Handle Write Offs, waivers and their reversals **/
@@ -170,7 +170,7 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
      * 
      */
     private void createJournalEntriesForRepaymentsAndWriteOffs(final LoanDTO loanDTO, final LoanTransactionDTO loanTransactionDTO,
-            final Office office, final boolean writeOff, final boolean repaymentAtDisbursement) {
+            final Office office, final boolean writeOff, final boolean isIncomeFromFee) {
         // loan properties
         final Long loanProductId = loanDTO.getLoanProductId();
         final Long loanId = loanDTO.getLoanId();
@@ -208,7 +208,7 @@ public class AccrualBasedAccountingProcessorForLoan implements AccountingProcess
 
             ACCRUAL_ACCOUNTS_FOR_LOAN feeAccountToCredit = ACCRUAL_ACCOUNTS_FOR_LOAN.FEES_RECEIVABLE;
 
-            if (repaymentAtDisbursement) {
+            if (isIncomeFromFee) {
                 feeAccountToCredit = ACCRUAL_ACCOUNTS_FOR_LOAN.INCOME_FROM_FEES;
             }
 

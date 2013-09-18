@@ -12,6 +12,7 @@ import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.mifosplatform.portfolio.charge.data.ChargeData;
+import org.mifosplatform.portfolio.charge.domain.ChargePaymentMode;
 
 /**
  * Immutable data object for loan charge data.
@@ -66,8 +67,18 @@ public class LoanChargeData {
     @SuppressWarnings("unused")
     private final boolean penalty;
 
+    private final EnumOptionData chargePaymentMode;
+
+    private final boolean paid;
+
+    private final boolean waived;
+    
+    private final boolean chargePayable;
+    
+    private final Long loanId;
+
     public static LoanChargeData template(final Collection<ChargeData> chargeOptions) {
-        return new LoanChargeData(null, null, null, null, null, null, null, null, chargeOptions, false);
+        return new LoanChargeData(null, null, null, null, null, null, null, null, chargeOptions, false, null, false, false, null);
     }
 
     /**
@@ -76,15 +87,16 @@ public class LoanChargeData {
      */
     public static LoanChargeData newLoanChargeDetails(final Long chargeId, final String name, final CurrencyData currency,
             final BigDecimal amount, final BigDecimal percentage, final EnumOptionData chargeTimeType,
-            final EnumOptionData chargeCalculationType, final boolean penalty) {
-        return new LoanChargeData(null, chargeId, name, currency, amount, percentage, chargeTimeType, chargeCalculationType, null, penalty);
+            final EnumOptionData chargeCalculationType, final boolean penalty, final EnumOptionData chargePaymentMode) {
+        return new LoanChargeData(null, chargeId, name, currency, amount, percentage, chargeTimeType, chargeCalculationType, null, penalty,
+                chargePaymentMode, false, false, null);
     }
 
     public LoanChargeData(final Long id, final Long chargeId, final String name, final CurrencyData currency, final BigDecimal amount,
             final BigDecimal amountPaid, final BigDecimal amountWaived, final BigDecimal amountWrittenOff,
             final BigDecimal amountOutstanding, final EnumOptionData chargeTimeType, final LocalDate dueDate,
             final EnumOptionData chargeCalculationType, final BigDecimal percentage, final BigDecimal amountPercentageAppliedTo,
-            final boolean penalty) {
+            final boolean penalty, EnumOptionData chargePaymentMode, boolean paid, boolean waived, Long loanId) {
         this.id = id;
         this.chargeId = chargeId;
         this.name = name;
@@ -100,6 +112,9 @@ public class LoanChargeData {
         this.percentage = percentage;
         this.amountPercentageAppliedTo = amountPercentageAppliedTo;
         this.penalty = penalty;
+        this.chargePaymentMode = chargePaymentMode;
+        this.paid = paid;
+        this.waived = waived;
 
         if (chargeCalculationType != null && chargeCalculationType.getId().intValue() > 1) {
             this.amountOrPercentage = this.percentage;
@@ -108,11 +123,14 @@ public class LoanChargeData {
         }
 
         this.chargeOptions = null;
+        this.chargePayable = isChargePayable();
+        this.loanId = loanId;
     }
 
     private LoanChargeData(final Long id, final Long chargeId, final String name, final CurrencyData currency, final BigDecimal amount,
             final BigDecimal pecentage, final EnumOptionData chargeTimeType, final EnumOptionData chargeCalculationType,
-            final Collection<ChargeData> chargeOptions, final boolean penalty) {
+            final Collection<ChargeData> chargeOptions, final boolean penalty, EnumOptionData chargePaymentMode, boolean paid,
+            boolean waived, Long loanId) {
         this.id = id;
         this.chargeId = chargeId;
         this.name = name;
@@ -128,6 +146,9 @@ public class LoanChargeData {
         this.percentage = pecentage;
         this.amountPercentageAppliedTo = null;
         this.penalty = penalty;
+        this.chargePaymentMode = chargePaymentMode;
+        this.paid = paid;
+        this.waived = waived;
 
         if (chargeCalculationType != null && chargeCalculationType.getId().intValue() > 1) {
             this.amountOrPercentage = this.percentage;
@@ -136,5 +157,57 @@ public class LoanChargeData {
         }
 
         this.chargeOptions = chargeOptions;
+        this.chargePayable = isChargePayable();
+        this.loanId = loanId;
+    }
+
+    public LoanChargeData(final Long id,final LocalDate dueAsOfDate,final BigDecimal amountOutstanding,final Long loanId) {
+        this.id = id;
+        this.chargeId = null;
+        this.name = null;
+        this.currency = null;
+        this.amount = null;
+        this.amountPaid = null;
+        this.amountWaived = null;
+        this.amountWrittenOff = null;
+        this.amountOutstanding = amountOutstanding;
+        this.chargeTimeType = null;
+        this.dueDate = dueAsOfDate;
+        this.chargeCalculationType = null;
+        this.percentage = null;
+        this.amountPercentageAppliedTo = null;
+        this.penalty = false;
+        this.chargePaymentMode = null;
+        this.paid = false;
+        this.waived = false;
+        this.amountOrPercentage = null;
+        this.chargeOptions = null;
+        this.chargePayable = false;
+        this.loanId = loanId;
+    }
+
+    public boolean isChargePayable() {
+        boolean isAccountTransfer = false;
+        if(this.chargePaymentMode!=null){
+            isAccountTransfer = ChargePaymentMode.fromInt(this.chargePaymentMode.getId().intValue()).isPaymentModeAccountTransfer();
+        }
+        return isAccountTransfer && !this.paid && !this.waived;
+    }
+    
+    public Long getId() {
+        return this.id;
+    }
+    
+    public LocalDate getDueDate() {
+        return this.dueDate;
+    }
+    
+    public Long getLoanId() {
+        return this.loanId;
+    }
+
+    
+    public BigDecimal getAmountOutstanding() {
+        return this.amountOutstanding;
     }
 }

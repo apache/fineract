@@ -28,6 +28,7 @@ import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.organisation.monetary.domain.Money;
 import org.mifosplatform.portfolio.charge.domain.Charge;
 import org.mifosplatform.portfolio.charge.domain.ChargeCalculationType;
+import org.mifosplatform.portfolio.charge.domain.ChargePaymentMode;
 import org.mifosplatform.portfolio.charge.domain.ChargeTimeType;
 import org.mifosplatform.portfolio.charge.exception.LoanChargeWithoutMandatoryFieldException;
 import org.mifosplatform.portfolio.loanaccount.command.LoanChargeCommand;
@@ -54,6 +55,9 @@ public class LoanCharge extends AbstractPersistable<Long> {
 
     @Column(name = "charge_calculation_enum")
     private Integer chargeCalculation;
+    
+    @Column(name = "charge_payment_mode_enum")
+    private Integer chargePaymentMode;
 
     @Column(name = "calculation_percentage", scale = 6, precision = 19, nullable = true)
     private BigDecimal percentage;
@@ -92,16 +96,17 @@ public class LoanCharge extends AbstractPersistable<Long> {
 
         ChargeTimeType chargeTime = null;
         ChargeCalculationType chargeCalculation = null;
+        ChargePaymentMode chargePaymentMode = null;
 
-        return new LoanCharge(loan, chargeDefinition, loan.getPrincpal().getAmount(), amount, chargeTime, chargeCalculation, dueDate);
+        return new LoanCharge(loan, chargeDefinition, loan.getPrincpal().getAmount(), amount, chargeTime, chargeCalculation, dueDate, chargePaymentMode);
     }
 
     /*
      * loanPrincipal is required for charges that are percentage based
      */
     public static LoanCharge createNewWithoutLoan(final Charge chargeDefinition, final BigDecimal loanPrincipal, final BigDecimal amount,
-            final ChargeTimeType chargeTime, final ChargeCalculationType chargeCalculation, final LocalDate dueDate) {
-        return new LoanCharge(null, chargeDefinition, loanPrincipal, amount, chargeTime, chargeCalculation, dueDate);
+            final ChargeTimeType chargeTime, final ChargeCalculationType chargeCalculation, final LocalDate dueDate, ChargePaymentMode chargePaymentMode) {
+        return new LoanCharge(null, chargeDefinition, loanPrincipal, amount, chargeTime, chargeCalculation, dueDate, chargePaymentMode);
     }
 
     protected LoanCharge() {
@@ -109,7 +114,7 @@ public class LoanCharge extends AbstractPersistable<Long> {
     }
 
     public LoanCharge(final Loan loan, final Charge chargeDefinition, final BigDecimal loanPrincipal, final BigDecimal amount,
-            final ChargeTimeType chargeTime, final ChargeCalculationType chargeCalculation, final LocalDate dueDate) {
+            final ChargeTimeType chargeTime, final ChargeCalculationType chargeCalculation, final LocalDate dueDate, ChargePaymentMode chargePaymentMode) {
         this.loan = loan;
         this.charge = chargeDefinition;
         this.penaltyCharge = chargeDefinition.isPenalty();
@@ -140,6 +145,11 @@ public class LoanCharge extends AbstractPersistable<Long> {
         BigDecimal chargeAmount = chargeDefinition.getAmount();
         if (amount != null) {
             chargeAmount = amount;
+        }
+        
+        this.chargePaymentMode = chargeDefinition.getChargePaymentMode();
+        if(chargePaymentMode != null){
+            this.chargePaymentMode = chargePaymentMode.getValue();
         }
 
         populateDerivedFields(loanPrincipal, chargeAmount);
@@ -388,6 +398,10 @@ public class LoanCharge extends AbstractPersistable<Long> {
     public BigDecimal amount() {
         return this.amount;
     }
+    
+    public BigDecimal amountOutstanding(){
+        return this.amountOutstanding;
+    }
 
     public boolean hasNotLoanIdentifiedBy(final Long loanId) {
         return !hasLoanIdentifiedBy(loanId);
@@ -512,5 +526,10 @@ public class LoanCharge extends AbstractPersistable<Long> {
                 .append(this.charge.getId()) //
                 .append(this.amount).append(this.getDueLocalDate()) //
                 .toHashCode();
+    }
+
+    
+    public ChargePaymentMode getChargePaymentMode() {
+        return ChargePaymentMode.fromInt(this.chargePaymentMode);
     }
 }

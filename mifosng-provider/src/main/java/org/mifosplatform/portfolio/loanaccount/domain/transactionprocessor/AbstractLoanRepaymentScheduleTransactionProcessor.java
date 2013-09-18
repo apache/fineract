@@ -5,6 +5,7 @@
  */
 package org.mifosplatform.portfolio.loanaccount.domain.transactionprocessor;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -64,7 +65,33 @@ public abstract class AbstractLoanRepaymentScheduleTransactionProcessor implemen
         wrapper.reprocess(currency, disbursementDate, installments, charges);
 
         ChangedTransactionDetail changedTransactionDetail = new ChangedTransactionDetail();
+        List<LoanTransaction> transactionstoBeProcessed = new ArrayList<LoanTransaction>();
         for (LoanTransaction loanTransaction : transactionsPostDisbursement) {
+            if (loanTransaction.isChargePayment()){
+                Set<LoanChargePaidBy> chargePaidBies =loanTransaction.getLoanChargesPaid();
+                Set<LoanCharge> transferCharges = new HashSet<LoanCharge>();
+                for(LoanChargePaidBy chargePaidBy: chargePaidBies){
+                    transferCharges.add(chargePaidBy.getLoanCharge());
+                }
+                List<LoanRepaymentScheduleInstallment> chargePaymentInstallments = new ArrayList<LoanRepaymentScheduleInstallment>();
+                LocalDate startDate = disbursementDate;
+                for(LoanRepaymentScheduleInstallment installment:installments){
+                    for(LoanCharge loanCharge :transferCharges){
+                        if(loanCharge.isDueForCollectionFromAndUpToAndIncluding(startDate, installment.getDueDate())){
+                            chargePaymentInstallments.add(installment);
+                            break;
+                        }
+                    }
+                    startDate = installment.getDueDate();
+                }
+                loanTransaction.resetDerivedComponents();
+                handleTransaction(loanTransaction, currency, chargePaymentInstallments, transferCharges);
+            }else{
+                transactionstoBeProcessed.add(loanTransaction);
+            }
+        }
+        
+        for (LoanTransaction loanTransaction : transactionstoBeProcessed) {
 
             if (loanTransaction.isRepayment() || loanTransaction.isInterestWaiver()) {
                 // pass through for new transactions

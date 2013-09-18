@@ -8,6 +8,7 @@ package org.mifosplatform.portfolio.charge.service;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.portfolio.charge.domain.ChargeAppliesTo;
 import org.mifosplatform.portfolio.charge.domain.ChargeCalculationType;
+import org.mifosplatform.portfolio.charge.domain.ChargePaymentMode;
 import org.mifosplatform.portfolio.charge.domain.ChargeTimeType;
 
 public class ChargeEnumerations {
@@ -82,4 +83,25 @@ public class ChargeEnumerations {
         }
         return optionData;
     }
+    
+    public static EnumOptionData chargePaymentMode(final int id) {
+        return chargePaymentMode(ChargePaymentMode.fromInt(id));
+    }
+
+
+    public static EnumOptionData chargePaymentMode(final ChargePaymentMode type) {
+        EnumOptionData optionData = null;
+        switch (type) {
+            case ACCOUNT_TRANSFER:
+                optionData = new EnumOptionData(ChargePaymentMode.ACCOUNT_TRANSFER.getValue().longValue(),
+                        ChargePaymentMode.ACCOUNT_TRANSFER.getCode(), ChargePaymentMode.ACCOUNT_TRANSFER.getCode());
+            break;
+            default:
+                optionData = new EnumOptionData(ChargePaymentMode.REGULAR.getValue().longValue(), ChargePaymentMode.REGULAR.getCode(),
+                        ChargePaymentMode.REGULAR.getCode());
+            break;
+        }
+        return optionData;
+    }
+
 }

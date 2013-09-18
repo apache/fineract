@@ -46,6 +46,9 @@ public class Charge extends AbstractPersistable<Long> {
 
     @Column(name = "charge_calculation_enum")
     private Integer chargeCalculation;
+    
+    @Column(name = "charge_payment_mode_enum")
+    private Integer chargePaymentMode;
 
     @Column(name = "is_penalty", nullable = false)
     private boolean penalty;
@@ -66,11 +69,12 @@ public class Charge extends AbstractPersistable<Long> {
         final ChargeTimeType chargeTimeType = ChargeTimeType.fromInt(command.integerValueOfParameterNamed("chargeTimeType"));
         final ChargeCalculationType chargeCalculationType = ChargeCalculationType.fromInt(command
                 .integerValueOfParameterNamed("chargeCalculationType"));
+        final ChargePaymentMode paymentMode = ChargePaymentMode.fromInt(command.integerValueOfParameterNamed("chargePaymentMode"));
 
         final boolean penalty = command.booleanPrimitiveValueOfParameterNamed("penalty");
         final boolean active = command.booleanPrimitiveValueOfParameterNamed("active");
 
-        return new Charge(name, amount, currencyCode, chargeAppliesTo, chargeTimeType, chargeCalculationType, penalty, active);
+        return new Charge(name, amount, currencyCode, chargeAppliesTo, chargeTimeType, chargeCalculationType, penalty, active, paymentMode);
     }
 
     protected Charge() {
@@ -78,7 +82,8 @@ public class Charge extends AbstractPersistable<Long> {
     }
 
     private Charge(final String name, final BigDecimal amount, final String currencyCode, final ChargeAppliesTo chargeAppliesTo,
-            final ChargeTimeType chargeTime, final ChargeCalculationType chargeCalculationType, final boolean penalty, final boolean active) {
+            final ChargeTimeType chargeTime, final ChargeCalculationType chargeCalculationType, final boolean penalty, final boolean active,
+            final ChargePaymentMode paymentMode) {
         this.name = name;
         this.amount = amount;
         this.currencyCode = currencyCode;
@@ -87,6 +92,7 @@ public class Charge extends AbstractPersistable<Long> {
         this.chargeCalculation = chargeCalculationType.getValue();
         this.penalty = penalty;
         this.active = active;
+        this.chargePaymentMode = paymentMode.getValue();
         if (penalty && chargeTime.isTimeOfDisbursement()) { throw new ChargeDueAtDisbursementCannotBePenaltyException(name); }
     }
 
@@ -191,6 +197,15 @@ public class Charge extends AbstractPersistable<Long> {
             actualChanges.put("locale", localeAsInput);
             this.chargeCalculation = ChargeCalculationType.fromInt(newValue).getValue();
         }
+        
+        final String paymentModeParamName = "chargePaymentMode";
+        if (command.isChangeInIntegerParameterNamed(paymentModeParamName, this.chargePaymentMode)) {
+            final Integer newValue = command.integerValueOfParameterNamed(paymentModeParamName);
+            actualChanges.put(paymentModeParamName, newValue);
+            actualChanges.put("locale", localeAsInput);
+            this.chargePaymentMode = ChargePaymentMode.fromInt(newValue).getValue();
+        }
+
 
         final String penaltyParamName = "penalty";
         if (command.isChangeInBooleanParameterNamed(penaltyParamName, this.penalty)) {
@@ -228,9 +243,14 @@ public class Charge extends AbstractPersistable<Long> {
         EnumOptionData chargeTimeType = ChargeEnumerations.chargeTimeType(this.chargeTime);
         EnumOptionData chargeAppliesTo = ChargeEnumerations.chargeAppliesTo(this.chargeAppliesTo);
         EnumOptionData chargeCalculationType = ChargeEnumerations.chargeCalculationType(this.chargeCalculation);
-
+        EnumOptionData chargePaymentmode = ChargeEnumerations.chargePaymentMode(this.chargePaymentMode);
         CurrencyData currency = new CurrencyData(this.currencyCode, null, 0, 0, null, null);
         return ChargeData.instance(this.getId(), this.name, this.amount, currency, chargeTimeType, chargeAppliesTo, chargeCalculationType,
-                penalty, active);
+                chargePaymentmode, penalty, active);
+    }
+
+    
+    public Integer getChargePaymentMode() {
+        return this.chargePaymentMode;
     }
 }

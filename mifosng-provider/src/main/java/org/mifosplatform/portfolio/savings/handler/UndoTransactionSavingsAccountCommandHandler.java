@@ -27,6 +27,6 @@ public class UndoTransactionSavingsAccountCommandHandler implements NewCommandSo
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
         final Long transactionId = Long.valueOf(command.getTransactionId());
-        return this.writePlatformService.undoTransaction(command.getSavingsId(), transactionId);
+        return this.writePlatformService.undoTransaction(command.getSavingsId(), transactionId, false);
     }
 }

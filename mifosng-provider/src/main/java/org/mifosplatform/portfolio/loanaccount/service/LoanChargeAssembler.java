@@ -14,6 +14,7 @@ import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.portfolio.charge.domain.Charge;
 import org.mifosplatform.portfolio.charge.domain.ChargeCalculationType;
+import org.mifosplatform.portfolio.charge.domain.ChargePaymentMode;
 import org.mifosplatform.portfolio.charge.domain.ChargeRepositoryWrapper;
 import org.mifosplatform.portfolio.charge.domain.ChargeTimeType;
 import org.mifosplatform.portfolio.charge.exception.LoanChargeNotFoundException;
@@ -65,19 +66,23 @@ public class LoanChargeAssembler {
                             locale);
                     final LocalDate dueDate = fromApiJsonHelper.extractLocalDateNamed("dueDate", loanChargeElement,
                             dateFormat, locale);
-
+                    final Integer chargePaymentMode = fromApiJsonHelper.extractIntegerNamed("chargePaymentMode", loanChargeElement, locale);
                     if (id == null) {
                         final Charge chargeDefinition = this.chargeRepository.findOneWithNotFoundDetection(chargeId);
                         ChargeTimeType chargeTime = null;
                         if (chargeTimeType != null) {
-                            ChargeTimeType.fromInt(chargeTimeType);
+                            chargeTime = ChargeTimeType.fromInt(chargeTimeType);
                         }
                         ChargeCalculationType chargeCalculation = null;
                         if (chargeCalculationType != null) {
-                            ChargeCalculationType.fromInt(chargeCalculationType);
+                            chargeCalculation = ChargeCalculationType.fromInt(chargeCalculationType);
+                        }
+                        ChargePaymentMode chargePaymentModeEnum = null;
+                        if(chargePaymentMode != null){
+                            chargePaymentModeEnum = ChargePaymentMode.fromInt(chargePaymentMode);
                         }
                         final LoanCharge loanCharge = LoanCharge.createNewWithoutLoan(chargeDefinition, principal, amount, chargeTime,
-                                chargeCalculation, dueDate);
+                                chargeCalculation, dueDate, chargePaymentModeEnum);
                         loanCharges.add(loanCharge);
                     } else {
                         final Long loanChargeId = id;

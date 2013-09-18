@@ -103,4 +103,8 @@ public class PortfolioAccountData {
     public BigDecimal getAmtForTransfer() {
         return this.amtForTransfer;
     }
+    
+    public Long accountId(){
+        return this.id;
+    }
 }

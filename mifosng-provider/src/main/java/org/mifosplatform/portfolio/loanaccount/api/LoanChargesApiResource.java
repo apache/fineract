@@ -124,11 +124,19 @@ public class LoanChargesApiResource {
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String addLoanCharge(@PathParam("loanId") final Long loanId, final String apiRequestBodyAsJson) {
+    public String executeLoanCharge(@PathParam("loanId") final Long loanId, @QueryParam("command") final String commandParam,
+            final String apiRequestBodyAsJson) {
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder().createLoanCharge(loanId).withJson(apiRequestBodyAsJson).build();
-
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        CommandProcessingResult result = null;
+        if (is(commandParam, "pay")) {
+            final CommandWrapper commandRequest = new CommandWrapperBuilder().payLoanCharge(loanId, null).withJson(apiRequestBodyAsJson)
+                    .build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        } else {
+            final CommandWrapper commandRequest = new CommandWrapperBuilder().createLoanCharge(loanId).withJson(apiRequestBodyAsJson)
+                    .build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        }
 
         return this.toApiJsonSerializer.serialize(result);
     }
@@ -152,21 +160,22 @@ public class LoanChargesApiResource {
     @Path("{chargeId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String waiveLoanCharge(@PathParam("loanId") final Long loanId, @PathParam("chargeId") final Long loanChargeId,
-            @QueryParam("command") final String commandParam) {
+    public String executeLoanCharge(@PathParam("loanId") final Long loanId, @PathParam("chargeId") final Long loanChargeId,
+            @QueryParam("command") final String commandParam, final String apiRequestBodyAsJson) {
 
-        String json = "";
+        final CommandWrapperBuilder builder = new CommandWrapperBuilder().withJson(apiRequestBodyAsJson);
+        CommandProcessingResult result = null;
         if (is(commandParam, "waive")) {
-            final CommandWrapper commandRequest = new CommandWrapperBuilder().waiveLoanCharge(loanId, loanChargeId).build();
-
-            final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-
-            json = this.toApiJsonSerializer.serialize(result);
+            final CommandWrapper commandRequest = builder.waiveLoanCharge(loanId, loanChargeId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        } else if (is(commandParam, "pay")) {
+            final CommandWrapper commandRequest = builder.payLoanCharge(loanId, loanChargeId).build();
+            result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         } else {
             throw new UnrecognizedQueryParamException("command", commandParam);
         }
-
-        return json;
+        if (result == null) { throw new UnrecognizedQueryParamException("command", commandParam); }
+        return this.toApiJsonSerializer.serialize(result);
     }
 
     @DELETE

@@ -25,6 +25,7 @@ import org.mifosplatform.organisation.staff.exception.StaffRoleException;
 import org.mifosplatform.organisation.workingdays.domain.WorkingDays;
 import org.mifosplatform.organisation.workingdays.domain.WorkingDaysRepositoryWrapper;
 import org.mifosplatform.portfolio.accountdetails.service.AccountEnumerations;
+import org.mifosplatform.portfolio.charge.domain.ChargePaymentMode;
 import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.client.domain.ClientRepositoryWrapper;
 import org.mifosplatform.portfolio.client.exception.ClientNotActiveException;
@@ -55,6 +56,7 @@ import org.mifosplatform.portfolio.loanproduct.domain.LoanProduct;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanProductRelatedDetail;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanProductRepository;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanTransactionProcessingStrategy;
+import org.mifosplatform.portfolio.loanproduct.exception.LinkedAccountRequiredException;
 import org.mifosplatform.portfolio.loanproduct.exception.InvalidCurrencyException;
 import org.mifosplatform.portfolio.loanproduct.exception.LoanProductNotFoundException;
 import org.mifosplatform.useradministration.domain.AppUser;
@@ -157,6 +159,13 @@ public class LoanAssembler {
             if (!loanProduct.hasCurrencyCodeOf(loanCharge.currencyCode())) {
                 final String errorMessage = "Charge and Loan must have the same currency.";
                 throw new InvalidCurrencyException("loanCharge", "attach.to.loan", errorMessage);
+            }
+            if(loanCharge.getChargePaymentMode().isPaymentModeAccountTransfer()){
+                final Long savingsAccountId = this.fromApiJsonHelper.extractLongNamed("linkAccountId", element);
+                if(savingsAccountId == null){
+                    final String errorMessage = "one of the charges requires linked savings account for payment";
+                    throw new LinkedAccountRequiredException("loanCharge", errorMessage);
+                }
             }
         }
 

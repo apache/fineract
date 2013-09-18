@@ -71,7 +71,16 @@ public class InterestPrincipalPenaltyFeesOrderLoanRepaymentScheduleTransactionPr
             transactionAmountRemaining = transactionAmountRemaining.minus(interestPortion);
 
             loanTransaction.updateComponents(principalPortion, interestPortion, feeChargesPortion, penaltyChargesPortion);
-        } else {
+        } else if(loanTransaction.isChargePayment()){
+            if(loanTransaction.isPenaltyPayment()){
+                penaltyChargesPortion = currentInstallment.payPenaltyChargesComponent(transactionDate, transactionAmountRemaining);
+                transactionAmountRemaining = transactionAmountRemaining.minus(penaltyChargesPortion);
+            }else{
+                feeChargesPortion = currentInstallment.payFeeChargesComponent(transactionDate, transactionAmountRemaining);
+                transactionAmountRemaining = transactionAmountRemaining.minus(feeChargesPortion);
+            }
+            loanTransaction.updateComponents(principalPortion, interestPortion, feeChargesPortion, penaltyChargesPortion);
+        }else {
             interestPortion = currentInstallment.payInterestComponent(transactionDate, transactionAmountRemaining);
             transactionAmountRemaining = transactionAmountRemaining.minus(interestPortion);
 

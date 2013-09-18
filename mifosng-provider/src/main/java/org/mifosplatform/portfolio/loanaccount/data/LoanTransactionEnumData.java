@@ -29,6 +29,8 @@ public class LoanTransactionEnumData {
     private final boolean approveTransfer;
     private final boolean withdrawTransfer;
     private final boolean rejectTransfer;
+    private final boolean chargePayment;
+    private final boolean refund;
 
     public LoanTransactionEnumData(final Long id, final String code, final String value) {
         this.id = id;
@@ -48,6 +50,8 @@ public class LoanTransactionEnumData {
         this.approveTransfer = Long.valueOf(13).equals(this.id);
         this.withdrawTransfer = Long.valueOf(14).equals(this.id);
         this.rejectTransfer = Long.valueOf(15).equals(this.id);
+        this.refund = Long.valueOf(16).equals(this.id);
+        this.chargePayment = Long.valueOf(17).equals(this.id);
     }
 
     public Long id() {
@@ -115,6 +119,16 @@ public class LoanTransactionEnumData {
 
     public boolean isRejectTransfer() {
         return this.rejectTransfer;
+    }
+
+    
+    public boolean isChargePayment() {
+        return this.chargePayment;
+    }
+
+    
+    public boolean isRefund() {
+        return this.refund;
     }
 
 }
