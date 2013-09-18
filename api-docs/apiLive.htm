@@ -2263,7 +2263,7 @@ Request Body:
 	<a id="clients_accept_transfer" name="clients_accept_transfer" class="old-syle-anchor">&nbsp;</a>
 	<div class="method-section">
 	    <div class="method-description">
-	        <h4>Reject a Client Transfer</h4>
+	        <h4>Accept a Client Transfer</h4>
 	        <p>Allows the Destination Branch to accept the <a href="#clients_propose_transfer">proposed</a> Client Transfer.</p>
 	        <p>The destination branch may also choose to link this client to a group (in which case, any existing active JLG loan of the client is rescheduled to match the meeting frequency of the group) and loan Officer at the time of accepting
 	        the transfer</p>
@@ -8933,190 +8933,190 @@ DELETE loanproducts/5/productmix
 			<!-- end of loan products mix api docs -->
 
 		<!-- start of holidays api docs -->
-			<a id="holidays" name="holidays" class="old-syle-anchor">&nbsp;</a>
-			<div class="method-section">
-				<div class="method-description">
-					<h3>Holidays</h3>
-						<p>Some MFI's span large regions where different branch offices might observe different holidays. They need the ability to define holidays for specific branch offices and be able to set the repayment rule to follow during those holidays.
-						</p>
-						<p>
-							The reschedule of repayments to repaymentsRescheduledTo date durign defined holidays is turned on/off by enabling/disabling reschedule-repayments-on-holidays in <a href="#configs_global">Global configurations</a>.
-						</p>
-						<p> Allow Repayment transactions on a defined holidays is turned on/off by enabling/disabling allow-transactions-on-holiday in <a href="#configs_global">Global configurations</a>.
-						</p>
-					<table class=matrixHeading>
-						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Field Descriptions</div></td>
-						</tr>
-						<tr class=alt>
-							<td>name</td>
-						</tr>
-						<tr>
-							<td class=fielddesc>Name of the holiday.
-							</td>
-						</tr>
-						<tr class=alt>
-							<td>fromDate</td>
-						</tr>
-						<tr>
-							<td class=fielddesc>The date on holiday begins.
-							</td>
-						</tr>
-						<tr class=alt>
-							<td>toDate</td>
-						</tr>
-						<tr>
-							<td class=fielddesc>The date on holiday ends.
-							</td>
-						</tr>
-						<tr class=alt>
-							<td>repaymentsRescheduledTo</td>
-						</tr>
-						<tr>
-							<td class=fielddesc>Date to which repayments will be rescheduled when repayments date falls on a defined holiday. e.g. A holiday is defined on 25th of October 2013 with repaymentsRescheduledTo date to 26th of October 2013 and any loans with repayments date on 25th of October 2013 will be rescheduled to 26th of October 2013.
-							</td>
-						</tr>
-						<tr class=alt>
-							<td>officeId</td>
-						</tr>
-						<tr>
-							<td class=fielddesc>The officeId represents the office to which holiday is applied.
-							</td>
-						</tr>
-					</table>
-				</div>
+		<a id="holidays" name="holidays" class="old-syle-anchor">&nbsp;</a>
+		<div class="method-section">
+			<div class="method-description">
+				<h3>Holidays</h3>
+					<p>Some MFI's span large regions where different branch offices might observe different holidays. They need the ability to define holidays for specific branch offices and be able to set the repayment rule to follow during those holidays.
+					</p>
+					<p>
+						The reschedule of repayments to <b>repaymentsRescheduledTo</b> date during defined holidays is turned on/off by enabling/disabling <i>reschedule-repayments-on-holidays</i> in <a href="#configs_global">Global configurations</a>.
+					</p>
+					<p> Allow Repayment transactions on a defined holidays is turned on/off by enabling/disabling allow-transactions-on-holiday in <a href="#configs_global">Global configurations</a>.
+					</p>
+				<table class=matrixHeading>
+					<tr class="matrixHeadingBG">
+						<td><div class="mifosXHeading2">Field Descriptions</div></td>
+					</tr>
+					<tr class=alt>
+						<td>name</td>
+					</tr>
+					<tr>
+						<td class=fielddesc>Name of the holiday.
+						</td>
+					</tr>
+					<tr class=alt>
+						<td>fromDate</td>
+					</tr>
+					<tr>
+						<td class=fielddesc>The date on holiday begins.
+						</td>
+					</tr>
+					<tr class=alt>
+						<td>toDate</td>
+					</tr>
+					<tr>
+						<td class=fielddesc>The date on holiday ends.
+						</td>
+					</tr>
+					<tr class=alt>
+						<td>repaymentsRescheduledTo</td>
+					</tr>
+					<tr>
+						<td class=fielddesc>Date to which repayments will be rescheduled when repayments date falls on a defined holiday. e.g. A holiday is defined on 25th of October 2013 with repaymentsRescheduledTo date to 26th of October 2013 and any loans with repayments date on 25th of October 2013 will be rescheduled to 26th of October 2013.
+						</td>
+					</tr>
+					<tr class=alt>
+						<td>officeId</td>
+					</tr>
+					<tr>
+						<td class=fielddesc>The officeId represents the office to which holiday is applied.
+						</td>
+					</tr>
+				</table>
 			</div>
+		</div>
 
-			<a id="holidays_list" name="holidays_list" class="old-syle-anchor">&nbsp;</a>
-			<div class="method-section">
-				<div class="method-description">
-					<h4>List Holidays</h4>
-					<p>Example Requests:</p>
-					<div class=apiClick>holidays?officeId=1</div>
-					<br>
-					<br>
-				</div>
-				<div class="method-example">
-					<code class="method-declaration">
+		<a id="holidays_list" name="holidays_list" class="old-syle-anchor">&nbsp;</a>
+		<div class="method-section">
+			<div class="method-description">
+				<h4>List Holidays</h4>
+				<p>Example Requests:</p>
+				<div class=apiClick>holidays?officeId=1</div>
+				<br>
+				<br>
+			</div>
+			<div class="method-example">
+				<code class="method-declaration">
 GET https://DomainName/api/v1/holidays?officeId=1
-					</code>
-					<code class="method-response">
+				</code>
+				<code class="method-response">
 [
-	{
-	    "id": 1,
-	    "name": "Good Friday",
-	    "fromDate": [
-	      2013,
-	      10,
-	      25
-	    ],
-	    "toDate": [
-	      2013,
-	      10,
-	      25
-	    ],
-	    "repaymentsScheduleTo": [
-	      2013,
-	      10,
-	      26
-	    ]
-	}
+{
+    "id": 1,
+    "name": "Good Friday",
+    "fromDate": [
+      2013,
+      10,
+      25
+    ],
+    "toDate": [
+      2013,
+      10,
+      25
+    ],
+    "repaymentsScheduleTo": [
+      2013,
+      10,
+      26
+    ]
+}
 ]
-					</code>
-				</div>
+				</code>
 			</div>
+		</div>
 
-			<a id="holidays_create" name="offices_create" class="old-syle-anchor">&nbsp;</a>
-			<div class="method-section">
-				<div class="method-description">
-					<h4>Create a Holiday</h4>
-					<table class=matrixHeading>
-						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Mandatory Fields</div></td>
-						</tr>
-						<tr class=alt>
-							<td>name, fromDate, toDate, repaymentsRescheduledTo, offices</td>
-						</tr>
-					</table>
-				</div>
-				<div class="method-example">
-					<code class="method-declaration">
+		<a id="holidays_create" name="offices_create" class="old-syle-anchor">&nbsp;</a>
+		<div class="method-section">
+			<div class="method-description">
+				<h4>Create a Holiday</h4>
+				<table class=matrixHeading>
+					<tr class="matrixHeadingBG">
+						<td><div class="mifosXHeading2">Mandatory Fields</div></td>
+					</tr>
+					<tr class=alt>
+						<td>name, fromDate, toDate, repaymentsRescheduledTo, offices</td>
+					</tr>
+				</table>
+			</div>
+			<div class="method-example">
+				<code class="method-declaration">
 POST https://DomainName/api/v1/holidays
-					</code>
-					<code class="method-request">
+				</code>
+				<code class="method-request">
 POST holidays
 Content-Type: application/json 
 Request Body: 
 {
-    "name": "Good Friday",
-    "dateFormat": "dd MMMM yyyy",
-    "locale": "en",
-    "fromDate": "25 October 2013",
-    "toDate": "25 October 2013",
-    "repaymentsRescheduledTo": "26 October 2013",
-    "offices": [
-    	"officeId":"1",
-    	"officeId":"2"
-    ]
+"name": "Good Friday",
+"dateFormat": "dd MMMM yyyy",
+"locale": "en",
+"fromDate": "25 October 2013",
+"toDate": "25 October 2013",
+"repaymentsRescheduledTo": "26 October 2013",
+"offices": [
+	"officeId":"1",
+	"officeId":"2"
+]
 }
-					</code>
-					<code class="method-response">
+				</code>
+				<code class="method-response">
 {
-    "resourceId": 1
+"resourceId": 1
 }
-					</code>
-				</div>
+				</code>
 			</div>
-			<!-- end of holidays api docs -->
+		</div>
+		<!-- end of holidays api docs -->
 
 <!-- start of workingdays api docs -->
-			<a id="workingdays" name="workingdays" class="old-syle-anchor">&nbsp;</a>
-			<div class="method-section">
-				<div class="method-description">
-					<h3>Working days</h3>
-						<p>The days of the week that are workdays.
-						</p>
-						<p>
-							Rescheduling of repayments when it falls on a non-working is turned on /off by enable/disable reschedule-future-repayments parameter in <a href="#configs_global">Global configurations</a>.							
-						</p>
-						<p>
-							Allow transactions on non-working days is configurable by enabling/disbaling the allow-transactions-on-non_workingday parameter in <a href="#configs_global">Global configurations</a>.							
-						</p>
-					<table id="nw_repayment_schedule_rule" class=matrixHeading>
-						<tr class="matrixHeadingBG">
-							<td><div class="mifosXHeading2">Schedule for repayments on non-working day</div></td>
-						</tr>
-						<tr class=alt>
-							<td>Same day</td>
-						</tr>
-						<tr>
-							<td class=fielddesc>The repayments schedule for same day regardless of it's a non-working day.
-							</td>
-						</tr>
-						<tr class=alt>
-							<td>Next workday</td>
-						</tr>
-						<tr>
-							<td class=fielddesc>The repayments reschedule to next working day. e.g. if a repayment falls on a non-working day will be rescheduled to next available working day.
-							</td>
-						</tr>
-						<tr class=alt>
-							<td>Previous workday</td>
-						</tr>
-						<tr>
-							<td class=fielddesc>The repayments reschedule to previous working day. e.g. if a repayment falls on a non-working day will be rescheduled to previous available working day.
-							</td>
-						</tr>
-						<tr class=alt>
-							<td>Next scheduled meeting</td>
-						</tr>
-						<tr>
-							<td class=fielddesc>The repayments reschduled to next scheduled meeting.
-							</td>
-						</tr>
-					</table>
-				</div>
+		<a id="workingdays" name="workingdays" class="old-syle-anchor">&nbsp;</a>
+		<div class="method-section">
+			<div class="method-description">
+				<h3>Working days</h3>
+					<p>The days of the week that are workdays.
+					</p>
+					<p>
+						Rescheduling of repayments when it falls on a non-working is turned on /off by enable/disable reschedule-future-repayments parameter in <a href="#configs_global">Global configurations</a>.							
+					</p>
+					<p>
+						Allow transactions on non-working days is configurable by enabling/disbaling the allow-transactions-on-non_workingday parameter in <a href="#configs_global">Global configurations</a>.							
+					</p>
+				<table id="nw_repayment_schedule_rule" class=matrixHeading>
+					<tr class="matrixHeadingBG">
+						<td><div class="mifosXHeading2">Schedule for repayments on non-working day</div></td>
+					</tr>
+					<tr class=alt>
+						<td>Same day</td>
+					</tr>
+					<tr>
+						<td class=fielddesc>The repayments schedule for same day regardless of it's a non-working day.
+						</td>
+					</tr>
+					<tr class=alt>
+						<td>Next workday</td>
+					</tr>
+					<tr>
+						<td class=fielddesc>The repayments reschedule to next working day. e.g. if a repayment falls on a non-working day will be rescheduled to next available working day.
+						</td>
+					</tr>
+					<tr class=alt>
+						<td>Previous workday</td>
+					</tr>
+					<tr>
+						<td class=fielddesc>The repayments reschedule to previous working day. e.g. if a repayment falls on a non-working day will be rescheduled to previous available working day.
+						</td>
+					</tr>
+					<tr class=alt>
+						<td>Next scheduled meeting</td>
+					</tr>
+					<tr>
+						<td class=fielddesc>The repayments reschduled to next scheduled meeting.
+						</td>
+					</tr>
+				</table>
 			</div>
+		</div>
 
 			<!-- end of workingdays api docs -->			
 
