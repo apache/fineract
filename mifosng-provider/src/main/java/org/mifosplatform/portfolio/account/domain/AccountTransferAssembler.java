@@ -23,6 +23,7 @@ import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.organisation.monetary.domain.Money;
 import org.mifosplatform.organisation.office.domain.Office;
 import org.mifosplatform.organisation.office.domain.OfficeRepository;
+import org.mifosplatform.portfolio.account.data.AccountTransferDTO;
 import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.client.domain.ClientRepositoryWrapper;
 import org.mifosplatform.portfolio.loanaccount.domain.Loan;
@@ -137,6 +138,20 @@ public class AccountTransferAssembler {
 
         return AccountTransfer.LoanTosavingsTransfer(fromOffice, fromClient, fromLoanAccount, toOffice, toClient, toSavingsAccount,
                 deposit, loanRefundTransaction, transactionDate, transactionMonetaryAmount, description);
+    }
+
+    public AccountTransfer assembleSavingsToLoanTransfer(final AccountTransferDTO accountTransferDTO,
+            final SavingsAccount fromSavingsAccount, final Loan toLoanAccount, final SavingsAccountTransaction savingsAccountTransaction,
+            final LoanTransaction loanTransaction) {
+        final Office fromOffice = fromSavingsAccount.office();
+        final Client fromClient = fromSavingsAccount.getClient();
+        final Office toOffice = toLoanAccount.getOffice();
+        final Client toClient = toLoanAccount.client();
+
+        final Money transactionMonetaryAmount = Money.of(fromSavingsAccount.getCurrency(), accountTransferDTO.getTransactionAmount());
+        return AccountTransfer.savingsToLoanTransfer(fromOffice, fromClient, fromSavingsAccount, toOffice, toClient, toLoanAccount,
+                savingsAccountTransaction, loanTransaction, accountTransferDTO.getTransactionDate(), transactionMonetaryAmount,
+                accountTransferDTO.getDescription());
     }
 
 }

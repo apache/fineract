@@ -108,6 +108,12 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
             final LocalDate paymentDate, final String externalId) {
         return new LoanTransaction(null, office, LoanTransactionType.REPAYMENT, paymentDetail, amount.getAmount(), paymentDate, externalId);
     }
+    
+    public static LoanTransaction loanPayment(final Loan loan ,final Office office, final Money amount, final PaymentDetail paymentDetail,
+            final LocalDate paymentDate, final String externalId,final LoanTransactionType transactionType){
+        return new LoanTransaction(loan, office, transactionType, paymentDetail, amount.getAmount(), paymentDate,
+                externalId);
+    }
 
     public static LoanTransaction repaymentAtDisbursement(final Office office, final Money amount, final PaymentDetail paymentDetail,
             final LocalDate paymentDate, final String externalId) {
@@ -354,6 +360,21 @@ public final class LoanTransaction extends AbstractPersistable<Long> {
 
     public boolean isNotWaiver() {
         return !isInterestWaiver() && !isChargesWaiver();
+    }
+    
+    public boolean isChargePayment(){
+        return getTypeOf().isChargePayment() && isNotReversed();
+    }
+    
+    public boolean isPenaltyPayment(){
+        boolean isPenalty = false;
+        if(isChargePayment()){
+            for(LoanChargePaidBy chargePaidBy:this.loanChargesPaid){
+                isPenalty = chargePaidBy.getLoanCharge().isPenaltyCharge();
+                break;
+            }
+        }
+        return isPenalty;
     }
 
     public boolean isWriteOff() {

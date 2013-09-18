@@ -11,6 +11,7 @@ import java.util.Map;
 import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
+import org.mifosplatform.infrastructure.jobs.exception.JobExecutionException;
 import org.mifosplatform.organisation.office.domain.Office;
 import org.mifosplatform.organisation.staff.domain.Staff;
 import org.mifosplatform.portfolio.calendar.domain.Calendar;
@@ -66,5 +67,10 @@ public interface LoanWritePlatformService {
     void rejectLoanTransfer(Long accountId);
 
     LoanTransaction acceptLoanTransfer(Long accountId, LocalDate transferDate, Office acceptedInOffice, Staff loanOfficer);
+
+    CommandProcessingResult payLoanCharge(Long loanId, Long loanChargeId, JsonCommand command, boolean isChargeIdIncludedInJson);
+
+    void transferFeeCharges() throws JobExecutionException;
+
 
 }

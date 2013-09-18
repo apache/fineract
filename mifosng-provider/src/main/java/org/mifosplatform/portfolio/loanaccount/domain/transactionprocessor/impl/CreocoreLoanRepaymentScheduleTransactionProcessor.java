@@ -97,7 +97,15 @@ public class CreocoreLoanRepaymentScheduleTransactionProcessor extends AbstractL
         } else if (loanTransaction.isInterestWaiver()) {
             interestPortion = currentInstallment.waiveInterestComponent(transactionDate, transactionAmountRemaining);
             transactionAmountRemaining = transactionAmountRemaining.minus(interestPortion);
-        } else {
+        } else if(loanTransaction.isChargePayment()){
+            if(loanTransaction.isPenaltyPayment()){
+                penaltyChargesPortion = currentInstallment.payPenaltyChargesComponent(transactionDate, transactionAmountRemaining);
+                transactionAmountRemaining = transactionAmountRemaining.minus(penaltyChargesPortion);
+            }else{
+                feeChargesPortion = currentInstallment.payFeeChargesComponent(transactionDate, transactionAmountRemaining);
+                transactionAmountRemaining = transactionAmountRemaining.minus(feeChargesPortion);
+            }
+        }else {
             penaltyChargesPortion = currentInstallment.payPenaltyChargesComponent(transactionDate, transactionAmountRemaining);
             transactionAmountRemaining = transactionAmountRemaining.minus(penaltyChargesPortion);
 

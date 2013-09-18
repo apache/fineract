@@ -35,7 +35,7 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
      */
     private final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("name", "amount", "locale", "currencyCode",
             "currencyOptions", "chargeAppliesTo", "chargeTimeType", "chargeCalculationType", "chargeCalculationTypeOptions", "penalty",
-            "active"));
+            "active","chargePaymentMode"));
 
     private final FromJsonHelper fromApiJsonHelper;
 
@@ -72,6 +72,9 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
 
         final Integer chargeCalculationType = fromApiJsonHelper.extractIntegerNamed("chargeCalculationType", element, Locale.getDefault());
         baseDataValidator.reset().parameter("chargeCalculationType").value(chargeCalculationType).notNull().inMinMaxRange(1, 4);
+
+        final Integer chargePaymentMode = fromApiJsonHelper.extractIntegerNamed("chargePaymentMode", element, Locale.getDefault());
+        baseDataValidator.reset().parameter("chargePaymentMode").value(chargePaymentMode).notNull().inMinMaxRange(0, 1);
 
         if (fromApiJsonHelper.parameterExists("penalty", element)) {
             final Boolean penalty = fromApiJsonHelper.extractBooleanNamed("penalty", element);
@@ -125,6 +128,11 @@ public final class ChargeDefinitionCommandFromApiJsonDeserializer {
             final Integer chargeCalculationType = fromApiJsonHelper.extractIntegerNamed("chargeCalculationType", element,
                     Locale.getDefault());
             baseDataValidator.reset().parameter("chargeCalculationType").value(chargeCalculationType).notNull().inMinMaxRange(1, 4);
+        }
+        
+        if (fromApiJsonHelper.parameterExists("chargePaymentMode", element)) {
+            final Integer chargePaymentMode = fromApiJsonHelper.extractIntegerNamed("chargePaymentMode", element, Locale.getDefault());
+            baseDataValidator.reset().parameter("chargePaymentMode").value(chargePaymentMode).notNull().inMinMaxRange(0, 1);
         }
 
         if (fromApiJsonHelper.parameterExists("penalty", element)) {

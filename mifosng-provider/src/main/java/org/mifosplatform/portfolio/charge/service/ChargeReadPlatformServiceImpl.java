@@ -81,9 +81,10 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
         final List<EnumOptionData> allowedChargeCalculationTypeOptions = this.chargeDropdownReadPlatformService.retrieveCalculationTypes();
         final List<EnumOptionData> allowedChargeAppliesToOptions = this.chargeDropdownReadPlatformService.retrieveApplicableToTypes();
         final List<EnumOptionData> allowedChargeTimeOptions = this.chargeDropdownReadPlatformService.retrieveCollectionTimeTypes();
+        final List<EnumOptionData> chargePaymentOptions = this.chargeDropdownReadPlatformService.retrivePaymentModes();
 
         return ChargeData.template(currencyOptions, allowedChargeCalculationTypeOptions, allowedChargeAppliesToOptions,
-                allowedChargeTimeOptions);
+                allowedChargeTimeOptions, chargePaymentOptions);
     }
 
     @Override
@@ -130,6 +131,7 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
         public String chargeSchema() {
             return "c.id as id, c.name as name, c.amount as amount, c.currency_code as currencyCode, "
                     + "c.charge_applies_to_enum as chargeAppliesTo, c.charge_time_enum as chargeTime, "
+                    +"c.charge_payment_mode_enum as chargePaymentMode, "
                     + "c.charge_calculation_enum as chargeCalculation, c.is_penalty as penalty, c.is_active as active, oc.name as currencyName, "
                     + "oc.decimal_places as currencyDecimalPlaces,oc.currency_multiplesof as inMultiplesOf, oc.display_symbol as currencyDisplaySymbol, "
                     + "oc.internationalized_name_code as currencyNameCode from m_charge c "
@@ -164,11 +166,16 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
 
             final int chargeCalculation = rs.getInt("chargeCalculation");
             final EnumOptionData chargeCalculationType = ChargeEnumerations.chargeCalculationType(chargeCalculation);
+
+            final int paymentMode = rs.getInt("chargePaymentMode");
+            final EnumOptionData chargePaymentMode = ChargeEnumerations.chargePaymentMode(paymentMode);
+
+            
             final boolean penalty = rs.getBoolean("penalty");
             final boolean active = rs.getBoolean("active");
 
-            return ChargeData.instance(id, name, amount, currency, chargeTimeType, chargeAppliesToType, chargeCalculationType, penalty,
-                    active);
+            return ChargeData.instance(id, name, amount, currency, chargeTimeType, chargeAppliesToType, chargeCalculationType, chargePaymentMode,
+                    penalty, active);
         }
     }
 

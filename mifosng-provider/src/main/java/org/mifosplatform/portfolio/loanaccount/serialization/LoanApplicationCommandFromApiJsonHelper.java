@@ -23,7 +23,9 @@ import org.mifosplatform.infrastructure.core.exception.InvalidJsonException;
 import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.portfolio.accountdetails.domain.AccountType;
+import org.mifosplatform.portfolio.loanaccount.domain.Loan;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanProduct;
+import org.mifosplatform.portfolio.savings.domain.SavingsAccount;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -48,7 +50,8 @@ public final class LoanApplicationCommandFromApiJsonHelper {
             "loanPurposeId", "inArrearsTolerance", "charges", "collateral", // optional
             "transactionProcessingStrategyId", // settings
             "calendarId", // optional
-            "syncDisbursementWithMeeting"//optional
+            "syncDisbursementWithMeeting",//optional
+            "linkAccountId"
     ));
 
     private final FromJsonHelper fromApiJsonHelper;
@@ -233,6 +236,14 @@ public final class LoanApplicationCommandFromApiJsonHelper {
                 element);
         baseDataValidator.reset().parameter(transactionProcessingStrategyIdParameterName).value(transactionProcessingStrategyId).notNull()
                 .integerGreaterThanZero();
+        
+        final String linkAccountIdParameterName = "linkAccountId";
+        if (fromApiJsonHelper.parameterExists(submittedOnNoteParameterName, element)) {
+            final Long linkAccountId = fromApiJsonHelper.extractLongNamed(linkAccountIdParameterName, element);
+            baseDataValidator.reset().parameter(linkAccountIdParameterName).value(linkAccountId).ignoreIfNull()
+                    .longGreaterThanZero();
+        }
+        
 
         // charges
         final String chargesParameterName = "charges";
@@ -533,6 +544,14 @@ public final class LoanApplicationCommandFromApiJsonHelper {
             baseDataValidator.reset().parameter(submittedOnNoteParameterName).value(submittedOnNote).ignoreIfNull()
                     .notExceedingLengthOf(500);
         }
+        
+        final String linkAccountIdParameterName = "linkAccountId";
+        if (fromApiJsonHelper.parameterExists(submittedOnNoteParameterName, element)) {
+            atLeastOneParameterPassedForUpdate = true;
+            final Long linkAccountId = fromApiJsonHelper.extractLongNamed(linkAccountIdParameterName, element);
+            baseDataValidator.reset().parameter(linkAccountIdParameterName).value(linkAccountId).ignoreIfNull()
+                    .longGreaterThanZero();
+        }
 
         // charges
         final String chargesParameterName = "charges";
@@ -677,5 +696,25 @@ public final class LoanApplicationCommandFromApiJsonHelper {
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
                 "Validation errors exist.", dataValidationErrors); }
     }
+    
+    public void validatelinkedSavingsAccount(final SavingsAccount savingsAccount,final Loan loanApplication) {
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        if(savingsAccount.isNotActive()){
+            ApiParameterError error = ApiParameterError.parameterError(
+                    "validation.msg.loan.linked.savings.account.is.not.active",
+                    "Linked Savings account with id:"+savingsAccount.getId()+ " is not in active state", "linkAccountId",
+                    savingsAccount.getId());
+            dataValidationErrors.add(error);
+        }else if(loanApplication.getClientId() != savingsAccount.clientId()){
+            ApiParameterError error = ApiParameterError.parameterError(
+                    "validation.msg.loan.linked.savings.account.not.belongs.to.same.client",
+                    "Linked Savings account with id:"+savingsAccount.getId()+ " is not belongs to the same client", "linkAccountId",
+                    savingsAccount.getId());
+            dataValidationErrors.add(error);
+        }
+       if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
+                "Validation errors exist.", dataValidationErrors); }
+    }
+
 
 }

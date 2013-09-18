@@ -51,7 +51,8 @@ public class CashBasedAccountingProcessorForLoan implements AccountingProcessorF
              * Repayments and Repayments at disbursement
              ***/
             else if (loanTransactionDTO.getTransactionType().isRepayment()
-                    || loanTransactionDTO.getTransactionType().isRepaymentAtDisbursement()) {
+                    || loanTransactionDTO.getTransactionType().isRepaymentAtDisbursement() 
+                    || loanTransactionDTO.getTransactionType().isChargePayment()) {
                 createJournalEntriesForRepayments(loanDTO, loanTransactionDTO, office);
             }
             /***

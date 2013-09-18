@@ -8,10 +8,15 @@ package org.mifosplatform.portfolio.account.service;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.portfolio.account.PortfolioAccountType;
+import org.mifosplatform.portfolio.account.data.AccountTransferDTO;
 
 public interface AccountTransfersWritePlatformService {
 
     CommandProcessingResult create(JsonCommand command);
 
-    void reverseTransfers(Long accountNumber, PortfolioAccountType accountTypeId);
+    void reverseTransfersWithFromAccountType(Long accountNumber, PortfolioAccountType accountTypeId);
+
+    Long transferFunds(AccountTransferDTO accountTransferDTO);
+
+    void reverseAllTransactions(Long accountId, PortfolioAccountType accountTypeId);
 }

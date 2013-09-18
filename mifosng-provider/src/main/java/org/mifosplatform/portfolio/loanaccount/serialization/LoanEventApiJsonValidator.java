@@ -50,8 +50,8 @@ public final class LoanEventApiJsonValidator {
 
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
-        final Set<String> disbursementParameters = new HashSet<String>(Arrays.asList("actualDisbursementDate", "externalId", "note", "locale",
-                "dateFormat", "paymentTypeId", "accountNumber", "checkNumber", "routingCode", "receiptNumber", "bankNumber"));
+        final Set<String> disbursementParameters = new HashSet<String>(Arrays.asList("actualDisbursementDate", "externalId", "note",
+                "locale", "dateFormat", "paymentTypeId", "accountNumber", "checkNumber", "routingCode", "receiptNumber", "bankNumber"));
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, disbursementParameters);
@@ -70,7 +70,7 @@ public final class LoanEventApiJsonValidator {
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
-    
+
     public void validateDisbursementDateWithMeetingDate(final LocalDate actualDisbursementDate, final CalendarInstance calendarInstance) {
         if (null != calendarInstance) {
             Calendar calendar = calendarInstance.getCalendar();
@@ -79,21 +79,21 @@ public final class LoanEventApiJsonValidator {
                 if (!CalendarUtils.isValidRedurringDate(calendar.getRecurrence(), calendar.getStartDateLocalDate(), actualDisbursementDate)) {
                     final String errorMessage = "Expected disbursement date '" + actualDisbursementDate.toString()
                             + "' does not fall on a meeting date.";
-                    throw new NotValidRecurringDateException("loan.actual.disbursement.date", errorMessage, actualDisbursementDate.toString(),
-                            calendar.getTitle());
+                    throw new NotValidRecurringDateException("loan.actual.disbursement.date", errorMessage,
+                            actualDisbursementDate.toString(), calendar.getTitle());
                 }
 
             }
         }
     }
 
-
     public void validateTransaction(final String json) {
 
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
-        final Set<String> transactionParameters = new HashSet<String>(Arrays.asList("transactionDate", "transactionAmount", "externalId", "note",
-                "locale", "dateFormat", "paymentTypeId", "accountNumber", "checkNumber", "routingCode", "receiptNumber", "bankNumber"));
+        final Set<String> transactionParameters = new HashSet<String>(Arrays.asList("transactionDate", "transactionAmount", "externalId",
+                "note", "locale", "dateFormat", "paymentTypeId", "accountNumber", "checkNumber", "routingCode", "receiptNumber",
+                "bankNumber"));
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, transactionParameters);
@@ -119,8 +119,9 @@ public final class LoanEventApiJsonValidator {
 
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
-        final Set<String> transactionParameters = new HashSet<String>(Arrays.asList("transactionDate", "transactionAmount", "externalId", "note",
-                "locale", "dateFormat", "paymentTypeId", "accountNumber", "checkNumber", "routingCode", "receiptNumber", "bankNumber"));
+        final Set<String> transactionParameters = new HashSet<String>(Arrays.asList("transactionDate", "transactionAmount", "externalId",
+                "note", "locale", "dateFormat", "paymentTypeId", "accountNumber", "checkNumber", "routingCode", "receiptNumber",
+                "bankNumber"));
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, transactionParameters);
@@ -148,8 +149,7 @@ public final class LoanEventApiJsonValidator {
             if (calendar != null && repaymentDate != null) {
                 // Disbursement date should fall on a meeting date
                 if (!CalendarUtils.isValidRedurringDate(calendar.getRecurrence(), calendar.getStartDateLocalDate(), repaymentDate)) {
-                    final String errorMessage = "Transaction date '" + repaymentDate.toString()
-                            + "' does not fall on a meeting date.";
+                    final String errorMessage = "Transaction date '" + repaymentDate.toString() + "' does not fall on a meeting date.";
                     throw new NotValidRecurringDateException("loan.transaction.date", errorMessage, repaymentDate.toString(),
                             calendar.getTitle());
                 }
@@ -157,7 +157,7 @@ public final class LoanEventApiJsonValidator {
             }
         }
     }
-    
+
     private void validatePaymentDetails(final DataValidatorBuilder baseDataValidator, final JsonElement element) {
         // Validate all string payment detail fields for max length
         final Integer paymentTypeId = fromApiJsonHelper.extractIntegerWithLocaleNamed("paymentTypeId", element);
@@ -260,20 +260,20 @@ public final class LoanEventApiJsonValidator {
 
         final String assignmentDateStr = this.fromApiJsonHelper.extractStringNamed("assignmentDate", element);
         baseDataValidator.reset().parameter("assignmentDate").value(assignmentDateStr).notBlank();
-        
-        if(!StringUtils.isBlank(assignmentDateStr)){
+
+        if (!StringUtils.isBlank(assignmentDateStr)) {
             final LocalDate assignmentDate = this.fromApiJsonHelper.extractLocalDateNamed("assignmentDate", element);
             baseDataValidator.reset().parameter("assignmentDate").value(assignmentDate).notNull();
         }
-        
+
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
-    
+
     public void validateForBulkLoanReassignment(final String json) {
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
-        final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("assignmentDate", "fromLoanOfficerId",
-                "toLoanOfficerId", "loans", "locale", "dateFormat"));
+        final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("assignmentDate", "fromLoanOfficerId", "toLoanOfficerId",
+                "loans", "locale", "dateFormat"));
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
         this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, supportedParameters);
@@ -294,4 +294,32 @@ public final class LoanEventApiJsonValidator {
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
+
+    public void validateChargePaymentTransaction(final String json,boolean isChargeIdIncluded) {
+
+        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+        Set<String> transactionParameters = null;
+        if(isChargeIdIncluded){
+            transactionParameters = new HashSet<String>(Arrays.asList("transactionDate", "locale", "dateFormat","chargeId"));
+        }else{
+            transactionParameters = new HashSet<String>(Arrays.asList("transactionDate", "locale", "dateFormat"));
+        }
+
+        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+        fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, transactionParameters);
+
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors)
+                .resource("loan.charge.payment.transaction");
+
+        final JsonElement element = fromApiJsonHelper.parse(json);
+        final LocalDate transactionDate = fromApiJsonHelper.extractLocalDateNamed("transactionDate", element);
+        if(isChargeIdIncluded){
+            final Long chargeId = fromApiJsonHelper.extractLongNamed("chargeId", element);
+            baseDataValidator.reset().parameter("chargeId").value(chargeId).notNull().integerGreaterThanZero();
+        }
+        baseDataValidator.reset().parameter("transactionDate").value(transactionDate).notNull();
+        throwExceptionIfValidationWarningsExist(dataValidationErrors);
+    }
+
 }

@@ -13,11 +13,14 @@ import org.mifosplatform.portfolio.paymentdetail.domain.PaymentDetail;
 
 public interface LoanAccountDomainService {
 
-    LoanTransaction makeRepayment(Long accountId, CommandProcessingResultBuilder builderResult, LocalDate transactionDate,
+    LoanTransaction makeRepayment(Loan loan, CommandProcessingResultBuilder builderResult, LocalDate transactionDate,
             BigDecimal transactionAmount, PaymentDetail paymentDetail, String noteText, String txnExternalId);
     
     LoanTransaction makeRefund(Long accountId, CommandProcessingResultBuilder builderResult, LocalDate transactionDate,
             BigDecimal transactionAmount, PaymentDetail paymentDetail, String noteText, String txnExternalId);
      
     void reverseTransfer(LoanTransaction loanTransaction);
+
+    LoanTransaction makeChargePayment(Loan loan, Long chargeId, LocalDate transactionDate, BigDecimal transactionAmount,
+            PaymentDetail paymentDetail, String noteText, String txnExternalId, Integer transactionType);
 }

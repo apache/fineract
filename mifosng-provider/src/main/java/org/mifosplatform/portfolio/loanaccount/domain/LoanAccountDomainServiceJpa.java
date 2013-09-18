@@ -70,11 +70,10 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
 
     @Transactional
     @Override
-    public LoanTransaction makeRepayment(final Long accountId, final CommandProcessingResultBuilder builderResult,
+    public LoanTransaction makeRepayment(final Loan loan, final CommandProcessingResultBuilder builderResult,
             final LocalDate transactionDate, final BigDecimal transactionAmount, final PaymentDetail paymentDetail, final String noteText,
             final String txnExternalId) {
 
-        final Loan loan = this.loanAccountAssembler.assembleFrom(accountId);
         checkClientOrGroupActive(loan);
 
         // TODO: Is it required to validate transaction date with meeting dates
@@ -135,6 +134,45 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
                 .withGroupId(loan.getGroupId()); //
 
         return newRepaymentTransaction;
+    }
+
+    @Override
+    @Transactional
+    public LoanTransaction makeChargePayment(final Loan loan, final Long chargeId, final LocalDate transactionDate,
+            final BigDecimal transactionAmount, final PaymentDetail paymentDetail, final String noteText, final String txnExternalId,
+            final Integer transactionType) {
+
+        checkClientOrGroupActive(loan);
+
+        final List<Long> existingTransactionIds = new ArrayList<Long>();
+        final List<Long> existingReversedTransactionIds = new ArrayList<Long>();
+
+        final Money paymentAmout = Money.of(loan.getCurrency(), transactionAmount);
+        LoanTransactionType loanTransactionType = LoanTransactionType.fromInt(transactionType);
+        
+        final LoanTransaction newPaymentTransaction = LoanTransaction.loanPayment(null, loan.getOffice(), paymentAmout, paymentDetail,
+                transactionDate, txnExternalId, loanTransactionType);
+        final boolean allowTransactionsOnHoliday = this.configurationDomainService.allowTransactionsOnHolidayEnabled();
+        final List<Holiday> holidays = this.holidayRepository
+                .findByOfficeIdAndGreaterThanDate(loan.getOfficeId(), transactionDate.toDate());
+        final WorkingDays workingDays = this.workingDaysRepository.findOne();
+        final boolean allowTransactionsOnNonWorkingDay = this.configurationDomainService.allowTransactionsOnNonWorkingDayEnabled();
+        if(loanTransactionType.isRepaymentAtDisbursement()){
+            loan.handlePayDisbursementTransaction(chargeId, newPaymentTransaction);
+        }else{
+        loan.makeChargePayment(chargeId, defaultLoanLifecycleStateMachine(), existingTransactionIds, existingReversedTransactionIds,
+                allowTransactionsOnHoliday, holidays, workingDays, allowTransactionsOnNonWorkingDay, newPaymentTransaction);
+        }
+        this.loanTransactionRepository.save(newPaymentTransaction);
+        this.loanRepository.save(loan);
+
+        if (StringUtils.isNotBlank(noteText)) {
+            final Note note = Note.loanTransactionNote(loan, newPaymentTransaction, noteText);
+            this.noteRepository.save(note);
+        }
+
+        postJournalEntries(loan, existingTransactionIds, existingReversedTransactionIds);
+        return newPaymentTransaction;
     }
 
     private void postJournalEntries(final Loan loanAccount, final List<Long> existingTransactionIds,

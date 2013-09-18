@@ -38,6 +38,7 @@ import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.organisation.office.domain.Office;
 import org.mifosplatform.organisation.staff.domain.Staff;
 import org.mifosplatform.portfolio.account.PortfolioAccountType;
+import org.mifosplatform.portfolio.account.service.AccountAssociationsReadPlatformService;
 import org.mifosplatform.portfolio.account.service.AccountTransfersReadPlatformService;
 import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.client.exception.ClientNotActiveException;
@@ -57,6 +58,7 @@ import org.mifosplatform.portfolio.savings.domain.SavingsAccountRepository;
 import org.mifosplatform.portfolio.savings.domain.SavingsAccountStatusType;
 import org.mifosplatform.portfolio.savings.domain.SavingsAccountTransaction;
 import org.mifosplatform.portfolio.savings.domain.SavingsAccountTransactionRepository;
+import org.mifosplatform.portfolio.savings.exception.SavingsAccountClosingNotAllowedException;
 import org.mifosplatform.portfolio.savings.exception.SavingsAccountTransactionNotFoundException;
 import org.mifosplatform.portfolio.savings.exception.TransactionUpdateNotAllowedException;
 import org.mifosplatform.useradministration.domain.AppUser;
@@ -78,6 +80,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
     private final SavingsAccountDomainService savingsAccountDomainService;
     private final NoteRepository noteRepository;
     private final AccountTransfersReadPlatformService accountTransfersReadPlatformService;
+    private final AccountAssociationsReadPlatformService accountAssociationsReadPlatformService;
 
     @Autowired
     public SavingsAccountWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
@@ -89,7 +92,8 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
             final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepositoryWrapper,
             final JournalEntryWritePlatformService journalEntryWritePlatformService,
             final SavingsAccountDomainService savingsAccountDomainService, final NoteRepository noteRepository,
-            final AccountTransfersReadPlatformService accountTransfersReadPlatformService) {
+            final AccountTransfersReadPlatformService accountTransfersReadPlatformService,
+            final AccountAssociationsReadPlatformService accountAssociationsReadPlatformService) {
         this.context = context;
         this.savingAccountRepository = savingAccountRepository;
         this.savingsAccountTransactionRepository = savingsAccountTransactionRepository;
@@ -101,6 +105,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         this.savingsAccountDomainService = savingsAccountDomainService;
         this.noteRepository = noteRepository;
         this.accountTransfersReadPlatformService = accountTransfersReadPlatformService;
+        this.accountAssociationsReadPlatformService = accountAssociationsReadPlatformService;
     }
 
     @Transactional
@@ -299,7 +304,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
     }
 
     @Override
-    public CommandProcessingResult undoTransaction(final Long savingsId, final Long transactionId) {
+    public CommandProcessingResult undoTransaction(final Long savingsId, final Long transactionId, boolean allowAccountTransferModification) {
 
         final List<Long> newTransactionIds = new ArrayList<Long>();
         final List<Long> reversedTransactionIds = new ArrayList<Long>();
@@ -308,7 +313,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
                 transactionId, savingsId);
         if (savingsAccountTransaction == null) { throw new SavingsAccountTransactionNotFoundException(savingsId, transactionId); }
         
-        if(accountTransfersReadPlatformService.isAccountTransfer(transactionId, PortfolioAccountType.SAVINGS)){
+        if(!allowAccountTransferModification && accountTransfersReadPlatformService.isAccountTransfer(transactionId, PortfolioAccountType.SAVINGS)){
             throw new PlatformServiceUnavailableException("error.msg.saving.account.transfer.transaction.update.not.allowed","Savings account transaction:"+transactionId+" update not allowed as it involves in account transfer",transactionId);
         }
 
@@ -451,6 +456,12 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
 
         this.savingsAccountTransactionDataValidator.validateClosing(command);
         final SavingsAccount account = this.savingAccountAssembler.assembleFrom(savingsId);
+        final boolean isLinkedWithAnyActiveLoan = accountAssociationsReadPlatformService.isLinkedWithAnyActiveLoan(savingsId);
+        if(isLinkedWithAnyActiveLoan){
+            String defaultUserMessage = "Closing savings account with id:"+savingsId+" is not allowed, since it is linked with one of the active loans";
+            throw new SavingsAccountClosingNotAllowedException("linked", defaultUserMessage, savingsId);
+        }
+        
         final Map<String, Object> changes = account.close(user, command, DateUtils.getLocalDateOfTenant());
         if (!changes.isEmpty()) {
             this.savingAccountRepository.save(account);

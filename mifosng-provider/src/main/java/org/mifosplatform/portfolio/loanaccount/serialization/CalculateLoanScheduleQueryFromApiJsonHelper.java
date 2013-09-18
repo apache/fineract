@@ -42,7 +42,7 @@ public final class CalculateLoanScheduleQueryFromApiJsonHelper {
             "loanTermFrequencyType", "repaymentFrequencyType", "interestRateFrequencyType", "amortizationType", "interestType",
             "interestCalculationPeriodType", "expectedDisbursementDate", "repaymentsStartingFromDate", "graceOnPrincipalPayment",
             "graceOnInterestPayment", "graceOnInterestCharged", "interestChargedFromDate", "submittedOnDate", "submittedOnNote", "locale",
-            "dateFormat", "charges", "collateral", "syncDisbursementWithMeeting"));
+            "dateFormat", "charges", "collateral", "syncDisbursementWithMeeting","linkAccountId"));
 
     private final FromJsonHelper fromApiJsonHelper;
 

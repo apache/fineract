@@ -8,6 +8,7 @@ package org.mifosplatform.portfolio.charge.service;
 import static org.mifosplatform.portfolio.charge.service.ChargeEnumerations.chargeAppliesTo;
 import static org.mifosplatform.portfolio.charge.service.ChargeEnumerations.chargeCalculationType;
 import static org.mifosplatform.portfolio.charge.service.ChargeEnumerations.chargeTimeType;
+import static org.mifosplatform.portfolio.charge.service.ChargeEnumerations.chargePaymentMode;
 
 import java.util.Arrays;
 import java.util.List;
@@ -15,6 +16,7 @@ import java.util.List;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.portfolio.charge.domain.ChargeAppliesTo;
 import org.mifosplatform.portfolio.charge.domain.ChargeCalculationType;
+import org.mifosplatform.portfolio.charge.domain.ChargePaymentMode;
 import org.mifosplatform.portfolio.charge.domain.ChargeTimeType;
 import org.springframework.stereotype.Service;
 
@@ -39,5 +41,10 @@ public class ChargeDropdownReadPlatformServiceImpl implements ChargeDropdownRead
     @Override
     public List<EnumOptionData> retrieveCollectionTimeTypes() {
         return Arrays.asList(chargeTimeType(ChargeTimeType.DISBURSEMENT), chargeTimeType(ChargeTimeType.SPECIFIED_DUE_DATE));
+    }
+
+    @Override
+    public List<EnumOptionData> retrivePaymentModes() {
+        return Arrays.asList(chargePaymentMode(ChargePaymentMode.REGULAR), chargePaymentMode(ChargePaymentMode.ACCOUNT_TRANSFER));
     }
 }

@@ -17,4 +17,6 @@ public interface LoanChargeReadPlatformService {
     Collection<LoanChargeData> retrieveLoanCharges(Long loanId);
 
     LoanChargeData retrieveLoanChargeDetails(Long loanChargeId, Long loanId);
+
+    Collection<LoanChargeData> retrieveLoanChargesForFeePayment(Integer paymentMode, Integer loanStatus);
 }

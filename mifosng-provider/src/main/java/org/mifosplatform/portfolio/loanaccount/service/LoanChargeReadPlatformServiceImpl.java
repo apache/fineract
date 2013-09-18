@@ -55,6 +55,9 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
                     + "lc.is_penalty as penalty, "
                     + "lc.due_for_collection_as_of_date as dueAsOfDate, "
                     + "lc.charge_calculation_enum as chargeCalculation, "
+                    + "lc.charge_payment_mode_enum as chargePaymentMode, "
+                    + "lc.is_paid_derived as paid, "
+                    + "lc.waived as waied, "
                     + "c.currency_code as currencyCode, oc.name as currencyName, "
                     + "oc.decimal_places as currencyDecimalPlaces, oc.currency_multiplesof as inMultiplesOf, oc.display_symbol as currencyDisplaySymbol, "
                     + "oc.internationalized_name_code as currencyNameCode from m_charge c "
@@ -95,8 +98,14 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
             final EnumOptionData chargeCalculationType = ChargeEnumerations.chargeCalculationType(chargeCalculation);
             final boolean penalty = rs.getBoolean("penalty");
 
+            final int chargePaymentMode = rs.getInt("chargePaymentMode");
+            final EnumOptionData paymentMode = ChargeEnumerations.chargePaymentMode(chargePaymentMode);
+            final boolean paid = rs.getBoolean("paid");
+            final boolean waived = rs.getBoolean("waied");
+
             return new LoanChargeData(id, chargeId, name, currency, amount, amountPaid, amountWaived, amountWrittenOff, amountOutstanding,
-                    chargeTimeType, dueAsOfDate, chargeCalculationType, percentageOf, amountPercentageAppliedTo, penalty);
+                    chargeTimeType, dueAsOfDate, chargeCalculationType, percentageOf, amountPercentageAppliedTo, penalty, paymentMode,
+                    paid, waived, null);
         }
     }
 
@@ -107,7 +116,7 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
         final List<EnumOptionData> allowedChargeCalculationTypeOptions = this.chargeDropdownReadPlatformService.retrieveCalculationTypes();
         final List<EnumOptionData> allowedChargeTimeOptions = this.chargeDropdownReadPlatformService.retrieveCollectionTimeTypes();
 
-        return ChargeData.template(null, allowedChargeCalculationTypeOptions, null, allowedChargeTimeOptions);
+        return ChargeData.template(null, allowedChargeCalculationTypeOptions, null, allowedChargeTimeOptions, null);
     }
 
     @Override
@@ -131,5 +140,33 @@ public class LoanChargeReadPlatformServiceImpl implements LoanChargeReadPlatform
                 + " order by lc.charge_time_enum ASC, lc.due_for_collection_as_of_date ASC, lc.is_penalty ASC";
 
         return this.jdbcTemplate.query(sql, rm, new Object[] { loanId });
+    }
+
+    @Override
+    public Collection<LoanChargeData> retrieveLoanChargesForFeePayment(final Integer paymentMode, final Integer loanStatus) {
+        final LoanChargeMapperWithLoanId rm = new LoanChargeMapperWithLoanId();
+        final String sql = "select " + rm.schema()
+                + "where loan.loan_status_id= ? and lc.charge_payment_mode_enum=? and lc.waived =0 and lc.is_paid_derived=0";
+        return this.jdbcTemplate.query(sql, rm, new Object[] { loanStatus, paymentMode });
+    }
+
+    private static final class LoanChargeMapperWithLoanId implements RowMapper<LoanChargeData> {
+
+        public String schema() {
+            return "lc.id as id, lc.due_for_collection_as_of_date as dueAsOfDate, "
+                    + "lc.amount_outstanding_derived as amountOutstanding, "
+                    + "loan.id as loanId " + "from  m_loan_charge lc "
+                    + "join m_loan loan on loan.id = lc.loan_id ";
+        }
+
+        @Override
+        public LoanChargeData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+
+            final Long id = rs.getLong("id");
+            final LocalDate dueAsOfDate = JdbcSupport.getLocalDate(rs, "dueAsOfDate");
+            final Long loanId = rs.getLong("loanId");
+            final BigDecimal amountOutstanding = rs.getBigDecimal("amountOutstanding");
+            return new LoanChargeData(id, dueAsOfDate, amountOutstanding, loanId);
+        }
     }
 }

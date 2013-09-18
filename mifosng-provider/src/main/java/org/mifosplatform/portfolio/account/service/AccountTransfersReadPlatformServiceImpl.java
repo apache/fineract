@@ -261,7 +261,7 @@ public class AccountTransfersReadPlatformServiceImpl implements AccountTransfers
             sqlBuilder.append("join m_client fromclient on fromclient.id = sat.from_client_id ");
             sqlBuilder.append("join m_client toclient on toclient.id = sat.to_client_id ");
             sqlBuilder.append("left join m_savings_account fromsavacc on fromsavacc.id = sat.from_savings_account_id ");
-            sqlBuilder.append("left join m_savings_account fromloanacc on fromloanacc.id = sat.from_loan_account_id ");
+            sqlBuilder.append("left join m_loan fromloanacc on fromloanacc.id = sat.from_loan_account_id ");
             sqlBuilder.append("left join m_savings_account tosavacc on tosavacc.id = sat.to_savings_account_id ");
             sqlBuilder.append("left join m_loan toloanacc on toloanacc.id = sat.to_loan_account_id ");
             sqlBuilder.append("left join m_savings_account_transaction fromsavtran on fromsavtran.id = sat.from_savings_transaction_id ");

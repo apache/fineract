@@ -501,6 +501,32 @@ public class Loan extends AbstractPersistable<Long> {
         return applyLoanChargeTransaction;
     }
 
+    private void handleChargePaidTransaction(final LoanCharge charge, final LoanTransaction chargesPayment,
+            final LoanLifecycleStateMachine loanLifecycleStateMachine) {
+        chargesPayment.updateLoan(this);
+        this.loanTransactions.add(chargesPayment);
+        final LoanStatus statusEnum = loanLifecycleStateMachine.transition(LoanEvent.LOAN_CHARGE_PAYMENT,
+                LoanStatus.fromInt(this.loanStatus));
+        this.loanStatus = statusEnum.getValue();
+
+        final LoanRepaymentScheduleTransactionProcessor loanRepaymentScheduleTransactionProcessor = this.transactionProcessorFactory
+                .determineProcessor(this.transactionProcessingStrategy);
+        List<LoanRepaymentScheduleInstallment> chargePaymentInstallments = new ArrayList<LoanRepaymentScheduleInstallment>();
+        LocalDate startDate = getDisbursementDate();
+        for (LoanRepaymentScheduleInstallment installment : this.repaymentScheduleInstallments) {
+            if (charge.isDueForCollectionFromAndUpToAndIncluding(startDate, installment.getDueDate())) {
+                chargePaymentInstallments.add(installment);
+                break;
+            }
+            startDate = installment.getDueDate();
+        }
+        Set<LoanCharge> loanCharges = new HashSet<LoanCharge>(1);
+        loanCharges.add(charge);
+        loanRepaymentScheduleTransactionProcessor.handleTransaction(chargesPayment, getCurrency(), chargePaymentInstallments, loanCharges);
+        updateLoanSummaryDerivedFields();
+        doPostLoanTransactionChecks(chargesPayment.getTransactionDate(), loanLifecycleStateMachine);
+    }
+
     private void validateLoanIsNotClosed(final LoanCharge loanCharge) {
         if (isClosed()) {
             final String defaultUserMessage = "This charge cannot be added as the loan is already closed.";
@@ -1420,13 +1446,6 @@ public class Loan extends AbstractPersistable<Long> {
         final Money totalFeeChargesDueAtDisbursement = this.summary.getTotalFeeChargesDueAtDisbursement(loanCurrency());
         if (totalFeeChargesDueAtDisbursement.isGreaterThanZero()) {
 
-            final LoanTransaction chargesPayment = LoanTransaction.repaymentAtDisbursement(this.getOffice(),
-                    totalFeeChargesDueAtDisbursement, null, disbursedOn, txnExternalId);
-            final Money zero = Money.zero(getCurrency());
-            chargesPayment.updateComponents(zero, zero, totalFeeChargesDueAtDisbursement, zero);
-            chargesPayment.updateLoan(this);
-            this.loanTransactions.add(chargesPayment);
-
             /**
              * all Charges repaid at disbursal is marked as repaid and
              * "APPLY Charge" transactions are created for all other fees (
@@ -1434,10 +1453,19 @@ public class Loan extends AbstractPersistable<Long> {
              **/
             for (final LoanCharge charge : setOfLoanCharges()) {
                 if (charge.isDueAtDisbursement()) {
-                    charge.markAsFullyPaid();
-                    // Add "Loan Charge Paid By" details to this transaction
-                    final LoanChargePaidBy loanChargePaidBy = new LoanChargePaidBy(chargesPayment, charge, charge.amount());
-                    chargesPayment.getLoanChargesPaid().add(loanChargePaidBy);
+                    if (!charge.getChargePaymentMode().isPaymentModeAccountTransfer()) {
+                        final LoanTransaction chargesPayment = LoanTransaction.repaymentAtDisbursement(this.getOffice(),
+                                charge.getAmount(getCurrency()), null, disbursedOn, txnExternalId);
+                        final Money zero = Money.zero(getCurrency());
+                        chargesPayment.updateComponents(zero, zero, totalFeeChargesDueAtDisbursement, zero);
+                        chargesPayment.updateLoan(this);
+                        this.loanTransactions.add(chargesPayment);
+
+                        charge.markAsFullyPaid();
+                        // Add "Loan Charge Paid By" details to this transaction
+                        final LoanChargePaidBy loanChargePaidBy = new LoanChargePaidBy(chargesPayment, charge, charge.amount());
+                        chargesPayment.getLoanChargesPaid().add(loanChargePaidBy);
+                    }
                 } else {
                     handleChargeAppliedTransaction(charge, disbursedOn);
                 }
@@ -1460,6 +1488,24 @@ public class Loan extends AbstractPersistable<Long> {
         }
 
         return disbursementTransaction;
+    }
+
+    public LoanTransaction handlePayDisbursementTransaction(final Long chargeId, final LoanTransaction chargesPayment) {
+        LoanCharge charge = null;
+        for (LoanCharge loanCharge : this.charges) {
+            if (chargeId.equals(loanCharge.getId())) {
+                charge = loanCharge;
+            }
+        }
+        @SuppressWarnings("null")
+        final LoanChargePaidBy loanChargePaidBy = new LoanChargePaidBy(chargesPayment, charge, charge.amount());
+        chargesPayment.getLoanChargesPaid().add(loanChargePaidBy);
+        final Money zero = Money.zero(getCurrency());
+        chargesPayment.updateComponents(zero, zero, charge.getAmount(getCurrency()), zero);
+        chargesPayment.updateLoan(this);
+        this.loanTransactions.add(chargesPayment);
+        charge.markAsFullyPaid();
+        return chargesPayment;
     }
 
     public Map<String, Object> undoDisbursal(final List<Long> existingTransactionIds, final List<Long> existingReversedTransactionIds) {
@@ -1547,6 +1593,31 @@ public class Loan extends AbstractPersistable<Long> {
         return changedTransactionDetail;
     }
 
+    public void makeChargePayment(final Long chargeId, final LoanLifecycleStateMachine loanLifecycleStateMachine,
+            final List<Long> existingTransactionIds, final List<Long> existingReversedTransactionIds,
+            final boolean allowTransactionsOnHoliday, final List<Holiday> holidays, final WorkingDays workingDays,
+            final boolean allowTransactionsOnNonWorkingDay, LoanTransaction paymentTransaction) {
+
+        validateActivityNotBeforeClientOrGroupTransferDate(LoanEvent.LOAN_CHARGE_PAYMENT, paymentTransaction.getTransactionDate());
+        validateRepaymentDateIsOnHoliday(paymentTransaction.getTransactionDate(), allowTransactionsOnHoliday, holidays);
+        validateRepaymentDateIsOnNonWorkingDay(paymentTransaction.getTransactionDate(), workingDays, allowTransactionsOnNonWorkingDay);
+
+        if (paymentTransaction.getTransactionDate().isAfter(new LocalDate())) {
+            final String errorMessage = "The date on which a loan charge paid cannot be in the future.";
+            throw new InvalidLoanStateTransitionException("charge.payment", "cannot.be.a.future.date", errorMessage,
+                    paymentTransaction.getTransactionDate());
+        }
+        existingTransactionIds.addAll(findExistingTransactionIds());
+        existingReversedTransactionIds.addAll(findExistingReversedTransactionIds());
+        LoanCharge charge = null;
+        for (LoanCharge loanCharge : this.charges) {
+            if (chargeId.equals(loanCharge.getId())) {
+                charge = loanCharge;
+            }
+        }
+        handleChargePaidTransaction(charge, paymentTransaction, loanLifecycleStateMachine);
+    }
+
     public void makeRefund(final LoanTransaction loanTransaction, final LoanLifecycleStateMachine loanLifecycleStateMachine,
             final List<Long> existingTransactionIds, final List<Long> existingReversedTransactionIds,
             final boolean allowTransactionsOnHoliday, final List<Holiday> holidays, final WorkingDays workingDays,
@@ -1571,16 +1642,13 @@ public class Loan extends AbstractPersistable<Long> {
             final String errorMessage = "Transfer funds is allowed only for loan accounts with overpaid status ";
             throw new InvalidLoanStateTransitionException("transaction", "is.not.a.overpaid.loan", errorMessage);
         }
-        this.totalOverpaid = this.totalOverpaid.subtract(loanTransaction.getAmount(getCurrency()).getAmount());
-        if (this.totalOverpaid.compareTo(BigDecimal.ZERO) == 0) {
-            handleLoanRepaymentInFull(loanTransaction.getTransactionDate(), loanLifecycleStateMachine);
-        }
         loanTransaction.updateLoan(this);
 
         if (loanTransaction.isNotZero(loanCurrency())) {
             this.loanTransactions.add(loanTransaction);
         }
-
+        updateLoanSummaryDerivedFields();
+        doPostLoanTransactionChecks(loanTransaction.getTransactionDate(), loanLifecycleStateMachine);
     }
 
     private ChangedTransactionDetail handleRepaymentOrWaiverTransaction(final LoanTransaction loanTransaction,
@@ -1676,11 +1744,25 @@ public class Loan extends AbstractPersistable<Long> {
 
     private void handleLoanRepaymentInFull(final LocalDate transactionDate, final LoanLifecycleStateMachine loanLifecycleStateMachine) {
 
-        final LoanStatus statusEnum = loanLifecycleStateMachine.transition(LoanEvent.REPAID_IN_FULL, LoanStatus.fromInt(this.loanStatus));
-        this.loanStatus = statusEnum.getValue();
+        boolean isAllChargesPaid = true;
+        for (LoanCharge loanCharge : this.charges) {
+            if (!(loanCharge.isPaid() || loanCharge.isWaived())) {
+                isAllChargesPaid = false;
+                break;
+            }
+        }
+        if (isAllChargesPaid) {
+            final LoanStatus statusEnum = loanLifecycleStateMachine.transition(LoanEvent.REPAID_IN_FULL,
+                    LoanStatus.fromInt(this.loanStatus));
+            this.loanStatus = statusEnum.getValue();
 
-        this.closedOnDate = transactionDate.toDate();
-        this.actualMaturityDate = transactionDate.toDate();
+            this.closedOnDate = transactionDate.toDate();
+            this.actualMaturityDate = transactionDate.toDate();
+        } else if (LoanStatus.fromInt(this.loanStatus).isOverpaid()) {
+            final LoanStatus statusEnum = loanLifecycleStateMachine.transition(LoanEvent.LOAN_REPAYMENT_OR_WAIVER,
+                    LoanStatus.fromInt(this.loanStatus));
+            this.loanStatus = statusEnum.getValue();
+        }
     }
 
     private void handleLoanOverpayment(final LoanLifecycleStateMachine loanLifecycleStateMachine) {
@@ -2194,7 +2276,7 @@ public class Loan extends AbstractPersistable<Long> {
         Money cumulativePaid = Money.zero(loanCurrency());
 
         for (final LoanTransaction repayment : this.loanTransactions) {
-            if (repayment.isRepayment()) {
+            if (repayment.isRepayment() && !repayment.isReversed()) {
                 cumulativePaid = cumulativePaid.plus(repayment.getAmount(loanCurrency()));
             }
         }
@@ -2731,11 +2813,20 @@ public class Loan extends AbstractPersistable<Long> {
                         action = "close";
                         postfix = "cannot.be.undone.before.client.transfer.date";
                     break;
+                    case LOAN_CHARGE_PAYMENT:
+                        errorMessage = "The date on which a charge payment is made cannot be earlier than client's transfer date to this office";
+                        action = "charge.payment";
+                        postfix = "cannot.be.made.before.client.transfer.date";
+                    break;
                     default:
                     break;
                 }
                 throw new InvalidLoanStateTransitionException(action, postfix, errorMessage, clientOfficeJoiningDate);
             }
         }
+    }
+
+    public Set<LoanCharge> charges() {
+        return this.charges;
     }
 }
