@@ -1452,25 +1452,28 @@ public class Loan extends AbstractPersistable<Long> {
              * "APPLY Charge" transactions are created for all other fees (
              * which are created during disbursal but not repaid)
              **/
+            Money disbursentMoney = Money.zero(getCurrency());
+            final LoanTransaction chargesPayment = LoanTransaction.repaymentAtDisbursement(this.getOffice(),
+                    disbursentMoney, null, disbursedOn, txnExternalId);
             for (final LoanCharge charge : setOfLoanCharges()) {
                 if (charge.isDueAtDisbursement()) {
                     if (totalFeeChargesDueAtDisbursement.isGreaterThanZero() && !charge.getChargePaymentMode().isPaymentModeAccountTransfer()) {
-                        final LoanTransaction chargesPayment = LoanTransaction.repaymentAtDisbursement(this.getOffice(),
-                                charge.getAmount(getCurrency()), null, disbursedOn, txnExternalId);
-                        final Money zero = Money.zero(getCurrency());
-                        chargesPayment.updateComponents(zero, zero, charge.getAmount(getCurrency()), zero);
-                        chargesPayment.updateLoan(this);
-                        this.loanTransactions.add(chargesPayment);
-
                         charge.markAsFullyPaid();
                         // Add "Loan Charge Paid By" details to this transaction
                         final LoanChargePaidBy loanChargePaidBy = new LoanChargePaidBy(chargesPayment, charge, charge.amount());
                         chargesPayment.getLoanChargesPaid().add(loanChargePaidBy);
+                        disbursentMoney = disbursentMoney.plus(charge.amount());
                     }
                 } else {
                     handleChargeAppliedTransaction(charge, disbursedOn);
                 }
-        }
+            }
+            if(disbursentMoney.isGreaterThanZero()){
+                final Money zero = Money.zero(getCurrency());
+                chargesPayment.updateComponentsAndTotal(zero, zero, disbursentMoney, zero);
+                chargesPayment.updateLoan(this);
+                this.loanTransactions.add(chargesPayment);
+            }
 
         if (getApprovedOnDate() != null && disbursedOn.isBefore(getApprovedOnDate())) {
             final String errorMessage = "The date on which a loan is disbursed cannot be before its approval date: "

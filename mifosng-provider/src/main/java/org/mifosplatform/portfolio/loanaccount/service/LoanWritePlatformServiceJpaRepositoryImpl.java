@@ -9,6 +9,8 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -245,17 +247,21 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         }
 
         Set<LoanCharge> loanCharges = loan.charges();
-        final Locale locale = command.extractLocale();
-        final DateTimeFormatter fmt = DateTimeFormat.forPattern(command.dateFormat()).withLocale(locale);
+        Map<Long,BigDecimal> disBuLoanCharges = new HashMap<Long,BigDecimal>();
         for (LoanCharge loanCharge : loanCharges) {
             if (loanCharge.isDueAtDisbursement() && loanCharge.getChargePaymentMode().isPaymentModeAccountTransfer()) {
+                disBuLoanCharges.put(loanCharge.getId(), loanCharge.amount());
+            }
+        }
+        final Locale locale = command.extractLocale();
+        final DateTimeFormatter fmt = DateTimeFormat.forPattern(command.dateFormat()).withLocale(locale);
+        for (Map.Entry<Long, BigDecimal> entrySet: disBuLoanCharges.entrySet()) {
                 PortfolioAccountData savingAccountData = this.accountAssociationsReadPlatformService.retriveLoanAssociation(loanId);
-                AccountTransferDTO accountTransferDTO = new AccountTransferDTO(actualDisbursementDate, loanCharge.amount(),
+                AccountTransferDTO accountTransferDTO = new AccountTransferDTO(actualDisbursementDate, entrySet.getValue(),
                         PortfolioAccountType.SAVINGS, PortfolioAccountType.LOAN, savingAccountData.accountId(), loanId,
                         "Loan Charge Payment", locale, fmt, null, null, LoanTransactionType.REPAYMENT_AT_DISBURSEMENT.getValue(),
-                        loanCharge.getId());
+                        entrySet.getKey());
                 accountTransfersWritePlatformService.transferFunds(accountTransferDTO);
-            }
         }
 
         return new CommandProcessingResultBuilder() //

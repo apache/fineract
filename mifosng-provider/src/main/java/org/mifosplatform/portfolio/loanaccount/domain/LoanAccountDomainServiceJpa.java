@@ -164,7 +164,7 @@ public class LoanAccountDomainServiceJpa implements LoanAccountDomainService {
                 allowTransactionsOnHoliday, holidays, workingDays, allowTransactionsOnNonWorkingDay, newPaymentTransaction);
         }
         this.loanTransactionRepository.save(newPaymentTransaction);
-        this.loanRepository.save(loan);
+        this.loanRepository.saveAndFlush(loan);
 
         if (StringUtils.isNotBlank(noteText)) {
             final Note note = Note.loanTransactionNote(loan, newPaymentTransaction, noteText);
