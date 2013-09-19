@@ -55,7 +55,6 @@ import org.mifosplatform.portfolio.calendar.service.CalendarUtils;
 import org.mifosplatform.portfolio.charge.domain.Charge;
 import org.mifosplatform.portfolio.charge.domain.ChargePaymentMode;
 import org.mifosplatform.portfolio.charge.domain.ChargeRepositoryWrapper;
-import org.mifosplatform.portfolio.charge.exception.ChargeIsNotActiveException;
 import org.mifosplatform.portfolio.charge.exception.LoanChargeCannotBeDeletedException;
 import org.mifosplatform.portfolio.charge.exception.LoanChargeCannotBeDeletedException.LOAN_CHARGE_CANNOT_BE_DELETED_REASON;
 import org.mifosplatform.portfolio.charge.exception.LoanChargeCannotBePayedException;
