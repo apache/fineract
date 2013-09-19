@@ -504,6 +504,9 @@ public class Loan extends AbstractPersistable<Long> {
     private void handleChargePaidTransaction(final LoanCharge charge, final LoanTransaction chargesPayment,
             final LoanLifecycleStateMachine loanLifecycleStateMachine) {
         chargesPayment.updateLoan(this);
+        LoanChargePaidBy loanChargePaidBy = new LoanChargePaidBy(chargesPayment, charge, chargesPayment.getAmount(getCurrency())
+                .getAmount());
+        chargesPayment.getLoanChargesPaid().add(loanChargePaidBy);
         this.loanTransactions.add(chargesPayment);
         final LoanStatus statusEnum = loanLifecycleStateMachine.transition(LoanEvent.LOAN_CHARGE_PAYMENT,
                 LoanStatus.fromInt(this.loanStatus));
@@ -1444,16 +1447,14 @@ public class Loan extends AbstractPersistable<Long> {
          * for repayments at disbursements too?
          ***/
         final Money totalFeeChargesDueAtDisbursement = this.summary.getTotalFeeChargesDueAtDisbursement(loanCurrency());
-        if (totalFeeChargesDueAtDisbursement.isGreaterThanZero()) {
-
-            /**
+                   /**
              * all Charges repaid at disbursal is marked as repaid and
              * "APPLY Charge" transactions are created for all other fees (
              * which are created during disbursal but not repaid)
              **/
             for (final LoanCharge charge : setOfLoanCharges()) {
                 if (charge.isDueAtDisbursement()) {
-                    if (!charge.getChargePaymentMode().isPaymentModeAccountTransfer()) {
+                    if (totalFeeChargesDueAtDisbursement.isGreaterThanZero() && !charge.getChargePaymentMode().isPaymentModeAccountTransfer()) {
                         final LoanTransaction chargesPayment = LoanTransaction.repaymentAtDisbursement(this.getOffice(),
                                 charge.getAmount(getCurrency()), null, disbursedOn, txnExternalId);
                         final Money zero = Money.zero(getCurrency());
@@ -1469,7 +1470,6 @@ public class Loan extends AbstractPersistable<Long> {
                 } else {
                     handleChargeAppliedTransaction(charge, disbursedOn);
                 }
-            }
         }
 
         if (getApprovedOnDate() != null && disbursedOn.isBefore(getApprovedOnDate())) {

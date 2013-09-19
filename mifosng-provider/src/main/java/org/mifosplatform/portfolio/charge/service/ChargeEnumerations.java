@@ -94,11 +94,11 @@ public class ChargeEnumerations {
         switch (type) {
             case ACCOUNT_TRANSFER:
                 optionData = new EnumOptionData(ChargePaymentMode.ACCOUNT_TRANSFER.getValue().longValue(),
-                        ChargePaymentMode.ACCOUNT_TRANSFER.getCode(), ChargePaymentMode.ACCOUNT_TRANSFER.getCode());
+                        ChargePaymentMode.ACCOUNT_TRANSFER.getCode(), "Account transfer");
             break;
             default:
                 optionData = new EnumOptionData(ChargePaymentMode.REGULAR.getValue().longValue(), ChargePaymentMode.REGULAR.getCode(),
-                        ChargePaymentMode.REGULAR.getCode());
+                        "Regular");
             break;
         }
         return optionData;
