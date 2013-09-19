@@ -96,6 +96,7 @@ import org.mifosplatform.portfolio.loanaccount.serialization.LoanUpdateCommandFr
 import org.mifosplatform.portfolio.loanproduct.data.LoanProductData;
 import org.mifosplatform.portfolio.loanproduct.domain.LoanProductRelatedDetail;
 import org.mifosplatform.portfolio.loanproduct.exception.InvalidCurrencyException;
+import org.mifosplatform.portfolio.loanproduct.exception.LinkedAccountRequiredException;
 import org.mifosplatform.portfolio.loanproduct.service.LoanProductReadPlatformService;
 import org.mifosplatform.portfolio.note.domain.Note;
 import org.mifosplatform.portfolio.note.domain.NoteRepository;
@@ -786,6 +787,13 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
             final String errorMessage = "Charge and Loan must have the same currency.";
             throw new InvalidCurrencyException("loanCharge", "attach.to.loan", errorMessage);
         }
+        if(loanCharge.getChargePaymentMode().isPaymentModeAccountTransfer()){
+        PortfolioAccountData portfolioAccountData = this.accountAssociationsReadPlatformService.retriveLoanAssociation(loanId);
+        if(portfolioAccountData == null){
+            final String errorMessage = loanCharge.name()+"Charge  requires linked savings account for payment";
+            throw new LinkedAccountRequiredException("loanCharge.add", errorMessage,loanCharge.name());
+        }
+        }
 
         final List<Long> existingTransactionIds = new ArrayList<Long>();
         final List<Long> existingReversedTransactionIds = new ArrayList<Long>();
@@ -965,6 +973,10 @@ public class LoanWritePlatformServiceJpaRepositoryImpl implements LoanWritePlatf
         final DateTimeFormatter fmt = DateTimeFormat.forPattern(command.dateFormat()).withLocale(locale);
 
         PortfolioAccountData portfolioAccountData = this.accountAssociationsReadPlatformService.retriveLoanAssociation(loanId);
+        if(portfolioAccountData == null){
+            final String errorMessage = "Charge with id:"+loanChargeId+" requires linked savings account for payment";
+            throw new LinkedAccountRequiredException("loanCharge.pay", errorMessage,loanChargeId);
+        }
         AccountTransferDTO accountTransferDTO = new AccountTransferDTO(transactionDate, loanCharge.amountOutstanding(),
                 PortfolioAccountType.SAVINGS, PortfolioAccountType.LOAN, portfolioAccountData.accountId(), loanId, "Loan Charge Payment",
                 locale, fmt, null, null, LoanTransactionType.CHARGE_PAYMENT.getValue(), loanChargeId);

@@ -58,17 +58,4 @@ public class LoanChargePaidBy extends AbstractPersistable<Long> {
     public void setAmount(BigDecimal amount) {
         this.amount = amount;
     }
-    
-    @Override
-    public boolean equals(Object obj) {
-        boolean isEqual = false;
-        LoanChargePaidBy paidBy = (LoanChargePaidBy)obj;
-        if(this.loanTransaction.getId() == paidBy.loanTransaction.getId() 
-                && this.loanCharge.getId() == paidBy.loanCharge.getId()
-                && this.amount == paidBy.amount){
-            isEqual = true;
-        }
-        return isEqual;
-    }
-
 }
