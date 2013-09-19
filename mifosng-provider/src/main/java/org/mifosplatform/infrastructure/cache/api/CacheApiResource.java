@@ -51,7 +51,8 @@ public class CacheApiResource {
     private final RuntimeDelegatingCacheManager cacheService;
 
     @Autowired
-    public CacheApiResource(final PlatformSecurityContext context, @Qualifier("runtimeDelegatingCacheManager") final RuntimeDelegatingCacheManager cacheService,
+    public CacheApiResource(final PlatformSecurityContext context,
+            @Qualifier("runtimeDelegatingCacheManager") final RuntimeDelegatingCacheManager cacheService,
             final DefaultToApiJsonSerializer<CacheData> toApiJsonSerializer, final ApiRequestParameterHelper apiRequestParameterHelper,
             final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
         this.context = context;

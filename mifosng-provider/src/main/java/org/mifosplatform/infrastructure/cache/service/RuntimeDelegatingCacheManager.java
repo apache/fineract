@@ -30,11 +30,12 @@ public class RuntimeDelegatingCacheManager implements CacheManager {
 
     private final EhCacheCacheManager ehcacheCacheManager;
     private final CacheManager noOpCacheManager = new NoOpCacheManager();
-    private CacheManager currentCacheManager = this.noOpCacheManager;
+    private CacheManager currentCacheManager;
 
     @Autowired
     public RuntimeDelegatingCacheManager(final EhCacheCacheManager ehCacheCacheManager) {
         this.ehcacheCacheManager = ehCacheCacheManager;
+        this.currentCacheManager = this.noOpCacheManager;
     }
 
     @Override
@@ -49,19 +50,22 @@ public class RuntimeDelegatingCacheManager implements CacheManager {
 
     public Collection<CacheData> retrieveAll() {
 
-        final boolean ehcacheEnabled = false;
-        final boolean noCacheEnabled = !ehcacheEnabled;
-        final boolean distributedCacheEnabled = false;
+        final boolean noCacheEnabled = this.currentCacheManager instanceof NoOpCacheManager;
+        final boolean ehcacheEnabled = this.currentCacheManager instanceof EhCacheCacheManager;
+
+        // final boolean distributedCacheEnabled = false;
 
         final EnumOptionData noCacheType = CacheEnumerations.cacheType(CacheType.NO_CACHE);
         final EnumOptionData singleNodeCacheType = CacheEnumerations.cacheType(CacheType.SINGLE_NODE);
-        final EnumOptionData multiNodeCacheType = CacheEnumerations.cacheType(CacheType.MULTI_NODE);
+        // final EnumOptionData multiNodeCacheType =
+        // CacheEnumerations.cacheType(CacheType.MULTI_NODE);
 
         final CacheData noCache = CacheData.instance(noCacheType, noCacheEnabled);
         final CacheData singleNodeCache = CacheData.instance(singleNodeCacheType, ehcacheEnabled);
-        final CacheData distributedCache = CacheData.instance(multiNodeCacheType, distributedCacheEnabled);
+        // final CacheData distributedCache =
+        // CacheData.instance(multiNodeCacheType, distributedCacheEnabled);
 
-        final Collection<CacheData> caches = Arrays.asList(noCache, singleNodeCache, distributedCache);
+        final Collection<CacheData> caches = Arrays.asList(noCache, singleNodeCache);
         return caches;
     }
 
@@ -78,15 +82,15 @@ public class RuntimeDelegatingCacheManager implements CacheManager {
             case NO_CACHE:
                 if (!noCacheEnabled) {
                     changes.put(CacheApiConstants.cacheTypeParameter, toCacheType.getValue());
-                    this.currentCacheManager = this.noOpCacheManager;
                 }
+                this.currentCacheManager = this.noOpCacheManager;
             break;
             case SINGLE_NODE:
                 if (!ehcacheEnabled) {
                     changes.put(CacheApiConstants.cacheTypeParameter, toCacheType.getValue());
                     clearEhCache();
-                    this.currentCacheManager = this.ehcacheCacheManager;
                 }
+                this.currentCacheManager = this.ehcacheCacheManager;
             break;
             case MULTI_NODE:
                 if (!distributedCacheEnabled) {
