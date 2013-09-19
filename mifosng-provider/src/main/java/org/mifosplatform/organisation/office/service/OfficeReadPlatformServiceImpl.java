@@ -114,8 +114,8 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
             Integer currencyDigits = JdbcSupport.getInteger(rs, "currencyDigits");
             Integer inMultiplesOf = JdbcSupport.getInteger(rs, "inMultiplesOf");
 
-            CurrencyData currencyData = new CurrencyData(currencyCode, currencyName, currencyDigits, inMultiplesOf,
-                    currencyDisplaySymbol, currencyNameCode);
+            CurrencyData currencyData = new CurrencyData(currencyCode, currencyName, currencyDigits, inMultiplesOf, currencyDisplaySymbol,
+                    currencyNameCode);
 
             BigDecimal transactionAmount = rs.getBigDecimal("transactionAmount");
             String description = rs.getString("description");
@@ -126,12 +126,17 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
     }
 
     @Override
-    public Collection<OfficeData> retrieveAllOffices() {
+    public Collection<OfficeData> retrieveAllOffices(boolean includeAllOffices) {
 
         AppUser currentUser = context.authenticatedUser();
 
         String hierarchy = currentUser.getOffice().getHierarchy();
-        String hierarchySearchString = hierarchy + "%";
+        String hierarchySearchString = null;
+        if (includeAllOffices) {
+            hierarchySearchString = "." + "%";
+        } else {
+            hierarchySearchString = hierarchy + "%";
+        }
 
         OfficeMapper rm = new OfficeMapper();
         String sql = "select " + rm.officeSchema() + "where o.hierarchy like ? order by o.hierarchy";
