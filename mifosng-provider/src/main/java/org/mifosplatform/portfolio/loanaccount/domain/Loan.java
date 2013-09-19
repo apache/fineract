@@ -1458,7 +1458,7 @@ public class Loan extends AbstractPersistable<Long> {
                         final LoanTransaction chargesPayment = LoanTransaction.repaymentAtDisbursement(this.getOffice(),
                                 charge.getAmount(getCurrency()), null, disbursedOn, txnExternalId);
                         final Money zero = Money.zero(getCurrency());
-                        chargesPayment.updateComponents(zero, zero, totalFeeChargesDueAtDisbursement, zero);
+                        chargesPayment.updateComponents(zero, zero, charge.getAmount(getCurrency()), zero);
                         chargesPayment.updateLoan(this);
                         this.loanTransactions.add(chargesPayment);
 
