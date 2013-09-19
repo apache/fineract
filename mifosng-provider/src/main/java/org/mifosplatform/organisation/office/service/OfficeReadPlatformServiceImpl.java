@@ -123,8 +123,8 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
             final Integer currencyDigits = JdbcSupport.getInteger(rs, "currencyDigits");
             final Integer inMultiplesOf = JdbcSupport.getInteger(rs, "inMultiplesOf");
 
-            final CurrencyData currencyData = new CurrencyData(currencyCode, currencyName, currencyDigits, inMultiplesOf, currencyDisplaySymbol,
-                    currencyNameCode);
+            final CurrencyData currencyData = new CurrencyData(currencyCode, currencyName, currencyDigits, inMultiplesOf,
+                    currencyDisplaySymbol, currencyNameCode);
 
             final BigDecimal transactionAmount = rs.getBigDecimal("transactionAmount");
             final String description = rs.getString("description");
@@ -134,15 +134,18 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
         }
     }
 
+    /** TODO: Vishwas This change breaks caching, need to have a relook **/
     @Override
     @Cacheable(value = "offices", key = "T(org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat(#root.target.context.authenticatedUser().getOffice().getHierarchy()+'of')")
-    public Collection<OfficeData> retrieveAllOffices() {
-
+    public Collection<OfficeData> retrieveAllOffices(boolean includeAllOffices) {
         final AppUser currentUser = this.context.authenticatedUser();
-
         final String hierarchy = currentUser.getOffice().getHierarchy();
-        final String hierarchySearchString = hierarchy + "%";
-
+        String hierarchySearchString = null;
+        if (includeAllOffices) {
+            hierarchySearchString = "." + "%";
+        } else {
+            hierarchySearchString = hierarchy + "%";
+        }
         final OfficeMapper rm = new OfficeMapper();
         final String sql = "select " + rm.officeSchema() + "where o.hierarchy like ? order by o.hierarchy";
 
@@ -242,7 +245,7 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
     }
 
     @Override
-    @Cacheable(value = "tenantsById", key="#tenantIdentifier")
+    @Cacheable(value = "tenantsById", key = "#tenantIdentifier")
     public MifosPlatformTenant loadTenantById(final String tenantIdentifier) {
 
         try {

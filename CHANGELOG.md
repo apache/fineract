@@ -5,6 +5,7 @@ See VERSIONING (https://github.com/openMF/mifosx/blob/master/VERSIONING.md) for 
 
 Releases
 ===============
+1. 18 Sep 2013 - 1.9.2.RELEASE
 1. 10 Sep 2013 - 1.9.1.RELEASE
 1. 8 Sep 2013 - 1.9.0.RELEASE
 1. 21 Aug 2013 - 1.8.1.RELEASE
@@ -34,6 +35,22 @@ Releases
 1. 10 April 2013 - 0.11.2.beta
 1. 05 April 2013 - 0.11.1.beta
 1. 05 April 2013 - 0.11.0.beta
+
+1.9.2.RELEASE
+=============
+Bug Release
+
+Platform & API
+
+Bug
+ - [MIFOSX-659] - Not able to transfer Client between Branch offices which were created under same parent office.
+ - [MIFOSX-663] - No API documentation on Holidays or Working Days features
+ - [MIFOSX-671] - "Minimum opening balance" assigned is not displaying as balance in Transaction page after activation of savings account
+ - [MIFOSX-672] - Final installment of FLAT interest loans incorrectly has closing loan balance thats greater than zero.
+
+Improvement
+ - [MIFOSX-669] - Ability to not allow to "close" a client while transfer of client is in progress
+
 
 1.9.1.RELEASE
 =============

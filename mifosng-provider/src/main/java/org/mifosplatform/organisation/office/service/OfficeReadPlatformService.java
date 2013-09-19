@@ -15,7 +15,7 @@ public interface OfficeReadPlatformService {
 
     MifosPlatformTenant loadTenantById(String tenantIdentifier);
 
-    Collection<OfficeData> retrieveAllOffices();
+    Collection<OfficeData> retrieveAllOffices(boolean includeAllOffices);
 
     Collection<OfficeData> retrieveAllOfficesForDropdown();
 

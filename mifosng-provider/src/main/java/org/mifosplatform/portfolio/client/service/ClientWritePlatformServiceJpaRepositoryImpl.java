@@ -344,6 +344,9 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             if (ClientStatus.fromInt(client.getStatus()).isClosed()) {
                 final String errorMessage = "Client is alread closed.";
                 throw new InvalidClientStateTransitionException("close", "is.already.closed", errorMessage);
+            } else if (ClientStatus.fromInt(client.getStatus()).isUnderTransfer()) {
+                final String errorMessage = "Cannot Close a Client under Transfer";
+                throw new InvalidClientStateTransitionException("close", "is.under.transfer", errorMessage);
             }
 
             if (client.isNotPending() && client.getActivationLocalDate().isAfter(closureDate)) {

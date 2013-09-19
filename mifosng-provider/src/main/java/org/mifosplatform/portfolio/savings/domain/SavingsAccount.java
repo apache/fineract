@@ -169,7 +169,7 @@ public class SavingsAccount extends AbstractPersistable<Long> {
     /**
      * The interest period is the span of time at the end of which savings in a
      * client's account earn interest.
-     *
+     * 
      * A value from the {@link SavingsCompoundingInterestPeriodType}
      * enumeration.
      */
@@ -424,11 +424,11 @@ public class SavingsAccount extends AbstractPersistable<Long> {
 
     /**
      * All interest calculation based on END-OF-DAY-BALANCE.
-     *
+     * 
      * Interest calculation is performed on-the-fly over all account
      * transactions.
-     *
-     *
+     * 
+     * 
      * 1. Calculate Interest From Beginning Of Account 1a. determine the
      * 'crediting' periods that exist for this savings acccount 1b. determine
      * the 'compounding' periods that exist within each 'crediting' period
@@ -1682,13 +1682,17 @@ public class SavingsAccount extends AbstractPersistable<Long> {
         // activating account.
         final Money minRequiredOpeningBalance = Money.of(this.currency, this.minRequiredOpeningBalance);
         if (minRequiredOpeningBalance.isGreaterThanZero()) {
-
             final SavingsAccountTransactionDTO transactionDTO = new SavingsAccountTransactionDTO(fmt, activationDate,
                     minRequiredOpeningBalance.getAmount(), existingTransactionIds, existingReversedTransactionIds, null);
-
             deposit(transactionDTO);
 
+            // no openingBalance concept supported yet but probably will to
+            // allow
+            // for migrations.
             final Money openingAccountBalance = Money.zero(this.currency);
+
+            // update existing transactions so derived balance fields are
+            // correct.
             recalculateDailyBalances(openingAccountBalance);
         }
 
