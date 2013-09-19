@@ -458,7 +458,7 @@
 							<tr class="alt">
 								<td></td>
 								<td>loans/{loanId}/charges/{loanChargeId}</td>
-								<td></td>
+								<td><a href="#loans_charges_pay">Pay Loan Charge</a></td>
 								<td><a href="#loans_charges_retrieve">Retrieve a Loan Charge</a></td>
 								<td><a href="#loans_charges_update">Modify a Loan Charge</a></td>
 								<td><a href="#loans_charges_delete">Delete a Loan Charge</a></td>
@@ -4645,6 +4645,12 @@ GET https://DomainName/mifosng-provider/api/v1/groups
 							<td class=fielddesc>The date the <b>loan application</b> was submitted by applicant.</td>
 						</tr>
 						<tr class=alt>
+							<td>linkAccountId</td>
+						</tr>
+						<tr>
+							<td class=fielddesc>The Savings Account id for linking with loan account for payments.</td>
+						</tr>
+						<tr class=alt>
 							<td>amortizationType</td>
 						</tr>
 						<tr>
@@ -5036,6 +5042,18 @@ GET https://DomainName/api/v1/loans/template?templateType=individual&clientId=1&
       "name": "option.Gold",
       "position": 18
     }
+  ],
+  "accountLinkingOptions":[
+  	{
+  		"id":1,
+  		"accountNo":"000000001",
+  		"clientId":1,
+  		"clientName":"pramod nuthakki",
+  		"productId":1,
+  		"productName":"pramod sav",
+  		"fieldOfficerId":0,
+  		"currency":{"code":"USD","name":"US Dollar","decimalPlaces":2,"displaySymbol":"$","nameCode":"currency.USD","displayLabel":"US Dollar ($)"}
+  	}
   ]
 }
 					</code>
@@ -5254,7 +5272,11 @@ GET https://DomainName/api/v1/loans/{loanId}
       2012,
       5,
       10
-    ]
+    ],
+    "linkedAccount":{
+    	"id":1,
+    	"accountNo":"000000001"
+    }
   }
 }
 					</code>
@@ -5446,6 +5468,10 @@ GET https://DomainName/mifosng-provider/api/v1/loans
           6,
           1
         ]
+      },
+      "linkedAccount":{
+    	"id":1,
+    	"accountNo":"000000001"
       },
       "summary": {
         "currency": {
@@ -5675,7 +5701,7 @@ Request Body:
 							<td><div class="mifosXHeading2">Optional Fields</div></td>
 						</tr>
 						<tr class=alt>
-							<td>graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged</td>
+							<td>graceOnPrincipalPayment, graceOnInterestPayment, graceOnInterestCharged,linkAccountId</td>
 						</tr>
 					</table>
 				</div>
@@ -5706,6 +5732,7 @@ Request Body:
     "transactionProcessingStrategyId": 1,
     "expectedDisbursementDate": "10 Jun 2013",
     "submittedOnDate": "10 Jun 2013"
+    "linkAccountId" : "1"
 }
 					</code>
 					<code class="method-response">
@@ -7401,6 +7428,42 @@ Request Body:
 				</div>
 			</div>
 
+            <a id="loans_charges_pay" name="loans_charges_pay"
+				class="old-syle-anchor">&nbsp;</a>
+			<div class="method-section">
+				<div class="method-description">
+					<h4>Pay Loan Charge</h4>
+					<p>Loan Charge will be paid if the loan is linked with a savings account
+					</p>
+				</div>
+				<div class="method-example">
+					<code class="method-declaration">
+POST https://DomainName/api/v1/loans/{loanId}/charges/{chargeId}?command=pay
+					</code>
+					<code class="method-request">
+POST loans/1/charges/12?command=pay
+Content-Type: application/json 
+Request Body: 
+{
+  "dateFormat": "dd MMMM yyyy",
+  "locale": "en",
+  "transactionDate": "19 September 2013"
+}
+					</code>
+					<code class="method-response">
+
+
+    {
+       "officeId": 1,
+       "clientId": 1,
+       "loanId": 6,
+       "savingsId": 1,
+       "resourceId": 12
+    }
+
+					</code>
+				</div>
+			</div>
 			<a id="loans_charges_delete" name="loans_charges_delete" class="old-syle-anchor">&nbsp;</a>
 			<div class="method-section">
 				<div class="method-description">
@@ -11013,7 +11076,20 @@ GET https://DomainName/api/v1/charges/template
            "code": "chargeTimeType.specifiedDueDate",
            "value": "Specified due date"
        }
-   ]
+   ],
+   "chargePaymetModeOptions":
+   [
+   		{
+   			"id":0,
+   			"code":"chargepaymentmode.regular",
+   			"value":"chargepaymentmode.regular"
+   		},
+   		{
+   			"id":1,
+   			"code":"chargepaymentmode.accounttransfer",
+   			"value":"chargepaymentmode.accounttransfer"
+   		}
+   	]
 }
 					</code>
 				</div>
@@ -11042,6 +11118,7 @@ Request Body:
     "amount": "230.56",
     "chargeTimeType": "1",
     "chargeCalculationType": "1",
+    "chargePaymentMode": "1"
     "active": true
 }
 					</code>
@@ -11062,6 +11139,7 @@ Request Body:
   "chargeAppliesTo": "1",
   "chargeTimeType": "2",
   "chargeCalculationType": "2",
+  "chargeCalculationType": "1",
   "active": "true",
   "penalty": "true"
 }
@@ -11116,6 +11194,11 @@ GET https://DomainName/api/v1/charges
             "id": 1,
             "code": "chargeCalculationType.flat",
             "value": "Flat"
+        },
+        "chargePaymentMode":{
+        	"id":1,
+        	"code":"chargepaymentmode.accounttransfer",
+        	"value":"Account transfer"
         }
     }
 ]
@@ -11165,6 +11248,11 @@ GET https://DomainName/api/v1/charges/{chargeId}
         "id": 1,
         "code": "chargeCalculationType.flat",
         "value": "Flat"
+    },
+    "chargePaymentMode":{
+        	"id":1,
+        	"code":"chargepaymentmode.accounttransfer",
+        	"value":"Account transfer"
     }
 }
 					</code>
@@ -19057,7 +19145,7 @@ GET https://DomainName/api/v1/search?query=000000111
 				<tr>
 					<td></td>
 					<td>loans/{loanId}/charges/{loanChargeId}</td>
-					<td></td>
+					<td><a href="#loans_charges_pay">Pay a Loan Charge</a></td>
 					<td><a href="#loans_charges_retrieve">Retrieve a Loan Charge</a></td>
 					<td><a href="#loans_charges_update">Modify a Loan Charge</a></td>
 					<td><a href="#loans_charges_delete">Delete a Loan Charge</a></td>
