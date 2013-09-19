@@ -49,7 +49,7 @@ Bug
  - [MIFOSX-672] - Final installment of FLAT interest loans incorrectly has closing loan balance thats greater than zero.
 
 Improvement
- - [MIFOSX-669] - Ability of Not allow to "close" client while trasfer of client is in progress
+ - [MIFOSX-669] - Ability to not allow to "close" a client while transfer of client is in progress
 
 
 1.9.1.RELEASE
