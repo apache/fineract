@@ -5,6 +5,7 @@ See VERSIONING (https://github.com/openMF/mifosx/blob/master/VERSIONING.md) for 
 
 Releases
 ===============
+1. 19 Sep 2013 - 1.10.0.RELEASE
 1. 18 Sep 2013 - 1.9.2.RELEASE
 1. 10 Sep 2013 - 1.9.1.RELEASE
 1. 8 Sep 2013 - 1.9.0.RELEASE
@@ -35,6 +36,24 @@ Releases
 1. 10 April 2013 - 0.11.2.beta
 1. 05 April 2013 - 0.11.1.beta
 1. 05 April 2013 - 0.11.0.beta
+
+1.10.0.RELEASE
+=============
+Feature Release
+
+This feature release ships a tighter integration between Loans and Savings (ability to pay Loan Charges from Savings) , introduces configurable fees for savings and adds the ability to Transfer clients with active savings accounts across branches along with a couple of bug fixes
+
+Platform & API
+
+New Features & Improvements
+ - [MIFOSX-642] - Allow charges for a loan to be deducted from savings of the client
+ - [MIFOSX-643] - Transfer Clients with Savings accounts between Branches
+ - [MIFOSX-644] - Configurable Fees for savings
+
+Bug 
+ - [MIFOSX-662] - Not able to define "Transfer in Suspense" in cash based accounting for Savings product.
+ - [MIFOSX-674] - Not able to disburse the Client's loan if charges attached to that loan is transfered from Savings account
+
 
 1.9.2.RELEASE
 =============
