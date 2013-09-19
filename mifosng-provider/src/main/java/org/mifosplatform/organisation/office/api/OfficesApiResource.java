@@ -11,12 +11,14 @@ import java.util.HashSet;
 import java.util.Set;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
@@ -53,7 +55,7 @@ public class OfficesApiResource {
     private final OfficeReadPlatformService readPlatformService;
     private final DefaultToApiJsonSerializer<OfficeData> toApiJsonSerializer;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
-     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
+    private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 
     @Autowired
     public OfficesApiResource(final PlatformSecurityContext context, final OfficeReadPlatformService readPlatformService,
@@ -69,11 +71,12 @@ public class OfficesApiResource {
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveOffices(@Context final UriInfo uriInfo) {
+    public String retrieveOffices(@Context final UriInfo uriInfo,
+            @DefaultValue("false") @QueryParam("includeAllOffices") final boolean onlyManualEntries) {
 
         context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
 
-        final Collection<OfficeData> offices = this.readPlatformService.retrieveAllOffices();
+        final Collection<OfficeData> offices = this.readPlatformService.retrieveAllOffices(onlyManualEntries);
 
         final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serialize(settings, offices, RESPONSE_DATA_PARAMETERS);

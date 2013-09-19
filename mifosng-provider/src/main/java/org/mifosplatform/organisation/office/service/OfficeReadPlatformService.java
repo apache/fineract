@@ -12,7 +12,7 @@ import org.mifosplatform.organisation.office.data.OfficeTransactionData;
 
 public interface OfficeReadPlatformService {
 
-    Collection<OfficeData> retrieveAllOffices();
+    Collection<OfficeData> retrieveAllOffices(boolean includeAllOffices);
 
     Collection<OfficeData> retrieveAllOfficesForDropdown();
 
