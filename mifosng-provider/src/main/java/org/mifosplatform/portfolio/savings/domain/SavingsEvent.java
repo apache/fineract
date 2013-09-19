@@ -20,8 +20,9 @@ public enum SavingsEvent {
     SAVINGS_POST_INTEREST("interest.post"), //
     SAVINGS_UNDO_TRANSACTION("transaction.undo"), //
     SAVINGS_ADJUST_TRANSACTION("transaction.adjust"), //
-    SAVINGS_APPLY_FEE("fee.apply"), //
-    SAVINGS_PAY_FEE("fee.pay"), //
+    SAVINGS_APPLY_CHARGE("charge.apply"), //
+    SAVINGS_WAIVE_CHARGE("charge.waive"), //
+    SAVINGS_PAY_CHARGE("charge.pay"), //
     SAVINGS_CLOSE_ACCOUNT("account.close");
 
     private final String value;
