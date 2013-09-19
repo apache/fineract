@@ -6,6 +6,8 @@
 package org.mifosplatform.portfolio.savings.service;
 
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.SAVINGS_ACCOUNT_RESOURCE_NAME;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.amountParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.chargeIdParamName;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
@@ -40,6 +42,8 @@ import org.mifosplatform.organisation.staff.domain.Staff;
 import org.mifosplatform.portfolio.account.PortfolioAccountType;
 import org.mifosplatform.portfolio.account.service.AccountAssociationsReadPlatformService;
 import org.mifosplatform.portfolio.account.service.AccountTransfersReadPlatformService;
+import org.mifosplatform.portfolio.charge.domain.Charge;
+import org.mifosplatform.portfolio.charge.domain.ChargeRepositoryWrapper;
 import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.client.exception.ClientNotActiveException;
 import org.mifosplatform.portfolio.group.domain.Group;
@@ -49,10 +53,13 @@ import org.mifosplatform.portfolio.note.domain.NoteRepository;
 import org.mifosplatform.portfolio.paymentdetail.domain.PaymentDetail;
 import org.mifosplatform.portfolio.paymentdetail.service.PaymentDetailWritePlatformService;
 import org.mifosplatform.portfolio.savings.SavingsApiConstants;
+import org.mifosplatform.portfolio.savings.data.SavingsAccountChargeDataValidator;
 import org.mifosplatform.portfolio.savings.data.SavingsAccountTransactionDTO;
 import org.mifosplatform.portfolio.savings.data.SavingsAccountTransactionDataValidator;
 import org.mifosplatform.portfolio.savings.domain.SavingsAccount;
 import org.mifosplatform.portfolio.savings.domain.SavingsAccountAssembler;
+import org.mifosplatform.portfolio.savings.domain.SavingsAccountCharge;
+import org.mifosplatform.portfolio.savings.domain.SavingsAccountChargeRepositoryWrapper;
 import org.mifosplatform.portfolio.savings.domain.SavingsAccountDomainService;
 import org.mifosplatform.portfolio.savings.domain.SavingsAccountRepository;
 import org.mifosplatform.portfolio.savings.domain.SavingsAccountStatusType;
@@ -74,6 +81,7 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
     private final SavingsAccountTransactionRepository savingsAccountTransactionRepository;
     private final SavingsAccountAssembler savingAccountAssembler;
     private final SavingsAccountTransactionDataValidator savingsAccountTransactionDataValidator;
+    private final SavingsAccountChargeDataValidator savingsAccountChargeDataValidator;
     private final PaymentDetailWritePlatformService paymentDetailWritePlatformService;
     private final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepositoryWrapper;
     private final JournalEntryWritePlatformService journalEntryWritePlatformService;
@@ -81,6 +89,8 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
     private final NoteRepository noteRepository;
     private final AccountTransfersReadPlatformService accountTransfersReadPlatformService;
     private final AccountAssociationsReadPlatformService accountAssociationsReadPlatformService;
+    private final ChargeRepositoryWrapper chargeRepository;
+    private final SavingsAccountChargeRepositoryWrapper savingsAccountChargeRepository;
 
     @Autowired
     public SavingsAccountWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
@@ -88,17 +98,20 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
             final SavingsAccountTransactionRepository savingsAccountTransactionRepository,
             final SavingsAccountAssembler savingAccountAssembler,
             final SavingsAccountTransactionDataValidator savingsAccountTransactionDataValidator,
+            final SavingsAccountChargeDataValidator savingsAccountChargeDataValidator,
             final PaymentDetailWritePlatformService paymentDetailWritePlatformService,
             final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepositoryWrapper,
             final JournalEntryWritePlatformService journalEntryWritePlatformService,
             final SavingsAccountDomainService savingsAccountDomainService, final NoteRepository noteRepository,
             final AccountTransfersReadPlatformService accountTransfersReadPlatformService,
-            final AccountAssociationsReadPlatformService accountAssociationsReadPlatformService) {
+            final AccountAssociationsReadPlatformService accountAssociationsReadPlatformService,
+            final ChargeRepositoryWrapper chargeRepository, final SavingsAccountChargeRepositoryWrapper savingsAccountChargeRepository) {
         this.context = context;
         this.savingAccountRepository = savingAccountRepository;
         this.savingsAccountTransactionRepository = savingsAccountTransactionRepository;
         this.savingAccountAssembler = savingAccountAssembler;
         this.savingsAccountTransactionDataValidator = savingsAccountTransactionDataValidator;
+        this.savingsAccountChargeDataValidator = savingsAccountChargeDataValidator;
         this.paymentDetailWritePlatformService = paymentDetailWritePlatformService;
         this.applicationCurrencyRepositoryWrapper = applicationCurrencyRepositoryWrapper;
         this.journalEntryWritePlatformService = journalEntryWritePlatformService;
@@ -106,6 +119,8 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
         this.noteRepository = noteRepository;
         this.accountTransfersReadPlatformService = accountTransfersReadPlatformService;
         this.accountAssociationsReadPlatformService = accountAssociationsReadPlatformService;
+        this.chargeRepository = chargeRepository;
+        this.savingsAccountChargeRepository = savingsAccountChargeRepository;
     }
 
     @Transactional
@@ -553,4 +568,148 @@ public class SavingsAccountWritePlatformServiceJpaRepositoryImpl implements Savi
 
         return acceptTransferTransaction;
     }
+    
+    @Transactional
+    @Override
+    public CommandProcessingResult addSavingsAccountCharge(final JsonCommand command) {
+
+        this.context.authenticatedUser();
+        final Long savingsAccountId = command.getSavingsId();
+        this.savingsAccountChargeDataValidator.validateAdd(command.json());
+
+        final SavingsAccount savingsAccount = this.savingAccountAssembler.assembleFrom(savingsAccountId);
+        checkClientOrGroupActive(savingsAccount);
+
+        final DateTimeFormatter fmt = DateTimeFormat.forPattern("dd MM yyyy");
+        
+        final Long chargeDefinitionId = command.longValueOfParameterNamed(chargeIdParamName);
+        final Charge chargeDefinition = this.chargeRepository.findOneWithNotFoundDetection(chargeDefinitionId);
+
+        final SavingsAccountCharge savingsAccountCharge = SavingsAccountCharge.createNewFromJson(savingsAccount, chargeDefinition, command);
+
+        savingsAccount.addCharge(fmt, savingsAccountCharge, chargeDefinition);
+        
+        this.savingAccountRepository.saveAndFlush(savingsAccount);
+
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(command.commandId()) //
+                .withEntityId(savingsAccountCharge.getId()) //
+                .withOfficeId(savingsAccount.officeId()) //
+                .withClientId(savingsAccount.clientId()) //
+                .withGroupId(savingsAccount.groupId()) //
+                .withLoanId(savingsAccountId) //
+                .build();
+    }
+
+    @Transactional
+    @Override
+    public CommandProcessingResult updateSavingsAccountCharge(JsonCommand command) {
+        this.context.authenticatedUser();
+
+        this.savingsAccountChargeDataValidator.validateUpdate(command.json());
+        final Long savingsAccountId = command.getSavingsId();
+        final Long savingsChargeId = command.entityId();//SavingsAccount Charge entity
+        
+        final SavingsAccount savingsAccount = this.savingAccountAssembler.assembleFrom(savingsAccountId);
+        checkClientOrGroupActive(savingsAccount);
+        
+        final SavingsAccountCharge savingsAccountCharge = this.savingsAccountChargeRepository.findOneWithNotFoundDetection(savingsChargeId, savingsAccountId);
+        final Map<String, Object> changes = savingsAccountCharge.update(command);
+        this.savingsAccountChargeRepository.saveAndFlush(savingsAccountCharge);
+        //TODO AA: revisit the code
+        /*
+        // Charges may be edited only when the loan associated with them are
+        // yet to be approved (are in submitted and pending status)
+        if (!loan.status().isSubmittedAndPendingApproval()) { throw new LoanChargeCannotBeUpdatedException(
+                LOAN_CHARGE_CANNOT_BE_UPDATED_REASON.LOAN_NOT_IN_SUBMITTED_AND_PENDING_APPROVAL_STAGE, loanCharge.getId()); }
+*/
+
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(command.commandId()) //
+                .withEntityId(savingsChargeId) //
+                //.withOfficeId(savings) //
+                //.withClientId(loan.getClientId()) //
+                //.withGroupId(loan.getGroupId()) //
+                //.withLoanId(savingsAccountId) //
+                .with(changes) //
+                .build();
+    }
+    
+    
+    @Transactional
+    @Override
+    public CommandProcessingResult waiveCharge(Long savingsAccountId, Long savingsAccountChargeId, JsonCommand command) {
+        
+        this.context.authenticatedUser();
+        
+        final List<Long> existingTransactionIds = new ArrayList<Long>();
+        final List<Long> existingReversedTransactionIds = new ArrayList<Long>();
+        
+        final SavingsAccount savingsAccount = this.savingAccountAssembler.assembleFrom(savingsAccountId);
+        checkClientOrGroupActive(savingsAccount);
+
+        savingsAccount.waiveCharge(savingsAccountChargeId, existingTransactionIds, existingReversedTransactionIds);
+        
+        this.savingAccountRepository.saveAndFlush(savingsAccount);
+        
+        return new CommandProcessingResultBuilder() //
+        .withCommandId(command.commandId()) //
+        .withEntityId(savingsAccountChargeId) //
+        .withOfficeId(savingsAccount.officeId()) //
+        .withClientId(savingsAccount.clientId()) //
+        .withGroupId(savingsAccount.groupId()) //
+        .withSavingsId(savingsAccountId) //
+        .build();
+    }
+
+    @Transactional
+    @Override
+    public CommandProcessingResult deleteSavingsAccountCharge(Long savingsAccountId, Long savingsAccountChargeId, JsonCommand command) {
+        this.context.authenticatedUser();
+        
+        final SavingsAccount savingsAccount = this.savingAccountAssembler.assembleFrom(savingsAccountId);
+        checkClientOrGroupActive(savingsAccount);
+        final SavingsAccountCharge savingsAccountCharge = this.savingsAccountChargeRepository.findOneWithNotFoundDetection(savingsAccountChargeId, savingsAccountId);
+
+        //TODO AA: validate before deleting a charge
+        
+        savingsAccount.removeCharge(savingsAccountCharge);
+        this.savingAccountRepository.saveAndFlush(savingsAccount);
+        
+        return new CommandProcessingResultBuilder() //
+        .withEntityId(savingsAccountChargeId) //
+        .withOfficeId(savingsAccount.officeId()) //
+        .withClientId(savingsAccount.clientId()) //
+        .withGroupId(savingsAccount.groupId()) //
+        .withSavingsId(savingsAccountId) //
+        .build();
+    }
+
+    @Transactional
+    @Override
+    public CommandProcessingResult payCharge(Long savingsAccountId, Long savingsAccountChargeId, JsonCommand command) {
+        this.context.authenticatedUser();
+
+        final List<Long> existingTransactionIds = new ArrayList<Long>();
+        final List<Long> existingReversedTransactionIds = new ArrayList<Long>();
+
+        final SavingsAccount savingsAccount = this.savingAccountAssembler.assembleFrom(savingsAccountId);
+        checkClientOrGroupActive(savingsAccount);
+
+        final BigDecimal chargeAmount = command.bigDecimalValueOfParameterNamed(amountParamName);
+        savingsAccount.payCharge(savingsAccountChargeId, chargeAmount, existingTransactionIds, existingReversedTransactionIds);
+
+        this.savingAccountRepository.saveAndFlush(savingsAccount);
+
+        return new CommandProcessingResultBuilder() //
+                .withCommandId(command.commandId()) //
+                .withEntityId(savingsAccountChargeId) //
+                .withOfficeId(savingsAccount.officeId()) //
+                .withClientId(savingsAccount.clientId()) //
+                .withGroupId(savingsAccount.groupId()) //
+                .withSavingsId(savingsAccountId) //
+                .build();
+
+    }
+   
 }

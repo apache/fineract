@@ -41,6 +41,8 @@ import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSeria
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.mifosplatform.organisation.monetary.service.CurrencyReadPlatformService;
+import org.mifosplatform.portfolio.charge.data.ChargeData;
+import org.mifosplatform.portfolio.charge.service.ChargeReadPlatformService;
 import org.mifosplatform.portfolio.paymentdetail.PaymentDetailConstants;
 import org.mifosplatform.portfolio.savings.SavingsApiConstants;
 import org.mifosplatform.portfolio.savings.SavingsCompoundingInterestPeriodType;
@@ -54,6 +56,7 @@ import org.mifosplatform.portfolio.savings.service.SavingsProductReadPlatformSer
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 @Path("/savingsproducts")
 @Component
@@ -70,6 +73,7 @@ public class SavingsProductsApiResource {
     private final AccountingDropdownReadPlatformService accountingDropdownReadPlatformService;
     private final CodeValueReadPlatformService codeValueReadPlatformService;
     private final ProductToGLAccountMappingReadPlatformService accountMappingReadPlatformService;
+    private final ChargeReadPlatformService chargeReadPlatformService;
 
     @Autowired
     public SavingsProductsApiResource(final SavingsProductReadPlatformService savingProductReadPlatformService,
@@ -79,7 +83,8 @@ public class SavingsProductsApiResource {
             final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
             final ApiRequestParameterHelper apiRequestParameterHelper, final CodeValueReadPlatformService codeValueReadPlatformService,
             final AccountingDropdownReadPlatformService accountingDropdownReadPlatformService,
-            final ProductToGLAccountMappingReadPlatformService accountMappingReadPlatformService) {
+            final ProductToGLAccountMappingReadPlatformService accountMappingReadPlatformService,
+            final ChargeReadPlatformService chargeReadPlatformService) {
         this.savingProductReadPlatformService = savingProductReadPlatformService;
         this.dropdownReadPlatformService = dropdownReadPlatformService;
         this.currencyReadPlatformService = currencyReadPlatformService;
@@ -90,6 +95,7 @@ public class SavingsProductsApiResource {
         this.codeValueReadPlatformService = codeValueReadPlatformService;
         this.accountingDropdownReadPlatformService = accountingDropdownReadPlatformService;
         this.accountMappingReadPlatformService = accountMappingReadPlatformService;
+        this.chargeReadPlatformService = chargeReadPlatformService;
     }
 
     @POST
@@ -141,6 +147,10 @@ public class SavingsProductsApiResource {
         context.authenticatedUser().validateHasReadPermission(SavingsApiConstants.SAVINGS_PRODUCT_RESOURCE_NAME);
 
         SavingsProductData savingProductData = this.savingProductReadPlatformService.retrieveOne(productId);
+        
+        final Collection<ChargeData> charges = this.chargeReadPlatformService.retrieveSavingsProductCharges(productId);
+        
+        savingProductData = SavingsProductData.withCharges(savingProductData, charges);
 
         final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 
@@ -220,19 +230,27 @@ public class SavingsProductsApiResource {
                 .retrieveAccountingRuleTypeOptions();
         final Map<String, List<GLAccountData>> accountingMappingOptions = accountingDropdownReadPlatformService
                 .retrieveAccountMappingOptionsForSavingsProducts();
-
+        
+        //charges 
+        final boolean feeChargesOnly = true;
+        Collection<ChargeData> chargeOptions = this.chargeReadPlatformService.retrieveSavingsAccountApplicableCharges(feeChargesOnly);
+        chargeOptions = CollectionUtils.isEmpty(chargeOptions) ? null : chargeOptions;
+        
+        Collection<ChargeData> penaltyOptions = this.chargeReadPlatformService.retrieveSavingsAccountApplicablePenalties();
+        penaltyOptions = CollectionUtils.isEmpty(penaltyOptions) ? null : penaltyOptions;
+        
         SavingsProductData savingsProductToReturn = null;
         if (savingsProduct != null) {
             savingsProductToReturn = SavingsProductData.withTemplate(savingsProduct, currencyOptions, interestCompoundingPeriodTypeOptions,
                     interestPostingPeriodTypeOptions, interestCalculationTypeOptions, interestCalculationDaysInYearTypeOptions,
                     lockinPeriodFrequencyTypeOptions, withdrawalFeeTypeOptions, paymentTypeOptions, accountingRuleOptions,
-                    accountingMappingOptions);
+                    accountingMappingOptions, chargeOptions, penaltyOptions);
         } else {
             savingsProductToReturn = SavingsProductData.template(currency, interestCompoundingPeriodType, interestPostingPeriodType,
                     interestCalculationType, interestCalculationDaysInYearType, accountingRule, currencyOptions,
                     interestCompoundingPeriodTypeOptions, interestPostingPeriodTypeOptions, interestCalculationTypeOptions,
                     interestCalculationDaysInYearTypeOptions, lockinPeriodFrequencyTypeOptions, withdrawalFeeTypeOptions,
-                    paymentTypeOptions, accountingRuleOptions, accountingMappingOptions);
+                    paymentTypeOptions, accountingRuleOptions, accountingMappingOptions, chargeOptions, penaltyOptions);
         }
 
         return savingsProductToReturn;

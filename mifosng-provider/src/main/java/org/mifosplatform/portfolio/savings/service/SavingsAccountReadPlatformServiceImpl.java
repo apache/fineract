@@ -27,6 +27,8 @@ import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.mifosplatform.organisation.staff.data.StaffData;
 import org.mifosplatform.organisation.staff.service.StaffReadPlatformService;
 import org.mifosplatform.portfolio.account.data.AccountTransferData;
+import org.mifosplatform.portfolio.charge.data.ChargeData;
+import org.mifosplatform.portfolio.charge.service.ChargeReadPlatformService;
 import org.mifosplatform.portfolio.client.data.ClientData;
 import org.mifosplatform.portfolio.client.service.ClientReadPlatformService;
 import org.mifosplatform.portfolio.group.data.GroupGeneralData;
@@ -40,6 +42,7 @@ import org.mifosplatform.portfolio.savings.SavingsPeriodFrequencyType;
 import org.mifosplatform.portfolio.savings.SavingsPostingInterestPeriodType;
 import org.mifosplatform.portfolio.savings.data.SavingsAccountAnnualFeeData;
 import org.mifosplatform.portfolio.savings.data.SavingsAccountApplicationTimelineData;
+import org.mifosplatform.portfolio.savings.data.SavingsAccountChargeData;
 import org.mifosplatform.portfolio.savings.data.SavingsAccountData;
 import org.mifosplatform.portfolio.savings.data.SavingsAccountStatusEnumData;
 import org.mifosplatform.portfolio.savings.data.SavingsAccountSummaryData;
@@ -65,6 +68,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
     private final SavingsProductReadPlatformService savingsProductReadPlatformService;
     private final StaffReadPlatformService staffReadPlatformService;
     private final SavingsDropdownReadPlatformService dropdownReadPlatformService;
+    private final ChargeReadPlatformService chargeReadPlatformService;
 
     // mappers
     private final SavingsAccountTransactionTemplateMapper transactionTemplateMapper;
@@ -79,7 +83,8 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
     public SavingsAccountReadPlatformServiceImpl(final PlatformSecurityContext context, final RoutingDataSource dataSource,
             final ClientReadPlatformService clientReadPlatformService, final GroupReadPlatformService groupReadPlatformService,
             final SavingsProductReadPlatformService savingProductReadPlatformService,
-            final StaffReadPlatformService staffReadPlatformService, final SavingsDropdownReadPlatformService dropdownReadPlatformService) {
+            final StaffReadPlatformService staffReadPlatformService, final SavingsDropdownReadPlatformService dropdownReadPlatformService,
+            final ChargeReadPlatformService chargeReadPlatformService) {
         this.context = context;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.clientReadPlatformService = clientReadPlatformService;
@@ -91,6 +96,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
         this.transactionsMapper = new SavingsAccountTransactionsMapper();
         this.savingAccountMapper = new SavingAccountMapper();
         this.annualFeeMapper = new SavingsAccountAnnualFeeMapper();
+        this.chargeReadPlatformService = chargeReadPlatformService;
     }
 
     @Override
@@ -229,7 +235,9 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             sqlBuilder.append("sa.total_annual_fees_derived as totalAnnualFees, ");
             sqlBuilder.append("sa.total_interest_earned_derived as totalInterestEarned, ");
             sqlBuilder.append("sa.total_interest_posted_derived as totalInterestPosted, ");
-            sqlBuilder.append("sa.account_balance_derived as accountBalance ");
+            sqlBuilder.append("sa.account_balance_derived as accountBalance, ");
+            sqlBuilder.append("sa.total_fees_charge_derived as totalFeeCharge, ");
+            sqlBuilder.append("sa.total_penalty_charge_derived as totalPenaltyCharge ");
             sqlBuilder.append("from m_savings_account sa ");
             sqlBuilder.append("join m_savings_product sp ON sa.product_id = sp.id ");
             sqlBuilder.append("join m_currency curr on curr.code = sa.currency_code ");
@@ -372,9 +380,12 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             final BigDecimal totalInterestEarned = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "totalInterestEarned");
             final BigDecimal totalInterestPosted = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "totalInterestPosted");
             final BigDecimal accountBalance = JdbcSupport.getBigDecimalDefaultToZeroIfNull(rs, "accountBalance");
-
+            final BigDecimal totalFeeCharge = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "totalFeeCharge");
+            final BigDecimal totalPenaltyCharge = JdbcSupport.getBigDecimalDefaultToNullIfZero(rs, "totalPenaltyCharge");
+            
             final SavingsAccountSummaryData summary = new SavingsAccountSummaryData(currency, totalDeposits, totalWithdrawals,
-                    totalWithdrawalFees, totalAnnualFees, totalInterestEarned, totalInterestPosted, accountBalance);
+                    totalWithdrawalFees, totalAnnualFees, totalInterestEarned, totalInterestPosted, accountBalance, totalFeeCharge,
+                    totalPenaltyCharge);
 
             return SavingsAccountData.instance(id, accountNo, externalId, groupId, groupName, clientId, clientName, productId, productName,
                     fieldOfficerId, fieldOfficerName, status, timeline, currency, nominalAnnualInterestRate, interestCompoundingPeriodType,
@@ -430,6 +441,12 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             final Collection<EnumOptionData> withdrawalFeeTypeOptions = this.dropdownReadPlatformService.retrievewithdrawalFeeTypeOptions();
 
             final Collection<SavingsAccountTransactionData> transactions = null;
+            final Collection<ChargeData> productCharges = this.chargeReadPlatformService.retrieveSavingsProductCharges(productId);
+            //update charges from Product charges
+            final Collection<SavingsAccountChargeData> charges = fromChargesToSavingsCharges(productCharges);
+            
+            final boolean feeChargesOnly = false;
+            final Collection<ChargeData> chargeOptions = this.chargeReadPlatformService.retrieveSavingsAccountApplicableCharges(feeChargesOnly);
 
             Collection<StaffData> fieldOfficerOptions = null;
 
@@ -459,7 +476,7 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
 
             template = SavingsAccountData.withTemplateOptions(template, productOptions, fieldOfficerOptions,
                     interestCompoundingPeriodTypeOptions, interestPostingPeriodTypeOptions, interestCalculationTypeOptions,
-                    interestCalculationDaysInYearTypeOptions, lockinPeriodFrequencyTypeOptions, withdrawalFeeTypeOptions, transactions);
+                    interestCalculationDaysInYearTypeOptions, lockinPeriodFrequencyTypeOptions, withdrawalFeeTypeOptions, transactions, charges, chargeOptions);
         } else {
 
             String clientName = null;
@@ -483,13 +500,26 @@ public class SavingsAccountReadPlatformServiceImpl implements SavingsAccountRead
             final Collection<EnumOptionData> withdrawalFeeTypeOptions = null;
 
             final Collection<SavingsAccountTransactionData> transactions = null;
+            final Collection<SavingsAccountChargeData> charges = null;
+            
+            final boolean feeChargesOnly = true;
+            final Collection<ChargeData> chargeOptions = this.chargeReadPlatformService.retrieveSavingsAccountApplicableCharges(feeChargesOnly);
 
             template = SavingsAccountData.withTemplateOptions(template, productOptions, fieldOfficerOptions,
                     interestCompoundingPeriodTypeOptions, interestPostingPeriodTypeOptions, interestCalculationTypeOptions,
-                    interestCalculationDaysInYearTypeOptions, lockinPeriodFrequencyTypeOptions, withdrawalFeeTypeOptions, transactions);
+                    interestCalculationDaysInYearTypeOptions, lockinPeriodFrequencyTypeOptions, withdrawalFeeTypeOptions, transactions, charges, chargeOptions);
         }
 
         return template;
+    }
+
+    private Collection<SavingsAccountChargeData> fromChargesToSavingsCharges(Collection<ChargeData> productCharges) {
+        final Collection<SavingsAccountChargeData> savingsCharges = new ArrayList<SavingsAccountChargeData>();
+        for (ChargeData chargeData : productCharges) {
+            final SavingsAccountChargeData savingsCharge = chargeData.toSavingsAccountChargeData();
+            savingsCharges.add(savingsCharge);
+        }
+        return savingsCharges;
     }
 
     @Override

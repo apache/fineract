@@ -141,6 +141,10 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
         public String loanProductChargeSchema() {
             return chargeSchema() + " join m_product_loan_charge plc on plc.charge_id = c.id";
         }
+        
+        public String savingsProductChargeSchema() {
+            return chargeSchema() + " join m_savings_product_charge spc on spc.charge_id = c.id";
+        }
 
         @Override
         public ChargeData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
@@ -179,4 +183,42 @@ public class ChargeReadPlatformServiceImpl implements ChargeReadPlatformService 
         }
     }
 
+    @Override
+    public Collection<ChargeData> retrieveSavingsAccountApplicableCharges(boolean feeChargesOnly) {
+        this.context.authenticatedUser();
+
+        final ChargeMapper rm = new ChargeMapper();
+
+        String sql = "select " + rm.chargeSchema()
+                + " where c.is_deleted=0 and c.is_active=1 and c.charge_applies_to_enum=? order by c.name ";
+        if (feeChargesOnly) {
+            sql = "select " + rm.chargeSchema()
+                    + " where c.is_deleted=0 and c.is_active=1 and c.is_penalty=0 and c.charge_applies_to_enum=? order by c.name ";
+        }
+
+        return this.jdbcTemplate.query(sql, rm, new Object[] { ChargeAppliesTo.SAVINGS.getValue() });
+    }
+
+    @Override
+    public Collection<ChargeData> retrieveSavingsAccountApplicablePenalties() {
+        this.context.authenticatedUser();
+
+        final ChargeMapper rm = new ChargeMapper();
+
+        String sql = "select " + rm.chargeSchema()
+                + " where c.is_deleted=0 and c.is_active=1 and c.is_penalty=1 and c.charge_applies_to_enum=? order by c.name ";
+        return this.jdbcTemplate.query(sql, rm, new Object[] { ChargeAppliesTo.SAVINGS.getValue() });
+    }
+
+    @Override
+    public Collection<ChargeData> retrieveSavingsProductCharges(Long savingsProductId) {
+        this.context.authenticatedUser();
+
+        final ChargeMapper rm = new ChargeMapper();
+
+        final String sql = "select " + rm.savingsProductChargeSchema() + " where c.is_deleted=0 and c.is_active=1 and spc.savings_product_id=?";
+
+        return this.jdbcTemplate.query(sql, rm, new Object[] { savingsProductId });
+    }
+    
 }

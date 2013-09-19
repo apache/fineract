@@ -38,8 +38,10 @@ import org.mifosplatform.infrastructure.core.service.Page;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.portfolio.group.service.SearchParameters;
 import org.mifosplatform.portfolio.savings.SavingsApiConstants;
+import org.mifosplatform.portfolio.savings.data.SavingsAccountChargeData;
 import org.mifosplatform.portfolio.savings.data.SavingsAccountData;
 import org.mifosplatform.portfolio.savings.data.SavingsAccountTransactionData;
+import org.mifosplatform.portfolio.savings.service.SavingsAccountChargeReadPlatformService;
 import org.mifosplatform.portfolio.savings.service.SavingsAccountReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -56,17 +58,19 @@ public class SavingsAccountsApiResource {
     private final DefaultToApiJsonSerializer<SavingsAccountData> toApiJsonSerializer;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
+    private final SavingsAccountChargeReadPlatformService savingsAccountChargeReadPlatformService;
 
     @Autowired
     public SavingsAccountsApiResource(final SavingsAccountReadPlatformService savingsAccountReadPlatformService,
             final PlatformSecurityContext context, final DefaultToApiJsonSerializer<SavingsAccountData> toApiJsonSerializer,
             final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
-            final ApiRequestParameterHelper apiRequestParameterHelper) {
+            final ApiRequestParameterHelper apiRequestParameterHelper, final SavingsAccountChargeReadPlatformService savingsAccountChargeReadPlatformService) {
         this.savingsAccountReadPlatformService = savingsAccountReadPlatformService;
         this.context = context;
         this.toApiJsonSerializer = toApiJsonSerializer;
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
         this.apiRequestParameterHelper = apiRequestParameterHelper;
+        this.savingsAccountChargeReadPlatformService = savingsAccountChargeReadPlatformService;
     }
 
     @GET
@@ -143,12 +147,13 @@ public class SavingsAccountsApiResource {
             final boolean staffInSelectedOfficeOnly, final UriInfo uriInfo, final Set<String> mandatoryResponseParameters) {
 
         Collection<SavingsAccountTransactionData> transactions = null;
+        Collection<SavingsAccountChargeData> charges = null;
 
         final Set<String> associationParameters = ApiParameterHelper.extractAssociationsForResponseIfProvided(uriInfo.getQueryParameters());
         if (!associationParameters.isEmpty()) {
 
             if (associationParameters.contains("all")) {
-                associationParameters.addAll(Arrays.asList("transactions"));
+                associationParameters.addAll(Arrays.asList("transactions", "charges"));
             }
 
             if (associationParameters.contains("transactions")) {
@@ -157,6 +162,15 @@ public class SavingsAccountsApiResource {
                         .retrieveAllTransactions(accountId);
                 if (!CollectionUtils.isEmpty(currentTransactions)) {
                     transactions = currentTransactions;
+                }
+            }
+            
+            if (associationParameters.contains("charges")) {
+                mandatoryResponseParameters.add("charges");
+                final Collection<SavingsAccountChargeData> currentCharges = this.savingsAccountChargeReadPlatformService
+                        .retrieveSavingsAccountCharges(accountId);
+                if (!CollectionUtils.isEmpty(currentCharges)) {
+                    charges = currentCharges;
                 }
             }
         }
@@ -168,7 +182,7 @@ public class SavingsAccountsApiResource {
                     savingsAccount.productId(), staffInSelectedOfficeOnly);
         }
 
-        return SavingsAccountData.withTemplateOptions(savingsAccount, templateData, transactions);
+        return SavingsAccountData.withTemplateOptions(savingsAccount, templateData, transactions, charges);
     }
 
     @PUT

@@ -27,6 +27,7 @@ import static org.mifosplatform.portfolio.savings.SavingsApiConstants.withdrawal
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.withdrawalFeeForTransfersParamName;
 
 import java.math.BigDecimal;
+import java.util.Set;
 
 import org.joda.time.LocalDate;
 import org.joda.time.MonthDay;
@@ -66,19 +67,22 @@ public class SavingsAccountAssembler {
     private final StaffRepositoryWrapper staffRepository;
     private final SavingsProductRepository savingProductRepository;
     private final SavingsAccountRepositoryWrapper savingsAccountRepository;
+    private final SavingsAccountChargeAssembler savingsAccountChargeAssembler;
     private final FromJsonHelper fromApiJsonHelper;
 
     @Autowired
     public SavingsAccountAssembler(final SavingsAccountTransactionSummaryWrapper savingsAccountTransactionSummaryWrapper,
             final ClientRepositoryWrapper clientRepository, final GroupRepositoryWrapper groupRepository,
             final StaffRepositoryWrapper staffRepository, final SavingsProductRepository savingProductRepository,
-            final SavingsAccountRepositoryWrapper savingsAccountRepository, final FromJsonHelper fromApiJsonHelper) {
+            final SavingsAccountRepositoryWrapper savingsAccountRepository,
+            final SavingsAccountChargeAssembler savingsAccountChargeAssembler, final FromJsonHelper fromApiJsonHelper) {
         this.savingsAccountTransactionSummaryWrapper = savingsAccountTransactionSummaryWrapper;
         this.clientRepository = clientRepository;
         this.groupRepository = groupRepository;
         this.staffRepository = staffRepository;
         this.savingProductRepository = savingProductRepository;
         this.savingsAccountRepository = savingsAccountRepository;
+        this.savingsAccountChargeAssembler = savingsAccountChargeAssembler;
         this.fromApiJsonHelper = fromApiJsonHelper;
     }
 
@@ -231,12 +235,14 @@ public class SavingsAccountAssembler {
         } else {
             monthDayOfAnnualFee = product.monthDayOfAnnualFee();
         }
+        
+        final Set<SavingsAccountCharge> charges = this.savingsAccountChargeAssembler.fromParsedJson(element);
 
         final SavingsAccount account = SavingsAccount.createNewApplicationForSubmittal(client, group, product, fieldOfficer, accountNo,
                 externalId, accountType, submittedOnDate, interestRate, interestCompoundingPeriodType, interestPostingPeriodType,
                 interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance, lockinPeriodFrequency,
                 lockinPeriodFrequencyType, withdrawalFeeAmount, withdrawalFeeType, iswithdrawalFeeApplicableForTransfer, annualFeeAmount,
-                monthDayOfAnnualFee);
+                monthDayOfAnnualFee, charges);
         account.setHelpers(this.savingsAccountTransactionSummaryWrapper, this.savingsHelper);
 
         account.validateNewApplicationState(DateUtils.getLocalDateOfTenant());

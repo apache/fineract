@@ -941,6 +941,52 @@ public class CommandWrapperBuilder {
         this.href = "/savingsaccounts/" + accountId + "?command=applyAnnualFees";
         return this;
     }
+    
+    public CommandWrapperBuilder createSavingsAccountCharge(final Long savingsAccountId) {
+        this.actionName = "CREATE";
+        this.entityName = "SAVINGSACCOUNTCHARGE";
+        this.savingsId = savingsAccountId;
+        this.href = "/savingsaccounts/" + savingsAccountId + "/charges";
+        return this;
+    }
+
+    public CommandWrapperBuilder updateSavingsAccountCharge(final Long savingsAccountId, final Long savingsAccountChargeId) {
+        this.actionName = "UPDATE";
+        this.entityName = "SAVINGSACCOUNTCHARGE";
+        this.entityId = savingsAccountChargeId;
+        this.savingsId = savingsAccountId;
+        this.href = "/savingsaccounts/" + savingsAccountId + "/charges/" + savingsAccountChargeId;
+        return this;
+    }
+
+    public CommandWrapperBuilder waiveSavingsAccountCharge(final Long savingsAccountId, final Long savingsAccountChargeId) {
+        this.actionName = "WAIVE";
+        this.entityName = "SAVINGSACCOUNTCHARGE";
+        this.entityId = savingsAccountChargeId;
+        this.savingsId = savingsAccountId;
+        this.href = "/savingsaccounts/" + savingsAccountId + "/charges/" + savingsAccountChargeId;
+        return this;
+
+    }
+
+    public CommandWrapperBuilder paySavingsAccountCharge(final Long savingsAccountId, final Long savingsAccountChargeId) {
+        this.actionName = "PAY";
+        this.entityName = "SAVINGSACCOUNTCHARGE";
+        this.entityId = savingsAccountChargeId;
+        this.savingsId = savingsAccountId;
+        this.href = "/savingsaccounts/" + savingsAccountId + "/charges/" + savingsAccountChargeId;
+        return this;
+
+    }
+    
+    public CommandWrapperBuilder deleteSavingsAccountCharge(final Long savingsAccountId, final Long savingsAccountChargeId) {
+        this.actionName = "DELETE";
+        this.entityName = "SAVINGSACCOUNTCHARGE";
+        this.entityId = savingsAccountChargeId;
+        this.savingsId = savingsAccountId;
+        this.href = "/savingsaccounts/" + savingsAccountId + "/charges/" + savingsAccountChargeId;
+        return this;
+    }
 
     public CommandWrapperBuilder createCalendar(final String supportedEntityType, final Long supportedEntityId) {
         this.actionName = "CREATE";

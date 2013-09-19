@@ -6,7 +6,9 @@
 package org.mifosplatform.portfolio.charge.domain;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.persistence.Column;
@@ -17,10 +19,14 @@ import javax.persistence.UniqueConstraint;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
+import org.mifosplatform.infrastructure.core.data.ApiParameterError;
+import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
+import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.mifosplatform.portfolio.charge.data.ChargeData;
 import org.mifosplatform.portfolio.charge.exception.ChargeDueAtDisbursementCannotBePenaltyException;
+import org.mifosplatform.portfolio.charge.exception.ChargeParameterUpdateNotSupportedException;
 import org.mifosplatform.portfolio.charge.service.ChargeEnumerations;
 import org.mifosplatform.portfolio.loanaccount.domain.LoanCharge;
 import org.springframework.data.jpa.domain.AbstractPersistable;
@@ -93,7 +99,33 @@ public class Charge extends AbstractPersistable<Long> {
         this.penalty = penalty;
         this.active = active;
         this.chargePaymentMode = paymentMode.getValue();
-        if (penalty && chargeTime.isTimeOfDisbursement()) { throw new ChargeDueAtDisbursementCannotBePenaltyException(name); }
+
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("charges");
+
+        if (isSavingsCharge()) {
+
+            if (!isAllowedSavingsChargeTime()) {
+                baseDataValidator.reset().parameter("chargeTimeType").value(this.chargeTime)
+                        .failWithCodeNoParameterAddedToErrorCode("not.allowed.charge.time.for.savings");
+            }
+
+            if (!isAllowedSavingsChargeCalculationType()) {
+                baseDataValidator.reset().parameter("chargeCalculationType").value(this.chargeCalculation)
+                        .failWithCodeNoParameterAddedToErrorCode("not.allowed.charge.calculation.type.for.savings");
+            }
+            
+        } else if (isLoanCharge()) {
+            
+            if (penalty && chargeTime.isTimeOfDisbursement()) { throw new ChargeDueAtDisbursementCannotBePenaltyException(name); }
+            
+            if (!isAllowedLoanChargeTime()) {
+                baseDataValidator.reset().parameter("chargeTimeType").value(this.chargeTime)
+                .failWithCodeNoParameterAddedToErrorCode("not.allowed.charge.time.for.loan");
+            }
+        }
+
+        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
     }
 
     @Override
@@ -145,12 +177,35 @@ public class Charge extends AbstractPersistable<Long> {
     public boolean isDeleted() {
         return deleted;
     }
+    
+    public boolean isLoanCharge(){
+        return ChargeAppliesTo.fromInt(this.chargeAppliesTo).isLoanCharge();
+    }
+    
+    public boolean isAllowedLoanChargeTime(){
+        return ChargeTimeType.fromInt(this.chargeTime).isAllowedLoanChargeTime();
+    }
+    
+    public boolean isSavingsCharge(){
+        return ChargeAppliesTo.fromInt(this.chargeAppliesTo).isSavingsCharge();
+    }
+    
+    public boolean isAllowedSavingsChargeTime(){
+        return ChargeTimeType.fromInt(this.chargeTime).isAllowedSavingsChargeTime();
+    }
 
+    public boolean isAllowedSavingsChargeCalculationType(){
+        return ChargeCalculationType.fromInt(this.chargeCalculation).isAllowedSavingsChargeCalculationType();
+    }
+    
     public Map<String, Object> update(final JsonCommand command) {
 
         final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(7);
 
         final String localeAsInput = command.locale();
+        
+        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("charges");
 
         final String nameParamName = "name";
         if (command.isChangeInStringParameterNamed(nameParamName, this.name)) {
@@ -180,14 +235,31 @@ public class Charge extends AbstractPersistable<Long> {
             actualChanges.put(chargeTimeParamName, newValue);
             actualChanges.put("locale", localeAsInput);
             this.chargeTime = ChargeTimeType.fromInt(newValue).getValue();
+
+            if (isSavingsCharge()) {
+                if (!isAllowedSavingsChargeTime()) {
+                    baseDataValidator.reset().parameter("chargeTimeType").value(this.chargeTime)
+                            .failWithCodeNoParameterAddedToErrorCode("not.allowed.charge.time.for.savings");
+                }
+            } else if (isLoanCharge()) {
+                if (!isAllowedLoanChargeTime()) {
+                    baseDataValidator.reset().parameter("chargeTimeType").value(this.chargeTime)
+                    .failWithCodeNoParameterAddedToErrorCode("not.allowed.charge.time.for.loan");
+                }
+            }
+
         }
 
         final String chargeAppliesToParamName = "chargeAppliesTo";
         if (command.isChangeInIntegerParameterNamed(chargeAppliesToParamName, this.chargeAppliesTo)) {
-            final Integer newValue = command.integerValueOfParameterNamed(chargeAppliesToParamName);
+            /*final Integer newValue = command.integerValueOfParameterNamed(chargeAppliesToParamName);
             actualChanges.put(chargeAppliesToParamName, newValue);
             actualChanges.put("locale", localeAsInput);
-            this.chargeAppliesTo = ChargeAppliesTo.fromInt(newValue).getValue();
+            this.chargeAppliesTo = ChargeAppliesTo.fromInt(newValue).getValue();*/
+            
+            //AA: Do not allow to change chargeAppliesTo.
+            final String errorMessage = "Update of Charge applies to is not supported";
+            throw new ChargeParameterUpdateNotSupportedException("charge.applies.to", errorMessage);
         }
 
         final String chargeCalculationParamName = "chargeCalculationType";
@@ -196,6 +268,13 @@ public class Charge extends AbstractPersistable<Long> {
             actualChanges.put(chargeCalculationParamName, newValue);
             actualChanges.put("locale", localeAsInput);
             this.chargeCalculation = ChargeCalculationType.fromInt(newValue).getValue();
+            
+            if (isSavingsCharge()) {
+                if (!isAllowedSavingsChargeCalculationType()) {
+                    baseDataValidator.reset().parameter("chargeCalculationType").value(this.chargeCalculation)
+                            .failWithCodeNoParameterAddedToErrorCode("not.allowed.charge.calculation.type.for.savings");
+                }
+            }
         }
         
         final String paymentModeParamName = "chargePaymentMode";
@@ -223,7 +302,9 @@ public class Charge extends AbstractPersistable<Long> {
 
         if (this.penalty && ChargeTimeType.fromInt(this.chargeTime).isTimeOfDisbursement()) { throw new ChargeDueAtDisbursementCannotBePenaltyException(
                 name); }
-
+        
+        if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
+        
         return actualChanges;
     }
 

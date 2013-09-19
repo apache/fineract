@@ -445,7 +445,7 @@ public class CommandWrapper {
     public boolean isSavingsAccountResource() {
         return this.entityName.equalsIgnoreCase("SAVINGSACCOUNT");
     }
-
+    
     public boolean isRejectionOfSavingsAccountApplication() {
         return this.actionName.equalsIgnoreCase("REJECT") && this.entityName.equalsIgnoreCase("SAVINGSACCOUNT");
     }
@@ -498,6 +498,30 @@ public class CommandWrapper {
         return this.actionName.equalsIgnoreCase("ADJUSTTRANSACTION") && this.entityName.equalsIgnoreCase("SAVINGSACCOUNT");
     }
 
+    public boolean isSavingsAccountChargeResource() {
+        return this.entityName.equalsIgnoreCase("SAVINGSACCOUNTCHARGE");
+    }
+    
+    public boolean isAddSavingsAccountCharge() {
+        return this.actionName.equalsIgnoreCase("CREATE") && this.entityName.equalsIgnoreCase("SAVINGSACCOUNTCHARGE");
+    }
+
+    public boolean isDeleteSavingsAccountCharge() {
+        return isDeleteOperation() && this.entityName.equalsIgnoreCase("SAVINGSACCOUNTCHARGE");
+    }
+
+    public boolean isUpdateSavingsAccountCharge() {
+        return this.actionName.equalsIgnoreCase("UPDATE") && this.entityName.equalsIgnoreCase("SAVINGSACCOUNTCHARGE");
+    }
+
+    public boolean isWaiveSavingsAccountCharge() {
+        return this.actionName.equalsIgnoreCase("WAIVE") && this.entityName.equalsIgnoreCase("SAVINGSACCOUNTCHARGE");
+    }
+    
+    public boolean isPaySavingsAccountCharge() {
+        return this.actionName.equalsIgnoreCase("PAY") && this.entityName.equalsIgnoreCase("SAVINGSACCOUNTCHARGE");
+    }
+    
     public boolean isCalendarResource() {
         return this.entityName.equalsIgnoreCase("CALENDAR");
     }

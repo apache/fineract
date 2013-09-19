@@ -28,6 +28,14 @@ public class ChargeEnumerations {
                 optionData = new EnumOptionData(ChargeTimeType.SPECIFIED_DUE_DATE.getValue().longValue(),
                         ChargeTimeType.SPECIFIED_DUE_DATE.getCode(), "Specified due date");
             break;
+            case MONTHLY:
+                optionData = new EnumOptionData(ChargeTimeType.MONTHLY.getValue().longValue(),
+                        ChargeTimeType.MONTHLY.getCode(), "Monthly");
+            break;
+            case YEARLY:
+                optionData = new EnumOptionData(ChargeTimeType.YEARLY.getValue().longValue(),
+                        ChargeTimeType.YEARLY.getCode(), "Yearly");
+            break;
             default:
                 optionData = new EnumOptionData(ChargeTimeType.INVALID.getValue().longValue(), ChargeTimeType.INVALID.getCode(), "Invalid");
             break;
@@ -44,6 +52,9 @@ public class ChargeEnumerations {
         switch (type) {
             case LOAN:
                 optionData = new EnumOptionData(ChargeAppliesTo.LOAN.getValue().longValue(), ChargeAppliesTo.LOAN.getCode(), "Loan");
+            break;
+            case SAVINGS:
+                optionData = new EnumOptionData(ChargeAppliesTo.SAVINGS.getValue().longValue(), ChargeAppliesTo.SAVINGS.getCode(), "Savings");
             break;
             default:
                 optionData = new EnumOptionData(ChargeAppliesTo.INVALID.getValue().longValue(), ChargeAppliesTo.INVALID.getCode(),

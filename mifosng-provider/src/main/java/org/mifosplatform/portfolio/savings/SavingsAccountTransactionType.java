@@ -19,6 +19,8 @@ public enum SavingsAccountTransactionType {
     INTEREST_POSTING(3, "savingsAccountTransactionType.interestPosting"), //
     WITHDRAWAL_FEE(4, "savingsAccountTransactionType.withdrawalFee"), //
     ANNUAL_FEE(5, "savingsAccountTransactionType.annualFee"), //
+    WAIVE_CHARGES(6, "savingsAccountTransactionType.waiveCharges"),
+    APPLY_CHARGES(7, "savingsAccountTransactionType.applyCharges"),
     INITIATE_TRANSFER(12, "savingsAccountTransactionType.initiateTransfer"), //
     APPROVE_TRANSFER(13, "savingsAccountTransactionType.approveTransfer"), //
     WITHDRAW_TRANSFER(14, "savingsAccountTransactionType.withdrawTransfer"), //
@@ -44,37 +46,43 @@ public enum SavingsAccountTransactionType {
 
         if (transactionType == null) { return SavingsAccountTransactionType.INVALID; }
 
-        SavingsAccountTransactionType loanTransactionType = SavingsAccountTransactionType.INVALID;
+        SavingsAccountTransactionType savingsAccountTransactionType = SavingsAccountTransactionType.INVALID;
         switch (transactionType) {
             case 1:
-                loanTransactionType = SavingsAccountTransactionType.DEPOSIT;
+                savingsAccountTransactionType = SavingsAccountTransactionType.DEPOSIT;
             break;
             case 2:
-                loanTransactionType = SavingsAccountTransactionType.WITHDRAWAL;
+                savingsAccountTransactionType = SavingsAccountTransactionType.WITHDRAWAL;
             break;
             case 3:
-                loanTransactionType = SavingsAccountTransactionType.INTEREST_POSTING;
+                savingsAccountTransactionType = SavingsAccountTransactionType.INTEREST_POSTING;
             break;
             case 4:
-                loanTransactionType = SavingsAccountTransactionType.WITHDRAWAL_FEE;
+                savingsAccountTransactionType = SavingsAccountTransactionType.WITHDRAWAL_FEE;
             break;
             case 5:
-                loanTransactionType = SavingsAccountTransactionType.ANNUAL_FEE;
+                savingsAccountTransactionType = SavingsAccountTransactionType.ANNUAL_FEE;
+            break;
+            case 6:
+                savingsAccountTransactionType = SavingsAccountTransactionType.WAIVE_CHARGES;
+            break;
+            case 7:
+                savingsAccountTransactionType = SavingsAccountTransactionType.APPLY_CHARGES;
             break;
             case 12:
-                loanTransactionType = SavingsAccountTransactionType.INITIATE_TRANSFER;
+                savingsAccountTransactionType = SavingsAccountTransactionType.INITIATE_TRANSFER;
             break;
             case 13:
-                loanTransactionType = SavingsAccountTransactionType.APPROVE_TRANSFER;
+                savingsAccountTransactionType = SavingsAccountTransactionType.APPROVE_TRANSFER;
             break;
             case 14:
-                loanTransactionType = SavingsAccountTransactionType.WITHDRAW_TRANSFER;
+                savingsAccountTransactionType = SavingsAccountTransactionType.WITHDRAW_TRANSFER;
             break;
             case 15:
-                loanTransactionType = SavingsAccountTransactionType.REJECT_TRANSFER;
+                savingsAccountTransactionType = SavingsAccountTransactionType.REJECT_TRANSFER;
             break;
         }
-        return loanTransactionType;
+        return savingsAccountTransactionType;
     }
 
     public boolean isDeposit() {
@@ -96,9 +104,17 @@ public enum SavingsAccountTransactionType {
     public boolean isAnnualFee() {
         return this.value.equals(SavingsAccountTransactionType.ANNUAL_FEE.getValue());
     }
+    
+    public boolean isCharge() {
+        return this.value.equals(SavingsAccountTransactionType.APPLY_CHARGES.getValue());
+    }
+    
+    public boolean isWaiveCharge() {
+        return this.value.equals(SavingsAccountTransactionType.WAIVE_CHARGES.getValue());
+    }
 
     public boolean isDebit() {
-        return isWithdrawal() || isWithdrawalFee() || isAnnualFee();
+        return isWithdrawal() || isWithdrawalFee() || isAnnualFee() || isCharge();
     }
 
     public boolean isCredit() {

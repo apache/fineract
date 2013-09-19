@@ -429,6 +429,20 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
             } else {
                 throw new UnsupportedCommandException(wrapper.commandName());
             }
+        } else if (wrapper.isSavingsAccountChargeResource()) {
+            if (wrapper.isAddSavingsAccountCharge()) {
+                handler = this.applicationContext.getBean("addSavingsAccountChargeCommandHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isDeleteSavingsAccountCharge()) {
+                handler = this.applicationContext.getBean("deleteSavingsAccountChargeCommandHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isUpdateSavingsAccountCharge()) {
+                handler = this.applicationContext.getBean("updateSavingsAccountChargeCommandHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isWaiveSavingsAccountCharge()) {
+                handler = this.applicationContext.getBean("waiveSavingsAccountChargeCommandHandler", NewCommandSourceHandler.class);
+            } else if (wrapper.isPaySavingsAccountCharge()) {
+                handler = this.applicationContext.getBean("paySavingsAccountChargeCommandHandler", NewCommandSourceHandler.class);
+            } else {
+                throw new UnsupportedCommandException(wrapper.commandName());
+            }            
         } else if (wrapper.isCalendarResource()) {
             if (wrapper.isCreate()) {
                 handler = this.applicationContext.getBean("createCalendarCommandHandler", NewCommandSourceHandler.class);

@@ -10,9 +10,11 @@ import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.List;
 
+import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.mifosplatform.portfolio.loanaccount.data.LoanChargeData;
+import org.mifosplatform.portfolio.savings.data.SavingsAccountChargeData;
 
 /**
  * Immutable data object for charge data.
@@ -124,5 +126,22 @@ public class ChargeData implements Comparable<ChargeData>, Serializable {
 
         return LoanChargeData.newLoanChargeDetails(this.id, this.name, this.currency, this.amount, percentage, this.chargeTimeType,
                 this.chargeCalculationType, this.penalty,this.chargePaymentMode);
+    }
+    
+    public SavingsAccountChargeData toSavingsAccountChargeData(){
+        
+        final Long savingsChargeId = null;
+        final BigDecimal amountPaid = BigDecimal.ZERO;
+        final BigDecimal amountWaived = BigDecimal.ZERO;
+        final BigDecimal amountWrittenOff = BigDecimal.ZERO;
+        final BigDecimal amountOutstanding = BigDecimal.ZERO;
+        final BigDecimal percentage = BigDecimal.ZERO;
+        final BigDecimal amountPercentageAppliedTo = BigDecimal.ZERO;
+        final Collection<ChargeData> chargeOptions = null;
+        final LocalDate dueAsOfDate = null;
+        
+        return SavingsAccountChargeData.instance(savingsChargeId, this.id, this.name, this.currency, this.amount, amountPaid, amountWaived,
+                amountWrittenOff, amountOutstanding, this.chargeTimeType, dueAsOfDate, this.chargeCalculationType, percentage,
+                amountPercentageAppliedTo, chargeOptions, this.penalty);
     }
 }

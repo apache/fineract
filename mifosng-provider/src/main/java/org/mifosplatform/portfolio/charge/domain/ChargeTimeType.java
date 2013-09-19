@@ -5,11 +5,14 @@
  */
 package org.mifosplatform.portfolio.charge.domain;
 
+
 public enum ChargeTimeType {
 
     INVALID(0, "chargeTimeType.invalid"), //
     DISBURSEMENT(1, "chargeTimeType.disbursement"), //
-    SPECIFIED_DUE_DATE(2, "chargeTimeType.specifiedDueDate");
+    SPECIFIED_DUE_DATE(2, "chargeTimeType.specifiedDueDate"),
+    MONTHLY(3, "chargeTimeType.monthly"),
+    YEARLY(4, "chargeTimeType.yearly");
 
     private final Integer value;
     private final String code;
@@ -27,6 +30,14 @@ public enum ChargeTimeType {
         return code;
     }
 
+    public static int minValue(){
+        return 1;
+    }
+    
+    public static int maxValue(){
+        return 4;
+    }
+    
     public static ChargeTimeType fromInt(final Integer chargeTime) {
         ChargeTimeType chargeTimeType = ChargeTimeType.INVALID;
         switch (chargeTime) {
@@ -35,6 +46,12 @@ public enum ChargeTimeType {
             break;
             case 2:
                 chargeTimeType = SPECIFIED_DUE_DATE;
+            break;
+            case 3:
+                chargeTimeType = MONTHLY;
+            break;
+            case 4:
+                chargeTimeType = YEARLY;
             break;
             default:
                 chargeTimeType = INVALID;
@@ -45,5 +62,25 @@ public enum ChargeTimeType {
 
     public boolean isTimeOfDisbursement() {
         return ChargeTimeType.DISBURSEMENT.getValue().equals(this.value);
+    }
+    
+    public boolean isOnSpecifiedDueDate() {
+        return this.value.equals(ChargeTimeType.SPECIFIED_DUE_DATE.getValue());
+    }
+    
+    public boolean isMonthly(){
+        return this.value.equals(ChargeTimeType.MONTHLY.getValue());
+    }
+    
+    public boolean isYearly(){
+        return this.value.equals(ChargeTimeType.YEARLY.getValue());
+    }
+    
+    public boolean isAllowedLoanChargeTime(){
+        return this.isTimeOfDisbursement() || this.isOnSpecifiedDueDate();
+    }
+    
+    public boolean isAllowedSavingsChargeTime(){
+        return this.isOnSpecifiedDueDate() || this.isMonthly() || this.isYearly();
     }
 }

@@ -7,6 +7,9 @@ package org.mifosplatform.portfolio.savings.domain;
 
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.annualFeeAmountParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.annualFeeOnMonthDayParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.idParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.chargeIdParamName;
+import static org.mifosplatform.portfolio.savings.SavingsApiConstants.chargesParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.currencyCodeParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.descriptionParamName;
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.digitsAfterDecimalParamName;
@@ -25,21 +28,38 @@ import static org.mifosplatform.portfolio.savings.SavingsApiConstants.withdrawal
 import static org.mifosplatform.portfolio.savings.SavingsApiConstants.withdrawalFeeTypeParamName;
 
 import java.math.BigDecimal;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.joda.time.MonthDay;
 import org.mifosplatform.accounting.common.AccountingRuleType;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
+import org.mifosplatform.portfolio.charge.domain.Charge;
+import org.mifosplatform.portfolio.charge.domain.ChargeRepositoryWrapper;
+import org.mifosplatform.portfolio.charge.exception.ChargeCannotBeAppliedToException;
+import org.mifosplatform.portfolio.loanproduct.exception.InvalidCurrencyException;
 import org.mifosplatform.portfolio.savings.SavingsCompoundingInterestPeriodType;
 import org.mifosplatform.portfolio.savings.SavingsInterestCalculationDaysInYearType;
 import org.mifosplatform.portfolio.savings.SavingsInterestCalculationType;
 import org.mifosplatform.portfolio.savings.SavingsPeriodFrequencyType;
 import org.mifosplatform.portfolio.savings.SavingsPostingInterestPeriodType;
 import org.mifosplatform.portfolio.savings.SavingsWithdrawalFeesType;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 
 @Component
 public class SavingsProductAssembler {
+
+    private final ChargeRepositoryWrapper chargeRepository;
+    
+    @Autowired
+    public SavingsProductAssembler(final ChargeRepositoryWrapper chargeRepository) {
+        this.chargeRepository = chargeRepository;
+    }
 
     public SavingsProduct assemble(final JsonCommand command) {
 
@@ -103,10 +123,46 @@ public class SavingsProductAssembler {
         final BigDecimal annualFeeAmount = command.bigDecimalValueOfParameterNamedDefaultToNullIfZero(annualFeeAmountParamName);
         final MonthDay monthDayOfAnnualFee = command.extractMonthDayNamed(annualFeeOnMonthDayParamName);
         final AccountingRuleType accountingRuleType = AccountingRuleType.fromInt(command.integerValueOfParameterNamed("accountingRule"));
-
+        
+        //Savings product charges
+        final Set<Charge> charges = this.assembleListOfSavingsProductCharges(command, currencyCode); 
+        
         return SavingsProduct.createNew(name, description, currency, interestRate, interestCompoundingPeriodType,
                 interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance,
                 lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeAmount, withdrawalFeeType, iswithdrawalFeeApplicableForTransfer,
-                annualFeeAmount, monthDayOfAnnualFee, accountingRuleType);
+                annualFeeAmount, monthDayOfAnnualFee, accountingRuleType, charges);
+    }
+
+    public Set<Charge> assembleListOfSavingsProductCharges(final JsonCommand command, final String savingsProductCurrencyCode) {
+
+        final Set<Charge> charges = new HashSet<Charge>();
+        
+        if (command.parameterExists(chargesParamName)) {
+            JsonArray chargesArray = command.arrayOfParameterNamed(chargesParamName);
+            if (chargesArray != null) {
+                for (int i = 0; i < chargesArray.size(); i++) {
+
+                    final JsonObject jsonObject = chargesArray.get(i).getAsJsonObject();
+                    if (jsonObject.has(idParamName)) {
+                        final Long id = jsonObject.get(idParamName).getAsLong();
+
+                        final Charge charge = this.chargeRepository.findOneWithNotFoundDetection(id);
+
+                        if(!charge.isSavingsCharge()){
+                            String errorMessage = "Charge with identifier " + charge.getId() + " cannot be applied to Savings product.";
+                            throw new ChargeCannotBeAppliedToException("savings.product", errorMessage, charge.getId()); 
+                        }
+                        
+                        if (!savingsProductCurrencyCode.equals(charge.getCurrencyCode())) {
+                            String errorMessage = "Charge and Savings Product must have the same currency.";
+                            throw new InvalidCurrencyException("charge", "attach.to.savings.product", errorMessage);
+                        }
+                        charges.add(charge);
+                    }
+                }
+            }
+        }
+
+        return charges;
     }
 }

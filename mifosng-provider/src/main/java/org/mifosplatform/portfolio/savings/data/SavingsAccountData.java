@@ -15,6 +15,7 @@ import org.joda.time.MonthDay;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.mifosplatform.organisation.staff.data.StaffData;
+import org.mifosplatform.portfolio.charge.data.ChargeData;
 
 /**
  * Immutable data object representing a savings account.
@@ -54,6 +55,7 @@ public class SavingsAccountData {
     private final SavingsAccountSummaryData summary;
     @SuppressWarnings("unused")
     private final Collection<SavingsAccountTransactionData> transactions;
+    private final Collection<SavingsAccountChargeData> charges;
 
     // template
     private final Collection<SavingsProductData> productOptions;
@@ -64,6 +66,7 @@ public class SavingsAccountData {
     private final Collection<EnumOptionData> interestCalculationDaysInYearTypeOptions;
     private final Collection<EnumOptionData> lockinPeriodFrequencyTypeOptions;
     private final Collection<EnumOptionData> withdrawalFeeTypeOptions;
+    private final Collection<ChargeData> chargeOptions;
 
     public static SavingsAccountData instance(final Long id, final String accountNo, final String externalId, final Long groupId,
             final String groupName, final Long clientId, final String clientName, final Long productId, final String productName,
@@ -86,6 +89,8 @@ public class SavingsAccountData {
         final Collection<EnumOptionData> withdrawalFeeTypeOptions = null;
 
         final Collection<SavingsAccountTransactionData> transactions = null;
+        final Collection<SavingsAccountChargeData> charges = null;
+        final Collection<ChargeData> chargeOptions = null;
 
         return new SavingsAccountData(id, accountNo, externalId, groupId, groupName, clientId, clientName, productId, productName,
                 fieldOfficerId, fieldOfficerName, status, timeline, currency, interestRate, interestCompoundingPeriodType,
@@ -93,7 +98,7 @@ public class SavingsAccountData {
                 lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeAmount, withdrawalFeeType, withdrawalFeeForTransfers,
                 annualFeeAmount, annualFeeOnMonthDay, annualFeeNextDueDate, summary, transactions, productOptions, fieldOfficerOptions,
                 interestCompoundingPeriodTypeOptions, interestPostingPeriodTypeOptions, interestCalculationTypeOptions,
-                interestCalculationDaysInYearTypeOptions, lockinPeriodFrequencyTypeOptions, withdrawalFeeTypeOptions);
+                interestCalculationDaysInYearTypeOptions, lockinPeriodFrequencyTypeOptions, withdrawalFeeTypeOptions, charges, chargeOptions);
     }
 
     public static SavingsAccountData lookup(final Long accountId, final String accountNo) {
@@ -108,16 +113,18 @@ public class SavingsAccountData {
         final Collection<EnumOptionData> withdrawalFeeTypeOptions = null;
 
         final Collection<SavingsAccountTransactionData> transactions = null;
+        final Collection<SavingsAccountChargeData> charges = null;
+        final Collection<ChargeData> chargeOptions = null;
 
         return new SavingsAccountData(accountId, accountNo, null, null, null, null, null, null, null, null, null, null, null, null, null,
                 null, null, null, null, null, null, null, null, null, false, null, null, null, null, transactions, productOptions,
                 fieldOfficerOptions, interestCompoundingPeriodTypeOptions, interestPostingPeriodTypeOptions,
                 interestCalculationTypeOptions, interestCalculationDaysInYearTypeOptions, lockinPeriodFrequencyTypeOptions,
-                withdrawalFeeTypeOptions);
+                withdrawalFeeTypeOptions, charges, chargeOptions);
     }
 
     public static SavingsAccountData withTemplateOptions(final SavingsAccountData account, final SavingsAccountData template,
-            final Collection<SavingsAccountTransactionData> transactions) {
+            final Collection<SavingsAccountTransactionData> transactions, final Collection<SavingsAccountChargeData> charges) {
 
         if (template == null) {
             final Collection<SavingsProductData> productOptions = null;
@@ -128,10 +135,11 @@ public class SavingsAccountData {
             final Collection<EnumOptionData> interestCalculationDaysInYearTypeOptions = null;
             final Collection<EnumOptionData> lockinPeriodFrequencyTypeOptions = null;
             final Collection<EnumOptionData> withdrawalFeeTypeOptions = null;
+            final Collection<ChargeData> chargeOptions = null;
 
             return withTemplateOptions(account, productOptions, fieldOfficerOptions, interestCompoundingPeriodTypeOptions,
                     interestPostingPeriodTypeOptions, interestCalculationTypeOptions, interestCalculationDaysInYearTypeOptions,
-                    lockinPeriodFrequencyTypeOptions, withdrawalFeeTypeOptions, transactions);
+                    lockinPeriodFrequencyTypeOptions, withdrawalFeeTypeOptions, transactions, charges, chargeOptions);
         }
 
         return new SavingsAccountData(account.id, account.accountNo, account.externalId, account.groupId, account.groupName,
@@ -143,7 +151,7 @@ public class SavingsAccountData {
                 account.annualFeeAmount, account.annualFeeOnMonthDay, account.annualFeeNextDueDate, account.summary, transactions, template.productOptions,
                 template.fieldOfficerOptions, template.interestCompoundingPeriodTypeOptions, template.interestPostingPeriodTypeOptions,
                 template.interestCalculationTypeOptions, template.interestCalculationDaysInYearTypeOptions,
-                template.lockinPeriodFrequencyTypeOptions, template.withdrawalFeeTypeOptions);
+                template.lockinPeriodFrequencyTypeOptions, template.withdrawalFeeTypeOptions, charges, template.chargeOptions);
     }
 
     public static SavingsAccountData withTemplateOptions(final SavingsAccountData account,
@@ -153,7 +161,7 @@ public class SavingsAccountData {
             final Collection<EnumOptionData> interestCalculationTypeOptions,
             final Collection<EnumOptionData> interestCalculationDaysInYearTypeOptions,
             final Collection<EnumOptionData> lockinPeriodFrequencyTypeOptions, final Collection<EnumOptionData> withdrawalFeeTypeOptions,
-            final Collection<SavingsAccountTransactionData> transactions) {
+            final Collection<SavingsAccountTransactionData> transactions, final Collection<SavingsAccountChargeData> charges, final Collection<ChargeData> chargeOptions) {
 
         return new SavingsAccountData(account.id, account.accountNo, account.externalId, account.groupId, account.groupName,
                 account.clientId, account.clientName, account.savingsProductId, account.savingsProductName, account.fieldOfficerId,
@@ -164,7 +172,7 @@ public class SavingsAccountData {
                 account.annualFeeAmount, account.annualFeeOnMonthDay, account.annualFeeNextDueDate, account.summary, transactions, productOptions,
                 fieldOfficerOptions, interestCompoundingPeriodTypeOptions, interestPostingPeriodTypeOptions,
                 interestCalculationTypeOptions, interestCalculationDaysInYearTypeOptions, lockinPeriodFrequencyTypeOptions,
-                withdrawalFeeTypeOptions);
+                withdrawalFeeTypeOptions, charges, chargeOptions);
     }
 
     public static SavingsAccountData withClientTemplate(final Long clientId, final String clientName, final Long groupId,
@@ -207,13 +215,16 @@ public class SavingsAccountData {
         final Collection<EnumOptionData> lockinPeriodFrequencyTypeOptions = null;
         final Collection<EnumOptionData> withdrawalFeeTypeOptions = null;
 
+        final Collection<SavingsAccountChargeData> charges = null;
+        final Collection<ChargeData> chargeOptions = null;
+        
         return new SavingsAccountData(id, accountNo, externalId, groupId, groupName, clientId, clientName, productId, productName,
                 fieldOfficerId, fieldOfficerName, status, timeline, currency, nominalAnnualInterestRate, interestPeriodType,
                 interestPostingPeriodType, interestCalculationType, interestCalculationDaysInYearType, minRequiredOpeningBalance,
                 lockinPeriodFrequency, lockinPeriodFrequencyType, withdrawalFeeAmount, withdrawalFeeType,withdrawalFeeForTransfers,
                 annualFeeAmount, annualFeeOnMonthDay, annualFeeNextDueDate, summary, transactions, productOptions, fieldOfficerOptions,
                 interestCompoundingPeriodTypeOptions, interestPostingPeriodTypeOptions, interestCalculationTypeOptions,
-                interestCalculationDaysInYearTypeOptions, lockinPeriodFrequencyTypeOptions, withdrawalFeeTypeOptions);
+                interestCalculationDaysInYearTypeOptions, lockinPeriodFrequencyTypeOptions, withdrawalFeeTypeOptions, charges, chargeOptions);
     }
 
     private SavingsAccountData(final Long id, final String accountNo, final String externalId, final Long groupId, final String groupName,
@@ -230,7 +241,7 @@ public class SavingsAccountData {
             final Collection<EnumOptionData> interestPostingPeriodTypeOptions,
             final Collection<EnumOptionData> interestCalculationTypeOptions,
             final Collection<EnumOptionData> interestCalculationDaysInYearTypeOptions,
-            final Collection<EnumOptionData> lockinPeriodFrequencyTypeOptions, final Collection<EnumOptionData> withdrawalFeeTypeOptions) {
+            final Collection<EnumOptionData> lockinPeriodFrequencyTypeOptions, final Collection<EnumOptionData> withdrawalFeeTypeOptions, final Collection<SavingsAccountChargeData> charges, final Collection<ChargeData> chargeOptions) {
         this.id = id;
         this.accountNo = accountNo;
         this.externalId = externalId;
@@ -271,6 +282,9 @@ public class SavingsAccountData {
         this.interestCalculationDaysInYearTypeOptions = interestCalculationDaysInYearTypeOptions;
         this.lockinPeriodFrequencyTypeOptions = lockinPeriodFrequencyTypeOptions;
         this.withdrawalFeeTypeOptions = withdrawalFeeTypeOptions;
+        
+        this.charges = charges;//charges associated with Savings account
+        this.chargeOptions = chargeOptions;//charges available for adding to Savings account
     }
 
     public Long id() {

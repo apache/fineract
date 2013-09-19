@@ -36,6 +36,12 @@ public final class SavingsAccountSummary {
 
     @Column(name = "total_withdrawal_fees_derived", scale = 6, precision = 19)
     private BigDecimal totalWithdrawalFees;
+    
+    @Column(name = "total_fees_charge_derived", scale = 6, precision = 19)
+    private BigDecimal totalFeeCharge;
+    
+    @Column(name = "total_penalty_charge_derived", scale = 6, precision = 19)
+    private BigDecimal totalPenaltyCharge;
 
     @Column(name = "total_annual_fees_derived", scale = 6, precision = 19)
     private BigDecimal totalAnnualFees;
@@ -55,9 +61,11 @@ public final class SavingsAccountSummary {
         this.totalInterestPosted = wrapper.calculateTotalInterestPosted(currency, transactions);
         this.totalWithdrawalFees = wrapper.calculateTotalWithdrawalFees(currency, transactions);
         this.totalAnnualFees = wrapper.calculateTotalAnnualFees(currency, transactions);
+        this.totalFeeCharge = wrapper.calculateTotalFeesCharge(currency, transactions);
+        this.totalPenaltyCharge = wrapper.calculateTotalPenaltyCharge(currency, transactions);
 
         this.accountBalance = Money.of(currency, this.totalDeposits).plus(this.totalInterestPosted).minus(this.totalWithdrawals)
-                .minus(this.totalWithdrawalFees).minus(this.totalAnnualFees).getAmount();
+                .minus(this.totalWithdrawalFees).minus(this.totalAnnualFees).minus(totalFeeCharge).minus(totalPenaltyCharge).getAmount();
     }
 
     public void updateFromInterestPeriodSummaries(final MonetaryCurrency currency, final List<PostingPeriod> allPostingPeriods) {

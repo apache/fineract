@@ -10,7 +10,7 @@ import java.math.BigDecimal;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
 
 /**
- * Immutable data object representing loan summary information.
+ * Immutable data object representing Savings Account summary information.
  */
 @SuppressWarnings("unused")
 public class SavingsAccountSummaryData {
@@ -23,10 +23,13 @@ public class SavingsAccountSummaryData {
     private final BigDecimal totalInterestEarned;
     private final BigDecimal totalInterestPosted;
     private final BigDecimal accountBalance;
+    private final BigDecimal totalFeeCharge;
+    private final BigDecimal totalPenaltyCharge;
 
     public SavingsAccountSummaryData(final CurrencyData currency, final BigDecimal totalDeposits, final BigDecimal totalWithdrawals,
             final BigDecimal totalWithdrawalFees, final BigDecimal totalAnnualFees, final BigDecimal totalInterestEarned,
-            final BigDecimal totalInterestPosted, final BigDecimal accountBalance) {
+            final BigDecimal totalInterestPosted, final BigDecimal accountBalance, final BigDecimal totalFeeCharge,
+            final BigDecimal totalPenaltyCharge) {
         this.currency = currency;
         this.totalDeposits = totalDeposits;
         this.totalWithdrawals = totalWithdrawals;
@@ -35,5 +38,7 @@ public class SavingsAccountSummaryData {
         this.totalInterestEarned = totalInterestEarned;
         this.totalInterestPosted = totalInterestPosted;
         this.accountBalance = accountBalance;
+        this.totalFeeCharge = totalFeeCharge;
+        this.totalPenaltyCharge = totalPenaltyCharge;
     }
 }
