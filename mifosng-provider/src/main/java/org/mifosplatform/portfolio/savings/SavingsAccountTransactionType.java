@@ -113,6 +113,22 @@ public enum SavingsAccountTransactionType {
         return this.value.equals(SavingsAccountTransactionType.WAIVE_CHARGES.getValue());
     }
 
+    public boolean isTransferInitiation() {
+        return this.value.equals(SavingsAccountTransactionType.INITIATE_TRANSFER.getValue());
+    }
+
+    public boolean isTransferApproval() {
+        return this.value.equals(SavingsAccountTransactionType.APPROVE_TRANSFER.getValue());
+    }
+
+    public boolean isTransferRejection() {
+        return this.value.equals(SavingsAccountTransactionType.REJECT_TRANSFER.getValue());
+    }
+
+    public boolean isTransferWithdrawal() {
+        return this.value.equals(SavingsAccountTransactionType.WITHDRAW_TRANSFER.getValue());
+    }
+
     public boolean isDebit() {
         return isWithdrawal() || isWithdrawalFee() || isAnnualFee() || isCharge();
     }

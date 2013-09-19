@@ -232,6 +232,26 @@ public final class SavingsAccountTransaction extends AbstractPersistable<Long> {
         return this.reversed;
     }
 
+    public boolean isTransferInitiation() {
+        return SavingsAccountTransactionType.fromInt(this.typeOf).isTransferInitiation();
+    }
+
+    public boolean isTransferApproval() {
+        return SavingsAccountTransactionType.fromInt(this.typeOf).isTransferApproval();
+    }
+
+    public boolean isTransferRejection() {
+        return SavingsAccountTransactionType.fromInt(this.typeOf).isTransferRejection();
+    }
+
+    public boolean isTransferWithdrawal() {
+        return SavingsAccountTransactionType.fromInt(this.typeOf).isTransferWithdrawal();
+    }
+
+    public boolean isTransferRelatedTransaction() {
+        return isTransferInitiation() || isTransferApproval() || isTransferRejection() || isTransferWithdrawal();
+    }
+
     public boolean occursOn(final LocalDate occursOnDate) {
         return getTransactionLocalDate().isEqual(occursOnDate);
     }
