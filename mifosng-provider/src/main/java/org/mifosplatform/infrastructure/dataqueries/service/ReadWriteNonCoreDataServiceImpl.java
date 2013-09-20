@@ -228,10 +228,10 @@ public class ReadWriteNonCoreDataServiceImpl implements ReadWriteNonCoreDataServ
             this.jdbcTemplate.batchUpdate(sqlArray);
 
         }
-        final /***
+        /***
          * Strangely, a Hibernate contraint violation exception is thrown
          ****/
-        catch (ConstraintViolationException cve) {
+        catch (final ConstraintViolationException cve) {
             final Throwable realCause = cve.getCause();
             // even if duplicate is only due to permission duplicate, okay to
             // show duplicate datatable error msg
